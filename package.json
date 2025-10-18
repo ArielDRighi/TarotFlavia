@@ -1,0 +1,15 @@
+{
+  "private": true,
+  "name": "tarot-monorepo",
+  "version": "0.0.0",
+  "workspaces": [
+    "backend/*",
+    "frontend"
+  ],
+  "scripts": {
+    "install": "npm install",
+    "build": "npm run --workspaces build",
+    "test": "npm run --workspaces test",
+    "lint": "npm run --workspaces lint"
+  }
+}

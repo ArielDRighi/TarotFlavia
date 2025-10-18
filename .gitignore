@@ -128,3 +128,11 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Frontend build / node modules
+frontend/node_modules/
+frontend/dist/
+
+# Root workspace lockfiles (optional)
+package-lock.json
+
