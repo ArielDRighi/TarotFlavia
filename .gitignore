@@ -136,3 +136,27 @@ frontend/dist/
 # Root workspace lockfiles (optional)
 package-lock.json
 
+# =============================================================================
+# Docker & Database
+# =============================================================================
+# Environment files with sensitive data
+.env
+.env.local
+.env.*.local
+
+# Docker volumes and data directories
+docker/postgres/data/
+**/postgres-data/
+
+# pgAdmin configuration
+**/pgadmin-data/
+
+# Database backups
+*.sql
+*.dump
+*.backup
+!**/init/*.sql
+
+# Docker Compose override files (for local customization)
+docker-compose.override.yml
+
