@@ -32,7 +32,7 @@ Crear configuración de Docker Compose para levantar PostgreSQL localmente y fac
   - Healthcheck configurado
   - Labels para identificación del proyecto
   - Red dedicada (`tarotflavia-network`)
-- [x] Crear archivo `.env.example` con variables necesarias (prefijo TAROTFLAVIA_):
+- [x] Crear archivo `.env.example` con variables necesarias (prefijo TAROTFLAVIA\_):
   - `TAROTFLAVIA_DB_USER=tarotflavia_user`
   - `TAROTFLAVIA_DB_PASSWORD=tarotflavia_secure_password_2024`
   - `TAROTFLAVIA_DB_NAME=tarotflavia_db`
@@ -764,6 +764,7 @@ Refinar y optimizar los system prompts y user prompts enviados a OpenAI para obt
   - Definir tono: empático, místico pero accesible, sin tecnicismos excesivos
   - Definir estructura de respuesta esperada
 - [ ] Crear template de prompt de usuario que incluya:
+
   - **Pregunta del usuario** y **categoría** (amor, trabajo, etc.)
   - **Spread utilizado** con descripción de cada posición (desde TASK-006)
   - **Cartas que salieron** en cada posición con:
@@ -790,6 +791,7 @@ Refinar y optimizar los system prompts y user prompts enviados a OpenAI para obt
 
     Instrucciones: Interpreta estas cartas considerando sus posiciones y la pregunta del usuario.
     ```
+
 - [ ] Implementar instrucciones específicas para respuesta estructurada:
   - Interpretación general (2-3 párrafos) integrando todas las posiciones
   - Análisis posicional (1 párrafo por carta en su posición específica)
@@ -1918,6 +1920,7 @@ Optimizar configuración de connection pooling de TypeORM para manejar carga con
   - `REDIS_DB` (default: 0)
   - `CACHE_STORE` (enum: 'memory' | 'redis') - para poder cambiar fácilmente
 - [ ] Configurar `CacheModule` con Redis store condicional:
+
   ```typescript
   CacheModule.registerAsync({
     useFactory: (configService: ConfigService) => {
@@ -1937,6 +1940,7 @@ Optimizar configuración de connection pooling de TypeORM para manejar carga con
     },
   });
   ```
+
 - [ ] Migrar caché de interpretaciones a Redis (TASK-020)
 - [ ] Implementar caché para:
   - Lista de cartas (TTL: 24 horas, raramente cambia)
