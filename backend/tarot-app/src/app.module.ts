@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { TarotModule } from './tarot/tarot.module';
+import { CardsModule } from './cards/cards.module';
 import databaseConfig from './config/typeorm';
 import { User } from './users/entities/user.entity';
 
@@ -29,6 +30,7 @@ import { User } from './users/entities/user.entity';
     }),
     AuthModule,
     UsersModule,
+    CardsModule,
     TarotModule,
   ],
   controllers: [AppController],

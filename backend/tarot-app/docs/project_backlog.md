@@ -5,12 +5,13 @@
 ## 🧪 Metodología de Desarrollo
 
 > **TDD (Test-Driven Development)** - A partir de TASK-001, todo el desarrollo seguirá el ciclo Red-Green-Refactor:
-> 
+>
 > 1. ✍️ **RED**: Escribir el test que falla primero
 > 2. ✅ **GREEN**: Escribir el código mínimo para que el test pase
 > 3. 🔄 **REFACTOR**: Mejorar el código manteniendo los tests verdes
-> 
+>
 > **Reglas:**
+>
 > - No se escribe código de producción sin un test que falle primero
 > - Los tests deben ser claros, concisos y enfocados en un solo comportamiento
 > - El coverage mínimo debe ser del 80% para código nuevo
