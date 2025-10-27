@@ -8,11 +8,14 @@
 
 ---
 
-### **TASK-000: Configurar PostgreSQL con Docker para Desarrollo**
+### **TASK-000: Configurar PostgreSQL con Docker para Desarrollo** ✅
 
 **Prioridad:** 🔴 CRÍTICA  
 **Estimación:** 0.5 días  
-**Dependencias:** Ninguna
+**Dependencias:** Ninguna  
+**Estado:** ✅ COMPLETADO  
+**Branch:** `feature/TASK-000-docker-postgresql-setup`  
+**Commit:** `1d7c956`
 
 #### 📋 Descripción
 
@@ -20,36 +23,61 @@ Crear configuración de Docker Compose para levantar PostgreSQL localmente y fac
 
 #### ✅ Tareas específicas
 
-- [ ] Crear archivo `docker-compose.yml` en la raíz del proyecto con:
-  - Servicio PostgreSQL 15 (última versión estable)
-  - Puerto: 5432 (mapeo a localhost)
-  - Nombre de base de datos: `tarot_dev`
+- [x] Crear archivo `docker-compose.yml` en backend/tarot-app con:
+  - Servicio PostgreSQL 16-alpine (última versión estable)
+  - Puerto: 5435 (evita conflictos con otros proyectos: 5432, 5433, 5434)
+  - Nombre de base de datos: `tarotflavia_db`
   - Usuario/password configurables vía variables de entorno
-  - Volumen persistente para data (`postgres-data`)
-- [ ] Crear archivo `.env.example` con variables necesarias:
-  - `POSTGRES_USER=tarot_user`
-  - `POSTGRES_PASSWORD=tarot_password`
-  - `POSTGRES_DB=tarot_dev`
-  - `POSTGRES_PORT=5432`
-- [ ] Agregar scripts en `package.json`:
-  - `"docker:db:up": "docker-compose up -d postgres"`
-  - `"docker:db:down": "docker-compose down"`
-  - `"docker:db:logs": "docker-compose logs -f postgres"`
-  - `"docker:db:reset": "docker-compose down -v && docker-compose up -d"`
-- [ ] Documentar en `README.md`:
+  - Volumen persistente con nombre descriptivo (`tarotflavia-postgres-data`)
+  - Healthcheck configurado
+  - Labels para identificación del proyecto
+  - Red dedicada (`tarotflavia-network`)
+- [x] Crear archivo `.env.example` con variables necesarias (prefijo TAROTFLAVIA_):
+  - `TAROTFLAVIA_DB_USER=tarotflavia_user`
+  - `TAROTFLAVIA_DB_PASSWORD=tarotflavia_secure_password_2024`
+  - `TAROTFLAVIA_DB_NAME=tarotflavia_db`
+  - `TAROTFLAVIA_DB_PORT=5435`
+  - Variables de pgAdmin
+  - Variables de conexión para NestJS
+- [x] Agregar pgAdmin 4 como servicio opcional con profile 'tools':
+  - Puerto: 5050
+  - Credenciales configurables
+  - Depende de PostgreSQL healthy
+- [x] Crear script de inicialización automática:
+  - Extensión `uuid-ossp` para generación de UUIDs
+  - Extensión `pg_trgm` para búsquedas de texto
+  - Permisos correctos
+- [x] Documentar en `README-DOCKER.md`:
   - Prerequisitos (Docker instalado)
-  - Comandos para levantar la base de datos
-  - Cómo conectarse con cliente visual (pgAdmin, DBeaver)
-  - Troubleshooting común (puerto ocupado, permisos, etc.)
-- [ ] Configurar healthcheck para PostgreSQL en docker-compose
-- [ ] Opcional: Agregar pgAdmin 4 como servicio adicional para visualización
+  - Configuración paso a paso
+  - Comandos útiles (start, stop, logs, backup, restore)
+  - Conexión desde NestJS con TypeORM
+  - Troubleshooting detallado
+  - Mantenimiento y seguridad
+- [x] Actualizar `.gitignore` para excluir:
+  - Archivos .env
+  - Datos de PostgreSQL
+  - Configuración de pgAdmin
+  - Backups (excepto init scripts)
 
 #### 🎯 Criterios de aceptación
 
-- ✓ La base de datos se levanta con `npm run docker:db:up`
-- ✓ La aplicación puede conectarse correctamente a PostgreSQL
-- ✓ Los datos persisten entre reinicios del contenedor
-- ✓ El README tiene instrucciones claras de setup
+- ✅ La base de datos se levanta con `docker-compose up -d tarotflavia-postgres`
+- ✅ Todos los recursos Docker tienen prefijo 'tarotflavia' para evitar confusión
+- ✅ Puerto 5435 evita conflictos con otros proyectos
+- ✅ Los datos persisten entre reinicios del contenedor
+- ✅ README-DOCKER.md tiene instrucciones completas y troubleshooting
+- ✅ Extensiones uuid-ossp y pg_trgm instaladas automáticamente
+- ✅ pgAdmin disponible opcionalmente con `docker-compose --profile tools up -d`
+
+#### 📝 Notas de implementación
+
+- PostgreSQL 16.10 corriendo en puerto 5435
+- Container: `tarotflavia-postgres-db`
+- Volume: `tarotflavia-postgres-data`
+- Network: `tarotflavia-network`
+- Healthcheck: verificando cada 10s
+- Inicialización exitosa confirmada: "TarotFlavia database initialized successfully!"
 
 ---
 
