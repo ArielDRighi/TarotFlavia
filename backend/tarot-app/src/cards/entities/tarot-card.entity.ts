@@ -9,7 +9,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { TarotDeck } from '../../tarot/entities/tarot-deck.entity';
+import { TarotDeck } from '../../decks/entities/tarot-deck.entity';
 import { TarotReading } from '../../tarot/entities/tarot-reading.entity';
 
 @Entity()
