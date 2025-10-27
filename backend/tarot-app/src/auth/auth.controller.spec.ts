@@ -8,21 +8,17 @@ describe('AuthController', () => {
 
   beforeEach(async () => {
     authServiceMock = {
-      register: jest
-        .fn()
-        .mockImplementation((dto) =>
-          Promise.resolve({
-            user: { id: 1, email: dto.email },
-            access_token: 't',
-          }),
-        ),
-      validateUser: jest.fn().mockResolvedValue({ id: 2, email: 'a@a.com' }),
-      login: jest
-        .fn()
-        .mockResolvedValue({
-          user: { id: 2, email: 'a@a.com' },
-          access_token: 'tok',
+      register: jest.fn().mockImplementation((dto) =>
+        Promise.resolve({
+          user: { id: 1, email: dto.email },
+          access_token: 't',
         }),
+      ),
+      validateUser: jest.fn().mockResolvedValue({ id: 2, email: 'a@a.com' }),
+      login: jest.fn().mockResolvedValue({
+        user: { id: 2, email: 'a@a.com' },
+        access_token: 'tok',
+      }),
     } as any;
 
     const module: TestingModule = await Test.createTestingModule({

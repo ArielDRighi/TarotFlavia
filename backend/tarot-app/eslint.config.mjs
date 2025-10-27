@@ -1,3 +1,8 @@
+import tseslint from 'typescript-eslint';
+import eslint from '@eslint/js';
+import globals from 'globals';
+import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
+
 export default tseslint.config(
   {
     ignores: ['eslint.config.mjs'],

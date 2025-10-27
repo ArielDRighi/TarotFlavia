@@ -87,11 +87,187 @@ Crear configuración de Docker Compose para levantar PostgreSQL localmente y fac
 
 ---
 
-### **TASK-001: Migrar de synchronize: true a Sistema de Migraciones**
+### **TASK-001: Refactorizar Módulo Tarot a Arquitectura Modular**
+
+**Prioridad:** 🟡 ALTA  
+**Estimación:** 2-3 días  
+**Dependencias:** TASK-000  
+**Estado:** ⏳ PENDIENTE
+
+#### 📋 Descripción
+
+Refactorizar el módulo `TarotModule` monolítico actual en múltiples módulos independientes siguiendo el principio de Single Responsibility. Actualmente todos los servicios y controllers conviven en un solo módulo, lo que dificulta el testing, escalabilidad y mantenimiento. Esta refactorización debe hacerse ANTES de las migraciones para evitar modificar rutas después.
+
+**Arquitectura Actual (Monolítica):**
+
+```
+src/tarot/
+├── tarot.module.ts          # ❌ Un módulo con 6 controllers + 4 services
+├── card.controller.ts       # 136 líneas
+├── card.service.ts          # 94 líneas
+├── deck.controller.ts       # 124 líneas
+├── deck.service.ts          # 209 líneas
+├── interpretation.controller.ts  # 163 líneas
+├── interpretation.service.ts     # 224 líneas
+├── reading.controller.ts    # 120 líneas
+├── share.controller.ts      # 71 líneas
+├── tarot.controller.ts      # 96 líneas
+├── tarot.service.ts         # 226 líneas
+├── dto/                     # ❌ DTOs mezclados de todos los módulos
+└── entities/                # ❌ Entidades mezcladas
+```
+
+**Arquitectura Objetivo (Modular):**
+
+```
+src/
+├── cards/
+│   ├── cards.module.ts
+│   ├── cards.controller.ts
+│   ├── cards.service.ts
+│   ├── dto/
+│   └── entities/
+│       └── tarot-card.entity.ts
+├── decks/
+│   ├── decks.module.ts
+│   ├── decks.controller.ts
+│   ├── decks.service.ts
+│   ├── dto/
+│   └── entities/
+│       └── tarot-deck.entity.ts
+├── spreads/
+│   ├── spreads.module.ts
+│   ├── spreads.controller.ts
+│   ├── spreads.service.ts
+│   ├── dto/
+│   └── entities/
+│       └── tarot-spread.entity.ts
+├── readings/
+│   ├── readings.module.ts
+│   ├── readings.controller.ts
+│   ├── readings.service.ts
+│   ├── share.controller.ts      # Sub-feature de readings
+│   ├── dto/
+│   └── entities/
+│       └── tarot-reading.entity.ts
+├── interpretations/
+│   ├── interpretations.module.ts
+│   ├── interpretations.controller.ts
+│   ├── interpretations.service.ts
+│   ├── dto/
+│   └── entities/
+│       └── tarot-interpretation.entity.ts
+└── tarot/
+    ├── tarot.module.ts          # ✅ Módulo orquestador (importa submódulos)
+    └── tarot.controller.ts      # ✅ Solo endpoints generales si son necesarios
+```
+
+#### ✅ Tareas específicas
+
+**Fase 1: Crear estructura de módulos**
+
+- [ ] Crear módulo `CardsModule` con su estructura de carpetas
+  - Mover `card.controller.ts` → `cards/cards.controller.ts`
+  - Mover `card.service.ts` → `cards/cards.service.ts`
+  - Mover `tarot-card.entity.ts` → `cards/entities/`
+  - Mover DTOs relacionados: `create-card.dto.ts`, `update-card.dto.ts`
+  - Crear `cards/cards.module.ts` con imports necesarios
+- [ ] Crear módulo `DecksModule` con su estructura
+  - Mover `deck.controller.ts` → `decks/decks.controller.ts`
+  - Mover `deck.service.ts` → `decks/decks.service.ts`
+  - Mover `tarot-deck.entity.ts` → `decks/entities/`
+  - Mover DTOs: `create-deck.dto.ts`, `update-deck.dto.ts`, `shuffle-deck.dto.ts`
+  - Crear `decks/decks.module.ts` con `forwardRef` a CardsModule si necesario
+- [ ] Crear módulo `SpreadsModule` con su estructura
+  - Mover `tarot-spread.entity.ts` → `spreads/entities/`
+  - Crear `spreads.controller.ts` (actualmente en tarot.controller)
+  - Crear `spreads.service.ts` (extraer lógica de tarot.service)
+  - Mover DTO: `create-spread.dto.ts`
+  - Crear `spreads/spreads.module.ts`
+- [ ] Crear módulo `ReadingsModule` con su estructura
+  - Mover `reading.controller.ts` → `readings/readings.controller.ts`
+  - Mover `share.controller.ts` → `readings/share.controller.ts`
+  - Extraer `readings.service.ts` desde `tarot.service.ts`
+  - Mover `tarot-reading.entity.ts` → `readings/entities/`
+  - Mover DTOs: `create-reading.dto.ts`, `random-cards.dto.ts`
+  - Crear `readings/readings.module.ts`
+- [ ] Crear módulo `InterpretationsModule` con su estructura
+  - Mover `interpretation.controller.ts` → `interpretations/interpretations.controller.ts`
+  - Mover `interpretation.service.ts` → `interpretations/interpretations.service.ts`
+  - Mover `tarot-interpretation.entity.ts` → `interpretations/entities/`
+  - Mover DTO: `generate-interpretation.dto.ts`
+  - Crear `interpretations/interpretations.module.ts`
+
+**Fase 2: Actualizar imports y dependencias**
+
+- [ ] Actualizar todos los imports en controllers para reflejar nuevas rutas
+- [ ] Actualizar todos los imports en services para reflejar nuevas rutas
+- [ ] Configurar `forwardRef()` donde haya dependencias circulares
+- [ ] Actualizar `app.module.ts` para importar nuevos módulos
+- [ ] Eliminar o reducir `TarotModule` a orquestador simple
+- [ ] Actualizar exports de módulos según dependencias
+
+**Fase 3: Actualizar tests**
+
+- [ ] Mover `card.controller.spec.ts` → `cards/cards.controller.spec.ts`
+- [ ] Mover `card.service.spec.ts` → `cards/cards.service.spec.ts`
+- [ ] Crear tests para cada nuevo módulo con mocks apropiados
+- [ ] Actualizar imports en todos los archivos de test
+- [ ] Verificar que todos los tests pasen con la nueva estructura
+
+**Fase 4: Actualizar configuración de TypeORM**
+
+- [ ] Actualizar rutas de entities en `typeorm.ts`:
+  - `entities: [__dirname + '/../**/*.entity{.ts,.js}']` debe encontrar las nuevas rutas
+- [ ] Verificar que TypeORM carga correctamente todas las entidades
+- [ ] Probar conexión a base de datos con nueva estructura
+
+**Fase 5: Documentación y validación**
+
+- [ ] Actualizar documentación de arquitectura
+- [ ] Crear diagrama de dependencias entre módulos
+- [ ] Documentar cómo agregar nuevos módulos siguiendo el patrón
+- [ ] Ejecutar `npm run lint` y corregir warnings
+- [ ] Ejecutar `npm run format` para formatear código
+- [ ] Ejecutar `npm run build` y verificar que compila sin errores
+- [ ] Ejecutar `npm test` y verificar que todos los tests pasan
+- [ ] Verificar que la aplicación arranca correctamente con `npm run start:dev`
+
+#### 🎯 Criterios de aceptación
+
+- ✅ Cada dominio (cards, decks, spreads, readings, interpretations) tiene su propio módulo
+- ✅ Cada módulo es independiente y puede testearse de forma aislada
+- ✅ Las entidades están ubicadas dentro de sus módulos respectivos
+- ✅ Los DTOs están organizados por módulo
+- ✅ No hay imports directos entre módulos (solo a través de exports del módulo)
+- ✅ Todos los tests pasan (ejecutar `npm test`)
+- ✅ El proyecto compila sin errores (`npm run build`)
+- ✅ Lint pasa sin warnings (`npm run lint`)
+- ✅ La aplicación arranca correctamente y responde a requests
+- ✅ TypeORM carga todas las entidades correctamente
+- ✅ No hay dependencias circulares sin resolver
+
+#### 📝 Notas importantes
+
+- **Por qué ANTES de migraciones:** TASK-002 (migraciones) capturará las rutas actuales de las entidades. Si refactorizamos después, habrá que modificar las migraciones.
+- **Dependencias circulares:** Usar `forwardRef()` de NestJS cuando sea necesario (ej: DecksModule necesita CardsModule y viceversa)
+- **Testing:** Cada módulo debe tener sus propios mocks, no depender de otros módulos reales
+- **Rutas API:** Mantener las mismas rutas públicas (ej: `/tarot/cards` funciona igual, solo cambia la organización interna)
+
+#### 🚨 Posibles problemas
+
+1. **Dependencias circulares**: DecksModule y CardsModule pueden necesitarse mutuamente → Usar `forwardRef()`
+2. **ReadingsModule complejo**: Depende de Cards, Decks, Spreads, Interpretations → Inyectar solo lo necesario
+3. **InterpretationsModule**: Necesita acceso a OpenAI y cache → Importar HttpModule y CacheModule
+4. **Tests rotos**: Todos los imports cambiarán → Actualizar uno por uno
+
+---
+
+### **TASK-002: Migrar de synchronize: true a Sistema de Migraciones**
 
 **Prioridad:** 🔴 CRÍTICA  
 **Estimación:** 3 días  
-**Dependencias:** TASK-000
+**Dependencias:** TASK-001
 
 #### 📋 Descripción
 
@@ -126,11 +302,11 @@ Reemplazar el modo `synchronize: true` de TypeORM (que sincroniza automáticamen
 
 ---
 
-### **TASK-002: Implementar Validación Robusta de Variables de Entorno**
+### **TASK-003: Implementar Validación Robusta de Variables de Entorno**
 
 **Prioridad:** 🔴 CRÍTICA  
 **Estimación:** 2 días  
-**Dependencias:** Ninguna
+**Dependencias:** TASK-002
 
 #### 📋 Descripción
 
@@ -168,11 +344,12 @@ Implementar validación estricta de todas las variables de entorno necesarias us
 
 ---
 
-### **TASK-003: Configurar API Key de OpenAI y Verificación de Conectividad**
+### **TASK-004: Configurar API Key de OpenAI y Verificación de Conectividad**
 
 **Prioridad:** 🔴 CRÍTICA  
 **Estimación:** 0.5 días  
-**Dependencias:** TASK-002
+**Dependencias:** TASK-003
+**Dependencias:** TASK-003
 
 #### 📋 Descripción
 
@@ -210,11 +387,11 @@ Configurar la API Key de OpenAI en las variables de entorno y crear un mecanismo
 
 ---
 
-### **TASK-004: Crear Seeders para las 78 Cartas del Tarot Estándar**
+### **TASK-005: Crear Seeders para las 78 Cartas del Tarot Estándar**
 
 **Prioridad:** 🔴 CRÍTICA  
 **Estimación:** 3 días  
-**Dependencias:** TASK-001
+**Dependencias:** TASK-002
 
 #### 📋 Descripción
 
@@ -284,7 +461,7 @@ Crear seeder para al menos un mazo predeterminado (Rider-Waite) que agrupe las 7
 
 **Prioridad:** 🟡 ALTA  
 **Estimación:** 1.5 días  
-**Dependencias:** TASK-001
+**Dependencias:** TASK-002
 
 #### 📋 Descripción
 
@@ -353,7 +530,7 @@ La IA recibirá: "En la posición PASADO salió la carta X, en PRESENTE la Y, en
 
 **Prioridad:** 🔴 CRÍTICA  
 **Estimación:** 2 días  
-**Dependencias:** TASK-001
+**Dependencias:** TASK-002
 
 #### 📋 Descripción
 
@@ -495,7 +672,7 @@ Crear seeders con al menos 5-8 preguntas bien formuladas para cada una de las 6 
 
 **Prioridad:** 🟡 ALTA  
 **Estimación:** 2 días  
-**Dependencias:** TASK-001
+**Dependencias:** TASK-002
 
 #### 📋 Descripción
 
@@ -1334,7 +1511,7 @@ Crear sistema de audit log que registre todas las acciones administrativas y cam
 
 **Prioridad:** 🟢 MEDIA  
 **Estimación:** 2 días  
-**Dependencias:** TASK-001
+**Dependencias:** TASK-002
 
 #### 📋 Descripción
 
@@ -1446,7 +1623,7 @@ Epic 10: Módulo de Rituales y Amuletos---
 
 **Prioridad:** 🟢 MEDIA  
 **Estimación:** 2 días  
-**Dependencias:** TASK-001
+**Dependencias:** TASK-002
 
 #### 📋 Descripción
 
@@ -1620,7 +1797,7 @@ Crear sistema básico de recomendación que sugiera rituales basados en las lect
 
 **Prioridad:** 🟢 MEDIA  
 **Estimación:** 2 días  
-**Dependencias:** TASK-001
+**Dependencias:** TASK-002
 
 #### 📋 Descripción
 

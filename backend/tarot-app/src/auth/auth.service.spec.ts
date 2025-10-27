@@ -11,16 +11,14 @@ describe('AuthService', () => {
 
   beforeEach(async () => {
     usersServiceMock = {
-      create: jest
-        .fn()
-        .mockImplementation((dto) =>
-          Promise.resolve({
-            id: 1,
-            email: dto.email,
-            name: dto.name,
-            isAdmin: false,
-          }),
-        ),
+      create: jest.fn().mockImplementation((dto) =>
+        Promise.resolve({
+          id: 1,
+          email: dto.email,
+          name: dto.name,
+          isAdmin: false,
+        }),
+      ),
       findByEmail: jest.fn(),
     };
 
@@ -74,8 +72,8 @@ describe('AuthService', () => {
         storedUser.email,
       );
       expect(result).toBeDefined();
-      expect((result as any).password).toBeUndefined();
-      expect((result as any).email).toEqual(storedUser.email);
+      expect(result.password).toBeUndefined();
+      expect(result.email).toEqual(storedUser.email);
     });
 
     it('should return null when credentials are invalid', async () => {
