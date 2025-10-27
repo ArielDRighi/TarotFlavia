@@ -324,7 +324,7 @@ docker ps --format "table {{.Names}}\t{{.Ports}}"
 1. Login:
 
    - Email: `admin@tarotflavia.local`
-   - Password: `admin123`
+   - Password: `change_me_to_secure_password` (o la que hayas configurado en `.env`)
 
 2. Agregar servidor:
    - Name: `TarotFlavia DB`

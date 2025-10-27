@@ -45,7 +45,7 @@ services:
     restart: unless-stopped
     environment:
       PGADMIN_DEFAULT_EMAIL: ${TAROTFLAVIA_PGADMIN_EMAIL:-admin@tarotflavia.local}
-      PGADMIN_DEFAULT_PASSWORD: ${TAROTFLAVIA_PGADMIN_PASSWORD:-admin123}
+      PGADMIN_DEFAULT_PASSWORD: ${TAROTFLAVIA_PGADMIN_PASSWORD:-change_me_to_secure_password}
       PGADMIN_LISTEN_PORT: 80
     ports:
       # Host:Container mapping - using 5050 for pgAdmin interface
