@@ -104,12 +104,13 @@ Crear configuración de Docker Compose para levantar PostgreSQL localmente y fac
 
 ---
 
-### **TASK-001: Refactorizar Módulo Tarot a Arquitectura Modular**
+### **TASK-001: Refactorizar Módulo Tarot a Arquitectura Modular** ✅
 
 **Prioridad:** 🟡 ALTA  
 **Estimación:** 2-3 días  
 **Dependencias:** TASK-000  
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADO (Parcial: Cards, Decks, Spreads)  
+**Branch:** `feature/TASK-001-modular-refactoring`
 
 #### 📋 Descripción
 

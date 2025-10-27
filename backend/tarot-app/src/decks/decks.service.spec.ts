@@ -172,7 +172,7 @@ describe('DecksService', () => {
     it('should throw ConflictException if new name already exists', async () => {
       const updateWithName: UpdateDeckDto = { name: 'Existing Deck' };
       const anotherDeck = { ...mockDeck, id: 2, name: 'Existing Deck' };
-      
+
       mockDeckRepository.findOne
         .mockResolvedValueOnce(mockDeck)
         .mockResolvedValueOnce(anotherDeck);
