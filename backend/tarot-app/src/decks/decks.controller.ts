@@ -19,17 +19,16 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { DeckService } from './deck.service';
+import { DecksService } from './decks.service';
 import { CreateDeckDto } from './dto/create-deck.dto';
 import { UpdateDeckDto } from './dto/update-deck.dto';
 import { TarotDeck } from './entities/tarot-deck.entity';
 
 @ApiTags('Mazos')
 @Controller('decks')
-export class DeckController {
-  constructor(private readonly deckService: DeckService) {}
+export class DecksController {
+  constructor(private readonly decksService: DecksService) {}
 
-  // Endpoints para mazos
   @UseGuards(JwtAuthGuard)
   @Post()
   @ApiBearerAuth()
@@ -43,12 +42,14 @@ export class DeckController {
     status: 403,
     description: 'Acceso denegado - Solo administradores',
   })
-  async createDeck(@Request() req, @Body() createDeckDto: CreateDeckDto) {
-    // Verificar si es administrador
+  async createDeck(
+    @Request() req: { user: { userId?: number; isAdmin?: boolean } },
+    @Body() createDeckDto: CreateDeckDto,
+  ) {
     if (!req.user.isAdmin) {
       throw new ForbiddenException('Solo administradores pueden crear mazos');
     }
-    return this.deckService.createDeck(createDeckDto);
+    return this.decksService.createDeck(createDeckDto);
   }
 
   @Get()
@@ -59,7 +60,7 @@ export class DeckController {
     type: [TarotDeck],
   })
   async getAllDecks() {
-    return this.deckService.findAllDecks();
+    return this.decksService.findAllDecks();
   }
 
   @Get(':id')
@@ -68,7 +69,7 @@ export class DeckController {
   @ApiResponse({ status: 200, description: 'Mazo encontrado', type: TarotDeck })
   @ApiResponse({ status: 404, description: 'Mazo no encontrado' })
   async getDeckById(@Param('id', ParseIntPipe) id: number) {
-    return this.deckService.findDeckById(id);
+    return this.decksService.findDeckById(id);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -87,17 +88,16 @@ export class DeckController {
   })
   @ApiResponse({ status: 404, description: 'Mazo no encontrado' })
   async updateDeck(
-    @Request() req,
+    @Request() req: { user: { userId?: number; isAdmin?: boolean } },
     @Param('id', ParseIntPipe) id: number,
     @Body() updateDeckDto: UpdateDeckDto,
   ) {
-    // Verificar si es administrador
     if (!req.user.isAdmin) {
       throw new ForbiddenException(
         'Solo administradores pueden actualizar mazos',
       );
     }
-    return this.deckService.updateDeck(id, updateDeckDto);
+    return this.decksService.updateDeck(id, updateDeckDto);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -111,14 +111,16 @@ export class DeckController {
     description: 'Acceso denegado - Solo administradores',
   })
   @ApiResponse({ status: 404, description: 'Mazo no encontrado' })
-  async removeDeck(@Request() req, @Param('id', ParseIntPipe) id: number) {
-    // Verificar si es administrador
+  async removeDeck(
+    @Request() req: { user: { userId?: number; isAdmin?: boolean } },
+    @Param('id', ParseIntPipe) id: number,
+  ) {
     if (!req.user.isAdmin) {
       throw new ForbiddenException(
         'Solo administradores pueden eliminar mazos',
       );
     }
-    await this.deckService.removeDeck(id);
+    await this.decksService.removeDeck(id);
     return { message: 'Mazo eliminado con éxito' };
   }
 }

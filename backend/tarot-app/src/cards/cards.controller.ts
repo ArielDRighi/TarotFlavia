@@ -17,18 +17,17 @@ import {
   ApiResponse,
   ApiBearerAuth,
   ApiParam,
-  ApiQuery,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { CardService } from './card.service';
+import { CardsService } from './cards.service';
 import { CreateCardDto } from './dto/create-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
 import { TarotCard } from './entities/tarot-card.entity';
 
 @ApiTags('Cartas')
 @Controller('cards')
-export class CardController {
-  constructor(private readonly cardService: CardService) {}
+export class CardsController {
+  constructor(private readonly cardsService: CardsService) {}
 
   @Get()
   @ApiOperation({ summary: 'Obtener todas las cartas' })
@@ -38,7 +37,7 @@ export class CardController {
     type: [TarotCard],
   })
   async getAllCards() {
-    return this.cardService.findAll();
+    return this.cardsService.findAll();
   }
 
   @Get(':id')
@@ -51,7 +50,7 @@ export class CardController {
   })
   @ApiResponse({ status: 404, description: 'Carta no encontrada' })
   async getCardById(@Param('id', ParseIntPipe) id: number) {
-    return this.cardService.findById(id);
+    return this.cardsService.findById(id);
   }
 
   @Get('deck/:deckId')
@@ -64,7 +63,7 @@ export class CardController {
   })
   @ApiResponse({ status: 404, description: 'Mazo no encontrado' })
   async getCardsByDeck(@Param('deckId', ParseIntPipe) deckId: number) {
-    return this.cardService.findByDeck(deckId);
+    return this.cardsService.findByDeck(deckId);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -80,11 +79,14 @@ export class CardController {
     status: 403,
     description: 'Acceso denegado - Solo administradores',
   })
-  async createCard(@Request() req, @Body() createCardDto: CreateCardDto) {
+  async createCard(
+    @Request() req: { user: { isAdmin: boolean } },
+    @Body() createCardDto: CreateCardDto,
+  ) {
     if (!req.user.isAdmin) {
       throw new ForbiddenException('Solo administradores pueden crear cartas');
     }
-    return this.cardService.create(createCardDto);
+    return this.cardsService.create(createCardDto);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -102,7 +104,7 @@ export class CardController {
     description: 'Acceso denegado - Solo administradores',
   })
   async updateCard(
-    @Request() req,
+    @Request() req: { user: { isAdmin: boolean } },
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCardDto: UpdateCardDto,
   ) {
@@ -111,7 +113,7 @@ export class CardController {
         'Solo administradores pueden actualizar cartas',
       );
     }
-    return this.cardService.update(id, updateCardDto);
+    return this.cardsService.update(id, updateCardDto);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -124,13 +126,16 @@ export class CardController {
     status: 403,
     description: 'Acceso denegado - Solo administradores',
   })
-  async removeCard(@Request() req, @Param('id', ParseIntPipe) id: number) {
+  async removeCard(
+    @Request() req: { user: { isAdmin: boolean } },
+    @Param('id', ParseIntPipe) id: number,
+  ) {
     if (!req.user.isAdmin) {
       throw new ForbiddenException(
         'Solo administradores pueden eliminar cartas',
       );
     }
-    await this.cardService.remove(id);
+    await this.cardsService.remove(id);
     return { message: 'Carta eliminada con éxito' };
   }
 }

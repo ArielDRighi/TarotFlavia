@@ -6,11 +6,12 @@ import {
   ManyToMany,
   JoinTable,
   CreateDateColumn,
+  DeleteDateColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from '../../users/entities/user.entity';
-import { TarotCard } from './tarot-card.entity';
-import { TarotDeck } from './tarot-deck.entity';
+import { TarotCard } from '../../cards/entities/tarot-card.entity';
+import { TarotDeck } from '../../decks/entities/tarot-deck.entity';
 
 @Entity()
 export class TarotReading {
@@ -55,7 +56,7 @@ export class TarotReading {
     description: 'Interpretación completa de la lectura',
   })
   @Column('text', { nullable: true })
-  interpretation: string;
+  interpretation: string | null;
 
   @ApiProperty({
     example: '2023-01-01T00:00:00Z',
@@ -63,4 +64,7 @@ export class TarotReading {
   })
   @CreateDateColumn()
   createdAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt?: Date;
 }

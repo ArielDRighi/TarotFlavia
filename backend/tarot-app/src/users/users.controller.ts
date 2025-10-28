@@ -35,7 +35,7 @@ export class UsersController {
   @ApiResponse({ status: 200, description: 'Perfil recuperado exitosamente' })
   @ApiResponse({ status: 401, description: 'No autorizado' })
   @ApiResponse({ status: 404, description: 'Usuario no encontrado' })
-  async getProfile(@Request() req) {
+  async getProfile(@Request() req: { user: { userId: number } }) {
     const userId = req.user.userId;
     const user = await this.usersService.findById(userId);
 
@@ -44,7 +44,8 @@ export class UsersController {
     }
 
     // No devolver la contraseña en la respuesta
-    const { password, ...result } = user;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: _password, ...result } = user;
     return result;
   }
 
@@ -55,7 +56,10 @@ export class UsersController {
   @ApiResponse({ status: 200, description: 'Perfil actualizado exitosamente' })
   @ApiResponse({ status: 401, description: 'No autorizado' })
   @ApiResponse({ status: 404, description: 'Usuario no encontrado' })
-  async updateProfile(@Request() req, @Body() updateUserDto: UpdateUserDto) {
+  async updateProfile(
+    @Request() req: { user: { userId: number } },
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
     const userId = req.user.userId;
     return this.usersService.update(userId, updateUserDto);
   }
@@ -66,7 +70,7 @@ export class UsersController {
   @ApiResponse({ status: 200, description: 'Lista de usuarios' })
   @ApiResponse({ status: 401, description: 'No autorizado' })
   @ApiResponse({ status: 403, description: 'Acceso denegado (no es admin)' })
-  async findAll(@Request() req) {
+  async findAll(@Request() req: { user: { isAdmin: boolean } }) {
     // Verificar si es administrador
     if (!req.user.isAdmin) {
       throw new ForbiddenException(
@@ -85,7 +89,10 @@ export class UsersController {
   @ApiResponse({ status: 401, description: 'No autorizado' })
   @ApiResponse({ status: 403, description: 'Acceso denegado' })
   @ApiResponse({ status: 404, description: 'Usuario no encontrado' })
-  async findOne(@Request() req, @Param('id', ParseIntPipe) id: number) {
+  async findOne(
+    @Request() req: { user: { userId: number; isAdmin: boolean } },
+    @Param('id', ParseIntPipe) id: number,
+  ) {
     // Permitir acceso si es el propio usuario o un administrador
     if (req.user.userId !== id && !req.user.isAdmin) {
       throw new ForbiddenException('Acceso denegado');
@@ -96,7 +103,8 @@ export class UsersController {
       throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
     }
 
-    const { password, ...result } = user;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: _password, ...result } = user;
     return result;
   }
 
@@ -108,7 +116,10 @@ export class UsersController {
   @ApiResponse({ status: 401, description: 'No autorizado' })
   @ApiResponse({ status: 403, description: 'Acceso denegado' })
   @ApiResponse({ status: 404, description: 'Usuario no encontrado' })
-  async remove(@Request() req, @Param('id', ParseIntPipe) id: number) {
+  async remove(
+    @Request() req: { user: { userId: number; isAdmin: boolean } },
+    @Param('id', ParseIntPipe) id: number,
+  ) {
     // Solo administradores o el propio usuario pueden eliminar cuentas
     if (req.user.userId !== id && !req.user.isAdmin) {
       throw new ForbiddenException('Acceso denegado');

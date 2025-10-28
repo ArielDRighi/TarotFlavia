@@ -1,103 +1,95 @@
 import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-  ManyToOne,
-  ManyToMany,
-  JoinColumn,
-} from 'typeorm';
+  IsString,
+  IsNotEmpty,
+  IsUrl,
+  IsOptional,
+  IsInt,
+  Min,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { TarotDeck } from './tarot-deck.entity';
-import { TarotReading } from './tarot-reading.entity';
 
-@Entity()
-export class TarotCard {
-  @ApiProperty({ example: 1, description: 'ID único de la carta' })
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class CreateCardDto {
   @ApiProperty({
     example: 'El Loco',
     description: 'Nombre de la carta de tarot',
   })
-  @Column()
+  @IsString()
+  @IsNotEmpty({ message: 'El nombre de la carta es requerido' })
   name: string;
 
   @ApiProperty({
     example: 0,
     description: 'Número de la carta (0 para El Loco, etc.)',
   })
-  @Column()
+  @IsInt()
+  @Min(0, { message: 'El número debe ser positivo o cero' })
   number: number;
 
   @ApiProperty({
     example: 'arcanos_mayores',
     description: 'Categoría de la carta (arcanos mayores, copas, oros, etc.)',
   })
-  @Column()
+  @IsString()
+  @IsNotEmpty({ message: 'La categoría de la carta es requerida' })
   category: string;
 
   @ApiProperty({
     example: 'https://ejemplo.com/cartas/el_loco.jpg',
     description: 'URL de la imagen de la carta',
   })
-  @Column()
+  @IsUrl({}, { message: 'Debe proporcionar una URL válida para la imagen' })
+  @IsNotEmpty()
   imageUrl: string;
 
   @ApiProperty({
     example: 'https://ejemplo.com/cartas/el_loco_reverso.jpg',
     description: 'URL de la imagen de la carta invertida (opcional)',
+    required: false,
   })
-  @Column({ nullable: true })
-  reversedImageUrl: string;
+  @IsUrl(
+    {},
+    { message: 'Debe proporcionar una URL válida para la imagen invertida' },
+  )
+  @IsOptional()
+  reversedImageUrl?: string;
 
   @ApiProperty({
     example: 'Nuevos comienzos, libertad y espontaneidad...',
     description: 'Significado de la carta en posición normal',
   })
-  @Column('text')
+  @IsString()
+  @IsNotEmpty({ message: 'El significado en posición normal es requerido' })
   meaningUpright: string;
 
   @ApiProperty({
     example: 'Imprudencia, toma de riesgos innecesarios...',
     description: 'Significado de la carta en posición invertida',
   })
-  @Column('text')
+  @IsString()
+  @IsNotEmpty({ message: 'El significado en posición invertida es requerido' })
   meaningReversed: string;
 
   @ApiProperty({
     example: 'El Loco simboliza el inicio de un viaje hacia lo desconocido...',
     description: 'Descripción detallada de la carta',
   })
-  @Column('text')
+  @IsString()
+  @IsNotEmpty({ message: 'La descripción es requerida' })
   description: string;
 
   @ApiProperty({
     example: 'Aventura, libertad, espíritu libre, caos, potencial',
     description: 'Palabras clave asociadas a la carta',
   })
-  @Column('text')
+  @IsString()
+  @IsNotEmpty({ message: 'Las palabras clave son requeridas' })
   keywords: string;
 
   @ApiProperty({
     example: 1,
     description: 'ID del mazo al que pertenece la carta',
   })
-  @Column()
+  @IsInt()
+  @IsNotEmpty({ message: 'El ID del mazo es requerido' })
   deckId: number;
-
-  @ManyToOne(() => TarotDeck, (deck) => deck.cards)
-  @JoinColumn({ name: 'deckId' })
-  deck: TarotDeck;
-
-  @ManyToMany(() => TarotReading, (reading) => reading.cards)
-  readings: TarotReading[];
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 }

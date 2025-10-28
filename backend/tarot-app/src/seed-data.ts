@@ -1,15 +1,22 @@
 import { NestFactory } from '@nestjs/core';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { AppModule } from './app.module';
-import { TarotDeck } from './tarot/entities/tarot-deck.entity';
-import { TarotCard } from './tarot/entities/tarot-card.entity';
-import { TarotSpread } from './tarot/entities/tarot-spread.entity';
+import { TarotDeck } from './decks/entities/tarot-deck.entity';
+import { TarotCard } from './cards/entities/tarot-card.entity';
+import { TarotSpread } from './spreads/entities/tarot-spread.entity';
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppModule);
-  const deckRepository = app.get(getRepositoryToken(TarotDeck));
-  const cardRepository = app.get(getRepositoryToken(TarotCard));
-  const spreadRepository = app.get(getRepositoryToken(TarotSpread));
+  const deckRepository = app.get<Repository<TarotDeck>>(
+    getRepositoryToken(TarotDeck),
+  );
+  const cardRepository = app.get<Repository<TarotCard>>(
+    getRepositoryToken(TarotCard),
+  );
+  const spreadRepository = app.get<Repository<TarotSpread>>(
+    getRepositoryToken(TarotSpread),
+  );
 
   try {
     // Comprobar si ya hay datos cargados
@@ -490,4 +497,4 @@ async function bootstrap() {
   }
 }
 
-bootstrap();
+void bootstrap();

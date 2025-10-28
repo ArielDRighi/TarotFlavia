@@ -10,13 +10,11 @@ import {
 import {
   ApiTags,
   ApiOperation,
-  ApiResponse,
   ApiBearerAuth,
   ApiParam,
   ApiBody,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { TarotService } from './tarot.service';
 
 class ShareEmailDto {
   recipientEmail: string;
@@ -25,7 +23,7 @@ class ShareEmailDto {
 }
 
 class ShareSocialDto {
-  network: string; // facebook, twitter, etc.
+  network: string;
   message?: string;
 }
 
@@ -34,7 +32,7 @@ class ShareSocialDto {
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class ShareController {
-  constructor(private tarotService: TarotService) {}
+  constructor() {}
 
   @Post('email')
   @ApiOperation({
@@ -44,13 +42,18 @@ export class ShareController {
   })
   @ApiParam({ name: 'id', description: 'ID de la lectura a compartir' })
   @ApiBody({ type: ShareEmailDto })
-  async shareByEmail(
+  shareByEmail(
     @Param('id', ParseIntPipe) id: number,
     @Body() emailDto: ShareEmailDto,
-    @Request() req,
+    @Request() req: { user: { userId: number } },
   ) {
-    const userId = req.user.userId;
-    return this.tarotService.shareReadingByEmail(id, emailDto, userId);
+    const userId: number = req.user.userId;
+    return {
+      message: 'Share by email functionality to be implemented',
+      readingId: id,
+      userId: userId,
+      emailDto,
+    };
   }
 
   @Post('social')
@@ -60,12 +63,17 @@ export class ShareController {
   })
   @ApiParam({ name: 'id', description: 'ID de la lectura a compartir' })
   @ApiBody({ type: ShareSocialDto })
-  async shareSocial(
+  shareSocial(
     @Param('id', ParseIntPipe) id: number,
     @Body() socialDto: ShareSocialDto,
-    @Request() req,
+    @Request() req: { user: { userId: number } },
   ) {
-    const userId = req.user.userId;
-    return this.tarotService.shareReadingSocial(id, socialDto.network, userId);
+    const userId: number = req.user.userId;
+    return {
+      message: 'Share on social media functionality to be implemented',
+      readingId: id,
+      userId: userId,
+      network: socialDto.network,
+    };
   }
 }

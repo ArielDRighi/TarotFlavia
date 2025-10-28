@@ -3,14 +3,14 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { HttpService } from '@nestjs/axios';
-import { TarotCard } from './entities/tarot-card.entity';
+import { TarotCard } from '../cards/entities/tarot-card.entity';
 import { TarotInterpretation } from './entities/tarot-interpretation.entity';
-import { TarotSpread } from './entities/tarot-spread.entity';
-import { TarotReading } from './entities/tarot-reading.entity';
+import { TarotSpread } from '../spreads/entities/tarot-spread.entity';
+import { TarotReading } from '../readings/entities/tarot-reading.entity';
 import OpenAI from 'openai';
 
 @Injectable()
-export class InterpretationService {
+export class InterpretationsService {
   private openai: OpenAI | null = null;
 
   constructor(
@@ -95,7 +95,7 @@ export class InterpretationService {
     try {
       console.log('Enviando solicitud a OpenAI...');
       const model =
-        this.configService.get<string>('OPENAI_MODEL') || 'gpt-4-turbo';
+        this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o-mini';
 
       const response = await this.openai.chat.completions.create({
         model,
@@ -143,6 +143,7 @@ export class InterpretationService {
       const interpretation = this.interpretationRepository.create({
         content,
         modelUsed,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         aiConfig,
       });
       await this.interpretationRepository.save(interpretation);
@@ -152,7 +153,6 @@ export class InterpretationService {
     }
   }
 
-  // Método para asociar una interpretación a una lectura existente
   async attachInterpretationToReading(
     readingId: number,
     interpretation: string,
@@ -161,9 +161,10 @@ export class InterpretationService {
   ) {
     try {
       const tarotInterpretation = this.interpretationRepository.create({
-        reading: { id: readingId },
+        reading: { id: readingId } as Pick<TarotReading, 'id'>,
         content: interpretation,
         modelUsed,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         aiConfig,
       });
       return await this.interpretationRepository.save(tarotInterpretation);
@@ -179,46 +180,16 @@ export class InterpretationService {
   async regenerateInterpretation(reading: TarotReading): Promise<string> {
     const cards = reading.cards;
     const positions = reading.cardPositions;
-    let spreadId: number | undefined;
-
-    if (reading.deck) {
-      spreadId = reading.deck.id;
-    }
-
-    let spread: TarotSpread | undefined;
-    if (spreadId) {
-      try {
-        spread = await this.findSpreadById(spreadId);
-      } catch (error) {
-        console.warn(`No se pudo encontrar la tirada con ID ${spreadId}`);
-      }
-    }
 
     const newInterpretation = await this.generateInterpretation(
       cards,
       positions,
       reading.question,
-      spread,
     );
 
     // Actualizar la interpretación en la lectura
     reading.interpretation = newInterpretation;
 
     return newInterpretation;
-  }
-
-  private async findSpreadById(id: number): Promise<TarotSpread> {
-    const spread = await this.interpretationRepository.manager.findOne(
-      TarotSpread,
-      {
-        where: { id },
-      },
-    );
-
-    if (!spread) {
-      throw new Error(`Tirada con ID ${id} no encontrada`);
-    }
-
-    return spread;
   }
 }

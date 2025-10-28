@@ -2,6 +2,23 @@
 
 ---
 
+## 🧪 Metodología de Desarrollo
+
+> **TDD (Test-Driven Development)** - A partir de TASK-001, todo el desarrollo seguirá el ciclo Red-Green-Refactor:
+>
+> 1. ✍️ **RED**: Escribir el test que falla primero
+> 2. ✅ **GREEN**: Escribir el código mínimo para que el test pase
+> 3. 🔄 **REFACTOR**: Mejorar el código manteniendo los tests verdes
+>
+> **Reglas:**
+>
+> - No se escribe código de producción sin un test que falle primero
+> - Los tests deben ser claros, concisos y enfocados en un solo comportamiento
+> - El coverage mínimo debe ser del 80% para código nuevo
+> - Cada commit debe tener tests pasando (CI/CD verde)
+
+---
+
 ## 📦 Epic 0: Setup de Entorno de Desarrollo
 
 > **Objetivo:** Configurar entorno de desarrollo local con Docker para base de datos PostgreSQL
@@ -87,12 +104,13 @@ Crear configuración de Docker Compose para levantar PostgreSQL localmente y fac
 
 ---
 
-### **TASK-001: Refactorizar Módulo Tarot a Arquitectura Modular**
+### **TASK-001: Refactorizar Módulo Tarot a Arquitectura Modular** ✅
 
 **Prioridad:** 🟡 ALTA  
 **Estimación:** 2-3 días  
 **Dependencias:** TASK-000  
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADO  
+**Branch:** `feature/TASK-001-modular-refactoring`
 
 #### 📋 Descripción
 
@@ -166,32 +184,32 @@ src/
 
 **Fase 1: Crear estructura de módulos**
 
-- [ ] Crear módulo `CardsModule` con su estructura de carpetas
+- [x] Crear módulo `CardsModule` con su estructura de carpetas
   - Mover `card.controller.ts` → `cards/cards.controller.ts`
   - Mover `card.service.ts` → `cards/cards.service.ts`
   - Mover `tarot-card.entity.ts` → `cards/entities/`
   - Mover DTOs relacionados: `create-card.dto.ts`, `update-card.dto.ts`
   - Crear `cards/cards.module.ts` con imports necesarios
-- [ ] Crear módulo `DecksModule` con su estructura
+- [x] Crear módulo `DecksModule` con su estructura
   - Mover `deck.controller.ts` → `decks/decks.controller.ts`
   - Mover `deck.service.ts` → `decks/decks.service.ts`
   - Mover `tarot-deck.entity.ts` → `decks/entities/`
   - Mover DTOs: `create-deck.dto.ts`, `update-deck.dto.ts`, `shuffle-deck.dto.ts`
   - Crear `decks/decks.module.ts` con `forwardRef` a CardsModule si necesario
-- [ ] Crear módulo `SpreadsModule` con su estructura
+- [x] Crear módulo `SpreadsModule` con su estructura
   - Mover `tarot-spread.entity.ts` → `spreads/entities/`
   - Crear `spreads.controller.ts` (actualmente en tarot.controller)
   - Crear `spreads.service.ts` (extraer lógica de tarot.service)
   - Mover DTO: `create-spread.dto.ts`
   - Crear `spreads/spreads.module.ts`
-- [ ] Crear módulo `ReadingsModule` con su estructura
+- [x] Crear módulo `ReadingsModule` con su estructura
   - Mover `reading.controller.ts` → `readings/readings.controller.ts`
   - Mover `share.controller.ts` → `readings/share.controller.ts`
   - Extraer `readings.service.ts` desde `tarot.service.ts`
   - Mover `tarot-reading.entity.ts` → `readings/entities/`
   - Mover DTOs: `create-reading.dto.ts`, `random-cards.dto.ts`
   - Crear `readings/readings.module.ts`
-- [ ] Crear módulo `InterpretationsModule` con su estructura
+- [x] Crear módulo `InterpretationsModule` con su estructura
   - Mover `interpretation.controller.ts` → `interpretations/interpretations.controller.ts`
   - Mover `interpretation.service.ts` → `interpretations/interpretations.service.ts`
   - Mover `tarot-interpretation.entity.ts` → `interpretations/entities/`
@@ -200,38 +218,38 @@ src/
 
 **Fase 2: Actualizar imports y dependencias**
 
-- [ ] Actualizar todos los imports en controllers para reflejar nuevas rutas
-- [ ] Actualizar todos los imports en services para reflejar nuevas rutas
-- [ ] Configurar `forwardRef()` donde haya dependencias circulares
-- [ ] Actualizar `app.module.ts` para importar nuevos módulos
-- [ ] Eliminar o reducir `TarotModule` a orquestador simple
-- [ ] Actualizar exports de módulos según dependencias
+- [x] Actualizar todos los imports en controllers para reflejar nuevas rutas
+- [x] Actualizar todos los imports en services para reflejar nuevas rutas
+- [x] Configurar `forwardRef()` donde haya dependencias circulares
+- [x] Actualizar `app.module.ts` para importar nuevos módulos
+- [x] Eliminar o reducir `TarotModule` a orquestador simple
+- [x] Actualizar exports de módulos según dependencias
 
 **Fase 3: Actualizar tests**
 
-- [ ] Mover `card.controller.spec.ts` → `cards/cards.controller.spec.ts`
-- [ ] Mover `card.service.spec.ts` → `cards/cards.service.spec.ts`
-- [ ] Crear tests para cada nuevo módulo con mocks apropiados
-- [ ] Actualizar imports en todos los archivos de test
-- [ ] Verificar que todos los tests pasen con la nueva estructura
+- [x] Mover `card.controller.spec.ts` → `cards/cards.controller.spec.ts`
+- [x] Mover `card.service.spec.ts` → `cards/cards.service.spec.ts`
+- [x] Crear tests para cada nuevo módulo con mocks apropiados
+- [x] Actualizar imports en todos los archivos de test
+- [x] Verificar que todos los tests pasen con la nueva estructura
 
 **Fase 4: Actualizar configuración de TypeORM**
 
-- [ ] Actualizar rutas de entities en `typeorm.ts`:
+- [x] Actualizar rutas de entities en `typeorm.ts`:
   - `entities: [__dirname + '/../**/*.entity{.ts,.js}']` debe encontrar las nuevas rutas
-- [ ] Verificar que TypeORM carga correctamente todas las entidades
-- [ ] Probar conexión a base de datos con nueva estructura
+- [x] Verificar que TypeORM carga correctamente todas las entidades
+- [x] Probar conexión a base de datos con nueva estructura
 
 **Fase 5: Documentación y validación**
 
-- [ ] Actualizar documentación de arquitectura
-- [ ] Crear diagrama de dependencias entre módulos
-- [ ] Documentar cómo agregar nuevos módulos siguiendo el patrón
-- [ ] Ejecutar `npm run lint` y corregir warnings
-- [ ] Ejecutar `npm run format` para formatear código
-- [ ] Ejecutar `npm run build` y verificar que compila sin errores
-- [ ] Ejecutar `npm test` y verificar que todos los tests pasan
-- [ ] Verificar que la aplicación arranca correctamente con `npm run start:dev`
+- [x] Actualizar documentación de arquitectura
+- [x] Crear diagrama de dependencias entre módulos
+- [x] Documentar cómo agregar nuevos módulos siguiendo el patrón
+- [x] Ejecutar `npm run lint` y corregir warnings
+- [x] Ejecutar `npm run format` para formatear código
+- [x] Ejecutar `npm run build` y verificar que compila sin errores
+- [x] Ejecutar `npm test` y verificar que todos los tests pasan
+- [x] Verificar que la aplicación arranca correctamente con `npm run start:dev`
 
 #### 🎯 Criterios de aceptación
 
@@ -260,6 +278,82 @@ src/
 2. **ReadingsModule complejo**: Depende de Cards, Decks, Spreads, Interpretations → Inyectar solo lo necesario
 3. **InterpretationsModule**: Necesita acceso a OpenAI y cache → Importar HttpModule y CacheModule
 4. **Tests rotos**: Todos los imports cambiarán → Actualizar uno por uno
+
+#### ✅ Resumen de Implementación (Completado)
+
+**Estructura final creada:**
+
+```
+src/
+├── cards/
+│   ├── cards.module.ts
+│   ├── cards.controller.ts (+ .spec.ts)
+│   ├── cards.service.ts (+ .spec.ts)
+│   ├── dto/
+│   │   ├── create-card.dto.ts
+│   │   └── update-card.dto.ts
+│   └── entities/
+│       └── tarot-card.entity.ts
+├── decks/
+│   ├── decks.module.ts
+│   ├── decks.controller.ts (+ .spec.ts)
+│   ├── decks.service.ts (+ .spec.ts)
+│   ├── dto/
+│   │   ├── create-deck.dto.ts
+│   │   ├── update-deck.dto.ts
+│   │   └── shuffle-deck.dto.ts
+│   └── entities/
+│       └── tarot-deck.entity.ts
+├── spreads/
+│   ├── spreads.module.ts
+│   ├── spreads.controller.ts (+ .spec.ts)
+│   ├── spreads.service.ts (+ .spec.ts)
+│   ├── dto/
+│   │   └── create-spread.dto.ts
+│   └── entities/
+│       └── tarot-spread.entity.ts
+├── readings/
+│   ├── readings.module.ts
+│   ├── readings.controller.ts (+ .spec.ts)
+│   ├── readings.service.ts (+ .spec.ts)
+│   ├── share.controller.ts
+│   ├── dto/
+│   │   ├── create-reading.dto.ts
+│   │   └── random-cards.dto.ts
+│   └── entities/
+│       └── tarot-reading.entity.ts
+├── interpretations/
+│   ├── interpretations.module.ts
+│   ├── interpretations.controller.ts
+│   ├── interpretations.service.ts (+ .spec.ts)
+│   ├── dto/
+│   │   └── generate-interpretation.dto.ts
+│   └── entities/
+│       └── tarot-interpretation.entity.ts
+└── tarot/
+    └── tarot.module.ts  # Módulo orquestador
+```
+
+**Resultados:**
+
+- ✅ 5 módulos independientes creados (Cards, Decks, Spreads, Readings, Interpretations)
+- ✅ TarotModule refactorizado como orquestador que importa todos los submódulos
+- ✅ AppModule actualizado con todos los nuevos módulos
+- ✅ Todas las entidades movidas a sus respectivos módulos
+- ✅ Todos los DTOs organizados por módulo
+- ✅ Tests unitarios creados siguiendo TDD para nuevos módulos
+- ✅ 103 tests pasando exitosamente
+- ✅ Build exitoso sin errores de compilación
+- ✅ Aplicación arranca correctamente
+- ✅ TypeORM carga todas las entidades desde las nuevas ubicaciones
+
+**Metodología TDD aplicada:**
+
+1. ✅ Tests escritos primero para ReadingsService y ReadingsController
+2. ✅ Implementación mínima para pasar tests
+3. ✅ Tests escritos para InterpretationsService
+4. ✅ Refactorización y limpieza de código
+5. ✅ Verificación final con suite completa de tests
 
 ---
 

@@ -7,7 +7,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { TarotCard } from './tarot-card.entity';
+import { TarotCard } from '../../cards/entities/tarot-card.entity';
 
 @Entity()
 export class TarotDeck {
