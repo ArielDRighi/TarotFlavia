@@ -48,6 +48,41 @@ export class TarotDeck {
   @Column({ default: true })
   isActive: boolean;
 
+  @ApiProperty({
+    example: true,
+    description: 'Si este es el mazo predeterminado del sistema',
+  })
+  @Column({ default: false })
+  isDefault: boolean;
+
+  @ApiProperty({
+    example: 'Pamela Colman Smith',
+    description: 'Artista que ilustró el mazo',
+  })
+  @Column({ nullable: true })
+  artist: string;
+
+  @ApiProperty({
+    example: 1909,
+    description: 'Año de creación del mazo',
+  })
+  @Column({ nullable: true })
+  yearCreated: number;
+
+  @ApiProperty({
+    example: 'Hermética / Orden del Amanecer Dorado',
+    description: 'Tradición esotérica del mazo',
+  })
+  @Column({ nullable: true })
+  tradition: string;
+
+  @ApiProperty({
+    example: 'Rider & Company',
+    description: 'Editorial que publicó el mazo',
+  })
+  @Column({ nullable: true })
+  publisher: string;
+
   @OneToMany(() => TarotCard, (card) => card.deck)
   cards: TarotCard[];
 

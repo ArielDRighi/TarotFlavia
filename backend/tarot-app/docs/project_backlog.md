@@ -579,6 +579,75 @@ Crear seeder para al menos un mazo predeterminado (Rider-Waite) que agrupe las 7
 
 ---
 
+### **TASK-005-a: Crear Seeders para Mazos (Decks) Predeterminados** ✅
+
+**Prioridad:** 🟡 ALTA  
+**Estimación:** 1 día  
+**Dependencias:** TASK-005  
+**Estado:** ✅ COMPLETADO  
+**Branch:** `feature/TASK-005-a-deck-seeder`  
+**Commit:** Pending merge
+
+#### 📋 Descripción
+
+Crear seeder para al menos un mazo predeterminado (Rider-Waite) que agrupe las 78 cartas creadas. Preparar la estructura para futuros mazos adicionales.
+
+#### ✅ Tareas específicas
+
+- [x] Crear seeder para entidad `tarot_decks` con el mazo "Rider-Waite Classic"
+- [x] Establecer este mazo como `is_default: true`
+- [x] Documentar la estructura para agregar mazos adicionales en el futuro (ej: Marsella, Thoth)
+- [x] Crear relación entre el mazo y las 78 cartas existentes (tabla intermedia si es necesario)
+- [x] Agregar descripción completa del mazo con información histórica
+- [x] Incluir metadata del mazo: año de creación, artista, tradición
+- [x] Implementar validación que asegure que siempre exista al menos un mazo default
+- [x] Crear endpoint `GET /decks/default` que retorne el mazo predeterminado
+
+#### 🎯 Criterios de aceptación
+
+- ✅ Existe un mazo "Rider-Waite Classic" marcado como default
+- ✅ El mazo está correctamente vinculado a las 78 cartas
+- ✅ El sistema puede manejar múltiples mazos (aunque solo exista uno)
+
+#### ✅ Resumen de Implementación (Completado)
+
+**Archivos creados/modificados:**
+
+- `src/decks/entities/tarot-deck.entity.ts` - Added `isDefault`, `artist`, `yearCreated`, `tradition`, `publisher` fields
+- `src/database/seeds/data/tarot-decks.data.ts` (106 líneas) - Datos estructurados del mazo Rider-Waite
+- `src/database/seeds/tarot-decks.seeder.ts` (67 líneas) - Seeder principal
+- `src/database/seeds/tarot-decks.seeder.spec.ts` (236 líneas) - 12 tests unitarios
+- `src/decks/decks.service.ts` - Added `findDefaultDeck()` method
+- `src/decks/decks.controller.ts` - Added `GET /decks/default` endpoint
+- `src/seed-data.ts` - Integrated deck seeder before cards seeder
+
+**Características implementadas:**
+
+- ✅ Seeder idempotente con validaciones de integridad
+- ✅ Mazo Rider-Waite con metadata histórica completa:
+  - Artista: Pamela Colman Smith
+  - Año: 1909
+  - Tradición: Hermética / Orden del Amanecer Dorado
+  - Editorial: Rider & Company
+- ✅ Validación que solo permite un mazo default
+- ✅ Endpoint público `GET /decks/default` funcional
+- ✅ Documentación para agregar futuros mazos (Marsella, Thoth, etc.)
+- ✅ 12 tests unitarios con 100% de cobertura
+- ✅ 161 tests totales pasando (incluye 149 existentes + 12 nuevos)
+- ✅ Metodología TDD Red-Green-Refactor aplicada
+- ✅ Código formateado con Prettier y linted con ESLint
+
+**Metodología TDD aplicada:**
+
+1. ✅ Tests escritos primero para seeder (RED phase)
+2. ✅ Implementación mínima para pasar tests (GREEN phase)
+3. ✅ Tests escritos para endpoint GET /decks/default (RED phase)
+4. ✅ Implementación del service y controller (GREEN phase)
+5. ✅ Refactorización y limpieza de código (REFACTOR phase)
+6. ✅ Verificación final con suite completa de tests
+
+---
+
 ### **TASK-006: Crear Seeders para Tipos de Tiradas (Spreads) Predefinidos**
 
 **Prioridad:** 🟡 ALTA  

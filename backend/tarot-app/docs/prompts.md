@@ -1,4 +1,4 @@
-creacion de nueva tarea:
+# Creacion de nueva tarea:
 
 OK, vamos a iniciar esta tarea.
 
@@ -20,7 +20,7 @@ Validación Final: Asegúrate de que todos los tests (nuevos y existentes) pasen
 
 Entregable: Proporcióname el diff de cambios y un borrador del mensaje para la Pull Request.
 
-Pull Request
+# Pull Request
 
 Tengo el siguiente feedback del PR para la rama feature/TASK-00x.
 
