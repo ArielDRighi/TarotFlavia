@@ -33,9 +33,11 @@ export class DecksService {
     try {
       return await this.deckRepository.save(deck);
     } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       throw new InternalServerErrorException(
         'Error al crear el mazo de tarot',
-        error.message,
+        errorMessage,
       );
     }
   }
@@ -80,9 +82,11 @@ export class DecksService {
     try {
       return await this.deckRepository.save(deck);
     } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       throw new InternalServerErrorException(
         'Error al actualizar el mazo de tarot',
-        error.message,
+        errorMessage,
       );
     }
   }

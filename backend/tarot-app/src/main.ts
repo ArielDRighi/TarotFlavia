@@ -51,4 +51,5 @@ async function bootstrap() {
     `Documentación de Swagger disponible en: ${await app.getUrl()}/api`,
   );
 }
-bootstrap();
+
+void bootstrap();

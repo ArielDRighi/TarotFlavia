@@ -66,7 +66,10 @@ export class SpreadsController {
     status: 403,
     description: 'Acceso denegado - Solo administradores',
   })
-  async createSpread(@Request() req, @Body() createSpreadDto: CreateSpreadDto) {
+  async createSpread(
+    @Request() req: { user: { userId?: number; isAdmin?: boolean } },
+    @Body() createSpreadDto: CreateSpreadDto,
+  ) {
     if (!req.user.isAdmin) {
       throw new ForbiddenException('Solo administradores pueden crear tiradas');
     }
@@ -89,7 +92,7 @@ export class SpreadsController {
   })
   @ApiResponse({ status: 404, description: 'Tirada no encontrada' })
   async updateSpread(
-    @Request() req,
+    @Request() req: { user: { userId?: number; isAdmin?: boolean } },
     @Param('id', ParseIntPipe) id: number,
     @Body() updateSpreadDto: UpdateSpreadDto,
   ) {
@@ -112,7 +115,10 @@ export class SpreadsController {
     description: 'Acceso denegado - Solo administradores',
   })
   @ApiResponse({ status: 404, description: 'Tirada no encontrada' })
-  async removeSpread(@Request() req, @Param('id', ParseIntPipe) id: number) {
+  async removeSpread(
+    @Request() req: { user: { userId?: number; isAdmin?: boolean } },
+    @Param('id', ParseIntPipe) id: number,
+  ) {
     if (!req.user.isAdmin) {
       throw new ForbiddenException(
         'Solo administradores pueden eliminar tiradas',

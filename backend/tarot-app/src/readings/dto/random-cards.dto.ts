@@ -1,4 +1,4 @@
-import { IsInt, IsOptional, Min, Max, IsNumber } from 'class-validator';
+import { IsInt, IsOptional, Min, Max } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 
@@ -13,7 +13,7 @@ export class RandomCardsDto {
   @Min(1, { message: 'Debe solicitar al menos una carta' })
   @Max(10, { message: 'No puede solicitar más de 10 cartas' })
   @IsOptional()
-  @Transform(({ value }) => parseInt(value, 10))
+  @Transform(({ value }: { value: string }) => parseInt(value, 10))
   count?: number = 3;
 
   @ApiProperty({
@@ -23,6 +23,6 @@ export class RandomCardsDto {
   })
   @IsInt()
   @IsOptional()
-  @Transform(({ value }) => parseInt(value, 10))
+  @Transform(({ value }: { value: string }) => parseInt(value, 10))
   deckId?: number;
 }

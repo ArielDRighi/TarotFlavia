@@ -8,7 +8,6 @@ import { TarotSpread } from './entities/tarot-spread.entity';
 
 describe('SpreadsController', () => {
   let controller: SpreadsController;
-  let service: SpreadsService;
 
   const mockSpread: TarotSpread = {
     id: 1,
@@ -45,7 +44,6 @@ describe('SpreadsController', () => {
     }).compile();
 
     controller = module.get<SpreadsController>(SpreadsController);
-    service = module.get<SpreadsService>(SpreadsService);
   });
 
   afterEach(() => {
@@ -64,7 +62,7 @@ describe('SpreadsController', () => {
       const result = await controller.getAllSpreads();
 
       expect(result).toEqual(spreads);
-      expect(service.findAll).toHaveBeenCalled();
+      expect(mockSpreadsService.findAll).toHaveBeenCalled();
     });
   });
 
@@ -75,7 +73,7 @@ describe('SpreadsController', () => {
       const result = await controller.getSpreadById(1);
 
       expect(result).toEqual(mockSpread);
-      expect(service.findById).toHaveBeenCalledWith(1);
+      expect(mockSpreadsService.findById).toHaveBeenCalledWith(1);
     });
   });
 
@@ -111,7 +109,7 @@ describe('SpreadsController', () => {
       const result = await controller.createSpread(adminUser, createSpreadDto);
 
       expect(result).toEqual(newSpread);
-      expect(service.create).toHaveBeenCalledWith(createSpreadDto);
+      expect(mockSpreadsService.create).toHaveBeenCalledWith(createSpreadDto);
     });
 
     it('should throw ForbiddenException when user is not admin', async () => {
@@ -121,7 +119,7 @@ describe('SpreadsController', () => {
       await expect(
         controller.createSpread(regularUser, createSpreadDto),
       ).rejects.toThrow('Solo administradores pueden crear tiradas');
-      expect(service.create).not.toHaveBeenCalled();
+      expect(mockSpreadsService.create).not.toHaveBeenCalled();
     });
   });
 
@@ -157,7 +155,10 @@ describe('SpreadsController', () => {
       );
 
       expect(result).toEqual(updatedSpread);
-      expect(service.update).toHaveBeenCalledWith(1, updateSpreadDto);
+      expect(mockSpreadsService.update).toHaveBeenCalledWith(
+        1,
+        updateSpreadDto,
+      );
     });
 
     it('should throw ForbiddenException when user is not admin', async () => {
@@ -167,7 +168,7 @@ describe('SpreadsController', () => {
       await expect(
         controller.updateSpread(regularUser, 1, updateSpreadDto),
       ).rejects.toThrow('Solo administradores pueden actualizar tiradas');
-      expect(service.update).not.toHaveBeenCalled();
+      expect(mockSpreadsService.update).not.toHaveBeenCalled();
     });
   });
 
@@ -194,7 +195,7 @@ describe('SpreadsController', () => {
       const result = await controller.removeSpread(adminUser, 1);
 
       expect(result).toEqual({ message: 'Tirada eliminada con éxito' });
-      expect(service.remove).toHaveBeenCalledWith(1);
+      expect(mockSpreadsService.remove).toHaveBeenCalledWith(1);
     });
 
     it('should throw ForbiddenException when user is not admin', async () => {
@@ -204,7 +205,7 @@ describe('SpreadsController', () => {
       await expect(controller.removeSpread(regularUser, 1)).rejects.toThrow(
         'Solo administradores pueden eliminar tiradas',
       );
-      expect(service.remove).not.toHaveBeenCalled();
+      expect(mockSpreadsService.remove).not.toHaveBeenCalled();
     });
   });
 });

@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { CreateUserDto } from '../users/dto/create-user.dto';
+import { LoginDto } from './dto/login.dto';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -8,7 +10,7 @@ describe('AuthController', () => {
 
   beforeEach(async () => {
     authServiceMock = {
-      register: jest.fn().mockImplementation((dto) =>
+      register: jest.fn().mockImplementation((dto: CreateUserDto) =>
         Promise.resolve({
           user: { id: 1, email: dto.email },
           access_token: 't',
@@ -19,7 +21,7 @@ describe('AuthController', () => {
         user: { id: 2, email: 'a@a.com' },
         access_token: 'tok',
       }),
-    } as any;
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
@@ -35,18 +37,24 @@ describe('AuthController', () => {
 
   describe('register', () => {
     it('should call authService.register and return result', async () => {
-      const dto = { email: 'new@e.com', name: 'New', password: 'pass' } as any;
+      const dto: CreateUserDto = {
+        email: 'new@e.com',
+        name: 'New',
+        password: 'pass',
+      };
       const res = await controller.register(dto);
       expect(authServiceMock.register).toHaveBeenCalledWith(dto);
       expect(res).toHaveProperty('access_token');
-      expect(res.user.email).toEqual(dto.email);
+      if (res.user && 'email' in res.user) {
+        expect(res.user.email).toEqual(dto.email);
+      }
     });
   });
 
   describe('login', () => {
     it('should return 401 when credentials are invalid', async () => {
       (authServiceMock.validateUser as jest.Mock).mockResolvedValue(null);
-      const dto = { email: 'b@b.com', password: 'p' } as any;
+      const dto: LoginDto = { email: 'b@b.com', password: 'p' };
       await expect(controller.login(dto)).rejects.toThrow();
     });
 
@@ -60,7 +68,7 @@ describe('AuthController', () => {
         access_token: 'tok',
       });
 
-      const dto = { email: 'b@b.com', password: 'p' } as any;
+      const dto: LoginDto = { email: 'b@b.com', password: 'p' };
       const res = await controller.login(dto);
       expect(authServiceMock.validateUser).toHaveBeenCalledWith(
         dto.email,

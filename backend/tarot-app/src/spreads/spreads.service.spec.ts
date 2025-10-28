@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { NotFoundException, ConflictException } from '@nestjs/common';
 import { SpreadsService } from './spreads.service';
 import { TarotSpread } from './entities/tarot-spread.entity';
@@ -9,7 +8,6 @@ import { UpdateSpreadDto } from './dto/update-spread.dto';
 
 describe('SpreadsService', () => {
   let service: SpreadsService;
-  let spreadRepository: Repository<TarotSpread>;
 
   const mockSpread: TarotSpread = {
     id: 1,
@@ -46,9 +44,6 @@ describe('SpreadsService', () => {
     }).compile();
 
     service = module.get<SpreadsService>(SpreadsService);
-    spreadRepository = module.get<Repository<TarotSpread>>(
-      getRepositoryToken(TarotSpread),
-    );
   });
 
   afterEach(() => {

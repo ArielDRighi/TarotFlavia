@@ -8,7 +8,6 @@ import { TarotDeck } from './entities/tarot-deck.entity';
 
 describe('DecksController', () => {
   let controller: DecksController;
-  let service: DecksService;
 
   const mockDeck: TarotDeck = {
     id: 1,
@@ -42,7 +41,6 @@ describe('DecksController', () => {
     }).compile();
 
     controller = module.get<DecksController>(DecksController);
-    service = module.get<DecksService>(DecksService);
   });
 
   afterEach(() => {
@@ -83,7 +81,7 @@ describe('DecksController', () => {
       const result = await controller.createDeck(adminUser, createDeckDto);
 
       expect(result).toEqual(newDeck);
-      expect(service.createDeck).toHaveBeenCalledWith(createDeckDto);
+      expect(mockDecksService.createDeck).toHaveBeenCalledWith(createDeckDto);
     });
 
     it('should throw ForbiddenException when user is not admin', async () => {
@@ -93,7 +91,7 @@ describe('DecksController', () => {
       await expect(
         controller.createDeck(regularUser, createDeckDto),
       ).rejects.toThrow('Solo administradores pueden crear mazos');
-      expect(service.createDeck).not.toHaveBeenCalled();
+      expect(mockDecksService.createDeck).not.toHaveBeenCalled();
     });
   });
 
@@ -105,7 +103,7 @@ describe('DecksController', () => {
       const result = await controller.getAllDecks();
 
       expect(result).toEqual(decks);
-      expect(service.findAllDecks).toHaveBeenCalled();
+      expect(mockDecksService.findAllDecks).toHaveBeenCalled();
     });
   });
 
@@ -116,7 +114,7 @@ describe('DecksController', () => {
       const result = await controller.getDeckById(1);
 
       expect(result).toEqual(mockDeck);
-      expect(service.findDeckById).toHaveBeenCalledWith(1);
+      expect(mockDecksService.findDeckById).toHaveBeenCalledWith(1);
     });
   });
 
@@ -148,7 +146,10 @@ describe('DecksController', () => {
       const result = await controller.updateDeck(adminUser, 1, updateDeckDto);
 
       expect(result).toEqual(updatedDeck);
-      expect(service.updateDeck).toHaveBeenCalledWith(1, updateDeckDto);
+      expect(mockDecksService.updateDeck).toHaveBeenCalledWith(
+        1,
+        updateDeckDto,
+      );
     });
 
     it('should throw ForbiddenException when user is not admin', async () => {
@@ -158,7 +159,7 @@ describe('DecksController', () => {
       await expect(
         controller.updateDeck(regularUser, 1, updateDeckDto),
       ).rejects.toThrow('Solo administradores pueden actualizar mazos');
-      expect(service.updateDeck).not.toHaveBeenCalled();
+      expect(mockDecksService.updateDeck).not.toHaveBeenCalled();
     });
   });
 
@@ -185,7 +186,7 @@ describe('DecksController', () => {
       const result = await controller.removeDeck(adminUser, 1);
 
       expect(result).toEqual({ message: 'Mazo eliminado con éxito' });
-      expect(service.removeDeck).toHaveBeenCalledWith(1);
+      expect(mockDecksService.removeDeck).toHaveBeenCalledWith(1);
     });
 
     it('should throw ForbiddenException when user is not admin', async () => {
@@ -195,7 +196,7 @@ describe('DecksController', () => {
       await expect(controller.removeDeck(regularUser, 1)).rejects.toThrow(
         'Solo administradores pueden eliminar mazos',
       );
-      expect(service.removeDeck).not.toHaveBeenCalled();
+      expect(mockDecksService.removeDeck).not.toHaveBeenCalled();
     });
   });
 });

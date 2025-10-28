@@ -1,44 +1,30 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { HttpModule } from '@nestjs/axios';
-import { ConfigModule } from '@nestjs/config';
-import { TarotCard } from './entities/tarot-card.entity';
-import { TarotDeck } from './entities/tarot-deck.entity';
-import { TarotReading } from './entities/tarot-reading.entity';
-import { TarotSpread } from './entities/tarot-spread.entity';
-import { TarotInterpretation } from './entities/tarot-interpretation.entity';
-import { TarotService } from './tarot.service';
-import { TarotController } from './tarot.controller';
-import { DeckController } from './deck.controller';
-import { DeckService } from './deck.service';
-import { InterpretationService } from './interpretation.service';
-import { InterpretationController } from './interpretation.controller';
-import { CardController } from './card.controller';
-import { CardService } from './card.service';
-import { ReadingController } from './reading.controller';
-import { ShareController } from './share.controller';
+import { CardsModule } from '../cards/cards.module';
+import { DecksModule } from '../decks/decks.module';
+import { SpreadsModule } from '../spreads/spreads.module';
+import { ReadingsModule } from '../readings/readings.module';
+import { InterpretationsModule } from '../interpretations/interpretations.module';
 
+/**
+ * TarotModule - Módulo orquestador que agrupa todos los submódulos del sistema de tarot
+ *
+ * Este módulo actúa como punto de entrada principal para todas las funcionalidades
+ * relacionadas con el tarot, importando y re-exportando los módulos especializados.
+ */
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      TarotCard,
-      TarotDeck,
-      TarotReading,
-      TarotSpread,
-      TarotInterpretation,
-    ]),
-    HttpModule,
-    ConfigModule,
+    CardsModule,
+    DecksModule,
+    SpreadsModule,
+    ReadingsModule,
+    InterpretationsModule,
   ],
-  controllers: [
-    TarotController,
-    DeckController,
-    CardController,
-    InterpretationController,
-    ReadingController,
-    ShareController,
+  exports: [
+    CardsModule,
+    DecksModule,
+    SpreadsModule,
+    ReadingsModule,
+    InterpretationsModule,
   ],
-  providers: [TarotService, DeckService, CardService, InterpretationService],
-  exports: [TarotService, DeckService, CardService, InterpretationService],
 })
 export class TarotModule {}

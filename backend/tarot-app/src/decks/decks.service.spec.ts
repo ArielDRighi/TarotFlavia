@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import {
   NotFoundException,
   ConflictException,
@@ -13,7 +12,6 @@ import { UpdateDeckDto } from './dto/update-deck.dto';
 
 describe('DecksService', () => {
   let service: DecksService;
-  let deckRepository: Repository<TarotDeck>;
 
   const mockDeck: TarotDeck = {
     id: 1,
@@ -48,9 +46,6 @@ describe('DecksService', () => {
     }).compile();
 
     service = module.get<DecksService>(DecksService);
-    deckRepository = module.get<Repository<TarotDeck>>(
-      getRepositoryToken(TarotDeck),
-    );
   });
 
   afterEach(() => {

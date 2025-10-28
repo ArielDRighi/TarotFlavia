@@ -1,17 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { NotFoundException, ConflictException } from '@nestjs/common';
 import { CardsService } from './cards.service';
 import { TarotCard } from './entities/tarot-card.entity';
-import { TarotDeck } from '../tarot/entities/tarot-deck.entity';
+import { TarotDeck } from '../decks/entities/tarot-deck.entity';
 import { CreateCardDto } from './dto/create-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
 
 describe('CardsService', () => {
   let service: CardsService;
-  let cardRepository: Repository<TarotCard>;
-  let deckRepository: Repository<TarotDeck>;
 
   const mockCard: TarotCard = {
     id: 1,
@@ -81,12 +78,6 @@ describe('CardsService', () => {
     }).compile();
 
     service = module.get<CardsService>(CardsService);
-    cardRepository = module.get<Repository<TarotCard>>(
-      getRepositoryToken(TarotCard),
-    );
-    deckRepository = module.get<Repository<TarotDeck>>(
-      getRepositoryToken(TarotDeck),
-    );
   });
 
   afterEach(() => {

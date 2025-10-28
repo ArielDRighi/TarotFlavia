@@ -79,7 +79,10 @@ export class CardsController {
     status: 403,
     description: 'Acceso denegado - Solo administradores',
   })
-  async createCard(@Request() req, @Body() createCardDto: CreateCardDto) {
+  async createCard(
+    @Request() req: { user: { isAdmin: boolean } },
+    @Body() createCardDto: CreateCardDto,
+  ) {
     if (!req.user.isAdmin) {
       throw new ForbiddenException('Solo administradores pueden crear cartas');
     }
@@ -101,7 +104,7 @@ export class CardsController {
     description: 'Acceso denegado - Solo administradores',
   })
   async updateCard(
-    @Request() req,
+    @Request() req: { user: { isAdmin: boolean } },
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCardDto: UpdateCardDto,
   ) {
@@ -123,7 +126,10 @@ export class CardsController {
     status: 403,
     description: 'Acceso denegado - Solo administradores',
   })
-  async removeCard(@Request() req, @Param('id', ParseIntPipe) id: number) {
+  async removeCard(
+    @Request() req: { user: { isAdmin: boolean } },
+    @Param('id', ParseIntPipe) id: number,
+  ) {
     if (!req.user.isAdmin) {
       throw new ForbiddenException(
         'Solo administradores pueden eliminar cartas',

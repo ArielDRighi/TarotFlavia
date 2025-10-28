@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { TarotDeck } from '../../decks/entities/tarot-deck.entity';
-import { TarotReading } from '../../tarot/entities/tarot-reading.entity';
+import { TarotReading } from '../../readings/entities/tarot-reading.entity';
 
 @Entity()
 export class TarotCard {

@@ -42,7 +42,10 @@ export class DecksController {
     status: 403,
     description: 'Acceso denegado - Solo administradores',
   })
-  async createDeck(@Request() req, @Body() createDeckDto: CreateDeckDto) {
+  async createDeck(
+    @Request() req: { user: { userId?: number; isAdmin?: boolean } },
+    @Body() createDeckDto: CreateDeckDto,
+  ) {
     if (!req.user.isAdmin) {
       throw new ForbiddenException('Solo administradores pueden crear mazos');
     }
@@ -85,7 +88,7 @@ export class DecksController {
   })
   @ApiResponse({ status: 404, description: 'Mazo no encontrado' })
   async updateDeck(
-    @Request() req,
+    @Request() req: { user: { userId?: number; isAdmin?: boolean } },
     @Param('id', ParseIntPipe) id: number,
     @Body() updateDeckDto: UpdateDeckDto,
   ) {
@@ -108,7 +111,10 @@ export class DecksController {
     description: 'Acceso denegado - Solo administradores',
   })
   @ApiResponse({ status: 404, description: 'Mazo no encontrado' })
-  async removeDeck(@Request() req, @Param('id', ParseIntPipe) id: number) {
+  async removeDeck(
+    @Request() req: { user: { userId?: number; isAdmin?: boolean } },
+    @Param('id', ParseIntPipe) id: number,
+  ) {
     if (!req.user.isAdmin) {
       throw new ForbiddenException(
         'Solo administradores pueden eliminar mazos',

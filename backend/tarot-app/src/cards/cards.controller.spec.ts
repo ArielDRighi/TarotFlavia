@@ -8,7 +8,6 @@ import { TarotCard } from './entities/tarot-card.entity';
 
 describe('CardsController', () => {
   let controller: CardsController;
-  let service: CardsService;
 
   const mockCard: TarotCard = {
     id: 1,
@@ -59,7 +58,6 @@ describe('CardsController', () => {
     }).compile();
 
     controller = module.get<CardsController>(CardsController);
-    service = module.get<CardsService>(CardsService);
   });
 
   afterEach(() => {
@@ -78,7 +76,7 @@ describe('CardsController', () => {
       const result = await controller.getAllCards();
 
       expect(result).toEqual(cards);
-      expect(service.findAll).toHaveBeenCalled();
+      expect(mockCardsService.findAll).toHaveBeenCalled();
     });
   });
 
@@ -89,7 +87,7 @@ describe('CardsController', () => {
       const result = await controller.getCardById(1);
 
       expect(result).toEqual(mockCard);
-      expect(service.findById).toHaveBeenCalledWith(1);
+      expect(mockCardsService.findById).toHaveBeenCalledWith(1);
     });
   });
 
@@ -101,7 +99,7 @@ describe('CardsController', () => {
       const result = await controller.getCardsByDeck(1);
 
       expect(result).toEqual(cards);
-      expect(service.findByDeck).toHaveBeenCalledWith(1);
+      expect(mockCardsService.findByDeck).toHaveBeenCalledWith(1);
     });
   });
 
@@ -142,7 +140,7 @@ describe('CardsController', () => {
       const result = await controller.createCard(adminUser, createCardDto);
 
       expect(result).toEqual(newCard);
-      expect(service.create).toHaveBeenCalledWith(createCardDto);
+      expect(mockCardsService.create).toHaveBeenCalledWith(createCardDto);
     });
 
     it('should throw ForbiddenException when user is not admin', async () => {
@@ -152,7 +150,7 @@ describe('CardsController', () => {
       await expect(
         controller.createCard(regularUser, createCardDto),
       ).rejects.toThrow('Solo administradores pueden crear cartas');
-      expect(service.create).not.toHaveBeenCalled();
+      expect(mockCardsService.create).not.toHaveBeenCalled();
     });
   });
 
@@ -184,7 +182,7 @@ describe('CardsController', () => {
       const result = await controller.updateCard(adminUser, 1, updateCardDto);
 
       expect(result).toEqual(updatedCard);
-      expect(service.update).toHaveBeenCalledWith(1, updateCardDto);
+      expect(mockCardsService.update).toHaveBeenCalledWith(1, updateCardDto);
     });
 
     it('should throw ForbiddenException when user is not admin', async () => {
@@ -194,7 +192,7 @@ describe('CardsController', () => {
       await expect(
         controller.updateCard(regularUser, 1, updateCardDto),
       ).rejects.toThrow('Solo administradores pueden actualizar cartas');
-      expect(service.update).not.toHaveBeenCalled();
+      expect(mockCardsService.update).not.toHaveBeenCalled();
     });
   });
 
@@ -221,7 +219,7 @@ describe('CardsController', () => {
       const result = await controller.removeCard(adminUser, 1);
 
       expect(result).toEqual({ message: 'Carta eliminada con éxito' });
-      expect(service.remove).toHaveBeenCalledWith(1);
+      expect(mockCardsService.remove).toHaveBeenCalledWith(1);
     });
 
     it('should throw ForbiddenException when user is not admin', async () => {
@@ -231,7 +229,7 @@ describe('CardsController', () => {
       await expect(controller.removeCard(regularUser, 1)).rejects.toThrow(
         'Solo administradores pueden eliminar cartas',
       );
-      expect(service.remove).not.toHaveBeenCalled();
+      expect(mockCardsService.remove).not.toHaveBeenCalled();
     });
   });
 });

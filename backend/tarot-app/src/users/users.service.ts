@@ -44,9 +44,10 @@ export class UsersService {
       await this.usersRepository.save(user);
 
       // Return user without password
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password: _, ...result } = user;
       return result;
-    } catch (error) {
+    } catch {
       throw new InternalServerErrorException('Error creating user');
     }
   }
@@ -55,7 +56,8 @@ export class UsersService {
     const users = await this.usersRepository.find();
     // Eliminar contraseñas de la respuesta
     return users.map((user) => {
-      const { password, ...result } = user;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password: _password, ...result } = user;
       return result as User;
     });
   }
@@ -96,9 +98,10 @@ export class UsersService {
 
     try {
       await this.usersRepository.save(user);
-      const { password, ...result } = user;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password: _password, ...result } = user;
       return result;
-    } catch (error) {
+    } catch {
       throw new InternalServerErrorException('Error updating user');
     }
   }

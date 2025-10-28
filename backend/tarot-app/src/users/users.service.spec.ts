@@ -2,11 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
 
 describe('UsersService', () => {
   let service: UsersService;
-  let repository: Repository<User>;
 
   const mockUserRepository = {
     findOne: jest.fn(),
@@ -29,7 +27,6 @@ describe('UsersService', () => {
     }).compile();
 
     service = module.get<UsersService>(UsersService);
-    repository = module.get<Repository<User>>(getRepositoryToken(User));
   });
 
   it('should be defined', () => {
