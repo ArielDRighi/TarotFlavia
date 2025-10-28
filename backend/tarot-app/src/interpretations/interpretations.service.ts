@@ -153,8 +153,6 @@ export class InterpretationsService {
     }
   }
 
-  // Método para asociar una interpretación a una lectura existente
-
   async attachInterpretationToReading(
     readingId: number,
     interpretation: string,
@@ -163,8 +161,7 @@ export class InterpretationsService {
   ) {
     try {
       const tarotInterpretation = this.interpretationRepository.create({
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        reading: { id: readingId } as any,
+        reading: { id: readingId } as Pick<TarotReading, 'id'>,
         content: interpretation,
         modelUsed,
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

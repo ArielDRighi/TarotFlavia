@@ -6,6 +6,7 @@ import {
   ManyToMany,
   JoinTable,
   CreateDateColumn,
+  DeleteDateColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from '../../users/entities/user.entity';
@@ -63,4 +64,7 @@ export class TarotReading {
   })
   @CreateDateColumn()
   createdAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt?: Date;
 }

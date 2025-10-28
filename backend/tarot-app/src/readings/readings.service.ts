@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { TarotReading } from './entities/tarot-reading.entity';
 import { User } from '../users/entities/user.entity';
+import { TarotDeck } from '../decks/entities/tarot-deck.entity';
 import { CreateReadingDto } from './dto/create-reading.dto';
 
 @Injectable()
@@ -23,8 +24,7 @@ export class ReadingsService {
     const reading = this.readingsRepository.create({
       question: createReadingDto.question,
       user,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      deck: { id: createReadingDto.deckId } as any,
+      deck: { id: createReadingDto.deckId } as Pick<TarotDeck, 'id'>,
       cardPositions: createReadingDto.cardPositions,
       interpretation: createReadingDto.generateInterpretation
         ? 'Interpretation will be generated'
@@ -80,8 +80,8 @@ export class ReadingsService {
   async remove(id: number, userId: number): Promise<void> {
     const reading = await this.findOne(id, userId);
 
-    // Soft delete - add deletedAt field
-    reading['deletedAt'] = new Date();
+    // Soft delete using TypeORM's DeleteDateColumn
+    reading.deletedAt = new Date();
     await this.readingsRepository.save(reading);
   }
 }
