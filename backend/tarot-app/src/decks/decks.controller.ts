@@ -63,6 +63,21 @@ export class DecksController {
     return this.decksService.findAllDecks();
   }
 
+  @Get('default')
+  @ApiOperation({ summary: 'Obtener el mazo predeterminado del sistema' })
+  @ApiResponse({
+    status: 200,
+    description: 'Mazo predeterminado encontrado',
+    type: TarotDeck,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'No se encontró un mazo predeterminado',
+  })
+  async getDefaultDeck() {
+    return this.decksService.findDefaultDeck();
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Obtener un mazo específico' })
   @ApiParam({ name: 'id', description: 'ID del mazo' })

@@ -103,4 +103,17 @@ export class DecksService {
     const count = await this.deckRepository.count({ where: { id } });
     return count > 0;
   }
+
+  async findDefaultDeck(): Promise<TarotDeck> {
+    const defaultDeck = await this.deckRepository.findOne({
+      where: { isDefault: true },
+      relations: ['cards'],
+    });
+
+    if (!defaultDeck) {
+      throw new NotFoundException('No se encontró un mazo predeterminado');
+    }
+
+    return defaultDeck;
+  }
 }

@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ForbiddenException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { DecksController } from './decks.controller';
 import { DecksService } from './decks.service';
 import { CreateDeckDto } from './dto/create-deck.dto';
@@ -16,6 +16,11 @@ describe('DecksController', () => {
     imageUrl: 'https://example.com/rw.jpg',
     cardCount: 78,
     isActive: true,
+    isDefault: false,
+    artist: 'Pamela Colman Smith',
+    yearCreated: 1909,
+    tradition: 'Hermética',
+    publisher: 'Rider & Company',
     createdAt: new Date(),
     updatedAt: new Date(),
     cards: [],
@@ -27,6 +32,7 @@ describe('DecksController', () => {
     findDeckById: jest.fn(),
     updateDeck: jest.fn(),
     removeDeck: jest.fn(),
+    findDefaultDeck: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -197,6 +203,32 @@ describe('DecksController', () => {
         'Solo administradores pueden eliminar mazos',
       );
       expect(mockDecksService.removeDeck).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getDefaultDeck', () => {
+    it('should return the default deck', async () => {
+      const defaultDeck = {
+        ...mockDeck,
+        isDefault: true,
+      };
+      mockDecksService.findDefaultDeck.mockResolvedValue(defaultDeck);
+
+      const result = await controller.getDefaultDeck();
+
+      expect(result).toEqual(defaultDeck);
+      expect(mockDecksService.findDefaultDeck).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw NotFoundException if no default deck exists', async () => {
+      mockDecksService.findDefaultDeck.mockRejectedValue(
+        new NotFoundException('No se encontró un mazo predeterminado'),
+      );
+
+      await expect(controller.getDefaultDeck()).rejects.toThrow(
+        NotFoundException,
+      );
+      expect(mockDecksService.findDefaultDeck).toHaveBeenCalledTimes(1);
     });
   });
 });
