@@ -36,4 +36,6 @@ Justifica (Pushback): Si no estás de acuerdo con algún comentario (porque el r
 
 Calidad y TDD: Si las correcciones implican cambios de lógica, deben reflejarse en los tests (actualizándolos o creando nuevos). Vuelve a pasar el ciclo de lint, format, build y test para asegurar que todo sigue limpio.
 
+Estrategia de Commits: Crea un NUEVO commit con las correcciones usando el mensaje: "fix: apply PR feedback - [descripción breve de los cambios]". NUNCA uses --amend para correcciones de PR, ya que complica el historial y requiere force push.
+
 Entregable: Muéstrame el código actualizado y las respuestas que prepararías para los comentarios del PR (especialmente los que estés rechazando).
