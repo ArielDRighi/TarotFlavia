@@ -649,14 +649,15 @@ Crear seeder para al menos un mazo predeterminado (Rider-Waite) que agrupe las 7
 
 ---
 
-### **TASK-006: Crear Seeders para Tipos de Tiradas (Spreads) Predefinidos** 🚧
+### **TASK-006: Crear Seeders para Tipos de Tiradas (Spreads) Predefinidos** ✅
 
 **Prioridad:** 🟡 ALTA  
 **Estimación:** 1.5 días  
 **Dependencias:** TASK-002  
-**Estado:** 🚧 EN PROGRESO  
+**Estado:** ✅ COMPLETADO  
 **Branch:** `feature/TASK-006-spreads-seeder`  
-**Inicio:** 28 de Octubre 2025
+**Inicio:** 28 de Octubre 2025  
+**Fin:** 28 de Octubre 2025
 
 #### 📋 Descripción
 
@@ -672,12 +673,12 @@ La IA recibirá: "En la posición PASADO salió la carta X, en PRESENTE la Y, en
 
 #### ✅ Tareas específicas
 
-- [ ] Crear seeder para `tarot_spreads` con **3-4 spreads esenciales**:
+- [x] Crear seeder para `tarot_spreads` con **4 spreads esenciales**:
   - **Tirada de 1 carta** (respuesta rápida/del día)
   - **Tirada de 3 cartas** (pasado-presente-futuro)
   - **Tirada de 5 cartas** (situación-obstáculos-pasado-futuro-resultado)
   - **Cruz Céltica de 10 cartas** (spread completo tradicional)
-- [ ] Definir estructura JSON para campo `positions` con significado de cada posición:
+- [x] Definir estructura JSON para campo `positions` con significado de cada posición:
   ```json
   {
     "positions": [
@@ -696,22 +697,35 @@ La IA recibirá: "En la posición PASADO salió la carta X, en PRESENTE la Y, en
     ]
   }
   ```
-- [ ] Agregar descripción de cuándo usar cada spread:
+- [x] Agregar descripción de cuándo usar cada spread:
   - 1 carta: respuestas rápidas, orientación diaria
   - 3 cartas: panorama general simple
   - 5 cartas: análisis profundo de situación
   - 10 cartas: lectura completa y detallada
-- [ ] Incluir campo `difficulty` (beginner/intermediate/advanced)
-- [ ] Marcar spreads con `is_beginner_friendly: true/false`
-- [ ] Implementar validación: `card_count` debe coincidir con longitud de `positions`
-- [ ] Documentar cómo la IA usará esta información en prompts
+- [x] Incluir campo `difficulty` (beginner/intermediate/advanced)
+- [x] Marcar spreads con `is_beginner_friendly: true/false`
+- [x] Implementar validación: `card_count` debe coincidir con longitud de `positions`
+- [x] Documentar cómo la IA usará esta información en prompts (docs/SPREADS_AI_USAGE.md)
+- [x] Escribir tests unitarios siguiendo TDD (14 tests, 100% cobertura)
+- [x] Actualizar migración InitialSchema con nuevos campos de metadata
 
 #### 🎯 Criterios de aceptación
 
-- ✓ Existen 3-4 spreads básicos en la base de datos (suficiente para MVP)
-- ✓ Cada spread tiene definidas todas sus posiciones con nombre y descripción
-- ✓ La estructura JSON es consistente y lista para consumo por IA
-- ✓ Está documentado cómo los spreads se usan en el prompt de OpenAI
+- ✅ Existen 4 spreads básicos en la base de datos (suficiente para MVP)
+- ✅ Cada spread tiene definidas todas sus posiciones con nombre y descripción
+- ✅ La estructura JSON es consistente y lista para consumo por IA
+- ✅ Está documentado cómo los spreads se usan en el prompt de OpenAI
+- ✅ Todos los tests pasan (173 tests en total, +14 nuevos)
+- ✅ Seeder es idempotente y valida integridad de datos
+
+#### 📝 Notas de implementación
+
+- Seeder implementado como función (patrón consistente con otros seeders)
+- 4 spreads con dificultad progresiva: beginner → intermediate → advanced
+- Cada posición incluye `interpretation_focus` para guiar prompts de AI
+- Validación estricta: `cardCount` debe coincidir con `positions.length`
+- Tests cubren: estructura, idempotencia, validación, campos metadata
+- Documentación completa en SPREADS_AI_USAGE.md con ejemplos de prompts
 
 ---
 

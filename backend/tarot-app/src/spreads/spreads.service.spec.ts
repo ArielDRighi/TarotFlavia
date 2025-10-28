@@ -20,6 +20,10 @@ describe('SpreadsService', () => {
       { name: 'Futuro', description: 'Posibilidades futuras' },
     ],
     imageUrl: 'https://example.com/three-card.jpg',
+    difficulty: 'beginner',
+    isBeginnerFriendly: true,
+    whenToUse:
+      'Ideal para consultas rápidas sobre situaciones con pasado, presente y futuro',
     createdAt: new Date(),
     updatedAt: new Date(),
   };
