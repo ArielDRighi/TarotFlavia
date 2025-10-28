@@ -315,7 +315,9 @@ npm run migration:show
 Para más información sobre el sistema de migraciones, consulta:
 📖 [docs/MIGRATIONS.md](./docs/MIGRATIONS.md)
 
----## 🛠️ Troubleshooting
+---
+
+## 🛠️ Troubleshooting
 
 ### ❌ Error: Puerto 5435 ya está en uso
 

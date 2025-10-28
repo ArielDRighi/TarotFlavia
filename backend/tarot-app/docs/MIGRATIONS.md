@@ -348,7 +348,7 @@ npm run migration:run
 
 ## Historial de Cambios
 
-- **2024-10-28**: Sistema de migraciones implementado (TASK-002)
+- **2025-10-28**: Sistema de migraciones implementado (TASK-002)
   - Creada migración inicial `InitialSchema`
   - Desactivado `synchronize: true`
   - Agregados scripts npm para manejo de migraciones

@@ -12,13 +12,20 @@ if (fs.existsSync(envPath)) {
   console.warn('[DataSource] No se encontró el archivo .env');
 }
 
+// Validar que la contraseña esté configurada
+if (!process.env.POSTGRES_PASSWORD) {
+  throw new Error(
+    'POSTGRES_PASSWORD environment variable must be set. Please configure it in your .env file.',
+  );
+}
+
 // Configuración del DataSource para migraciones
 export const AppDataSource = new DataSource({
   type: 'postgres',
   host: process.env.POSTGRES_HOST || 'localhost',
   port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
   username: process.env.POSTGRES_USER || 'postgres',
-  password: process.env.POSTGRES_PASSWORD || 'CanonEos50d',
+  password: process.env.POSTGRES_PASSWORD,
   database: process.env.POSTGRES_DB || 'tarot_app',
   synchronize: false, // IMPORTANTE: desactivado para usar migraciones
   logging: true,
