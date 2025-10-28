@@ -488,7 +488,8 @@ Configurar la API Key de OpenAI en las variables de entorno y crear un mecanismo
 **Dependencias:** TASK-002  
 **Estado:** ✅ COMPLETADO  
 **Branch:** `feature/TASK-005-tarot-cards-seeder`  
-**Commit:** `1f4a09f`
+**Commit:** `1f4a09f`  
+**Fecha de Finalización:** 28 de Octubre 2025
 
 #### 📋 Descripción
 
@@ -648,11 +649,14 @@ Crear seeder para al menos un mazo predeterminado (Rider-Waite) que agrupe las 7
 
 ---
 
-### **TASK-006: Crear Seeders para Tipos de Tiradas (Spreads) Predefinidos**
+### **TASK-006: Crear Seeders para Tipos de Tiradas (Spreads) Predefinidos** 🚧
 
 **Prioridad:** 🟡 ALTA  
 **Estimación:** 1.5 días  
-**Dependencias:** TASK-002
+**Dependencias:** TASK-002  
+**Estado:** 🚧 EN PROGRESO  
+**Branch:** `feature/TASK-006-spreads-seeder`  
+**Inicio:** 28 de Octubre 2025
 
 #### 📋 Descripción
 
