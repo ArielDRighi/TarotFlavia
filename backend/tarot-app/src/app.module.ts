@@ -12,12 +12,14 @@ import { SpreadsModule } from './spreads/spreads.module';
 import { ReadingsModule } from './readings/readings.module';
 import { InterpretationsModule } from './interpretations/interpretations.module';
 import databaseConfig from './config/typeorm';
+import { validate } from './config/env-validator';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       load: [databaseConfig],
+      validate,
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
