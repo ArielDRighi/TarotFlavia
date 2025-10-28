@@ -21,12 +21,13 @@ const config = {
   username: process.env.POSTGRES_USER || 'postgres',
   password: process.env.POSTGRES_PASSWORD,
   database: process.env.POSTGRES_DB || 'tarot_app',
-  synchronize: true, // En producción debería ser false
+  synchronize: false, // Desactivado - ahora usamos migraciones
   autoLoadEntities: true,
   logging: true,
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-  migrations: ['dist/migrations/*{.ts,.js}'],
+  migrations: [__dirname + '/../migrations/*{.ts,.js}'],
   migrationsTableName: 'migrations',
+  migrationsRun: true, // Ejecutar migraciones automáticamente al iniciar
   ssl: false,
   dropSchema: false,
 };

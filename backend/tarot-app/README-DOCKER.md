@@ -9,6 +9,7 @@ Configuración completa de Docker para el desarrollo local de TarotFlavia Backen
 - [Características](#-características)
 - [Requisitos Previos](#-requisitos-previos)
 - [Configuración Inicial](#-configuración-inicial)
+- [Sistema de Migraciones](#-sistema-de-migraciones)
 - [Comandos Útiles](#-comandos-útiles)
 - [Estructura de Archivos](#-estructura-de-archivos)
 - [Conexión desde NestJS](#-conexión-desde-nestjs)
@@ -250,9 +251,69 @@ export const typeOrmConfig = (
 # Desde tu backend NestJS
 npm run start:dev
 
-# Deberías ver en los logs:
-# [TypeORM] Connected to PostgreSQL database: tarotflavia_db
+   # Deberías ver en los logs:
+   # [TypeORM] Connected to PostgreSQL database: tarotflavia_db
 ```
+
+---
+
+## 🔄 Sistema de Migraciones
+
+**IMPORTANTE:** Este proyecto usa un sistema de migraciones controlado en lugar de `synchronize: true`.
+
+### ¿Por qué migraciones?
+
+- ✅ Control total sobre cambios de esquema
+- ✅ Historial versionado de cambios
+- ✅ Capacidad de revertir (rollback)
+- ✅ Seguro para producción
+
+### Comandos de Migración
+
+```bash
+# Generar migración automática desde cambios en entidades
+npm run migration:generate src/migrations/MigrationName
+
+# Crear migración vacía para cambios manuales
+npm run migration:create src/migrations/MigrationName
+
+# Ejecutar migraciones pendientes
+npm run migration:run
+
+# Revertir última migración
+npm run migration:revert
+
+# Ver estado de migraciones
+npm run migration:show
+```
+
+### Ejemplo: Agregar nuevo campo
+
+1. Modificar entidad:
+
+   ```typescript
+   @Column({ nullable: true })
+   phoneNumber: string;
+   ```
+
+2. Generar migración:
+
+   ```bash
+   npm run migration:generate src/migrations/AddUserPhoneNumber
+   ```
+
+3. Revisar el archivo generado en `src/migrations/`
+
+4. Ejecutar migración:
+   ```bash
+   npm run migration:run
+   # O simplemente: npm run start:dev (se ejecuta automáticamente)
+   ```
+
+### Documentación Completa
+
+Para más información sobre el sistema de migraciones, consulta:
+📖 [docs/MIGRATIONS.md](./docs/MIGRATIONS.md)
 
 ---
 
