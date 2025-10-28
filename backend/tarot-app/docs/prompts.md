@@ -14,6 +14,8 @@ Metodología (TDD Estricto): Sigue un ciclo TDD riguroso: _ Escribe un test (deb
 
 Ciclo de Calidad (Pre-Commit): Al finalizar la implementación, ejecuta los scripts de lint, format y build del proyecto. Corrige todos los errores y warnings que surjan.
 
+Actualiza el documento backlog con la tarea completada, marcándola como finalizada.
+
 Validación Final: Asegúrate de que todos los tests (nuevos y existentes) pasen limpiamente.
 
 Entregable: Proporcióname el diff de cambios y un borrador del mensaje para la Pull Request.
