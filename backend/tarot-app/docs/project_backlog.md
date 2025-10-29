@@ -3204,17 +3204,626 @@ Crear sistema robusto de health checks que verifique todos los componentes crít
   - Database: timeout 5s
   - OpenAI: timeout 10s
   - Otros: timeout 3s
-- [ ] Implementar respuestas estándar JSON con status de cada componente
-- [ ] Documentar health checks para equipos de DevOps/SRE
+- [ ] Implementar respuestas estándar:
+  ```json
+  {
+    "status": "ok" | "error",
+    "info": {
+      "database": { "status": "up" },
+      "openai": { "status": "up" },
+      "redis": { "status": "up" }
+    },
+    "details": {...}
+  }
+  ```
+- [ ] Configurar health checks para orquestadores (Kubernetes ready/liveness):
+  - Liveness: retorna 200 si la app responde
+  - Readiness: retorna 200 solo si todos los servicios críticos están ok
+- [ ] Implementar graceful degradation:
+  - Si OpenAI falla, app sigue funcionando pero reporta degraded
+  - Si Redis falla (cache), app funciona pero sin cache
+- [ ] Agregar métricas de tiempo de respuesta de cada check
+- [ ] Documentar cómo usar health checks para monitoreo
 
 #### 🎯 Criterios de aceptación
 
-- ✓ Los health checks funcionan correctamente
-- ✓ Los endpoints son compatibles con Kubernetes probes
-- ✓ Los componentes fallidos son identificables
+- ✓ Los health checks verifican todos los componentes críticos
+- ✓ Los orquestadores pueden usar los endpoints para deployment
+- ✓ El sistema reporta estado detallado cuando se solicita
 
 ---
 
-## 📝 Notas Finales
+### **TASK-052: Implementar Métricas con Prometheus (Opcional)**
 
-> **Nota del autor:** El backlog termina aquí. Las tareas están organizadas en 14 épicas distribuidas en 3 fases: MVP (Fase 1), Funcionalidades Adicionales (Fase 2) y Mejoras y Escalabilidad (Fase 3). Este documento está pensado para ser un roadmap completo del proyecto TarotFlavia backend.
+**Prioridad:** 🟢 BAJA  
+**Estimación:** 3 días  
+**Dependencias:** TASK-051
+
+#### 📋 Descripción
+
+Integrar Prometheus para recolectar métricas detalladas de la aplicación y facilitar monitoreo avanzado.
+
+#### ✅ Tareas específicas
+- Instalar dependencias: `npm install @willsoto/nestjs-prometheus prom-client`
+- Configurar módulo Prometheus en la aplicación
+- Exponer endpoint `/metrics` en formato Prometheus
+- Implementar métricas personalizadas:
+  - **Contadores:**
+    - `tarot_readings_total`: total de lecturas creadas
+    - `oracle_queries_total`: total de consultas de oráculo
+    - `openai_requests_total`: total de llamadas a OpenAI (con labels: success/error)
+    - `auth_attempts_total`: intentos de login (con labels: success/failure)
+    - `http_requests_total`: requests HTTP por endpoint
+  - **Histogramas:**
+    - `openai_request_duration_seconds`: duración de llamadas a OpenAI
+    - `http_request_duration_seconds`: duración de requests HTTP
+    - `db_query_duration_seconds`: duración de queries de DB
+  - **Gauges:**
+    - `active_users`: usuarios con sesiones activas
+    - `cached_interpretations`: interpretaciones en cache
+    - `db_connections_active`: conexiones activas de DB pool
+- Implementar interceptor que capture métricas automáticamente:
+  - Duración de requests
+  - Status codes de respuesta
+  - Errores por endpoint
+- Agregar labels útiles a métricas:
+  - Endpoint path
+  - HTTP method
+  - Status code
+  - User plan (free/premium) cuando sea relevante
+- Implementar métricas de negocio específicas:
+  - Cartas más consultadas
+  - Categorías más populares
+  - Spreads más usados
+- Proteger endpoint `/metrics` con autenticación básica o IP whitelist
+- Crear dashboard ejemplo de Grafana con queries útiles
+- Documentar cómo conectar Prometheus y visualizar métricas
+
+#### 🎯 Criterios de aceptación
+
+- ✓ Las métricas se exponen correctamente en formato Prometheus
+- ✓ Las métricas capturan información útil de negocio y técnica
+- ✓ Existe documentación para setup de monitoreo
+
+---
+
+### **TASK-053: Implementar Distributed Tracing (Opcional)**
+
+**Prioridad:** 🟢 BAJA  
+**Estimación:** 4 días  
+**Dependencias:** Ninguna
+
+#### 📋 Descripción
+
+Implementar tracing distribuido para seguir requests a través de diferentes servicios y identificar bottlenecks.
+
+#### ✅ Tareas específicas
+- Seleccionar solución de tracing (Jaeger, Zipkin, o Datadog APM)
+- Instalar dependencia: `npm install opentracing`
+- Configurar tracer en `main.ts`:
+  - Inicializar con configuración apropiada
+  - Configurar sampler (ej: sample 10% en producción, 100% en dev)
+  - Configurar reporter (enviar a Jaeger/Zipkin)
+- Crear interceptor `TracingInterceptor`:
+  - Crear span para cada request HTTP
+  - Agregar tags: endpoint, method, user_id, plan
+  - Capturar errores como tags en spans
+- Implementar tracing manual en operaciones críticas:
+  - Llamadas a OpenAI (span separado)
+  - Queries de DB complejas
+  - Generación de interpretaciones completas
+  - Cache hits/misses
+- Propagar context de tracing entre servicios:
+  - Agregar trace_id y span_id a headers
+  - Loggear trace_id en todos los logs para correlación
+- Configurar baggage para información contextual:
+  - user_id, plan, session_id
+- Implementar muestreo adaptativo:
+  - 100% de requests con error
+  - 100% de requests lentos (>5s)
+  - 10% de requests normales
+- Agregar variables de entorno:
+  - `TRACING_ENABLED`
+  - `TRACING_ENDPOINT`
+  - `TRACING_SAMPLE_RATE`
+- Documentar cómo usar tracing para debugging de performance
+
+#### 🎯 Criterios de aceptación
+
+- ✓ Los traces capturan el flujo completo de requests
+- ✓ Se pueden identificar bottlenecks fácilmente
+- ✓ Los traces se correlacionan con logs
+
+---
+
+## 🎨 Epic 15: Optimizaciones de Costos
+
+> **Objetivo:** Controlar y optimizar costos operativos, especialmente relacionados con OpenAI API y recursos de infraestructura.
+
+---
+
+### **TASK-054: Implementar Sistema de Cuotas de OpenAI por Usuario**
+
+**Prioridad:** 🟡 ALTA  
+**Estimación:** 3 días  
+**Dependencias:** TASK-019
+
+#### 📋 Descripción
+
+Crear sistema que trackee y limite el gasto en OpenAI por usuario para controlar costos operativos.
+
+#### ✅ Tareas específicas
+- Agregar campo `openai_tokens_used_month` (integer) a entidad `User`
+- Agregar campo `openai_cost_usd_month` (decimal) a entidad `User`
+- Crear tarea cron que resetee estos contadores el primer día de cada mes
+- Implementar método `trackOpenAIUsage(userId, tokens, cost)` en servicio:
+  - Incrementar contadores del usuario
+  - Verificar si se excedió cuota mensual
+- Configurar cuotas mensuales por plan:
+  - FREE: $0.50 USD (~500 interpretaciones)
+  - PREMIUM: $5.00 USD (~5000 interpretaciones)
+  - ADMIN: ilimitado
+- Crear guard `OpenAIQuotaGuard` que verifique cuota antes de generar:
+  - Verificar tokens/costo usado en el mes
+  - Si se excedió cuota, retornar error 429 con mensaje:
+    - "Has alcanzado tu límite mensual de interpretaciones. Se resetea el [fecha]"
+    - Para free: sugerir upgrade a premium
+- Implementar soft limit y hard limit:
+  - Soft limit (80%): advertir al usuario que está cerca del límite
+  - Hard limit (100%): bloquear nuevas interpretaciones
+- Agregar campo `quota_warning_sent` (boolean) para no enviar múltiples warnings
+- Crear endpoint GET `/usage/openai` que retorne:
+  - Tokens usados este mes
+  - Costo estimado este mes
+  - Cuota total del plan
+  - Porcentaje usado
+  - Fecha de reset
+- Implementar notificaciones:
+  - Email cuando se alcanza 80% de cuota
+  - Email cuando se alcanza 100% de cuota
+- Loggear cuando usuarios alcanzan sus cuotas para análisis
+- Agregar configuración de cuotas en variables de entorno
+
+#### 🎯 Criterios de aceptación
+
+- ✓ Los usuarios no pueden exceder sus cuotas mensuales
+- ✓ Los contadores se resetean correctamente cada mes
+- ✓ Los usuarios son notificados apropiadamente
+
+---
+
+### **TASK-055: Implementar Estrategia Agresiva de Caché**
+
+**Prioridad:** 🟡 ALTA  
+**Estimación:** 3 días  
+**Dependencias:** TASK-020, TASK-044 (opcional)
+
+#### 📋 Descripción
+
+Expandir sistema de caché para maximizar cache hits y reducir llamadas a OpenAI.
+
+#### ✅ Tareas específicas
+- Implementar caché a múltiples niveles:
+  - **Nivel 1 - Caché exacto:** combinación exacta de cartas + pregunta
+  - **Nivel 2 - Caché de cartas:** mismas cartas sin considerar pregunta
+  - **Nivel 3 - Caché de significados:** significados base de cartas individuales
+- Refinar algoritmo de cache key para maximizar hits:
+  - Normalizar preguntas similares (remover artículos, singular/plural)
+  - Considerar sinónimos en categorías
+  - Agrupar preguntas muy similares
+- Implementar "fuzzy matching" para preguntas:
+  - Si pregunta es muy similar (>80% similitud) a una cacheada, usar cache
+  - Usar librería de similitud de strings (Levenshtein distance)
+- Crear estrategia de warming de cache:
+  - Pre-generar interpretaciones para combinaciones comunes
+  - Ejecutar en horarios de baja demanda
+- Implementar TTL dinámico basado en popularidad:
+  - Interpretaciones populares (hit_count > 10): TTL 90 días
+  - Interpretaciones medias (hit_count 3-10): TTL 30 días
+  - Interpretaciones poco usadas (hit_count < 3): TTL 7 días
+- Crear endpoint admin `/admin/cache/warm` para pre-generar cache:
+  - Generar interpretaciones para top 100 combinaciones de cartas
+  - Ejecutar en background
+- Implementar analytics de cache:
+  - Cache hit rate por hora/día
+  - Combinaciones de cartas más cacheadas
+  - Ahorro estimado en costos de OpenAI
+- Crear dashboard admin con métricas de cache
+- Documentar estrategia y configuración de cache
+
+#### 🎯 Criterios de aceptación
+
+- ✓ El cache hit rate supera el 60%
+- ✓ Los costos de OpenAI se reducen proporcionalmente
+- ✓ El sistema de warming funciona correctamente
+
+---
+
+### **TASK-056: Implementar Rate Limiting Dinámico Basado en Plan**
+
+**Prioridad:** 🟢 MEDIA  
+**Estimación:** 2 días  
+**Dependencias:** TASK-016, TASK-011
+
+#### 📋 Descripción
+
+Mejorar sistema de rate limiting para aplicar límites diferentes según el plan del usuario.
+
+#### ✅ Tareas específicas
+- Modificar `ThrottlerGuard` existente para considerar plan del usuario
+- Implementar límites dinámicos por plan:
+  - **FREE:**
+    - Lecturas: 3/día (ya implementado en usage limits)
+    - API requests generales: 60/hora
+    - Regeneraciones: 0
+  - **PREMIUM:**
+    - Lecturas: ilimitadas
+    - API requests generales: 300/hora
+    - Regeneraciones: 3 por lectura
+  - **ADMIN:**
+    - Sin límites
+- Crear decorador `@DynamicThrottle()` que aplique límites según plan:
+  - Extraer usuario del JWT
+  - Aplicar límites correspondientes a su plan
+- Implementar whitelist de endpoints sin rate limiting:
+  - Health checks
+  - Endpoints de autenticación básicos
+  - Documentación
+- Agregar headers informativos en respuestas:
+  - `X-RateLimit-Limit`: límite total
+  - `X-RateLimit-Remaining`: requests restantes
+  - `X-RateLimit-Reset`: timestamp de reset
+  - `X-RateLimit-Plan`: plan del usuario
+- Implementar rate limiting por IP para usuarios no autenticados:
+  - Más restrictivo: 30 requests/hora
+- Crear endpoint GET `/rate-limit/status` que retorne:
+  - Límites del plan actual
+  - Uso actual
+  - Tiempo hasta reset
+- Loggear cuando usuarios alcanzan límites repetidamente (posible abuso)
+- Documentar límites de cada plan para referencia de usuarios
+
+#### 🎯 Criterios de aceptación
+
+- ✓ Los límites se aplican correctamente según el plan
+- ✓ Los usuarios premium tienen mayores límites
+- ✓ Los headers informativos son precisos
+
+---
+
+## 🎨 Epic 16: Mejoras de Experiencia de Desarrollo
+
+> **Objetivo:** Facilitar el desarrollo, mantenimiento y onboarding de nuevos desarrolladores mediante documentación, tooling y testing completos.
+
+---
+
+### **TASK-057: Implementar Swagger/OpenAPI Completo y Detallado**
+
+**Prioridad:** 🟡 ALTA  
+**Estimación:** 3 días  
+**Dependencias:** Todos los endpoints implementados
+
+#### 📋 Descripción
+
+Completar y mejorar documentación de API con Swagger para facilitar integración de frontend y terceros.
+
+#### ✅ Tareas específicas
+- Auditar todos los endpoints y asegurar que tengan decoradores Swagger:
+  - `@ApiOperation()`: descripción clara de qué hace el endpoint
+  - `@ApiResponse()`: documentar todas las respuestas posibles (200, 400, 401, 403, 404, 429, 500)
+  - `@ApiTags()`: agrupar endpoints lógicamente
+  - `@ApiBearerAuth()`: indicar endpoints que requieren auth
+- Documentar todos los DTOs con decoradores:
+  - `@ApiProperty()`: descripción, ejemplo, tipo, requerido/opcional
+  - `@ApiPropertyOptional()`: para campos opcionales
+  - Ejemplos realistas y útiles en cada campo
+- Crear ejemplos completos de requests y responses:
+  - Request bodies con todos los campos
+  - Responses exitosas con data real
+  - Responses de error con mensajes apropiados
+- Organizar endpoints en secciones lógicas:
+  - Authentication
+  - Readings (Tarot)
+  - Oracle
+  - Rituals
+  - Service Requests
+  - Admin - Users
+  - Admin - Dashboard
+  - Admin - Content Management
+- Agregar metadata general de la API:
+  - Título, descripción, versión
+  - Información de contacto
+  - License
+  - Servers (dev, staging, production)
+- Documentar headers requeridos:
+  - Authorization
+  - Content-Type
+- Documentar query parameters y sus opciones:
+  - Filtros disponibles
+  - Opciones de sort
+  - Paginación
+- Agregar sección de "Getting Started":
+  - Cómo obtener token de autenticación
+  - Flujo básico de uso de la API
+- Implementar agrupación por roles:
+  - Public endpoints
+  - User endpoints
+  - Admin endpoints
+- Configurar Swagger UI con tema personalizado si es posible
+- Agregar botón "Try it out" funcional en todos los endpoints
+
+#### 🎯 Criterios de aceptación
+
+- ✓ Todos los endpoints están documentados completamente
+- ✓ Los ejemplos son útiles y realistas
+- ✓ Un desarrollador nuevo puede entender la API solo con Swagger
+
+---
+
+### **TASK-058: Crear Scripts de Desarrollo y Utilidades**
+
+**Prioridad:** 🟢 MEDIA  
+**Estimación:** 2 días  
+**Dependencias:** TASK-001, TASK-004
+
+#### 📋 Descripción
+
+Crear colección de scripts útiles para facilitar desarrollo, testing y debugging.
+
+#### ✅ Tareas específicas
+- Crear script `npm run db:reset`:
+  - Drop database
+  - Create database
+  - Run migrations
+  - Run seeders
+  - Útil para empezar desde cero
+- Crear script `npm run db:seed:all`:
+  - Ejecutar todos los seeders en orden correcto
+  - Verificar dependencias entre seeders
+- Crear script `npm run db:seed:cards`:
+  - Solo seedear cartas (útil para testing)
+- Crear script `npm run db:seed:users`:
+  - Crear usuarios de prueba:
+    - Admin (admin@test.com)
+    - Premium user (premium@test.com)
+    - Free user (free@test.com)
+  - Con contraseñas conocidas para testing
+- Crear script `npm run generate:reading`:
+  - CLI que genera lectura de prueba para un usuario
+  - Útil para testing sin hacer requests HTTP
+- Crear script `npm run test:e2e:local`:
+  - Setup de DB de test
+  - Ejecutar tests E2E
+  - Cleanup
+- Crear script `npm run logs:openai`:
+  - Mostrar últimas 50 llamadas a OpenAI con costos
+  - Útil para debugging
+- Crear script `npm run stats:cache`:
+  - Mostrar estadísticas de cache hit rate
+  - Interpretaciones más cacheadas
+- Crear comando CLI `npm run cli` con subcomandos:
+  - `cli user:create` - crear usuario
+  - `cli user:promote` - cambiar rol
+  - `cli cache:clear` - limpiar cache
+  - `cli openai:test` - probar conexión OpenAI
+- Documentar todos los scripts en README.md
+- Crear archivo `.env.example.local` con configuración optimizada para desarrollo
+
+#### 🎯 Criterios de aceptación
+
+- ✓ Los scripts facilitan tareas comunes de desarrollo
+- ✓ La documentación explica cuándo usar cada script
+- ✓ Los scripts manejan errores gracefully
+
+---
+
+### **TASK-059: Implementar Testing Suite Completo**
+
+**Prioridad:** 🟡 ALTA  
+**Estimación:** 5 días  
+**Dependencias:** Todos los módulos implementados
+
+#### 📋 Descripción
+
+Crear suite completo de tests unitarios, de integración y E2E para asegurar calidad del código.
+
+#### ✅ Tareas específicas
+- **Tests Unitarios (Jest):**
+  - Crear tests para todos los servicios:
+    - AuthService: login, register, token generation
+    - TarotService: card selection, shuffle algorithm
+    - InterpretationService: prompt generation, caching
+    - UsageLimitsService: limit checking, increment logic
+  - Crear tests para guards:
+    - RolesGuard, UsageLimitGuard, etc.
+  - Crear tests para pipes y interceptors
+  - Target: >80% code coverage
+- **Tests de Integración:**
+  - Tests de endpoints completos con DB de test:
+    - Auth flow completo (register → login → access protected endpoint)
+    - Reading creation flow completo
+    - Admin operations
+  - Usar TestingModule de NestJS
+  - Setup y teardown de DB para cada test suite
+- **Tests E2E:**
+  - Flujos completos de usuario:
+    - Usuario free: registro → lectura → alcanzar límite
+    - Usuario premium: registro → múltiples lecturas → regeneración
+    - Admin: gestión de usuarios y contenido
+  - Usar supertest para requests HTTP
+- Configurar DB separada para testing:
+  - `tarot_test` database
+  - Migrations automáticas antes de tests
+  - Cleanup después de tests
+- Implementar fixtures y factories:
+  - Factory para crear usuarios de prueba
+  - Factory para crear lecturas de prueba
+  - Fixtures de datos comunes
+- Mockear servicios externos:
+  - OpenAI API (usar respuestas fake)
+  - Email service (capturar emails sin enviar)
+- Configurar coverage reports:
+  - HTML report local
+  - JSON report para CI
+  - Thresholds mínimos (80% líneas, 70% branches)
+- Crear script `npm run test:watch` para desarrollo
+- Agregar tests de performance para endpoints críticos:
+  - Lectura no debe tomar >15s
+  - Listados no deben tomar >500ms
+- Documentar cómo ejecutar tests y crear nuevos
+
+#### 🎯 Criterios de aceptación
+
+- ✓ Coverage supera 80% en servicios críticos
+- ✓ Todos los tests pasan consistentemente
+- ✓ Los tests son rápidos (<5 min total)
+
+---
+
+### **TASK-060: Crear Documentación Técnica Completa**
+
+**Prioridad:** 🟡 ALTA  
+**Estimación:** 3 días  
+**Dependencias:** Todas las features implementadas
+
+#### 📋 Descripción
+
+Crear documentación técnica comprehensiva para facilitar onboarding de desarrolladores y mantenimiento.
+
+#### ✅ Tareas específicas
+- Crear/actualizar README.md principal:
+  - Descripción del proyecto
+  - Stack tecnológico
+  - Requisitos (Node version, PostgreSQL, etc.)
+  - Setup instructions paso a paso
+  - Variables de entorno necesarias
+  - Cómo ejecutar en desarrollo
+  - Cómo ejecutar tests
+  - Estructura del proyecto
+- Crear CONTRIBUTING.md:
+  - Guías de estilo de código
+  - Convenciones de nombres
+  - Cómo crear branches
+  - Proceso de PR
+  - Cómo reportar bugs
+- Crear ARCHITECTURE.md:
+  - Diagrama de arquitectura general
+  - Explicación de módulos principales
+  - Flujo de datos
+  - Decisiones arquitectónicas (ADRs)
+  - Patrones utilizados
+- Crear API_DOCUMENTATION.md:
+  - Overview de la API
+  - Autenticación y autorización
+  - Rate limiting
+  - Ejemplos de uso comunes
+  - Error handling
+  - Link a Swagger
+- Crear DEPLOYMENT.md:
+  - Opciones de deployment
+  - Configuración de cada plataforma
+  - Variables de entorno para producción
+  - Proceso de CI/CD
+  - Rollback strategy
+  - Monitoreo y alertas
+- Crear DEVELOPMENT.md:
+  - Setup de entorno de desarrollo
+  - Herramientas recomendadas (VS Code extensions)
+  - Debugging tips
+  - Scripts útiles
+  - Troubleshooting común
+- Crear DATABASE.md:
+  - Diagrama ER
+  - Descripción de cada tabla
+  - Índices y su propósito
+  - Estrategia de migraciones
+  - Seeders disponibles
+- Documentar cada módulo con JSDoc:
+  - Descripción de clases y métodos
+  - Parámetros y tipos de retorno
+  - Ejemplos de uso
+- Crear SECURITY.md:
+  - Políticas de seguridad
+  - Cómo reportar vulnerabilidades
+  - Security best practices implementadas
+- Crear CHANGELOG.md:
+  - Versiones y fechas
+  - Features añadidas
+  - Bugs fixed
+  - Breaking changes
+- Agregar diagramas útiles:
+  - Flujo de autenticación
+  - Flujo de creación de lectura
+  - Arquitectura de caché
+  - Integración con OpenAI
+
+#### 🎯 Criterios de aceptación
+
+- ✓ Un desarrollador nuevo puede hacer setup completo siguiendo docs
+- ✓ Todos los aspectos técnicos importantes están documentados
+- ✓ La documentación está actualizada con el código
+
+---
+
+## 📊 RESUMEN Y PRIORIZACIÓN
+
+### Distribución por Prioridad
+
+**🔴 CRÍTICAS (MVP Blocker):** 12 tareas
+- TASK-001 a TASK-003: Configuración base
+- TASK-004 a TASK-006: Datos de tarot
+- TASK-007 a TASK-010: Categorías y preguntas
+- TASK-022: Pregunta híbrida
+- TASK-048: Validación de inputs
+
+**🟡 ALTAS (Importantes para Launch):** 20 tareas
+- TASK-011 a TASK-014: Sistema de planes
+- TASK-015 a TASK-019: Auth y IA
+- TASK-024, TASK-027 a TASK-029: Admin y UX
+- TASK-042, TASK-043, TASK-045: Performance
+- TASK-047, TASK-049, TASK-051, TASK-054 a TASK-057, TASK-059 a TASK-060: Seguridad y docs
+
+**🟢 MEDIAS/BAJAS (Post-Launch):** 28 tareas
+- TASK-020, TASK-021, TASK-023, TASK-025, TASK-026: Mejoras de lecturas
+- TASK-030 a TASK-041: Módulos adicionales (Oráculo, Rituales, Servicios)
+- TASK-044, TASK-046, TASK-050, TASK-052, TASK-053, TASK-055, TASK-056, TASK-058: Optimizaciones
+
+### Estimación Total
+
+- **Fase 1 (MVP):** ~40-50 días de desarrollo
+- **Fase 2 (Funcionalidades Adicionales):** ~25-30 días
+- **Fase 3 (Optimización y Escala):** ~20-25 días
+
+**TOTAL ESTIMADO:** 85-105 días de desarrollo backend
+
+---
+
+## 🎯 ROADMAP RECOMENDADO
+
+### Sprint 1-2 (Semanas 1-4): Fundamentos
+- TASK-001 a TASK-003, TASK-048
+- TASK-004 a TASK-006
+- TASK-007 a TASK-010
+
+### Sprint 3-4 (Semanas 5-8): Planes y Límites
+- TASK-011 a TASK-014
+- TASK-022
+- TASK-015 a TASK-016
+
+### Sprint 5-6 (Semanas 9-12): IA y Performance
+- TASK-018 a TASK-021
+- TASK-042, TASK-043, TASK-045
+
+### Sprint 7-8 (Semanas 13-16): Admin y Seguridad
+- TASK-024 a TASK-026
+- TASK-027 a TASK-030
+- TASK-047, TASK-049, TASK-051
+
+### Sprint 9-10 (Semanas 17-20): Testing y Docs
+- TASK-057, TASK-059, TASK-060
+- TASK-054 a TASK-056
+- TASK-058
+
+---
+
+Este backlog proporciona una hoja de ruta completa y detallada para el desarrollo backend. Cada tarea incluye descripción clara, subtareas específicas y criterios de aceptación medibles. ¿Te gustaría que profundice en alguna tarea específica o ajuste las prioridades?
