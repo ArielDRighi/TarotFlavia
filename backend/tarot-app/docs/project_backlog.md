@@ -1,5 +1,22 @@
 # 🎯 FASE 1: MVP - CRÍTICO PARA LANZAMIENTO
 
+> **📊 ANÁLISIS MVP ACTUALIZADO:** Ver documento `MVP_RESUMEN_EJECUTIVO.md` para resumen completo
+>
+> **🧪 ESTRATEGIA DE TESTING:** Ver documento `TESTING_STRATEGY.md` para detalles de testing
+>
+> **Última actualización:** 29 de Octubre, 2025
+
+---
+
+## 🏆 MARCADORES MVP
+
+Las tareas están marcadas según su importancia para el MVP:
+
+- ⭐⭐⭐ **CRÍTICO PARA MVP** - Sin esto NO hay MVP funcional
+- ⭐⭐ **NECESARIO PARA MVP** - Requerido para experiencia completa
+- ⭐ **RECOMENDADO PARA MVP** - Mejora calidad/UX, no bloqueante
+- 🔵 **FASE 2** - Post-MVP, no incluir ahora
+
 ---
 
 ## 🧪 Metodología de Desarrollo
@@ -357,11 +374,202 @@ src/
 
 ---
 
-### **TASK-002: Migrar de synchronize: true a Sistema de Migraciones**
+### **TASK-001-a: Refactorizar Estructura del Proyecto según Best Practices** ⭐⭐
+
+**Prioridad:** � ALTA  
+**Estimación:** 0.5-1 día  
+**Dependencias:** TASK-001  
+**Marcador MVP:** ⭐⭐ **NECESARIO ANTES DE CONTINUAR MVP** - Evita refactor masivo futuro
+
+> **CRÍTICO:** Ejecutar AHORA antes de agregar más features. Con 7 módulos es simple, con 15+ será una pesadilla de imports rotos.
+
+#### 📋 Descripción
+
+Reorganizar la estructura del proyecto backend para seguir las mejores prácticas de NestJS con arquitectura modular escalable. La estructura actual tiene los módulos en la raíz de `src/`, pero para mejor escalabilidad y organización, deberían estar bajo `src/modules/`.
+
+**Estructura Actual:**
+```
+src/
+├── auth/
+├── cards/
+├── categories/
+├── config/
+├── database/
+├── decks/
+├── interpretations/
+├── readings/
+├── spreads/
+├── tarot/
+├── users/
+├── app.module.ts
+└── main.ts
+```
+
+**Estructura Objetivo (Best Practices):**
+```
+src/
+├── modules/
+│   ├── auth/
+│   ├── users/
+│   ├── tarot/
+│   │   ├── cards/
+│   │   ├── decks/
+│   │   ├── readings/
+│   │   ├── interpretations/
+│   │   └── spreads/
+│   ├── categories/
+│   └── (futuros: oracle/, rituals/, services/, admin/)
+├── common/
+│   ├── decorators/
+│   ├── filters/
+│   ├── guards/
+│   ├── interceptors/
+│   ├── pipes/
+│   └── utils/
+├── config/
+├── database/
+│   ├── migrations/
+│   └── seeds/
+├── app.module.ts
+└── main.ts
+```
+
+#### ✅ Ejecución (AUTOMATIZADA)
+
+**Opción 1: Script Automático (RECOMENDADO)**
+```bash
+# Windows PowerShell (tu caso)
+cd backend/tarot-app
+.\scripts\restructure.ps1
+
+# Linux/Mac
+cd backend/tarot-app
+chmod +x scripts/restructure.sh
+./scripts/restructure.sh
+```
+
+**Opción 2: Manual (si script falla)**
+
+1. **Crear estructura de carpetas:**
+   ```bash
+   mkdir -p src/modules/tarot
+   mkdir -p src/common/{decorators,filters,guards,interceptors,pipes,utils}
+   mkdir -p src/database/migrations
+   ```
+
+2. **Mover módulos:**
+   ```bash
+   # Auth y Users
+   mv src/auth src/modules/
+   mv src/users src/modules/
+   
+   # Tarot (todos bajo modules/tarot/)
+   mv src/cards src/modules/tarot/
+   mv src/decks src/modules/tarot/
+   mv src/readings src/modules/tarot/
+   mv src/interpretations src/modules/tarot/
+   mv src/spreads src/modules/tarot/
+   
+   # Categories
+   mv src/categories src/modules/
+   
+   # Migrations
+   mv src/migrations/* src/database/migrations/
+   ```
+
+3. **Actualizar imports automáticamente:**
+   - El script ya lo hace, o usar Find & Replace del IDE:
+     - `src/auth/` → `src/modules/auth/`
+     - `src/users/` → `src/modules/users/`
+     - `src/cards/` → `src/modules/tarot/cards/`
+     - etc.
+
+#### ✅ Validación (CRÍTICO)
+
+**Después de ejecutar el script:**
+```bash
+# 1. Compilar
+npm run build
+# ❌ Si falla: revisar errores de imports
+
+# 2. Ejecutar tests
+npm run test
+# ❌ Si fallan: revisar imports en archivos .spec.ts
+
+# 3. Arrancar aplicación
+npm run start:dev
+# ❌ Si falla: revisar app.module.ts y paths de entities
+```
+
+#### ✅ Fixes Comunes Post-Refactor
+
+**Si TypeORM no encuentra entities:**
+```typescript
+// src/config/typeorm.ts
+entities: [
+  __dirname + '/../modules/**/*.entity{.ts,.js}',
+  __dirname + '/../**/*.entity{.ts,.js}'
+]
+```
+
+**Si hay imports rotos en app.module.ts:**
+```typescript
+// Antes
+import { AuthModule } from './auth/auth.module';
+// Después
+import { AuthModule } from './modules/auth/auth.module';
+```
+
+**Si migrations no se encuentran:**
+```typescript
+// src/config/typeorm.ts
+migrations: [__dirname + '/../database/migrations/*{.ts,.js}']
+```
+
+#### 🎯 Criterios de aceptación
+
+- ✅ Estructura sigue convenciones de NestJS best practices
+- ✅ Todos los módulos están bajo `src/modules/`
+- ✅ Carpeta `common/` contiene utilities reutilizables
+- ✅ Proyecto compila sin errores (`npm run build`)
+- ✅ Todos los tests pasan (`npm test`)
+- ✅ No hay imports rotos
+- ✅ TypeORM encuentra todas las entities
+- ✅ Aplicación arranca correctamente
+- ✅ Documentación actualizada
+
+#### 📝 Beneficios
+
+- ✅ Mejor organización y separación de responsabilidades
+- ✅ Más fácil agregar nuevos módulos (oracle, rituals, etc.)
+- ✅ Utilities comunes en un solo lugar
+- ✅ Sigue estándares de la industria
+- ✅ Facilita onboarding de nuevos desarrolladores
+
+#### ⚠️ Riesgos y Mitigaciones
+
+**Riesgo:** Muchos imports rotos  
+**Mitigación:** Usar herramientas de refactoring del IDE, hacer en branch separado
+
+**Riesgo:** Tests fallan después del move  
+**Mitigación:** Ejecutar tests después de cada grupo de módulos movidos
+
+**Riesgo:** TypeORM no encuentra entities  
+**Mitigación:** Probar que migraciones funcionan antes de commit
+
+#### 🔄 Alternativa
+
+Si esta refactorización se considera demasiado disruptiva para el MVP, puede posponerse a Fase 2. Sin embargo, hacerlo ahora (con solo 7 tasks completadas) es el momento ideal antes de que el proyecto crezca más.
+
+---
+
+### **TASK-002: Migrar de synchronize: true a Sistema de Migraciones** ⭐⭐⭐ ✅
 
 **Prioridad:** 🔴 CRÍTICA  
 **Estimación:** 3 días  
-**Dependencias:** TASK-001
+**Dependencias:** TASK-001  
+**Estado:** ✅ COMPLETADO  
+**Marcador MVP:** ⭐⭐⭐ **CRÍTICO PARA MVP** - Obligatorio antes de producción
 
 #### 📋 Descripción
 
@@ -396,11 +604,13 @@ Reemplazar el modo `synchronize: true` de TypeORM (que sincroniza automáticamen
 
 ---
 
-### **TASK-003: Implementar Validación Robusta de Variables de Entorno**
+### **TASK-003: Implementar Validación Robusta de Variables de Entorno** ⭐⭐⭐ ✅
 
 **Prioridad:** 🔴 CRÍTICA  
 **Estimación:** 2 días  
-**Dependencias:** TASK-002
+**Dependencias:** TASK-002  
+**Estado:** ✅ COMPLETADO  
+**Marcador MVP:** ⭐⭐⭐ **CRÍTICO PARA MVP** - Previene errores en producción
 
 #### 📋 Descripción
 
@@ -438,16 +648,33 @@ Implementar validación estricta de todas las variables de entorno necesarias us
 
 ---
 
-### **TASK-004: Configurar API Key de OpenAI y Verificación de Conectividad**
+### **TASK-004: Configurar API Key de OpenAI y Verificación de Conectividad** ⭐⭐⭐
 
 **Prioridad:** 🔴 CRÍTICA  
 **Estimación:** 0.5 días  
-**Dependencias:** TASK-003
-**Dependencias:** TASK-003
+**Dependencias:** TASK-003  
+**Marcador MVP:** ⭐⭐⭐ **CRÍTICO PARA MVP** - Sin OpenAI no hay interpretaciones
 
 #### 📋 Descripción
 
 Configurar la API Key de OpenAI en las variables de entorno y crear un mecanismo de health check que verifique la conectividad con OpenAI al arrancar la aplicación.
+
+#### 🧪 Testing (CRÍTICO)
+
+**Tests necesarios:**
+- [ ] **Tests unitarios:**
+  - `OpenAIHealthService` detecta API key válida
+  - `OpenAIHealthService` detecta API key inválida
+  - Timeout de 30s se respeta
+  - Manejo correcto de errores 401, 429, 500
+  
+- [ ] **Tests E2E (OBLIGATORIOS):**
+  - GET `/health/openai` con key válida → 200 + `status: 'ok'`
+  - Aplicación arranca correctamente con OpenAI configurado
+  - Logs apropiados para cada tipo de error
+
+**Ubicación:** `src/config/*.spec.ts` + `test/openai-health.e2e-spec.ts`  
+**Importancia:** ⭐⭐⭐ CRÍTICA - Sin OpenAI funcional el core del negocio no sirve
 
 #### ✅ Tareas específicas
 
@@ -798,15 +1025,27 @@ Crear la entidad `ReadingCategory` con sus 6 categorías principales (Amor, Trab
 
 ---
 
-### **TASK-008: Crear Seeders de Categorías con Iconos y Descripciones**
+### **TASK-008: Crear Seeders de Categorías con Iconos y Descripciones** ⭐⭐
 
 **Prioridad:** 🔴 CRÍTICA  
 **Estimación:** 1 día  
-**Dependencias:** TASK-007
+**Dependencias:** TASK-007  
+**Marcador MVP:** ⭐⭐ **NECESARIO PARA MVP** - UX fundamental
 
 #### 📋 Descripción
 
 Crear seeder con las 6 categorías predefinidas incluyendo iconos (emoji o referencias a iconos), colores y descripciones atractivas para usuarios.
+
+#### 🧪 Testing
+
+**Tests necesarios:**
+- [ ] **Tests unitarios:**
+  - Seeder inserta exactamente 6 categorías
+  - Idempotencia: no duplica en múltiples ejecuciones
+  - Todas las categorías tienen icono, color, descripción y orden
+  - Todas inician con `is_active: true`
+
+**Ubicación:** `src/database/seeds/*.spec.ts`
 
 #### ✅ Tareas específicas
 
@@ -830,15 +1069,32 @@ Crear seeder con las 6 categorías predefinidas incluyendo iconos (emoji o refer
 
 ---
 
-### **TASK-009: Implementar Entidad y Módulo de Preguntas Predefinidas**
+### **TASK-009: Implementar Entidad y Módulo de Preguntas Predefinidas** ⭐⭐
 
 **Prioridad:** 🔴 CRÍTICA  
 **Estimación:** 3 días  
-**Dependencias:** TASK-007
+**Dependencias:** TASK-007  
+**Marcador MVP:** ⭐⭐ **NECESARIO PARA MVP** - Diferenciador free vs premium
 
 #### 📋 Descripción
 
 Crear la entidad `PredefinedQuestion` y su módulo completo para gestionar preguntas que usuarios free podrán seleccionar.
+
+#### 🧪 Testing
+
+**Tests necesarios:**
+- [ ] **Tests unitarios:**
+  - CRUD completo funciona correctamente
+  - Filtrado por `category_id`
+  - Solo preguntas activas en endpoint público
+  - Soft-delete no elimina físicamente
+  
+- [ ] **Tests E2E:**
+  - GET `/predefined-questions?categoryId=1` retorna solo de esa categoría
+  - Admin puede crear/editar preguntas → 201
+  - Usuario normal no puede modificar preguntas → 403
+
+**Ubicación:** `src/predefined-questions/*.spec.ts` + `test/predefined-questions.e2e-spec.ts`
 
 #### ✅ Tareas específicas
 
@@ -865,15 +1121,27 @@ Crear la entidad `PredefinedQuestion` y su módulo completo para gestionar pregu
 
 ---
 
-### **TASK-010: Crear Seeders de Preguntas Predefinidas por Categoría**
+### **TASK-010: Crear Seeders de Preguntas Predefinidas por Categoría** ⭐⭐
 
 **Prioridad:** 🔴 CRÍTICA  
 **Estimación:** 2 días  
-**Dependencias:** TASK-008, TASK-009
+**Dependencias:** TASK-008, TASK-009  
+**Marcador MVP:** ⭐⭐ **NECESARIO PARA MVP** - Contenido esencial para usuarios free
 
 #### 📋 Descripción
 
 Crear seeders con al menos 5-8 preguntas bien formuladas para cada una de las 6 categorías (total: 30-48 preguntas).
+
+#### 🧪 Testing
+
+**Tests necesarios:**
+- [ ] **Tests unitarios:**
+  - Seeder inserta mínimo 30 preguntas (5×6 categorías)
+  - Preguntas asociadas a categorías correctas
+  - No se crean duplicados en múltiples ejecuciones (idempotencia)
+  - Todas las preguntas inician con `is_active: true`
+
+**Ubicación:** `src/database/seeds/*.spec.ts`
 
 #### ✅ Tareas específicas
 
@@ -906,15 +1174,31 @@ Crear seeders con al menos 5-8 preguntas bien formuladas para cada una de las 6 
 
 ---
 
-### **TASK-011: Ampliar Entidad User con Sistema de Planes**
+### **TASK-011: Ampliar Entidad User con Sistema de Planes** ⭐⭐
 
 **Prioridad:** 🟡 ALTA  
 **Estimación:** 2 días  
-**Dependencias:** TASK-002
+**Dependencias:** TASK-002  
+**Marcador MVP:** ⭐⭐ **NECESARIO PARA MVP** - Base del modelo de negocio
 
 #### 📋 Descripción
 
 Modificar la entidad `User` para incluir sistema completo de planes (free/premium) con campos relacionados a suscripción y límites.
+
+#### 🧪 Testing
+
+**Tests necesarios:**
+- [ ] **Tests unitarios:**
+  - `isPremium()` retorna true para usuario premium activo
+  - `isPremium()` retorna false para usuario free
+  - `hasPlanExpired()` detecta planes vencidos
+  
+- [ ] **Tests de integración:**
+  - Migración agrega todos los campos correctamente
+  - JWT incluye información de plan
+  - Índice en campo `plan` funciona
+
+**Ubicación:** `src/users/*.spec.ts`
 
 #### ✅ Tareas específicas
 
@@ -939,15 +1223,37 @@ Modificar la entidad `User` para incluir sistema completo de planes (free/premiu
 
 ---
 
-### **TASK-012: Implementar Entidad y Módulo de Límites de Uso (Usage Limits)**
+### **TASK-012: Implementar Entidad y Módulo de Límites de Uso (Usage Limits)** ⭐⭐
 
 **Prioridad:** 🟡 ALTA  
 **Estimación:** 3 días  
-**Dependencias:** TASK-011
+**Dependencias:** TASK-011  
+**Marcador MVP:** ⭐⭐ **NECESARIO PARA MVP** - Control de uso free vs premium
 
 #### 📋 Descripción
 
 Crear sistema completo de tracking de límites de uso para usuarios free (lecturas por día, regeneraciones, etc.).
+
+#### 🧪 Testing
+
+**Tests necesarios:**
+- [ ] **Tests unitarios:**
+  - `checkLimit()` retorna true cuando hay límite disponible
+  - `checkLimit()` retorna false cuando límite excedido
+  - `incrementUsage()` incrementa correctamente
+  - Usuario premium tiene límites ilimitados (-1)
+  
+- [ ] **Tests de integración:**
+  - Límites se resetean a medianoche (mock time)
+  - Índice compuesto previene duplicados
+  - Cron limpia registros antiguos
+  
+- [ ] **Tests E2E:**
+  - Usuario FREE hace 3 lecturas → 4ta rechazada
+  - Usuario PREMIUM puede hacer lecturas ilimitadas
+  - Usuario FREE al día siguiente puede hacer 3 nuevas
+
+**Ubicación:** `src/usage-limits/*.spec.ts` + `test/usage-limits.e2e-spec.ts`
 
 #### ✅ Tareas específicas
 
@@ -978,15 +1284,38 @@ Crear sistema completo de tracking de límites de uso para usuarios free (lectur
 
 ---
 
-### **TASK-013: Modificar Sistema de Lecturas para Preguntas Predefinidas vs Libres**
+### **TASK-013: Modificar Sistema de Lecturas para Preguntas Predefinidas vs Libres** ⭐⭐⭐
 
 **Prioridad:** � CRÍTICA  
 **Estimación:** 3 días  
-**Dependencias:** TASK-009, TASK-011
+**Dependencias:** TASK-009, TASK-011  
+**Marcador MVP:** ⭐⭐⭐ **CRÍTICO PARA MVP** - Implementa diferenciación del negocio
 
 #### 📋 Descripción
 
 Adaptar el flujo de creación de lecturas para que usuarios free solo puedan usar preguntas predefinidas y usuarios premium escriban libremente.
+
+#### 🧪 Testing (CRÍTICO - Diferenciador del negocio)
+
+**Tests necesarios:**
+- [ ] **Tests unitarios:**
+  - DTO valida pregunta predefinida para free
+  - DTO acepta pregunta custom para premium
+  - Guard rechaza custom para free
+  
+- [ ] **Tests de integración:**
+  - Lectura con `predefined_question_id`
+  - Lectura con `custom_question` (premium)
+  - Error claro para free con custom
+  
+- [ ] **Tests E2E (OBLIGATORIOS):**
+  - Usuario FREE crea lectura con pregunta predefinida → 201
+  - Usuario FREE rechazado con pregunta custom → 403
+  - Usuario PREMIUM crea lectura con custom → 201
+  - Usuario PREMIUM puede usar predefinidas también → 201
+
+**Ubicación:** `src/readings/*.spec.ts` + `test/readings-hybrid.e2e-spec.ts`  
+**Importancia:** ⭐⭐⭐ CRÍTICA - Sin estos tests el modelo de negocio no está validado
 
 #### ✅ Tareas específicas
 
@@ -1014,11 +1343,12 @@ Adaptar el flujo de creación de lecturas para que usuarios free solo puedan usa
 
 ---
 
-### **TASK-014: Implementar Rate Limiting Global**
+### **TASK-014: Implementar Rate Limiting Global** ⭐
 
 **Prioridad:** 🟡 ALTA  
 **Estimación:** 1 día  
-**Dependencias:** TASK-002
+**Dependencias:** TASK-002  
+**Marcador MVP:** ⭐ **RECOMENDADO PARA MVP** - Protección contra abuso
 
 #### 📋 Descripción
 
@@ -1161,11 +1491,12 @@ Crear flujo completo de recuperación de contraseña con tokens seguros y expira
 
 ---
 
-### **TASK-018: Optimizar Prompts de OpenAI para Tarot**
+### **TASK-018: Optimizar Prompts de OpenAI para Tarot** ⭐
 
 **Prioridad:** 🟡 ALTA  
 **Estimación:** 3 días  
-**Dependencias:** TASK-003, TASK-004, TASK-006
+**Dependencias:** TASK-003, TASK-004, TASK-006  
+**Marcador MVP:** ⭐ **RECOMENDADO PARA MVP** - Define calidad de interpretaciones
 
 #### 📋 Descripción
 
@@ -1234,15 +1565,26 @@ Refinar y optimizar los system prompts y user prompts enviados a OpenAI para obt
 
 ---
 
-### **TASK-019: Implementar Sistema de Logging de Uso de OpenAI**
+### **TASK-019: Implementar Sistema de Logging de Uso de OpenAI** ⭐
 
 **Prioridad:** 🟡 ALTA  
 **Estimación:** 2 días  
-**Dependencias:** TASK-003
+**Dependencias:** TASK-003  
+**Marcador MVP:** ⭐ **RECOMENDADO PARA MVP** - Monitoreo de costos y uso
 
 #### 📋 Descripción
 
 Crear sistema robusto de logging que trackee todas las llamadas a OpenAI para monitorear costos, rendimiento y debugging.
+
+#### 🧪 Testing
+
+**Tests necesarios:**
+- [ ] Tests unitarios: Logging se crea con todos los campos
+- [ ] Tests unitarios: Costo calculado correctamente
+- [ ] Tests de integración: Llamada a OpenAI registra log
+- [ ] Tests E2E: Endpoint admin retorna estadísticas
+
+**Ubicación:** `src/openai-usage/*.spec.ts` + `test/admin/openai-stats.e2e-spec.ts`
 
 #### ✅ Tareas específicas
 
@@ -1273,6 +1615,143 @@ Crear sistema robusto de logging que trackee todas las llamadas a OpenAI para mo
 - ✓ Todas las llamadas a OpenAI se registran correctamente
 - ✓ Los costos se calculan con precisión
 - ✓ Los administradores pueden consultar estadísticas de uso
+
+---
+
+### **TASK-019-a: Implementar Suite Completa de Tests E2E para MVP** ⭐⭐⭐
+
+**Prioridad:** 🔴 CRÍTICA  
+**Estimación:** 3 días  
+**Dependencias:** TASK-013, TASK-012, TASK-014  
+**Marcador MVP:** ⭐⭐⭐ **CRÍTICO PARA MVP** - Obligatorio antes de producción
+
+#### 📋 Descripción
+
+Implementar suite completa de tests End-to-End (E2E) que cubran todos los flujos críticos del MVP. Estos tests simulan el comportamiento real del usuario y son obligatorios antes de deploy a producción.
+
+#### 🧪 Tests E2E Críticos (12 NO Negociables)
+
+**Suite MVP Completa:**
+
+```typescript
+// test/mvp-complete.e2e-spec.ts
+describe('MVP Complete Flow E2E', () => {
+  
+  // 1. Authentication Flow
+  it('✅ Usuario puede registrarse', async () => { ... });
+  it('✅ Usuario puede hacer login y recibir JWT', async () => { ... });
+  
+  // 2. Categories & Questions
+  it('✅ Lista 6 categorías correctamente', async () => { ... });
+  it('✅ Lista preguntas predefinidas por categoría', async () => { ... });
+  
+  // 3. Reading Creation (FREE user)
+  it('✅ Usuario FREE crea lectura con pregunta predefinida', async () => { ... });
+  it('✅ Usuario FREE rechazado con pregunta custom', async () => { ... });
+  it('✅ Usuario FREE bloqueado después de 3 lecturas/día', async () => { ... });
+  
+  // 4. Reading Creation (PREMIUM user)
+  it('✅ Usuario PREMIUM crea lectura con pregunta custom', async () => { ... });
+  it('✅ Usuario PREMIUM tiene lecturas ilimitadas', async () => { ... });
+  
+  // 5. AI Interpretation
+  it('✅ Interpretación con IA se genera correctamente', async () => { ... });
+  
+  // 6. Reading History
+  it('✅ Usuario puede ver su historial de lecturas', async () => { ... });
+  
+  // 7. Security & Rate Limiting
+  it('✅ Rate limiting protege endpoints', async () => { ... });
+});
+```
+
+#### ✅ Tareas específicas
+
+- [ ] **Configurar entorno de testing E2E:**
+  - Test database separada (PostgreSQL en Docker)
+  - Seeders automáticos antes de cada suite
+  - Cleanup automático después de tests
+  
+- [ ] **Crear archivo `test/mvp-complete.e2e-spec.ts`:**
+  - 12 tests críticos obligatorios
+  - Setup y teardown apropiados
+  - Helpers para crear usuarios test
+  
+- [ ] **Tests de Autenticación:**
+  - Register con validaciones
+  - Login exitoso con JWT
+  - Login fallido con credenciales incorrectas
+  - JWT en headers funciona
+  
+- [ ] **Tests de Categorías y Preguntas:**
+  - GET /categories retorna 6 categorías
+  - GET /predefined-questions?categoryId=X funciona
+  - Estructura de datos correcta
+  
+- [ ] **Tests de Sistema Híbrido (FREE vs PREMIUM):**
+  - FREE: POST /readings con predefinedQuestionId → 201
+  - FREE: POST /readings con customQuestion → 403
+  - PREMIUM: POST /readings con customQuestion → 201
+  - PREMIUM: POST /readings con predefinedQuestionId → 201
+  
+- [ ] **Tests de Límites de Uso:**
+  - FREE puede hacer 3 lecturas
+  - 4ta lectura FREE → 429 (Too Many Requests)
+  - PREMIUM puede hacer >10 lecturas sin límite
+  
+- [ ] **Tests de Interpretación IA:**
+  - Interpretación se genera (<15s timeout)
+  - Campo `interpretation` presente y no vacío
+  - Tokens usados registrados
+  
+- [ ] **Tests de Historial:**
+  - GET /readings retorna lecturas del usuario
+  - Paginación funciona
+  - Solo lecturas propias (no de otros usuarios)
+  
+- [ ] **Tests de Rate Limiting:**
+  - 101 requests rápidos → algunos 429
+  - Headers X-RateLimit presentes
+  
+- [ ] **Tests de OpenAI Health:**
+  - GET /health/openai retorna status
+  - Endpoint funciona sin auth
+
+#### 🎯 Criterios de aceptación
+
+- ✅ Los 12 tests críticos pasan consistentemente
+- ✅ Suite completa ejecuta en <5 minutos
+- ✅ Test database se resetea entre ejecuciones
+- ✅ No hay dependencias entre tests (orden independiente)
+- ✅ Logs claros cuando falla un test
+- ✅ CI/CD ejecuta suite en cada PR
+- ✅ Coverage E2E >90% de endpoints críticos
+
+#### 📝 Notas de implementación
+
+**Scripts de package.json:**
+```json
+{
+  "test:e2e": "jest --config ./test/jest-e2e.json",
+  "test:e2e:watch": "jest --config ./test/jest-e2e.json --watch",
+  "test:e2e:cov": "jest --config ./test/jest-e2e.json --coverage",
+  "test:mvp": "jest --config ./test/jest-e2e.json test/mvp-complete.e2e-spec.ts"
+}
+```
+
+**Configuración de CI/CD:**
+```yaml
+# .github/workflows/e2e-tests.yml
+- name: Run E2E Tests
+  run: npm run test:e2e
+  env:
+    DATABASE_URL: postgresql://test:test@localhost:5432/tarot_test
+    OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+```
+
+#### ⚠️ Importante
+
+Esta tarea es **bloqueante para producción**. No se puede hacer deploy del MVP sin que esta suite de tests esté completa y pasando.
 
 ---
 
@@ -1745,11 +2224,12 @@ Crear sistema de audit log que registre todas las acciones administrativas y cam
 
 ---
 
-### **TASK-031: Diseñar e Implementar Entidades del Módulo Oráculo**
+### **TASK-031: Diseñar e Implementar Entidades del Módulo Oráculo** 🔵
 
 **Prioridad:** 🟢 MEDIA  
 **Estimación:** 2 días  
-**Dependencias:** TASK-002
+**Dependencias:** TASK-002  
+**Marcador:** 🔵 **FASE 2** - NO incluir en MVP
 
 #### 📋 Descripción
 
@@ -1851,7 +2331,10 @@ Implementar endpoints REST para consultas de oráculo con validaciones y límite
 
 Epic 10: Módulo de Rituales y Amuletos---
 
-## 🎨 Epic 10: Módulo de Rituales
+## 🔵 Epic 10: Módulo de Rituales (FASE 2 - NO MVP)
+
+> **⚠️ IMPORTANTE:** Este módulo NO forma parte del MVP. Se desarrollará en Fase 2 después del lanzamiento.
+> El MVP se enfoca exclusivamente en **tiradas de tarot**.
 
 > **Objetivo:** Implementar catálogo completo de rituales esotéricos con sistema de favoritos, búsqueda avanzada y recomendaciones personalizadas.
 
