@@ -11,7 +11,10 @@ export class InitialSchema1761655973524 implements MigrationInterface {
       `CREATE TABLE "tarot_card" ("id" SERIAL NOT NULL, "name" character varying NOT NULL, "number" integer NOT NULL, "category" character varying NOT NULL, "imageUrl" character varying NOT NULL, "reversedImageUrl" character varying, "meaningUpright" text NOT NULL, "meaningReversed" text NOT NULL, "description" text NOT NULL, "keywords" text NOT NULL, "deckId" integer NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_4644ee36c645c993956a62bf2d2" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "tarot_reading" ("id" SERIAL NOT NULL, "question" character varying, "cardPositions" jsonb NOT NULL, "interpretation" text, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "deletedAt" TIMESTAMP, "userId" integer, "deckId" integer, CONSTRAINT "PK_8f96c960d305aaf75bd688fb2cd" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "reading_category" ("id" SERIAL NOT NULL, "name" character varying NOT NULL, "slug" character varying NOT NULL, "description" text NOT NULL, "icon" character varying NOT NULL, "color" character varying NOT NULL, "order" integer NOT NULL DEFAULT '0', "isActive" boolean NOT NULL DEFAULT true, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "UQ_reading_category_name" UNIQUE ("name"), CONSTRAINT "UQ_reading_category_slug" UNIQUE ("slug"), CONSTRAINT "PK_reading_category_id" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "tarot_reading" ("id" SERIAL NOT NULL, "question" character varying, "cardPositions" jsonb NOT NULL, "interpretation" text, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "deletedAt" TIMESTAMP, "userId" integer, "deckId" integer, "categoryId" integer, CONSTRAINT "PK_8f96c960d305aaf75bd688fb2cd" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `CREATE TABLE "user" ("id" SERIAL NOT NULL, "email" character varying NOT NULL, "password" character varying NOT NULL, "name" character varying NOT NULL, "profilePicture" character varying, "isAdmin" boolean NOT NULL DEFAULT false, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "UQ_e12875dfb3b1d92d7d7c5377e22" UNIQUE ("email"), CONSTRAINT "PK_cace4a159ff9f2512dd42373760" PRIMARY KEY ("id"))`,
@@ -41,6 +44,9 @@ export class InitialSchema1761655973524 implements MigrationInterface {
       `ALTER TABLE "tarot_reading" ADD CONSTRAINT "FK_906c9f21a4276fc08a570bee56e" FOREIGN KEY ("deckId") REFERENCES "tarot_deck"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
+      `ALTER TABLE "tarot_reading" ADD CONSTRAINT "FK_tarot_reading_category" FOREIGN KEY ("categoryId") REFERENCES "reading_category"("id") ON DELETE SET NULL ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
       `ALTER TABLE "tarot_interpretation" ADD CONSTRAINT "FK_b41f049863deb7f13835ba43c79" FOREIGN KEY ("readingId") REFERENCES "tarot_reading"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
@@ -62,6 +68,9 @@ export class InitialSchema1761655973524 implements MigrationInterface {
       `ALTER TABLE "tarot_interpretation" DROP CONSTRAINT "FK_b41f049863deb7f13835ba43c79"`,
     );
     await queryRunner.query(
+      `ALTER TABLE "tarot_reading" DROP CONSTRAINT "FK_tarot_reading_category"`,
+    );
+    await queryRunner.query(
       `ALTER TABLE "tarot_reading" DROP CONSTRAINT "FK_906c9f21a4276fc08a570bee56e"`,
     );
     await queryRunner.query(
@@ -81,6 +90,7 @@ export class InitialSchema1761655973524 implements MigrationInterface {
     await queryRunner.query(`DROP TABLE "tarot_spread"`);
     await queryRunner.query(`DROP TABLE "user"`);
     await queryRunner.query(`DROP TABLE "tarot_reading"`);
+    await queryRunner.query(`DROP TABLE "reading_category"`);
     await queryRunner.query(`DROP TABLE "tarot_card"`);
     await queryRunner.query(`DROP TABLE "tarot_deck"`);
   }

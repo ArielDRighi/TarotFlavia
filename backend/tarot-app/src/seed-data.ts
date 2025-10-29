@@ -7,6 +7,7 @@ import { TarotCard } from './cards/entities/tarot-card.entity';
 import { seedTarotDecks } from './database/seeds/tarot-decks.seeder';
 import { seedTarotCards } from './database/seeds/tarot-cards.seeder';
 import { seedTarotSpreads } from './database/seeds/tarot-spreads.seeder';
+import { seedReadingCategories } from './database/seeds/reading-categories.seed';
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppModule);
@@ -20,6 +21,9 @@ async function bootstrap() {
 
   try {
     console.log('🌱 Starting database seeding process...\n');
+
+    // Seed Reading Categories first
+    await seedReadingCategories(dataSource);
 
     // Seed Decks first (required for cards)
     await seedTarotDecks(deckRepository);

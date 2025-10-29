@@ -12,6 +12,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { User } from '../../users/entities/user.entity';
 import { TarotCard } from '../../cards/entities/tarot-card.entity';
 import { TarotDeck } from '../../decks/entities/tarot-deck.entity';
+import { ReadingCategory } from '../../categories/entities/reading-category.entity';
 
 @Entity()
 export class TarotReading {
@@ -31,6 +32,13 @@ export class TarotReading {
 
   @ManyToOne(() => TarotDeck)
   deck: TarotDeck;
+
+  @ApiProperty({
+    description: 'Categoría de la lectura',
+    type: () => ReadingCategory,
+  })
+  @ManyToOne(() => ReadingCategory, { nullable: true })
+  category: ReadingCategory;
 
   @ApiProperty({
     type: [TarotCard],

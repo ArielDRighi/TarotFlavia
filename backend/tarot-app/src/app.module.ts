@@ -11,6 +11,7 @@ import { DecksModule } from './decks/decks.module';
 import { SpreadsModule } from './spreads/spreads.module';
 import { ReadingsModule } from './readings/readings.module';
 import { InterpretationsModule } from './interpretations/interpretations.module';
+import { CategoriesModule } from './categories/categories.module';
 import databaseConfig from './config/typeorm';
 import { validate } from './config/env-validator';
 
@@ -43,6 +44,7 @@ import { validate } from './config/env-validator';
     SpreadsModule,
     ReadingsModule,
     InterpretationsModule,
+    CategoriesModule,
     TarotModule,
   ],
   controllers: [AppController],
