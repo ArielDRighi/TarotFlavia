@@ -186,59 +186,226 @@ describe('EnvironmentVariables', () => {
     });
   });
 
-  describe('OpenAI Variables', () => {
-    it('should fail if OPENAI_API_KEY does not start with sk-', async () => {
-      const envConfig = plainToClass(EnvironmentVariables, {
-        POSTGRES_HOST: 'localhost',
-        POSTGRES_PORT: '5432',
-        POSTGRES_USER: 'user',
-        POSTGRES_PASSWORD: 'pass',
-        POSTGRES_DB: 'db',
-        JWT_SECRET: 'a'.repeat(32),
-        JWT_EXPIRES_IN: '1h',
-        OPENAI_API_KEY: 'invalid-key',
+  describe('AI Provider Variables', () => {
+    describe('Groq (Primary Provider)', () => {
+      it('should fail if GROQ_API_KEY is missing', async () => {
+        const envConfig = plainToClass(EnvironmentVariables, {
+          POSTGRES_HOST: 'localhost',
+          POSTGRES_PORT: '5432',
+          POSTGRES_USER: 'user',
+          POSTGRES_PASSWORD: 'pass',
+          POSTGRES_DB: 'db',
+          JWT_SECRET: 'a'.repeat(32),
+          JWT_EXPIRES_IN: '1h',
+        });
+
+        const errors = await validate(envConfig);
+        const apiKeyError = errors.find((e) => e.property === 'GROQ_API_KEY');
+
+        expect(apiKeyError).toBeDefined();
       });
 
-      const errors = await validate(envConfig);
-      const apiKeyError = errors.find((e) => e.property === 'OPENAI_API_KEY');
+      it('should fail if GROQ_API_KEY does not start with gsk_', async () => {
+        const envConfig = plainToClass(EnvironmentVariables, {
+          POSTGRES_HOST: 'localhost',
+          POSTGRES_PORT: '5432',
+          POSTGRES_USER: 'user',
+          POSTGRES_PASSWORD: 'pass',
+          POSTGRES_DB: 'db',
+          JWT_SECRET: 'a'.repeat(32),
+          JWT_EXPIRES_IN: '1h',
+          GROQ_API_KEY: 'invalid-key',
+        });
 
-      expect(apiKeyError).toBeDefined();
-      expect(apiKeyError?.constraints).toHaveProperty('matches');
+        const errors = await validate(envConfig);
+        const apiKeyError = errors.find((e) => e.property === 'GROQ_API_KEY');
+
+        expect(apiKeyError).toBeDefined();
+        expect(apiKeyError?.constraints).toHaveProperty('matches');
+      });
+
+      it('should pass with valid Groq API key', async () => {
+        const envConfig = plainToClass(EnvironmentVariables, {
+          POSTGRES_HOST: 'localhost',
+          POSTGRES_PORT: '5432',
+          POSTGRES_USER: 'user',
+          POSTGRES_PASSWORD: 'pass',
+          POSTGRES_DB: 'db',
+          JWT_SECRET: 'a'.repeat(32),
+          JWT_EXPIRES_IN: '1h',
+          GROQ_API_KEY: 'gsk_1234567890abcdef',
+        });
+
+        const errors = await validate(envConfig);
+        const apiKeyError = errors.find((e) => e.property === 'GROQ_API_KEY');
+
+        expect(apiKeyError).toBeUndefined();
+      });
+
+      it('should use default GROQ_MODEL if not provided', () => {
+        const envConfig = plainToClass(EnvironmentVariables, {
+          POSTGRES_HOST: 'localhost',
+          POSTGRES_PORT: '5432',
+          POSTGRES_USER: 'user',
+          POSTGRES_PASSWORD: 'pass',
+          POSTGRES_DB: 'db',
+          JWT_SECRET: 'a'.repeat(32),
+          JWT_EXPIRES_IN: '1h',
+          GROQ_API_KEY: 'gsk_test',
+        });
+
+        expect(envConfig.GROQ_MODEL).toBe('llama-3.1-70b-versatile');
+      });
+
+      it('should accept custom GROQ_MODEL', () => {
+        const envConfig = plainToClass(EnvironmentVariables, {
+          POSTGRES_HOST: 'localhost',
+          POSTGRES_PORT: '5432',
+          POSTGRES_USER: 'user',
+          POSTGRES_PASSWORD: 'pass',
+          POSTGRES_DB: 'db',
+          JWT_SECRET: 'a'.repeat(32),
+          JWT_EXPIRES_IN: '1h',
+          GROQ_API_KEY: 'gsk_test',
+          GROQ_MODEL: 'llama-3.2-90b-text-preview',
+        });
+
+        expect(envConfig.GROQ_MODEL).toBe('llama-3.2-90b-text-preview');
+      });
     });
 
-    it('should fail if OPENAI_API_KEY is missing', async () => {
-      const envConfig = plainToClass(EnvironmentVariables, {
-        POSTGRES_HOST: 'localhost',
-        POSTGRES_PORT: '5432',
-        POSTGRES_USER: 'user',
-        POSTGRES_PASSWORD: 'pass',
-        POSTGRES_DB: 'db',
-        JWT_SECRET: 'a'.repeat(32),
-        JWT_EXPIRES_IN: '1h',
+    describe('DeepSeek (Optional Growth Provider)', () => {
+      it('should be optional', async () => {
+        const envConfig = plainToClass(EnvironmentVariables, {
+          POSTGRES_HOST: 'localhost',
+          POSTGRES_PORT: '5432',
+          POSTGRES_USER: 'user',
+          POSTGRES_PASSWORD: 'pass',
+          POSTGRES_DB: 'db',
+          JWT_SECRET: 'a'.repeat(32),
+          JWT_EXPIRES_IN: '1h',
+          GROQ_API_KEY: 'gsk_test',
+        });
+
+        const errors = await validate(envConfig);
+        const apiKeyError = errors.find(
+          (e) => e.property === 'DEEPSEEK_API_KEY',
+        );
+
+        expect(apiKeyError).toBeUndefined();
       });
 
-      const errors = await validate(envConfig);
-      const apiKeyError = errors.find((e) => e.property === 'OPENAI_API_KEY');
+      it('should accept valid DeepSeek API key', async () => {
+        const envConfig = plainToClass(EnvironmentVariables, {
+          POSTGRES_HOST: 'localhost',
+          POSTGRES_PORT: '5432',
+          POSTGRES_USER: 'user',
+          POSTGRES_PASSWORD: 'pass',
+          POSTGRES_DB: 'db',
+          JWT_SECRET: 'a'.repeat(32),
+          JWT_EXPIRES_IN: '1h',
+          GROQ_API_KEY: 'gsk_test',
+          DEEPSEEK_API_KEY: 'sk-deepseek-1234',
+        });
 
-      expect(apiKeyError).toBeDefined();
+        const errors = await validate(envConfig);
+        const apiKeyError = errors.find(
+          (e) => e.property === 'DEEPSEEK_API_KEY',
+        );
+
+        expect(apiKeyError).toBeUndefined();
+      });
+
+      it('should use default DEEPSEEK_MODEL if not provided', () => {
+        const envConfig = plainToClass(EnvironmentVariables, {
+          POSTGRES_HOST: 'localhost',
+          POSTGRES_PORT: '5432',
+          POSTGRES_USER: 'user',
+          POSTGRES_PASSWORD: 'pass',
+          POSTGRES_DB: 'db',
+          JWT_SECRET: 'a'.repeat(32),
+          JWT_EXPIRES_IN: '1h',
+          GROQ_API_KEY: 'gsk_test',
+          DEEPSEEK_API_KEY: 'sk-deepseek-1234',
+        });
+
+        expect(envConfig.DEEPSEEK_MODEL).toBe('deepseek-chat');
+      });
     });
 
-    it('should pass with valid OpenAI API key', async () => {
-      const envConfig = plainToClass(EnvironmentVariables, {
-        POSTGRES_HOST: 'localhost',
-        POSTGRES_PORT: '5432',
-        POSTGRES_USER: 'user',
-        POSTGRES_PASSWORD: 'pass',
-        POSTGRES_DB: 'db',
-        JWT_SECRET: 'a'.repeat(32),
-        JWT_EXPIRES_IN: '1h',
-        OPENAI_API_KEY: 'sk-1234567890abcdef',
+    describe('OpenAI (Optional Fallback Provider)', () => {
+      it('should be optional', async () => {
+        const envConfig = plainToClass(EnvironmentVariables, {
+          POSTGRES_HOST: 'localhost',
+          POSTGRES_PORT: '5432',
+          POSTGRES_USER: 'user',
+          POSTGRES_PASSWORD: 'pass',
+          POSTGRES_DB: 'db',
+          JWT_SECRET: 'a'.repeat(32),
+          JWT_EXPIRES_IN: '1h',
+          GROQ_API_KEY: 'gsk_test',
+        });
+
+        const errors = await validate(envConfig);
+        const apiKeyError = errors.find((e) => e.property === 'OPENAI_API_KEY');
+
+        expect(apiKeyError).toBeUndefined();
       });
 
-      const errors = await validate(envConfig);
-      const apiKeyError = errors.find((e) => e.property === 'OPENAI_API_KEY');
+      it('should fail if OPENAI_API_KEY does not start with sk- when provided', async () => {
+        const envConfig = plainToClass(EnvironmentVariables, {
+          POSTGRES_HOST: 'localhost',
+          POSTGRES_PORT: '5432',
+          POSTGRES_USER: 'user',
+          POSTGRES_PASSWORD: 'pass',
+          POSTGRES_DB: 'db',
+          JWT_SECRET: 'a'.repeat(32),
+          JWT_EXPIRES_IN: '1h',
+          GROQ_API_KEY: 'gsk_test',
+          OPENAI_API_KEY: 'invalid-key',
+        });
 
-      expect(apiKeyError).toBeUndefined();
+        const errors = await validate(envConfig);
+        const apiKeyError = errors.find((e) => e.property === 'OPENAI_API_KEY');
+
+        expect(apiKeyError).toBeDefined();
+        expect(apiKeyError?.constraints).toHaveProperty('matches');
+      });
+
+      it('should pass with valid OpenAI API key', async () => {
+        const envConfig = plainToClass(EnvironmentVariables, {
+          POSTGRES_HOST: 'localhost',
+          POSTGRES_PORT: '5432',
+          POSTGRES_USER: 'user',
+          POSTGRES_PASSWORD: 'pass',
+          POSTGRES_DB: 'db',
+          JWT_SECRET: 'a'.repeat(32),
+          JWT_EXPIRES_IN: '1h',
+          GROQ_API_KEY: 'gsk_test',
+          OPENAI_API_KEY: 'sk-1234567890abcdef',
+        });
+
+        const errors = await validate(envConfig);
+        const apiKeyError = errors.find((e) => e.property === 'OPENAI_API_KEY');
+
+        expect(apiKeyError).toBeUndefined();
+      });
+
+      it('should use default OPENAI_MODEL if not provided', () => {
+        const envConfig = plainToClass(EnvironmentVariables, {
+          POSTGRES_HOST: 'localhost',
+          POSTGRES_PORT: '5432',
+          POSTGRES_USER: 'user',
+          POSTGRES_PASSWORD: 'pass',
+          POSTGRES_DB: 'db',
+          JWT_SECRET: 'a'.repeat(32),
+          JWT_EXPIRES_IN: '1h',
+          GROQ_API_KEY: 'gsk_test',
+          OPENAI_API_KEY: 'sk-test',
+        });
+
+        expect(envConfig.OPENAI_MODEL).toBe('gpt-4o-mini');
+      });
     });
   });
 
@@ -252,7 +419,7 @@ describe('EnvironmentVariables', () => {
         POSTGRES_DB: 'db',
         JWT_SECRET: 'a'.repeat(32),
         JWT_EXPIRES_IN: '1h',
-        OPENAI_API_KEY: 'sk-test',
+        GROQ_API_KEY: 'gsk_test',
       });
 
       expect(envConfig.NODE_ENV).toBe('development');
@@ -267,7 +434,7 @@ describe('EnvironmentVariables', () => {
         POSTGRES_DB: 'db',
         JWT_SECRET: 'a'.repeat(32),
         JWT_EXPIRES_IN: '1h',
-        OPENAI_API_KEY: 'sk-test',
+        GROQ_API_KEY: 'gsk_test',
         NODE_ENV: '',
       });
 
@@ -283,7 +450,7 @@ describe('EnvironmentVariables', () => {
         POSTGRES_DB: 'db',
         JWT_SECRET: 'a'.repeat(32),
         JWT_EXPIRES_IN: '1h',
-        OPENAI_API_KEY: 'sk-test',
+        GROQ_API_KEY: 'gsk_test',
       });
 
       expect(envConfig.PORT).toBe(3000);
@@ -298,7 +465,7 @@ describe('EnvironmentVariables', () => {
         POSTGRES_DB: 'db',
         JWT_SECRET: 'a'.repeat(32),
         JWT_EXPIRES_IN: '1h',
-        OPENAI_API_KEY: 'sk-test',
+        GROQ_API_KEY: 'gsk_test',
         PORT: '8080',
       });
 
@@ -314,7 +481,7 @@ describe('EnvironmentVariables', () => {
         POSTGRES_DB: 'db',
         JWT_SECRET: 'a'.repeat(32),
         JWT_EXPIRES_IN: '1h',
-        OPENAI_API_KEY: 'sk-test',
+        GROQ_API_KEY: 'gsk_test',
         NODE_ENV: 'invalid',
       });
 
@@ -335,7 +502,7 @@ describe('EnvironmentVariables', () => {
         POSTGRES_DB: 'db',
         JWT_SECRET: 'a'.repeat(32),
         JWT_EXPIRES_IN: '1h',
-        OPENAI_API_KEY: 'sk-test',
+        GROQ_API_KEY: 'gsk_test',
         CORS_ORIGINS: 'http://localhost:3000,https://app.example.com',
       });
 
@@ -354,7 +521,7 @@ describe('EnvironmentVariables', () => {
         POSTGRES_DB: 'db',
         JWT_SECRET: 'a'.repeat(32),
         JWT_EXPIRES_IN: '1h',
-        OPENAI_API_KEY: 'sk-test',
+        GROQ_API_KEY: 'gsk_test',
       });
 
       expect(envConfig.CORS_ORIGINS).toBe('http://localhost:3000');
@@ -369,7 +536,7 @@ describe('EnvironmentVariables', () => {
         POSTGRES_DB: 'db',
         JWT_SECRET: 'a'.repeat(32),
         JWT_EXPIRES_IN: '1h',
-        OPENAI_API_KEY: 'sk-test',
+        GROQ_API_KEY: 'gsk_test',
         CORS_ORIGINS: '',
       });
 
@@ -387,7 +554,7 @@ describe('EnvironmentVariables', () => {
         POSTGRES_DB: 'db',
         JWT_SECRET: 'a'.repeat(32),
         JWT_EXPIRES_IN: '1h',
-        OPENAI_API_KEY: 'sk-test',
+        GROQ_API_KEY: 'gsk_test',
       });
 
       expect(envConfig.RATE_LIMIT_TTL).toBe(60);
@@ -402,7 +569,7 @@ describe('EnvironmentVariables', () => {
         POSTGRES_DB: 'db',
         JWT_SECRET: 'a'.repeat(32),
         JWT_EXPIRES_IN: '1h',
-        OPENAI_API_KEY: 'sk-test',
+        GROQ_API_KEY: 'gsk_test',
       });
 
       expect(envConfig.RATE_LIMIT_MAX).toBe(100);
@@ -417,7 +584,7 @@ describe('EnvironmentVariables', () => {
         POSTGRES_DB: 'db',
         JWT_SECRET: 'a'.repeat(32),
         JWT_EXPIRES_IN: '1h',
-        OPENAI_API_KEY: 'sk-test',
+        GROQ_API_KEY: 'gsk_test',
         RATE_LIMIT_TTL: '120',
         RATE_LIMIT_MAX: '200',
       });

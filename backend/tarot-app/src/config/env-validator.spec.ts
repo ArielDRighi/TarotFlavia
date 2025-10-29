@@ -11,7 +11,7 @@ describe('env-validator', () => {
       POSTGRES_DB: 'database',
       JWT_SECRET: 'a'.repeat(32),
       JWT_EXPIRES_IN: '1h',
-      OPENAI_API_KEY: 'sk-test123',
+      GROQ_API_KEY: 'gsk_test123',
     };
 
     expect(() => validate(config)).not.toThrow();
@@ -26,7 +26,7 @@ describe('env-validator', () => {
       POSTGRES_DB: 'database',
       JWT_SECRET: 'short', // Too short
       JWT_EXPIRES_IN: '1h',
-      OPENAI_API_KEY: 'invalid', // Wrong format
+      GROQ_API_KEY: 'invalid', // Wrong format
     };
 
     expect(() => validate(config)).toThrow(
@@ -34,7 +34,7 @@ describe('env-validator', () => {
     );
     expect(() => validate(config)).toThrow('POSTGRES_PASSWORD');
     expect(() => validate(config)).toThrow('JWT_SECRET');
-    expect(() => validate(config)).toThrow('OPENAI_API_KEY');
+    expect(() => validate(config)).toThrow('GROQ_API_KEY');
   });
 
   it('should apply default values for optional variables', () => {
@@ -46,7 +46,7 @@ describe('env-validator', () => {
       POSTGRES_DB: 'database',
       JWT_SECRET: 'a'.repeat(32),
       JWT_EXPIRES_IN: '1h',
-      OPENAI_API_KEY: 'sk-test',
+      GROQ_API_KEY: 'gsk_test',
     };
 
     const result = validate(config);
@@ -56,6 +56,7 @@ describe('env-validator', () => {
     expect(result.CORS_ORIGINS).toBe('http://localhost:3000');
     expect(result.RATE_LIMIT_TTL).toBe(60);
     expect(result.RATE_LIMIT_MAX).toBe(100);
+    expect(result.GROQ_MODEL).toBe('llama-3.1-70b-versatile');
   });
 
   it('should preserve custom values for optional variables', () => {
@@ -67,12 +68,13 @@ describe('env-validator', () => {
       POSTGRES_DB: 'database',
       JWT_SECRET: 'a'.repeat(32),
       JWT_EXPIRES_IN: '1h',
-      OPENAI_API_KEY: 'sk-test',
+      GROQ_API_KEY: 'gsk_test',
       NODE_ENV: 'production',
       PORT: '8080',
       CORS_ORIGINS: 'https://example.com',
       RATE_LIMIT_TTL: '120',
       RATE_LIMIT_MAX: '200',
+      GROQ_MODEL: 'llama-3.2-90b-text-preview',
     };
 
     const result = validate(config);
@@ -82,6 +84,7 @@ describe('env-validator', () => {
     expect(result.CORS_ORIGINS).toBe('https://example.com');
     expect(result.RATE_LIMIT_TTL).toBe(120);
     expect(result.RATE_LIMIT_MAX).toBe(200);
+    expect(result.GROQ_MODEL).toBe('llama-3.2-90b-text-preview');
   });
 
   it('should include helpful error message in exception', () => {

@@ -12,6 +12,7 @@ import { SpreadsModule } from './modules/tarot/spreads/spreads.module';
 import { ReadingsModule } from './modules/tarot/readings/readings.module';
 import { InterpretationsModule } from './modules/tarot/interpretations/interpretations.module';
 import { CategoriesModule } from './modules/categories/categories.module';
+import { HealthModule } from './modules/health/health.module';
 import databaseConfig from './config/typeorm';
 import { validate } from './config/env-validator';
 
@@ -46,6 +47,7 @@ import { validate } from './config/env-validator';
     InterpretationsModule,
     CategoriesModule,
     TarotModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
