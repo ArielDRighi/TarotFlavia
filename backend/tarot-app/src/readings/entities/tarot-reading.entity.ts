@@ -36,9 +36,10 @@ export class TarotReading {
   @ApiProperty({
     description: 'Categoría de la lectura',
     type: () => ReadingCategory,
+    required: false,
   })
   @ManyToOne(() => ReadingCategory, { nullable: true })
-  category: ReadingCategory;
+  category: ReadingCategory | null;
 
   @ApiProperty({
     type: [TarotCard],

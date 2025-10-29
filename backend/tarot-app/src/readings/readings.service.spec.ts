@@ -81,6 +81,7 @@ describe('ReadingsService', () => {
     user: mockUser,
     deck: mockDeck,
     cards: mockCards,
+    category: null,
     cardPositions: [
       { cardId: 1, position: 'past', isReversed: false },
       { cardId: 2, position: 'present', isReversed: true },
