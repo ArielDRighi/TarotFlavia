@@ -6,7 +6,7 @@ import {
   ApiBearerAuth,
   ApiBody,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { InterpretationsService } from './interpretations.service';
 import { GenerateInterpretationDto } from './dto/generate-interpretation.dto';
 

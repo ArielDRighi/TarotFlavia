@@ -1,5 +1,5 @@
 import { DataSource, Repository } from 'typeorm';
-import { TarotSpread } from '../../spreads/entities/tarot-spread.entity';
+import { TarotSpread } from '../../modules/tarot/spreads/entities/tarot-spread.entity';
 import { seedTarotSpreads } from './tarot-spreads.seeder';
 
 interface SpreadData {
