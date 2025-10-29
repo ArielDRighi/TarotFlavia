@@ -53,6 +53,32 @@ export class TarotSpread {
   @Column({ nullable: true })
   imageUrl: string;
 
+  @ApiProperty({
+    example: 'beginner',
+    description: 'Nivel de dificultad de la tirada',
+    enum: ['beginner', 'intermediate', 'advanced'],
+  })
+  @Column({
+    type: 'varchar',
+    default: 'beginner',
+  })
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
+
+  @ApiProperty({
+    example: true,
+    description: 'Indica si esta tirada es amigable para principiantes',
+  })
+  @Column({ default: true })
+  isBeginnerFriendly: boolean;
+
+  @ApiProperty({
+    example:
+      'Respuestas rápidas, orientación diaria, consejo sobre una decisión simple',
+    description: 'Describe cuándo es apropiado usar esta tirada',
+  })
+  @Column('text')
+  whenToUse: string;
+
   @CreateDateColumn()
   createdAt: Date;
 
