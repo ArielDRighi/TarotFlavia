@@ -56,7 +56,7 @@ describe('env-validator', () => {
     expect(result.CORS_ORIGINS).toBe('http://localhost:3000');
     expect(result.RATE_LIMIT_TTL).toBe(60);
     expect(result.RATE_LIMIT_MAX).toBe(100);
-    expect(result.GROQ_MODEL).toBe('llama-3.1-70b-versatile');
+    expect(result.GROQ_MODEL).toBe('llama-3.3-70b-versatile');
   });
 
   it('should preserve custom values for optional variables', () => {
