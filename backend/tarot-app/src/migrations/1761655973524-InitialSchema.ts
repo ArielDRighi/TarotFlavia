@@ -71,6 +71,9 @@ export class InitialSchema1761655973524 implements MigrationInterface {
       `ALTER TABLE "tarot_reading" DROP CONSTRAINT "FK_tarot_reading_category"`,
     );
     await queryRunner.query(
+      `ALTER TABLE "tarot_reading" DROP COLUMN "categoryId"`,
+    );
+    await queryRunner.query(
       `ALTER TABLE "tarot_reading" DROP CONSTRAINT "FK_906c9f21a4276fc08a570bee56e"`,
     );
     await queryRunner.query(
