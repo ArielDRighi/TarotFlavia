@@ -14,7 +14,7 @@ This application supports multiple AI providers with a cost-optimized strategy:
 
 **Use:** Groq exclusively  
 **Cost:** $0/month  
-**Reason:** Free tier covers all needs, excellent quality with Llama 3.1 70B
+**Reason:** Free tier covers all needs, excellent quality with Llama 3.3 70B
 
 ### Growth Stage (100-1,000 users)
 
@@ -79,7 +79,7 @@ This application supports multiple AI providers with a cost-optimized strategy:
 ```bash
 # Groq Configuration (Primary Provider - FREE)
 GROQ_API_KEY=gsk_your_api_key_here
-GROQ_MODEL=llama-3.1-70b-versatile  # Default, can be changed
+GROQ_MODEL=llama-3.3-70b-versatile  # Default, can be changed
 ```
 
 ### Optional (DeepSeek)
@@ -133,7 +133,7 @@ OPENAI_MODEL=gpt-4o-mini  # Default for cost efficiency
 ```bash
 # .env
 GROQ_API_KEY=gsk_xxx  # Only Groq needed
-GROQ_MODEL=llama-3.1-70b-versatile
+GROQ_MODEL=llama-3.3-70b-versatile
 ```
 
 **Action:** None needed, stay on free tier
@@ -143,7 +143,7 @@ GROQ_MODEL=llama-3.1-70b-versatile
 ```bash
 # .env
 GROQ_API_KEY=gsk_xxx  # Keep as fallback
-GROQ_MODEL=llama-3.1-70b-versatile
+GROQ_MODEL=llama-3.3-70b-versatile
 
 DEEPSEEK_API_KEY=sk_xxx  # Add DeepSeek
 DEEPSEEK_MODEL=deepseek-chat
@@ -190,7 +190,7 @@ curl http://localhost:3000/health/ai
     "provider": "groq",
     "configured": true,
     "status": "ok",
-    "model": "llama-3.1-70b-versatile",
+    "model": "llama-3.3-70b-versatile",
     "responseTime": 150,
     "rateLimits": {
       "remaining": 14350,

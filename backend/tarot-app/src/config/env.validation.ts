@@ -70,10 +70,9 @@ export class EnvironmentVariables {
   })
   GROQ_API_KEY: string;
 
-  @IsString()
   @IsOptional()
-  @Transform(({ value }) => (value ? String(value) : 'llama-3.1-70b-versatile'))
-  GROQ_MODEL: string = 'llama-3.1-70b-versatile';
+  @IsString()
+  GROQ_MODEL: string = 'llama-3.3-70b-versatile';
 
   // DeepSeek (Growth - Low Cost)
   @IsString()
