@@ -1,13 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
-import { AppModule } from './app.module';
-import { TarotDeck } from './decks/entities/tarot-deck.entity';
-import { TarotCard } from './cards/entities/tarot-card.entity';
-import { seedTarotDecks } from './database/seeds/tarot-decks.seeder';
-import { seedTarotCards } from './database/seeds/tarot-cards.seeder';
-import { seedTarotSpreads } from './database/seeds/tarot-spreads.seeder';
-import { seedReadingCategories } from './database/seeds/reading-categories.seed';
+import { AppModule } from '../../app.module';
+import { TarotDeck } from '../../modules/tarot/decks/entities/tarot-deck.entity';
+import { TarotCard } from '../../modules/tarot/cards/entities/tarot-card.entity';
+import { seedTarotDecks } from './tarot-decks.seeder';
+import { seedTarotCards } from './tarot-cards.seeder';
+import { seedTarotSpreads } from './tarot-spreads.seeder';
+import { seedReadingCategories } from './reading-categories.seed';
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppModule);

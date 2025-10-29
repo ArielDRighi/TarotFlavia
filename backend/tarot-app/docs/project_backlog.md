@@ -388,6 +388,7 @@ src/
 Reorganizar la estructura del proyecto backend para seguir las mejores prácticas de NestJS con arquitectura modular escalable. La estructura actual tiene los módulos en la raíz de `src/`, pero para mejor escalabilidad y organización, deberían estar bajo `src/modules/`.
 
 **Estructura Actual:**
+
 ```
 src/
 ├── auth/
@@ -406,6 +407,7 @@ src/
 ```
 
 **Estructura Objetivo (Best Practices):**
+
 ```
 src/
 ├── modules/
@@ -437,6 +439,7 @@ src/
 #### ✅ Ejecución (AUTOMATIZADA)
 
 **Opción 1: Script Automático (RECOMENDADO)**
+
 ```bash
 # Windows PowerShell (tu caso)
 cd backend/tarot-app
@@ -451,6 +454,7 @@ chmod +x scripts/restructure.sh
 **Opción 2: Manual (si script falla)**
 
 1. **Crear estructura de carpetas:**
+
    ```bash
    mkdir -p src/modules/tarot
    mkdir -p src/common/{decorators,filters,guards,interceptors,pipes,utils}
@@ -458,21 +462,22 @@ chmod +x scripts/restructure.sh
    ```
 
 2. **Mover módulos:**
+
    ```bash
    # Auth y Users
    mv src/auth src/modules/
    mv src/users src/modules/
-   
+
    # Tarot (todos bajo modules/tarot/)
    mv src/cards src/modules/tarot/
    mv src/decks src/modules/tarot/
    mv src/readings src/modules/tarot/
    mv src/interpretations src/modules/tarot/
    mv src/spreads src/modules/tarot/
-   
+
    # Categories
    mv src/categories src/modules/
-   
+
    # Migrations
    mv src/migrations/* src/database/migrations/
    ```
@@ -487,6 +492,7 @@ chmod +x scripts/restructure.sh
 #### ✅ Validación (CRÍTICO)
 
 **Después de ejecutar el script:**
+
 ```bash
 # 1. Compilar
 npm run build
@@ -504,15 +510,17 @@ npm run start:dev
 #### ✅ Fixes Comunes Post-Refactor
 
 **Si TypeORM no encuentra entities:**
+
 ```typescript
 // src/config/typeorm.ts
 entities: [
   __dirname + '/../modules/**/*.entity{.ts,.js}',
-  __dirname + '/../**/*.entity{.ts,.js}'
-]
+  __dirname + '/../**/*.entity{.ts,.js}',
+];
 ```
 
 **Si hay imports rotos en app.module.ts:**
+
 ```typescript
 // Antes
 import { AuthModule } from './auth/auth.module';
@@ -521,9 +529,10 @@ import { AuthModule } from './modules/auth/auth.module';
 ```
 
 **Si migrations no se encuentran:**
+
 ```typescript
 // src/config/typeorm.ts
-migrations: [__dirname + '/../database/migrations/*{.ts,.js}']
+migrations: [__dirname + '/../database/migrations/*{.ts,.js}'];
 ```
 
 #### 🎯 Criterios de aceptación
@@ -662,12 +671,12 @@ Configurar la API Key de OpenAI en las variables de entorno y crear un mecanismo
 #### 🧪 Testing (CRÍTICO)
 
 **Tests necesarios:**
+
 - [ ] **Tests unitarios:**
   - `OpenAIHealthService` detecta API key válida
   - `OpenAIHealthService` detecta API key inválida
   - Timeout de 30s se respeta
   - Manejo correcto de errores 401, 429, 500
-  
 - [ ] **Tests E2E (OBLIGATORIOS):**
   - GET `/health/openai` con key válida → 200 + `status: 'ok'`
   - Aplicación arranca correctamente con OpenAI configurado
@@ -1039,6 +1048,7 @@ Crear seeder con las 6 categorías predefinidas incluyendo iconos (emoji o refer
 #### 🧪 Testing
 
 **Tests necesarios:**
+
 - [ ] **Tests unitarios:**
   - Seeder inserta exactamente 6 categorías
   - Idempotencia: no duplica en múltiples ejecuciones
@@ -1083,12 +1093,12 @@ Crear la entidad `PredefinedQuestion` y su módulo completo para gestionar pregu
 #### 🧪 Testing
 
 **Tests necesarios:**
+
 - [ ] **Tests unitarios:**
   - CRUD completo funciona correctamente
   - Filtrado por `category_id`
   - Solo preguntas activas en endpoint público
   - Soft-delete no elimina físicamente
-  
 - [ ] **Tests E2E:**
   - GET `/predefined-questions?categoryId=1` retorna solo de esa categoría
   - Admin puede crear/editar preguntas → 201
@@ -1135,6 +1145,7 @@ Crear seeders con al menos 5-8 preguntas bien formuladas para cada una de las 6 
 #### 🧪 Testing
 
 **Tests necesarios:**
+
 - [ ] **Tests unitarios:**
   - Seeder inserta mínimo 30 preguntas (5×6 categorías)
   - Preguntas asociadas a categorías correctas
@@ -1188,11 +1199,11 @@ Modificar la entidad `User` para incluir sistema completo de planes (free/premiu
 #### 🧪 Testing
 
 **Tests necesarios:**
+
 - [ ] **Tests unitarios:**
   - `isPremium()` retorna true para usuario premium activo
   - `isPremium()` retorna false para usuario free
   - `hasPlanExpired()` detecta planes vencidos
-  
 - [ ] **Tests de integración:**
   - Migración agrega todos los campos correctamente
   - JWT incluye información de plan
@@ -1237,17 +1248,16 @@ Crear sistema completo de tracking de límites de uso para usuarios free (lectur
 #### 🧪 Testing
 
 **Tests necesarios:**
+
 - [ ] **Tests unitarios:**
   - `checkLimit()` retorna true cuando hay límite disponible
   - `checkLimit()` retorna false cuando límite excedido
   - `incrementUsage()` incrementa correctamente
   - Usuario premium tiene límites ilimitados (-1)
-  
 - [ ] **Tests de integración:**
   - Límites se resetean a medianoche (mock time)
   - Índice compuesto previene duplicados
   - Cron limpia registros antiguos
-  
 - [ ] **Tests E2E:**
   - Usuario FREE hace 3 lecturas → 4ta rechazada
   - Usuario PREMIUM puede hacer lecturas ilimitadas
@@ -1298,16 +1308,15 @@ Adaptar el flujo de creación de lecturas para que usuarios free solo puedan usa
 #### 🧪 Testing (CRÍTICO - Diferenciador del negocio)
 
 **Tests necesarios:**
+
 - [ ] **Tests unitarios:**
   - DTO valida pregunta predefinida para free
   - DTO acepta pregunta custom para premium
   - Guard rechaza custom para free
-  
 - [ ] **Tests de integración:**
   - Lectura con `predefined_question_id`
   - Lectura con `custom_question` (premium)
   - Error claro para free con custom
-  
 - [ ] **Tests E2E (OBLIGATORIOS):**
   - Usuario FREE crea lectura con pregunta predefinida → 201
   - Usuario FREE rechazado con pregunta custom → 403
@@ -1579,6 +1588,7 @@ Crear sistema robusto de logging que trackee todas las llamadas a OpenAI para mo
 #### 🧪 Testing
 
 **Tests necesarios:**
+
 - [ ] Tests unitarios: Logging se crea con todos los campos
 - [ ] Tests unitarios: Costo calculado correctamente
 - [ ] Tests de integración: Llamada a OpenAI registra log
@@ -1636,30 +1646,30 @@ Implementar suite completa de tests End-to-End (E2E) que cubran todos los flujos
 ```typescript
 // test/mvp-complete.e2e-spec.ts
 describe('MVP Complete Flow E2E', () => {
-  
+
   // 1. Authentication Flow
   it('✅ Usuario puede registrarse', async () => { ... });
   it('✅ Usuario puede hacer login y recibir JWT', async () => { ... });
-  
+
   // 2. Categories & Questions
   it('✅ Lista 6 categorías correctamente', async () => { ... });
   it('✅ Lista preguntas predefinidas por categoría', async () => { ... });
-  
+
   // 3. Reading Creation (FREE user)
   it('✅ Usuario FREE crea lectura con pregunta predefinida', async () => { ... });
   it('✅ Usuario FREE rechazado con pregunta custom', async () => { ... });
   it('✅ Usuario FREE bloqueado después de 3 lecturas/día', async () => { ... });
-  
+
   // 4. Reading Creation (PREMIUM user)
   it('✅ Usuario PREMIUM crea lectura con pregunta custom', async () => { ... });
   it('✅ Usuario PREMIUM tiene lecturas ilimitadas', async () => { ... });
-  
+
   // 5. AI Interpretation
   it('✅ Interpretación con IA se genera correctamente', async () => { ... });
-  
+
   // 6. Reading History
   it('✅ Usuario puede ver su historial de lecturas', async () => { ... });
-  
+
   // 7. Security & Rate Limiting
   it('✅ Rate limiting protege endpoints', async () => { ... });
 });
@@ -1671,48 +1681,39 @@ describe('MVP Complete Flow E2E', () => {
   - Test database separada (PostgreSQL en Docker)
   - Seeders automáticos antes de cada suite
   - Cleanup automático después de tests
-  
 - [ ] **Crear archivo `test/mvp-complete.e2e-spec.ts`:**
   - 12 tests críticos obligatorios
   - Setup y teardown apropiados
   - Helpers para crear usuarios test
-  
 - [ ] **Tests de Autenticación:**
   - Register con validaciones
   - Login exitoso con JWT
   - Login fallido con credenciales incorrectas
   - JWT en headers funciona
-  
 - [ ] **Tests de Categorías y Preguntas:**
   - GET /categories retorna 6 categorías
   - GET /predefined-questions?categoryId=X funciona
   - Estructura de datos correcta
-  
 - [ ] **Tests de Sistema Híbrido (FREE vs PREMIUM):**
   - FREE: POST /readings con predefinedQuestionId → 201
   - FREE: POST /readings con customQuestion → 403
   - PREMIUM: POST /readings con customQuestion → 201
   - PREMIUM: POST /readings con predefinedQuestionId → 201
-  
 - [ ] **Tests de Límites de Uso:**
   - FREE puede hacer 3 lecturas
   - 4ta lectura FREE → 429 (Too Many Requests)
   - PREMIUM puede hacer >10 lecturas sin límite
-  
 - [ ] **Tests de Interpretación IA:**
   - Interpretación se genera (<15s timeout)
   - Campo `interpretation` presente y no vacío
   - Tokens usados registrados
-  
 - [ ] **Tests de Historial:**
   - GET /readings retorna lecturas del usuario
   - Paginación funciona
   - Solo lecturas propias (no de otros usuarios)
-  
 - [ ] **Tests de Rate Limiting:**
   - 101 requests rápidos → algunos 429
   - Headers X-RateLimit presentes
-  
 - [ ] **Tests de OpenAI Health:**
   - GET /health/openai retorna status
   - Endpoint funciona sin auth
@@ -1730,6 +1731,7 @@ describe('MVP Complete Flow E2E', () => {
 #### 📝 Notas de implementación
 
 **Scripts de package.json:**
+
 ```json
 {
   "test:e2e": "jest --config ./test/jest-e2e.json",
@@ -1740,6 +1742,7 @@ describe('MVP Complete Flow E2E', () => {
 ```
 
 **Configuración de CI/CD:**
+
 ```yaml
 # .github/workflows/e2e-tests.yml
 - name: Run E2E Tests

@@ -18,7 +18,7 @@ import {
   ApiBearerAuth,
   ApiParam,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { SpreadsService } from './spreads.service';
 import { CreateSpreadDto } from './dto/create-spread.dto';
 import { UpdateSpreadDto } from './dto/update-spread.dto';

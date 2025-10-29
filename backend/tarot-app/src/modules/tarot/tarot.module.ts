@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { CardsModule } from '../cards/cards.module';
-import { DecksModule } from '../decks/decks.module';
-import { SpreadsModule } from '../spreads/spreads.module';
-import { ReadingsModule } from '../readings/readings.module';
-import { InterpretationsModule } from '../interpretations/interpretations.module';
+import { CardsModule } from './cards/cards.module';
+import { DecksModule } from './decks/decks.module';
+import { SpreadsModule } from './spreads/spreads.module';
+import { ReadingsModule } from './readings/readings.module';
+import { InterpretationsModule } from './interpretations/interpretations.module';
 
 /**
  * TarotModule - Módulo orquestador que agrupa todos los submódulos del sistema de tarot

@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { TarotCard } from '../../cards/entities/tarot-card.entity';
-import { TarotDeck } from '../../decks/entities/tarot-deck.entity';
+import { TarotCard } from '../../modules/tarot/cards/entities/tarot-card.entity';
+import { TarotDeck } from '../../modules/tarot/decks/entities/tarot-deck.entity';
 import { seedTarotCards } from './tarot-cards.seeder';
 
 describe('TarotCards Seeder', () => {

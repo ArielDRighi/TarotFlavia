@@ -16,10 +16,10 @@ import {
   ApiParam,
   ApiBody,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { ReadingsService } from './readings.service';
 import { CreateReadingDto } from './dto/create-reading.dto';
-import { User } from '../users/entities/user.entity';
+import { User } from '../../users/entities/user.entity';
 
 @ApiTags('Lecturas de Tarot')
 @Controller('readings')

@@ -1,5 +1,5 @@
 import { Repository } from 'typeorm';
-import { TarotDeck } from '../../decks/entities/tarot-deck.entity';
+import { TarotDeck } from '../../modules/tarot/decks/entities/tarot-deck.entity';
 import { ALL_TAROT_DECKS } from './data/tarot-decks.data';
 
 /**

@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ReadingsService } from './readings.service';
 import { TarotReading } from './entities/tarot-reading.entity';
-import { User } from '../users/entities/user.entity';
+import { User } from '../../users/entities/user.entity';
 import { TarotDeck } from '../decks/entities/tarot-deck.entity';
 import { TarotCard } from '../cards/entities/tarot-card.entity';
 import { NotFoundException, ForbiddenException } from '@nestjs/common';

@@ -1,5 +1,5 @@
 import { DataSource } from 'typeorm';
-import { ReadingCategory } from '../../categories/entities/reading-category.entity';
+import { ReadingCategory } from '../../modules/categories/entities/reading-category.entity';
 
 export async function seedReadingCategories(
   dataSource: DataSource,

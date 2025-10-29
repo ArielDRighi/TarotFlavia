@@ -1,5 +1,5 @@
 import { DataSource } from 'typeorm';
-import { TarotSpread } from '../../spreads/entities/tarot-spread.entity';
+import { TarotSpread } from '../../modules/tarot/spreads/entities/tarot-spread.entity';
 import { TAROT_SPREADS_DATA } from './data/tarot-spreads.data';
 
 export async function seedTarotSpreads(dataSource: DataSource): Promise<void> {

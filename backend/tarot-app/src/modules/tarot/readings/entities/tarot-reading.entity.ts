@@ -9,10 +9,10 @@ import {
   DeleteDateColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from '../../users/entities/user.entity';
+import { User } from '../../../users/entities/user.entity';
 import { TarotCard } from '../../cards/entities/tarot-card.entity';
 import { TarotDeck } from '../../decks/entities/tarot-deck.entity';
-import { ReadingCategory } from '../../categories/entities/reading-category.entity';
+import { ReadingCategory } from '../../../categories/entities/reading-category.entity';
 
 @Entity()
 export class TarotReading {

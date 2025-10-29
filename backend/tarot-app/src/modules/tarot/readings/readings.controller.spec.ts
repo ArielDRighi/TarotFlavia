@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ReadingsController } from './readings.controller';
 import { ReadingsService } from './readings.service';
 import { CreateReadingDto } from './dto/create-reading.dto';
-import { User } from '../users/entities/user.entity';
+import { User } from '../../users/entities/user.entity';
 import { TarotReading } from './entities/tarot-reading.entity';
 
 describe('ReadingsController', () => {

@@ -6,7 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { TarotReading } from './entities/tarot-reading.entity';
-import { User } from '../users/entities/user.entity';
+import { User } from '../../users/entities/user.entity';
 import { TarotDeck } from '../decks/entities/tarot-deck.entity';
 import { CreateReadingDto } from './dto/create-reading.dto';
 
