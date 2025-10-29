@@ -735,11 +735,15 @@ La IA recibirá: "En la posición PASADO salió la carta X, en PRESENTE la Y, en
 
 ---
 
-### **TASK-007: Implementar Entidad y Módulo de Categorías de Lectura**
+### **TASK-007: Implementar Entidad y Módulo de Categorías de Lectura** ✅
 
 **Prioridad:** 🔴 CRÍTICA  
 **Estimación:** 2 días  
-**Dependencias:** TASK-002
+**Dependencias:** TASK-002  
+**Estado:** ✅ COMPLETADO  
+**Branch:** `feature/TASK-007-reading-categories`  
+**Inicio:** 29 de Octubre 2025  
+**Finalización:** 29 de Octubre 2025
 
 #### 📋 Descripción
 
@@ -747,19 +751,44 @@ Crear la entidad `ReadingCategory` con sus 6 categorías principales (Amor, Trab
 
 #### ✅ Tareas específicas
 
-- [ ] Crear entidad `ReadingCategory` con campos:
-  - `id`, `name`, `slug`, `description`, `icon`, `color`, `order`
-- [ ] Crear módulo `CategoriesModule` con su controlador y servicio
-- [ ] Implementar endpoints CRUD básicos: `GET`, `POST`, `PUT`, `DELETE`
-- [ ] Crear DTOs:
+- ✅ Crear entidad `ReadingCategory` con campos:
+  - `id`, `name`, `slug`, `description`, `icon`, `color`, `order`, `isActive`
+- ✅ Crear módulo `CategoriesModule` con su controlador y servicio
+- ✅ Implementar endpoints CRUD básicos: `GET`, `POST`, `PUT`, `DELETE`
+- ✅ Crear DTOs:
   - `CreateCategoryDto` con validaciones
   - `UpdateCategoryDto` con validaciones
-- [ ] Implementar endpoint `GET /categories` que retorne todas las categorías ordenadas
-- [ ] Agregar campo `is_active` para habilitar/deshabilitar categorías sin eliminarlas
-- [ ] Implementar validación de unicidad en `slug`
-- [ ] Crear guards que solo permitan a admins crear/modificar categorías
-- [ ] Agregar relación con `tarot_readings` (foreign key `category_id`)
-- [ ] Documentar con Swagger todos los endpoints
+- ✅ Implementar endpoint `GET /categories` que retorne todas las categorías ordenadas
+- ✅ Agregar campo `isActive` para habilitar/deshabilitar categorías sin eliminarlas
+- ✅ Implementar validación de unicidad en `slug`
+- ✅ Crear guards que solo permitan a admins crear/modificar categorías
+- ✅ Agregar relación con `tarot_readings` (foreign key `category_id`)
+- ✅ Documentar con Swagger todos los endpoints
+
+#### ✅ Criterios de aceptación cumplidos
+
+- ✅ Entidad ReadingCategory con todos los campos requeridos y relación bidireccional con TarotReading
+- ✅ 6 categorías predefinidas: Amor (❤️), Trabajo (💼), Dinero (💰), Salud (🌿), Espiritual (✨), General (🔮)
+- ✅ Migración actualizada en InitialSchema con tabla reading_category y FK en tarot_reading
+- ✅ Seeder implementado con las 6 categorías iniciales (idempotente)
+- ✅ DTOs con validaciones completas (slug pattern, hex color, maxLength, etc.)
+- ✅ CategoriesService con todos los métodos CRUD + toggleActive + findBySlug
+- ✅ AdminGuard implementado para proteger endpoints de mutación (POST, PATCH, DELETE)
+- ✅ Controller con documentación Swagger completa (@ApiTags, @ApiOperation, @ApiResponse, @ApiBearerAuth)
+- ✅ 23 tests unitarios (14 service + 9 controller) - todos pasando
+- ✅ Calidad: lint ✅, format ✅, build ✅
+- ✅ Módulo integrado en AppModule
+
+#### 📝 Notas de implementación
+
+- **TDD Estricto:** Tests escritos primero (fase RED), luego implementación (fase GREEN)
+- **Validaciones:** Slug con pattern regex `^[a-z0-9]+(?:-[a-z0-9]+)*$`, color con `@IsHexColor()`
+- **Relaciones:** `@OneToMany` en ReadingCategory, `@ManyToOne` nullable en TarotReading
+- **Guards:** AdminGuard verifica `request.user.isAdmin` con ForbiddenException
+- **Migración:** Actualizada InitialSchema en lugar de crear nueva (proyecto pre-producción)
+- **Seeder:** Integrado en seed-data.ts, se ejecuta primero antes de decks/cards/spreads
+- **Endpoints protegidos:** POST /, PATCH /:id, DELETE /:id, PATCH /:id/toggle-active requieren admin
+- **Tests coverage:** findAll (con/sin activeOnly), findOne, findBySlug, create, update (con validación slug), remove, toggleActive
 
 #### 🎯 Criterios de aceptación
 
