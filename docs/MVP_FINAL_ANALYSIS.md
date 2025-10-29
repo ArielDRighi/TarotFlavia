@@ -106,30 +106,43 @@ El MVP se centra **exclusivamente** en ofrecer lecturas de tarot profesionales c
 
 ---
 
-#### **TASK-004: Configurar y Verificar OpenAI API** 🔴 CRÍTICA
+#### **TASK-004: Configurar Proveedor de IA (Groq GRATIS)** 🔴 CRÍTICA
 
 **Prioridad:** MÁXIMA  
-**Estimación:** 0.5 días  
-**Marcador MVP:** ⭐ **CRÍTICO PARA MVP**
+**Estimación:** 1 día  
+**Marcador MVP:** ⭐⭐⭐ **CRÍTICO PARA MVP**
+
+**🎉 CAMBIO IMPORTANTE: IA Gratuita Disponible**
 
 **¿Por qué es crítico?**
 
-- Sin OpenAI NO hay interpretaciones
-- Es el valor principal del producto
-- Solo requiere configuración
+- Sin IA NO hay interpretaciones
+- **Groq es 100% GRATIS** (14,400 requests/día)
+- Llama 3.1 70B tiene calidad comparable a GPT-4
+- Ultra-rápido: 1-2s vs 5-10s de OpenAI
+
+**💰 Estrategia Escalonada:**
+- **MVP:** Groq (Llama 3.1 70B) - $0/mes
+- **Crecimiento:** DeepSeek (V3) - ~$0.80/1000 interpretaciones
+- **Escala:** OpenAI GPT-4o-mini (fallback) - ~$4.50/1000
 
 **Tareas específicas:**
 
-- [ ] Documentar obtención de API Key
-- [ ] Agregar `OPENAI_API_KEY` con validación
-- [ ] Crear health check de conectividad
-- [ ] Implementar endpoint `/health/openai`
+- [ ] Obtener API key en console.groq.com (gratis)
+- [ ] Configurar `GROQ_API_KEY`, `GROQ_MODEL`
+- [ ] Configurar DeepSeek/OpenAI como opcionales (fallback)
+- [ ] Crear health check multi-provider
+- [ ] Implementar endpoint `/health/ai`
+- [ ] Documentar costos por provider
 
 **Criterios de aceptación:**
 
-- API key válida configurada
-- Health check funciona
-- Logs claros para troubleshooting
+- Groq configurado como provider principal
+- Funciona sin OpenAI (opcional)
+- Health check verifica todos los providers
+- Logs indican qué provider se usó
+
+**Ver TASK-061 para arquitectura de abstracción de providers**
 
 ---
 
@@ -504,15 +517,16 @@ Dinero:
 11. TASK-018: Optimizar Prompts ⭐⭐⭐
 12. TASK-019: Logging OpenAI ⭐⭐⭐
 
-**Backend Calidad & Producción (7 tasks):**
+**Backend Calidad & Producción (8 tasks):**
 
 13. TASK-051: Health Checks ⭐⭐⭐ (CRÍTICA - 2 días)
-14. TASK-054: Cuotas OpenAI ⭐⭐ (NECESARIA - 3 días)
+14. TASK-054: Cuotas IA ⭐⭐ (NECESARIA - 3 días)
 15. TASK-055: Caché Agresivo ⭐⭐ (NECESARIA - 3 días)
 16. TASK-056: Rate Limiting Dinámico ⭐ (RECOMENDADA - 2 días)
 17. TASK-057: Swagger Completo ⭐⭐ (NECESARIA - 3 días)
 18. TASK-058: Scripts Dev ⭐ (RECOMENDADA - 2 días)
 19. TASK-059: Testing Suite ⭐⭐⭐ (CRÍTICA - 5 días)
+20. **TASK-061: Abstracción IA Providers ⭐⭐⭐ (CRÍTICA - 4 días)** 🆕
 
 **Frontend (5 components):**
 
@@ -522,7 +536,9 @@ Dinero:
 4. Lectura/Tirada ⭐⭐⭐
 5. Historial ⭐⭐⭐
 
-**Total pendiente MVP:** 24 tasks críticas (12 core + 7 calidad + 5 frontend)
+**Total pendiente MVP:** 25 tasks críticas (12 core + **8 calidad** + 5 frontend)
+
+**🆕 ACTUALIZACIÓN:** TASK-061 agregada para permitir IA gratuita con Groq y migración futura sin reescribir código.
 
 ---
 
@@ -540,14 +556,17 @@ Dinero:
 ### Backend Calidad & Producción (NUEVO)
 
 - TASK-051: Health Checks: **2 días** ⭐⭐⭐
-- TASK-054: Cuotas OpenAI: **3 días** ⭐⭐
+- TASK-054: Cuotas IA (generalizada): **3 días** ⭐⭐
 - TASK-055: Caché Agresivo: **3 días** ⭐⭐
 - TASK-056: Rate Limiting Dinámico: **2 días** ⭐
 - TASK-057: Swagger Completo: **3 días** ⭐⭐
 - TASK-058: Scripts Dev: **2 días** ⭐
 - TASK-059: Testing Suite: **5 días** ⭐⭐⭐
+- **TASK-061: Abstracción IA Providers: 4 días ⭐⭐⭐** (NUEVA)
 
-**Subtotal Calidad:** ~20 días (~4 semanas)
+**Subtotal Calidad:** ~24 días (~4.5 semanas)
+
+**⚠️ ACTUALIZACIÓN:** TASK-061 es crítica para permitir estrategia escalonada de costos (Groq → DeepSeek → OpenAI)
 
 **Nota:** Las tareas marcadas con ⭐⭐⭐ (TASK-051, TASK-059) son bloqueantes para producción.  
 Las tareas ⭐⭐ (TASK-054, TASK-055, TASK-057) son altamente recomendadas para viabilidad económica y DX.  
@@ -565,19 +584,24 @@ Las tareas ⭐ (TASK-056, TASK-058) pueden ejecutarse en paralelo o después del
 
 ### **TOTAL MVP REVISADO:**
 
-**Opción 1 - MVP Completo (Recomendado):**  
-- Backend Core: 25 días
-- Backend Calidad (críticas + necesarias): 16 días (051, 054, 055, 057, 059)
-- Frontend: 17 días
-- **TOTAL: 58 días (~12 semanas / 3 meses)**
+**Opción 1 - MVP Completo con IA Gratuita (RECOMENDADO):**
 
-**Opción 2 - MVP Mínimo (Solo críticas):**  
-- Backend Core: 25 días
-- Backend Calidad (solo críticas): 7 días (051, 059)
+- Backend Core: 25.5 días (incluye +0.5 día TASK-004 actualizada)
+- Backend Calidad (críticas + necesarias): 20 días (051, 054, 055, 057, 059, **061**)
 - Frontend: 17 días
-- **TOTAL: 49 días (~10 semanas / 2.5 meses)**
+- **TOTAL: 62.5 días (~12.5 semanas / 3 meses)**
+
+**Opción 2 - MVP Mínimo (Solo críticas):**
+
+- Backend Core: 25.5 días
+- Backend Calidad (solo críticas): 11 días (051, 059, **061**)
+- Frontend: 17 días
+- **TOTAL: 53.5 días (~11 semanas / 2.5 meses)**
+
+**💡 Nota IMPORTANTE:** Con TASK-061 (abstracción IA), el MVP usa **Groq GRATIS** ($0/mes en IA) y puedes migrar a DeepSeek/OpenAI después sin reescribir código. Esta arquitectura ahorra 100% de costos de IA en fase MVP.
 
 **Recursos:**
+
 - Con 1 dev full-time: **3 meses** (MVP completo)
 - Con 2 devs (1 backend + 1 frontend): **7-8 semanas** (MVP completo)
 - Con 2 devs + testing paralelo: **6 semanas** (MVP completo)
@@ -628,6 +652,7 @@ Las tareas ⭐ (TASK-056, TASK-058) pueden ejecutarse en paralelo o después del
 **¿Por qué es crítico?** Kubernetes/Docker necesitan probes para deployments. Sin health checks, no hay forma de verificar que la app está lista para recibir tráfico.
 
 **Incluye:**
+
 - Endpoint `/health` para liveness probe
 - Endpoint `/health/ready` para readiness probe
 - Verificación de PostgreSQL, OpenAI, Redis (si existe)
@@ -644,6 +669,7 @@ Las tareas ⭐ (TASK-056, TASK-058) pueden ejecutarse en paralelo o después del
 **¿Por qué es necesaria?** Control de costos operativos desde día 1. Sin esto, un usuario malicioso podría generar costos descontrolados.
 
 **Incluye:**
+
 - Campo `openai_tokens_used_month` en User
 - Cuotas por plan (FREE: $0.50/mes, PREMIUM: $5.00/mes)
 - Guard que bloquea cuando se excede cuota
@@ -656,6 +682,7 @@ Las tareas ⭐ (TASK-056, TASK-058) pueden ejecutarse en paralelo o después del
 **¿Por qué es necesaria?** Target de 60% cache hit rate reduce costos de OpenAI significativamente. Esencial para viabilidad económica.
 
 **Incluye:**
+
 - Caché multi-nivel (exacto, por cartas, significados base)
 - Fuzzy matching de preguntas similares (>80% similitud)
 - TTL dinámico basado en popularidad
@@ -678,6 +705,7 @@ Las tareas ⭐ (TASK-056, TASK-058) pueden ejecutarse en paralelo o después del
 **¿Por qué es necesaria?** Facilita integración del frontend. Sin documentación de API clara, el desarrollo frontend se ralentiza significativamente.
 
 **Incluye:**
+
 - Todos los endpoints documentados con ejemplos
 - DTOs con decoradores `@ApiProperty()`
 - Respuestas de error documentadas
@@ -696,6 +724,7 @@ Las tareas ⭐ (TASK-056, TASK-058) pueden ejecutarse en paralelo o después del
 **¿Por qué es crítico?** NO se puede deployar a producción sin suite completo de tests. Target de >80% code coverage es estándar de industria para aplicaciones críticas.
 
 **Incluye:**
+
 - Tests unitarios para todos los servicios (>80% coverage)
 - Tests de integración con DB de test
 - Tests E2E para flujos completos:
@@ -706,6 +735,7 @@ Las tareas ⭐ (TASK-056, TASK-058) pueden ejecutarse en paralelo o después del
 - Coverage reports configurados
 
 **Conecta con:**
+
 - TASK-019-a: Suite E2E completa (ya marcada crítica)
 - TESTING_STRATEGY.md: 12 tests E2E no negociables
 
@@ -714,6 +744,42 @@ Las tareas ⭐ (TASK-056, TASK-058) pueden ejecutarse en paralelo o después del
 **Prioridad:** ALTA  
 **Estimación:** 3 días  
 **Nota:** Importante para mantenimiento pero puede completarse iterativamente durante el desarrollo.
+
+---
+
+#### **TASK-061: Abstracción de Proveedores de IA** ⭐⭐⭐ CRÍTICA MVP 🆕
+
+**Prioridad:** CRÍTICA  
+**Estimación:** 4 días  
+**¿Por qué es crítico?** Permite empezar con **IA 100% GRATIS** (Groq) y migrar después sin reescribir código. Arquitectura fundamental para viabilidad económica.
+
+**💰 Impacto Económico:**
+- **MVP (0-100 usuarios):** $0/mes con Groq (vs $10-30/mes con OpenAI)
+- **Crecimiento (1000 usuarios):** $0.80/mes con DeepSeek (vs $4.50/mes con OpenAI)
+- **Ahorro:** 82-100% en costos de IA
+
+**Incluye:**
+- Interfaz `IAIProvider` con métodos estándar
+- Implementación de 4 providers:
+  - **GroqProvider** (Llama 3.1 70B - GRATIS, principal para MVP)
+  - **DeepSeekProvider** (DeepSeek-V3 - económico para crecimiento)
+  - **OpenAIProvider** (GPT-4o-mini - fallback opcional)
+  - **GeminiProvider** (Gemini 1.5 Flash - alternativa gratuita)
+- Factory con selección por env var
+- Sistema de fallback automático
+- Logging por provider (requests, costos, tiempos)
+- Configuración:
+  ```bash
+  AI_PROVIDER=groq  # Principal (gratis)
+  AI_FALLBACK_PROVIDER=openai  # Opcional
+  GROQ_API_KEY=gsk_xxxxx
+  ```
+
+**Conecta con:**
+- TASK-004: Configuración de proveedores
+- TASK-018: Prompts optimizados para Llama vs GPT
+- TASK-054: Cuotas por provider
+- TASK-055: Caché reduce uso de rate limits
 
 ---
 

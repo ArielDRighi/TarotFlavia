@@ -90,33 +90,36 @@
 
 ### Backend Calidad & Producción (7 Tasks NUEVAS)
 
-| #   | Task                         | Prioridad  | Días | Marcador MVP       |
-| --- | ---------------------------- | ---------- | ---- | ------------------ |
-| 13  | TASK-051: Health Checks      | 🔴 CRÍTICA | 2    | ⭐⭐⭐ CRÍTICA MVP |
-| 14  | TASK-054: Cuotas OpenAI      | 🟡 ALTA    | 3    | ⭐⭐ NECESARIA MVP |
-| 15  | TASK-055: Caché Agresivo     | 🟡 ALTA    | 3    | ⭐⭐ NECESARIA MVP |
-| 16  | TASK-056: Rate Limit Dinámico| 🟢 MEDIA   | 2    | ⭐ RECOMENDADA MVP |
-| 17  | TASK-057: Swagger Completo   | 🟡 ALTA    | 3    | ⭐⭐ NECESARIA MVP |
-| 18  | TASK-058: Scripts Dev        | 🟢 MEDIA   | 2    | ⭐ RECOMENDADA MVP |
-| 19  | TASK-059: Testing Suite      | 🔴 CRÍTICA | 5    | ⭐⭐⭐ CRÍTICA MVP |
+| #   | Task                          | Prioridad  | Días | Marcador MVP       |
+| --- | ----------------------------- | ---------- | ---- | ------------------ |
+| 13  | TASK-051: Health Checks       | 🔴 CRÍTICA | 2    | ⭐⭐⭐ CRÍTICA MVP |
+| 14  | TASK-054: Cuotas OpenAI       | 🟡 ALTA    | 3    | ⭐⭐ NECESARIA MVP |
+| 15  | TASK-055: Caché Agresivo      | 🟡 ALTA    | 3    | ⭐⭐ NECESARIA MVP |
+| 16  | TASK-056: Rate Limit Dinámico | 🟢 MEDIA   | 2    | ⭐ RECOMENDADA MVP |
+| 17  | TASK-057: Swagger Completo    | 🟡 ALTA    | 3    | ⭐⭐ NECESARIA MVP |
+| 18  | TASK-058: Scripts Dev         | 🟢 MEDIA   | 2    | ⭐ RECOMENDADA MVP |
+| 19  | TASK-059: Testing Suite       | 🔴 CRÍTICA | 5    | ⭐⭐⭐ CRÍTICA MVP |
 
 **Subtotal Calidad:** 20 días (~4 semanas)
 
 ### **TOTAL MVP REVISADO:**
 
 **Opción 1 - MVP Completo (RECOMENDADO):**
+
 - Backend Core: 25.5 días
 - Backend Calidad (críticas + necesarias): 16 días
 - Frontend: 17 días
 - **TOTAL: 58.5 días (~12 semanas / 3 meses)**
 
 **Opción 2 - MVP Mínimo (Solo Críticas):**
+
 - Backend Core: 25.5 días
 - Backend Calidad (solo críticas): 7 días (TASK-051, TASK-059)
 - Frontend: 17 días
 - **TOTAL: 49.5 días (~10 semanas / 2.5 meses)**
 
 **Recursos:**
+
 - **Con 1 dev full-time:** 3 meses (MVP completo)
 - **Con 2 devs (1 backend + 1 frontend):** 7-8 semanas (MVP completo)
 - **Con 2 devs + testing paralelo:** 6 semanas (MVP completo)
@@ -138,6 +141,7 @@
 Esta tarea implementa toda la estrategia de testing documentada en `TESTING_STRATEGY.md`:
 
 **Alcance de TASK-059:**
+
 - ✅ Tests unitarios para todos los servicios (>80% coverage)
 - ✅ Tests de integración con DB `tarot_test`
 - ✅ Tests E2E para flujos completos (FREE, PREMIUM, Admin)
@@ -164,6 +168,7 @@ Esta tarea implementa toda la estrategia de testing documentada en `TESTING_STRA
 ```
 
 **Criterios de aceptación (TASK-059):**
+
 - ✓ Coverage supera 80% en servicios críticos
 - ✓ Todos los tests pasan consistentemente
 - ✓ Los tests son rápidos (<5 min total)
@@ -171,6 +176,7 @@ Esta tarea implementa toda la estrategia de testing documentada en `TESTING_STRA
 **Ubicación:** `test/mvp-complete.e2e-spec.ts` + `test/integration/`
 
 **Relación con otras tareas:**
+
 - TASK-019-a: Suite E2E completa (ya marcada ⭐⭐⭐ CRÍTICA)
 - TASK-051: Health checks (verifica disponibilidad de sistema)
 
@@ -349,24 +355,47 @@ Esta tarea implementa toda la estrategia de testing documentada en `TESTING_STRA
 
 ---
 
-## 💰 COSTOS ESTIMADOS MVP
+## 💰 COSTOS ESTIMADOS MVP (ACTUALIZADO - IA GRATUITA)
 
-### Desarrollo
+### 💸 Estrategia Escalonada de Costos de IA
 
-- **OpenAI API:** $10-30/mes (100-1000 lecturas)
+**FASE 1 - MVP (0-100 usuarios):**
+- **IA:** Groq (Llama 3.1 70B) - **$0/mes** ✨ GRATIS
+- **Límite:** 14,400 requests/día (~600/hora)
+- **Velocidad:** 1-2s por interpretación (ultra-rápido)
+- **Costo por lectura:** $0
+
+**FASE 2 - Crecimiento (100-1000 usuarios):**
+- **IA:** DeepSeek (V3) - **~$5-15/mes**
+- **Costo por lectura:** ~$0.0008 (80% más barato que OpenAI)
+- **1000 interpretaciones:** ~$0.80/mes
+
+**FASE 3 - Escala (1000+ usuarios):**
+- **IA:** Evaluar DeepSeek vs OpenAI según calidad
+- **OpenAI GPT-4o-mini:** ~$4.50/1000 interpretaciones
+- **OpenAI GPT-4o:** ~$45/1000 interpretaciones (premium)
+
+### Infraestructura (sin cambios)
+
 - **Hosting Backend:** $7-20/mes (Railway/Render)
 - **Hosting Frontend:** $0 (Vercel hobby) o $20/mes (pro)
 - **Base de Datos:** $7-15/mes (PostgreSQL)
 
-**Total Infraestructura:** $24-85/mes
+**Total Infraestructura:** $14-55/mes
 
-### Por Lectura
+### 📊 Comparativa de Costos por Volumen
 
-- **Costo OpenAI:** ~$0.0008-0.002 por interpretación
-- **100 lecturas/día:** ~$2.40-6/mes
-- **1,000 lecturas/día:** ~$24-60/mes
+| Volumen | Groq (MVP) | DeepSeek | OpenAI mini | Ahorro |
+|---------|------------|----------|-------------|---------|
+| 100 lecturas/mes | $0 | $0.08 | $0.45 | 100% |
+| 1,000 lecturas/mes | $0 | $0.80 | $4.50 | 100% |
+| 10,000 lecturas/mes | $0* | $8.00 | $45.00 | 82% |
 
-**Conclusión:** Costos muy manejables, escalables según uso.
+*Groq gratis hasta 14,400/día = ~432,000/mes
+
+### ✨ Conclusión: MVP 100% GRATIS en IA
+
+Con Groq, **el MVP no tiene costos de IA**. Solo pagas hosting (~$14/mes mínimo). Cuando crezcas, migras a DeepSeek que es 82% más barato que OpenAI.
 
 ---
 
@@ -384,30 +413,38 @@ Esta tarea implementa toda la estrategia de testing documentada en `TESTING_STRA
 
 - ✅ 0 errores críticos en producción
 - ✅ API responde <500ms (promedio)
-- ✅ OpenAI responde <10s
+- ✅ Groq responde <2s (1-2s típico, ultra-rápido)
 - ✅ Coverage >80% en tests (TASK-059)
 - ✅ Migraciones sin pérdida de datos
 - ✅ Health checks respondiendo (TASK-051)
 - ✅ Cache hit rate >60% (TASK-055)
 - ✅ API documentada en Swagger (TASK-057)
-- ✅ Cuotas OpenAI controladas (TASK-054)
+- ✅ Cuotas de IA controladas (TASK-054)
+- ✅ Abstracción de IA permite cambiar provider sin reescribir código (TASK-061)
 
 ### Negocio
 
 - 🎯 10+ usuarios registrados primera semana
 - 🎯 70% completan primera lectura
 - 🎯 20% vuelven para segunda lectura
-- 🎯 Costo por usuario <$0.10/mes
+- 🎯 **Costo por usuario: $0/mes** (con Groq) 🎉
 
 ---
 
 ## ⚠️ DECISIONES CRÍTICAS INMEDIATAS
 
-### 1. Activar OpenAI API - HOY
+### 1. Activar Groq API - HOY (¡GRATIS!)
 
-**Acción:** Obtener API key y agregar créditos ($10 USD)  
-**Tiempo:** 15 minutos  
+**Acción:** Obtener API key gratuita en console.groq.com  
+**Tiempo:** 5 minutos  
+**Costo:** $0 (100% gratis)  
+**Límite:** 14,400 requests/día (más que suficiente para MVP)  
 **Impacto:** Sin esto NO hay MVP
+
+**Opcional - OpenAI como fallback:**
+- Solo necesario si quieres fallback premium
+- No es obligatorio para MVP
+- Puedes agregar después
 
 ### 2. Priorizar Backend o Comenzar Frontend en Paralelo
 

@@ -970,22 +970,26 @@ Esta estrategia se implementa completamente en **TASK-059: Implementar Testing S
 ### Alcance de TASK-059 (5 días, ⭐⭐⭐ CRÍTICA)
 
 **Tests Unitarios:**
+
 - ✅ Todos los servicios con >80% coverage
 - ✅ Guards (RolesGuard, UsageLimitGuard, etc.)
 - ✅ Pipes e interceptors
 
 **Tests de Integración:**
+
 - ✅ Auth flow completo (register → login → protected endpoint)
 - ✅ Reading creation flow completo
 - ✅ Admin operations con DB de test
 
 **Tests E2E:**
+
 - ✅ Usuario FREE: registro → lectura → límite alcanzado
 - ✅ Usuario PREMIUM: múltiples lecturas → regeneración
 - ✅ Admin: gestión de usuarios y contenido
 - ✅ Los 12 tests críticos listados en este documento
 
 **Infraestructura:**
+
 - ✅ DB `tarot_test` separada
 - ✅ Factories para fixtures (users, readings)
 - ✅ Mocks de OpenAI API
@@ -998,6 +1002,7 @@ Esta estrategia se implementa completamente en **TASK-059: Implementar Testing S
 - **TASK-059:** Testing Suite completo (implementación de esta estrategia)
 
 **Criterios de aceptación (según backlog):**
+
 - ✓ Coverage supera 80% en servicios críticos
 - ✓ Todos los tests pasan consistentemente
 - ✓ Los tests son rápidos (<5 min total)
