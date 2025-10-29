@@ -360,17 +360,20 @@ Esta tarea implementa toda la estrategia de testing documentada en `TESTING_STRA
 ### 💸 Estrategia Escalonada de Costos de IA
 
 **FASE 1 - MVP (0-100 usuarios):**
+
 - **IA:** Groq (Llama 3.1 70B) - **$0/mes** ✨ GRATIS
 - **Límite:** 14,400 requests/día (~600/hora)
 - **Velocidad:** 1-2s por interpretación (ultra-rápido)
 - **Costo por lectura:** $0
 
 **FASE 2 - Crecimiento (100-1000 usuarios):**
+
 - **IA:** DeepSeek (V3) - **~$5-15/mes**
 - **Costo por lectura:** ~$0.0008 (80% más barato que OpenAI)
 - **1000 interpretaciones:** ~$0.80/mes
 
 **FASE 3 - Escala (1000+ usuarios):**
+
 - **IA:** Evaluar DeepSeek vs OpenAI según calidad
 - **OpenAI GPT-4o-mini:** ~$4.50/1000 interpretaciones
 - **OpenAI GPT-4o:** ~$45/1000 interpretaciones (premium)
@@ -385,13 +388,13 @@ Esta tarea implementa toda la estrategia de testing documentada en `TESTING_STRA
 
 ### 📊 Comparativa de Costos por Volumen
 
-| Volumen | Groq (MVP) | DeepSeek | OpenAI mini | Ahorro |
-|---------|------------|----------|-------------|---------|
-| 100 lecturas/mes | $0 | $0.08 | $0.45 | 100% |
-| 1,000 lecturas/mes | $0 | $0.80 | $4.50 | 100% |
-| 10,000 lecturas/mes | $0* | $8.00 | $45.00 | 82% |
+| Volumen             | Groq (MVP) | DeepSeek | OpenAI mini | Ahorro |
+| ------------------- | ---------- | -------- | ----------- | ------ |
+| 100 lecturas/mes    | $0         | $0.08    | $0.45       | 100%   |
+| 1,000 lecturas/mes  | $0         | $0.80    | $4.50       | 100%   |
+| 10,000 lecturas/mes | $0\*       | $8.00    | $45.00      | 82%    |
 
-*Groq gratis hasta 14,400/día = ~432,000/mes
+\*Groq gratis hasta 14,400/día = ~432,000/mes
 
 ### ✨ Conclusión: MVP 100% GRATIS en IA
 
@@ -442,6 +445,7 @@ Con Groq, **el MVP no tiene costos de IA**. Solo pagas hosting (~$14/mes mínimo
 **Impacto:** Sin esto NO hay MVP
 
 **Opcional - OpenAI como fallback:**
+
 - Solo necesario si quieres fallback premium
 - No es obligatorio para MVP
 - Puedes agregar después

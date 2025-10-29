@@ -122,6 +122,7 @@ El MVP se centra **exclusivamente** en ofrecer lecturas de tarot profesionales c
 - Ultra-rápido: 1-2s vs 5-10s de OpenAI
 
 **💰 Estrategia Escalonada:**
+
 - **MVP:** Groq (Llama 3.1 70B) - $0/mes
 - **Crecimiento:** DeepSeek (V3) - ~$0.80/1000 interpretaciones
 - **Escala:** OpenAI GPT-4o-mini (fallback) - ~$4.50/1000
@@ -754,11 +755,13 @@ Las tareas ⭐ (TASK-056, TASK-058) pueden ejecutarse en paralelo o después del
 **¿Por qué es crítico?** Permite empezar con **IA 100% GRATIS** (Groq) y migrar después sin reescribir código. Arquitectura fundamental para viabilidad económica.
 
 **💰 Impacto Económico:**
+
 - **MVP (0-100 usuarios):** $0/mes con Groq (vs $10-30/mes con OpenAI)
 - **Crecimiento (1000 usuarios):** $0.80/mes con DeepSeek (vs $4.50/mes con OpenAI)
 - **Ahorro:** 82-100% en costos de IA
 
 **Incluye:**
+
 - Interfaz `IAIProvider` con métodos estándar
 - Implementación de 4 providers:
   - **GroqProvider** (Llama 3.1 70B - GRATIS, principal para MVP)
@@ -776,6 +779,7 @@ Las tareas ⭐ (TASK-056, TASK-058) pueden ejecutarse en paralelo o después del
   ```
 
 **Conecta con:**
+
 - TASK-004: Configuración de proveedores
 - TASK-018: Prompts optimizados para Llama vs GPT
 - TASK-054: Cuotas por provider

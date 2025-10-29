@@ -669,7 +669,8 @@ Implementar validación estricta de todas las variables de entorno necesarias us
 Configurar proveedor de IA gratuito (Groq como principal) con OpenAI como fallback opcional. Crear health checks que verifiquen conectividad al arrancar.
 
 **💰 Estrategia Escalonada de Costos:**
-- **MVP (0-100 usuarios):** Groq (Llama 3.1 70B) - **$0/mes** 
+
+- **MVP (0-100 usuarios):** Groq (Llama 3.1 70B) - **$0/mes**
 - **Crecimiento (100-1000):** DeepSeek (V3) - **~$0.80/1000 interpretaciones**
 - **Escala (1000+):** Evaluar DeepSeek vs OpenAI según calidad/volumen
 
@@ -695,6 +696,7 @@ Configurar proveedor de IA gratuito (Groq como principal) con OpenAI como fallba
 #### ✅ Tareas específicas
 
 **Configuración Groq (PRINCIPAL - GRATIS):**
+
 - [ ] Obtener API Key en console.groq.com (proceso gratuito)
 - [ ] Agregar `GROQ_API_KEY` a variables de entorno (requerido)
 - [ ] Configurar `GROQ_MODEL` (default: `llama-3.1-70b-versatile`)
@@ -702,18 +704,21 @@ Configurar proveedor de IA gratuito (Groq como principal) con OpenAI como fallba
 - [ ] Instalar SDK: `npm install groq-sdk`
 
 **Configuración DeepSeek (CRECIMIENTO):**
+
 - [ ] Documentar obtención de API Key en platform.deepseek.com
 - [ ] Agregar `DEEPSEEK_API_KEY` (opcional para MVP)
 - [ ] Configurar `DEEPSEEK_MODEL` (default: `deepseek-chat`)
 - [ ] Documentar costos: ~$0.0008/interpretación
 
 **Configuración OpenAI (FALLBACK OPCIONAL):**
+
 - [ ] Agregar `OPENAI_API_KEY` como **opcional**
 - [ ] Configurar `OPENAI_MODEL` (default: `gpt-4o-mini`)
 - [ ] Usar solo como fallback o para usuarios premium
 - [ ] Documentar costos: ~$0.0045/interpretación
 
 **Health Checks:**
+
 - [ ] Crear servicio `AIHealthService` que verifique:
   - Groq como proveedor principal
   - OpenAI como fallback (si está configurado)
@@ -729,6 +734,7 @@ Configurar proveedor de IA gratuito (Groq como principal) con OpenAI como fallba
   - OpenAI: 30s
 
 **Logging y Monitoreo:**
+
 - [ ] Loggear proveedor usado en cada request
 - [ ] Implementar logging específico por proveedor:
   - Rate limits alcanzados
@@ -742,6 +748,7 @@ Configurar proveedor de IA gratuito (Groq como principal) con OpenAI como fallba
   - Costo acumulado
 
 **Documentación:**
+
 - [ ] Crear guía de obtención de API keys para cada proveedor
 - [ ] Documentar tabla comparativa de costos:
   - Groq: $0 (gratis, 14,400/día)
@@ -1560,6 +1567,7 @@ Crear flujo completo de recuperación de contraseña con tokens seguros y expira
 Refinar y optimizar los system prompts y user prompts para modelos open-source (Llama 3.1 70B, Mixtral) que son diferentes a GPT. Los modelos de Groq/DeepSeek requieren prompts más explícitos y estructurados. **IMPORTANTE:** Los spreads (TASK-006) proporcionan la estructura posicional, las cartas (TASK-004) dan los significados, y la IA combina ambos para crear la interpretación final.
 
 **⚠️ Diferencias clave Llama vs GPT:**
+
 - Llama necesita instrucciones más explícitas y ejemplos
 - Mejor con formato markdown estructurado
 - Responde mejor a prompts con jerarquía clara (headers, bullets)
@@ -1568,30 +1576,38 @@ Refinar y optimizar los system prompts y user prompts para modelos open-source (
 #### ✅ Tareas específicas
 
 **1. Investigar diferencias entre modelos (0.5 días):**
+
 - [ ] Comparar respuestas de Llama 3.1 70B vs GPT-4o-mini
 - [ ] Documentar diferencias en estilo y formato
 - [ ] Identificar mejores prácticas para modelos open-source
 - [ ] Probar diferentes temperatures (0.3, 0.5, 0.7) con cada modelo
 
 **2. Crear prompts optimizados para Llama (1.5 días):**
+
 - [ ] Crear prompt de sistema (system message) más explícito para Llama:
+
   ```markdown
   # ROLE
+
   Eres Flavia, una tarotista profesional con 20 años de experiencia...
-  
+
   # TONE
+
   - Empático y comprensivo
   - Místico pero accesible
   - Sin tecnicismos excesivos
-  
+
   # RESPONSE FORMAT
+
   Debes responder SIEMPRE con esta estructura:
+
   1. **Visión General** (2-3 párrafos)
   2. **Análisis por Carta** (1 párrafo por posición)
   3. **Conexiones y Flujo** (1-2 párrafos)
   4. **Consejos Prácticos** (3 puntos bullet)
   5. **Conclusión** (1 párrafo)
   ```
+
 - [ ] Usar formato markdown estructurado (headers, bullets, bold)
 - [ ] Incluir ejemplos en el system prompt (few-shot learning)
 - [ ] Configurar temperature óptima:
@@ -1632,7 +1648,7 @@ Refinar y optimizar los system prompts y user prompts para modelos open-source (
   - Relaciones entre cartas y el flujo temporal/energético (1-2 párrafos)
   - Consejos prácticos (lista de 2-3 puntos accionables)
   - Conclusión final (1 párrafo)
-**3. Configurar límites por proveedor (0.5 días):**
+    **3. Configurar límites por proveedor (0.5 días):**
 - [ ] Configurar max_tokens apropiado por proveedor:
   - **Groq (Llama):** Más generoso (gratis)
     - 1 carta: 500 tokens
@@ -1648,6 +1664,7 @@ Refinar y optimizar los system prompts y user prompts para modelos open-source (
     - 5+ cartas: 800 tokens
 
 **4. Implementar fallbacks y timeouts (0.5 días):**
+
 - [ ] Implementar fallback a respuesta predeterminada si todos los providers fallan
 - [ ] Configurar timeouts por proveedor:
   - Groq: 10s (ultra-rápido)
@@ -1656,12 +1673,14 @@ Refinar y optimizar los system prompts y user prompts para modelos open-source (
 - [ ] Crear respuestas de error amigables
 
 **5. Testing y comparación (0.5 días):**
+
 - [ ] Probar misma interpretación con Groq, DeepSeek y OpenAI
 - [ ] Comparar calidad, tiempo y costo
 - [ ] Documentar diferencias y recomendaciones
 - [ ] Crear ejemplos side-by-side en documentación
 
 **6. Documentación (0.5 días):**
+
 - [ ] Documentar cómo se construye el prompt desde 3 fuentes:
   1. Spread (estructura posicional)
   2. Cartas (significados)
@@ -1705,6 +1724,7 @@ Crear sistema robusto de logging que trackee todas las llamadas a OpenAI para mo
 #### ✅ Tareas específicas
 
 **1. Crear entidad de logging generalizada:**
+
 - [ ] Crear entidad `AIUsageLog` (no solo OpenAI) con campos:
   - `id`, `user_id` (FK nullable), `reading_id` (FK nullable)
   - `provider` (`'groq'`, `'deepseek'`, `'openai'`, `'gemini'`)
@@ -1713,11 +1733,13 @@ Crear sistema robusto de logging que trackee todas las llamadas a OpenAI para mo
   - `error_message`, `fallback_used` (boolean), `created_at`
 
 **2. Interceptar llamadas a IA:**
+
 - [ ] Interceptar todas las llamadas a `IAIProvider` (no solo OpenAI)
 - [ ] Registrar información antes y después de ejecución
 - [ ] Loggear si se usó fallback automático
 
 **3. Calcular costos por proveedor:**
+
 - [ ] Implementar cálculo de costo según provider:
   - **Groq:** $0 (gratis)
   - **DeepSeek:**
@@ -1729,6 +1751,7 @@ Crear sistema robusto de logging que trackee todas las llamadas a OpenAI para mo
   - **Gemini:** $0 (gratis hasta límite)
 
 **4. Métricas y monitoreo:**
+
 - [ ] Medir tiempo de respuesta por proveedor
 - [ ] Loggear errores con stack trace completo
 - [ ] Crear endpoint `GET /admin/ai-usage` que retorne estadísticas:
@@ -1742,6 +1765,7 @@ Crear sistema robusto de logging que trackee todas las llamadas a OpenAI para mo
   - Rate limits restantes de Groq (14,400/día)
 
 **5. Alertas y límites:**
+
 - [ ] Implementar alertas cuando:
   - Rate limit de Groq cerca de límite (>12,000/día)
   - Costo diario supere threshold (si usa DeepSeek/OpenAI)
@@ -3486,6 +3510,7 @@ Implementar tracing distribuido para seguir requests a través de diferentes ser
 Crear sistema que trackee y limite el uso de IA por usuario para controlar costos operativos y uso de rate limits. Aunque Groq es gratuito, tiene límite de 14,400 requests/día compartido entre todos los usuarios.
 
 **💰 Impacto por Estrategia:**
+
 - **Con Groq (gratis):** Controlar rate limits (14,400/día = ~600/hora)
 - **Con DeepSeek:** Controlar costos ($0.0008/interpretación)
 - **Con OpenAI (fallback):** Controlar costos ($0.0045/interpretación)
@@ -3493,12 +3518,14 @@ Crear sistema que trackee y limite el uso de IA por usuario para controlar costo
 #### ✅ Tareas específicas
 
 **1. Campos de tracking (generalizar, no solo OpenAI):**
+
 - Agregar campo `ai_requests_used_month` (integer) a entidad `User`
 - Agregar campo `ai_cost_usd_month` (decimal) a entidad `User`
 - Agregar campo `ai_tokens_used_month` (integer) a entidad `User`
 - Agregar campo `ai_provider_used` (string) para analytics
 
 **2. Sistema de tracking:**
+
 - Crear tarea cron que resetee contadores el primer día de cada mes
 - Implementar método `trackAIUsage(userId, requests, tokens, cost, provider)`:
   - Incrementar contadores del usuario
@@ -3506,6 +3533,7 @@ Crear sistema que trackee y limite el uso de IA por usuario para controlar costo
   - Loggear proveedor usado
 
 **3. Configurar cuotas por plan (independiente del proveedor):**
+
 - **FREE:**
   - Requests: 100/mes (suficiente para evaluar)
   - Costo máximo: $0 con Groq, $5 si usa fallback
@@ -3517,6 +3545,7 @@ Crear sistema que trackee y limite el uso de IA por usuario para controlar costo
   - Sin límites
 
 **4. Implementar guards:**
+
 - Crear guard `AIQuotaGuard` que verifique cuota antes de generar:
   - Verificar requests/tokens/costo usado en el mes
   - Si se excedió cuota, retornar error 429 con mensaje apropiado:
@@ -3526,11 +3555,13 @@ Crear sistema que trackee y limite el uso de IA por usuario para controlar costo
   - Considerar rate limits globales de Groq (14,400/día compartido)
 
 **5. Implementar soft/hard limits:**
+
 - Soft limit (80%): advertir al usuario que está cerca del límite
 - Hard limit (100%): bloquear nuevas interpretaciones
 - Agregar campo `quota_warning_sent` (boolean) para no enviar múltiples warnings
 
 **6. Crear endpoints de monitoreo:**
+
 - Crear endpoint GET `/usage/ai` que retorne:
   - Requests usados este mes
   - Tokens usados este mes
@@ -3542,12 +3573,14 @@ Crear sistema que trackee y limite el uso de IA por usuario para controlar costo
   - Rate limit global de Groq (si aplica)
 
 **7. Notificaciones:**
+
 - Implementar notificaciones:
   - Email cuando se alcanza 80% de cuota
   - Email cuando se alcanza 100% de cuota
   - Warning en UI cuando está cerca del límite
 
 **8. Analytics y configuración:**
+
 - Loggear cuando usuarios alcanzan sus cuotas
 - Trackear qué provider se usa más frecuentemente
 - Agregar configuración de cuotas en variables de entorno:
@@ -3576,6 +3609,7 @@ Crear sistema que trackee y limite el uso de IA por usuario para controlar costo
 #### 📋 Descripción
 
 Expandir sistema de caché para maximizar cache hits y reducir llamadas a IA. Aunque Groq es gratuito, el caché:
+
 - **Mejora velocidad:** Respuesta instantánea vs 1-2s de Groq
 - **Ahorra rate limits:** 14,400 requests/día compartidos entre usuarios
 - **Prepara escalabilidad:** Cuando migres a DeepSeek/OpenAI, reduces costos 60%+
@@ -3963,6 +3997,7 @@ Crear documentación técnica comprehensiva para facilitar onboarding de desarro
 #### 📋 Descripción
 
 Crear capa de abstracción que permita cambiar entre diferentes proveedores de IA (Groq, DeepSeek, OpenAI, Gemini) sin modificar lógica de negocio. Esta arquitectura permite:
+
 - **Empezar gratis** con Groq (14,400 requests/día)
 - **Escalar económicamente** a DeepSeek ($0.80/1000 interpretaciones)
 - **Fallback automático** si un proveedor falla
@@ -3996,6 +4031,7 @@ Crear capa de abstracción que permita cambiar entre diferentes proveedores de I
 #### ✅ Tareas específicas
 
 **1. Crear Interfaz Base (1 día):**
+
 - [ ] Crear interface `IAIProvider` con métodos:
   - `generateInterpretation(prompt: string, options?: AIOptions): Promise<AIResponse>`
   - `generateOracleAnswer(prompt: string, options?: AIOptions): Promise<AIResponse>`
@@ -4009,6 +4045,7 @@ Crear capa de abstracción que permita cambiar entre diferentes proveedores de I
 **2. Implementar Proveedores Concretos (2 días):**
 
 **GroqProvider (Prioridad MÁXIMA - MVP gratis):**
+
 - [ ] Instalar SDK: `npm install groq-sdk`
 - [ ] Configurar API key: `GROQ_API_KEY` (obtener en console.groq.com)
 - [ ] Modelo por defecto: `llama-3.1-70b-versatile`
@@ -4017,6 +4054,7 @@ Crear capa de abstracción que permita cambiar entre diferentes proveedores de I
 - [ ] Ventaja: Ultra-rápido (1-2s por interpretación)
 
 **DeepSeekProvider (FASE 2 - Crecimiento):**
+
 - [ ] Instalar SDK: `npm install openai` (compatible con OpenAI SDK)
 - [ ] URL base: `https://api.deepseek.com`
 - [ ] Modelo: `deepseek-chat` (DeepSeek-V3)
@@ -4024,12 +4062,14 @@ Crear capa de abstracción que permita cambiar entre diferentes proveedores de I
 - [ ] Ventaja: Muy económico, 80% más barato que GPT-4o-mini
 
 **OpenAIProvider (Fallback/Premium):**
+
 - [ ] Ya implementado en TASK-004
 - [ ] Modelo: `gpt-4o-mini` (fallback) o `gpt-4o` (premium)
 - [ ] Costo: ~$0.0045/interpretación (gpt-4o-mini)
 - [ ] Usar solo como fallback o para usuarios premium
 
 **GeminiProvider (Alternativa gratuita):**
+
 - [ ] Instalar SDK: `npm install @google/generative-ai`
 - [ ] Modelo: `gemini-1.5-flash`
 - [ ] Rate limit: 15 RPM (requests por minuto)
@@ -4037,20 +4077,22 @@ Crear capa de abstracción que permita cambiar entre diferentes proveedores de I
 - [ ] Ventaja: Gratuito, buena calidad
 
 **3. Implementar Factory y Configuración (0.5 días):**
+
 - [ ] Crear `AIProviderFactory`:
   - Lee `AI_PROVIDER` de env (groq | deepseek | openai | gemini)
   - Instancia el provider correspondiente
   - Configura fallback si está definido
 - [ ] Variables de entorno necesarias:
+
   ```bash
   # Provider principal
   AI_PROVIDER=groq
   AI_MODEL=llama-3.1-70b-versatile
-  
+
   # Provider de fallback
   AI_FALLBACK_PROVIDER=openai
   AI_FALLBACK_MODEL=gpt-4o-mini
-  
+
   # API Keys
   GROQ_API_KEY=gsk_xxxxx
   DEEPSEEK_API_KEY=sk-xxxxx
@@ -4059,6 +4101,7 @@ Crear capa de abstracción que permita cambiar entre diferentes proveedores de I
   ```
 
 **4. Implementar Sistema de Fallback (0.5 días):**
+
 - [ ] Crear decorator `@WithFallback()` que:
   - Intenta con provider primario
   - Si falla (timeout, rate limit, error), usa fallback
@@ -4070,6 +4113,7 @@ Crear capa de abstracción que permita cambiar entre diferentes proveedores de I
   - Gemini: 15s
 
 **5. Logging y Métricas (0.5 días):**
+
 - [ ] Loggear en cada interpretación:
   - Provider usado
   - Modelo usado
@@ -4084,6 +4128,7 @@ Crear capa de abstracción que permita cambiar entre diferentes proveedores de I
   - Tiempo promedio de respuesta
 
 **6. Migración de Código Existente:**
+
 - [ ] Refactorizar `InterpretationsService` para usar `IAIProvider`
 - [ ] Reemplazar llamadas directas a OpenAI con factory
 - [ ] Mantener backward compatibility si ya hay código OpenAI
@@ -4099,11 +4144,13 @@ Crear capa de abstracción que permita cambiar entre diferentes proveedores de I
 #### 💰 Impacto Económico
 
 **Con esta implementación:**
+
 - **MVP (0-100 usuarios):** $0/mes con Groq
 - **Crecimiento (100-1000 usuarios):** ~$5-15/mes con DeepSeek
 - **Escala (1000+ usuarios):** Evaluar DeepSeek vs OpenAI según calidad
 
 **Ahorro estimado vs solo OpenAI:**
+
 - 1000 interpretaciones/mes: $4.50 → $0 = 100% ahorro (Groq)
 - 1000 interpretaciones/mes: $4.50 → $0.80 = 82% ahorro (DeepSeek)
 
