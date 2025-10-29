@@ -4,13 +4,16 @@
 **Proyecto:** TarotFlavia - Backend NestJS  
 **Framework:** Jest + Supertest
 
+> **⚠️ IMPORTANTE:** Esta estrategia se implementa completamente en **TASK-059: Testing Suite Completo** (⭐⭐⭐ CRÍTICA MVP).  
+> Ver `backend/tarot-app/docs/project_backlog.md` líneas 3590-3650 para detalles de implementación.
+
 ---
 
 ## 📊 Estado Actual del Testing
 
 ### Tests Implementados ✅
 
-- **Total de tests:** 103 pasando
+- **Total de tests:** 196 pasando (post-refactoring TASK-001-a)
 - **Módulos con tests:**
   - ✅ Auth (controller + service)
   - ✅ Cards (controller + service)
@@ -20,11 +23,13 @@
   - ✅ Interpretations (service)
   - ✅ Categories (controller + service)
   - ✅ Seeders (cards, decks, spreads, categories)
+  - ✅ Config (env validation)
 
 ### Coverage Actual
 
-- **Estimado:** ~75-80% de cobertura
+- **Estimado:** ~80% de cobertura
 - **Metodología:** TDD aplicada desde TASK-001
+- **Target MVP:** >80% code coverage (según TASK-059)
 
 ---
 
@@ -956,4 +961,45 @@ backend/tarot-app/
 4. **Coverage mínimo:** No permitir merge <80% coverage
 5. **Suite MVP:** Ejecutar `mvp-complete.e2e-spec.ts` antes de producción
 
-**Próximo paso inmediato:** Crear archivo `test/mvp-complete.e2e-spec.ts` con los 12 tests críticos listados arriba.
+---
+
+## 🎯 Implementación: TASK-059
+
+Esta estrategia se implementa completamente en **TASK-059: Implementar Testing Suite Completo**.
+
+### Alcance de TASK-059 (5 días, ⭐⭐⭐ CRÍTICA)
+
+**Tests Unitarios:**
+- ✅ Todos los servicios con >80% coverage
+- ✅ Guards (RolesGuard, UsageLimitGuard, etc.)
+- ✅ Pipes e interceptors
+
+**Tests de Integración:**
+- ✅ Auth flow completo (register → login → protected endpoint)
+- ✅ Reading creation flow completo
+- ✅ Admin operations con DB de test
+
+**Tests E2E:**
+- ✅ Usuario FREE: registro → lectura → límite alcanzado
+- ✅ Usuario PREMIUM: múltiples lecturas → regeneración
+- ✅ Admin: gestión de usuarios y contenido
+- ✅ Los 12 tests críticos listados en este documento
+
+**Infraestructura:**
+- ✅ DB `tarot_test` separada
+- ✅ Factories para fixtures (users, readings)
+- ✅ Mocks de OpenAI API
+- ✅ Coverage reports (HTML local + JSON para CI)
+- ✅ Script `npm run test:watch` para desarrollo
+
+### Tareas Relacionadas
+
+- **TASK-019-a:** Suite E2E completa (ya marcada ⭐⭐⭐ CRÍTICA)
+- **TASK-059:** Testing Suite completo (implementación de esta estrategia)
+
+**Criterios de aceptación (según backlog):**
+- ✓ Coverage supera 80% en servicios críticos
+- ✓ Todos los tests pasan consistentemente
+- ✓ Los tests son rápidos (<5 min total)
+
+**Próximo paso:** Ejecutar TASK-059 después de completar funcionalidades core del MVP.

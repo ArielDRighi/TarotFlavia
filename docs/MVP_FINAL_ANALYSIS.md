@@ -489,43 +489,69 @@ Dinero:
 
 ### Tareas PENDIENTES CRÍTICAS 🔴
 
-**Backend (16 tasks):**
+**Backend Core (12 tasks):**
 
-1. TASK-002: Migraciones ⭐
-2. TASK-003: Validación Env ⭐
-3. TASK-004: OpenAI Config ⭐
-4. TASK-008: Seeder Categorías ⭐
-5. TASK-009: Módulo Preguntas ⭐
-6. TASK-010: Seeder Preguntas ⭐
-7. TASK-011: Planes en User ⭐
-8. TASK-012: Sistema Límites ⭐
-9. TASK-013: Lecturas Híbridas ⭐
-10. TASK-014: Rate Limiting ⭐
-11. TASK-018: Optimizar Prompts ⭐
-12. TASK-019: Logging OpenAI ⭐
+1. TASK-002: Migraciones ⭐⭐⭐
+2. TASK-003: Validación Env ⭐⭐⭐
+3. TASK-004: OpenAI Config ⭐⭐⭐
+4. TASK-008: Seeder Categorías ⭐⭐⭐
+5. TASK-009: Módulo Preguntas ⭐⭐⭐
+6. TASK-010: Seeder Preguntas ⭐⭐⭐
+7. TASK-011: Planes en User ⭐⭐⭐
+8. TASK-012: Sistema Límites ⭐⭐⭐
+9. TASK-013: Lecturas Híbridas ⭐⭐⭐
+10. TASK-014: Rate Limiting ⭐⭐⭐
+11. TASK-018: Optimizar Prompts ⭐⭐⭐
+12. TASK-019: Logging OpenAI ⭐⭐⭐
+
+**Backend Calidad & Producción (7 tasks):**
+
+13. TASK-051: Health Checks ⭐⭐⭐ (CRÍTICA - 2 días)
+14. TASK-054: Cuotas OpenAI ⭐⭐ (NECESARIA - 3 días)
+15. TASK-055: Caché Agresivo ⭐⭐ (NECESARIA - 3 días)
+16. TASK-056: Rate Limiting Dinámico ⭐ (RECOMENDADA - 2 días)
+17. TASK-057: Swagger Completo ⭐⭐ (NECESARIA - 3 días)
+18. TASK-058: Scripts Dev ⭐ (RECOMENDADA - 2 días)
+19. TASK-059: Testing Suite ⭐⭐⭐ (CRÍTICA - 5 días)
 
 **Frontend (5 components):**
 
-1. Setup + Auth ⭐
-2. Dashboard ⭐
-3. Categorías + Preguntas ⭐
-4. Lectura/Tirada ⭐
-5. Historial ⭐
+1. Setup + Auth ⭐⭐⭐
+2. Dashboard ⭐⭐⭐
+3. Categorías + Preguntas ⭐⭐⭐
+4. Lectura/Tirada ⭐⭐⭐
+5. Historial ⭐⭐⭐
 
-**Total pendiente MVP:** 17 tasks críticas
+**Total pendiente MVP:** 24 tasks críticas (12 core + 7 calidad + 5 frontend)
 
 ---
 
 ## ⏱️ ESTIMACIÓN TEMPORAL MVP
 
-### Backend Pendiente
+### Backend Core (Pendiente)
 
 - Epic 1 (Estabilización): **5.5 días**
 - Epic 2 (Categorías/Preguntas): **6 días**
 - Epic 3 (Planes/Límites): **8 días**
 - Epic 4 (Seguridad): **6 días**
 
-**Subtotal Backend:** ~25 días (~5 semanas)
+**Subtotal Backend Core:** ~25 días (~5 semanas)
+
+### Backend Calidad & Producción (NUEVO)
+
+- TASK-051: Health Checks: **2 días** ⭐⭐⭐
+- TASK-054: Cuotas OpenAI: **3 días** ⭐⭐
+- TASK-055: Caché Agresivo: **3 días** ⭐⭐
+- TASK-056: Rate Limiting Dinámico: **2 días** ⭐
+- TASK-057: Swagger Completo: **3 días** ⭐⭐
+- TASK-058: Scripts Dev: **2 días** ⭐
+- TASK-059: Testing Suite: **5 días** ⭐⭐⭐
+
+**Subtotal Calidad:** ~20 días (~4 semanas)
+
+**Nota:** Las tareas marcadas con ⭐⭐⭐ (TASK-051, TASK-059) son bloqueantes para producción.  
+Las tareas ⭐⭐ (TASK-054, TASK-055, TASK-057) son altamente recomendadas para viabilidad económica y DX.  
+Las tareas ⭐ (TASK-056, TASK-058) pueden ejecutarse en paralelo o después del MVP core.
 
 ### Frontend Completo
 
@@ -537,10 +563,24 @@ Dinero:
 
 **Subtotal Frontend:** ~17 días (~3.5 semanas)
 
-### **TOTAL MVP: 42 días (~8.5 semanas)**
+### **TOTAL MVP REVISADO:**
 
-Con 1 dev full-time: **2 meses**  
-Con 2 devs (1 backend + 1 frontend): **5-6 semanas**
+**Opción 1 - MVP Completo (Recomendado):**  
+- Backend Core: 25 días
+- Backend Calidad (críticas + necesarias): 16 días (051, 054, 055, 057, 059)
+- Frontend: 17 días
+- **TOTAL: 58 días (~12 semanas / 3 meses)**
+
+**Opción 2 - MVP Mínimo (Solo críticas):**  
+- Backend Core: 25 días
+- Backend Calidad (solo críticas): 7 días (051, 059)
+- Frontend: 17 días
+- **TOTAL: 49 días (~10 semanas / 2.5 meses)**
+
+**Recursos:**
+- Con 1 dev full-time: **3 meses** (MVP completo)
+- Con 2 devs (1 backend + 1 frontend): **7-8 semanas** (MVP completo)
+- Con 2 devs + testing paralelo: **6 semanas** (MVP completo)
 
 ---
 
@@ -563,13 +603,117 @@ Con 2 devs (1 backend + 1 frontend): **5-6 semanas**
 - ✅ OpenAI respondiendo <10s
 - ✅ API protegida con rate limiting
 - ✅ 0 errores críticos en producción
-- ✅ Tests e2e pasando
+- ✅ Tests E2E pasando (TASK-059)
+- ✅ Health checks respondiendo (TASK-051)
+- ✅ Cache hit rate >60% (TASK-055)
+- ✅ Code coverage >80% (TASK-059)
+- ✅ API documentada en Swagger (TASK-057)
 
 ### Negocio
 
 - 🎯 10+ usuarios primera semana
 - 🎯 70% completan primera lectura
 - 🎯 Costo por lectura <$0.002
+
+---
+
+## 🧪 TAREAS DE CALIDAD Y PRODUCCIÓN (Fase 3 - MVP)
+
+### Epic 14: Monitoreo y Observabilidad
+
+#### **TASK-051: Implementar Health Checks Completos** ⭐⭐⭐ CRÍTICA MVP
+
+**Prioridad:** CRÍTICA  
+**Estimación:** 2 días  
+**¿Por qué es crítico?** Kubernetes/Docker necesitan probes para deployments. Sin health checks, no hay forma de verificar que la app está lista para recibir tráfico.
+
+**Incluye:**
+- Endpoint `/health` para liveness probe
+- Endpoint `/health/ready` para readiness probe
+- Verificación de PostgreSQL, OpenAI, Redis (si existe)
+- Respuestas estándar con status de cada componente
+
+---
+
+### Epic 15: Optimización de Costos
+
+#### **TASK-054: Sistema de Cuotas de OpenAI por Usuario** ⭐⭐ NECESARIA MVP
+
+**Prioridad:** ALTA  
+**Estimación:** 3 días  
+**¿Por qué es necesaria?** Control de costos operativos desde día 1. Sin esto, un usuario malicioso podría generar costos descontrolados.
+
+**Incluye:**
+- Campo `openai_tokens_used_month` en User
+- Cuotas por plan (FREE: $0.50/mes, PREMIUM: $5.00/mes)
+- Guard que bloquea cuando se excede cuota
+- Reset automático mensual
+
+#### **TASK-055: Estrategia Agresiva de Caché** ⭐⭐ NECESARIA MVP
+
+**Prioridad:** ALTA  
+**Estimación:** 3 días  
+**¿Por qué es necesaria?** Target de 60% cache hit rate reduce costos de OpenAI significativamente. Esencial para viabilidad económica.
+
+**Incluye:**
+- Caché multi-nivel (exacto, por cartas, significados base)
+- Fuzzy matching de preguntas similares (>80% similitud)
+- TTL dinámico basado en popularidad
+- Cache warming para combinaciones comunes
+
+#### **TASK-056: Rate Limiting Dinámico por Plan** ⭐ RECOMENDADA MVP
+
+**Prioridad:** MEDIA  
+**Estimación:** 2 días  
+**Nota:** Mejora sobre TASK-016 (rate limiting básico ya implementado). Nice-to-have pero no bloqueante.
+
+---
+
+### Epic 16: Developer Experience
+
+#### **TASK-057: Swagger/OpenAPI Completo** ⭐⭐ NECESARIA MVP
+
+**Prioridad:** ALTA  
+**Estimación:** 3 días  
+**¿Por qué es necesaria?** Facilita integración del frontend. Sin documentación de API clara, el desarrollo frontend se ralentiza significativamente.
+
+**Incluye:**
+- Todos los endpoints documentados con ejemplos
+- DTOs con decoradores `@ApiProperty()`
+- Respuestas de error documentadas
+- Agrupación por roles (Public/User/Admin)
+
+#### **TASK-058: Scripts de Desarrollo** ⭐ RECOMENDADA MVP
+
+**Prioridad:** MEDIA  
+**Estimación:** 2 días  
+**Nota:** Facilita desarrollo pero no bloqueante para producción.
+
+#### **TASK-059: Testing Suite Completo** ⭐⭐⭐ CRÍTICA MVP
+
+**Prioridad:** CRÍTICA  
+**Estimación:** 5 días  
+**¿Por qué es crítico?** NO se puede deployar a producción sin suite completo de tests. Target de >80% code coverage es estándar de industria para aplicaciones críticas.
+
+**Incluye:**
+- Tests unitarios para todos los servicios (>80% coverage)
+- Tests de integración con DB de test
+- Tests E2E para flujos completos:
+  - Usuario FREE: registro → lectura → límite alcanzado
+  - Usuario PREMIUM: registro → múltiples lecturas → regeneración
+  - Admin: gestión de usuarios
+- Mock de OpenAI API
+- Coverage reports configurados
+
+**Conecta con:**
+- TASK-019-a: Suite E2E completa (ya marcada crítica)
+- TESTING_STRATEGY.md: 12 tests E2E no negociables
+
+#### **TASK-060: Documentación Técnica** ⭐ RECOMENDADA MVP
+
+**Prioridad:** ALTA  
+**Estimación:** 3 días  
+**Nota:** Importante para mantenimiento pero puede completarse iterativamente durante el desarrollo.
 
 ---
 
@@ -597,11 +741,15 @@ Las siguientes funcionalidades están en **Fase 2** (post-MVP):
 - TASK-029: Dashboard Estadísticas
 - TASK-030: Audit Log
 
+### Epic 14: Monitoreo Avanzado (Fase 2)
+
+- **TASK-052:** Prometheus metrics (observabilidad avanzada)
+- **TASK-053:** Distributed Tracing (debugging distribuido)
+
 ### Otras Features Fase 2
 
 - Sistema de pagos (Stripe)
 - Email transaccional completo
-- Caché avanzado con Redis
 - Regeneración de interpretaciones
 - Sistema de compartir público
 - Módulo de servicios pagos

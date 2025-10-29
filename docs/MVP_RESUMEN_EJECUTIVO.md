@@ -19,7 +19,7 @@
 
 **Progreso Backend:** ~40% completado  
 **Progreso Frontend:** 0% (no iniciado)  
-**Calidad:** TDD aplicado, 103 tests unitarios pasando
+**Calidad:** TDD aplicado, 196 tests unitarios pasando (post-refactoring)
 
 ---
 
@@ -86,10 +86,40 @@
 
 **Subtotal Frontend:** 17 días (~3.5 semanas)
 
-### **TOTAL MVP: 42.5 días (~8.5 semanas)**
+**Subtotal Frontend:** 17 días (~3.5 semanas)
 
-**Con 1 desarrollador full-time:** 2 meses  
-**Con 2 desarrolladores (1 backend + 1 frontend):** 5-6 semanas
+### Backend Calidad & Producción (7 Tasks NUEVAS)
+
+| #   | Task                         | Prioridad  | Días | Marcador MVP       |
+| --- | ---------------------------- | ---------- | ---- | ------------------ |
+| 13  | TASK-051: Health Checks      | 🔴 CRÍTICA | 2    | ⭐⭐⭐ CRÍTICA MVP |
+| 14  | TASK-054: Cuotas OpenAI      | 🟡 ALTA    | 3    | ⭐⭐ NECESARIA MVP |
+| 15  | TASK-055: Caché Agresivo     | 🟡 ALTA    | 3    | ⭐⭐ NECESARIA MVP |
+| 16  | TASK-056: Rate Limit Dinámico| 🟢 MEDIA   | 2    | ⭐ RECOMENDADA MVP |
+| 17  | TASK-057: Swagger Completo   | 🟡 ALTA    | 3    | ⭐⭐ NECESARIA MVP |
+| 18  | TASK-058: Scripts Dev        | 🟢 MEDIA   | 2    | ⭐ RECOMENDADA MVP |
+| 19  | TASK-059: Testing Suite      | 🔴 CRÍTICA | 5    | ⭐⭐⭐ CRÍTICA MVP |
+
+**Subtotal Calidad:** 20 días (~4 semanas)
+
+### **TOTAL MVP REVISADO:**
+
+**Opción 1 - MVP Completo (RECOMENDADO):**
+- Backend Core: 25.5 días
+- Backend Calidad (críticas + necesarias): 16 días
+- Frontend: 17 días
+- **TOTAL: 58.5 días (~12 semanas / 3 meses)**
+
+**Opción 2 - MVP Mínimo (Solo Críticas):**
+- Backend Core: 25.5 días
+- Backend Calidad (solo críticas): 7 días (TASK-051, TASK-059)
+- Frontend: 17 días
+- **TOTAL: 49.5 días (~10 semanas / 2.5 meses)**
+
+**Recursos:**
+- **Con 1 dev full-time:** 3 meses (MVP completo)
+- **Con 2 devs (1 backend + 1 frontend):** 7-8 semanas (MVP completo)
+- **Con 2 devs + testing paralelo:** 6 semanas (MVP completo)
 
 ---
 
@@ -97,17 +127,26 @@
 
 ### Tests Implementados Actualmente
 
-- ✅ 103 tests unitarios pasando
+- ✅ 196 tests unitarios pasando (post-refactoring TASK-001-a)
 - ✅ TDD aplicado desde TASK-001
-- ✅ Cobertura estimada: 75-80%
+- ✅ Coverage estimado: ~80%
 
-### Tests Pendientes Críticos
+### Implementación Completa: TASK-059
 
-#### 1. Tests E2E (End-to-End) - OBLIGATORIOS
+**TASK-059: Testing Suite Completo** (⭐⭐⭐ CRÍTICA MVP - 5 días)
 
-**Cuándo crear:** Antes de marcar MVP listo para producción
+Esta tarea implementa toda la estrategia de testing documentada en `TESTING_STRATEGY.md`:
 
-**12 Tests E2E Críticos NO Negociables:**
+**Alcance de TASK-059:**
+- ✅ Tests unitarios para todos los servicios (>80% coverage)
+- ✅ Tests de integración con DB `tarot_test`
+- ✅ Tests E2E para flujos completos (FREE, PREMIUM, Admin)
+- ✅ Mock de OpenAI API
+- ✅ Factories para fixtures
+- ✅ Coverage reports configurados
+- ✅ Script `npm run test:watch`
+
+**12 Tests E2E Críticos NO Negociables (de TESTING_STRATEGY.md):**
 
 ```bash
 ✅ Usuario puede registrarse
@@ -124,33 +163,18 @@
 ✅ OpenAI health check funciona
 ```
 
-**Ubicación:** `test/mvp-complete.e2e-spec.ts`  
-**Estimación:** 2 días de desarrollo
+**Criterios de aceptación (TASK-059):**
+- ✓ Coverage supera 80% en servicios críticos
+- ✓ Todos los tests pasan consistentemente
+- ✓ Los tests son rápidos (<5 min total)
 
-#### 2. Tests de Integración - RECOMENDADOS
+**Ubicación:** `test/mvp-complete.e2e-spec.ts` + `test/integration/`
 
-**Cuándo crear:** Al completar cada módulo
+**Relación con otras tareas:**
+- TASK-019-a: Suite E2E completa (ya marcada ⭐⭐⭐ CRÍTICA)
+- TASK-051: Health checks (verifica disponibilidad de sistema)
 
-**Tasks que requieren tests de integración:**
-
-- TASK-012: Sistema de Límites (verificar reset diario)
-- TASK-013: Lecturas Híbridas (flujo completo free vs premium)
-- TASK-002: Migraciones (run + revert sin pérdida de datos)
-
-**Ubicación:** `test/integration/*.spec.ts`  
-**Estimación:** 3 días total
-
-#### 3. Tests Unitarios - OBLIGATORIOS
-
-**Cuándo crear:** Durante desarrollo (TDD)
-
-**Metodología:**
-
-1. ✍️ Escribir test que falla (RED)
-2. ✅ Implementar código mínimo (GREEN)
-3. 🔄 Refactorizar manteniendo tests verdes (REFACTOR)
-
-**Coverage objetivo:** >90% en servicios, >85% en controladores
+**Coverage objetivo:** >80% global (servicios >80%, controladores >75%)
 
 ### Checklist de Testing por Task
 
@@ -242,44 +266,85 @@
   └─ Tests: Unitarios de prompt generation
 ```
 
-### Semana 5: Monitoreo + E2E
+### Semana 5: Monitoreo Backend
 
 **Objetivo:** Calidad y observabilidad
 
 ```bash
 □ TASK-019: Logging OpenAI (2 días)
   └─ Tests: Unitarios + E2E estadísticas
-□ Suite E2E completa (2 días)
-  └─ 12 tests críticos en mvp-complete.e2e-spec.ts
-□ Tests de integración pendientes (1 día)
+□ TASK-051: Health Checks (2 días) ⭐⭐⭐ CRÍTICA
+  └─ Tests: E2E /health, /health/ready, /health/live
 ```
 
-### Semana 6-8: Frontend MVP
+### Semana 6-7: Frontend Core (paralelo con backend)
 
-**Objetivo:** Interfaz de usuario funcional
+**Objetivo:** Interfaz funcional
 
 ```bash
-□ Setup Next.js + TailwindCSS (1 día)
-□ Auth pages (Login/Register) (2 días)
+□ Setup Next.js + Auth (3 días)
+  └─ Login/Register/Dashboard base
 □ Dashboard + Navegación (3 días)
-□ Selector categorías + preguntas (4 días)
-□ Vista de lectura/tirada (5 días)
-□ Historial de lecturas (2 días)
+  └─ Layout, menú, responsive
+□ Categorías + Preguntas (4 días)
+  └─ Selector categorías + preguntas predefinidas/custom
+□ Vista Lectura/Tirada (5 días)
+  └─ Display de cartas + interpretación
 ```
 
-### Semana 9-10: Testing Final + Deploy
+### Semana 8: Optimización de Costos
+
+**Objetivo:** Viabilidad económica
+
+```bash
+□ TASK-054: Cuotas OpenAI (3 días) ⭐⭐ NECESARIA
+  └─ Tests: E2E límite mensual alcanzado
+□ TASK-055: Caché Agresivo (3 días) ⭐⭐ NECESARIA
+  └─ Tests: E2E cache hit rate >60%
+  └─ Target: Reducir costos OpenAI 40-60%
+```
+
+### Semana 9: Developer Experience
+
+**Objetivo:** Facilitar desarrollo e integración
+
+```bash
+□ TASK-057: Swagger Completo (3 días) ⭐⭐ NECESARIA
+  └─ Documentación completa para frontend
+□ TASK-056: Rate Limiting Dinámico (2 días) ⭐ RECOMENDADA
+  └─ Límites diferenciados por plan
+□ TASK-058: Scripts Dev (2 días) ⭐ RECOMENDADA
+  └─ db:reset, db:seed, generate:reading CLI
+```
+
+### Semana 10-11: Testing Suite Completo
+
+**Objetivo:** Calidad asegurada antes de producción
+
+```bash
+□ TASK-059: Testing Suite (5 días) ⭐⭐⭐ CRÍTICA
+  - Tests unitarios (>80% coverage)
+  - Tests de integración (DB test)
+  - Tests E2E (12 críticos + flujos completos)
+  - Mock OpenAI API
+  - Factories y fixtures
+  └─ Coverage reports + CI integration
+```
+
+### Semana 12: Frontend Final + Deploy
 
 **Objetivo:** Producción lista
 
 ```bash
+□ Historial de lecturas (2 días)
 □ Tests E2E frontend (2 días)
-□ Testing integrado frontend-backend (2 días)
-□ Corrección de bugs (3 días)
+□ Corrección de bugs (2 días)
 □ Setup CI/CD (1 día)
-□ Deploy a producción (2 días)
+□ Deploy producción (1 día)
   - Frontend: Vercel
   - Backend: Railway/Render
   - DB: Railway PostgreSQL
+  - Health checks configurados
 ```
 
 ---
@@ -320,8 +385,12 @@
 - ✅ 0 errores críticos en producción
 - ✅ API responde <500ms (promedio)
 - ✅ OpenAI responde <10s
-- ✅ Coverage >80% en tests
+- ✅ Coverage >80% en tests (TASK-059)
 - ✅ Migraciones sin pérdida de datos
+- ✅ Health checks respondiendo (TASK-051)
+- ✅ Cache hit rate >60% (TASK-055)
+- ✅ API documentada en Swagger (TASK-057)
+- ✅ Cuotas OpenAI controladas (TASK-054)
 
 ### Negocio
 

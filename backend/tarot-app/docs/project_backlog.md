@@ -3175,9 +3175,9 @@ Crear sistema de gestión de IPs para bloquear IPs maliciosas y permitir IPs con
 
 ---
 
-### **TASK-051: Implementar Health Checks Completos**
+### **TASK-051: Implementar Health Checks Completos** ⭐⭐⭐ CRÍTICA MVP
 
-**Prioridad:** 🟡 ALTA  
+**Prioridad:** � CRÍTICA  
 **Estimación:** 2 días  
 **Dependencias:** TASK-003, TASK-043
 
@@ -3233,7 +3233,7 @@ Crear sistema robusto de health checks que verifique todos los componentes crít
 
 ---
 
-### **TASK-052: Implementar Métricas con Prometheus (Opcional)**
+### **TASK-052: Implementar Métricas con Prometheus (Opcional)** 🔵 FASE 2
 
 **Prioridad:** 🟢 BAJA  
 **Estimación:** 3 días  
@@ -3244,6 +3244,7 @@ Crear sistema robusto de health checks que verifique todos los componentes crít
 Integrar Prometheus para recolectar métricas detalladas de la aplicación y facilitar monitoreo avanzado.
 
 #### ✅ Tareas específicas
+
 - Instalar dependencias: `npm install @willsoto/nestjs-prometheus prom-client`
 - Configurar módulo Prometheus en la aplicación
 - Exponer endpoint `/metrics` en formato Prometheus
@@ -3287,7 +3288,7 @@ Integrar Prometheus para recolectar métricas detalladas de la aplicación y fac
 
 ---
 
-### **TASK-053: Implementar Distributed Tracing (Opcional)**
+### **TASK-053: Implementar Distributed Tracing (Opcional)** 🔵 FASE 2
 
 **Prioridad:** 🟢 BAJA  
 **Estimación:** 4 días  
@@ -3298,6 +3299,7 @@ Integrar Prometheus para recolectar métricas detalladas de la aplicación y fac
 Implementar tracing distribuido para seguir requests a través de diferentes servicios y identificar bottlenecks.
 
 #### ✅ Tareas específicas
+
 - Seleccionar solución de tracing (Jaeger, Zipkin, o Datadog APM)
 - Instalar dependencia: `npm install opentracing`
 - Configurar tracer en `main.ts`:
@@ -3342,7 +3344,7 @@ Implementar tracing distribuido para seguir requests a través de diferentes ser
 
 ---
 
-### **TASK-054: Implementar Sistema de Cuotas de OpenAI por Usuario**
+### **TASK-054: Implementar Sistema de Cuotas de OpenAI por Usuario** ⭐⭐ NECESARIA MVP
 
 **Prioridad:** 🟡 ALTA  
 **Estimación:** 3 días  
@@ -3353,6 +3355,7 @@ Implementar tracing distribuido para seguir requests a través de diferentes ser
 Crear sistema que trackee y limite el gasto en OpenAI por usuario para controlar costos operativos.
 
 #### ✅ Tareas específicas
+
 - Agregar campo `openai_tokens_used_month` (integer) a entidad `User`
 - Agregar campo `openai_cost_usd_month` (decimal) a entidad `User`
 - Crear tarea cron que resetee estos contadores el primer día de cada mes
@@ -3392,7 +3395,7 @@ Crear sistema que trackee y limite el gasto en OpenAI por usuario para controlar
 
 ---
 
-### **TASK-055: Implementar Estrategia Agresiva de Caché**
+### **TASK-055: Implementar Estrategia Agresiva de Caché** ⭐⭐ NECESARIA MVP
 
 **Prioridad:** 🟡 ALTA  
 **Estimación:** 3 días  
@@ -3403,6 +3406,7 @@ Crear sistema que trackee y limite el gasto en OpenAI por usuario para controlar
 Expandir sistema de caché para maximizar cache hits y reducir llamadas a OpenAI.
 
 #### ✅ Tareas específicas
+
 - Implementar caché a múltiples niveles:
   - **Nivel 1 - Caché exacto:** combinación exacta de cartas + pregunta
   - **Nivel 2 - Caché de cartas:** mismas cartas sin considerar pregunta
@@ -3439,7 +3443,7 @@ Expandir sistema de caché para maximizar cache hits y reducir llamadas a OpenAI
 
 ---
 
-### **TASK-056: Implementar Rate Limiting Dinámico Basado en Plan**
+### **TASK-056: Implementar Rate Limiting Dinámico Basado en Plan** ⭐ RECOMENDADA MVP
 
 **Prioridad:** 🟢 MEDIA  
 **Estimación:** 2 días  
@@ -3450,6 +3454,7 @@ Expandir sistema de caché para maximizar cache hits y reducir llamadas a OpenAI
 Mejorar sistema de rate limiting para aplicar límites diferentes según el plan del usuario.
 
 #### ✅ Tareas específicas
+
 - Modificar `ThrottlerGuard` existente para considerar plan del usuario
 - Implementar límites dinámicos por plan:
   - **FREE:**
@@ -3497,7 +3502,7 @@ Mejorar sistema de rate limiting para aplicar límites diferentes según el plan
 
 ---
 
-### **TASK-057: Implementar Swagger/OpenAPI Completo y Detallado**
+### **TASK-057: Implementar Swagger/OpenAPI Completo y Detallado** ⭐⭐ NECESARIA MVP
 
 **Prioridad:** 🟡 ALTA  
 **Estimación:** 3 días  
@@ -3508,6 +3513,7 @@ Mejorar sistema de rate limiting para aplicar límites diferentes según el plan
 Completar y mejorar documentación de API con Swagger para facilitar integración de frontend y terceros.
 
 #### ✅ Tareas específicas
+
 - Auditar todos los endpoints y asegurar que tengan decoradores Swagger:
   - `@ApiOperation()`: descripción clara de qué hace el endpoint
   - `@ApiResponse()`: documentar todas las respuestas posibles (200, 400, 401, 403, 404, 429, 500)
@@ -3560,7 +3566,7 @@ Completar y mejorar documentación de API con Swagger para facilitar integració
 
 ---
 
-### **TASK-058: Crear Scripts de Desarrollo y Utilidades**
+### **TASK-058: Crear Scripts de Desarrollo y Utilidades** ⭐ RECOMENDADA MVP
 
 **Prioridad:** 🟢 MEDIA  
 **Estimación:** 2 días  
@@ -3571,6 +3577,7 @@ Completar y mejorar documentación de API con Swagger para facilitar integració
 Crear colección de scripts útiles para facilitar desarrollo, testing y debugging.
 
 #### ✅ Tareas específicas
+
 - Crear script `npm run db:reset`:
   - Drop database
   - Create database
@@ -3617,9 +3624,9 @@ Crear colección de scripts útiles para facilitar desarrollo, testing y debuggi
 
 ---
 
-### **TASK-059: Implementar Testing Suite Completo**
+### **TASK-059: Implementar Testing Suite Completo** ⭐⭐⭐ CRÍTICA MVP
 
-**Prioridad:** 🟡 ALTA  
+**Prioridad:** � CRÍTICA  
 **Estimación:** 5 días  
 **Dependencias:** Todos los módulos implementados
 
@@ -3628,6 +3635,7 @@ Crear colección de scripts útiles para facilitar desarrollo, testing y debuggi
 Crear suite completo de tests unitarios, de integración y E2E para asegurar calidad del código.
 
 #### ✅ Tareas específicas
+
 - **Tests Unitarios (Jest):**
   - Crear tests para todos los servicios:
     - AuthService: login, register, token generation
@@ -3680,7 +3688,7 @@ Crear suite completo de tests unitarios, de integración y E2E para asegurar cal
 
 ---
 
-### **TASK-060: Crear Documentación Técnica Completa**
+### **TASK-060: Crear Documentación Técnica Completa** ⭐ RECOMENDADA MVP
 
 **Prioridad:** 🟡 ALTA  
 **Estimación:** 3 días  
@@ -3691,6 +3699,7 @@ Crear suite completo de tests unitarios, de integración y E2E para asegurar cal
 Crear documentación técnica comprehensiva para facilitar onboarding de desarrolladores y mantenimiento.
 
 #### ✅ Tareas específicas
+
 - Crear/actualizar README.md principal:
   - Descripción del proyecto
   - Stack tecnológico
@@ -3770,6 +3779,7 @@ Crear documentación técnica comprehensiva para facilitar onboarding de desarro
 ### Distribución por Prioridad
 
 **🔴 CRÍTICAS (MVP Blocker):** 12 tareas
+
 - TASK-001 a TASK-003: Configuración base
 - TASK-004 a TASK-006: Datos de tarot
 - TASK-007 a TASK-010: Categorías y preguntas
@@ -3777,6 +3787,7 @@ Crear documentación técnica comprehensiva para facilitar onboarding de desarro
 - TASK-048: Validación de inputs
 
 **🟡 ALTAS (Importantes para Launch):** 20 tareas
+
 - TASK-011 a TASK-014: Sistema de planes
 - TASK-015 a TASK-019: Auth y IA
 - TASK-024, TASK-027 a TASK-029: Admin y UX
@@ -3784,6 +3795,7 @@ Crear documentación técnica comprehensiva para facilitar onboarding de desarro
 - TASK-047, TASK-049, TASK-051, TASK-054 a TASK-057, TASK-059 a TASK-060: Seguridad y docs
 
 **🟢 MEDIAS/BAJAS (Post-Launch):** 28 tareas
+
 - TASK-020, TASK-021, TASK-023, TASK-025, TASK-026: Mejoras de lecturas
 - TASK-030 a TASK-041: Módulos adicionales (Oráculo, Rituales, Servicios)
 - TASK-044, TASK-046, TASK-050, TASK-052, TASK-053, TASK-055, TASK-056, TASK-058: Optimizaciones
@@ -3801,25 +3813,30 @@ Crear documentación técnica comprehensiva para facilitar onboarding de desarro
 ## 🎯 ROADMAP RECOMENDADO
 
 ### Sprint 1-2 (Semanas 1-4): Fundamentos
+
 - TASK-001 a TASK-003, TASK-048
 - TASK-004 a TASK-006
 - TASK-007 a TASK-010
 
 ### Sprint 3-4 (Semanas 5-8): Planes y Límites
+
 - TASK-011 a TASK-014
 - TASK-022
 - TASK-015 a TASK-016
 
 ### Sprint 5-6 (Semanas 9-12): IA y Performance
+
 - TASK-018 a TASK-021
 - TASK-042, TASK-043, TASK-045
 
 ### Sprint 7-8 (Semanas 13-16): Admin y Seguridad
+
 - TASK-024 a TASK-026
 - TASK-027 a TASK-030
 - TASK-047, TASK-049, TASK-051
 
 ### Sprint 9-10 (Semanas 17-20): Testing y Docs
+
 - TASK-057, TASK-059, TASK-060
 - TASK-054 a TASK-056
 - TASK-058
