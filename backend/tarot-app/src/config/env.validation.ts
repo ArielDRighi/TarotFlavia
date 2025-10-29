@@ -59,15 +59,43 @@ export class EnvironmentVariables {
   JWT_EXPIRES_IN: string;
 
   // =============================================================================
-  // OPENAI CONFIGURATION
+  // AI PROVIDERS CONFIGURATION
   // =============================================================================
 
+  // Groq (Primary - Free)
   @IsString()
   @IsNotEmpty()
+  @Matches(/^gsk_/, {
+    message: 'GROQ_API_KEY must start with "gsk_"',
+  })
+  GROQ_API_KEY: string;
+
+  @IsOptional()
+  @IsString()
+  GROQ_MODEL: string = 'llama-3.3-70b-versatile';
+
+  // DeepSeek (Growth - Low Cost)
+  @IsString()
+  @IsOptional()
+  DEEPSEEK_API_KEY?: string;
+
+  @IsString()
+  @IsOptional()
+  @Transform(({ value }) => (value ? String(value) : 'deepseek-chat'))
+  DEEPSEEK_MODEL: string = 'deepseek-chat';
+
+  // OpenAI (Fallback/Premium - Optional)
+  @IsString()
+  @IsOptional()
   @Matches(/^sk-/, {
     message: 'OPENAI_API_KEY must start with "sk-"',
   })
-  OPENAI_API_KEY: string;
+  OPENAI_API_KEY?: string;
+
+  @IsString()
+  @IsOptional()
+  @Transform(({ value }) => (value ? String(value) : 'gpt-4o-mini'))
+  OPENAI_MODEL: string = 'gpt-4o-mini';
 
   // =============================================================================
   // APPLICATION CONFIGURATION (Optional with Defaults)
