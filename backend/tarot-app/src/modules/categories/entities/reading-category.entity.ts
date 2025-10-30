@@ -7,7 +7,6 @@ import {
   OneToMany,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { TarotReading } from '../../tarot/readings/entities/tarot-reading.entity';
 
 @Entity('reading_category')
 export class ReadingCategory {
@@ -64,8 +63,11 @@ export class ReadingCategory {
   @Column({ default: true })
   isActive: boolean;
 
-  @OneToMany(() => TarotReading, (reading) => reading.category)
-  readings: TarotReading[];
+  @OneToMany('TarotReading', 'category')
+  readings?: unknown[];
+
+  @OneToMany('PredefinedQuestion', 'category')
+  predefinedQuestions?: unknown[];
 
   @CreateDateColumn()
   createdAt: Date;

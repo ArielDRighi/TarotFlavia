@@ -14,6 +14,12 @@ export class InitialSchema1761655973524 implements MigrationInterface {
       `CREATE TABLE "reading_category" ("id" SERIAL NOT NULL, "name" character varying NOT NULL, "slug" character varying NOT NULL, "description" text NOT NULL, "icon" character varying NOT NULL, "color" character varying NOT NULL, "order" integer NOT NULL DEFAULT '0', "isActive" boolean NOT NULL DEFAULT true, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "UQ_reading_category_name" UNIQUE ("name"), CONSTRAINT "UQ_reading_category_slug" UNIQUE ("slug"), CONSTRAINT "PK_reading_category_id" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
+      `CREATE TABLE "predefined_question" ("id" SERIAL NOT NULL, "category_id" integer NOT NULL, "question_text" character varying(200) NOT NULL, "order" integer NOT NULL DEFAULT '0', "is_active" boolean NOT NULL DEFAULT true, "usage_count" integer NOT NULL DEFAULT '0', "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now(), "deleted_at" TIMESTAMP, CONSTRAINT "PK_predefined_question_id" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_predefined_question_category" ON "predefined_question" ("category_id")`,
+    );
+    await queryRunner.query(
       `CREATE TABLE "tarot_reading" ("id" SERIAL NOT NULL, "question" character varying, "cardPositions" jsonb NOT NULL, "interpretation" text, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "deletedAt" TIMESTAMP, "userId" integer, "deckId" integer, "categoryId" integer, CONSTRAINT "PK_8f96c960d305aaf75bd688fb2cd" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
@@ -44,6 +50,9 @@ export class InitialSchema1761655973524 implements MigrationInterface {
       `ALTER TABLE "tarot_reading" ADD CONSTRAINT "FK_906c9f21a4276fc08a570bee56e" FOREIGN KEY ("deckId") REFERENCES "tarot_deck"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
+      `ALTER TABLE "predefined_question" ADD CONSTRAINT "FK_predefined_question_category" FOREIGN KEY ("category_id") REFERENCES "reading_category"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
       `ALTER TABLE "tarot_reading" ADD CONSTRAINT "FK_tarot_reading_category" FOREIGN KEY ("categoryId") REFERENCES "reading_category"("id") ON DELETE SET NULL ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
@@ -71,6 +80,9 @@ export class InitialSchema1761655973524 implements MigrationInterface {
       `ALTER TABLE "tarot_reading" DROP CONSTRAINT "FK_tarot_reading_category"`,
     );
     await queryRunner.query(
+      `ALTER TABLE "predefined_question" DROP CONSTRAINT "FK_predefined_question_category"`,
+    );
+    await queryRunner.query(
       `ALTER TABLE "tarot_reading" DROP COLUMN "categoryId"`,
     );
     await queryRunner.query(
@@ -93,6 +105,10 @@ export class InitialSchema1761655973524 implements MigrationInterface {
     await queryRunner.query(`DROP TABLE "tarot_spread"`);
     await queryRunner.query(`DROP TABLE "user"`);
     await queryRunner.query(`DROP TABLE "tarot_reading"`);
+    await queryRunner.query(
+      `DROP INDEX "public"."IDX_predefined_question_category"`,
+    );
+    await queryRunner.query(`DROP TABLE "predefined_question"`);
     await queryRunner.query(`DROP TABLE "reading_category"`);
     await queryRunner.query(`DROP TABLE "tarot_card"`);
     await queryRunner.query(`DROP TABLE "tarot_deck"`);
