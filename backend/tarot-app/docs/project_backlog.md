@@ -1107,7 +1107,7 @@ Crear seeder con las 6 categorías predefinidas incluyendo iconos (emoji o refer
 
 **Tests necesarios:**
 
-- [ ] **Tests unitarios:**
+- [x] **Tests unitarios:**
   - Seeder inserta exactamente 6 categorías
   - Idempotencia: no duplica en múltiples ejecuciones
   - Todas las categorías tienen icono, color, descripción y orden
@@ -1117,23 +1117,23 @@ Crear seeder con las 6 categorías predefinidas incluyendo iconos (emoji o refer
 
 #### ✅ Tareas específicas
 
-- [ ] Crear seeder para las 6 categorías:
+- [x] Crear seeder para las 6 categorías:
   - **❤️ Amor y Relaciones** (`#FF6B9D`)
   - **💼 Carrera y Trabajo** (`#4A90E2`)
   - **💰 Dinero y Finanzas** (`#F5A623`)
   - **🏥 Salud y Bienestar** (`#7ED321`)
   - **✨ Crecimiento Espiritual** (`#9013FE`)
   - **🌟 Consulta General** (`#50E3C2`)
-- [ ] Escribir descripciones atractivas para cada categoría (1-2 oraciones)
-- [ ] Asignar orden de visualización apropiado (`order: 1-6`)
-- [ ] Implementar validación que evite duplicar categorías en múltiples ejecuciones
-- [ ] Todas las categorías deben iniciarse como `is_active: true`
+- [x] Escribir descripciones atractivas para cada categoría (1-2 oraciones)
+- [x] Asignar orden de visualización apropiado (`order: 1-6`)
+- [x] Implementar validación que evite duplicar categorías en múltiples ejecuciones
+- [x] Todas las categorías deben iniciarse como `is_active: true`
 
 #### 🎯 Criterios de aceptación
 
-- ✓ Existen exactamente 6 categorías después del seed
-- ✓ Cada categoría tiene icono, color y descripción completa
-- ✓ El seeder es idempotente
+- ✅ Existen exactamente 6 categorías después del seed
+- ✅ Cada categoría tiene icono, color y descripción completa
+- ✅ El seeder es idempotente
 
 ---
 
