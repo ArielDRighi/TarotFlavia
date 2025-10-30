@@ -23,8 +23,15 @@ export class InitialSchema1761655973524 implements MigrationInterface {
       `CREATE TABLE "tarot_reading" ("id" SERIAL NOT NULL, "question" character varying, "cardPositions" jsonb NOT NULL, "interpretation" text, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "deletedAt" TIMESTAMP, "userId" integer, "deckId" integer, "categoryId" integer, CONSTRAINT "PK_8f96c960d305aaf75bd688fb2cd" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "user" ("id" SERIAL NOT NULL, "email" character varying NOT NULL, "password" character varying NOT NULL, "name" character varying NOT NULL, "profilePicture" character varying, "isAdmin" boolean NOT NULL DEFAULT false, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "UQ_e12875dfb3b1d92d7d7c5377e22" UNIQUE ("email"), CONSTRAINT "PK_cace4a159ff9f2512dd42373760" PRIMARY KEY ("id"))`,
+      `CREATE TYPE "user_plan_enum" AS ENUM('free', 'premium')`,
     );
+    await queryRunner.query(
+      `CREATE TYPE "user_subscription_status_enum" AS ENUM('active', 'cancelled', 'expired')`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "user" ("id" SERIAL NOT NULL, "email" character varying NOT NULL, "password" character varying NOT NULL, "name" character varying NOT NULL, "profilePicture" character varying, "isAdmin" boolean NOT NULL DEFAULT false, "plan" "user_plan_enum" NOT NULL DEFAULT 'free', "planStartedAt" TIMESTAMP, "planExpiresAt" TIMESTAMP, "subscriptionStatus" "user_subscription_status_enum", "stripeCustomerId" character varying, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "UQ_e12875dfb3b1d92d7d7c5377e22" UNIQUE ("email"), CONSTRAINT "PK_cace4a159ff9f2512dd42373760" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(`CREATE INDEX "IDX_user_plan" ON "user" ("plan")`);
     await queryRunner.query(
       `CREATE TABLE "tarot_spread" ("id" SERIAL NOT NULL, "name" character varying NOT NULL, "description" text NOT NULL, "cardCount" integer NOT NULL, "positions" jsonb NOT NULL, "imageUrl" character varying, "difficulty" character varying NOT NULL DEFAULT 'beginner', "isBeginnerFriendly" boolean NOT NULL DEFAULT true, "whenToUse" text NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_957eb94a9818cae3b346c0b70b1" PRIMARY KEY ("id"))`,
     );
@@ -103,7 +110,10 @@ export class InitialSchema1761655973524 implements MigrationInterface {
     await queryRunner.query(`DROP TABLE "tarot_reading_cards_tarot_card"`);
     await queryRunner.query(`DROP TABLE "tarot_interpretation"`);
     await queryRunner.query(`DROP TABLE "tarot_spread"`);
+    await queryRunner.query(`DROP INDEX "public"."IDX_user_plan"`);
     await queryRunner.query(`DROP TABLE "user"`);
+    await queryRunner.query(`DROP TYPE "user_subscription_status_enum"`);
+    await queryRunner.query(`DROP TYPE "user_plan_enum"`);
     await queryRunner.query(`DROP TABLE "tarot_reading"`);
     await queryRunner.query(
       `DROP INDEX "public"."IDX_predefined_question_category"`,

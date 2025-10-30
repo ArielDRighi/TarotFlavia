@@ -4,7 +4,7 @@ import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { CreateUserDto } from '../users/dto/create-user.dto';
-import { User } from '../users/entities/user.entity';
+import { User, UserPlan } from '../users/entities/user.entity';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -133,6 +133,27 @@ describe('AuthService', () => {
         expect(res.user.email).toEqual(user.email);
         expect(res.user.name).toEqual(user.name);
       }
+    });
+
+    it('should include plan information in JWT payload', () => {
+      const user: Partial<User> = {
+        id: 4,
+        email: 'premium@example.com',
+        name: 'Premium User',
+        isAdmin: false,
+        plan: UserPlan.PREMIUM,
+      };
+
+      service.login(user);
+
+      expect(jwtServiceMock.sign).toHaveBeenCalledWith(
+        expect.objectContaining({
+          email: user.email,
+          sub: user.id,
+          isAdmin: user.isAdmin,
+          plan: user.plan,
+        }),
+      );
     });
   });
 });
