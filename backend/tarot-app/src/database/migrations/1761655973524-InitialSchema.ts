@@ -33,6 +33,15 @@ export class InitialSchema1761655973524 implements MigrationInterface {
     );
     await queryRunner.query(`CREATE INDEX "IDX_user_plan" ON "user" ("plan")`);
     await queryRunner.query(
+      `CREATE TYPE "usage_feature_enum" AS ENUM('tarot_reading', 'oracle_query', 'interpretation_regeneration')`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "usage_limit" ("id" SERIAL NOT NULL, "user_id" integer NOT NULL, "feature" "usage_feature_enum" NOT NULL, "count" integer NOT NULL DEFAULT '0', "date" date NOT NULL, "created_at" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_usage_limit_id" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE UNIQUE INDEX "IDX_usage_limit_user_feature_date" ON "usage_limit" ("user_id", "feature", "date")`,
+    );
+    await queryRunner.query(
       `CREATE TABLE "tarot_spread" ("id" SERIAL NOT NULL, "name" character varying NOT NULL, "description" text NOT NULL, "cardCount" integer NOT NULL, "positions" jsonb NOT NULL, "imageUrl" character varying, "difficulty" character varying NOT NULL DEFAULT 'beginner', "isBeginnerFriendly" boolean NOT NULL DEFAULT true, "whenToUse" text NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_957eb94a9818cae3b346c0b70b1" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
@@ -70,6 +79,9 @@ export class InitialSchema1761655973524 implements MigrationInterface {
     );
     await queryRunner.query(
       `ALTER TABLE "tarot_reading_cards_tarot_card" ADD CONSTRAINT "FK_527004ab3eb18d59af73150b59e" FOREIGN KEY ("tarotCardId") REFERENCES "tarot_card"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "usage_limit" ADD CONSTRAINT "FK_usage_limit_user" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
     );
   }
 
@@ -110,6 +122,14 @@ export class InitialSchema1761655973524 implements MigrationInterface {
     await queryRunner.query(`DROP TABLE "tarot_reading_cards_tarot_card"`);
     await queryRunner.query(`DROP TABLE "tarot_interpretation"`);
     await queryRunner.query(`DROP TABLE "tarot_spread"`);
+    await queryRunner.query(
+      `ALTER TABLE "usage_limit" DROP CONSTRAINT "FK_usage_limit_user"`,
+    );
+    await queryRunner.query(
+      `DROP INDEX "public"."IDX_usage_limit_user_feature_date"`,
+    );
+    await queryRunner.query(`DROP TABLE "usage_limit"`);
+    await queryRunner.query(`DROP TYPE "usage_feature_enum"`);
     await queryRunner.query(`DROP INDEX "public"."IDX_user_plan"`);
     await queryRunner.query(`DROP TABLE "user"`);
     await queryRunner.query(`DROP TYPE "user_subscription_status_enum"`);
