@@ -1192,12 +1192,13 @@ Crear la entidad `PredefinedQuestion` y su módulo completo para gestionar pregu
 
 ---
 
-### **TASK-010: Crear Seeders de Preguntas Predefinidas por Categoría** ⭐⭐
+### **TASK-010: Crear Seeders de Preguntas Predefinidas por Categoría** ⭐⭐ ✅
 
 **Prioridad:** 🔴 CRÍTICA  
 **Estimación:** 2 días  
 **Dependencias:** TASK-008, TASK-009  
-**Marcador MVP:** ⭐⭐ **NECESARIO PARA MVP** - Contenido esencial para usuarios free
+**Marcador MVP:** ⭐⭐ **NECESARIO PARA MVP** - Contenido esencial para usuarios free  
+**Estado:** ✅ **COMPLETADA** (30/10/2025)
 
 #### 📋 Descripción
 
@@ -1207,36 +1208,38 @@ Crear seeders con al menos 5-8 preguntas bien formuladas para cada una de las 6 
 
 **Tests necesarios:**
 
-- [ ] **Tests unitarios:**
-  - Seeder inserta mínimo 30 preguntas (5×6 categorías)
-  - Preguntas asociadas a categorías correctas
-  - No se crean duplicados en múltiples ejecuciones (idempotencia)
-  - Todas las preguntas inician con `is_active: true`
+- [x] **Tests unitarios:**
+  - Seeder inserta mínimo 30 preguntas (5×6 categorías) ✅
+  - Preguntas asociadas a categorías correctas ✅
+  - No se crean duplicados en múltiples ejecuciones (idempotencia) ✅
+  - Todas las preguntas inician con `is_active: true` ✅
 
 **Ubicación:** `src/database/seeds/*.spec.ts`
+**Resultado:** 9/9 tests passing
 
 #### ✅ Tareas específicas
 
-- [ ] Investigar y formular preguntas comunes de tarot para cada categoría
-- [ ] Crear seeder con preguntas para "❤️ Amor y Relaciones":
-  - "¿Cómo mejorar mi relación actual?"
-  - "¿Encontraré el amor pronto?"
-  - "¿Qué debo saber sobre mi vida amorosa?"
-  - "¿Esta persona es adecuada para mí?"
-  - "¿Cómo superar una ruptura?"
-  - _Etc._ (mínimo 5)
-- [ ] Crear preguntas similares para las otras 5 categorías
-- [ ] Asegurar que las preguntas estén bien formuladas y sean abiertas (no sí/no)
-- [ ] Ordenar preguntas de más generales a más específicas dentro de cada categoría
-- [ ] Todas las preguntas deben iniciarse con `is_active: true`
-- [ ] Implementar verificación de duplicados antes de insertar
-- [ ] Documentar la lógica de formulación de preguntas para mantener consistencia
+- [x] Investigar y formular preguntas comunes de tarot para cada categoría
+- [x] Crear seeder con preguntas para "❤️ Amor y Relaciones" (8 preguntas)
+- [x] Crear seeder con preguntas para "💼 Trabajo y Carrera" (8 preguntas)
+- [x] Crear seeder con preguntas para "💰 Dinero y Finanzas" (7 preguntas)
+- [x] Crear seeder con preguntas para "🌿 Salud y Bienestar" (6 preguntas)
+- [x] Crear seeder con preguntas para "✨ Espiritual y Crecimiento" (7 preguntas)
+- [x] Crear seeder con preguntas para "🔮 General" (6 preguntas)
+- [x] Asegurar que las preguntas estén bien formuladas y sean abiertas (no sí/no)
+- [x] Ordenar preguntas de más generales a más específicas dentro de cada categoría
+- [x] Todas las preguntas iniciadas con `is_active: true`
+- [x] Implementar verificación de duplicados (idempotencia)
+- [x] Documentar las preguntas en archivo data
 
 #### 🎯 Criterios de aceptación
 
-- ✓ Existen al menos 5 preguntas por cada categoría (30 total mínimo)
-- ✓ Las preguntas están correctamente asociadas a sus categorías
-- ✓ Las preguntas son coherentes y útiles para lecturas de tarot
+- ✅ Existen 42 preguntas en total (superando el mínimo de 30)
+- ✅ Cada categoría tiene entre 6-8 preguntas (todas superan el mínimo de 5)
+- ✅ Las preguntas están correctamente asociadas a sus categorías
+- ✅ Las preguntas son coherentes y útiles para lecturas de tarot
+- ✅ Implementación con TDD estricto (tests primero)
+- ✅ Código sin eslint-disable, tipos correctamente definidos
 
 ---
 
