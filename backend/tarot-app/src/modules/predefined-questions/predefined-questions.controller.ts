@@ -8,6 +8,7 @@ import {
   Delete,
   Query,
   UseGuards,
+  ParseIntPipe,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -45,11 +46,12 @@ export class PredefinedQuestionsController {
     status: 200,
     description: 'Lista de preguntas predefinidas retornada exitosamente',
   })
-  findAll(@Query('categoryId') categoryId?: number) {
+  findAll(
+    @Query('categoryId', new ParseIntPipe({ optional: true }))
+    categoryId?: number,
+  ) {
     if (categoryId) {
-      return this.predefinedQuestionsService.findByCategoryId(
-        Number(categoryId),
-      );
+      return this.predefinedQuestionsService.findByCategoryId(categoryId);
     }
     return this.predefinedQuestionsService.findAll();
   }

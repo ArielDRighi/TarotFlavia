@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
@@ -36,15 +35,16 @@ describe('PredefinedQuestions (e2e)', () => {
     categoryId = categoryResult[0].id;
 
     // Crear usuarios de prueba
-    const adminResult = await dataSource.query(
+    // Hash válido de bcrypt para 'test123'
+    await dataSource.query(
       `INSERT INTO "user" (email, password, name, "isAdmin") 
-       VALUES ('admin@test.com', '$2b$10$test', 'Admin', true) 
+       VALUES ('admin@test.com', '$2b$10$/0GFzlbRMqjragnJnSUfIuLPYsqyQNDUpD8YBzfG3/ttDThiMiMhu', 'Admin', true) 
        RETURNING id`,
     );
 
-    const userResult = await dataSource.query(
+    await dataSource.query(
       `INSERT INTO "user" (email, password, name, "isAdmin") 
-       VALUES ('user@test.com', '$2b$10$test', 'User', false) 
+       VALUES ('user@test.com', '$2b$10$/0GFzlbRMqjragnJnSUfIuLPYsqyQNDUpD8YBzfG3/ttDThiMiMhu', 'User', false) 
        RETURNING id`,
     );
 
