@@ -20,7 +20,7 @@ export class AuthService {
   async validateUser(
     email: string,
     pass: string,
-  ): Promise<Omit<User, 'password'> | null> {
+  ): Promise<Partial<User> | null> {
     const user = await this.usersService.findByEmail(email);
 
     if (user && (await bcrypt.compare(pass, user.password))) {
@@ -36,7 +36,12 @@ export class AuthService {
   }
 
   private generateAuthResponse(user: Partial<User>) {
-    const payload = { email: user.email, sub: user.id, isAdmin: user.isAdmin };
+    const payload = {
+      email: user.email,
+      sub: user.id,
+      isAdmin: user.isAdmin,
+      plan: user.plan,
+    };
 
     return {
       user: {
@@ -44,6 +49,7 @@ export class AuthService {
         email: user.email,
         name: user.name,
         isAdmin: user.isAdmin,
+        plan: user.plan,
       },
       access_token: this.jwtService.sign(payload),
     };

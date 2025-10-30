@@ -1249,12 +1249,14 @@ Crear seeders con al menos 5-8 preguntas bien formuladas para cada una de las 6 
 
 ---
 
-### **TASK-011: Ampliar Entidad User con Sistema de Planes** ⭐⭐
+### **TASK-011: Ampliar Entidad User con Sistema de Planes** ⭐⭐ ✅
 
+**Estado:** ✅ **COMPLETADA**  
 **Prioridad:** 🟡 ALTA  
 **Estimación:** 2 días  
 **Dependencias:** TASK-002  
-**Marcador MVP:** ⭐⭐ **NECESARIO PARA MVP** - Base del modelo de negocio
+**Marcador MVP:** ⭐⭐ **NECESARIO PARA MVP** - Base del modelo de negocio  
+**Fecha de Completado:** 30 de octubre, 2025
 
 #### 📋 Descripción
 
@@ -1264,11 +1266,11 @@ Modificar la entidad `User` para incluir sistema completo de planes (free/premiu
 
 **Tests necesarios:**
 
-- [ ] **Tests unitarios:**
+- [x] **Tests unitarios:**
   - `isPremium()` retorna true para usuario premium activo
   - `isPremium()` retorna false para usuario free
   - `hasPlanExpired()` detecta planes vencidos
-- [ ] **Tests de integración:**
+- [x] **Tests de integración:**
   - Migración agrega todos los campos correctamente
   - JWT incluye información de plan
   - Índice en campo `plan` funciona
@@ -1277,24 +1279,34 @@ Modificar la entidad `User` para incluir sistema completo de planes (free/premiu
 
 #### ✅ Tareas específicas
 
-- [ ] Crear migración que agregue campos a tabla `users`:
+- [x] Crear migración que agregue campos a tabla `users`:
   - `plan` (enum: `'free'`, `'premium'`, default: `'free'`)
   - `plan_started_at` (timestamp, nullable)
   - `plan_expires_at` (timestamp, nullable)
   - `subscription_status` (enum: `'active'`, `'cancelled'`, `'expired'`, nullable)
   - `stripe_customer_id` (string, nullable, para futura integración)
-- [ ] Actualizar entidad `User` con estos nuevos campos
-- [ ] Implementar método `isPremium()` en la entidad que verifique si el plan es premium y está activo
-- [ ] Implementar método `hasPlanExpired()` que verifique la fecha de expiración
-- [ ] Crear DTO `UpdateUserPlanDto` para cambios de plan por admin
-- [ ] Actualizar servicios de autenticación para incluir información de plan en JWT payload
-- [ ] Crear índice en campo `plan` para queries eficientes
+- [x] Actualizar entidad `User` con estos nuevos campos
+- [x] Implementar método `isPremium()` en la entidad que verifique si el plan es premium y está activo
+- [x] Implementar método `hasPlanExpired()` que verifique la fecha de expiración
+- [x] Crear DTO `UpdateUserPlanDto` para cambios de plan por admin
+- [x] Actualizar servicios de autenticación para incluir información de plan en JWT payload
+- [x] Crear índice en campo `plan` para queries eficientes
 
 #### 🎯 Criterios de aceptación
 
-- ✓ Los campos nuevos están correctamente migrados
-- ✓ Los métodos de verificación de plan funcionan correctamente
-- ✓ El token JWT incluye información del plan del usuario
+- ✅ Los campos nuevos están correctamente migrados
+- ✅ Los métodos de verificación de plan funcionan correctamente
+- ✅ El token JWT incluye información del plan del usuario
+
+#### 📝 Notas de Implementación
+
+- Se actualizó la migración existente `1761655973524-InitialSchema.ts` en lugar de crear una nueva, ya que la aplicación no está en producción
+- Se crearon enums `UserPlan` y `SubscriptionStatus` para type-safety
+- Se implementaron tests unitarios completos con 9 casos de prueba para la entidad User
+- Se crearon tests de validación completos con 7 casos de prueba para el DTO `UpdateUserPlanDto`
+- Se actualizó el servicio de autenticación para incluir el plan en el payload del JWT
+- Todos los tests pasan (283 tests en total)
+- El código pasó lint, format y build sin errores
 
 ---
 

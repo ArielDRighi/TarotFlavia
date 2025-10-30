@@ -9,6 +9,17 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { TarotReading } from '../../tarot/readings/entities/tarot-reading.entity';
 
+export enum UserPlan {
+  FREE = 'free',
+  PREMIUM = 'premium',
+}
+
+export enum SubscriptionStatus {
+  ACTIVE = 'active',
+  CANCELLED = 'cancelled',
+  EXPIRED = 'expired',
+}
+
 @Entity()
 export class User {
   @ApiProperty({ example: 1, description: 'ID único del usuario' })
@@ -46,6 +57,55 @@ export class User {
   @Column({ default: false })
   isAdmin: boolean;
 
+  @ApiProperty({
+    example: 'free',
+    description: 'Plan del usuario (free o premium)',
+    enum: UserPlan,
+  })
+  @Column({
+    type: 'enum',
+    enum: UserPlan,
+    default: UserPlan.FREE,
+  })
+  plan: UserPlan;
+
+  @ApiProperty({
+    example: '2023-01-01T00:00:00Z',
+    description: 'Fecha de inicio del plan actual',
+    nullable: true,
+  })
+  @Column({ nullable: true })
+  planStartedAt: Date;
+
+  @ApiProperty({
+    example: '2023-12-31T23:59:59Z',
+    description: 'Fecha de expiración del plan',
+    nullable: true,
+  })
+  @Column({ nullable: true })
+  planExpiresAt: Date;
+
+  @ApiProperty({
+    example: 'active',
+    description: 'Estado de la suscripción',
+    enum: SubscriptionStatus,
+    nullable: true,
+  })
+  @Column({
+    type: 'enum',
+    enum: SubscriptionStatus,
+    nullable: true,
+  })
+  subscriptionStatus: SubscriptionStatus;
+
+  @ApiProperty({
+    example: 'cus_123456789',
+    description: 'ID del cliente en Stripe',
+    nullable: true,
+  })
+  @Column({ nullable: true })
+  stripeCustomerId: string;
+
   @OneToMany(() => TarotReading, (reading) => reading.user)
   readings: TarotReading[];
 
@@ -62,4 +122,27 @@ export class User {
   })
   @UpdateDateColumn()
   updatedAt: Date;
+
+  /**
+   * Verifica si el usuario tiene un plan premium activo
+   * @returns true si el usuario tiene plan premium y está activo
+   */
+  isPremium(): boolean {
+    return (
+      this.plan === UserPlan.PREMIUM &&
+      this.subscriptionStatus === SubscriptionStatus.ACTIVE &&
+      !this.hasPlanExpired()
+    );
+  }
+
+  /**
+   * Verifica si el plan del usuario ha expirado
+   * @returns true si la fecha de expiración es anterior a la fecha actual
+   */
+  hasPlanExpired(): boolean {
+    if (!this.planExpiresAt) {
+      return false;
+    }
+    return new Date() > new Date(this.planExpiresAt);
+  }
 }
