@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
-import { User } from '../users/entities/user.entity';
+import { User, UserWithoutPassword } from '../users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -20,13 +20,13 @@ export class AuthService {
   async validateUser(
     email: string,
     pass: string,
-  ): Promise<Partial<User> | null> {
+  ): Promise<UserWithoutPassword | null> {
     const user = await this.usersService.findByEmail(email);
 
     if (user && (await bcrypt.compare(pass, user.password))) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...result } = user;
-      return result;
+      return result as UserWithoutPassword;
     }
     return null;
   }

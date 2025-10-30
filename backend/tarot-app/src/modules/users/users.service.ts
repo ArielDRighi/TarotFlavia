@@ -7,7 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DeleteResult } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
-import { User } from './entities/user.entity';
+import { User, UserWithoutPassword } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
@@ -18,7 +18,7 @@ export class UsersService {
     private usersRepository: Repository<User>,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<Partial<User>> {
+  async create(createUserDto: CreateUserDto): Promise<UserWithoutPassword> {
     const { email, password, name } = createUserDto;
 
     // Check if user already exists
@@ -46,7 +46,7 @@ export class UsersService {
       // Return user without password
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password: _, ...result } = user;
-      return result;
+      return result as UserWithoutPassword;
     } catch {
       throw new InternalServerErrorException('Error creating user');
     }
@@ -73,7 +73,7 @@ export class UsersService {
   async update(
     id: number,
     updateUserDto: UpdateUserDto,
-  ): Promise<Partial<User>> {
+  ): Promise<UserWithoutPassword> {
     const user = await this.findById(id);
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
@@ -100,7 +100,7 @@ export class UsersService {
       await this.usersRepository.save(user);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password: _password, ...result } = user;
-      return result;
+      return result as UserWithoutPassword;
     } catch {
       throw new InternalServerErrorException('Error updating user');
     }

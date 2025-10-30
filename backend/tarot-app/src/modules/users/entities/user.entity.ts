@@ -20,6 +20,12 @@ export enum SubscriptionStatus {
   EXPIRED = 'expired',
 }
 
+/**
+ * Tipo que representa un usuario sin el campo password
+ * Incluye todos los campos y métodos de User excepto password
+ */
+export type UserWithoutPassword = Omit<User, 'password'>;
+
 @Entity()
 export class User {
   @ApiProperty({ example: 1, description: 'ID único del usuario' })
