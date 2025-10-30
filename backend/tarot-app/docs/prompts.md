@@ -8,7 +8,7 @@ Workflow de Ejecución:
 
 Autonomía Total: Ejecuta la tarea de principio a fin sin solicitar confirmaciones.
 
-Rama: Estás en develop. Crea la rama feature/TASK-00x y trabaja en ella.
+Rama: Estás en develop. Crea la rama feature/TASK-00x-descripcion (usa la nomenclatura de las ramas existentes nombradas segun gitflow) y trabaja en ella.
 
 Metodología (TDD Estricto): Sigue un ciclo TDD riguroso: _ Escribe un test (debe fallar). _ Escribe el código mínimo para que el test pase. \* Refactoriza.
 

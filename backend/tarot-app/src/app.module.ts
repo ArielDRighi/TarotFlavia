@@ -12,6 +12,7 @@ import { SpreadsModule } from './modules/tarot/spreads/spreads.module';
 import { ReadingsModule } from './modules/tarot/readings/readings.module';
 import { InterpretationsModule } from './modules/tarot/interpretations/interpretations.module';
 import { CategoriesModule } from './modules/categories/categories.module';
+import { PredefinedQuestionsModule } from './modules/predefined-questions/predefined-questions.module';
 import { HealthModule } from './modules/health/health.module';
 import databaseConfig from './config/typeorm';
 import { validate } from './config/env-validator';
@@ -46,6 +47,7 @@ import { validate } from './config/env-validator';
     ReadingsModule,
     InterpretationsModule,
     CategoriesModule,
+    PredefinedQuestionsModule,
     TarotModule,
     HealthModule,
   ],

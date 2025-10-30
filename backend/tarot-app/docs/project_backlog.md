@@ -1152,40 +1152,43 @@ Crear la entidad `PredefinedQuestion` y su módulo completo para gestionar pregu
 
 **Tests necesarios:**
 
-- [ ] **Tests unitarios:**
+- [x] **Tests unitarios:**
   - CRUD completo funciona correctamente
   - Filtrado por `category_id`
   - Solo preguntas activas en endpoint público
   - Soft-delete no elimina físicamente
-- [ ] **Tests E2E:**
+- [x] **Tests E2E:**
   - GET `/predefined-questions?categoryId=1` retorna solo de esa categoría
   - Admin puede crear/editar preguntas → 201
   - Usuario normal no puede modificar preguntas → 403
 
 **Ubicación:** `src/predefined-questions/*.spec.ts` + `test/predefined-questions.e2e-spec.ts`
+**Tests ejecutados:** 17 tests unitarios passed ✅
 
 #### ✅ Tareas específicas
 
-- [ ] Crear entidad `PredefinedQuestion` con campos:
-  - `id`, `category_id` (FK), `question_text`, `order`, `is_active`, `created_at`, `updated_at`
-- [ ] Crear relación Many-to-One con `ReadingCategory`
-- [ ] Crear módulo `PredefinedQuestionsModule` con controlador y servicio
-- [ ] Implementar endpoint `GET /predefined-questions?categoryId=X` que filtre por categoría
-- [ ] Implementar endpoint `GET /predefined-questions/:id` para obtener pregunta específica
-- [ ] Crear DTOs:
+- [x] Crear entidad `PredefinedQuestion` con campos:
+  - `id`, `category_id` (FK), `question_text`, `order`, `is_active`, `usage_count`, `created_at`, `updated_at`, `deleted_at`
+- [x] Crear relación Many-to-One con `ReadingCategory`
+- [x] Crear módulo `PredefinedQuestionsModule` con controlador y servicio
+- [x] Implementar endpoint `GET /predefined-questions?categoryId=X` que filtre por categoría
+- [x] Implementar endpoint `GET /predefined-questions/:id` para obtener pregunta específica
+- [x] Crear DTOs:
   - `CreatePredefinedQuestionDto` con validación de longitud (max 200 caracteres)
   - `UpdatePredefinedQuestionDto` con validación de longitud (max 200 caracteres)
-- [ ] Implementar endpoints `POST`, `PUT`, `DELETE` protegidos para admin
-- [ ] Agregar campo `usage_count` para trackear popularidad de preguntas
-- [ ] Implementar soft-delete para preguntas (no eliminar físicamente)
-- [ ] Agregar índice en `category_id` para optimizar queries
-- [ ] Documentar endpoints con Swagger
+- [x] Implementar endpoints `POST`, `PATCH`, `DELETE` protegidos para admin
+- [x] Agregar campo `usage_count` para trackear popularidad de preguntas
+- [x] Implementar soft-delete para preguntas (no eliminar físicamente)
+- [x] Agregar índice en `category_id` para optimizar queries
+- [x] Documentar endpoints con Swagger
 
 #### 🎯 Criterios de aceptación
 
-- ✓ La entidad está correctamente migrada con sus relaciones
-- ✓ Usuarios pueden listar preguntas filtradas por categoría
-- ✓ Solo admins pueden modificar preguntas
+- ✅ La entidad está correctamente migrada con sus relaciones
+- ✅ Usuarios pueden listar preguntas filtradas por categoría
+- ✅ Solo admins pueden modificar preguntas
+
+**Estado:** ✅ **COMPLETADA** - Fecha: 2025-10-29
 
 ---
 
