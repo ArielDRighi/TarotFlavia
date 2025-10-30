@@ -14,6 +14,7 @@ import { InterpretationsModule } from './modules/tarot/interpretations/interpret
 import { CategoriesModule } from './modules/categories/categories.module';
 import { PredefinedQuestionsModule } from './modules/predefined-questions/predefined-questions.module';
 import { HealthModule } from './modules/health/health.module';
+import { UsageLimitsModule } from './modules/usage-limits/usage-limits.module';
 import databaseConfig from './config/typeorm';
 import { validate } from './config/env-validator';
 
@@ -50,6 +51,7 @@ import { validate } from './config/env-validator';
     PredefinedQuestionsModule,
     TarotModule,
     HealthModule,
+    UsageLimitsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
