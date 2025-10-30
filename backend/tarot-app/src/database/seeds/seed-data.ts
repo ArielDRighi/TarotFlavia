@@ -4,10 +4,11 @@ import { Repository, DataSource } from 'typeorm';
 import { AppModule } from '../../app.module';
 import { TarotDeck } from '../../modules/tarot/decks/entities/tarot-deck.entity';
 import { TarotCard } from '../../modules/tarot/cards/entities/tarot-card.entity';
+import { ReadingCategory } from '../../modules/categories/entities/reading-category.entity';
 import { seedTarotDecks } from './tarot-decks.seeder';
 import { seedTarotCards } from './tarot-cards.seeder';
 import { seedTarotSpreads } from './tarot-spreads.seeder';
-import { seedReadingCategories } from './reading-categories.seed';
+import { seedReadingCategories } from './reading-categories.seeder';
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppModule);
@@ -18,12 +19,15 @@ async function bootstrap() {
   const cardRepository = app.get<Repository<TarotCard>>(
     getRepositoryToken(TarotCard),
   );
+  const categoryRepository = app.get<Repository<ReadingCategory>>(
+    getRepositoryToken(ReadingCategory),
+  );
 
   try {
     console.log('🌱 Starting database seeding process...\n');
 
     // Seed Reading Categories first
-    await seedReadingCategories(dataSource);
+    await seedReadingCategories(categoryRepository);
 
     // Seed Decks first (required for cards)
     await seedTarotDecks(deckRepository);
