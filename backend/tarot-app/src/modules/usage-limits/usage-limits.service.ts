@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UsageLimit, UsageFeature } from './entities/usage-limit.entity';
@@ -16,12 +20,14 @@ export class UsageLimitsService {
   async checkLimit(userId: number, feature: UsageFeature): Promise<boolean> {
     const user = await this.usersService.findById(userId);
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException(`User with ID ${userId} not found`);
     }
 
     const limit = USAGE_LIMITS[user.plan]?.[feature];
     if (limit === undefined) {
-      throw new Error('Invalid feature for this plan');
+      throw new BadRequestException(
+        `Invalid feature '${feature}' for plan '${user.plan}'`,
+      );
     }
 
     // Premium users have unlimited access
@@ -51,7 +57,37 @@ export class UsageLimitsService {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const usageRecord = await this.usageLimitRepository.findOne({
+    // First, try to create a new record (if it doesn't exist)
+    // This leverages the unique constraint on (userId, feature, date)
+    try {
+      await this.usageLimitRepository
+        .createQueryBuilder()
+        .insert()
+        .into(UsageLimit)
+        .values({
+          userId,
+          feature,
+          date: today,
+          count: 0, // Start at 0, will be incremented below
+        })
+        .orIgnore() // If record exists, do nothing
+        .execute();
+    } catch {
+      // Ignore unique constraint violations (record already exists)
+    }
+
+    // Now atomically increment the count
+    await this.usageLimitRepository
+      .createQueryBuilder()
+      .update(UsageLimit)
+      .set({ count: () => '"count" + 1' })
+      .where('userId = :userId', { userId })
+      .andWhere('feature = :feature', { feature })
+      .andWhere('date = :date', { date: today })
+      .execute();
+
+    // Return the updated record
+    const updatedRecord = await this.usageLimitRepository.findOne({
       where: {
         userId,
         feature,
@@ -59,18 +95,11 @@ export class UsageLimitsService {
       },
     });
 
-    if (usageRecord) {
-      usageRecord.count += 1;
-      return await this.usageLimitRepository.save(usageRecord);
-    } else {
-      const newRecord = this.usageLimitRepository.create({
-        userId,
-        feature,
-        date: today,
-        count: 1,
-      });
-      return await this.usageLimitRepository.save(newRecord);
+    if (!updatedRecord) {
+      throw new Error('Failed to increment usage - record not found');
     }
+
+    return updatedRecord;
   }
 
   async getRemainingUsage(
@@ -79,12 +108,14 @@ export class UsageLimitsService {
   ): Promise<number> {
     const user = await this.usersService.findById(userId);
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException(`User with ID ${userId} not found`);
     }
 
     const limit = USAGE_LIMITS[user.plan]?.[feature];
     if (limit === undefined) {
-      throw new Error('Invalid feature for this plan');
+      throw new BadRequestException(
+        `Invalid feature '${feature}' for plan '${user.plan}'`,
+      );
     }
 
     // Premium users have unlimited access
