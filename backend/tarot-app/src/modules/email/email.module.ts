@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, Logger } from '@nestjs/common';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
@@ -11,6 +11,7 @@ import { EmailService } from './email.service';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
+        const logger = new Logger('EmailModule');
         const smtpHost = configService.get<string>('SMTP_HOST');
         const smtpPort = configService.get<number>('SMTP_PORT');
         const smtpUser = configService.get<string>('SMTP_USER');
@@ -19,6 +20,11 @@ import { EmailService } from './email.service';
 
         // Si no hay configuración SMTP, usar configuración por defecto que no enviará emails
         if (!smtpHost || !smtpPort || !smtpUser || !smtpPass || !emailFrom) {
+          logger.warn(
+            '⚠️  Email configuration is incomplete. Running in TEST MODE with jsonTransport. ' +
+              'Emails will be logged to console but not sent. ' +
+              'Configure SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, and EMAIL_FROM to enable real email sending.',
+          );
           return {
             transport: {
               jsonTransport: true, // Modo de prueba que no envía emails reales

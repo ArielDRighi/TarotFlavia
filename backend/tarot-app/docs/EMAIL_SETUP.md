@@ -1,12 +1,12 @@
-# TASK-016: Email Service - Variables de entorno requeridas
+# TASK-016: Email Service - Configuración de Email
 
 ## Variables nuevas agregadas a .env.example
 
-Las siguientes variables de entorno son ahora **REQUERIDAS** y deben agregarse al archivo `.env` local:
+Las siguientes variables de entorno son **OPCIONALES** pero recomendadas para habilitar el envío de emails reales:
 
 ```bash
 # -----------------------------------------------------------------------------
-# Email Configuration (REQUIRED)
+# Email Configuration (OPTIONAL - recommended for production)
 # -----------------------------------------------------------------------------
 SMTP_HOST=smtp.mailtrap.io
 SMTP_PORT=587
@@ -15,6 +15,15 @@ SMTP_PASS=your_smtp_password
 EMAIL_FROM=noreply@tarotflavia.com
 FRONTEND_URL=http://localhost:3000
 ```
+
+## Comportamiento sin configuración
+
+Si las variables de email **NO están configuradas**, el módulo funcionará en **modo de prueba (jsonTransport)**:
+
+- ✅ La aplicación iniciará sin problemas
+- ✅ Los tests pasarán correctamente
+- ⚠️ Los emails se loguearán en consola pero NO se enviarán realmente
+- ℹ️ Se mostrará un warning al iniciar indicando que está en modo de prueba
 
 ## Para desarrollo/testing local
 
@@ -34,8 +43,9 @@ EMAIL_FROM=noreply@tarotflavia.com
 FRONTEND_URL=http://localhost:3000
 ```
 
-## Notas
+## Notas importantes
 
-- Las variables de email son requeridas ahora en la validación de entorno
-- Los tests E2E fallarán si estas variables no están configuradas
-- Para producción, usar un servicio real de email (SendGrid, AWS SES, etc.)
+- ✅ Las variables de email son **opcionales** - no bloquean la aplicación ni los tests
+- ⚠️ En producción, se recomienda configurar un servicio real de email (SendGrid, AWS SES, etc.)
+- 📧 Para testing, Mailtrap.io es ideal ya que captura todos los emails sin enviarlos realmente
+- 🔍 El módulo emitirá un warning si detecta configuración incompleta

@@ -122,6 +122,9 @@ jobs:
           JWT_EXPIRES_IN: 1h
           # AI Provider config (required)
           GROQ_API_KEY: gsk_test_key_for_ci_only_not_real
+          # Optional AI providers (for validation tests)
+          OPENAI_API_KEY: sk-test-key-for-ci-only-not-real-12345
+          DEEPSEEK_API_KEY: sk-test-key-for-ci-only-not-real-12345
           # Optional configs with defaults
           NODE_ENV: test
           PORT: 3000
@@ -180,17 +183,6 @@ jobs:
         working-directory: ./backend/tarot-app
         run: npm install
 
-      - name: Wait for PostgreSQL to be ready
-        run: |
-          for i in {1..30}; do
-            if pg_isready -h localhost -p 5432 -U tarotflavia_test_user; then
-              echo "PostgreSQL is ready!"
-              break
-            fi
-            echo "Waiting for PostgreSQL... ($i/30)"
-            sleep 2
-          done
-
       - name: Run database migrations
         working-directory: ./backend/tarot-app
         env:
@@ -216,9 +208,9 @@ jobs:
           JWT_SECRET: test-jwt-secret-for-ci-only-minimum-32-characters-required
           JWT_EXPIRES_IN: 1h
           GROQ_API_KEY: gsk_test_key_for_ci_only_not_real
-          # Optional AI providers (will test with invalid keys)
-          OPENAI_API_KEY: sk_test_key_for_ci_only_not_real_12345
-          DEEPSEEK_API_KEY: sk_test_key_for_ci_only_not_real_12345
+          # Optional AI providers (will test with invalid keys but valid format)
+          OPENAI_API_KEY: sk-test-key-for-ci-only-not-real-12345
+          DEEPSEEK_API_KEY: sk-test-key-for-ci-only-not-real-12345
           NODE_ENV: test
           PORT: 3001
           RATE_LIMIT_TTL: 60
