@@ -160,31 +160,33 @@ export class EnvironmentVariables {
   RATE_LIMIT_MAX: number = 100;
 
   // =============================================================================
-  // EMAIL CONFIGURATION
+  // EMAIL CONFIGURATION (OPTIONAL)
   // =============================================================================
+  // Email functionality is optional - if not configured, email features will be disabled
 
   @IsString()
-  @IsNotEmpty()
-  SMTP_HOST: string;
+  @IsOptional()
+  SMTP_HOST?: string;
 
   @IsPort()
-  @Transform(({ value }) => String(value))
-  SMTP_PORT: string;
+  @IsOptional()
+  @Transform(({ value }) => (value ? String(value) : undefined))
+  SMTP_PORT?: string;
 
   @IsString()
-  @IsNotEmpty()
-  SMTP_USER: string;
+  @IsOptional()
+  SMTP_USER?: string;
 
   @IsString()
-  @IsNotEmpty()
-  SMTP_PASS: string;
+  @IsOptional()
+  SMTP_PASS?: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   @Matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, {
     message: 'EMAIL_FROM must be a valid email address',
   })
-  EMAIL_FROM: string;
+  EMAIL_FROM?: string;
 
   @IsString()
   @IsOptional()

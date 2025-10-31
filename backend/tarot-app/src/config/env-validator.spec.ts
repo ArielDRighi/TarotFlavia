@@ -12,6 +12,21 @@ describe('env-validator', () => {
       JWT_SECRET: 'a'.repeat(32),
       JWT_EXPIRES_IN: '1h',
       GROQ_API_KEY: 'gsk_test123',
+    };
+
+    expect(() => validate(config)).not.toThrow();
+  });
+
+  it('should validate successfully with optional email variables', () => {
+    const config = {
+      POSTGRES_HOST: 'localhost',
+      POSTGRES_PORT: '5432',
+      POSTGRES_USER: 'user',
+      POSTGRES_PASSWORD: 'password',
+      POSTGRES_DB: 'database',
+      JWT_SECRET: 'a'.repeat(32),
+      JWT_EXPIRES_IN: '1h',
+      GROQ_API_KEY: 'gsk_test123',
       SMTP_HOST: 'smtp.test.com',
       SMTP_PORT: '587',
       SMTP_USER: 'test@test.com',
@@ -52,11 +67,6 @@ describe('env-validator', () => {
       JWT_SECRET: 'a'.repeat(32),
       JWT_EXPIRES_IN: '1h',
       GROQ_API_KEY: 'gsk_test',
-      SMTP_HOST: 'smtp.test.com',
-      SMTP_PORT: '587',
-      SMTP_USER: 'test@test.com',
-      SMTP_PASS: 'testpass',
-      EMAIL_FROM: 'noreply@test.com',
     };
 
     const result = validate(config);
@@ -80,11 +90,6 @@ describe('env-validator', () => {
       JWT_SECRET: 'a'.repeat(32),
       JWT_EXPIRES_IN: '1h',
       GROQ_API_KEY: 'gsk_test',
-      SMTP_HOST: 'smtp.test.com',
-      SMTP_PORT: '587',
-      SMTP_USER: 'test@test.com',
-      SMTP_PASS: 'testpass',
-      EMAIL_FROM: 'noreply@test.com',
       NODE_ENV: 'production',
       PORT: '8080',
       CORS_ORIGINS: 'https://example.com',
