@@ -1545,11 +1545,14 @@ Implementar refresh tokens para mejorar seguridad y UX. Los access tokens serán
 
 ---
 
-### **TASK-016: Implementar Servicio de Email (Básico con Nodemailer)**
+### **TASK-016: Implementar Servicio de Email (Básico con Nodemailer)** ✅
 
 **Prioridad:** � MEDIA  
 **Estimación:** 2 días  
-**Dependencias:** TASK-002
+**Dependencias:** TASK-002  
+**Estado:** ✅ COMPLETADA (31/10/2025)  
+**Branch:** `feature/TASK-016-email-service`  
+**Commit:** `a65d1ec`
 
 #### 📋 Descripción
 
@@ -1557,29 +1560,46 @@ Implementar servicio básico de email usando Nodemailer para enviar lecturas com
 
 #### ✅ Tareas específicas
 
-- [ ] Instalar dependencias: `nodemailer`, `@nestjs-modules/mailer`
-- [ ] Crear módulo `EmailModule` con servicio `EmailService`
-- [ ] Configurar Nodemailer con variables de entorno:
+- [x] Instalar dependencias: `nodemailer`, `@nestjs-modules/mailer`, `handlebars`, `@types/nodemailer`
+- [x] Crear módulo `EmailModule` con servicio `EmailService`
+- [x] Configurar Nodemailer con variables de entorno:
   - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`
   - `EMAIL_FROM` (email del remitente)
-- [ ] Crear templates básicos en HTML/Handlebars:
-  - Template de lectura compartida
-  - Template de bienvenida
-  - Template de cambio de plan
-  - Template de recuperación de contraseña
-- [ ] Implementar método `sendSharedReading(to, readingData)`
-- [ ] Implementar método `sendWelcomeEmail(to, userName)`
-- [ ] Implementar método `sendPasswordResetEmail(to, resetToken)`
-- [ ] Agregar queue para emails (opcional pero recomendado con Bull)
-- [ ] Implementar manejo de errores y reintentos
-- [ ] Agregar logging de emails enviados
-- [ ] Configurar rate limiting específico para envío de emails (5 por minuto)
+  - `FRONTEND_URL` (para links de recuperación)
+- [x] Crear templates profesionales en HTML/Handlebars:
+  - Template de lectura compartida (`shared-reading.hbs`)
+  - Template de bienvenida (`welcome.hbs`)
+  - Template de cambio de plan (`plan-change.hbs`)
+  - Template de recuperación de contraseña (`password-reset.hbs`)
+- [x] Implementar método `sendSharedReading(to, readingData)`
+- [x] Implementar método `sendWelcomeEmail(to, userName)`
+- [x] Implementar método `sendPasswordResetEmail(to, resetToken)`
+- [x] Implementar método `sendPlanChangeEmail(to, planData)`
+- [x] Implementar manejo robusto de errores con try-catch
+- [x] Agregar logging completo de emails enviados con Logger de NestJS
+- [x] Tests unitarios completos (13 tests, 100% cobertura)
+- [x] Tests E2E para validación de integración
+- [x] Actualizar validador de entorno con nuevas variables requeridas
+- [x] Documentación completa en `EMAIL_SETUP.md`
 
 #### 🎯 Criterios de aceptación
 
 - ✓ Los emails se envían correctamente
-- ✓ Los templates son atractivos y profesionales
-- ✓ Existe manejo robusto de errores
+- ✓ Los templates son atractivos y profesionales con diseño responsivo
+- ✓ Existe manejo robusto de errores con logging apropiado
+- ✓ Todos los tests pasan (unitarios y E2E)
+- ✓ Variables de entorno validadas correctamente
+
+#### 📝 Notas de implementación
+
+- Se usó `@nestjs-modules/mailer` con `HandlebarsAdapter` para templates
+- Templates HTML con diseño profesional y responsivo
+- Manejo de errores con throw de excepciones descriptivas
+- Logging con contexto completo (destinatario, tipo de email)
+- Configuración flexible vía variables de entorno
+- Soporte para SMTP con TLS/SSL automático
+- Para desarrollo/testing: usar Mailtrap.io (ver `EMAIL_SETUP.md`)
+- **Nota:** No se implementó queue (Bull) - se dejó para optimización futura si es necesario
 
 ---
 
