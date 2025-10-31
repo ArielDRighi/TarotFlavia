@@ -87,13 +87,16 @@ export class InitialSchema1761655973524 implements MigrationInterface {
       `ALTER TABLE "usage_limit" ADD CONSTRAINT "FK_usage_limit_user" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `CREATE TABLE "refresh_tokens" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "user_id" integer NOT NULL, "token" character varying(500) NOT NULL, "expires_at" TIMESTAMP NOT NULL, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "revoked_at" TIMESTAMP, "ip_address" character varying(45), "user_agent" character varying(500), CONSTRAINT "PK_refresh_tokens_id" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "refresh_tokens" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "user_id" integer NOT NULL, "token" character varying(500) NOT NULL, "token_hash" character varying(64) NOT NULL, "expires_at" TIMESTAMP NOT NULL, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "revoked_at" TIMESTAMP, "ip_address" character varying(45), "user_agent" character varying(500), CONSTRAINT "PK_refresh_tokens_id" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `CREATE INDEX "IDX_refresh_tokens_user_id" ON "refresh_tokens" ("user_id")`,
     );
     await queryRunner.query(
       `CREATE INDEX "IDX_refresh_tokens_token" ON "refresh_tokens" ("token")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_refresh_tokens_token_hash" ON "refresh_tokens" ("token_hash")`,
     );
     await queryRunner.query(
       `CREATE INDEX "IDX_refresh_tokens_user_token" ON "refresh_tokens" ("user_id", "token")`,
@@ -109,6 +112,9 @@ export class InitialSchema1761655973524 implements MigrationInterface {
     );
     await queryRunner.query(
       `DROP INDEX "public"."IDX_refresh_tokens_user_token"`,
+    );
+    await queryRunner.query(
+      `DROP INDEX "public"."IDX_refresh_tokens_token_hash"`,
     );
     await queryRunner.query(`DROP INDEX "public"."IDX_refresh_tokens_token"`);
     await queryRunner.query(`DROP INDEX "public"."IDX_refresh_tokens_user_id"`);

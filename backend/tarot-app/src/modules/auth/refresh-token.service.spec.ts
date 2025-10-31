@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
 import { IsNull } from 'typeorm';
 import { RefreshTokenService } from './refresh-token.service';
 import { RefreshToken } from './entities/refresh-token.entity';
@@ -18,6 +19,14 @@ describe('RefreshTokenService', () => {
     createQueryBuilder: jest.fn(),
   };
 
+  const mockConfigService = {
+    get: jest.fn((key: string) => {
+      if (key === 'REFRESH_TOKEN_EXPIRY_DAYS') return 7;
+      if (key === 'REFRESH_TOKEN_RETENTION_DAYS') return 30;
+      return undefined;
+    }),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -25,6 +34,10 @@ describe('RefreshTokenService', () => {
         {
           provide: getRepositoryToken(RefreshToken),
           useValue: mockRepository,
+        },
+        {
+          provide: ConfigService,
+          useValue: mockConfigService,
         },
       ],
     }).compile();

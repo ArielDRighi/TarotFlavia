@@ -26,6 +26,10 @@ export class RefreshToken {
   @Index()
   token: string;
 
+  @Column({ name: 'token_hash', type: 'varchar', length: 64 })
+  @Index()
+  tokenHash: string;
+
   @Column({ name: 'expires_at', type: 'timestamp' })
   expiresAt: Date;
 

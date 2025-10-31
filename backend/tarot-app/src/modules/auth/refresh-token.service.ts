@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
 import { Repository, IsNull } from 'typeorm';
 import { RefreshToken } from './entities/refresh-token.entity';
 import { User } from '../users/entities/user.entity';
@@ -11,6 +12,7 @@ export class RefreshTokenService {
   constructor(
     @InjectRepository(RefreshToken)
     private readonly refreshTokenRepository: Repository<RefreshToken>,
+    private readonly configService: ConfigService,
   ) {}
 
   /**
@@ -34,6 +36,13 @@ export class RefreshTokenService {
   }
 
   /**
+   * Genera un hash SHA-256 rápido para indexación
+   */
+  private generateTokenHash(token: string): string {
+    return crypto.createHash('sha256').update(token).digest('hex');
+  }
+
+  /**
    * Crea un nuevo refresh token para un usuario
    * @returns Objeto con el token en texto plano y la entidad guardada
    */
@@ -44,12 +53,17 @@ export class RefreshTokenService {
   ): Promise<{ token: string; refreshToken: RefreshToken }> {
     const plainToken = await this.generateToken();
     const hashedToken = await this.hashToken(plainToken);
+    const tokenHash = this.generateTokenHash(plainToken);
+
+    const expiryDays =
+      this.configService.get<number>('REFRESH_TOKEN_EXPIRY_DAYS') || 7;
 
     const refreshToken = this.refreshTokenRepository.create({
       userId: user.id,
       user,
       token: hashedToken,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 días
+      tokenHash,
+      expiresAt: new Date(Date.now() + expiryDays * 24 * 60 * 60 * 1000),
       ipAddress,
       userAgent,
     });
@@ -64,26 +78,31 @@ export class RefreshTokenService {
 
   /**
    * Encuentra un refresh token por el hash del token sin conocer el userId
-   * Compara el token en texto plano con todos los tokens activos en la BD
+   * Usa SHA-256 hash para búsqueda rápida O(1) con índice, luego valida con bcrypt
    */
   async findTokenByPlainToken(
     plainToken: string,
   ): Promise<RefreshToken | null> {
-    // Obtener todos los tokens no revocados
-    const allTokens = await this.refreshTokenRepository.find({
-      where: { revokedAt: IsNull() },
+    // Generar hash SHA-256 para búsqueda indexada
+    const tokenHash = this.generateTokenHash(plainToken);
+
+    // Búsqueda O(1) por índice
+    const token = await this.refreshTokenRepository.findOne({
+      where: { tokenHash, revokedAt: IsNull() },
       relations: ['user'],
     });
 
-    // Comparar el token en texto plano con cada token hasheado
-    for (const token of allTokens) {
-      const isMatch = await bcrypt.compare(plainToken, token.token);
-      if (isMatch) {
-        return token;
-      }
+    if (!token) {
+      return null;
     }
 
-    return null;
+    // Validación final con bcrypt para seguridad
+    const isMatch = await bcrypt.compare(plainToken, token.token);
+    if (!isMatch) {
+      return null;
+    }
+
+    return token;
   }
 
   /**
@@ -130,20 +149,23 @@ export class RefreshTokenService {
   }
 
   /**
-   * Elimina tokens expirados hace más de 30 días
+   * Elimina tokens expirados hace más de N días (configurable)
    * @returns Número de tokens eliminados
    */
   async deleteExpiredTokens(): Promise<number> {
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const retentionDays =
+      this.configService.get<number>('REFRESH_TOKEN_RETENTION_DAYS') || 30;
+
+    const retentionDate = new Date();
+    retentionDate.setDate(retentionDate.getDate() - retentionDays);
 
     const result = await this.refreshTokenRepository
       .createQueryBuilder()
       .delete()
       .from(RefreshToken)
-      .where('expires_at < :date', { date: thirtyDaysAgo })
+      .where('expires_at < :date', { date: retentionDate })
       .andWhere('(revoked_at IS NULL OR revoked_at < :date)', {
-        date: thirtyDaysAgo,
+        date: retentionDate,
       })
       .execute();
 

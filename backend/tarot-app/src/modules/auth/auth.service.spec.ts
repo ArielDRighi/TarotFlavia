@@ -14,16 +14,38 @@ describe('AuthService', () => {
   let refreshTokenServiceMock: Partial<RefreshTokenService>;
 
   beforeEach(async () => {
+    // Map to store created users for findById
+    const userStore = new Map<number, User>();
+
     usersServiceMock = {
-      create: jest.fn().mockImplementation((dto: CreateUserDto) =>
-        Promise.resolve({
-          id: 1,
+      create: jest.fn().mockImplementation((dto: CreateUserDto) => {
+        const user = {
+          id: userStore.size + 1,
           email: dto.email,
           name: dto.name,
+          password: 'hashed_password',
           isAdmin: false,
-        } as User),
-      ),
+          plan: UserPlan.FREE,
+        } as User;
+        userStore.set(user.id, user);
+        return Promise.resolve(user);
+      }),
       findByEmail: jest.fn(),
+      findById: jest.fn().mockImplementation((id: number) => {
+        const user = userStore.get(id);
+        if (user) {
+          return Promise.resolve(user);
+        }
+        // Fallback for users not in store (like in login tests)
+        return Promise.resolve({
+          id,
+          email: 'test@example.com',
+          name: 'Test User',
+          password: 'hashed_password',
+          isAdmin: false,
+          plan: UserPlan.FREE,
+        } as User);
+      }),
     };
 
     jwtServiceMock = {
@@ -133,6 +155,14 @@ describe('AuthService', () => {
         name: 'X',
         isAdmin: true,
       };
+
+      // Mock findById to return the complete user
+      (usersServiceMock.findById as jest.Mock).mockResolvedValueOnce({
+        ...user,
+        password: 'hashed_password',
+        plan: UserPlan.FREE,
+      } as User);
+
       const ipAddress = '192.168.1.1';
       const userAgent = 'Mozilla/5.0';
       const res = await service.login(user, ipAddress, userAgent);
@@ -161,6 +191,13 @@ describe('AuthService', () => {
         isAdmin: false,
         plan: UserPlan.PREMIUM,
       };
+
+      // Mock findById to return the complete user
+      (usersServiceMock.findById as jest.Mock).mockResolvedValueOnce({
+        ...user,
+        password: 'hashed_password',
+      } as User);
+
       const ipAddress = '10.0.0.1';
       const userAgent = 'Chrome';
 

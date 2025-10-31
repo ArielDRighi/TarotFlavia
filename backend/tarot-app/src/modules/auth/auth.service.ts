@@ -19,7 +19,14 @@ export class AuthService {
     ipAddress: string,
     userAgent: string,
   ) {
-    const user = await this.usersService.create(createUserDto);
+    const createdUser = await this.usersService.create(createUserDto);
+
+    // Fetch complete user data including password for refresh token generation
+    const user = await this.usersService.findById(createdUser.id);
+    if (!user) {
+      throw new UnauthorizedException('User creation failed');
+    }
+
     return this.generateAuthResponse(user, ipAddress, userAgent);
   }
 
@@ -37,7 +44,22 @@ export class AuthService {
     return null;
   }
 
-  async login(user: Partial<User>, ipAddress: string, userAgent: string) {
+  async login(
+    userPartial: Partial<User>,
+    ipAddress: string,
+    userAgent: string,
+  ) {
+    // Ensure we have a complete User object with required fields
+    if (!userPartial.id || !userPartial.email) {
+      throw new UnauthorizedException('Invalid user data');
+    }
+
+    // Fetch complete user data from database
+    const user = await this.usersService.findById(userPartial.id);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
     return this.generateAuthResponse(user, ipAddress, userAgent);
   }
 
@@ -115,16 +137,16 @@ export class AuthService {
   }
 
   private async generateAuthResponse(
-    user: Partial<User>,
+    user: User,
     ipAddress: string,
     userAgent: string,
   ): Promise<{
     user: {
-      id: number | undefined;
-      email: string | undefined;
-      name: string | undefined;
-      isAdmin: boolean | undefined;
-      plan: string | undefined;
+      id: number;
+      email: string;
+      name: string;
+      isAdmin: boolean;
+      plan: string;
     };
     access_token: string;
     refresh_token: string;
@@ -137,10 +159,9 @@ export class AuthService {
     };
 
     // Crear refresh token
-    const fullUser = user as User;
     const { token: refreshToken } =
       await this.refreshTokenService.createRefreshToken(
-        fullUser,
+        user,
         ipAddress,
         userAgent,
       );

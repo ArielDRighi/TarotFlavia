@@ -4,6 +4,7 @@ import {
   Post,
   UnauthorizedException,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
@@ -12,6 +13,7 @@ import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { Request } from 'express';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @ApiTags('Autenticación')
 @Controller('auth')
@@ -95,6 +97,7 @@ export class AuthController {
   }
 
   @Post('logout-all')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Cerrar todas las sesiones (revocar todos los refresh tokens)',
   })

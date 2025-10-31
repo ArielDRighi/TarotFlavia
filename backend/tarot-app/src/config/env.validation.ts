@@ -59,6 +59,24 @@ export class EnvironmentVariables {
   JWT_EXPIRES_IN: string;
 
   // =============================================================================
+  // REFRESH TOKEN CONFIGURATION
+  // =============================================================================
+
+  @IsInt()
+  @Min(1)
+  @IsOptional()
+  @Type(() => Number)
+  @Transform(({ value }) => (value ? Number(value) : 7))
+  REFRESH_TOKEN_EXPIRY_DAYS: number = 7;
+
+  @IsInt()
+  @Min(1)
+  @IsOptional()
+  @Type(() => Number)
+  @Transform(({ value }) => (value ? Number(value) : 30))
+  REFRESH_TOKEN_RETENTION_DAYS: number = 30;
+
+  // =============================================================================
   // AI PROVIDERS CONFIGURATION
   // =============================================================================
 
