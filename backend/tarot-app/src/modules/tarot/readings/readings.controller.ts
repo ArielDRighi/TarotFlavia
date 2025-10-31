@@ -16,6 +16,7 @@ import {
   ApiParam,
   ApiBody,
 } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RequiresPremiumForCustomQuestionGuard } from './guards/requires-premium-for-custom-question.guard';
 import { ReadingsService } from './readings.service';
@@ -24,6 +25,7 @@ import { User } from '../../users/entities/user.entity';
 
 @ApiTags('Lecturas de Tarot')
 @Controller('readings')
+@Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 requests por minuto para endpoints de lecturas
 export class ReadingsController {
   constructor(private readonly readingsService: ReadingsService) {}
 
@@ -49,6 +51,10 @@ export class ReadingsController {
     status: 400,
     description:
       'Validación fallida: ninguna pregunta o ambas preguntas proporcionadas',
+  })
+  @ApiResponse({
+    status: 429,
+    description: 'Demasiadas solicitudes. Límite: 10 por minuto',
   })
   async createReading(
     @Request() req: { user: { userId: number } },

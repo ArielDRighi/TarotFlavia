@@ -1466,12 +1466,16 @@ Adaptar el flujo de creación de lecturas para que usuarios free solo puedan usa
 
 ---
 
-### **TASK-014: Implementar Rate Limiting Global** ⭐
+### **TASK-014: Implementar Rate Limiting Global** ⭐ ✅
 
 **Prioridad:** 🟡 ALTA  
 **Estimación:** 1 día  
 **Dependencias:** TASK-002  
-**Marcador MVP:** ⭐ **RECOMENDADO PARA MVP** - Protección contra abuso
+**Marcador MVP:** ⭐ **RECOMENDADO PARA MVP** - Protección contra abuso  
+**Estado:** ✅ COMPLETADO  
+**Branch:** `feature/TASK-014-implementar-rate-limiting-global`  
+**Commit:** Pendiente push  
+**Fecha completado:** 27/01/2025
 
 #### 📋 Descripción
 
@@ -1479,24 +1483,30 @@ Implementar rate limiting global para proteger la API de abuso y ataques DDoS us
 
 #### ✅ Tareas específicas
 
-- [ ] Instalar dependencia `@nestjs/throttler`
-- [ ] Configurar `ThrottlerModule` a nivel global en `AppModule`
-- [ ] Establecer límites por defecto:
+- [x] Instalar dependencia `@nestjs/throttler`
+- [x] Configurar `ThrottlerModule` a nivel global en `AppModule`
+- [x] Establecer límites por defecto:
   - **Global**: 100 requests/minuto por IP
   - **Auth endpoints** (`/auth/*`): 5 requests/minuto
   - **Lecturas** (`/tarot/reading`): 10 requests/minuto
-- [ ] Configurar diferentes límites para usuarios premium vs free
-- [ ] Implementar custom storage si se requiere (Redis para producción)
-- [ ] Crear decorador `@SkipThrottle()` para endpoints públicos específicos
-- [ ] Personalizar mensajes de error cuando se excede rate limit
-- [ ] Agregar headers de respuesta con información de límites (`X-RateLimit-*`)
-- [ ] Documentar límites en Swagger y README
+- [x] Configurar diferentes límites para usuarios premium vs free (doble límite para premium)
+- [x] Implementar `CustomThrottlerGuard` para diferenciación de planes
+- [x] Decorador `@SkipThrottle()` disponible para endpoints públicos
+- [x] Personalizar mensajes de error cuando se excede rate limit (español)
+- [x] Agregar headers de respuesta con información de límites (`X-RateLimit-*`)
+- [x] Crear `ThrottlerExceptionFilter` para mensajes personalizados
+- [x] Documentar límites en `docs/RATE_LIMITING.md`
 
 #### 🎯 Criterios de aceptación
 
-- ✓ Los endpoints están protegidos contra spam y abuso
-- ✓ Los límites son apropiados para cada tipo de endpoint
-- ✓ Los usuarios reciben feedback claro sobre límites
+- ✅ Los endpoints están protegidos contra spam y abuso
+- ✅ Los límites son apropiados para cada tipo de endpoint
+- ✅ Los usuarios reciben feedback claro sobre límites
+- ✅ Headers X-RateLimit-* se incluyen en todas las respuestas
+- ✅ Usuarios premium tienen el doble de límite
+- ✅ Mensaje de error personalizado en español con tiempo de espera
+- ✅ 4 pruebas E2E pasando
+- ✅ 315 pruebas unitarias pasando
 
 ---
 

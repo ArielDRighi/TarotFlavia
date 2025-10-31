@@ -1,10 +1,5 @@
-import {
-  Body,
-  Controller,
-  Post,
-  ValidationPipe,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Body, Controller, Post, UnauthorizedException } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
@@ -12,6 +7,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 
 @ApiTags('Autenticación')
 @Controller('auth')
+@Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 requests por minuto para endpoints de autenticación
 export class AuthController {
   constructor(private authService: AuthService) {}
 
@@ -20,7 +16,11 @@ export class AuthController {
   @ApiBody({ type: CreateUserDto })
   @ApiResponse({ status: 201, description: 'Usuario registrado exitosamente' })
   @ApiResponse({ status: 409, description: 'El email ya está registrado' })
-  async register(@Body(ValidationPipe) createUserDto: CreateUserDto) {
+  @ApiResponse({
+    status: 429,
+    description: 'Demasiadas solicitudes. Límite: 5 por minuto',
+  })
+  async register(@Body() createUserDto: CreateUserDto) {
     return this.authService.register(createUserDto);
   }
 
@@ -29,7 +29,11 @@ export class AuthController {
   @ApiBody({ type: LoginDto })
   @ApiResponse({ status: 200, description: 'Login exitoso' })
   @ApiResponse({ status: 401, description: 'Credenciales inválidas' })
-  async login(@Body(ValidationPipe) loginDto: LoginDto) {
+  @ApiResponse({
+    status: 429,
+    description: 'Demasiadas solicitudes. Límite: 5 por minuto',
+  })
+  async login(@Body() loginDto: LoginDto) {
     const user = await this.authService.validateUser(
       loginDto.email,
       loginDto.password,
