@@ -94,7 +94,7 @@ export class CreateReadingDto {
   })
   @Validate(IsExclusiveWithConstraint, ['predefinedQuestionId'], {
     message:
-      'Debes proporcionar una pregunta predefinida o una pregunta personalizada',
+      'Debes proporcionar solo una: pregunta predefinida o pregunta personalizada, no ambas',
   })
   customQuestion?: string;
 
