@@ -21,12 +21,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
-          cache-dependency-path: ./backend/tarot-app/package-lock.json
 
       - name: Install dependencies
         working-directory: ./backend/tarot-app
-        run: npm ci
+        run: npm install
 
       - name: Run ESLint
         working-directory: ./backend/tarot-app
@@ -50,12 +48,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
-          cache-dependency-path: ./backend/tarot-app/package-lock.json
 
       - name: Install dependencies
         working-directory: ./backend/tarot-app
-        run: npm ci
+        run: npm install
 
       - name: Type check with TypeScript
         working-directory: ./backend/tarot-app
@@ -76,12 +72,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
-          cache-dependency-path: ./backend/tarot-app/package-lock.json
 
       - name: Install dependencies
         working-directory: ./backend/tarot-app
-        run: npm ci
+        run: npm install
 
       - name: Build application
         working-directory: ./backend/tarot-app
@@ -109,12 +103,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
-          cache-dependency-path: ./backend/tarot-app/package-lock.json
 
       - name: Install dependencies
         working-directory: ./backend/tarot-app
-        run: npm ci
+        run: npm install
 
       - name: Run unit tests with coverage
         working-directory: ./backend/tarot-app
@@ -183,12 +175,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
-          cache-dependency-path: ./backend/tarot-app/package-lock.json
 
       - name: Install dependencies
         working-directory: ./backend/tarot-app
-        run: npm ci
+        run: npm install
 
       - name: Wait for PostgreSQL to be ready
         run: |
