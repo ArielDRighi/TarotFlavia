@@ -134,7 +134,7 @@ frontend/node_modules/
 frontend/dist/
 
 # Root workspace lockfiles (optional)
-package-lock.json
+# package-lock.json (tracked in repo — remove the comment if you want it ignored)
 
 # =============================================================================
 # Docker & Database

@@ -7,15 +7,157 @@ on:
     branches: [main, develop]
 
 jobs:
-  test:
+  # ============================================================================
+  # JOB 1: Linting y Formateo
+  # ============================================================================
+  lint-and-format:
+    name: Lint & Format Check
     runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies (monorepo root)
+        run: npm install
+
+      - name: Run ESLint
+        working-directory: ./backend/tarot-app
+        run: npm run lint
+
+      - name: Check code formatting with Prettier
+        working-directory: ./backend/tarot-app
+        run: npm run format -- --check
+
+  # ============================================================================
+  # JOB 2: TypeScript Type Check
+  # ============================================================================
+  type-check:
+    name: TypeScript Type Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies (monorepo root)
+        run: npm install
+
+      - name: Type check with TypeScript
+        working-directory: ./backend/tarot-app
+        run: npx tsc --noEmit
+
+  # ============================================================================
+  # JOB 3: Build
+  # ============================================================================
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    needs: [lint-and-format, type-check]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies (monorepo root)
+        run: npm install
+
+      - name: Build application
+        working-directory: ./backend/tarot-app
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-backend
+          path: backend/tarot-app/dist
+          retention-days: 1
+
+  # ============================================================================
+  # JOB 4: Unit Tests
+  # ============================================================================
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: [lint-and-format, type-check]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies (monorepo root)
+        run: npm install
+
+      - name: Run unit tests with coverage
+        working-directory: ./backend/tarot-app
+        env:
+          # Database config (not used in unit tests but required for validation)
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_db
+          # JWT config
+          JWT_SECRET: test-jwt-secret-for-ci-only-minimum-32-characters-required
+          JWT_EXPIRES_IN: 1h
+          # AI Provider config (required)
+          GROQ_API_KEY: gsk_test_key_for_ci_only_not_real
+          # Optional AI providers (for validation tests)
+          OPENAI_API_KEY: sk-test-key-for-ci-only-not-real-12345
+          DEEPSEEK_API_KEY: sk-test-key-for-ci-only-not-real-12345
+          # Optional configs with defaults
+          NODE_ENV: test
+          PORT: 3000
+          # Email config (optional - will use jsonTransport)
+          # SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, EMAIL_FROM not needed
+        run: npm run test -- --coverage --maxWorkers=2
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-unit-tests
+          path: backend/tarot-app/coverage
+          retention-days: 7
+
+      - name: Upload coverage to Codecov (optional)
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          files: ./backend/tarot-app/coverage/lcov.info
+          flags: unittests
+          name: unit-tests-coverage
+        continue-on-error: true
+
+  # ============================================================================
+  # JOB 5: E2E Tests
+  # ============================================================================
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    needs: [lint-and-format, type-check]
 
     services:
       postgres:
         image: postgres:16-alpine
         env:
-          POSTGRES_USER: tarotflavia_user
-          POSTGRES_PASSWORD: tarotflavia_test_password
+          POSTGRES_USER: tarotflavia_test_user
+          POSTGRES_PASSWORD: tarotflavia_test_password_secure
           POSTGRES_DB: tarotflavia_test_db
         ports:
           - 5432:5432
@@ -28,30 +170,92 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Use Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
-      - name: Install backend dependencies
-        working-directory: ./backend/tarot-app
+      - name: Install dependencies (monorepo root)
         run: npm install
 
-      - name: Run backend tests with coverage
+      - name: Run database migrations
         working-directory: ./backend/tarot-app
         env:
-          TAROTFLAVIA_DB_HOST: localhost
-          TAROTFLAVIA_DB_PORT: 5432
-          TAROTFLAVIA_DB_USERNAME: tarotflavia_user
-          TAROTFLAVIA_DB_PASSWORD: tarotflavia_test_password
-          TAROTFLAVIA_DB_DATABASE: tarotflavia_test_db
-          JWT_SECRET: test-jwt-secret-for-ci-only-min-32-chars
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: tarotflavia_test_user
+          POSTGRES_PASSWORD: tarotflavia_test_password_secure
+          POSTGRES_DB: tarotflavia_test_db
+          JWT_SECRET: test-jwt-secret-for-ci-only-minimum-32-characters-required
           JWT_EXPIRES_IN: 1h
+          GROQ_API_KEY: gsk_test_key_for_ci_only_not_real
           NODE_ENV: test
-        run: npm test -- --coverage
+        run: npm run migration:run
 
-      - name: Upload coverage artifact
+      - name: Run E2E tests
+        working-directory: ./backend/tarot-app
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: tarotflavia_test_user
+          POSTGRES_PASSWORD: tarotflavia_test_password_secure
+          POSTGRES_DB: tarotflavia_test_db
+          JWT_SECRET: test-jwt-secret-for-ci-only-minimum-32-characters-required
+          JWT_EXPIRES_IN: 1h
+          GROQ_API_KEY: gsk_test_key_for_ci_only_not_real
+          # Optional AI providers (will test with invalid keys but valid format)
+          OPENAI_API_KEY: sk-test-key-for-ci-only-not-real-12345
+          DEEPSEEK_API_KEY: sk-test-key-for-ci-only-not-real-12345
+          NODE_ENV: test
+          PORT: 3001
+          RATE_LIMIT_TTL: 60
+          RATE_LIMIT_MAX: 1000
+        run: npm run test:e2e -- --maxWorkers=1
+
+      - name: Upload E2E test results
         uses: actions/upload-artifact@v4
+        if: failure()
         with:
-          name: coverage-backend
-          path: backend/tarot-app/coverage
+          name: e2e-test-results
+          path: backend/tarot-app/test-results
+          retention-days: 3
+
+  # ============================================================================
+  # JOB 6: Security Audit
+  # ============================================================================
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run npm audit
+        working-directory: ./backend/tarot-app
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+
+  # ============================================================================
+  # JOB 7: Summary
+  # ============================================================================
+  ci-success:
+    name: CI Pipeline Success
+    runs-on: ubuntu-latest
+    needs: [build, unit-tests, e2e-tests]
+    if: success()
+
+    steps:
+      - name: CI Pipeline Passed
+        run: |
+          echo "✅ All CI checks passed successfully!"
+          echo "- Linting & Formatting: ✓"
+          echo "- Type Checking: ✓"
+          echo "- Build: ✓"
+          echo "- Unit Tests: ✓"
+          echo "- E2E Tests: ✓"

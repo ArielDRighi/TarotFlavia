@@ -1,0 +1,158 @@
+<html lang='es'>
+  <head>
+    <meta charset='UTF-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <title>Tu Lectura de Tarot</title>
+    <style>
+      body {
+        font-family: 'Georgia', serif;
+        background-color: #f5f3f0;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        padding: 40px 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+        border-bottom: 2px solid #8b7355;
+        padding-bottom: 20px;
+      }
+      .header h1 {
+        color: #8b7355;
+        font-size: 28px;
+        margin: 0;
+        font-weight: normal;
+      }
+      .greeting {
+        color: #5a5a5a;
+        font-size: 16px;
+        margin: 20px 0;
+        line-height: 1.6;
+      }
+      .reading-info {
+        background-color: #f9f7f5;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+      }
+      .reading-type {
+        color: #8b7355;
+        font-weight: bold;
+        font-size: 18px;
+        margin-bottom: 10px;
+      }
+      .reading-date {
+        color: #888;
+        font-size: 14px;
+      }
+      .cards-section {
+        margin: 30px 0;
+      }
+      .card {
+        background-color: #fff;
+        border-left: 4px solid #8b7355;
+        padding: 15px;
+        margin: 15px 0;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+      .card-position {
+        color: #8b7355;
+        font-weight: bold;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .card-name {
+        color: #333;
+        font-size: 20px;
+        margin: 10px 0;
+        font-weight: bold;
+      }
+      .card-interpretation {
+        color: #666;
+        font-size: 15px;
+        line-height: 1.5;
+        font-style: italic;
+      }
+      .interpretation-section {
+        background-color: #f0ebe5;
+        padding: 25px;
+        border-radius: 8px;
+        margin: 30px 0;
+      }
+      .interpretation-title {
+        color: #8b7355;
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 15px;
+      }
+      .interpretation-text {
+        color: #444;
+        font-size: 16px;
+        line-height: 1.7;
+      }
+      .footer {
+        text-align: center;
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 1px solid #e0e0e0;
+        color: #888;
+        font-size: 13px;
+      }
+      .footer p {
+        margin: 5px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class='container'>
+      <div class='header'>
+        <h1>🌙 Tu Lectura de Tarot 🌙</h1>
+      </div>
+
+      <div class='greeting'>
+        <p>Hola <strong>{{userName}}</strong>,</p>
+        <p>Aquí está la lectura de tarot que compartiste. Guárdala y reflexiona
+          sobre ella cuando lo necesites.</p>
+      </div>
+
+      <div class='reading-info'>
+        <div class='reading-type'>{{readingType}}</div>
+        <div class='reading-date'>Fecha de la lectura: {{date}}</div>
+      </div>
+
+      <div class='cards-section'>
+        <h2 style='color: #8b7355; font-size: 22px; margin-bottom: 20px;'>Las
+          Cartas</h2>
+        {{#each cards}}
+          <div class='card'>
+            <div class='card-position'>{{this.position}}</div>
+            <div class='card-name'>{{this.name}}</div>
+            {{#if this.interpretation}}
+              <div class='card-interpretation'>{{this.interpretation}}</div>
+            {{/if}}
+          </div>
+        {{/each}}
+      </div>
+
+      <div class='interpretation-section'>
+        <div class='interpretation-title'>Interpretación General</div>
+        <div class='interpretation-text'>{{interpretation}}</div>
+      </div>
+
+      <div class='footer'>
+        <p>✨ Tarot App - Tu guía espiritual ✨</p>
+        <p>Este email fue generado automáticamente. Por favor no respondas a
+          este mensaje.</p>
+      </div>
+    </div>
+  </body>
+</html>

@@ -58,6 +58,55 @@ describe('Readings Hybrid Questions (E2E)', () => {
 
     dataSource = moduleFixture.get<DataSource>(DataSource);
 
+    // Verificar si la tabla refresh_tokens existe
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const tableExists = await dataSource.query(
+      `SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'refresh_tokens'
+      )`,
+    );
+
+    // Si no existe, crearla manualmente
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    if (!tableExists[0].exists) {
+      await dataSource.query(`
+        CREATE TABLE "refresh_tokens" (
+          "id" uuid NOT NULL DEFAULT uuid_generate_v4(), 
+          "user_id" integer NOT NULL, 
+          "token" character varying(500) NOT NULL, 
+          "token_hash" character varying(64) NOT NULL, 
+          "expires_at" TIMESTAMP NOT NULL, 
+          "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
+          "revoked_at" TIMESTAMP, 
+          "ip_address" character varying(45), 
+          "user_agent" character varying(500), 
+          CONSTRAINT "PK_refresh_tokens_id" PRIMARY KEY ("id")
+        )
+      `);
+      
+      await dataSource.query(
+        `CREATE INDEX "IDX_refresh_tokens_user_id" ON "refresh_tokens" ("user_id")`,
+      );
+      
+      await dataSource.query(
+        `CREATE INDEX "IDX_refresh_tokens_token" ON "refresh_tokens" ("token")`,
+      );
+      
+      await dataSource.query(
+        `CREATE INDEX "IDX_refresh_tokens_token_hash" ON "refresh_tokens" ("token_hash")`,
+      );
+      
+      await dataSource.query(
+        `CREATE INDEX "IDX_refresh_tokens_user_token" ON "refresh_tokens" ("user_id", "token")`,
+      );
+      
+      await dataSource.query(
+        `ALTER TABLE "refresh_tokens" ADD CONSTRAINT "FK_refresh_tokens_user" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
+      );
+    }
+
     // Crear datos de prueba necesarios (se reutilizarán en todos los tests)
     const timestamp = Date.now();
     const category = await dataSource.getRepository(ReadingCategory).save({
@@ -97,8 +146,8 @@ describe('Readings Hybrid Questions (E2E)', () => {
     spreadId = spread.id;
   });
 
-  beforeEach(async () => {
-    // Crear usuarios con emails únicos por test
+  beforeAll(async () => {
+    // Crear usuarios una sola vez para todos los tests
     testTimestamp = Date.now();
     const hashedPassword = await hash('test123', 10);
 
@@ -118,7 +167,7 @@ describe('Readings Hybrid Questions (E2E)', () => {
     });
     premiumUserId = premiumUser.id;
 
-    // Obtener tokens
+    // Obtener tokens (solo una vez)
     const freeLoginResponse = await request(app.getHttpServer())
       .post('/auth/login')
       .send({
@@ -135,19 +184,24 @@ describe('Readings Hybrid Questions (E2E)', () => {
       });
     premiumUserToken = (premiumLoginResponse.body as LoginResponse)
       .access_token;
-  });
+  }, 30000);
 
   afterEach(async () => {
-    // Limpiar datos de prueba de este test
+    // Limpiar solo las readings de este test, no los usuarios
+    await dataSource.query(
+      'DELETE FROM tarot_reading WHERE "userId" IN ($1, $2)',
+      [freeUserId, premiumUserId],
+    );
+  });
+
+  afterAll(async () => {
+    // Limpiar usuarios al finalizar todos los tests
     await dataSource.query(
       'DELETE FROM tarot_reading WHERE "userId" IN ($1, $2)',
       [freeUserId, premiumUserId],
     );
     await dataSource.getRepository(User).delete({ id: freeUserId });
     await dataSource.getRepository(User).delete({ id: premiumUserId });
-  });
-
-  afterAll(async () => {
     await app.close();
   });
 

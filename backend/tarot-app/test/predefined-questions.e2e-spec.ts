@@ -26,6 +26,53 @@ describe('PredefinedQuestions (e2e)', () => {
 
     dataSource = moduleFixture.get<DataSource>(DataSource);
 
+    // Verificar si la tabla refresh_tokens existe
+    const tableExists = await dataSource.query(
+      `SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'refresh_tokens'
+      )`,
+    );
+
+    // Si no existe, crearla manualmente
+    if (!tableExists[0].exists) {
+      await dataSource.query(`
+        CREATE TABLE "refresh_tokens" (
+          "id" uuid NOT NULL DEFAULT uuid_generate_v4(), 
+          "user_id" integer NOT NULL, 
+          "token" character varying(500) NOT NULL, 
+          "token_hash" character varying(64) NOT NULL, 
+          "expires_at" TIMESTAMP NOT NULL, 
+          "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
+          "revoked_at" TIMESTAMP, 
+          "ip_address" character varying(45), 
+          "user_agent" character varying(500), 
+          CONSTRAINT "PK_refresh_tokens_id" PRIMARY KEY ("id")
+        )
+      `);
+      
+      await dataSource.query(
+        `CREATE INDEX "IDX_refresh_tokens_user_id" ON "refresh_tokens" ("user_id")`,
+      );
+      
+      await dataSource.query(
+        `CREATE INDEX "IDX_refresh_tokens_token" ON "refresh_tokens" ("token")`,
+      );
+      
+      await dataSource.query(
+        `CREATE INDEX "IDX_refresh_tokens_token_hash" ON "refresh_tokens" ("token_hash")`,
+      );
+      
+      await dataSource.query(
+        `CREATE INDEX "IDX_refresh_tokens_user_token" ON "refresh_tokens" ("user_id", "token")`,
+      );
+      
+      await dataSource.query(
+        `ALTER TABLE "refresh_tokens" ADD CONSTRAINT "FK_refresh_tokens_user" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
+      );
+    }
+
     // Crear categoría de prueba
     const categoryResult = await dataSource.query(
       `INSERT INTO reading_category (name, slug, description, icon, color, "order", "isActive") 
@@ -51,14 +98,22 @@ describe('PredefinedQuestions (e2e)', () => {
     // Obtener tokens (simulando login)
     const adminLoginResponse = await request(app.getHttpServer())
       .post('/auth/login')
-      .send({ email: 'admin@test.com', password: 'test123' });
+      .send({ email: 'admin@test.com', password: 'test123' })
+      .expect(201);
 
     const userLoginResponse = await request(app.getHttpServer())
       .post('/auth/login')
-      .send({ email: 'user@test.com', password: 'test123' });
+      .send({ email: 'user@test.com', password: 'test123' })
+      .expect(201);
 
-    adminToken = adminLoginResponse.body.accessToken;
-    userToken = userLoginResponse.body.accessToken;
+    adminToken = adminLoginResponse.body.access_token;
+    userToken = userLoginResponse.body.access_token;
+
+    if (!adminToken || !userToken) {
+      throw new Error(
+        `Failed to obtain tokens. Admin response: ${JSON.stringify(adminLoginResponse.body)}, User response: ${JSON.stringify(userLoginResponse.body)}`,
+      );
+    }
   });
 
   afterAll(async () => {

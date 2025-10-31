@@ -17,6 +17,26 @@ describe('env-validator', () => {
     expect(() => validate(config)).not.toThrow();
   });
 
+  it('should validate successfully with optional email variables', () => {
+    const config = {
+      POSTGRES_HOST: 'localhost',
+      POSTGRES_PORT: '5432',
+      POSTGRES_USER: 'user',
+      POSTGRES_PASSWORD: 'password',
+      POSTGRES_DB: 'database',
+      JWT_SECRET: 'a'.repeat(32),
+      JWT_EXPIRES_IN: '1h',
+      GROQ_API_KEY: 'gsk_test123',
+      SMTP_HOST: 'smtp.test.com',
+      SMTP_PORT: '587',
+      SMTP_USER: 'test@test.com',
+      SMTP_PASS: 'testpass',
+      EMAIL_FROM: 'noreply@test.com',
+    };
+
+    expect(() => validate(config)).not.toThrow();
+  });
+
   it('should throw descriptive error when validation fails', () => {
     const config = {
       POSTGRES_HOST: 'localhost',
@@ -57,6 +77,7 @@ describe('env-validator', () => {
     expect(result.RATE_LIMIT_TTL).toBe(60);
     expect(result.RATE_LIMIT_MAX).toBe(100);
     expect(result.GROQ_MODEL).toBe('llama-3.3-70b-versatile');
+    expect(result.FRONTEND_URL).toBe('http://localhost:3000');
   });
 
   it('should preserve custom values for optional variables', () => {
@@ -75,6 +96,7 @@ describe('env-validator', () => {
       RATE_LIMIT_TTL: '120',
       RATE_LIMIT_MAX: '200',
       GROQ_MODEL: 'llama-3.2-90b-text-preview',
+      FRONTEND_URL: 'https://app.example.com',
     };
 
     const result = validate(config);
@@ -85,6 +107,7 @@ describe('env-validator', () => {
     expect(result.RATE_LIMIT_TTL).toBe(120);
     expect(result.RATE_LIMIT_MAX).toBe(200);
     expect(result.GROQ_MODEL).toBe('llama-3.2-90b-text-preview');
+    expect(result.FRONTEND_URL).toBe('https://app.example.com');
   });
 
   it('should include helpful error message in exception', () => {
