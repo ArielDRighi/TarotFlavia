@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD, APP_FILTER } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
@@ -15,6 +17,8 @@ import { CategoriesModule } from './modules/categories/categories.module';
 import { PredefinedQuestionsModule } from './modules/predefined-questions/predefined-questions.module';
 import { HealthModule } from './modules/health/health.module';
 import { UsageLimitsModule } from './modules/usage-limits/usage-limits.module';
+import { CustomThrottlerGuard } from './common/guards/custom-throttler.guard';
+import { ThrottlerExceptionFilter } from './common/filters/throttler-exception.filter';
 import databaseConfig from './config/typeorm';
 import { validate } from './config/env-validator';
 
@@ -40,6 +44,12 @@ import { validate } from './config/env-validator';
         return dbConfig;
       },
     }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000, // 60 segundos = 1 minuto
+        limit: 100, // 100 requests por minuto (global)
+      },
+    ]),
     AuthModule,
     UsersModule,
     CardsModule,
@@ -54,6 +64,16 @@ import { validate } from './config/env-validator';
     UsageLimitsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: CustomThrottlerGuard,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: ThrottlerExceptionFilter,
+    },
+  ],
 })
 export class AppModule {}
