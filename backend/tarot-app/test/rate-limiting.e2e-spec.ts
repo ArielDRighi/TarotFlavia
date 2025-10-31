@@ -96,7 +96,16 @@ describe('Rate Limiting (e2e)', () => {
       const throttledResponse = throttledRequests[0];
       expect(throttledResponse?.body).toHaveProperty('statusCode', 429);
       expect(throttledResponse?.body).toHaveProperty('message');
-      expect(throttledResponse?.body.message).toContain(
+
+      // Type assertion para body con estructura conocida
+      const responseBody = throttledResponse?.body as {
+        message: string;
+        statusCode: number;
+        error: string;
+        retryAfter: number;
+      };
+
+      expect(responseBody.message).toContain(
         'Has excedido el límite de solicitudes',
       );
       expect(throttledResponse?.body).toHaveProperty('retryAfter');
