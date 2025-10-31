@@ -1,0 +1,190 @@
+<html lang='es'>
+  <head>
+    <meta charset='UTF-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <title>Cambio de Plan Confirmado</title>
+    <style>
+      body {
+        font-family: 'Georgia', serif;
+        background-color: #f5f3f0;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        padding: 40px 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+      }
+      .header h1 {
+        color: #8b7355;
+        font-size: 28px;
+        margin: 10px 0;
+        font-weight: normal;
+      }
+      .success-icon {
+        font-size: 60px;
+        margin-bottom: 10px;
+      }
+      .content {
+        color: #5a5a5a;
+        font-size: 16px;
+        line-height: 1.8;
+        margin: 20px 0;
+      }
+      .content p {
+        margin: 15px 0;
+      }
+      .plan-change-box {
+        background-color: #f9f7f5;
+        padding: 30px;
+        border-radius: 8px;
+        margin: 30px 0;
+        text-align: center;
+      }
+      .plan-row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 20px 0;
+      }
+      .plan-badge {
+        padding: 15px 25px;
+        border-radius: 8px;
+        font-size: 18px;
+        font-weight: bold;
+        min-width: 150px;
+      }
+      .old-plan {
+        background-color: #e8e8e8;
+        color: #666;
+      }
+      .new-plan {
+        background-color: #8b7355;
+        color: #ffffff;
+      }
+      .arrow {
+        font-size: 30px;
+        margin: 0 20px;
+        color: #8b7355;
+      }
+      .change-date {
+        color: #888;
+        font-size: 14px;
+        margin-top: 15px;
+      }
+      .benefits-box {
+        background-color: #f0ebe5;
+        padding: 25px;
+        border-radius: 8px;
+        margin: 30px 0;
+      }
+      .benefits-box h2 {
+        color: #8b7355;
+        font-size: 20px;
+        margin-top: 0;
+        margin-bottom: 15px;
+      }
+      .benefits-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .benefits-list li {
+        padding: 10px 0;
+        color: #555;
+        font-size: 15px;
+      }
+      .benefits-list li:before {
+        content: '✓ ';
+        color: #8b7355;
+        font-weight: bold;
+        font-size: 18px;
+        margin-right: 10px;
+      }
+      .highlight-box {
+        background-color: #fff8dc;
+        border-left: 4px solid #8b7355;
+        padding: 20px;
+        border-radius: 5px;
+        margin: 20px 0;
+      }
+      .highlight-box strong {
+        color: #8b7355;
+      }
+      .footer {
+        text-align: center;
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 1px solid #e0e0e0;
+        color: #888;
+        font-size: 13px;
+      }
+      .footer p {
+        margin: 5px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class='container'>
+      <div class='header'>
+        <div class='success-icon'>🎉</div>
+        <h1>¡Cambio de Plan Confirmado!</h1>
+      </div>
+
+      <div class='content'>
+        <p>Hola <strong>{{userName}}</strong>,</p>
+        <p>Tu cambio de plan se ha procesado exitosamente. ¡Gracias por confiar
+          en Tarot App!</p>
+      </div>
+
+      <div class='plan-change-box'>
+        <div class='plan-row'>
+          <div class='plan-badge old-plan'>{{oldPlan}}</div>
+          <div class='arrow'>→</div>
+          <div class='plan-badge new-plan'>{{newPlan}}</div>
+        </div>
+        <div class='change-date'>Fecha de cambio: {{changeDate}}</div>
+      </div>
+
+      <div class='highlight-box'>
+        <strong>🌟 Tu nuevo plan está activo desde ahora</strong>
+        <p style='margin: 10px 0 0 0; color: #666;'>Ya puedes disfrutar de todos
+          los beneficios incluidos en tu plan
+          {{newPlan}}.</p>
+      </div>
+
+      <div class='benefits-box'>
+        <h2>¿Qué incluye tu nuevo plan?</h2>
+        <ul class='benefits-list'>
+          <li>Lecturas ilimitadas de tarot</li>
+          <li>Acceso a tiradas premium exclusivas</li>
+          <li>Interpretaciones más profundas con IA avanzada</li>
+          <li>Historial completo de tus lecturas</li>
+          <li>Soporte prioritario</li>
+          <li>Sin publicidad</li>
+        </ul>
+      </div>
+
+      <div class='content'>
+        <p>Estamos emocionados de seguir acompañándote en tu viaje espiritual
+          con funcionalidades mejoradas.</p>
+        <p>Si tienes alguna pregunta sobre tu nuevo plan, no dudes en
+          contactarnos.</p>
+      </div>
+
+      <div class='footer'>
+        <p>✨ Tarot App - Tu guía espiritual ✨</p>
+        <p>Este email fue generado automáticamente. Por favor no respondas a
+          este mensaje.</p>
+      </div>
+    </div>
+  </body>
+</html>

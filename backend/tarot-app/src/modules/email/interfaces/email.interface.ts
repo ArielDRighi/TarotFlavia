@@ -1,0 +1,36 @@
+export interface EmailOptions {
+  to: string;
+  subject: string;
+  template: string;
+  context: Record<string, unknown>;
+}
+
+export interface SharedReadingData {
+  userName: string;
+  readingType: string;
+  cards: Array<{
+    name: string;
+    position: string;
+    interpretation?: string;
+  }>;
+  interpretation: string;
+  date: Date;
+}
+
+export interface WelcomeEmailData {
+  userName: string;
+  email: string;
+}
+
+export interface PasswordResetData {
+  userName: string;
+  resetToken: string;
+  resetUrl: string;
+}
+
+export interface PlanChangeData {
+  userName: string;
+  oldPlan: string;
+  newPlan: string;
+  changeDate: Date;
+}

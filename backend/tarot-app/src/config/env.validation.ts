@@ -158,4 +158,36 @@ export class EnvironmentVariables {
   @Type(() => Number)
   @Transform(({ value }) => (value ? Number(value) : 100))
   RATE_LIMIT_MAX: number = 100;
+
+  // =============================================================================
+  // EMAIL CONFIGURATION
+  // =============================================================================
+
+  @IsString()
+  @IsNotEmpty()
+  SMTP_HOST: string;
+
+  @IsPort()
+  @Transform(({ value }) => String(value))
+  SMTP_PORT: string;
+
+  @IsString()
+  @IsNotEmpty()
+  SMTP_USER: string;
+
+  @IsString()
+  @IsNotEmpty()
+  SMTP_PASS: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @Matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, {
+    message: 'EMAIL_FROM must be a valid email address',
+  })
+  EMAIL_FROM: string;
+
+  @IsString()
+  @IsOptional()
+  @Transform(({ value }) => (value ? String(value) : 'http://localhost:3000'))
+  FRONTEND_URL: string = 'http://localhost:3000';
 }
