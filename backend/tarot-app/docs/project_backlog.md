@@ -1598,8 +1598,21 @@ Implementar servicio básico de email usando Nodemailer para enviar lecturas com
 - Logging con contexto completo (destinatario, tipo de email)
 - Configuración flexible vía variables de entorno
 - Soporte para SMTP con TLS/SSL automático
+- **Variables de email son OPCIONALES** - si no están configuradas, se usa `jsonTransport` (modo test)
 - Para desarrollo/testing: usar Mailtrap.io (ver `EMAIL_SETUP.md`)
 - **Nota:** No se implementó queue (Bull) - se dejó para optimización futura si es necesario
+
+#### ✅ Tests
+
+- **Tests unitarios:** 358 tests pasando (incluyendo 13 del EmailService + 1 nuevo del validador)
+- **Tests E2E pasando:** app, rate-limiting, ai-health, email (9 tests)
+- **Tests E2E con issues preexistentes:** predefined-questions, readings-hybrid (problema con class-validator no relacionado con esta tarea)
+
+#### 🔄 Commits
+
+1. `a65d1ec` - Implementación inicial completa
+2. `2ab35a8` - Actualización del backlog
+3. `067f6a5` - Fix: Variables de email opcionales para no romper tests E2E
 
 ---
 
