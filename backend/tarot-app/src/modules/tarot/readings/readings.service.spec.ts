@@ -78,6 +78,10 @@ describe('ReadingsService', () => {
   const mockReading: TarotReading = {
     id: 1,
     question: 'What does my future hold?',
+    predefinedQuestionId: null,
+    predefinedQuestion: null,
+    customQuestion: null,
+    questionType: null,
     user: mockUser,
     deck: mockDeck,
     cards: mockCards,
@@ -113,9 +117,9 @@ describe('ReadingsService', () => {
   });
 
   describe('create', () => {
-    it('should create a new reading', async () => {
+    it('should create a reading with predefined question', async () => {
       const createReadingDto: CreateReadingDto = {
-        question: 'What does my future hold?',
+        predefinedQuestionId: 5,
         deckId: 1,
         spreadId: 1,
         cardIds: [1, 2],
@@ -126,19 +130,68 @@ describe('ReadingsService', () => {
         generateInterpretation: true,
       };
 
-      mockRepository.create.mockReturnValue(mockReading);
-      mockRepository.save.mockResolvedValue(mockReading);
+      const readingWithPredefined = {
+        ...mockReading,
+        predefinedQuestionId: 5,
+        customQuestion: null,
+        questionType: 'predefined' as const,
+      };
+
+      mockRepository.create.mockReturnValue(readingWithPredefined);
+      mockRepository.save.mockResolvedValue(readingWithPredefined);
 
       const result = await service.create(mockUser, createReadingDto);
 
-      expect(mockRepository.create).toHaveBeenCalled();
+      expect(mockRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          predefinedQuestionId: 5,
+          customQuestion: null,
+          questionType: 'predefined',
+        }),
+      );
       expect(mockRepository.save).toHaveBeenCalled();
-      expect(result).toEqual(mockReading);
+      expect(result.questionType).toBe('predefined');
+    });
+
+    it('should create a reading with custom question', async () => {
+      const createReadingDto: CreateReadingDto = {
+        customQuestion: '¿Cuál es mi propósito en la vida?',
+        deckId: 1,
+        spreadId: 1,
+        cardIds: [1, 2],
+        cardPositions: [
+          { cardId: 1, position: 'past', isReversed: false },
+          { cardId: 2, position: 'present', isReversed: true },
+        ],
+        generateInterpretation: true,
+      };
+
+      const readingWithCustom = {
+        ...mockReading,
+        predefinedQuestionId: null,
+        customQuestion: '¿Cuál es mi propósito en la vida?',
+        questionType: 'custom' as const,
+      };
+
+      mockRepository.create.mockReturnValue(readingWithCustom);
+      mockRepository.save.mockResolvedValue(readingWithCustom);
+
+      const result = await service.create(mockUser, createReadingDto);
+
+      expect(mockRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          predefinedQuestionId: null,
+          customQuestion: '¿Cuál es mi propósito en la vida?',
+          questionType: 'custom',
+        }),
+      );
+      expect(mockRepository.save).toHaveBeenCalled();
+      expect(result.questionType).toBe('custom');
     });
 
     it('should create reading without interpretation if not requested', async () => {
       const createReadingDto: CreateReadingDto = {
-        question: 'Test question',
+        predefinedQuestionId: 3,
         deckId: 1,
         spreadId: 1,
         cardIds: [1, 2],
@@ -152,6 +205,9 @@ describe('ReadingsService', () => {
       const readingWithoutInterpretation = {
         ...mockReading,
         interpretation: null,
+        predefinedQuestionId: 3,
+        customQuestion: null,
+        questionType: 'predefined' as const,
       };
       mockRepository.create.mockReturnValue(readingWithoutInterpretation);
       mockRepository.save.mockResolvedValue(readingWithoutInterpretation);

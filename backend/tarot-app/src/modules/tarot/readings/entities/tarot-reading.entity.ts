@@ -7,12 +7,14 @@ import {
   JoinTable,
   CreateDateColumn,
   DeleteDateColumn,
+  JoinColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from '../../../users/entities/user.entity';
 import { TarotCard } from '../../cards/entities/tarot-card.entity';
 import { TarotDeck } from '../../decks/entities/tarot-deck.entity';
 import { ReadingCategory } from '../../../categories/entities/reading-category.entity';
+import { PredefinedQuestion } from '../../../predefined-questions/entities/predefined-question.entity';
 
 @Entity()
 export class TarotReading {
@@ -22,10 +24,47 @@ export class TarotReading {
 
   @ApiProperty({
     example: 'Mi futuro profesional',
-    description: 'Tema o pregunta de la lectura',
+    description:
+      'Tema o pregunta de la lectura (deprecated, usar predefinedQuestionId o customQuestion)',
+    deprecated: true,
   })
   @Column({ nullable: true })
   question: string;
+
+  @ApiProperty({
+    example: 5,
+    description: 'ID de la pregunta predefinida usada (para usuarios free)',
+    required: false,
+  })
+  @Column({ nullable: true })
+  predefinedQuestionId: number | null;
+
+  @ApiProperty({
+    description: 'Relación con la pregunta predefinida',
+    type: () => PredefinedQuestion,
+    required: false,
+  })
+  @ManyToOne(() => PredefinedQuestion, { nullable: true })
+  @JoinColumn({ name: 'predefinedQuestionId' })
+  predefinedQuestion: PredefinedQuestion | null;
+
+  @ApiProperty({
+    example: '¿Cuál es mi propósito en la vida?',
+    description: 'Pregunta personalizada (requiere plan premium)',
+    required: false,
+    maxLength: 500,
+  })
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  customQuestion: string | null;
+
+  @ApiProperty({
+    example: 'predefined',
+    description: 'Tipo de pregunta: predefined o custom',
+    enum: ['predefined', 'custom'],
+    required: false,
+  })
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  questionType: 'predefined' | 'custom' | null;
 
   @ManyToOne(() => User)
   user: User;
