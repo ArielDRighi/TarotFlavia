@@ -3,6 +3,9 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { UnauthorizedException } from '@nestjs/common';
+import { Request } from 'express';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -10,16 +13,73 @@ describe('AuthController', () => {
 
   beforeEach(async () => {
     authServiceMock = {
-      register: jest.fn().mockImplementation((dto: CreateUserDto) =>
-        Promise.resolve({
-          user: { id: 1, email: dto.email },
-          access_token: 't',
-        }),
+      register: jest.fn().mockImplementation(
+        (
+          dto: CreateUserDto,
+        ): Promise<{
+          user: { id: number; email: string };
+          access_token: string;
+          refresh_token: string;
+        }> => {
+          return Promise.resolve({
+            user: { id: 1, email: dto.email },
+            access_token: 't',
+            refresh_token: 'refresh_t',
+          });
+        },
       ),
       validateUser: jest.fn().mockResolvedValue({ id: 2, email: 'a@a.com' }),
-      login: jest.fn().mockResolvedValue({
-        user: { id: 2, email: 'a@a.com' },
-        access_token: 'tok',
+      login: jest.fn().mockImplementation(
+        (): Promise<{
+          user: { id: number; email: string };
+          access_token: string;
+          refresh_token: string;
+        }> => {
+          return Promise.resolve({
+            user: { id: 2, email: 'a@a.com' },
+            access_token: 'tok',
+            refresh_token: 'refresh_tok',
+          });
+        },
+      ),
+      refresh: jest
+        .fn()
+        .mockImplementation(
+          (
+            refreshToken: string,
+          ): Promise<{ access_token: string; refresh_token: string }> => {
+            if (
+              refreshToken === 'invalid_token_12345' ||
+              refreshToken === 'expired_token_67890' ||
+              refreshToken === 'revoked_token_abcde'
+            ) {
+              return Promise.reject(
+                new UnauthorizedException('Invalid refresh token'),
+              );
+            }
+            return Promise.resolve({
+              access_token: 'new_access_token_123',
+              refresh_token: 'new_refresh_token_456',
+            });
+          },
+        ),
+      logout: jest.fn().mockImplementation((refreshToken: string) => {
+        if (refreshToken === 'invalid_token') {
+          return Promise.reject(
+            new UnauthorizedException('Invalid refresh token'),
+          );
+        }
+        return Promise.resolve({ message: 'Logged out successfully' });
+      }),
+      logoutAll: jest.fn().mockImplementation((userId: number) => {
+        if (!userId) {
+          return Promise.reject(
+            new UnauthorizedException('User not authenticated'),
+          );
+        }
+        return Promise.resolve({
+          message: 'All sessions logged out successfully',
+        });
       }),
     };
 
@@ -42,9 +102,24 @@ describe('AuthController', () => {
         name: 'New',
         password: 'pass',
       };
-      const res = await controller.register(dto);
-      expect(authServiceMock.register).toHaveBeenCalledWith(dto);
+      const mockReq = {
+        ip: '127.0.0.1',
+        get: jest.fn((name: string) => {
+          if (name === 'user-agent') {
+            return 'test-user-agent';
+          }
+          return undefined;
+        }) as Request['get'],
+      } as Request;
+
+      const res = await controller.register(dto, mockReq);
+      expect(authServiceMock.register).toHaveBeenCalledWith(
+        dto,
+        '127.0.0.1',
+        'test-user-agent',
+      );
       expect(res).toHaveProperty('access_token');
+      expect(res).toHaveProperty('refresh_token');
       if (res.user && 'email' in res.user) {
         expect(res.user.email).toEqual(dto.email);
       }
@@ -52,10 +127,20 @@ describe('AuthController', () => {
   });
 
   describe('login', () => {
+    const mockReq = {
+      ip: '192.168.1.1',
+      get: jest.fn((name: string) => {
+        if (name === 'user-agent') {
+          return 'login-user-agent';
+        }
+        return undefined;
+      }) as Request['get'],
+    } as Request;
+
     it('should return 401 when credentials are invalid', async () => {
       (authServiceMock.validateUser as jest.Mock).mockResolvedValue(null);
       const dto: LoginDto = { email: 'b@b.com', password: 'p' };
-      await expect(controller.login(dto)).rejects.toThrow();
+      await expect(controller.login(dto, mockReq)).rejects.toThrow();
     });
 
     it('should return token when credentials are valid', async () => {
@@ -66,16 +151,117 @@ describe('AuthController', () => {
       (authServiceMock.login as jest.Mock).mockResolvedValue({
         user: { id: 2, email: 'b@b.com' },
         access_token: 'tok',
+        refresh_token: 'refresh_tok',
       });
 
       const dto: LoginDto = { email: 'b@b.com', password: 'p' };
-      const res = await controller.login(dto);
+      const res = await controller.login(dto, mockReq);
       expect(authServiceMock.validateUser).toHaveBeenCalledWith(
         dto.email,
         dto.password,
       );
       expect(authServiceMock.login).toHaveBeenCalled();
       expect(res).toHaveProperty('access_token', 'tok');
+      expect(res).toHaveProperty('refresh_token', 'refresh_tok');
+    });
+  });
+
+  describe('refresh', () => {
+    let mockRequest: Request;
+
+    beforeEach(() => {
+      mockRequest = {
+        ip: '127.0.0.1',
+        get: jest.fn((name: string) => {
+          if (name === 'user-agent') {
+            return 'test-user-agent';
+          }
+          return undefined;
+        }) as Request['get'],
+      } as Request;
+    });
+
+    it('should throw UnauthorizedException when refresh token is invalid', async () => {
+      const dto: RefreshTokenDto = {
+        refreshToken: 'invalid_token_12345',
+      };
+      await expect(controller.refresh(dto, mockRequest)).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+
+    it('should throw UnauthorizedException when refresh token is expired', async () => {
+      const dto: RefreshTokenDto = {
+        refreshToken: 'expired_token_67890',
+      };
+      await expect(controller.refresh(dto, mockRequest)).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+
+    it('should throw UnauthorizedException when refresh token is revoked', async () => {
+      const dto: RefreshTokenDto = {
+        refreshToken: 'revoked_token_abcde',
+      };
+      await expect(controller.refresh(dto, mockRequest)).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+
+    it('should return new access and refresh tokens when refresh token is valid', async () => {
+      const dto: RefreshTokenDto = {
+        refreshToken: 'valid_token_xyz123',
+      };
+      const result = await controller.refresh(dto, mockRequest);
+      expect(result).toHaveProperty('access_token');
+      expect(result).toHaveProperty('refresh_token');
+      expect(typeof result.access_token).toBe('string');
+      expect(typeof result.refresh_token).toBe('string');
+    });
+  });
+
+  describe('logout', () => {
+    it('should revoke refresh token and return success', async () => {
+      const dto: RefreshTokenDto = {
+        refreshToken: 'valid_token_to_revoke',
+      };
+      const result = await controller.logout(dto);
+      expect(result).toHaveProperty('message');
+      expect(result.message).toBe('Logged out successfully');
+    });
+
+    it('should throw UnauthorizedException when refresh token is invalid', async () => {
+      const dto: RefreshTokenDto = {
+        refreshToken: 'invalid_token',
+      };
+      await expect(controller.logout(dto)).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+  });
+
+  describe('logoutAll', () => {
+    const mockUser = {
+      userId: 1,
+      email: 'test@example.com',
+    };
+
+    it('should revoke all refresh tokens for authenticated user', async () => {
+      const mockReq = {
+        user: mockUser,
+      } as unknown as Request;
+
+      const result = await controller.logoutAll(mockReq);
+      expect(result).toHaveProperty('message');
+      expect(result.message).toBe('All sessions logged out successfully');
+    });
+
+    it('should throw UnauthorizedException when user is not authenticated', async () => {
+      const mockReq = {} as unknown as Request;
+
+      await expect(controller.logoutAll(mockReq)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 });
