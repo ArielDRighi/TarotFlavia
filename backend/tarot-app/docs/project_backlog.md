@@ -1375,6 +1375,7 @@ Crear sistema completo de tracking de límites de uso para usuarios free (lectur
 #### ✅ Resumen de Implementación (Completado)
 
 **Archivos creados:**
+
 - `src/modules/usage-limits/entities/usage-limit.entity.ts` - Entidad con enum UsageFeature y composite index
 - `src/modules/usage-limits/usage-limits.constants.ts` - Constantes estructuradas por plan y feature
 - `src/modules/usage-limits/usage-limits.service.ts` - Service con 4 métodos principales
@@ -1383,6 +1384,7 @@ Crear sistema completo de tracking de límites de uso para usuarios free (lectur
 - `src/database/migrations/1761655973524-InitialSchema.ts` - Migración actualizada
 
 **Características implementadas:**
+
 - ✅ UsageLimit entity con UsageFeature enum (TAROT_READING, ORACLE_QUERY, INTERPRETATION_REGENERATION)
 - ✅ Composite unique index en (userId, feature, date) para tracking diario
 - ✅ USAGE_LIMITS estructurado: Record<UserPlan, Record<UsageFeature, number>>
@@ -1396,6 +1398,7 @@ Crear sistema completo de tracking de límites de uso para usuarios free (lectur
 - ✅ Metodología TDD Red-Green-Refactor aplicada estrictamente
 
 **📝 Notas:**
+
 - **Tests E2E y Cron job:** Parte de TASK-019-a (Suite Completa de Tests E2E para MVP)
 - Reset diario: implementado via lógica de fecha en checkLimit/incrementUsage (fecha actual vs fecha registro)
 - Cron job: método cleanOldRecords() listo, scheduler pendiente para automatización
@@ -1404,11 +1407,12 @@ Crear sistema completo de tracking de límites de uso para usuarios free (lectur
 
 ### **TASK-013: Modificar Sistema de Lecturas para Preguntas Predefinidas vs Libres** ✅
 
-**Prioridad:** � CRÍTICA  
+**Prioridad:** 🔴 CRÍTICA  
 **Estimación:** 3 días  
 **Dependencias:** TASK-009, TASK-011  
 **Estado:** ✅ COMPLETADO
 **Branch:** `feature/TASK-013-modificar-sistema-lecturas-preguntas`
+**Commit:** `5907c6c`
 **Marcador MVP:** ⭐⭐⭐ **CRÍTICO PARA MVP** - Implementa diferenciación del negocio
 
 #### 📋 Descripción
@@ -1419,46 +1423,46 @@ Adaptar el flujo de creación de lecturas para que usuarios free solo puedan usa
 
 **Tests necesarios:**
 
-- [ ] **Tests unitarios:**
-  - DTO valida pregunta predefinida para free
+- [x] **Tests unitarios:**
+  - DTO valida pregunta predefinida para free (9 tests)
   - DTO acepta pregunta custom para premium
-  - Guard rechaza custom para free
-- [ ] **Tests de integración:**
+  - Guard rechaza custom para free (6 tests)
+- [x] **Tests de integración:**
   - Lectura con `predefined_question_id`
   - Lectura con `custom_question` (premium)
   - Error claro para free con custom
-- [ ] **Tests E2E (OBLIGATORIOS):**
-  - Usuario FREE crea lectura con pregunta predefinida → 201
-  - Usuario FREE rechazado con pregunta custom → 403
-  - Usuario PREMIUM crea lectura con custom → 201
-  - Usuario PREMIUM puede usar predefinidas también → 201
+- [x] **Tests E2E (OBLIGATORIOS):**
+  - Usuario FREE crea lectura con pregunta predefinida → 201 ✅
+  - Usuario FREE rechazado con pregunta custom → 403 ✅
+  - Usuario PREMIUM crea lectura con custom → 201 ✅
+  - Usuario PREMIUM puede usar predefinidas también → 201 ✅
 
 **Ubicación:** `src/readings/*.spec.ts` + `test/readings-hybrid.e2e-spec.ts`  
 **Importancia:** ⭐⭐⭐ CRÍTICA - Sin estos tests el modelo de negocio no está validado
 
 #### ✅ Tareas específicas
 
-- [ ] Modificar `CreateReadingDto` para incluir:
+- [x] Modificar `CreateReadingDto` para incluir:
   - `predefined_question_id` (opcional)
   - `custom_question` (opcional)
   - Validación: usuarios free DEBEN usar `predefined_question_id`
   - Validación: usuarios premium PUEDEN usar cualquiera de los dos
-- [ ] Crear guard `@RequiresPremiumForCustomQuestion()` que valide el tipo de pregunta
-- [ ] Actualizar entidad `TarotReading` para incluir ambos campos:
+- [x] Crear guard `@RequiresPremiumForCustomQuestion()` que valide el tipo de pregunta
+- [x] Actualizar entidad `TarotReading` para incluir ambos campos:
   - `predefined_question_id` (FK nullable)
   - `custom_question` (string nullable)
-- [ ] Modificar `TarotService.createReading()` para manejar ambos tipos de preguntas
-- [ ] Agregar relación con `PredefinedQuestion` en la entidad
-- [ ] Actualizar endpoint `POST /tarot/reading` con validación de plan
-- [ ] Implementar mensajes de error claros cuando usuario free intenta pregunta custom
-- [ ] Agregar campo `question_type` (`'predefined'` | `'custom'`) para analytics
-- [ ] Actualizar tests unitarios y e2e para ambos flujos
+- [x] Modificar `TarotService.createReading()` para manejar ambos tipos de preguntas
+- [x] Agregar relación con `PredefinedQuestion` en la entidad
+- [x] Actualizar endpoint `POST /tarot/reading` con validación de plan
+- [x] Implementar mensajes de error claros cuando usuario free intenta pregunta custom
+- [x] Agregar campo `question_type` (`'predefined'` | `'custom'`) para analytics
+- [x] Actualizar tests unitarios y e2e para ambos flujos
 
 #### 🎯 Criterios de aceptación
 
-- ✓ Usuarios free solo pueden crear lecturas con preguntas predefinidas
-- ✓ Usuarios premium pueden usar ambos tipos de preguntas
-- ✓ Los errores de validación son claros y útiles
+- ✅ Usuarios free solo pueden crear lecturas con preguntas predefinidas
+- ✅ Usuarios premium pueden usar ambos tipos de preguntas
+- ✅ Los errores de validación son claros y útiles
 
 ---
 
@@ -1850,6 +1854,7 @@ Crear sistema robusto de logging que trackee todas las llamadas a OpenAI para mo
 Implementar suite completa de tests End-to-End (E2E) que cubran todos los flujos críticos del MVP. Estos tests simulan el comportamiento real del usuario y son obligatorios antes de deploy a producción.
 
 **📝 Incluye tests E2E pendientes de TASK-012 (Usage Limits):**
+
 - Tests de integración para reset diario, índice compuesto, cleanup
 - Tests E2E de escenarios: FREE 3 lecturas/día, PREMIUM ilimitado, reset diario
 - Implementación de cron job automático para `cleanOldRecords()`
