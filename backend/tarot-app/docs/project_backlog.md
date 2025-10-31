@@ -1502,7 +1502,7 @@ Implementar rate limiting global para proteger la API de abuso y ataques DDoS us
 - ✅ Los endpoints están protegidos contra spam y abuso
 - ✅ Los límites son apropiados para cada tipo de endpoint
 - ✅ Los usuarios reciben feedback claro sobre límites
-- ✅ Headers X-RateLimit-* se incluyen en todas las respuestas
+- ✅ Headers X-RateLimit-\* se incluyen en todas las respuestas
 - ✅ Usuarios premium tienen el doble de límite
 - ✅ Mensaje de error personalizado en español con tiempo de espera
 - ✅ 4 pruebas E2E pasando
