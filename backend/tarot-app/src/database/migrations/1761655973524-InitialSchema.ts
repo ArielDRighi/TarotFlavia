@@ -20,7 +20,7 @@ export class InitialSchema1761655973524 implements MigrationInterface {
       `CREATE INDEX "IDX_predefined_question_category" ON "predefined_question" ("category_id")`,
     );
     await queryRunner.query(
-      `CREATE TABLE "tarot_reading" ("id" SERIAL NOT NULL, "question" character varying, "cardPositions" jsonb NOT NULL, "interpretation" text, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "deletedAt" TIMESTAMP, "userId" integer, "deckId" integer, "categoryId" integer, CONSTRAINT "PK_8f96c960d305aaf75bd688fb2cd" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "tarot_reading" ("id" SERIAL NOT NULL, "question" character varying, "predefinedQuestionId" integer, "customQuestion" character varying(500), "questionType" character varying(20), "cardPositions" jsonb NOT NULL, "interpretation" text, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "deletedAt" TIMESTAMP, "userId" integer, "deckId" integer, "categoryId" integer, CONSTRAINT "PK_8f96c960d305aaf75bd688fb2cd" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `CREATE TYPE "user_plan_enum" AS ENUM('free', 'premium')`,
@@ -72,6 +72,9 @@ export class InitialSchema1761655973524 implements MigrationInterface {
       `ALTER TABLE "tarot_reading" ADD CONSTRAINT "FK_tarot_reading_category" FOREIGN KEY ("categoryId") REFERENCES "reading_category"("id") ON DELETE SET NULL ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
+      `ALTER TABLE "tarot_reading" ADD CONSTRAINT "FK_tarot_reading_predefined_question" FOREIGN KEY ("predefinedQuestionId") REFERENCES "predefined_question"("id") ON DELETE SET NULL ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
       `ALTER TABLE "tarot_interpretation" ADD CONSTRAINT "FK_b41f049863deb7f13835ba43c79" FOREIGN KEY ("readingId") REFERENCES "tarot_reading"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
@@ -94,6 +97,9 @@ export class InitialSchema1761655973524 implements MigrationInterface {
     );
     await queryRunner.query(
       `ALTER TABLE "tarot_interpretation" DROP CONSTRAINT "FK_b41f049863deb7f13835ba43c79"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "tarot_reading" DROP CONSTRAINT "FK_tarot_reading_predefined_question"`,
     );
     await queryRunner.query(
       `ALTER TABLE "tarot_reading" DROP CONSTRAINT "FK_tarot_reading_category"`,

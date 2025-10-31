@@ -21,8 +21,15 @@ export class ReadingsService {
     user: User,
     createReadingDto: CreateReadingDto,
   ): Promise<TarotReading> {
+    // Determinar tipo de pregunta y establecer campos apropiados
+    const questionType = createReadingDto.predefinedQuestionId
+      ? ('predefined' as const)
+      : ('custom' as const);
+
     const reading = this.readingsRepository.create({
-      question: createReadingDto.question,
+      predefinedQuestionId: createReadingDto.predefinedQuestionId || null,
+      customQuestion: createReadingDto.customQuestion || null,
+      questionType,
       user,
       deck: { id: createReadingDto.deckId } as Pick<TarotDeck, 'id'>,
       cardPositions: createReadingDto.cardPositions,

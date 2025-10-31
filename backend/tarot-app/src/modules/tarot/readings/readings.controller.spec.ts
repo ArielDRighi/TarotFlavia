@@ -61,9 +61,9 @@ describe('ReadingsController', () => {
   });
 
   describe('create', () => {
-    it('should create a new reading', async () => {
+    it('should create a new reading with predefined question', async () => {
       const createDto: CreateReadingDto = {
-        question: 'What does my future hold?',
+        predefinedQuestionId: 5,
         deckId: 1,
         spreadId: 1,
         cardIds: [1, 2],
@@ -86,6 +86,37 @@ describe('ReadingsController', () => {
         createDto,
       );
       expect(result).toEqual(mockReading);
+    });
+
+    it('should create a new reading with custom question', async () => {
+      const createDto: CreateReadingDto = {
+        customQuestion: '¿Cuál es mi propósito en la vida?',
+        deckId: 1,
+        spreadId: 1,
+        cardIds: [1, 2],
+        cardPositions: [
+          { cardId: 1, position: 'past', isReversed: false },
+          { cardId: 2, position: 'present', isReversed: true },
+        ],
+        generateInterpretation: true,
+      };
+
+      const req = { user: { userId: mockUser.id } };
+      const readingWithCustom = {
+        ...mockReading,
+        customQuestion: createDto.customQuestion,
+      };
+      mockService.create.mockResolvedValue(readingWithCustom);
+
+      const result = await controller.createReading(req, createDto);
+
+      expect(mockService.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: mockUser.id,
+        }),
+        createDto,
+      );
+      expect(result).toEqual(readingWithCustom);
     });
   });
 

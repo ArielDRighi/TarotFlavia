@@ -17,6 +17,7 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { RequiresPremiumForCustomQuestionGuard } from './guards/requires-premium-for-custom-question.guard';
 import { ReadingsService } from './readings.service';
 import { CreateReadingDto } from './dto/create-reading.dto';
 import { User } from '../../users/entities/user.entity';
@@ -26,18 +27,28 @@ import { User } from '../../users/entities/user.entity';
 export class ReadingsController {
   constructor(private readonly readingsService: ReadingsService) {}
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RequiresPremiumForCustomQuestionGuard)
   @Post()
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Crear una nueva lectura de tarot',
     description:
-      'Procesa una lectura completa con cartas seleccionadas, generando interpretación',
+      'Procesa una lectura completa con cartas seleccionadas, generando interpretación. Los usuarios free solo pueden usar preguntas predefinidas, mientras que los usuarios premium pueden usar preguntas personalizadas.',
   })
   @ApiBody({ type: CreateReadingDto })
   @ApiResponse({
     status: 201,
     description: 'Lectura creada con éxito',
+  })
+  @ApiResponse({
+    status: 403,
+    description:
+      'Usuario free intentando usar pregunta personalizada (requiere plan premium)',
+  })
+  @ApiResponse({
+    status: 400,
+    description:
+      'Validación fallida: ninguna pregunta o ambas preguntas proporcionadas',
   })
   async createReading(
     @Request() req: { user: { userId: number } },
