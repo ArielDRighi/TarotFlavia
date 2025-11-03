@@ -5,6 +5,7 @@ import {
   Body,
   Param,
   UseGuards,
+  UseInterceptors,
   Request,
   ParseIntPipe,
 } from '@nestjs/common';
@@ -19,6 +20,12 @@ import {
 import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RequiresPremiumForCustomQuestionGuard } from './guards/requires-premium-for-custom-question.guard';
+import {
+  CheckUsageLimitGuard,
+  IncrementUsageInterceptor,
+  CheckUsageLimit,
+  UsageFeature,
+} from '../../usage-limits';
 import { ReadingsService } from './readings.service';
 import { CreateReadingDto } from './dto/create-reading.dto';
 import { User } from '../../users/entities/user.entity';
@@ -29,7 +36,13 @@ import { User } from '../../users/entities/user.entity';
 export class ReadingsController {
   constructor(private readonly readingsService: ReadingsService) {}
 
-  @UseGuards(JwtAuthGuard, RequiresPremiumForCustomQuestionGuard)
+  @UseGuards(
+    JwtAuthGuard,
+    RequiresPremiumForCustomQuestionGuard,
+    CheckUsageLimitGuard,
+  )
+  @UseInterceptors(IncrementUsageInterceptor)
+  @CheckUsageLimit(UsageFeature.TAROT_READING)
   @Post()
   @ApiBearerAuth()
   @ApiOperation({
@@ -45,7 +58,7 @@ export class ReadingsController {
   @ApiResponse({
     status: 403,
     description:
-      'Usuario free intentando usar pregunta personalizada (requiere plan premium)',
+      'Usuario free intentando usar pregunta personalizada (requiere plan premium) o límite de lecturas alcanzado',
   })
   @ApiResponse({
     status: 400,

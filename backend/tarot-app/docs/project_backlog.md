@@ -1405,11 +1405,14 @@ Crear sistema completo de tracking de límites de uso para usuarios free (lectur
 
 ---
 
-### **TASK-012-a: Crear Guard y Decorator Reutilizable @CheckUsageLimit** 🔵
+### **TASK-012-a: Crear Guard y Decorator Reutilizable @CheckUsageLimit** 🔵 ✅
 
 **Prioridad:** 🟢 BAJA (Refactoring/Mejora de código)  
 **Estimación:** 1 día  
 **Dependencias:** TASK-012 (completada)  
+**Estado:** ✅ COMPLETADO  
+**Branch:** `feature/TASK-012-a-guard-decorator-usage-limit`  
+**Fecha de Finalización:** 3 de Noviembre 2025  
 **Marcador MVP:** 🔵 **FASE 2** - Mejora de calidad de código, no bloqueante
 
 #### 📋 Descripción
