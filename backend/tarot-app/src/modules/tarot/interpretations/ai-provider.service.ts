@@ -14,6 +14,12 @@ import {
   AIProvider,
   AIUsageStatus,
 } from '../../ai-usage/entities/ai-usage-log.entity';
+import {
+  CircuitBreaker,
+  CircuitBreakerState,
+} from './errors/circuit-breaker.utils';
+import { retryWithBackoff } from './errors/retry.utils';
+import { AIProviderException } from './errors/ai-error.types';
 
 /**
  * AI Provider Service
@@ -24,6 +30,7 @@ import {
 export class AIProviderService {
   private readonly logger = new Logger(AIProviderService.name);
   private providers: IAIProvider[] = [];
+  private circuitBreakers: Map<AIProviderType, CircuitBreaker> = new Map();
 
   constructor(
     private readonly configService: ConfigService,
@@ -38,10 +45,27 @@ export class AIProviderService {
       this.deepseekProvider, // Secondary: Low cost
       this.openaiProvider, // Tertiary: Fallback
     ];
+
+    // Initialize circuit breakers for each provider
+    // Groq: 5 failures, 5 minutes timeout
+    this.circuitBreakers.set(
+      AIProviderType.GROQ,
+      new CircuitBreaker(AIProviderType.GROQ, 5, 300000),
+    );
+    // DeepSeek: 5 failures, 5 minutes timeout
+    this.circuitBreakers.set(
+      AIProviderType.DEEPSEEK,
+      new CircuitBreaker(AIProviderType.DEEPSEEK, 5, 300000),
+    );
+    // OpenAI: 5 failures, 5 minutes timeout
+    this.circuitBreakers.set(
+      AIProviderType.OPENAI,
+      new CircuitBreaker(AIProviderType.OPENAI, 5, 300000),
+    );
   }
 
   /**
-   * Generate completion with automatic fallback
+   * Generate completion with automatic fallback, retry, and circuit breaker
    * Tries providers in priority order until one succeeds
    */
   async generateCompletion(
@@ -54,18 +78,45 @@ export class AIProviderService {
     let providerIndex = 0;
 
     for (const provider of this.providers) {
-      const startTime = Date.now();
       const providerType = provider.getProviderType();
+      const circuitBreaker = this.circuitBreakers.get(providerType);
+
+      // Check circuit breaker before attempting
+      if (circuitBreaker && !circuitBreaker.canExecute()) {
+        this.logger.warn(
+          `Circuit breaker OPEN for ${providerType}, skipping to next provider`,
+        );
+        errors.push({
+          provider: providerType,
+          error: 'Circuit breaker open',
+        });
+        providerIndex++;
+        if (providerIndex > 0) {
+          fallbackUsed = true;
+        }
+        continue;
+      }
+
+      const startTime = Date.now();
 
       try {
         this.logger.log(`Attempting completion with ${providerType}`);
 
-        const response = await provider.generateCompletion(messages, {});
+        // Wrap provider call with retry logic
+        const response = await retryWithBackoff(async () => {
+          return await provider.generateCompletion(messages, {});
+        }, 3); // Max 3 retries
+
         const durationMs = Date.now() - startTime;
 
         this.logger.log(
           `Success with ${response.provider} (${response.durationMs}ms, ${response.tokensUsed.total} tokens)`,
         );
+
+        // Record success in circuit breaker
+        if (circuitBreaker) {
+          circuitBreaker.recordSuccess();
+        }
 
         // Log successful call
         const costUsd = this.aiUsageService.calculateCost(
@@ -94,6 +145,12 @@ export class AIProviderService {
         const durationMs = Date.now() - startTime;
         const errorMessage =
           error instanceof Error ? error.message : 'Unknown error';
+
+        // Record failure in circuit breaker
+        if (circuitBreaker) {
+          circuitBreaker.recordFailure();
+        }
+
         errors.push({
           provider: providerType,
           error: errorMessage,
@@ -116,7 +173,19 @@ export class AIProviderService {
         });
 
         if (process.env.NODE_ENV !== 'test') {
-          this.logger.warn(`${providerType} failed: ${errorMessage}`);
+          this.logger.warn(
+            `${providerType} failed after retries: ${errorMessage}`,
+          );
+
+          // Log circuit breaker state change
+          if (
+            circuitBreaker &&
+            circuitBreaker.getState() === CircuitBreakerState.OPEN
+          ) {
+            this.logger.error(
+              `⚠️ Circuit breaker OPENED for ${providerType} after ${circuitBreaker.getStats().consecutiveFailures} failures`,
+            );
+          }
         }
 
         providerIndex++;
@@ -175,5 +244,16 @@ export class AIProviderService {
       }
     }
     return null;
+  }
+
+  /**
+   * Get circuit breaker statistics for all providers
+   */
+  getCircuitBreakerStats() {
+    const stats: ReturnType<CircuitBreaker['getStats']>[] = [];
+    for (const [, circuitBreaker] of this.circuitBreakers) {
+      stats.push(circuitBreaker.getStats());
+    }
+    return stats;
   }
 }

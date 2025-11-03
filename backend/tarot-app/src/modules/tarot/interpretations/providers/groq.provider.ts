@@ -8,6 +8,7 @@ import {
   AIResponse,
   IAIProvider,
 } from '../ai-provider.interface';
+import { AIProviderException, AIErrorType } from '../errors/ai-error.types';
 
 @Injectable()
 export class GroqProvider implements IAIProvider {
@@ -28,7 +29,13 @@ export class GroqProvider implements IAIProvider {
     config: Partial<AIProviderConfig>,
   ): Promise<AIResponse> {
     if (!this.client) {
-      throw new Error('Groq client not initialized - API key missing');
+      throw new AIProviderException(
+        AIProviderType.GROQ,
+        AIErrorType.INVALID_KEY,
+        'Groq client not initialized - API key missing',
+        false,
+        new Error('API key missing'),
+      );
     }
 
     const model =
@@ -55,14 +62,26 @@ export class GroqProvider implements IAIProvider {
       ]);
 
       if (!response || typeof response === 'string') {
-        throw new Error('Timeout exceeded');
+        throw new AIProviderException(
+          AIProviderType.GROQ,
+          AIErrorType.TIMEOUT,
+          'Groq request timeout exceeded (>10s)',
+          true,
+          new Error('Timeout'),
+        );
       }
 
       const durationMs = Date.now() - startTime;
       const content = response.choices[0]?.message?.content || '';
 
       if (!content) {
-        throw new Error('Empty response from Groq');
+        throw new AIProviderException(
+          AIProviderType.GROQ,
+          AIErrorType.SERVER_ERROR,
+          'Empty response from Groq',
+          true,
+          new Error('Empty response'),
+        );
       }
 
       return {
@@ -77,10 +96,84 @@ export class GroqProvider implements IAIProvider {
         durationMs,
       };
     } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(`Groq API error: ${error.message}`);
+      // If already AIProviderException, rethrow
+      if (error instanceof AIProviderException) {
+        throw error;
       }
-      throw error;
+
+      // Handle Groq SDK specific errors
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+
+      // Check for specific error codes/messages
+      if (errorMessage.includes('401') || errorMessage.includes('API key')) {
+        throw new AIProviderException(
+          AIProviderType.GROQ,
+          AIErrorType.INVALID_KEY,
+          `Groq API key invalid: ${errorMessage}`,
+          false,
+          error as Error,
+        );
+      }
+
+      if (errorMessage.includes('429') || errorMessage.includes('rate limit')) {
+        throw new AIProviderException(
+          AIProviderType.GROQ,
+          AIErrorType.RATE_LIMIT,
+          `Groq rate limit exceeded: ${errorMessage}`,
+          true,
+          error as Error,
+        );
+      }
+
+      if (
+        errorMessage.includes('500') ||
+        errorMessage.includes('502') ||
+        errorMessage.includes('503')
+      ) {
+        throw new AIProviderException(
+          AIProviderType.GROQ,
+          AIErrorType.SERVER_ERROR,
+          `Groq server error: ${errorMessage}`,
+          true,
+          error as Error,
+        );
+      }
+
+      if (
+        errorMessage.includes('timeout') ||
+        errorMessage.includes('Timeout')
+      ) {
+        throw new AIProviderException(
+          AIProviderType.GROQ,
+          AIErrorType.TIMEOUT,
+          `Groq request timeout: ${errorMessage}`,
+          true,
+          error as Error,
+        );
+      }
+
+      if (
+        errorMessage.includes('context') ||
+        errorMessage.includes('too long')
+      ) {
+        throw new AIProviderException(
+          AIProviderType.GROQ,
+          AIErrorType.CONTEXT_LENGTH,
+          `Groq context too long: ${errorMessage}`,
+          false,
+          error as Error,
+        );
+      }
+
+      // Default to network error for unknown errors
+      throw new AIProviderException(
+        AIProviderType.GROQ,
+        AIErrorType.NETWORK_ERROR,
+        `Groq API error: ${errorMessage}`,
+        true,
+        error as Error,
+      );
     }
   }
 

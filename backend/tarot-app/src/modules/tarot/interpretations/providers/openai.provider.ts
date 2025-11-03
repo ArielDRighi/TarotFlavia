@@ -8,6 +8,7 @@ import {
   AIResponse,
   IAIProvider,
 } from '../ai-provider.interface';
+import { AIProviderException, AIErrorType } from '../errors/ai-error.types';
 
 @Injectable()
 export class OpenAIProvider implements IAIProvider {
@@ -28,7 +29,13 @@ export class OpenAIProvider implements IAIProvider {
     config: Partial<AIProviderConfig>,
   ): Promise<AIResponse> {
     if (!this.client) {
-      throw new Error('OpenAI client not initialized - API key missing');
+      throw new AIProviderException(
+        AIProviderType.OPENAI,
+        AIErrorType.INVALID_KEY,
+        'OpenAI client not initialized - API key missing',
+        false,
+        new Error('API key missing'),
+      );
     }
 
     const model =
@@ -55,14 +62,26 @@ export class OpenAIProvider implements IAIProvider {
       ]);
 
       if (!response || typeof response === 'string') {
-        throw new Error('Timeout exceeded');
+        throw new AIProviderException(
+          AIProviderType.OPENAI,
+          AIErrorType.TIMEOUT,
+          'OpenAI request timeout exceeded (>30s)',
+          true,
+          new Error('Timeout'),
+        );
       }
 
       const durationMs = Date.now() - startTime;
       const content = response.choices[0]?.message?.content || '';
 
       if (!content) {
-        throw new Error('Empty response from OpenAI');
+        throw new AIProviderException(
+          AIProviderType.OPENAI,
+          AIErrorType.SERVER_ERROR,
+          'Empty response from OpenAI',
+          true,
+          new Error('Empty response'),
+        );
       }
 
       return {
@@ -77,10 +96,80 @@ export class OpenAIProvider implements IAIProvider {
         durationMs,
       };
     } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(`OpenAI API error: ${error.message}`);
+      if (error instanceof AIProviderException) {
+        throw error;
       }
-      throw error;
+
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+
+      if (errorMessage.includes('401') || errorMessage.includes('API key')) {
+        throw new AIProviderException(
+          AIProviderType.OPENAI,
+          AIErrorType.INVALID_KEY,
+          `OpenAI API key invalid: ${errorMessage}`,
+          false,
+          error as Error,
+        );
+      }
+
+      if (errorMessage.includes('429') || errorMessage.includes('rate limit')) {
+        throw new AIProviderException(
+          AIProviderType.OPENAI,
+          AIErrorType.RATE_LIMIT,
+          `OpenAI rate limit exceeded: ${errorMessage}`,
+          true,
+          error as Error,
+        );
+      }
+
+      if (
+        errorMessage.includes('500') ||
+        errorMessage.includes('502') ||
+        errorMessage.includes('503')
+      ) {
+        throw new AIProviderException(
+          AIProviderType.OPENAI,
+          AIErrorType.SERVER_ERROR,
+          `OpenAI server error: ${errorMessage}`,
+          true,
+          error as Error,
+        );
+      }
+
+      if (
+        errorMessage.includes('timeout') ||
+        errorMessage.includes('Timeout')
+      ) {
+        throw new AIProviderException(
+          AIProviderType.OPENAI,
+          AIErrorType.TIMEOUT,
+          `OpenAI request timeout: ${errorMessage}`,
+          true,
+          error as Error,
+        );
+      }
+
+      if (
+        errorMessage.includes('context') ||
+        errorMessage.includes('too long')
+      ) {
+        throw new AIProviderException(
+          AIProviderType.OPENAI,
+          AIErrorType.CONTEXT_LENGTH,
+          `OpenAI context too long: ${errorMessage}`,
+          false,
+          error as Error,
+        );
+      }
+
+      throw new AIProviderException(
+        AIProviderType.OPENAI,
+        AIErrorType.NETWORK_ERROR,
+        `OpenAI API error: ${errorMessage}`,
+        true,
+        error as Error,
+      );
     }
   }
 

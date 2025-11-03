@@ -1,7 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, forwardRef, Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Groq from 'groq-sdk';
 import OpenAI from 'openai';
+import { AIProviderService } from '../tarot/interpretations/ai-provider.service';
 
 export interface AIProviderHealth {
   provider: string;
@@ -20,6 +21,7 @@ export interface AIProviderHealth {
 export interface AIHealthCheckResult {
   primary: AIProviderHealth;
   fallback: AIProviderHealth[];
+  circuitBreakers?: ReturnType<AIProviderService['getCircuitBreakerStats']>;
   timestamp: string;
 }
 
@@ -30,7 +32,11 @@ export class AIHealthService {
   private readonly DEEPSEEK_TIMEOUT = 15000; // 15s
   private readonly OPENAI_TIMEOUT = 30000; // 30s
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    @Inject(forwardRef(() => AIProviderService))
+    private readonly aiProviderService?: AIProviderService,
+  ) {}
 
   /**
    * Check Groq provider health (Primary - Free)
@@ -210,9 +216,15 @@ export class AIHealthService {
       fallback.push(openai);
     }
 
+    // Get circuit breaker statistics if available
+    const circuitBreakers = this.aiProviderService
+      ? this.aiProviderService.getCircuitBreakerStats()
+      : undefined;
+
     return {
       primary: groq,
       fallback,
+      circuitBreakers,
       timestamp: new Date().toISOString(),
     };
   }
