@@ -12,14 +12,16 @@ describe('CheckUsageLimitGuard', () => {
   let reflector: { getAllAndOverride: jest.Mock };
 
   const mockExecutionContext = (userId: number): ExecutionContext => {
+    const handler = jest.fn();
+    const classRef = jest.fn();
     return {
       switchToHttp: () => ({
         getRequest: () => ({
           user: { userId },
         }),
       }),
-      getHandler: jest.fn(),
-      getClass: jest.fn(),
+      getHandler: () => handler,
+      getClass: () => classRef,
     } as unknown as ExecutionContext;
   };
 
