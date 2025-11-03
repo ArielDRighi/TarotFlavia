@@ -79,7 +79,7 @@ export class InterpretationsService {
       question || 'Pregunta general sobre la situación actual';
     const categoryName = category || 'General';
     const questionHash = this.cacheService.generateQuestionHash(
-      categoryName.length, // Usamos length como categoría numérica temporal
+      categoryName, // Usamos el nombre de la categoría normalizado
       questionText,
     );
 
@@ -92,7 +92,7 @@ export class InterpretationsService {
 
     const cacheKey = this.cacheService.generateCacheKey(
       cardCombination,
-      spread?.id?.toString() || 'no-spread',
+      spread?.id?.toString() || null,
       questionHash,
     );
 
@@ -158,7 +158,7 @@ export class InterpretationsService {
       // Guardar en caché para futuras consultas
       await this.cacheService.saveToCache(
         cacheKey,
-        spread?.id?.toString() || 'no-spread',
+        spread?.id?.toString() || null,
         cardCombination,
         questionHash,
         interpretation,

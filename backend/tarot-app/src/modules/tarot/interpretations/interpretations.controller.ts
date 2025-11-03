@@ -84,7 +84,7 @@ export class InterpretationsController {
       database: dbStats,
       hitRate: {
         percentage: hitRate,
-        description: `${hitRate.toFixed(2)}% of requests served from cache`,
+        description: `${Number.isFinite(hitRate) ? hitRate.toFixed(2) : '0.00'}% of requests served from cache`,
       },
       timestamp: new Date().toISOString(),
     };

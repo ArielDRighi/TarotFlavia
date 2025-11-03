@@ -201,9 +201,11 @@ describe('ReadingsService', () => {
         id: 5,
         questionText: '¿Qué me depara el futuro?',
       });
-      mockInterpretationsService.generateInterpretation.mockResolvedValue(
-        'Your reading suggests...',
-      );
+      mockInterpretationsService.generateInterpretation.mockResolvedValue({
+        interpretation: 'Your reading suggests...',
+        fromCache: false,
+        cacheHitRate: 0,
+      });
 
       const result = await service.create(mockUser, createReadingDto);
 
@@ -257,9 +259,11 @@ describe('ReadingsService', () => {
         .mockResolvedValueOnce(readingWithInterpretation);
       mockCardsService.findByIds.mockResolvedValue(mockCards);
       mockSpreadsService.findById.mockResolvedValue(mockSpread);
-      mockInterpretationsService.generateInterpretation.mockResolvedValue(
-        'Your reading suggests...',
-      );
+      mockInterpretationsService.generateInterpretation.mockResolvedValue({
+        interpretation: 'Your reading suggests...',
+        fromCache: false,
+        cacheHitRate: 0,
+      });
 
       const result = await service.create(mockUser, createReadingDto);
 

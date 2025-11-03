@@ -124,29 +124,21 @@ describe('InterpretationCacheService', () => {
 
   describe('generateQuestionHash', () => {
     it('should generate a deterministic hash for the same question', () => {
-      const categoryId = 1;
+      const category = 'Love';
       const questionText = 'Will I find love?';
 
-      const hash1 = service.generateQuestionHash(categoryId, questionText);
-      const hash2 = service.generateQuestionHash(categoryId, questionText);
+      const hash1 = service.generateQuestionHash(category, questionText);
+      const hash2 = service.generateQuestionHash(category, questionText);
 
       expect(hash1).toBe(hash2);
       expect(hash1).toBeTruthy();
     });
 
-    it('should normalize question text (case and whitespace)', () => {
-      const categoryId = 1;
-
-      const hash1 = service.generateQuestionHash(
-        categoryId,
-        'Will I find love?',
-      );
-      const hash2 = service.generateQuestionHash(
-        categoryId,
-        'will i find love?',
-      );
+    it('should normalize question text and category (case and whitespace)', () => {
+      const hash1 = service.generateQuestionHash('Love', 'Will I find love?');
+      const hash2 = service.generateQuestionHash('love', 'will i find love?');
       const hash3 = service.generateQuestionHash(
-        categoryId,
+        '  LOVE  ',
         '  WILL  I  FIND  LOVE?  ',
       );
 
@@ -157,21 +149,18 @@ describe('InterpretationCacheService', () => {
     it('should generate different hashes for different categories', () => {
       const questionText = 'Will I find love?';
 
-      const hash1 = service.generateQuestionHash(1, questionText);
-      const hash2 = service.generateQuestionHash(2, questionText);
+      const hash1 = service.generateQuestionHash('Love', questionText);
+      const hash2 = service.generateQuestionHash('Career', questionText);
 
       expect(hash1).not.toBe(hash2);
     });
 
     it('should generate different hashes for different questions', () => {
-      const categoryId = 1;
+      const category = 'Love';
 
-      const hash1 = service.generateQuestionHash(
-        categoryId,
-        'Will I find love?',
-      );
+      const hash1 = service.generateQuestionHash(category, 'Will I find love?');
       const hash2 = service.generateQuestionHash(
-        categoryId,
+        category,
         'Will I find money?',
       );
 
@@ -457,6 +446,7 @@ describe('InterpretationCacheService', () => {
       const queryBuilder = {
         select: jest.fn().mockReturnThis(),
         addSelect: jest.fn().mockReturnThis(),
+        setParameter: jest.fn().mockReturnThis(),
         getRawOne: jest.fn().mockResolvedValue({
           total: '100',
           expired: '10',
@@ -473,6 +463,10 @@ describe('InterpretationCacheService', () => {
         expired: 10,
         avgHits: 5.5,
       });
+      expect(queryBuilder.setParameter).toHaveBeenCalledWith(
+        'now',
+        expect.any(Date),
+      );
     });
   });
 });

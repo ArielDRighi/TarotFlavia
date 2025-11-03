@@ -7,6 +7,7 @@ import { HttpService } from '@nestjs/axios';
 import { TarotCard } from '../cards/entities/tarot-card.entity';
 import { AIProviderService } from './ai-provider.service';
 import { AIProviderType } from './ai-provider.interface';
+import { InterpretationCacheService } from './interpretation-cache.service';
 
 describe('InterpretationsService', () => {
   let service: InterpretationsService;
@@ -32,6 +33,17 @@ describe('InterpretationsService', () => {
     generateCompletion: jest.fn(),
     getProvidersStatus: jest.fn(),
     getPrimaryProvider: jest.fn(),
+  };
+
+  const mockCacheService = {
+    generateCacheKey: jest.fn(),
+    generateQuestionHash: jest.fn(),
+    getFromCache: jest.fn(),
+    saveToCache: jest.fn(),
+    clearAllCaches: jest.fn(),
+    cleanExpiredCache: jest.fn(),
+    cleanUnusedCache: jest.fn(),
+    getCacheStats: jest.fn(),
   };
 
   const mockCards: TarotCard[] = [
@@ -71,6 +83,10 @@ describe('InterpretationsService', () => {
           provide: AIProviderService,
           useValue: mockAIProviderService,
         },
+        {
+          provide: InterpretationCacheService,
+          useValue: mockCacheService,
+        },
       ],
     }).compile();
 
@@ -98,6 +114,11 @@ describe('InterpretationsService', () => {
         },
       };
 
+      mockCacheService.generateQuestionHash.mockReturnValue('question-hash');
+      mockCacheService.generateCacheKey.mockReturnValue('cache-key');
+      mockCacheService.getFromCache.mockResolvedValue(null); // Cache miss
+      mockCacheService.saveToCache.mockResolvedValue(undefined);
+
       mockAIProviderService.generateCompletion.mockResolvedValue(mockResponse);
       mockRepository.create.mockReturnValue({
         content: mockResponse.content,
@@ -115,11 +136,17 @@ describe('InterpretationsService', () => {
       );
 
       expect(mockAIProviderService.generateCompletion).toHaveBeenCalled();
-      expect(result).toBe(mockResponse.content);
+      expect(result.interpretation).toBe(mockResponse.content);
+      expect(result.fromCache).toBe(false);
       expect(mockRepository.save).toHaveBeenCalled();
+      expect(mockCacheService.saveToCache).toHaveBeenCalled();
     });
 
     it('should use fallback interpretation if all providers fail', async () => {
+      mockCacheService.generateQuestionHash.mockReturnValue('question-hash');
+      mockCacheService.generateCacheKey.mockReturnValue('cache-key');
+      mockCacheService.getFromCache.mockResolvedValue(null); // Cache miss
+
       mockAIProviderService.generateCompletion.mockRejectedValue(
         new Error('All providers failed'),
       );
@@ -131,8 +158,11 @@ describe('InterpretationsService', () => {
         mockPositions,
       );
 
-      expect(result).toContain('Interpretación Basada en Significados');
-      expect(result).toContain('The Fool');
+      expect(result.interpretation).toContain(
+        'Interpretación Basada en Significados',
+      );
+      expect(result.interpretation).toContain('The Fool');
+      expect(result.fromCache).toBe(false);
       expect(mockRepository.save).toHaveBeenCalled();
     });
   });

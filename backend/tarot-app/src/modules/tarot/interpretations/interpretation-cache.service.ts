@@ -29,7 +29,7 @@ export class InterpretationCacheService {
    */
   generateCacheKey(
     cardCombination: CardCombination[],
-    spreadId: string,
+    spreadId: string | null,
     questionHash: string,
   ): string {
     // Ordenar cartas por posición para asegurar consistencia
@@ -42,7 +42,7 @@ export class InterpretationCacheService {
       .map((card) => `${card.card_id}-${card.position}-${card.is_reversed}`)
       .join('|');
 
-    const dataString = `${spreadId}:${cardsString}:${questionHash}`;
+    const dataString = `${spreadId || 'no-spread'}:${cardsString}:${questionHash}`;
 
     // Generar hash SHA-256
     return createHash('sha256').update(dataString).digest('hex');
@@ -51,14 +51,17 @@ export class InterpretationCacheService {
   /**
    * Genera un hash de la pregunta normalizada
    */
-  generateQuestionHash(categoryId: number, questionText: string): string {
+  generateQuestionHash(category: string, questionText: string): string {
+    // Normalizar categoría: lowercase, trim
+    const normalizedCategory = category.toLowerCase().trim();
+
     // Normalizar pregunta: lowercase, trim, eliminar espacios múltiples
     const normalizedQuestion = questionText
       .toLowerCase()
       .trim()
       .replace(/\s+/g, ' ');
 
-    const dataString = `${categoryId}:${normalizedQuestion}`;
+    const dataString = `${normalizedCategory}:${normalizedQuestion}`;
 
     return createHash('sha256').update(dataString).digest('hex');
   }
@@ -108,7 +111,7 @@ export class InterpretationCacheService {
    */
   async saveToCache(
     cacheKey: string,
-    spreadId: string,
+    spreadId: string | null,
     cardCombination: CardCombination[],
     questionHash: string,
     interpretation: string,
@@ -133,12 +136,20 @@ export class InterpretationCacheService {
   }
 
   /**
-   * Limpia ambos cachés completamente
+   * Limpia ambos cachés completamente.
+   *
+   * Intenta limpiar tanto el caché in-memory como el de base de datos.
+   * Si la implementación de cacheManager soporta el método reset(), se usará para limpiar el caché in-memory.
+   * De lo contrario, el caché in-memory expirará naturalmente y puede contener entradas obsoletas temporalmente.
    */
   async clearAllCaches(): Promise<void> {
-    // Limpiar caché in-memory - no hay método reset directo en Cache interface
-    // pero podemos usar del para eliminar claves específicas si es necesario
-    // Por ahora, dejamos que el caché in-memory expire naturalmente
+    // Limpiar caché in-memory si es posible
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    if (typeof (this.cacheManager as any).reset === 'function') {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+      await (this.cacheManager as any).reset();
+    }
+    // Si no hay reset(), el caché in-memory expirará naturalmente (TTL 1 hora)
 
     // Limpiar caché DB
     await this.cacheRepository
@@ -188,11 +199,13 @@ export class InterpretationCacheService {
     expired: number;
     avgHits: number;
   }> {
+    const now = new Date();
     const stats = (await this.cacheRepository
       .createQueryBuilder('cache')
       .select('COUNT(*)', 'total')
-      .addSelect('COUNT(CASE WHEN expires_at < NOW() THEN 1 END)', 'expired')
+      .addSelect('COUNT(CASE WHEN expires_at < :now THEN 1 END)', 'expired')
       .addSelect('AVG(hit_count)', 'avg_hits')
+      .setParameter('now', now)
       .getRawOne()) as { total: string; expired: string; avg_hits: string };
 
     return {
