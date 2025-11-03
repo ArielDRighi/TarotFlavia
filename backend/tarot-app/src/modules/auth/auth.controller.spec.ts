@@ -264,4 +264,63 @@ describe('AuthController', () => {
       );
     });
   });
+
+  describe('forgotPassword', () => {
+    it('should call authService.forgotPassword and return success message', async () => {
+      const dto = { email: 'test@example.com' };
+      authServiceMock.forgotPassword = jest.fn().mockResolvedValue({
+        message: 'Password reset email sent',
+      });
+
+      const result = await controller.forgotPassword(dto);
+
+      expect(authServiceMock.forgotPassword).toHaveBeenCalledWith(dto.email);
+      expect(result).toEqual({ message: 'Password reset email sent' });
+    });
+
+    it('should handle errors from authService.forgotPassword', async () => {
+      const dto = { email: 'nonexistent@example.com' };
+      authServiceMock.forgotPassword = jest
+        .fn()
+        .mockRejectedValue(new Error('User not found'));
+
+      await expect(controller.forgotPassword(dto)).rejects.toThrow(
+        'User not found',
+      );
+    });
+  });
+
+  describe('resetPassword', () => {
+    it('should call authService.resetPassword and return success message', async () => {
+      const dto = {
+        token: 'valid-token-123',
+        newPassword: 'NewStrongP@ss1',
+      };
+      authServiceMock.resetPassword = jest.fn().mockResolvedValue({
+        message: 'Password reset successful',
+      });
+
+      const result = await controller.resetPassword(dto);
+
+      expect(authServiceMock.resetPassword).toHaveBeenCalledWith(
+        dto.token,
+        dto.newPassword,
+      );
+      expect(result).toEqual({ message: 'Password reset successful' });
+    });
+
+    it('should handle errors from authService.resetPassword', async () => {
+      const dto = {
+        token: 'invalid-token',
+        newPassword: 'NewStrongP@ss1',
+      };
+      authServiceMock.resetPassword = jest
+        .fn()
+        .mockRejectedValue(new Error('Invalid token'));
+
+      await expect(controller.resetPassword(dto)).rejects.toThrow(
+        'Invalid token',
+      );
+    });
+  });
 });

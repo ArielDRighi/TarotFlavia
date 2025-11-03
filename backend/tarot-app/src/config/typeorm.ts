@@ -7,10 +7,14 @@ import * as fs from 'fs';
 // Cargar variables de entorno al inicio
 const envPath = path.resolve(process.cwd(), '.env');
 if (fs.existsSync(envPath)) {
-  console.log(`[TypeORM Config] Cargando .env desde: ${envPath}`);
+  if (process.env.NODE_ENV !== 'test') {
+    console.log(`[TypeORM Config] Cargando .env desde: ${envPath}`);
+  }
   dotenv.config({ path: envPath });
 } else {
-  console.warn('[TypeORM Config] No se encontró el archivo .env');
+  if (process.env.NODE_ENV !== 'test') {
+    console.warn('[TypeORM Config] No se encontró el archivo .env');
+  }
 }
 
 // Configuración de la base de datos usando variables de entorno
@@ -23,7 +27,7 @@ const config = {
   database: process.env.POSTGRES_DB || 'tarot_app',
   synchronize: false, // Desactivado - ahora usamos migraciones
   autoLoadEntities: true,
-  logging: true,
+  logging: process.env.NODE_ENV !== 'test', // Disable logging in test environment
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
   migrations: [__dirname + '/../migrations/*{.ts,.js}'],
   migrationsTableName: 'migrations',
@@ -33,12 +37,16 @@ const config = {
 };
 
 // Verificar que las variables críticas estén definidas
-console.log('[TypeORM Config] Verificando configuración de la base de datos:');
-console.log(`Host: ${config.host}`);
-console.log(`Puerto: ${config.port}`);
-console.log(`Usuario: ${config.username}`);
-console.log(`Base de Datos: ${config.database}`);
-console.log(`Contraseña existe: ${Boolean(config.password)}`);
+if (process.env.NODE_ENV !== 'test') {
+  console.log(
+    '[TypeORM Config] Verificando configuración de la base de datos:',
+  );
+  console.log(`Host: ${config.host}`);
+  console.log(`Puerto: ${config.port}`);
+  console.log(`Usuario: ${config.username}`);
+  console.log(`Base de Datos: ${config.database}`);
+  console.log(`Contraseña existe: ${Boolean(config.password)}`);
+}
 
 // Si falta alguna configuración crítica, usar valores por defecto
 if (!config.password) {

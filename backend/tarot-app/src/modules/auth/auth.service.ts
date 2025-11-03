@@ -5,6 +5,7 @@ import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { User, UserWithoutPassword } from '../users/entities/user.entity';
 import { RefreshTokenService } from './refresh-token.service';
+import { PasswordResetService } from './password-reset.service';
 
 @Injectable()
 export class AuthService {
@@ -12,6 +13,7 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private refreshTokenService: RefreshTokenService,
+    private passwordResetService: PasswordResetService,
   ) {}
 
   async register(
@@ -134,6 +136,39 @@ export class AuthService {
     await this.refreshTokenService.revokeAllUserTokens(userId);
 
     return { message: 'All sessions logged out successfully' };
+  }
+
+  async forgotPassword(email: string): Promise<{ message: string }> {
+    const { token } = await this.passwordResetService.generateResetToken(email);
+
+    // TODO: For now, log the link to console (until real email integration is implemented)
+    console.log('========================================');
+    console.log('Password reset link:');
+    console.log(`/reset-password?token=${token}`);
+    console.log('========================================');
+
+    return { message: 'Password reset email sent' };
+  }
+
+  async resetPassword(
+    token: string,
+    newPassword: string,
+  ): Promise<{ message: string }> {
+    // Validate token
+    const resetToken = await this.passwordResetService.validateToken(token);
+
+    // Update user password (usersService.update will handle hashing)
+    await this.usersService.update(resetToken.userId, {
+      password: newPassword,
+    });
+
+    // Invalidate all user refresh tokens for security
+    await this.refreshTokenService.revokeAllUserTokens(resetToken.userId);
+
+    // Mark token as used
+    await this.passwordResetService.markTokenAsUsed(resetToken);
+
+    return { message: 'Password reset successful' };
   }
 
   private async generateAuthResponse(

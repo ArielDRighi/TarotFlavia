@@ -51,23 +51,23 @@ describe('PredefinedQuestions (e2e)', () => {
           CONSTRAINT "PK_refresh_tokens_id" PRIMARY KEY ("id")
         )
       `);
-      
+
       await dataSource.query(
         `CREATE INDEX "IDX_refresh_tokens_user_id" ON "refresh_tokens" ("user_id")`,
       );
-      
+
       await dataSource.query(
         `CREATE INDEX "IDX_refresh_tokens_token" ON "refresh_tokens" ("token")`,
       );
-      
+
       await dataSource.query(
         `CREATE INDEX "IDX_refresh_tokens_token_hash" ON "refresh_tokens" ("token_hash")`,
       );
-      
+
       await dataSource.query(
         `CREATE INDEX "IDX_refresh_tokens_user_token" ON "refresh_tokens" ("user_id", "token")`,
       );
-      
+
       await dataSource.query(
         `ALTER TABLE "refresh_tokens" ADD CONSTRAINT "FK_refresh_tokens_user" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
       );
@@ -99,12 +99,12 @@ describe('PredefinedQuestions (e2e)', () => {
     const adminLoginResponse = await request(app.getHttpServer())
       .post('/auth/login')
       .send({ email: 'admin@test.com', password: 'test123' })
-      .expect(201);
+      .expect(200);
 
     const userLoginResponse = await request(app.getHttpServer())
       .post('/auth/login')
       .send({ email: 'user@test.com', password: 'test123' })
-      .expect(201);
+      .expect(200);
 
     adminToken = adminLoginResponse.body.access_token;
     userToken = userLoginResponse.body.access_token;

@@ -85,23 +85,23 @@ describe('Readings Hybrid Questions (E2E)', () => {
           CONSTRAINT "PK_refresh_tokens_id" PRIMARY KEY ("id")
         )
       `);
-      
+
       await dataSource.query(
         `CREATE INDEX "IDX_refresh_tokens_user_id" ON "refresh_tokens" ("user_id")`,
       );
-      
+
       await dataSource.query(
         `CREATE INDEX "IDX_refresh_tokens_token" ON "refresh_tokens" ("token")`,
       );
-      
+
       await dataSource.query(
         `CREATE INDEX "IDX_refresh_tokens_token_hash" ON "refresh_tokens" ("token_hash")`,
       );
-      
+
       await dataSource.query(
         `CREATE INDEX "IDX_refresh_tokens_user_token" ON "refresh_tokens" ("user_id", "token")`,
       );
-      
+
       await dataSource.query(
         `ALTER TABLE "refresh_tokens" ADD CONSTRAINT "FK_refresh_tokens_user" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
       );

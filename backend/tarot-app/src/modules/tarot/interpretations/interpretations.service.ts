@@ -22,12 +22,16 @@ export class InterpretationsService {
     // Inicializar OpenAI con la clave API
     const apiKey = this.configService.get<string>('OPENAI_API_KEY');
     if (!apiKey || apiKey === 'tu_clave_de_api') {
-      console.warn(
-        'ADVERTENCIA: No se encontró una clave API válida para OpenAI. La generación de interpretaciones no funcionará correctamente.',
-      );
+      if (process.env.NODE_ENV !== 'test') {
+        console.warn(
+          'ADVERTENCIA: No se encontró una clave API válida para OpenAI. La generación de interpretaciones no funcionará correctamente.',
+        );
+      }
     } else {
       this.openai = new OpenAI({ apiKey });
-      console.log('API de OpenAI inicializada correctamente');
+      if (process.env.NODE_ENV !== 'test') {
+        console.log('API de OpenAI inicializada correctamente');
+      }
     }
   }
 

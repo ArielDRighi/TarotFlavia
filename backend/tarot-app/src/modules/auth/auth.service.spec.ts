@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { RefreshTokenService } from './refresh-token.service';
+import { PasswordResetService } from './password-reset.service';
 import * as bcrypt from 'bcryptjs';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { User, UserPlan } from '../users/entities/user.entity';
@@ -12,6 +13,7 @@ describe('AuthService', () => {
   let usersServiceMock: Partial<UsersService>;
   let jwtServiceMock: Partial<JwtService>;
   let refreshTokenServiceMock: Partial<RefreshTokenService>;
+  let passwordResetServiceMock: Partial<PasswordResetService>;
 
   beforeEach(async () => {
     // Map to store created users for findById
@@ -59,12 +61,17 @@ describe('AuthService', () => {
       }),
     };
 
+    passwordResetServiceMock = {
+      generateResetToken: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
         { provide: UsersService, useValue: usersServiceMock },
         { provide: JwtService, useValue: jwtServiceMock },
         { provide: RefreshTokenService, useValue: refreshTokenServiceMock },
+        { provide: PasswordResetService, useValue: passwordResetServiceMock },
       ],
     }).compile();
 
@@ -210,6 +217,151 @@ describe('AuthService', () => {
           isAdmin: user.isAdmin,
           plan: user.plan,
         }),
+      );
+    });
+  });
+
+  describe('forgotPassword', () => {
+    let consoleLogSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
+    });
+
+    afterEach(() => {
+      consoleLogSpy.mockRestore();
+    });
+
+    it('should generate reset token and log reset link', async () => {
+      const email = 'test@example.com';
+      const mockToken = 'abc123def456';
+      const mockExpiresAt = new Date();
+
+      (
+        passwordResetServiceMock.generateResetToken as jest.Mock
+      ).mockResolvedValue({
+        token: mockToken,
+        expiresAt: mockExpiresAt,
+      });
+
+      const result = await service.forgotPassword(email);
+
+      expect(passwordResetServiceMock.generateResetToken).toHaveBeenCalledWith(
+        email,
+      );
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Password reset link:'),
+      );
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        expect.stringContaining(mockToken),
+      );
+      expect(result).toEqual({ message: 'Password reset email sent' });
+    });
+
+    it('should handle errors from password reset service', async () => {
+      const email = 'nonexistent@example.com';
+      (
+        passwordResetServiceMock.generateResetToken as jest.Mock
+      ).mockRejectedValue(new Error('User not found'));
+
+      await expect(service.forgotPassword(email)).rejects.toThrow(
+        'User not found',
+      );
+    });
+  });
+
+  describe('resetPassword', () => {
+    const mockToken = 'valid-token-123';
+    const newPassword = 'NewStrongP@ss1';
+    const mockUser = {
+      id: 1,
+      email: 'test@example.com',
+      password: 'old-hashed-password',
+    };
+
+    beforeEach(() => {
+      passwordResetServiceMock.validateToken = jest.fn();
+      passwordResetServiceMock.markTokenAsUsed = jest.fn();
+      refreshTokenServiceMock.revokeAllUserTokens = jest.fn();
+      usersServiceMock.update = jest.fn();
+    });
+
+    it('should validate token, update password, invalidate refresh tokens, and mark token as used', async () => {
+      const mockResetToken = {
+        id: 1,
+        userId: mockUser.id,
+        user: mockUser,
+        token: 'hashed-token',
+        expiresAt: new Date(Date.now() + 3600000),
+        usedAt: null,
+        createdAt: new Date(),
+      };
+
+      (passwordResetServiceMock.validateToken as jest.Mock).mockResolvedValue(
+        mockResetToken,
+      );
+      (
+        refreshTokenServiceMock.revokeAllUserTokens as jest.Mock
+      ).mockResolvedValue(undefined);
+      (usersServiceMock.update as jest.Mock).mockResolvedValue(undefined);
+      (passwordResetServiceMock.markTokenAsUsed as jest.Mock).mockResolvedValue(
+        undefined,
+      );
+
+      const result = await service.resetPassword(mockToken, newPassword);
+
+      expect(passwordResetServiceMock.validateToken).toHaveBeenCalledWith(
+        mockToken,
+      );
+      expect(usersServiceMock.update).toHaveBeenCalledWith(mockUser.id, {
+        password: newPassword,
+      });
+      expect(refreshTokenServiceMock.revokeAllUserTokens).toHaveBeenCalledWith(
+        mockUser.id,
+      );
+      expect(passwordResetServiceMock.markTokenAsUsed).toHaveBeenCalledWith(
+        mockResetToken,
+      );
+      expect(result).toEqual({ message: 'Password reset successful' });
+    });
+
+    it('should handle invalid token', async () => {
+      (passwordResetServiceMock.validateToken as jest.Mock).mockRejectedValue(
+        new Error('Invalid token'),
+      );
+
+      await expect(
+        service.resetPassword('invalid-token', newPassword),
+      ).rejects.toThrow('Invalid token');
+    });
+
+    it('should hash the new password before updating', async () => {
+      const mockResetToken = {
+        id: 1,
+        userId: mockUser.id,
+        user: mockUser,
+        token: 'hashed-token',
+        expiresAt: new Date(Date.now() + 3600000),
+        usedAt: null,
+        createdAt: new Date(),
+      };
+
+      (passwordResetServiceMock.validateToken as jest.Mock).mockResolvedValue(
+        mockResetToken,
+      );
+      (
+        refreshTokenServiceMock.revokeAllUserTokens as jest.Mock
+      ).mockResolvedValue(undefined);
+      (usersServiceMock.update as jest.Mock).mockResolvedValue(undefined);
+      (passwordResetServiceMock.markTokenAsUsed as jest.Mock).mockResolvedValue(
+        undefined,
+      );
+
+      await service.resetPassword(mockToken, newPassword);
+
+      expect(usersServiceMock.update).toHaveBeenCalledWith(
+        mockUser.id,
+        expect.any(Object),
       );
     });
   });
