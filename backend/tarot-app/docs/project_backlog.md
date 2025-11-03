@@ -2533,43 +2533,174 @@ Implementar sistema de caché IN-MEMORY (usando `@nestjs/cache-manager`) que reu
 
 ---
 
-### **TASK-021: Implementar Manejo Robusto de Errores de OpenAI**
+### **TASK-021: Implementar Manejo Robusto de Errores Multi-Provider**
 
 **Prioridad:** 🟡 ALTA  
-**Estimación:** 2 días  
+**Estimación:** 2-3 días  
 **Dependencias:** TASK-003
 
 #### 📋 Descripción
 
-Implementar sistema completo de manejo de errores para diferentes escenarios de fallo de OpenAI con fallbacks apropiados.
+Implementar sistema completo de manejo de errores para todos los providers de IA (Groq, DeepSeek, OpenAI) con fallbacks automáticos, retry con exponential backoff y circuit breaker pattern para garantizar alta disponibilidad del servicio.
+
+> **Nota:** El sistema actualmente usa Groq como provider primario (free tier), con DeepSeek y OpenAI como fallbacks opcionales. Esta tarea agrega resiliencia y manejo inteligente de errores entre providers.
 
 #### ✅ Tareas específicas
 
-- [ ] Crear enum `OpenAIErrorType` con tipos:
-  - `RATE_LIMIT`, `INVALID_KEY`, `TIMEOUT`, `CONTEXT_LENGTH`, `SERVER_ERROR`, `NETWORK_ERROR`
-- [ ] Implementar manejo específico para cada código de error de OpenAI:
-  - **401** (Invalid API Key): Error crítico, notificar a admin
-  - **429** (Rate Limit): Implementar retry con exponential backoff (3 intentos)
-  - **500/502/503** (Server Error): Retry hasta 2 veces
-  - **Timeout**: Retry 1 vez con timeout extendido
-- [ ] Crear clase custom `OpenAIException` que extienda `HttpException`
-- [ ] Implementar mensajes de error user-friendly para cada tipo:
-  - "El servicio de interpretación está temporalmente ocupado, intenta en unos minutos"
-  - "Estamos experimentando dificultades técnicas, por favor intenta más tarde"
-- [ ] Implementar sistema de fallback con interpretaciones genéricas si OpenAI falla completamente:
-  - Usar significados base de las cartas de la DB
-  - Combinar significados con template genérico
-  - Marcar interpretación como `is_fallback: true`
-- [ ] Loggear todos los errores con contexto completo (user_id, reading_id, error type)
-- [ ] Implementar circuit breaker pattern: si OpenAI falla 5 veces consecutivas, usar fallback automáticamente por 5 minutos
-- [ ] Crear notificaciones automáticas a admin cuando el circuit breaker se active
-- [ ] Agregar métricas de tasa de error en endpoint de estadísticas
+**A. Enums y tipos de error**
+
+- [ ] Crear enum `AIErrorType` con tipos:
+  - `RATE_LIMIT`, `INVALID_KEY`, `TIMEOUT`, `CONTEXT_LENGTH`, `SERVER_ERROR`, `NETWORK_ERROR`, `PROVIDER_UNAVAILABLE`
+- [ ] Crear clase custom `AIProviderException` que extienda `HttpException` con:
+  - `provider: AIProviderType` (groq, deepseek, openai)
+  - `errorType: AIErrorType`
+  - `retryable: boolean`
+  - `originalError: Error`
+
+**B. Manejo específico por provider**
+
+- [ ] **Groq (Provider primario):**
+
+  - 401 (Invalid API Key): Error crítico, notificar a admin
+  - 429 (Rate Limit - 14,400/day, 30/min): Retry con exponential backoff (3 intentos), fallback a DeepSeek
+  - Timeout (>10s): Log warning, cambiar a DeepSeek inmediatamente
+  - 500/502/503 (Server Error): Retry 2 veces, luego fallback
+  - Network Error: Retry 1 vez, luego fallback
+
+- [ ] **DeepSeek (Provider secundario):**
+
+  - 401: Error crítico, notificar a admin
+  - 429 (Rate Limit): Retry con exponential backoff (2 intentos)
+  - Timeout (>15s): Fallback a OpenAI si está configurado, sino genérico
+  - 5xx: Retry 2 veces, luego fallback
+
+- [ ] **OpenAI (Provider terciario - opcional):**
+  - 401: Error crítico
+  - 429: Retry con exponential backoff (2 intentos)
+  - Timeout (>30s): Fallback genérico
+  - 5xx: Retry 1 vez, luego fallback
+
+**C. Sistema de retry con exponential backoff**
+
+- [ ] Implementar función `retryWithBackoff`:
+  - Intento 1: inmediato
+  - Intento 2: esperar 2s
+  - Intento 3: esperar 4s
+  - Intento 4: esperar 8s (opcional)
+- [ ] Agregar jitter aleatorio (±20%) para evitar thundering herd
+- [ ] Solo reintentar en errores retryable (rate limit, timeout, 5xx)
+- [ ] No reintentar en errores permanentes (401, 400, context length)
+
+**D. Sistema de fallback automático en cadena**
+
+- [ ] Implementar cadena de fallback configurable:
+  1. **Primary**: Groq (rápido y gratuito)
+  2. **Secondary**: DeepSeek (bajo costo si Groq falla)
+  3. **Tertiary**: OpenAI (si está configurado)
+  4. **Fallback genérico**: Interpretaciones desde DB
+- [ ] Fallback genérico cuando todos los providers fallan:
+  - Obtener significados base de las cartas desde DB
+  - Combinar con template predefinido por tipo de spread
+  - Marcar interpretación con `is_fallback: true`
+  - Agregar mensaje: "Interpretación generada con método alternativo"
+- [ ] Loggear cada cambio de provider: `"Fallback: Groq → DeepSeek (reason: rate_limit)"`
+
+**E. Circuit breaker pattern**
+
+- [ ] Implementar clase `CircuitBreaker` por provider con 3 estados:
+  - **CLOSED** (normal): Permite todas las requests
+  - **OPEN** (fallando): Bloquea requests, usa fallback directo
+  - **HALF_OPEN** (testing): Permite 1 request de prueba
+- [ ] Configuración del circuit breaker:
+  - Umbral de fallos: 5 errores consecutivos → estado OPEN
+  - Timeout: 5 minutos en estado OPEN antes de pasar a HALF_OPEN
+  - Reset: 3 requests exitosas en HALF_OPEN → vuelve a CLOSED
+- [ ] Crear notificación automática a admin (email/log crítico) cuando:
+  - Circuit breaker pasa a OPEN
+  - Todos los providers están en OPEN simultáneamente
+- [ ] Exponer estado de circuit breakers en `/health/ai`
+
+**F. Logging y monitoreo detallado**
+
+- [ ] Loggear todos los errores con contexto completo:
+  ```typescript
+  {
+    timestamp: Date,
+    user_id: string,
+    reading_id: string,
+    provider: 'groq' | 'deepseek' | 'openai',
+    error_type: AIErrorType,
+    error_message: string,
+    attempt_number: number,
+    will_retry: boolean,
+    fallback_provider?: string
+  }
+  ```
+- [ ] Agregar métricas en endpoint `/stats` o `/health/ai`:
+  - Tasa de error por provider (últimas 24h)
+  - Promedio de intentos hasta éxito
+  - Uso de fallback genérico (contador)
+  - Estado actual de circuit breakers
+  - Requests por provider (distribución)
+- [ ] Implementar alertas proactivas:
+  - Warning: Tasa de error >10% en cualquier provider
+  - Critical: Todos los providers con tasa de error >50%
+  - Info: Uso frecuente de fallback genérico (>5% requests)
+
+**G. Mensajes user-friendly**
+
+- [ ] Mapear errores técnicos a mensajes claros para usuarios:
+  - Rate Limit: _"El servicio de interpretación está temporalmente ocupado. Por favor, intenta nuevamente en unos minutos."_
+  - Server Error: _"Estamos experimentando dificultades técnicas. Tu solicitud se procesará con un método alternativo."_
+  - Timeout: _"La generación está tomando más tiempo del esperado. Hemos activado un método alternativo."_
+  - Fallback genérico: _"Tu interpretación fue generada con nuestro método base. Para lecturas más personalizadas, intenta nuevamente más tarde."_
+- [ ] Incluir en response cuando se usa fallback:
+  ```json
+  {
+    "interpretation": "...",
+    "is_fallback": true,
+    "fallback_reason": "rate_limit",
+    "message": "Interpretación generada con método alternativo"
+  }
+  ```
+
+**H. Testing**
+
+- [ ] Unit tests para cada escenario de error por provider
+- [ ] Test de retry con exponential backoff (mock delays)
+- [ ] Test de circuit breaker (transiciones de estado)
+- [ ] Test de fallback en cadena (Groq → DeepSeek → OpenAI → Genérico)
+- [ ] E2E test simulando rate limit de Groq
+- [ ] E2E test con todos los providers fallando (validar fallback genérico)
 
 #### 🎯 Criterios de aceptación
 
-- ✓ El sistema maneja gracefully todos los tipos de error de OpenAI
-- ✓ Los usuarios reciben mensajes claros cuando hay problemas
-- ✓ Existe fallback funcional cuando OpenAI no está disponible
+- ✓ El sistema maneja gracefully todos los tipos de error de los 3 providers
+- ✓ Retry automático con exponential backoff funciona correctamente
+- ✓ Fallback automático entre providers funciona sin intervención manual
+- ✓ Circuit breaker previene cascadas de fallos y notifica a admin
+- ✓ Los usuarios nunca ven errores técnicos, siempre reciben una interpretación (aunque sea genérica)
+- ✓ Logging completo permite debugging y análisis de patrones de error
+- ✓ Métricas expuestas en `/health/ai` muestran salud de cada provider
+- ✓ Sistema es resiliente a fallos de rate limit de Groq (14,400/day)
+- ✓ Coverage >80% en tests de manejo de errores
+
+#### 📊 Contexto técnico
+
+**Arquitectura actual:**
+
+- Multi-provider con abstracción via `IAIProvider` interface
+- Groq como primary (free tier: 14,400 req/day, 30 req/min)
+- DeepSeek opcional (pay-as-you-go: ~$0.0008/interpretación)
+- OpenAI opcional (pay-as-you-go: ~$0.0045/interpretación)
+- Ver: `docs/AI_PROVIDERS.md` para detalles completos
+
+**Por qué es crítico:**
+
+- Con 100 usuarios activos (10 lecturas/mes) = ~1,000 req/mes → Groq suficiente
+- Con 500+ usuarios = riesgo de hit rate limits de Groq → necesita fallback automático
+- Circuit breaker evita desperdiciar tiempo en provider caído
+- Fallback genérico garantiza que el servicio nunca está "completamente caído"
 
 ---
 
