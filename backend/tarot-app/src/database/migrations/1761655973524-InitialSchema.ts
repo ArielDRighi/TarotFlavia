@@ -140,9 +140,31 @@ export class InitialSchema1761655973524 implements MigrationInterface {
     await queryRunner.query(
       `ALTER TABLE "ai_usage_logs" ADD CONSTRAINT "FK_ai_usage_logs_reading" FOREIGN KEY ("reading_id") REFERENCES "tarot_reading"("id") ON DELETE SET NULL ON UPDATE NO ACTION`,
     );
+    await queryRunner.query(
+      `CREATE TABLE "cached_interpretations" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "cache_key" character varying(255) NOT NULL, "spread_id" uuid NOT NULL, "card_combination" jsonb NOT NULL, "question_hash" character varying(64) NOT NULL, "interpretation_text" text NOT NULL, "hit_count" integer NOT NULL DEFAULT '0', "last_used_at" TIMESTAMP, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "expires_at" TIMESTAMP NOT NULL, CONSTRAINT "UQ_cached_interpretations_cache_key" UNIQUE ("cache_key"), CONSTRAINT "PK_cached_interpretations_id" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_cached_interpretations_cache_key" ON "cached_interpretations" ("cache_key")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_cached_interpretations_expires_at" ON "cached_interpretations" ("expires_at")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_cached_interpretations_hit_count" ON "cached_interpretations" ("hit_count")`,
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(
+      `DROP INDEX "public"."IDX_cached_interpretations_hit_count"`,
+    );
+    await queryRunner.query(
+      `DROP INDEX "public"."IDX_cached_interpretations_expires_at"`,
+    );
+    await queryRunner.query(
+      `DROP INDEX "public"."IDX_cached_interpretations_cache_key"`,
+    );
+    await queryRunner.query(`DROP TABLE "cached_interpretations"`);
     await queryRunner.query(
       `ALTER TABLE "ai_usage_logs" DROP CONSTRAINT "FK_ai_usage_logs_reading"`,
     );

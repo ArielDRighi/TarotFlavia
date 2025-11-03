@@ -79,20 +79,26 @@ export class ReadingsService {
         }
 
         // Generar interpretación con IA
-        const interpretation =
-          await this.interpretationsService.generateInterpretation(
-            cards,
-            createReadingDto.cardPositions,
-            question,
-            spread,
-            undefined, // category - puede agregarse después
-            user.id,
-            savedReading.id,
-          );
+        const result = await this.interpretationsService.generateInterpretation(
+          cards,
+          createReadingDto.cardPositions,
+          question,
+          spread,
+          undefined, // category - puede agregarse después
+          user.id,
+          savedReading.id,
+        );
 
         // Actualizar la lectura con la interpretación
-        savedReading.interpretation = interpretation;
+        savedReading.interpretation = result.interpretation;
         await this.readingsRepository.save(savedReading);
+
+        // Loggear si vino del caché
+        if (result.fromCache) {
+          this.logger.log(
+            `Interpretation served from cache for reading ${savedReading.id}. Cache hit rate: ${result.cacheHitRate?.toFixed(2)}%`,
+          );
+        }
 
         this.logger.log(
           `Interpretation generated successfully for reading ${savedReading.id}`,
