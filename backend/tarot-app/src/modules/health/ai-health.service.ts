@@ -77,7 +77,9 @@ export class AIHealthService {
       };
     } catch (error) {
       const errorMessage = this.parseProviderError(error, 'groq');
-      this.logger.error(`Groq health check failed: ${errorMessage}`);
+      if (process.env.NODE_ENV !== 'test') {
+        this.logger.error(`Groq health check failed: ${errorMessage}`);
+      }
 
       return {
         provider: 'groq',
@@ -120,7 +122,9 @@ export class AIHealthService {
       };
     } catch (error) {
       const errorMessage = this.parseProviderError(error, 'deepseek');
-      this.logger.error(`DeepSeek health check failed: ${errorMessage}`);
+      if (process.env.NODE_ENV !== 'test') {
+        this.logger.error(`DeepSeek health check failed: ${errorMessage}`);
+      }
 
       return {
         provider: 'deepseek',
@@ -172,7 +176,9 @@ export class AIHealthService {
       };
     } catch (error) {
       const errorMessage = this.parseProviderError(error, 'openai');
-      this.logger.error(`OpenAI health check failed: ${errorMessage}`);
+      if (process.env.NODE_ENV !== 'test') {
+        this.logger.error(`OpenAI health check failed: ${errorMessage}`);
+      }
 
       return {
         provider: 'openai',

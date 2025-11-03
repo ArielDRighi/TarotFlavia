@@ -38,10 +38,12 @@ import { validate } from './config/env-validator';
         if (!dbConfig) {
           throw new Error('Database configuration not found');
         }
-        console.log('Usando configuración de base de datos:', {
-          ...dbConfig,
-          password: '****', // Ocultar contraseña en los logs
-        });
+        if (process.env.NODE_ENV !== 'test') {
+          console.log('Usando configuración de base de datos:', {
+            ...dbConfig,
+            password: '****', // Ocultar contraseña en los logs
+          });
+        }
         return dbConfig;
       },
     }),

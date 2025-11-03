@@ -99,12 +99,12 @@ describe('PredefinedQuestions (e2e)', () => {
     const adminLoginResponse = await request(app.getHttpServer())
       .post('/auth/login')
       .send({ email: 'admin@test.com', password: 'test123' })
-      .expect(201);
+      .expect(200);
 
     const userLoginResponse = await request(app.getHttpServer())
       .post('/auth/login')
       .send({ email: 'user@test.com', password: 'test123' })
-      .expect(201);
+      .expect(200);
 
     adminToken = adminLoginResponse.body.access_token;
     userToken = userLoginResponse.body.access_token;
