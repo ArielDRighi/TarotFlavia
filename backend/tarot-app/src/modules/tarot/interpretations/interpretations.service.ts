@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -7,32 +11,21 @@ import { TarotCard } from '../cards/entities/tarot-card.entity';
 import { TarotInterpretation } from './entities/tarot-interpretation.entity';
 import { TarotSpread } from '../spreads/entities/tarot-spread.entity';
 import { TarotReading } from '../readings/entities/tarot-reading.entity';
-import OpenAI from 'openai';
+import { AIProviderService } from './ai-provider.service';
+import { TarotPrompts } from './tarot-prompts';
 
 @Injectable()
 export class InterpretationsService {
-  private openai: OpenAI | null = null;
+  private readonly logger = new Logger(InterpretationsService.name);
 
   constructor(
     @InjectRepository(TarotInterpretation)
     private interpretationRepository: Repository<TarotInterpretation>,
     private httpService: HttpService,
     private configService: ConfigService,
+    private aiProviderService: AIProviderService,
   ) {
-    // Inicializar OpenAI con la clave API
-    const apiKey = this.configService.get<string>('OPENAI_API_KEY');
-    if (!apiKey || apiKey === 'tu_clave_de_api') {
-      if (process.env.NODE_ENV !== 'test') {
-        console.warn(
-          'ADVERTENCIA: No se encontró una clave API válida para OpenAI. La generación de interpretaciones no funcionará correctamente.',
-        );
-      }
-    } else {
-      this.openai = new OpenAI({ apiKey });
-      if (process.env.NODE_ENV !== 'test') {
-        console.log('API de OpenAI inicializada correctamente');
-      }
-    }
+    this.logger.log('InterpretationsService initialized with AI Provider');
   }
 
   async generateInterpretation(
@@ -40,101 +33,89 @@ export class InterpretationsService {
     positions: { cardId: number; position: string; isReversed: boolean }[],
     question?: string,
     spread?: TarotSpread,
+    category?: string,
   ): Promise<string> {
-    if (!this.openai) {
-      throw new InternalServerErrorException(
-        'No se puede generar una interpretación porque la clave API de OpenAI no está configurada correctamente.',
-      );
-    }
+    const startTime = Date.now();
 
-    // Construir el contexto para la interpretación
-    let prompt = 'Por favor, interpreta esta lectura de tarot:\n\n';
-
-    // Agregar información sobre la tirada si está disponible
-    if (spread) {
-      prompt += `Tirada: ${spread.name}\nDescripción: ${spread.description}\n\n`;
-    }
-
-    // Agregar pregunta si existe
-    if (question) {
-      prompt += `Pregunta: "${question}"\n\n`;
-    }
-
-    // Preparar información de las cartas
+    // Preparar información de las cartas con posiciones en el formato requerido
     const cardDetails = cards.map((card) => {
       const position = positions.find((p) => p.cardId === card.id);
-      const orientation = position?.isReversed ? 'invertida' : 'derecha';
-      const meaning = position?.isReversed
-        ? card.meaningReversed
-        : card.meaningUpright;
+      const positionName = position?.position || 'Posición no especificada';
+
+      // Buscar la descripción de la posición en el spread
+      const positionInfo = spread?.positions?.find(
+        (p) => p.name === positionName,
+      );
 
       return {
-        name: card.name,
-        position: position?.position || 'No especificada',
-        orientation,
-        meaning,
+        cardName: card.name,
+        positionName: positionName,
+        positionDescription:
+          positionInfo?.description || 'Sin descripción de posición',
+        isReversed: position?.isReversed || false,
+        meaningUpright: card.meaningUpright,
+        meaningReversed: card.meaningReversed,
         keywords: card.keywords,
-        description: card.description,
       };
     });
 
-    prompt += 'Cartas en la lectura:\n';
-    cardDetails.forEach((card, index) => {
-      prompt += `\nCarta ${index + 1}: ${card.name} (${card.orientation}) en posición "${card.position}"\n`;
-      prompt += `Significado: ${card.meaning}\n`;
-      prompt += `Palabras clave: ${card.keywords}\n`;
+    // Usar los prompts optimizados para Llama
+    const systemPrompt = TarotPrompts.getSystemPrompt();
+    const userPrompt = TarotPrompts.buildUserPrompt({
+      question: question || 'Pregunta general sobre la situación actual',
+      category: category || 'General',
+      spreadName: spread?.name || 'Tirada libre',
+      spreadDescription: spread?.description || 'Tirada personalizada',
+      cards: cardDetails,
     });
 
-    prompt += '\nPor favor proporciona:\n';
-    prompt += '1. Una interpretación general de la lectura\n';
-    prompt += '2. La interpretación de cada carta en su posición específica\n';
-    prompt += '3. Como las cartas se relacionan entre sí\n';
-    prompt += '4. Consejos prácticos basados en la lectura\n';
-    prompt += '5. Una conclusión final\n\n';
-
-    if (question) {
-      prompt += `Por favor enfoca tu interpretación a la pregunta: "${question}"\n\n`;
-    }
-
     try {
-      console.log('Enviando solicitud a OpenAI...');
-      const model =
-        this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o-mini';
+      this.logger.log('Generating interpretation with AI Provider');
 
-      const response = await this.openai.chat.completions.create({
-        model,
-        messages: [
-          {
-            role: 'system',
-            content:
-              'Eres un experto tarólogo con años de experiencia en la lectura e interpretación del tarot. Debes proporcionar interpretaciones profundas, intuitivas y útiles basadas en las cartas presentadas. Usa un lenguaje claro pero místico, hablando directamente a la persona que consulta.',
-          },
-          { role: 'user', content: prompt },
-        ],
-        temperature: 0.7,
-        max_tokens: 1500,
-      });
+      // Intentar generar con el sistema de providers con fallback automático
+      const response = await this.aiProviderService.generateCompletion([
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ]);
 
-      // Obtener la interpretación generada
-      const interpretation = response.choices[0].message.content;
+      const interpretation = response.content;
+      const duration = Date.now() - startTime;
 
-      if (!interpretation) {
-        throw new Error('No se pudo generar una interpretación');
-      }
+      this.logger.log(
+        `Interpretation generated successfully with ${response.provider} in ${duration}ms (${response.tokensUsed.total} tokens)`,
+      );
 
-      // Registrar la interpretación generada (opcional)
-      await this.saveInterpretation(interpretation, model, {
-        model,
-        temperature: 0.7,
-        maxTokens: 1500,
+      // Guardar la interpretación con metadata del provider usado
+      await this.saveInterpretation(interpretation, response.provider, {
+        provider: response.provider,
+        model: response.model,
+        tokensUsed: response.tokensUsed,
+        duration,
+        spread: spread?.name,
+        cardCount: cards.length,
       });
 
       return interpretation;
     } catch (error) {
-      console.error('Error al generar interpretación con OpenAI:', error);
-      throw new InternalServerErrorException(
-        'Error al generar la interpretación. Por favor intenta nuevamente más tarde.',
-      );
+      this.logger.error('All AI providers failed, using fallback', error);
+
+      // Si todos los providers fallan, retornar interpretación de fallback
+      const fallbackCards = cards.map((card) => ({
+        cardName: card.name,
+        meaningUpright: card.meaningUpright,
+      }));
+
+      const fallbackInterpretation =
+        TarotPrompts.getFallbackInterpretation(fallbackCards);
+
+      // Guardar el fallback también para registro
+      await this.saveInterpretation(fallbackInterpretation, 'fallback', {
+        provider: 'fallback',
+        error: error instanceof Error ? error.message : 'Unknown error',
+        cardCount: cards.length,
+      });
+
+      return fallbackInterpretation;
     }
   }
 
@@ -152,7 +133,7 @@ export class InterpretationsService {
       });
       await this.interpretationRepository.save(interpretation);
     } catch (error) {
-      console.error('Error al guardar interpretación:', error);
+      this.logger.error('Error al guardar interpretación:', error);
       // No lanzamos excepción para no interrumpir el flujo principal
     }
   }
@@ -173,7 +154,7 @@ export class InterpretationsService {
       });
       return await this.interpretationRepository.save(tarotInterpretation);
     } catch (error) {
-      console.error('Error al asociar interpretación a lectura:', error);
+      this.logger.error('Error al asociar interpretación a lectura:', error);
       throw new InternalServerErrorException(
         'Error al guardar la interpretación',
       );

@@ -5,7 +5,8 @@ import { TarotInterpretation } from './entities/tarot-interpretation.entity';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { TarotCard } from '../cards/entities/tarot-card.entity';
-import { InternalServerErrorException } from '@nestjs/common';
+import { AIProviderService } from './ai-provider.service';
+import { AIProviderType } from './ai-provider.interface';
 
 describe('InterpretationsService', () => {
   let service: InterpretationsService;
@@ -25,6 +26,12 @@ describe('InterpretationsService', () => {
 
   const mockHttpService = {
     post: jest.fn(),
+  };
+
+  const mockAIProviderService = {
+    generateCompletion: jest.fn(),
+    getProvidersStatus: jest.fn(),
+    getPrimaryProvider: jest.fn(),
   };
 
   const mockCards: TarotCard[] = [
@@ -60,6 +67,10 @@ describe('InterpretationsService', () => {
           provide: HttpService,
           useValue: mockHttpService,
         },
+        {
+          provide: AIProviderService,
+          useValue: mockAIProviderService,
+        },
       ],
     }).compile();
 
@@ -75,12 +86,54 @@ describe('InterpretationsService', () => {
   });
 
   describe('generateInterpretation', () => {
-    it('should throw error if OpenAI is not configured', async () => {
-      // The service was already created with null API key in beforeEach
-      // so we just need to test that it throws the error
-      await expect(
-        service.generateInterpretation(mockCards, mockPositions),
-      ).rejects.toThrow(InternalServerErrorException);
+    it('should generate interpretation using AI provider', async () => {
+      const mockResponse = {
+        content: 'Test interpretation from AI',
+        provider: AIProviderType.GROQ,
+        model: 'llama-3.1-70b-versatile',
+        tokensUsed: {
+          prompt: 100,
+          completion: 200,
+          total: 300,
+        },
+      };
+
+      mockAIProviderService.generateCompletion.mockResolvedValue(mockResponse);
+      mockRepository.create.mockReturnValue({
+        content: mockResponse.content,
+        modelUsed: mockResponse.provider,
+      });
+      mockRepository.save.mockResolvedValue({
+        id: 1,
+        content: mockResponse.content,
+        modelUsed: mockResponse.provider,
+      });
+
+      const result = await service.generateInterpretation(
+        mockCards,
+        mockPositions,
+      );
+
+      expect(mockAIProviderService.generateCompletion).toHaveBeenCalled();
+      expect(result).toBe(mockResponse.content);
+      expect(mockRepository.save).toHaveBeenCalled();
+    });
+
+    it('should use fallback interpretation if all providers fail', async () => {
+      mockAIProviderService.generateCompletion.mockRejectedValue(
+        new Error('All providers failed'),
+      );
+      mockRepository.create.mockReturnValue({});
+      mockRepository.save.mockResolvedValue({});
+
+      const result = await service.generateInterpretation(
+        mockCards,
+        mockPositions,
+      );
+
+      expect(result).toContain('Interpretación Basada en Significados');
+      expect(result).toContain('The Fool');
+      expect(mockRepository.save).toHaveBeenCalled();
     });
   });
 
