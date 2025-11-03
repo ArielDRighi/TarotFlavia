@@ -5,9 +5,19 @@ import { ReadingsController } from './readings.controller';
 import { ShareController } from './share.controller';
 import { TarotReading } from './entities/tarot-reading.entity';
 import { RequiresPremiumForCustomQuestionGuard } from './guards/requires-premium-for-custom-question.guard';
+import { InterpretationsModule } from '../interpretations/interpretations.module';
+import { CardsModule } from '../cards/cards.module';
+import { SpreadsModule } from '../spreads/spreads.module';
+import { PredefinedQuestionsModule } from '../../predefined-questions/predefined-questions.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([TarotReading])],
+  imports: [
+    TypeOrmModule.forFeature([TarotReading]),
+    InterpretationsModule,
+    CardsModule,
+    SpreadsModule,
+    PredefinedQuestionsModule,
+  ],
   controllers: [ReadingsController, ShareController],
   providers: [ReadingsService, RequiresPremiumForCustomQuestionGuard],
   exports: [ReadingsService],

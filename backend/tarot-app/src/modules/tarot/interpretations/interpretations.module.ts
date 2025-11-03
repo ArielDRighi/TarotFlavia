@@ -9,12 +9,14 @@ import { AIProviderService } from './ai-provider.service';
 import { GroqProvider } from './providers/groq.provider';
 import { DeepSeekProvider } from './providers/deepseek.provider';
 import { OpenAIProvider } from './providers/openai.provider';
+import { AIUsageModule } from '../../ai-usage/ai-usage.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([TarotInterpretation]),
     HttpModule,
     ConfigModule,
+    AIUsageModule,
   ],
   controllers: [InterpretationsController],
   providers: [

@@ -4,7 +4,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { TarotCard } from './entities/tarot-card.entity';
 import { TarotDeck } from '../decks/entities/tarot-deck.entity';
 import { CreateCardDto } from './dto/create-card.dto';
@@ -34,6 +34,21 @@ export class CardsService {
     }
 
     return card;
+  }
+
+  async findByIds(ids: number[]): Promise<TarotCard[]> {
+    const cards = await this.cardRepository.find({
+      where: { id: In(ids) },
+      relations: ['deck'],
+    });
+
+    if (cards.length !== ids.length) {
+      throw new NotFoundException(
+        `Algunas cartas no fueron encontradas. Se esperaban ${ids.length}, se encontraron ${cards.length}`,
+      );
+    }
+
+    return cards;
   }
 
   async findByDeck(deckId: number): Promise<TarotCard[]> {

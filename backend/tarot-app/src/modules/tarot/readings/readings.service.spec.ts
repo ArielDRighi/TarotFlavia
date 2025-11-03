@@ -7,6 +7,10 @@ import { TarotDeck } from '../decks/entities/tarot-deck.entity';
 import { TarotCard } from '../cards/entities/tarot-card.entity';
 import { NotFoundException, ForbiddenException } from '@nestjs/common';
 import { CreateReadingDto } from './dto/create-reading.dto';
+import { InterpretationsService } from '../interpretations/interpretations.service';
+import { CardsService } from '../cards/cards.service';
+import { SpreadsService } from '../spreads/spreads.service';
+import { PredefinedQuestionsService } from '../../predefined-questions/predefined-questions.service';
 
 describe('ReadingsService', () => {
   let service: ReadingsService;
@@ -17,6 +21,22 @@ describe('ReadingsService', () => {
     find: jest.fn(),
     findOne: jest.fn(),
     update: jest.fn(),
+  };
+
+  const mockInterpretationsService = {
+    generateInterpretation: jest.fn(),
+  };
+
+  const mockCardsService = {
+    findByIds: jest.fn(),
+  };
+
+  const mockSpreadsService = {
+    findById: jest.fn(),
+  };
+
+  const mockPredefinedQuestionsService = {
+    findOne: jest.fn(),
   };
 
   const mockUser = {
@@ -75,6 +95,18 @@ describe('ReadingsService', () => {
     } as unknown as TarotCard,
   ];
 
+  const mockSpread = {
+    id: 1,
+    name: 'Three Card Spread',
+    description: 'Past, Present, Future',
+    cardCount: 3,
+    positions: [
+      { name: 'past', description: 'Past influences' },
+      { name: 'present', description: 'Current situation' },
+      { name: 'future', description: 'Future outcome' },
+    ],
+  };
+
   const mockReading: TarotReading = {
     id: 1,
     question: 'What does my future hold?',
@@ -101,6 +133,22 @@ describe('ReadingsService', () => {
         {
           provide: getRepositoryToken(TarotReading),
           useValue: mockRepository,
+        },
+        {
+          provide: InterpretationsService,
+          useValue: mockInterpretationsService,
+        },
+        {
+          provide: CardsService,
+          useValue: mockCardsService,
+        },
+        {
+          provide: SpreadsService,
+          useValue: mockSpreadsService,
+        },
+        {
+          provide: PredefinedQuestionsService,
+          useValue: mockPredefinedQuestionsService,
         },
       ],
     }).compile();
@@ -130,15 +178,32 @@ describe('ReadingsService', () => {
         generateInterpretation: true,
       };
 
-      const readingWithPredefined = {
+      const savedReading = {
         ...mockReading,
         predefinedQuestionId: 5,
         customQuestion: null,
         questionType: 'predefined' as const,
+        interpretation: null,
       };
 
-      mockRepository.create.mockReturnValue(readingWithPredefined);
-      mockRepository.save.mockResolvedValue(readingWithPredefined);
+      const readingWithInterpretation = {
+        ...savedReading,
+        interpretation: 'Your reading suggests...',
+      };
+
+      mockRepository.create.mockReturnValue(savedReading);
+      mockRepository.save
+        .mockResolvedValueOnce(savedReading)
+        .mockResolvedValueOnce(readingWithInterpretation);
+      mockCardsService.findByIds.mockResolvedValue(mockCards);
+      mockSpreadsService.findById.mockResolvedValue(mockSpread);
+      mockPredefinedQuestionsService.findOne.mockResolvedValue({
+        id: 5,
+        questionText: '¿Qué me depara el futuro?',
+      });
+      mockInterpretationsService.generateInterpretation.mockResolvedValue(
+        'Your reading suggests...',
+      );
 
       const result = await service.create(mockUser, createReadingDto);
 
@@ -149,8 +214,15 @@ describe('ReadingsService', () => {
           questionType: 'predefined',
         }),
       );
-      expect(mockRepository.save).toHaveBeenCalled();
+      expect(mockRepository.save).toHaveBeenCalledTimes(2);
+      expect(mockCardsService.findByIds).toHaveBeenCalledWith([1, 2]);
+      expect(mockSpreadsService.findById).toHaveBeenCalledWith(1);
+      expect(mockPredefinedQuestionsService.findOne).toHaveBeenCalledWith(5);
+      expect(
+        mockInterpretationsService.generateInterpretation,
+      ).toHaveBeenCalled();
       expect(result.questionType).toBe('predefined');
+      expect(result.interpretation).toBe('Your reading suggests...');
     });
 
     it('should create a reading with custom question', async () => {
@@ -166,15 +238,28 @@ describe('ReadingsService', () => {
         generateInterpretation: true,
       };
 
-      const readingWithCustom = {
+      const savedReading = {
         ...mockReading,
         predefinedQuestionId: null,
         customQuestion: '¿Cuál es mi propósito en la vida?',
         questionType: 'custom' as const,
+        interpretation: null,
       };
 
-      mockRepository.create.mockReturnValue(readingWithCustom);
-      mockRepository.save.mockResolvedValue(readingWithCustom);
+      const readingWithInterpretation = {
+        ...savedReading,
+        interpretation: 'Your reading suggests...',
+      };
+
+      mockRepository.create.mockReturnValue(savedReading);
+      mockRepository.save
+        .mockResolvedValueOnce(savedReading)
+        .mockResolvedValueOnce(readingWithInterpretation);
+      mockCardsService.findByIds.mockResolvedValue(mockCards);
+      mockSpreadsService.findById.mockResolvedValue(mockSpread);
+      mockInterpretationsService.generateInterpretation.mockResolvedValue(
+        'Your reading suggests...',
+      );
 
       const result = await service.create(mockUser, createReadingDto);
 
@@ -185,8 +270,14 @@ describe('ReadingsService', () => {
           questionType: 'custom',
         }),
       );
-      expect(mockRepository.save).toHaveBeenCalled();
+      expect(mockRepository.save).toHaveBeenCalledTimes(2);
+      expect(mockCardsService.findByIds).toHaveBeenCalledWith([1, 2]);
+      expect(mockSpreadsService.findById).toHaveBeenCalledWith(1);
+      expect(
+        mockInterpretationsService.generateInterpretation,
+      ).toHaveBeenCalled();
       expect(result.questionType).toBe('custom');
+      expect(result.interpretation).toBe('Your reading suggests...');
     });
 
     it('should create reading without interpretation if not requested', async () => {
@@ -214,6 +305,9 @@ describe('ReadingsService', () => {
 
       const result = await service.create(mockUser, createReadingDto);
 
+      expect(
+        mockInterpretationsService.generateInterpretation,
+      ).not.toHaveBeenCalled();
       expect(result.interpretation).toBeNull();
     });
   });

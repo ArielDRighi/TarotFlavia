@@ -119,9 +119,45 @@ export class InitialSchema1761655973524 implements MigrationInterface {
     await queryRunner.query(
       `ALTER TABLE "password_reset_tokens" ADD CONSTRAINT "FK_password_reset_tokens_user" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
     );
+    await queryRunner.query(
+      `CREATE TYPE "ai_provider_enum" AS ENUM('groq', 'deepseek', 'openai', 'gemini')`,
+    );
+    await queryRunner.query(
+      `CREATE TYPE "ai_usage_status_enum" AS ENUM('success', 'error', 'cached')`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "ai_usage_logs" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "user_id" integer, "reading_id" integer, "provider" "ai_provider_enum" NOT NULL, "model_used" character varying(100) NOT NULL, "prompt_tokens" integer NOT NULL DEFAULT '0', "completion_tokens" integer NOT NULL DEFAULT '0', "total_tokens" integer NOT NULL DEFAULT '0', "cost_usd" decimal(10,6) NOT NULL DEFAULT '0', "duration_ms" integer NOT NULL DEFAULT '0', "status" "ai_usage_status_enum" NOT NULL DEFAULT 'success', "error_message" text, "fallback_used" boolean NOT NULL DEFAULT false, "created_at" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_ai_usage_logs_id" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_ai_usage_logs_user_created" ON "ai_usage_logs" ("user_id", "created_at")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_ai_usage_logs_provider_created" ON "ai_usage_logs" ("provider", "created_at")`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "ai_usage_logs" ADD CONSTRAINT "FK_ai_usage_logs_user" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE SET NULL ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "ai_usage_logs" ADD CONSTRAINT "FK_ai_usage_logs_reading" FOREIGN KEY ("reading_id") REFERENCES "tarot_reading"("id") ON DELETE SET NULL ON UPDATE NO ACTION`,
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(
+      `ALTER TABLE "ai_usage_logs" DROP CONSTRAINT "FK_ai_usage_logs_reading"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "ai_usage_logs" DROP CONSTRAINT "FK_ai_usage_logs_user"`,
+    );
+    await queryRunner.query(
+      `DROP INDEX "public"."IDX_ai_usage_logs_provider_created"`,
+    );
+    await queryRunner.query(
+      `DROP INDEX "public"."IDX_ai_usage_logs_user_created"`,
+    );
+    await queryRunner.query(`DROP TABLE "ai_usage_logs"`);
+    await queryRunner.query(`DROP TYPE "ai_usage_status_enum"`);
+    await queryRunner.query(`DROP TYPE "ai_provider_enum"`);
     await queryRunner.query(
       `ALTER TABLE "password_reset_tokens" DROP CONSTRAINT "FK_password_reset_tokens_user"`,
     );
