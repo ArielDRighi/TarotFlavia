@@ -19,7 +19,6 @@ import {
   CircuitBreakerState,
 } from './errors/circuit-breaker.utils';
 import { retryWithBackoff } from './errors/retry.utils';
-import { AIProviderException } from './errors/ai-error.types';
 
 /**
  * AI Provider Service
