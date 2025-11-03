@@ -122,7 +122,7 @@ export class OpenAIProvider implements IAIProvider {
     return 1000; // 10-card spreads
   }
 
-  private timeout(ms: number): Promise<string> {
+  private timeout(ms: number): Promise<never> {
     return new Promise((_, reject) =>
       setTimeout(() => reject(new Error('Timeout exceeded')), ms),
     );

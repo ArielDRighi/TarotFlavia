@@ -133,7 +133,7 @@ export class InterpretationsService {
       });
       await this.interpretationRepository.save(interpretation);
     } catch (error) {
-      console.error('Error al guardar interpretación:', error);
+      this.logger.error('Error al guardar interpretación:', error);
       // No lanzamos excepción para no interrumpir el flujo principal
     }
   }
@@ -154,7 +154,7 @@ export class InterpretationsService {
       });
       return await this.interpretationRepository.save(tarotInterpretation);
     } catch (error) {
-      console.error('Error al asociar interpretación a lectura:', error);
+      this.logger.error('Error al asociar interpretación a lectura:', error);
       throw new InternalServerErrorException(
         'Error al guardar la interpretación',
       );
