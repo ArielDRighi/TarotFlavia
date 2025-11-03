@@ -2435,7 +2435,11 @@ Esta tarea es **bloqueante para producción**. No se puede hacer deploy del MVP 
 
 **Prioridad:** 🟢 MEDIA  
 **Estimación:** 3 días  
-**Dependencias:** TASK-003
+**Dependencias:** TASK-003  
+**Estado:** ✅ COMPLETADO  
+**Branch:** feature/TASK-020-cache-interpretaciones  
+**Commit:** 4aec167  
+**Tests:** 21/21 passing
 
 #### 📋 Descripción
 
@@ -2443,63 +2447,83 @@ Implementar sistema de caché IN-MEMORY (usando `@nestjs/cache-manager`) que reu
 
 #### ✅ Tareas específicas
 
-- [ ] **Configurar caché in-memory de NestJS:**
+- [x] **Configurar caché in-memory de NestJS:**
   ```typescript
   CacheModule.register({
-    ttl: 86400, // 24 horas en segundos
+    ttl: 3600000, // 1 hora en milisegundos
     max: 200, // máximo 200 interpretaciones en caché
   });
   ```
-- [ ] Crear entidad `CachedInterpretation` con campos:
+- [x] Crear entidad `CachedInterpretation` con campos:
   - `id`, `cache_key` (unique), `spread_id`, `card_combination` (jsonb)
   - `question_hash` (hash de la pregunta), `interpretation_text`
   - `hit_count`, `last_used_at`, `created_at`, `expires_at`
-- [ ] Generar `cache_key` determinístico basado en:
+- [x] Generar `cache_key` determinístico basado en:
   - IDs de cartas ordenados
   - Posiciones de las cartas
   - Estado (derecha/invertida) de cada carta
   - Spread utilizado
   - Hash de la pregunta (categoría + pregunta normalizada)
-- [ ] Implementar **estrategia dual de caché**:
+- [x] Implementar **estrategia dual de caché**:
   1. **Caché in-memory** (rápido, para interpretaciones frecuentes):
      - Guardar en `@nestjs/cache-manager` con TTL de 1 hora
      - Ideal para cartas/spreads/categorías (datos estáticos)
   2. **Caché en base de datos** (persistente, para interpretaciones completas):
      - Guardar en `CachedInterpretation` con TTL de 30 días
      - Para reutilizar interpretaciones de IA
-- [ ] Implementar lógica de búsqueda en caché ANTES de llamar a OpenAI:
+- [x] Implementar lógica de búsqueda en caché ANTES de llamar a OpenAI:
   - Si existe caché válido (no expirado): retornar interpretación cacheada
   - Si no existe: generar con OpenAI y almacenar en ambos cachés
-- [ ] Configurar expiración:
+- [x] Configurar expiración:
   - Caché in-memory: 1 hora (auto-limpieza)
   - Caché DB: 30 días
-- [ ] Incrementar `hit_count` cada vez que se usa una interpretación cacheada
-- [ ] Actualizar `last_used_at` en cada hit
-- [ ] Crear endpoint `DELETE /admin/cache/clear` para limpiar ambos cachés
-- [ ] Implementar tarea cron que limpie cachés expirados de DB (más de 30 días)
-- [ ] **Documentar plan de migración a Redis** (opcional, para escalabilidad futura):
+- [x] Incrementar `hit_count` cada vez que se usa una interpretación cacheada
+- [x] Actualizar `last_used_at` en cada hit
+- [x] Crear endpoint `DELETE /admin/cache/clear` para limpiar ambos cachés
+- [x] Implementar tarea cron que limpie cachés expirados de DB (más de 30 días)
+- [x] **Documentar plan de migración a Redis** (opcional, para escalabilidad futura):
   - Cuando tener múltiples instancias del backend
   - Cuando el caché in-memory consuma mucha RAM
   - Ver TASK-044 para implementación completa
 
 #### 🎯 Criterios de aceptación
 
-- ✓ El caché in-memory funciona para datos estáticos (cartas, spreads)
-- ✓ El caché DB funciona para interpretaciones de IA
-- ✓ Se reduce significativamente el número de llamadas a OpenAI
-- ✓ El caché se invalida apropiadamente cuando expira
-- ✓ Está documentado cuándo migrar a Redis (no necesario para MVP)
-- [ ] Implementar tarea cron que elimine caché expirado y poco usado (hit_count < 2 después de 7 días)
-- [ ] Agregar flag `from_cache: boolean` en la respuesta de interpretación para transparencia
-- [ ] Implementar índice en `cache_key` para búsquedas ultra-rápidas
-- [ ] Calcular y loggear tasa de cache hit rate para optimización
-- [ ] Documentar estrategia de invalidación de caché si se actualizan significados de cartas
+- ✅ El caché in-memory funciona para datos estáticos (cartas, spreads)
+- ✅ El caché DB funciona para interpretaciones de IA
+- ✅ Se reduce significativamente el número de llamadas a OpenAI
+- ✅ El caché se invalida apropiadamente cuando expira
+- ✅ Está documentado cuándo migrar a Redis (no necesario para MVP)
+- ✅ Implementar tarea cron que elimine caché expirado y poco usado (hit_count < 2 después de 7 días)
+- ✅ Agregar flag `from_cache: boolean` en la respuesta de interpretación para transparencia
+- ✅ Implementar índice en `cache_key` para búsquedas ultra-rápidas
+- ✅ Calcular y loggear tasa de cache hit rate para optimización
+- ✅ Documentar estrategia de invalidación de caché si se actualizan significados de cartas
 
 #### 🎯 Criterios de aceptación
 
-- ✓ El sistema busca en caché antes de llamar a OpenAI
-- ✓ El cache hit rate es rastreable y medible
-- ✓ Los costos de OpenAI se reducen significativamente con caché activo
+- ✅ El sistema busca en caché antes de llamar a OpenAI
+- ✅ El cache hit rate es rastreable y medible
+- ✅ Los costos de OpenAI se reducen significativamente con caché activo
+
+#### 📦 Entregables
+
+- **Archivos creados:**
+  - `src/modules/tarot/interpretations/entities/cached-interpretation.entity.ts`
+  - `src/modules/tarot/interpretations/interpretation-cache.service.ts`
+  - `src/modules/tarot/interpretations/interpretation-cache.service.spec.ts`
+  - `src/modules/tarot/interpretations/cache-cleanup.service.ts`
+  - `docs/CACHE_STRATEGY.md`
+- **Archivos modificados:**
+  - `src/app.module.ts` - CacheModule global config
+  - `src/database/migrations/1761655973524-InitialSchema.ts` - tabla cached_interpretations
+  - `src/modules/tarot/interpretations/interpretations.module.ts` - nuevos servicios y ScheduleModule
+  - `src/modules/tarot/interpretations/interpretations.service.ts` - integración con caché
+  - `src/modules/tarot/interpretations/interpretations.controller.ts` - endpoints admin
+  - `src/modules/tarot/readings/readings.service.ts` - manejo de InterpretationResult
+  - `package.json` y `package-lock.json` - nuevas dependencias
+- **Tests:** 21/21 passing
+- **Cron jobs:** Limpieza diaria (3AM), limpieza semanal (domingo 4AM), estadísticas cada 6 horas
+- **Endpoints admin:** DELETE /interpretations/admin/cache, GET /interpretations/admin/cache/stats
 
 ---
 
