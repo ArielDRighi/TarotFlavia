@@ -21,22 +21,22 @@ export class PasswordResetService {
   async generateResetToken(
     email: string,
   ): Promise<{ token: string; expiresAt: Date }> {
-    // Verificar que el usuario existe
+    // Verify that user exists
     const user = await this.usersService.findByEmail(email);
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    // Generar token aleatorio de 32 bytes
+    // Generate random 32-byte token
     const plainToken = crypto.randomBytes(32).toString('hex');
 
-    // Hash del token para almacenar en DB
+    // Hash token for database storage
     const hashedToken = await bcrypt.hash(plainToken, 10);
 
-    // Calcular fecha de expiración (1 hora)
+    // Calculate expiration date (1 hour)
     const expiresAt = new Date(Date.now() + 3600000); // 1 hour
 
-    // Crear y guardar el token
+    // Create and save token
     const resetToken = this.passwordResetTokenRepository.create({
       userId: user.id,
       token: hashedToken,
@@ -50,26 +50,17 @@ export class PasswordResetService {
   }
 
   async validateToken(plainToken: string): Promise<PasswordResetToken> {
-    // Buscar todos los tokens no usados
+    // Find all unused and non-expired tokens to reduce comparison overhead
     const tokens = await this.passwordResetTokenRepository
       .createQueryBuilder('token')
       .where('token.usedAt IS NULL')
+      .andWhere('token.expiresAt > :now', { now: new Date() })
       .getMany();
 
-    // Verificar cada token hasheado
+    // Check each hashed token
     for (const token of tokens) {
       const isValid = await bcrypt.compare(plainToken, token.token);
       if (isValid) {
-        // Verificar que no esté expirado
-        if (token.expiresAt < new Date()) {
-          throw new BadRequestException('Token has expired');
-        }
-
-        // Verificar que no esté usado
-        if (token.usedAt) {
-          throw new BadRequestException('Token has already been used');
-        }
-
         return token;
       }
     }

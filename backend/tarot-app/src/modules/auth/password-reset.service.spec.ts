@@ -11,6 +11,7 @@ describe('PasswordResetService', () => {
 
   const mockQueryBuilder = {
     where: jest.fn().mockReturnThis(),
+    andWhere: jest.fn().mockReturnThis(),
     getMany: jest.fn(),
     delete: jest.fn().mockReturnThis(),
     from: jest.fn().mockReturnThis(),
@@ -120,35 +121,21 @@ describe('PasswordResetService', () => {
     });
 
     it('should throw BadRequestException if token is expired', async () => {
-      const plainToken = 'expired-token';
-      const hashedToken = await bcrypt.hash(plainToken, 10);
+      // Expired tokens are now filtered by the query itself (expiresAt > now)
+      // So they won't be in the result set
+      mockQueryBuilder.getMany.mockResolvedValue([]);
 
-      const resetToken = new PasswordResetToken();
-      resetToken.token = hashedToken;
-      resetToken.expiresAt = new Date(Date.now() - 1000); // expired
-      resetToken.usedAt = null;
-
-      mockQueryBuilder.getMany.mockResolvedValue([resetToken]);
-      jest.spyOn(bcrypt, 'compare').mockResolvedValue(true as never);
-
-      await expect(service.validateToken(plainToken)).rejects.toThrow(
+      await expect(service.validateToken('expired-token')).rejects.toThrow(
         BadRequestException,
       );
     });
 
     it('should throw BadRequestException if token is already used', async () => {
-      const plainToken = 'used-token';
-      const hashedToken = await bcrypt.hash(plainToken, 10);
+      // Used tokens are now filtered by the query itself (usedAt IS NULL)
+      // So they won't be in the result set
+      mockQueryBuilder.getMany.mockResolvedValue([]);
 
-      const resetToken = new PasswordResetToken();
-      resetToken.token = hashedToken;
-      resetToken.expiresAt = new Date(Date.now() + 3600000);
-      resetToken.usedAt = new Date(); // already used
-
-      mockQueryBuilder.getMany.mockResolvedValue([resetToken]);
-      jest.spyOn(bcrypt, 'compare').mockResolvedValue(true as never);
-
-      await expect(service.validateToken(plainToken)).rejects.toThrow(
+      await expect(service.validateToken('used-token')).rejects.toThrow(
         BadRequestException,
       );
     });

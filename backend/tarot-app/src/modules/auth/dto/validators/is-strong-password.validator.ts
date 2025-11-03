@@ -13,17 +13,17 @@ export function IsStrongPassword(validationOptions?: ValidationOptions) {
             return false;
           }
 
-          // Mínimo 8 caracteres
+          // Minimum 8 characters
           if (value.length < 8) {
             return false;
           }
 
-          // Al menos una mayúscula
+          // At least one uppercase letter
           if (!/[A-Z]/.test(value)) {
             return false;
           }
 
-          // Al menos un número
+          // At least one number
           if (!/[0-9]/.test(value)) {
             return false;
           }

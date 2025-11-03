@@ -141,7 +141,7 @@ export class AuthService {
   async forgotPassword(email: string): Promise<{ message: string }> {
     const { token } = await this.passwordResetService.generateResetToken(email);
 
-    // Por ahora, loggear el link en consola (hasta implementar email real)
+    // TODO: For now, log the link to console (until real email integration is implemented)
     console.log('========================================');
     console.log('Password reset link:');
     console.log(`/reset-password?token=${token}`);
@@ -154,18 +154,18 @@ export class AuthService {
     token: string,
     newPassword: string,
   ): Promise<{ message: string }> {
-    // Validar el token
+    // Validate token
     const resetToken = await this.passwordResetService.validateToken(token);
 
-    // Actualizar contraseña del usuario (usersService.update se encargará de hashearla)
+    // Update user password (usersService.update will handle hashing)
     await this.usersService.update(resetToken.userId, {
       password: newPassword,
     });
 
-    // Invalidar todos los refresh tokens del usuario por seguridad
+    // Invalidate all user refresh tokens for security
     await this.refreshTokenService.revokeAllUserTokens(resetToken.userId);
 
-    // Marcar token como usado
+    // Mark token as used
     await this.passwordResetService.markTokenAsUsed(resetToken);
 
     return { message: 'Password reset successful' };
