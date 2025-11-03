@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { User, UserPlan } from '../../modules/users/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 
@@ -23,11 +23,21 @@ export async function seedUsers(
 ): Promise<void> {
   console.log('👥 Starting Users seeding process...');
 
-  // Check if users already exist (idempotency)
-  const existingUsersCount = await userRepository.count();
-  if (existingUsersCount > 0) {
+  // Check if test users already exist (idempotency)
+  // Only check for our specific test user emails
+  const testUserEmails = [
+    'free@test.com',
+    'premium@test.com',
+    'admin@test.com',
+  ];
+
+  const existingTestUsers = await userRepository.countBy({
+    email: In(testUserEmails),
+  });
+
+  if (existingTestUsers > 0) {
     console.log(
-      `✅ Users already seeded (found ${existingUsersCount} user(s)). Skipping...`,
+      `✅ Test users already seeded (found ${existingTestUsers} user(s)). Skipping...`,
     );
     return;
   }
