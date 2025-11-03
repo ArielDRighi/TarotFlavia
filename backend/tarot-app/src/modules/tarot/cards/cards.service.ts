@@ -4,7 +4,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { TarotCard } from './entities/tarot-card.entity';
 import { TarotDeck } from '../decks/entities/tarot-deck.entity';
 import { CreateCardDto } from './dto/create-card.dto';
@@ -38,7 +38,7 @@ export class CardsService {
 
   async findByIds(ids: number[]): Promise<TarotCard[]> {
     const cards = await this.cardRepository.find({
-      where: ids.map((id) => ({ id })),
+      where: { id: In(ids) },
       relations: ['deck'],
     });
 

@@ -13,6 +13,7 @@ import { CreateReadingDto } from './dto/create-reading.dto';
 import { InterpretationsService } from '../interpretations/interpretations.service';
 import { CardsService } from '../cards/cards.service';
 import { SpreadsService } from '../spreads/spreads.service';
+import { PredefinedQuestionsService } from '../../predefined-questions/predefined-questions.service';
 
 @Injectable()
 export class ReadingsService {
@@ -24,6 +25,7 @@ export class ReadingsService {
     private interpretationsService: InterpretationsService,
     private cardsService: CardsService,
     private spreadsService: SpreadsService,
+    private predefinedQuestionsService: PredefinedQuestionsService,
   ) {}
 
   async create(
@@ -67,11 +69,14 @@ export class ReadingsService {
         );
 
         // Determinar la pregunta a usar
-        const question =
-          createReadingDto.customQuestion ||
-          (createReadingDto.predefinedQuestionId
-            ? `Pregunta predefinida ID: ${createReadingDto.predefinedQuestionId}`
-            : undefined);
+        let question: string | undefined = createReadingDto.customQuestion;
+        if (!question && createReadingDto.predefinedQuestionId) {
+          const predefinedQuestion =
+            await this.predefinedQuestionsService.findOne(
+              createReadingDto.predefinedQuestionId,
+            );
+          question = predefinedQuestion.questionText;
+        }
 
         // Generar interpretación con IA
         const interpretation =
@@ -99,7 +104,7 @@ export class ReadingsService {
         );
         // No fallar toda la creación si la interpretación falla
         savedReading.interpretation =
-          'Error al generar interpretación. Por favor, intenta regenerar más tarde.';
+          'No se pudo generar la interpretación automáticamente. El error ha sido registrado. Por favor, intenta regenerar más tarde.';
         await this.readingsRepository.save(savedReading);
       }
     }

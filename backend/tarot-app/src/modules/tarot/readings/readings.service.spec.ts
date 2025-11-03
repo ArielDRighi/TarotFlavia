@@ -10,6 +10,7 @@ import { CreateReadingDto } from './dto/create-reading.dto';
 import { InterpretationsService } from '../interpretations/interpretations.service';
 import { CardsService } from '../cards/cards.service';
 import { SpreadsService } from '../spreads/spreads.service';
+import { PredefinedQuestionsService } from '../../predefined-questions/predefined-questions.service';
 
 describe('ReadingsService', () => {
   let service: ReadingsService;
@@ -32,6 +33,10 @@ describe('ReadingsService', () => {
 
   const mockSpreadsService = {
     findById: jest.fn(),
+  };
+
+  const mockPredefinedQuestionsService = {
+    findOne: jest.fn(),
   };
 
   const mockUser = {
@@ -141,6 +146,10 @@ describe('ReadingsService', () => {
           provide: SpreadsService,
           useValue: mockSpreadsService,
         },
+        {
+          provide: PredefinedQuestionsService,
+          useValue: mockPredefinedQuestionsService,
+        },
       ],
     }).compile();
 
@@ -188,6 +197,10 @@ describe('ReadingsService', () => {
         .mockResolvedValueOnce(readingWithInterpretation);
       mockCardsService.findByIds.mockResolvedValue(mockCards);
       mockSpreadsService.findById.mockResolvedValue(mockSpread);
+      mockPredefinedQuestionsService.findOne.mockResolvedValue({
+        id: 5,
+        questionText: '¿Qué me depara el futuro?',
+      });
       mockInterpretationsService.generateInterpretation.mockResolvedValue(
         'Your reading suggests...',
       );
@@ -204,6 +217,7 @@ describe('ReadingsService', () => {
       expect(mockRepository.save).toHaveBeenCalledTimes(2);
       expect(mockCardsService.findByIds).toHaveBeenCalledWith([1, 2]);
       expect(mockSpreadsService.findById).toHaveBeenCalledWith(1);
+      expect(mockPredefinedQuestionsService.findOne).toHaveBeenCalledWith(5);
       expect(
         mockInterpretationsService.generateInterpretation,
       ).toHaveBeenCalled();

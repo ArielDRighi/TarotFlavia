@@ -111,7 +111,12 @@ export class AIUsageService {
       });
     }
 
-    queryBuilder.groupBy('log.provider');
+    queryBuilder
+      .addSelect(
+        'COUNT(CASE WHEN log.fallback_used = true THEN 1 END)',
+        'fallbackCalls',
+      )
+      .groupBy('log.provider');
 
     const rawStats = await queryBuilder.getRawMany<{
       provider: string;
@@ -119,35 +124,32 @@ export class AIUsageService {
       successCalls: string;
       errorCalls: string;
       cachedCalls: string;
+      fallbackCalls: string;
       totalTokens: string;
       totalCost: string;
       avgDuration: string;
     }>();
 
-    const fallbackCount = await this.aiUsageLogRepository.count({
-      where: {
-        fallbackUsed: true,
-        ...(startDate && endDate
-          ? { createdAt: Between(startDate, endDate) }
-          : {}),
-      },
-    });
+    return rawStats.map((stat) => {
+      const totalCalls = parseInt(stat.totalCalls, 10);
+      const errorCalls = parseInt(stat.errorCalls, 10);
+      const cachedCalls = parseInt(stat.cachedCalls, 10);
+      const fallbackCalls = parseInt(stat.fallbackCalls || '0', 10);
 
-    return rawStats.map((stat) => ({
-      provider: stat.provider as AIProvider,
-      totalCalls: parseInt(stat.totalCalls, 10),
-      successCalls: parseInt(stat.successCalls, 10),
-      errorCalls: parseInt(stat.errorCalls, 10),
-      cachedCalls: parseInt(stat.cachedCalls, 10),
-      totalTokens: parseInt(stat.totalTokens || '0', 10),
-      totalCost: parseFloat(stat.totalCost || '0'),
-      avgDuration: parseFloat(stat.avgDuration || '0'),
-      errorRate:
-        (parseInt(stat.errorCalls, 10) / parseInt(stat.totalCalls, 10)) * 100,
-      cacheHitRate:
-        (parseInt(stat.cachedCalls, 10) / parseInt(stat.totalCalls, 10)) * 100,
-      fallbackRate: (fallbackCount / parseInt(stat.totalCalls, 10)) * 100,
-    }));
+      return {
+        provider: stat.provider as AIProvider,
+        totalCalls,
+        successCalls: parseInt(stat.successCalls, 10),
+        errorCalls,
+        cachedCalls,
+        totalTokens: parseInt(stat.totalTokens || '0', 10),
+        totalCost: parseFloat(stat.totalCost || '0'),
+        avgDuration: parseFloat(stat.avgDuration || '0'),
+        errorRate: totalCalls > 0 ? (errorCalls / totalCalls) * 100 : 0,
+        cacheHitRate: totalCalls > 0 ? (cachedCalls / totalCalls) * 100 : 0,
+        fallbackRate: totalCalls > 0 ? (fallbackCalls / totalCalls) * 100 : 0,
+      };
+    });
   }
 
   async getByProvider(provider: AIProvider): Promise<AIUsageLog[]> {
@@ -203,6 +205,9 @@ export class AIUsageService {
             createdAt: Between(startOfDay, endOfDay),
           },
         });
+        if (totalCount === 0) {
+          return false;
+        }
         const fallbackRate = (fallbackCount / totalCount) * 100;
         return fallbackRate > ALERT_THRESHOLDS.fallbackRatePercent;
       }

@@ -259,9 +259,6 @@ describe('AIUsageService', () => {
     });
 
     it('should calculate fallback rate correctly', async () => {
-      const mockFallbackCount = 15;
-      mockRepository.count.mockResolvedValue(mockFallbackCount);
-
       const mockStats = [
         {
           provider: AIProvider.GROQ,
@@ -269,6 +266,7 @@ describe('AIUsageService', () => {
           successCalls: '145',
           errorCalls: '5',
           cachedCalls: '0',
+          fallbackCalls: '15',
           totalTokens: '450000',
           totalCost: '0',
           avgDuration: '5000',

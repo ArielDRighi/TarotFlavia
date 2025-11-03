@@ -8,6 +8,7 @@ import { RequiresPremiumForCustomQuestionGuard } from './guards/requires-premium
 import { InterpretationsModule } from '../interpretations/interpretations.module';
 import { CardsModule } from '../cards/cards.module';
 import { SpreadsModule } from '../spreads/spreads.module';
+import { PredefinedQuestionsModule } from '../../predefined-questions/predefined-questions.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { SpreadsModule } from '../spreads/spreads.module';
     InterpretationsModule,
     CardsModule,
     SpreadsModule,
+    PredefinedQuestionsModule,
   ],
   controllers: [ReadingsController, ShareController],
   providers: [ReadingsService, RequiresPremiumForCustomQuestionGuard],

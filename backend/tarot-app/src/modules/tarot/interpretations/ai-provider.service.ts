@@ -64,7 +64,7 @@ export class AIProviderService {
         const durationMs = Date.now() - startTime;
 
         this.logger.log(
-          `Success with ${response.provider} (${durationMs}ms, ${response.tokensUsed.total} tokens)`,
+          `Success with ${response.provider} (${response.durationMs}ms, ${response.tokensUsed.total} tokens)`,
         );
 
         // Log successful call
@@ -134,8 +134,7 @@ export class AIProviderService {
   }
 
   private mapProviderToEnum(providerType: AIProviderType | string): AIProvider {
-    const typeStr =
-      typeof providerType === 'string' ? providerType : providerType;
+    const typeStr = String(providerType);
     switch (typeStr.toLowerCase()) {
       case 'groq':
         return AIProvider.GROQ;
