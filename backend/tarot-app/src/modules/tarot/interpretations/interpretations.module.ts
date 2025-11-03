@@ -5,6 +5,10 @@ import { ConfigModule } from '@nestjs/config';
 import { InterpretationsService } from './interpretations.service';
 import { InterpretationsController } from './interpretations.controller';
 import { TarotInterpretation } from './entities/tarot-interpretation.entity';
+import { AIProviderService } from './ai-provider.service';
+import { GroqProvider } from './providers/groq.provider';
+import { DeepSeekProvider } from './providers/deepseek.provider';
+import { OpenAIProvider } from './providers/openai.provider';
 
 @Module({
   imports: [
@@ -13,7 +17,13 @@ import { TarotInterpretation } from './entities/tarot-interpretation.entity';
     ConfigModule,
   ],
   controllers: [InterpretationsController],
-  providers: [InterpretationsService],
-  exports: [InterpretationsService],
+  providers: [
+    InterpretationsService,
+    AIProviderService,
+    GroqProvider,
+    DeepSeekProvider,
+    OpenAIProvider,
+  ],
+  exports: [InterpretationsService, AIProviderService],
 })
 export class InterpretationsModule {}
