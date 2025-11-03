@@ -5,6 +5,7 @@ import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { User, UserWithoutPassword } from '../users/entities/user.entity';
 import { RefreshTokenService } from './refresh-token.service';
+import { PasswordResetService } from './password-reset.service';
 
 @Injectable()
 export class AuthService {
@@ -12,6 +13,7 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private refreshTokenService: RefreshTokenService,
+    private passwordResetService: PasswordResetService,
   ) {}
 
   async register(
@@ -134,6 +136,39 @@ export class AuthService {
     await this.refreshTokenService.revokeAllUserTokens(userId);
 
     return { message: 'All sessions logged out successfully' };
+  }
+
+  async forgotPassword(email: string): Promise<{ message: string }> {
+    const { token } = await this.passwordResetService.generateResetToken(email);
+
+    // Por ahora, loggear el link en consola (hasta implementar email real)
+    console.log('========================================');
+    console.log('Password reset link:');
+    console.log(`/reset-password?token=${token}`);
+    console.log('========================================');
+
+    return { message: 'Password reset email sent' };
+  }
+
+  async resetPassword(
+    token: string,
+    newPassword: string,
+  ): Promise<{ message: string }> {
+    // Validar el token
+    const resetToken = await this.passwordResetService.validateToken(token);
+
+    // Actualizar contraseña del usuario (usersService.update se encargará de hashearla)
+    await this.usersService.update(resetToken.userId, {
+      password: newPassword,
+    });
+
+    // Invalidar todos los refresh tokens del usuario por seguridad
+    await this.refreshTokenService.revokeAllUserTokens(resetToken.userId);
+
+    // Marcar token como usado
+    await this.passwordResetService.markTokenAsUsed(resetToken);
+
+    return { message: 'Password reset successful' };
   }
 
   private async generateAuthResponse(

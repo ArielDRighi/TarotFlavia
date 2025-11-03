@@ -6,7 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PasswordResetToken } from './entities/password-reset-token.entity';
-import { User } from '../users/entities/user.entity';
+import { UsersService } from '../users/users.service';
 import * as crypto from 'crypto';
 import * as bcrypt from 'bcrypt';
 
@@ -15,15 +15,14 @@ export class PasswordResetService {
   constructor(
     @InjectRepository(PasswordResetToken)
     private readonly passwordResetTokenRepository: Repository<PasswordResetToken>,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    private readonly usersService: UsersService,
   ) {}
 
   async generateResetToken(
     email: string,
   ): Promise<{ token: string; expiresAt: Date }> {
     // Verificar que el usuario existe
-    const user = await this.userRepository.findOne({ where: { email } });
+    const user = await this.usersService.findByEmail(email);
     if (!user) {
       throw new NotFoundException('User not found');
     }

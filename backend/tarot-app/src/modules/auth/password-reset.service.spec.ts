@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { PasswordResetService } from './password-reset.service';
 import { PasswordResetToken } from './entities/password-reset-token.entity';
-import { User } from '../users/entities/user.entity';
+import { UsersService } from '../users/users.service';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 
@@ -25,9 +25,9 @@ describe('PasswordResetService', () => {
     createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
   };
 
-  const mockUserRepository = {
-    findOne: jest.fn(),
-    save: jest.fn(),
+  const mockUsersService = {
+    findByEmail: jest.fn(),
+    update: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -39,8 +39,8 @@ describe('PasswordResetService', () => {
           useValue: mockRepository,
         },
         {
-          provide: getRepositoryToken(User),
-          useValue: mockUserRepository,
+          provide: UsersService,
+          useValue: mockUsersService,
         },
       ],
     }).compile();
@@ -56,9 +56,9 @@ describe('PasswordResetService', () => {
 
   describe('generateResetToken', () => {
     it('should generate a reset token for existing user', async () => {
-      const user = { id: 1, email: 'test@test.com' } as User;
+      const user = { id: 1, email: 'test@test.com' };
 
-      mockUserRepository.findOne.mockResolvedValue(user);
+      mockUsersService.findByEmail.mockResolvedValue(user);
 
       const resetToken = new PasswordResetToken();
       resetToken.id = 'uuid';
@@ -75,15 +75,15 @@ describe('PasswordResetService', () => {
       expect(result).toHaveProperty('token');
       expect(result).toHaveProperty('expiresAt');
       expect(result.token).toHaveLength(64); // 32 bytes en hex = 64 chars
-      expect(mockUserRepository.findOne).toHaveBeenCalledWith({
-        where: { email: 'test@test.com' },
-      });
+      expect(mockUsersService.findByEmail).toHaveBeenCalledWith(
+        'test@test.com',
+      );
       expect(mockRepository.create).toHaveBeenCalled();
       expect(mockRepository.save).toHaveBeenCalled();
     });
 
     it('should throw NotFoundException if user does not exist', async () => {
-      mockUserRepository.findOne.mockResolvedValue(null);
+      mockUsersService.findByEmail.mockResolvedValue(null);
 
       await expect(
         service.generateResetToken('nonexistent@test.com'),
