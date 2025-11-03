@@ -104,9 +104,37 @@ export class InitialSchema1761655973524 implements MigrationInterface {
     await queryRunner.query(
       `ALTER TABLE "refresh_tokens" ADD CONSTRAINT "FK_refresh_tokens_user" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
     );
+    await queryRunner.query(
+      `CREATE TABLE "password_reset_tokens" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "user_id" integer NOT NULL, "token" character varying(64) NOT NULL, "expires_at" TIMESTAMP NOT NULL, "used_at" TIMESTAMP, "created_at" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_password_reset_tokens_id" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_password_reset_tokens_user_id" ON "password_reset_tokens" ("user_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_password_reset_tokens_token" ON "password_reset_tokens" ("token")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_password_reset_tokens_expires_at" ON "password_reset_tokens" ("expires_at")`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "password_reset_tokens" ADD CONSTRAINT "FK_password_reset_tokens_user" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(
+      `ALTER TABLE "password_reset_tokens" DROP CONSTRAINT "FK_password_reset_tokens_user"`,
+    );
+    await queryRunner.query(
+      `DROP INDEX "public"."IDX_password_reset_tokens_expires_at"`,
+    );
+    await queryRunner.query(
+      `DROP INDEX "public"."IDX_password_reset_tokens_token"`,
+    );
+    await queryRunner.query(
+      `DROP INDEX "public"."IDX_password_reset_tokens_user_id"`,
+    );
+    await queryRunner.query(`DROP TABLE "password_reset_tokens"`);
     await queryRunner.query(
       `ALTER TABLE "refresh_tokens" DROP CONSTRAINT "FK_refresh_tokens_user"`,
     );

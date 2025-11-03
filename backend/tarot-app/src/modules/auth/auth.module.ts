@@ -9,13 +9,15 @@ import { UsersModule } from '../users/users.module';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { RefreshTokenService } from './refresh-token.service';
 import { RefreshToken } from './entities/refresh-token.entity';
+import { PasswordResetService } from './password-reset.service';
+import { PasswordResetToken } from './entities/password-reset-token.entity';
 
 @Module({
   imports: [
     UsersModule,
     PassportModule,
     ConfigModule,
-    TypeOrmModule.forFeature([RefreshToken]),
+    TypeOrmModule.forFeature([RefreshToken, PasswordResetToken]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -26,7 +28,12 @@ import { RefreshToken } from './entities/refresh-token.entity';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, RefreshTokenService],
-  exports: [AuthService, JwtModule, RefreshTokenService],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    RefreshTokenService,
+    PasswordResetService,
+  ],
+  exports: [AuthService, JwtModule, RefreshTokenService, PasswordResetService],
 })
 export class AuthModule {}
