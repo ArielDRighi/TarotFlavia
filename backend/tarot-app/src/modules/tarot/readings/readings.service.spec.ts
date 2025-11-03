@@ -11,6 +11,7 @@ import { InterpretationsService } from '../interpretations/interpretations.servi
 import { CardsService } from '../cards/cards.service';
 import { SpreadsService } from '../spreads/spreads.service';
 import { PredefinedQuestionsService } from '../../predefined-questions/predefined-questions.service';
+import { UsageLimitsService } from '../../usage-limits/usage-limits.service';
 
 describe('ReadingsService', () => {
   let service: ReadingsService;
@@ -37,6 +38,11 @@ describe('ReadingsService', () => {
 
   const mockPredefinedQuestionsService = {
     findOne: jest.fn(),
+  };
+
+  const mockUsageLimitsService = {
+    checkLimit: jest.fn(),
+    incrementUsage: jest.fn(),
   };
 
   const mockUser = {
@@ -150,6 +156,10 @@ describe('ReadingsService', () => {
           provide: PredefinedQuestionsService,
           useValue: mockPredefinedQuestionsService,
         },
+        {
+          provide: UsageLimitsService,
+          useValue: mockUsageLimitsService,
+        },
       ],
     }).compile();
 
@@ -195,6 +205,8 @@ describe('ReadingsService', () => {
       mockRepository.save
         .mockResolvedValueOnce(savedReading)
         .mockResolvedValueOnce(readingWithInterpretation);
+      mockUsageLimitsService.checkLimit.mockResolvedValue(true);
+      mockUsageLimitsService.incrementUsage.mockResolvedValue({});
       mockCardsService.findByIds.mockResolvedValue(mockCards);
       mockSpreadsService.findById.mockResolvedValue(mockSpread);
       mockPredefinedQuestionsService.findOne.mockResolvedValue({
@@ -207,6 +219,14 @@ describe('ReadingsService', () => {
 
       const result = await service.create(mockUser, createReadingDto);
 
+      expect(mockUsageLimitsService.checkLimit).toHaveBeenCalledWith(
+        mockUser.id,
+        'tarot_reading',
+      );
+      expect(mockUsageLimitsService.incrementUsage).toHaveBeenCalledWith(
+        mockUser.id,
+        'tarot_reading',
+      );
       expect(mockRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({
           predefinedQuestionId: 5,
@@ -255,6 +275,8 @@ describe('ReadingsService', () => {
       mockRepository.save
         .mockResolvedValueOnce(savedReading)
         .mockResolvedValueOnce(readingWithInterpretation);
+      mockUsageLimitsService.checkLimit.mockResolvedValue(true);
+      mockUsageLimitsService.incrementUsage.mockResolvedValue({});
       mockCardsService.findByIds.mockResolvedValue(mockCards);
       mockSpreadsService.findById.mockResolvedValue(mockSpread);
       mockInterpretationsService.generateInterpretation.mockResolvedValue(
@@ -302,6 +324,8 @@ describe('ReadingsService', () => {
       };
       mockRepository.create.mockReturnValue(readingWithoutInterpretation);
       mockRepository.save.mockResolvedValue(readingWithoutInterpretation);
+      mockUsageLimitsService.checkLimit.mockResolvedValue(true);
+      mockUsageLimitsService.incrementUsage.mockResolvedValue({});
 
       const result = await service.create(mockUser, createReadingDto);
 
@@ -309,6 +333,99 @@ describe('ReadingsService', () => {
         mockInterpretationsService.generateInterpretation,
       ).not.toHaveBeenCalled();
       expect(result.interpretation).toBeNull();
+    });
+
+    it('should throw ForbiddenException when usage limit is reached', async () => {
+      const createReadingDto: CreateReadingDto = {
+        predefinedQuestionId: 5,
+        deckId: 1,
+        spreadId: 1,
+        cardIds: [1, 2],
+        cardPositions: [
+          { cardId: 1, position: 'past', isReversed: false },
+          { cardId: 2, position: 'present', isReversed: true },
+        ],
+        generateInterpretation: false,
+      };
+
+      mockUsageLimitsService.checkLimit.mockResolvedValue(false);
+
+      await expect(service.create(mockUser, createReadingDto)).rejects.toThrow(
+        ForbiddenException,
+      );
+
+      expect(mockUsageLimitsService.checkLimit).toHaveBeenCalledWith(
+        mockUser.id,
+        'tarot_reading',
+      );
+      expect(mockRepository.create).not.toHaveBeenCalled();
+      expect(mockUsageLimitsService.incrementUsage).not.toHaveBeenCalled();
+    });
+
+    it('should increment usage after entire reading creation process completes', async () => {
+      const createReadingDto: CreateReadingDto = {
+        predefinedQuestionId: 5,
+        deckId: 1,
+        spreadId: 1,
+        cardIds: [1, 2],
+        cardPositions: [
+          { cardId: 1, position: 'past', isReversed: false },
+          { cardId: 2, position: 'present', isReversed: true },
+        ],
+        generateInterpretation: true,
+      };
+
+      const savedReading = {
+        ...mockReading,
+        predefinedQuestionId: 5,
+        interpretation: null,
+      };
+
+      const readingWithInterpretation = {
+        ...savedReading,
+        interpretation: 'Your reading suggests...',
+      };
+
+      let saveCallCount = 0;
+      let incrementUsageCalled = false;
+
+      mockRepository.create.mockReturnValue(savedReading);
+      mockRepository.save.mockImplementation(() => {
+        saveCallCount++;
+        // Verificar que incrementUsage NO se ha llamado aún durante el proceso
+        if (saveCallCount <= 2) {
+          expect(incrementUsageCalled).toBe(false);
+        }
+        return Promise.resolve(
+          saveCallCount === 1 ? savedReading : readingWithInterpretation,
+        );
+      });
+
+      mockUsageLimitsService.checkLimit.mockResolvedValue(true);
+      mockUsageLimitsService.incrementUsage.mockImplementation(() => {
+        incrementUsageCalled = true;
+        return Promise.resolve({});
+      });
+
+      mockCardsService.findByIds.mockResolvedValue(mockCards);
+      mockSpreadsService.findById.mockResolvedValue(mockSpread);
+      mockPredefinedQuestionsService.findOne.mockResolvedValue({
+        id: 5,
+        questionText: '¿Qué me depara el futuro?',
+      });
+      mockInterpretationsService.generateInterpretation.mockResolvedValue(
+        'Your reading suggests...',
+      );
+
+      const result = await service.create(mockUser, createReadingDto);
+
+      // Verificar que incrementUsage se llamó al final
+      expect(incrementUsageCalled).toBe(true);
+      expect(mockUsageLimitsService.incrementUsage).toHaveBeenCalledWith(
+        mockUser.id,
+        'tarot_reading',
+      );
+      expect(result.interpretation).toBe('Your reading suggests...');
     });
   });
 

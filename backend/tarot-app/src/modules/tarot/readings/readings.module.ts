@@ -9,6 +9,7 @@ import { InterpretationsModule } from '../interpretations/interpretations.module
 import { CardsModule } from '../cards/cards.module';
 import { SpreadsModule } from '../spreads/spreads.module';
 import { PredefinedQuestionsModule } from '../../predefined-questions/predefined-questions.module';
+import { UsageLimitsModule } from '../../usage-limits/usage-limits.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { PredefinedQuestionsModule } from '../../predefined-questions/predefined
     CardsModule,
     SpreadsModule,
     PredefinedQuestionsModule,
+    UsageLimitsModule,
   ],
   controllers: [ReadingsController, ShareController],
   providers: [ReadingsService, RequiresPremiumForCustomQuestionGuard],
