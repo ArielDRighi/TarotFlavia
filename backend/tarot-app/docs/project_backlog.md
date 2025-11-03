@@ -1917,7 +1917,7 @@ Crear sistema robusto de logging que trackee todas las llamadas a OpenAI para mo
 - [x] Tests unitarios: Costo calculado correctamente (incluido en suite de 20 tests)
 - [x] Tests de integración: Llamada a OpenAI registra log (interception en ai-provider.service)
 - [x] Tests unitarios controller: 6 tests en ai-usage.controller.spec.ts
-- [ ] Tests E2E: Endpoint admin retorna estadísticas *(pendiente para TASK-019-a Phase 2)*
+- [ ] Tests E2E: Endpoint admin retorna estadísticas _(pendiente para TASK-019-a Phase 2)_
 
 **Ubicación:** `src/modules/ai-usage/*.spec.ts`  
 **Resultado:** 26 tests passing (20 service + 6 controller), 411 tests totales en suite completa
@@ -1990,11 +1990,13 @@ Crear sistema robusto de logging que trackee todas las llamadas a OpenAI para mo
 **Componentes implementados:**
 
 1. **AIUsageLog Entity** (`src/modules/ai-usage/entities/ai-usage-log.entity.ts`):
+
    - Enums: `AIProvider`, `AIUsageStatus`
    - Relaciones con `User` y `Reading` (nullable)
    - Índices compuestos para queries eficientes
 
 2. **AIUsageService** (`src/modules/ai-usage/ai-usage.service.ts`):
+
    - `createLog()`: registra cada llamada con todos los campos
    - `calculateCost()`: calcula costo según provider y tokens
    - `getStatistics()`: agrega métricas por provider con filtros de fecha
@@ -2004,12 +2006,14 @@ Crear sistema robusto de logging que trackee todas las llamadas a OpenAI para mo
    - 20 tests unitarios passing
 
 3. **AIUsageController** (`src/modules/ai-usage/ai-usage.controller.ts`):
+
    - `GET /admin/ai-usage`: endpoint protegido para admins
    - Query params: `startDate`, `endDate` (opcionales)
    - Response: `AIUsageStatsDto` con estadísticas por provider + 4 alertas
    - 6 tests unitarios passing
 
 4. **AIProviderService Integration** (`src/modules/tarot/interpretations/ai-provider.service.ts`):
+
    - Interception en `generateCompletion()`: antes y después de cada llamada
    - Tracking de timing, tokens, costos, errores, fallback
    - Manejo de excepciones con logging de error
@@ -2020,6 +2024,7 @@ Crear sistema robusto de logging que trackee todas las llamadas a OpenAI para mo
    - Tests actualizados con mocks apropiados
 
 **Resultados:**
+
 - ✅ 26 tests nuevos (20 service + 6 controller)
 - ✅ 411 tests totales pasando
 - ✅ Lint: 0 errores
@@ -2027,6 +2032,7 @@ Crear sistema robusto de logging que trackee todas las llamadas a OpenAI para mo
 - ✅ Branch: `feature/TASK-019-ai-usage-logging`
 
 **Pendiente para Phase 2 (TASK-019-a):**
+
 - Tests E2E para endpoint `/admin/ai-usage`
 - Integración con alerting system (email/webhook)
 
