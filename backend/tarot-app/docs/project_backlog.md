@@ -1405,6 +1405,198 @@ Crear sistema completo de tracking de límites de uso para usuarios free (lectur
 
 ---
 
+### **TASK-012-a: Crear Guard y Decorator Reutilizable @CheckUsageLimit** 🔵
+
+**Prioridad:** 🟢 BAJA (Refactoring/Mejora de código)  
+**Estimación:** 1 día  
+**Dependencias:** TASK-012 (completada)  
+**Marcador MVP:** 🔵 **FASE 2** - Mejora de calidad de código, no bloqueante
+
+#### 📋 Descripción
+
+Crear guard y decorator reutilizable que simplifique la aplicación de límites de uso en múltiples endpoints. Actualmente, la validación de límites se hace manualmente en `ReadingsService`, lo cual funciona pero no es escalable cuando se agreguen más features que requieran validación (interpretaciones regeneradas, consultas de oráculo, etc.).
+
+**Contexto actual:**
+
+- ✅ `UsageLimitsService` completamente funcional (TASK-012)
+- ✅ Aplicación manual en `ReadingsService` funcionando correctamente (TASK-019-a)
+- ❌ No existe guard/decorator reutilizable para otros endpoints
+
+**Beneficios de esta tarea:**
+
+- Código más limpio y DRY (Don't Repeat Yourself)
+- Facilita agregar validación a nuevos endpoints
+- Centraliza la lógica de validación en un solo lugar
+- Mejora mantenibilidad del código
+
+#### 🧪 Testing
+
+**Tests necesarios:**
+
+- [ ] **Tests unitarios del Guard:**
+
+  - Guard permite acción cuando límite no alcanzado
+  - Guard bloquea acción cuando límite alcanzado (403)
+  - Guard maneja usuarios premium con límite -1 (unlimited)
+  - Guard extrae feature correctamente del decorator
+  - Guard maneja errores del service apropiadamente
+
+- [ ] **Tests de integración:**
+
+  - Decorator `@CheckUsageLimit()` funciona en controladores
+  - Guard se ejecuta antes del handler del endpoint
+  - Múltiples guards pueden aplicarse simultáneamente
+  - Metadata del decorator se lee correctamente
+
+- [ ] **Tests E2E:**
+  - Endpoint con guard rechaza cuando límite alcanzado
+  - Endpoint con guard permite cuando límite disponible
+  - Error 403 incluye mensaje claro sobre límite
+
+**Ubicación:** `src/modules/usage-limits/guards/*.spec.ts` + actualizar tests existentes
+
+#### ✅ Tareas específicas
+
+- [ ] **Crear `CheckUsageLimitGuard`:**
+
+  - Implementar `CanActivate` de NestJS
+  - Extraer `userId` del request (JWT)
+  - Extraer `feature` de metadata del decorator
+  - Llamar a `usageLimitsService.checkLimit(userId, feature)`
+  - Retornar `true` si puede usar, lanzar `ForbiddenException` si no
+  - Inyectar `UsageLimitsService` y `Reflector`
+
+- [ ] **Crear decorator `@CheckUsageLimit(feature: UsageFeature)`:**
+
+  - Usar `SetMetadata` de NestJS
+  - Guardar feature en metadata con key `'usage-limit-feature'`
+  - Exportar decorator desde módulo
+
+- [ ] **Crear interceptor `IncrementUsageInterceptor`:**
+
+  - Implementar `NestInterceptor`
+  - Ejecutar **después** del handler (en el `tap`)
+  - Llamar a `usageLimitsService.incrementUsage(userId, feature)`
+  - Manejar errores sin bloquear la respuesta
+
+- [ ] **Refactorizar `ReadingsService` para usar el guard:**
+
+  - Remover llamadas manuales a `checkLimit` y `incrementUsage`
+  - Aplicar `@UseGuards(CheckUsageLimitGuard)` en `ReadingsController`
+  - Aplicar `@UseInterceptors(IncrementUsageInterceptor)` en `ReadingsController`
+  - Agregar `@CheckUsageLimit(UsageFeature.TAROT_READING)` al endpoint POST
+
+- [ ] **Documentar uso del guard:**
+
+  - Agregar ejemplos en README o docs/
+  - Documentar cómo aplicar a nuevos endpoints
+  - Listar features disponibles
+
+- [ ] **Actualizar tests existentes:**
+  - Verificar que tests E2E de TASK-019-a sigan pasando
+  - Agregar tests específicos del guard
+  - Verificar cobertura >80%
+
+#### 🎯 Criterios de aceptación
+
+- ✅ El guard `CheckUsageLimitGuard` funciona correctamente
+- ✅ El decorator `@CheckUsageLimit()` es fácil de usar
+- ✅ El interceptor `IncrementUsageInterceptor` registra uso automáticamente
+- ✅ `ReadingsController` usa el guard en lugar de validación manual
+- ✅ Todos los tests E2E existentes (14 tests) siguen pasando
+- ✅ Tests unitarios del guard tienen >80% coverage
+- ✅ La documentación explica claramente cómo usar el guard
+
+#### 📝 Ejemplo de uso esperado
+
+**Antes (implementación actual en ReadingsService):**
+
+```typescript
+// src/modules/tarot/readings/readings.service.ts
+async create(user: User, dto: CreateReadingDto): Promise<TarotReading> {
+  // Validación manual
+  const canCreateReading = await this.usageLimitsService.checkLimit(
+    user.id,
+    UsageFeature.TAROT_READING,
+  );
+  if (!canCreateReading) {
+    throw new ForbiddenException('Has alcanzado el límite diario...');
+  }
+
+  const reading = await this.readingsRepository.save(...);
+
+  // Registro manual
+  await this.usageLimitsService.incrementUsage(
+    user.id,
+    UsageFeature.TAROT_READING,
+  );
+
+  return reading;
+}
+```
+
+**Después (con guard reutilizable):**
+
+```typescript
+// src/modules/tarot/readings/readings.controller.ts
+@UseGuards(JwtAuthGuard, RequiresPremiumForCustomQuestionGuard, CheckUsageLimitGuard)
+@UseInterceptors(IncrementUsageInterceptor)
+@CheckUsageLimit(UsageFeature.TAROT_READING)
+@Post()
+async createReading(@Request() req, @Body() dto: CreateReadingDto) {
+  const user = { id: req.user.userId } as User;
+  return this.readingsService.create(user, dto);
+}
+
+// src/modules/tarot/readings/readings.service.ts
+async create(user: User, dto: CreateReadingDto): Promise<TarotReading> {
+  // Ya no necesita validación ni registro manual
+  // El guard valida, el interceptor registra
+  const reading = await this.readingsRepository.save(...);
+  return reading;
+}
+```
+
+**Aplicación en futuros endpoints:**
+
+```typescript
+// Para regenerar interpretaciones (TASK-022)
+@CheckUsageLimit(UsageFeature.INTERPRETATION_REGENERATION)
+@Post(':id/regenerate')
+async regenerateInterpretation(...) { ... }
+
+// Para consultas de oráculo (TASK-033)
+@CheckUsageLimit(UsageFeature.ORACLE_QUERY)
+@Post()
+async createOracleQuery(...) { ... }
+```
+
+#### 📦 Archivos a crear/modificar
+
+**Nuevos archivos:**
+
+- `src/modules/usage-limits/guards/check-usage-limit.guard.ts`
+- `src/modules/usage-limits/guards/check-usage-limit.guard.spec.ts`
+- `src/modules/usage-limits/decorators/check-usage-limit.decorator.ts`
+- `src/modules/usage-limits/interceptors/increment-usage.interceptor.ts`
+- `src/modules/usage-limits/interceptors/increment-usage.interceptor.spec.ts`
+
+**Archivos a modificar:**
+
+- `src/modules/usage-limits/usage-limits.module.ts` - Exportar guard, decorator, interceptor
+- `src/modules/tarot/readings/readings.controller.ts` - Aplicar guard
+- `src/modules/tarot/readings/readings.service.ts` - Remover validación manual
+- `test/mvp-complete.e2e-spec.ts` - Verificar que sigue pasando
+
+#### ⚠️ Importante
+
+- Esta tarea es **opcional** para el MVP. El sistema actual funciona correctamente.
+- Implementar **solo** después del lanzamiento del MVP.
+- Es una tarea de **refactoring/mejora de código**, no un bug fix.
+- Útil cuando se implementen TASK-022 (regenerar interpretaciones) y TASK-033 (oráculo).
+
+---
+
 ### **TASK-013: Modificar Sistema de Lecturas para Preguntas Predefinidas vs Libres** ✅
 
 **Prioridad:** 🔴 CRÍTICA  
