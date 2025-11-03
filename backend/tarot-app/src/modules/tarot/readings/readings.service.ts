@@ -66,12 +66,6 @@ export class ReadingsService {
     // Guardar para obtener el ID
     const savedReading = await this.readingsRepository.save(reading);
 
-    // Registrar el uso de la función de lectura
-    await this.usageLimitsService.incrementUsage(
-      user.id,
-      UsageFeature.TAROT_READING,
-    );
-
     // Generar interpretación si se solicita
     if (createReadingDto.generateInterpretation) {
       try {
@@ -129,6 +123,13 @@ export class ReadingsService {
         await this.readingsRepository.save(savedReading);
       }
     }
+
+    // Registrar el uso de la función de lectura DESPUÉS de que todo el proceso complete
+    // Esto evita consumir la cuota del usuario si falla la generación de interpretación
+    await this.usageLimitsService.incrementUsage(
+      user.id,
+      UsageFeature.TAROT_READING,
+    );
 
     return savedReading;
   }

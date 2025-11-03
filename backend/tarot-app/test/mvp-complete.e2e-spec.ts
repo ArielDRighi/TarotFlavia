@@ -563,11 +563,15 @@ describe('MVP Complete Flow E2E', () => {
         await new Promise((resolve) => setTimeout(resolve, 100));
       }
 
-      // Verificar el límite consultando la API
+      // Verificar el límite consultando la base de datos
+      // Usar la misma lógica de fecha que UsageLimitsService para consistencia
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const usageLimits = await dataSource.query(
-        'SELECT * FROM usage_limit WHERE user_id = $1 AND feature = $2 AND date = CURRENT_DATE',
-        [freeUserId, 'tarot_reading'],
+        'SELECT * FROM usage_limit WHERE user_id = $1 AND feature = $2 AND date = $3',
+        [freeUserId, 'tarot_reading', today],
       );
 
       // Verificar que se registraron las 3 lecturas
