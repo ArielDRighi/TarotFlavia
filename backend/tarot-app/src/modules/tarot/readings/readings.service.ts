@@ -14,8 +14,6 @@ import { InterpretationsService } from '../interpretations/interpretations.servi
 import { CardsService } from '../cards/cards.service';
 import { SpreadsService } from '../spreads/spreads.service';
 import { PredefinedQuestionsService } from '../../predefined-questions/predefined-questions.service';
-import { UsageLimitsService } from '../../usage-limits/usage-limits.service';
-import { UsageFeature } from '../../usage-limits/entities/usage-limit.entity';
 
 @Injectable()
 export class ReadingsService {
@@ -28,25 +26,12 @@ export class ReadingsService {
     private cardsService: CardsService,
     private spreadsService: SpreadsService,
     private predefinedQuestionsService: PredefinedQuestionsService,
-    private usageLimitsService: UsageLimitsService,
   ) {}
 
   async create(
     user: User,
     createReadingDto: CreateReadingDto,
   ): Promise<TarotReading> {
-    // Verificar el límite de uso antes de crear la lectura
-    const canCreateReading = await this.usageLimitsService.checkLimit(
-      user.id,
-      UsageFeature.TAROT_READING,
-    );
-
-    if (!canCreateReading) {
-      throw new ForbiddenException(
-        'Has alcanzado el límite diario de lecturas. Actualiza tu plan para continuar.',
-      );
-    }
-
     // Determinar tipo de pregunta y establecer campos apropiados
     const questionType = createReadingDto.predefinedQuestionId
       ? ('predefined' as const)
@@ -123,13 +108,6 @@ export class ReadingsService {
         await this.readingsRepository.save(savedReading);
       }
     }
-
-    // Registrar el uso de la función de lectura DESPUÉS de que todo el proceso complete
-    // Esto evita consumir la cuota del usuario si falla la generación de interpretación
-    await this.usageLimitsService.incrementUsage(
-      user.id,
-      UsageFeature.TAROT_READING,
-    );
 
     return savedReading;
   }

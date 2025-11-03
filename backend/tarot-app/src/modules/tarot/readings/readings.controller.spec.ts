@@ -1,9 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { Reflector } from '@nestjs/core';
 import { ReadingsController } from './readings.controller';
 import { ReadingsService } from './readings.service';
 import { CreateReadingDto } from './dto/create-reading.dto';
 import { User } from '../../users/entities/user.entity';
 import { TarotReading } from './entities/tarot-reading.entity';
+import { CheckUsageLimitGuard } from '../../usage-limits/guards/check-usage-limit.guard';
+import { IncrementUsageInterceptor } from '../../usage-limits/interceptors/increment-usage.interceptor';
+import { UsageLimitsService } from '../../usage-limits/usage-limits.service';
 
 describe('ReadingsController', () => {
   let controller: ReadingsController;
@@ -38,6 +42,13 @@ describe('ReadingsController', () => {
     remove: jest.fn(),
   };
 
+  const mockUsageLimitsService = {
+    checkLimit: jest.fn(),
+    incrementUsage: jest.fn(),
+    getRemainingUsage: jest.fn(),
+    cleanOldRecords: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ReadingsController],
@@ -46,6 +57,13 @@ describe('ReadingsController', () => {
           provide: ReadingsService,
           useValue: mockService,
         },
+        {
+          provide: UsageLimitsService,
+          useValue: mockUsageLimitsService,
+        },
+        CheckUsageLimitGuard,
+        IncrementUsageInterceptor,
+        Reflector,
       ],
     }).compile();
 
