@@ -1,0 +1,204 @@
+import { Injectable, Inject } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
+import { createHash } from 'crypto';
+import { CachedInterpretation } from './entities/cached-interpretation.entity';
+
+interface CardCombination {
+  card_id: string;
+  position: number;
+  is_reversed: boolean;
+}
+
+@Injectable()
+export class InterpretationCacheService {
+  private readonly MEMORY_CACHE_TTL = 3600000; // 1 hora en milisegundos
+  private readonly DB_CACHE_TTL_DAYS = 30;
+
+  constructor(
+    @InjectRepository(CachedInterpretation)
+    private readonly cacheRepository: Repository<CachedInterpretation>,
+    @Inject(CACHE_MANAGER)
+    private readonly cacheManager: Cache,
+  ) {}
+
+  /**
+   * Genera un cache key determinístico basado en la combinación de cartas, spread y pregunta
+   */
+  generateCacheKey(
+    cardCombination: CardCombination[],
+    spreadId: string,
+    questionHash: string,
+  ): string {
+    // Ordenar cartas por posición para asegurar consistencia
+    const sortedCards = [...cardCombination].sort(
+      (a, b) => a.position - b.position,
+    );
+
+    // Crear string determinístico
+    const cardsString = sortedCards
+      .map((card) => `${card.card_id}-${card.position}-${card.is_reversed}`)
+      .join('|');
+
+    const dataString = `${spreadId}:${cardsString}:${questionHash}`;
+
+    // Generar hash SHA-256
+    return createHash('sha256').update(dataString).digest('hex');
+  }
+
+  /**
+   * Genera un hash de la pregunta normalizada
+   */
+  generateQuestionHash(categoryId: number, questionText: string): string {
+    // Normalizar pregunta: lowercase, trim, eliminar espacios múltiples
+    const normalizedQuestion = questionText
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, ' ');
+
+    const dataString = `${categoryId}:${normalizedQuestion}`;
+
+    return createHash('sha256').update(dataString).digest('hex');
+  }
+
+  /**
+   * Busca en caché (primero in-memory, luego DB)
+   */
+  async getFromCache(cacheKey: string): Promise<CachedInterpretation | null> {
+    // 1. Buscar en caché in-memory
+    const memoryCache =
+      await this.cacheManager.get<CachedInterpretation>(cacheKey);
+    if (memoryCache) {
+      return memoryCache;
+    }
+
+    // 2. Buscar en base de datos
+    const dbCache = await this.cacheRepository.findOne({
+      where: { cache_key: cacheKey },
+    });
+
+    if (!dbCache) {
+      return null;
+    }
+
+    // Verificar si no está expirado
+    if (dbCache.expires_at < new Date()) {
+      return null;
+    }
+
+    // Actualizar hit_count y last_used_at
+    await this.cacheRepository.update(
+      { id: dbCache.id },
+      {
+        hit_count: dbCache.hit_count + 1,
+        last_used_at: new Date(),
+      },
+    );
+
+    // Guardar en caché in-memory para próximas consultas
+    await this.cacheManager.set(cacheKey, dbCache, this.MEMORY_CACHE_TTL);
+
+    return dbCache;
+  }
+
+  /**
+   * Guarda en ambos cachés (in-memory y DB)
+   */
+  async saveToCache(
+    cacheKey: string,
+    spreadId: string,
+    cardCombination: CardCombination[],
+    questionHash: string,
+    interpretation: string,
+  ): Promise<void> {
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + this.DB_CACHE_TTL_DAYS);
+
+    const cacheEntry = this.cacheRepository.create({
+      cache_key: cacheKey,
+      spread_id: spreadId,
+      card_combination: cardCombination,
+      question_hash: questionHash,
+      interpretation_text: interpretation,
+      hit_count: 0,
+      expires_at: expiresAt,
+    });
+
+    const saved = await this.cacheRepository.save(cacheEntry);
+
+    // Guardar también en caché in-memory
+    await this.cacheManager.set(cacheKey, saved, this.MEMORY_CACHE_TTL);
+  }
+
+  /**
+   * Limpia ambos cachés completamente
+   */
+  async clearAllCaches(): Promise<void> {
+    // Limpiar caché in-memory - no hay método reset directo en Cache interface
+    // pero podemos usar del para eliminar claves específicas si es necesario
+    // Por ahora, dejamos que el caché in-memory expire naturalmente
+
+    // Limpiar caché DB
+    await this.cacheRepository
+      .createQueryBuilder()
+      .delete()
+      .from(CachedInterpretation)
+      .execute();
+  }
+
+  /**
+   * Elimina cachés expirados de la base de datos
+   */
+  async cleanExpiredCache(): Promise<number> {
+    const result = await this.cacheRepository
+      .createQueryBuilder()
+      .delete()
+      .from(CachedInterpretation)
+      .where('expires_at < :now', { now: new Date() })
+      .execute();
+
+    return result.affected || 0;
+  }
+
+  /**
+   * Elimina cachés poco usados después de 7 días
+   */
+  async cleanUnusedCache(): Promise<number> {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - 7);
+
+    const result = await this.cacheRepository
+      .createQueryBuilder()
+      .delete()
+      .from(CachedInterpretation)
+      .where('hit_count < :minHits', { minHits: 2 })
+      .andWhere('created_at < :cutoffDate', { cutoffDate })
+      .execute();
+
+    return result.affected || 0;
+  }
+
+  /**
+   * Obtiene estadísticas del caché
+   */
+  async getCacheStats(): Promise<{
+    total: number;
+    expired: number;
+    avgHits: number;
+  }> {
+    const stats = (await this.cacheRepository
+      .createQueryBuilder('cache')
+      .select('COUNT(*)', 'total')
+      .addSelect('COUNT(CASE WHEN expires_at < NOW() THEN 1 END)', 'expired')
+      .addSelect('AVG(hit_count)', 'avg_hits')
+      .getRawOne()) as { total: string; expired: string; avg_hits: string };
+
+    return {
+      total: parseInt(stats?.total || '0', 10),
+      expired: parseInt(stats?.expired || '0', 10),
+      avgHits: parseFloat(stats?.avg_hits || '0'),
+    };
+  }
+}

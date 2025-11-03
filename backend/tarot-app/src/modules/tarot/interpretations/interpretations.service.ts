@@ -12,11 +12,20 @@ import { TarotInterpretation } from './entities/tarot-interpretation.entity';
 import { TarotSpread } from '../spreads/entities/tarot-spread.entity';
 import { TarotReading } from '../readings/entities/tarot-reading.entity';
 import { AIProviderService } from './ai-provider.service';
+import { InterpretationCacheService } from './interpretation-cache.service';
 import { TarotPrompts } from './tarot-prompts';
+
+interface InterpretationResult {
+  interpretation: string;
+  fromCache: boolean;
+  cacheHitRate?: number;
+}
 
 @Injectable()
 export class InterpretationsService {
   private readonly logger = new Logger(InterpretationsService.name);
+  private cacheHits = 0;
+  private totalRequests = 0;
 
   constructor(
     @InjectRepository(TarotInterpretation)
@@ -24,8 +33,11 @@ export class InterpretationsService {
     private httpService: HttpService,
     private configService: ConfigService,
     private aiProviderService: AIProviderService,
+    private cacheService: InterpretationCacheService,
   ) {
-    this.logger.log('InterpretationsService initialized with AI Provider');
+    this.logger.log(
+      'InterpretationsService initialized with AI Provider and Cache',
+    );
   }
 
   async generateInterpretation(
@@ -36,8 +48,9 @@ export class InterpretationsService {
     category?: string,
     userId?: number,
     readingId?: number,
-  ): Promise<string> {
+  ): Promise<InterpretationResult> {
     const startTime = Date.now();
+    this.totalRequests++;
 
     // Preparar información de las cartas con posiciones en el formato requerido
     const cardDetails = cards.map((card) => {
@@ -60,6 +73,47 @@ export class InterpretationsService {
         keywords: card.keywords,
       };
     });
+
+    // Generar cache key para buscar interpretación cacheada
+    const questionText =
+      question || 'Pregunta general sobre la situación actual';
+    const categoryName = category || 'General';
+    const questionHash = this.cacheService.generateQuestionHash(
+      categoryName.length, // Usamos length como categoría numérica temporal
+      questionText,
+    );
+
+    const cardCombination = cards.map((card, index) => ({
+      card_id: card.id.toString(),
+      position: index,
+      is_reversed:
+        positions.find((p) => p.cardId === card.id)?.isReversed || false,
+    }));
+
+    const cacheKey = this.cacheService.generateCacheKey(
+      cardCombination,
+      spread?.id?.toString() || 'no-spread',
+      questionHash,
+    );
+
+    // Buscar en caché
+    const cachedResult = await this.cacheService.getFromCache(cacheKey);
+    if (cachedResult) {
+      this.cacheHits++;
+      const cacheHitRate = (this.cacheHits / this.totalRequests) * 100;
+
+      this.logger.log(
+        `Cache HIT! Returning cached interpretation. Hit rate: ${cacheHitRate.toFixed(2)}%`,
+      );
+
+      return {
+        interpretation: cachedResult.interpretation_text,
+        fromCache: true,
+        cacheHitRate,
+      };
+    }
+
+    this.logger.log('Cache MISS. Generating new interpretation with AI...');
 
     // Usar los prompts optimizados para Llama
     const systemPrompt = TarotPrompts.getSystemPrompt();
@@ -101,7 +155,25 @@ export class InterpretationsService {
         cardCount: cards.length,
       });
 
-      return interpretation;
+      // Guardar en caché para futuras consultas
+      await this.cacheService.saveToCache(
+        cacheKey,
+        spread?.id?.toString() || 'no-spread',
+        cardCombination,
+        questionHash,
+        interpretation,
+      );
+
+      const cacheHitRate = (this.cacheHits / this.totalRequests) * 100;
+      this.logger.log(
+        `Interpretation cached. Current hit rate: ${cacheHitRate.toFixed(2)}%`,
+      );
+
+      return {
+        interpretation,
+        fromCache: false,
+        cacheHitRate,
+      };
     } catch (error) {
       this.logger.error('All AI providers failed, using fallback', error);
 
@@ -121,7 +193,13 @@ export class InterpretationsService {
         cardCount: cards.length,
       });
 
-      return fallbackInterpretation;
+      const cacheHitRate = (this.cacheHits / this.totalRequests) * 100;
+
+      return {
+        interpretation: fallbackInterpretation,
+        fromCache: false,
+        cacheHitRate,
+      };
     }
   }
 
@@ -168,19 +246,27 @@ export class InterpretationsService {
   }
 
   // Método para regenerar la interpretación de una lectura existente
-  async regenerateInterpretation(reading: TarotReading): Promise<string> {
+  async regenerateInterpretation(
+    reading: TarotReading,
+  ): Promise<InterpretationResult> {
     const cards = reading.cards;
     const positions = reading.cardPositions;
 
-    const newInterpretation = await this.generateInterpretation(
+    const result = await this.generateInterpretation(
       cards,
       positions,
       reading.question,
     );
 
     // Actualizar la interpretación en la lectura
-    reading.interpretation = newInterpretation;
+    reading.interpretation = result.interpretation;
 
-    return newInterpretation;
+    return result;
+  }
+
+  getCacheHitRate(): number {
+    return this.totalRequests === 0
+      ? 0
+      : (this.cacheHits / this.totalRequests) * 100;
   }
 }

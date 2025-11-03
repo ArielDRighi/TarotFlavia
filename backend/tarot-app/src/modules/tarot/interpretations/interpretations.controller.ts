@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Delete, Get } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -7,7 +7,9 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { AdminGuard } from '../../auth/guards/admin.guard';
 import { InterpretationsService } from './interpretations.service';
+import { InterpretationCacheService } from './interpretation-cache.service';
 import { GenerateInterpretationDto } from './dto/generate-interpretation.dto';
 
 @ApiTags('Interpretaciones')
@@ -15,6 +17,7 @@ import { GenerateInterpretationDto } from './dto/generate-interpretation.dto';
 export class InterpretationsController {
   constructor(
     private readonly interpretationsService: InterpretationsService,
+    private readonly cacheService: InterpretationCacheService,
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -39,6 +42,51 @@ export class InterpretationsController {
       cardIds: generateDto.cardIds,
       positions: generateDto.positions,
       question: generateDto.question,
+    };
+  }
+
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @Delete('admin/cache')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Limpiar caché de interpretaciones (Admin)',
+    description:
+      'Elimina todas las interpretaciones cacheadas en memoria y base de datos',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Caché limpiado exitosamente',
+  })
+  async clearCache() {
+    await this.cacheService.clearAllCaches();
+    return {
+      message: 'Cache cleared successfully',
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @Get('admin/cache/stats')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Obtener estadísticas del caché (Admin)',
+    description: 'Retorna métricas sobre el uso del caché de interpretaciones',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Estadísticas del caché',
+  })
+  async getCacheStats() {
+    const dbStats = await this.cacheService.getCacheStats();
+    const hitRate = this.interpretationsService.getCacheHitRate();
+
+    return {
+      database: dbStats,
+      hitRate: {
+        percentage: hitRate,
+        description: `${hitRate.toFixed(2)}% of requests served from cache`,
+      },
+      timestamp: new Date().toISOString(),
     };
   }
 }

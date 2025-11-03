@@ -3,6 +3,7 @@ import { APP_GUARD, APP_FILTER } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { CacheModule } from '@nestjs/cache-manager';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
@@ -46,6 +47,11 @@ import { validate } from './config/env-validator';
         }
         return dbConfig;
       },
+    }),
+    CacheModule.register({
+      isGlobal: true,
+      ttl: 3600000, // 1 hora en milisegundos
+      max: 200, // máximo 200 items en caché
     }),
     ThrottlerModule.forRoot([
       {
