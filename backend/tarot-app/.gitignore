@@ -1,0 +1,8 @@
+
+# Manual testing scripts (iterations)
+debug-api.sh
+final-mvp-test.sh
+mvp-complete-test.sh
+mvp-final-corrected.sh
+mvp-test-fixed.sh
+mvp-test.sh

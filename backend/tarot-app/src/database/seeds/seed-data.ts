@@ -6,11 +6,13 @@ import { TarotDeck } from '../../modules/tarot/decks/entities/tarot-deck.entity'
 import { TarotCard } from '../../modules/tarot/cards/entities/tarot-card.entity';
 import { ReadingCategory } from '../../modules/categories/entities/reading-category.entity';
 import { PredefinedQuestion } from '../../modules/predefined-questions/entities/predefined-question.entity';
+import { User } from '../../modules/users/entities/user.entity';
 import { seedTarotDecks } from './tarot-decks.seeder';
 import { seedTarotCards } from './tarot-cards.seeder';
 import { seedTarotSpreads } from './tarot-spreads.seeder';
 import { seedReadingCategories } from './reading-categories.seeder';
 import { seedPredefinedQuestions } from './predefined-questions.seeder';
+import { seedUsers } from './users.seeder';
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppModule);
@@ -27,6 +29,7 @@ async function bootstrap() {
   const questionRepository = app.get<Repository<PredefinedQuestion>>(
     getRepositoryToken(PredefinedQuestion),
   );
+  const userRepository = app.get<Repository<User>>(getRepositoryToken(User));
 
   try {
     console.log('🌱 Starting database seeding process...\n');
@@ -45,6 +48,9 @@ async function bootstrap() {
 
     // Seed Predefined Questions (requires categories to exist)
     await seedPredefinedQuestions(questionRepository, categoryRepository);
+
+    // Seed Test Users (for development and E2E testing)
+    await seedUsers(userRepository);
 
     console.log('\n✨ ¡Datos iniciales cargados con éxito!');
   } catch (error) {
