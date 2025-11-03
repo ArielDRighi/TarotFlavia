@@ -34,6 +34,8 @@ export class InterpretationsService {
     question?: string,
     spread?: TarotSpread,
     category?: string,
+    userId?: number,
+    readingId?: number,
   ): Promise<string> {
     const startTime = Date.now();
 
@@ -73,10 +75,14 @@ export class InterpretationsService {
       this.logger.log('Generating interpretation with AI Provider');
 
       // Intentar generar con el sistema de providers con fallback automático
-      const response = await this.aiProviderService.generateCompletion([
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
-      ]);
+      const response = await this.aiProviderService.generateCompletion(
+        [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
+        ],
+        userId,
+        readingId,
+      );
 
       const interpretation = response.content;
       const duration = Date.now() - startTime;

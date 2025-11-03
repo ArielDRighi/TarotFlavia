@@ -36,6 +36,21 @@ export class CardsService {
     return card;
   }
 
+  async findByIds(ids: number[]): Promise<TarotCard[]> {
+    const cards = await this.cardRepository.find({
+      where: ids.map((id) => ({ id })),
+      relations: ['deck'],
+    });
+
+    if (cards.length !== ids.length) {
+      throw new NotFoundException(
+        `Algunas cartas no fueron encontradas. Se esperaban ${ids.length}, se encontraron ${cards.length}`,
+      );
+    }
+
+    return cards;
+  }
+
   async findByDeck(deckId: number): Promise<TarotCard[]> {
     // Verificar que el mazo existe
     const deck = await this.deckRepository.findOne({ where: { id: deckId } });
