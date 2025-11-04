@@ -309,6 +309,14 @@ describe('Reading Regeneration E2E', () => {
           ]);
         }
 
+        // Limpiar junction table primero (para evitar FK constraint)
+        if (cardIds && cardIds.length > 0) {
+          await dataSource.query(
+            `DELETE FROM tarot_reading_cards_tarot_card WHERE "tarotCardId" = ANY($1::int[])`,
+            [cardIds],
+          );
+        }
+
         // Limpiar cartas y deck creados para estos tests
         if (cardIds && cardIds.length > 0) {
           await dataSource.query(
@@ -466,87 +474,34 @@ describe('Reading Regeneration E2E', () => {
    * TEST: Límite de 3 regeneraciones por lectura
    */
   describe('POST /readings/:id/regenerate - Regeneration Limit', () => {
-    it('should allow up to 3 regenerations', async () => {
-      // Crear una reading específica para este test
-      const limitTestReading = await dataSource
-        .getRepository(TarotReading)
-        .save({
-          userId: premiumUserId,
-          deckId: deckId,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'Past', isReversed: false },
-            { cardId: cardIds[1], position: 'Present', isReversed: false },
-            { cardId: cardIds[2], position: 'Future', isReversed: true },
-          ],
-          predefinedQuestionId: predefinedQuestionId,
-          interpretation: 'Test interpretation',
-          regenerationCount: 0,
-        });
-
-      // Asociar cartas
-      await dataSource.query(
-        `INSERT INTO tarot_reading_cards_tarot_card ("tarotReadingId", "tarotCardId") VALUES ($1, $2), ($1, $3), ($1, $4)`,
-        [limitTestReading.id, cardIds[0], cardIds[1], cardIds[2]],
-      );
-
+    it('should allow up to 3 regenerations and then return 429', async () => {
+      // Usar la reading global para probar el límite
       // Hacer 3 regeneraciones
       await request(app.getHttpServer())
-        .post(`/readings/${limitTestReading.id}/regenerate`)
+        .post(`/readings/${readingId}/regenerate`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(201);
 
       await request(app.getHttpServer())
-        .post(`/readings/${limitTestReading.id}/regenerate`)
+        .post(`/readings/${readingId}/regenerate`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(201);
 
       await request(app.getHttpServer())
-        .post(`/readings/${limitTestReading.id}/regenerate`)
+        .post(`/readings/${readingId}/regenerate`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(201);
 
       // Verificar que regenerationCount es 3
       const reading = await dataSource
         .getRepository(TarotReading)
-        .findOne({ where: { id: limitTestReading.id } });
+        .findOne({ where: { id: readingId } });
 
       expect(reading?.regenerationCount).toBe(3);
-    });
-
-    it('should return 429 when exceeding 3 regenerations', async () => {
-      // Crear una reading específica para este test
-      const limitTestReading2 = await dataSource
-        .getRepository(TarotReading)
-        .save({
-          userId: premiumUserId,
-          deckId: deckId,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'Past', isReversed: false },
-            { cardId: cardIds[1], position: 'Present', isReversed: false },
-            { cardId: cardIds[2], position: 'Future', isReversed: true },
-          ],
-          predefinedQuestionId: predefinedQuestionId,
-          interpretation: 'Test interpretation',
-          regenerationCount: 0,
-        });
-
-      // Asociar cartas
-      await dataSource.query(
-        `INSERT INTO tarot_reading_cards_tarot_card ("tarotReadingId", "tarotCardId") VALUES ($1, $2), ($1, $3), ($1, $4)`,
-        [limitTestReading2.id, cardIds[0], cardIds[1], cardIds[2]],
-      );
-
-      // Hacer 3 regeneraciones (llegando al límite)
-      for (let i = 0; i < 3; i++) {
-        await request(app.getHttpServer())
-          .post(`/readings/${limitTestReading2.id}/regenerate`)
-          .set('Authorization', `Bearer ${premiumUserToken}`)
-          .expect(201);
-      }
 
       // La cuarta debe fallar con 429
       const response = await request(app.getHttpServer())
-        .post(`/readings/${limitTestReading2.id}/regenerate`)
+        .post(`/readings/${readingId}/regenerate`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(429);
 
