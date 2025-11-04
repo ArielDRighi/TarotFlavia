@@ -131,7 +131,6 @@ export class E2EDatabaseHelper {
   async resetDatabase(): Promise<void> {
     console.log('[E2E Database Helper] Reseteando base de datos...');
     await this.dropDatabase();
-    await this.createDatabase();
     await this.runMigrations();
     console.log('[E2E Database Helper] Base de datos reseteada');
   }
