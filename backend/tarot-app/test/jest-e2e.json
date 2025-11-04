@@ -11,5 +11,6 @@
   "globalSetup": "<rootDir>/setup-e2e-db.ts",
   "globalTeardown": "<rootDir>/teardown-e2e-db.ts",
   "forceExit": true,
-  "detectOpenHandles": false
+  "detectOpenHandles": false,
+  "setupFiles": ["<rootDir>/setup-env.ts"]
 }

@@ -4,15 +4,9 @@ import * as request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
 import { UserPlan } from '../src/modules/users/entities/user.entity';
-import { ReadingCategory } from '../src/modules/categories/entities/reading-category.entity';
 import { TarotDeck } from '../src/modules/tarot/decks/entities/tarot-deck.entity';
 import { TarotSpread } from '../src/modules/tarot/spreads/entities/tarot-spread.entity';
 import { E2EDatabaseHelper } from './helpers/e2e-database.helper';
-import { seedReadingCategories } from '../src/database/seeds/reading-categories.seeder';
-import { seedTarotDecks } from '../src/database/seeds/tarot-decks.seeder';
-import { seedTarotCards } from '../src/database/seeds/tarot-cards.seeder';
-import { seedTarotSpreads } from '../src/database/seeds/tarot-spreads.seeder';
-import { seedPredefinedQuestions } from '../src/database/seeds/predefined-questions.seeder';
 import { PredefinedQuestion } from '../src/modules/predefined-questions/entities/predefined-question.entity';
 
 interface LoginResponse {
@@ -53,7 +47,7 @@ describe('Readings Hybrid Questions (E2E)', () => {
 
   beforeAll(async () => {
     await dbHelper.initialize();
-    await dbHelper.cleanDatabase();
+    // NOTE: NO limpiar base de datos aquí - los seeders ya se ejecutaron en globalSetup
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
@@ -63,22 +57,14 @@ describe('Readings Hybrid Questions (E2E)', () => {
     app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
     await app.init();
 
-    // Seed all necessary data
+    // NOTE: NO hacer seeding aquí - los seeders ya se ejecutaron en globalSetup
+    // Solo obtener IDs de datos existentes
     const dataSource = dbHelper.getDataSource();
-    const categoryRepository = dataSource.getRepository(ReadingCategory);
     const deckRepository = dataSource.getRepository(TarotDeck);
-    const cardRepository = dataSource.getRepository('TarotCard');
     const spreadRepository = dataSource.getRepository(TarotSpread);
     const questionRepository = dataSource.getRepository(PredefinedQuestion);
 
-    await seedReadingCategories(categoryRepository);
-    await seedTarotDecks(deckRepository);
-    await seedTarotCards(cardRepository as any, deckRepository);
-    await seedTarotSpreads(dataSource);
-    await seedPredefinedQuestions(questionRepository, categoryRepository);
-
     // Get seeded data for tests
-
     const questions = await questionRepository.find();
     predefinedQuestionId = questions[0].id;
 

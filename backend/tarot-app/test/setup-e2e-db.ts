@@ -27,10 +27,57 @@ export default async function globalSetup() {
     await dbHelper.resetDatabase();
     console.log('[Global Setup E2E] Base de datos E2E reseteada ✓');
 
-    // Ejecutar seeders base (opcional, cada test puede cargar sus propios datos)
-    // Aquí se pueden ejecutar seeders comunes a todos los tests
+    // Ejecutar seeders base para todos los tests
     console.log('[Global Setup E2E] Ejecutando seeders base...');
-    // await dbHelper.seedData([commonSeeder]);
+    await dbHelper.initialize(); // Re-conectar después del reset
+    const dataSource = dbHelper.getDataSource();
+
+    // Import seeders
+    const { seedReadingCategories } = await import(
+      '../src/database/seeds/reading-categories.seeder'
+    );
+    const { seedTarotDecks } = await import(
+      '../src/database/seeds/tarot-decks.seeder'
+    );
+    const { seedTarotCards } = await import(
+      '../src/database/seeds/tarot-cards.seeder'
+    );
+    const { seedTarotSpreads } = await import(
+      '../src/database/seeds/tarot-spreads.seeder'
+    );
+    const { seedPredefinedQuestions } = await import(
+      '../src/database/seeds/predefined-questions.seeder'
+    );
+    const { seedUsers } = await import('../src/database/seeds/users.seeder');
+
+    const { ReadingCategory } = await import(
+      '../src/modules/categories/entities/reading-category.entity'
+    );
+    const { TarotDeck } = await import(
+      '../src/modules/tarot/decks/entities/tarot-deck.entity'
+    );
+    const { TarotCard } = await import(
+      '../src/modules/tarot/cards/entities/tarot-card.entity'
+    );
+    const { PredefinedQuestion } = await import(
+      '../src/modules/predefined-questions/entities/predefined-question.entity'
+    );
+    const { User } = await import('../src/modules/users/entities/user.entity');
+
+    // Execute seeders
+    await seedReadingCategories(dataSource.getRepository(ReadingCategory));
+    await seedTarotDecks(dataSource.getRepository(TarotDeck));
+    await seedTarotCards(
+      dataSource.getRepository(TarotCard),
+      dataSource.getRepository(TarotDeck),
+    );
+    await seedTarotSpreads(dataSource);
+    await seedPredefinedQuestions(
+      dataSource.getRepository(PredefinedQuestion),
+      dataSource.getRepository(ReadingCategory),
+    );
+    await seedUsers(dataSource.getRepository(User));
+
     console.log('[Global Setup E2E] Seeders base ejecutados ✓');
 
     console.log('✅ [Global Setup E2E] Configuración completada\n');

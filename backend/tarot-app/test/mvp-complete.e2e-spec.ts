@@ -10,12 +10,6 @@ import { TarotDeck } from '../src/modules/tarot/decks/entities/tarot-deck.entity
 import { TarotSpread } from '../src/modules/tarot/spreads/entities/tarot-spread.entity';
 import { TarotCard } from '../src/modules/tarot/cards/entities/tarot-card.entity';
 import { E2EDatabaseHelper } from './helpers/e2e-database.helper';
-import { seedReadingCategories } from '../src/database/seeds/reading-categories.seeder';
-import { seedTarotDecks } from '../src/database/seeds/tarot-decks.seeder';
-import { seedTarotCards } from '../src/database/seeds/tarot-cards.seeder';
-import { seedTarotSpreads } from '../src/database/seeds/tarot-spreads.seeder';
-import { seedPredefinedQuestions } from '../src/database/seeds/predefined-questions.seeder';
-import { seedUsers } from '../src/database/seeds/users.seeder';
 
 interface LoginResponse {
   user: {
@@ -103,7 +97,7 @@ describe('MVP Complete Flow E2E', () => {
    */
   beforeAll(async () => {
     await dbHelper.initialize();
-    await dbHelper.cleanDatabase();
+    // NOTE: NO limpiar base de datos aquí - los seeders ya se ejecutaron en globalSetup
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
@@ -113,23 +107,14 @@ describe('MVP Complete Flow E2E', () => {
     app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
     await app.init();
 
-    // Seed all necessary data
+    // NOTE: NO hacer seeding aquí - los seeders ya se ejecutaron en globalSetup
+    // Solo obtener IDs de datos existentes
     const dataSource = dbHelper.getDataSource();
     const categoryRepository = dataSource.getRepository(ReadingCategory);
     const deckRepository = dataSource.getRepository(TarotDeck);
     const cardRepository = dataSource.getRepository(TarotCard);
     const spreadRepository = dataSource.getRepository(TarotSpread);
     const questionRepository = dataSource.getRepository(PredefinedQuestion);
-
-    await seedReadingCategories(categoryRepository);
-    await seedTarotDecks(deckRepository);
-    await seedTarotCards(cardRepository, deckRepository);
-    await seedTarotSpreads(dataSource);
-    await seedPredefinedQuestions(questionRepository, categoryRepository);
-
-    // Seed users using wrapper for correct signature
-    const userRepo = dataSource.getRepository('User');
-    await seedUsers(userRepo as any);
 
     // Get first category and question for tests
     const categories = await categoryRepository.find();
@@ -197,38 +182,18 @@ describe('MVP Complete Flow E2E', () => {
     });
 
     it('✅ Usuario puede hacer login y recibir JWT', async () => {
-      // Primero registrar usuario premium
-      const registerResponse = await request(app.getHttpServer())
-        .post('/auth/register')
-        .send({
-          email: `mvp-premium-${testTimestamp}@test.com`,
-          password: 'SecurePass123!',
-          name: 'MVP Premium User',
-        })
-        .expect(201);
-
-      const registeredUser = registerResponse.body as LoginResponse;
-      const userId = registeredUser.user.id;
-
-      // Actualizar a premium manualmente
-      const dataSource = dbHelper.getDataSource();
-      await dataSource.query(`UPDATE "user" SET plan = $1 WHERE id = $2`, [
-        UserPlan.PREMIUM,
-        userId,
-      ]);
-
-      // Login
+      // Usar usuario premium seeded (premium@test.com)
       const loginResponse = await request(app.getHttpServer())
         .post('/auth/login')
         .send({
-          email: `mvp-premium-${testTimestamp}@test.com`,
-          password: 'SecurePass123!',
+          email: 'premium@test.com',
+          password: 'Test123456!',
         })
         .expect(200);
 
       const body = loginResponse.body as LoginResponse;
       expect(body).toHaveProperty('access_token');
-      expect(body.user.email).toBe(`mvp-premium-${testTimestamp}@test.com`);
+      expect(body.user.email).toBe('premium@test.com');
       expect(body.user.plan).toBe(UserPlan.PREMIUM);
 
       premiumUserId = body.user.id;

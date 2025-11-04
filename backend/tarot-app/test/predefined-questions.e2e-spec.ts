@@ -8,9 +8,6 @@ import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
 import { E2EDatabaseHelper } from './helpers/e2e-database.helper';
 import { ReadingCategory } from '../src/modules/categories/entities/reading-category.entity';
-import { seedReadingCategories } from '../src/database/seeds/reading-categories.seeder';
-import { seedUsers } from '../src/database/seeds/users.seeder';
-import { User } from '../src/modules/users/entities/user.entity';
 
 describe('PredefinedQuestions (e2e)', () => {
   let app: INestApplication<App>;
@@ -23,17 +20,11 @@ describe('PredefinedQuestions (e2e)', () => {
     // Initialize E2E database helper
     dbHelper = new E2EDatabaseHelper();
     await dbHelper.initialize();
-    await dbHelper.cleanDatabase();
+    // NOTE: NO limpiar base de datos aquí - los seeders ya se ejecutaron en globalSetup
 
-    // Seed categories and users
+    // Get first category ID for tests (data already seeded in globalSetup)
     const dataSource = dbHelper.getDataSource();
     const categoryRepository = dataSource.getRepository(ReadingCategory);
-    const userRepository = dataSource.getRepository(User);
-
-    await seedReadingCategories(categoryRepository);
-    await seedUsers(userRepository);
-
-    // Get first category ID for tests
     const category = await categoryRepository.findOne({ where: { order: 1 } });
     categoryId = category!.id;
 
@@ -75,35 +66,30 @@ describe('PredefinedQuestions (e2e)', () => {
   });
 
   afterEach(async () => {
-    // Clean predefined questions after each test
-    const dataSource = dbHelper.getDataSource();
-    await dataSource.query('DELETE FROM predefined_question');
+    // NOTE: NO borrar preguntas aquí porque son las seeded en globalSetup
+    // que necesitan otros tests. Solo borrar preguntas creadas en los tests si es necesario
+    // En este test, los tests crean preguntas temporales que se deben limpiar individualmente
   });
 
   describe('/predefined-questions (GET)', () => {
     it('should return all active questions', async () => {
-      // Crear preguntas de prueba
-      const dataSource = dbHelper.getDataSource();
-      await dataSource.query(
-        `INSERT INTO predefined_question (category_id, question_text, "order", is_active) 
-         VALUES ($1, 'Test question 1', 1, true), 
-                ($1, 'Test question 2', 2, true)`,
-        [categoryId],
-      );
-
+      // Usar las preguntas seeded del globalSetup (42 preguntas)
       const response = await request(app.getHttpServer())
         .get('/predefined-questions')
         .expect(200);
 
-      expect(response.body.length).toBeGreaterThanOrEqual(2);
+      expect(response.body.length).toBeGreaterThanOrEqual(42);
+      expect(Array.isArray(response.body)).toBe(true);
     });
 
     it('should filter questions by categoryId', async () => {
+      // Usar las preguntas seeded del globalSetup
       const response = await request(app.getHttpServer())
         .get(`/predefined-questions?categoryId=${categoryId}`)
         .expect(200);
 
       expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body.length).toBeGreaterThanOrEqual(5); // Al menos 5 preguntas por categoría
       response.body.forEach((question: { categoryId: number }) => {
         expect(question.categoryId).toBe(categoryId);
       });
@@ -112,21 +98,20 @@ describe('PredefinedQuestions (e2e)', () => {
 
   describe('/predefined-questions/:id (GET)', () => {
     it('should return a question by id', async () => {
+      // Usar una pregunta seeded del globalSetup
       const dataSource = dbHelper.getDataSource();
-      const questionResult = await dataSource.query(
-        `INSERT INTO predefined_question (category_id, question_text, "order", is_active) 
-         VALUES ($1, 'Specific question', 1, true) 
-         RETURNING id`,
+      const seededQuestion = await dataSource.query(
+        `SELECT id, question_text FROM predefined_question WHERE category_id = $1 LIMIT 1`,
         [categoryId],
       );
-      const questionId = questionResult[0].id;
+      const questionId = seededQuestion[0].id;
 
       const response = await request(app.getHttpServer())
         .get(`/predefined-questions/${questionId}`)
         .expect(200);
 
       expect(response.body.id).toBe(questionId);
-      expect(response.body.questionText).toBe('Specific question');
+      expect(response.body.questionText).toBeTruthy();
     });
 
     it('should return 404 when question not found', async () => {
@@ -153,6 +138,13 @@ describe('PredefinedQuestions (e2e)', () => {
 
       expect(response.body.questionText).toBe(createDto.questionText);
       expect(response.body.categoryId).toBe(categoryId);
+
+      // Limpiar la pregunta creada
+      const createdId = response.body.id;
+      const dataSource = dbHelper.getDataSource();
+      await dataSource.query(`DELETE FROM predefined_question WHERE id = $1`, [
+        createdId,
+      ]);
     });
 
     it('should return 403 when non-admin tries to create', async () => {
@@ -188,6 +180,7 @@ describe('PredefinedQuestions (e2e)', () => {
 
   describe('/predefined-questions/:id (PATCH)', () => {
     it('should update a question when admin', async () => {
+      // Crear pregunta temporal para actualizar
       const dataSource = dbHelper.getDataSource();
       const questionResult = await dataSource.query(
         `INSERT INTO predefined_question (category_id, question_text, "order", is_active) 
@@ -208,9 +201,15 @@ describe('PredefinedQuestions (e2e)', () => {
         .expect(200);
 
       expect(response.body.questionText).toBe(updateDto.questionText);
+
+      // Limpiar la pregunta creada
+      await dataSource.query(`DELETE FROM predefined_question WHERE id = $1`, [
+        questionId,
+      ]);
     });
 
     it('should return 403 when non-admin tries to update', async () => {
+      // Crear pregunta temporal para probar acceso
       const dataSource = dbHelper.getDataSource();
       const questionResult = await dataSource.query(
         `INSERT INTO predefined_question (category_id, question_text, "order", is_active) 
@@ -225,11 +224,17 @@ describe('PredefinedQuestions (e2e)', () => {
         .set('Authorization', `Bearer ${userToken}`)
         .send({ questionText: 'Updated' })
         .expect(403);
+
+      // Limpiar la pregunta creada
+      await dataSource.query(`DELETE FROM predefined_question WHERE id = $1`, [
+        questionId,
+      ]);
     });
   });
 
   describe('/predefined-questions/:id (DELETE)', () => {
     it('should soft delete a question when admin', async () => {
+      // Crear pregunta temporal para eliminar
       const dataSource = dbHelper.getDataSource();
       const questionResult = await dataSource.query(
         `INSERT INTO predefined_question (category_id, question_text, "order", is_active) 
@@ -251,9 +256,15 @@ describe('PredefinedQuestions (e2e)', () => {
         [questionId],
       );
       expect(deletedQuestion[0].deleted_at).not.toBeNull();
+
+      // Limpiar completamente la pregunta (hard delete)
+      await ds.query(`DELETE FROM predefined_question WHERE id = $1`, [
+        questionId,
+      ]);
     });
 
     it('should return 403 when non-admin tries to delete', async () => {
+      // Crear pregunta temporal para probar acceso
       const dataSource = dbHelper.getDataSource();
       const questionResult = await dataSource.query(
         `INSERT INTO predefined_question (category_id, question_text, "order", is_active) 
@@ -267,6 +278,11 @@ describe('PredefinedQuestions (e2e)', () => {
         .delete(`/predefined-questions/${questionId}`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(403);
+
+      // Limpiar la pregunta creada
+      await dataSource.query(`DELETE FROM predefined_question WHERE id = $1`, [
+        questionId,
+      ]);
     });
   });
 });
