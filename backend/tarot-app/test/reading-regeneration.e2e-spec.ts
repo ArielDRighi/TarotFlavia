@@ -60,16 +60,6 @@ describe('Reading Regeneration E2E', () => {
     await createTestData();
   }, 60000);
 
-  beforeEach(async () => {
-    // Limpiamos TODOS los registros de uso del usuario premium antes de cada test
-    // Como premium tiene límite ilimitado (-1), el guard siempre permitirá el acceso
-    if (premiumUserId) {
-      await dataSource.query(`DELETE FROM usage_limit WHERE user_id = $1`, [
-        premiumUserId,
-      ]);
-    }
-  });
-
   afterAll(async () => {
     await cleanupTestData();
     await app.close();
