@@ -69,6 +69,10 @@ describe('Reading Regeneration E2E', () => {
    * Helper: Crear datos de prueba
    */
   async function createTestData(): Promise<void> {
+    // Necesitamos esperar a que app esté disponible
+    if (!app) {
+      throw new Error('App not initialized');
+    }
     // Crear usuarios
     const hashedPassword = await hash('Password123!', 10);
 
@@ -129,73 +133,58 @@ describe('Reading Regeneration E2E', () => {
     });
     predefinedQuestionId = question.id;
 
-    // Obtener o crear deck
-    let deck = await dataSource.getRepository(TarotDeck).findOne({
-      where: { isDefault: true },
+    // Crear deck específico para estos tests
+    const deck = await dataSource.getRepository(TarotDeck).save({
+      name: `Regen Test Deck ${testTimestamp}`,
+      description: 'Deck for regeneration tests',
+      imageUrl: 'https://example.com/deck.jpg',
+      cardCount: 78,
+      isActive: true,
+      isDefault: false,
     });
-
-    if (!deck) {
-      deck = await dataSource.getRepository(TarotDeck).save({
-        name: 'Rider-Waite-Smith',
-        description: 'Classic tarot deck',
-        imageUrl: 'https://example.com/deck.jpg',
-        cardCount: 78,
-        isActive: true,
-        isDefault: true,
-      });
-    }
     deckId = deck.id;
 
-    // Crear cartas si no existen
-    const existingCards = await dataSource.getRepository(TarotCard).find({
-      where: { deckId: deckId },
-      take: 3,
-    });
+    // Crear cartas para el test
+    const cardsToCreate = [
+      {
+        name: `The Fool Regen ${testTimestamp}`,
+        number: 0,
+        category: 'major',
+        deckId: deckId,
+        imageUrl: 'https://example.com/fool.jpg',
+        meaningUpright: 'New beginnings',
+        meaningReversed: 'Recklessness',
+        description: 'The Fool card',
+        keywords: 'beginning,innocence,spontaneity',
+      },
+      {
+        name: `The Magician Regen ${testTimestamp}`,
+        number: 1,
+        category: 'major',
+        deckId: deckId,
+        imageUrl: 'https://example.com/magician.jpg',
+        meaningUpright: 'Manifestation',
+        meaningReversed: 'Manipulation',
+        description: 'The Magician card',
+        keywords: 'manifestation,resourcefulness,power',
+      },
+      {
+        name: `The High Priestess Regen ${testTimestamp}`,
+        number: 2,
+        category: 'major',
+        deckId: deckId,
+        imageUrl: 'https://example.com/priestess.jpg',
+        meaningUpright: 'Intuition',
+        meaningReversed: 'Secrets',
+        description: 'The High Priestess card',
+        keywords: 'intuition,sacred knowledge,divine feminine',
+      },
+    ];
 
-    if (existingCards.length >= 3) {
-      cardIds = existingCards.slice(0, 3).map((card) => card.id);
-    } else {
-      const cardsToCreate = [
-        {
-          name: 'The Fool',
-          number: 0,
-          category: 'major',
-          deckId: deckId,
-          imageUrl: 'https://example.com/fool.jpg',
-          meaningUpright: 'New beginnings',
-          meaningReversed: 'Recklessness',
-          description: 'The Fool card',
-          keywords: 'beginning,innocence,spontaneity',
-        },
-        {
-          name: 'The Magician',
-          number: 1,
-          category: 'major',
-          deckId: deckId,
-          imageUrl: 'https://example.com/magician.jpg',
-          meaningUpright: 'Manifestation',
-          meaningReversed: 'Manipulation',
-          description: 'The Magician card',
-          keywords: 'manifestation,resourcefulness,power',
-        },
-        {
-          name: 'The High Priestess',
-          number: 2,
-          category: 'major',
-          deckId: deckId,
-          imageUrl: 'https://example.com/priestess.jpg',
-          meaningUpright: 'Intuition',
-          meaningReversed: 'Secrets',
-          description: 'The High Priestess card',
-          keywords: 'intuition,sacred knowledge,divine feminine',
-        },
-      ];
-
-      const createdCards = await dataSource
-        .getRepository(TarotCard)
-        .save(cardsToCreate);
-      cardIds = createdCards.map((card) => card.id);
-    }
+    const createdCards = await dataSource
+      .getRepository(TarotCard)
+      .save(cardsToCreate);
+    cardIds = createdCards.map((card) => card.id);
 
     // Crear spread
     const spread = await dataSource.getRepository(TarotSpread).save({
@@ -213,21 +202,26 @@ describe('Reading Regeneration E2E', () => {
     });
     spreadId = spread.id;
 
-    // Crear una lectura para el usuario premium
-    const reading = await dataSource.getRepository(TarotReading).save({
-      user: { id: premiumUserId },
-      deck: { id: deckId },
-      predefinedQuestionId: predefinedQuestionId,
-      questionType: 'predefined',
-      cardPositions: [
-        { cardId: cardIds[0], position: 'Past', isReversed: false },
-        { cardId: cardIds[1], position: 'Present', isReversed: false },
-        { cardId: cardIds[2], position: 'Future', isReversed: true },
-      ],
-      interpretation: 'Initial interpretation of the reading',
-      regenerationCount: 0,
-    });
-    readingId = reading.id;
+    // Crear una lectura para el usuario premium usando el endpoint
+    // Esto asegura que la lectura se crea correctamente con todas las validaciones
+    const createReadingResponse = await request(app.getHttpServer())
+      .post('/readings')
+      .set('Authorization', `Bearer ${premiumUserToken}`)
+      .send({
+        predefinedQuestionId: predefinedQuestionId,
+        deckId: deckId,
+        spreadId: spreadId,
+        cardIds: cardIds,
+        cardPositions: [
+          { cardId: cardIds[0], position: 'Past', isReversed: false },
+          { cardId: cardIds[1], position: 'Present', isReversed: false },
+          { cardId: cardIds[2], position: 'Future', isReversed: true },
+        ],
+        generateInterpretation: true,
+      });
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    readingId = createReadingResponse.body.id as number;
   }
 
   /**
@@ -285,6 +279,20 @@ describe('Reading Regeneration E2E', () => {
             spreadId,
           ]);
         }
+
+        // Limpiar cartas y deck creados para estos tests
+        if (cardIds && cardIds.length > 0) {
+          await dataSource.query(
+            `DELETE FROM tarot_card WHERE id = ANY($1::int[])`,
+            [cardIds],
+          );
+        }
+
+        if (deckId) {
+          await dataSource.query(`DELETE FROM tarot_deck WHERE id = $1`, [
+            deckId,
+          ]);
+        }
       } catch (error) {
         console.error('Cleanup error:', error);
       }
@@ -309,23 +317,28 @@ describe('Reading Regeneration E2E', () => {
    */
   describe('POST /readings/:id/regenerate - Premium Required', () => {
     it('should return 403 for free users', async () => {
-      // Crear una lectura para el usuario free
-      const freeReading = await dataSource.getRepository(TarotReading).save({
-        user: { id: freeUserId },
-        deck: { id: deckId },
-        predefinedQuestionId: predefinedQuestionId,
-        questionType: 'predefined',
-        cardPositions: [
-          { cardId: cardIds[0], position: 'Past', isReversed: false },
-          { cardId: cardIds[1], position: 'Present', isReversed: false },
-          { cardId: cardIds[2], position: 'Future', isReversed: false },
-        ],
-        interpretation: 'Initial interpretation',
-        regenerationCount: 0,
-      });
+      // Crear una lectura para el usuario free usando el endpoint
+      const createResponse = await request(app.getHttpServer())
+        .post('/readings')
+        .set('Authorization', `Bearer ${freeUserToken}`)
+        .send({
+          predefinedQuestionId: predefinedQuestionId,
+          deckId: deckId,
+          spreadId: spreadId,
+          cardIds: cardIds,
+          cardPositions: [
+            { cardId: cardIds[0], position: 'Past', isReversed: false },
+            { cardId: cardIds[1], position: 'Present', isReversed: false },
+            { cardId: cardIds[2], position: 'Future', isReversed: false },
+          ],
+          generateInterpretation: true,
+        });
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const freeReadingId = createResponse.body.id as number;
 
       const response = await request(app.getHttpServer())
-        .post(`/readings/${freeReading.id}/regenerate`)
+        .post(`/readings/${freeReadingId}/regenerate`)
         .set('Authorization', `Bearer ${freeUserToken}`)
         .expect(403);
 
@@ -341,24 +354,29 @@ describe('Reading Regeneration E2E', () => {
    */
   describe('POST /readings/:id/regenerate - Ownership', () => {
     it('should return 403 when trying to regenerate another user reading', async () => {
-      // Crear una lectura para el usuario free
-      const otherReading = await dataSource.getRepository(TarotReading).save({
-        user: { id: freeUserId },
-        deck: { id: deckId },
-        predefinedQuestionId: predefinedQuestionId,
-        questionType: 'predefined',
-        cardPositions: [
-          { cardId: cardIds[0], position: 'Past', isReversed: false },
-          { cardId: cardIds[1], position: 'Present', isReversed: false },
-          { cardId: cardIds[2], position: 'Future', isReversed: false },
-        ],
-        interpretation: 'Initial interpretation',
-        regenerationCount: 0,
-      });
+      // Crear una lectura para el usuario free usando el endpoint
+      const createResponse = await request(app.getHttpServer())
+        .post('/readings')
+        .set('Authorization', `Bearer ${freeUserToken}`)
+        .send({
+          predefinedQuestionId: predefinedQuestionId,
+          deckId: deckId,
+          spreadId: spreadId,
+          cardIds: cardIds,
+          cardPositions: [
+            { cardId: cardIds[0], position: 'Past', isReversed: false },
+            { cardId: cardIds[1], position: 'Present', isReversed: false },
+            { cardId: cardIds[2], position: 'Future', isReversed: false },
+          ],
+          generateInterpretation: true,
+        });
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const otherReadingId = createResponse.body.id as number;
 
       // Intentar regenerar con token de premium user
       const response = await request(app.getHttpServer())
-        .post(`/readings/${otherReading.id}/regenerate`)
+        .post(`/readings/${otherReadingId}/regenerate`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(403);
 
@@ -464,41 +482,51 @@ describe('Reading Regeneration E2E', () => {
    */
   describe('POST /readings/:id/regenerate - UpdatedAt', () => {
     it('should update the updatedAt field on regeneration', async () => {
-      // Crear nueva lectura
-      const newReading = await dataSource.getRepository(TarotReading).save({
-        user: { id: premiumUserId },
-        deck: { id: deckId },
-        predefinedQuestionId: predefinedQuestionId,
-        questionType: 'predefined',
-        cardPositions: [
-          { cardId: cardIds[0], position: 'Past', isReversed: false },
-          { cardId: cardIds[1], position: 'Present', isReversed: false },
-          { cardId: cardIds[2], position: 'Future', isReversed: false },
-        ],
-        interpretation: 'Initial interpretation',
-        regenerationCount: 0,
-      });
+      // Crear nueva lectura usando el endpoint
+      const createResponse = await request(app.getHttpServer())
+        .post('/readings')
+        .set('Authorization', `Bearer ${premiumUserToken}`)
+        .send({
+          predefinedQuestionId: predefinedQuestionId,
+          deckId: deckId,
+          spreadId: spreadId,
+          cardIds: cardIds,
+          cardPositions: [
+            { cardId: cardIds[0], position: 'Past', isReversed: false },
+            { cardId: cardIds[1], position: 'Present', isReversed: false },
+            { cardId: cardIds[2], position: 'Future', isReversed: false },
+          ],
+          generateInterpretation: true,
+        });
 
-      const originalUpdatedAt = newReading.updatedAt;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const newReadingId = createResponse.body.id as number;
+
+      // Obtener el updatedAt original
+      const newReading = await dataSource
+        .getRepository(TarotReading)
+        .findOne({ where: { id: newReadingId } });
+
+      const originalUpdatedAt = newReading!.updatedAt;
 
       // Esperar un momento para asegurar que updatedAt cambie
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Regenerar
       await request(app.getHttpServer())
-        .post(`/readings/${newReading.id}/regenerate`)
+        .post(`/readings/${newReadingId}/regenerate`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(201);
 
       // Verificar que updatedAt cambió
       const updatedReading = await dataSource
         .getRepository(TarotReading)
-        .findOne({ where: { id: newReading.id } });
+        .findOne({ where: { id: newReadingId } });
 
       expect(updatedReading?.updatedAt).not.toEqual(originalUpdatedAt);
       expect(new Date(updatedReading!.updatedAt).getTime()).toBeGreaterThan(
         new Date(originalUpdatedAt).getTime(),
       );
-    });
+    }, 10000); // Timeout de 10 segundos para este test
   });
 });
