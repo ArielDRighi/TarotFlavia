@@ -2785,20 +2785,20 @@ Crear endpoint que permita a usuarios premium regenerar la interpretación de un
 
 #### ✅ Tareas específicas
 
-- [ ] Crear endpoint `POST /readings/:id/regenerate`
-- [ ] Aplicar guard `@CheckUsageLimit('interpretation_regeneration')`
-- [ ] Verificar que el usuario sea premium (users free no pueden regenerar)
-- [ ] Verificar que la lectura pertenezca al usuario autenticado
-- [ ] Mantener las mismas cartas, posiciones y estado (derecha/invertida)
-- [ ] Generar nueva interpretación llamando a OpenAI con prompt ligeramente modificado:
+- [x] Crear endpoint `POST /readings/:id/regenerate`
+- [x] Aplicar guard `@CheckUsageLimit('interpretation_regeneration')`
+- [x] Verificar que el usuario sea premium (users free no pueden regenerar)
+- [x] Verificar que la lectura pertenezca al usuario autenticado
+- [x] Mantener las mismas cartas, posiciones y estado (derecha/invertida)
+- [x] Generar nueva interpretación llamando a OpenAI con prompt ligeramente modificado:
   - Agregar instrucción "Proporciona una perspectiva alternativa..."
-- [ ] Crear nueva entrada en tabla `tarot_interpretations` vinculada a la misma lectura
-- [ ] Retornar la nueva interpretación manteniendo acceso a las anteriores
-- [ ] Actualizar campo `updated_at` de la lectura
-- [ ] Agregar campo `regeneration_count` en `TarotReading` para trackear cuántas veces se regeneró
-- [ ] Limitar regeneraciones a máximo 3 por lectura (incluso para premium) para prevenir abuso
-- [ ] Retornar error 429 si se excede el límite de regeneraciones de la lectura
-- [ ] NO usar caché para regeneraciones (siempre generar interpretación nueva)
+- [x] Crear nueva entrada en tabla `tarot_interpretations` vinculada a la misma lectura
+- [x] Retornar la nueva interpretación manteniendo acceso a las anteriores
+- [x] Actualizar campo `updated_at` de la lectura
+- [x] Agregar campo `regeneration_count` en `TarotReading` para trackear cuántas veces se regeneró
+- [x] Limitar regeneraciones a máximo 3 por lectura (incluso para premium) para prevenir abuso
+- [x] Retornar error 429 si se excede el límite de regeneraciones de la lectura
+- [x] NO usar caché para regeneraciones (siempre generar interpretación nueva)
 
 #### 🎯 Criterios de aceptación
 
@@ -4969,10 +4969,9 @@ Crear capa de abstracción que permita cambiar entre diferentes proveedores de I
 
 Este backlog proporciona una hoja de ruta completa y detallada para el desarrollo backend. Cada tarea incluye descripción clara, subtareas específicas y criterios de aceptación medibles. ¿Te gustaría que profundice en alguna tarea específica o ajuste las prioridades?
 
-
 ---
 
-## ��� TASK-022: ACTUALIZACIÓN DE ESTADO (4 de Noviembre 2025)
+## ��� TASK-022: ACTUALIZACIÓN DE ESTADO (4 de Noviembre 2025)
 
 **Estado:** ✅ **COMPLETADO**  
 **Branch:** `feature/TASK-022-regenerate-interpretation`
@@ -4980,8 +4979,9 @@ Este backlog proporciona una hoja de ruta completa y detallada para el desarroll
 ### Implementación Exitosa
 
 **Archivos modificados:**
+
 - `tarot-reading.entity.ts`: Agregados `updatedAt`, `regenerationCount`, relación `OneToMany` con interpretaciones
-- `tarot-interpretation.entity.ts`: Cambiado de `OneToOne` a `ManyToOne` 
+- `tarot-interpretation.entity.ts`: Cambiado de `OneToOne` a `ManyToOne`
 - `1761655973524-InitialSchema.ts`: Actualizada migración
 - `readings.service.ts`: Método `regenerateInterpretation()` completo
 - `readings.controller.ts`: Endpoint con guards `@CheckUsageLimit`, `JwtAuthGuard`
@@ -4989,8 +4989,9 @@ Este backlog proporciona una hoja de ruta completa y detallada para el desarroll
 - `cached-interpretation.entity.ts`: Corregido tipo `spread_id` (uuid → integer)
 
 **Tests:** 9/9 E2E tests pasando ✅
+
 - Authentication (401)
-- Premium requirement (403 for free users)  
+- Premium requirement (403 for free users)
 - Ownership verification (403 for non-owners)
 - Successful regeneration (201)
 - New interpretation entry created
@@ -5007,4 +5008,3 @@ Este backlog proporciona una hoja de ruta completa y detallada para el desarroll
 ✅ Creación de nueva `TarotInterpretation` cada vez
 ✅ Prompt modificado con perspectiva alternativa
 ✅ Sin caché en regeneraciones
-
