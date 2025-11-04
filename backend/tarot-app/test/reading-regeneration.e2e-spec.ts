@@ -218,10 +218,29 @@ describe('Reading Regeneration E2E', () => {
           { cardId: cardIds[2], position: 'Future', isReversed: true },
         ],
         generateInterpretation: true,
-      });
+      })
+      .expect(201); // Asegurar que la creación fue exitosa
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     readingId = createReadingResponse.body.id as number;
+
+    // Verificar que se obtuvo un ID válido
+    if (!readingId) {
+      console.error('Failed to create initial reading for tests');
+      console.error('Status:', createReadingResponse.status);
+      console.error(
+        'Body:',
+        JSON.stringify(createReadingResponse.body, null, 2),
+      );
+      console.error('Card IDs used:', cardIds);
+      console.error('Deck ID:', deckId);
+      console.error('Spread ID:', spreadId);
+      throw new Error(
+        `Failed to create initial reading for tests. Got undefined ID`,
+      );
+    }
+
+    console.log(`✓ Initial reading created successfully with ID: ${readingId}`);
   }
 
   /**
@@ -332,10 +351,12 @@ describe('Reading Regeneration E2E', () => {
             { cardId: cardIds[2], position: 'Future', isReversed: false },
           ],
           generateInterpretation: true,
-        });
+        })
+        .expect(201);
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       const freeReadingId = createResponse.body.id as number;
+      expect(freeReadingId).toBeDefined();
 
       const response = await request(app.getHttpServer())
         .post(`/readings/${freeReadingId}/regenerate`)
@@ -369,10 +390,12 @@ describe('Reading Regeneration E2E', () => {
             { cardId: cardIds[2], position: 'Future', isReversed: false },
           ],
           generateInterpretation: true,
-        });
+        })
+        .expect(201);
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       const otherReadingId = createResponse.body.id as number;
+      expect(otherReadingId).toBeDefined();
 
       // Intentar regenerar con token de premium user
       const response = await request(app.getHttpServer())
@@ -497,10 +520,12 @@ describe('Reading Regeneration E2E', () => {
             { cardId: cardIds[2], position: 'Future', isReversed: false },
           ],
           generateInterpretation: true,
-        });
+        })
+        .expect(201);
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       const newReadingId = createResponse.body.id as number;
+      expect(newReadingId).toBeDefined();
 
       // Obtener el updatedAt original
       const newReading = await dataSource
