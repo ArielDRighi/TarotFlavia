@@ -38,7 +38,7 @@
     "db:e2e:migrate": "cross-env DATABASE_URL=postgresql://${TAROT_E2E_DB_USER}:${TAROT_E2E_DB_PASSWORD}@localhost:${TAROT_E2E_DB_PORT}/${TAROT_E2E_DB_NAME} npm run migration:run",
     "pretest:e2e": "echo 'E2E tests use global setup/teardown - no pre-reset needed'",
     "test:e2e:fresh": "npm run db:e2e:reset && npm run test:e2e",
-    "validate:schema": "ts-node -r tsconfig-paths/register scripts/validate-schema-consistency.ts"
+    "validate:schema": "npm run build && tsc scripts/validate-schema-consistency.ts --outDir dist/scripts --module commonjs --esModuleInterop && node dist/scripts/validate-schema-consistency.js"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^2.0.2",
