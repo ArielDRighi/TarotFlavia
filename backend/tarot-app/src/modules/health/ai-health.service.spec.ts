@@ -2,12 +2,17 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
 import { AIHealthService } from './ai-health.service';
+import { AIProviderService } from '../tarot/interpretations/ai-provider.service';
 
 describe('AIHealthService', () => {
   let service: AIHealthService;
 
   const mockConfigService = {
     get: jest.fn(),
+  };
+
+  const mockAIProviderService = {
+    getCircuitBreakerStats: jest.fn().mockReturnValue([]),
   };
 
   beforeEach(async () => {
@@ -19,6 +24,10 @@ describe('AIHealthService', () => {
         {
           provide: ConfigService,
           useValue: mockConfigService,
+        },
+        {
+          provide: AIProviderService,
+          useValue: mockAIProviderService,
         },
       ],
     }).compile();

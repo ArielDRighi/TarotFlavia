@@ -8,6 +8,7 @@ import {
   AIResponse,
   IAIProvider,
 } from '../ai-provider.interface';
+import { AIProviderException, AIErrorType } from '../errors/ai-error.types';
 
 @Injectable()
 export class DeepSeekProvider implements IAIProvider {
@@ -32,7 +33,13 @@ export class DeepSeekProvider implements IAIProvider {
     config: Partial<AIProviderConfig>,
   ): Promise<AIResponse> {
     if (!this.client) {
-      throw new Error('DeepSeek client not initialized - API key missing');
+      throw new AIProviderException(
+        AIProviderType.DEEPSEEK,
+        AIErrorType.INVALID_KEY,
+        'DeepSeek client not initialized - API key missing',
+        false,
+        new Error('API key missing'),
+      );
     }
 
     const model =
@@ -59,14 +66,26 @@ export class DeepSeekProvider implements IAIProvider {
       ]);
 
       if (!response || typeof response === 'string') {
-        throw new Error('Timeout exceeded');
+        throw new AIProviderException(
+          AIProviderType.DEEPSEEK,
+          AIErrorType.TIMEOUT,
+          'DeepSeek request timeout exceeded (>15s)',
+          true,
+          new Error('Timeout'),
+        );
       }
 
       const durationMs = Date.now() - startTime;
       const content = response.choices[0]?.message?.content || '';
 
       if (!content) {
-        throw new Error('Empty response from DeepSeek');
+        throw new AIProviderException(
+          AIProviderType.DEEPSEEK,
+          AIErrorType.SERVER_ERROR,
+          'Empty response from DeepSeek',
+          true,
+          new Error('Empty response'),
+        );
       }
 
       return {
@@ -81,10 +100,80 @@ export class DeepSeekProvider implements IAIProvider {
         durationMs,
       };
     } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(`DeepSeek API error: ${error.message}`);
+      if (error instanceof AIProviderException) {
+        throw error;
       }
-      throw error;
+
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+
+      if (errorMessage.includes('401') || errorMessage.includes('API key')) {
+        throw new AIProviderException(
+          AIProviderType.DEEPSEEK,
+          AIErrorType.INVALID_KEY,
+          `DeepSeek API key invalid: ${errorMessage}`,
+          false,
+          error as Error,
+        );
+      }
+
+      if (errorMessage.includes('429') || errorMessage.includes('rate limit')) {
+        throw new AIProviderException(
+          AIProviderType.DEEPSEEK,
+          AIErrorType.RATE_LIMIT,
+          `DeepSeek rate limit exceeded: ${errorMessage}`,
+          true,
+          error as Error,
+        );
+      }
+
+      if (
+        errorMessage.includes('500') ||
+        errorMessage.includes('502') ||
+        errorMessage.includes('503')
+      ) {
+        throw new AIProviderException(
+          AIProviderType.DEEPSEEK,
+          AIErrorType.SERVER_ERROR,
+          `DeepSeek server error: ${errorMessage}`,
+          true,
+          error as Error,
+        );
+      }
+
+      if (
+        errorMessage.includes('timeout') ||
+        errorMessage.includes('Timeout')
+      ) {
+        throw new AIProviderException(
+          AIProviderType.DEEPSEEK,
+          AIErrorType.TIMEOUT,
+          `DeepSeek request timeout: ${errorMessage}`,
+          true,
+          error as Error,
+        );
+      }
+
+      if (
+        errorMessage.includes('context') ||
+        errorMessage.includes('too long')
+      ) {
+        throw new AIProviderException(
+          AIProviderType.DEEPSEEK,
+          AIErrorType.CONTEXT_LENGTH,
+          `DeepSeek context too long: ${errorMessage}`,
+          false,
+          error as Error,
+        );
+      }
+
+      throw new AIProviderException(
+        AIProviderType.DEEPSEEK,
+        AIErrorType.NETWORK_ERROR,
+        `DeepSeek API error: ${errorMessage}`,
+        true,
+        error as Error,
+      );
     }
   }
 
