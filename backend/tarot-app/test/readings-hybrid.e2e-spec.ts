@@ -3,13 +3,17 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
-import { DataSource } from 'typeorm';
-import { User, UserPlan } from '../src/modules/users/entities/user.entity';
-import { PredefinedQuestion } from '../src/modules/predefined-questions/entities/predefined-question.entity';
+import { UserPlan } from '../src/modules/users/entities/user.entity';
 import { ReadingCategory } from '../src/modules/categories/entities/reading-category.entity';
 import { TarotDeck } from '../src/modules/tarot/decks/entities/tarot-deck.entity';
 import { TarotSpread } from '../src/modules/tarot/spreads/entities/tarot-spread.entity';
-import { hash } from 'bcrypt';
+import { E2EDatabaseHelper } from './helpers/e2e-database.helper';
+import { seedReadingCategories } from '../src/database/seeds/reading-categories.seeder';
+import { seedTarotDecks } from '../src/database/seeds/tarot-decks.seeder';
+import { seedTarotCards } from '../src/database/seeds/tarot-cards.seeder';
+import { seedTarotSpreads } from '../src/database/seeds/tarot-spreads.seeder';
+import { seedPredefinedQuestions } from '../src/database/seeds/predefined-questions.seeder';
+import { PredefinedQuestion } from '../src/modules/predefined-questions/entities/predefined-question.entity';
 
 interface LoginResponse {
   user: {
@@ -37,7 +41,7 @@ interface ErrorResponse {
 
 describe('Readings Hybrid Questions (E2E)', () => {
   let app: INestApplication<App>;
-  let dataSource: DataSource;
+  const dbHelper = new E2EDatabaseHelper();
   let freeUserToken: string;
   let premiumUserToken: string;
   let freeUserId: number;
@@ -48,6 +52,9 @@ describe('Readings Hybrid Questions (E2E)', () => {
   let testTimestamp: number;
 
   beforeAll(async () => {
+    await dbHelper.initialize();
+    await dbHelper.cleanDatabase();
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -56,152 +63,86 @@ describe('Readings Hybrid Questions (E2E)', () => {
     app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
     await app.init();
 
-    dataSource = moduleFixture.get<DataSource>(DataSource);
+    // Seed all necessary data
+    const dataSource = dbHelper.getDataSource();
+    const categoryRepository = dataSource.getRepository(ReadingCategory);
+    const deckRepository = dataSource.getRepository(TarotDeck);
+    const cardRepository = dataSource.getRepository('TarotCard');
+    const spreadRepository = dataSource.getRepository(TarotSpread);
+    const questionRepository = dataSource.getRepository(PredefinedQuestion);
 
-    // Verificar si la tabla refresh_tokens existe
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const tableExists = await dataSource.query(
-      `SELECT EXISTS (
-        SELECT FROM information_schema.tables 
-        WHERE table_schema = 'public' 
-        AND table_name = 'refresh_tokens'
-      )`,
-    );
+    await seedReadingCategories(categoryRepository);
+    await seedTarotDecks(deckRepository);
+    await seedTarotCards(cardRepository as any, deckRepository);
+    await seedTarotSpreads(dataSource);
+    await seedPredefinedQuestions(questionRepository, categoryRepository);
 
-    // Si no existe, crearla manualmente
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    if (!tableExists[0].exists) {
-      await dataSource.query(`
-        CREATE TABLE "refresh_tokens" (
-          "id" uuid NOT NULL DEFAULT uuid_generate_v4(), 
-          "user_id" integer NOT NULL, 
-          "token" character varying(500) NOT NULL, 
-          "token_hash" character varying(64) NOT NULL, 
-          "expires_at" TIMESTAMP NOT NULL, 
-          "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
-          "revoked_at" TIMESTAMP, 
-          "ip_address" character varying(45), 
-          "user_agent" character varying(500), 
-          CONSTRAINT "PK_refresh_tokens_id" PRIMARY KEY ("id")
-        )
-      `);
+    // Get seeded data for tests
 
-      await dataSource.query(
-        `CREATE INDEX "IDX_refresh_tokens_user_id" ON "refresh_tokens" ("user_id")`,
-      );
+    const questions = await questionRepository.find();
+    predefinedQuestionId = questions[0].id;
 
-      await dataSource.query(
-        `CREATE INDEX "IDX_refresh_tokens_token" ON "refresh_tokens" ("token")`,
-      );
+    const decks = await deckRepository.find();
+    deckId = decks[0].id;
 
-      await dataSource.query(
-        `CREATE INDEX "IDX_refresh_tokens_token_hash" ON "refresh_tokens" ("token_hash")`,
-      );
-
-      await dataSource.query(
-        `CREATE INDEX "IDX_refresh_tokens_user_token" ON "refresh_tokens" ("user_id", "token")`,
-      );
-
-      await dataSource.query(
-        `ALTER TABLE "refresh_tokens" ADD CONSTRAINT "FK_refresh_tokens_user" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
-      );
-    }
-
-    // Crear datos de prueba necesarios (se reutilizarán en todos los tests)
-    const timestamp = Date.now();
-    const category = await dataSource.getRepository(ReadingCategory).save({
-      name: `Amor-${timestamp}`,
-      slug: `amor-${timestamp}`,
-      description: 'Preguntas sobre relaciones',
-      icon: '❤️',
-      color: '#FF0000',
-    });
-
-    const predefinedQuestion = await dataSource
-      .getRepository(PredefinedQuestion)
-      .save({
-        categoryId: category.id,
-        questionText: '¿Qué me depara el amor?',
-      });
-    predefinedQuestionId = predefinedQuestion.id;
-
-    const deck = await dataSource.getRepository(TarotDeck).save({
-      name: `Test Deck ${timestamp}`,
-      description: 'Deck de prueba',
-      imageUrl: 'https://example.com/deck.jpg',
-    });
-    deckId = deck.id;
-
-    const spread = await dataSource.getRepository(TarotSpread).save({
-      name: 'Test Spread',
-      description: 'Spread de prueba',
-      cardCount: 3,
-      positions: [
-        { name: 'pasado', description: 'El pasado' },
-        { name: 'presente', description: 'El presente' },
-        { name: 'futuro', description: 'El futuro' },
-      ],
-      whenToUse: 'Siempre',
-    });
-    spreadId = spread.id;
+    const spreads = await spreadRepository.find();
+    spreadId = spreads[0].id;
   });
 
   beforeAll(async () => {
-    // Crear usuarios una sola vez para todos los tests
+    // Crear usuarios para pruebas
     testTimestamp = Date.now();
-    const hashedPassword = await hash('test123', 10);
 
-    const freeUser = await dataSource.getRepository(User).save({
-      email: `free-${testTimestamp}@test.com`,
-      password: hashedPassword,
-      name: 'Free User',
-      plan: UserPlan.FREE,
-    });
-    freeUserId = freeUser.id;
-
-    const premiumUser = await dataSource.getRepository(User).save({
-      email: `premium-${testTimestamp}@test.com`,
-      password: hashedPassword,
-      name: 'Premium User',
-      plan: UserPlan.PREMIUM,
-    });
-    premiumUserId = premiumUser.id;
-
-    // Obtener tokens (solo una vez)
-    const freeLoginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+    // Register users via API
+    const freeResponse = await request(app.getHttpServer())
+      .post('/auth/register')
       .send({
         email: `free-${testTimestamp}@test.com`,
-        password: 'test123',
+        password: 'Test123456!',
+        name: 'Free User',
       });
-    freeUserToken = (freeLoginResponse.body as LoginResponse).access_token;
+    freeUserToken = (freeResponse.body as LoginResponse).access_token;
+    freeUserId = (freeResponse.body as LoginResponse).user.id;
 
-    const premiumLoginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+    const premiumResponse = await request(app.getHttpServer())
+      .post('/auth/register')
       .send({
         email: `premium-${testTimestamp}@test.com`,
-        password: 'test123',
+        password: 'Test123456!',
+        name: 'Premium User',
       });
-    premiumUserToken = (premiumLoginResponse.body as LoginResponse)
-      .access_token;
+    premiumUserToken = (premiumResponse.body as LoginResponse).access_token;
+    premiumUserId = (premiumResponse.body as LoginResponse).user.id;
+
+    // Update premium user to PREMIUM plan
+    const ds = dbHelper.getDataSource();
+    await ds.query(`UPDATE "user" SET plan = $1 WHERE id = $2`, [
+      UserPlan.PREMIUM,
+      premiumUserId,
+    ]);
   }, 30000);
 
   afterEach(async () => {
     // Limpiar solo las readings de este test, no los usuarios
-    await dataSource.query(
-      'DELETE FROM tarot_reading WHERE "userId" IN ($1, $2)',
-      [freeUserId, premiumUserId],
-    );
+    const ds = dbHelper.getDataSource();
+    await ds.query('DELETE FROM tarot_reading WHERE "userId" IN ($1, $2)', [
+      freeUserId,
+      premiumUserId,
+    ]);
   });
 
   afterAll(async () => {
     // Limpiar usuarios al finalizar todos los tests
-    await dataSource.query(
-      'DELETE FROM tarot_reading WHERE "userId" IN ($1, $2)',
-      [freeUserId, premiumUserId],
-    );
-    await dataSource.getRepository(User).delete({ id: freeUserId });
-    await dataSource.getRepository(User).delete({ id: premiumUserId });
+    const ds = dbHelper.getDataSource();
+    await ds.query('DELETE FROM tarot_reading WHERE "userId" IN ($1, $2)', [
+      freeUserId,
+      premiumUserId,
+    ]);
+    await ds.query('DELETE FROM "user" WHERE id IN ($1, $2)', [
+      freeUserId,
+      premiumUserId,
+    ]);
+    await dbHelper.close();
     await app.close();
   });
 

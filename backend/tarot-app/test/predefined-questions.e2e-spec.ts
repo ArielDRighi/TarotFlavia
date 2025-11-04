@@ -6,16 +6,38 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
-import { DataSource } from 'typeorm';
+import { E2EDatabaseHelper } from './helpers/e2e-database.helper';
+import { ReadingCategory } from '../src/modules/categories/entities/reading-category.entity';
+import { seedReadingCategories } from '../src/database/seeds/reading-categories.seeder';
+import { seedUsers } from '../src/database/seeds/users.seeder';
+import { User } from '../src/modules/users/entities/user.entity';
 
 describe('PredefinedQuestions (e2e)', () => {
   let app: INestApplication<App>;
-  let dataSource: DataSource;
+  let dbHelper: E2EDatabaseHelper;
   let adminToken: string;
   let userToken: string;
   let categoryId: number;
 
   beforeAll(async () => {
+    // Initialize E2E database helper
+    dbHelper = new E2EDatabaseHelper();
+    await dbHelper.initialize();
+    await dbHelper.cleanDatabase();
+
+    // Seed categories and users
+    const dataSource = dbHelper.getDataSource();
+    const categoryRepository = dataSource.getRepository(ReadingCategory);
+    const userRepository = dataSource.getRepository(User);
+
+    await seedReadingCategories(categoryRepository);
+    await seedUsers(userRepository);
+
+    // Get first category ID for tests
+    const category = await categoryRepository.findOne({ where: { order: 1 } });
+    categoryId = category!.id;
+
+    // Create NestJS application
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -24,116 +46,44 @@ describe('PredefinedQuestions (e2e)', () => {
     app.useGlobalPipes(new ValidationPipe());
     await app.init();
 
-    dataSource = moduleFixture.get<DataSource>(DataSource);
-
-    // Verificar si la tabla refresh_tokens existe
-    const tableExists = await dataSource.query(
-      `SELECT EXISTS (
-        SELECT FROM information_schema.tables 
-        WHERE table_schema = 'public' 
-        AND table_name = 'refresh_tokens'
-      )`,
-    );
-
-    // Si no existe, crearla manualmente
-    if (!tableExists[0].exists) {
-      await dataSource.query(`
-        CREATE TABLE "refresh_tokens" (
-          "id" uuid NOT NULL DEFAULT uuid_generate_v4(), 
-          "user_id" integer NOT NULL, 
-          "token" character varying(500) NOT NULL, 
-          "token_hash" character varying(64) NOT NULL, 
-          "expires_at" TIMESTAMP NOT NULL, 
-          "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
-          "revoked_at" TIMESTAMP, 
-          "ip_address" character varying(45), 
-          "user_agent" character varying(500), 
-          CONSTRAINT "PK_refresh_tokens_id" PRIMARY KEY ("id")
-        )
-      `);
-
-      await dataSource.query(
-        `CREATE INDEX "IDX_refresh_tokens_user_id" ON "refresh_tokens" ("user_id")`,
-      );
-
-      await dataSource.query(
-        `CREATE INDEX "IDX_refresh_tokens_token" ON "refresh_tokens" ("token")`,
-      );
-
-      await dataSource.query(
-        `CREATE INDEX "IDX_refresh_tokens_token_hash" ON "refresh_tokens" ("token_hash")`,
-      );
-
-      await dataSource.query(
-        `CREATE INDEX "IDX_refresh_tokens_user_token" ON "refresh_tokens" ("user_id", "token")`,
-      );
-
-      await dataSource.query(
-        `ALTER TABLE "refresh_tokens" ADD CONSTRAINT "FK_refresh_tokens_user" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
-      );
-    }
-
-    // Crear categoría de prueba
-    const categoryResult = await dataSource.query(
-      `INSERT INTO reading_category (name, slug, description, icon, color, "order", "isActive") 
-       VALUES ('Test Category', 'test-category', 'Test description', '🧪', '#000000', 1, true) 
-       RETURNING id`,
-    );
-    categoryId = categoryResult[0].id;
-
-    // Crear usuarios de prueba
-    // Hash válido de bcrypt para 'test123'
-    await dataSource.query(
-      `INSERT INTO "user" (email, password, name, "isAdmin") 
-       VALUES ('admin@test.com', '$2b$10$/0GFzlbRMqjragnJnSUfIuLPYsqyQNDUpD8YBzfG3/ttDThiMiMhu', 'Admin', true) 
-       RETURNING id`,
-    );
-
-    await dataSource.query(
-      `INSERT INTO "user" (email, password, name, "isAdmin") 
-       VALUES ('user@test.com', '$2b$10$/0GFzlbRMqjragnJnSUfIuLPYsqyQNDUpD8YBzfG3/ttDThiMiMhu', 'User', false) 
-       RETURNING id`,
-    );
-
-    // Obtener tokens (simulando login)
+    // Login to get tokens (using seeded users)
     const adminLoginResponse = await request(app.getHttpServer())
       .post('/auth/login')
-      .send({ email: 'admin@test.com', password: 'test123' })
+      .send({ email: 'admin@test.com', password: 'Test123456!' })
       .expect(200);
 
     const userLoginResponse = await request(app.getHttpServer())
       .post('/auth/login')
-      .send({ email: 'user@test.com', password: 'test123' })
+      .send({ email: 'free@test.com', password: 'Test123456!' })
       .expect(200);
 
     adminToken = adminLoginResponse.body.access_token;
     userToken = userLoginResponse.body.access_token;
 
     if (!adminToken || !userToken) {
-      throw new Error(
-        `Failed to obtain tokens. Admin response: ${JSON.stringify(adminLoginResponse.body)}, User response: ${JSON.stringify(userLoginResponse.body)}`,
-      );
+      throw new Error('Failed to obtain authentication tokens');
     }
   });
 
   afterAll(async () => {
-    // Limpiar datos de prueba
-    await dataSource.query(
-      `DELETE FROM predefined_question WHERE category_id = $1`,
-      [categoryId],
-    );
-    await dataSource.query(`DELETE FROM reading_category WHERE id = $1`, [
-      categoryId,
-    ]);
-    await dataSource.query(
-      `DELETE FROM "user" WHERE email IN ('admin@test.com', 'user@test.com')`,
-    );
-    await app.close();
+    if (app) {
+      await app.close();
+    }
+    if (dbHelper) {
+      await dbHelper.close();
+    }
+  });
+
+  afterEach(async () => {
+    // Clean predefined questions after each test
+    const dataSource = dbHelper.getDataSource();
+    await dataSource.query('DELETE FROM predefined_question');
   });
 
   describe('/predefined-questions (GET)', () => {
     it('should return all active questions', async () => {
       // Crear preguntas de prueba
+      const dataSource = dbHelper.getDataSource();
       await dataSource.query(
         `INSERT INTO predefined_question (category_id, question_text, "order", is_active) 
          VALUES ($1, 'Test question 1', 1, true), 
@@ -162,6 +112,7 @@ describe('PredefinedQuestions (e2e)', () => {
 
   describe('/predefined-questions/:id (GET)', () => {
     it('should return a question by id', async () => {
+      const dataSource = dbHelper.getDataSource();
       const questionResult = await dataSource.query(
         `INSERT INTO predefined_question (category_id, question_text, "order", is_active) 
          VALUES ($1, 'Specific question', 1, true) 
@@ -237,6 +188,7 @@ describe('PredefinedQuestions (e2e)', () => {
 
   describe('/predefined-questions/:id (PATCH)', () => {
     it('should update a question when admin', async () => {
+      const dataSource = dbHelper.getDataSource();
       const questionResult = await dataSource.query(
         `INSERT INTO predefined_question (category_id, question_text, "order", is_active) 
          VALUES ($1, 'Original question', 1, true) 
@@ -259,6 +211,7 @@ describe('PredefinedQuestions (e2e)', () => {
     });
 
     it('should return 403 when non-admin tries to update', async () => {
+      const dataSource = dbHelper.getDataSource();
       const questionResult = await dataSource.query(
         `INSERT INTO predefined_question (category_id, question_text, "order", is_active) 
          VALUES ($1, 'Question to update', 1, true) 
@@ -277,6 +230,7 @@ describe('PredefinedQuestions (e2e)', () => {
 
   describe('/predefined-questions/:id (DELETE)', () => {
     it('should soft delete a question when admin', async () => {
+      const dataSource = dbHelper.getDataSource();
       const questionResult = await dataSource.query(
         `INSERT INTO predefined_question (category_id, question_text, "order", is_active) 
          VALUES ($1, 'Question to delete', 1, true) 
@@ -291,7 +245,8 @@ describe('PredefinedQuestions (e2e)', () => {
         .expect(200);
 
       // Verificar que fue soft-deleted
-      const deletedQuestion = await dataSource.query(
+      const ds = dbHelper.getDataSource();
+      const deletedQuestion = await ds.query(
         `SELECT deleted_at FROM predefined_question WHERE id = $1`,
         [questionId],
       );
@@ -299,6 +254,7 @@ describe('PredefinedQuestions (e2e)', () => {
     });
 
     it('should return 403 when non-admin tries to delete', async () => {
+      const dataSource = dbHelper.getDataSource();
       const questionResult = await dataSource.query(
         `INSERT INTO predefined_question (category_id, question_text, "order", is_active) 
          VALUES ($1, 'Question to delete', 1, true) 
