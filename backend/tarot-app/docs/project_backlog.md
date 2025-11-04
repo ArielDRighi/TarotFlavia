@@ -2821,7 +2821,7 @@ Crear endpoint que permita a usuarios premium regenerar la interpretación de un
 Crear y configurar una base de datos PostgreSQL dedicada exclusivamente para tests E2E, aislada completamente de la base de datos de desarrollo. Esto incluye validación completa de migraciones, seeders, y scripts automatizados de gestión para ambas bases de datos siguiendo mejores prácticas empresariales.
 
 **Contexto:**  
-Actualmente los tests E2E utilizan la misma base de datos de desarrollo (`tarotflavia_db`), lo cual genera:
+Actualmente los tests E2E utilizan la misma base de datos de desarrollo (`tarot_db`), lo cual genera:
 
 - ❌ Contaminación de datos entre desarrollo y testing
 - ❌ Riesgo de pérdida de datos de desarrollo durante tests
@@ -2837,54 +2837,50 @@ Implementar infraestructura de base de datos de testing con gestión automatizad
 
 **1.1 Docker Compose - Nueva Base de Datos de Testing**
 
-- [ ] Extender `docker-compose.yml` agregando servicio `tarotflavia-postgres-test`:
+- [ ] Extender `docker-compose.yml` agregando servicio `tarot-postgres-e2e`:
 
   ```yaml
-  tarotflavia-postgres-test:
-    container_name: tarotflavia-postgres-test-db
+  tarot-postgres-e2e:
+    container_name: tarot-postgres-e2e-db
     image: postgres:16-alpine
     ports:
-      - '${TAROTFLAVIA_TEST_DB_PORT:-5436}:5432'
+      - '${TAROT_E2E_DB_PORT:-5436}:5432'
     environment:
-      POSTGRES_DB: ${TAROTFLAVIA_TEST_DB_NAME:-tarotflavia_test_db}
-      POSTGRES_USER: ${TAROTFLAVIA_TEST_DB_USER:-tarotflavia_test_user}
-      POSTGRES_PASSWORD: ${TAROTFLAVIA_TEST_DB_PASSWORD:-tarotflavia_test_password_2024}
+      POSTGRES_DB: ${TAROT_E2E_DB_NAME:-tarot_e2e}
+      POSTGRES_USER: ${TAROT_E2E_DB_USER:-tarot_e2e_user}
+      POSTGRES_PASSWORD: ${TAROT_E2E_DB_PASSWORD:-tarot_e2e_password_2024}
     volumes:
-      - tarotflavia-postgres-test-data:/var/lib/postgresql/data
+      - tarot-postgres-e2e-data:/var/lib/postgresql/data
       - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
     networks:
-      - tarotflavia-network
+      - tarot-network
     healthcheck:
-      test:
-        [
-          'CMD-SHELL',
-          'pg_isready -U tarotflavia_test_user -d tarotflavia_test_db',
-        ]
+      test: ['CMD-SHELL', 'pg_isready -U tarot_e2e_user -d tarot_e2e']
       interval: 10s
       timeout: 5s
       retries: 5
     labels:
-      - 'com.tarotflavia.service=postgres-test'
-      - 'com.tarotflavia.environment=testing'
+      - 'com.tarot.service=postgres-e2e'
+      - 'com.tarot.environment=testing'
   ```
 
-- [ ] Agregar volumen `tarotflavia-postgres-test-data` en la sección `volumes`
+- [ ] Agregar volumen `tarot-postgres-e2e-data` en la sección `volumes`
 
 - [ ] Actualizar `.env.example` con variables de testing:
   ```env
-  # Testing Database Configuration
-  TAROTFLAVIA_TEST_DB_HOST=localhost
-  TAROTFLAVIA_TEST_DB_PORT=5436
-  TAROTFLAVIA_TEST_DB_USER=tarotflavia_test_user
-  TAROTFLAVIA_TEST_DB_PASSWORD=tarotflavia_test_password_2024
-  TAROTFLAVIA_TEST_DB_NAME=tarotflavia_test_db
-  TAROTFLAVIA_TEST_DB_SYNCHRONIZE=false
-  TAROTFLAVIA_TEST_DB_LOGGING=false
+  # Testing Database Configuration (E2E)
+  TAROT_E2E_DB_HOST=localhost
+  TAROT_E2E_DB_PORT=5436
+  TAROT_E2E_DB_USER=tarot_e2e_user
+  TAROT_E2E_DB_PASSWORD=tarot_e2e_password_2024
+  TAROT_E2E_DB_NAME=tarot_e2e
+  TAROT_E2E_DB_SYNCHRONIZE=false
+  TAROT_E2E_DB_LOGGING=false
   ```
 
 **1.2 Configuración TypeORM para Testing**
 
-- [ ] Crear `src/config/typeorm-test.config.ts`:
+- [ ] Crear `src/config/typeorm-e2e.config.ts`:
 
   ```typescript
   import { DataSource, DataSourceOptions } from 'typeorm';
@@ -2893,49 +2889,47 @@ Implementar infraestructura de base de datos de testing con gestión automatizad
 
   config();
 
-  export const testDataSourceOptions: DataSourceOptions = {
+  export const e2eDataSourceOptions: DataSourceOptions = {
     type: 'postgres',
-    host: process.env.TAROTFLAVIA_TEST_DB_HOST || 'localhost',
-    port: parseInt(process.env.TAROTFLAVIA_TEST_DB_PORT || '5436', 10),
-    username: process.env.TAROTFLAVIA_TEST_DB_USER || 'tarotflavia_test_user',
-    password:
-      process.env.TAROTFLAVIA_TEST_DB_PASSWORD ||
-      'tarotflavia_test_password_2024',
-    database: process.env.TAROTFLAVIA_TEST_DB_NAME || 'tarotflavia_test_db',
+    host: process.env.TAROT_E2E_DB_HOST || 'localhost',
+    port: parseInt(process.env.TAROT_E2E_DB_PORT || '5436', 10),
+    username: process.env.TAROT_E2E_DB_USER || 'tarot_e2e_user',
+    password: process.env.TAROT_E2E_DB_PASSWORD || 'tarot_e2e_password_2024',
+    database: process.env.TAROT_E2E_DB_NAME || 'tarot_e2e',
     entities: [join(__dirname, '..', '**', '*.entity{.ts,.js}')],
     migrations: [join(__dirname, '..', 'database', 'migrations', '*{.ts,.js}')],
     synchronize: false,
-    logging: process.env.TAROTFLAVIA_TEST_DB_LOGGING === 'true',
+    logging: process.env.TAROT_E2E_DB_LOGGING === 'true',
     migrationsRun: false, // Gestionado por scripts
   };
 
-  export const TestDataSource = new DataSource(testDataSourceOptions);
+  export const E2EDataSource = new DataSource(e2eDataSourceOptions);
   ```
 
-- [ ] Crear helper `test/test-database.helper.ts` para gestión de DB en tests:
+- [ ] Crear helper `test/e2e-database.helper.ts` para gestión de DB en tests:
 
   ```typescript
-  import { TestDataSource } from '../src/config/typeorm-test.config';
+  import { E2EDataSource } from '../src/config/typeorm-e2e.config';
   import { DataSource } from 'typeorm';
 
-  export class TestDatabaseHelper {
-    static async initializeTestDatabase(): Promise<DataSource> {
-      if (!TestDataSource.isInitialized) {
-        await TestDataSource.initialize();
+  export class E2EDatabaseHelper {
+    static async initializeE2EDatabase(): Promise<DataSource> {
+      if (!E2EDataSource.isInitialized) {
+        await E2EDataSource.initialize();
       }
-      return TestDataSource;
+      return E2EDataSource;
     }
 
-    static async closeTestDatabase(): Promise<void> {
-      if (TestDataSource.isInitialized) {
-        await TestDataSource.destroy();
+    static async closeE2EDatabase(): Promise<void> {
+      if (E2EDataSource.isInitialized) {
+        await E2EDataSource.destroy();
       }
     }
 
     static async clearAllTables(): Promise<void> {
-      const entities = TestDataSource.entityMetadatas;
+      const entities = E2EDataSource.entityMetadatas;
       for (const entity of entities) {
-        const repository = TestDataSource.getRepository(entity.name);
+        const repository = E2EDataSource.getRepository(entity.name);
         await repository.query(`TRUNCATE TABLE "${entity.tableName}" CASCADE;`);
       }
     }
@@ -2971,15 +2965,14 @@ Implementar infraestructura de base de datos de testing con gestión automatizad
   // Cargar variables de entorno para testing
   config({ path: join(__dirname, '..', '.env') });
 
-  // Sobrescribir con configuración de testing
-  process.env.TAROTFLAVIA_DB_HOST = process.env.TAROTFLAVIA_TEST_DB_HOST;
-  process.env.TAROTFLAVIA_DB_PORT = process.env.TAROTFLAVIA_TEST_DB_PORT;
-  process.env.TAROTFLAVIA_DB_USERNAME = process.env.TAROTFLAVIA_TEST_DB_USER;
-  process.env.TAROTFLAVIA_DB_PASSWORD_VALUE =
-    process.env.TAROTFLAVIA_TEST_DB_PASSWORD;
-  process.env.TAROTFLAVIA_DB_DATABASE = process.env.TAROTFLAVIA_TEST_DB_NAME;
-  process.env.TAROTFLAVIA_DB_SYNCHRONIZE = 'false';
-  process.env.TAROTFLAVIA_DB_LOGGING = 'false';
+  // Sobrescribir con configuración de testing E2E
+  process.env.TAROT_DB_HOST = process.env.TAROT_E2E_DB_HOST;
+  process.env.TAROT_DB_PORT = process.env.TAROT_E2E_DB_PORT;
+  process.env.TAROT_DB_USERNAME = process.env.TAROT_E2E_DB_USER;
+  process.env.TAROT_DB_PASSWORD_VALUE = process.env.TAROT_E2E_DB_PASSWORD;
+  process.env.TAROT_DB_DATABASE = process.env.TAROT_E2E_DB_NAME;
+  process.env.TAROT_DB_SYNCHRONIZE = 'false';
+  process.env.TAROT_DB_LOGGING = 'false';
   ```
 
 ---
@@ -2999,14 +2992,14 @@ Implementar infraestructura de base de datos de testing con gestión automatizad
   echo "🧹 Limpiando base de datos de DESARROLLO..."
 
   # Variables
-  DB_CONTAINER="tarotflavia-postgres-db"
-  DB_NAME="${TAROTFLAVIA_DB_NAME:-tarotflavia_db}"
-  DB_USER="${TAROTFLAVIA_DB_USER:-tarotflavia_user}"
+  DB_CONTAINER="tarot-postgres-db"
+  DB_NAME="${TAROT_DB_NAME:-tarot_db}"
+  DB_USER="${TAROT_DB_USER:-tarot_user}"
 
   # Verificar que el contenedor esté corriendo
   if ! docker ps | grep -q $DB_CONTAINER; then
     echo "❌ Error: Contenedor $DB_CONTAINER no está corriendo"
-    echo "   Ejecuta: docker-compose up -d tarotflavia-postgres"
+    echo "   Ejecuta: docker-compose up -d tarot-postgres"
     exit 1
   fi
 
@@ -3064,9 +3057,9 @@ Implementar infraestructura de base de datos de testing con gestión automatizad
 
 - [ ] Crear versión PowerShell `scripts/db-dev-reset.ps1`
 
-**2.2 Scripts para DB de Testing**
+**2.2 Scripts para DB de Testing E2E**
 
-- [ ] Crear `scripts/db-test-clean.sh`:
+- [ ] Crear `scripts/db-e2e-clean.sh`:
 
   ```bash
   #!/bin/bash
@@ -3074,15 +3067,15 @@ Implementar infraestructura de base de datos de testing con gestión automatizad
 
   set -e
 
-  echo "🧹 Limpiando base de datos de TESTING..."
+  echo "🧹 Limpiando base de datos de TESTING E2E..."
 
-  DB_CONTAINER="tarotflavia-postgres-test-db"
-  DB_NAME="${TAROTFLAVIA_TEST_DB_NAME:-tarotflavia_test_db}"
-  DB_USER="${TAROTFLAVIA_TEST_DB_USER:-tarotflavia_test_user}"
+  DB_CONTAINER="tarot-postgres-e2e-db"
+  DB_NAME="${TAROT_E2E_DB_NAME:-tarot_e2e}"
+  DB_USER="${TAROT_E2E_DB_USER:-tarot_e2e_user}"
 
   if ! docker ps | grep -q $DB_CONTAINER; then
     echo "❌ Error: Contenedor $DB_CONTAINER no está corriendo"
-    echo "   Ejecuta: docker-compose up -d tarotflavia-postgres-test"
+    echo "   Ejecuta: docker-compose up -d tarot-postgres-e2e"
     exit 1
   fi
 
@@ -3095,10 +3088,10 @@ Implementar infraestructura de base de datos de testing con gestión automatizad
     CREATE EXTENSION IF NOT EXISTS pg_trgm;
   "
 
-  echo "✅ Base de datos de testing limpiada"
+  echo "✅ Base de datos de testing E2E limpiada"
   ```
 
-- [ ] Crear `scripts/db-test-reset.sh`:
+- [ ] Crear `scripts/db-e2e-reset.sh`:
 
   ```bash
   #!/bin/bash
@@ -3106,15 +3099,15 @@ Implementar infraestructura de base de datos de testing con gestión automatizad
 
   set -e
 
-  echo "🔄 Reiniciando base de datos de TESTING..."
+  echo "🔄 Reiniciando base de datos de TESTING E2E..."
 
   # Limpiar
-  ./scripts/db-test-clean.sh
+  ./scripts/db-e2e-clean.sh
 
-  # Ejecutar migraciones en DB de testing
+  # Ejecutar migraciones en DB de testing E2E
   echo ""
-  echo "📦 Ejecutando migraciones en DB de testing..."
-  DATABASE_URL="postgresql://${TAROTFLAVIA_TEST_DB_USER}:${TAROTFLAVIA_TEST_DB_PASSWORD}@localhost:${TAROTFLAVIA_TEST_DB_PORT}/${TAROTFLAVIA_TEST_DB_NAME}" \
+  echo "📦 Ejecutando migraciones en DB de testing E2E..."
+  DATABASE_URL="postgresql://${TAROT_E2E_DB_USER}:${TAROT_E2E_DB_PASSWORD}@localhost:${TAROT_E2E_DB_PORT}/${TAROT_E2E_DB_NAME}" \
   npm run migration:run
 
   # Ejecutar solo seeders esenciales
@@ -3123,7 +3116,7 @@ Implementar infraestructura de base de datos de testing con gestión automatizad
   NODE_ENV=test npm run seed
 
   echo ""
-  echo "✅ Base de datos de testing reiniciada"
+  echo "✅ Base de datos de testing E2E reiniciada"
   ```
 
 - [ ] Crear versiones PowerShell de ambos scripts
@@ -3131,6 +3124,7 @@ Implementar infraestructura de base de datos de testing con gestión automatizad
 **2.3 Scripts NPM en package.json**
 
 - [ ] Agregar scripts en `package.json`:
+
   ```json
   {
     "scripts": {
@@ -3138,14 +3132,14 @@ Implementar infraestructura de base de datos de testing con gestión automatizad
       "db:dev:clean": "bash scripts/db-dev-clean.sh",
       "db:dev:reset": "bash scripts/db-dev-reset.sh",
 
-      // Testing
-      "db:test:clean": "bash scripts/db-test-clean.sh",
-      "db:test:reset": "bash scripts/db-test-reset.sh",
-      "db:test:migrate": "DATABASE_URL=postgresql://${TAROTFLAVIA_TEST_DB_USER}:${TAROTFLAVIA_TEST_DB_PASSWORD}@localhost:${TAROTFLAVIA_TEST_DB_PORT}/${TAROTFLAVIA_TEST_DB_NAME} npm run migration:run",
+      // Testing E2E
+      "db:e2e:clean": "bash scripts/db-e2e-clean.sh",
+      "db:e2e:reset": "bash scripts/db-e2e-reset.sh",
+      "db:e2e:migrate": "DATABASE_URL=postgresql://${TAROT_E2E_DB_USER}:${TAROT_E2E_DB_PASSWORD}@localhost:${TAROT_E2E_DB_PORT}/${TAROT_E2E_DB_NAME} npm run migration:run",
 
       // Pre-test setup
-      "pretest:e2e": "npm run db:test:reset",
-      "test:e2e:fresh": "npm run db:test:reset && npm run test:e2e"
+      "pretest:e2e": "npm run db:e2e:reset",
+      "test:e2e:fresh": "npm run db:e2e:reset && npm run test:e2e"
     }
   }
   ```
@@ -3173,19 +3167,19 @@ Implementar infraestructura de base de datos de testing con gestión automatizad
 - [ ] Crear test unitario `src/database/migrations/migration-validation.spec.ts`:
 
   ```typescript
-  import { TestDataSource } from '../../config/typeorm-test.config';
+  import { E2EDataSource } from '../../config/typeorm-e2e.config';
   import { InitialSchema1761655973524 } from './1761655973524-InitialSchema';
 
   describe('InitialSchema Migration', () => {
     it('should run up migration successfully', async () => {
-      await TestDataSource.initialize();
-      const queryRunner = TestDataSource.createQueryRunner();
+      await E2EDataSource.initialize();
+      const queryRunner = E2EDataSource.createQueryRunner();
 
       const migration = new InitialSchema1761655973524();
       await expect(migration.up(queryRunner)).resolves.not.toThrow();
 
       await queryRunner.release();
-      await TestDataSource.destroy();
+      await E2EDataSource.destroy();
     });
 
     it('should verify all tables are created', async () => {
@@ -3204,14 +3198,14 @@ Implementar infraestructura de base de datos de testing con gestión automatizad
 
   ```typescript
   import { DataSource } from 'typeorm';
-  import { testDataSourceOptions } from '../src/config/typeorm-test.config';
+  import { e2eDataSourceOptions } from '../src/config/typeorm-e2e.config';
 
   /**
    * Valida que el esquema generado por migraciones coincida
    * exactamente con las entidades de TypeORM
    */
   async function validateSchemaConsistency() {
-    const dataSource = new DataSource(testDataSourceOptions);
+    const dataSource = new DataSource(e2eDataSourceOptions);
     await dataSource.initialize();
 
     try {
@@ -3360,7 +3354,7 @@ Implementar infraestructura de base de datos de testing con gestión automatizad
 
 - [ ] Modificar `test/mvp-complete.e2e-spec.ts`:
 
-  - Usar `TestDatabaseHelper` para inicialización
+  - Usar `E2EDatabaseHelper` para inicialización
   - Eliminar creación manual de tablas en `beforeAll`
   - Usar seeders en lugar de crear datos inline
   - Agregar `afterEach` para limpiar datos entre tests si es necesario
@@ -3385,7 +3379,7 @@ Implementar infraestructura de base de datos de testing con gestión automatizad
       it('should have all required extensions installed', () => {});
     });
 
-    describe('Test Database', () => {
+    describe('E2E Database', () => {
       it('should be accessible on port 5436', () => {});
       it('should be isolated from development database', () => {});
       it('should reset cleanly between test runs', () => {});
@@ -3444,10 +3438,10 @@ Implementar infraestructura de base de datos de testing con gestión automatizad
 
 **Infraestructura:**
 
-- ✓ Segundo contenedor PostgreSQL corriendo en puerto 5436
-- ✓ DB de testing completamente aislada de DB de desarrollo
-- ✓ Variables de entorno correctamente configuradas
-- ✓ Conexiones TypeORM separadas para dev y test
+- ✓ Segundo contenedor PostgreSQL corriendo en puerto 5436 (`tarot-postgres-e2e`)
+- ✓ DB de testing E2E (`tarot_e2e`) completamente aislada de DB de desarrollo (`tarot_db`)
+- ✓ Variables de entorno correctamente configuradas (prefijo `TAROT_E2E_DB_*`)
+- ✓ Conexiones TypeORM separadas para dev y E2E
 
 **Scripts:**
 
@@ -3476,8 +3470,8 @@ Implementar infraestructura de base de datos de testing con gestión automatizad
 
 - ✓ Todos los tests E2E existentes pasan con nueva configuración
 - ✓ Tests de infraestructura creados y pasando
-- ✓ Tests utilizan DB de testing, no DB de desarrollo
-- ✓ Setup/teardown estandarizado en todos los tests
+- ✓ Tests utilizan DB E2E (`tarot_e2e`), no DB de desarrollo (`tarot_db`)
+- ✓ Setup/teardown estandarizado en todos los tests usando `E2EDatabaseHelper`
 
 **Calidad:**
 
