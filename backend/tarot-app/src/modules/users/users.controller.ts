@@ -157,7 +157,7 @@ export class UsersController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserPlanDto: UpdateUserPlanDto,
   ) {
-    const user = await this.usersService.updatePlan(id, updateUserPlanDto.plan);
+    const user = await this.usersService.updatePlan(id, updateUserPlanDto);
     return {
       message:
         'Plan actualizado exitosamente. El usuario debe volver a iniciar sesión para acceder a las nuevas funcionalidades.',

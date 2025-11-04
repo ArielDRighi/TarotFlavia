@@ -53,11 +53,11 @@ Esta configuración Docker proporciona:
 
 ## 🔄 Migración desde Nomenclatura Antigua
 
-Si vienes de una versión anterior que usaba `tarot-*`:
+Si vienes de una versión anterior que usaba `tarotflavia-*`:
 
 ### ¿Por qué el cambio?
 
-La nomenclatura se actualizó de `tarot-*` a `tarot-*` para mantener consistencia con el contenedor principal `tarot-app` y tener una nomenclatura más limpia y profesional.
+La nomenclatura se actualizó de `tarotflavia-*` a `tarot-*` para mantener consistencia con el contenedor principal `tarot-app` y tener una nomenclatura más limpia y profesional.
 
 ### Pasos para migrar
 

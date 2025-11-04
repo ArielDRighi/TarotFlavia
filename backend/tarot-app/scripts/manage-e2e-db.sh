@@ -70,12 +70,17 @@ start_db() {
   local max_attempts=30
   local attempt=0
   
+  # Obtener variables de entorno o usar defaults
+  local db_port="${TAROT_E2E_DB_PORT:-5436}"
+  local db_user="${TAROT_E2E_DB_USER:-tarot_e2e_user}"
+  local db_name="${TAROT_E2E_DB_NAME:-tarot_e2e}"
+  
   while [ $attempt -lt $max_attempts ]; do
-    if docker exec "${CONTAINER_NAME}" pg_isready -U tarot_e2e_user -d tarot_e2e >/dev/null 2>&1; then
+    if docker exec "${CONTAINER_NAME}" pg_isready -U "${db_user}" -d "${db_name}" >/dev/null 2>&1; then
       print_success "Base de datos E2E iniciada correctamente"
-      print_info "Puerto: 5436"
-      print_info "Usuario: tarot_e2e_user"
-      print_info "Base de datos: tarot_e2e"
+      print_info "Puerto: ${db_port}"
+      print_info "Usuario: ${db_user}"
+      print_info "Base de datos: ${db_name}"
       return 0
     fi
     

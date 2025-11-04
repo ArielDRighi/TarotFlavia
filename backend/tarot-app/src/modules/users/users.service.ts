@@ -7,9 +7,10 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DeleteResult } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
-import { User, UserWithoutPassword, UserPlan } from './entities/user.entity';
+import { User, UserWithoutPassword } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateUserPlanDto } from './dto/update-user-plan.dto';
 import { RefreshTokenService } from '../auth/refresh-token.service';
 
 @Injectable()
@@ -114,19 +115,37 @@ export class UsersService {
 
   /**
    * Actualiza el plan de un usuario e invalida todos sus tokens de refresh
-   * para forzar re-autenticación y obtener un nuevo JWT con el plan actualizado
+   * para forzar re-autenticación y obtener un nuevo JWT con el plan actualizado.
+   * También permite actualizar otros campos relacionados al plan como fechas,
+   * estado de suscripción y stripe customer ID.
    */
   async updatePlan(
     id: number,
-    newPlan: UserPlan,
+    updateUserPlanDto: UpdateUserPlanDto,
   ): Promise<UserWithoutPassword> {
     const user = await this.findById(id);
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    // Actualizar el plan
-    user.plan = newPlan;
+    // Actualizar campos del plan
+    user.plan = updateUserPlanDto.plan;
+
+    if (updateUserPlanDto.planStartedAt !== undefined) {
+      user.planStartedAt = updateUserPlanDto.planStartedAt;
+    }
+
+    if (updateUserPlanDto.planExpiresAt !== undefined) {
+      user.planExpiresAt = updateUserPlanDto.planExpiresAt;
+    }
+
+    if (updateUserPlanDto.subscriptionStatus !== undefined) {
+      user.subscriptionStatus = updateUserPlanDto.subscriptionStatus;
+    }
+
+    if (updateUserPlanDto.stripeCustomerId !== undefined) {
+      user.stripeCustomerId = updateUserPlanDto.stripeCustomerId;
+    }
 
     try {
       await this.usersRepository.save(user);

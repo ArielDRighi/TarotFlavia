@@ -27,10 +27,13 @@ const e2eConfig: DataSourceOptions = {
   dropSchema: false,
 };
 
-console.log('[TypeORM E2E Config] Configuración E2E:');
-console.log(`Host: ${e2eConfig.host}`);
-console.log(`Puerto: ${e2eConfig.port}`);
-console.log(`Usuario: ${e2eConfig.username}`);
-console.log(`Base de Datos: ${e2eConfig.database}`);
+// Solo mostrar logs de configuración si DEBUG está habilitado
+if (process.env.DEBUG) {
+  console.log('[TypeORM E2E Config] Configuración E2E:');
+  console.log(`Host: ${e2eConfig.host}`);
+  console.log(`Puerto: ${e2eConfig.port}`);
+  console.log(`Usuario: ${e2eConfig.username}`);
+  console.log(`Base de Datos: ${e2eConfig.database}`);
+}
 
 export const e2eConnectionSource = new DataSource(e2eConfig);
