@@ -34,7 +34,9 @@ Este documento registra las **mejoras opcionales** que quedaron pendientes del c
 
 **Prioridad:** 🟢 MEDIA  
 **Estimación:** 4 horas  
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ **COMPLETADA**  
+**Commit:** `5b668cc`  
+**Fecha:** 04/01/2025
 
 **Descripción:**  
 Crear versiones PowerShell de los scripts bash existentes para compatibilidad completa con desarrolladores Windows-only (sin Git Bash).

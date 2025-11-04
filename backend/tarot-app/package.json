@@ -26,7 +26,19 @@
     "migration:create": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:create",
     "migration:run": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:run -d src/config/data-source.ts",
     "migration:revert": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:revert -d src/config/data-source.ts",
-    "migration:show": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:show -d src/config/data-source.ts"
+    "migration:show": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:show -d src/config/data-source.ts",
+    "db:dev:clean": "bash scripts/db-dev-clean.sh",
+    "db:dev:reset": "bash scripts/db-dev-reset.sh",
+    "db:dev:clean:win": "powershell -ExecutionPolicy Bypass -File scripts/db-dev-clean.ps1",
+    "db:dev:reset:win": "powershell -ExecutionPolicy Bypass -File scripts/db-dev-reset.ps1",
+    "db:e2e:clean": "bash scripts/db-e2e-clean.sh",
+    "db:e2e:reset": "bash scripts/db-e2e-reset.sh",
+    "db:e2e:clean:win": "powershell -ExecutionPolicy Bypass -File scripts/db-e2e-clean.ps1",
+    "db:e2e:reset:win": "powershell -ExecutionPolicy Bypass -File scripts/db-e2e-reset.ps1",
+    "db:e2e:migrate": "cross-env DATABASE_URL=postgresql://${TAROT_E2E_DB_USER}:${TAROT_E2E_DB_PASSWORD}@localhost:${TAROT_E2E_DB_PORT}/${TAROT_E2E_DB_NAME} npm run migration:run",
+    "pretest:e2e": "echo 'E2E tests use global setup/teardown - no pre-reset needed'",
+    "test:e2e:fresh": "npm run db:e2e:reset && npm run test:e2e",
+    "validate:schema": "ts-node -r tsconfig-paths/register scripts/validate-schema-consistency.ts"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^2.0.2",
