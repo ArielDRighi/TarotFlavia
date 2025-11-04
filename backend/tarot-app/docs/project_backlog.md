@@ -2818,7 +2818,14 @@ Crear endpoint que permita a usuarios premium regenerar la interpretación de un
 
 #### 📋 Descripción
 
-Crear y configurar una base de datos PostgreSQL dedicada exclusivamente para tests E2E, aislada completamente de la base de datos de desarrollo. Esto incluye validación completa de migraciones, seeders, y scripts automatizados de gestión para ambas bases de datos siguiendo mejores prácticas empresariales.
+Crear y configurar una base de datos PostgreSQL dedicada exclusivamente para tests E2E, aislada completamente de la base de datos de desarrollo. Esta tarea incluye también un **refactor completo de nomenclatura Docker** para mantener consistencia con el contenedor existente `tarot-app`, seguido de validación completa de migraciones, seeders, y scripts automatizados de gestión para ambas bases de datos siguiendo mejores prácticas empresariales.
+
+> ⚠️ **ORDEN DE EJECUCIÓN CRÍTICO:**  
+> Esta tarea se divide en **fases secuenciales** que DEBEN ejecutarse en orden:
+>
+> 1. **Fase 0:** Refactor de nomenclatura (desarrollo) - `tarotflavia-*` → `tarot-*`
+> 2. **Fase 1-4:** Configuración de DB E2E, scripts, validación y tests
+> 3. **Fase 5:** Documentación completa
 
 **Contexto:**  
 Actualmente los tests E2E utilizan la misma base de datos de desarrollo (`tarot_db`), lo cual genera:
@@ -2833,9 +2840,426 @@ Implementar infraestructura de base de datos de testing con gestión automatizad
 
 ---
 
-#### ✅ Fase 1: Configuración de Infraestructura de Testing
+#### ✅ Fase 0: Refactor de Nomenclatura Docker (Prerequisito)
 
-**1.1 Docker Compose - Nueva Base de Datos de Testing**
+**0.1 Actualizar Docker Compose de Desarrollo**
+
+> ⚠️ **IMPORTANTE:** Realizar este paso primero para mantener consistencia con el contenedor `tarot-app` existente.
+
+- [ ] Actualizar `docker-compose.yml` - Renombrar servicio principal:
+
+  ```yaml
+  # ANTES: tarotflavia-postgres
+  # AHORA: tarot-postgres
+  tarot-postgres:
+    image: postgres:16-alpine
+    container_name: tarot-postgres-db # ANTES: tarotflavia-postgres-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${TAROT_DB_USER:-tarot_user} # ANTES: TAROTFLAVIA_DB_USER
+      POSTGRES_PASSWORD: ${TAROT_DB_PASSWORD:-tarot_password_2024}
+      POSTGRES_DB: ${TAROT_DB_NAME:-tarot_db}
+      POSTGRES_INITDB_ARGS: '-E UTF8 --locale=en_US.utf8'
+    ports:
+      - '${TAROT_DB_PORT:-5435}:5432'
+    volumes:
+      - tarot-postgres-data:/var/lib/postgresql/data # ANTES: tarotflavia-postgres-data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d
+    networks:
+      - tarot-network # ANTES: tarotflavia-network
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U ${TAROT_DB_USER:-tarot_user} -d ${TAROT_DB_NAME:-tarot_db}',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    labels:
+      com.tarot.description: 'PostgreSQL database for Tarot backend'
+      com.tarot.project: 'tarot'
+      com.tarot.environment: 'development'
+  ```
+
+- [ ] Actualizar servicio pgAdmin:
+
+  ```yaml
+  # ANTES: tarotflavia-pgadmin
+  # AHORA: tarot-pgadmin
+  tarot-pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: tarot-pgadmin # ANTES: tarotflavia-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${TAROT_PGADMIN_EMAIL:-admin@tarot.local}
+      PGADMIN_DEFAULT_PASSWORD: ${TAROT_PGADMIN_PASSWORD:-change_me_to_secure_password}
+      PGADMIN_LISTEN_PORT: 80
+    ports:
+      - '${TAROT_PGADMIN_PORT:-5050}:80'
+    volumes:
+      - tarot-pgadmin-data:/var/lib/pgadmin # ANTES: tarotflavia-pgadmin-data
+    networks:
+      - tarot-network
+    depends_on:
+      tarot-postgres: # ANTES: tarotflavia-postgres
+        condition: service_healthy
+    labels:
+      com.tarot.description: 'pgAdmin interface for Tarot database management'
+      com.tarot.project: 'tarot'
+      com.tarot.environment: 'development'
+    profiles:
+      - tools
+  ```
+
+- [ ] Actualizar volúmenes:
+
+  ```yaml
+  volumes:
+    tarot-postgres-data: # ANTES: tarotflavia-postgres-data
+      name: tarot-postgres-data
+      labels:
+        com.tarot.description: 'PostgreSQL data volume for Tarot'
+        com.tarot.project: 'tarot'
+
+    tarot-pgadmin-data: # ANTES: tarotflavia-pgadmin-data
+      name: tarot-pgadmin-data
+      labels:
+        com.tarot.description: 'pgAdmin configuration volume for Tarot'
+        com.tarot.project: 'tarot'
+  ```
+
+- [ ] Actualizar network:
+
+  ```yaml
+  networks:
+    tarot-network: # ANTES: tarotflavia-network
+      name: tarot-network
+      driver: bridge
+      labels:
+        com.tarot.description: 'Docker network for Tarot services'
+        com.tarot.project: 'tarot'
+  ```
+
+**0.2 Actualizar Variables de Entorno**
+
+- [ ] Actualizar `.env.example` - Renombrar todas las variables `TAROTFLAVIA_*` a `TAROT_*`:
+
+  ```env
+  # Database Configuration (Development)
+  TAROT_DB_HOST=localhost
+  TAROT_DB_PORT=5435
+  TAROT_DB_USER=tarot_user
+  TAROT_DB_PASSWORD=tarot_password_2024
+  TAROT_DB_NAME=tarot_db
+  TAROT_DB_SYNCHRONIZE=false
+  TAROT_DB_LOGGING=true
+
+  # pgAdmin Configuration
+  TAROT_PGADMIN_EMAIL=admin@tarot.local
+  TAROT_PGADMIN_PASSWORD=change_me_to_secure_password
+  TAROT_PGADMIN_PORT=5050
+  ```
+
+- [ ] Actualizar archivo `.env` personal (si existe) con las nuevas variables
+
+**0.3 Migración y Limpieza de Infraestructura Docker**
+
+- [ ] Crear script de migración `scripts/migrate-docker-nomenclature.sh`:
+
+  ```bash
+  #!/bin/bash
+  # Migra datos de contenedores antiguos (tarotflavia-*) a nuevos (tarot-*)
+  # Y proporciona herramientas para limpieza controlada
+
+  set -e
+
+  echo "🔄 Migración de nomenclatura Docker: tarotflavia-* → tarot-*"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+
+  # Variables
+  OLD_CONTAINER="tarotflavia-postgres-db"
+  OLD_PGADMIN="tarotflavia-pgadmin"
+  OLD_VOLUME_DB="tarotflavia-postgres-data"
+  OLD_VOLUME_PGADMIN="tarotflavia-pgadmin-data"
+  OLD_NETWORK="tarotflavia-network"
+
+  NEW_CONTAINER="tarot-postgres-db"
+  BACKUP_DIR="backups/migration-$(date +%Y%m%d_%H%M%S)"
+
+  # Función para verificar si un contenedor existe
+  container_exists() {
+    docker ps -a --format '{{.Names}}' | grep -q "^$1$"
+  }
+
+  # Función para verificar si un volumen existe
+  volume_exists() {
+    docker volume ls --format '{{.Name}}' | grep -q "^$1$"
+  }
+
+  # FASE 1: BACKUP
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "FASE 1: BACKUP DE DATOS EXISTENTES"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+
+  if container_exists "$OLD_CONTAINER"; then
+    echo "📦 Contenedor antiguo encontrado: $OLD_CONTAINER"
+
+    # Verificar si el contenedor está corriendo
+    if docker ps --format '{{.Names}}' | grep -q "^$OLD_CONTAINER$"; then
+      echo "✓ Contenedor está corriendo"
+
+      # Crear backup
+      echo "💾 Creando backup de base de datos..."
+      mkdir -p "$BACKUP_DIR"
+
+      docker exec $OLD_CONTAINER pg_dump -U tarotflavia_user tarotflavia_db \
+        > "$BACKUP_DIR/tarotflavia_db.sql"
+
+      # Verificar tamaño del backup
+      BACKUP_SIZE=$(du -h "$BACKUP_DIR/tarotflavia_db.sql" | cut -f1)
+      echo "✅ Backup creado exitosamente: $BACKUP_SIZE"
+      echo "   Ubicación: $BACKUP_DIR/tarotflavia_db.sql"
+    else
+      echo "⚠️  Contenedor existe pero no está corriendo"
+      echo "   Iniciando contenedor para backup..."
+      docker start $OLD_CONTAINER
+      sleep 5
+
+      mkdir -p "$BACKUP_DIR"
+      docker exec $OLD_CONTAINER pg_dump -U tarotflavia_user tarotflavia_db \
+        > "$BACKUP_DIR/tarotflavia_db.sql"
+
+      BACKUP_SIZE=$(du -h "$BACKUP_DIR/tarotflavia_db.sql" | cut -f1)
+      echo "✅ Backup creado: $BACKUP_SIZE"
+    fi
+
+    # Backup de configuración de pgAdmin (si existe)
+    if container_exists "$OLD_PGADMIN"; then
+      echo "💾 Backup de configuración pgAdmin..."
+      docker cp $OLD_PGADMIN:/var/lib/pgadmin "$BACKUP_DIR/pgadmin-config" 2>/dev/null || true
+      echo "✓ Configuración pgAdmin respaldada"
+    fi
+
+    echo ""
+  else
+    echo "ℹ️  No se encontraron contenedores antiguos (tarotflavia-*)"
+    echo "   Esta es una instalación nueva o ya se migró anteriormente."
+    echo ""
+  fi
+
+  # FASE 2: INFORMACIÓN PRE-MIGRACIÓN
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "FASE 2: ESTADO ACTUAL DE RECURSOS DOCKER"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+
+  echo "📊 Contenedores tarotflavia-*:"
+  docker ps -a --filter "name=tarotflavia" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" || echo "   (ninguno)"
+  echo ""
+
+  echo "📊 Volúmenes tarotflavia-*:"
+  docker volume ls --filter "name=tarotflavia" --format "table {{.Name}}\t{{.Driver}}" || echo "   (ninguno)"
+  echo ""
+
+  echo "📊 Networks tarotflavia-*:"
+  docker network ls --filter "name=tarotflavia" --format "table {{.Name}}\t{{.Driver}}" || echo "   (ninguno)"
+  echo ""
+
+  # FASE 3: INSTRUCCIONES
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "FASE 3: PRÓXIMOS PASOS PARA COMPLETAR LA MIGRACIÓN"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+
+  echo "1️⃣  ACTUALIZAR CONFIGURACIÓN:"
+  echo "   → Actualizar archivo .env con nuevas variables TAROT_*"
+  echo "   → Revisar docker-compose.yml actualizado"
+  echo ""
+
+  echo "2️⃣  LEVANTAR NUEVOS SERVICIOS:"
+  echo "   → docker-compose up -d tarot-postgres"
+  echo "   → docker-compose --profile tools up -d  # (si usas pgAdmin)"
+  echo ""
+
+  if [ -f "$BACKUP_DIR/tarotflavia_db.sql" ]; then
+    echo "3️⃣  RESTAURAR DATOS (si es necesario):"
+    echo "   → cat $BACKUP_DIR/tarotflavia_db.sql | docker exec -i tarot-postgres-db psql -U tarot_user -d tarot_db"
+    echo ""
+  fi
+
+  echo "4️⃣  VERIFICAR APLICACIÓN:"
+  echo "   → npm run start:dev"
+  echo "   → npm run test:e2e"
+  echo "   → Verificar que todo funciona correctamente"
+  echo ""
+
+  echo "5️⃣  LIMPIEZA DE RECURSOS ANTIGUOS (después de verificar):"
+  echo "   → bash scripts/cleanup-old-docker-resources.sh"
+  echo "   → O manualmente (ver script de limpieza)"
+  echo ""
+
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "✅ Script de migración completado"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  ```
+
+- [ ] Crear script de limpieza `scripts/cleanup-old-docker-resources.sh`:
+
+  ```bash
+  #!/bin/bash
+  # Limpia recursos Docker antiguos (tarotflavia-*) después de migración exitosa
+
+  set -e
+
+  echo "🧹 Limpieza de recursos Docker antiguos (tarotflavia-*)"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+  echo "⚠️  ADVERTENCIA: Esta operación eliminará permanentemente:"
+  echo "   - Contenedores: tarotflavia-postgres-db, tarotflavia-pgadmin"
+  echo "   - Volúmenes: tarotflavia-postgres-data, tarotflavia-pgadmin-data"
+  echo "   - Network: tarotflavia-network"
+  echo ""
+  echo "   Asegúrate de que:"
+  echo "   ✓ La aplicación funciona correctamente con los nuevos contenedores"
+  echo "   ✓ Tienes backups recientes"
+  echo "   ✓ Has verificado los datos en el nuevo contenedor"
+  echo ""
+
+  read -p "¿Deseas continuar con la limpieza? (escribe 'SI' para confirmar): " CONFIRM
+
+  if [ "$CONFIRM" != "SI" ]; then
+    echo "❌ Limpieza cancelada"
+    exit 0
+  fi
+
+  echo ""
+  echo "�️  Iniciando limpieza..."
+  echo ""
+
+  # Detener contenedores si están corriendo
+  echo "1. Deteniendo contenedores antiguos..."
+  docker stop tarotflavia-postgres-db 2>/dev/null && echo "   ✓ tarotflavia-postgres-db detenido" || echo "   ℹ️  tarotflavia-postgres-db no estaba corriendo"
+  docker stop tarotflavia-pgadmin 2>/dev/null && echo "   ✓ tarotflavia-pgadmin detenido" || echo "   ℹ️  tarotflavia-pgadmin no estaba corriendo"
+  echo ""
+
+  # Eliminar contenedores
+  echo "2. Eliminando contenedores..."
+  docker rm tarotflavia-postgres-db 2>/dev/null && echo "   ✓ tarotflavia-postgres-db eliminado" || echo "   ℹ️  tarotflavia-postgres-db no existe"
+  docker rm tarotflavia-pgadmin 2>/dev/null && echo "   ✓ tarotflavia-pgadmin eliminado" || echo "   ℹ️  tarotflavia-pgadmin no existe"
+  echo ""
+
+  # Eliminar volúmenes
+  echo "3. Eliminando volúmenes..."
+  docker volume rm tarotflavia-postgres-data 2>/dev/null && echo "   ✓ tarotflavia-postgres-data eliminado" || echo "   ℹ️  tarotflavia-postgres-data no existe"
+  docker volume rm tarotflavia-pgadmin-data 2>/dev/null && echo "   ✓ tarotflavia-pgadmin-data eliminado" || echo "   ℹ️  tarotflavia-pgadmin-data no existe"
+  echo ""
+
+  # Eliminar network (solo si no está en uso)
+  echo "4. Eliminando network..."
+  docker network rm tarotflavia-network 2>/dev/null && echo "   ✓ tarotflavia-network eliminado" || echo "   ℹ️  tarotflavia-network no existe o está en uso"
+  echo ""
+
+  # Verificar limpieza
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "5. Verificando limpieza..."
+  echo ""
+
+  REMAINING_CONTAINERS=$(docker ps -a --filter "name=tarotflavia" --format "{{.Names}}" | wc -l)
+  REMAINING_VOLUMES=$(docker volume ls --filter "name=tarotflavia" --format "{{.Name}}" | wc -l)
+  REMAINING_NETWORKS=$(docker network ls --filter "name=tarotflavia" --format "{{.Name}}" | wc -l)
+
+  if [ "$REMAINING_CONTAINERS" -eq 0 ] && [ "$REMAINING_VOLUMES" -eq 0 ] && [ "$REMAINING_NETWORKS" -eq 0 ]; then
+    echo "✅ Limpieza completada exitosamente"
+    echo "   No quedan recursos tarotflavia-* en Docker"
+  else
+    echo "⚠️  Algunos recursos no pudieron eliminarse:"
+    [ "$REMAINING_CONTAINERS" -gt 0 ] && echo "   - Contenedores restantes: $REMAINING_CONTAINERS"
+    [ "$REMAINING_VOLUMES" -gt 0 ] && echo "   - Volúmenes restantes: $REMAINING_VOLUMES"
+    [ "$REMAINING_NETWORKS" -gt 0 ] && echo "   - Networks restantes: $REMAINING_NETWORKS"
+    echo ""
+    echo "   Revisa manualmente con:"
+    echo "   → docker ps -a --filter 'name=tarotflavia'"
+    echo "   → docker volume ls --filter 'name=tarotflavia'"
+    echo "   → docker network ls --filter 'name=tarotflavia'"
+  fi
+
+  echo ""
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "📝 IMPORTANTE: Los backups en backups/migration-* se mantienen"
+  echo "   Puedes eliminarlos manualmente después de confirmar que todo funciona"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  ```
+
+- [ ] Dar permisos de ejecución a ambos scripts:
+
+  ```bash
+  chmod +x scripts/migrate-docker-nomenclature.sh
+  chmod +x scripts/cleanup-old-docker-resources.sh
+  ```
+
+- [ ] Crear versiones PowerShell:
+  - `scripts/migrate-docker-nomenclature.ps1`
+  - `scripts/cleanup-old-docker-resources.ps1`
+
+**0.4 Actualizar Configuración TypeORM de Desarrollo**
+
+- [ ] Actualizar `src/config/typeorm.ts` para usar nuevas variables:
+
+  ```typescript
+  export const typeOrmConfig = (
+    configService: ConfigService,
+  ): TypeOrmModuleOptions => ({
+    type: 'postgres',
+    host: configService.get('TAROT_DB_HOST', 'localhost'), // ANTES: TAROTFLAVIA_DB_HOST
+    port: configService.get('TAROT_DB_PORT', 5435),
+    username: configService.get('TAROT_DB_USER', 'tarot_user'),
+    password: configService.get('TAROT_DB_PASSWORD', 'tarot_password_2024'),
+    database: configService.get('TAROT_DB_NAME', 'tarot_db'),
+    // ... resto de configuración
+  });
+  ```
+
+**0.5 Actualizar README-DOCKER.md**
+
+- [ ] Buscar y reemplazar todas las ocurrencias:
+
+  - `tarotflavia-postgres-db` → `tarot-postgres-db`
+  - `tarotflavia-pgadmin` → `tarot-pgadmin`
+  - `tarotflavia-network` → `tarot-network`
+  - `tarotflavia_db` → `tarot_db`
+  - `tarotflavia_user` → `tarot_user`
+  - `TAROTFLAVIA_` → `TAROT_` (en todas las variables)
+
+- [ ] Agregar sección sobre migración:
+
+  ```markdown
+  ## 🔄 Migración desde Nomenclatura Antigua
+
+  Si vienes de una versión anterior que usaba `tarotflavia-*`:
+
+  1. Ejecutar script de migración: `bash scripts/migrate-docker-nomenclature.sh`
+  2. Actualizar variables en `.env` (prefijo `TAROT_` en lugar de `TAROTFLAVIA_`)
+  3. Reiniciar servicios: `docker-compose down && docker-compose up -d`
+  4. Verificar que todo funciona
+  5. Eliminar recursos antiguos (opcional, ver script)
+  ```
+
+**0.6 Actualizar Scripts Existentes**
+
+- [ ] Buscar en todos los scripts existentes (`.sh`, `.ps1`) y actualizar:
+  - Referencias a `tarotflavia-postgres-db` → `tarot-postgres-db`
+  - Variables `TAROTFLAVIA_*` → `TAROT_*`
+  - Nombres de bases de datos y usuarios
+
+---
+
+#### ✅ Fase 1: Configuración de Infraestructura de Testing E2E
+
+**1.1 Docker Compose - Nueva Base de Datos de Testing E2E**
 
 - [ ] Extender `docker-compose.yml` agregando servicio `tarot-postgres-e2e`:
 
@@ -3405,11 +3829,47 @@ Implementar infraestructura de base de datos de testing con gestión automatizad
 
 **5.1 Actualizar README-DOCKER.md**
 
-- [ ] Agregar sección "Base de Datos de Testing":
-  - Propósito y beneficios
+- [ ] Documentar cambio de nomenclatura en sección dedicada:
+
+  ```markdown
+  ## 🔄 Actualización de Nomenclatura (v2.0)
+
+  **Cambios aplicados en esta versión:**
+
+  - ✅ `tarotflavia-*` → `tarot-*` (consistencia con contenedor `tarot-app`)
+  - ✅ Variables de entorno: `TAROTFLAVIA_*` → `TAROT_*`
+  - ✅ Nomenclatura más limpia y profesional
+
+  **Nomenclatura actual:**
+  ```
+
+  # Desarrollo
+
+  - Aplicación: tarot-app
+  - PostgreSQL: tarot-postgres-db (puerto 5435)
+  - pgAdmin: tarot-pgadmin (puerto 5050)
+  - Network: tarot-network
+  - DB: tarot_db
+  - User: tarot_user
+
+  # Testing E2E
+
+  - PostgreSQL: tarot-postgres-e2e-db (puerto 5436)
+  - DB: tarot_e2e
+  - User: tarot_e2e_user
+
+  ```
+
+  **Migración desde versión anterior:**
+  Ver sección "Migración desde Nomenclatura Antigua"
+  ```
+
+- [ ] Agregar sección "Base de Datos de Testing E2E":
+  - Propósito y beneficios del aislamiento
   - Configuración del segundo contenedor
-  - Diferencias entre DB dev y test
+  - Diferencias entre DB dev (`tarot_db`) y E2E (`tarot_e2e`)
   - Comandos específicos para testing
+  - Cuándo usar cada base de datos
 
 **5.2 Crear TESTING_DATABASE.md**
 
@@ -3436,12 +3896,31 @@ Implementar infraestructura de base de datos de testing con gestión automatizad
 
 #### 🎯 Criterios de Aceptación
 
-**Infraestructura:**
+**Refactor de Nomenclatura (Fase 0):**
 
-- ✓ Segundo contenedor PostgreSQL corriendo en puerto 5436 (`tarot-postgres-e2e`)
+- ✓ Docker Compose actualizado con nombres `tarot-*` en todos los servicios
+- ✓ Contenedor de desarrollo renombrado a `tarot-postgres-db`
+- ✓ pgAdmin renombrado a `tarot-pgadmin`
+- ✓ Network renombrado a `tarot-network`
+- ✓ Volúmenes renombrados a `tarot-postgres-data`, `tarot-pgadmin-data`
+- ✓ Todas las variables de entorno cambiadas de `TAROTFLAVIA_*` a `TAROT_*`
+- ✓ Configuración TypeORM actualizada con nuevas variables
+- ✓ Script de migración (`migrate-docker-nomenclature.sh`) funciona correctamente
+- ✓ Script de limpieza (`cleanup-old-docker-resources.sh`) funciona correctamente
+- ✓ Backup automático de datos antiguos creado antes de migración
+- ✓ Proceso de limpieza requiere confirmación explícita del usuario
+- ✓ Recursos antiguos (`tarotflavia-*`) eliminados completamente después de verificación
+- ✓ README-DOCKER.md actualizado con nueva nomenclatura y proceso de migración
+- ✓ Scripts existentes actualizados para usar nuevos nombres
+- ✓ Aplicación funciona correctamente con nueva configuración
+
+**Infraestructura E2E (Fase 1):**
+
+- ✓ Segundo contenedor PostgreSQL corriendo en puerto 5436 (`tarot-postgres-e2e-db`)
 - ✓ DB de testing E2E (`tarot_e2e`) completamente aislada de DB de desarrollo (`tarot_db`)
 - ✓ Variables de entorno correctamente configuradas (prefijo `TAROT_E2E_DB_*`)
-- ✓ Conexiones TypeORM separadas para dev y E2E
+- ✓ Conexiones TypeORM separadas para dev (`tarot_db`) y E2E (`tarot_e2e`)
+- ✓ Ambos contenedores pueden correr simultáneamente sin conflictos
 
 **Scripts:**
 
@@ -3535,6 +4014,58 @@ Implementar infraestructura de base de datos de testing con gestión automatizad
 - [ ] Transactional tests (rollback automático después de cada test)
 - [ ] Performance testing con datos voluminosos
 - [ ] Tests de migración entre versiones (upgrade path)
+
+---
+
+#### ⚠️ Notas Importantes
+
+**Sobre el Refactor de Nomenclatura (Fase 0):**
+
+1. **Breaking Change:** Este cambio afecta la configuración existente
+2. **Backup Obligatorio:** El script de migración crea backup automáticamente
+3. **Coordinación:** Si trabajas en equipo, coordinar el cambio con todos los desarrolladores
+4. **Variables de Entorno:** Cada desarrollador debe actualizar su `.env` local
+5. **Eliminación Controlada:**
+   - Los contenedores antiguos NO se eliminan automáticamente
+   - Permite verificar que todo funciona antes de limpiar
+   - Script de limpieza separado (`cleanup-old-docker-resources.sh`)
+   - Requiere confirmación explícita ("SI") antes de eliminar
+   - Los backups se mantienen incluso después de la limpieza
+6. **Zero Downtime:** Se pueden ejecutar ambas versiones en paralelo durante la transición
+7. **Rollback Posible:** Si algo falla, los contenedores antiguos siguen disponibles
+8. **Limpieza Segura:**
+   - Verifica existencia de recursos antes de eliminar
+   - Detiene contenedores antes de eliminarlos
+   - Muestra reporte de lo que se eliminó
+   - Mantiene backups intactos
+
+**Sobre la Base de Datos E2E:**
+
+1. **Aislamiento Total:** Nunca usar `tarot_db` para tests, siempre `tarot_e2e`
+2. **Datos Volátiles:** La DB E2E puede limpiarse en cualquier momento
+3. **No Mezclar:** Nunca ejecutar seeders de testing en DB de desarrollo
+4. **CI/CD Ready:** Esta configuración está preparada para pipelines automáticos
+
+**Checklist Pre-Ejecución:**
+
+- [ ] Hacer backup completo de `tarot_db` actual
+- [ ] Commitear todos los cambios pendientes
+- [ ] Verificar que no hay tests corriendo
+- [ ] Revisar archivo `.env` actual
+- [ ] Tener backup del `.env` anterior
+- [ ] Liberar puertos 5435 y 5436
+
+**Checklist Post-Ejecución:**
+
+- [ ] Verificar que aplicación inicia correctamente con nuevos contenedores
+- [ ] Verificar que tests E2E pasan
+- [ ] Confirmar que datos de desarrollo están intactos y migrados
+- [ ] Actualizar documentación de equipo
+- [ ] Comunicar cambios al equipo
+- [ ] Verificar que nuevos contenedores (`tarot-*`) funcionan correctamente
+- [ ] Ejecutar `bash scripts/cleanup-old-docker-resources.sh` para eliminar recursos antiguos
+- [ ] Confirmar limpieza: `docker ps -a | grep tarotflavia` no debe retornar nada
+- [ ] Mantener backups durante al menos 1 mes antes de eliminar
 
 ---
 
