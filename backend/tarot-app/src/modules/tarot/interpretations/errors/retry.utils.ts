@@ -33,8 +33,8 @@ export async function retryWithBackoff<T>(
         throw error;
       }
 
-      // Calculate delay with exponential backoff: 2^attempt * 1000ms
-      // attempt 1: 2s, attempt 2: 4s, attempt 3: 8s
+      // Calculate delay with exponential backoff: 2^(attempt + 1) * 1000ms
+      // attempt = 0 (first retry): 2s, attempt = 1 (second retry): 4s, attempt = 2 (third retry): 8s
       const baseDelay = Math.pow(2, attempt + 1) * 1000;
 
       // Add jitter (±20%)

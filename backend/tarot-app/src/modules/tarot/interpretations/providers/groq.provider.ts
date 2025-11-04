@@ -105,8 +105,23 @@ export class GroqProvider implements IAIProvider {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
 
-      // Check for specific error codes/messages
-      if (errorMessage.includes('401') || errorMessage.includes('API key')) {
+      // Check error object properties first, then fallback to string matching
+      // Note: Groq SDK doesn't expose structured error codes, so we combine both approaches
+      const errorObj = error as Error & {
+        status?: number;
+        statusCode?: number;
+        code?: string;
+        response?: { status?: number };
+      };
+      const statusCode =
+        errorObj?.status || errorObj?.statusCode || errorObj?.response?.status;
+
+      // Check for 401 (Invalid API key)
+      if (
+        statusCode === 401 ||
+        errorMessage.includes('401') ||
+        errorMessage.includes('API key')
+      ) {
         throw new AIProviderException(
           AIProviderType.GROQ,
           AIErrorType.INVALID_KEY,
@@ -116,7 +131,12 @@ export class GroqProvider implements IAIProvider {
         );
       }
 
-      if (errorMessage.includes('429') || errorMessage.includes('rate limit')) {
+      // Check for 429 (Rate limit)
+      if (
+        statusCode === 429 ||
+        errorMessage.includes('429') ||
+        errorMessage.toLowerCase().includes('rate limit')
+      ) {
         throw new AIProviderException(
           AIProviderType.GROQ,
           AIErrorType.RATE_LIMIT,
@@ -126,7 +146,9 @@ export class GroqProvider implements IAIProvider {
         );
       }
 
+      // Check for 5xx (Server errors)
       if (
+        (statusCode && statusCode >= 500) ||
         errorMessage.includes('500') ||
         errorMessage.includes('502') ||
         errorMessage.includes('503')
@@ -140,9 +162,10 @@ export class GroqProvider implements IAIProvider {
         );
       }
 
+      // Check for timeout
       if (
-        errorMessage.includes('timeout') ||
-        errorMessage.includes('Timeout')
+        errorObj?.code === 'ETIMEDOUT' ||
+        errorMessage.toLowerCase().includes('timeout')
       ) {
         throw new AIProviderException(
           AIProviderType.GROQ,
