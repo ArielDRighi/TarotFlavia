@@ -103,13 +103,21 @@ describe('Reading Regeneration E2E', () => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const newReadingId = createResponse.body.id as number;
     expect(newReadingId).toBeDefined();
+
+    // Verificar inmediatamente que la reading existe en la DB
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const verifyReading = await dataSource.query(
+      `SELECT id, "userId" FROM tarot_reading WHERE id = $1`,
+      [newReadingId],
+    );
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    if (!verifyReading || verifyReading.length === 0) {
+      throw new Error(
+        `Reading ${newReadingId} was created via API but not found in database!`,
+      );
+    }
+
     console.log(`✓ Created fresh reading with ID: ${newReadingId}`);
-
-    // Limpiar usage limits DESPUÉS de crear para que el siguiente test no tenga límites
-    await dataSource.query(`DELETE FROM usage_limit WHERE user_id = $1`, [
-      userId,
-    ]);
-
     return newReadingId;
   }
 
@@ -465,6 +473,14 @@ describe('Reading Regeneration E2E', () => {
         premiumUserId,
         premiumUserToken,
       );
+
+      // Verificar que la reading existe antes de intentar regenerar
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const readingCheck = await dataSource.query(
+        `SELECT id, "userId", "regenerationCount" FROM tarot_reading WHERE id = $1`,
+        [testReadingId],
+      );
+      console.log(`Reading check before regenerate:`, readingCheck);
 
       const response = await request(app.getHttpServer())
         .post(`/readings/${testReadingId}/regenerate`)
