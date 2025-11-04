@@ -81,7 +81,9 @@ npm test
 
 **Prioridad:** 🟢 MEDIA  
 **Estimación:** 2 horas  
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ **COMPLETADA**  
+**Commit:** `5f3f0da`  
+**Fecha:** 04/01/2025
 
 **Descripción:**  
 Agregar comandos NPM intuitivos en `package.json` para gestión de bases de datos, mejorando la DX (Developer Experience).
