@@ -8,6 +8,8 @@
   },
   "modulePaths": ["<rootDir>/../node_modules", "<rootDir>/../"],
   "moduleDirectories": ["node_modules"],
+  "globalSetup": "<rootDir>/setup-e2e-db.ts",
+  "globalTeardown": "<rootDir>/teardown-e2e-db.ts",
   "forceExit": true,
   "detectOpenHandles": false
 }
