@@ -475,12 +475,29 @@ describe('Reading Regeneration E2E', () => {
       );
 
       // Verificar que la reading existe antes de intentar regenerar
+      console.log(`Premium user ID: ${premiumUserId}`);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const readingCheck = await dataSource.query(
-        `SELECT id, "userId", "regenerationCount" FROM tarot_reading WHERE id = $1`,
+        `SELECT id, "userId", "regenerationCount", "deckId", "spreadId" FROM tarot_reading WHERE id = $1`,
         [testReadingId],
       );
       console.log(`Reading check before regenerate:`, readingCheck);
+
+      // Verificar que las relaciones existen
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const cardsCheck = await dataSource.query(
+        `SELECT COUNT(*) as count FROM tarot_reading_cards_tarot_card WHERE "tarotReadingId" = $1`,
+        [testReadingId],
+      );
+      console.log(`Cards count for reading ${testReadingId}:`, cardsCheck);
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const deckExists = await dataSource.query(
+        `SELECT id FROM tarot_deck WHERE id = $1`,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        [readingCheck[0].deckId],
+      );
+      console.log(`Deck exists:`, deckExists);
 
       const response = await request(app.getHttpServer())
         .post(`/readings/${testReadingId}/regenerate`)
