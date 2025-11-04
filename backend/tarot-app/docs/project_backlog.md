@@ -2813,8 +2813,16 @@ Crear endpoint que permita a usuarios premium regenerar la interpretación de un
 **Prioridad:** 🟡 ALTA  
 **Estimación:** 3 días  
 **Dependencias:** TASK-000, TASK-002, TASK-019-a  
-**Estado:** 📋 PENDIENTE  
-**Branch:** `feature/TASK-023-a-test-database-setup`
+**Estado:** ✅ COMPLETADA  
+**Branch:** `feature/TASK-023-a-test-database-setup` (merged to develop)  
+**Commits:**
+
+- `744c5e9` - refactor(docker): Rename containers from tarotflavia-_ to tarot-_
+- `c2d217a` - feat(e2e): Add dedicated E2E database infrastructure
+- `db6b65c` - feat(e2e): Add E2E database lifecycle management scripts
+- `a2a21f3` - fix(seeders): Correct category slug mismatch in validation
+- `2db083d` - refactor(e2e): Update E2E tests to use E2EDatabaseHelper pattern
+- `[pending]` - docs(e2e): Update documentation for E2E database setup
 
 #### 📋 Descripción
 

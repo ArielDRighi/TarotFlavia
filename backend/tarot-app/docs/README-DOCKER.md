@@ -298,6 +298,165 @@ backend/tarot-app/
 
 ---
 
+## 🧪 Base de Datos de Testing E2E
+
+Este proyecto incluye una **base de datos PostgreSQL dedicada para tests E2E**, completamente aislada del entorno de desarrollo.
+
+### Características
+
+- ✅ **Puerto 5436** (diferente del desarrollo en 5435)
+- ✅ **Profile Docker `e2e`** para iniciar solo cuando sea necesario
+- ✅ **E2EDatabaseHelper** para gestión automática del ciclo de vida
+- ✅ **Seeders** para datos de prueba consistentes
+- ✅ **Limpieza automática** entre tests
+- ✅ **Aislamiento completo** del entorno de desarrollo
+
+### Iniciar E2E Database
+
+```bash
+# Iniciar contenedor de E2E (profile: e2e)
+docker-compose --profile e2e up -d tarot-postgres-e2e
+
+# Verificar que está corriendo
+docker ps --filter "name=tarot-postgres-e2e"
+```
+
+### Script de Gestión: `manage-e2e-db.sh`
+
+El proyecto incluye un script bash para gestión completa de la E2E database:
+
+```bash
+# Desde backend/tarot-app/
+chmod +x scripts/manage-e2e-db.sh
+
+# Ver ayuda
+./scripts/manage-e2e-db.sh help
+
+# Iniciar contenedor E2E
+./scripts/manage-e2e-db.sh start
+
+# Parar contenedor E2E
+./scripts/manage-e2e-db.sh stop
+
+# Limpiar base de datos (DELETE all data)
+./scripts/manage-e2e-db.sh clean
+
+# Setup completo: migraciones + seeders
+./scripts/manage-e2e-db.sh setup
+
+# Ejecutar tests E2E
+./scripts/manage-e2e-db.sh test
+
+# Verificar estado
+./scripts/manage-e2e-db.sh status
+
+# Resetear completamente (clean + setup)
+./scripts/manage-e2e-db.sh reset
+
+# Parar y eliminar contenedor
+./scripts/manage-e2e-db.sh destroy
+```
+
+### Workflow Típico de Testing
+
+```bash
+# 1. Iniciar E2E database
+./scripts/manage-e2e-db.sh start
+
+# 2. Setup inicial (solo primera vez o después de destroy)
+./scripts/manage-e2e-db.sh setup
+
+# 3. Ejecutar tests E2E
+npm run test:e2e
+
+# 4. Limpiar datos entre ejecuciones (opcional)
+./scripts/manage-e2e-db.sh clean
+
+# 5. Parar cuando termines
+./scripts/manage-e2e-db.sh stop
+```
+
+### E2EDatabaseHelper Class
+
+Los tests E2E usan la clase `E2EDatabaseHelper` que proporciona:
+
+```typescript
+import { E2EDatabaseHelper } from './helpers/e2e-database.helper';
+
+const dbHelper = new E2EDatabaseHelper();
+
+// En beforeAll
+await dbHelper.initialize();
+await dbHelper.cleanDatabase();
+
+// En tests
+const dataSource = dbHelper.getDataSource();
+await dataSource.query('SELECT ...');
+
+// En afterAll
+await dbHelper.close();
+```
+
+**Ventajas:**
+
+- ✅ Conexión automática a E2E database (puerto 5436)
+- ✅ Limpieza de datos entre tests
+- ✅ Gestión segura del ciclo de vida
+- ✅ Seeders integrados para datos de prueba
+
+### Datos de Prueba (Seeders)
+
+La E2E database se inicializa con datos consistentes:
+
+- 6 categorías de lectura
+- 1 mazo de tarot (Rider-Waite)
+- 78 cartas de tarot completas
+- 4 tipos de tiradas (spreads)
+- 42 preguntas predefinidas
+- 3 usuarios de prueba:
+  - `admin@test.com` (Admin, plan Premium)
+  - `premium@test.com` (Premium user)
+  - `free@test.com` (Free user)
+  - Contraseña para todos: `Test123456!`
+
+### Troubleshooting E2E Database
+
+**❌ Puerto 5436 ya en uso:**
+
+```bash
+# Ver qué proceso usa el puerto
+netstat -ano | grep 5436
+
+# Cambiar puerto en docker-compose.yml o .env
+```
+
+**❌ Tests fallan por datos inconsistentes:**
+
+```bash
+# Resetear E2E database completamente
+./scripts/manage-e2e-db.sh reset
+
+# Volver a ejecutar tests
+npm run test:e2e
+```
+
+**❌ Contenedor E2E no se levanta:**
+
+```bash
+# Ver logs del contenedor
+docker logs tarot-postgres-e2e-db
+
+# Verificar que no hay conflictos
+docker ps -a --filter "name=tarot"
+
+# Recrear contenedor
+./scripts/manage-e2e-db.sh destroy
+./scripts/manage-e2e-db.sh start
+./scripts/manage-e2e-db.sh setup
+```
+
+---
+
 ## 🔌 Conexión desde NestJS
 
 ### Opción 1: Usar la URL de conexión completa
