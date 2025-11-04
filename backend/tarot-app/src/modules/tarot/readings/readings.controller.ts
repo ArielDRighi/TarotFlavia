@@ -125,8 +125,7 @@ export class ReadingsController {
   })
   @ApiResponse({
     status: 403,
-    description:
-      'Usuario no premium o límite de regeneraciones alcanzado para esta lectura',
+    description: 'Usuario no es premium o no es el dueño de la lectura',
   })
   @ApiResponse({
     status: 404,
@@ -134,7 +133,8 @@ export class ReadingsController {
   })
   @ApiResponse({
     status: 429,
-    description: 'Límite diario de regeneraciones alcanzado',
+    description:
+      'Límite de regeneraciones alcanzado (máximo 3 por lectura) o límite diario alcanzado',
   })
   async regenerateInterpretation(
     @Request() req: { user: { userId: number } },

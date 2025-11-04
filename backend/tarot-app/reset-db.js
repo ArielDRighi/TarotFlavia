@@ -1,12 +1,15 @@
+require('dotenv').config();
 const { Client } = require('pg');
 
 async function resetDatabase() {
   // Conectar como superusuario para poder drop/create la base de datos
   const adminClient = new Client({
-    host: 'localhost',
-    port: 5435,
-    user: 'tarotflavia_user',
-    password: 'tarotflavia_secure_password_2024',
+    host: process.env.POSTGRES_HOST || 'localhost',
+    port: process.env.POSTGRES_PORT
+      ? parseInt(process.env.POSTGRES_PORT, 10)
+      : 5435,
+    user: process.env.POSTGRES_USER,
+    password: process.env.POSTGRES_PASSWORD,
     database: 'postgres', // Conectar a la base postgres default
   });
 

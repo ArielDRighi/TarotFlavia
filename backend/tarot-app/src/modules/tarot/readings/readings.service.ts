@@ -18,6 +18,16 @@ import { CardsService } from '../cards/cards.service';
 import { SpreadsService } from '../spreads/spreads.service';
 import { PredefinedQuestionsService } from '../../predefined-questions/predefined-questions.service';
 
+// Constantes para regeneración
+const DEFAULT_SPREAD_ID = 1; // ID del spread por defecto cuando no se especifica
+const MAX_REGENERATIONS = 3; // Límite máximo de regeneraciones por lectura
+const REGENERATION_AI_CONFIG = {
+  model: 'regeneration',
+  temperature: 0.7,
+  maxTokens: 1000,
+  isRegeneration: true,
+} as const;
+
 @Injectable()
 export class ReadingsService {
   private readonly logger = new Logger(ReadingsService.name);
@@ -206,10 +216,10 @@ export class ReadingsService {
       );
     }
 
-    // Verificar límite de regeneraciones (máximo 3)
-    if (reading.regenerationCount >= 3) {
+    // Verificar límite de regeneraciones
+    if (reading.regenerationCount >= MAX_REGENERATIONS) {
       throw new HttpException(
-        'Has alcanzado el máximo de regeneraciones (3) para esta lectura',
+        `Has alcanzado el máximo de regeneraciones (${MAX_REGENERATIONS}) para esta lectura`,
         HttpStatus.TOO_MANY_REQUESTS,
       );
     }
@@ -225,12 +235,19 @@ export class ReadingsService {
       const predefinedQuestion = await this.predefinedQuestionsService.findOne(
         reading.predefinedQuestionId,
       );
+
+      if (!predefinedQuestion) {
+        throw new NotFoundException(
+          `Pregunta predefinida con id ${reading.predefinedQuestionId} no encontrada`,
+        );
+      }
+
       question = predefinedQuestion.questionText;
     }
 
     // Obtener el spread (si existe, buscar el spread usado originalmente)
     // Como no tenemos spreadId en reading, usamos un spread genérico
-    const spread = await this.spreadsService.findById(1); // Ajustar según sea necesario
+    const spread = await this.spreadsService.findById(DEFAULT_SPREAD_ID);
 
     this.logger.log(
       `Regenerating interpretation for reading ${id} (regeneration #${reading.regenerationCount + 1})`,
@@ -256,13 +273,8 @@ export class ReadingsService {
     const newInterpretation = this.interpretationsRepository.create({
       reading,
       content: result.interpretation,
-      modelUsed: 'regeneration',
-      aiConfig: {
-        model: 'regeneration',
-        temperature: 0.7,
-        maxTokens: 1000,
-        isRegeneration: true,
-      },
+      modelUsed: REGENERATION_AI_CONFIG.model,
+      aiConfig: REGENERATION_AI_CONFIG,
     });
 
     await this.interpretationsRepository.save(newInterpretation);

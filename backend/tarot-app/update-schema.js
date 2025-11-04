@@ -1,14 +1,17 @@
+require('dotenv').config();
 const { Client } = require('pg');
 const fs = require('fs');
 const path = require('path');
 
 async function updateSchema() {
   const client = new Client({
-    host: 'localhost',
-    port: 5435,
-    user: 'tarotflavia_user',
-    password: 'tarotflavia_secure_password_2024',
-    database: 'tarotflavia_db',
+    host: process.env.POSTGRES_HOST || 'localhost',
+    port: process.env.POSTGRES_PORT
+      ? parseInt(process.env.POSTGRES_PORT, 10)
+      : 5435,
+    user: process.env.POSTGRES_USER,
+    password: process.env.POSTGRES_PASSWORD,
+    database: process.env.POSTGRES_DB,
   });
 
   try {
