@@ -478,7 +478,7 @@ describe('Reading Regeneration E2E', () => {
       console.log(`Premium user ID: ${premiumUserId}`);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const readingCheck = await dataSource.query(
-        `SELECT id, "userId", "regenerationCount", "deckId", "spreadId", "deletedAt" FROM tarot_reading WHERE id = $1`,
+        `SELECT id, "userId", "regenerationCount", "deckId", "deletedAt" FROM tarot_reading WHERE id = $1`,
         [testReadingId],
       );
       console.log(`Reading check before regenerate:`, readingCheck);
