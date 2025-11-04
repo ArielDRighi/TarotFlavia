@@ -420,6 +420,31 @@ describe('Reading Regeneration E2E', () => {
    */
   describe('POST /readings/:id/regenerate - Success', () => {
     it('should successfully regenerate interpretation for premium user', async () => {
+      // DEBUG: Verificar estado de la reading antes de regenerar
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const checkReading = await dataSource.query(
+        `SELECT id, "deletedAt", "userId", "deckId" FROM tarot_reading WHERE id = $1`,
+        [readingId],
+      );
+      console.log('DEBUG - Reading state before regeneration:', checkReading);
+
+      // Verificar con withDeleted si está soft-deleted
+      const readingWithDeleted = await dataSource
+        .getRepository(TarotReading)
+        .createQueryBuilder('reading')
+        .where('reading.id = :id', { id: readingId })
+        .withDeleted()
+        .getOne();
+      console.log(
+        'DEBUG - Reading with deleted:',
+        readingWithDeleted
+          ? {
+              id: readingWithDeleted.id,
+              deletedAt: readingWithDeleted.deletedAt,
+            }
+          : 'NOT FOUND',
+      );
+
       // Usar la reading global creada en beforeAll - es más estable en CI
       const response = await request(app.getHttpServer())
         .post(`/readings/${readingId}/regenerate`)
