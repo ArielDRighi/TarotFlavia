@@ -60,10 +60,58 @@ describe('Reading Regeneration E2E', () => {
     await createTestData();
   }, 60000);
 
+  beforeEach(async () => {
+    // Limpiamos TODOS los registros de uso del usuario premium antes de cada test
+    // Como premium tiene límite ilimitado (-1), el guard siempre permitirá el acceso
+    if (premiumUserId) {
+      await dataSource.query(`DELETE FROM usage_limit WHERE user_id = $1`, [
+        premiumUserId,
+      ]);
+    }
+  });
+
   afterAll(async () => {
     await cleanupTestData();
     await app.close();
   }, 30000);
+
+  /**
+   * Helper: Crear una reading fresca para tests
+   * Esta función se puede llamar en cada test para tener una reading independiente
+   */
+  async function createFreshReading(
+    userId: number,
+    token: string,
+  ): Promise<number> {
+    const createResponse = await request(app.getHttpServer())
+      .post('/readings')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        predefinedQuestionId: predefinedQuestionId,
+        deckId: deckId,
+        spreadId: spreadId,
+        cardIds: cardIds,
+        cardPositions: [
+          { cardId: cardIds[0], position: 'Past', isReversed: false },
+          { cardId: cardIds[1], position: 'Present', isReversed: false },
+          { cardId: cardIds[2], position: 'Future', isReversed: true },
+        ],
+        generateInterpretation: true,
+      })
+      .expect(201);
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const newReadingId = createResponse.body.id as number;
+    expect(newReadingId).toBeDefined();
+    console.log(`✓ Created fresh reading with ID: ${newReadingId}`);
+
+    // Limpiar usage limits DESPUÉS de crear para que el siguiente test no tenga límites
+    await dataSource.query(`DELETE FROM usage_limit WHERE user_id = $1`, [
+      userId,
+    ]);
+
+    return newReadingId;
+  }
 
   /**
    * Helper: Crear datos de prueba
@@ -412,8 +460,14 @@ describe('Reading Regeneration E2E', () => {
    */
   describe('POST /readings/:id/regenerate - Success', () => {
     it('should successfully regenerate interpretation for premium user', async () => {
+      // Crear una reading fresca para este test específico
+      const testReadingId = await createFreshReading(
+        premiumUserId,
+        premiumUserToken,
+      );
+
       const response = await request(app.getHttpServer())
-        .post(`/readings/${readingId}/regenerate`)
+        .post(`/readings/${testReadingId}/regenerate`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(201);
 
@@ -438,10 +492,21 @@ describe('Reading Regeneration E2E', () => {
     });
 
     it('should create new interpretation entry in database', async () => {
+      // Crear una reading fresca y regenerarla
+      const testReadingId = await createFreshReading(
+        premiumUserId,
+        premiumUserToken,
+      );
+
+      await request(app.getHttpServer())
+        .post(`/readings/${testReadingId}/regenerate`)
+        .set('Authorization', `Bearer ${premiumUserToken}`)
+        .expect(201);
+
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const interpretations = await dataSource.query(
         `SELECT * FROM tarot_interpretation WHERE "readingId" = $1 ORDER BY "createdAt" DESC`,
-        [readingId],
+        [testReadingId],
       );
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -454,29 +519,54 @@ describe('Reading Regeneration E2E', () => {
    */
   describe('POST /readings/:id/regenerate - Regeneration Limit', () => {
     it('should allow up to 3 regenerations', async () => {
-      // Ya hicimos 1 regeneración en el test anterior
-      // Hacemos 2 más para llegar al límite
+      // Crear una reading fresca para probar el límite
+      const testReadingId = await createFreshReading(
+        premiumUserId,
+        premiumUserToken,
+      );
+
+      // Hacer 3 regeneraciones
       await request(app.getHttpServer())
-        .post(`/readings/${readingId}/regenerate`)
+        .post(`/readings/${testReadingId}/regenerate`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(201);
 
       await request(app.getHttpServer())
-        .post(`/readings/${readingId}/regenerate`)
+        .post(`/readings/${testReadingId}/regenerate`)
+        .set('Authorization', `Bearer ${premiumUserToken}`)
+        .expect(201);
+
+      await request(app.getHttpServer())
+        .post(`/readings/${testReadingId}/regenerate`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(201);
 
       // Verificar que regenerationCount es 3
       const reading = await dataSource
         .getRepository(TarotReading)
-        .findOne({ where: { id: readingId } });
+        .findOne({ where: { id: testReadingId } });
 
       expect(reading?.regenerationCount).toBe(3);
     });
 
     it('should return 429 when exceeding 3 regenerations', async () => {
+      // Crear una reading fresca y hacer 3 regeneraciones
+      const testReadingId = await createFreshReading(
+        premiumUserId,
+        premiumUserToken,
+      );
+
+      // Hacer 3 regeneraciones (llegando al límite)
+      for (let i = 0; i < 3; i++) {
+        await request(app.getHttpServer())
+          .post(`/readings/${testReadingId}/regenerate`)
+          .set('Authorization', `Bearer ${premiumUserToken}`)
+          .expect(201);
+      }
+
+      // La cuarta debe fallar con 429
       const response = await request(app.getHttpServer())
-        .post(`/readings/${readingId}/regenerate`)
+        .post(`/readings/${testReadingId}/regenerate`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(429);
 
