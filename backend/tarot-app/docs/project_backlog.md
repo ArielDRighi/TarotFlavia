@@ -2808,6 +2808,742 @@ Crear endpoint que permita a usuarios premium regenerar la interpretación de un
 
 ---
 
+### **TASK-023-a: Configurar Base de Datos Dedicada para Testing E2E** ⭐⭐
+
+**Prioridad:** 🟡 ALTA  
+**Estimación:** 3 días  
+**Dependencias:** TASK-000, TASK-002, TASK-019-a  
+**Estado:** 📋 PENDIENTE  
+**Branch:** `feature/TASK-023-a-test-database-setup`
+
+#### 📋 Descripción
+
+Crear y configurar una base de datos PostgreSQL dedicada exclusivamente para tests E2E, aislada completamente de la base de datos de desarrollo. Esto incluye validación completa de migraciones, seeders, y scripts automatizados de gestión para ambas bases de datos siguiendo mejores prácticas empresariales.
+
+**Contexto:**  
+Actualmente los tests E2E utilizan la misma base de datos de desarrollo (`tarotflavia_db`), lo cual genera:
+
+- ❌ Contaminación de datos entre desarrollo y testing
+- ❌ Riesgo de pérdida de datos de desarrollo durante tests
+- ❌ Imposibilidad de ejecutar tests en paralelo con desarrollo activo
+- ❌ Dificultad para mantener entornos reproducibles
+
+**Solución:**  
+Implementar infraestructura de base de datos de testing con gestión automatizada y validación de integridad.
+
+---
+
+#### ✅ Fase 1: Configuración de Infraestructura de Testing
+
+**1.1 Docker Compose - Nueva Base de Datos de Testing**
+
+- [ ] Extender `docker-compose.yml` agregando servicio `tarotflavia-postgres-test`:
+
+  ```yaml
+  tarotflavia-postgres-test:
+    container_name: tarotflavia-postgres-test-db
+    image: postgres:16-alpine
+    ports:
+      - '${TAROTFLAVIA_TEST_DB_PORT:-5436}:5432'
+    environment:
+      POSTGRES_DB: ${TAROTFLAVIA_TEST_DB_NAME:-tarotflavia_test_db}
+      POSTGRES_USER: ${TAROTFLAVIA_TEST_DB_USER:-tarotflavia_test_user}
+      POSTGRES_PASSWORD: ${TAROTFLAVIA_TEST_DB_PASSWORD:-tarotflavia_test_password_2024}
+    volumes:
+      - tarotflavia-postgres-test-data:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - tarotflavia-network
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U tarotflavia_test_user -d tarotflavia_test_db',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    labels:
+      - 'com.tarotflavia.service=postgres-test'
+      - 'com.tarotflavia.environment=testing'
+  ```
+
+- [ ] Agregar volumen `tarotflavia-postgres-test-data` en la sección `volumes`
+
+- [ ] Actualizar `.env.example` con variables de testing:
+  ```env
+  # Testing Database Configuration
+  TAROTFLAVIA_TEST_DB_HOST=localhost
+  TAROTFLAVIA_TEST_DB_PORT=5436
+  TAROTFLAVIA_TEST_DB_USER=tarotflavia_test_user
+  TAROTFLAVIA_TEST_DB_PASSWORD=tarotflavia_test_password_2024
+  TAROTFLAVIA_TEST_DB_NAME=tarotflavia_test_db
+  TAROTFLAVIA_TEST_DB_SYNCHRONIZE=false
+  TAROTFLAVIA_TEST_DB_LOGGING=false
+  ```
+
+**1.2 Configuración TypeORM para Testing**
+
+- [ ] Crear `src/config/typeorm-test.config.ts`:
+
+  ```typescript
+  import { DataSource, DataSourceOptions } from 'typeorm';
+  import { config } from 'dotenv';
+  import { join } from 'path';
+
+  config();
+
+  export const testDataSourceOptions: DataSourceOptions = {
+    type: 'postgres',
+    host: process.env.TAROTFLAVIA_TEST_DB_HOST || 'localhost',
+    port: parseInt(process.env.TAROTFLAVIA_TEST_DB_PORT || '5436', 10),
+    username: process.env.TAROTFLAVIA_TEST_DB_USER || 'tarotflavia_test_user',
+    password:
+      process.env.TAROTFLAVIA_TEST_DB_PASSWORD ||
+      'tarotflavia_test_password_2024',
+    database: process.env.TAROTFLAVIA_TEST_DB_NAME || 'tarotflavia_test_db',
+    entities: [join(__dirname, '..', '**', '*.entity{.ts,.js}')],
+    migrations: [join(__dirname, '..', 'database', 'migrations', '*{.ts,.js}')],
+    synchronize: false,
+    logging: process.env.TAROTFLAVIA_TEST_DB_LOGGING === 'true',
+    migrationsRun: false, // Gestionado por scripts
+  };
+
+  export const TestDataSource = new DataSource(testDataSourceOptions);
+  ```
+
+- [ ] Crear helper `test/test-database.helper.ts` para gestión de DB en tests:
+
+  ```typescript
+  import { TestDataSource } from '../src/config/typeorm-test.config';
+  import { DataSource } from 'typeorm';
+
+  export class TestDatabaseHelper {
+    static async initializeTestDatabase(): Promise<DataSource> {
+      if (!TestDataSource.isInitialized) {
+        await TestDataSource.initialize();
+      }
+      return TestDataSource;
+    }
+
+    static async closeTestDatabase(): Promise<void> {
+      if (TestDataSource.isInitialized) {
+        await TestDataSource.destroy();
+      }
+    }
+
+    static async clearAllTables(): Promise<void> {
+      const entities = TestDataSource.entityMetadatas;
+      for (const entity of entities) {
+        const repository = TestDataSource.getRepository(entity.name);
+        await repository.query(`TRUNCATE TABLE "${entity.tableName}" CASCADE;`);
+      }
+    }
+  }
+  ```
+
+**1.3 Actualizar Configuración de Jest E2E**
+
+- [ ] Modificar `test/jest-e2e.json` para usar variables de entorno de testing:
+
+  ```json
+  {
+    "moduleFileExtensions": ["js", "json", "ts"],
+    "rootDir": ".",
+    "testEnvironment": "node",
+    "testRegex": ".e2e-spec.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "setupFilesAfterEnv": ["<rootDir>/setup-e2e.ts"],
+    "testTimeout": 30000,
+    "maxWorkers": 1,
+    "forceExit": true
+  }
+  ```
+
+- [ ] Crear `test/setup-e2e.ts` para configurar entorno antes de tests:
+
+  ```typescript
+  import { config } from 'dotenv';
+  import { join } from 'path';
+
+  // Cargar variables de entorno para testing
+  config({ path: join(__dirname, '..', '.env') });
+
+  // Sobrescribir con configuración de testing
+  process.env.TAROTFLAVIA_DB_HOST = process.env.TAROTFLAVIA_TEST_DB_HOST;
+  process.env.TAROTFLAVIA_DB_PORT = process.env.TAROTFLAVIA_TEST_DB_PORT;
+  process.env.TAROTFLAVIA_DB_USERNAME = process.env.TAROTFLAVIA_TEST_DB_USER;
+  process.env.TAROTFLAVIA_DB_PASSWORD_VALUE =
+    process.env.TAROTFLAVIA_TEST_DB_PASSWORD;
+  process.env.TAROTFLAVIA_DB_DATABASE = process.env.TAROTFLAVIA_TEST_DB_NAME;
+  process.env.TAROTFLAVIA_DB_SYNCHRONIZE = 'false';
+  process.env.TAROTFLAVIA_DB_LOGGING = 'false';
+  ```
+
+---
+
+#### ✅ Fase 2: Scripts de Gestión de Bases de Datos
+
+**2.1 Scripts para DB de Desarrollo**
+
+- [ ] Crear `scripts/db-dev-clean.sh`:
+
+  ```bash
+  #!/bin/bash
+  # Limpia completamente la DB de desarrollo y la recrea desde cero
+
+  set -e
+
+  echo "🧹 Limpiando base de datos de DESARROLLO..."
+
+  # Variables
+  DB_CONTAINER="tarotflavia-postgres-db"
+  DB_NAME="${TAROTFLAVIA_DB_NAME:-tarotflavia_db}"
+  DB_USER="${TAROTFLAVIA_DB_USER:-tarotflavia_user}"
+
+  # Verificar que el contenedor esté corriendo
+  if ! docker ps | grep -q $DB_CONTAINER; then
+    echo "❌ Error: Contenedor $DB_CONTAINER no está corriendo"
+    echo "   Ejecuta: docker-compose up -d tarotflavia-postgres"
+    exit 1
+  fi
+
+  # Eliminar todas las tablas
+  echo "  → Eliminando todas las tablas..."
+  docker exec -it $DB_CONTAINER psql -U $DB_USER -d $DB_NAME -c "
+    DROP SCHEMA public CASCADE;
+    CREATE SCHEMA public;
+    GRANT ALL ON SCHEMA public TO $DB_USER;
+    GRANT ALL ON SCHEMA public TO public;
+  "
+
+  # Reinstalar extensiones necesarias
+  echo "  → Reinstalando extensiones..."
+  docker exec -it $DB_CONTAINER psql -U $DB_USER -d $DB_NAME -c "
+    CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";
+    CREATE EXTENSION IF NOT EXISTS pg_trgm;
+  "
+
+  echo "✅ Base de datos de desarrollo limpiada exitosamente"
+  echo ""
+  echo "📝 Próximos pasos:"
+  echo "   1. Ejecutar migraciones: npm run migration:run"
+  echo "   2. Ejecutar seeders: npm run seed"
+  ```
+
+- [ ] Crear versión PowerShell `scripts/db-dev-clean.ps1` (Windows compatible)
+
+- [ ] Crear `scripts/db-dev-reset.sh`:
+
+  ```bash
+  #!/bin/bash
+  # Limpia, ejecuta migraciones y seeders en DB de desarrollo
+
+  set -e
+
+  echo "🔄 Reiniciando base de datos de DESARROLLO..."
+
+  # Limpiar
+  ./scripts/db-dev-clean.sh
+
+  # Ejecutar migraciones
+  echo ""
+  echo "📦 Ejecutando migraciones..."
+  npm run migration:run
+
+  # Ejecutar seeders
+  echo ""
+  echo "🌱 Ejecutando seeders..."
+  npm run seed
+
+  echo ""
+  echo "✅ Base de datos de desarrollo reiniciada completamente"
+  ```
+
+- [ ] Crear versión PowerShell `scripts/db-dev-reset.ps1`
+
+**2.2 Scripts para DB de Testing**
+
+- [ ] Crear `scripts/db-test-clean.sh`:
+
+  ```bash
+  #!/bin/bash
+  # Limpia completamente la DB de testing
+
+  set -e
+
+  echo "🧹 Limpiando base de datos de TESTING..."
+
+  DB_CONTAINER="tarotflavia-postgres-test-db"
+  DB_NAME="${TAROTFLAVIA_TEST_DB_NAME:-tarotflavia_test_db}"
+  DB_USER="${TAROTFLAVIA_TEST_DB_USER:-tarotflavia_test_user}"
+
+  if ! docker ps | grep -q $DB_CONTAINER; then
+    echo "❌ Error: Contenedor $DB_CONTAINER no está corriendo"
+    echo "   Ejecuta: docker-compose up -d tarotflavia-postgres-test"
+    exit 1
+  fi
+
+  docker exec -it $DB_CONTAINER psql -U $DB_USER -d $DB_NAME -c "
+    DROP SCHEMA public CASCADE;
+    CREATE SCHEMA public;
+    GRANT ALL ON SCHEMA public TO $DB_USER;
+    GRANT ALL ON SCHEMA public TO public;
+    CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";
+    CREATE EXTENSION IF NOT EXISTS pg_trgm;
+  "
+
+  echo "✅ Base de datos de testing limpiada"
+  ```
+
+- [ ] Crear `scripts/db-test-reset.sh`:
+
+  ```bash
+  #!/bin/bash
+  # Reinicia DB de testing con migraciones y datos mínimos
+
+  set -e
+
+  echo "🔄 Reiniciando base de datos de TESTING..."
+
+  # Limpiar
+  ./scripts/db-test-clean.sh
+
+  # Ejecutar migraciones en DB de testing
+  echo ""
+  echo "📦 Ejecutando migraciones en DB de testing..."
+  DATABASE_URL="postgresql://${TAROTFLAVIA_TEST_DB_USER}:${TAROTFLAVIA_TEST_DB_PASSWORD}@localhost:${TAROTFLAVIA_TEST_DB_PORT}/${TAROTFLAVIA_TEST_DB_NAME}" \
+  npm run migration:run
+
+  # Ejecutar solo seeders esenciales
+  echo ""
+  echo "🌱 Ejecutando seeders esenciales..."
+  NODE_ENV=test npm run seed
+
+  echo ""
+  echo "✅ Base de datos de testing reiniciada"
+  ```
+
+- [ ] Crear versiones PowerShell de ambos scripts
+
+**2.3 Scripts NPM en package.json**
+
+- [ ] Agregar scripts en `package.json`:
+  ```json
+  {
+    "scripts": {
+      // Desarrollo
+      "db:dev:clean": "bash scripts/db-dev-clean.sh",
+      "db:dev:reset": "bash scripts/db-dev-reset.sh",
+
+      // Testing
+      "db:test:clean": "bash scripts/db-test-clean.sh",
+      "db:test:reset": "bash scripts/db-test-reset.sh",
+      "db:test:migrate": "DATABASE_URL=postgresql://${TAROTFLAVIA_TEST_DB_USER}:${TAROTFLAVIA_TEST_DB_PASSWORD}@localhost:${TAROTFLAVIA_TEST_DB_PORT}/${TAROTFLAVIA_TEST_DB_NAME} npm run migration:run",
+
+      // Pre-test setup
+      "pretest:e2e": "npm run db:test:reset",
+      "test:e2e:fresh": "npm run db:test:reset && npm run test:e2e"
+    }
+  }
+  ```
+
+---
+
+#### ✅ Fase 3: Validación de Migraciones y Seeders
+
+**3.1 Auditoría de Migraciones**
+
+- [ ] Revisar migración `1761655973524-InitialSchema.ts`:
+
+  - Verificar que todos los campos estén correctamente tipados
+  - Validar nombres de columnas (snake_case vs camelCase)
+  - Confirmar índices necesarios
+  - Asegurar foreign keys correctas
+  - Validar constraints (NOT NULL, UNIQUE, etc.)
+
+- [ ] Verificar que la migración sea idempotente:
+
+  - Ejecutar `up()` dos veces debe fallar apropiadamente
+  - Ejecutar `down()` debe revertir completamente todos los cambios
+  - No debe haber hard-coded values excepto defaults
+
+- [ ] Crear test unitario `src/database/migrations/migration-validation.spec.ts`:
+
+  ```typescript
+  import { TestDataSource } from '../../config/typeorm-test.config';
+  import { InitialSchema1761655973524 } from './1761655973524-InitialSchema';
+
+  describe('InitialSchema Migration', () => {
+    it('should run up migration successfully', async () => {
+      await TestDataSource.initialize();
+      const queryRunner = TestDataSource.createQueryRunner();
+
+      const migration = new InitialSchema1761655973524();
+      await expect(migration.up(queryRunner)).resolves.not.toThrow();
+
+      await queryRunner.release();
+      await TestDataSource.destroy();
+    });
+
+    it('should verify all tables are created', async () => {
+      // Verificar existencia de todas las tablas esperadas
+    });
+
+    it('should verify all indexes are created', async () => {
+      // Verificar índices
+    });
+  });
+  ```
+
+**3.2 Validación de Consistencia entre Entidades y Migraciones**
+
+- [ ] Crear script `scripts/validate-schema-consistency.ts`:
+
+  ```typescript
+  import { DataSource } from 'typeorm';
+  import { testDataSourceOptions } from '../src/config/typeorm-test.config';
+
+  /**
+   * Valida que el esquema generado por migraciones coincida
+   * exactamente con las entidades de TypeORM
+   */
+  async function validateSchemaConsistency() {
+    const dataSource = new DataSource(testDataSourceOptions);
+    await dataSource.initialize();
+
+    try {
+      // Ejecutar migraciones
+      await dataSource.runMigrations();
+
+      // Comparar esquema real vs esperado por entidades
+      const queryRunner = dataSource.createQueryRunner();
+      const tables = await queryRunner.getTables();
+
+      // Validaciones:
+      // 1. Todas las entidades tienen tabla
+      // 2. Todos los campos de entidades existen en tablas
+      // 3. Tipos de datos coinciden
+      // 4. Relaciones están correctamente configuradas
+
+      console.log('✅ Esquema consistente entre migraciones y entidades');
+    } catch (error) {
+      console.error('❌ Inconsistencia detectada:', error);
+      process.exit(1);
+    } finally {
+      await dataSource.destroy();
+    }
+  }
+
+  validateSchemaConsistency();
+  ```
+
+- [ ] Agregar script NPM: `"validate:schema": "ts-node scripts/validate-schema-consistency.ts"`
+
+**3.3 Auditoría de Seeders**
+
+- [ ] Revisar cada seeder y validar:
+
+  **a) `tarot-decks.seeder.ts`:**
+
+  - [ ] Campos coinciden con entidad `TarotDeck`
+  - [ ] Verificar: `name`, `description`, `imageUrl`, `cardCount`, `isActive`, `isDefault`, `artist`, `yearCreated`, `tradition`, `publisher`
+  - [ ] Asegurar que hay exactamente 1 deck con `isDefault: true`
+  - [ ] Validar URLs de imágenes
+
+  **b) `tarot-cards.seeder.ts`:**
+
+  - [ ] Campos coinciden con entidad `TarotCard`
+  - [ ] Verificar: `name`, `number`, `category`, `imageUrl`, `reversedImageUrl`, `meaningUpright`, `meaningReversed`, `description`, `keywords`, `deckId`
+  - [ ] Asegurar que `deckId` referencia deck existente
+  - [ ] Validar 78 cartas por deck (22 Arcanos Mayores + 56 Arcanos Menores)
+  - [ ] Validar categories: `'major'`, `'cups'`, `'wands'`, `'swords'`, `'pentacles'`
+
+  **c) `tarot-spreads.seeder.ts`:**
+
+  - [ ] Campos coinciden con entidad `TarotSpread`
+  - [ ] Verificar: `name`, `description`, `cardCount`, `positions` (jsonb), `imageUrl`, `difficulty`, `isBeginnerFriendly`, `whenToUse`
+  - [ ] Validar que `positions` es array JSON válido
+  - [ ] Verificar que `cardCount` coincide con length de `positions`
+
+  **d) `reading-categories.seeder.ts`:**
+
+  - [ ] Campos coinciden con entidad `ReadingCategory`
+  - [ ] Verificar: `name`, `slug`, `description`, `icon`, `color`, `order`, `isActive`
+  - [ ] Asegurar slugs únicos (sin espacios, lowercase, sin caracteres especiales)
+  - [ ] Validar valores de `order` sin duplicados
+
+  **e) `predefined-questions.seeder.ts`:**
+
+  - [ ] Campos coinciden con entidad `PredefinedQuestion`
+  - [ ] Verificar: `category_id` vs `categoryId` (revisar naming convention)
+  - [ ] Asegurar que `category_id` referencia categorías existentes
+  - [ ] Validar que `question_text` tiene máximo 200 caracteres
+  - [ ] Verificar que hay al menos 3-5 preguntas por categoría
+
+  **f) `users.seeder.ts`:**
+
+  - [ ] Campos coinciden con entidad `User`
+  - [ ] Verificar hashing de passwords con bcrypt
+  - [ ] Crear usuarios de prueba:
+    - Usuario FREE básico
+    - Usuario PREMIUM
+    - Usuario ADMIN
+  - [ ] **NO incluir en producción** (solo para desarrollo/testing)
+
+- [ ] Crear test de integración `src/database/seeds/seeders-validation.spec.ts`:
+
+  ```typescript
+  describe('Seeders Validation', () => {
+    it('should seed all data without errors', async () => {
+      // Ejecutar todos los seeders y verificar que no fallan
+    });
+
+    it('should maintain referential integrity', async () => {
+      // Verificar que todas las FKs apuntan a registros existentes
+    });
+
+    it('should create expected number of records', async () => {
+      // Verificar conteos esperados:
+      // - 1 deck mínimo
+      // - 78 cartas por deck
+      // - Mínimo 3 spreads
+      // - Mínimo 5 categorías
+      // - Mínimo 15 preguntas predefinidas
+    });
+  });
+  ```
+
+**3.4 Datos Esenciales vs Datos de Testing**
+
+- [ ] Identificar datos que DEBEN estar en AMBAS DBs (esenciales):
+
+  - ✅ Decks de Tarot (al menos Rider-Waite)
+  - ✅ 78 cartas del deck principal
+  - ✅ Spreads básicos (Cruz Celta, 3 cartas, etc.)
+  - ✅ Categorías de lecturas
+  - ✅ Preguntas predefinidas
+
+- [ ] Identificar datos SOLO para testing:
+
+  - ✅ Usuarios de prueba (free, premium, admin)
+  - ✅ Lecturas de ejemplo
+  - ✅ Tokens de refresh de prueba
+
+- [ ] Modificar `src/seed-data.ts` para detectar entorno:
+
+  ```typescript
+  const isTestEnvironment = process.env.NODE_ENV === 'test';
+
+  async function seed() {
+    // Siempre ejecutar seeders esenciales
+    await seedDecks();
+    await seedCards();
+    await seedSpreads();
+    await seedCategories();
+    await seedPredefinedQuestions();
+
+    // Solo en desarrollo/testing crear usuarios de prueba
+    if (isTestEnvironment || process.env.NODE_ENV === 'development') {
+      await seedTestUsers();
+    }
+  }
+  ```
+
+---
+
+#### ✅ Fase 4: Actualizar Tests E2E
+
+**4.1 Actualizar Tests Existentes**
+
+- [ ] Modificar `test/mvp-complete.e2e-spec.ts`:
+
+  - Usar `TestDatabaseHelper` para inicialización
+  - Eliminar creación manual de tablas en `beforeAll`
+  - Usar seeders en lugar de crear datos inline
+  - Agregar `afterEach` para limpiar datos entre tests si es necesario
+
+- [ ] Actualizar `test/readings-hybrid.e2e-spec.ts`:
+
+  - Aplicar mismo patrón de gestión de DB
+
+- [ ] Actualizar todos los archivos `*.e2e-spec.ts`:
+  - Estandarizar setup/teardown de DB
+  - Usar helpers compartidos
+  - Documentar dependencias de datos
+
+**4.2 Crear Suite de Tests de Infraestructura**
+
+- [ ] Crear `test/database-infrastructure.e2e-spec.ts`:
+
+  ```typescript
+  describe('Database Infrastructure (E2E)', () => {
+    describe('Development Database', () => {
+      it('should be accessible on port 5435', () => {});
+      it('should have all required extensions installed', () => {});
+    });
+
+    describe('Test Database', () => {
+      it('should be accessible on port 5436', () => {});
+      it('should be isolated from development database', () => {});
+      it('should reset cleanly between test runs', () => {});
+    });
+
+    describe('Migrations', () => {
+      it('should run all migrations without errors', () => {});
+      it('should be reversible (down migrations work)', () => {});
+      it('should match entity schema', () => {});
+    });
+
+    describe('Seeders', () => {
+      it('should seed all essential data', () => {});
+      it('should respect referential integrity', () => {});
+      it('should be idempotent', () => {});
+    });
+  });
+  ```
+
+---
+
+#### ✅ Fase 5: Documentación
+
+**5.1 Actualizar README-DOCKER.md**
+
+- [ ] Agregar sección "Base de Datos de Testing":
+  - Propósito y beneficios
+  - Configuración del segundo contenedor
+  - Diferencias entre DB dev y test
+  - Comandos específicos para testing
+
+**5.2 Crear TESTING_DATABASE.md**
+
+- [ ] Documentar en detalle:
+  - Arquitectura de testing con DB dedicada
+  - Flujo de ejecución de tests E2E
+  - Scripts de gestión disponibles
+  - Troubleshooting específico de testing
+  - Mejores prácticas de testing con bases de datos
+
+**5.3 Actualizar MIGRATIONS.md**
+
+- [ ] Agregar sección sobre testing de migraciones
+- [ ] Documentar proceso de validación de esquema
+- [ ] Guías para escribir migraciones testeables
+
+**5.4 Actualizar TESTING_STRATEGY.md**
+
+- [ ] Incluir estrategia de base de datos de testing
+- [ ] Documentar helpers y utilidades
+- [ ] Patrones recomendados para tests E2E
+
+---
+
+#### 🎯 Criterios de Aceptación
+
+**Infraestructura:**
+
+- ✓ Segundo contenedor PostgreSQL corriendo en puerto 5436
+- ✓ DB de testing completamente aislada de DB de desarrollo
+- ✓ Variables de entorno correctamente configuradas
+- ✓ Conexiones TypeORM separadas para dev y test
+
+**Scripts:**
+
+- ✓ Scripts de limpieza funcionan correctamente en ambas DBs
+- ✓ Scripts de reset ejecutan migraciones + seeders sin errores
+- ✓ Scripts disponibles tanto en Bash como PowerShell
+- ✓ Comandos NPM intuitivos y bien documentados
+
+**Migraciones:**
+
+- ✓ Migración `InitialSchema` ejecuta sin errores
+- ✓ Todas las tablas, índices y constraints creados correctamente
+- ✓ Rollback (down migration) funciona correctamente
+- ✓ Esquema de migración coincide 100% con entidades TypeORM
+
+**Seeders:**
+
+- ✓ Todos los seeders ejecutan sin errores
+- ✓ Nombres de campos coinciden exactamente con entidades
+- ✓ Integridad referencial respetada (FKs válidas)
+- ✓ Datos esenciales presentes en ambas DBs
+- ✓ Usuarios de prueba solo en DB de testing
+- ✓ Seeders son idempotentes (pueden ejecutarse múltiples veces)
+
+**Tests:**
+
+- ✓ Todos los tests E2E existentes pasan con nueva configuración
+- ✓ Tests de infraestructura creados y pasando
+- ✓ Tests utilizan DB de testing, no DB de desarrollo
+- ✓ Setup/teardown estandarizado en todos los tests
+
+**Calidad:**
+
+- ✓ Coverage de migraciones: 100%
+- ✓ Coverage de seeders: 100%
+- ✓ Tests de validación de esquema pasando
+- ✓ Tests de integridad referencial pasando
+
+**Documentación:**
+
+- ✓ README-DOCKER.md actualizado con sección de testing
+- ✓ TESTING_DATABASE.md creado y completo
+- ✓ MIGRATIONS.md actualizado
+- ✓ TESTING_STRATEGY.md actualizado
+- ✓ Scripts documentados con comentarios inline
+
+---
+
+#### 📚 Recursos y Referencias
+
+**Mejores Prácticas Empresariales:**
+
+- Separación estricta de entornos (dev/test/prod)
+- Infraestructura como código (Docker Compose)
+- Scripts automatizados y reproducibles
+- Validación automática de integridad
+- Documentación exhaustiva
+
+**Patrones Aplicados:**
+
+- Test Data Builders para seeders
+- Database-per-test-suite pattern
+- Repository pattern para acceso a datos
+- Migration-based schema management (no sync)
+
+**Herramientas:**
+
+- TypeORM migrations
+- Docker Compose para orquestación
+- Jest para testing
+- Bash/PowerShell para scripting
+
+---
+
+#### 🔗 Tareas Relacionadas
+
+- **TASK-000:** Configuración inicial de Docker PostgreSQL
+- **TASK-002:** Sistema de migraciones
+- **TASK-019-a:** Suite completa de tests E2E
+- **TASK-005:** Tarot cards seeder
+- **TASK-008:** Category seeder
+- **TASK-010:** Predefined questions seeder
+
+---
+
+#### 💡 Mejoras Futuras (Post-MVP)
+
+- [ ] CI/CD: Ejecutar tests E2E en pipeline con DB temporal
+- [ ] Snapshots de DB para tests más rápidos
+- [ ] Factory pattern para generación de datos de prueba
+- [ ] Transactional tests (rollback automático después de cada test)
+- [ ] Performance testing con datos voluminosos
+- [ ] Tests de migración entre versiones (upgrade path)
+
+---
+
 ### **TASK-023: Implementar Endpoint de Historial de Lecturas con Paginación**
 
 **Prioridad:** 🟡 ALTA  
