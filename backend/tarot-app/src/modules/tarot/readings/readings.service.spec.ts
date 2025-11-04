@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ReadingsService } from './readings.service';
 import { TarotReading } from './entities/tarot-reading.entity';
+import { TarotInterpretation } from '../interpretations/entities/tarot-interpretation.entity';
 import { User } from '../../users/entities/user.entity';
 import { TarotDeck } from '../decks/entities/tarot-deck.entity';
 import { TarotCard } from '../cards/entities/tarot-card.entity';
@@ -124,6 +125,9 @@ describe('ReadingsService', () => {
     ],
     interpretation: 'Your reading suggests...',
     createdAt: new Date(),
+    updatedAt: new Date(),
+    regenerationCount: 0,
+    interpretations: [],
   };
 
   beforeEach(async () => {
@@ -132,6 +136,10 @@ describe('ReadingsService', () => {
         ReadingsService,
         {
           provide: getRepositoryToken(TarotReading),
+          useValue: mockRepository,
+        },
+        {
+          provide: getRepositoryToken(TarotInterpretation),
           useValue: mockRepository,
         },
         {
