@@ -1,0 +1,504 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
+import * as request from 'supertest';
+import { App } from 'supertest/types';
+import { AppModule } from '../src/app.module';
+import { DataSource } from 'typeorm';
+import { User, UserPlan } from '../src/modules/users/entities/user.entity';
+import { TarotReading } from '../src/modules/tarot/readings/entities/tarot-reading.entity';
+import { TarotDeck } from '../src/modules/tarot/decks/entities/tarot-deck.entity';
+import { TarotSpread } from '../src/modules/tarot/spreads/entities/tarot-spread.entity';
+import { TarotCard } from '../src/modules/tarot/cards/entities/tarot-card.entity';
+import { ReadingCategory } from '../src/modules/categories/entities/reading-category.entity';
+import { PredefinedQuestion } from '../src/modules/predefined-questions/entities/predefined-question.entity';
+import { hash } from 'bcrypt';
+
+interface LoginResponse {
+  user: {
+    id: number;
+    email: string;
+    name: string;
+    isAdmin: boolean;
+    plan: string;
+  };
+  access_token: string;
+}
+
+/**
+ * Reading Regeneration E2E Tests
+ *
+ * Tests específicos para la funcionalidad de regeneración de interpretaciones
+ * Solo usuarios premium pueden regenerar interpretaciones
+ * Límite: 3 regeneraciones por lectura
+ */
+describe('Reading Regeneration E2E', () => {
+  let app: INestApplication<App>;
+  let dataSource: DataSource;
+  let freeUserToken: string;
+  let premiumUserToken: string;
+  let freeUserId: number;
+  let premiumUserId: number;
+  let readingId: number;
+  let categoryId: number;
+  let predefinedQuestionId: number;
+  let deckId: number;
+  let spreadId: number;
+  let cardIds: number[];
+  const testTimestamp = Date.now();
+
+  beforeAll(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+    await app.init();
+
+    dataSource = moduleFixture.get<DataSource>(DataSource);
+
+    await createTestData();
+  }, 60000);
+
+  afterAll(async () => {
+    await cleanupTestData();
+    await app.close();
+  }, 30000);
+
+  /**
+   * Helper: Crear datos de prueba
+   */
+  async function createTestData(): Promise<void> {
+    // Crear usuarios
+    const hashedPassword = await hash('Password123!', 10);
+
+    const freeUser = await dataSource.getRepository(User).save({
+      email: `free-regen-${testTimestamp}@test.com`,
+      password: hashedPassword,
+      name: 'Free User Regen Test',
+      plan: UserPlan.FREE,
+    });
+    freeUserId = freeUser.id;
+
+    const premiumUser = await dataSource.getRepository(User).save({
+      email: `premium-regen-${testTimestamp}@test.com`,
+      password: hashedPassword,
+      name: 'Premium User Regen Test',
+      plan: UserPlan.PREMIUM,
+      planStartedAt: new Date(),
+      planExpiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    });
+    premiumUserId = premiumUser.id;
+
+    // Login usuarios
+    const freeLoginResponse = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({
+        email: `free-regen-${testTimestamp}@test.com`,
+        password: 'Password123!',
+      });
+    freeUserToken = (freeLoginResponse.body as LoginResponse).access_token;
+
+    const premiumLoginResponse = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({
+        email: `premium-regen-${testTimestamp}@test.com`,
+        password: 'Password123!',
+      });
+    premiumUserToken = (premiumLoginResponse.body as LoginResponse)
+      .access_token;
+
+    // Crear categoría
+    const category = await dataSource.getRepository(ReadingCategory).save({
+      name: `Test Category Regen ${testTimestamp}`,
+      slug: `test-category-regen-${testTimestamp}`,
+      description: 'Test category for regeneration',
+      icon: 'test-icon',
+      color: '#000000',
+      order: 1,
+      isActive: true,
+    });
+    categoryId = category.id;
+
+    // Crear pregunta predefinida
+    const question = await dataSource.getRepository(PredefinedQuestion).save({
+      categoryId: categoryId,
+      questionText: 'What does my future hold?',
+      order: 1,
+      isActive: true,
+    });
+    predefinedQuestionId = question.id;
+
+    // Obtener o crear deck
+    let deck = await dataSource.getRepository(TarotDeck).findOne({
+      where: { isDefault: true },
+    });
+
+    if (!deck) {
+      deck = await dataSource.getRepository(TarotDeck).save({
+        name: 'Rider-Waite-Smith',
+        description: 'Classic tarot deck',
+        imageUrl: 'https://example.com/deck.jpg',
+        cardCount: 78,
+        isActive: true,
+        isDefault: true,
+      });
+    }
+    deckId = deck.id;
+
+    // Crear cartas si no existen
+    const existingCards = await dataSource.getRepository(TarotCard).find({
+      where: { deckId: deckId },
+      take: 3,
+    });
+
+    if (existingCards.length >= 3) {
+      cardIds = existingCards.slice(0, 3).map((card) => card.id);
+    } else {
+      const cardsToCreate = [
+        {
+          name: 'The Fool',
+          number: 0,
+          category: 'major',
+          deckId: deckId,
+          imageUrl: 'https://example.com/fool.jpg',
+          meaningUpright: 'New beginnings',
+          meaningReversed: 'Recklessness',
+          description: 'The Fool card',
+          keywords: 'beginning,innocence,spontaneity',
+        },
+        {
+          name: 'The Magician',
+          number: 1,
+          category: 'major',
+          deckId: deckId,
+          imageUrl: 'https://example.com/magician.jpg',
+          meaningUpright: 'Manifestation',
+          meaningReversed: 'Manipulation',
+          description: 'The Magician card',
+          keywords: 'manifestation,resourcefulness,power',
+        },
+        {
+          name: 'The High Priestess',
+          number: 2,
+          category: 'major',
+          deckId: deckId,
+          imageUrl: 'https://example.com/priestess.jpg',
+          meaningUpright: 'Intuition',
+          meaningReversed: 'Secrets',
+          description: 'The High Priestess card',
+          keywords: 'intuition,sacred knowledge,divine feminine',
+        },
+      ];
+
+      const createdCards = await dataSource
+        .getRepository(TarotCard)
+        .save(cardsToCreate);
+      cardIds = createdCards.map((card) => card.id);
+    }
+
+    // Crear spread
+    const spread = await dataSource.getRepository(TarotSpread).save({
+      name: 'Three Card Spread Regen',
+      description: 'Past, Present, Future',
+      cardCount: 3,
+      positions: [
+        { name: 'Past', description: 'What has led to this moment' },
+        { name: 'Present', description: 'The current situation' },
+        { name: 'Future', description: 'What is coming' },
+      ],
+      difficulty: 'beginner',
+      isBeginnerFriendly: true,
+      whenToUse: 'For general guidance',
+    });
+    spreadId = spread.id;
+
+    // Crear una lectura para el usuario premium
+    const reading = await dataSource.getRepository(TarotReading).save({
+      user: { id: premiumUserId },
+      deck: { id: deckId },
+      predefinedQuestionId: predefinedQuestionId,
+      questionType: 'predefined',
+      cardPositions: [
+        { cardId: cardIds[0], position: 'Past', isReversed: false },
+        { cardId: cardIds[1], position: 'Present', isReversed: false },
+        { cardId: cardIds[2], position: 'Future', isReversed: true },
+      ],
+      interpretation: 'Initial interpretation of the reading',
+      regenerationCount: 0,
+    });
+    readingId = reading.id;
+  }
+
+  /**
+   * Helper: Limpiar datos de prueba
+   */
+  async function cleanupTestData(): Promise<void> {
+    if (dataSource && dataSource.isInitialized) {
+      try {
+        // Limpiar en orden de dependencias
+        await dataSource.query(
+          `DELETE FROM tarot_interpretation WHERE "readingId" IN (SELECT id FROM tarot_reading WHERE "userId" IN ($1, $2))`,
+          [freeUserId, premiumUserId],
+        );
+
+        await dataSource.query(
+          `DELETE FROM tarot_reading_cards_tarot_card WHERE "tarotReadingId" IN (SELECT id FROM tarot_reading WHERE "userId" IN ($1, $2))`,
+          [freeUserId, premiumUserId],
+        );
+
+        await dataSource.query(
+          `DELETE FROM tarot_reading WHERE "userId" IN ($1, $2)`,
+          [freeUserId, premiumUserId],
+        );
+
+        await dataSource.query(
+          `DELETE FROM usage_limit WHERE user_id IN ($1, $2)`,
+          [freeUserId, premiumUserId],
+        );
+
+        await dataSource.query(
+          `DELETE FROM refresh_tokens WHERE user_id IN ($1, $2)`,
+          [freeUserId, premiumUserId],
+        );
+
+        await dataSource.query(`DELETE FROM "user" WHERE id IN ($1, $2)`, [
+          freeUserId,
+          premiumUserId,
+        ]);
+
+        if (predefinedQuestionId) {
+          await dataSource.query(
+            `DELETE FROM predefined_question WHERE id = $1`,
+            [predefinedQuestionId],
+          );
+        }
+
+        if (categoryId) {
+          await dataSource.query(`DELETE FROM reading_category WHERE id = $1`, [
+            categoryId,
+          ]);
+        }
+
+        if (spreadId) {
+          await dataSource.query(`DELETE FROM tarot_spread WHERE id = $1`, [
+            spreadId,
+          ]);
+        }
+      } catch (error) {
+        console.error('Cleanup error:', error);
+      }
+    }
+  }
+
+  /**
+   * TEST: Endpoint debe requerir autenticación
+   */
+  describe('POST /readings/:id/regenerate - Authentication', () => {
+    it('should return 401 without authentication', async () => {
+      const response = await request(app.getHttpServer())
+        .post(`/readings/${readingId}/regenerate`)
+        .expect(401);
+
+      expect(response.body).toHaveProperty('message');
+    });
+  });
+
+  /**
+   * TEST: Solo usuarios premium pueden regenerar
+   */
+  describe('POST /readings/:id/regenerate - Premium Required', () => {
+    it('should return 403 for free users', async () => {
+      // Crear una lectura para el usuario free
+      const freeReading = await dataSource.getRepository(TarotReading).save({
+        user: { id: freeUserId },
+        deck: { id: deckId },
+        predefinedQuestionId: predefinedQuestionId,
+        questionType: 'predefined',
+        cardPositions: [
+          { cardId: cardIds[0], position: 'Past', isReversed: false },
+          { cardId: cardIds[1], position: 'Present', isReversed: false },
+          { cardId: cardIds[2], position: 'Future', isReversed: false },
+        ],
+        interpretation: 'Initial interpretation',
+        regenerationCount: 0,
+      });
+
+      const response = await request(app.getHttpServer())
+        .post(`/readings/${freeReading.id}/regenerate`)
+        .set('Authorization', `Bearer ${freeUserToken}`)
+        .expect(403);
+
+      expect(response.body).toHaveProperty('message');
+      // El guard de límites de uso puede ejecutarse antes que la verificación premium
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(String(response.body.message)).toMatch(/premium|límite|limit/i);
+    });
+  });
+
+  /**
+   * TEST: Usuario debe ser dueño de la lectura
+   */
+  describe('POST /readings/:id/regenerate - Ownership', () => {
+    it('should return 403 when trying to regenerate another user reading', async () => {
+      // Crear una lectura para el usuario free
+      const otherReading = await dataSource.getRepository(TarotReading).save({
+        user: { id: freeUserId },
+        deck: { id: deckId },
+        predefinedQuestionId: predefinedQuestionId,
+        questionType: 'predefined',
+        cardPositions: [
+          { cardId: cardIds[0], position: 'Past', isReversed: false },
+          { cardId: cardIds[1], position: 'Present', isReversed: false },
+          { cardId: cardIds[2], position: 'Future', isReversed: false },
+        ],
+        interpretation: 'Initial interpretation',
+        regenerationCount: 0,
+      });
+
+      // Intentar regenerar con token de premium user
+      const response = await request(app.getHttpServer())
+        .post(`/readings/${otherReading.id}/regenerate`)
+        .set('Authorization', `Bearer ${premiumUserToken}`)
+        .expect(403);
+
+      expect(response.body).toHaveProperty('message');
+    });
+  });
+
+  /**
+   * TEST: Regeneración exitosa para usuario premium
+   */
+  describe('POST /readings/:id/regenerate - Success', () => {
+    it('should successfully regenerate interpretation for premium user', async () => {
+      const response = await request(app.getHttpServer())
+        .post(`/readings/${readingId}/regenerate`)
+        .set('Authorization', `Bearer ${premiumUserToken}`)
+        .expect(201);
+
+      expect(response.body).toHaveProperty('id');
+      expect(response.body).toHaveProperty('interpretation');
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.interpretation).toBeTruthy();
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.interpretation).not.toBe(
+        'Initial interpretation of the reading',
+      );
+      expect(response.body).toHaveProperty('regenerationCount', 1);
+      expect(response.body).toHaveProperty('updatedAt');
+
+      // Verificar que las cartas se mantienen iguales
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.cardPositions).toEqual([
+        { cardId: cardIds[0], position: 'Past', isReversed: false },
+        { cardId: cardIds[1], position: 'Present', isReversed: false },
+        { cardId: cardIds[2], position: 'Future', isReversed: true },
+      ]);
+    });
+
+    it('should create new interpretation entry in database', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const interpretations = await dataSource.query(
+        `SELECT * FROM tarot_interpretation WHERE "readingId" = $1 ORDER BY "createdAt" DESC`,
+        [readingId],
+      );
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(interpretations.length).toBeGreaterThanOrEqual(1);
+    });
+  });
+
+  /**
+   * TEST: Límite de 3 regeneraciones por lectura
+   */
+  describe('POST /readings/:id/regenerate - Regeneration Limit', () => {
+    it('should allow up to 3 regenerations', async () => {
+      // Ya hicimos 1 regeneración en el test anterior
+      // Hacemos 2 más para llegar al límite
+      await request(app.getHttpServer())
+        .post(`/readings/${readingId}/regenerate`)
+        .set('Authorization', `Bearer ${premiumUserToken}`)
+        .expect(201);
+
+      await request(app.getHttpServer())
+        .post(`/readings/${readingId}/regenerate`)
+        .set('Authorization', `Bearer ${premiumUserToken}`)
+        .expect(201);
+
+      // Verificar que regenerationCount es 3
+      const reading = await dataSource
+        .getRepository(TarotReading)
+        .findOne({ where: { id: readingId } });
+
+      expect(reading?.regenerationCount).toBe(3);
+    });
+
+    it('should return 429 when exceeding 3 regenerations', async () => {
+      const response = await request(app.getHttpServer())
+        .post(`/readings/${readingId}/regenerate`)
+        .set('Authorization', `Bearer ${premiumUserToken}`)
+        .expect(429);
+
+      expect(response.body).toHaveProperty('message');
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(String(response.body.message)).toContain('máximo');
+    });
+  });
+
+  /**
+   * TEST: Lectura no encontrada
+   */
+  describe('POST /readings/:id/regenerate - Not Found', () => {
+    it('should return 404 for non-existent reading', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/readings/999999/regenerate')
+        .set('Authorization', `Bearer ${premiumUserToken}`)
+        .expect(404);
+
+      expect(response.body).toHaveProperty('message');
+    });
+  });
+
+  /**
+   * TEST: Verificar que updatedAt se actualiza
+   */
+  describe('POST /readings/:id/regenerate - UpdatedAt', () => {
+    it('should update the updatedAt field on regeneration', async () => {
+      // Crear nueva lectura
+      const newReading = await dataSource.getRepository(TarotReading).save({
+        user: { id: premiumUserId },
+        deck: { id: deckId },
+        predefinedQuestionId: predefinedQuestionId,
+        questionType: 'predefined',
+        cardPositions: [
+          { cardId: cardIds[0], position: 'Past', isReversed: false },
+          { cardId: cardIds[1], position: 'Present', isReversed: false },
+          { cardId: cardIds[2], position: 'Future', isReversed: false },
+        ],
+        interpretation: 'Initial interpretation',
+        regenerationCount: 0,
+      });
+
+      const originalUpdatedAt = newReading.updatedAt;
+
+      // Esperar un momento para asegurar que updatedAt cambie
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Regenerar
+      await request(app.getHttpServer())
+        .post(`/readings/${newReading.id}/regenerate`)
+        .set('Authorization', `Bearer ${premiumUserToken}`)
+        .expect(201);
+
+      // Verificar que updatedAt cambió
+      const updatedReading = await dataSource
+        .getRepository(TarotReading)
+        .findOne({ where: { id: newReading.id } });
+
+      expect(updatedReading?.updatedAt).not.toEqual(originalUpdatedAt);
+      expect(new Date(updatedReading!.updatedAt).getTime()).toBeGreaterThan(
+        new Date(originalUpdatedAt).getTime(),
+      );
+    });
+  });
+});

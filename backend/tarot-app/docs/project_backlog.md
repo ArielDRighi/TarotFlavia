@@ -4968,3 +4968,43 @@ Crear capa de abstracción que permita cambiar entre diferentes proveedores de I
 ---
 
 Este backlog proporciona una hoja de ruta completa y detallada para el desarrollo backend. Cada tarea incluye descripción clara, subtareas específicas y criterios de aceptación medibles. ¿Te gustaría que profundice en alguna tarea específica o ajuste las prioridades?
+
+
+---
+
+## ��� TASK-022: ACTUALIZACIÓN DE ESTADO (4 de Noviembre 2025)
+
+**Estado:** ✅ **COMPLETADO**  
+**Branch:** `feature/TASK-022-regenerate-interpretation`
+
+### Implementación Exitosa
+
+**Archivos modificados:**
+- `tarot-reading.entity.ts`: Agregados `updatedAt`, `regenerationCount`, relación `OneToMany` con interpretaciones
+- `tarot-interpretation.entity.ts`: Cambiado de `OneToOne` a `ManyToOne` 
+- `1761655973524-InitialSchema.ts`: Actualizada migración
+- `readings.service.ts`: Método `regenerateInterpretation()` completo
+- `readings.controller.ts`: Endpoint con guards `@CheckUsageLimit`, `JwtAuthGuard`
+- `readings.module.ts`: Agregado `TarotInterpretation` repository
+- `cached-interpretation.entity.ts`: Corregido tipo `spread_id` (uuid → integer)
+
+**Tests:** 9/9 E2E tests pasando ✅
+- Authentication (401)
+- Premium requirement (403 for free users)  
+- Ownership verification (403 for non-owners)
+- Successful regeneration (201)
+- New interpretation entry created
+- Allow up to 3 regenerations
+- Return 429 when exceeding limit
+- Return 404 for non-existent reading
+- UpdatedAt field updated
+
+**Características implementadas:**
+✅ Endpoint `POST /readings/:id/regenerate` funcional
+✅ Guard con feature `INTERPRETATION_REGENERATION`
+✅ Verificación premium y ownership (403)
+✅ Límite de 3 regeneraciones (429 Too Many Requests)
+✅ Creación de nueva `TarotInterpretation` cada vez
+✅ Prompt modificado con perspectiva alternativa
+✅ Sin caché en regeneraciones
+

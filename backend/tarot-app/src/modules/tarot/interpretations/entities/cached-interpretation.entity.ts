@@ -15,8 +15,8 @@ export class CachedInterpretation {
   @Index()
   cache_key: string;
 
-  @Column({ type: 'uuid', nullable: true })
-  spread_id: string | null;
+  @Column({ type: 'int', nullable: true })
+  spread_id: number | null;
 
   @Column({ type: 'jsonb' })
   card_combination: {

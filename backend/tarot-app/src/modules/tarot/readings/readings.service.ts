@@ -3,11 +3,14 @@ import {
   NotFoundException,
   ForbiddenException,
   Logger,
+  HttpStatus,
+  HttpException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { TarotReading } from './entities/tarot-reading.entity';
-import { User } from '../../users/entities/user.entity';
+import { TarotInterpretation } from '../interpretations/entities/tarot-interpretation.entity';
+import { User, UserPlan } from '../../users/entities/user.entity';
 import { TarotDeck } from '../decks/entities/tarot-deck.entity';
 import { CreateReadingDto } from './dto/create-reading.dto';
 import { InterpretationsService } from '../interpretations/interpretations.service';
@@ -22,6 +25,8 @@ export class ReadingsService {
   constructor(
     @InjectRepository(TarotReading)
     private readingsRepository: Repository<TarotReading>,
+    @InjectRepository(TarotInterpretation)
+    private interpretationsRepository: Repository<TarotInterpretation>,
     private interpretationsService: InterpretationsService,
     private cardsService: CardsService,
     private spreadsService: SpreadsService,
@@ -167,5 +172,112 @@ export class ReadingsService {
     // Soft delete using TypeORM's DeleteDateColumn
     reading.deletedAt = new Date();
     await this.readingsRepository.save(reading);
+  }
+
+  async regenerateInterpretation(
+    id: number,
+    userId: number,
+  ): Promise<TarotReading> {
+    // Buscar la lectura
+    const reading = await this.readingsRepository.findOne({
+      where: { id },
+      relations: ['deck', 'cards', 'user'],
+    });
+
+    if (!reading) {
+      throw new NotFoundException(`Reading with ID ${id} not found`);
+    }
+
+    // Verificar ownership
+    if (reading.user.id !== userId) {
+      throw new ForbiddenException(
+        'You do not have permission to regenerate this reading',
+      );
+    }
+
+    // Verificar que el usuario sea premium
+    const user = await this.readingsRepository.manager.findOne(User, {
+      where: { id: userId },
+    });
+
+    if (!user || user.plan !== UserPlan.PREMIUM) {
+      throw new ForbiddenException(
+        'Solo los usuarios premium pueden regenerar interpretaciones',
+      );
+    }
+
+    // Verificar límite de regeneraciones (máximo 3)
+    if (reading.regenerationCount >= 3) {
+      throw new HttpException(
+        'Has alcanzado el máximo de regeneraciones (3) para esta lectura',
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+
+    // Obtener las cartas
+    const cards = await this.cardsService.findByIds(
+      reading.cardPositions.map((cp) => cp.cardId),
+    );
+
+    // Determinar la pregunta
+    let question: string | undefined = reading.customQuestion ?? undefined;
+    if (!question && reading.predefinedQuestionId) {
+      const predefinedQuestion = await this.predefinedQuestionsService.findOne(
+        reading.predefinedQuestionId,
+      );
+      question = predefinedQuestion.questionText;
+    }
+
+    // Obtener el spread (si existe, buscar el spread usado originalmente)
+    // Como no tenemos spreadId en reading, usamos un spread genérico
+    const spread = await this.spreadsService.findById(1); // Ajustar según sea necesario
+
+    this.logger.log(
+      `Regenerating interpretation for reading ${id} (regeneration #${reading.regenerationCount + 1})`,
+    );
+
+    // Modificar la pregunta para solicitar perspectiva alternativa
+    const regenerationQuestion = question
+      ? `${question} [REGENERACIÓN: Proporciona una perspectiva alternativa y diferente a interpretaciones anteriores]`
+      : 'Proporciona una perspectiva alternativa y diferente para esta lectura';
+
+    // Generar nueva interpretación (sin usar caché)
+    const result = await this.interpretationsService.generateInterpretation(
+      cards,
+      reading.cardPositions,
+      regenerationQuestion,
+      spread,
+      undefined,
+      userId,
+      reading.id,
+    );
+
+    // Crear nueva entrada de interpretación
+    const newInterpretation = this.interpretationsRepository.create({
+      reading,
+      content: result.interpretation,
+      modelUsed: 'regeneration',
+      aiConfig: {
+        model: 'regeneration',
+        temperature: 0.7,
+        maxTokens: 1000,
+        isRegeneration: true,
+      },
+    });
+
+    await this.interpretationsRepository.save(newInterpretation);
+
+    // Actualizar la lectura
+    reading.interpretation = result.interpretation;
+    reading.regenerationCount += 1;
+    // updatedAt se actualiza automáticamente por UpdateDateColumn
+
+    const updatedReading = await this.readingsRepository.save(reading);
+
+    this.logger.log(
+      `Interpretation regenerated successfully for reading ${id}. Total regenerations: ${updatedReading.regenerationCount}`,
+    );
+
+    return updatedReading;
   }
 }

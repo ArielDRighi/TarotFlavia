@@ -20,7 +20,7 @@ export class InitialSchema1761655973524 implements MigrationInterface {
       `CREATE INDEX "IDX_predefined_question_category" ON "predefined_question" ("category_id")`,
     );
     await queryRunner.query(
-      `CREATE TABLE "tarot_reading" ("id" SERIAL NOT NULL, "question" character varying, "predefinedQuestionId" integer, "customQuestion" character varying(500), "questionType" character varying(20), "cardPositions" jsonb NOT NULL, "interpretation" text, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "deletedAt" TIMESTAMP, "userId" integer, "deckId" integer, "categoryId" integer, CONSTRAINT "PK_8f96c960d305aaf75bd688fb2cd" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "tarot_reading" ("id" SERIAL NOT NULL, "question" character varying, "predefinedQuestionId" integer, "customQuestion" character varying(500), "questionType" character varying(20), "cardPositions" jsonb NOT NULL, "interpretation" text, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "regenerationCount" integer NOT NULL DEFAULT '0', "deletedAt" TIMESTAMP, "userId" integer, "deckId" integer, "categoryId" integer, CONSTRAINT "PK_8f96c960d305aaf75bd688fb2cd" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `CREATE TYPE "user_plan_enum" AS ENUM('free', 'premium')`,
@@ -45,7 +45,10 @@ export class InitialSchema1761655973524 implements MigrationInterface {
       `CREATE TABLE "tarot_spread" ("id" SERIAL NOT NULL, "name" character varying NOT NULL, "description" text NOT NULL, "cardCount" integer NOT NULL, "positions" jsonb NOT NULL, "imageUrl" character varying, "difficulty" character varying NOT NULL DEFAULT 'beginner', "isBeginnerFriendly" boolean NOT NULL DEFAULT true, "whenToUse" text NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_957eb94a9818cae3b346c0b70b1" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "tarot_interpretation" ("id" SERIAL NOT NULL, "content" text NOT NULL, "aiConfig" jsonb NOT NULL, "modelUsed" character varying NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "readingId" integer, CONSTRAINT "REL_b41f049863deb7f13835ba43c7" UNIQUE ("readingId"), CONSTRAINT "PK_c11341a6e30c3a97298c10663ca" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "tarot_interpretation" ("id" SERIAL NOT NULL, "content" text NOT NULL, "aiConfig" jsonb NOT NULL, "modelUsed" character varying NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "readingId" integer, CONSTRAINT "PK_c11341a6e30c3a97298c10663ca" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_tarot_interpretation_reading" ON "tarot_interpretation" ("readingId")`,
     );
     await queryRunner.query(
       `CREATE TABLE "tarot_reading_cards_tarot_card" ("tarotReadingId" integer NOT NULL, "tarotCardId" integer NOT NULL, CONSTRAINT "PK_c353c01874695631a4805fde250" PRIMARY KEY ("tarotReadingId", "tarotCardId"))`,
@@ -141,7 +144,7 @@ export class InitialSchema1761655973524 implements MigrationInterface {
       `ALTER TABLE "ai_usage_logs" ADD CONSTRAINT "FK_ai_usage_logs_reading" FOREIGN KEY ("reading_id") REFERENCES "tarot_reading"("id") ON DELETE SET NULL ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `CREATE TABLE "cached_interpretations" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "cache_key" character varying(255) NOT NULL, "spread_id" uuid NOT NULL, "card_combination" jsonb NOT NULL, "question_hash" character varying(64) NOT NULL, "interpretation_text" text NOT NULL, "hit_count" integer NOT NULL DEFAULT '0', "last_used_at" TIMESTAMP, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "expires_at" TIMESTAMP NOT NULL, CONSTRAINT "UQ_cached_interpretations_cache_key" UNIQUE ("cache_key"), CONSTRAINT "PK_cached_interpretations_id" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "cached_interpretations" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "cache_key" character varying(255) NOT NULL, "spread_id" integer, "card_combination" jsonb NOT NULL, "question_hash" character varying(64) NOT NULL, "interpretation_text" text NOT NULL, "hit_count" integer NOT NULL DEFAULT '0', "last_used_at" TIMESTAMP, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "expires_at" TIMESTAMP NOT NULL, CONSTRAINT "UQ_cached_interpretations_cache_key" UNIQUE ("cache_key"), CONSTRAINT "PK_cached_interpretations_id" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `CREATE INDEX "IDX_cached_interpretations_cache_key" ON "cached_interpretations" ("cache_key")`,
@@ -242,6 +245,9 @@ export class InitialSchema1761655973524 implements MigrationInterface {
       `DROP INDEX "public"."IDX_517895e32a7d9645bd4443b0c3"`,
     );
     await queryRunner.query(`DROP TABLE "tarot_reading_cards_tarot_card"`);
+    await queryRunner.query(
+      `DROP INDEX "public"."IDX_tarot_interpretation_reading"`,
+    );
     await queryRunner.query(`DROP TABLE "tarot_interpretation"`);
     await queryRunner.query(`DROP TABLE "tarot_spread"`);
     await queryRunner.query(

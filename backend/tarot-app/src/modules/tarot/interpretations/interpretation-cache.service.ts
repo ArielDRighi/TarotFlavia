@@ -111,7 +111,7 @@ export class InterpretationCacheService {
    */
   async saveToCache(
     cacheKey: string,
-    spreadId: string | null,
+    spreadId: number | null,
     cardCombination: CardCombination[],
     questionHash: string,
     interpretation: string,

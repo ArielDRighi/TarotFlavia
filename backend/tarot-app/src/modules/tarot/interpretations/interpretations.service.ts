@@ -158,7 +158,7 @@ export class InterpretationsService {
       // Guardar en caché para futuras consultas
       await this.cacheService.saveToCache(
         cacheKey,
-        spread?.id?.toString() || null,
+        spread?.id || null,
         cardCombination,
         questionHash,
         interpretation,

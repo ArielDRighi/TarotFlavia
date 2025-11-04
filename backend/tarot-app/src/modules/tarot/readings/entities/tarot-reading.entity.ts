@@ -4,8 +4,10 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   ManyToMany,
+  OneToMany,
   JoinTable,
   CreateDateColumn,
+  UpdateDateColumn,
   DeleteDateColumn,
   JoinColumn,
 } from 'typeorm';
@@ -15,6 +17,7 @@ import { TarotCard } from '../../cards/entities/tarot-card.entity';
 import { TarotDeck } from '../../decks/entities/tarot-deck.entity';
 import { ReadingCategory } from '../../../categories/entities/reading-category.entity';
 import { PredefinedQuestion } from '../../../predefined-questions/entities/predefined-question.entity';
+import { TarotInterpretation } from '../../interpretations/entities/tarot-interpretation.entity';
 
 @Entity()
 export class TarotReading {
@@ -112,6 +115,31 @@ export class TarotReading {
   })
   @CreateDateColumn()
   createdAt: Date;
+
+  @ApiProperty({
+    example: '2023-01-01T00:00:00Z',
+    description: 'Fecha de última actualización',
+  })
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  @ApiProperty({
+    example: 0,
+    description: 'Número de veces que se regeneró la interpretación',
+  })
+  @Column({ default: 0 })
+  regenerationCount: number;
+
+  @ApiProperty({
+    type: () => TarotInterpretation,
+    isArray: true,
+    description: 'Historial de interpretaciones para esta lectura',
+  })
+  @OneToMany(
+    () => TarotInterpretation,
+    (interpretation) => interpretation.reading,
+  )
+  interpretations: TarotInterpretation[];
 
   @DeleteDateColumn()
   deletedAt?: Date;
