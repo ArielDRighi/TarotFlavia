@@ -188,11 +188,26 @@ export class ReadingsService {
     id: number,
     userId: number,
   ): Promise<TarotReading> {
+    // DEBUG: Log incoming parameters
+    console.log('DEBUG regenerateInterpretation called with:', { id, userId });
+
     // Buscar la lectura
     const reading = await this.readingsRepository.findOne({
       where: { id },
       relations: ['deck', 'cards', 'user'],
     });
+
+    console.log(
+      'DEBUG reading found:',
+      reading
+        ? {
+            id: reading.id,
+            hasUser: !!reading.user,
+            hasCards: !!reading.cards,
+            cardCount: reading.cards?.length,
+          }
+        : 'NULL',
+    );
 
     if (!reading) {
       throw new NotFoundException(`Reading with ID ${id} not found`);
