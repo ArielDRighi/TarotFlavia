@@ -20,11 +20,15 @@ if (fs.existsSync(envPath)) {
 // Configuración de la base de datos usando variables de entorno
 const config = {
   type: 'postgres',
-  host: process.env.POSTGRES_HOST || 'localhost',
-  port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
-  username: process.env.POSTGRES_USER || 'postgres',
-  password: process.env.POSTGRES_PASSWORD,
-  database: process.env.POSTGRES_DB || 'tarot_app',
+  host: process.env.TAROT_DB_HOST || process.env.POSTGRES_HOST || 'localhost',
+  port: parseInt(
+    process.env.TAROT_DB_PORT || process.env.POSTGRES_PORT || '5435',
+    10,
+  ),
+  username:
+    process.env.TAROT_DB_USER || process.env.POSTGRES_USER || 'tarot_user',
+  password: process.env.TAROT_DB_PASSWORD || process.env.POSTGRES_PASSWORD,
+  database: process.env.TAROT_DB_NAME || process.env.POSTGRES_DB || 'tarot_db',
   synchronize: false, // Desactivado - ahora usamos migraciones
   autoLoadEntities: true,
   logging: process.env.NODE_ENV !== 'test', // Disable logging in test environment
