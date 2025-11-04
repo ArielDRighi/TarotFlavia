@@ -31,6 +31,11 @@ export class AIProviderService {
   private providers: IAIProvider[] = [];
   private circuitBreakers: Map<AIProviderType, CircuitBreaker> = new Map();
 
+  // Configuration constants
+  private readonly MAX_RETRY_ATTEMPTS = 3;
+  private readonly CIRCUIT_BREAKER_FAILURE_THRESHOLD = 5;
+  private readonly CIRCUIT_BREAKER_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+
   constructor(
     private readonly configService: ConfigService,
     private readonly groqProvider: GroqProvider,
@@ -46,20 +51,29 @@ export class AIProviderService {
     ];
 
     // Initialize circuit breakers for each provider
-    // Groq: 5 failures, 5 minutes timeout
     this.circuitBreakers.set(
       AIProviderType.GROQ,
-      new CircuitBreaker(AIProviderType.GROQ, 5, 300000),
+      new CircuitBreaker(
+        AIProviderType.GROQ,
+        this.CIRCUIT_BREAKER_FAILURE_THRESHOLD,
+        this.CIRCUIT_BREAKER_TIMEOUT_MS,
+      ),
     );
-    // DeepSeek: 5 failures, 5 minutes timeout
     this.circuitBreakers.set(
       AIProviderType.DEEPSEEK,
-      new CircuitBreaker(AIProviderType.DEEPSEEK, 5, 300000),
+      new CircuitBreaker(
+        AIProviderType.DEEPSEEK,
+        this.CIRCUIT_BREAKER_FAILURE_THRESHOLD,
+        this.CIRCUIT_BREAKER_TIMEOUT_MS,
+      ),
     );
-    // OpenAI: 5 failures, 5 minutes timeout
     this.circuitBreakers.set(
       AIProviderType.OPENAI,
-      new CircuitBreaker(AIProviderType.OPENAI, 5, 300000),
+      new CircuitBreaker(
+        AIProviderType.OPENAI,
+        this.CIRCUIT_BREAKER_FAILURE_THRESHOLD,
+        this.CIRCUIT_BREAKER_TIMEOUT_MS,
+      ),
     );
   }
 
@@ -104,7 +118,7 @@ export class AIProviderService {
         // Wrap provider call with retry logic
         const response = await retryWithBackoff(async () => {
           return await provider.generateCompletion(messages, {});
-        }, 3); // Max 3 retries
+        }, this.MAX_RETRY_ATTEMPTS);
 
         const durationMs = Date.now() - startTime;
 
