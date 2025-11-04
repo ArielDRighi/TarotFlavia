@@ -7,15 +7,17 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DeleteResult } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
-import { User, UserWithoutPassword } from './entities/user.entity';
+import { User, UserWithoutPassword, UserPlan } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { RefreshTokenService } from '../auth/refresh-token.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    private refreshTokenService: RefreshTokenService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<UserWithoutPassword> {
@@ -108,5 +110,36 @@ export class UsersService {
 
   async remove(id: number): Promise<DeleteResult> {
     return this.usersRepository.delete(id);
+  }
+
+  /**
+   * Actualiza el plan de un usuario e invalida todos sus tokens de refresh
+   * para forzar re-autenticación y obtener un nuevo JWT con el plan actualizado
+   */
+  async updatePlan(
+    id: number,
+    newPlan: UserPlan,
+  ): Promise<UserWithoutPassword> {
+    const user = await this.findById(id);
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    // Actualizar el plan
+    user.plan = newPlan;
+
+    try {
+      await this.usersRepository.save(user);
+
+      // Invalidar todos los refresh tokens del usuario para forzar re-login
+      await this.refreshTokenService.revokeAllUserTokens(id);
+
+      // Retornar usuario sin contraseña
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password: _password, ...result } = user;
+      return result as UserWithoutPassword;
+    } catch {
+      throw new InternalServerErrorException('Error updating user plan');
+    }
   }
 }

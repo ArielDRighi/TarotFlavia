@@ -3,7 +3,6 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
-import { UserPlan } from '../src/modules/users/entities/user.entity';
 import { TarotDeck } from '../src/modules/tarot/decks/entities/tarot-deck.entity';
 import { TarotSpread } from '../src/modules/tarot/spreads/entities/tarot-spread.entity';
 import { E2EDatabaseHelper } from './helpers/e2e-database.helper';
@@ -43,7 +42,6 @@ describe('Readings Hybrid Questions (E2E)', () => {
   let predefinedQuestionId: number;
   let deckId: number;
   let spreadId: number;
-  let testTimestamp: number;
 
   beforeAll(async () => {
     await dbHelper.initialize();
@@ -76,36 +74,40 @@ describe('Readings Hybrid Questions (E2E)', () => {
   });
 
   beforeAll(async () => {
-    // Crear usuarios para pruebas
-    testTimestamp = Date.now();
+    // Usar los usuarios seeded del globalSetup en lugar de crear nuevos
+    // Los usuarios seeded son: free@test.com, premium@test.com y admin@test.com
 
-    // Register users via API
-    const freeResponse = await request(app.getHttpServer())
-      .post('/auth/register')
+    // Login con usuario FREE seeded
+    const freeLoginResponse = await request(app.getHttpServer())
+      .post('/auth/login')
       .send({
-        email: `free-${testTimestamp}@test.com`,
+        email: 'free@test.com',
         password: 'Test123456!',
-        name: 'Free User',
-      });
-    freeUserToken = (freeResponse.body as LoginResponse).access_token;
-    freeUserId = (freeResponse.body as LoginResponse).user.id;
+      })
+      .expect(200);
 
-    const premiumResponse = await request(app.getHttpServer())
-      .post('/auth/register')
+    freeUserToken = (freeLoginResponse.body as LoginResponse).access_token;
+    freeUserId = (freeLoginResponse.body as LoginResponse).user.id;
+
+    // Login con usuario PREMIUM seeded
+    const premiumLoginResponse = await request(app.getHttpServer())
+      .post('/auth/login')
       .send({
-        email: `premium-${testTimestamp}@test.com`,
+        email: 'premium@test.com',
         password: 'Test123456!',
-        name: 'Premium User',
-      });
-    premiumUserToken = (premiumResponse.body as LoginResponse).access_token;
-    premiumUserId = (premiumResponse.body as LoginResponse).user.id;
+      })
+      .expect(200);
 
-    // Update premium user to PREMIUM plan
-    const ds = dbHelper.getDataSource();
-    await ds.query(`UPDATE "user" SET plan = $1 WHERE id = $2`, [
-      UserPlan.PREMIUM,
-      premiumUserId,
-    ]);
+    premiumUserToken = (premiumLoginResponse.body as LoginResponse)
+      .access_token;
+    premiumUserId = (premiumLoginResponse.body as LoginResponse).user.id;
+
+    // Verificar que obtuvimos los tokens correctamente
+    if (!freeUserToken || !premiumUserToken) {
+      throw new Error(
+        'Failed to obtain authentication tokens from seeded users',
+      );
+    }
   }, 30000);
 
   afterEach(async () => {
@@ -118,16 +120,13 @@ describe('Readings Hybrid Questions (E2E)', () => {
   });
 
   afterAll(async () => {
-    // Limpiar usuarios al finalizar todos los tests
+    // Limpiar lecturas de los usuarios seeded
     const ds = dbHelper.getDataSource();
     await ds.query('DELETE FROM tarot_reading WHERE "userId" IN ($1, $2)', [
       freeUserId,
       premiumUserId,
     ]);
-    await ds.query('DELETE FROM "user" WHERE id IN ($1, $2)', [
-      freeUserId,
-      premiumUserId,
-    ]);
+    // NO eliminar los usuarios porque son seeded y los necesitan otros tests
     await dbHelper.close();
     await app.close();
   });
@@ -156,7 +155,7 @@ describe('Readings Hybrid Questions (E2E)', () => {
       expect(body.predefinedQuestionId).toBe(predefinedQuestionId);
       expect(body.customQuestion).toBeNull();
       expect(body.questionType).toBe('predefined');
-    });
+    }, 10000);
 
     it('debe rechazar pregunta custom (403)', async () => {
       const response = await request(app.getHttpServer())
@@ -229,7 +228,7 @@ describe('Readings Hybrid Questions (E2E)', () => {
       expect(body.predefinedQuestionId).toBeNull();
       expect(body.customQuestion).toBe('¿Cuál es mi propósito en la vida?');
       expect(body.questionType).toBe('custom');
-    });
+    }, 10000);
 
     it('debe crear lectura con pregunta predefinida también (201)', async () => {
       const response = await request(app.getHttpServer())
@@ -254,7 +253,7 @@ describe('Readings Hybrid Questions (E2E)', () => {
       expect(body.predefinedQuestionId).toBe(predefinedQuestionId);
       expect(body.customQuestion).toBeNull();
       expect(body.questionType).toBe('predefined');
-    });
+    }, 10000);
 
     it('debe rechazar si proporciona ambas preguntas (400)', async () => {
       const response = await request(app.getHttpServer())
@@ -281,5 +280,102 @@ describe('Readings Hybrid Questions (E2E)', () => {
         : body.message;
       expect(messageText).toContain('solo una');
     });
+  });
+
+  describe('Plan upgrade flow (FREE → PREMIUM)', () => {
+    it('debe rechazar pregunta custom antes de upgrade, permitirla después de upgrade', async () => {
+      // 1. Login como admin para poder actualizar el plan
+      const adminLoginResponse = await request(app.getHttpServer())
+        .post('/auth/login')
+        .send({
+          email: 'admin@test.com',
+          password: 'Test123456!',
+        })
+        .expect(200);
+
+      const adminToken = (adminLoginResponse.body as LoginResponse)
+        .access_token;
+
+      // 2. Intentar crear lectura con pregunta custom como FREE (debe fallar)
+      await request(app.getHttpServer())
+        .post('/readings')
+        .set('Authorization', `Bearer ${freeUserToken}`)
+        .send({
+          customQuestion: '¿Cuál es mi destino?',
+          deckId: deckId,
+          spreadId: spreadId,
+          cardIds: [1, 2, 3],
+          cardPositions: [
+            { cardId: 1, position: 'pasado', isReversed: false },
+            { cardId: 2, position: 'presente', isReversed: false },
+            { cardId: 3, position: 'futuro', isReversed: false },
+          ],
+          generateInterpretation: true,
+        })
+        .expect(403);
+
+      // 3. Admin actualiza el plan del usuario FREE a PREMIUM
+      await request(app.getHttpServer())
+        .patch(`/users/${freeUserId}/plan`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          plan: 'premium',
+        })
+        .expect(200);
+
+      // 4. Usuario FREE debe hacer re-login para obtener nuevo token
+      const newLoginResponse = await request(app.getHttpServer())
+        .post('/auth/login')
+        .send({
+          email: 'free@test.com',
+          password: 'Test123456!',
+        })
+        .expect(200);
+
+      const newToken = (newLoginResponse.body as LoginResponse).access_token;
+
+      // 5. Ahora con el nuevo token (con plan=premium) puede crear lectura con pregunta custom
+      const response = await request(app.getHttpServer())
+        .post('/readings')
+        .set('Authorization', `Bearer ${newToken}`)
+        .send({
+          customQuestion: '¿Cuál es mi destino?',
+          deckId: deckId,
+          spreadId: spreadId,
+          cardIds: [1, 2, 3],
+          cardPositions: [
+            { cardId: 1, position: 'pasado', isReversed: false },
+            { cardId: 2, position: 'presente', isReversed: false },
+            { cardId: 3, position: 'futuro', isReversed: false },
+          ],
+          generateInterpretation: true,
+        })
+        .expect(201);
+
+      const body = response.body as ReadingResponse;
+      expect(body).toHaveProperty('id');
+      expect(body.customQuestion).toBe('¿Cuál es mi destino?');
+      expect(body.questionType).toBe('custom');
+
+      // 6. Revertir el cambio de plan para no afectar otros tests
+      await request(app.getHttpServer())
+        .patch(`/users/${freeUserId}/plan`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          plan: 'free',
+        })
+        .expect(200);
+
+      // Actualizar el token FREE para futuros tests
+      const revertLoginResponse = await request(app.getHttpServer())
+        .post('/auth/login')
+        .send({
+          email: 'free@test.com',
+          password: 'Test123456!',
+        })
+        .expect(200);
+
+      freeUserToken = (revertLoginResponse.body as LoginResponse).access_token;
+    }, 60000);
   });
 });

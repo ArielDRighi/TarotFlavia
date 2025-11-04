@@ -109,10 +109,15 @@ jobs:
         env:
           # Database config (not used in unit tests but required for validation)
           POSTGRES_HOST: localhost
-          POSTGRES_PORT: 5432
-          POSTGRES_USER: test_user
-          POSTGRES_PASSWORD: test_password
-          POSTGRES_DB: test_db
+          POSTGRES_PORT: 5435
+          POSTGRES_USER: tarot_user
+          POSTGRES_PASSWORD: tarot_password
+          POSTGRES_DB: tarot_db
+          TAROT_DB_HOST: localhost
+          TAROT_DB_PORT: 5435
+          TAROT_DB_USER: tarot_user
+          TAROT_DB_PASSWORD: tarot_password
+          TAROT_DB_NAME: tarot_db
           # JWT config
           JWT_SECRET: test-jwt-secret-for-ci-only-minimum-32-characters-required
           JWT_EXPIRES_IN: 1h
@@ -156,11 +161,11 @@ jobs:
       postgres:
         image: postgres:16-alpine
         env:
-          POSTGRES_USER: tarotflavia_test_user
-          POSTGRES_PASSWORD: tarotflavia_test_password_secure
-          POSTGRES_DB: tarotflavia_test_db
+          POSTGRES_USER: tarot_e2e_user
+          POSTGRES_PASSWORD: tarot_e2e_password_secure
+          POSTGRES_DB: tarot_e2e
         ports:
-          - 5432:5432
+          - 5436:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -181,13 +186,29 @@ jobs:
       - name: Run database migrations
         working-directory: ./backend/tarot-app
         env:
+          # Production database config (for migrations)
           POSTGRES_HOST: localhost
-          POSTGRES_PORT: 5432
-          POSTGRES_USER: tarotflavia_test_user
-          POSTGRES_PASSWORD: tarotflavia_test_password_secure
-          POSTGRES_DB: tarotflavia_test_db
+          POSTGRES_PORT: 5436
+          POSTGRES_USER: tarot_e2e_user
+          POSTGRES_PASSWORD: tarot_e2e_password_secure
+          POSTGRES_DB: tarot_e2e
+          TAROT_DB_HOST: localhost
+          TAROT_DB_PORT: 5436
+          TAROT_DB_USER: tarot_e2e_user
+          TAROT_DB_PASSWORD: tarot_e2e_password_secure
+          TAROT_DB_NAME: tarot_e2e
+          # E2E database config (for tests)
+          TAROT_E2E_DB_HOST: localhost
+          TAROT_E2E_DB_PORT: 5436
+          TAROT_E2E_DB_USER: tarot_e2e_user
+          TAROT_E2E_DB_PASSWORD: tarot_e2e_password_secure
+          TAROT_E2E_DB_NAME: tarot_e2e
+          TAROT_E2E_DB_SYNCHRONIZE: false
+          TAROT_E2E_DB_LOGGING: false
+          # Auth config
           JWT_SECRET: test-jwt-secret-for-ci-only-minimum-32-characters-required
           JWT_EXPIRES_IN: 1h
+          # AI config
           GROQ_API_KEY: gsk_test_key_for_ci_only_not_real
           NODE_ENV: test
         run: npm run migration:run
@@ -195,17 +216,34 @@ jobs:
       - name: Run E2E tests
         working-directory: ./backend/tarot-app
         env:
+          # Production database config (backward compatibility)
           POSTGRES_HOST: localhost
-          POSTGRES_PORT: 5432
-          POSTGRES_USER: tarotflavia_test_user
-          POSTGRES_PASSWORD: tarotflavia_test_password_secure
-          POSTGRES_DB: tarotflavia_test_db
+          POSTGRES_PORT: 5436
+          POSTGRES_USER: tarot_e2e_user
+          POSTGRES_PASSWORD: tarot_e2e_password_secure
+          POSTGRES_DB: tarot_e2e
+          TAROT_DB_HOST: localhost
+          TAROT_DB_PORT: 5436
+          TAROT_DB_USER: tarot_e2e_user
+          TAROT_DB_PASSWORD: tarot_e2e_password_secure
+          TAROT_DB_NAME: tarot_e2e
+          # E2E database config (used by tests via setup-env.ts)
+          TAROT_E2E_DB_HOST: localhost
+          TAROT_E2E_DB_PORT: 5436
+          TAROT_E2E_DB_USER: tarot_e2e_user
+          TAROT_E2E_DB_PASSWORD: tarot_e2e_password_secure
+          TAROT_E2E_DB_NAME: tarot_e2e
+          TAROT_E2E_DB_SYNCHRONIZE: false
+          TAROT_E2E_DB_LOGGING: false
+          # Auth config
           JWT_SECRET: test-jwt-secret-for-ci-only-minimum-32-characters-required
           JWT_EXPIRES_IN: 1h
+          # AI config
           GROQ_API_KEY: gsk_test_key_for_ci_only_not_real
           # Optional AI providers (will test with invalid keys but valid format)
           OPENAI_API_KEY: sk-test-key-for-ci-only-not-real-12345
           DEEPSEEK_API_KEY: sk-test-key-for-ci-only-not-real-12345
+          # App config
           NODE_ENV: test
           PORT: 3001
           RATE_LIMIT_TTL: 60

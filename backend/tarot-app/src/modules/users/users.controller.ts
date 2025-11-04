@@ -13,7 +13,9 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateUserPlanDto } from './dto/update-user-plan.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AdminGuard } from '../auth/guards/admin.guard';
 import {
   ApiTags,
   ApiOperation,
@@ -131,5 +133,35 @@ export class UsersController {
     }
 
     return { message: 'Usuario eliminado exitosamente' };
+  }
+
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @Patch(':id/plan')
+  @ApiOperation({
+    summary: 'Actualizar plan de usuario (solo administradores)',
+  })
+  @ApiParam({ name: 'id', description: 'ID del usuario' })
+  @ApiBody({ type: UpdateUserPlanDto })
+  @ApiResponse({
+    status: 200,
+    description:
+      'Plan actualizado exitosamente. Todos los tokens de sesión del usuario han sido invalidados.',
+  })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({
+    status: 403,
+    description: 'Se requieren permisos de administrador',
+  })
+  @ApiResponse({ status: 404, description: 'Usuario no encontrado' })
+  async updateUserPlan(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateUserPlanDto: UpdateUserPlanDto,
+  ) {
+    const user = await this.usersService.updatePlan(id, updateUserPlanDto.plan);
+    return {
+      message:
+        'Plan actualizado exitosamente. El usuario debe volver a iniciar sesión para acceder a las nuevas funcionalidades.',
+      user,
+    };
   }
 }
