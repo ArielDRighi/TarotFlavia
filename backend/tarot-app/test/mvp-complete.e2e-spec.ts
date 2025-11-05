@@ -423,9 +423,21 @@ describe('MVP Complete Flow E2E', () => {
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(200);
 
-      const readings = historyResponse.body as ReadingResponse[];
+      // El endpoint ahora retorna formato paginado: { data: [], meta: {} }
+      interface PaginatedResponse {
+        data: ReadingResponse[];
+        meta: {
+          page: number;
+          limit: number;
+          totalItems: number;
+          totalPages: number;
+          hasNextPage: boolean;
+          hasPreviousPage: boolean;
+        };
+      }
+      const paginatedReadings = historyResponse.body as PaginatedResponse;
       // Premium user debería tener al menos 1 lectura (la que acabamos de crear)
-      expect(readings.length).toBeGreaterThanOrEqual(1);
+      expect(paginatedReadings.data.length).toBeGreaterThanOrEqual(1);
 
       // Verificar que no hay límite de uso registrado para premium user
       const dataSource = dbHelper.getDataSource();
@@ -507,11 +519,16 @@ describe('MVP Complete Flow E2E', () => {
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(200);
 
-      const readings = response.body as ReadingResponse[];
-      expect(Array.isArray(readings)).toBe(true);
-      expect(readings.length).toBeGreaterThan(0);
+      // El endpoint ahora retorna formato paginado
+      interface PaginatedResponse {
+        data: ReadingResponse[];
+        meta: unknown;
+      }
+      const paginatedResponse = response.body as PaginatedResponse;
+      expect(Array.isArray(paginatedResponse.data)).toBe(true);
+      expect(paginatedResponse.data.length).toBeGreaterThan(0);
 
-      const firstReading = readings[0];
+      const firstReading = paginatedResponse.data[0];
       expect(firstReading).toHaveProperty('id');
       // Cards might not be populated in list view
       expect(firstReading).toBeDefined();

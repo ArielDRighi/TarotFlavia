@@ -4,6 +4,7 @@ import {
   Get,
   Body,
   Param,
+  Query,
   UseGuards,
   UseInterceptors,
   Request,
@@ -16,8 +17,9 @@ import {
   ApiBearerAuth,
   ApiParam,
   ApiBody,
+  ApiQuery,
 } from '@nestjs/swagger';
-import { Throttle } from '@nestjs/throttler';
+
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RequiresPremiumForCustomQuestionGuard } from './guards/requires-premium-for-custom-question.guard';
 import {
@@ -28,11 +30,13 @@ import {
 } from '../../usage-limits';
 import { ReadingsService } from './readings.service';
 import { CreateReadingDto } from './dto/create-reading.dto';
+import { QueryReadingsDto } from './dto/query-readings.dto';
+import { PaginatedReadingsResponseDto } from './dto/paginated-readings-response.dto';
+import { ReadingsCacheInterceptor } from './interceptors/readings-cache.interceptor';
 import { User } from '../../users/entities/user.entity';
 
 @ApiTags('Lecturas de Tarot')
 @Controller('readings')
-@Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 requests por minuto para endpoints de lecturas
 export class ReadingsController {
   constructor(private readonly readingsService: ReadingsService) {}
 
@@ -78,16 +82,73 @@ export class ReadingsController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(ReadingsCacheInterceptor)
   @Get()
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'Obtener historial de lecturas del usuario',
+    summary: 'Obtener historial de lecturas del usuario con paginación',
     description:
-      'Recupera todas las lecturas realizadas por el usuario autenticado',
+      'Recupera lecturas del usuario autenticado con soporte para paginación, ordenamiento y filtros. Usuarios free están limitados a ver solo las 10 lecturas más recientes. Resultados cacheados por 5 minutos.',
   })
-  async getUserReadings(@Request() req: { user: { userId: number } }) {
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Número de página (default: 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Cantidad de elementos por página (default: 10, max: 50)',
+  })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    enum: ['created_at', 'updated_at'],
+    description: 'Campo por el cual ordenar (default: created_at)',
+  })
+  @ApiQuery({
+    name: 'sortOrder',
+    required: false,
+    enum: ['ASC', 'DESC'],
+    description: 'Orden de clasificación (default: DESC)',
+  })
+  @ApiQuery({
+    name: 'categoryId',
+    required: false,
+    type: Number,
+    description: 'Filtrar por ID de categoría',
+  })
+  @ApiQuery({
+    name: 'spreadId',
+    required: false,
+    type: Number,
+    description: 'Filtrar por ID de spread',
+  })
+  @ApiQuery({
+    name: 'dateFrom',
+    required: false,
+    type: String,
+    description: 'Filtrar desde fecha (ISO 8601)',
+  })
+  @ApiQuery({
+    name: 'dateTo',
+    required: false,
+    type: String,
+    description: 'Filtrar hasta fecha (ISO 8601)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Historial de lecturas con paginación',
+    type: PaginatedReadingsResponseDto,
+  })
+  async getUserReadings(
+    @Request() req: { user: { userId: number } },
+    @Query() queryDto: QueryReadingsDto,
+  ): Promise<PaginatedReadingsResponseDto> {
     const userId = req.user.userId;
-    return this.readingsService.findAll(userId);
+    return this.readingsService.findAll(userId, queryDto);
   }
 
   @UseGuards(JwtAuthGuard)

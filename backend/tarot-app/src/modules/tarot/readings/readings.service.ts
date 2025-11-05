@@ -7,12 +7,14 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder, ObjectLiteral } from 'typeorm';
 import { TarotReading } from './entities/tarot-reading.entity';
 import { TarotInterpretation } from '../interpretations/entities/tarot-interpretation.entity';
 import { User, UserPlan } from '../../users/entities/user.entity';
 import { TarotDeck } from '../decks/entities/tarot-deck.entity';
 import { CreateReadingDto } from './dto/create-reading.dto';
+import { QueryReadingsDto } from './dto/query-readings.dto';
+import { PaginatedReadingsResponseDto } from './dto/paginated-readings-response.dto';
 import { InterpretationsService } from '../interpretations/interpretations.service';
 import { CardsService } from '../cards/cards.service';
 import { SpreadsService } from '../spreads/spreads.service';
@@ -37,6 +39,8 @@ export class ReadingsService {
     private readingsRepository: Repository<TarotReading>,
     @InjectRepository(TarotInterpretation)
     private interpretationsRepository: Repository<TarotInterpretation>,
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
     private interpretationsService: InterpretationsService,
     private cardsService: CardsService,
     private spreadsService: SpreadsService,
@@ -133,12 +137,82 @@ export class ReadingsService {
     return savedReading;
   }
 
-  async findAll(userId: number): Promise<TarotReading[]> {
-    return this.readingsRepository.find({
-      where: { user: { id: userId } },
-      relations: ['deck', 'cards', 'user'],
-      order: { createdAt: 'DESC' },
-    });
+  async findAll(
+    userId: number,
+    queryDto?: QueryReadingsDto,
+  ): Promise<PaginatedReadingsResponseDto> {
+    const page = queryDto?.page ?? 1;
+    const limit = queryDto?.limit ?? 10;
+    const sortBy = queryDto?.sortBy ?? 'created_at';
+    const sortOrder = queryDto?.sortOrder ?? 'DESC';
+
+    // Get user to check plan
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Calculate total items (respecting free user limit)
+    let totalQuery = this.readingsRepository
+      .createQueryBuilder('reading')
+      .where('reading.userId = :userId', { userId })
+      .orderBy(
+        `reading.${sortBy === 'created_at' ? 'createdAt' : 'updatedAt'}`,
+        sortOrder,
+      );
+
+    // Apply common filters
+    if (queryDto) {
+      totalQuery = this.applyReadingFilters(totalQuery, queryDto);
+    }
+
+    const totalItems = await totalQuery.getCount();
+
+    // Free users can only see 10 most recent readings
+    const isFreeUser = user.plan === UserPlan.FREE;
+    const effectiveTotalItems = isFreeUser
+      ? Math.min(totalItems, 10)
+      : totalItems;
+
+    // Calculate pagination metadata
+    const totalPages = Math.ceil(effectiveTotalItems / limit);
+    const hasNextPage = page < totalPages;
+    const hasPreviousPage = page > 1;
+
+    // Fetch paginated data with eager loading
+    const skip = (page - 1) * limit;
+    let query = this.readingsRepository
+      .createQueryBuilder('reading')
+      .leftJoinAndSelect('reading.deck', 'deck')
+      .leftJoinAndSelect('reading.cards', 'cards')
+      .leftJoinAndSelect('reading.user', 'user')
+      .leftJoinAndSelect('reading.category', 'category')
+      .where('reading.userId = :userId', { userId })
+      .orderBy(
+        `reading.${sortBy === 'created_at' ? 'createdAt' : 'updatedAt'}`,
+        sortOrder,
+      )
+      .skip(skip)
+      .take(isFreeUser ? Math.min(limit, 10 - skip) : limit);
+
+    // Apply common filters
+    if (queryDto) {
+      query = this.applyReadingFilters(query, queryDto);
+    }
+
+    const data = await query.getMany();
+
+    return {
+      data,
+      meta: {
+        page,
+        limit,
+        totalItems: effectiveTotalItems,
+        totalPages,
+        hasNextPage,
+        hasPreviousPage,
+      },
+    };
   }
 
   async findOne(
@@ -306,5 +380,33 @@ export class ReadingsService {
     );
 
     return updatedReading;
+  }
+
+  /**
+   * Applies common filters to a query builder based on query parameters
+   * @param query The query builder to apply filters to
+   * @param queryDto The query parameters containing filter criteria
+   * @returns The query builder with filters applied
+   */
+  private applyReadingFilters<T extends ObjectLiteral>(
+    query: SelectQueryBuilder<T>,
+    queryDto: QueryReadingsDto,
+  ): SelectQueryBuilder<T> {
+    if (queryDto?.categoryId !== undefined) {
+      query.andWhere('reading.categoryId = :categoryId', {
+        categoryId: queryDto.categoryId,
+      });
+    }
+    if (queryDto?.dateFrom) {
+      query.andWhere('reading.createdAt >= :dateFrom', {
+        dateFrom: new Date(queryDto.dateFrom),
+      });
+    }
+    if (queryDto?.dateTo) {
+      query.andWhere('reading.createdAt <= :dateTo', {
+        dateTo: new Date(queryDto.dateTo),
+      });
+    }
+    return query;
   }
 }

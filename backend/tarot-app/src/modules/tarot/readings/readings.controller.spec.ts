@@ -1,8 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Reflector } from '@nestjs/core';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ReadingsController } from './readings.controller';
 import { ReadingsService } from './readings.service';
 import { CreateReadingDto } from './dto/create-reading.dto';
+import { QueryReadingsDto } from './dto/query-readings.dto';
 import { User } from '../../users/entities/user.entity';
 import { TarotReading } from './entities/tarot-reading.entity';
 import { TarotDeck } from '../decks/entities/tarot-deck.entity';
@@ -60,6 +62,12 @@ describe('ReadingsController', () => {
     cleanOldRecords: jest.fn(),
   };
 
+  const mockCacheManager = {
+    get: jest.fn(),
+    set: jest.fn(),
+    del: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ReadingsController],
@@ -71,6 +79,10 @@ describe('ReadingsController', () => {
         {
           provide: UsageLimitsService,
           useValue: mockUsageLimitsService,
+        },
+        {
+          provide: CACHE_MANAGER,
+          useValue: mockCacheManager,
         },
         CheckUsageLimitGuard,
         IncrementUsageInterceptor,
@@ -150,15 +162,26 @@ describe('ReadingsController', () => {
   });
 
   describe('getUserReadings', () => {
-    it('should return all readings for the user', async () => {
-      const readings = [mockReading];
+    it('should return paginated readings for the user', async () => {
+      const paginatedResponse = {
+        data: [mockReading],
+        meta: {
+          page: 1,
+          limit: 10,
+          totalItems: 1,
+          totalPages: 1,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      };
       const req = { user: { userId: mockUser.id } };
-      mockService.findAll.mockResolvedValue(readings);
+      const queryDto: QueryReadingsDto = { page: 1, limit: 10 };
+      mockService.findAll.mockResolvedValue(paginatedResponse);
 
-      const result = await controller.getUserReadings(req);
+      const result = await controller.getUserReadings(req, queryDto);
 
-      expect(mockService.findAll).toHaveBeenCalledWith(mockUser.id);
-      expect(result).toEqual(readings);
+      expect(mockService.findAll).toHaveBeenCalledWith(mockUser.id, queryDto);
+      expect(result).toEqual(paginatedResponse);
     });
   });
 

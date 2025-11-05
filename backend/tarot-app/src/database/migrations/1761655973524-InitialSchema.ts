@@ -23,6 +23,9 @@ export class InitialSchema1761655973524 implements MigrationInterface {
       `CREATE TABLE "tarot_reading" ("id" SERIAL NOT NULL, "question" character varying, "predefinedQuestionId" integer, "customQuestion" character varying(500), "questionType" character varying(20), "cardPositions" jsonb NOT NULL, "interpretation" text, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "regenerationCount" integer NOT NULL DEFAULT '0', "deletedAt" TIMESTAMP, "userId" integer, "deckId" integer, "categoryId" integer, CONSTRAINT "PK_8f96c960d305aaf75bd688fb2cd" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
+      `CREATE INDEX "IDX_tarot_reading_user_created" ON "tarot_reading" ("userId", "createdAt")`,
+    );
+    await queryRunner.query(
       `CREATE TYPE "user_plan_enum" AS ENUM('free', 'premium')`,
     );
     await queryRunner.query(
@@ -262,6 +265,9 @@ export class InitialSchema1761655973524 implements MigrationInterface {
     await queryRunner.query(`DROP TABLE "user"`);
     await queryRunner.query(`DROP TYPE "user_subscription_status_enum"`);
     await queryRunner.query(`DROP TYPE "user_plan_enum"`);
+    await queryRunner.query(
+      `DROP INDEX "public"."IDX_tarot_reading_user_created"`,
+    );
     await queryRunner.query(`DROP TABLE "tarot_reading"`);
     await queryRunner.query(
       `DROP INDEX "public"."IDX_predefined_question_category"`,
