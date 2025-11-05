@@ -82,7 +82,7 @@ npm test
 **Prioridad:** 🟢 MEDIA  
 **Estimación:** 2 horas  
 **Estado:** ✅ **COMPLETADA**  
-**Commit:** `5f3f0da`  
+**Commit:** `5f3f0da` + `5b668cc`  
 **Fecha:** 04/01/2025
 
 **Descripción:**  
@@ -148,7 +148,9 @@ npm test
 
 **Prioridad:** 🟢 BAJA  
 **Estimación:** 6 horas  
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ **COMPLETADA**  
+**Commit:** `2a1f2c2`  
+**Fecha:** 04/01/2025
 
 **Descripción:**  
 Crear suite de tests unitarios que valida la integridad de las migraciones (up/down, idempotencia, rollback).
@@ -255,7 +257,9 @@ npm test
 
 **Prioridad:** 🟢 BAJA  
 **Estimación:** 4 horas  
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ **COMPLETADA**  
+**Commit:** `20b3539`  
+**Fecha:** 04/01/2025
 
 **Descripción:**  
 Crear script que compara el schema generado por migraciones vs el schema esperado por entidades TypeORM, detectando drift automáticamente.
@@ -387,7 +391,9 @@ npm test
 
 **Prioridad:** 🟢 BAJA  
 **Estimación:** 4 horas  
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ **COMPLETADA**  
+**Commit:** `c67881f`  
+**Fecha:** 04/01/2025
 
 **Descripción:**  
 Crear suite de tests E2E que valida la infraestructura de bases de datos antes de ejecutar los tests funcionales.
@@ -542,7 +548,9 @@ npm run test:e2e
 
 **Prioridad:** 🟢 MEDIA  
 **Estimación:** 3 horas  
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ **COMPLETADA**  
+**Commit:** `203cd9e`  
+**Fecha:** 04/01/2025
 
 **Descripción:**  
 Crear guía completa y dedicada sobre testing con bases de datos, cubriendo todos los aspectos de la infraestructura E2E.
@@ -612,7 +620,9 @@ Crear guía completa y dedicada sobre testing con bases de datos, cubriendo todo
 
 **Prioridad:** 🟢 BAJA  
 **Estimación:** 1 hora  
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ **COMPLETADA**  
+**Commit:** `276099f`  
+**Fecha:** 04/01/2025
 
 **Descripción:**  
 Agregar sección en MIGRATIONS.md sobre testing de migraciones y validación de consistencia de schema.
