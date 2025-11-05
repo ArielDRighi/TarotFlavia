@@ -1,6 +1,6 @@
 import { DataSource, QueryRunner } from 'typeorm';
-import { e2eConnectionSource } from '../../config/typeorm-e2e.config';
-import { InitialSchema1761655973524 } from './1761655973524-InitialSchema';
+import { e2eConnectionSource } from '../config/typeorm-e2e.config';
+import { InitialSchema1761655973524 } from './migrations/1761655973524-InitialSchema';
 
 describe('Migration Validation', () => {
   let dataSource: DataSource;

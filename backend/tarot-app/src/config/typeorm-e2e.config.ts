@@ -20,7 +20,7 @@ const e2eConfig: DataSourceOptions = {
   synchronize: false, // Usar migraciones en lugar de sincronización automática
   logging: false, // Desactivar logs en tests E2E
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-  migrations: [__dirname + '/../database/migrations/*{.ts,.js}'],
+  migrations: [__dirname + '/../database/migrations/*-*{.ts,.js}'], // Solo archivos con timestamp (formato: NNNNNNNNNN-Name.ts)
   migrationsTableName: 'migrations',
   migrationsRun: false, // Las migraciones se ejecutan manualmente en tests
   ssl: false,
