@@ -5,6 +5,7 @@ import { ReadingsController } from './readings.controller';
 import { ReadingsAdminController } from './readings-admin.controller';
 import { ReadingsCleanupService } from './readings-cleanup.service';
 import { ShareController } from './share.controller';
+import { SharedReadingsController } from './shared-readings.controller';
 import { TarotReading } from './entities/tarot-reading.entity';
 import { TarotInterpretation } from '../interpretations/entities/tarot-interpretation.entity';
 import { User } from '../../users/entities/user.entity';
@@ -25,7 +26,12 @@ import { UsageLimitsModule } from '../../usage-limits/usage-limits.module';
     PredefinedQuestionsModule,
     UsageLimitsModule,
   ],
-  controllers: [ReadingsController, ReadingsAdminController, ShareController],
+  controllers: [
+    ReadingsController,
+    ReadingsAdminController,
+    ShareController,
+    SharedReadingsController,
+  ],
   providers: [
     ReadingsService,
     ReadingsCleanupService,
