@@ -9,6 +9,9 @@ import {
   UseInterceptors,
   Request,
   ParseIntPipe,
+  Delete,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -79,6 +82,23 @@ export class ReadingsController {
   ) {
     const user = { id: req.user.userId } as User;
     return this.readingsService.create(user, createReadingDto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('trash')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Obtener lecturas eliminadas (papelera)',
+    description:
+      'Recupera las lecturas eliminadas del usuario en los últimos 30 días. Las lecturas pueden ser restauradas desde aquí.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Listado de lecturas eliminadas',
+  })
+  async getTrashedReadings(@Request() req: { user: { userId: number } }) {
+    const userId = req.user.userId;
+    return this.readingsService.findTrashedReadings(userId);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -203,5 +223,70 @@ export class ReadingsController {
   ) {
     const userId = req.user.userId;
     return this.readingsService.regenerateInterpretation(id, userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Eliminar una lectura (soft delete)',
+    description:
+      'Elimina lógicamente una lectura. La lectura no se elimina de la base de datos pero no aparecerá en los listados normales. Puede ser restaurada dentro de 30 días.',
+  })
+  @ApiParam({ name: 'id', description: 'ID de la lectura a eliminar' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lectura eliminada con éxito',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tienes permiso para eliminar esta lectura',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Lectura no encontrada',
+  })
+  async deleteReading(
+    @Request() req: { user: { userId: number } },
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<{ message: string }> {
+    const userId = req.user.userId;
+    await this.readingsService.remove(id, userId);
+    return { message: 'Lectura eliminada con éxito' };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/restore')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Restaurar una lectura eliminada',
+    description:
+      'Restaura una lectura eliminada haciéndola visible nuevamente en los listados normales.',
+  })
+  @ApiParam({ name: 'id', description: 'ID de la lectura a restaurar' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lectura restaurada con éxito',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'La lectura no está eliminada',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tienes permiso para restaurar esta lectura',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Lectura no encontrada',
+  })
+  async restoreReading(
+    @Request() req: { user: { userId: number } },
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    const userId = req.user.userId;
+    return this.readingsService.restore(id, userId);
   }
 }

@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { HttpModule } from '@nestjs/axios';
 import { ConfigModule } from '@nestjs/config';
-import { ScheduleModule } from '@nestjs/schedule';
 import { InterpretationsService } from './interpretations.service';
 import { InterpretationsController } from './interpretations.controller';
 import { TarotInterpretation } from './entities/tarot-interpretation.entity';
@@ -20,7 +19,6 @@ import { AIUsageModule } from '../../ai-usage/ai-usage.module';
     TypeOrmModule.forFeature([TarotInterpretation, CachedInterpretation]),
     HttpModule,
     ConfigModule,
-    ScheduleModule.forRoot(),
     AIUsageModule,
   ],
   controllers: [InterpretationsController],

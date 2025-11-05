@@ -156,6 +156,7 @@ export class ReadingsService {
     let totalQuery = this.readingsRepository
       .createQueryBuilder('reading')
       .where('reading.userId = :userId', { userId })
+      .andWhere('reading.deletedAt IS NULL')
       .orderBy(
         `reading.${sortBy === 'created_at' ? 'createdAt' : 'updatedAt'}`,
         sortOrder,
@@ -188,6 +189,7 @@ export class ReadingsService {
       .leftJoinAndSelect('reading.user', 'user')
       .leftJoinAndSelect('reading.category', 'category')
       .where('reading.userId = :userId', { userId })
+      .andWhere('reading.deletedAt IS NULL')
       .orderBy(
         `reading.${sortBy === 'created_at' ? 'createdAt' : 'updatedAt'}`,
         sortOrder,
@@ -253,9 +255,133 @@ export class ReadingsService {
   async remove(id: number, userId: number): Promise<void> {
     const reading = await this.findOne(id, userId);
 
-    // Soft delete using TypeORM's DeleteDateColumn
-    reading.deletedAt = new Date();
-    await this.readingsRepository.save(reading);
+    // Soft delete using TypeORM's softRemove
+    await this.readingsRepository.softRemove(reading);
+  }
+
+  async findTrashedReadings(userId: number): Promise<TarotReading[]> {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    return this.readingsRepository
+      .createQueryBuilder('reading')
+      .leftJoinAndSelect('reading.deck', 'deck')
+      .leftJoinAndSelect('reading.cards', 'cards')
+      .leftJoinAndSelect('reading.category', 'category')
+      .where('reading.userId = :userId', { userId })
+      .andWhere('reading.deletedAt IS NOT NULL')
+      .andWhere('reading.deletedAt > :thirtyDaysAgo', { thirtyDaysAgo })
+      .withDeleted()
+      .orderBy('reading.deletedAt', 'DESC')
+      .getMany();
+  }
+
+  async restore(id: number, userId: number): Promise<TarotReading> {
+    // Buscar la lectura incluyendo eliminadas
+    const reading = await this.readingsRepository.findOne({
+      where: { id },
+      withDeleted: true,
+      relations: ['user', 'deck', 'cards', 'category'],
+    });
+
+    if (!reading) {
+      throw new NotFoundException(`Reading with ID ${id} not found`);
+    }
+
+    if (reading.user.id !== userId) {
+      throw new ForbiddenException(
+        'You do not have permission to restore this reading',
+      );
+    }
+
+    if (!reading.deletedAt) {
+      throw new HttpException('Reading is not deleted', HttpStatus.BAD_REQUEST);
+    }
+
+    // Restaurar limpiando deletedAt
+    // Usamos restore para TypeORM gestione correctamente la columna
+    await this.readingsRepository.restore({ id });
+
+    // Retornar la lectura restaurada
+    const restored = await this.readingsRepository.findOne({
+      where: { id },
+      relations: ['user', 'deck', 'cards', 'category'],
+    });
+
+    if (!restored) {
+      throw new NotFoundException(
+        `Reading with ID ${id} not found after restore`,
+      );
+    }
+
+    return restored;
+  }
+
+  async findAllForAdmin(
+    includeDeleted = false,
+  ): Promise<PaginatedReadingsResponseDto> {
+    // Create separate query builder for counting (without .take())
+    const countQueryBuilder = this.readingsRepository
+      .createQueryBuilder('reading')
+      .leftJoin('reading.deck', 'deck')
+      .leftJoin('reading.cards', 'cards')
+      .leftJoin('reading.user', 'user')
+      .leftJoin('reading.category', 'category');
+
+    if (includeDeleted) {
+      countQueryBuilder.withDeleted();
+    }
+
+    const totalItems = await countQueryBuilder.getCount();
+
+    // Create query builder for fetching data (with .take())
+    const queryBuilder = this.readingsRepository
+      .createQueryBuilder('reading')
+      .leftJoinAndSelect('reading.deck', 'deck')
+      .leftJoinAndSelect('reading.cards', 'cards')
+      .leftJoinAndSelect('reading.user', 'user')
+      .leftJoinAndSelect('reading.category', 'category')
+      .orderBy('reading.createdAt', 'DESC')
+      .take(50);
+
+    if (includeDeleted) {
+      queryBuilder.withDeleted();
+    }
+
+    const data = await queryBuilder.getMany();
+
+    return {
+      data,
+      meta: {
+        page: 1,
+        limit: 50,
+        totalItems,
+        totalPages: Math.ceil(totalItems / 50),
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
+    };
+  }
+
+  async cleanupOldDeletedReadings(): Promise<number> {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const readingsToDelete = await this.readingsRepository
+      .createQueryBuilder('reading')
+      .where('reading.deletedAt IS NOT NULL')
+      .andWhere('reading.deletedAt < :thirtyDaysAgo', { thirtyDaysAgo })
+      .withDeleted()
+      .getMany();
+
+    if (readingsToDelete.length === 0) {
+      return 0;
+    }
+
+    // Hard delete (remove permanently)
+    await this.readingsRepository.remove(readingsToDelete);
+
+    return readingsToDelete.length;
   }
 
   async regenerateInterpretation(
