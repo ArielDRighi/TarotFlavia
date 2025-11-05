@@ -143,6 +143,10 @@ describe('ReadingsService', () => {
           useValue: mockRepository,
         },
         {
+          provide: getRepositoryToken(User),
+          useValue: mockRepository,
+        },
+        {
           provide: InterpretationsService,
           useValue: mockInterpretationsService,
         },
