@@ -3,7 +3,7 @@ import {
   Column,
   PrimaryGeneratedColumn,
   CreateDateColumn,
-  OneToOne,
+  ManyToOne,
   JoinColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
@@ -15,7 +15,7 @@ export class TarotInterpretation {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @OneToOne(() => TarotReading)
+  @ManyToOne(() => TarotReading, (reading) => reading.interpretations)
   @JoinColumn()
   reading: TarotReading;
 

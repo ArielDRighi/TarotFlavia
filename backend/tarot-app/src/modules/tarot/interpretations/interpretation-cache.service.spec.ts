@@ -286,7 +286,7 @@ describe('InterpretationCacheService', () => {
   describe('saveToCache', () => {
     it('should save to both in-memory and database caches', async () => {
       const cacheKey = 'test-key';
-      const spreadId = 'spread123';
+      const spreadId = 123;
       const cardCombination = [
         { card_id: 'card1', position: 0, is_reversed: false },
       ];
@@ -337,7 +337,7 @@ describe('InterpretationCacheService', () => {
 
     it('should set expires_at to 30 days from now', async () => {
       const cacheKey = 'test-key';
-      const spreadId = 'spread123';
+      const spreadId = 123;
       const cardCombination = [
         { card_id: 'card1', position: 0, is_reversed: false },
       ];

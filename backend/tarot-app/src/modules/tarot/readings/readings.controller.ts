@@ -107,4 +107,40 @@ export class ReadingsController {
 
     return this.readingsService.findOne(id, userId, isAdmin);
   }
+
+  @UseGuards(JwtAuthGuard, CheckUsageLimitGuard)
+  @UseInterceptors(IncrementUsageInterceptor)
+  @CheckUsageLimit(UsageFeature.INTERPRETATION_REGENERATION)
+  @Post(':id/regenerate')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Regenerar interpretación de una lectura existente',
+    description:
+      'Genera una nueva interpretación para una lectura existente manteniendo las mismas cartas. Solo disponible para usuarios premium. Límite: 3 regeneraciones por lectura.',
+  })
+  @ApiParam({ name: 'id', description: 'ID de la lectura a regenerar' })
+  @ApiResponse({
+    status: 201,
+    description: 'Interpretación regenerada con éxito',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Usuario no es premium o no es el dueño de la lectura',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Lectura no encontrada',
+  })
+  @ApiResponse({
+    status: 429,
+    description:
+      'Límite de regeneraciones alcanzado (máximo 3 por lectura) o límite diario alcanzado',
+  })
+  async regenerateInterpretation(
+    @Request() req: { user: { userId: number } },
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    const userId = req.user.userId;
+    return this.readingsService.regenerateInterpretation(id, userId);
+  }
 }

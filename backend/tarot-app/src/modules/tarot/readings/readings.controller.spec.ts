@@ -5,6 +5,7 @@ import { ReadingsService } from './readings.service';
 import { CreateReadingDto } from './dto/create-reading.dto';
 import { User } from '../../users/entities/user.entity';
 import { TarotReading } from './entities/tarot-reading.entity';
+import { TarotDeck } from '../decks/entities/tarot-deck.entity';
 import { CheckUsageLimitGuard } from '../../usage-limits/guards/check-usage-limit.guard';
 import { IncrementUsageInterceptor } from '../../usage-limits/interceptors/increment-usage.interceptor';
 import { UsageLimitsService } from '../../usage-limits/usage-limits.service';
@@ -25,13 +26,23 @@ describe('ReadingsController', () => {
   const mockReading: TarotReading = {
     id: 1,
     question: 'What does my future hold?',
+    predefinedQuestionId: null,
+    predefinedQuestion: null,
+    customQuestion: null,
+    questionType: null,
     user: mockUser,
+    deck: {} as TarotDeck,
+    cards: [],
+    category: null,
     cardPositions: [
       { cardId: 1, position: 'past', isReversed: false },
       { cardId: 2, position: 'present', isReversed: true },
     ],
     interpretation: 'Your reading suggests...',
     createdAt: new Date(),
+    updatedAt: new Date(),
+    regenerationCount: 0,
+    interpretations: [],
   } as TarotReading;
 
   const mockService = {
