@@ -130,6 +130,9 @@ describe('ReadingsService', () => {
     updatedAt: new Date(),
     regenerationCount: 0,
     interpretations: [],
+    sharedToken: null,
+    isPublic: false,
+    viewCount: 0,
   };
 
   beforeEach(async () => {
