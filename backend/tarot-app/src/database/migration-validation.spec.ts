@@ -15,11 +15,20 @@ describe('Migration Validation', () => {
   }, 15000);
 
   afterAll(async () => {
-    if (queryRunner) {
-      await queryRunner.release();
+    try {
+      if (queryRunner && !queryRunner.isReleased) {
+        await queryRunner.release();
+      }
+    } catch {
+      // Silently ignore if already released
     }
-    if (dataSource && dataSource.isInitialized) {
-      await dataSource.destroy();
+
+    try {
+      if (dataSource?.isInitialized) {
+        await dataSource.destroy();
+      }
+    } catch {
+      // Silently ignore if already destroyed
     }
   }, 10000);
 

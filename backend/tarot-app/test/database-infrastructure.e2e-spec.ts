@@ -28,13 +28,13 @@ describe('Database Infrastructure (E2E)', () => {
 
     beforeAll(async () => {
       dataSource = e2eConnectionSource;
-      await dataSource.initialize();
+      if (!dataSource.isInitialized) {
+        await dataSource.initialize();
+      }
     }, 30000);
 
     afterAll(async () => {
-      if (dataSource && dataSource.isInitialized) {
-        await dataSource.destroy();
-      }
+      // Don't destroy - will be cleaned up by other tests or global teardown
     }, 10000);
 
     it('should be accessible on port 5436', () => {
@@ -87,9 +87,7 @@ describe('Database Infrastructure (E2E)', () => {
     }, 30000);
 
     afterAll(async () => {
-      if (dataSource && dataSource.isInitialized) {
-        await dataSource.destroy();
-      }
+      // Don't destroy - shared connection with other tests
     }, 10000);
 
     it('should have migrations table created', async () => {
@@ -216,9 +214,7 @@ describe('Database Infrastructure (E2E)', () => {
     }, 30000);
 
     afterAll(async () => {
-      if (dataSource && dataSource.isInitialized) {
-        await dataSource.destroy();
-      }
+      // Don't destroy - shared connection with other tests
     }, 10000);
 
     it('should be able to query database successfully', async () => {
