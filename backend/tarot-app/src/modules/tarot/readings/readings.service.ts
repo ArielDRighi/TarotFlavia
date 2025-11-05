@@ -7,7 +7,7 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder, ObjectLiteral } from 'typeorm';
 import { TarotReading } from './entities/tarot-reading.entity';
 import { TarotInterpretation } from '../interpretations/entities/tarot-interpretation.entity';
 import { User, UserPlan } from '../../users/entities/user.entity';
@@ -153,7 +153,7 @@ export class ReadingsService {
     }
 
     // Calculate total items (respecting free user limit)
-    const totalQuery = this.readingsRepository
+    let totalQuery = this.readingsRepository
       .createQueryBuilder('reading')
       .where('reading.userId = :userId', { userId })
       .orderBy(
@@ -161,20 +161,9 @@ export class ReadingsService {
         sortOrder,
       );
 
-    if (queryDto?.categoryId !== undefined) {
-      totalQuery.andWhere('reading.categoryId = :categoryId', {
-        categoryId: queryDto.categoryId,
-      });
-    }
-    if (queryDto?.dateFrom) {
-      totalQuery.andWhere('reading.createdAt >= :dateFrom', {
-        dateFrom: new Date(queryDto.dateFrom),
-      });
-    }
-    if (queryDto?.dateTo) {
-      totalQuery.andWhere('reading.createdAt <= :dateTo', {
-        dateTo: new Date(queryDto.dateTo),
-      });
+    // Apply common filters
+    if (queryDto) {
+      totalQuery = this.applyReadingFilters(totalQuery, queryDto);
     }
 
     const totalItems = await totalQuery.getCount();
@@ -192,7 +181,7 @@ export class ReadingsService {
 
     // Fetch paginated data with eager loading
     const skip = (page - 1) * limit;
-    const query = this.readingsRepository
+    let query = this.readingsRepository
       .createQueryBuilder('reading')
       .leftJoinAndSelect('reading.deck', 'deck')
       .leftJoinAndSelect('reading.cards', 'cards')
@@ -206,20 +195,9 @@ export class ReadingsService {
       .skip(skip)
       .take(isFreeUser ? Math.min(limit, 10 - skip) : limit);
 
-    if (queryDto?.categoryId !== undefined) {
-      query.andWhere('reading.categoryId = :categoryId', {
-        categoryId: queryDto.categoryId,
-      });
-    }
-    if (queryDto?.dateFrom) {
-      query.andWhere('reading.createdAt >= :dateFrom', {
-        dateFrom: new Date(queryDto.dateFrom),
-      });
-    }
-    if (queryDto?.dateTo) {
-      query.andWhere('reading.createdAt <= :dateTo', {
-        dateTo: new Date(queryDto.dateTo),
-      });
+    // Apply common filters
+    if (queryDto) {
+      query = this.applyReadingFilters(query, queryDto);
     }
 
     const data = await query.getMany();
@@ -402,5 +380,33 @@ export class ReadingsService {
     );
 
     return updatedReading;
+  }
+
+  /**
+   * Applies common filters to a query builder based on query parameters
+   * @param query The query builder to apply filters to
+   * @param queryDto The query parameters containing filter criteria
+   * @returns The query builder with filters applied
+   */
+  private applyReadingFilters<T extends ObjectLiteral>(
+    query: SelectQueryBuilder<T>,
+    queryDto: QueryReadingsDto,
+  ): SelectQueryBuilder<T> {
+    if (queryDto?.categoryId !== undefined) {
+      query.andWhere('reading.categoryId = :categoryId', {
+        categoryId: queryDto.categoryId,
+      });
+    }
+    if (queryDto?.dateFrom) {
+      query.andWhere('reading.createdAt >= :dateFrom', {
+        dateFrom: new Date(queryDto.dateFrom),
+      });
+    }
+    if (queryDto?.dateTo) {
+      query.andWhere('reading.createdAt <= :dateTo', {
+        dateTo: new Date(queryDto.dateTo),
+      });
+    }
+    return query;
   }
 }
