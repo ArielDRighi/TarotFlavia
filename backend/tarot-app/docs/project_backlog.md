@@ -2963,7 +2963,7 @@ Implementar eliminación lógica (soft delete) de lecturas para permitir que usu
 
 **Archivos creados/modificados:**
 
-1. `test/readings-soft-delete.e2e-spec.ts` (820 líneas) - 20 tests E2E
+1. `test/readings-soft-delete.e2e-spec.ts` (578 líneas) - 20 tests E2E
 2. `src/database/migrations/1761655973524-InitialSchema.ts` - Índice added
 3. `src/modules/tarot/readings/readings.controller.ts` - 3 endpoints nuevos (DELETE, GET /trash, POST /restore)
 4. `src/modules/tarot/readings/readings-admin.controller.ts` - NUEVO: Admin endpoint

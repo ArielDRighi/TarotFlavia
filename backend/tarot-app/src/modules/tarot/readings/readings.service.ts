@@ -320,6 +320,21 @@ export class ReadingsService {
   async findAllForAdmin(
     includeDeleted = false,
   ): Promise<PaginatedReadingsResponseDto> {
+    // Create separate query builder for counting (without .take())
+    const countQueryBuilder = this.readingsRepository
+      .createQueryBuilder('reading')
+      .leftJoin('reading.deck', 'deck')
+      .leftJoin('reading.cards', 'cards')
+      .leftJoin('reading.user', 'user')
+      .leftJoin('reading.category', 'category');
+
+    if (includeDeleted) {
+      countQueryBuilder.withDeleted();
+    }
+
+    const totalItems = await countQueryBuilder.getCount();
+
+    // Create query builder for fetching data (with .take())
     const queryBuilder = this.readingsRepository
       .createQueryBuilder('reading')
       .leftJoinAndSelect('reading.deck', 'deck')
@@ -334,7 +349,6 @@ export class ReadingsService {
     }
 
     const data = await queryBuilder.getMany();
-    const totalItems = await queryBuilder.getCount();
 
     return {
       data,

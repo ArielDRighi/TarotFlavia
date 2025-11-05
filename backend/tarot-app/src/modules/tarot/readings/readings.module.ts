@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ScheduleModule } from '@nestjs/schedule';
 import { ReadingsService } from './readings.service';
 import { ReadingsController } from './readings.controller';
 import { ReadingsAdminController } from './readings-admin.controller';
@@ -20,7 +19,6 @@ import { UsageLimitsModule } from '../../usage-limits/usage-limits.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([TarotReading, TarotInterpretation, User]),
-    ScheduleModule.forRoot(),
     InterpretationsModule,
     CardsModule,
     SpreadsModule,

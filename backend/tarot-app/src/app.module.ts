@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { CacheModule } from '@nestjs/cache-manager';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
@@ -59,6 +60,7 @@ import { validate } from './config/env-validator';
         limit: 100, // 100 requests por minuto (global)
       },
     ]),
+    ScheduleModule.forRoot(),
     AuthModule,
     UsersModule,
     CardsModule,
