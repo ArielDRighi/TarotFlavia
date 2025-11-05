@@ -490,33 +490,54 @@ describe('Reading Regeneration E2E', () => {
    */
   describe('POST /readings/:id/regenerate - Regeneration Limit', () => {
     it('should allow up to 3 regenerations and then return 429', async () => {
-      // Usar la reading global para probar el límite
+      // Crear una nueva lectura específica para este test (sin regeneraciones previas)
+      const createResponse = await request(app.getHttpServer())
+        .post('/readings')
+        .set('Authorization', `Bearer ${premiumUserToken}`)
+        .send({
+          predefinedQuestionId: predefinedQuestionId,
+          deckId: deckId,
+          spreadId: spreadId,
+          cardIds: cardIds,
+          cardPositions: [
+            { cardId: cardIds[0], position: 'Past', isReversed: false },
+            { cardId: cardIds[1], position: 'Present', isReversed: false },
+            { cardId: cardIds[2], position: 'Future', isReversed: false },
+          ],
+          generateInterpretation: true,
+        })
+        .expect(201);
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const freshReadingId = createResponse.body.id as number;
+      expect(freshReadingId).toBeDefined();
+
       // Hacer 3 regeneraciones
       await request(app.getHttpServer())
-        .post(`/readings/${readingId}/regenerate`)
+        .post(`/readings/${freshReadingId}/regenerate`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(201);
 
       await request(app.getHttpServer())
-        .post(`/readings/${readingId}/regenerate`)
+        .post(`/readings/${freshReadingId}/regenerate`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(201);
 
       await request(app.getHttpServer())
-        .post(`/readings/${readingId}/regenerate`)
+        .post(`/readings/${freshReadingId}/regenerate`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(201);
 
       // Verificar que regenerationCount es 3
       const reading = await dataSource
         .getRepository(TarotReading)
-        .findOne({ where: { id: readingId } });
+        .findOne({ where: { id: freshReadingId } });
 
       expect(reading?.regenerationCount).toBe(3);
 
       // La cuarta debe fallar con 429
       const response = await request(app.getHttpServer())
-        .post(`/readings/${readingId}/regenerate`)
+        .post(`/readings/${freshReadingId}/regenerate`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(429);
 
