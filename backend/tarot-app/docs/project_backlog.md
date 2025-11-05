@@ -2994,11 +2994,13 @@ Implementar eliminación lógica (soft delete) de lecturas para permitir que usu
 
 ---
 
-### **TASK-025: Implementar Sistema de Compartir Lecturas (Preparación)**
+### **TASK-025: Implementar Sistema de Compartir Lecturas (Preparación)** ✅
 
 **Prioridad:** 🟢 BAJA  
 **Estimación:** 3 días  
-**Dependencias:** TASK-011
+**Dependencias:** TASK-011  
+**Estado:** ✅ COMPLETADA (05/11/2025)  
+**Rama:** `feature/TASK-025-share-readings`
 
 #### 📋 Descripción
 
@@ -3006,29 +3008,52 @@ Preparar backend para sistema de compartir lecturas mediante tokens únicos, per
 
 #### ✅ Tareas específicas
 
-- [ ] Agregar campo `shared_token` (string unique nullable) a entidad `TarotReading`
-- [ ] Agregar campo `is_public` (boolean default false) a entidad `TarotReading`
-- [ ] Implementar endpoint `POST /readings/:id/share` (solo premium):
+- [x] Agregar campo `shared_token` (string unique nullable) a entidad `TarotReading`
+- [x] Agregar campo `is_public` (boolean default false) a entidad `TarotReading`
+- [x] Implementar endpoint `POST /readings/:id/share` (solo premium):
   - Generar token único seguro (8-12 caracteres alfanuméricos)
   - Marcar lectura como `is_public: true`
   - Retornar URL completa: `https://app.com/shared/{token}`
-- [ ] Implementar endpoint `DELETE /readings/:id/unshare`:
+- [x] Implementar endpoint `DELETE /readings/:id/unshare`:
   - Remover token y marcar `is_public: false`
-- [ ] Implementar endpoint público `GET /shared/:token`:
+- [x] Implementar endpoint público `GET /shared/:token`:
   - No requiere autenticación
   - Retorna lectura completa sin información del usuario (solo nombre/alias si se configura)
   - Incrementar contador `view_count` cada vez que se accede
-- [ ] Agregar campo `view_count` (integer default 0) para trackear visualizaciones
-- [ ] Validar que solo usuarios premium puedan compartir
-- [ ] Verificar que el token sea único antes de guardarlo (retry si colisión)
-- [ ] Crear índice único en `shared_token` para búsquedas rápidas
-- [ ] Implementar rate limiting especial para endpoint público (100 requests/15min por IP)
+- [x] Agregar campo `view_count` (integer default 0) para trackear visualizaciones
+- [x] Validar que solo usuarios premium puedan compartir
+- [x] Verificar que el token sea único antes de guardarlo (retry si colisión)
+- [x] Crear índice único en `shared_token` para búsquedas rápidas
+- [x] Implementar rate limiting especial para endpoint público (100 requests/15min por IP)
 
 #### 🎯 Criterios de aceptación
 
-- ✓ Usuarios premium pueden generar enlaces de compartir
-- ✓ El endpoint público funciona sin autenticación
-- ✓ Se trackean las visualizaciones de lecturas compartidas
+- ✅ Usuarios premium pueden generar enlaces de compartir
+- ✅ El endpoint público funciona sin autenticación
+- ✅ Se trackean las visualizaciones de lecturas compartidas
+
+#### 📝 Notas de implementación
+
+**Archivos modificados:**
+
+- `src/modules/tarot/readings/entities/tarot-reading.entity.ts`: Agregados campos `sharedToken`, `isPublic`, `viewCount`
+- `src/database/migrations/1761655973524-InitialSchema.ts`: Agregada columna en migración con índice único
+- `src/modules/tarot/readings/readings.service.ts`: Implementados métodos `shareReading()`, `unshareReading()`, `getSharedReading()`
+- `src/modules/tarot/readings/readings.controller.ts`: Agregados endpoints POST `/readings/:id/share` y DELETE `/readings/:id/unshare`
+- `src/modules/tarot/readings/shared-readings.controller.ts`: Creado nuevo controlador para endpoint público GET `/shared/:token`
+- `src/modules/tarot/readings/readings.module.ts`: Registrado `SharedReadingsController`
+- `test/readings-share.e2e-spec.ts`: Suite completa de tests E2E (17 tests, todos pasando)
+
+**Tests:**
+
+- 17 tests E2E implementados y pasando ✅
+- Cobertura completa de casos de uso: autenticación, premium only, tokens únicos, contador de vistas
+
+**Calidad:**
+
+- ✅ Lint: Sin errores
+- ✅ Format: Código formateado
+- ✅ Build: Compilación exitosa
 
 ---
 

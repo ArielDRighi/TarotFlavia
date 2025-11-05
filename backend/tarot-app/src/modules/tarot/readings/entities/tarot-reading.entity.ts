@@ -141,6 +141,28 @@ export class TarotReading {
   )
   interpretations: TarotInterpretation[];
 
+  @ApiProperty({
+    example: 'abc123xyz',
+    description: 'Token único para compartir la lectura públicamente',
+    required: false,
+  })
+  @Column({ type: 'varchar', length: 12, nullable: true, unique: true })
+  sharedToken: string | null;
+
+  @ApiProperty({
+    example: false,
+    description: 'Indica si la lectura es pública y compartible',
+  })
+  @Column({ default: false })
+  isPublic: boolean;
+
+  @ApiProperty({
+    example: 0,
+    description: 'Número de veces que se visualizó la lectura compartida',
+  })
+  @Column({ default: 0 })
+  viewCount: number;
+
   @DeleteDateColumn()
   deletedAt?: Date;
 }

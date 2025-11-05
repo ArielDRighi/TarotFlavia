@@ -289,4 +289,64 @@ export class ReadingsController {
     const userId = req.user.userId;
     return this.readingsService.restore(id, userId);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/share')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Compartir una lectura (solo premium)',
+    description:
+      'Genera un token único para compartir la lectura públicamente. Solo disponible para usuarios premium.',
+  })
+  @ApiParam({ name: 'id', description: 'ID de la lectura a compartir' })
+  @ApiResponse({
+    status: 201,
+    description: 'Lectura compartida con éxito',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Usuario no es premium o no es el dueño de la lectura',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Lectura no encontrada',
+  })
+  async shareReading(
+    @Request() req: { user: { userId: number } },
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    const userId = req.user.userId;
+    return this.readingsService.shareReading(id, userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id/unshare')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Dejar de compartir una lectura',
+    description:
+      'Remueve el token de compartir y marca la lectura como privada.',
+  })
+  @ApiParam({ name: 'id', description: 'ID de la lectura' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lectura dejó de ser compartida con éxito',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tienes permiso para modificar esta lectura',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Lectura no encontrada',
+  })
+  async unshareReading(
+    @Request() req: { user: { userId: number } },
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    const userId = req.user.userId;
+    return this.readingsService.unshareReading(id, userId);
+  }
 }

@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder, ObjectLiteral } from 'typeorm';
+import * as crypto from 'crypto';
 import { TarotReading } from './entities/tarot-reading.entity';
 import { TarotInterpretation } from '../interpretations/entities/tarot-interpretation.entity';
 import { User, UserPlan } from '../../users/entities/user.entity';
@@ -506,6 +507,159 @@ export class ReadingsService {
     );
 
     return updatedReading;
+  }
+
+  /**
+   * Genera un token único para compartir una lectura
+   * Solo usuarios premium pueden compartir lecturas
+   */
+  async shareReading(
+    id: number,
+    userId: number,
+  ): Promise<{ sharedToken: string; shareUrl: string; isPublic: boolean }> {
+    // Verificar que el usuario sea premium
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    if (user.plan !== UserPlan.PREMIUM) {
+      throw new ForbiddenException(
+        'Solo los usuarios premium pueden compartir lecturas',
+      );
+    }
+
+    // Obtener la lectura
+    const reading = await this.findOne(id, userId);
+
+    // Si ya tiene un token, retornarlo
+    if (reading.sharedToken && reading.isPublic) {
+      return {
+        sharedToken: reading.sharedToken,
+        shareUrl: this.buildShareUrl(reading.sharedToken),
+        isPublic: reading.isPublic,
+      };
+    }
+
+    // Generar nuevo token único
+    let sharedToken: string;
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    do {
+      sharedToken = this.generateToken();
+      attempts++;
+
+      // Verificar si el token ya existe
+      const existing = await this.readingsRepository.findOne({
+        where: { sharedToken },
+      });
+
+      if (!existing) {
+        break;
+      }
+
+      if (attempts >= maxAttempts) {
+        throw new HttpException(
+          'No se pudo generar un token único. Intente nuevamente.',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    } while (attempts < maxAttempts);
+
+    // Actualizar la lectura
+    reading.sharedToken = sharedToken;
+    reading.isPublic = true;
+    await this.readingsRepository.save(reading);
+
+    this.logger.log(`Reading ${id} shared with token ${sharedToken}`);
+
+    return {
+      sharedToken,
+      shareUrl: this.buildShareUrl(sharedToken),
+      isPublic: true,
+    };
+  }
+
+  /**
+   * Deja de compartir una lectura
+   */
+  async unshareReading(
+    id: number,
+    userId: number,
+  ): Promise<{
+    message: string;
+    isPublic: boolean;
+    sharedToken: string | null;
+  }> {
+    // Obtener la lectura (valida que pertenezca al usuario)
+    const reading = await this.findOne(id, userId);
+
+    // Remover el token y marcar como no pública
+    reading.sharedToken = null;
+    reading.isPublic = false;
+    await this.readingsRepository.save(reading);
+
+    this.logger.log(`Reading ${id} unshared`);
+
+    return {
+      message: 'Lectura dejó de ser compartida con éxito',
+      isPublic: false,
+      sharedToken: null,
+    };
+  }
+
+  /**
+   * Obtiene una lectura compartida públicamente mediante su token
+   * No requiere autenticación
+   * Incrementa el contador de visualizaciones
+   */
+  async getSharedReading(token: string): Promise<TarotReading> {
+    const reading = await this.readingsRepository.findOne({
+      where: { sharedToken: token, isPublic: true },
+      relations: ['cards', 'deck', 'category'],
+    });
+
+    if (!reading) {
+      throw new NotFoundException(
+        'Lectura compartida no encontrada o no está pública',
+      );
+    }
+
+    // Incrementar el contador de visualizaciones
+    reading.viewCount += 1;
+    await this.readingsRepository.save(reading);
+
+    this.logger.log(
+      `Shared reading ${reading.id} viewed (count: ${reading.viewCount})`,
+    );
+
+    return reading;
+  }
+
+  /**
+   * Genera un token alfanumérico criptográficamente seguro de 8-12 caracteres
+   */
+  private generateToken(): string {
+    const length = Math.floor(crypto.randomInt(5)) + 8; // Entre 8 y 12 caracteres
+    const chars =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let token = '';
+
+    for (let i = 0; i < length; i++) {
+      const randomIndex = crypto.randomInt(chars.length);
+      token += chars.charAt(randomIndex);
+    }
+
+    return token;
+  }
+
+  /**
+   * Construye la URL completa para compartir una lectura
+   */
+  private buildShareUrl(token: string): string {
+    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    return `${baseUrl}/shared/${token}`;
   }
 
   /**
