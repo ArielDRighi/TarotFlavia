@@ -346,8 +346,269 @@ npm run migration:run
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)
 - [NestJS Database Guide](https://docs.nestjs.com/techniques/database)
 
+## Testing de Migraciones
+
+### Validación Automática
+
+Tenemos varias herramientas para validar migraciones y asegurar la integridad del esquema:
+
+#### 1. Tests Unitarios de Migraciones
+
+```bash
+npm test -- migration-validation.spec.ts
+```
+
+**Valida:**
+
+- ✅ Método `up()` ejecuta sin errores
+- ✅ Método `down()` ejecuta sin errores (rollback)
+- ✅ Todas las tablas se crean correctamente
+- ✅ Todas las columnas críticas existen
+- ✅ Foreign keys están configuradas
+- ✅ Extensiones PostgreSQL están instaladas (uuid-ossp)
+- ✅ Tabla de migrations existe y tiene registros
+
+**Ubicación:** `src/database/migration-validation.spec.ts`
+
+**Ejemplo de uso:**
+
+```bash
+# Ejecutar solo tests de validación de migraciones
+npm test -- migration-validation
+
+# Output esperado:
+# ✓ should have up and down methods defined
+# ✓ should create all core tables
+# ✓ should create user table with critical columns
+# ✓ should have PostgreSQL uuid-ossp extension enabled
+# ✓ should have foreign key constraints on reading table
+# ✓ should record migration execution
+```
+
+#### 2. Validación de Consistencia de Schema
+
+```bash
+npm run validate:schema
+```
+
+**Compara** el schema real (después de migraciones) vs el schema esperado (entidades TypeORM).
+
+**Detecta:**
+
+- ❌ Tablas faltantes en DB
+- ❌ Columnas faltantes en DB
+- ❌ Diferencias de tipos de datos
+- ❌ Foreign keys faltantes
+- ❌ Drift entre código y DB
+
+**Flujo del script:**
+
+```
+1. Conectar a DB E2E
+2. Ejecutar migraciones
+3. Obtener tablas reales de DB
+4. Comparar con entidades TypeORM
+5. Reportar errores y warnings
+```
+
+**Output esperado:**
+
+```
+🔍 Validando consistencia de schema...
+
+✅ Conexión a DB E2E establecida
+
+📦 Ejecutando migraciones...
+✅ Migraciones ejecutadas
+
+📊 Tablas encontradas en DB: 13
+  - user
+  - tarot_card
+  - tarot_reading
+  ...
+
+📋 Entidades definidas en código: 13
+  - User
+  - TarotCard
+  - TarotReading
+  ...
+
+============================================================
+📊 RESUMEN DE VALIDACIÓN
+============================================================
+Total de entidades: 13
+Total de tablas en DB: 13
+Errores encontrados: 0
+Advertencias: 0
+============================================================
+
+✅ Validación EXITOSA: Schema consistente entre código y DB
+```
+
+#### 3. Tests de Infraestructura E2E
+
+```bash
+npm run test:e2e -- database-infrastructure.e2e-spec.ts
+```
+
+**Valida la infraestructura completa de testing:**
+
+- ✅ Configuración de DB development correcta
+- ✅ Configuración de DB E2E correcta
+- ✅ Aislamiento entre bases de datos
+- ✅ Extensiones PostgreSQL instaladas
+- ✅ Ejecución de migraciones sin errores
+- ✅ Creación de todas las tablas core
+- ✅ Configuración de conexión correcta
+- ✅ Variables de entorno correctas
+
+**Ubicación:** `test/database-infrastructure.e2e-spec.ts`
+
+### Workflow Completo de Testing
+
+#### Al crear una nueva migración:
+
+```bash
+# 1. Generar migración
+npm run migration:generate -- -n FeatureName
+
+# 2. Ejecutar tests unitarios de migraciones
+npm test -- migration-validation.spec.ts
+
+# 3. Validar consistencia de schema
+npm run validate:schema
+
+# 4. Ejecutar tests E2E de infraestructura
+npm run test:e2e -- database-infrastructure
+
+# 5. Ejecutar suite completa E2E
+npm run test:e2e
+
+# 6. Si todo pasa, commit
+git add src/database/migrations/
+git commit -m "feat: add feature migration"
+```
+
+#### Antes de merge a main:
+
+```bash
+# Pipeline CI debe ejecutar:
+npm run lint
+npm run format
+npm run build
+npm test                                    # Incluye migration-validation
+npm run validate:schema
+npm run test:e2e                            # Incluye database-infrastructure
+```
+
+### Mejores Prácticas de Testing
+
+#### ✅ DO (Hacer)
+
+1. **Siempre testear migraciones** antes de commit
+
+   ```bash
+   npm test -- migration-validation
+   ```
+
+2. **Validar rollback** (método `down()`) funciona correctamente
+
+   ```bash
+   npm run migration:revert
+   npm run migration:run
+   ```
+
+3. **Ejecutar validación de schema** después de crear migración
+
+   ```bash
+   npm run validate:schema
+   ```
+
+4. **Probar en DB E2E limpia**
+
+   ```bash
+   npm run db:e2e:reset
+   npm run test:e2e
+   ```
+
+5. **Verificar comportamiento idempotente**
+   ```bash
+   # Ejecutar migraciones dos veces no debe fallar
+   npm run migration:run
+   npm run migration:run
+   ```
+
+#### ❌ DON'T (No Hacer)
+
+1. **No saltarse tests de migraciones** antes de commit
+2. **No ignorar warnings** de validación de schema
+3. **No testear solo en DB de desarrollo** (usar E2E también)
+4. **No commitear migraciones** sin ejecutar suite completa
+5. **No modificar migraciones** después de que tests E2E pasen
+
+### Debugging de Migraciones
+
+#### Ver queries SQL ejecutadas:
+
+```typescript
+// src/config/typeorm-e2e.config.ts
+const e2eConfig: DataSourceOptions = {
+  logging: true, // Activar temporalmente
+  logger: 'advanced-console',
+};
+```
+
+#### Inspeccionar DB E2E manualmente:
+
+```bash
+# Conectar con psql
+docker exec -it tarot-postgres-e2e-db psql -U tarot_e2e_user -d tarot_e2e
+
+# Comandos útiles:
+\dt                           # Listar tablas
+\d+ users                     # Ver estructura de tabla
+SELECT * FROM migrations;     # Ver migraciones ejecutadas
+\q                            # Salir
+```
+
+#### Ejecutar tests con verbose:
+
+```bash
+# Ver output completo de tests
+npm test -- migration-validation --verbose
+
+# Ver queries SQL en tests E2E
+DEBUG=true npm run test:e2e -- database-infrastructure
+```
+
+### Integración CI/CD
+
+#### GitHub Actions / GitLab CI
+
+```yaml
+test-migrations:
+  script:
+    - npm ci
+    - docker-compose --profile e2e up -d
+    - npm run migration:run
+    - npm test -- migration-validation
+    - npm run validate:schema
+    - npm run test:e2e -- database-infrastructure
+```
+
+## Referencias
+
+- [TESTING_DATABASE.md](./TESTING_DATABASE.md) - Guía completa de testing con bases de datos
+- [README-DOCKER.md](./README-DOCKER.md) - Configuración Docker
+- [TESTING_STRATEGY.md](./TESTING_STRATEGY.md) - Estrategia general de testing
+
 ## Historial de Cambios
 
+- **2025-01-04**: Sección de testing agregada (TASK-023-a)
+  - Agregados tests unitarios de validación de migraciones
+  - Agregado script de validación de consistencia de schema
+  - Agregada suite de tests E2E de infraestructura
+  - Documentadas mejores prácticas de testing
 - **2025-10-28**: Sistema de migraciones implementado (TASK-002)
   - Creada migración inicial `InitialSchema`
   - Desactivado `synchronize: true`

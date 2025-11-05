@@ -51,19 +51,19 @@ El proyecto utiliza **dos bases de datos PostgreSQL completamente aisladas**:
 
 ### Comparativa: Development vs E2E
 
-| Aspecto              | **Development DB** (`tarot_db`)      | **E2E Testing DB** (`tarot_e2e`)         |
-| -------------------- | ------------------------------------ | ---------------------------------------- |
-| **Puerto**           | `5435`                               | `5436`                                   |
-| **Nombre DB**        | `tarot_db`                           | `tarot_e2e`                              |
-| **Usuario**          | `tarot_user`                         | `tarot_e2e_user`                         |
-| **Password**         | `tarot_password_2024`                | `tarot_e2e_password_2024`                |
-| **Propósito**        | Desarrollo manual                    | Tests automatizados E2E                  |
-| **Gestión de datos** | Manual (seeders opcionales)          | Automática (setup/teardown)              |
-| **Ciclo de vida**    | Persistente                          | Limpiado entre suites                    |
-| **Sincronización**   | Deshabilitada (usar migraciones)     | Deshabilitada (usar migraciones)         |
-| **Acceso**           | Desarrollador + aplicación           | Solo tests                               |
-| **Config file**      | `src/config/typeorm.ts`              | `src/config/typeorm-e2e.config.ts`       |
-| **Variable prefix**  | `TAROT_DB_*`                         | `TAROT_E2E_DB_*`                         |
+| Aspecto              | **Development DB** (`tarot_db`)  | **E2E Testing DB** (`tarot_e2e`)   |
+| -------------------- | -------------------------------- | ---------------------------------- |
+| **Puerto**           | `5435`                           | `5436`                             |
+| **Nombre DB**        | `tarot_db`                       | `tarot_e2e`                        |
+| **Usuario**          | `tarot_user`                     | `tarot_e2e_user`                   |
+| **Password**         | `tarot_password_2024`            | `tarot_e2e_password_2024`          |
+| **Propósito**        | Desarrollo manual                | Tests automatizados E2E            |
+| **Gestión de datos** | Manual (seeders opcionales)      | Automática (setup/teardown)        |
+| **Ciclo de vida**    | Persistente                      | Limpiado entre suites              |
+| **Sincronización**   | Deshabilitada (usar migraciones) | Deshabilitada (usar migraciones)   |
+| **Acceso**           | Desarrollador + aplicación       | Solo tests                         |
+| **Config file**      | `src/config/typeorm.ts`          | `src/config/typeorm-e2e.config.ts` |
+| **Variable prefix**  | `TAROT_DB_*`                     | `TAROT_E2E_DB_*`                   |
 
 ### Variables de Entorno
 
