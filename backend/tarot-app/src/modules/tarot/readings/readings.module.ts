@@ -7,6 +7,7 @@ import { TarotReading } from './entities/tarot-reading.entity';
 import { TarotInterpretation } from '../interpretations/entities/tarot-interpretation.entity';
 import { User } from '../../users/entities/user.entity';
 import { RequiresPremiumForCustomQuestionGuard } from './guards/requires-premium-for-custom-question.guard';
+import { ReadingsCacheInterceptor } from './interceptors/readings-cache.interceptor';
 import { InterpretationsModule } from '../interpretations/interpretations.module';
 import { CardsModule } from '../cards/cards.module';
 import { SpreadsModule } from '../spreads/spreads.module';
@@ -23,7 +24,11 @@ import { UsageLimitsModule } from '../../usage-limits/usage-limits.module';
     UsageLimitsModule,
   ],
   controllers: [ReadingsController, ShareController],
-  providers: [ReadingsService, RequiresPremiumForCustomQuestionGuard],
+  providers: [
+    ReadingsService,
+    RequiresPremiumForCustomQuestionGuard,
+    ReadingsCacheInterceptor,
+  ],
   exports: [ReadingsService],
 })
 export class ReadingsModule {}

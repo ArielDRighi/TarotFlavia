@@ -32,6 +32,7 @@ import { ReadingsService } from './readings.service';
 import { CreateReadingDto } from './dto/create-reading.dto';
 import { QueryReadingsDto } from './dto/query-readings.dto';
 import { PaginatedReadingsResponseDto } from './dto/paginated-readings-response.dto';
+import { ReadingsCacheInterceptor } from './interceptors/readings-cache.interceptor';
 import { User } from '../../users/entities/user.entity';
 
 @ApiTags('Lecturas de Tarot')
@@ -81,12 +82,13 @@ export class ReadingsController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(ReadingsCacheInterceptor)
   @Get()
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Obtener historial de lecturas del usuario con paginación',
     description:
-      'Recupera lecturas del usuario autenticado con soporte para paginación, ordenamiento y filtros. Usuarios free están limitados a ver solo las 10 lecturas más recientes.',
+      'Recupera lecturas del usuario autenticado con soporte para paginación, ordenamiento y filtros. Usuarios free están limitados a ver solo las 10 lecturas más recientes. Resultados cacheados por 5 minutos.',
   })
   @ApiQuery({
     name: 'page',
