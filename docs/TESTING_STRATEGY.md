@@ -141,6 +141,63 @@ describe("Readings Integration", () => {
 
 - `test/*.e2e-spec.ts`
 
+**Base de Datos E2E Dedicada:**
+
+Este proyecto usa una **base de datos PostgreSQL dedicada** para tests E2E (puerto 5436), completamente aislada del entorno de desarrollo (puerto 5435).
+
+**Características:**
+
+- ✅ **E2EDatabaseHelper** - Clase helper para gestión automática del ciclo de vida
+- ✅ **Seeders** - Datos de prueba consistentes (categorías, cartas, spreads, usuarios)
+- ✅ **Limpieza automática** - `cleanDatabase()` entre tests para aislamiento
+- ✅ **Docker profile `e2e`** - Contenedor separado del desarrollo
+- ✅ **Usuarios de prueba**: `admin@test.com`, `premium@test.com`, `free@test.com` (password: `Test123456!`)
+
+**Uso en tests E2E:**
+
+```typescript
+import { E2EDatabaseHelper } from "./helpers/e2e-database.helper";
+
+const dbHelper = new E2EDatabaseHelper();
+
+beforeAll(async () => {
+  await dbHelper.initialize(); // Conecta a E2E DB (puerto 5436)
+  await dbHelper.cleanDatabase(); // Limpia datos previos
+
+  // Seed datos de prueba
+  const dataSource = dbHelper.getDataSource();
+  await seedReadingCategories(dataSource.getRepository(ReadingCategory));
+  await seedTarotCards(dataSource.getRepository(TarotCard));
+  // ...
+});
+
+afterAll(async () => {
+  await dbHelper.close(); // Cierra conexión limpiamente
+  await app.close();
+});
+```
+
+**Gestión de E2E Database:**
+
+```bash
+# Iniciar E2E database
+./scripts/manage-e2e-db.sh start
+
+# Setup completo (migraciones + seeders)
+./scripts/manage-e2e-db.sh setup
+
+# Ejecutar tests E2E
+npm run test:e2e
+
+# Limpiar datos
+./scripts/manage-e2e-db.sh clean
+
+# Resetear completamente
+./scripts/manage-e2e-db.sh reset
+```
+
+Ver [README-DOCKER.md](../backend/tarot-app/docs/README-DOCKER.md#-base-de-datos-de-testing-e2e) para documentación completa.
+
 **Ejemplo ya existente:**
 
 ```typescript
@@ -787,20 +844,39 @@ backend/tarot-app/
 │   ├── readings/
 │   │   ├── readings.service.spec.ts
 │   │   └── readings.controller.spec.ts
+│   ├── database/
+│   │   └── seeds/                     ← Seeders para datos de prueba
 │   └── ...
 ├── test/
+│   ├── helpers/
+│   │   └── e2e-database.helper.ts    ← Helper para E2E DB management
 │   ├── app.e2e-spec.ts               ← E2E básico
-│   ├── auth.e2e-spec.ts              ← E2E autenticación
-│   ├── readings.e2e-spec.ts          ← E2E lecturas
+│   ├── predefined-questions.e2e-spec.ts ← E2E preguntas
 │   ├── mvp-complete.e2e-spec.ts      ← Suite MVP completa
+│   ├── password-recovery.e2e-spec.ts ← E2E password reset
+│   ├── readings-hybrid.e2e-spec.ts   ← E2E lecturas híbridas
+│   ├── rate-limiting.e2e-spec.ts     ← E2E rate limiting
 │   ├── integration/
 │   │   ├── readings.integration.spec.ts
 │   │   ├── migrations.spec.ts
 │   │   └── seeders.spec.ts
-│   └── jest-e2e.json
+│   ├── jest-e2e.json                 ← Config Jest E2E
+│   └── setup/
+│       ├── setup-e2e-db.ts           ← Setup E2E database
+│       └── teardown-e2e-db.ts        ← Teardown E2E database
+├── scripts/
+│   └── manage-e2e-db.sh              ← Script gestión E2E DB
 ├── coverage/                          ← Reports de coverage
 └── package.json
 ```
+
+**Archivos clave de E2E:**
+
+- `test/helpers/e2e-database.helper.ts` - Clase helper para gestión de E2E DB
+- `test/setup/setup-e2e-db.ts` - Inicializa E2E database con migraciones y seeders
+- `test/setup/teardown-e2e-db.ts` - Limpia E2E database después de tests
+- `scripts/manage-e2e-db.sh` - Script bash para gestión completa de E2E DB
+- `typeorm-e2e.config.ts` - Configuración TypeORM para E2E database (puerto 5436)
 
 ---
 

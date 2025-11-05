@@ -2,9 +2,9 @@ const { Pool } = require('pg');
 const pool = new Pool({
   host: 'localhost',
   port: 5435,
-  user: 'tarotflavia_user',
-  password: 'tarotflavia_secure_password_2024',
-  database: 'tarotflavia_db',
+  user: 'tarot_user',
+  password: 'tarot_password_2024',
+  database: 'tarot_db',
 });
 
 async function check() {

@@ -17,30 +17,49 @@ if (fs.existsSync(envPath)) {
   }
 }
 
+// Detectar si estamos en modo E2E testing
+const isE2ETesting =
+  process.env.NODE_ENV === 'test' || process.env.E2E_TESTING === 'true';
+
 // Configuración de la base de datos usando variables de entorno
+// Si estamos en E2E testing, usar la base de datos E2E dedicada
 const config = {
   type: 'postgres',
-  host: process.env.POSTGRES_HOST || 'localhost',
-  port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
-  username: process.env.POSTGRES_USER || 'postgres',
-  password: process.env.POSTGRES_PASSWORD,
-  database: process.env.POSTGRES_DB || 'tarot_app',
+  host: isE2ETesting
+    ? process.env.TAROT_E2E_DB_HOST || 'localhost'
+    : process.env.TAROT_DB_HOST || process.env.POSTGRES_HOST || 'localhost',
+  port: isE2ETesting
+    ? parseInt(process.env.TAROT_E2E_DB_PORT || '5436', 10)
+    : parseInt(
+        process.env.TAROT_DB_PORT || process.env.POSTGRES_PORT || '5435',
+        10,
+      ),
+  username: isE2ETesting
+    ? process.env.TAROT_E2E_DB_USER || 'tarot_e2e_user'
+    : process.env.TAROT_DB_USER || process.env.POSTGRES_USER || 'tarot_user',
+  password: isE2ETesting
+    ? process.env.TAROT_E2E_DB_PASSWORD || 'tarot_e2e_password_2024'
+    : process.env.TAROT_DB_PASSWORD || process.env.POSTGRES_PASSWORD,
+  database: isE2ETesting
+    ? process.env.TAROT_E2E_DB_NAME || 'tarot_e2e'
+    : process.env.TAROT_DB_NAME || process.env.POSTGRES_DB || 'tarot_db',
   synchronize: false, // Desactivado - ahora usamos migraciones
   autoLoadEntities: true,
-  logging: process.env.NODE_ENV !== 'test', // Disable logging in test environment
+  logging: false, // Desactivado en todos los tests
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
   migrations: [__dirname + '/../migrations/*{.ts,.js}'],
   migrationsTableName: 'migrations',
-  migrationsRun: true, // Ejecutar migraciones automáticamente al iniciar
+  migrationsRun: isE2ETesting ? false : true, // No ejecutar migraciones automáticamente en E2E (ya se ejecutan en globalSetup)
   ssl: false,
   dropSchema: false,
 };
 
 // Verificar que las variables críticas estén definidas
-if (process.env.NODE_ENV !== 'test') {
+if (process.env.NODE_ENV !== 'test' && !isE2ETesting) {
   console.log(
     '[TypeORM Config] Verificando configuración de la base de datos:',
   );
+  console.log(`Modo: ${isE2ETesting ? 'E2E Testing' : 'Production'}`);
   console.log(`Host: ${config.host}`);
   console.log(`Puerto: ${config.port}`);
   console.log(`Usuario: ${config.username}`);

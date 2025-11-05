@@ -1,18 +1,20 @@
-# 🔮 TarotFlavia - Docker Setup Guide
+# 🔮 Tarot - Docker Setup Guide
 
-Configuración completa de Docker para el desarrollo local de TarotFlavia Backend.
+Configuración completa de Docker para el desarrollo local de Tarot Backend.
 
 ---
 
 ## 📋 Tabla de Contenidos
 
 - [Características](#-características)
+- [Migración desde Nomenclatura Antigua](#-migración-desde-nomenclatura-antigua)
 - [Requisitos Previos](#-requisitos-previos)
 - [Configuración Inicial](#-configuración-inicial)
 - [Sistema de Migraciones](#-sistema-de-migraciones)
 - [Comandos Útiles](#-comandos-útiles)
 - [Estructura de Archivos](#-estructura-de-archivos)
 - [Conexión desde NestJS](#-conexión-desde-nestjs)
+- [Base de Datos de Testing E2E](#-base-de-datos-de-testing-e2e)
 - [Troubleshooting](#-troubleshooting)
 - [Mantenimiento](#-mantenimiento)
 
@@ -25,17 +27,104 @@ Esta configuración Docker proporciona:
 - ✅ **PostgreSQL 16** con persistencia de datos
 - ✅ **pgAdmin 4** para gestión visual de la base de datos (opcional)
 - ✅ **Nombres descriptivos** para evitar confusión con otros proyectos
-- ✅ **Puerto personalizado (5435)** para evitar conflictos
+- ✅ **Puerto personalizado (5435)** para desarrollo y **5436** para E2E tests
 - ✅ **Health checks** automáticos
 - ✅ **Inicialización automática** con extensiones necesarias
-- ✅ **Network aislada** para servicios de TarotFlavia
+- ✅ **Network aislada** para servicios de Tarot
+- ✅ **Base de datos dedicada para tests E2E** (aislada de desarrollo)
 
-**Identificadores únicos:**
+**Identificadores únicos (Desarrollo):**
 
-- Contenedor PostgreSQL: `tarotflavia-postgres-db`
-- Contenedor pgAdmin: `tarotflavia-pgadmin`
-- Volume de datos: `tarotflavia-postgres-data`
-- Network: `tarotflavia-network`
+- Contenedor PostgreSQL: `tarot-postgres-db`
+- Contenedor pgAdmin: `tarot-pgadmin`
+- Volume de datos: `tarot-postgres-data`
+- Network: `tarot-network`
+- DB: `tarot_db`
+- User: `tarot_user`
+
+**Identificadores únicos (Testing E2E):**
+
+- Contenedor PostgreSQL: `tarot-postgres-e2e-db`
+- Volume de datos: `tarot-postgres-e2e-data`
+- DB: `tarot_e2e`
+- User: `tarot_e2e_user`
+
+---
+
+## 🔄 Migración desde Nomenclatura Antigua
+
+Si vienes de una versión anterior que usaba `tarotflavia-*`:
+
+### ¿Por qué el cambio?
+
+La nomenclatura se actualizó de `tarotflavia-*` a `tarot-*` para mantener consistencia con el contenedor principal `tarot-app` y tener una nomenclatura más limpia y profesional.
+
+### Pasos para migrar
+
+1. **Ejecutar script de migración:**
+
+   ```bash
+   bash scripts/migrate-docker-nomenclature.sh
+   ```
+
+   Este script:
+
+   - ✅ Crea backup automático de tus datos
+   - ✅ Muestra el estado actual de recursos Docker
+   - ✅ Proporciona instrucciones claras para continuar
+
+2. **Actualizar archivo `.env`:**
+
+   Renombrar variables con prefijo `TAROT_` en lugar de `TAROT_`:
+
+   ```bash
+   # ANTES
+   TAROT_DB_PORT=5435
+   TAROT_DB_USER=tarot_user
+   TAROT_DB_PASSWORD=...
+
+   # AHORA
+   TAROT_DB_PORT=5435
+   TAROT_DB_USER=tarot_user
+   TAROT_DB_PASSWORD=...
+   ```
+
+3. **Levantar nuevos servicios:**
+
+   ```bash
+   docker-compose down
+   docker-compose up -d tarot-postgres
+   ```
+
+4. **Restaurar datos (si es necesario):**
+
+   ```bash
+   cat backups/migration-XXXXXX/tarot_db.sql | docker exec -i tarot-postgres-db psql -U tarot_user -d tarot_db
+   ```
+
+5. **Verificar que todo funciona:**
+
+   ```bash
+   npm run start:dev
+   npm run test:e2e
+   ```
+
+6. **Limpiar recursos antiguos (opcional):**
+
+   Después de confirmar que todo funciona correctamente:
+
+   ```bash
+   bash scripts/cleanup-old-docker-resources.sh
+   ```
+
+   Este script requiere confirmación explícita ("SI") antes de eliminar recursos antiguos.
+
+**Notas importantes:**
+
+- ⚠️ Los backups se mantienen incluso después de la limpieza
+- ⚠️ Los contenedores antiguos NO se eliminan automáticamente
+- ✅ Puedes ejecutar ambas versiones en paralelo durante la transición
+- ✅ Rollback posible: los contenedores antiguos siguen disponibles si algo falla
 
 ---
 
@@ -74,10 +163,10 @@ Si necesitas cambiar los valores por defecto, edita `.env`:
 
 ```bash
 # Ejemplo de configuración personalizada
-TAROTFLAVIA_DB_PORT=5435
-TAROTFLAVIA_DB_USER=tarotflavia_user
-TAROTFLAVIA_DB_PASSWORD=mi_password_super_seguro
-TAROTFLAVIA_DB_NAME=tarotflavia_db
+TAROT_DB_PORT=5435
+TAROT_DB_USER=tarot_user
+TAROT_DB_PASSWORD=mi_password_super_seguro
+TAROT_DB_NAME=tarot_db
 ```
 
 ### 3. Iniciar los servicios Docker
@@ -85,7 +174,7 @@ TAROTFLAVIA_DB_NAME=tarotflavia_db
 **Opción A: Solo PostgreSQL**
 
 ```bash
-docker-compose up -d tarotflavia-postgres
+docker-compose up -d tarot-postgres
 ```
 
 **Opción B: PostgreSQL + pgAdmin**
@@ -104,8 +193,8 @@ Deberías ver algo como:
 
 ```
 CONTAINER ID   IMAGE                    STATUS                    PORTS                    NAMES
-abc123def456   postgres:16-alpine       Up 30 seconds (healthy)   0.0.0.0:5435->5432/tcp   tarotflavia-postgres-db
-xyz789ghi012   dpage/pgadmin4:latest    Up 29 seconds             0.0.0.0:5050->80/tcp     tarotflavia-pgadmin
+abc123def456   postgres:16-alpine       Up 30 seconds (healthy)   0.0.0.0:5435->5432/tcp   tarot-postgres-db
+xyz789ghi012   dpage/pgadmin4:latest    Up 29 seconds             0.0.0.0:5050->80/tcp     tarot-pgadmin
 ```
 
 ---
@@ -119,7 +208,7 @@ xyz789ghi012   dpage/pgadmin4:latest    Up 29 seconds             0.0.0.0:5050->
 docker-compose up -d
 
 # Iniciar solo PostgreSQL
-docker-compose up -d tarotflavia-postgres
+docker-compose up -d tarot-postgres
 
 # Iniciar con pgAdmin
 docker-compose --profile tools up -d
@@ -134,7 +223,7 @@ docker-compose down -v
 docker-compose logs -f
 
 # Ver logs solo de PostgreSQL
-docker-compose logs -f tarotflavia-postgres
+docker-compose logs -f tarot-postgres
 
 # Reiniciar servicios
 docker-compose restart
@@ -144,42 +233,42 @@ docker-compose restart
 
 ```bash
 # Ver estado de salud de PostgreSQL
-docker inspect tarotflavia-postgres-db --format='{{.State.Health.Status}}'
+docker inspect tarot-postgres-db --format='{{.State.Health.Status}}'
 
 # Conectar a PostgreSQL desde línea de comandos
-docker exec -it tarotflavia-postgres-db psql -U tarotflavia_user -d tarotflavia_db
+docker exec -it tarot-postgres-db psql -U tarot_user -d tarot_db
 
 # Ejecutar comandos SQL directamente
-docker exec -it tarotflavia-postgres-db psql -U tarotflavia_user -d tarotflavia_db -c "SELECT version();"
+docker exec -it tarot-postgres-db psql -U tarot_user -d tarot_db -c "SELECT version();"
 
 # Ver variables de entorno del contenedor
-docker exec tarotflavia-postgres-db env
+docker exec tarot-postgres-db env
 
 # Abrir shell en el contenedor
-docker exec -it tarotflavia-postgres-db sh
+docker exec -it tarot-postgres-db sh
 ```
 
 ### Gestión de Volúmenes
 
 ```bash
-# Listar volúmenes de TarotFlavia
+# Listar volúmenes de Tarot
 docker volume ls --filter "name=tarotflavia"
 
 # Ver detalles del volumen de datos
-docker volume inspect tarotflavia-postgres-data
+docker volume inspect tarot-postgres-data
 
 # Backup de la base de datos
-docker exec tarotflavia-postgres-db pg_dump -U tarotflavia_user tarotflavia_db > backup_$(date +%Y%m%d_%H%M%S).sql
+docker exec tarot-postgres-db pg_dump -U tarot_user tarot_db > backup_$(date +%Y%m%d_%H%M%S).sql
 
 # Restaurar desde backup
-cat backup_20241027_120000.sql | docker exec -i tarotflavia-postgres-db psql -U tarotflavia_user -d tarotflavia_db
+cat backup_20241027_120000.sql | docker exec -i tarot-postgres-db psql -U tarot_user -d tarot_db
 ```
 
 ### Limpieza
 
 ```bash
 # Eliminar solo el contenedor (mantiene datos)
-docker rm -f tarotflavia-postgres-db
+docker rm -f tarot-postgres-db
 
 # Eliminar contenedor y volúmenes (⚠️ BORRA DATOS)
 docker-compose down -v
@@ -209,6 +298,165 @@ backend/tarot-app/
 
 ---
 
+## 🧪 Base de Datos de Testing E2E
+
+Este proyecto incluye una **base de datos PostgreSQL dedicada para tests E2E**, completamente aislada del entorno de desarrollo.
+
+### Características
+
+- ✅ **Puerto 5436** (diferente del desarrollo en 5435)
+- ✅ **Profile Docker `e2e`** para iniciar solo cuando sea necesario
+- ✅ **E2EDatabaseHelper** para gestión automática del ciclo de vida
+- ✅ **Seeders** para datos de prueba consistentes
+- ✅ **Limpieza automática** entre tests
+- ✅ **Aislamiento completo** del entorno de desarrollo
+
+### Iniciar E2E Database
+
+```bash
+# Iniciar contenedor de E2E (profile: e2e)
+docker-compose --profile e2e up -d tarot-postgres-e2e
+
+# Verificar que está corriendo
+docker ps --filter "name=tarot-postgres-e2e"
+```
+
+### Script de Gestión: `manage-e2e-db.sh`
+
+El proyecto incluye un script bash para gestión completa de la E2E database:
+
+```bash
+# Desde backend/tarot-app/
+chmod +x scripts/manage-e2e-db.sh
+
+# Ver ayuda
+./scripts/manage-e2e-db.sh help
+
+# Iniciar contenedor E2E
+./scripts/manage-e2e-db.sh start
+
+# Parar contenedor E2E
+./scripts/manage-e2e-db.sh stop
+
+# Limpiar base de datos (DELETE all data)
+./scripts/manage-e2e-db.sh clean
+
+# Setup completo: migraciones + seeders
+./scripts/manage-e2e-db.sh setup
+
+# Ejecutar tests E2E
+./scripts/manage-e2e-db.sh test
+
+# Verificar estado
+./scripts/manage-e2e-db.sh status
+
+# Resetear completamente (clean + setup)
+./scripts/manage-e2e-db.sh reset
+
+# Parar y eliminar contenedor
+./scripts/manage-e2e-db.sh destroy
+```
+
+### Workflow Típico de Testing
+
+```bash
+# 1. Iniciar E2E database
+./scripts/manage-e2e-db.sh start
+
+# 2. Setup inicial (solo primera vez o después de destroy)
+./scripts/manage-e2e-db.sh setup
+
+# 3. Ejecutar tests E2E
+npm run test:e2e
+
+# 4. Limpiar datos entre ejecuciones (opcional)
+./scripts/manage-e2e-db.sh clean
+
+# 5. Parar cuando termines
+./scripts/manage-e2e-db.sh stop
+```
+
+### E2EDatabaseHelper Class
+
+Los tests E2E usan la clase `E2EDatabaseHelper` que proporciona:
+
+```typescript
+import { E2EDatabaseHelper } from './helpers/e2e-database.helper';
+
+const dbHelper = new E2EDatabaseHelper();
+
+// En beforeAll
+await dbHelper.initialize();
+await dbHelper.cleanDatabase();
+
+// En tests
+const dataSource = dbHelper.getDataSource();
+await dataSource.query('SELECT ...');
+
+// En afterAll
+await dbHelper.close();
+```
+
+**Ventajas:**
+
+- ✅ Conexión automática a E2E database (puerto 5436)
+- ✅ Limpieza de datos entre tests
+- ✅ Gestión segura del ciclo de vida
+- ✅ Seeders integrados para datos de prueba
+
+### Datos de Prueba (Seeders)
+
+La E2E database se inicializa con datos consistentes:
+
+- 6 categorías de lectura
+- 1 mazo de tarot (Rider-Waite)
+- 78 cartas de tarot completas
+- 4 tipos de tiradas (spreads)
+- 42 preguntas predefinidas
+- 3 usuarios de prueba:
+  - `admin@test.com` (Admin, plan Premium)
+  - `premium@test.com` (Premium user)
+  - `free@test.com` (Free user)
+  - Contraseña para todos: `Test123456!`
+
+### Troubleshooting E2E Database
+
+**❌ Puerto 5436 ya en uso:**
+
+```bash
+# Ver qué proceso usa el puerto
+netstat -ano | grep 5436
+
+# Cambiar puerto en docker-compose.yml o .env
+```
+
+**❌ Tests fallan por datos inconsistentes:**
+
+```bash
+# Resetear E2E database completamente
+./scripts/manage-e2e-db.sh reset
+
+# Volver a ejecutar tests
+npm run test:e2e
+```
+
+**❌ Contenedor E2E no se levanta:**
+
+```bash
+# Ver logs del contenedor
+docker logs tarot-postgres-e2e-db
+
+# Verificar que no hay conflictos
+docker ps -a --filter "name=tarot"
+
+# Recrear contenedor
+./scripts/manage-e2e-db.sh destroy
+./scripts/manage-e2e-db.sh start
+./scripts/manage-e2e-db.sh setup
+```
+
+---
+
 ## 🔌 Conexión desde NestJS
 
 ### Opción 1: Usar la URL de conexión completa
@@ -216,7 +464,7 @@ backend/tarot-app/
 En tu archivo `.env` de NestJS:
 
 ```env
-DATABASE_URL=postgresql://tarotflavia_user:tarotflavia_secure_password_2024@localhost:5435/tarotflavia_db
+DATABASE_URL=postgresql://tarot_user:tarot_secure_password_2024@localhost:5435/tarot_db
 ```
 
 ### Opción 2: Usar configuración TypeORM individual
@@ -231,17 +479,17 @@ export const typeOrmConfig = (
   configService: ConfigService,
 ): TypeOrmModuleOptions => ({
   type: 'postgres',
-  host: configService.get('TAROTFLAVIA_DB_HOST', 'localhost'),
-  port: configService.get('TAROTFLAVIA_DB_PORT_INTERNAL', 5435),
-  username: configService.get('TAROTFLAVIA_DB_USERNAME', 'tarotflavia_user'),
+  host: configService.get('TAROT_DB_HOST', 'localhost'),
+  port: configService.get('TAROT_DB_PORT_INTERNAL', 5435),
+  username: configService.get('TAROT_DB_USERNAME', 'tarot_user'),
   password: configService.get(
-    'TAROTFLAVIA_DB_PASSWORD_VALUE',
-    'tarotflavia_secure_password_2024',
+    'TAROT_DB_PASSWORD_VALUE',
+    'tarot_secure_password_2024',
   ),
-  database: configService.get('TAROTFLAVIA_DB_DATABASE', 'tarotflavia_db'),
+  database: configService.get('TAROT_DB_DATABASE', 'tarot_db'),
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-  synchronize: configService.get('TAROTFLAVIA_DB_SYNCHRONIZE', true), // ⚠️ false en producción
-  logging: configService.get('TAROTFLAVIA_DB_LOGGING', true),
+  synchronize: configService.get('TAROT_DB_SYNCHRONIZE', true), // ⚠️ false en producción
+  logging: configService.get('TAROT_DB_LOGGING', true),
 });
 ```
 
@@ -252,7 +500,7 @@ export const typeOrmConfig = (
 npm run start:dev
 
    # Deberías ver en los logs:
-   # [TypeORM] Connected to PostgreSQL database: tarotflavia_db
+   # [TypeORM] Connected to PostgreSQL database: tarot_db
 ```
 
 ---
@@ -328,7 +576,7 @@ Para más información sobre el sistema de migraciones, consulta:
 netstat -ano | grep 5435
 
 # Cambiar el puerto en .env
-TAROTFLAVIA_DB_PORT=5436  # Usar otro puerto
+TAROT_DB_PORT=5436  # Usar otro puerto
 
 # Reiniciar servicios
 docker-compose down && docker-compose up -d
@@ -341,24 +589,24 @@ docker-compose down && docker-compose up -d
 1. **Contenedor está corriendo:**
 
    ```bash
-   docker ps --filter "name=tarotflavia-postgres"
+   docker ps --filter "name=tarot-postgres"
    ```
 
 2. **Health check está OK:**
 
    ```bash
-   docker inspect tarotflavia-postgres-db --format='{{.State.Health.Status}}'
+   docker inspect tarot-postgres-db --format='{{.State.Health.Status}}'
    ```
 
 3. **Logs del contenedor:**
 
    ```bash
-   docker logs tarotflavia-postgres-db --tail 50
+   docker logs tarot-postgres-db --tail 50
    ```
 
 4. **Conexión manual:**
    ```bash
-   docker exec -it tarotflavia-postgres-db psql -U tarotflavia_user -d tarotflavia_db
+   docker exec -it tarot-postgres-db psql -U tarot_user -d tarot_db
    ```
 
 ### ❌ Error: Conflicto con otros contenedores PostgreSQL
@@ -372,7 +620,7 @@ docker ps -a --filter "ancestor=postgres"
 # Ver nombres y puertos
 docker ps --format "table {{.Names}}\t{{.Ports}}"
 
-# TarotFlavia usa puerto 5435, otros proyectos usan:
+# Tarot usa puerto 5435, otros proyectos usan:
 # - ecommerce-postgres: 5432
 # - microservices-postgres: 5433
 # - go-api-postgres: 5434
@@ -388,13 +636,13 @@ docker ps --format "table {{.Names}}\t{{.Ports}}"
    - Password: `change_me_to_secure_password` (o la que hayas configurado en `.env`)
 
 2. Agregar servidor:
-   - Name: `TarotFlavia DB`
-   - Host: `tarotflavia-postgres` (⚠️ NO usar `localhost`)
+   - Name: `Tarot DB`
+   - Host: `tarot-postgres` (⚠️ NO usar `localhost`)
    - Port: `5432` (⚠️ Puerto interno, NO 5435)
-   - Username: `tarotflavia_user`
-   - Password: `tarotflavia_secure_password_2024`
+   - Username: `tarot_user`
+   - Password: `tarot_secure_password_2024`
 
-**Explicación:** pgAdmin corre dentro de Docker, debe usar el nombre del servicio (`tarotflavia-postgres`) y el puerto interno (`5432`), no el puerto expuesto al host (`5435`).
+**Explicación:** pgAdmin corre dentro de Docker, debe usar el nombre del servicio (`tarot-postgres`) y el puerto interno (`5432`), no el puerto expuesto al host (`5435`).
 
 ### ❌ Error: Permission denied en scripts de inicialización
 
@@ -403,7 +651,7 @@ docker ps --format "table {{.Names}}\t{{.Ports}}"
 chmod +x docker/postgres/init/01-init-database.sh
 
 # Reiniciar el contenedor
-docker-compose restart tarotflavia-postgres
+docker-compose restart tarot-postgres
 ```
 
 ### ❌ Datos corruptos o necesitas empezar de cero
@@ -415,7 +663,7 @@ docker-compose restart tarotflavia-postgres
 docker-compose down
 
 # 2. Eliminar el volumen
-docker volume rm tarotflavia-postgres-data
+docker volume rm tarot-postgres-data
 
 # 3. Iniciar de nuevo (recreará el volumen vacío)
 docker-compose up -d
@@ -432,17 +680,17 @@ docker-compose up -d
 mkdir -p backups
 
 # Backup automático con timestamp
-docker exec tarotflavia-postgres-db pg_dump -U tarotflavia_user tarotflavia_db > backups/tarotflavia_backup_$(date +%Y%m%d_%H%M%S).sql
+docker exec tarot-postgres-db pg_dump -U tarot_user tarot_db > backups/tarot_backup_$(date +%Y%m%d_%H%M%S).sql
 
 # Comprimir backup
-gzip backups/tarotflavia_backup_*.sql
+gzip backups/tarot_backup_*.sql
 ```
 
 ### Actualizar PostgreSQL
 
 ```bash
 # 1. Hacer backup
-docker exec tarotflavia-postgres-db pg_dump -U tarotflavia_user tarotflavia_db > backup_before_upgrade.sql
+docker exec tarot-postgres-db pg_dump -U tarot_user tarot_db > backup_before_upgrade.sql
 
 # 2. Cambiar versión en docker-compose.yml
 # image: postgres:16-alpine → postgres:17-alpine
@@ -452,7 +700,7 @@ docker-compose down
 docker-compose up -d
 
 # 4. Verificar versión
-docker exec tarotflavia-postgres-db psql -U tarotflavia_user -d tarotflavia_db -c "SELECT version();"
+docker exec tarot-postgres-db psql -U tarot_user -d tarot_db -c "SELECT version();"
 ```
 
 ### Monitoreo de Uso
@@ -462,10 +710,10 @@ docker exec tarotflavia-postgres-db psql -U tarotflavia_user -d tarotflavia_db -
 docker system df -v | grep tarotflavia
 
 # Estadísticas del contenedor
-docker stats tarotflavia-postgres-db
+docker stats tarot-postgres-db
 
 # Conexiones activas a la base de datos
-docker exec tarotflavia-postgres-db psql -U tarotflavia_user -d tarotflavia_db -c "SELECT count(*) FROM pg_stat_activity;"
+docker exec tarot-postgres-db psql -U tarot_user -d tarot_db -c "SELECT count(*) FROM pg_stat_activity;"
 ```
 
 ---

@@ -31,19 +31,28 @@ export async function seedUsers(
     'admin@test.com',
   ];
 
-  const existingTestUsers = await userRepository.countBy({
-    email: In(testUserEmails),
+  const existingTestUsers = await userRepository.find({
+    where: { email: In(testUserEmails) },
   });
-
-  if (existingTestUsers > 0) {
-    console.log(
-      `✅ Test users already seeded (found ${existingTestUsers} user(s)). Skipping...`,
-    );
-    return;
-  }
 
   // Hash password once for all test users (Test123456!)
   const hashedPassword = await bcrypt.hash('Test123456!', 10);
+
+  if (existingTestUsers.length > 0) {
+    console.log(
+      `✅ Test users already exist (found ${existingTestUsers.length} user(s)). Updating passwords...`,
+    );
+
+    // Update passwords to ensure they match expected credentials
+    for (const user of existingTestUsers) {
+      user.password = hashedPassword;
+      await userRepository.save(user);
+      console.log(`   ✓ Updated password for: ${user.email}`);
+    }
+
+    console.log('✅ Test user passwords updated!');
+    return;
+  }
 
   // Test users data
   const testUsers = [

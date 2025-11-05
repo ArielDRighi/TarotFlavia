@@ -1,15 +1,15 @@
 #!/bin/bash
 
 # Limpiar solo lecturas (mantener usuarios seeded)
-echo "í·¹ Limpiando lecturas anteriores..."
+echo "ï¿½ï¿½ï¿½ Limpiando lecturas anteriores..."
 node -e "
 const { Pool } = require('pg');
 const pool = new Pool({
   host: 'localhost',
   port: 5435,
-  user: 'tarotflavia_user',
-  password: 'tarotflavia_secure_password_2024',
-  database: 'tarotflavia_db',
+  user: 'tarot_user',
+  password: 'tarot_password_2024',
+  database: 'tarot_db',
 });
 (async () => {
   await pool.query('DELETE FROM tarot_reading');
@@ -119,7 +119,7 @@ echo "$R4" | grep -Eq '"statusCode":(403|429)' && echo "âœ… PASS (blocked)" || e
 sleep 3
 
 # 10-11. PREMIUM user
-echo "í´Ÿ Login PREMIUM user (seeded)"
+echo "ï¿½ï¿½ï¿½ Login PREMIUM user (seeded)"
 PREM_TOKEN=$(curl -s -X POST http://localhost:3000/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"premium@test.com","password":"Test123456!"}' \
