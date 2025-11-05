@@ -2900,8 +2900,8 @@ Mejorar el endpoint de historial de lecturas con paginación eficiente, filtros 
 - [x] Implementar eager loading de relaciones necesarias (cards, deck, user, category)
 - [x] Para usuarios free: limitar historial a últimas 10 lecturas
 - [x] Para usuarios premium: acceso ilimitado al historial
-- [ ] Agregar índice compuesto en `(user_id, created_at)` para optimizar queries (pendiente para futuro)
-- [ ] Implementar caché de 5 minutos para lista de historial (pendiente para futuro)
+- [x] Agregar índice compuesto en `(user_id, created_at)` para optimizar queries
+- [x] Implementar caché de 5 minutos para lista de historial (usar interceptor)
 
 #### 🎯 Criterios de aceptación
 
