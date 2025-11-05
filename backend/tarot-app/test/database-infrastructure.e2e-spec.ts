@@ -5,21 +5,35 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 describe('Database Infrastructure (E2E)', () => {
+  // Helper to check if we're in CI environment
+  const isCI = process.env.CI === 'true';
+
   describe('Development Database', () => {
     it('should be accessible on configured port', () => {
       const devPort = process.env.TAROT_DB_PORT || '5435';
-      expect(devPort).toBe('5435');
+      // In CI, dev and e2e share the same DB, so port will be 5436
+      const expectedPort = isCI ? '5436' : '5435';
+      expect(devPort).toBe(expectedPort);
     });
 
     it('should have correct database name', () => {
       const devDb = process.env.TAROT_DB_NAME || 'tarot_db';
-      expect(devDb).toBe('tarot_db');
+      // In CI, dev and e2e share the same DB
+      const expectedDb = isCI ? 'tarot_e2e' : 'tarot_db';
+      expect(devDb).toBe(expectedDb);
     });
 
-    it('should use different user than E2E', () => {
+    it('should use different user than E2E (local) or same (CI)', () => {
       const devUser = process.env.TAROT_DB_USER || 'tarot_user';
       const e2eUser = process.env.TAROT_E2E_DB_USER || 'tarot_e2e_user';
-      expect(devUser).not.toBe(e2eUser);
+
+      if (isCI) {
+        // In CI, both use the same user
+        expect(devUser).toBe(e2eUser);
+      } else {
+        // Locally, they should be different
+        expect(devUser).not.toBe(e2eUser);
+      }
     });
   });
 
@@ -42,10 +56,18 @@ describe('Database Infrastructure (E2E)', () => {
       expect(e2ePort).toBe('5436');
     });
 
-    it('should be isolated from development database', () => {
+    it('should be isolated from development database (local) or same (CI)', () => {
       const devDb = process.env.TAROT_DB_NAME || 'tarot_db';
       const e2eDb = process.env.TAROT_E2E_DB_NAME || 'tarot_e2e';
-      expect(e2eDb).not.toBe(devDb);
+
+      if (isCI) {
+        // In CI, both point to the same database
+        expect(e2eDb).toBe(devDb);
+      } else {
+        // Locally, they should be different
+        expect(e2eDb).not.toBe(devDb);
+      }
+
       expect(e2eDb).toBe('tarot_e2e');
     });
 
@@ -177,29 +199,50 @@ describe('Database Infrastructure (E2E)', () => {
   });
 
   describe('Environment Isolation', () => {
-    it('should have different ports for dev and e2e', () => {
+    it('should have different ports for dev and e2e (local) or same (CI)', () => {
       const devPort = process.env.TAROT_DB_PORT || '5435';
       const e2ePort = process.env.TAROT_E2E_DB_PORT || '5436';
 
-      expect(devPort).not.toBe(e2ePort);
-      expect(devPort).toBe('5435');
-      expect(e2ePort).toBe('5436');
+      if (isCI) {
+        // In CI, both use port 5436
+        expect(devPort).toBe(e2ePort);
+        expect(devPort).toBe('5436');
+        expect(e2ePort).toBe('5436');
+      } else {
+        // Locally, different ports
+        expect(devPort).not.toBe(e2ePort);
+        expect(devPort).toBe('5435');
+        expect(e2ePort).toBe('5436');
+      }
     });
 
-    it('should have different database names', () => {
+    it('should have different database names (local) or same (CI)', () => {
       const devDb = process.env.TAROT_DB_NAME || 'tarot_db';
       const e2eDb = process.env.TAROT_E2E_DB_NAME || 'tarot_e2e';
 
-      expect(devDb).not.toBe(e2eDb);
+      if (isCI) {
+        // In CI, both use tarot_e2e
+        expect(devDb).toBe(e2eDb);
+      } else {
+        // Locally, different databases
+        expect(devDb).not.toBe(e2eDb);
+      }
     });
 
-    it('should have different credentials', () => {
+    it('should have different credentials (local) or same (CI)', () => {
       const devUser = process.env.TAROT_DB_USER;
       const e2eUser = process.env.TAROT_E2E_DB_USER;
 
       expect(devUser).toBeDefined();
       expect(e2eUser).toBeDefined();
-      expect(devUser).not.toBe(e2eUser);
+
+      if (isCI) {
+        // In CI, both use same credentials
+        expect(devUser).toBe(e2eUser);
+      } else {
+        // Locally, different credentials
+        expect(devUser).not.toBe(e2eUser);
+      }
     });
   });
 
