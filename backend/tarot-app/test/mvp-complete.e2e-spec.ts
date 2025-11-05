@@ -3,14 +3,13 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
-import { DataSource } from 'typeorm';
-import { User, UserPlan } from '../src/modules/users/entities/user.entity';
+import { UserPlan } from '../src/modules/users/entities/user.entity';
 import { PredefinedQuestion } from '../src/modules/predefined-questions/entities/predefined-question.entity';
 import { ReadingCategory } from '../src/modules/categories/entities/reading-category.entity';
 import { TarotDeck } from '../src/modules/tarot/decks/entities/tarot-deck.entity';
 import { TarotSpread } from '../src/modules/tarot/spreads/entities/tarot-spread.entity';
 import { TarotCard } from '../src/modules/tarot/cards/entities/tarot-card.entity';
-import { hash } from 'bcrypt';
+import { E2EDatabaseHelper } from './helpers/e2e-database.helper';
 
 interface LoginResponse {
   user: {
@@ -81,7 +80,7 @@ interface PredefinedQuestionResponse {
  */
 describe('MVP Complete Flow E2E', () => {
   let app: INestApplication<App>;
-  let dataSource: DataSource;
+  const dbHelper = new E2EDatabaseHelper();
   let freeUserToken: string;
   let premiumUserToken: string;
   let freeUserId: number;
@@ -97,6 +96,9 @@ describe('MVP Complete Flow E2E', () => {
    * Setup: Inicializar app y crear datos de prueba
    */
   beforeAll(async () => {
+    await dbHelper.initialize();
+    // NOTE: NO limpiar base de datos aquí - los seeders ya se ejecutaron en globalSetup
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -105,275 +107,54 @@ describe('MVP Complete Flow E2E', () => {
     app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
     await app.init();
 
-    dataSource = moduleFixture.get<DataSource>(DataSource);
+    // NOTE: NO hacer seeding aquí - los seeders ya se ejecutaron en globalSetup
+    // Solo obtener IDs de datos existentes
+    const dataSource = dbHelper.getDataSource();
+    const categoryRepository = dataSource.getRepository(ReadingCategory);
+    const deckRepository = dataSource.getRepository(TarotDeck);
+    const cardRepository = dataSource.getRepository(TarotCard);
+    const spreadRepository = dataSource.getRepository(TarotSpread);
+    const questionRepository = dataSource.getRepository(PredefinedQuestion);
 
-    // Asegurar que las tablas necesarias existen
-    await ensureRefreshTokensTableExists(dataSource);
-    await ensureAIUsageLogsTableExists(dataSource);
+    // Get first category and question for tests
+    const categories = await categoryRepository.find();
+    categoryId = categories[0].id;
 
-    // Crear datos de prueba necesarios
-    await createTestData();
+    const questions = await questionRepository.find();
+    predefinedQuestionId = questions[0].id;
+
+    const decks = await deckRepository.find();
+    deckId = decks[0].id;
+
+    const spreads = await spreadRepository.find();
+    spreadId = spreads[0].id;
+
+    const cards = await cardRepository.find({ take: 3 });
+    cardIds = cards.map((c) => c.id);
   }, 60000);
 
   /**
    * Cleanup: Limpiar datos de prueba
    */
   afterAll(async () => {
-    await cleanupTestData();
+    const ds = dbHelper.getDataSource();
+    // Limpiar lecturas del usuario FREE creado en test
+    // NOTA: NO limpiar lecturas de premium@test.com ya que es usuario seeded compartido
+    if (freeUserId) {
+      await ds.query('DELETE FROM tarot_reading WHERE "userId" = $1', [
+        freeUserId,
+      ]);
+    }
+
+    // Limpiar SOLO el usuario FREE creado en test (mvp-free-{timestamp}@test.com)
+    // NOTA: NO borrar premiumUserId porque premium@test.com es usuario seeded compartido
+    if (freeUserId) {
+      await ds.query('DELETE FROM "user" WHERE id = $1', [freeUserId]);
+    }
+
+    await dbHelper.close();
     await app.close();
   }, 30000);
-
-  /**
-   * Helper: Asegurar que existe la tabla refresh_tokens
-   */
-  async function ensureRefreshTokensTableExists(ds: DataSource): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const tableExists = await ds.query(
-      `SELECT EXISTS (
-        SELECT FROM information_schema.tables 
-        WHERE table_schema = 'public' 
-        AND table_name = 'refresh_tokens'
-      )`,
-    );
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    if (!tableExists[0].exists) {
-      await ds.query(`
-        CREATE TABLE "refresh_tokens" (
-          "id" uuid NOT NULL DEFAULT uuid_generate_v4(), 
-          "user_id" integer NOT NULL, 
-          "token" character varying(500) NOT NULL, 
-          "token_hash" character varying(64) NOT NULL, 
-          "expires_at" TIMESTAMP NOT NULL, 
-          "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
-          "revoked_at" TIMESTAMP, 
-          "ip_address" character varying(45), 
-          "user_agent" character varying(500), 
-          CONSTRAINT "PK_refresh_tokens_id" PRIMARY KEY ("id")
-        )
-      `);
-
-      await ds.query(
-        `CREATE INDEX "IDX_refresh_tokens_user_id" ON "refresh_tokens" ("user_id")`,
-      );
-
-      await ds.query(
-        `CREATE INDEX "IDX_refresh_tokens_token" ON "refresh_tokens" ("token")`,
-      );
-
-      await ds.query(
-        `CREATE INDEX "IDX_refresh_tokens_token_hash" ON "refresh_tokens" ("token_hash")`,
-      );
-
-      await ds.query(
-        `CREATE INDEX "IDX_refresh_tokens_user_token" ON "refresh_tokens" ("user_id", "token")`,
-      );
-
-      await ds.query(
-        `ALTER TABLE "refresh_tokens" ADD CONSTRAINT "FK_refresh_tokens_user" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
-      );
-    }
-  }
-
-  /**
-   * Helper: Asegurar que existe la tabla ai_usage_logs
-   */
-  async function ensureAIUsageLogsTableExists(ds: DataSource): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const tableExists = await ds.query(
-      `SELECT EXISTS (
-        SELECT FROM information_schema.tables 
-        WHERE table_schema = 'public' 
-        AND table_name = 'ai_usage_logs'
-      )`,
-    );
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    if (!tableExists[0].exists) {
-      // Crear enum si no existe
-      await ds.query(`
-        DO $$ BEGIN
-          CREATE TYPE "ai_provider_enum" AS ENUM('groq', 'deepseek', 'openai', 'gemini');
-        EXCEPTION
-          WHEN duplicate_object THEN null;
-        END $$;
-      `);
-
-      await ds.query(`
-        DO $$ BEGIN
-          CREATE TYPE "ai_usage_status_enum" AS ENUM('success', 'error', 'cached');
-        EXCEPTION
-          WHEN duplicate_object THEN null;
-        END $$;
-      `);
-
-      await ds.query(`
-        CREATE TABLE "ai_usage_logs" (
-          "id" SERIAL NOT NULL,
-          "user_id" integer,
-          "reading_id" integer,
-          "provider" "ai_provider_enum" NOT NULL,
-          "model_used" character varying NOT NULL,
-          "prompt_tokens" integer NOT NULL DEFAULT 0,
-          "completion_tokens" integer NOT NULL DEFAULT 0,
-          "total_tokens" integer NOT NULL DEFAULT 0,
-          "cost_usd" numeric(10,6) NOT NULL DEFAULT 0,
-          "duration_ms" integer NOT NULL DEFAULT 0,
-          "status" "ai_usage_status_enum" NOT NULL DEFAULT 'success',
-          "error_message" text,
-          "fallback_used" boolean NOT NULL DEFAULT false,
-          "created_at" TIMESTAMP NOT NULL DEFAULT now(),
-          CONSTRAINT "PK_ai_usage_logs" PRIMARY KEY ("id")
-        )
-      `);
-
-      await ds.query(
-        `CREATE INDEX "IDX_ai_usage_logs_user_created" ON "ai_usage_logs" ("user_id", "created_at")`,
-      );
-
-      await ds.query(
-        `CREATE INDEX "IDX_ai_usage_logs_provider_created" ON "ai_usage_logs" ("provider", "created_at")`,
-      );
-
-      await ds.query(
-        `ALTER TABLE "ai_usage_logs" ADD CONSTRAINT "FK_ai_usage_logs_user" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE SET NULL ON UPDATE NO ACTION`,
-      );
-
-      await ds.query(
-        `ALTER TABLE "ai_usage_logs" ADD CONSTRAINT "FK_ai_usage_logs_reading" FOREIGN KEY ("reading_id") REFERENCES "tarot_reading"("id") ON DELETE SET NULL ON UPDATE NO ACTION`,
-      );
-    }
-  }
-
-  /**
-   * Helper: Crear datos de prueba (categorías, preguntas, decks, spreads, cartas)
-   */
-  async function createTestData(): Promise<void> {
-    // Crear categoría
-    const category = await dataSource.getRepository(ReadingCategory).save({
-      name: `MVP Test Category ${testTimestamp}`,
-      slug: `mvp-test-${testTimestamp}`,
-      description: 'Categoría para tests MVP',
-      icon: '🧪',
-      color: '#00FF00',
-      order: 999,
-      isActive: true,
-    });
-    categoryId = category.id;
-
-    // Crear pregunta predefinida
-    const question = await dataSource.getRepository(PredefinedQuestion).save({
-      categoryId: categoryId,
-      questionText: 'Test question for MVP E2E',
-      order: 1,
-      isActive: true,
-    });
-    predefinedQuestionId = question.id;
-
-    // Crear deck
-    const deck = await dataSource.getRepository(TarotDeck).save({
-      name: `MVP Test Deck ${testTimestamp}`,
-      description: 'Test deck for MVP',
-      imageUrl: 'https://example.com/deck.jpg',
-      isActive: true,
-    });
-    deckId = deck.id;
-
-    // Crear spread
-    const spread = await dataSource.getRepository(TarotSpread).save({
-      name: `MVP Test Spread ${testTimestamp}`,
-      description: 'Test spread for MVP',
-      cardCount: 3,
-      positions: [
-        { name: 'past', description: 'The past' },
-        { name: 'present', description: 'The present' },
-        { name: 'future', description: 'The future' },
-      ],
-      whenToUse: 'For MVP testing',
-      isActive: true,
-    });
-    spreadId = spread.id;
-
-    // Crear cartas de prueba
-    const cards = await dataSource.getRepository(TarotCard).save([
-      {
-        deckId: deckId,
-        name: `Test Card 1 ${testTimestamp}`,
-        number: 1,
-        category: 'arcanos_mayores',
-        meaningUpright: 'Positive meaning 1',
-        meaningReversed: 'Negative meaning 1',
-        description: 'Test card 1 description',
-        keywords: 'test, card, one',
-        imageUrl: 'https://example.com/card1.jpg',
-      },
-      {
-        deckId: deckId,
-        name: `Test Card 2 ${testTimestamp}`,
-        number: 2,
-        category: 'arcanos_mayores',
-        meaningUpright: 'Positive meaning 2',
-        meaningReversed: 'Negative meaning 2',
-        description: 'Test card 2 description',
-        keywords: 'test, card, two',
-        imageUrl: 'https://example.com/card2.jpg',
-      },
-      {
-        deckId: deckId,
-        name: `Test Card 3 ${testTimestamp}`,
-        number: 3,
-        category: 'arcanos_mayores',
-        meaningUpright: 'Positive meaning 3',
-        meaningReversed: 'Negative meaning 3',
-        description: 'Test card 3 description',
-        keywords: 'test, card, three',
-        imageUrl: 'https://example.com/card3.jpg',
-      },
-    ]);
-    cardIds = cards.map((c) => c.id);
-  }
-
-  /**
-   * Helper: Limpiar datos de prueba
-   */
-  async function cleanupTestData(): Promise<void> {
-    // Limpiar lecturas
-    if (freeUserId || premiumUserId) {
-      await dataSource.query(
-        'DELETE FROM tarot_reading WHERE "userId" IN ($1, $2)',
-        [freeUserId || 0, premiumUserId || 0],
-      );
-    }
-
-    // Limpiar usuarios
-    if (freeUserId) {
-      await dataSource.getRepository(User).delete({ id: freeUserId });
-    }
-    if (premiumUserId) {
-      await dataSource.getRepository(User).delete({ id: premiumUserId });
-    }
-
-    // Limpiar cartas, deck, spread, pregunta, categoría
-    if (cardIds && cardIds.length > 0) {
-      await dataSource.getRepository(TarotCard).delete(cardIds);
-    }
-    if (deckId) {
-      await dataSource.getRepository(TarotDeck).delete({ id: deckId });
-    }
-    if (spreadId) {
-      await dataSource.getRepository(TarotSpread).delete({ id: spreadId });
-    }
-    if (predefinedQuestionId) {
-      await dataSource
-        .getRepository(PredefinedQuestion)
-        .delete({ id: predefinedQuestionId });
-    }
-    if (categoryId) {
-      await dataSource
-        .getRepository(ReadingCategory)
-        .delete({ id: categoryId });
-    }
-  }
 
   /**
    * 1. Authentication Flow
@@ -399,41 +180,18 @@ describe('MVP Complete Flow E2E', () => {
     });
 
     it('✅ Usuario puede hacer login y recibir JWT', async () => {
-      // Primero registrar usuario premium
-      const registerResponse = await request(app.getHttpServer())
-        .post('/auth/register')
-        .send({
-          email: `mvp-premium-${testTimestamp}@test.com`,
-          password: 'SecurePass123!',
-          name: 'MVP Premium User',
-        })
-        .expect(201);
-
-      const registeredUser = registerResponse.body as LoginResponse;
-      const userId = registeredUser.user.id;
-
-      // Actualizar a premium manualmente
-      const hashedPassword = await hash('SecurePass123!', 10);
-      await dataSource.getRepository(User).update(
-        { id: userId },
-        {
-          plan: UserPlan.PREMIUM,
-          password: hashedPassword,
-        },
-      );
-
-      // Login
+      // Usar usuario premium seeded (premium@test.com)
       const loginResponse = await request(app.getHttpServer())
         .post('/auth/login')
         .send({
-          email: `mvp-premium-${testTimestamp}@test.com`,
-          password: 'SecurePass123!',
+          email: 'premium@test.com',
+          password: 'Test123456!',
         })
         .expect(200);
 
       const body = loginResponse.body as LoginResponse;
       expect(body).toHaveProperty('access_token');
-      expect(body.user.email).toBe(`mvp-premium-${testTimestamp}@test.com`);
+      expect(body.user.email).toBe('premium@test.com');
       expect(body.user.plan).toBe(UserPlan.PREMIUM);
 
       premiumUserId = body.user.id;
@@ -532,12 +290,13 @@ describe('MVP Complete Flow E2E', () => {
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Limpiar lecturas anteriores del usuario free para empezar fresh
-      await dataSource.query('DELETE FROM tarot_reading WHERE "userId" = $1', [
+      const ds1 = dbHelper.getDataSource();
+      await ds1.query('DELETE FROM tarot_reading WHERE "userId" = $1', [
         freeUserId,
       ]);
 
       // Limpiar usage limits anteriores
-      await dataSource.query('DELETE FROM usage_limit WHERE user_id = $1', [
+      await ds1.query('DELETE FROM usage_limit WHERE user_id = $1', [
         freeUserId,
       ]);
 
@@ -568,8 +327,9 @@ describe('MVP Complete Flow E2E', () => {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
+      const ds2 = dbHelper.getDataSource();
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const usageLimits = await dataSource.query(
+      const usageLimits = await ds2.query(
         'SELECT * FROM usage_limit WHERE user_id = $1 AND feature = $2 AND date = $3',
         [freeUserId, 'tarot_reading', today],
       );
@@ -668,6 +428,7 @@ describe('MVP Complete Flow E2E', () => {
       expect(readings.length).toBeGreaterThanOrEqual(1);
 
       // Verificar que no hay límite de uso registrado para premium user
+      const dataSource = dbHelper.getDataSource();
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const premiumUsageCheck = await dataSource.query(
         'SELECT * FROM usage_limit WHERE user_id = $1 AND feature = $2',

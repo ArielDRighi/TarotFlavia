@@ -2808,6 +2808,61 @@ Crear endpoint que permita a usuarios premium regenerar la interpretación de un
 
 ---
 
+### **TASK-023-a: Configurar Base de Datos Dedicada para Testing E2E** ✅
+
+**Prioridad:** 🟡 ALTA  
+**Estimación:** 3 días  
+**Estado:** ✅ **COMPLETADA**  
+**Fecha:** 28/12/2024 - 04/01/2025
+
+#### 📋 Descripción
+
+Implementación de base de datos PostgreSQL dedicada para tests E2E (puerto 5436), completamente aislada del entorno de desarrollo. Incluye refactor de nomenclatura Docker (tarotflavia-\* → tarot-\*), scripts de gestión cross-platform, validación de migraciones/seeders y documentación completa.
+
+#### 📊 Resultados
+
+**Implementado exitosamente:**
+
+- ✅ Refactor nomenclatura Docker (containers, volumes, network: tarotflavia-\* → tarot-\*)
+- ✅ Base de datos E2E dedicada configurada y funcionando (puerto 5436)
+- ✅ Scripts de migración y limpieza (migrate-docker-nomenclatura.sh, cleanup-old-docker-resources.sh)
+- ✅ TypeORM configurado para E2E (typeorm-e2e.config.ts)
+- ✅ Helper E2EDatabaseHelper creado y funcionando
+- ✅ Scripts de gestión de DB E2E (manage-e2e-db.sh)
+- ✅ Validación de seeders implementada (validate-seeders-e2e.ts)
+- ✅ Tests E2E actualizados con E2EDatabaseHelper pattern
+- ✅ Documentación README-DOCKER.md y TESTING_STRATEGY.md actualizada
+- ✅ **BONUS:** Bug producción JWT resuelto (invalidación de tokens en cambio de plan)
+- ✅ **BONUS:** CI workflow actualizado (.github/workflows/ci.yml)
+
+- ✅ Global setup/teardown Jest para inicialización automática
+- ✅ Tests de validación de migraciones y esquema (24 tests)
+- ✅ Scripts de migración y limpieza de contenedores antiguos
+
+**Archivos creados:**
+
+```
+src/config/typeorm-e2e.config.ts
+test/helpers/e2e-database.helper.ts
+test/setup-e2e-db.ts, teardown-e2e-db.ts
+scripts/db-{dev,e2e}-{clean,reset}.{sh,ps1}
+scripts/migrate-docker-nomenclature.{sh,ps1}
+scripts/cleanup-old-docker-resources.{sh,ps1}
+docs/TESTING_DATABASE.md, E2E_SCRIPTS_GUIDE.md
+```
+
+**Scripts NPM agregados:**
+
+```bash
+npm run db:e2e:{clean,reset,migrate}[:win]  # Gestión DB E2E
+npm run db:dev:{clean,reset}[:win]          # Gestión DB dev
+npm run test:e2e:fresh                      # Reset + tests
+```
+
+**Ver:** `docs/TESTING_DATABASE.md` y `docs/E2E_SCRIPTS_GUIDE.md` para detalles completos.
+
+---
+
 ### **TASK-023: Implementar Endpoint de Historial de Lecturas con Paginación**
 
 **Prioridad:** 🟡 ALTA  

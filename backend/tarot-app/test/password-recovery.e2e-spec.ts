@@ -3,12 +3,12 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
-import { DataSource } from 'typeorm';
 import { APP_GUARD, APP_FILTER } from '@nestjs/core';
+import { E2EDatabaseHelper } from './helpers/e2e-database.helper';
 
 describe('Password Recovery (e2e)', () => {
   let app: INestApplication<App>;
-  let dataSource: DataSource;
+  const dbHelper = new E2EDatabaseHelper();
   let resetToken: string;
 
   const testUser = {
@@ -50,40 +50,39 @@ describe('Password Recovery (e2e)', () => {
 
     await app.init();
 
-    dataSource = app.get(DataSource);
+    await dbHelper.initialize();
 
     // Cleanup: Delete test user and related data BEFORE tests
-    if (dataSource) {
-      await dataSource.query(
-        `DELETE FROM "password_reset_tokens" WHERE user_id IN (SELECT id FROM "user" WHERE email = $1)`,
-        [testUser.email],
-      );
-      await dataSource.query(
-        `DELETE FROM "refresh_tokens" WHERE user_id IN (SELECT id FROM "user" WHERE email = $1)`,
-        [testUser.email],
-      );
-      await dataSource.query(`DELETE FROM "user" WHERE email = $1`, [
-        testUser.email,
-      ]);
-    }
+    const dataSource = dbHelper.getDataSource();
+    await dataSource.query(
+      `DELETE FROM "password_reset_tokens" WHERE user_id IN (SELECT id FROM "user" WHERE email = $1)`,
+      [testUser.email],
+    );
+    await dataSource.query(
+      `DELETE FROM "refresh_tokens" WHERE user_id IN (SELECT id FROM "user" WHERE email = $1)`,
+      [testUser.email],
+    );
+    await dataSource.query(`DELETE FROM "user" WHERE email = $1`, [
+      testUser.email,
+    ]);
   });
 
   afterAll(async () => {
     // Cleanup: Delete test user and related data
-    if (dataSource) {
-      await dataSource.query(
-        `DELETE FROM "password_reset_tokens" WHERE user_id IN (SELECT id FROM "user" WHERE email = $1)`,
-        [testUser.email],
-      );
-      await dataSource.query(
-        `DELETE FROM "refresh_tokens" WHERE user_id IN (SELECT id FROM "user" WHERE email = $1)`,
-        [testUser.email],
-      );
-      await dataSource.query(`DELETE FROM "user" WHERE email = $1`, [
-        testUser.email,
-      ]);
-    }
+    const dataSource = dbHelper.getDataSource();
+    await dataSource.query(
+      `DELETE FROM "password_reset_tokens" WHERE user_id IN (SELECT id FROM "user" WHERE email = $1)`,
+      [testUser.email],
+    );
+    await dataSource.query(
+      `DELETE FROM "refresh_tokens" WHERE user_id IN (SELECT id FROM "user" WHERE email = $1)`,
+      [testUser.email],
+    );
+    await dataSource.query(`DELETE FROM "user" WHERE email = $1`, [
+      testUser.email,
+    ]);
 
+    await dbHelper.close();
     await app.close();
   });
 

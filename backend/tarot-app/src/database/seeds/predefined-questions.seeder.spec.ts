@@ -16,7 +16,7 @@ describe('PredefinedQuestions Seeder', () => {
       {
         id: 1,
         name: 'Amor y Relaciones',
-        slug: 'amor',
+        slug: 'amor-relaciones',
         description: 'Consultas sobre amor y relaciones',
         icon: '❤️',
         color: '#FF6B9D',
@@ -28,7 +28,7 @@ describe('PredefinedQuestions Seeder', () => {
       {
         id: 2,
         name: 'Trabajo y Carrera',
-        slug: 'trabajo',
+        slug: 'carrera-trabajo',
         description: 'Orientación profesional',
         icon: '💼',
         color: '#4A90E2',
@@ -40,7 +40,7 @@ describe('PredefinedQuestions Seeder', () => {
       {
         id: 3,
         name: 'Dinero y Finanzas',
-        slug: 'dinero',
+        slug: 'dinero-finanzas',
         description: 'Situación financiera',
         icon: '💰',
         color: '#F5A623',
@@ -52,7 +52,7 @@ describe('PredefinedQuestions Seeder', () => {
       {
         id: 4,
         name: 'Salud y Bienestar',
-        slug: 'salud',
+        slug: 'salud-bienestar',
         description: 'Bienestar físico y emocional',
         icon: '🌿',
         color: '#7ED321',
@@ -64,7 +64,7 @@ describe('PredefinedQuestions Seeder', () => {
       {
         id: 5,
         name: 'Espiritual y Crecimiento',
-        slug: 'espiritual',
+        slug: 'crecimiento-espiritual',
         description: 'Desarrollo espiritual',
         icon: '✨',
         color: '#9013FE',
@@ -76,7 +76,7 @@ describe('PredefinedQuestions Seeder', () => {
       {
         id: 6,
         name: 'General',
-        slug: 'general',
+        slug: 'consulta-general',
         description: 'Consultas generales',
         icon: '🔮',
         color: '#50E3C2',
