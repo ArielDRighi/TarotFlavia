@@ -138,20 +138,18 @@ describe('MVP Complete Flow E2E', () => {
    */
   afterAll(async () => {
     const ds = dbHelper.getDataSource();
-    // Limpiar lecturas de los usuarios de prueba creados en tests
-    if (freeUserId || premiumUserId) {
-      await ds.query('DELETE FROM tarot_reading WHERE "userId" IN ($1, $2)', [
-        freeUserId || 0,
-        premiumUserId || 0,
+    // Limpiar lecturas del usuario FREE creado en test
+    // NOTA: NO limpiar lecturas de premium@test.com ya que es usuario seeded compartido
+    if (freeUserId) {
+      await ds.query('DELETE FROM tarot_reading WHERE "userId" = $1', [
+        freeUserId,
       ]);
     }
 
-    // Limpiar usuarios de prueba creados en tests
+    // Limpiar SOLO el usuario FREE creado en test (mvp-free-{timestamp}@test.com)
+    // NOTA: NO borrar premiumUserId porque premium@test.com es usuario seeded compartido
     if (freeUserId) {
       await ds.query('DELETE FROM "user" WHERE id = $1', [freeUserId]);
-    }
-    if (premiumUserId) {
-      await ds.query('DELETE FROM "user" WHERE id = $1', [premiumUserId]);
     }
 
     await dbHelper.close();
