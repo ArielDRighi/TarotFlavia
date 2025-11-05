@@ -13,6 +13,8 @@ import { TarotInterpretation } from '../interpretations/entities/tarot-interpret
 import { User, UserPlan } from '../../users/entities/user.entity';
 import { TarotDeck } from '../decks/entities/tarot-deck.entity';
 import { CreateReadingDto } from './dto/create-reading.dto';
+import { QueryReadingsDto } from './dto/query-readings.dto';
+import { PaginatedReadingsResponseDto } from './dto/paginated-readings-response.dto';
 import { InterpretationsService } from '../interpretations/interpretations.service';
 import { CardsService } from '../cards/cards.service';
 import { SpreadsService } from '../spreads/spreads.service';
@@ -37,6 +39,8 @@ export class ReadingsService {
     private readingsRepository: Repository<TarotReading>,
     @InjectRepository(TarotInterpretation)
     private interpretationsRepository: Repository<TarotInterpretation>,
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
     private interpretationsService: InterpretationsService,
     private cardsService: CardsService,
     private spreadsService: SpreadsService,
@@ -133,12 +137,104 @@ export class ReadingsService {
     return savedReading;
   }
 
-  async findAll(userId: number): Promise<TarotReading[]> {
-    return this.readingsRepository.find({
-      where: { user: { id: userId } },
-      relations: ['deck', 'cards', 'user'],
-      order: { createdAt: 'DESC' },
-    });
+  async findAll(
+    userId: number,
+    queryDto?: QueryReadingsDto,
+  ): Promise<PaginatedReadingsResponseDto> {
+    const page = queryDto?.page ?? 1;
+    const limit = queryDto?.limit ?? 10;
+    const sortBy = queryDto?.sortBy ?? 'created_at';
+    const sortOrder = queryDto?.sortOrder ?? 'DESC';
+
+    // Get user to check plan
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Calculate total items (respecting free user limit)
+    const totalQuery = this.readingsRepository
+      .createQueryBuilder('reading')
+      .where('reading.userId = :userId', { userId })
+      .orderBy(
+        `reading.${sortBy === 'created_at' ? 'createdAt' : 'updatedAt'}`,
+        sortOrder,
+      );
+
+    if (queryDto?.categoryId !== undefined) {
+      totalQuery.andWhere('reading.categoryId = :categoryId', {
+        categoryId: queryDto.categoryId,
+      });
+    }
+    if (queryDto?.dateFrom) {
+      totalQuery.andWhere('reading.createdAt >= :dateFrom', {
+        dateFrom: new Date(queryDto.dateFrom),
+      });
+    }
+    if (queryDto?.dateTo) {
+      totalQuery.andWhere('reading.createdAt <= :dateTo', {
+        dateTo: new Date(queryDto.dateTo),
+      });
+    }
+
+    const totalItems = await totalQuery.getCount();
+
+    // Free users can only see 10 most recent readings
+    const isFreeUser = user.plan === UserPlan.FREE;
+    const effectiveTotalItems = isFreeUser
+      ? Math.min(totalItems, 10)
+      : totalItems;
+
+    // Calculate pagination metadata
+    const totalPages = Math.ceil(effectiveTotalItems / limit);
+    const hasNextPage = page < totalPages;
+    const hasPreviousPage = page > 1;
+
+    // Fetch paginated data with eager loading
+    const skip = (page - 1) * limit;
+    const query = this.readingsRepository
+      .createQueryBuilder('reading')
+      .leftJoinAndSelect('reading.deck', 'deck')
+      .leftJoinAndSelect('reading.cards', 'cards')
+      .leftJoinAndSelect('reading.user', 'user')
+      .leftJoinAndSelect('reading.category', 'category')
+      .where('reading.userId = :userId', { userId })
+      .orderBy(
+        `reading.${sortBy === 'created_at' ? 'createdAt' : 'updatedAt'}`,
+        sortOrder,
+      )
+      .skip(skip)
+      .take(isFreeUser ? Math.min(limit, 10 - skip) : limit);
+
+    if (queryDto?.categoryId !== undefined) {
+      query.andWhere('reading.categoryId = :categoryId', {
+        categoryId: queryDto.categoryId,
+      });
+    }
+    if (queryDto?.dateFrom) {
+      query.andWhere('reading.createdAt >= :dateFrom', {
+        dateFrom: new Date(queryDto.dateFrom),
+      });
+    }
+    if (queryDto?.dateTo) {
+      query.andWhere('reading.createdAt <= :dateTo', {
+        dateTo: new Date(queryDto.dateTo),
+      });
+    }
+
+    const data = await query.getMany();
+
+    return {
+      data,
+      meta: {
+        page,
+        limit,
+        totalItems: effectiveTotalItems,
+        totalPages,
+        hasNextPage,
+        hasPreviousPage,
+      },
+    };
   }
 
   async findOne(
