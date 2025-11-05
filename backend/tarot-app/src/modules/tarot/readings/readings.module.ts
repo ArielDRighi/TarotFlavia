@@ -1,7 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ReadingsService } from './readings.service';
 import { ReadingsController } from './readings.controller';
+import { ReadingsAdminController } from './readings-admin.controller';
+import { ReadingsCleanupService } from './readings-cleanup.service';
 import { ShareController } from './share.controller';
 import { TarotReading } from './entities/tarot-reading.entity';
 import { TarotInterpretation } from '../interpretations/entities/tarot-interpretation.entity';
@@ -17,15 +20,17 @@ import { UsageLimitsModule } from '../../usage-limits/usage-limits.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([TarotReading, TarotInterpretation, User]),
+    ScheduleModule.forRoot(),
     InterpretationsModule,
     CardsModule,
     SpreadsModule,
     PredefinedQuestionsModule,
     UsageLimitsModule,
   ],
-  controllers: [ReadingsController, ShareController],
+  controllers: [ReadingsController, ReadingsAdminController, ShareController],
   providers: [
     ReadingsService,
+    ReadingsCleanupService,
     RequiresPremiumForCustomQuestionGuard,
     ReadingsCacheInterceptor,
   ],

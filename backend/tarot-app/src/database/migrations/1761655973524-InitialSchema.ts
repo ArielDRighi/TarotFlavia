@@ -26,6 +26,9 @@ export class InitialSchema1761655973524 implements MigrationInterface {
       `CREATE INDEX "IDX_tarot_reading_user_created" ON "tarot_reading" ("userId", "createdAt")`,
     );
     await queryRunner.query(
+      `CREATE INDEX "IDX_tarot_reading_deleted_at" ON "tarot_reading" ("deletedAt")`,
+    );
+    await queryRunner.query(
       `CREATE TYPE "user_plan_enum" AS ENUM('free', 'premium')`,
     );
     await queryRunner.query(
@@ -267,6 +270,9 @@ export class InitialSchema1761655973524 implements MigrationInterface {
     await queryRunner.query(`DROP TYPE "user_plan_enum"`);
     await queryRunner.query(
       `DROP INDEX "public"."IDX_tarot_reading_user_created"`,
+    );
+    await queryRunner.query(
+      `DROP INDEX "public"."IDX_tarot_reading_deleted_at"`,
     );
     await queryRunner.query(`DROP TABLE "tarot_reading"`);
     await queryRunner.query(
