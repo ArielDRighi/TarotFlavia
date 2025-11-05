@@ -2921,11 +2921,15 @@ Mejorar el endpoint de historial de lecturas con paginación eficiente, filtros 
 
 ---
 
-### **TASK-024: Implementar Soft Delete en Lecturas**
+### **TASK-024: Implementar Soft Delete en Lecturas** ✅
 
 **Prioridad:** 🟢 MEDIA  
 **Estimación:** 2 días  
-**Dependencias:** Ninguna
+**Dependencias:** Ninguna  
+**Estado:** ✅ COMPLETADO  
+**Branch:** `feature/TASK-024-soft-delete-lecturas`  
+**Commit:** `c606bff`  
+**Fecha:** 29 de Enero, 2025
 
 #### 📋 Descripción
 
@@ -2933,24 +2937,60 @@ Implementar eliminación lógica (soft delete) de lecturas para permitir que usu
 
 #### ✅ Tareas específicas
 
-- [ ] Agregar campo `deleted_at` (timestamp nullable) a entidad `TarotReading`
-- [ ] Configurar TypeORM con `@DeleteDateColumn()` para soft delete automático
-- [ ] Implementar endpoint `DELETE /readings/:id` que haga soft delete
-- [ ] Verificar que la lectura pertenezca al usuario autenticado antes de eliminar
-- [ ] Por defecto, excluir lecturas eliminadas de todos los queries:
-  - Usar global scope en repositorio
-  - O aplicar filtro `where: { deleted_at: IsNull() }` en queries
-- [ ] Crear endpoint `GET /readings/trash` para que usuarios vean lecturas eliminadas (últimos 30 días)
-- [ ] Implementar endpoint `POST /readings/:id/restore` para restaurar lecturas eliminadas
-- [ ] Crear tarea cron que elimine permanentemente (hard delete) lecturas soft-deleted hace más de 30 días
-- [ ] Para admin: endpoint `GET /admin/readings?includeDeleted=true` que muestre todas las lecturas
-- [ ] Agregar índice en `deleted_at` para optimizar queries de lecturas activas
+- [x] Agregar campo `deleted_at` (timestamp nullable) a entidad `TarotReading` - Ya existía @DeleteDateColumn
+- [x] Configurar TypeORM con `@DeleteDateColumn()` para soft delete automático
+- [x] Implementar endpoint `DELETE /readings/:id` que haga soft delete
+- [x] Verificar que la lectura pertenezca al usuario autenticado antes de eliminar
+- [x] Por defecto, excluir lecturas eliminadas de todos los queries:
+  - Agregado filtro explícito `deletedAt: IsNull()` en queries
+  - Modificado findAll() para filtrar por deletedAt IS NULL
+- [x] Crear endpoint `GET /readings/trash` para que usuarios vean lecturas eliminadas (últimos 30 días)
+- [x] Implementar endpoint `POST /readings/:id/restore` para restaurar lecturas eliminadas
+- [x] Crear tarea cron que elimine permanentemente (hard delete) lecturas soft-deleted hace más de 30 días
+  - ReadingsCleanupService con @Cron diario a las 4 AM
+- [x] Para admin: endpoint `GET /admin/readings?includeDeleted=true` que muestre todas las lecturas
+  - ReadingsAdminController con JwtAuthGuard + AdminGuard
+- [x] Agregar índice en `deleted_at` para optimizar queries de lecturas activas
+  - IDX_tarot_reading_deleted_at en migración InitialSchema
 
 #### 🎯 Criterios de aceptación
 
-- ✓ Las lecturas "eliminadas" no se muestran pero no se pierden
-- ✓ Los usuarios pueden restaurar lecturas eliminadas dentro de 30 días
-- ✓ El hard delete automático funciona correctamente
+- ✅ Las lecturas "eliminadas" no se muestran pero no se pierden
+- ✅ Los usuarios pueden restaurar lecturas eliminadas dentro de 30 días
+- ✅ El hard delete automático funciona correctamente
+
+#### ✅ Resumen de Implementación
+
+**Archivos creados/modificados:**
+
+1. `test/readings-soft-delete.e2e-spec.ts` (820 líneas) - 20 tests E2E
+2. `src/database/migrations/1761655973524-InitialSchema.ts` - Índice added
+3. `src/modules/tarot/readings/readings.controller.ts` - 3 endpoints nuevos (DELETE, GET /trash, POST /restore)
+4. `src/modules/tarot/readings/readings-admin.controller.ts` - NUEVO: Admin endpoint
+5. `src/modules/tarot/readings/readings-cleanup.service.ts` - NUEVO: Cron service
+6. `src/modules/tarot/readings/readings.service.ts` - 4 métodos nuevos + filtros
+7. `src/modules/tarot/readings/readings.module.ts` - Registro de nuevos servicios/controllers
+
+**Características implementadas:**
+
+- ✅ Soft delete con TypeORM's @DeleteDateColumn y softRemove()
+- ✅ Restore con TypeORM's restore() method
+- ✅ Filtros explícitos "deletedAt IS NULL" en queries normales
+- ✅ Papelera (GET /trash) muestra últimos 30 días con withDeleted()
+- ✅ Admin puede ver todas (includeDeleted query param)
+- ✅ Cron job diario (4 AM) elimina permanentemente registros >30 días
+- ✅ Verificación de ownership en todos los endpoints
+- ✅ Índice IDX_tarot_reading_deleted_at para performance
+- ✅ Guards: JwtAuthGuard (users), JwtAuthGuard + AdminGuard (admin)
+- ✅ 20/20 tests E2E pasando
+- ✅ Metodología TDD Red-Green-Refactor aplicada
+
+**Debugging completado:**
+
+- Fixed: Restore method usando TypeORM's restore() nativo
+- Fixed: Queries con filtro explícito deletedAt IS NULL
+- Fixed: Route ordering (GET /trash antes de GET /:id)
+- Fixed: Test final verifica DB state en vez de cached response
 
 ---
 
