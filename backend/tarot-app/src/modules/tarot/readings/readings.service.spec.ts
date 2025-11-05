@@ -22,6 +22,7 @@ describe('ReadingsService', () => {
     find: jest.fn(),
     findOne: jest.fn(),
     update: jest.fn(),
+    createQueryBuilder: jest.fn(),
   };
 
   const mockInterpretationsService = {
@@ -329,26 +330,73 @@ describe('ReadingsService', () => {
   });
 
   describe('findAll', () => {
-    it('should return all readings for a user', async () => {
+    it('should return paginated readings for a user', async () => {
       const readings = [mockReading];
-      mockRepository.find.mockResolvedValue(readings);
 
-      const result = await service.findAll(mockUser.id);
+      // Mock user repository to return the user
+      mockRepository.findOne = jest.fn().mockResolvedValue(mockUser);
 
-      expect(mockRepository.find).toHaveBeenCalledWith({
-        where: { user: { id: mockUser.id } },
-        relations: ['deck', 'cards', 'user'],
-        order: { createdAt: 'DESC' },
+      // Mock query builder chain
+      const mockQueryBuilder = {
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        getCount: jest.fn().mockResolvedValue(readings.length),
+        getMany: jest.fn().mockResolvedValue(readings),
+      };
+
+      mockRepository.createQueryBuilder = jest
+        .fn()
+        .mockReturnValue(mockQueryBuilder);
+
+      const queryDto = { page: 1, limit: 10 };
+      const result = await service.findAll(mockUser.id, queryDto);
+
+      expect(mockRepository.findOne).toHaveBeenCalledWith({
+        where: { id: mockUser.id },
       });
-      expect(result).toEqual(readings);
+      expect(mockRepository.createQueryBuilder).toHaveBeenCalled();
+      expect(result).toEqual({
+        data: readings,
+        meta: {
+          page: 1,
+          limit: 10,
+          totalItems: readings.length,
+          totalPages: 1,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      });
     });
 
-    it('should return empty array if no readings found', async () => {
-      mockRepository.find.mockResolvedValue([]);
+    it('should return empty paginated response if no readings found', async () => {
+      // Mock user repository to return the user
+      mockRepository.findOne = jest.fn().mockResolvedValue(mockUser);
 
-      const result = await service.findAll(mockUser.id);
+      // Mock query builder chain
+      const mockQueryBuilder = {
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        getCount: jest.fn().mockResolvedValue(0),
+        getMany: jest.fn().mockResolvedValue([]),
+      };
 
-      expect(result).toEqual([]);
+      mockRepository.createQueryBuilder = jest
+        .fn()
+        .mockReturnValue(mockQueryBuilder);
+
+      const queryDto = { page: 1, limit: 10 };
+      const result = await service.findAll(mockUser.id, queryDto);
+
+      expect(result.data).toEqual([]);
+      expect(result.meta.totalItems).toBe(0);
     });
   });
 
