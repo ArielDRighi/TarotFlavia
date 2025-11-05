@@ -23,6 +23,7 @@ describe('ReadingsService', () => {
     findOne: jest.fn(),
     update: jest.fn(),
     createQueryBuilder: jest.fn(),
+    softRemove: jest.fn(),
   };
 
   const mockInterpretationsService = {
@@ -472,14 +473,14 @@ describe('ReadingsService', () => {
   describe('remove', () => {
     it('should remove a reading (soft delete)', async () => {
       mockRepository.findOne.mockResolvedValue(mockReading);
-      mockRepository.save.mockResolvedValue({
+      mockRepository.softRemove.mockResolvedValue({
         ...mockReading,
         deletedAt: new Date(),
       });
 
       await service.remove(mockReading.id, mockUser.id);
 
-      expect(mockRepository.save).toHaveBeenCalled();
+      expect(mockRepository.softRemove).toHaveBeenCalledWith(mockReading);
     });
 
     it('should throw NotFoundException if reading does not exist', async () => {
