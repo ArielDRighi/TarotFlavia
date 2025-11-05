@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder, ObjectLiteral } from 'typeorm';
+import * as crypto from 'crypto';
 import { TarotReading } from './entities/tarot-reading.entity';
 import { TarotInterpretation } from '../interpretations/entities/tarot-interpretation.entity';
 import { User, UserPlan } from '../../users/entities/user.entity';
@@ -535,7 +536,7 @@ export class ReadingsService {
     if (reading.sharedToken && reading.isPublic) {
       return {
         sharedToken: reading.sharedToken,
-        shareUrl: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/shared/${reading.sharedToken}`,
+        shareUrl: this.buildShareUrl(reading.sharedToken),
         isPublic: reading.isPublic,
       };
     }
@@ -575,7 +576,7 @@ export class ReadingsService {
 
     return {
       sharedToken,
-      shareUrl: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/shared/${sharedToken}`,
+      shareUrl: this.buildShareUrl(sharedToken),
       isPublic: true,
     };
   }
@@ -637,19 +638,28 @@ export class ReadingsService {
   }
 
   /**
-   * Genera un token alfanumérico aleatorio de 8-12 caracteres
+   * Genera un token alfanumérico criptográficamente seguro de 8-12 caracteres
    */
   private generateToken(): string {
-    const length = Math.floor(Math.random() * 5) + 8; // Entre 8 y 12 caracteres
+    const length = Math.floor(crypto.randomInt(5)) + 8; // Entre 8 y 12 caracteres
     const chars =
       'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let token = '';
 
     for (let i = 0; i < length; i++) {
-      token += chars.charAt(Math.floor(Math.random() * chars.length));
+      const randomIndex = crypto.randomInt(chars.length);
+      token += chars.charAt(randomIndex);
     }
 
     return token;
+  }
+
+  /**
+   * Construye la URL completa para compartir una lectura
+   */
+  private buildShareUrl(token: string): string {
+    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    return `${baseUrl}/shared/${token}`;
   }
 
   /**
