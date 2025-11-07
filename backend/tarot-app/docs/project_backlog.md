@@ -5028,516 +5028,6579 @@ Crear capa de abstracción que permita cambiar entre diferentes proveedores de I
 
 ---
 
+### **TASK-062: Implementar Lectura Diaria "Carta del Día"** ⭐⭐ NECESARIA MVP
+
+**Prioridad:** � NECESARIA  
+**Estimación:** 3 días  
+**Dependencias:** TASK-005, TASK-018, TASK-061  
+**Marcador MVP:** ⭐⭐ **NECESARIA PARA MVP** - Funcionalidad principal de engagement diario  
+**Tags:** mvp, tarot-core, daily-feature, engagement
+
+#### 📋 Descripción
+
+Implementar la funcionalidad "Carta del Día" - una tirada diaria de una sola carta que ayuda al usuario a conocer la energía del día y cómo aprovecharla. Esta tirada está diseñada para realizarse al inicio del día (idealmente por la mañana antes de salir a trabajar) y proporciona claridad sobre ventajas, cuidados y la energía general del día.
+
+**Concepto:** A diferencia de las lecturas tradicionales con múltiples cartas, la Carta del Día es una práctica espiritual matutina donde una sola carta revela la energía dominante del día. El usuario debe poder acceder rápidamente a esta función cada mañana como ritual diario.
+
+#### 🧪 Testing
+
+**Tests necesarios:**
+
+- [ ] **Tests unitarios:**
+  - Generación de carta aleatoria (sin repetición en mismo día)
+  - Validación de que solo se puede generar 1 carta por día
+  - Interpretación específica para contexto "carta del día"
+  - Usuario premium puede regenerar, free no puede
+- [ ] **Tests de integración:**
+  - Creación de daily reading con timestamp correcto
+  - Verificación de unicidad por usuario/fecha
+  - Historial de cartas del día ordenado cronológicamente
+- [ ] **Tests E2E:**
+  - Usuario solicita carta del día → 201 + interpretación
+  - Usuario intenta 2da carta mismo día → 409 Conflict
+  - Usuario accede a historial de cartas del día → 200
+  - A medianoche usuario puede generar nueva carta → 201
+
+**Ubicación:** `src/modules/tarot/daily-reading/*.spec.ts` + `test/daily-reading.e2e-spec.ts`  
+**Importancia:** ⭐⭐ CRÍTICA - Feature principal de engagement diario
+
+#### ✅ Tareas específicas
+
+**1. Investigación y Diseño (0.5 días):**
+
+- [ ] Investigar tradición de "Carta del Día" en tarot
+- [ ] Definir estructura de interpretación específica para carta diaria:
+  - Energía general del día
+  - Ventajas que ofrece esta energía
+  - Cuidados o aspectos a tener presente
+  - Consejo práctico para aprovechar el día
+- [ ] Diseñar prompt específico para Llama/GPT que genere interpretaciones diarias
+- [ ] Definir UX: debe ser accesible en 2 clicks desde home
+
+**2. Modelo de Datos (0.5 días):**
+
+- [ ] Crear entidad `DailyReading` con campos:
+  - `id`, `user_id` (FK), `tarotista_id` (FK)
+  - `card_id` (FK a TarotCard)
+  - `is_reversed` (boolean)
+  - `interpretation` (text)
+  - `reading_date` (date, not timestamp - solo fecha sin hora)
+  - `was_regenerated` (boolean, para analytics)
+  - `created_at`, `updated_at`
+- [ ] Agregar constraint unique en `(user_id, reading_date, tarotista_id)`
+- [ ] Agregar índice en `(user_id, reading_date)` para búsquedas rápidas
+- [ ] Migración con nueva tabla
+
+**3. Lógica de Negocio (1 día):**
+
+- [ ] Crear módulo `DailyReadingModule` con servicio y controlador
+- [ ] Implementar método `generateDailyCard(userId, tarotistaId)`:
+  - Verificar que NO existe carta del día para hoy
+  - Si existe, retornar error 409 con mensaje: "Ya generaste tu carta del día. Vuelve mañana para una nueva carta."
+  - Seleccionar carta aleatoria (incluir probabilidad 50% invertida)
+  - Generar interpretación con prompt específico de "carta del día"
+  - Guardar en `daily_reading`
+  - Retornar carta + interpretación
+- [ ] Implementar método `getTodayCard(userId)`:
+  - Retornar carta del día de hoy si existe
+  - Si no existe, retornar null (para mostrar botón "Descubre tu carta del día")
+- [ ] Implementar método `getDailyHistory(userId, page, limit)`:
+  - Retornar historial de cartas del día (ordenado por fecha DESC)
+  - Paginado (10 por página)
+  - Incluir fecha, carta, si fue invertida, interpretación resumida
+- [ ] Implementar método `regenerateDailyCard(userId)` (solo premium):
+  - Verificar que usuario sea premium
+  - Marcar `was_regenerated = true`
+  - Generar nueva carta e interpretación
+  - Actualizar registro existente
+
+**4. Prompts Específicos para IA (0.5 días):**
+
+- [ ] Crear prompt especializado en `TarotPrompts.getDailyCardPrompt()`:
+
+  ```typescript
+  System Prompt:
+  "Eres Flavia, una tarotista profesional. Tu tarea es interpretar la CARTA DEL DÍA,
+  una práctica espiritual matutina que revela la energía dominante del día.
+
+  ESTRUCTURA DE RESPUESTA (OBLIGATORIA):
+  1. **Energía del Día**: Describe la energía principal que trae esta carta (2-3 oraciones)
+  2. **Ventajas**: ¿Qué oportunidades o fortalezas ofrece esta energía? (2-3 puntos)
+  3. **Cuidados**: ¿Qué aspectos tener presentes o evitar? (2-3 puntos)
+  4. **Consejo del Día**: Un consejo práctico y accionable para hoy (1-2 oraciones)
+
+  TONO: Motivador, práctico, enfocado en el día presente (no futuro lejano)"
+
+  User Prompt:
+  "Carta del Día: {card_name} ({orientation})
+  Significado base: {card_meaning}
+  Keywords: {keywords}
+
+  Genera la interpretación de la Carta del Día siguiendo la estructura requerida."
+  ```
+
+- [ ] Configurar max_tokens específico: 400 tokens (interpretación más breve que lecturas)
+- [ ] Configurar temperature: 0.65 (balance entre creatividad y coherencia)
+
+**5. Endpoints REST (0.5 días):**
+
+- [ ] Crear `DailyReadingController` con endpoints:
+  - **POST /daily-reading:** Generar carta del día (requiere auth)
+    - Rate limit especial: 2 requests/hora (prevenir abuse)
+    - Validar límite de 1 carta por día
+    - Retornar 409 si ya existe carta hoy
+  - **GET /daily-reading/today:** Obtener carta del día de hoy
+    - Retornar null si no existe (para mostrar CTA)
+    - Retornar carta completa con interpretación si existe
+  - **GET /daily-reading/history:** Historial paginado
+    - Query params: page=1, limit=10
+    - Ordenar por reading_date DESC
+  - **POST /daily-reading/regenerate:** Regenerar carta (solo premium)
+    - Verificar plan premium
+    - Aplicar `@CheckUsageLimit('daily_card_regeneration')`
+    - Límite: 1 regeneración por día para premium
+- [ ] Crear DTOs:
+  - `DailyReadingResponseDto` con todos los campos
+  - `DailyReadingHistoryDto` con resumen de cartas
+- [ ] Documentar endpoints con Swagger
+
+**6. Integración con Sistema de Límites (0.5 días):**
+
+- [ ] Agregar feature `DAILY_CARD` a `UsageFeature` enum
+- [ ] Agregar feature `DAILY_CARD_REGENERATION` para premium
+- [ ] Configurar límites en `USAGE_LIMITS`:
+  ```typescript
+  [UserPlan.FREE]: {
+    [UsageFeature.DAILY_CARD]: 1,  // 1 carta por día
+    [UsageFeature.DAILY_CARD_REGENERATION]: 0,  // No puede regenerar
+  },
+  [UserPlan.PREMIUM]: {
+    [UsageFeature.DAILY_CARD]: 1,  // 1 carta por día
+    [UsageFeature.DAILY_CARD_REGENERATION]: 1,  // 1 regeneración por día
+  }
+  ```
+- [ ] Validación de límite se resetea a medianoche (fecha, no timestamp)
+
+**7. Notificaciones y Engagement (0.5 días):**
+
+- [ ] Implementar lógica de notificación matutina (preparación, no MVP):
+  - Documentar cómo implementar notificación push en futuro
+  - Placeholder: "¿Ya descubriste tu carta del día?"
+- [ ] Agregar campo `last_daily_reading_at` en User entity (para analytics)
+- [ ] Trackear en analytics:
+  - Usuarios que usan carta del día diariamente (streak)
+  - Hora promedio de consulta (para optimizar notificaciones)
+  - Tasa de regeneración (premium)
+
+**8. UX y Frontend (preparación):**
+
+- [ ] Documentar especificaciones para frontend:
+  - Widget destacado en home (arriba)
+  - Animación de volteo de carta
+  - Botón CTA: "Descubre tu Carta del Día" (si no existe)
+  - Mostrar carta actual (si existe hoy)
+  - Badge "Nueva" cada medianoche
+  - Acceso rápido a historial
+  - Compartir carta del día en redes sociales
+
+#### 🎯 Criterios de aceptación
+
+- ✓ Usuario puede generar 1 carta del día por fecha (no por timestamp 24h)
+- ✓ La interpretación sigue estructura específica de carta diaria (energía/ventajas/cuidados/consejo)
+- ✓ No se puede generar 2da carta el mismo día (409 Conflict)
+- ✓ A medianoche se puede generar nueva carta
+- ✓ Usuario premium puede regenerar 1 vez por día
+- ✓ Historial muestra todas las cartas del día anteriores
+- ✓ Prompt genera interpretaciones enfocadas en el día presente (no futuro lejano)
+- ✓ Endpoints están documentados con Swagger
+- ✓ Tests E2E validan flujo completo diario
+
+#### 📝 Notas de implementación
+
+**Diferencias vs Lectura Tradicional:**
+
+- Solo 1 carta (no 3, 5, 10)
+- No requiere pregunta del usuario
+- Interpretación más breve y práctica
+- Enfoque en el día presente (no pasado/futuro)
+- Límite temporal: 1 por día (no por cantidad)
+- Prompt especializado con estructura fija
+
+**Hooks para futuro:**
+
+- Notificaciones push matutinas (8-9 AM según zona horaria)
+- Streak de días consecutivos con recompensas
+- Compartir carta del día en redes sociales
+- Widget de escritorio/móvil
+- Integración con calendario (marcar días con cartas generadas)
+
+**Prioridad Alta porque:**
+
+- Feature principal de engagement diario
+- Diferenciador competitivo
+- Ritual matutino crea hábito
+- Aumenta retención significativamente
+- Simple de implementar (no requiere selección de cartas/preguntas)
+
+---
+
+### **TASK-063: Implementar Sistema de Calendario de Disponibilidad del Tarotista** ⭐⭐ NECESARIA MVP
+
+**Prioridad:** 🟡 ALTA  
+**Estimación:** 5 días  
+**Dependencias:** TASK-016 (Email), TASK-061 (Multi-tarotista)  
+**Marcador MVP:** ⭐⭐⭐ **NECESARIO PARA MVP** - Esencial para servicios personalizados  
+**Tags:** mvp, scheduling, services, marketplace-ready
+
+#### 📋 Descripción
+
+Implementar sistema completo de gestión de disponibilidad horaria del tarotista y reserva de sesiones virtuales por parte de usuarios. El tarotista podrá definir días y horarios disponibles, y los usuarios podrán agendar sesiones en esos slots. Ambas partes recibirán notificaciones por email con link de Google Meet generado automáticamente.
+
+**Contexto Marketplace:** Aunque el MVP es single-tarotista (Flavia), el sistema debe estar diseñado para soportar múltiples tarotistas desde el inicio (usando FK `tarotista_id`).
+
+#### 🧪 Testing
+
+**Tests necesarios:**
+
+- [ ] **Tests unitarios:**
+  - Validación de slots de disponibilidad (no solapamiento)
+  - Generación de slots de 30/60/90 minutos
+  - Verificación de disponibilidad antes de reservar
+  - Bloqueo de slot reservado
+  - Generación de link de Google Meet
+  - Cálculo de precio según duración
+- [ ] **Tests de integración:**
+  - CRUD completo de disponibilidad
+  - Creación de reserva con validaciones
+  - Envío de emails a ambas partes
+  - Cancelación con liberación de slot
+  - Estados de sesión (pending, confirmed, completed, cancelled)
+- [ ] **Tests E2E:**
+  - Tarotista crea disponibilidad → 201
+  - Usuario lista slots disponibles → 200 con array
+  - Usuario reserva slot → 201 + emails enviados
+  - Usuario intenta reservar slot ocupado → 409 Conflict
+  - Usuario cancela con >24h anticipación → 200
+  - Usuario intenta cancelar con <24h → 400 o 403
+
+**Ubicación:** `src/modules/scheduling/*.spec.ts` + `test/scheduling.e2e-spec.ts`  
+**Importancia:** ⭐⭐⭐ ALTA - Core para monetización de servicios personalizados
+
+#### ✅ Tareas específicas
+
+**1. Modelo de Datos (1 día):**
+
+- [ ] Crear entidad `TarotistAvailability` (disponibilidad general):
+  - `id`, `tarotista_id` (FK)
+  - `day_of_week` (enum: 0-6, 0=domingo)
+  - `start_time` (time, ej: "09:00")
+  - `end_time` (time, ej: "18:00")
+  - `is_active` (boolean)
+  - `created_at`, `updated_at`
+- [ ] Crear entidad `TarotistException` (días específicos bloqueados/abiertos):
+  - `id`, `tarotista_id` (FK)
+  - `exception_date` (date)
+  - `exception_type` (enum: 'blocked', 'custom_hours')
+  - `start_time` (time, nullable)
+  - `end_time` (time, nullable)
+  - `reason` (text, ej: "Vacaciones", "Feriado")
+  - `created_at`
+- [ ] Crear entidad `Session` (sesiones agendadas):
+  - `id`, `tarotista_id` (FK), `user_id` (FK)
+  - `session_date` (date)
+  - `session_time` (time, ej: "10:00")
+  - `duration_minutes` (integer: 30, 60, 90)
+  - `session_type` (enum: 'tarot_reading', 'energy_cleaning', 'hebrew_pendulum', 'consultation')
+  - `status` (enum: 'pending', 'confirmed', 'completed', 'cancelled_by_user', 'cancelled_by_tarotist')
+  - `price_usd` (decimal)
+  - `payment_status` (enum: 'pending', 'paid', 'refunded')
+  - `google_meet_link` (varchar, generado automáticamente)
+  - `user_email` (varchar, para enviar link)
+  - `user_notes` (text, comentarios del usuario)
+  - `tarotist_notes` (text, notas privadas del tarotista)
+  - `cancelled_at`, `cancellation_reason` (text)
+  - `created_at`, `updated_at`, `confirmed_at`, `completed_at`
+- [ ] Migraciones con índices:
+  - Índice en `(tarotista_id, day_of_week)` para availability
+  - Índice unique en `(tarotista_id, exception_date)` para exceptions
+  - Índice en `(tarotista_id, session_date, session_time)` para sessions
+  - Índice en `(user_id, session_date)` para user sessions
+
+**2. Lógica de Disponibilidad del Tarotista (1 día):**
+
+- [ ] Crear módulo `SchedulingModule` con servicios y controladores
+- [ ] Implementar `AvailabilityService` con métodos:
+  - `setWeeklyAvailability(tarotistaId, dayOfWeek, startTime, endTime)`:
+    - Validar que startTime < endTime
+    - Validar formato HH:MM
+    - No permitir solapamiento de horarios en mismo día
+    - Guardar en `tarotist_availability`
+  - `getWeeklyAvailability(tarotistaId)`:
+    - Retornar horarios por día de semana (array de 7 elementos)
+  - `addException(tarotistaId, date, type, times?)`:
+    - Bloquear día completo o definir horarios custom
+    - Validar que fecha sea futura
+  - `removeException(tarotistaId, exceptionId)`:
+    - Eliminar excepción específica
+  - `getAvailableSlots(tarotistaId, startDate, endDate)`:
+    - Algoritmo complejo: Generar slots disponibles considerando:
+      - Disponibilidad semanal general
+      - Excepciones (días bloqueados/custom)
+      - Sesiones ya reservadas
+      - Duración de sesión solicitada (30/60/90 min)
+    - Retornar array de objetos: `{ date, time, duration, available: true }`
+    - Excluir slots en el pasado
+    - Excluir slots con <2 horas de anticipación
+- [ ] Crear `SessionService` con métodos:
+  - `bookSession(userId, tarotistaId, date, time, duration, type)`:
+    - Verificar disponibilidad del slot
+    - Verificar que no esté ya reservado (lock optimista)
+    - Calcular precio según tarotista y duración
+    - Generar link de Google Meet único
+    - Guardar sesión con status 'pending'
+    - Enviar emails a usuario y tarotista
+    - Retornar sesión creada con link de Meet
+  - `getUserSessions(userId, status?)`:
+    - Retornar sesiones del usuario (paginado)
+    - Filtrar por status si se proporciona
+  - `getTarotistSessions(tarotistaId, date?)`:
+    - Retornar sesiones del tarotista
+    - Agrupar por fecha si no se especifica
+  - `confirmSession(sessionId, tarotistaId)`:
+    - Cambiar status a 'confirmed'
+    - Enviar email de confirmación
+  - `cancelSession(sessionId, userId, reason)`:
+    - Validar que sea >24h antes (sino cobrar penalidad o no permitir)
+    - Cambiar status a 'cancelled_by_user'
+    - Liberar slot
+    - Enviar email de cancelación
+  - `completeSession(sessionId, tarotistaId, notes?)`:
+    - Cambiar status a 'completed'
+    - Guardar notas del tarotista si existen
+  - `generateGoogleMeetLink()`:
+    - Por ahora: generar URL única con UUID
+    - Futuro: integrar con Google Calendar API para crear evento + Meet
+
+**3. Endpoints para Tarotista (1 día):**
+
+- [ ] Crear `TarotistSchedulingController` (requiere rol tarotist o admin):
+  - **GET /tarotist/availability/weekly:**
+    - Retornar disponibilidad semanal actual
+  - **POST /tarotist/availability/weekly:**
+    - Body: `{ dayOfWeek: 1, startTime: "09:00", endTime: "18:00" }`
+    - Establecer horarios para día específico
+  - **DELETE /tarotist/availability/weekly/:id:**
+    - Eliminar disponibilidad de día específico
+  - **POST /tarotist/availability/exceptions:**
+    - Body: `{ date: "2025-12-25", type: "blocked", reason: "Navidad" }`
+    - Agregar día bloqueado o con horarios custom
+  - **GET /tarotist/availability/exceptions:**
+    - Listar excepciones futuras
+  - **DELETE /tarotist/availability/exceptions/:id:**
+    - Eliminar excepción
+  - **GET /tarotist/sessions:**
+    - Query params: status, startDate, endDate
+    - Retornar sesiones del tarotista (paginado)
+  - **POST /tarotist/sessions/:id/confirm:**
+    - Confirmar sesión pendiente
+  - **POST /tarotist/sessions/:id/complete:**
+    - Body: `{ notes: "..." }` (opcional)
+    - Marcar sesión como completada
+  - **POST /tarotist/sessions/:id/cancel:**
+    - Body: `{ reason: "..." }`
+    - Cancelar sesión por parte del tarotista
+- [ ] Documentar todos los endpoints con Swagger
+- [ ] Aplicar guards: `@Roles('tarotist', 'admin')`
+
+**4. Endpoints para Usuario (1 día):**
+
+- [ ] Crear `UserSchedulingController` (requiere auth):
+  - **GET /scheduling/available-slots:**
+    - Query params: tarotistaId, startDate, endDate, duration (30/60/90)
+    - Retornar slots disponibles en rango de fechas
+    - Formato: `[{ date: "2025-11-10", time: "10:00", duration: 60, available: true }]`
+  - **POST /scheduling/book:**
+    - Body: `{ tarotistaId, date, time, duration, sessionType, notes }`
+    - Validar disponibilidad
+    - Crear sesión
+    - Enviar emails
+    - Retornar sesión con link de Google Meet
+  - **GET /scheduling/my-sessions:**
+    - Query params: status, upcoming (boolean)
+    - Retornar sesiones del usuario
+  - **GET /scheduling/my-sessions/:id:**
+    - Detalle de sesión específica
+  - **POST /scheduling/my-sessions/:id/cancel:**
+    - Body: `{ reason: "..." }`
+    - Validar política de cancelación (>24h)
+    - Cancelar sesión
+    - Enviar email de cancelación
+- [ ] Crear DTOs con validaciones estrictas:
+  - `BookSessionDto`: validar fecha futura, tiempo válido, duración enum
+  - `AvailabilityQueryDto`: validar rango de fechas, duración
+- [ ] Documentar con Swagger
+
+**5. Sistema de Emails (0.5 días):**
+
+- [ ] Crear templates Handlebars:
+
+  - `session-booked-user.hbs`:
+    - Confirmación de reserva para usuario
+    - Fecha, hora, duración, tipo de sesión
+    - Link de Google Meet (destacado)
+    - Botón "Agregar a Calendario" (iCalendar format)
+    - Política de cancelación (>24h)
+    - Link para cancelar si necesario
+  - `session-booked-tarotist.hbs`:
+    - Notificación de nueva reserva para tarotista
+    - Datos del usuario: nombre, email
+    - Fecha, hora, duración
+    - Notas del usuario si existen
+    - Link de Google Meet
+    - Botón para confirmar sesión
+  - `session-confirmed.hbs`:
+    - Email al usuario cuando tarotista confirma
+    - Recordatorio de fecha/hora
+    - Link de Meet
+  - `session-cancelled.hbs`:
+    - Notificación de cancelación
+    - Razón si se proporcionó
+    - Políticas de reembolso si aplica
+  - `session-reminder-24h.hbs`:
+    - Recordatorio 24h antes (implementar con cron job en futuro)
+
+- [ ] Integrar con `EmailService` existente (TASK-016)
+
+**6. Validaciones y Reglas de Negocio (0.5 días):**
+
+- [ ] Implementar validaciones críticas:
+  - No permitir reservar en el pasado
+  - No permitir reservar con <2h de anticipación
+  - No permitir solapamiento de sesiones del mismo tarotista
+  - Usuario no puede tener >1 sesión pending con mismo tarotista
+  - Cancelación >24h: reembolso completo (si ya pagó)
+  - Cancelación <24h: no reembolso (o penalidad 50%)
+  - Tarotista puede cancelar siempre (con notificación inmediata)
+- [ ] Implementar locks optimistas para prevenir double-booking:
+  - Usar transacciones de DB
+  - Verificar disponibilidad dentro de transacción
+  - Rollback si slot ya fue tomado
+- [ ] Agregar campo `version` para optimistic locking si es necesario
+
+**7. Integración con Pagos (preparación, no MVP):**
+
+- [ ] Documentar flujo futuro de pagos:
+  - Usuario reserva → genera intención de pago (Stripe/MercadoPago)
+  - Usuario paga → sesión confirmada automáticamente
+  - Si no paga en X horas → sesión cancelada, slot liberado
+- [ ] Por ahora: sesiones en status 'pending' hasta confirmación manual
+
+**8. Generación de Links de Google Meet (0.5 días):**
+
+- [ ] Implementar generador temporal de links:
+  ```typescript
+  generateGoogleMeetLink(): string {
+    const uuid = crypto.randomUUID();
+    return `https://meet.google.com/${uuid.substring(0, 10)}`;
+  }
+  ```
+- [ ] Documentar integración futura con Google Calendar API:
+  - Crear evento en calendario del tarotista
+  - Generar link real de Google Meet
+  - Enviar invitaciones de calendario a ambos
+  - Sincronizar cancelaciones
+
+**9. Dashboard y Analytics (preparación):**
+
+- [ ] Preparar endpoints de métricas para tarotista:
+  - Total de sesiones este mes
+  - Ingresos proyectados
+  - Tasa de cancelación
+  - Horas más reservadas
+  - Tasa de ocupación (slots usados vs disponibles)
+
+#### 🎯 Criterios de aceptación
+
+- ✓ Tarotista puede definir horarios semanales recurrentes
+- ✓ Tarotista puede bloquear días específicos (vacaciones, feriados)
+- ✓ Sistema genera slots disponibles considerando disponibilidad + excepciones + sesiones existentes
+- ✓ Usuario puede ver slots disponibles en calendario visual
+- ✓ Usuario puede reservar sesión en slot disponible
+- ✓ No es posible double-booking (2 reservas en mismo slot)
+- ✓ Ambas partes reciben email con link de Google Meet
+- ✓ Usuario puede cancelar con >24h de anticipación
+- ✓ Tarotista puede confirmar, completar o cancelar sesiones
+- ✓ Sistema previene solapamiento de horarios
+- ✓ Sesiones tienen estados correctos (pending → confirmed → completed)
+- ✓ Endpoints están documentados con Swagger
+- ✓ Tests E2E validan flujo completo de reserva
+
+#### 📝 Notas de implementación
+
+**Algoritmo de Generación de Slots:**
+
+```typescript
+// Pseudocódigo
+function getAvailableSlots(tarotistaId, startDate, endDate, duration) {
+  slots = []
+
+  for each day in range(startDate, endDate):
+    // 1. Obtener disponibilidad general del día de semana
+    availability = getWeeklyAvailability(day.dayOfWeek)
+
+    // 2. Verificar si hay excepción para esta fecha específica
+    exception = getException(tarotistaId, day)
+    if exception.type == 'blocked': continue  // Día bloqueado
+    if exception.type == 'custom_hours': availability = exception.hours
+
+    // 3. Generar slots cada 30 minutos dentro del rango
+    for time in range(availability.start, availability.end, step=30min):
+      slot = { date: day, time, duration }
+
+      // 4. Verificar si slot está ocupado
+      if !isSlotOccupied(tarotistaId, slot):
+        slots.push(slot)
+
+  return slots
+}
+```
+
+**Políticas de Cancelación:**
+
+- Usuario: >24h = reembolso completo, <24h = sin reembolso
+- Tarotista: puede cancelar siempre, debe notificar inmediatamente
+
+**Consideraciones de Zona Horaria:**
+
+- Por ahora: trabajar con zona horaria local del tarotista
+- Futuro: almacenar timezone del tarotista y convertir para usuarios
+
+**Hooks para Marketplace Multi-tarotista:**
+
+- Todos los endpoints ya reciben `tarotistaId`
+- Frontend puede listar tarotistas y mostrar disponibilidad de cada uno
+- Usuario puede comparar disponibilidad de varios tarotistas
+- Sistema ya preparado para múltiples calendarios independientes
+
+**Integraciones Futuras:**
+
+- Google Calendar API (crear eventos reales)
+- Stripe/MercadoPago (pagos online)
+- Zoom API (alternativa a Google Meet)
+- SMS (recordatorios por WhatsApp)
+- iCalendar export (agregar a calendario del usuario)
+
+---
+
+### **TASK-064: Crear Schema de Base de Datos para Multi-Tarotista** ⭐⭐⭐ CRÍTICA MVP
+
+**Prioridad:** 🔴 CRÍTICA  
+**Estimación:** 3 días  
+**Dependencias:** TASK-002 (Migraciones), TASK-011 (Sistema de Planes)  
+**Estado:** 🔵 PENDIENTE  
+**Marcador MVP:** ⭐⭐⭐ **CRÍTICO PARA MARKETPLACE** - Schema base fundamental  
+**Tags:** mvp, marketplace, database-schema, multi-tarotist
+
+#### 📋 Descripción
+
+Crear todas las tablas y relaciones necesarias para soportar múltiples tarotistas según el diseño del documento de análisis "INFORME_TRASPASO_A_MARKETPLACE.md" (Sección 6: Cambios Fundamentales). Esta tarea implementa la arquitectura de base de datos que permite escalar de single-tarotista a marketplace sin romper funcionalidad existente.
+
+**Contexto del Informe:** Esta tarea implementa las recomendaciones de la Sección 6.1 "Cambios Estructurales en Base de Datos" del informe, preparando el sistema para múltiples tarotistas mientras mantiene backward compatibility total.
+
+#### 🧪 Testing
+
+**Tests necesarios:**
+
+- [ ] **Tests unitarios:**
+  - Entidad `Tarotista` con todas sus relaciones
+  - Entidad `TarotistaConfig` con validaciones de campos
+  - Entidad `TarotistaCardMeaning` con constraint unique
+  - Entidad `UserTarotistaSubscription` con validaciones de negocio
+  - Entidad `TarotistaRevenueMetrics` con cálculos correctos
+- [ ] **Tests de integración:**
+  - Migración crea todas las tablas correctamente
+  - Relaciones FK funcionan (cascades, set null)
+  - Índices compuestos previenen duplicados
+  - Triggers de actualización funcionan
+- [ ] **Tests E2E:**
+  - Crear tarotista → 201 + perfil completo
+  - Establecer tarotista favorito (free) → 200
+  - Suscripción premium individual → 201
+  - Suscripción all-access → 201
+  - Verificar unique constraints (1 favorito free, 1 suscripción activa)
+
+**Ubicación:** `src/modules/tarotistas/*.spec.ts` + `test/tarotistas-schema.e2e-spec.ts`
+
+#### ✅ Tareas específicas
+
+**1. Crear Entidad Tarotista (0.5 días):**
+
+- [ ] Crear archivo `src/modules/tarotistas/entities/tarotista.entity.ts`
+- [ ] Campos según análisis:
+  - `id`, `userId` (FK unique a User), `nombrePublico`, `bio`, `fotoPerfil`
+  - `especialidades` (array), `idiomas` (array), `añosExperiencia`
+  - `ofreceSesionesVirtuales`, `precioSesionUsd`, `duracionSesionMinutos`
+  - `isActive`, `isAcceptingNewClients`, `isFeatured`
+  - `comisionPorcentaje` (default 30.00)
+  - `totalLecturas`, `ratingPromedio`, `totalReviews`
+  - `createdAt`, `updatedAt`
+- [ ] Relaciones:
+  - `@OneToOne(() => User)` con `@JoinColumn()`
+  - `@OneToMany(() => TarotistaConfig)`
+  - `@OneToMany(() => TarotistaCardMeaning)`
+  - `@OneToMany(() => UserTarotistaSubscription)`
+  - `@OneToMany(() => TarotReading)`
+- [ ] Constraints:
+  - `CHECK (comisionPorcentaje BETWEEN 0 AND 100)`
+  - `CHECK (ratingPromedio BETWEEN 0 AND 5)`
+- [ ] Índices:
+  - `idx_tarotista_active`
+  - `idx_tarotista_featured`
+  - GIN index en `especialidades`
+  - Index en `ratingPromedio DESC`
+
+**2. Crear Entidad TarotistaConfig (0.5 días):**
+
+- [ ] Crear archivo `src/modules/tarotistas/entities/tarotista-config.entity.ts`
+- [ ] Campos:
+  - `id`, `tarotistaId` (FK), `systemPrompt` (text)
+  - `styleConfig` (jsonb con estructura predefinida)
+  - `temperature`, `maxTokens`, `topP`
+  - `customKeywords` (jsonb array), `additionalInstructions`
+  - `version`, `isActive`
+  - `createdAt`, `updatedAt`
+- [ ] Relación `@ManyToOne(() => Tarotista)`
+- [ ] Constraint: solo 1 config activa por tarotista
+  ```sql
+  CREATE UNIQUE INDEX idx_tarotista_config_active_unique
+    ON tarotista_config(tarotista_id)
+    WHERE is_active = true;
+  ```
+- [ ] Validaciones:
+  - `temperature BETWEEN 0 AND 2`
+  - `topP BETWEEN 0 AND 1`
+
+**3. Crear Entidad TarotistaCardMeaning (0.5 días):**
+
+- [ ] Crear archivo `src/modules/tarotistas/entities/tarotista-card-meaning.entity.ts`
+- [ ] Campos:
+  - `id`, `tarotistaId` (FK), `cardId` (FK)
+  - `customMeaningUpright`, `customMeaningReversed`
+  - `customKeywords`, `customDescription`, `privateNotes`
+  - `createdAt`, `updatedAt`
+- [ ] Relaciones:
+  - `@ManyToOne(() => Tarotista)`
+  - `@ManyToOne(() => TarotCard)`
+- [ ] Constraint unique: `(tarotistaId, cardId)`
+
+**4. Crear Entidad UserTarotistaSubscription (0.5 días):**
+
+- [ ] Crear enums:
+
+  ```typescript
+  export enum SubscriptionType {
+    FAVORITE = 'favorite', // FREE: 1 tarotista favorito
+    PREMIUM_INDIVIDUAL = 'premium_individual', // PREMIUM: 1 específico
+    PREMIUM_ALL_ACCESS = 'premium_all_access', // PREMIUM: todos
+  }
+
+  export enum SubscriptionStatus {
+    ACTIVE = 'active',
+    CANCELLED = 'cancelled',
+    EXPIRED = 'expired',
+  }
+  ```
+
+- [ ] Crear archivo `src/modules/tarotistas/entities/user-tarotista-subscription.entity.ts`
+- [ ] Campos:
+  - `id`, `userId` (FK), `tarotistaId` (FK nullable)
+  - `subscriptionType`, `status`
+  - `startedAt`, `expiresAt`, `cancelledAt`
+  - `canChangeAt` (para FREE), `changeCount`
+  - `stripeSubscriptionId`
+  - `createdAt`, `updatedAt`
+- [ ] Relaciones con User y Tarotista
+- [ ] Constraints críticos (validaciones de negocio):
+
+  ```sql
+  -- FREE: solo 1 favorito activo
+  CREATE UNIQUE INDEX idx_user_single_favorite
+    ON user_tarotista_subscription(user_id)
+    WHERE subscription_type = 'favorite' AND status = 'active';
+
+  -- PREMIUM individual: solo 1 activo
+  CREATE UNIQUE INDEX idx_user_single_premium_individual
+    ON user_tarotista_subscription(user_id)
+    WHERE subscription_type = 'premium_individual' AND status = 'active';
+
+  -- PREMIUM all-access: solo 1 activo
+  CREATE UNIQUE INDEX idx_user_single_premium_all_access
+    ON user_tarotista_subscription(user_id)
+    WHERE subscription_type = 'premium_all_access' AND status = 'active';
+  ```
+
+**5. Crear Entidad TarotistaRevenueMetrics (0.5 días):**
+
+- [ ] Crear archivo `src/modules/tarotistas/entities/tarotista-revenue-metrics.entity.ts`
+- [ ] Campos:
+  - `id`, `tarotistaId` (FK), `userId` (FK), `readingId` (FK nullable)
+  - `subscriptionType`, `revenueShareUsd`, `platformFeeUsd`, `totalRevenueUsd`
+  - `calculationDate`, `periodStart`, `periodEnd`
+  - `metadata` (jsonb), `createdAt`
+- [ ] Relaciones con Tarotista, User, TarotReading
+- [ ] Constraint: `revenueShareUsd + platformFeeUsd = totalRevenueUsd`
+- [ ] Índices para reportes:
+  - `(tarotistaId, calculationDate)`
+  - `(tarotistaId, periodStart, periodEnd)`
+
+**6. Crear Entidad TarotistaReview (opcional para MVP):**
+
+- [ ] Crear archivo `src/modules/tarotistas/entities/tarotista-review.entity.ts`
+- [ ] Campos:
+  - `id`, `tarotistaId` (FK), `userId` (FK), `readingId` (FK nullable)
+  - `rating` (1-5), `comment`
+  - `isApproved`, `isHidden`, `moderationNotes`
+  - `tarotistResponse`, `tarotistResponseAt`
+  - `createdAt`, `updatedAt`
+- [ ] Constraint unique: `(userId, tarotistaId)` - 1 review por usuario
+
+**7. Modificar Entidades Existentes (0.5 días):**
+
+- [ ] User Entity:
+
+  ```typescript
+  // Agregar enum UserRole
+  export enum UserRole {
+    CONSUMER = 'consumer',
+    TAROTIST = 'tarotist',
+    ADMIN = 'admin'
+  }
+
+  // Agregar campo roles[]
+  @Column({ type: 'enum', enum: UserRole, array: true, default: [UserRole.CONSUMER] })
+  roles: UserRole[];
+  ```
+
+- [ ] TarotReading Entity:
+
+  ```typescript
+  @ManyToOne(() => Tarotista, { nullable: true })
+  @JoinColumn({ name: 'tarotista_id' })
+  tarotista: Tarotista;
+
+  @Column({ name: 'tarotista_id', nullable: true })
+  tarotistaId: number;
+  ```
+
+- [ ] UsageLimit Entity:
+  ```typescript
+  @Column({ name: 'tarotista_id', nullable: true })
+  tarotistaId: number;
+  ```
+  - Actualizar unique index: `(userId, feature, COALESCE(tarotistaId, 0), date)`
+- [ ] AIUsageLog Entity:
+  ```typescript
+  @Column({ name: 'tarotista_id', nullable: true })
+  tarotistaId: number;
+  ```
+- [ ] CachedInterpretation Entity:
+  ```typescript
+  @Column({ name: 'tarotista_id', nullable: true })
+  tarotistaId: number;
+  ```
+  - Actualizar cache key generation para incluir `tarotistaId`
+
+**8. Crear Migración Completa (0.5 días):**
+
+- [ ] Crear migración: `npm run migration:create CreateMultiTarotistSchema`
+- [ ] Incluir todas las tablas nuevas
+- [ ] Incluir modificaciones a tablas existentes
+- [ ] Incluir todos los índices y constraints
+- [ ] Incluir triggers y funciones auxiliares:
+  - `update_updated_at_column()`
+  - `calculate_tarotist_rating()`
+  - `increment_tarotist_reading_count()`
+- [ ] Tests de rollback de migración
+
+#### 🎯 Criterios de aceptación
+
+- ✓ Migración corre exitosamente sin errores
+- ✓ Todas las entidades TypeORM están correctamente mapeadas
+- ✓ Relaciones FK funcionan correctamente (cascades, set null)
+- ✓ Constraints unique previenen duplicados de negocio
+- ✓ Índices optimizan queries críticos
+- ✓ Rollback de migración funciona correctamente
+- ✓ Tests unitarios pasan (100% cobertura de entities)
+- ✓ Tests de integración validan constraints
+
+#### 📝 Notas de implementación
+
+**Estrategia de Migración Sin Downtime:**
+
+1. Crear todas las tablas nuevas (no rompe nada existente)
+2. Agregar columnas nuevas como NULLABLE (no rompe queries existentes)
+3. Migrar datos existentes a estructura nueva
+4. Actualizar código para usar nuevas tablas
+5. Hacer columnas NOT NULL cuando código esté actualizado
+
+**Orden de Creación de Tablas:**
+
+```sql
+1. tarotista (depende de: user)
+2. tarotista_config (depende de: tarotista)
+3. tarotista_card_meaning (depende de: tarotista, tarot_card)
+4. user_tarotista_subscription (depende de: user, tarotista)
+5. tarotista_revenue_metrics (depende de: tarotista, user, tarot_reading)
+6. tarotista_review (depende de: tarotista, user, tarot_reading)
+```
+
+**Rollback Plan:**
+
+- Migración `down()` debe eliminar tablas en orden inverso
+- Verificar que no hay datos antes de eliminar (prevenir pérdida)
+- Restaurar columnas eliminadas en tablas existentes
+
+---
+
+### **TASK-065: Migrar Flavia a Tabla Tarotistas y Seeders** ⭐⭐⭐ CRÍTICA MVP
+
+**Prioridad:** 🔴 CRÍTICA  
+**Estimación:** 2 días  
+**Dependencias:** TASK-064  
+**Estado:** 🔵 PENDIENTE  
+**Marcador MVP:** ⭐⭐⭐ **CRÍTICO PARA MARKETPLACE** - Migración de datos inicial  
+**Tags:** mvp, marketplace, data-migration, seeders, backward-compatibility
+
+#### 📋 Descripción
+
+Migrar la identidad "Flavia" (la tarotista actual hardcodeada) a la tabla `tarotista`, crear su configuración de IA con los prompts actuales, y actualizar todas las lecturas existentes para referenciarla. Esto permite que el sistema funcione igual que antes pero con arquitectura marketplace.
+
+**Contexto del Informe:** Esta tarea implementa las recomendaciones de la Sección 7 "Estrategia de Implementación" del informe, específicamente el "Enfoque de Migración de Datos" que mantiene backward compatibility total.
+
+#### 🧪 Testing
+
+**Tests necesarios:**
+
+- [ ] **Tests unitarios:**
+  - Seeder crea usuario Flavia con roles correctos
+  - Seeder crea perfil de tarotista con datos completos
+  - Seeder crea configuración de IA con prompts actuales
+  - Idempotencia: seeder no duplica si ya existe
+- [ ] **Tests de integración:**
+  - Migración de lecturas existentes a Flavia
+  - Verificación de FK correctas después de migración
+  - Conteo de lecturas migradas = lecturas totales
+- [ ] **Tests E2E:**
+  - Sistema arranca correctamente con Flavia migrada
+  - Nueva lectura se asigna a Flavia automáticamente
+  - Interpretaciones usan configuración de Flavia
+
+**Ubicación:** `src/database/seeds/*.spec.ts` + `test/flavia-migration.e2e-spec.ts`
+
+#### ✅ Tareas específicas
+
+**1. Crear Seeder de Usuario Flavia (0.5 días):**
+
+- [ ] Crear `src/database/seeds/data/flavia-user.data.ts`:
+  ```typescript
+  export const flaviaUserData = {
+    email: 'flavia@tarotflavia.com',
+    password: '$2b$10$...', // Hash seguro
+    name: 'Flavia',
+    roles: [UserRole.TAROTIST, UserRole.ADMIN],
+    plan: UserPlan.PREMIUM,
+    isAdmin: true, // Backward compatibility
+    planStartedAt: new Date(),
+    subscriptionStatus: SubscriptionStatus.ACTIVE,
+  };
+  ```
+- [ ] Crear `src/database/seeds/flavia-user.seeder.ts`:
+  - Verificar si usuario ya existe (by email)
+  - Si no existe, crear con datos predefinidos
+  - Loggear creación o skip si ya existe
+  - Retornar userId para uso en siguiente seeder
+
+**2. Crear Seeder de Tarotista Flavia (0.5 días):**
+
+- [ ] Crear `src/database/seeds/data/flavia-tarotista.data.ts`:
+  ```typescript
+  export const flaviaTarotistaData = {
+    nombrePublico: 'Flavia',
+    bio: 'Tarotista profesional con 20 años de experiencia en la interpretación del tarot. Especializada en lecturas de amor, trabajo y crecimiento espiritual.',
+    fotoPerfil: null, // Placeholder para futuro
+    especialidades: ['amor', 'trabajo', 'espiritual'],
+    idiomas: ['es'],
+    añosExperiencia: 20,
+    ofreceSesionesVirtuales: true,
+    precioSesionUsd: 50.0,
+    duracionSesionMinutos: 60,
+    isActive: true,
+    isAcceptingNewClients: true,
+    isFeatured: true,
+    comisionPorcentaje: 30.0,
+  };
+  ```
+- [ ] Crear `src/database/seeds/flavia-tarotista.seeder.ts`:
+  - Buscar usuario Flavia (by email)
+  - Verificar si ya tiene perfil de tarotista
+  - Si no existe, crear con datos predefinidos
+  - Retornar tarotistaId para siguiente seeder
+
+**3. Crear Seeder de Configuración de IA Flavia (0.5 días):**
+
+- [ ] Extraer prompts actuales de `src/modules/tarot/interpretations/tarot-prompts.ts`
+- [ ] Crear `src/database/seeds/data/flavia-ia-config.data.ts`:
+
+  ```typescript
+  export const flaviaIAConfigData = {
+    systemPrompt: `# ROLE
+  Eres Flavia, una tarotista profesional con 20 años de experiencia...
+  
+  [COPIAR PROMPT COMPLETO ACTUAL DE tarot-prompts.ts]`,
+
+    styleConfig: {
+      tone: 'empático y comprensivo',
+      mysticism_level: 'medio',
+      formality: 'informal-amigable',
+      language_style: 'moderno accesible',
+    },
+
+    temperature: 0.7,
+    maxTokens: 1000,
+    topP: 1.0,
+
+    customKeywords: [],
+    additionalInstructions: null,
+
+    version: 1,
+    isActive: true,
+  };
+  ```
+
+- [ ] Crear `src/database/seeds/flavia-ia-config.seeder.ts`:
+  - Buscar tarotista Flavia
+  - Verificar si ya tiene configuración activa
+  - Si no existe, crear con prompts actuales
+  - Marcar como version 1 y activa
+
+**4. Script de Migración de Lecturas Existentes (0.5 días):**
+
+- [ ] Crear `src/database/migrations/XXXX-MigrateReadingsToFlavia.ts`:
+
+  ```typescript
+  export class MigrateReadingsToFlavia1234567890 implements MigrationInterface {
+    public async up(queryRunner: QueryRunner): Promise<void> {
+      // 1. Buscar ID de Flavia en tabla tarotista
+      const [flavia] = await queryRunner.query(
+        `SELECT id FROM tarotista WHERE nombre_publico = 'Flavia' LIMIT 1`,
+      );
+
+      if (!flavia) {
+        throw new Error(
+          'Tarotista Flavia no encontrada. Ejecutar seeders primero.',
+        );
+      }
+
+      // 2. Actualizar todas las lecturas sin tarotista_id
+      const result = await queryRunner.query(
+        `UPDATE tarot_reading 
+         SET tarotista_id = $1 
+         WHERE tarotista_id IS NULL`,
+        [flavia.id],
+      );
+
+      console.log(`Migrated ${result.affectedRows} readings to Flavia`);
+
+      // 3. Actualizar contadores de Flavia
+      await queryRunner.query(
+        `UPDATE tarotista 
+         SET total_lecturas = (SELECT COUNT(*) FROM tarot_reading WHERE tarotista_id = $1)
+         WHERE id = $1`,
+        [flavia.id],
+      );
+    }
+
+    public async down(queryRunner: QueryRunner): Promise<void> {
+      // Rollback: quitar tarotistaId de todas las lecturas
+      await queryRunner.query(`UPDATE tarot_reading SET tarotista_id = NULL`);
+    }
+  }
+  ```
+
+**5. Integrar Seeders en Secuencia (0.5 días):**
+
+- [ ] Modificar `src/database/seeds/seed-data.ts`:
+
+  ```typescript
+  import { flaviaUserSeeder } from './flavia-user.seeder';
+  import { flaviaTarotistaSeeder } from './flavia-tarotista.seeder';
+  import { flaviaIAConfigSeeder } from './flavia-ia-config.seeder';
+
+  export async function seedAll() {
+    console.log('🌱 Starting database seeding...');
+
+    // 1. Seed Flavia User
+    const userId = await flaviaUserSeeder();
+    console.log(`✅ Flavia user created/found: ${userId}`);
+
+    // 2. Seed Flavia Tarotista Profile
+    const tarotistaId = await flaviaTarotistaSeeder(userId);
+    console.log(`✅ Flavia tarotista profile created: ${tarotistaId}`);
+
+    // 3. Seed Flavia IA Config
+    await flaviaIAConfigSeeder(tarotistaId);
+    console.log(`✅ Flavia IA config created`);
+
+    // 4. Continue with existing seeders...
+    await seedCategories();
+    await seedCards();
+    // etc...
+  }
+  ```
+
+**6. Actualizar Script de Reset de DB (0.25 días):**
+
+- [ ] Modificar `npm run db:reset` para ejecutar:
+  - Drop database
+  - Create database
+  - Run migrations (incluye MigrateReadingsToFlavia)
+  - Run seeders (incluye Flavia seeders)
+
+**7. Documentación de Migración (0.25 días):**
+
+- [ ] Crear `docs/FLAVIA_MIGRATION.md`:
+
+  - Explicar qué se migró y por qué
+  - Instrucciones para ejecutar migración en producción
+  - Rollback plan si algo falla
+  - Verificaciones post-migración:
+
+    ```sql
+    -- Verificar que Flavia existe
+    SELECT * FROM tarotista WHERE nombre_publico = 'Flavia';
+
+    -- Verificar que todas las lecturas tienen tarotista_id
+    SELECT COUNT(*) FROM tarot_reading WHERE tarotista_id IS NULL;
+    -- Debe retornar 0
+
+    -- Verificar configuración de IA
+    SELECT * FROM tarotista_config WHERE tarotista_id = (
+      SELECT id FROM tarotista WHERE nombre_publico = 'Flavia'
+    );
+    ```
+
+#### 🎯 Criterios de aceptación
+
+- ✓ Usuario Flavia existe con roles TAROTIST + ADMIN
+- ✓ Perfil de tarotista Flavia creado con 20 años experiencia
+- ✓ Configuración de IA de Flavia tiene prompts actuales
+- ✓ Todas las lecturas existentes referencian a Flavia
+- ✓ Campo `total_lecturas` de Flavia es correcto
+- ✓ Seeders son idempotentes (pueden ejecutarse múltiples veces)
+- ✓ Sistema funciona igual que antes (backward compatibility)
+- ✓ Tests E2E pasan sin cambios
+
+#### 📝 Notas de implementación
+
+**Orden de Ejecución:**
+
+```
+1. Ejecutar TASK-064 (crear schema)
+2. Ejecutar seeders de Flavia
+3. Ejecutar migración MigrateReadingsToFlavia
+4. Verificar con queries SQL
+5. Ejecutar tests E2E
+```
+
+**Backward Compatibility:**
+
+- Usuario Flavia tiene `isAdmin = true` (para guards existentes)
+- Flavia tiene plan PREMIUM (para funcionalidades existentes)
+- Todas las lecturas apuntan a Flavia (no hay lecturas "huérfanas")
+
+**Preparación para Marketplace:**
+
+- Sistema ya funciona con 1 tarotista (Flavia)
+- Agregar más tarotistas es solo ejecutar seeders similares
+- Frontend puede seguir asumiendo "tarotista único" inicialmente
+- Cuando se active marketplace, frontend listará tarotistas disponibles
+
+---
+
+### � TASK-065-a: Migración de Datos Históricos al Modelo Multi-Tarotista ⭐⭐
+
+**Prioridad:** 🟡 NECESARIA  
+**Estimación:** 1 día  
+**Tags:** marketplace, data-migration, database, backward-compatibility  
+**Dependencias:** TASK-065 (Migración Flavia)  
+**Estado:** 🟡 NO INICIADA  
+**Contexto:** Migración de datos existentes para compatibilidad con nuevo esquema multi-tarotista
+
+---
+
+#### **Descripción:**
+
+Migrar todos los datos históricos existentes que no tienen `tarotistaId` o que fueron creados antes de la implementación del sistema multi-tarotista para asegurar compatibilidad total con el nuevo esquema.
+
+#### **Alcance:**
+
+**1. Migración de Lecturas sin tarotistaId:**
+
+- Identificar todas las lecturas (`readings`) sin `tarotistaId`
+- Asignar automáticamente a Flavia (tarotista por defecto)
+- Script de migración con rollback
+
+**2. Migración de Cache sin Segregación:**
+
+- Revisar cache keys existentes
+- Agregar prefijo de tarotista donde aplique
+- Invalidar cache antiguo sin segregación
+
+**3. Migración de Usuarios con isAdmin:**
+
+- Identificar usuarios con `isAdmin: true`
+- Migrar a nuevo sistema de roles: `roles: ['admin']`
+- Mantener backward compatibility durante transición
+
+**4. Validación de Integridad:**
+
+- Verificar que todas las lecturas tienen `tarotistaId`
+- Verificar que todos los cache keys tienen prefijo correcto
+- Verificar que todos los roles están correctamente asignados
+
+#### **Criterios de Aceptación:**
+
+- ✅ Script de migración ejecutable con `npm run migrate:historical-data`
+- ✅ 100% de lecturas tienen `tarotistaId` válido
+- ✅ Cache segregado por tarotista correctamente
+- ✅ Usuarios admin migrados a sistema de roles
+- ✅ Tests de regresión pasan
+- ✅ Rollback disponible en caso de error
+
+#### **Notas Técnicas:**
+
+- Ejecutar en ambiente staging primero
+- Backup de BD antes de migración
+- Monitorear logs durante migración
+- Plan de contingencia si falla
+
+---
+
+### �🔴 TASK-066: Implementar Sistema de Significados Personalizados de Cartas ⭐⭐⭐
+
+**Prioridad:** 🔴 CRÍTICA  
+**Estimación:** 2.5 días  
+**Tags:** mvp, marketplace, tarot-core, personalization, database  
+**Dependencias:** TASK-064 (Multi-Tarotist Schema), TASK-065 (Migración Flavia)  
+**Estado:** 🟡 NO INICIADA  
+**Contexto Informe:** Sección 6.1 - Preparar Personalización de Cartas
+
+---
+
+#### 📋 Descripción
+
+Implementar el sistema completo de significados personalizados de cartas que permite a cada tarotista:
+
+1. **Definir sus propios significados** para cualquier carta (upright y reversed)
+2. **Heredar significados base** cuando no tienen personalización
+3. **Gestionar keywords personalizados** que influyen en las interpretaciones de IA
+4. **Actualizar significados** sin afectar a otros tarotistas
+
+El informe especifica:
+
+> "Permitir que cada tarotista pueda sobreescribir el significado de cualquier carta del tarot. Si un tarotista no ha personalizado una carta, se usará el significado base del sistema."
+
+Este sistema es **crítico para el marketplace** porque permite que cada tarotista aporte su interpretación única de las cartas, diferenciándose de otros y creando valor para los usuarios que eligen un tarotista específico.
+
+**Patrón de Herencia Implementado:**
+
+```
+Usuario solicita lectura con Tarotista X
+  ↓
+Sistema busca significados de cartas
+  ↓
+¿Tarotista X tiene significado personalizado para Carta Y?
+  → SÍ: Usar significado personalizado
+  → NO: Usar significado base de la carta
+```
+
+---
+
+#### 🧪 Testing
+
+**Unit Tests:**
+
+- [ ] Mock de repositorios (`TarotistaCardMeaning`, `TarotCard`)
+- [ ] Test `getCardMeaning()` retorna personalizado cuando existe
+- [ ] Test `getCardMeaning()` retorna base cuando no hay personalizado
+- [ ] Test diferentes orientaciones (upright/reversed)
+- [ ] Test `setCustomMeaning()` crea o actualiza correctamente
+- [ ] Test `deleteCustomMeaning()` elimina solo del tarotista correcto
+- [ ] Test `getAllCustomMeanings()` retorna solo del tarotista
+
+**Integration Tests:**
+
+- [ ] Test con BD: crear tarotista + personalizar 5 cartas + consultar
+- [ ] Test patrón herencia: consultar 10 cartas (5 personalizadas, 5 base)
+- [ ] Test actualización: modificar significado personalizado y re-consultar
+- [ ] Test eliminación: borrar personalizado y validar fallback a base
+- [ ] Test bulk operations: personalizar 78 cartas de golpe
+
+**E2E Tests (no requeridos para este task):**
+
+- Tests E2E se cubrirán en TASK-074 (Actualizar Tests E2E Multi-Tarotista)
+
+---
+
+#### ✅ Tareas específicas
+
+**1. Crear servicio `CardMeaningService` (1 día):**
+
+- [ ] Crear archivo `src/modules/tarot-core/services/card-meaning.service.ts`
+- [ ] Inyectar repositorios necesarios:
+  ```typescript
+  @Injectable()
+  export class CardMeaningService {
+    constructor(
+      @InjectRepository(TarotCard)
+      private tarotCardRepo: Repository<TarotCard>,
+      @InjectRepository(TarotistaCardMeaning)
+      private tarotistaCardMeaningRepo: Repository<TarotistaCardMeaning>,
+    ) {}
+  }
+  ```
+- [ ] Implementar caché en memoria para significados:
+
+  ```typescript
+  private meaningCache = new Map<string, CardMeaningResult>();
+  private CACHE_TTL = 15 * 60 * 1000; // 15 minutos
+
+  private getCacheKey(tarotistaId: number, cardId: number, isReversed: boolean): string {
+    return `${tarotistaId}:${cardId}:${isReversed}`;
+  }
+  ```
+
+**2. Implementar método `getCardMeaning()` con patrón de herencia (0.5 días):**
+
+- [ ] Buscar significado personalizado primero, luego fallback a base:
+
+  ```typescript
+  async getCardMeaning(
+    tarotistaId: number,
+    cardId: number,
+    isReversed: boolean,
+  ): Promise<CardMeaningResult> {
+    // Check cache
+    const cacheKey = this.getCacheKey(tarotistaId, cardId, isReversed);
+    const cached = this.meaningCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
+      return cached;
+    }
+
+    // 1. Buscar significado personalizado del tarotista
+    const customMeaning = await this.tarotistaCardMeaningRepo.findOne({
+      where: { tarotistaId, cardId, isReversed },
+    });
+
+    if (customMeaning) {
+      const result: CardMeaningResult = {
+        meaning: customMeaning.meaning,
+        keywords: customMeaning.keywords || [],
+        isCustom: true,
+        tarotistaId,
+        cardId,
+        isReversed,
+        timestamp: Date.now(),
+      };
+      this.meaningCache.set(cacheKey, result);
+      return result;
+    }
+
+    // 2. Fallback a significado base
+    const card = await this.tarotCardRepo.findOne({ where: { id: cardId } });
+    if (!card) {
+      throw new NotFoundException(`Card with ID ${cardId} not found`);
+    }
+
+    const result: CardMeaningResult = {
+      meaning: isReversed ? card.meaningReversed : card.meaningUpright,
+      keywords: isReversed ? card.keywordsReversed : card.keywordsUpright,
+      isCustom: false,
+      tarotistaId,
+      cardId,
+      isReversed,
+      timestamp: Date.now(),
+    };
+    this.meaningCache.set(cacheKey, result);
+    return result;
+  }
+  ```
+
+- [ ] Definir interface `CardMeaningResult`:
+  ```typescript
+  export interface CardMeaningResult {
+    meaning: string;
+    keywords: string[];
+    isCustom: boolean;
+    tarotistaId: number;
+    cardId: number;
+    isReversed: boolean;
+    timestamp: number;
+  }
+  ```
+
+**3. Implementar método `getBulkCardMeanings()` para optimizar lecturas (0.5 días):**
+
+- [ ] Cargar múltiples significados en una sola query:
+
+  ```typescript
+  async getBulkCardMeanings(
+    tarotistaId: number,
+    cards: Array<{ cardId: number; isReversed: boolean }>,
+  ): Promise<CardMeaningResult[]> {
+    const results: CardMeaningResult[] = [];
+
+    // Extract cardIds
+    const cardIds = cards.map(c => c.cardId);
+
+    // Load all custom meanings for this tarotista and these cards
+    const customMeanings = await this.tarotistaCardMeaningRepo.find({
+      where: { tarotistaId, cardId: In(cardIds) },
+    });
+
+    // Load all base cards
+    const baseCards = await this.tarotCardRepo.find({
+      where: { id: In(cardIds) },
+    });
+
+    // Build results with inheritance pattern
+    for (const { cardId, isReversed } of cards) {
+      const custom = customMeanings.find(
+        cm => cm.cardId === cardId && cm.isReversed === isReversed,
+      );
+
+      if (custom) {
+        results.push({
+          meaning: custom.meaning,
+          keywords: custom.keywords || [],
+          isCustom: true,
+          tarotistaId,
+          cardId,
+          isReversed,
+          timestamp: Date.now(),
+        });
+      } else {
+        const baseCard = baseCards.find(bc => bc.id === cardId);
+        if (!baseCard) {
+          throw new NotFoundException(`Card ${cardId} not found`);
+        }
+        results.push({
+          meaning: isReversed ? baseCard.meaningReversed : baseCard.meaningUpright,
+          keywords: isReversed ? baseCard.keywordsReversed : baseCard.keywordsUpright,
+          isCustom: false,
+          tarotistaId,
+          cardId,
+          isReversed,
+          timestamp: Date.now(),
+        });
+      }
+    }
+
+    return results;
+  }
+  ```
+
+**4. Implementar métodos de gestión de significados personalizados (0.5 días):**
+
+- [ ] Crear/actualizar significado personalizado:
+
+  ```typescript
+  async setCustomMeaning(
+    tarotistaId: number,
+    cardId: number,
+    isReversed: boolean,
+    meaning: string,
+    keywords?: string[],
+  ): Promise<TarotistaCardMeaning> {
+    // Verificar que la carta existe
+    const card = await this.tarotCardRepo.findOne({ where: { id: cardId } });
+    if (!card) {
+      throw new NotFoundException(`Card ${cardId} not found`);
+    }
+
+    // Buscar si ya existe
+    let customMeaning = await this.tarotistaCardMeaningRepo.findOne({
+      where: { tarotistaId, cardId, isReversed },
+    });
+
+    if (customMeaning) {
+      // Update existing
+      customMeaning.meaning = meaning;
+      customMeaning.keywords = keywords || [];
+      customMeaning.updatedAt = new Date();
+    } else {
+      // Create new
+      customMeaning = this.tarotistaCardMeaningRepo.create({
+        tarotistaId,
+        cardId,
+        isReversed,
+        meaning,
+        keywords: keywords || [],
+      });
+    }
+
+    const saved = await this.tarotistaCardMeaningRepo.save(customMeaning);
+
+    // Invalidate cache
+    this.clearCache(tarotistaId, cardId, isReversed);
+
+    return saved;
+  }
+  ```
+
+- [ ] Eliminar significado personalizado:
+
+  ```typescript
+  async deleteCustomMeaning(
+    tarotistaId: number,
+    cardId: number,
+    isReversed: boolean,
+  ): Promise<void> {
+    const result = await this.tarotistaCardMeaningRepo.delete({
+      tarotistaId,
+      cardId,
+      isReversed,
+    });
+
+    if (result.affected === 0) {
+      throw new NotFoundException('Custom meaning not found');
+    }
+
+    // Invalidate cache
+    this.clearCache(tarotistaId, cardId, isReversed);
+  }
+  ```
+
+- [ ] Listar todos los significados personalizados de un tarotista:
+  ```typescript
+  async getAllCustomMeanings(tarotistaId: number): Promise<TarotistaCardMeaning[]> {
+    return this.tarotistaCardMeaningRepo.find({
+      where: { tarotistaId },
+      relations: ['card'],
+      order: { cardId: 'ASC', isReversed: 'ASC' },
+    });
+  }
+  ```
+
+**5. Implementar métodos de caché (10 min):**
+
+- [ ] Invalidar caché selectivo:
+  ```typescript
+  clearCache(tarotistaId?: number, cardId?: number, isReversed?: boolean): void {
+    if (tarotistaId && cardId !== undefined && isReversed !== undefined) {
+      // Clear specific entry
+      const key = this.getCacheKey(tarotistaId, cardId, isReversed);
+      this.meaningCache.delete(key);
+    } else if (tarotistaId) {
+      // Clear all entries for this tarotista
+      for (const key of this.meaningCache.keys()) {
+        if (key.startsWith(`${tarotistaId}:`)) {
+          this.meaningCache.delete(key);
+        }
+      }
+    } else {
+      // Clear all cache
+      this.meaningCache.clear();
+    }
+  }
+  ```
+
+**6. Actualizar `PromptBuilderService` para usar `CardMeaningService` (0.5 días):**
+
+- [ ] Inyectar `CardMeaningService` en `PromptBuilderService`
+- [ ] Reemplazar método `getCardMeaning()` para delegar al nuevo servicio:
+
+  ```typescript
+  // En PromptBuilderService
+  constructor(
+    // ... otros repos
+    private cardMeaningService: CardMeaningService,
+  ) {}
+
+  async getCardMeaning(
+    tarotistaId: number,
+    cardId: number,
+    isReversed: boolean,
+  ): Promise<CardMeaningResult> {
+    return this.cardMeaningService.getCardMeaning(tarotistaId, cardId, isReversed);
+  }
+  ```
+
+**7. Exportar servicio y crear tests (0.5 días):**
+
+- [ ] Agregar `CardMeaningService` a providers de `tarot-core.module.ts`
+- [ ] Exportar el servicio
+- [ ] Crear archivo `card-meaning.service.spec.ts` con tests completos
+- [ ] Test suite con 20+ tests cubriendo todos los métodos y edge cases
+
+---
+
+#### 🎯 Criterios de Aceptación
+
+- ✅ Servicio `CardMeaningService` creado e inyectable
+- ✅ Método `getCardMeaning()` implementa patrón de herencia correctamente
+- ✅ Fallback automático a significado base cuando no hay personalización
+- ✅ Método `getBulkCardMeanings()` optimiza carga de múltiples cartas
+- ✅ CRUD completo: crear, actualizar, eliminar, listar significados personalizados
+- ✅ Caché en memoria con TTL de 15 minutos e invalidación selectiva
+- ✅ Validación: solo se pueden personalizar cartas que existen en BD
+- ✅ Aislamiento: eliminar personalización de Tarotista A no afecta a Tarotista B
+- ✅ `PromptBuilderService` actualizado para usar el nuevo servicio
+- ✅ Tests unitarios con 90%+ coverage
+- ✅ Tests de integración validan patrón de herencia con BD real
+
+---
+
+#### 📝 Notas de Implementación
+
+**Estructura de Archivos:**
+
+```
+src/modules/tarot-core/
+  services/
+    card-meaning.service.ts        ← Nuevo
+    card-meaning.service.spec.ts   ← Nuevo
+    prompt-builder.service.ts      ← Actualizar
+  entities/
+    tarot-card.entity.ts           ← Ya existe
+    tarotista-card-meaning.entity.ts ← De TASK-064
+```
+
+**Interface CardMeaningResult:**
+
+```typescript
+export interface CardMeaningResult {
+  meaning: string; // Significado completo de la carta
+  keywords: string[]; // Keywords para IA (3-5 palabras clave)
+  isCustom: boolean; // true = personalizado, false = base
+  tarotistaId: number; // ID del tarotista
+  cardId: number; // ID de la carta
+  isReversed: boolean; // Orientación
+  timestamp: number; // Para control de caché
+}
+```
+
+**Patrón de Uso desde InterpretationsService:**
+
+```typescript
+// En InterpretationsService.generateInterpretation()
+const tarotistaId = await this.resolveTarotistaForUser(userId);
+
+// Obtener significados de todas las cartas del spread
+const cardMeanings = await this.cardMeaningService.getBulkCardMeanings(
+  tarotistaId,
+  selectedCards.map((sc) => ({
+    cardId: sc.card.id,
+    isReversed: sc.isReversed,
+  })),
+);
+
+// Ahora cardMeanings contiene los significados correctos (personalizados o base)
+// Pasar a PromptBuilder para construir el prompt
+```
+
+**Ejemplo de Personalización:**
+
+```typescript
+// Admin o Tarotista personaliza "The Fool" en posición derecha
+await cardMeaningService.setCustomMeaning(
+  tarotistaId: 2, // ID del tarotista
+  cardId: 1,      // The Fool
+  isReversed: false,
+  meaning: "El Loco representa el inicio de un viaje espiritual único. Para mí, esta carta simboliza la valentía de confiar en el universo cuando no hay un camino claro. Es la fe en su forma más pura.",
+  keywords: ['inicio', 'fe', 'confianza', 'aventura', 'potencial infinito'],
+);
+
+// Luego, cuando un usuario pide lectura con este tarotista:
+const meaning = await cardMeaningService.getCardMeaning(2, 1, false);
+// → Retorna el significado personalizado del tarotista
+// → meaning.isCustom === true
+
+// Si otro tarotista no personalizó The Fool:
+const meaning2 = await cardMeaningService.getCardMeaning(3, 1, false);
+// → Retorna el significado base de la carta
+// → meaning2.isCustom === false
+```
+
+**Optimización de Performance:**
+
+```typescript
+// ❌ MAL: 10 queries individuales
+for (const card of selectedCards) {
+  const meaning = await cardMeaningService.getCardMeaning(
+    tarotistaId,
+    card.id,
+    card.isReversed,
+  );
+}
+
+// ✅ BIEN: 2 queries (customs + bases) con patrón herencia
+const meanings = await cardMeaningService.getBulkCardMeanings(
+  tarotistaId,
+  selectedCards.map((c) => ({ cardId: c.id, isReversed: c.isReversed })),
+);
+```
+
+**Testing Strategy:**
+
+```typescript
+describe('CardMeaningService', () => {
+  describe('getCardMeaning - Inheritance Pattern', () => {
+    it('should return custom meaning when exists', async () => {
+      // Setup: create custom meaning for tarotist 2, card 1
+      await service.setCustomMeaning(2, 1, false, 'Custom meaning', ['custom']);
+
+      const result = await service.getCardMeaning(2, 1, false);
+
+      expect(result.isCustom).toBe(true);
+      expect(result.meaning).toBe('Custom meaning');
+    });
+
+    it('should return base meaning when no custom exists', async () => {
+      // No custom meaning for tarotist 3, card 1
+      const result = await service.getCardMeaning(3, 1, false);
+
+      expect(result.isCustom).toBe(false);
+      expect(result.meaning).toBe(baseCard.meaningUpright);
+    });
+
+    it('should isolate meanings between tarotists', async () => {
+      // Tarotist 2 personalizes, tarotist 3 doesn't
+      await service.setCustomMeaning(2, 1, false, 'Custom A', []);
+
+      const result2 = await service.getCardMeaning(2, 1, false);
+      const result3 = await service.getCardMeaning(3, 1, false);
+
+      expect(result2.isCustom).toBe(true);
+      expect(result3.isCustom).toBe(false);
+      expect(result2.meaning).not.toBe(result3.meaning);
+    });
+  });
+
+  describe('getBulkCardMeanings', () => {
+    it('should load mix of custom and base meanings efficiently', async () => {
+      // Personalize cards 1, 2, 3 for tarotist 2
+      await service.setCustomMeaning(2, 1, false, 'Custom 1', []);
+      await service.setCustomMeaning(2, 2, false, 'Custom 2', []);
+      await service.setCustomMeaning(2, 3, false, 'Custom 3', []);
+
+      // Request meanings for cards 1-10 (3 custom, 7 base)
+      const cards = Array.from({ length: 10 }, (_, i) => ({
+        cardId: i + 1,
+        isReversed: false,
+      }));
+
+      const results = await service.getBulkCardMeanings(2, cards);
+
+      expect(results).toHaveLength(10);
+      expect(results.filter((r) => r.isCustom)).toHaveLength(3);
+      expect(results.filter((r) => !r.isCustom)).toHaveLength(7);
+    });
+  });
+});
+```
+
+**Backward Compatibility:**
+
+- Sistema funciona igual con Flavia (ID=1) que siempre usa significados base
+- Cuando se migre data de Flavia, no se crean personalizaciones (usa base por defecto)
+- Tests existentes no necesitan cambios porque usan significados base
+
+---
+
+### **TASK-067: Crear PromptBuilderService y Refactorizar InterpretationsService** ⭐⭐⭐ CRÍTICA MVP
+
+**Prioridad:** 🔴 CRÍTICA  
+**Estimación:** 5 días  
+**Dependencias:** TASK-064, TASK-065, TASK-066, TASK-018, TASK-061  
+**Estado:** 🔵 PENDIENTE  
+**Marcador MVP:** ⭐⭐⭐ **CRÍTICO PARA MARKETPLACE** - Núcleo del diferenciador de negocio  
+**Tags:** mvp, marketplace, ai-personalization, refactoring, core-logic
+
+#### 📋 Descripción
+
+Refactorizar completamente `InterpretationsService` para generar interpretaciones personalizadas por tarotista. Este es el cambio más crítico del marketplace: pasar de prompts estáticos hardcodeados a configuración dinámica por tarotista cargada desde base de datos.
+
+**Contexto del Informe:** Esta tarea implementa la Sección 6.2 "Cambios en Lógica de Aplicación" del informe:
+
+- Abstraer Configuración de Prompts
+- Servicio de Construcción de Prompts
+- Inyectar Contexto en Servicios
+
+**Cambio Fundamental:** De `TarotPrompts` estático → `PromptBuilderService` dinámico que recibe `tarotistaId` y carga configuración desde BD.
+
+#### 🧪 Testing
+
+**Tests necesarios:**
+
+- [ ] **Tests unitarios:**
+  - `InterpretationsService.generate()` recibe `tarotistaId`
+  - Carga configuración correcta de `TarotistaConfig`
+  - Usa significados personalizados si existen
+  - Fallback a significados base si no hay personalizados
+  - Cache keys incluyen `tarotistaId`
+- [ ] **Tests de integración:**
+  - Interpretación con Flavia usa su configuración
+  - Dos tarotistas diferentes generan interpretaciones diferentes
+  - Cache de tarotista A no afecta a tarotista B
+- [ ] **Tests E2E:**
+  - Lectura existente sigue funcionando igual (backward compatibility)
+  - Nueva lectura usa configuración de tarotista asignado
+  - Sistema funciona con 1 tarotista (Flavia)
+
+**Ubicación:** `src/modules/tarot/interpretations/*.spec.ts` + `test/interpretations-multi-tarotist.e2e-spec.ts`  
+**Importancia:** ⭐⭐⭐ CRÍTICA - Núcleo del diferenciador de marketplace
+
+#### ✅ Tareas específicas
+
+**1. Crear PromptBuilderService (1 día):**
+
+- [ ] Crear `src/modules/tarot/interpretations/prompt-builder.service.ts`
+- [ ] Inyectar dependencias:
+  ```typescript
+  @Injectable()
+  export class PromptBuilderService {
+    constructor(
+      @InjectRepository(TarotistaConfig)
+      private tarotistaConfigRepo: Repository<TarotistaConfig>,
+      @InjectRepository(TarotCard)
+      private tarotCardRepo: Repository<TarotCard>,
+      @InjectRepository(TarotistaCardMeaning)
+      private tarotistaCardMeaningRepo: Repository<TarotistaCardMeaning>,
+    ) {}
+  }
+  ```
+- [ ] Implementar método `getActiveConfig(tarotistaId: number)`:
+  - Buscar configuración activa del tarotista
+  - Si no existe, retornar configuración default de Flavia
+  - Cachear configuraciones en memoria (invalidar cada 5 min)
+- [ ] Implementar método `getCardMeaning(tarotistaId, cardId, isReversed)`:
+  - Buscar significado personalizado del tarotista
+  - Si existe, usar personalizado
+  - Si no existe, usar significado base de la carta
+  - Retornar objeto: `{ meaning: string, keywords: string[], isCustom: boolean }`
+- [ ] Implementar método `buildInterpretationPrompt(tarotistaId, cards, question, category)`:
+  - Cargar configuración del tarotista
+  - Obtener significados de cartas (personalizados o base)
+  - Construir system prompt con identidad del tarotista
+  - Construir user prompt con cartas y pregunta
+  - Retornar `{ systemPrompt: string, userPrompt: string, config: AIConfig }`
+
+**2. Refactorizar InterpretationsService (1 día):**
+
+- [ ] Modificar constructor para inyectar `PromptBuilderService`:
+  ```typescript
+  constructor(
+    private promptBuilder: PromptBuilderService,
+    private aiProvider: IAIProvider,
+    private cacheService: CacheService,
+    private usageLogger: AIUsageLogService,
+  ) {}
+  ```
+- [ ] Modificar método `generateInterpretation()`:
+
+  ```typescript
+  async generateInterpretation(
+    cards: SelectedCard[],
+    question: string,
+    category: string,
+    tarotistaId: number, // ← NUEVO parámetro
+  ): Promise<InterpretationResult> {
+    // 1. Generar cache key con tarotistaId
+    const cacheKey = this.buildCacheKey(cards, question, category, tarotistaId);
+
+    // 2. Verificar cache (separado por tarotista)
+    const cached = await this.cacheService.get(cacheKey);
+    if (cached) return cached;
+
+    // 3. Obtener prompts dinámicos
+    const { systemPrompt, userPrompt, config } =
+      await this.promptBuilder.buildInterpretationPrompt(
+        tarotistaId, cards, question, category
+      );
+
+    // 4. Generar con IA
+    const result = await this.aiProvider.generateInterpretation(
+      systemPrompt,
+      userPrompt,
+      {
+        temperature: config.temperature,
+        maxTokens: config.maxTokens,
+        topP: config.topP,
+      }
+    );
+
+    // 5. Guardar en cache
+    await this.cacheService.set(cacheKey, result, { ttl: 86400 });
+
+    // 6. Loggear uso con tarotistaId
+    await this.usageLogger.log({
+      tarotistaId,
+      provider: result.provider,
+      tokens: result.tokensUsed,
+      cost: result.cost,
+    });
+
+    return result;
+  }
+  ```
+
+- [ ] Actualizar método `buildCacheKey()`:
+  ```typescript
+  private buildCacheKey(
+    cards: SelectedCard[],
+    question: string,
+    category: string,
+    tarotistaId: number, // ← NUEVO
+  ): string {
+    const cardIds = cards.map(c => `${c.cardId}-${c.isReversed}`).join(',');
+    const questionHash = this.hashString(question);
+    return `interpretation:t${tarotistaId}:${category}:${cardIds}:${questionHash}`;
+  }
+  ```
+
+**3. Refactorizar ReadingsService (0.5 días):**
+
+- [ ] Modificar método `createReading()` para obtener `tarotistaId`:
+
+  ```typescript
+  async createReading(
+    userId: number,
+    spreadType: SpreadType,
+    category: string,
+    question?: string,
+  ): Promise<TarotReading> {
+    // 1. Determinar qué tarotista usar
+    const tarotistaId = await this.getTarotistaForUser(userId);
+
+    // 2. Seleccionar cartas
+    const selectedCards = await this.selectCards(spreadType);
+
+    // 3. Generar interpretación con contexto de tarotista
+    const interpretation = await this.interpretationsService.generateInterpretation(
+      selectedCards,
+      question,
+      category,
+      tarotistaId, // ← NUEVO
+    );
+
+    // 4. Guardar lectura con tarotistaId
+    const reading = this.readingsRepo.create({
+      userId,
+      tarotistaId, // ← NUEVO
+      spreadType,
+      category,
+      question,
+      cards: selectedCards,
+      interpretation: interpretation.text,
+      // ...
+    });
+
+    return this.readingsRepo.save(reading);
+  }
+  ```
+
+- [ ] Implementar método `getTarotistaForUser(userId)`:
+
+  ```typescript
+  private async getTarotistaForUser(userId: number): Promise<number> {
+    // 1. Buscar suscripción activa del usuario
+    const subscription = await this.subscriptionRepo.findOne({
+      where: { userId, status: SubscriptionStatus.ACTIVE },
+    });
+
+    // 2. Si tiene suscripción, usar ese tarotista
+    if (subscription) {
+      // Si es all-access, elegir tarotista por defecto (Flavia por ahora)
+      if (subscription.type === SubscriptionType.PREMIUM_ALL_ACCESS) {
+        return this.getDefaultTarotista();
+      }
+      // Si es individual o favorite, usar el asignado
+      return subscription.tarotistaId;
+    }
+
+    // 3. Si no tiene suscripción, usar tarotista por defecto (Flavia)
+    return this.getDefaultTarotista();
+  }
+
+  private async getDefaultTarotista(): Promise<number> {
+    // Cachear ID de Flavia para no consultarlo cada vez
+    if (!this.defaultTarotistaId) {
+      const flavia = await this.tarotistaRepo.findOne({
+        where: { nombrePublico: 'Flavia' },
+      });
+      this.defaultTarotistaId = flavia.id;
+    }
+    return this.defaultTarotistaId;
+  }
+  ```
+
+**4. Actualizar CachedInterpretation Entity (0.5 días):**
+
+- [ ] Ya debería tener columna `tarotista_id` de TASK-064
+- [ ] Actualizar índices:
+
+  ```typescript
+  @Index(['tarotistaId', 'spreadType', 'category'])
+  @Entity('cached_interpretation')
+  export class CachedInterpretation {
+    @Column({ name: 'tarotista_id', nullable: true })
+    tarotistaId: number;
+
+    // ... resto de campos
+  }
+  ```
+
+- [ ] Crear método de limpieza de cache por tarotista:
+  ```typescript
+  async clearTarotistCache(tarotistaId: number): Promise<void> {
+    await this.cacheRepo.delete({ tarotistaId });
+  }
+  ```
+
+**5. Migrar Prompts Existentes a Servicio (0.5 días):**
+
+- [ ] Mantener `TarotPrompts` como fallback temporal
+- [ ] Crear configuración default en `PromptBuilderService`:
+  ```typescript
+  private getDefaultConfig(): TarotistaConfig {
+    return {
+      systemPrompt: TarotPrompts.getSystemPrompt(), // Usar existente como default
+      temperature: 0.70,
+      maxTokens: 1000,
+      topP: 1.0,
+      styleConfig: {
+        tone: 'empático y comprensivo',
+        mysticism_level: 'medio',
+        formality: 'informal-amigable',
+      },
+    };
+  }
+  ```
+- [ ] Documentar migración gradual en `docs/PROMPT_MIGRATION.md`
+
+**6. Actualizar Tests Existentes (1 día):**
+
+- [ ] Actualizar todos los tests que llaman `generateInterpretation()`:
+
+  ```typescript
+  // ANTES:
+  const result = await service.generateInterpretation(
+    cards,
+    question,
+    category,
+  );
+
+  // DESPUÉS:
+  const flaviaId = 1; // O obtener de fixture
+  const result = await service.generateInterpretation(
+    cards,
+    question,
+    category,
+    flaviaId,
+  );
+  ```
+
+- [ ] Actualizar mocks de servicios para incluir `tarotistaId`
+- [ ] Crear fixtures de tarotistas para testing:
+  ```typescript
+  export const testTarotistas = {
+    flavia: { id: 1, nombrePublico: 'Flavia', ... },
+    testTarotist: { id: 2, nombrePublico: 'Test Tarotist', ... },
+  };
+  ```
+
+**7. Documentación y Rollout (0.5 días):**
+
+- [ ] Documentar en `docs/TAROTIST_CONTEXT.md`:
+  - Cómo funciona el sistema de contexto de tarotista
+  - Cómo se cargan las configuraciones
+  - Cómo se resuelve qué tarotista usar para un usuario
+  - Ejemplos de uso del `PromptBuilderService`
+- [ ] Crear diagrama de flujo: Usuario → Tarotista → Config → Interpretación
+- [ ] Documentar estrategia de rollout sin downtime
+
+#### 🎯 Criterios de aceptación
+
+- ✓ `InterpretationsService` recibe y usa `tarotistaId`
+- ✓ `PromptBuilderService` carga configuración desde BD
+- ✓ Sistema usa significados personalizados cuando existen
+- ✓ Cache está separado por `tarotistaId`
+- ✓ Lecturas se asignan correctamente a tarotistas
+- ✓ Backward compatibility: sistema funciona igual con Flavia
+- ✓ Todos los tests existentes pasan con mínimos cambios
+- ✓ Tests E2E validan múltiples tarotistas
+
+#### 📝 Notas de implementación
+
+**Estrategia de Rollout Sin Downtime:**
+
+1. Agregar parámetro `tarotistaId` como opcional con default
+2. Implementar nuevo servicio pero usar default si no se proporciona
+3. Actualizar llamadas gradualmente para pasar `tarotistaId`
+4. Hacer parámetro obligatorio cuando todo esté migrado
+
+**Backward Compatibility:**
+
+```typescript
+// Método con backward compatibility
+async generateInterpretation(
+  cards: SelectedCard[],
+  question: string,
+  category: string,
+  tarotistaId?: number, // ← Opcional temporalmente
+): Promise<InterpretationResult> {
+  // Si no se proporciona, usar Flavia por defecto
+  const finalTarotistaId = tarotistaId || await this.getDefaultTarotista();
+  // ... resto de lógica
+}
+```
+
+**Patrón de Herencia de Significados:**
+
+```typescript
+// Pseudocódigo del patrón
+async getCardMeaning(tarotistaId: number, cardId: number): Promise<CardMeaning> {
+  // 1. Buscar significado personalizado
+  const custom = await this.findCustomMeaning(tarotistaId, cardId);
+  if (custom) {
+    return {
+      upright: custom.customMeaningUpright,
+      reversed: custom.customMeaningReversed,
+      keywords: custom.customKeywords,
+      source: 'tarotist',
+    };
+  }
+
+  // 2. Fallback a significado base
+  const base = await this.findBaseMeaning(cardId);
+  return {
+    upright: base.meaningUpright,
+    reversed: base.meaningReversed,
+    keywords: base.keywords,
+    source: 'base',
+  };
+}
+```
+
+**Cache Invalidation:**
+
+- Cuando tarotista actualiza su configuración → invalidar cache de ese tarotista
+- Cuando tarotista actualiza significados personalizados → invalidar cache de cartas afectadas
+- TTL base: 24 horas
+- Implementar endpoint admin: `DELETE /admin/tarotistas/:id/cache`
+
+---
+
+### � TASK-067-a: Sistema de Invalidación de Cache por Tarotista ⭐⭐
+
+**Prioridad:** 🟡 NECESARIA  
+**Estimación:** 0.5 días  
+**Tags:** marketplace, cache, invalidation, performance, data-consistency  
+**Dependencias:** TASK-067 (PromptBuilderService)  
+**Estado:** 🟡 NO INICIADA  
+**Contexto:** Sistema automático de invalidación de cache cuando cambia configuración de tarotista
+
+---
+
+#### **Descripción:**
+
+Implementar un sistema robusto y automático de invalidación de cache que asegure consistencia de datos cuando un tarotista modifica su configuración, significados personalizados de cartas, o cualquier otro dato que afecte las interpretaciones.
+
+#### **Alcance:**
+
+**1. Event Emitter para Cambios de Tarotista:**
+
+- Crear eventos: `tarotista.config.updated`, `tarotista.meanings.updated`
+- Emitir eventos desde TarotistasService cuando hay cambios
+- Listeners en CacheService para invalidación automática
+
+**2. Estrategias de Invalidación:**
+
+- **Invalidación por Tarotista:** Limpiar todo el cache de un tarotista específico
+- **Invalidación Selectiva:** Solo cartas/spreads afectados
+- **Invalidación en Cascada:** Invalidar interpretaciones que dependen de datos modificados
+
+**3. Endpoints Admin de Cache:**
+
+- `DELETE /admin/cache/tarotistas/:id` - Invalidar cache de tarotista
+- `DELETE /admin/cache/tarotistas/:id/meanings` - Invalidar solo significados
+- `DELETE /admin/cache/global` - Limpiar todo el cache (emergency)
+- `GET /admin/cache/stats` - Estadísticas de cache
+
+**4. Logs y Monitoreo:**
+
+- Log de invalidaciones con razón y timestamp
+- Métricas de hit/miss rate por tarotista
+- Alertas si invalidaciones son muy frecuentes
+
+#### **Criterios de Aceptación:**
+
+- ✅ Cache se invalida automáticamente al actualizar configuración de tarotista
+- ✅ Cache se invalida selectivamente al modificar significados de cartas
+- ✅ Endpoints admin funcionan correctamente
+- ✅ Logs registran todas las invalidaciones
+- ✅ Tests unitarios para eventos y listeners
+- ✅ Tests E2E para invalidación automática
+- ✅ Documentación de estrategias de invalidación
+
+#### **Notas Técnicas:**
+
+- Usar EventEmitter2 para eventos asíncronos
+- Cache keys deben incluir tarotistaId
+- TTL base: 24 horas
+- Considerar Redis pub/sub si hay múltiples instancias
+
+---
+
+### �🔴 TASK-069: Actualizar Guards y Decoradores para Sistema de Roles ⭐⭐⭐
+
+**Prioridad:** 🔴 CRÍTICA  
+**Estimación:** 2.5 días  
+**Tags:** mvp, marketplace, auth, guards, roles, security  
+**Dependencias:** TASK-064 (Multi-Tarotist Schema), TASK-065 (Migración Flavia)  
+**Estado:** 🟡 NO INICIADA  
+**Contexto Informe:** Sección 6.2 - Sistema de Roles Extensible
+
+---
+
+#### 📋 Descripción
+
+Migrar el sistema de autorización actual basado en booleano `isAdmin` a un sistema robusto basado en array `roles[]` que soporte múltiples roles simultáneos. Este cambio es fundamental para el marketplace porque necesitamos distinguir entre:
+
+1. **CONSUMER**: Usuario final que consume lecturas
+2. **TAROTIST**: Usuario que ofrece lecturas (puede tener clientes propios)
+3. **ADMIN**: Usuario con permisos administrativos completos
+
+El informe especifica:
+
+> "Migrar de `isAdmin: boolean` a `roles: string[]` en la entidad User. Esto permite que un usuario tenga múltiples roles simultáneamente (ej: puede ser TAROTIST y ADMIN)."
+
+**Casos de Uso Reales:**
+
+- Usuario normal: `roles: ['CONSUMER']`
+- Tarotista: `roles: ['CONSUMER', 'TAROTIST']` (puede consumir y ofrecer)
+- Admin tarotista: `roles: ['CONSUMER', 'TAROTIST', 'ADMIN']`
+- Admin puro: `roles: ['CONSUMER', 'ADMIN']`
+
+**Backward Compatibility Crítica:**
+
+- Sistema debe seguir funcionando con usuarios existentes que tienen `isAdmin`
+- Migración automática: `isAdmin: true` → `roles: ['CONSUMER', 'ADMIN']`
+- Migración automática: `isAdmin: false` → `roles: ['CONSUMER']`
+
+---
+
+#### 🧪 Testing
+
+**Unit Tests:**
+
+- [ ] Test `RolesGuard` valida roles correctamente
+- [ ] Test `@Roles()` decorator con single role
+- [ ] Test `@Roles()` decorator con multiple roles (OR logic)
+- [ ] Test `hasRole()` helper method
+- [ ] Test `hasAnyRole()` helper method
+- [ ] Test `hasAllRoles()` helper method
+- [ ] Test backward compatibility: `isAdmin` getter retorna true si tiene ADMIN
+
+**Integration Tests:**
+
+- [ ] Test endpoint protegido con `@Roles('ADMIN')` rechaza CONSUMER
+- [ ] Test endpoint protegido con `@Roles('ADMIN')` acepta ADMIN
+- [ ] Test endpoint con `@Roles('TAROTIST', 'ADMIN')` acepta ambos
+- [ ] Test usuario con múltiples roles accede correctamente
+- [ ] Test migración automática de `isAdmin` a `roles[]`
+
+**E2E Tests:**
+
+- [ ] Test flujo completo: registro → login → acceso con roles
+- [ ] Test CONSUMER no puede acceder a endpoints de TAROTIST
+- [ ] Test TAROTIST puede acceder a sus propios endpoints
+- [ ] Test ADMIN puede acceder a todos los endpoints admin
+
+---
+
+#### ✅ Tareas específicas
+
+**1. Crear enum y tipos para roles (0.5 días):**
+
+- [ ] Crear archivo `src/common/enums/user-role.enum.ts`:
+
+  ```typescript
+  export enum UserRole {
+    CONSUMER = 'CONSUMER', // Usuario final que consume lecturas
+    TAROTIST = 'TAROTIST', // Usuario que ofrece lecturas
+    ADMIN = 'ADMIN', // Administrador del sistema
+  }
+
+  // Helper type para validación
+  export type UserRoleType = `${UserRole}`;
+  ```
+
+- [ ] Exportar desde `src/common/index.ts`
+
+**2. Actualizar User Entity (0.5 días):**
+
+- [ ] Modificar `src/modules/users/entities/user.entity.ts`:
+
+  ```typescript
+  import { UserRole } from '@/common/enums/user-role.enum';
+
+  @Entity('users')
+  export class User {
+    // ... campos existentes
+
+    @Column('simple-array', { default: 'CONSUMER' })
+    roles: UserRole[];
+
+    // Mantener isAdmin por backward compatibility (deprecated)
+    @Column({ default: false })
+    @Deprecated('Use roles array instead')
+    isAdmin: boolean;
+
+    // Getter para backward compatibility
+    get isAdminUser(): boolean {
+      return this.roles.includes(UserRole.ADMIN);
+    }
+
+    // Helper methods
+    hasRole(role: UserRole): boolean {
+      return this.roles.includes(role);
+    }
+
+    hasAnyRole(...roles: UserRole[]): boolean {
+      return roles.some((role) => this.roles.includes(role));
+    }
+
+    hasAllRoles(...roles: UserRole[]): boolean {
+      return roles.every((role) => this.roles.includes(role));
+    }
+
+    isConsumer(): boolean {
+      return this.hasRole(UserRole.CONSUMER);
+    }
+
+    isTarotist(): boolean {
+      return this.hasRole(UserRole.TAROTIST);
+    }
+
+    isAdmin(): boolean {
+      return this.hasRole(UserRole.ADMIN);
+    }
+  }
+  ```
+
+- [ ] Crear migración TypeORM:
+
+  ```typescript
+  // migrations/XXXXXX-add-roles-to-users.ts
+  export class AddRolesToUsers1699999999999 implements MigrationInterface {
+    public async up(queryRunner: QueryRunner): Promise<void> {
+      // 1. Agregar columna roles con default
+      await queryRunner.query(`
+        ALTER TABLE "users" 
+        ADD COLUMN "roles" text DEFAULT 'CONSUMER'
+      `);
+
+      // 2. Migrar datos existentes basados en isAdmin
+      await queryRunner.query(`
+        UPDATE "users" 
+        SET "roles" = 'CONSUMER,ADMIN' 
+        WHERE "isAdmin" = true
+      `);
+
+      await queryRunner.query(`
+        UPDATE "users" 
+        SET "roles" = 'CONSUMER' 
+        WHERE "isAdmin" = false
+      `);
+
+      // 3. NOT NULL constraint
+      await queryRunner.query(`
+        ALTER TABLE "users" 
+        ALTER COLUMN "roles" SET NOT NULL
+      `);
+
+      // 4. Mantener isAdmin por backward compatibility (no eliminar todavía)
+    }
+
+    public async down(queryRunner: QueryRunner): Promise<void> {
+      await queryRunner.query(`ALTER TABLE "users" DROP COLUMN "roles"`);
+    }
+  }
+  ```
+
+**3. Crear nuevo RolesGuard (0.5 días):**
+
+- [ ] Crear archivo `src/common/guards/roles.guard.ts`:
+
+  ```typescript
+  import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+  import { Reflector } from '@nestjs/core';
+  import { UserRole } from '@/common/enums/user-role.enum';
+  import { ROLES_KEY } from '@/common/decorators/roles.decorator';
+
+  @Injectable()
+  export class RolesGuard implements CanActivate {
+    constructor(private reflector: Reflector) {}
+
+    canActivate(context: ExecutionContext): boolean {
+      // Obtener roles requeridos del decorator @Roles()
+      const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(
+        ROLES_KEY,
+        [context.getHandler(), context.getClass()],
+      );
+
+      // Si no hay roles requeridos, permitir acceso
+      if (!requiredRoles || requiredRoles.length === 0) {
+        return true;
+      }
+
+      // Obtener usuario del request (inyectado por JwtAuthGuard)
+      const { user } = context.switchToHttp().getRequest();
+      if (!user) {
+        return false;
+      }
+
+      // Verificar si el usuario tiene al menos uno de los roles requeridos (OR logic)
+      return requiredRoles.some((role) => user.roles?.includes(role));
+    }
+  }
+  ```
+
+**4. Crear decorator @Roles() (0.25 días):**
+
+- [ ] Crear archivo `src/common/decorators/roles.decorator.ts`:
+
+  ```typescript
+  import { SetMetadata } from '@nestjs/common';
+  import { UserRole } from '@/common/enums/user-role.enum';
+
+  export const ROLES_KEY = 'roles';
+
+  /**
+   * Decorator para proteger endpoints con roles específicos.
+   * Usa lógica OR: el usuario necesita tener AL MENOS uno de los roles especificados.
+   *
+   * @example
+   * // Solo ADMIN puede acceder
+   * @Roles(UserRole.ADMIN)
+   *
+   * @example
+   * // TAROTIST o ADMIN pueden acceder
+   * @Roles(UserRole.TAROTIST, UserRole.ADMIN)
+   */
+  export const Roles = (...roles: UserRole[]) => SetMetadata(ROLES_KEY, roles);
+  ```
+
+**5. Actualizar guards existentes para compatibilidad (0.5 días):**
+
+- [ ] Actualizar `AdminGuard` para usar nuevo sistema (mantener por backward compatibility):
+
+  ```typescript
+  // src/common/guards/admin.guard.ts
+  import { UserRole } from '@/common/enums/user-role.enum';
+
+  @Injectable()
+  export class AdminGuard implements CanActivate {
+    canActivate(context: ExecutionContext): boolean {
+      const { user } = context.switchToHttp().getRequest();
+
+      // Nuevo: verificar roles array
+      if (user.roles?.includes(UserRole.ADMIN)) {
+        return true;
+      }
+
+      // Fallback: verificar isAdmin (deprecated pero funcional)
+      return user.isAdmin === true;
+    }
+  }
+  ```
+
+- [ ] Marcar `AdminGuard` como deprecated en favor de `@Roles(UserRole.ADMIN)`
+
+**6. Actualizar AuthService para asignar roles en registro (0.5 días):**
+
+- [ ] Modificar `register()` para asignar rol CONSUMER por defecto:
+
+  ```typescript
+  async register(registerDto: RegisterDto): Promise<AuthResponse> {
+    // ... validaciones
+
+    const user = this.usersRepository.create({
+      email: registerDto.email,
+      password: hashedPassword,
+      roles: [UserRole.CONSUMER], // Default role
+      isAdmin: false, // Mantener por backward compatibility
+    });
+
+    await this.usersRepository.save(user);
+    // ... resto
+  }
+  ```
+
+- [ ] Método para promover usuario a TAROTIST (usado por admin):
+
+  ```typescript
+  async promoteToTarotist(userId: number): Promise<User> {
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+
+    if (!user.roles.includes(UserRole.TAROTIST)) {
+      user.roles.push(UserRole.TAROTIST);
+      await this.usersRepository.save(user);
+    }
+
+    return user;
+  }
+  ```
+
+- [ ] Método para promover usuario a ADMIN:
+
+  ```typescript
+  async promoteToAdmin(userId: number): Promise<User> {
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+
+    if (!user.roles.includes(UserRole.ADMIN)) {
+      user.roles.push(UserRole.ADMIN);
+      user.isAdmin = true; // Mantener sincronizado
+      await this.usersRepository.save(user);
+    }
+
+    return user;
+  }
+  ```
+
+**7. Auditar y migrar todos los guards existentes (0.5 días):**
+
+- [ ] **AUDITORÍA COMPLETA**: Identificar todos los archivos que usan `isAdmin` o `AdminGuard`:
+
+  ```bash
+  # Buscar todos los usos de isAdmin
+  grep -r "isAdmin" src/
+
+  # Buscar todos los usos de AdminGuard
+  grep -r "AdminGuard" src/
+
+  # Buscar decoradores @UseGuards
+  grep -r "@UseGuards.*Admin" src/
+  ```
+
+- [ ] **MIGRACIÓN SISTEMÁTICA**: Actualizar cada endpoint identificado:
+
+  ```typescript
+  // ❌ ANTES (deprecated):
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @Get('admin/users')
+  async getAllUsers() { ... }
+
+  // ✅ DESPUÉS (recomendado):
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Get('admin/users')
+  async getAllUsers() { ... }
+  ```
+
+- [ ] **LISTA DE CONTROLLERS A AUDITAR** (mínimo):
+
+  - `UsersController`: Endpoints de gestión de usuarios
+  - `TarotistasController`: Endpoints admin de tarotistas
+  - `ReadingsController`: Endpoints admin de lecturas
+  - `SubscriptionsController`: Endpoints admin de suscripciones
+  - `AdminController`: Todos los endpoints admin
+  - Cualquier controller con rutas `/admin/*`
+
+- [ ] **GUARDS PERSONALIZADOS**: Identificar y migrar guards custom que chequean `isAdmin`:
+
+  - `OwnerOrAdminGuard`: Actualizar para usar `roles.includes(UserRole.ADMIN)`
+  - `TarotistGuard`: Crear nuevo guard para rol TAROTIST
+  - Cualquier guard que haga `user.isAdmin === true`
+
+- [ ] **VALIDACIONES EN SERVICIOS**: Buscar lógica de negocio que use `isAdmin`:
+
+  ```typescript
+  // ❌ ANTES:
+  if (!user.isAdmin) {
+    throw new ForbiddenException();
+  }
+
+  // ✅ DESPUÉS:
+  if (!user.hasRole(UserRole.ADMIN)) {
+    throw new ForbiddenException();
+  }
+  ```
+
+- [ ] Documentar en OpenAPI/Swagger los roles requeridos por cada endpoint
+
+**8. Crear endpoints para gestión de roles (Admin) (0.5 días):**
+
+- [ ] Crear `RolesController` en módulo admin:
+
+  ```typescript
+  @Controller('admin/users/:userId/roles')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  export class RolesController {
+    constructor(private authService: AuthService) {}
+
+    @Post('tarotist')
+    async promoteToTarotist(@Param('userId') userId: number) {
+      return this.authService.promoteToTarotist(userId);
+    }
+
+    @Post('admin')
+    async promoteToAdmin(@Param('userId') userId: number) {
+      return this.authService.promoteToAdmin(userId);
+    }
+
+    @Delete(':role')
+    async removeRole(
+      @Param('userId') userId: number,
+      @Param('role') role: UserRole,
+    ) {
+      return this.authService.removeRole(userId, role);
+    }
+  }
+  ```
+
+**9. Actualizar seeders para usar nuevo sistema (0.25 días):**
+
+- [ ] Modificar seeder de usuarios:
+
+  ```typescript
+  // seeders/users.seeder.ts
+  const adminUser = usersRepo.create({
+    email: 'admin@tarotflavia.com',
+    password: await hash('admin123', 10),
+    roles: [UserRole.CONSUMER, UserRole.ADMIN],
+    isAdmin: true, // Backward compatibility
+  });
+
+  const tarotistUser = usersRepo.create({
+    email: 'tarotist@example.com',
+    password: await hash('tarotist123', 10),
+    roles: [UserRole.CONSUMER, UserRole.TAROTIST],
+    isAdmin: false,
+  });
+
+  const normalUser = usersRepo.create({
+    email: 'user@example.com',
+    password: await hash('user123', 10),
+    roles: [UserRole.CONSUMER],
+    isAdmin: false,
+  });
+  ```
+
+**10. Crear tests completos (0.5 días):**
+
+- [ ] Tests unitarios de `RolesGuard`: 10+ tests
+- [ ] Tests de integración con endpoints reales: 8+ scenarios
+- [ ] Tests E2E de flujos completos: 5+ user journeys
+- [ ] Tests de backward compatibility: verificar que `isAdmin` sigue funcionando
+
+---
+
+#### 🎯 Criterios de Aceptación
+
+- ✅ Enum `UserRole` creado con CONSUMER, TAROTIST, ADMIN
+- ✅ Entity `User` tiene array `roles[]` con tipo correcto
+- ✅ Migración TypeORM ejecutada: columna `roles` agregada, datos migrados
+- ✅ `RolesGuard` implementado con lógica OR (any role matches)
+- ✅ Decorator `@Roles()` creado y funcional
+- ✅ Helper methods en User entity: `hasRole()`, `hasAnyRole()`, `hasAllRoles()`
+- ✅ Backward compatibility: `isAdmin` getter sigue funcionando
+- ✅ `AuthService.register()` asigna rol CONSUMER por defecto
+- ✅ Endpoints admin migrados a usar `@Roles(UserRole.ADMIN)`
+- ✅ Endpoints para promover usuarios a TAROTIST/ADMIN (admin only)
+- ✅ Seeders actualizados con nuevo sistema de roles
+- ✅ Tests unitarios, integración y E2E pasan con 90%+ coverage
+- ✅ Documentación de API actualizada con roles requeridos
+
+---
+
+#### 📝 Notas de Implementación
+
+**Estrategia de Migración Sin Downtime:**
+
+```typescript
+// FASE 1: Agregar roles[] SIN eliminar isAdmin
+// - Deploy de migración + código dual
+// - Sistema lee de roles[] pero mantiene isAdmin sincronizado
+// - Todos los usuarios migrados automáticamente
+
+// FASE 2: Deprecar isAdmin (1-2 semanas después)
+// - Agregar warnings en logs cuando se use isAdmin
+// - Actualizar toda lógica para usar solo roles[]
+// - Mantener isAdmin como columna pero no usarla
+
+// FASE 3: Eliminar isAdmin (1 mes después)
+// - Crear migración que elimina columna isAdmin
+// - Eliminar getter y lógica de backward compatibility
+```
+
+**Patrón de Uso en Controllers:**
+
+```typescript
+// Ejemplo 1: Solo ADMIN
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.ADMIN)
+@Get('admin/dashboard')
+async getAdminDashboard() { ... }
+
+// Ejemplo 2: TAROTIST o ADMIN (OR logic)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.TAROTIST, UserRole.ADMIN)
+@Get('tarotist/profile')
+async getTarotistProfile(@GetUser() user: User) { ... }
+
+// Ejemplo 3: Sin restricción de roles (cualquier autenticado)
+@UseGuards(JwtAuthGuard)
+@Get('readings/history')
+async getReadingsHistory(@GetUser() user: User) { ... }
+```
+
+**Helper Methods en User Entity:**
+
+```typescript
+// En controllers o servicios
+if (user.isAdmin()) {
+  // Lógica para admin
+}
+
+if (user.isTarotist()) {
+  // Lógica para tarotista
+}
+
+if (user.hasAnyRole(UserRole.TAROTIST, UserRole.ADMIN)) {
+  // Lógica para tarotista O admin
+}
+
+if (user.hasAllRoles(UserRole.CONSUMER, UserRole.TAROTIST)) {
+  // Usuario que es consumidor Y tarotista simultáneamente
+}
+```
+
+**Validación de Roles en DTOs:**
+
+```typescript
+// Para endpoints que reciben roles
+export class UpdateUserRolesDto {
+  @IsArray()
+  @IsEnum(UserRole, { each: true })
+  roles: UserRole[];
+}
+```
+
+**Testing Strategy:**
+
+```typescript
+describe('RolesGuard', () => {
+  it('should allow access when user has required role', () => {
+    const user = { roles: [UserRole.ADMIN] };
+    const requiredRoles = [UserRole.ADMIN];
+    // expect: true
+  });
+
+  it('should allow access when user has one of multiple required roles', () => {
+    const user = { roles: [UserRole.TAROTIST] };
+    const requiredRoles = [UserRole.TAROTIST, UserRole.ADMIN];
+    // expect: true (OR logic)
+  });
+
+  it('should deny access when user lacks all required roles', () => {
+    const user = { roles: [UserRole.CONSUMER] };
+    const requiredRoles = [UserRole.ADMIN];
+    // expect: false
+  });
+
+  it('should work with multiple user roles', () => {
+    const user = {
+      roles: [UserRole.CONSUMER, UserRole.TAROTIST, UserRole.ADMIN],
+    };
+    const requiredRoles = [UserRole.ADMIN];
+    // expect: true
+  });
+});
+```
+
+**Backward Compatibility Tests:**
+
+```typescript
+describe('User Entity - Backward Compatibility', () => {
+  it('should sync isAdmin with roles array', async () => {
+    const user = new User();
+    user.roles = [UserRole.CONSUMER, UserRole.ADMIN];
+
+    expect(user.isAdminUser).toBe(true);
+    expect(user.isAdmin()).toBe(true);
+  });
+
+  it('should work with old isAdmin field', async () => {
+    // Usuario creado con código viejo
+    const user = new User();
+    user.isAdmin = true;
+    user.roles = [UserRole.CONSUMER, UserRole.ADMIN];
+
+    expect(user.isAdminUser).toBe(true);
+  });
+});
+```
+
+**Orden de Implementación Recomendado:**
+
+1. ✅ Crear enum y tipos
+2. ✅ Actualizar entity con roles[] (mantener isAdmin)
+3. ✅ Crear y ejecutar migración
+4. ✅ Crear RolesGuard y @Roles() decorator
+5. ✅ Actualizar AuthService para asignar roles
+6. ✅ Migrar endpoints progresivamente
+7. ✅ Crear endpoints de gestión de roles
+8. ✅ Tests completos
+9. 🔄 Monitorear en producción 1-2 semanas
+10. 🔄 Fase 2: deprecar isAdmin completamente
+
+---
+
+### 🔴 TASK-070: Implementar Módulo de Gestión de Tarotistas (Admin) ⭐⭐⭐
+
+**Prioridad:** 🔴 CRÍTICA  
+**Estimación:** 5 días  
+**Tags:** mvp, marketplace, admin, crud, management, tarotistas  
+**Dependencias:** TASK-064 (Schema), TASK-065 (Migración), TASK-067 (PromptBuilder), TASK-066 (CardMeaning), TASK-069 (Roles)  
+**Estado:** 🟡 NO INICIADA  
+**Contexto Informe:** Sección 8 - Panel de Administración
+
+---
+
+#### 📋 Descripción
+
+Crear un módulo completo de administración para gestionar tarotistas en el marketplace. Este módulo es el **corazón del panel de administración** y permite:
+
+1. **CRUD completo de tarotistas**: crear, listar, editar, desactivar
+2. **Gestión de configuración de IA**: editar system prompts, guidelines, provider preferences
+3. **Gestión de significados personalizados**: CRUD de interpretaciones custom por carta
+4. **Aprobación de tarotistas**: workflow de aplicación → revisión → aprobación/rechazo
+5. **Métricas y analytics**: lecturas realizadas, ingresos generados, rating promedio
+6. **Gestión de perfil público**: bio, foto, especialidades, enlaces sociales
+
+El informe especifica:
+
+> "Panel de administración para gestionar tarotistas: aprobar nuevas aplicaciones, editar perfiles, configurar sistema de IA, ver métricas de uso."
+
+**Funcionalidades Clave:**
+
+- Admin puede crear tarotista directamente (bypass de aplicación)
+- Admin puede aprobar/rechazar aplicaciones de usuarios que quieren ser tarotistas
+- Admin puede editar toda la configuración de IA de cualquier tarotista
+- Admin puede ver dashboard con métricas de cada tarotista
+- Admin puede desactivar tarotistas (soft delete)
+
+---
+
+#### 🧪 Testing
+
+**Unit Tests:**
+
+- [ ] Tests de `TarotistasService`: CRUD methods, búsquedas, filtros
+- [ ] Tests de validación de DTOs: CreateTarotistaDto, UpdateTarotistaDto
+- [ ] Tests de permisos: solo ADMIN puede gestionar tarotistas
+- [ ] Tests de soft delete: tarotistas desactivados no aparecen en listings públicos
+
+**Integration Tests:**
+
+- [ ] Test flujo completo: crear tarotista → configurar IA → personalizar cartas
+- [ ] Test aprobar aplicación: user request → admin approve → user gains TAROTIST role
+- [ ] Test actualizar config: modificar prompts → invalidar cache → verificar nuevos prompts
+- [ ] Test desactivar tarotista: soft delete → verificar no disponible en marketplace
+
+**E2E Tests:**
+
+- [ ] Test admin crea tarotista nuevo con perfil completo
+- [ ] Test admin edita configuración de IA y se refleja en lecturas
+- [ ] Test admin personaliza significados de 5 cartas y funcionan en lecturas
+- [ ] Test usuario aplica a tarotista → admin aprueba → usuario puede ofrecer lecturas
+- [ ] Test admin desactiva tarotista → lecturas pendientes fallan
+
+---
+
+#### ✅ Tareas específicas
+
+**1. Crear TarotistasModule y estructura (0.5 días):**
+
+- [ ] Crear directorio `src/modules/tarotistas/`
+- [ ] Crear módulo principal:
+  ```typescript
+  @Module({
+    imports: [
+      TypeOrmModule.forFeature([
+        Tarotista,
+        TarotistaConfig,
+        TarotistaCardMeaning,
+        TarotCard,
+        User,
+      ]),
+    ],
+    controllers: [TarotistasController, TarotistasAdminController],
+    providers: [TarotistasService, TarotistasAdminService],
+    exports: [TarotistasService],
+  })
+  export class TarotistasModule {}
+  ```
+- [ ] Importar en `AppModule`
+
+**2. Crear TarotistasAdminService con CRUD completo (1.5 días):**
+
+- [ ] Implementar método `createTarotista()`:
+
+  ```typescript
+  async createTarotista(
+    createDto: CreateTarotistaDto,
+  ): Promise<Tarotista> {
+    // 1. Validar que userId existe y no es tarotista ya
+    const user = await this.usersRepo.findOne({
+      where: { id: createDto.userId }
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    if (user.hasRole(UserRole.TAROTIST)) {
+      throw new BadRequestException('User is already a tarotist');
+    }
+
+    // 2. Crear registro de tarotista
+    const tarotista = this.tarotistasRepo.create({
+      userId: createDto.userId,
+      nombrePublico: createDto.nombrePublico,
+      biografia: createDto.biografia,
+      especialidades: createDto.especialidades || [],
+      fotoPerfil: createDto.fotoPerfil,
+      estado: TarotistaEstado.ACTIVO,
+      isActive: true,
+    });
+    await this.tarotistasRepo.save(tarotista);
+
+    // 3. Crear configuración de IA default
+    const config = this.tarotistaConfigRepo.create({
+      tarotistaId: tarotista.id,
+      systemPromptIdentity: createDto.systemPromptIdentity || DEFAULT_IDENTITY,
+      systemPromptGuidelines: createDto.systemPromptGuidelines || DEFAULT_GUIDELINES,
+      preferredProvider: 'groq',
+      preferredModel: 'llama-3.1-70b-versatile',
+      temperature: 0.7,
+      maxTokens: 800,
+      isActive: true,
+    });
+    await this.tarotistaConfigRepo.save(config);
+
+    // 4. Promover usuario a rol TAROTIST
+    await this.authService.promoteToTarotist(user.id);
+
+    return tarotista;
+  }
+  ```
+
+- [ ] Implementar método `getAllTarotistas()` con filtros:
+
+  ```typescript
+  async getAllTarotistas(filters: GetTarotistasFilterDto): Promise<{
+    tarotistas: Tarotista[];
+    total: number;
+    page: number;
+    pageSize: number;
+  }> {
+    const {
+      page = 1,
+      pageSize = 20,
+      estado,
+      isActive,
+      search,
+      orderBy = 'createdAt',
+      order = 'DESC',
+    } = filters;
+
+    const query = this.tarotistasRepo
+      .createQueryBuilder('tarotista')
+      .leftJoinAndSelect('tarotista.user', 'user')
+      .leftJoinAndSelect('tarotista.configs', 'configs');
+
+    // Filtros
+    if (estado) {
+      query.andWhere('tarotista.estado = :estado', { estado });
+    }
+    if (isActive !== undefined) {
+      query.andWhere('tarotista.isActive = :isActive', { isActive });
+    }
+    if (search) {
+      query.andWhere(
+        '(tarotista.nombrePublico ILIKE :search OR tarotista.biografia ILIKE :search)',
+        { search: `%${search}%` },
+      );
+    }
+
+    // Paginación
+    query
+      .orderBy(`tarotista.${orderBy}`, order)
+      .skip((page - 1) * pageSize)
+      .take(pageSize);
+
+    const [tarotistas, total] = await query.getManyAndCount();
+
+    return { tarotistas, total, page, pageSize };
+  }
+  ```
+
+- [ ] Implementar método `getTarotistaById()` con relaciones completas
+- [ ] Implementar método `updateTarotista()` para perfil público
+- [ ] Implementar método `deactivateTarotista()` (soft delete)
+- [ ] Implementar método `reactivateTarotista()`
+
+**3. Crear gestión de configuración de IA (1 día):**
+
+- [ ] Implementar `updateTarotistaConfig()`:
+
+  ```typescript
+  async updateTarotistaConfig(
+    tarotistaId: number,
+    updateDto: UpdateTarotistaConfigDto,
+  ): Promise<TarotistaConfig> {
+    // 1. Buscar config activa
+    let config = await this.tarotistaConfigRepo.findOne({
+      where: { tarotistaId, isActive: true },
+    });
+
+    if (!config) {
+      throw new NotFoundException('Active config not found');
+    }
+
+    // 2. Actualizar campos
+    if (updateDto.systemPromptIdentity) {
+      config.systemPromptIdentity = updateDto.systemPromptIdentity;
+    }
+    if (updateDto.systemPromptGuidelines) {
+      config.systemPromptGuidelines = updateDto.systemPromptGuidelines;
+    }
+    if (updateDto.preferredProvider) {
+      config.preferredProvider = updateDto.preferredProvider;
+    }
+    if (updateDto.preferredModel) {
+      config.preferredModel = updateDto.preferredModel;
+    }
+    if (updateDto.temperature !== undefined) {
+      config.temperature = updateDto.temperature;
+    }
+    if (updateDto.maxTokens !== undefined) {
+      config.maxTokens = updateDto.maxTokens;
+    }
+
+    config.updatedAt = new Date();
+    await this.tarotistaConfigRepo.save(config);
+
+    // 3. Invalidar cache de prompts
+    await this.promptBuilderService.clearCache(tarotistaId);
+
+    return config;
+  }
+  ```
+
+- [ ] Implementar `getTarotistaConfig()` para leer configuración actual
+- [ ] Implementar `resetTarotistaConfigToDefault()` para restaurar defaults
+
+**4. Crear gestión de significados personalizados (1 día):**
+
+- [ ] Implementar `setCustomCardMeaning()`:
+
+  ```typescript
+  async setCustomCardMeaning(
+    tarotistaId: number,
+    cardId: number,
+    dto: SetCustomMeaningDto,
+  ): Promise<TarotistaCardMeaning> {
+    return this.cardMeaningService.setCustomMeaning(
+      tarotistaId,
+      cardId,
+      dto.isReversed,
+      dto.meaning,
+      dto.keywords,
+    );
+  }
+  ```
+
+- [ ] Implementar `getAllCustomMeanings()`:
+
+  ```typescript
+  async getAllCustomMeanings(
+    tarotistaId: number,
+  ): Promise<TarotistaCardMeaning[]> {
+    return this.cardMeaningService.getAllCustomMeanings(tarotistaId);
+  }
+  ```
+
+- [ ] Implementar `deleteCustomMeaning()`:
+
+  ```typescript
+  async deleteCustomMeaning(
+    tarotistaId: number,
+    cardId: number,
+    isReversed: boolean,
+  ): Promise<void> {
+    await this.cardMeaningService.deleteCustomMeaning(
+      tarotistaId,
+      cardId,
+      isReversed,
+    );
+  }
+  ```
+
+- [ ] Implementar `bulkImportCustomMeanings()` para importar 78 cartas de golpe:
+
+  ```typescript
+  async bulkImportCustomMeanings(
+    tarotistaId: number,
+    meanings: BulkCustomMeaningDto[],
+  ): Promise<{ imported: number; errors: string[] }> {
+    const errors: string[] = [];
+    let imported = 0;
+
+    for (const meaning of meanings) {
+      try {
+        await this.cardMeaningService.setCustomMeaning(
+          tarotistaId,
+          meaning.cardId,
+          meaning.isReversed,
+          meaning.meaning,
+          meaning.keywords,
+        );
+        imported++;
+      } catch (error) {
+        errors.push(`Card ${meaning.cardId}: ${error.message}`);
+      }
+    }
+
+    return { imported, errors };
+  }
+  ```
+
+**5. Crear sistema de aprobación de tarotistas (0.5 días):**
+
+- [ ] Implementar `applyToBeTarotist()` (endpoint público):
+
+  ```typescript
+  async applyToBeTarotist(
+    userId: number,
+    applicationDto: TarotistaApplicationDto,
+  ): Promise<TarotistaApplication> {
+    // Verificar que no sea ya tarotista
+    const user = await this.usersRepo.findOne({ where: { id: userId } });
+    if (user.hasRole(UserRole.TAROTIST)) {
+      throw new BadRequestException('Already a tarotist');
+    }
+
+    // Crear aplicación
+    const application = this.applicationsRepo.create({
+      userId,
+      nombrePublico: applicationDto.nombrePublico,
+      biografia: applicationDto.biografia,
+      especialidades: applicationDto.especialidades,
+      motivacion: applicationDto.motivacion,
+      experiencia: applicationDto.experiencia,
+      estado: 'PENDIENTE',
+    });
+
+    return this.applicationsRepo.save(application);
+  }
+  ```
+
+- [ ] Implementar `approveApplication()` (admin only):
+
+  ```typescript
+  async approveApplication(
+    applicationId: number,
+    adminNotes?: string,
+  ): Promise<Tarotista> {
+    const application = await this.applicationsRepo.findOne({
+      where: { id: applicationId },
+      relations: ['user'],
+    });
+
+    if (!application) {
+      throw new NotFoundException('Application not found');
+    }
+    if (application.estado !== 'PENDIENTE') {
+      throw new BadRequestException('Application already processed');
+    }
+
+    // Crear tarotista
+    const tarotista = await this.createTarotista({
+      userId: application.userId,
+      nombrePublico: application.nombrePublico,
+      biografia: application.biografia,
+      especialidades: application.especialidades,
+    });
+
+    // Actualizar aplicación
+    application.estado = 'APROBADA';
+    application.adminNotes = adminNotes;
+    application.reviewedAt = new Date();
+    await this.applicationsRepo.save(application);
+
+    return tarotista;
+  }
+  ```
+
+- [ ] Implementar `rejectApplication()` (admin only)
+- [ ] Implementar `getAllApplications()` para listar aplicaciones pendientes
+
+**6. Crear TarotistasAdminController con todos los endpoints (0.5 días):**
+
+- [ ] Proteger todos los endpoints con `@Roles(UserRole.ADMIN)`:
+
+  ```typescript
+  @Controller('admin/tarotistas')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiTags('Admin - Tarotistas')
+  export class TarotistasAdminController {
+    constructor(private tarotistasAdminService: TarotistasAdminService) {}
+
+    @Post()
+    @ApiOperation({ summary: 'Create new tarotista (bypass application)' })
+    async create(@Body() dto: CreateTarotistaDto) {
+      return this.tarotistasAdminService.createTarotista(dto);
+    }
+
+    @Get()
+    @ApiOperation({ summary: 'Get all tarotistas with filters' })
+    async getAll(@Query() filters: GetTarotistasFilterDto) {
+      return this.tarotistasAdminService.getAllTarotistas(filters);
+    }
+
+    @Get(':id')
+    @ApiOperation({ summary: 'Get tarotista by ID with full details' })
+    async getById(@Param('id') id: number) {
+      return this.tarotistasAdminService.getTarotistaById(id);
+    }
+
+    @Patch(':id')
+    @ApiOperation({ summary: 'Update tarotista profile' })
+    async update(@Param('id') id: number, @Body() dto: UpdateTarotistaDto) {
+      return this.tarotistasAdminService.updateTarotista(id, dto);
+    }
+
+    @Delete(':id')
+    @ApiOperation({ summary: 'Deactivate tarotista (soft delete)' })
+    async deactivate(@Param('id') id: number) {
+      return this.tarotistasAdminService.deactivateTarotista(id);
+    }
+
+    @Post(':id/reactivate')
+    @ApiOperation({ summary: 'Reactivate deactivated tarotista' })
+    async reactivate(@Param('id') id: number) {
+      return this.tarotistasAdminService.reactivateTarotista(id);
+    }
+
+    // Config endpoints
+    @Get(':id/config')
+    async getConfig(@Param('id') id: number) {
+      return this.tarotistasAdminService.getTarotistaConfig(id);
+    }
+
+    @Patch(':id/config')
+    async updateConfig(
+      @Param('id') id: number,
+      @Body() dto: UpdateTarotistaConfigDto,
+    ) {
+      return this.tarotistasAdminService.updateTarotistaConfig(id, dto);
+    }
+
+    @Post(':id/config/reset')
+    async resetConfig(@Param('id') id: number) {
+      return this.tarotistasAdminService.resetTarotistaConfigToDefault(id);
+    }
+
+    // Custom meanings endpoints
+    @Get(':id/custom-meanings')
+    async getCustomMeanings(@Param('id') id: number) {
+      return this.tarotistasAdminService.getAllCustomMeanings(id);
+    }
+
+    @Post(':id/custom-meanings/:cardId')
+    async setCustomMeaning(
+      @Param('id') tarotistaId: number,
+      @Param('cardId') cardId: number,
+      @Body() dto: SetCustomMeaningDto,
+    ) {
+      return this.tarotistasAdminService.setCustomCardMeaning(
+        tarotistaId,
+        cardId,
+        dto,
+      );
+    }
+
+    @Delete(':id/custom-meanings/:cardId')
+    async deleteCustomMeaning(
+      @Param('id') tarotistaId: number,
+      @Param('cardId') cardId: number,
+      @Query('isReversed') isReversed: boolean,
+    ) {
+      return this.tarotistasAdminService.deleteCustomMeaning(
+        tarotistaId,
+        cardId,
+        isReversed,
+      );
+    }
+
+    @Post(':id/custom-meanings/bulk')
+    async bulkImportMeanings(
+      @Param('id') tarotistaId: number,
+      @Body() dto: BulkCustomMeaningsDto,
+    ) {
+      return this.tarotistasAdminService.bulkImportCustomMeanings(
+        tarotistaId,
+        dto.meanings,
+      );
+    }
+
+    // Applications endpoints
+    @Get('applications/pending')
+    async getPendingApplications() {
+      return this.tarotistasAdminService.getAllApplications('PENDIENTE');
+    }
+
+    @Post('applications/:id/approve')
+    async approveApplication(
+      @Param('id') id: number,
+      @Body() dto: ApproveApplicationDto,
+    ) {
+      return this.tarotistasAdminService.approveApplication(id, dto.adminNotes);
+    }
+
+    @Post('applications/:id/reject')
+    async rejectApplication(
+      @Param('id') id: number,
+      @Body() dto: RejectApplicationDto,
+    ) {
+      return this.tarotistasAdminService.rejectApplication(id, dto.reason);
+    }
+  }
+  ```
+
+**7. Crear DTOs de validación (0.5 días):**
+
+- [ ] `CreateTarotistaDto`, `UpdateTarotistaDto`
+- [ ] `UpdateTarotistaConfigDto`
+- [ ] `SetCustomMeaningDto`, `BulkCustomMeaningsDto`
+- [ ] `TarotistaApplicationDto`, `ApproveApplicationDto`, `RejectApplicationDto`
+- [ ] `GetTarotistasFilterDto` con paginación y filtros
+
+**8. Crear tests completos (0.5 días):**
+
+- [ ] Tests unitarios de `TarotistasAdminService`: 20+ tests
+- [ ] Tests de integración: flujos completos de CRUD
+- [ ] Tests E2E: admin crea tarotista → configura → personaliza cartas
+- [ ] Tests de permisos: verificar que solo ADMIN puede acceder
+
+---
+
+#### 🎯 Criterios de Aceptación
+
+- ✅ `TarotistasModule` creado con controllers y services
+- ✅ CRUD completo: crear, listar, obtener, actualizar, desactivar tarotistas
+- ✅ Gestión de configuración de IA: leer, actualizar, resetear
+- ✅ Gestión de significados personalizados: CRUD + bulk import
+- ✅ Sistema de aplicaciones: apply, approve, reject
+- ✅ Todos los endpoints protegidos con `@Roles(UserRole.ADMIN)`
+- ✅ Filtros y paginación en listados
+- ✅ Validación completa con DTOs y class-validator
+- ✅ Soft delete: tarotistas desactivados no aparecen en marketplace
+- ✅ Invalidación de cache al actualizar configs
+- ✅ Tests unitarios, integración y E2E con 90%+ coverage
+- ✅ Documentación OpenAPI/Swagger completa
+
+---
+
+#### 📝 Notas de Implementación
+
+**Estructura de Directorios:**
+
+```
+src/modules/tarotistas/
+  controllers/
+    tarotistas-admin.controller.ts
+    tarotistas-admin.controller.spec.ts
+    tarotistas.controller.ts          ← Para endpoints públicos (TASK-072)
+  services/
+    tarotistas-admin.service.ts
+    tarotistas-admin.service.spec.ts
+    tarotistas.service.ts             ← Para lógica pública
+  dto/
+    create-tarotista.dto.ts
+    update-tarotista.dto.ts
+    update-tarotista-config.dto.ts
+    set-custom-meaning.dto.ts
+    tarotista-application.dto.ts
+    get-tarotistas-filter.dto.ts
+  entities/
+    tarotista-application.entity.ts   ← Nueva entidad
+  tarotistas.module.ts
+```
+
+**Entity TarotistaApplication:**
+
+```typescript
+@Entity('tarotista_applications')
+export class TarotistaApplication {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  userId: number;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'user_id' })
+  user: User;
+
+  @Column()
+  nombrePublico: string;
+
+  @Column('text')
+  biografia: string;
+
+  @Column('simple-array')
+  especialidades: string[];
+
+  @Column('text')
+  motivacion: string;
+
+  @Column('text')
+  experiencia: string;
+
+  @Column({ default: 'PENDIENTE' })
+  estado: 'PENDIENTE' | 'APROBADA' | 'RECHAZADA';
+
+  @Column({ type: 'text', nullable: true })
+  adminNotes?: string;
+
+  @Column({ type: 'timestamp', nullable: true })
+  reviewedAt?: Date;
+
+  @CreateDateColumn()
+  createdAt: Date;
+}
+```
+
+**Ejemplo de CreateTarotistaDto:**
+
+```typescript
+export class CreateTarotistaDto {
+  @IsNumber()
+  @ApiProperty({ example: 123 })
+  userId: number;
+
+  @IsString()
+  @MinLength(3)
+  @MaxLength(50)
+  @ApiProperty({ example: 'Luna Mística' })
+  nombrePublico: string;
+
+  @IsString()
+  @MinLength(50)
+  @MaxLength(500)
+  @ApiProperty()
+  biografia: string;
+
+  @IsArray()
+  @IsString({ each: true })
+  @ApiProperty({ example: ['amor', 'trabajo', 'espiritual'] })
+  especialidades: string[];
+
+  @IsOptional()
+  @IsUrl()
+  @ApiProperty({ required: false })
+  fotoPerfil?: string;
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty({ required: false })
+  systemPromptIdentity?: string;
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty({ required: false })
+  systemPromptGuidelines?: string;
+}
+```
+
+**Ejemplo de Uso - Crear Tarotista Completo:**
+
+```bash
+POST /admin/tarotistas
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+
+{
+  "userId": 123,
+  "nombrePublico": "Luna Mística",
+  "biografia": "Tarotista con 15 años de experiencia...",
+  "especialidades": ["amor", "trabajo", "espiritual"],
+  "fotoPerfil": "https://example.com/photo.jpg",
+  "systemPromptIdentity": "Soy Luna, una tarotista especializada en...",
+  "systemPromptGuidelines": "Mis lecturas se caracterizan por..."
+}
+```
+
+**Ejemplo de Uso - Bulk Import Significados:**
+
+```bash
+POST /admin/tarotistas/2/custom-meanings/bulk
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+
+{
+  "meanings": [
+    {
+      "cardId": 1,
+      "isReversed": false,
+      "meaning": "El Loco representa...",
+      "keywords": ["inicio", "fe", "aventura"]
+    },
+    {
+      "cardId": 1,
+      "isReversed": true,
+      "meaning": "El Loco invertido sugiere...",
+      "keywords": ["imprudencia", "caos", "falta de dirección"]
+    },
+    // ... 76 cartas más
+  ]
+}
+```
+
+**Flujo de Aplicación a Tarotista:**
+
+```typescript
+// 1. Usuario aplica (endpoint público)
+POST /tarotistas/apply
+{
+  "nombrePublico": "Luna Mística",
+  "biografia": "...",
+  "especialidades": ["amor"],
+  "motivacion": "Quiero compartir mi don...",
+  "experiencia": "15 años practicando tarot..."
+}
+
+// 2. Admin revisa aplicaciones pendientes
+GET /admin/tarotistas/applications/pending
+→ Retorna lista de aplicaciones
+
+// 3. Admin aprueba
+POST /admin/tarotistas/applications/123/approve
+{
+  "adminNotes": "Excelente perfil, aprobado"
+}
+→ Crea tarotista automáticamente
+→ Promove user a rol TAROTIST
+→ Crea config de IA default
+```
+
+**Metrics Dashboard (para futuro TASK-073):**
+
+```typescript
+// Preparar método para métricas
+async getTarotistaMetrics(tarotistaId: number): Promise<TarotistaMetrics> {
+  return {
+    totalReadings: await this.countReadings(tarotistaId),
+    totalRevenue: await this.calculateRevenue(tarotistaId),
+    averageRating: await this.calculateAverageRating(tarotistaId),
+    activeSubscribers: await this.countActiveSubscribers(tarotistaId),
+    readingsThisMonth: await this.countReadingsThisMonth(tarotistaId),
+    revenueThisMonth: await this.calculateRevenueThisMonth(tarotistaId),
+  };
+}
+```
+
+**Orden de Implementación:**
+
+1. ✅ Crear módulo y estructura básica
+2. ✅ Crear TarotistasAdminService con CRUD
+3. ✅ Crear gestión de configuración de IA
+4. ✅ Crear gestión de significados personalizados
+5. ✅ Crear sistema de aplicaciones
+6. ✅ Crear controller con todos los endpoints
+7. ✅ Crear DTOs de validación
+8. ✅ Tests completos
+
+---
+
+### 🔴 TASK-071: Implementar Sistema de Suscripciones a Tarotistas ⭐⭐⭐
+
+**Prioridad:** 🔴 CRÍTICA  
+**Estimación:** 4 días  
+**Tags:** mvp, marketplace, subscriptions, business-logic, monetization  
+**Dependencias:** TASK-064 (Schema), TASK-013 (Planes), TASK-070 (Admin Tarotistas)  
+**Estado:** 🟡 NO INICIADA  
+**Contexto Informe:** Sección 4 - Modelo de Suscripciones a Tarotistas
+
+---
+
+#### 📋 Descripción
+
+Implementar el sistema de suscripciones que permite a usuarios seleccionar sus tarotistas preferidos según su plan. Este es el **modelo de negocio core del marketplace**:
+
+**FREE Plan:**
+
+- Puede elegir **1 tarotista favorito** (default: Flavia)
+- Todas sus lecturas se hacen con ese tarotista
+- Cooldown de **30 días** para cambiar de favorito
+- Si no elige, usa Flavia automáticamente
+
+**PREMIUM Plan:**
+
+- Puede elegir **1 tarotista específico** (lecturas ilimitadas con él/ella)
+- O puede elegir **"All Access"** (acceso a todos los tarotistas)
+- Puede cambiar de favorito **sin cooldown**
+- Lecturas ilimitadas
+
+**PROFESSIONAL Plan:**
+
+- Igual que PREMIUM pero con más lecturas
+- **"All Access"** por defecto
+- Sin restricciones
+
+El informe especifica:
+
+> "Sistema de suscripción: usuarios FREE eligen 1 tarotista (cooldown 30 días al cambiar). PREMIUM pueden elegir 1 específico o all-access. Sistema rastrea qué tarotista generó cada lectura para revenue sharing."
+
+**Funcionalidades Clave:**
+
+- Gestión de favorito: elegir, cambiar, cooldown
+- Resolver tarotista para lectura según plan y preferencias
+- Tracking de lecturas por tarotista (para revenue sharing)
+- Validaciones: solo tarotistas activos, respeto de cooldown
+- Dashboard de usuario: ver su tarotista actual y próximo cambio disponible
+
+---
+
+#### 🧪 Testing
+
+**Unit Tests:**
+
+- [ ] Test `SubscriptionsService.setFavoriteTarotist()` valida plan FREE
+- [ ] Test cooldown: FREE no puede cambiar antes de 30 días
+- [ ] Test PREMIUM puede cambiar sin cooldown
+- [ ] Test `resolveTarotistaForReading()` retorna correcto según plan
+- [ ] Test all-access: retorna tarotista disponible aleatoriamente
+- [ ] Test fallback a Flavia si no hay favorito
+
+**Integration Tests:**
+
+- [ ] Test flujo FREE: elegir favorito → esperar 30 días → cambiar
+- [ ] Test flujo PREMIUM: elegir favorito → cambiar inmediatamente
+- [ ] Test generar lectura usa tarotista correcto
+- [ ] Test tracking: lectura registra tarotistaId correcto
+- [ ] Test desactivar tarotista: usuarios deben elegir otro
+
+**E2E Tests:**
+
+- [ ] Test usuario FREE elige tarotista → genera lecturas → cambia después de 30 días
+- [ ] Test usuario PREMIUM elige all-access → genera lecturas con varios tarotistas
+- [ ] Test usuario upgrade FREE → PREMIUM → puede cambiar inmediatamente
+- [ ] Test tarotista desactivado: usuarios reciben notificación y deben re-elegir
+
+---
+
+#### ✅ Tareas específicas
+
+**1. Crear entity TarotistaSubscription (0.5 días):**
+
+- [ ] Crear archivo `src/modules/subscriptions/entities/tarotista-subscription.entity.ts`:
+
+  ```typescript
+  @Entity('tarotista_subscriptions')
+  @Index(['userId'], { unique: true }) // Un usuario solo tiene una suscripción activa
+  export class TarotistaSubscription {
+    @PrimaryGeneratedColumn()
+    id: number;
+
+    @Column()
+    userId: number;
+
+    @ManyToOne(() => User)
+    @JoinColumn({ name: 'user_id' })
+    user: User;
+
+    @Column({ nullable: true })
+    tarotistaId: number | null; // null = "all access" para PREMIUM
+
+    @ManyToOne(() => Tarotista, { nullable: true })
+    @JoinColumn({ name: 'tarotista_id' })
+    tarotista: Tarotista | null;
+
+    @Column({ default: false })
+    isAllAccess: boolean; // true = acceso a todos (PREMIUM/PROFESSIONAL)
+
+    @Column({ type: 'timestamp', nullable: true })
+    lastChangedAt: Date | null; // Para calcular cooldown
+
+    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+    createdAt: Date;
+
+    @UpdateDateColumn()
+    updatedAt: Date;
+
+    // Helper: calcular próximo cambio disponible
+    getNextChangeAvailableAt(userPlan: string): Date | null {
+      if (userPlan !== 'FREE') {
+        return null; // Sin cooldown para PREMIUM/PROFESSIONAL
+      }
+
+      if (!this.lastChangedAt) {
+        return null; // Primer cambio siempre disponible
+      }
+
+      const cooldownDays = 30;
+      const nextChange = new Date(this.lastChangedAt);
+      nextChange.setDate(nextChange.getDate() + cooldownDays);
+      return nextChange;
+    }
+
+    canChangeNow(userPlan: string): boolean {
+      const nextChange = this.getNextChangeAvailableAt(userPlan);
+      if (!nextChange) return true;
+      return new Date() >= nextChange;
+    }
+  }
+  ```
+
+- [ ] Crear migración TypeORM
+
+**2. Crear SubscriptionsService (1.5 días):**
+
+- [ ] Implementar método `getFavoriteTarotista()`:
+
+  ```typescript
+  async getFavoriteTarotista(userId: number): Promise<TarotistaSubscription | null> {
+    return this.subscriptionsRepo.findOne({
+      where: { userId },
+      relations: ['tarotista'],
+    });
+  }
+  ```
+
+- [ ] Implementar método `setFavoriteTarotist()`:
+
+  ```typescript
+  async setFavoriteTarotist(
+    userId: number,
+    tarotistaId: number,
+    force = false, // Admin puede forzar cambio sin cooldown
+  ): Promise<TarotistaSubscription> {
+    // 1. Obtener usuario con plan
+    const user = await this.usersRepo.findOne({
+      where: { id: userId },
+      relations: ['subscription'],
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // 2. Validar que tarotista existe y está activo
+    const tarotista = await this.tarotistasRepo.findOne({
+      where: { id: tarotistaId, isActive: true },
+    });
+    if (!tarotista) {
+      throw new NotFoundException('Tarotista not found or inactive');
+    }
+
+    // 3. Buscar suscripción existente
+    let subscription = await this.subscriptionsRepo.findOne({
+      where: { userId },
+    });
+
+    // 4. Validar cooldown para FREE
+    if (subscription && user.subscription.planType === 'FREE' && !force) {
+      if (!subscription.canChangeNow('FREE')) {
+        const nextChange = subscription.getNextChangeAvailableAt('FREE');
+        throw new BadRequestException(
+          `Cannot change favorite yet. Next change available at: ${nextChange.toISOString()}`,
+        );
+      }
+    }
+
+    // 5. Crear o actualizar suscripción
+    if (!subscription) {
+      subscription = this.subscriptionsRepo.create({
+        userId,
+        tarotistaId,
+        isAllAccess: false,
+        lastChangedAt: new Date(),
+      });
+    } else {
+      subscription.tarotistaId = tarotistaId;
+      subscription.isAllAccess = false;
+      subscription.lastChangedAt = new Date();
+    }
+
+    return this.subscriptionsRepo.save(subscription);
+  }
+  ```
+
+- [ ] Implementar método `setAllAccess()` (solo PREMIUM/PROFESSIONAL):
+
+  ```typescript
+  async setAllAccess(userId: number): Promise<TarotistaSubscription> {
+    const user = await this.usersRepo.findOne({
+      where: { id: userId },
+      relations: ['subscription'],
+    });
+
+    if (!['PREMIUM', 'PROFESSIONAL'].includes(user.subscription.planType)) {
+      throw new ForbiddenException('All Access requires PREMIUM or PROFESSIONAL plan');
+    }
+
+    let subscription = await this.subscriptionsRepo.findOne({
+      where: { userId },
+    });
+
+    if (!subscription) {
+      subscription = this.subscriptionsRepo.create({
+        userId,
+        tarotistaId: null,
+        isAllAccess: true,
+        lastChangedAt: new Date(),
+      });
+    } else {
+      subscription.tarotistaId = null;
+      subscription.isAllAccess = true;
+      subscription.lastChangedAt = new Date();
+    }
+
+    return this.subscriptionsRepo.save(subscription);
+  }
+  ```
+
+- [ ] Implementar método `resolveTarotistaForReading()` (CORE):
+
+  ```typescript
+  async resolveTarotistaForReading(userId: number): Promise<number> {
+    // 1. Obtener suscripción del usuario
+    const subscription = await this.subscriptionsRepo.findOne({
+      where: { userId },
+    });
+
+    // 2. Si tiene all-access, retornar tarotista aleatorio activo
+    if (subscription?.isAllAccess) {
+      const randomTarotista = await this.tarotistasRepo
+        .createQueryBuilder('t')
+        .where('t.isActive = true')
+        .orderBy('RANDOM()')
+        .getOne();
+
+      if (!randomTarotista) {
+        throw new Error('No active tarotistas available');
+      }
+
+      return randomTarotista.id;
+    }
+
+    // 3. Si tiene favorito específico, validar que esté activo
+    if (subscription?.tarotistaId) {
+      const tarotista = await this.tarotistasRepo.findOne({
+        where: { id: subscription.tarotistaId, isActive: true },
+      });
+
+      if (tarotista) {
+        return tarotista.id;
+      }
+
+      // Tarotista inactivo, forzar re-selección
+      throw new BadRequestException(
+        'Your favorite tarotista is no longer available. Please select a new one.',
+      );
+    }
+
+    // 4. Sin suscripción, usar Flavia (default)
+    const flavia = await this.tarotistasRepo.findOne({
+      where: { nombrePublico: 'Flavia' },
+    });
+
+    if (!flavia) {
+      throw new Error('Default tarotista (Flavia) not found');
+    }
+
+    return flavia.id;
+  }
+  ```
+
+- [ ] Implementar método `getRemainingCooldown()`:
+
+  ```typescript
+  async getRemainingCooldown(userId: number): Promise<{
+    canChange: boolean;
+    nextChangeAt: Date | null;
+    daysRemaining: number | null;
+  }> {
+    const user = await this.usersRepo.findOne({
+      where: { id: userId },
+      relations: ['subscription'],
+    });
+
+    const subscription = await this.subscriptionsRepo.findOne({
+      where: { userId },
+    });
+
+    if (!subscription) {
+      return { canChange: true, nextChangeAt: null, daysRemaining: null };
+    }
+
+    const canChange = subscription.canChangeNow(user.subscription.planType);
+    const nextChangeAt = subscription.getNextChangeAvailableAt(user.subscription.planType);
+
+    let daysRemaining = null;
+    if (nextChangeAt && !canChange) {
+      const now = new Date();
+      const diff = nextChangeAt.getTime() - now.getTime();
+      daysRemaining = Math.ceil(diff / (1000 * 60 * 60 * 24));
+    }
+
+    return { canChange, nextChangeAt, daysRemaining };
+  }
+  ```
+
+**3. Actualizar ReadingsService para usar resolver (0.5 días):**
+
+- [ ] Modificar `generateReading()` para resolver tarotista:
+
+  ```typescript
+  async generateReading(
+    userId: number,
+    createReadingDto: CreateReadingDto,
+  ): Promise<Reading> {
+    // ... validaciones previas
+
+    // Resolver tarotista según suscripción del usuario
+    const tarotistaId = await this.subscriptionsService.resolveTarotistaForReading(userId);
+
+    // Generar interpretación con tarotista correcto
+    const interpretation = await this.interpretationsService.generateInterpretation(
+      selectedCards,
+      createReadingDto.question,
+      createReadingDto.category,
+      tarotistaId, // ← Pasar tarotista
+    );
+
+    // Crear reading y guardar tarotistaId para tracking
+    const reading = this.readingsRepo.create({
+      userId,
+      tarotistaId, // ← Tracking para revenue sharing
+      spreadType: createReadingDto.spreadType,
+      question: createReadingDto.question,
+      category: createReadingDto.category,
+      interpretation: interpretation.text,
+      // ... resto
+    });
+
+    return this.readingsRepo.save(reading);
+  }
+  ```
+
+**4. Crear SubscriptionsController (0.5 días):**
+
+- [ ] Crear endpoints para gestionar suscripciones:
+
+  ```typescript
+  @Controller('subscriptions/tarotistas')
+  @UseGuards(JwtAuthGuard)
+  @ApiTags('Subscriptions - Tarotistas')
+  export class TarotistasSubscriptionsController {
+    constructor(private subscriptionsService: SubscriptionsService) {}
+
+    @Get('current')
+    @ApiOperation({ summary: 'Get current favorite tarotista' })
+    async getCurrentFavorite(@GetUser() user: User) {
+      return this.subscriptionsService.getFavoriteTarotista(user.id);
+    }
+
+    @Post('favorite/:tarotistaId')
+    @ApiOperation({ summary: 'Set favorite tarotista' })
+    async setFavorite(
+      @GetUser() user: User,
+      @Param('tarotistaId') tarotistaId: number,
+    ) {
+      return this.subscriptionsService.setFavoriteTarotist(
+        user.id,
+        tarotistaId,
+      );
+    }
+
+    @Post('all-access')
+    @ApiOperation({
+      summary: 'Enable all-access mode (PREMIUM/PROFESSIONAL only)',
+    })
+    async enableAllAccess(@GetUser() user: User) {
+      return this.subscriptionsService.setAllAccess(user.id);
+    }
+
+    @Get('cooldown')
+    @ApiOperation({ summary: 'Get remaining cooldown for changing favorite' })
+    async getCooldown(@GetUser() user: User) {
+      return this.subscriptionsService.getRemainingCooldown(user.id);
+    }
+
+    @Get('stats')
+    @ApiOperation({ summary: 'Get subscription stats (readings by tarotista)' })
+    async getStats(@GetUser() user: User) {
+      return this.subscriptionsService.getUserSubscriptionStats(user.id);
+    }
+  }
+  ```
+
+**5. Crear sistema de notificaciones para cambios (0.5 días):**
+
+- [ ] Notificar cuando tarotista favorito es desactivado:
+
+  ```typescript
+  async notifyUsersWhenTarotistaDeactivated(tarotistaId: number): Promise<void> {
+    // Buscar todos los usuarios con este tarotista como favorito
+    const subscriptions = await this.subscriptionsRepo.find({
+      where: { tarotistaId },
+      relations: ['user'],
+    });
+
+    for (const subscription of subscriptions) {
+      // Enviar email/notificación
+      await this.emailService.send({
+        to: subscription.user.email,
+        template: 'tarotista-deactivated',
+        context: {
+          userName: subscription.user.name,
+          tarotistaName: subscription.tarotista.nombrePublico,
+        },
+      });
+
+      // Limpiar suscripción (forzar re-selección)
+      subscription.tarotistaId = null;
+      subscription.isAllAccess = false;
+      await this.subscriptionsRepo.save(subscription);
+    }
+  }
+  ```
+
+- [ ] Integrar con `TarotistasAdminService.deactivateTarotista()`:
+
+  ```typescript
+  async deactivateTarotista(tarotistaId: number): Promise<void> {
+    const tarotista = await this.tarotistasRepo.findOne({
+      where: { id: tarotistaId },
+    });
+
+    tarotista.isActive = false;
+    await this.tarotistasRepo.save(tarotista);
+
+    // Notificar usuarios afectados
+    await this.subscriptionsService.notifyUsersWhenTarotistaDeactivated(tarotistaId);
+  }
+  ```
+
+**6. Crear seeder para suscripciones de testing (0.25 días):**
+
+- [ ] Crear suscripciones para usuarios de testing:
+
+  ```typescript
+  // seeders/tarotista-subscriptions.seeder.ts
+  const freeUser = await usersRepo.findOne({
+    where: { email: 'free@test.com' },
+  });
+  const premiumUser = await usersRepo.findOne({
+    where: { email: 'premium@test.com' },
+  });
+  const flavia = await tarotistasRepo.findOne({
+    where: { nombrePublico: 'Flavia' },
+  });
+
+  // FREE user con Flavia como favorita
+  await subscriptionsRepo.save({
+    userId: freeUser.id,
+    tarotistaId: flavia.id,
+    isAllAccess: false,
+    lastChangedAt: new Date(),
+  });
+
+  // PREMIUM user con all-access
+  await subscriptionsRepo.save({
+    userId: premiumUser.id,
+    tarotistaId: null,
+    isAllAccess: true,
+    lastChangedAt: new Date(),
+  });
+  ```
+
+**7. Crear tests completos (0.5 días):**
+
+- [ ] Tests unitarios de `SubscriptionsService`: 15+ tests
+- [ ] Tests de cooldown: validar 30 días para FREE
+- [ ] Tests de all-access: validar selección aleatoria
+- [ ] Tests de integración con lecturas
+- [ ] Tests E2E: flujos completos de usuario
+
+---
+
+#### 🎯 Criterios de Aceptación
+
+- ✅ Entity `TarotistaSubscription` creada con columnas correctas
+- ✅ Helper methods: `canChangeNow()`, `getNextChangeAvailableAt()`
+- ✅ `SubscriptionsService` implementado con todos los métodos
+- ✅ Método `setFavoriteTarotist()` valida cooldown para FREE
+- ✅ Método `setAllAccess()` solo funciona para PREMIUM/PROFESSIONAL
+- ✅ Método `resolveTarotistaForReading()` retorna correcto según plan
+- ✅ Fallback a Flavia si no hay suscripción
+- ✅ All-access retorna tarotista aleatorio activo
+- ✅ `ReadingsService` actualizado para usar resolver
+- ✅ Cada reading registra `tarotistaId` para tracking
+- ✅ Controller con endpoints: get current, set favorite, all-access, cooldown
+- ✅ Notificaciones cuando tarotista favorito es desactivado
+- ✅ Seeders de testing con suscripciones
+- ✅ Tests unitarios, integración y E2E con 90%+ coverage
+
+---
+
+#### 📝 Notas de Implementación
+
+**Lógica de Cooldown:**
+
+```typescript
+// FREE user intenta cambiar antes de 30 días
+const subscription = {
+  lastChangedAt: new Date('2024-01-01'),
+  // ...
+};
+const userPlan = 'FREE';
+
+const nextChange = new Date(subscription.lastChangedAt);
+nextChange.setDate(nextChange.getDate() + 30); // 2024-01-31
+
+if (new Date() < nextChange) {
+  throw new BadRequestException('Cannot change yet');
+}
+```
+
+**Flujo All-Access (PREMIUM):**
+
+```typescript
+// Usuario PREMIUM con all-access
+const subscription = { isAllAccess: true, tarotistaId: null };
+
+// En cada lectura, seleccionar aleatorio
+const tarotista = await db.query(`
+  SELECT * FROM tarotistas 
+  WHERE is_active = true 
+  ORDER BY RANDOM() 
+  LIMIT 1
+`);
+
+// Usar ese tarotista para esta lectura específica
+// Próxima lectura puede ser con otro tarotista
+```
+
+**Ejemplo de Uso - Usuario FREE:**
+
+```typescript
+// Día 1: Elegir favorito
+POST /subscriptions/tarotistas/favorite/2
+→ OK, tarotista 2 es favorito
+
+// Día 15: Intentar cambiar
+POST /subscriptions/tarotistas/favorite/3
+→ ERROR: "Cannot change favorite yet. Next change available at: 2024-02-01"
+
+// Día 31: Cambiar exitosamente
+POST /subscriptions/tarotistas/favorite/3
+→ OK, tarotista 3 es nuevo favorito
+```
+
+**Ejemplo de Uso - Usuario PREMIUM:**
+
+```typescript
+// Día 1: Elegir favorito
+POST /subscriptions/tarotistas/favorite/2
+→ OK, tarotista 2 es favorito
+
+// Día 2: Cambiar inmediatamente (sin cooldown)
+POST /subscriptions/tarotistas/favorite/3
+→ OK, tarotista 3 es nuevo favorito
+
+// Día 3: Activar all-access
+POST /subscriptions/tarotistas/all-access
+→ OK, all-access activado
+
+// Generar lectura → usa tarotista aleatorio
+POST /readings
+→ Reading usa tarotista 5
+
+// Generar otra lectura → puede usar otro tarotista
+POST /readings
+→ Reading usa tarotista 7
+```
+
+**Tracking para Revenue Sharing:**
+
+```sql
+-- Ver lecturas por tarotista (para TASK-073)
+SELECT
+  t.nombre_publico,
+  COUNT(r.id) as total_readings,
+  COUNT(CASE WHEN r.created_at >= NOW() - INTERVAL '30 days' THEN 1 END) as readings_last_30_days
+FROM readings r
+JOIN tarotistas t ON r.tarotista_id = t.id
+GROUP BY t.id, t.nombre_publico
+ORDER BY total_readings DESC;
+```
+
+**Dashboard de Usuario:**
+
+```typescript
+// GET /subscriptions/tarotistas/current
+{
+  "currentTarotista": {
+    "id": 2,
+    "nombrePublico": "Luna Mística",
+    "fotoPerfil": "https://...",
+    "especialidades": ["amor", "trabajo"]
+  },
+  "isAllAccess": false,
+  "cooldown": {
+    "canChange": false,
+    "nextChangeAt": "2024-02-01T00:00:00Z",
+    "daysRemaining": 15
+  },
+  "stats": {
+    "totalReadingsWithThisTarotista": 42,
+    "readingsThisMonth": 8
+  }
+}
+```
+
+**Validaciones Importantes:**
+
+```typescript
+// 1. Solo tarotistas activos
+const tarotista = await repo.findOne({
+  where: { id: tarotistaId, isActive: true },
+});
+
+// 2. Respetar cooldown para FREE
+if (plan === 'FREE' && !canChangeNow()) {
+  throw new BadRequestException('Cooldown active');
+}
+
+// 3. All-access solo para planes elegibles
+if (!['PREMIUM', 'PROFESSIONAL'].includes(plan)) {
+  throw new ForbiddenException('Requires PREMIUM');
+}
+
+// 4. Fallback si tarotista inactivo
+if (!tarotista) {
+  return getFlaviaId(); // Default
+}
+```
+
+**Orden de Implementación:**
+
+1. ✅ Crear entity TarotistaSubscription
+2. ✅ Crear SubscriptionsService con métodos core
+3. ✅ Actualizar ReadingsService para resolver tarotista
+4. ✅ Crear controller con endpoints
+5. ✅ Sistema de notificaciones
+6. ✅ Seeders de testing
+7. ✅ Tests completos
+
+---
+
+### 🔴 TASK-072: Crear Endpoints Públicos de Tarotistas ⭐⭐⭐
+
+**Prioridad:** 🔴 CRÍTICA  
+**Estimación:** 2 días  
+**Tags:** mvp, marketplace, public-api, frontend-ready, discovery  
+**Dependencias:** TASK-064 (Schema), TASK-070 (Admin Tarotistas)  
+**Estado:** 🟡 NO INICIADA  
+**Contexto Informe:** Sección 5 - Descubrimiento de Tarotistas
+
+---
+
+#### 📋 Descripción
+
+Crear endpoints públicos (sin autenticación requerida) para que el frontend del marketplace pueda:
+
+1. **Listar todos los tarotistas activos** con paginación
+2. **Ver perfil público detallado** de cada tarotista
+3. **Filtrar por especialidades** (amor, trabajo, salud, etc.)
+4. **Ordenar por popularidad, rating, o alfabético**
+5. **Buscar por nombre o biografía**
+6. **Ver estadísticas públicas**: total de lecturas, rating promedio
+
+El informe especifica:
+
+> "Endpoints públicos para listar tarotistas disponibles, ver perfiles, filtrar por especialidad, ordenar por rating. Frontend usa estos endpoints para la página de marketplace."
+
+**Casos de Uso:**
+
+- Usuario visitante explora tarotistas antes de registrarse
+- Usuario registrado FREE busca tarotista para seleccionar como favorito
+- Usuario PREMIUM explora opciones antes de elegir favorito o all-access
+- Landing page muestra "Nuestros Tarotistas" con cards
+
+**Datos Públicos vs Privados:**
+
+- ✅ Público: nombre, foto, biografía, especialidades, rating, total lecturas
+- ❌ Privado: configuración de IA, significados personalizados, ingresos, email
+
+---
+
+#### 🧪 Testing
+
+**Unit Tests:**
+
+- [ ] Test `TarotistasService.getAllPublic()` retorna solo activos
+- [ ] Test filtros: especialidad, búsqueda, ordenamiento
+- [ ] Test paginación: page, pageSize
+- [ ] Test `getTarotistaPublicProfile()` no expone datos sensibles
+
+**Integration Tests:**
+
+- [ ] Test endpoint `/tarotistas` retorna lista paginada
+- [ ] Test endpoint `/tarotistas/:id` retorna perfil completo
+- [ ] Test filtro por especialidad: `/tarotistas?especialidad=amor`
+- [ ] Test ordenamiento: `/tarotistas?orderBy=rating&order=DESC`
+- [ ] Test búsqueda: `/tarotistas?search=luna`
+
+**E2E Tests:**
+
+- [ ] Test usuario visitante puede ver lista sin autenticación
+- [ ] Test usuario registrado puede ver perfiles
+- [ ] Test tarotista inactivo NO aparece en lista pública
+- [ ] Test búsqueda retorna resultados relevantes
+
+---
+
+#### ✅ Tareas específicas
+
+**1. Crear TarotistasService con métodos públicos (1 día):**
+
+- [ ] Implementar método `getAllPublic()`:
+
+  ```typescript
+  async getAllPublic(filters: GetPublicTarotistasDto): Promise<{
+    tarotistas: PublicTarotistaDto[];
+    total: number;
+    page: number;
+    pageSize: number;
+  }> {
+    const {
+      page = 1,
+      pageSize = 20,
+      especialidad,
+      search,
+      orderBy = 'rating',
+      order = 'DESC',
+    } = filters;
+
+    const query = this.tarotistasRepo
+      .createQueryBuilder('t')
+      .where('t.isActive = true') // Solo activos
+      .select([
+        't.id',
+        't.nombrePublico',
+        't.biografia',
+        't.especialidades',
+        't.fotoPerfil',
+        't.rating',
+        't.totalLecturas',
+        't.yearsExperience',
+        't.instagramUrl',
+        't.websiteUrl',
+        't.createdAt',
+      ]);
+
+    // Filtro por especialidad
+    if (especialidad) {
+      query.andWhere(':especialidad = ANY(t.especialidades)', { especialidad });
+    }
+
+    // Búsqueda por nombre o biografía
+    if (search) {
+      query.andWhere(
+        '(t.nombrePublico ILIKE :search OR t.biografia ILIKE :search)',
+        { search: `%${search}%` },
+      );
+    }
+
+    // Ordenamiento
+    const orderByMap = {
+      rating: 't.rating',
+      totalLecturas: 't.totalLecturas',
+      nombre: 't.nombrePublico',
+      createdAt: 't.createdAt',
+    };
+    const orderColumn = orderByMap[orderBy] || 't.rating';
+    query.orderBy(orderColumn, order as 'ASC' | 'DESC');
+
+    // Paginación
+    query.skip((page - 1) * pageSize).take(pageSize);
+
+    const [tarotistas, total] = await query.getManyAndCount();
+
+    return {
+      tarotistas: tarotistas.map(t => this.toPublicDto(t)),
+      total,
+      page,
+      pageSize,
+    };
+  }
+  ```
+
+- [ ] Implementar método `getPublicProfile()`:
+
+  ```typescript
+  async getPublicProfile(tarotistaId: number): Promise<PublicTarotistaDto> {
+    const tarotista = await this.tarotistasRepo.findOne({
+      where: { id: tarotistaId, isActive: true },
+      select: [
+        'id',
+        'nombrePublico',
+        'biografia',
+        'especialidades',
+        'fotoPerfil',
+        'rating',
+        'totalLecturas',
+        'yearsExperience',
+        'instagramUrl',
+        'websiteUrl',
+        'createdAt',
+      ],
+    });
+
+    if (!tarotista) {
+      throw new NotFoundException('Tarotista not found or inactive');
+    }
+
+    return this.toPublicDto(tarotista);
+  }
+  ```
+
+- [ ] Implementar método helper `toPublicDto()`:
+
+  ```typescript
+  private toPublicDto(tarotista: Tarotista): PublicTarotistaDto {
+    return {
+      id: tarotista.id,
+      nombrePublico: tarotista.nombrePublico,
+      biografia: tarotista.biografia,
+      especialidades: tarotista.especialidades,
+      fotoPerfil: tarotista.fotoPerfil,
+      rating: tarotista.rating || 0,
+      totalLecturas: tarotista.totalLecturas || 0,
+      yearsExperience: tarotista.yearsExperience,
+      socialLinks: {
+        instagram: tarotista.instagramUrl,
+        website: tarotista.websiteUrl,
+      },
+      memberSince: tarotista.createdAt,
+    };
+  }
+  ```
+
+- [ ] Implementar método `getSpecialities()` para filtros:
+
+  ```typescript
+  async getAvailableSpecialities(): Promise<string[]> {
+    const result = await this.tarotistasRepo
+      .createQueryBuilder('t')
+      .select('UNNEST(t.especialidades)', 'especialidad')
+      .where('t.isActive = true')
+      .distinct(true)
+      .getRawMany();
+
+    return result.map(r => r.especialidad).sort();
+  }
+  ```
+
+**2. Crear DTOs de respuesta pública (0.5 días):**
+
+- [ ] Crear `PublicTarotistaDto`:
+
+  ```typescript
+  export class PublicTarotistaDto {
+    @ApiProperty({ example: 1 })
+    id: number;
+
+    @ApiProperty({ example: 'Luna Mística' })
+    nombrePublico: string;
+
+    @ApiProperty({ example: 'Tarotista con 15 años de experiencia...' })
+    biografia: string;
+
+    @ApiProperty({ example: ['amor', 'trabajo', 'espiritual'] })
+    especialidades: string[];
+
+    @ApiProperty({ example: 'https://example.com/photo.jpg' })
+    fotoPerfil: string;
+
+    @ApiProperty({ example: 4.8 })
+    rating: number;
+
+    @ApiProperty({ example: 1250 })
+    totalLecturas: number;
+
+    @ApiProperty({ example: 15 })
+    yearsExperience?: number;
+
+    @ApiProperty()
+    socialLinks: {
+      instagram?: string;
+      website?: string;
+    };
+
+    @ApiProperty()
+    memberSince: Date;
+  }
+  ```
+
+- [ ] Crear `GetPublicTarotistasDto` para query params:
+
+  ```typescript
+  export class GetPublicTarotistasDto {
+    @IsOptional()
+    @IsNumber()
+    @Type(() => Number)
+    @Min(1)
+    @ApiPropertyOptional({ example: 1 })
+    page?: number;
+
+    @IsOptional()
+    @IsNumber()
+    @Type(() => Number)
+    @Min(1)
+    @Max(100)
+    @ApiPropertyOptional({ example: 20 })
+    pageSize?: number;
+
+    @IsOptional()
+    @IsString()
+    @ApiPropertyOptional({ example: 'amor' })
+    especialidad?: string;
+
+    @IsOptional()
+    @IsString()
+    @ApiPropertyOptional({ example: 'luna' })
+    search?: string;
+
+    @IsOptional()
+    @IsIn(['rating', 'totalLecturas', 'nombre', 'createdAt'])
+    @ApiPropertyOptional({ example: 'rating' })
+    orderBy?: string;
+
+    @IsOptional()
+    @IsIn(['ASC', 'DESC'])
+    @ApiPropertyOptional({ example: 'DESC' })
+    order?: 'ASC' | 'DESC';
+  }
+  ```
+
+**3. Crear TarotistasController público (0.5 días):**
+
+- [ ] Crear controller SIN guards (público):
+
+  ```typescript
+  @Controller('tarotistas')
+  @ApiTags('Public - Tarotistas')
+  export class TarotistasController {
+    constructor(private tarotistasService: TarotistasService) {}
+
+    @Get()
+    @ApiOperation({
+      summary: 'Get all active tarotistas (public)',
+      description:
+        'List all active tarotistas with filters, search, and sorting. No authentication required.',
+    })
+    @ApiResponse({
+      status: 200,
+      description: 'Paginated list of tarotistas',
+      type: [PublicTarotistaDto],
+    })
+    async getAll(@Query() filters: GetPublicTarotistasDto) {
+      return this.tarotistasService.getAllPublic(filters);
+    }
+
+    @Get('specialties')
+    @ApiOperation({
+      summary: 'Get available specialties (public)',
+      description:
+        'Returns distinct list of all specialties from active tarotistas.',
+    })
+    @ApiResponse({
+      status: 200,
+      description: 'Array of specialty names',
+      type: [String],
+    })
+    async getSpecialties() {
+      return this.tarotistasService.getAvailableSpecialities();
+    }
+
+    @Get(':id')
+    @ApiOperation({
+      summary: 'Get tarotista public profile (public)',
+      description:
+        'Get full public profile of a specific tarotista. No authentication required.',
+    })
+    @ApiResponse({
+      status: 200,
+      description: 'Tarotista public profile',
+      type: PublicTarotistaDto,
+    })
+    @ApiResponse({
+      status: 404,
+      description: 'Tarotista not found or inactive',
+    })
+    async getProfile(@Param('id', ParseIntPipe) id: number) {
+      return this.tarotistasService.getPublicProfile(id);
+    }
+
+    @Get(':id/stats')
+    @ApiOperation({
+      summary: 'Get tarotista public stats (public)',
+      description:
+        'Get public statistics like rating breakdown, recent activity.',
+    })
+    @ApiResponse({
+      status: 200,
+      description: 'Tarotista public statistics',
+    })
+    async getStats(@Param('id', ParseIntPipe) id: number) {
+      return this.tarotistasService.getPublicStats(id);
+    }
+  }
+  ```
+
+**4. Implementar método `getPublicStats()` (0.5 días):**
+
+- [ ] Crear método para estadísticas públicas:
+
+  ```typescript
+  async getPublicStats(tarotistaId: number): Promise<TarotistaPublicStats> {
+    const tarotista = await this.tarotistasRepo.findOne({
+      where: { id: tarotistaId, isActive: true },
+    });
+
+    if (!tarotista) {
+      throw new NotFoundException('Tarotista not found');
+    }
+
+    // Rating breakdown
+    const ratingBreakdown = await this.readingsRepo
+      .createQueryBuilder('r')
+      .select('r.rating', 'rating')
+      .addSelect('COUNT(*)', 'count')
+      .where('r.tarotistaId = :tarotistaId', { tarotistaId })
+      .andWhere('r.rating IS NOT NULL')
+      .groupBy('r.rating')
+      .orderBy('r.rating', 'DESC')
+      .getRawMany();
+
+    // Lecturas por mes (últimos 6 meses)
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+    const readingsByMonth = await this.readingsRepo
+      .createQueryBuilder('r')
+      .select("TO_CHAR(r.createdAt, 'YYYY-MM')", 'month')
+      .addSelect('COUNT(*)', 'count')
+      .where('r.tarotistaId = :tarotistaId', { tarotistaId })
+      .andWhere('r.createdAt >= :sixMonthsAgo', { sixMonthsAgo })
+      .groupBy('month')
+      .orderBy('month', 'ASC')
+      .getRawMany();
+
+    return {
+      totalLecturas: tarotista.totalLecturas || 0,
+      rating: tarotista.rating || 0,
+      ratingBreakdown: ratingBreakdown.map(r => ({
+        rating: parseInt(r.rating),
+        count: parseInt(r.count),
+      })),
+      readingsByMonth: readingsByMonth.map(r => ({
+        month: r.month,
+        count: parseInt(r.count),
+      })),
+      activeSubscribers: await this.countActiveSubscribers(tarotistaId),
+    };
+  }
+
+  private async countActiveSubscribers(tarotistaId: number): Promise<number> {
+    return this.subscriptionsRepo.count({
+      where: { tarotistaId },
+    });
+  }
+  ```
+
+**5. Actualizar Tarotista Entity con campos públicos (0.25 días):**
+
+- [ ] Agregar campos para datos públicos:
+
+  ```typescript
+  @Entity('tarotistas')
+  export class Tarotista {
+    // ... campos existentes
+
+    @Column({ type: 'decimal', precision: 3, scale: 2, default: 0 })
+    rating: number; // Promedio calculado
+
+    @Column({ default: 0 })
+    totalLecturas: number; // Contador incrementado
+
+    @Column({ type: 'int', nullable: true })
+    yearsExperience: number; // Años de experiencia
+
+    @Column({ type: 'varchar', nullable: true })
+    instagramUrl: string;
+
+    @Column({ type: 'varchar', nullable: true })
+    websiteUrl: string;
+
+    // Helper: actualizar rating y total lecturas
+    async updateStats(readingsRepo: Repository<Reading>): Promise<void> {
+      const stats = await readingsRepo
+        .createQueryBuilder('r')
+        .select('COUNT(*)', 'total')
+        .addSelect('AVG(r.rating)', 'avgRating')
+        .where('r.tarotistaId = :id', { id: this.id })
+        .andWhere('r.rating IS NOT NULL')
+        .getRawOne();
+
+      this.totalLecturas = parseInt(stats.total) || 0;
+      this.rating = parseFloat(stats.avgRating) || 0;
+    }
+  }
+  ```
+
+**6. Crear seeder para datos de testing (0.25 días):**
+
+- [ ] Crear tarotistas de ejemplo con datos públicos completos:
+
+  ```typescript
+  // seeders/tarotistas-public-data.seeder.ts
+  const tarotistas = [
+    {
+      nombrePublico: 'Flavia',
+      biografia:
+        'Tarotista profesional con 20 años de experiencia. Especializada en lecturas de amor y trabajo.',
+      especialidades: ['amor', 'trabajo', 'espiritual'],
+      fotoPerfil: 'https://example.com/flavia.jpg',
+      yearsExperience: 20,
+      instagramUrl: 'https://instagram.com/tarotflavia',
+      websiteUrl: 'https://tarotflavia.com',
+      rating: 4.9,
+      totalLecturas: 5000,
+    },
+    {
+      nombrePublico: 'Luna Mística',
+      biografia:
+        'Me especializo en lecturas profundas del alma y conexión espiritual.',
+      especialidades: ['espiritual', 'amor', 'salud'],
+      fotoPerfil: 'https://example.com/luna.jpg',
+      yearsExperience: 15,
+      instagramUrl: 'https://instagram.com/lunamistica',
+      rating: 4.8,
+      totalLecturas: 3200,
+    },
+    {
+      nombrePublico: 'Sol Radiante',
+      biografia:
+        'Tarotista enfocada en claridad y acción. Te ayudo a tomar decisiones.',
+      especialidades: ['trabajo', 'dinero', 'decisiones'],
+      fotoPerfil: 'https://example.com/sol.jpg',
+      yearsExperience: 10,
+      websiteUrl: 'https://solradiante.com',
+      rating: 4.7,
+      totalLecturas: 1800,
+    },
+  ];
+
+  for (const data of tarotistas) {
+    const user = await usersRepo.save({
+      email: `${data.nombrePublico.toLowerCase().replace(' ', '')}@example.com`,
+      password: await hash('test123', 10),
+      roles: [UserRole.CONSUMER, UserRole.TAROTIST],
+    });
+
+    await tarotistasRepo.save({
+      ...data,
+      userId: user.id,
+      isActive: true,
+    });
+  }
+  ```
+
+**7. Crear tests completos (0.5 días):**
+
+- [ ] Tests unitarios de `TarotistasService`: 10+ tests
+- [ ] Tests de filtros y búsqueda
+- [ ] Tests de paginación
+- [ ] Tests de endpoints públicos sin auth
+- [ ] Tests E2E: visitante ve lista → selecciona perfil
+
+---
+
+#### 🎯 Criterios de Aceptación
+
+- ✅ Endpoint `GET /tarotistas` público (sin auth) con paginación
+- ✅ Filtros: especialidad, búsqueda, ordenamiento
+- ✅ Endpoint `GET /tarotistas/:id` retorna perfil público completo
+- ✅ Endpoint `GET /tarotistas/specialties` retorna lista de especialidades
+- ✅ Endpoint `GET /tarotistas/:id/stats` retorna estadísticas públicas
+- ✅ Solo tarotistas activos (`isActive = true`) aparecen en listados
+- ✅ Datos sensibles NO expuestos (config IA, significados, ingresos)
+- ✅ DTOs de respuesta bien documentados con Swagger
+- ✅ Paginación funcional con page y pageSize
+- ✅ Seeders con 3+ tarotistas de ejemplo
+- ✅ Tests unitarios, integración y E2E con 90%+ coverage
+
+---
+
+#### 📝 Notas de Implementación
+
+**Ejemplo de Respuesta - Lista de Tarotistas:**
+
+```json
+GET /tarotistas?especialidad=amor&orderBy=rating&page=1&pageSize=10
+
+{
+  "tarotistas": [
+    {
+      "id": 1,
+      "nombrePublico": "Flavia",
+      "biografia": "Tarotista profesional con 20 años...",
+      "especialidades": ["amor", "trabajo", "espiritual"],
+      "fotoPerfil": "https://...",
+      "rating": 4.9,
+      "totalLecturas": 5000,
+      "yearsExperience": 20,
+      "socialLinks": {
+        "instagram": "https://instagram.com/tarotflavia",
+        "website": "https://tarotflavia.com"
+      },
+      "memberSince": "2020-01-15T00:00:00Z"
+    },
+    {
+      "id": 2,
+      "nombrePublico": "Luna Mística",
+      "biografia": "Me especializo en lecturas profundas...",
+      "especialidades": ["espiritual", "amor", "salud"],
+      "fotoPerfil": "https://...",
+      "rating": 4.8,
+      "totalLecturas": 3200,
+      "yearsExperience": 15,
+      "socialLinks": {
+        "instagram": "https://instagram.com/lunamistica"
+      },
+      "memberSince": "2021-03-20T00:00:00Z"
+    }
+  ],
+  "total": 15,
+  "page": 1,
+  "pageSize": 10
+}
+```
+
+**Ejemplo de Respuesta - Perfil Individual:**
+
+```json
+GET /tarotistas/1
+
+{
+  "id": 1,
+  "nombrePublico": "Flavia",
+  "biografia": "Tarotista profesional con 20 años de experiencia. Especializada en lecturas de amor y trabajo. Mi enfoque es compasivo y directo, te ayudo a ver claridad en situaciones complejas.",
+  "especialidades": ["amor", "trabajo", "espiritual"],
+  "fotoPerfil": "https://...",
+  "rating": 4.9,
+  "totalLecturas": 5000,
+  "yearsExperience": 20,
+  "socialLinks": {
+    "instagram": "https://instagram.com/tarotflavia",
+    "website": "https://tarotflavia.com"
+  },
+  "memberSince": "2020-01-15T00:00:00Z"
+}
+```
+
+**Ejemplo de Respuesta - Estadísticas:**
+
+```json
+GET /tarotistas/1/stats
+
+{
+  "totalLecturas": 5000,
+  "rating": 4.9,
+  "ratingBreakdown": [
+    { "rating": 5, "count": 4200 },
+    { "rating": 4, "count": 600 },
+    { "rating": 3, "count": 150 },
+    { "rating": 2, "count": 40 },
+    { "rating": 1, "count": 10 }
+  ],
+  "readingsByMonth": [
+    { "month": "2024-05", "count": 420 },
+    { "month": "2024-06", "count": 450 },
+    { "month": "2024-07", "count": 480 },
+    { "month": "2024-08", "count": 510 },
+    { "month": "2024-09", "count": 490 },
+    { "month": "2024-10", "count": 520 }
+  ],
+  "activeSubscribers": 1250
+}
+```
+
+**Frontend Usage Example:**
+
+```typescript
+// React/Next.js component
+const TarotistasMarketplace = () => {
+  const [tarotistas, setTarotistas] = useState([]);
+  const [filters, setFilters] = useState({
+    especialidad: '',
+    search: '',
+    page: 1,
+  });
+
+  useEffect(() => {
+    const fetchTarotistas = async () => {
+      const params = new URLSearchParams(filters);
+      const response = await fetch(`/api/tarotistas?${params}`);
+      const data = await response.json();
+      setTarotistas(data.tarotistas);
+    };
+
+    fetchTarotistas();
+  }, [filters]);
+
+  return (
+    <div>
+      <SearchBar onSearch={(term) => setFilters({ ...filters, search: term })} />
+      <SpecialtyFilter onChange={(esp) => setFilters({ ...filters, especialidad: esp })} />
+      <TarotistaGrid tarotistas={tarotistas} />
+    </div>
+  );
+};
+```
+
+**SEO Considerations:**
+
+- Endpoints públicos permiten server-side rendering (SSR)
+- Meta tags dinámicos por tarotista: `<title>Flavia - Tarotista | TarotFlavia</title>`
+- Open Graph para compartir en redes sociales
+- Canonical URLs: `/tarotistas/flavia` (slug-based)
+
+**Orden de Implementación:**
+
+1. ✅ Crear métodos públicos en TarotistasService
+2. ✅ Crear DTOs de respuesta pública
+3. ✅ Crear TarotistasController público (sin guards)
+4. ✅ Implementar estadísticas públicas
+5. ✅ Actualizar entity con campos públicos
+6. ✅ Seeders con datos de ejemplo
+7. ✅ Tests completos
+
+---
+
+### 🔴 TASK-073: Implementar Sistema de Revenue Sharing y Métricas ⭐⭐⭐
+
+**Prioridad:** 🔴 CRÍTICA  
+**Estimación:** 4 días  
+**Tags:** mvp, marketplace, revenue-sharing, analytics, business-metrics, monetization  
+**Dependencias:** TASK-064 (Schema), TASK-071 (Subscriptions), TASK-072 (Public Endpoints)  
+**Estado:** 🟡 NO INICIADA  
+**Contexto Informe:** Sección 9 - Revenue Sharing y Métricas
+
+---
+
+#### 📋 Descripción
+
+Implementar el sistema completo de **revenue sharing** (reparto de ingresos) y **analytics** para el marketplace. Este sistema es crítico para:
+
+1. **Calcular ingresos por tarotista** basado en lecturas generadas
+2. **Aplicar comisiones configurables** por la plataforma
+3. **Generar reportes financieros** mensuales por tarotista
+4. **Dashboard de métricas** para tarotistas y admin
+5. **Tracking detallado** de uso y performance
+
+El informe especifica:
+
+> "Sistema de revenue sharing: trackear qué tarotista generó cada lectura. Aplicar comisión configurable a la plataforma (ej: 70% tarotista, 30% plataforma). Dashboard con métricas por tarotista: ingresos, lecturas, rating."
+
+**Modelo de Negocio:**
+
+- Plataforma cobra **comisión sobre suscripciones** de usuarios que usan cada tarotista
+- Comisión configurable: default 70/30 (70% tarotista, 30% plataforma)
+- Pago mensual a tarotistas basado en sus lecturas generadas
+- Métricas en tiempo real para decisiones estratégicas
+
+**Funcionalidades Clave:**
+
+- Cálculo automático de ingresos por lectura
+- Dashboard admin: ver ingresos totales y por tarotista
+- Dashboard tarotista: ver sus propias métricas
+- Reportes exportables (CSV/PDF)
+- Configuración de comisiones por tarotista (negociaciones especiales)
+
+---
+
+#### 🧪 Testing
+
+**Unit Tests:**
+
+- [ ] Test cálculo de ingresos por lectura según plan de usuario
+- [ ] Test aplicación de comisión: 70/30 default
+- [ ] Test comisión custom por tarotista
+- [ ] Test agregación de métricas mensuales
+- [ ] Test cálculo de payouts pendientes
+
+**Integration Tests:**
+
+- [ ] Test generación de lectura incrementa contadores
+- [ ] Test dashboard muestra métricas correctas
+- [ ] Test exportación de reportes con datos reales
+- [ ] Test cambio de comisión se refleja en cálculos futuros
+
+**E2E Tests:**
+
+- [ ] Test flujo completo: lectura generada → ingresos calculados → dashboard actualizado
+- [ ] Test admin ve métricas de todos los tarotistas
+- [ ] Test tarotista solo ve sus propias métricas
+- [ ] Test exportar reporte mensual con lecturas y earnings
+
+---
+
+#### ✅ Tareas específicas
+
+**1. Crear entity TarotistaEarnings para tracking (0.5 días):**
+
+- [ ] Crear archivo `src/modules/tarotistas/entities/tarotista-earnings.entity.ts`:
+
+  ```typescript
+  @Entity('tarotista_earnings')
+  @Index(['tarotistaId', 'month', 'year'], { unique: true })
+  export class TarotistaEarnings {
+    @PrimaryGeneratedColumn()
+    id: number;
+
+    @Column()
+    tarotistaId: number;
+
+    @ManyToOne(() => Tarotista)
+    @JoinColumn({ name: 'tarotista_id' })
+    tarotista: Tarotista;
+
+    @Column({ type: 'int' })
+    month: number; // 1-12
+
+    @Column({ type: 'int' })
+    year: number; // 2024
+
+    @Column({ type: 'int', default: 0 })
+    totalReadings: number;
+
+    @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+    grossRevenue: number; // Ingresos brutos
+
+    @Column({ type: 'decimal', precision: 5, scale: 2, default: 30 })
+    platformCommissionPercent: number; // % comisión plataforma
+
+    @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+    platformCommission: number; // Comisión en $
+
+    @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+    netRevenue: number; // Ingresos netos para tarotista
+
+    @Column({ type: 'boolean', default: false })
+    isPaidOut: boolean; // Ya se pagó este periodo
+
+    @Column({ type: 'timestamp', nullable: true })
+    paidOutAt: Date | null;
+
+    @CreateDateColumn()
+    createdAt: Date;
+
+    @UpdateDateColumn()
+    updatedAt: Date;
+
+    // Helper: calcular neto
+    calculateNet(): void {
+      this.platformCommission =
+        this.grossRevenue * (this.platformCommissionPercent / 100);
+      this.netRevenue = this.grossRevenue - this.platformCommission;
+    }
+  }
+  ```
+
+- [ ] Crear migración TypeORM
+
+**2. Crear entity ReadingRevenue para tracking detallado (0.5 días):**
+
+- [ ] Crear tracking por lectura individual:
+
+  ```typescript
+  @Entity('reading_revenues')
+  export class ReadingRevenue {
+    @PrimaryGeneratedColumn()
+    id: number;
+
+    @Column()
+    readingId: number;
+
+    @OneToOne(() => Reading)
+    @JoinColumn({ name: 'reading_id' })
+    reading: Reading;
+
+    @Column()
+    tarotistaId: number;
+
+    @Column()
+    userId: number;
+
+    @Column({ type: 'varchar', length: 20 })
+    userPlanType: string; // FREE, PREMIUM, PROFESSIONAL
+
+    @Column({ type: 'decimal', precision: 10, scale: 2 })
+    revenueAmount: number; // Valor de esta lectura
+
+    @Column({ type: 'decimal', precision: 5, scale: 2 })
+    platformCommissionPercent: number;
+
+    @Column({ type: 'decimal', precision: 10, scale: 2 })
+    platformCommission: number;
+
+    @Column({ type: 'decimal', precision: 10, scale: 2 })
+    tarotistaRevenue: number;
+
+    @Column({ type: 'int' })
+    month: number;
+
+    @Column({ type: 'int' })
+    year: number;
+
+    @CreateDateColumn()
+    createdAt: Date;
+  }
+  ```
+
+**3. Crear RevenueService con lógica de cálculo (1 día):**
+
+- [ ] Implementar método `calculateReadingRevenue()`:
+
+  ```typescript
+  @Injectable()
+  export class RevenueService {
+    constructor(
+      @InjectRepository(ReadingRevenue)
+      private revenueRepo: Repository<ReadingRevenue>,
+      @InjectRepository(TarotistaEarnings)
+      private earningsRepo: Repository<TarotistaEarnings>,
+      @InjectRepository(Tarotista)
+      private tarotistasRepo: Repository<Tarotista>,
+    ) {}
+
+    async calculateReadingRevenue(
+      readingId: number,
+      tarotistaId: number,
+      userId: number,
+      userPlanType: string,
+    ): Promise<ReadingRevenue> {
+      // 1. Obtener valor de la lectura según plan
+      const revenueAmount = this.getRevenuePerReading(userPlanType);
+
+      // 2. Obtener comisión del tarotista (puede ser custom)
+      const tarotista = await this.tarotistasRepo.findOne({
+        where: { id: tarotistaId },
+      });
+      const commissionPercent = tarotista.customCommissionPercent || 30; // Default 30%
+
+      // 3. Calcular split
+      const platformCommission = revenueAmount * (commissionPercent / 100);
+      const tarotistaRevenue = revenueAmount - platformCommission;
+
+      // 4. Crear registro
+      const revenue = this.revenueRepo.create({
+        readingId,
+        tarotistaId,
+        userId,
+        userPlanType,
+        revenueAmount,
+        platformCommissionPercent: commissionPercent,
+        platformCommission,
+        tarotistaRevenue,
+        month: new Date().getMonth() + 1,
+        year: new Date().getFullYear(),
+      });
+
+      await this.revenueRepo.save(revenue);
+
+      // 5. Actualizar earnings mensuales
+      await this.updateMonthlyEarnings(tarotistaId);
+
+      return revenue;
+    }
+
+    private getRevenuePerReading(planType: string): number {
+      // Valor prorrateado de cada lectura según plan
+      const revenueMap = {
+        FREE: 0, // FREE no genera ingresos directos
+        PREMIUM: 1.99, // $19.99/mes ÷ 10 lecturas = ~$2/lectura
+        PROFESSIONAL: 3.99, // $39.99/mes ÷ 10 lecturas = ~$4/lectura
+      };
+      return revenueMap[planType] || 0;
+    }
+
+    private async updateMonthlyEarnings(tarotistaId: number): Promise<void> {
+      const now = new Date();
+      const month = now.getMonth() + 1;
+      const year = now.getFullYear();
+
+      // Buscar o crear earnings del mes
+      let earnings = await this.earningsRepo.findOne({
+        where: { tarotistaId, month, year },
+      });
+
+      if (!earnings) {
+        const tarotista = await this.tarotistasRepo.findOne({
+          where: { id: tarotistaId },
+        });
+        earnings = this.earningsRepo.create({
+          tarotistaId,
+          month,
+          year,
+          platformCommissionPercent: tarotista.customCommissionPercent || 30,
+        });
+      }
+
+      // Recalcular totales del mes
+      const monthStats = await this.revenueRepo
+        .createQueryBuilder('r')
+        .select('COUNT(*)', 'totalReadings')
+        .addSelect('SUM(r.revenueAmount)', 'grossRevenue')
+        .addSelect('SUM(r.platformCommission)', 'platformCommission')
+        .addSelect('SUM(r.tarotistaRevenue)', 'netRevenue')
+        .where('r.tarotistaId = :tarotistaId', { tarotistaId })
+        .andWhere('r.month = :month', { month })
+        .andWhere('r.year = :year', { year })
+        .getRawOne();
+
+      earnings.totalReadings = parseInt(monthStats.totalReadings) || 0;
+      earnings.grossRevenue = parseFloat(monthStats.grossRevenue) || 0;
+      earnings.platformCommission =
+        parseFloat(monthStats.platformCommission) || 0;
+      earnings.netRevenue = parseFloat(monthStats.netRevenue) || 0;
+
+      await this.earningsRepo.save(earnings);
+    }
+  }
+  ```
+
+**4. Actualizar ReadingsService para registrar revenue (0.5 días):**
+
+- [ ] Modificar `generateReading()`:
+
+  ```typescript
+  async generateReading(
+    userId: number,
+    createReadingDto: CreateReadingDto,
+  ): Promise<Reading> {
+    // ... lógica existente de generación de lectura
+
+    const reading = await this.readingsRepo.save(newReading);
+
+    // Registrar revenue si es lectura de pago
+    const user = await this.usersRepo.findOne({
+      where: { id: userId },
+      relations: ['subscription'],
+    });
+
+    if (user.subscription.planType !== 'FREE') {
+      await this.revenueService.calculateReadingRevenue(
+        reading.id,
+        reading.tarotistaId,
+        userId,
+        user.subscription.planType,
+      );
+    }
+
+    return reading;
+  }
+  ```
+
+**5. Crear dashboard endpoints para métricas (1 día):**
+
+- [ ] Implementar método `getTarotistaMetrics()`:
+
+  ```typescript
+  async getTarotistaMetrics(
+    tarotistaId: number,
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<TarotistaMetricsDto> {
+    const start = startDate || new Date(new Date().setMonth(new Date().getMonth() - 6));
+    const end = endDate || new Date();
+
+    // Earnings por mes
+    const monthlyEarnings = await this.earningsRepo.find({
+      where: {
+        tarotistaId,
+        // year y month en rango
+      },
+      order: { year: 'ASC', month: 'ASC' },
+    });
+
+    // Stats generales
+    const totalStats = await this.revenueRepo
+      .createQueryBuilder('r')
+      .select('COUNT(*)', 'totalReadings')
+      .addSelect('SUM(r.tarotistaRevenue)', 'totalEarnings')
+      .where('r.tarotistaId = :tarotistaId', { tarotistaId })
+      .andWhere('r.createdAt BETWEEN :start AND :end', { start, end })
+      .getRawOne();
+
+    // Breakdown por plan de usuario
+    const revenueByPlan = await this.revenueRepo
+      .createQueryBuilder('r')
+      .select('r.userPlanType', 'planType')
+      .addSelect('COUNT(*)', 'readings')
+      .addSelect('SUM(r.tarotistaRevenue)', 'earnings')
+      .where('r.tarotistaId = :tarotistaId', { tarotistaId })
+      .andWhere('r.createdAt BETWEEN :start AND :end', { start, end })
+      .groupBy('r.userPlanType')
+      .getRawMany();
+
+    // Top months
+    const topMonths = monthlyEarnings
+      .sort((a, b) => b.netRevenue - a.netRevenue)
+      .slice(0, 3);
+
+    return {
+      totalReadings: parseInt(totalStats.totalReadings) || 0,
+      totalEarnings: parseFloat(totalStats.totalEarnings) || 0,
+      monthlyEarnings: monthlyEarnings.map(e => ({
+        month: e.month,
+        year: e.year,
+        readings: e.totalReadings,
+        gross: e.grossRevenue,
+        commission: e.platformCommission,
+        net: e.netRevenue,
+        isPaidOut: e.isPaidOut,
+      })),
+      revenueByPlan: revenueByPlan.map(r => ({
+        planType: r.planType,
+        readings: parseInt(r.readings),
+        earnings: parseFloat(r.earnings),
+      })),
+      topMonths: topMonths.map(m => ({
+        month: `${m.year}-${String(m.month).padStart(2, '0')}`,
+        earnings: m.netRevenue,
+      })),
+    };
+  }
+  ```
+
+- [ ] Implementar método `getAdminDashboard()`:
+
+  ```typescript
+  async getAdminDashboard(): Promise<AdminDashboardDto> {
+    // Total platform revenue
+    const platformTotal = await this.earningsRepo
+      .createQueryBuilder('e')
+      .select('SUM(e.platformCommission)', 'total')
+      .where('e.isPaidOut = false')
+      .getRawOne();
+
+    // Top tarotistas by earnings
+    const topTarotistas = await this.earningsRepo
+      .createQueryBuilder('e')
+      .leftJoinAndSelect('e.tarotista', 't')
+      .select('t.nombrePublico', 'nombre')
+      .addSelect('SUM(e.totalReadings)', 'totalReadings')
+      .addSelect('SUM(e.netRevenue)', 'totalEarnings')
+      .groupBy('t.id, t.nombrePublico')
+      .orderBy('SUM(e.netRevenue)', 'DESC')
+      .limit(10)
+      .getRawMany();
+
+    // Pending payouts
+    const pendingPayouts = await this.earningsRepo
+      .createQueryBuilder('e')
+      .leftJoinAndSelect('e.tarotista', 't')
+      .where('e.isPaidOut = false')
+      .getMany();
+
+    // Revenue by month (platform)
+    const revenueByMonth = await this.earningsRepo
+      .createQueryBuilder('e')
+      .select("CONCAT(e.year, '-', LPAD(CAST(e.month AS TEXT), 2, '0'))", 'month')
+      .addSelect('SUM(e.platformCommission)', 'revenue')
+      .groupBy('e.year, e.month')
+      .orderBy('e.year', 'DESC')
+      .addOrderBy('e.month', 'DESC')
+      .limit(12)
+      .getRawMany();
+
+    return {
+      platformRevenue: {
+        pending: parseFloat(platformTotal.total) || 0,
+        thisMonth: await this.getPlatformRevenueThisMonth(),
+      },
+      topTarotistas: topTarotistas.map(t => ({
+        nombre: t.nombre,
+        totalReadings: parseInt(t.totalReadings),
+        totalEarnings: parseFloat(t.totalEarnings),
+      })),
+      pendingPayouts: pendingPayouts.map(p => ({
+        tarotistaId: p.tarotistaId,
+        nombre: p.tarotista.nombrePublico,
+        month: p.month,
+        year: p.year,
+        amount: p.netRevenue,
+      })),
+      revenueByMonth: revenueByMonth.map(r => ({
+        month: r.month,
+        revenue: parseFloat(r.revenue),
+      })),
+    };
+  }
+  ```
+
+**6. Crear controllers para métricas (0.5 días):**
+
+- [ ] Controller para tarotistas (solo sus métricas):
+
+  ```typescript
+  @Controller('tarotist/metrics')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.TAROTIST)
+  @ApiTags('Tarotist - Metrics')
+  export class TarotistMetricsController {
+    constructor(private revenueService: RevenueService) {}
+
+    @Get()
+    @ApiOperation({ summary: 'Get own metrics and earnings' })
+    async getMyMetrics(@GetUser() user: User) {
+      // Obtener tarotistaId del usuario
+      const tarotista = await this.tarotistasRepo.findOne({
+        where: { userId: user.id },
+      });
+
+      return this.revenueService.getTarotistaMetrics(tarotista.id);
+    }
+
+    @Get('export')
+    @ApiOperation({ summary: 'Export earnings report (CSV)' })
+    async exportReport(@GetUser() user: User, @Res() res: Response) {
+      const tarotista = await this.tarotistasRepo.findOne({
+        where: { userId: user.id },
+      });
+
+      const report = await this.revenueService.generateCSVReport(tarotista.id);
+      res.header('Content-Type', 'text/csv');
+      res.attachment(`earnings-${tarotista.nombrePublico}.csv`);
+      res.send(report);
+    }
+  }
+  ```
+
+- [ ] Controller para admin (todas las métricas):
+
+  ```typescript
+  @Controller('admin/metrics')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiTags('Admin - Metrics')
+  export class AdminMetricsController {
+    constructor(private revenueService: RevenueService) {}
+
+    @Get('dashboard')
+    @ApiOperation({ summary: 'Get admin dashboard with platform metrics' })
+    async getDashboard() {
+      return this.revenueService.getAdminDashboard();
+    }
+
+    @Get('tarotistas/:id')
+    @ApiOperation({ summary: 'Get specific tarotista metrics (admin view)' })
+    async getTarotistaMetrics(@Param('id') tarotistaId: number) {
+      return this.revenueService.getTarotistaMetrics(tarotistaId);
+    }
+
+    @Post('payouts/:id/mark-paid')
+    @ApiOperation({ summary: 'Mark earnings period as paid out' })
+    async markAsPaid(@Param('id') earningsId: number) {
+      return this.revenueService.markAsPaidOut(earningsId);
+    }
+
+    @Get('export/all')
+    @ApiOperation({ summary: 'Export all revenue data (CSV)' })
+    async exportAll(@Res() res: Response) {
+      const report = await this.revenueService.generateFullCSVReport();
+      res.header('Content-Type', 'text/csv');
+      res.attachment(`platform-revenue-${new Date().toISOString()}.csv`);
+      res.send(report);
+    }
+  }
+  ```
+
+**7. Crear tests completos (0.5 días):**
+
+- [ ] Tests unitarios de cálculos de revenue
+- [ ] Tests de agregación mensual
+- [ ] Tests de métricas por tarotista
+- [ ] Tests de dashboard admin
+- [ ] Tests E2E: lectura → revenue → dashboard
+
+---
+
+#### 🎯 Criterios de Aceptación
+
+- ✅ Entities `TarotistaEarnings` y `ReadingRevenue` creadas
+- ✅ Cada lectura registra revenue automáticamente
+- ✅ Cálculo de revenue basado en plan de usuario
+- ✅ Comisiones configurables por tarotista (default 30%)
+- ✅ Agregación automática de earnings mensuales
+- ✅ Dashboard tarotista: ver solo sus métricas
+- ✅ Dashboard admin: ver todas las métricas y payouts pendientes
+- ✅ Exportación de reportes en CSV
+- ✅ Método `markAsPaidOut()` para registrar pagos
+- ✅ Tests unitarios, integración y E2E con 90%+ coverage
+
+---
+
+#### 📝 Notas de Implementación
+
+**Ejemplo de Dashboard Tarotista:**
+
+```json
+GET /tarotist/metrics
+
+{
+  "totalReadings": 1250,
+  "totalEarnings": 2487.50,
+  "monthlyEarnings": [
+    {
+      "month": 10,
+      "year": 2024,
+      "readings": 150,
+      "gross": 597.00,
+      "commission": 179.10,
+      "net": 417.90,
+      "isPaidOut": false
+    },
+    {
+      "month": 9,
+      "year": 2024,
+      "readings": 140,
+      "gross": 556.00,
+      "commission": 166.80,
+      "net": 389.20,
+      "isPaidOut": true
+    }
+  ],
+  "revenueByPlan": [
+    { "planType": "PREMIUM", "readings": 800, "earnings": 1592.00 },
+    { "planType": "PROFESSIONAL", "readings": 450, "earnings": 895.50 }
+  ],
+  "topMonths": [
+    { "month": "2024-07", "earnings": 520.00 },
+    { "month": "2024-08", "earnings": 498.50 },
+    { "month": "2024-10", "earnings": 417.90 }
+  ]
+}
+```
+
+**Ejemplo de Dashboard Admin:**
+
+```json
+GET /admin/metrics/dashboard
+
+{
+  "platformRevenue": {
+    "pending": 1524.30,
+    "thisMonth": 456.80
+  },
+  "topTarotistas": [
+    { "nombre": "Flavia", "totalReadings": 5000, "totalEarnings": 12450.00 },
+    { "nombre": "Luna Mística", "totalReadings": 3200, "totalEarnings": 7968.00 },
+    { "nombre": "Sol Radiante", "totalReadings": 1800, "totalEarnings": 4482.00 }
+  ],
+  "pendingPayouts": [
+    { "tarotistaId": 1, "nombre": "Flavia", "month": 10, "year": 2024, "amount": 520.00 },
+    { "tarotistaId": 2, "nombre": "Luna", "month": 10, "year": 2024, "amount": 389.20 }
+  ],
+  "revenueByMonth": [
+    { "month": "2024-10", "revenue": 456.80 },
+    { "month": "2024-09", "revenue": 423.50 }
+  ]
+}
+```
+
+**Lógica de Revenue por Plan:**
+
+```typescript
+// Usuario PREMIUM: $19.99/mes, 10 lecturas ilimitadas
+// Valor prorrateado: ~$2/lectura
+// Lectura generada:
+//   - Tarotista: $1.40 (70%)
+//   - Plataforma: $0.60 (30%)
+
+// Usuario PROFESSIONAL: $39.99/mes, lecturas ilimitadas
+// Valor prorrateado: ~$4/lectura
+// Lectura generada:
+//   - Tarotista: $2.80 (70%)
+//   - Plataforma: $1.20 (30%)
+```
+
+**Orden de Implementación:**
+
+1. ✅ Crear entities de tracking
+2. ✅ Crear RevenueService con cálculos
+3. ✅ Actualizar ReadingsService
+4. ✅ Crear dashboard endpoints
+5. ✅ Crear controllers con permisos
+6. ✅ Exportación de reportes
+7. ✅ Tests completos
+
+---
+
+### 🔴 TASK-074: Actualizar Tests E2E para Contexto Multi-Tarotista ⭐⭐⭐
+
+**Prioridad:** 🔴 CRÍTICA  
+**Estimación:** 5 días (2.5 días TASK-074-a + 2.5 días TASK-074-b)  
+**Tags:** mvp, marketplace, testing, e2e, quality-assurance, backward-compatibility  
+**Dependencias:** TASK-066 a TASK-073 (todas las tareas de marketplace - nota: después de renumeración será TASK-066 a TASK-072)  
+**Estado:** 🟡 NO INICIADA  
+**Contexto Informe:** Sección 10 - Testing y Calidad
+
+**Nota:** Esta tarea se divide en dos sub-tareas secuenciales:
+
+- **TASK-074-a**: Actualizar Tests Existentes (2.5 días)
+- **TASK-074-b**: Crear Tests Nuevos Marketplace (2.5 días)
+
+---
+
+#### 📋 Descripción
+
+Actualizar **todos los tests E2E existentes** para funcionar con el nuevo contexto multi-tarotista y crear **nuevos tests** que validen específicamente las funcionalidades del marketplace. Este task es crítico para:
+
+1. **Garantizar backward compatibility** con sistema single-tarotist (Flavia)
+2. **Validar funcionamiento multi-tarotista** con 2+ tarotistas
+3. **Actualizar tests existentes** que asumen Flavia hardcodeada
+4. **Crear tests nuevos** para suscripciones, revenue sharing, etc.
+5. **Test de regresión** completo del sistema
+
+El informe especifica:
+
+> "Tests E2E deben validar que el sistema funciona tanto con un solo tarotista (Flavia) como con múltiples tarotistas. Backward compatibility es crítica."
+
+**Alcance:**
+
+- Actualizar ~20 archivos de tests E2E existentes
+- Crear ~10 archivos de tests E2E nuevos para marketplace
+- Test fixtures con múltiples tarotistas
+- Seeders de testing actualizados
+- Validación de que tests existentes siguen pasando
+
+---
+
+#### 🧪 Testing
+
+**Tests a Actualizar (Existentes):**
+
+- [ ] `app.e2e-spec.ts` - Health checks
+- [ ] `auth.e2e-spec.ts` - Login, registro, JWT
+- [ ] `readings.e2e-spec.ts` - Generación de lecturas
+- [ ] `interpretations.e2e-spec.ts` - Interpretaciones de IA
+- [ ] `subscriptions.e2e-spec.ts` - Planes FREE/PREMIUM
+- [ ] `usage-limits.e2e-spec.ts` - Límites por plan
+- [ ] `admin.e2e-spec.ts` - Endpoints admin
+- [ ] Todos los demás tests que generan lecturas
+
+**Tests Nuevos a Crear:**
+
+- [ ] `tarotistas-marketplace.e2e-spec.ts` - Marketplace público
+- [ ] `tarotista-subscriptions.e2e-spec.ts` - Suscripciones a tarotistas
+- [ ] `tarotista-management.e2e-spec.ts` - Admin gestión tarotistas
+- [ ] `tarotista-revenue.e2e-spec.ts` - Revenue sharing
+- [ ] `multi-tarotist-readings.e2e-spec.ts` - Lecturas con múltiples tarotistas
+- [ ] `backward-compatibility.e2e-spec.ts` - Tests específicos de compatibilidad
+- [ ] `tarotista-applications.e2e-spec.ts` - Aplicaciones de tarotistas
+- [ ] `custom-meanings.e2e-spec.ts` - Significados personalizados
+- [ ] `roles-and-permissions.e2e-spec.ts` - Sistema de roles
+
+---
+
+#### ✅ Tareas específicas
+
+### TASK-074-a: Actualizar Tests Existentes (2.5 días)
+
+**Objetivo:** Actualizar todos los tests E2E existentes para que funcionen con el nuevo contexto multi-tarotista manteniendo backward compatibility.
+
+**1. Actualizar database seeders para tests (0.5 días):**
+
+- [ ] Crear seeder `test-tarotistas.seeder.ts`:
+
+  ```typescript
+  export async function seedTestTarotistas(
+    dataSource: DataSource,
+  ): Promise<{ flavia: Tarotista; luna: Tarotista; sol: Tarotista }> {
+    const usersRepo = dataSource.getRepository(User);
+    const tarotistasRepo = dataSource.getRepository(Tarotista);
+    const configsRepo = dataSource.getRepository(TarotistaConfig);
+
+    // 1. Crear usuarios para tarotistas
+    const flaviaUser = await usersRepo.save({
+      email: 'flavia@test.com',
+      password: await hash('test123', 10),
+      roles: [UserRole.CONSUMER, UserRole.TAROTIST],
+    });
+
+    const lunaUser = await usersRepo.save({
+      email: 'luna@test.com',
+      password: await hash('test123', 10),
+      roles: [UserRole.CONSUMER, UserRole.TAROTIST],
+    });
+
+    const solUser = await usersRepo.save({
+      email: 'sol@test.com',
+      password: await hash('test123', 10),
+      roles: [UserRole.CONSUMER, UserRole.TAROTIST],
+    });
+
+    // 2. Crear tarotistas
+    const flavia = await tarotistasRepo.save({
+      userId: flaviaUser.id,
+      nombrePublico: 'Flavia',
+      biografia: 'Tarotista principal del sistema',
+      especialidades: ['amor', 'trabajo', 'espiritual'],
+      isActive: true,
+    });
+
+    const luna = await tarotistasRepo.save({
+      userId: lunaUser.id,
+      nombrePublico: 'Luna Mística',
+      biografia: 'Especialista en conexión espiritual',
+      especialidades: ['espiritual', 'amor'],
+      isActive: true,
+    });
+
+    const sol = await tarotistasRepo.save({
+      userId: solUser.id,
+      nombrePublico: 'Sol Radiante',
+      biografia: 'Enfoque en decisiones y trabajo',
+      especialidades: ['trabajo', 'dinero'],
+      isActive: true,
+    });
+
+    // 3. Crear configuraciones de IA
+    await configsRepo.save([
+      {
+        tarotistaId: flavia.id,
+        systemPromptIdentity: 'Soy Flavia, una tarotista experimentada...',
+        systemPromptGuidelines: 'Mis lecturas son compasivas...',
+        preferredProvider: 'groq',
+        preferredModel: 'llama-3.1-70b-versatile',
+        isActive: true,
+      },
+      {
+        tarotistaId: luna.id,
+        systemPromptIdentity: 'Soy Luna, especialista en lo espiritual...',
+        systemPromptGuidelines: 'Mis lecturas profundizan en el alma...',
+        preferredProvider: 'groq',
+        preferredModel: 'llama-3.1-70b-versatile',
+        isActive: true,
+      },
+      {
+        tarotistaId: sol.id,
+        systemPromptIdentity: 'Soy Sol, enfocada en acción y claridad...',
+        systemPromptGuidelines: 'Mis lecturas son directas y prácticas...',
+        preferredProvider: 'groq',
+        preferredModel: 'llama-3.1-70b-versatile',
+        isActive: true,
+      },
+    ]);
+
+    return { flavia, luna, sol };
+  }
+  ```
+
+**2. Actualizar setup global de tests E2E (0.5 días):**
+
+- [ ] Modificar `test/jest-e2e.json`:
+
+  ```json
+  {
+    "moduleFileExtensions": ["js", "json", "ts"],
+    "rootDir": ".",
+    "testEnvironment": "node",
+    "testRegex": ".e2e-spec.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "setupFilesAfterEnv": ["<rootDir>/setup-e2e.ts"],
+    "testTimeout": 30000
+  }
+  ```
+
+- [ ] Crear `test/setup-e2e.ts`:
+
+  ```typescript
+  import { DataSource } from 'typeorm';
+  import { seedTestTarotistas } from './seeders/test-tarotistas.seeder';
+
+  let dataSource: DataSource;
+  let testTarotistas: any;
+
+  beforeAll(async () => {
+    // Conectar a DB de testing
+    dataSource = new DataSource({
+      type: 'postgres',
+      host: process.env.DB_HOST || 'localhost',
+      port: parseInt(process.env.DB_PORT) || 5432,
+      username: process.env.DB_USER || 'postgres',
+      password: process.env.DB_PASSWORD || 'postgres',
+      database: process.env.DB_NAME || 'tarotflavia_test',
+      entities: ['src/**/*.entity.ts'],
+      synchronize: true, // Solo para tests
+    });
+
+    await dataSource.initialize();
+
+    // Limpiar DB
+    await dataSource.dropDatabase();
+    await dataSource.synchronize();
+
+    // Seed tarotistas de testing
+    testTarotistas = await seedTestTarotistas(dataSource);
+  });
+
+  afterAll(async () => {
+    await dataSource.destroy();
+  });
+
+  // Export para usar en tests
+  export const getTestTarotistas = () => testTarotistas;
+  export const getTestDataSource = () => dataSource;
+  ```
+
+**3. Actualizar tests existentes de readings (1 día):**
+
+- [ ] Modificar `test/readings.e2e-spec.ts`:
+
+  ```typescript
+  describe('Readings (E2E) - Multi-Tarotist', () => {
+    let app: INestApplication;
+    let userToken: string;
+    let testTarotistas: any;
+
+    beforeAll(async () => {
+      // ... setup app
+      testTarotistas = getTestTarotistas();
+    });
+
+    describe('POST /readings - Backward Compatibility', () => {
+      it('should generate reading with Flavia (default) for FREE user', async () => {
+        const response = await request(app.getHttpServer())
+          .post('/readings')
+          .set('Authorization', `Bearer ${userToken}`)
+          .send({
+            spreadType: 'THREE_CARD',
+            question: 'Test question',
+            category: 'amor',
+          })
+          .expect(201);
+
+        expect(response.body.tarotistaId).toBe(testTarotistas.flavia.id);
+        expect(response.body.interpretation).toBeDefined();
+      });
+    });
+
+    describe('POST /readings - Multi-Tarotist Context', () => {
+      it('should generate reading with selected tarotista for PREMIUM user', async () => {
+        // 1. Upgrade user to PREMIUM
+        await upgradeUserToPremium(userId);
+
+        // 2. Select Luna as favorite
+        await request(app.getHttpServer())
+          .post(`/subscriptions/tarotistas/favorite/${testTarotistas.luna.id}`)
+          .set('Authorization', `Bearer ${userToken}`)
+          .expect(201);
+
+        // 3. Generate reading
+        const response = await request(app.getHttpServer())
+          .post('/readings')
+          .set('Authorization', `Bearer ${userToken}`)
+          .send({
+            spreadType: 'THREE_CARD',
+            question: 'Test question',
+            category: 'espiritual',
+          })
+          .expect(201);
+
+        // Verify reading uses Luna's context
+        expect(response.body.tarotistaId).toBe(testTarotistas.luna.id);
+        expect(response.body.interpretation).toContain('Luna'); // Luna's identity in prompt
+      });
+
+      it('should use different tarotistas with all-access', async () => {
+        // 1. Enable all-access
+        await request(app.getHttpServer())
+          .post('/subscriptions/tarotistas/all-access')
+          .set('Authorization', `Bearer ${userToken}`)
+          .expect(201);
+
+        // 2. Generate multiple readings
+        const tarotistaIds = new Set();
+        for (let i = 0; i < 5; i++) {
+          const response = await request(app.getHttpServer())
+            .post('/readings')
+            .set('Authorization', `Bearer ${userToken}`)
+            .send({
+              spreadType: 'THREE_CARD',
+              question: `Test question ${i}`,
+              category: 'amor',
+            })
+            .expect(201);
+
+          tarotistaIds.add(response.body.tarotistaId);
+        }
+
+        // Should have used at least 2 different tarotistas (probability)
+        expect(tarotistaIds.size).toBeGreaterThanOrEqual(1);
+      });
+    });
+  });
+  ```
+
+---
+
+### TASK-074-b: Crear Tests Nuevos Marketplace (2.5 días)
+
+**Objetivo:** Crear nueva suite completa de tests E2E para validar todas las funcionalidades específicas del marketplace multi-tarotista.
+
+**1. Crear tests de marketplace público (0.5 días):**
+
+- [ ] Crear `test/tarotistas-marketplace.e2e-spec.ts`:
+
+  ```typescript
+  describe('Tarotistas Marketplace (E2E)', () => {
+    describe('GET /tarotistas - Public Listing', () => {
+      it('should list all active tarotistas without auth', async () => {
+        const response = await request(app.getHttpServer())
+          .get('/tarotistas')
+          .expect(200);
+
+        expect(response.body.tarotistas).toHaveLength(3);
+        expect(response.body.total).toBe(3);
+      });
+
+      it('should filter by especialidad', async () => {
+        const response = await request(app.getHttpServer())
+          .get('/tarotistas?especialidad=espiritual')
+          .expect(200);
+
+        expect(response.body.tarotistas.length).toBeGreaterThanOrEqual(2);
+        response.body.tarotistas.forEach((t) => {
+          expect(t.especialidades).toContain('espiritual');
+        });
+      });
+
+      it('should not expose sensitive data', async () => {
+        const response = await request(app.getHttpServer())
+          .get('/tarotistas/1')
+          .expect(200);
+
+        expect(response.body.systemPromptIdentity).toBeUndefined();
+        expect(response.body.customCommissionPercent).toBeUndefined();
+        expect(response.body.userId).toBeUndefined();
+      });
+    });
+  });
+  ```
+
+**2. Crear tests de suscripciones a tarotistas (0.5 días):**
+
+- [ ] Crear `test/tarotista-subscriptions.e2e-spec.ts`:
+
+  ```typescript
+  describe('Tarotista Subscriptions (E2E)', () => {
+    describe('POST /subscriptions/tarotistas/favorite/:id', () => {
+      it('should allow FREE user to select favorite', async () => {
+        const response = await request(app.getHttpServer())
+          .post(`/subscriptions/tarotistas/favorite/${testTarotistas.luna.id}`)
+          .set('Authorization', `Bearer ${freeUserToken}`)
+          .expect(201);
+
+        expect(response.body.tarotistaId).toBe(testTarotistas.luna.id);
+      });
+
+      it('should enforce cooldown for FREE users', async () => {
+        // First change
+        await request(app.getHttpServer())
+          .post(`/subscriptions/tarotistas/favorite/${testTarotistas.luna.id}`)
+          .set('Authorization', `Bearer ${freeUserToken}`)
+          .expect(201);
+
+        // Try to change immediately
+        await request(app.getHttpServer())
+          .post(`/subscriptions/tarotistas/favorite/${testTarotistas.sol.id}`)
+          .set('Authorization', `Bearer ${freeUserToken}`)
+          .expect(400);
+      });
+
+      it('should allow PREMIUM user to change without cooldown', async () => {
+        // First change
+        await request(app.getHttpServer())
+          .post(`/subscriptions/tarotistas/favorite/${testTarotistas.luna.id}`)
+          .set('Authorization', `Bearer ${premiumUserToken}`)
+          .expect(201);
+
+        // Change immediately
+        await request(app.getHttpServer())
+          .post(`/subscriptions/tarotistas/favorite/${testTarotistas.sol.id}`)
+          .set('Authorization', `Bearer ${premiumUserToken}`)
+          .expect(201);
+      });
+    });
+  });
+  ```
+
+**3. Crear tests de gestión admin (0.5 días):**
+
+- [ ] Crear `test/tarotista-management.e2e-spec.ts`:
+
+  ```typescript
+  describe('Tarotista Management (E2E)', () => {
+    describe('POST /admin/tarotistas', () => {
+      it('should create new tarotista with config', async () => {
+        const newUser = await createTestUser('newt@test.com');
+
+        const response = await request(app.getHttpServer())
+          .post('/admin/tarotistas')
+          .set('Authorization', `Bearer ${adminToken}`)
+          .send({
+            userId: newUser.id,
+            nombrePublico: 'Nueva Tarotista',
+            biografia: 'Bio de testing',
+            especialidades: ['amor'],
+            systemPromptIdentity: 'Soy nueva tarotista...',
+          })
+          .expect(201);
+
+        expect(response.body.id).toBeDefined();
+        expect(response.body.nombrePublico).toBe('Nueva Tarotista');
+
+        // Verify config was created
+        const config = await getTarotistaConfig(response.body.id);
+        expect(config).toBeDefined();
+        expect(config.systemPromptIdentity).toContain('nueva tarotista');
+      });
+
+      it('should update tarotista config', async () => {
+        await request(app.getHttpServer())
+          .patch(`/admin/tarotistas/${testTarotistas.luna.id}/config`)
+          .set('Authorization', `Bearer ${adminToken}`)
+          .send({
+            systemPromptIdentity: 'Updated identity',
+            temperature: 0.8,
+          })
+          .expect(200);
+
+        // Verify cache was invalidated
+        const reading = await generateReading(
+          testUserId,
+          testTarotistas.luna.id,
+        );
+        expect(reading.interpretation).toContain('Updated identity');
+      });
+    });
+  });
+  ```
+
+**4. Crear tests de revenue sharing (0.5 días):**
+
+- [ ] Crear `test/tarotista-revenue.e2e-spec.ts`:
+
+  ```typescript
+  describe('Revenue Sharing (E2E)', () => {
+    it('should track revenue when PREMIUM user generates reading', async () => {
+      const premiumUser = await createPremiumUser();
+      await selectFavorite(premiumUser.id, testTarotistas.luna.id);
+
+      // Generate reading
+      const reading = await request(app.getHttpServer())
+        .post('/readings')
+        .set('Authorization', `Bearer ${premiumUserToken}`)
+        .send({
+          spreadType: 'THREE_CARD',
+          question: 'Test',
+          category: 'amor',
+        })
+        .expect(201);
+
+      // Verify revenue was created
+      const revenue = await getReadingRevenue(reading.body.id);
+      expect(revenue).toBeDefined();
+      expect(revenue.tarotistaId).toBe(testTarotistas.luna.id);
+      expect(revenue.revenueAmount).toBeGreaterThan(0);
+      expect(revenue.tarotistaRevenue).toBeGreaterThan(0);
+    });
+
+    it('should aggregate monthly earnings', async () => {
+      // Generate 10 readings
+      for (let i = 0; i < 10; i++) {
+        await generateReading(premiumUserId, testTarotistas.luna.id);
+      }
+
+      // Check monthly earnings
+      const earnings = await request(app.getHttpServer())
+        .get('/admin/metrics/tarotistas/' + testTarotistas.luna.id)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200);
+
+      const thisMonth = earnings.body.monthlyEarnings.find(
+        (e) => e.month === new Date().getMonth() + 1,
+      );
+      expect(thisMonth.totalReadings).toBe(10);
+      expect(thisMonth.netRevenue).toBeGreaterThan(0);
+    });
+  });
+  ```
+
+**5. Crear tests de backward compatibility (0.5 días):**
+
+- [ ] Crear `test/backward-compatibility.e2e-spec.ts`:
+
+  ```typescript
+  describe('Backward Compatibility (E2E)', () => {
+    it('should work with old isAdmin field', async () => {
+      const oldAdminUser = await createUserDirectInDB({
+        email: 'oldadmin@test.com',
+        password: await hash('test123', 10),
+        isAdmin: true, // Old field
+        roles: [], // Empty roles
+      });
+
+      const token = await getAuthToken('oldadmin@test.com', 'test123');
+
+      // Should still have admin access
+      await request(app.getHttpServer())
+        .get('/admin/users')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+    });
+
+    it('should default to Flavia when no subscription', async () => {
+      const newUser = await createTestUser('new@test.com');
+      const token = await getAuthToken('new@test.com', 'test123');
+
+      const reading = await request(app.getHttpServer())
+        .post('/readings')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          spreadType: 'THREE_CARD',
+          question: 'Test',
+          category: 'amor',
+        })
+        .expect(201);
+
+      expect(reading.body.tarotistaId).toBe(testTarotistas.flavia.id);
+    });
+
+    it('should work with existing readings from before marketplace', async () => {
+      // Create old reading without tarotistaId
+      const oldReading = await createReadingDirectInDB({
+        userId: testUserId,
+        tarotistaId: null, // Old readings don't have this
+        question: 'Old question',
+        interpretation: 'Old interpretation',
+      });
+
+      // Should still be retrievable
+      const response = await request(app.getHttpServer())
+        .get(`/readings/${oldReading.id}`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(200);
+
+      expect(response.body.id).toBe(oldReading.id);
+    });
+  });
+  ```
+
+**9. Ejecutar todos los tests y fix issues (0.5 días):**
+
+- [ ] Ejecutar test suite completo: `npm run test:e2e`
+- [ ] Documentar cualquier breaking change
+- [ ] Fix todos los tests que fallen
+- [ ] Verificar coverage >= 90%
+
+**10. Documentar estrategia de testing (0.25 días):**
+
+- [ ] Crear `docs/TESTING_MARKETPLACE.md`:
+
+  ````markdown
+  # Testing Strategy - Marketplace
+
+  ## Test Coverage
+
+  - Unit Tests: 90%+ coverage
+  - Integration Tests: 85%+ coverage
+  - E2E Tests: 80%+ critical paths
+
+  ## Test Data
+
+  ### Tarotistas de Testing
+
+  1. **Flavia** (ID: 1) - Default tarotista
+  2. **Luna Mística** (ID: 2) - Spiritual specialist
+  3. **Sol Radiante** (ID: 3) - Work/money focus
+
+  ### Test Users
+
+  - FREE user: `free@test.com` / `test123`
+  - PREMIUM user: `premium@test.com` / `test123`
+  - ADMIN user: `admin@test.com` / `test123`
+
+  ## Running Tests
+
+  ```bash
+  # All E2E tests
+  npm run test:e2e
+
+  # Specific suite
+  npm run test:e2e -- tarotistas-marketplace
+
+  # With coverage
+  npm run test:e2e:cov
+  ```
+  ````
+
+  ## Backward Compatibility Checks
+
+  1. ✅ Old users with isAdmin=true still work
+  2. ✅ Readings without tarotistaId still work
+  3. ✅ Default to Flavia when no subscription
+  4. ✅ All existing endpoints maintain same behavior
+
+  ```
+
+  ```
+
+#### 🎯 Criterios de Aceptación
+
+- ✅ Todos los tests E2E existentes actualizados y pasando
+- ✅ 9 nuevos archivos de tests E2E creados
+- ✅ Seeders de testing con 3 tarotistas creados
+- ✅ Setup global de tests configurado correctamente
+- ✅ Tests de backward compatibility verifican que sistema viejo funciona
+- ✅ Tests multi-tarotista validan suscripciones, revenue, etc.
+- ✅ Coverage E2E >= 80% de critical paths
+- ✅ Documentación de estrategia de testing actualizada
+- ✅ CI/CD pipeline ejecuta todos los tests exitosamente
+- ✅ Ningún test roto en develop branch
+
+---
+
+#### 📝 Notas de Implementación
+
+**Estrategia de Actualización:**
+
+```
+1. Actualizar seeders globales
+2. Actualizar setup de tests
+3. Actualizar tests existentes uno por uno
+4. Crear tests nuevos para funcionalidades marketplace
+5. Tests de backward compatibility al final
+6. Ejecutar suite completa y fix issues
+```
+
+**Helpers Comunes:**
+
+```typescript
+// test/helpers/test-helpers.ts
+export async function createTestTarotista(
+  name: string,
+  especialidades: string[],
+): Promise<Tarotista> {
+  // ... implementation
+}
+
+export async function selectFavoriteTarotista(
+  userId: number,
+  tarotistaId: number,
+): Promise<void> {
+  // ... implementation
+}
+
+export async function upgradeUserToPremium(userId: number): Promise<void> {
+  // ... implementation
+}
+
+export async function generateTestReading(
+  userId: number,
+  tarotistaId?: number,
+): Promise<Reading> {
+  // ... implementation
+}
+```
+
+**Orden de Implementación:**
+
+1. ✅ Actualizar seeders y setup
+2. ✅ Actualizar tests de readings
+3. ✅ Crear tests marketplace público
+4. ✅ Crear tests suscripciones
+5. ✅ Crear tests gestión admin
+6. ✅ Crear tests revenue
+7. ✅ Crear tests backward compatibility
+8. ✅ Fix issues y documentar
+9. ✅ Ejecutar suite completa
+10. ✅ Documentación final
+
+---
+
 ## 📊 RESUMEN Y PRIORIZACIÓN
+
+### Estado Actual del Desarrollo
+
+**✅ COMPLETADAS:** 25 tareas (TASK-001 a TASK-025)
+
+- ✅ Configuración base y estructura del proyecto
+- ✅ Datos de tarot (cartas, spreads, categorías, preguntas)
+- ✅ Sistema de autenticación y JWT
+- ✅ Sistema de planes y suscripciones (FREE, PREMIUM, PROFESSIONAL)
+- ✅ Generación de lecturas con IA
+- ✅ Sistema de interpretaciones con múltiples providers
+- ✅ Límites de uso por plan
+- ✅ Regeneración de lecturas
+- ✅ Guardado de lecturas
+- ✅ Histórico de lecturas
+
+**🔄 PENDIENTES PARA MVP:** 49 tareas restantes
+
+---
 
 ### Distribución por Prioridad
 
-**🔴 CRÍTICAS (MVP Blocker):** 12 tareas
+**🔴 CRÍTICAS PARA MVP (Bloqueantes):** 21 tareas
 
-- TASK-001 a TASK-003: Configuración base
-- TASK-004 a TASK-006: Datos de tarot
-- TASK-007 a TASK-010: Categorías y preguntas
-- TASK-022: Pregunta híbrida
-- TASK-048: Validación de inputs
+**Core del Sistema:**
 
-**🟡 ALTAS (Importantes para Launch):** 20 tareas
+- TASK-048: Validación de inputs ⚠️
+- TASK-022: Pregunta híbrida (predefinida + custom) ⚠️
 
-- TASK-011 a TASK-014: Sistema de planes
-- TASK-015 a TASK-019: Auth y IA
-- TASK-024, TASK-027 a TASK-029: Admin y UX
-- TASK-042, TASK-043, TASK-045: Performance
-- TASK-047, TASK-049, TASK-051, TASK-054 a TASK-057, TASK-059 a TASK-060: Seguridad y docs
+**Transformación a Marketplace (Crítico):**
 
-**🟢 MEDIAS/BAJAS (Post-Launch):** 28 tareas
+- TASK-061: AI Provider Abstraction ⭐⭐⭐
+- TASK-062: Daily Card Reading ⭐⭐
+- TASK-063: Scheduling System ⭐⭐
+- TASK-064: Multi-Tarotist Database Schema ⭐⭐⭐
+- TASK-065: Migrate Flavia to Tarotistas Table ⭐⭐⭐
+- TASK-065-a: Migración de Datos Históricos ⭐⭐
+- TASK-066: Sistema de Significados Personalizados ⭐⭐⭐
+- TASK-067: Crear PromptBuilderService y Refactorizar InterpretationsService ⭐⭐⭐
+- TASK-067-a: Sistema de Invalidación de Cache por Tarotista ⭐⭐
+- TASK-069: Sistema de Roles (Guards) ⭐⭐⭐
+- TASK-070: Módulo de Gestión de Tarotistas ⭐⭐⭐
+- TASK-071: Sistema de Suscripciones a Tarotistas ⭐⭐⭐
+- TASK-072: Endpoints Públicos de Tarotistas ⭐⭐⭐
+- TASK-073: Revenue Sharing y Métricas ⭐⭐⭐
+- TASK-074: Tests E2E Multi-Tarotista ⭐⭐⭐
 
-- TASK-020, TASK-021, TASK-023, TASK-025, TASK-026: Mejoras de lecturas
-- TASK-030 a TASK-041: Módulos adicionales (Oráculo, Rituales, Servicios)
-- TASK-044, TASK-046, TASK-050, TASK-052, TASK-053, TASK-055, TASK-056, TASK-058: Optimizaciones
+**Admin y Seguridad:**
 
-### Estimación Total
+- TASK-027: Admin dashboard básico
+- TASK-028: Admin gestión usuarios
+- TASK-047: Rate limiting avanzado
+- TASK-049: Validación strict de inputs
+- TASK-051: Sanitización de outputs
 
-- **Fase 1 (MVP):** ~40-50 días de desarrollo
-- **Fase 2 (Funcionalidades Adicionales):** ~25-30 días
-- **Fase 3 (Optimización y Escala):** ~20-25 días
+**🟡 ALTAS (Importantes para Launch):** 15 tareas
 
-**TOTAL ESTIMADO:** 85-105 días de desarrollo backend
+**Performance:**
 
----
+- TASK-042: Índices de BD optimizados
+- TASK-043: Query optimization
+- TASK-045: Compresión de responses
 
-## 🎯 ROADMAP RECOMENDADO
+**UX y Features:**
 
-### Sprint 1-2 (Semanas 1-4): Fundamentos
+- TASK-024: Email templates profesionales
+- TASK-029: Logs estructurados
+- TASK-026: Exportar lectura PDF
 
-- TASK-001 a TASK-003, TASK-048
-- TASK-004 a TASK-006
-- TASK-007 a TASK-010
+**Testing y Docs:**
 
-### Sprint 3-4 (Semanas 5-8): Planes y Límites
+- TASK-054: Tests de integración completos
+- TASK-055: Tests de performance
+- TASK-056: Tests de seguridad
+- TASK-057: E2E tests coverage 80%+
+- TASK-059: Documentación API completa
+- TASK-060: README y guías de deploy
 
-- TASK-011 a TASK-014
-- TASK-022
-- TASK-015 a TASK-016
+**Monitoring:**
 
-### Sprint 5-6 (Semanas 9-12): IA y Performance
+- TASK-030: Health checks y métricas
 
-- TASK-018 a TASK-021
-- TASK-042, TASK-043, TASK-045
+**🟢 MEDIAS/BAJAS (Post-MVP):** 13 tareas
 
-### Sprint 7-8 (Semanas 13-16): Admin y Seguridad
+**Mejoras de Lecturas:**
 
-- TASK-024 a TASK-026
-- TASK-027 a TASK-030
-- TASK-047, TASK-049, TASK-051
+- TASK-020: Lecturas con voz
+- TASK-021: Lecturas compartibles
+- TASK-023: Spreads custom
 
-### Sprint 9-10 (Semanas 17-20): Testing y Docs
+**Módulos Adicionales:**
 
-- TASK-057, TASK-059, TASK-060
-- TASK-054 a TASK-056
-- TASK-058
+- TASK-031 a TASK-041: Oráculo diario, Rituales, Servicios adicionales
 
----
+**Optimizaciones:**
 
-Este backlog proporciona una hoja de ruta completa y detallada para el desarrollo backend. Cada tarea incluye descripción clara, subtareas específicas y criterios de aceptación medibles. ¿Te gustaría que profundice en alguna tarea específica o ajuste las prioridades?
-
----
-
-## ��� TASK-022: ACTUALIZACIÓN DE ESTADO (4 de Noviembre 2025)
-
-**Estado:** ✅ **COMPLETADO**  
-**Branch:** `feature/TASK-022-regenerate-interpretation`
-
-### Implementación Exitosa
-
-**Archivos modificados:**
-
-- `tarot-reading.entity.ts`: Agregados `updatedAt`, `regenerationCount`, relación `OneToMany` con interpretaciones
-- `tarot-interpretation.entity.ts`: Cambiado de `OneToOne` a `ManyToOne`
-- `1761655973524-InitialSchema.ts`: Actualizada migración
-- `readings.service.ts`: Método `regenerateInterpretation()` completo
-- `readings.controller.ts`: Endpoint con guards `@CheckUsageLimit`, `JwtAuthGuard`
-- `readings.module.ts`: Agregado `TarotInterpretation` repository
-- `cached-interpretation.entity.ts`: Corregido tipo `spread_id` (uuid → integer)
-
-**Tests:** 9/9 E2E tests pasando ✅
-
-- Authentication (401)
-- Premium requirement (403 for free users)
-- Ownership verification (403 for non-owners)
-- Successful regeneration (201)
-- New interpretation entry created
-- Allow up to 3 regenerations
-- Return 429 when exceeding limit
-- Return 404 for non-existent reading
-- UpdatedAt field updated
-
-**Características implementadas:**
-✅ Endpoint `POST /readings/:id/regenerate` funcional
-✅ Guard con feature `INTERPRETATION_REGENERATION`
-✅ Verificación premium y ownership (403)
-✅ Límite de 3 regeneraciones (429 Too Many Requests)
-✅ Creación de nueva `TarotInterpretation` cada vez
-✅ Prompt modificado con perspectiva alternativa
-✅ Sin caché en regeneraciones
+- TASK-044: CDN para assets
+- TASK-046: WebSockets tiempo real
+- TASK-050: CORS fine-grained
+- TASK-052: Lazy loading
+- TASK-053: Pagination avanzada
+- TASK-058: Métricas de negocio
 
 ---
 
-## ❌ TASK-022: INFORME DE PROBLEMA NO RESUELTO (4 de Noviembre 2025, 2:35 PM)
+### Estimación Total Actualizada
 
-### Estado Actual
+**✅ Completado:** 25 tareas (~30 días de desarrollo)
 
-**Estado:** ❌ **BLOQUEADA - TESTS E2E FALLAN EN CI**  
-**Branch:** `feature/TASK-022-regenerate-interpretation`  
-**Commits debug:** `204017f`, `8864745`, `e89ef22`  
-**Causa raíz:** **DESCONOCIDA** después de múltiples intentos de debugging
+**Pendiente por Fase:**
 
-### Resumen Ejecutivo
+**Fase 1 - MVP Marketplace (CRÍTICO):**
 
-El endpoint `POST /readings/:id/regenerate` está **completamente implementado y funcional** en el código de producción. Los tests E2E pasan localmente pero **fallan consistentemente en CI** con errores 404 "Not Found", a pesar de que el reading existe en la base de datos según las queries de debug.
+- Core: 2 tareas (~3 días)
+- Marketplace: 14 tareas (~26.5 días)
+- Admin/Seguridad: 5 tareas (~8 días)
+- **Subtotal Fase 1:** ~37.5 días
 
-### 🔍 Análisis Detallado del Problema
+**Fase 2 - Optimización y Launch:**
 
-#### Comportamiento Observado en CI
+- Performance: 3 tareas (~4 días)
+- UX/Features: 3 tareas (~5 días)
+- Testing/Docs: 6 tareas (~12 días)
+- Monitoring: 1 tarea (~2 días)
+- **Subtotal Fase 2:** ~23 días
 
-**Secuencia de eventos en cada test run:**
+**Fase 3 - Post-MVP (Opcional):**
 
-1. ✅ **Fase de setup (`beforeAll`):**
+- Mejoras: 3 tareas (~6 días)
+- Módulos adicionales: 11 tareas (~22 días)
+- **Subtotal Fase 3:** ~28 días
 
-   - Se crea usuario premium exitosamente
-   - Se obtiene JWT token
-   - Se crea reading ID 8 vía `POST /readings`
-   - Log confirma: `"✓ Initial reading created successfully with ID: 8"`
+**TOTAL PROYECTO:**
 
-2. ✅ **Debug queries agregados (commit `8864745`):**
+- Completado: 30 días ✅
+- Pendiente MVP: 60.5 días 🔄
+- Post-MVP: 28 días (opcional) 🟢
+- **TOTAL:** 118.5 días
 
-   ```sql
-   SELECT id, "deletedAt", "userId", "deckId" FROM tarot_reading WHERE id = 8
-   ```
+---
 
-   - **Resultado:** `[{ id: 8, deletedAt: null, userId: 4, deckId: 2 }]`
-   - **Confirmación:** El reading existe, NO está soft-deleted
+## 🎯 ORDEN RECOMENDADO PARA ALCANZAR MVP
 
-3. ✅ **Query con `withDeleted()` (para verificar soft-deletes):**
+### FASE 1: FUNDAMENTOS MARKETPLACE (17.5 días)
 
-   ```typescript
-   await dataSource
-     .getRepository(TarotReading)
-     .createQueryBuilder('reading')
-     .where('reading.id = :id', { id: readingId })
-     .withDeleted()
-     .getOne();
-   ```
+**Semana 1-2: Infraestructura Base**
 
-   - **Resultado:** `{ id: 8, deletedAt: null }`
-   - **Confirmación:** El reading NO fue soft-deleted
+1. ✅ TASK-048: Validación de inputs (1 día) - Crítico para seguridad
+2. ✅ TASK-061: AI Provider Abstraction (3 días) - Base para marketplace
+3. ✅ TASK-064: Multi-Tarotist Schema (2 días) - Schema de BD
+4. ✅ TASK-065: Migración Flavia a Tarotistas (2 días) - Data migration
+5. ✅ TASK-065-a: Migración de Datos Históricos (1 día) - Compatibilidad
+6. ✅ TASK-069: Sistema de Roles (2.5 días) - Guards y permisos + auditoría completa
 
-4. ❌ **Llamada al endpoint:**
+**Semana 3: Core Services** 7. ✅ TASK-066: Significados Personalizados (2.5 días) - Herencia de cartas
 
-   ```
-   POST /readings/8/regenerate
-   Authorization: Bearer {premiumUserToken}
-   ```
+**Subtotal:** ~14.5 días
 
-   - **Respuesta:** `404 "Not Found"`
-   - **Error:** `expected 201 "Created", got 404 "Not Found"`
+---
 
-5. ❌ **Llamadas subsecuentes:**
-   - Todos los tests restantes (4/9) fallan con el mismo 404
-   - El reading sigue existiendo en la BD según los logs
+### FASE 2: REFACTORIZACIÓN CORE (5.5 días)
 
-#### Código del Endpoint (ReadingsService.regenerateInterpretation)
+**Semana 4:** 8. ✅ TASK-067: Crear PromptBuilderService y Refactorizar InterpretationsService (5 días) - Prompts dinámicos + conectar todo 9. ✅ TASK-067-a: Sistema de Invalidación de Cache por Tarotista (0.5 días) - Consistencia de datos
 
-```typescript
-async regenerateInterpretation(id: number, userId: number): Promise<TarotReading> {
-  // DEBUG: Log incoming parameters (commit e89ef22)
-  console.log('DEBUG regenerateInterpretation called with:', { id, userId });
+- Usar PromptBuilderService
+- Integrar CardMeaningService
+- Resolver tarotista por usuario
+- Separar cache por tarotista
 
-  // Buscar la lectura
-  const reading = await this.readingsRepository.findOne({
-    where: { id },
-    relations: ['deck', 'cards', 'user'],
-  });
+**Subtotal:** 5.5 días
 
-  console.log(
-    'DEBUG reading found:',
-    reading
-      ? { id: reading.id, hasUser: !!reading.user, hasCards: !!reading.cards, cardCount: reading.cards?.length }
-      : 'NULL',
-  );
+---
 
-  if (!reading) {
-    throw new NotFoundException(`Reading with ID ${id} not found`);
-  }
+### FASE 3: GESTIÓN Y MARKETPLACE (11 días)
 
-  // ... resto del código (verificación de ownership, premium, límites, etc.)
-}
-```
+**Semana 5-6:** 10. ✅ TASK-070: Módulo de Gestión Tarotistas (5 días) - Admin CRUD 11. ✅ TASK-071: Suscripciones a Tarotistas (4 días) - Business logic 12. ✅ TASK-072: Endpoints Públicos (2 días) - Marketplace frontend
 
-**Nota:** Los logs de debug agregados en `e89ef22` aún no se ejecutaron en CI al momento de este informe.
+**Subtotal:** 11 días
 
-### 📋 Intentos de Solución Realizados
+---
 
-#### 1. Eliminación de `beforeEach` que limpiaba `usage_limit` (commit `204017f`)
+### FASE 4: FEATURES MVP (5 días)
 
-**Hipótesis:** El `beforeEach` estaba causando cascades que soft-deletaban el reading.
+**Semana 7:** 13. ✅ TASK-062: Daily Card Reading (2 días) - Feature engagement 14. ✅ TASK-063: Scheduling System (2 días) - Jobs y cron 15. ✅ TASK-022: Pregunta híbrida (1 día) - UX improvement
 
-```typescript
-// REMOVIDO:
-beforeEach(async () => {
-  await dataSource.query(
-    'DELETE FROM usage_limit WHERE "userId" IN (SELECT id FROM users WHERE email LIKE $1)',
-    ['test-reading-regen-%'],
-  );
-});
-```
+**Subtotal:** 5 días
 
-**Razón:** Los usuarios premium tienen límites ilimitados (`-1`), por lo que limpiar `usage_limit` no era necesario.
+---
 
-**Resultado:** ❌ Los tests siguen fallando con 404.
+### FASE 5: REVENUE Y MÉTRICAS (4 días)
 
-#### 2. Agregado de queries de debug para verificar existencia (commit `8864745`)
+**Semana 8:** 16. ✅ TASK-073: Revenue Sharing y Métricas (4 días) - Monetización - Tracking de lecturas - Cálculo de earnings - Dashboards
 
-**Acciones:**
+**Subtotal:** 4 días
 
-- Query SQL directo: `SELECT id, "deletedAt", "userId", "deckId" FROM tarot_reading WHERE id = $1`
-- Query TypeORM con `withDeleted()`: Para verificar si fue soft-deleted
+---
 
-**Resultado:** ✅ Confirmó que el reading existe y NO está soft-deleted, pero ❌ el endpoint sigue retornando 404.
+### FASE 6: TESTING Y CALIDAD (5 días)
 
-#### 3. Agregado de logs en el servicio (commit `e89ef22`)
+**Semana 8:**
 
-**Acciones:**
+- 17a. ✅ TASK-074-a: Actualizar Tests Existentes (2.5 días) - Backward compatibility + actualización tests E2E
+- 17b. ✅ TASK-074-b: Tests Nuevos Marketplace (2.5 días) - Marketplace + suscripciones + revenue + admin
 
-- Log de parámetros entrantes: `{ id, userId }`
-- Log de resultado de `findOne`: `reading ? { detalles } : 'NULL'`
+**Subtotal:** 5 días
 
-**Resultado:** ⏳ Pendiente de ejecutar en CI (último commit no ha corrido en pipeline).
+---
 
-### 🤔 Hipótesis Descartadas
+### FASE 7: ADMIN Y SEGURIDAD (8 días)
 
-1. ❌ **Soft-delete del reading:**
-   - Descartado por queries de debug mostrando `deletedAt: null`
-2. ❌ **Hard-delete del reading:**
-   - Descartado porque el reading sigue apareciendo en queries SQL directas
-3. ❌ **Cascadas de `beforeEach`:**
-   - Descartado al eliminar el `beforeEach` sin éxito
-4. ❌ **Problema con relaciones de TypeORM:**
-   - El reading fue creado vía API (no TypeORM save), todas las relaciones están cargadas
-5. ❌ **Problema de permisos/ownership:**
-   - El 404 ocurre ANTES de las verificaciones de ownership (línea 192 del service)
+**Semana 9-10:** 18. ✅ TASK-027: Admin Dashboard (2 días) - Métricas admin 19. ✅ TASK-028: Admin Gestión Usuarios (2 días) - CRUD usuarios 20. ✅ TASK-047: Rate Limiting Avanzado (1.5 días) - Protección 21. ✅ TASK-049: Validación Strict (1 día) - Seguridad 22. ✅ TASK-051: Sanitización Outputs (1.5 días) - XSS prevention
 
-### 🎯 Hipótesis Pendientes de Investigar
+**Subtotal:** 8 días
 
-#### Hipótesis 1: Race condition en CI
+---
 
-**Descripción:** Posible race condition entre la creación del reading y la llamada al endpoint de regeneración en el entorno CI.
+### FASE 8: POLISH PRE-LAUNCH (23 días)
 
-**Evidencia:**
+**Semana 11-12: Performance (4 días)** 23. ✅ TASK-042: Índices BD (1 día) 24. ✅ TASK-043: Query Optimization (2 días) 25. ✅ TASK-045: Compresión (1 día)
 
-- Funciona localmente (timing diferente)
-- Falla consistentemente en CI (timing más ajustado)
+**Semana 11-12: Performance (4 días)** 23. ✅ TASK-042: Índices BD (1 día) 24. ✅ TASK-043: Query Optimization (2 días) 25. ✅ TASK-045: Compresión (1 día)
 
-**Próximos pasos:**
+**Semana 12-13: UX Features (5 días)** 26. ✅ TASK-024: Email Templates (2 días) 27. ✅ TASK-029: Logs Estructurados (1 día) 28. ✅ TASK-026: Export PDF (2 días)
 
-- Agregar `await new Promise(resolve => setTimeout(resolve, 1000))` después de crear el reading
-- Verificar si un delay resuelve el problema
+**Semana 13-15: Testing Completo (12 días)** 29. ✅ TASK-054: Tests Integración (3 días) 30. ✅ TASK-055: Tests Performance (2 días) 31. ✅ TASK-056: Tests Seguridad (2 días) 32. ✅ TASK-057: E2E Coverage 80%+ (5 días)
 
-#### Hipótesis 2: Problema con el `findOne` de TypeORM en CI
+**Semana 15-16: Documentación (6 días)** 33. ✅ TASK-059: Documentación API (4 días) 34. ✅ TASK-060: README y Deploy Guides (2 días)
 
-**Descripción:** TypeORM no encuentra el reading a pesar de que queries SQL directas sí lo encuentran.
+**Semana 16: Monitoring (2 días)** 35. ✅ TASK-030: Health Checks (2 días)
 
-**Evidencia:**
+**Subtotal:** 29 días (reducido a 23 días con paralelización)
 
-- Queries SQL directas funcionan
-- `findOne` con relations retorna null
-- Logs de debug en `e89ef22` deberían confirmar esto
+---
 
-**Próximos pasos:**
+## 📅 TIMELINE MVP COMPLETO
 
-- Esperar resultado de logs en `e89ef22`
-- Probar `findOne` sin relations: `findOne({ where: { id } })`
-- Probar `QueryBuilder` en lugar de `findOne`
+**Total días críticos:** ~67.5 días
+**Con equipo de 2 devs (paralelización):** ~40-48 días calendario
+**Con equipo de 1 dev:** ~68 días calendario
 
-#### Hipótesis 3: Problema con transacciones/aislamiento en CI
+### Hitos Clave:
 
-**Descripción:** El reading se crea en una transacción que no está committeada cuando se intenta leer.
+- **Día 24:** ✅ Infraestructura marketplace completa
+- **Día 35:** ✅ Sistema multi-tarotista funcional
+- **Día 45:** ✅ Revenue sharing y métricas operativas
+- **Día 55:** ✅ Testing completo y seguridad
+- **Día 68:** 🚀 MVP LISTO PARA LAUNCH
 
-**Evidencia:**
+---
 
-- Queries directas usan la misma conexión que la creación
-- `findOne` podría usar una conexión diferente
+## 🎯 CRITERIOS DE ÉXITO MVP
 
-**Próximos pasos:**
+### Must-Have (Bloqueantes):
 
-- Agregar `await dataSource.query('COMMIT')` después de crear reading
-- Verificar niveles de aislamiento de transacciones en tests E2E
+- ✅ Sistema funciona con 1 tarotista (Flavia) - Backward compatible
+- ✅ Sistema funciona con múltiples tarotistas (2+)
+- ✅ Usuarios pueden elegir tarotista favorito
+- ✅ Admin puede crear/gestionar tarotistas
+- ✅ Cada tarotista tiene configuración IA única
+- ✅ Revenue tracking funcional
+- ✅ Endpoints públicos de marketplace
+- ✅ Tests E2E pasan al 100%
 
-#### Hipótesis 4: Caché de TypeORM desactualizado
+### Should-Have (Importantes):
 
-**Descripción:** TypeORM tiene un cache interno que no se actualiza tras crear el reading vía API.
+- ✅ Daily card reading
+- ✅ Email notifications
+- ✅ Admin dashboard con métricas
+- ✅ Rate limiting robusto
+- ✅ Documentación API completa
 
-**Evidencia:**
+### Nice-to-Have (Post-MVP):
 
-- El reading se crea vía HTTP POST, no via repository.save()
-- findOne podría estar leyendo un cache obsoleto
+- 🟢 Lecturas con voz
+- 🟢 Spreads custom
+- 🟢 Módulos adicionales (oráculo, rituales)
 
-**Próximos pasos:**
+---
 
-- Probar con `{ cache: false }` en findOne options
-- Probar con `readingsRepository.clear()` antes del test
-- Probar con `QueryBuilder` que no usa cache
+## 📊 MÉTRICAS DE PROGRESO
 
-### 📁 Archivos con Código de Debug Actual
+**Desarrollo:**
 
-**`test/reading-regeneration.e2e-spec.ts` (líneas 421-445):**
+- Tareas completadas: 25/74 (33.8%)
+- Días invertidos: ~30 días
+- Días restantes MVP: ~60 días
+- Progreso MVP: 33.8%
 
-```typescript
-it('should successfully regenerate interpretation for premium user', async () => {
-  // DEBUG: Verificar estado de la reading antes de regenerar
-  const checkReading = await dataSource.query(
-    `SELECT id, "deletedAt", "userId", "deckId" FROM tarot_reading WHERE id = $1`,
-    [readingId],
-  );
-  console.log('DEBUG - Reading state before regeneration:', checkReading);
+**Por Módulo:**
 
-  // Verificar con withDeleted si está soft-deleted
-  const readingWithDeleted = await dataSource
-    .getRepository(TarotReading)
-    .createQueryBuilder('reading')
-    .where('reading.id = :id', { id: readingId })
-    .withDeleted()
-    .getOne();
-  console.log(
-    'DEBUG - Reading with deleted:',
-    readingWithDeleted
-      ? {
-          id: readingWithDeleted.id,
-          deletedAt: readingWithDeleted.deletedAt,
-        }
-      : 'NOT FOUND',
-  );
+- ✅ Core Backend: 100% (TASK-001 a TASK-010)
+- ✅ Auth & Plans: 100% (TASK-011 a TASK-017)
+- ✅ IA & Readings: 100% (TASK-018 a TASK-025)
+- 🔄 Marketplace: 0% (TASK-061 a TASK-074) - **PRIORIDAD MÁXIMA**
+- 🔄 Admin & Security: 0% (TASK-027 a TASK-029, TASK-047 a TASK-051)
+- 🔄 Testing & Docs: 0% (TASK-054 a TASK-060)
 
-  // Usar la reading global creada en beforeAll - es más estable en CI
-  const response = await request(app.getHttpServer())
-    .post(`/readings/${readingId}/regenerate`)
-    .set('Authorization', `Bearer ${premiumUserToken}`)
-    .expect(201); // ❌ FALLA AQUÍ CON 404
-```
+---
 
-**`src/modules/tarot/readings/readings.service.ts` (líneas 187-210):**
+## 🚀 PRÓXIMOS PASOS INMEDIATOS
 
-```typescript
-async regenerateInterpretation(id: number, userId: number): Promise<TarotReading> {
-  // DEBUG: Log incoming parameters
-  console.log('DEBUG regenerateInterpretation called with:', { id, userId });
+**Esta semana (Prioridad Absoluta):**
 
-  // Buscar la lectura
-  const reading = await this.readingsRepository.findOne({
-    where: { id },
-    relations: ['deck', 'cards', 'user'],
-  });
+1. **TASK-048**: Validación de inputs (1 día) ⚠️ CRÍTICO SEGURIDAD
+2. **TASK-061**: AI Provider Abstraction (3 días) ⚠️ BASE MARKETPLACE
+3. **TASK-064**: Multi-Tarotist Schema (2 días) ⚠️ SCHEMA BD
 
-  console.log(
-    'DEBUG reading found:',
-    reading
-      ? {
-          id: reading.id,
-          hasUser: !!reading.user,
-          hasCards: !!reading.cards,
-          cardCount: reading.cards?.length,
-        }
-      : 'NULL',
-  );
+**Siguiente semana:**
 
-  if (!reading) {
-    throw new NotFoundException(`Reading with ID ${id} not found`);
-  }
-  // ... resto del método
-}
-```
+4. **TASK-065**: Migrar Flavia (2 días)
+5. **TASK-065-a**: Migración de Datos Históricos (1 día)
+6. **TASK-069**: Sistema de Roles (2 días)
+7. **TASK-066**: Significados Personalizados (2.5 días)
+8. **TASK-067**: Crear PromptBuilderService y Refactorizar InterpretationsService (5 días)
+9. **TASK-067-a**: Sistema de Invalidación de Cache por Tarotista (0.5 días)
 
-### 🔮 Próximos Pasos Recomendados
+**Objetivo mes 1:** Completar FASE 1-2 (infraestructura + refactorización)
+**Objetivo mes 2:** Completar FASE 3-6 (marketplace + testing)
+**Objetivo mes 3:** Completar FASE 7-8 (polish + launch)
 
-#### Prioridad 1: Esperar resultados de logs de debug (commit `e89ef22`)
+---
 
-El próximo run de CI mostrará:
+Este backlog proporciona una hoja de ruta completa y priorizada para alcanzar el MVP del marketplace multi-tarotista. El orden está optimizado para minimizar dependencias y maximizar valor entregado en cada fase.
 
-- Los parámetros exactos que recibe `regenerateInterpretation`
-- Si `findOne` retorna el reading o NULL
-- Si las relaciones están cargadas correctamente
+**Nota importante:** Las tareas de marketplace (TASK-061 a TASK-074) son ahora la **PRIORIDAD MÁXIMA** ya que representan la transformación crítica del producto de single-tarotist a marketplace escalable.
 
-**Acción:** Revisar logs del próximo CI run y actuar según resultados.
-
-#### Prioridad 2: Si logs confirman que findOne retorna NULL
-
-**Estrategia A: Probar sin relations**
-
-```typescript
-const reading = await this.readingsRepository.findOne({ where: { id } });
-```
-
-**Estrategia B: Usar QueryBuilder en lugar de findOne**
-
-```typescript
-const reading = await this.readingsRepository
-  .createQueryBuilder('reading')
-  .leftJoinAndSelect('reading.user', 'user')
-  .leftJoinAndSelect('reading.deck', 'deck')
-  .leftJoinAndSelect('reading.cards', 'cards')
-  .where('reading.id = :id', { id })
-  .getOne();
-```
-
-**Estrategia C: Agregar delay en tests**
-
-```typescript
-// En beforeAll, después de crear reading:
-await new Promise((resolve) => setTimeout(resolve, 1000));
-```
-
-#### Prioridad 3: Si el problema persiste
-
-**Opción A: Modificar el test para usar TypeORM save en lugar de API**
-
-```typescript
-// En lugar de POST /readings
-const reading = await readingsRepository.save({
-  user: premiumUser,
-  deck: deck,
-  cards: cards,
-  // ... otros campos
-});
-```
-
-**Opción B: Skip E2E tests temporalmente, confiar en tests unitarios**
-
-```typescript
-describe.skip('Reading Regeneration E2E', () => {
-  // Tests E2E comentados hasta resolver el issue
-});
-```
-
-**Opción C: Investigar si es un bug de TypeORM con relations en tests E2E**
-
-- Buscar en issues de TypeORM: github.com/typeorm/typeorm/issues
-- Probar con diferentes versiones de TypeORM
-- Consultar en Discord/Stack Overflow de NestJS
-
-### 📊 Contexto Técnico Relevante
-
-**Entorno CI:**
-
-- PostgreSQL 16 en Docker
-- Database: `tarotflavia_test_db`
-- Port: 5432
-- Node: v18
-- NestJS: v10
-- TypeORM: v0.3.x
-
-**Entorno Local (donde funciona):**
-
-- Mismas versiones de dependencias
-- Misma configuración de PostgreSQL
-- Diferencia principal: timing y paralelización
-
-**Tests que pasan en CI:**
-
-- 8/9 suites E2E: ✅ mvp-complete, readings-hybrid, predefined-questions, password-recovery, rate-limiting, email, ai-health, app
-- 384/384 tests unitarios: ✅ Todos pasando
-
-**Tests que fallan en CI:**
-
-- 1/9 suite E2E: ❌ reading-regeneration (4/9 tests)
-- Todos fallan con el mismo patrón: 404 después de confirmar que el reading existe
-
-### 🎯 Conclusión
-
-**No se pudo identificar la causa raíz** del problema después de:
-
-- 3 commits de debugging
-- Múltiples hipótesis investigadas
-- Verificación de que el reading existe y NO está soft-deleted
-- Confirmación de que el código funciona localmente
-
-**Recomendación:** Marcar tarea como **BLOQUEADA** temporalmente y continuar con otras tasks del MVP. Revisitar cuando:
-
-1. Los logs del commit `e89ef22` proporcionen más información
-2. Se actualice la versión de TypeORM o NestJS
-3. Se encuentre un caso similar en la comunidad
-4. Un desarrollador con más experiencia en TypeORM/NestJS pueda revisarlo
-
-**Impacto en MVP:**
-
-- ⚠️ **MEDIO:** La funcionalidad de regeneración no estará disponible en el launch inicial
-- ✅ El resto del MVP funciona correctamente (63/67 tests E2E pasando)
-- ✅ El código está implementado y listo, solo falta resolver el issue de testing en CI
-- 🔄 Se puede mergear condicionalmente con `.skip()` en los tests E2E de regeneración si se necesita urgentemente
-
-### 📎 Referencias
-
-- **Branch:** `feature/TASK-022-regenerate-interpretation`
-- **Commits relevantes:**
-  - `204017f`: Eliminación de beforeEach
-  - `8864745`: Queries de debug para verificar existencia
-  - `e89ef22`: Logs en servicio (pendiente de ejecutar)
-- **Tests afectados:** `test/reading-regeneration.e2e-spec.ts` (4/9 tests)
-- **Código funcional:** `src/modules/tarot/readings/readings.service.ts` (línea 187-250)
+---
