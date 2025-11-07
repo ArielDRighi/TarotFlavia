@@ -10,6 +10,7 @@
   "moduleDirectories": ["node_modules"],
   "globalSetup": "<rootDir>/setup-e2e-db.ts",
   "globalTeardown": "<rootDir>/teardown-e2e-db.ts",
+  "maxWorkers": 1,
   "forceExit": true,
   "detectOpenHandles": false,
   "setupFiles": ["<rootDir>/setup-env.ts"]

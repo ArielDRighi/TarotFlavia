@@ -26,7 +26,12 @@ describe('PredefinedQuestions (e2e)', () => {
     const dataSource = dbHelper.getDataSource();
     const categoryRepository = dataSource.getRepository(ReadingCategory);
     const category = await categoryRepository.findOne({ where: { order: 1 } });
-    categoryId = category!.id;
+    if (!category) {
+      throw new Error(
+        'No categories found in database. Make sure global setup has run correctly.',
+      );
+    }
+    categoryId = category.id;
 
     // Create NestJS application
     const moduleFixture: TestingModule = await Test.createTestingModule({

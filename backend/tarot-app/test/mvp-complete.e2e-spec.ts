@@ -118,18 +118,43 @@ describe('MVP Complete Flow E2E', () => {
 
     // Get first category and question for tests
     const categories = await categoryRepository.find();
+    if (categories.length === 0) {
+      throw new Error(
+        'No categories found in database. Make sure global setup has run correctly.',
+      );
+    }
     categoryId = categories[0].id;
 
     const questions = await questionRepository.find();
+    if (questions.length === 0) {
+      throw new Error(
+        'No predefined questions found in database. Make sure global setup has run correctly.',
+      );
+    }
     predefinedQuestionId = questions[0].id;
 
     const decks = await deckRepository.find();
+    if (decks.length === 0) {
+      throw new Error(
+        'No decks found in database. Make sure global setup has run correctly.',
+      );
+    }
     deckId = decks[0].id;
 
     const spreads = await spreadRepository.find();
+    if (spreads.length === 0) {
+      throw new Error(
+        'No spreads found in database. Make sure global setup has run correctly.',
+      );
+    }
     spreadId = spreads[0].id;
 
     const cards = await cardRepository.find({ take: 3 });
+    if (cards.length < 3) {
+      throw new Error(
+        'Not enough cards found in database. Make sure global setup has run correctly.',
+      );
+    }
     cardIds = cards.map((c) => c.id);
   }, 60000);
 

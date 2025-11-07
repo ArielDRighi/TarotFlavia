@@ -1,0 +1,2145 @@
+
+> tarot-app@0.0.1 pretest:e2e
+> echo 'E2E tests use global setup/teardown - no pre-reset needed'
+
+'E2E tests use global setup/teardown - no pre-reset needed'
+
+> tarot-app@0.0.1 test:e2e
+> jest --config ./test/jest-e2e.json
+
+
+🚀 [Global Setup E2E] Iniciando configuración...
+[Global Setup E2E] Verificando conexión E2E...
+[E2E Database Helper] Conexión E2E inicializada
+[Global Setup E2E] Conexión E2E verificada ✓
+[Global Setup E2E] Reseteando base de datos E2E...
+[E2E Database Helper] Reseteando base de datos...
+[E2E Database Helper] Eliminando schema...
+[E2E Database Helper] Schema eliminado
+[E2E Database Helper] Ejecutando migraciones...
+[E2E Database Helper] Migraciones ejecutadas
+[E2E Database Helper] Base de datos reseteada
+[Global Setup E2E] Base de datos E2E reseteada ✓
+[Global Setup E2E] Ejecutando seeders base...
+📚 Starting Reading Categories seeding process...
+💾 Saving 6 categories...
+✅ Successfully seeded 6 categories!
+   Categories:
+   ❤️ Amor y Relaciones (order: 1)
+   💼 Carrera y Trabajo (order: 2)
+   💰 Dinero y Finanzas (order: 3)
+   🏥 Salud y Bienestar (order: 4)
+   ✨ Crecimiento Espiritual (order: 5)
+   🌟 Consulta General (order: 6)
+🃏 Starting Tarot Decks seeding process...
+💾 Saving deck: Rider-Waite...
+✅ Successfully seeded deck: Rider-Waite (ID: 1)
+   • Artist: Pamela Colman Smith
+   • Year Created: 1909
+   • Tradition: Hermética / Orden del Amanecer Dorado
+   • Card Count: 78
+   • Is Default: true
+🌟 Starting Tarot Cards seeding process...
+📦 Found deck: Rider-Waite (ID: 1)
+📊 Card distribution:
+   • Arcanos Mayores: 22
+   • Bastos (Wands): 14
+   • Copas (Cups): 14
+   • Espadas (Swords): 14
+   • Oros (Pentacles): 14
+   • TOTAL: 78
+💾 Saving cards to database...
+✅ Successfully seeded 78 tarot cards!
+✓ Tarot spreads seeded successfully!
+  Total spreads: 4
+  Distribution:
+    - 1 card(s): 1 spread(s)
+    - 3 card(s): 1 spread(s)
+    - 5 card(s): 1 spread(s)
+    - 10 card(s): 1 spread(s)
+💬 Starting Predefined Questions seeding process...
+📦 Found 6 categories
+📊 Question distribution:
+   Amor y Relaciones: 8 questions
+   Carrera y Trabajo: 8 questions
+   Dinero y Finanzas: 7 questions
+   Salud y Bienestar: 6 questions
+   Crecimiento Espiritual: 7 questions
+   Consulta General: 6 questions
+   • TOTAL: 42 questions
+💾 Saving questions to database...
+✅ Successfully seeded 42 predefined questions!
+👥 Starting Users seeding process...
+💾 Creating test users...
+   ✓ Created: free@test.com (free
+   ✓ Created: premium@test.com (premium
+   ✓ Created: admin@test.com (premium
+✅ Successfully seeded test users!
+
+📋 Test Credentials:
+   FREE User:
+      Email: free@test.com
+      Password: Test123456!
+
+   PREMIUM User:
+      Email: premium@test.com
+      Password: Test123456!
+
+   ADMIN User:
+      Email: admin@test.com
+      Password: Test123456!
+
+⚠️  WARNING: These are TEST users. Remove in production!
+[Global Setup E2E] Seeders base ejecutados ✓
+✅ [Global Setup E2E] Configuración completada
+
+[E2E Database Helper] Conexión E2E cerrada
+PASS test/rate-limiting.e2e-spec.ts (26.613 s)
+  ● Console
+
+    console.log
+      [Setup Env] E2E Testing environment configured
+
+      at Object.<anonymous> (setup-env.ts:18:9)
+
+    console.log
+      [Setup Env] Database: tarot_e2e on port 5436
+
+      at Object.<anonymous> (setup-env.ts:19:9)
+
+PASS test/database-infrastructure.e2e-spec.ts (43.661 s)
+  ● Console
+
+    console.log
+      [Setup Env] E2E Testing environment configured
+
+      at Object.<anonymous> (setup-env.ts:18:9)
+
+    console.log
+      [Setup Env] Database: tarot_e2e on port 5436
+
+      at Object.<anonymous> (setup-env.ts:19:9)
+
+PASS test/email.e2e-spec.ts (44.32 s)
+  ● Console
+
+    console.log
+      [Setup Env] E2E Testing environment configured
+
+      at Object.<anonymous> (setup-env.ts:18:9)
+
+    console.log
+      [Setup Env] Database: tarot_e2e on port 5436
+
+      at Object.<anonymous> (setup-env.ts:19:9)
+
+PASS test/ai-health.e2e-spec.ts (44.978 s)
+  ● Console
+
+    console.log
+      [Setup Env] E2E Testing environment configured
+
+      at Object.<anonymous> (setup-env.ts:18:9)
+
+    console.log
+      [Setup Env] Database: tarot_e2e on port 5436
+
+      at Object.<anonymous> (setup-env.ts:19:9)
+
+[31m[Nest] 7516  - [39m07/11/2025, 12:33:42 [31m  ERROR[39m [38;5;3m[ExceptionsHandler] [39mQueryFailedError: insert or update on table "predefined_question" violates foreign key constraint "FK_predefined_question_category"
+    at PostgresQueryRunner.query [90m(D:\Personal\tarot\backend\tarot-app\[39msrc\driver\postgres\PostgresQueryRunner.ts:331:19[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at InsertQueryBuilder.execute [90m(D:\Personal\tarot\backend\tarot-app\[39msrc\query-builder\InsertQueryBuilder.ts:163:33[90m)[39m
+    at SubjectExecutor.executeInsertOperations [90m(D:\Personal\tarot\backend\tarot-app\[39msrc\persistence\SubjectExecutor.ts:435:42[90m)[39m
+    at SubjectExecutor.execute [90m(D:\Personal\tarot\backend\tarot-app\[39msrc\persistence\SubjectExecutor.ts:137:9[90m)[39m
+    at EntityPersistExecutor.execute [90m(D:\Personal\tarot\backend\tarot-app\[39msrc\persistence\EntityPersistExecutor.ts:182:21[90m)[39m
+    at PredefinedQuestionsService.create [90m(D:\Personal\tarot\backend\tarot-app\[39msrc\modules\predefined-questions\predefined-questions.service.ts:48:12[90m)[39m
+    at D:\Personal\tarot\node_modules\[4m@nestjs[24m\core\router\router-execution-context.js:46:28
+    at D:\Personal\tarot\node_modules\[4m@nestjs[24m\core\router\router-proxy.js:9:17 {
+  query: [32m'INSERT INTO "predefined_question"("category_id", "question_text", "order", "is_active", "usage_count", "created_at", "updated_at", "deleted_at") VALUES ($1, $2, $3, $4, DEFAULT, DEFAULT, DEFAULT, DEFAULT) RETURNING "id", "order", "is_active", "usage_count", "created_at", "updated_at", "deleted_at"'[39m,
+  parameters: [
+    [33m1[39m,
+    [32m'¿Nueva pregunta de prueba?'[39m,
+    [33m10[39m,
+    [33m1[39m
+  ],
+  driverError: error: insert or update on table "predefined_question" violates foreign key constraint "FK_predefined_question_category"
+      at [90mD:\Personal\tarot\backend\tarot-app\[39mnode_modules\[4mpg[24m\lib\client.js:535:17
+  [90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+      at PostgresQueryRunner.query [90m(D:\Personal\tarot\backend\tarot-app\[39msrc\driver\postgres\PostgresQueryRunner.ts:260:25[90m)[39m
+      at InsertQueryBuilder.execute [90m(D:\Personal\tarot\backend\tarot-app\[39msrc\query-builder\InsertQueryBuilder.ts:163:33[90m)[39m
+      at SubjectExecutor.executeInsertOperations [90m(D:\Personal\tarot\backend\tarot-app\[39msrc\persistence\SubjectExecutor.ts:435:42[90m)[39m
+      at SubjectExecutor.execute [90m(D:\Personal\tarot\backend\tarot-app\[39msrc\persistence\SubjectExecutor.ts:137:9[90m)[39m
+      at EntityPersistExecutor.execute [90m(D:\Personal\tarot\backend\tarot-app\[39msrc\persistence\EntityPersistExecutor.ts:182:21[90m)[39m
+      at PredefinedQuestionsService.create [90m(D:\Personal\tarot\backend\tarot-app\[39msrc\modules\predefined-questions\predefined-questions.service.ts:48:12[90m)[39m
+      at D:\Personal\tarot\node_modules\[4m@nestjs[24m\core\router\router-execution-context.js:46:28
+      at D:\Personal\tarot\node_modules\[4m@nestjs[24m\core\router\router-proxy.js:9:17 {
+    length: [33m311[39m,
+    severity: [32m'ERROR'[39m,
+    code: [32m'23503'[39m,
+    detail: [32m'Key (category_id)=(1) is not present in table "reading_category".'[39m,
+    hint: [90mundefined[39m,
+    position: [90mundefined[39m,
+    internalPosition: [90mundefined[39m,
+    internalQuery: [90mundefined[39m,
+    where: [90mundefined[39m,
+    schema: [32m'public'[39m,
+    table: [32m'predefined_question'[39m,
+    column: [90mundefined[39m,
+    dataType: [90mundefined[39m,
+    constraint: [32m'FK_predefined_question_category'[39m,
+    file: [32m'ri_triggers.c'[39m,
+    line: [32m'2608'[39m,
+    routine: [32m'ri_ReportViolation'[39m
+  },
+  length: [33m311[39m,
+  severity: [32m'ERROR'[39m,
+  code: [32m'23503'[39m,
+  detail: [32m'Key (category_id)=(1) is not present in table "reading_category".'[39m,
+  hint: [90mundefined[39m,
+  position: [90mundefined[39m,
+  internalPosition: [90mundefined[39m,
+  internalQuery: [90mundefined[39m,
+  where: [90mundefined[39m,
+  schema: [32m'public'[39m,
+  table: [32m'predefined_question'[39m,
+  column: [90mundefined[39m,
+  dataType: [90mundefined[39m,
+  constraint: [32m'FK_predefined_question_category'[39m,
+  file: [32m'ri_triggers.c'[39m,
+  line: [32m'2608'[39m,
+  routine: [32m'ri_ReportViolation'[39m
+}
+FAIL test/reading-regeneration.e2e-spec.ts (49.863 s)
+  ● Console
+
+    console.log
+      [Setup Env] E2E Testing environment configured
+
+      at Object.<anonymous> (setup-env.ts:18:9)
+
+    console.log
+      [Setup Env] Database: tarot_e2e on port 5436
+
+      at Object.<anonymous> (setup-env.ts:19:9)
+
+    console.error
+      Cleanup error: QueryFailedError: deadlock detected
+          at PostgresQueryRunner.query (D:\Personal\tarot\backend\tarot-app\src\driver\postgres\PostgresQueryRunner.ts:331:19)
+          at processTicksAndRejections (node:internal/process/task_queues:105:5)
+          at DataSource.query (D:\Personal\tarot\backend\tarot-app\src\data-source\DataSource.ts:540:20)
+          at cleanupTestData (D:\Personal\tarot\backend\tarot-app\test\reading-regeneration.e2e-spec.ts:258:9)
+          at Object.<anonymous> (D:\Personal\tarot\backend\tarot-app\test\reading-regeneration.e2e-spec.ts:64:5) {
+        query: 'DELETE FROM tarot_reading_cards_tarot_card WHERE "tarotReadingId" IN (SELECT id FROM tarot_reading WHERE "userId" IN ($1, $2))',
+        parameters: [ 4, 6 ],
+        driverError: error: deadlock detected
+            at D:\Personal\tarot\backend\tarot-app\node_modules\pg\lib\client.js:535:17
+            at processTicksAndRejections (node:internal/process/task_queues:105:5)
+            at PostgresQueryRunner.query (D:\Personal\tarot\backend\tarot-app\src\driver\postgres\PostgresQueryRunner.ts:260:25)
+            at DataSource.query (D:\Personal\tarot\backend\tarot-app\src\data-source\DataSource.ts:540:20)
+            at cleanupTestData (D:\Personal\tarot\backend\tarot-app\test\reading-regeneration.e2e-spec.ts:258:9)
+            at Object.<anonymous> (D:\Personal\tarot\backend\tarot-app\test\reading-regeneration.e2e-spec.ts:64:5) {
+          length: 329,
+          severity: 'ERROR',
+          code: '40P01',
+          detail: 'Process 12794 waits for AccessShareLock on relation 86901 of database 16384; blocked by process 12798.\n' +
+            'Process 12798 waits for AccessExclusiveLock on relation 86991 of database 16384; blocked by process 12794.',
+          hint: 'See server log for query details.',
+          position: '86',
+          internalPosition: undefined,
+          internalQuery: undefined,
+          where: undefined,
+          schema: undefined,
+          table: undefined,
+          column: undefined,
+          dataType: undefined,
+          constraint: undefined,
+          file: 'deadlock.c',
+          line: '1130',
+          routine: 'DeadLockReport'
+        },
+        length: 329,
+        severity: 'ERROR',
+        code: '40P01',
+        detail: 'Process 12794 waits for AccessShareLock on relation 86901 of database 16384; blocked by process 12798.\n' +
+          'Process 12798 waits for AccessExclusiveLock on relation 86991 of database 16384; blocked by process 12794.',
+        hint: 'See server log for query details.',
+        position: '86',
+        internalPosition: undefined,
+        internalQuery: undefined,
+        where: undefined,
+        schema: undefined,
+        table: undefined,
+        column: undefined,
+        dataType: undefined,
+        constraint: undefined,
+        file: 'deadlock.c',
+        line: '1130',
+        routine: 'DeadLockReport'
+      }
+
+    [0m [90m 322 |[39m         }
+     [90m 323 |[39m       } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 324 |[39m         console[33m.[39merror([32m'Cleanup error:'[39m[33m,[39m error)[33m;[39m
+     [90m     |[39m                 [31m[1m^[22m[39m
+     [90m 325 |[39m       }
+     [90m 326 |[39m     }
+     [90m 327 |[39m   }[0m
+
+      at cleanupTestData (reading-regeneration.e2e-spec.ts:324:17)
+      at Object.<anonymous> (reading-regeneration.e2e-spec.ts:64:5)
+
+  ● Reading Regeneration E2E › POST /readings/:id/regenerate - Authentication › should return 401 without authentication
+
+    QueryFailedError: insert or update on table "predefined_question" violates foreign key constraint "FK_predefined_question_category"
+
+      at PostgresQueryRunner.query (../src/driver/postgres/PostgresQueryRunner.ts:331:19)
+      at InsertQueryBuilder.execute (../src/query-builder/InsertQueryBuilder.ts:163:33)
+      at SubjectExecutor.executeInsertOperations (../src/persistence/SubjectExecutor.ts:435:42)
+      at SubjectExecutor.execute (../src/persistence/SubjectExecutor.ts:137:9)
+      at EntityPersistExecutor.execute (../src/persistence/EntityPersistExecutor.ts:182:21)
+      at createTestData (reading-regeneration.e2e-spec.ts:128:22)
+      at Object.<anonymous> (reading-regeneration.e2e-spec.ts:60:5)
+
+  ● Reading Regeneration E2E › POST /readings/:id/regenerate - Premium Required › should return 403 for free users
+
+    QueryFailedError: insert or update on table "predefined_question" violates foreign key constraint "FK_predefined_question_category"
+
+      at PostgresQueryRunner.query (../src/driver/postgres/PostgresQueryRunner.ts:331:19)
+      at InsertQueryBuilder.execute (../src/query-builder/InsertQueryBuilder.ts:163:33)
+      at SubjectExecutor.executeInsertOperations (../src/persistence/SubjectExecutor.ts:435:42)
+      at SubjectExecutor.execute (../src/persistence/SubjectExecutor.ts:137:9)
+      at EntityPersistExecutor.execute (../src/persistence/EntityPersistExecutor.ts:182:21)
+      at createTestData (reading-regeneration.e2e-spec.ts:128:22)
+      at Object.<anonymous> (reading-regeneration.e2e-spec.ts:60:5)
+
+  ● Reading Regeneration E2E › POST /readings/:id/regenerate - Ownership › should return 403 when trying to regenerate another user reading
+
+    QueryFailedError: insert or update on table "predefined_question" violates foreign key constraint "FK_predefined_question_category"
+
+      at PostgresQueryRunner.query (../src/driver/postgres/PostgresQueryRunner.ts:331:19)
+      at InsertQueryBuilder.execute (../src/query-builder/InsertQueryBuilder.ts:163:33)
+      at SubjectExecutor.executeInsertOperations (../src/persistence/SubjectExecutor.ts:435:42)
+      at SubjectExecutor.execute (../src/persistence/SubjectExecutor.ts:137:9)
+      at EntityPersistExecutor.execute (../src/persistence/EntityPersistExecutor.ts:182:21)
+      at createTestData (reading-regeneration.e2e-spec.ts:128:22)
+      at Object.<anonymous> (reading-regeneration.e2e-spec.ts:60:5)
+
+  ● Reading Regeneration E2E › POST /readings/:id/regenerate - Success › should successfully regenerate interpretation for premium user
+
+    QueryFailedError: insert or update on table "predefined_question" violates foreign key constraint "FK_predefined_question_category"
+
+      at PostgresQueryRunner.query (../src/driver/postgres/PostgresQueryRunner.ts:331:19)
+      at InsertQueryBuilder.execute (../src/query-builder/InsertQueryBuilder.ts:163:33)
+      at SubjectExecutor.executeInsertOperations (../src/persistence/SubjectExecutor.ts:435:42)
+      at SubjectExecutor.execute (../src/persistence/SubjectExecutor.ts:137:9)
+      at EntityPersistExecutor.execute (../src/persistence/EntityPersistExecutor.ts:182:21)
+      at createTestData (reading-regeneration.e2e-spec.ts:128:22)
+      at Object.<anonymous> (reading-regeneration.e2e-spec.ts:60:5)
+
+  ● Reading Regeneration E2E › POST /readings/:id/regenerate - Success › should create new interpretation entry in database
+
+    QueryFailedError: insert or update on table "predefined_question" violates foreign key constraint "FK_predefined_question_category"
+
+      at PostgresQueryRunner.query (../src/driver/postgres/PostgresQueryRunner.ts:331:19)
+      at InsertQueryBuilder.execute (../src/query-builder/InsertQueryBuilder.ts:163:33)
+      at SubjectExecutor.executeInsertOperations (../src/persistence/SubjectExecutor.ts:435:42)
+      at SubjectExecutor.execute (../src/persistence/SubjectExecutor.ts:137:9)
+      at EntityPersistExecutor.execute (../src/persistence/EntityPersistExecutor.ts:182:21)
+      at createTestData (reading-regeneration.e2e-spec.ts:128:22)
+      at Object.<anonymous> (reading-regeneration.e2e-spec.ts:60:5)
+
+  ● Reading Regeneration E2E › POST /readings/:id/regenerate - Regeneration Limit › should allow up to 3 regenerations and then return 429
+
+    QueryFailedError: insert or update on table "predefined_question" violates foreign key constraint "FK_predefined_question_category"
+
+      at PostgresQueryRunner.query (../src/driver/postgres/PostgresQueryRunner.ts:331:19)
+      at InsertQueryBuilder.execute (../src/query-builder/InsertQueryBuilder.ts:163:33)
+      at SubjectExecutor.executeInsertOperations (../src/persistence/SubjectExecutor.ts:435:42)
+      at SubjectExecutor.execute (../src/persistence/SubjectExecutor.ts:137:9)
+      at EntityPersistExecutor.execute (../src/persistence/EntityPersistExecutor.ts:182:21)
+      at createTestData (reading-regeneration.e2e-spec.ts:128:22)
+      at Object.<anonymous> (reading-regeneration.e2e-spec.ts:60:5)
+
+  ● Reading Regeneration E2E › POST /readings/:id/regenerate - Not Found › should return 404 for non-existent reading
+
+    QueryFailedError: insert or update on table "predefined_question" violates foreign key constraint "FK_predefined_question_category"
+
+      at PostgresQueryRunner.query (../src/driver/postgres/PostgresQueryRunner.ts:331:19)
+      at InsertQueryBuilder.execute (../src/query-builder/InsertQueryBuilder.ts:163:33)
+      at SubjectExecutor.executeInsertOperations (../src/persistence/SubjectExecutor.ts:435:42)
+      at SubjectExecutor.execute (../src/persistence/SubjectExecutor.ts:137:9)
+      at EntityPersistExecutor.execute (../src/persistence/EntityPersistExecutor.ts:182:21)
+      at createTestData (reading-regeneration.e2e-spec.ts:128:22)
+      at Object.<anonymous> (reading-regeneration.e2e-spec.ts:60:5)
+
+  ● Reading Regeneration E2E › POST /readings/:id/regenerate - UpdatedAt › should update the updatedAt field on regeneration
+
+    QueryFailedError: insert or update on table "predefined_question" violates foreign key constraint "FK_predefined_question_category"
+
+      at PostgresQueryRunner.query (../src/driver/postgres/PostgresQueryRunner.ts:331:19)
+      at InsertQueryBuilder.execute (../src/query-builder/InsertQueryBuilder.ts:163:33)
+      at SubjectExecutor.executeInsertOperations (../src/persistence/SubjectExecutor.ts:435:42)
+      at SubjectExecutor.execute (../src/persistence/SubjectExecutor.ts:137:9)
+      at EntityPersistExecutor.execute (../src/persistence/EntityPersistExecutor.ts:182:21)
+      at createTestData (reading-regeneration.e2e-spec.ts:128:22)
+      at Object.<anonymous> (reading-regeneration.e2e-spec.ts:60:5)
+
+FAIL test/readings-pagination.e2e-spec.ts (49.91 s)
+  ● Console
+
+    console.log
+      [Setup Env] E2E Testing environment configured
+
+      at Object.<anonymous> (setup-env.ts:18:9)
+
+    console.log
+      [Setup Env] Database: tarot_e2e on port 5436
+
+      at Object.<anonymous> (setup-env.ts:19:9)
+
+    console.error
+      Cleanup error: QueryFailedError: deadlock detected
+          at PostgresQueryRunner.query (D:\Personal\tarot\backend\tarot-app\src\driver\postgres\PostgresQueryRunner.ts:331:19)
+          at processTicksAndRejections (node:internal/process/task_queues:105:5)
+          at DataSource.query (D:\Personal\tarot\backend\tarot-app\src\data-source\DataSource.ts:540:20)
+          at cleanupTestData (D:\Personal\tarot\backend\tarot-app\test\readings-pagination.e2e-spec.ts:318:9)
+          at Object.<anonymous> (D:\Personal\tarot\backend\tarot-app\test\readings-pagination.e2e-spec.ts:91:5) {
+        query: 'DELETE FROM tarot_reading_cards_tarot_card WHERE "tarotReadingId" IN (SELECT id FROM tarot_reading WHERE "userId" IN ($1, $2))',
+        parameters: [ 7, 9 ],
+        driverError: error: deadlock detected
+            at D:\Personal\tarot\backend\tarot-app\node_modules\pg\lib\client.js:535:17
+            at processTicksAndRejections (node:internal/process/task_queues:105:5)
+            at PostgresQueryRunner.query (D:\Personal\tarot\backend\tarot-app\src\driver\postgres\PostgresQueryRunner.ts:260:25)
+            at DataSource.query (D:\Personal\tarot\backend\tarot-app\src\data-source\DataSource.ts:540:20)
+            at cleanupTestData (D:\Personal\tarot\backend\tarot-app\test\readings-pagination.e2e-spec.ts:318:9)
+            at Object.<anonymous> (D:\Personal\tarot\backend\tarot-app\test\readings-pagination.e2e-spec.ts:91:5) {
+          length: 329,
+          severity: 'ERROR',
+          code: '40P01',
+          detail: 'Process 12796 waits for AccessShareLock on relation 86901 of database 16384; blocked by process 12798.\n' +
+            'Process 12798 waits for AccessExclusiveLock on relation 86991 of database 16384; blocked by process 12796.',
+          hint: 'See server log for query details.',
+          position: '86',
+          internalPosition: undefined,
+          internalQuery: undefined,
+          where: undefined,
+          schema: undefined,
+          table: undefined,
+          column: undefined,
+          dataType: undefined,
+          constraint: undefined,
+          file: 'deadlock.c',
+          line: '1130',
+          routine: 'DeadLockReport'
+        },
+        length: 329,
+        severity: 'ERROR',
+        code: '40P01',
+        detail: 'Process 12796 waits for AccessShareLock on relation 86901 of database 16384; blocked by process 12798.\n' +
+          'Process 12798 waits for AccessExclusiveLock on relation 86991 of database 16384; blocked by process 12796.',
+        hint: 'See server log for query details.',
+        position: '86',
+        internalPosition: undefined,
+        internalQuery: undefined,
+        where: undefined,
+        schema: undefined,
+        table: undefined,
+        column: undefined,
+        dataType: undefined,
+        constraint: undefined,
+        file: 'deadlock.c',
+        line: '1130',
+        routine: 'DeadLockReport'
+      }
+
+    [0m [90m 380 |[39m         }
+     [90m 381 |[39m       } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 382 |[39m         console[33m.[39merror([32m'Cleanup error:'[39m[33m,[39m error)[33m;[39m
+     [90m     |[39m                 [31m[1m^[22m[39m
+     [90m 383 |[39m       }
+     [90m 384 |[39m     }
+     [90m 385 |[39m   }[0m
+
+      at cleanupTestData (readings-pagination.e2e-spec.ts:382:17)
+      at Object.<anonymous> (readings-pagination.e2e-spec.ts:91:5)
+
+  ● Readings Pagination E2E › GET /readings - Pagination › should return paginated results with default parameters
+
+    QueryFailedError: insert or update on table "predefined_question" violates foreign key constraint "FK_predefined_question_category"
+
+      at PostgresQueryRunner.query (../src/driver/postgres/PostgresQueryRunner.ts:331:19)
+      at InsertQueryBuilder.execute (../src/query-builder/InsertQueryBuilder.ts:163:33)
+      at SubjectExecutor.executeInsertOperations (../src/persistence/SubjectExecutor.ts:435:42)
+      at SubjectExecutor.execute (../src/persistence/SubjectExecutor.ts:137:9)
+      at EntityPersistExecutor.execute (../src/persistence/EntityPersistExecutor.ts:182:21)
+      at createTestData (readings-pagination.e2e-spec.ts:162:23)
+      at Object.<anonymous> (readings-pagination.e2e-spec.ts:87:5)
+
+  ● Readings Pagination E2E › GET /readings - Pagination › should respect custom page and limit parameters
+
+    QueryFailedError: insert or update on table "predefined_question" violates foreign key constraint "FK_predefined_question_category"
+
+      at PostgresQueryRunner.query (../src/driver/postgres/PostgresQueryRunner.ts:331:19)
+      at InsertQueryBuilder.execute (../src/query-builder/InsertQueryBuilder.ts:163:33)
+      at SubjectExecutor.executeInsertOperations (../src/persistence/SubjectExecutor.ts:435:42)
+      at SubjectExecutor.execute (../src/persistence/SubjectExecutor.ts:137:9)
+      at EntityPersistExecutor.execute (../src/persistence/EntityPersistExecutor.ts:182:21)
+      at createTestData (readings-pagination.e2e-spec.ts:162:23)
+      at Object.<anonymous> (readings-pagination.e2e-spec.ts:87:5)
+
+  ● Readings Pagination E2E › GET /readings - Pagination › should not allow limit greater than 50
+
+    QueryFailedError: insert or update on table "predefined_question" violates foreign key constraint "FK_predefined_question_category"
+
+      at PostgresQueryRunner.query (../src/driver/postgres/PostgresQueryRunner.ts:331:19)
+      at InsertQueryBuilder.execute (../src/query-builder/InsertQueryBuilder.ts:163:33)
+      at SubjectExecutor.executeInsertOperations (../src/persistence/SubjectExecutor.ts:435:42)
+      at SubjectExecutor.execute (../src/persistence/SubjectExecutor.ts:137:9)
+      at EntityPersistExecutor.execute (../src/persistence/EntityPersistExecutor.ts:182:21)
+      at createTestData (readings-pagination.e2e-spec.ts:162:23)
+      at Object.<anonymous> (readings-pagination.e2e-spec.ts:87:5)
+
+  ● Readings Pagination E2E › GET /readings - Pagination › should return empty data for page beyond total pages
+
+    QueryFailedError: insert or update on table "predefined_question" violates foreign key constraint "FK_predefined_question_category"
+
+      at PostgresQueryRunner.query (../src/driver/postgres/PostgresQueryRunner.ts:331:19)
+      at InsertQueryBuilder.execute (../src/query-builder/InsertQueryBuilder.ts:163:33)
+      at SubjectExecutor.executeInsertOperations (../src/persistence/SubjectExecutor.ts:435:42)
+      at SubjectExecutor.execute (../src/persistence/SubjectExecutor.ts:137:9)
+      at EntityPersistExecutor.execute (../src/persistence/EntityPersistExecutor.ts:182:21)
+      at createTestData (readings-pagination.e2e-spec.ts:162:23)
+      at Object.<anonymous> (readings-pagination.e2e-spec.ts:87:5)
+
+  ● Readings Pagination E2E › GET /readings - Sorting › should sort by created_at DESC by default
+
+    QueryFailedError: insert or update on table "predefined_question" violates foreign key constraint "FK_predefined_question_category"
+
+      at PostgresQueryRunner.query (../src/driver/postgres/PostgresQueryRunner.ts:331:19)
+      at InsertQueryBuilder.execute (../src/query-builder/InsertQueryBuilder.ts:163:33)
+      at SubjectExecutor.executeInsertOperations (../src/persistence/SubjectExecutor.ts:435:42)
+      at SubjectExecutor.execute (../src/persistence/SubjectExecutor.ts:137:9)
+      at EntityPersistExecutor.execute (../src/persistence/EntityPersistExecutor.ts:182:21)
+      at createTestData (readings-pagination.e2e-spec.ts:162:23)
+      at Object.<anonymous> (readings-pagination.e2e-spec.ts:87:5)
+
+  ● Readings Pagination E2E › GET /readings - Sorting › should sort by created_at ASC when specified
+
+    QueryFailedError: insert or update on table "predefined_question" violates foreign key constraint "FK_predefined_question_category"
+
+      at PostgresQueryRunner.query (../src/driver/postgres/PostgresQueryRunner.ts:331:19)
+      at InsertQueryBuilder.execute (../src/query-builder/InsertQueryBuilder.ts:163:33)
+      at SubjectExecutor.executeInsertOperations (../src/persistence/SubjectExecutor.ts:435:42)
+      at SubjectExecutor.execute (../src/persistence/SubjectExecutor.ts:137:9)
+      at EntityPersistExecutor.execute (../src/persistence/EntityPersistExecutor.ts:182:21)
+      at createTestData (readings-pagination.e2e-spec.ts:162:23)
+      at Object.<anonymous> (readings-pagination.e2e-spec.ts:87:5)
+
+  ● Readings Pagination E2E › GET /readings - Sorting › should sort by updated_at when specified
+
+    QueryFailedError: insert or update on table "predefined_question" violates foreign key constraint "FK_predefined_question_category"
+
+      at PostgresQueryRunner.query (../src/driver/postgres/PostgresQueryRunner.ts:331:19)
+      at InsertQueryBuilder.execute (../src/query-builder/InsertQueryBuilder.ts:163:33)
+      at SubjectExecutor.executeInsertOperations (../src/persistence/SubjectExecutor.ts:435:42)
+      at SubjectExecutor.execute (../src/persistence/SubjectExecutor.ts:137:9)
+      at EntityPersistExecutor.execute (../src/persistence/EntityPersistExecutor.ts:182:21)
+      at createTestData (readings-pagination.e2e-spec.ts:162:23)
+      at Object.<anonymous> (readings-pagination.e2e-spec.ts:87:5)
+
+  ● Readings Pagination E2E › GET /readings - Filters › should filter by categoryId
+
+    QueryFailedError: insert or update on table "predefined_question" violates foreign key constraint "FK_predefined_question_category"
+
+      at PostgresQueryRunner.query (../src/driver/postgres/PostgresQueryRunner.ts:331:19)
+      at InsertQueryBuilder.execute (../src/query-builder/InsertQueryBuilder.ts:163:33)
+      at SubjectExecutor.executeInsertOperations (../src/persistence/SubjectExecutor.ts:435:42)
+      at SubjectExecutor.execute (../src/persistence/SubjectExecutor.ts:137:9)
+      at EntityPersistExecutor.execute (../src/persistence/EntityPersistExecutor.ts:182:21)
+      at createTestData (readings-pagination.e2e-spec.ts:162:23)
+      at Object.<anonymous> (readings-pagination.e2e-spec.ts:87:5)
+
+  ● Readings Pagination E2E › GET /readings - Filters › should filter by spreadId
+
+    QueryFailedError: insert or update on table "predefined_question" violates foreign key constraint "FK_predefined_question_category"
+
+      at PostgresQueryRunner.query (../src/driver/postgres/PostgresQueryRunner.ts:331:19)
+      at InsertQueryBuilder.execute (../src/query-builder/InsertQueryBuilder.ts:163:33)
+      at SubjectExecutor.executeInsertOperations (../src/persistence/SubjectExecutor.ts:435:42)
+      at SubjectExecutor.execute (../src/persistence/SubjectExecutor.ts:137:9)
+      at EntityPersistExecutor.execute (../src/persistence/EntityPersistExecutor.ts:182:21)
+      at createTestData (readings-pagination.e2e-spec.ts:162:23)
+      at Object.<anonymous> (readings-pagination.e2e-spec.ts:87:5)
+
+  ● Readings Pagination E2E › GET /readings - Filters › should filter by date range
+
+    QueryFailedError: insert or update on table "predefined_question" violates foreign key constraint "FK_predefined_question_category"
+
+      at PostgresQueryRunner.query (../src/driver/postgres/PostgresQueryRunner.ts:331:19)
+      at InsertQueryBuilder.execute (../src/query-builder/InsertQueryBuilder.ts:163:33)
+      at SubjectExecutor.executeInsertOperations (../src/persistence/SubjectExecutor.ts:435:42)
+      at SubjectExecutor.execute (../src/persistence/SubjectExecutor.ts:137:9)
+      at EntityPersistExecutor.execute (../src/persistence/EntityPersistExecutor.ts:182:21)
+      at createTestData (readings-pagination.e2e-spec.ts:162:23)
+      at Object.<anonymous> (readings-pagination.e2e-spec.ts:87:5)
+
+  ● Readings Pagination E2E › GET /readings - Filters › should combine multiple filters
+
+    QueryFailedError: insert or update on table "predefined_question" violates foreign key constraint "FK_predefined_question_category"
+
+      at PostgresQueryRunner.query (../src/driver/postgres/PostgresQueryRunner.ts:331:19)
+      at InsertQueryBuilder.execute (../src/query-builder/InsertQueryBuilder.ts:163:33)
+      at SubjectExecutor.executeInsertOperations (../src/persistence/SubjectExecutor.ts:435:42)
+      at SubjectExecutor.execute (../src/persistence/SubjectExecutor.ts:137:9)
+      at EntityPersistExecutor.execute (../src/persistence/EntityPersistExecutor.ts:182:21)
+      at createTestData (readings-pagination.e2e-spec.ts:162:23)
+      at Object.<anonymous> (readings-pagination.e2e-spec.ts:87:5)
+
+  ● Readings Pagination E2E › GET /readings - Free User Limit › should limit free users to last 10 readings regardless of actual count
+
+    QueryFailedError: insert or update on table "predefined_question" violates foreign key constraint "FK_predefined_question_category"
+
+      at PostgresQueryRunner.query (../src/driver/postgres/PostgresQueryRunner.ts:331:19)
+      at InsertQueryBuilder.execute (../src/query-builder/InsertQueryBuilder.ts:163:33)
+      at SubjectExecutor.executeInsertOperations (../src/persistence/SubjectExecutor.ts:435:42)
+      at SubjectExecutor.execute (../src/persistence/SubjectExecutor.ts:137:9)
+      at EntityPersistExecutor.execute (../src/persistence/EntityPersistExecutor.ts:182:21)
+      at createTestData (readings-pagination.e2e-spec.ts:162:23)
+      at Object.<anonymous> (readings-pagination.e2e-spec.ts:87:5)
+
+  ● Readings Pagination E2E › GET /readings - Free User Limit › should allow premium users unlimited history access
+
+    QueryFailedError: insert or update on table "predefined_question" violates foreign key constraint "FK_predefined_question_category"
+
+      at PostgresQueryRunner.query (../src/driver/postgres/PostgresQueryRunner.ts:331:19)
+      at InsertQueryBuilder.execute (../src/query-builder/InsertQueryBuilder.ts:163:33)
+      at SubjectExecutor.executeInsertOperations (../src/persistence/SubjectExecutor.ts:435:42)
+      at SubjectExecutor.execute (../src/persistence/SubjectExecutor.ts:137:9)
+      at EntityPersistExecutor.execute (../src/persistence/EntityPersistExecutor.ts:182:21)
+      at createTestData (readings-pagination.e2e-spec.ts:162:23)
+      at Object.<anonymous> (readings-pagination.e2e-spec.ts:87:5)
+
+  ● Readings Pagination E2E › GET /readings - Performance › should include necessary relations (cards, spread)
+
+    QueryFailedError: insert or update on table "predefined_question" violates foreign key constraint "FK_predefined_question_category"
+
+      at PostgresQueryRunner.query (../src/driver/postgres/PostgresQueryRunner.ts:331:19)
+      at InsertQueryBuilder.execute (../src/query-builder/InsertQueryBuilder.ts:163:33)
+      at SubjectExecutor.executeInsertOperations (../src/persistence/SubjectExecutor.ts:435:42)
+      at SubjectExecutor.execute (../src/persistence/SubjectExecutor.ts:137:9)
+      at EntityPersistExecutor.execute (../src/persistence/EntityPersistExecutor.ts:182:21)
+      at createTestData (readings-pagination.e2e-spec.ts:162:23)
+      at Object.<anonymous> (readings-pagination.e2e-spec.ts:87:5)
+
+  ● Readings Pagination E2E › GET /readings - Authentication › should return 401 without authentication
+
+    QueryFailedError: insert or update on table "predefined_question" violates foreign key constraint "FK_predefined_question_category"
+
+      at PostgresQueryRunner.query (../src/driver/postgres/PostgresQueryRunner.ts:331:19)
+      at InsertQueryBuilder.execute (../src/query-builder/InsertQueryBuilder.ts:163:33)
+      at SubjectExecutor.executeInsertOperations (../src/persistence/SubjectExecutor.ts:435:42)
+      at SubjectExecutor.execute (../src/persistence/SubjectExecutor.ts:137:9)
+      at EntityPersistExecutor.execute (../src/persistence/EntityPersistExecutor.ts:182:21)
+      at createTestData (readings-pagination.e2e-spec.ts:162:23)
+      at Object.<anonymous> (readings-pagination.e2e-spec.ts:87:5)
+
+  ● Readings Pagination E2E › GET /readings - Validation › should reject invalid page number
+
+    QueryFailedError: insert or update on table "predefined_question" violates foreign key constraint "FK_predefined_question_category"
+
+      at PostgresQueryRunner.query (../src/driver/postgres/PostgresQueryRunner.ts:331:19)
+      at InsertQueryBuilder.execute (../src/query-builder/InsertQueryBuilder.ts:163:33)
+      at SubjectExecutor.executeInsertOperations (../src/persistence/SubjectExecutor.ts:435:42)
+      at SubjectExecutor.execute (../src/persistence/SubjectExecutor.ts:137:9)
+      at EntityPersistExecutor.execute (../src/persistence/EntityPersistExecutor.ts:182:21)
+      at createTestData (readings-pagination.e2e-spec.ts:162:23)
+      at Object.<anonymous> (readings-pagination.e2e-spec.ts:87:5)
+
+  ● Readings Pagination E2E › GET /readings - Validation › should reject invalid sortBy value
+
+    QueryFailedError: insert or update on table "predefined_question" violates foreign key constraint "FK_predefined_question_category"
+
+      at PostgresQueryRunner.query (../src/driver/postgres/PostgresQueryRunner.ts:331:19)
+      at InsertQueryBuilder.execute (../src/query-builder/InsertQueryBuilder.ts:163:33)
+      at SubjectExecutor.executeInsertOperations (../src/persistence/SubjectExecutor.ts:435:42)
+      at SubjectExecutor.execute (../src/persistence/SubjectExecutor.ts:137:9)
+      at EntityPersistExecutor.execute (../src/persistence/EntityPersistExecutor.ts:182:21)
+      at createTestData (readings-pagination.e2e-spec.ts:162:23)
+      at Object.<anonymous> (readings-pagination.e2e-spec.ts:87:5)
+
+  ● Readings Pagination E2E › GET /readings - Validation › should reject invalid date format
+
+    QueryFailedError: insert or update on table "predefined_question" violates foreign key constraint "FK_predefined_question_category"
+
+      at PostgresQueryRunner.query (../src/driver/postgres/PostgresQueryRunner.ts:331:19)
+      at InsertQueryBuilder.execute (../src/query-builder/InsertQueryBuilder.ts:163:33)
+      at SubjectExecutor.executeInsertOperations (../src/persistence/SubjectExecutor.ts:435:42)
+      at SubjectExecutor.execute (../src/persistence/SubjectExecutor.ts:137:9)
+      at EntityPersistExecutor.execute (../src/persistence/EntityPersistExecutor.ts:182:21)
+      at createTestData (readings-pagination.e2e-spec.ts:162:23)
+      at Object.<anonymous> (readings-pagination.e2e-spec.ts:87:5)
+
+FAIL test/input-validation-security.e2e-spec.ts (50.287 s)
+  ● Console
+
+    console.log
+      [Setup Env] E2E Testing environment configured
+
+      at Object.<anonymous> (setup-env.ts:18:9)
+
+    console.log
+      [Setup Env] Database: tarot_e2e on port 5436
+
+      at Object.<anonymous> (setup-env.ts:19:9)
+
+    console.log
+      [E2E Database Helper] Conexión E2E inicializada
+
+      at E2EDatabaseHelper.initialize (helpers/e2e-database.helper.ts:21:15)
+
+    console.log
+      [E2E Database Helper] Limpiando datos...
+
+      at E2EDatabaseHelper.cleanDatabase (helpers/e2e-database.helper.ts:89:13)
+
+    console.log
+      [E2E Database Helper] Limpiando datos...
+
+      at E2EDatabaseHelper.cleanDatabase (helpers/e2e-database.helper.ts:89:13)
+
+    console.log
+      [E2E Database Helper] Datos limpiados
+
+      at E2EDatabaseHelper.cleanDatabase (helpers/e2e-database.helper.ts:107:13)
+
+  ● Input Validation and Security (E2E) › SQL Injection Protection › should reject SQL injection attempts in email field
+
+    QueryFailedError: deadlock detected
+
+      at PostgresQueryRunner.query (../src/driver/postgres/PostgresQueryRunner.ts:331:19)
+      at DataSource.query (../src/data-source/DataSource.ts:540:20)
+      at E2EDatabaseHelper.cleanDatabase (helpers/e2e-database.helper.ts:99:7)
+      at Object.<anonymous> (input-validation-security.e2e-spec.ts:34:5)
+
+  ● Input Validation and Security (E2E) › Input Validation - String Length › should reject excessively long strings
+
+    QueryFailedError: deadlock detected
+
+      at PostgresQueryRunner.query (../src/driver/postgres/PostgresQueryRunner.ts:331:19)
+      at DataSource.query (../src/data-source/DataSource.ts:540:20)
+      at E2EDatabaseHelper.cleanDatabase (helpers/e2e-database.helper.ts:99:7)
+      at Object.<anonymous> (input-validation-security.e2e-spec.ts:34:5)
+
+  ● Input Validation and Security (E2E) › Input Validation - Email Format › should reject invalid email format
+
+    QueryFailedError: deadlock detected
+
+      at PostgresQueryRunner.query (../src/driver/postgres/PostgresQueryRunner.ts:331:19)
+      at DataSource.query (../src/data-source/DataSource.ts:540:20)
+      at E2EDatabaseHelper.cleanDatabase (helpers/e2e-database.helper.ts:99:7)
+      at Object.<anonymous> (input-validation-security.e2e-spec.ts:34:5)
+
+  ● Input Validation and Security (E2E) › Input Validation - Email Format › should accept valid email format and trim whitespace
+
+    QueryFailedError: deadlock detected
+
+      at PostgresQueryRunner.query (../src/driver/postgres/PostgresQueryRunner.ts:331:19)
+      at DataSource.query (../src/data-source/DataSource.ts:540:20)
+      at E2EDatabaseHelper.cleanDatabase (helpers/e2e-database.helper.ts:99:7)
+      at Object.<anonymous> (input-validation-security.e2e-spec.ts:34:5)
+
+  ● Input Validation and Security (E2E) › Input Validation - Required Fields › should reject missing required fields
+
+    QueryFailedError: deadlock detected
+
+      at PostgresQueryRunner.query (../src/driver/postgres/PostgresQueryRunner.ts:331:19)
+      at DataSource.query (../src/data-source/DataSource.ts:540:20)
+      at E2EDatabaseHelper.cleanDatabase (helpers/e2e-database.helper.ts:99:7)
+      at Object.<anonymous> (input-validation-security.e2e-spec.ts:34:5)
+
+  ● Input Validation and Security (E2E) › Password Security › should reject passwords shorter than minimum length
+
+    QueryFailedError: deadlock detected
+
+      at PostgresQueryRunner.query (../src/driver/postgres/PostgresQueryRunner.ts:331:19)
+      at DataSource.query (../src/data-source/DataSource.ts:540:20)
+      at E2EDatabaseHelper.cleanDatabase (helpers/e2e-database.helper.ts:99:7)
+      at Object.<anonymous> (input-validation-security.e2e-spec.ts:34:5)
+
+FAIL test/predefined-questions.e2e-spec.ts (50.401 s)
+  ● Console
+
+    console.log
+      [Setup Env] E2E Testing environment configured
+
+      at Object.<anonymous> (setup-env.ts:18:9)
+
+    console.log
+      [Setup Env] Database: tarot_e2e on port 5436
+
+      at Object.<anonymous> (setup-env.ts:19:9)
+
+    console.log
+      [E2E Database Helper] Conexión E2E inicializada
+
+      at E2EDatabaseHelper.initialize (helpers/e2e-database.helper.ts:21:15)
+
+    console.log
+      [E2E Database Helper] Conexión E2E cerrada
+
+      at E2EDatabaseHelper.close (helpers/e2e-database.helper.ts:31:15)
+
+  ● PredefinedQuestions (e2e) › /predefined-questions (GET) › should return all active questions
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 42
+    Received:    0
+
+    [0m [90m 79 |[39m         [33m.[39mexpect([35m200[39m)[33m;[39m
+     [90m 80 |[39m
+    [31m[1m>[22m[39m[90m 81 |[39m       expect(response[33m.[39mbody[33m.[39mlength)[33m.[39mtoBeGreaterThanOrEqual([35m42[39m)[33m;[39m
+     [90m    |[39m                                    [31m[1m^[22m[39m
+     [90m 82 |[39m       expect([33mArray[39m[33m.[39misArray(response[33m.[39mbody))[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+     [90m 83 |[39m     })[33m;[39m
+     [90m 84 |[39m[0m
+
+      at Object.<anonymous> (predefined-questions.e2e-spec.ts:81:36)
+
+  ● PredefinedQuestions (e2e) › /predefined-questions (GET) › should filter questions by categoryId
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 5
+    Received:    0
+
+    [0m [90m 90 |[39m
+     [90m 91 |[39m       expect([33mArray[39m[33m.[39misArray(response[33m.[39mbody))[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 92 |[39m       expect(response[33m.[39mbody[33m.[39mlength)[33m.[39mtoBeGreaterThanOrEqual([35m5[39m)[33m;[39m [90m// Al menos 5 preguntas por categoría[39m
+     [90m    |[39m                                    [31m[1m^[22m[39m
+     [90m 93 |[39m       response[33m.[39mbody[33m.[39mforEach((question[33m:[39m { categoryId[33m:[39m number }) [33m=>[39m {
+     [90m 94 |[39m         expect(question[33m.[39mcategoryId)[33m.[39mtoBe(categoryId)[33m;[39m
+     [90m 95 |[39m       })[33m;[39m[0m
+
+      at Object.<anonymous> (predefined-questions.e2e-spec.ts:92:36)
+
+  ● PredefinedQuestions (e2e) › /predefined-questions/:id (GET) › should return a question by id
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+    [0m [90m 105 |[39m         [categoryId][33m,[39m
+     [90m 106 |[39m       )[33m;[39m
+    [31m[1m>[22m[39m[90m 107 |[39m       [36mconst[39m questionId [33m=[39m seededQuestion[[35m0[39m][33m.[39mid[33m;[39m
+     [90m     |[39m                                            [31m[1m^[22m[39m
+     [90m 108 |[39m
+     [90m 109 |[39m       [36mconst[39m response [33m=[39m [36mawait[39m request(app[33m.[39mgetHttpServer())
+     [90m 110 |[39m         [33m.[39m[36mget[39m([32m`/predefined-questions/${questionId}`[39m)[0m
+
+      at Object.<anonymous> (predefined-questions.e2e-spec.ts:107:44)
+
+  ● PredefinedQuestions (e2e) › /predefined-questions (POST) › should create a new question when admin
+
+    expected 201 "Created", got 500 "Internal Server Error"
+
+    [0m [90m 135 |[39m         [33m.[39m[36mset[39m([32m'Authorization'[39m[33m,[39m [32m`Bearer ${adminToken}`[39m)
+     [90m 136 |[39m         [33m.[39msend(createDto)
+    [31m[1m>[22m[39m[90m 137 |[39m         [33m.[39mexpect([35m201[39m)[33m;[39m
+     [90m     |[39m          [31m[1m^[22m[39m
+     [90m 138 |[39m
+     [90m 139 |[39m       expect(response[33m.[39mbody[33m.[39mquestionText)[33m.[39mtoBe(createDto[33m.[39mquestionText)[33m;[39m
+     [90m 140 |[39m       expect(response[33m.[39mbody[33m.[39mcategoryId)[33m.[39mtoBe(categoryId)[33m;[39m[0m
+
+      at Object.<anonymous> (predefined-questions.e2e-spec.ts:137:10)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+FAIL test/readings-soft-delete.e2e-spec.ts (51.416 s)
+  ● Console
+
+    console.log
+      [Setup Env] E2E Testing environment configured
+
+      at Object.<anonymous> (setup-env.ts:18:9)
+
+    console.log
+      [Setup Env] Database: tarot_e2e on port 5436
+
+      at Object.<anonymous> (setup-env.ts:19:9)
+
+  ● Readings Soft Delete E2E › DELETE /readings/:id - Soft Delete Básico › debe hacer soft delete de una lectura propia
+
+    expected 201 "Created", got 404 "Not Found"
+
+    [0m [90m 241 |[39m         generateInterpretation[33m:[39m [36mfalse[39m[33m,[39m
+     [90m 242 |[39m       })
+    [31m[1m>[22m[39m[90m 243 |[39m       [33m.[39mexpect([35m201[39m)[33m;[39m
+     [90m     |[39m        [31m[1m^[22m[39m
+     [90m 244 |[39m
+     [90m 245 |[39m     [36mreturn[39m (response[33m.[39mbody [36mas[39m [33mTarotReading[39m)[33m.[39mid[33m;[39m
+     [90m 246 |[39m   }[0m
+
+      at createTestReading (readings-soft-delete.e2e-spec.ts:243:8)
+      at Object.<anonymous> (readings-soft-delete.e2e-spec.ts:250:31)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Soft Delete E2E › DELETE /readings/:id - Soft Delete Básico › no debe permitir eliminar lectura de otro usuario
+
+    expected 201 "Created", got 404 "Not Found"
+
+    [0m [90m 241 |[39m         generateInterpretation[33m:[39m [36mfalse[39m[33m,[39m
+     [90m 242 |[39m       })
+    [31m[1m>[22m[39m[90m 243 |[39m       [33m.[39mexpect([35m201[39m)[33m;[39m
+     [90m     |[39m        [31m[1m^[22m[39m
+     [90m 244 |[39m
+     [90m 245 |[39m     [36mreturn[39m (response[33m.[39mbody [36mas[39m [33mTarotReading[39m)[33m.[39mid[33m;[39m
+     [90m 246 |[39m   }[0m
+
+      at createTestReading (readings-soft-delete.e2e-spec.ts:243:8)
+      at Object.<anonymous> (readings-soft-delete.e2e-spec.ts:268:31)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Soft Delete E2E › DELETE /readings/:id - Soft Delete Básico › debe retornar 401 si no está autenticado
+
+    expected 201 "Created", got 404 "Not Found"
+
+    [0m [90m 241 |[39m         generateInterpretation[33m:[39m [36mfalse[39m[33m,[39m
+     [90m 242 |[39m       })
+    [31m[1m>[22m[39m[90m 243 |[39m       [33m.[39mexpect([35m201[39m)[33m;[39m
+     [90m     |[39m        [31m[1m^[22m[39m
+     [90m 244 |[39m
+     [90m 245 |[39m     [36mreturn[39m (response[33m.[39mbody [36mas[39m [33mTarotReading[39m)[33m.[39mid[33m;[39m
+     [90m 246 |[39m   }[0m
+
+      at createTestReading (readings-soft-delete.e2e-spec.ts:243:8)
+      at Object.<anonymous> (readings-soft-delete.e2e-spec.ts:292:31)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Soft Delete E2E › DELETE /readings/:id - Soft Delete Básico › las lecturas eliminadas no deben aparecer en GET /readings
+
+    expected 201 "Created", got 404 "Not Found"
+
+    [0m [90m 241 |[39m         generateInterpretation[33m:[39m [36mfalse[39m[33m,[39m
+     [90m 242 |[39m       })
+    [31m[1m>[22m[39m[90m 243 |[39m       [33m.[39mexpect([35m201[39m)[33m;[39m
+     [90m     |[39m        [31m[1m^[22m[39m
+     [90m 244 |[39m
+     [90m 245 |[39m     [36mreturn[39m (response[33m.[39mbody [36mas[39m [33mTarotReading[39m)[33m.[39mid[33m;[39m
+     [90m 246 |[39m   }[0m
+
+      at createTestReading (readings-soft-delete.e2e-spec.ts:243:8)
+      at Object.<anonymous> (readings-soft-delete.e2e-spec.ts:300:31)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Soft Delete E2E › DELETE /readings/:id - Soft Delete Básico › las lecturas eliminadas no deben ser accesibles con GET /readings/:id
+
+    expected 201 "Created", got 404 "Not Found"
+
+    [0m [90m 241 |[39m         generateInterpretation[33m:[39m [36mfalse[39m[33m,[39m
+     [90m 242 |[39m       })
+    [31m[1m>[22m[39m[90m 243 |[39m       [33m.[39mexpect([35m201[39m)[33m;[39m
+     [90m     |[39m        [31m[1m^[22m[39m
+     [90m 244 |[39m
+     [90m 245 |[39m     [36mreturn[39m (response[33m.[39mbody [36mas[39m [33mTarotReading[39m)[33m.[39mid[33m;[39m
+     [90m 246 |[39m   }[0m
+
+      at createTestReading (readings-soft-delete.e2e-spec.ts:243:8)
+      at Object.<anonymous> (readings-soft-delete.e2e-spec.ts:322:31)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Soft Delete E2E › GET /readings/trash - Ver Lecturas Eliminadas › debe retornar lecturas eliminadas del usuario autenticado
+
+    expected 201 "Created", got 404 "Not Found"
+
+    [0m [90m 241 |[39m         generateInterpretation[33m:[39m [36mfalse[39m[33m,[39m
+     [90m 242 |[39m       })
+    [31m[1m>[22m[39m[90m 243 |[39m       [33m.[39mexpect([35m201[39m)[33m;[39m
+     [90m     |[39m        [31m[1m^[22m[39m
+     [90m 244 |[39m
+     [90m 245 |[39m     [36mreturn[39m (response[33m.[39mbody [36mas[39m [33mTarotReading[39m)[33m.[39mid[33m;[39m
+     [90m 246 |[39m   }[0m
+
+      at createTestReading (readings-soft-delete.e2e-spec.ts:243:8)
+      at Object.<anonymous> (readings-soft-delete.e2e-spec.ts:340:32)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Soft Delete E2E › GET /readings/trash - Ver Lecturas Eliminadas › no debe retornar lecturas eliminadas de otros usuarios
+
+    expected 201 "Created", got 404 "Not Found"
+
+    [0m [90m 241 |[39m         generateInterpretation[33m:[39m [36mfalse[39m[33m,[39m
+     [90m 242 |[39m       })
+    [31m[1m>[22m[39m[90m 243 |[39m       [33m.[39mexpect([35m201[39m)[33m;[39m
+     [90m     |[39m        [31m[1m^[22m[39m
+     [90m 244 |[39m
+     [90m 245 |[39m     [36mreturn[39m (response[33m.[39mbody [36mas[39m [33mTarotReading[39m)[33m.[39mid[33m;[39m
+     [90m 246 |[39m   }[0m
+
+      at createTestReading (readings-soft-delete.e2e-spec.ts:243:8)
+      at Object.<anonymous> (readings-soft-delete.e2e-spec.ts:369:31)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Soft Delete E2E › GET /readings/trash - Ver Lecturas Eliminadas › no debe retornar lecturas eliminadas hace más de 30 días
+
+    expected 201 "Created", got 404 "Not Found"
+
+    [0m [90m 241 |[39m         generateInterpretation[33m:[39m [36mfalse[39m[33m,[39m
+     [90m 242 |[39m       })
+    [31m[1m>[22m[39m[90m 243 |[39m       [33m.[39mexpect([35m201[39m)[33m;[39m
+     [90m     |[39m        [31m[1m^[22m[39m
+     [90m 244 |[39m
+     [90m 245 |[39m     [36mreturn[39m (response[33m.[39mbody [36mas[39m [33mTarotReading[39m)[33m.[39mid[33m;[39m
+     [90m 246 |[39m   }[0m
+
+      at createTestReading (readings-soft-delete.e2e-spec.ts:243:8)
+      at Object.<anonymous> (readings-soft-delete.e2e-spec.ts:391:31)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Soft Delete E2E › POST /readings/:id/restore - Restaurar Lecturas › debe restaurar una lectura eliminada propia
+
+    expected 201 "Created", got 404 "Not Found"
+
+    [0m [90m 241 |[39m         generateInterpretation[33m:[39m [36mfalse[39m[33m,[39m
+     [90m 242 |[39m       })
+    [31m[1m>[22m[39m[90m 243 |[39m       [33m.[39mexpect([35m201[39m)[33m;[39m
+     [90m     |[39m        [31m[1m^[22m[39m
+     [90m 244 |[39m
+     [90m 245 |[39m     [36mreturn[39m (response[33m.[39mbody [36mas[39m [33mTarotReading[39m)[33m.[39mid[33m;[39m
+     [90m 246 |[39m   }[0m
+
+      at createTestReading (readings-soft-delete.e2e-spec.ts:243:8)
+      at Object.<anonymous> (readings-soft-delete.e2e-spec.ts:419:31)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Soft Delete E2E › POST /readings/:id/restore - Restaurar Lecturas › no debe permitir restaurar lectura de otro usuario
+
+    expected 201 "Created", got 404 "Not Found"
+
+    [0m [90m 241 |[39m         generateInterpretation[33m:[39m [36mfalse[39m[33m,[39m
+     [90m 242 |[39m       })
+    [31m[1m>[22m[39m[90m 243 |[39m       [33m.[39mexpect([35m201[39m)[33m;[39m
+     [90m     |[39m        [31m[1m^[22m[39m
+     [90m 244 |[39m
+     [90m 245 |[39m     [36mreturn[39m (response[33m.[39mbody [36mas[39m [33mTarotReading[39m)[33m.[39mid[33m;[39m
+     [90m 246 |[39m   }[0m
+
+      at createTestReading (readings-soft-delete.e2e-spec.ts:243:8)
+      at Object.<anonymous> (readings-soft-delete.e2e-spec.ts:443:31)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Soft Delete E2E › POST /readings/:id/restore - Restaurar Lecturas › debe retornar 400 si la lectura no está eliminada
+
+    expected 201 "Created", got 404 "Not Found"
+
+    [0m [90m 241 |[39m         generateInterpretation[33m:[39m [36mfalse[39m[33m,[39m
+     [90m 242 |[39m       })
+    [31m[1m>[22m[39m[90m 243 |[39m       [33m.[39mexpect([35m201[39m)[33m;[39m
+     [90m     |[39m        [31m[1m^[22m[39m
+     [90m 244 |[39m
+     [90m 245 |[39m     [36mreturn[39m (response[33m.[39mbody [36mas[39m [33mTarotReading[39m)[33m.[39mid[33m;[39m
+     [90m 246 |[39m   }[0m
+
+      at createTestReading (readings-soft-delete.e2e-spec.ts:243:8)
+      at Object.<anonymous> (readings-soft-delete.e2e-spec.ts:473:31)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Soft Delete E2E › POST /readings/:id/restore - Restaurar Lecturas › debe retornar 401 si no está autenticado
+
+    expected 201 "Created", got 404 "Not Found"
+
+    [0m [90m 241 |[39m         generateInterpretation[33m:[39m [36mfalse[39m[33m,[39m
+     [90m 242 |[39m       })
+    [31m[1m>[22m[39m[90m 243 |[39m       [33m.[39mexpect([35m201[39m)[33m;[39m
+     [90m     |[39m        [31m[1m^[22m[39m
+     [90m 244 |[39m
+     [90m 245 |[39m     [36mreturn[39m (response[33m.[39mbody [36mas[39m [33mTarotReading[39m)[33m.[39mid[33m;[39m
+     [90m 246 |[39m   }[0m
+
+      at createTestReading (readings-soft-delete.e2e-spec.ts:243:8)
+      at Object.<anonymous> (readings-soft-delete.e2e-spec.ts:482:31)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Soft Delete E2E › POST /readings/:id/restore - Restaurar Lecturas › la lectura restaurada debe estar disponible en la base de datos
+
+    expected 201 "Created", got 404 "Not Found"
+
+    [0m [90m 241 |[39m         generateInterpretation[33m:[39m [36mfalse[39m[33m,[39m
+     [90m 242 |[39m       })
+    [31m[1m>[22m[39m[90m 243 |[39m       [33m.[39mexpect([35m201[39m)[33m;[39m
+     [90m     |[39m        [31m[1m^[22m[39m
+     [90m 244 |[39m
+     [90m 245 |[39m     [36mreturn[39m (response[33m.[39mbody [36mas[39m [33mTarotReading[39m)[33m.[39mid[33m;[39m
+     [90m 246 |[39m   }[0m
+
+      at createTestReading (readings-soft-delete.e2e-spec.ts:243:8)
+      at Object.<anonymous> (readings-soft-delete.e2e-spec.ts:490:31)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Soft Delete E2E › GET /admin/readings - Endpoint Admin con includeDeleted › admin debe poder ver todas las lecturas incluyendo eliminadas
+
+    expected 201 "Created", got 404 "Not Found"
+
+    [0m [90m 241 |[39m         generateInterpretation[33m:[39m [36mfalse[39m[33m,[39m
+     [90m 242 |[39m       })
+    [31m[1m>[22m[39m[90m 243 |[39m       [33m.[39mexpect([35m201[39m)[33m;[39m
+     [90m     |[39m        [31m[1m^[22m[39m
+     [90m 244 |[39m
+     [90m 245 |[39m     [36mreturn[39m (response[33m.[39mbody [36mas[39m [33mTarotReading[39m)[33m.[39mid[33m;[39m
+     [90m 246 |[39m   }[0m
+
+      at createTestReading (readings-soft-delete.e2e-spec.ts:243:8)
+      at Object.<anonymous> (readings-soft-delete.e2e-spec.ts:522:31)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Soft Delete E2E › GET /admin/readings - Endpoint Admin con includeDeleted › admin debe poder ver solo lecturas activas sin includeDeleted
+
+    expected 201 "Created", got 404 "Not Found"
+
+    [0m [90m 241 |[39m         generateInterpretation[33m:[39m [36mfalse[39m[33m,[39m
+     [90m 242 |[39m       })
+    [31m[1m>[22m[39m[90m 243 |[39m       [33m.[39mexpect([35m201[39m)[33m;[39m
+     [90m     |[39m        [31m[1m^[22m[39m
+     [90m 244 |[39m
+     [90m 245 |[39m     [36mreturn[39m (response[33m.[39mbody [36mas[39m [33mTarotReading[39m)[33m.[39mid[33m;[39m
+     [90m 246 |[39m   }[0m
+
+      at createTestReading (readings-soft-delete.e2e-spec.ts:243:8)
+      at Object.<anonymous> (readings-soft-delete.e2e-spec.ts:545:31)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+PASS test/app.e2e-spec.ts (51.917 s)
+  ● Console
+
+    console.log
+      [Setup Env] E2E Testing environment configured
+
+      at Object.<anonymous> (setup-env.ts:18:9)
+
+    console.log
+      [Setup Env] Database: tarot_e2e on port 5436
+
+      at Object.<anonymous> (setup-env.ts:19:9)
+
+FAIL test/mvp-complete.e2e-spec.ts (52.126 s)
+  ● Console
+
+    console.log
+      [Setup Env] E2E Testing environment configured
+
+      at Object.<anonymous> (setup-env.ts:18:9)
+
+    console.log
+      [Setup Env] Database: tarot_e2e on port 5436
+
+      at Object.<anonymous> (setup-env.ts:19:9)
+
+    console.log
+      [E2E Database Helper] Conexión E2E inicializada
+
+      at E2EDatabaseHelper.initialize (helpers/e2e-database.helper.ts:21:15)
+
+    console.log
+      [E2E Database Helper] Conexión E2E cerrada
+
+      at E2EDatabaseHelper.close (helpers/e2e-database.helper.ts:31:15)
+
+  ● MVP Complete Flow E2E › 1. Authentication Flow › ✅ Usuario puede registrarse
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+    [0m [90m 119 |[39m     [90m// Get first category and question for tests[39m
+     [90m 120 |[39m     [36mconst[39m categories [33m=[39m [36mawait[39m categoryRepository[33m.[39mfind()[33m;[39m
+    [31m[1m>[22m[39m[90m 121 |[39m     categoryId [33m=[39m categories[[35m0[39m][33m.[39mid[33m;[39m
+     [90m     |[39m                                [31m[1m^[22m[39m
+     [90m 122 |[39m
+     [90m 123 |[39m     [36mconst[39m questions [33m=[39m [36mawait[39m questionRepository[33m.[39mfind()[33m;[39m
+     [90m 124 |[39m     predefinedQuestionId [33m=[39m questions[[35m0[39m][33m.[39mid[33m;[39m[0m
+
+      at Object.<anonymous> (mvp-complete.e2e-spec.ts:121:32)
+
+  ● MVP Complete Flow E2E › 1. Authentication Flow › ✅ Usuario puede hacer login y recibir JWT
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+    [0m [90m 119 |[39m     [90m// Get first category and question for tests[39m
+     [90m 120 |[39m     [36mconst[39m categories [33m=[39m [36mawait[39m categoryRepository[33m.[39mfind()[33m;[39m
+    [31m[1m>[22m[39m[90m 121 |[39m     categoryId [33m=[39m categories[[35m0[39m][33m.[39mid[33m;[39m
+     [90m     |[39m                                [31m[1m^[22m[39m
+     [90m 122 |[39m
+     [90m 123 |[39m     [36mconst[39m questions [33m=[39m [36mawait[39m questionRepository[33m.[39mfind()[33m;[39m
+     [90m 124 |[39m     predefinedQuestionId [33m=[39m questions[[35m0[39m][33m.[39mid[33m;[39m[0m
+
+      at Object.<anonymous> (mvp-complete.e2e-spec.ts:121:32)
+
+  ● MVP Complete Flow E2E › 2. Categories & Questions › ✅ Lista categorías correctamente (debe haber al menos 1)
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+    [0m [90m 119 |[39m     [90m// Get first category and question for tests[39m
+     [90m 120 |[39m     [36mconst[39m categories [33m=[39m [36mawait[39m categoryRepository[33m.[39mfind()[33m;[39m
+    [31m[1m>[22m[39m[90m 121 |[39m     categoryId [33m=[39m categories[[35m0[39m][33m.[39mid[33m;[39m
+     [90m     |[39m                                [31m[1m^[22m[39m
+     [90m 122 |[39m
+     [90m 123 |[39m     [36mconst[39m questions [33m=[39m [36mawait[39m questionRepository[33m.[39mfind()[33m;[39m
+     [90m 124 |[39m     predefinedQuestionId [33m=[39m questions[[35m0[39m][33m.[39mid[33m;[39m[0m
+
+      at Object.<anonymous> (mvp-complete.e2e-spec.ts:121:32)
+
+  ● MVP Complete Flow E2E › 2. Categories & Questions › ✅ Lista preguntas predefinidas por categoría
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+    [0m [90m 119 |[39m     [90m// Get first category and question for tests[39m
+     [90m 120 |[39m     [36mconst[39m categories [33m=[39m [36mawait[39m categoryRepository[33m.[39mfind()[33m;[39m
+    [31m[1m>[22m[39m[90m 121 |[39m     categoryId [33m=[39m categories[[35m0[39m][33m.[39mid[33m;[39m
+     [90m     |[39m                                [31m[1m^[22m[39m
+     [90m 122 |[39m
+     [90m 123 |[39m     [36mconst[39m questions [33m=[39m [36mawait[39m questionRepository[33m.[39mfind()[33m;[39m
+     [90m 124 |[39m     predefinedQuestionId [33m=[39m questions[[35m0[39m][33m.[39mid[33m;[39m[0m
+
+      at Object.<anonymous> (mvp-complete.e2e-spec.ts:121:32)
+
+  ● MVP Complete Flow E2E › 3. Reading Creation (FREE user) › ✅ Usuario FREE crea lectura con pregunta predefinida
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+    [0m [90m 119 |[39m     [90m// Get first category and question for tests[39m
+     [90m 120 |[39m     [36mconst[39m categories [33m=[39m [36mawait[39m categoryRepository[33m.[39mfind()[33m;[39m
+    [31m[1m>[22m[39m[90m 121 |[39m     categoryId [33m=[39m categories[[35m0[39m][33m.[39mid[33m;[39m
+     [90m     |[39m                                [31m[1m^[22m[39m
+     [90m 122 |[39m
+     [90m 123 |[39m     [36mconst[39m questions [33m=[39m [36mawait[39m questionRepository[33m.[39mfind()[33m;[39m
+     [90m 124 |[39m     predefinedQuestionId [33m=[39m questions[[35m0[39m][33m.[39mid[33m;[39m[0m
+
+      at Object.<anonymous> (mvp-complete.e2e-spec.ts:121:32)
+
+  ● MVP Complete Flow E2E › 3. Reading Creation (FREE user) › ✅ Usuario FREE rechazado con pregunta custom
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+    [0m [90m 119 |[39m     [90m// Get first category and question for tests[39m
+     [90m 120 |[39m     [36mconst[39m categories [33m=[39m [36mawait[39m categoryRepository[33m.[39mfind()[33m;[39m
+    [31m[1m>[22m[39m[90m 121 |[39m     categoryId [33m=[39m categories[[35m0[39m][33m.[39mid[33m;[39m
+     [90m     |[39m                                [31m[1m^[22m[39m
+     [90m 122 |[39m
+     [90m 123 |[39m     [36mconst[39m questions [33m=[39m [36mawait[39m questionRepository[33m.[39mfind()[33m;[39m
+     [90m 124 |[39m     predefinedQuestionId [33m=[39m questions[[35m0[39m][33m.[39mid[33m;[39m[0m
+
+      at Object.<anonymous> (mvp-complete.e2e-spec.ts:121:32)
+
+  ● MVP Complete Flow E2E › 3. Reading Creation (FREE user) › ✅ Usuario FREE bloqueado después de 3 lecturas/día
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+    [0m [90m 119 |[39m     [90m// Get first category and question for tests[39m
+     [90m 120 |[39m     [36mconst[39m categories [33m=[39m [36mawait[39m categoryRepository[33m.[39mfind()[33m;[39m
+    [31m[1m>[22m[39m[90m 121 |[39m     categoryId [33m=[39m categories[[35m0[39m][33m.[39mid[33m;[39m
+     [90m     |[39m                                [31m[1m^[22m[39m
+     [90m 122 |[39m
+     [90m 123 |[39m     [36mconst[39m questions [33m=[39m [36mawait[39m questionRepository[33m.[39mfind()[33m;[39m
+     [90m 124 |[39m     predefinedQuestionId [33m=[39m questions[[35m0[39m][33m.[39mid[33m;[39m[0m
+
+      at Object.<anonymous> (mvp-complete.e2e-spec.ts:121:32)
+
+  ● MVP Complete Flow E2E › 4. Reading Creation (PREMIUM user) › ✅ Usuario PREMIUM crea lectura con pregunta custom
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+    [0m [90m 119 |[39m     [90m// Get first category and question for tests[39m
+     [90m 120 |[39m     [36mconst[39m categories [33m=[39m [36mawait[39m categoryRepository[33m.[39mfind()[33m;[39m
+    [31m[1m>[22m[39m[90m 121 |[39m     categoryId [33m=[39m categories[[35m0[39m][33m.[39mid[33m;[39m
+     [90m     |[39m                                [31m[1m^[22m[39m
+     [90m 122 |[39m
+     [90m 123 |[39m     [36mconst[39m questions [33m=[39m [36mawait[39m questionRepository[33m.[39mfind()[33m;[39m
+     [90m 124 |[39m     predefinedQuestionId [33m=[39m questions[[35m0[39m][33m.[39mid[33m;[39m[0m
+
+      at Object.<anonymous> (mvp-complete.e2e-spec.ts:121:32)
+
+  ● MVP Complete Flow E2E › 4. Reading Creation (PREMIUM user) › ✅ Usuario PREMIUM tiene lecturas ilimitadas
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+    [0m [90m 119 |[39m     [90m// Get first category and question for tests[39m
+     [90m 120 |[39m     [36mconst[39m categories [33m=[39m [36mawait[39m categoryRepository[33m.[39mfind()[33m;[39m
+    [31m[1m>[22m[39m[90m 121 |[39m     categoryId [33m=[39m categories[[35m0[39m][33m.[39mid[33m;[39m
+     [90m     |[39m                                [31m[1m^[22m[39m
+     [90m 122 |[39m
+     [90m 123 |[39m     [36mconst[39m questions [33m=[39m [36mawait[39m questionRepository[33m.[39mfind()[33m;[39m
+     [90m 124 |[39m     predefinedQuestionId [33m=[39m questions[[35m0[39m][33m.[39mid[33m;[39m[0m
+
+      at Object.<anonymous> (mvp-complete.e2e-spec.ts:121:32)
+
+  ● MVP Complete Flow E2E › 5. AI Interpretation › ✅ Interpretación con IA se genera correctamente
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+    [0m [90m 119 |[39m     [90m// Get first category and question for tests[39m
+     [90m 120 |[39m     [36mconst[39m categories [33m=[39m [36mawait[39m categoryRepository[33m.[39mfind()[33m;[39m
+    [31m[1m>[22m[39m[90m 121 |[39m     categoryId [33m=[39m categories[[35m0[39m][33m.[39mid[33m;[39m
+     [90m     |[39m                                [31m[1m^[22m[39m
+     [90m 122 |[39m
+     [90m 123 |[39m     [36mconst[39m questions [33m=[39m [36mawait[39m questionRepository[33m.[39mfind()[33m;[39m
+     [90m 124 |[39m     predefinedQuestionId [33m=[39m questions[[35m0[39m][33m.[39mid[33m;[39m[0m
+
+      at Object.<anonymous> (mvp-complete.e2e-spec.ts:121:32)
+
+  ● MVP Complete Flow E2E › 6. Reading History › ✅ Usuario puede ver su historial de lecturas
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+    [0m [90m 119 |[39m     [90m// Get first category and question for tests[39m
+     [90m 120 |[39m     [36mconst[39m categories [33m=[39m [36mawait[39m categoryRepository[33m.[39mfind()[33m;[39m
+    [31m[1m>[22m[39m[90m 121 |[39m     categoryId [33m=[39m categories[[35m0[39m][33m.[39mid[33m;[39m
+     [90m     |[39m                                [31m[1m^[22m[39m
+     [90m 122 |[39m
+     [90m 123 |[39m     [36mconst[39m questions [33m=[39m [36mawait[39m questionRepository[33m.[39mfind()[33m;[39m
+     [90m 124 |[39m     predefinedQuestionId [33m=[39m questions[[35m0[39m][33m.[39mid[33m;[39m[0m
+
+      at Object.<anonymous> (mvp-complete.e2e-spec.ts:121:32)
+
+  ● MVP Complete Flow E2E › 7. Security & Rate Limiting › ✅ Rate limiting protege endpoints
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+    [0m [90m 119 |[39m     [90m// Get first category and question for tests[39m
+     [90m 120 |[39m     [36mconst[39m categories [33m=[39m [36mawait[39m categoryRepository[33m.[39mfind()[33m;[39m
+    [31m[1m>[22m[39m[90m 121 |[39m     categoryId [33m=[39m categories[[35m0[39m][33m.[39mid[33m;[39m
+     [90m     |[39m                                [31m[1m^[22m[39m
+     [90m 122 |[39m
+     [90m 123 |[39m     [36mconst[39m questions [33m=[39m [36mawait[39m questionRepository[33m.[39mfind()[33m;[39m
+     [90m 124 |[39m     predefinedQuestionId [33m=[39m questions[[35m0[39m][33m.[39mid[33m;[39m[0m
+
+      at Object.<anonymous> (mvp-complete.e2e-spec.ts:121:32)
+
+  ● MVP Complete Flow E2E › 8. Health Checks › ✅ Health check de AI retorna status
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+    [0m [90m 119 |[39m     [90m// Get first category and question for tests[39m
+     [90m 120 |[39m     [36mconst[39m categories [33m=[39m [36mawait[39m categoryRepository[33m.[39mfind()[33m;[39m
+    [31m[1m>[22m[39m[90m 121 |[39m     categoryId [33m=[39m categories[[35m0[39m][33m.[39mid[33m;[39m
+     [90m     |[39m                                [31m[1m^[22m[39m
+     [90m 122 |[39m
+     [90m 123 |[39m     [36mconst[39m questions [33m=[39m [36mawait[39m questionRepository[33m.[39mfind()[33m;[39m
+     [90m 124 |[39m     predefinedQuestionId [33m=[39m questions[[35m0[39m][33m.[39mid[33m;[39m[0m
+
+      at Object.<anonymous> (mvp-complete.e2e-spec.ts:121:32)
+
+  ● MVP Complete Flow E2E › 8. Health Checks › ✅ Endpoint funciona sin autenticación
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+    [0m [90m 119 |[39m     [90m// Get first category and question for tests[39m
+     [90m 120 |[39m     [36mconst[39m categories [33m=[39m [36mawait[39m categoryRepository[33m.[39mfind()[33m;[39m
+    [31m[1m>[22m[39m[90m 121 |[39m     categoryId [33m=[39m categories[[35m0[39m][33m.[39mid[33m;[39m
+     [90m     |[39m                                [31m[1m^[22m[39m
+     [90m 122 |[39m
+     [90m 123 |[39m     [36mconst[39m questions [33m=[39m [36mawait[39m questionRepository[33m.[39mfind()[33m;[39m
+     [90m 124 |[39m     predefinedQuestionId [33m=[39m questions[[35m0[39m][33m.[39mid[33m;[39m[0m
+
+      at Object.<anonymous> (mvp-complete.e2e-spec.ts:121:32)
+
+FAIL test/readings-hybrid.e2e-spec.ts (52.728 s)
+  ● Console
+
+    console.log
+      [Setup Env] E2E Testing environment configured
+
+      at Object.<anonymous> (setup-env.ts:18:9)
+
+    console.log
+      [Setup Env] Database: tarot_e2e on port 5436
+
+      at Object.<anonymous> (setup-env.ts:19:9)
+
+    console.log
+      [E2E Database Helper] Conexión E2E inicializada
+
+      at E2EDatabaseHelper.initialize (helpers/e2e-database.helper.ts:21:15)
+
+    console.log
+      [E2E Database Helper] Conexión E2E cerrada
+
+      at E2EDatabaseHelper.close (helpers/e2e-database.helper.ts:31:15)
+
+  ● Readings Hybrid Questions (E2E) › POST /readings - Usuario FREE › debe crear lectura con pregunta predefinida (201)
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+    [0m [90m 65 |[39m     [90m// Get seeded data for tests[39m
+     [90m 66 |[39m     [36mconst[39m questions [33m=[39m [36mawait[39m questionRepository[33m.[39mfind()[33m;[39m
+    [31m[1m>[22m[39m[90m 67 |[39m     predefinedQuestionId [33m=[39m questions[[35m0[39m][33m.[39mid[33m;[39m
+     [90m    |[39m                                         [31m[1m^[22m[39m
+     [90m 68 |[39m
+     [90m 69 |[39m     [36mconst[39m decks [33m=[39m [36mawait[39m deckRepository[33m.[39mfind()[33m;[39m
+     [90m 70 |[39m     deckId [33m=[39m decks[[35m0[39m][33m.[39mid[33m;[39m[0m
+
+      at Object.<anonymous> (readings-hybrid.e2e-spec.ts:67:41)
+
+  ● Readings Hybrid Questions (E2E) › POST /readings - Usuario FREE › debe crear lectura con pregunta predefinida (201)
+
+    expected 200 "OK", got 401 "Unauthorized"
+
+    [0m [90m 85 |[39m         password[33m:[39m [32m'Test123456!'[39m[33m,[39m
+     [90m 86 |[39m       })
+    [31m[1m>[22m[39m[90m 87 |[39m       [33m.[39mexpect([35m200[39m)[33m;[39m
+     [90m    |[39m        [31m[1m^[22m[39m
+     [90m 88 |[39m
+     [90m 89 |[39m     freeUserToken [33m=[39m (freeLoginResponse[33m.[39mbody [36mas[39m [33mLoginResponse[39m)[33m.[39maccess_token[33m;[39m
+     [90m 90 |[39m     freeUserId [33m=[39m (freeLoginResponse[33m.[39mbody [36mas[39m [33mLoginResponse[39m)[33m.[39muser[33m.[39mid[33m;[39m[0m
+
+      at Object.<anonymous> (readings-hybrid.e2e-spec.ts:87:8)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Hybrid Questions (E2E) › POST /readings - Usuario FREE › debe rechazar pregunta custom (403)
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+    [0m [90m 65 |[39m     [90m// Get seeded data for tests[39m
+     [90m 66 |[39m     [36mconst[39m questions [33m=[39m [36mawait[39m questionRepository[33m.[39mfind()[33m;[39m
+    [31m[1m>[22m[39m[90m 67 |[39m     predefinedQuestionId [33m=[39m questions[[35m0[39m][33m.[39mid[33m;[39m
+     [90m    |[39m                                         [31m[1m^[22m[39m
+     [90m 68 |[39m
+     [90m 69 |[39m     [36mconst[39m decks [33m=[39m [36mawait[39m deckRepository[33m.[39mfind()[33m;[39m
+     [90m 70 |[39m     deckId [33m=[39m decks[[35m0[39m][33m.[39mid[33m;[39m[0m
+
+      at Object.<anonymous> (readings-hybrid.e2e-spec.ts:67:41)
+
+  ● Readings Hybrid Questions (E2E) › POST /readings - Usuario FREE › debe rechazar pregunta custom (403)
+
+    expected 200 "OK", got 401 "Unauthorized"
+
+    [0m [90m 85 |[39m         password[33m:[39m [32m'Test123456!'[39m[33m,[39m
+     [90m 86 |[39m       })
+    [31m[1m>[22m[39m[90m 87 |[39m       [33m.[39mexpect([35m200[39m)[33m;[39m
+     [90m    |[39m        [31m[1m^[22m[39m
+     [90m 88 |[39m
+     [90m 89 |[39m     freeUserToken [33m=[39m (freeLoginResponse[33m.[39mbody [36mas[39m [33mLoginResponse[39m)[33m.[39maccess_token[33m;[39m
+     [90m 90 |[39m     freeUserId [33m=[39m (freeLoginResponse[33m.[39mbody [36mas[39m [33mLoginResponse[39m)[33m.[39muser[33m.[39mid[33m;[39m[0m
+
+      at Object.<anonymous> (readings-hybrid.e2e-spec.ts:87:8)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Hybrid Questions (E2E) › POST /readings - Usuario FREE › debe rechazar si no proporciona ninguna pregunta (400)
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+    [0m [90m 65 |[39m     [90m// Get seeded data for tests[39m
+     [90m 66 |[39m     [36mconst[39m questions [33m=[39m [36mawait[39m questionRepository[33m.[39mfind()[33m;[39m
+    [31m[1m>[22m[39m[90m 67 |[39m     predefinedQuestionId [33m=[39m questions[[35m0[39m][33m.[39mid[33m;[39m
+     [90m    |[39m                                         [31m[1m^[22m[39m
+     [90m 68 |[39m
+     [90m 69 |[39m     [36mconst[39m decks [33m=[39m [36mawait[39m deckRepository[33m.[39mfind()[33m;[39m
+     [90m 70 |[39m     deckId [33m=[39m decks[[35m0[39m][33m.[39mid[33m;[39m[0m
+
+      at Object.<anonymous> (readings-hybrid.e2e-spec.ts:67:41)
+
+  ● Readings Hybrid Questions (E2E) › POST /readings - Usuario FREE › debe rechazar si no proporciona ninguna pregunta (400)
+
+    expected 200 "OK", got 401 "Unauthorized"
+
+    [0m [90m 85 |[39m         password[33m:[39m [32m'Test123456!'[39m[33m,[39m
+     [90m 86 |[39m       })
+    [31m[1m>[22m[39m[90m 87 |[39m       [33m.[39mexpect([35m200[39m)[33m;[39m
+     [90m    |[39m        [31m[1m^[22m[39m
+     [90m 88 |[39m
+     [90m 89 |[39m     freeUserToken [33m=[39m (freeLoginResponse[33m.[39mbody [36mas[39m [33mLoginResponse[39m)[33m.[39maccess_token[33m;[39m
+     [90m 90 |[39m     freeUserId [33m=[39m (freeLoginResponse[33m.[39mbody [36mas[39m [33mLoginResponse[39m)[33m.[39muser[33m.[39mid[33m;[39m[0m
+
+      at Object.<anonymous> (readings-hybrid.e2e-spec.ts:87:8)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Hybrid Questions (E2E) › POST /readings - Usuario PREMIUM › debe crear lectura con pregunta custom (201)
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+    [0m [90m 65 |[39m     [90m// Get seeded data for tests[39m
+     [90m 66 |[39m     [36mconst[39m questions [33m=[39m [36mawait[39m questionRepository[33m.[39mfind()[33m;[39m
+    [31m[1m>[22m[39m[90m 67 |[39m     predefinedQuestionId [33m=[39m questions[[35m0[39m][33m.[39mid[33m;[39m
+     [90m    |[39m                                         [31m[1m^[22m[39m
+     [90m 68 |[39m
+     [90m 69 |[39m     [36mconst[39m decks [33m=[39m [36mawait[39m deckRepository[33m.[39mfind()[33m;[39m
+     [90m 70 |[39m     deckId [33m=[39m decks[[35m0[39m][33m.[39mid[33m;[39m[0m
+
+      at Object.<anonymous> (readings-hybrid.e2e-spec.ts:67:41)
+
+  ● Readings Hybrid Questions (E2E) › POST /readings - Usuario PREMIUM › debe crear lectura con pregunta custom (201)
+
+    expected 200 "OK", got 401 "Unauthorized"
+
+    [0m [90m 85 |[39m         password[33m:[39m [32m'Test123456!'[39m[33m,[39m
+     [90m 86 |[39m       })
+    [31m[1m>[22m[39m[90m 87 |[39m       [33m.[39mexpect([35m200[39m)[33m;[39m
+     [90m    |[39m        [31m[1m^[22m[39m
+     [90m 88 |[39m
+     [90m 89 |[39m     freeUserToken [33m=[39m (freeLoginResponse[33m.[39mbody [36mas[39m [33mLoginResponse[39m)[33m.[39maccess_token[33m;[39m
+     [90m 90 |[39m     freeUserId [33m=[39m (freeLoginResponse[33m.[39mbody [36mas[39m [33mLoginResponse[39m)[33m.[39muser[33m.[39mid[33m;[39m[0m
+
+      at Object.<anonymous> (readings-hybrid.e2e-spec.ts:87:8)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Hybrid Questions (E2E) › POST /readings - Usuario PREMIUM › debe crear lectura con pregunta predefinida también (201)
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+    [0m [90m 65 |[39m     [90m// Get seeded data for tests[39m
+     [90m 66 |[39m     [36mconst[39m questions [33m=[39m [36mawait[39m questionRepository[33m.[39mfind()[33m;[39m
+    [31m[1m>[22m[39m[90m 67 |[39m     predefinedQuestionId [33m=[39m questions[[35m0[39m][33m.[39mid[33m;[39m
+     [90m    |[39m                                         [31m[1m^[22m[39m
+     [90m 68 |[39m
+     [90m 69 |[39m     [36mconst[39m decks [33m=[39m [36mawait[39m deckRepository[33m.[39mfind()[33m;[39m
+     [90m 70 |[39m     deckId [33m=[39m decks[[35m0[39m][33m.[39mid[33m;[39m[0m
+
+      at Object.<anonymous> (readings-hybrid.e2e-spec.ts:67:41)
+
+  ● Readings Hybrid Questions (E2E) › POST /readings - Usuario PREMIUM › debe crear lectura con pregunta predefinida también (201)
+
+    expected 200 "OK", got 401 "Unauthorized"
+
+    [0m [90m 85 |[39m         password[33m:[39m [32m'Test123456!'[39m[33m,[39m
+     [90m 86 |[39m       })
+    [31m[1m>[22m[39m[90m 87 |[39m       [33m.[39mexpect([35m200[39m)[33m;[39m
+     [90m    |[39m        [31m[1m^[22m[39m
+     [90m 88 |[39m
+     [90m 89 |[39m     freeUserToken [33m=[39m (freeLoginResponse[33m.[39mbody [36mas[39m [33mLoginResponse[39m)[33m.[39maccess_token[33m;[39m
+     [90m 90 |[39m     freeUserId [33m=[39m (freeLoginResponse[33m.[39mbody [36mas[39m [33mLoginResponse[39m)[33m.[39muser[33m.[39mid[33m;[39m[0m
+
+      at Object.<anonymous> (readings-hybrid.e2e-spec.ts:87:8)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Hybrid Questions (E2E) › POST /readings - Usuario PREMIUM › debe rechazar si proporciona ambas preguntas (400)
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+    [0m [90m 65 |[39m     [90m// Get seeded data for tests[39m
+     [90m 66 |[39m     [36mconst[39m questions [33m=[39m [36mawait[39m questionRepository[33m.[39mfind()[33m;[39m
+    [31m[1m>[22m[39m[90m 67 |[39m     predefinedQuestionId [33m=[39m questions[[35m0[39m][33m.[39mid[33m;[39m
+     [90m    |[39m                                         [31m[1m^[22m[39m
+     [90m 68 |[39m
+     [90m 69 |[39m     [36mconst[39m decks [33m=[39m [36mawait[39m deckRepository[33m.[39mfind()[33m;[39m
+     [90m 70 |[39m     deckId [33m=[39m decks[[35m0[39m][33m.[39mid[33m;[39m[0m
+
+      at Object.<anonymous> (readings-hybrid.e2e-spec.ts:67:41)
+
+  ● Readings Hybrid Questions (E2E) › POST /readings - Usuario PREMIUM › debe rechazar si proporciona ambas preguntas (400)
+
+    expected 200 "OK", got 401 "Unauthorized"
+
+    [0m [90m 85 |[39m         password[33m:[39m [32m'Test123456!'[39m[33m,[39m
+     [90m 86 |[39m       })
+    [31m[1m>[22m[39m[90m 87 |[39m       [33m.[39mexpect([35m200[39m)[33m;[39m
+     [90m    |[39m        [31m[1m^[22m[39m
+     [90m 88 |[39m
+     [90m 89 |[39m     freeUserToken [33m=[39m (freeLoginResponse[33m.[39mbody [36mas[39m [33mLoginResponse[39m)[33m.[39maccess_token[33m;[39m
+     [90m 90 |[39m     freeUserId [33m=[39m (freeLoginResponse[33m.[39mbody [36mas[39m [33mLoginResponse[39m)[33m.[39muser[33m.[39mid[33m;[39m[0m
+
+      at Object.<anonymous> (readings-hybrid.e2e-spec.ts:87:8)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Hybrid Questions (E2E) › Plan upgrade flow (FREE → PREMIUM) › debe rechazar pregunta custom antes de upgrade, permitirla después de upgrade
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+    [0m [90m 65 |[39m     [90m// Get seeded data for tests[39m
+     [90m 66 |[39m     [36mconst[39m questions [33m=[39m [36mawait[39m questionRepository[33m.[39mfind()[33m;[39m
+    [31m[1m>[22m[39m[90m 67 |[39m     predefinedQuestionId [33m=[39m questions[[35m0[39m][33m.[39mid[33m;[39m
+     [90m    |[39m                                         [31m[1m^[22m[39m
+     [90m 68 |[39m
+     [90m 69 |[39m     [36mconst[39m decks [33m=[39m [36mawait[39m deckRepository[33m.[39mfind()[33m;[39m
+     [90m 70 |[39m     deckId [33m=[39m decks[[35m0[39m][33m.[39mid[33m;[39m[0m
+
+      at Object.<anonymous> (readings-hybrid.e2e-spec.ts:67:41)
+
+  ● Readings Hybrid Questions (E2E) › Plan upgrade flow (FREE → PREMIUM) › debe rechazar pregunta custom antes de upgrade, permitirla después de upgrade
+
+    expected 200 "OK", got 401 "Unauthorized"
+
+    [0m [90m 85 |[39m         password[33m:[39m [32m'Test123456!'[39m[33m,[39m
+     [90m 86 |[39m       })
+    [31m[1m>[22m[39m[90m 87 |[39m       [33m.[39mexpect([35m200[39m)[33m;[39m
+     [90m    |[39m        [31m[1m^[22m[39m
+     [90m 88 |[39m
+     [90m 89 |[39m     freeUserToken [33m=[39m (freeLoginResponse[33m.[39mbody [36mas[39m [33mLoginResponse[39m)[33m.[39maccess_token[33m;[39m
+     [90m 90 |[39m     freeUserId [33m=[39m (freeLoginResponse[33m.[39mbody [36mas[39m [33mLoginResponse[39m)[33m.[39muser[33m.[39mid[33m;[39m[0m
+
+      at Object.<anonymous> (readings-hybrid.e2e-spec.ts:87:8)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+[31m[Nest] 14472  - [39m07/11/2025, 12:33:48 [31m  ERROR[39m [38;5;3m[ExceptionsHandler] [39mQueryFailedError: insert or update on table "tarot_reading" violates foreign key constraint "FK_906c9f21a4276fc08a570bee56e"
+    at PostgresQueryRunner.query [90m(D:\Personal\tarot\backend\tarot-app\[39msrc\driver\postgres\PostgresQueryRunner.ts:331:19[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at InsertQueryBuilder.execute [90m(D:\Personal\tarot\backend\tarot-app\[39msrc\query-builder\InsertQueryBuilder.ts:163:33[90m)[39m
+    at SubjectExecutor.executeInsertOperations [90m(D:\Personal\tarot\backend\tarot-app\[39msrc\persistence\SubjectExecutor.ts:435:42[90m)[39m
+    at SubjectExecutor.execute [90m(D:\Personal\tarot\backend\tarot-app\[39msrc\persistence\SubjectExecutor.ts:137:9[90m)[39m
+    at EntityPersistExecutor.execute [90m(D:\Personal\tarot\backend\tarot-app\[39msrc\persistence\EntityPersistExecutor.ts:182:21[90m)[39m
+    at ReadingsService.create [90m(D:\Personal\tarot\backend\tarot-app\[39msrc\modules\tarot\readings\readings.service.ts:72:26[90m)[39m {
+  query: [32m'INSERT INTO "tarot_reading"("question", "predefinedQuestionId", "customQuestion", "questionType", "cardPositions", "interpretation", "createdAt", "updatedAt", "regenerationCount", "sharedToken", "isPublic", "viewCount", "deletedAt", "userId", "deckId", "categoryId") VALUES (DEFAULT, $1, $2, $3, $4, $5, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, $6, $7, DEFAULT) RETURNING "id", "createdAt", "updatedAt", "regenerationCount", "isPublic", "viewCount", "deletedAt"'[39m,
+  parameters: [
+    [33m1[39m,
+    [1mnull[22m,
+    [32m'predefined'[39m,
+    [32m'[{"cardId":1,"position":"past","isReversed":false},{"cardId":2,"position":"present","isReversed":false},{"cardId":3,"position":"future","isReversed":false}]'[39m,
+    [1mnull[22m,
+    [33m2[39m,
+    [33m1[39m
+  ],
+  driverError: error: insert or update on table "tarot_reading" violates foreign key constraint "FK_906c9f21a4276fc08a570bee56e"
+      at [90mD:\Personal\tarot\backend\tarot-app\[39mnode_modules\[4mpg[24m\lib\client.js:535:17
+  [90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+      at PostgresQueryRunner.query [90m(D:\Personal\tarot\backend\tarot-app\[39msrc\driver\postgres\PostgresQueryRunner.ts:260:25[90m)[39m
+      at InsertQueryBuilder.execute [90m(D:\Personal\tarot\backend\tarot-app\[39msrc\query-builder\InsertQueryBuilder.ts:163:33[90m)[39m
+      at SubjectExecutor.executeInsertOperations [90m(D:\Personal\tarot\backend\tarot-app\[39msrc\persistence\SubjectExecutor.ts:435:42[90m)[39m
+      at SubjectExecutor.execute [90m(D:\Personal\tarot\backend\tarot-app\[39msrc\persistence\SubjectExecutor.ts:137:9[90m)[39m
+      at EntityPersistExecutor.execute [90m(D:\Personal\tarot\backend\tarot-app\[39msrc\persistence\EntityPersistExecutor.ts:182:21[90m)[39m
+      at ReadingsService.create [90m(D:\Personal\tarot\backend\tarot-app\[39msrc\modules\tarot\readings\readings.service.ts:72:26[90m)[39m {
+    length: [33m286[39m,
+    severity: [32m'ERROR'[39m,
+    code: [32m'23503'[39m,
+    detail: [32m'Key (deckId)=(1) is not present in table "tarot_deck".'[39m,
+    hint: [90mundefined[39m,
+    position: [90mundefined[39m,
+    internalPosition: [90mundefined[39m,
+    internalQuery: [90mundefined[39m,
+    where: [90mundefined[39m,
+    schema: [32m'public'[39m,
+    table: [32m'tarot_reading'[39m,
+    column: [90mundefined[39m,
+    dataType: [90mundefined[39m,
+    constraint: [32m'FK_906c9f21a4276fc08a570bee56e'[39m,
+    file: [32m'ri_triggers.c'[39m,
+    line: [32m'2608'[39m,
+    routine: [32m'ri_ReportViolation'[39m
+  },
+  length: [33m286[39m,
+  severity: [32m'ERROR'[39m,
+  code: [32m'23503'[39m,
+  detail: [32m'Key (deckId)=(1) is not present in table "tarot_deck".'[39m,
+  hint: [90mundefined[39m,
+  position: [90mundefined[39m,
+  internalPosition: [90mundefined[39m,
+  internalQuery: [90mundefined[39m,
+  where: [90mundefined[39m,
+  schema: [32m'public'[39m,
+  table: [32m'tarot_reading'[39m,
+  column: [90mundefined[39m,
+  dataType: [90mundefined[39m,
+  constraint: [32m'FK_906c9f21a4276fc08a570bee56e'[39m,
+  file: [32m'ri_triggers.c'[39m,
+  line: [32m'2608'[39m,
+  routine: [32m'ri_ReportViolation'[39m
+}
+FAIL test/readings-share.e2e-spec.ts (55.109 s)
+  ● Console
+
+    console.log
+      [Setup Env] E2E Testing environment configured
+
+      at Object.<anonymous> (setup-env.ts:18:9)
+
+    console.log
+      [Setup Env] Database: tarot_e2e on port 5436
+
+      at Object.<anonymous> (setup-env.ts:19:9)
+
+    console.log
+      [E2E Database Helper] Conexión E2E inicializada
+
+      at E2EDatabaseHelper.initialize (helpers/e2e-database.helper.ts:21:15)
+
+  ● Readings Share System (e2e) › POST /readings/:id/share › should fail when user is not authenticated
+
+    expected 201 "Created", got 500 "Internal Server Error"
+
+    [0m [90m 140 |[39m         generateInterpretation[33m:[39m [36mfalse[39m[33m,[39m
+     [90m 141 |[39m       })
+    [31m[1m>[22m[39m[90m 142 |[39m       [33m.[39mexpect([35m201[39m)[33m;[39m
+     [90m     |[39m        [31m[1m^[22m[39m
+     [90m 143 |[39m
+     [90m 144 |[39m     readingId [33m=[39m (readingResponse[33m.[39mbody [36mas[39m [33mReadingResponse[39m)[33m.[39mid[33m;[39m
+     [90m 145 |[39m   })[33m;[39m[0m
+
+      at Object.<anonymous> (readings-share.e2e-spec.ts:142:8)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Share System (e2e) › POST /readings/:id/share › should fail when user is free (not premium)
+
+    expected 201 "Created", got 500 "Internal Server Error"
+
+    [0m [90m 140 |[39m         generateInterpretation[33m:[39m [36mfalse[39m[33m,[39m
+     [90m 141 |[39m       })
+    [31m[1m>[22m[39m[90m 142 |[39m       [33m.[39mexpect([35m201[39m)[33m;[39m
+     [90m     |[39m        [31m[1m^[22m[39m
+     [90m 143 |[39m
+     [90m 144 |[39m     readingId [33m=[39m (readingResponse[33m.[39mbody [36mas[39m [33mReadingResponse[39m)[33m.[39mid[33m;[39m
+     [90m 145 |[39m   })[33m;[39m[0m
+
+      at Object.<anonymous> (readings-share.e2e-spec.ts:142:8)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Share System (e2e) › POST /readings/:id/share › should successfully share a reading for premium user
+
+    expected 201 "Created", got 500 "Internal Server Error"
+
+    [0m [90m 140 |[39m         generateInterpretation[33m:[39m [36mfalse[39m[33m,[39m
+     [90m 141 |[39m       })
+    [31m[1m>[22m[39m[90m 142 |[39m       [33m.[39mexpect([35m201[39m)[33m;[39m
+     [90m     |[39m        [31m[1m^[22m[39m
+     [90m 143 |[39m
+     [90m 144 |[39m     readingId [33m=[39m (readingResponse[33m.[39mbody [36mas[39m [33mReadingResponse[39m)[33m.[39mid[33m;[39m
+     [90m 145 |[39m   })[33m;[39m[0m
+
+      at Object.<anonymous> (readings-share.e2e-spec.ts:142:8)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Share System (e2e) › POST /readings/:id/share › should return same token if reading is already shared
+
+    expected 201 "Created", got 500 "Internal Server Error"
+
+    [0m [90m 140 |[39m         generateInterpretation[33m:[39m [36mfalse[39m[33m,[39m
+     [90m 141 |[39m       })
+    [31m[1m>[22m[39m[90m 142 |[39m       [33m.[39mexpect([35m201[39m)[33m;[39m
+     [90m     |[39m        [31m[1m^[22m[39m
+     [90m 143 |[39m
+     [90m 144 |[39m     readingId [33m=[39m (readingResponse[33m.[39mbody [36mas[39m [33mReadingResponse[39m)[33m.[39mid[33m;[39m
+     [90m 145 |[39m   })[33m;[39m[0m
+
+      at Object.<anonymous> (readings-share.e2e-spec.ts:142:8)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Share System (e2e) › POST /readings/:id/share › should fail when trying to share reading of another user
+
+    expected 201 "Created", got 500 "Internal Server Error"
+
+    [0m [90m 140 |[39m         generateInterpretation[33m:[39m [36mfalse[39m[33m,[39m
+     [90m 141 |[39m       })
+    [31m[1m>[22m[39m[90m 142 |[39m       [33m.[39mexpect([35m201[39m)[33m;[39m
+     [90m     |[39m        [31m[1m^[22m[39m
+     [90m 143 |[39m
+     [90m 144 |[39m     readingId [33m=[39m (readingResponse[33m.[39mbody [36mas[39m [33mReadingResponse[39m)[33m.[39mid[33m;[39m
+     [90m 145 |[39m   })[33m;[39m[0m
+
+      at Object.<anonymous> (readings-share.e2e-spec.ts:142:8)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Share System (e2e) › POST /readings/:id/share › should fail when reading does not exist
+
+    expected 201 "Created", got 500 "Internal Server Error"
+
+    [0m [90m 140 |[39m         generateInterpretation[33m:[39m [36mfalse[39m[33m,[39m
+     [90m 141 |[39m       })
+    [31m[1m>[22m[39m[90m 142 |[39m       [33m.[39mexpect([35m201[39m)[33m;[39m
+     [90m     |[39m        [31m[1m^[22m[39m
+     [90m 143 |[39m
+     [90m 144 |[39m     readingId [33m=[39m (readingResponse[33m.[39mbody [36mas[39m [33mReadingResponse[39m)[33m.[39mid[33m;[39m
+     [90m 145 |[39m   })[33m;[39m[0m
+
+      at Object.<anonymous> (readings-share.e2e-spec.ts:142:8)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Share System (e2e) › DELETE /readings/:id/unshare › should fail when user is not authenticated
+
+    expected 201 "Created", got 500 "Internal Server Error"
+
+    [0m [90m 140 |[39m         generateInterpretation[33m:[39m [36mfalse[39m[33m,[39m
+     [90m 141 |[39m       })
+    [31m[1m>[22m[39m[90m 142 |[39m       [33m.[39mexpect([35m201[39m)[33m;[39m
+     [90m     |[39m        [31m[1m^[22m[39m
+     [90m 143 |[39m
+     [90m 144 |[39m     readingId [33m=[39m (readingResponse[33m.[39mbody [36mas[39m [33mReadingResponse[39m)[33m.[39mid[33m;[39m
+     [90m 145 |[39m   })[33m;[39m[0m
+
+      at Object.<anonymous> (readings-share.e2e-spec.ts:142:8)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Share System (e2e) › DELETE /readings/:id/unshare › should successfully unshare a reading
+
+    expected 201 "Created", got 500 "Internal Server Error"
+
+    [0m [90m 140 |[39m         generateInterpretation[33m:[39m [36mfalse[39m[33m,[39m
+     [90m 141 |[39m       })
+    [31m[1m>[22m[39m[90m 142 |[39m       [33m.[39mexpect([35m201[39m)[33m;[39m
+     [90m     |[39m        [31m[1m^[22m[39m
+     [90m 143 |[39m
+     [90m 144 |[39m     readingId [33m=[39m (readingResponse[33m.[39mbody [36mas[39m [33mReadingResponse[39m)[33m.[39mid[33m;[39m
+     [90m 145 |[39m   })[33m;[39m[0m
+
+      at Object.<anonymous> (readings-share.e2e-spec.ts:142:8)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Share System (e2e) › DELETE /readings/:id/unshare › should fail when trying to unshare reading of another user
+
+    expected 201 "Created", got 500 "Internal Server Error"
+
+    [0m [90m 140 |[39m         generateInterpretation[33m:[39m [36mfalse[39m[33m,[39m
+     [90m 141 |[39m       })
+    [31m[1m>[22m[39m[90m 142 |[39m       [33m.[39mexpect([35m201[39m)[33m;[39m
+     [90m     |[39m        [31m[1m^[22m[39m
+     [90m 143 |[39m
+     [90m 144 |[39m     readingId [33m=[39m (readingResponse[33m.[39mbody [36mas[39m [33mReadingResponse[39m)[33m.[39mid[33m;[39m
+     [90m 145 |[39m   })[33m;[39m[0m
+
+      at Object.<anonymous> (readings-share.e2e-spec.ts:142:8)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Share System (e2e) › DELETE /readings/:id/unshare › should fail when reading does not exist
+
+    expected 201 "Created", got 500 "Internal Server Error"
+
+    [0m [90m 140 |[39m         generateInterpretation[33m:[39m [36mfalse[39m[33m,[39m
+     [90m 141 |[39m       })
+    [31m[1m>[22m[39m[90m 142 |[39m       [33m.[39mexpect([35m201[39m)[33m;[39m
+     [90m     |[39m        [31m[1m^[22m[39m
+     [90m 143 |[39m
+     [90m 144 |[39m     readingId [33m=[39m (readingResponse[33m.[39mbody [36mas[39m [33mReadingResponse[39m)[33m.[39mid[33m;[39m
+     [90m 145 |[39m   })[33m;[39m[0m
+
+      at Object.<anonymous> (readings-share.e2e-spec.ts:142:8)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Share System (e2e) › DELETE /readings/:id/unshare › should succeed even if reading is not shared
+
+    expected 201 "Created", got 500 "Internal Server Error"
+
+    [0m [90m 140 |[39m         generateInterpretation[33m:[39m [36mfalse[39m[33m,[39m
+     [90m 141 |[39m       })
+    [31m[1m>[22m[39m[90m 142 |[39m       [33m.[39mexpect([35m201[39m)[33m;[39m
+     [90m     |[39m        [31m[1m^[22m[39m
+     [90m 143 |[39m
+     [90m 144 |[39m     readingId [33m=[39m (readingResponse[33m.[39mbody [36mas[39m [33mReadingResponse[39m)[33m.[39mid[33m;[39m
+     [90m 145 |[39m   })[33m;[39m[0m
+
+      at Object.<anonymous> (readings-share.e2e-spec.ts:142:8)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Share System (e2e) › GET /shared/:token › should successfully get shared reading without authentication
+
+    expected 201 "Created", got 500 "Internal Server Error"
+
+    [0m [90m 140 |[39m         generateInterpretation[33m:[39m [36mfalse[39m[33m,[39m
+     [90m 141 |[39m       })
+    [31m[1m>[22m[39m[90m 142 |[39m       [33m.[39mexpect([35m201[39m)[33m;[39m
+     [90m     |[39m        [31m[1m^[22m[39m
+     [90m 143 |[39m
+     [90m 144 |[39m     readingId [33m=[39m (readingResponse[33m.[39mbody [36mas[39m [33mReadingResponse[39m)[33m.[39mid[33m;[39m
+     [90m 145 |[39m   })[33m;[39m[0m
+
+      at Object.<anonymous> (readings-share.e2e-spec.ts:142:8)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Share System (e2e) › GET /shared/:token › should increment view count on each access
+
+    expected 201 "Created", got 500 "Internal Server Error"
+
+    [0m [90m 140 |[39m         generateInterpretation[33m:[39m [36mfalse[39m[33m,[39m
+     [90m 141 |[39m       })
+    [31m[1m>[22m[39m[90m 142 |[39m       [33m.[39mexpect([35m201[39m)[33m;[39m
+     [90m     |[39m        [31m[1m^[22m[39m
+     [90m 143 |[39m
+     [90m 144 |[39m     readingId [33m=[39m (readingResponse[33m.[39mbody [36mas[39m [33mReadingResponse[39m)[33m.[39mid[33m;[39m
+     [90m 145 |[39m   })[33m;[39m[0m
+
+      at Object.<anonymous> (readings-share.e2e-spec.ts:142:8)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Share System (e2e) › GET /shared/:token › should fail when token does not exist
+
+    expected 201 "Created", got 500 "Internal Server Error"
+
+    [0m [90m 140 |[39m         generateInterpretation[33m:[39m [36mfalse[39m[33m,[39m
+     [90m 141 |[39m       })
+    [31m[1m>[22m[39m[90m 142 |[39m       [33m.[39mexpect([35m201[39m)[33m;[39m
+     [90m     |[39m        [31m[1m^[22m[39m
+     [90m 143 |[39m
+     [90m 144 |[39m     readingId [33m=[39m (readingResponse[33m.[39mbody [36mas[39m [33mReadingResponse[39m)[33m.[39mid[33m;[39m
+     [90m 145 |[39m   })[33m;[39m[0m
+
+      at Object.<anonymous> (readings-share.e2e-spec.ts:142:8)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Share System (e2e) › GET /shared/:token › should fail when reading is unshared
+
+    expected 201 "Created", got 500 "Internal Server Error"
+
+    [0m [90m 140 |[39m         generateInterpretation[33m:[39m [36mfalse[39m[33m,[39m
+     [90m 141 |[39m       })
+    [31m[1m>[22m[39m[90m 142 |[39m       [33m.[39mexpect([35m201[39m)[33m;[39m
+     [90m     |[39m        [31m[1m^[22m[39m
+     [90m 143 |[39m
+     [90m 144 |[39m     readingId [33m=[39m (readingResponse[33m.[39mbody [36mas[39m [33mReadingResponse[39m)[33m.[39mid[33m;[39m
+     [90m 145 |[39m   })[33m;[39m[0m
+
+      at Object.<anonymous> (readings-share.e2e-spec.ts:142:8)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Share System (e2e) › GET /shared/:token › should respect rate limiting (100 requests per 15 min)
+
+    expected 201 "Created", got 500 "Internal Server Error"
+
+    [0m [90m 140 |[39m         generateInterpretation[33m:[39m [36mfalse[39m[33m,[39m
+     [90m 141 |[39m       })
+    [31m[1m>[22m[39m[90m 142 |[39m       [33m.[39mexpect([35m201[39m)[33m;[39m
+     [90m     |[39m        [31m[1m^[22m[39m
+     [90m 143 |[39m
+     [90m 144 |[39m     readingId [33m=[39m (readingResponse[33m.[39mbody [36mas[39m [33mReadingResponse[39m)[33m.[39mid[33m;[39m
+     [90m 145 |[39m   })[33m;[39m[0m
+
+      at Object.<anonymous> (readings-share.e2e-spec.ts:142:8)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+  ● Readings Share System (e2e) › Token Generation › should generate unique tokens for different readings
+
+    expected 201 "Created", got 500 "Internal Server Error"
+
+    [0m [90m 140 |[39m         generateInterpretation[33m:[39m [36mfalse[39m[33m,[39m
+     [90m 141 |[39m       })
+    [31m[1m>[22m[39m[90m 142 |[39m       [33m.[39mexpect([35m201[39m)[33m;[39m
+     [90m     |[39m        [31m[1m^[22m[39m
+     [90m 143 |[39m
+     [90m 144 |[39m     readingId [33m=[39m (readingResponse[33m.[39mbody [36mas[39m [33mReadingResponse[39m)[33m.[39mid[33m;[39m
+     [90m 145 |[39m   })[33m;[39m[0m
+
+      at Object.<anonymous> (readings-share.e2e-spec.ts:142:8)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:252:14)
+      at ../node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:285:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:164:23)
+      at Server.localAssert (../node_modules/supertest/lib/test.js:120:14)
+
+PASS test/password-recovery.e2e-spec.ts (56.049 s)
+  ● Console
+
+    console.log
+      [Setup Env] E2E Testing environment configured
+
+      at Object.<anonymous> (setup-env.ts:18:9)
+
+    console.log
+      [Setup Env] Database: tarot_e2e on port 5436
+
+      at Object.<anonymous> (setup-env.ts:19:9)
+
+    console.log
+      [E2E Database Helper] Conexión E2E inicializada
+
+      at E2EDatabaseHelper.initialize (helpers/e2e-database.helper.ts:21:15)
+
+    console.log
+      [E2E Database Helper] Conexión E2E cerrada
+
+      at E2EDatabaseHelper.close (helpers/e2e-database.helper.ts:31:15)
+
+A worker process has failed to exit gracefully and has been force exited. This is likely caused by tests leaking due to improper teardown. Try running with --detectOpenHandles to find leaks. Active timers can also cause this, ensure that .unref() was called on them.
+
+Test Suites: 8 failed, 6 passed, 14 total
+Tests:       89 failed, 58 passed, 147 total
+Snapshots:   0 total
+Time:        58.067 s
+Ran all test suites.
+
+🧹 [Global Teardown E2E] Iniciando limpieza...
+[Global Teardown E2E] Manteniendo datos seeded para reutilización
+✅ [Global Teardown E2E] Limpieza completada
+
+Force exiting Jest: Have you considered using `--detectOpenHandles` to detect async operations that kept running after all tests finished?
+npm error Lifecycle script `test:e2e` failed with error:
+npm error code 1
+npm error path D:\Personal\tarot\backend\tarot-app
+npm error workspace tarot-app@0.0.1
+npm error location D:\Personal\tarot\backend\tarot-app
+npm error command failed
+npm error command C:\WINDOWS\system32\cmd.exe /d /s /c jest --config ./test/jest-e2e.json

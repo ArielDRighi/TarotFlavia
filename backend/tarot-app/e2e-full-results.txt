@@ -1,0 +1,101 @@
+
+> tarot-app@0.0.1 pretest:e2e
+> echo 'E2E tests use global setup/teardown - no pre-reset needed'
+
+'E2E tests use global setup/teardown - no pre-reset needed'
+
+> tarot-app@0.0.1 test:e2e
+> jest --config ./test/jest-e2e.json
+
+
+🚀 [Global Setup E2E] Iniciando configuración...
+[Global Setup E2E] Verificando conexión E2E...
+[E2E Database Helper] Conexión E2E inicializada
+[Global Setup E2E] Conexión E2E verificada ✓
+[Global Setup E2E] Reseteando base de datos E2E...
+[E2E Database Helper] Reseteando base de datos...
+[E2E Database Helper] Eliminando schema...
+[E2E Database Helper] Schema eliminado
+[E2E Database Helper] Ejecutando migraciones...
+[E2E Database Helper] Migraciones ejecutadas
+[E2E Database Helper] Base de datos reseteada
+[Global Setup E2E] Base de datos E2E reseteada ✓
+[Global Setup E2E] Ejecutando seeders base...
+📚 Starting Reading Categories seeding process...
+💾 Saving 6 categories...
+✅ Successfully seeded 6 categories!
+   Categories:
+   ❤️ Amor y Relaciones (order: 1)
+   💼 Carrera y Trabajo (order: 2)
+   💰 Dinero y Finanzas (order: 3)
+   🏥 Salud y Bienestar (order: 4)
+   ✨ Crecimiento Espiritual (order: 5)
+   🌟 Consulta General (order: 6)
+🃏 Starting Tarot Decks seeding process...
+💾 Saving deck: Rider-Waite...
+✅ Successfully seeded deck: Rider-Waite (ID: 1)
+   • Artist: Pamela Colman Smith
+   • Year Created: 1909
+   • Tradition: Hermética / Orden del Amanecer Dorado
+   • Card Count: 78
+   • Is Default: true
+🌟 Starting Tarot Cards seeding process...
+📦 Found deck: Rider-Waite (ID: 1)
+📊 Card distribution:
+   • Arcanos Mayores: 22
+   • Bastos (Wands): 14
+   • Copas (Cups): 14
+   • Espadas (Swords): 14
+   • Oros (Pentacles): 14
+   • TOTAL: 78
+💾 Saving cards to database...
+✅ Successfully seeded 78 tarot cards!
+✓ Tarot spreads seeded successfully!
+  Total spreads: 4
+  Distribution:
+    - 1 card(s): 1 spread(s)
+    - 3 card(s): 1 spread(s)
+    - 5 card(s): 1 spread(s)
+    - 10 card(s): 1 spread(s)
+💬 Starting Predefined Questions seeding process...
+📦 Found 6 categories
+📊 Question distribution:
+   Amor y Relaciones: 8 questions
+   Carrera y Trabajo: 8 questions
+   Dinero y Finanzas: 7 questions
+   Salud y Bienestar: 6 questions
+   Crecimiento Espiritual: 7 questions
+   Consulta General: 6 questions
+   • TOTAL: 42 questions
+💾 Saving questions to database...
+✅ Successfully seeded 42 predefined questions!
+👥 Starting Users seeding process...
+💾 Creating test users...
+   ✓ Created: free@test.com (free
+   ✓ Created: premium@test.com (premium
+   ✓ Created: admin@test.com (premium
+✅ Successfully seeded test users!
+
+📋 Test Credentials:
+   FREE User:
+      Email: free@test.com
+      Password: Test123456!
+
+   PREMIUM User:
+      Email: premium@test.com
+      Password: Test123456!
+
+   ADMIN User:
+      Email: admin@test.com
+      Password: Test123456!
+
+⚠️  WARNING: These are TEST users. Remove in production!
+[Global Setup E2E] Seeders base ejecutados ✓
+✅ [Global Setup E2E] Configuración completada
+
+[E2E Database Helper] Conexión E2E cerrada
+
+🧹 [Global Teardown E2E] Iniciando limpieza...
+[Global Teardown E2E] Manteniendo datos seeded para reutilización
+✅ [Global Teardown E2E] Limpieza completada
+
