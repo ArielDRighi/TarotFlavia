@@ -7,9 +7,16 @@ import {
   ValidateNested,
   IsUrl,
   IsOptional,
+  MaxLength,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { MaxJsonDepth } from '../../../../common/validators/max-json-depth.validator';
+import { IsSecureUrl } from '../../../../common/validators/is-secure-url.validator';
+import {
+  SanitizeHtml,
+  Trim,
+} from '../../../../common/decorators/sanitize.decorator';
 
 class SpreadPositionDto {
   @ApiProperty({
@@ -18,6 +25,10 @@ class SpreadPositionDto {
   })
   @IsString()
   @IsNotEmpty()
+  @MaxLength(100, {
+    message: 'El nombre de la posición no debe exceder 100 caracteres',
+  })
+  @SanitizeHtml()
   name: string;
 
   @ApiProperty({
@@ -26,6 +37,10 @@ class SpreadPositionDto {
   })
   @IsString()
   @IsNotEmpty()
+  @MaxLength(500, {
+    message: 'La descripción de la posición no debe exceder 500 caracteres',
+  })
+  @SanitizeHtml()
   description: string;
 }
 
@@ -36,6 +51,10 @@ export class CreateSpreadDto {
   })
   @IsString()
   @IsNotEmpty({ message: 'El nombre de la tirada es requerido' })
+  @MaxLength(100, {
+    message: 'El nombre de la tirada no debe exceder 100 caracteres',
+  })
+  @SanitizeHtml()
   name: string;
 
   @ApiProperty({
@@ -45,6 +64,10 @@ export class CreateSpreadDto {
   })
   @IsString()
   @IsNotEmpty({ message: 'La descripción de la tirada es requerida' })
+  @MaxLength(1000, {
+    message: 'La descripción no debe exceder 1000 caracteres',
+  })
+  @SanitizeHtml()
   description: string;
 
   @ApiProperty({
@@ -62,6 +85,9 @@ export class CreateSpreadDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => SpreadPositionDto)
+  @MaxJsonDepth(5, {
+    message: 'La estructura de posiciones no puede tener más de 5 niveles',
+  })
   positions: SpreadPositionDto[];
 
   @ApiProperty({
@@ -70,6 +96,10 @@ export class CreateSpreadDto {
     required: false,
   })
   @IsUrl({}, { message: 'Debe proporcionar una URL válida para la imagen' })
+  @IsSecureUrl(true, {
+    message: 'La URL de la imagen debe ser segura (HTTPS preferido)',
+  })
   @IsOptional()
+  @Trim()
   imageUrl?: string;
 }

@@ -12,10 +12,12 @@ import {
   ValidatorConstraintInterface,
   ValidationArguments,
   ValidateIf,
+  MinLength,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsExclusiveWithConstraint } from './validators/is-exclusive-with.validator';
+import { SanitizeHtml } from '../../../../common/decorators/sanitize.decorator';
 
 /**
  * Validador que asegura que al menos uno de predefinedQuestionId o customQuestion esté presente
@@ -89,9 +91,13 @@ export class CreateReadingDto {
   @ValidateIf((o: CreateReadingDto) => o.customQuestion !== undefined)
   @IsString({ message: 'La pregunta personalizada debe ser texto' })
   @IsNotEmpty({ message: 'La pregunta personalizada no puede estar vacía' })
+  @MinLength(10, {
+    message: 'La pregunta personalizada debe tener al menos 10 caracteres',
+  })
   @MaxLength(500, {
     message: 'La pregunta personalizada no debe exceder los 500 caracteres',
   })
+  @SanitizeHtml()
   @Validate(IsExclusiveWithConstraint, ['predefinedQuestionId'], {
     message:
       'Debes proporcionar solo una: pregunta predefinida o pregunta personalizada, no ambas',
