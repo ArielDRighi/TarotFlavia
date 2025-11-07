@@ -36,6 +36,8 @@ describe('ReadingsController', () => {
     deck: {} as TarotDeck,
     cards: [],
     category: null,
+    tarotista: null,
+    tarotistaId: null,
     cardPositions: [
       { cardId: 1, position: 'past', isReversed: false },
       { cardId: 2, position: 'present', isReversed: true },

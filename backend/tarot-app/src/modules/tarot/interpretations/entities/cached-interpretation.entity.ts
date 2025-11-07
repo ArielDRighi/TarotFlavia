@@ -16,6 +16,9 @@ export class CachedInterpretation {
   cache_key: string;
 
   @Column({ type: 'int', nullable: true })
+  tarotista_id: number | null;
+
+  @Column({ type: 'int', nullable: true })
   spread_id: number | null;
 
   @Column({ type: 'jsonb' })

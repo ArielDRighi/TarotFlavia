@@ -17,7 +17,7 @@ export enum UsageFeature {
 }
 
 @Entity('usage_limit')
-@Index(['userId', 'feature', 'date'], { unique: true })
+@Index(['userId', 'feature', 'tarotistaId', 'date'], { unique: true })
 export class UsageLimit {
   @ApiProperty({ example: 1, description: 'ID único del registro de uso' })
   @PrimaryGeneratedColumn()
@@ -33,6 +33,14 @@ export class UsageLimit {
   @ManyToOne(() => User)
   @JoinColumn({ name: 'user_id' })
   user: User;
+
+  @ApiProperty({
+    example: 1,
+    description: 'ID del tarotista (opcional para límites específicos)',
+    required: false,
+  })
+  @Column({ name: 'tarotista_id', type: 'int', nullable: true })
+  tarotistaId: number | null;
 
   @ApiProperty({
     example: 'tarot_reading',

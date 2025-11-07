@@ -20,6 +20,12 @@ export enum SubscriptionStatus {
   EXPIRED = 'expired',
 }
 
+export enum UserRole {
+  CONSUMER = 'consumer',
+  TAROTIST = 'tarotist',
+  ADMIN = 'admin',
+}
+
 /**
  * Tipo que representa un usuario sin el campo password
  * Incluye todos los campos y métodos de User excepto password
@@ -62,6 +68,20 @@ export class User {
   })
   @Column({ default: false })
   isAdmin: boolean;
+
+  @ApiProperty({
+    example: ['consumer'],
+    description: 'Roles del usuario',
+    enum: UserRole,
+    isArray: true,
+  })
+  @Column({
+    type: 'enum',
+    enum: UserRole,
+    array: true,
+    default: [UserRole.CONSUMER],
+  })
+  roles: UserRole[];
 
   @ApiProperty({
     example: 'free',
