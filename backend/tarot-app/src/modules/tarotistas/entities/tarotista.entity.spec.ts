@@ -11,14 +11,14 @@ describe('Tarotista Entity', () => {
       tarotista.bio = 'Tarotista con 20 años de experiencia';
       tarotista.isActive = true;
       tarotista.isAcceptingNewClients = true;
-      tarotista.comisionPorcentaje = 30.0;
+      tarotista.comisiónPorcentaje = 30.0;
 
       expect(tarotista.id).toBe(1);
       expect(tarotista.userId).toBe(1);
       expect(tarotista.nombrePublico).toBe('Flavia');
       expect(tarotista.bio).toBe('Tarotista con 20 años de experiencia');
       expect(tarotista.isActive).toBe(true);
-      expect(tarotista.comisionPorcentaje).toBe(30.0);
+      expect(tarotista.comisiónPorcentaje).toBe(30.0);
     });
 
     it('should have default values for optional fields', () => {
@@ -28,7 +28,7 @@ describe('Tarotista Entity', () => {
 
       expect(tarotista.isActive).toBeUndefined(); // Will be set by default in entity
       expect(tarotista.isFeatured).toBeUndefined();
-      expect(tarotista.comisionPorcentaje).toBeUndefined();
+      expect(tarotista.comisiónPorcentaje).toBeUndefined();
       expect(tarotista.totalLecturas).toBeUndefined();
       expect(tarotista.ratingPromedio).toBeUndefined();
       expect(tarotista.totalReviews).toBeUndefined();
@@ -107,14 +107,14 @@ describe('Tarotista Entity', () => {
       const tarotista = new Tarotista();
 
       // Valid values
-      tarotista.comisionPorcentaje = 0;
-      expect(tarotista.comisionPorcentaje).toBe(0);
+      tarotista.comisiónPorcentaje = 0;
+      expect(tarotista.comisiónPorcentaje).toBe(0);
 
-      tarotista.comisionPorcentaje = 50;
-      expect(tarotista.comisionPorcentaje).toBe(50);
+      tarotista.comisiónPorcentaje = 50;
+      expect(tarotista.comisiónPorcentaje).toBe(50);
 
-      tarotista.comisionPorcentaje = 100;
-      expect(tarotista.comisionPorcentaje).toBe(100);
+      tarotista.comisiónPorcentaje = 100;
+      expect(tarotista.comisiónPorcentaje).toBe(100);
 
       // Note: Actual validation happens at DB level via CHECK constraint
     });

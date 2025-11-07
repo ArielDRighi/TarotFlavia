@@ -15,7 +15,7 @@ import { User } from '../../users/entities/user.entity';
 import { TarotReading } from '../../tarot/readings/entities/tarot-reading.entity';
 
 @Entity('tarotistas')
-@Check('"comision_porcentaje" >= 0 AND "comision_porcentaje" <= 100')
+@Check('"comisión_porcentaje" >= 0 AND "comisión_porcentaje" <= 100')
 @Check('"rating_promedio" >= 0 AND "rating_promedio" <= 5')
 @Index('idx_tarotista_active', ['isActive'])
 @Index('idx_tarotista_featured', ['isFeatured'])
@@ -137,13 +137,13 @@ export class Tarotista {
     description: 'Porcentaje de comisión (0-100)',
   })
   @Column({
-    name: 'comision_porcentaje',
+    name: 'comisión_porcentaje',
     type: 'decimal',
     precision: 5,
     scale: 2,
     default: 30.0,
   })
-  comisionPorcentaje: number;
+  comisiónPorcentaje: number;
 
   @ApiProperty({
     example: 150,

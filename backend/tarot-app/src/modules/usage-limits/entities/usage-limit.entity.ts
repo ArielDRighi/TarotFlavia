@@ -5,7 +5,6 @@ import {
   CreateDateColumn,
   ManyToOne,
   JoinColumn,
-  Index,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from '../../users/entities/user.entity';
@@ -17,7 +16,9 @@ export enum UsageFeature {
 }
 
 @Entity('usage_limit')
-@Index(['userId', 'feature', 'tarotistaId', 'date'], { unique: true })
+// Note: The unique index is created in the migration with COALESCE(tarotista_id, 0)
+// to handle NULL values correctly. TypeORM @Index decorator doesn't support SQL expressions,
+// so we don't declare it here to avoid mismatch with actual database implementation.
 export class UsageLimit {
   @ApiProperty({ example: 1, description: 'ID único del registro de uso' })
   @PrimaryGeneratedColumn()

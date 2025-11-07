@@ -33,7 +33,7 @@ export class CreateMultiTarotistSchema1762555582744
         "is_active" boolean NOT NULL DEFAULT true,
         "is_accepting_new_clients" boolean NOT NULL DEFAULT true,
         "is_featured" boolean NOT NULL DEFAULT false,
-        "comision_porcentaje" numeric(5,2) NOT NULL DEFAULT '30.00',
+        "comisión_porcentaje" numeric(5,2) NOT NULL DEFAULT '30.00',
         "total_lecturas" integer NOT NULL DEFAULT '0',
         "rating_promedio" numeric(3,2),
         "total_reviews" integer NOT NULL DEFAULT '0',
@@ -41,7 +41,7 @@ export class CreateMultiTarotistSchema1762555582744
         "updated_at" TIMESTAMP NOT NULL DEFAULT now(),
         CONSTRAINT "PK_tarotistas" PRIMARY KEY ("id"),
         CONSTRAINT "UQ_tarotistas_user_id" UNIQUE ("user_id"),
-        CONSTRAINT "CHK_tarotistas_comision" CHECK ("comision_porcentaje" >= 0 AND "comision_porcentaje" <= 100),
+        CONSTRAINT "CHK_tarotistas_comision" CHECK ("comisión_porcentaje" >= 0 AND "comisión_porcentaje" <= 100),
         CONSTRAINT "CHK_tarotistas_rating" CHECK ("rating_promedio" >= 0 AND "rating_promedio" <= 5)
       )`,
     );
