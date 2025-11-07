@@ -61,7 +61,7 @@ export class TarotistaConfig {
     example: 1000,
     description: 'Máximo de tokens para la respuesta',
   })
-  @Column({ name: 'max_tokens', default: 1000 })
+  @Column({ name: 'max_tokens', type: 'int', default: 1000 })
   maxTokens: number;
 
   @ApiProperty({
@@ -96,7 +96,7 @@ export class TarotistaConfig {
     example: 1,
     description: 'Versión de la configuración',
   })
-  @Column({ default: 1 })
+  @Column({ type: 'int', default: 1 })
   version: number;
 
   @ApiProperty({

@@ -48,7 +48,7 @@ export class TarotistaRevenueMetrics {
   user: User;
 
   @ApiProperty({ example: 1, description: 'ID de la lectura (opcional)' })
-  @Column({ name: 'reading_id', nullable: true })
+  @Column({ name: 'reading_id', type: 'int', nullable: true })
   readingId: number | null;
 
   @ApiProperty({

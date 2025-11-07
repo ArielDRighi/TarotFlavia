@@ -45,7 +45,7 @@ export class UserTarotistaSubscription {
     example: 1,
     description: 'ID del tarotista (null para all-access)',
   })
-  @Column({ name: 'tarotista_id', nullable: true })
+  @Column({ name: 'tarotista_id', type: 'int', nullable: true })
   tarotistaId: number | null;
 
   @ApiProperty({
@@ -116,7 +116,7 @@ export class UserTarotistaSubscription {
     example: 0,
     description: 'Número de veces que el usuario cambió de tarotista favorito',
   })
-  @Column({ name: 'change_count', default: 0 })
+  @Column({ name: 'change_count', type: 'int', default: 0 })
   changeCount: number;
 
   @ApiProperty({

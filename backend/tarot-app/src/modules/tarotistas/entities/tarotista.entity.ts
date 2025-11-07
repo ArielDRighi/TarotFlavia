@@ -81,7 +81,7 @@ export class Tarotista {
     example: 20,
     description: 'Años de experiencia del tarotista',
   })
-  @Column({ name: 'años_experiencia', nullable: true })
+  @Column({ name: 'años_experiencia', type: 'int', nullable: true })
   añosExperiencia: number | null;
 
   @ApiProperty({
@@ -108,7 +108,7 @@ export class Tarotista {
     example: 60,
     description: 'Duración de la sesión en minutos',
   })
-  @Column({ name: 'duracion_sesion_minutos', nullable: true })
+  @Column({ name: 'duracion_sesion_minutos', type: 'int', nullable: true })
   duracionSesionMinutos: number | null;
 
   @ApiProperty({
@@ -149,7 +149,7 @@ export class Tarotista {
     example: 150,
     description: 'Total de lecturas realizadas',
   })
-  @Column({ name: 'total_lecturas', default: 0 })
+  @Column({ name: 'total_lecturas', type: 'int', default: 0 })
   totalLecturas: number;
 
   @ApiProperty({
@@ -169,7 +169,7 @@ export class Tarotista {
     example: 50,
     description: 'Total de reviews recibidas',
   })
-  @Column({ name: 'total_reviews', default: 0 })
+  @Column({ name: 'total_reviews', type: 'int', default: 0 })
   totalReviews: number;
 
   @ApiProperty({

@@ -50,7 +50,7 @@ export class TarotistaReview {
     example: 1,
     description: 'ID de la lectura relacionada (opcional)',
   })
-  @Column({ name: 'reading_id', nullable: true })
+  @Column({ name: 'reading_id', type: 'int', nullable: true })
   readingId: number | null;
 
   @ApiProperty({
