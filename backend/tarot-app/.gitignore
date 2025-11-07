@@ -6,3 +6,8 @@ mvp-complete-test.sh
 mvp-final-corrected.sh
 mvp-test-fixed.sh
 mvp-test.sh
+
+# Test result files
+*-results.txt
+e2e-*.txt
+test-results*.txt

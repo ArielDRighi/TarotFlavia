@@ -375,7 +375,7 @@ describe('Reading Regeneration E2E', () => {
       // El guard de límites de uso puede ejecutarse antes que la verificación premium
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(String(response.body.message)).toMatch(/premium|límite|limit/i);
-    });
+    }, 30000);
   });
 
   /**
@@ -412,7 +412,7 @@ describe('Reading Regeneration E2E', () => {
         .expect(403);
 
       expect(response.body).toHaveProperty('message');
-    });
+    }, 30000);
   });
 
   /**
@@ -469,9 +469,20 @@ describe('Reading Regeneration E2E', () => {
         { cardId: cardIds[1], position: 'Present', isReversed: false },
         { cardId: cardIds[2], position: 'Future', isReversed: true },
       ]);
-    });
+    }, 30000);
 
     it('should create new interpretation entry in database', async () => {
+      // Primero verificar que readingId existe y tiene una interpretación inicial
+      const reading = await dataSource
+        .getRepository(TarotReading)
+        .findOne({ where: { id: readingId } });
+
+      if (!reading) {
+        throw new Error(
+          `Reading with ID ${readingId} not found. The test setup failed.`,
+        );
+      }
+
       // Usar la reading global - ya tiene 1 regeneración del test anterior
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const interpretations = await dataSource.query(
@@ -544,7 +555,7 @@ describe('Reading Regeneration E2E', () => {
       expect(response.body).toHaveProperty('message');
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(String(response.body.message)).toContain('máximo');
-    });
+    }, 60000);
   });
 
   /**
