@@ -123,7 +123,12 @@ export class UserTarotistaSubscription {
     example: 'sub_123456789',
     description: 'ID de la suscripción en Stripe',
   })
-  @Column({ name: 'stripe_subscription_id', nullable: true })
+  @Column({
+    name: 'stripe_subscription_id',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
   stripeSubscriptionId: string | null;
 
   @ApiProperty({
