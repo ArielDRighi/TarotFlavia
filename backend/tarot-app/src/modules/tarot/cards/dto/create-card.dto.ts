@@ -5,8 +5,14 @@ import {
   IsOptional,
   IsInt,
   Min,
+  MaxLength,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsSecureUrl } from '../../../../common/validators/is-secure-url.validator';
+import {
+  SanitizeHtml,
+  Trim,
+} from '../../../../common/decorators/sanitize.decorator';
 
 export class CreateCardDto {
   @ApiProperty({
@@ -15,6 +21,9 @@ export class CreateCardDto {
   })
   @IsString()
   @IsNotEmpty({ message: 'El nombre de la carta es requerido' })
+  @MaxLength(100, { message: 'El nombre no debe exceder 100 caracteres' })
+  @SanitizeHtml()
+  @Trim()
   name: string;
 
   @ApiProperty({
@@ -31,6 +40,9 @@ export class CreateCardDto {
   })
   @IsString()
   @IsNotEmpty({ message: 'La categoría de la carta es requerida' })
+  @MaxLength(50, { message: 'La categoría no debe exceder 50 caracteres' })
+  @SanitizeHtml()
+  @Trim()
   category: string;
 
   @ApiProperty({
@@ -38,7 +50,11 @@ export class CreateCardDto {
     description: 'URL de la imagen de la carta',
   })
   @IsUrl({}, { message: 'Debe proporcionar una URL válida para la imagen' })
+  @IsSecureUrl(true, {
+    message: 'La URL de la imagen debe ser segura (HTTPS preferido)',
+  })
   @IsNotEmpty()
+  @Trim()
   imageUrl: string;
 
   @ApiProperty({
@@ -50,7 +66,11 @@ export class CreateCardDto {
     {},
     { message: 'Debe proporcionar una URL válida para la imagen invertida' },
   )
+  @IsSecureUrl(true, {
+    message: 'La URL de la imagen invertida debe ser segura (HTTPS preferido)',
+  })
   @IsOptional()
+  @Trim()
   reversedImageUrl?: string;
 
   @ApiProperty({
@@ -59,6 +79,11 @@ export class CreateCardDto {
   })
   @IsString()
   @IsNotEmpty({ message: 'El significado en posición normal es requerido' })
+  @MaxLength(1000, {
+    message: 'El significado no debe exceder 1000 caracteres',
+  })
+  @SanitizeHtml()
+  @Trim()
   meaningUpright: string;
 
   @ApiProperty({
@@ -67,6 +92,11 @@ export class CreateCardDto {
   })
   @IsString()
   @IsNotEmpty({ message: 'El significado en posición invertida es requerido' })
+  @MaxLength(1000, {
+    message: 'El significado invertido no debe exceder 1000 caracteres',
+  })
+  @SanitizeHtml()
+  @Trim()
   meaningReversed: string;
 
   @ApiProperty({
@@ -75,6 +105,11 @@ export class CreateCardDto {
   })
   @IsString()
   @IsNotEmpty({ message: 'La descripción es requerida' })
+  @MaxLength(2000, {
+    message: 'La descripción no debe exceder 2000 caracteres',
+  })
+  @SanitizeHtml()
+  @Trim()
   description: string;
 
   @ApiProperty({
@@ -83,6 +118,11 @@ export class CreateCardDto {
   })
   @IsString()
   @IsNotEmpty({ message: 'Las palabras clave son requeridas' })
+  @MaxLength(500, {
+    message: 'Las palabras clave no deben exceder 500 caracteres',
+  })
+  @SanitizeHtml()
+  @Trim()
   keywords: string;
 
   @ApiProperty({
