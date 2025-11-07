@@ -29,7 +29,6 @@ class SpreadPositionDto {
     message: 'El nombre de la posición no debe exceder 100 caracteres',
   })
   @SanitizeHtml()
-  @Trim()
   name: string;
 
   @ApiProperty({
@@ -42,7 +41,6 @@ class SpreadPositionDto {
     message: 'La descripción de la posición no debe exceder 500 caracteres',
   })
   @SanitizeHtml()
-  @Trim()
   description: string;
 }
 
@@ -57,7 +55,6 @@ export class CreateSpreadDto {
     message: 'El nombre de la tirada no debe exceder 100 caracteres',
   })
   @SanitizeHtml()
-  @Trim()
   name: string;
 
   @ApiProperty({
@@ -71,7 +68,6 @@ export class CreateSpreadDto {
     message: 'La descripción no debe exceder 1000 caracteres',
   })
   @SanitizeHtml()
-  @Trim()
   description: string;
 
   @ApiProperty({

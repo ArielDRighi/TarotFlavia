@@ -23,7 +23,6 @@ export class CreateCardDto {
   @IsNotEmpty({ message: 'El nombre de la carta es requerido' })
   @MaxLength(100, { message: 'El nombre no debe exceder 100 caracteres' })
   @SanitizeHtml()
-  @Trim()
   name: string;
 
   @ApiProperty({
@@ -42,7 +41,6 @@ export class CreateCardDto {
   @IsNotEmpty({ message: 'La categoría de la carta es requerida' })
   @MaxLength(50, { message: 'La categoría no debe exceder 50 caracteres' })
   @SanitizeHtml()
-  @Trim()
   category: string;
 
   @ApiProperty({
@@ -83,7 +81,6 @@ export class CreateCardDto {
     message: 'El significado no debe exceder 1000 caracteres',
   })
   @SanitizeHtml()
-  @Trim()
   meaningUpright: string;
 
   @ApiProperty({
@@ -96,7 +93,6 @@ export class CreateCardDto {
     message: 'El significado invertido no debe exceder 1000 caracteres',
   })
   @SanitizeHtml()
-  @Trim()
   meaningReversed: string;
 
   @ApiProperty({
@@ -109,7 +105,6 @@ export class CreateCardDto {
     message: 'La descripción no debe exceder 2000 caracteres',
   })
   @SanitizeHtml()
-  @Trim()
   description: string;
 
   @ApiProperty({
@@ -122,7 +117,6 @@ export class CreateCardDto {
     message: 'Las palabras clave no deben exceder 500 caracteres',
   })
   @SanitizeHtml()
-  @Trim()
   keywords: string;
 
   @ApiProperty({

@@ -19,16 +19,20 @@ export class MaxJsonDepthConstraint implements ValidatorConstraintInterface {
 
     if (Array.isArray(obj)) {
       if (obj.length === 0) return currentDepth + 1;
-      return Math.max(
-        ...obj.map((item) => this.getDepth(item, currentDepth + 1)),
+      return obj.reduce<number>(
+        (max: number, item: unknown) =>
+          Math.max(max, this.getDepth(item, currentDepth + 1)),
+        currentDepth + 1,
       );
     }
 
     const values = Object.values(obj);
     if (values.length === 0) return currentDepth + 1;
 
-    return Math.max(
-      ...values.map((value) => this.getDepth(value, currentDepth + 1)),
+    return values.reduce<number>(
+      (max: number, value: unknown) =>
+        Math.max(max, this.getDepth(value, currentDepth + 1)),
+      currentDepth + 1,
     );
   }
 

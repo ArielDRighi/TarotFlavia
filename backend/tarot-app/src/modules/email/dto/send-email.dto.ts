@@ -15,7 +15,6 @@ export class SendEmailDto {
   @IsNotEmpty()
   @MaxLength(200, { message: 'Subject must not exceed 200 characters' })
   @SanitizeHtml()
-  @Trim()
   subject: string;
 
   @IsString()

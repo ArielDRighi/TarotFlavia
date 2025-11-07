@@ -29,7 +29,6 @@ export class CreateUserDto {
   @IsNotEmpty({ message: 'Name is required' })
   @MaxLength(255, { message: 'Name must not exceed 255 characters' })
   @SanitizeHtml()
-  @Trim()
   name: string;
 
   @ApiProperty({

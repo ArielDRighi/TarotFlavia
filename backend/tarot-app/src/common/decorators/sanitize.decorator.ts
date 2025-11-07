@@ -43,7 +43,7 @@ export function SanitizeHtml(allowedTags: string[] = []) {
         `<(?!/?(?:${allowedTagsPattern})\\b)[^>]*>`,
         'gi',
       );
-      sanitized = regex.test(value) ? sanitized.replace(regex, '') : sanitized;
+      sanitized = sanitized.replace(regex, '');
     }
 
     // Remove any remaining HTML entities that could be dangerous

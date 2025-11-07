@@ -17,10 +17,7 @@ import {
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsExclusiveWithConstraint } from './validators/is-exclusive-with.validator';
-import {
-  SanitizeHtml,
-  Trim,
-} from '../../../../common/decorators/sanitize.decorator';
+import { SanitizeHtml } from '../../../../common/decorators/sanitize.decorator';
 
 /**
  * Validador que asegura que al menos uno de predefinedQuestionId o customQuestion esté presente
@@ -101,7 +98,6 @@ export class CreateReadingDto {
     message: 'La pregunta personalizada no debe exceder los 500 caracteres',
   })
   @SanitizeHtml()
-  @Trim()
   @Validate(IsExclusiveWithConstraint, ['predefinedQuestionId'], {
     message:
       'Debes proporcionar solo una: pregunta predefinida o pregunta personalizada, no ambas',
