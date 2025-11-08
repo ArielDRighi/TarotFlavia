@@ -44,6 +44,9 @@ export class AIUsageLog {
   @JoinColumn({ name: 'reading_id' })
   reading: TarotReading | null;
 
+  @Column({ name: 'tarotista_id', type: 'int', nullable: true })
+  tarotistaId: number | null;
+
   @Column({
     type: 'enum',
     enum: AIProvider,

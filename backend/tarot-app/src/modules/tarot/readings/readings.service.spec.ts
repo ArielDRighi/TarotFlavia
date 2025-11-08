@@ -121,6 +121,8 @@ describe('ReadingsService', () => {
     deck: mockDeck,
     cards: mockCards,
     category: null,
+    tarotista: null,
+    tarotistaId: null,
     cardPositions: [
       { cardId: 1, position: 'past', isReversed: false },
       { cardId: 2, position: 'present', isReversed: true },

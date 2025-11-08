@@ -76,6 +76,17 @@ export class TarotReading {
   deck: TarotDeck;
 
   @ApiProperty({
+    description: 'Tarotista que realizó la lectura',
+    required: false,
+  })
+  @ManyToOne('Tarotista', 'readings', { nullable: true })
+  @JoinColumn({ name: 'tarotista_id' })
+  tarotista: unknown;
+
+  @Column({ name: 'tarotista_id', nullable: true })
+  tarotistaId: number | null;
+
+  @ApiProperty({
     description: 'Categoría de la lectura',
     type: () => ReadingCategory,
     required: false,
