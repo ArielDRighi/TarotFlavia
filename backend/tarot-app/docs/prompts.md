@@ -12,7 +12,7 @@ Rama: Estás en develop. Crea la rama feature/TASK-00x-descripcion (usa la nomen
 
 Metodología (TDD Estricto): Sigue un ciclo TDD riguroso: _ Escribe un test (debe fallar). _ Escribe el código mínimo para que el test pase. \* Refactoriza.
 
-Ciclo de Calidad (Pre-Commit): Al finalizar la implementación, ejecuta los scripts de lint, format y build del proyecto. Corrige todos los errores y warnings que surjan.
+Ciclo de Calidad (Pre-Commit): Al finalizar la implementación, ejecuta los scripts de lint, format y build del proyecto. Todos los tipos de tests completos. Corrige todos los errores y warnings que surjan.
 
 Esta terminantemente prohibido agregar eslint disable, debes solucionar los problemas de forma real.
 
