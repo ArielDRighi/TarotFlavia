@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 /* eslint-disable @typescript-eslint/require-await */
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';

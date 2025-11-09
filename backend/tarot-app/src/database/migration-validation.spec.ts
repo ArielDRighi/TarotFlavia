@@ -35,7 +35,7 @@ describe('Migration Validation', () => {
   describe('InitialSchema Migration', () => {
     it('should have up and down methods defined', () => {
       const migration = new InitialSchema1761655973524();
-      // eslint-disable-next-line @typescript-eslint/unbound-method
+
       const { up, down } = migration;
       expect(up).toBeDefined();
       expect(down).toBeDefined();
