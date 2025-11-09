@@ -6,7 +6,7 @@ import {
 
 /**
  * Flavia User Data
- * Default tarotist user for the MVP
+ * Default tarotista user for the MVP
  */
 export const flaviaUserData = {
   email: 'flavia@tarotflavia.com',
