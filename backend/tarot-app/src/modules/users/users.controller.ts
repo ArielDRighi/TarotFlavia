@@ -10,6 +10,7 @@ import {
   Request,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
   ParseIntPipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
@@ -255,14 +256,14 @@ export class UsersController {
     @Param('role') role: string,
   ) {
     // Validar que el rol es válido
-    const roleEnum = role.toUpperCase() as UserRole;
+    const roleEnum = role.toLowerCase() as UserRole;
     if (!Object.values(UserRole).includes(roleEnum)) {
-      throw new ForbiddenException('Rol inválido');
+      throw new BadRequestException('Rol inválido');
     }
 
     const user = await this.usersService.removeRole(id, roleEnum);
     return {
-      message: `Rol ${roleEnum} eliminado exitosamente`,
+      message: `Rol ${role.toUpperCase()} eliminado exitosamente`,
       user,
     };
   }
