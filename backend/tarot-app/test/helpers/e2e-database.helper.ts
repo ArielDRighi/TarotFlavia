@@ -133,25 +133,38 @@ export class E2EDatabaseHelper {
       'usage_limit',
     ];
 
-    // Desactivar foreign keys temporalmente
+    // Desactivar foreign keys temporalmente y asegurarse de restaurarlas
     await this.dataSource.query('SET session_replication_role = replica;');
-
-    // Truncar solo las tablas de usuario
-    for (const tableName of userTables) {
-      try {
-        await this.dataSource.query(
-          `TRUNCATE TABLE "${tableName}" RESTART IDENTITY CASCADE;`,
-        );
-      } catch {
-        // Ignorar si la tabla no existe
-        console.warn(
-          `[E2E Database Helper] Warning: Could not truncate table ${tableName}`,
-        );
+    try {
+      // Truncar solo las tablas de usuario
+      for (const tableName of userTables) {
+        try {
+          await this.dataSource.query(
+            `TRUNCATE TABLE "${tableName}" RESTART IDENTITY CASCADE;`,
+          );
+        } catch (error: unknown) {
+          // Ignorar si la tabla no existe (PostgreSQL error code 42P01)
+          const pgError = error as { code?: string; message?: string };
+          if (
+            pgError &&
+            (pgError.code === '42P01' ||
+              (pgError.message && pgError.message.includes('does not exist')))
+          ) {
+            console.warn(
+              `[E2E Database Helper] Warning: Table "${tableName}" does not exist, skipping truncate.`,
+            );
+          } else {
+            console.error(
+              `[E2E Database Helper] Error truncating table "${tableName}":`,
+              error,
+            );
+          }
+        }
       }
+    } finally {
+      // Reactivar foreign keys
+      await this.dataSource.query('SET session_replication_role = DEFAULT;');
     }
-
-    // Reactivar foreign keys
-    await this.dataSource.query('SET session_replication_role = DEFAULT;');
 
     console.log('[E2E Database Helper] Datos de usuario limpiados');
   }
