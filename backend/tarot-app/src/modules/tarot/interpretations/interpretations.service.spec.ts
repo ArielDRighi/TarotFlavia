@@ -2,12 +2,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { InterpretationsService } from './interpretations.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { TarotInterpretation } from './entities/tarot-interpretation.entity';
+import { Tarotista } from '../../tarotistas/entities/tarotista.entity';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { TarotCard } from '../cards/entities/tarot-card.entity';
 import { AIProviderService } from './ai-provider.service';
 import { AIProviderType } from './ai-provider.interface';
 import { InterpretationCacheService } from './interpretation-cache.service';
+import { PromptBuilderService } from './prompt-builder.service';
 
 describe('InterpretationsService', () => {
   let service: InterpretationsService;
@@ -19,6 +21,10 @@ describe('InterpretationsService', () => {
     manager: {
       findOne: jest.fn(),
     },
+  };
+
+  const mockTarotistaRepository = {
+    findOne: jest.fn(),
   };
 
   const mockConfigService = {
@@ -44,6 +50,14 @@ describe('InterpretationsService', () => {
     cleanExpiredCache: jest.fn(),
     cleanUnusedCache: jest.fn(),
     getCacheStats: jest.fn(),
+    clearTarotistaCache: jest.fn(),
+  };
+
+  const mockPromptBuilderService = {
+    getActiveConfig: jest.fn(),
+    getCardMeaning: jest.fn(),
+    buildInterpretationPrompt: jest.fn(),
+    clearConfigCache: jest.fn(),
   };
 
   const mockCards: TarotCard[] = [
@@ -72,6 +86,10 @@ describe('InterpretationsService', () => {
           useValue: mockRepository,
         },
         {
+          provide: getRepositoryToken(Tarotista),
+          useValue: mockTarotistaRepository,
+        },
+        {
           provide: ConfigService,
           useValue: mockConfigService,
         },
@@ -87,10 +105,30 @@ describe('InterpretationsService', () => {
           provide: InterpretationCacheService,
           useValue: mockCacheService,
         },
+        {
+          provide: PromptBuilderService,
+          useValue: mockPromptBuilderService,
+        },
       ],
     }).compile();
 
     service = module.get<InterpretationsService>(InterpretationsService);
+
+    // Setup default mocks
+    mockTarotistaRepository.findOne.mockResolvedValue({
+      id: 1,
+      nombrePublico: 'Flavia',
+    });
+
+    mockPromptBuilderService.buildInterpretationPrompt.mockResolvedValue({
+      systemPrompt: 'You are a tarot reader...',
+      userPrompt: 'Interpret these cards...',
+      config: {
+        temperature: 0.7,
+        maxTokens: 1000,
+        topP: 0.9,
+      },
+    });
   });
 
   afterEach(() => {

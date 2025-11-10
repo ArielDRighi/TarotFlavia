@@ -115,12 +115,14 @@ export class InterpretationCacheService {
     cardCombination: CardCombination[],
     questionHash: string,
     interpretation: string,
+    tarotistaId?: number,
   ): Promise<void> {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + this.DB_CACHE_TTL_DAYS);
 
     const cacheEntry = this.cacheRepository.create({
       cache_key: cacheKey,
+      tarotista_id: tarotistaId || null,
       spread_id: spreadId,
       card_combination: cardCombination,
       question_hash: questionHash,
@@ -133,6 +135,20 @@ export class InterpretationCacheService {
 
     // Guardar también en caché in-memory
     await this.cacheManager.set(cacheKey, saved, this.MEMORY_CACHE_TTL);
+  }
+
+  /**
+   * Limpia el cache de un tarotista específico
+   */
+  async clearTarotistaCache(tarotistaId: number): Promise<number> {
+    const result = await this.cacheRepository
+      .createQueryBuilder()
+      .delete()
+      .from(CachedInterpretation)
+      .where('tarotista_id = :tarotistaId', { tarotistaId })
+      .execute();
+
+    return result.affected || 0;
   }
 
   /**
