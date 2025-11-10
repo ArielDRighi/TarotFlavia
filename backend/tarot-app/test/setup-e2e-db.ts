@@ -49,6 +49,15 @@ export default async function globalSetup() {
       '../src/database/seeds/predefined-questions.seeder'
     );
     const { seedUsers } = await import('../src/database/seeds/users.seeder');
+    const { seedFlaviaUser } = await import(
+      '../src/database/seeds/flavia-user.seeder'
+    );
+    const { seedFlaviaTarotista } = await import(
+      '../src/database/seeds/flavia-tarotista.seeder'
+    );
+    const { seedFlaviaIAConfig } = await import(
+      '../src/database/seeds/flavia-ia-config.seeder'
+    );
 
     const { ReadingCategory } = await import(
       '../src/modules/categories/entities/reading-category.entity'
@@ -63,6 +72,12 @@ export default async function globalSetup() {
       '../src/modules/predefined-questions/entities/predefined-question.entity'
     );
     const { User } = await import('../src/modules/users/entities/user.entity');
+    const { Tarotista } = await import(
+      '../src/modules/tarotistas/entities/tarotista.entity'
+    );
+    const { TarotistaConfig } = await import(
+      '../src/modules/tarotistas/entities/tarotista-config.entity'
+    );
 
     // Execute seeders
     await seedReadingCategories(dataSource.getRepository(ReadingCategory));
@@ -77,6 +92,19 @@ export default async function globalSetup() {
       dataSource.getRepository(ReadingCategory),
     );
     await seedUsers(dataSource.getRepository(User));
+
+    // Seed Flavia (tarotista por defecto)
+    const flaviaUserId = await seedFlaviaUser(dataSource.getRepository(User));
+    const flaviaTarotistaId = await seedFlaviaTarotista(
+      flaviaUserId,
+      dataSource.getRepository(Tarotista),
+      dataSource.getRepository(User),
+    );
+    await seedFlaviaIAConfig(
+      flaviaTarotistaId,
+      dataSource.getRepository(TarotistaConfig),
+      dataSource.getRepository(Tarotista),
+    );
 
     console.log('[Global Setup E2E] Seeders base ejecutados ✓');
 
