@@ -108,6 +108,68 @@ export class E2EDatabaseHelper {
   }
 
   /**
+   * Limpia solo las tablas de datos de usuario, preservando los seeders base
+   * Útil para tests que necesitan limpiar datos entre tests pero mantener categorías, cartas, etc.
+   */
+  async cleanUserData(): Promise<void> {
+    await this.initialize();
+    console.log('[E2E Database Helper] Limpiando datos de usuario...');
+
+    // Tablas a limpiar (datos de usuario, NO seeders base)
+    const userTables = [
+      'tarot_reading',
+      'tarot_interpretation',
+      'user',
+      'tarotistas',
+      'tarotista_config',
+      'tarotista_card_meanings',
+      'tarotista_reviews',
+      'tarotista_revenue_metrics',
+      'user_tarotista_subscriptions',
+      'password_reset_tokens',
+      'refresh_tokens',
+      'ai_usage_logs',
+      'cached_interpretations',
+      'usage_limit',
+    ];
+
+    // Desactivar foreign keys temporalmente y asegurarse de restaurarlas
+    await this.dataSource.query('SET session_replication_role = replica;');
+    try {
+      // Truncar solo las tablas de usuario
+      for (const tableName of userTables) {
+        try {
+          await this.dataSource.query(
+            `TRUNCATE TABLE "${tableName}" RESTART IDENTITY CASCADE;`,
+          );
+        } catch (error: unknown) {
+          // Ignorar si la tabla no existe (PostgreSQL error code 42P01)
+          const pgError = error as { code?: string; message?: string };
+          if (
+            pgError &&
+            (pgError.code === '42P01' ||
+              (pgError.message && pgError.message.includes('does not exist')))
+          ) {
+            console.warn(
+              `[E2E Database Helper] Warning: Table "${tableName}" does not exist, skipping truncate.`,
+            );
+          } else {
+            console.error(
+              `[E2E Database Helper] Error truncating table "${tableName}":`,
+              error,
+            );
+          }
+        }
+      }
+    } finally {
+      // Reactivar foreign keys
+      await this.dataSource.query('SET session_replication_role = DEFAULT;');
+    }
+
+    console.log('[E2E Database Helper] Datos de usuario limpiados');
+  }
+
+  /**
    * Ejecuta los seeders en la base de datos E2E
    * @param seeders Array de funciones seeder a ejecutar
    */

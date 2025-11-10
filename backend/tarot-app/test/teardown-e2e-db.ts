@@ -10,11 +10,11 @@ export default async function globalTeardown() {
   const dbHelper = new E2EDatabaseHelper();
 
   try {
-    // NOTE: NO limpiar datos aquí porque los seeders se ejecutan en globalSetup
-    // y necesitamos que persistan durante toda la ejecución de tests
+    // Limpiar SOLO datos de usuario, mantener seeders base para la próxima ejecución
     console.log(
-      '[Global Teardown E2E] Manteniendo datos seeded para reutilización',
+      '[Global Teardown E2E] Limpiando datos de usuario, manteniendo seeders base...',
     );
+    await dbHelper.cleanUserData();
 
     // Nota: No cerramos el contenedor Docker aquí - eso se maneja manualmente
     // El contenedor puede quedar corriendo para acelerar siguientes ejecuciones
