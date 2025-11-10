@@ -1,6 +1,154 @@
-import { User, UserPlan, SubscriptionStatus } from './user.entity';
+import { User, UserPlan, SubscriptionStatus, UserRole } from './user.entity';
 
 describe('User Entity', () => {
+  describe('Role Helper Methods', () => {
+    describe('hasRole', () => {
+      it('should return true when user has the specified role', () => {
+        const user = new User();
+        user.roles = [UserRole.CONSUMER, UserRole.ADMIN];
+
+        expect(user.hasRole(UserRole.ADMIN)).toBe(true);
+      });
+
+      it('should return false when user does not have the specified role', () => {
+        const user = new User();
+        user.roles = [UserRole.CONSUMER];
+
+        expect(user.hasRole(UserRole.ADMIN)).toBe(false);
+      });
+
+      it('should return false when roles array is empty', () => {
+        const user = new User();
+        user.roles = [];
+
+        expect(user.hasRole(UserRole.CONSUMER)).toBe(false);
+      });
+    });
+
+    describe('hasAnyRole', () => {
+      it('should return true when user has at least one of the specified roles', () => {
+        const user = new User();
+        user.roles = [UserRole.CONSUMER, UserRole.TAROTIST];
+
+        expect(user.hasAnyRole(UserRole.TAROTIST, UserRole.ADMIN)).toBe(true);
+      });
+
+      it('should return false when user has none of the specified roles', () => {
+        const user = new User();
+        user.roles = [UserRole.CONSUMER];
+
+        expect(user.hasAnyRole(UserRole.TAROTIST, UserRole.ADMIN)).toBe(false);
+      });
+
+      it('should return false when roles array is empty', () => {
+        const user = new User();
+        user.roles = [];
+
+        expect(user.hasAnyRole(UserRole.CONSUMER, UserRole.ADMIN)).toBe(false);
+      });
+    });
+
+    describe('hasAllRoles', () => {
+      it('should return true when user has all specified roles', () => {
+        const user = new User();
+        user.roles = [UserRole.CONSUMER, UserRole.TAROTIST, UserRole.ADMIN];
+
+        expect(user.hasAllRoles(UserRole.CONSUMER, UserRole.TAROTIST)).toBe(
+          true,
+        );
+      });
+
+      it('should return false when user is missing at least one role', () => {
+        const user = new User();
+        user.roles = [UserRole.CONSUMER, UserRole.TAROTIST];
+
+        expect(user.hasAllRoles(UserRole.CONSUMER, UserRole.ADMIN)).toBe(false);
+      });
+
+      it('should return false when roles array is empty', () => {
+        const user = new User();
+        user.roles = [];
+
+        expect(user.hasAllRoles(UserRole.CONSUMER)).toBe(false);
+      });
+    });
+
+    describe('isConsumer', () => {
+      it('should return true when user has CONSUMER role', () => {
+        const user = new User();
+        user.roles = [UserRole.CONSUMER];
+
+        expect(user.isConsumer()).toBe(true);
+      });
+
+      it('should return false when user does not have CONSUMER role', () => {
+        const user = new User();
+        user.roles = [UserRole.ADMIN];
+
+        expect(user.isConsumer()).toBe(false);
+      });
+    });
+
+    describe('isTarotist', () => {
+      it('should return true when user has TAROTIST role', () => {
+        const user = new User();
+        user.roles = [UserRole.CONSUMER, UserRole.TAROTIST];
+
+        expect(user.isTarotist()).toBe(true);
+      });
+
+      it('should return false when user does not have TAROTIST role', () => {
+        const user = new User();
+        user.roles = [UserRole.CONSUMER];
+
+        expect(user.isTarotist()).toBe(false);
+      });
+    });
+
+    describe('isAdminRole', () => {
+      it('should return true when user has ADMIN role', () => {
+        const user = new User();
+        user.roles = [UserRole.CONSUMER, UserRole.ADMIN];
+
+        expect(user.isAdminRole()).toBe(true);
+      });
+
+      it('should return false when user does not have ADMIN role', () => {
+        const user = new User();
+        user.roles = [UserRole.CONSUMER];
+
+        expect(user.isAdminRole()).toBe(false);
+      });
+    });
+
+    describe('isAdminUser getter - Backward Compatibility', () => {
+      it('should return true when user has ADMIN role in roles array', () => {
+        const user = new User();
+        user.roles = [UserRole.CONSUMER, UserRole.ADMIN];
+        user.isAdmin = true;
+
+        expect(user.isAdminUser).toBe(true);
+      });
+
+      it('should return false when user does not have ADMIN role', () => {
+        const user = new User();
+        user.roles = [UserRole.CONSUMER];
+        user.isAdmin = false;
+
+        expect(user.isAdminUser).toBe(false);
+      });
+
+      it('should sync with isAdmin field for backward compatibility', () => {
+        const user = new User();
+        user.roles = [UserRole.CONSUMER, UserRole.ADMIN];
+        user.isAdmin = true;
+
+        expect(user.isAdminUser).toBe(true);
+        expect(user.isAdmin).toBe(true);
+      });
+    });
+  });
+
   describe('isPremium', () => {
     it('should return true for active premium user', () => {
       const user = new User();
