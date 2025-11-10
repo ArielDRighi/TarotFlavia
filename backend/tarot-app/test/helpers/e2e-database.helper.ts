@@ -108,6 +108,55 @@ export class E2EDatabaseHelper {
   }
 
   /**
+   * Limpia solo las tablas de datos de usuario, preservando los seeders base
+   * Útil para tests que necesitan limpiar datos entre tests pero mantener categorías, cartas, etc.
+   */
+  async cleanUserData(): Promise<void> {
+    await this.initialize();
+    console.log('[E2E Database Helper] Limpiando datos de usuario...');
+
+    // Tablas a limpiar (datos de usuario, NO seeders base)
+    const userTables = [
+      'tarot_reading',
+      'tarot_interpretation',
+      'user',
+      'tarotistas',
+      'tarotista_config',
+      'tarotista_card_meanings',
+      'tarotista_reviews',
+      'tarotista_revenue_metrics',
+      'user_tarotista_subscriptions',
+      'password_reset_tokens',
+      'refresh_tokens',
+      'ai_usage_logs',
+      'cached_interpretations',
+      'usage_limit',
+    ];
+
+    // Desactivar foreign keys temporalmente
+    await this.dataSource.query('SET session_replication_role = replica;');
+
+    // Truncar solo las tablas de usuario
+    for (const tableName of userTables) {
+      try {
+        await this.dataSource.query(
+          `TRUNCATE TABLE "${tableName}" RESTART IDENTITY CASCADE;`,
+        );
+      } catch {
+        // Ignorar si la tabla no existe
+        console.warn(
+          `[E2E Database Helper] Warning: Could not truncate table ${tableName}`,
+        );
+      }
+    }
+
+    // Reactivar foreign keys
+    await this.dataSource.query('SET session_replication_role = DEFAULT;');
+
+    console.log('[E2E Database Helper] Datos de usuario limpiados');
+  }
+
+  /**
    * Ejecuta los seeders en la base de datos E2E
    * @param seeders Array de funciones seeder a ejecutar
    */

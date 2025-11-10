@@ -31,19 +31,20 @@ describe('Input Validation and Security (E2E)', () => {
 
     dbHelper = new E2EDatabaseHelper();
     await dbHelper.initialize();
-    await dbHelper.cleanDatabase();
+    await dbHelper.cleanUserData(); // Solo limpiar datos de usuario, no los seeders base
   });
 
   afterAll(async () => {
-    await dbHelper.cleanDatabase();
+    await dbHelper.cleanUserData(); // Solo limpiar datos de usuario
+    await dbHelper.close();
     await app.close();
   });
 
   beforeEach(async () => {
-    await dbHelper.cleanDatabase();
+    await dbHelper.cleanUserData(); // Solo limpiar datos de usuario entre tests
     // Add significant delay to avoid rate limiting between tests
     await delay(1000);
-  });
+  }, 15000); // Aumentar timeout a 15s para operaciones de limpieza de DB
 
   describe('SQL Injection Protection', () => {
     it('should reject SQL injection attempts in email field', async () => {
