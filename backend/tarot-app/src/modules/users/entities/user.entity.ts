@@ -8,6 +8,10 @@ import {
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { TarotReading } from '../../tarot/readings/entities/tarot-reading.entity';
+import { UserRole } from '../../../common/enums/user-role.enum';
+
+// Re-export UserRole for backward compatibility
+export { UserRole };
 
 export enum UserPlan {
   FREE = 'free',
@@ -18,12 +22,6 @@ export enum SubscriptionStatus {
   ACTIVE = 'active',
   CANCELLED = 'cancelled',
   EXPIRED = 'expired',
-}
-
-export enum UserRole {
-  CONSUMER = 'consumer',
-  TAROTIST = 'tarotist',
-  ADMIN = 'admin',
 }
 
 /**
@@ -170,5 +168,64 @@ export class User {
       return false;
     }
     return new Date() > new Date(this.planExpiresAt);
+  }
+
+  /**
+   * Verifica si el usuario tiene un rol específico
+   * @param role - El rol a verificar
+   * @returns true si el usuario tiene el rol especificado
+   */
+  hasRole(role: UserRole): boolean {
+    return this.roles.includes(role);
+  }
+
+  /**
+   * Verifica si el usuario tiene al menos uno de los roles especificados
+   * @param roles - Lista de roles a verificar (lógica OR)
+   * @returns true si el usuario tiene al menos uno de los roles
+   */
+  hasAnyRole(...roles: UserRole[]): boolean {
+    return roles.some((role) => this.roles.includes(role));
+  }
+
+  /**
+   * Verifica si el usuario tiene todos los roles especificados
+   * @param roles - Lista de roles a verificar (lógica AND)
+   * @returns true si el usuario tiene todos los roles
+   */
+  hasAllRoles(...roles: UserRole[]): boolean {
+    return roles.every((role) => this.roles.includes(role));
+  }
+
+  /**
+   * Verifica si el usuario tiene el rol CONSUMER
+   * @returns true si el usuario es consumidor
+   */
+  isConsumer(): boolean {
+    return this.hasRole(UserRole.CONSUMER);
+  }
+
+  /**
+   * Verifica si el usuario tiene el rol TAROTIST
+   * @returns true si el usuario es tarotista
+   */
+  isTarotist(): boolean {
+    return this.hasRole(UserRole.TAROTIST);
+  }
+
+  /**
+   * Verifica si el usuario tiene el rol ADMIN (método)
+   * @returns true si el usuario es administrador
+   */
+  isAdminRole(): boolean {
+    return this.hasRole(UserRole.ADMIN);
+  }
+
+  /**
+   * Getter para backward compatibility con isAdmin boolean
+   * @returns true si el usuario tiene rol ADMIN en el array roles
+   */
+  get isAdminUser(): boolean {
+    return this.hasRole(UserRole.ADMIN);
   }
 }
