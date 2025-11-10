@@ -11,8 +11,10 @@ import { TarotCard } from '../cards/entities/tarot-card.entity';
 import { TarotInterpretation } from './entities/tarot-interpretation.entity';
 import { TarotSpread } from '../spreads/entities/tarot-spread.entity';
 import { TarotReading } from '../readings/entities/tarot-reading.entity';
+import { Tarotista } from '../../tarotistas/entities/tarotista.entity';
 import { AIProviderService } from './ai-provider.service';
 import { InterpretationCacheService } from './interpretation-cache.service';
+import { PromptBuilderService } from './prompt-builder.service';
 import { TarotPrompts } from './tarot-prompts';
 
 interface InterpretationResult {
@@ -26,18 +28,45 @@ export class InterpretationsService {
   private readonly logger = new Logger(InterpretationsService.name);
   private cacheHits = 0;
   private totalRequests = 0;
+  private defaultTarotistaId: number | null = null;
 
   constructor(
     @InjectRepository(TarotInterpretation)
     private interpretationRepository: Repository<TarotInterpretation>,
+    @InjectRepository(Tarotista)
+    private tarotistaRepository: Repository<Tarotista>,
     private httpService: HttpService,
     private configService: ConfigService,
     private aiProviderService: AIProviderService,
     private cacheService: InterpretationCacheService,
+    private promptBuilder: PromptBuilderService,
   ) {
     this.logger.log(
-      'InterpretationsService initialized with AI Provider and Cache',
+      'InterpretationsService initialized with AI Provider, Cache, and PromptBuilder',
     );
+  }
+
+  /**
+   * Get default tarotista (Flavia) ID
+   * Caches the result to avoid repeated DB queries
+   */
+  private async getDefaultTarotista(): Promise<number> {
+    if (this.defaultTarotistaId) {
+      return this.defaultTarotistaId;
+    }
+
+    const flavia = await this.tarotistaRepository.findOne({
+      where: { nombrePublico: 'Flavia' },
+    });
+
+    if (!flavia) {
+      this.logger.error('Default tarotista (Flavia) not found in database');
+      // Fallback to ID 1 assuming it's Flavia
+      return 1;
+    }
+
+    this.defaultTarotistaId = flavia.id;
+    return flavia.id;
   }
 
   async generateInterpretation(
@@ -48,31 +77,17 @@ export class InterpretationsService {
     category?: string,
     userId?: number,
     readingId?: number,
+    tarotistaId?: number, // ← NUEVO parámetro opcional para backward compatibility
   ): Promise<InterpretationResult> {
     const startTime = Date.now();
     this.totalRequests++;
 
-    // Preparar información de las cartas con posiciones en el formato requerido
-    const cardDetails = cards.map((card) => {
-      const position = positions.find((p) => p.cardId === card.id);
-      const positionName = position?.position || 'Posición no especificada';
+    // Determinar tarotistaId: usar el proporcionado o el default (Flavia)
+    const finalTarotistaId = tarotistaId || (await this.getDefaultTarotista());
 
-      // Buscar la descripción de la posición en el spread
-      const positionInfo = spread?.positions?.find(
-        (p) => p.name === positionName,
-      );
-
-      return {
-        cardName: card.name,
-        positionName: positionName,
-        positionDescription:
-          positionInfo?.description || 'Sin descripción de posición',
-        isReversed: position?.isReversed || false,
-        meaningUpright: card.meaningUpright,
-        meaningReversed: card.meaningReversed,
-        keywords: card.keywords,
-      };
-    });
+    this.logger.log(
+      `Generating interpretation with tarotista ID: ${finalTarotistaId}`,
+    );
 
     // Generar cache key para buscar interpretación cacheada
     const questionText =
@@ -90,10 +105,12 @@ export class InterpretationsService {
         positions.find((p) => p.cardId === card.id)?.isReversed || false,
     }));
 
-    const cacheKey = this.cacheService.generateCacheKey(
+    // Cache key ahora incluye tarotistaId
+    const cacheKey = this.buildCacheKey(
       cardCombination,
       spread?.id?.toString() || null,
       questionHash,
+      finalTarotistaId,
     );
 
     // Buscar en caché
@@ -103,7 +120,7 @@ export class InterpretationsService {
       const cacheHitRate = (this.cacheHits / this.totalRequests) * 100;
 
       this.logger.log(
-        `Cache HIT! Returning cached interpretation. Hit rate: ${cacheHitRate.toFixed(2)}%`,
+        `Cache HIT! Returning cached interpretation for tarotista ${finalTarotistaId}. Hit rate: ${cacheHitRate.toFixed(2)}%`,
       );
 
       return {
@@ -113,20 +130,28 @@ export class InterpretationsService {
       };
     }
 
-    this.logger.log('Cache MISS. Generating new interpretation with AI...');
+    this.logger.log(
+      `Cache MISS for tarotista ${finalTarotistaId}. Generating new interpretation with AI...`,
+    );
 
-    // Usar los prompts optimizados para Llama
-    const systemPrompt = TarotPrompts.getSystemPrompt();
-    const userPrompt = TarotPrompts.buildUserPrompt({
-      question: question || 'Pregunta general sobre la situación actual',
-      category: category || 'General',
-      spreadName: spread?.name || 'Tirada libre',
-      spreadDescription: spread?.description || 'Tirada personalizada',
-      cards: cardDetails,
-    });
+    // Preparar cartas para PromptBuilder
+    const selectedCards = positions.map((pos) => ({
+      cardId: pos.cardId,
+      position: pos.position,
+      isReversed: pos.isReversed,
+    }));
 
     try {
-      this.logger.log('Generating interpretation with AI Provider');
+      this.logger.log('Generating interpretation with PromptBuilder');
+
+      // Usar PromptBuilder para generar prompts dinámicos
+      const { systemPrompt, userPrompt } =
+        await this.promptBuilder.buildInterpretationPrompt(
+          finalTarotistaId,
+          selectedCards,
+          questionText,
+          categoryName,
+        );
 
       // Intentar generar con el sistema de providers con fallback automático
       const response = await this.aiProviderService.generateCompletion(
@@ -142,7 +167,7 @@ export class InterpretationsService {
       const duration = Date.now() - startTime;
 
       this.logger.log(
-        `Interpretation generated successfully with ${response.provider} in ${duration}ms (${response.tokensUsed.total} tokens)`,
+        `Interpretation generated successfully with ${response.provider} in ${duration}ms (${response.tokensUsed.total} tokens) for tarotista ${finalTarotistaId}`,
       );
 
       // Guardar la interpretación con metadata del provider usado
@@ -153,6 +178,7 @@ export class InterpretationsService {
         duration,
         spread: spread?.name,
         cardCount: cards.length,
+        tarotistaId: finalTarotistaId,
       });
 
       // Guardar en caché para futuras consultas
@@ -162,11 +188,12 @@ export class InterpretationsService {
         cardCombination,
         questionHash,
         interpretation,
+        finalTarotistaId,
       );
 
       const cacheHitRate = (this.cacheHits / this.totalRequests) * 100;
       this.logger.log(
-        `Interpretation cached. Current hit rate: ${cacheHitRate.toFixed(2)}%`,
+        `Interpretation cached for tarotista ${finalTarotistaId}. Current hit rate: ${cacheHitRate.toFixed(2)}%`,
       );
 
       return {
@@ -175,7 +202,10 @@ export class InterpretationsService {
         cacheHitRate,
       };
     } catch (error) {
-      this.logger.error('All AI providers failed, using fallback', error);
+      this.logger.error(
+        `All AI providers failed for tarotista ${finalTarotistaId}, using fallback`,
+        error,
+      );
 
       // Si todos los providers fallan, retornar interpretación de fallback
       const fallbackCards = cards.map((card) => ({
@@ -191,6 +221,7 @@ export class InterpretationsService {
         provider: 'fallback',
         error: error instanceof Error ? error.message : 'Unknown error',
         cardCount: cards.length,
+        tarotistaId: finalTarotistaId,
       });
 
       const cacheHitRate = (this.cacheHits / this.totalRequests) * 100;
@@ -201,6 +232,29 @@ export class InterpretationsService {
         cacheHitRate,
       };
     }
+  }
+
+  /**
+   * Build cache key including tarotistaId for separation
+   */
+  private buildCacheKey(
+    cardCombination: {
+      card_id: string;
+      position: number;
+      is_reversed: boolean;
+    }[],
+    spreadId: string | null,
+    questionHash: string,
+    tarotistaId: number,
+  ): string {
+    const baseCacheKey = this.cacheService.generateCacheKey(
+      cardCombination,
+      spreadId,
+      questionHash,
+    );
+
+    // Incluir tarotistaId en el cache key para separación
+    return `t${tarotistaId}:${baseCacheKey}`;
   }
 
   private async saveInterpretation(

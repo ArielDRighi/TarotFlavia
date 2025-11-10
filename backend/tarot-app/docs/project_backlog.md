@@ -6838,23 +6838,44 @@ describe('CardMeaningService', () => {
 **Prioridad:** 🔴 CRÍTICA  
 **Estimación:** 5 días  
 **Dependencias:** TASK-064, TASK-065, TASK-066, TASK-018, TASK-061  
-**Estado:** 🔵 PENDIENTE  
+**Estado:** ✅ COMPLETADO  
+**Branch:** `feature/TASK-067-prompt-builder-refactor`  
 **Marcador MVP:** ⭐⭐⭐ **CRÍTICO PARA MARKETPLACE** - Núcleo del diferenciador de negocio  
 **Tags:** mvp, marketplace, ai-personalization, refactoring, core-logic
 
-#### 📋 Descripción
+#### 📋 Resumen de Implementación
 
-Refactorizar completamente `InterpretationsService` para generar interpretaciones personalizadas por tarotista. Este es el cambio más crítico del marketplace: pasar de prompts estáticos hardcodeados a configuración dinámica por tarotista cargada desde base de datos.
+Refactorización completa de `InterpretationsService` para generar interpretaciones personalizadas por tarotista. Sistema ahora soporta prompts dinámicos cargados desde BD en lugar de hardcodeados.
 
-**Contexto del Informe:** Esta tarea implementa la Sección 6.2 "Cambios en Lógica de Aplicación" del informe:
+**Implementado:**
 
-- Abstraer Configuración de Prompts
-- Servicio de Construcción de Prompts
-- Inyectar Contexto en Servicios
+- ✅ `PromptBuilderService` - Construcción dinámica de prompts por tarotista
+- ✅ `InterpretationsService` refactorizado - Recibe y usa `tarotistaId`
+- ✅ `ReadingsService` actualizado - Asigna tarotista a lecturas
+- ✅ Cache separado por tarotista - Keys incluyen `tarotistaId`
+- ✅ Backward compatibility - Funciona sin romper código existente
+- ✅ Sistema de fallbacks - Config Flavia por defecto
+- ✅ Herencia de significados - Custom > Base
 
-**Cambio Fundamental:** De `TarotPrompts` estático → `PromptBuilderService` dinámico que recibe `tarotistaId` y carga configuración desde BD.
+**Archivos modificados:**
 
-#### 🧪 Testing
+- `src/modules/tarot/interpretations/prompt-builder.service.ts` (NUEVO)
+- `src/modules/tarot/interpretations/prompt-builder.service.spec.ts` (NUEVO)
+- `src/modules/tarot/interpretations/interpretations.service.ts`
+- `src/modules/tarot/interpretations/interpretations.service.spec.ts`
+- `src/modules/tarot/interpretations/interpretations.module.ts`
+- `src/modules/tarot/interpretations/interpretation-cache.service.ts`
+- `src/modules/tarot/interpretations/entities/cached-interpretation.entity.ts`
+- `src/modules/tarot/readings/readings.service.ts`
+
+**Testing:**
+
+- ✅ 15 tests unitarios PromptBuilderService (todos pasan)
+- ✅ 667 tests unitarios totales (todos pasan)
+- ✅ Tests E2E críticos: mvp-complete, readings-hybrid, reading-regeneration (todos pasan)
+- ✅ Backward compatibility validada
+
+#### 🧪 Testing Original
 
 **Tests necesarios:**
 

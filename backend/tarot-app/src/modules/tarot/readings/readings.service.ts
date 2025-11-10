@@ -34,6 +34,7 @@ const REGENERATION_AI_CONFIG = {
 @Injectable()
 export class ReadingsService {
   private readonly logger = new Logger(ReadingsService.name);
+  private defaultTarotistaId: number | null = null;
 
   constructor(
     @InjectRepository(TarotReading)
@@ -57,12 +58,16 @@ export class ReadingsService {
       ? ('predefined' as const)
       : ('custom' as const);
 
+    // Determinar qué tarotista usar (por ahora siempre Flavia)
+    const tarotistaId = this.getDefaultTarotista();
+
     // Crear la lectura primero sin interpretación
     const reading = this.readingsRepository.create({
       predefinedQuestionId: createReadingDto.predefinedQuestionId || null,
       customQuestion: createReadingDto.customQuestion || null,
       questionType,
       user,
+      tarotistaId, // ← NUEVO: Asignar tarotista a la lectura
       deck: { id: createReadingDto.deckId } as Pick<TarotDeck, 'id'>,
       cardPositions: createReadingDto.cardPositions,
       interpretation: null,
@@ -75,7 +80,7 @@ export class ReadingsService {
     if (createReadingDto.generateInterpretation) {
       try {
         this.logger.log(
-          `Generating interpretation for reading ${savedReading.id}`,
+          `Generating interpretation for reading ${savedReading.id} with tarotista ${tarotistaId}`,
         );
 
         // Obtener las cartas
@@ -98,7 +103,7 @@ export class ReadingsService {
           question = predefinedQuestion.questionText;
         }
 
-        // Generar interpretación con IA
+        // Generar interpretación con IA (ahora incluye tarotistaId)
         const result = await this.interpretationsService.generateInterpretation(
           cards,
           createReadingDto.cardPositions,
@@ -107,6 +112,7 @@ export class ReadingsService {
           undefined, // category - puede agregarse después
           user.id,
           savedReading.id,
+          tarotistaId, // ← NUEVO: Pasar tarotistaId
         );
 
         // Actualizar la lectura con la interpretación
@@ -136,6 +142,16 @@ export class ReadingsService {
     }
 
     return savedReading;
+  }
+
+  /**
+   * Get default tarotista (Flavia) ID
+   * TODO: En futuro, este método será reemplazado por lógica de suscripciones
+   */
+  private getDefaultTarotista(): number {
+    // Por ahora retornar 1 (Flavia hardcoded)
+    // En futuro: consultar UserTarotistaSubscription
+    return 1;
   }
 
   async findAll(
@@ -469,6 +485,9 @@ export class ReadingsService {
       `Regenerating interpretation for reading ${id} (regeneration #${reading.regenerationCount + 1})`,
     );
 
+    // Determinar tarotista a usar (usar el de la lectura original o default)
+    const tarotistaId = reading.tarotistaId || this.getDefaultTarotista();
+
     // Modificar la pregunta para solicitar perspectiva alternativa
     const regenerationQuestion = question
       ? `${question} [REGENERACIÓN: Proporciona una perspectiva alternativa y diferente a interpretaciones anteriores]`
@@ -483,6 +502,7 @@ export class ReadingsService {
       undefined,
       userId,
       reading.id,
+      tarotistaId, // ← NUEVO: Pasar tarotistaId
     );
 
     // Crear nueva entrada de interpretación

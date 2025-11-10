@@ -7,6 +7,8 @@ import {
 } from 'typeorm';
 
 @Entity('cached_interpretations')
+@Index(['tarotista_id', 'spread_id', 'question_hash'])
+@Index(['tarotista_id', 'created_at'])
 export class CachedInterpretation {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -16,6 +18,7 @@ export class CachedInterpretation {
   cache_key: string;
 
   @Column({ type: 'int', nullable: true })
+  @Index()
   tarotista_id: number | null;
 
   @Column({ type: 'int', nullable: true })
