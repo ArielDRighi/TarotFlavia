@@ -27,6 +27,7 @@
     "migration:run": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:run -d src/config/data-source.ts",
     "migration:revert": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:revert -d src/config/data-source.ts",
     "migration:show": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:show -d src/config/data-source.ts",
+    "migrate:historical-data": "ts-node -r tsconfig-paths/register run-migration.ts",
     "db:dev:clean": "bash scripts/db-dev-clean.sh",
     "db:dev:reset": "bash scripts/db-dev-reset.sh",
     "db:dev:clean:win": "powershell -ExecutionPolicy Bypass -File scripts/db-dev-clean.ps1",

@@ -6135,13 +6135,14 @@ eslint.config.mjs (updated - disabled unbound-method for test files)
 
 ---
 
-### � TASK-065-a: Migración de Datos Históricos al Modelo Multi-Tarotista ⭐⭐
+### ✅ TASK-065-a: Migración de Datos Históricos al Modelo Multi-Tarotista ⭐⭐
 
 **Prioridad:** 🟡 NECESARIA  
 **Estimación:** 1 día  
 **Tags:** marketplace, data-migration, database, backward-compatibility  
 **Dependencias:** TASK-065 (Migración Flavia)  
-**Estado:** 🟡 NO INICIADA  
+**Estado:** ✅ COMPLETADA  
+**Fecha Completada:** 2025-11-09  
 **Contexto:** Migración de datos existentes para compatibilidad con nuevo esquema multi-tarotista
 
 ---
@@ -6185,12 +6186,58 @@ Migrar todos los datos históricos existentes que no tienen `tarotistaId` o que 
 - ✅ Tests de regresión pasan
 - ✅ Rollback disponible en caso de error
 
+#### **Implementación Completada:**
+
+**Archivos Creados:**
+
+1. **migrate-historical-data.ts** - Clase principal de migración con todas las funciones:
+
+   - `migrateReadingsToFlavia()` - Migra lecturas sin tarotista a Flavia
+   - `migrateCacheKeys(tarotistaId)` - Agrega prefijo de tarotista a cache keys
+   - `migrateAdminRoles()` - Migra isAdmin a sistema de roles
+   - `validateDataIntegrity()` - Valida integridad de datos
+   - `rollbackReadingsMigration()` - Rollback de migración de lecturas
+   - `rollbackCacheMigration()` - Rollback de migración de cache
+   - `rollbackAdminRolesMigration()` - Rollback de migración de roles
+   - `runAll()` - Ejecuta todas las migraciones
+   - `rollbackAll()` - Rollback de todas las migraciones
+
+2. **run-migration.ts** - CLI ejecutable para correr migraciones
+
+3. **test/historical-data-migration.e2e-spec.ts** - Tests E2E completos
+
+**Scripts en package.json:**
+
+```json
+"migrate:historical-data": "ts-node -r tsconfig-paths/register run-migration.ts"
+```
+
+**Uso:**
+
+```bash
+# Ejecutar todas las migraciones
+npm run migrate:historical-data migrate
+
+# Validar integridad de datos
+npm run migrate:historical-data validate
+
+# Rollback de todas las migraciones
+npm run migrate:historical-data rollback
+
+# Migrar solo lecturas / cache / roles
+npm run migrate:historical-data migrate:readings
+npm run migrate:historical-data migrate:cache
+npm run migrate:historical-data migrate:roles
+```
+
 #### **Notas Técnicas:**
 
-- Ejecutar en ambiente staging primero
-- Backup de BD antes de migración
-- Monitorear logs durante migración
-- Plan de contingencia si falla
+- ✅ Ejecutar en ambiente staging primero
+- ✅ Backup de BD antes de migración
+- ✅ Monitorear logs durante migración
+- ✅ Plan de contingencia si falla (rollback implementado)
+- ✅ Validación de integridad automática
+- ✅ Logs detallados de cada paso
 
 ---
 
