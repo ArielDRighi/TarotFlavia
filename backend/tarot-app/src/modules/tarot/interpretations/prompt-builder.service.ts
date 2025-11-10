@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { TarotistaConfig } from '../../tarotistas/entities/tarotista-config.entity';
 import { TarotCard } from '../cards/entities/tarot-card.entity';
 import { TarotistaCardMeaning } from '../../tarotistas/entities/tarotista-card-meaning.entity';
@@ -163,6 +163,7 @@ export class PromptBuilderService {
   /**
    * Build complete interpretation prompt for a tarotista
    * Loads tarotista config, gets card meanings (custom or base), and constructs prompts
+   * Optimized to avoid N+1 queries by batching all database calls
    * @param tarotistaId - ID of the tarotista
    * @param cards - Array of selected cards with positions
    * @param question - User's question
@@ -178,28 +179,81 @@ export class PromptBuilderService {
     // Load tarotista configuration
     const config = await this.getActiveConfig(tarotistaId);
 
+    // Batch-fetch all card entities to avoid N+1 queries
+    const cardIds = cards.map((card) => card.cardId);
+    const cardEntities = await this.tarotCardRepo.find({
+      where: { id: In(cardIds) },
+    });
+
+    // Create a map for O(1) lookup: cardId -> TarotCard
+    const cardEntityMap = new Map(cardEntities.map((card) => [card.id, card]));
+
+    // Batch-fetch all custom meanings for this tarotista and these cards
+    const customMeanings = await this.tarotistaCardMeaningRepo.find({
+      where: {
+        tarotistaId,
+        cardId: In(cardIds),
+      },
+    });
+
+    // Create a map for O(1) lookup: cardId -> TarotistaCardMeaning
+    const customMeaningMap = new Map(
+      customMeanings.map((meaning) => [meaning.cardId, meaning]),
+    );
+
     // Build user prompt with card meanings
     let userPrompt = `# CONTEXTO DE LA LECTURA\n\n`;
     userPrompt += `**Pregunta del Consultante**: "${question}"\n`;
     userPrompt += `**Categoría**: ${category}\n\n`;
     userPrompt += `# CARTAS EN LA LECTURA\n\n`;
 
-    // Get meanings for each card
+    // Process each card using pre-fetched data
     for (let i = 0; i < cards.length; i++) {
       const card = cards[i];
-      const cardEntity = await this.tarotCardRepo.findOne({
-        where: { id: card.cardId },
-      });
+      const cardEntity = cardEntityMap.get(card.cardId);
 
       if (!cardEntity) {
         throw new NotFoundException(`Card with ID ${card.cardId} not found`);
       }
 
-      const cardMeaning = await this.getCardMeaning(
-        tarotistaId,
-        card.cardId,
-        card.isReversed,
-      );
+      // Get meaning: prefer custom, fallback to base
+      const customMeaning = customMeaningMap.get(card.cardId);
+      let cardMeaning: CardMeaning;
+
+      if (customMeaning) {
+        const meaning = card.isReversed
+          ? customMeaning.customMeaningReversed
+          : customMeaning.customMeaningUpright;
+
+        // If custom meaning exists for this orientation
+        if (meaning) {
+          cardMeaning = {
+            meaning,
+            keywords: customMeaning.customKeywords
+              ? customMeaning.customKeywords.split(',').map((k) => k.trim())
+              : [],
+            isCustom: true,
+          };
+        } else {
+          // Custom meaning exists but not for this orientation, use base
+          cardMeaning = {
+            meaning: card.isReversed
+              ? cardEntity.meaningReversed
+              : cardEntity.meaningUpright,
+            keywords: cardEntity.keywords.split(',').map((k) => k.trim()),
+            isCustom: false,
+          };
+        }
+      } else {
+        // No custom meaning, use base card meaning
+        cardMeaning = {
+          meaning: card.isReversed
+            ? cardEntity.meaningReversed
+            : cardEntity.meaningUpright,
+          keywords: cardEntity.keywords.split(',').map((k) => k.trim()),
+          isCustom: false,
+        };
+      }
 
       const orientation = card.isReversed ? 'Invertida ↓' : 'Derecha ↑';
 

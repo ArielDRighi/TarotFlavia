@@ -93,12 +93,14 @@ describe('PromptBuilderService', () => {
           provide: getRepositoryToken(TarotCard),
           useValue: {
             findOne: jest.fn(),
+            find: jest.fn(), // ← Agregar para batching
           },
         },
         {
           provide: getRepositoryToken(TarotistaCardMeaning),
           useValue: {
             findOne: jest.fn(),
+            find: jest.fn(), // ← Agregar para batching
           },
         },
         {
@@ -264,10 +266,12 @@ describe('PromptBuilderService', () => {
 
     it('should build complete prompt with tarotista config', async () => {
       jest.spyOn(tarotistaConfigRepo, 'findOne').mockResolvedValue(mockConfig);
+      // Mock batch fetch of cards
+      jest.spyOn(tarotCardRepo, 'find').mockResolvedValue([mockCard]);
+      // Mock batch fetch of custom meanings
       jest
-        .spyOn(tarotistaCardMeaningRepo, 'findOne')
-        .mockResolvedValue(mockCustomMeaning);
-      jest.spyOn(tarotCardRepo, 'findOne').mockResolvedValue(mockCard);
+        .spyOn(tarotistaCardMeaningRepo, 'find')
+        .mockResolvedValue([mockCustomMeaning]);
 
       const result = await service.buildInterpretationPrompt(
         1,
@@ -296,8 +300,9 @@ describe('PromptBuilderService', () => {
 
     it('should use base meanings when no custom meanings exist', async () => {
       jest.spyOn(tarotistaConfigRepo, 'findOne').mockResolvedValue(mockConfig);
-      jest.spyOn(tarotistaCardMeaningRepo, 'findOne').mockResolvedValue(null);
-      jest.spyOn(tarotCardRepo, 'findOne').mockResolvedValue(mockCard);
+      // Mock batch fetch - no custom meanings
+      jest.spyOn(tarotCardRepo, 'find').mockResolvedValue([mockCard]);
+      jest.spyOn(tarotistaCardMeaningRepo, 'find').mockResolvedValue([]);
 
       const result = await service.buildInterpretationPrompt(
         1,
@@ -319,10 +324,11 @@ describe('PromptBuilderService', () => {
       ];
 
       jest.spyOn(tarotistaConfigRepo, 'findOne').mockResolvedValue(mockConfig);
+      // Mock batch fetch with custom meanings
+      jest.spyOn(tarotCardRepo, 'find').mockResolvedValue([mockCard]);
       jest
-        .spyOn(tarotistaCardMeaningRepo, 'findOne')
-        .mockResolvedValue(mockCustomMeaning);
-      jest.spyOn(tarotCardRepo, 'findOne').mockResolvedValue(mockCard);
+        .spyOn(tarotistaCardMeaningRepo, 'find')
+        .mockResolvedValue([mockCustomMeaning]);
 
       const result = await service.buildInterpretationPrompt(
         1,
@@ -344,8 +350,9 @@ describe('PromptBuilderService', () => {
       ];
 
       jest.spyOn(tarotistaConfigRepo, 'findOne').mockResolvedValue(mockConfig);
-      jest.spyOn(tarotistaCardMeaningRepo, 'findOne').mockResolvedValue(null);
-      jest.spyOn(tarotCardRepo, 'findOne').mockResolvedValue(mockCard);
+      // Mock batch fetch - find returns array with same card 3 times
+      jest.spyOn(tarotCardRepo, 'find').mockResolvedValue([mockCard]);
+      jest.spyOn(tarotistaCardMeaningRepo, 'find').mockResolvedValue([]);
 
       const result = await service.buildInterpretationPrompt(
         1,

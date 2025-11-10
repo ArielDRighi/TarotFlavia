@@ -31,6 +31,15 @@ const REGENERATION_AI_CONFIG = {
   isRegeneration: true,
 } as const;
 
+/**
+ * ID del tarotista por defecto (Flavia)
+ * IMPORTANTE: Este valor asume que Flavia siempre tiene ID 1 en la base de datos.
+ * Si el seeding cambia, este valor debe actualizarse.
+ * TODO: Cuando se implemente el sistema de suscripciones multi-tarotista,
+ * reemplazar este hardcoded value por una consulta a UserTarotistaSubscription
+ */
+const DEFAULT_TAROTISTA_ID = 1;
+
 @Injectable()
 export class ReadingsService {
   private readonly logger = new Logger(ReadingsService.name);
@@ -146,12 +155,10 @@ export class ReadingsService {
 
   /**
    * Get default tarotista (Flavia) ID
-   * TODO: En futuro, este método será reemplazado por lógica de suscripciones
+   * Returns the constant DEFAULT_TAROTISTA_ID which assumes Flavia always has ID 1
    */
   private getDefaultTarotista(): number {
-    // Por ahora retornar 1 (Flavia hardcoded)
-    // En futuro: consultar UserTarotistaSubscription
-    return 1;
+    return DEFAULT_TAROTISTA_ID;
   }
 
   async findAll(

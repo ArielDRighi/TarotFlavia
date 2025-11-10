@@ -49,6 +49,29 @@ export class InterpretationsService {
   /**
    * Get default tarotista (Flavia) ID
    * Caches the result to avoid repeated DB queries
+   *
+   * IMPORTANT: This method implements graceful degradation with a fallback to ID 1.
+   * The fallback strategy is intentional for the following reasons:
+   *
+   * 1. **Availability over Failure**: If Flavia doesn't exist in the DB (e.g., seed issue,
+   *    DB migration problem), throwing an exception would crash ALL interpretation requests
+   *    across the entire application. The fallback allows the app to continue functioning.
+   *
+   * 2. **Production Resilience**: In production, a missing tarotista is a configuration issue
+   *    that should be monitored and fixed, but shouldn't cause a total service outage.
+   *    This follows the principle of "degrade gracefully" rather than "fail catastrophically".
+   *
+   * 3. **Default Assumption**: ID 1 is a reasonable fallback because:
+   *    - Our seed data consistently assigns Flavia as ID 1
+   *    - Even if another tarotista has ID 1, it's better to use their config than crash
+   *    - Monitoring logs will alert us to the issue via the error log above
+   *
+   * Alternative (throwing exception) would require:
+   * - Perfect DB consistency at all times (unrealistic in production)
+   * - Would convert a data issue into an availability issue
+   * - Would require additional error handling in ALL calling code
+   *
+   * If you need to change this behavior, consider the production implications carefully.
    */
   private async getDefaultTarotista(): Promise<number> {
     if (this.defaultTarotistaId) {
@@ -60,8 +83,11 @@ export class InterpretationsService {
     });
 
     if (!flavia) {
-      this.logger.error('Default tarotista (Flavia) not found in database');
-      // Fallback to ID 1 assuming it's Flavia
+      this.logger.error(
+        'Default tarotista (Flavia) not found in database. Using fallback ID 1. ' +
+          'This indicates a seed data or migration issue that should be investigated.',
+      );
+      // Intentional fallback for graceful degradation (see method documentation)
       return 1;
     }
 
