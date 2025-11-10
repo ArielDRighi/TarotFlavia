@@ -6247,8 +6247,25 @@ npm run migrate:historical-data migrate:roles
 **Estimación:** 2.5 días  
 **Tags:** mvp, marketplace, tarot-core, personalization, database  
 **Dependencias:** TASK-064 (Multi-Tarotist Schema), TASK-065 (Migración Flavia)  
-**Estado:** 🟡 NO INICIADA  
-**Contexto Informe:** Sección 6.1 - Preparar Personalización de Cartas
+**Estado:** ✅ COMPLETADA  
+**Branch:** `feature/TASK-066-card-meanings-personalization`  
+**Commits:**
+
+- `6cb0f5c` - Initial implementation
+- `3348e35` - Fix CI compatibility (--runInBand)
+- `357d575` - Update backlog
+- `3c471c3` - PR feedback fixes (validation, error messages, cache)
+  **Coverage:** 93.93% (30 unit tests, 652 total)  
+  **Contexto Informe:** Sección 6.1 - Preparar Personalización de Cartas
+
+**Notas de Implementación:**
+
+- ✅ Sistema de cache in-memory con TTL 15 minutos
+- ✅ Validación de meaning vacío
+- ✅ Mensajes de error estandarizados
+- ✅ Cache invalidation para ambas orientaciones (keywords compartidos)
+- 📋 **Defer a Fase 2:** Distributed cache (Redis) - solo necesario para horizontal scaling (> 1 instancia)
+- 📋 **Defer a Fase 2:** LRU cache eviction - impacto mínimo en MVP (< 10 tarotistas, ~780 KB memoria estimada)
 
 ---
 
@@ -6616,7 +6633,50 @@ Sistema busca significados de cartas
 
 ---
 
-#### 📝 Notas de Implementación
+#### � Decisiones de Arquitectura (Post-PR Review)
+
+**Cache Strategy - In-Memory (MVP) vs Distributed (Fase 2):**
+
+El PR review sugirió implementar cache distribuido (Redis) para deployments multi-instancia. **Decisión: Diferir a Fase 2.**
+
+**Justificación:**
+
+- **MVP scope:** Single-instance deployment (no horizontal scaling planificado en Q1)
+- **Complejidad vs ROI:** Redis requiere 2-3 días adicionales (infraestructura, serialización, manejo de errores)
+- **YAGNI:** No tenemos múltiples instancias actualmente
+- **Mitigation:** TTL de 15 minutos limita ventana de inconsistencia si escalamos prematuramente
+
+**Trigger para implementar:** Cuando se planifique horizontal scaling (> 1 pod/instancia).
+
+**Cache Size Limits - LRU Eviction:**
+
+El PR review sugirió implementar límite de tamaño de cache con LRU eviction. **Decisión: Monitorear en producción, implementar si necesario.**
+
+**Análisis de impacto:**
+
+- Magnitud del problema: 78 cartas × 2 orientaciones × 10 tarotistas = **~780 KB** de memoria
+- Para MVP con < 10 tarotistas: impacto insignificante (< 1 MB)
+- TTL existente + lazy eviction ya mitiga memory leaks
+- V8 garbage collector maneja objetos no referenciados
+
+**Trigger para implementar:**
+
+- Memoria de cache > 100 MB en producción, O
+- > 50 tarotistas activos simultáneamente, O
+- Proyección de > 100 tarotistas en Q1
+
+**Alternativa simple (si se requiere):** Periodic cleanup cada 30 minutos para limpiar entradas expiradas.
+
+**Validación aplicada en PR:**
+
+- ✅ Validación de meaning vacío (BadRequestException)
+- ✅ Mensajes de error estandarizados (`"Card with ID X not found"`)
+- ✅ Cache invalidation para ambas orientaciones (keywords compartidos en entity)
+- ✅ 3 tests adicionales agregados (total: 30 tests)
+
+---
+
+#### �📝 Notas de Implementación
 
 **Estructura de Archivos:**
 

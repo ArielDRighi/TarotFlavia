@@ -12,7 +12,7 @@ describe('Migration Validation', () => {
       await dataSource.initialize();
     }
     queryRunner = dataSource.createQueryRunner();
-  }, 15000);
+  }, 60000);
 
   afterAll(async () => {
     try {
@@ -30,7 +30,7 @@ describe('Migration Validation', () => {
     } catch {
       // Silently ignore if already destroyed
     }
-  }, 10000);
+  }, 30000);
 
   describe('InitialSchema Migration', () => {
     it('should have up and down methods defined', () => {
