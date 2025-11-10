@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { TarotCard } from '../entities/tarot-card.entity';
@@ -165,7 +169,7 @@ export class CardMeaningService {
       if (!result) {
         const baseCard = baseCards.find((bc) => bc.id === cardId);
         if (!baseCard) {
-          throw new NotFoundException(`Card ${cardId} not found`);
+          throw new NotFoundException(`Card with ID ${cardId} not found`);
         }
 
         result = {
@@ -201,10 +205,15 @@ export class CardMeaningService {
     meaning: string,
     keywords?: string[],
   ): Promise<TarotistaCardMeaning> {
+    // Validate meaning is not empty
+    if (!meaning || meaning.trim().length === 0) {
+      throw new BadRequestException('Meaning cannot be empty');
+    }
+
     // Verify card exists
     const card = await this.tarotCardRepo.findOne({ where: { id: cardId } });
     if (!card) {
-      throw new NotFoundException(`Card ${cardId} not found`);
+      throw new NotFoundException(`Card with ID ${cardId} not found`);
     }
 
     // Try to find existing custom meaning
@@ -236,8 +245,9 @@ export class CardMeaningService {
 
     const saved = await this.tarotistaCardMeaningRepo.save(customMeaning);
 
-    // Invalidate cache for this specific meaning
-    this.clearCache(tarotistaId, cardId, isReversed);
+    // Invalidate cache for both orientations since keywords are shared in the entity
+    this.clearCache(tarotistaId, cardId, true);
+    this.clearCache(tarotistaId, cardId, false);
 
     return saved;
   }

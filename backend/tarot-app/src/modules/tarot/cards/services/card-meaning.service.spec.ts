@@ -276,7 +276,7 @@ describe('CardMeaningService', () => {
         NotFoundException,
       );
       await expect(service.getBulkCardMeanings(2, requests)).rejects.toThrow(
-        'Card 999 not found',
+        'Card with ID 999 not found',
       );
     });
 
@@ -377,7 +377,7 @@ describe('CardMeaningService', () => {
       ).rejects.toThrow(NotFoundException);
       await expect(
         service.setCustomMeaning(2, 999, false, 'meaning', []),
-      ).rejects.toThrow('Card 999 not found');
+      ).rejects.toThrow('Card with ID 999 not found');
     });
 
     it('should invalidate cache after setting custom meaning', async () => {
@@ -402,6 +402,37 @@ describe('CardMeaningService', () => {
 
       expect(result.isCustom).toBe(true);
       expect(mockTarotistaCardMeaningRepo.findOne).toHaveBeenCalledTimes(3);
+    });
+
+    it('should reject empty meaning', async () => {
+      await expect(
+        service.setCustomMeaning(2, 1, false, '', []),
+      ).rejects.toThrow('Meaning cannot be empty');
+
+      await expect(
+        service.setCustomMeaning(2, 1, false, '   ', []),
+      ).rejects.toThrow('Meaning cannot be empty');
+    });
+
+    it('should invalidate cache for both orientations when keywords are updated', async () => {
+      mockTarotCardRepo.findOne.mockResolvedValue(mockTarotCard);
+      mockTarotistaCardMeaningRepo.findOne.mockResolvedValue(null);
+      mockTarotistaCardMeaningRepo.create.mockReturnValue(mockCustomMeaning);
+      mockTarotistaCardMeaningRepo.save.mockResolvedValue(mockCustomMeaning);
+
+      const clearCacheSpy = jest.spyOn(service, 'clearCache');
+
+      await service.setCustomMeaning(2, 1, false, 'Upright meaning', [
+        'new',
+        'keywords',
+      ]);
+
+      // Should clear cache for BOTH orientations since keywords are shared
+      expect(clearCacheSpy).toHaveBeenCalledWith(2, 1, true);
+      expect(clearCacheSpy).toHaveBeenCalledWith(2, 1, false);
+      expect(clearCacheSpy).toHaveBeenCalledTimes(2);
+
+      clearCacheSpy.mockRestore();
     });
   });
 
