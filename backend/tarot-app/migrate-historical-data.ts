@@ -294,9 +294,15 @@ export class HistoricalDataMigration {
 
   /**
    * Rollback de la migración de lecturas
+   * ADVERTENCIA: Esta operación establece tarotista_id = NULL para TODAS las lecturas
+   * Es una operación de emergencia para revertir el sistema a su estado pre-migración
+   * En un entorno de producción, considere hacer backup antes de ejecutar
    */
   async rollbackReadingsMigration(): Promise<void> {
     console.log('🔄 Rolling back migration of readings to Flavia...');
+    console.warn(
+      '⚠️  WARNING: This will set tarotista_id = NULL for ALL readings',
+    );
 
     // Set tarotista_id to NULL for all readings
     const updateResult = await this.dataSource.query<[unknown, number]>(
@@ -367,16 +373,37 @@ export class HistoricalDataMigration {
 
   /**
    * Rollback de la migración de roles admin
+   * NOTA: Solo remueve el rol 'admin' de usuarios que tienen is_admin=true
+   * Si la columna is_admin no existe, no hace nada (esquema ya migrado permanentemente)
    */
   async rollbackAdminRolesMigration(): Promise<void> {
     console.log('🔄 Rolling back admin roles migration...');
 
-    // Find users with admin role
-    const adminUsers = await this.dataSource.query<UserWithRoles[]>(
-      `SELECT * FROM "user" WHERE 'admin' = ANY(roles)`,
+    // Check if is_admin column exists
+    const columnCheck = await this.dataSource.query<Array<{ exists: boolean }>>(
+      `SELECT EXISTS (
+         SELECT 1 FROM information_schema.columns 
+         WHERE table_name = 'user' AND column_name = 'is_admin'
+       ) as exists`,
     );
 
-    console.log(`📊 Found ${adminUsers.length} users with admin role`);
+    if (!columnCheck[0]?.exists) {
+      console.log(
+        '⚠️  Column is_admin does not exist. Cannot rollback admin roles (schema already migrated).',
+      );
+      return;
+    }
+
+    // Find users with admin role AND is_admin=true (only those migrated by us)
+    const adminUsers = await this.dataSource.query<UserWithRoles[]>(
+      `SELECT * FROM "user" 
+       WHERE 'admin' = ANY(roles) 
+       AND is_admin = true`,
+    );
+
+    console.log(
+      `📊 Found ${adminUsers.length} users with admin role to rollback`,
+    );
 
     // Remove admin role from each user
     for (const user of adminUsers) {
