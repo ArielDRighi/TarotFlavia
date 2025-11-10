@@ -1,5 +1,9 @@
 import { Repository, In } from 'typeorm';
-import { User, UserPlan } from '../../modules/users/entities/user.entity';
+import {
+  User,
+  UserPlan,
+  UserRole,
+} from '../../modules/users/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 
 /**
@@ -61,6 +65,7 @@ export async function seedUsers(
       name: 'Free Test User',
       password: hashedPassword,
       plan: UserPlan.FREE,
+      roles: [UserRole.CONSUMER],
       isAdmin: false,
     },
     {
@@ -68,6 +73,7 @@ export async function seedUsers(
       name: 'Premium Test User',
       password: hashedPassword,
       plan: UserPlan.PREMIUM,
+      roles: [UserRole.CONSUMER],
       isAdmin: false,
     },
     {
@@ -75,6 +81,7 @@ export async function seedUsers(
       name: 'Admin Test User',
       password: hashedPassword,
       plan: UserPlan.PREMIUM, // Admin tiene acceso premium
+      roles: [UserRole.CONSUMER, UserRole.ADMIN],
       isAdmin: true,
     },
   ];
