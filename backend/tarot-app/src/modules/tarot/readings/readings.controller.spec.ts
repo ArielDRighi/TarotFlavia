@@ -3,6 +3,7 @@ import { Reflector } from '@nestjs/core';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ReadingsController } from './readings.controller';
 import { ReadingsService } from './readings.service';
+import { ReadingsOrchestratorService } from './application/services/readings-orchestrator.service';
 import { CreateReadingDto } from './dto/create-reading.dto';
 import { QueryReadingsDto } from './dto/query-readings.dto';
 import { User } from '../../users/entities/user.entity';
@@ -60,6 +61,22 @@ describe('ReadingsController', () => {
     remove: jest.fn(),
   };
 
+  const mockOrchestrator = {
+    create: jest.fn(),
+    findAll: jest.fn(),
+    findOne: jest.fn(),
+    update: jest.fn(),
+    remove: jest.fn(),
+    findTrashedReadings: jest.fn(),
+    restore: jest.fn(),
+    shareReading: jest.fn(),
+    unshareReading: jest.fn(),
+    regenerateInterpretation: jest.fn(),
+    findAllForAdmin: jest.fn(),
+    cleanupOldDeletedReadings: jest.fn(),
+    getSharedReading: jest.fn(),
+  };
+
   const mockUsageLimitsService = {
     checkLimit: jest.fn(),
     incrementUsage: jest.fn(),
@@ -80,6 +97,10 @@ describe('ReadingsController', () => {
         {
           provide: ReadingsService,
           useValue: mockService,
+        },
+        {
+          provide: ReadingsOrchestratorService,
+          useValue: mockOrchestrator,
         },
         {
           provide: UsageLimitsService,
@@ -121,11 +142,11 @@ describe('ReadingsController', () => {
       };
 
       const req = { user: { userId: mockUser.id } };
-      mockService.create.mockResolvedValue(mockReading);
+      mockOrchestrator.create.mockResolvedValue(mockReading);
 
       const result = await controller.createReading(req, createDto);
 
-      expect(mockService.create).toHaveBeenCalledWith(
+      expect(mockOrchestrator.create).toHaveBeenCalledWith(
         expect.objectContaining({
           id: mockUser.id,
         }),
@@ -152,11 +173,11 @@ describe('ReadingsController', () => {
         ...mockReading,
         customQuestion: createDto.customQuestion,
       };
-      mockService.create.mockResolvedValue(readingWithCustom);
+      mockOrchestrator.create.mockResolvedValue(readingWithCustom);
 
       const result = await controller.createReading(req, createDto);
 
-      expect(mockService.create).toHaveBeenCalledWith(
+      expect(mockOrchestrator.create).toHaveBeenCalledWith(
         expect.objectContaining({
           id: mockUser.id,
         }),
@@ -181,11 +202,14 @@ describe('ReadingsController', () => {
       };
       const req = { user: { userId: mockUser.id } };
       const queryDto: QueryReadingsDto = { page: 1, limit: 10 };
-      mockService.findAll.mockResolvedValue(paginatedResponse);
+      mockOrchestrator.findAll.mockResolvedValue(paginatedResponse);
 
       const result = await controller.getUserReadings(req, queryDto);
 
-      expect(mockService.findAll).toHaveBeenCalledWith(mockUser.id, queryDto);
+      expect(mockOrchestrator.findAll).toHaveBeenCalledWith(
+        expect.objectContaining({ id: mockUser.id }),
+        queryDto,
+      );
       expect(result).toEqual(paginatedResponse);
     });
   });
@@ -193,11 +217,11 @@ describe('ReadingsController', () => {
   describe('getReadingById', () => {
     it('should return a specific reading', async () => {
       const req = { user: { userId: mockUser.id, isAdmin: false } };
-      mockService.findOne.mockResolvedValue(mockReading);
+      mockOrchestrator.findOne.mockResolvedValue(mockReading);
 
       const result = await controller.getReadingById(req, mockReading.id);
 
-      expect(mockService.findOne).toHaveBeenCalledWith(
+      expect(mockOrchestrator.findOne).toHaveBeenCalledWith(
         mockReading.id,
         mockUser.id,
         false,

@@ -16,6 +16,7 @@ import {
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { AdminGuard } from '../../auth/guards/admin.guard';
 import { ReadingsService } from './readings.service';
+import { ReadingsOrchestratorService } from './application/services/readings-orchestrator.service';
 import { PaginatedReadingsResponseDto } from './dto/paginated-readings-response.dto';
 
 @ApiTags('Admin - Lecturas de Tarot')
@@ -23,7 +24,10 @@ import { PaginatedReadingsResponseDto } from './dto/paginated-readings-response.
 @UseGuards(JwtAuthGuard, AdminGuard)
 @ApiBearerAuth()
 export class ReadingsAdminController {
-  constructor(private readonly readingsService: ReadingsService) {}
+  constructor(
+    private readonly readingsService: ReadingsService, // Legacy
+    private readonly orchestrator: ReadingsOrchestratorService, // NEW
+  ) {}
 
   @Get()
   @ApiOperation({
@@ -51,6 +55,6 @@ export class ReadingsAdminController {
     @Query('includeDeleted', new ParseBoolPipe({ optional: true }))
     includeDeleted?: boolean,
   ): Promise<PaginatedReadingsResponseDto> {
-    return this.readingsService.findAllForAdmin(includeDeleted ?? false);
+    return this.orchestrator.findAllForAdmin(includeDeleted ?? false);
   }
 }
