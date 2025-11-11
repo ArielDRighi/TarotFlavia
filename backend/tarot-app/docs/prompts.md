@@ -89,7 +89,6 @@ npm run start:dev  # Probar endpoints manualmente
 **Métricas de Éxito (todas obligatorias):**
 
 ✅ Lint, format, Build sin errores, todos los tipos de tests (unit + e2e) (por ahora e2e de a uno, ya que existen problemas al ejecutarlos en paralelo)
-✅ Tests pasan (unit + e2e)
 ✅ Coverage >= baseline
 ✅ 0 dependencias circulares
 ✅ App funciona
