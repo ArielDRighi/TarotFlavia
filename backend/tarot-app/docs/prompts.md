@@ -10,7 +10,7 @@ Autonomía Total: Ejecuta la tarea de principio a fin sin solicitar confirmacion
 
 Rama: Estás en develop. Crea la rama feature/TASK-00x-descripcion (usa la nomenclatura de las ramas existentes nombradas segun gitflow) y trabaja en ella.
 
-Análisis Arquitectural Previo: Antes de crear cualquier archivo nuevo, analiza el documento ARQUITECTURA_ANALISIS.md y TAREAS_REFACTORIZACION_ARQUITECTURA.md para determinar la ubicación correcta según las recomendaciones arquitecturales. Los nuevos módulos deben seguir la estructura domain/application/infrastructure y ubicarse en src/modules/. Si la tarea implica crear un nuevo módulo o servicio, verifica que no viole el principio de responsabilidad única y que esté correctamente ubicado según el análisis arquitectural.
+Patrones y Convenciones: Antes de crear archivos y carpetas, analiza la estructura existente del proyecto para identificar y respetar los patrones establecidos (nombres de archivos, organización de carpetas, convenciones de módulos). Replica estos patrones en tu implementación para mantener consistencia arquitectural.
 
 Metodología (TDD Estricto): Sigue un ciclo TDD riguroso: _ Escribe un test (debe fallar). _ Escribe el código mínimo para que el test pase. \* Refactoriza.
 
@@ -23,6 +23,79 @@ Actualiza el documento backlog con la tarea completada, marcándola como finaliz
 Validación Final: Asegúrate de que todos los tests (nuevos y existentes) pasen limpiamente.
 
 Entregable: Proporcióname el diff de cambios y un borrador del mensaje para la Pull Request.
+
+---
+
+# Tarea de Refactorización Arquitectural
+
+OK, vamos a ejecutar esta tarea de refactorización arquitectural.
+
+Tarea: TASK-ARCH-00x: [Pega aquí el número y descripción de la tarea del PLAN_REFACTORIZACION.md]
+
+**Contexto:**
+
+- Esta es una refactorización basada en PLAN_REFACTORIZACION.md
+- NUNCA sacrifiques funcionalidad por arquitectura
+- Objetivo: Mejorar estructura sin romper nada
+
+**Workflow:**
+
+**1. Preparación:**
+
+- Lee COMPLETO el PLAN_REFACTORIZACION.md (especialmente la task ARCH-00x)
+- Verifica precondiciones (sección 3 del plan)
+- Ejecuta: `npm run build && npm test && npm run test:cov && npm run test:e2e`
+- Documenta coverage ACTUAL (baseline - no puede bajar)
+- Crea rama: `feature/TASK-ARCH-00x-descripcion-corta`
+
+**2. Metodología: PRESERVE-VERIFY-REFACTOR**
+
+- **PRESERVE:** Duplica (no muevas). Crea nueva estructura, COPIA archivos, adapta imports
+- **VERIFY:** Valida (`npm run build && npm test && npm run test:e2e`). Prueba endpoints críticos
+- **REFACTOR:** Solo AHORA elimina código antiguo. Valida de nuevo
+
+**3. Ejecución:**
+
+- Sigue PLAN_REFACTORIZACION.md paso a paso
+- Checkpoint cada 3-5 pasos: `npm run build && npm test && npm run lint`
+- NUNCA elimines tests existentes - muévelos con el código
+- Coverage >= baseline (obligatorio)
+- Commits incrementales: `refactor(arch): TASK-ARCH-00x paso X/N - descripción`
+
+**4. Prohibiciones:**
+🚫 Cambiar comportamiento funcional
+🚫 Eliminar tests
+🚫 Usar eslint-disable
+🚫 Bajar coverage
+🚫 Romper marketplace features
+
+**5. Validación Final (Pre-PR):**
+
+```bash
+rm -rf dist/ node_modules/.cache
+npm run build && npm run lint && npm run format
+npm test && npm run test:cov && npm run test:e2e
+madge --circular --extensions ts src/  # Debe ser 0
+npm run start:dev  # Probar endpoints manualmente
+```
+
+**6. Entregable:**
+
+- Resumen: Task, archivos (movidos/creados/eliminados), coverage (antes→después)
+- Diff: `git diff develop --stat`
+- Validaciones: Build, tests, coverage, linter, dependencias circulares, app funcional
+- Borrador PR con estructura del plan
+
+**Métricas de Éxito (todas obligatorias):**
+✅ Build sin errores
+✅ Tests pasan (unit + e2e)
+✅ Coverage >= baseline
+✅ 0 dependencias circulares
+✅ App funciona
+✅ Marketplace OK (si aplica)
+✅ Plan ejecutado completo
+
+---
 
 # Pull Request
 
