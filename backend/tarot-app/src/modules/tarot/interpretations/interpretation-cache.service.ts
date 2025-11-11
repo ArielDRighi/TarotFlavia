@@ -1,10 +1,13 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { createHash } from 'crypto';
+import { OnEvent } from '@nestjs/event-emitter';
 import { CachedInterpretation } from './entities/cached-interpretation.entity';
+import { TarotistaConfig } from '../../tarotistas/entities/tarotista-config.entity';
+import { TarotistaCardMeaning } from '../../tarotistas/entities/tarotista-card-meaning.entity';
 
 interface CardCombination {
   card_id: string;
@@ -16,6 +19,14 @@ interface CardCombination {
 export class InterpretationCacheService {
   private readonly MEMORY_CACHE_TTL = 3600000; // 1 hora en milisegundos
   private readonly DB_CACHE_TTL_DAYS = 30;
+  private readonly logger = new Logger(InterpretationCacheService.name);
+
+  // Métricas de invalidación en memoria
+  private invalidationMetrics = {
+    total: 0,
+    byTarotista: 0,
+    byMeanings: 0,
+  };
 
   constructor(
     @InjectRepository(CachedInterpretation)
@@ -229,5 +240,160 @@ export class InterpretationCacheService {
       expired: parseInt(stats?.expired || '0', 10),
       avgHits: parseFloat(stats?.avg_hits || '0'),
     };
+  }
+
+  /**
+   * Invalida todo el cache de un tarotista específico
+   */
+  async invalidateTarotistaCache(tarotistaId: number): Promise<number> {
+    this.logger.log(
+      `Invalidating all cache for tarotista ${tarotistaId}`,
+      'CacheInvalidation',
+    );
+
+    const result = await this.cacheRepository
+      .createQueryBuilder()
+      .delete()
+      .from(CachedInterpretation)
+      .where('tarotista_id = :tarotistaId', { tarotistaId })
+      .execute();
+
+    const deletedCount = result.affected || 0;
+
+    // Actualizar métricas
+    this.invalidationMetrics.total += 1;
+    this.invalidationMetrics.byTarotista += 1;
+
+    this.logger.log(
+      `Invalidated ${deletedCount} cache entries for tarotista ${tarotistaId}`,
+      'CacheInvalidation',
+    );
+
+    return deletedCount;
+  }
+
+  /**
+   * Invalida selectivamente el cache afectado por cambios en significados de cartas
+   */
+  async invalidateTarotistaMeaningsCache(
+    tarotistaId: number,
+    cardIds: number[],
+  ): Promise<number> {
+    this.logger.log(
+      `Invalidating cache for tarotista ${tarotistaId}, cards: ${cardIds.join(', ')}`,
+      'CacheInvalidation',
+    );
+
+    // Buscar entradas de cache que contengan alguna de las cartas afectadas
+    const affectedEntries = await this.cacheRepository
+      .createQueryBuilder('cache')
+      .select(['cache.id', 'cache.cache_key', 'cache.card_combination'])
+      .where('tarotista_id = :tarotistaId', { tarotistaId })
+      .getMany();
+
+    // Filtrar entradas que contengan las cartas modificadas
+    const entriesToDelete = affectedEntries.filter((entry) => {
+      const cardCombination = entry.card_combination as {
+        card_id: string;
+        position: number;
+        is_reversed: boolean;
+      }[];
+
+      return cardCombination.some((card) =>
+        cardIds.includes(parseInt(card.card_id, 10)),
+      );
+    });
+
+    if (entriesToDelete.length === 0) {
+      this.logger.log(
+        `No cache entries found for tarotista ${tarotistaId} with cards ${cardIds.join(', ')}`,
+        'CacheInvalidation',
+      );
+      return 0;
+    }
+
+    const idsToDelete = entriesToDelete.map((entry) => entry.id);
+
+    const result = await this.cacheRepository
+      .createQueryBuilder()
+      .delete()
+      .from(CachedInterpretation)
+      .whereInIds(idsToDelete)
+      .execute();
+
+    const deletedCount = result.affected || 0;
+
+    // Actualizar métricas
+    this.invalidationMetrics.total += 1;
+    this.invalidationMetrics.byMeanings += 1;
+
+    this.logger.log(
+      `Invalidated ${deletedCount} selective cache entries for tarotista ${tarotistaId}`,
+      'CacheInvalidation',
+    );
+
+    return deletedCount;
+  }
+
+  /**
+   * Invalidación en cascada - elimina todas las interpretaciones que dependen de la configuración
+   */
+  async invalidateCascade(tarotistaId: number): Promise<number> {
+    this.logger.log(
+      `Cascade invalidation for tarotista ${tarotistaId}`,
+      'CacheInvalidation',
+    );
+
+    // Por ahora, invalidación en cascada es igual a invalidar todo el tarotista
+    // En el futuro podría ser más selectivo dependiendo del tipo de cambio
+    return this.invalidateTarotistaCache(tarotistaId);
+  }
+
+  /**
+   * Event listener: Se ejecuta cuando se actualiza la configuración de un tarotista
+   */
+  @OnEvent('tarotista.config.updated')
+  async handleTarotistaConfigUpdated(payload: {
+    tarotistaId: number;
+    previousConfig: TarotistaConfig;
+    newConfig: TarotistaConfig;
+  }): Promise<void> {
+    this.logger.log(
+      `Handling tarotista.config.updated event for tarotista ${payload.tarotistaId}`,
+      'CacheInvalidation',
+    );
+
+    await this.invalidateTarotistaCache(payload.tarotistaId);
+  }
+
+  /**
+   * Event listener: Se ejecuta cuando se actualiza un significado de carta
+   */
+  @OnEvent('tarotista.meanings.updated')
+  async handleTarotistaMeaningsUpdated(payload: {
+    tarotistaId: number;
+    cardId: number;
+    previousMeaning: TarotistaCardMeaning | null;
+    newMeaning: TarotistaCardMeaning | null;
+  }): Promise<void> {
+    this.logger.log(
+      `Handling tarotista.meanings.updated event for tarotista ${payload.tarotistaId}, card ${payload.cardId}`,
+      'CacheInvalidation',
+    );
+
+    await this.invalidateTarotistaMeaningsCache(payload.tarotistaId, [
+      payload.cardId,
+    ]);
+  }
+
+  /**
+   * Obtiene métricas de invalidación
+   */
+  getInvalidationMetrics(): Promise<{
+    total: number;
+    byTarotista: number;
+    byMeanings: number;
+  }> {
+    return Promise.resolve({ ...this.invalidationMetrics });
   }
 }

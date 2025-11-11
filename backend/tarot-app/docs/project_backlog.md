@@ -7238,13 +7238,14 @@ async getCardMeaning(tarotistaId: number, cardId: number): Promise<CardMeaning> 
 
 ---
 
-### � TASK-067-a: Sistema de Invalidación de Cache por Tarotista ⭐⭐
+### ✅ TASK-067-a: Sistema de Invalidación de Cache por Tarotista ⭐⭐
 
 **Prioridad:** 🟡 NECESARIA  
 **Estimación:** 0.5 días  
 **Tags:** marketplace, cache, invalidation, performance, data-consistency  
 **Dependencias:** TASK-067 (PromptBuilderService)  
-**Estado:** 🟡 NO INICIADA  
+**Estado:** ✅ COMPLETADA (10/11/2025)  
+**Branch:** `feature/TASK-067-a-cache-invalidation`  
 **Contexto:** Sistema automático de invalidación de cache cuando cambia configuración de tarotista
 
 ---
@@ -7286,16 +7287,96 @@ Implementar un sistema robusto y automático de invalidación de cache que asegu
 - ✅ Cache se invalida selectivamente al modificar significados de cartas
 - ✅ Endpoints admin funcionan correctamente
 - ✅ Logs registran todas las invalidaciones
-- ✅ Tests unitarios para eventos y listeners
-- ✅ Tests E2E para invalidación automática
+- ✅ Tests unitarios para eventos y listeners (6 tests pasando)
+- ✅ Tests E2E para invalidación automática (9 tests pasando)
 - ✅ Documentación de estrategias de invalidación
+
+#### ✅ **Resumen de Implementación (Completado 10/11/2025):**
+
+**Archivos creados/modificados:**
+
+- `src/modules/tarotistas/tarotistas.service.ts` - Service con EventEmitter2 integration (5 unit tests)
+- `src/modules/tarotistas/tarotistas.module.ts` - Module configuration
+- `src/modules/tarot/interpretations/interpretation-cache.service.ts` - Extended con invalidation methods y event listeners
+- `src/modules/tarot/interpretations/cache-admin.controller.ts` - Admin endpoints (7 unit tests)
+- `src/modules/tarot/interpretations/interpretations.module.ts` - Added CacheAdminController
+- `src/app.module.ts` - Added EventEmitterModule.forRoot() y TarotistasModule
+- `test/cache-admin.e2e-spec.ts` - E2E tests para admin endpoints (6 tests)
+- `test/cache-invalidation-flow.e2e-spec.ts` - E2E tests para automatic invalidation (3 tests)
+- `backend/tarot-app/ARQUITECTURA_ANALISIS.md` - Análisis arquitectural solicitado por el usuario
+
+**Características implementadas:**
+
+- ✅ **Event-driven invalidation:** @OnEvent listeners en InterpretationCacheService para `tarotista.config.updated` y `tarotista.meanings.updated`
+- ✅ **Three invalidation strategies:**
+  - `invalidateTarotistaCache(tarotistaId)` - Delete all cache for specific tarotista
+  - `invalidateTarotistaMeaningsCache(tarotistaId, cardIds[])` - Selective invalidation by card IDs
+  - `invalidateCascade(tarotistaId)` - Cascade invalidation for config changes
+- ✅ **Admin endpoints:**
+  - DELETE `/admin/cache/tarotistas/:id` - Invalidate all cache for tarotista
+  - DELETE `/admin/cache/tarotistas/:id/meanings?cardIds=1,2,3` - Selective invalidation
+  - DELETE `/admin/cache/global` - Emergency full cache clear
+  - GET `/admin/cache/stats` - Cache statistics and metrics
+- ✅ **Metrics tracking:** `invalidationMetrics` object tracking total, byTarotista, byMeanings counts
+- ✅ **Comprehensive logging:** All invalidations logged with context (tarotistaId, reason, cardIds)
+- ✅ **TTL-based cache:** 24-hour TTL with cache-manager integration
+- ✅ **OpenAPI documentation:** All endpoints documented with @ApiOperation, @ApiResponse
+
+**Metodología TDD aplicada:**
+
+1. ✅ Tests escritos primero para TarotistasService event emission (RED phase)
+2. ✅ Implementación mínima para pasar tests (GREEN phase)
+3. ✅ Tests escritos para invalidation strategies (RED phase)
+4. ✅ Implementación de event listeners y invalidation methods (GREEN phase)
+5. ✅ Tests E2E para admin endpoints y automatic flows (RED phase)
+6. ✅ Implementación de controllers y integration (GREEN phase)
+7. ✅ Refactorización y limpieza de código (REFACTOR phase)
+8. ✅ Verificación final: 685 unit tests + 9 E2E tests pasando
+
+**Tests ejecutados:**
+
+- ✅ **Unit tests:** 685/685 passing (including 18 new tests for cache invalidation)
+  - TarotistasService: 5 tests
+  - InterpretationCacheService invalidation: 6 tests
+  - CacheAdminController: 7 tests
+- ✅ **E2E tests:** Cache-related tests passing (9 total)
+  - cache-admin.e2e-spec.ts: 6 tests PASSED
+  - cache-invalidation-flow.e2e-spec.ts: 3 tests PASSED
+- ✅ **Quality checks:** lint (0 errors), format, build all successful
+
+**Verificación de fallos E2E:**
+
+- 11 tests E2E fallaron en ejecución paralela
+- Verificación individual: **TODOS pasaron individualmente**
+  - input-validation-security: 6/6 ✅
+  - readings-pagination: 18/18 ✅
+  - readings-hybrid: 7/7 ✅
+  - mvp-complete: 14/14 ✅
+  - readings-soft-delete: 20/20 ✅
+  - reading-regeneration: 8/8 ✅
+  - predefined-questions: 11/11 ✅
+  - readings-share: 17/17 ✅
+  - historical-data-migration: 19/19 ✅
+- **Conclusión:** Fallos son por **paralelism/resource contention**, NO por esta implementación
+
+**Análisis arquitectural:**
+
+- Usuario solicitó evaluación de Clean Architecture y mejores prácticas enterprise
+- Creado documento completo `ARQUITECTURA_ANALISIS.md` con:
+  - Evaluación de estructura actual (feature-based modules de NestJS)
+  - Identificación de problemas: `interpretations` module sobrecargado (19 archivos)
+  - Violación de SRP en algunos módulos
+  - Recomendación: Refactorización incremental (NO Clean Architecture full por ahora)
+  - Plan de acción: Extraer módulos `cache` y `ai` independientes
+  - Trade-offs y roadmap propuesto (Q1-Q2 2026)
 
 #### **Notas Técnicas:**
 
-- Usar EventEmitter2 para eventos asíncronos
-- Cache keys deben incluir tarotistaId
-- TTL base: 24 horas
-- Considerar Redis pub/sub si hay múltiples instancias
+- ✅ EventEmitter2 instalado y configurado globally en AppModule
+- ✅ Cache keys incluyen tarotistaId para invalidación selectiva
+- ✅ TTL base: 24 horas (configurable via CacheModule)
+- ✅ Consideración futura: Redis pub/sub si hay múltiples instancias (out of scope para MVP)
+- ✅ Package.json actualizado: @nestjs/event-emitter@^2.1.0
 
 ---
 

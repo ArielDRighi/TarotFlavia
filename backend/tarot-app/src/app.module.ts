@@ -5,6 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ScheduleModule } from '@nestjs/schedule';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
@@ -20,6 +21,7 @@ import { PredefinedQuestionsModule } from './modules/predefined-questions/predef
 import { HealthModule } from './modules/health/health.module';
 import { UsageLimitsModule } from './modules/usage-limits/usage-limits.module';
 import { EmailModule } from './modules/email/email.module';
+import { TarotistasModule } from './modules/tarotistas/tarotistas.module';
 import { CustomThrottlerGuard } from './common/guards/custom-throttler.guard';
 import { ThrottlerExceptionFilter } from './common/filters/throttler-exception.filter';
 import databaseConfig from './config/typeorm';
@@ -49,6 +51,7 @@ import { validate } from './config/env-validator';
         return dbConfig;
       },
     }),
+    EventEmitterModule.forRoot(),
     CacheModule.register({
       isGlobal: true,
       ttl: 3600000, // 1 hora en milisegundos
@@ -63,6 +66,7 @@ import { validate } from './config/env-validator';
     ScheduleModule.forRoot(),
     AuthModule,
     UsersModule,
+    TarotistasModule,
     CardsModule,
     DecksModule,
     SpreadsModule,
