@@ -1,42 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { EventEmitterModule } from '@nestjs/event-emitter';
-import { CacheModule } from '@nestjs/cache-manager';
-import { InterpretationsModule } from '../src/modules/tarot/interpretations/interpretations.module';
-import { CachedInterpretation } from '../src/modules/tarot/interpretations/entities/cached-interpretation.entity';
-import { TarotistasModule } from '../src/modules/tarotistas/tarotistas.module';
+import { App } from 'supertest/types';
+import { AppModule } from '../src/app.module';
 
 describe('Cache Admin Endpoints (e2e)', () => {
-  let app: INestApplication;
+  let app: INestApplication<App>;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [
-        TypeOrmModule.forRoot({
-          type: 'postgres',
-          host: process.env.TAROT_E2E_DB_HOST || 'localhost',
-          port: parseInt(process.env.TAROT_E2E_DB_PORT || '5433', 10),
-          username: process.env.TAROT_E2E_DB_USER || 'tarot_test',
-          password: process.env.TAROT_E2E_DB_PASSWORD || 'test_password',
-          database: process.env.TAROT_E2E_DB_NAME || 'tarot_test',
-          entities: [CachedInterpretation],
-          synchronize: true,
-          dropSchema: true,
-        }),
-        EventEmitterModule.forRoot(),
-        CacheModule.register({
-          isGlobal: true,
-          ttl: 3600000,
-        }),
-        InterpretationsModule,
-        TarotistasModule,
-      ],
+      imports: [AppModule],
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe());
     await app.init();
   });
 

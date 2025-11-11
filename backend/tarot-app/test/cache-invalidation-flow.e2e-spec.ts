@@ -1,47 +1,25 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { EventEmitterModule } from '@nestjs/event-emitter';
-import { CacheModule } from '@nestjs/cache-manager';
-import { InterpretationsModule } from '../src/modules/tarot/interpretations/interpretations.module';
+import { INestApplication } from '@nestjs/common';
+import { App } from 'supertest/types';
+import { AppModule } from '../src/app.module';
 import { InterpretationCacheService } from '../src/modules/tarot/interpretations/interpretation-cache.service';
-import { CachedInterpretation } from '../src/modules/tarot/interpretations/entities/cached-interpretation.entity';
 
 describe('Cache Invalidation Flow (e2e)', () => {
-  let app: INestApplication;
+  let app: INestApplication<App>;
   let cacheService: InterpretationCacheService;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [
-        TypeOrmModule.forRoot({
-          type: 'postgres',
-          host: process.env.TAROT_E2E_DB_HOST || 'localhost',
-          port: parseInt(process.env.TAROT_E2E_DB_PORT || '5433', 10),
-          username: process.env.TAROT_E2E_DB_USER || 'tarot_test',
-          password: process.env.TAROT_E2E_DB_PASSWORD || 'test_password',
-          database: process.env.TAROT_E2E_DB_NAME || 'tarot_test',
-          entities: [CachedInterpretation],
-          synchronize: true,
-          dropSchema: false, // No eliminar schema, ya está configurado
-        }),
-        EventEmitterModule.forRoot(),
-        CacheModule.register({
-          isGlobal: true,
-          ttl: 3600000,
-        }),
-        InterpretationsModule,
-      ],
+      imports: [AppModule],
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe());
     await app.init();
 
     cacheService = moduleFixture.get<InterpretationCacheService>(
       InterpretationCacheService,
     );
-  }, 30000); // Aumentar timeout
+  });
 
   afterAll(async () => {
     await app.close();
