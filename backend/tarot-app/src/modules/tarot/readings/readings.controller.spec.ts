@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Reflector } from '@nestjs/core';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ReadingsController } from './readings.controller';
-import { ReadingsService } from './readings.service';
 import { ReadingsOrchestratorService } from './application/services/readings-orchestrator.service';
 import { CreateReadingDto } from './dto/create-reading.dto';
 import { QueryReadingsDto } from './dto/query-readings.dto';
@@ -53,14 +52,6 @@ describe('ReadingsController', () => {
     viewCount: 0,
   } as TarotReading;
 
-  const mockService = {
-    create: jest.fn(),
-    findAll: jest.fn(),
-    findOne: jest.fn(),
-    update: jest.fn(),
-    remove: jest.fn(),
-  };
-
   const mockOrchestrator = {
     create: jest.fn(),
     findAll: jest.fn(),
@@ -94,10 +85,6 @@ describe('ReadingsController', () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ReadingsController],
       providers: [
-        {
-          provide: ReadingsService,
-          useValue: mockService,
-        },
         {
           provide: ReadingsOrchestratorService,
           useValue: mockOrchestrator,

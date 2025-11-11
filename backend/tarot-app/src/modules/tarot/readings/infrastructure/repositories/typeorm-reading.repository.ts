@@ -21,7 +21,7 @@ export class TypeOrmReadingRepository implements IReadingRepository {
 
   async findById(
     id: number,
-    relations: string[] = ['deck', 'user', 'cards', 'interpretation'],
+    relations: string[] = ['deck', 'user', 'cards', 'interpretations'],
   ): Promise<TarotReading | null> {
     return this.readingRepo.findOne({
       where: { id },

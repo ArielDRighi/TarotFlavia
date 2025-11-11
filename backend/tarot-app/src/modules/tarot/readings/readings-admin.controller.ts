@@ -15,7 +15,6 @@ import {
 
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { AdminGuard } from '../../auth/guards/admin.guard';
-import { ReadingsService } from './readings.service';
 import { ReadingsOrchestratorService } from './application/services/readings-orchestrator.service';
 import { PaginatedReadingsResponseDto } from './dto/paginated-readings-response.dto';
 
@@ -24,10 +23,7 @@ import { PaginatedReadingsResponseDto } from './dto/paginated-readings-response.
 @UseGuards(JwtAuthGuard, AdminGuard)
 @ApiBearerAuth()
 export class ReadingsAdminController {
-  constructor(
-    private readonly readingsService: ReadingsService, // Legacy
-    private readonly orchestrator: ReadingsOrchestratorService, // NEW
-  ) {}
+  constructor(private readonly orchestrator: ReadingsOrchestratorService) {}
 
   @Get()
   @ApiOperation({

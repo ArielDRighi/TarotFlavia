@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { IReadingRepository } from '../../domain/interfaces/reading-repository.interface';
 import { ReadingValidatorService } from '../services/reading-validator.service';
 import { TarotReading } from '../../entities/tarot-reading.entity';
@@ -23,7 +23,7 @@ export class GetReadingUseCase {
     ]);
 
     if (!reading) {
-      throw new Error(`Reading with ID ${readingId} not found`);
+      throw new NotFoundException(`Reading with ID ${readingId} not found`);
     }
 
     // Validar ownership si no es admin

@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ReadingsService } from './readings.service';
 import { ReadingsController } from './readings.controller';
 import { ReadingsAdminController } from './readings-admin.controller';
 import { ReadingsCleanupService } from './readings-cleanup.service';
@@ -17,7 +16,7 @@ import { SpreadsModule } from '../spreads/spreads.module';
 import { PredefinedQuestionsModule } from '../../predefined-questions/predefined-questions.module';
 import { UsageLimitsModule } from '../../usage-limits/usage-limits.module';
 
-// ==================== New Architecture ====================
+// ==================== Clean Architecture ====================
 // Repositories
 import { TypeOrmReadingRepository } from './infrastructure/repositories/typeorm-reading.repository';
 
@@ -51,13 +50,11 @@ import { RestoreReadingUseCase } from './application/use-cases/restore-reading.u
     SharedReadingsController,
   ],
   providers: [
-    // Legacy service (keeping for gradual migration)
-    ReadingsService,
     ReadingsCleanupService,
     RequiresPremiumForCustomQuestionGuard,
     ReadingsCacheInterceptor,
 
-    // New architecture
+    // Clean Architecture
     // Repository
     {
       provide: 'IReadingRepository',
@@ -78,9 +75,6 @@ import { RestoreReadingUseCase } from './application/use-cases/restore-reading.u
     DeleteReadingUseCase,
     RestoreReadingUseCase,
   ],
-  exports: [
-    ReadingsService, // Legacy export
-    ReadingsOrchestratorService, // New export
-  ],
+  exports: [ReadingsOrchestratorService],
 })
 export class ReadingsModule {}

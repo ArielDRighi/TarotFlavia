@@ -31,7 +31,6 @@ import {
   CheckUsageLimit,
   UsageFeature,
 } from '../../usage-limits';
-import { ReadingsService } from './readings.service';
 import { ReadingsOrchestratorService } from './application/services/readings-orchestrator.service';
 import { CreateReadingDto } from './dto/create-reading.dto';
 import { QueryReadingsDto } from './dto/query-readings.dto';
@@ -42,10 +41,7 @@ import { User } from '../../users/entities/user.entity';
 @ApiTags('Lecturas de Tarot')
 @Controller('readings')
 export class ReadingsController {
-  constructor(
-    private readonly readingsService: ReadingsService, // Legacy - mantener temporalmente
-    private readonly orchestrator: ReadingsOrchestratorService, // NEW - usar este
-  ) {}
+  constructor(private readonly orchestrator: ReadingsOrchestratorService) {}
 
   @UseGuards(
     JwtAuthGuard,

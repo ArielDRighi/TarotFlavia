@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { CreateReadingUseCase } from '../use-cases/create-reading.use-case';
 import { ListReadingsUseCase } from '../use-cases/list-readings.use-case';
 import { GetReadingUseCase } from '../use-cases/get-reading.use-case';
@@ -142,7 +142,9 @@ export class ReadingsOrchestratorService {
     const reading = await this.readingRepo.findByShareToken(token);
 
     if (!reading) {
-      throw new Error('Lectura compartida no encontrada o no está pública');
+      throw new NotFoundException(
+        'Lectura compartida no encontrada o no está pública',
+      );
     }
 
     // Incrementar el contador de visualizaciones

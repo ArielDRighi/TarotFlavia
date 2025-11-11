@@ -1,16 +1,12 @@
 import { Controller, Get, Param, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
-import { ReadingsService } from './readings.service';
 import { ReadingsOrchestratorService } from './application/services/readings-orchestrator.service';
 import { TarotReading } from './entities/tarot-reading.entity';
 
 @ApiTags('Lecturas Compartidas')
 @Controller('shared')
 export class SharedReadingsController {
-  constructor(
-    private readonly readingsService: ReadingsService, // Legacy
-    private readonly orchestrator: ReadingsOrchestratorService, // NEW
-  ) {}
+  constructor(private readonly orchestrator: ReadingsOrchestratorService) {}
 
   @Get(':token')
   @HttpCode(HttpStatus.OK)
