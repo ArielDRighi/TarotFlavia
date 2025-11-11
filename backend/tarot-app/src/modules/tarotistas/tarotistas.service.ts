@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Repository } from 'typeorm';
@@ -24,7 +24,9 @@ export class TarotistasService {
     });
 
     if (!existingConfig) {
-      throw new Error('Config not found');
+      throw new NotFoundException(
+        `Tarotista configuration not found for ID ${tarotistaId}`,
+      );
     }
 
     const updatedConfig = await this.configRepository.save({
@@ -82,7 +84,9 @@ export class TarotistasService {
     });
 
     if (!existingMeaning) {
-      throw new Error('Meaning not found');
+      throw new NotFoundException(
+        `Card meaning not found for tarotista ${tarotistaId} and card ${cardId}`,
+      );
     }
 
     await this.meaningRepository.delete({ tarotistaId, cardId });

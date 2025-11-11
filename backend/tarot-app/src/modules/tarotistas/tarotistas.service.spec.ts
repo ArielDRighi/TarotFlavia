@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { TarotistasService } from './tarotistas.service';
 import { TarotistaConfig } from './entities/tarotista-config.entity';
@@ -81,6 +82,23 @@ describe('TarotistasService', () => {
           previousConfig: existingConfig,
           newConfig: expect.objectContaining(configData) as TarotistaConfig,
         },
+      );
+    });
+
+    it('should throw NotFoundException when config not found', async () => {
+      const tarotistaId = 999;
+      const configData = {
+        systemPrompt: 'Updated prompt',
+      };
+
+      jest.spyOn(configRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(
+        service.updateTarotistaConfig(tarotistaId, configData),
+      ).rejects.toThrow(
+        new NotFoundException(
+          `Tarotista configuration not found for ID ${tarotistaId}`,
+        ),
       );
     });
   });
@@ -191,6 +209,21 @@ describe('TarotistasService', () => {
           previousMeaning: existingMeaning,
           newMeaning: null,
         },
+      );
+    });
+
+    it('should throw NotFoundException when meaning not found', async () => {
+      const tarotistaId = 1;
+      const cardId = 999;
+
+      jest.spyOn(meaningRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(
+        service.deleteCardMeaning(tarotistaId, cardId),
+      ).rejects.toThrow(
+        new NotFoundException(
+          `Card meaning not found for tarotista ${tarotistaId} and card ${cardId}`,
+        ),
       );
     });
   });

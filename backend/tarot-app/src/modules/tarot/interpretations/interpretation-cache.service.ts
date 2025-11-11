@@ -344,8 +344,8 @@ export class InterpretationCacheService {
       'CacheInvalidation',
     );
 
-    // Por ahora, invalidación en cascada es igual a invalidar todo el tarotista
-    // En el futuro podría ser más selectivo dependiendo del tipo de cambio
+    // For now, cascade invalidation is equivalent to invalidating all tarotista cache
+    // In the future, it could be more selective depending on the type of change
     return this.invalidateTarotistaCache(tarotistaId);
   }
 

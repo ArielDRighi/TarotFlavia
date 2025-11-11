@@ -7376,7 +7376,7 @@ Implementar un sistema robusto y automático de invalidación de cache que asegu
 - ✅ Cache keys incluyen tarotistaId para invalidación selectiva
 - ✅ TTL base: 24 horas (configurable via CacheModule)
 - ✅ Consideración futura: Redis pub/sub si hay múltiples instancias (out of scope para MVP)
-- ✅ Package.json actualizado: @nestjs/event-emitter@^2.1.0
+- ✅ Package.json actualizado: @nestjs/event-emitter@^3.0.1
 
 ---
 

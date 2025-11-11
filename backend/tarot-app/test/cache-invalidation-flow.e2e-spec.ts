@@ -29,14 +29,14 @@ describe('Cache Invalidation Flow (e2e)', () => {
     it('should track invalidation metrics when config is updated', async () => {
       const tarotistaId = 1;
 
-      // 1. Obtener métricas iniciales
+      // 1. Get initial metrics
       const metricsBefore = await cacheService.getInvalidationMetrics();
       const initialByTarotista = metricsBefore.byTarotista;
 
-      // 2. Simular invalidación de cache por actualización de config
+      // 2. Simulate cache invalidation due to config update
       await cacheService.invalidateTarotistaCache(tarotistaId);
 
-      // 3. Verificar que las métricas se actualizaron
+      // 3. Verify that metrics were updated
       const metricsAfter = await cacheService.getInvalidationMetrics();
       expect(metricsAfter.byTarotista).toBe(initialByTarotista + 1);
       expect(metricsAfter.total).toBeGreaterThan(metricsBefore.total);
@@ -48,7 +48,7 @@ describe('Cache Invalidation Flow (e2e)', () => {
       const tarotistaId = 2;
       const cardId = 5;
 
-      // 1. Crear entradas de cache
+      // 1. Create cache entries
       await cacheService.saveToCache(
         'test-key-affected',
         null,
@@ -58,16 +58,16 @@ describe('Cache Invalidation Flow (e2e)', () => {
         tarotistaId,
       );
 
-      // 2. Obtener métricas iniciales
+      // 2. Get initial metrics
       const metricsBefore = await cacheService.getInvalidationMetrics();
       const initialByMeanings = metricsBefore.byMeanings;
 
-      // 3. Invalidar cache por cambio de significado
+      // 3. Invalidate cache due to meaning change
       await cacheService.invalidateTarotistaMeaningsCache(tarotistaId, [
         cardId,
       ]);
 
-      // 4. Verificar que las métricas se actualizaron
+      // 4. Verify that metrics were updated
       const metricsAfter = await cacheService.getInvalidationMetrics();
       expect(metricsAfter.byMeanings).toBe(initialByMeanings + 1);
     });
@@ -77,7 +77,7 @@ describe('Cache Invalidation Flow (e2e)', () => {
     it('should only invalidate cache entries that use the modified cards', async () => {
       const tarotistaId = 3;
 
-      // Crear múltiples entradas con diferentes cartas
+      // Create multiple entries with different cards
       await cacheService.saveToCache(
         'key-card-1',
         null,
@@ -108,7 +108,7 @@ describe('Cache Invalidation Flow (e2e)', () => {
       const statsBefore = await cacheService.getCacheStats();
       const totalBefore = statsBefore.total;
 
-      // Invalidar solo las cartas 1 y 2
+      // Invalidate only cards 1 and 2
       const deleted = await cacheService.invalidateTarotistaMeaningsCache(
         tarotistaId,
         [1, 2],
