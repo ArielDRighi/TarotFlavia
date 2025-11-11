@@ -1,12 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { ReadingsService } from './readings.service';
+import { ReadingsOrchestratorService } from './application/services/readings-orchestrator.service';
 
 @Injectable()
 export class ReadingsCleanupService {
   private readonly logger = new Logger(ReadingsCleanupService.name);
 
-  constructor(private readonly readingsService: ReadingsService) {}
+  constructor(private readonly orchestrator: ReadingsOrchestratorService) {}
 
   /**
    * Ejecuta limpieza de lecturas eliminadas hace más de 30 días
@@ -19,8 +19,7 @@ export class ReadingsCleanupService {
     );
 
     try {
-      const deletedCount =
-        await this.readingsService.cleanupOldDeletedReadings();
+      const deletedCount = await this.orchestrator.cleanupOldDeletedReadings();
 
       if (deletedCount > 0) {
         this.logger.log(

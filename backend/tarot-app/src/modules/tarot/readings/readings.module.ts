@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ReadingsService } from './readings.service';
 import { ReadingsController } from './readings.controller';
 import { ReadingsAdminController } from './readings-admin.controller';
 import { ReadingsCleanupService } from './readings-cleanup.service';
@@ -16,6 +15,24 @@ import { CardsModule } from '../cards/cards.module';
 import { SpreadsModule } from '../spreads/spreads.module';
 import { PredefinedQuestionsModule } from '../../predefined-questions/predefined-questions.module';
 import { UsageLimitsModule } from '../../usage-limits/usage-limits.module';
+
+// ==================== Clean Architecture ====================
+// Repositories
+import { TypeOrmReadingRepository } from './infrastructure/repositories/typeorm-reading.repository';
+
+// Services
+import { ReadingValidatorService } from './application/services/reading-validator.service';
+import { ReadingShareService } from './application/services/reading-share.service';
+import { ReadingsOrchestratorService } from './application/services/readings-orchestrator.service';
+
+// Use Cases
+import { CreateReadingUseCase } from './application/use-cases/create-reading.use-case';
+import { ListReadingsUseCase } from './application/use-cases/list-readings.use-case';
+import { GetReadingUseCase } from './application/use-cases/get-reading.use-case';
+import { ShareReadingUseCase } from './application/use-cases/share-reading.use-case';
+import { RegenerateReadingUseCase } from './application/use-cases/regenerate-reading.use-case';
+import { DeleteReadingUseCase } from './application/use-cases/delete-reading.use-case';
+import { RestoreReadingUseCase } from './application/use-cases/restore-reading.use-case';
 
 @Module({
   imports: [
@@ -33,11 +50,31 @@ import { UsageLimitsModule } from '../../usage-limits/usage-limits.module';
     SharedReadingsController,
   ],
   providers: [
-    ReadingsService,
     ReadingsCleanupService,
     RequiresPremiumForCustomQuestionGuard,
     ReadingsCacheInterceptor,
+
+    // Clean Architecture
+    // Repository
+    {
+      provide: 'IReadingRepository',
+      useClass: TypeOrmReadingRepository,
+    },
+
+    // Services
+    ReadingValidatorService,
+    ReadingShareService,
+    ReadingsOrchestratorService,
+
+    // Use Cases
+    CreateReadingUseCase,
+    ListReadingsUseCase,
+    GetReadingUseCase,
+    ShareReadingUseCase,
+    RegenerateReadingUseCase,
+    DeleteReadingUseCase,
+    RestoreReadingUseCase,
   ],
-  exports: [ReadingsService],
+  exports: [ReadingsOrchestratorService],
 })
 export class ReadingsModule {}

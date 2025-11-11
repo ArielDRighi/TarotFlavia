@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ExecutionContext, ForbiddenException } from '@nestjs/common';
-import { RequiresPremiumForCustomQuestionGuard } from './requires-premium-for-custom-question.guard';
-import { UserPlan } from '../../../users/entities/user.entity';
+import { RequiresPremiumForCustomQuestionGuard } from '../../src/modules/tarot/readings/guards/requires-premium-for-custom-question.guard';
+import { UserPlan } from '../../src/modules/users/entities/user.entity';
 
 describe('RequiresPremiumForCustomQuestionGuard', () => {
   let guard: RequiresPremiumForCustomQuestionGuard;

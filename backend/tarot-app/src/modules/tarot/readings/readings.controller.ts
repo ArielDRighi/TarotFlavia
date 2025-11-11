@@ -31,7 +31,7 @@ import {
   CheckUsageLimit,
   UsageFeature,
 } from '../../usage-limits';
-import { ReadingsService } from './readings.service';
+import { ReadingsOrchestratorService } from './application/services/readings-orchestrator.service';
 import { CreateReadingDto } from './dto/create-reading.dto';
 import { QueryReadingsDto } from './dto/query-readings.dto';
 import { PaginatedReadingsResponseDto } from './dto/paginated-readings-response.dto';
@@ -41,7 +41,7 @@ import { User } from '../../users/entities/user.entity';
 @ApiTags('Lecturas de Tarot')
 @Controller('readings')
 export class ReadingsController {
-  constructor(private readonly readingsService: ReadingsService) {}
+  constructor(private readonly orchestrator: ReadingsOrchestratorService) {}
 
   @UseGuards(
     JwtAuthGuard,
@@ -81,7 +81,7 @@ export class ReadingsController {
     @Body() createReadingDto: CreateReadingDto,
   ) {
     const user = { id: req.user.userId } as User;
-    return this.readingsService.create(user, createReadingDto);
+    return this.orchestrator.create(user, createReadingDto);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -98,7 +98,7 @@ export class ReadingsController {
   })
   async getTrashedReadings(@Request() req: { user: { userId: number } }) {
     const userId = req.user.userId;
-    return this.readingsService.findTrashedReadings(userId);
+    return this.orchestrator.findTrashedReadings(userId);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -141,12 +141,6 @@ export class ReadingsController {
     description: 'Filtrar por ID de categoría',
   })
   @ApiQuery({
-    name: 'spreadId',
-    required: false,
-    type: Number,
-    description: 'Filtrar por ID de spread',
-  })
-  @ApiQuery({
     name: 'dateFrom',
     required: false,
     type: String,
@@ -167,8 +161,8 @@ export class ReadingsController {
     @Request() req: { user: { userId: number } },
     @Query() queryDto: QueryReadingsDto,
   ): Promise<PaginatedReadingsResponseDto> {
-    const userId = req.user.userId;
-    return this.readingsService.findAll(userId, queryDto);
+    const user = { id: req.user.userId } as User;
+    return this.orchestrator.findAll(user, queryDto);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -186,7 +180,7 @@ export class ReadingsController {
     const userId = req.user.userId;
     const isAdmin = req.user.isAdmin || false;
 
-    return this.readingsService.findOne(id, userId, isAdmin);
+    return this.orchestrator.findOne(id, userId, isAdmin);
   }
 
   @UseGuards(JwtAuthGuard, CheckUsageLimitGuard)
@@ -222,7 +216,7 @@ export class ReadingsController {
     @Param('id', ParseIntPipe) id: number,
   ) {
     const userId = req.user.userId;
-    return this.readingsService.regenerateInterpretation(id, userId);
+    return this.orchestrator.regenerateInterpretation(id, userId);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -252,7 +246,7 @@ export class ReadingsController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<{ message: string }> {
     const userId = req.user.userId;
-    await this.readingsService.remove(id, userId);
+    await this.orchestrator.remove(id, userId);
     return { message: 'Lectura eliminada con éxito' };
   }
 
@@ -287,7 +281,7 @@ export class ReadingsController {
     @Param('id', ParseIntPipe) id: number,
   ) {
     const userId = req.user.userId;
-    return this.readingsService.restore(id, userId);
+    return this.orchestrator.restore(id, userId);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -317,7 +311,7 @@ export class ReadingsController {
     @Param('id', ParseIntPipe) id: number,
   ) {
     const userId = req.user.userId;
-    return this.readingsService.shareReading(id, userId);
+    return this.orchestrator.shareReading(id, userId);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -347,6 +341,6 @@ export class ReadingsController {
     @Param('id', ParseIntPipe) id: number,
   ) {
     const userId = req.user.userId;
-    return this.readingsService.unshareReading(id, userId);
+    return this.orchestrator.unshareReading(id, userId);
   }
 }

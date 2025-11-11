@@ -1,6 +1,6 @@
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
-import { CreateReadingDto } from './create-reading.dto';
+import { CreateReadingDto } from '../../src/modules/tarot/readings/dto/create-reading.dto';
 
 describe('CreateReadingDto', () => {
   describe('Validación de preguntas predefinidas vs custom', () => {

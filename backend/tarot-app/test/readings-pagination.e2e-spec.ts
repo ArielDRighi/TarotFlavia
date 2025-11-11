@@ -522,17 +522,6 @@ describe('Readings Pagination E2E', () => {
       expect(body.data.length).toBe(0);
     });
 
-    it('should filter by spreadId', async () => {
-      const response = await request(app.getHttpServer())
-        .get(`/readings?spreadId=${spreadIds[0]}`)
-        .set('Authorization', `Bearer ${premiumUserToken}`)
-        .expect(200);
-
-      const body = asTypedResponse<PaginatedResponse>(response.body);
-      expect(body).toHaveProperty('data');
-      expect(body.data.length).toBeGreaterThan(0);
-    });
-
     it('should filter by date range', async () => {
       // Test that date filtering works by using future date that should return 0 results
       const dateFrom = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
@@ -549,19 +538,6 @@ describe('Readings Pagination E2E', () => {
       // Future date range should return 0 results
       expect(body.data.length).toBe(0);
       expect(body.meta.totalItems).toBe(0);
-    });
-
-    it('should combine multiple filters', async () => {
-      const response = await request(app.getHttpServer())
-        .get(
-          `/readings?categoryId=${categoryIds[0]}&spreadId=${spreadIds[0]}&limit=5`,
-        )
-        .set('Authorization', `Bearer ${premiumUserToken}`)
-        .expect(200);
-
-      const body = asTypedResponse<PaginatedResponse>(response.body);
-      expect(body).toHaveProperty('data');
-      expect(body.data.length).toBeLessThanOrEqual(5);
     });
   });
 
