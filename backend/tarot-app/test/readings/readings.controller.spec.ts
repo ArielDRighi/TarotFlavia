@@ -1,16 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Reflector } from '@nestjs/core';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { ReadingsController } from './readings.controller';
-import { ReadingsOrchestratorService } from './application/services/readings-orchestrator.service';
-import { CreateReadingDto } from './dto/create-reading.dto';
-import { QueryReadingsDto } from './dto/query-readings.dto';
-import { User } from '../../users/entities/user.entity';
-import { TarotReading } from './entities/tarot-reading.entity';
-import { TarotDeck } from '../decks/entities/tarot-deck.entity';
-import { CheckUsageLimitGuard } from '../../usage-limits/guards/check-usage-limit.guard';
-import { IncrementUsageInterceptor } from '../../usage-limits/interceptors/increment-usage.interceptor';
-import { UsageLimitsService } from '../../usage-limits/usage-limits.service';
+import { ReadingsController } from '../../src/modules/tarot/readings/readings.controller';
+import { ReadingsOrchestratorService } from '../../src/modules/tarot/readings/application/services/readings-orchestrator.service';
+import { CreateReadingDto } from '../../src/modules/tarot/readings/dto/create-reading.dto';
+import { QueryReadingsDto } from '../../src/modules/tarot/readings/dto/query-readings.dto';
+import { User } from '../../src/modules/users/entities/user.entity';
+import { TarotReading } from '../../src/modules/tarot/readings/entities/tarot-reading.entity';
+import { TarotDeck } from '../../src/modules/tarot/decks/entities/tarot-deck.entity';
+import { CheckUsageLimitGuard } from '../../src/modules/usage-limits/guards/check-usage-limit.guard';
+import { IncrementUsageInterceptor } from '../../src/modules/usage-limits/interceptors/increment-usage.interceptor';
+import { UsageLimitsService } from '../../src/modules/usage-limits/usage-limits.service';
 
 describe('ReadingsController', () => {
   let controller: ReadingsController;
