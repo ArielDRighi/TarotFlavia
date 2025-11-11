@@ -16,6 +16,7 @@ import { OpenAIProvider } from './infrastructure/providers/openai.provider';
 import { TarotistaConfig } from '../tarotistas/entities/tarotista-config.entity';
 import { TarotCard } from '../tarot/cards/entities/tarot-card.entity';
 import { TarotistaCardMeaning } from '../tarotistas/entities/tarotista-card-meaning.entity';
+import { Tarotista } from '../tarotistas/entities/tarotista.entity';
 
 // External dependency for AIProviderService
 import { AIUsageModule } from '../ai-usage/ai-usage.module';
@@ -28,6 +29,7 @@ import { AIUsageModule } from '../ai-usage/ai-usage.module';
       TarotistaConfig,
       TarotCard,
       TarotistaCardMeaning,
+      Tarotista,
     ]),
     AIUsageModule,
   ],
