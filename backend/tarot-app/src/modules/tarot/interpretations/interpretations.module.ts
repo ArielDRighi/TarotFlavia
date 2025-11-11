@@ -4,6 +4,7 @@ import { HttpModule } from '@nestjs/axios';
 import { ConfigModule } from '@nestjs/config';
 import { InterpretationsService } from './interpretations.service';
 import { InterpretationsController } from './interpretations.controller';
+import { CacheAdminController } from './cache-admin.controller';
 import { TarotInterpretation } from './entities/tarot-interpretation.entity';
 import { CachedInterpretation } from './entities/cached-interpretation.entity';
 import { AIProviderService } from './ai-provider.service';
@@ -33,7 +34,7 @@ import { TarotCard } from '../cards/entities/tarot-card.entity';
     ConfigModule,
     AIUsageModule,
   ],
-  controllers: [InterpretationsController],
+  controllers: [InterpretationsController, CacheAdminController],
   providers: [
     InterpretationsService,
     AIProviderService,
