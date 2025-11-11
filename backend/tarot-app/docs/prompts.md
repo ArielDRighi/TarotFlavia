@@ -87,7 +87,8 @@ npm run start:dev  # Probar endpoints manualmente
 - Borrador PR con estructura del plan
 
 **Métricas de Éxito (todas obligatorias):**
-✅ Build sin errores
+
+✅ Lint, format, Build sin errores, todos los tipos de tests (unit + e2e) (por ahora e2e de a uno, ya que existen problemas al ejecutarlos en paralelo)
 ✅ Tests pasan (unit + e2e)
 ✅ Coverage >= baseline
 ✅ 0 dependencias circulares
