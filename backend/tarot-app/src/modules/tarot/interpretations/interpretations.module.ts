@@ -4,12 +4,8 @@ import { HttpModule } from '@nestjs/axios';
 import { ConfigModule } from '@nestjs/config';
 import { InterpretationsService } from './interpretations.service';
 import { InterpretationsController } from './interpretations.controller';
-import { CacheAdminController } from './cache-admin.controller';
 import { TarotInterpretation } from './entities/tarot-interpretation.entity';
-import { CachedInterpretation } from './entities/cached-interpretation.entity';
 import { AIProviderService } from './ai-provider.service';
-import { InterpretationCacheService } from './interpretation-cache.service';
-import { CacheCleanupService } from './cache-cleanup.service';
 import { PromptBuilderService } from './prompt-builder.service';
 import { GroqProvider } from './providers/groq.provider';
 import { DeepSeekProvider } from './providers/deepseek.provider';
@@ -19,12 +15,12 @@ import { TarotistaConfig } from '../../tarotistas/entities/tarotista-config.enti
 import { TarotistaCardMeaning } from '../../tarotistas/entities/tarotista-card-meaning.entity';
 import { Tarotista } from '../../tarotistas/entities/tarotista.entity';
 import { TarotCard } from '../cards/entities/tarot-card.entity';
+import { CacheModule } from '../../cache/cache.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       TarotInterpretation,
-      CachedInterpretation,
       TarotistaConfig,
       TarotistaCardMeaning,
       Tarotista,
@@ -33,23 +29,17 @@ import { TarotCard } from '../cards/entities/tarot-card.entity';
     HttpModule,
     ConfigModule,
     AIUsageModule,
+    CacheModule,
   ],
-  controllers: [InterpretationsController, CacheAdminController],
+  controllers: [InterpretationsController],
   providers: [
     InterpretationsService,
     AIProviderService,
-    InterpretationCacheService,
-    CacheCleanupService,
     PromptBuilderService,
     GroqProvider,
     DeepSeekProvider,
     OpenAIProvider,
   ],
-  exports: [
-    InterpretationsService,
-    AIProviderService,
-    InterpretationCacheService,
-    PromptBuilderService,
-  ],
+  exports: [InterpretationsService, AIProviderService, PromptBuilderService],
 })
 export class InterpretationsModule {}

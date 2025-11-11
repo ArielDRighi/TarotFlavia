@@ -8,7 +8,7 @@ import { HttpService } from '@nestjs/axios';
 import { TarotCard } from '../cards/entities/tarot-card.entity';
 import { AIProviderService } from './ai-provider.service';
 import { AIProviderType } from './ai-provider.interface';
-import { InterpretationCacheService } from './interpretation-cache.service';
+import { InterpretationCacheService } from '../../cache/application/services/interpretation-cache.service';
 import { PromptBuilderService } from './prompt-builder.service';
 
 describe('InterpretationsService', () => {

@@ -6,7 +6,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { User, UserRole } from '../src/modules/users/entities/user.entity';
 import { TarotReading } from '../src/modules/tarot/readings/entities/tarot-reading.entity';
 import { Tarotista } from '../src/modules/tarotistas/entities/tarotista.entity';
-import { CachedInterpretation } from '../src/modules/tarot/interpretations/entities/cached-interpretation.entity';
+import { CachedInterpretation } from '../src/modules/cache/infrastructure/entities/cached-interpretation.entity';
 import { HistoricalDataMigration } from '../migrate-historical-data';
 
 describe('Historical Data Migration (E2E)', () => {
@@ -138,7 +138,7 @@ describe('Historical Data Migration (E2E)', () => {
         interpretation_text: 'test',
         hit_count: 0,
         expires_at: new Date(Date.now() + 86400000),
-      });
+      } as Partial<CachedInterpretation>);
 
       const legacyCacheEntries = await cacheRepository
         .createQueryBuilder('cache')
@@ -158,7 +158,7 @@ describe('Historical Data Migration (E2E)', () => {
         interpretation_text: 'test',
         hit_count: 0,
         expires_at: new Date(Date.now() + 86400000),
-      });
+      } as Partial<CachedInterpretation>);
 
       await migration.migrateCacheKeys(flaviaTarotistaId);
 
@@ -179,7 +179,7 @@ describe('Historical Data Migration (E2E)', () => {
         interpretation_text: 'Test interpretation to preserve',
         hit_count: 5,
         expires_at: new Date(Date.now() + 86400000),
-      });
+      } as Partial<CachedInterpretation>);
 
       await migration.migrateCacheKeys(flaviaTarotistaId);
 
@@ -205,7 +205,7 @@ describe('Historical Data Migration (E2E)', () => {
         interpretation_text: 'test',
         hit_count: 0,
         expires_at: new Date(Date.now() + 86400000),
-      });
+      } as Partial<CachedInterpretation>);
 
       await migration.migrateCacheKeys(flaviaTarotistaId);
 
@@ -376,7 +376,7 @@ describe('Historical Data Migration (E2E)', () => {
         interpretation_text: 'test',
         hit_count: 0,
         expires_at: new Date(Date.now() + 86400000),
-      });
+      } as Partial<CachedInterpretation>);
 
       await migration.migrateCacheKeys(flaviaTarotistaId);
       await migration.rollbackCacheMigration();

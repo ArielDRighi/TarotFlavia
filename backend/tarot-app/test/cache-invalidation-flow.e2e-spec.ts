@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
-import { InterpretationCacheService } from '../src/modules/tarot/interpretations/interpretation-cache.service';
+import { InterpretationCacheService } from '../src/modules/cache/application/services/interpretation-cache.service';
 
 describe('Cache Invalidation Flow (e2e)', () => {
   let app: INestApplication<App>;

@@ -9,7 +9,7 @@ import {
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { AdminGuard } from '../../auth/guards/admin.guard';
 import { InterpretationsService } from './interpretations.service';
-import { InterpretationCacheService } from './interpretation-cache.service';
+import { InterpretationCacheService } from '../../cache/application/services/interpretation-cache.service';
 import { GenerateInterpretationDto } from './dto/generate-interpretation.dto';
 
 @ApiTags('Interpretaciones')

@@ -5,9 +5,9 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { createHash } from 'crypto';
 import { OnEvent } from '@nestjs/event-emitter';
-import { CachedInterpretation } from './entities/cached-interpretation.entity';
-import { TarotistaConfig } from '../../tarotistas/entities/tarotista-config.entity';
-import { TarotistaCardMeaning } from '../../tarotistas/entities/tarotista-card-meaning.entity';
+import { CachedInterpretation } from '../../infrastructure/entities/cached-interpretation.entity';
+import { TarotistaConfig } from '../../../tarotistas/entities/tarotista-config.entity';
+import { TarotistaCardMeaning } from '../../../tarotistas/entities/tarotista-card-meaning.entity';
 
 interface CardCombination {
   card_id: string;
