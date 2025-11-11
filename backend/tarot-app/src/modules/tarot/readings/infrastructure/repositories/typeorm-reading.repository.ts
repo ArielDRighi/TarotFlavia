@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import type { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import {
   IReadingRepository,
   PaginationOptions,
@@ -149,12 +150,15 @@ export class TypeOrmReadingRepository implements IReadingRepository {
   }
 
   async update(id: number, data: Partial<TarotReading>): Promise<TarotReading> {
-    // TypeORM update requiere un tipo específico, usamos any para simplificar
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    await this.readingRepo.update(id, data as any);
+    await this.readingRepo.update(
+      id,
+      data as QueryDeepPartialEntity<TarotReading>,
+    );
     const updated = await this.findById(id);
     if (!updated) {
-      throw new Error(`Reading with ID ${id} not found after update`);
+      throw new NotFoundException(
+        `Reading with ID ${id} not found after update`,
+      );
     }
     return updated;
   }

@@ -21,9 +21,14 @@ export interface IReadingRepository {
 export interface PaginationOptions {
   page?: number;
   limit?: number;
-  filters?: Record<string, any>;
+  filters?: ReadingFilters;
   sortBy?: string;
   sortOrder?: 'ASC' | 'DESC';
   dateFrom?: string;
   dateTo?: string;
+}
+
+export interface ReadingFilters {
+  categoryId?: number;
+  // Future filters can be added here with proper types
 }

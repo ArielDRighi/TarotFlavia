@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 
@@ -43,6 +43,9 @@ export class ReadingShareService {
       attempts++;
     }
 
-    throw new Error('No se pudo generar un token único. Intente nuevamente.');
+    throw new HttpException(
+      'No se pudo generar un token único. Intente nuevamente.',
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
   }
 }

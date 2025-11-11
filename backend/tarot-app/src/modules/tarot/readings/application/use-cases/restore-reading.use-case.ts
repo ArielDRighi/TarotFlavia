@@ -1,4 +1,4 @@
-import { Injectable, Inject, Logger } from '@nestjs/common';
+import { Injectable, Inject, Logger, NotFoundException } from '@nestjs/common';
 import { IReadingRepository } from '../../domain/interfaces/reading-repository.interface';
 import { ReadingValidatorService } from '../services/reading-validator.service';
 import { TarotReading } from '../../entities/tarot-reading.entity';
@@ -30,7 +30,9 @@ export class RestoreReadingUseCase {
     const restored = await this.readingRepo.findById(readingId);
 
     if (!restored) {
-      throw new Error(`Reading with ID ${readingId} not found after restore`);
+      throw new NotFoundException(
+        `Reading with ID ${readingId} not found after restore`,
+      );
     }
 
     this.logger.log(`Reading ${readingId} restored by user ${userId}`);

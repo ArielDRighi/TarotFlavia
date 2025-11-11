@@ -2,6 +2,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import {
   IReadingRepository,
   PaginationOptions,
+  ReadingFilters,
 } from '../../domain/interfaces/reading-repository.interface';
 import { QueryReadingsDto } from '../../dto/query-readings.dto';
 import { PaginatedReadingsResponseDto } from '../../dto/paginated-readings-response.dto';
@@ -27,7 +28,7 @@ export class ListReadingsUseCase {
     const sortOrder = queryDto?.sortOrder ?? 'DESC';
 
     // Construir filtros
-    const filters: Record<string, any> = {};
+    const filters: ReadingFilters = {};
     if (queryDto?.categoryId !== undefined) {
       filters.categoryId = queryDto.categoryId;
     }
