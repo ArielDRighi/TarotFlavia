@@ -76,15 +76,9 @@ export class QueryReadingsDto {
   @Min(1)
   categoryId?: number;
 
-  @ApiPropertyOptional({
-    description: 'Filtrar por ID de tipo de tirada (spread)',
-    example: 1,
-  })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  spreadId?: number;
+  // NOTE: spreadId filter removed - TarotReading entity has no spread relation
+  // Spreads are used during reading creation but not stored as a relation
+  // See: https://github.com/ArielDRighi/TarotFlavia/commit/c792521
 
   @ApiPropertyOptional({
     description: 'Fecha desde (ISO 8601)',

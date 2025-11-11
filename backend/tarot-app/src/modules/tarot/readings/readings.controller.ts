@@ -141,12 +141,6 @@ export class ReadingsController {
     description: 'Filtrar por ID de categoría',
   })
   @ApiQuery({
-    name: 'spreadId',
-    required: false,
-    type: Number,
-    description: 'Filtrar por ID de spread',
-  })
-  @ApiQuery({
     name: 'dateFrom',
     required: false,
     type: String,
