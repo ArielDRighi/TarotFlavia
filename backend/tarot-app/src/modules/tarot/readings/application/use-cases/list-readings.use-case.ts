@@ -20,7 +20,10 @@ export class ListReadingsUseCase {
   ): Promise<PaginatedReadingsResponseDto> {
     const page = queryDto?.page ?? 1;
     const limit = queryDto?.limit ?? 10;
-    const sortBy = queryDto?.sortBy ?? 'createdAt';
+
+    // Map snake_case from DTO to camelCase for entity
+    const sortByRaw = queryDto?.sortBy ?? 'created_at';
+    const sortBy = sortByRaw === 'created_at' ? 'createdAt' : 'updatedAt';
     const sortOrder = queryDto?.sortOrder ?? 'DESC';
 
     // Construir filtros
@@ -28,6 +31,8 @@ export class ListReadingsUseCase {
     if (queryDto?.categoryId !== undefined) {
       filters.categoryId = queryDto.categoryId;
     }
+    // NOTE: spreadId is ignored because TarotReading entity doesn't have spread relation
+    // This matches legacy behavior in readings.service.ts applyReadingFilters()
 
     const options: PaginationOptions = {
       page,
@@ -35,6 +40,8 @@ export class ListReadingsUseCase {
       sortBy,
       sortOrder,
       filters,
+      dateFrom: queryDto?.dateFrom,
+      dateTo: queryDto?.dateTo,
     };
 
     // Obtener lecturas del usuario

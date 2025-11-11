@@ -14,10 +14,11 @@ export class RestoreReadingUseCase {
   ) {}
 
   async execute(readingId: number, userId: number): Promise<TarotReading> {
-    // Verificar ownership
+    // Verificar ownership (including deleted readings)
     const reading = await this.validator.validateReadingOwnership(
       readingId,
       userId,
+      true, // includeDeleted
     );
 
     // Verificar que esté eliminada

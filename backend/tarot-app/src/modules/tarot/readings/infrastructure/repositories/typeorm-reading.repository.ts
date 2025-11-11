@@ -39,6 +39,8 @@ export class TypeOrmReadingRepository implements IReadingRepository {
       sortBy = 'createdAt',
       sortOrder = 'DESC',
       filters,
+      dateFrom,
+      dateTo,
     } = options || {};
 
     const skip = (page - 1) * limit;
@@ -62,6 +64,14 @@ export class TypeOrmReadingRepository implements IReadingRepository {
           [key]: value as string | number | boolean,
         });
       });
+    }
+
+    // Aplicar filtros de fecha
+    if (dateFrom) {
+      query.andWhere('reading.createdAt >= :dateFrom', { dateFrom });
+    }
+    if (dateTo) {
+      query.andWhere('reading.createdAt <= :dateTo', { dateTo });
     }
 
     return query.getManyAndCount();

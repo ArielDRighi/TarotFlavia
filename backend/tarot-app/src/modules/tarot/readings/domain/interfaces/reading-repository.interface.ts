@@ -24,4 +24,6 @@ export interface PaginationOptions {
   filters?: Record<string, any>;
   sortBy?: string;
   sortOrder?: 'ASC' | 'DESC';
+  dateFrom?: string;
+  dateTo?: string;
 }

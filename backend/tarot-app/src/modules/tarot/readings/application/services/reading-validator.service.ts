@@ -3,6 +3,8 @@ import {
   BadRequestException,
   NotFoundException,
   ForbiddenException,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -43,11 +45,18 @@ export class ReadingValidatorService {
   async validateReadingOwnership(
     readingId: number,
     userId: number,
+    includeDeleted = false,
   ): Promise<TarotReading> {
-    const reading = await this.readingRepo.findOne({
-      where: { id: readingId },
-      relations: ['user'],
-    });
+    const queryBuilder = this.readingRepo
+      .createQueryBuilder('reading')
+      .leftJoinAndSelect('reading.user', 'user')
+      .where('reading.id = :id', { id: readingId });
+
+    if (includeDeleted) {
+      queryBuilder.withDeleted();
+    }
+
+    const reading = await queryBuilder.getOne();
 
     if (!reading) {
       throw new NotFoundException(`Reading with ID ${readingId} not found`);
@@ -75,8 +84,9 @@ export class ReadingValidatorService {
   validateRegenerationCount(reading: TarotReading): void {
     const MAX_REGENERATIONS = 3;
     if (reading.regenerationCount >= MAX_REGENERATIONS) {
-      throw new BadRequestException(
+      throw new HttpException(
         `Has alcanzado el máximo de regeneraciones (${MAX_REGENERATIONS}) para esta lectura`,
+        HttpStatus.TOO_MANY_REQUESTS,
       );
     }
   }

@@ -1,13 +1,24 @@
 import { Injectable, Inject, Logger, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { IReadingRepository } from '../../domain/interfaces/reading-repository.interface';
 import { ReadingValidatorService } from '../services/reading-validator.service';
 import { TarotReading } from '../../entities/tarot-reading.entity';
+import { TarotInterpretation } from '../../../interpretations/entities/tarot-interpretation.entity';
 import { InterpretationsService } from '../../../interpretations/interpretations.service';
 import { CardsService } from '../../../cards/cards.service';
 import { SpreadsService } from '../../../spreads/spreads.service';
 import { PredefinedQuestionsService } from '../../../../predefined-questions/predefined-questions.service';
 
 const DEFAULT_SPREAD_ID = 1;
+
+// AI config for regeneration
+const REGENERATION_AI_CONFIG = {
+  model: 'llama-3.3-70b-versatile',
+  provider: 'groq',
+  temperature: 0.9, // Higher temperature for more creative variations
+  maxTokens: 2000,
+};
 
 @Injectable()
 export class RegenerateReadingUseCase {
@@ -16,6 +27,8 @@ export class RegenerateReadingUseCase {
   constructor(
     @Inject('IReadingRepository')
     private readonly readingRepo: IReadingRepository,
+    @InjectRepository(TarotInterpretation)
+    private readonly interpretationsRepo: Repository<TarotInterpretation>,
     private readonly validator: ReadingValidatorService,
     private readonly interpretationsService: InterpretationsService,
     private readonly cardsService: CardsService,
@@ -83,6 +96,16 @@ export class RegenerateReadingUseCase {
       reading.id,
       tarotistaId,
     );
+
+    // Crear nueva entrada de interpretación
+    const newInterpretation = this.interpretationsRepo.create({
+      reading: { id: reading.id } as TarotReading,
+      content: result.interpretation,
+      modelUsed: REGENERATION_AI_CONFIG.model,
+      aiConfig: REGENERATION_AI_CONFIG,
+    });
+
+    await this.interpretationsRepo.save(newInterpretation);
 
     // Actualizar la lectura
     const updatedReading = await this.readingRepo.update(readingId, {
