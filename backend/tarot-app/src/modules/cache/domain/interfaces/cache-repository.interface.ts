@@ -1,3 +1,7 @@
+// TODO: TASK-ARCH-006 (Fase 3 - Separar Capas) - Replace infrastructure entity import
+// with pure domain model. Currently violates clean architecture dependency rule,
+// but acceptable for Phase 1 (Quick Wins) incremental refactoring approach.
+// See PLAN_REFACTORIZACION.md - Fase 3 for domain model creation strategy.
 import { CachedInterpretation } from '../../infrastructure/entities/cached-interpretation.entity';
 
 export interface ICacheRepository {

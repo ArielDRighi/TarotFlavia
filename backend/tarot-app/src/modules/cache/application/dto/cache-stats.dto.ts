@@ -13,6 +13,10 @@ export class CacheStatsDto {
   @ApiProperty({ description: 'Cache miss count', example: 50 })
   misses: number;
 
-  @ApiProperty({ description: 'Hit rate percentage', example: 90.91 })
-  hitRate: number;
+  // TODO: TASK-ARCH-001 - Implement proper miss tracking before adding hitRate
+  // Currently misses is hardcoded to 0 in repository, making hit rate calculation
+  // inaccurate. See PR feedback: https://github.com/ArielDRighi/TarotFlavia/pull/XXX
+  // Uncomment when miss tracking is implemented:
+  // @ApiProperty({ description: 'Hit rate percentage', example: 90.91 })
+  // hitRate: number;
 }
