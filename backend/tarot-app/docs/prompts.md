@@ -10,6 +10,8 @@ Autonomía Total: Ejecuta la tarea de principio a fin sin solicitar confirmacion
 
 Rama: Estás en develop. Crea la rama feature/TASK-00x-descripcion (usa la nomenclatura de las ramas existentes nombradas segun gitflow) y trabaja en ella.
 
+Análisis Arquitectural Previo: Antes de crear cualquier archivo nuevo, analiza el documento ARQUITECTURA_ANALISIS.md y TAREAS_REFACTORIZACION_ARQUITECTURA.md para determinar la ubicación correcta según las recomendaciones arquitecturales. Los nuevos módulos deben seguir la estructura domain/application/infrastructure y ubicarse en src/modules/. Si la tarea implica crear un nuevo módulo o servicio, verifica que no viole el principio de responsabilidad única y que esté correctamente ubicado según el análisis arquitectural.
+
 Metodología (TDD Estricto): Sigue un ciclo TDD riguroso: _ Escribe un test (debe fallar). _ Escribe el código mínimo para que el test pase. \* Refactoriza.
 
 Ciclo de Calidad (Pre-Commit): Al finalizar la implementación, ejecuta los scripts de lint, format y build del proyecto. Todos los tipos de tests completos. Corrige todos los errores y warnings que surjan.
