@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { PromptBuilderService } from './prompt-builder.service';
-import { TarotistaConfig } from '../../tarotistas/entities/tarotista-config.entity';
-import { TarotCard } from '../cards/entities/tarot-card.entity';
-import { TarotistaCardMeaning } from '../../tarotistas/entities/tarotista-card-meaning.entity';
-import { Tarotista } from '../../tarotistas/entities/tarotista.entity';
+import { PromptBuilderService } from '../../src/modules/ai/application/services/prompt-builder.service';
+import { TarotistaConfig } from '../../src/modules/tarotistas/entities/tarotista-config.entity';
+import { TarotCard } from '../../src/modules/tarot/cards/entities/tarot-card.entity';
+import { TarotistaCardMeaning } from '../../src/modules/tarotistas/entities/tarotista-card-meaning.entity';
+import { Tarotista } from '../../src/modules/tarotistas/entities/tarotista.entity';
 import { NotFoundException } from '@nestjs/common';
 
 describe('PromptBuilderService', () => {

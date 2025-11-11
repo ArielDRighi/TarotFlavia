@@ -1,6 +1,9 @@
-import { retryWithBackoff } from './retry.utils';
-import { AIErrorType, AIProviderException } from './ai-error.types';
-import { AIProviderType } from '../ai-provider.interface';
+import { retryWithBackoff } from '../../src/modules/ai/infrastructure/errors/retry.utils';
+import {
+  AIErrorType,
+  AIProviderException,
+} from '../../src/modules/ai/infrastructure/errors/ai-error.types';
+import { AIProviderType } from '../../src/modules/ai/domain/interfaces/ai-provider.interface';
 
 describe('retryWithBackoff', () => {
   beforeEach(() => {

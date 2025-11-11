@@ -7,7 +7,7 @@ import {
   AIMessage,
   AIResponse,
   IAIProvider,
-} from '../ai-provider.interface';
+} from '../../domain/interfaces/ai-provider.interface';
 import { AIProviderException, AIErrorType } from '../errors/ai-error.types';
 
 @Injectable()
