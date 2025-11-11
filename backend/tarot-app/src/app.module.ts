@@ -23,6 +23,7 @@ import { UsageLimitsModule } from './modules/usage-limits/usage-limits.module';
 import { EmailModule } from './modules/email/email.module';
 import { TarotistasModule } from './modules/tarotistas/tarotistas.module';
 import { CacheModule as InterpretationCacheModule } from './modules/cache/cache.module';
+import { AIModule } from './modules/ai/ai.module';
 import { CustomThrottlerGuard } from './common/guards/custom-throttler.guard';
 import { ThrottlerExceptionFilter } from './common/filters/throttler-exception.filter';
 import databaseConfig from './config/typeorm';
@@ -69,6 +70,7 @@ import { validate } from './config/env-validator';
     UsersModule,
     TarotistasModule,
     InterpretationCacheModule,
+    AIModule,
     CardsModule,
     DecksModule,
     SpreadsModule,

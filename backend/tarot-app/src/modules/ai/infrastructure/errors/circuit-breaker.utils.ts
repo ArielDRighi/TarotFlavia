@@ -1,4 +1,4 @@
-import { AIProviderType } from '../ai-provider.interface';
+import { AIProviderType } from '../../domain/interfaces/ai-provider.interface';
 
 export enum CircuitBreakerState {
   CLOSED = 'closed',

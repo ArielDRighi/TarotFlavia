@@ -1,5 +1,8 @@
-import { CircuitBreaker, CircuitBreakerState } from './circuit-breaker.utils';
-import { AIProviderType } from '../ai-provider.interface';
+import {
+  CircuitBreaker,
+  CircuitBreakerState,
+} from '../../src/modules/ai/infrastructure/errors/circuit-breaker.utils';
+import { AIProviderType } from '../../src/modules/ai/domain/interfaces/ai-provider.interface';
 
 describe('CircuitBreaker', () => {
   let circuitBreaker: CircuitBreaker;

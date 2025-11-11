@@ -1,5 +1,8 @@
-import { AIErrorType, AIProviderException } from './ai-error.types';
-import { AIProviderType } from '../ai-provider.interface';
+import {
+  AIErrorType,
+  AIProviderException,
+} from '../../src/modules/ai/infrastructure/errors/ai-error.types';
+import { AIProviderType } from '../../src/modules/ai/domain/interfaces/ai-provider.interface';
 import { HttpStatus } from '@nestjs/common';
 
 describe('AIErrorType', () => {

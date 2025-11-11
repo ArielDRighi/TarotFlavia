@@ -1,26 +1,26 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import Groq from 'groq-sdk';
+import OpenAI from 'openai';
 import {
   AIProviderType,
   AIProviderConfig,
   AIMessage,
   AIResponse,
   IAIProvider,
-} from '../ai-provider.interface';
+} from '../../domain/interfaces/ai-provider.interface';
 import { AIProviderException, AIErrorType } from '../errors/ai-error.types';
 
 @Injectable()
-export class GroqProvider implements IAIProvider {
-  private client: Groq | null = null;
-  private readonly DEFAULT_MODEL = 'llama-3.1-70b-versatile';
-  private readonly DEFAULT_TEMPERATURE = 0.6; // Lower than GPT for more deterministic responses
-  private readonly TIMEOUT = 10000; // 10s - Groq is ultra-fast
+export class OpenAIProvider implements IAIProvider {
+  private client: OpenAI | null = null;
+  private readonly DEFAULT_MODEL = 'gpt-4o-mini';
+  private readonly DEFAULT_TEMPERATURE = 0.7; // GPT can be more creative
+  private readonly TIMEOUT = 30000; // 30s - OpenAI can be slower
 
   constructor(private readonly configService: ConfigService) {
-    const apiKey = this.configService.get<string>('GROQ_API_KEY');
-    if (apiKey && apiKey.startsWith('gsk_')) {
-      this.client = new Groq({ apiKey });
+    const apiKey = this.configService.get<string>('OPENAI_API_KEY');
+    if (apiKey && apiKey.startsWith('sk-')) {
+      this.client = new OpenAI({ apiKey });
     }
   }
 
@@ -30,9 +30,9 @@ export class GroqProvider implements IAIProvider {
   ): Promise<AIResponse> {
     if (!this.client) {
       throw new AIProviderException(
-        AIProviderType.GROQ,
+        AIProviderType.OPENAI,
         AIErrorType.INVALID_KEY,
-        'Groq client not initialized - API key missing',
+        'OpenAI client not initialized - API key missing',
         false,
         new Error('API key missing'),
       );
@@ -40,7 +40,7 @@ export class GroqProvider implements IAIProvider {
 
     const model =
       config.model ||
-      this.configService.get<string>('GROQ_MODEL') ||
+      this.configService.get<string>('OPENAI_MODEL') ||
       this.DEFAULT_MODEL;
     const temperature = config.temperature ?? this.DEFAULT_TEMPERATURE;
     const maxTokens = config.maxTokens ?? this.calculateMaxTokens(messages);
@@ -63,9 +63,9 @@ export class GroqProvider implements IAIProvider {
 
       if (!response || typeof response === 'string') {
         throw new AIProviderException(
-          AIProviderType.GROQ,
+          AIProviderType.OPENAI,
           AIErrorType.TIMEOUT,
-          'Groq request timeout exceeded (>10s)',
+          'OpenAI request timeout exceeded (>30s)',
           true,
           new Error('Timeout'),
         );
@@ -76,9 +76,9 @@ export class GroqProvider implements IAIProvider {
 
       if (!content) {
         throw new AIProviderException(
-          AIProviderType.GROQ,
+          AIProviderType.OPENAI,
           AIErrorType.SERVER_ERROR,
-          'Empty response from Groq',
+          'Empty response from OpenAI',
           true,
           new Error('Empty response'),
         );
@@ -86,7 +86,7 @@ export class GroqProvider implements IAIProvider {
 
       return {
         content,
-        provider: AIProviderType.GROQ,
+        provider: AIProviderType.OPENAI,
         model,
         tokensUsed: {
           prompt: response.usage?.prompt_tokens || 0,
@@ -96,17 +96,14 @@ export class GroqProvider implements IAIProvider {
         durationMs,
       };
     } catch (error) {
-      // If already AIProviderException, rethrow
       if (error instanceof AIProviderException) {
         throw error;
       }
 
-      // Handle Groq SDK specific errors
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
 
       // Check error object properties first, then fallback to string matching
-      // Note: Groq SDK doesn't expose structured error codes, so we combine both approaches
       const errorObj = error as Error & {
         status?: number;
         statusCode?: number;
@@ -123,9 +120,9 @@ export class GroqProvider implements IAIProvider {
         errorMessage.includes('API key')
       ) {
         throw new AIProviderException(
-          AIProviderType.GROQ,
+          AIProviderType.OPENAI,
           AIErrorType.INVALID_KEY,
-          `Groq API key invalid: ${errorMessage}`,
+          `OpenAI API key invalid: ${errorMessage}`,
           false,
           error as Error,
         );
@@ -138,9 +135,9 @@ export class GroqProvider implements IAIProvider {
         errorMessage.toLowerCase().includes('rate limit')
       ) {
         throw new AIProviderException(
-          AIProviderType.GROQ,
+          AIProviderType.OPENAI,
           AIErrorType.RATE_LIMIT,
-          `Groq rate limit exceeded: ${errorMessage}`,
+          `OpenAI rate limit exceeded: ${errorMessage}`,
           true,
           error as Error,
         );
@@ -154,9 +151,9 @@ export class GroqProvider implements IAIProvider {
         errorMessage.includes('503')
       ) {
         throw new AIProviderException(
-          AIProviderType.GROQ,
+          AIProviderType.OPENAI,
           AIErrorType.SERVER_ERROR,
-          `Groq server error: ${errorMessage}`,
+          `OpenAI server error: ${errorMessage}`,
           true,
           error as Error,
         );
@@ -168,9 +165,9 @@ export class GroqProvider implements IAIProvider {
         errorMessage.toLowerCase().includes('timeout')
       ) {
         throw new AIProviderException(
-          AIProviderType.GROQ,
+          AIProviderType.OPENAI,
           AIErrorType.TIMEOUT,
-          `Groq request timeout: ${errorMessage}`,
+          `OpenAI request timeout: ${errorMessage}`,
           true,
           error as Error,
         );
@@ -181,19 +178,18 @@ export class GroqProvider implements IAIProvider {
         errorMessage.includes('too long')
       ) {
         throw new AIProviderException(
-          AIProviderType.GROQ,
+          AIProviderType.OPENAI,
           AIErrorType.CONTEXT_LENGTH,
-          `Groq context too long: ${errorMessage}`,
+          `OpenAI context too long: ${errorMessage}`,
           false,
           error as Error,
         );
       }
 
-      // Default to network error for unknown errors
       throw new AIProviderException(
-        AIProviderType.GROQ,
+        AIProviderType.OPENAI,
         AIErrorType.NETWORK_ERROR,
-        `Groq API error: ${errorMessage}`,
+        `OpenAI API error: ${errorMessage}`,
         true,
         error as Error,
       );
@@ -206,7 +202,6 @@ export class GroqProvider implements IAIProvider {
     }
 
     try {
-      // Simple test call to verify connectivity
       await Promise.race([
         this.client.chat.completions.create({
           model: this.DEFAULT_MODEL,
@@ -222,22 +217,21 @@ export class GroqProvider implements IAIProvider {
   }
 
   getProviderType(): AIProviderType {
-    return AIProviderType.GROQ;
+    return AIProviderType.OPENAI;
   }
 
   /**
    * Calculate appropriate max_tokens based on card count
-   * Groq is free, so we can be more generous
+   * OpenAI is costly, so we're more restrictive
    */
   private calculateMaxTokens(messages: AIMessage[]): number {
-    // Estimate card count from user message length
     const userMessage = messages.find((m) => m.role === 'user')?.content || '';
     const cardCount = (userMessage.match(/Posición \d+:/g) || []).length;
 
-    if (cardCount === 1) return 500;
-    if (cardCount <= 3) return 800;
-    if (cardCount <= 5) return 1200;
-    return 1500; // 10-card spreads
+    if (cardCount === 1) return 400;
+    if (cardCount <= 3) return 600;
+    if (cardCount <= 5) return 800;
+    return 1000; // 10-card spreads
   }
 
   private timeout(ms: number): Promise<never> {

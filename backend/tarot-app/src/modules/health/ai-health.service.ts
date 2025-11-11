@@ -2,7 +2,7 @@ import { Injectable, Logger, forwardRef, Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Groq from 'groq-sdk';
 import OpenAI from 'openai';
-import { AIProviderService } from '../tarot/interpretations/ai-provider.service';
+import { AIProviderService } from '../ai/application/services/ai-provider.service';
 
 export interface AIProviderHealth {
   provider: string;

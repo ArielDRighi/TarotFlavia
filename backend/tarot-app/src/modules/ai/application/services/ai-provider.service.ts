@@ -5,20 +5,20 @@ import {
   AIMessage,
   AIResponse,
   IAIProvider,
-} from './ai-provider.interface';
-import { GroqProvider } from './providers/groq.provider';
-import { DeepSeekProvider } from './providers/deepseek.provider';
-import { OpenAIProvider } from './providers/openai.provider';
-import { AIUsageService } from '../../ai-usage/ai-usage.service';
+} from '../../domain/interfaces/ai-provider.interface';
+import { GroqProvider } from '../../infrastructure/providers/groq.provider';
+import { DeepSeekProvider } from '../../infrastructure/providers/deepseek.provider';
+import { OpenAIProvider } from '../../infrastructure/providers/openai.provider';
+import { AIUsageService } from '../../../ai-usage/ai-usage.service';
 import {
   AIProvider,
   AIUsageStatus,
-} from '../../ai-usage/entities/ai-usage-log.entity';
+} from '../../../ai-usage/entities/ai-usage-log.entity';
 import {
   CircuitBreaker,
   CircuitBreakerState,
-} from './errors/circuit-breaker.utils';
-import { retryWithBackoff } from './errors/retry.utils';
+} from '../../infrastructure/errors/circuit-breaker.utils';
+import { retryWithBackoff } from '../../infrastructure/errors/retry.utils';
 
 /**
  * AI Provider Service

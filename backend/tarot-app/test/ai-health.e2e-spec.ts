@@ -8,7 +8,7 @@ import * as request from 'supertest';
 import { ConfigService } from '@nestjs/config';
 import { AIHealthService } from '../src/modules/health/ai-health.service';
 import { AIHealthController } from '../src/modules/health/ai-health.controller';
-import { AIProviderService } from '../src/modules/tarot/interpretations/ai-provider.service';
+import { AIProviderService } from '../src/modules/ai/application/services/ai-provider.service';
 
 describe('AI Health (e2e)', () => {
   let app: INestApplication;

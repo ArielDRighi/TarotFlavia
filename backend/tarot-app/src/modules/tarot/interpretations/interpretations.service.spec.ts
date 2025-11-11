@@ -6,10 +6,10 @@ import { Tarotista } from '../../tarotistas/entities/tarotista.entity';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { TarotCard } from '../cards/entities/tarot-card.entity';
-import { AIProviderService } from './ai-provider.service';
-import { AIProviderType } from './ai-provider.interface';
+import { AIProviderService } from '../../ai/application/services/ai-provider.service';
+import { AIProviderType } from '../../ai/domain/interfaces/ai-provider.interface';
 import { InterpretationCacheService } from '../../cache/application/services/interpretation-cache.service';
-import { PromptBuilderService } from './prompt-builder.service';
+import { PromptBuilderService } from '../../ai/application/services/prompt-builder.service';
 
 describe('InterpretationsService', () => {
   let service: InterpretationsService;

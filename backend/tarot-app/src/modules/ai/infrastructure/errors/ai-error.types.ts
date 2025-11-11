@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { AIProviderType } from '../ai-provider.interface';
+import { AIProviderType } from '../../domain/interfaces/ai-provider.interface';
 
 /**
  * Enum for AI error types
