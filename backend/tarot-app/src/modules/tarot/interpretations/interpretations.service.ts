@@ -13,7 +13,7 @@ import { TarotSpread } from '../spreads/entities/tarot-spread.entity';
 import { TarotReading } from '../readings/entities/tarot-reading.entity';
 import { Tarotista } from '../../tarotistas/entities/tarotista.entity';
 import { AIProviderService } from './ai-provider.service';
-import { InterpretationCacheService } from './interpretation-cache.service';
+import { InterpretationCacheService } from '../../cache/application/services/interpretation-cache.service';
 import { PromptBuilderService } from './prompt-builder.service';
 import { TarotPrompts } from './tarot-prompts';
 

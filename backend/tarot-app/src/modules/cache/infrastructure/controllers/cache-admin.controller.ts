@@ -8,7 +8,7 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
-import { InterpretationCacheService } from './interpretation-cache.service';
+import { InterpretationCacheService } from '../../application/services/interpretation-cache.service';
 
 @ApiTags('Admin - Cache')
 @Controller('admin/cache')

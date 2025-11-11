@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CacheAdminController } from './cache-admin.controller';
-import { InterpretationCacheService } from './interpretation-cache.service';
+import { CacheAdminController } from '../../src/modules/cache/infrastructure/controllers/cache-admin.controller';
+import { InterpretationCacheService } from '../../src/modules/cache/application/services/interpretation-cache.service';
 
 describe('CacheAdminController', () => {
   let controller: CacheAdminController;

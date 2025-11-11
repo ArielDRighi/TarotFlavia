@@ -2,8 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Repository } from 'typeorm';
-import { InterpretationCacheService } from './interpretation-cache.service';
-import { CachedInterpretation } from './entities/cached-interpretation.entity';
+import { InterpretationCacheService } from '../../src/modules/cache/application/services/interpretation-cache.service';
+import { CachedInterpretation } from '../../src/modules/cache/infrastructure/entities/cached-interpretation.entity';
 
 describe('InterpretationCacheService - Invalidation', () => {
   let service: InterpretationCacheService;
