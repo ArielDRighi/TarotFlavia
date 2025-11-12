@@ -48,6 +48,7 @@ describe('AuthService', () => {
           plan: UserPlan.FREE,
         } as User);
       }),
+      update: jest.fn().mockResolvedValue({} as User),
     };
 
     jwtServiceMock = {
@@ -163,12 +164,17 @@ describe('AuthService', () => {
         isAdmin: true,
       };
 
-      // Mock findById to return the complete user
-      (usersServiceMock.findById as jest.Mock).mockResolvedValueOnce({
+      // Mock findById to return the complete user with isBanned method
+      const mockCompleteUser = {
         ...user,
         password: 'hashed_password',
         plan: UserPlan.FREE,
-      } as User);
+        roles: [],
+        isBanned: jest.fn().mockReturnValue(false),
+      } as unknown as User;
+      (usersServiceMock.findById as jest.Mock).mockResolvedValueOnce(
+        mockCompleteUser,
+      );
 
       const ipAddress = '192.168.1.1';
       const userAgent = 'Mozilla/5.0';
@@ -190,6 +196,41 @@ describe('AuthService', () => {
       }
     });
 
+    it('should update lastLogin timestamp on login', async () => {
+      const user: Partial<User> = {
+        id: 5,
+        email: 'lastlogin@example.com',
+        name: 'LastLogin User',
+        isAdmin: false,
+      };
+
+      // Mock findById to return the complete user with isBanned method
+      const mockCompleteUser = {
+        ...user,
+        password: 'hashed_password',
+        plan: UserPlan.FREE,
+        roles: [],
+        lastLogin: null,
+        isBanned: jest.fn().mockReturnValue(false),
+      } as unknown as User;
+      (usersServiceMock.findById as jest.Mock).mockResolvedValueOnce(
+        mockCompleteUser,
+      );
+
+      const ipAddress = '192.168.1.1';
+      const userAgent = 'Mozilla/5.0';
+      await service.login(user, ipAddress, userAgent);
+
+      expect(usersServiceMock.update).toHaveBeenCalled();
+      const updateCall = (usersServiceMock.update as jest.Mock).mock
+        .calls[0] as Array<unknown>;
+      expect(updateCall[0]).toBe(user.id);
+      expect(updateCall[1]).toHaveProperty('lastLogin');
+      expect((updateCall[1] as { lastLogin: Date }).lastLogin).toBeInstanceOf(
+        Date,
+      );
+    });
+
     it('should include plan information in JWT payload', async () => {
       const user: Partial<User> = {
         id: 4,
@@ -199,11 +240,16 @@ describe('AuthService', () => {
         plan: UserPlan.PREMIUM,
       };
 
-      // Mock findById to return the complete user
-      (usersServiceMock.findById as jest.Mock).mockResolvedValueOnce({
+      // Mock findById to return the complete user with isBanned method
+      const mockCompleteUser = {
         ...user,
         password: 'hashed_password',
-      } as User);
+        roles: [],
+        isBanned: jest.fn().mockReturnValue(false),
+      } as unknown as User;
+      (usersServiceMock.findById as jest.Mock).mockResolvedValueOnce(
+        mockCompleteUser,
+      );
 
       const ipAddress = '10.0.0.1';
       const userAgent = 'Chrome';

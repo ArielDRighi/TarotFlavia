@@ -3,9 +3,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { CacheModule } from '@nestjs/cache-manager';
 import { AdminDashboardController } from './admin-dashboard.controller';
 import { AdminDashboardService } from './admin-dashboard.service';
+import { AdminUsersController } from './admin-users.controller';
 import { User } from '../users/entities/user.entity';
 import { TarotReading } from '../tarot/readings/entities/tarot-reading.entity';
 import { AIUsageLog } from '../ai-usage/entities/ai-usage-log.entity';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
@@ -14,8 +16,9 @@ import { AIUsageLog } from '../ai-usage/entities/ai-usage-log.entity';
       ttl: 300000, // 5 minutos default
       max: 100, // Máximo 100 items en caché
     }),
+    UsersModule,
   ],
-  controllers: [AdminDashboardController],
+  controllers: [AdminDashboardController, AdminUsersController],
   providers: [AdminDashboardService],
   exports: [AdminDashboardService],
 })

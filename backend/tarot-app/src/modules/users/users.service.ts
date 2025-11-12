@@ -13,6 +13,9 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateUserPlanDto } from './dto/update-user-plan.dto';
 import { RefreshTokenService } from '../auth/refresh-token.service';
+import { UserQueryDto } from './dto/user-query.dto';
+import { UserListResponseDto } from './dto/user-list-response.dto';
+import { UserDetailDto } from './dto/user-detail.dto';
 
 @Injectable()
 export class UsersService {
@@ -267,5 +270,183 @@ export class UsersService {
     } catch {
       throw new InternalServerErrorException('Error removing role');
     }
+  }
+
+  /**
+   * Banea a un usuario
+   * @param userId - ID del usuario a banear
+   * @param reason - Razón del baneo
+   * @returns Usuario actualizado sin contraseña
+   * @throws NotFoundException si el usuario no existe
+   */
+  async banUser(userId: number, reason: string): Promise<UserWithoutPassword> {
+    const user = await this.findById(userId);
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    user.ban(reason);
+
+    try {
+      await this.usersRepository.save(user);
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password: _password, ...result } = user;
+      return result as UserWithoutPassword;
+    } catch {
+      throw new InternalServerErrorException('Error banning user');
+    }
+  }
+
+  /**
+   * Desbanea a un usuario
+   * @param userId - ID del usuario a desbanear
+   * @returns Usuario actualizado sin contraseña
+   * @throws NotFoundException si el usuario no existe
+   */
+  async unbanUser(userId: number): Promise<UserWithoutPassword> {
+    const user = await this.findById(userId);
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    user.unban();
+
+    try {
+      await this.usersRepository.save(user);
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password: _password, ...result } = user;
+      return result as UserWithoutPassword;
+    } catch {
+      throw new InternalServerErrorException('Error unbanning user');
+    }
+  }
+
+  /**
+   * Busca usuarios con filtros, paginación y ordenamiento
+   * @param query - Parámetros de búsqueda y filtros
+   * @returns Lista paginada de usuarios sin contraseñas
+   */
+  async findAllWithFilters(query: UserQueryDto): Promise<UserListResponseDto> {
+    const {
+      search,
+      role,
+      plan,
+      banned,
+      sortBy = 'createdAt',
+      sortOrder = 'DESC',
+      page = 1,
+      limit = 10,
+    } = query;
+
+    const queryBuilder = this.usersRepository.createQueryBuilder('user');
+
+    // Aplicar filtro de búsqueda (email o nombre)
+    if (search) {
+      queryBuilder.andWhere(
+        '(LOWER(user.email) LIKE LOWER(:search) OR LOWER(user.name) LIKE LOWER(:search))',
+        { search: `%${search}%` },
+      );
+    }
+
+    // Filtrar por rol
+    if (role) {
+      queryBuilder.andWhere(':role = ANY(user.roles)', { role });
+    }
+
+    // Filtrar por plan
+    if (plan) {
+      queryBuilder.andWhere('user.plan = :plan', { plan });
+    }
+
+    // Filtrar por estado de ban
+    if (banned !== undefined) {
+      if (banned) {
+        queryBuilder.andWhere('user.bannedAt IS NOT NULL');
+      } else {
+        queryBuilder.andWhere('user.bannedAt IS NULL');
+      }
+    }
+
+    // Ordenamiento con whitelist para prevenir SQL injection
+    const allowedSortColumns: Record<string, string> = {
+      createdAt: 'user.createdAt',
+      lastLogin: 'user.lastLogin',
+      email: 'user.email',
+      name: 'user.name',
+    };
+    const sortColumn =
+      allowedSortColumns[sortBy] || allowedSortColumns['createdAt'];
+    queryBuilder.orderBy(sortColumn, sortOrder);
+
+    // Paginación
+    const skip = (page - 1) * limit;
+    queryBuilder.skip(skip).take(limit);
+
+    const [users, totalItems] = await queryBuilder.getManyAndCount();
+
+    // Remover contraseñas
+    const usersWithoutPassword = users.map((user) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password: _password, ...result } = user;
+      return result as UserWithoutPassword;
+    });
+
+    const totalPages = Math.ceil(totalItems / limit);
+
+    return {
+      users: usersWithoutPassword,
+      meta: {
+        currentPage: page,
+        itemsPerPage: limit,
+        totalItems,
+        totalPages,
+      },
+    };
+  }
+
+  /**
+   * Obtiene información detallada de un usuario incluyendo estadísticas
+   * @param userId - ID del usuario
+   * @returns Usuario con estadísticas
+   * @throws NotFoundException si el usuario no existe
+   */
+  async getUserDetail(userId: number): Promise<UserDetailDto> {
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      relations: ['readings'],
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    // Calcular estadísticas
+    const totalReadings = user.readings?.length || 0;
+    const lastReading =
+      user.readings && user.readings.length > 0
+        ? user.readings.sort(
+            (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+          )[0]
+        : null;
+
+    // TODO(TASK-029): Implement actual AI usage count from ai_usage_logs table
+    // Currently assumes 1 interpretation per reading as a temporary measure.
+    // Expected: Query ai_usage_logs table to get accurate count of AI interpretations for the user.
+    // Temporary assumption: 1 AI interpretation per tarot reading
+    const totalAIUsage = totalReadings;
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: _password, ...userWithoutPassword } = user;
+
+    return {
+      user: userWithoutPassword as UserWithoutPassword,
+      statistics: {
+        totalReadings,
+        lastReadingDate: lastReading?.createdAt || null,
+        totalAIUsage,
+      },
+    };
   }
 }

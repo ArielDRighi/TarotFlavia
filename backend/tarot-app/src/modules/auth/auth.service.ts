@@ -62,6 +62,17 @@ export class AuthService {
       throw new UnauthorizedException('User not found');
     }
 
+    // Check if user is banned
+    if (user.isBanned()) {
+      throw new UnauthorizedException(
+        `Usuario baneado${user.banReason ? `: ${user.banReason}` : ''}`,
+      );
+    }
+
+    // Update lastLogin timestamp
+    user.lastLogin = new Date();
+    await this.usersService.update(user.id, { lastLogin: user.lastLogin });
+
     return this.generateAuthResponse(user, ipAddress, userAgent);
   }
 
@@ -97,6 +108,7 @@ export class AuthService {
       email: user.email,
       sub: user.id,
       isAdmin: user.isAdmin,
+      roles: user.roles,
       plan: user.plan,
     };
     const accessToken = this.jwtService.sign(payload);
@@ -190,6 +202,7 @@ export class AuthService {
       email: user.email,
       sub: user.id,
       isAdmin: user.isAdmin,
+      roles: user.roles,
       plan: user.plan,
     };
 
