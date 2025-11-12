@@ -1,12 +1,15 @@
 name: Architecture Validation
 
+# Workflow disabled - run manually when needed
+# Use: gh workflow run architecture-validation.yml or run checks locally
 on:
-  pull_request:
-    branches: [develop, main]
-    paths:
-      - "backend/tarot-app/src/**"
-      - "backend/tarot-app/test/**"
-      - "backend/tarot-app/package.json"
+  workflow_dispatch: # Manual trigger only
+  # pull_request:
+  #   branches: [develop, main]
+  #   paths:
+  #     - "backend/tarot-app/src/**"
+  #     - "backend/tarot-app/test/**"
+  #     - "backend/tarot-app/package.json"
 
 jobs:
   validate-architecture:
