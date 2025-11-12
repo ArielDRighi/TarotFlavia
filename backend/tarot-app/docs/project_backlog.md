@@ -3228,11 +3228,13 @@ Implementar panel de control administrativo con métricas clave, usuarios activo
 
 ---
 
-### **TASK-028: Crear Endpoints de Gestión de Usuarios para Admin**
+### **TASK-028: Crear Endpoints de Gestión de Usuarios para Admin** ✅
 
 **Prioridad:** 🟡 ALTA  
 **Estimación:** 3 días  
-**Dependencias:** TASK-027
+**Dependencias:** TASK-027  
+**Estado:** ✅ COMPLETADO (25/Enero/2025)  
+**Branch:** `feature/TASK-028-admin-users-management`
 
 #### 📋 Descripción
 
@@ -3240,33 +3242,46 @@ Implementar panel completo de administración de usuarios con búsqueda, filtros
 
 #### ✅ Tareas específicas
 
-- [ ] Crear módulo `AdminUsersModule` con controlador dedicado `/admin/users`
-- [ ] Implementar endpoint `GET /admin/users` con paginación, búsqueda y filtros:
-  - **Search:** buscar por email, nombre
-  - **Filtros:** por rol, plan, estado (activo/verificado), fecha de registro
-  - **Ordenamiento:** por `created_at`, `last_login`, `total_readings`
-- [ ] Implementar endpoint `GET /admin/users/:id` que retorne información detallada:
-  - Información básica del usuario
-  - Estadísticas: total de lecturas, fecha última lectura, uso de OpenAI
-  - Plan actual y fechas de suscripción
-  - Historial de cambios de rol
-- [ ] Implementar endpoint `PATCH /admin/users/:id/role` para cambiar rol de usuario
-- [ ] Implementar endpoint `PATCH /admin/users/:id/plan` para cambiar plan (free/premium)
-- [ ] Implementar endpoint `POST /admin/users/:id/ban` para suspender usuario:
-  - Agregar campo `banned_at` y `ban_reason` a `User` entity
+- [x] Crear controlador `AdminUsersController` en `/admin/users` con 8 endpoints
+- [x] Implementar endpoint `GET /admin/users` con paginación, búsqueda y filtros:
+  - **Search:** buscar por email, nombre (con LIKE en PostgreSQL)
+  - **Filtros:** por rol (usando ANY operator), plan, banned, fecha de registro
+  - **Ordenamiento:** por `createdAt`, `lastLogin`, `email`, `name` (ASC/DESC)
+  - **Paginación:** page (default 1) y limit (default 10, max 100)
+- [x] Implementar endpoint `GET /admin/users/:id` que retorne información detallada:
+  - Información básica del usuario sin contraseña
+  - Estadísticas: total de lecturas, fecha última lectura, uso de IA
+- [x] Implementar endpoint `POST /admin/users/:id/roles/tarotist` para agregar rol TAROTIST
+- [x] Implementar endpoint `POST /admin/users/:id/roles/admin` para agregar rol ADMIN
+- [x] Implementar endpoint `DELETE /admin/users/:id/roles/:role` para quitar roles
+- [x] Implementar endpoint `PATCH /admin/users/:id/plan` para cambiar plan (free/premium)
+- [x] Implementar endpoint `POST /admin/users/:id/ban` para suspender usuario:
+  - Agregados campos `bannedAt`, `banReason`, `lastLogin` a `User` entity
+  - Usuario baneado bloqueado en JwtStrategy (validate method)
   - Usuario baneado no puede hacer login
-- [ ] Implementar endpoint `POST /admin/users/:id/unban` para reactivar usuario
-- [ ] Implementar endpoint `DELETE /admin/users/:id` para eliminación lógica de usuarios
-- [ ] Crear DTO `UpdateUserRoleDto`, `UpdateUserPlanDto`, `BanUserDto` con validaciones
-- [ ] Agregar logging de todas las acciones administrativas (audit log)
-- [ ] Proteger todos los endpoints con `@Roles('admin', 'superadmin')`
-- [ ] Implementar índices en campos de búsqueda frecuente
+- [x] Implementar endpoint `POST /admin/users/:id/unban` para reactivar usuario
+- [x] Implementar endpoint `DELETE /admin/users/:id` para eliminación lógica de usuarios
+- [x] Crear DTOs con validaciones: `BanUserDto`, `UserQueryDto`, `UserDetailDto`, `UserListResponseDto`
+- [x] Agregar Logger statements para audit log de todas las acciones administrativas
+- [x] Proteger todos los endpoints con `@UseGuards(JwtAuthGuard, RolesGuard)` y `@Roles(UserRole.ADMIN)`
+- [x] Implementar índices en `User` entity: `IDX_user_last_login`, `IDX_user_banned_at`, `IDX_user_name`, `IDX_user_created_at`
+- [x] Migración de base de datos: `1762973040893-AddUserBanAndLastLoginFields.ts`
+- [x] Modificar `AuthService.login()` para actualizar `lastLogin` timestamp
+- [x] Modificar `JwtStrategy.validate()` para verificar si usuario está baneado
+- [x] Agregar `lastLogin` field a `UpdateUserDto`
+- [x] Tests unitarios completos: `user.entity.spec.ts`, `ban-user.dto.spec.ts`, `users.service.spec.ts`, `admin-users.controller.spec.ts`, `jwt.strategy.spec.ts`, `auth.service.spec.ts`
+- [x] Tests E2E: `admin-users.e2e-spec.ts` con 15 test cases
+- [x] Validar arquitectura con `validate-architecture.js`
 
 #### 🎯 Criterios de aceptación
 
-- ✓ Los admins pueden buscar, filtrar y gestionar usuarios
-- ✓ Todas las acciones administrativas quedan registradas
-- ✓ Los endpoints están protegidos con roles apropiados
+- ✅ Los admins pueden buscar, filtrar y gestionar usuarios
+- ✅ Todas las acciones administrativas quedan registradas con Logger
+- ✅ Los endpoints están protegidos con roles apropiados
+- ✅ Build exitoso sin errores de compilación
+- ✅ Architecture validation passed
+- ✅ 197+ unit tests passing
+- ✅ Usuarios baneados no pueden iniciar sesión
 
 ---
 

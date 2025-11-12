@@ -1,5 +1,12 @@
-import { IsEmail, IsString, IsOptional, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  IsOptional,
+  MinLength,
+  IsDate,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 export class UpdateUserDto {
   @ApiProperty({
@@ -38,4 +45,14 @@ export class UpdateUserDto {
   @IsString()
   @IsOptional()
   profilePicture?: string;
+
+  @ApiProperty({
+    example: '2024-01-15T10:30:00Z',
+    description: 'Fecha y hora del último login',
+    required: false,
+  })
+  @IsDate()
+  @Type(() => Date)
+  @IsOptional()
+  lastLogin?: Date;
 }

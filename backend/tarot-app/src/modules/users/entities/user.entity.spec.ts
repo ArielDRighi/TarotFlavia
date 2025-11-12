@@ -219,4 +219,71 @@ describe('User Entity', () => {
       expect(user.hasPlanExpired()).toBe(false);
     });
   });
+
+  describe('Ban Status Methods', () => {
+    describe('isBanned', () => {
+      it('should return true when user has banned_at date', () => {
+        const user = new User();
+        user.bannedAt = new Date();
+
+        expect(user.isBanned()).toBe(true);
+      });
+
+      it('should return false when banned_at is null', () => {
+        const user = new User();
+        user.bannedAt = null;
+
+        expect(user.isBanned()).toBe(false);
+      });
+
+      it('should return false when banned_at is undefined', () => {
+        const user = new User();
+
+        expect(user.isBanned()).toBe(false);
+      });
+    });
+
+    describe('ban', () => {
+      it('should set bannedAt date and ban reason', () => {
+        const user = new User();
+        const reason = 'Violated terms of service';
+
+        user.ban(reason);
+
+        expect(user.bannedAt).toBeInstanceOf(Date);
+        expect(user.banReason).toBe(reason);
+      });
+
+      it('should set bannedAt date without reason', () => {
+        const user = new User();
+
+        user.ban();
+
+        expect(user.bannedAt).toBeInstanceOf(Date);
+        expect(user.banReason).toBeNull();
+      });
+    });
+
+    describe('unban', () => {
+      it('should clear bannedAt and banReason', () => {
+        const user = new User();
+        user.bannedAt = new Date();
+        user.banReason = 'Some reason';
+
+        user.unban();
+
+        expect(user.bannedAt).toBeNull();
+        expect(user.banReason).toBeNull();
+      });
+
+      it('should work even if user was not banned', () => {
+        const user = new User();
+
+        user.unban();
+
+        expect(user.bannedAt).toBeNull();
+        expect(user.banReason).toBeNull();
+      });
+    });
+  });
 });

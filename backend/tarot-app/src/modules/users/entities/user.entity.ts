@@ -135,6 +135,30 @@ export class User {
 
   @ApiProperty({
     example: '2023-01-01T00:00:00Z',
+    description: 'Fecha de último inicio de sesión',
+    nullable: true,
+  })
+  @Column({ type: 'timestamp', nullable: true })
+  lastLogin: Date | null;
+
+  @ApiProperty({
+    example: null,
+    description: 'Fecha en que el usuario fue baneado',
+    nullable: true,
+  })
+  @Column({ type: 'timestamp', nullable: true })
+  bannedAt: Date | null;
+
+  @ApiProperty({
+    example: null,
+    description: 'Razón del baneo del usuario',
+    nullable: true,
+  })
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  banReason: string | null;
+
+  @ApiProperty({
+    example: '2023-01-01T00:00:00Z',
     description: 'Fecha de creación del usuario',
   })
   @CreateDateColumn()
@@ -227,5 +251,30 @@ export class User {
    */
   get isAdminUser(): boolean {
     return this.hasRole(UserRole.ADMIN);
+  }
+
+  /**
+   * Verifica si el usuario está baneado
+   * @returns true si el usuario tiene una fecha de baneo
+   */
+  isBanned(): boolean {
+    return this.bannedAt !== null && this.bannedAt !== undefined;
+  }
+
+  /**
+   * Banea al usuario estableciendo la fecha de baneo y la razón
+   * @param reason - Razón opcional del baneo
+   */
+  ban(reason?: string): void {
+    this.bannedAt = new Date();
+    this.banReason = reason || null;
+  }
+
+  /**
+   * Desbanea al usuario limpiando la fecha de baneo y la razón
+   */
+  unban(): void {
+    this.bannedAt = null;
+    this.banReason = null;
   }
 }

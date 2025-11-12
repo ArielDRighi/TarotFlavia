@@ -8,6 +8,15 @@ import { RefreshTokenService } from '../auth/refresh-token.service';
 describe('UsersService', () => {
   let service: UsersService;
 
+  const mockQueryBuilder = {
+    where: jest.fn().mockReturnThis(),
+    andWhere: jest.fn().mockReturnThis(),
+    orderBy: jest.fn().mockReturnThis(),
+    skip: jest.fn().mockReturnThis(),
+    take: jest.fn().mockReturnThis(),
+    getManyAndCount: jest.fn(),
+  };
+
   const mockUserRepository = {
     findOne: jest.fn(),
     find: jest.fn(),
@@ -15,6 +24,7 @@ describe('UsersService', () => {
     update: jest.fn(),
     delete: jest.fn(),
     create: jest.fn(),
+    createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
   };
 
   const mockRefreshTokenService = {
@@ -222,6 +232,115 @@ describe('UsersService', () => {
       );
       await expect(service.removeRole(1, UserRole.ADMIN)).rejects.toThrow(
         'User does not have admin role',
+      );
+    });
+  });
+
+  describe('banUser', () => {
+    it('should ban a user with reason', async () => {
+      const mockUser = {
+        id: 1,
+        email: 'test@test.com',
+        ban: jest.fn(),
+        password: 'hashed',
+      } as unknown as User;
+
+      mockUserRepository.findOne.mockResolvedValue(mockUser);
+      mockUserRepository.save.mockResolvedValue(mockUser);
+
+      const result = await service.banUser(1, 'Spam behavior');
+
+      expect(mockUser.ban).toHaveBeenCalledWith('Spam behavior');
+      expect(mockUserRepository.save).toHaveBeenCalled();
+      expect(result).not.toHaveProperty('password');
+    });
+
+    it('should throw NotFoundException if user does not exist', async () => {
+      mockUserRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.banUser(999, 'Reason')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
+
+  describe('unbanUser', () => {
+    it('should unban a user', async () => {
+      const mockUser = {
+        id: 1,
+        email: 'test@test.com',
+        unban: jest.fn(),
+        password: 'hashed',
+      } as unknown as User;
+
+      mockUserRepository.findOne.mockResolvedValue(mockUser);
+      mockUserRepository.save.mockResolvedValue(mockUser);
+
+      const result = await service.unbanUser(1);
+
+      expect(mockUser.unban).toHaveBeenCalled();
+      expect(mockUserRepository.save).toHaveBeenCalled();
+      expect(result).not.toHaveProperty('password');
+    });
+
+    it('should throw NotFoundException if user does not exist', async () => {
+      mockUserRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.unbanUser(999)).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('findAllWithFilters', () => {
+    it('should return paginated users with default parameters', async () => {
+      const mockUsers = [
+        { id: 1, email: 'user1@test.com', password: 'hash1' },
+        { id: 2, email: 'user2@test.com', password: 'hash2' },
+      ] as User[];
+
+      mockQueryBuilder.getManyAndCount.mockResolvedValue([mockUsers, 2]);
+
+      const result = await service.findAllWithFilters({});
+
+      expect(result.users).toHaveLength(2);
+      expect(result.users[0]).not.toHaveProperty('password');
+      expect(result.meta.totalItems).toBe(2);
+      expect(result.meta.currentPage).toBe(1);
+    });
+
+    it('should apply search filter', async () => {
+      mockQueryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
+
+      await service.findAllWithFilters({ search: 'john' });
+
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalled();
+    });
+  });
+
+  describe('getUserDetail', () => {
+    it('should return user with statistics', async () => {
+      const mockUser = {
+        id: 1,
+        email: 'test@test.com',
+        password: 'hash',
+        readings: [],
+      } as unknown as User;
+
+      mockUserRepository.findOne.mockResolvedValue(mockUser);
+
+      const result = await service.getUserDetail(1);
+
+      expect(result.user).not.toHaveProperty('password');
+      expect(result.statistics).toBeDefined();
+      expect(result.statistics).toHaveProperty('totalReadings');
+      expect(result.statistics).toHaveProperty('lastReadingDate');
+      expect(result.statistics).toHaveProperty('totalAIUsage');
+    });
+
+    it('should throw NotFoundException if user does not exist', async () => {
+      mockUserRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.getUserDetail(999)).rejects.toThrow(
+        NotFoundException,
       );
     });
   });
