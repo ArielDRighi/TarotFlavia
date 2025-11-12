@@ -12,12 +12,37 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from '../../../users/entities/user.entity';
-import { TarotCard } from '../../cards/entities/tarot-card.entity';
-import { TarotDeck } from '../../decks/entities/tarot-deck.entity';
-import { ReadingCategory } from '../../../categories/entities/reading-category.entity';
-import { PredefinedQuestion } from '../../../predefined-questions/entities/predefined-question.entity';
-import { TarotInterpretation } from '../../interpretations/entities/tarot-interpretation.entity';
+
+// Interfaces to avoid circular dependencies
+interface IUser {
+  id: number;
+  email: string;
+}
+
+interface ITarotCard {
+  id: number;
+  name: string;
+}
+
+interface ITarotDeck {
+  id: number;
+  name: string;
+}
+
+interface IReadingCategory {
+  id: number;
+  name: string;
+}
+
+interface IPredefinedQuestion {
+  id: number;
+  question: string;
+}
+
+interface ITarotInterpretation {
+  id: number;
+  interpretation: string;
+}
 
 @Entity()
 export class TarotReading {
@@ -44,12 +69,11 @@ export class TarotReading {
 
   @ApiProperty({
     description: 'Relación con la pregunta predefinida',
-    type: () => PredefinedQuestion,
     required: false,
   })
-  @ManyToOne(() => PredefinedQuestion, { nullable: true })
+  @ManyToOne('PredefinedQuestion', { nullable: true })
   @JoinColumn({ name: 'predefinedQuestionId' })
-  predefinedQuestion: PredefinedQuestion | null;
+  predefinedQuestion: IPredefinedQuestion | null;
 
   @ApiProperty({
     example: '¿Cuál es mi propósito en la vida?',
@@ -69,11 +93,11 @@ export class TarotReading {
   @Column({ type: 'varchar', length: 20, nullable: true })
   questionType: 'predefined' | 'custom' | null;
 
-  @ManyToOne(() => User)
-  user: User;
+  @ManyToOne('User')
+  user: IUser;
 
-  @ManyToOne(() => TarotDeck)
-  deck: TarotDeck;
+  @ManyToOne('TarotDeck')
+  deck: ITarotDeck;
 
   @ApiProperty({
     description: 'Tarotista que realizó la lectura',
@@ -88,19 +112,17 @@ export class TarotReading {
 
   @ApiProperty({
     description: 'Categoría de la lectura',
-    type: () => ReadingCategory,
     required: false,
   })
-  @ManyToOne(() => ReadingCategory, { nullable: true })
-  category: ReadingCategory | null;
+  @ManyToOne('ReadingCategory', { nullable: true })
+  category: IReadingCategory | null;
 
   @ApiProperty({
-    type: [TarotCard],
     description: 'Cartas seleccionadas para la lectura',
   })
-  @ManyToMany(() => TarotCard, (card) => card.readings)
+  @ManyToMany('TarotCard', 'readings')
   @JoinTable()
-  cards: TarotCard[];
+  cards: ITarotCard[];
 
   @ApiProperty({
     example: '[{id: 1, position: "pasado", isReversed: false}, ...]',
@@ -142,15 +164,11 @@ export class TarotReading {
   regenerationCount: number;
 
   @ApiProperty({
-    type: () => TarotInterpretation,
     isArray: true,
     description: 'Historial de interpretaciones para esta lectura',
   })
-  @OneToMany(
-    () => TarotInterpretation,
-    (interpretation) => interpretation.reading,
-  )
-  interpretations: TarotInterpretation[];
+  @OneToMany('TarotInterpretation', 'reading')
+  interpretations: ITarotInterpretation[];
 
   @ApiProperty({
     example: 'abc123xyz',

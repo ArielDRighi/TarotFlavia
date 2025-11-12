@@ -7,7 +7,11 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { TarotReading } from '../../readings/entities/tarot-reading.entity';
+
+// Interface to avoid circular dependency
+interface ITarotReading {
+  id: number;
+}
 
 @Entity()
 export class TarotInterpretation {
@@ -15,9 +19,9 @@ export class TarotInterpretation {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => TarotReading, (reading) => reading.interpretations)
+  @ManyToOne('TarotReading', 'interpretations')
   @JoinColumn()
-  reading: TarotReading;
+  reading: ITarotReading;
 
   @ApiProperty({
     example: 'Tu lectura indica un período de transformación...',

@@ -9,8 +9,28 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { TarotDeck } from '../../decks/entities/tarot-deck.entity';
-import { TarotReading } from '../../readings/entities/tarot-reading.entity';
+
+// Interface to avoid circular dependency: include fields tests and services expect
+interface ITarotDeck {
+  id: number;
+  name: string;
+  description?: string;
+  imageUrl?: string;
+  cardCount?: number;
+  isActive?: boolean;
+  isDefault?: boolean;
+  artist?: string;
+  yearCreated?: number;
+  tradition?: string;
+  publisher?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  cards?: { id: number; name?: string }[];
+}
+
+interface ITarotReading {
+  id: number;
+}
 
 @Entity()
 export class TarotCard {
@@ -88,12 +108,12 @@ export class TarotCard {
   @Column()
   deckId: number;
 
-  @ManyToOne(() => TarotDeck, (deck) => deck.cards)
+  @ManyToOne('TarotDeck', 'cards')
   @JoinColumn({ name: 'deckId' })
-  deck: TarotDeck;
+  deck: ITarotDeck;
 
-  @ManyToMany(() => TarotReading, (reading) => reading.cards)
-  readings: TarotReading[];
+  @ManyToMany('TarotReading', 'cards')
+  readings: ITarotReading[];
 
   @CreateDateColumn()
   createdAt: Date;
