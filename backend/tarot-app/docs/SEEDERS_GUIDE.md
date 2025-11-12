@@ -219,11 +219,11 @@ Crea 42 preguntas predefinidas distribuidas en las 6 categorías.
 **Distribución de preguntas:**
 
 - Amor y Relaciones: 8 preguntas
-- Trabajo y Carrera: 8 preguntas
+- Carrera y Trabajo: 8 preguntas
 - Dinero y Finanzas: 7 preguntas
 - Salud y Bienestar: 6 preguntas
-- Espiritual y Crecimiento: 7 preguntas
-- General: 6 preguntas
+- Crecimiento Espiritual: 7 preguntas
+- Consulta General: 6 preguntas
 
 **Tabla afectada:** `predefined_questions`
 
