@@ -28,7 +28,7 @@ Arquitectura y Patrones (CRÍTICO):
 
 Metodología (TDD Estricto): Sigue un ciclo TDD riguroso: _ Escribe un test (debe fallar). _ Escribe el código mínimo para que el test pase. \* Refactoriza.
 
-Ciclo de Calidad (Pre-Commit): Al finalizar la implementación, ejecuta los scripts de lint, format y build del proyecto. Todos los tipos de tests completos. Corrige todos los errores y warnings que surjan.
+Ciclo de Calidad (Pre-Commit): Al finalizar la implementación, ejecuta los scripts de lint, format y build del proyecto. Todos los tipos de tests completos (unitarios y e2e). Corrige todos los errores y warnings que surjan. Y finalmente el script validate-architecture.js
 
 Esta terminantemente prohibido agregar eslint disable, debes solucionar los problemas de forma real.
 
@@ -125,7 +125,7 @@ Aplica Correcciones: Implementa los cambios para todo el feedback que consideres
 
 Justifica (Pushback): Si no estás de acuerdo con algún comentario (porque el revisor malinterpretó algo, o tu solución es preferible por una razón X), no lo apliques. En su lugar, prepara una respuesta técnica y educada para el PR explicando tu razonamiento.
 
-Calidad y TDD: Si las correcciones implican cambios de lógica, deben reflejarse en los tests (actualizándolos o creando nuevos). Vuelve a pasar el ciclo de lint, format, build y test (todos los tests) para asegurar que todo sigue limpio.
+Calidad y TDD: Si las correcciones implican cambios de lógica, deben reflejarse en los tests (actualizándolos o creando nuevos). Vuelve a pasar el ciclo de lint, format, build y test (todos los tests) para asegurar que todo sigue limpio. Y finalmente el script validate-architecture.js
 
 Estrategia de Commits: Crea un NUEVO commit con las correcciones usando el mensaje: "fix: apply PR feedback - [descripción breve de los cambios]". NUNCA uses --amend para correcciones de PR, ya que complica el historial y requiere force push.
 
