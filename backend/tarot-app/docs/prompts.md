@@ -10,7 +10,21 @@ Autonomía Total: Ejecuta la tarea de principio a fin sin solicitar confirmacion
 
 Rama: Estás en develop. Crea la rama feature/TASK-00x-descripcion (usa la nomenclatura de las ramas existentes nombradas segun gitflow) y trabaja en ella.
 
-Patrones y Convenciones: Antes de crear archivos y carpetas, analiza la estructura existente del proyecto para identificar y respetar los patrones establecidos (nombres de archivos, organización de carpetas, convenciones de módulos). Replica estos patrones en tu implementación para mantener consistencia arquitectural.
+Arquitectura y Patrones (CRÍTICO):
+
+- **LEE PRIMERO:** `backend/tarot-app/docs/ARCHITECTURE.md` (completo) para entender la arquitectura híbrida feature-based del proyecto.
+- **Feature-Based:** El código está organizado por dominio (`src/modules/tarot/`, `src/modules/tarotistas/`, etc). Crea archivos en el módulo correspondiente según el dominio de negocio.
+- **Capas Internas:** Módulos complejos (>10 archivos o lógica compleja) usan capas: `domain/`, `application/`, `infrastructure/`. Módulos simples (CRUD) pueden ser flat (entities, dto, service, controller en raíz del módulo).
+- **Nombres:** Sigue la nomenclatura de NestJS:
+  - Entities: `nombre.entity.ts` (PascalCase: `TarotReading`)
+  - DTOs: `create-nombre.dto.ts`, `update-nombre.dto.ts` (kebab-case)
+  - Services: `nombre.service.ts` (PascalCase: `ReadingsService`)
+  - Controllers: `nombre.controller.ts` (kebab-case routes)
+- **Inyección de Dependencias (TypeORM):**
+  - **Estándar:** Usa `@InjectRepository(Entity)` directo en servicios (enfoque pragmático NestJS)
+  - **Testing:** Mockea `Repository<Entity>` con `jest.fn()` en tests unitarios
+  - **Excepción:** Solo usa Repository Pattern (interface + implementación) si el módulo ya lo tiene establecido
+- **ANTES de crear:** Inspecciona módulos existentes similares (ej: si crearás algo de tarot, mira `src/modules/tarot/cards/`) y replica su estructura exacta.
 
 Metodología (TDD Estricto): Sigue un ciclo TDD riguroso: _ Escribe un test (debe fallar). _ Escribe el código mínimo para que el test pase. \* Refactoriza.
 
