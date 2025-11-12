@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, MoreThanOrEqual } from 'typeorm';
+import { Repository, MoreThanOrEqual, IsNull } from 'typeorm';
 import { User, UserPlan } from '../users/entities/user.entity';
 import { TarotReading } from '../tarot/readings/entities/tarot-reading.entity';
 import { AIUsageLog } from '../ai-usage/entities/ai-usage-log.entity';
@@ -57,11 +57,12 @@ export class AdminDashboardService {
 
     const totalUsers = await this.userRepository.count();
 
-    // Usuarios activos = usuarios que han hecho lecturas en el periodo
+    // Usuarios activos = usuarios que han hecho lecturas en el periodo (excluyendo soft-deleted)
     const activeUsersLast7Days = await this.readingRepository
       .createQueryBuilder('reading')
       .select('COUNT(DISTINCT reading.userId)', 'count')
       .where('reading.createdAt >= :date', { date: sevenDaysAgo })
+      .andWhere('reading.deletedAt IS NULL')
       .getRawOne()
       .then((result: { count: string } | undefined) =>
         parseInt(result?.count || '0', 10),
@@ -71,6 +72,7 @@ export class AdminDashboardService {
       .createQueryBuilder('reading')
       .select('COUNT(DISTINCT reading.userId)', 'count')
       .where('reading.createdAt >= :date', { date: thirtyDaysAgo })
+      .andWhere('reading.deletedAt IS NULL')
       .getRawOne()
       .then((result: { count: string } | undefined) =>
         parseInt(result?.count || '0', 10),
@@ -89,20 +91,20 @@ export class AdminDashboardService {
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
     const totalReadings = await this.readingRepository.count({
-      where: { deletedAt: null as never },
+      where: { deletedAt: IsNull() },
     });
 
     const readingsLast7Days = await this.readingRepository.count({
       where: {
         createdAt: MoreThanOrEqual(sevenDaysAgo),
-        deletedAt: null as never,
+        deletedAt: IsNull(),
       },
     });
 
     const readingsLast30Days = await this.readingRepository.count({
       where: {
         createdAt: MoreThanOrEqual(thirtyDaysAgo),
-        deletedAt: null as never,
+        deletedAt: IsNull(),
       },
     });
 
@@ -162,7 +164,7 @@ export class AdminDashboardService {
         id: reading.id,
         userEmail: user.email,
         userName: user.name,
-        spreadType: 'Cruz Celta', // TODO: Agregar relación con spread
+        spreadType: null, // TODO: Implement spread relation when available
         category: category?.name || null,
         question:
           reading.questionType === 'custom'

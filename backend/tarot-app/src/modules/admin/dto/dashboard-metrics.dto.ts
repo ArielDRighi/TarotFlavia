@@ -2,6 +2,46 @@ import { ApiProperty } from '@nestjs/swagger';
 import { RecentReadingDto } from './recent-reading.dto';
 import { RecentUserDto } from './recent-user.dto';
 
+export class UserMetricsDto {
+  @ApiProperty({
+    example: 1000,
+    description: 'Total de usuarios registrados',
+  })
+  totalUsers: number;
+
+  @ApiProperty({
+    example: 200,
+    description: 'Usuarios activos en los últimos 7 días',
+  })
+  activeUsersLast7Days: number;
+
+  @ApiProperty({
+    example: 350,
+    description: 'Usuarios activos en los últimos 30 días',
+  })
+  activeUsersLast30Days: number;
+}
+
+export class ReadingMetricsDto {
+  @ApiProperty({
+    example: 5000,
+    description: 'Total de lecturas realizadas',
+  })
+  totalReadings: number;
+
+  @ApiProperty({
+    example: 400,
+    description: 'Lecturas realizadas en los últimos 7 días',
+  })
+  readingsLast7Days: number;
+
+  @ApiProperty({
+    example: 1200,
+    description: 'Lecturas realizadas en los últimos 30 días',
+  })
+  readingsLast30Days: number;
+}
+
 export class PlanDistributionDto {
   @ApiProperty({
     example: 150,
@@ -55,21 +95,15 @@ export class AIMetricsDto {
 export class DashboardMetricsDto {
   @ApiProperty({
     description: 'Métricas generales de usuarios',
+    type: UserMetricsDto,
   })
-  userMetrics: {
-    totalUsers: number;
-    activeUsersLast7Days: number;
-    activeUsersLast30Days: number;
-  };
+  userMetrics: UserMetricsDto;
 
   @ApiProperty({
     description: 'Métricas generales de lecturas',
+    type: ReadingMetricsDto,
   })
-  readingMetrics: {
-    totalReadings: number;
-    readingsLast7Days: number;
-    readingsLast30Days: number;
-  };
+  readingMetrics: ReadingMetricsDto;
 
   @ApiProperty({
     description: 'Distribución de planes',

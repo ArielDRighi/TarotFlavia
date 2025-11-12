@@ -22,8 +22,9 @@ export class RecentReadingDto {
   @ApiProperty({
     example: 'Cruz Celta',
     description: 'Tipo de tirada (spread) utilizado',
+    nullable: true,
   })
-  spreadType: string;
+  spreadType: string | null;
 
   @ApiProperty({
     example: 'Amor',

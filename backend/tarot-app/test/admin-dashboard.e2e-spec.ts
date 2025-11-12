@@ -28,7 +28,7 @@ interface DashboardMetricsResponse {
     id: number;
     userEmail: string;
     userName: string;
-    spreadType: string;
+    spreadType: string | null;
     category: string | null;
     question: string | null;
     status: string;
@@ -235,6 +235,8 @@ describe('Admin Dashboard E2E', () => {
         expect(typeof reading.id).toBe('number');
         expect(typeof reading.userEmail).toBe('string');
         expect(typeof reading.userName).toBe('string');
+        // spreadType puede ser null hasta que se implemente la relación con spread
+        expect([null, 'string'].includes(typeof reading.spreadType)).toBe(true);
       }
     });
 
