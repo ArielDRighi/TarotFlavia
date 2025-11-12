@@ -142,6 +142,9 @@ function validateLayerDependencies(moduleName, modulePath) {
   const domainPath = path.join(modulePath, 'domain');
 
   if (!fs.existsSync(domainPath)) {
+    console.log(
+      `   ℹ️  INFO: Domain layer not found for module "${moduleName}". This may indicate a misconfiguration.`,
+    );
     return;
   }
 
@@ -152,8 +155,19 @@ function validateLayerDependencies(moduleName, modulePath) {
     const lines = content.split('\n');
 
     lines.forEach((line, index) => {
-      // Detectar imports de infrastructure/ desde domain/
-      if (line.includes('from') && line.includes('infrastructure')) {
+      const trimmedLine = line.trim();
+
+      // Skip comments (single-line and JSDoc)
+      if (
+        trimmedLine.startsWith('//') ||
+        trimmedLine.startsWith('*') ||
+        trimmedLine.startsWith('/*')
+      ) {
+        return;
+      }
+
+      // Detectar imports de infrastructure/ desde domain/ (regex más preciso)
+      if (/from\s+['"][^'"]*infrastructure/.test(line)) {
         console.log(`   ❌ ERROR: Domain layer importing from infrastructure`);
         console.log(
           `      File: ${path.relative(modulePath, file)}:${index + 1}`,
@@ -227,8 +241,12 @@ function validateModules() {
 
     // Si es un módulo con submódulos (ej: tarot/), validar cada submódulo
     const subModules = fs.readdirSync(modulePath, { withFileTypes: true });
+    const LAYER_DIRS = ['domain', 'application', 'infrastructure'];
     const hasSubModules = subModules.some(
-      (sub) => sub.isDirectory() && !sub.name.startsWith('.'),
+      (sub) =>
+        sub.isDirectory() &&
+        !sub.name.startsWith('.') &&
+        !LAYER_DIRS.includes(sub.name),
     );
 
     if (hasSubModules) {
