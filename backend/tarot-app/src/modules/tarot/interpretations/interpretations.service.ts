@@ -326,14 +326,14 @@ export class InterpretationsService {
   }
 
   // Método para regenerar la interpretación de una lectura existente
-  async regenerateInterpretation(
+  private async regenerateInterpretation(
     reading: TarotReading,
   ): Promise<InterpretationResult> {
     const cards = reading.cards;
     const positions = reading.cardPositions;
 
     const result = await this.generateInterpretation(
-      cards,
+      cards as TarotCard[], // TypeORM loads full entities at runtime despite interface type
       positions,
       reading.question,
     );

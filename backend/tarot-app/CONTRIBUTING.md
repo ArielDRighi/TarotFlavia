@@ -293,7 +293,7 @@ Antes de crear un Pull Request, verificar:
 - [ ] **Linter pasa:** `npm run lint`
 - [ ] **Formato correcto:** `npm run format`
 - [ ] **E2E críticos pasan:** `npm run test:e2e -- {test}.e2e-spec.ts`
-- [ ] **0 dependencias circulares:** `npx madge --circular --extensions ts src/`
+- [ ] **0 dependencias circulares:** `npx madge --circular --extensions ts --exclude '\.module\.ts$' src/`
 - [ ] **Commits siguen Conventional Commits**
 - [ ] **ADR creado** (si decisión arquitectural)
 - [ ] **Documentación actualizada** (README, docs/)
@@ -632,12 +632,15 @@ git push origin --delete feature/TASK-XXX-descripcion
 **Verificar:**
 
 ```bash
-npx madge --circular --extensions ts src/
+# Excluye .module.ts (pueden tener dependencias circulares válidas con forwardRef)
+npx madge --circular --extensions ts --exclude '\.module\.ts$' src/
 ```
 
 **Solución:**
 
-- Usar `forwardRef()` en NestJS
+- **Para módulos:** Usar `forwardRef()` en ambos módulos (esto es válido en NestJS)
+- **Para entidades:** Usar interfaces locales en lugar de importar las clases completas
+- **Para servicios:** Reorganizar dependencias o usar eventos
 - Reorganizar imports
 - Crear interface intermedia
 

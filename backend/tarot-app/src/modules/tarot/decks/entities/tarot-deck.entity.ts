@@ -7,7 +7,13 @@ import {
   OneToMany,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { TarotCard } from '../../cards/entities/tarot-card.entity';
+
+// Interface to avoid circular dependency
+interface ITarotCard {
+  id: number;
+  name: string;
+  number: number;
+}
 
 @Entity()
 export class TarotDeck {
@@ -83,8 +89,8 @@ export class TarotDeck {
   @Column({ nullable: true })
   publisher: string;
 
-  @OneToMany(() => TarotCard, (card) => card.deck)
-  cards: TarotCard[];
+  @OneToMany('TarotCard', 'deck')
+  cards: ITarotCard[];
 
   @CreateDateColumn()
   createdAt: Date;

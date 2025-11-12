@@ -468,7 +468,8 @@ describe('Readings E2E', () => {
 **Validaciones automáticas:**
 
 1. ✅ **Estructura de módulos:** `node scripts/validate-architecture.js`
-2. ✅ **Dependencias circulares:** `madge --circular --extensions ts src/`
+2. ✅ **Dependencias circulares:** `madge --circular --extensions ts --exclude '\.module\.ts$' src/`
+   - **Nota:** Se excluyen archivos `.module.ts` porque NestJS permite dependencias circulares entre módulos usando `forwardRef()`
 3. ✅ **Linter:** `npm run lint`
 4. ✅ **Build:** `npm run build`
 5. ✅ **Tests + Coverage:** `npm run test:cov`
@@ -492,7 +493,8 @@ node scripts/validate-architecture.js
 
 ```bash
 npm install -g madge
-madge --circular --extensions ts src/
+# Excluye .module.ts (pueden tener dependencias circulares válidas con forwardRef)
+madge --circular --extensions ts --exclude '\.module\.ts$' src/
 ```
 
 **Validar coverage:**
