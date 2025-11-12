@@ -3104,11 +3104,14 @@ Expandir sistema de roles para incluir diferentes niveles de permisos administra
 
 ---
 
-### **TASK-027: Crear Dashboard Admin**
+### **TASK-027: Crear Dashboard Admin** ✅
 
 **Prioridad:** ⭐⭐⭐ ALTA  
 **Estimación:** 2 días  
-**Dependencias:** Ninguna
+**Dependencias:** Ninguna  
+**Estado:** ✅ **COMPLETADO**  
+**Branch:** `feature/TASK-027-admin-dashboard`  
+**Fecha:** 12 de Noviembre, 2025
 
 #### 📋 Descripción
 
@@ -3116,8 +3119,8 @@ Implementar panel de control administrativo con métricas clave, usuarios activo
 
 #### ✅ Tareas específicas
 
-- [ ] Crear módulo `AdminModule` con controlador `/admin/dashboard`
-- [ ] Implementar endpoint `GET /admin/dashboard/metrics` que retorne:
+- [x] Crear módulo `AdminModule` con controlador `/admin/dashboard`
+- [x] Implementar endpoint `GET /admin/dashboard/metrics` que retorne:
   - **Métricas generales:**
     - Total de usuarios registrados
     - Usuarios activos en últimos 7/30 días
@@ -3132,40 +3135,96 @@ Implementar panel de control administrativo con métricas clave, usuarios activo
     - Últimos 10 usuarios registrados con: email, plan, fecha registro
   - **Métricas de IA:**
     - Total de interpretaciones generadas
-    - Uso de IA por proveedor (OpenAI/Anthropic)
-- [ ] Crear DTOs de respuesta:
+    - Uso de IA por proveedor (Groq/DeepSeek/OpenAI)
+- [x] Crear DTOs de respuesta:
   - `DashboardMetricsDto` con todas las métricas
   - `RecentReadingDto` para lecturas recientes
   - `RecentUserDto` para usuarios recientes
-- [ ] Implementar servicio `AdminDashboardService` con métodos:
+- [x] Implementar servicio `AdminDashboardService` con métodos:
   - `getMetrics()` - métricas generales
   - `getRecentReadings(limit)` - lecturas recientes
   - `getRecentUsers(limit)` - usuarios recientes
   - `getPlanDistribution()` - distribución de planes
-- [ ] Agregar caché de 5 minutos para las métricas (para evitar consultas pesadas)
-- [ ] Proteger endpoint con `@Roles('admin')` guard
-- [ ] Implementar índices en campos de fecha para optimizar queries:
-  - `user.created_at`
-  - `tarot_reading.created_at`
-- [ ] Agregar tests E2E para verificar:
+  - `getAIMetrics()` - métricas de uso de IA
+- [x] Agregar caché de 5 minutos para las métricas (para evitar consultas pesadas)
+- [x] Proteger endpoint con `AdminGuard`
+- [x] Implementar índices en campos de fecha para optimizar queries (ya existentes en InitialSchema)
+- [x] Agregar tests E2E para verificar:
   - Admin puede acceder a métricas
   - Usuario regular NO puede acceder
   - Las métricas retornan datos correctos
 
 #### 🎯 Criterios de aceptación
 
-- ✓ Endpoint `GET /admin/dashboard/metrics` retorna todas las métricas requeridas
-- ✓ Solo usuarios con rol `admin` pueden acceder
-- ✓ Las métricas son precisas y actualizadas (caché de 5 min máximo)
-- ✓ Las lecturas y usuarios recientes se muestran correctamente
-- ✓ Los tests E2E validan el acceso y los datos
+- ✅ Endpoint `GET /admin/dashboard/metrics` retorna todas las métricas requeridas
+- ✅ Solo usuarios con rol `admin` pueden acceder
+- ✅ Las métricas son precisas y actualizadas (caché de 5 min máximo)
+- ✅ Las lecturas y usuarios recientes se muestran correctamente
+- ✅ Los tests E2E validan el acceso y los datos (8/8 tests pasando)
+
+#### 📝 Implementación Completada
+
+**Archivos creados:**
+
+- `src/modules/admin/admin.module.ts` - Módulo admin con CacheModule integrado
+- `src/modules/admin/admin-dashboard.controller.ts` - Controlador con endpoint protegido
+- `src/modules/admin/admin-dashboard.service.ts` - Servicio con métodos de métricas
+- `src/modules/admin/dto/dashboard-metrics.dto.ts` - DTO principal con todas las métricas
+- `src/modules/admin/dto/recent-reading.dto.ts` - DTO para lecturas recientes
+- `src/modules/admin/dto/recent-user.dto.ts` - DTO para usuarios recientes
+- `test/admin-dashboard.e2e-spec.ts` - Suite de tests E2E (8 tests)
+
+**Archivos modificados:**
+
+- `src/app.module.ts` - Agregado AdminModule a imports
+
+**Características implementadas:**
+
+- ✅ Endpoint GET `/admin/dashboard/metrics` protegido con JwtAuthGuard + AdminGuard
+- ✅ Métricas generales de usuarios (total, activos 7/30 días)
+- ✅ Métricas generales de lecturas (total, últimos 7/30 días)
+- ✅ Distribución de planes (FREE/PREMIUM con porcentajes y tasa de conversión)
+- ✅ Últimas 10 lecturas con información completa
+- ✅ Últimos 10 usuarios registrados
+- ✅ Métricas de IA con uso por proveedor (Groq, DeepSeek, OpenAI)
+- ✅ Caché de 5 minutos con CacheInterceptor, @CacheKey y @CacheTTL
+- ✅ Queries optimizadas con eager loading y agregaciones
+- ✅ 8 tests E2E pasando (autenticación, autorización, métricas correctas)
+
+**Técnicas aplicadas:**
+
+- TDD estricto: tests escritos antes de implementación
+- Repository Pattern: uso directo de TypeORM con @InjectRepository
+- Caché integrado con @nestjs/cache-manager
+- Queries optimizadas con QueryBuilder para agregaciones
+- Guards combinados (JwtAuthGuard + AdminGuard)
+- Documentación Swagger completa con @ApiOperation y @ApiResponse
+
+**Tests:**
+
+- 8/8 tests E2E pasando:
+  - Admin puede acceder
+  - Usuario regular NO puede acceder
+  - Sin token NO puede acceder
+  - Métricas correctas (validación de consistencia)
+  - Lecturas recientes con estructura correcta
+  - Usuarios recientes con estructura correcta
+  - Métricas de IA con estructura correcta
+  - Caché funciona correctamente
+
+**Calidad:**
+
+- ✅ Lint: Sin errores
+- ✅ Format: Código formateado
+- ✅ Build: Compilación exitosa
+- ✅ Tests E2E: 8/8 pasando
 
 #### 📝 Notas técnicas
 
 - Este dashboard es la **base mínima** para que Flavia monitoree su negocio en el MVP
 - TASK-029 (Dashboard de Estadísticas) es una versión más completa con gráficos y análisis avanzados
-- Los datos deben ser eficientes: usar `.select()` para traer solo campos necesarios
-- Implementar paginación en lecturas/usuarios recientes si el volumen crece
+- Los datos se obtienen eficientemente usando QueryBuilder para agregaciones
+- El caché reduce la carga en DB para consultas frecuentes del dashboard
 
 ---
 
