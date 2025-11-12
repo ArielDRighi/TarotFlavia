@@ -3265,7 +3265,7 @@ Implementar panel completo de administración de usuarios con búsqueda, filtros
 - [x] Agregar Logger statements para audit log de todas las acciones administrativas
 - [x] Proteger todos los endpoints con `@UseGuards(JwtAuthGuard, RolesGuard)` y `@Roles(UserRole.ADMIN)`
 - [x] Implementar índices en `User` entity: `IDX_user_last_login`, `IDX_user_banned_at`, `IDX_user_name`, `IDX_user_created_at`
-- [x] Migración de base de datos: `1762973040893-AddUserBanAndLastLoginFields.ts`
+- [x] Migración de base de datos: `1762973040894-AddUserBanAndLastLoginFieldsClean.ts`
 - [x] Modificar `AuthService.login()` para actualizar `lastLogin` timestamp
 - [x] Modificar `JwtStrategy.validate()` para verificar si usuario está baneado
 - [x] Agregar `lastLogin` field a `UpdateUserDto`

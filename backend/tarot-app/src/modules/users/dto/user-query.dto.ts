@@ -1,5 +1,13 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, IsEnum, IsInt, Min, Max } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsEnum,
+  IsIn,
+  IsInt,
+  Min,
+  Max,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { UserPlan, UserRole } from '../entities/user.entity';
 
@@ -42,7 +50,7 @@ export class UserQueryDto {
     default: 'createdAt',
   })
   @IsOptional()
-  @IsString()
+  @IsIn(['createdAt', 'lastLogin', 'email', 'name'])
   sortBy?: 'createdAt' | 'lastLogin' | 'email' | 'name';
 
   @ApiPropertyOptional({
@@ -51,7 +59,7 @@ export class UserQueryDto {
     default: 'DESC',
   })
   @IsOptional()
-  @IsEnum(['ASC', 'DESC'])
+  @IsIn(['ASC', 'DESC'])
   sortOrder?: 'ASC' | 'DESC';
 
   @ApiPropertyOptional({

@@ -8,6 +8,8 @@ import * as bcrypt from 'bcryptjs';
 import { UserPlan } from '../src/modules/users/entities/user.entity';
 import { UserRole } from '../src/common/enums/user-role.enum';
 
+const TEST_DOMAIN = 'test-admin-users.com';
+
 interface LoginResponse {
   user: {
     id: number;
@@ -132,7 +134,7 @@ describe('Admin Users Management (e2e)', () => {
       `INSERT INTO "user" (email, password, name, "isAdmin", roles, plan) 
        VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
       [
-        'testuser@test-admin-users.com',
+        `testuser@${TEST_DOMAIN}`,
         hashedPassword,
         'Test User',
         false,
@@ -146,7 +148,7 @@ describe('Admin Users Management (e2e)', () => {
     const adminLoginResponse = await request(app.getHttpServer())
       .post('/auth/login')
       .send({
-        email: 'admin@test-admin-users.com',
+        email: `admin@${TEST_DOMAIN}`,
         password: 'Admin123!',
       });
     const adminLogin = adminLoginResponse.body as LoginResponse;
@@ -156,7 +158,7 @@ describe('Admin Users Management (e2e)', () => {
     const userLoginResponse = await request(app.getHttpServer())
       .post('/auth/login')
       .send({
-        email: 'user@test-admin-users.com',
+        email: `user@${TEST_DOMAIN}`,
         password: 'Admin123!',
       });
     const userLogin = userLoginResponse.body as LoginResponse;
@@ -166,7 +168,7 @@ describe('Admin Users Management (e2e)', () => {
   afterAll(async () => {
     // Clean up test data
     await dataSource.query('DELETE FROM "user" WHERE email LIKE $1', [
-      '%@test-admin-users.com',
+      `%@${TEST_DOMAIN}`,
     ]);
     await app.close();
   });
@@ -309,7 +311,7 @@ describe('Admin Users Management (e2e)', () => {
       const response = await request(app.getHttpServer())
         .post('/auth/login')
         .send({
-          email: 'testuser@test-admin-users.com',
+          email: `testuser@${TEST_DOMAIN}`,
           password: 'Admin123!',
         });
 

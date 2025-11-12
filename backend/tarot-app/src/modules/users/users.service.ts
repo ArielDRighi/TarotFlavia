@@ -369,8 +369,16 @@ export class UsersService {
       }
     }
 
-    // Ordenamiento
-    queryBuilder.orderBy(`user.${sortBy}`, sortOrder);
+    // Ordenamiento con whitelist para prevenir SQL injection
+    const allowedSortColumns: Record<string, string> = {
+      createdAt: 'user.createdAt',
+      lastLogin: 'user.lastLogin',
+      email: 'user.email',
+      name: 'user.name',
+    };
+    const sortColumn =
+      allowedSortColumns[sortBy] || allowedSortColumns['createdAt'];
+    queryBuilder.orderBy(sortColumn, sortOrder);
 
     // Paginación
     const skip = (page - 1) * limit;
@@ -423,8 +431,11 @@ export class UsersService {
           )[0]
         : null;
 
-    // TODO: Implementar conteo real de AI usage cuando esté disponible la relación
-    const totalAIUsage = totalReadings; // Por ahora asumimos 1 interpretación por lectura
+    // TODO(TASK-029): Implement actual AI usage count from ai_usage_logs table
+    // Currently assumes 1 interpretation per reading as a temporary measure.
+    // Expected: Query ai_usage_logs table to get accurate count of AI interpretations for the user.
+    // Temporary assumption: 1 AI interpretation per tarot reading
+    const totalAIUsage = totalReadings;
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: _password, ...userWithoutPassword } = user;

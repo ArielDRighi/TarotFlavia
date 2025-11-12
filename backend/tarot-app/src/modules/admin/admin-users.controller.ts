@@ -93,7 +93,7 @@ export class AdminUsersController {
   @ApiOperation({ summary: 'Banear usuario (solo administradores)' })
   @ApiParam({ name: 'id', description: 'ID del usuario' })
   @ApiBody({ type: BanUserDto })
-  @ApiResponse({ status: 200, description: 'Usuario baneado exitosamente' })
+  @ApiResponse({ status: 201, description: 'Usuario baneado exitosamente' })
   @ApiResponse({ status: 401, description: 'No autorizado' })
   @ApiResponse({
     status: 403,
@@ -118,7 +118,7 @@ export class AdminUsersController {
   @ApiOperation({ summary: 'Desbanear usuario (solo administradores)' })
   @ApiParam({ name: 'id', description: 'ID del usuario' })
   @ApiResponse({
-    status: 200,
+    status: 201,
     description: 'Usuario desbaneado exitosamente',
   })
   @ApiResponse({ status: 401, description: 'No autorizado' })
@@ -169,7 +169,7 @@ export class AdminUsersController {
   })
   @ApiParam({ name: 'id', description: 'ID del usuario' })
   @ApiResponse({
-    status: 200,
+    status: 201,
     description: 'Rol TAROTIST agregado exitosamente',
   })
   @ApiResponse({ status: 400, description: 'Usuario ya tiene el rol TAROTIST' })
@@ -196,7 +196,7 @@ export class AdminUsersController {
   })
   @ApiParam({ name: 'id', description: 'ID del usuario' })
   @ApiResponse({
-    status: 200,
+    status: 201,
     description: 'Rol ADMIN agregado exitosamente',
   })
   @ApiResponse({ status: 400, description: 'Usuario ya tiene el rol ADMIN' })
@@ -246,8 +246,14 @@ export class AdminUsersController {
     @Param('id', ParseIntPipe) id: number,
     @Param('role') role: string,
   ) {
-    const roleEnum = role.toLowerCase() as UserRole;
-    if (!Object.values(UserRole).includes(roleEnum)) {
+    // Whitelist de roles permitidos para prevenir inyecciones
+    const roleMap: Record<string, UserRole> = {
+      tarotist: UserRole.TAROTIST,
+      admin: UserRole.ADMIN,
+    };
+
+    const roleEnum = roleMap[role.toLowerCase()];
+    if (!roleEnum) {
       throw new BadRequestException('Rol inválido');
     }
 
