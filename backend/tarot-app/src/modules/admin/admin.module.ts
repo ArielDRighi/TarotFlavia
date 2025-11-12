@@ -8,6 +8,7 @@ import { User } from '../users/entities/user.entity';
 import { TarotReading } from '../tarot/readings/entities/tarot-reading.entity';
 import { AIUsageLog } from '../ai-usage/entities/ai-usage-log.entity';
 import { UsersModule } from '../users/users.module';
+import { AuditModule } from '../audit/audit.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { UsersModule } from '../users/users.module';
       max: 100, // Máximo 100 items en caché
     }),
     UsersModule,
+    AuditModule,
   ],
   controllers: [AdminDashboardController, AdminUsersController],
   providers: [AdminDashboardService],
