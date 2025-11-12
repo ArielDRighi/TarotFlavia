@@ -3104,6 +3104,71 @@ Expandir sistema de roles para incluir diferentes niveles de permisos administra
 
 ---
 
+### **TASK-027: Crear Dashboard Admin**
+
+**Prioridad:** ⭐⭐⭐ ALTA  
+**Estimación:** 2 días  
+**Dependencias:** Ninguna
+
+#### 📋 Descripción
+
+Implementar panel de control administrativo con métricas clave, usuarios activos y lecturas recientes para que el admin pueda monitorear el negocio de Flavia.
+
+#### ✅ Tareas específicas
+
+- [ ] Crear módulo `AdminModule` con controlador `/admin/dashboard`
+- [ ] Implementar endpoint `GET /admin/dashboard/metrics` que retorne:
+  - **Métricas generales:**
+    - Total de usuarios registrados
+    - Usuarios activos en últimos 7/30 días
+    - Total de lecturas realizadas
+    - Lecturas en últimos 7/30 días
+  - **Distribución de planes:**
+    - Usuarios FREE vs PREMIUM (count y %)
+    - Tasa de conversión FREE → PREMIUM
+  - **Lecturas recientes:**
+    - Últimas 10 lecturas con: usuario, tipo de spread, fecha, estado
+  - **Usuarios recientes:**
+    - Últimos 10 usuarios registrados con: email, plan, fecha registro
+  - **Métricas de IA:**
+    - Total de interpretaciones generadas
+    - Uso de IA por proveedor (OpenAI/Anthropic)
+- [ ] Crear DTOs de respuesta:
+  - `DashboardMetricsDto` con todas las métricas
+  - `RecentReadingDto` para lecturas recientes
+  - `RecentUserDto` para usuarios recientes
+- [ ] Implementar servicio `AdminDashboardService` con métodos:
+  - `getMetrics()` - métricas generales
+  - `getRecentReadings(limit)` - lecturas recientes
+  - `getRecentUsers(limit)` - usuarios recientes
+  - `getPlanDistribution()` - distribución de planes
+- [ ] Agregar caché de 5 minutos para las métricas (para evitar consultas pesadas)
+- [ ] Proteger endpoint con `@Roles('admin')` guard
+- [ ] Implementar índices en campos de fecha para optimizar queries:
+  - `user.created_at`
+  - `tarot_reading.created_at`
+- [ ] Agregar tests E2E para verificar:
+  - Admin puede acceder a métricas
+  - Usuario regular NO puede acceder
+  - Las métricas retornan datos correctos
+
+#### 🎯 Criterios de aceptación
+
+- ✓ Endpoint `GET /admin/dashboard/metrics` retorna todas las métricas requeridas
+- ✓ Solo usuarios con rol `admin` pueden acceder
+- ✓ Las métricas son precisas y actualizadas (caché de 5 min máximo)
+- ✓ Las lecturas y usuarios recientes se muestran correctamente
+- ✓ Los tests E2E validan el acceso y los datos
+
+#### 📝 Notas técnicas
+
+- Este dashboard es la **base mínima** para que Flavia monitoree su negocio en el MVP
+- TASK-029 (Dashboard de Estadísticas) es una versión más completa con gráficos y análisis avanzados
+- Los datos deben ser eficientes: usar `.select()` para traer solo campos necesarios
+- Implementar paginación en lecturas/usuarios recientes si el volumen crece
+
+---
+
 ### **TASK-028: Crear Endpoints de Gestión de Usuarios para Admin**
 
 **Prioridad:** 🟡 ALTA  
