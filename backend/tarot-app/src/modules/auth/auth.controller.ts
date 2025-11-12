@@ -125,7 +125,16 @@ export class AuthController {
   @Post('forgot-password')
   @HttpCode(200)
   @ApiOperation({ summary: 'Solicitar recuperación de contraseña' })
-  @ApiBody({ type: ForgotPasswordDto })
+  @ApiBody({
+    type: ForgotPasswordDto,
+    examples: {
+      example1: {
+        value: {
+          email: 'user@example.com',
+        },
+      },
+    },
+  })
   @ApiResponse({
     status: 200,
     description: 'Email de recuperación enviado',
@@ -141,7 +150,18 @@ export class AuthController {
   @Post('reset-password')
   @HttpCode(200)
   @ApiOperation({ summary: 'Restablecer contraseña con token' })
-  @ApiBody({ type: ResetPasswordDto })
+  @ApiBody({
+    type: ResetPasswordDto,
+    examples: {
+      example1: {
+        value: {
+          token:
+            'cb7e614a86f3ddf5e793af8a9c4e0f68291af6b058ca70c01422fee8d49bed65',
+          newPassword: 'NewSecurePass123!',
+        },
+      },
+    },
+  })
   @ApiResponse({
     status: 200,
     description: 'Contraseña restablecida exitosamente',
