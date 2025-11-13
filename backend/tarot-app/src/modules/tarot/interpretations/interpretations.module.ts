@@ -11,6 +11,7 @@ import { Tarotista } from '../../tarotistas/entities/tarotista.entity';
 import { TarotCard } from '../cards/entities/tarot-card.entity';
 import { CacheModule } from '../../cache/cache.module';
 import { AIModule } from '../../ai/ai.module';
+import { OutputSanitizerService } from '../../../common/services/output-sanitizer.service';
 
 @Module({
   imports: [
@@ -27,7 +28,7 @@ import { AIModule } from '../../ai/ai.module';
     AIModule,
   ],
   controllers: [InterpretationsController],
-  providers: [InterpretationsService],
+  providers: [InterpretationsService, OutputSanitizerService],
   exports: [InterpretationsService],
 })
 export class InterpretationsModule {}
