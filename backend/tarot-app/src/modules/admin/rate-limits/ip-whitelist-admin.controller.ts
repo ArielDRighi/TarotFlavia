@@ -4,15 +4,14 @@ import {
   Post,
   Delete,
   Body,
-  Param,
   UseGuards,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
-  ApiParam,
   ApiBody,
 } from '@nestjs/swagger';
 import { IPWhitelistService } from '../../../common/services/ip-whitelist.service';
@@ -84,22 +83,41 @@ export class IPWhitelistAdminController {
     };
   }
 
-  @Delete(':ip')
+  @Delete()
   @ApiOperation({
     summary: 'Eliminar IP de la whitelist',
     description:
-      'Elimina una IP de la whitelist. La IP volverá a estar sujeta a rate limiting.',
+      'Elimina una IP de la whitelist. La IP volverá a estar sujeta a rate limiting. IP debe enviarse en el body para soportar IPv6.',
   })
-  @ApiParam({ name: 'ip', description: 'IP address to remove' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        ip: {
+          type: 'string',
+          description: 'IP address to remove (IPv4 or IPv6)',
+          example: '203.0.113.45',
+        },
+      },
+      required: ['ip'],
+    },
+  })
   @ApiResponse({
     status: 200,
     description: 'IP eliminada exitosamente',
   })
   @ApiResponse({
+    status: 400,
+    description: 'IP address is required',
+  })
+  @ApiResponse({
     status: 403,
     description: 'Usuario no es administrador',
   })
-  removeIP(@Param('ip') ip: string) {
+  removeIP(@Body('ip') ip: string) {
+    if (!ip) {
+      throw new BadRequestException('IP address is required');
+    }
     this.ipWhitelistService.removeIP(ip);
     return {
       message: `IP ${ip} removed from whitelist`,

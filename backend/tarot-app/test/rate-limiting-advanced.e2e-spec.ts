@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { Server } from 'http';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { IPBlockingService } from '../src/common/services/ip-blocking.service';
@@ -7,6 +8,7 @@ import { IPWhitelistService } from '../src/common/services/ip-whitelist.service'
 
 describe('Rate Limiting Advanced (IP Blocking) E2E Tests', () => {
   let app: INestApplication;
+  let httpServer: Server;
   let ipBlockingService: IPBlockingService;
   let ipWhitelistService: IPWhitelistService;
 
@@ -26,6 +28,7 @@ describe('Rate Limiting Advanced (IP Blocking) E2E Tests', () => {
 
     await app.init();
 
+    httpServer = app.getHttpServer() as Server;
     ipBlockingService = app.get<IPBlockingService>(IPBlockingService);
     ipWhitelistService = app.get<IPWhitelistService>(IPWhitelistService);
   });
@@ -125,23 +128,23 @@ describe('Rate Limiting Advanced (IP Blocking) E2E Tests', () => {
       const email2 = `user2-${Date.now() + 1}@test.com`;
       const email3 = `user3-${Date.now() + 2}@test.com`;
 
-      await request(app.getHttpServer())
+      await request(httpServer)
         .post('/auth/register')
         .send({ email: email1, password: 'Pass123!', name: 'User 1' })
         .expect(201);
 
-      await request(app.getHttpServer())
+      await request(httpServer)
         .post('/auth/register')
         .send({ email: email2, password: 'Pass123!', name: 'User 2' })
         .expect(201);
 
-      await request(app.getHttpServer())
+      await request(httpServer)
         .post('/auth/register')
         .send({ email: email3, password: 'Pass123!', name: 'User 3' })
         .expect(201);
 
       // 4th request should be rate limited (limit is 3 per hour)
-      const fourthResponse = await request(app.getHttpServer())
+      const fourthResponse = await request(httpServer)
         .post('/auth/register')
         .send({
           email: `user4-${Date.now() + 3}@test.com`,

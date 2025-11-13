@@ -466,21 +466,24 @@ El sistema previene bypass de rate limiting mediante:
 
 ### Usuario legítimo bloqueado
 
+> ⚠️ **Nota**: Actualmente no existe un endpoint REST para desbloquear IPs. El desbloqueo debe realizarse programáticamente desde el servicio o agregando la IP a la whitelist.
+
+**Opción 1: Desbloquear vía servicio** (requiere acceso al código):
+
+```typescript
+ipBlockingService.unblockIP('203.0.113.100');
+```
+
+**Opción 2: Agregar a whitelist** (preferido para IPs confiables):
+
 ```bash
-# Desbloquear IP manualmente
-POST /admin/rate-limits/unblock
+POST /admin/ip-whitelist
 Authorization: Bearer <admin_token>
 Content-Type: application/json
 
 {
   "ip": "203.0.113.100"
 }
-```
-
-O vía servicio:
-
-```typescript
-ipBlockingService.unblockIP('203.0.113.100');
 ```
 
 ### Demasiados 429 en producción

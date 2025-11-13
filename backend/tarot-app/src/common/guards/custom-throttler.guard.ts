@@ -10,6 +10,7 @@ import {
   ThrottlerRequest,
   ThrottlerModuleOptions,
   ThrottlerStorage,
+  ThrottlerException,
 } from '@nestjs/throttler';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
@@ -43,6 +44,18 @@ export class CustomThrottlerGuard extends ThrottlerGuard {
   ) {
     super(options, storageService, reflector);
     this.customReflector = reflector;
+
+    // Warn if critical security services are not provided
+    if (!this.ipBlockingService) {
+      this.logger.warn(
+        'IPBlockingService not provided. IP blocking and violation tracking disabled.',
+      );
+    }
+    if (!this.ipWhitelistService) {
+      this.logger.warn(
+        'IPWhitelistService not provided. IP whitelisting disabled.',
+      );
+    }
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -66,31 +79,35 @@ export class CustomThrottlerGuard extends ThrottlerGuard {
 
       try {
         // Check for custom rate limits from @RateLimit decorator
+        let customRateLimit: RateLimitOptions | undefined;
         if (this.customReflector) {
           const handler = context.getHandler();
-          const customRateLimit = this.customReflector.get<RateLimitOptions>(
+          customRateLimit = this.customReflector.get<RateLimitOptions>(
             RATE_LIMIT_OPTIONS_KEY,
             handler,
           );
-
-          if (customRateLimit) {
-            this.logger.debug(
-              `Custom rate limit detected for ${request.url}: ${customRateLimit.limit} req/${customRateLimit.ttl}s`,
-            );
-            // Note: Custom rate limits need to be manually applied via @Throttle decorator
-            // The @RateLimit decorator is primarily for documentation and admin endpoint stats
-          }
         }
 
-        // Proceed with parent's rate limiting logic
+        // Note: Custom rate limits from @RateLimit decorator need to be enforced
+        // by also adding @Throttle decorator with matching values to the endpoint.
+        // The @RateLimit decorator stores metadata for documentation and admin stats.
+        if (customRateLimit) {
+          this.logger.debug(
+            `Custom rate limit metadata detected for ${request.url}: ${customRateLimit.limit} req/${customRateLimit.ttl}s`,
+          );
+        }
+
+        // Proceed with parent's default rate limiting logic (uses @Throttle decorator limits)
         return await super.canActivate(context);
       } catch (error) {
         // Record violation when rate limit is exceeded
-        this.ipBlockingService.recordViolation(ip);
-        const violations = this.ipBlockingService.getViolations(ip);
-        this.logger.warn(
-          `Rate limit violation from IP ${ip} - Violations: ${violations}`,
-        );
+        if (error instanceof ThrottlerException) {
+          this.ipBlockingService.recordViolation(ip);
+          const violations = this.ipBlockingService.getViolations(ip);
+          this.logger.warn(
+            `Rate limit violation from IP ${ip} - Violations: ${violations}`,
+          );
+        }
         throw error;
       }
     }
@@ -141,10 +158,13 @@ export class CustomThrottlerGuard extends ThrottlerGuard {
   }
 
   private getIP(request: Request): string {
-    return (
-      (request.headers?.['x-forwarded-for'] as string) ||
-      request.ip ||
-      'unknown'
-    );
+    // x-forwarded-for can contain multiple IPs (comma-separated)
+    // Extract and sanitize the first IP (client's real IP)
+    const forwarded = request.headers?.['x-forwarded-for'] as string;
+    if (forwarded) {
+      const ip = forwarded.split(',')[0].trim();
+      return ip || request.ip || 'unknown';
+    }
+    return request.ip || 'unknown';
   }
 }

@@ -11,9 +11,6 @@ import { TarotReading } from '../tarot/readings/entities/tarot-reading.entity';
 import { AIUsageLog } from '../ai-usage/entities/ai-usage-log.entity';
 import { UsersModule } from '../users/users.module';
 import { AuditModule } from '../audit/audit.module';
-import { IPBlockingService } from '../../common/services/ip-blocking.service';
-import { IPWhitelistService } from '../../common/services/ip-whitelist.service';
-
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, TarotReading, AIUsageLog]),
@@ -30,7 +27,7 @@ import { IPWhitelistService } from '../../common/services/ip-whitelist.service';
     RateLimitsAdminController,
     IPWhitelistAdminController,
   ],
-  providers: [AdminDashboardService, IPBlockingService, IPWhitelistService],
+  providers: [AdminDashboardService],
   exports: [AdminDashboardService],
 })
 export class AdminModule {}
