@@ -36,14 +36,15 @@ describe('Input Validation and Security (E2E)', () => {
 
   afterAll(async () => {
     await dbHelper.cleanDatabase();
+    await dbHelper.close();
     await app.close();
   });
 
   beforeEach(async () => {
     await dbHelper.cleanDatabase();
     // Add significant delay to avoid rate limiting between tests
-    await delay(1000);
-  });
+    await delay(2000);
+  }, 30000);
 
   describe('SQL Injection Protection', () => {
     it('should reject SQL injection attempts in email field', async () => {
