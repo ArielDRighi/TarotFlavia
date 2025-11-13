@@ -4509,7 +4509,7 @@ Complementar TASK-048 implementando sanitización de outputs (especialmente inte
 - `src/modules/tarot/interpretations/interpretations.service.ts` - Integrada sanitización en generateInterpretation y fallback
 - `src/main.ts` - Configurado Helmet con CSP, HSTS, X-Frame-Options, etc.
 - `docs/INPUT_VALIDATION.md` - Agregada sección de Output Sanitization
-- `package.json` - Añadidas dependencias helmet@7.2.0 y xss@1.0.15
+- `package.json` - Añadida dependencia helmet@8.1.0 (custom sanitization implementation, no external xss lib)
 
 **Características implementadas:**
 

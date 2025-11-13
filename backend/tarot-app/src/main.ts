@@ -68,8 +68,13 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   // Configure CORS with security headers (TASK-048-a)
+  if (!process.env.CORS_ORIGIN) {
+    console.warn(
+      '⚠️  CORS_ORIGIN environment variable is not set. CORS will be disabled for security.',
+    );
+  }
   app.enableCors({
-    origin: process.env.CORS_ORIGIN || '*',
+    origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN : false,
     credentials: true,
     exposedHeaders: [
       'X-Content-Type-Options',

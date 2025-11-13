@@ -457,6 +457,6 @@ npm test -- max-json-depth.validator.spec.ts
 
 ---
 
-**Last Updated:** November 13, 2025  
+**Last Updated:** January 27, 2025  
 **Version:** 1.0.0  
-**Next Review:** February 13, 2026
+**Next Review:** April 27, 2025

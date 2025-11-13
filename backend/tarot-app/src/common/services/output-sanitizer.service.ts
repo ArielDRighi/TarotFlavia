@@ -163,15 +163,14 @@ export class OutputSanitizerService {
    * @returns Text with HTML entities escaped
    */
   private escapeHtmlEntities(text: string): string {
-    const entityMap: Record<string, string> = {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#x27;',
-      '/': '&#x2F;',
-    };
-
-    return text.replace(/[&<>"'/]/g, (char) => entityMap[char] || char);
+    // IMPORTANT: Escape & first to prevent double-escaping
+    // Otherwise < becomes &lt; then &amp;lt;
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;')
+      .replace(/\//g, '&#x2F;');
   }
 }
