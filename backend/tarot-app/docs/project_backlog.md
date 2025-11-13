@@ -1712,6 +1712,7 @@ Implementar rate limiting global para proteger la API de abuso y ataques DDoS us
 **Dependencias:** TASK-014 (completada)  
 **Estado:** ✅ **COMPLETADA** (13/11/2025)  
 **Branch:** `feature/TASK-014-a-rate-limiting-avanzado`  
+**Commit:** `5df5727`  
 **Marcador MVP:** ⭐⭐⭐ **CRÍTICO PARA MVP** - Protección DDoS avanzada
 
 #### 📋 Descripción
