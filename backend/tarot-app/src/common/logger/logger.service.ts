@@ -58,28 +58,33 @@ export class LoggerService implements NestLoggerService {
       new winston.transports.Console({
         format: this.isDevelopment ? devFormat : jsonFormat,
       }),
-
-      // Combined log file with rotation
-      new DailyRotateFile({
-        dirname: logDir,
-        filename: 'combined-%DATE%.log',
-        datePattern: 'YYYY-MM-DD',
-        maxSize,
-        maxFiles,
-        format: jsonFormat,
-      }),
-
-      // Error log file with rotation
-      new DailyRotateFile({
-        dirname: logDir,
-        filename: 'error-%DATE%.log',
-        datePattern: 'YYYY-MM-DD',
-        level: 'error',
-        maxSize,
-        maxFiles,
-        format: jsonFormat,
-      }),
     ];
+
+    // Only add file transports in non-test environments
+    if (process.env.NODE_ENV !== 'test') {
+      transports.push(
+        // Combined log file with rotation
+        new DailyRotateFile({
+          dirname: logDir,
+          filename: 'combined-%DATE%.log',
+          datePattern: 'YYYY-MM-DD',
+          maxSize,
+          maxFiles,
+          format: jsonFormat,
+        }),
+
+        // Error log file with rotation
+        new DailyRotateFile({
+          dirname: logDir,
+          filename: 'error-%DATE%.log',
+          datePattern: 'YYYY-MM-DD',
+          level: 'error',
+          maxSize,
+          maxFiles,
+          format: jsonFormat,
+        }),
+      );
+    }
 
     // Create Winston logger
     this.logger = winston.createLogger({
