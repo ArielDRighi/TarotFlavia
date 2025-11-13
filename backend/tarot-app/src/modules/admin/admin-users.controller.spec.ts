@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Test, TestingModule } from '@nestjs/testing';
 import { AdminUsersController } from './admin-users.controller';
 import { UsersService } from '../users/users.service';
@@ -42,7 +43,7 @@ describe('AdminUsersController', () => {
     findAll: jest.fn(),
   };
 
-  const mockRequest = {
+  const mockRequest: any = {
     user: { userId: 999, roles: [UserRole.ADMIN] },
     ip: '127.0.0.1',
     headers: { 'user-agent': 'test-agent' },
@@ -156,7 +157,7 @@ describe('AdminUsersController', () => {
       const result = await controller.banUser(
         1,
         { reason: 'Test reason' },
-        mockRequest as any,
+        mockRequest,
       );
 
       expect(result).toEqual({
@@ -176,7 +177,7 @@ describe('AdminUsersController', () => {
       mockUsersService.unbanUser.mockResolvedValue(unbannedUser);
       mockAuditLogService.log.mockResolvedValue({});
 
-      const result = await controller.unbanUser(1, mockRequest as any);
+      const result = await controller.unbanUser(1, mockRequest);
 
       expect(result).toEqual({
         message: 'Usuario desbaneado exitosamente',
@@ -198,7 +199,7 @@ describe('AdminUsersController', () => {
       const result = await controller.updateUserPlan(
         1,
         { plan: UserPlan.PREMIUM },
-        mockRequest as any,
+        mockRequest,
       );
 
       expect(result).toEqual({
@@ -223,7 +224,7 @@ describe('AdminUsersController', () => {
       mockUsersService.addTarotistRole.mockResolvedValue(updatedUser);
       mockAuditLogService.log.mockResolvedValue({});
 
-      const result = await controller.addTarotistRole(1, mockRequest as any);
+      const result = await controller.addTarotistRole(1, mockRequest);
 
       expect(result).toEqual({
         message: 'Rol TAROTIST agregado exitosamente',
@@ -246,7 +247,7 @@ describe('AdminUsersController', () => {
       mockUsersService.addAdminRole.mockResolvedValue(updatedUser);
       mockAuditLogService.log.mockResolvedValue({});
 
-      const result = await controller.addAdminRole(1, mockRequest as any);
+      const result = await controller.addAdminRole(1, mockRequest);
 
       expect(result).toEqual({
         message: 'Rol ADMIN agregado exitosamente',
@@ -268,11 +269,7 @@ describe('AdminUsersController', () => {
       mockUsersService.removeRole.mockResolvedValue(updatedUser);
       mockAuditLogService.log.mockResolvedValue({});
 
-      const result = await controller.removeRole(
-        1,
-        'tarotist',
-        mockRequest as any,
-      );
+      const result = await controller.removeRole(1, 'tarotist', mockRequest);
 
       expect(result).toEqual({
         message: 'Rol TAROTIST eliminado exitosamente',
@@ -293,7 +290,7 @@ describe('AdminUsersController', () => {
       mockUsersService.remove.mockResolvedValue({ affected: 1 });
       mockAuditLogService.log.mockResolvedValue({});
 
-      const result = await controller.deleteUser(1, mockRequest as any);
+      const result = await controller.deleteUser(1, mockRequest);
 
       expect(result).toEqual({
         message: 'Usuario eliminado exitosamente',
@@ -306,9 +303,9 @@ describe('AdminUsersController', () => {
     it('should throw NotFoundException if user does not exist', async () => {
       mockUsersService.findById.mockResolvedValue(null);
 
-      await expect(
-        controller.deleteUser(1, mockRequest as any),
-      ).rejects.toThrow(NotFoundException);
+      await expect(controller.deleteUser(1, mockRequest)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 });
