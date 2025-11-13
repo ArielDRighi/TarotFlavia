@@ -16,6 +16,7 @@ import { AIProviderService } from '../../ai/application/services/ai-provider.ser
 import { InterpretationCacheService } from '../../cache/application/services/interpretation-cache.service';
 import { PromptBuilderService } from '../../ai/application/services/prompt-builder.service';
 import { TarotPrompts } from '../../ai/application/prompts/tarot-prompts';
+import { OutputSanitizerService } from '../../../common/services/output-sanitizer.service';
 
 interface InterpretationResult {
   interpretation: string;
@@ -40,9 +41,10 @@ export class InterpretationsService {
     private aiProviderService: AIProviderService,
     private cacheService: InterpretationCacheService,
     private promptBuilder: PromptBuilderService,
+    private outputSanitizer: OutputSanitizerService,
   ) {
     this.logger.log(
-      'InterpretationsService initialized with AI Provider, Cache, and PromptBuilder',
+      'InterpretationsService initialized with AI Provider, Cache, PromptBuilder, and OutputSanitizer',
     );
   }
 
@@ -189,7 +191,11 @@ export class InterpretationsService {
         readingId,
       );
 
-      const interpretation = response.content;
+      // Sanitize AI response before using it (TASK-048-a: Output Sanitization)
+      const rawInterpretation = response.content;
+      const interpretation =
+        this.outputSanitizer.sanitizeAiResponse(rawInterpretation);
+
       const duration = Date.now() - startTime;
 
       this.logger.log(
@@ -239,8 +245,11 @@ export class InterpretationsService {
         meaningUpright: card.meaningUpright,
       }));
 
+      const rawFallback = TarotPrompts.getFallbackInterpretation(fallbackCards);
+
+      // Sanitize fallback response too (TASK-048-a: Output Sanitization)
       const fallbackInterpretation =
-        TarotPrompts.getFallbackInterpretation(fallbackCards);
+        this.outputSanitizer.sanitizeAiResponse(rawFallback);
 
       // Guardar el fallback también para registro
       await this.saveInterpretation(fallbackInterpretation, 'fallback', {

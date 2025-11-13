@@ -1,8 +1,14 @@
-# Input Validation and Sanitization Documentation
+# Input Validation, Sanitization, and Output Security Documentation
 
 ## Overview
 
-This document describes the comprehensive input validation and sanitization strategy implemented across the application to prevent security vulnerabilities such as SQL Injection, XSS (Cross-Site Scripting), and other injection attacks.
+This document describes the comprehensive input validation, sanitization, and output security strategy implemented across the application to prevent security vulnerabilities such as SQL Injection, XSS (Cross-Site Scripting), and other injection attacks.
+
+**Defense-in-depth strategy:**
+
+- **Input Sanitization** (TASK-048): Clean data entering the system
+- **Output Sanitization** (TASK-048-a): Clean data leaving the system (especially AI-generated content)
+- **Security Headers** (TASK-048-a): HTTP headers to protect client browsers
 
 ## Global Configuration
 
@@ -355,12 +361,84 @@ All validation errors return structured responses:
 3. Add comprehensive tests
 4. Document usage in this file
 
+## Output Sanitization (TASK-048-a)
+
+### Overview
+
+While input sanitization prevents malicious data from entering the system, output sanitization ensures that any data leaving the system (especially AI-generated content) is safe for display in client browsers.
+
+### OutputSanitizerService
+
+**Location:** `src/common/services/output-sanitizer.service.ts`
+
+**Purpose:** Sanitize AI-generated responses before sending them to clients to prevent XSS attacks.
+
+**Features:**
+
+- Removes all HTML tags and scripts
+- Escapes HTML entities (`<`, `>`, `&`, `"`, `'`)
+- Removes dangerous protocols (javascript:, data:, vbscript:)
+- Logs potential XSS attempts for security monitoring
+- Handles edge cases (null, undefined, empty strings)
+- Performant with large texts (AI interpretations)
+
+**Usage:**
+
+```typescript
+@Injectable()
+export class InterpretationsService {
+  constructor(private readonly outputSanitizer: OutputSanitizerService) {}
+
+  async generateInterpretation(...): Promise<string> {
+    const rawInterpretation = await this.aiProvider.generate(...);
+
+    // Sanitize AI output before storing/returning
+    const sanitizedInterpretation =
+      this.outputSanitizer.sanitizeAiResponse(rawInterpretation);
+
+    return sanitizedInterpretation;
+  }
+}
+```
+
+**Why Output Sanitization is Critical:**
+
+1. **AI Model Manipulation:** If an attacker manipulates prompts, the AI might generate malicious content
+2. **Third-Party Data:** AI models are trained on internet data that may contain XSS payloads
+3. **Defense in Depth:** Even if input sanitization fails, output sanitization is a last line of defense
+4. **Cached Content:** Sanitized outputs are cached, preventing repeated exposure to vulnerabilities
+
+### Where Output Sanitization is Applied
+
+1. **AI-Generated Interpretations:**
+   - `InterpretationsService.generateInterpretation()`
+   - `InterpretationsService` fallback responses
+2. **Future:** Any service that generates or fetches content from external sources
+
+### Output Sanitization vs Input Sanitization
+
+| Aspect              | Input Sanitization                   | Output Sanitization                      |
+| ------------------- | ------------------------------------ | ---------------------------------------- |
+| **When**            | Data enters system (DTOs)            | Data leaves system (responses)           |
+| **Purpose**         | Prevent DB pollution, code injection | Prevent XSS in browser                   |
+| **Target**          | User inputs                          | AI outputs, external data                |
+| **Implementation**  | Decorators on DTOs                   | Service method calls                     |
+| **Example**         | `@SanitizeHtml() name: string`       | `sanitizer.sanitizeAiResponse(response)` |
+| **Fallback if nil** | Rejects request                      | Returns safe string                      |
+
 ## Testing
 
 Run security tests:
 
 ```bash
+# Input validation tests
 npm run test:e2e -- input-validation-security.e2e-spec.ts
+
+# Output sanitization tests (TASK-048-a)
+npm run test:e2e -- output-sanitization.e2e-spec.ts
+
+# Unit tests for output sanitizer
+npm test -- output-sanitizer.service.spec.ts
 ```
 
 ## References
@@ -369,3 +447,5 @@ npm run test:e2e -- input-validation-security.e2e-spec.ts
 - [class-validator Documentation](https://github.com/typestack/class-validator)
 - [class-transformer Documentation](https://github.com/typestack/class-transformer)
 - [OWASP Input Validation Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html)
+- [OWASP XSS Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html)
+- [Helmet.js Documentation](https://helmetjs.github.io/)

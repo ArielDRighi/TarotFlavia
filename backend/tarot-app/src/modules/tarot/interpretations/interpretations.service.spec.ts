@@ -10,6 +10,7 @@ import { AIProviderService } from '../../ai/application/services/ai-provider.ser
 import { AIProviderType } from '../../ai/domain/interfaces/ai-provider.interface';
 import { InterpretationCacheService } from '../../cache/application/services/interpretation-cache.service';
 import { PromptBuilderService } from '../../ai/application/services/prompt-builder.service';
+import { OutputSanitizerService } from '../../../common/services/output-sanitizer.service';
 
 describe('InterpretationsService', () => {
   let service: InterpretationsService;
@@ -60,6 +61,11 @@ describe('InterpretationsService', () => {
     clearConfigCache: jest.fn(),
   };
 
+  const mockOutputSanitizerService = {
+    sanitizeAiResponse: jest.fn((text: string) => text), // Pass-through by default
+    sanitizeBatch: jest.fn(),
+  };
+
   const mockCards: TarotCard[] = [
     {
       id: 1,
@@ -108,6 +114,10 @@ describe('InterpretationsService', () => {
         {
           provide: PromptBuilderService,
           useValue: mockPromptBuilderService,
+        },
+        {
+          provide: OutputSanitizerService,
+          useValue: mockOutputSanitizerService,
         },
       ],
     }).compile();
