@@ -13,6 +13,11 @@ import { AIHealthService } from './ai-health.service';
 @ApiTags('health')
 @Controller('health')
 export class HealthController {
+  // Health check thresholds
+  private readonly DATABASE_TIMEOUT_MS = 5000; // 5 seconds
+  private readonly MEMORY_THRESHOLD_BYTES = 1024 * 1024 * 1024; // 1GB
+  private readonly DISK_THRESHOLD_PERCENT = 0.9; // Alert when disk is 90% full
+
   constructor(
     private readonly health: HealthCheckService,
     private readonly db: TypeOrmHealthIndicator,
@@ -28,10 +33,11 @@ export class HealthController {
    */
   private getDiskPath(): string {
     if (process.platform === 'win32') {
-      // Extract drive letter from current working directory (e.g., "D:\project" -> "D:\")
+      // Extract drive letter from current working directory using regex
+      // Handles standard paths like "D:\project" and provides fallback for edge cases
       const cwd = process.cwd();
-      const driveLetter = cwd.charAt(0);
-      return `${driveLetter}:\\`;
+      const match = cwd.match(/^([A-Za-z]):/);
+      return match ? `${match[1]}:\\` : 'C:\\';
     }
     return '/';
   }
@@ -39,8 +45,9 @@ export class HealthController {
   @Get()
   @HealthCheck()
   @ApiOperation({
-    summary: 'General health check (liveness probe)',
-    description: 'Returns the health status of all system components',
+    summary: 'Comprehensive health check',
+    description:
+      'Performs detailed health checks of all system components (database, memory, disk, AI). Suitable for monitoring and diagnostics. Use /health/live for liveness probes and /health/ready for readiness probes.',
   })
   @ApiResponse({
     status: 200,
@@ -57,18 +64,19 @@ export class HealthController {
   })
   async check(): Promise<HealthCheckResult> {
     return this.health.check([
-      // Database check with 5s timeout
-      () => this.db.pingCheck('database', { timeout: 5000 }),
+      // Database check with timeout
+      () =>
+        this.db.pingCheck('database', { timeout: this.DATABASE_TIMEOUT_MS }),
 
-      // Memory checks - warn if > 1GB
-      () => this.memory.checkHeap('memory_heap', 1024 * 1024 * 1024),
-      () => this.memory.checkRSS('memory_rss', 1024 * 1024 * 1024),
+      // Memory checks
+      () => this.memory.checkHeap('memory_heap', this.MEMORY_THRESHOLD_BYTES),
+      () => this.memory.checkRSS('memory_rss', this.MEMORY_THRESHOLD_BYTES),
 
-      // Disk check - warn if < 10% free space
+      // Disk check
       () =>
         this.disk.checkStorage('disk', {
           path: this.getDiskPath(),
-          thresholdPercent: 0.9,
+          thresholdPercent: this.DISK_THRESHOLD_PERCENT,
         }),
 
       // AI providers check - app funciona en modo degradado sin AI
@@ -113,7 +121,8 @@ export class HealthController {
   async checkReady(): Promise<HealthCheckResult> {
     return this.health.check([
       // Critical: Database must be available
-      () => this.db.pingCheck('database', { timeout: 5000 }),
+      () =>
+        this.db.pingCheck('database', { timeout: this.DATABASE_TIMEOUT_MS }),
 
       // AI providers: app can start if configured (even if temporarily unavailable)
       async () => {
@@ -157,24 +166,32 @@ export class HealthController {
   @Get('details')
   @HealthCheck()
   @ApiOperation({
-    summary: 'Detailed health check',
+    summary: 'Detailed health check with circuit breaker info',
     description:
-      'Returns detailed information about all system components. For admin/monitoring use.',
+      'Returns comprehensive health information including circuit breaker statistics. Intended for admin dashboards and monitoring systems. Note: Exposes system metrics - consider adding authentication in production.',
   })
   @ApiResponse({
     status: 200,
-    description: 'Detailed health information',
+    description: 'Detailed health information including circuit breakers',
   })
   async checkDetails(): Promise<HealthCheckResult> {
     return this.health.check([
-      () => this.db.pingCheck('database', { timeout: 5000 }),
-      () => this.memory.checkHeap('memory_heap', 1024 * 1024 * 1024),
-      () => this.memory.checkRSS('memory_rss', 1024 * 1024 * 1024),
+      // Database check with timeout
+      () =>
+        this.db.pingCheck('database', { timeout: this.DATABASE_TIMEOUT_MS }),
+
+      // Memory checks
+      () => this.memory.checkHeap('memory_heap', this.MEMORY_THRESHOLD_BYTES),
+      () => this.memory.checkRSS('memory_rss', this.MEMORY_THRESHOLD_BYTES),
+
+      // Disk check
       () =>
         this.disk.checkStorage('disk', {
           path: this.getDiskPath(),
-          thresholdPercent: 0.9,
+          thresholdPercent: this.DISK_THRESHOLD_PERCENT,
         }),
+
+      // AI providers check with circuit breaker details
       async () => {
         const aiHealth = await this.aiHealthService.checkAllProviders();
         const isConfigured =
@@ -189,6 +206,7 @@ export class HealthController {
             available: hasWorkingProvider,
             primary: aiHealth.primary,
             fallback: aiHealth.fallback,
+            // Include circuit breaker stats for detailed monitoring
             circuitBreakers: aiHealth.circuitBreakers,
             timestamp: aiHealth.timestamp,
           },

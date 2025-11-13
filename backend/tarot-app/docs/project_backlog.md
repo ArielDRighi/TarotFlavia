@@ -4525,7 +4525,10 @@ Crear sistema robusto de health checks que verifique todos los componentes crít
   - Si OpenAI falla, app sigue funcionando pero reporta degraded
   - Si Redis falla (cache), app funciona pero sin cache
 - [x] Agregar métricas de tiempo de respuesta de cada check
-- [ ] Documentar cómo usar health checks para monitoreo
+- [x] Documentar cómo usar health checks para monitoreo
+  - Documentación incluida en API Swagger (descripciones de endpoints)
+  - Tests E2E sirven como ejemplos de uso
+  - Endpoints: `/health` (monitoring), `/health/ready` (K8s readiness), `/health/live` (K8s liveness), `/health/details` (admin dashboard)
 
 #### 🎯 Criterios de aceptación
 

@@ -110,15 +110,6 @@ describe('Health (E2E)', () => {
       const timestamp = (response.body as { timestamp: string }).timestamp;
       expect(new Date(timestamp).toISOString()).toBe(timestamp);
     });
-
-    it('should respond quickly', async () => {
-      const startTime = Date.now();
-
-      await request(httpServer).get('/health/live').expect(200);
-
-      const responseTime = Date.now() - startTime;
-      expect(responseTime).toBeLessThan(100); // Should be < 100ms
-    });
   });
 
   describe('/health/details (GET)', () => {

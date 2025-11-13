@@ -18,10 +18,6 @@ import { AIHealthService } from './ai-health.service';
  * Los errores son FALSOS POSITIVOS del análisis estático y no afectan la ejecución real.
  * Por ello se deshabilitan las reglas de unsafe type checking solo en este archivo.
  */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
 
 describe('HealthController', () => {
   let controller: HealthController;

@@ -108,16 +108,15 @@
   - ✅ ValidationPipe global con whitelist
   - ✅ Documentación completa en INPUT_VALIDATION.md
 
-**2. TASK-051: Health Checks Completos** (2 días) ⭐⭐⭐
+**2. ✅ TASK-051: Health Checks Completos** (COMPLETADA - Nov 13, 2025)
 
-- **Nota:** Renumerada desde TASK-030 original
 - **Qué hace:**
   - Verificar DB, IA providers, Redis (si existe)
-  - Endpoints `/health`, `/health/ready`, `/health/live`
+  - Endpoints `/health`, `/health/ready`, `/health/live`, `/health/details`
   - Formato estándar para Kubernetes
   - Graceful degradation
 - **Dependencias:** TASK-004 (completada)
-- **Tests:** Health checks funcionan, timeouts correctos
+- **Tests:** ✅ 11 unit tests, 16 E2E tests, todos pasando
 
 **3. TASK-052: Sanitización de Outputs** (1.5 días) ⭐⭐
 
