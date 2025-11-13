@@ -7,7 +7,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { Throttle } from '@nestjs/throttler';
+import { RateLimit } from '../../common/decorators/rate-limit.decorator';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
@@ -20,11 +20,11 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @ApiTags('Autenticación')
 @Controller('auth')
-@Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 requests por minuto para endpoints de autenticación
 export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('register')
+  @RateLimit({ ttl: 3600, limit: 3, blockDuration: 3600 }) // 3 registros/hora por IP
   @ApiOperation({ summary: 'Registrar un nuevo usuario' })
   @ApiBody({ type: CreateUserDto })
   @ApiResponse({ status: 201, description: 'Usuario registrado exitosamente' })
@@ -40,6 +40,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @RateLimit({ ttl: 900, limit: 5, blockDuration: 3600 }) // 5 intentos/15min, bloqueo 1 hora
   @HttpCode(200)
   @ApiOperation({ summary: 'Iniciar sesión' })
   @ApiBody({ type: LoginDto })
@@ -123,6 +124,7 @@ export class AuthController {
   }
 
   @Post('forgot-password')
+  @RateLimit({ ttl: 3600, limit: 3, blockDuration: 3600 }) // 3 requests/hora por IP
   @HttpCode(200)
   @ApiOperation({ summary: 'Solicitar recuperación de contraseña' })
   @ApiBody({
