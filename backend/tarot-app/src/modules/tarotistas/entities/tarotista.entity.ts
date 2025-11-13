@@ -13,6 +13,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from '../../users/entities/user.entity';
 import { TarotReading } from '../../tarot/readings/entities/tarot-reading.entity';
+import { UserTarotistaSubscription } from './user-tarotista-subscription.entity';
 
 @Entity('tarotistas')
 @Check('"comisión_porcentaje" >= 0 AND "comisión_porcentaje" <= 100')
@@ -190,11 +191,14 @@ export class Tarotista {
 
   @ApiProperty({
     description: 'Suscripciones de usuarios a este tarotista',
-    type: () => 'UserTarotistaSubscription',
+    type: () => UserTarotistaSubscription,
     isArray: true,
   })
-  @OneToMany('UserTarotistaSubscription', 'tarotista')
-  subscriptions: unknown[];
+  @OneToMany(
+    () => UserTarotistaSubscription,
+    (subscription) => subscription.tarotista,
+  )
+  subscriptions: UserTarotistaSubscription[];
 
   @ApiProperty({
     description: 'Lecturas realizadas por el tarotista',
