@@ -71,12 +71,22 @@ export class HealthController {
           thresholdPercent: 0.9,
         }),
 
-      // AI providers check
+      // AI providers check - app funciona en modo degradado sin AI
       async () => {
         const aiHealth = await this.aiHealthService.checkAllProviders();
+        // App is healthy even if AI is unavailable (graceful degradation)
+        // Only mark as 'down' if AI is required AND completely unavailable
+        const isConfigured =
+          aiHealth.primary.configured || aiHealth.fallback.length > 0;
+        const hasWorkingProvider =
+          aiHealth.primary.status === 'ok' ||
+          aiHealth.fallback.some((f) => f.status === 'ok');
+
         return {
           ai: {
-            status: aiHealth.primary.status === 'ok' ? 'up' : 'down',
+            // Report 'up' if configured (even if temporarily unavailable)
+            status: isConfigured ? 'up' : 'down',
+            available: hasWorkingProvider,
             primary: aiHealth.primary,
             fallback: aiHealth.fallback,
           },
@@ -105,18 +115,21 @@ export class HealthController {
       // Critical: Database must be available
       () => this.db.pingCheck('database', { timeout: 5000 }),
 
-      // Critical: At least one AI provider must be configured
+      // AI providers: app can start if configured (even if temporarily unavailable)
       async () => {
         const aiHealth = await this.aiHealthService.checkAllProviders();
+        const isConfigured =
+          aiHealth.primary.configured || aiHealth.fallback.length > 0;
         const hasWorkingProvider =
           aiHealth.primary.status === 'ok' ||
           aiHealth.fallback.some((f) => f.status === 'ok');
 
         return {
           ai: {
-            status: hasWorkingProvider ? 'up' : 'down',
-            configured:
-              aiHealth.primary.configured || aiHealth.fallback.length > 0,
+            // Ready if configured, even if temporarily unavailable
+            status: isConfigured ? 'up' : 'down',
+            configured: isConfigured,
+            available: hasWorkingProvider,
           },
         };
       },
@@ -164,9 +177,16 @@ export class HealthController {
         }),
       async () => {
         const aiHealth = await this.aiHealthService.checkAllProviders();
+        const isConfigured =
+          aiHealth.primary.configured || aiHealth.fallback.length > 0;
+        const hasWorkingProvider =
+          aiHealth.primary.status === 'ok' ||
+          aiHealth.fallback.some((f) => f.status === 'ok');
+
         return {
           ai: {
-            status: aiHealth.primary.status === 'ok' ? 'up' : 'down',
+            status: isConfigured ? 'up' : 'down',
+            available: hasWorkingProvider,
             primary: aiHealth.primary,
             fallback: aiHealth.fallback,
             circuitBreakers: aiHealth.circuitBreakers,
