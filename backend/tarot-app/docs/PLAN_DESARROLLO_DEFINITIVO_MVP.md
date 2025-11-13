@@ -67,28 +67,59 @@
 - ✅ **TASK-030**: Audit Log (Registro de Auditoría)
 - ✅ **TASK-042**: Índices de BD Optimizados
 
-**Total Completadas: 34 tareas (~38 días de desarrollo)**
+#### Epic 14: Arquitectura y Refactorización (5 tareas)
+
+- ✅ **TASK-ARCH-001**: Extraer Módulo Cache con Capas
+- ✅ **TASK-ARCH-002**: Extraer Módulo AI con Capas
+- ✅ **TASK-ARCH-003**: Dividir Readings Service en Use Cases
+- ✅ **TASK-ARCH-006**: Separar Capas en Módulos
+- ✅ **TASK-ARCH-007**: Documentación y Governance
+
+#### Epic 15: Preparación Marketplace (Completadas Anticipadamente) (7 tareas)
+
+- ✅ **TASK-061**: AI Provider Abstraction
+- ✅ **TASK-064**: Schema Multi-Tarotista
+- ✅ **TASK-065**: Migrar Flavia a Tabla Tarotistas
+- ✅ **TASK-065-a**: Migración Datos Históricos
+- ✅ **TASK-066**: Sistema Significados Personalizados
+- ✅ **TASK-067**: PromptBuilderService Dinámico
+- ✅ **TASK-067-a**: Cache por Tarotista/Invalidación
+- ✅ **TASK-069**: Sistema de Roles (CONSUMER/TAROTIST/ADMIN)
+- ✅ **TASK-070**: Fix E2E Parallel Tests
+
+**Total Completadas: 51 tareas (~65 días de desarrollo)**
 
 ---
 
-## 🔄 TAREAS PENDIENTES PARA MVP (25 tareas - ~40.5 días)
+## 🔄 TAREAS PENDIENTES PARA MVP (13 tareas - ~30.5 días)
 
-### 🔴 FASE 1: FUNDAMENTOS CRÍTICOS (7.5 días)
+### 🔴 FASE 1: FUNDAMENTOS CRÍTICOS (6.5 días)
 
-#### Seguridad y Core (5 días)
+#### Seguridad y Core (4 días)
 
-**1. TASK-048: Validación y Sanitización de Inputs** (1 día) ⭐⭐⭐
+**1. TASK-048: Validación y Sanitización de Inputs** ✅ (COMPLETADA)
 
-- **Prioridad:** CRÍTICA - Seguridad fundamental
+- **Estado:** ✅ Completada el 13/11/2025
+- **Branch:** feature/TASK-048-input-validation-sanitization
+- **Tests:** 6/6 E2E tests pasando, 493/493 tests unitarios
+- **Implementación:**
+  - ✅ Validadores custom (@IsSecureUrl, @MaxJsonDepth)
+  - ✅ Decoradores de sanitización (@SanitizeHtml, @SanitizeEmail, @Trim)
+  - ✅ ValidationPipe global con whitelist
+  - ✅ Documentación completa en INPUT_VALIDATION.md
+
+**2. TASK-051: Health Checks Completos** (2 días) ⭐⭐⭐
+
+- **Nota:** Renumerada desde TASK-030 original
 - **Qué hace:**
-  - Validar todos los inputs con class-validator
-  - Sanitizar strings para prevenir inyecciones
-  - Validación estricta de DTOs
-  - WhiteList y ForbidNonWhitelisted global
-- **Dependencias:** Ninguna
-- **Tests:** Validación de DTOs, prevención de inyecciones
+  - Verificar DB, IA providers, Redis (si existe)
+  - Endpoints `/health`, `/health/ready`, `/health/live`
+  - Formato estándar para Kubernetes
+  - Graceful degradation
+- **Dependencias:** TASK-004 (completada)
+- **Tests:** Health checks funcionan, timeouts correctos
 
-**2. TASK-051: Sanitización de Outputs** (1.5 días) ⭐⭐
+**3. TASK-052: Sanitización de Outputs** (1.5 días) ⭐⭐
 
 - **Qué hace:**
   - Prevenir XSS en respuestas
@@ -97,7 +128,7 @@
 - **Dependencias:** Ninguna
 - **Tests:** Prevención XSS, headers correctos
 
-**3. TASK-047: Rate Limiting Avanzado** (1.5 días) ⭐⭐⭐
+**4. TASK-047: Rate Limiting Avanzado** (1.5 días) ⭐⭐⭐
 
 - **Qué hace:**
   - Protección DDoS avanzada
@@ -106,7 +137,7 @@
 - **Dependencias:** TASK-014 (ya completada)
 - **Tests:** Límites respetados, diferenciación planes
 
-**4. TASK-075: Logging Estructurado con Winston** (1 día) ⭐⭐
+**5. TASK-075: Logging Estructurado con Winston** (1 día) ⭐⭐
 
 - **Qué hace:**
   - Logs JSON estructurados
@@ -116,7 +147,7 @@
 - **Dependencias:** Ninguna
 - **Tests:** Formato JSON, correlationId, rotación
 
-**5. TASK-043: Connection Pooling Optimizado** (1 día) ⭐⭐
+**6. TASK-043: Connection Pooling Optimizado** (1 día) ⭐⭐
 
 - **Qué hace:**
   - Optimizar pool de conexiones de TypeORM
@@ -126,7 +157,7 @@
 - **Dependencias:** TASK-002 (completada)
 - **Tests:** Pool maneja concurrencia, no hay timeouts
 
-**6. TASK-045: Query Optimization (N+1, Eager Loading)** (1.5 días) ⭐⭐⭐
+**7. TASK-045: Query Optimization (N+1, Eager Loading)** (1.5 días) ⭐⭐⭐
 
 - **Qué hace:**
   - Eliminar N+1 query problems
@@ -144,7 +175,7 @@
 
 #### Dashboard y Health Checks (4 días)
 
-**5. TASK-029: Dashboard de Estadísticas Admin** (2 días) ⭐⭐
+**8. TASK-029: Dashboard de Estadísticas Admin** (2 días) ⭐⭐
 
 - **Qué hace:**
   - Endpoint `/admin/dashboard/stats` con métricas clave
@@ -154,23 +185,13 @@
 - **Dependencias:** TASK-027 (completada)
 - **Tests:** Métricas correctas, caché funciona
 
-**6. TASK-030: Health Checks Completos** (2 días) ⭐⭐⭐
-
-- **Qué hace:**
-  - Verificar DB, IA providers, Redis (si existe)
-  - Endpoints `/health`, `/health/ready`, `/health/live`
-  - Formato estándar para Kubernetes
-  - Graceful degradation
-- **Dependencias:** TASK-004 (completada)
-- **Tests:** Health checks funcionan, timeouts correctos
-
 ---
 
 ### 🔵 FASE 3: FEATURES OPCIONALES MVP (6 días)
 
 #### Engagement y UX (6 días)
 
-**7. TASK-062: Lectura Diaria "Carta del Día"** (2 días) ⭐⭐
+**9. TASK-062: Lectura Diaria "Carta del Día"** (2 días) ⭐⭐
 
 - **Qué hace:**
   - Endpoint `/readings/daily-card` gratuito
@@ -181,7 +202,7 @@
 - **Tests:** Límite diario, interpretación correcta
 - **Nota:** Puede posponerse si hay presión de tiempo
 
-**8. TASK-063: Sistema de Calendario/Scheduling** (2 días) ⭐⭐
+**10. TASK-063: Sistema de Calendario/Scheduling** (2 días) ⭐⭐
 
 - **Qué hace:**
   - Tarotista define disponibilidad
@@ -191,7 +212,7 @@
 - **Tests:** Reservas funcionan, no hay conflictos
 - **Nota:** Puede posponerse para post-MVP
 
-**9. TASK-049: Logging y Monitoreo de Seguridad** (2 días) ⭐⭐
+**11. TASK-049: Logging y Monitoreo de Seguridad** (2 días) ⭐⭐
 
 - **Qué hace:**
   - Loggear eventos de seguridad
@@ -207,7 +228,7 @@
 
 #### Suite Completa de Tests (12 días)
 
-**10. TASK-054: Tests de Integración Completos** (3 días) ⭐⭐⭐
+**12. TASK-054: Tests de Integración Completos** (3 días) ⭐⭐⭐
 
 - **Qué hace:**
   - Tests de integración para todos los módulos
@@ -216,7 +237,7 @@
 - **Dependencias:** Todas las features completadas
 - **Tests:** 80%+ coverage en integración
 
-**11. TASK-055: Tests de Performance** (2 días) ⭐⭐
+**13. TASK-055: Tests de Performance** (2 días) ⭐⭐
 
 - **Qué hace:**
   - Benchmarks de endpoints críticos
@@ -226,7 +247,7 @@
 - **Dependencias:** TASK-042, TASK-043 (completadas)
 - **Tests:** Performance aceptable bajo carga
 
-**12. TASK-056: Tests de Seguridad** (2 días) ⭐⭐
+**14. TASK-056: Tests de Seguridad** (2 días) ⭐⭐
 
 - **Qué hace:**
   - Tests de penetración básicos
@@ -236,7 +257,7 @@
 - **Dependencias:** TASK-048, TASK-051
 - **Tests:** Vulnerabilidades conocidas cubiertas
 
-**13. TASK-057: E2E Coverage 80%+** (5 días) ⭐⭐⭐
+**15. TASK-057: E2E Coverage 80%+** (5 días) ⭐⭐⭐
 
 - **Qué hace:**
   - Suite E2E completa de critical paths
@@ -252,7 +273,7 @@
 
 #### Docs para Launch (6 días)
 
-**14. TASK-059: Documentación API Completa** (4 días) ⭐⭐
+**16. TASK-059: Documentación API Completa** (4 días) ⭐⭐
 
 - **Qué hace:**
   - Swagger/OpenAPI completo
@@ -263,7 +284,7 @@
 - **Dependencias:** Todas las features
 - **Entregables:** Swagger UI completo
 
-**15. TASK-060: README y Guías de Deploy** (2 días) ⭐⭐
+**17. TASK-060: README y Guías de Deploy** (2 días) ⭐⭐
 
 - **Qué hace:**
   - README completo del proyecto
@@ -316,30 +337,30 @@
 
 | Fase                               | Duración      | Prioridad |
 | ---------------------------------- | ------------- | --------- |
-| ✅ **Completado**                  | 38 días       | -         |
-| 🔴 **FASE 1: Fundamentos**         | 7.5 días      | CRÍTICA   |
-| 🟡 **FASE 2: Admin**               | 4 días        | ALTA      |
+| ✅ **Completado**                  | 65 días       | -         |
+| 🔴 **FASE 1: Fundamentos**         | 6.5 días      | CRÍTICA   |
+| 🟡 **FASE 2: Admin**               | 2 días        | ALTA      |
 | 🔵 **FASE 3: Features Opcionales** | 6 días        | MEDIA     |
 | 🧪 **FASE 4: Testing**             | 12 días       | CRÍTICA   |
 | 📚 **FASE 5: Documentación**       | 6 días        | ALTA      |
-| **TOTAL PENDIENTE MVP**            | **35.5 días** | -         |
-| **GRAN TOTAL**                     | **73.5 días** | -         |
+| **TOTAL PENDIENTE MVP**            | **32.5 días** | -         |
+| **GRAN TOTAL**                     | **97.5 días** | -         |
 
 ### Calendario Estimado (1 desarrollador)
 
-- **Día 1-8:** FASE 1 - Fundamentos críticos (seguridad + performance)
-- **Día 9-12:** FASE 2 - Admin y monitoreo
-- **Día 13-18:** FASE 3 - Features opcionales (o skip si hay presión)
-- **Día 19-30:** FASE 4 - Testing exhaustivo
-- **Día 31-36:** FASE 5 - Documentación completa
-- **Día 37:** 🚀 **LAUNCH MVP**
+- **Día 1-7:** FASE 1 - Fundamentos críticos (seguridad + performance)
+- **Día 8-9:** FASE 2 - Admin y monitoreo
+- **Día 10-15:** FASE 3 - Features opcionales (o skip si hay presión)
+- **Día 16-27:** FASE 4 - Testing exhaustivo
+- **Día 28-33:** FASE 5 - Documentación completa
+- **Día 34:** 🚀 **LAUNCH MVP**
 
 ### Con 2 Desarrolladores (Paralelización)
 
 - **Semana 1-2:** FASE 1-2 + inicio FASE 4
 - **Semana 3:** FASE 3 + continuar FASE 4
 - **Semana 4:** Completar FASE 4 + FASE 5
-- **Día 21-24:** 🚀 **LAUNCH MVP**
+- **Día 20-22:** 🚀 **LAUNCH MVP**
 
 ---
 
@@ -347,20 +368,20 @@
 
 ### Esta Semana (Prioridad Máxima):
 
-1. **TASK-048**: Validación y Sanitización de Inputs (1 día)
-2. **TASK-051**: Sanitización de Outputs (1.5 días)
-3. **TASK-047**: Rate Limiting Avanzado (1.5 días)
-4. **TASK-075**: Logging Estructurado (1 día)
-5. **TASK-043**: Connection Pooling (1 día)
-6. **TASK-045**: Query Optimization - N+1 queries (1.5 días)
+1. ✅ **TASK-048**: Validación y Sanitización de Inputs (COMPLETADA)
+2. **TASK-051**: Health Checks Completos (2 días)
+3. **TASK-052**: Sanitización de Outputs (1.5 días)
+4. **TASK-047**: Rate Limiting Avanzado (1.5 días)
+5. **TASK-075**: Logging Estructurado (1 día)
+6. **TASK-043**: Connection Pooling (1 día)
 
-**Total: 7.5 días** - Fundamentos críticos de seguridad y performance
+**Total: 6.5 días restantes** - Fundamentos críticos de seguridad y performance
 
 ### Próximas 2 Semanas:
 
-5. **TASK-029**: Dashboard Estadísticas (2 días)
-6. **TASK-030**: Health Checks (2 días)
-7. Decidir si implementar FASE 3 o saltar a testing
+7. **TASK-045**: Query Optimization - N+1 queries (1.5 días)
+8. **TASK-029**: Dashboard Estadísticas (2 días)
+9. Decidir si implementar FASE 3 o saltar a testing
 
 ### Mes Actual:
 
@@ -370,24 +391,28 @@
 
 ---
 
-## 📋 POST-MVP: PREPARACIÓN MARKETPLACE (Futuro)
+## 📋 POST-MVP: PREPARACIÓN MARKETPLACE
 
-### Cuando se decida activar Marketplace (estimado: 30-40 días adicionales)
+### ✅ Infraestructura Marketplace COMPLETADA Anticipadamente
 
-Las siguientes tareas están **pendientes** pero NO son necesarias para el MVP single-tarotist:
+**Nota Importante:** Las siguientes tareas de infraestructura marketplace ya fueron completadas anticipadamente, preparando el sistema para escalabilidad futura:
 
-#### Infraestructura Marketplace:
+#### Infraestructura Marketplace (✅ COMPLETADAS):
 
-- **TASK-061**: AI Provider Abstraction (3 días)
-- **TASK-064**: Schema Multi-Tarotista (2 días)
-- **TASK-065**: Migrar Flavia a Tabla Tarotistas (2 días)
-- **TASK-065-a**: Migración Datos Históricos (1 día)
-- **TASK-066**: Sistema Significados Personalizados (2.5 días)
-- **TASK-067**: PromptBuilderService Dinámico (5 días)
-- **TASK-067-a**: Cache por Tarotista (0.5 días)
-- **TASK-069**: Sistema de Roles (CONSUMER/TAROTIST/ADMIN) (2.5 días)
+- ✅ **TASK-061**: AI Provider Abstraction (3 días)
+- ✅ **TASK-064**: Schema Multi-Tarotista (2 días)
+- ✅ **TASK-065**: Migrar Flavia a Tabla Tarotistas (2 días)
+- ✅ **TASK-065-a**: Migración Datos Históricos (1 día)
+- ✅ **TASK-066**: Sistema Significados Personalizados (2.5 días)
+- ✅ **TASK-067**: PromptBuilderService Dinámico (5 días)
+- ✅ **TASK-067-a**: Cache por Tarotista/Invalidación (0.5 días)
+- ✅ **TASK-069**: Sistema de Roles (CONSUMER/TAROTIST/ADMIN) (2.5 días)
 
-#### Gestión Marketplace:
+**Total Infraestructura Completada:** ~18.5 días
+
+### 🔄 Gestión Marketplace (Pendiente - ~20 días):
+
+Estas tareas se implementarán cuando se decida activar el marketplace público:
 
 - **TASK-070**: Módulo Gestión Tarotistas (5 días)
 - **TASK-071**: Suscripciones a Tarotistas (4 días)
@@ -395,7 +420,7 @@ Las siguientes tareas están **pendientes** pero NO son necesarias para el MVP s
 - **TASK-073**: Revenue Sharing (4 días)
 - **TASK-074**: Tests E2E Multi-Tarotista (5 días)
 
-**Total Marketplace:** ~38.5 días adicionales
+**Total Gestión Pendiente:** ~20 días adicionales
 
 ---
 
@@ -444,26 +469,53 @@ Las siguientes tareas están **pendientes** pero NO son necesarias para el MVP s
 
 ## 🚦 RECOMENDACIÓN FINAL
 
-### Ruta Rápida (MVP Mínimo - 29.5 días):
+### Ruta Rápida (MVP Mínimo - 26.5 días):
 
-1. ✅ FASE 1: Fundamentos (7.5 días) - **OBLIGATORIO**
-2. ✅ FASE 2: Admin (4 días) - **OBLIGATORIO**
+1. ✅ FASE 1: Fundamentos (6.5 días) - **OBLIGATORIO**
+2. ✅ FASE 2: Admin (2 días) - **OBLIGATORIO**
 3. ❌ FASE 3: Skip features opcionales
 4. ✅ FASE 4: Testing (12 días) - **OBLIGATORIO**
 5. ✅ FASE 5: Docs (6 días) - **OBLIGATORIO**
 
-**Total: 29.5 días → Launch más rápido**
+**Total: 26.5 días → Launch más rápido**
 
-### Ruta Completa (MVP Robusto - 35.5 días):
+### Ruta Completa (MVP Robusto - 32.5 días):
 
 1-5. Todas las fases incluidas
 
-**Total: 35.5 días → Launch con más features**
+**Total: 32.5 días → Launch con más features**
 
 ---
 
-**Última Actualización:** 12 de Noviembre 2025  
+**Última Actualización:** 13 de Noviembre 2025  
 **Próxima Revisión:** Al completar FASE 1
+
+---
+
+## 📝 CAMBIOS IMPORTANTES EN ESTA ACTUALIZACIÓN (13/11/2025)
+
+### ✅ Tareas Actualizadas como Completadas:
+
+1. **TASK-048**: Validación y Sanitización de Inputs ✅
+2. Todas las tareas de **Infraestructura Marketplace** (TASK-061 a TASK-069) ✅
+3. Todas las tareas de **Arquitectura** (TASK-ARCH-001 a TASK-ARCH-007) ✅
+
+### 📊 Impacto en Timeline:
+
+- **Antes:** 38 días completados, 35.5 días pendientes (total: 73.5 días)
+- **Ahora:** 65 días completados, 32.5 días pendientes (total: 97.5 días)
+- **Progreso:** 66.7% del trabajo total completado
+- **MVP Listo en:** ~26-32 días adicionales (según ruta elegida)
+
+### 🎯 Estado del MVP:
+
+El proyecto está mucho más avanzado de lo que el plan original indicaba. La infraestructura de marketplace ya está completada, lo que significa que:
+
+1. ✅ Sistema ya está preparado para múltiples tarotistas
+2. ✅ Arquitectura escalable implementada
+3. ✅ Abstracción de IA completa
+4. ✅ Sistema de roles y permisos funcional
+5. 🔄 Solo falta: testing exhaustivo, optimizaciones finales y documentación
 
 ---
 
@@ -472,5 +524,5 @@ Las siguientes tareas están **pendientes** pero NO son necesarias para el MVP s
 Para dudas sobre este plan de desarrollo, contactar al tech lead del proyecto.
 
 **Repositorio:** https://github.com/ArielDRighi/TarotFlavia  
-**Branch Actual:** feature/TASK-030-audit-log  
+**Branch Actual:** develop  
 **Documentación:** `/backend/tarot-app/docs/`
