@@ -4371,6 +4371,150 @@ Auditar y reforzar validación/sanitización de todos los inputs de usuario para
 
 ---
 
+### **TASK-048-a: Sanitización de Outputs y Content Security Policy** 🔴 CRÍTICA
+
+**Prioridad:** 🔴 CRÍTICA  
+**Estimación:** 1.5 días  
+**Dependencias:** TASK-048  
+**Estado:** ⏳ PENDIENTE
+
+#### 📋 Descripción
+
+Complementar TASK-048 implementando sanitización de outputs (especialmente interpretaciones de IA) y agregar Content Security Policy headers para protección completa contra XSS.
+
+**Contexto:** TASK-048 implementó sanitización de **inputs**, pero no cubre:
+
+- Sanitización de **outputs** (respuestas de IA que se devuelven al cliente)
+- Content Security Policy headers
+- Tests de XSS en outputs
+
+#### ✅ Tareas específicas
+
+**1. Sanitización de Outputs de IA (1 día)**
+
+- [ ] Instalar dependencias de seguridad:
+  - `npm install helmet` - Security headers middleware
+  - `npm install xss` - Librería especializada en XSS prevention
+- [ ] Crear `OutputSanitizerService` en `src/common/services/`:
+  - Método `sanitizeAiResponse(text: string): string`
+  - Escapar HTML entities (`<`, `>`, `&`, `"`, `'`)
+  - Detectar y neutralizar potenciales scripts
+  - Permitir markdown seguro si es necesario (whitelist de tags)
+  - Logging de intentos de XSS detectados
+- [ ] Integrar sanitización en interpretaciones:
+  - Modificar `InterpretationsService.generateInterpretation()`
+  - Sanitizar respuesta de IA antes de guardar en BD
+  - Sanitizar respuesta antes de retornar al cliente
+  - Aplicar en `RegenerateReadingUseCase`
+- [ ] Aplicar sanitización en otros outputs de IA:
+  - Daily card interpretations
+  - Cualquier contenido generado por IA
+- [ ] Crear interceptor opcional `SanitizeResponseInterceptor`:
+  - Para sanitizar automáticamente todas las respuestas
+  - Aplicable globalmente o por controller
+
+**2. Content Security Policy Headers (0.5 días)**
+
+- [ ] Configurar Helmet en `main.ts`:
+
+  ```typescript
+  import helmet from 'helmet';
+
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          imgSrc: ["'self'", 'data:', 'https:'],
+          connectSrc: ["'self'"],
+          fontSrc: ["'self'"],
+          objectSrc: ["'none'"],
+          mediaSrc: ["'self'"],
+          frameSrc: ["'none'"],
+        },
+      },
+      xssFilter: true,
+      noSniff: true,
+      hsts: {
+        maxAge: 31536000,
+        includeSubDomains: true,
+        preload: true,
+      },
+      frameguard: {
+        action: 'deny',
+      },
+    }),
+  );
+  ```
+
+- [ ] Configurar CORS con headers seguros:
+  - `Access-Control-Allow-Origin` controlado
+  - `X-Content-Type-Options: nosniff`
+  - `X-Frame-Options: DENY`
+  - `X-XSS-Protection: 1; mode=block`
+- [ ] Documentar políticas CSP en `docs/SECURITY.md`
+
+**3. Testing de Outputs (0.5 días)**
+
+- [ ] Crear `test/output-sanitization.e2e-spec.ts`:
+  - Test: IA response con `<script>` es sanitizado
+  - Test: IA response con event handlers es sanitizado
+  - Test: HTML entities son escapados correctamente
+  - Test: Markdown seguro funciona (si aplica)
+  - Test: Headers CSP están presentes en respuestas
+  - Test: Headers de seguridad (X-Frame-Options, etc.) presentes
+- [ ] Agregar tests unitarios para `OutputSanitizerService`:
+  - Casos edge: strings vacíos, null, muy largos
+  - Diferentes tipos de ataques XSS
+  - Performance con textos largos (interpretaciones)
+
+**4. Documentación**
+
+- [ ] Actualizar `docs/INPUT_VALIDATION.md`:
+  - Agregar sección de "Output Sanitization"
+  - Explicar el flujo completo: Input → Proceso → Output
+- [ ] Crear/actualizar `docs/SECURITY.md`:
+  - Políticas CSP implementadas
+  - Estrategia de sanitización end-to-end
+  - Headers de seguridad
+  - Guía de desarrollo seguro
+
+#### 🎯 Criterios de aceptación
+
+- ✓ Todas las respuestas de IA están sanitizadas antes de enviarse al cliente
+- ✓ Content Security Policy headers configurados y funcionando
+- ✓ Headers de seguridad adicionales presentes (X-Frame-Options, etc.)
+- ✓ Tests E2E verifican que outputs peligrosos son sanitizados
+- ✓ Tests E2E verifican presencia de headers de seguridad
+- ✓ No hay regresión en funcionalidad (markdown seguro funciona)
+- ✓ Performance aceptable (sanitización no añade latencia significativa)
+- ✓ Documentación completa de estrategia de seguridad
+
+#### 📝 Notas técnicas
+
+**Librerías recomendadas:**
+
+- `helmet`: ^7.1.0 - Security headers middleware
+- `xss`: ^1.0.14 - XSS sanitization library
+
+**Enfoque de sanitización:**
+
+1. **Defense in depth**: Sanitizar en inputs Y outputs
+2. **Whitelist approach**: Permitir solo lo seguro, bloquear todo lo demás
+3. **Context-aware**: Diferentes niveles según el contexto (HTML vs plain text)
+4. **Logging**: Registrar intentos de XSS para análisis
+
+**Consideraciones:**
+
+- Las interpretaciones de IA raramente contendrán HTML/JS, pero es crítico prevenirlo
+- Si se permite markdown, usar librería segura como `marked` con sanitización
+- CSP puede romper integraciones frontend si no se configura bien (probar exhaustivamente)
+- Balance entre seguridad y UX (no sobre-sanitizar contenido legítimo)
+
+---
+
 ### **TASK-049: Implementar Logging y Monitoreo de Seguridad**
 
 **Prioridad:** 🟡 ALTA  

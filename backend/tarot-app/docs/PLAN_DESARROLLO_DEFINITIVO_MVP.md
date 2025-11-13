@@ -118,14 +118,23 @@
 - **Dependencias:** TASK-004 (completada)
 - **Tests:** ✅ 11 unit tests, 16 E2E tests, todos pasando
 
-**3. TASK-052: Sanitización de Outputs** (1.5 días) ⭐⭐
+**3. TASK-048-a: Sanitización de Outputs y CSP** (1.5 días) ⭐⭐⭐
 
 - **Qué hace:**
-  - Prevenir XSS en respuestas
-  - Escapar HTML en interpretaciones de IA
-  - Content Security Policy headers
-- **Dependencias:** Ninguna
-- **Tests:** Prevención XSS, headers correctos
+  - **Sanitización de outputs**: Escapar HTML en interpretaciones de IA antes de enviar al cliente
+  - **OutputSanitizerService**: Servicio especializado para sanitizar respuestas de IA
+  - **Content Security Policy**: Configurar Helmet con headers CSP y seguridad
+  - **Security headers**: X-Frame-Options, X-Content-Type-Options, HSTS, X-XSS-Protection
+  - **Integración en InterpretationsService**: Sanitizar todas las respuestas de IA
+  - **Tests E2E de outputs**: Verificar sanitización de XSS en respuestas
+- **Dependencias:** TASK-048 (completada)
+- **Tests:** Sanitización outputs, headers CSP presentes, XSS prevention en respuestas
+- **Importancia:** CRÍTICA - Completa la protección XSS end-to-end (inputs + outputs)
+- **Archivos:**
+  - `src/common/services/output-sanitizer.service.ts`
+  - `src/common/interceptors/sanitize-response.interceptor.ts` (opcional)
+  - `test/output-sanitization.e2e-spec.ts`
+  - `docs/SECURITY.md`
 
 **4. TASK-047: Rate Limiting Avanzado** (1.5 días) ⭐⭐⭐
 
@@ -306,7 +315,7 @@
 - ✅ **Lecturas:** Sistema completo con spreads, interpretaciones IA
 - ✅ **Categorías:** Sistema de categorías y preguntas predefinidas
 - ✅ **Admin:** Dashboard básico, gestión de usuarios
-- ✅ **Seguridad:** Validación inputs, sanitización outputs, rate limiting
+- ✅ **Seguridad:** Validación inputs + outputs, CSP headers, rate limiting
 - ✅ **Email:** Notificaciones funcionando
 - ✅ **Logs:** Sistema de logging estructurado
 - ✅ **Performance:** Query optimization, connection pooling, índices BD
@@ -368,8 +377,8 @@
 ### Esta Semana (Prioridad Máxima):
 
 1. ✅ **TASK-048**: Validación y Sanitización de Inputs (COMPLETADA)
-2. **TASK-051**: Health Checks Completos (2 días)
-3. **TASK-052**: Sanitización de Outputs (1.5 días)
+2. ✅ **TASK-051**: Health Checks Completos (COMPLETADA)
+3. **TASK-048-a**: Sanitización de Outputs y CSP (1.5 días)
 4. **TASK-047**: Rate Limiting Avanzado (1.5 días)
 5. **TASK-075**: Logging Estructurado (1 día)
 6. **TASK-043**: Connection Pooling (1 día)
