@@ -15,16 +15,13 @@ export class LoggerService implements NestLoggerService {
   public readonly logger: winston.Logger;
   private readonly isDevelopment: boolean;
 
-  constructor(
-    private readonly correlationIdService: CorrelationIdService,
-    config?: LoggerConfig,
-  ) {
+  constructor(private readonly correlationIdService: CorrelationIdService) {
     this.isDevelopment = process.env.NODE_ENV !== 'production';
 
-    const logLevel = config?.level || process.env.LOG_LEVEL || 'info';
-    const logDir = config?.logDir || process.env.LOG_DIR || './logs';
-    const maxFiles = config?.maxFiles || process.env.LOG_MAX_FILES || '14d';
-    const maxSize = config?.maxSize || process.env.LOG_MAX_SIZE || '20m';
+    const logLevel = process.env.LOG_LEVEL || 'info';
+    const logDir = process.env.LOG_DIR || './logs';
+    const maxFiles = process.env.LOG_MAX_FILES || '14d';
+    const maxSize = process.env.LOG_MAX_SIZE || '20m';
 
     // Custom format for structured JSON logging
     const jsonFormat = winston.format.combine(

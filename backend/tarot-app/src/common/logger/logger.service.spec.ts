@@ -22,6 +22,12 @@ describe('LoggerService', () => {
   });
 
   beforeEach(async () => {
+    // Set environment variables for testing
+    process.env.LOG_LEVEL = 'debug';
+    process.env.LOG_DIR = testLogDir;
+    process.env.LOG_MAX_FILES = '1d';
+    process.env.LOG_MAX_SIZE = '1m';
+
     const module: TestingModule = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({
@@ -29,21 +35,7 @@ describe('LoggerService', () => {
           envFilePath: '.env.test',
         }),
       ],
-      providers: [
-        {
-          provide: LoggerService,
-          useFactory: (correlationIdSvc: CorrelationIdService) => {
-            return new LoggerService(correlationIdSvc, {
-              level: 'debug',
-              logDir: testLogDir,
-              maxFiles: '1d',
-              maxSize: '1m',
-            });
-          },
-          inject: [CorrelationIdService],
-        },
-        CorrelationIdService,
-      ],
+      providers: [LoggerService, CorrelationIdService],
     }).compile();
 
     service = module.get<LoggerService>(LoggerService);
