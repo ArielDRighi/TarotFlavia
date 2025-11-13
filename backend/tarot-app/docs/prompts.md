@@ -36,6 +36,19 @@ Actualiza el documento backlog con la tarea completada, marcándola como finaliz
 
 Validación Final: Asegúrate de que todos los tests (nuevos y existentes) pasen limpiamente.
 
+Push y Monitoreo CI:
+
+```bash
+git push origin feature/TASK-00x-descripcion
+
+# Monitorear CI en tiempo real
+gh run list --branch feature/TASK-00x-descripcion --limit 1
+gh run watch <run-id>  # Usar el ID del comando anterior
+
+# Si falla, ver logs específicos:
+gh run view <run-id> --job=<job-id> --log | grep "FAIL\|ERROR"
+```
+
 Entregable: Proporcióname el diff de cambios y un borrador del mensaje para la Pull Request.
 
 ---
@@ -128,5 +141,18 @@ Justifica (Pushback): Si no estás de acuerdo con algún comentario (porque el r
 Calidad y TDD: Si las correcciones implican cambios de lógica, deben reflejarse en los tests (actualizándolos o creando nuevos). Vuelve a pasar el ciclo de lint, format, build y test (todos los tests) para asegurar que todo sigue limpio. Y finalmente el script validate-architecture.js
 
 Estrategia de Commits: Crea un NUEVO commit con las correcciones usando el mensaje: "fix: apply PR feedback - [descripción breve de los cambios]". NUNCA uses --amend para correcciones de PR, ya que complica el historial y requiere force push.
+
+Push y Monitoreo CI:
+
+```bash
+git push origin feature/TASK-00x-descripcion
+
+# Monitorear CI en tiempo real
+gh run list --branch feature/TASK-00x-descripcion --limit 1
+gh run watch <run-id>
+
+# Ver solo errores si falla:
+gh run view <run-id> --log | grep -A 10 "FAIL\|ERROR"
+```
 
 Entregable: Muéstrame el código actualizado y las respuestas que prepararías para los comentarios del PR (especialmente los que estés rechazando).
