@@ -1705,6 +1705,74 @@ Implementar rate limiting global para proteger la API de abuso y ataques DDoS us
 
 ---
 
+### **TASK-014-a: Rate Limiting Avanzado** ⭐⭐⭐
+
+**Prioridad:** 🔴 CRÍTICA  
+**Estimación:** 1.5 días  
+**Dependencias:** TASK-014 (completada)  
+**Marcador MVP:** ⭐⭐⭐ **CRÍTICO PARA MVP** - Protección DDoS avanzada
+
+#### 📋 Descripción
+
+Mejorar el sistema de rate limiting básico implementado en TASK-014 con protección DDoS avanzada, límites específicos por endpoint crítico y diferenciación más granular entre planes.
+
+#### 🧪 Testing
+
+**Tests necesarios:**
+
+- [ ] **Tests unitarios:**
+  - Rate limiter específico por endpoint funciona
+  - Límites diferentes para free/premium/guest
+  - Bloqueo temporal de IPs abusivas
+- [ ] **Tests E2E:**
+  - Endpoint `/auth/register` tiene límite bajo (3/hora)
+  - Endpoint `/readings` límite respetado por plan
+  - IP bloqueada temporalmente tras 10 violaciones
+  - Headers `X-RateLimit-*` correctos por endpoint
+
+**Ubicación:** `src/common/guards/*.spec.ts` + `test/rate-limiting-advanced.e2e-spec.ts`
+
+#### ✅ Tareas específicas
+
+- [ ] Implementar rate limiting específico por endpoint crítico:
+  - `/auth/register`: 3 registros/hora por IP (prevenir spam de cuentas)
+  - `/auth/login`: 5 intentos/15min por IP (prevenir brute force)
+  - `/auth/forgot-password`: 3 requests/hora por IP
+  - `/readings`: FREE: 3/día, PREMIUM: 50/día
+  - `/interpretations/regenerate`: FREE: 0, PREMIUM: 10/día
+- [ ] Implementar sistema de "penalización" temporal:
+  - Tras 10 violaciones de rate limit en 1 hora → bloqueo de IP por 1 hora
+  - Loggear IPs bloqueadas para análisis
+- [ ] Diferenciar 3 niveles de límites:
+  - **Guest** (no autenticado): límites más restrictivos
+  - **FREE** (autenticado free): límites medios
+  - **PREMIUM** (autenticado premium): límites altos
+- [ ] Implementar storage de rate limiting:
+  - Usar Redis si está disponible (mejor performance)
+  - Fallback a memoria si no hay Redis
+- [ ] Agregar endpoint admin `GET /admin/rate-limits/violations`:
+  - Lista IPs con más violaciones
+  - Stats de rate limiting por endpoint
+- [ ] Crear decorator `@RateLimit()` personalizado:
+  ```typescript
+  @RateLimit({ ttl: 3600, limit: 3, blockDuration: 3600 })
+  @Post('register')
+  ```
+- [ ] Implementar whitelist de IPs (admins, health checks, etc.)
+- [ ] Documentar nuevos límites en `docs/RATE_LIMITING.md`
+- [ ] Configurar variables de entorno para ajustar límites sin rebuild
+
+#### 🎯 Criterios de aceptación
+
+- ✓ Cada endpoint crítico tiene límites específicos apropiados
+- ✓ Sistema bloquea temporalmente IPs abusivas
+- ✓ Existe diferenciación clara entre guest/free/premium
+- ✓ Redis integrado para mejor performance (con fallback)
+- ✓ Admins pueden ver estadísticas de violaciones
+- ✓ Sistema protege efectivamente contra ataques DDoS básicos
+
+---
+
 ### **TASK-015: Implementar Sistema de Refresh Tokens**
 
 **Prioridad:** 🟡 ALTA  

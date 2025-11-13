@@ -136,7 +136,7 @@
   - `test/output-sanitization.e2e-spec.ts`
   - `docs/SECURITY.md`
 
-**4. TASK-047: Rate Limiting Avanzado** (1.5 días) ⭐⭐⭐
+**4. TASK-014-a: Rate Limiting Avanzado** (1.5 días) ⭐⭐⭐
 
 - **Qué hace:**
   - Protección DDoS avanzada
