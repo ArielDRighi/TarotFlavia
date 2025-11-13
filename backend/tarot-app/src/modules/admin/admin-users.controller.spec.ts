@@ -43,7 +43,7 @@ describe('AdminUsersController', () => {
   };
 
   const mockRequest = {
-    user: { id: 999, roles: [UserRole.ADMIN] },
+    user: { userId: 999, roles: [UserRole.ADMIN] },
     ip: '127.0.0.1',
     headers: { 'user-agent': 'test-agent' },
   };
