@@ -11621,6 +11621,215 @@ El informe especifica:
 
 ---
 
+### **TASK-075: Implementar Sistema de Logging Estructurado con Winston** ⭐⭐
+
+**Prioridad:** 🟡 ALTA  
+**Estimación:** 1 día  
+**Dependencias:** Ninguna  
+**Marcador MVP:** ⭐⭐ **NECESARIO PARA MVP** - Observabilidad y debugging
+
+#### 📋 Descripción
+
+Implementar sistema de logging estructurado JSON con Winston, incluyendo correlationId para tracing de requests, niveles apropiados de log y contexto enriquecido. Esto es fundamental para debugging en producción y análisis de problemas.
+
+#### 🧪 Testing
+
+**Tests necesarios:**
+
+- [ ] **Tests unitarios:**
+  - LoggerService crea logs con formato JSON correcto
+  - CorrelationId se propaga a través de requests
+  - Niveles de log funcionan correctamente (debug, info, warn, error)
+  - Context se agrega apropiadamente a logs
+  - Transports funcionan (console, file, error file)
+- [ ] **Tests de integración:**
+  - Middleware de correlationId funciona
+  - Logs incluyen información de request
+  - Logs de error incluyen stack trace
+  - Rotación de archivos funciona correctamente
+
+**Ubicación:** `src/common/logger/*.spec.ts`  
+**Importancia:** ⭐⭐ ALTA - Crítico para operaciones y debugging
+
+#### ✅ Tareas específicas
+
+**1. Instalar dependencias (10 min):**
+
+- [ ] Instalar paquetes necesarios:
+  ```bash
+  npm install winston winston-daily-rotate-file nestjs-pino pino-http
+  npm install --save-dev @types/pino
+  ```
+
+**2. Crear LoggerService con Winston (2 horas):**
+
+- [ ] Crear `src/common/logger/logger.service.ts`:
+  - Wrapper sobre Winston para NestJS
+  - Formato JSON estructurado
+  - Timestamps en ISO 8601
+  - Niveles: error, warn, info, http, debug
+  - Incluir siempre: timestamp, level, message, context, correlationId
+- [ ] Configurar múltiples transports:
+  - **Console**: desarrollo con colores y formato legible
+  - **File**: `logs/combined.log` con rotación diaria
+  - **Error File**: `logs/error.log` solo errores
+  - **Rotation**: mantener últimos 14 días, max 20MB por archivo
+- [ ] Implementar métodos:
+  - `log(message, context?, metadata?)` - nivel info
+  - `error(message, trace?, context?, metadata?)` - nivel error con stack
+  - `warn(message, context?, metadata?)` - nivel warn
+  - `debug(message, context?, metadata?)` - nivel debug
+  - `verbose(message, context?, metadata?)` - nivel verbose
+  - `http(message, context?, metadata?)` - nivel http para requests
+
+**3. Crear Middleware de CorrelationId (1 hora):**
+
+- [ ] Crear `src/common/middleware/correlation-id.middleware.ts`:
+  - Generar UUID v4 para cada request
+  - Almacenar en `AsyncLocalStorage` o `cls-hooked`
+  - Agregar a headers de respuesta: `X-Correlation-ID`
+  - Disponible para toda la aplicación via servicio
+- [ ] Crear `CorrelationIdService`:
+  - `getCorrelationId(): string` - obtener ID actual
+  - `setCorrelationId(id: string)` - establecer ID
+  - Usar AsyncLocalStorage de Node.js para storage
+
+**4. Crear Interceptor de Logging HTTP (1 hora):**
+
+- [ ] Crear `src/common/interceptors/logging.interceptor.ts`:
+  - Loggear inicio de request:
+    - Method, URL, correlationId, userId (si existe)
+  - Loggear fin de request:
+    - Status code, duration, correlationId
+  - Formato estructurado JSON:
+    ```json
+    {
+      "timestamp": "2025-11-12T10:30:00.000Z",
+      "level": "http",
+      "message": "HTTP Request",
+      "correlationId": "uuid-here",
+      "context": "HTTPLogger",
+      "method": "POST",
+      "url": "/readings",
+      "userId": 123,
+      "statusCode": 201,
+      "duration": "245ms"
+    }
+    ```
+
+**5. Integrar en Aplicación (1 hora):**
+
+- [ ] Actualizar `main.ts`:
+  - Reemplazar Logger de NestJS con custom Winston logger
+  - Aplicar middleware de correlationId globalmente
+  - Aplicar interceptor de logging globalmente
+- [ ] Actualizar `app.module.ts`:
+  - Registrar LoggerModule como global
+  - Exportar LoggerService
+- [ ] Configurar variables de entorno (`.env`):
+  - `LOG_LEVEL` (default: 'info')
+  - `LOG_DIR` (default: './logs')
+  - `LOG_MAX_FILES` (default: '14d')
+  - `LOG_MAX_SIZE` (default: '20m')
+
+**6. Actualizar Código Existente (2 horas):**
+
+- [ ] Reemplazar `console.log` con `logger.log()`
+- [ ] Reemplazar `console.error` con `logger.error()`
+- [ ] Agregar context apropiado a logs:
+  - En services: `this.logger.log('Message', ServiceName.name)`
+  - En controllers: incluir endpoint name como context
+- [ ] Logs críticos a incluir:
+  - **Auth**: login attempts, logout, token refresh
+  - **Readings**: creación, regeneración, errores IA
+  - **Admin**: acciones administrativas
+  - **Errors**: todos los errores con stack trace completo
+
+**7. Crear Configuración por Entorno (30 min):**
+
+- [ ] **Development**:
+  - Console con colores
+  - Nivel: debug
+  - Pretty print para lectura fácil
+- [ ] **Production**:
+  - JSON estructurado puro
+  - Nivel: info
+  - Incluir metadata de servidor (hostname, pid)
+  - Enviar a servicio externo (opcional: Datadog, Logtail)
+
+**8. Documentación (30 min):**
+
+- [ ] Crear `docs/LOGGING.md`:
+  - Cómo usar LoggerService
+  - Estructura de logs JSON
+  - Cómo usar correlationId para tracing
+  - Best practices de logging
+  - Cómo buscar logs por correlationId
+  - Ejemplos de queries útiles
+
+#### 🎯 Criterios de aceptación
+
+- ✅ Todos los logs están en formato JSON estructurado
+- ✅ CorrelationId se propaga a través de requests
+- ✅ Logs HTTP incluyen duración y status de cada request
+- ✅ Logs de error incluyen stack trace completo
+- ✅ Rotación de archivos funciona (14 días, max 20MB)
+- ✅ Variables de entorno permiten configurar logging
+- ✅ Documentación completa en LOGGING.md
+- ✅ No hay `console.log` en código de producción
+- ✅ Tests unitarios y de integración pasan
+
+#### 📝 Ejemplo de Log Estructurado
+
+```json
+{
+  "timestamp": "2025-11-12T10:30:00.000Z",
+  "level": "info",
+  "message": "Reading created successfully",
+  "correlationId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "context": "ReadingsService",
+  "userId": 123,
+  "readingId": 456,
+  "spreadType": "three-card",
+  "tarotistaId": 1,
+  "duration": "245ms"
+}
+```
+
+```json
+{
+  "timestamp": "2025-11-12T10:31:15.000Z",
+  "level": "error",
+  "message": "OpenAI API call failed",
+  "correlationId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "context": "InterpretationsService",
+  "userId": 123,
+  "error": {
+    "name": "OpenAIError",
+    "message": "Rate limit exceeded",
+    "statusCode": 429,
+    "stack": "Error: Rate limit exceeded\n    at ..."
+  }
+}
+```
+
+#### 📦 Paquetes Recomendados
+
+- `winston`: Logger principal
+- `winston-daily-rotate-file`: Rotación automática de logs
+- `nestjs-pino` (alternativa): Logger ultra-rápido basado en Pino
+- `cls-hooked` o Node's `AsyncLocalStorage`: Para propagación de correlationId
+
+#### ⚠️ Consideraciones
+
+- **Performance**: Winston es más lento que Pino pero más flexible
+- **Alternativa Pino**: Si performance es crítica, considerar `nestjs-pino`
+- **Cloud Logging**: En producción, enviar logs a servicio externo (Datadog, Logtail, CloudWatch)
+- **PII**: NO loggear información sensible (contraseñas, tokens, datos de tarjeta)
+- **GDPR**: Considerar anonimización de userId en logs si aplica
+
+---
+
 #### 📝 Notas de Implementación
 
 **Estrategia de Actualización:**
