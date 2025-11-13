@@ -111,7 +111,7 @@ export class AdminUsersController {
   async banUser(
     @Param('id', ParseIntPipe) id: number,
     @Body() banUserDto: BanUserDto,
-    @Req() req: Request & { user: { id: number; roles: string[] } },
+    @Req() req: Request & { user?: { id: number; roles: string[] } },
   ): Promise<{ message: string; user: UserWithoutPassword }> {
     const oldUser = await this.usersService.findById(id);
     if (!oldUser) {
@@ -121,7 +121,7 @@ export class AdminUsersController {
     const user = await this.usersService.banUser(id, banUserDto.reason);
 
     await this.auditLogService.log({
-      userId: req.user.id,
+      userId: req.user?.id ?? 0,
       targetUserId: id,
       action: AuditAction.USER_BANNED,
       entityType: 'User',
@@ -156,7 +156,7 @@ export class AdminUsersController {
   @ApiResponse({ status: 404, description: 'Usuario no encontrado' })
   async unbanUser(
     @Param('id', ParseIntPipe) id: number,
-    @Req() req: Request & { user: { id: number; roles: string[] } },
+    @Req() req: Request & { user?: { id: number; roles: string[] } },
   ): Promise<{ message: string; user: UserWithoutPassword }> {
     const oldUser = await this.usersService.findById(id);
     if (!oldUser) {
@@ -166,7 +166,7 @@ export class AdminUsersController {
     const user = await this.usersService.unbanUser(id);
 
     await this.auditLogService.log({
-      userId: req.user.id,
+      userId: req.user?.id ?? 0,
       targetUserId: id,
       action: AuditAction.USER_UNBANNED,
       entityType: 'User',
@@ -200,7 +200,7 @@ export class AdminUsersController {
   async updateUserPlan(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserPlanDto: UpdateUserPlanDto,
-    @Req() req: Request & { user: { id: number; roles: string[] } },
+    @Req() req: Request & { user?: { id: number; roles: string[] } },
   ): Promise<{ message: string; user: UserWithoutPassword }> {
     const oldUser = await this.usersService.findById(id);
     if (!oldUser) {
@@ -210,7 +210,7 @@ export class AdminUsersController {
     const user = await this.usersService.updatePlan(id, updateUserPlanDto);
 
     await this.auditLogService.log({
-      userId: req.user.id,
+      userId: req.user?.id ?? 0,
       targetUserId: id,
       action: AuditAction.PLAN_CHANGED,
       entityType: 'User',
@@ -248,7 +248,7 @@ export class AdminUsersController {
   @ApiResponse({ status: 404, description: 'Usuario no encontrado' })
   async addTarotistRole(
     @Param('id', ParseIntPipe) id: number,
-    @Req() req: Request & { user: { id: number; roles: string[] } },
+    @Req() req: Request & { user?: { id: number; roles: string[] } },
   ): Promise<{ message: string; user: UserWithoutPassword }> {
     const oldUser = await this.usersService.findById(id);
     if (!oldUser) {
@@ -258,7 +258,7 @@ export class AdminUsersController {
     const user = await this.usersService.addTarotistRole(id);
 
     await this.auditLogService.log({
-      userId: req.user.id,
+      userId: req.user?.id ?? 0,
       targetUserId: id,
       action: AuditAction.ROLE_ADDED,
       entityType: 'User',
@@ -296,7 +296,7 @@ export class AdminUsersController {
   @ApiResponse({ status: 404, description: 'Usuario no encontrado' })
   async addAdminRole(
     @Param('id', ParseIntPipe) id: number,
-    @Req() req: Request & { user: { id: number; roles: string[] } },
+    @Req() req: Request & { user?: { id: number; roles: string[] } },
     
   ): Promise<{ message: string; user: UserWithoutPassword }> {
     const oldUser = await this.usersService.findById(id);
@@ -307,7 +307,7 @@ export class AdminUsersController {
     const user = await this.usersService.addAdminRole(id);
 
     await this.auditLogService.log({
-      userId: req.user.id,
+      userId: req.user?.id ?? 0,
       targetUserId: id,
       action: AuditAction.ROLE_ADDED,
       entityType: 'User',
@@ -355,7 +355,7 @@ export class AdminUsersController {
   async removeRole(
     @Param('id', ParseIntPipe) id: number,
     @Param('role') role: string,
-    @Req() req: Request & { user: { id: number; roles: string[] } },
+    @Req() req: Request & { user?: { id: number; roles: string[] } },
     
   ) {
     // Whitelist de roles permitidos para prevenir inyecciones
@@ -377,7 +377,7 @@ export class AdminUsersController {
     const user = await this.usersService.removeRole(id, roleEnum);
 
     await this.auditLogService.log({
-      userId: req.user.id,
+      userId: req.user?.id ?? 0,
       targetUserId: id,
       action: AuditAction.ROLE_REMOVED,
       entityType: 'User',
@@ -409,7 +409,7 @@ export class AdminUsersController {
   @ApiResponse({ status: 404, description: 'Usuario no encontrado' })
   async deleteUser(
     @Param('id', ParseIntPipe) id: number,
-    @Req() req: Request & { user: { id: number; roles: string[] } },
+    @Req() req: Request & { user?: { id: number; roles: string[] } },
     
   ): Promise<{ message: string }> {
     const user = await this.usersService.findById(id);
@@ -423,7 +423,7 @@ export class AdminUsersController {
     }
 
     await this.auditLogService.log({
-      userId: req.user.id,
+      userId: req.user?.id ?? 0,
       targetUserId: id,
       action: AuditAction.USER_DELETED,
       entityType: 'User',
