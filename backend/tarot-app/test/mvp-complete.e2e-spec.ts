@@ -571,6 +571,9 @@ describe('MVP Complete Flow E2E', () => {
    * 8. Health Checks
    */
   describe('8. Health Checks', () => {
+    // Increase timeout for AI health checks
+    jest.setTimeout(30000);
+
     it('✅ Health check de AI retorna status', async () => {
       const response = await request(app.getHttpServer())
         .get('/health/ai')

@@ -9,6 +9,9 @@ describe('Health (E2E)', () => {
   let app: INestApplication;
   let httpServer: any;
 
+  // Increase timeout for health checks (AI providers can be slow in CI)
+  jest.setTimeout(30000);
+
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
@@ -17,7 +20,7 @@ describe('Health (E2E)', () => {
     app = moduleFixture.createNestApplication();
     await app.init();
     httpServer = app.getHttpServer();
-  });
+  }, 30000); // Increase timeout for health checks in CI
 
   afterAll(async () => {
     await app.close();
