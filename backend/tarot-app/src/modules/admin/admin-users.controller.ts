@@ -128,8 +128,8 @@ export class AdminUsersController {
       entityId: String(id),
       oldValue: { bannedAt: oldUser.bannedAt, banReason: oldUser.banReason },
       newValue: { bannedAt: user.bannedAt, banReason: user.banReason },
-      ipAddress: req.ip,
-      userAgent: req.headers['user-agent'] as string,
+      ipAddress: req.ip || null,
+      userAgent: (req.headers['user-agent'] as string) || null,
     });
 
     this.logger.warn(
@@ -173,8 +173,8 @@ export class AdminUsersController {
       entityId: String(id),
       oldValue: { bannedAt: oldUser.bannedAt, banReason: oldUser.banReason },
       newValue: { bannedAt: user.bannedAt, banReason: user.banReason },
-      ipAddress: req.ip,
-      userAgent: req.headers['user-agent'] as string,
+      ipAddress: req.ip || null,
+      userAgent: (req.headers['user-agent'] as string) || null,
     });
 
     this.logger.log(`Admin action: User unbanned - userId: ${id}`);
@@ -217,8 +217,8 @@ export class AdminUsersController {
       entityId: String(id),
       oldValue: { plan: oldUser.plan },
       newValue: { plan: user.plan },
-      ipAddress: req.ip,
-      userAgent: req.headers['user-agent'] as string,
+      ipAddress: req.ip || null,
+      userAgent: (req.headers['user-agent'] as string) || null,
     });
 
     this.logger.log(
@@ -265,8 +265,8 @@ export class AdminUsersController {
       entityId: String(id),
       oldValue: { roles: oldUser.roles },
       newValue: { roles: user.roles },
-      ipAddress: req.ip,
-      userAgent: req.headers['user-agent'] as string,
+      ipAddress: req.ip || null,
+      userAgent: (req.headers['user-agent'] as string) || null,
     });
 
     this.logger.log(
@@ -313,8 +313,8 @@ export class AdminUsersController {
       entityId: String(id),
       oldValue: { roles: oldUser.roles },
       newValue: { roles: user.roles },
-      ipAddress: req.ip,
-      userAgent: req.headers['user-agent'] as string,
+      ipAddress: req.ip || null,
+      userAgent: (req.headers['user-agent'] as string) || null,
     });
 
     this.logger.warn(
@@ -382,8 +382,8 @@ export class AdminUsersController {
       entityId: String(id),
       oldValue: { roles: oldUser.roles },
       newValue: { roles: user.roles },
-      ipAddress: req.ip,
-      userAgent: req.headers['user-agent'] as string,
+      ipAddress: req.ip || null,
+      userAgent: (req.headers['user-agent'] as string) || null,
     });
 
     this.logger.log(
@@ -423,8 +423,8 @@ export class AdminUsersController {
       entityId: String(id),
       oldValue: { email: user.email, roles: user.roles, plan: user.plan },
       newValue: { deleted: true },
-      ipAddress: req.ip,
-      userAgent: req.headers['user-agent'] as string,
+      ipAddress: req.ip || null,
+      userAgent: (req.headers['user-agent'] as string) || null,
     });
 
     const result = await this.usersService.remove(id);

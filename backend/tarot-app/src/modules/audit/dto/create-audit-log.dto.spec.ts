@@ -17,8 +17,9 @@ describe('CreateAuditLogDto', () => {
     expect(errors).toHaveLength(0);
   });
 
-  it('should require userId', async () => {
+  it('should allow nullable userId (for deleted admin accounts)', async () => {
     const dto = plainToInstance(CreateAuditLogDto, {
+      userId: null,
       action: AuditAction.USER_BANNED,
       entityType: 'User',
       entityId: '123',
@@ -26,8 +27,7 @@ describe('CreateAuditLogDto', () => {
     });
 
     const errors = await validate(dto);
-    expect(errors.length).toBeGreaterThan(0);
-    expect(errors[0].property).toBe('userId');
+    expect(errors).toHaveLength(0);
   });
 
   it('should require action', async () => {

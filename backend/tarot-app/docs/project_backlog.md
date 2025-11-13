@@ -3389,6 +3389,7 @@ Crear sistema de audit log que registre todas las acciones administrativas y cam
 #### 📊 Tests Implementados
 
 - **45 tests unitarios pasando:**
+
   - `audit-log.entity.spec.ts`: 7 tests (validación de entity, relaciones, nullable fields)
   - `create-audit-log.dto.spec.ts`: 12 tests (validación completa de campos)
   - `query-audit-log.dto.spec.ts`: 11 tests (validación de filtros y paginación)

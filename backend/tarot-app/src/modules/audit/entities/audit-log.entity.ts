@@ -14,16 +14,17 @@ import { AuditAction } from '../enums/audit-action.enum';
 @Index(['userId', 'createdAt'])
 @Index(['action', 'createdAt'])
 @Index(['entityType', 'createdAt'])
+@Index(['targetUserId', 'createdAt'])
 export class AuditLog {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ name: 'user_id', type: 'int' })
-  userId: number;
+  @Column({ name: 'user_id', type: 'int', nullable: true })
+  userId: number | null;
 
-  @ManyToOne(() => User, { nullable: false, onDelete: 'CASCADE' })
+  @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'user_id' })
-  user: User;
+  user: User | null;
 
   @Column({ name: 'target_user_id', type: 'int', nullable: true })
   targetUserId: number | null;

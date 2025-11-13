@@ -222,13 +222,49 @@ describe('AuditLogService', () => {
       });
     });
 
-    it('should filter by date range', async () => {
+    it('should filter by date range (both dates)', async () => {
       mockRepository.findAndCount.mockResolvedValue([[], 0]);
 
       const startDate = '2025-01-01T00:00:00Z';
       const endDate = '2025-12-31T23:59:59Z';
 
       await service.findAll({ startDate, endDate, page: 1, limit: 20 });
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const expectedWhere = { createdAt: expect.anything() };
+      expect(mockRepository.findAndCount).toHaveBeenCalledWith({
+        where: expectedWhere,
+        relations: ['user', 'targetUser'],
+        order: { createdAt: 'DESC' },
+        skip: 0,
+        take: 20,
+      });
+    });
+
+    it('should filter by startDate only (logs after date)', async () => {
+      mockRepository.findAndCount.mockResolvedValue([[], 0]);
+
+      const startDate = '2025-01-01T00:00:00Z';
+
+      await service.findAll({ startDate, page: 1, limit: 20 });
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const expectedWhere = { createdAt: expect.anything() };
+      expect(mockRepository.findAndCount).toHaveBeenCalledWith({
+        where: expectedWhere,
+        relations: ['user', 'targetUser'],
+        order: { createdAt: 'DESC' },
+        skip: 0,
+        take: 20,
+      });
+    });
+
+    it('should filter by endDate only (logs before date)', async () => {
+      mockRepository.findAndCount.mockResolvedValue([[], 0]);
+
+      const endDate = '2025-12-31T23:59:59Z';
+
+      await service.findAll({ endDate, page: 1, limit: 20 });
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const expectedWhere = { createdAt: expect.anything() };

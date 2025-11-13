@@ -28,7 +28,7 @@ export class CreateAuditLogTableClean1762989000000
     await queryRunner.query(`
       CREATE TABLE "audit_logs" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
-        "user_id" integer NOT NULL,
+        "user_id" integer,
         "target_user_id" integer,
         "action" "public"."audit_logs_action_enum" NOT NULL,
         "entity_type" character varying(100) NOT NULL,
@@ -52,13 +52,16 @@ export class CreateAuditLogTableClean1762989000000
     await queryRunner.query(
       `CREATE INDEX "IDX_43c81a4d688b5a5394a69a8ddd" ON "audit_logs" ("entity_type", "created_at")`,
     );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_audit_logs_target_user_created" ON "audit_logs" ("target_user_id", "created_at")`,
+    );
 
     // Agregar foreign keys
     await queryRunner.query(`
       ALTER TABLE "audit_logs" 
       ADD CONSTRAINT "FK_bd2726fd31b35443f2245b93ba0" 
       FOREIGN KEY ("user_id") REFERENCES "user"("id") 
-      ON DELETE CASCADE ON UPDATE NO ACTION
+      ON DELETE SET NULL ON UPDATE NO ACTION
     `);
 
     await queryRunner.query(`
@@ -79,6 +82,9 @@ export class CreateAuditLogTableClean1762989000000
     );
 
     // Eliminar índices
+    await queryRunner.query(
+      `DROP INDEX "public"."IDX_audit_logs_target_user_created"`,
+    );
     await queryRunner.query(
       `DROP INDEX "public"."IDX_43c81a4d688b5a5394a69a8ddd"`,
     );

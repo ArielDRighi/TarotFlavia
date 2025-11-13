@@ -9,13 +9,14 @@ import {
 import { AuditAction } from '../enums/audit-action.enum';
 
 export class CreateAuditLogDto {
-  @ApiProperty({
-    description: 'ID del usuario que realiza la acción',
+  @ApiPropertyOptional({
+    description:
+      'ID del usuario que realiza la acción (nullable si el admin fue eliminado)',
     example: 1,
   })
   @IsInt()
-  @IsNotEmpty()
-  userId: number;
+  @IsOptional()
+  userId?: number | null;
 
   @ApiPropertyOptional({
     description: 'ID del usuario afectado por la acción (nullable)',
@@ -65,18 +66,20 @@ export class CreateAuditLogDto {
   newValue: Record<string, any>;
 
   @ApiPropertyOptional({
-    description: 'Dirección IP del usuario',
+    description: 'Dirección IP desde donde se realizó la acción',
     example: '192.168.1.1',
+    nullable: true,
   })
   @IsString()
   @IsOptional()
-  ipAddress?: string;
+  ipAddress?: string | null;
 
   @ApiPropertyOptional({
     description: 'User agent del navegador',
     example: 'Mozilla/5.0',
+    nullable: true,
   })
   @IsString()
   @IsOptional()
-  userAgent?: string;
+  userAgent?: string | null;
 }

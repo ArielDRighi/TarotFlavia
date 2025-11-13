@@ -1,6 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between, FindOptionsWhere } from 'typeorm';
+import {
+  Repository,
+  Between,
+  MoreThanOrEqual,
+  LessThanOrEqual,
+  FindOptionsWhere,
+} from 'typeorm';
 import { AuditLog } from './entities/audit-log.entity';
 import { CreateAuditLogDto } from './dto/create-audit-log.dto';
 import { QueryAuditLogDto } from './dto/query-audit-log.dto';
@@ -52,8 +58,13 @@ export class AuditLogService {
       where.entityType = entityType;
     }
 
+    // Support partial date ranges for flexible querying
     if (startDate && endDate) {
       where.createdAt = Between(new Date(startDate), new Date(endDate));
+    } else if (startDate) {
+      where.createdAt = MoreThanOrEqual(new Date(startDate));
+    } else if (endDate) {
+      where.createdAt = LessThanOrEqual(new Date(endDate));
     }
 
     const skip = (page - 1) * limit;
