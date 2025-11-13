@@ -235,8 +235,11 @@ describe('Admin Dashboard E2E', () => {
         expect(typeof reading.id).toBe('number');
         expect(typeof reading.userEmail).toBe('string');
         expect(typeof reading.userName).toBe('string');
-        // spreadType puede ser null hasta que se implemente la relación con spread
-        expect([null, 'string'].includes(typeof reading.spreadType)).toBe(true);
+        // spreadType puede ser null, string, u objeto con información del spread
+        expect(
+          ['object', 'string'].includes(typeof reading.spreadType) ||
+            reading.spreadType === null,
+        ).toBe(true);
       }
     });
 

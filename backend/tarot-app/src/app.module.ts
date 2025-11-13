@@ -28,6 +28,7 @@ import { AdminModule } from './modules/admin/admin.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { CustomThrottlerGuard } from './common/guards/custom-throttler.guard';
 import { ThrottlerExceptionFilter } from './common/filters/throttler-exception.filter';
+import { RateLimitingModule } from './common/rate-limiting/rate-limiting.module';
 import databaseConfig from './config/typeorm';
 import { validate } from './config/env-validator';
 
@@ -86,6 +87,7 @@ import { validate } from './config/env-validator';
     HealthModule,
     UsageLimitsModule,
     EmailModule,
+    RateLimitingModule,
   ],
   controllers: [AppController],
   providers: [

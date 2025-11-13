@@ -139,7 +139,7 @@ jobs:
           TAROT_E2E_DB_NAME: tarot_e2e
           JWT_SECRET: test-jwt-secret-for-ci-only-minimum-32-characters-required
           JWT_EXPIRES_IN: 1h
-          GROQ_API_KEY: gsk_test_key_for_ci_only_not_real
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           NODE_ENV: test
         run: npm run migration:run
 
@@ -167,7 +167,7 @@ jobs:
           JWT_SECRET: test-jwt-secret-for-ci-only-minimum-32-characters-required
           JWT_EXPIRES_IN: 1h
           # AI Provider config (required)
-          GROQ_API_KEY: gsk_test_key_for_ci_only_not_real
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           # Optional AI providers (for validation tests)
           OPENAI_API_KEY: sk-test-key-for-ci-only-not-real-12345
           DEEPSEEK_API_KEY: sk-test-key-for-ci-only-not-real-12345
@@ -256,7 +256,7 @@ jobs:
           JWT_SECRET: test-jwt-secret-for-ci-only-minimum-32-characters-required
           JWT_EXPIRES_IN: 1h
           # AI config
-          GROQ_API_KEY: gsk_test_key_for_ci_only_not_real
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           NODE_ENV: test
         run: npm run migration:run
 
@@ -286,7 +286,7 @@ jobs:
           JWT_SECRET: test-jwt-secret-for-ci-only-minimum-32-characters-required
           JWT_EXPIRES_IN: 1h
           # AI config
-          GROQ_API_KEY: gsk_test_key_for_ci_only_not_real
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           # Optional AI providers (will test with invalid keys but valid format)
           OPENAI_API_KEY: sk-test-key-for-ci-only-not-real-12345
           DEEPSEEK_API_KEY: sk-test-key-for-ci-only-not-real-12345

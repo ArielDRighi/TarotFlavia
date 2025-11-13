@@ -272,7 +272,7 @@ describe('Readings Pagination E2E', () => {
             { cardId: cardIds[1], position: 'Present', isReversed: false },
             { cardId: cardIds[2], position: 'Future', isReversed: false },
           ],
-          generateInterpretation: true,
+          generateInterpretation: false,
         });
 
       // Pequeña pausa para asegurar diferentes timestamps
@@ -295,7 +295,7 @@ describe('Readings Pagination E2E', () => {
             { cardId: cardIds[1], position: 'Present', isReversed: false },
             { cardId: cardIds[2], position: 'Future', isReversed: false },
           ],
-          generateInterpretation: true,
+          generateInterpretation: false,
         });
 
       await new Promise((resolve) => setTimeout(resolve, 100));

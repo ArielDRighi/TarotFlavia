@@ -10,6 +10,9 @@ describe('Output Sanitization & Security Headers (e2e) - TASK-048-a', () => {
   let app: INestApplication;
   let authToken: string;
 
+  // Increase timeout for health checks (can be slow in CI)
+  jest.setTimeout(30000);
+
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],

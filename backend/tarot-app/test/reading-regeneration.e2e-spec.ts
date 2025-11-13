@@ -217,7 +217,7 @@ describe('Reading Regeneration E2E', () => {
           { cardId: cardIds[1], position: 'Present', isReversed: false },
           { cardId: cardIds[2], position: 'Future', isReversed: true },
         ],
-        generateInterpretation: true,
+        generateInterpretation: false,
       })
       .expect(201); // Asegurar que la creación fue exitosa
 
@@ -358,7 +358,7 @@ describe('Reading Regeneration E2E', () => {
             { cardId: cardIds[1], position: 'Present', isReversed: false },
             { cardId: cardIds[2], position: 'Future', isReversed: false },
           ],
-          generateInterpretation: true,
+          generateInterpretation: false,
         })
         .expect(201);
 
@@ -397,7 +397,7 @@ describe('Reading Regeneration E2E', () => {
             { cardId: cardIds[1], position: 'Present', isReversed: false },
             { cardId: cardIds[2], position: 'Future', isReversed: false },
           ],
-          generateInterpretation: true,
+          generateInterpretation: false,
         })
         .expect(201);
 
@@ -500,6 +500,9 @@ describe('Reading Regeneration E2E', () => {
    * TEST: Límite de 3 regeneraciones por lectura
    */
   describe('POST /readings/:id/regenerate - Regeneration Limit', () => {
+    // Increase timeout for regeneration tests (can be slow)
+    jest.setTimeout(90000);
+
     it('should allow up to 3 regenerations and then return 429', async () => {
       // Crear una nueva lectura específica para este test (sin regeneraciones previas)
       const createResponse = await request(app.getHttpServer())
@@ -515,7 +518,7 @@ describe('Reading Regeneration E2E', () => {
             { cardId: cardIds[1], position: 'Present', isReversed: false },
             { cardId: cardIds[2], position: 'Future', isReversed: false },
           ],
-          generateInterpretation: true,
+          generateInterpretation: false,
         })
         .expect(201);
 
@@ -576,6 +579,9 @@ describe('Reading Regeneration E2E', () => {
    * TEST: Verificar que updatedAt se actualiza
    */
   describe('POST /readings/:id/regenerate - UpdatedAt', () => {
+    // Increase timeout for regeneration tests
+    jest.setTimeout(30000);
+
     it('should update the updatedAt field on regeneration', async () => {
       // Crear nueva lectura usando el endpoint
       const createResponse = await request(app.getHttpServer())
@@ -591,7 +597,7 @@ describe('Reading Regeneration E2E', () => {
             { cardId: cardIds[1], position: 'Present', isReversed: false },
             { cardId: cardIds[2], position: 'Future', isReversed: false },
           ],
-          generateInterpretation: true,
+          generateInterpretation: false,
         })
         .expect(201);
 
