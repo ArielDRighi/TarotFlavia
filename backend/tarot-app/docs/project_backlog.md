@@ -3348,7 +3348,7 @@ Implementar endpoint que retorne métricas y estadísticas clave de la aplicaci�
 **Dependencias:** TASK-027  
 **Estado:** ✅ COMPLETADO  
 **Branch:** `feature/TASK-030-audit-log`  
-**Fecha de Completado:** 21 de Enero, 2025
+**Fecha de Completado:** 12 de Noviembre, 2025
 
 #### 📋 Descripción
 
@@ -3394,6 +3394,12 @@ Crear sistema de audit log que registre todas las acciones administrativas y cam
   - `query-audit-log.dto.spec.ts`: 11 tests (validación de filtros y paginación)
   - `audit-log.service.spec.ts`: 12 tests (log creation, findAll con todos los filtros)
   - `audit-log.controller.spec.ts`: 3 tests (endpoint delegation, guards)
+  - `admin-users.controller.spec.ts`: 12 tests (integración completa de audit logging)
+
+- **18 tests E2E pasando:**
+  - `admin-users.e2e-spec.ts`: Todos los endpoints admin verifican que los audit logs se crean correctamente
+  - Fix crítico: `req.user.userId` (no `req.user.id`) alineado con JwtStrategy
+  - Fix timing: audit log en deleteUser se ejecuta ANTES del soft delete para evitar FK violations
 
 #### 🎯 Criterios de aceptación
 
@@ -3419,8 +3425,10 @@ Crear sistema de audit log que registre todas las acciones administrativas y cam
   - `AppModule` y `AdminModule`: AuditModule importado
 - **Calidad:**
   - Lint: ✅ 0 errores
+  - Format: ✅ Prettier OK
   - Build: ✅ Compilación exitosa
-  - Tests: ✅ 45 tests unitarios pasando
+  - Tests unitarios: ✅ 57 tests pasando (45 audit + 12 admin-users.controller)
+  - Tests E2E: ✅ 18 tests pasando (admin-users.e2e-spec.ts)
   - Architecture validation: ✅ Flat structure OK (< 10 archivos, audit module es simple CRUD)
 
 ---
