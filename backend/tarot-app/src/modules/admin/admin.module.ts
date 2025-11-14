@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CacheModule } from '@nestjs/cache-manager';
+import { ADMIN_DASHBOARD_CACHE_TTL } from './constants/cache.constants';
 import { AdminDashboardController } from './admin-dashboard.controller';
 import { AdminDashboardService } from './admin-dashboard.service';
 import { AdminUsersController } from './admin-users.controller';
@@ -24,7 +25,7 @@ import { AuditModule } from '../audit/audit.module';
       PredefinedQuestion,
     ]),
     CacheModule.register({
-      ttl: 900000, // 15 minutos (TASK-029)
+      ttl: ADMIN_DASHBOARD_CACHE_TTL,
       max: 100,
     }),
     UsersModule,

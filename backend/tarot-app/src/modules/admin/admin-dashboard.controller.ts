@@ -13,6 +13,7 @@ import { UserRole } from '../../common/enums/user-role.enum';
 import { AdminDashboardService } from './admin-dashboard.service';
 import { DashboardMetricsDto } from './dto/dashboard-metrics.dto';
 import { StatsResponseDto, ChartsResponseDto } from './dto/stats-response.dto';
+import { ADMIN_DASHBOARD_CACHE_TTL } from './constants/cache.constants';
 
 @ApiTags('Admin - Dashboard')
 @ApiBearerAuth()
@@ -25,11 +26,11 @@ export class AdminDashboardController {
   @Get('metrics')
   @UseInterceptors(CacheInterceptor)
   @CacheKey('admin_dashboard_metrics')
-  @CacheTTL(900000) // 15 minutos (TASK-029)
+  @CacheTTL(ADMIN_DASHBOARD_CACHE_TTL)
   @ApiOperation({
     summary: 'Get dashboard metrics (deprecated)',
     description:
-      'Returns basic metrics. Use /stats for comprehensive statistics. Cached for 15 minutes.',
+      'Returns basic metrics. Use /stats for comprehensive statistics. This endpoint will be removed in version 2.0. Cached for 15 minutes.',
     deprecated: true,
   })
   @ApiResponse({
@@ -52,7 +53,7 @@ export class AdminDashboardController {
   @Get('stats')
   @UseInterceptors(CacheInterceptor)
   @CacheKey('admin_dashboard_stats')
-  @CacheTTL(900000) // 15 minutos (TASK-029)
+  @CacheTTL(ADMIN_DASHBOARD_CACHE_TTL)
   @ApiOperation({
     summary: 'Get comprehensive dashboard statistics',
     description:
@@ -78,7 +79,7 @@ export class AdminDashboardController {
   @Get('charts')
   @UseInterceptors(CacheInterceptor)
   @CacheKey('admin_dashboard_charts')
-  @CacheTTL(900000) // 15 minutos (TASK-029)
+  @CacheTTL(ADMIN_DASHBOARD_CACHE_TTL)
   @ApiOperation({
     summary: 'Get chart data for last 30 days',
     description:

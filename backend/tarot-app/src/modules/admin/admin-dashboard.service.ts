@@ -500,7 +500,7 @@ export class AdminDashboardService {
       .getRawOne<{ totalReadings: string; totalUsers: string }>();
 
     const totalReadings = parseInt(result?.totalReadings || '0', 10);
-    const totalUsers = parseInt(result?.totalUsers || '1', 10);
+    const totalUsers = parseInt(result?.totalUsers || '0', 10);
 
     return totalUsers > 0 ? totalReadings / totalUsers : 0;
   }

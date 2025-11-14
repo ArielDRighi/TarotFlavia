@@ -1,6 +1,13 @@
+/**
+ * Test suite for AdminDashboardService
+ *
+ * Note: TypeScript unsafe warnings are disabled for test assertions because
+ * we're testing with mocked data and type assertions. This is a common pattern
+ * in NestJS testing where mocking complex QueryBuilder responses requires
+ * type assertions that TypeScript cannot verify at compile time.
+ */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -10,11 +17,13 @@ import { TarotReading } from '../tarot/readings/entities/tarot-reading.entity';
 import { AIUsageLog } from '../ai-usage/entities/ai-usage-log.entity';
 import { TarotCard } from '../tarot/cards/entities/tarot-card.entity';
 import { PredefinedQuestion } from '../predefined-questions/entities/predefined-question.entity';
+import { StatsResponseDto } from './dto/stats-response.dto';
 
 describe('AdminDashboardService', () => {
   let service: AdminDashboardService;
 
-  const mockQueryBuilder: any = {
+  // Mock QueryBuilder con tipos jest
+  const mockQueryBuilder = {
     select: jest.fn().mockReturnThis(),
     addSelect: jest.fn().mockReturnThis(),
     leftJoin: jest.fn().mockReturnThis(),
@@ -33,30 +42,31 @@ describe('AdminDashboardService', () => {
     getCount: jest.fn(),
   };
 
+  // Mock Repositories con tipos jest
   const mockUserRepository = {
     count: jest.fn(),
     find: jest.fn(),
-    createQueryBuilder: jest.fn(() => mockQueryBuilder),
+    createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
   };
 
   const mockReadingRepository = {
     count: jest.fn(),
     find: jest.fn(),
-    createQueryBuilder: jest.fn(() => mockQueryBuilder),
+    createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
   };
 
   const mockAIUsageRepository = {
     count: jest.fn(),
     find: jest.fn(),
-    createQueryBuilder: jest.fn(() => mockQueryBuilder),
+    createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
   };
 
   const mockCardRepository = {
-    createQueryBuilder: jest.fn(() => mockQueryBuilder),
+    createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
   };
 
   const mockPredefinedQuestionRepository = {
-    createQueryBuilder: jest.fn(() => mockQueryBuilder),
+    createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
   };
 
   beforeEach(async () => {
@@ -195,8 +205,7 @@ describe('AdminDashboardService', () => {
         .mockResolvedValueOnce(100) // errors
         .mockResolvedValueOnce(500); // cached
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const result = (await service.getStats()) as any;
+      const result: StatsResponseDto = await service.getStats();
 
       expect(result).toBeDefined();
       expect(result.users).toBeDefined();
@@ -247,7 +256,6 @@ describe('AdminDashboardService', () => {
         .mockResolvedValueOnce(mockReadingsPerDay)
         .mockResolvedValueOnce(mockAICostsPerDay);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = (await service.getCharts()) as any;
 
       expect(result).toBeDefined();
@@ -279,7 +287,6 @@ describe('AdminDashboardService', () => {
         { date: '2024-01-02', count: '15' },
       ]);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = (await service.getUserStats()) as any;
 
       expect(result.totalUsers).toBe(1000);
@@ -320,7 +327,6 @@ describe('AdminDashboardService', () => {
         { date: '2024-01-01', count: '50' },
       ]);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = (await service.getReadingStats()) as any;
 
       expect(result.totalReadings).toBe(5000);
@@ -351,7 +357,6 @@ describe('AdminDashboardService', () => {
         reversed: '2500',
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = (await service.getCardStats()) as any;
 
       expect(result.topCards).toHaveLength(2);
@@ -385,7 +390,6 @@ describe('AdminDashboardService', () => {
         ])
         .mockResolvedValueOnce([{ date: '2024-01-01', totalCost: '1.50' }]);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = (await service.getOpenAIStats()) as any;
 
       expect(result.totalInterpretations).toBe(5000);
@@ -421,7 +425,6 @@ describe('AdminDashboardService', () => {
         customCount: '500',
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = (await service.getQuestionStats()) as any;
 
       expect(result.topPredefinedQuestions).toHaveLength(2);
