@@ -6,6 +6,7 @@
 import { DataSource } from 'typeorm';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
+import * as fs from 'fs';
 
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
@@ -18,6 +19,10 @@ interface QueryAnalysis {
   plan?: string;
 }
 
+interface ExplainPlanRow {
+  'QUERY PLAN': string;
+}
+
 async function analyzeQuery(
   dataSource: DataSource,
   query: string,
@@ -26,9 +31,11 @@ async function analyzeQuery(
   console.log(`\n📊 Analizando: ${description}`);
   console.log(`Query: ${query.substring(0, 100)}...`);
 
-  const result = await dataSource.query(`EXPLAIN (ANALYZE, BUFFERS) ${query}`);
+  const result = await dataSource.query<ExplainPlanRow[]>(
+    `EXPLAIN (ANALYZE, BUFFERS) ${query}`,
+  );
 
-  const planText = result.map((r: any) => r['QUERY PLAN']).join('\n');
+  const planText = result.map((r) => r['QUERY PLAN']).join('\n');
   const planningTimeMatch = planText.match(/Planning Time: ([\d.]+) ms/);
   const executionTimeMatch = planText.match(/Execution Time: ([\d.]+) ms/);
 
@@ -78,13 +85,13 @@ async function main() {
       await analyzeQuery(
         dataSource,
         `
-        SELECT reading.*, deck.*, cards.*, user.*, category.*
+        SELECT reading.*, deck.*, cards.*, category.*, predefinedQuestion.*
         FROM tarot_reading reading
         LEFT JOIN tarot_deck deck ON reading.deckId = deck.id
         LEFT JOIN tarot_reading_cards_tarot_card reading_cards ON reading.id = reading_cards.tarotReadingId
         LEFT JOIN tarot_card cards ON reading_cards.tarotCardId = cards.id
-        LEFT JOIN "user" user ON reading.userId = user.id
         LEFT JOIN reading_category category ON reading.categoryId = category.id
+        LEFT JOIN predefined_question predefinedQuestion ON reading.predefinedQuestionId = predefinedQuestion.id
         WHERE reading.userId = 1 AND reading.deletedAt IS NULL
         ORDER BY reading.createdAt DESC
         LIMIT 10
@@ -125,10 +132,11 @@ async function main() {
       await analyzeQuery(
         dataSource,
         `
-        SELECT reading.*, user.*, category.*
+        SELECT reading.*, user.*, category.*, predefinedQuestion.*
         FROM tarot_reading reading
         LEFT JOIN "user" user ON reading.userId = user.id
         LEFT JOIN reading_category category ON reading.categoryId = category.id
+        LEFT JOIN predefined_question predefinedQuestion ON reading.predefinedQuestionId = predefinedQuestion.id
         WHERE reading.deletedAt IS NULL
         ORDER BY reading.createdAt DESC
         LIMIT 10
@@ -145,7 +153,7 @@ async function main() {
         SELECT token.*, user.*
         FROM refresh_token token
         LEFT JOIN "user" user ON token.userId = user.id
-        WHERE token.token = 'some-token'
+        WHERE token.tokenHash = 'some-hash-value' AND token.revokedAt IS NULL
       `,
         'Refresh Token - Validación con user',
       ),
@@ -176,7 +184,6 @@ async function main() {
     );
 
     // Guardar análisis en archivo
-    const fs = require('fs');
     fs.writeFileSync(
       path.join(__dirname, '../query-performance-baseline.json'),
       JSON.stringify(analyses, null, 2),

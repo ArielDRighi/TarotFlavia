@@ -283,7 +283,8 @@ SELECT * FROM tarot_deck WHERE id = 1;  -- Query 4 (duplicado!)
 
 ```sql
 -- GET /readings (leftJoinAndSelect)
-SELECT reading.*, deck.*, cards.*, category.*, question.*
+-- Nota: cards.deck también se carga automáticamente via eager loading en TarotCard.deck
+SELECT reading.*, deck.*, cards.*, cards.deck.*, category.*, question.*
 FROM tarot_reading reading
 LEFT JOIN tarot_deck deck ON reading.deckId = deck.id
 LEFT JOIN tarot_reading_cards_tarot_card rc ON reading.id = rc.tarotReadingId
