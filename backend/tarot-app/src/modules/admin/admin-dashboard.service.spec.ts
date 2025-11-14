@@ -97,11 +97,29 @@ describe('AdminDashboardService', () => {
 
   describe('getStats', () => {
     it('should return comprehensive dashboard statistics', async () => {
+      jest.clearAllMocks();
+
       // Mock user data
       mockUserRepository.count.mockResolvedValueOnce(1000); // totalUsers
+
+      // Mock all getRawOne calls in execution order
       mockQueryBuilder.getRawOne
-        .mockResolvedValueOnce({ count: '200' }) // activeUsers 7 days
-        .mockResolvedValueOnce({ count: '350' }); // activeUsers 30 days
+        // getUserStats -> getActiveUsersCount (7 days) - line 93
+        .mockResolvedValueOnce({ count: '200' })
+        // getUserStats -> getActiveUsersCount (30 days) - line 103
+        .mockResolvedValueOnce({ count: '350' })
+        // getReadingStats -> getAverageReadingsPerUser - line 500
+        .mockResolvedValueOnce({ totalReadings: '5500', totalUsers: '1000' })
+        // getCardStats -> getCardOrientation - line 646
+        .mockResolvedValueOnce({ upright: '2500', reversed: '2500' })
+        // getOpenAIStats -> getTokenUsage - line 671
+        .mockResolvedValueOnce({ totalTokens: '10000000', avgTokens: '2000' })
+        // getOpenAIStats -> getTotalCost - line 686
+        .mockResolvedValueOnce({ totalCost: '50.00' })
+        // getOpenAIStats -> getAverageDuration - line 695
+        .mockResolvedValueOnce({ avgDuration: '1500' })
+        // getQuestionStats -> getQuestionTypeDist - line 771
+        .mockResolvedValueOnce({ predefinedCount: '800', customCount: '200' });
 
       // Mock reading data
       mockReadingRepository.count
@@ -109,72 +127,73 @@ describe('AdminDashboardService', () => {
         .mockResolvedValueOnce(400) // readingsLast7Days
         .mockResolvedValueOnce(1200); // readingsLast30Days
 
-      mockQueryBuilder.getRawOne
-        .mockResolvedValueOnce({ avgReadings: '5.5' }) // avg readings per user
-        .mockResolvedValueOnce({ count: '1000' }); // predefined questions count
-
       // Mock plan distribution
       mockUserRepository.count
         .mockResolvedValueOnce(750) // free users
         .mockResolvedValueOnce(250); // premium users
 
-      // Mock category distribution
-      mockQueryBuilder.getRawMany.mockResolvedValueOnce([
-        { categoryId: 1, categoryName: 'Amor', count: '2000' },
-        { categoryId: 2, categoryName: 'Trabajo', count: '1500' },
-      ]);
-
-      // Mock spread distribution
-      mockQueryBuilder.getRawMany.mockResolvedValueOnce([
-        { spreadName: 'Tres Cartas', count: '3000' },
-        { spreadName: 'Cruz Celta', count: '2000' },
-      ]);
-
-      // Mock card stats
+      // Mock all getRawMany calls in execution order for Promise.all in getStats
+      // Note: Promise.all executes concurrently, so order may vary, but we configure all needed mocks
       mockQueryBuilder.getRawMany
+        // getUserStats -> getUserRegistrationsPerDay (line 486)
         .mockResolvedValueOnce([
-          { cardId: 1, cardName: 'El Loco', count: '500' },
-          { cardId: 2, cardName: 'La Muerte', count: '450' },
+          { date: '2024-01-01', count: '10' },
+          { date: '2024-01-02', count: '15' },
         ])
+        // getReadingStats -> getCategoryDistribution (line 520)
+        .mockResolvedValueOnce([
+          { categoryId: 1, categoryName: 'Amor', count: '2000' },
+          { categoryId: 2, categoryName: 'Trabajo', count: '1500' },
+        ])
+        // getReadingStats -> getSpreadDistribution (line 543)
+        .mockResolvedValueOnce([
+          { cardCount: 3, count: '3000' },
+          { cardCount: 10, count: '2000' },
+        ])
+        // getReadingStats -> getReadingsPerDay (line 568)
+        .mockResolvedValueOnce([
+          { date: '2024-01-01', count: '50' },
+          { date: '2024-01-02', count: '60' },
+        ])
+        // getCardStats -> getTopCards (line 589)
+        .mockResolvedValueOnce([
+          { cardId: 1, name: 'El Loco', count: '500' },
+          { cardId: 2, name: 'La Muerte', count: '450' },
+        ])
+        // getCardStats -> getCardsByCategory (line 610)
         .mockResolvedValueOnce([
           { category: 'arcanos_mayores', count: '3000' },
           { category: 'copas', count: '1000' },
+        ])
+        // getOpenAIStats -> getProviderUsage (line 707)
+        .mockResolvedValueOnce([
+          { provider: 'groq', count: '3000' },
+          { provider: 'openai', count: '2000' },
+        ])
+        // getOpenAIStats -> getAICostsPerDay (line 723)
+        .mockResolvedValueOnce([
+          { date: '2024-01-01', totalCost: '1.50' },
+          { date: '2024-01-02', totalCost: '2.00' },
+        ])
+        // getQuestionStats -> getTopPredefinedQuestions (line 745)
+        .mockResolvedValueOnce([
+          {
+            questionId: 1,
+            question: '¿Cómo mejorar mi relación?',
+            count: '500',
+          },
+          {
+            questionId: 2,
+            question: '¿Cuál es mi futuro laboral?',
+            count: '400',
+          },
         ]);
 
-      mockQueryBuilder.getRawOne.mockResolvedValueOnce({
-        upright: '2500',
-        reversed: '2500',
-      }); // card orientation
-
-      // Mock AI metrics
-      mockAIUsageRepository.count.mockResolvedValueOnce(5000);
-      mockQueryBuilder.getRawOne
-        .mockResolvedValueOnce({ totalTokens: '10000000', avgTokens: '2000' })
-        .mockResolvedValueOnce({ totalCost: '50.00' })
-        .mockResolvedValueOnce({ avgDuration: '1500' });
-
-      mockQueryBuilder.getRawMany.mockResolvedValueOnce([
-        { provider: 'groq', count: '3000' },
-        { provider: 'openai', count: '2000' },
-      ]);
-
+      // Mock AI metrics count calls
       mockAIUsageRepository.count
+        .mockResolvedValueOnce(5000) // total interpretations
         .mockResolvedValueOnce(100) // errors
         .mockResolvedValueOnce(500); // cached
-
-      // Mock predefined questions
-      mockQueryBuilder.getRawMany.mockResolvedValueOnce([
-        {
-          questionId: 1,
-          questionText: '¿Cómo mejorar mi relación?',
-          count: '500',
-        },
-        {
-          questionId: 2,
-          questionText: '¿Cuál es mi futuro laboral?',
-          count: '400',
-        },
-      ]);
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = (await service.getStats()) as any;
