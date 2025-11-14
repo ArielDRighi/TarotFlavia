@@ -67,7 +67,7 @@ export class EnvironmentVariables {
   @IsOptional()
   @Type(() => Number)
   @Transform(({ value }) => (value ? Number(value) : 5000))
-  DB_MAX_QUERY_TIME: number = 5000;
+  DB_MAX_QUERY_TIME: number;
 
   @IsInt()
   @Min(5000)
@@ -75,7 +75,7 @@ export class EnvironmentVariables {
   @IsOptional()
   @Type(() => Number)
   @Transform(({ value }) => (value ? Number(value) : 30000))
-  DB_CONNECTION_TIMEOUT: number = 30000;
+  DB_CONNECTION_TIMEOUT: number;
 
   // =============================================================================
   // JWT CONFIGURATION

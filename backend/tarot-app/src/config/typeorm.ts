@@ -105,7 +105,7 @@ if (process.env.NODE_ENV !== 'test' && !isE2ETesting) {
     `Pool Size: ${config.extra.max} (min: ${config.extra.min}, timeout: ${config.extra.connectionTimeoutMillis}ms)`,
   );
   console.log(
-    `Max Query Time: ${config.maxQueryExecutionTime}ms (queries lentas serán loggeadas)`,
+    `Max Query Time: ${config.maxQueryExecutionTime}ms (queries lentas serán logueadas)`,
   );
   console.log(
     `Retry Strategy: ${config.extra.connectionRetryAttempts} intentos con delay inicial de ${config.extra.connectionRetryDelay}ms (backoff exponencial)`,

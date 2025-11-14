@@ -81,9 +81,10 @@ export class DatabaseHealthService {
       const maxConnections: number = pool.options?.max ?? 10;
       const minConnections: number = pool.options?.min ?? 2;
 
-      const utilizationPercent: number = Math.round(
-        (totalClients / maxConnections) * 100,
-      );
+      const utilizationPercent: number =
+        maxConnections > 0
+          ? Math.round((totalClients / maxConnections) * 100)
+          : 0;
 
       const metrics: PoolMetrics = {
         active: activeClients,

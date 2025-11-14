@@ -259,6 +259,10 @@ export class HealthController {
           type: 'string',
           description: 'Warning message if pool utilization is high',
         },
+        error: {
+          type: 'string',
+          description: 'Error message when database is down',
+        },
       },
     },
   })
