@@ -1,0 +1,261 @@
+<html>
+  <head>
+    <meta charset='UTF-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <title>Nueva Sesión Reservada</title>
+  </head>
+  <body
+    style="
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    "
+  >
+    <div
+      style='
+        max-width: 600px;
+        margin: 20px auto;
+        background-color: #ffffff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      '
+    >
+      <!-- Header -->
+      <div
+        style='
+          background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+          color: white;
+          padding: 30px 20px;
+          text-align: center;
+        '
+      >
+        <h1 style='margin: 0; font-size: 24px'>🔔 Nueva Sesión Reservada</h1>
+        <p style='margin: 10px 0 0 0; opacity: 0.9'>
+          Tienes una nueva reserva
+        </p>
+      </div>
+
+      <!-- Content -->
+      <div style='padding: 30px 20px'>
+        <p style='color: #333; font-size: 16px; line-height: 1.6'>
+          Hola
+          <strong>{{tarotistaName}}</strong>,
+        </p>
+
+        <p style='color: #333; font-size: 16px; line-height: 1.6'>
+          Has recibido una nueva reserva de sesión. A continuación los detalles:
+        </p>
+
+        <!-- Client Info -->
+        <div
+          style='
+            background-color: #f8f9fa;
+            border-left: 4px solid #f5576c;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+          '
+        >
+          <h2
+            style='
+              color: #f5576c;
+              font-size: 18px;
+              margin: 0 0 15px 0;
+              font-weight: 600;
+            '
+          >
+            👤 Información del Cliente
+          </h2>
+
+          <table style='width: 100%; border-collapse: collapse'>
+            <tr>
+              <td style='padding: 8px 0; color: #666; font-weight: 600'>
+                Nombre:
+              </td>
+              <td style='padding: 8px 0; color: #333'>{{userName}}</td>
+            </tr>
+            <tr>
+              <td style='padding: 8px 0; color: #666; font-weight: 600'>
+                Email:
+              </td>
+              <td style='padding: 8px 0; color: #333'>{{userEmail}}</td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- Session Details -->
+        <div
+          style='
+            background-color: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+          '
+        >
+          <h2
+            style='
+              color: #2196f3;
+              font-size: 18px;
+              margin: 0 0 15px 0;
+              font-weight: 600;
+            '
+          >
+            📅 Detalles de la Sesión
+          </h2>
+
+          <table style='width: 100%; border-collapse: collapse'>
+            <tr>
+              <td style='padding: 8px 0; color: #666; font-weight: 600'>
+                Tipo:
+              </td>
+              <td style='padding: 8px 0; color: #333'>{{sessionType}}</td>
+            </tr>
+            <tr>
+              <td style='padding: 8px 0; color: #666; font-weight: 600'>
+                Fecha:
+              </td>
+              <td style='padding: 8px 0; color: #333'>{{sessionDate}}</td>
+            </tr>
+            <tr>
+              <td style='padding: 8px 0; color: #666; font-weight: 600'>
+                Hora:
+              </td>
+              <td style='padding: 8px 0; color: #333'>{{sessionTime}}</td>
+            </tr>
+            <tr>
+              <td style='padding: 8px 0; color: #666; font-weight: 600'>
+                Duración:
+              </td>
+              <td style='padding: 8px 0; color: #333'>
+                {{durationMinutes}}
+                minutos
+              </td>
+            </tr>
+            <tr>
+              <td style='padding: 8px 0; color: #666; font-weight: 600'>
+                Precio:
+              </td>
+              <td style='padding: 8px 0; color: #333'>${{priceUsd}} USD</td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- User Notes -->
+        {{#if userNotes}}
+          <div
+            style='
+            background-color: #fff9c4;
+            border-left: 4px solid #fbc02d;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+          '
+          >
+            <h3 style='color: #f57f17; font-size: 16px; margin: 0 0 10px 0'>
+              💬 Notas del Cliente:
+            </h3>
+            <p
+              style='
+              color: #333;
+              font-style: italic;
+              margin: 0;
+              line-height: 1.6;
+            '
+            >
+              "{{userNotes}}"
+            </p>
+          </div>
+        {{/if}}
+
+        <!-- Google Meet Link -->
+        <div
+          style='
+            background-color: #e8f5e9;
+            border: 2px solid #4caf50;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            text-align: center;
+          '
+        >
+          <h3 style='color: #2e7d32; margin: 0 0 10px 0; font-size: 16px'>
+            🎥 Link de Videollamada
+          </h3>
+          <a
+            href='{{googleMeetLink}}'
+            style='
+              display: inline-block;
+              background-color: #4caf50;
+              color: white;
+              padding: 12px 30px;
+              text-decoration: none;
+              border-radius: 6px;
+              font-weight: 600;
+              margin-top: 10px;
+            '
+          >
+            Unirse a Google Meet
+          </a>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style='text-align: center; margin: 30px 0'>
+          <a
+            href='{{confirmLink}}'
+            style='
+              display: inline-block;
+              background-color: #4caf50;
+              color: white;
+              padding: 12px 30px;
+              text-decoration: none;
+              border-radius: 6px;
+              font-weight: 600;
+              margin: 5px;
+            '
+          >
+            ✓ Confirmar Sesión
+          </a>
+          <a
+            href='{{dashboardLink}}'
+            style='
+              display: inline-block;
+              background-color: #2196f3;
+              color: white;
+              padding: 12px 30px;
+              text-decoration: none;
+              border-radius: 6px;
+              font-weight: 600;
+              margin: 5px;
+            '
+          >
+            📊 Ver Dashboard
+          </a>
+        </div>
+
+        <p
+          style='color: #333; font-size: 16px; line-height: 1.6; margin-top: 30px'
+        >
+          Saludos,<br />
+          <strong>Sistema Tarot Flavia</strong>
+        </p>
+      </div>
+
+      <!-- Footer -->
+      <div
+        style='
+          background-color: #f8f9fa;
+          padding: 20px;
+          text-align: center;
+          border-top: 1px solid #e0e0e0;
+        '
+      >
+        <p style='color: #666; font-size: 12px; margin: 0'>
+          Este email fue enviado porque tienes una nueva reserva en tu agenda.
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

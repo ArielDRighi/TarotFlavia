@@ -1,0 +1,207 @@
+<html>
+  <head>
+    <meta charset='UTF-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <title>Sesión Cancelada</title>
+  </head>
+  <body
+    style="
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    "
+  >
+    <div
+      style='
+        max-width: 600px;
+        margin: 20px auto;
+        background-color: #ffffff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      '
+    >
+      <!-- Header -->
+      <div
+        style='
+          background: linear-gradient(135deg, #ef5350 0%, #e91e63 100%);
+          color: white;
+          padding: 30px 20px;
+          text-align: center;
+        '
+      >
+        <h1 style='margin: 0; font-size: 24px'>❌ Sesión Cancelada</h1>
+        <p style='margin: 10px 0 0 0; opacity: 0.9'>
+          Tu sesión ha sido cancelada
+        </p>
+      </div>
+
+      <!-- Content -->
+      <div style='padding: 30px 20px'>
+        <p style='color: #333; font-size: 16px; line-height: 1.6'>
+          Hola
+          <strong>{{userName}}</strong>,
+        </p>
+
+        <p style='color: #333; font-size: 16px; line-height: 1.6'>
+          Tu sesión con
+          <strong>{{tarotistaName}}</strong>
+          ha sido cancelada.
+        </p>
+
+        <!-- Session Details -->
+        <div
+          style='
+            background-color: #ffebee;
+            border-left: 4px solid #ef5350;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+          '
+        >
+          <h2
+            style='
+              color: #c62828;
+              font-size: 18px;
+              margin: 0 0 15px 0;
+              font-weight: 600;
+            '
+          >
+            📅 Sesión Cancelada
+          </h2>
+
+          <table style='width: 100%; border-collapse: collapse'>
+            <tr>
+              <td style='padding: 8px 0; color: #666; font-weight: 600'>
+                Fecha:
+              </td>
+              <td style='padding: 8px 0; color: #333'>{{sessionDate}}</td>
+            </tr>
+            <tr>
+              <td style='padding: 8px 0; color: #666; font-weight: 600'>
+                Hora:
+              </td>
+              <td style='padding: 8px 0; color: #333'>{{sessionTime}}</td>
+            </tr>
+            <tr>
+              <td style='padding: 8px 0; color: #666; font-weight: 600'>
+                Tipo:
+              </td>
+              <td style='padding: 8px 0; color: #333'>{{sessionType}}</td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- Cancellation Reason -->
+        {{#if cancellationReason}}
+          <div
+            style='
+            background-color: #fff9c4;
+            border-left: 4px solid #fbc02d;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+          '
+          >
+            <h3 style='color: #f57f17; font-size: 16px; margin: 0 0 10px 0'>
+              📝 Motivo de Cancelación:
+            </h3>
+            <p
+              style='
+              color: #333;
+              font-style: italic;
+              margin: 0;
+              line-height: 1.6;
+            '
+            >
+              "{{cancellationReason}}"
+            </p>
+          </div>
+        {{/if}}
+
+        <!-- Refund Policy -->
+        {{#if refundApplies}}
+          <div
+            style='
+            background-color: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+          '
+          >
+            <h3 style='color: #2e7d32; font-size: 16px; margin: 0 0 10px 0'>
+              💰 Reembolso
+            </h3>
+            <p style='color: #333; margin: 0; line-height: 1.6'>
+              Como la cancelación se realizó con más de 24 horas de
+              anticipación, se procesará un reembolso completo en los próximos
+              5-7 días hábiles.
+            </p>
+          </div>
+        {{else}}
+          <div
+            style='
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+          '
+          >
+            <h3 style='color: #856404; font-size: 16px; margin: 0 0 10px 0'>
+              ⚠️ Política de Cancelación
+            </h3>
+            <p style='color: #856404; margin: 0; line-height: 1.6'>
+              Según nuestra política de cancelación, las sesiones canceladas con
+              menos de 24 horas de anticipación no son reembolsables.
+            </p>
+          </div>
+        {{/if}}
+
+        <!-- Book Again -->
+        <div style='text-align: center; margin: 30px 0'>
+          <p style='color: #666; font-size: 14px; margin-bottom: 15px'>
+            ¿Te gustaría reservar una nueva sesión?
+          </p>
+          <a
+            href='{{bookAgainLink}}'
+            style='
+              display: inline-block;
+              background-color: #667eea;
+              color: white;
+              padding: 12px 30px;
+              text-decoration: none;
+              border-radius: 6px;
+              font-weight: 600;
+            '
+          >
+            📅 Reservar Nueva Sesión
+          </a>
+        </div>
+
+        <p
+          style='color: #333; font-size: 16px; line-height: 1.6; margin-top: 30px'
+        >
+          Esperamos verte pronto,<br />
+          <strong>Equipo Tarot Flavia</strong>
+        </p>
+      </div>
+
+      <!-- Footer -->
+      <div
+        style='
+          background-color: #f8f9fa;
+          padding: 20px;
+          text-align: center;
+          border-top: 1px solid #e0e0e0;
+        '
+      >
+        <p style='color: #666; font-size: 12px; margin: 0'>
+          Este email fue enviado porque tu sesión ha sido cancelada.
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,236 @@
+<html>
+  <head>
+    <meta charset='UTF-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <title>Sesión Reservada</title>
+  </head>
+  <body
+    style="
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    "
+  >
+    <div
+      style='
+        max-width: 600px;
+        margin: 20px auto;
+        background-color: #ffffff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      '
+    >
+      <!-- Header -->
+      <div
+        style='
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          padding: 30px 20px;
+          text-align: center;
+        '
+      >
+        <h1 style='margin: 0; font-size: 24px'>✨ Sesión Reservada</h1>
+        <p style='margin: 10px 0 0 0; opacity: 0.9'>
+          Tu sesión ha sido confirmada
+        </p>
+      </div>
+
+      <!-- Content -->
+      <div style='padding: 30px 20px'>
+        <p style='color: #333; font-size: 16px; line-height: 1.6'>
+          Hola
+          <strong>{{userName}}</strong>,
+        </p>
+
+        <p style='color: #333; font-size: 16px; line-height: 1.6'>
+          Tu sesión con
+          <strong>{{tarotistaName}}</strong>
+          ha sido reservada exitosamente. A continuación encontrarás todos los
+          detalles:
+        </p>
+
+        <!-- Session Details -->
+        <div
+          style='
+            background-color: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+          '
+        >
+          <h2
+            style='
+              color: #667eea;
+              font-size: 18px;
+              margin: 0 0 15px 0;
+              font-weight: 600;
+            '
+          >
+            📅 Detalles de la Sesión
+          </h2>
+
+          <table style='width: 100%; border-collapse: collapse'>
+            <tr>
+              <td style='padding: 8px 0; color: #666; font-weight: 600'>
+                Tipo:
+              </td>
+              <td style='padding: 8px 0; color: #333'>{{sessionType}}</td>
+            </tr>
+            <tr>
+              <td style='padding: 8px 0; color: #666; font-weight: 600'>
+                Fecha:
+              </td>
+              <td style='padding: 8px 0; color: #333'>{{sessionDate}}</td>
+            </tr>
+            <tr>
+              <td style='padding: 8px 0; color: #666; font-weight: 600'>
+                Hora:
+              </td>
+              <td style='padding: 8px 0; color: #333'>{{sessionTime}}</td>
+            </tr>
+            <tr>
+              <td style='padding: 8px 0; color: #666; font-weight: 600'>
+                Duración:
+              </td>
+              <td style='padding: 8px 0; color: #333'>
+                {{durationMinutes}}
+                minutos
+              </td>
+            </tr>
+            <tr>
+              <td style='padding: 8px 0; color: #666; font-weight: 600'>
+                Precio:
+              </td>
+              <td style='padding: 8px 0; color: #333'>${{priceUsd}} USD</td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- Google Meet Link -->
+        <div
+          style='
+            background-color: #e8f5e9;
+            border: 2px solid #4caf50;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            text-align: center;
+          '
+        >
+          <h3 style='color: #2e7d32; margin: 0 0 10px 0; font-size: 16px'>
+            🎥 Link de Videollamada
+          </h3>
+          <a
+            href='{{googleMeetLink}}'
+            style='
+              display: inline-block;
+              background-color: #4caf50;
+              color: white;
+              padding: 12px 30px;
+              text-decoration: none;
+              border-radius: 6px;
+              font-weight: 600;
+              margin-top: 10px;
+            '
+          >
+            Unirse a Google Meet
+          </a>
+          <p style='color: #666; font-size: 12px; margin: 10px 0 0 0'>
+            Guarda este link para acceder a tu sesión
+          </p>
+        </div>
+
+        <!-- User Notes -->
+        {{#if userNotes}}
+          <div style='margin: 20px 0'>
+            <h3 style='color: #667eea; font-size: 16px; margin: 0 0 10px 0'>
+              📝 Tus Notas:
+            </h3>
+            <p
+              style='
+              color: #333;
+              font-style: italic;
+              background-color: #f8f9fa;
+              padding: 15px;
+              border-radius: 4px;
+              margin: 0;
+            '
+            >
+              "{{userNotes}}"
+            </p>
+          </div>
+        {{/if}}
+
+        <!-- Add to Calendar -->
+        <div style='text-align: center; margin: 30px 0'>
+          <a
+            href='{{calendarLink}}'
+            style='
+              display: inline-block;
+              background-color: #667eea;
+              color: white;
+              padding: 12px 30px;
+              text-decoration: none;
+              border-radius: 6px;
+              font-weight: 600;
+            '
+          >
+            📆 Agregar a mi Calendario
+          </a>
+        </div>
+
+        <!-- Cancellation Policy -->
+        <div
+          style='
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+          '
+        >
+          <p style='color: #856404; margin: 0; font-size: 14px'>
+            <strong>⚠️ Política de Cancelación:</strong><br />
+            Puedes cancelar tu sesión con al menos 24 horas de anticipación sin
+            cargo. Cancelaciones con menos de 24 horas no son reembolsables.
+          </p>
+        </div>
+
+        <!-- Cancel Link -->
+        <p style='color: #666; font-size: 14px; text-align: center'>
+          ¿Necesitas cancelar?
+          <a
+            href='{{cancelLink}}'
+            style='color: #667eea; text-decoration: none'
+          >
+            Cancelar sesión
+          </a>
+        </p>
+
+        <p
+          style='color: #333; font-size: 16px; line-height: 1.6; margin-top: 30px'
+        >
+          Nos vemos pronto,<br />
+          <strong>Equipo Tarot Flavia</strong>
+        </p>
+      </div>
+
+      <!-- Footer -->
+      <div
+        style='
+          background-color: #f8f9fa;
+          padding: 20px;
+          text-align: center;
+          border-top: 1px solid #e0e0e0;
+        '
+      >
+        <p style='color: #666; font-size: 12px; margin: 0'>
+          Este email fue enviado porque reservaste una sesión en Tarot Flavia.
+        </p>
+      </div>
+    </div>
+  </body>
+</html>
