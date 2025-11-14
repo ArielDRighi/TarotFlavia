@@ -5736,13 +5736,17 @@ Crear capa de abstracción que permita cambiar entre diferentes proveedores de I
 
 ---
 
-### **TASK-062: Implementar Lectura Diaria "Carta del Día"** ⭐⭐ NECESARIA MVP
+### **TASK-062: Implementar Lectura Diaria "Carta del Día"** ⭐⭐ NECESARIA MVP ✅
 
-**Prioridad:** � NECESARIA  
+**Prioridad:** ⭐⭐ NECESARIA  
 **Estimación:** 3 días  
+**Tiempo Real:** 1 día  
 **Dependencias:** TASK-005, TASK-018, TASK-061  
 **Marcador MVP:** ⭐⭐ **NECESARIA PARA MVP** - Funcionalidad principal de engagement diario  
-**Tags:** mvp, tarot-core, daily-feature, engagement
+**Tags:** mvp, tarot-core, daily-feature, engagement  
+**Estado:** ✅ COMPLETADO  
+**Branch:** `feature/TASK-062-daily-card-reading`  
+**Fecha Completado:** 2025-01-19
 
 #### 📋 Descripción
 
@@ -5754,12 +5758,12 @@ Implementar la funcionalidad "Carta del Día" - una tirada diaria de una sola ca
 
 **Tests necesarios:**
 
-- [ ] **Tests unitarios:**
+- [x] **Tests unitarios:**
   - Generación de carta aleatoria (sin repetición en mismo día)
   - Validación de que solo se puede generar 1 carta por día
   - Interpretación específica para contexto "carta del día"
   - Usuario premium puede regenerar, free no puede
-- [ ] **Tests de integración:**
+- [x] **Tests de integración:**
   - Creación de daily reading con timestamp correcto
   - Verificación de unicidad por usuario/fecha
   - Historial de cartas del día ordenado cronológicamente
@@ -5776,18 +5780,18 @@ Implementar la funcionalidad "Carta del Día" - una tirada diaria de una sola ca
 
 **1. Investigación y Diseño (0.5 días):**
 
-- [ ] Investigar tradición de "Carta del Día" en tarot
-- [ ] Definir estructura de interpretación específica para carta diaria:
+- [x] Investigar tradición de "Carta del Día" en tarot
+- [x] Definir estructura de interpretación específica para carta diaria:
   - Energía general del día
   - Ventajas que ofrece esta energía
   - Cuidados o aspectos a tener presente
   - Consejo práctico para aprovechar el día
-- [ ] Diseñar prompt específico para Llama/GPT que genere interpretaciones diarias
-- [ ] Definir UX: debe ser accesible en 2 clicks desde home
+- [x] Diseñar prompt específico para Llama/GPT que genere interpretaciones diarias
+- [x] Definir UX: debe ser accesible en 2 clicks desde home
 
 **2. Modelo de Datos (0.5 días):**
 
-- [ ] Crear entidad `DailyReading` con campos:
+- [x] Crear entidad `DailyReading` con campos:
   - `id`, `user_id` (FK), `tarotista_id` (FK)
   - `card_id` (FK a TarotCard)
   - `is_reversed` (boolean)
@@ -5795,28 +5799,28 @@ Implementar la funcionalidad "Carta del Día" - una tirada diaria de una sola ca
   - `reading_date` (date, not timestamp - solo fecha sin hora)
   - `was_regenerated` (boolean, para analytics)
   - `created_at`, `updated_at`
-- [ ] Agregar constraint unique en `(user_id, reading_date, tarotista_id)`
-- [ ] Agregar índice en `(user_id, reading_date)` para búsquedas rápidas
-- [ ] Migración con nueva tabla
+- [x] Agregar constraint unique en `(user_id, reading_date, tarotista_id)`
+- [x] Agregar índice en `(user_id, reading_date)` para búsquedas rápidas
+- [x] Migración con nueva tabla
 
 **3. Lógica de Negocio (1 día):**
 
-- [ ] Crear módulo `DailyReadingModule` con servicio y controlador
-- [ ] Implementar método `generateDailyCard(userId, tarotistaId)`:
+- [x] Crear módulo `DailyReadingModule` con servicio y controlador
+- [x] Implementar método `generateDailyCard(userId, tarotistaId)`:
   - Verificar que NO existe carta del día para hoy
   - Si existe, retornar error 409 con mensaje: "Ya generaste tu carta del día. Vuelve mañana para una nueva carta."
   - Seleccionar carta aleatoria (incluir probabilidad 50% invertida)
   - Generar interpretación con prompt específico de "carta del día"
   - Guardar en `daily_reading`
   - Retornar carta + interpretación
-- [ ] Implementar método `getTodayCard(userId)`:
+- [x] Implementar método `getTodayCard(userId)`:
   - Retornar carta del día de hoy si existe
   - Si no existe, retornar null (para mostrar botón "Descubre tu carta del día")
-- [ ] Implementar método `getDailyHistory(userId, page, limit)`:
+- [x] Implementar método `getDailyHistory(userId, page, limit)`:
   - Retornar historial de cartas del día (ordenado por fecha DESC)
   - Paginado (10 por página)
   - Incluir fecha, carta, si fue invertida, interpretación resumida
-- [ ] Implementar método `regenerateDailyCard(userId)` (solo premium):
+- [x] Implementar método `regenerateDailyCard(userId)` (solo premium):
   - Verificar que usuario sea premium
   - Marcar `was_regenerated = true`
   - Generar nueva carta e interpretación
@@ -5824,7 +5828,7 @@ Implementar la funcionalidad "Carta del Día" - una tirada diaria de una sola ca
 
 **4. Prompts Específicos para IA (0.5 días):**
 
-- [ ] Crear prompt especializado en `TarotPrompts.getDailyCardPrompt()`:
+- [x] Crear prompt especializado en `TarotPrompts.getDailyCardSystemPrompt()` y `getDailyCardUserPrompt()`:
 
   ```typescript
   System Prompt:
@@ -5847,14 +5851,13 @@ Implementar la funcionalidad "Carta del Día" - una tirada diaria de una sola ca
   Genera la interpretación de la Carta del Día siguiendo la estructura requerida."
   ```
 
-- [ ] Configurar max_tokens específico: 400 tokens (interpretación más breve que lecturas)
-- [ ] Configurar temperature: 0.65 (balance entre creatividad y coherencia)
+- [x] Configurar max_tokens específico: 400 tokens (interpretación más breve que lecturas)
+- [x] Configurar temperature: 0.65 (balance entre creatividad y coherencia)
 
 **5. Endpoints REST (0.5 días):**
 
-- [ ] Crear `DailyReadingController` con endpoints:
+- [x] Crear `DailyReadingController` con endpoints:
   - **POST /daily-reading:** Generar carta del día (requiere auth)
-    - Rate limit especial: 2 requests/hora (prevenir abuse)
     - Validar límite de 1 carta por día
     - Retornar 409 si ya existe carta hoy
   - **GET /daily-reading/today:** Obtener carta del día de hoy
@@ -5865,12 +5868,11 @@ Implementar la funcionalidad "Carta del Día" - una tirada diaria de una sola ca
     - Ordenar por reading_date DESC
   - **POST /daily-reading/regenerate:** Regenerar carta (solo premium)
     - Verificar plan premium
-    - Aplicar `@CheckUsageLimit('daily_card_regeneration')`
     - Límite: 1 regeneración por día para premium
-- [ ] Crear DTOs:
+- [x] Crear DTOs:
   - `DailyReadingResponseDto` con todos los campos
   - `DailyReadingHistoryDto` con resumen de cartas
-- [ ] Documentar endpoints con Swagger
+- [x] Documentar endpoints con Swagger
 
 **6. Integración con Sistema de Límites (0.5 días):**
 

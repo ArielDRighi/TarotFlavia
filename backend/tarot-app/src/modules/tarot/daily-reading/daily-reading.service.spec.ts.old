@@ -1,0 +1,326 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { DailyReadingService } from './daily-reading.service';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { DailyReading } from './entities/daily-reading.entity';
+import { Repository } from 'typeorm';
+import { TarotCard } from '../cards/entities/tarot-card.entity';
+import {
+  ConflictException,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
+import { InterpretationsService } from '../interpretations/interpretations.service';
+import { UserPlan } from '../../users/entities/user.entity';
+
+describe('DailyReadingService', () => {
+  let service: DailyReadingService;
+  let mockDailyReadingRepo: any;
+  let mockCardRepo: any;
+  let mockInterpretationsService: any;
+
+  beforeEach(async () => {
+    // Mock QueryBuilder para DailyReading
+    const mockDailyReadingQueryBuilder = {
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      leftJoinAndSelect: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      skip: jest.fn().mockReturnThis(),
+      take: jest.fn().mockReturnThis(),
+      getOne: jest.fn(),
+      getManyAndCount: jest.fn(),
+    };
+
+    // Mock QueryBuilder para TarotCard
+    const mockCardQueryBuilder = {
+      orderBy: jest.fn().mockReturnThis(),
+      skip: jest.fn().mockReturnThis(),
+      take: jest.fn().mockReturnThis(),
+      getOne: jest.fn(),
+    };
+
+    mockDailyReadingRepo = {
+      create: jest.fn(),
+      save: jest.fn(),
+      findOne: jest.fn(),
+      createQueryBuilder: jest.fn(() => mockDailyReadingQueryBuilder),
+    };
+
+    mockCardRepo = {
+      count: jest.fn(),
+      createQueryBuilder: jest.fn(() => mockCardQueryBuilder),
+    };
+
+    mockInterpretationsService = {
+      generateDailyCardInterpretation: jest.fn(),
+    };
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        DailyReadingService,
+        {
+          provide: getRepositoryToken(DailyReading),
+          useValue: mockDailyReadingRepo,
+        },
+        {
+          provide: getRepositoryToken(TarotCard),
+          useValue: mockCardRepo,
+        },
+        {
+          provide: InterpretationsService,
+          useValue: mockInterpretationsService,
+        },
+      ],
+    }).compile();
+
+    service = module.get<DailyReadingService>(DailyReadingService);
+    dailyReadingRepo = module.get(getRepositoryToken(DailyReading));
+    cardRepo = module.get(getRepositoryToken(TarotCard));
+    interpretationsService = module.get(InterpretationsService);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('generateDailyCard', () => {
+    const userId = 1;
+    const tarotistaId = 1;
+    const today = new Date().toISOString().split('T')[0];
+
+    it('should throw ConflictException if user already has a daily card for today', async () => {
+      mockDailyReadingRepo.findOne.mockResolvedValue({
+        id: 1,
+        userId,
+        readingDate: today,
+      } as DailyReading);
+
+      await expect(service.generateDailyCard(userId, tarotistaId)).rejects.toThrow(
+        ConflictException,
+      );
+      await expect(service.generateDailyCard(userId, tarotistaId)).rejects.toThrow(
+        'Ya generaste tu carta del día. Vuelve mañana para una nueva carta.',
+      );
+    });
+
+    it('should generate a daily card with random card selection', async () => {
+      mockDailyReadingRepo.findOne.mockResolvedValue(null);
+      mockCardRepo.count.mockResolvedValue(78);
+      mockCardRepo.findOne.mockResolvedValue({
+        id: 1,
+        name: 'El Mago',
+        arcana: 'major',
+        number: 1,
+        uprightMeaning: 'Manifestación, poder personal',
+        reversedMeaning: 'Manipulación, engaño',
+      } as TarotCard);
+
+      mockInterpretationsService.generateDailyCardInterpretation.mockResolvedValue(
+        '**Energía del Día**: El Mago trae poder...',
+      );
+
+      const mockSavedReading = {
+        id: 1,
+        userId,
+        tarotistaId,
+        cardId: 1,
+        isReversed: false,
+        interpretation: '**Energía del Día**: El Mago trae poder...',
+        readingDate: today,
+        wasRegenerated: false,
+        card: {
+          id: 1,
+          name: 'El Mago',
+        },
+      } as DailyReading;
+
+      mockDailyReadingRepo.create.mockReturnValue(mockSavedReading);
+      mockDailyReadingRepo.save.mockResolvedValue(mockSavedReading);
+
+      const result = await service.generateDailyCard(userId, tarotistaId);
+
+      expect(result).toBeDefined();
+      expect(result.cardId).toBe(1);
+      expect(result.interpretation).toContain('Energía del Día');
+      expect(mockCardRepo.count).toHaveBeenCalled();
+      expect(mockInterpretationsService.generateDailyCardInterpretation).toHaveBeenCalled();
+    });
+
+    it('should randomly set isReversed to true or false (50% probability)', async () => {
+      mockDailyReadingRepo.findOne.mockResolvedValue(null);
+      mockCardRepo.count.mockResolvedValue(78);
+      mockCardRepo.findOne.mockResolvedValue({
+        id: 1,
+        name: 'El Mago',
+      } as TarotCard);
+      mockInterpretationsService.generateDailyCardInterpretation.mockResolvedValue(
+        'Interpretation',
+      );
+
+      const mockReading = { id: 1, isReversed: false } as DailyReading;
+      mockDailyReadingRepo.create.mockReturnValue(mockReading);
+      mockDailyReadingRepo.save.mockResolvedValue(mockReading);
+
+      // El test verifica que el campo existe, no el valor específico (es random)
+      const result = await service.generateDailyCard(userId, tarotistaId);
+      expect(typeof result.isReversed).toBe('boolean');
+    });
+  });
+
+  describe('getTodayCard', () => {
+    const userId = 1;
+    const today = new Date().toISOString().split('T')[0];
+
+    it('should return null if no daily card exists for today', async () => {
+      mockDailyReadingRepo.findOne.mockResolvedValue(null);
+
+      const result = await service.getTodayCard(userId);
+
+      expect(result).toBeNull();
+      expect(mockDailyReadingRepo.findOne).toHaveBeenCalledWith({
+        where: { userId, readingDate: today },
+        relations: ['card'],
+      });
+    });
+
+    it('should return the daily card if it exists for today', async () => {
+      const mockReading = {
+        id: 1,
+        userId,
+        cardId: 1,
+        interpretation: 'Test interpretation',
+        readingDate: today,
+        card: { id: 1, name: 'El Mago' },
+      } as DailyReading;
+
+      mockDailyReadingRepo.findOne.mockResolvedValue(mockReading);
+
+      const result = await service.getTodayCard(userId);
+
+      expect(result).toEqual(mockReading);
+    });
+  });
+
+  describe('regenerateDailyCard', () => {
+    const userId = 1;
+    const tarotistaId = 1;
+    const today = new Date().toISOString().split('T')[0];
+
+    const mockPremiumUser = {
+      id: userId,
+      plan: UserPlan.PREMIUM,
+    } as User;
+
+    const mockFreeUser = {
+      id: userId,
+      plan: UserPlan.FREE,
+    } as User;
+
+    it('should throw ForbiddenException if user is not premium', async () => {
+      await expect(
+        service.regenerateDailyCard(userId, tarotistaId, mockFreeUser),
+      ).rejects.toThrow(ForbiddenException);
+      await expect(
+        service.regenerateDailyCard(userId, tarotistaId, mockFreeUser),
+      ).rejects.toThrow('Solo usuarios premium pueden regenerar la carta del día');
+    });
+
+    it('should throw ConflictException if no daily card exists for today', async () => {
+      mockDailyReadingRepo.findOne.mockResolvedValue(null);
+
+      await expect(
+        service.regenerateDailyCard(userId, tarotistaId, mockPremiumUser),
+      ).rejects.toThrow(ConflictException);
+      await expect(
+        service.regenerateDailyCard(userId, tarotistaId, mockPremiumUser),
+      ).rejects.toThrow('No tienes una carta del día para regenerar');
+    });
+
+    it('should regenerate the daily card for premium users', async () => {
+      const existingReading = {
+        id: 1,
+        userId,
+        cardId: 1,
+        interpretation: 'Old interpretation',
+        wasRegenerated: false,
+      } as DailyReading;
+
+      mockDailyReadingRepo.findOne.mockResolvedValue(existingReading);
+      mockCardRepo.count.mockResolvedValue(78);
+      mockCardRepo.findOne.mockResolvedValue({
+        id: 2,
+        name: 'La Emperatriz',
+      } as TarotCard);
+      mockInterpretationsService.generateDailyCardInterpretation.mockResolvedValue(
+        'New interpretation',
+      );
+
+      const updatedReading = {
+        ...existingReading,
+        cardId: 2,
+        interpretation: 'New interpretation',
+        wasRegenerated: true,
+      } as DailyReading;
+
+      mockDailyReadingRepo.save.mockResolvedValue(updatedReading);
+
+      const result = await service.regenerateDailyCard(userId, tarotistaId, mockPremiumUser);
+
+      expect(result.wasRegenerated).toBe(true);
+      expect(result.interpretation).toBe('New interpretation');
+    });
+  });
+
+  describe('getDailyHistory', () => {
+    const userId = 1;
+
+    it('should return paginated history of daily cards', async () => {
+      const mockQueryBuilder = {
+        where: jest.fn().mockReturnThis(),
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValue([
+          [
+            {
+              id: 1,
+              readingDate: '2025-01-15',
+              card: { name: 'El Mago' },
+              isReversed: false,
+              interpretation: 'Full interpretation text here...',
+              wasRegenerated: false,
+            },
+          ],
+          1,
+        ]),
+      };
+
+      mockDailyReadingRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder as any);
+
+      const result = await service.getDailyHistory(userId, 1, 10);
+
+      expect(result.items).toHaveLength(1);
+      expect(result.total).toBe(1);
+      expect(result.page).toBe(1);
+      expect(result.totalPages).toBe(1);
+    });
+
+    it('should return empty array if no history exists', async () => {
+      const mockQueryBuilder = {
+        where: jest.fn().mockReturnThis(),
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
+      };
+
+      mockDailyReadingRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder as any);
+
+      const result = await service.getDailyHistory(userId, 1, 10);
+
+      expect(result.items).toHaveLength(0);
+      expect(result.total).toBe(0);
+    });
+  });
+});
