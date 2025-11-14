@@ -87,9 +87,9 @@ export class RefreshTokenService {
     const tokenHash = this.generateTokenHash(plainToken);
 
     // Búsqueda O(1) por índice
+    // user se carga automáticamente por eager: true en la entidad
     const token = await this.refreshTokenRepository.findOne({
       where: { tokenHash, revokedAt: IsNull() },
-      relations: ['user'],
     });
 
     if (!token) {
@@ -113,9 +113,9 @@ export class RefreshTokenService {
     plainToken: string,
     userId: number,
   ): Promise<RefreshToken | null> {
+    // user se carga automáticamente por eager: true en la entidad
     const userTokens = await this.refreshTokenRepository.find({
       where: { userId },
-      relations: ['user'],
     });
 
     for (const token of userTokens) {

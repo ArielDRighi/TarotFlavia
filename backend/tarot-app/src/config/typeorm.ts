@@ -45,7 +45,10 @@ const config = {
     : process.env.TAROT_DB_NAME || process.env.POSTGRES_DB || 'tarot_db',
   synchronize: false, // Desactivado - ahora usamos migraciones
   autoLoadEntities: true,
-  logging: false, // Desactivado en todos los tests
+  logging:
+    process.env.NODE_ENV === 'development' && !isE2ETesting
+      ? ['query', 'error', 'warn']
+      : false, // Habilitado en desarrollo para detectar N+1 queries
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
   migrations: [__dirname + '/../migrations/*{.ts,.js}'],
   migrationsTableName: 'migrations',

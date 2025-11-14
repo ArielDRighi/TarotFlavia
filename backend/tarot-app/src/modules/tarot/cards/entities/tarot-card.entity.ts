@@ -108,7 +108,7 @@ export class TarotCard {
   @Column()
   deckId: number;
 
-  @ManyToOne('TarotDeck', 'cards')
+  @ManyToOne('TarotDeck', 'cards', { eager: true })
   @JoinColumn({ name: 'deckId' })
   deck: ITarotDeck;
 
