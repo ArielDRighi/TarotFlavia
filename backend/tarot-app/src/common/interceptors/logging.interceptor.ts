@@ -10,6 +10,11 @@ import { Request, Response } from 'express';
 import { LoggerService } from '../logger/logger.service';
 import { CorrelationIdService } from '../logger/correlation-id.service';
 
+interface RequestUser {
+  id: number;
+  [key: string]: any;
+}
+
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
   constructor(
@@ -31,7 +36,7 @@ export class LoggingInterceptor implements NestInterceptor {
       method,
       url,
       ...(correlationId && { correlationId }),
-      ...(user && { userId: (user as { id: number }).id }),
+      ...(user && { userId: (user as RequestUser).id }),
     });
 
     return next.handle().pipe(
@@ -46,21 +51,26 @@ export class LoggingInterceptor implements NestInterceptor {
           statusCode,
           duration,
           ...(correlationId && { correlationId }),
-          ...(user && { userId: (user as { id: number }).id }),
+          ...(user && { userId: (user as RequestUser).id }),
         });
       }),
       catchError((error: Error) => {
         // Log error
         const duration = `${Date.now() - startTime}ms`;
 
-        this.logger.error('HTTP Request Error', error.stack, 'HTTPLogger', {
-          method,
-          url,
-          duration,
-          error: error.message,
-          ...(correlationId && { correlationId }),
-          ...(user && { userId: (user as { id: number }).id }),
-        });
+        this.logger.error(
+          'HTTP Request Error',
+          error instanceof Error ? error.stack : undefined,
+          'HTTPLogger',
+          {
+            method,
+            url,
+            duration,
+            error: error instanceof Error ? error.message : String(error),
+            ...(correlationId && { correlationId }),
+            ...(user && { userId: (user as RequestUser).id }),
+          },
+        );
 
         return throwError(() => error);
       }),

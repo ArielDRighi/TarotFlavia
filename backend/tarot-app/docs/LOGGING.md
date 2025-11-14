@@ -60,7 +60,7 @@ If environment variables are not set, the following defaults apply:
 
 ```typescript
 import { Injectable } from '@nestjs/common';
-import { LoggerService } from '@/common/logger/logger.service';
+import { LoggerService } from 'src/common/logger/logger.service';
 
 @Injectable()
 export class MyService {
@@ -83,10 +83,15 @@ export class MyService {
     try {
       // ... some code
     } catch (error) {
-      this.logger.error('Failed to process payment', error.stack, 'MyService', {
-        userId: 123,
-        amount: 50.0,
-      });
+      this.logger.error(
+        'Failed to process payment',
+        error instanceof Error ? error.stack : undefined,
+        'MyService',
+        {
+          userId: 123,
+          amount: 50.0,
+        },
+      );
     }
 
     // Debug level (only in debug mode)

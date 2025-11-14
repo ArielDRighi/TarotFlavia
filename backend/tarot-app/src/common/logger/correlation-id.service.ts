@@ -45,7 +45,9 @@ export class CorrelationIdService {
           const result = await callback();
           resolve(result);
         } catch (error) {
-          reject(error instanceof Error ? error : new Error(String(error)));
+          reject(
+            error instanceof Error ? error : new Error(JSON.stringify(error)),
+          );
         }
       });
     });

@@ -119,14 +119,14 @@ describe('CorrelationIdMiddleware', () => {
     it('should set correlation ID available within context', async () => {
       let capturedId: string | undefined;
 
-      mockNext = jest.fn(() => {
+      const customNext = jest.fn(() => {
         capturedId = correlationIdService.getCorrelationId();
       });
 
       middleware.use(
         mockRequest as Request,
         mockResponse as Response,
-        mockNext,
+        customNext,
       );
 
       // Wait for async context to be set
