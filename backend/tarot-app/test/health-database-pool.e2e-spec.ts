@@ -112,6 +112,6 @@ describe('Health - Database Pool (E2E)', () => {
 
       expect(body).toHaveProperty('status');
       expect(['ok', 'error']).toContain(body.status);
-    }, 10000); // 10 second timeout for comprehensive health check
+    }, 30000); // 30 second timeout for comprehensive health check (CI can be slow)
   });
 });

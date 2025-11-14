@@ -358,4 +358,56 @@ export class InterpretationsService {
       ? 0
       : (this.cacheHits / this.totalRequests) * 100;
   }
+
+  /**
+   * Genera interpretación específica para Carta del Día
+   * Usa un prompt especializado enfocado en energía diaria
+   */
+  async generateDailyCardInterpretation(
+    card: TarotCard,
+    isReversed: boolean,
+    tarotistaId?: number,
+  ): Promise<string> {
+    try {
+      const actualTarotistaId =
+        tarotistaId || (await this.getDefaultTarotista());
+      const tarotista = await this.tarotistaRepository.findOne({
+        where: { id: actualTarotistaId },
+      });
+
+      if (!tarotista) {
+        throw new InternalServerErrorException('Tarotista no encontrado');
+      }
+
+      // Construir prompt específico para carta del día
+      const systemPrompt = TarotPrompts.getDailyCardSystemPrompt(
+        tarotista.nombrePublico,
+      );
+      const userPrompt = TarotPrompts.getDailyCardUserPrompt(card, isReversed);
+
+      this.logger.log(
+        `Generating daily card interpretation for card: ${card.name} (${isReversed ? 'reversed' : 'upright'})`,
+      );
+
+      // Generar interpretación con IA
+      const response = await this.aiProviderService.generateCompletion([
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ]);
+
+      // Sanitizar output
+      const sanitized = this.outputSanitizer.sanitizeAiResponse(
+        response.content,
+      );
+
+      this.logger.log('Daily card interpretation generated successfully');
+
+      return sanitized;
+    } catch (error) {
+      this.logger.error('Error generating daily card interpretation:', error);
+      throw new InternalServerErrorException(
+        'Error al generar interpretación de la carta del día',
+      );
+    }
+  }
 }
