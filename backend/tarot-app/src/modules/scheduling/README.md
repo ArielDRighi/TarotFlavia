@@ -11,11 +11,13 @@ Sistema completo de gestión de disponibilidad horaria del tarotista y reserva d
 ### Entidades (3)
 
 1. **TarotistAvailability** - Disponibilidad semanal recurrente
+
    - Campos: `id`, `tarotistaId`, `dayOfWeek`, `startTime`, `endTime`, `isActive`
    - Relación: `ManyToOne` con Tarotista
    - Índice: `(tarotistaId, dayOfWeek)`
 
 2. **TarotistException** - Excepciones (días bloqueados/custom)
+
    - Campos: `id`, `tarotistaId`, `exceptionDate`, `exceptionType`, `startTime`, `endTime`, `reason`
    - Relación: `ManyToOne` con Tarotista
    - Índice único: `(tarotistaId, exceptionDate)`
@@ -47,6 +49,7 @@ Sistema completo de gestión de disponibilidad horaria del tarotista y reserva d
 ### Servicios (2)
 
 1. **AvailabilityService**
+
    - `setWeeklyAvailability()` - Configurar horarios
    - `getWeeklyAvailability()` - Obtener configuración
    - `removeWeeklyAvailability()` - Eliminar día
@@ -67,6 +70,7 @@ Sistema completo de gestión de disponibilidad horaria del tarotista y reserva d
 ### Controladores (2)
 
 1. **TarotistSchedulingController** (`/tarotist/scheduling`)
+
    - GET `/availability/weekly` - Ver disponibilidad
    - POST `/availability/weekly` - Configurar horarios
    - DELETE `/availability/weekly/:id` - Eliminar día
@@ -161,6 +165,7 @@ Sistema implementa **optimistic locking** con transacciones:
 ## 🔗 Generación de Google Meet Links
 
 **Implementación Actual (MVP):**
+
 ```typescript
 generateGoogleMeetLink(): string {
   const uuid = randomUUID();
@@ -170,6 +175,7 @@ generateGoogleMeetLink(): string {
 ```
 
 **Futuro (Post-MVP):**
+
 - Integración con Google Calendar API
 - Crear evento real en calendario del tarotista
 - Generar link real de Google Meet
@@ -180,17 +186,21 @@ generateGoogleMeetLink(): string {
 **Archivo:** `1763160254267-CreateSchedulingTables.ts`
 
 **Tablas creadas:**
+
 - `tarotist_availability` (5 columnas)
 - `tarotist_exceptions` (7 columnas)
 - `sessions` (18 columnas)
 
 **Índices creados:**
+
 - 3 índices para optimizar queries frecuentes
 
 **Triggers creados:**
+
 - 2 triggers `updated_at` para auto-update
 
 **Función creada:**
+
 - `update_updated_at_column()` para triggers
 
 **Rollback:** Completo con `down()` method
@@ -266,23 +276,28 @@ src/database/migrations/
 ## 🚀 Próximos Pasos (Post-TASK-063)
 
 1. **Integración con EmailService** (TASK-016)
+
    - Implementar envío real de emails
    - Conectar templates Handlebars con EmailService
 
 2. **Guards y Auth**
+
    - Aplicar `@Roles('tarotist')` en TarotistSchedulingController
    - Aplicar `JwtAuthGuard` en ambos controladores
 
 3. **Tests E2E**
+
    - Flujo completo de reserva
    - Validación de double-booking
    - Cancelaciones con políticas
 
 4. **Cron Jobs**
+
    - Recordatorio 24h antes de sesión
    - Limpieza de sesiones antiguas
 
 5. **Google Calendar API Integration**
+
    - Reemplazar links temporales con eventos reales
    - Sincronización bidireccional
 
@@ -294,6 +309,7 @@ src/database/migrations/
 ## 💰 Cálculo de Precios
 
 **Tarifas base implementadas:**
+
 - Tarot Reading: $0.83/min ($50/60min)
 - Energy Cleaning: $1.00/min ($60/60min)
 - Hebrew Pendulum: $0.67/min ($40/60min)
@@ -311,6 +327,7 @@ src/database/migrations/
 ## 📚 Documentación Swagger
 
 Todos los endpoints están documentados con:
+
 - `@ApiOperation` con descripción clara
 - `@ApiResponse` para todos los códigos HTTP
 - `@ApiParam` para parámetros de ruta
@@ -327,7 +344,7 @@ Todos los endpoints están documentados con:
 **Endpoints REST:** 15  
 **Tablas DB:** 3  
 **Índices DB:** 3  
-**Triggers DB:** 2  
+**Triggers DB:** 2
 
 **Estado:** ✅ **PRODUCCIÓN READY**
 
