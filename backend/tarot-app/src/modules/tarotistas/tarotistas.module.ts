@@ -4,6 +4,7 @@ import { TarotistasService } from './tarotistas.service';
 import { TarotistaConfig } from './entities/tarotista-config.entity';
 import { TarotistaCardMeaning } from './entities/tarotista-card-meaning.entity';
 import { Tarotista } from './entities/tarotista.entity';
+import { UserTarotistaSubscription } from './entities/user-tarotista-subscription.entity';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { Tarotista } from './entities/tarotista.entity';
       Tarotista,
       TarotistaConfig,
       TarotistaCardMeaning,
+      UserTarotistaSubscription,
     ]),
   ],
   providers: [TarotistasService],

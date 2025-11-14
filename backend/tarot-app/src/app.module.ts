@@ -1,5 +1,5 @@
-import { Module } from '@nestjs/common';
-import { APP_GUARD, APP_FILTER } from '@nestjs/core';
+import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
+import { APP_GUARD, APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
@@ -29,6 +29,9 @@ import { AuditModule } from './modules/audit/audit.module';
 import { CustomThrottlerGuard } from './common/guards/custom-throttler.guard';
 import { ThrottlerExceptionFilter } from './common/filters/throttler-exception.filter';
 import { RateLimitingModule } from './common/rate-limiting/rate-limiting.module';
+import { LoggerModule } from './common/logger/logger.module';
+import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import databaseConfig from './config/typeorm';
 import { validate } from './config/env-validator';
 
@@ -69,6 +72,7 @@ import { validate } from './config/env-validator';
       },
     ]),
     ScheduleModule.forRoot(),
+    LoggerModule,
     AuthModule,
     UsersModule,
     AdminModule,
@@ -100,6 +104,18 @@ import { validate } from './config/env-validator';
       provide: APP_FILTER,
       useClass: ThrottlerExceptionFilter,
     },
+    ...(process.env.NODE_ENV !== 'test'
+      ? [
+          {
+            provide: APP_INTERCEPTOR,
+            useClass: LoggingInterceptor,
+          },
+        ]
+      : []),
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(CorrelationIdMiddleware).forRoutes('*');
+  }
+}

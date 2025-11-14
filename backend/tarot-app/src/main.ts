@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { LoggerService } from './common/logger/logger.service';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as dotenv from 'dotenv';
@@ -11,21 +12,33 @@ async function bootstrap() {
   // Explicitly load .env file
   const envPath = path.resolve(process.cwd(), '.env');
   if (fs.existsSync(envPath)) {
-    console.log(`Loading .env from: ${envPath}`);
+    // Only log .env loading in development
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`Loading .env from: ${envPath}`);
+    }
     dotenv.config({ path: envPath });
   } else {
     console.warn('No .env file found!');
   }
 
   // Check database environment variables
-  console.log('Database connection details:');
-  console.log(`Host: ${process.env.POSTGRES_HOST}`);
-  console.log(`Port: ${process.env.POSTGRES_PORT}`);
-  console.log(`User: ${process.env.POSTGRES_USER}`);
-  console.log(`Database: ${process.env.POSTGRES_DB}`);
-  console.log(`Password exists: ${Boolean(process.env.POSTGRES_PASSWORD)}`);
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('Database connection details:');
+    console.log(`Host: ${process.env.POSTGRES_HOST}`);
+    console.log(`Port: ${process.env.POSTGRES_PORT}`);
+    console.log(`User: ${process.env.POSTGRES_USER}`);
+    console.log(`Database: ${process.env.POSTGRES_DB}`);
+    console.log(`Password exists: ${Boolean(process.env.POSTGRES_PASSWORD)}`);
+  }
 
   const app = await NestFactory.create(AppModule);
+
+  // Get custom logger from the app context
+  const loggerService = app.get(LoggerService);
+  app.useLogger(loggerService);
+
+  // Log startup with custom logger
+  loggerService.log('Application is starting...', 'Bootstrap');
 
   // Configure security headers with Helmet (TASK-048-a)
   app.use(
@@ -69,8 +82,9 @@ async function bootstrap() {
 
   // Configure CORS with security headers (TASK-048-a)
   if (!process.env.CORS_ORIGIN) {
-    console.warn(
-      '⚠️  CORS_ORIGIN environment variable is not set. CORS will be disabled for security.',
+    loggerService.warn(
+      'CORS_ORIGIN environment variable is not set. CORS will be disabled for security.',
+      'Bootstrap',
     );
   }
   app.enableCors({
@@ -92,9 +106,12 @@ async function bootstrap() {
   );
 
   await app.listen(process.env.PORT ?? 3000);
-  console.log(`La aplicación está corriendo en: ${await app.getUrl()}`);
-  console.log(
-    `Documentación de Swagger disponible en: ${await app.getUrl()}/api`,
+
+  const appUrl = await app.getUrl();
+  loggerService.log(`Application is running on: ${appUrl}`, 'Bootstrap');
+  loggerService.log(
+    `Swagger documentation available at: ${appUrl}/api`,
+    'Bootstrap',
   );
 }
 
