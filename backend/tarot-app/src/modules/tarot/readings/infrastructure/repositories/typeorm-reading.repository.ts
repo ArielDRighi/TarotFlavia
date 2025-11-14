@@ -46,12 +46,14 @@ export class TypeOrmReadingRepository implements IReadingRepository {
 
     const skip = (page - 1) * limit;
 
+    // Optimización: Cargar todas las relaciones en una sola query con leftJoinAndSelect
     const query = this.readingRepo
       .createQueryBuilder('reading')
       .leftJoinAndSelect('reading.deck', 'deck')
       .leftJoinAndSelect('reading.cards', 'cards')
-      .leftJoinAndSelect('reading.user', 'user')
       .leftJoinAndSelect('reading.category', 'category')
+      .leftJoinAndSelect('reading.predefinedQuestion', 'predefinedQuestion')
+      // Nota: user se omite para reducir payload (el frontend ya sabe qué user es)
       .where('reading.userId = :userId', { userId })
       .andWhere('reading.deletedAt IS NULL')
       .orderBy(`reading.${sortBy}`, sortOrder)
@@ -91,12 +93,15 @@ export class TypeOrmReadingRepository implements IReadingRepository {
 
     const skip = (page - 1) * limit;
 
+    // Optimización: Cargar todas las relaciones necesarias en una sola query
     const query = this.readingRepo
       .createQueryBuilder('reading')
       .leftJoinAndSelect('reading.deck', 'deck')
       .leftJoinAndSelect('reading.cards', 'cards')
+      // user incluido para admin dashboard
       .leftJoinAndSelect('reading.user', 'user')
       .leftJoinAndSelect('reading.category', 'category')
+      .leftJoinAndSelect('reading.predefinedQuestion', 'predefinedQuestion')
       .andWhere('reading.deletedAt IS NULL')
       .orderBy(`reading.${sortBy}`, sortOrder)
       .skip(skip)
@@ -117,11 +122,13 @@ export class TypeOrmReadingRepository implements IReadingRepository {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
+    // Optimización: Cargar relaciones necesarias en una query
     return this.readingRepo
       .createQueryBuilder('reading')
       .leftJoinAndSelect('reading.deck', 'deck')
       .leftJoinAndSelect('reading.cards', 'cards')
       .leftJoinAndSelect('reading.category', 'category')
+      .leftJoinAndSelect('reading.predefinedQuestion', 'predefinedQuestion')
       .where('reading.userId = :userId', { userId })
       .andWhere('reading.deletedAt IS NOT NULL')
       .andWhere('reading.deletedAt > :thirtyDaysAgo', { thirtyDaysAgo })
@@ -133,12 +140,14 @@ export class TypeOrmReadingRepository implements IReadingRepository {
   async findAllForAdmin(
     includeDeleted = false,
   ): Promise<[TarotReading[], number]> {
+    // Optimización: Cargar todas las relaciones necesarias para admin dashboard
     const query = this.readingRepo
       .createQueryBuilder('reading')
       .leftJoinAndSelect('reading.deck', 'deck')
       .leftJoinAndSelect('reading.cards', 'cards')
       .leftJoinAndSelect('reading.user', 'user')
       .leftJoinAndSelect('reading.category', 'category')
+      .leftJoinAndSelect('reading.predefinedQuestion', 'predefinedQuestion')
       .orderBy('reading.createdAt', 'DESC')
       .take(50);
 
@@ -194,9 +203,11 @@ export class TypeOrmReadingRepository implements IReadingRepository {
   }
 
   async findByShareToken(token: string): Promise<TarotReading | null> {
+    // Optimización: Cargar solo las relaciones necesarias para lectura compartida
     return this.readingRepo.findOne({
       where: { sharedToken: token, isPublic: true },
-      relations: ['cards', 'deck', 'category'],
+      relations: ['cards', 'deck', 'category', 'predefinedQuestion'],
+      // Nota: NO cargamos user para proteger privacidad en lecturas compartidas
     });
   }
 

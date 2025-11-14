@@ -20,13 +20,14 @@ export class CardsService {
   ) {}
 
   async findAll(): Promise<TarotCard[]> {
-    return this.cardRepository.find({ relations: ['deck'] });
+    // deck se carga automáticamente por eager: true en la entidad
+    return this.cardRepository.find();
   }
 
   async findById(id: number): Promise<TarotCard> {
+    // deck se carga automáticamente por eager: true en la entidad
     const card = await this.cardRepository.findOne({
       where: { id },
-      relations: ['deck'],
     });
 
     if (!card) {
@@ -37,9 +38,9 @@ export class CardsService {
   }
 
   async findByIds(ids: number[]): Promise<TarotCard[]> {
+    // deck se carga automáticamente por eager: true en la entidad
     const cards = await this.cardRepository.find({
       where: { id: In(ids) },
-      relations: ['deck'],
     });
 
     if (cards.length !== ids.length) {
@@ -58,9 +59,9 @@ export class CardsService {
       throw new NotFoundException(`Mazo con ID ${deckId} no encontrado`);
     }
 
+    // deck se carga automáticamente por eager: true en la entidad
     return this.cardRepository.find({
       where: { deckId },
-      relations: ['deck'],
     });
   }
 

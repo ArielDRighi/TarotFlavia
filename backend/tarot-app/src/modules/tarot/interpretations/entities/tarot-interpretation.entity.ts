@@ -19,7 +19,7 @@ export class TarotInterpretation {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne('TarotReading', 'interpretations')
+  @ManyToOne('TarotReading', 'interpretations', { eager: false })
   @JoinColumn()
   reading: ITarotReading;
 
