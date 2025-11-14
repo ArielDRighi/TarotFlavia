@@ -104,10 +104,14 @@ import { validate } from './config/env-validator';
       provide: APP_FILTER,
       useClass: ThrottlerExceptionFilter,
     },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: LoggingInterceptor,
-    },
+    ...(process.env.NODE_ENV !== 'test'
+      ? [
+          {
+            provide: APP_INTERCEPTOR,
+            useClass: LoggingInterceptor,
+          },
+        ]
+      : []),
   ],
 })
 export class AppModule implements NestModule {
