@@ -98,10 +98,16 @@ describe('AdminDashboardController', () => {
   };
 
   const mockAdminDashboardService = {
-    getStats: jest.fn().mockResolvedValue(mockStatsResponse),
-    getCharts: jest.fn().mockResolvedValue(mockChartsResponse),
-    getMetrics: jest.fn().mockResolvedValue(mockMetricsResponse),
-  };
+    getStats: jest
+      .fn<Promise<StatsResponseDto>, []>()
+      .mockResolvedValue(mockStatsResponse),
+    getCharts: jest
+      .fn<Promise<ChartsResponseDto>, []>()
+      .mockResolvedValue(mockChartsResponse),
+    getMetrics: jest
+      .fn<Promise<DashboardMetricsDto>, []>()
+      .mockResolvedValue(mockMetricsResponse),
+  } as unknown as AdminDashboardService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -135,18 +141,14 @@ describe('AdminDashboardController', () => {
 
   describe('getStats', () => {
     it('should return comprehensive dashboard statistics', async () => {
-      const result = await controller.getStats();
-
-      expect(result).toEqual(mockStatsResponse);
+      await expect(controller.getStats()).resolves.toEqual(mockStatsResponse);
       expect(service.getStats).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('getCharts', () => {
     it('should return chart data for last 30 days', async () => {
-      const result = await controller.getCharts();
-
-      expect(result).toEqual(mockChartsResponse);
+      await expect(controller.getCharts()).resolves.toEqual(mockChartsResponse);
       expect(service.getCharts).toHaveBeenCalledTimes(1);
     });
   });

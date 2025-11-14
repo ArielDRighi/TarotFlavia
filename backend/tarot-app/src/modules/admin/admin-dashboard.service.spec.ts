@@ -298,7 +298,6 @@ describe('AdminDashboardService', () => {
         { date: '2024-01-01', count: '50' },
       ]);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = await service.getReadingStats();
 
       expect(result.totalReadings).toBe(5000);
@@ -362,7 +361,6 @@ describe('AdminDashboardService', () => {
         ])
         .mockResolvedValueOnce([{ date: '2024-01-01', totalCost: '1.50' }]);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = await service.getOpenAIStats();
 
       expect(result.totalInterpretations).toBe(5000);
@@ -398,7 +396,6 @@ describe('AdminDashboardService', () => {
         customCount: '500',
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = await service.getQuestionStats();
 
       expect(result.topPredefinedQuestions).toHaveLength(2);
