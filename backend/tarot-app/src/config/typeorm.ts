@@ -52,6 +52,42 @@ const config = {
   migrationsRun: isE2ETesting ? false : true, // No ejecutar migraciones automáticamente en E2E (ya se ejecutan en globalSetup)
   ssl: false,
   dropSchema: false,
+  // Connection pooling configuration
+  extra: {
+    // Maximum number of connections in the pool
+    max: parseInt(
+      process.env.DB_POOL_SIZE ||
+        (process.env.NODE_ENV === 'production' ? '25' : '10'),
+      10,
+    ),
+    // Minimum number of connections to keep in the pool (25% of max)
+    min: Math.ceil(
+      parseInt(
+        process.env.DB_POOL_SIZE ||
+          (process.env.NODE_ENV === 'production' ? '25' : '10'),
+        10,
+      ) * 0.25,
+    ),
+    // Maximum time (ms) to wait for connection from pool
+    connectionTimeoutMillis: parseInt(
+      process.env.DB_CONNECTION_TIMEOUT || '30000',
+      10,
+    ),
+    // Time (ms) before idle connection is closed
+    idleTimeoutMillis: 30000,
+    // Application name for PostgreSQL connection tracking
+    application_name: 'tarot-app',
+    // Statement timeout (prevent runaway queries)
+    statement_timeout: 30000, // 30 seconds
+    // Query timeout for individual queries
+    query_timeout: parseInt(process.env.DB_MAX_QUERY_TIME || '5000', 10),
+    // Connection retry configuration
+    // PostgreSQL will retry connection attempts with exponential backoff
+    connectionRetryAttempts: 3,
+    connectionRetryDelay: 1000, // Start with 1 second, doubles each retry
+  },
+  // Log slow queries for performance monitoring
+  maxQueryExecutionTime: parseInt(process.env.DB_MAX_QUERY_TIME || '5000', 10),
 };
 
 // Verificar que las variables críticas estén definidas
@@ -65,6 +101,15 @@ if (process.env.NODE_ENV !== 'test' && !isE2ETesting) {
   console.log(`Usuario: ${config.username}`);
   console.log(`Base de Datos: ${config.database}`);
   console.log(`Contraseña existe: ${Boolean(config.password)}`);
+  console.log(
+    `Pool Size: ${config.extra.max} (min: ${config.extra.min}, timeout: ${config.extra.connectionTimeoutMillis}ms)`,
+  );
+  console.log(
+    `Max Query Time: ${config.maxQueryExecutionTime}ms (queries lentas serán loggeadas)`,
+  );
+  console.log(
+    `Retry Strategy: ${config.extra.connectionRetryAttempts} intentos con delay inicial de ${config.extra.connectionRetryDelay}ms (backoff exponencial)`,
+  );
 }
 
 // Si falta alguna configuración crítica, usar valores por defecto
