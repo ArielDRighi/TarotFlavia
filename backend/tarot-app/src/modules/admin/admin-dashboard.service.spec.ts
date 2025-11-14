@@ -277,17 +277,28 @@ describe('AdminDashboardService', () => {
         .mockResolvedValueOnce(400) // last 7 days
         .mockResolvedValueOnce(1200); // last 30 days
 
-      mockQueryBuilder.getRawOne
-        .mockResolvedValueOnce({ avgReadings: '5.5' })
-        .mockResolvedValueOnce({ predefinedCount: '1000' });
+      // Mock for getAverageReadingsPerUser
+      mockQueryBuilder.getRawOne.mockResolvedValueOnce({
+        totalReadings: '5500',
+        totalUsers: '1000',
+      });
 
-      mockQueryBuilder.getRawMany
-        .mockResolvedValueOnce([
-          { categoryId: 1, categoryName: 'Amor', count: '2000' },
-        ])
-        .mockResolvedValueOnce([{ spreadName: 'Tres Cartas', count: '3000' }])
-        .mockResolvedValueOnce([{ date: '2024-01-01', count: '50' }]);
+      // Mock for getCategoryDistribution
+      mockQueryBuilder.getRawMany.mockResolvedValueOnce([
+        { categoryId: 1, categoryName: 'Amor', count: '2000' },
+      ]);
 
+      // Mock for getSpreadDistribution
+      mockQueryBuilder.getRawMany.mockResolvedValueOnce([
+        { cardCount: 3, count: '3000' },
+      ]);
+
+      // Mock for getReadingsPerDay
+      mockQueryBuilder.getRawMany.mockResolvedValueOnce([
+        { date: '2024-01-01', count: '50' },
+      ]);
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = await service.getReadingStats();
 
       expect(result.totalReadings).toBe(5000);
@@ -301,10 +312,12 @@ describe('AdminDashboardService', () => {
 
   describe('getCardStats', () => {
     it('should return detailed card statistics', async () => {
+      jest.clearAllMocks();
+
       mockQueryBuilder.getRawMany
         .mockResolvedValueOnce([
-          { cardId: 1, cardName: 'El Loco', count: '500' },
-          { cardId: 2, cardName: 'La Muerte', count: '450' },
+          { cardId: 1, name: 'El Loco', count: '500' },
+          { cardId: 2, name: 'La Muerte', count: '450' },
         ])
         .mockResolvedValueOnce([
           { category: 'arcanos_mayores', count: '3000' },
@@ -330,6 +343,8 @@ describe('AdminDashboardService', () => {
 
   describe('getOpenAIStats', () => {
     it('should return detailed OpenAI statistics', async () => {
+      jest.clearAllMocks();
+
       mockAIUsageRepository.count
         .mockResolvedValueOnce(5000) // total
         .mockResolvedValueOnce(100) // errors
@@ -347,6 +362,7 @@ describe('AdminDashboardService', () => {
         ])
         .mockResolvedValueOnce([{ date: '2024-01-01', totalCost: '1.50' }]);
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = await service.getOpenAIStats();
 
       expect(result.totalInterpretations).toBe(5000);
@@ -362,15 +378,17 @@ describe('AdminDashboardService', () => {
 
   describe('getQuestionStats', () => {
     it('should return detailed question statistics', async () => {
+      jest.clearAllMocks();
+
       mockQueryBuilder.getRawMany.mockResolvedValueOnce([
         {
           questionId: 1,
-          questionText: '¿Cómo mejorar mi relación?',
+          question: '¿Cómo mejorar mi relación?',
           count: '500',
         },
         {
           questionId: 2,
-          questionText: '¿Cuál es mi futuro laboral?',
+          question: '¿Cuál es mi futuro laboral?',
           count: '400',
         },
       ]);
@@ -380,6 +398,7 @@ describe('AdminDashboardService', () => {
         customCount: '500',
       });
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = await service.getQuestionStats();
 
       expect(result.topPredefinedQuestions).toHaveLength(2);
