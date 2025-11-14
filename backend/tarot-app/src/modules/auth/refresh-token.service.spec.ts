@@ -132,7 +132,6 @@ describe('RefreshTokenService', () => {
       expect(result?.id).toBe('uuid-1');
       expect(mockRepository.find).toHaveBeenCalledWith({
         where: { userId: user.id },
-        relations: ['user'],
       });
     });
 

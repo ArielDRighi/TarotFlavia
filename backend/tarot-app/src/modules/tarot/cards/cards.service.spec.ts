@@ -106,9 +106,7 @@ describe('CardsService', () => {
       const result = await service.findAll();
 
       expect(result).toEqual(cards);
-      expect(mockCardRepository.find).toHaveBeenCalledWith({
-        relations: ['deck'],
-      });
+      expect(mockCardRepository.find).toHaveBeenCalledWith();
     });
 
     it('should return an empty array if no cards exist', async () => {
@@ -129,7 +127,6 @@ describe('CardsService', () => {
       expect(result).toEqual(mockCard);
       expect(mockCardRepository.findOne).toHaveBeenCalledWith({
         where: { id: 1 },
-        relations: ['deck'],
       });
     });
 
@@ -157,7 +154,6 @@ describe('CardsService', () => {
       });
       expect(mockCardRepository.find).toHaveBeenCalledWith({
         where: { deckId: 1 },
-        relations: ['deck'],
       });
     });
 
