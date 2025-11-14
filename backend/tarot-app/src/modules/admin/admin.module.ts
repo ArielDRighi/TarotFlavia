@@ -9,14 +9,23 @@ import { IPWhitelistAdminController } from './rate-limits/ip-whitelist-admin.con
 import { User } from '../users/entities/user.entity';
 import { TarotReading } from '../tarot/readings/entities/tarot-reading.entity';
 import { AIUsageLog } from '../ai-usage/entities/ai-usage-log.entity';
+import { TarotCard } from '../tarot/cards/entities/tarot-card.entity';
+import { PredefinedQuestion } from '../predefined-questions/entities/predefined-question.entity';
 import { UsersModule } from '../users/users.module';
 import { AuditModule } from '../audit/audit.module';
+
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, TarotReading, AIUsageLog]),
+    TypeOrmModule.forFeature([
+      User,
+      TarotReading,
+      AIUsageLog,
+      TarotCard,
+      PredefinedQuestion,
+    ]),
     CacheModule.register({
-      ttl: 300000, // 5 minutos default
-      max: 100, // Máximo 100 items en caché
+      ttl: 900000, // 15 minutos (TASK-029)
+      max: 100,
     }),
     UsersModule,
     AuditModule,
