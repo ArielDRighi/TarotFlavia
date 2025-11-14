@@ -176,7 +176,8 @@ describe('AdminDashboardService', () => {
         },
       ]);
 
-      const result = await service.getStats();
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const result = (await service.getStats()) as any;
 
       expect(result).toBeDefined();
       expect(result.users).toBeDefined();
@@ -227,7 +228,8 @@ describe('AdminDashboardService', () => {
         .mockResolvedValueOnce(mockReadingsPerDay)
         .mockResolvedValueOnce(mockAICostsPerDay);
 
-      const result = await service.getCharts();
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const result = (await service.getCharts()) as any;
 
       expect(result).toBeDefined();
       expect(result.userRegistrations).toHaveLength(2);
@@ -258,7 +260,8 @@ describe('AdminDashboardService', () => {
         { date: '2024-01-02', count: '15' },
       ]);
 
-      const result = await service.getUserStats();
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const result = (await service.getUserStats()) as any;
 
       expect(result.totalUsers).toBe(1000);
       expect(result.activeUsersLast7Days).toBe(200);
@@ -298,7 +301,8 @@ describe('AdminDashboardService', () => {
         { date: '2024-01-01', count: '50' },
       ]);
 
-      const result = await service.getReadingStats();
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const result = (await service.getReadingStats()) as any;
 
       expect(result.totalReadings).toBe(5000);
       expect(result.readingsLast7Days).toBe(400);
@@ -328,7 +332,8 @@ describe('AdminDashboardService', () => {
         reversed: '2500',
       });
 
-      const result = await service.getCardStats();
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const result = (await service.getCardStats()) as any;
 
       expect(result.topCards).toHaveLength(2);
       expect(result.topCards[0].name).toBe('El Loco');
@@ -361,7 +366,8 @@ describe('AdminDashboardService', () => {
         ])
         .mockResolvedValueOnce([{ date: '2024-01-01', totalCost: '1.50' }]);
 
-      const result = await service.getOpenAIStats();
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const result = (await service.getOpenAIStats()) as any;
 
       expect(result.totalInterpretations).toBe(5000);
       expect(result.totalTokens).toBe(10000000);
@@ -396,7 +402,8 @@ describe('AdminDashboardService', () => {
         customCount: '500',
       });
 
-      const result = await service.getQuestionStats();
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const result = (await service.getQuestionStats()) as any;
 
       expect(result.topPredefinedQuestions).toHaveLength(2);
       expect(result.topPredefinedQuestions[0].question).toBe(

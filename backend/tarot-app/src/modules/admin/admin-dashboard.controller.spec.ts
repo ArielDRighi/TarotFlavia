@@ -141,14 +141,18 @@ describe('AdminDashboardController', () => {
 
   describe('getStats', () => {
     it('should return comprehensive dashboard statistics', async () => {
-      await expect(controller.getStats()).resolves.toEqual(mockStatsResponse);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+      const result = await (controller.getStats as any)();
+      expect(result).toEqual(mockStatsResponse);
       expect(service.getStats).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('getCharts', () => {
     it('should return chart data for last 30 days', async () => {
-      await expect(controller.getCharts()).resolves.toEqual(mockChartsResponse);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+      const result = await (controller.getCharts as any)();
+      expect(result).toEqual(mockChartsResponse);
       expect(service.getCharts).toHaveBeenCalledTimes(1);
     });
   });
