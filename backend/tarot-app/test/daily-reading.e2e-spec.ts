@@ -33,8 +33,6 @@ describe('DailyReading (e2e)', () => {
   let freeUserToken: string;
   let premiumUserToken: string;
   let freeUserId: number;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  let premiumUserId: number;
 
   beforeAll(async () => {
     // Initialize E2E database helper
@@ -69,7 +67,6 @@ describe('DailyReading (e2e)', () => {
       .expect(200);
 
     premiumUserToken = premiumLoginResponse.body.access_token;
-    premiumUserId = premiumLoginResponse.body.user.id;
 
     if (!freeUserToken || !premiumUserToken) {
       throw new Error('Failed to obtain authentication tokens');

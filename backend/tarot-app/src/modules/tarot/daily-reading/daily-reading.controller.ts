@@ -20,6 +20,11 @@ import { DailyReadingService } from './daily-reading.service';
 import { DailyReadingResponseDto } from './dto/daily-reading-response.dto';
 import { DailyReadingHistoryDto } from './dto/daily-reading-history.dto';
 
+/**
+ * Default tarotista ID (Flavia)
+ */
+const DEFAULT_TAROTISTA_ID = 1;
+
 @ApiTags('Daily Card')
 @Controller('daily-reading')
 @UseGuards(JwtAuthGuard)
@@ -51,7 +56,7 @@ export class DailyReadingController {
     @Request() req: { user: { userId: number } },
   ): Promise<DailyReadingResponseDto> {
     const userId = req.user.userId;
-    const tarotistaId = 1; // Default tarotista (Flavia)
+    const tarotistaId = DEFAULT_TAROTISTA_ID;
 
     const dailyReading = await this.dailyReadingService.generateDailyCard(
       userId,
@@ -168,7 +173,7 @@ export class DailyReadingController {
     description: 'No autorizado - solo usuarios premium',
   })
   @ApiResponse({
-    status: 409,
+    status: 404,
     description: 'No existe carta del día para regenerar',
   })
   @ApiResponse({
@@ -179,7 +184,7 @@ export class DailyReadingController {
     @Request() req: { user: { userId: number } },
   ): Promise<DailyReadingResponseDto> {
     const userId = req.user.userId;
-    const tarotistaId = 1; // Default tarotista (Flavia)
+    const tarotistaId = DEFAULT_TAROTISTA_ID;
 
     const dailyReading = await this.dailyReadingService.regenerateDailyCard(
       userId,
