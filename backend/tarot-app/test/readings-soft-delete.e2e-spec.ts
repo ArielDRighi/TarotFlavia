@@ -210,7 +210,16 @@ describe('Readings Soft Delete E2E', () => {
    * Helper: Limpiar datos de prueba
    */
   async function cleanupTestData(): Promise<void> {
-    await dataSource.getRepository(TarotReading).delete({});
+    // Delete readings from test users (respects foreign keys)
+    await dataSource
+      .createQueryBuilder()
+      .delete()
+      .from(TarotReading)
+      .where('userId IN (:...userIds)', {
+        userIds: [userId, adminId, otherUserId],
+      })
+      .execute();
+
     await dataSource.getRepository(TarotCard).delete({ deckId });
     await dataSource.getRepository(TarotSpread).delete({ id: spreadId });
     await dataSource.getRepository(PredefinedQuestion).delete({
