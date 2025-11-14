@@ -44,6 +44,40 @@ export class EnvironmentVariables {
   POSTGRES_DB: string;
 
   // =============================================================================
+  // DATABASE POOLING CONFIGURATION (Optional)
+  // =============================================================================
+
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  @IsOptional()
+  @Type(() => Number)
+  @Transform(({ value }) => {
+    if (!value) {
+      // Default based on NODE_ENV
+      return process.env.NODE_ENV === 'production' ? 25 : 10;
+    }
+    return Number(value);
+  })
+  DB_POOL_SIZE: number;
+
+  @IsInt()
+  @Min(1000)
+  @Max(60000)
+  @IsOptional()
+  @Type(() => Number)
+  @Transform(({ value }) => (value ? Number(value) : 5000))
+  DB_MAX_QUERY_TIME: number;
+
+  @IsInt()
+  @Min(5000)
+  @Max(120000)
+  @IsOptional()
+  @Type(() => Number)
+  @Transform(({ value }) => (value ? Number(value) : 30000))
+  DB_CONNECTION_TIMEOUT: number;
+
+  // =============================================================================
   // JWT CONFIGURATION
   // =============================================================================
 

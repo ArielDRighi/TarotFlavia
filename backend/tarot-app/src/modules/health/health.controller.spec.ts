@@ -5,6 +5,7 @@ import { TypeOrmHealthIndicator } from '@nestjs/terminus';
 import { MemoryHealthIndicator } from '@nestjs/terminus';
 import { DiskHealthIndicator } from '@nestjs/terminus';
 import { AIHealthService } from './ai-health.service';
+import { DatabaseHealthService } from './database-health.service';
 
 /**
  * NOTA TÉCNICA: TypeScript Language Server muestra errores de tipo "error typed"
@@ -86,6 +87,34 @@ describe('HealthController', () => {
             checkAllProviders: jest.fn().mockResolvedValue({
               primary: { status: 'ok', provider: 'groq', configured: true },
               fallback: [],
+              timestamp: new Date().toISOString(),
+            }),
+          },
+        },
+        {
+          provide: DatabaseHealthService,
+          useValue: {
+            getHealthStatus: jest.fn().mockReturnValue({
+              status: 'up',
+              metrics: {
+                active: 3,
+                idle: 7,
+                waiting: 0,
+                max: 10,
+                min: 2,
+                total: 10,
+                utilizationPercent: 30,
+                timestamp: new Date().toISOString(),
+              },
+            }),
+            getPoolMetrics: jest.fn().mockReturnValue({
+              active: 3,
+              idle: 7,
+              waiting: 0,
+              max: 10,
+              min: 2,
+              total: 10,
+              utilizationPercent: 30,
               timestamp: new Date().toISOString(),
             }),
           },

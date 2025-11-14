@@ -9,6 +9,7 @@ import {
   HealthCheckResult,
 } from '@nestjs/terminus';
 import { AIHealthService } from './ai-health.service';
+import { DatabaseHealthService } from './database-health.service';
 
 @ApiTags('health')
 @Controller('health')
@@ -24,6 +25,7 @@ export class HealthController {
     private readonly memory: MemoryHealthIndicator,
     private readonly disk: DiskHealthIndicator,
     private readonly aiHealthService: AIHealthService,
+    private readonly databaseHealthService: DatabaseHealthService,
   ) {}
 
   /**
@@ -213,5 +215,58 @@ export class HealthController {
         };
       },
     ]);
+  }
+
+  @Get('database')
+  @ApiOperation({
+    summary: 'Database connection pool metrics',
+    description:
+      'Returns detailed metrics about the PostgreSQL connection pool including active connections, idle connections, pool utilization percentage, and configuration. Useful for monitoring database load and optimizing pool settings.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Database pool metrics and health status',
+    schema: {
+      type: 'object',
+      properties: {
+        status: { type: 'string', enum: ['up', 'down'] },
+        metrics: {
+          type: 'object',
+          properties: {
+            active: {
+              type: 'number',
+              description: 'Number of active connections',
+            },
+            idle: { type: 'number', description: 'Number of idle connections' },
+            waiting: {
+              type: 'number',
+              description: 'Number of requests waiting for connection',
+            },
+            max: { type: 'number', description: 'Maximum pool size' },
+            min: { type: 'number', description: 'Minimum pool size' },
+            total: {
+              type: 'number',
+              description: 'Total connections (active + idle)',
+            },
+            utilizationPercent: {
+              type: 'number',
+              description: 'Pool utilization percentage',
+            },
+            timestamp: { type: 'string', format: 'date-time' },
+          },
+        },
+        warning: {
+          type: 'string',
+          description: 'Warning message if pool utilization is high',
+        },
+        error: {
+          type: 'string',
+          description: 'Error message when database is down',
+        },
+      },
+    },
+  })
+  checkDatabase() {
+    return this.databaseHealthService.getHealthStatus();
   }
 }
