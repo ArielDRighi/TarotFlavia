@@ -13,14 +13,14 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:cov": "jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
-    "test:e2e:watch": "jest --config ./test/jest-e2e.json --watch",
-    "test:e2e:cov": "jest --config ./test/jest-e2e.json --coverage",
-    "test:mvp": "jest --config ./test/jest-e2e.json test/mvp-complete.e2e-spec.ts",
+    "test": "jest --no-watchman --all",
+    "test:watch": "jest --watch --no-watchman",
+    "test:cov": "jest --coverage --no-watchman --all",
+    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand --no-watchman --all",
+    "test:e2e": "jest --config ./test/jest-e2e.json --no-watchman",
+    "test:e2e:watch": "jest --config ./test/jest-e2e.json --watch --no-watchman",
+    "test:e2e:cov": "jest --config ./test/jest-e2e.json --coverage --no-watchman",
+    "test:mvp": "jest --config ./test/jest-e2e.json test/mvp-complete.e2e-spec.ts --no-watchman",
     "seed": "ts-node -r tsconfig-paths/register src/database/seeds/seed-data.ts",
     "clean:test-users": "ts-node -r tsconfig-paths/register scripts/clean-test-users.ts",
     "migration:generate": "node ../../node_modules/typeorm/cli-ts-node-commonjs.js migration:generate -d src/config/data-source.ts",
@@ -136,6 +136,7 @@
     "testEnvironment": "node",
     "moduleNameMapper": {
       "^src/(.*)$": "<rootDir>/src/$1"
-    }
+    },
+    "watchman": false
   }
 }

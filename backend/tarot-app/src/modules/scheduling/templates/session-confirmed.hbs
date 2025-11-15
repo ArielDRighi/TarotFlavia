@@ -1,0 +1,228 @@
+<html>
+  <head>
+    <meta charset='UTF-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <title>Sesión Confirmada</title>
+  </head>
+  <body
+    style="
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    "
+  >
+    <div
+      style='
+        max-width: 600px;
+        margin: 20px auto;
+        background-color: #ffffff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      '
+    >
+      <!-- Header -->
+      <div
+        style='
+          background: linear-gradient(135deg, #4caf50 0%, #8bc34a 100%);
+          color: white;
+          padding: 30px 20px;
+          text-align: center;
+        '
+      >
+        <h1 style='margin: 0; font-size: 24px'>✅ Sesión Confirmada</h1>
+        <p style='margin: 10px 0 0 0; opacity: 0.9'>
+          Tu sesión ha sido confirmada por el tarotista
+        </p>
+      </div>
+
+      <!-- Content -->
+      <div style='padding: 30px 20px'>
+        <p style='color: #333; font-size: 16px; line-height: 1.6'>
+          Hola
+          <strong>{{userName}}</strong>,
+        </p>
+
+        <p style='color: #333; font-size: 16px; line-height: 1.6'>
+          Excelentes noticias!
+          <strong>{{tarotistaName}}</strong>
+          ha confirmado tu sesión. Ya está todo listo para tu encuentro.
+        </p>
+
+        <!-- Session Details -->
+        <div
+          style='
+            background-color: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+          '
+        >
+          <h2
+            style='
+              color: #2e7d32;
+              font-size: 18px;
+              margin: 0 0 15px 0;
+              font-weight: 600;
+            '
+          >
+            📅 Recordatorio de la Sesión
+          </h2>
+
+          <table style='width: 100%; border-collapse: collapse'>
+            <tr>
+              <td style='padding: 8px 0; color: #666; font-weight: 600'>
+                Fecha:
+              </td>
+              <td style='padding: 8px 0; color: #333'>{{sessionDate}}</td>
+            </tr>
+            <tr>
+              <td style='padding: 8px 0; color: #666; font-weight: 600'>
+                Hora:
+              </td>
+              <td style='padding: 8px 0; color: #333'>{{sessionTime}}</td>
+            </tr>
+            <tr>
+              <td style='padding: 8px 0; color: #666; font-weight: 600'>
+                Duración:
+              </td>
+              <td style='padding: 8px 0; color: #333'>
+                {{durationMinutes}}
+                minutos
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- Tarotist Notes -->
+        {{#if tarotistNotes}}
+          <div
+            style='
+            background-color: #e1f5fe;
+            border-left: 4px solid #03a9f4;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+          '
+          >
+            <h3 style='color: #0277bd; font-size: 16px; margin: 0 0 10px 0'>
+              💬 Mensaje del Tarotista:
+            </h3>
+            <p
+              style='
+              color: #333;
+              font-style: italic;
+              margin: 0;
+              line-height: 1.6;
+            '
+            >
+              "{{tarotistNotes}}"
+            </p>
+          </div>
+        {{/if}}
+
+        <!-- Google Meet Link -->
+        <div
+          style='
+            background-color: #fff3e0;
+            border: 2px solid #ff9800;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            text-align: center;
+          '
+        >
+          <h3 style='color: #e65100; margin: 0 0 10px 0; font-size: 16px'>
+            🎥 Link de Videollamada
+          </h3>
+          <p style='color: #666; font-size: 14px; margin: 10px 0'>
+            Ingresa a este link el día y hora de tu sesión:
+          </p>
+          <a
+            href='{{googleMeetLink}}'
+            style='
+              display: inline-block;
+              background-color: #ff9800;
+              color: white;
+              padding: 12px 30px;
+              text-decoration: none;
+              border-radius: 6px;
+              font-weight: 600;
+              margin-top: 10px;
+            '
+          >
+            Unirse a Google Meet
+          </a>
+        </div>
+
+        <!-- Preparation Tips -->
+        <div
+          style='
+            background-color: #f3e5f5;
+            border-left: 4px solid #9c27b0;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+          '
+        >
+          <h3 style='color: #6a1b9a; font-size: 16px; margin: 0 0 10px 0'>
+            💡 Consejos para tu Sesión
+          </h3>
+          <ul style='color: #333; margin: 10px 0; padding-left: 20px'>
+            <li style='margin: 5px 0'>
+              Conéctate unos minutos antes para verificar tu cámara y micrófono
+            </li>
+            <li style='margin: 5px 0'>
+              Busca un espacio tranquilo donde no te interrumpan
+            </li>
+            <li style='margin: 5px 0'>
+              Ten a mano papel y lápiz para tomar notas si lo deseas
+            </li>
+            <li style='margin: 5px 0'>Llega con una mente abierta y receptiva</li>
+          </ul>
+        </div>
+
+        <!-- Add to Calendar -->
+        <div style='text-align: center; margin: 30px 0'>
+          <a
+            href='{{calendarLink}}'
+            style='
+              display: inline-block;
+              background-color: #667eea;
+              color: white;
+              padding: 12px 30px;
+              text-decoration: none;
+              border-radius: 6px;
+              font-weight: 600;
+            '
+          >
+            📆 Agregar a mi Calendario
+          </a>
+        </div>
+
+        <p
+          style='color: #333; font-size: 16px; line-height: 1.6; margin-top: 30px'
+        >
+          Nos vemos pronto!<br />
+          <strong>Equipo Tarot Flavia</strong>
+        </p>
+      </div>
+
+      <!-- Footer -->
+      <div
+        style='
+          background-color: #f8f9fa;
+          padding: 20px;
+          text-align: center;
+          border-top: 1px solid #e0e0e0;
+        '
+      >
+        <p style='color: #666; font-size: 12px; margin: 0'>
+          Este email fue enviado porque tu sesión ha sido confirmada.
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

@@ -32,13 +32,13 @@ describe('Input Validation and Security (E2E)', () => {
     dbHelper = new E2EDatabaseHelper();
     await dbHelper.initialize();
     await dbHelper.cleanUserData(); // Solo limpiar datos de usuario, no los seeders base
-  });
+  }, 30000);
 
   afterAll(async () => {
     await dbHelper.cleanUserData(); // Solo limpiar datos de usuario
     await dbHelper.close();
     await app.close();
-  });
+  }, 30000);
 
   beforeEach(async () => {
     await dbHelper.cleanUserData(); // Solo limpiar datos de usuario entre tests
