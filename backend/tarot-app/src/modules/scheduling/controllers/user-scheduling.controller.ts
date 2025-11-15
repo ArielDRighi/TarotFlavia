@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Request,
   Query,
+  NotFoundException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -141,7 +142,7 @@ export class UserSchedulingController {
     const session = sessions.find((s) => s.id === id);
 
     if (!session) {
-      throw new Error('Sesión no encontrada');
+      throw new NotFoundException('Sesión no encontrada');
     }
 
     return session;

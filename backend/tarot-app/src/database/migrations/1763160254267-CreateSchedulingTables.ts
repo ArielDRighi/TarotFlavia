@@ -15,9 +15,10 @@ export class CreateSchedulingTables1763160254267 implements MigrationInterface {
         columns: [
           {
             name: 'id',
-            type: 'uuid',
+            type: 'int',
             isPrimary: true,
-            default: 'uuid_generate_v4()',
+            isGenerated: true,
+            generationStrategy: 'increment',
           },
           {
             name: 'tarotista_id',
@@ -89,9 +90,10 @@ export class CreateSchedulingTables1763160254267 implements MigrationInterface {
         columns: [
           {
             name: 'id',
-            type: 'uuid',
+            type: 'int',
             isPrimary: true,
-            default: 'uuid_generate_v4()',
+            isGenerated: true,
+            generationStrategy: 'increment',
           },
           {
             name: 'tarotista_id',
@@ -129,17 +131,12 @@ export class CreateSchedulingTables1763160254267 implements MigrationInterface {
             type: 'timestamp',
             default: 'CURRENT_TIMESTAMP',
           },
-          {
-            name: 'updated_at',
-            type: 'timestamp',
-            default: 'CURRENT_TIMESTAMP',
-          },
         ],
       }),
       true,
     );
 
-    // Create FK for tarotist_exceptions
+    // FKs para tarotist_exceptions
     await queryRunner.createForeignKey(
       'tarotist_exceptions',
       new TableForeignKey({
@@ -167,9 +164,10 @@ export class CreateSchedulingTables1763160254267 implements MigrationInterface {
         columns: [
           {
             name: 'id',
-            type: 'uuid',
+            type: 'int',
             isPrimary: true,
-            default: 'uuid_generate_v4()',
+            isGenerated: true,
+            generationStrategy: 'increment',
           },
           {
             name: 'tarotista_id',
@@ -325,9 +323,9 @@ export class CreateSchedulingTables1763160254267 implements MigrationInterface {
       }),
     );
 
-    // Create trigger for updating updated_at on sessions
+    // Create generic trigger function for updating updated_at
     await queryRunner.query(`
-      CREATE OR REPLACE FUNCTION update_sessions_updated_at()
+      CREATE OR REPLACE FUNCTION update_updated_at_column()
       RETURNS TRIGGER AS $$
       BEGIN
         NEW.updated_at = CURRENT_TIMESTAMP;
@@ -340,7 +338,7 @@ export class CreateSchedulingTables1763160254267 implements MigrationInterface {
       CREATE TRIGGER trigger_update_sessions_updated_at
       BEFORE UPDATE ON sessions
       FOR EACH ROW
-      EXECUTE FUNCTION update_sessions_updated_at();
+      EXECUTE FUNCTION update_updated_at_column();
     `);
 
     // Create trigger for updating updated_at on tarotist_availability
@@ -348,7 +346,7 @@ export class CreateSchedulingTables1763160254267 implements MigrationInterface {
       CREATE TRIGGER trigger_update_availability_updated_at
       BEFORE UPDATE ON tarotist_availability
       FOR EACH ROW
-      EXECUTE FUNCTION update_sessions_updated_at();
+      EXECUTE FUNCTION update_updated_at_column();
     `);
   }
 
@@ -361,7 +359,7 @@ export class CreateSchedulingTables1763160254267 implements MigrationInterface {
       `DROP TRIGGER IF EXISTS trigger_update_sessions_updated_at ON sessions`,
     );
     await queryRunner.query(
-      `DROP FUNCTION IF EXISTS update_sessions_updated_at()`,
+      `DROP FUNCTION IF EXISTS update_updated_at_column()`,
     );
 
     // Drop indexes

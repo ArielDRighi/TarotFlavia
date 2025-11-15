@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between } from 'typeorm';
+import { Repository, Between, In } from 'typeorm';
 import { TarotistAvailability, TarotistException, Session } from '../entities';
 import {
   SetWeeklyAvailabilityDto,
@@ -220,7 +220,7 @@ export class AvailabilityService {
       where: {
         tarotistaId,
         sessionDate: Between(startDate, endDate),
-        status: SessionStatus.PENDING || SessionStatus.CONFIRMED,
+        status: In([SessionStatus.PENDING, SessionStatus.CONFIRMED]),
       },
     });
 

@@ -79,33 +79,25 @@ describe('Output Sanitization & Security Headers (e2e) - TASK-048-a', () => {
 
   describe('Security Headers', () => {
     it('should have X-Content-Type-Options header', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/')
-        .expect(200);
+      const response = await request(app.getHttpServer()).get('/').expect(200);
 
       expect(response.headers['x-content-type-options']).toBe('nosniff');
     });
 
     it('should have X-Frame-Options header', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/')
-        .expect(200);
+      const response = await request(app.getHttpServer()).get('/').expect(200);
 
       expect(response.headers['x-frame-options']).toBe('DENY');
     });
 
     it('should have X-XSS-Protection header', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/')
-        .expect(200);
+      const response = await request(app.getHttpServer()).get('/').expect(200);
 
       expect(response.headers['x-xss-protection']).toBe('0');
     });
 
     it('should have Strict-Transport-Security header', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/')
-        .expect(200);
+      const response = await request(app.getHttpServer()).get('/').expect(200);
 
       expect(response.headers['strict-transport-security']).toContain(
         'max-age=31536000',
@@ -116,9 +108,7 @@ describe('Output Sanitization & Security Headers (e2e) - TASK-048-a', () => {
     });
 
     it('should have Content-Security-Policy header', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/')
-        .expect(200);
+      const response = await request(app.getHttpServer()).get('/').expect(200);
 
       expect(response.headers['content-security-policy']).toBeDefined();
       expect(response.headers['content-security-policy']).toContain(
@@ -137,9 +127,7 @@ describe('Output Sanitization & Security Headers (e2e) - TASK-048-a', () => {
       // we verify sanitization through a simpler endpoint
 
       // Test that the sanitizer is available and working through any endpoint
-      const response = await request(app.getHttpServer())
-        .get('/')
-        .expect(200);
+      const response = await request(app.getHttpServer()).get('/').expect(200);
 
       // Verify the sanitizer service is loaded (by checking app is working)
       expect(response.body).toBeDefined();

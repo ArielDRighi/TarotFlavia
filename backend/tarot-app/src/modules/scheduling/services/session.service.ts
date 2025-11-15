@@ -5,7 +5,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
+import { Repository, DataSource, In } from 'typeorm';
 import { Session } from '../entities';
 import {
   BookSessionDto,
@@ -95,7 +95,7 @@ export class SessionService {
           tarotistaId: dto.tarotistaId,
           sessionDate: dto.sessionDate,
           sessionTime: dto.sessionTime,
-          status: SessionStatus.PENDING || SessionStatus.CONFIRMED,
+          status: In([SessionStatus.PENDING, SessionStatus.CONFIRMED]),
         },
       });
 
