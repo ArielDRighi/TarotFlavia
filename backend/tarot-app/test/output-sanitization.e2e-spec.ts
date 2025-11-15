@@ -80,7 +80,7 @@ describe('Output Sanitization & Security Headers (e2e) - TASK-048-a', () => {
   describe('Security Headers', () => {
     it('should have X-Content-Type-Options header', async () => {
       const response = await request(app.getHttpServer())
-        .get('/health')
+        .get('/')
         .expect(200);
 
       expect(response.headers['x-content-type-options']).toBe('nosniff');
@@ -88,7 +88,7 @@ describe('Output Sanitization & Security Headers (e2e) - TASK-048-a', () => {
 
     it('should have X-Frame-Options header', async () => {
       const response = await request(app.getHttpServer())
-        .get('/health')
+        .get('/')
         .expect(200);
 
       expect(response.headers['x-frame-options']).toBe('DENY');
@@ -96,7 +96,7 @@ describe('Output Sanitization & Security Headers (e2e) - TASK-048-a', () => {
 
     it('should have X-XSS-Protection header', async () => {
       const response = await request(app.getHttpServer())
-        .get('/health')
+        .get('/')
         .expect(200);
 
       expect(response.headers['x-xss-protection']).toBe('0');
@@ -104,7 +104,7 @@ describe('Output Sanitization & Security Headers (e2e) - TASK-048-a', () => {
 
     it('should have Strict-Transport-Security header', async () => {
       const response = await request(app.getHttpServer())
-        .get('/health')
+        .get('/')
         .expect(200);
 
       expect(response.headers['strict-transport-security']).toContain(
@@ -117,7 +117,7 @@ describe('Output Sanitization & Security Headers (e2e) - TASK-048-a', () => {
 
     it('should have Content-Security-Policy header', async () => {
       const response = await request(app.getHttpServer())
-        .get('/health')
+        .get('/')
         .expect(200);
 
       expect(response.headers['content-security-policy']).toBeDefined();
@@ -138,7 +138,7 @@ describe('Output Sanitization & Security Headers (e2e) - TASK-048-a', () => {
 
       // Test that the sanitizer is available and working through any endpoint
       const response = await request(app.getHttpServer())
-        .get('/health')
+        .get('/')
         .expect(200);
 
       // Verify the sanitizer service is loaded (by checking app is working)
