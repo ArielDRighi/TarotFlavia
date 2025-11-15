@@ -8,15 +8,15 @@ describe('TarotistException Entity', () => {
     expect(exception).toBeInstanceOf(TarotistException);
   });
 
-  it('should have all required properties for blocked day', () => {
+  it('should have all required properties', () => {
     const exception = new TarotistException();
     exception.tarotistaId = 1;
-    exception.exceptionDate = new Date('2025-12-25');
+    exception.exceptionDate = '2025-12-25';
     exception.exceptionType = ExceptionType.BLOCKED;
     exception.reason = 'Christmas Holiday';
 
     expect(exception.tarotistaId).toBe(1);
-    expect(exception.exceptionDate).toEqual(new Date('2025-12-25'));
+    expect(exception.exceptionDate).toBe('2025-12-25');
     expect(exception.exceptionType).toBe(ExceptionType.BLOCKED);
     expect(exception.reason).toBe('Christmas Holiday');
     expect(exception.startTime).toBeUndefined();
@@ -26,14 +26,14 @@ describe('TarotistException Entity', () => {
   it('should have all required properties for custom hours', () => {
     const exception = new TarotistException();
     exception.tarotistaId = 1;
-    exception.exceptionDate = new Date('2025-12-24');
+    exception.exceptionDate = '2025-12-24';
     exception.exceptionType = ExceptionType.CUSTOM_HOURS;
     exception.startTime = '10:00';
     exception.endTime = '14:00';
     exception.reason = 'Christmas Eve - Short hours';
 
     expect(exception.tarotistaId).toBe(1);
-    expect(exception.exceptionDate).toEqual(new Date('2025-12-24'));
+    expect(exception.exceptionDate).toBe('2025-12-24');
     expect(exception.exceptionType).toBe(ExceptionType.CUSTOM_HOURS);
     expect(exception.startTime).toBe('10:00');
     expect(exception.endTime).toBe('14:00');
@@ -75,12 +75,12 @@ describe('TarotistException Entity', () => {
     expect(exception.createdAt).toEqual(now);
   });
 
-  it('should accept date in Date format', () => {
+  it('should accept date as string in YYYY-MM-DD format', () => {
     const exception = new TarotistException();
-    const date = new Date('2025-12-25');
-    exception.exceptionDate = date;
+    const dateString = '2025-12-25';
+    exception.exceptionDate = dateString;
 
-    expect(exception.exceptionDate).toEqual(date);
-    expect(exception.exceptionDate).toBeInstanceOf(Date);
+    expect(exception.exceptionDate).toBe(dateString);
+    expect(exception.exceptionDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 });

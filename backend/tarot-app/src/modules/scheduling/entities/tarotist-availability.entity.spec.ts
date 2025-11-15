@@ -37,7 +37,11 @@ describe('TarotistAvailability Entity', () => {
 
     // Enum restricts invalid values at compile time
     expect(Object.values(DayOfWeek)).toContain(DayOfWeek.MONDAY);
-    expect(Object.values(DayOfWeek)).toHaveLength(7);
+    // TypeScript numeric enums have both keys and values, so length is 14 (7 names + 7 numbers)
+    expect(Object.keys(DayOfWeek)).toHaveLength(14);
+    // Verify all numeric values are present
+    expect(DayOfWeek.SUNDAY).toBe(0);
+    expect(DayOfWeek.SATURDAY).toBe(6);
   });
 
   it('should accept time in HH:MM format', () => {

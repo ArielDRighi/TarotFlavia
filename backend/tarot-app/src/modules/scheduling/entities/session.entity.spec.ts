@@ -12,7 +12,7 @@ describe('Session Entity', () => {
     const session = new Session();
     session.tarotistaId = 1;
     session.userId = 1;
-    session.sessionDate = new Date('2025-11-20');
+    session.sessionDate = '2025-11-20';
     session.sessionTime = '10:00';
     session.durationMinutes = 60;
     session.sessionType = SessionType.TAROT_READING;
@@ -24,7 +24,7 @@ describe('Session Entity', () => {
 
     expect(session.tarotistaId).toBe(1);
     expect(session.userId).toBe(1);
-    expect(session.sessionDate).toEqual(new Date('2025-11-20'));
+    expect(session.sessionDate).toBe('2025-11-20');
     expect(session.sessionTime).toBe('10:00');
     expect(session.durationMinutes).toBe(60);
     expect(session.sessionType).toBe(SessionType.TAROT_READING);
