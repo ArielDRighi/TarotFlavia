@@ -1,4 +1,10 @@
-import { MigrationInterface, QueryRunner, Table, TableIndex } from 'typeorm';
+import {
+  MigrationInterface,
+  QueryRunner,
+  Table,
+  TableIndex,
+  TableForeignKey,
+} from 'typeorm';
 
 export class CreateSchedulingTables1763160254267 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -52,16 +58,19 @@ export class CreateSchedulingTables1763160254267 implements MigrationInterface {
             default: 'CURRENT_TIMESTAMP',
           },
         ],
-        foreignKeys: [
-          {
-            columnNames: ['tarotista_id'],
-            referencedTableName: 'tarotistas',
-            referencedColumnNames: ['id'],
-            onDelete: 'CASCADE',
-          },
-        ],
       }),
       true,
+    );
+
+    // Create FK for tarotist_availability
+    await queryRunner.createForeignKey(
+      'tarotist_availability',
+      new TableForeignKey({
+        columnNames: ['tarotista_id'],
+        referencedTableName: 'tarotistas',
+        referencedColumnNames: ['id'],
+        onDelete: 'CASCADE',
+      }),
     );
 
     // Create index for availability lookup
@@ -120,17 +129,25 @@ export class CreateSchedulingTables1763160254267 implements MigrationInterface {
             type: 'timestamp',
             default: 'CURRENT_TIMESTAMP',
           },
-        ],
-        foreignKeys: [
           {
-            columnNames: ['tarotista_id'],
-            referencedTableName: 'tarotistas',
-            referencedColumnNames: ['id'],
-            onDelete: 'CASCADE',
+            name: 'updated_at',
+            type: 'timestamp',
+            default: 'CURRENT_TIMESTAMP',
           },
         ],
       }),
       true,
+    );
+
+    // Create FK for tarotist_exceptions
+    await queryRunner.createForeignKey(
+      'tarotist_exceptions',
+      new TableForeignKey({
+        columnNames: ['tarotista_id'],
+        referencedTableName: 'tarotistas',
+        referencedColumnNames: ['id'],
+        onDelete: 'CASCADE',
+      }),
     );
 
     // Create unique index for exception date
@@ -258,22 +275,29 @@ export class CreateSchedulingTables1763160254267 implements MigrationInterface {
             isNullable: true,
           },
         ],
-        foreignKeys: [
-          {
-            columnNames: ['tarotista_id'],
-            referencedTableName: 'tarotistas',
-            referencedColumnNames: ['id'],
-            onDelete: 'CASCADE',
-          },
-          {
-            columnNames: ['user_id'],
-            referencedTableName: 'users',
-            referencedColumnNames: ['id'],
-            onDelete: 'CASCADE',
-          },
-        ],
       }),
       true,
+    );
+
+    // Create FKs for sessions
+    await queryRunner.createForeignKey(
+      'sessions',
+      new TableForeignKey({
+        columnNames: ['tarotista_id'],
+        referencedTableName: 'tarotistas',
+        referencedColumnNames: ['id'],
+        onDelete: 'CASCADE',
+      }),
+    );
+
+    await queryRunner.createForeignKey(
+      'sessions',
+      new TableForeignKey({
+        columnNames: ['user_id'],
+        referencedTableName: 'user',
+        referencedColumnNames: ['id'],
+        onDelete: 'CASCADE',
+      }),
     );
 
     // Create indexes for sessions
