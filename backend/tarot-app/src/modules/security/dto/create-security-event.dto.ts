@@ -31,5 +31,5 @@ export class CreateSecurityEventDto {
 
   @IsOptional()
   @IsObject()
-  details?: Record<string, any> | null;
+  details?: Record<string, unknown> | null;
 }

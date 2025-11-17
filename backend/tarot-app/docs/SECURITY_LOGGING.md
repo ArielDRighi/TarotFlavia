@@ -12,10 +12,10 @@ Entidad principal que representa un evento de seguridad en la base de datos.
 
 **Campos:**
 
-- `id` (UUID): Identificador único
+- `id` (number): Identificador único auto-incremental
 - `eventType` (enum): Tipo de evento de seguridad
 - `severity` (enum): Nivel de severidad
-- `userId` (UUID, nullable): Usuario relacionado
+- `userId` (number, nullable): Usuario relacionado
 - `ipAddress` (string, nullable): Dirección IP del origen
 - `userAgent` (string, nullable): User agent del navegador
 - `details` (jsonb, nullable): Detalles adicionales del evento
@@ -23,10 +23,10 @@ Entidad principal que representa un evento de seguridad en la base de datos.
 
 **Índices:**
 
-- `(userId, createdAt)` - Para consultas por usuario
-- `(eventType, createdAt)` - Para consultas por tipo de evento
-- `(severity, createdAt)` - Para consultas por severidad
-- `(ipAddress, createdAt)` - Para consultas por IP
+- `IDX_security_events_user_created` - Para consultas por usuario
+- `IDX_security_events_event_type_created` - Para consultas por tipo de evento
+- `IDX_security_events_severity_created` - Para consultas por severidad
+- `IDX_security_events_created_at` - Para consultas ordenadas por fecha
 
 ### Tipos de Eventos (SecurityEventType)
 
@@ -94,17 +94,16 @@ Consulta eventos de seguridad con filtros y paginación.
 - `eventType`: Filtrar por tipo de evento
 - `severity`: Filtrar por nivel de severidad
 - `userId`: Filtrar por usuario
-- `ipAddress`: Filtrar por dirección IP
 - `startDate`: Fecha de inicio del rango
 - `endDate`: Fecha de fin del rango
 - `page`: Número de página (por defecto: 1)
-- `limit`: Elementos por página (por defecto: 10)
+- `limit`: Elementos por página (por defecto: 20, máximo: 100)
 
 #### `logToWinston(event: SecurityEvent): void`
 
 Método privado que registra eventos en los archivos de log de Winston según la severidad:
 
-- **LOW**: No se registra en archivos (solo en consola en desarrollo)
+- **LOW**: Se registra como `info`
 - **MEDIUM**: Se registra como `warn`
 - **HIGH**: Se registra como `error`
 - **CRITICAL**: Se registra como `error`
@@ -119,12 +118,11 @@ Consulta eventos de seguridad (requiere rol admin).
 
 - `eventType` (opcional): Tipo de evento (failed_login, successful_login, etc.)
 - `severity` (opcional): Nivel de severidad (low, medium, high, critical)
-- `userId` (opcional): UUID del usuario
-- `ipAddress` (opcional): Dirección IP
+- `userId` (opcional): ID numérico del usuario
 - `startDate` (opcional): Fecha de inicio (ISO 8601)
 - `endDate` (opcional): Fecha de fin (ISO 8601)
 - `page` (opcional): Número de página (mínimo: 1)
-- `limit` (opcional): Elementos por página (1-100)
+- `limit` (opcional): Elementos por página (1-100, por defecto: 20)
 
 **Respuesta:**
 
@@ -132,10 +130,10 @@ Consulta eventos de seguridad (requiere rol admin).
 {
   "events": [
     {
-      "id": "uuid",
+      "id": 1,
       "eventType": "failed_login",
       "severity": "medium",
-      "userId": "uuid",
+      "userId": 42,
       "ipAddress": "192.168.1.100",
       "userAgent": "Mozilla/5.0...",
       "details": {
@@ -147,9 +145,9 @@ Consulta eventos de seguridad (requiere rol admin).
   ],
   "meta": {
     "currentPage": 1,
-    "itemsPerPage": 10,
+    "itemsPerPage": 20,
     "totalItems": 45,
-    "totalPages": 5
+    "totalPages": 3
   }
 }
 ```
@@ -209,7 +207,7 @@ Los eventos se registran automáticamente en archivos de log según su severidad
 **Ejemplo de log:**
 
 ```
-2025-01-17 10:30:00 warn [correlation-id] [SecurityEventService]: Security Event: failed_login {"eventType":"failed_login","severity":"medium","userId":"uuid","ipAddress":"192.168.1.100","details":{"email":"user@example.com","reason":"Invalid password"}}
+2025-01-17 10:30:00 warn [correlation-id] [SecurityEventService]: Security Event: failed_login {"eventType":"failed_login","severity":"medium","userId":42,"ipAddress":"192.168.1.100","details":{"email":"user@example.com","reason":"Invalid password"}}
 ```
 
 ## Rendimiento
@@ -219,11 +217,11 @@ Los eventos se registran automáticamente en archivos de log según su severidad
 Se han creado 4 índices compuestos para optimizar las consultas:
 
 1. `IDX_security_events_user_created`: `(user_id, created_at)`
-2. `IDX_security_events_type_created`: `(event_type, created_at)`
+2. `IDX_security_events_event_type_created`: `(event_type, created_at)`
 3. `IDX_security_events_severity_created`: `(severity, created_at)`
-4. `IDX_security_events_ip_created`: `(ip_address, created_at)`
+4. `IDX_security_events_created_at`: `(created_at)`
 
-Todos los índices incluyen `created_at` para optimizar consultas con rangos de fechas.
+Todos los índices compuestos incluyen `created_at` para optimizar consultas con rangos de fechas.
 
 ### Foreign Keys
 
@@ -253,7 +251,7 @@ await this.securityEventService.logSecurityEvent({
 
 ```typescript
 const events = await this.securityEventService.findAll({
-  userId: 'user-uuid',
+  userId: 42, // ID numérico del usuario
   page: 1,
   limit: 20,
 });

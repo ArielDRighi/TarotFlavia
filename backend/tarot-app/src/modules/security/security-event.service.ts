@@ -159,12 +159,12 @@ export class SecurityEventService {
       where.userId = userId;
     }
 
-    const failedAttempts = await this.securityEventRepository.find({
+    const failedAttempts = await this.securityEventRepository.count({
       where,
     });
 
     // Consider suspicious if more than 5 failed attempts in 1 hour
-    return failedAttempts.length >= 5;
+    return failedAttempts >= 5;
   }
 
   /**
@@ -173,14 +173,12 @@ export class SecurityEventService {
   async getFailedLoginCount(userId: number): Promise<number> {
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
 
-    const failedAttempts = await this.securityEventRepository.find({
+    return await this.securityEventRepository.count({
       where: {
         userId,
         eventType: SecurityEventType.FAILED_LOGIN,
         createdAt: MoreThanOrEqual(oneHourAgo),
       },
     });
-
-    return failedAttempts.length;
   }
 }

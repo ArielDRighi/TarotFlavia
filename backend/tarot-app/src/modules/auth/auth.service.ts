@@ -52,23 +52,33 @@ export class AuthService {
 
     // Log failed login attempt
     if (user) {
-      await this.securityEventService.logSecurityEvent({
-        eventType: SecurityEventType.FAILED_LOGIN,
-        userId: user.id,
-        ipAddress: ipAddress ?? null,
-        userAgent: userAgent ?? null,
-        severity: SecurityEventSeverity.MEDIUM,
-        details: { email, reason: 'Invalid password' },
-      });
+      try {
+        await this.securityEventService.logSecurityEvent({
+          eventType: SecurityEventType.FAILED_LOGIN,
+          userId: user.id,
+          ipAddress: ipAddress ?? null,
+          userAgent: userAgent ?? null,
+          severity: SecurityEventSeverity.MEDIUM,
+          details: { email, reason: 'Invalid password' },
+        });
+      } catch (error) {
+        // Log but don't block authentication
+        console.error('Failed to log security event:', error);
+      }
     } else {
-      await this.securityEventService.logSecurityEvent({
-        eventType: SecurityEventType.FAILED_LOGIN,
-        userId: null,
-        ipAddress: ipAddress ?? null,
-        userAgent: userAgent ?? null,
-        severity: SecurityEventSeverity.LOW,
-        details: { email, reason: 'User not found' },
-      });
+      try {
+        await this.securityEventService.logSecurityEvent({
+          eventType: SecurityEventType.FAILED_LOGIN,
+          userId: null,
+          ipAddress: ipAddress ?? null,
+          userAgent: userAgent ?? null,
+          severity: SecurityEventSeverity.LOW,
+          details: { email, reason: 'User not found' },
+        });
+      } catch (error) {
+        // Log but don't block authentication
+        console.error('Failed to log security event:', error);
+      }
     }
 
     return null;
@@ -102,14 +112,19 @@ export class AuthService {
     await this.usersService.update(user.id, { lastLogin: user.lastLogin });
 
     // Log successful login
-    await this.securityEventService.logSecurityEvent({
-      eventType: SecurityEventType.SUCCESSFUL_LOGIN,
-      userId: user.id,
-      ipAddress,
-      userAgent,
-      severity: SecurityEventSeverity.LOW,
-      details: { email: user.email },
-    });
+    try {
+      await this.securityEventService.logSecurityEvent({
+        eventType: SecurityEventType.SUCCESSFUL_LOGIN,
+        userId: user.id,
+        ipAddress,
+        userAgent,
+        severity: SecurityEventSeverity.LOW,
+        details: { email: user.email },
+      });
+    } catch (error) {
+      // Log but don't block authentication
+      console.error('Failed to log security event:', error);
+    }
 
     return this.generateAuthResponse(user, ipAddress, userAgent);
   }
