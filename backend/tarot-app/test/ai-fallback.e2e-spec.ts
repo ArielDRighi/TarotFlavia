@@ -187,7 +187,7 @@ describe('AI Provider Fallback (e2e)', () => {
   describe('System Continuity', () => {
     it('should maintain continuous service availability', async () => {
       // Create multiple readings to verify system stability
-      const promises = [];
+      const promises: Array<request.Test> = [];
       for (let i = 0; i < 3; i++) {
         promises.push(
           request(app.getHttpServer())
