@@ -91,9 +91,9 @@
 
 ---
 
-## 🔄 TAREAS PENDIENTES PARA MVP (13 tareas - ~30.5 días)
+## 🔄 TAREAS PENDIENTES PARA MVP (16 tareas - ~39 días)
 
-### 🔴 FASE 1: FUNDAMENTOS CRÍTICOS (6.5 días)
+### 🔴 FASE 1: FUNDAMENTOS CRÍTICOS (15 días)
 
 #### Seguridad y Core (4 días)
 
@@ -177,6 +177,46 @@
 - **Tests:** No hay N+1 queries, performance mejorada
 - **Importancia:** CRÍTICA para performance en producción
 
+**8. TASK-054: Sistema de Cuotas de IA por Usuario** (3 días) ⭐⭐⭐
+
+- **Qué hace:**
+  - Trackear y limitar uso de IA por usuario (requests, tokens, costo)
+  - Controlar rate limits de Groq (14,400/día compartido)
+  - Prevenir abuse y controlar costos de providers (DeepSeek/OpenAI fallback)
+  - FREE: 100 requests/mes, PREMIUM: unlimited
+  - Soft limits (80% warning) y hard limits (100% bloqueo)
+  - Endpoint GET `/usage/ai` para mostrar cuota restante
+  - Cron job para resetear contadores mensualmente
+- **Dependencias:** TASK-019, TASK-061 (completadas)
+- **Tests:** Límites respetados, reset mensual, notificaciones al 80%/100%
+- **Importancia:** CRÍTICA - Previene agotamiento de rate limits compartidos de Groq
+
+**9. TASK-054-a: Fallback Automático Escalonado de Providers IA** (2 días) ⭐⭐⭐
+
+- **Qué hace:**
+  - **Fallback automático: Groq → DeepSeek → OpenAI**
+  - Detectar error 429 (rate limit) y cambiar automáticamente de provider
+  - Health check que valida qué providers están disponibles
+  - Retry con backoff exponencial antes de cambiar provider
+  - Logging detallado de cada cambio de provider
+  - Alertas a admin cuando se cambia de provider
+- **Dependencias:** TASK-054, TASK-061 (completadas)
+- **Tests:** Cambio automático funciona, logs correctos, servicio 24/7 sin interrupciones
+- **Importancia:** CRÍTICA - Evita caídas del servicio cuando Groq se agota
+
+**10. TASK-054-b: Límite Hard de Gasto en Providers de Pago** (1.5 días) ⭐⭐⭐
+
+- **Qué hace:**
+  - Variables `DEEPSEEK_MAX_MONTHLY_COST_USD` y `OPENAI_MAX_MONTHLY_COST_USD`
+  - Bloqueo automático cuando se alcanza límite de gasto configurado
+  - Tabla `ai_provider_usage` para trackear costos por provider
+  - Notificaciones al 80% y 100% de límite
+  - Endpoint admin `/admin/ai-costs` con dashboard de gastos
+  - Cron job de reset mensual de contadores
+- **Dependencias:** TASK-054, TASK-054-a
+- **Tests:** Bloqueo funciona, costos nunca exceden límite, admin puede aumentar límite
+- **Importancia:** CRÍTICA - Protección financiera contra gastos inesperados
+
 ---
 
 ### 🟡 FASE 2: ADMIN Y MONITOREO (4 días)
@@ -236,7 +276,7 @@
 
 #### Suite Completa de Tests (12 días)
 
-**12. TASK-054: Tests de Integración Completos** (3 días) ⭐⭐⭐
+**12. TASK-082: Tests de Integración Completos** (3 días) ⭐⭐⭐
 
 - **Qué hace:**
   - Tests de integración para todos los módulos
@@ -343,25 +383,25 @@
 
 ### Resumen de Tiempos
 
-| Fase                               | Duración      | Prioridad |
-| ---------------------------------- | ------------- | --------- |
-| ✅ **Completado**                  | 65 días       | -         |
-| 🔴 **FASE 1: Fundamentos**         | 6.5 días      | CRÍTICA   |
-| 🟡 **FASE 2: Admin**               | 2 días        | ALTA      |
-| 🔵 **FASE 3: Features Opcionales** | 6 días        | MEDIA     |
-| 🧪 **FASE 4: Testing**             | 12 días       | CRÍTICA   |
-| 📚 **FASE 5: Documentación**       | 6 días        | ALTA      |
-| **TOTAL PENDIENTE MVP**            | **32.5 días** | -         |
-| **GRAN TOTAL**                     | **97.5 días** | -         |
+| Fase                               | Duración     | Prioridad |
+| ---------------------------------- | ------------ | --------- |
+| ✅ **Completado**                  | 65 días      | -         |
+| 🔴 **FASE 1: Fundamentos**         | 15 días      | CRÍTICA   |
+| 🟡 **FASE 2: Admin**               | 2 días       | ALTA      |
+| 🔵 **FASE 3: Features Opcionales** | 6 días       | MEDIA     |
+| 🧪 **FASE 4: Testing**             | 12 días      | CRÍTICA   |
+| 📚 **FASE 5: Documentación**       | 6 días       | ALTA      |
+| **TOTAL PENDIENTE MVP**            | **41 días**  | -         |
+| **GRAN TOTAL**                     | **106 días** | -         |
 
 ### Calendario Estimado (1 desarrollador)
 
-- **Día 1-7:** FASE 1 - Fundamentos críticos (seguridad + performance)
-- **Día 8-9:** FASE 2 - Admin y monitoreo
-- **Día 10-15:** FASE 3 - Features opcionales (o skip si hay presión)
-- **Día 16-27:** FASE 4 - Testing exhaustivo
-- **Día 28-33:** FASE 5 - Documentación completa
-- **Día 34:** 🚀 **LAUNCH MVP**
+- **Día 1-15:** FASE 1 - Fundamentos críticos (seguridad + performance + cuotas IA + fallback + límites)
+- **Día 16-17:** FASE 2 - Admin y monitoreo
+- **Día 18-23:** FASE 3 - Features opcionales (o skip si hay presión)
+- **Día 24-35:** FASE 4 - Testing exhaustivo
+- **Día 36-41:** FASE 5 - Documentación completa
+- **Día 42:** 🚀 **LAUNCH MVP**
 
 ### Con 2 Desarrolladores (Paralelización)
 
@@ -379,17 +419,20 @@
 1. ✅ **TASK-048**: Validación y Sanitización de Inputs (COMPLETADA)
 2. ✅ **TASK-051**: Health Checks Completos (COMPLETADA)
 3. **TASK-048-a**: Sanitización de Outputs y CSP (1.5 días)
-4. **TASK-047**: Rate Limiting Avanzado (1.5 días)
+4. **TASK-014-a**: Rate Limiting Avanzado (1.5 días)
 5. **TASK-075**: Logging Estructurado (1 día)
 6. **TASK-043**: Connection Pooling (1 día)
+7. **TASK-045**: Query Optimization (1.5 días)
+8. **TASK-054**: Sistema de Cuotas de IA (3 días)
+9. **TASK-054-a**: Fallback Automático de Providers (2 días)
+10. **TASK-054-b**: Límites Hard de Gasto (1.5 días)
 
-**Total: 6.5 días restantes** - Fundamentos críticos de seguridad y performance
+**Total: 15 días restantes** - Fundamentos críticos de seguridad, performance, control de costos y continuidad del servicio
 
 ### Próximas 2 Semanas:
 
-7. **TASK-045**: Query Optimization - N+1 queries (1.5 días)
-8. **TASK-029**: Dashboard Estadísticas (2 días)
-9. Decidir si implementar FASE 3 o saltar a testing
+9. **TASK-029**: Dashboard Estadísticas (2 días)
+10. Decidir si implementar FASE 3 o saltar a testing
 
 ### Mes Actual:
 
@@ -477,21 +520,21 @@ Estas tareas se implementarán cuando se decida activar el marketplace público:
 
 ## 🚦 RECOMENDACIÓN FINAL
 
-### Ruta Rápida (MVP Mínimo - 26.5 días):
+### Ruta Rápida (MVP Mínimo - 35 días):
 
-1. ✅ FASE 1: Fundamentos (6.5 días) - **OBLIGATORIO**
+1. ✅ FASE 1: Fundamentos (15 días) - **OBLIGATORIO**
 2. ✅ FASE 2: Admin (2 días) - **OBLIGATORIO**
 3. ❌ FASE 3: Skip features opcionales
 4. ✅ FASE 4: Testing (12 días) - **OBLIGATORIO**
 5. ✅ FASE 5: Docs (6 días) - **OBLIGATORIO**
 
-**Total: 26.5 días → Launch más rápido**
+**Total: 35 días → Launch más rápido**
 
-### Ruta Completa (MVP Robusto - 32.5 días):
+### Ruta Completa (MVP Robusto - 41 días):
 
 1-5. Todas las fases incluidas
 
-**Total: 32.5 días → Launch con más features**
+**Total: 41 días → Launch con más features**
 
 ---
 
@@ -511,9 +554,9 @@ Estas tareas se implementarán cuando se decida activar el marketplace público:
 ### 📊 Impacto en Timeline:
 
 - **Antes:** 38 días completados, 35.5 días pendientes (total: 73.5 días)
-- **Ahora:** 65 días completados, 32.5 días pendientes (total: 97.5 días)
-- **Progreso:** 66.7% del trabajo total completado
-- **MVP Listo en:** ~26-32 días adicionales (según ruta elegida)
+- **Ahora:** 65 días completados, 41 días pendientes (total: 106 días)
+- **Progreso:** 61.3% del trabajo total completado
+- **MVP Listo en:** ~35-41 días adicionales (según ruta elegida)
 
 ### 🎯 Estado del MVP:
 

@@ -5230,6 +5230,386 @@ Crear sistema que trackee y limite el uso de IA por usuario para controlar costo
 
 ---
 
+### **TASK-054-a: Fallback Automático Escalonado de Providers IA** ⭐⭐⭐ CRÍTICA MVP
+
+**Prioridad:** 🔴 CRÍTICA  
+**Estimación:** 2 días  
+**Dependencias:** TASK-054, TASK-061  
+**Marcador MVP:** ⭐⭐⭐ **CRÍTICO PARA MVP** - Evita interrupciones del servicio
+
+#### 📋 Descripción
+
+Implementar sistema de fallback automático que cambia entre providers de IA cuando se agotan límites o cuotas. La estrategia es: **Groq (gratis) → DeepSeek (barato) → OpenAI (caro)**. Esto asegura continuidad del servicio y optimiza costos.
+
+**Flujo de Fallback:**
+
+1. **Groq (principal)**: Gratis, 14,400 requests/día compartidos
+2. **DeepSeek (secundario)**: ~$0.0008/interpretación cuando Groq se agota
+3. **OpenAI (último recurso)**: ~$0.0045/interpretación cuando DeepSeek se agota
+
+#### 🧪 Testing
+
+**Tests necesarios:**
+
+- [ ] **Tests unitarios:**
+  - AIProviderFallbackService detecta error 429 de Groq
+  - Cambio automático a DeepSeek cuando Groq falla
+  - Cambio automático a OpenAI cuando DeepSeek falla
+  - Retry con provider anterior cuando se recupera
+  - Logging de cada cambio de provider
+- [ ] **Tests de integración:**
+  - Flujo completo: Groq → DeepSeek → OpenAI
+  - Request funciona con cualquier provider disponible
+  - No hay pérdida de datos en el cambio
+- [ ] **Tests E2E:**
+  - Usuario crea lectura cuando Groq está agotado → usa DeepSeek
+  - Sistema funciona 24/7 sin interrupciones
+  - Logs reflejan provider usado correctamente
+
+**Ubicación:** `src/modules/ai/services/*.spec.ts` + `test/ai-fallback.e2e-spec.ts`  
+**Importancia:** ⭐⭐⭐ CRÍTICA - Sin esto, el servicio se cae cuando Groq se agota
+
+#### ✅ Tareas específicas
+
+**1. Crear AIProviderFallbackService (1 día):**
+
+- [ ] Crear `src/modules/ai/services/ai-provider-fallback.service.ts`
+- [ ] Implementar método `executeWithFallback(prompt, options)`:
+  - Intentar con provider principal (Groq)
+  - Si falla con 429 (rate limit), cambiar a DeepSeek
+  - Si DeepSeek falla, cambiar a OpenAI
+  - Si OpenAI falla, retornar error descriptivo
+- [ ] Implementar detección inteligente de errores:
+  - `429`: Rate limit excedido → cambiar provider
+  - `401`: API key inválida → skip provider, ir al siguiente
+  - `500`: Error de servidor → reintentar 3 veces antes de cambiar
+  - Network errors → reintentar con backoff exponencial
+- [ ] Crear método `getAvailableProviders()`:
+  - Verificar qué providers tienen API key configurada
+  - Verificar límites de cuota no excedidos
+  - Retornar lista ordenada por prioridad (Groq → DeepSeek → OpenAI)
+- [ ] Implementar estrategia de retry:
+  - 3 reintentos por provider con backoff exponencial (1s, 2s, 4s)
+  - Timeout de 30s por request
+- [ ] Logging detallado de cada cambio de provider:
+  - Provider original intentado
+  - Razón del cambio (429, 401, error, etc.)
+  - Provider usado finalmente
+  - Tiempo de respuesta
+
+**2. Integrar en AIProviderService (0.5 días):**
+
+- [ ] Modificar `AIProviderService.generateInterpretation()`:
+  - Usar `AIProviderFallbackService.executeWithFallback()`
+  - Pasar prompt y opciones
+  - Manejar respuesta exitosa de cualquier provider
+- [ ] Actualizar logging de uso de IA:
+  - Registrar provider realmente usado (no solo el intentado)
+  - Trackear cambios de provider en analytics
+
+**3. Configuración y Variables de Entorno (0.25 días):**
+
+- [ ] Agregar variables de configuración:
+
+  ```bash
+  # Prioridad de providers (orden de fallback)
+  AI_PROVIDER_PRIORITY=groq,deepseek,openai
+
+  # Habilitar/deshabilitar fallback
+  AI_FALLBACK_ENABLED=true
+
+  # Máximo de reintentos por provider
+  AI_MAX_RETRIES_PER_PROVIDER=3
+
+  # Timeout por request (ms)
+  AI_REQUEST_TIMEOUT=30000
+  ```
+
+- [ ] Validar configuración al arrancar aplicación
+- [ ] Documentar variables en `.env.example`
+
+**4. Health Checks y Monitoreo (0.25 días):**
+
+- [ ] Actualizar `/health/ai` para mostrar:
+  - Estado de cada provider (available/unavailable)
+  - Provider activo actualmente
+  - Rate limits restantes por provider
+  - Número de fallbacks en última hora
+- [ ] Crear endpoint admin `/admin/ai/fallback-stats`:
+  - Historial de cambios de provider (últimas 24h)
+  - Tasa de éxito por provider
+  - Tiempo promedio de respuesta por provider
+- [ ] Implementar alertas cuando:
+  - Groq se agota → notificar admin
+  - DeepSeek se agota → alerta crítica (solo queda OpenAI)
+  - Todos los providers fallan → alerta emergencia
+
+**5. Tests y Documentación (0.25 días):**
+
+- [ ] Escribir tests unitarios (8+ scenarios)
+- [ ] Escribir tests E2E de fallback completo
+- [ ] Documentar estrategia en `docs/AI_PROVIDERS.md`:
+  - Flujo de fallback
+  - Cómo se detectan errores
+  - Cómo configurar prioridad de providers
+  - Troubleshooting común
+
+#### 🎯 Criterios de aceptación
+
+- ✅ Sistema cambia automáticamente de Groq a DeepSeek cuando Groq se agota
+- ✅ Sistema cambia automáticamente de DeepSeek a OpenAI cuando DeepSeek se agota
+- ✅ Logs claros indican qué provider se usó en cada request
+- ✅ Health check muestra estado de todos los providers
+- ✅ Servicio funciona 24/7 sin interrupciones por rate limits
+- ✅ Admin recibe alertas cuando se cambia de provider
+
+#### 📝 Ejemplo de Implementación
+
+```typescript
+// src/modules/ai/services/ai-provider-fallback.service.ts
+@Injectable()
+export class AIProviderFallbackService {
+  async executeWithFallback(prompt: string, options: any): Promise<string> {
+    const providers = this.getAvailableProviders();
+
+    for (const provider of providers) {
+      try {
+        this.logger.log(`Trying provider: ${provider}`);
+        const result = await this.tryProvider(provider, prompt, options);
+        this.logger.log(`Success with provider: ${provider}`);
+        return result;
+      } catch (error) {
+        if (error.status === 429) {
+          this.logger.warn(
+            `Provider ${provider} rate limit exceeded, trying next`,
+          );
+          await this.notifyProviderExhausted(provider);
+          continue; // Try next provider
+        }
+        throw error; // Re-throw if not rate limit error
+      }
+    }
+
+    throw new Error('All AI providers exhausted');
+  }
+}
+```
+
+---
+
+### **TASK-054-b: Límite Hard de Gasto en Providers de Pago** ⭐⭐⭐ CRÍTICA MVP
+
+**Prioridad:** 🔴 CRÍTICA  
+**Estimación:** 1.5 días  
+**Dependencias:** TASK-054, TASK-054-a  
+**Marcador MVP:** ⭐⭐⭐ **CRÍTICO PARA MVP** - Protección financiera esencial
+
+#### 📋 Descripción
+
+Implementar límites estrictos de gasto mensual para DeepSeek y OpenAI, evitando sorpresas en la facturación. El sistema debe bloquear automáticamente requests cuando se alcanza el límite configurado, protegiendo el presupuesto operativo.
+
+**Problema a Resolver:**
+
+- DeepSeek y OpenAI cobran por uso (tokens)
+- Sin límites, un pico de tráfico puede generar facturas de cientos/miles de dólares
+- Necesitamos control estricto de cuánto gastamos mensualmente
+
+#### 🧪 Testing
+
+**Tests necesarios:**
+
+- [ ] **Tests unitarios:**
+  - AIProviderCostService trackea costos correctamente
+  - Bloqueo cuando se alcanza límite configurado
+  - Reset mensual de contadores funciona
+  - Cálculo de costo por tokens correcto
+- [ ] **Tests de integración:**
+  - Request bloqueado cuando límite de OpenAI alcanzado
+  - Notificaciones enviadas al 80% y 100% de límite
+  - Dashboard admin muestra costos actualizados
+- [ ] **Tests E2E:**
+  - Sistema rechaza lecturas cuando límite de gasto alcanzado
+  - Error claro al usuario cuando servicio pausado por límite
+  - Admin puede aumentar límite y servicio se reanuda
+
+**Ubicación:** `src/modules/ai/services/*.spec.ts` + `test/ai-cost-limits.e2e-spec.ts`  
+**Importancia:** ⭐⭐⭐ CRÍTICA - Sin esto, gastos pueden ser impredecibles
+
+#### ✅ Tareas específicas
+
+**1. Crear entidad AIProviderUsage (0.25 días):**
+
+- [ ] Crear `src/modules/ai/entities/ai-provider-usage.entity.ts`:
+  ```typescript
+  @Entity('ai_provider_usage')
+  export class AIProviderUsage {
+    @PrimaryGeneratedColumn()
+    id: number;
+
+    @Column({ type: 'enum', enum: AIProvider })
+    provider: AIProvider; // 'groq', 'deepseek', 'openai'
+
+    @Column({ type: 'date' })
+    month: Date; // YYYY-MM-01
+
+    @Column({ type: 'integer', default: 0 })
+    requestsCount: number;
+
+    @Column({ type: 'bigint', default: 0 })
+    tokensUsed: number;
+
+    @Column({ type: 'decimal', precision: 10, scale: 4, default: 0 })
+    costUsd: number;
+
+    @Column({ type: 'decimal', precision: 10, scale: 4 })
+    monthlyLimitUsd: number;
+
+    @Column({ type: 'boolean', default: false })
+    limitReached: boolean;
+
+    @Column({ type: 'boolean', default: false })
+    warningAt80Sent: boolean;
+
+    @CreateDateColumn()
+    createdAt: Date;
+
+    @UpdateDateColumn()
+    updatedAt: Date;
+  }
+  ```
+- [ ] Crear índice único en (provider, month)
+- [ ] Crear migración para la tabla
+
+**2. Crear AIProviderCostService (0.75 días):**
+
+- [ ] Crear `src/modules/ai/services/ai-provider-cost.service.ts`
+- [ ] Implementar método `trackUsage(provider, tokens, cost)`:
+  - Obtener/crear registro del mes actual
+  - Incrementar contadores (requests, tokens, cost)
+  - Verificar si se alcanzó límite
+  - Enviar notificaciones si corresponde
+- [ ] Implementar método `canUseProvider(provider)`:
+  - Verificar si límite de gasto NO alcanzado
+  - Retornar true/false
+  - Si false, loggear razón
+- [ ] Implementar método `getRemainingBudget(provider)`:
+  - Calcular: monthlyLimit - costUsed
+  - Retornar monto restante en USD
+- [ ] Implementar cálculo de costos por provider:
+  ```typescript
+  private calculateCost(provider: AIProvider, tokens: number): number {
+    const COSTS_PER_1M_TOKENS = {
+      groq: 0, // Gratis
+      deepseek: 0.80, // $0.80 por millón de tokens
+      openai: 4.50, // $4.50 por millón de tokens (gpt-4o-mini)
+    };
+    return (tokens / 1_000_000) * COSTS_PER_1M_TOKENS[provider];
+  }
+  ```
+- [ ] Implementar notificaciones:
+  - Al 80% de límite: email a admin con warning
+  - Al 100%: email a admin + bloqueo de provider
+
+**3. Integrar en AIProviderFallbackService (0.25 días):**
+
+- [ ] Modificar `executeWithFallback()`:
+  - Antes de usar provider de pago, verificar `canUseProvider()`
+  - Si límite alcanzado, skip provider y continuar con siguiente
+  - Después de respuesta exitosa, llamar `trackUsage()`
+- [ ] Actualizar `getAvailableProviders()`:
+  - Filtrar providers que alcanzaron límite de gasto
+  - Si Groq OK → usar Groq
+  - Si Groq agotado y DeepSeek bajo límite → usar DeepSeek
+  - Si DeepSeek agotado y OpenAI bajo límite → usar OpenAI
+  - Si todos agotados → error descriptivo
+
+**4. Configuración y Variables de Entorno (0.1 días):**
+
+- [ ] Agregar variables de límites de gasto:
+
+  ```bash
+  # Límites mensuales de gasto (USD)
+  DEEPSEEK_MAX_MONTHLY_COST_USD=20.00
+  OPENAI_MAX_MONTHLY_COST_USD=50.00
+
+  # Email para alertas de costos
+  ADMIN_EMAIL_COST_ALERTS=admin@tarotflavia.com
+  ```
+
+- [ ] Validar límites al arrancar:
+  - Límites deben ser > 0
+  - Email de alertas debe estar configurado
+- [ ] Documentar en `.env.example`
+
+**5. Endpoints Admin y Dashboard (0.25 días):**
+
+- [ ] Crear endpoint `GET /admin/ai-costs`:
+  - Costos por provider este mes
+  - Límites configurados
+  - Porcentaje usado
+  - Proyección de gasto (basado en tendencia)
+  - Requests y tokens usados
+- [ ] Crear endpoint `PATCH /admin/ai-costs/:provider/limit`:
+  - Permitir a admin aumentar límite dinámicamente
+  - Validar nuevo límite > costo actual
+  - Desbloquear provider si estaba bloqueado
+- [ ] Integrar métricas en `/admin/dashboard/stats`:
+  - Agregar sección de costos IA
+  - Gráfico de tendencia de gasto
+
+**6. Cron Job de Reset Mensual (0.1 días):**
+
+- [ ] Crear `AIProviderCostCleanupService`
+- [ ] Implementar cron que corre el día 1 de cada mes:
+  - Crear nuevos registros para el mes actual
+  - Archivar datos del mes anterior (no eliminar)
+  - Reset de flags `warningAt80Sent`
+  - Notificar admin con resumen del mes anterior
+
+**7. Tests y Documentación (0.25 días):**
+
+- [ ] Tests unitarios (10+ scenarios)
+- [ ] Tests E2E de bloqueo por límite
+- [ ] Documentar en `docs/AI_PROVIDERS.md`:
+  - Cómo funcionan los límites
+  - Cómo configurar presupuesto
+  - Qué pasa cuando se alcanza límite
+  - Cómo aumentar límite de emergencia
+  - Troubleshooting
+
+#### 🎯 Criterios de aceptación
+
+- ✅ Sistema bloquea automáticamente DeepSeek cuando alcanza límite configurado
+- ✅ Sistema bloquea automáticamente OpenAI cuando alcanza límite configurado
+- ✅ Admin recibe email al 80% de límite (warning temprano)
+- ✅ Admin recibe email al 100% de límite (bloqueo)
+- ✅ Dashboard admin muestra costos en tiempo real
+- ✅ Admin puede aumentar límite dinámicamente vía API
+- ✅ Costos nunca exceden límite configurado (±5% por redondeo)
+- ✅ Reset mensual funciona correctamente
+
+#### 📝 Ejemplo de Uso
+
+**Variables de entorno:**
+
+```bash
+# Groq es gratis, no tiene límite
+DEEPSEEK_MAX_MONTHLY_COST_USD=20.00  # Máximo $20/mes en DeepSeek
+OPENAI_MAX_MONTHLY_COST_USD=50.00    # Máximo $50/mes en OpenAI
+```
+
+**Flujo en producción:**
+
+1. **Día 1-15**: Groq funciona bien, $0 gastados
+2. **Día 16**: Groq alcanza 14,400/día, cambia a DeepSeek
+3. **Día 16-25**: DeepSeek procesa requests, $15 gastados
+4. **Día 26**: DeepSeek alcanza 80% ($16 de $20) → email warning a admin
+5. **Día 27**: DeepSeek alcanza 100% ($20) → bloqueado, cambia a OpenAI
+6. **Día 27-30**: OpenAI procesa requests, $12 gastados de $50
+7. **Día 1 mes siguiente**: Reset contadores, vuelve a Groq
+
+---
+
 ### **TASK-055: Implementar Estrategia Agresiva de Caché** ⭐⭐ NECESARIA MVP
 
 **Prioridad:** 🟡 ALTA  
@@ -12228,6 +12608,173 @@ Implementar sistema de logging estructurado JSON con Winston, incluyendo correla
 
 ---
 
+### **TASK-082: Tests de Integración Completos** ⭐⭐⭐
+
+**Prioridad:** 🔴 CRÍTICA  
+**Estimación:** 3 días  
+**Dependencias:** Todas las features MVP completadas  
+**Marcador MVP:** ⭐⭐⭐ **CRÍTICO PARA MVP** - Validación de integración entre módulos  
+**Estado:** ⏳ PENDIENTE
+
+#### 📋 Descripción
+
+Crear suite completa de tests de integración que validen las interacciones entre módulos del sistema. A diferencia de los tests E2E (que prueban flujos completos de usuario), estos tests verifican que los módulos se integren correctamente entre sí a nivel de servicios y repositorios.
+
+**Diferencia con E2E:**
+
+- **Tests E2E:** Flujos completos de usuario (registro → login → crear lectura)
+- **Tests de Integración:** Interacciones específicas entre módulos (UsageLimitsService + ReadingsService)
+
+#### 🧪 Testing
+
+**Tests necesarios:**
+
+- [ ] **Auth + Users Integration:**
+  - Registro de usuario crea usuario en BD correctamente
+  - Login valida credenciales contra BD
+  - Refresh token rota y revoca correctamente
+  - Password recovery flow completo (token → reset → invalidación)
+- [ ] **Readings + Interpretations + AI Integration:**
+  - Crear lectura llama a InterpretationsService
+  - InterpretationsService llama a AIProviderService
+  - Respuesta de IA se guarda en BD correctamente
+  - Cache de interpretaciones funciona entre requests
+- [ ] **UsageLimits + Readings Integration:**
+  - Crear lectura incrementa contador de uso
+  - Límite alcanzado bloquea creación de nuevas lecturas
+  - Reset diario de límites funciona
+  - Premium users tienen límites ilimitados
+- [ ] **Email + PasswordRecovery Integration:**
+  - Forgot password envía email correctamente
+  - Email contiene token válido
+  - Reset password con token válido funciona
+- [ ] **Admin + Users Integration:**
+  - Admin puede actualizar plan de usuario
+  - Cambio de plan refleja en BD
+  - Cambio de plan afecta límites de uso
+- [ ] **Cache + AI Integration:**
+  - Cache almacena respuestas de IA
+  - Cache se invalida por tarotista
+  - Cache hit no llama a provider de IA
+- [ ] **Categories + PredefinedQuestions Integration:**
+  - Preguntas asociadas a categoría correcta
+  - Filtrado por categoría retorna preguntas correctas
+  - Soft-delete de categoría no rompe preguntas
+
+**Ubicación:** `test/integration/*.spec.ts`  
+**Importancia:** ⭐⭐⭐ CRÍTICA - Sin estos tests, no se validan interacciones críticas
+
+#### ✅ Tareas específicas
+
+**1. Configurar entorno de testing de integración (0.5 días):**
+
+- [ ] Crear carpeta `test/integration/`
+- [ ] Configurar base de datos de testing separada
+- [ ] Setup y teardown automático de BD por test suite
+- [ ] Seeders mínimos para datos de prueba
+- [ ] Configuración de Jest para tests de integración
+
+**2. Tests de Auth + Users (0.5 días):**
+
+- [ ] `auth-users.integration.spec.ts`
+  - Register flow completo
+  - Login con credenciales válidas/inválidas
+  - Refresh token rotation
+  - Password recovery completo
+  - Logout invalida refresh tokens
+
+**3. Tests de Readings + Interpretations + AI (0.5 días):**
+
+- [ ] `readings-interpretations-ai.integration.spec.ts`
+  - Crear lectura genera interpretación con IA
+  - Interpretación se almacena en BD
+  - Regenerar interpretación llama a IA nuevamente
+  - Cache funciona correctamente
+
+**4. Tests de UsageLimits (0.5 días):**
+
+- [ ] `usage-limits.integration.spec.ts`
+  - Lectura incrementa contador
+  - Límite bloqueante funciona
+  - Premium bypasses limits
+  - Reset diario con fecha simulada
+
+**5. Tests de Email (0.25 días):**
+
+- [ ] `email.integration.spec.ts`
+  - Password recovery email
+  - Plan change email
+  - Welcome email
+
+**6. Tests de Admin (0.25 días):**
+
+- [ ] `admin.integration.spec.ts`
+  - Cambio de plan de usuario
+  - Gestión de usuarios
+  - Audit log de acciones admin
+
+**7. Tests de Cache (0.25 días):**
+
+- [ ] `cache-ai.integration.spec.ts`
+  - Cache hit/miss
+  - Invalidación por tarotista
+  - TTL de cache
+
+**8. Coverage y documentación (0.25 días):**
+
+- [ ] Verificar 80%+ coverage en módulos críticos
+- [ ] Documentar setup de tests de integración
+- [ ] CI/CD pipeline ejecuta integration tests
+
+#### 🎯 Criterios de aceptación
+
+- ✅ Al menos 80% coverage en tests de integración para módulos críticos
+- ✅ Todos los tests de integración pasan
+- ✅ BD de testing se resetea automáticamente entre tests
+- ✅ Tests corren en < 5 minutos
+- ✅ CI/CD ejecuta integration tests antes de merge
+
+#### 📝 Ejemplo de Test de Integración
+
+```typescript
+// test/integration/readings-interpretations-ai.integration.spec.ts
+describe('Readings + Interpretations + AI Integration', () => {
+  let app: INestApplication;
+  let readingsService: ReadingsService;
+  let interpretationsService: InterpretationsService;
+  let aiProviderService: AIProviderService;
+
+  beforeAll(async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleRef.createNestApplication();
+    await app.init();
+
+    readingsService = moduleRef.get(ReadingsService);
+    interpretationsService = moduleRef.get(InterpretationsService);
+    aiProviderService = moduleRef.get(AIProviderService);
+  });
+
+  it('should create reading with AI interpretation', async () => {
+    const user = { id: 1, plan: UserPlan.FREE };
+    const dto = {
+      spreadId: 1,
+      predefinedQuestionId: 1,
+    };
+
+    const reading = await readingsService.create(user, dto);
+
+    expect(reading).toBeDefined();
+    expect(reading.interpretation).toBeDefined();
+    expect(reading.interpretation.content).toContain('carta');
+  });
+});
+```
+
+---
+
 #### 📝 Notas de Implementación
 
 **Estrategia de Actualización:**
@@ -12358,7 +12905,7 @@ export async function generateTestReading(
 
 **Testing y Docs:**
 
-- TASK-054: Tests de integración completos
+- TASK-082: Tests de integración completos
 - TASK-055: Tests de performance
 - TASK-056: Tests de seguridad
 - TASK-057: E2E tests coverage 80%+
@@ -12511,7 +13058,7 @@ export async function generateTestReading(
 
 **Semana 12-13: UX Features (5 días)** 26. ✅ TASK-024: Email Templates (2 días) 27. ✅ TASK-029: Logs Estructurados (1 día) 28. ✅ TASK-026: Export PDF (2 días)
 
-**Semana 13-15: Testing Completo (12 días)** 29. ✅ TASK-054: Tests Integración (3 días) 30. ✅ TASK-055: Tests Performance (2 días) 31. ✅ TASK-056: Tests Seguridad (2 días) 32. ✅ TASK-057: E2E Coverage 80%+ (5 días)
+**Semana 13-15: Testing Completo (12 días)** 29. ✅ TASK-082: Tests Integración (3 días) 30. ✅ TASK-055: Tests Performance (2 días) 31. ✅ TASK-056: Tests Seguridad (2 días) 32. ✅ TASK-057: E2E Coverage 80%+ (5 días)
 
 **Semana 15-16: Documentación (6 días)** 33. ✅ TASK-059: Documentación API (4 días) 34. ✅ TASK-060: README y Deploy Guides (2 días)
 
@@ -12582,7 +13129,7 @@ export async function generateTestReading(
 - ✅ IA & Readings: 100% (TASK-018 a TASK-025)
 - 🔄 Marketplace: 0% (TASK-061 a TASK-074) - **PRIORIDAD MÁXIMA**
 - 🔄 Admin & Security: 0% (TASK-027 a TASK-029, TASK-047 a TASK-051)
-- 🔄 Testing & Docs: 0% (TASK-054 a TASK-060)
+- 🔄 Testing & Docs: 0% (TASK-082, TASK-055 a TASK-060)
 
 ---
 
