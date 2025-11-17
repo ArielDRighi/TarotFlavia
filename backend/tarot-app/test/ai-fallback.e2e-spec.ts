@@ -94,12 +94,10 @@ describe('AI Provider Fallback (e2e)', () => {
       );
 
       expect(usageLogs.length).toBeGreaterThan(0);
-      expect(usageLogs[0]).toHaveProperty('provider_name');
+      expect(usageLogs[0]).toHaveProperty('provider');
       expect(usageLogs[0]).toHaveProperty('prompt_tokens');
       expect(usageLogs[0]).toHaveProperty('completion_tokens');
-      expect(['groq', 'deepseek', 'openai']).toContain(
-        usageLogs[0].provider_name,
-      );
+      expect(['groq', 'deepseek', 'openai']).toContain(usageLogs[0].provider);
     });
 
     it('should log complete usage information in ai_usage_logs', async () => {
