@@ -54,17 +54,20 @@ export class AuthController {
     description: 'Demasiadas solicitudes. Límite: 5 por minuto',
   })
   async login(@Body() loginDto: LoginDto, @Req() req: Request) {
+    const ipAddress = req.ip || 'unknown';
+    const userAgent = req.get('user-agent') || 'unknown';
+
     const user = await this.authService.validateUser(
       loginDto.email,
       loginDto.password,
+      ipAddress,
+      userAgent,
     );
 
     if (!user) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
-    const ipAddress = req.ip || 'unknown';
-    const userAgent = req.get('user-agent') || 'unknown';
     return this.authService.login(user, ipAddress, userAgent);
   }
 

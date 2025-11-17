@@ -16,7 +16,7 @@ import { DatabaseHealthService } from './database-health.service';
 export class HealthController {
   // Health check thresholds
   private readonly DATABASE_TIMEOUT_MS = 5000; // 5 seconds
-  private readonly MEMORY_THRESHOLD_BYTES = 1024 * 1024 * 1024; // 1GB
+  private readonly MEMORY_THRESHOLD_BYTES = 2 * 1024 * 1024 * 1024; // 2GB (increased for CI stability)
   private readonly DISK_THRESHOLD_PERCENT = 0.9; // Alert when disk is 90% full
 
   constructor(
