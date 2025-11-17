@@ -140,12 +140,12 @@ describe('AI Provider Fallback (e2e)', () => {
 
       expect(usageLogs.length).toBeGreaterThan(0);
       const log = usageLogs[0];
-      expect(log).toHaveProperty('provider_name');
+      expect(log).toHaveProperty('provider');
       expect(log).toHaveProperty('model_used');
       expect(log).toHaveProperty('prompt_tokens');
       expect(log).toHaveProperty('completion_tokens');
       expect(log).toHaveProperty('total_tokens');
-      expect(log).toHaveProperty('estimated_cost_usd');
+      expect(log).toHaveProperty('cost_usd');
       expect(log).toHaveProperty('fallback_used');
       expect(typeof log.fallback_used).toBe('boolean');
     });
