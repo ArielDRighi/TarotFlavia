@@ -314,6 +314,124 @@ curl http://localhost:3000/health/ai
 # 5. Delete old key from provider
 ```
 
+## 📊 Cuotas Mensuales por Plan
+
+### Límites de Uso
+
+El sistema implementa cuotas mensuales para prevenir abuso y optimizar costos:
+
+| Plan    | Cuota Mensual          | Advertencia | Acción al Límite                |
+| ------- | ---------------------- | ----------- | ------------------------------- |
+| FREE    | 100 interpretaciones\* | 80% (80)    | Bloqueo + Email de notificación |
+| PREMIUM | Ilimitado              | N/A         | Sin restricciones               |
+
+_\* Configurable vía variables de entorno (ver `.env.example`)_
+
+### Variables de Entorno
+
+```bash
+# AI Quota Configuration (Optional - Has Defaults)
+AI_QUOTA_FREE_MONTHLY=100        # FREE plan: Max AI requests per month
+AI_QUOTA_PREMIUM_MONTHLY=-1      # PREMIUM plan: -1 = unlimited
+```
+
+### Integración del Sistema de Cuotas
+
+#### AIQuotaGuard
+
+Aplicado automáticamente a endpoints que consumen IA:
+
+```typescript
+@UseGuards(JwtAuthGuard, AIQuotaGuard, CheckUsageLimitGuard)
+@Post(':id/regenerate')
+async regenerate(@Param('id') readingId: string, @Req() req: any) {
+  // El guard valida cuota ANTES de permitir acceso
+  // Si cuota excedida: 403 Forbidden con mensaje informativo
+}
+```
+
+Endpoints protegidos:
+
+- `POST /readings/:id/regenerate` - Regenerar lectura
+- `POST /daily-reading/regenerate` - Regenerar carta del día
+- `POST /interpretations/generate` - Generar interpretación IA
+
+#### Tracking de Uso
+
+El tracking se realiza automáticamente en `AIProviderService` después de cada llamada exitosa:
+
+```typescript
+// En AIProviderService.complete()
+if (userId) {
+  await this.aiQuotaService.trackMonthlyUsage(
+    userId,
+    1, // 1 request
+    response.tokensUsed.total,
+    costUsd,
+    response.provider,
+  );
+}
+```
+
+#### Notificaciones por Email
+
+El sistema envía emails automáticos en dos escenarios:
+
+**1. Advertencia al 80% (quota-warning-80.hbs)**
+
+- Envío: Una vez al alcanzar 80% de uso
+- Contenido: Uso actual, restante, fecha de renovación
+- CTA: Botón de upgrade a Premium
+
+**2. Límite alcanzado al 100% (quota-limit-reached.hbs)**
+
+- Envío: Al alcanzar 100% de uso
+- Contenido: Cuota agotada, fecha de renovación
+- CTA: Botón de upgrade a Premium
+
+#### Reset Mensual
+
+Las cuotas se resetean automáticamente el día 1 de cada mes a las 00:00 vía cron job:
+
+```typescript
+@Cron(CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT)
+async resetMonthlyQuotas(): Promise<void> {
+  // Resetea contadores de todos los usuarios
+  // aiRequestsUsedMonth = 0
+  // aiTokensUsedMonth = 0
+  // aiCostUsdMonth = 0
+  // quotaWarningSent = false
+}
+```
+
+### Consultar Cuota de Usuario
+
+Endpoint para verificar cuota actual:
+
+```bash
+# GET /ai-quota/me
+# Requiere autenticación JWT
+curl -H "Authorization: Bearer <token>" \
+     http://localhost:3000/ai-quota/me
+```
+
+Respuesta:
+
+```json
+{
+  "quotaLimit": 100,
+  "requestsUsed": 45,
+  "requestsRemaining": 55,
+  "percentageUsed": 45,
+  "resetDate": "2025-02-01T00:00:00.000Z",
+  "warningTriggered": false,
+  "plan": "FREE",
+  "tokensUsed": 123456,
+  "costEstimated": 0.045,
+  "providerPrimarilyUsed": "groq"
+}
+```
+
 ## 📞 Support
 
 ### Groq

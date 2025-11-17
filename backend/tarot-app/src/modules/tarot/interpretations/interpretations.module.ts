@@ -11,6 +11,7 @@ import { Tarotista } from '../../tarotistas/entities/tarotista.entity';
 import { TarotCard } from '../cards/entities/tarot-card.entity';
 import { CacheModule } from '../../cache/cache.module';
 import { AIModule } from '../../ai/ai.module';
+import { AIUsageModule } from '../../ai-usage/ai-usage.module';
 import { OutputSanitizerService } from '../../../common/services/output-sanitizer.service';
 
 @Module({
@@ -26,6 +27,7 @@ import { OutputSanitizerService } from '../../../common/services/output-sanitize
     ConfigModule,
     CacheModule,
     AIModule,
+    AIUsageModule,
   ],
   controllers: [InterpretationsController],
   providers: [InterpretationsService, OutputSanitizerService],

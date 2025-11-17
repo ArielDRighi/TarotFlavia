@@ -15,6 +15,7 @@ import { CardsModule } from '../cards/cards.module';
 import { SpreadsModule } from '../spreads/spreads.module';
 import { PredefinedQuestionsModule } from '../../predefined-questions/predefined-questions.module';
 import { UsageLimitsModule } from '../../usage-limits/usage-limits.module';
+import { AIUsageModule } from '../../ai-usage/ai-usage.module';
 
 // ==================== Clean Architecture ====================
 // Repositories
@@ -42,6 +43,7 @@ import { RestoreReadingUseCase } from './application/use-cases/restore-reading.u
     SpreadsModule,
     PredefinedQuestionsModule,
     UsageLimitsModule,
+    AIUsageModule,
   ],
   controllers: [
     ReadingsController,

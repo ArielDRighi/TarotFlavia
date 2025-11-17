@@ -100,6 +100,67 @@ describe('AI Quota (E2E)', () => {
         });
     });
 
+    it('should not require authentication for health checks', () => {
+      return request(getServer()).get('/health').expect(200);
+    });
+  });
+
+  describe('AIQuotaGuard Integration', () => {
+    it('should block POST /readings/:id/regenerate when quota exceeded (FREE user)', async () => {
+      // Update user to exceed quota
+      const userRepository = dataSource.getRepository(User);
+      await userRepository.update(testUserId, {
+        aiRequestsUsedMonth: 100, // FREE limit is 100
+      });
+
+      return request(getServer())
+        .post('/readings/999/regenerate')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(403)
+        .expect((res) => {
+          const body = res.body as { message: string };
+          expect(body.message).toContain('Has alcanzado tu límite mensual');
+          expect(body.message).toContain('100 interpretaciones');
+        });
+    });
+
+    it('should block POST /daily-reading/regenerate when quota exceeded', async () => {
+      // User still has quota exceeded from previous test
+      return request(getServer())
+        .post('/daily-reading/regenerate')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(403)
+        .expect((res) => {
+          const body = res.body as { message: string };
+          expect(body.message).toContain('Has alcanzado tu límite mensual');
+        });
+    });
+
+    it('should allow POST /readings/:id/regenerate when quota available', async () => {
+      // Reset quota
+      const userRepository = dataSource.getRepository(User);
+      await userRepository.update(testUserId, {
+        aiRequestsUsedMonth: 50,
+      });
+
+      // Note: This will fail because reading 999 doesn't exist,
+      // but the important part is that it passes the AIQuotaGuard (not 403 quota)
+      return request(getServer())
+        .post('/readings/999/regenerate')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect((res) => {
+          // Should get 404 (not found) or 403 (premium/owner check), NOT 403 quota
+          // The key is that the error message should NOT be about quota
+          if (res.status === 403) {
+            const body = res.body as { message: string };
+            expect(body.message).not.toContain('límite mensual');
+            expect(body.message).not.toContain('cuota');
+          }
+          // Any other status (404, 500, etc) is fine - guard passed
+          expect([403, 404, 500]).toContain(res.status);
+        });
+    });
+
     it('should return 401 when not authenticated', () => {
       return request(getServer()).get('/usage/ai').expect(401);
     });

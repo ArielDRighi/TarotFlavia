@@ -10,6 +10,7 @@ import { GroqProvider } from '../../infrastructure/providers/groq.provider';
 import { DeepSeekProvider } from '../../infrastructure/providers/deepseek.provider';
 import { OpenAIProvider } from '../../infrastructure/providers/openai.provider';
 import { AIUsageService } from '../../../ai-usage/ai-usage.service';
+import { AIQuotaService } from '../../../ai-usage/ai-quota.service';
 import {
   AIProvider,
   AIUsageStatus,
@@ -42,6 +43,7 @@ export class AIProviderService {
     private readonly deepseekProvider: DeepSeekProvider,
     private readonly openaiProvider: OpenAIProvider,
     private readonly aiUsageService: AIUsageService,
+    private readonly aiQuotaService: AIQuotaService,
   ) {
     // Initialize providers in priority order
     this.providers = [
@@ -152,6 +154,17 @@ export class AIProviderService {
           errorMessage: null,
           fallbackUsed,
         });
+
+        // Track monthly usage for quota management (if userId provided)
+        if (userId) {
+          await this.aiQuotaService.trackMonthlyUsage(
+            userId,
+            1, // 1 request
+            response.tokensUsed.total,
+            costUsd,
+            response.provider,
+          );
+        }
 
         return response;
       } catch (error) {

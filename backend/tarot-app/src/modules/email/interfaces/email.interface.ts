@@ -32,5 +32,25 @@ export interface PlanChangeData {
   userName: string;
   oldPlan: string;
   newPlan: string;
-  changeDate: Date;
+  changeDate: string;
+}
+
+export interface QuotaWarningData {
+  userName: string;
+  plan: string;
+  quotaLimit: number;
+  requestsUsed: number;
+  requestsRemaining: number;
+  percentageUsed: number;
+  resetDate: string;
+  frontendUrl: string;
+}
+
+export interface QuotaLimitReachedData {
+  userName: string;
+  plan: string;
+  quotaLimit: number;
+  requestsUsed: number;
+  resetDate: string;
+  frontendUrl: string;
 }

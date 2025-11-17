@@ -4,6 +4,8 @@ import { ConfigService } from '@nestjs/config';
 import {
   SharedReadingData,
   PlanChangeData,
+  QuotaWarningData,
+  QuotaLimitReachedData,
 } from './interfaces/email.interface';
 
 @Injectable()
@@ -123,6 +125,61 @@ export class EmailService {
         error instanceof Error ? error.stack : String(error),
       );
       throw new Error('Error al enviar email de cambio de plan');
+    }
+  }
+
+  /**
+   * Envía advertencia de cuota de IA al 80%
+   */
+  async sendQuotaWarningEmail(
+    to: string,
+    quotaData: QuotaWarningData,
+  ): Promise<void> {
+    try {
+      await this.mailerService.sendMail({
+        to,
+        subject: '⚠️ Has usado el 80% de tu cuota mensual de IA',
+        template: 'quota-warning-80',
+        context: quotaData,
+      });
+
+      this.logger.log(
+        `Email de advertencia de cuota (80%) enviado exitosamente a ${to}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error al enviar email de advertencia de cuota a ${to}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+      throw new Error('Error al enviar email de advertencia de cuota');
+    }
+  }
+
+  /**
+   * Envía notificación de cuota de IA alcanzada (100%)
+   */
+  async sendQuotaLimitReachedEmail(
+    to: string,
+    quotaData: QuotaLimitReachedData,
+  ): Promise<void> {
+    try {
+      await this.mailerService.sendMail({
+        to,
+        subject:
+          '🚫 Has alcanzado tu límite mensual de interpretaciones con IA',
+        template: 'quota-limit-reached',
+        context: quotaData,
+      });
+
+      this.logger.log(
+        `Email de límite de cuota alcanzado enviado exitosamente a ${to}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error al enviar email de límite de cuota a ${to}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+      throw new Error('Error al enviar email de límite de cuota');
     }
   }
 }
