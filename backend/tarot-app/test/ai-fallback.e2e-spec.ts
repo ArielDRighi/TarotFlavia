@@ -78,14 +78,16 @@ describe('AI Provider Fallback (e2e)', () => {
         .post('/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
-          spreadId: 1, // Three Card Spread
-          question: 'Test question for fallback',
-          questionCategory: 'general',
-          cards: [
-            { cardId: 1, position: 'Pasado', isReversed: false },
-            { cardId: 2, position: 'Presente', isReversed: false },
-            { cardId: 3, position: 'Futuro', isReversed: false },
+          predefinedQuestionId: 1,
+          deckId: 1,
+          spreadId: 1,
+          cardIds: [1, 2, 3],
+          cardPositions: [
+            { cardId: 1, position: 'pasado', isReversed: false },
+            { cardId: 2, position: 'presente', isReversed: false },
+            { cardId: 3, position: 'futuro', isReversed: false },
           ],
+          generateInterpretation: true,
         })
         .expect(201);
 
@@ -117,14 +119,16 @@ describe('AI Provider Fallback (e2e)', () => {
         .post('/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
+          predefinedQuestionId: 1,
+          deckId: 1,
           spreadId: 1,
-          question: 'Test fallback to DeepSeek',
-          questionCategory: 'general',
-          cards: [
-            { cardId: 1, position: 'Pasado', isReversed: false },
-            { cardId: 2, position: 'Presente', isReversed: false },
-            { cardId: 3, position: 'Futuro', isReversed: false },
+          cardIds: [1, 2, 3],
+          cardPositions: [
+            { cardId: 1, position: 'pasado', isReversed: false },
+            { cardId: 2, position: 'presente', isReversed: false },
+            { cardId: 3, position: 'futuro', isReversed: false },
           ],
+          generateInterpretation: true,
         })
         .expect(201);
 
@@ -167,14 +171,16 @@ describe('AI Provider Fallback (e2e)', () => {
         .post('/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
+          predefinedQuestionId: 1,
+          deckId: 1,
           spreadId: 1,
-          question: 'Test fallback to OpenAI',
-          questionCategory: 'general',
-          cards: [
-            { cardId: 1, position: 'Pasado', isReversed: false },
-            { cardId: 2, position: 'Presente', isReversed: false },
-            { cardId: 3, position: 'Futuro', isReversed: false },
+          cardIds: [1, 2, 3],
+          cardPositions: [
+            { cardId: 1, position: 'pasado', isReversed: false },
+            { cardId: 2, position: 'presente', isReversed: false },
+            { cardId: 3, position: 'futuro', isReversed: false },
           ],
+          generateInterpretation: true,
         })
         .expect(201);
 
@@ -219,14 +225,16 @@ describe('AI Provider Fallback (e2e)', () => {
         .post('/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
+          predefinedQuestionId: 1,
+          deckId: 1,
           spreadId: 1,
-          question: 'Test all providers fail',
-          questionCategory: 'general',
-          cards: [
-            { cardId: 1, position: 'Pasado', isReversed: false },
-            { cardId: 2, position: 'Presente', isReversed: false },
-            { cardId: 3, position: 'Futuro', isReversed: false },
+          cardIds: [1, 2, 3],
+          cardPositions: [
+            { cardId: 1, position: 'pasado', isReversed: false },
+            { cardId: 2, position: 'presente', isReversed: false },
+            { cardId: 3, position: 'futuro', isReversed: false },
           ],
+          generateInterpretation: true,
         })
         .expect(500);
 
@@ -244,14 +252,16 @@ describe('AI Provider Fallback (e2e)', () => {
         .post('/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
+          predefinedQuestionId: 1,
+          deckId: 1,
           spreadId: 1,
-          question: 'Test provider logging',
-          questionCategory: 'general',
-          cards: [
-            { cardId: 1, position: 'Pasado', isReversed: false },
-            { cardId: 2, position: 'Presente', isReversed: false },
-            { cardId: 3, position: 'Futuro', isReversed: false },
+          cardIds: [1, 2, 3],
+          cardPositions: [
+            { cardId: 1, position: 'pasado', isReversed: false },
+            { cardId: 2, position: 'presente', isReversed: false },
+            { cardId: 3, position: 'futuro', isReversed: false },
           ],
+          generateInterpretation: true,
         })
         .expect(201);
 
@@ -272,14 +282,16 @@ describe('AI Provider Fallback (e2e)', () => {
         .post('/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
+          predefinedQuestionId: 1,
+          deckId: 1,
           spreadId: 1,
-          question: 'Test fallback logging',
-          questionCategory: 'general',
-          cards: [
-            { cardId: 1, position: 'Pasado', isReversed: false },
-            { cardId: 2, position: 'Presente', isReversed: false },
-            { cardId: 3, position: 'Futuro', isReversed: false },
+          cardIds: [1, 2, 3],
+          cardPositions: [
+            { cardId: 1, position: 'pasado', isReversed: false },
+            { cardId: 2, position: 'presente', isReversed: false },
+            { cardId: 3, position: 'futuro', isReversed: false },
           ],
+          generateInterpretation: true,
         })
         .expect(201);
 
@@ -343,14 +355,16 @@ describe('AI Provider Fallback (e2e)', () => {
         .post('/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
+          predefinedQuestionId: 1,
+          deckId: 1,
           spreadId: 1,
-          question: 'Continuous service test 1',
-          questionCategory: 'general',
-          cards: [
-            { cardId: 1, position: 'Pasado', isReversed: false },
-            { cardId: 2, position: 'Presente', isReversed: false },
-            { cardId: 3, position: 'Futuro', isReversed: false },
+          cardIds: [1, 2, 3],
+          cardPositions: [
+            { cardId: 1, position: 'pasado', isReversed: false },
+            { cardId: 2, position: 'presente', isReversed: false },
+            { cardId: 3, position: 'futuro', isReversed: false },
           ],
+          generateInterpretation: true,
         })
         .expect(201);
 
@@ -358,14 +372,16 @@ describe('AI Provider Fallback (e2e)', () => {
         .post('/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
+          predefinedQuestionId: 1,
+          deckId: 1,
           spreadId: 1,
-          question: 'Continuous service test 2',
-          questionCategory: 'general',
-          cards: [
-            { cardId: 1, position: 'Pasado', isReversed: false },
-            { cardId: 2, position: 'Presente', isReversed: false },
-            { cardId: 3, position: 'Futuro', isReversed: false },
+          cardIds: [1, 2, 3],
+          cardPositions: [
+            { cardId: 1, position: 'pasado', isReversed: false },
+            { cardId: 2, position: 'presente', isReversed: false },
+            { cardId: 3, position: 'futuro', isReversed: false },
           ],
+          generateInterpretation: true,
         })
         .expect(201);
 
@@ -373,14 +389,16 @@ describe('AI Provider Fallback (e2e)', () => {
         .post('/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
+          predefinedQuestionId: 1,
+          deckId: 1,
           spreadId: 1,
-          question: 'Continuous service test 3',
-          questionCategory: 'general',
-          cards: [
-            { cardId: 1, position: 'Pasado', isReversed: false },
-            { cardId: 2, position: 'Presente', isReversed: false },
-            { cardId: 3, position: 'Futuro', isReversed: false },
+          cardIds: [1, 2, 3],
+          cardPositions: [
+            { cardId: 1, position: 'pasado', isReversed: false },
+            { cardId: 2, position: 'presente', isReversed: false },
+            { cardId: 3, position: 'futuro', isReversed: false },
           ],
+          generateInterpretation: true,
         })
         .expect(201);
 
@@ -395,23 +413,25 @@ describe('AI Provider Fallback (e2e)', () => {
 
     it('should work without interruptions despite rate limits', async () => {
       // This test verifies the complete fallback chain works
-      const response = await request(app.getHttpServer())
+      const responseContinuity = await request(app.getHttpServer())
         .post('/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
+          predefinedQuestionId: 1,
+          deckId: 1,
           spreadId: 1,
-          question: 'Continuous availability test',
-          questionCategory: 'general',
-          cards: [
-            { cardId: 1, position: 'Pasado', isReversed: false },
-            { cardId: 2, position: 'Presente', isReversed: false },
-            { cardId: 3, position: 'Futuro', isReversed: false },
+          cardIds: [1, 2, 3],
+          cardPositions: [
+            { cardId: 1, position: 'pasado', isReversed: false },
+            { cardId: 2, position: 'presente', isReversed: false },
+            { cardId: 3, position: 'futuro', isReversed: false },
           ],
+          generateInterpretation: true,
         })
         .expect(201);
 
-      expect(response.body).toHaveProperty('interpretation');
-      expect(response.body.interpretation).not.toBe('');
+      expect(responseContinuity.body).toHaveProperty('interpretation');
+      expect(responseContinuity.body.interpretation).not.toBe('');
     });
   });
 });
