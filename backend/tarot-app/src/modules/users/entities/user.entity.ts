@@ -134,6 +134,61 @@ export class User {
   readings: TarotReading[];
 
   @ApiProperty({
+    example: 0,
+    description: 'Número de requests de IA usados este mes',
+  })
+  @Column({ name: 'ai_requests_used_month', type: 'int', default: 0 })
+  aiRequestsUsedMonth: number;
+
+  @ApiProperty({
+    example: 0.0,
+    description: 'Costo acumulado en USD de IA este mes',
+  })
+  @Column({
+    name: 'ai_cost_usd_month',
+    type: 'decimal',
+    precision: 10,
+    scale: 6,
+    default: 0,
+  })
+  aiCostUsdMonth: number;
+
+  @ApiProperty({
+    example: 0,
+    description: 'Tokens de IA usados este mes',
+  })
+  @Column({ name: 'ai_tokens_used_month', type: 'int', default: 0 })
+  aiTokensUsedMonth: number;
+
+  @ApiProperty({
+    example: 'groq',
+    description: 'Proveedor de IA usado mayoritariamente',
+    nullable: true,
+  })
+  @Column({
+    name: 'ai_provider_used',
+    type: 'varchar',
+    length: 50,
+    nullable: true,
+  })
+  aiProviderUsed: string | null;
+
+  @ApiProperty({
+    example: false,
+    description: 'Indica si se envió advertencia de cuota al usuario',
+  })
+  @Column({ name: 'quota_warning_sent', type: 'boolean', default: false })
+  quotaWarningSent: boolean;
+
+  @ApiProperty({
+    example: '2023-12-01T00:00:00Z',
+    description: 'Fecha del último reset de uso de IA',
+    nullable: true,
+  })
+  @Column({ name: 'ai_usage_reset_at', type: 'timestamp', nullable: true })
+  aiUsageResetAt: Date | null;
+
+  @ApiProperty({
     example: '2023-01-01T00:00:00Z',
     description: 'Fecha de último inicio de sesión',
     nullable: true,

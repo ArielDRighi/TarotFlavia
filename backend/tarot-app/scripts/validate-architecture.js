@@ -75,17 +75,46 @@ function hasLayeredStructure(dir) {
 }
 
 /**
+ * Verifica si tiene subcarpetas organizacionales (services/, guards/, controllers/, etc.)
+ * que NO son conceptuales (entities/, dto/, constants/)
+ */
+function hasOrganizationalSubfolders(dir) {
+  if (!fs.existsSync(dir)) {
+    return false;
+  }
+
+  const CONCEPTUAL_FOLDERS = ['entities', 'dto', 'constants', 'interfaces'];
+  const LAYER_FOLDERS = ['domain', 'application', 'infrastructure'];
+
+  const contents = fs.readdirSync(dir, { withFileTypes: true });
+  const subfolders = contents
+    .filter((item) => item.isDirectory())
+    .map((item) => item.name)
+    .filter((name) => !name.startsWith('.'))
+    .filter((name) => !CONCEPTUAL_FOLDERS.includes(name))
+    .filter((name) => !LAYER_FOLDERS.includes(name));
+
+  return subfolders.length > 0 ? subfolders : false;
+}
+
+/**
  * Valida un módulo individual
  */
 function validateModule(moduleName, modulePath) {
   const fileCount = countFiles(modulePath);
   const lineCount = countLines(modulePath);
   const hasLayers = hasLayeredStructure(modulePath);
+  const organizationalFolders = hasOrganizationalSubfolders(modulePath);
 
   console.log(`\n📦 Validating ${moduleName}:`);
   console.log(`   Files: ${fileCount}`);
   console.log(`   Lines: ${lineCount}`);
   console.log(`   Has layers: ${hasLayers ? '✅' : '❌'}`);
+  if (organizationalFolders) {
+    console.log(
+      `   Organizational subfolders: ${organizationalFolders.join(', ')}`,
+    );
+  }
 
   // Si cumple criterio de complejidad pero NO tiene capas
   if (
@@ -112,13 +141,28 @@ function validateModule(moduleName, modulePath) {
     console.log(`   This is OK if module is expected to grow`);
   }
 
-  // Si no cumple criterio y no tiene capas (OK)
+  // Si no cumple criterio y no tiene capas (debe ser flat)
   if (
     !hasLayers &&
     fileCount < THRESHOLD_FILES &&
     lineCount < THRESHOLD_LINES
   ) {
-    console.log(`   ✅ Flat structure OK (below threshold)`);
+    // Verificar que realmente sea flat (sin subcarpetas organizacionales)
+    if (organizationalFolders) {
+      console.log(
+        `   ❌ ERROR: Module is below threshold but has organizational subfolders`,
+      );
+      console.log(
+        `   Flat modules should only have conceptual folders (entities/, dto/, constants/)`,
+      );
+      console.log(`   Found: ${organizationalFolders.join(', ')}`);
+      console.log(
+        `   Move these files to module root or apply layered structure if complexity justifies it`,
+      );
+      exitCode = 1;
+    } else {
+      console.log(`   ✅ Flat structure OK (below threshold)`);
+    }
   }
 
   // Si tiene capas y cumple criterio (OK)
