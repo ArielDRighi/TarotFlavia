@@ -54,3 +54,16 @@ export interface QuotaLimitReachedData {
   resetDate: string;
   frontendUrl: string;
 }
+
+export interface ProviderCostWarningData {
+  provider: string;
+  currentCost: number;
+  monthlyLimit: number;
+  percentageUsed: number;
+}
+
+export interface ProviderCostLimitReachedData {
+  provider: string;
+  currentCost: number;
+  monthlyLimit: number;
+}
