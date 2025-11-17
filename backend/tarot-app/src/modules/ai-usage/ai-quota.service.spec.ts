@@ -46,6 +46,7 @@ describe('AIQuotaService', () => {
     const mockUpdateQueryBuilder = {
       update: jest.fn().mockReturnThis(),
       set: jest.fn().mockReturnThis(),
+      setParameters: jest.fn().mockReturnThis(),
       where: jest.fn().mockReturnThis(),
       execute: jest.fn().mockResolvedValue({ affected: 1 }),
     } as unknown as UpdateQueryBuilder<User>;
@@ -162,7 +163,7 @@ describe('AIQuotaService', () => {
   });
 
   describe('trackMonthlyUsage', () => {
-    it('should increment usage counters atomically', async () => {
+    it('should increment usage counters atomically with parameterized queries', async () => {
       const user = createMockUser();
       userRepository.findOne.mockResolvedValue(user);
 
@@ -170,8 +171,25 @@ describe('AIQuotaService', () => {
 
       const queryBuilder = userRepository.createQueryBuilder();
       expect(queryBuilder.update).toHaveBeenCalled();
+      expect(queryBuilder.setParameters).toHaveBeenCalledWith({
+        requests: 1,
+        tokens: 1500,
+        cost: 0.005,
+      });
       expect(queryBuilder.where).toHaveBeenCalledWith('id = :id', { id: 1 });
       expect(queryBuilder.execute).toHaveBeenCalled();
+    });
+
+    it('should log warning for invalid AI provider', async () => {
+      const user = createMockUser();
+      userRepository.findOne.mockResolvedValue(user);
+      const loggerSpy = jest.spyOn(service['logger'], 'warn');
+
+      await service.trackMonthlyUsage(1, 1, 1500, 0.005, 'invalid-provider');
+
+      expect(loggerSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Invalid AI provider "invalid-provider"'),
+      );
     });
 
     it('should not send warning if user is PREMIUM', async () => {
@@ -187,8 +205,9 @@ describe('AIQuotaService', () => {
     });
 
     it('should send warning when FREE user reaches 80% quota', async () => {
+      // User already has 80 requests after the atomic update (79 + 1 = 80)
       const user = createMockUser({
-        aiRequestsUsedMonth: 79,
+        aiRequestsUsedMonth: 80, // This is the value AFTER the atomic increment
         quotaWarningSent: false,
       });
       userRepository.findOne.mockResolvedValue(user);

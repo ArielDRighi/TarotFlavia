@@ -186,7 +186,7 @@ describe('AI Quota (E2E)', () => {
           password: hashedPassword,
           name: 'Exhausted User',
           plan: UserPlan.FREE,
-          aiRequestsUsedMonth: 100, // Cuota agotada
+          aiRequestsUsedMonth: 100, // Quota exhausted
           aiCostUsdMonth: 0,
           aiTokensUsedMonth: 0,
           aiProviderUsed: null,

@@ -115,16 +115,25 @@ export class AIQuotaService {
     cost: number,
     provider: string,
   ): Promise<void> {
+    // Validate provider to prevent invalid data
+    const validProviders = ['openai', 'groq', 'deepseek', 'anthropic'];
+    if (provider && !validProviders.includes(provider.toLowerCase())) {
+      this.logger.warn(
+        `Invalid AI provider "${provider}" for user ${userId}, using anyway`,
+      );
+    }
+
     // Incrementar contadores de forma atómica
     await this.userRepository
       .createQueryBuilder()
       .update(User)
       .set({
-        aiRequestsUsedMonth: () => `ai_requests_used_month + ${requests}`,
-        aiTokensUsedMonth: () => `ai_tokens_used_month + ${tokens}`,
-        aiCostUsdMonth: () => `ai_cost_usd_month + ${cost}`,
+        aiRequestsUsedMonth: () => 'ai_requests_used_month + :requests',
+        aiTokensUsedMonth: () => 'ai_tokens_used_month + :tokens',
+        aiCostUsdMonth: () => 'ai_cost_usd_month + :cost',
         aiProviderUsed: provider,
       })
+      .setParameters({ requests, tokens, cost })
       .where('id = :id', { id: userId })
       .execute();
 
@@ -136,7 +145,8 @@ export class AIQuotaService {
     }
 
     const quota = AI_MONTHLY_QUOTAS[user.plan];
-    const usageAfterUpdate = user.aiRequestsUsedMonth + requests;
+    // user.aiRequestsUsedMonth already includes the atomic increment above
+    const usageAfterUpdate = user.aiRequestsUsedMonth;
     const percentageUsed = (usageAfterUpdate / quota.maxRequests) * 100;
 
     // Soft limit: 80% - enviar warning (solo una vez)

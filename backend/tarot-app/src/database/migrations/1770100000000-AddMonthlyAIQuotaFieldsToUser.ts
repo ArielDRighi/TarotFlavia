@@ -37,7 +37,9 @@ export class AddMonthlyAIQuotaFieldsToUser1770100000000
       ADD COLUMN "ai_usage_reset_at" TIMESTAMP
     `);
 
-    // Crear índice para optimizar queries de cuotas
+    // Create index to optimize monthly quota reset cron job queries
+    // The resetMonthlyQuotas() cron job in AIQuotaService uses this index
+    // to efficiently update all users' quotas on the 1st of each month
     await queryRunner.query(`
       CREATE INDEX "IDX_user_ai_quota_reset" 
       ON "user" ("ai_usage_reset_at")
