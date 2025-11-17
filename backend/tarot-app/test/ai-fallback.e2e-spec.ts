@@ -60,7 +60,7 @@ describe('AI Provider Fallback (e2e)', () => {
     await ds.query('DELETE FROM tarot_reading WHERE "userId" = $1', [
       freeUserId,
     ]);
-    await ds.query('DELETE FROM usage_limit WHERE "userId" = $1', [freeUserId]);
+    await ds.query('DELETE FROM usage_limit WHERE user_id = $1', [freeUserId]);
   });
 
   afterAll(async () => {
