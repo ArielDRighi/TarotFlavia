@@ -2,10 +2,14 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { ConfigService } from '@nestjs/config';
 import { User, UserPlan } from '../users/entities/user.entity';
 import { AI_MONTHLY_QUOTAS } from './constants/ai-usage.constants';
 import { startOfMonth } from 'date-fns/startOfMonth';
 import { addMonths } from 'date-fns/addMonths';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { EmailService } from '../email/email.service';
 
 export interface QuotaInfo {
   quotaLimit: number;
@@ -27,6 +31,8 @@ export class AIQuotaService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly emailService: EmailService,
+    private readonly configService: ConfigService,
   ) {}
 
   /**
@@ -150,14 +156,19 @@ export class AIQuotaService {
     const percentageUsed = (usageAfterUpdate / quota.maxRequests) * 100;
 
     // Soft limit: 80% - enviar warning (solo una vez)
-    if (percentageUsed >= 80 && !user.quotaWarningSent) {
-      this.sendQuotaWarning(user, percentageUsed);
+    if (
+      percentageUsed >= 80 &&
+      percentageUsed < 100 &&
+      !user.quotaWarningSent
+    ) {
+      await this.sendQuotaWarningEmail(user, percentageUsed);
       user.quotaWarningSent = true;
       await this.userRepository.save(user);
     }
 
-    // Hard limit: 100% - loggear bloqueo
-    if (usageAfterUpdate >= quota.hardLimit) {
+    // Hard limit: 100% - enviar notificación de límite alcanzado (solo FREE)
+    if (user.plan === UserPlan.FREE && usageAfterUpdate >= quota.hardLimit) {
+      await this.sendQuotaLimitReachedEmail(user);
       this.logger.warn(
         `User ${userId} has reached hard limit: ${usageAfterUpdate}/${quota.hardLimit}`,
       );
@@ -202,17 +213,67 @@ export class AIQuotaService {
   /**
    * Envía advertencia de cuota al usuario (placeholder para integración con EmailService)
    */
-  private sendQuotaWarning(user: User, percentageUsed: number): void {
-    // TODO: Integrar con EmailService cuando esté disponible (TASK-040)
-    this.logger.warn(
-      `User ${user.id} (${user.email}) has reached ${Math.round(percentageUsed)}% of monthly AI quota`,
-    );
+  private async sendQuotaWarningEmail(
+    user: User,
+    percentageUsed: number,
+  ): Promise<void> {
+    try {
+      const quota = AI_MONTHLY_QUOTAS[user.plan];
+      const frontendUrl =
+        this.configService.get<string>('FRONTEND_URL') ||
+        'http://localhost:3000';
+      const resetDate = this.getNextResetDate();
 
-    // Futura integración:
-    // await this.emailService.sendQuotaWarning(user.email, {
-    //   percentageUsed: Math.round(percentageUsed),
-    //   quotaLimit: AI_MONTHLY_QUOTAS[user.plan].maxRequests,
-    //   resetDate: this.getNextResetDate(),
-    // });
+      await this.emailService.sendQuotaWarningEmail(user.email, {
+        userName: user.name || 'Usuario',
+        plan: user.plan,
+        quotaLimit: quota.maxRequests,
+        requestsUsed: user.aiRequestsUsedMonth,
+        requestsRemaining: quota.maxRequests - user.aiRequestsUsedMonth,
+        percentageUsed: Math.round(percentageUsed),
+        resetDate: format(resetDate, "d 'de' MMMM 'de' yyyy", { locale: es }),
+        frontendUrl,
+      });
+
+      this.logger.log(
+        `Quota warning email sent to user ${user.id} (${user.email}) - ${Math.round(percentageUsed)}% used`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to send quota warning email to user ${user.id}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+    }
+  }
+
+  /**
+   * Envía notificación de cuota alcanzada al 100%
+   */
+  private async sendQuotaLimitReachedEmail(user: User): Promise<void> {
+    try {
+      const quota = AI_MONTHLY_QUOTAS[user.plan];
+      const frontendUrl =
+        this.configService.get<string>('FRONTEND_URL') ||
+        'http://localhost:3000';
+      const resetDate = this.getNextResetDate();
+
+      await this.emailService.sendQuotaLimitReachedEmail(user.email, {
+        userName: user.name || 'Usuario',
+        plan: user.plan,
+        quotaLimit: quota.maxRequests,
+        requestsUsed: user.aiRequestsUsedMonth,
+        resetDate: format(resetDate, "d 'de' MMMM 'de' yyyy", { locale: es }),
+        frontendUrl,
+      });
+
+      this.logger.log(
+        `Quota limit reached email sent to user ${user.id} (${user.email})`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to send quota limit reached email to user ${user.id}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+    }
   }
 }

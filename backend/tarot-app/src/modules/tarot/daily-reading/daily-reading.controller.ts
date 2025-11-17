@@ -16,6 +16,7 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { AIQuotaGuard } from '../../ai-usage/ai-quota.guard';
 import { DailyReadingService } from './daily-reading.service';
 import { DailyReadingResponseDto } from './dto/daily-reading-response.dto';
 import { DailyReadingHistoryDto } from './dto/daily-reading-history.dto';
@@ -156,12 +157,13 @@ export class DailyReadingController {
     return this.dailyReadingService.getDailyHistory(userId, pageNum, limitNum);
   }
 
+  @UseGuards(JwtAuthGuard, AIQuotaGuard)
   @Post('regenerate')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Regenerar carta del día (solo premium)',
     description:
-      'Regenera la carta del día con una nueva carta y interpretación. Solo disponible para usuarios premium, 1 vez por día.',
+      'Regenera la carta del día con una nueva carta y interpretación. Solo disponible para usuarios premium, 1 vez por día. Consume de la cuota mensual de IA.',
   })
   @ApiResponse({
     status: 200,

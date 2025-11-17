@@ -5,11 +5,13 @@ import { DailyReadingService } from './daily-reading.service';
 import { DailyReading } from './entities/daily-reading.entity';
 import { TarotCard } from '../cards/entities/tarot-card.entity';
 import { InterpretationsModule } from '../interpretations/interpretations.module';
+import { AIUsageModule } from '../../ai-usage/ai-usage.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([DailyReading, TarotCard]),
     InterpretationsModule,
+    AIUsageModule,
   ],
   controllers: [DailyReadingController],
   providers: [DailyReadingService],

@@ -31,6 +31,7 @@ import {
   CheckUsageLimit,
   UsageFeature,
 } from '../../usage-limits';
+import { AIQuotaGuard } from '../../ai-usage/ai-quota.guard';
 import { ReadingsOrchestratorService } from './application/services/readings-orchestrator.service';
 import { CreateReadingDto } from './dto/create-reading.dto';
 import { QueryReadingsDto } from './dto/query-readings.dto';
@@ -183,7 +184,7 @@ export class ReadingsController {
     return this.orchestrator.findOne(id, userId, isAdmin);
   }
 
-  @UseGuards(JwtAuthGuard, CheckUsageLimitGuard)
+  @UseGuards(JwtAuthGuard, AIQuotaGuard, CheckUsageLimitGuard)
   @UseInterceptors(IncrementUsageInterceptor)
   @CheckUsageLimit(UsageFeature.INTERPRETATION_REGENERATION)
   @Post(':id/regenerate')
@@ -191,7 +192,7 @@ export class ReadingsController {
   @ApiOperation({
     summary: 'Regenerar interpretación de una lectura existente',
     description:
-      'Genera una nueva interpretación para una lectura existente manteniendo las mismas cartas. Solo disponible para usuarios premium. Límite: 3 regeneraciones por lectura.',
+      'Genera una nueva interpretación para una lectura existente manteniendo las mismas cartas. Solo disponible para usuarios premium. Límite: 3 regeneraciones por lectura. Consume de la cuota mensual de IA.',
   })
   @ApiParam({ name: 'id', description: 'ID de la lectura a regenerar' })
   @ApiResponse({

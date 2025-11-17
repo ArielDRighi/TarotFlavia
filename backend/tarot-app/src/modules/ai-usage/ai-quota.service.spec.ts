@@ -1,14 +1,20 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, UpdateQueryBuilder } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
 import { AIQuotaService } from './ai-quota.service';
 import { User, UserPlan } from '../users/entities/user.entity';
 import { Logger } from '@nestjs/common';
 import { UserRole } from '../../common/enums/user-role.enum';
+import { EmailService } from '../email/email.service';
 
 describe('AIQuotaService', () => {
   let service: AIQuotaService;
   let userRepository: jest.Mocked<Repository<User>>;
+  let mockEmailService: {
+    sendQuotaWarningEmail: jest.Mock;
+    sendQuotaLimitReachedEmail: jest.Mock;
+  };
 
   const createMockUser = (overrides: Partial<User> = {}): User => {
     const user = new User();
@@ -57,12 +63,33 @@ describe('AIQuotaService', () => {
       createQueryBuilder: jest.fn(() => mockUpdateQueryBuilder),
     };
 
+    mockEmailService = {
+      sendQuotaWarningEmail: jest.fn(),
+      sendQuotaLimitReachedEmail: jest.fn(),
+    };
+
+    const mockConfigService = {
+      get: jest.fn((key: string) => {
+        if (key === 'AI_QUOTA_FREE_MONTHLY') return 100;
+        if (key === 'AI_QUOTA_PREMIUM_MONTHLY') return -1;
+        return undefined;
+      }),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AIQuotaService,
         {
           provide: getRepositoryToken(User),
           useValue: mockRepository,
+        },
+        {
+          provide: EmailService,
+          useValue: mockEmailService,
+        },
+        {
+          provide: ConfigService,
+          useValue: mockConfigService,
         },
       ],
     }).compile();
@@ -231,6 +258,40 @@ describe('AIQuotaService', () => {
       await service.trackMonthlyUsage(1, 1, 1500, 0.005, 'groq');
 
       expect(userRepository.save).not.toHaveBeenCalled();
+    });
+
+    it('should send limit reached email when FREE user reaches 100% quota', async () => {
+      const user = createMockUser({
+        plan: UserPlan.FREE,
+        aiRequestsUsedMonth: 100,
+        quotaWarningSent: true,
+      });
+      userRepository.findOne.mockResolvedValue(user);
+
+      await service.trackMonthlyUsage(1, 1, 1500, 0.005, 'groq');
+
+      expect(mockEmailService.sendQuotaLimitReachedEmail).toHaveBeenCalledWith(
+        user.email,
+        expect.objectContaining({
+          userName: user.name,
+          plan: UserPlan.FREE,
+          quotaLimit: 100,
+        }),
+      );
+    });
+
+    it('should NOT send limit reached email when PREMIUM user reaches high usage', async () => {
+      const user = createMockUser({
+        plan: UserPlan.PREMIUM,
+        aiRequestsUsedMonth: 10000,
+      });
+      userRepository.findOne.mockResolvedValue(user);
+
+      await service.trackMonthlyUsage(1, 1, 1500, 0.005, 'groq');
+
+      expect(
+        mockEmailService.sendQuotaLimitReachedEmail,
+      ).not.toHaveBeenCalled();
     });
   });
 

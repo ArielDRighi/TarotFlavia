@@ -6,16 +6,23 @@ export interface QuotaConfig {
   hardLimit: number;
 }
 
+/**
+ * Cuotas mensuales de IA por plan de usuario
+ * IMPORTANTE: Estos valores por defecto pueden ser sobrescritos por variables de entorno
+ * Ver .env.example para configuración (AI_QUOTA_FREE_MONTHLY, AI_QUOTA_PREMIUM_MONTHLY)
+ */
 export const AI_MONTHLY_QUOTAS: Record<UserPlan, QuotaConfig> = {
   [UserPlan.FREE]: {
-    maxRequests: 100, // ~3 lecturas/día promedio
-    softLimit: 80, // Advertencia al 80%
-    hardLimit: 100, // Bloqueo al 100%
+    maxRequests: Number(process.env.AI_QUOTA_FREE_MONTHLY) || 100, // ~3 lecturas/día promedio
+    softLimit: Math.round(
+      (Number(process.env.AI_QUOTA_FREE_MONTHLY) || 100) * 0.8,
+    ), // Advertencia al 80%
+    hardLimit: Number(process.env.AI_QUOTA_FREE_MONTHLY) || 100, // Bloqueo al 100%
   },
   [UserPlan.PREMIUM]: {
-    maxRequests: -1, // Ilimitado
+    maxRequests: Number(process.env.AI_QUOTA_PREMIUM_MONTHLY) || -1, // Ilimitado
     softLimit: -1, // No aplica
-    hardLimit: -1, // No aplica
+    hardLimit: Number.MAX_SAFE_INTEGER, // Prácticamente ilimitado
   },
 };
 

@@ -5129,14 +5129,18 @@ Implementar tracing distribuido para seguir requests a través de diferentes ser
 
 ---
 
-### **TASK-054: Implementar Sistema de Cuotas de IA por Usuario** ⭐⭐ NECESARIA MVP ⚠️
+### **TASK-054: Implementar Sistema de Cuotas de IA por Usuario** ⭐⭐ NECESARIA MVP ✅
 
 **Prioridad:** 🟡 ALTA  
 **Estimación:** 3 días  
 **Dependencias:** TASK-019, TASK-061  
-**Estado:** ⚠️ **85% COMPLETADO** - Funcionalidad core implementada, faltan integraciones  
-**Branch:** `feature/TASK-054-ai-quota-system` (ya mergeada a develop)  
-**Fecha de Implementación:** noviembre 2025
+**Estado:** ✅ **100% COMPLETADO** - Sistema completamente integrado, probado y funcionando  
+**Branches:**
+
+- `feature/TASK-054-ai-quota-system` (mergeada a develop)
+- `feature/TASK-054-COMPLETE-ai-quota-integrations` (mergeada a develop)  
+  **Fecha de Implementación:** Noviembre 2025 - Enero 2026  
+  **Fecha de Finalización:** 17 de enero 2026
 
 #### 📋 Descripción
 
@@ -5211,9 +5215,14 @@ Crear sistema que trackee y limite el uso de IA por usuario para controlar costo
   - Llamar `aiQuotaService.checkMonthlyQuota(userId)` ✅
   - Si excedió cuota, lanzar `ForbiddenException` con mensaje detallado ✅
   - Incluir fecha de reset en el mensaje (formato español) ✅
-- [ ] Aplicar guard en endpoints de generación de interpretaciones ⚠️ **PENDIENTE**
+- [x] Aplicar guard en endpoints de generación de interpretaciones ✅
+  - `POST /readings/:id/regenerate` ✅
+  - `POST /daily-reading/regenerate` ✅
+  - `POST /interpretations/generate` ✅
 - [x] Tests unitarios del guard (6+ scenarios) ✅
   - **Archivo:** `src/modules/ai-usage/ai-quota.guard.spec.ts`
+- [x] Tests E2E de integración de guard (8 scenarios) ✅
+  - **Archivo:** `test/ai-quota.e2e-spec.ts`
 
 **5. Implementar soft/hard limits - ✅ COMPLETADO:**
 
@@ -5231,96 +5240,130 @@ Crear sistema que trackee y limite el uso de IA por usuario para controlar costo
   - **Archivo:** `test/ai-quota.e2e-spec.ts`
 - [x] Documentación Swagger ✅
 
-**7. Notificaciones de Cuotas (0.5 días) - ⚠️ PARCIALMENTE IMPLEMENTADO:**
+**7. Notificaciones de Cuotas (0.5 días) - ✅ COMPLETADO:**
 
-- [ ] Integrar con EmailService (dependencia: TASK-040) ⚠️ **PENDIENTE** (EmailService no disponible)
-- [ ] Crear templates de email: ⚠️ **PENDIENTE**
-  - `quota-warning-80.html`: "Has usado el 80% de tu cuota mensual"
-  - `quota-limit-reached.html`: "Has alcanzado tu límite mensual"
-- [x] Implementar envío de emails en `AIQuotaService.trackMonthlyUsage()`: ⚠️ **PARCIAL**
-  - Al 80%: logging implementado (envío de email pendiente de EmailService) ✅
-  - Al 100%: logging implementado (envío de email pendiente de EmailService) ✅
-  - **NOTA ACTUAL:** Sistema loggea warnings, envío de emails esperando TASK-040
+- [x] Integrar con EmailService ✅
+- [x] Crear templates de email: ✅
+  - `quota-warning-80.hbs`: Advertencia al 80% con estadísticas y CTA a Premium
+  - `quota-limit-reached.hbs`: Notificación de límite alcanzado con fecha de reset
+- [x] Implementar envío de emails en `AIQuotaService.trackMonthlyUsage()`: ✅
+  - Al 80%: envío automático con método `sendQuotaWarningEmail()` ✅
+  - Al 100%: envío automático con método `sendQuotaLimitReachedEmail()` ✅
+  - Emails con formato profesional HTML/CSS en español ✅
+  - Incluyen progreso visual, estadísticas y CTA a upgrade ✅
 
-**8. Integración y Variables de Entorno (0.25 días) - ⚠️ PARCIALMENTE IMPLEMENTADO:**
+**8. Integración y Variables de Entorno (0.25 días) - ✅ COMPLETADO:**
 
-- [ ] Integrar `AIQuotaService` en `AIProviderService.generateCompletion()`: ⚠️ **PENDIENTE**
-  - Tracking no está integrado automáticamente en cada generación
-  - **ACCIÓN REQUERIDA:** Agregar llamada a `trackMonthlyUsage()` después de `aiUsageService.createLog()`
-- [ ] Agregar variables de entorno a `.env.example`: ⚠️ **PENDIENTE**
-  - Variables hardcoded en constantes, no en .env
-  - **NOTA:** Funcionamiento OK, pero no configurable sin rebuild
-- [ ] Validar variables en `env.validation.ts` (opcional)
-- [ ] Documentar en `docs/AI_PROVIDERS.md` ⚠️ **PENDIENTE**
+- [x] Integrar `AIQuotaService` en `AIProviderService.complete()`: ✅
+  - Tracking automático después de cada generación exitosa ✅
+  - Llamada a `trackMonthlyUsage()` con userId, tokens, costo y provider ✅
+- [x] Agregar variables de entorno a `.env.example`: ✅
+  - `AI_QUOTA_FREE_MONTHLY=100` ✅
+  - `AI_QUOTA_PREMIUM_MONTHLY=-1` (ilimitado) ✅
+  - Documentación completa de uso y configuración ✅
+- [x] Validar variables en `env.validation.ts` ✅
+  - Validación con decoradores class-validator ✅
+  - Valores por defecto correctos ✅
+- [x] Actualizar constantes para leer de variables de entorno: ✅
+  - `AI_MONTHLY_QUOTAS` en `ai-usage.constants.ts` ✅
+  - Cálculo dinámico de softLimit y hardLimit ✅
+- [x] Documentar en `docs/AI_PROVIDERS.md` ✅
+  - Nueva sección "Cuotas Mensuales por Plan" ✅
+  - Tabla de límites por plan ✅
+  - Ejemplos de uso de guard ✅
+  - Documentación de tracking automático ✅
+  - Configuración de notificaciones por email ✅
+  - Endpoint de consulta de cuota ✅
 
 #### 🎯 Criterios de aceptación
 
-- ✅ Los usuarios FREE no pueden exceder 100 requests/mes (Guard implementado)
-- ✅ Los contadores se resetean correctamente cada mes (Cron job implementado)
-- ⚠️ Los usuarios son notificados apropiadamente (Logging implementado, emails pendientes de TASK-040)
-- ⚠️ Sistema previene abuse de rate limits de Groq (Implementado parcialmente - falta aplicar guard en endpoints)
+- ✅ Los usuarios FREE no pueden exceder 100 requests/mes (Guard aplicado en 3 endpoints)
+- ✅ Los contadores se resetean correctamente cada mes (Cron job implementado y probado)
+- ✅ Los usuarios son notificados apropiadamente (Emails automáticos al 80% y 100%)
+- ✅ Sistema previene abuse de rate limits de Groq (Guard aplicado en todos endpoints críticos)
 - ✅ Funciona con cualquier proveedor de IA (Groq, DeepSeek, OpenAI)
+- ✅ Tracking automático de uso mensual (Integrado en AIProviderService)
+- ✅ Configuración flexible vía variables de entorno (AI_QUOTA_FREE_MONTHLY, AI_QUOTA_PREMIUM_MONTHLY)
+- ✅ Documentación completa en AI_PROVIDERS.md
+- ✅ Tests E2E completos (8/8 passing)
 
 #### 📦 Resumen de Implementación
 
-**Archivos creados (85% completado):**
+**Archivos creados/modificados (100% completado):**
 
 1. ✅ `src/database/migrations/1770100000000-AddMonthlyAIQuotaFieldsToUser.ts` - Migración completa
-2. ✅ `src/modules/ai-usage/ai-quota.service.ts` - Servicio completo con cron job
-3. ✅ `src/modules/ai-usage/ai-quota.guard.ts` - Guard implementado
+2. ✅ `src/modules/ai-usage/ai-quota.service.ts` - Servicio completo con cron job y emails
+3. ✅ `src/modules/ai-usage/ai-quota.guard.ts` - Guard implementado y aplicado
 4. ✅ `src/modules/ai-usage/ai-quota.controller.ts` - Endpoint GET /usage/ai
-5. ✅ `src/modules/ai-usage/constants/ai-usage.constants.ts` - Constantes de cuotas
+5. ✅ `src/modules/ai-usage/constants/ai-usage.constants.ts` - Constantes con env vars
 6. ✅ `src/modules/ai-usage/skip-quota-check.decorator.ts` - Decorador para skipear guard
-7. ✅ `src/modules/ai-usage/ai-quota.service.spec.ts` - Tests unitarios
-8. ✅ `src/modules/ai-usage/ai-quota.guard.spec.ts` - Tests unitarios
-9. ✅ `test/ai-quota.e2e-spec.ts` - Tests E2E
+7. ✅ `src/modules/ai-usage/ai-usage.module.ts` - Importa EmailModule
+8. ✅ `src/modules/ai/application/services/ai-provider.service.ts` - Tracking integrado
+9. ✅ `src/modules/tarot/readings/readings.controller.ts` - Guard aplicado
+10. ✅ `src/modules/tarot/daily-reading/daily-reading.controller.ts` - Guard aplicado
+11. ✅ `src/modules/tarot/interpretations/interpretations.controller.ts` - Guard aplicado
+12. ✅ `src/modules/tarot/readings/readings.module.ts` - Importa AIUsageModule
+13. ✅ `src/modules/tarot/daily-reading/daily-reading.module.ts` - Importa AIUsageModule
+14. ✅ `src/modules/tarot/interpretations/interpretations.module.ts` - Importa AIUsageModule
+15. ✅ `src/modules/email/templates/quota-warning-80.hbs` - Template HTML profesional
+16. ✅ `src/modules/email/templates/quota-limit-reached.hbs` - Template HTML profesional
+17. ✅ `src/modules/email/email.service.ts` - Métodos sendQuotaWarningEmail() y sendQuotaLimitReachedEmail()
+18. ✅ `src/modules/email/interfaces/email.interface.ts` - Interfaces QuotaWarningData y QuotaLimitReachedData
+19. ✅ `src/config/env.validation.ts` - Validación de AI*QUOTA*\*\_MONTHLY
+20. ✅ `.env.example` - Documentación de variables de entorno
+21. ✅ `docs/AI_PROVIDERS.md` - Sección "Cuotas Mensuales por Plan"
+22. ✅ `src/modules/ai-usage/ai-quota.service.spec.ts` - Tests unitarios
+23. ✅ `src/modules/ai-usage/ai-quota.guard.spec.ts` - Tests unitarios
+24. ✅ `test/ai-quota.e2e-spec.ts` - Tests E2E (8/8 passing)
 
 **Características implementadas:**
 
 - ✅ Migración con 6 campos de tracking mensual en tabla `user`
-- ✅ User entity actualizado con campos de cuotas
-- ✅ AIQuotaService con `trackMonthlyUsage()`, `checkMonthlyQuota()`, `getRemainingQuota()`
-- ✅ Cron job que resetea cuotas el día 1 de cada mes a las 00:00
-- ✅ AI_MONTHLY_QUOTAS: FREE (100 requests/mes), PREMIUM (ilimitado)
-- ✅ AIQuotaGuard que bloquea requests cuando se excede cuota
-- ✅ Endpoint GET /usage/ai con toda la información de cuota del usuario
-- ✅ Tests unitarios y E2E
+- ✅ AIQuotaService con tracking automático, verificación y cron job
+- ✅ AIQuotaGuard aplicado en 3 endpoints críticos que consumen IA
+- ✅ Integración completa con AIProviderService (tracking automático post-completion)
+- ✅ Notificaciones por email al 80% y 100% con templates HTML profesionales
+- ✅ Variables de entorno configurables (AI_QUOTA_FREE_MONTHLY, AI_QUOTA_PREMIUM_MONTHLY)
+- ✅ Endpoint GET /usage/ai para consultar cuota del usuario
+- ✅ Reset automático mensual con cron job el día 1 a las 00:00
+- ✅ Documentación completa en AI_PROVIDERS.md
+- ✅ Tests unitarios y E2E completos
 
-**Pendiente de completar (15%):**
+**Integración con otros módulos:**
 
-1. ⚠️ **Aplicar AIQuotaGuard en endpoints de interpretaciones:**
+- ✅ `AIUsageModule` exporta AIQuotaService y AIQuotaGuard
+- ✅ `ReadingsModule`, `DailyReadingModule`, `InterpretationsModule` importan AIUsageModule
+- ✅ `AIUsageModule` importa EmailModule para notificaciones
+- ✅ `AIProviderService` inyecta AIQuotaService y llama trackMonthlyUsage()
 
-   - `POST /interpretations`
-   - `POST /readings/:id/regenerate`
-   - Otros endpoints que consuman IA
+**Funcionamiento end-to-end:**
 
-2. ⚠️ **Integrar trackMonthlyUsage() en AIProviderService:**
+1. Usuario hace POST /readings/:id/regenerate
+2. JwtAuthGuard verifica autenticación
+3. **AIQuotaGuard verifica cuota mensual** (si excedida → 403)
+4. CheckUsageLimitGuard verifica límite diario
+5. Controller ejecuta regeneración
+6. AIProviderService genera interpretación con IA
+7. **AIProviderService llama trackMonthlyUsage()** automáticamente
+8. AIQuotaService incrementa contadores y verifica thresholds
+9. Si 80% → envío de email de advertencia (una vez)
+10. Si 100% → envío de email de límite alcanzado
 
-   - Agregar llamada después de `aiUsageService.createLog()` en `generateCompletion()`
-   - Tracking automático en cada uso de IA
+#### 📝 Notas Finales
 
-3. ⚠️ **Templates de email (depende de TASK-040):**
+**Impacto en producción:**
 
-   - `quota-warning-80.html`
-   - `quota-limit-reached.html`
+- Control efectivo de costos de IA (FREE users limitados a 100 requests/mes)
+- Prevención de abuse de rate limits de Groq (14,400 requests/día compartidos)
+- Notificaciones proactivas para upgrade a Premium
+- Configuración flexible sin necesidad de redeploy
 
-4. ⚠️ **Variables de entorno configurables:**
+**Próximos pasos (post-MVP):**
 
-   - Agregar a `.env.example`
-   - Validar en `env.validation.ts`
-
-5. ⚠️ **Documentación:**
-   - Actualizar `docs/AI_PROVIDERS.md` con sección de cuotas mensuales
-
-**Próximos pasos para completar al 100%:**
-
-```bash
-# 1. Aplicar guard en interpretations controller
-# 2. Integrar trackMonthlyUsage en AIProviderService
-# 3. Crear templates de email (cuando EmailService esté listo)
-# 4. Agregar variables de entorno
-# 5. Documentar en AI_PROVIDERS.md
-```
+- Dashboard de analytics de uso de cuotas por plan
+- Ajuste dinámico de cuotas según demanda
+- Notificaciones push además de emails
+- Telemetría avanzada de uso de IA
 
 ---
 

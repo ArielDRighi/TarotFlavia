@@ -1,0 +1,213 @@
+<html>
+  <head>
+    <meta charset='utf-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <title>Cuota de IA Alcanzada - TarotFlavia</title>
+    <style>
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f4f4f4;
+      }
+      .container {
+        background-color: #ffffff;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        text-align: center;
+        padding-bottom: 20px;
+        border-bottom: 3px solid #dc3545;
+      }
+      .header h1 {
+        color: #dc3545;
+        margin: 0;
+        font-size: 28px;
+      }
+      .content {
+        padding: 30px 0;
+      }
+      .alert-box {
+        background-color: #f8d7da;
+        border-left: 4px solid #dc3545;
+        padding: 15px;
+        margin: 20px 0;
+        border-radius: 5px;
+      }
+      .stats {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 5px;
+        margin: 20px 0;
+      }
+      .stats-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #dee2e6;
+      }
+      .stats-item:last-child {
+        border-bottom: none;
+      }
+      .stats-label {
+        font-weight: 600;
+        color: #6c757d;
+      }
+      .stats-value {
+        font-weight: 700;
+        color: #333;
+      }
+      .cta-button {
+        display: inline-block;
+        padding: 15px 30px;
+        background-color: #9013fe;
+        color: #ffffff;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: bold;
+        margin: 20px 0;
+        text-align: center;
+      }
+      .cta-button:hover {
+        background-color: #7a0fdb;
+      }
+      .footer {
+        text-align: center;
+        padding-top: 20px;
+        border-top: 1px solid #dee2e6;
+        color: #6c757d;
+        font-size: 14px;
+      }
+      .progress-bar {
+        width: 100%;
+        height: 30px;
+        background-color: #e9ecef;
+        border-radius: 15px;
+        overflow: hidden;
+        margin: 15px 0;
+      }
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #dc3545 0%, #c82333 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        font-weight: bold;
+        font-size: 14px;
+      }
+      .benefits {
+        background-color: #d4edda;
+        border-left: 4px solid #28a745;
+        padding: 15px;
+        margin: 20px 0;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class='container'>
+      <div class='header'>
+        <h1>🚫 Cuota Mensual Alcanzada</h1>
+      </div>
+
+      <div class='content'>
+        <p>Hola <strong>{{userName}}</strong>,</p>
+
+        <div class='alert-box'>
+          <p style='margin: 0; font-size: 16px;'>
+            <strong>Has alcanzado el límite de tu cuota mensual de
+              interpretaciones con IA.</strong>
+          </p>
+        </div>
+
+        <p>
+          Has utilizado todas las
+          {{quotaLimit}}
+          interpretaciones incluidas en tu plan Free este mes. No podrás generar
+          nuevas interpretaciones hasta que tu cuota se renueve.
+        </p>
+
+        <div class='stats'>
+          <div class='stats-item'>
+            <span class='stats-label'>Plan actual:</span>
+            <span class='stats-value'>{{plan}}</span>
+          </div>
+          <div class='stats-item'>
+            <span class='stats-label'>Cuota mensual:</span>
+            <span class='stats-value'>{{quotaLimit}} interpretaciones</span>
+          </div>
+          <div class='stats-item'>
+            <span class='stats-label'>Ya usadas:</span>
+            <span class='stats-value' style='color: #dc3545;'>{{requestsUsed}}
+              interpretaciones</span>
+          </div>
+          <div class='stats-item'>
+            <span class='stats-label'>Renovación automática:</span>
+            <span class='stats-value'>{{resetDate}}</span>
+          </div>
+        </div>
+
+        <div class='progress-bar'>
+          <div class='progress-fill' style='width: 100%;'>
+            100% Usado
+          </div>
+        </div>
+
+        <p>
+          <strong>¿Qué puedes hacer ahora?</strong>
+        </p>
+        <ol>
+          <li><strong>Actualizar a Premium</strong>
+            - Disfruta de interpretaciones ilimitadas inmediatamente</li>
+          <li><strong>Esperar</strong>
+            - Tu cuota se renovará automáticamente el
+            {{resetDate}}</li>
+        </ol>
+
+        <div class='benefits'>
+          <p style='margin: 0 0 10px 0; font-weight: 600; color: #28a745;'>
+            🌟 Beneficios del Plan Premium:
+          </p>
+          <ul style='margin: 0; padding-left: 20px;'>
+            <li><strong>Interpretaciones ilimitadas</strong>
+              - Sin restricciones mensuales</li>
+            <li><strong>Preguntas personalizadas</strong>
+              - Consultas adaptadas a tu situación</li>
+            <li><strong>Regeneración de lecturas</strong>
+              - Obtén diferentes perspectivas</li>
+            <li><strong>Soporte prioritario</strong>
+              - Respuestas más rápidas</li>
+            <li><strong>Acceso anticipado</strong>
+              - Nuevas funcionalidades primero</li>
+          </ul>
+        </div>
+
+        <div style='text-align: center;'>
+          <a href='{{frontendUrl}}/upgrade' class='cta-button'>
+            ✨ Actualizar a Premium Ahora
+          </a>
+        </div>
+
+        <p
+          style='font-size: 14px; color: #6c757d; margin-top: 30px; text-align: center;'
+        >
+          <em>Con Premium, nunca más te quedarás sin interpretaciones.</em>
+        </p>
+      </div>
+
+      <div class='footer'>
+        <p>Este es un email automático de TarotFlavia</p>
+        <p>
+          Si tienes preguntas sobre tu cuenta o el plan Premium, contáctanos en
+          <a href='mailto:soporte@tarotflavia.com'>soporte@tarotflavia.com</a>
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

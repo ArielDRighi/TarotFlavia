@@ -150,6 +150,23 @@ export class EnvironmentVariables {
   OPENAI_MODEL: string = 'gpt-4o-mini';
 
   // =============================================================================
+  // AI QUOTA CONFIGURATION (Optional with Defaults)
+  // =============================================================================
+
+  @IsInt()
+  @Min(1)
+  @IsOptional()
+  @Type(() => Number)
+  @Transform(({ value }) => (value ? Number(value) : 100))
+  AI_QUOTA_FREE_MONTHLY: number = 100;
+
+  @IsInt()
+  @IsOptional()
+  @Type(() => Number)
+  @Transform(({ value }) => (value ? Number(value) : -1))
+  AI_QUOTA_PREMIUM_MONTHLY: number = -1;
+
+  // =============================================================================
   // APPLICATION CONFIGURATION (Optional with Defaults)
   // =============================================================================
 

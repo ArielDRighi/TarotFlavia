@@ -124,7 +124,7 @@ describe('EmailService (e2e)', () => {
           userName: 'Test User',
           oldPlan: 'Free',
           newPlan: 'Premium',
-          changeDate: new Date(),
+          changeDate: new Date().toISOString(),
         };
 
         expect(async () => {

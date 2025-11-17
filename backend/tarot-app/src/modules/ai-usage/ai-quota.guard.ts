@@ -12,7 +12,7 @@ import { es } from 'date-fns/locale/es';
 
 interface RequestWithUser {
   user?: {
-    id?: number;
+    userId?: number; // JWT sets userId, not id
   };
 }
 
@@ -37,16 +37,18 @@ export class AIQuotaGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<RequestWithUser>();
     const user = request.user;
 
-    if (!user || !user.id) {
+    if (!user || !user.userId) {
       throw new ForbiddenException(
         'Usuario no autenticado. Por favor, inicia sesión.',
       );
     }
 
-    const hasQuota = await this.aiQuotaService.checkMonthlyQuota(user.id);
+    const hasQuota = await this.aiQuotaService.checkMonthlyQuota(user.userId);
 
     if (!hasQuota) {
-      const quotaInfo = await this.aiQuotaService.getRemainingQuota(user.id);
+      const quotaInfo = await this.aiQuotaService.getRemainingQuota(
+        user.userId,
+      );
       const resetDateFormatted = format(quotaInfo.resetDate, 'd/M/yyyy', {
         locale: es,
       });

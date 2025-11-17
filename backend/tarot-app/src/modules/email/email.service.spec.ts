@@ -261,7 +261,7 @@ describe('EmailService', () => {
         userName: 'John Doe',
         oldPlan: 'Free',
         newPlan: 'Premium',
-        changeDate: new Date('2025-10-31'),
+        changeDate: new Date('2025-10-31').toISOString(),
       };
 
       mockMailerService.sendMail.mockResolvedValue({ messageId: 'test-id' });
@@ -283,7 +283,7 @@ describe('EmailService', () => {
         userName: 'John Doe',
         oldPlan: 'Free',
         newPlan: 'Premium',
-        changeDate: new Date(),
+        changeDate: new Date().toISOString(),
       };
 
       const error = new Error('SMTP Error');
@@ -301,7 +301,7 @@ describe('EmailService', () => {
         userName: 'John Doe',
         oldPlan: 'Free',
         newPlan: 'Premium',
-        changeDate: new Date(),
+        changeDate: new Date().toISOString(),
       };
 
       mockMailerService.sendMail.mockResolvedValue({ messageId: 'test-id' });
