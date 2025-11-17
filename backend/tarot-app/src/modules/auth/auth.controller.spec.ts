@@ -159,6 +159,8 @@ describe('AuthController', () => {
       expect(authServiceMock.validateUser).toHaveBeenCalledWith(
         dto.email,
         dto.password,
+        mockReq.ip,
+        mockReq.get('user-agent'),
       );
       expect(authServiceMock.login).toHaveBeenCalled();
       expect(res).toHaveProperty('access_token', 'tok');

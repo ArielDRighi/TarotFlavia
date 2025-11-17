@@ -66,6 +66,15 @@ describe('AuthService', () => {
       generateResetToken: jest.fn(),
     };
 
+    const securityEventServiceMock = {
+      logSecurityEvent: jest.fn().mockResolvedValue(undefined),
+    };
+
+    // Necesitamos importar la clase para usarla como token
+    const { SecurityEventService } = await import(
+      '../security/security-event.service'
+    );
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
@@ -73,6 +82,7 @@ describe('AuthService', () => {
         { provide: JwtService, useValue: jwtServiceMock },
         { provide: RefreshTokenService, useValue: refreshTokenServiceMock },
         { provide: PasswordResetService, useValue: passwordResetServiceMock },
+        { provide: SecurityEventService, useValue: securityEventServiceMock },
       ],
     }).compile();
 
