@@ -6,6 +6,9 @@ import { CreateUserDto } from '../users/dto/create-user.dto';
 import { User, UserWithoutPassword } from '../users/entities/user.entity';
 import { RefreshTokenService } from './refresh-token.service';
 import { PasswordResetService } from './password-reset.service';
+import { SecurityEventService } from '../security/security-event.service';
+import { SecurityEventType } from '../security/enums/security-event-type.enum';
+import { SecurityEventSeverity } from '../security/enums/security-event-severity.enum';
 
 @Injectable()
 export class AuthService {
@@ -14,6 +17,7 @@ export class AuthService {
     private jwtService: JwtService,
     private refreshTokenService: RefreshTokenService,
     private passwordResetService: PasswordResetService,
+    private securityEventService: SecurityEventService,
   ) {}
 
   async register(
@@ -35,6 +39,8 @@ export class AuthService {
   async validateUser(
     email: string,
     pass: string,
+    ipAddress?: string,
+    userAgent?: string,
   ): Promise<UserWithoutPassword | null> {
     const user = await this.usersService.findByEmail(email);
 
@@ -43,6 +49,28 @@ export class AuthService {
       const { password, ...result } = user;
       return result as UserWithoutPassword;
     }
+
+    // Log failed login attempt
+    if (user) {
+      await this.securityEventService.logSecurityEvent({
+        eventType: SecurityEventType.FAILED_LOGIN,
+        userId: user.id,
+        ipAddress: ipAddress ?? null,
+        userAgent: userAgent ?? null,
+        severity: SecurityEventSeverity.MEDIUM,
+        details: { email, reason: 'Invalid password' },
+      });
+    } else {
+      await this.securityEventService.logSecurityEvent({
+        eventType: SecurityEventType.FAILED_LOGIN,
+        userId: null,
+        ipAddress: ipAddress ?? null,
+        userAgent: userAgent ?? null,
+        severity: SecurityEventSeverity.LOW,
+        details: { email, reason: 'User not found' },
+      });
+    }
+
     return null;
   }
 
@@ -72,6 +100,16 @@ export class AuthService {
     // Update lastLogin timestamp
     user.lastLogin = new Date();
     await this.usersService.update(user.id, { lastLogin: user.lastLogin });
+
+    // Log successful login
+    await this.securityEventService.logSecurityEvent({
+      eventType: SecurityEventType.SUCCESSFUL_LOGIN,
+      userId: user.id,
+      ipAddress,
+      userAgent,
+      severity: SecurityEventSeverity.LOW,
+      details: { email: user.email },
+    });
 
     return this.generateAuthResponse(user, ipAddress, userAgent);
   }

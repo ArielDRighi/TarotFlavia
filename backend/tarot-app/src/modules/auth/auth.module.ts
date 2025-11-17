@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { UsersModule } from '../users/users.module';
+import { SecurityModule } from '../security/security.module';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { RefreshTokenService } from './refresh-token.service';
 import { RefreshToken } from './entities/refresh-token.entity';
@@ -16,6 +17,7 @@ import { PasswordResetCleanupService } from './password-reset-cleanup.service';
 @Module({
   imports: [
     forwardRef(() => UsersModule),
+    SecurityModule,
     PassportModule,
     ConfigModule,
     TypeOrmModule.forFeature([RefreshToken, PasswordResetToken]),
