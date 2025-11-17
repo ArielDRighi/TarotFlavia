@@ -16,12 +16,20 @@ import { EmailService } from '../email/email.service';
 export class AIProviderCostService {
   private readonly logger = new Logger(AIProviderCostService.name);
 
-  // Cost per 1 million tokens (USD)
+  /**
+   * Cost per 1 million tokens (USD) - Combined input + output pricing
+   * Based on cheapest model per provider as of Nov 2025:
+   * - Groq: Free (llama models)
+   * - DeepSeek: $0.80/1M (DeepSeek-V2 combined rate)
+   * - OpenAI: $4.50/1M (gpt-4o-mini combined rate)
+   * - Gemini: Free (flash models)
+   * Note: Update if provider pricing changes
+   */
   private readonly COSTS_PER_1M_TOKENS = {
-    [AIProvider.GROQ]: 0, // Free
-    [AIProvider.DEEPSEEK]: 0.8, // $0.80 per 1M tokens
-    [AIProvider.OPENAI]: 4.5, // $4.50 per 1M tokens (gpt-4o-mini)
-    [AIProvider.GEMINI]: 0, // Free (for now)
+    [AIProvider.GROQ]: 0,
+    [AIProvider.DEEPSEEK]: 0.8,
+    [AIProvider.OPENAI]: 4.5,
+    [AIProvider.GEMINI]: 0,
   };
 
   constructor(
@@ -276,9 +284,9 @@ export class AIProviderCostService {
     this.logger.log('Running monthly usage reset...');
 
     try {
-      const previousMonth = startOfMonth(
-        new Date(new Date().setMonth(new Date().getMonth() - 1)),
-      );
+      const now = new Date();
+      now.setMonth(now.getMonth() - 1);
+      const previousMonth = startOfMonth(now);
 
       const usageRecords = await this.providerUsageRepo.find({
         where: {
