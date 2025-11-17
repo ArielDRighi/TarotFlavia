@@ -11,6 +11,10 @@ import { EmailService } from '../email/email.service';
 describe('AIQuotaService', () => {
   let service: AIQuotaService;
   let userRepository: jest.Mocked<Repository<User>>;
+  let mockEmailService: {
+    sendQuotaWarningEmail: jest.Mock;
+    sendQuotaLimitReachedEmail: jest.Mock;
+  };
 
   const createMockUser = (overrides: Partial<User> = {}): User => {
     const user = new User();
@@ -59,9 +63,9 @@ describe('AIQuotaService', () => {
       createQueryBuilder: jest.fn(() => mockUpdateQueryBuilder),
     };
 
-    const mockEmailService = {
-      sendQuotaWarning: jest.fn(),
-      sendQuotaLimitReached: jest.fn(),
+    mockEmailService = {
+      sendQuotaWarningEmail: jest.fn(),
+      sendQuotaLimitReachedEmail: jest.fn(),
     };
 
     const mockConfigService = {
@@ -254,6 +258,40 @@ describe('AIQuotaService', () => {
       await service.trackMonthlyUsage(1, 1, 1500, 0.005, 'groq');
 
       expect(userRepository.save).not.toHaveBeenCalled();
+    });
+
+    it('should send limit reached email when FREE user reaches 100% quota', async () => {
+      const user = createMockUser({
+        plan: UserPlan.FREE,
+        aiRequestsUsedMonth: 100,
+        quotaWarningSent: true,
+      });
+      userRepository.findOne.mockResolvedValue(user);
+
+      await service.trackMonthlyUsage(1, 1, 1500, 0.005, 'groq');
+
+      expect(mockEmailService.sendQuotaLimitReachedEmail).toHaveBeenCalledWith(
+        user.email,
+        expect.objectContaining({
+          userName: user.name,
+          plan: UserPlan.FREE,
+          quotaLimit: 100,
+        }),
+      );
+    });
+
+    it('should NOT send limit reached email when PREMIUM user reaches high usage', async () => {
+      const user = createMockUser({
+        plan: UserPlan.PREMIUM,
+        aiRequestsUsedMonth: 10000,
+      });
+      userRepository.findOne.mockResolvedValue(user);
+
+      await service.trackMonthlyUsage(1, 1, 1500, 0.005, 'groq');
+
+      expect(
+        mockEmailService.sendQuotaLimitReachedEmail,
+      ).not.toHaveBeenCalled();
     });
   });
 

@@ -166,8 +166,8 @@ export class AIQuotaService {
       await this.userRepository.save(user);
     }
 
-    // Hard limit: 100% - enviar notificación de límite alcanzado
-    if (usageAfterUpdate >= quota.hardLimit) {
+    // Hard limit: 100% - enviar notificación de límite alcanzado (solo FREE)
+    if (user.plan === UserPlan.FREE && usageAfterUpdate >= quota.hardLimit) {
       await this.sendQuotaLimitReachedEmail(user);
       this.logger.warn(
         `User ${userId} has reached hard limit: ${usageAfterUpdate}/${quota.hardLimit}`,

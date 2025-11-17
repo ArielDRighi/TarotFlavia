@@ -164,6 +164,12 @@ export class AIProviderService {
             costUsd,
             response.provider,
           );
+        } else {
+          this.logger.warn(
+            `Quota tracking skipped: missing userId (readingId: ${
+              readingId || 'N/A'
+            }, provider: ${response.provider}, model: ${response.model})`,
+          );
         }
 
         return response;

@@ -27,7 +27,7 @@ export class InterpretationsController {
   @ApiOperation({
     summary: 'Generar interpretación para un conjunto de cartas',
     description:
-      'Genera una interpretación basada en las cartas seleccionadas y sus posiciones. Consume cuota mensual de IA.',
+      'Genera una interpretación basada en las cartas seleccionadas y sus posiciones. Consume de la cuota mensual de IA.',
   })
   @ApiBody({ type: GenerateInterpretationDto })
   @ApiResponse({

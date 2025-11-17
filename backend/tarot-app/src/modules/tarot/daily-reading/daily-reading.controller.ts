@@ -163,7 +163,7 @@ export class DailyReadingController {
   @ApiOperation({
     summary: 'Regenerar carta del día (solo premium)',
     description:
-      'Regenera la carta del día con una nueva carta y interpretación. Solo disponible para usuarios premium, 1 vez por día. Consume cuota mensual de IA.',
+      'Regenera la carta del día con una nueva carta y interpretación. Solo disponible para usuarios premium, 1 vez por día. Consume de la cuota mensual de IA.',
   })
   @ApiResponse({
     status: 200,

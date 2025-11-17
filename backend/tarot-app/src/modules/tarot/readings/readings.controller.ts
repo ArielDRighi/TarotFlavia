@@ -192,7 +192,7 @@ export class ReadingsController {
   @ApiOperation({
     summary: 'Regenerar interpretación de una lectura existente',
     description:
-      'Genera una nueva interpretación para una lectura existente manteniendo las mismas cartas. Solo disponible para usuarios premium. Límite: 3 regeneraciones por lectura. Consume cuota mensual de IA.',
+      'Genera una nueva interpretación para una lectura existente manteniendo las mismas cartas. Solo disponible para usuarios premium. Límite: 3 regeneraciones por lectura. Consume de la cuota mensual de IA.',
   })
   @ApiParam({ name: 'id', description: 'ID de la lectura a regenerar' })
   @ApiResponse({

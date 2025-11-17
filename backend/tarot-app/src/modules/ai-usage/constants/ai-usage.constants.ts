@@ -14,7 +14,7 @@ export interface QuotaConfig {
 export const AI_MONTHLY_QUOTAS: Record<UserPlan, QuotaConfig> = {
   [UserPlan.FREE]: {
     maxRequests: Number(process.env.AI_QUOTA_FREE_MONTHLY) || 100, // ~3 lecturas/día promedio
-    softLimit: Math.floor(
+    softLimit: Math.round(
       (Number(process.env.AI_QUOTA_FREE_MONTHLY) || 100) * 0.8,
     ), // Advertencia al 80%
     hardLimit: Number(process.env.AI_QUOTA_FREE_MONTHLY) || 100, // Bloqueo al 100%
