@@ -11,6 +11,7 @@ import { TarotDeck } from '../../src/modules/tarot/decks/entities/tarot-deck.ent
 import { CheckUsageLimitGuard } from '../../src/modules/usage-limits/guards/check-usage-limit.guard';
 import { IncrementUsageInterceptor } from '../../src/modules/usage-limits/interceptors/increment-usage.interceptor';
 import { UsageLimitsService } from '../../src/modules/usage-limits/usage-limits.service';
+import { AIQuotaService } from '../../src/modules/ai-usage/ai-quota.service';
 
 describe('ReadingsController', () => {
   let controller: ReadingsController;
@@ -96,6 +97,14 @@ describe('ReadingsController', () => {
         {
           provide: CACHE_MANAGER,
           useValue: mockCacheManager,
+        },
+        {
+          provide: AIQuotaService,
+          useValue: {
+            checkMonthlyQuota: jest.fn().mockResolvedValue(true),
+            getRemainingQuota: jest.fn(),
+            trackMonthlyUsage: jest.fn(),
+          },
         },
         CheckUsageLimitGuard,
         IncrementUsageInterceptor,

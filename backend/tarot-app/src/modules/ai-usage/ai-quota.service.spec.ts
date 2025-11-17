@@ -1,10 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, UpdateQueryBuilder } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
 import { AIQuotaService } from './ai-quota.service';
 import { User, UserPlan } from '../users/entities/user.entity';
 import { Logger } from '@nestjs/common';
 import { UserRole } from '../../common/enums/user-role.enum';
+import { EmailService } from '../email/email.service';
 
 describe('AIQuotaService', () => {
   let service: AIQuotaService;
@@ -57,12 +59,33 @@ describe('AIQuotaService', () => {
       createQueryBuilder: jest.fn(() => mockUpdateQueryBuilder),
     };
 
+    const mockEmailService = {
+      sendQuotaWarning: jest.fn(),
+      sendQuotaLimitReached: jest.fn(),
+    };
+
+    const mockConfigService = {
+      get: jest.fn((key: string) => {
+        if (key === 'AI_QUOTA_FREE_MONTHLY') return 100;
+        if (key === 'AI_QUOTA_PREMIUM_MONTHLY') return -1;
+        return undefined;
+      }),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AIQuotaService,
         {
           provide: getRepositoryToken(User),
           useValue: mockRepository,
+        },
+        {
+          provide: EmailService,
+          useValue: mockEmailService,
+        },
+        {
+          provide: ConfigService,
+          useValue: mockConfigService,
         },
       ],
     }).compile();

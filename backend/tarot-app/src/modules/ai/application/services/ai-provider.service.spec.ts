@@ -5,6 +5,7 @@ import { GroqProvider } from '../../infrastructure/providers/groq.provider';
 import { DeepSeekProvider } from '../../infrastructure/providers/deepseek.provider';
 import { OpenAIProvider } from '../../infrastructure/providers/openai.provider';
 import { AIUsageService } from '../../../ai-usage/ai-usage.service';
+import { AIQuotaService } from '../../../ai-usage/ai-quota.service';
 import {
   AIProviderType,
   AIMessage,
@@ -18,6 +19,7 @@ describe('AIProviderService', () => {
   let deepseekProvider: jest.Mocked<DeepSeekProvider>;
   let openaiProvider: jest.Mocked<OpenAIProvider>;
   let aiUsageService: jest.Mocked<AIUsageService>;
+  let aiQuotaService: jest.Mocked<AIQuotaService>;
 
   const mockMessages: AIMessage[] = [
     {
@@ -74,6 +76,13 @@ describe('AIProviderService', () => {
     aiUsageService =
       aiUsageServiceMock as unknown as jest.Mocked<AIUsageService>;
 
+    const aiQuotaServiceMock = {
+      checkMonthlyQuota: jest.fn().mockResolvedValue(true),
+      trackMonthlyUsage: jest.fn().mockResolvedValue(undefined),
+    };
+    aiQuotaService =
+      aiQuotaServiceMock as unknown as jest.Mocked<AIQuotaService>;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AIProviderService,
@@ -98,6 +107,10 @@ describe('AIProviderService', () => {
         {
           provide: AIUsageService,
           useValue: aiUsageService,
+        },
+        {
+          provide: AIQuotaService,
+          useValue: aiQuotaService,
         },
       ],
     }).compile();

@@ -40,7 +40,7 @@ describe('AIQuotaGuard', () => {
   });
 
   const createMockExecutionContext = (user: {
-    id: number;
+    userId: number;
     plan: UserPlan;
   }): ExecutionContext => {
     return {
@@ -57,7 +57,7 @@ describe('AIQuotaGuard', () => {
   describe('canActivate', () => {
     it('should allow request when user has quota available', async () => {
       const context = createMockExecutionContext({
-        id: 1,
+        userId: 1,
         plan: UserPlan.FREE,
       });
       aiQuotaService.checkMonthlyQuota.mockResolvedValue(true);
@@ -71,7 +71,7 @@ describe('AIQuotaGuard', () => {
 
     it('should throw ForbiddenException when FREE user has no quota', async () => {
       const context = createMockExecutionContext({
-        id: 1,
+        userId: 1,
         plan: UserPlan.FREE,
       });
       aiQuotaService.checkMonthlyQuota.mockResolvedValue(false);
@@ -99,7 +99,7 @@ describe('AIQuotaGuard', () => {
 
     it('should allow PREMIUM user regardless of quota', async () => {
       const context = createMockExecutionContext({
-        id: 2,
+        userId: 2,
         plan: UserPlan.PREMIUM,
       });
       aiQuotaService.checkMonthlyQuota.mockResolvedValue(true);
@@ -113,7 +113,7 @@ describe('AIQuotaGuard', () => {
 
     it('should skip check when @SkipQuotaCheck decorator is present', async () => {
       const context = createMockExecutionContext({
-        id: 1,
+        userId: 1,
         plan: UserPlan.FREE,
       });
       reflector.getAllAndOverride.mockReturnValue(true); // Decorator present
@@ -144,7 +144,7 @@ describe('AIQuotaGuard', () => {
     it('should include reset date in error message', async () => {
       const resetDate = new Date('2025-12-01T12:00:00Z'); // Usar mediodía UTC para evitar timezone issues
       const context = createMockExecutionContext({
-        id: 1,
+        userId: 1,
         plan: UserPlan.FREE,
       });
       aiQuotaService.checkMonthlyQuota.mockResolvedValue(false);
