@@ -6,6 +6,8 @@ import {
   PlanChangeData,
   QuotaWarningData,
   QuotaLimitReachedData,
+  ProviderCostWarningData,
+  ProviderCostLimitReachedData,
 } from './interfaces/email.interface';
 
 @Injectable()
@@ -180,6 +182,60 @@ export class EmailService {
         error instanceof Error ? error.stack : String(error),
       );
       throw new Error('Error al enviar email de límite de cuota');
+    }
+  }
+
+  /**
+   * Envía advertencia de costo de proveedor al 80%
+   */
+  async sendProviderCostWarningEmail(
+    to: string,
+    costData: ProviderCostWarningData,
+  ): Promise<void> {
+    try {
+      await this.mailerService.sendMail({
+        to,
+        subject: `⚠️ AI Cost Alert: ${costData.provider} at 80% of monthly limit`,
+        template: 'provider-cost-warning',
+        context: costData,
+      });
+
+      this.logger.log(
+        `Email de advertencia de costo de ${costData.provider} enviado exitosamente a ${to}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error al enviar email de advertencia de costo a ${to}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+      // Don't throw, just log (email is not critical)
+    }
+  }
+
+  /**
+   * Envía notificación de límite de costo de proveedor alcanzado (100%)
+   */
+  async sendProviderCostLimitReachedEmail(
+    to: string,
+    costData: ProviderCostLimitReachedData,
+  ): Promise<void> {
+    try {
+      await this.mailerService.sendMail({
+        to,
+        subject: `🚨 AI Cost Alert: ${costData.provider} LIMIT REACHED`,
+        template: 'provider-cost-limit-reached',
+        context: costData,
+      });
+
+      this.logger.log(
+        `Email de límite de costo de ${costData.provider} alcanzado enviado exitosamente a ${to}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error al enviar email de límite de costo a ${to}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+      // Don't throw, just log (email is not critical)
     }
   }
 }
