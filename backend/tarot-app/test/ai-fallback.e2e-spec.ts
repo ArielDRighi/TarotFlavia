@@ -54,6 +54,14 @@ describe('AI Provider Fallback (e2e)', () => {
     }
   });
 
+  afterEach(async () => {
+    // Clean up readings after each test to reset usage limits
+    const ds = dbHelper.getDataSource();
+    await ds.query('DELETE FROM tarot_reading WHERE "userId" = $1', [
+      freeUserId,
+    ]);
+  });
+
   afterAll(async () => {
     if (app) {
       await app.close();
