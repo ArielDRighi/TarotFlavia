@@ -144,4 +144,14 @@ export const CACHE_ANALYTICS = {
    * Rate limit diario de Groq
    */
   GROQ_DAILY_RATE_LIMIT: 14400,
+
+  /**
+   * Tiempo de respuesta estimado de caché in-memory (ms)
+   */
+  ESTIMATED_CACHE_RESPONSE_TIME_MS: 50,
+
+  /**
+   * Tiempo de respuesta estimado promedio de AI provider (ms)
+   */
+  ESTIMATED_AI_RESPONSE_TIME_MS: 1500,
 };

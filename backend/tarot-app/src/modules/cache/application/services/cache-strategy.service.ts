@@ -63,10 +63,9 @@ export class CacheStrategyService {
       newExpiresAt.setDate(newExpiresAt.getDate() + newTTLDays);
 
       // Solo actualizar si el nuevo TTL es diferente al actual
-      const currentTTLDays = Math.floor(
-        (cache.expires_at.getTime() - cache.created_at.getTime()) /
-          (1000 * 60 * 60 * 24),
-      );
+      const currentTTLMs =
+        cache.expires_at.getTime() - cache.created_at.getTime();
+      const currentTTLDays = Math.round(currentTTLMs / (1000 * 60 * 60 * 24));
 
       if (Math.abs(currentTTLDays - newTTLDays) > 1) {
         await this.cacheRepository.update(
@@ -125,14 +124,16 @@ export class CacheStrategyService {
       .map((card) => `${card.card_id}-${card.position}-${card.is_reversed}`)
       .join('|');
 
-    const potentialMatches = await this.cacheRepository
-      .createQueryBuilder('cache')
-      .where(
-        'spread_id = :spreadId OR (spread_id IS NULL AND :spreadId IS NULL)',
-        { spreadId },
-      )
-      .andWhere('expires_at > :now', { now: new Date() })
-      .getMany();
+    const queryBuilder = this.cacheRepository.createQueryBuilder('cache');
+
+    if (spreadId === null) {
+      queryBuilder.where('spread_id IS NULL');
+    } else {
+      queryBuilder.where('spread_id = :spreadId', { spreadId });
+    }
+    queryBuilder.andWhere('expires_at > :now', { now: new Date() });
+
+    const potentialMatches = await queryBuilder.getMany();
 
     // Filtrar por combinación de cartas exacta
     const matchingCardCombinations = potentialMatches.filter((cache) => {

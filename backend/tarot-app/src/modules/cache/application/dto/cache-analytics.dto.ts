@@ -206,3 +206,38 @@ export class CacheWarmingStatusDto {
   })
   estimatedTimeRemainingMinutes: number;
 }
+
+/**
+ * DTO para historical cache metrics
+ */
+export class HistoricalCacheMetricDto {
+  @ApiProperty({
+    description: 'Metric date',
+    example: '2025-11-17',
+  })
+  date: Date;
+
+  @ApiProperty({
+    description: 'Hit rate percentage for this date',
+    example: 65.5,
+  })
+  hitRatePercentage: number;
+
+  @ApiProperty({
+    description: 'Total requests for this date',
+    example: 1000,
+  })
+  totalRequests: number;
+
+  @ApiProperty({
+    description: 'Cache hits for this date',
+    example: 655,
+  })
+  cacheHits: number;
+
+  @ApiProperty({
+    description: 'Cache misses for this date',
+    example: 345,
+  })
+  cacheMisses: number;
+}

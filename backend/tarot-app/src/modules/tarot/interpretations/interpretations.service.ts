@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { HttpService } from '@nestjs/axios';
 import { TarotCard } from '../cards/entities/tarot-card.entity';
 import { TarotInterpretation } from './entities/tarot-interpretation.entity';
@@ -424,19 +424,10 @@ export class InterpretationsService {
       is_reversed: boolean;
     }[],
   ): Promise<InterpretationResult> {
-    // Buscar las cartas en la base de datos
-    const cards: TarotCard[] = [];
-    for (const id of cardIds) {
-      const card = await this.interpretationRepository.manager.findOne(
-        TarotCard,
-        {
-          where: { id },
-        },
-      );
-      if (card) {
-        cards.push(card);
-      }
-    }
+    // Buscar las cartas en la base de datos usando IN clause
+    const cards = await this.interpretationRepository.manager.find(TarotCard, {
+      where: { id: In(cardIds) },
+    });
 
     if (cards.length === 0) {
       throw new Error(
@@ -463,10 +454,11 @@ export class InterpretationsService {
     }));
 
     // Usar el método estándar de generación de interpretación
+    // Nota: Usa pregunta genérica intencionalmente para warming
     return this.generateInterpretation(
       cards,
       positions,
-      'Pregunta general sobre la situación', // Pregunta genérica para warming
+      'Pregunta general sobre la situación',
       spread || undefined,
       'General',
     );

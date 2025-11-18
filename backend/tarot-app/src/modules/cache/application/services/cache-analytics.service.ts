@@ -116,9 +116,8 @@ export class CacheAnalyticsService {
    * TODO: Implementar tracking de tiempos reales
    */
   calculateResponseTimes(): ResponseTimeMetricsDto {
-    // Valores estimados basados en mediciones típicas
-    const cacheAvg = 50; // ms - caché in-memory
-    const aiAvg = 1500; // ms - promedio Groq
+    const cacheAvg = CACHE_ANALYTICS.ESTIMATED_CACHE_RESPONSE_TIME_MS;
+    const aiAvg = CACHE_ANALYTICS.ESTIMATED_AI_RESPONSE_TIME_MS;
 
     const improvementFactor = Math.floor(aiAvg / cacheAvg);
 
@@ -190,18 +189,40 @@ export class CacheAnalyticsService {
 
     const hitRate = await this.calculateHitRate(1); // Última hora
 
-    const metric = this.metricsRepository.create({
-      metric_date: metricDate,
-      metric_hour: metricHour,
-      total_requests: hitRate.totalRequests,
-      cache_hits: hitRate.cacheHits,
-      cache_misses: hitRate.cacheMisses,
-      hit_rate_percentage: hitRate.percentage,
-      avg_cache_response_time_ms: 50, // TODO: Tracking real
-      avg_ai_response_time_ms: 1500, // TODO: Tracking real
+    // Verificar si ya existe una métrica para esta fecha/hora
+    const existing = await this.metricsRepository.findOne({
+      where: { metric_date: metricDate, metric_hour: metricHour },
     });
 
-    await this.metricsRepository.save(metric);
+    if (existing) {
+      // Actualizar métrica existente
+      await this.metricsRepository.update(
+        { id: existing.id },
+        {
+          total_requests: hitRate.totalRequests,
+          cache_hits: hitRate.cacheHits,
+          cache_misses: hitRate.cacheMisses,
+          hit_rate_percentage: hitRate.percentage,
+          avg_cache_response_time_ms:
+            CACHE_ANALYTICS.ESTIMATED_CACHE_RESPONSE_TIME_MS,
+          avg_ai_response_time_ms:
+            CACHE_ANALYTICS.ESTIMATED_AI_RESPONSE_TIME_MS,
+        },
+      );
+    } else {
+      // Crear nueva métrica
+      await this.metricsRepository.save({
+        metric_date: metricDate,
+        metric_hour: metricHour,
+        total_requests: hitRate.totalRequests,
+        cache_hits: hitRate.cacheHits,
+        cache_misses: hitRate.cacheMisses,
+        hit_rate_percentage: hitRate.percentage,
+        avg_cache_response_time_ms:
+          CACHE_ANALYTICS.ESTIMATED_CACHE_RESPONSE_TIME_MS,
+        avg_ai_response_time_ms: CACHE_ANALYTICS.ESTIMATED_AI_RESPONSE_TIME_MS,
+      });
+    }
 
     this.logger.log(
       `Recorded hourly metrics for ${metricDate.toISOString()} hour ${metricHour}: ${hitRate.percentage}% hit rate`,

@@ -23,6 +23,7 @@ import {
   CacheAnalyticsDto,
   CacheWarmingStatusDto,
   TopCachedCombinationDto,
+  HistoricalCacheMetricDto,
 } from '../../application/dto/cache-analytics.dto';
 
 @ApiTags('Admin - Cache')
@@ -187,10 +188,11 @@ export class CacheAdminController {
   @ApiResponse({
     status: 200,
     description: 'Historical metrics retrieved successfully',
+    type: [HistoricalCacheMetricDto],
   })
   async getHistoricalMetrics(
     @Query('days', new DefaultValuePipe(7), ParseIntPipe) days: number,
-  ): Promise<any> {
+  ): Promise<HistoricalCacheMetricDto[]> {
     return this.analyticsService.getHistoricalMetrics(days);
   }
 
