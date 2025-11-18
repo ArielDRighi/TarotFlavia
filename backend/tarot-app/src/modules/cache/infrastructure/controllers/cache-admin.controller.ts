@@ -2,18 +2,38 @@ import {
   Controller,
   Delete,
   Get,
+  Post,
   Param,
   Query,
   BadRequestException,
   ParseIntPipe,
+  DefaultValuePipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { InterpretationCacheService } from '../../application/services/interpretation-cache.service';
+import { CacheAnalyticsService } from '../../application/services/cache-analytics.service';
+import { CacheWarmingService } from '../../application/services/cache-warming.service';
+import {
+  CacheAnalyticsDto,
+  CacheWarmingStatusDto,
+  TopCachedCombinationDto,
+  HistoricalCacheMetricDto,
+} from '../../application/dto/cache-analytics.dto';
 
 @ApiTags('Admin - Cache')
 @Controller('admin/cache')
 export class CacheAdminController {
-  constructor(private readonly cacheService: InterpretationCacheService) {}
+  constructor(
+    private readonly cacheService: InterpretationCacheService,
+    private readonly analyticsService: CacheAnalyticsService,
+    private readonly warmingService: CacheWarmingService,
+  ) {}
 
   @Delete('tarotistas/:id')
   @ApiOperation({ summary: 'Invalidate cache for a specific tarotista' })
@@ -123,6 +143,104 @@ export class CacheAdminController {
     return {
       ...stats,
       invalidations,
+    };
+  }
+
+  @Get('analytics')
+  @ApiOperation({ summary: 'Get comprehensive cache analytics' })
+  @ApiQuery({
+    name: 'windowHours',
+    required: false,
+    description: 'Time window in hours for analytics (default: 24)',
+    example: 24,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Cache analytics retrieved successfully',
+    type: CacheAnalyticsDto,
+  })
+  async getCacheAnalytics(
+    @Query('windowHours', new DefaultValuePipe(24), ParseIntPipe)
+    windowHours: number,
+  ): Promise<CacheAnalyticsDto> {
+    return this.analyticsService.getAnalytics(windowHours);
+  }
+
+  @Get('analytics/top-combinations')
+  @ApiOperation({ summary: 'Get top cached card combinations' })
+  @ApiResponse({
+    status: 200,
+    description: 'Top combinations retrieved successfully',
+    type: [TopCachedCombinationDto],
+  })
+  async getTopCombinations(): Promise<TopCachedCombinationDto[]> {
+    return this.analyticsService.getTopCachedCombinations();
+  }
+
+  @Get('analytics/historical')
+  @ApiOperation({ summary: 'Get historical cache metrics' })
+  @ApiQuery({
+    name: 'days',
+    required: false,
+    description: 'Number of days to retrieve (default: 7)',
+    example: 7,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Historical metrics retrieved successfully',
+    type: [HistoricalCacheMetricDto],
+  })
+  async getHistoricalMetrics(
+    @Query('days', new DefaultValuePipe(7), ParseIntPipe) days: number,
+  ): Promise<HistoricalCacheMetricDto[]> {
+    return this.analyticsService.getHistoricalMetrics(days);
+  }
+
+  @Post('warm')
+  @ApiOperation({ summary: 'Start cache warming process' })
+  @ApiQuery({
+    name: 'topN',
+    required: false,
+    description: 'Number of top combinations to warm (default: 100)',
+    example: 100,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Cache warming started successfully',
+  })
+  async warmCache(
+    @Query('topN', new DefaultValuePipe(100), ParseIntPipe) topN: number,
+  ): Promise<{
+    started: boolean;
+    totalCombinations?: number;
+    estimatedTimeMinutes?: number;
+    message?: string;
+  }> {
+    return this.warmingService.warmCache(topN);
+  }
+
+  @Get('warm/status')
+  @ApiOperation({ summary: 'Get cache warming status' })
+  @ApiResponse({
+    status: 200,
+    description: 'Warming status retrieved successfully',
+    type: CacheWarmingStatusDto,
+  })
+  getWarmingStatus(): CacheWarmingStatusDto {
+    return this.warmingService.getStatus();
+  }
+
+  @Post('warm/stop')
+  @ApiOperation({ summary: 'Stop cache warming process' })
+  @ApiResponse({
+    status: 200,
+    description: 'Cache warming stopped successfully',
+  })
+  stopWarming(): { message: string; timestamp: Date } {
+    this.warmingService.stopWarming();
+    return {
+      message: 'Cache warming stopped',
+      timestamp: new Date(),
     };
   }
 }

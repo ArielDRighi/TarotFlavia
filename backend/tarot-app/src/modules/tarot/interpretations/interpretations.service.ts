@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { HttpService } from '@nestjs/axios';
 import { TarotCard } from '../cards/entities/tarot-card.entity';
 import { TarotInterpretation } from './entities/tarot-interpretation.entity';
@@ -409,5 +409,58 @@ export class InterpretationsService {
         'Error al generar interpretación de la carta del día',
       );
     }
+  }
+
+  /**
+   * Genera interpretación específicamente para cache warming
+   * Simplificado para evitar dependencias innecesarias
+   */
+  async generateInterpretationForCacheWarming(
+    cardIds: number[],
+    spreadId: number | null,
+    cardCombination: {
+      card_id: string;
+      position: number;
+      is_reversed: boolean;
+    }[],
+  ): Promise<InterpretationResult> {
+    // Buscar las cartas en la base de datos usando IN clause
+    const cards = await this.interpretationRepository.manager.find(TarotCard, {
+      where: { id: In(cardIds) },
+    });
+
+    if (cards.length === 0) {
+      throw new Error(
+        `No cards found for IDs: ${cardIds.join(', ')} during cache warming`,
+      );
+    }
+
+    // Buscar el spread si se proporcionó
+    let spread: TarotSpread | null = null;
+    if (spreadId) {
+      spread = await this.interpretationRepository.manager.findOne(
+        TarotSpread,
+        {
+          where: { id: spreadId },
+        },
+      );
+    }
+
+    // Crear positions array basado en cardCombination
+    const positions = cardCombination.map((combo, index) => ({
+      cardId: parseInt(combo.card_id, 10),
+      position: `Position ${index + 1}`,
+      isReversed: combo.is_reversed,
+    }));
+
+    // Usar el método estándar de generación de interpretación
+    // Nota: Usa pregunta genérica intencionalmente para warming
+    return this.generateInterpretation(
+      cards,
+      positions,
+      'Pregunta general sobre la situación',
+      spread || undefined,
+      'General',
+    );
   }
 }
