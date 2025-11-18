@@ -1,63 +1,85 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
+import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
+import { E2EDatabaseHelper } from './helpers/e2e-database.helper';
+
+interface LoginResponse {
+  user: {
+    id: number;
+    email: string;
+    name: string;
+    isAdmin: boolean;
+    plan: string;
+  };
+  access_token: string;
+}
 
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 
 describe('Rate Limit Status (e2e)', () => {
-  let app: INestApplication;
+  let app: INestApplication<App>;
+  const dbHelper = new E2EDatabaseHelper();
   let freeAccessToken: string;
   let premiumAccessToken: string;
   let adminAccessToken: string;
 
   beforeAll(async () => {
+    await dbHelper.initialize();
+    // NOTE: NO limpiar base de datos aquí - los seeders ya se ejecutaron en globalSetup
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
     app = moduleFixture.createNestApplication();
-
-    // Apply global pipes like in main.ts
-    app.useGlobalPipes(
-      new ValidationPipe({
-        whitelist: true,
-        forbidNonWhitelisted: true,
-        transform: true,
-      }),
-    );
-
+    app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
     await app.init();
 
-    // Login with seeded test users
+    // Login with seeded test users from globalSetup
     const freeLogin = await request(app.getHttpServer())
       .post('/auth/login')
       .send({
         email: 'free@test.com',
         password: 'Test123456!',
-      });
-    freeAccessToken = freeLogin.body.access_token;
+      })
+      .expect(200);
+
+    freeAccessToken = (freeLogin.body as LoginResponse).access_token;
 
     const premiumLogin = await request(app.getHttpServer())
       .post('/auth/login')
       .send({
         email: 'premium@test.com',
         password: 'Test123456!',
-      });
-    premiumAccessToken = premiumLogin.body.access_token;
+      })
+      .expect(200);
+
+    premiumAccessToken = (premiumLogin.body as LoginResponse).access_token;
 
     const adminLogin = await request(app.getHttpServer())
       .post('/auth/login')
       .send({
         email: 'admin@test.com',
         password: 'Test123456!',
-      });
-    adminAccessToken = adminLogin.body.access_token;
+      })
+      .expect(200);
+
+    adminAccessToken = (adminLogin.body as LoginResponse).access_token;
+
+    // Verify tokens were obtained
+    if (!freeAccessToken || !premiumAccessToken || !adminAccessToken) {
+      throw new Error(
+        'Failed to obtain authentication tokens from seeded users',
+      );
+    }
   }, 30000);
 
   afterAll(async () => {
+    await dbHelper.close();
     await app.close();
   });
 
