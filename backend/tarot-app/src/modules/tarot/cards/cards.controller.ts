@@ -68,7 +68,7 @@ export class CardsController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Crear una nueva carta (solo admin)' })
   @ApiResponse({
     status: 201,
@@ -91,7 +91,7 @@ export class CardsController {
 
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Actualizar una carta (solo admin)' })
   @ApiParam({ name: 'id', description: 'ID de la carta a actualizar' })
   @ApiResponse({
@@ -118,7 +118,7 @@ export class CardsController {
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Eliminar una carta (solo admin)' })
   @ApiParam({ name: 'id', description: 'ID de la carta a eliminar' })
   @ApiResponse({ status: 200, description: 'Carta eliminada con éxito' })

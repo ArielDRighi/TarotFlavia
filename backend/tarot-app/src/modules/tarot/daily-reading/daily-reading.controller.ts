@@ -29,7 +29,7 @@ const DEFAULT_TAROTISTA_ID = 1;
 @ApiTags('Daily Card')
 @Controller('daily-reading')
 @UseGuards(JwtAuthGuard)
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 export class DailyReadingController {
   constructor(private readonly dailyReadingService: DailyReadingService) {}
 

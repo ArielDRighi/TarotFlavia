@@ -28,7 +28,7 @@ class AddIPDto {
 @ApiTags('Admin - IP Whitelist')
 @Controller('admin/ip-whitelist')
 @UseGuards(JwtAuthGuard, AdminGuard)
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 export class IPWhitelistAdminController {
   constructor(private readonly ipWhitelistService: IPWhitelistService) {}
 

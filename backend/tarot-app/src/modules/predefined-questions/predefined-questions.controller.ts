@@ -75,7 +75,7 @@ export class PredefinedQuestionsController {
 
   @Post()
   @UseGuards(JwtAuthGuard, AdminGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Crear pregunta predefinida',
     description: 'Crea una nueva pregunta predefinida (solo administradores)',
@@ -94,7 +94,7 @@ export class PredefinedQuestionsController {
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard, AdminGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Actualizar pregunta predefinida',
     description:
@@ -124,7 +124,7 @@ export class PredefinedQuestionsController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, AdminGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Eliminar pregunta predefinida',
     description:

@@ -23,7 +23,7 @@ export class InterpretationsController {
 
   @UseGuards(JwtAuthGuard, AIQuotaGuard)
   @Post('generate')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Generar interpretación para un conjunto de cartas',
     description:
@@ -52,7 +52,7 @@ export class InterpretationsController {
 
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Delete('admin/cache')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Limpiar caché de interpretaciones (Admin)',
     description:
@@ -72,7 +72,7 @@ export class InterpretationsController {
 
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Get('admin/cache/stats')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Obtener estadísticas del caché (Admin)',
     description: 'Retorna métricas sobre el uso del caché de interpretaciones',

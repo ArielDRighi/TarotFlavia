@@ -21,7 +21,7 @@ import { PaginatedReadingsResponseDto } from './dto/paginated-readings-response.
 @ApiTags('Admin - Lecturas de Tarot')
 @Controller('admin/readings')
 @UseGuards(JwtAuthGuard, AdminGuard)
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 export class ReadingsAdminController {
   constructor(private readonly orchestrator: ReadingsOrchestratorService) {}
 

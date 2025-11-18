@@ -31,7 +31,7 @@ import { SessionStatus } from '../domain/enums';
 import { AuthenticatedRequest } from '../interfaces/authenticated-request.interface';
 
 @ApiTags('Tarotist Scheduling')
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 @Controller('tarotist/scheduling')
 export class TarotistSchedulingController {
   constructor(

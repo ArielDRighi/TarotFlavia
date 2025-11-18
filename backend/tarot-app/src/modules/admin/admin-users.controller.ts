@@ -37,7 +37,7 @@ import {
 } from '@nestjs/swagger';
 
 @ApiTags('Admin - Usuarios')
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(UserRole.ADMIN)
 @Controller('admin/users')

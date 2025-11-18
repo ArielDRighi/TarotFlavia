@@ -13,7 +13,7 @@ export class AIQuotaController {
   @Get('/ai')
   @UseGuards(JwtAuthGuard)
   @SkipQuotaCheck() // Este endpoint no consume cuota
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOkResponse({
     description: 'Información de cuota de IA del usuario',
     schema: {
