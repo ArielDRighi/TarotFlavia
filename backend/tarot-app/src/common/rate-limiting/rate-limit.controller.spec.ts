@@ -68,8 +68,8 @@ describe('RateLimitController', () => {
           },
         },
         resetAt: {
-          hour: expect.any(Number),
-          minute: expect.any(Number),
+          hour: expect.any(Number) as number,
+          minute: expect.any(Number) as number,
         },
       };
 
@@ -106,8 +106,8 @@ describe('RateLimitController', () => {
           },
         },
         resetAt: {
-          hour: expect.any(Number),
-          minute: expect.any(Number),
+          hour: expect.any(Number) as number,
+          minute: expect.any(Number) as number,
         },
       };
 
