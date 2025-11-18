@@ -81,9 +81,9 @@ export class ResponseTimeMetricsDto {
   aiAvg: number;
 
   @ApiProperty({
-    description: 'Performance improvement factor',
+    description:
+      'Performance improvement factor - how many times faster cache is vs AI',
     example: 30,
-    description: 'How many times faster cache is vs AI',
   })
   improvementFactor: number;
 }
