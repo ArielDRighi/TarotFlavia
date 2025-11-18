@@ -38,7 +38,7 @@ describe('Rate Limit Status (e2e)', () => {
         email: 'free@test.com',
         password: 'Test123456!',
       });
-    freeAccessToken = freeLogin.body.accessToken;
+    freeAccessToken = freeLogin.body.access_token;
 
     const premiumLogin = await request(app.getHttpServer())
       .post('/auth/login')
@@ -46,7 +46,7 @@ describe('Rate Limit Status (e2e)', () => {
         email: 'premium@test.com',
         password: 'Test123456!',
       });
-    premiumAccessToken = premiumLogin.body.accessToken;
+    premiumAccessToken = premiumLogin.body.access_token;
 
     const adminLogin = await request(app.getHttpServer())
       .post('/auth/login')
@@ -54,7 +54,7 @@ describe('Rate Limit Status (e2e)', () => {
         email: 'admin@test.com',
         password: 'Test123456!',
       });
-    adminAccessToken = adminLogin.body.accessToken;
+    adminAccessToken = adminLogin.body.access_token;
   }, 30000);
 
   afterAll(async () => {
@@ -127,19 +127,20 @@ describe('Rate Limit Status (e2e)', () => {
         .set('Authorization', `Bearer ${adminAccessToken}`)
         .expect(200);
 
+      // Note: Infinity is serialized as null in JSON
       expect(response.body).toMatchObject({
         plan: 'ADMIN',
         limits: {
-          requestsPerHour: Infinity,
-          requestsPerMinute: Infinity,
-          regenerationsPerReading: Infinity,
+          requestsPerHour: null,
+          requestsPerMinute: null,
+          regenerationsPerReading: null,
         },
         usage: {
           requestsThisHour: 0,
           requestsThisMinute: 0,
           remaining: {
-            hour: Infinity,
-            minute: Infinity,
+            hour: null,
+            minute: null,
           },
         },
         resetAt: {
