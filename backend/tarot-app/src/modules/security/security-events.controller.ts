@@ -14,7 +14,7 @@ import { UserRole } from '../../common/enums/user-role.enum';
 import { RolesGuard } from '../../common/guards/roles.guard';
 
 @ApiTags('security-events')
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 @Controller('admin/security/events')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(UserRole.ADMIN)

@@ -31,7 +31,7 @@ export class DecksController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Crear un nuevo mazo (solo admin)' })
   @ApiResponse({
     status: 201,
@@ -89,7 +89,7 @@ export class DecksController {
 
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Actualizar un mazo (solo admin)' })
   @ApiParam({ name: 'id', description: 'ID del mazo a actualizar' })
   @ApiResponse({
@@ -117,7 +117,7 @@ export class DecksController {
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Eliminar un mazo (solo admin)' })
   @ApiParam({ name: 'id', description: 'ID del mazo a eliminar' })
   @ApiResponse({ status: 200, description: 'Mazo eliminado con éxito' })

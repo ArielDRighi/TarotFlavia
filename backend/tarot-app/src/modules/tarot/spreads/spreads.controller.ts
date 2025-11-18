@@ -55,7 +55,7 @@ export class SpreadsController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Crear una nueva tirada (solo admin)' })
   @ApiResponse({
     status: 201,
@@ -78,7 +78,7 @@ export class SpreadsController {
 
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Actualizar una tirada (solo admin)' })
   @ApiParam({ name: 'id', description: 'ID de la tirada a actualizar' })
   @ApiResponse({
@@ -106,7 +106,7 @@ export class SpreadsController {
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Eliminar una tirada (solo admin)' })
   @ApiParam({ name: 'id', description: 'ID de la tirada a eliminar' })
   @ApiResponse({ status: 200, description: 'Tirada eliminada con éxito' })

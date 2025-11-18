@@ -13,7 +13,7 @@ import { QueryAuditLogDto } from './dto/query-audit-log.dto';
 @ApiTags('Admin - Audit Logs')
 @Controller('admin/audit-logs')
 @UseGuards(JwtAuthGuard, AdminGuard)
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 export class AuditLogController {
   constructor(private readonly auditLogService: AuditLogService) {}
 

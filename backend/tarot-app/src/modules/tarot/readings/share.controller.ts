@@ -30,7 +30,7 @@ class ShareSocialDto {
 @ApiTags('Compartir Lecturas')
 @Controller('readings/:id/share')
 @UseGuards(JwtAuthGuard)
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 export class ShareController {
   constructor() {}
 

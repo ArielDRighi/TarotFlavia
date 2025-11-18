@@ -12,7 +12,7 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 @ApiTags('Admin - Rate Limiting')
 @Controller('admin/rate-limits')
 @UseGuards(JwtAuthGuard, AdminGuard)
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 export class RateLimitsAdminController {
   constructor(private readonly ipBlockingService: IPBlockingService) {}
 

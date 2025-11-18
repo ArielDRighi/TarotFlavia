@@ -31,7 +31,7 @@ import {
 } from '@nestjs/swagger';
 
 @ApiTags('Usuarios')
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}

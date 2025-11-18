@@ -16,7 +16,7 @@ import { StatsResponseDto, ChartsResponseDto } from './dto/stats-response.dto';
 import { ADMIN_DASHBOARD_CACHE_TTL } from './constants/cache.constants';
 
 @ApiTags('Admin - Dashboard')
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 @Controller('admin/dashboard')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(UserRole.ADMIN)

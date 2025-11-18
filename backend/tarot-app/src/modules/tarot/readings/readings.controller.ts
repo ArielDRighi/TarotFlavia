@@ -52,7 +52,7 @@ export class ReadingsController {
   @UseInterceptors(IncrementUsageInterceptor)
   @CheckUsageLimit(UsageFeature.TAROT_READING)
   @Post()
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Crear una nueva lectura de tarot',
     description:
@@ -87,7 +87,7 @@ export class ReadingsController {
 
   @UseGuards(JwtAuthGuard)
   @Get('trash')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Obtener lecturas eliminadas (papelera)',
     description:
@@ -105,7 +105,7 @@ export class ReadingsController {
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(ReadingsCacheInterceptor)
   @Get()
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Obtener historial de lecturas del usuario con paginación',
     description:
@@ -168,7 +168,7 @@ export class ReadingsController {
 
   @UseGuards(JwtAuthGuard)
   @Get(':id')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Obtener detalles de una lectura específica',
     description: 'Recupera todos los detalles de una lectura de tarot',
@@ -188,7 +188,7 @@ export class ReadingsController {
   @UseInterceptors(IncrementUsageInterceptor)
   @CheckUsageLimit(UsageFeature.INTERPRETATION_REGENERATION)
   @Post(':id/regenerate')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Regenerar interpretación de una lectura existente',
     description:
@@ -223,7 +223,7 @@ export class ReadingsController {
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Eliminar una lectura (soft delete)',
     description:
@@ -254,7 +254,7 @@ export class ReadingsController {
   @UseGuards(JwtAuthGuard)
   @Post(':id/restore')
   @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Restaurar una lectura eliminada',
     description:
@@ -288,7 +288,7 @@ export class ReadingsController {
   @UseGuards(JwtAuthGuard)
   @Post(':id/share')
   @HttpCode(HttpStatus.CREATED)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Compartir una lectura (solo premium)',
     description:
@@ -318,7 +318,7 @@ export class ReadingsController {
   @UseGuards(JwtAuthGuard)
   @Delete(':id/unshare')
   @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Dejar de compartir una lectura',
     description:

@@ -13,7 +13,7 @@ import { AIUsageStatsDto } from './dto/ai-usage-stats.dto';
 import { AIProvider } from './entities/ai-usage-log.entity';
 
 @ApiTags('Admin - AI Usage')
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 @Controller('admin/ai-usage')
 @UseGuards(JwtAuthGuard, AdminGuard)
 export class AIUsageController {

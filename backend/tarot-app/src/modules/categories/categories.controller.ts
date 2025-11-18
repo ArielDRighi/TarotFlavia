@@ -72,7 +72,7 @@ export class CategoriesController {
 
   @Post()
   @UseGuards(JwtAuthGuard, AdminGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Crear una nueva categoría (solo admins)' })
   @ApiResponse({
     status: 201,
@@ -91,7 +91,7 @@ export class CategoriesController {
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard, AdminGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Actualizar una categoría (solo admins)' })
   @ApiResponse({
     status: 200,
@@ -112,7 +112,7 @@ export class CategoriesController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, AdminGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Eliminar una categoría (solo admins)' })
   @ApiResponse({ status: 200, description: 'Categoría eliminada exitosamente' })
   @ApiResponse({ status: 401, description: 'No autenticado' })
@@ -124,7 +124,7 @@ export class CategoriesController {
 
   @Patch(':id/toggle-active')
   @UseGuards(JwtAuthGuard, AdminGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Activar/Desactivar una categoría (solo admins)',
   })
