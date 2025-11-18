@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CacheAdminController } from '../../src/modules/cache/infrastructure/controllers/cache-admin.controller';
 import { InterpretationCacheService } from '../../src/modules/cache/application/services/interpretation-cache.service';
+import { CacheAnalyticsService } from '../../src/modules/cache/application/services/cache-analytics.service';
+import { CacheWarmingService } from '../../src/modules/cache/application/services/cache-warming.service';
 
 describe('CacheAdminController', () => {
   let controller: CacheAdminController;
@@ -18,6 +20,22 @@ describe('CacheAdminController', () => {
             clearAllCaches: jest.fn(),
             getCacheStats: jest.fn(),
             getInvalidationMetrics: jest.fn(),
+          },
+        },
+        {
+          provide: CacheAnalyticsService,
+          useValue: {
+            getAnalytics: jest.fn(),
+            getTopCachedCombinations: jest.fn(),
+            getHistoricalMetrics: jest.fn(),
+          },
+        },
+        {
+          provide: CacheWarmingService,
+          useValue: {
+            warmCache: jest.fn(),
+            getStatus: jest.fn(),
+            stopWarming: jest.fn(),
           },
         },
       ],
