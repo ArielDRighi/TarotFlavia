@@ -630,6 +630,6 @@ describe('Reading Regeneration E2E', () => {
       expect(new Date(updatedReading!.updatedAt).getTime()).toBeGreaterThan(
         new Date(originalUpdatedAt).getTime(),
       );
-    }, 10000); // Timeout de 10 segundos para este test
+    });
   });
 });

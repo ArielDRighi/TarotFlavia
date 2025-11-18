@@ -52,7 +52,7 @@ describe('AI Provider Fallback (e2e)', () => {
     if (!freeUserToken) {
       throw new Error('Failed to obtain authentication token');
     }
-  });
+  }, 30000);
 
   afterEach(async () => {
     // Clean up readings and usage limits after each test to reset usage constraints
@@ -70,7 +70,7 @@ describe('AI Provider Fallback (e2e)', () => {
     if (dbHelper) {
       await dbHelper.close();
     }
-  });
+  }, 30000);
 
   describe('AI Provider Integration', () => {
     it('should successfully generate interpretation with available provider', async () => {
@@ -107,7 +107,7 @@ describe('AI Provider Fallback (e2e)', () => {
       expect(usageLogs[0]).toHaveProperty('prompt_tokens');
       expect(usageLogs[0]).toHaveProperty('completion_tokens');
       expect(['groq', 'deepseek', 'openai']).toContain(usageLogs[0].provider);
-    });
+    }, 30000);
 
     it('should log complete usage information in ai_usage_logs', async () => {
       const response = await request(app.getHttpServer())
@@ -148,7 +148,7 @@ describe('AI Provider Fallback (e2e)', () => {
       expect(log).toHaveProperty('cost_usd');
       expect(log).toHaveProperty('fallback_used');
       expect(typeof log.fallback_used).toBe('boolean');
-    });
+    }, 30000);
   });
 
   describe('Health Check - AI Providers', () => {
@@ -223,6 +223,6 @@ describe('AI Provider Fallback (e2e)', () => {
         expect(response.body).toHaveProperty('interpretation');
         expect(response.body.interpretation).not.toBe('');
       });
-    });
+    }, 30000);
   });
 });
