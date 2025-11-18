@@ -26,14 +26,6 @@ interface HitRateQueryResult {
   total_entries: string;
 }
 
-interface HistoricalMetricRaw {
-  date: Date;
-  hit_rate_percentage: string;
-  total_requests: string;
-  cache_hits: string;
-  cache_misses: string;
-}
-
 /**
  * Servicio para analytics de caché
  * Calcula:
@@ -231,7 +223,7 @@ export class CacheAnalyticsService {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
-    const metrics = (await this.metricsRepository
+    const metrics = await this.metricsRepository
       .createQueryBuilder('metric')
       .select('metric.metric_date', 'date')
       .addSelect('AVG(metric.hit_rate_percentage)', 'hit_rate_percentage')
@@ -241,7 +233,13 @@ export class CacheAnalyticsService {
       .where('metric.metric_date >= :startDate', { startDate })
       .groupBy('metric.metric_date')
       .orderBy('metric.metric_date', 'ASC')
-      .getRawMany()) as HistoricalMetricRaw[];
+      .getRawMany<{
+        date: Date;
+        hit_rate_percentage: string;
+        total_requests: string;
+        cache_hits: string;
+        cache_misses: string;
+      }>();
 
     return metrics.map((m) => ({
       date: m.date,
@@ -256,11 +254,11 @@ export class CacheAnalyticsService {
    * Registra un hit/miss de caché para analytics
    * Llamado por el servicio de interpretaciones
    */
-  async recordCacheAccess(
+  recordCacheAccess(
     isHit: boolean,
     level: CacheLevel,
     responseTimeMs?: number,
-  ): Promise<void> {
+  ): void {
     this.logger.debug(
       `Cache access recorded: ${isHit ? 'HIT' : 'MISS'} at level ${level}, time: ${responseTimeMs || 'N/A'}ms`,
     );

@@ -171,34 +171,38 @@ export class CacheWarmingStatusDto {
   isRunning: boolean;
 
   @ApiProperty({
+    description: 'Progress percentage (0-100)',
+    example: 45.5,
+  })
+  progress: number;
+
+  @ApiProperty({
     description: 'Total combinations to warm',
     example: 100,
   })
   totalCombinations: number;
 
   @ApiProperty({
-    description: 'Combinations already warmed',
+    description: 'Combinations already processed',
     example: 45,
   })
-  completedCombinations: number;
+  processedCombinations: number;
 
   @ApiProperty({
-    description: 'Progress percentage',
-    example: 45.0,
+    description: 'Successfully warmed combinations',
+    example: 43,
   })
-  progressPercentage: number;
+  successCount: number;
 
   @ApiProperty({
-    description: 'Estimated time remaining (seconds)',
-    example: 275,
-    nullable: true,
+    description: 'Combinations that failed to warm',
+    example: 2,
   })
-  estimatedTimeRemaining: number | null;
+  errorCount: number;
 
   @ApiProperty({
-    description: 'Start time of current warming process',
-    example: '2025-11-17T10:00:00Z',
-    nullable: true,
+    description: 'Estimated time remaining in minutes',
+    example: 5,
   })
-  startedAt: Date | null;
+  estimatedTimeRemainingMinutes: number;
 }

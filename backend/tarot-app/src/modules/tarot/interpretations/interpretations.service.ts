@@ -410,4 +410,65 @@ export class InterpretationsService {
       );
     }
   }
+
+  /**
+   * Genera interpretación específicamente para cache warming
+   * Simplificado para evitar dependencias innecesarias
+   */
+  async generateInterpretationForCacheWarming(
+    cardIds: number[],
+    spreadId: number | null,
+    cardCombination: {
+      card_id: string;
+      position: number;
+      is_reversed: boolean;
+    }[],
+  ): Promise<InterpretationResult> {
+    // Buscar las cartas en la base de datos
+    const cards: TarotCard[] = [];
+    for (const id of cardIds) {
+      const card = await this.interpretationRepository.manager.findOne(
+        TarotCard,
+        {
+          where: { id },
+        },
+      );
+      if (card) {
+        cards.push(card);
+      }
+    }
+
+    if (cards.length === 0) {
+      throw new Error(
+        `No cards found for IDs: ${cardIds.join(', ')} during cache warming`,
+      );
+    }
+
+    // Buscar el spread si se proporcionó
+    let spread: TarotSpread | null = null;
+    if (spreadId) {
+      spread = await this.interpretationRepository.manager.findOne(
+        TarotSpread,
+        {
+          where: { id: spreadId },
+        },
+      );
+    }
+
+    // Crear positions array basado en cardCombination
+    const positions = cardCombination.map((combo, index) => ({
+      cardId: parseInt(combo.card_id, 10),
+      position: `Position ${index + 1}`,
+      isReversed: combo.is_reversed,
+    }));
+
+    // Usar el método estándar de generación de interpretación
+    return this.generateInterpretation(
+      cards,
+      positions,
+      'Pregunta general sobre la situación', // Pregunta genérica para warming
+      spread || undefined,
+      'General',
+    );
+  }
 }

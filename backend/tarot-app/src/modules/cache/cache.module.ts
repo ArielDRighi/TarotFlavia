@@ -1,31 +1,42 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 // Entities
 import { CachedInterpretation } from './infrastructure/entities/cached-interpretation.entity';
+import { CacheMetric } from './infrastructure/entities/cache-metrics.entity';
 
 // Services
 import { InterpretationCacheService } from './application/services/interpretation-cache.service';
 import { CacheCleanupService } from './application/services/cache-cleanup.service';
+import { CacheStrategyService } from './application/services/cache-strategy.service';
+import { CacheAnalyticsService } from './application/services/cache-analytics.service';
+import { CacheWarmingService } from './application/services/cache-warming.service';
 
 // Controllers
 import { CacheAdminController } from './infrastructure/controllers/cache-admin.controller';
 
-// TODO: TASK-ARCH-004 - Enable repository pattern
-// import { TypeOrmCacheRepository } from './infrastructure/repositories/typeorm-cache.repository';
+// External modules
+import { InterpretationsModule } from '../tarot/interpretations/interpretations.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([CachedInterpretation])],
+  imports: [
+    TypeOrmModule.forFeature([CachedInterpretation, CacheMetric]),
+    forwardRef(() => InterpretationsModule),
+  ],
   controllers: [CacheAdminController],
   providers: [
     InterpretationCacheService,
     CacheCleanupService,
-    // TODO: TASK-ARCH-004 (Repository Pattern) - Refactor InterpretationCacheService
-    // to use ICacheRepository instead of TypeORM directly. Currently the service
-    // uses TypeORM-specific methods (createQueryBuilder, findOne with relations, etc.)
-    // that would require significant refactoring to abstract behind the repository interface.
-    // This is deferred to Phase 2 where we apply explicit repository pattern across all modules.
+    CacheStrategyService,
+    CacheAnalyticsService,
+    CacheWarmingService,
   ],
-  exports: [InterpretationCacheService, CacheCleanupService],
+  exports: [
+    InterpretationCacheService,
+    CacheCleanupService,
+    CacheStrategyService,
+    CacheAnalyticsService,
+    CacheWarmingService,
+  ],
 })
 export class CacheModule {}

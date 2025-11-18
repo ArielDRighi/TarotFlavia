@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { HttpModule } from '@nestjs/axios';
 import { ConfigModule } from '@nestjs/config';
@@ -25,7 +25,7 @@ import { OutputSanitizerService } from '../../../common/services/output-sanitize
     ]),
     HttpModule,
     ConfigModule,
-    CacheModule,
+    forwardRef(() => CacheModule),
     AIModule,
     AIUsageModule,
   ],
