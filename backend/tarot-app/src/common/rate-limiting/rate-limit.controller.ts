@@ -1,10 +1,4 @@
-import {
-  Controller,
-  Get,
-  Request,
-  UnauthorizedException,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Request, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../modules/auth/guards/jwt-auth.guard';
 import { RateLimitService } from './rate-limit.service';
@@ -28,11 +22,7 @@ export class RateLimitController {
       ip?: string;
     };
 
-    if (!request.user) {
-      throw new UnauthorizedException('User not authenticated');
-    }
-
-    const userId = request.user.userId;
+    const userId = request.user!.userId;
 
     return this.rateLimitService.getRateLimitStatus(userId);
   }

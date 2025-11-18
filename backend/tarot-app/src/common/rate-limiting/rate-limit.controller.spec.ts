@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { RateLimitController } from './rate-limit.controller';
 import { RateLimitService } from './rate-limit.service';
 import { UserPlan } from '../../modules/users/entities/user.entity';
-import { UnauthorizedException } from '@nestjs/common';
 
 describe('RateLimitController', () => {
   let controller: RateLimitController;
@@ -36,13 +35,6 @@ describe('RateLimitController', () => {
   });
 
   describe('getStatus', () => {
-    it('should throw UnauthorizedException if user is not authenticated', async () => {
-      const req = {};
-      await expect(controller.getStatus(req)).rejects.toThrow(
-        UnauthorizedException,
-      );
-    });
-
     it('should return rate limit status for authenticated FREE user', async () => {
       const req = {
         user: {
@@ -155,6 +147,7 @@ describe('RateLimitController', () => {
       const result = await controller.getStatus(req);
 
       expect(result).toEqual(expectedStatus);
+      expect(service.getRateLimitStatus).toHaveBeenCalledWith(3);
     });
   });
 });

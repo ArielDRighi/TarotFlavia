@@ -126,6 +126,15 @@ describe('RateLimitService', () => {
         },
       });
     });
+
+    it('should throw NotFoundException when user is not found', async () => {
+      const userId = 999;
+      mockUsersService.findById.mockResolvedValue(null);
+
+      await expect(service.getRateLimitStatus(userId)).rejects.toThrow(
+        'User 999 not found',
+      );
+    });
   });
 
   describe('getPlanLimits', () => {

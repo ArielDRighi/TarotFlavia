@@ -16,9 +16,7 @@ interface LoginResponse {
   access_token: string;
 }
 
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
 
 describe('Rate Limit Status (e2e)', () => {
   let app: INestApplication<App>;
@@ -141,6 +139,9 @@ describe('Rate Limit Status (e2e)', () => {
           },
         },
       });
+
+      expect(response.body.resetAt.hour).toBeGreaterThan(Date.now());
+      expect(response.body.resetAt.minute).toBeGreaterThan(Date.now());
     });
 
     it('should return unlimited status for ADMIN users', async () => {

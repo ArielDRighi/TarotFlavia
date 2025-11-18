@@ -5884,14 +5884,6 @@ Mejorar sistema de rate limiting para aplicar límites diferentes según el plan
 
 ---
 
-#### 📝 Notas Técnicas
-
-- **Tracking de uso actual:** Implementación MVP retorna uso = 0. El tracking real requiere integración con ThrottlerStorage o implementación de servicio custom de tracking, dejado para iteración futura.
-- **Test E2E:** Presenta issue con JwtAuthGuard en entorno de testing. Tests unitarios pasan completamente. Issue documentado para revisión futura.
-- **Arquitectura:** Siguiendo patrón feature-based, el código está en `common/rate-limiting/` ya que es funcionalidad transversal.
-
----
-
 ## 🎨 Epic 16: Mejoras de Experiencia de Desarrollo
 
 > **Objetivo:** Facilitar el desarrollo, mantenimiento y onboarding de nuevos desarrolladores mediante documentación, tooling y testing completos.

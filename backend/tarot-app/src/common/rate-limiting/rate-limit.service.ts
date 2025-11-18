@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { UserPlan } from '../../modules/users/entities/user.entity';
 import { UsersService } from '../../modules/users/users.service';
 
@@ -71,7 +71,7 @@ export class RateLimitService {
     const user = await this.usersService.findById(userId);
 
     if (!user) {
-      throw new Error(`User ${userId} not found`);
+      throw new NotFoundException(`User ${userId} not found`);
     }
 
     const isAdmin = user.isAdmin || false;
