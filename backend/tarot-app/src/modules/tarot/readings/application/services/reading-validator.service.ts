@@ -62,6 +62,13 @@ export class ReadingValidatorService {
       throw new NotFoundException(`Reading with ID ${readingId} not found`);
     }
 
+    // BUG FIX: Validate that reading has a user relation loaded
+    if (!reading.user) {
+      throw new BadRequestException(
+        'Reading data is corrupted: missing user relation',
+      );
+    }
+
     if (reading.user.id !== userId) {
       throw new ForbiddenException('You do not own this reading');
     }
@@ -82,6 +89,18 @@ export class ReadingValidatorService {
   }
 
   validateRegenerationCount(reading: TarotReading): void {
+    // BUG FIX: Validate that regenerationCount is a valid number
+    if (
+      reading.regenerationCount === null ||
+      reading.regenerationCount === undefined ||
+      typeof reading.regenerationCount !== 'number' ||
+      isNaN(reading.regenerationCount)
+    ) {
+      throw new BadRequestException(
+        'Reading data is corrupted: invalid regenerationCount',
+      );
+    }
+
     const MAX_REGENERATIONS = 3;
     if (reading.regenerationCount >= MAX_REGENERATIONS) {
       throw new HttpException(
@@ -95,6 +114,24 @@ export class ReadingValidatorService {
     totalReadings: number,
     userPlan: UserPlan,
   ): void {
+    // BUG FIX: Validate that totalReadings is a valid number
+    if (
+      totalReadings === null ||
+      totalReadings === undefined ||
+      typeof totalReadings !== 'number' ||
+      isNaN(totalReadings) ||
+      totalReadings < 0
+    ) {
+      throw new BadRequestException(
+        'Invalid totalReadings value: must be a non-negative number',
+      );
+    }
+
+    // BUG FIX: Validate that userPlan is valid
+    if (!userPlan || !Object.values(UserPlan).includes(userPlan)) {
+      throw new BadRequestException('Invalid user plan');
+    }
+
     const FREE_USER_LIMIT = 10;
     if (userPlan === UserPlan.FREE && totalReadings >= FREE_USER_LIMIT) {
       throw new ForbiddenException(

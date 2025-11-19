@@ -157,6 +157,127 @@ Los tests SON para ENCONTRAR dónde NO funciona y CORREGIRLO.
 - Confianza real en el test suite
 - Menos bugs reportados por usuarios
 
+## BUENAS PRÁCTICAS - TAMAÑO Y ORGANIZACIÓN DE ARCHIVOS DE TEST
+
+### Límites Recomendados
+
+**Un archivo de test NO debería exceder:**
+
+- ✅ **300-400 líneas** para tests unitarios simples
+- ⚠️ **500-600 líneas** para tests de integración complejos
+- 🔴 **>800 líneas** es señal de que DEBE refactorizarse
+
+### Cuándo Refactorizar un Archivo de Test
+
+**Señales de que un archivo de test es demasiado grande:**
+
+1. **Más de 500 líneas** → Considerar dividir
+2. **Más de 800 líneas** → OBLIGATORIO dividir
+3. **Más de 10 bloques `describe()`** de primer nivel
+4. **Scrolling excesivo** para encontrar tests específicos
+5. **Setup duplicado** en múltiples bloques
+6. **Dificultad para entender** qué se está testeando
+
+### Estrategias de Refactorización
+
+#### Opción 1: Dividir por Funcionalidad
+
+```
+# Archivo original muy grande
+users.service.spec.ts (1200 líneas) ❌
+
+# Dividir en:
+users.service.create.spec.ts (300 líneas) ✅
+users.service.read.spec.ts (250 líneas) ✅
+users.service.update.spec.ts (280 líneas) ✅
+users.service.delete.spec.ts (220 líneas) ✅
+users.service.validation.spec.ts (150 líneas) ✅
+```
+
+#### Opción 2: Dividir por Caso de Uso
+
+```
+# Archivo original muy grande
+readings.service.spec.ts (1500 líneas) ❌
+
+# Dividir en:
+readings.service.creation.spec.ts (400 líneas) ✅
+readings.service.retrieval.spec.ts (300 líneas) ✅
+readings.service.interpretation.spec.ts (450 líneas) ✅
+readings.service.edge-cases.spec.ts (350 líneas) ✅
+```
+
+#### Opción 3: Dividir por Tipo de Test
+
+```
+# Archivo original muy grande
+auth.e2e-spec.ts (900 líneas) ❌
+
+# Dividir en:
+auth-register.e2e-spec.ts (250 líneas) ✅
+auth-login.e2e-spec.ts (200 líneas) ✅
+auth-tokens.e2e-spec.ts (300 líneas) ✅
+auth-permissions.e2e-spec.ts (150 líneas) ✅
+```
+
+### Helpers y Utilities Compartidos
+
+**Para evitar duplicación entre archivos:**
+
+```typescript
+// test/helpers/users.helpers.ts
+export const createUserFactory = () => { ... };
+export const mockUserRepository = () => { ... };
+
+// test/fixtures/users.fixtures.ts
+export const validUserDto = { ... };
+export const invalidUserDto = { ... };
+
+// users.service.create.spec.ts
+import { createUserFactory, mockUserRepository } from '@test/helpers/users.helpers';
+import { validUserDto } from '@test/fixtures/users.fixtures';
+```
+
+### Ventajas de Archivos de Test Pequeños
+
+✅ **Legibilidad:** Fácil encontrar y entender tests específicos  
+✅ **Mantenibilidad:** Cambios localizados, menos conflictos de merge  
+✅ **Performance:** Jest puede paralelizar mejor archivos pequeños  
+✅ **Navegación:** Menos scrolling, estructura más clara  
+✅ **Debugging:** Más fácil identificar qué falló  
+✅ **Onboarding:** Nuevos desarrolladores entienden más rápido
+
+### Límites por Tipo de Test
+
+| Tipo de Test         | Límite Ideal | Límite Máximo | Acción si Excede           |
+| -------------------- | ------------ | ------------- | -------------------------- |
+| Unit Test (simple)   | 300 líneas   | 500 líneas    | Dividir por método/función |
+| Unit Test (complejo) | 400 líneas   | 600 líneas    | Dividir por caso de uso    |
+| Integration Test     | 500 líneas   | 800 líneas    | Dividir por flujo          |
+| E2E Test             | 400 líneas   | 700 líneas    | Dividir por user journey   |
+
+### Excepción: Tests Exhaustivos
+
+**A veces un archivo grande está justificado:**
+
+- Tests de validación exhaustiva (100+ edge cases)
+- Tests de compatibilidad con múltiples versiones
+- Tests de regresión documentando bugs históricos
+
+**En estos casos:**
+
+- Documentar claramente POR QUÉ es grande
+- Usar comentarios de sección para navegación
+- Mantener estructura clara con `describe()` anidados
+
+### Red Flags
+
+🔴 **Archivo >1000 líneas** sin justificación documentada  
+🔴 **Copy-paste de setup** entre bloques (extraer a helper)  
+🔴 **Tests difíciles de encontrar** (pobre organización)  
+🔴 **Timeouts frecuentes** al ejecutar (demasiados tests en un archivo)  
+🔴 **Merge conflicts recurrentes** (demasiadas personas editando mismo archivo)
+
 ---
 
 **RECUERDA: Un test que pasa sin encontrar bugs es un test que NO hizo su trabajo correctamente.**
