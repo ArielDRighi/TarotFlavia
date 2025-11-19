@@ -4,6 +4,7 @@ import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { RefreshTokenService } from './refresh-token.service';
 import { PasswordResetService } from './password-reset.service';
+import { UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { User, UserPlan } from '../users/entities/user.entity';
@@ -418,6 +419,283 @@ describe('AuthService', () => {
       expect(usersServiceMock.update).toHaveBeenCalledWith(
         mockUser.id,
         expect.any(Object),
+      );
+    });
+  });
+
+  describe('register - additional tests', () => {
+    it('should throw UnauthorizedException if user creation fails', async () => {
+      const dto: CreateUserDto = {
+        email: 'fail@test.com',
+        name: 'Fail User',
+        password: 'Test1234!',
+      };
+
+      // Mock create to succeed but findById to fail (simulating edge case)
+      (usersServiceMock.create as jest.Mock).mockResolvedValueOnce({
+        id: 999,
+        email: dto.email,
+      });
+      (usersServiceMock.findById as jest.Mock).mockResolvedValueOnce(null);
+
+      await expect(
+        service.register(dto, '127.0.0.1', 'test-agent'),
+      ).rejects.toThrow(UnauthorizedException);
+      await expect(
+        service.register(dto, '127.0.0.1', 'test-agent'),
+      ).rejects.toThrow('User creation failed');
+    });
+  });
+
+  describe('login - additional tests', () => {
+    it('should throw UnauthorizedException for banned user', async () => {
+      const bannedUser: Partial<User> = {
+        id: 10,
+        email: 'banned@test.com',
+        name: 'Banned User',
+        isAdmin: false,
+      };
+
+      const mockBannedUser = {
+        ...bannedUser,
+        password: 'hashed_password',
+        plan: UserPlan.FREE,
+        roles: [],
+        isBanned: jest.fn().mockReturnValue(true),
+        banReason: 'Violation of terms',
+      } as unknown as User;
+
+      (usersServiceMock.findById as jest.Mock).mockResolvedValueOnce(
+        mockBannedUser,
+      );
+
+      await expect(
+        service.login(bannedUser, '127.0.0.1', 'test-agent'),
+      ).rejects.toThrow(UnauthorizedException);
+      await expect(
+        service.login(bannedUser, '127.0.0.1', 'test-agent'),
+      ).rejects.toThrow('Usuario baneado: Violation of terms');
+    });
+
+    it('should throw UnauthorizedException for invalid user data', async () => {
+      const invalidUser: Partial<User> = {
+        name: 'No ID User',
+      };
+
+      await expect(
+        service.login(invalidUser, '127.0.0.1', 'test-agent'),
+      ).rejects.toThrow(UnauthorizedException);
+      await expect(
+        service.login(invalidUser, '127.0.0.1', 'test-agent'),
+      ).rejects.toThrow('Invalid user data');
+    });
+
+    it('should throw UnauthorizedException if user not found in database', async () => {
+      const user: Partial<User> = {
+        id: 999,
+        email: 'notfound@test.com',
+        name: 'Not Found',
+      };
+
+      (usersServiceMock.findById as jest.Mock).mockResolvedValueOnce(null);
+
+      await expect(
+        service.login(user, '127.0.0.1', 'test-agent'),
+      ).rejects.toThrow(UnauthorizedException);
+      await expect(
+        service.login(user, '127.0.0.1', 'test-agent'),
+      ).rejects.toThrow('User not found');
+    });
+  });
+
+  describe('refresh', () => {
+    it('should refresh tokens successfully with valid refresh token', async () => {
+      const refreshToken = 'valid-refresh-token';
+      const mockUser = {
+        id: 1,
+        email: 'test@test.com',
+        name: 'Test User',
+        isAdmin: false,
+        plan: UserPlan.FREE,
+        roles: [],
+      } as User;
+
+      const mockTokenEntity = {
+        id: 'token-id-123',
+        token: 'hashed-token',
+        user: mockUser,
+        isValid: jest.fn().mockReturnValue(true),
+      };
+
+      (
+        refreshTokenServiceMock.findTokenByPlainToken as jest.Mock
+      ).mockResolvedValue(mockTokenEntity);
+      (refreshTokenServiceMock.revokeToken as jest.Mock).mockResolvedValue(
+        undefined,
+      );
+      (
+        refreshTokenServiceMock.createRefreshToken as jest.Mock
+      ).mockResolvedValue({
+        token: 'new-refresh-token',
+      });
+
+      const result = await service.refresh(
+        refreshToken,
+        '127.0.0.1',
+        'test-agent',
+      );
+
+      expect(
+        refreshTokenServiceMock.findTokenByPlainToken,
+      ).toHaveBeenCalledWith(refreshToken);
+      expect(mockTokenEntity.isValid).toHaveBeenCalled();
+      expect(refreshTokenServiceMock.revokeToken).toHaveBeenCalledWith(
+        mockTokenEntity.id,
+      );
+      expect(refreshTokenServiceMock.createRefreshToken).toHaveBeenCalledWith(
+        mockUser,
+        '127.0.0.1',
+        'test-agent',
+      );
+      expect(jwtServiceMock.sign).toHaveBeenCalledWith(
+        expect.objectContaining({
+          email: mockUser.email,
+          sub: mockUser.id,
+          isAdmin: mockUser.isAdmin,
+          plan: mockUser.plan,
+        }),
+      );
+      expect(result).toEqual({
+        access_token: 'signed-token',
+        refresh_token: 'new-refresh-token',
+      });
+    });
+
+    it('should throw UnauthorizedException for invalid refresh token', async () => {
+      const refreshToken = 'invalid-refresh-token';
+
+      (
+        refreshTokenServiceMock.findTokenByPlainToken as jest.Mock
+      ).mockResolvedValue(null);
+
+      await expect(
+        service.refresh(refreshToken, '127.0.0.1', 'test-agent'),
+      ).rejects.toThrow(UnauthorizedException);
+      await expect(
+        service.refresh(refreshToken, '127.0.0.1', 'test-agent'),
+      ).rejects.toThrow('Invalid refresh token');
+    });
+
+    it('should throw UnauthorizedException for expired refresh token', async () => {
+      const refreshToken = 'expired-refresh-token';
+      const mockTokenEntity = {
+        id: 'token-id-456',
+        token: 'hashed-token',
+        isValid: jest.fn().mockReturnValue(false), // Token expired or revoked
+      };
+
+      (
+        refreshTokenServiceMock.findTokenByPlainToken as jest.Mock
+      ).mockResolvedValue(mockTokenEntity);
+
+      await expect(
+        service.refresh(refreshToken, '127.0.0.1', 'test-agent'),
+      ).rejects.toThrow(UnauthorizedException);
+      await expect(
+        service.refresh(refreshToken, '127.0.0.1', 'test-agent'),
+      ).rejects.toThrow('Invalid refresh token');
+    });
+
+    it('should throw UnauthorizedException if user not found in token', async () => {
+      const refreshToken = 'no-user-refresh-token';
+      const mockTokenEntity = {
+        id: 'token-id-789',
+        token: 'hashed-token',
+        user: null, // No user associated
+        isValid: jest.fn().mockReturnValue(true),
+      };
+
+      (
+        refreshTokenServiceMock.findTokenByPlainToken as jest.Mock
+      ).mockResolvedValue(mockTokenEntity);
+
+      await expect(
+        service.refresh(refreshToken, '127.0.0.1', 'test-agent'),
+      ).rejects.toThrow(UnauthorizedException);
+      await expect(
+        service.refresh(refreshToken, '127.0.0.1', 'test-agent'),
+      ).rejects.toThrow('User not found');
+    });
+  });
+
+  describe('logout', () => {
+    it('should logout successfully with valid refresh token', async () => {
+      const refreshToken = 'valid-logout-token';
+      const mockTokenEntity = {
+        id: 'token-logout-123',
+        token: 'hashed-token',
+      };
+
+      (
+        refreshTokenServiceMock.findTokenByPlainToken as jest.Mock
+      ).mockResolvedValue(mockTokenEntity);
+      (refreshTokenServiceMock.revokeToken as jest.Mock).mockResolvedValue(
+        undefined,
+      );
+
+      const result = await service.logout(refreshToken);
+
+      expect(
+        refreshTokenServiceMock.findTokenByPlainToken,
+      ).toHaveBeenCalledWith(refreshToken);
+      expect(refreshTokenServiceMock.revokeToken).toHaveBeenCalledWith(
+        mockTokenEntity.id,
+      );
+      expect(result).toEqual({ message: 'Logged out successfully' });
+    });
+
+    it('should throw UnauthorizedException for invalid logout token', async () => {
+      const refreshToken = 'invalid-logout-token';
+
+      (
+        refreshTokenServiceMock.findTokenByPlainToken as jest.Mock
+      ).mockResolvedValue(null);
+
+      await expect(service.logout(refreshToken)).rejects.toThrow(
+        UnauthorizedException,
+      );
+      await expect(service.logout(refreshToken)).rejects.toThrow(
+        'Invalid refresh token',
+      );
+    });
+  });
+
+  describe('logoutAll', () => {
+    it('should logout all sessions for a user', async () => {
+      const userId = 1;
+
+      (
+        refreshTokenServiceMock.revokeAllUserTokens as jest.Mock
+      ).mockResolvedValue(undefined);
+
+      const result = await service.logoutAll(userId);
+
+      expect(refreshTokenServiceMock.revokeAllUserTokens).toHaveBeenCalledWith(
+        userId,
+      );
+      expect(result).toEqual({
+        message: 'All sessions logged out successfully',
+      });
+    });
+
+    it('should throw UnauthorizedException for invalid userId', async () => {
+      const userId = null as unknown as number;
+
+      await expect(service.logoutAll(userId)).rejects.toThrow(
+        UnauthorizedException,
+      );
+      await expect(service.logoutAll(userId)).rejects.toThrow(
+        'User not authenticated',
       );
     });
   });
