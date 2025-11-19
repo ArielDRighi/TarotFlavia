@@ -34,14 +34,16 @@ export class CardFactory {
     card.number = options.number ?? id - 1;
     card.category = options.category ?? 'arcanos_mayores';
     card.imageUrl = options.imageUrl ?? `https://example.com/card${id}.jpg`;
-    card.reversedImageUrl =
+    card.reversedImageUrl = card.reversedImageUrl =
       options.reversedImageUrl ?? `https://example.com/card${id}-reversed.jpg`;
     card.meaningUpright = options.meaningUpright ?? 'Positive meaning';
     card.meaningReversed = options.meaningReversed ?? 'Reversed meaning';
     card.description = options.description ?? `Description of card ${id}`;
     card.keywords = options.keywords ?? 'test,keywords';
     card.deckId = options.deckId ?? 1;
-    card.deck = options.deck ?? undefined;
+    if (options.deck) {
+      card.deck = options.deck;
+    }
     card.createdAt = new Date();
     card.updatedAt = new Date();
 

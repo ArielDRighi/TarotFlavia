@@ -38,7 +38,7 @@ export class UserFactory {
     user.name = options.name ?? `Test User ${id}`;
     user.isAdmin = options.isAdmin ?? false;
     user.plan = options.plan ?? UserPlan.FREE;
-    user.isBannedFlag = options.isBannedFlag ?? false;
+    user.bannedAt = options.isBannedFlag ? new Date() : null;
     user.banReason = options.banReason ?? null;
     user.lastLogin = options.lastLogin ?? null;
     user.createdAt = new Date();

@@ -1,25 +1,20 @@
 import { TarotReading } from '../../../src/modules/tarot/readings/entities/tarot-reading.entity';
-import { User } from '../../../src/modules/users/entities/user.entity';
-import { TarotSpread } from '../../../src/modules/tarot/spreads/entities/tarot-spread.entity';
-import { TarotCard } from '../../../src/modules/tarot/cards/entities/tarot-card.entity';
 
 interface CreateReadingFactoryOptions {
   id?: number;
-  user?: User;
-  userId?: number;
-  spread?: TarotSpread;
-  spreadId?: number;
-  cards?: TarotCard[];
+  question?: string;
+  customQuestion?: string | null;
+  predefinedQuestionId?: number | null;
   cardPositions?: Array<{
     cardId: number;
     position: string;
     isReversed: boolean;
   }>;
-  question?: string;
-  category?: string;
-  isShared?: boolean;
-  shareToken?: string | null;
-  deletedAt?: Date | null;
+  interpretation?: string | null;
+  tarotistaId?: number | null;
+  isPublic?: boolean;
+  sharedToken?: string | null;
+  deletedAt?: Date;
 }
 
 /**
@@ -36,17 +31,17 @@ export class ReadingFactory {
 
     const reading = new TarotReading();
     reading.id = id;
-    reading.userId = options.userId ?? 1;
-    reading.user = options.user ?? undefined;
-    reading.spreadId = options.spreadId ?? 1;
-    reading.spread = options.spread ?? undefined;
-    reading.cards = options.cards ?? [];
-    reading.cardPositions = options.cardPositions ?? [];
     reading.question = options.question ?? 'Test question';
-    reading.category = options.category ?? 'General';
-    reading.isShared = options.isShared ?? false;
-    reading.shareToken = options.shareToken ?? null;
-    reading.deletedAt = options.deletedAt ?? null;
+    reading.customQuestion = options.customQuestion ?? null;
+    reading.predefinedQuestionId = options.predefinedQuestionId ?? null;
+    reading.cardPositions = options.cardPositions ?? [];
+    reading.interpretation = options.interpretation ?? null;
+    reading.tarotistaId = options.tarotistaId ?? null;
+    reading.isPublic = options.isPublic ?? false;
+    reading.sharedToken = options.sharedToken ?? null;
+    reading.deletedAt = options.deletedAt;
+    reading.regenerationCount = 0;
+    reading.viewCount = 0;
     reading.createdAt = new Date();
     reading.updatedAt = new Date();
 
@@ -59,8 +54,8 @@ export class ReadingFactory {
   static createShared(options: CreateReadingFactoryOptions = {}): TarotReading {
     return this.create({
       ...options,
-      isShared: true,
-      shareToken: options.shareToken ?? `share-token-${Date.now()}`,
+      isPublic: true,
+      sharedToken: options.sharedToken ?? `share-token-${Date.now()}`,
     });
   }
 
