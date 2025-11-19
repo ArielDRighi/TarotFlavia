@@ -17,7 +17,15 @@ export class TypeOrmReadingRepository implements IReadingRepository {
 
   async create(reading: Partial<TarotReading>): Promise<TarotReading> {
     const newReading = this.readingRepo.create(reading);
-    return this.readingRepo.save(newReading);
+    const savedReading = await this.readingRepo.save(newReading);
+
+    // Cargar relaciones después de guardar
+    const readingWithRelations = await this.findById(savedReading.id);
+    if (!readingWithRelations) {
+      throw new Error('Failed to retrieve created reading');
+    }
+
+    return readingWithRelations;
   }
 
   async findById(

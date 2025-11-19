@@ -1,4 +1,4 @@
-import { Injectable, Inject, Logger } from '@nestjs/common';
+import { Injectable, Inject, Logger, NotFoundException } from '@nestjs/common';
 import { IReadingRepository } from '../../domain/interfaces/reading-repository.interface';
 import { ReadingValidatorService } from '../services/reading-validator.service';
 import { CreateReadingDto } from '../../dto/create-reading.dto';
@@ -7,6 +7,7 @@ import { User } from '../../../../users/entities/user.entity';
 import { InterpretationsService } from '../../../interpretations/interpretations.service';
 import { CardsService } from '../../../cards/cards.service';
 import { SpreadsService } from '../../../spreads/spreads.service';
+import { DecksService } from '../../../decks/decks.service';
 import { PredefinedQuestionsService } from '../../../../predefined-questions/predefined-questions.service';
 import { TarotDeck } from '../../../decks/entities/tarot-deck.entity';
 
@@ -23,6 +24,7 @@ export class CreateReadingUseCase {
     private readonly interpretationsService: InterpretationsService,
     private readonly cardsService: CardsService,
     private readonly spreadsService: SpreadsService,
+    private readonly decksService: DecksService,
     private readonly predefinedQuestionsService: PredefinedQuestionsService,
   ) {}
 
@@ -33,6 +35,24 @@ export class CreateReadingUseCase {
     // Validar usuario
     await this.validator.validateUser(user.id);
 
+    // Validar que el deck existe
+    const deck = await this.decksService.findDeckById(createReadingDto.deckId);
+    if (!deck) {
+      throw new NotFoundException(
+        `Deck with ID ${createReadingDto.deckId} not found`,
+      );
+    }
+
+    // Validar que el spread existe (antes de crear la lectura)
+    const spread = await this.spreadsService.findById(
+      createReadingDto.spreadId,
+    );
+    if (!spread) {
+      throw new NotFoundException(
+        `Spread with ID ${createReadingDto.spreadId} not found`,
+      );
+    }
+
     // Determinar tipo de pregunta
     const questionType = createReadingDto.predefinedQuestionId
       ? ('predefined' as const)
@@ -41,6 +61,9 @@ export class CreateReadingUseCase {
     // Determinar qué tarotista usar (por ahora siempre Flavia)
     const tarotistaId = DEFAULT_TAROTISTA_ID;
 
+    // Obtener las cartas antes de crear la lectura (esto también valida que existan)
+    const cards = await this.cardsService.findByIds(createReadingDto.cardIds);
+
     // Crear la lectura primero sin interpretación
     const reading = await this.readingRepo.create({
       predefinedQuestionId: createReadingDto.predefinedQuestionId || null,
@@ -48,7 +71,8 @@ export class CreateReadingUseCase {
       questionType,
       user,
       tarotistaId,
-      deck: { id: createReadingDto.deckId } as TarotDeck,
+      deck, // Usar el deck validado
+      cards, // Agregar las cartas a la lectura
       cardPositions: createReadingDto.cardPositions,
       interpretation: null,
     });
@@ -58,16 +82,6 @@ export class CreateReadingUseCase {
       try {
         this.logger.log(
           `Generating interpretation for reading ${reading.id} with tarotista ${tarotistaId}`,
-        );
-
-        // Obtener las cartas
-        const cards = await this.cardsService.findByIds(
-          createReadingDto.cardIds,
-        );
-
-        // Obtener el spread
-        const spread = await this.spreadsService.findById(
-          createReadingDto.spreadId,
         );
 
         // Determinar la pregunta a usar
@@ -80,7 +94,7 @@ export class CreateReadingUseCase {
           question = predefinedQuestion.questionText;
         }
 
-        // Generar interpretación con IA
+        // Generar interpretación con IA (ya tenemos las cards y spread del paso anterior)
         const result = await this.interpretationsService.generateInterpretation(
           cards,
           createReadingDto.cardPositions,
