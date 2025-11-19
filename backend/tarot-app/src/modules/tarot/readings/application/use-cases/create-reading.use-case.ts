@@ -31,6 +31,11 @@ export class CreateReadingUseCase {
     user: User,
     createReadingDto: CreateReadingDto,
   ): Promise<TarotReading> {
+    // Validar que user no sea null
+    if (!user || !user.id) {
+      throw new Error('User is required');
+    }
+
     // Validar usuario
     await this.validator.validateUser(user.id);
 
@@ -90,6 +95,11 @@ export class CreateReadingUseCase {
             await this.predefinedQuestionsService.findOne(
               createReadingDto.predefinedQuestionId,
             );
+          if (!predefinedQuestion) {
+            throw new NotFoundException(
+              `Predefined question with ID ${createReadingDto.predefinedQuestionId} not found`,
+            );
+          }
           question = predefinedQuestion.questionText;
         }
 
