@@ -329,38 +329,28 @@ npm run stats:cache
 - Items más cacheados
 - **Recomendaciones de optimización**
 
-**Ejemplo de output:**
+**Ejemplo de output (estado actual - no implementado):**
 
 ```
-📊 Fetching cache statistics...
+📊 Cache statistics feature is not fully implemented yet.
 
-🗄️  Cache Statistics:
+🗄️  Basic Information:
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-📈 Hit Rate:
-   Total Hits: 850
-   Total Misses: 150
-   Hit Rate: 85.00%
+💡 Note:
+   The current cache implementation (in-memory) does not expose detailed metrics.
+   Consider implementing Redis with metrics support for production.
 
-💾 Cache Size:
-   Total Keys: 320
-   Memory Used: 12450 KB
+📋 Available cache-related commands:
+   npm run cli cache:clear  - Clear all cache
 
-🔥 Most Cached Items:
-   1. interpretation:reading:42:tarotista:1
-      Hits: 45
-      Size: 2048 bytes
-      TTL: 3600s
-   ...
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-💡 Recommendations:
-   ✅ Excellent hit rate! Cache is working well.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ✨ Done!
 ```
+
+> **🚧 Estado:** Esta funcionalidad está pendiente de implementación completa. La implementación actual de caché en memoria no expone métricas detalladas. Considera migrar a Redis para soporte de métricas en producción.
 
 **Útil para:**
 
@@ -424,10 +414,12 @@ npm run cli user:promote -- --email=test@test.com --role=admin
 **Output:**
 
 ```
-✅ User promoted successfully!
-   Email: test@test.com
-   Roles: consumer, admin
+ℹ️  Note: Direct role assignment is not implemented in CLI.
+   Current roles: consumer
+   To add role 'admin', update the database directly or use the admin panel.
 ```
+
+> **⚠️ Limitación Actual:** Este comando solo **verifica** los roles del usuario. La asignación directa de roles no está implementada porque `UpdateUserDto` no incluye el campo `roles`. Para cambiar roles de usuario, utiliza el panel de administración o actualiza la base de datos directamente.
 
 ---
 

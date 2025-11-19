@@ -31,7 +31,14 @@ async function bootstrap() {
     const [key, value] = arg.replace('--', '').split('=');
     if (key && value) {
       if (key === 'userId' || key === 'spreadId') {
-        options[key] = parseInt(value, 10);
+        const parsed = parseInt(value, 10);
+        if (isNaN(parsed) || parsed <= 0) {
+          console.error(
+            `❌ Invalid value for --${key}: "${value}". Must be a positive integer.`,
+          );
+          process.exit(1);
+        }
+        options[key] = parsed;
       } else if (key === 'customQuestion') {
         options[key] = value === 'true';
       } else if (key === 'email' || key === 'question') {

@@ -28,7 +28,14 @@ async function bootstrap() {
 
   args.forEach((arg) => {
     if (arg.startsWith('--limit=')) {
-      limit = parseInt(arg.replace('--limit=', ''), 10);
+      const parsed = parseInt(arg.replace('--limit=', ''), 10);
+      if (isNaN(parsed) || !Number.isInteger(parsed) || parsed <= 0) {
+        console.error(
+          '❌ Invalid value for --limit. Please provide a positive integer.',
+        );
+        process.exit(1);
+      }
+      limit = parsed;
     }
   });
 
@@ -97,12 +104,17 @@ async function bootstrap() {
     console.log(`   Total Requests: ${totalRequests}`);
     console.log(`   Total Tokens: ${totalTokens.toLocaleString()}`);
     console.log(`   Total Cost: $${totalCost.toFixed(4)} USD`);
-    console.log(
-      `   Avg Cost per Request: $${(totalCost / totalRequests).toFixed(6)} USD`,
-    );
-    console.log(
-      `   Avg Tokens per Request: ${Math.round(totalTokens / totalRequests).toLocaleString()}`,
-    );
+    if (totalRequests > 0) {
+      console.log(
+        `   Avg Cost per Request: $${(totalCost / totalRequests).toFixed(6)} USD`,
+      );
+      console.log(
+        `   Avg Tokens per Request: ${Math.round(totalTokens / totalRequests).toLocaleString()}`,
+      );
+    } else {
+      console.log('   Avg Cost per Request: N/A');
+      console.log('   Avg Tokens per Request: N/A');
+    }
 
     console.log('\n✨ Done!');
   } catch (error) {
