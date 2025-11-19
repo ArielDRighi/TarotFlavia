@@ -7,7 +7,7 @@ import { TarotReading } from '../../entities/tarot-reading.entity';
 
 describe('TypeOrmReadingRepository - BUG HUNTING', () => {
   let repository: TypeOrmReadingRepository;
-  let readingRepo: Repository<TarotReading>;
+  let _readingRepo: Repository<TarotReading>; // Prefixed with _ to indicate intentionally unused
 
   // Mock QueryBuilder
   const mockQueryBuilder = {
@@ -47,7 +47,7 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
     }).compile();
 
     repository = module.get<TypeOrmReadingRepository>(TypeOrmReadingRepository);
-    readingRepo = module.get<Repository<TarotReading>>(
+    _readingRepo = module.get<Repository<TarotReading>>(
       getRepositoryToken(TarotReading),
     );
 
@@ -758,7 +758,7 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
     it('should handle null token', async () => {
       mockReadingRepository.findOne.mockResolvedValue(null);
 
-      const result = await repository.findByShareToken(null as any);
+      await repository.findByShareToken(null as any);
 
       expect(mockReadingRepository.findOne).toHaveBeenCalledWith({
         where: { sharedToken: null, isPublic: true },

@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import {
   NotFoundException,
   ForbiddenException,
@@ -14,8 +13,6 @@ import { User, UserPlan } from '../../../../users/entities/user.entity';
 
 describe('ReadingValidatorService - BUG HUNTING', () => {
   let service: ReadingValidatorService;
-  let userRepo: Repository<User>;
-  let readingRepo: Repository<TarotReading>;
 
   // Mock repositories
   const mockUserRepository = {
@@ -42,10 +39,6 @@ describe('ReadingValidatorService - BUG HUNTING', () => {
     }).compile();
 
     service = module.get<ReadingValidatorService>(ReadingValidatorService);
-    userRepo = module.get<Repository<User>>(getRepositoryToken(User));
-    readingRepo = module.get<Repository<TarotReading>>(
-      getRepositoryToken(TarotReading),
-    );
 
     // Reset all mocks before each test
     jest.clearAllMocks();
