@@ -20,9 +20,9 @@ Este documento describe todos los seeders disponibles en el proyecto, qué datos
 
 ---
 
-## 🚀 Comando Principal
+## 🚀 Comandos Principales
 
-### Ejecutar Todos los Seeders
+### Ejecutar Todos los Seeders (Completo)
 
 ```bash
 npm run seed
@@ -38,6 +38,64 @@ La base de datos configurada en las variables de entorno (`.env`):
 - **E2E Testing**: `tarot_test_db` en puerto `5436`
 
 **Nota:** Asegúrate de estar apuntando a la base de datos correcta verificando tu archivo `.env`.
+
+---
+
+### Ejecutar Seeders Específicos
+
+#### Todos los Seeders con Verificación de Dependencias
+
+```bash
+npm run db:seed:all
+```
+
+**¿Qué hace?**
+Ejecuta `scripts/db-seed-all.ts` que corre todos los seeders con verificación explícita de dependencias y reporta el progreso detallado.
+
+**Ventajas:**
+
+- ✅ Verificación de dependencias entre seeders
+- ✅ Mensajes de progreso detallados
+- ✅ Resumen al finalizar
+- ✅ Manejo de errores mejorado
+
+#### Solo Cartas de Tarot
+
+```bash
+npm run db:seed:cards
+```
+
+**¿Qué hace?**
+Ejecuta `scripts/db-seed-cards.ts` que seedea únicamente:
+
+- Mazos de tarot (Tarot Decks)
+- Cartas de tarot (Tarot Cards)
+
+**Útil para:** Testing de funcionalidad de cartas sin necesitar todo el sistema.
+
+#### Solo Usuarios de Prueba
+
+```bash
+npm run db:seed:users
+```
+
+**¿Qué hace?**
+Ejecuta `scripts/db-seed-users.ts` que crea únicamente los 3 usuarios de prueba:
+
+- free@test.com (FREE user)
+- premium@test.com (PREMIUM user)
+- admin@test.com (ADMIN user)
+
+**Útil para:** Testing de autenticación y permisos.
+
+**Muestra las credenciales al finalizar:**
+
+```
+🔑 Test User Credentials:
+  Admin:   admin@test.com   / admin123
+  Premium: premium@test.com / premium123
+  Free:    free@test.com    / free123
+```
 
 ---
 
@@ -396,26 +454,41 @@ if (existingData > 0) {
 ### Seedear DB de Desarrollo
 
 ```bash
-# Asegúrate de estar usando .env correcto
+# Opción 1: Comando estándar
 npm run seed
+
+# Opción 2: Con verificación de dependencias
+npm run db:seed:all
+
+# Opción 3: Solo lo que necesitas
+npm run db:seed:cards  # Solo cartas
+npm run db:seed:users  # Solo usuarios de prueba
 ```
+
+### Reset Completo de Base de Datos
+
+```bash
+# Opción rápida: Un solo comando
+npm run db:reset
+
+# O paso a paso:
+npm run db:dev:clean      # Limpiar DB
+npm run migration:run     # Ejecutar migraciones
+npm run db:seed:all       # Ejecutar seeders
+```
+
+**Nota:** `npm run db:reset` es un alias de `npm run db:dev:reset` que hace todo automáticamente.
 
 ### Seedear DB de E2E Testing
 
 ```bash
-# Cambiar a .env.test o usar variables de entorno
-DB_PORT=5436 DB_NAME=tarot_test_db npm run seed
-```
+# Reset completo de E2E database
+npm run db:e2e:reset
 
-### Reset + Seed (Limpio)
-
-```bash
-# Limpiar DB y ejecutar migrations
-npm run db:dev:clean
-npm run migration:run
-
-# Ejecutar seeders
-npm run seed
+# O paso a paso:
+npm run db:e2e:clean      # Limpiar E2E DB
+npm run db:e2e:migrate    # Ejecutar migraciones
+npm run seed              # Ejecutar seeders
 ```
 
 ---
@@ -474,6 +547,159 @@ SELECT * FROM users;  # Verificar usuarios
 - Para ambiente de producción, se recomienda **NO ejecutar** los seeders de test users
 - El seeder de Flavia es **crítico** para el funcionamiento del marketplace
 - Todos los passwords están hasheados con bcrypt (salt rounds: 10)
+
+---
+
+## 🛠️ Scripts de Desarrollo Adicionales
+
+### Generar Lectura de Prueba
+
+```bash
+# Con usuario por defecto (free@test.com)
+npm run generate:reading
+
+# Con usuario específico
+npm run generate:reading -- --email=premium@test.com
+
+# Con usuario y tirada específica
+npm run generate:reading -- --userId=1 --spreadId=2
+
+# Con pregunta personalizada
+npm run generate:reading -- --question="¿Qué me depara el futuro?" --customQuestion=true
+```
+
+**¿Qué hace?**
+Genera una lectura de tarot completa con interpretación de IA sin hacer requests HTTP.
+
+**Útil para:**
+
+- Testing de la funcionalidad de lecturas
+- Testing de integración con IA
+- Debugging de interpretaciones
+- Generar datos de prueba rápidamente
+
+### Ver Logs de OpenAI
+
+```bash
+# Ver últimas 50 llamadas (por defecto)
+npm run logs:openai
+
+# Ver más llamadas
+npm run logs:openai -- --limit=100
+```
+
+**¿Qué hace?**
+Muestra un resumen de uso de IA por usuario con:
+
+- Número de requests
+- Tokens utilizados
+- Costos acumulados
+- Provider utilizado
+- Fecha de último reset
+
+**Útil para:**
+
+- Debugging de costos de IA
+- Monitoreo de uso por usuario
+- Análisis de patrones de consumo
+
+### Ver Estadísticas de Caché
+
+```bash
+npm run stats:cache
+```
+
+**¿Qué hace?**
+Muestra estadísticas detalladas del sistema de caché:
+
+- Hit rate (porcentaje de aciertos)
+- Total de hits y misses
+- Tamaño de caché
+- Items más cacheados
+- Recomendaciones de optimización
+
+**Útil para:**
+
+- Optimización de rendimiento
+- Debugging de caché
+- Validar estrategia de invalidación
+
+### CLI de Administración
+
+```bash
+# Ver ayuda
+npm run cli help
+
+# Crear usuario
+npm run cli user:create -- --email=test@test.com --name="Test User" --password=test123
+
+# Promover usuario a rol específico
+npm run cli user:promote -- --email=test@test.com --role=admin
+
+# Limpiar caché
+npm run cli cache:clear
+
+# Probar configuración de OpenAI
+npm run cli openai:test
+```
+
+**¿Qué hace?**
+Proporciona comandos de línea para tareas administrativas comunes sin necesidad de hacer requests HTTP.
+
+**Útil para:**
+
+- Gestión de usuarios en desarrollo
+- Debugging de configuración
+- Tareas de mantenimiento
+- Testing de funcionalidad sin UI
+
+---
+
+## 📊 Flujo de Trabajo Recomendado
+
+### Setup Inicial (Primera Vez)
+
+```bash
+# 1. Configurar entorno
+cp .env.example.local .env
+# Editar .env con tus credenciales
+
+# 2. Levantar base de datos
+docker-compose up -d tarot-postgres
+
+# 3. Ejecutar migraciones
+npm run migration:run
+
+# 4. Seedear datos
+npm run db:seed:all
+
+# 5. Verificar que todo funciona
+npm run generate:reading
+npm run logs:openai
+```
+
+### Desarrollo Diario
+
+```bash
+# Resetear DB cuando necesites empezar limpio
+npm run db:reset
+
+# O solo actualizar seeders específicos
+npm run db:seed:users    # Recrear usuarios de test
+npm run db:seed:cards    # Actualizar cartas
+```
+
+### Testing
+
+```bash
+# Setup completo para E2E tests
+npm run test:e2e:local   # Hace todo: setup + tests + cleanup
+
+# O manual
+npm run db:e2e:reset     # Preparar E2E DB
+npm run test:e2e         # Ejecutar tests
+npm run db:e2e:clean     # Limpiar
+```
 
 ---
 
