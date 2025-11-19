@@ -11,6 +11,7 @@
 Antes de escribir cualquier test:
 
 1. **Leer el código de producción completo**
+
    - Controller: ¿Qué endpoints existen? ¿Qué guards tienen?
    - Service: ¿Qué lógica de negocio implementa?
    - Repository: ¿Cómo interactúa con la BD?
@@ -18,6 +19,7 @@ Antes de escribir cualquier test:
    - Entities: ¿Qué relaciones hay? ¿Qué constraints?
 
 2. **Ejecutar el código manualmente** (si es posible)
+
    - Usar Postman/curl para probar endpoints
    - Verificar respuestas reales
    - Inspeccionar base de datos
@@ -33,6 +35,7 @@ Antes de escribir cualquier test:
 **NO escribir tests asumiendo que el código funciona correctamente**
 
 **SÍ escribir tests que:**
+
 - Verifiquen comportamiento esperado según los requisitos de negocio
 - Prueben edge cases (null, undefined, strings vacíos, números negativos, etc.)
 - Busquen vulnerabilidades de seguridad
@@ -42,12 +45,14 @@ Antes de escribir cualquier test:
 ### 3. CUANDO UN TEST FALLA
 
 **NUNCA hacer:**
+
 - ❌ Cambiar el test para que pase sin investigar
 - ❌ Asumir que el código está correcto y el test está mal
 - ❌ Usar `.skip()` sin documentar el bug encontrado
 - ❌ Cambiar expectations para que coincidan con output incorrecto
 
 **SIEMPRE hacer:**
+
 - ✅ Investigar POR QUÉ falla el test
 - ✅ Determinar si es un bug REAL en el código de producción
 - ✅ Si es bug real: CORREGIR el código de producción
@@ -57,18 +62,21 @@ Antes de escribir cualquier test:
 ### 4. EJEMPLOS DE BUGS REALES ENCONTRADOS
 
 #### Bug #1: Cards array vacío en readings
+
 **Test escribió:** `expect(response.body.cards).toHaveLength(3)`
 **Resultado:** `cards: []` (array vacío)
 **Acción CORRECTA:** Investigar use-case → Encontrar que `CreateReadingUseCase` no agregaba cards al reading
 **Acción INCORRECTA:** Cambiar a `expect(response.body.cards).toHaveLength(0)`
 
 #### Bug #2: Spread/Deck inválido retorna 500 en lugar de 404
+
 **Test escribió:** `expect(404)` para deck inválido
 **Resultado:** Error 500 Internal Server Error
 **Acción CORRECTA:** Agregar validación en use-case para devolver 404
 **Acción INCORRECTA:** Cambiar test a `expect(500)`
 
 #### Bug #3: Email case-sensitivity permite duplicados
+
 **Test escribió:** Registrar `test@example.com` y `Test@Example.com`
 **Resultado esperado:** Segundo registro debe fallar con 409
 **Resultado real:** Ambos registros exitosos (BUG)
@@ -78,18 +86,21 @@ Antes de escribir cualquier test:
 ### 5. TIPOS DE TESTS REQUERIDOS
 
 #### Integration Tests (E2E)
+
 - Usan base de datos REAL
 - Prueban flujo completo de endpoints
 - Verifican relaciones entre módulos
 - Buscan bugs de integración
 
 #### Unit Tests
+
 - Mockean dependencias
 - Prueban lógica aislada
 - Verifican edge cases
 - Alcanzan >80% coverage
 
 #### Performance Tests
+
 - Verifican tiempos de respuesta
 - Buscan N+1 queries
 - Verifican caching
@@ -119,11 +130,13 @@ Los tests NO son para validar que el código funciona.
 Los tests SON para ENCONTRAR dónde NO funciona y CORREGIRLO.
 
 **Mentalidad correcta:**
+
 - "Este endpoint DEBERÍA hacer X según requisitos. ¿Realmente lo hace?"
 - "¿Qué pasa si envío datos inválidos? ¿Se maneja correctamente?"
 - "¿Hay validaciones de seguridad? ¿Funcionan?"
 
 **Mentalidad incorrecta:**
+
 - "Asumo que funciona, voy a escribir test que pase"
 - "El test falla, debo estar escribiendo mal el test"
 - "El código está bien, solo ajusto el test"
