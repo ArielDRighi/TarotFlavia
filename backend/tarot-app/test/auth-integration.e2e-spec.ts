@@ -323,6 +323,56 @@ describe('Auth Integration Tests (E2E)', () => {
     });
   });
 
+  describe('Email normalization', () => {
+    it('should prevent duplicate registration with different email case', async () => {
+      // Register with lowercase email
+      await request(app.getHttpServer())
+        .post('/auth/register')
+        .send({
+          email: testUserData.email.toLowerCase(),
+          password: testUserData.password,
+          name: testUserData.name,
+        })
+        .expect(201);
+
+      // Attempt to register with same email but different case
+      await request(app.getHttpServer())
+        .post('/auth/register')
+        .send({
+          email: testUserData.email.toUpperCase(), // TEST@EXAMPLE.COM
+          password: 'AnotherPassword123!',
+          name: 'Another Name',
+        })
+        .expect(409); // Should be treated as duplicate
+    });
+
+    it('should login with any email case variation', async () => {
+      // Register with lowercase
+      await request(app.getHttpServer())
+        .post('/auth/register')
+        .send({
+          email: testUserData.email.toLowerCase(),
+          password: testUserData.password,
+          name: testUserData.name,
+        })
+        .expect(201);
+
+      // Login with uppercase should work
+      const loginResponse = await request(app.getHttpServer())
+        .post('/auth/login')
+        .send({
+          email: testUserData.email.toUpperCase(),
+          password: testUserData.password,
+        })
+        .expect(200);
+
+      expect(loginResponse.body).toBeDefined();
+      expect(loginResponse.body.user.email).toBe(
+        testUserData.email.toLowerCase(),
+      );
+    });
+  });
+
   describe('Password validation', () => {
     it('should reject weak passwords', async () => {
       await request(app.getHttpServer())
