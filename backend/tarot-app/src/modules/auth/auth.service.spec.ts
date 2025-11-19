@@ -511,14 +511,12 @@ describe('AuthService', () => {
   describe('refresh', () => {
     it('should refresh tokens successfully with valid refresh token', async () => {
       const refreshToken = 'valid-refresh-token';
-      const mockUser = {
-        id: 1,
-        email: 'test@test.com',
-        name: 'Test User',
-        isAdmin: false,
-        plan: UserPlan.FREE,
-        roles: [],
-      } as User;
+      const mockUser = new User();
+      mockUser.id = 1;
+      mockUser.email = 'test@test.com';
+      mockUser.name = 'Test User';
+      mockUser.isAdmin = false;
+      mockUser.plan = UserPlan.FREE;
 
       const mockTokenEntity = {
         id: 'token-id-123',
