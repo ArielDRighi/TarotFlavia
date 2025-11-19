@@ -9,7 +9,6 @@ import { CardsService } from '../../../cards/cards.service';
 import { SpreadsService } from '../../../spreads/spreads.service';
 import { DecksService } from '../../../decks/decks.service';
 import { PredefinedQuestionsService } from '../../../../predefined-questions/predefined-questions.service';
-import { TarotDeck } from '../../../decks/entities/tarot-deck.entity';
 
 const DEFAULT_TAROTISTA_ID = 1;
 
