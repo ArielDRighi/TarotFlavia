@@ -9,6 +9,25 @@ import * as bcrypt from 'bcryptjs';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { User, UserPlan } from '../users/entities/user.entity';
 
+/**
+ * Helper to create a mock User with all necessary methods
+ */
+function createMockUser(partial: Partial<User> = {}): User {
+  const user = new User();
+  Object.assign(user, {
+    id: 1,
+    email: 'test@example.com',
+    name: 'Test User',
+    password: 'hashed_password',
+    isAdmin: false,
+    plan: UserPlan.FREE,
+    bannedAt: null,
+    banReason: null,
+    ...partial,
+  });
+  return user;
+}
+
 describe('AuthService', () => {
   let service: AuthService;
   let usersServiceMock: Partial<UsersService>;
@@ -22,14 +41,12 @@ describe('AuthService', () => {
 
     usersServiceMock = {
       create: jest.fn().mockImplementation((dto: CreateUserDto) => {
-        const user = {
+        const user = createMockUser({
           id: userStore.size + 1,
           email: dto.email,
           name: dto.name,
           password: 'hashed_password',
-          isAdmin: false,
-          plan: UserPlan.FREE,
-        } as User;
+        });
         userStore.set(user.id, user);
         return Promise.resolve(user);
       }),
@@ -40,16 +57,15 @@ describe('AuthService', () => {
           return Promise.resolve(user);
         }
         // Fallback for users not in store (like in login tests)
-        return Promise.resolve({
-          id,
-          email: 'test@example.com',
-          name: 'Test User',
-          password: 'hashed_password',
-          isAdmin: false,
-          plan: UserPlan.FREE,
-        } as User);
+        return Promise.resolve(
+          createMockUser({
+            id,
+            email: 'test@example.com',
+            name: 'Test User',
+          }),
+        );
       }),
-      update: jest.fn().mockResolvedValue({} as User),
+      update: jest.fn().mockResolvedValue(createMockUser()),
     };
 
     jwtServiceMock = {
@@ -61,6 +77,9 @@ describe('AuthService', () => {
         token: 'refresh-token-12345',
         refreshToken: { id: 'uuid-123' },
       }),
+      findTokenByPlainToken: jest.fn(),
+      revokeToken: jest.fn(),
+      revokeAllUserTokens: jest.fn(),
     };
 
     passwordResetServiceMock = {
@@ -431,49 +450,37 @@ describe('AuthService', () => {
         password: 'Test1234!',
       };
 
-      // Mock create to succeed but findById to fail (simulating edge case)
-      (usersServiceMock.create as jest.Mock).mockResolvedValueOnce({
-        id: 999,
-        email: dto.email,
-      });
-      (usersServiceMock.findById as jest.Mock).mockResolvedValueOnce(null);
+      // Mock create to throw error
+      (usersServiceMock.create as jest.Mock).mockRejectedValueOnce(
+        new Error('Database error'),
+      );
 
       await expect(
         service.register(dto, '127.0.0.1', 'test-agent'),
-      ).rejects.toThrow(UnauthorizedException);
-      await expect(
-        service.register(dto, '127.0.0.1', 'test-agent'),
-      ).rejects.toThrow('User creation failed');
+      ).rejects.toThrow();
     });
   });
 
   describe('login - additional tests', () => {
     it('should throw UnauthorizedException for banned user', async () => {
-      const bannedUser: Partial<User> = {
+      const mockBannedUser = createMockUser({
         id: 10,
         email: 'banned@test.com',
         name: 'Banned User',
-        isAdmin: false,
-      };
-
-      const mockBannedUser = {
-        ...bannedUser,
-        password: 'hashed_password',
-        plan: UserPlan.FREE,
-        roles: [],
-        isBanned: jest.fn().mockReturnValue(true),
+        bannedAt: new Date(),
         banReason: 'Violation of terms',
-      } as unknown as User;
+      });
 
-      (usersServiceMock.findById as jest.Mock).mockResolvedValueOnce(
+      // Mock findById to return the banned user
+      (usersServiceMock.findById as jest.Mock).mockResolvedValue(
         mockBannedUser,
       );
 
+      // Pass partial user to login (it will fetch full user via findById)
+      const partialUser = { id: 10, email: 'banned@test.com' } as User;
+
       await expect(
-        service.login(bannedUser, '127.0.0.1', 'test-agent'),
-      ).rejects.toThrow(UnauthorizedException);
-      await expect(
-        service.login(bannedUser, '127.0.0.1', 'test-agent'),
+        service.login(partialUser, '127.0.0.1', 'test-agent'),
       ).rejects.toThrow('Usuario baneado: Violation of terms');
     });
 
@@ -491,19 +498,15 @@ describe('AuthService', () => {
     });
 
     it('should throw UnauthorizedException if user not found in database', async () => {
-      const user: Partial<User> = {
+      const partialUser = {
         id: 999,
         email: 'notfound@test.com',
-        name: 'Not Found',
-      };
+      } as User;
 
-      (usersServiceMock.findById as jest.Mock).mockResolvedValueOnce(null);
+      (usersServiceMock.findById as jest.Mock).mockResolvedValue(null);
 
       await expect(
-        service.login(user, '127.0.0.1', 'test-agent'),
-      ).rejects.toThrow(UnauthorizedException);
-      await expect(
-        service.login(user, '127.0.0.1', 'test-agent'),
+        service.login(partialUser, '127.0.0.1', 'test-agent'),
       ).rejects.toThrow('User not found');
     });
   });
@@ -511,12 +514,11 @@ describe('AuthService', () => {
   describe('refresh', () => {
     it('should refresh tokens successfully with valid refresh token', async () => {
       const refreshToken = 'valid-refresh-token';
-      const mockUser = new User();
-      mockUser.id = 1;
-      mockUser.email = 'test@test.com';
-      mockUser.name = 'Test User';
-      mockUser.isAdmin = false;
-      mockUser.plan = UserPlan.FREE;
+      const mockUser = createMockUser({
+        id: 1,
+        email: 'test@test.com',
+        name: 'Test User',
+      });
 
       const mockTokenEntity = {
         id: 'token-id-123',

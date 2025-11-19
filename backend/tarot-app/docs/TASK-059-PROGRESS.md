@@ -1,12 +1,14 @@
 # TASK-059: Testing Suite Completo - Progress Report
 
 ## Estado General
+
 **Branch:** `feature/TASK-059-testing-suite-completo`  
 **Fecha Inicio:** 2025-01-XX  
 **Última Actualización:** 2025-01-XX  
 **Progreso Global:** ~25% completado
 
 ## Objetivos de la Tarea
+
 - [x] Implementar Factory Pattern para test data
 - [x] Crear fixtures reutilizables
 - [ ] Tests Unitarios (Jest): Cobertura >80% para todos los servicios
@@ -17,7 +19,9 @@
 ## Trabajo Completado ✅
 
 ### 1. Infraestructura de Testing (100%)
+
 - ✅ **Test Factories** (`test/helpers/factories/`)
+
   - `UserFactory`: Métodos para crear admin, premium, free, banned users
   - `ReadingFactory`: Métodos para crear lecturas compartidas, eliminadas
   - `CardFactory`: Métodos para Major/Minor Arcana, spreads
@@ -25,6 +29,7 @@
   - `index.ts`: Exportación centralizada de todas las factories
 
 - ✅ **Test Fixtures** (`test/helpers/fixtures.ts`)
+
   - `MOCK_USERS`: admin, premiumUser, freeUser, bannedUser
   - `MOCK_CARDS`: theFool, theMagician, theHighPriestess
   - `MOCK_SPREADS`: threeCard, singleCard, celticCross
@@ -39,9 +44,11 @@
     - Agregado: `isPublic`, `sharedToken`, `tarotistaId`
 
 ### 2. Tests Unitarios - AuthService (58% completo)
+
 **Estado:** 14 de 24 tests pasando
 
 #### Tests Pasando (14) ✅
+
 - ✅ Service definition
 - ✅ Register: user creation with tokens
 - ✅ ValidateUser: valid/invalid credentials
@@ -52,25 +59,32 @@
 - ✅ LogoutAll: invalid userId
 
 #### Tests Fallando (10) ❌
+
 1. **Register** - Error handling cuando falla creación de usuario
+
    - Issue: Mock no configurado correctamente para fallar
 
 2. **Login** - Usuario baneado
+
    - Issue: Mock User no tiene método `isBanned()`
 
 3. **Login** - Usuario no encontrado en DB
+
    - Issue: Mismo problema con `isBanned()`
 
 4. **Refresh** - 4 tests (valid token, invalid, expired, user not found)
+
    - Issue: `refreshTokenServiceMock` falta método `findTokenByPlainToken`
 
 5. **Logout** - 2 tests (valid, invalid)
+
    - Issue: `refreshTokenServiceMock` falta método `findTokenByPlainToken`
 
 6. **LogoutAll** - Logout de todas las sesiones
    - Issue: `refreshTokenServiceMock` falta método `revokeAllUserTokens`
 
 ### 3. Commits Realizados
+
 ```bash
 # Commit 1: Initial factories and fixtures
 ed50d2a - feat: add test factories and fixtures for comprehensive testing
@@ -85,7 +99,9 @@ ed50d2a - feat: add test factories and fixtures for comprehensive testing
 ## Trabajo Pendiente ⏳
 
 ### Próximos Pasos Inmediatos
+
 1. **Fix AuthService Tests** (~1-2 horas)
+
    - [ ] Agregar método `isBanned()` al mock de User
    - [ ] Agregar `findTokenByPlainToken` a `refreshTokenServiceMock`
    - [ ] Agregar `revokeAllUserTokens` a `refreshTokenServiceMock`
@@ -101,7 +117,9 @@ ed50d2a - feat: add test factories and fixtures for comprehensive testing
 ### Servicios Pendientes de Testing
 
 #### Alta Prioridad
+
 3. **TarotService / InterpretationsService** (~8-10 horas)
+
    - [ ] Tests para generación de lecturas
    - [ ] Tests para interpretación con IA
    - [ ] Tests para manejo de cache
@@ -109,6 +127,7 @@ ed50d2a - feat: add test factories and fixtures for comprehensive testing
    - Target: >80% coverage
 
 4. **UsageLimitsService** (~4-6 horas)
+
    - [ ] Tests para límites por plan (Free/Premium)
    - [ ] Tests para incremento de uso
    - [ ] Tests para reset de contadores
@@ -122,7 +141,9 @@ ed50d2a - feat: add test factories and fixtures for comprehensive testing
    - [ ] JWT guard edge cases
 
 #### Media Prioridad
+
 6. **UsersService** (~4-5 horas)
+
    - [ ] Tests CRUD completo
    - [ ] Tests ban/unban
    - [ ] Tests cambio de plan
@@ -135,6 +156,7 @@ ed50d2a - feat: add test factories and fixtures for comprehensive testing
    - [ ] Tests paginación y filtros
 
 ### Tests de Integración (~15-20 horas)
+
 - [ ] Auth flow completo (register → login → protected endpoint)
 - [ ] Reading creation flow con IA
 - [ ] Usage limits integration
@@ -142,12 +164,14 @@ ed50d2a - feat: add test factories and fixtures for comprehensive testing
 - [ ] Shared readings access
 
 ### Tests E2E (~10-15 horas)
+
 - [ ] Usuario nuevo: registro → primera lectura → ver historial
 - [ ] Usuario premium: lectura personalizada → compartir
 - [ ] Admin: dashboard → ban user → verificar efecto
 - [ ] Rate limiting en acción
 
 ### Configuración y Optimización (~5-8 horas)
+
 - [ ] Configurar Jest coverage thresholds en `jest.config.js`
   ```javascript
   coverageThreshold: {
@@ -167,6 +191,7 @@ ed50d2a - feat: add test factories and fixtures for comprehensive testing
 ## Métricas Actuales
 
 ### Coverage Global
+
 ```
 Statements   : 2.29% ( 245/10676 )
 Branches     : 1.19% ( 26/2183 )
@@ -177,12 +202,14 @@ Lines        : 2.28% ( 221/9652 )
 **Target:** 80% lines, 70% branches
 
 ### Tests Ejecutados
+
 - **Total Tests:** 24 (AuthService)
 - **Passing:** 14 (58%)
 - **Failing:** 10 (42%)
 - **Skipped:** 0
 
 ## Estimación de Tiempo Restante
+
 - **Corregir AuthService:** 2 horas
 - **Completar Unit Tests:** 30-40 horas
 - **Integration Tests:** 15-20 horas
@@ -194,17 +221,20 @@ Lines        : 2.28% ( 221/9652 )
 ## Notas Técnicas
 
 ### Lecciones Aprendidas
+
 1. **TypeORM Relations:** Las entidades usan decoradores `@ManyToOne` en lugar de propiedades FK directas en muchos casos
 2. **Factory Pattern:** Crucial validar contra entity real, no asumir estructura
 3. **Mock Configuration:** Los mocks deben incluir TODOS los métodos usados en tests
 4. **User.isBanned():** Es un método, no una propiedad - necesita mock apropiado
 
 ### Decisiones de Diseño
+
 - **Factories:** Métodos estáticos para facilitar uso sin instanciación
 - **Fixtures:** Constantes inmutables para datos de test comunes
 - **Mocks:** Partial types para permitir mocking selectivo de servicios
 
 ### Archivos Clave
+
 ```
 test/helpers/
   ├── factories/
@@ -222,6 +252,7 @@ src/modules/auth/
 ## Próxima Sesión de Trabajo
 
 ### Checklist Inmediato
+
 1. [ ] Fix `refreshTokenServiceMock` - agregar métodos faltantes
 2. [ ] Fix User mock - agregar método `isBanned()`
 3. [ ] Fix register failure test
@@ -232,6 +263,7 @@ src/modules/auth/
 8. [ ] Continuar con siguiente servicio (UsageLimitsService recomendado)
 
 ### Comando de Prueba
+
 ```bash
 # Run AuthService tests with coverage
 npm run test -- --testPathPattern="auth.service.spec" --coverage
