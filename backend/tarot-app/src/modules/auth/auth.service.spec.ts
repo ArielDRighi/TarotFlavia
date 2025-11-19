@@ -137,6 +137,32 @@ describe('AuthService', () => {
   });
 
   describe('validateUser', () => {
+    let securityEventService: any;
+
+    beforeEach(async () => {
+      const { SecurityEventService } = await import(
+        '../security/security-event.service'
+      );
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          AuthService,
+          { provide: UsersService, useValue: usersServiceMock },
+          { provide: JwtService, useValue: jwtServiceMock },
+          { provide: RefreshTokenService, useValue: refreshTokenServiceMock },
+          { provide: PasswordResetService, useValue: passwordResetServiceMock },
+          {
+            provide: SecurityEventService,
+            useValue: {
+              logSecurityEvent: jest.fn().mockResolvedValue(undefined),
+            },
+          },
+        ],
+      }).compile();
+
+      service = module.get<AuthService>(AuthService);
+      securityEventService = module.get(SecurityEventService);
+    });
+
     it('should return user (without password) when credentials are valid', async () => {
       const plain = 'mypassword';
       const salt = await bcrypt.genSalt();
@@ -181,6 +207,176 @@ describe('AuthService', () => {
         storedUser.email!,
         'notmatching',
       );
+      expect(result).toBeNull();
+    });
+
+    it('should return null when user does not exist', async () => {
+      (usersServiceMock.findByEmail as jest.Mock).mockResolvedValue(null);
+
+      const result = await service.validateUser(
+        'nonexistent@test.com',
+        'password123',
+        '127.0.0.1',
+        'test-agent',
+      );
+
+      expect(result).toBeNull();
+      expect(securityEventService.logSecurityEvent).toHaveBeenCalled();
+    });
+
+    it('should handle null ipAddress in validateUser', async () => {
+      (usersServiceMock.findByEmail as jest.Mock).mockResolvedValue(null);
+
+      await service.validateUser(
+        'test@test.com',
+        'password123',
+        undefined,
+        'test-agent',
+      );
+
+      expect(securityEventService.logSecurityEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ipAddress: null,
+        }),
+      );
+    });
+
+    it('should handle null userAgent in validateUser', async () => {
+      (usersServiceMock.findByEmail as jest.Mock).mockResolvedValue(null);
+
+      await service.validateUser(
+        'test@test.com',
+        'password123',
+        '127.0.0.1',
+        undefined,
+      );
+
+      expect(securityEventService.logSecurityEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userAgent: null,
+        }),
+      );
+    });
+
+    it('should not throw when security event logging fails (user exists)', async () => {
+      const storedUser: Partial<User> = {
+        id: 3,
+        email: 'test@test.com',
+        password: 'wronghash',
+        name: 'Test',
+        isAdmin: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      (usersServiceMock.findByEmail as jest.Mock).mockResolvedValue(storedUser);
+      securityEventService.logSecurityEvent.mockRejectedValue(
+        new Error('DB error'),
+      );
+      const consoleErrorSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
+
+      const result = await service.validateUser(
+        'test@test.com',
+        'wrongpassword',
+        '127.0.0.1',
+        'test-agent',
+      );
+
+      expect(result).toBeNull();
+      expect(consoleErrorSpy).toHaveBeenCalled();
+      consoleErrorSpy.mockRestore();
+    });
+
+    it('should not throw when security event logging fails (user not found)', async () => {
+      (usersServiceMock.findByEmail as jest.Mock).mockResolvedValue(null);
+      securityEventService.logSecurityEvent.mockRejectedValue(
+        new Error('DB error'),
+      );
+      const consoleErrorSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
+
+      const result = await service.validateUser(
+        'nonexistent@test.com',
+        'password123',
+        '127.0.0.1',
+        'test-agent',
+      );
+
+      expect(result).toBeNull();
+      expect(consoleErrorSpy).toHaveBeenCalled();
+      consoleErrorSpy.mockRestore();
+    });
+
+    it('should handle empty email', async () => {
+      (usersServiceMock.findByEmail as jest.Mock).mockResolvedValue(null);
+
+      const result = await service.validateUser(
+        '',
+        'password123',
+        '127.0.0.1',
+        'test-agent',
+      );
+
+      expect(result).toBeNull();
+      expect(usersServiceMock.findByEmail).toHaveBeenCalledWith('');
+    });
+
+    it('should handle null email', async () => {
+      (usersServiceMock.findByEmail as jest.Mock).mockResolvedValue(null);
+
+      const result = await service.validateUser(
+        null as any,
+        'password123',
+        '127.0.0.1',
+        'test-agent',
+      );
+
+      expect(result).toBeNull();
+    });
+
+    it('should handle empty password', async () => {
+      const storedUser: Partial<User> = {
+        id: 4,
+        email: 'test@test.com',
+        password: 'hashed',
+        name: 'Test',
+        isAdmin: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      (usersServiceMock.findByEmail as jest.Mock).mockResolvedValue(storedUser);
+
+      const result = await service.validateUser(
+        'test@test.com',
+        '',
+        '127.0.0.1',
+        'test-agent',
+      );
+
+      expect(result).toBeNull();
+    });
+
+    it('should handle null password', async () => {
+      const storedUser: Partial<User> = {
+        id: 5,
+        email: 'test@test.com',
+        password: 'hashed',
+        name: 'Test',
+        isAdmin: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      (usersServiceMock.findByEmail as jest.Mock).mockResolvedValue(storedUser);
+
+      const result = await service.validateUser(
+        'test@test.com',
+        null as any,
+        '127.0.0.1',
+        'test-agent',
+      );
+
       expect(result).toBeNull();
     });
   });
@@ -459,6 +655,149 @@ describe('AuthService', () => {
         service.register(dto, '127.0.0.1', 'test-agent'),
       ).rejects.toThrow();
     });
+
+    it('should throw UnauthorizedException if user not found after creation', async () => {
+      const dto: CreateUserDto = {
+        email: 'ghost@test.com',
+        name: 'Ghost User',
+        password: 'Test1234!',
+      };
+
+      const createdUser = createMockUser({ id: 99, email: dto.email });
+      (usersServiceMock.create as jest.Mock).mockResolvedValueOnce(createdUser);
+      // Override the fallback to return null for this specific id
+      (usersServiceMock.findById as jest.Mock).mockImplementation(
+        (id: number) => {
+          if (id === 99) return Promise.resolve(null);
+          return Promise.resolve(createMockUser({ id }));
+        },
+      );
+
+      await expect(
+        service.register(dto, '127.0.0.1', 'test-agent'),
+      ).rejects.toThrow(UnauthorizedException);
+
+      // Reset mock for subsequent tests
+      (usersServiceMock.findById as jest.Mock).mockImplementation(
+        (id: number) => {
+          return Promise.resolve(
+            createMockUser({
+              id,
+              email: 'test@example.com',
+              name: 'Test User',
+            }),
+          );
+        },
+      );
+    });
+
+    it('should handle null ipAddress in register', async () => {
+      const dto: CreateUserDto = {
+        email: 'nullip@test.com',
+        name: 'Null IP User',
+        password: 'Test1234!',
+      };
+
+      const createdUser = createMockUser({ id: 100, email: dto.email });
+      (usersServiceMock.create as jest.Mock).mockResolvedValueOnce(createdUser);
+      (usersServiceMock.findById as jest.Mock).mockResolvedValueOnce(
+        createdUser,
+      );
+      (
+        refreshTokenServiceMock.createRefreshToken as jest.Mock
+      ).mockResolvedValue({
+        token: 'refresh-token-12345',
+      });
+
+      await service.register(dto, null as any, 'test-agent');
+
+      expect(refreshTokenServiceMock.createRefreshToken).toHaveBeenCalledWith(
+        createdUser,
+        null,
+        'test-agent',
+      );
+    });
+
+    it('should handle undefined userAgent in register', async () => {
+      const dto: CreateUserDto = {
+        email: 'undefua@test.com',
+        name: 'Undef UA User',
+        password: 'Test1234!',
+      };
+
+      const createdUser = createMockUser({ id: 101, email: dto.email });
+      (usersServiceMock.create as jest.Mock).mockResolvedValueOnce(createdUser);
+      (usersServiceMock.findById as jest.Mock).mockResolvedValueOnce(
+        createdUser,
+      );
+      (
+        refreshTokenServiceMock.createRefreshToken as jest.Mock
+      ).mockResolvedValue({
+        token: 'refresh-token-12345',
+      });
+
+      await service.register(dto, '127.0.0.1', undefined as any);
+
+      expect(refreshTokenServiceMock.createRefreshToken).toHaveBeenCalledWith(
+        createdUser,
+        '127.0.0.1',
+        undefined,
+      );
+    });
+
+    it('should handle empty string ipAddress in register', async () => {
+      const dto: CreateUserDto = {
+        email: 'emptyip@test.com',
+        name: 'Empty IP User',
+        password: 'Test1234!',
+      };
+
+      const createdUser = createMockUser({ id: 102, email: dto.email });
+      (usersServiceMock.create as jest.Mock).mockResolvedValueOnce(createdUser);
+      (usersServiceMock.findById as jest.Mock).mockResolvedValueOnce(
+        createdUser,
+      );
+      (
+        refreshTokenServiceMock.createRefreshToken as jest.Mock
+      ).mockResolvedValue({
+        token: 'refresh-token-12345',
+      });
+
+      await service.register(dto, '', 'test-agent');
+
+      expect(refreshTokenServiceMock.createRefreshToken).toHaveBeenCalledWith(
+        createdUser,
+        '',
+        'test-agent',
+      );
+    });
+
+    it('should handle empty string userAgent in register', async () => {
+      const dto: CreateUserDto = {
+        email: 'emptyua@test.com',
+        name: 'Empty UA User',
+        password: 'Test1234!',
+      };
+
+      const createdUser = createMockUser({ id: 103, email: dto.email });
+      (usersServiceMock.create as jest.Mock).mockResolvedValueOnce(createdUser);
+      (usersServiceMock.findById as jest.Mock).mockResolvedValueOnce(
+        createdUser,
+      );
+      (
+        refreshTokenServiceMock.createRefreshToken as jest.Mock
+      ).mockResolvedValue({
+        token: 'refresh-token-12345',
+      });
+
+      await service.register(dto, '127.0.0.1', '');
+
+      expect(refreshTokenServiceMock.createRefreshToken).toHaveBeenCalledWith(
+        createdUser,
+        '127.0.0.1',
+        '',
+      );
+    });
   });
 
   describe('login - additional tests', () => {
@@ -508,6 +847,114 @@ describe('AuthService', () => {
       await expect(
         service.login(partialUser, '127.0.0.1', 'test-agent'),
       ).rejects.toThrow('User not found');
+    });
+
+    it('should throw UnauthorizedException for user with id 0', async () => {
+      const partialUser = {
+        id: 0,
+        email: 'zero@test.com',
+      } as User;
+
+      await expect(
+        service.login(partialUser, '127.0.0.1', 'test-agent'),
+      ).rejects.toThrow(UnauthorizedException);
+      await expect(
+        service.login(partialUser, '127.0.0.1', 'test-agent'),
+      ).rejects.toThrow('Invalid user data');
+    });
+
+    it('should throw UnauthorizedException for user with negative id', async () => {
+      const partialUser = {
+        id: -1,
+        email: 'negative@test.com',
+      } as User;
+
+      await expect(
+        service.login(partialUser, '127.0.0.1', 'test-agent'),
+      ).rejects.toThrow(UnauthorizedException);
+      await expect(
+        service.login(partialUser, '127.0.0.1', 'test-agent'),
+      ).rejects.toThrow('Invalid user data');
+    });
+
+    it('should throw UnauthorizedException for user with null email', async () => {
+      const partialUser = {
+        id: 1,
+        email: null,
+      } as any;
+
+      await expect(
+        service.login(partialUser, '127.0.0.1', 'test-agent'),
+      ).rejects.toThrow(UnauthorizedException);
+      await expect(
+        service.login(partialUser, '127.0.0.1', 'test-agent'),
+      ).rejects.toThrow('Invalid user data');
+    });
+
+    it('should throw UnauthorizedException for user with empty email', async () => {
+      const partialUser = {
+        id: 1,
+        email: '',
+      } as User;
+
+      await expect(
+        service.login(partialUser, '127.0.0.1', 'test-agent'),
+      ).rejects.toThrow(UnauthorizedException);
+      await expect(
+        service.login(partialUser, '127.0.0.1', 'test-agent'),
+      ).rejects.toThrow('Invalid user data');
+    });
+
+    it('should not throw when security event logging fails in login', async () => {
+      const user: Partial<User> = {
+        id: 7,
+        email: 'seclog@test.com',
+        name: 'SecLog User',
+        isAdmin: false,
+      };
+
+      const mockCompleteUser = {
+        ...user,
+        password: 'hashed_password',
+        plan: UserPlan.FREE,
+        roles: [],
+        isBanned: jest.fn().mockReturnValue(false),
+      } as unknown as User;
+      (usersServiceMock.findById as jest.Mock).mockResolvedValueOnce(
+        mockCompleteUser,
+      );
+
+      const { SecurityEventService } = await import(
+        '../security/security-event.service'
+      );
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          AuthService,
+          { provide: UsersService, useValue: usersServiceMock },
+          { provide: JwtService, useValue: jwtServiceMock },
+          { provide: RefreshTokenService, useValue: refreshTokenServiceMock },
+          { provide: PasswordResetService, useValue: passwordResetServiceMock },
+          {
+            provide: SecurityEventService,
+            useValue: {
+              logSecurityEvent: jest
+                .fn()
+                .mockRejectedValue(new Error('DB error')),
+            },
+          },
+        ],
+      }).compile();
+
+      const testService = module.get<AuthService>(AuthService);
+      const consoleErrorSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
+
+      const result = await testService.login(user, '127.0.0.1', 'test-agent');
+
+      expect(result).toHaveProperty('access_token');
+      expect(consoleErrorSpy).toHaveBeenCalled();
+      consoleErrorSpy.mockRestore();
     });
   });
 
