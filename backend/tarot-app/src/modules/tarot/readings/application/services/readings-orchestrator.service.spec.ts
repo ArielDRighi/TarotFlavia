@@ -177,6 +177,44 @@ describe('ReadingsOrchestratorService', () => {
         expect(createReadingUC.execute).toHaveBeenCalledWith(mockUser, dto);
         expect(result).toEqual(mockReading);
       });
+
+      it('should handle null user', async () => {
+        const dto: CreateReadingDto = {
+          customQuestion: 'Test question',
+          spreadId: 1,
+          deckId: 1,
+          cardIds: [1, 2, 3],
+          cardPositions: [],
+          generateInterpretation: true,
+        };
+
+        await service.create(null as any, dto);
+
+        expect(createReadingUC.execute).toHaveBeenCalledWith(null, dto);
+      });
+
+      it('should handle null dto', async () => {
+        await service.create(mockUser, null as any);
+
+        expect(createReadingUC.execute).toHaveBeenCalledWith(mockUser, null);
+      });
+
+      it('should propagate errors from use case', async () => {
+        const dto: CreateReadingDto = {
+          customQuestion: 'Test question',
+          spreadId: 1,
+          deckId: 1,
+          cardIds: [1, 2, 3],
+          cardPositions: [],
+          generateInterpretation: true,
+        };
+
+        createReadingUC.execute.mockRejectedValue(new Error('Creation failed'));
+
+        await expect(service.create(mockUser, dto)).rejects.toThrow(
+          'Creation failed',
+        );
+      });
     });
 
     describe('findAll', () => {
@@ -248,6 +286,44 @@ describe('ReadingsOrchestratorService', () => {
 
         expect(getReadingUC.execute).toHaveBeenCalledWith(1, mockUser.id, true);
         expect(result).toEqual(mockReading);
+      });
+
+      it('should handle reading id 0', async () => {
+        await service.findOne(0, mockUser.id, false);
+
+        expect(getReadingUC.execute).toHaveBeenCalledWith(
+          0,
+          mockUser.id,
+          false,
+        );
+      });
+
+      it('should handle negative reading id', async () => {
+        await service.findOne(-1, mockUser.id, false);
+
+        expect(getReadingUC.execute).toHaveBeenCalledWith(
+          -1,
+          mockUser.id,
+          false,
+        );
+      });
+
+      it('should handle user id 0', async () => {
+        await service.findOne(1, 0, false);
+
+        expect(getReadingUC.execute).toHaveBeenCalledWith(1, 0, false);
+      });
+
+      it('should handle negative user id', async () => {
+        await service.findOne(1, -1, false);
+
+        expect(getReadingUC.execute).toHaveBeenCalledWith(1, -1, false);
+      });
+
+      it('should handle null userId', async () => {
+        await service.findOne(1, null as any, false);
+
+        expect(getReadingUC.execute).toHaveBeenCalledWith(1, null, false);
       });
     });
 
@@ -339,6 +415,44 @@ describe('ReadingsOrchestratorService', () => {
 
         expect(readingRepo.update).not.toHaveBeenCalled();
       });
+
+      it('should handle reading id 0', async () => {
+        const updateData: Partial<TarotReading> = { customQuestion: 'test' };
+        getReadingUC.execute.mockResolvedValue(mockReading);
+        readingRepo.update.mockResolvedValue(mockReading);
+
+        await service.update(0, mockUser.id, updateData);
+
+        expect(getReadingUC.execute).toHaveBeenCalledWith(0, mockUser.id);
+      });
+
+      it('should handle negative reading id', async () => {
+        const updateData: Partial<TarotReading> = { customQuestion: 'test' };
+        getReadingUC.execute.mockResolvedValue(mockReading);
+        readingRepo.update.mockResolvedValue(mockReading);
+
+        await service.update(-1, mockUser.id, updateData);
+
+        expect(getReadingUC.execute).toHaveBeenCalledWith(-1, mockUser.id);
+      });
+
+      it('should handle null updateData', async () => {
+        getReadingUC.execute.mockResolvedValue(mockReading);
+        readingRepo.update.mockResolvedValue(mockReading);
+
+        await service.update(1, mockUser.id, null as any);
+
+        expect(readingRepo.update).toHaveBeenCalledWith(1, null);
+      });
+
+      it('should handle empty updateData', async () => {
+        getReadingUC.execute.mockResolvedValue(mockReading);
+        readingRepo.update.mockResolvedValue(mockReading);
+
+        await service.update(1, mockUser.id, {});
+
+        expect(readingRepo.update).toHaveBeenCalledWith(1, {});
+      });
     });
 
     describe('findTrashedReadings', () => {
@@ -350,6 +464,30 @@ describe('ReadingsOrchestratorService', () => {
 
         expect(readingRepo.findTrashed).toHaveBeenCalledWith(mockUser.id);
         expect(result).toEqual([trashedReading]);
+      });
+
+      it('should handle user id 0', async () => {
+        readingRepo.findTrashed.mockResolvedValue([]);
+
+        await service.findTrashedReadings(0);
+
+        expect(readingRepo.findTrashed).toHaveBeenCalledWith(0);
+      });
+
+      it('should handle negative user id', async () => {
+        readingRepo.findTrashed.mockResolvedValue([]);
+
+        await service.findTrashedReadings(-1);
+
+        expect(readingRepo.findTrashed).toHaveBeenCalledWith(-1);
+      });
+
+      it('should handle null user id', async () => {
+        readingRepo.findTrashed.mockResolvedValue([]);
+
+        await service.findTrashedReadings(null as any);
+
+        expect(readingRepo.findTrashed).toHaveBeenCalledWith(null);
       });
     });
 
@@ -481,6 +619,55 @@ describe('ReadingsOrchestratorService', () => {
         );
 
         expect(readingRepo.incrementViewCount).not.toHaveBeenCalled();
+      });
+
+      it('should handle empty token', async () => {
+        readingRepo.findByShareToken.mockResolvedValue(null);
+
+        await expect(service.getSharedReading('')).rejects.toThrow(
+          NotFoundException,
+        );
+        expect(readingRepo.findByShareToken).toHaveBeenCalledWith('');
+      });
+
+      it('should handle null token', async () => {
+        readingRepo.findByShareToken.mockResolvedValue(null);
+
+        await expect(service.getSharedReading(null as any)).rejects.toThrow(
+          NotFoundException,
+        );
+        expect(readingRepo.findByShareToken).toHaveBeenCalledWith(null);
+      });
+
+      it('should handle undefined token', async () => {
+        readingRepo.findByShareToken.mockResolvedValue(null);
+
+        await expect(
+          service.getSharedReading(undefined as any),
+        ).rejects.toThrow(NotFoundException);
+        expect(readingRepo.findByShareToken).toHaveBeenCalledWith(undefined);
+      });
+
+      it('should handle very long token', async () => {
+        const longToken = 'a'.repeat(10000);
+        readingRepo.findByShareToken.mockResolvedValue(null);
+
+        await expect(service.getSharedReading(longToken)).rejects.toThrow(
+          NotFoundException,
+        );
+        expect(readingRepo.findByShareToken).toHaveBeenCalledWith(longToken);
+      });
+
+      it('should handle SQL injection attempt in token', async () => {
+        const maliciousToken = "'; DROP TABLE readings;--";
+        readingRepo.findByShareToken.mockResolvedValue(null);
+
+        await expect(service.getSharedReading(maliciousToken)).rejects.toThrow(
+          NotFoundException,
+        );
+        expect(readingRepo.findByShareToken).toHaveBeenCalledWith(
+          maliciousToken,
+        );
       });
     });
   });
