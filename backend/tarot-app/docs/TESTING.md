@@ -10,6 +10,7 @@
 6. [Coverage Actual](#coverage-actual)
 7. [Best Practices](#best-practices)
 8. [Debugging Tests](#debugging-tests)
+9. [Developer Workflows](#developer-workflows)
 
 ---
 
@@ -706,11 +707,29 @@ it('should reject invalid input', async () => {
 
 ---
 
+## Developer Workflows
+
+Para workflows optimizados de desarrollo diario, consulta **[DEVELOPER_WORKFLOWS.md](./DEVELOPER_WORKFLOWS.md)**.
+
+Esta guía incluye:
+- ⚡ Watch mode y desarrollo iterativo
+- 🐛 Debug workflows con VS Code y Chrome DevTools
+- 📋 Workflows por escenario (nueva feature, fixing bug, refactoring, etc.)
+- ⚡ Optimización de velocidad de tests
+- 📝 Checklists para desarrolladores
+- 🛠️ Troubleshooting común
+
+---
+
 ## Recursos
 
 ### Documentación Interna
 
 - **[TESTING_PHILOSOPHY.md](./TESTING_PHILOSOPHY.md)** - Filosofía obligatoria de testing
+- **[DEVELOPER_WORKFLOWS.md](./DEVELOPER_WORKFLOWS.md)** - Workflows de desarrollo diario
+- **[FIXTURES_GUIDE.md](./FIXTURES_GUIDE.md)** - Uso de fixtures y factories
+- **[TESTING_MOCKS.md](./TESTING_MOCKS.md)** - Mocking de servicios externos
+- **[COVERAGE.md](./COVERAGE.md)** - Coverage configuration y mejora
 - **[ARCHITECTURE.md](./ARCHITECTURE.md)** - Arquitectura del proyecto
 - **[CONTRIBUTING.md](../CONTRIBUTING.md)** - Guía de contribución
 

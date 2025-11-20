@@ -33,6 +33,7 @@ Configurados en `package.json`:
 ```
 
 **Criterios:**
+
 - ✅ **Statements:** 70% mínimo (actual: 73.8%)
 - ✅ **Branches:** 55% mínimo (actual: 58.3%)
 - ✅ **Functions:** 65% mínimo (actual: 66.28%)
@@ -103,8 +104,8 @@ npm run test:coverage
 
 ```typescript
 collectCoverageFrom: [
-  "src/**/*.ts",          // Todo el código fuente
-]
+  'src/**/*.ts', // Todo el código fuente
+];
 ```
 
 ### ❌ Excluido
@@ -112,23 +113,24 @@ collectCoverageFrom: [
 ```typescript
 collectCoverageFrom: [
   // Archivos de test
-  "!src/**/*.spec.ts",
-  "!src/**/*.e2e-spec.ts",
-  
+  '!src/**/*.spec.ts',
+  '!src/**/*.e2e-spec.ts',
+
   // Archivos de infraestructura
-  "!src/**/index.ts",
-  "!src/main.ts",
-  
+  '!src/**/index.ts',
+  '!src/main.ts',
+
   // Configuración
-  "!src/config/**",
-  
+  '!src/config/**',
+
   // Base de datos
-  "!src/database/migrations/**",
-  "!src/database/seeds/**",
-]
+  '!src/database/migrations/**',
+  '!src/database/seeds/**',
+];
 ```
 
 **Razón:** Los archivos excluidos son:
+
 - Tests (no tiene sentido medir coverage de tests)
 - Entry points (main.ts, index.ts)
 - Configuración (archivos de config)
@@ -145,9 +147,9 @@ collectCoverageFrom: [
 ```typescript
 // Ejemplo
 function example() {
-  const x = 1;        // ✅ Statement 1
-  const y = 2;        // ✅ Statement 2
-  return x + y;       // ✅ Statement 3
+  const x = 1; // ✅ Statement 1
+  const y = 2; // ✅ Statement 2
+  return x + y; // ✅ Statement 3
 }
 // Si el test llama example(), statements = 100%
 ```
@@ -161,9 +163,11 @@ function example() {
 ```typescript
 // Ejemplo
 function isAdult(age: number) {
-  if (age >= 18) {     // Branch 1: true
+  if (age >= 18) {
+    // Branch 1: true
     return true;
-  } else {             // Branch 2: false
+  } else {
+    // Branch 2: false
     return false;
   }
 }
@@ -184,10 +188,10 @@ function isAdult(age: number) {
 ```typescript
 // Ejemplo
 class UserService {
-  create() { }        // ✅ Llamada en tests
-  update() { }        // ✅ Llamada en tests
-  delete() { }        // ❌ Nunca llamada
-  restore() { }       // ❌ Nunca llamada
+  create() {} // ✅ Llamada en tests
+  update() {} // ✅ Llamada en tests
+  delete() {} // ❌ Nunca llamada
+  restore() {} // ❌ Nunca llamada
 }
 // Functions coverage = 50% (2/4)
 ```
@@ -201,10 +205,10 @@ class UserService {
 ```typescript
 // Ejemplo
 function calculate(x: number, y: number) {
-  const sum = x + y;         // ✅ Line 1
-  const product = x * y;     // ❌ Line 2 (nunca ejecutada)
-  const division = x / y;    // ❌ Line 3 (nunca ejecutada)
-  return sum;                // ✅ Line 4
+  const sum = x + y; // ✅ Line 1
+  const product = x * y; // ❌ Line 2 (nunca ejecutada)
+  const division = x / y; // ❌ Line 3 (nunca ejecutada)
+  return sum; // ✅ Line 4
 }
 // Lines coverage = 50% (2/4)
 ```
@@ -218,11 +222,13 @@ function calculate(x: number, y: number) {
 ### Prioridades para Aumentar Coverage
 
 1. **Branches (58.3% → 65%)**
+
    - Agregar tests para else clauses
    - Probar todos los casos de switch
    - Cubrir operadores ternarios
 
 2. **Functions (66.28% → 75%)**
+
    - Identificar funciones sin tests
    - Agregar tests para métodos edge
 
@@ -274,6 +280,7 @@ it('should create user', async () => {
 ```
 
 **Importante:**
+
 - Coverage mide **qué código se ejecuta**, no **qué se verifica**
 - Tests sin `expect()` aumentan coverage pero no encuentran bugs
 - Priorizar **calidad** sobre **cantidad**
@@ -283,16 +290,16 @@ it('should create user', async () => {
 ```typescript
 // Coverage 100% pero bug no detectado
 function divide(a: number, b: number) {
-  return a / b;  // Bug: división por 0 no manejada
+  return a / b; // Bug: división por 0 no manejada
 }
 
 it('should divide', () => {
-  expect(divide(10, 2)).toBe(5);  // ✅ Pasa pero no cubre edge case
+  expect(divide(10, 2)).toBe(5); // ✅ Pasa pero no cubre edge case
 });
 
 // Test completo
 it('should throw on division by zero', () => {
-  expect(() => divide(10, 0)).toThrow();  // 🔍 Encuentra el bug
+  expect(() => divide(10, 0)).toThrow(); // 🔍 Encuentra el bug
 });
 ```
 
@@ -383,6 +390,7 @@ npm run test:cov
 **Causa:** Coverage bajó por debajo de thresholds configurados.
 
 **Solución:**
+
 1. Revisar `package.json` → `coverageThreshold`
 2. Agregar tests para código no cubierto
 3. Si es aceptable, ajustar thresholds (documentar razón)
@@ -402,6 +410,7 @@ npx jest --coverage --testPathPattern="specific-test"
 **Causa:** Tests con leaks de memoria o timers.
 
 **Solución:**
+
 ```bash
 # Detectar handles abiertos
 npx jest --detectOpenHandles
