@@ -561,6 +561,7 @@ TASK-059 es demasiado extensa para completarse en un solo commit. Este documento
 **Tests already exist:**
 
 - ✅ ai-provider.service.spec.ts (23 tests - comprehensive fallback logic)
+
   - generateCompletion: primary provider success
   - Fallback: Groq → DeepSeek → OpenAI (automatic)
   - All providers fail scenario
@@ -577,6 +578,7 @@ TASK-059 es demasiado extensa para completarse en un solo commit. Este documento
   - Error handling: all provider errors in final message
 
 - ✅ circuit-breaker.utils.spec.ts (20 tests - already passing)
+
   - Initial state: CLOSED, allows execution
   - Recording failures: threshold detection, success reset
   - OPEN state: blocks execution, timeout transition
@@ -609,7 +611,7 @@ TASK-059 es demasiado extensa para completarse en un solo commit. Este documento
 **TypeScript compliance:**
 
 - ✅ 0 eslint errors
-- ✅ 0 warnings (@typescript-eslint/no-unsafe-*)
+- ✅ 0 warnings (@typescript-eslint/no-unsafe-\*)
 - ✅ Proper async/await patterns
 - ✅ Circuit breaker state machine type-safe
 
@@ -1031,9 +1033,9 @@ Actualizar esta sección después de completar cada subtarea:
 
 ### Última Actualización: 2025-11-20
 
-- **Coverage Actual:** ~54% (estimado tras completar SUBTASK-14)
-- **Subtareas Completadas:** 12/27 (44%) - SUBTASK-14 completado al 100%
-- **Bugs Encontrados:** 21 (total acumulado - 0 nuevos en SUBTASK-14)
+- **Coverage Actual:** ~57% (estimado tras completar SUBTASK-17)
+- **Subtareas Completadas:** 15/27 (56%) - SUBTASK-17 completado
+- **Bugs Encontrados:** 21 (total acumulado - 0 nuevos en SUBTASK-15/16/17)
   - InterpretationsService: 5 bugs
   - Reading Creation Flow: 4 bugs
   - UsersService: 0 bugs
@@ -1046,8 +1048,9 @@ Actualizar esta sección después de completar cada subtarea:
   - Guards (7 guards): 0 bugs (verified correct)
   - Interceptors: 1 bug (userId=0 falsy check)
   - Cache Services: 0 bugs (verified correct)
-  - Controllers (AuthController, UsersController): 0 bugs (verified correct)
-- **Tests Totales:** ~578 passing
+  - Controllers (Auth, Users, Readings): 0 bugs (verified correct)
+  - AI Providers (OpenAI, Fallback, CircuitBreaker, Retry): 0 bugs (verified correct)
+- **Tests Totales:** ~678+ passing
   - SUBTASK-4: ReadingValidatorService (28 tests)
   - SUBTASK-5: TypeOrmReadingRepository (36 tests)
   - SUBTASK-6: AuthService (30 tests)
@@ -1057,7 +1060,10 @@ Actualizar esta sección después de completar cada subtarea:
   - SUBTASK-10: Interceptors (28 tests - 3/3 interceptors COMPLETOS)
   - SUBTASK-11: Cache Services (54 tests - 2/2 services COMPLETOS)
   - SUBTASK-14: Controllers Part 1 (38 tests - 2/2 controllers COMPLETOS)
-- **Commits:** 18 total (17 previos + 1 nuevo: SUBTASK-14)
+  - SUBTASK-15: Controllers Part 2 (17 tests - ReadingsController COMPLETO)
+  - SUBTASK-16: AI Providers - OpenAI (31 tests - OpenAIProvider COMPLETO)
+  - SUBTASK-17: AI Providers - Fallback (52 tests - AIProviderService, CircuitBreaker, Retry COMPLETOS)
+- **Commits:** 21 total
 
 ---
 
