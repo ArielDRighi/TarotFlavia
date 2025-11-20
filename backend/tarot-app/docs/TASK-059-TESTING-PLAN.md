@@ -28,7 +28,7 @@ TASK-059 es demasiado extensa para completarse en un solo commit. Este documento
 
 ## Estado Actual (Coverage: ~61% estimado)
 
-**Progreso:** 22/27 subtareas completadas (SUBTASK-0 a SUBTASK-24)
+**Progreso:** 23/27 subtareas completadas (SUBTASK-0 a SUBTASK-25)
 
 **Tests totales:**
 
@@ -36,7 +36,7 @@ TASK-059 es demasiado extensa para completarse en un solo commit. Este documento
 - ~256+ integration/e2e tests
 - **Total: 794+ tests (todos pasando)**
 
-**Commits realizados:** 29 commits
+**Commits realizados:** 30 commits
 
 ### ✅ Ya Completado (Commits 1-21)
 
@@ -1194,27 +1194,80 @@ This subtask added 6 new edge case tests to complete SUBTASK-18 requirements.
 
 ---
 
-#### SUBTASK-25: Test Fixtures & Factories Expansion
+#### SUBTASK-25: Test Fixtures & Factories Expansion ✅ COMPLETADO
 
 **Prioridad:** MEDIA  
-**Estimación:** 2 horas
+**Estimación:** 2 horas  
+**Tiempo Real:** 1.5 horas  
+**Bugs encontrados:** 0 (expansión de fixtures, no código de producción)
 
-**Tareas:**
+**✅ Tareas Completadas:**
 
-- Crear fixtures adicionales:
-  - Admin users
-  - Premium users
-  - Banned users
-  - Multiple spreads
-  - Edge case readings
-- Documentar uso de fixtures
+- ✅ Revisar fixtures y factories existentes (4 factories ya creadas)
+- ✅ Crear fixtures avanzadas para casos edge: `test/helpers/fixtures-advanced.ts` (700+ líneas)
+  - Edge case users (10 variantes: long email, short name, inactive, banned variations, etc.)
+  - Edge case readings (11 variantes: long question, all reversed, max regenerations, etc.)
+  - Edge case spreads (4 variantes: max cards, long name, long description, etc.)
+  - Edge case cards (5 variantes: long keywords, long meanings, short name, etc.)
+  - Edge case AI responses (7 variantes: too short, very long, special chars, malicious HTML, etc.)
+  - Edge case usage limits (5 variantes: at limit, over limit, premium usage, etc.)
+  - Edge case dates (6 variantes: very old, future, midnight, leap year, etc.)
+  - Edge case JWT tokens (4 variantes: minimal, extra claims, near expiry, etc.)
+- ✅ Documentar uso completo de fixtures: `docs/FIXTURES_GUIDE.md` (500+ líneas)
+  - Diferencias entre factories y fixtures
+  - Guías de uso para cada factory (User, Reading, Spread, Card)
+  - Guías de uso para fixtures básicas y avanzadas
+  - Patrones de uso recomendados
+  - Antipatrones (qué NO hacer)
+  - Ejemplos completos de integración, unit tests, edge cases
+  - Checklist: ¿Factory o Fixture?
 
-**Criterios:**
+**📊 Fixtures Creadas:**
 
-- Fixtures completos
-- Fácil de usar
-- Documentados
-- 1 commit al completar
+1. **test/helpers/fixtures-advanced.ts** (700+ líneas):
+   - `EDGE_CASE_USERS`: 10 variantes de usuarios edge
+   - `EDGE_CASE_READINGS`: 11 variantes de lecturas edge
+   - `EDGE_CASE_SPREADS`: 4 variantes de spreads edge
+   - `EDGE_CASE_CARDS`: 5 variantes de cartas edge
+   - `EDGE_CASE_AI_RESPONSES`: 7 variantes de respuestas AI edge
+   - `EDGE_CASE_USAGE`: 5 variantes de límites de uso
+   - `EDGE_CASE_REQUESTS`: 4 variantes de datos de request
+   - `EDGE_CASE_DATES`: 6 variantes de fechas edge
+   - `EDGE_CASE_JWT_TOKENS`: 4 variantes de tokens JWT
+
+2. **docs/FIXTURES_GUIDE.md** (500+ líneas):
+   - Introducción: Factories vs Fixtures
+   - Guías detalladas para cada factory:
+     * UserFactory: create, createAdmin, createPremium, createFree, createBanned, createMany
+     * ReadingFactory: create, createShared, createDeleted, createMany
+     * SpreadFactory: create, createThreeCardSpread, createSingleCardSpread, createCelticCross
+     * CardFactory: create, createMajorArcana, createMinorArcana, createThreeCardSpread
+   - Guías para fixtures básicas (MOCK_USERS, MOCK_CARDS, MOCK_SPREADS, MOCK_AI_RESPONSE, etc.)
+   - Guías para fixtures avanzadas (EDGE_CASE_*)
+   - 4 patrones de uso recomendados con ejemplos
+   - Antipatrones documentados (qué NO hacer)
+   - 3 ejemplos completos (integración, unit, edge cases)
+   - Checklist: ¿Factory o Fixture?
+   - Guía de mantenimiento
+
+**📝 Factories Existentes (revisadas, no modificadas):**
+
+- `test/helpers/factories/user.factory.ts`: UserFactory completa
+- `test/helpers/factories/reading.factory.ts`: ReadingFactory completa
+- `test/helpers/factories/spread.factory.ts`: SpreadFactory completa
+- `test/helpers/factories/card.factory.ts`: CardFactory completa
+
+**📝 Fixtures Existentes (revisadas, no modificadas):**
+
+- `test/helpers/fixtures.ts`: MOCK_USERS, MOCK_CARDS, MOCK_SPREADS, MOCK_READINGS, MOCK_AI_RESPONSE, etc.
+
+**Criterios Cumplidos:**
+
+- ✅ Fixtures completos (56+ variantes de casos edge)
+- ✅ Fácil de usar (imports simples, bien documentados)
+- ✅ Documentados (500+ líneas de guía completa)
+- ✅ 0 errores de eslint
+- ✅ 1 commit al completar
 
 ---
 
@@ -1427,9 +1480,9 @@ Actualizar esta sección después de completar cada subtarea:
 
 ### Última Actualización: 2025-11-20
 
-- **Coverage Actual:** ~61% (estimado tras completar SUBTASK-24)
-- **Subtareas Completadas:** 22/27 (81%) - SUBTASK-24 completado
-- **Bugs Encontrados:** 21 (total acumulado - 0 nuevos bugs en SUBTASK-18/19/20/21/22/23/24)
+- **Coverage Actual:** ~61% (estimado tras completar SUBTASK-25)
+- **Subtareas Completadas:** 23/27 (85%) - SUBTASK-25 completado
+- **Bugs Encontrados:** 21 (total acumulado - 0 nuevos bugs en SUBTASK-18/19/20/21/22/23/24/25)
   - InterpretationsService: 5 bugs
   - Reading Creation Flow: 4 bugs
   - UsersService: 0 bugs
@@ -1451,6 +1504,7 @@ Actualizar esta sección después de completar cada subtarea:
   - Performance Tests - Critical Endpoints: 0 bugs (all targets met)
   - Performance Tests - Database Queries: 0 bugs (0 bottlenecks, all queries optimized)
   - External Services Mocking: 0 bugs (all services correctly mocked, no real calls)
+  - Test Fixtures & Factories: 0 bugs (expansion of test data, no production code)
 - **Tests Totales:** ~794+ passing
   - SUBTASK-4: ReadingValidatorService (28 tests)
   - SUBTASK-5: TypeOrmReadingRepository (36 tests)
@@ -1471,7 +1525,8 @@ Actualizar esta sección después de completar cada subtarea:
   - SUBTASK-22: Performance Tests - Critical Endpoints (13 tests - all targets met COMPLETO)
   - SUBTASK-23: Performance Tests - Database Queries (15 tests - 0 bottlenecks COMPLETO)
   - SUBTASK-24: External Services Mocking (0 tests - documentación + verificación COMPLETO)
-- **Commits:** 29 total
+  - SUBTASK-25: Test Fixtures & Factories (0 tests - 56+ edge case fixtures + documentación COMPLETO)
+- **Commits:** 30 total
 
 ---
 
