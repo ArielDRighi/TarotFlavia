@@ -161,7 +161,7 @@ describe('AI Provider Fallback (e2e)', () => {
 
       expect(response.body).toHaveProperty('status');
       expect(response.body.status).toBe('ok');
-    });
+    }, 10000); // Timeout de 10s para CI
 
     it('should provide circuit breaker stats via service', () => {
       const stats = aiProviderService.getCircuitBreakerStats();
