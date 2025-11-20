@@ -19,6 +19,7 @@ npm run test:e2e:watch
 ```
 
 **Watch mode:**
+
 - ✅ Re-ejecuta tests automáticamente cuando guardas archivos
 - ✅ Solo corre tests relacionados a archivos modificados
 - ✅ Interfaz interactiva para filtrar tests
@@ -35,6 +36,7 @@ npm test
 ```
 
 **Tiempo esperado:**
+
 - Unit tests: ~90 segundos
 - E2E tests: ~2-3 minutos
 - Total: ~4-5 minutos
@@ -76,6 +78,7 @@ npm run test:watch
 ```
 
 **Tips:**
+
 - Watch mode detecta cambios automáticamente
 - Presiona `o` para correr solo tests de archivos modificados
 - Presiona `a` para correr todos los tests
@@ -189,6 +192,7 @@ Cuando ejecutas `npm run test:watch`, tienes estos comandos disponibles:
 ### Ejemplos de Uso
 
 **Filtrar por nombre de archivo:**
+
 ```
 Press p
 Pattern: auth.service
@@ -196,6 +200,7 @@ Pattern: auth.service
 ```
 
 **Filtrar por nombre de test:**
+
 ```
 Press t
 Pattern: should create user
@@ -203,6 +208,7 @@ Pattern: should create user
 ```
 
 **Solo tests que fallaron:**
+
 ```
 Press f
 # Re-ejecuta solo los tests rojos
@@ -242,11 +248,7 @@ Press f
       "request": "launch",
       "name": "Jest Debug All",
       "program": "${workspaceFolder}/node_modules/.bin/jest",
-      "args": [
-        "--runInBand",
-        "--no-cache",
-        "--watchAll=false"
-      ],
+      "args": ["--runInBand", "--no-cache", "--watchAll=false"],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
     }
@@ -255,6 +257,7 @@ Press f
 ```
 
 **Uso:**
+
 1. Abrir archivo de test en VS Code
 2. Poner breakpoint (click en número de línea)
 3. Presionar F5 o "Debug Current File"
@@ -293,6 +296,7 @@ node --inspect-brk ./node_modules/.bin/jest --runInBand -t "should create user"
 ### Tests Lentos Actual
 
 **Tiempos medidos:**
+
 - Unit tests: ~90 segundos (110 suites, 1,482 tests)
 - E2E tests: ~2-3 minutos
 - **Total: ~4-5 minutos**
@@ -399,28 +403,28 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
           node-version: '18'
           cache: 'npm'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Run linter
         run: npm run lint
-      
+
       - name: Run unit tests
         run: npm run test:cov
-      
+
       - name: Run E2E tests
         run: npm run test:e2e:cov
-      
+
       - name: Upload coverage
         uses: codecov/codecov-action@v3
         with:
@@ -492,6 +496,7 @@ npx husky add .husky/pre-commit "npm run lint && npm test"
 **Problema:** Watch mode no detecta cambios.
 
 **Solución:**
+
 ```bash
 # 1. Salir de watch mode (q)
 # 2. Limpiar cache
@@ -505,6 +510,7 @@ npm run test:watch
 **Problema:** Tests no terminan, timeout.
 
 **Solución:**
+
 ```typescript
 // Cerrar conexiones en afterAll
 afterAll(async () => {
@@ -518,6 +524,7 @@ afterAll(async () => {
 **Problema:** Tests ahora toman >5 minutos.
 
 **Solución:**
+
 ```bash
 # 1. Identificar tests lentos
 npx jest --verbose 2>&1 | grep -E '\([5-9]\.[0-9]+ s\)'
@@ -535,6 +542,7 @@ it.skip('very slow integration test', () => {
 **Problema:** Imports no resuelven correctamente.
 
 **Solución:**
+
 ```bash
 # Verificar tsconfig paths
 # Verificar moduleNameMapper en jest config

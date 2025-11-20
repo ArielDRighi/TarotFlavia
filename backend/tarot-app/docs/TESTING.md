@@ -712,6 +712,7 @@ it('should reject invalid input', async () => {
 Para workflows optimizados de desarrollo diario, consulta **[DEVELOPER_WORKFLOWS.md](./DEVELOPER_WORKFLOWS.md)**.
 
 Esta guía incluye:
+
 - ⚡ Watch mode y desarrollo iterativo
 - 🐛 Debug workflows con VS Code y Chrome DevTools
 - 📋 Workflows por escenario (nueva feature, fixing bug, refactoring, etc.)
