@@ -26,19 +26,19 @@ TASK-059 es demasiado extensa para completarse en un solo commit. Este documento
 
 ---
 
-## Estado Actual (Coverage: ~55% estimado)
+## Estado Actual (Coverage: ~56% estimado)
 
-**Progreso:** 13/27 subtareas completadas (SUBTASK-0 a SUBTASK-15)
+**Progreso:** 14/27 subtareas completadas (SUBTASK-0 a SUBTASK-16)
 
 **Tests totales:**
 
-- ~455+ unit tests
+- ~486+ unit tests
 - ~140+ integration/e2e tests
-- **Total: 595+ tests**
+- **Total: 626+ tests**
 
-**Commits realizados:** 19 commits
+**Commits realizados:** 20 commits
 
-### ✅ Ya Completado (Commits 1-16)
+### ✅ Ya Completado (Commits 1-20)
 
 #### SUBTASK-0: Documentación Base
 
@@ -491,28 +491,60 @@ TASK-059 es demasiado extensa para completarse en un solo commit. Este documento
 
 ### Fase 5: Tests de AI Providers
 
-#### SUBTASK-16: OpenAI Provider Unit Tests
+#### ~~SUBTASK-16: OpenAI Provider Unit Tests~~ ✅ COMPLETADO
 
-**Prioridad:** ALTA  
-**Estimación:** 3-4 horas
+**Estado:** ✅ COMPLETADO  
+**Tests:** 31 passing (OpenAIProvider)  
+**Coverage:**
 
-**Tareas:**
+- OpenAIProvider: 97% Stmts, 91% Branches, 100% Funcs, 98% Lines (31 tests, 663 lines)
 
-- Mockear OpenAI SDK
-- Tests de prompt generation
-- Tests de response parsing
-- Tests de error handling:
-  - API down
-  - Rate limits
-  - Invalid responses
-  - Timeout scenarios
+**Tests created:**
 
-**Criterios:**
+- ✅ openai.provider.spec.ts (31 tests - created from scratch)
+  - constructor: valid API key, missing key, invalid format
+  - generateCompletion: success with default/custom config
+  - calculateMaxTokens: 1/3/5/10 cards (dynamic token limits)
+  - error handling: 401/429/500/502/503 errors
+  - timeout handling: ETIMEDOUT, Promise.race timeout
+  - context length exceeded
+  - rate limit detection (status code + string matching)
+  - invalid API key detection (status code + string matching)
+  - error property variations (status/statusCode/response.status)
+  - AIProviderException re-throw without wrapping
+  - missing usage data handling
+  - isAvailable: API check, client not initialized, errors, timeout
+  - getProviderType
 
-- AI Provider >80% coverage
-- Mocks correctos
-- Error scenarios covered
-- 1 commit al completar
+**Bugs found:** 0 bugs (provider working correctly)
+
+**Edge cases tested:**
+
+- Client not initialized (no API key)
+- Invalid API key format (not starting with "sk-")
+- Timeout scenarios (30s request timeout, 5s availability check)
+- Empty response content
+- Missing usage metadata
+- Various HTTP status codes (401, 429, 500, 502, 503)
+- Error code ETIMEDOUT
+- String-based error detection (case insensitive)
+- Error object property variations
+- Dynamic token calculation based on card count
+
+**TypeScript compliance:**
+
+- ✅ 0 eslint errors
+- ✅ 0 warnings (@typescript-eslint/no-unsafe-*)
+- ✅ No 'as any' usage (explicit interface typing for mocks)
+- ✅ Proper typing for mock functions
+- ✅ Try-catch with instanceof checks (no expect.objectContaining)
+
+**⚠️ NOTE:** Test file is 663 lines (exceeds 600-line limit)
+
+- Documented for future refactorization
+- Suggested split: success scenarios (350 lines) + error scenarios (313 lines)
+
+📝 Commit: "test(SUBTASK-16): add OpenAI Provider unit tests (31 passing, 97% coverage)"
 
 ---
 
@@ -1011,12 +1043,13 @@ Según **TESTING_PHILOSOPHY.md** (límites actualizados: ideal 400, máximo 600 
 
 6. **users.service.spec.ts: 606 líneas** (justo sobre el límite)
 7. **create-reading.use-case.spec.ts: 605 líneas** (justo sobre el límite)
+8. **openai.provider.spec.ts: 663 líneas** (63 líneas sobre el límite)
 
 **📝 Crear SUBTASK-XX:** Refactorizar Archivos de Test Grandes
 
 - **Prioridad:** Alta (antes de merge a main)
 - **Estimación:** 4-6 horas
-- **Tests afectados:** 228 tests (deben seguir pasando al 100%)
+- **Tests afectados:** 259 tests (deben seguir pasando al 100%)
 - **Beneficio:** Cumplimiento de límites de Clean Code, mejor mantenibilidad
 
 ---
