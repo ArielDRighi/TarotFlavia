@@ -257,6 +257,7 @@ import { validUserDto } from '@test/fixtures/users.fixtures';
 | E2E Test             | 300 líneas   | 500 líneas    | Dividir por user journey   |
 
 **⚠️ LÍMITE CRÍTICO: 600 líneas**
+
 - Archivos >600 líneas **DEBEN** refactorizarse
 - Archivos >800 líneas **RECHAZAN** en code review
 - Archivos >1000 líneas violan principios SOLID y Clean Code

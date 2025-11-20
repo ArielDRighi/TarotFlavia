@@ -892,20 +892,24 @@ Según **TESTING_PHILOSOPHY.md** (límites actualizados: ideal 400, máximo 600 
 #### 🔴 CRÍTICO - Refactorizar Antes de Merge a Main
 
 1. **auth.service.spec.ts: 1,149 líneas** → Dividir en 4 archivos:
+
    - `auth.service.register.spec.ts` (~350 líneas)
    - `auth.service.login.spec.ts` (~450 líneas)
    - `auth.service.tokens.spec.ts` (~200 líneas)
    - `auth.service.password.spec.ts` (~150 líneas)
 
 2. **typeorm-reading.repository.spec.ts: 889 líneas** → Dividir en 2 archivos:
+
    - `typeorm-reading.repository.crud.spec.ts` (~450 líneas)
    - `typeorm-reading.repository.queries.spec.ts` (~439 líneas)
 
 3. **regenerate-reading.use-case.spec.ts: 875 líneas** → Dividir en 2 archivos:
+
    - `regenerate-reading.use-case.success.spec.ts` (~450 líneas)
    - `regenerate-reading.use-case.errors.spec.ts` (~425 líneas)
 
 4. **reading-validator.service.spec.ts: 764 líneas** → Dividir en 2 archivos:
+
    - `reading-validator.service.user.spec.ts` (~380 líneas)
    - `reading-validator.service.reading.spec.ts` (~384 líneas)
 
@@ -919,6 +923,7 @@ Según **TESTING_PHILOSOPHY.md** (límites actualizados: ideal 400, máximo 600 
 7. **create-reading.use-case.spec.ts: 605 líneas** (justo sobre el límite)
 
 **📝 Crear SUBTASK-XX:** Refactorizar Archivos de Test Grandes
+
 - **Prioridad:** Alta (antes de merge a main)
 - **Estimación:** 4-6 horas
 - **Tests afectados:** 228 tests (deben seguir pasando al 100%)
