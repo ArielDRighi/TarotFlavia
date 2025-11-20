@@ -1,4 +1,10 @@
-import { Injectable, Inject, Logger, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  Logger,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { IReadingRepository } from '../../domain/interfaces/reading-repository.interface';
 import { ReadingValidatorService } from '../services/reading-validator.service';
 import { CreateReadingDto } from '../../dto/create-reading.dto';
@@ -33,7 +39,9 @@ export class CreateReadingUseCase {
   ): Promise<TarotReading> {
     // Validar que user no sea null
     if (!user || !user.id) {
-      throw new Error('User is required');
+      throw new UnauthorizedException(
+        'Invalid user: user object or user.id is missing',
+      );
     }
 
     // Validar usuario

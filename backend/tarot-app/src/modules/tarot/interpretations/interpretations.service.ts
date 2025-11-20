@@ -113,7 +113,7 @@ export class InterpretationsService {
 
     // Validar entrada: cards no puede estar vacío
     if (!cards || cards.length === 0) {
-      throw new BadRequestException('Cards array cannot be empty');
+      throw new BadRequestException('El array de cartas no puede estar vacío');
     }
 
     // Validar tarotistaId ANTES de usar fallback
