@@ -1,6 +1,6 @@
 # 🗄️ Database Documentation - TarotFlavia
 
-## Tabla de Contenido
+## Tabla de Contenidos
 
 - [Overview](#overview)
 - [Diagrama ER](#diagrama-er)
@@ -625,8 +625,6 @@ const readings = await readingRepo
   .getMany();
 ```
 
-Ver [QUERY_OPTIMIZATION.md](./QUERY_OPTIMIZATION.md) para más detalles.
-
 ---
 
 ## Migraciones
@@ -849,8 +847,6 @@ SELECT pg_terminate_backend(pid)
 FROM pg_stat_activity
 WHERE pid = 12345;
 ```
-
-Ver [DATABASE_POOLING.md](./DATABASE_POOLING.md) para más detalles.
 
 ---
 

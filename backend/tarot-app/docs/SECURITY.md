@@ -383,7 +383,7 @@ Before deploying to production:
 - [ ] Error messages don't leak sensitive info (NODE_ENV=production)
 - [ ] All environment variables are set correctly
 - [ ] Backup strategy is configured (see DATABASE.md)
-- [ ] Monitoring is configured (see LOGGING.md)
+- [ ] Monitoring is configured (Winston logger enabled)
 
 ## Emergency Contacts & Reporting
 
@@ -393,7 +393,7 @@ If you discover a security vulnerability, please report it responsibly:
 
 **DO NOT** open a public GitHub issue.
 
-**Email:** security@tarotflavia.com (or repository owner email)
+**Email:** TBD (to be configured - please contact repository owner in the meantime)
 
 **Include:**
 
@@ -419,12 +419,12 @@ If you discover a security vulnerability, please report it responsibly:
 
 ### Incident Severity Classification
 
-| Severity | Description | Response Time |
-|----------|-------------|---------------|
-| **Critical** | Data breach, system compromise, RCE | Immediate (< 2 hours) |
-| **High** | Authentication bypass, privilege escalation | < 24 hours |
-| **Medium** | XSS, CSRF, information disclosure | < 72 hours |
-| **Low** | Minor information leak, rate limit bypass | < 1 week |
+| Severity     | Description                                 | Response Time         |
+| ------------ | ------------------------------------------- | --------------------- |
+| **Critical** | Data breach, system compromise, RCE         | Immediate (< 2 hours) |
+| **High**     | Authentication bypass, privilege escalation | < 24 hours            |
+| **Medium**   | XSS, CSRF, information disclosure           | < 72 hours            |
+| **Low**      | Minor information leak, rate limit bypass   | < 1 week              |
 
 ### Emergency Contacts
 
@@ -592,11 +592,10 @@ this.logger.log(`User ${user.email} logged in with password ${password}`); // NE
 
 ## Related Documentation
 
-- [INPUT_VALIDATION.md](./INPUT_VALIDATION.md) - Detailed input validation strategy
-- [AUDIT_LOG.md](./AUDIT_LOG.md) - Audit logging implementation
 - [API_DOCUMENTATION.md](./API_DOCUMENTATION.md) - API security considerations
 - [DEPLOYMENT.md](./DEPLOYMENT.md) - Production deployment security
 - [DATABASE.md](./DATABASE.md) - Database security and pooling
+- [ARCHITECTURE.md](./ARCHITECTURE.md) - System architecture and patterns
 
 ## External Resources
 
@@ -606,4 +605,3 @@ this.logger.log(`User ${user.email} logged in with password ${password}`); // NE
 - [NestJS Security Best Practices](https://docs.nestjs.com/security/security-best-practices)
 - [JWT Best Practices (RFC 8725)](https://tools.ietf.org/html/rfc8725)
 - [GDPR Compliance Guide](https://gdpr.eu/)
-

@@ -243,7 +243,7 @@ When adding entries to the changelog:
 
 ## Links
 
-- **Repository**: [GitHub](https://github.com/your-org/tarot) (TBD)
+- **Repository**: [GitHub](https://github.com/ArielDRighi/TarotFlavia)
 - **Documentation**: [README.md](README.md)
 - **API Documentation**: [API_DOCUMENTATION.md](backend/tarot-app/docs/API_DOCUMENTATION.md)
 - **Deployment Guide**: [DEPLOYMENT.md](backend/tarot-app/docs/DEPLOYMENT.md)

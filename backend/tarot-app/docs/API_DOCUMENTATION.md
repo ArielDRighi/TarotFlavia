@@ -1,6 +1,6 @@
 # 📡 API Documentation - TarotFlavia
 
-## Tabla de Contenido
+## Tabla de Contenidos
 
 - [Overview](#overview)
 - [Autenticación y Autorización](#autenticación-y-autorización)
@@ -1159,7 +1159,7 @@ Esto permite generar clientes automáticamente en cualquier lenguaje.
 
 Para preguntas sobre la API:
 
-- **Email**: api@tarotflavia.com
+- **Email**: soporte@tarotflavia.com (TBD - configurar antes de producción)
 - **GitHub Issues**: https://github.com/ArielDRighi/TarotFlavia/issues
 - **Documentación**: Ver carpeta `docs/`
 

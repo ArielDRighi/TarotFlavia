@@ -490,6 +490,6 @@ Para preguntas o soporte:
 
 ---
 
-**Versión**: 0.0.1  
+**Versión**: 0.1.0  
 **Última actualización**: Noviembre 2025  
 **Estado**: MVP en desarrollo activo

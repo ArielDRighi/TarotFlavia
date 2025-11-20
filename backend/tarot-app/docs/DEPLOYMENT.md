@@ -1,6 +1,6 @@
 # 🚀 Deployment Guide - TarotFlavia
 
-## Tabla de Contenido
+## Tabla de Contenidos
 
 - [Overview](#overview)
 - [Requisitos de Deployment](#requisitos-de-deployment)

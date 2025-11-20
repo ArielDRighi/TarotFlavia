@@ -1,6 +1,6 @@
 # 🛠️ Development Guide - TarotFlavia
 
-## Tabla de Contenido
+## Tabla de Contenidos
 
 - [Setup del Entorno de Desarrollo](#setup-del-entorno-de-desarrollo)
 - [Herramientas Recomendadas](#herramientas-recomendadas)
@@ -20,7 +20,7 @@
 
 Antes de comenzar, asegúrate de tener instalado:
 
-- **Node.js**: v18.x o superior (recomendado v20 LTS)
+- **Node.js**: v18.x o superior (se recomienda v20.x LTS)
 - **npm**: v9.x o superior
 - **Git**: Última versión
 - **PostgreSQL**: 15+ (puede correr en Docker)
@@ -225,29 +225,29 @@ Instalar estas extensiones para mejor DX:
     "esbenp.prettier-vscode",
     "orta.vscode-jest",
     "firsttris.vscode-jest-runner",
-    
+
     // Database
     "mtxr.sqltools",
     "mtxr.sqltools-driver-pg",
     "cweijan.vscode-postgresql-client2",
-    
+
     // Git
     "eamodio.gitlens",
     "mhutchie.git-graph",
-    
+
     // Markdown
     "yzhang.markdown-all-in-one",
     "davidanson.vscode-markdownlint",
-    
+
     // Utilities
     "usernamehw.errorlens",
     "streetsidesoftware.code-spell-checker",
     "wayou.vscode-todo-highlight",
     "gruntfuggly.todo-tree",
-    
+
     // Docker
     "ms-azuretools.vscode-docker",
-    
+
     // REST Client
     "humao.rest-client"
   ]
@@ -302,10 +302,7 @@ Configurar `lint-staged` en `package.json`:
 ```json
 {
   "lint-staged": {
-    "*.{ts,js}": [
-      "eslint --fix",
-      "prettier --write"
-    ]
+    "*.{ts,js}": ["eslint --fix", "prettier --write"]
   }
 }
 ```
@@ -929,16 +926,16 @@ import { User } from '../src/modules/users/entities/user.entity';
 
 async function seed() {
   await AppDataSource.initialize();
-  
+
   const userRepo = AppDataSource.getRepository(User);
-  
+
   await userRepo.save({
     email: 'admin@example.com',
     password: await bcrypt.hash('admin123', 10),
     name: 'Admin',
     roles: [UserRole.ADMIN],
   });
-  
+
   console.log('✅ Custom seed completed');
   await AppDataSource.destroy();
 }
@@ -986,11 +983,13 @@ Ya configurado en `npm run start:dev`:
 ### Qué se Recompila Automáticamente
 
 ✅ **Recompila automáticamente:**
+
 - Archivos `.ts` en `src/`
 - Cambios en módulos
 - Cambios en servicios, controllers, etc.
 
 ❌ **Requiere restart manual:**
+
 - Cambios en `package.json`
 - Cambios en `.env`
 - Cambios en archivos de configuración (`tsconfig.json`, etc.)
@@ -1013,6 +1012,7 @@ npm install --save-dev nodemon
 ### Durante Desarrollo
 
 ✅ **DO:**
+
 - Usar test watch mode durante desarrollo
 - Hacer commits pequeños y frecuentes
 - Escribir tests antes de código (TDD)
@@ -1022,6 +1022,7 @@ npm install --save-dev nodemon
 - Usar debug mode para investigar bugs
 
 ❌ **DON'T:**
+
 - Commitear `console.log` en código de producción
 - Ignorar warnings de TypeScript
 - Hacer commits gigantes (>500 líneas)
