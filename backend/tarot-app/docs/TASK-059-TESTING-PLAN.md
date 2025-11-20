@@ -702,6 +702,11 @@ TASK-059 es demasiado extensa para completarse en un solo commit. Este documento
 **NOTE:** mvp-complete.e2e-spec.ts was already implemented and passing.
 This subtask added 6 new edge case tests to complete SUBTASK-18 requirements.
 
+**Limitaciones documentadas:** Ver `docs/KNOWN_LIMITATIONS.md` para detalles completos
+
+- 🟠 MEDIA: Race condition (corrección recomendada post-MVP)
+- 🟢 BAJA: JWT stateless behavior (expected by design)
+
 📝 Commit: "test(SUBTASK-18): add Free User E2E edge case tests (concurrent requests, session expiry)"
 
 ---
