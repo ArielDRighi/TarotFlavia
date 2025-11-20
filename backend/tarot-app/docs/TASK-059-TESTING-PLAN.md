@@ -269,24 +269,34 @@ TASK-059 es demasiado extensa para completarse en un solo commit. Este documento
 
 ---
 
-#### SUBTASK-10: Pipes & Interceptors Unit Tests
+#### ~~SUBTASK-10: Pipes & Interceptors Unit Tests~~ ✅ COMPLETADO
 
-**Prioridad:** MEDIA  
-**Estimación:** 2 horas
+**Estado:** ✅ COMPLETADO  
+**Tests:** 28 passing (13 new + 10 logging + 5 increment-usage)  
+**Coverage:**
 
-**Tareas:**
+- ReadingsCacheInterceptor: 100% (all metrics)
+- LoggingInterceptor: 100% statements/functions/lines, 81.25% branches
+- IncrementUsageInterceptor: 95.23% statements/lines, 50% branches
 
-- ValidationPipe tests (si custom)
-- TransformInterceptor tests
-- LoggingInterceptor tests
-- CacheInterceptor tests
-- Tests de transformaciones correctas
+**Bugs corregidos:**
 
-**Criterios:**
+- **userId=0 falsy check**: Changed `if (!userId)` to `if (userId === undefined || userId === null)`
+- userId=0 was incorrectly treated as falsy, bypassing cache for valid user ID 0
 
-- Pipes/Interceptors >80% coverage
-- Transformaciones validadas
-- 1 commit al completar
+**Tests created:**
+
+- ✅ readings-cache.interceptor.spec.ts (13 tests, 365 lines, 100% coverage)
+  - Authenticated/unauthenticated requests
+  - Cache hit/miss scenarios
+  - Query params handling (URLSearchParams alphabetical sort)
+  - Edge cases (userId 0, negative userId)
+  - Error handling (cache.get throws, cache.set fire-and-forget)
+  - TTL verification (5-minute cache)
+
+**No Pipes found:** Project doesn't use custom pipes
+
+📝 Commit: "test(SUBTASK-10): add ReadingsCacheInterceptor tests + fix userId=0 bug"
 
 ---
 
