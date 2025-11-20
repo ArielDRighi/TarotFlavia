@@ -312,7 +312,7 @@ describe('InterpretationsService', () => {
 
         await expect(
           service.generateInterpretation([], mockPositions),
-        ).rejects.toThrow('Cards array cannot be empty');
+        ).rejects.toThrow('El array de cartas no puede estar vacío');
       });
     });
 

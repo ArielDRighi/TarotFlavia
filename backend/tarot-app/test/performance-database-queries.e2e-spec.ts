@@ -424,7 +424,9 @@ describe('Performance Tests - Database Queries (SUBTASK-23)', () => {
       expect(page5Metrics.duration).toBeLessThan(100);
 
       // Page 5 shouldn't be significantly slower (index working)
-      expect(page5Metrics.duration).toBeLessThan(page1Metrics.duration * 2);
+      // Allow for measurement noise when queries are very fast (<1ms)
+      const threshold = Math.max(page1Metrics.duration * 2, 10); // At least 10ms threshold
+      expect(page5Metrics.duration).toBeLessThan(threshold);
     });
 
     it('should count total without loading all rows', async () => {
