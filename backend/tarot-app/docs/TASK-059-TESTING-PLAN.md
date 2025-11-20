@@ -28,15 +28,15 @@ TASK-059 es demasiado extensa para completarse en un solo commit. Este documento
 
 ## Estado Actual (Coverage: ~59% estimado)
 
-**Progreso:** 17/27 subtareas completadas (SUBTASK-0 a SUBTASK-19)
+**Progreso:** 18/27 subtareas completadas (SUBTASK-0 a SUBTASK-20)
 
 **Tests totales:**
 
 - ~538+ unit tests
-- ~160+ integration/e2e tests
-- **Total: 698+ tests**
+- ~193+ integration/e2e tests
+- **Total: 731+ tests**
 
-**Commits realizados:** 23 commits
+**Commits realizados:** 25 commits
 
 ### ✅ Ya Completado (Commits 1-21)
 
@@ -774,28 +774,85 @@ This subtask added 6 new edge case tests to complete SUBTASK-18 requirements.
 
 ---
 
-#### SUBTASK-20: E2E - Admin User Journey
+#### ~~SUBTASK-20: E2E - Admin User Journey~~ ✅ COMPLETADO
 
-**Prioridad:** MEDIA  
-**Estimación:** 2-3 horas
+**Estado:** ✅ COMPLETADO  
+**Tests:** 33 passing (18 admin-users + 15 admin-edge-cases)  
+**Coverage:** E2E complete admin user journey + edge cases
 
-**Tareas:**
+**Tests existentes (admin-users.e2e-spec.ts - 18 tests, 397 lines):**
 
-- Flujo completo:
-  1. Login as admin
-  2. List users
-  3. Ban user
-  4. Unban user
-  5. View analytics (si existe)
-- Tests de permisos:
-  - Non-admin cannot access
-  - Admin CRUD operations work
+- ✅ Authentication and Authorization (3 tests)
+  - Require authentication
+  - Require admin role
+  - Allow admin access
+- ✅ GET /admin/users - List users (4 tests)
+  - Paginated users
+  - Filter by search term
+  - Filter by role
+  - Support pagination
+- ✅ GET /admin/users/:id - User detail (2 tests)
+  - Return user details with statistics
+  - Return 404 for non-existent user
+- ✅ POST /admin/users/:id/ban - Ban user (2 tests)
+  - Ban user with reason
+  - Require ban reason
+- ✅ Banned user login blocking (1 test)
+  - Block banned user from logging in
+- ✅ POST /admin/users/:id/unban - Unban user (1 test)
+  - Unban user successfully
+- ✅ PATCH /admin/users/:id/plan - Update plan (1 test)
+  - Update user plan
+- ✅ POST /admin/users/:id/roles/tarotist - Add role (1 test)
+  - Add TAROTIST role
+- ✅ DELETE /admin/users/:id/roles/:role - Remove role (1 test)
+  - Remove TAROTIST role
+- ✅ DELETE /admin/users/:id - Delete user (2 tests)
+  - Delete user (soft delete)
+  - Return 404 for non-existent user
 
-**Criterios:**
+**Tests creados (admin-user-edge-cases.e2e-spec.ts - 15 tests, 560 lines):**
 
-- Admin operations functional
-- Permisos correctos
-- 1 commit al completar
+- ✅ Operaciones Simultáneas Admin (3 tests)
+  - Ban + update plan sin corrupción de datos
+  - Usuario baneado bloqueado de endpoints protegidos
+  - Unban restaura acceso a usuario
+- ✅ Re-autenticación después de cambios de rol (2 tests)
+  - Re-login necesario después de agregar rol ADMIN para obtener permisos
+  - JWT inmutable: remover rol ADMIN requiere re-login (token viejo sigue funcionando)
+- ✅ Múltiples operaciones y consistencia de datos (1 test)
+  - Secuencia completa: upgrade plan, agregar rol, ban, unban, remover rol, downgrade
+  - Verificación de integridad en cada paso
+- ✅ Escenarios de error (6 tests)
+  - Ban, unban, update plan, add role, remove role, delete - todos retornan 404 para usuarios inexistentes
+- ✅ Validaciones de integridad de roles (3 tests)
+  - Rol inválido (consumer) retorna error de validación
+  - Agregar rol existente retorna 400 (no es idempotente)
+  - Remover rol que no tiene retorna 400
+
+**Bugs found:** 0 bugs (all functionality working correctly)
+
+**Edge cases tested:**
+
+- Operaciones simultáneas (ban + update plan)
+- Re-autenticación después de cambios de rol
+- JWT inmutable (roles en token no cambian hasta re-login)
+- Consistencia de datos después de múltiples operaciones
+- Usuarios inexistentes (404 responses)
+- Validación de roles (consumer no se puede remover, roles solo tarotist/admin)
+- Idempotencia de operaciones (agregar rol existente retorna error)
+
+**TypeScript compliance:**
+
+- ✅ 0 eslint errors
+- ✅ 0 warnings (@typescript-eslint/no-unsafe-\*)
+- ✅ Proper typing for database query results (UserRow type)
+- ✅ Proper typing for API responses (LoginResponse, UserActionResponse, ErrorResponse)
+- ✅ PostgreSQL array format handling (`"{consumer}"` string vs `["consumer"]` array)
+
+**⚠️ NOTE:** Test file is 560 lines (under 600-line limit ✓)
+
+📝 Commit: "test(SUBTASK-20): add Admin User E2E edge case tests"
 
 ---
 
@@ -1126,9 +1183,9 @@ Actualizar esta sección después de completar cada subtarea:
 
 ### Última Actualización: 2025-11-20
 
-- **Coverage Actual:** ~59% (estimado tras completar SUBTASK-19)
-- **Subtareas Completadas:** 17/27 (63%) - SUBTASK-19 completado
-- **Bugs Encontrados:** 21 (total acumulado - 0 nuevos bugs en SUBTASK-18/19)
+- **Coverage Actual:** ~59% (estimado tras completar SUBTASK-20)
+- **Subtareas Completadas:** 18/27 (67%) - SUBTASK-20 completado
+- **Bugs Encontrados:** 21 (total acumulado - 0 nuevos bugs en SUBTASK-18/19/20)
   - InterpretationsService: 5 bugs
   - Reading Creation Flow: 4 bugs
   - UsersService: 0 bugs
@@ -1145,7 +1202,8 @@ Actualizar esta sección después de completar cada subtarea:
   - AI Providers (OpenAI, Fallback, CircuitBreaker, Retry): 0 bugs (verified correct)
   - E2E Free User Journey: 0 critical bugs, 2 known limitations (documented in KNOWN_LIMITATIONS.md)
   - E2E Premium User Journey: 0 bugs (verified correct)
-- **Tests Totales:** ~698+ passing
+  - E2E Admin User Journey: 0 bugs (verified correct)
+- **Tests Totales:** ~731+ passing
   - SUBTASK-4: ReadingValidatorService (28 tests)
   - SUBTASK-5: TypeOrmReadingRepository (36 tests)
   - SUBTASK-6: AuthService (30 tests)
@@ -1160,7 +1218,8 @@ Actualizar esta sección después de completar cada subtarea:
   - SUBTASK-17: AI Providers - Fallback (52 tests - AIProviderService, CircuitBreaker, Retry COMPLETOS)
   - SUBTASK-18: E2E Free User Journey (20 tests - MVP complete + edge cases COMPLETOS)
   - SUBTASK-19: E2E Premium User Journey (23 tests - MVP complete + edge cases COMPLETOS)
-- **Commits:** 23 total (pending SUBTASK-19 commit)
+  - SUBTASK-20: E2E Admin User Journey (33 tests - admin-users + edge cases COMPLETOS)
+- **Commits:** 25 total (pending SUBTASK-20 commit)
 
 ---
 
