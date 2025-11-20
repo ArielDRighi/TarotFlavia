@@ -26,17 +26,17 @@ TASK-059 es demasiado extensa para completarse en un solo commit. Este documento
 
 ---
 
-## Estado Actual (Coverage: ~60% estimado)
+## Estado Actual (Coverage: ~61% estimado)
 
-**Progreso:** 21/27 subtareas completadas (SUBTASK-0 a SUBTASK-23)
+**Progreso:** 22/27 subtareas completadas (SUBTASK-0 a SUBTASK-24)
 
 **Tests totales:**
 
 - ~538+ unit tests
 - ~256+ integration/e2e tests
-- **Total: 794+ tests**
+- **Total: 794+ tests (todos pasando)**
 
-**Commits realizados:** 28 commits (pending SUBTASK-23 commit)
+**Commits realizados:** 29 commits
 
 ### ✅ Ya Completado (Commits 1-21)
 
@@ -1045,26 +1045,31 @@ This subtask added 6 new edge case tests to complete SUBTASK-18 requirements.
 **Tests creados (performance-database-queries.e2e-spec.ts - 15 tests, 528 lines):**
 
 - ✅ GET /readings - N+1 Prevention (3 tests)
+
   - Load all relations in single query (no N+1)
   - Load 20 readings with relations <500ms (215ms ✓)
   - Verify leftJoinAndSelect eager loading pattern
 
 - ✅ Direct Database Queries - Performance (4 tests)
+
   - Query readings with JOIN <100ms (28ms ✓)
   - Query with multiple JOINs <150ms (3ms ✓)
   - Count total readings <50ms (3ms ✓)
   - Filter by date range <100ms (46ms ✓)
 
 - ✅ Database Indexes - Effectiveness (3 tests)
+
   - Index on userId for fast lookup <50ms (55ms ✓ - acceptable variance)
   - Index on createdAt for sorting <100ms (6ms ✓)
   - Verify indexes exist on critical columns (PK, userId)
 
 - ✅ Pagination - Performance (2 tests)
+
   - Paginate efficiently with LIMIT/OFFSET (page 1 vs page 5)
   - Count total without loading all rows <50ms (7ms ✓)
 
 - ✅ Complex Queries - Performance (2 tests)
+
   - Filtered + sorted + paginated query <200ms (47ms ✓)
   - Aggregate data efficiently <200ms (5ms ✓)
 
@@ -1074,16 +1079,19 @@ This subtask added 6 new edge case tests to complete SUBTASK-18 requirements.
 **Performance findings:**
 
 1. **N+1 Prevention:** ✅ VERIFIED
+
    - Repository uses `leftJoinAndSelect` correctly
    - All relations loaded in single query (deck, cards, category, predefinedQuestion)
    - No lazy loading triggering additional queries
 
 2. **Index Effectiveness:** ✅ VERIFIED
+
    - Primary key index: Working correctly
    - userId index: Fast lookups (55ms for filtered queries)
    - createdAt index: Efficient sorting (6ms)
 
 3. **Query Performance:** ✅ EXCELLENT
+
    - Simple queries: <10ms average
    - JOIN queries: <50ms average
    - Complex aggregations: <50ms average
@@ -1095,6 +1103,7 @@ This subtask added 6 new edge case tests to complete SUBTASK-18 requirements.
    - Indexes supporting pagination correctly
 
 **No bottlenecks identified:**
+
 - All queries performing excellently
 - No N+1 problems detected
 - Indexes working as expected
@@ -1113,7 +1122,7 @@ This subtask added 6 new edge case tests to complete SUBTASK-18 requirements.
 **TypeScript compliance:**
 
 - ✅ 0 eslint errors
-- ✅ 0 warnings (@typescript-eslint/no-unsafe-*)
+- ✅ 0 warnings (@typescript-eslint/no-unsafe-\*)
 - ✅ Proper typing for query results
 - ✅ Direct SQL queries with TypeORM DataSource
 
@@ -1125,25 +1134,63 @@ This subtask added 6 new edge case tests to complete SUBTASK-18 requirements.
 
 ### Fase 8: Tests de Fixtures & Mocks
 
-#### SUBTASK-24: External Services Mocking
+#### SUBTASK-24: External Services Mocking ✅ COMPLETADO
 
 **Prioridad:** ALTA  
-**Estimación:** 2-3 horas
+**Estimación:** 2-3 horas  
+**Tiempo Real:** 1.5 horas  
+**Bugs encontrados:** 0 (verificación de mocks existentes, no código nuevo)
 
-**Tareas:**
+**✅ Tareas Completadas:**
 
-- Mockear OpenAI API completamente
-- Mockear Email Service
-- Mockear Payment Gateway (si existe)
-- Tests que usan mocks NO llaman servicios reales
-- Documentar cómo crear nuevos mocks
+- ✅ Verificar OpenAI API completamente mockeado (openai.provider.spec.ts)
+- ✅ Verificar Email Service mockeado (email.service.spec.ts)
+- ✅ Verificar AI Providers mockeados (Groq, DeepSeek, OpenAI)
+- ✅ Confirmar NO llamadas reales en tests (0 llamadas encontradas)
+- ✅ Crear documentación completa: `docs/TESTING_MOCKS.md` (400+ líneas)
 
-**Criterios:**
+**📊 Hallazgos:**
 
-- Todos los servicios externos mockeados
-- No llamadas reales en tests
-- Documentación clara
-- 1 commit al completar
+1. **OpenAI API:**
+
+   - ✅ Completamente mockeado en `openai.provider.spec.ts`
+   - ✅ Constructor, chat.completions.create, errores (401, 429, 500)
+   - ✅ No llamadas reales
+
+2. **Email Service:**
+
+   - ✅ MailerService.sendMail mockeado en `email.service.spec.ts`
+   - ✅ ConfigService mockeado para credenciales SMTP
+   - ✅ No emails reales enviados
+
+3. **AI Providers:**
+
+   - ✅ Groq API mocking pattern identificado
+   - ✅ DeepSeek API mocking pattern identificado
+   - ✅ Fallback chain completamente mockeado
+
+4. **Verificaciones:**
+   - ✅ 0 llamadas reales en unit tests (src/\*_/_.spec.ts)
+   - ✅ 0 llamadas reales en E2E tests (test/\*_/_.e2e-spec.ts)
+   - ✅ API keys solo usadas en configuración mockeada (ai-health.e2e-spec.ts)
+   - ✅ Tests pasan offline (sin conexión a internet)
+
+**📝 Documentación Creada:**
+
+- `docs/TESTING_MOCKS.md` (400+ líneas):
+  - Guía completa de mocking para servicios externos
+  - Ejemplos detallados para OpenAI, Groq, DeepSeek, Email
+  - Checklist para crear nuevos mocks
+  - Qué NO hacer (antipatrones)
+  - Comandos de verificación
+  - Estado actual de todos los servicios mockeados
+
+**Criterios Cumplidos:**
+
+- ✅ Todos los servicios externos mockeados
+- ✅ No llamadas reales en tests (verificado con grep)
+- ✅ Documentación clara y completa
+- ✅ 1 commit al completar
 
 ---
 
@@ -1380,9 +1427,9 @@ Actualizar esta sección después de completar cada subtarea:
 
 ### Última Actualización: 2025-11-20
 
-- **Coverage Actual:** ~61% (estimado tras completar SUBTASK-23)
-- **Subtareas Completadas:** 21/27 (78%) - SUBTASK-23 completado
-- **Bugs Encontrados:** 21 (total acumulado - 0 nuevos bugs en SUBTASK-18/19/20/21/22/23)
+- **Coverage Actual:** ~61% (estimado tras completar SUBTASK-24)
+- **Subtareas Completadas:** 22/27 (81%) - SUBTASK-24 completado
+- **Bugs Encontrados:** 21 (total acumulado - 0 nuevos bugs en SUBTASK-18/19/20/21/22/23/24)
   - InterpretationsService: 5 bugs
   - Reading Creation Flow: 4 bugs
   - UsersService: 0 bugs
@@ -1403,6 +1450,7 @@ Actualizar esta sección después de completar cada subtarea:
   - E2E Error Scenarios: 0 bugs (all error handling correct)
   - Performance Tests - Critical Endpoints: 0 bugs (all targets met)
   - Performance Tests - Database Queries: 0 bugs (0 bottlenecks, all queries optimized)
+  - External Services Mocking: 0 bugs (all services correctly mocked, no real calls)
 - **Tests Totales:** ~794+ passing
   - SUBTASK-4: ReadingValidatorService (28 tests)
   - SUBTASK-5: TypeOrmReadingRepository (36 tests)
@@ -1422,7 +1470,8 @@ Actualizar esta sección después de completar cada subtarea:
   - SUBTASK-21: E2E Error Scenarios (35 tests - comprehensive error handling COMPLETO)
   - SUBTASK-22: Performance Tests - Critical Endpoints (13 tests - all targets met COMPLETO)
   - SUBTASK-23: Performance Tests - Database Queries (15 tests - 0 bottlenecks COMPLETO)
-- **Commits:** 28 total (pending SUBTASK-23 commit)
+  - SUBTASK-24: External Services Mocking (0 tests - documentación + verificación COMPLETO)
+- **Commits:** 29 total
 
 ---
 
