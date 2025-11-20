@@ -5,6 +5,12 @@ import { NotFoundException } from '@nestjs/common';
 import { TypeOrmReadingRepository } from './typeorm-reading.repository';
 import { TarotReading } from '../../entities/tarot-reading.entity';
 
+// Helper types for test cases
+type PartialTarotReading = Omit<Partial<TarotReading>, 'user'> & {
+  id?: number;
+  user?: Partial<TarotReading['user']>;
+};
+
 describe('TypeOrmReadingRepository - BUG HUNTING', () => {
   let repository: TypeOrmReadingRepository;
   let _readingRepo: Repository<TarotReading>; // Prefixed with _ to indicate intentionally unused
@@ -58,19 +64,23 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
   describe('create', () => {
     it('should create and return reading with relations', async () => {
       const mockReading = { id: 1, question: 'Test' } as TarotReading;
-      const mockSavedReading = { id: 1 } as TarotReading;
-      const mockReadingWithRelations = {
+      const mockSavedReading = { id: 1 } as PartialTarotReading;
+      const mockReadingWithRelations: PartialTarotReading = {
         id: 1,
         question: 'Test',
-        user: { id: 1 },
-        deck: { id: 1 },
-      } as any;
+      };
 
       mockReadingRepository.create.mockReturnValue(mockReading);
-      mockReadingRepository.save.mockResolvedValue(mockSavedReading);
-      mockReadingRepository.findOne.mockResolvedValue(mockReadingWithRelations);
+      mockReadingRepository.save.mockResolvedValue(
+        mockSavedReading as TarotReading,
+      );
+      mockReadingRepository.findOne.mockResolvedValue(
+        mockReadingWithRelations as TarotReading,
+      );
 
-      const result = await repository.create({ question: 'Test' } as any);
+      const result = await repository.create({
+        question: 'Test',
+      } as Partial<TarotReading>);
 
       expect(result).toEqual(mockReadingWithRelations);
       expect(mockReadingRepository.create).toHaveBeenCalledWith({
@@ -85,12 +95,12 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
       const mockReading = { id: 1 } as TarotReading;
 
       mockReadingRepository.create.mockReturnValue(mockReading);
-      mockReadingRepository.save.mockResolvedValue({ id: 1 } as any);
+      mockReadingRepository.save.mockResolvedValue({ id: 1 } as TarotReading);
       mockReadingRepository.findOne.mockResolvedValue(null);
 
-      await expect(repository.create({} as any)).rejects.toThrow(
-        'Failed to retrieve created reading',
-      );
+      await expect(
+        repository.create({} as Partial<TarotReading>),
+      ).rejects.toThrow('Failed to retrieve created reading');
     });
 
     // BUG HUNTING: Empty data
@@ -98,8 +108,12 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
       const mockReading = {} as TarotReading;
 
       mockReadingRepository.create.mockReturnValue(mockReading);
-      mockReadingRepository.save.mockResolvedValue({ id: 1 } as any);
-      mockReadingRepository.findOne.mockResolvedValue({ id: 1 } as any);
+      mockReadingRepository.save.mockResolvedValue({
+        id: 1,
+      } as TarotReading);
+      mockReadingRepository.findOne.mockResolvedValue({
+        id: 1,
+      } as TarotReading);
 
       const result = await repository.create({});
 
@@ -109,11 +123,15 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
 
     // BUG HUNTING: null/undefined data
     it('should handle null data', async () => {
-      mockReadingRepository.create.mockReturnValue({} as any);
-      mockReadingRepository.save.mockResolvedValue({ id: 1 } as any);
-      mockReadingRepository.findOne.mockResolvedValue({ id: 1 } as any);
+      mockReadingRepository.create.mockReturnValue({} as TarotReading);
+      mockReadingRepository.save.mockResolvedValue({
+        id: 1,
+      } as TarotReading);
+      mockReadingRepository.findOne.mockResolvedValue({
+        id: 1,
+      } as TarotReading);
 
-      await repository.create(null as any);
+      await repository.create(null as unknown as Partial<TarotReading>);
 
       expect(mockReadingRepository.create).toHaveBeenCalledWith(null);
     });
@@ -121,8 +139,10 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
 
   describe('findById', () => {
     it('should find reading with default relations', async () => {
-      const mockReading = { id: 1, user: { id: 1 } } as any;
-      mockReadingRepository.findOne.mockResolvedValue(mockReading);
+      const mockReading: PartialTarotReading = { id: 1 };
+      mockReadingRepository.findOne.mockResolvedValue(
+        mockReading as TarotReading,
+      );
 
       const result = await repository.findById(1);
 
@@ -134,8 +154,10 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
     });
 
     it('should find reading with custom relations', async () => {
-      const mockReading = { id: 1 } as any;
-      mockReadingRepository.findOne.mockResolvedValue(mockReading);
+      const mockReading: PartialTarotReading = { id: 1 };
+      mockReadingRepository.findOne.mockResolvedValue(
+        mockReading as TarotReading,
+      );
 
       const result = await repository.findById(1, ['deck']);
 
@@ -163,7 +185,7 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
       expect(result).toBeNull();
       expect(mockReadingRepository.findOne).toHaveBeenCalledWith({
         where: { id: 0 },
-        relations: expect.any(Array),
+        relations: expect.any(Array) as string[],
       });
     });
 
@@ -177,7 +199,9 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
 
     // BUG HUNTING: Empty relations array
     it('should handle empty relations array', async () => {
-      mockReadingRepository.findOne.mockResolvedValue({ id: 1 } as any);
+      mockReadingRepository.findOne.mockResolvedValue({
+        id: 1,
+      } as TarotReading);
 
       const result = await repository.findById(1, []);
 
@@ -195,8 +219,11 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
     });
 
     it('should find readings with default pagination', async () => {
-      const mockReadings = [{ id: 1, userId: 1 }] as any;
-      mockQueryBuilder.getManyAndCount.mockResolvedValue([mockReadings, 1]);
+      const mockReadings: PartialTarotReading[] = [{ id: 1, user: { id: 1 } }];
+      mockQueryBuilder.getManyAndCount.mockResolvedValue([
+        mockReadings as TarotReading[],
+        1,
+      ]);
 
       const result = await repository.findByUserId(1);
 
@@ -221,8 +248,8 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
       await repository.findByUserId(1, {
         page: 2,
         limit: 20,
-        sortBy: 'id',
-        sortOrder: 'ASC',
+        sortBy: 'id' as keyof TarotReading,
+        sortOrder: 'ASC' as 'ASC' | 'DESC',
       });
 
       expect(mockQueryBuilder.skip).toHaveBeenCalledWith(20); // (2-1)*20
@@ -290,7 +317,7 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
       await repository.findByUserId(1, {
         page: 1,
         limit: 10,
-        sortBy: 'id; DROP TABLE users--' as any,
+        sortBy: 'id; DROP TABLE users--' as keyof TarotReading,
       });
 
       // Whitelisted fields only, malicious string rejected
@@ -307,7 +334,7 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
       await repository.findByUserId(1, {
         page: 1,
         limit: 10,
-        sortOrder: 'INVALID' as any,
+        sortOrder: 'INVALID' as 'ASC' | 'DESC',
       });
 
       expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith(
@@ -344,10 +371,12 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
       });
 
       // Date parsed and validated
-      const calls = mockQueryBuilder.andWhere.mock.calls;
-      const dateFromCall = calls.find((call) => call[0].includes('dateFrom'));
+      const calls = mockQueryBuilder.andWhere.mock.calls as Array<
+        [string, Record<string, unknown>]
+      >;
+      const dateFromCall = calls.find((call) => call[0]?.includes('dateFrom'));
       expect(dateFromCall).toBeDefined();
-      expect(dateFromCall[1].dateFrom).toBeInstanceOf(Date);
+      expect(dateFromCall?.[1]?.dateFrom).toBeInstanceOf(Date);
     });
 
     it('should handle dateTo filter by converting string to Date', async () => {
@@ -360,10 +389,12 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
         dateTo: testDate,
       });
 
-      const calls = mockQueryBuilder.andWhere.mock.calls;
-      const dateToCall = calls.find((call) => call[0].includes('dateTo'));
+      const calls = mockQueryBuilder.andWhere.mock.calls as Array<
+        [string, Record<string, unknown>]
+      >;
+      const dateToCall = calls.find((call) => call[0]?.includes('dateTo'));
       expect(dateToCall).toBeDefined();
-      expect(dateToCall[1].dateTo).toBeInstanceOf(Date);
+      expect(dateToCall?.[1]?.dateTo).toBeInstanceOf(Date);
     });
 
     // BUG HUNTING: Invalid date objects
@@ -378,7 +409,9 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
       });
 
       // Invalid date should NOT be added to query
-      const calls = mockQueryBuilder.andWhere.mock.calls;
+      const calls = mockQueryBuilder.andWhere.mock.calls as Array<
+        [string, Record<string, unknown>]
+      >;
       const dateFromCall = calls.find(
         (call) => call[0] && call[0].includes('dateFrom'),
       );
@@ -416,8 +449,11 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
     });
 
     it('should find all readings with default pagination', async () => {
-      const mockReadings = [{ id: 1 }] as any;
-      mockQueryBuilder.getManyAndCount.mockResolvedValue([mockReadings, 1]);
+      const mockReadings: PartialTarotReading[] = [{ id: 1 }];
+      mockQueryBuilder.getManyAndCount.mockResolvedValue([
+        mockReadings as TarotReading[],
+        1,
+      ]);
 
       const result = await repository.findAll();
 
@@ -454,8 +490,10 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
     });
 
     it('should find trashed readings within 30 days', async () => {
-      const mockTrashed = [{ id: 1, deletedAt: new Date() }] as any;
-      mockQueryBuilder.getMany.mockResolvedValue(mockTrashed);
+      const mockTrashed: PartialTarotReading[] = [
+        { id: 1, deletedAt: new Date() },
+      ];
+      mockQueryBuilder.getMany.mockResolvedValue(mockTrashed as TarotReading[]);
 
       const result = await repository.findTrashed(1);
 
@@ -481,16 +519,19 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
       await repository.findTrashed(1);
 
       // Verify date calculation is correct
-      const callArgs = mockQueryBuilder.andWhere.mock.calls.find((call) =>
-        call[0].includes('thirtyDaysAgo'),
-      );
+      const calls = mockQueryBuilder.andWhere.mock.calls as Array<
+        [string, Record<string, unknown>]
+      >;
+      const callArgs = calls.find((call) => call[0]?.includes('thirtyDaysAgo'));
       expect(callArgs).toBeDefined();
-      expect(callArgs[1].thirtyDaysAgo).toBeInstanceOf(Date);
+      if (callArgs) {
+        expect(callArgs[1]?.thirtyDaysAgo).toBeInstanceOf(Date);
 
-      // Check date is approximately 30 days ago (within 1 minute tolerance)
-      const passedDate = callArgs[1].thirtyDaysAgo as Date;
-      const diff = Math.abs(passedDate.getTime() - thirtyDaysAgo.getTime());
-      expect(diff).toBeLessThan(60000); // 1 minute in ms
+        // Check date is approximately 30 days ago (within 1 minute tolerance)
+        const passedDate = callArgs[1]?.thirtyDaysAgo as Date;
+        const diff = Math.abs(passedDate.getTime() - thirtyDaysAgo.getTime());
+        expect(diff).toBeLessThan(60000); // 1 minute in ms
+      }
     });
 
     // BUG HUNTING: userId = 0 or negative
@@ -512,8 +553,11 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
     });
 
     it('should find all readings without deleted ones by default', async () => {
-      const mockReadings = [{ id: 1 }] as any;
-      mockQueryBuilder.getManyAndCount.mockResolvedValue([mockReadings, 1]);
+      const mockReadings: PartialTarotReading[] = [{ id: 1 }];
+      mockQueryBuilder.getManyAndCount.mockResolvedValue([
+        mockReadings as TarotReading[],
+        1,
+      ]);
 
       const result = await repository.findAllForAdmin(false);
 
@@ -533,12 +577,14 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
 
   describe('update', () => {
     it('should update reading and return updated entity', async () => {
-      const mockUpdated = { id: 1, question: 'Updated' } as any;
+      const mockUpdated: PartialTarotReading = { id: 1, question: 'Updated' };
 
-      mockReadingRepository.update.mockResolvedValue({ affected: 1 } as any);
+      mockReadingRepository.update.mockResolvedValue({ affected: 1 });
       mockReadingRepository.findOne.mockResolvedValue(mockUpdated);
 
-      const result = await repository.update(1, { question: 'Updated' } as any);
+      const result = await repository.update(1, {
+        question: 'Updated',
+      } as Partial<TarotReading>);
 
       expect(result).toEqual(mockUpdated);
       expect(mockReadingRepository.update).toHaveBeenCalledWith(1, {
@@ -547,21 +593,23 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
     });
 
     it('should throw NotFoundException if reading not found after update', async () => {
-      mockReadingRepository.update.mockResolvedValue({ affected: 1 } as any);
+      mockReadingRepository.update.mockResolvedValue({ affected: 1 });
       mockReadingRepository.findOne.mockResolvedValue(null);
 
       await expect(
-        repository.update(999, { question: 'Test' } as any),
+        repository.update(999, { question: 'Test' } as Partial<TarotReading>),
       ).rejects.toThrow(NotFoundException);
       await expect(
-        repository.update(999, { question: 'Test' } as any),
+        repository.update(999, { question: 'Test' } as Partial<TarotReading>),
       ).rejects.toThrow('Reading with ID 999 not found after update');
     });
 
     // BUG HUNTING: Empty data update
     it('should handle empty update data', async () => {
-      mockReadingRepository.update.mockResolvedValue({ affected: 1 } as any);
-      mockReadingRepository.findOne.mockResolvedValue({ id: 1 } as any);
+      mockReadingRepository.update.mockResolvedValue({ affected: 1 });
+      mockReadingRepository.findOne.mockResolvedValue({
+        id: 1,
+      } as TarotReading);
 
       const result = await repository.update(1, {});
 
@@ -571,30 +619,36 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
 
     // BUG HUNTING: null data
     it('should handle null update data', async () => {
-      mockReadingRepository.update.mockResolvedValue({ affected: 1 } as any);
-      mockReadingRepository.findOne.mockResolvedValue({ id: 1 } as any);
+      mockReadingRepository.update.mockResolvedValue({ affected: 1 });
+      mockReadingRepository.findOne.mockResolvedValue({
+        id: 1,
+      } as TarotReading);
 
-      await repository.update(1, null as any);
+      await repository.update(1, null as unknown as Partial<TarotReading>);
 
       expect(mockReadingRepository.update).toHaveBeenCalledWith(1, null);
     });
 
     // BUG HUNTING: id = 0 or negative
     it('should handle id = 0', async () => {
-      mockReadingRepository.update.mockResolvedValue({ affected: 0 } as any);
+      mockReadingRepository.update.mockResolvedValue({ affected: 0 });
       mockReadingRepository.findOne.mockResolvedValue(null);
 
-      await expect(repository.update(0, {} as any)).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        repository.update(0, {} as Partial<TarotReading>),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
   describe('softDelete', () => {
     it('should soft delete existing reading', async () => {
-      const mockReading = { id: 1 } as any;
-      mockReadingRepository.findOne.mockResolvedValue(mockReading);
-      mockReadingRepository.softRemove.mockResolvedValue(mockReading);
+      const mockReading: PartialTarotReading = { id: 1 };
+      mockReadingRepository.findOne.mockResolvedValue(
+        mockReading as TarotReading,
+      );
+      mockReadingRepository.softRemove.mockResolvedValue(
+        mockReading as TarotReading,
+      );
 
       await repository.softDelete(1);
 
@@ -642,7 +696,7 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
 
     // BUG HUNTING: id = 0 or negative
     it('should handle id = 0', async () => {
-      mockReadingRepository.restore.mockResolvedValue({ affected: 0 } as any);
+      mockReadingRepository.restore.mockResolvedValue({ affected: 0 });
 
       await repository.restore(0);
 
@@ -655,13 +709,17 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
       const oldDate = new Date();
       oldDate.setDate(oldDate.getDate() - 40);
 
-      const mockReadings = [
+      const mockReadings: PartialTarotReading[] = [
         { id: 1, deletedAt: oldDate },
         { id: 2, deletedAt: oldDate },
-      ] as any;
+      ];
 
-      mockQueryBuilder.getMany.mockResolvedValue(mockReadings);
-      mockReadingRepository.remove.mockResolvedValue(mockReadings);
+      mockQueryBuilder.getMany.mockResolvedValue(
+        mockReadings as TarotReading[],
+      );
+      mockReadingRepository.remove.mockResolvedValue(
+        mockReadings as TarotReading[],
+      );
 
       const result = await repository.hardDelete(30);
 
@@ -689,7 +747,10 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
       await repository.hardDelete(0);
 
       // Cutoff date is today, will delete all readings with deletedAt < today
-      const callArgs = mockQueryBuilder.andWhere.mock.calls[0];
+      const callArgs = mockQueryBuilder.andWhere.mock.calls[0] as [
+        string,
+        Record<string, unknown>,
+      ];
       expect(callArgs[0]).toContain('deletedAt < :cutoffDate');
     });
 
@@ -717,12 +778,14 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
 
   describe('findByShareToken', () => {
     it('should find public reading by share token', async () => {
-      const mockReading = {
+      const mockReading: PartialTarotReading = {
         id: 1,
         sharedToken: 'abc123',
         isPublic: true,
-      } as any;
-      mockReadingRepository.findOne.mockResolvedValue(mockReading);
+      };
+      mockReadingRepository.findOne.mockResolvedValue(
+        mockReading as TarotReading,
+      );
 
       const result = await repository.findByShareToken('abc123');
 
@@ -750,7 +813,7 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
       expect(result).toBeNull();
       expect(mockReadingRepository.findOne).toHaveBeenCalledWith({
         where: { sharedToken: '', isPublic: true },
-        relations: expect.any(Array),
+        relations: expect.any(Array) as string[],
       });
     });
 
@@ -758,11 +821,11 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
     it('should handle null token', async () => {
       mockReadingRepository.findOne.mockResolvedValue(null);
 
-      await repository.findByShareToken(null as any);
+      await repository.findByShareToken(null as unknown as string);
 
       expect(mockReadingRepository.findOne).toHaveBeenCalledWith({
         where: { sharedToken: null, isPublic: true },
-        relations: expect.any(Array),
+        relations: expect.any(Array) as string[],
       });
     });
 
@@ -779,7 +842,7 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
 
   describe('incrementViewCount', () => {
     it('should increment view count by 1', async () => {
-      mockReadingRepository.increment.mockResolvedValue({ affected: 1 } as any);
+      mockReadingRepository.increment.mockResolvedValue({ affected: 1 });
 
       await repository.incrementViewCount(1);
 
@@ -792,7 +855,7 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
 
     // BUG HUNTING: No validation if reading exists
     it('should not throw if reading does not exist', async () => {
-      mockReadingRepository.increment.mockResolvedValue({ affected: 0 } as any);
+      mockReadingRepository.increment.mockResolvedValue({ affected: 0 });
 
       // Silent failure
       await expect(repository.incrementViewCount(999)).resolves.not.toThrow();
@@ -800,7 +863,7 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
 
     // BUG HUNTING: id = 0 or negative
     it('should handle id = 0', async () => {
-      mockReadingRepository.increment.mockResolvedValue({ affected: 0 } as any);
+      mockReadingRepository.increment.mockResolvedValue({ affected: 0 });
 
       await repository.incrementViewCount(0);
 
@@ -812,7 +875,7 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
     });
 
     it('should handle negative id', async () => {
-      mockReadingRepository.increment.mockResolvedValue({ affected: 0 } as any);
+      mockReadingRepository.increment.mockResolvedValue({ affected: 0 });
 
       await repository.incrementViewCount(-1);
 

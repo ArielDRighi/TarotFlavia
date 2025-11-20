@@ -161,8 +161,12 @@ describe('RegenerateReadingUseCase', () => {
       interpretationsService.generateInterpretation.mockResolvedValue(
         newInterpretation,
       );
-      interpretationsRepo.create.mockReturnValue(savedInterpretation as any);
-      interpretationsRepo.save.mockResolvedValue(savedInterpretation as any);
+      interpretationsRepo.create.mockReturnValue(
+        savedInterpretation as unknown as TarotInterpretation,
+      );
+      interpretationsRepo.save.mockResolvedValue(
+        savedInterpretation as unknown as TarotInterpretation,
+      );
       readingRepo.update.mockResolvedValue(updatedReading);
 
       const result = await useCase.execute(readingId, userId);
@@ -245,8 +249,12 @@ describe('RegenerateReadingUseCase', () => {
       interpretationsService.generateInterpretation.mockResolvedValue(
         newInterpretation,
       );
-      interpretationsRepo.create.mockReturnValue(savedInterpretation as any);
-      interpretationsRepo.save.mockResolvedValue(savedInterpretation as any);
+      interpretationsRepo.create.mockReturnValue(
+        savedInterpretation as unknown as TarotInterpretation,
+      );
+      interpretationsRepo.save.mockResolvedValue(
+        savedInterpretation as unknown as TarotInterpretation,
+      );
       readingRepo.update.mockResolvedValue(updatedReading);
 
       const result = await useCase.execute(readingId, userId);
@@ -299,8 +307,12 @@ describe('RegenerateReadingUseCase', () => {
       interpretationsService.generateInterpretation.mockResolvedValue(
         newInterpretation,
       );
-      interpretationsRepo.create.mockReturnValue(savedInterpretation as any);
-      interpretationsRepo.save.mockResolvedValue(savedInterpretation as any);
+      interpretationsRepo.create.mockReturnValue(
+        savedInterpretation as unknown as TarotInterpretation,
+      );
+      interpretationsRepo.save.mockResolvedValue(
+        savedInterpretation as unknown as TarotInterpretation,
+      );
       readingRepo.update.mockResolvedValue(updatedReading);
 
       const result = await useCase.execute(readingId, userId);
@@ -352,8 +364,12 @@ describe('RegenerateReadingUseCase', () => {
       interpretationsService.generateInterpretation.mockResolvedValue(
         newInterpretation,
       );
-      interpretationsRepo.create.mockReturnValue(savedInterpretation as any);
-      interpretationsRepo.save.mockResolvedValue(savedInterpretation as any);
+      interpretationsRepo.create.mockReturnValue(
+        savedInterpretation as unknown as TarotInterpretation,
+      );
+      interpretationsRepo.save.mockResolvedValue(
+        savedInterpretation as unknown as TarotInterpretation,
+      );
       readingRepo.update.mockResolvedValue(updatedReading);
 
       const result = await useCase.execute(readingId, userId);
@@ -397,8 +413,12 @@ describe('RegenerateReadingUseCase', () => {
       interpretationsService.generateInterpretation.mockResolvedValue(
         newInterpretation,
       );
-      interpretationsRepo.create.mockReturnValue(savedInterpretation as any);
-      interpretationsRepo.save.mockResolvedValue(savedInterpretation as any);
+      interpretationsRepo.create.mockReturnValue(
+        savedInterpretation as unknown as TarotInterpretation,
+      );
+      interpretationsRepo.save.mockResolvedValue(
+        savedInterpretation as unknown as TarotInterpretation,
+      );
       readingRepo.update.mockResolvedValue(updatedReading);
 
       await useCase.execute(readingId, userId);
@@ -449,8 +469,12 @@ describe('RegenerateReadingUseCase', () => {
       interpretationsService.generateInterpretation.mockResolvedValue(
         newInterpretation,
       );
-      interpretationsRepo.create.mockReturnValue(savedInterpretation as any);
-      interpretationsRepo.save.mockResolvedValue(savedInterpretation as any);
+      interpretationsRepo.create.mockReturnValue(
+        savedInterpretation as unknown as TarotInterpretation,
+      );
+      interpretationsRepo.save.mockResolvedValue(
+        savedInterpretation as unknown as TarotInterpretation,
+      );
       readingRepo.update.mockResolvedValue(updatedReading);
 
       await useCase.execute(readingId, userId);
@@ -535,7 +559,9 @@ describe('RegenerateReadingUseCase', () => {
       validator.validateReadingOwnership.mockResolvedValue(reading);
       validator.validateRegenerationCount.mockReturnValue(undefined);
       cardsService.findByIds.mockResolvedValue(cards);
-      predefinedQuestionsService.findOne.mockResolvedValue(null as any);
+      predefinedQuestionsService.findOne.mockResolvedValue(
+        null as unknown as PredefinedQuestion,
+      );
 
       await expect(useCase.execute(readingId, userId)).rejects.toThrow(
         NotFoundException,
@@ -638,7 +664,9 @@ describe('RegenerateReadingUseCase', () => {
       interpretationsService.generateInterpretation.mockResolvedValue(
         newInterpretation,
       );
-      interpretationsRepo.create.mockReturnValue(savedInterpretation as any);
+      interpretationsRepo.create.mockReturnValue(
+        savedInterpretation as unknown as TarotInterpretation,
+      );
       interpretationsRepo.save.mockRejectedValue(error);
 
       await expect(useCase.execute(readingId, userId)).rejects.toThrow(error);
@@ -673,8 +701,12 @@ describe('RegenerateReadingUseCase', () => {
       interpretationsService.generateInterpretation.mockResolvedValue(
         newInterpretation,
       );
-      interpretationsRepo.create.mockReturnValue(savedInterpretation as any);
-      interpretationsRepo.save.mockResolvedValue(savedInterpretation as any);
+      interpretationsRepo.create.mockReturnValue(
+        savedInterpretation as unknown as TarotInterpretation,
+      );
+      interpretationsRepo.save.mockResolvedValue(
+        savedInterpretation as unknown as TarotInterpretation,
+      );
       readingRepo.update.mockRejectedValue(error);
 
       await expect(useCase.execute(readingId, userId)).rejects.toThrow(error);
@@ -719,8 +751,12 @@ describe('RegenerateReadingUseCase', () => {
       interpretationsService.generateInterpretation.mockResolvedValue(
         newInterpretation,
       );
-      interpretationsRepo.create.mockReturnValue(savedInterpretation as any);
-      interpretationsRepo.save.mockResolvedValue(savedInterpretation as any);
+      interpretationsRepo.create.mockReturnValue(
+        savedInterpretation as unknown as TarotInterpretation,
+      );
+      interpretationsRepo.save.mockResolvedValue(
+        savedInterpretation as unknown as TarotInterpretation,
+      );
       readingRepo.update.mockResolvedValue(updatedReading);
 
       const result = await useCase.execute(readingId, userId);
@@ -773,8 +809,12 @@ describe('RegenerateReadingUseCase', () => {
       interpretationsService.generateInterpretation.mockResolvedValue(
         newInterpretation,
       );
-      interpretationsRepo.create.mockReturnValue(savedInterpretation as any);
-      interpretationsRepo.save.mockResolvedValue(savedInterpretation as any);
+      interpretationsRepo.create.mockReturnValue(
+        savedInterpretation as unknown as TarotInterpretation,
+      );
+      interpretationsRepo.save.mockResolvedValue(
+        savedInterpretation as unknown as TarotInterpretation,
+      );
       readingRepo.update.mockResolvedValue(updatedReading);
 
       const result = await useCase.execute(readingId, userId);
@@ -815,8 +855,12 @@ describe('RegenerateReadingUseCase', () => {
       interpretationsService.generateInterpretation.mockResolvedValue(
         newInterpretation,
       );
-      interpretationsRepo.create.mockReturnValue(savedInterpretation as any);
-      interpretationsRepo.save.mockResolvedValue(savedInterpretation as any);
+      interpretationsRepo.create.mockReturnValue(
+        savedInterpretation as unknown as TarotInterpretation,
+      );
+      interpretationsRepo.save.mockResolvedValue(
+        savedInterpretation as unknown as TarotInterpretation,
+      );
       readingRepo.update.mockResolvedValue(updatedReading);
 
       const result = await useCase.execute(readingId, userId);

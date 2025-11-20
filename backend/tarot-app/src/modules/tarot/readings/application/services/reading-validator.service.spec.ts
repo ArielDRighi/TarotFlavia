@@ -11,6 +11,14 @@ import { ReadingValidatorService } from './reading-validator.service';
 import { TarotReading } from '../../entities/tarot-reading.entity';
 import { User, UserPlan } from '../../../../users/entities/user.entity';
 
+// Helper types for test cases
+type PartialUser = Partial<User> & { id: number; plan?: UserPlan | null };
+type PartialReading = Omit<Partial<TarotReading>, 'deletedAt' | 'user'> & {
+  id: number;
+  user?: Partial<User> | null;
+  deletedAt?: Date | null;
+};
+
 describe('ReadingValidatorService - BUG HUNTING', () => {
   let service: ReadingValidatorService;
 
@@ -96,13 +104,17 @@ describe('ReadingValidatorService - BUG HUNTING', () => {
     it('should handle null userId', async () => {
       mockUserRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.validateUser(null as any)).rejects.toThrow();
+      await expect(
+        service.validateUser(null as unknown as number),
+      ).rejects.toThrow();
     });
 
     it('should handle undefined userId', async () => {
       mockUserRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.validateUser(undefined as any)).rejects.toThrow();
+      await expect(
+        service.validateUser(undefined as unknown as number),
+      ).rejects.toThrow();
     });
 
     // BUG HUNTING: String userId (type coercion)
@@ -110,7 +122,9 @@ describe('ReadingValidatorService - BUG HUNTING', () => {
       mockUserRepository.findOne.mockResolvedValue(null);
 
       // TypeScript permite esto en runtime si viene de HTTP request
-      await expect(service.validateUser('123' as any)).rejects.toThrow();
+      await expect(
+        service.validateUser('123' as unknown as number),
+      ).rejects.toThrow();
     });
   });
 
@@ -157,11 +171,11 @@ describe('ReadingValidatorService - BUG HUNTING', () => {
 
     // BUG HUNTING: What if user.plan is null/undefined?
     it('should handle user with null plan', async () => {
-      const mockUserNoPlan = {
+      const mockUserNoPlan: PartialUser = {
         id: 1,
         email: 'noplan@example.com',
-        plan: null,
-      } as any;
+        plan: null as unknown as UserPlan,
+      };
 
       mockUserRepository.findOne.mockResolvedValue(mockUserNoPlan);
 
@@ -172,11 +186,11 @@ describe('ReadingValidatorService - BUG HUNTING', () => {
     });
 
     it('should handle user with undefined plan', async () => {
-      const mockUserNoPlan = {
+      const mockUserNoPlan: PartialUser = {
         id: 1,
         email: 'noplan@example.com',
-        plan: undefined,
-      } as any;
+        plan: undefined as unknown as UserPlan,
+      };
 
       mockUserRepository.findOne.mockResolvedValue(mockUserNoPlan);
 
@@ -187,11 +201,11 @@ describe('ReadingValidatorService - BUG HUNTING', () => {
 
     // BUG HUNTING: What if plan is invalid string?
     it('should handle invalid plan value', async () => {
-      const mockUserInvalidPlan = {
+      const mockUserInvalidPlan: PartialUser = {
         id: 1,
         email: 'invalid@example.com',
-        plan: 'INVALID_PLAN' as any,
-      } as User;
+        plan: 'INVALID_PLAN' as unknown as UserPlan,
+      };
 
       mockUserRepository.findOne.mockResolvedValue(mockUserInvalidPlan);
 
@@ -217,11 +231,11 @@ describe('ReadingValidatorService - BUG HUNTING', () => {
     });
 
     it('should return reading when user owns it', async () => {
-      const mockReading = {
+      const mockReading: PartialReading = {
         id: 1,
         user: { id: 1, email: 'owner@example.com' },
         deletedAt: null,
-      } as any;
+      };
 
       mockQueryBuilder.getOne.mockResolvedValue(mockReading);
 
@@ -253,11 +267,11 @@ describe('ReadingValidatorService - BUG HUNTING', () => {
     });
 
     it('should throw ForbiddenException when user does not own reading', async () => {
-      const mockReading = {
+      const mockReading: PartialReading = {
         id: 1,
         user: { id: 2, email: 'other@example.com' },
         deletedAt: null,
-      } as any;
+      };
 
       mockQueryBuilder.getOne.mockResolvedValue(mockReading);
 
@@ -270,11 +284,11 @@ describe('ReadingValidatorService - BUG HUNTING', () => {
     });
 
     it('should include deleted readings when includeDeleted is true', async () => {
-      const mockReading = {
+      const mockReading: PartialReading = {
         id: 1,
         user: { id: 1, email: 'owner@example.com' },
         deletedAt: new Date(),
-      } as any;
+      };
 
       mockQueryBuilder.getOne.mockResolvedValue(mockReading);
 
@@ -294,11 +308,11 @@ describe('ReadingValidatorService - BUG HUNTING', () => {
     });
 
     it('should handle userId = 0', async () => {
-      const mockReading = {
+      const mockReading: PartialReading = {
         id: 1,
         user: { id: 1, email: 'owner@example.com' },
         deletedAt: null,
-      } as any;
+      };
 
       mockQueryBuilder.getOne.mockResolvedValue(mockReading);
 
@@ -316,11 +330,11 @@ describe('ReadingValidatorService - BUG HUNTING', () => {
     });
 
     it('should handle negative userId', async () => {
-      const mockReading = {
+      const mockReading: PartialReading = {
         id: 1,
         user: { id: 1, email: 'owner@example.com' },
         deletedAt: null,
-      } as any;
+      };
 
       mockQueryBuilder.getOne.mockResolvedValue(mockReading);
 
@@ -331,11 +345,11 @@ describe('ReadingValidatorService - BUG HUNTING', () => {
 
     // BUG HUNTING: null/undefined user in reading
     it('should handle reading with null user', async () => {
-      const mockReading = {
+      const mockReading: PartialReading = {
         id: 1,
         user: null,
         deletedAt: null,
-      } as any;
+      };
 
       mockQueryBuilder.getOne.mockResolvedValue(mockReading);
 
@@ -349,11 +363,11 @@ describe('ReadingValidatorService - BUG HUNTING', () => {
     });
 
     it('should handle reading with undefined user', async () => {
-      const mockReading = {
+      const mockReading: PartialReading = {
         id: 1,
         user: undefined,
         deletedAt: null,
-      } as any;
+      };
 
       mockQueryBuilder.getOne.mockResolvedValue(mockReading);
 
@@ -364,11 +378,11 @@ describe('ReadingValidatorService - BUG HUNTING', () => {
 
     // BUG HUNTING: What if user.id is null?
     it('should handle reading with user but null id', async () => {
-      const mockReading = {
+      const mockReading: PartialReading = {
         id: 1,
-        user: { id: null, email: 'test@example.com' },
+        user: { id: null as unknown as number, email: 'test@example.com' },
         deletedAt: null,
-      } as any;
+      };
 
       mockQueryBuilder.getOne.mockResolvedValue(mockReading);
 
@@ -381,238 +395,241 @@ describe('ReadingValidatorService - BUG HUNTING', () => {
 
   describe('validateReadingNotDeleted', () => {
     it('should not throw when reading is not deleted', () => {
-      const mockReading = {
+      const mockReading: PartialReading = {
         id: 1,
         deletedAt: null,
-      } as any;
+      };
 
       expect(() =>
-        service.validateReadingNotDeleted(mockReading),
+        service.validateReadingNotDeleted(mockReading as TarotReading),
       ).not.toThrow();
     });
 
     it('should throw BadRequestException when reading is deleted', () => {
-      const mockReading = {
+      const mockReading: PartialReading = {
         id: 1,
         deletedAt: new Date(),
-      } as any;
+      };
 
-      expect(() => service.validateReadingNotDeleted(mockReading)).toThrow(
-        BadRequestException,
-      );
-      expect(() => service.validateReadingNotDeleted(mockReading)).toThrow(
-        'Reading is deleted',
-      );
+      expect(() =>
+        service.validateReadingNotDeleted(mockReading as TarotReading),
+      ).toThrow(BadRequestException);
+      expect(() =>
+        service.validateReadingNotDeleted(mockReading as TarotReading),
+      ).toThrow('Reading is deleted');
     });
 
     // BUG HUNTING: What if deletedAt is undefined (not null)?
     it('should handle undefined deletedAt', () => {
-      const mockReading = {
+      const mockReading: PartialReading = {
         id: 1,
         deletedAt: undefined,
-      } as any;
+      };
 
       // undefined is falsy, should not throw
       expect(() =>
-        service.validateReadingNotDeleted(mockReading),
+        service.validateReadingNotDeleted(mockReading as TarotReading),
       ).not.toThrow();
     });
 
     // BUG HUNTING: What if deletedAt is invalid date?
     it('should handle invalid date in deletedAt', () => {
-      const mockReading = {
+      const mockReading: PartialReading = {
         id: 1,
         deletedAt: new Date('invalid'),
-      } as any;
+      };
 
       // Invalid date is still truthy, should throw
-      expect(() => service.validateReadingNotDeleted(mockReading)).toThrow(
-        BadRequestException,
-      );
+      expect(() =>
+        service.validateReadingNotDeleted(mockReading as TarotReading),
+      ).toThrow(BadRequestException);
     });
 
     // BUG HUNTING: What if deletedAt is a string?
     it('should handle string deletedAt', () => {
-      const mockReading = {
+      const mockReading: PartialReading = {
         id: 1,
-        deletedAt: '2025-01-01' as any,
-      } as any;
+        deletedAt: '2025-01-01' as unknown as Date,
+      };
 
       // String is truthy, should throw
-      expect(() => service.validateReadingNotDeleted(mockReading)).toThrow(
-        BadRequestException,
-      );
+      expect(() =>
+        service.validateReadingNotDeleted(mockReading as TarotReading),
+      ).toThrow(BadRequestException);
     });
   });
 
   describe('validateReadingDeleted', () => {
     it('should not throw when reading is deleted', () => {
-      const mockReading = {
+      const mockReading: PartialReading = {
         id: 1,
         deletedAt: new Date(),
-      } as any;
+      };
 
-      expect(() => service.validateReadingDeleted(mockReading)).not.toThrow();
+      expect(() =>
+        service.validateReadingDeleted(mockReading as TarotReading),
+      ).not.toThrow();
     });
 
     it('should throw BadRequestException when reading is not deleted', () => {
-      const mockReading = {
+      const mockReading: PartialReading = {
         id: 1,
         deletedAt: null,
-      } as any;
+      };
 
-      expect(() => service.validateReadingDeleted(mockReading)).toThrow(
-        BadRequestException,
-      );
-      expect(() => service.validateReadingDeleted(mockReading)).toThrow(
-        'Reading is not deleted',
-      );
+      expect(() =>
+        service.validateReadingDeleted(mockReading as TarotReading),
+      ).toThrow(BadRequestException);
+      expect(() =>
+        service.validateReadingDeleted(mockReading as TarotReading),
+      ).toThrow('Reading is not deleted');
     });
 
     // BUG HUNTING: undefined deletedAt
     it('should handle undefined deletedAt', () => {
-      const mockReading = {
+      const mockReading: PartialReading = {
         id: 1,
         deletedAt: undefined,
-      } as any;
+      };
 
       // !undefined is true, should throw
-      expect(() => service.validateReadingDeleted(mockReading)).toThrow(
-        BadRequestException,
-      );
+      expect(() =>
+        service.validateReadingDeleted(mockReading as TarotReading),
+      ).toThrow(BadRequestException);
     });
   });
 
   describe('validateRegenerationCount', () => {
     it('should not throw when regeneration count is below maximum', () => {
-      const mockReading = {
+      const mockReading: PartialReading = {
         id: 1,
         regenerationCount: 0,
-      } as any;
+      };
 
       expect(() =>
-        service.validateRegenerationCount(mockReading),
+        service.validateRegenerationCount(mockReading as TarotReading),
       ).not.toThrow();
     });
 
     it('should not throw when regeneration count is 2 (below max of 3)', () => {
-      const mockReading = {
+      const mockReading: PartialReading = {
         id: 1,
         regenerationCount: 2,
-      } as any;
+      };
 
       expect(() =>
-        service.validateRegenerationCount(mockReading),
+        service.validateRegenerationCount(mockReading as TarotReading),
       ).not.toThrow();
     });
 
     it('should throw HttpException when regeneration count is at maximum (3)', () => {
-      const mockReading = {
+      const mockReading: PartialReading = {
         id: 1,
         regenerationCount: 3,
-      } as any;
+      };
 
-      expect(() => service.validateRegenerationCount(mockReading)).toThrow(
-        HttpException,
-      );
+      expect(() =>
+        service.validateRegenerationCount(mockReading as TarotReading),
+      ).toThrow(HttpException);
 
       try {
-        service.validateRegenerationCount(mockReading);
-      } catch (error) {
-        expect(error.getStatus()).toBe(HttpStatus.TOO_MANY_REQUESTS);
-        expect(error.message).toContain(
+        service.validateRegenerationCount(mockReading as TarotReading);
+      } catch (error: unknown) {
+        const httpError = error as HttpException;
+        expect(httpError.getStatus()).toBe(HttpStatus.TOO_MANY_REQUESTS);
+        expect(httpError.message).toContain(
           'Has alcanzado el máximo de regeneraciones (3)',
         );
       }
     });
 
     it('should throw when regeneration count exceeds maximum', () => {
-      const mockReading = {
+      const mockReading: PartialReading = {
         id: 1,
         regenerationCount: 5,
-      } as any;
+      };
 
-      expect(() => service.validateRegenerationCount(mockReading)).toThrow(
-        HttpException,
-      );
+      expect(() =>
+        service.validateRegenerationCount(mockReading as TarotReading),
+      ).toThrow(HttpException);
     });
 
     // BUG HUNTING: Negative regeneration count
     it('should handle negative regeneration count', () => {
-      const mockReading = {
+      const mockReading: PartialReading = {
         id: 1,
         regenerationCount: -1,
-      } as any;
+      };
 
       // -1 < 3, should not throw
       expect(() =>
-        service.validateRegenerationCount(mockReading),
+        service.validateRegenerationCount(mockReading as TarotReading),
       ).not.toThrow();
     });
 
     // BUG HUNTING: null/undefined regeneration count
     it('should handle null regeneration count', () => {
-      const mockReading = {
+      const mockReading: PartialReading = {
         id: 1,
-        regenerationCount: null,
-      } as any;
+        regenerationCount: null as unknown as number,
+      };
 
       // Now should throw BadRequestException
-      expect(() => service.validateRegenerationCount(mockReading)).toThrow(
-        BadRequestException,
-      );
-      expect(() => service.validateRegenerationCount(mockReading)).toThrow(
-        'Reading data is corrupted: invalid regenerationCount',
-      );
+      expect(() =>
+        service.validateRegenerationCount(mockReading as TarotReading),
+      ).toThrow(BadRequestException);
+      expect(() =>
+        service.validateRegenerationCount(mockReading as TarotReading),
+      ).toThrow('Reading data is corrupted: invalid regenerationCount');
     });
 
     it('should handle undefined regeneration count', () => {
-      const mockReading = {
+      const mockReading: PartialReading = {
         id: 1,
         regenerationCount: undefined,
-      } as any;
+      };
 
-      expect(() => service.validateRegenerationCount(mockReading)).toThrow(
-        BadRequestException,
-      );
+      expect(() =>
+        service.validateRegenerationCount(mockReading as TarotReading),
+      ).toThrow(BadRequestException);
     });
 
     // BUG HUNTING: String regeneration count
     it('should handle string regeneration count', () => {
-      const mockReading = {
+      const mockReading: PartialReading = {
         id: 1,
-        regenerationCount: '10' as any,
-      } as any;
+        regenerationCount: '10' as unknown as number,
+      };
 
       // Should throw BadRequestException due to type validation
-      expect(() => service.validateRegenerationCount(mockReading)).toThrow(
-        BadRequestException,
-      );
+      expect(() =>
+        service.validateRegenerationCount(mockReading as TarotReading),
+      ).toThrow(BadRequestException);
     });
 
     // BUG HUNTING: Decimal regeneration count
     it('should handle decimal regeneration count', () => {
-      const mockReading = {
+      const mockReading: PartialReading = {
         id: 1,
         regenerationCount: 2.9,
-      } as any;
+      };
 
       // 2.9 < 3, should not throw
       expect(() =>
-        service.validateRegenerationCount(mockReading),
+        service.validateRegenerationCount(mockReading as TarotReading),
       ).not.toThrow();
     });
 
     it('should handle decimal at exact limit', () => {
-      const mockReading = {
+      const mockReading: PartialReading = {
         id: 1,
         regenerationCount: 3.0,
-      } as any;
+      };
 
       // 3.0 >= 3, should throw
-      expect(() => service.validateRegenerationCount(mockReading)).toThrow(
-        HttpException,
-      );
+      expect(() =>
+        service.validateRegenerationCount(mockReading as TarotReading),
+      ).toThrow(HttpException);
     });
   });
 
@@ -671,16 +688,25 @@ describe('ReadingValidatorService - BUG HUNTING', () => {
     it('should handle null totalReadings for free user', () => {
       // Now should throw BadRequestException
       expect(() =>
-        service.validateFreeUserReadingsLimit(null as any, UserPlan.FREE),
+        service.validateFreeUserReadingsLimit(
+          null as unknown as number,
+          UserPlan.FREE,
+        ),
       ).toThrow(BadRequestException);
       expect(() =>
-        service.validateFreeUserReadingsLimit(null as any, UserPlan.FREE),
+        service.validateFreeUserReadingsLimit(
+          null as unknown as number,
+          UserPlan.FREE,
+        ),
       ).toThrow('Invalid totalReadings value: must be a non-negative number');
     });
 
     it('should handle undefined totalReadings for free user', () => {
       expect(() =>
-        service.validateFreeUserReadingsLimit(undefined as any, UserPlan.FREE),
+        service.validateFreeUserReadingsLimit(
+          undefined as unknown as number,
+          UserPlan.FREE,
+        ),
       ).toThrow(BadRequestException);
     });
 
@@ -688,7 +714,10 @@ describe('ReadingValidatorService - BUG HUNTING', () => {
     it('should handle string totalReadings', () => {
       // Should throw BadRequestException due to type validation
       expect(() =>
-        service.validateFreeUserReadingsLimit('15' as any, UserPlan.FREE),
+        service.validateFreeUserReadingsLimit(
+          '15' as unknown as number,
+          UserPlan.FREE,
+        ),
       ).toThrow(BadRequestException);
     });
 
@@ -707,22 +736,28 @@ describe('ReadingValidatorService - BUG HUNTING', () => {
     it('should handle null userPlan', () => {
       // Now should throw BadRequestException
       expect(() =>
-        service.validateFreeUserReadingsLimit(15, null as any),
+        service.validateFreeUserReadingsLimit(15, null as unknown as UserPlan),
       ).toThrow(BadRequestException);
       expect(() =>
-        service.validateFreeUserReadingsLimit(15, null as any),
+        service.validateFreeUserReadingsLimit(15, null as unknown as UserPlan),
       ).toThrow('Invalid user plan');
     });
 
     it('should handle undefined userPlan', () => {
       expect(() =>
-        service.validateFreeUserReadingsLimit(15, undefined as any),
+        service.validateFreeUserReadingsLimit(
+          15,
+          undefined as unknown as UserPlan,
+        ),
       ).toThrow(BadRequestException);
     });
 
     it('should handle invalid userPlan string', () => {
       expect(() =>
-        service.validateFreeUserReadingsLimit(15, 'INVALID' as any),
+        service.validateFreeUserReadingsLimit(
+          15,
+          'INVALID' as unknown as UserPlan,
+        ),
       ).toThrow(BadRequestException);
     });
   });

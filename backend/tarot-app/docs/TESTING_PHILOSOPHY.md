@@ -280,6 +280,224 @@ import { validUserDto } from '@test/fixtures/users.fixtures';
 
 ---
 
+## REGLAS DE TYPESCRIPT Y LINTING PARA TESTS
+
+### ⚠️ REGLA CRÍTICA: NUNCA usar `as any`
+
+TypeScript strict mode está habilitado. **TODOS** los tests deben pasar lint sin errores ni warnings.
+
+#### REGLA #1: Patrón `as unknown as Type`
+
+❌ **INCORRECTO:**
+
+```typescript
+const mockUser = { id: 1, email: 'test@test.com' } as any;
+mockService.findOne.mockResolvedValue(null as any);
+const mockDeck = { id: 1, name: 'Test' } as any;
+```
+
+✅ **CORRECTO:**
+
+```typescript
+const mockUser = { id: 1, email: 'test@test.com' } as unknown as User;
+mockService.findOne.mockResolvedValue(null as unknown as User);
+const mockDeck = { id: 1, name: 'Test' } as unknown as TarotDeck;
+```
+
+#### REGLA #2: Tipos helper para objetos parciales
+
+❌ **INCORRECTO:**
+
+```typescript
+const mockReading = {
+  id: 1,
+  user: { id: 100 },
+} as any;
+```
+
+✅ **CORRECTO:**
+
+```typescript
+type PartialUser = Partial<User> & Pick<User, 'id'>;
+type PartialReading = Omit<Partial<TarotReading>, 'user'> & {
+  user?: Partial<TarotReading['user']>;
+};
+
+const mockReading: PartialReading = {
+  id: 1,
+  user: { id: 100 },
+};
+```
+
+#### REGLA #3: Importar tipos de entidades
+
+❌ **INCORRECTO:**
+
+```typescript
+// No importar tipos necesarios
+const mockDeck = { id: 1, name: 'Test' } as any;
+```
+
+✅ **CORRECTO:**
+
+```typescript
+import { TarotDeck } from '../../../decks/entities/tarot-deck.entity';
+import { TarotSpread } from '../../../spreads/entities/tarot-spread.entity';
+import { TarotCard } from '../../../cards/entities/tarot-card.entity';
+
+const mockDeck = { id: 1, name: 'Test' } as unknown as TarotDeck;
+const mockSpread = { id: 1, name: 'Test' } as unknown as TarotSpread;
+```
+
+#### REGLA #4: Tipar bloques catch
+
+❌ **INCORRECTO:**
+
+```typescript
+try {
+  await service.method();
+} catch (error) {
+  expect(error.message).toBe('Error');
+}
+```
+
+✅ **CORRECTO:**
+
+```typescript
+try {
+  await service.method();
+} catch (error: unknown) {
+  const httpError = error as HttpException;
+  expect(httpError.message).toBe('Error');
+}
+```
+
+#### REGLA #5: ReturnType para mocks complejos
+
+❌ **INCORRECTO:**
+
+```typescript
+const mockQueryBuilder = {
+  where: jest.fn().mockReturnThis(),
+  getMany: jest.fn(),
+} as any;
+```
+
+✅ **CORRECTO:**
+
+```typescript
+const mockQueryBuilder = {
+  where: jest.fn().mockReturnThis(),
+  getMany: jest.fn(),
+} as unknown as ReturnType<Repository<Entity>['createQueryBuilder']>;
+```
+
+#### REGLA #6: Tests E2E con supertest
+
+Para archivos E2E donde `app.getHttpServer()` retorna `any`:
+
+```typescript
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
+import * as request from 'supertest';
+
+describe('Test E2E', () => {
+  let app: INestApplication;
+  let httpServer: ReturnType<INestApplication['getHttpServer']>;
+
+  beforeAll(async () => {
+    app = moduleFixture.createNestApplication();
+    await app.init();
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    httpServer = app.getHttpServer();
+  });
+
+  it('should work', async () => {
+    const response = await request(httpServer).get('/endpoint');
+    const body = response.body as unknown as ExpectedType;
+  });
+});
+```
+
+#### REGLA #7: Arrays de mocks tipados
+
+❌ **INCORRECTO:**
+
+```typescript
+const mockCards = [{ id: 1 }, { id: 2 }] as any[];
+```
+
+✅ **CORRECTO:**
+
+```typescript
+const mockCards = [
+  { id: 1, name: 'Card 1' },
+  { id: 2, name: 'Card 2' },
+] as unknown as TarotCard[];
+```
+
+#### REGLA #8: Mock de servicios con tipos explícitos
+
+❌ **INCORRECTO:**
+
+```typescript
+const mockService = {
+  method: jest.fn(),
+};
+```
+
+✅ **CORRECTO:**
+
+```typescript
+const mockService: jest.Mocked<ServiceType> = {
+  method: jest.fn(),
+} as jest.Mocked<ServiceType>;
+```
+
+### Workflow Obligatorio Después de Editar
+
+```bash
+# 1. Aplicar prettier automáticamente
+npx eslint <archivo> --fix
+
+# 2. Verificar 0 errores y 0 warnings
+npx eslint <archivo>
+
+# 3. Ejecutar tests
+npm test -- <archivo>
+```
+
+### Reemplazo Global con sed
+
+Para archivos con muchas ocurrencias:
+
+```bash
+sed -i 's/as any/as unknown as Type/g' archivo.spec.ts
+sed -i 's/} as any);/} as unknown as User);/g' archivo.spec.ts
+```
+
+### ✅ CHECKLIST DE LINT ANTES DE COMPLETAR TAREA
+
+- [ ] ✅ **0 errores** de eslint
+- [ ] ✅ **0 warnings** de `@typescript-eslint/no-unsafe-*`
+- [ ] ✅ Todos los tests pasan
+- [ ] ✅ No hay `as any` explícitos
+- [ ] ✅ Prettier aplicado (`--fix`)
+- [ ] ✅ Imports de tipos agregados
+- [ ] ✅ Tipos helper creados si son necesarios
+
+### Por Qué Estas Reglas Son Críticas
+
+1. **CI/CD:** El workflow de GitHub Actions rechaza código con errores de lint
+2. **Type Safety:** TypeScript strict mode previene bugs en tiempo de compilación
+3. **Mantenibilidad:** Código tipado es más fácil de refactorizar
+4. **Documentación:** Los tipos son documentación ejecutable
+5. **Autocompletado:** IDEs proveen mejor ayuda con tipos explícitos
+
+---
+
 **RECUERDA: Un test que pasa sin encontrar bugs es un test que NO hizo su trabajo correctamente.**
 
 **OBJETIVO: Encontrar y corregir TODOS los bugs antes de que lleguen a producción.**

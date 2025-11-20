@@ -5,6 +5,7 @@ import { ReadingValidatorService } from '../services/reading-validator.service';
 import { ReadingShareService } from '../services/reading-share.service';
 import { TarotReading } from '../../entities/tarot-reading.entity';
 import { HttpException } from '@nestjs/common';
+import { User } from '../../../../users/entities/user.entity';
 
 describe('ShareReadingUseCase', () => {
   let useCase: ShareReadingUseCase;
@@ -64,7 +65,7 @@ describe('ShareReadingUseCase', () => {
         id: 100,
         email: 'test@test.com',
         plan: 'premium',
-      } as any);
+      } as unknown as User);
       validator.validateReadingOwnership.mockResolvedValue(
         mockReading as TarotReading,
       );
@@ -108,7 +109,7 @@ describe('ShareReadingUseCase', () => {
         id: 100,
         email: 'test@test.com',
         plan: 'premium',
-      } as any);
+      } as unknown as User);
       validator.validateReadingOwnership.mockResolvedValue(
         mockReading as TarotReading,
       );
@@ -158,7 +159,7 @@ describe('ShareReadingUseCase', () => {
         id: 100,
         email: 'test@test.com',
         plan: 'premium',
-      } as any);
+      } as unknown as User);
       validator.validateReadingOwnership.mockResolvedValue(
         sharedReading as TarotReading,
       );
@@ -199,7 +200,7 @@ describe('ShareReadingUseCase', () => {
         id: 100,
         email: 'test@test.com',
         plan: 'premium',
-      } as any);
+      } as unknown as User);
       validator.validateReadingOwnership.mockResolvedValue(
         readingWithToken as TarotReading,
       );
@@ -235,7 +236,7 @@ describe('ShareReadingUseCase', () => {
         id: 100,
         email: 'test@test.com',
         plan: 'premium',
-      } as any);
+      } as unknown as User);
       validator.validateReadingOwnership.mockResolvedValue(
         publicReadingNoToken as TarotReading,
       );
@@ -279,7 +280,7 @@ describe('ShareReadingUseCase', () => {
         id: 100,
         email: 'test@test.com',
         plan: 'premium',
-      } as any);
+      } as unknown as User);
       validator.validateReadingOwnership.mockRejectedValue(error);
 
       await expect(useCase.execute(readingId, userId)).rejects.toThrow(
@@ -304,7 +305,7 @@ describe('ShareReadingUseCase', () => {
         id: 100,
         email: 'test@test.com',
         plan: 'premium',
-      } as any);
+      } as unknown as User);
       validator.validateReadingOwnership.mockResolvedValue(
         mockReading as TarotReading,
       );
@@ -326,7 +327,7 @@ describe('ShareReadingUseCase', () => {
         id: 100,
         email: 'test@test.com',
         plan: 'premium',
-      } as any);
+      } as unknown as User);
       validator.validateReadingOwnership.mockResolvedValue(
         mockReading as TarotReading,
       );
@@ -354,7 +355,7 @@ describe('ShareReadingUseCase', () => {
         id: 100,
         email: 'test@test.com',
         plan: 'premium',
-      } as any);
+      } as unknown as User);
       validator.validateReadingOwnership.mockRejectedValue(error);
 
       await expect(useCase.execute(readingId, userId)).rejects.toThrow(
@@ -383,7 +384,7 @@ describe('ShareReadingUseCase', () => {
         id: 100,
         email: 'test@test.com',
         plan: 'premium',
-      } as any);
+      } as unknown as User);
       validator.validateReadingOwnership.mockRejectedValue(error);
 
       await expect(useCase.execute(readingId, userId)).rejects.toThrow(
@@ -407,7 +408,7 @@ describe('ShareReadingUseCase', () => {
         id: 100,
         email: 'test@test.com',
         plan: 'premium',
-      } as any);
+      } as unknown as User);
       validator.validateReadingOwnership.mockResolvedValue(
         readingEmptyToken as TarotReading,
       );
@@ -439,7 +440,7 @@ describe('ShareReadingUseCase', () => {
         id: 100,
         email: 'test@test.com',
         plan: 'premium',
-      } as any);
+      } as unknown as User);
       validator.validateReadingOwnership.mockResolvedValue(
         readingUndefinedToken as TarotReading,
       );

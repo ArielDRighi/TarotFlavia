@@ -11,6 +11,10 @@ import { PredefinedQuestionsService } from '../../../../predefined-questions/pre
 import { TarotReading } from '../../entities/tarot-reading.entity';
 import { User, UserPlan } from '../../../../users/entities/user.entity';
 import { CreateReadingDto } from '../../dto/create-reading.dto';
+import { TarotDeck } from '../../../decks/entities/tarot-deck.entity';
+import { TarotSpread } from '../../../spreads/entities/tarot-spread.entity';
+import { PredefinedQuestion } from '../../../../predefined-questions/entities/predefined-question.entity';
+import { TarotCard } from '../../../cards/entities/tarot-card.entity';
 
 describe('CreateReadingUseCase', () => {
   let useCase: CreateReadingUseCase;
@@ -28,13 +32,16 @@ describe('CreateReadingUseCase', () => {
     plan: UserPlan.PREMIUM,
   } as User;
 
-  const mockDeck = { id: 1, name: 'Test Deck' } as any;
-  const mockSpread = { id: 1, name: 'Test Spread' } as any;
+  const mockDeck = { id: 1, name: 'Test Deck' } as unknown as TarotDeck;
+  const mockSpread = {
+    id: 1,
+    name: 'Test Spread',
+  } as unknown as TarotSpread;
   const mockCards = [
     { id: 1, name: 'Card 1' },
     { id: 2, name: 'Card 2' },
     { id: 3, name: 'Card 3' },
-  ] as any[];
+  ] as unknown as TarotCard[];
 
   const mockDto: CreateReadingDto = {
     deckId: 1,
@@ -208,7 +215,7 @@ describe('CreateReadingUseCase', () => {
 
     it('should throw NotFoundException when deck not found', async () => {
       validator.validateUser.mockResolvedValue(mockUser);
-      decksService.findDeckById.mockResolvedValue(null as any);
+      decksService.findDeckById.mockResolvedValue(null as unknown as TarotDeck);
 
       await expect(useCase.execute(mockUser, mockDto)).rejects.toThrow(
         NotFoundException,
@@ -223,7 +230,7 @@ describe('CreateReadingUseCase', () => {
     it('should throw NotFoundException when spread not found', async () => {
       validator.validateUser.mockResolvedValue(mockUser);
       decksService.findDeckById.mockResolvedValue(mockDeck);
-      spreadsService.findById.mockResolvedValue(null as any);
+      spreadsService.findById.mockResolvedValue(null as unknown as TarotSpread);
 
       await expect(useCase.execute(mockUser, mockDto)).rejects.toThrow(
         NotFoundException,
@@ -328,7 +335,7 @@ describe('CreateReadingUseCase', () => {
       const mockPredefinedQuestion = {
         id: 5,
         questionText: 'What does the future hold?',
-      };
+      } as unknown as PredefinedQuestion;
       const mockUpdatedReading = createMockReading({
         interpretation: 'AI interpretation',
       });
@@ -339,7 +346,7 @@ describe('CreateReadingUseCase', () => {
       cardsService.findByIds.mockResolvedValue(mockCards);
       readingRepo.create.mockResolvedValue(mockReading);
       predefinedQuestionsService.findOne.mockResolvedValue(
-        mockPredefinedQuestion as any,
+        mockPredefinedQuestion,
       );
       interpretationsService.generateInterpretation.mockResolvedValue({
         interpretation: 'AI interpretation',
@@ -432,7 +439,9 @@ describe('CreateReadingUseCase', () => {
       spreadsService.findById.mockResolvedValue(mockSpread);
       cardsService.findByIds.mockResolvedValue(mockCards);
       readingRepo.create.mockResolvedValue(mockReading);
-      predefinedQuestionsService.findOne.mockResolvedValue(null as any);
+      predefinedQuestionsService.findOne.mockResolvedValue(
+        null as unknown as PredefinedQuestion,
+      );
       readingRepo.update.mockResolvedValue(mockFallbackReading);
 
       const result = await useCase.execute(mockUser, dtoWithPredefined);
@@ -526,7 +535,7 @@ describe('CreateReadingUseCase', () => {
       };
 
       validator.validateUser.mockResolvedValue(mockUser);
-      decksService.findDeckById.mockResolvedValue(null as any);
+      decksService.findDeckById.mockResolvedValue(null as unknown as TarotDeck);
 
       await expect(useCase.execute(mockUser, dtoWithZeroDeck)).rejects.toThrow(
         NotFoundException,
@@ -544,7 +553,7 @@ describe('CreateReadingUseCase', () => {
 
       validator.validateUser.mockResolvedValue(mockUser);
       decksService.findDeckById.mockResolvedValue(mockDeck);
-      spreadsService.findById.mockResolvedValue(null as any);
+      spreadsService.findById.mockResolvedValue(null as unknown as TarotSpread);
 
       await expect(
         useCase.execute(mockUser, dtoWithZeroSpread),

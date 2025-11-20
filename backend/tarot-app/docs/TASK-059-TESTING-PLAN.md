@@ -1,5 +1,25 @@
 # TASK-059: Plan de Testing Suite Completo - Subtareas
 
+## ⚠️ LEER ANTES DE EMPEZAR CUALQUIER SUBTAREA
+
+**📖 DOCUMENTO OBLIGATORIO:** [TESTING_PHILOSOPHY.md](./TESTING_PHILOSOPHY.md)
+
+Este documento contiene:
+
+- ✅ Filosofía de testing (buscar bugs, nunca falsear tests)
+- ✅ **REGLAS TYPESCRIPT Y LINTING** (NUNCA usar `as any`)
+- ✅ Checklist obligatorio antes de completar cada tarea
+- ✅ Límites de tamaño para archivos de test
+
+**⚠️ TODAS las subtareas DEBEN cumplir con estas reglas:**
+
+- 🔴 0 errores de eslint
+- 🔴 0 warnings de `@typescript-eslint/no-unsafe-*`
+- 🔴 Todos los tests pasan
+- 🔴 No usar `as any` (usar `as unknown as Type`)
+
+---
+
 ## Contexto
 
 TASK-059 es demasiado extensa para completarse en un solo commit. Este documento divide la tarea en subtareas manejables, organizadas por tipo de test y complejidad. **Cada subtarea representa un commit independiente.**

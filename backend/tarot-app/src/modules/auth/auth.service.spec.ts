@@ -137,7 +137,7 @@ describe('AuthService', () => {
   });
 
   describe('validateUser', () => {
-    let securityEventService: any;
+    let securityEventService: { logSecurityEvent: jest.Mock };
 
     beforeEach(async () => {
       const { SecurityEventService } = await import(
@@ -327,7 +327,7 @@ describe('AuthService', () => {
       (usersServiceMock.findByEmail as jest.Mock).mockResolvedValue(null);
 
       const result = await service.validateUser(
-        null as any,
+        null as unknown as string,
         'password123',
         '127.0.0.1',
         'test-agent',
@@ -372,7 +372,7 @@ describe('AuthService', () => {
 
       const result = await service.validateUser(
         'test@test.com',
-        null as any,
+        null as unknown as string,
         '127.0.0.1',
         'test-agent',
       );
@@ -709,7 +709,7 @@ describe('AuthService', () => {
         token: 'refresh-token-12345',
       });
 
-      await service.register(dto, null as any, 'test-agent');
+      await service.register(dto, null as unknown as string, 'test-agent');
 
       expect(refreshTokenServiceMock.createRefreshToken).toHaveBeenCalledWith(
         createdUser,
@@ -736,7 +736,7 @@ describe('AuthService', () => {
         token: 'refresh-token-12345',
       });
 
-      await service.register(dto, '127.0.0.1', undefined as any);
+      await service.register(dto, '127.0.0.1', undefined as unknown as string);
 
       expect(refreshTokenServiceMock.createRefreshToken).toHaveBeenCalledWith(
         createdUser,
@@ -878,10 +878,10 @@ describe('AuthService', () => {
     });
 
     it('should throw UnauthorizedException for user with null email', async () => {
-      const partialUser = {
+      const partialUser: Partial<User> = {
         id: 1,
-        email: null,
-      } as any;
+        email: null as unknown as string,
+      };
 
       await expect(
         service.login(partialUser, '127.0.0.1', 'test-agent'),

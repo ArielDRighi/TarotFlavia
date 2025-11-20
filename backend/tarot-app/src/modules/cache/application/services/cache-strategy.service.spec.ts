@@ -208,7 +208,11 @@ describe('CacheStrategyService', () => {
 
       jest
         .spyOn(cacheRepository, 'createQueryBuilder')
-        .mockReturnValue(mockQueryBuilder as any);
+        .mockReturnValue(
+          mockQueryBuilder as unknown as ReturnType<
+            Repository<CachedInterpretation>['createQueryBuilder']
+          >,
+        );
 
       const result = await service.getFromMultiLevelCache(
         cardCombination,
@@ -259,7 +263,11 @@ describe('CacheStrategyService', () => {
 
       jest
         .spyOn(cacheRepository, 'createQueryBuilder')
-        .mockReturnValue(mockQueryBuilder as any);
+        .mockReturnValue(
+          mockQueryBuilder as unknown as ReturnType<
+            Repository<CachedInterpretation>['createQueryBuilder']
+          >,
+        );
 
       const result = await service.getCacheHitRate(startDate, endDate);
 
@@ -283,7 +291,11 @@ describe('CacheStrategyService', () => {
 
       jest
         .spyOn(cacheRepository, 'createQueryBuilder')
-        .mockReturnValue(mockQueryBuilder as any);
+        .mockReturnValue(
+          mockQueryBuilder as unknown as ReturnType<
+            Repository<CachedInterpretation>['createQueryBuilder']
+          >,
+        );
 
       const result = await service.getCacheHitRate(startDate, endDate);
 

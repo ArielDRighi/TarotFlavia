@@ -188,13 +188,13 @@ describe('ReadingsOrchestratorService', () => {
           generateInterpretation: true,
         };
 
-        await service.create(null as any, dto);
+        await service.create(null as unknown as User, dto);
 
         expect(createReadingUC.execute).toHaveBeenCalledWith(null, dto);
       });
 
       it('should handle null dto', async () => {
-        await service.create(mockUser, null as any);
+        await service.create(mockUser, null as unknown as CreateReadingDto);
 
         expect(createReadingUC.execute).toHaveBeenCalledWith(mockUser, null);
       });
@@ -321,7 +321,7 @@ describe('ReadingsOrchestratorService', () => {
       });
 
       it('should handle null userId', async () => {
-        await service.findOne(1, null as any, false);
+        await service.findOne(1, null as unknown as number, false);
 
         expect(getReadingUC.execute).toHaveBeenCalledWith(1, null, false);
       });
@@ -440,7 +440,11 @@ describe('ReadingsOrchestratorService', () => {
         getReadingUC.execute.mockResolvedValue(mockReading);
         readingRepo.update.mockResolvedValue(mockReading);
 
-        await service.update(1, mockUser.id, null as any);
+        await service.update(
+          1,
+          mockUser.id,
+          null as unknown as Partial<TarotReading>,
+        );
 
         expect(readingRepo.update).toHaveBeenCalledWith(1, null);
       });
@@ -485,7 +489,7 @@ describe('ReadingsOrchestratorService', () => {
       it('should handle null user id', async () => {
         readingRepo.findTrashed.mockResolvedValue([]);
 
-        await service.findTrashedReadings(null as any);
+        await service.findTrashedReadings(null as unknown as number);
 
         expect(readingRepo.findTrashed).toHaveBeenCalledWith(null);
       });
@@ -633,9 +637,9 @@ describe('ReadingsOrchestratorService', () => {
       it('should handle null token', async () => {
         readingRepo.findByShareToken.mockResolvedValue(null);
 
-        await expect(service.getSharedReading(null as any)).rejects.toThrow(
-          NotFoundException,
-        );
+        await expect(
+          service.getSharedReading(null as unknown as string),
+        ).rejects.toThrow(NotFoundException);
         expect(readingRepo.findByShareToken).toHaveBeenCalledWith(null);
       });
 
@@ -643,7 +647,7 @@ describe('ReadingsOrchestratorService', () => {
         readingRepo.findByShareToken.mockResolvedValue(null);
 
         await expect(
-          service.getSharedReading(undefined as any),
+          service.getSharedReading(undefined as unknown as string),
         ).rejects.toThrow(NotFoundException);
         expect(readingRepo.findByShareToken).toHaveBeenCalledWith(undefined);
       });
