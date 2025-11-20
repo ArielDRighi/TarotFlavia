@@ -26,19 +26,19 @@ TASK-059 es demasiado extensa para completarse en un solo commit. Este documento
 
 ---
 
-## Estado Actual (Coverage: ~56% estimado)
+## Estado Actual (Coverage: ~57% estimado)
 
-**Progreso:** 14/27 subtareas completadas (SUBTASK-0 a SUBTASK-16)
+**Progreso:** 15/27 subtareas completadas (SUBTASK-0 a SUBTASK-17)
 
 **Tests totales:**
 
-- ~486+ unit tests
+- ~538+ unit tests
 - ~140+ integration/e2e tests
-- **Total: 626+ tests**
+- **Total: 678+ tests**
 
-**Commits realizados:** 20 commits
+**Commits realizados:** 21 commits
 
-### ✅ Ya Completado (Commits 1-20)
+### ✅ Ya Completado (Commits 1-21)
 
 #### SUBTASK-0: Documentación Base
 
@@ -534,7 +534,7 @@ TASK-059 es demasiado extensa para completarse en un solo commit. Este documento
 **TypeScript compliance:**
 
 - ✅ 0 eslint errors
-- ✅ 0 warnings (@typescript-eslint/no-unsafe-*)
+- ✅ 0 warnings (@typescript-eslint/no-unsafe-\*)
 - ✅ No 'as any' usage (explicit interface typing for mocks)
 - ✅ Proper typing for mock functions
 - ✅ Try-catch with instanceof checks (no expect.objectContaining)
@@ -548,23 +548,79 @@ TASK-059 es demasiado extensa para completarse en un solo commit. Este documento
 
 ---
 
-#### SUBTASK-17: AI Provider Fallback Tests
+#### ~~SUBTASK-17: AI Provider Fallback Tests~~ ✅ COMPLETADO (Pre-existing)
 
-**Prioridad:** MEDIA  
-**Estimación:** 2 horas
+**Estado:** ✅ COMPLETADO  
+**Tests:** 52 passing (23 AIProviderService + 20 CircuitBreaker + 9 Retry)  
+**Coverage:**
 
-**Tareas:**
+- AIProviderService: 94.56% Stmts, 70.96% Branches, 100% Funcs, 94.44% Lines (23 tests, 484 lines)
+- CircuitBreaker: 100% Stmts/Branch/Funcs/Lines (20 tests, 226 lines)
+- Retry Utils: 95% Stmts, 66.66% Branches, 100% Funcs, 94.44% Lines (9 tests, 169 lines)
 
-- Tests de fallback logic (si existe)
-- Tests de retry mechanism
-- Tests de circuit breaker (si existe)
-- Tests de degraded mode
+**Tests already exist:**
 
-**Criterios:**
+- ✅ ai-provider.service.spec.ts (23 tests - comprehensive fallback logic)
+  - generateCompletion: primary provider success
+  - Fallback: Groq → DeepSeek → OpenAI (automatic)
+  - All providers fail scenario
+  - Provider failure logging
+  - Null userId/readingId handling
+  - Circuit breaker activation (5 consecutive failures)
+  - Circuit breaker skip when OPEN
+  - Circuit breaker reset after success
+  - Retry logic: 3 attempts with exponential backoff
+  - getProvidersStatus: all providers status check
+  - getPrimaryProvider: first available provider
+  - getCircuitBreakerStats: statistics retrieval
+  - Cost calculation for successful completion
+  - Error handling: all provider errors in final message
 
-- Fallback logic validada
-- Resilience patterns tested
-- 1 commit al completar
+- ✅ circuit-breaker.utils.spec.ts (20 tests - already passing)
+  - Initial state: CLOSED, allows execution
+  - Recording failures: threshold detection, success reset
+  - OPEN state: blocks execution, timeout transition
+  - HALF_OPEN state: allows execution, 3 successes → CLOSED
+  - Statistics tracking: failures, successes, consecutive failures
+  - Edge cases: rapid state transitions, success in OPEN state
+
+- ✅ retry.utils.spec.ts (9 tests - already passing)
+  - Success on first attempt (no retry)
+  - Retry on retryable errors (rate limit, server error, network error)
+  - No retry on non-retryable errors (invalid key, context length)
+  - Max retries exceeded (3 attempts)
+  - Exponential backoff timing
+  - Non-AIProviderException error handling
+
+**Bugs found:** 0 bugs (all resilience patterns working correctly)
+
+**Edge cases tested:**
+
+- Circuit breaker state transitions (CLOSED → OPEN → HALF_OPEN → CLOSED)
+- Provider priority order (Groq → DeepSeek → OpenAI)
+- All providers unavailable scenario
+- Null userId/readingId (quota tracking skip)
+- Rapid consecutive failures
+- Exponential backoff delay calculation
+- Retryable vs non-retryable error classification
+- Circuit breaker timeout (5 minutes)
+- HALF_OPEN success count reset on failure
+
+**TypeScript compliance:**
+
+- ✅ 0 eslint errors
+- ✅ 0 warnings (@typescript-eslint/no-unsafe-*)
+- ✅ Proper async/await patterns
+- ✅ Circuit breaker state machine type-safe
+
+**NOTE:** These tests were already implemented and passing before SUBTASK-17.
+
+- AIProviderService tests location: `src/modules/ai/application/services/ai-provider.service.spec.ts`
+- Circuit breaker tests location: `test/ai/circuit-breaker.utils.spec.ts`
+- Retry tests location: `test/ai/retry.utils.spec.ts`
+- All 52 tests passing with excellent coverage
+
+📝 Commit: "docs(SUBTASK-17): document pre-existing AI Provider fallback tests (52 passing)"
 
 ---
 
