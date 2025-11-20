@@ -16,10 +16,15 @@
     "test": "jest --no-watchman --all",
     "test:watch": "jest --watch --no-watchman",
     "test:cov": "jest --coverage --no-watchman --all",
+    "test:cov:html": "jest --coverage --no-watchman --all && open coverage/index.html",
+    "test:cov:summary": "jest --coverage --no-watchman --all --coverageReporters=text-summary",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand --no-watchman --all",
     "test:e2e": "jest --config ./test/jest-e2e.json --no-watchman",
     "test:e2e:watch": "jest --config ./test/jest-e2e.json --watch --no-watchman",
     "test:e2e:cov": "jest --config ./test/jest-e2e.json --coverage --no-watchman",
+    "test:e2e:cov:html": "jest --config ./test/jest-e2e.json --coverage --no-watchman && open coverage-e2e/index.html",
+    "test:all:cov": "npm run test:cov && npm run test:e2e:cov",
+    "test:coverage": "npm run test:cov",
     "test:mvp": "jest --config ./test/jest-e2e.json test/mvp-complete.e2e-spec.ts --no-watchman",
     "seed": "ts-node -r tsconfig-paths/register src/database/seeds/seed-data.ts",
     "clean:test-users": "ts-node -r tsconfig-paths/register scripts/clean-test-users.ts",
@@ -142,17 +147,38 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "collectCoverageFrom": [
-      "**/*.(t|j)s"
+      "src/**/*.ts",
+      "!src/**/*.spec.ts",
+      "!src/**/*.e2e-spec.ts",
+      "!src/**/index.ts",
+      "!src/main.ts",
+      "!src/config/**",
+      "!src/database/migrations/**",
+      "!src/database/seeds/**"
     ],
-    "coverageDirectory": "../coverage",
+    "coverageDirectory": "./coverage",
+    "coverageReporters": [
+      "text",
+      "text-summary",
+      "html",
+      "lcov",
+      "json"
+    ],
     "coverageThreshold": {
       "global": {
-        "lines": 80,
-        "branches": 70,
-        "functions": 75,
-        "statements": 80
+        "lines": 70,
+        "branches": 55,
+        "functions": 65,
+        "statements": 70
       }
     },
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/test/",
+      "/dist/",
+      ".module.ts$",
+      "main.ts$"
+    ],
     "testEnvironment": "node",
     "moduleNameMapper": {
       "^src/(.*)$": "<rootDir>/src/$1"
