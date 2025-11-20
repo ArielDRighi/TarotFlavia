@@ -1,8 +1,10 @@
-# Security Documentation
+# 🔒 Security Documentation - TarotFlavia
 
 ## Overview
 
-This document outlines the comprehensive security strategy implemented in the Tarot application to protect against common web vulnerabilities and ensure data confidentiality, integrity, and availability.
+This document outlines the comprehensive security strategy implemented in the TarotFlavia application to protect against common web vulnerabilities and ensure data confidentiality, integrity, and availability.
+
+**Security Philosophy:** Defense in depth with multiple layers of protection, secure by default, and continuous security monitoring.
 
 ## Security Architecture
 
@@ -315,49 +317,121 @@ npm audit fix
 
 **Never commit to git:**
 
-- `JWT_SECRET`
-- `JWT_REFRESH_SECRET`
-- `POSTGRES_PASSWORD`
-- `OPENAI_API_KEY`
+- `JWT_SECRET` - Secret for access tokens
+- `JWT_REFRESH_SECRET` - Secret for refresh tokens
+- `POSTGRES_PASSWORD` - Database password
+- `OPENAI_API_KEY` - OpenAI API key
+- `ANTHROPIC_API_KEY` - Anthropic API key (if using Claude)
+- `STRIPE_SECRET_KEY` - Stripe secret key (if using payments)
+- `STRIPE_WEBHOOK_SECRET` - Stripe webhook signing secret
 - Any other sensitive credentials
 
-**Use:**
+**Best Practices:**
 
-- `.env` files (gitignored)
-- Environment variable injection in deployment platform
-- Secret management services (AWS Secrets Manager, Azure Key Vault)
+```bash
+# Generate secure secrets
+openssl rand -base64 64
+
+# Example .env (NEVER commit this file)
+JWT_SECRET=your-very-long-random-secret-here-64-chars-minimum
+JWT_REFRESH_SECRET=another-different-secret-for-refresh-tokens
+POSTGRES_PASSWORD=secure-database-password-here
+```
+
+**Storage Options:**
+
+- **Development:** `.env` files (add to `.gitignore`)
+- **Production (Render):** Environment variables in dashboard
+- **Production (AWS):** AWS Secrets Manager
+- **Production (Azure):** Azure Key Vault
+- **CI/CD:** GitHub Secrets, GitLab CI/CD Variables
+
+### HTTPS & SSL/TLS
+
+**Production Requirements:**
+
+- HTTPS enforced (no HTTP access)
+- TLS 1.2 minimum (TLS 1.3 preferred)
+- Valid SSL certificate (Let's Encrypt, Cloudflare)
+- HSTS header enabled (see Helmet configuration)
+
+**Render Configuration:**
+
+Render provides automatic HTTPS with Let's Encrypt certificates (no configuration needed).
+
+**Custom Domain SSL:**
+
+```bash
+# Render automatically provisions SSL for custom domains
+# Just add your domain in Dashboard → Settings → Custom Domain
+```
 
 ### Production Checklist
 
 Before deploying to production:
 
-- [ ] All dependencies updated
+- [ ] All dependencies updated (`npm update`)
 - [ ] `npm audit` passes with no high/critical issues
 - [ ] JWT secrets are long and random (64+ characters)
-- [ ] CORS is restricted to frontend domain
-- [ ] HTTPS is enforced (HSTS enabled)
-- [ ] Database has strong password
-- [ ] Rate limiting is configured
-- [ ] Audit logging is enabled
-- [ ] Security headers are enabled (Helmet)
-- [ ] Error messages don't leak sensitive info
+- [ ] CORS is restricted to frontend domain (`CORS_ORIGIN=https://your-frontend.com`)
+- [ ] HTTPS is enforced (HSTS enabled via Helmet)
+- [ ] Database has strong password (20+ chars, mixed case, numbers, symbols)
+- [ ] Database is not publicly accessible (use VPC/private network)
+- [ ] Rate limiting is configured (see RATE_LIMITING.md)
+- [ ] Audit logging is enabled (AUDIT_LOG_ENABLED=true)
+- [ ] Security headers are enabled (Helmet configured)
+- [ ] Error messages don't leak sensitive info (NODE_ENV=production)
+- [ ] All environment variables are set correctly
+- [ ] Backup strategy is configured (see DATABASE.md)
+- [ ] Monitoring is configured (see LOGGING.md)
 
-## Incident Response
+## Emergency Contacts & Reporting
+
+### Reporting Security Vulnerabilities
+
+If you discover a security vulnerability, please report it responsibly:
+
+**DO NOT** open a public GitHub issue.
+
+**Email:** security@tarotflavia.com (or repository owner email)
+
+**Include:**
+
+- Description of the vulnerability
+- Steps to reproduce
+- Potential impact assessment
+- Your contact information (optional)
+
+**Response Time:**
+
+- Initial acknowledgment: Within 24 hours
+- Status update: Within 72 hours
+- Fix deployment: Depends on severity (critical within 7 days)
 
 ### Security Incident Steps
 
-1. **Identify:** Detect the security incident
-2. **Contain:** Isolate affected systems
-3. **Investigate:** Analyze audit logs and security events
-4. **Remediate:** Fix vulnerability, update code
-5. **Notify:** Inform affected users if data breach
-6. **Document:** Document incident and lessons learned
+1. **Identify:** Detect the security incident via logs, monitoring, or user reports
+2. **Contain:** Isolate affected systems, revoke compromised tokens, block suspicious IPs
+3. **Investigate:** Analyze audit logs, security events, database queries
+4. **Remediate:** Fix vulnerability, deploy patch, update dependencies
+5. **Notify:** Inform affected users if data breach (GDPR compliance)
+6. **Document:** Post-mortem analysis, document lessons learned, update security policies
+
+### Incident Severity Classification
+
+| Severity | Description | Response Time |
+|----------|-------------|---------------|
+| **Critical** | Data breach, system compromise, RCE | Immediate (< 2 hours) |
+| **High** | Authentication bypass, privilege escalation | < 24 hours |
+| **Medium** | XSS, CSRF, information disclosure | < 72 hours |
+| **Low** | Minor information leak, rate limit bypass | < 1 week |
 
 ### Emergency Contacts
 
-- Security Lead: [TBD]
-- DevOps Lead: [TBD]
-- Legal/Compliance: [TBD]
+- **Security Lead:** [TBD]
+- **DevOps Lead:** [TBD]
+- **Legal/Compliance:** [TBD]
+- **Platform Provider:** Render Support (if using Render)
 
 ## Security Testing
 
@@ -403,23 +477,85 @@ npm test -- max-json-depth.validator.spec.ts
 
 ### When Writing New Code
 
-1. **Always sanitize user inputs:** Use DTOs with validation
-2. **Always sanitize outputs:** Use OutputSanitizerService for AI responses
-3. **Use parameterized queries:** Never concatenate SQL
-4. **Validate all inputs:** Never trust client-side validation alone
-5. **Use HTTPS:** Even in development when testing authentication
-6. **Log security events:** Use AuditLogService for sensitive actions
-7. **Follow principle of least privilege:** Users should only access what they need
+1. **Always sanitize user inputs:** Use DTOs with validation decorators (`class-validator`)
+2. **Always sanitize outputs:** Use `OutputSanitizerService` for all AI-generated responses
+3. **Use parameterized queries:** Never concatenate SQL strings (TypeORM handles this)
+4. **Validate all inputs:** Never trust client-side validation alone (always validate server-side)
+5. **Use HTTPS:** Even in development when testing authentication flows
+6. **Log security events:** Use `AuditLogService` for all sensitive actions
+7. **Follow principle of least privilege:** Users should only access what they need (use guards and roles)
+8. **Never log sensitive data:** Passwords, JWT tokens, credit cards, API keys should never be logged
+9. **Use guards consistently:** Always use `@UseGuards(JwtAuthGuard)` for protected routes
+10. **Review third-party dependencies:** Check npm audit before adding new packages
+
+### Security Code Examples
+
+**✅ Good - Secure Code:**
+
+```typescript
+// DTO with validation
+export class CreateReadingDto {
+  @IsString()
+  @MinLength(10)
+  @MaxLength(500)
+  @SanitizeHtml() // Custom decorator
+  question: string;
+
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  spreadId: number;
+}
+
+// Controller with guards
+@UseGuards(JwtAuthGuard)
+@Post('readings')
+async createReading(
+  @Body() dto: CreateReadingDto,
+  @CurrentUser() user: User,
+) {
+  return this.readingsService.create(dto, user);
+}
+
+// Service with sanitization
+async generateInterpretation(reading: TarotReading): Promise<string> {
+  const rawInterpretation = await this.aiProvider.generate(prompt);
+  return this.outputSanitizer.sanitize(rawInterpretation); // Always sanitize AI output
+}
+```
+
+**❌ Bad - Insecure Code:**
+
+```typescript
+// No validation
+@Post('readings')
+async createReading(@Body() dto: any) { // 'any' type - no validation!
+  // Direct use without sanitization
+  await this.db.query(`INSERT INTO readings (question) VALUES ('${dto.question}')`); // SQL Injection!
+}
+
+// No authentication
+@Get('admin/users')
+async getAllUsers() { // Anyone can access this!
+  return this.usersService.findAll();
+}
+
+// Logging sensitive data
+this.logger.log(`User ${user.email} logged in with password ${password}`); // NEVER log passwords!
+```
 
 ### Code Review Checklist
 
-- [ ] All user inputs are validated
-- [ ] SQL queries use TypeORM (no raw SQL)
-- [ ] Passwords are hashed with bcrypt
-- [ ] Sensitive data is not logged
-- [ ] Authorization guards are in place
-- [ ] Error messages don't leak sensitive info
-- [ ] New dependencies are from trusted sources
+- [ ] All user inputs are validated with DTOs and decorators
+- [ ] SQL queries use TypeORM (no raw SQL string concatenation)
+- [ ] Passwords are hashed with bcrypt (never stored in plain text)
+- [ ] Sensitive data is not logged (passwords, tokens, API keys)
+- [ ] Authorization guards are in place (`@UseGuards(JwtAuthGuard, RolesGuard)`)
+- [ ] Error messages don't leak sensitive info (use generic messages in production)
+- [ ] New dependencies are from trusted sources (check npm, verify maintainer)
+- [ ] AI-generated content is sanitized before storing/returning
+- [ ] Rate limiting is applied to sensitive endpoints
+- [ ] CORS configuration is restrictive (not `*` in production)
 
 ## Compliance
 
@@ -447,16 +583,27 @@ npm test -- max-json-depth.validator.spec.ts
 | A09: Logging Failures          | Audit logs, security event monitoring                 |
 | A10: SSRF                      | URL validation, no user-controlled requests           |
 
-## References
+---
+
+**Version:** 2.0.0  
+**Last Updated:** November 2025  
+**Next Review:** February 2026  
+**Maintained by:** Development Team
+
+## Related Documentation
+
+- [INPUT_VALIDATION.md](./INPUT_VALIDATION.md) - Detailed input validation strategy
+- [AUDIT_LOG.md](./AUDIT_LOG.md) - Audit logging implementation
+- [API_DOCUMENTATION.md](./API_DOCUMENTATION.md) - API security considerations
+- [DEPLOYMENT.md](./DEPLOYMENT.md) - Production deployment security
+- [DATABASE.md](./DATABASE.md) - Database security and pooling
+
+## External Resources
 
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
 - [OWASP Cheat Sheet Series](https://cheatsheetseries.owasp.org/)
 - [Helmet.js Documentation](https://helmetjs.github.io/)
 - [NestJS Security Best Practices](https://docs.nestjs.com/security/security-best-practices)
-- [JWT Best Practices](https://tools.ietf.org/html/rfc8725)
+- [JWT Best Practices (RFC 8725)](https://tools.ietf.org/html/rfc8725)
+- [GDPR Compliance Guide](https://gdpr.eu/)
 
----
-
-**Last Updated:** January 27, 2025  
-**Version:** 1.0.0  
-**Next Review:** April 27, 2025
