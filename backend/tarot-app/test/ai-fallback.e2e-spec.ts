@@ -201,7 +201,7 @@ describe('AI Provider Fallback (e2e)', () => {
         promises.push(
           request(app.getHttpServer())
             .post('/readings')
-            .set('Authorization', `Bearer ${freeUserToken}`)
+            .set('Authorization', `Bearer ${premiumUserToken}`)
             .send({
               predefinedQuestionId: 1,
               deckId: 1,
