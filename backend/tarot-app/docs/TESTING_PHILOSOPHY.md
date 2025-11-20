@@ -247,14 +247,21 @@ import { validUserDto } from '@test/fixtures/users.fixtures';
 ✅ **Debugging:** Más fácil identificar qué falló  
 ✅ **Onboarding:** Nuevos desarrolladores entienden más rápido
 
-### Límites por Tipo de Test
+### Límites por Tipo de Test (Basados en Google TypeScript Style Guide)
 
 | Tipo de Test         | Límite Ideal | Límite Máximo | Acción si Excede           |
 | -------------------- | ------------ | ------------- | -------------------------- |
-| Unit Test (simple)   | 300 líneas   | 500 líneas    | Dividir por método/función |
+| Unit Test (simple)   | 300 líneas   | 400 líneas    | Dividir por método/función |
 | Unit Test (complejo) | 400 líneas   | 600 líneas    | Dividir por caso de uso    |
-| Integration Test     | 500 líneas   | 800 líneas    | Dividir por flujo          |
-| E2E Test             | 400 líneas   | 700 líneas    | Dividir por user journey   |
+| Integration Test     | 400 líneas   | 600 líneas    | Dividir por flujo          |
+| E2E Test             | 300 líneas   | 500 líneas    | Dividir por user journey   |
+
+**⚠️ LÍMITE CRÍTICO: 600 líneas**
+- Archivos >600 líneas **DEBEN** refactorizarse
+- Archivos >800 líneas **RECHAZAN** en code review
+- Archivos >1000 líneas violan principios SOLID y Clean Code
+
+**Referencia:** Google TypeScript Style Guide recomienda ~400 líneas máximo por archivo
 
 ### Excepción: Tests Exhaustivos
 
@@ -272,7 +279,9 @@ import { validUserDto } from '@test/fixtures/users.fixtures';
 
 ### Red Flags
 
-🔴 **Archivo >1000 líneas** sin justificación documentada  
+🔴 **Archivo >600 líneas** sin justificación documentada → DEBE refactorizarse  
+🔴 **Archivo >800 líneas** → RECHAZAR en code review  
+🔴 **Archivo >1000 líneas** → Violación grave de Clean Code  
 🔴 **Copy-paste de setup** entre bloques (extraer a helper)  
 🔴 **Tests difíciles de encontrar** (pobre organización)  
 🔴 **Timeouts frecuentes** al ejecutar (demasiados tests en un archivo)  
