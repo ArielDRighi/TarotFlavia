@@ -44,6 +44,11 @@ export class AuthService {
   ): Promise<UserWithoutPassword | null> {
     const user = await this.usersService.findByEmail(email);
 
+    // Validate password before bcrypt.compare
+    if (!pass || typeof pass !== 'string') {
+      return null;
+    }
+
     if (user && (await bcrypt.compare(pass, user.password))) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...result } = user;
@@ -90,7 +95,12 @@ export class AuthService {
     userAgent: string,
   ) {
     // Ensure we have a complete User object with required fields
-    if (!userPartial.id || !userPartial.email) {
+    if (
+      !userPartial.id ||
+      !userPartial.email ||
+      userPartial.id <= 0 ||
+      userPartial.email === ''
+    ) {
       throw new UnauthorizedException('Invalid user data');
     }
 

@@ -12,6 +12,7 @@ import { RequiresPremiumForCustomQuestionGuard } from './guards/requires-premium
 import { ReadingsCacheInterceptor } from './interceptors/readings-cache.interceptor';
 import { InterpretationsModule } from '../interpretations/interpretations.module';
 import { CardsModule } from '../cards/cards.module';
+import { DecksModule } from '../decks/decks.module';
 import { SpreadsModule } from '../spreads/spreads.module';
 import { PredefinedQuestionsModule } from '../../predefined-questions/predefined-questions.module';
 import { UsageLimitsModule } from '../../usage-limits/usage-limits.module';
@@ -40,6 +41,7 @@ import { RestoreReadingUseCase } from './application/use-cases/restore-reading.u
     TypeOrmModule.forFeature([TarotReading, TarotInterpretation, User]),
     InterpretationsModule,
     CardsModule,
+    DecksModule,
     SpreadsModule,
     PredefinedQuestionsModule,
     UsageLimitsModule,

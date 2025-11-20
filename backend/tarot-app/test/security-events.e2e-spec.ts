@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
@@ -33,6 +34,7 @@ interface SecurityEventResponse {
 
 describe('Security Events E2E', () => {
   let app: INestApplication;
+  let httpServer: ReturnType<INestApplication['getHttpServer']>;
   let datasource: DataSource;
   let adminToken: string;
   let regularUserToken: string;
@@ -53,33 +55,34 @@ describe('Security Events E2E', () => {
 
     await app.init();
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    httpServer = app.getHttpServer() as unknown as ReturnType<
+      INestApplication['getHttpServer']
+    >;
     datasource = moduleFixture.get<DataSource>(DataSource);
 
     // Get admin token
-    const adminResponse = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({
-        email: 'admin@test.com',
-        password: 'Test123456!',
-      });
+    const adminResponse = await request(httpServer).post('/auth/login').send({
+      email: 'admin@test.com',
+      password: 'Test123456!',
+    });
 
-    adminToken = (adminResponse.body as LoginResponse).access_token;
+    adminToken = (adminResponse.body as unknown as LoginResponse).access_token;
 
     // Create regular user and get token
-    await request(app.getHttpServer()).post('/auth/register').send({
+    await request(httpServer).post('/auth/register').send({
       email: 'securitytest@test.com',
       password: 'Test123456!',
       name: 'Security Test User',
     });
 
-    const userResponse = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({
-        email: 'securitytest@test.com',
-        password: 'Test123456!',
-      });
+    const userResponse = await request(httpServer).post('/auth/login').send({
+      email: 'securitytest@test.com',
+      password: 'Test123456!',
+    });
 
-    regularUserToken = (userResponse.body as LoginResponse).access_token;
+    regularUserToken = (userResponse.body as unknown as LoginResponse)
+      .access_token;
   });
 
   afterAll(async () => {
@@ -95,25 +98,23 @@ describe('Security Events E2E', () => {
 
   describe('Authentication', () => {
     it('should reject unauthenticated requests', () => {
-      return request(app.getHttpServer())
-        .get('/admin/security/events')
-        .expect(401);
+      return request(httpServer).get('/admin/security/events').expect(401);
     });
 
     it('should reject non-admin users', () => {
-      return request(app.getHttpServer())
+      return request(httpServer)
         .get('/admin/security/events')
         .set('Authorization', `Bearer ${regularUserToken}`)
         .expect(403);
     });
 
     it('should return security events for admin', async () => {
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer)
         .get('/admin/security/events')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
-      const body = response.body as SecurityEventResponse;
+      const body = response.body as unknown as SecurityEventResponse;
       expect(body).toHaveProperty('events');
       expect(body).toHaveProperty('meta');
       expect(Array.isArray(body.events)).toBe(true);
@@ -124,12 +125,12 @@ describe('Security Events E2E', () => {
     });
 
     it('should filter by event type', async () => {
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer)
         .get('/admin/security/events?eventType=failed_login')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
-      const body = response.body as SecurityEventResponse;
+      const body = response.body as unknown as SecurityEventResponse;
       expect(body.events).toBeDefined();
       if (body.events.length > 0) {
         expect(body.events[0].eventType).toBe('failed_login');
@@ -137,12 +138,12 @@ describe('Security Events E2E', () => {
     });
 
     it('should filter by severity', async () => {
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer)
         .get('/admin/security/events?severity=high')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
-      const body = response.body as SecurityEventResponse;
+      const body = response.body as unknown as SecurityEventResponse;
       expect(body.events).toBeDefined();
       if (body.events.length > 0) {
         expect(body.events[0].severity).toBe('high');
@@ -150,24 +151,24 @@ describe('Security Events E2E', () => {
     });
 
     it('should paginate results', async () => {
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer)
         .get('/admin/security/events?page=1&limit=5')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
-      const body = response.body as SecurityEventResponse;
+      const body = response.body as unknown as SecurityEventResponse;
       expect(body.meta.currentPage).toBe(1);
       expect(body.meta.itemsPerPage).toBe(5);
       expect(body.events.length).toBeLessThanOrEqual(5);
     });
 
     it('should validate pagination parameters', async () => {
-      await request(app.getHttpServer())
+      await request(httpServer)
         .get('/admin/security/events?page=-1')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(400);
 
-      await request(app.getHttpServer())
+      await request(httpServer)
         .get('/admin/security/events?limit=0')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(400);
@@ -177,7 +178,7 @@ describe('Security Events E2E', () => {
   describe('Security Event Logging', () => {
     it('should log failed login attempts', async () => {
       // Attempt failed login
-      await request(app.getHttpServer())
+      await request(httpServer)
         .post('/auth/login')
         .send({
           email: 'admin@test.com',
@@ -186,12 +187,12 @@ describe('Security Events E2E', () => {
         .expect(401);
 
       // Query security events
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer)
         .get('/admin/security/events?eventType=failed_login')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
-      const body = response.body as SecurityEventResponse;
+      const body = response.body as unknown as SecurityEventResponse;
       expect(body.events).toBeDefined();
       const failedEvent = body.events.find(
         (e: SecurityEventData) => e.ipAddress && e.eventType === 'failed_login',
@@ -209,7 +210,7 @@ describe('Security Events E2E', () => {
 
     it('should log successful login attempts', async () => {
       // Successful login
-      await request(app.getHttpServer())
+      await request(httpServer)
         .post('/auth/login')
         .send({
           email: 'admin@test.com',
@@ -218,12 +219,12 @@ describe('Security Events E2E', () => {
         .expect(200);
 
       // Query security events
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer)
         .get('/admin/security/events?eventType=successful_login')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
-      const body = response.body as SecurityEventResponse;
+      const body = response.body as unknown as SecurityEventResponse;
       expect(body.events).toBeDefined();
       const successEvent = body.events.find(
         (e: SecurityEventData) =>

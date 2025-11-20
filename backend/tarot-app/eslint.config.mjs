@@ -36,6 +36,14 @@ export default tseslint.config(
     files: ['**/*.spec.ts', '**/*.e2e-spec.ts'],
     rules: {
       '@typescript-eslint/unbound-method': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
     },
   },
 );

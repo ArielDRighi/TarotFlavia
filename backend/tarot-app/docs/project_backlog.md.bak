@@ -6070,19 +6070,11 @@ Crear colección de scripts útiles para facilitar desarrollo, testing y debuggi
 
 ---
 
-### **TASK-059: Implementar Testing Suite Completo** ⭐⭐⭐ CRÍTICA MVP ✅
+### **TASK-059: Implementar Testing Suite Completo** ⭐⭐⭐ CRÍTICA MVP
 
-**Prioridad:** 🔴 CRÍTICA  
+**Prioridad:** � CRÍTICA  
 **Estimación:** 5 días  
-**Dependencias:** Todos los módulos implementados  
-**Estado:** ✅ **COMPLETADA**  
-**Coverage Actual:** 73.8% statements, 58.3% branches, 66.28% functions, 73.62% lines  
-**Tests Totales:** 1,482 passing (110 suites)  
-**Bugs Encontrados y Corregidos:** 21 bugs reales en código de producción  
-**Subtareas Completadas:** 27/27 (100%)  
-**Commits Realizados:** 32 commits  
-**Fecha de Finalización:** 20 de Noviembre 2025  
-**Branch:** `feature/TASK-059-testing-suite-completo`
+**Dependencias:** Todos los módulos implementados
 
 #### 📋 Descripción
 
@@ -6090,54 +6082,55 @@ Crear suite completo de tests unitarios, de integración y E2E para asegurar cal
 
 #### ✅ Tareas específicas
 
-- ✅ **Tests Unitarios (Jest):**
-  - ✅ Crear tests para todos los servicios:
-    - ✅ AuthService: login, register, token generation (30 tests)
-    - ✅ TarotService: card selection, shuffle algorithm
-    - ✅ InterpretationService: prompt generation, caching (16 tests + 5 bugs corregidos)
-    - ✅ UsageLimitsService: limit checking, increment logic (11 tests)
-  - ✅ Crear tests para guards: RolesGuard, UsageLimitGuard, etc. (SUBTASK-9)
-  - ✅ Crear tests para pipes y interceptors (SUBTASK-10)
-  - ✅ Coverage: 73.8% statements, 58.3% branches, 66.28% functions, 73.62% lines
-- ✅ **Tests de Integración:**
-  - ✅ Tests de endpoints completos con DB de test:
-    - ✅ Auth flow completo (register → login → access protected endpoint) - 15/16 tests
-    - ✅ Reading creation flow completo - 16/16 tests + 4 bugs corregidos
-    - ✅ Admin operations
-  - ✅ Usar TestingModule de NestJS
-  - ✅ Setup y teardown de DB para cada test suite
-- ✅ **Tests E2E:**
-  - ✅ Flujos completos de usuario:
-    - ✅ Usuario free: registro → lectura → alcanzar límite (SUBTASK-18)
-    - ✅ Usuario premium: registro → múltiples lecturas → regeneración (SUBTASK-19)
-    - ✅ Admin: gestión de usuarios y contenido (SUBTASK-20)
-  - ✅ Usar supertest para requests HTTP
-- ✅ Configurar DB separada para testing:
-  - ✅ `tarot_test` database
-  - ✅ Migrations automáticas antes de tests
-  - ✅ Cleanup después de tests
-- ✅ Implementar fixtures y factories:
-  - ✅ Factory para crear usuarios de prueba (user.factory.ts)
-  - ✅ Factory para crear lecturas de prueba (reading.factory.ts)
-  - ✅ Fixtures de datos comunes (56+ edge cases - SUBTASK-25)
-- ✅ Mockear servicios externos:
-  - ✅ OpenAI API (usar respuestas fake - SUBTASK-24)
-  - ✅ Email service (capturar emails sin enviar)
-- ✅ Configurar coverage reports:
-  - ✅ HTML report local (`npm run test:cov:html`)
-  - ✅ JSON report para CI
-  - ✅ Thresholds configurados: 70% statements, 55% branches, 65% functions, 70% lines
-- ✅ Crear script `npm run test:watch` para desarrollo
-- ✅ Agregar tests de performance para endpoints críticos:
-  - ✅ Lectura no debe tomar >15s (SUBTASK-22)
-  - ✅ Listados no deben tomar >500ms (SUBTASK-23)
-- ✅ Documentar cómo ejecutar tests y crear nuevos (6 guías completas)
+- **Tests Unitarios (Jest):**
+  - Crear tests para todos los servicios:
+    - AuthService: login, register, token generation
+    - TarotService: card selection, shuffle algorithm
+    - InterpretationService: prompt generation, caching
+    - UsageLimitsService: limit checking, increment logic
+  - Crear tests para guards:
+    - RolesGuard, UsageLimitGuard, etc.
+  - Crear tests para pipes y interceptors
+  - Target: >80% code coverage
+- **Tests de Integración:**
+  - Tests de endpoints completos con DB de test:
+    - Auth flow completo (register → login → access protected endpoint)
+    - Reading creation flow completo
+    - Admin operations
+  - Usar TestingModule de NestJS
+  - Setup y teardown de DB para cada test suite
+- **Tests E2E:**
+  - Flujos completos de usuario:
+    - Usuario free: registro → lectura → alcanzar límite
+    - Usuario premium: registro → múltiples lecturas → regeneración
+    - Admin: gestión de usuarios y contenido
+  - Usar supertest para requests HTTP
+- Configurar DB separada para testing:
+  - `tarot_test` database
+  - Migrations automáticas antes de tests
+  - Cleanup después de tests
+- Implementar fixtures y factories:
+  - Factory para crear usuarios de prueba
+  - Factory para crear lecturas de prueba
+  - Fixtures de datos comunes
+- Mockear servicios externos:
+  - OpenAI API (usar respuestas fake)
+  - Email service (capturar emails sin enviar)
+- Configurar coverage reports:
+  - HTML report local
+  - JSON report para CI
+  - Thresholds mínimos (80% líneas, 70% branches)
+- Crear script `npm run test:watch` para desarrollo
+- Agregar tests de performance para endpoints críticos:
+  - Lectura no debe tomar >15s
+  - Listados no deben tomar >500ms
+- Documentar cómo ejecutar tests y crear nuevos
 
 #### 🎯 Criterios de aceptación
 
-- ✅ Coverage supera 70% en servicios críticos (actual: 73.8%)
-- ✅ Todos los tests pasan consistentemente (1,482/1,482 passing)
-- ✅ Los tests son rápidos (<5 min total, actual: ~71-90 segundos)
+- ✓ Coverage supera 80% en servicios críticos
+- ✓ Todos los tests pasan consistentemente
+- ✓ Los tests son rápidos (<5 min total)
 
 ---
 

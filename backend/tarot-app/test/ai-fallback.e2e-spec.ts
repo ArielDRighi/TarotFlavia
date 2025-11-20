@@ -19,8 +19,8 @@ import { AIProviderService } from '../src/modules/ai/application/services/ai-pro
 describe('AI Provider Fallback (e2e)', () => {
   let app: INestApplication<App>;
   let dbHelper: E2EDatabaseHelper;
-  let freeUserToken: string;
-  let freeUserId: number;
+  let premiumUserToken: string;
+  let premiumUserId: number;
   let aiProviderService: AIProviderService;
 
   beforeAll(async () => {
@@ -40,16 +40,16 @@ describe('AI Provider Fallback (e2e)', () => {
     // Get service instances
     aiProviderService = moduleFixture.get<AIProviderService>(AIProviderService);
 
-    // Login as free user
-    const freeLoginResponse = await request(app.getHttpServer())
+    // Login as premium user (to avoid AI quota issues in CI)
+    const premiumLoginResponse = await request(app.getHttpServer())
       .post('/auth/login')
-      .send({ email: 'free@test.com', password: 'Test123456!' })
+      .send({ email: 'premium@test.com', password: 'Test123456!' })
       .expect(200);
 
-    freeUserToken = freeLoginResponse.body.access_token;
-    freeUserId = freeLoginResponse.body.user.id;
+    premiumUserToken = premiumLoginResponse.body.access_token;
+    premiumUserId = premiumLoginResponse.body.user.id;
 
-    if (!freeUserToken) {
+    if (!premiumUserToken) {
       throw new Error('Failed to obtain authentication token');
     }
   }, 30000);
@@ -58,9 +58,11 @@ describe('AI Provider Fallback (e2e)', () => {
     // Clean up readings and usage limits after each test to reset usage constraints
     const ds = dbHelper.getDataSource();
     await ds.query('DELETE FROM tarot_reading WHERE "userId" = $1', [
-      freeUserId,
+      premiumUserId,
     ]);
-    await ds.query('DELETE FROM usage_limit WHERE user_id = $1', [freeUserId]);
+    await ds.query('DELETE FROM usage_limit WHERE user_id = $1', [
+      premiumUserId,
+    ]);
   });
 
   afterAll(async () => {
@@ -76,7 +78,7 @@ describe('AI Provider Fallback (e2e)', () => {
     it('should successfully generate interpretation with available provider', async () => {
       const response = await request(app.getHttpServer())
         .post('/readings')
-        .set('Authorization', `Bearer ${freeUserToken}`)
+        .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           predefinedQuestionId: 1,
           deckId: 1,
@@ -99,7 +101,7 @@ describe('AI Provider Fallback (e2e)', () => {
       const dataSource = dbHelper.getDataSource();
       const usageLogs = await dataSource.query(
         'SELECT * FROM ai_usage_logs WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1',
-        [freeUserId],
+        [premiumUserId],
       );
 
       expect(usageLogs.length).toBeGreaterThan(0);
@@ -112,7 +114,7 @@ describe('AI Provider Fallback (e2e)', () => {
     it('should log complete usage information in ai_usage_logs', async () => {
       const response = await request(app.getHttpServer())
         .post('/readings')
-        .set('Authorization', `Bearer ${freeUserToken}`)
+        .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           predefinedQuestionId: 1,
           deckId: 1,
@@ -135,7 +137,7 @@ describe('AI Provider Fallback (e2e)', () => {
       const dataSource = dbHelper.getDataSource();
       const usageLogs = await dataSource.query(
         'SELECT * FROM ai_usage_logs WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1',
-        [freeUserId],
+        [premiumUserId],
       );
 
       expect(usageLogs.length).toBeGreaterThan(0);
@@ -159,7 +161,7 @@ describe('AI Provider Fallback (e2e)', () => {
 
       expect(response.body).toHaveProperty('status');
       expect(response.body.status).toBe('ok');
-    });
+    }, 10000); // Timeout de 10s para CI
 
     it('should provide circuit breaker stats via service', () => {
       const stats = aiProviderService.getCircuitBreakerStats();
@@ -199,7 +201,7 @@ describe('AI Provider Fallback (e2e)', () => {
         promises.push(
           request(app.getHttpServer())
             .post('/readings')
-            .set('Authorization', `Bearer ${freeUserToken}`)
+            .set('Authorization', `Bearer ${premiumUserToken}`)
             .send({
               predefinedQuestionId: 1,
               deckId: 1,

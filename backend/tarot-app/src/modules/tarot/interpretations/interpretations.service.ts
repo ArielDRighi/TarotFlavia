@@ -2,6 +2,7 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
+  BadRequestException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -109,6 +110,16 @@ export class InterpretationsService {
   ): Promise<InterpretationResult> {
     const startTime = Date.now();
     this.totalRequests++;
+
+    // Validar entrada: cards no puede estar vacío
+    if (!cards || cards.length === 0) {
+      throw new BadRequestException('El array de cartas no puede estar vacío');
+    }
+
+    // Validar tarotistaId ANTES de usar fallback
+    if (tarotistaId !== undefined && tarotistaId <= 0) {
+      throw new BadRequestException('Invalid tarotistaId: must be positive');
+    }
 
     // Determinar tarotistaId: usar el proporcionado o el default (Flavia)
     const finalTarotistaId = tarotistaId || (await this.getDefaultTarotista());
@@ -368,17 +379,17 @@ export class InterpretationsService {
     isReversed: boolean,
     tarotistaId?: number,
   ): Promise<string> {
+    const actualTarotistaId = tarotistaId || (await this.getDefaultTarotista());
+    const tarotista = await this.tarotistaRepository.findOne({
+      where: { id: actualTarotistaId },
+    });
+
+    if (!tarotista) {
+      // Throw the specific error that the caller expects
+      throw new InternalServerErrorException('Tarotista no encontrado');
+    }
+
     try {
-      const actualTarotistaId =
-        tarotistaId || (await this.getDefaultTarotista());
-      const tarotista = await this.tarotistaRepository.findOne({
-        where: { id: actualTarotistaId },
-      });
-
-      if (!tarotista) {
-        throw new InternalServerErrorException('Tarotista no encontrado');
-      }
-
       // Construir prompt específico para carta del día
       const systemPrompt = TarotPrompts.getDailyCardSystemPrompt(
         tarotista.nombrePublico,
@@ -405,9 +416,8 @@ export class InterpretationsService {
       return sanitized;
     } catch (error) {
       this.logger.error('Error generating daily card interpretation:', error);
-      throw new InternalServerErrorException(
-        'Error al generar interpretación de la carta del día',
-      );
+      // Rethrow the error to preserve error details for debugging
+      throw error;
     }
   }
 

@@ -27,7 +27,7 @@ export class ReadingsCacheInterceptor implements NestInterceptor {
     const userId = request.user?.userId;
 
     // Only cache for authenticated requests
-    if (!userId) {
+    if (userId === undefined || userId === null) {
       return next.handle();
     }
 

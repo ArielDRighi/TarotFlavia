@@ -17,7 +17,15 @@ export class TypeOrmReadingRepository implements IReadingRepository {
 
   async create(reading: Partial<TarotReading>): Promise<TarotReading> {
     const newReading = this.readingRepo.create(reading);
-    return this.readingRepo.save(newReading);
+    const savedReading = await this.readingRepo.save(newReading);
+
+    // Cargar relaciones después de guardar
+    const readingWithRelations = await this.findById(savedReading.id);
+    if (!readingWithRelations) {
+      throw new Error('Failed to retrieve created reading');
+    }
+
+    return readingWithRelations;
   }
 
   async findById(
@@ -44,7 +52,26 @@ export class TypeOrmReadingRepository implements IReadingRepository {
       dateTo,
     } = options || {};
 
-    const skip = (page - 1) * limit;
+    // BUG FIX: Validate pagination parameters
+    const validatedPage = Math.max(1, page);
+    const validatedLimit = Math.min(Math.max(1, limit), 100); // Max 100 items per page
+    const skip = (validatedPage - 1) * validatedLimit;
+
+    // BUG FIX: Whitelist sortBy to prevent SQL injection
+    const allowedSortFields = [
+      'createdAt',
+      'updatedAt',
+      'id',
+      'viewCount',
+      'regenerationCount',
+    ];
+    const safeSortBy = allowedSortFields.includes(sortBy)
+      ? sortBy
+      : 'createdAt';
+
+    // BUG FIX: Validate sortOrder
+    const safeSortOrder: 'ASC' | 'DESC' =
+      sortOrder === 'ASC' || sortOrder === 'DESC' ? sortOrder : 'DESC';
 
     // Optimización: Cargar todas las relaciones en una sola query con leftJoinAndSelect
     const query = this.readingRepo
@@ -56,9 +83,9 @@ export class TypeOrmReadingRepository implements IReadingRepository {
       // Nota: user se omite para reducir payload (el frontend ya sabe qué user es)
       .where('reading.userId = :userId', { userId })
       .andWhere('reading.deletedAt IS NULL')
-      .orderBy(`reading.${sortBy}`, sortOrder)
+      .orderBy(`reading.${safeSortBy}`, safeSortOrder)
       .skip(skip)
-      .take(limit);
+      .take(validatedLimit);
 
     // Aplicar filtros adicionales si existen
     if (filters) {
@@ -69,12 +96,22 @@ export class TypeOrmReadingRepository implements IReadingRepository {
       });
     }
 
-    // Aplicar filtros de fecha
+    // BUG FIX: Validate date strings before using them
     if (dateFrom) {
-      query.andWhere('reading.createdAt >= :dateFrom', { dateFrom });
+      const parsedDateFrom = new Date(dateFrom);
+      if (!isNaN(parsedDateFrom.getTime())) {
+        query.andWhere('reading.createdAt >= :dateFrom', {
+          dateFrom: parsedDateFrom,
+        });
+      }
     }
     if (dateTo) {
-      query.andWhere('reading.createdAt <= :dateTo', { dateTo });
+      const parsedDateTo = new Date(dateTo);
+      if (!isNaN(parsedDateTo.getTime())) {
+        query.andWhere('reading.createdAt <= :dateTo', {
+          dateTo: parsedDateTo,
+        });
+      }
     }
 
     return query.getManyAndCount();
@@ -91,7 +128,26 @@ export class TypeOrmReadingRepository implements IReadingRepository {
       filters,
     } = options || {};
 
-    const skip = (page - 1) * limit;
+    // BUG FIX: Validate pagination parameters
+    const validatedPage = Math.max(1, page);
+    const validatedLimit = Math.min(Math.max(1, limit), 100);
+    const skip = (validatedPage - 1) * validatedLimit;
+
+    // BUG FIX: Whitelist sortBy to prevent SQL injection
+    const allowedSortFields = [
+      'createdAt',
+      'updatedAt',
+      'id',
+      'viewCount',
+      'regenerationCount',
+    ];
+    const safeSortBy = allowedSortFields.includes(sortBy)
+      ? sortBy
+      : 'createdAt';
+
+    // BUG FIX: Validate sortOrder
+    const safeSortOrder: 'ASC' | 'DESC' =
+      sortOrder === 'ASC' || sortOrder === 'DESC' ? sortOrder : 'DESC';
 
     // Optimización: Cargar todas las relaciones necesarias en una sola query
     const query = this.readingRepo
@@ -103,9 +159,9 @@ export class TypeOrmReadingRepository implements IReadingRepository {
       .leftJoinAndSelect('reading.category', 'category')
       .leftJoinAndSelect('reading.predefinedQuestion', 'predefinedQuestion')
       .andWhere('reading.deletedAt IS NULL')
-      .orderBy(`reading.${sortBy}`, sortOrder)
+      .orderBy(`reading.${safeSortBy}`, safeSortOrder)
       .skip(skip)
-      .take(limit);
+      .take(validatedLimit);
 
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
