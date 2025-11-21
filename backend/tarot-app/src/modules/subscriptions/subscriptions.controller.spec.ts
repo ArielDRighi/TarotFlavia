@@ -39,7 +39,7 @@ describe('SubscriptionsController', () => {
     it('debería establecer tarotista favorito para usuario autenticado', async () => {
       const userId = 1;
       const tarotistaId = 2;
-      const req = { user: { id: userId } };
+      const req = { user: { userId } };
 
       const mockSubscription = {
         id: 1,
@@ -71,7 +71,7 @@ describe('SubscriptionsController', () => {
     it('debería lanzar BadRequestException si intenta cambiar antes del cooldown', async () => {
       const userId = 1;
       const tarotistaId = 3;
-      const req = { user: { id: userId } };
+      const req = { user: { userId } };
 
       jest
         .spyOn(service, 'setFavoriteTarotista')
@@ -89,7 +89,7 @@ describe('SubscriptionsController', () => {
     it('debería lanzar NotFoundException si tarotista no existe', async () => {
       const userId = 1;
       const tarotistaId = 999;
-      const req = { user: { id: userId } };
+      const req = { user: { userId } };
 
       jest
         .spyOn(service, 'setFavoriteTarotista')
@@ -104,7 +104,7 @@ describe('SubscriptionsController', () => {
   describe('getMySubscription', () => {
     it('debería retornar información de suscripción del usuario', async () => {
       const userId = 1;
-      const req = { user: { id: userId } };
+      const req = { user: { userId } };
 
       const mockInfo = {
         subscriptionType: SubscriptionType.FAVORITE,
@@ -125,7 +125,7 @@ describe('SubscriptionsController', () => {
 
     it('debería retornar null si usuario no tiene suscripción', async () => {
       const userId = 1;
-      const req = { user: { id: userId } };
+      const req = { user: { userId } };
 
       jest.spyOn(service, 'getSubscriptionInfo').mockResolvedValue(null);
 
@@ -138,7 +138,7 @@ describe('SubscriptionsController', () => {
   describe('enableAllAccess', () => {
     it('debería activar modo all-access para usuario PREMIUM', async () => {
       const userId = 1;
-      const req = { user: { id: userId } };
+      const req = { user: { userId } };
 
       const mockSubscription = {
         id: 1,
@@ -163,7 +163,7 @@ describe('SubscriptionsController', () => {
 
     it('debería lanzar ForbiddenException si usuario es FREE', async () => {
       const userId = 1;
-      const req = { user: { id: userId } };
+      const req = { user: { userId } };
 
       jest
         .spyOn(service, 'enableAllAccessMode')

@@ -113,6 +113,10 @@ describe('SubscriptionsService', () => {
         id: userId,
         plan: UserPlan.FREE,
       };
+      const newTarotista: Partial<Tarotista> = {
+        id: newTarotistaId,
+        isActive: true,
+      };
 
       const currentSubscription: Partial<UserTarotistaSubscription> = {
         id: 1,
@@ -125,6 +129,9 @@ describe('SubscriptionsService', () => {
       };
 
       jest.spyOn(userRepo, 'findOne').mockResolvedValue(user as User);
+      jest
+        .spyOn(tarotistaRepo, 'findOne')
+        .mockResolvedValue(newTarotista as Tarotista);
       jest
         .spyOn(subscriptionRepo, 'findOne')
         .mockResolvedValue(currentSubscription as UserTarotistaSubscription);
