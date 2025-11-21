@@ -424,23 +424,41 @@ export class ExampleFactory {
 
 ## Coverage Actual
 
-### Estado Global (Actualizado: 2025-11-19)
+### Estado Global (Actualizado: 2025-11-20)
 
-| Métrica    | Actual | Target | Estado |
-| ---------- | ------ | ------ | ------ |
-| Statements | 39.49% | 80%    | ❌ Low |
-| Branches   | 29.38% | 70%    | ❌ Low |
-| Functions  | 32.03% | 75%    | ❌ Low |
-| Lines      | 39.49% | 80%    | ❌ Low |
+| Métrica    | Actual | Target | Estado        |
+| ---------- | ------ | ------ | ------------- |
+| Statements | 73.69% | 80%    | 🟡 Casi listo |
+| Branches   | 56.57% | 70%    | 🟡 Mejorando  |
+| Functions  | 66.05% | 75%    | 🟡 Mejorando  |
+| Lines      | 73.47% | 80%    | 🟡 Casi listo |
+
+**Progreso desde última medición (2025-11-19):**
+
+- Statements: +34.20% (39.49% → 73.69%)
+- Branches: +27.19% (29.38% → 56.57%)
+- Functions: +34.02% (32.03% → 66.05%)
+- Lines: +33.98% (39.49% → 73.47%)
+
+**Tests totales:** 1548 passing (120 test suites)
 
 ### Coverage por Módulo
 
-| Módulo                  | Coverage | Tests Pasando | Bugs Encontrados  | Estado |
-| ----------------------- | -------- | ------------- | ----------------- | ------ |
-| InterpretationsService  | 85%+     | 16/16         | 5 bugs corregidos | ✅     |
-| UsersService            | 84%      | 33/33         | 0 bugs (verified) | ✅     |
-| Auth (Integration)      | N/A      | 15/16         | 1 skipped         | 🟡     |
-| Reading Creation (Int.) | N/A      | 16/16         | 4 bugs corregidos | ✅     |
+| Módulo                    | Coverage | Tests Pasando | Bugs Encontrados  | Estado |
+| ------------------------- | -------- | ------------- | ----------------- | ------ |
+| InterpretationsService    | 85%+     | 16/16         | 5 bugs corregidos | ✅     |
+| UsersService              | 84%      | 33/33         | 0 bugs (verified) | ✅     |
+| TarotistasAdminController | 100%     | 17/17         | 0 bugs            | ✅     |
+| Admin Tarotistas E2E      | 100%     | 20/20         | 4 bugs corregidos | ✅     |
+| Auth (Integration)        | N/A      | 15/16         | 1 skipped         | 🟡     |
+| Reading Creation (Int.)   | N/A      | 16/16         | 4 bugs corregidos | ✅     |
+
+**Bugs encontrados en TASK-070:**
+
+1. **Table names mismatch**: SQL usaba `tarotista` en vez de `tarotistas` (plural)
+2. **Non-existent column**: Queries referenciaban `emailVerified` que no existe
+3. **Enum format**: Template strings PostgreSQL en vez de TypeScript arrays
+4. **Wrong relation**: TarotistasAdminService usaba `relations: ['config']` en vez de `['configs']` (500 errors)
 
 ### Próximos Targets
 
