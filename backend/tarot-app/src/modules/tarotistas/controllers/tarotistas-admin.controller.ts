@@ -29,6 +29,7 @@ import {
   UpdateTarotistaDto,
   UpdateTarotistaConfigDto,
   SetCustomMeaningDto,
+  BulkImportMeaningsDto,
   ApproveApplicationDto,
   RejectApplicationDto,
   GetTarotistasFilterDto,
@@ -169,11 +170,11 @@ export class TarotistasAdminController {
   @ApiResponse({ status: 201, description: 'Significados importados' })
   async bulkImportMeanings(
     @Param('id', ParseIntPipe) id: number,
-    @Body() meanings: SetCustomMeaningDto[],
+    @Body() bulkDto: BulkImportMeaningsDto,
   ) {
     return await this.tarotistasAdminService.bulkImportCustomMeanings(
       id,
-      meanings,
+      bulkDto.meanings,
     );
   }
 

@@ -882,7 +882,7 @@ Authorization: Bearer <admin_token>
 ##### Significados Personalizados de Cartas
 
 ```http
-POST /api/admin/tarotistas/:id/custom-meanings
+POST /api/admin/tarotistas/:id/meanings
 Authorization: Bearer <admin_token>
 Content-Type: application/json
 
@@ -897,25 +897,29 @@ Content-Type: application/json
 ```
 
 ```http
-GET /api/admin/tarotistas/:id/custom-meanings
+GET /api/admin/tarotistas/:id/meanings
 Authorization: Bearer <admin_token>
 ```
 
 ```http
-DELETE /api/admin/tarotistas/:id/custom-meanings/:meaningId
+DELETE /api/admin/tarotistas/:id/meanings/:meaningId
 Authorization: Bearer <admin_token>
 ```
 
 ```http
-POST /api/admin/tarotistas/:id/custom-meanings/bulk
+POST /api/admin/tarotistas/:id/meanings/bulk
 Authorization: Bearer <admin_token>
 Content-Type: application/json
 
-[
-  { "cardId": 1, "customMeaningUpright": "..." },
-  { "cardId": 2, "customMeaningUpright": "..." }
-]
+{
+  "meanings": [
+    { "cardId": 1, "customMeaningUpright": "...", "customMeaningReversed": "..." },
+    { "cardId": 2, "customMeaningUpright": "...", "customKeywords": "..." }
+  ]
+}
 ```
+
+> 🚨 **Validación**: El array `meanings` debe contener entre 1 y 78 elementos (tamaño del deck estándar).
 
 ##### Gestión de Aplicaciones de Tarotistas
 

@@ -52,6 +52,12 @@ describe('TarotistasAdminService', () => {
     findOne: jest.fn(),
     find: jest.fn(),
     findAndCount: jest.fn(),
+    manager: {
+      transaction: jest.fn(),
+      findOne: jest.fn(),
+      create: jest.fn(),
+      save: jest.fn(),
+    },
   };
 
   beforeEach(async () => {
@@ -107,6 +113,7 @@ describe('TarotistasAdminService', () => {
 
       const savedTarotista = { id: 1, ...createDto, isActive: true };
 
+      mockTarotistaRepo.findOne.mockResolvedValue(null); // No existe duplicado
       mockTarotistaRepo.create.mockReturnValue(createDto);
       mockTarotistaRepo.save.mockResolvedValue(savedTarotista);
 
@@ -114,6 +121,9 @@ describe('TarotistasAdminService', () => {
         createDto as unknown as CreateTarotistaDto,
       );
 
+      expect(mockTarotistaRepo.findOne).toHaveBeenCalledWith({
+        where: { userId: 1 },
+      });
       expect(mockTarotistaRepo.create).toHaveBeenCalledWith({
         userId: 1,
         nombrePublico: 'Luna Mística',
@@ -124,6 +134,28 @@ describe('TarotistasAdminService', () => {
       });
       expect(mockTarotistaRepo.save).toHaveBeenCalled();
       expect(result).toEqual(savedTarotista);
+    });
+
+    it('should throw BadRequestException if tarotista already exists', async () => {
+      const createDto = {
+        userId: 1,
+        nombrePublico: 'Luna Mística',
+        biografia: 'Tarotista con experiencia',
+        especialidades: ['amor', 'trabajo'],
+      };
+
+      const existingTarotista = { id: 1, userId: 1 };
+      mockTarotistaRepo.findOne.mockResolvedValue(existingTarotista);
+
+      await expect(
+        service.createTarotista(createDto as unknown as CreateTarotistaDto),
+      ).rejects.toThrow(BadRequestException);
+
+      expect(mockTarotistaRepo.findOne).toHaveBeenCalledWith({
+        where: { userId: 1 },
+      });
+      expect(mockTarotistaRepo.create).not.toHaveBeenCalled();
+      expect(mockTarotistaRepo.save).not.toHaveBeenCalled();
     });
   });
 
@@ -212,16 +244,33 @@ describe('TarotistasAdminService', () => {
 
       const approveDto = { adminNotes: 'Approved' };
 
-      mockApplicationRepo.findOne.mockResolvedValue(application);
-      mockApplicationRepo.save.mockResolvedValue({
+      const updatedApplication = {
         ...application,
         status: ApplicationStatus.APPROVED,
         adminNotes: 'Approved',
         reviewedByUserId: 1,
-      });
+        reviewedAt: new Date(),
+      };
 
-      mockTarotistaRepo.create.mockReturnValue({});
-      mockTarotistaRepo.save.mockResolvedValue({ id: 5 });
+      // Mock the transaction
+      mockApplicationRepo.manager.transaction.mockImplementation(
+        async (
+          callback: (manager: any) => Promise<TarotistaApplication>,
+        ): Promise<TarotistaApplication> => {
+          const mockManager = {
+            findOne: jest
+              .fn()
+              .mockResolvedValueOnce(application) // First call: TarotistaApplication
+              .mockResolvedValueOnce(null), // Second call: Tarotista (no existe)
+            create: jest.fn().mockReturnValue({ id: 5, userId: 10 }),
+            save: jest
+              .fn()
+              .mockResolvedValueOnce({ id: 5, userId: 10 }) // Tarotista save
+              .mockResolvedValueOnce(updatedApplication), // Application save
+          };
+          return await callback(mockManager);
+        },
+      );
 
       const result = await service.approveApplication(
         1,
@@ -230,7 +279,8 @@ describe('TarotistasAdminService', () => {
       );
 
       expect(result.status).toBe(ApplicationStatus.APPROVED);
-      expect(mockTarotistaRepo.save).toHaveBeenCalled();
+      expect(result.adminNotes).toBe('Approved');
+      expect(mockApplicationRepo.manager.transaction).toHaveBeenCalled();
     });
 
     it('should throw BadRequestException if already processed', async () => {
@@ -239,7 +289,19 @@ describe('TarotistasAdminService', () => {
         status: ApplicationStatus.APPROVED,
       };
 
-      mockApplicationRepo.findOne.mockResolvedValue(application);
+      // Mock the transaction
+      mockApplicationRepo.manager.transaction.mockImplementation(
+        async (
+          callback: (manager: any) => Promise<TarotistaApplication>,
+        ): Promise<TarotistaApplication> => {
+          const mockManager = {
+            findOne: jest.fn().mockResolvedValue(application),
+            create: jest.fn(),
+            save: jest.fn(),
+          };
+          return await callback(mockManager);
+        },
+      );
 
       await expect(
         service.approveApplication(
@@ -248,6 +310,42 @@ describe('TarotistasAdminService', () => {
           {} as unknown as ApproveApplicationDto,
         ),
       ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw BadRequestException if user is already a tarotista', async () => {
+      const application = {
+        id: 1,
+        userId: 10,
+        nombrePublico: 'Luna',
+        biografia: 'Bio',
+        especialidades: ['amor'],
+        status: ApplicationStatus.PENDING,
+      };
+
+      const existingTarotista = { id: 5, userId: 10 };
+
+      // Mock the transaction
+      mockApplicationRepo.manager.transaction.mockImplementation(
+        async (
+          callback: (manager: any) => Promise<TarotistaApplication>,
+        ): Promise<TarotistaApplication> => {
+          const mockManager = {
+            findOne: jest
+              .fn()
+              .mockResolvedValueOnce(application) // First call: TarotistaApplication
+              .mockResolvedValueOnce(existingTarotista), // Second call: Tarotista already exists
+            create: jest.fn(),
+            save: jest.fn(),
+          };
+          return await callback(mockManager);
+        },
+      );
+
+      await expect(
+        service.approveApplication(1, 1, {
+          adminNotes: 'Test',
+        } as unknown as ApproveApplicationDto),
+      ).rejects.toThrow(new BadRequestException('El usuario ya es tarotista'));
     });
   });
 

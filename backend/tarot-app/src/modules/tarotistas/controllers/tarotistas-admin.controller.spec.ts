@@ -368,6 +368,8 @@ describe('TarotistasAdminController', () => {
         } as unknown as SetCustomMeaningDto,
       ];
 
+      const bulkDto = { meanings };
+
       const expectedResult = [
         {
           id: 1,
@@ -387,7 +389,7 @@ describe('TarotistasAdminController', () => {
         expectedResult,
       );
 
-      const result = await controller.bulkImportMeanings(1, meanings);
+      const result = await controller.bulkImportMeanings(1, bulkDto as any);
 
       expect(service.bulkImportCustomMeanings).toHaveBeenCalledWith(
         1,

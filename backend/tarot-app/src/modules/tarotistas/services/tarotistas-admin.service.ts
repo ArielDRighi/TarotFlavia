@@ -37,6 +37,17 @@ export class TarotistasAdminService {
   ) {}
 
   async createTarotista(createDto: CreateTarotistaDto): Promise<Tarotista> {
+    // Check if tarotista already exists for this user
+    const existing = await this.tarotistaRepository.findOne({
+      where: { userId: createDto.userId },
+    });
+
+    if (existing) {
+      throw new BadRequestException(
+        `El usuario con ID ${createDto.userId} ya es tarotista`,
+      );
+    }
+
     const tarotista = this.tarotistaRepository.create({
       userId: createDto.userId,
       nombrePublico: createDto.nombrePublico,
@@ -79,7 +90,9 @@ export class TarotistasAdminService {
 
     const where: FindOptionsWhere<Tarotista> = {};
     if (search) {
-      where.nombrePublico = Like(`%${search}%`);
+      // Escape special characters % and _ to prevent SQL injection
+      const escapedSearch = search.replace(/[%_]/g, '\\$&');
+      where.nombrePublico = Like(`%${escapedSearch}%`);
     }
     if (isActive !== undefined) {
       where.isActive = isActive;
@@ -116,7 +129,20 @@ export class TarotistasAdminService {
       throw new NotFoundException(`Tarotista con ID ${id} no encontrado`);
     }
 
-    Object.assign(tarotista, updateDto);
+    // Only assign allowed fields from UpdateTarotistaDto (whitelist approach)
+    if (updateDto.nombrePublico !== undefined) {
+      tarotista.nombrePublico = updateDto.nombrePublico;
+    }
+    if (updateDto.biografia !== undefined) {
+      tarotista.bio = updateDto.biografia;
+    }
+    if (updateDto.especialidades !== undefined) {
+      tarotista.especialidades = updateDto.especialidades;
+    }
+    if (updateDto.fotoPerfil !== undefined) {
+      tarotista.fotoPerfil = updateDto.fotoPerfil;
+    }
+
     return await this.tarotistaRepository.save(tarotista);
   }
 
@@ -284,14 +310,12 @@ export class TarotistasAdminService {
     tarotistaId: number,
     meanings: SetCustomMeaningDto[],
   ): Promise<TarotistaCardMeaning[]> {
-    const results: TarotistaCardMeaning[] = [];
-
-    for (const meaningDto of meanings) {
-      const saved = await this.setCustomCardMeaning(tarotistaId, meaningDto);
-      results.push(saved);
-    }
-
-    return results;
+    // Process meanings in parallel for better performance
+    return await Promise.all(
+      meanings.map((meaningDto) =>
+        this.setCustomCardMeaning(tarotistaId, meaningDto),
+      ),
+    );
   }
 
   async applyToBeTarotist(
@@ -325,36 +349,69 @@ export class TarotistasAdminService {
     adminUserId: number,
     approveDto: ApproveApplicationDto,
   ): Promise<TarotistaApplication> {
-    const application = await this.applicationRepository.findOne({
-      where: { id: applicationId },
-    });
+    // Use transaction to ensure atomicity and prevent race conditions
+    return await this.applicationRepository.manager.transaction(
+      async (manager) => {
+        const application = await manager.findOne(TarotistaApplication, {
+          where: { id: applicationId },
+        });
 
-    if (!application) {
-      throw new NotFoundException(`Aplicación ${applicationId} no encontrada`);
-    }
+        if (!application) {
+          throw new NotFoundException(
+            `Aplicación ${applicationId} no encontrada`,
+          );
+        }
 
-    if (application.status !== ApplicationStatus.PENDING) {
-      throw new BadRequestException('Esta aplicación ya fue procesada');
-    }
+        if (application.status !== ApplicationStatus.PENDING) {
+          throw new BadRequestException('Esta aplicación ya fue procesada');
+        }
 
-    // Create tarotista from application
-    const tarotista = this.tarotistaRepository.create({
-      userId: application.userId,
-      nombrePublico: application.nombrePublico,
-      bio: application.biografia, // Map biografia -> bio
-      especialidades: application.especialidades,
-      isActive: true,
-    });
+        // Check if tarotista already exists for this user
+        const existingTarotista = await manager.findOne(Tarotista, {
+          where: { userId: application.userId },
+        });
 
-    await this.tarotistaRepository.save(tarotista);
+        if (existingTarotista) {
+          throw new BadRequestException('El usuario ya es tarotista');
+        }
 
-    // Update application status
-    application.status = ApplicationStatus.APPROVED;
-    application.reviewedByUserId = adminUserId;
-    application.reviewedAt = new Date();
-    application.adminNotes = approveDto.adminNotes || null;
+        // Create tarotista from application
+        const tarotista = manager.create(Tarotista, {
+          userId: application.userId,
+          nombrePublico: application.nombrePublico,
+          bio: application.biografia, // Map biografia -> bio
+          especialidades: application.especialidades,
+          isActive: true,
+        });
 
-    return await this.applicationRepository.save(application);
+        try {
+          await manager.save(Tarotista, tarotista);
+        } catch (err) {
+          // Handle unique constraint violation (race condition)
+          // PostgreSQL error code: 23505 (unique_violation)
+          // MySQL error code: ER_DUP_ENTRY
+          const errorCode =
+            err &&
+            typeof err === 'object' &&
+            'code' in err &&
+            typeof (err as { code: unknown }).code === 'string'
+              ? (err as { code: string }).code
+              : '';
+          if (errorCode === '23505' || errorCode === 'ER_DUP_ENTRY') {
+            throw new BadRequestException('El usuario ya es tarotista');
+          }
+          throw err;
+        }
+
+        // Update application status
+        application.status = ApplicationStatus.APPROVED;
+        application.reviewedByUserId = adminUserId;
+        application.reviewedAt = new Date();
+        application.adminNotes = approveDto.adminNotes || null;
+
+        return await manager.save(TarotistaApplication, application);
+      },
+    );
   }
 
   async rejectApplication(
