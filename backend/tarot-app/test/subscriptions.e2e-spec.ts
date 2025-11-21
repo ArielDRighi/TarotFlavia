@@ -116,12 +116,16 @@ describe('Subscriptions System E2E', () => {
 
   afterAll(async () => {
     // Limpiar datos de prueba
-    await subscriptionRepo.delete({ userId: freeUserId });
-    await subscriptionRepo.delete({ userId: premiumUserId });
-    await tarotistaRepo.delete({ id: testTarotistaId });
-    await userRepo.delete({ id: freeUserId });
-    await userRepo.delete({ id: premiumUserId });
-    await userRepo.delete({ email: `tarotista-${testTimestamp}@test.com` });
+    try {
+      await subscriptionRepo.delete({ userId: freeUserId });
+      await subscriptionRepo.delete({ userId: premiumUserId });
+      await tarotistaRepo.delete({ id: testTarotistaId });
+      await userRepo.delete({ id: freeUserId });
+      await userRepo.delete({ id: premiumUserId });
+      await userRepo.delete({ email: `tarotista-${testTimestamp}@test.com` });
+    } catch (error) {
+      console.warn('E2E cleanup failed:', error);
+    }
 
     await app.close();
   });

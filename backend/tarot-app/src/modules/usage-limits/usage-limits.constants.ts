@@ -17,6 +17,11 @@ export const USAGE_LIMITS: Record<UserPlan, Record<UsageFeature, number>> = {
     [UsageFeature.INTERPRETATION_REGENERATION]: -1, // ilimitado
     [UsageFeature.ORACLE_QUERY]: -1, // ilimitado
   },
+  [UserPlan.PROFESSIONAL]: {
+    [UsageFeature.TAROT_READING]: -1, // ilimitado
+    [UsageFeature.INTERPRETATION_REGENERATION]: -1, // ilimitado
+    [UsageFeature.ORACLE_QUERY]: -1, // ilimitado
+  },
 } as const;
 
 /**

@@ -73,6 +73,14 @@ export class SubscriptionsService {
       },
     });
 
+    // 3.1. Si ya tiene este tarotista, no hacer update innecesario
+    if (
+      currentSubscription &&
+      currentSubscription.tarotistaId === tarotistaId
+    ) {
+      return currentSubscription;
+    }
+
     // 4. Validar cooldown para FREE
     if (user.plan === UserPlan.FREE && currentSubscription) {
       const now = new Date();
@@ -162,13 +170,35 @@ export class SubscriptionsService {
         throw new BadRequestException('No hay tarotistas activos disponibles');
       }
 
-      // Seleccionar uno aleatorio
-      const randomIndex = Math.floor(Math.random() * tarotistas.length);
-      return tarotistas[randomIndex].id;
+      // Evitar seleccionar el último tarotista usado (mejor UX y distribución)
+      const lastTarotistaId = subscription.tarotistaId;
+      let availableTarotistas = tarotistas;
+
+      if (lastTarotistaId) {
+        const filtered = tarotistas.filter((t) => t.id !== lastTarotistaId);
+        if (filtered.length > 0) {
+          availableTarotistas = filtered;
+        }
+      }
+
+      const randomIndex = Math.floor(
+        Math.random() * availableTarotistas.length,
+      );
+      return availableTarotistas[randomIndex].id;
     }
 
     // FREE o PREMIUM individual → retornar el específico
     if (subscription.tarotistaId) {
+      // Verificar que el tarotista siga activo
+      const tarotista = await this.tarotistaRepo.findOne({
+        where: { id: subscription.tarotistaId, isActive: true },
+      });
+
+      if (!tarotista) {
+        // Tarotista desactivado, usar Flavia como fallback
+        return FLAVIA_TAROTISTA_ID;
+      }
+
       return subscription.tarotistaId;
     }
 
@@ -217,9 +247,9 @@ export class SubscriptionsService {
       throw new NotFoundException('Usuario no encontrado');
     }
 
-    if (user.plan !== UserPlan.PREMIUM) {
+    if (user.plan !== UserPlan.PREMIUM && user.plan !== UserPlan.PROFESSIONAL) {
       throw new ForbiddenException(
-        'Solo usuarios PREMIUM pueden activar modo all-access',
+        'Solo usuarios PREMIUM o PROFESSIONAL pueden activar modo all-access',
       );
     }
 

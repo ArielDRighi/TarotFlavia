@@ -266,7 +266,7 @@ describe('SubscriptionsService', () => {
   });
 
   describe('resolveTarotistaForReading', () => {
-    it('debería retornar tarotista favorito de usuario FREE', async () => {
+    it('debería retornar tarotista específico de usuario FREE', async () => {
       const userId = 1;
       const tarotistaId = 2;
 
@@ -278,13 +278,24 @@ describe('SubscriptionsService', () => {
         status: SubscriptionStatus.ACTIVE,
       };
 
+      const tarotista: Partial<Tarotista> = {
+        id: tarotistaId,
+        isActive: true,
+      };
+
       jest
         .spyOn(subscriptionRepo, 'findOne')
         .mockResolvedValue(subscription as UserTarotistaSubscription);
+      jest
+        .spyOn(tarotistaRepo, 'findOne')
+        .mockResolvedValue(tarotista as Tarotista);
 
       const result = await service.resolveTarotistaForReading(userId);
 
       expect(result).toBe(tarotistaId);
+      expect(tarotistaRepo.findOne).toHaveBeenCalledWith({
+        where: { id: tarotistaId, isActive: true },
+      });
     });
 
     it('debería retornar tarotista específico de usuario PREMIUM individual', async () => {
@@ -299,13 +310,49 @@ describe('SubscriptionsService', () => {
         status: SubscriptionStatus.ACTIVE,
       };
 
+      const tarotista: Partial<Tarotista> = {
+        id: tarotistaId,
+        isActive: true,
+      };
+
       jest
         .spyOn(subscriptionRepo, 'findOne')
         .mockResolvedValue(subscription as UserTarotistaSubscription);
+      jest
+        .spyOn(tarotistaRepo, 'findOne')
+        .mockResolvedValue(tarotista as Tarotista);
 
       const result = await service.resolveTarotistaForReading(userId);
 
       expect(result).toBe(tarotistaId);
+      expect(tarotistaRepo.findOne).toHaveBeenCalledWith({
+        where: { id: tarotistaId, isActive: true },
+      });
+    });
+
+    it('debería usar Flavia como fallback si tarotista seleccionado está inactivo', async () => {
+      const userId = 1;
+      const inactiveTarotistaId = 5;
+
+      const subscription: Partial<UserTarotistaSubscription> = {
+        id: 1,
+        userId,
+        tarotistaId: inactiveTarotistaId,
+        subscriptionType: SubscriptionType.FAVORITE,
+        status: SubscriptionStatus.ACTIVE,
+      };
+
+      jest
+        .spyOn(subscriptionRepo, 'findOne')
+        .mockResolvedValue(subscription as UserTarotistaSubscription);
+      jest.spyOn(tarotistaRepo, 'findOne').mockResolvedValue(null); // Tarotista inactivo
+
+      const result = await service.resolveTarotistaForReading(userId);
+
+      expect(result).toBe(1); // FLAVIA_TAROTISTA_ID
+      expect(tarotistaRepo.findOne).toHaveBeenCalledWith({
+        where: { id: inactiveTarotistaId, isActive: true },
+      });
     });
 
     it('debería retornar tarotista aleatorio para PREMIUM all-access', async () => {

@@ -24,6 +24,11 @@ export const AI_MONTHLY_QUOTAS: Record<UserPlan, QuotaConfig> = {
     softLimit: -1, // No aplica
     hardLimit: Number.MAX_SAFE_INTEGER, // Prácticamente ilimitado
   },
+  [UserPlan.PROFESSIONAL]: {
+    maxRequests: Number(process.env.AI_QUOTA_PROFESSIONAL_MONTHLY) || -1, // Ilimitado
+    softLimit: -1, // No aplica
+    hardLimit: Number.MAX_SAFE_INTEGER, // Prácticamente ilimitado
+  },
 };
 
 export const QUOTA_WARNING_MESSAGE =
