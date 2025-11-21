@@ -260,16 +260,22 @@ describe('Subscriptions System E2E', () => {
     });
 
     it('debería rechazar activación para usuario FREE', async () => {
-      // Primero necesitamos asegurar que el usuario FREE tenga una suscripción
-      await subscriptionRepo.save({
-        userId: freeUserId,
-        tarotistaId: flaviaId,
-        subscriptionType: SubscriptionType.FAVORITE,
-        status: SubscriptionStatus.ACTIVE,
-        startedAt: new Date(),
-        canChangeAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-        changeCount: 0,
+      // Asegurar que el usuario FREE tenga una suscripción
+      const existingSub = await subscriptionRepo.findOne({
+        where: { userId: freeUserId, status: SubscriptionStatus.ACTIVE },
       });
+
+      if (!existingSub) {
+        await subscriptionRepo.save({
+          userId: freeUserId,
+          tarotistaId: flaviaId,
+          subscriptionType: SubscriptionType.FAVORITE,
+          status: SubscriptionStatus.ACTIVE,
+          startedAt: new Date(),
+          canChangeAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          changeCount: 0,
+        });
+      }
 
       const response = await request(app.getHttpServer())
         .post('/subscriptions/enable-all-access')

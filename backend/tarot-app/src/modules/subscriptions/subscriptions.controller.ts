@@ -5,6 +5,8 @@ import {
   Body,
   UseGuards,
   Request,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -28,6 +30,7 @@ export class SubscriptionsController {
   constructor(private readonly subscriptionsService: SubscriptionsService) {}
 
   @Post('set-favorite')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Establecer tarotista favorito',
     description:
@@ -43,11 +46,11 @@ export class SubscriptionsController {
   })
   @ApiResponse({ status: 404, description: 'Tarotista no encontrado' })
   async setFavoriteTarotista(
-    @Request() req: { user: { id: number } },
+    @Request() req: { user: { userId: number } },
     @Body() dto: SetFavoriteTarotistaDto,
   ) {
     const subscription = await this.subscriptionsService.setFavoriteTarotista(
-      req.user.id,
+      req.user.userId,
       dto.tarotistaId,
     );
 
@@ -68,12 +71,13 @@ export class SubscriptionsController {
     description: 'Información de suscripción',
   })
   async getMySubscription(
-    @Request() req: { user: { id: number } },
+    @Request() req: { user: { userId: number } },
   ): Promise<SubscriptionInfo | null> {
-    return this.subscriptionsService.getSubscriptionInfo(req.user.id);
+    return this.subscriptionsService.getSubscriptionInfo(req.user.userId);
   }
 
   @Post('enable-all-access')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Activar modo all-access',
     description:
@@ -87,12 +91,12 @@ export class SubscriptionsController {
     status: 403,
     description: 'Solo usuarios PREMIUM pueden activar all-access',
   })
-  async enableAllAccess(@Request() req: { user: { id: number } }): Promise<{
+  async enableAllAccess(@Request() req: { user: { userId: number } }): Promise<{
     message: string;
     subscription: UserTarotistaSubscription;
   }> {
     const subscription = await this.subscriptionsService.enableAllAccessMode(
-      req.user.id,
+      req.user.userId,
     );
 
     return {

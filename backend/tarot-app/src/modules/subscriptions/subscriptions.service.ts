@@ -52,7 +52,20 @@ export class SubscriptionsService {
       throw new NotFoundException('Usuario no encontrado');
     }
 
-    // 2. Buscar suscripción actual
+    // 2. Validar que tarotista existe y está activo (ANTES del cooldown)
+    const tarotista = await this.tarotistaRepo.findOne({
+      where: { id: tarotistaId },
+    });
+    if (!tarotista) {
+      throw new NotFoundException('Tarotista no encontrado');
+    }
+    if (!tarotista.isActive) {
+      throw new BadRequestException(
+        'Este tarotista no está disponible actualmente',
+      );
+    }
+
+    // 3. Buscar suscripción actual
     const currentSubscription = await this.subscriptionRepo.findOne({
       where: {
         userId,
@@ -60,7 +73,7 @@ export class SubscriptionsService {
       },
     });
 
-    // 3. Validar cooldown para FREE
+    // 4. Validar cooldown para FREE
     if (user.plan === UserPlan.FREE && currentSubscription) {
       const now = new Date();
       if (
@@ -75,19 +88,6 @@ export class SubscriptionsService {
           `No puedes cambiar de tarotista favorito aún. Faltan ${daysRemaining} días. Próximo cambio disponible: ${currentSubscription.canChangeAt.toISOString()}`,
         );
       }
-    }
-
-    // 4. Validar que tarotista existe y está activo
-    const tarotista = await this.tarotistaRepo.findOne({
-      where: { id: tarotistaId },
-    });
-    if (!tarotista) {
-      throw new NotFoundException('Tarotista no encontrado');
-    }
-    if (!tarotista.isActive) {
-      throw new BadRequestException(
-        'Este tarotista no está disponible actualmente',
-      );
     }
 
     // 5. Si tiene suscripción, actualizar. Si no, crear nueva
@@ -119,6 +119,7 @@ export class SubscriptionsService {
 
       const newSubscription = this.subscriptionRepo.create({
         userId,
+        user,
         tarotistaId,
         subscriptionType,
         status: SubscriptionStatus.ACTIVE,
