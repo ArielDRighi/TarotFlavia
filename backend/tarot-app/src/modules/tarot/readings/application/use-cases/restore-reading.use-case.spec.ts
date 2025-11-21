@@ -217,7 +217,6 @@ describe('RestoreReadingUseCase', () => {
       readingRepo.restore.mockResolvedValue(undefined);
       readingRepo.findById.mockResolvedValue(mockRestoredReading);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       await useCase.execute(null as any, 100);
 
       expect(validator.validateReadingOwnership).toHaveBeenCalledWith(
@@ -234,7 +233,6 @@ describe('RestoreReadingUseCase', () => {
       readingRepo.restore.mockResolvedValue(undefined);
       readingRepo.findById.mockResolvedValue(mockRestoredReading);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       await useCase.execute(1, null as any);
 
       expect(validator.validateReadingOwnership).toHaveBeenCalledWith(

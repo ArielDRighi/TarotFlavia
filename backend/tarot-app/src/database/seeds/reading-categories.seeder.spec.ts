@@ -2,9 +2,6 @@ import { Repository } from 'typeorm';
 import { ReadingCategory } from '../../modules/categories/entities/reading-category.entity';
 import { seedReadingCategories } from './reading-categories.seeder';
 
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-
 describe('ReadingCategoriesSeeder', () => {
   let mockCategoryRepository: jest.Mocked<Repository<ReadingCategory>>;
 

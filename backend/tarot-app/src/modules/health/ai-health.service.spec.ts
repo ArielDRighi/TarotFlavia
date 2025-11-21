@@ -266,19 +266,16 @@ describe('AIHealthService', () => {
 
   describe('Provider timeouts', () => {
     it('should respect Groq timeout of 10s', () => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       const timeout = (service as any).GROQ_TIMEOUT as number;
       expect(timeout).toBe(10000);
     });
 
     it('should respect DeepSeek timeout of 15s', () => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       const timeout = (service as any).DEEPSEEK_TIMEOUT as number;
       expect(timeout).toBe(15000);
     });
 
     it('should respect OpenAI timeout of 30s', () => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       const timeout = (service as any).OPENAI_TIMEOUT as number;
       expect(timeout).toBe(30000);
     });

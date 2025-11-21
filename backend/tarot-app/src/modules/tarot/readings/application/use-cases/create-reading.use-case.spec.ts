@@ -8,6 +8,7 @@ import { CardsService } from '../../../cards/cards.service';
 import { SpreadsService } from '../../../spreads/spreads.service';
 import { DecksService } from '../../../decks/decks.service';
 import { PredefinedQuestionsService } from '../../../../predefined-questions/predefined-questions.service';
+import { SubscriptionsService } from '../../../../subscriptions/subscriptions.service';
 import { TarotReading } from '../../entities/tarot-reading.entity';
 import { User, UserPlan } from '../../../../users/entities/user.entity';
 import { CreateReadingDto } from '../../dto/create-reading.dto';
@@ -25,6 +26,7 @@ describe('CreateReadingUseCase', () => {
   let spreadsService: jest.Mocked<SpreadsService>;
   let decksService: jest.Mocked<DecksService>;
   let predefinedQuestionsService: jest.Mocked<PredefinedQuestionsService>;
+  let subscriptionsService: jest.Mocked<SubscriptionsService>;
 
   const mockUser: User = {
     id: 100,
@@ -132,6 +134,12 @@ describe('CreateReadingUseCase', () => {
             findOne: jest.fn(),
           },
         },
+        {
+          provide: SubscriptionsService,
+          useValue: {
+            resolveTarotistaForReading: jest.fn().mockResolvedValue(1), // Default to Flavia
+          },
+        },
       ],
     }).compile();
 
@@ -143,6 +151,7 @@ describe('CreateReadingUseCase', () => {
     spreadsService = module.get(SpreadsService);
     decksService = module.get(DecksService);
     predefinedQuestionsService = module.get(PredefinedQuestionsService);
+    subscriptionsService = module.get(SubscriptionsService);
   });
 
   afterEach(() => {
@@ -161,6 +170,9 @@ describe('CreateReadingUseCase', () => {
       const result = await useCase.execute(mockUser, mockDto);
 
       expect(validator.validateUser).toHaveBeenCalledWith(mockUser.id);
+      expect(
+        subscriptionsService.resolveTarotistaForReading,
+      ).toHaveBeenCalledWith(mockUser.id);
       expect(decksService.findDeckById).toHaveBeenCalledWith(1);
       expect(spreadsService.findById).toHaveBeenCalledWith(1);
       expect(cardsService.findByIds).toHaveBeenCalledWith([1, 2, 3]);
@@ -497,7 +509,6 @@ describe('CreateReadingUseCase', () => {
     });
 
     it('should handle null user', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       await expect(useCase.execute(null as any, mockDto)).rejects.toThrow(
         'Invalid user: user object or user.id is missing',
       );

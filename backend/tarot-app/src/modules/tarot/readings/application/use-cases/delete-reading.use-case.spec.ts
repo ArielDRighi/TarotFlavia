@@ -164,7 +164,6 @@ describe('DeleteReadingUseCase', () => {
       validator.validateReadingNotDeleted.mockReturnValue(undefined);
       readingRepo.softDelete.mockResolvedValue(undefined);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       await useCase.execute(null as any, 100);
 
       expect(validator.validateReadingOwnership).toHaveBeenCalledWith(
@@ -179,7 +178,6 @@ describe('DeleteReadingUseCase', () => {
       validator.validateReadingNotDeleted.mockReturnValue(undefined);
       readingRepo.softDelete.mockResolvedValue(undefined);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       await useCase.execute(1, null as any);
 
       expect(validator.validateReadingOwnership).toHaveBeenCalledWith(1, null);

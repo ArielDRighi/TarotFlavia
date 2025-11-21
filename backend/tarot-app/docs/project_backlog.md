@@ -9984,7 +9984,8 @@ async getTarotistaMetrics(tarotistaId: number): Promise<TarotistaMetrics> {
 **Estimación:** 4 días  
 **Tags:** mvp, marketplace, subscriptions, business-logic, monetization  
 **Dependencias:** TASK-064 (Schema), TASK-013 (Planes), TASK-070 (Admin Tarotistas)  
-**Estado:** 🟡 NO INICIADA  
+**Estado:** ✅ COMPLETADA (21/11/2025)  
+**Branch:** `feature/TASK-071-subscriptions-system`  
 **Contexto Informe:** Sección 4 - Modelo de Suscripciones a Tarotistas
 
 ---
@@ -10659,6 +10660,104 @@ if (!tarotista) {
 5. ✅ Sistema de notificaciones
 6. ✅ Seeders de testing
 7. ✅ Tests completos
+
+#### ✅ **Resumen de Implementación (Completado 21/11/2025):**
+
+**Archivos creados:**
+
+- `src/modules/subscriptions/subscriptions.service.ts` - Service con lógica de negocio (243 líneas, 4 métodos)
+- `src/modules/subscriptions/subscriptions.service.spec.ts` - Unit tests (520 líneas, 17 tests)
+- `src/modules/subscriptions/subscriptions.controller.ts` - Controller con endpoints REST (106 líneas, 3 endpoints)
+- `src/modules/subscriptions/subscriptions.controller.spec.ts` - Controller tests (182 líneas, 7 tests)
+- `src/modules/subscriptions/subscriptions.module.ts` - Module configuration (29 líneas)
+- `src/modules/subscriptions/dto/set-favorite-tarotista.dto.ts` - DTOs con validación (13 líneas)
+- `test/subscriptions.e2e-spec.ts` - E2E tests (370 líneas, 14 tests)
+
+**Archivos modificados:**
+
+- `src/app.module.ts` - Agregado SubscriptionsModule a imports
+- `src/modules/tarot/readings/readings.module.ts` - Importado SubscriptionsModule para dependency injection
+- `src/modules/tarot/readings/application/use-cases/create-reading.use-case.ts` - Reemplazado hardcoded DEFAULT_TAROTISTA_ID con llamada a subscriptionsService.resolveTarotistaForReading()
+- `src/modules/tarot/readings/application/use-cases/create-reading.use-case.spec.ts` - Agregado mock de SubscriptionsService
+- `eslint.config.mjs` - Agregadas reglas para archivos de test (supertest typing issue)
+
+**Características implementadas:**
+
+- ✅ **Plan FREE:** 1 tarotista favorito con cooldown de 30 días para cambios
+  - `setFavoriteTarotista(userId, tarotistaId)` valida cooldown y lanza BadRequestException si no puede cambiar
+  - Retorna fecha de próximo cambio disponible en mensaje de error
+- ✅ **Plan PREMIUM/PROFESSIONAL:** Sin cooldown, cambios inmediatos
+  - Mismo método `setFavoriteTarotista()` pero sin validación de cooldown para planes PREMIUM
+  - Puede activar "all-access" mode con `enableAllAccessMode(userId)`
+- ✅ **Resolución de tarotista para lecturas:**
+  - `resolveTarotistaForReading(userId)` retorna tarotistaId según tipo de suscripción
+  - Prioridad: favorite → individual → all-access → Flavia (ID=1) como fallback
+- ✅ **Validaciones completas:**
+  - Usuario existe y tiene plan válido (fetch fresh from DB)
+  - Tarotista existe y está activo (isActive = true)
+  - Cooldown respetado para FREE (30 días desde lastChangedAt)
+  - All-access solo para PREMIUM/PROFESSIONAL (lanza ForbiddenException para FREE)
+- ✅ **Database constraints:**
+  - Unique partial index: `idx_user_single_favorite` (userId WHERE subscriptionType = 'favorite')
+  - Unique partial index: `idx_user_single_premium_individual` (userId WHERE subscriptionType = 'individual')
+  - Ensures data integrity at database level
+- ✅ **TypeORM entities:**
+  - UserTarotistaSubscription con relaciones a User y Tarotista
+  - Campos: userId, tarotistaId, subscriptionType, isActive, lastChangedAt, createdAt, updatedAt
+  - Entity creation con `user` relation object + `userId` (like RefreshToken pattern)
+
+**Endpoints REST implementados:**
+
+- `POST /subscriptions/set-favorite` - Establece tarotista favorito (body: {tarotistaId}, responses: 200/400/404)
+- `GET /subscriptions/my-subscription` - Obtiene info de suscripción actual (responses: 200)
+- `POST /subscriptions/enable-all-access` - Activa modo all-access PREMIUM (responses: 200/403)
+
+**Documentación:**
+
+- ✅ API_DOCUMENTATION.md actualizado con sección "Suscripciones"
+- ✅ 3 endpoints documentados con ejemplos cURL y HTTPie
+- ✅ Schemas de request/response con ejemplos JSON
+- ✅ Casos de error documentados (400 cooldown, 403 forbidden, 404 not found)
+
+**Metodología TDD aplicada:**
+
+1. ✅ Tests escritos primero para SubscriptionsService (RED phase) - 17 tests
+2. ✅ Implementación mínima para pasar tests (GREEN phase) - 4 métodos
+3. ✅ Tests escritos para SubscriptionsController (RED phase) - 7 tests
+4. ✅ Implementación de controller y DTOs (GREEN phase) - 3 endpoints
+5. ✅ Tests E2E escritos (RED phase) - 14 scenarios
+6. ✅ Integración con CreateReadingUseCase (GREEN phase) - dynamic tarotista resolution
+7. ✅ Bug fixes y refactorización (REFACTOR phase) - JWT userId fix, validation order, TypeORM entity
+8. ✅ Verificación final: 38 tests pasando (24 unit + 14 E2E), lint clean, build successful
+
+**Tests ejecutados:**
+
+- ✅ **Unit tests:** 24/24 passing
+  - SubscriptionsService: 17 tests (cooldown validation, plan-based behavior, tarotista resolution, all-access mode)
+  - SubscriptionsController: 7 tests (endpoint behavior, request validation, response format)
+- ✅ **E2E tests:** 14/14 passing
+  - subscriptions.e2e-spec.ts: Flujos completos FREE cooldown, PREMIUM no cooldown, all-access activation, integration con readings
+- ✅ **Quality checks:**
+  - Lint: 0 errors (eslint.config.mjs properly configured for test files)
+  - Format: All files formatted with Prettier
+  - Build: TypeScript compilation successful (npm run build)
+  - Architecture validation: Flat structure approved by validate-architecture.js
+
+**Commits realizados:**
+
+- `b19e03f` - Initial subscriptions implementation (service, controller, module, DTOs, tests)
+- `c0ec1f6` - Bug fixes (JWT userId, validation order, HTTP status codes, TypeORM user relation)
+- `6979f1c` - Test fixes (updated all controller tests to use userId instead of id)
+- `dd257db` - Quality fixes (lint errors, removed unused imports, format)
+
+**Verificación de bugs críticos:**
+
+- ✅ **JWT userId bug:** Fixed controller to use `req.user.userId` instead of `req.user.id` (JWT strategy returns {userId, email, isAdmin, roles, plan})
+- ✅ **Validation order:** Moved tarotista existence/active check BEFORE cooldown validation (prevents wrong error messages)
+- ✅ **TypeORM entity creation:** Added `user` relation object alongside `userId` (fixed "null value in column user_id" error)
+- ✅ **HTTP status codes:** Added `@HttpCode(HttpStatus.OK)` to POST endpoints (E2E tests expected 200 not 201)
+- ✅ **Cooldown calculation:** Uses Date arithmetic with days (30 days = lastChangedAt + 30 days)
+- ✅ **Tarotista fallback:** Returns Flavia (ID=1) if no subscription found (backward compatibility)
 
 ---
 

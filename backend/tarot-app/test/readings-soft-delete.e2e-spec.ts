@@ -320,7 +320,6 @@ describe('Readings Soft Delete E2E', () => {
         .set('Authorization', `Bearer ${userToken}`)
         .expect(200);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       const readings = response.body.data as TarotReading[];
       const deletedReading = readings.find((r) => r.id === readingId);
 
@@ -542,7 +541,6 @@ describe('Readings Soft Delete E2E', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       const readings = response.body.data as TarotReading[];
       const deletedReading = readings.find((r) => r.id === readingId);
 
@@ -565,7 +563,6 @@ describe('Readings Soft Delete E2E', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       const readings = response.body.data as TarotReading[];
       const deletedReading = readings.find((r) => r.id === readingId);
 

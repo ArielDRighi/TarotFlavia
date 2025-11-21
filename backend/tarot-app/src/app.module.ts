@@ -22,6 +22,7 @@ import { HealthModule } from './modules/health/health.module';
 import { UsageLimitsModule } from './modules/usage-limits/usage-limits.module';
 import { EmailModule } from './modules/email/email.module';
 import { TarotistasModule } from './modules/tarotistas/tarotistas.module';
+import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { CacheModule as InterpretationCacheModule } from './modules/cache/cache.module';
 import { AIModule } from './modules/ai/ai.module';
 import { AdminModule } from './modules/admin/admin.module';
@@ -80,6 +81,7 @@ import { validate } from './config/env-validator';
     AuditModule,
     SecurityModule,
     TarotistasModule,
+    SubscriptionsModule,
     InterpretationCacheModule,
     AIModule,
     CardsModule,

@@ -6,8 +6,6 @@
  * in NestJS testing where mocking complex QueryBuilder responses requires
  * type assertions that TypeScript cannot verify at compile time.
  */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';

@@ -16,6 +16,7 @@ export { UserRole };
 export enum UserPlan {
   FREE = 'free',
   PREMIUM = 'premium',
+  PROFESSIONAL = 'professional',
 }
 
 export enum SubscriptionStatus {

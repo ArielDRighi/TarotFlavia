@@ -353,16 +353,16 @@ describe('MVP Complete Flow E2E', () => {
       today.setHours(0, 0, 0, 0);
 
       const ds2 = dbHelper.getDataSource();
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
       const usageLimits = await ds2.query(
         'SELECT * FROM usage_limit WHERE user_id = $1 AND feature = $2 AND date = $3',
         [freeUserId, 'tarot_reading', today],
       );
 
       // Verificar que se registraron las 3 lecturas
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
       expect(usageLimits.length).toBe(1);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
       expect(usageLimits[0].count).toBe(3);
 
       // Intentar la 4ta lectura - debería fallar por límite
@@ -466,13 +466,13 @@ describe('MVP Complete Flow E2E', () => {
 
       // Verificar que no hay límite de uso registrado para premium user
       const dataSource = dbHelper.getDataSource();
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
       const premiumUsageCheck = await dataSource.query(
         'SELECT * FROM usage_limit WHERE user_id = $1 AND feature = $2',
         [premiumUserId, 'tarot_reading'],
       );
       // Premium users no deberían tener límites registrados (o si los tienen, no se aplican)
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
       expect(premiumUsageCheck.length).toBeGreaterThanOrEqual(0);
     }, 35000);
   });

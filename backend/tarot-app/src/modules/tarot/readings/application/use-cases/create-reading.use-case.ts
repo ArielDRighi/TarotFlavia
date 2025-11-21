@@ -15,8 +15,7 @@ import { CardsService } from '../../../cards/cards.service';
 import { SpreadsService } from '../../../spreads/spreads.service';
 import { DecksService } from '../../../decks/decks.service';
 import { PredefinedQuestionsService } from '../../../../predefined-questions/predefined-questions.service';
-
-const DEFAULT_TAROTISTA_ID = 1;
+import { SubscriptionsService } from '../../../../subscriptions/subscriptions.service';
 
 @Injectable()
 export class CreateReadingUseCase {
@@ -31,6 +30,7 @@ export class CreateReadingUseCase {
     private readonly spreadsService: SpreadsService,
     private readonly decksService: DecksService,
     private readonly predefinedQuestionsService: PredefinedQuestionsService,
+    private readonly subscriptionsService: SubscriptionsService,
   ) {}
 
   async execute(
@@ -70,8 +70,13 @@ export class CreateReadingUseCase {
       ? ('predefined' as const)
       : ('custom' as const);
 
-    // Determinar qué tarotista usar (por ahora siempre Flavia)
-    const tarotistaId = DEFAULT_TAROTISTA_ID;
+    // Determinar qué tarotista usar según suscripción del usuario
+    const tarotistaId =
+      await this.subscriptionsService.resolveTarotistaForReading(user.id);
+
+    this.logger.log(
+      `Reading for user ${user.id} will use tarotista ${tarotistaId}`,
+    );
 
     // Obtener las cartas antes de crear la lectura (esto también valida que existan)
     const cards = await this.cardsService.findByIds(createReadingDto.cardIds);

@@ -230,7 +230,6 @@ describe('AuditLogService', () => {
 
       await service.findAll({ startDate, endDate, page: 1, limit: 20 });
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const expectedWhere = { createdAt: expect.anything() };
       expect(mockRepository.findAndCount).toHaveBeenCalledWith({
         where: expectedWhere,
@@ -248,7 +247,6 @@ describe('AuditLogService', () => {
 
       await service.findAll({ startDate, page: 1, limit: 20 });
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const expectedWhere = { createdAt: expect.anything() };
       expect(mockRepository.findAndCount).toHaveBeenCalledWith({
         where: expectedWhere,
@@ -266,7 +264,6 @@ describe('AuditLogService', () => {
 
       await service.findAll({ endDate, page: 1, limit: 20 });
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const expectedWhere = { createdAt: expect.anything() };
       expect(mockRepository.findAndCount).toHaveBeenCalledWith({
         where: expectedWhere,

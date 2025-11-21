@@ -253,7 +253,7 @@ describe('InterpretationCacheService', () => {
         { id: '123' },
         expect.objectContaining({
           hit_count: 6,
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
           last_used_at: expect.any(Date),
         }),
       );
@@ -323,7 +323,7 @@ describe('InterpretationCacheService', () => {
           question_hash: questionHash,
           interpretation_text: interpretation,
           hit_count: 0,
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
           expires_at: expect.any(Date),
         }),
       );
@@ -358,9 +358,8 @@ describe('InterpretationCacheService', () => {
       );
       const afterSave = Date.now();
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const saveCall = mockRepository.save.mock.calls[0][0];
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+
       const expiresAt = saveCall.expires_at.getTime();
 
       const expectedMin = beforeSave + 29.9 * 24 * 60 * 60 * 1000;

@@ -56,7 +56,6 @@ describe('Input Validation and Security (E2E)', () => {
         })
         .expect(400);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(response.body.message).toBeDefined();
     });
   });
@@ -73,9 +72,8 @@ describe('Input Validation and Security (E2E)', () => {
         })
         .expect(400);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(response.body.message).toBeDefined();
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
       expect(Array.isArray(response.body.message)).toBe(true);
     });
   });
@@ -91,7 +89,6 @@ describe('Input Validation and Security (E2E)', () => {
         })
         .expect(400);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(response.body.message).toBeDefined();
     });
 
@@ -105,7 +102,6 @@ describe('Input Validation and Security (E2E)', () => {
         })
         .expect(201);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       const user = response.body.user as { email: string; name: string };
       expect(user.email).toBe('validuser@example.com');
       expect(user.name).toBe('Test User');
@@ -122,7 +118,6 @@ describe('Input Validation and Security (E2E)', () => {
         })
         .expect(400);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(response.body.message).toBeDefined();
     });
   });
@@ -138,7 +133,6 @@ describe('Input Validation and Security (E2E)', () => {
         })
         .expect(400);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(response.body.message).toBeDefined();
     });
   });

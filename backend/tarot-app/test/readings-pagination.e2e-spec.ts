@@ -434,7 +434,6 @@ describe('Readings Pagination E2E', () => {
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(400);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(String(response.body.message)).toContain('limit');
     });
 

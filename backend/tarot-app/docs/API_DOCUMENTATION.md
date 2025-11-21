@@ -8,6 +8,7 @@
 - [Endpoints Principales](#endpoints-principales)
   - [Autenticación](#autenticación)
   - [Usuarios](#usuarios)
+  - [Suscripciones](#suscripciones)
   - [Lecturas de Tarot](#lecturas-de-tarot)
   - [Cartas](#cartas)
   - [Tiradas (Spreads)](#tiradas-spreads)
@@ -320,6 +321,205 @@ Authorization: Bearer <token>
   "currentPassword": "Password123!",
   "newPassword": "NewPassword456!"
 }
+```
+
+---
+
+### Suscripciones
+
+#### ⭐ Establecer Tarotista Favorito
+
+Permite a un usuario seleccionar su tarotista favorito según su plan.
+
+**Planes:**
+
+- **FREE**: Puede elegir 1 tarotista favorito con cooldown de 30 días para cambios
+- **PREMIUM/PROFESSIONAL**: Sin cooldown, puede cambiar inmediatamente
+
+```http
+POST /api/subscriptions/set-favorite
+Authorization: Bearer <token>
+```
+
+**Body:**
+
+```json
+{
+  "tarotistaId": 2
+}
+```
+
+**Response: `200 OK`**
+
+```json
+{
+  "id": 1,
+  "userId": 123,
+  "tarotistaId": 2,
+  "subscriptionType": "favorite",
+  "isActive": true,
+  "lastChangedAt": "2025-11-21T10:00:00.000Z",
+  "nextChangeAvailableAt": "2025-12-21T10:00:00.000Z",
+  "createdAt": "2025-11-21T10:00:00.000Z",
+  "updatedAt": "2025-11-21T10:00:00.000Z",
+  "tarotista": {
+    "id": 2,
+    "name": "Luna Mística",
+    "isActive": true
+  }
+}
+```
+
+**Errores:**
+
+- `400 Bad Request` - No puede cambiar de favorito aún (cooldown activo para usuarios FREE)
+
+  ```json
+  {
+    "statusCode": 400,
+    "message": "Cannot change favorite tarotista yet. Next change available at: 2025-12-21T10:00:00.000Z",
+    "error": "Bad Request"
+  }
+  ```
+
+- `404 Not Found` - Tarotista no existe o no está activo
+  ```json
+  {
+    "statusCode": 404,
+    "message": "Tarotista not found or not active",
+    "error": "Not Found"
+  }
+  ```
+
+**Ejemplo cURL:**
+
+```bash
+curl -X POST http://localhost:3000/api/subscriptions/set-favorite \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tarotistaId": 2
+  }'
+```
+
+**Ejemplo HTTPie:**
+
+```bash
+http POST http://localhost:3000/api/subscriptions/set-favorite \
+  Authorization:"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
+  tarotistaId:=2
+```
+
+---
+
+#### 📊 Obtener Información de Suscripción
+
+Obtiene la información actual de suscripción del usuario.
+
+```http
+GET /api/subscriptions/my-subscription
+Authorization: Bearer <token>
+```
+
+**Response: `200 OK`**
+
+```json
+{
+  "subscription": {
+    "id": 1,
+    "userId": 123,
+    "tarotistaId": 2,
+    "subscriptionType": "favorite",
+    "isActive": true,
+    "lastChangedAt": "2025-11-21T10:00:00.000Z",
+    "createdAt": "2025-11-21T10:00:00.000Z",
+    "updatedAt": "2025-11-21T10:00:00.000Z",
+    "tarotista": {
+      "id": 2,
+      "name": "Luna Mística",
+      "isActive": true
+    }
+  },
+  "canChange": false,
+  "nextChangeAvailableAt": "2025-12-21T10:00:00.000Z"
+}
+```
+
+**Response para usuario sin suscripción:**
+
+```json
+{
+  "subscription": null,
+  "canChange": true,
+  "nextChangeAvailableAt": null
+}
+```
+
+**Ejemplo cURL:**
+
+```bash
+curl -X GET http://localhost:3000/api/subscriptions/my-subscription \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+**Ejemplo HTTPie:**
+
+```bash
+http GET http://localhost:3000/api/subscriptions/my-subscription \
+  Authorization:"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+---
+
+#### 🌟 Activar Modo All-Access
+
+Permite a usuarios PREMIUM/PROFESSIONAL activar el modo all-access para obtener acceso a todos los tarotistas.
+
+**Restricción:** Solo disponible para usuarios con plan PREMIUM o PROFESSIONAL.
+
+```http
+POST /api/subscriptions/enable-all-access
+Authorization: Bearer <token>
+```
+
+**Response: `200 OK`**
+
+```json
+{
+  "id": 1,
+  "userId": 123,
+  "tarotistaId": null,
+  "subscriptionType": "all-access",
+  "isActive": true,
+  "lastChangedAt": "2025-11-21T10:00:00.000Z",
+  "createdAt": "2025-11-21T10:00:00.000Z",
+  "updatedAt": "2025-11-21T10:00:00.000Z"
+}
+```
+
+**Errores:**
+
+- `403 Forbidden` - Usuario no tiene plan PREMIUM/PROFESSIONAL
+  ```json
+  {
+    "statusCode": 403,
+    "message": "All-access mode is only available for PREMIUM and PROFESSIONAL users",
+    "error": "Forbidden"
+  }
+  ```
+
+**Ejemplo cURL:**
+
+```bash
+curl -X POST http://localhost:3000/api/subscriptions/enable-all-access \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+**Ejemplo HTTPie:**
+
+```bash
+http POST http://localhost:3000/api/subscriptions/enable-all-access \
+  Authorization:"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
 ---
