@@ -49,6 +49,15 @@ TarotFlavia es una plataforma completa de lecturas de tarot que combina:
 - Límites de uso por plan (3 lecturas/día free, ilimitadas premium)
 - Gestión de sesiones con refresh tokens
 
+✅ **Admin Panel Completo**
+
+- Gestión completa de tarotistas (CRUD + configuración)
+- Sistema de aplicaciones para nuevos tarotistas
+- Configuración individual de IA por tarotista
+- Significados personalizados de cartas
+- Dashboard con métricas y analytics
+- Audit logging de acciones administrativas
+
 ✅ **Arquitectura Escalable**
 
 - Arquitectura híbrida feature-based con capas

@@ -754,6 +754,227 @@ Authorization: Bearer <admin_token>
 - `search`: Buscar por nombre o email
 - `banned`: Solo usuarios baneados
 
+#### 🔮 Gestión de Tarotistas
+
+##### Crear Tarotista
+
+```http
+POST /api/admin/tarotistas
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+
+{
+  "userId": 123,
+  "nombrePublico": "Luna Mística",
+  "biografia": "Tarotista profesional con 10 años de experiencia",
+  "especialidades": ["amor", "trabajo", "espiritual"],
+  "fotoPerfil": "https://example.com/photo.jpg",
+  "systemPromptIdentity": "Eres Luna Mística, una tarotista espiritual...",
+  "systemPromptGuidelines": "Siempre proporciona lecturas empáticas..."
+}
+```
+
+**Response: `201 Created`**
+
+```json
+{
+  "id": 5,
+  "userId": 123,
+  "nombrePublico": "Luna Mística",
+  "bio": "Tarotista profesional con 10 años de experiencia",
+  "especialidades": ["amor", "trabajo", "espiritual"],
+  "fotoPerfil": "https://example.com/photo.jpg",
+  "isActive": true,
+  "createdAt": "2025-11-20T10:00:00Z",
+  "updatedAt": "2025-11-20T10:00:00Z"
+}
+```
+
+##### Listar Tarotistas
+
+```http
+GET /api/admin/tarotistas?page=1&limit=20&search=Luna&isActive=true
+Authorization: Bearer <admin_token>
+```
+
+**Query Parameters:**
+
+- `page`: Número de página (default: 1)
+- `limit`: Resultados por página (default: 20)
+- `search`: Buscar por nombre público
+- `isActive`: Filtrar por estado activo (true/false)
+- `sortBy`: Campo para ordenar (default: 'createdAt')
+- `sortOrder`: Orden (ASC/DESC, default: 'DESC')
+
+**Response: `200 OK`**
+
+```json
+{
+  "data": [
+    {
+      "id": 5,
+      "userId": 123,
+      "nombrePublico": "Luna Mística",
+      "bio": "Tarotista profesional",
+      "especialidades": ["amor", "trabajo"],
+      "isActive": true
+    }
+  ],
+  "total": 15,
+  "page": 1,
+  "limit": 20,
+  "totalPages": 1
+}
+```
+
+##### Actualizar Tarotista
+
+```http
+PUT /api/admin/tarotistas/:id
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+
+{
+  "nombrePublico": "Luna Mística - Actualizado",
+  "especialidades": ["amor", "trabajo", "espiritual", "salud"]
+}
+```
+
+##### Desactivar/Reactivar Tarotista
+
+```http
+PUT /api/admin/tarotistas/:id/deactivate
+Authorization: Bearer <admin_token>
+```
+
+```http
+PUT /api/admin/tarotistas/:id/reactivate
+Authorization: Bearer <admin_token>
+```
+
+##### Configuración de Tarotista
+
+```http
+GET /api/admin/tarotistas/:id/config
+Authorization: Bearer <admin_token>
+```
+
+```http
+PUT /api/admin/tarotistas/:id/config
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+
+{
+  "systemPrompt": "Eres una tarotista empática...",
+  "temperature": 0.8,
+  "maxTokens": 600,
+  "topP": 0.95,
+  "provider": "openai",
+  "model": "gpt-4-turbo"
+}
+```
+
+```http
+POST /api/admin/tarotistas/:id/config/reset
+Authorization: Bearer <admin_token>
+```
+
+##### Significados Personalizados de Cartas
+
+```http
+POST /api/admin/tarotistas/:id/meanings
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+
+{
+  "cardId": 1,
+  "customMeaningUpright": "En el contexto espiritual...",
+  "customMeaningReversed": "Cuando está invertida...",
+  "customKeywords": "poder, manifestación, acción",
+  "customDescription": "El Mago representa...",
+  "privateNotes": "Nota personal del tarotista"
+}
+```
+
+```http
+GET /api/admin/tarotistas/:id/meanings
+Authorization: Bearer <admin_token>
+```
+
+```http
+DELETE /api/admin/tarotistas/:id/meanings/:meaningId
+Authorization: Bearer <admin_token>
+```
+
+```http
+POST /api/admin/tarotistas/:id/meanings/bulk
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+
+{
+  "meanings": [
+    { "cardId": 1, "customMeaningUpright": "...", "customMeaningReversed": "..." },
+    { "cardId": 2, "customMeaningUpright": "...", "customKeywords": "..." }
+  ]
+}
+```
+
+> 🚨 **Validación**: El array `meanings` debe contener entre 1 y 78 elementos (tamaño del deck estándar).
+
+##### Gestión de Aplicaciones de Tarotistas
+
+```http
+GET /api/admin/tarotistas/applications?page=1&limit=20
+Authorization: Bearer <admin_token>
+```
+
+**Response: `200 OK`**
+
+```json
+{
+  "data": [
+    {
+      "id": 10,
+      "userId": 456,
+      "nombrePublico": "Estrella del Norte",
+      "biografia": "Aspirante a tarotista",
+      "especialidades": ["amor", "trabajo"],
+      "motivacion": "Quiero ayudar a las personas",
+      "experiencia": "5 años practicando tarot",
+      "status": "pending",
+      "adminNotes": null,
+      "reviewedByUserId": null,
+      "reviewedAt": null,
+      "createdAt": "2025-11-15T10:00:00Z"
+    }
+  ],
+  "total": 5,
+  "page": 1,
+  "limit": 20,
+  "totalPages": 1
+}
+```
+
+```http
+POST /api/admin/tarotistas/applications/:id/approve
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+
+{
+  "adminNotes": "Excelente perfil, aprobado para comenzar"
+}
+```
+
+```http
+POST /api/admin/tarotistas/applications/:id/reject
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+
+{
+  "adminNotes": "No cumple con los requisitos mínimos de experiencia"
+}
+```
+
 #### 📊 Dashboard de Métricas
 
 ```http

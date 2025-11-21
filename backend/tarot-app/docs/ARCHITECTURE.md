@@ -236,7 +236,38 @@ readings/
 | **interpretations** | 5        | ~600   | Simplificado (CRUD) |
 | **spreads**         | 6        | ~480   | CRUD simple         |
 | **cards**           | 7        | ~950   | Catálogo            |
-| **tarotistas**      | 7        | ~1000  | Preparado futuro    |
+
+### Módulos con Capas (Nuevos)
+
+| Módulo         | Archivos | Líneas | Razón                                           |
+| -------------- | -------- | ------ | ----------------------------------------------- |
+| **tarotistas** | 15+      | ~2500  | Gestión completa: CRUD, config IA, aplicaciones |
+
+**Estructura del módulo tarotistas:**
+
+```
+tarotistas/
+├── controllers/
+│   ├── tarotistas-admin.controller.ts    # 15 endpoints admin
+│   └── tarotistas-admin.controller.spec.ts
+├── services/
+│   └── tarotistas-admin.service.ts       # Lógica de negocio
+├── entities/
+│   ├── tarotista.entity.ts
+│   ├── tarotista-config.entity.ts        # Config IA personalizada
+│   ├── tarotista-card-meaning.entity.ts  # Significados custom
+│   └── tarotista-application.entity.ts   # Sistema de aplicaciones
+├── dto/
+│   ├── create-tarotista.dto.ts
+│   ├── update-tarotista.dto.ts
+│   ├── update-tarotista-config.dto.ts
+│   ├── set-custom-meaning.dto.ts
+│   ├── apply-to-be-tarotista.dto.ts
+│   ├── approve-application.dto.ts
+│   ├── reject-application.dto.ts
+│   └── get-tarotistas-filter.dto.ts
+└── tarotistas.module.ts
+```
 
 **Estructura:**
 
