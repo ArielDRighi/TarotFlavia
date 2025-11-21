@@ -176,7 +176,7 @@ describe('RefreshTokenService', () => {
 
       expect(mockRepository.update).toHaveBeenCalledWith(
         { id: tokenId },
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
         { revokedAt: expect.any(Date) },
       );
     });
@@ -192,7 +192,7 @@ describe('RefreshTokenService', () => {
 
       expect(mockRepository.update).toHaveBeenCalledWith(
         { userId, revokedAt: IsNull() },
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
         { revokedAt: expect.any(Date) },
       );
     });

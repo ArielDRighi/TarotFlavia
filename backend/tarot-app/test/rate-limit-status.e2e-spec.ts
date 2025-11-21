@@ -16,8 +16,6 @@ interface LoginResponse {
   access_token: string;
 }
 
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
 describe('Rate Limit Status (e2e)', () => {
   let app: INestApplication<App>;
   const dbHelper = new E2EDatabaseHelper();

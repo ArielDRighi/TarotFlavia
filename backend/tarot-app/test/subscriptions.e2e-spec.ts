@@ -13,16 +13,6 @@ import {
   SubscriptionStatus,
 } from '../src/modules/tarotistas/entities/user-tarotista-subscription.entity';
 
-interface LoginResponse {
-  user: {
-    id: number;
-    email: string;
-    name: string;
-    plan: string;
-  };
-  access_token: string;
-}
-
 /**
  * E2E Tests para Sistema de Suscripciones a Tarotistas
  *

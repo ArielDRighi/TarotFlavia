@@ -17,8 +17,6 @@ import { DecksService } from '../../../decks/decks.service';
 import { PredefinedQuestionsService } from '../../../../predefined-questions/predefined-questions.service';
 import { SubscriptionsService } from '../../../../subscriptions/subscriptions.service';
 
-const DEFAULT_TAROTISTA_ID = 1;
-
 @Injectable()
 export class CreateReadingUseCase {
   private readonly logger = new Logger(CreateReadingUseCase.name);

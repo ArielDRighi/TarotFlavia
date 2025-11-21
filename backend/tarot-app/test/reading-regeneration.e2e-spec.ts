@@ -221,7 +221,6 @@ describe('Reading Regeneration E2E', () => {
       })
       .expect(201); // Asegurar que la creación fue exitosa
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     readingId = createReadingResponse.body.id as number;
 
     // Verificar que se obtuvo un ID válido
@@ -362,7 +361,6 @@ describe('Reading Regeneration E2E', () => {
         })
         .expect(201);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       const freeReadingId = createResponse.body.id as number;
       expect(freeReadingId).toBeDefined();
 
@@ -373,7 +371,7 @@ describe('Reading Regeneration E2E', () => {
 
       expect(response.body).toHaveProperty('message');
       // El guard de límites de uso puede ejecutarse antes que la verificación premium
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
       expect(String(response.body.message)).toMatch(/premium|límite|limit/i);
     }, 30000);
   });
@@ -401,7 +399,6 @@ describe('Reading Regeneration E2E', () => {
         })
         .expect(201);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       const otherReadingId = createResponse.body.id as number;
       expect(otherReadingId).toBeDefined();
 
@@ -421,7 +418,7 @@ describe('Reading Regeneration E2E', () => {
   describe('POST /readings/:id/regenerate - Success', () => {
     it('should successfully regenerate interpretation for premium user', async () => {
       // DEBUG: Verificar estado de la reading antes de regenerar
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
       const checkReading = await dataSource.query(
         `SELECT id, "deletedAt", "userId", "deckId" FROM tarot_reading WHERE id = $1`,
         [readingId],
@@ -453,9 +450,9 @@ describe('Reading Regeneration E2E', () => {
 
       expect(response.body).toHaveProperty('id');
       expect(response.body).toHaveProperty('interpretation');
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
       expect(response.body.interpretation).toBeTruthy();
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
       expect(response.body.interpretation).not.toBe(
         'Initial interpretation of the reading',
       );
@@ -463,7 +460,7 @@ describe('Reading Regeneration E2E', () => {
       expect(response.body).toHaveProperty('updatedAt');
 
       // Verificar que las cartas se mantienen iguales
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
       expect(response.body.cardPositions).toEqual([
         { cardId: cardIds[0], position: 'Past', isReversed: false },
         { cardId: cardIds[1], position: 'Present', isReversed: false },
@@ -484,14 +481,14 @@ describe('Reading Regeneration E2E', () => {
       }
 
       // Usar la reading global - ya tiene 1 regeneración del test anterior
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
       const interpretations = await dataSource.query(
         `SELECT * FROM tarot_interpretation WHERE "readingId" = $1 ORDER BY "createdAt" DESC`,
         [readingId],
       );
 
       // Debe tener al menos 1 interpretación (la original + posibles regeneraciones)
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
       expect(interpretations.length).toBeGreaterThanOrEqual(1);
     });
   });
@@ -522,7 +519,6 @@ describe('Reading Regeneration E2E', () => {
         })
         .expect(201);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       const freshReadingId = createResponse.body.id as number;
       expect(freshReadingId).toBeDefined();
 
@@ -556,7 +552,7 @@ describe('Reading Regeneration E2E', () => {
         .expect(429);
 
       expect(response.body).toHaveProperty('message');
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
       expect(String(response.body.message)).toContain('máximo');
     }, 60000);
   });
@@ -601,7 +597,6 @@ describe('Reading Regeneration E2E', () => {
         })
         .expect(201);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       const newReadingId = createResponse.body.id as number;
       expect(newReadingId).toBeDefined();
 

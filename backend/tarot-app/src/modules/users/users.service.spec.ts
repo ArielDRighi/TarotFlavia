@@ -535,7 +535,6 @@ describe('UsersService', () => {
 
       // Malicious sortBy value
       await service.findAllWithFilters({
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         sortBy: 'email; DROP TABLE users--' as any,
       });
 

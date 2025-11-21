@@ -34,7 +34,7 @@ describe('UpdateUserPlanDto', () => {
 
     it('should fail validation with invalid plan', async () => {
       const dto = new UpdateUserPlanDto();
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
       (dto as any).plan = 'invalid_plan';
 
       const errors = await validate(dto);
@@ -45,7 +45,7 @@ describe('UpdateUserPlanDto', () => {
     it('should fail validation with invalid subscription status', async () => {
       const dto = new UpdateUserPlanDto();
       dto.plan = UserPlan.PREMIUM;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
       (dto as any).subscriptionStatus = 'invalid_status';
 
       const errors = await validate(dto);
@@ -58,7 +58,7 @@ describe('UpdateUserPlanDto', () => {
     it('should fail validation with invalid date format', async () => {
       const dto = new UpdateUserPlanDto();
       dto.plan = UserPlan.PREMIUM;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
       (dto as any).planStartedAt = 'invalid-date';
 
       const errors = await validate(dto);
@@ -69,7 +69,7 @@ describe('UpdateUserPlanDto', () => {
     it('should fail validation with invalid stripeCustomerId type', async () => {
       const dto = new UpdateUserPlanDto();
       dto.plan = UserPlan.PREMIUM;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
       (dto as any).stripeCustomerId = 12345;
 
       const errors = await validate(dto);

@@ -74,21 +74,21 @@ describe('Premium User Edge Cases E2E', () => {
     const ds = dbHelper.getDataSource();
 
     // Get deck
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
     const decks = await ds.query('SELECT id FROM tarot_deck LIMIT 1');
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
     deckId = decks[0].id as number;
 
     // Get spread
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
     const spreads = await ds.query('SELECT id FROM tarot_spread LIMIT 1');
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
     spreadId = spreads[0].id as number;
 
     // Get cards
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
     const cards = await ds.query('SELECT id FROM tarot_card LIMIT 3');
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+
     cardIds = cards.map((c: { id: number }) => c.id);
 
     // Register premium user
@@ -184,16 +184,14 @@ describe('Premium User Edge Cases E2E', () => {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const usageLimits = await ds.query(
         'SELECT * FROM usage_limit WHERE user_id = $1 AND feature = $2 AND date = $3',
         [premiumUserId, 'tarot_reading', today],
       );
 
       // Premium users might have NO usage_limit record, or count is tracked but not enforced
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
       if (usageLimits.length > 0) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         expect(usageLimits[0].count).toBeGreaterThanOrEqual(11);
       }
     }, 30000);
@@ -218,7 +216,6 @@ describe('Premium User Edge Cases E2E', () => {
         })
         .expect(400);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(response.body.message).toBeDefined();
     });
 
@@ -242,7 +239,6 @@ describe('Premium User Edge Cases E2E', () => {
         })
         .expect(400);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(response.body.message).toBeDefined();
     });
 

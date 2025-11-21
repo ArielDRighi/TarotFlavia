@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
@@ -55,7 +54,6 @@ describe('Security Events E2E', () => {
 
     await app.init();
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     httpServer = app.getHttpServer() as unknown as ReturnType<
       INestApplication['getHttpServer']
     >;

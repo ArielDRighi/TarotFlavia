@@ -74,14 +74,12 @@ describe('Database Infrastructure (E2E)', () => {
     it('should have uuid-ossp extension installed', async () => {
       const queryRunner = dataSource.createQueryRunner();
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = await queryRunner.query(`
         SELECT extname FROM pg_extension WHERE extname = 'uuid-ossp'
       `);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(result.length).toBeGreaterThan(0);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
       expect(result[0].extname).toBe('uuid-ossp');
 
       await queryRunner.release();
@@ -115,7 +113,6 @@ describe('Database Infrastructure (E2E)', () => {
     it('should have migrations table created', async () => {
       const queryRunner = dataSource.createQueryRunner();
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const tables = await queryRunner.query(`
         SELECT table_name 
         FROM information_schema.tables 
@@ -123,7 +120,6 @@ describe('Database Infrastructure (E2E)', () => {
         AND table_name = 'migrations'
       `);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(tables.length).toBe(1);
 
       await queryRunner.release();
@@ -132,16 +128,14 @@ describe('Database Infrastructure (E2E)', () => {
     it('should have at least one migration executed', async () => {
       const queryRunner = dataSource.createQueryRunner();
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const migrations = await queryRunner.query(
         'SELECT * FROM migrations ORDER BY timestamp DESC',
       );
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(migrations.length).toBeGreaterThan(0);
 
       // Verify migration has required fields
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+
       const latestMigration = migrations[0];
       expect(latestMigration).toHaveProperty('id');
       expect(latestMigration).toHaveProperty('timestamp');
@@ -153,7 +147,6 @@ describe('Database Infrastructure (E2E)', () => {
     it('should have all core tables created', async () => {
       const queryRunner = dataSource.createQueryRunner();
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = await queryRunner.query(`
         SELECT table_name 
         FROM information_schema.tables 
@@ -163,7 +156,7 @@ describe('Database Infrastructure (E2E)', () => {
         AND table_name NOT LIKE 'information_schema.%'
       `);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       const tableNames = result.map((r: any) => r.table_name);
 
       // Core tables
@@ -263,10 +256,8 @@ describe('Database Infrastructure (E2E)', () => {
     it('should be able to query database successfully', async () => {
       const queryRunner = dataSource.createQueryRunner();
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = await queryRunner.query('SELECT 1 as test');
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(result[0].test).toBe(1);
 
       await queryRunner.release();
@@ -275,10 +266,8 @@ describe('Database Infrastructure (E2E)', () => {
     it('should have PostgreSQL version 16 or higher', async () => {
       const queryRunner = dataSource.createQueryRunner();
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = await queryRunner.query('SELECT version()');
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const version: string = result[0].version;
       expect(version).toContain('PostgreSQL');
 

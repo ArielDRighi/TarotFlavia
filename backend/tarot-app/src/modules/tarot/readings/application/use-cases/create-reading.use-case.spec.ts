@@ -509,7 +509,6 @@ describe('CreateReadingUseCase', () => {
     });
 
     it('should handle null user', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       await expect(useCase.execute(null as any, mockDto)).rejects.toThrow(
         'Invalid user: user object or user.id is missing',
       );
