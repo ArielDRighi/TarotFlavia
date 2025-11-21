@@ -92,7 +92,7 @@ export class TarotistasAdminService {
       order: {
         [sortBy]: sortOrder,
       },
-      relations: ['config'],
+      relations: ['configs'],
     });
 
     return {
