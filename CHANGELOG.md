@@ -9,12 +9,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Admin Tarotista Management Module** (TASK-070)
+  - Complete CRUD operations for tarotistas (create, list, update, deactivate, reactivate)
+  - Advanced filtering and pagination (search, isActive, sortBy, sortOrder)
+  - Individual AI configuration per tarotista (prompts, temperature, model, provider)
+  - Custom card meanings system for personalized interpretations
+  - Bulk import of custom meanings
+  - Tarotista application workflow (apply → pending → approve/reject)
+  - Admin notes and review tracking for applications
+  - 15 admin endpoints with role-based access control
+  - Database migrations: tarotista_config, tarotista_card_meanings, tarotista_applications
+  - Comprehensive test suite: 17 unit tests + 20 E2E tests (100% passing)
 - Comprehensive technical documentation suite
 - API documentation with detailed endpoint specifications
 - Database documentation with ER diagrams and migration guides
 - Development environment setup guide
 - Deployment guides for Render, Railway, and DigitalOcean
 - Security best practices and vulnerability reporting process
+
+### Fixed
+
+- **TarotistasAdminService bug** (TASK-070): Wrong relation name 'config' → 'configs' causing 500 errors in filtered queries
 
 ---
 

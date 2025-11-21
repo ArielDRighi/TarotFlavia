@@ -428,6 +428,104 @@ CREATE INDEX idx_tarotistas_is_active ON tarotistas(is_active);
 
 ---
 
+### tarotista_config
+
+Configuración personalizada de IA para cada tarotista.
+
+| Columna         | Tipo         | Constraints                    | Descripción                           |
+| --------------- | ------------ | ------------------------------ | ------------------------------------- |
+| `id`            | INTEGER      | PRIMARY KEY                    | ID único autoincrementable            |
+| `tarotista_id`  | INTEGER      | FK tarotistas, UNIQUE NOT NULL | Tarotista asociado                    |
+| `system_prompt` | TEXT         | NOT NULL                       | Prompt del sistema personalizado      |
+| `temperature`   | DECIMAL(3,2) | DEFAULT 0.7                    | Creatividad del modelo (0.0-2.0)      |
+| `max_tokens`    | INTEGER      | DEFAULT 500                    | Máximo de tokens por respuesta        |
+| `top_p`         | DECIMAL(3,2) | DEFAULT 0.9                    | Nucleus sampling (0.0-1.0)            |
+| `provider`      | VARCHAR(50)  | DEFAULT 'openai'               | Proveedor de IA (openai, anthropic)   |
+| `model`         | VARCHAR(100) | NULLABLE                       | Modelo específico (gpt-4-turbo, etc.) |
+| `style_config`  | JSONB        | NULLABLE                       | Configuración de estilo adicional     |
+| `is_active`     | BOOLEAN      | DEFAULT true                   | Si la configuración está activa       |
+| `created_at`    | TIMESTAMP    | NOT NULL                       | Fecha de creación                     |
+| `updated_at`    | TIMESTAMP    | NOT NULL                       | Fecha de última actualización         |
+
+**Relaciones:**
+
+- `tarotista` ← `tarotistas` (1:1)
+
+**Índices:**
+
+```sql
+CREATE UNIQUE INDEX idx_tarotista_config_tarotista_id ON tarotista_config(tarotista_id);
+CREATE INDEX idx_tarotista_config_is_active ON tarotista_config(is_active);
+```
+
+---
+
+### tarotista_card_meanings
+
+Significados personalizados de cartas por tarotista.
+
+| Columna                   | Tipo      | Constraints             | Descripción                           |
+| ------------------------- | --------- | ----------------------- | ------------------------------------- |
+| `id`                      | INTEGER   | PRIMARY KEY             | ID único autoincrementable            |
+| `tarotista_id`            | INTEGER   | FK tarotistas, NOT NULL | Tarotista que personalizó             |
+| `card_id`                 | INTEGER   | FK tarot_card, NOT NULL | Carta del tarot                       |
+| `custom_meaning_upright`  | TEXT      | NULLABLE                | Significado personalizado (normal)    |
+| `custom_meaning_reversed` | TEXT      | NULLABLE                | Significado personalizado (invertida) |
+| `custom_keywords`         | TEXT      | NULLABLE                | Palabras clave personalizadas         |
+| `custom_description`      | TEXT      | NULLABLE                | Descripción personalizada de la carta |
+| `private_notes`           | TEXT      | NULLABLE                | Notas privadas del tarotista          |
+| `created_at`              | TIMESTAMP | NOT NULL                | Fecha de creación                     |
+| `updated_at`              | TIMESTAMP | NOT NULL                | Fecha de última actualización         |
+
+**Relaciones:**
+
+- `tarotista` ← `tarotistas` (N:1)
+- `card` ← `tarot_card` (N:1)
+
+**Índices:**
+
+```sql
+CREATE UNIQUE INDEX idx_tarotista_card_meanings_unique ON tarotista_card_meanings(tarotista_id, card_id);
+CREATE INDEX idx_tarotista_card_meanings_tarotista ON tarotista_card_meanings(tarotista_id);
+CREATE INDEX idx_tarotista_card_meanings_card ON tarotista_card_meanings(card_id);
+```
+
+---
+
+### tarotista_applications
+
+Aplicaciones de usuarios que quieren convertirse en tarotistas.
+
+| Columna               | Tipo         | Constraints                 | Descripción                         |
+| --------------------- | ------------ | --------------------------- | ----------------------------------- |
+| `id`                  | INTEGER      | PRIMARY KEY                 | ID único autoincrementable          |
+| `user_id`             | INTEGER      | FK users, NOT NULL          | Usuario que aplica                  |
+| `nombre_publico`      | VARCHAR(100) | NOT NULL                    | Nombre público propuesto            |
+| `biografia`           | TEXT         | NOT NULL                    | Biografía del aspirante             |
+| `especialidades`      | TEXT[]       | DEFAULT []                  | Especialidades declaradas           |
+| `motivacion`          | TEXT         | NOT NULL                    | Motivación para ser tarotista       |
+| `experiencia`         | TEXT         | NOT NULL                    | Experiencia previa con tarot        |
+| `status`              | ENUM         | NOT NULL, DEFAULT 'pending' | Estado: pending, approved, rejected |
+| `admin_notes`         | TEXT         | NULLABLE                    | Notas del admin que revisó          |
+| `reviewed_by_user_id` | INTEGER      | FK users, NULLABLE          | Admin que revisó la aplicación      |
+| `reviewed_at`         | TIMESTAMP    | NULLABLE                    | Fecha de revisión                   |
+| `created_at`          | TIMESTAMP    | NOT NULL                    | Fecha de aplicación                 |
+| `updated_at`          | TIMESTAMP    | NOT NULL                    | Fecha de última actualización       |
+
+**Relaciones:**
+
+- `user` ← `users` (N:1)
+- `reviewedBy` ← `users` (N:1)
+
+**Índices:**
+
+```sql
+CREATE INDEX idx_application_user ON tarotista_applications(user_id);
+CREATE INDEX idx_application_status ON tarotista_applications(status);
+```
+
+---
+
 ### daily_readings
 
 Carta del día generada diariamente para cada usuario.
