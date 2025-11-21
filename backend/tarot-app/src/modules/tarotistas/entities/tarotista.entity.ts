@@ -163,6 +163,11 @@ export class Tarotista {
     precision: 3,
     scale: 2,
     nullable: true,
+    transformer: {
+      to: (value: number | null) => value,
+      from: (value: string | null) =>
+        value !== null ? parseFloat(value) : null,
+    },
   })
   ratingPromedio: number | null;
 
