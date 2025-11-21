@@ -15,6 +15,7 @@
   - [Categorías](#categorías)
   - [Preguntas Predefinidas](#preguntas-predefinidas)
   - [Lectura Diaria](#lectura-diaria)
+  - [Tarotistas Públicos](#tarotistas-públicos)
   - [Admin](#admin)
 - [Error Handling](#error-handling)
 - [Ejemplos de Uso](#ejemplos-de-uso)
@@ -933,6 +934,220 @@ Authorization: Bearer <token>
 **Query Parameters:**
 
 - `limit`: Número de días (default: 7, max: 30)
+
+---
+
+### Tarotistas Públicos
+
+**Endpoints públicos sin autenticación** para descubrimiento de tarotistas en el marketplace.
+
+#### 📋 Listar Tarotistas Activos
+
+```http
+GET /api/tarotistas?page=1&limit=20&especialidad=Amor&search=Luna&orderBy=rating&order=DESC
+```
+
+**Sin autenticación requerida** ✅
+
+**Query Parameters:**
+
+- `page` (number, default: 1, min: 1): Número de página
+- `limit` (number, default: 20, min: 1, max: 100): Tarotistas por página
+- `search` (string, optional): Búsqueda por nombrePublico o bio
+- `especialidad` (string, optional): Filtrar por especialidad exacta
+- `orderBy` (string, optional): Campo de ordenamiento
+  - `rating`: Por rating promedio (default)
+  - `totalLecturas`: Por número de lecturas realizadas
+  - `nombrePublico`: Alfabético por nombre
+  - `createdAt`: Por fecha de creación
+- `order` (string, optional): Dirección del ordenamiento
+  - `DESC`: Descendente (default)
+  - `ASC`: Ascendente
+
+**Response: `200 OK`**
+
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "nombrePublico": "Luna Misteriosa",
+      "bio": "Experta en amor y relaciones con 10 años de experiencia",
+      "especialidades": ["Amor", "Trabajo"],
+      "fotoPerfil": "https://example.com/luna.jpg",
+      "ratingPromedio": 4.8,
+      "totalLecturas": 250,
+      "totalReviews": 50,
+      "añosExperiencia": 10,
+      "idiomas": ["Español", "Inglés"],
+      "createdAt": "2024-08-15T10:00:00Z"
+    },
+    {
+      "id": 2,
+      "nombrePublico": "Sol Radiante",
+      "bio": "Especialista en trabajo y finanzas",
+      "especialidades": ["Trabajo", "Salud"],
+      "fotoPerfil": "https://example.com/sol.jpg",
+      "ratingPromedio": 4.5,
+      "totalLecturas": 180,
+      "totalReviews": 36,
+      "añosExperiencia": 8,
+      "idiomas": ["Español"],
+      "createdAt": "2024-09-01T10:00:00Z"
+    }
+  ],
+  "total": 15,
+  "page": 1,
+  "limit": 20,
+  "totalPages": 1
+}
+```
+
+**Características:**
+
+- ✅ Solo retorna tarotistas **activos** (`isActive = true`)
+- ✅ **NO expone datos sensibles** (configs, customCardMeanings, userId)
+- ✅ Paginación estándar con metadata
+- ✅ Ordenamiento con `NULLS LAST` (valores null al final)
+- ✅ Prevención de SQL injection en búsqueda
+- ✅ Validación estricta de parámetros con class-validator
+
+**Ejemplos de Uso:**
+
+```bash
+# Listar todos los tarotistas (primera página)
+curl https://api.tarotflavia.com/api/tarotistas
+
+# Buscar tarotistas con "amor" en nombre o bio
+curl "https://api.tarotflavia.com/api/tarotistas?search=amor"
+
+# Filtrar por especialidad específica
+curl "https://api.tarotflavia.com/api/tarotistas?especialidad=Trabajo"
+
+# Ordenar por número de lecturas (más populares primero)
+curl "https://api.tarotflavia.com/api/tarotistas?orderBy=totalLecturas&order=DESC"
+
+# Combinar filtros: buscar + filtrar + ordenar + paginar
+curl "https://api.tarotflavia.com/api/tarotistas?search=espiritual&especialidad=Salud&orderBy=rating&order=DESC&page=1&limit=10"
+```
+
+**Validación de Errores:**
+
+```bash
+# Error: página inválida (< 1)
+GET /api/tarotistas?page=0
+# Response: 400 Bad Request
+{
+  "statusCode": 400,
+  "message": ["page must not be less than 1"],
+  "error": "Bad Request"
+}
+
+# Error: limit excede máximo (> 100)
+GET /api/tarotistas?limit=150
+# Response: 400 Bad Request
+{
+  "statusCode": 400,
+  "message": ["limit must not be greater than 100"],
+  "error": "Bad Request"
+}
+
+# Error: orderBy inválido
+GET /api/tarotistas?orderBy=invalid
+# Response: 400 Bad Request
+{
+  "statusCode": 400,
+  "message": [
+    "orderBy must be one of the following values: rating, totalLecturas, nombrePublico, createdAt"
+  ],
+  "error": "Bad Request"
+}
+```
+
+#### 👤 Ver Perfil Público de Tarotista
+
+```http
+GET /api/tarotistas/:id
+```
+
+**Sin autenticación requerida** ✅
+
+**Path Parameters:**
+
+- `id` (number): ID del tarotista
+
+**Response: `200 OK`**
+
+```json
+{
+  "id": 1,
+  "nombrePublico": "Luna Misteriosa",
+  "bio": "Experta en amor y relaciones con 10 años de experiencia. Mi enfoque combina la sabiduría del tarot tradicional con la psicología moderna para ofrecerte lecturas profundas y transformadoras.",
+  "especialidades": ["Amor", "Trabajo", "Crecimiento Personal"],
+  "fotoPerfil": "https://example.com/luna.jpg",
+  "ratingPromedio": 4.8,
+  "totalLecturas": 250,
+  "totalReviews": 50,
+  "añosExperiencia": 10,
+  "idiomas": ["Español", "Inglés", "Portugués"],
+  "isActive": true,
+  "createdAt": "2024-08-15T10:00:00Z",
+  "updatedAt": "2025-11-20T15:30:00Z"
+}
+```
+
+**Response: `404 Not Found`** (tarotista inactivo o no existe)
+
+```json
+{
+  "statusCode": 404,
+  "message": "Tarotista no encontrado o inactivo",
+  "error": "Not Found"
+}
+```
+
+**Características:**
+
+- ✅ Solo retorna perfiles de tarotistas **activos**
+- ✅ Retorna 404 si el tarotista está inactivo o no existe
+- ✅ **NO expone datos sensibles** (systemPrompt, configuración IA, etc.)
+- ✅ Validación automática de ID (debe ser numérico)
+
+**Ejemplos de Uso:**
+
+```bash
+# Ver perfil de tarotista activo
+curl https://api.tarotflavia.com/api/tarotistas/1
+
+# Tarotista no existe
+curl https://api.tarotflavia.com/api/tarotistas/99999
+# Response: 404 Not Found
+
+# ID inválido (no numérico)
+curl https://api.tarotflavia.com/api/tarotistas/invalid
+# Response: 400 Bad Request
+{
+  "statusCode": 400,
+  "message": "Validation failed (numeric string is expected)",
+  "error": "Bad Request"
+}
+```
+
+**Casos de Uso:**
+
+- 🔍 **Descubrimiento:** Usuario explora tarotistas antes de registrarse
+- ⭐ **Selección:** Usuario FREE busca tarotista para marcar como favorito
+- 📊 **Comparación:** Usuario PREMIUM compara opciones antes de elegir
+- 🎨 **Landing Page:** Mostrar "Nuestros Tarotistas" en página principal
+- 📱 **Marketplace:** Frontend construye cards de tarotistas para exploración
+
+**Seguridad:**
+
+- ✅ Endpoint público (sin JWT requerido)
+- ✅ Prevención de SQL injection (caracteres especiales escapados)
+- ✅ Rate limiting aplicado (mismos límites que endpoints autenticados)
+- ✅ Sanitización de búsqueda (LIKE con escape de % y _)
+- ✅ Solo datos públicos expuestos (no configs ni datos internos)
 
 ---
 
