@@ -17,15 +17,18 @@ Sistema completo de **Revenue Sharing** y **Métricas** implementado para el mar
 ### 1. Cálculo de Revenue (RevenueCalculationService)
 
 #### Funcionalidad
+
 - **Comisión por defecto**: 70/30 split (70% tarotista, 30% plataforma)
 - **Comisión personalizada**: Permite override vía `customCommissionPercentage` en entidad Tarotista
 - **Precisión decimal**: Math.round con 2 decimales para evitar errores de redondeo
 - **Registro histórico**: Persistencia en `tarotista_revenue_metrics` con referencia a lectura
 
 #### Endpoints
+
 No expuestos directamente (uso interno vía integración con readings)
 
 #### Código de ejemplo
+
 ```typescript
 const revenueCalc = await revenueCalculationService.calculateRevenue({
   tarotistaId: 1,
@@ -46,6 +49,7 @@ const revenueCalc = await revenueCalculationService.calculateRevenue({
 ### 2. Métricas (MetricsService)
 
 #### Funcionalidad
+
 - **Métricas individuales**: Stats por tarotista (lecturas, revenue, rating)
 - **Métricas de plataforma**: Agregación total + top 5 tarotistas
 - **Períodos flexibles**: DAY, WEEK, MONTH, YEAR, CUSTOM
@@ -54,9 +58,11 @@ const revenueCalc = await revenueCalculationService.calculateRevenue({
 #### Endpoints
 
 ##### GET /tarotistas/metrics/tarotista
+
 **Autenticación**: JWT required
 
 **Query Parameters**:
+
 ```typescript
 {
   tarotistaId: number;
@@ -67,6 +73,7 @@ const revenueCalc = await revenueCalculationService.calculateRevenue({
 ```
 
 **Response**:
+
 ```json
 {
   "tarotistaId": 1,
@@ -85,9 +92,11 @@ const revenueCalc = await revenueCalculationService.calculateRevenue({
 ```
 
 ##### GET /tarotistas/metrics/platform
+
 **Autenticación**: JWT + AdminGuard
 
 **Query Parameters**:
+
 ```typescript
 {
   period: 'DAY' | 'WEEK' | 'MONTH' | 'YEAR' | 'CUSTOM';
@@ -97,6 +106,7 @@ const revenueCalc = await revenueCalculationService.calculateRevenue({
 ```
 
 **Response**:
+
 ```json
 {
   "totalReadings": 1500,
@@ -124,6 +134,7 @@ const revenueCalc = await revenueCalculationService.calculateRevenue({
 ### 3. Reportes (ReportsService)
 
 #### Funcionalidad
+
 - **Formatos**: CSV y PDF (base64 encoded)
 - **Alcance**: Individual (tarotista específico) o plataforma (admin)
 - **Contenido CSV**: Headers + data rows (tarotistaId, nombrePublico, totalReadings, revenue)
@@ -133,9 +144,11 @@ const revenueCalc = await revenueCalculationService.calculateRevenue({
 #### Endpoints
 
 ##### POST /tarotistas/reports/export
+
 **Autenticación**: JWT required
 
 **Request Body**:
+
 ```json
 {
   "tarotistaId": 1,
@@ -147,6 +160,7 @@ const revenueCalc = await revenueCalculationService.calculateRevenue({
 ```
 
 **Response**:
+
 ```json
 {
   "filename": "report-tarotista-1-2025-01.csv",
@@ -156,6 +170,7 @@ const revenueCalc = await revenueCalculationService.calculateRevenue({
 ```
 
 #### Generación de PDF
+
 - **Biblioteca**: pdfkit
 - **Encoding**: Base64 para transporte HTTP
 - **Estructura**: Título → Summary (total revenue, platform fee) → Tabla de transacciones
@@ -164,18 +179,22 @@ const revenueCalc = await revenueCalculationService.calculateRevenue({
 ### 4. Integración Automática
 
 #### Hook en Creación de Lecturas
+
 Cuando se crea una lectura (CreateReadingUseCase), el sistema:
+
 1. Obtiene el tipo de suscripción del usuario (`getSubscriptionInfo`)
 2. Calcula revenue automáticamente (`calculateRevenue`)
 3. Registra en `tarotista_revenue_metrics` con `readingId` (`recordRevenue`)
 4. Loggea el split para auditoría
 
 #### Manejo de Errores
+
 - La creación de lectura **NO FALLA** si el cálculo de revenue falla
 - Errores se logean y se capturan en try/catch
 - Permite retroactividad: se puede recalcular revenue más adelante
 
 #### Código de integración
+
 ```typescript
 // En CreateReadingUseCase
 private async calculateRevenueForReading(
@@ -216,6 +235,7 @@ private async calculateRevenueForReading(
 **Tabla**: `tarotista_revenue_metrics`
 
 **Campos**:
+
 - `id`: PK
 - `tarotista_id`: FK a tarotistas
 - `user_id`: FK a users
@@ -231,6 +251,7 @@ private async calculateRevenueForReading(
 - `updated_at`: TIMESTAMP
 
 **Índices**:
+
 - `tarotistaId` (queries individuales)
 - `calculationDate` (filtrado por período)
 - `periodMonth` (agregaciones mensuales rápidas)
@@ -238,11 +259,14 @@ private async calculateRevenueForReading(
 ## Testing
 
 ### Cobertura
+
 - **Unit tests**: 37 tests pasando, 100% coverage en servicios
 - **E2E tests**: Pendiente (estructura creada)
 
 ### Desglose de tests
+
 1. **RevenueCalculationService (10 tests)**:
+
    - Cálculo 70/30 split
    - Custom commission percentage
    - Decimal precision
@@ -251,6 +275,7 @@ private async calculateRevenueForReading(
    - recordRevenue persistence
 
 2. **MetricsService (9 tests)**:
+
    - Períodos: DAY, WEEK, MONTH, YEAR, CUSTOM
    - getTarotistaMetrics
    - getPlatformMetrics
@@ -258,6 +283,7 @@ private async calculateRevenueForReading(
    - NotFoundException for invalid tarotista
 
 3. **ReportsService (8 tests)**:
+
    - CSV generation (tarotista + admin)
    - PDF generation (base64 encoding)
    - All periods (DAY, WEEK, MONTH, YEAR, CUSTOM)
@@ -265,6 +291,7 @@ private async calculateRevenueForReading(
    - NotFoundException validation
 
 4. **MetricsController (5 tests)**:
+
    - GET /tarotista/:id endpoint
    - GET /platform endpoint (admin only)
    - Auth guards (401/403)
@@ -279,11 +306,13 @@ private async calculateRevenueForReading(
 ## Seguridad
 
 ### Autenticación y Autorización
+
 - **JwtAuthGuard**: Todos los endpoints requieren token JWT
 - **AdminGuard**: Endpoint `/platform` solo para admins
 - **Validación**: DTOs con class-validator (`@IsNumber`, `@IsEnum`, `@Min`)
 
 ### Protección de Datos
+
 - **CORS**: Configurado en AppModule
 - **Rate limiting**: Aplica a todos los endpoints
 - **Input sanitization**: Vía ValidationPipe con `whitelist: true`
@@ -291,10 +320,12 @@ private async calculateRevenueForReading(
 ## Dependencias
 
 ### NPM Packages
+
 - **pdfkit**: `^0.15.0` (generación de PDFs)
 - **@types/pdfkit**: `^0.13.7` (TypeScript types)
 
 ### Módulos NestJS
+
 - **TarotistasModule**: Exporta servicios de revenue
 - **ReadingsModule**: Importa TarotistasModule para integración
 - **SubscriptionsModule**: Usado para obtener tipo de suscripción
@@ -302,6 +333,7 @@ private async calculateRevenueForReading(
 ## Deployment
 
 ### Pasos para Producción
+
 1. **Migración de DB**: Schema ya existe desde TASK-064
 2. **Variables de entorno**: No se requieren nuevas
 3. **Build**: `npm run build`
@@ -309,6 +341,7 @@ private async calculateRevenueForReading(
 5. **Deploy**: PM2/Docker standard
 
 ### Rollback Plan
+
 - Revenue calculation es **no-blocking**: rollback no afecta lecturas
 - Si hay error, simplemente se puede recalcular revenue histórico
 - No hay breaking changes en API existente
@@ -316,11 +349,13 @@ private async calculateRevenueForReading(
 ## Monitoreo
 
 ### Logs
+
 - **Info**: Revenue calculado exitosamente (con split detallado)
 - **Error**: Fallos en cálculo de revenue (no bloquean creación de lectura)
 - **Formato**: `Revenue calculated for reading ${readingId}: tarotista gets $X, platform gets $Y`
 
 ### Métricas Clave
+
 - Total revenue share por tarotista
 - Platform fee acumulado
 - Número de lecturas por período
@@ -329,6 +364,7 @@ private async calculateRevenueForReading(
 ## Próximos Pasos
 
 ### Mejoras Futuras
+
 1. **Integración con Stripe**: Actualizar `totalRevenueUsd` con pagos reales
 2. **Notificaciones**: Email a tarotistas cuando reciben revenue
 3. **Dashboard UI**: Frontend para visualizar métricas
@@ -337,6 +373,7 @@ private async calculateRevenueForReading(
 6. **Analytics avanzados**: Trending, forecasting, ROI por tarotista
 
 ### E2E Tests Pendientes
+
 - Test completo: Reading creation → Revenue calculation → Metrics updated
 - Admin puede ver métricas de todos los tarotistas
 - Tarotista solo ve sus propias métricas
@@ -345,12 +382,14 @@ private async calculateRevenueForReading(
 ## Recursos
 
 ### Documentación Relacionada
+
 - [TASK-064: Multi-Tarotista Schema](./docs/64-schema.md)
 - [TASK-071: Subscriptions](./docs/71-subscriptions.md)
 - [TASK-072: Public Endpoints](./docs/72-public-endpoints.md)
 - [API Documentation](./docs/API_DOCUMENTATION.md)
 
 ### Commits
+
 1. `feat(TASK-073): create revenue sharing DTOs with TDD`
 2. `feat(TASK-073): implement revenue calculation service (TDD)`
 3. `feat(TASK-073): implement metrics service with dashboard queries (TDD)`
