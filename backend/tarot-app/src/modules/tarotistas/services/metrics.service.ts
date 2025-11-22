@@ -103,19 +103,22 @@ export class MetricsService {
       .createQueryBuilder('revenue')
       .where('revenue.calculationDate >= :start', { start })
       .andWhere('revenue.calculationDate <= :end', { end })
-      .select('DISTINCT revenue.tarotistaId', 'tarotistaId')
+      .select('revenue.tarotistaId', 'tarotistaId')
       .distinct(true)
       .getRawMany();
 
     const activeTarotistas = activeTarotistasResult.length;
 
     // Contar usuarios activos (que generaron al menos una lectura)
-    const activeUsers = await this.readingsRepository
+    const activeUsersResult = await this.readingsRepository
       .createQueryBuilder('reading')
       .where('reading.createdAt >= :start', { start })
       .andWhere('reading.createdAt <= :end', { end })
-      .distinctOn(['reading.userId'])
-      .getCount();
+      .select('reading.userId', 'userId')
+      .distinct(true)
+      .getRawMany();
+
+    const activeUsers = activeUsersResult.length;
 
     // Top 5 tarotistas por revenue
     const topTarotistas = await this.getTopTarotistas(start, end);
@@ -150,7 +153,7 @@ export class MetricsService {
       .select('revenue.tarotistaId', 'tarotistaId')
       .addSelect('SUM(revenue.revenueShareUsd)', 'totalRevenue')
       .groupBy('revenue.tarotistaId')
-      .orderBy('totalRevenue', 'DESC')
+      .orderBy('"totalRevenue"', 'DESC')
       .limit(5)
       .getRawMany();
 

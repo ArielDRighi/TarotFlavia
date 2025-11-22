@@ -108,13 +108,16 @@ describe('ReportsService', () => {
       const result = await service.generateReport(dto);
 
       expect(result.format).toBe(ReportFormat.CSV);
-      expect(result.content).toContain(
+      const csvContent = Buffer.from(result.content, 'base64').toString(
+        'utf-8',
+      );
+      expect(csvContent).toContain(
         'Fecha,ID Lectura,ID Usuario,Email,Suscripción',
       );
-      expect(result.content).toContain('usuario@ejemplo.com');
-      expect(result.content).toContain('usuario2@ejemplo.com');
-      expect(result.content).toContain('50.00');
-      expect(result.content).toContain('60.00');
+      expect(csvContent).toContain('usuario@ejemplo.com');
+      expect(csvContent).toContain('usuario2@ejemplo.com');
+      expect(csvContent).toContain('50.00');
+      expect(csvContent).toContain('60.00');
       expect(result.filename).toMatch(
         /revenue-report-tarotista-1-\d{4}-\d{2}-\d{2}\.csv/,
       );
@@ -148,7 +151,10 @@ describe('ReportsService', () => {
       const result = await service.generateReport(dto);
 
       expect(result.format).toBe(ReportFormat.CSV);
-      expect(result.content).toContain(
+      const csvContent = Buffer.from(result.content, 'base64').toString(
+        'utf-8',
+      );
+      expect(csvContent).toContain(
         'Fecha,ID Lectura,ID Usuario,Email,Suscripción',
       );
       expect(result.filename).toMatch(
@@ -171,11 +177,14 @@ describe('ReportsService', () => {
       const result = await service.generateReport(dto);
 
       expect(result.format).toBe(ReportFormat.CSV);
-      expect(result.content).toContain(
+      const csvContent = Buffer.from(result.content, 'base64').toString(
+        'utf-8',
+      );
+      expect(csvContent).toContain(
         'Fecha,ID Lectura,ID Usuario,Email,Suscripción',
       );
       // Only header line when no data
-      expect(result.content.split('\n').length).toBe(1);
+      expect(csvContent.split('\n').length).toBe(1);
     });
 
     it('should generate report with CUSTOM period', async () => {
@@ -195,7 +204,10 @@ describe('ReportsService', () => {
       const result = await service.generateReport(dto);
 
       expect(result.format).toBe(ReportFormat.CSV);
-      expect(result.content).toContain('usuario@ejemplo.com');
+      const csvContent = Buffer.from(result.content, 'base64').toString(
+        'utf-8',
+      );
+      expect(csvContent).toContain('usuario@ejemplo.com');
     });
 
     it('should generate PDF report for tarotista', async () => {
@@ -236,7 +248,10 @@ describe('ReportsService', () => {
       const result = await service.generateReport(dto);
 
       expect(result.format).toBe(ReportFormat.CSV);
-      expect(result.content).toContain('usuario@ejemplo.com');
+      const csvContent = Buffer.from(result.content, 'base64').toString(
+        'utf-8',
+      );
+      expect(csvContent).toContain('usuario@ejemplo.com');
     });
 
     it('should handle YEAR period correctly', async () => {
@@ -254,7 +269,10 @@ describe('ReportsService', () => {
       const result = await service.generateReport(dto);
 
       expect(result.format).toBe(ReportFormat.CSV);
-      expect(result.content).toContain('usuario@ejemplo.com');
+      const csvContent = Buffer.from(result.content, 'base64').toString(
+        'utf-8',
+      );
+      expect(csvContent).toContain('usuario@ejemplo.com');
     });
   });
 });

@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, HttpCode } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ReportsService } from '../services/reports.service';
 import { ExportReportDto } from '../dto/report-export.dto';
@@ -10,6 +10,7 @@ export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}
 
   @Post('export')
+  @HttpCode(200)
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Export revenue report in CSV or PDF format' })
   @ApiResponse({

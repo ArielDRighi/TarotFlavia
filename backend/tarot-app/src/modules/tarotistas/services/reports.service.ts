@@ -89,19 +89,20 @@ export class ReportsService {
     // Agregar filas de datos
     data.forEach((revenue) => {
       const row = [
-        revenue.calculationDate.toISOString(),
+        new Date(revenue.calculationDate).toISOString(),
         revenue.readingId?.toString() || 'N/A',
         revenue.userId.toString(),
         revenue.user?.email || 'N/A',
         revenue.subscriptionType,
-        revenue.revenueShareUsd.toFixed(2),
-        revenue.platformFeeUsd.toFixed(2),
-        revenue.totalRevenueUsd.toFixed(2),
+        Number(revenue.revenueShareUsd).toFixed(2),
+        Number(revenue.platformFeeUsd).toFixed(2),
+        Number(revenue.totalRevenueUsd).toFixed(2),
       ];
       rows.push(row.join(','));
     });
 
-    const content = rows.join('\n');
+    const csvContent = rows.join('\n');
+    const content = Buffer.from(csvContent, 'utf-8').toString('base64');
     const filename = this.generateFilename(dto, 'csv');
 
     return { format: ReportFormat.CSV, content, filename };
@@ -137,9 +138,15 @@ export class ReportsService {
     doc.moveDown();
 
     // Totales
-    const totalRevenue = data.reduce((sum, r) => sum + r.totalRevenueUsd, 0);
-    const totalShare = data.reduce((sum, r) => sum + r.revenueShareUsd, 0);
-    const totalFee = data.reduce((sum, r) => sum + r.platformFeeUsd, 0);
+    const totalRevenue = data.reduce(
+      (sum, r) => sum + Number(r.totalRevenueUsd),
+      0,
+    );
+    const totalShare = data.reduce(
+      (sum, r) => sum + Number(r.revenueShareUsd),
+      0,
+    );
+    const totalFee = data.reduce((sum, r) => sum + Number(r.platformFeeUsd), 0);
 
     doc.fontSize(14).text('Resumen:', { underline: true });
     doc.fontSize(11).text(`Total Transacciones: ${data.length}`);
@@ -159,13 +166,15 @@ export class ReportsService {
         }
 
         doc.fontSize(10);
-        doc.text(`${index + 1}. ${revenue.calculationDate.toLocaleString()}`);
+        doc.text(
+          `${index + 1}. ${new Date(revenue.calculationDate).toLocaleString()}`,
+        );
         doc.text(
           `   Usuario: ${revenue.user?.email || 'N/A'} (ID: ${revenue.userId})`,
         );
         doc.text(`   Lectura ID: ${revenue.readingId || 'N/A'}`);
         doc.text(
-          `   Revenue: $${revenue.revenueShareUsd.toFixed(2)} | Comisión: $${revenue.platformFeeUsd.toFixed(2)} | Total: $${revenue.totalRevenueUsd.toFixed(2)}`,
+          `   Revenue: $${Number(revenue.revenueShareUsd).toFixed(2)} | Comisión: $${Number(revenue.platformFeeUsd).toFixed(2)} | Total: $${Number(revenue.totalRevenueUsd).toFixed(2)}`,
         );
         doc.moveDown(0.3);
       });

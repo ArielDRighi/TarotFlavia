@@ -282,8 +282,6 @@ describe('MetricsService', () => {
         { tarotistaId: '3' },
       ];
 
-      const mockActiveUsers = 150;
-
       const mockTopRevenue = [{ tarotistaId: 1, totalRevenue: '1400.00' }];
 
       const mockTarotistaMetrics = {
@@ -299,8 +297,8 @@ describe('MetricsService', () => {
         .mockResolvedValueOnce(mockTarotistaMetrics); // metrics for tarotista in loop
       mockQueryBuilder.getRawMany
         .mockResolvedValueOnce(mockActiveTarotistas) // activeTarotistasResult
+        .mockResolvedValueOnce([{ userId: '1' }]) // activeUsersResult
         .mockResolvedValueOnce(mockTopRevenue); // revenueByTarotista in getTopTarotistas
-      mockQueryBuilder.getCount.mockResolvedValueOnce(mockActiveUsers); // activeUsers
 
       jest.spyOn(tarotistaRepository, 'find').mockResolvedValue([
         {
@@ -318,7 +316,7 @@ describe('MetricsService', () => {
       expect(result.totalRevenueShare).toBe(3500.0);
       expect(result.totalPlatformFee).toBe(1500.0);
       expect(result.totalGrossRevenue).toBe(5000.0);
-      expect(result.activeUsers).toBe(150);
+      expect(result.activeUsers).toBe(1);
       expect(result.activeTarotistas).toBe(3);
       expect(result.topTarotistas).toHaveLength(1);
       expect(result.topTarotistas[0].tarotistaId).toBe(1);
@@ -338,15 +336,15 @@ describe('MetricsService', () => {
       };
 
       const mockActiveTarotistas = [];
-      const mockActiveUsers = 0;
+
       const mockTopRevenue = [];
 
       // Configure mock sequence
       mockQueryBuilder.getRawOne.mockResolvedValueOnce(mockAggregatedData); // totalMetrics
       mockQueryBuilder.getRawMany
         .mockResolvedValueOnce(mockActiveTarotistas) // activeTarotistasResult
+        .mockResolvedValueOnce([]) // activeUsersResult - empty
         .mockResolvedValueOnce(mockTopRevenue); // revenueByTarotista in getTopTarotistas
-      mockQueryBuilder.getCount.mockResolvedValueOnce(mockActiveUsers); // activeUsers
 
       const result = await service.getPlatformMetrics(query);
 
