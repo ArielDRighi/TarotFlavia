@@ -18,6 +18,7 @@ import { PredefinedQuestionsModule } from '../../predefined-questions/predefined
 import { UsageLimitsModule } from '../../usage-limits/usage-limits.module';
 import { AIUsageModule } from '../../ai-usage/ai-usage.module';
 import { SubscriptionsModule } from '../../subscriptions/subscriptions.module';
+import { TarotistasModule } from '../../tarotistas/tarotistas.module';
 
 // ==================== Clean Architecture ====================
 // Repositories
@@ -48,6 +49,7 @@ import { RestoreReadingUseCase } from './application/use-cases/restore-reading.u
     UsageLimitsModule,
     AIUsageModule,
     SubscriptionsModule,
+    TarotistasModule,
   ],
   controllers: [
     ReadingsController,
