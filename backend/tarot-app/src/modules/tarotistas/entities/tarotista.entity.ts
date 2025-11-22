@@ -163,10 +163,16 @@ export class Tarotista {
     precision: 3,
     scale: 2,
     nullable: true,
+    // Note: This transformer handles PostgreSQL decimal/numeric columns that may be returned as strings.
+    // It also handles cases where the value may already be a number (for other DB drivers).
     transformer: {
       to: (value: number | null) => value,
-      from: (value: string | null) =>
-        value !== null ? parseFloat(value) : null,
+      from: (value: string | number | null | undefined) => {
+        if (value === null || value === undefined) return null;
+        if (typeof value === 'number') return value;
+        if (typeof value === 'string') return parseFloat(value);
+        return null;
+      },
     },
   })
   ratingPromedio: number | null;

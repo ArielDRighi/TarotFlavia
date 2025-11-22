@@ -64,7 +64,7 @@ export class TarotistasPublicService {
       total,
       page,
       limit,
-      totalPages: total > 0 ? Math.ceil(total / limit) : 0,
+      totalPages: Math.ceil(total / limit),
     };
   }
 
