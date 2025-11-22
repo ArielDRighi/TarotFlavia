@@ -5,10 +5,9 @@ import { MetricsService } from './metrics.service';
 import { TarotistaRevenueMetrics } from '../entities/tarotista-revenue-metrics.entity';
 import { Tarotista } from '../entities/tarotista.entity';
 import { TarotReading } from '../../tarot/readings/entities/tarot-reading.entity';
+import { User } from '../../users/entities/user.entity';
 import {
   MetricsQueryDto,
-  TarotistaMetricsDto,
-  PlatformMetricsDto,
   PlatformMetricsQueryDto,
   MetricsPeriod,
 } from '../dto/metrics-query.dto';
@@ -16,9 +15,10 @@ import { NotFoundException } from '@nestjs/common';
 
 describe('MetricsService', () => {
   let service: MetricsService;
-  let revenueMetricsRepository: Repository<TarotistaRevenueMetrics>;
+  let _revenueMetricsRepository: Repository<TarotistaRevenueMetrics>;
   let tarotistaRepository: Repository<Tarotista>;
-  let readingsRepository: Repository<TarotReading>;
+  let _readingsRepository: Repository<TarotReading>;
+  let _userRepository: Repository<User>;
 
   const mockTarotista: Partial<Tarotista> = {
     id: 1,
@@ -72,13 +72,13 @@ describe('MetricsService', () => {
     }).compile();
 
     service = module.get<MetricsService>(MetricsService);
-    revenueMetricsRepository = module.get<Repository<TarotistaRevenueMetrics>>(
+    _revenueMetricsRepository = module.get<Repository<TarotistaRevenueMetrics>>(
       getRepositoryToken(TarotistaRevenueMetrics),
     );
     tarotistaRepository = module.get<Repository<Tarotista>>(
       getRepositoryToken(Tarotista),
     );
-    readingsRepository = module.get<Repository<TarotReading>>(
+    _readingsRepository = module.get<Repository<TarotReading>>(
       getRepositoryToken(TarotReading),
     );
 
