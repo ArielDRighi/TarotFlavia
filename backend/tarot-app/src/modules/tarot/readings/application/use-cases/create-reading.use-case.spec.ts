@@ -9,6 +9,7 @@ import { SpreadsService } from '../../../spreads/spreads.service';
 import { DecksService } from '../../../decks/decks.service';
 import { PredefinedQuestionsService } from '../../../../predefined-questions/predefined-questions.service';
 import { SubscriptionsService } from '../../../../subscriptions/subscriptions.service';
+import { RevenueCalculationService } from '../../../../tarotistas/services/revenue-calculation.service';
 import { TarotReading } from '../../entities/tarot-reading.entity';
 import { User, UserPlan } from '../../../../users/entities/user.entity';
 import { CreateReadingDto } from '../../dto/create-reading.dto';
@@ -27,6 +28,7 @@ describe('CreateReadingUseCase', () => {
   let decksService: jest.Mocked<DecksService>;
   let predefinedQuestionsService: jest.Mocked<PredefinedQuestionsService>;
   let subscriptionsService: jest.Mocked<SubscriptionsService>;
+  let _revenueCalculationService: jest.Mocked<RevenueCalculationService>;
 
   const mockUser: User = {
     id: 100,
@@ -138,6 +140,18 @@ describe('CreateReadingUseCase', () => {
           provide: SubscriptionsService,
           useValue: {
             resolveTarotistaForReading: jest.fn().mockResolvedValue(1), // Default to Flavia
+          },
+        },
+        {
+          provide: RevenueCalculationService,
+          useValue: {
+            calculateRevenue: jest.fn().mockResolvedValue({
+              totalRevenueUsd: 1.0,
+              revenueShareUsd: 0.7,
+              platformFeeUsd: 0.3,
+              commissionPercentage: 30,
+            }),
+            recordRevenue: jest.fn().mockResolvedValue(undefined),
           },
         },
       ],

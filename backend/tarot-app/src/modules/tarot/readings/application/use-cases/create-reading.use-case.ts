@@ -16,6 +16,8 @@ import { SpreadsService } from '../../../spreads/spreads.service';
 import { DecksService } from '../../../decks/decks.service';
 import { PredefinedQuestionsService } from '../../../../predefined-questions/predefined-questions.service';
 import { SubscriptionsService } from '../../../../subscriptions/subscriptions.service';
+import { RevenueCalculationService } from '../../../../tarotistas/services/revenue-calculation.service';
+import { SubscriptionType } from '../../../../tarotistas/entities/user-tarotista-subscription.entity';
 
 @Injectable()
 export class CreateReadingUseCase {
@@ -31,6 +33,7 @@ export class CreateReadingUseCase {
     private readonly decksService: DecksService,
     private readonly predefinedQuestionsService: PredefinedQuestionsService,
     private readonly subscriptionsService: SubscriptionsService,
+    private readonly revenueCalculationService: RevenueCalculationService,
   ) {}
 
   async execute(
@@ -144,6 +147,13 @@ export class CreateReadingUseCase {
           `Interpretation generated successfully for reading ${reading.id}`,
         );
 
+        // Calcular y registrar revenue para esta lectura
+        await this.calculateRevenueForReading(
+          updatedReading,
+          tarotistaId,
+          user.id,
+        );
+
         return updatedReading;
       } catch (error) {
         this.logger.error(
@@ -158,6 +168,59 @@ export class CreateReadingUseCase {
       }
     }
 
+    // Calcular y registrar revenue para lecturas sin interpretación también
+    await this.calculateRevenueForReading(reading, tarotistaId, user.id);
+
     return reading;
+  }
+
+  /**
+   * Calcula y registra el revenue share para una lectura generada.
+   * Este método se ejecuta de forma asíncrona y no debe bloquear la creación de la lectura.
+   */
+  private async calculateRevenueForReading(
+    reading: TarotReading,
+    tarotistaId: number,
+    userId: number,
+  ): Promise<void> {
+    try {
+      // Obtener el tipo de suscripción del usuario
+      const subscription =
+        await this.subscriptionsService.getSubscriptionInfo(userId);
+
+      // Convertir el tipo de suscripción del servicio al enum de SubscriptionType
+      const subscriptionType =
+        subscription?.subscriptionType || SubscriptionType.FAVORITE;
+
+      // Calcular revenue (esto ya valida tarotista y aplica comisiones correctas)
+      const revenueCalc = await this.revenueCalculationService.calculateRevenue(
+        {
+          tarotistaId,
+          userId,
+          subscriptionType,
+          totalRevenueUsd: 0, // Por ahora 0, se actualizará cuando tengamos pagos reales
+        },
+      );
+
+      // Registrar en la tabla de métricas con referencia a la lectura
+      await this.revenueCalculationService.recordRevenue({
+        tarotistaId,
+        userId,
+        subscriptionType,
+        totalRevenueUsd: revenueCalc.totalRevenueUsd,
+        readingId: reading.id,
+      });
+
+      this.logger.log(
+        `Revenue calculated for reading ${reading.id}: tarotista ${tarotistaId} gets $${revenueCalc.revenueShareUsd.toFixed(2)}, platform gets $${revenueCalc.platformFeeUsd.toFixed(2)}`,
+      );
+    } catch (error) {
+      // No fallar la creación de lectura si el revenue calculation falla
+      // TODO(TASK-XXX): Add metrics/monitoring alerts for revenue calculation failures
+      this.logger.error(
+        `Failed to calculate revenue for reading ${reading.id}`,
+        error instanceof Error ? error.stack : error,
+      );
+    }
   }
 }
