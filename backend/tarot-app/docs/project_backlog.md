@@ -10761,13 +10761,15 @@ if (!tarotista) {
 
 ---
 
-### 🔴 TASK-072: Crear Endpoints Públicos de Tarotistas ⭐⭐⭐
+### ✅ TASK-072: Crear Endpoints Públicos de Tarotistas ⭐⭐⭐
 
 **Prioridad:** 🔴 CRÍTICA  
 **Estimación:** 2 días  
 **Tags:** mvp, marketplace, public-api, frontend-ready, discovery  
 **Dependencias:** TASK-064 (Schema), TASK-070 (Admin Tarotistas)  
-**Estado:** 🟡 NO INICIADA  
+**Estado:** ✅ COMPLETADA  
+**Branch:** `feature/TASK-072-endpoints-publicos-tarotistas`  
+**Commit:** `2f865f6` - feat(TASK-072): Crear endpoints públicos de tarotistas  
 **Contexto Informe:** Sección 5 - Descubrimiento de Tarotistas
 
 ---
@@ -10776,12 +10778,12 @@ if (!tarotista) {
 
 Crear endpoints públicos (sin autenticación requerida) para que el frontend del marketplace pueda:
 
-1. **Listar todos los tarotistas activos** con paginación
-2. **Ver perfil público detallado** de cada tarotista
-3. **Filtrar por especialidades** (amor, trabajo, salud, etc.)
-4. **Ordenar por popularidad, rating, o alfabético**
-5. **Buscar por nombre o biografía**
-6. **Ver estadísticas públicas**: total de lecturas, rating promedio
+1. ✅ **Listar todos los tarotistas activos** con paginación
+2. ✅ **Ver perfil público detallado** de cada tarotista
+3. ✅ **Filtrar por especialidades** (amor, trabajo, salud, etc.)
+4. ✅ **Ordenar por popularidad, rating, o alfabético**
+5. ✅ **Buscar por nombre o biografía**
+6. ✅ **Ver estadísticas públicas**: total de lecturas, rating promedio
 
 El informe especifica:
 
@@ -10789,49 +10791,148 @@ El informe especifica:
 
 **Casos de Uso:**
 
-- Usuario visitante explora tarotistas antes de registrarse
-- Usuario registrado FREE busca tarotista para seleccionar como favorito
-- Usuario PREMIUM explora opciones antes de elegir favorito o all-access
-- Landing page muestra "Nuestros Tarotistas" con cards
+- ✅ Usuario visitante explora tarotistas antes de registrarse
+- ✅ Usuario registrado FREE busca tarotista para seleccionar como favorito
+- ✅ Usuario PREMIUM explora opciones antes de elegir favorito o all-access
+- ✅ Landing page muestra "Nuestros Tarotistas" con cards
 
 **Datos Públicos vs Privados:**
 
 - ✅ Público: nombre, foto, biografía, especialidades, rating, total lecturas
-- ❌ Privado: configuración de IA, significados personalizados, ingresos, email
+- ✅ Privado: configuración de IA, significados personalizados, ingresos, email (NO EXPUESTOS)
 
 ---
 
-#### 🧪 Testing
+#### 🧪 Testing ✅ COMPLETADO
 
-**Unit Tests:**
+**Unit Tests:** ✅ 59 tests passing
 
-- [ ] Test `TarotistasService.getAllPublic()` retorna solo activos
-- [ ] Test filtros: especialidad, búsqueda, ordenamiento
-- [ ] Test paginación: page, pageSize
-- [ ] Test `getTarotistaPublicProfile()` no expone datos sensibles
+- ✅ Test `TarotistasPublicService.getAllPublic()` retorna solo activos (20 tests)
+- ✅ Test filtros: especialidad, búsqueda, ordenamiento (DTO: 23 tests)
+- ✅ Test paginación: page, limit (validación 1-100)
+- ✅ Test `getPublicProfile()` no expone datos sensibles
+- ✅ Test controller con NotFoundException para inactivos (16 tests)
 
-**Integration Tests:**
+**E2E Tests:** ✅ 22 tests passing
 
-- [ ] Test endpoint `/tarotistas` retorna lista paginada
-- [ ] Test endpoint `/tarotistas/:id` retorna perfil completo
-- [ ] Test filtro por especialidad: `/tarotistas?especialidad=amor`
-- [ ] Test ordenamiento: `/tarotistas?orderBy=rating&order=DESC`
-- [ ] Test búsqueda: `/tarotistas?search=luna`
+- ✅ Test endpoint `/tarotistas` retorna lista paginada
+- ✅ Test endpoint `/tarotistas/:id` retorna perfil completo
+- ✅ Test filtro por especialidad: `/tarotistas?especialidad=Amor`
+- ✅ Test ordenamiento: `/tarotistas?orderBy=rating&order=DESC`
+- ✅ Test búsqueda: `/tarotistas?search=luna`
+- ✅ Test usuario visitante puede ver lista sin autenticación
+- ✅ Test usuario registrado puede ver perfiles
+- ✅ Test tarotista inactivo NO aparece en lista pública
+- ✅ Test búsqueda retorna resultados relevantes
+- ✅ Test validación de parámetros (page < 1, limit > 100, orderBy inválido)
+- ✅ Test SQL injection prevention
+- ✅ Test paginación correcta
+- ✅ Test metadata (total, totalPages)
+- ✅ Test 404 para tarotistas inactivos/no existentes
+- ✅ Test NO expone datos sensibles (configs, customCardMeanings)
 
-**E2E Tests:**
-
-- [ ] Test usuario visitante puede ver lista sin autenticación
-- [ ] Test usuario registrado puede ver perfiles
-- [ ] Test tarotista inactivo NO aparece en lista pública
-- [ ] Test búsqueda retorna resultados relevantes
+**Cobertura Total:** 186 unit tests + 22 E2E tests = 208 tests ✅ 100% passing
 
 ---
 
-#### ✅ Tareas específicas
+#### ✅ Implementación Completada
 
-**1. Crear TarotistasService con métodos públicos (1 día):**
+**Archivos Creados:**
 
-- [ ] Implementar método `getAllPublic()`:
+- ✅ `src/modules/tarotistas/dto/get-public-tarotistas-filter.dto.ts` - DTO de validación con class-validator
+- ✅ `src/modules/tarotistas/dto/get-public-tarotistas-filter.dto.spec.ts` - 23 unit tests
+- ✅ `src/modules/tarotistas/services/tarotistas-public.service.ts` - Lógica de negocio pública
+- ✅ `src/modules/tarotistas/services/tarotistas-public.service.spec.ts` - 20 unit tests
+- ✅ `src/modules/tarotistas/controllers/tarotistas-public.controller.ts` - Endpoints HTTP públicos
+- ✅ `src/modules/tarotistas/controllers/tarotistas-public.controller.spec.ts` - 16 unit tests
+- ✅ `test/tarotistas-public.e2e-spec.ts` - 22 E2E tests
+
+**Archivos Modificados:**
+
+- ✅ `src/modules/tarotistas/tarotistas.module.ts` - Registro de service/controller
+- ✅ `src/modules/tarotistas/dto/index.ts` - Export del nuevo DTO
+- ✅ `src/modules/tarotistas/entities/tarotista.entity.ts` - Transformer para `ratingPromedio` (decimal → number)
+
+**Características Técnicas Implementadas:**
+
+- ✅ **Endpoints públicos:** GET `/tarotistas` y GET `/tarotistas/:id`
+- ✅ **Paginación:** page (min: 1), limit (1-100, default: 20)
+- ✅ **Filtros:** search (nombrePublico/bio), especialidad
+- ✅ **Ordenamiento:** rating, totalLecturas, nombrePublico, createdAt (ASC/DESC)
+- ✅ **Seguridad:** Solo tarotistas activos, SQL injection prevention, sin datos sensibles
+- ✅ **Validación:** class-validator con mensajes descriptivos
+- ✅ **Transformer:** `ratingPromedio` convertido de decimal a number (TypeORM)
+- ✅ **NULLS LAST:** Valores null ordenados al final en SQL
+- ✅ **404 automático:** NotFoundException para tarotistas inactivos/inexistentes
+- ✅ **Metadata completa:** total, page, limit, totalPages
+
+**Metodología TDD:**
+
+- ✅ Tests escritos PRIMERO (Red)
+- ✅ Implementación MÍNIMA (Green)
+- ✅ Refactorización (Refactor)
+- ✅ Ciclo completo: DTO → Service → Controller → E2E
+
+**Validación de Calidad:**
+
+- ✅ `npm run lint` - 0 errores
+- ✅ `npm run build` - Build exitoso
+- ✅ All tests passing (186 unit + 22 E2E)
+- ✅ Arquitectura feature-based flat (módulo simple CRUD)
+- ✅ Sin `as any` (strict TypeScript)
+
+**Documentación:**
+
+- ✅ API_DOCUMENTATION.md actualizada con sección "Tarotistas Públicos"
+- ✅ Ejemplos de cURL completos
+- ✅ Casos de uso documentados
+- ✅ Errores de validación documentados
+
+---
+
+#### 📊 Métricas de Desarrollo
+
+- **Tiempo estimado:** 2 días
+- **Tiempo real:** 2 días
+- **Tests creados:** 59 unit + 22 E2E = 81 tests
+- **Líneas de código:** ~1,831 líneas
+- **Coverage:** >95% en nuevos archivos
+- **Commits:** 1 commit principal (`2f865f6`)
+
+---
+
+#### 🎯 Criterios de Aceptación ✅ COMPLETADOS
+
+- ✅ Endpoints públicos funcionan sin autenticación
+- ✅ Solo tarotistas activos son visibles
+- ✅ Filtrado por especialidad funciona correctamente
+- ✅ Búsqueda funciona en nombrePublico y bio
+- ✅ Ordenamiento funciona con todos los campos
+- ✅ Paginación retorna metadata correcta
+- ✅ No expone datos sensibles (configs, customCardMeanings)
+- ✅ Retorna 404 para tarotistas inactivos
+- ✅ Validación exhaustiva de parámetros
+- ✅ Tests 100% passing (unit + E2E)
+- ✅ Documentación API completa
+- ✅ Zero lint errors
+
+---
+
+#### ✅ Tareas específicas ✅ COMPLETADAS
+
+**1. ✅ Crear TarotistasPublicService con métodos públicos:**
+
+- ✅ Implementado método `getAllPublic()`:
+  - ✅ QueryBuilder con filtro `isActive = true`
+  - ✅ Filtro por especialidad con `ANY(array)`
+  - ✅ Búsqueda LIKE con escape de caracteres especiales
+  - ✅ Ordenamiento con `NULLS LAST`
+  - ✅ Paginación con skip/take
+  - ✅ Metadata de paginación
+  
+- ✅ Implementado método `getPublicProfile()`:
+  - ✅ Retorna null si inactivo (controller lanza 404)
+  - ✅ Solo datos públicos expuestos
 
   ```typescript
   async getAllPublic(filters: GetPublicTarotistasDto): Promise<{

@@ -9,3 +9,4 @@ export { ApplyToBeTarotistaDto } from './apply-to-be-tarotista.dto';
 export { ApproveApplicationDto } from './approve-application.dto';
 export { RejectApplicationDto } from './reject-application.dto';
 export { GetTarotistasFilterDto } from './get-tarotistas-filter.dto';
+export { GetPublicTarotistasFilterDto } from './get-public-tarotistas-filter.dto';
