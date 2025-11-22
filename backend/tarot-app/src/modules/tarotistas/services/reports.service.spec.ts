@@ -4,14 +4,13 @@ import { Repository } from 'typeorm';
 import { ReportsService } from './reports.service';
 import { TarotistaRevenueMetrics } from '../entities/tarotista-revenue-metrics.entity';
 import { Tarotista } from '../entities/tarotista.entity';
-import { User } from '../../users/entities/user.entity';
 import { ExportReportDto, ReportFormat } from '../dto/report-export.dto';
 import { MetricsPeriod } from '../dto/metrics-query.dto';
 import { NotFoundException } from '@nestjs/common';
 
 describe('ReportsService', () => {
   let service: ReportsService;
-  let revenueMetricsRepository: Repository<TarotistaRevenueMetrics>;
+  let _revenueMetricsRepository: Repository<TarotistaRevenueMetrics>;
   let tarotistaRepository: Repository<Tarotista>;
 
   const mockTarotista: Partial<Tarotista> = {
@@ -81,7 +80,7 @@ describe('ReportsService', () => {
     }).compile();
 
     service = module.get<ReportsService>(ReportsService);
-    revenueMetricsRepository = module.get<Repository<TarotistaRevenueMetrics>>(
+    _revenueMetricsRepository = module.get<Repository<TarotistaRevenueMetrics>>(
       getRepositoryToken(TarotistaRevenueMetrics),
     );
     tarotistaRepository = module.get<Repository<Tarotista>>(

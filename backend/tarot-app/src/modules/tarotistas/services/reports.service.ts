@@ -117,7 +117,7 @@ export class ReportsService {
     const doc = new PDFDocument();
     const chunks: Buffer[] = [];
 
-    doc.on('data', (chunk) => chunks.push(chunk));
+    doc.on('data', (chunk: Buffer) => chunks.push(chunk));
 
     // Título
     doc.fontSize(18).text('Reporte de Revenue', { align: 'center' });
