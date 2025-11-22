@@ -216,6 +216,7 @@ export class CreateReadingUseCase {
       );
     } catch (error) {
       // No fallar la creación de lectura si el revenue calculation falla
+      // TODO(TASK-XXX): Add metrics/monitoring alerts for revenue calculation failures
       this.logger.error(
         `Failed to calculate revenue for reading ${reading.id}`,
         error instanceof Error ? error.stack : error,

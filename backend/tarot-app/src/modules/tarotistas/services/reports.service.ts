@@ -92,7 +92,7 @@ export class ReportsService {
         new Date(revenue.calculationDate).toISOString(),
         revenue.readingId?.toString() || 'N/A',
         revenue.userId.toString(),
-        revenue.user?.email || 'N/A',
+        this.escapeCsvField(revenue.user?.email || 'N/A'),
         revenue.subscriptionType,
         Number(revenue.revenueShareUsd).toFixed(2),
         Number(revenue.platformFeeUsd).toFixed(2),
@@ -191,6 +191,16 @@ export class ReportsService {
         resolve({ format: ReportFormat.PDF, content, filename });
       });
     });
+  }
+
+  /**
+   * Escapa campos CSV que pueden contener caracteres especiales
+   */
+  private escapeCsvField(field: string): string {
+    if (field.includes(',') || field.includes('"') || field.includes('\n')) {
+      return `"${field.replace(/"/g, '""')}"`;
+    }
+    return field;
   }
 
   /**

@@ -5,6 +5,7 @@ import {
   IsNumber,
   IsPositive,
   IsDateString,
+  ValidateIf,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { MetricsPeriod } from './metrics-query.dto';
@@ -54,7 +55,7 @@ export class ExportReportDto {
     example: '2025-01-01T00:00:00Z',
     required: false,
   })
-  @IsOptional()
+  @ValidateIf((o: ExportReportDto) => o.period === MetricsPeriod.CUSTOM)
   @IsDateString()
   startDate?: string;
 
@@ -63,7 +64,7 @@ export class ExportReportDto {
     example: '2025-01-31T23:59:59Z',
     required: false,
   })
-  @IsOptional()
+  @ValidateIf((o: ExportReportDto) => o.period === MetricsPeriod.CUSTOM)
   @IsDateString()
   endDate?: string;
 }

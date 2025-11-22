@@ -140,6 +140,9 @@ export class MetricsService {
 
   /**
    * Obtiene top 5 tarotistas por revenue en el período
+   * TODO(OPTIMIZATION): Consider using JOIN query to avoid N+1 pattern (currently 6 queries max)
+   * Current implementation: 1 query for top IDs + 5 individual queries for each tarotista
+   * Not critical for MVP as it's limited to 5 tarotistas, but should be optimized for scale
    */
   private async getTopTarotistas(
     start: Date,

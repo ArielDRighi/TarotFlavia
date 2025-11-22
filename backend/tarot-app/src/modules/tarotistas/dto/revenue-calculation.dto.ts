@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsPositive, IsEnum, Min } from 'class-validator';
+import { IsNumber, IsPositive, IsEnum, Min, IsOptional } from 'class-validator';
 import { SubscriptionType } from '../entities/user-tarotista-subscription.entity';
 
 /**
@@ -39,10 +39,11 @@ export class CalculateRevenueDto {
   totalRevenueUsd: number;
 
   @ApiProperty({
-    description: 'ID de la lectura (opcional)',
-    example: 1,
+    description: 'ID de la lectura asociada (opcional)',
+    example: 123,
     required: false,
   })
+  @IsOptional()
   @IsNumber()
   @IsPositive()
   readingId?: number;
