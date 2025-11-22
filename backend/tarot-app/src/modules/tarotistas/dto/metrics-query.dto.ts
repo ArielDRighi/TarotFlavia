@@ -113,7 +113,6 @@ export class TarotistaMetricsDto {
 
   @ApiProperty({
     description: 'Período consultado',
-    type: 'object',
     example: {
       start: '2025-01-01T00:00:00Z',
       end: '2025-01-31T23:59:59Z',
@@ -201,7 +200,6 @@ export class PlatformMetricsDto {
 
   @ApiProperty({
     description: 'Período consultado',
-    type: 'object',
     example: {
       start: '2025-01-01T00:00:00Z',
       end: '2025-01-31T23:59:59Z',
