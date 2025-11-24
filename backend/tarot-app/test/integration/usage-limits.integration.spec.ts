@@ -86,7 +86,7 @@ describe('UsageLimits + Readings Integration Tests', () => {
       }))!;
     }
 
-    let flaviaTarotista = await tarotistaRepo.findOne({
+    const flaviaTarotista = await tarotistaRepo.findOne({
       where: { userId: flaviaUser.id },
     });
 
