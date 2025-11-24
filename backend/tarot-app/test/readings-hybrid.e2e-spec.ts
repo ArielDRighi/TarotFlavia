@@ -24,6 +24,7 @@ interface ReadingResponse {
   predefinedQuestionId: number | null;
   customQuestion: string | null;
   questionType: 'predefined' | 'custom';
+  tarotistaId: number | null;
   [key: string]: unknown;
 }
 
@@ -377,5 +378,54 @@ describe('Readings Hybrid Questions (E2E)', () => {
 
       freeUserToken = (revertLoginResponse.body as LoginResponse).access_token;
     }, 60000);
+  });
+
+  /**
+   * Multi-Tarotista Support (TASK-074)
+   */
+  describe('Multi-Tarotista Support (TASK-074)', () => {
+    it('should include tarotistaId in hybrid readings (FREE user with predefined)', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/readings')
+        .set('Authorization', `Bearer ${freeUserToken}`)
+        .send({
+          predefinedQuestionId: predefinedQuestionId,
+          deckId: deckId,
+          spreadId: spreadId,
+          cardIds: [1, 2, 3],
+          cardPositions: [
+            { cardId: 1, position: 'past', isReversed: false },
+            { cardId: 2, position: 'present', isReversed: false },
+            { cardId: 3, position: 'future', isReversed: false },
+          ],
+          generateInterpretation: false,
+        })
+        .expect(201);
+
+      const reading = response.body as ReadingResponse;
+      expect(reading.tarotistaId).toBe(1); // Default Flavia
+    }, 15000);
+
+    it('should include tarotistaId in hybrid readings (PREMIUM user with custom)', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/readings')
+        .set('Authorization', `Bearer ${premiumUserToken}`)
+        .send({
+          customQuestion: 'Hybrid test for multi-tarotista',
+          deckId: deckId,
+          spreadId: spreadId,
+          cardIds: [1, 2, 3],
+          cardPositions: [
+            { cardId: 1, position: 'past', isReversed: false },
+            { cardId: 2, position: 'present', isReversed: false },
+            { cardId: 3, position: 'future', isReversed: false },
+          ],
+          generateInterpretation: false,
+        })
+        .expect(201);
+
+      const reading = response.body as ReadingResponse;
+      expect(reading.tarotistaId).toBe(1); // Default Flavia
+    }, 15000);
   });
 });
