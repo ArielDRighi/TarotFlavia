@@ -384,10 +384,10 @@ describe('Readings Hybrid Questions (E2E)', () => {
    * Multi-Tarotista Support (TASK-074)
    */
   describe('Multi-Tarotista Support (TASK-074)', () => {
-    it('should include tarotistaId in hybrid readings (FREE user with predefined)', async () => {
+    it('should include tarotistaId in hybrid readings (PREMIUM user with predefined)', async () => {
       const response = await request(app.getHttpServer())
         .post('/readings')
-        .set('Authorization', `Bearer ${freeUserToken}`)
+        .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           predefinedQuestionId: predefinedQuestionId,
           deckId: deckId,
