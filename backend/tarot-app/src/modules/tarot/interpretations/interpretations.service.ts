@@ -140,8 +140,7 @@ export class InterpretationsService {
     const cardCombination = cards.map((card, index) => ({
       card_id: card.id.toString(),
       position: index,
-      is_reversed:
-        positions.find((p) => p.cardId === card.id)?.isReversed || false,
+      is_reversed: positions[index]?.isReversed || false,
     }));
 
     // Cache key ahora incluye tarotistaId
