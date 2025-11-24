@@ -18,6 +18,7 @@ import { InterpretationCacheService } from '../../cache/application/services/int
 import { PromptBuilderService } from '../../ai/application/services/prompt-builder.service';
 import { TarotPrompts } from '../../ai/application/prompts/tarot-prompts';
 import { OutputSanitizerService } from '../../../common/services/output-sanitizer.service';
+import { AIQuotaService } from '../../ai-usage/ai-quota.service';
 
 interface InterpretationResult {
   interpretation: string;
@@ -43,6 +44,7 @@ export class InterpretationsService {
     private cacheService: InterpretationCacheService,
     private promptBuilder: PromptBuilderService,
     private outputSanitizer: OutputSanitizerService,
+    private aiQuotaService: AIQuotaService,
   ) {
     this.logger.log(
       'InterpretationsService initialized with AI Provider, Cache, PromptBuilder, and OutputSanitizer',
@@ -260,6 +262,24 @@ export class InterpretationsService {
       // Sanitize fallback response too (TASK-048-a: Output Sanitization)
       const fallbackInterpretation =
         this.outputSanitizer.sanitizeAiResponse(rawFallback);
+
+      // Track monthly usage even for fallback (user still consumed a request)
+      if (userId) {
+        try {
+          await this.aiQuotaService.trackMonthlyUsage(
+            userId,
+            1, // 1 request
+            0, // no tokens for fallback
+            0, // no cost for fallback
+            'fallback',
+          );
+        } catch (trackingError) {
+          this.logger.error(
+            `Failed to track monthly usage for fallback interpretation`,
+            trackingError,
+          );
+        }
+      }
 
       // Guardar el fallback también para registro
       await this.saveInterpretation(fallbackInterpretation, 'fallback', {
