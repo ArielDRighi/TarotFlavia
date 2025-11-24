@@ -23,6 +23,7 @@ interface ReadingResponse {
   id: number;
   predefinedQuestionId: number | null;
   customQuestion: string | null;
+  tarotistaId: number | null;
 }
 
 interface ErrorResponse {
@@ -426,5 +427,45 @@ describe('Free User Edge Cases E2E (SUBTASK-18)', () => {
         expect(dbCheck[0].id).toBe(readingId);
       }
     }, 25000);
+  });
+
+  /**
+   * 3. Multi-Tarotista Support (TASK-074)
+   */
+  describe('3. Multi-Tarotista Support (TASK-074)', () => {
+    it('should include tarotistaId in all FREE user readings', async () => {
+      // Clean previous data
+      const ds = dbHelper.getDataSource();
+      await ds.query('DELETE FROM tarot_reading WHERE "userId" = $1', [
+        freeUserId,
+      ]);
+      await ds.query('DELETE FROM usage_limit WHERE user_id = $1', [
+        freeUserId,
+      ]);
+
+      // Wait to avoid rate limiting
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      // Create a reading
+      const response = await request(app.getHttpServer())
+        .post('/readings')
+        .set('Authorization', `Bearer ${freeUserToken}`)
+        .send({
+          predefinedQuestionId: predefinedQuestionId,
+          deckId: deckId,
+          spreadId: spreadId,
+          cardIds: cardIds,
+          cardPositions: [
+            { cardId: cardIds[0], position: 'past', isReversed: false },
+            { cardId: cardIds[1], position: 'present', isReversed: false },
+            { cardId: cardIds[2], position: 'future', isReversed: false },
+          ],
+          generateInterpretation: false,
+        })
+        .expect(201);
+
+      const reading = response.body as ReadingResponse;
+      expect(reading.tarotistaId).toBe(1); // FREE users default to Flavia
+    }, 15000);
   });
 });

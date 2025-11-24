@@ -638,4 +638,55 @@ describe('Readings Pagination E2E', () => {
       expect(body.message).toBeDefined();
     });
   });
+
+  /**
+   * TEST: Multi-Tarotista Support (TASK-074)
+   */
+  describe('GET /readings - Multi-Tarotista (TASK-074)', () => {
+    it('should include tarotistaId in all paginated readings', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/readings?page=1&limit=10')
+        .set('Authorization', `Bearer ${premiumUserToken}`)
+        .expect(200);
+
+      const paginatedResponse = asTypedResponse<PaginatedResponse>(
+        response.body,
+      );
+
+      expect(paginatedResponse.data).toBeDefined();
+      expect(Array.isArray(paginatedResponse.data)).toBe(true);
+      expect(paginatedResponse.data.length).toBeGreaterThan(0);
+
+      // Verify all readings have tarotistaId
+      paginatedResponse.data.forEach((reading) => {
+        expect(reading.tarotistaId).toBeDefined();
+        expect(typeof reading.tarotistaId).toBe('number');
+      });
+    });
+
+    it('should maintain tarotistaId across different pages', async () => {
+      // Get first page
+      const page1Response = await request(app.getHttpServer())
+        .get('/readings?page=1&limit=5')
+        .set('Authorization', `Bearer ${premiumUserToken}`)
+        .expect(200);
+
+      const page1 = asTypedResponse<PaginatedResponse>(page1Response.body);
+
+      // Get second page
+      const page2Response = await request(app.getHttpServer())
+        .get('/readings?page=2&limit=5')
+        .set('Authorization', `Bearer ${premiumUserToken}`)
+        .expect(200);
+
+      const page2 = asTypedResponse<PaginatedResponse>(page2Response.body);
+
+      // Verify all readings in both pages have tarotistaId
+      const allReadings = [...page1.data, ...page2.data];
+      allReadings.forEach((reading) => {
+        expect(reading.tarotistaId).toBeDefined();
+        expect(reading.tarotistaId).toBe(1); // Default Flavia
+      });
+    });
+  });
 });

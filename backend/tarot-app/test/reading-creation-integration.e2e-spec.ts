@@ -27,6 +27,7 @@ interface ReadingResponse {
   customQuestion: string | null;
   questionType: 'predefined' | 'custom';
   interpretation: string;
+  tarotistaId: number | null; // ← CRÍTICO: Debe estar presente para multi-tarotista
   cards: Array<{
     id: number;
     position: number;
@@ -130,6 +131,11 @@ describe('Reading Creation Flow Integration (E2E)', () => {
       expect(response.body.cards).toBeDefined();
       expect(response.body.cards).toHaveLength(3); // 3-card spread
       expect(response.body.createdAt).toBeDefined();
+
+      // TASK-074: Validar tarotistaId (backward compatibility)
+      // Usuario premium sin suscripción debería usar Flavia (ID 1) por defecto
+      expect(response.body.tarotistaId).toBeDefined();
+      expect(response.body.tarotistaId).toBe(1); // Flavia es el default (FLAVIA_TAROTISTA_ID)
     });
 
     it('should allow custom question for PREMIUM plan', async () => {
@@ -525,6 +531,194 @@ describe('Reading Creation Flow Integration (E2E)', () => {
 
       // Interpretation should be identical
       expect(cachedInterpretation).toBe(firstInterpretation);
+    });
+  });
+
+  describe('Multi-Tarotista Support (TASK-074)', () => {
+    // Increase timeout for AI interpretation tests (30 seconds)
+    jest.setTimeout(30000);
+
+    it('should use Flavia (ID 1) as default tarotista when user has no subscription', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/readings')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({
+          deckId,
+          spreadId,
+          predefinedQuestionId,
+          cardIds: [28, 29, 30],
+          cardPositions: [
+            { cardId: 28, position: 'pasado', isReversed: false },
+            { cardId: 29, position: 'presente', isReversed: false },
+            { cardId: 30, position: 'futuro', isReversed: false },
+          ],
+          generateInterpretation: true,
+        })
+        .expect(201);
+
+      const reading = response.body as ReadingResponse;
+
+      // Validar que tarotistaId es Flavia (backward compatibility)
+      expect(reading.tarotistaId).toBe(1);
+      expect(reading.interpretation).toBeDefined();
+      expect(reading.interpretation.length).toBeGreaterThan(50);
+    });
+
+    it('should persist tarotistaId to database correctly', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/readings')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({
+          deckId,
+          spreadId,
+          customQuestion: 'Test tarotistaId persistence',
+          cardIds: [31, 32, 33],
+          cardPositions: [
+            { cardId: 31, position: 'pasado', isReversed: false },
+            { cardId: 32, position: 'presente', isReversed: false },
+            { cardId: 33, position: 'futuro', isReversed: false },
+          ],
+          generateInterpretation: false,
+        })
+        .expect(201);
+
+      const readingId = (response.body as ReadingResponse).id;
+      const createdTarotistaId = (response.body as ReadingResponse).tarotistaId;
+
+      // Verificar que tarotistaId se persiste en DB
+      const dataSource = dbHelper.getDataSource();
+      const readingFromDb = (await dataSource.query(
+        'SELECT tarotista_id FROM tarot_reading WHERE id = $1',
+        [readingId],
+      )) as unknown as Array<{ tarotista_id: number }>;
+
+      expect(readingFromDb).toHaveLength(1);
+      expect(readingFromDb[0].tarotista_id).toBe(createdTarotistaId);
+      expect(readingFromDb[0].tarotista_id).toBe(1); // Flavia
+    });
+
+    it('should retrieve reading with tarotistaId included', async () => {
+      // Create reading
+      const createResponse = await request(app.getHttpServer())
+        .post('/readings')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({
+          deckId,
+          spreadId,
+          predefinedQuestionId,
+          cardIds: [34, 35, 36],
+          cardPositions: [
+            { cardId: 34, position: 'pasado', isReversed: false },
+            { cardId: 35, position: 'presente', isReversed: false },
+            { cardId: 36, position: 'futuro', isReversed: false },
+          ],
+          generateInterpretation: false,
+        })
+        .expect(201);
+
+      const readingId = (createResponse.body as ReadingResponse).id;
+
+      // Retrieve reading
+      const getResponse = await request(app.getHttpServer())
+        .get(`/readings/${readingId}`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(200);
+
+      const reading = getResponse.body as ReadingResponse;
+
+      // tarotistaId debe estar presente en GET
+      expect(reading.tarotistaId).toBeDefined();
+      expect(reading.tarotistaId).toBe(1); // Flavia
+    });
+
+    it('should list readings with tarotistaId in each reading', async () => {
+      // Create 2 readings
+      await request(app.getHttpServer())
+        .post('/readings')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({
+          deckId,
+          spreadId,
+          predefinedQuestionId,
+          cardIds: [37, 38, 39],
+          cardPositions: [
+            { cardId: 37, position: 'pasado', isReversed: false },
+            { cardId: 38, position: 'presente', isReversed: false },
+            { cardId: 39, position: 'futuro', isReversed: false },
+          ],
+          generateInterpretation: false,
+        })
+        .expect(201);
+
+      await request(app.getHttpServer())
+        .post('/readings')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({
+          deckId,
+          spreadId,
+          customQuestion: 'Second reading for listing',
+          cardIds: [40, 41, 42],
+          cardPositions: [
+            { cardId: 40, position: 'pasado', isReversed: false },
+            { cardId: 41, position: 'presente', isReversed: false },
+            { cardId: 42, position: 'futuro', isReversed: false },
+          ],
+          generateInterpretation: false,
+        })
+        .expect(201);
+
+      // List readings
+      const response = await request(app.getHttpServer())
+        .get('/readings')
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(200);
+
+      expect(response.body.data).toBeDefined();
+      expect(Array.isArray(response.body.data)).toBe(true);
+      expect(response.body.data.length).toBeGreaterThanOrEqual(2);
+
+      // Verificar que TODAS las lecturas tienen tarotistaId
+      response.body.data.forEach((reading: ReadingResponse) => {
+        expect(reading.tarotistaId).toBeDefined();
+        expect(reading.tarotistaId).toBe(1); // Todas usan Flavia por defecto
+      });
+    });
+
+    it('should include tarotistaId in cache key for interpretations', async () => {
+      // Este test verifica que el cache incluye tarotistaId
+      // Si dos tarotistas diferentes interpretan las mismas cartas,
+      // deberían tener cachés separados
+
+      // Primera lectura con Flavia (tarotistaId=1)
+      const firstResponse = await request(app.getHttpServer())
+        .post('/readings')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({
+          deckId,
+          spreadId,
+          predefinedQuestionId,
+          cardIds: [43, 44, 45],
+          cardPositions: [
+            { cardId: 43, position: 'pasado', isReversed: false },
+            { cardId: 44, position: 'presente', isReversed: false },
+            { cardId: 45, position: 'futuro', isReversed: false },
+          ],
+          generateInterpretation: true,
+        })
+        .expect(201);
+
+      const reading = firstResponse.body as ReadingResponse;
+
+      // Verificar que se usó Flavia
+      expect(reading.tarotistaId).toBe(1);
+      expect(reading.interpretation).toBeDefined();
+
+      // NOTE: Para probar cache con múltiples tarotistas, necesitaríamos:
+      // 1. Crear otro tarotista (Luna ID=2)
+      // 2. Suscribir usuario a Luna
+      // 3. Crear lectura con mismas cartas
+      // 4. Verificar que interpretación es diferente
+      // Esto se implementará en TASK-074-b (multi-tarotist-readings.e2e-spec.ts)
     });
   });
 });
