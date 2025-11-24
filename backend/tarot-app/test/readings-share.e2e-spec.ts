@@ -21,6 +21,7 @@ interface ReadingResponse {
   customQuestion: string | null;
   interpretation: string | null;
   cards: unknown[];
+  tarotistaId: number | null;
 }
 
 interface ShareResponse {
@@ -40,6 +41,7 @@ interface SharedReadingResponse {
   interpretation: string | null;
   cards: unknown[];
   viewCount: number;
+  tarotistaId: number | null;
 }
 
 describe('Readings Share System (e2e)', () => {
@@ -423,5 +425,79 @@ describe('Readings Share System (e2e)', () => {
         secondReadingId,
       ]);
     });
+  });
+
+  /**
+   * Multi-Tarotista Support (TASK-074)
+   */
+  describe('Multi-Tarotista Support (TASK-074)', () => {
+    it('should include tarotistaId in shared reading response', async () => {
+      // Create a new reading specifically for this test
+      const createResponse = await request(app.getHttpServer())
+        .post('/readings')
+        .set('Authorization', `Bearer ${premiumUserToken}`)
+        .send({
+          customQuestion: 'Test reading for multi-tarotista sharing',
+          deckId: 1,
+          spreadId: 1,
+          cardIds: [1, 2, 3],
+          cardPositions: [
+            { cardId: 1, position: 'past', isReversed: false },
+            { cardId: 2, position: 'present', isReversed: false },
+            { cardId: 3, position: 'future', isReversed: false },
+          ],
+          generateInterpretation: false,
+        })
+        .expect(201);
+
+      const newReading = createResponse.body as ReadingResponse;
+      const newReadingId = newReading.id;
+
+      // Small delay to ensure reading is persisted
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Share the reading
+      const shareResponse = await request(app.getHttpServer())
+        .post(`/readings/${newReadingId}/share`)
+        .set('Authorization', `Bearer ${premiumUserToken}`)
+        .expect(201);
+
+      const share = shareResponse.body as ShareResponse;
+      const sharedToken = share.sharedToken;
+
+      // Small delay to ensure sharing is persisted
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Access shared reading publicly
+      const publicResponse = await request(app.getHttpServer())
+        .get(`/shared/${sharedToken}`)
+        .expect(200);
+
+      const sharedReading = publicResponse.body as SharedReadingResponse;
+      expect(sharedReading.tarotistaId).toBeDefined();
+      expect(sharedReading.tarotistaId).toBe(1); // Flavia default
+    }, 15000);
+
+    it('should include tarotistaId when creating reading for sharing', async () => {
+      const createResponse = await request(app.getHttpServer())
+        .post('/readings')
+        .set('Authorization', `Bearer ${premiumUserToken}`)
+        .send({
+          customQuestion: 'Test reading for sharing with tarotista',
+          deckId: 1,
+          spreadId: 1,
+          cardIds: [1, 2, 3],
+          cardPositions: [
+            { cardId: 1, position: 'past', isReversed: false },
+            { cardId: 2, position: 'present', isReversed: false },
+            { cardId: 3, position: 'future', isReversed: false },
+          ],
+          generateInterpretation: false,
+        })
+        .expect(201);
+
+      const reading = createResponse.body as ReadingResponse;
+      expect(reading.tarotistaId).toBe(1);
+    }, 15000);
   });
 });
