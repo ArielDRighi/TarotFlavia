@@ -22,6 +22,7 @@ interface ReadingResponse {
   predefinedQuestionId: number | null;
   customQuestion: string | null;
   questionType: 'predefined' | 'custom';
+  tarotistaId: number | null;
   interpretation?: {
     id: number;
     interpretationText: string;
@@ -505,5 +506,64 @@ describe('Premium User Edge Cases E2E', () => {
         premiumUserId,
       ]);
     });
+  });
+
+  /**
+   * 5. Multi-Tarotista Support (TASK-074)
+   */
+  describe('5. Multi-Tarotista Support (TASK-074)', () => {
+    it('should include tarotistaId in PREMIUM user readings', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/readings')
+        .set('Authorization', `Bearer ${premiumUserToken}`)
+        .send({
+          customQuestion: 'Multi-tarotista test for premium',
+          deckId: deckId,
+          spreadId: spreadId,
+          cardIds: cardIds,
+          cardPositions: [
+            { cardId: cardIds[0], position: 'past', isReversed: false },
+            { cardId: cardIds[1], position: 'present', isReversed: false },
+            { cardId: cardIds[2], position: 'future', isReversed: false },
+          ],
+          generateInterpretation: false,
+        })
+        .expect(201);
+
+      const reading = response.body as ReadingResponse;
+      expect(reading.tarotistaId).toBe(1); // Default to Flavia when no subscription
+    }, 15000);
+
+    it('should validate tarotistaId persists in database for PREMIUM readings', async () => {
+      const createResponse = await request(app.getHttpServer())
+        .post('/readings')
+        .set('Authorization', `Bearer ${premiumUserToken}`)
+        .send({
+          customQuestion: 'Persistence test',
+          deckId: deckId,
+          spreadId: spreadId,
+          cardIds: cardIds,
+          cardPositions: [
+            { cardId: cardIds[0], position: 'past', isReversed: false },
+            { cardId: cardIds[1], position: 'present', isReversed: false },
+            { cardId: cardIds[2], position: 'future', isReversed: false },
+          ],
+          generateInterpretation: false,
+        })
+        .expect(201);
+
+      const reading = createResponse.body as ReadingResponse;
+      const readingId = reading.id;
+
+      // Query database directly
+      const ds = dbHelper.getDataSource();
+      const dbReading = await ds.query(
+        'SELECT tarotista_id FROM tarot_reading WHERE id = $1',
+        [readingId],
+      );
+
+      expect(dbReading).toHaveLength(1);
+      expect(dbReading[0].tarotista_id).toBe(1);
+    }, 15000);
   });
 });
