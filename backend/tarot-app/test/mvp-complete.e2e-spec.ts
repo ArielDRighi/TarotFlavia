@@ -27,6 +27,7 @@ interface ReadingResponse {
   predefinedQuestionId: number | null;
   customQuestion: string | null;
   questionType: 'predefined' | 'custom';
+  tarotistaId: number | null;
   interpretation?: {
     id: number;
     interpretationText: string;
@@ -286,6 +287,9 @@ describe('MVP Complete Flow E2E', () => {
       expect(body.questionType).toBe('predefined');
       // Cards might be an array or might not be populated depending on service implementation
       expect(body).toHaveProperty('interpretation');
+
+      // TASK-074: Validar tarotistaId (usuario FREE sin suscripción debe tener Flavia por defecto)
+      expect(body.tarotistaId).toBe(1);
     }, 20000);
 
     it('✅ Usuario FREE rechazado con pregunta custom', async () => {
@@ -415,6 +419,9 @@ describe('MVP Complete Flow E2E', () => {
       expect(body.customQuestion).toBe('¿Cuál es mi propósito de vida?');
       expect(body.predefinedQuestionId).toBeNull();
       expect(body.questionType).toBe('custom');
+
+      // TASK-074: Validar tarotistaId (usuario PREMIUM sin suscripción específica debe tener Flavia por defecto)
+      expect(body.tarotistaId).toBe(1);
     }, 20000);
 
     it('✅ Usuario PREMIUM tiene lecturas ilimitadas', async () => {
@@ -591,5 +598,179 @@ describe('MVP Complete Flow E2E', () => {
     it('✅ Endpoint funciona sin autenticación', async () => {
       await request(app.getHttpServer()).get('/health/ai').expect(200);
     });
+  });
+
+  /**
+   * 9. Multi-Tarotista Support (TASK-074)
+   * Validar que el sistema multi-tarotista funciona en el flujo completo del MVP
+   */
+  describe('9. Multi-Tarotista Support (TASK-074)', () => {
+    // Limpiar límites de uso antes de estos tests para evitar bloqueos por límite diario
+    beforeAll(async () => {
+      const ds = dbHelper.getDataSource();
+      await ds.query('DELETE FROM usage_limit WHERE user_id = $1', [
+        freeUserId,
+      ]);
+    });
+
+    it('✅ Usuario FREE sin suscripción recibe Flavia (ID=1) como tarotista predeterminada', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/readings')
+        .set('Authorization', `Bearer ${freeUserToken}`)
+        .send({
+          predefinedQuestionId: predefinedQuestionId,
+          deckId: deckId,
+          spreadId: spreadId,
+          cardIds: cardIds,
+          cardPositions: [
+            { cardId: cardIds[0], position: 'past', isReversed: false },
+            { cardId: cardIds[1], position: 'present', isReversed: false },
+            { cardId: cardIds[2], position: 'future', isReversed: false },
+          ],
+          generateInterpretation: false,
+        })
+        .expect(201);
+
+      const reading = response.body as ReadingResponse;
+      expect(reading.tarotistaId).toBe(1); // Flavia es la tarotista predeterminada
+    }, 20000);
+
+    it('✅ Usuario PREMIUM sin suscripción recibe Flavia (ID=1) como tarotista predeterminada', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/readings')
+        .set('Authorization', `Bearer ${premiumUserToken}`)
+        .send({
+          customQuestion: 'Multi-tarotista test question',
+          deckId: deckId,
+          spreadId: spreadId,
+          cardIds: cardIds,
+          cardPositions: [
+            { cardId: cardIds[0], position: 'past', isReversed: false },
+            { cardId: cardIds[1], position: 'present', isReversed: false },
+            { cardId: cardIds[2], position: 'future', isReversed: false },
+          ],
+          generateInterpretation: false,
+        })
+        .expect(201);
+
+      const reading = response.body as ReadingResponse;
+      expect(reading.tarotistaId).toBe(1); // Flavia es la tarotista predeterminada
+    }, 20000);
+
+    it('✅ tarotistaId persiste correctamente en base de datos', async () => {
+      // Crear una lectura
+      const createResponse = await request(app.getHttpServer())
+        .post('/readings')
+        .set('Authorization', `Bearer ${freeUserToken}`)
+        .send({
+          predefinedQuestionId: predefinedQuestionId,
+          deckId: deckId,
+          spreadId: spreadId,
+          cardIds: cardIds,
+          cardPositions: [
+            { cardId: cardIds[0], position: 'past', isReversed: false },
+            { cardId: cardIds[1], position: 'present', isReversed: false },
+            { cardId: cardIds[2], position: 'future', isReversed: false },
+          ],
+          generateInterpretation: false,
+        })
+        .expect(201);
+
+      const createdReading = createResponse.body as ReadingResponse;
+      const readingId = createdReading.id;
+
+      // Consultar directamente de la base de datos para verificar persistencia
+      const ds = dbHelper.getDataSource();
+      const dbReading = await ds.query(
+        'SELECT tarotista_id FROM tarot_reading WHERE id = $1',
+        [readingId],
+      );
+
+      expect(dbReading).toHaveLength(1);
+      expect(dbReading[0].tarotista_id).toBe(1);
+    }, 20000);
+
+    it('✅ GET /readings/:id incluye tarotistaId en la respuesta', async () => {
+      // Crear una lectura primero
+      const createResponse = await request(app.getHttpServer())
+        .post('/readings')
+        .set('Authorization', `Bearer ${freeUserToken}`)
+        .send({
+          predefinedQuestionId: predefinedQuestionId,
+          deckId: deckId,
+          spreadId: spreadId,
+          cardIds: cardIds,
+          cardPositions: [
+            { cardId: cardIds[0], position: 'past', isReversed: false },
+            { cardId: cardIds[1], position: 'present', isReversed: false },
+            { cardId: cardIds[2], position: 'future', isReversed: false },
+          ],
+          generateInterpretation: false,
+        })
+        .expect(201);
+
+      const createdReading = createResponse.body as ReadingResponse;
+
+      // Obtener la lectura por ID
+      const getResponse = await request(app.getHttpServer())
+        .get(`/readings/${createdReading.id}`)
+        .set('Authorization', `Bearer ${freeUserToken}`)
+        .expect(200);
+
+      const reading = getResponse.body as ReadingResponse;
+      expect(reading.tarotistaId).toBeDefined();
+      expect(reading.tarotistaId).toBe(1);
+    }, 20000);
+
+    it('✅ GET /readings lista incluye tarotistaId en todas las lecturas', async () => {
+      // Esperar para evitar rate limiting del throttler global
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      // Usar usuario PREMIUM para evitar límites diarios (FREE ya agotó 3 lecturas)
+      await request(app.getHttpServer())
+        .post('/readings')
+        .set('Authorization', `Bearer ${premiumUserToken}`)
+        .send({
+          customQuestion: 'Test reading para validar tarotistaId en lista',
+          deckId: deckId,
+          spreadId: spreadId,
+          cardIds: cardIds,
+          cardPositions: [
+            { cardId: cardIds[0], position: 'past', isReversed: false },
+            { cardId: cardIds[1], position: 'present', isReversed: false },
+            { cardId: cardIds[2], position: 'future', isReversed: false },
+          ],
+          generateInterpretation: false,
+        })
+        .expect(201);
+
+      // Obtener lista de lecturas del usuario PREMIUM
+      const listResponse = await request(app.getHttpServer())
+        .get('/readings')
+        .set('Authorization', `Bearer ${premiumUserToken}`)
+        .expect(200);
+
+      interface PaginatedReadingsResponse {
+        data: ReadingResponse[];
+        meta: {
+          page: number;
+          limit: number;
+          totalItems: number;
+          totalPages: number;
+        };
+      }
+
+      const paginatedResponse = listResponse.body as PaginatedReadingsResponse;
+
+      expect(paginatedResponse.data).toBeDefined();
+      expect(Array.isArray(paginatedResponse.data)).toBe(true);
+      expect(paginatedResponse.data.length).toBeGreaterThan(0);
+
+      // Verificar que TODAS las lecturas tienen tarotistaId
+      paginatedResponse.data.forEach((reading: ReadingResponse) => {
+        expect(reading.tarotistaId).toBeDefined();
+        expect(typeof reading.tarotistaId).toBe('number');
+      });
+    }, 20000);
   });
 });
