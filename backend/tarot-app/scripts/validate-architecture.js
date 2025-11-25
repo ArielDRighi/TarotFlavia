@@ -304,11 +304,33 @@ function validateModules() {
     // Si es un módulo con submódulos (ej: tarot/), validar cada submódulo
     const subModules = fs.readdirSync(modulePath, { withFileTypes: true });
     const LAYER_DIRS = ['domain', 'application', 'infrastructure'];
+    const CONCEPTUAL_FOLDERS = [
+      'entities',
+      'dto',
+      'constants',
+      'interfaces',
+      'enums',
+      'decorators',
+      'guards',
+      'strategies',
+      'templates',
+      'helpers',
+    ];
+
+    // Si tiene estructura layered completa, validar el módulo como uno solo
+    const hasLayers = hasLayeredStructure(modulePath);
+    if (hasLayers) {
+      validateModule(module.name, modulePath);
+      return;
+    }
+
+    // Si tiene submódulos que no son ni layers ni conceptuales, validar cada uno
     const hasSubModules = subModules.some(
       (sub) =>
         sub.isDirectory() &&
         !sub.name.startsWith('.') &&
-        !LAYER_DIRS.includes(sub.name),
+        !LAYER_DIRS.includes(sub.name) &&
+        !CONCEPTUAL_FOLDERS.includes(sub.name),
     );
 
     if (hasSubModules) {
