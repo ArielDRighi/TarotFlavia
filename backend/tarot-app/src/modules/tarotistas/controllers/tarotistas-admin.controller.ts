@@ -23,7 +23,7 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { UserRole } from '../../../common/enums/user-role.enum';
-import { TarotistasAdminService } from '../services/tarotistas-admin.service';
+import { TarotistasOrchestratorService } from '../application/services/tarotistas-orchestrator.service';
 import {
   CreateTarotistaDto,
   UpdateTarotistaDto,
@@ -41,22 +41,20 @@ import {
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(UserRole.ADMIN)
 export class TarotistasAdminController {
-  constructor(
-    private readonly tarotistasAdminService: TarotistasAdminService,
-  ) {}
+  constructor(private readonly orchestrator: TarotistasOrchestratorService) {}
 
   @Post()
   @ApiOperation({ summary: 'Crear nuevo tarotista (solo admin)' })
   @ApiResponse({ status: 201, description: 'Tarotista creado exitosamente' })
   async createTarotista(@Body() createDto: CreateTarotistaDto) {
-    return await this.tarotistasAdminService.createTarotista(createDto);
+    return await this.orchestrator.createTarotista(createDto);
   }
 
   @Get()
   @ApiOperation({ summary: 'Listar todos los tarotistas con filtros' })
   @ApiResponse({ status: 200, description: 'Lista de tarotistas' })
   async getAllTarotistas(@Query() filterDto: GetTarotistasFilterDto) {
-    return await this.tarotistasAdminService.getAllTarotistas(filterDto);
+    return await this.orchestrator.getAllTarotistas(filterDto);
   }
 
   @Put(':id')
@@ -69,7 +67,7 @@ export class TarotistasAdminController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateDto: UpdateTarotistaDto,
   ) {
-    return await this.tarotistasAdminService.updateTarotista(id, updateDto);
+    return await this.orchestrator.updateTarotista(id, updateDto);
   }
 
   @Put(':id/deactivate')
@@ -79,7 +77,7 @@ export class TarotistasAdminController {
     description: 'Tarotista desactivado exitosamente',
   })
   async deactivateTarotista(@Param('id', ParseIntPipe) id: number) {
-    return await this.tarotistasAdminService.deactivateTarotista(id);
+    return await this.orchestrator.setActiveStatus(id, false);
   }
 
   @Put(':id/reactivate')
@@ -89,14 +87,14 @@ export class TarotistasAdminController {
     description: 'Tarotista reactivado exitosamente',
   })
   async reactivateTarotista(@Param('id', ParseIntPipe) id: number) {
-    return await this.tarotistasAdminService.reactivateTarotista(id);
+    return await this.orchestrator.setActiveStatus(id, true);
   }
 
   @Get(':id/config')
   @ApiOperation({ summary: 'Obtener configuración de IA del tarotista' })
   @ApiResponse({ status: 200, description: 'Configuración del tarotista' })
   async getTarotistaConfig(@Param('id', ParseIntPipe) id: number) {
-    return await this.tarotistasAdminService.getTarotistaConfig(id);
+    return await this.orchestrator.getTarotistaConfig(id);
   }
 
   @Put(':id/config')
@@ -106,10 +104,7 @@ export class TarotistasAdminController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateDto: UpdateTarotistaConfigDto,
   ) {
-    return await this.tarotistasAdminService.updateTarotistaConfig(
-      id,
-      updateDto,
-    );
+    return await this.orchestrator.updateConfig(id, updateDto);
   }
 
   @Post(':id/config/reset')
@@ -120,7 +115,7 @@ export class TarotistasAdminController {
     description: 'Configuración reseteada a valores por defecto',
   })
   async resetConfigToDefault(@Param('id', ParseIntPipe) id: number) {
-    return await this.tarotistasAdminService.resetTarotistaConfigToDefault(id);
+    return await this.orchestrator.resetConfigToDefault(id);
   }
 
   @Post(':id/meanings')
@@ -133,10 +128,7 @@ export class TarotistasAdminController {
     @Param('id', ParseIntPipe) id: number,
     @Body() meaningDto: SetCustomMeaningDto,
   ) {
-    return await this.tarotistasAdminService.setCustomCardMeaning(
-      id,
-      meaningDto,
-    );
+    return await this.orchestrator.setCustomMeaning(id, meaningDto);
   }
 
   @Get(':id/meanings')
@@ -148,7 +140,7 @@ export class TarotistasAdminController {
     description: 'Lista de significados personalizados',
   })
   async getAllCustomMeanings(@Param('id', ParseIntPipe) id: number) {
-    return await this.tarotistasAdminService.getAllCustomMeanings(id);
+    return await this.orchestrator.getAllCustomMeanings(id);
   }
 
   @Delete(':id/meanings/:meaningId')
@@ -162,7 +154,7 @@ export class TarotistasAdminController {
     @Param('id', ParseIntPipe) id: number,
     @Param('meaningId', ParseIntPipe) meaningId: number,
   ) {
-    await this.tarotistasAdminService.deleteCustomMeaning(id, meaningId);
+    await this.orchestrator.deleteCustomMeaning(id, meaningId);
   }
 
   @Post(':id/meanings/bulk')
@@ -172,7 +164,7 @@ export class TarotistasAdminController {
     @Param('id', ParseIntPipe) id: number,
     @Body() bulkDto: BulkImportMeaningsDto,
   ) {
-    return await this.tarotistasAdminService.bulkImportCustomMeanings(
+    return await this.orchestrator.bulkImportCustomMeanings(
       id,
       bulkDto.meanings,
     );
@@ -182,7 +174,7 @@ export class TarotistasAdminController {
   @ApiOperation({ summary: 'Listar todas las aplicaciones para tarotista' })
   @ApiResponse({ status: 200, description: 'Lista de aplicaciones' })
   async getAllApplications(@Query() filterDto: GetTarotistasFilterDto) {
-    return await this.tarotistasAdminService.getAllApplications(filterDto);
+    return await this.orchestrator.getAllApplications(filterDto);
   }
 
   @Post('applications/:id/approve')
@@ -194,7 +186,7 @@ export class TarotistasAdminController {
     @Request() req: { user: { userId: number } },
     @Body() approveDto: ApproveApplicationDto,
   ) {
-    return await this.tarotistasAdminService.approveApplication(
+    return await this.orchestrator.approveApplication(
       id,
       req.user.userId,
       approveDto,
@@ -210,7 +202,7 @@ export class TarotistasAdminController {
     @Request() req: { user: { userId: number } },
     @Body() rejectDto: RejectApplicationDto,
   ) {
-    return await this.tarotistasAdminService.rejectApplication(
+    return await this.orchestrator.rejectApplication(
       id,
       req.user.userId,
       rejectDto,

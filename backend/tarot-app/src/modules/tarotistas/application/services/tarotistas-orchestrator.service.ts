@@ -7,6 +7,7 @@ import { ApproveApplicationUseCase } from '../use-cases/approve-application.use-
 import { RejectApplicationUseCase } from '../use-cases/reject-application.use-case';
 import { ToggleActiveStatusUseCase } from '../use-cases/toggle-active-status.use-case';
 import { GetTarotistaDetailsUseCase } from '../use-cases/get-tarotista-details.use-case';
+import { TarotistasAdminService } from '../../services/tarotistas-admin.service';
 import { Tarotista } from '../../entities/tarotista.entity';
 import { TarotistaApplication } from '../../entities/tarotista-application.entity';
 import { TarotistaConfig } from '../../entities/tarotista-config.entity';
@@ -17,10 +18,14 @@ import { UpdateTarotistaConfigDto } from '../../dto/update-tarotista-config.dto'
 import { SetCustomMeaningDto } from '../../dto/set-custom-meaning.dto';
 import { ApproveApplicationDto } from '../../dto/approve-application.dto';
 import { RejectApplicationDto } from '../../dto/reject-application.dto';
+import { UpdateTarotistaDto } from '../../dto/update-tarotista.dto';
 
 /**
  * Orchestrator Service - Coordinates use-cases for tarotistas module
  * Provides backward-compatible interface for existing controllers
+ *
+ * NOTE: Some methods still delegate to TarotistasAdminService (PRESERVE phase)
+ * TODO: Create use-cases for remaining methods and remove delegation
  */
 @Injectable()
 export class TarotistasOrchestratorService {
@@ -33,6 +38,8 @@ export class TarotistasOrchestratorService {
     private readonly rejectApplicationUseCase: RejectApplicationUseCase,
     private readonly toggleActiveStatusUseCase: ToggleActiveStatusUseCase,
     private readonly getTarotistaDetailsUseCase: GetTarotistaDetailsUseCase,
+    // PRESERVE: Keep old service for methods without use-cases yet
+    private readonly legacyService: TarotistasAdminService,
   ) {}
 
   // ==================== Tarotista Management ====================
@@ -86,6 +93,46 @@ export class TarotistasOrchestratorService {
 
   async setActiveStatus(id: number, isActive: boolean): Promise<Tarotista> {
     return await this.toggleActiveStatusUseCase.setStatus(id, isActive);
+  }
+
+  // TODO: Create UpdateTarotistaUseCase
+  async updateTarotista(
+    id: number,
+    dto: UpdateTarotistaDto,
+  ): Promise<Tarotista> {
+    return await this.legacyService.updateTarotista(id, dto);
+  }
+
+  // TODO: Create GetConfigUseCase
+  async getTarotistaConfig(tarotistaId: number): Promise<TarotistaConfig> {
+    return await this.legacyService.getTarotistaConfig(tarotistaId);
+  }
+
+  // TODO: Create GetAllApplicationsUseCase
+  async getAllApplications(filterDto: GetTarotistasFilterDto): Promise<{
+    data: TarotistaApplication[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }> {
+    return await this.legacyService.getAllApplications(filterDto);
+  }
+
+  // TODO: Create BulkImportMeaningsUseCase
+  async bulkImportCustomMeanings(
+    tarotistaId: number,
+    meanings: SetCustomMeaningDto[],
+  ): Promise<TarotistaCardMeaning[]> {
+    // Map SetCustomMeaningDto[] to the format expected by legacy service
+    const mappedMeanings = meanings.map((m) => ({
+      cardId: m.cardId,
+      customMeaning: m.customMeaningUpright || m.customDescription || '',
+    }));
+    return await this.legacyService.bulkImportCustomMeanings(
+      tarotistaId,
+      mappedMeanings,
+    );
   }
 
   // ==================== Configuration Management ====================
