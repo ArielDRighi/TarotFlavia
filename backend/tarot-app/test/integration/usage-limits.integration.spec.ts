@@ -146,6 +146,9 @@ describe('UsageLimits + Readings Integration Tests', () => {
           arcana: 'major',
           category: 'major',
           imageUrl: 'https://example.com/fool.jpg',
+          description:
+            'The Fool represents new beginnings and taking a leap of faith',
+          keywords: 'new beginnings, innocence, spontaneity, free spirit',
           meaningUpright: 'New beginnings, innocence',
           meaningReversed: 'Recklessness, fear',
           deckId: testDeck.id,
@@ -156,6 +159,9 @@ describe('UsageLimits + Readings Integration Tests', () => {
           arcana: 'major',
           category: 'major',
           imageUrl: 'https://example.com/magician.jpg',
+          description:
+            'The Magician represents manifestation and resourcefulness',
+          keywords: 'manifestation, resourcefulness, power, inspired action',
           meaningUpright: 'Manifestation, resourcefulness',
           meaningReversed: 'Manipulation, poor planning',
           deckId: testDeck.id,
@@ -166,6 +172,10 @@ describe('UsageLimits + Readings Integration Tests', () => {
           arcana: 'major',
           category: 'major',
           imageUrl: 'https://example.com/high-priestess.jpg',
+          description:
+            'The High Priestess represents intuition and sacred knowledge',
+          keywords:
+            'intuition, sacred knowledge, divine feminine, subconscious',
           meaningUpright: 'Intuition, sacred knowledge',
           meaningReversed: 'Secrets, disconnected from intuition',
           deckId: testDeck.id,
