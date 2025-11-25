@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CardsController } from './cards.controller';
 import { CardsService } from './cards.service';
-import { CardMeaningService } from './services/card-meaning.service';
+import { CardMeaningService } from './card-meaning.service';
 import { TarotCard } from './entities/tarot-card.entity';
 import { TarotDeck } from '../decks/entities/tarot-deck.entity';
 import { TarotistaCardMeaning } from '../../tarotistas/entities/tarotista-card-meaning.entity';

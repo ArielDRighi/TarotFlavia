@@ -4144,7 +4144,173 @@ npm test
 
 ---
 
-## TASK-ARCH-007: Documentación y Governance
+## TASK-ARCH-007: Corrección de Violaciones de Arquitectura
+
+**Prioridad:** 🔴 Alta (Bloqueante - CI)
+**Duración estimada:** 6-8 horas
+**Complejidad:** Media
+**Dependencias:** Ninguna
+**Estado:** ✅ Documentado (Ver: docs/TASK-ARCH-007-CORRECCION-VIOLACIONES-ARQUITECTURA.md)
+
+### Objetivo
+
+Corregir violaciones de arquitectura híbrida feature-based reportadas por `validate-architecture.js` que bloquean el pipeline de CI.
+
+### Problemas Identificados
+
+#### ERRORES (3 - Bloqueantes)
+
+1. `auth/dto/validators/` - Subcarpeta organizacional en módulo flat
+2. `scheduling/domain/enums/` - Estructura innecesaria en módulo flat
+3. `tarot/cards/services/` - Subcarpeta organizacional en módulo flat
+
+#### WARNINGS (3 - No bloqueantes, requieren tarea separada)
+
+- `tarotistas/{dto,entities,services}` - Módulos complejos sin capas (ver TASK-ARCH-008)
+
+### Soluciones
+
+1. **auth/dto:** Mover `validators/*.ts` → `dto/*.validator.ts`
+2. **scheduling:** Mover `domain/enums/*.ts` → `enums/*.ts`
+3. **tarot/cards:** Mover `services/*.ts` → `cards/*.service.ts`
+
+### Criterios de Éxito
+
+- ✅ `validate-architecture.js` sin ERRORES
+- ✅ Build OK, Lint OK, Tests OK
+- ✅ Coverage >= baseline
+- ✅ 0 dependencias circulares
+
+**Documentación completa:** `docs/TASK-ARCH-007-CORRECCION-VIOLACIONES-ARQUITECTURA.md`
+
+---
+
+## TASK-ARCH-008: Refactorizar Módulo Tarotistas a Layered
+
+**Prioridad:** 🟡 Media (Refactorización mayor)
+**Duración estimada:** 7-10 días
+**Complejidad:** Alta
+**Dependencias:** TASK-ARCH-007 completada
+**Estado:** 📝 Planificada (Pendiente de documentación detallada)
+
+### Objetivo
+
+Refactorizar el módulo `tarotistas` para aplicar arquitectura layered (domain/application/infrastructure) según criterios de `ADR-002-layered-architecture-criteria.md`.
+
+### Justificación
+
+El módulo `tarotistas` supera los umbrales de complejidad pero no tiene estructura layered:
+
+- `tarotistas/dto`: 13 archivos, 932 líneas ⚠️
+- `tarotistas/entities`: 7 archivos, 1028 líneas ⚠️
+- `tarotistas/services`: 5 archivos, 1292 líneas ⚠️
+- **Total:** 25 archivos, 3252 líneas
+
+### Estructura Propuesta
+
+```
+src/modules/tarotistas/
+├── domain/
+│   ├── entities/
+│   │   └── tarotista.entity.ts (dominio puro)
+│   └── interfaces/
+│       └── tarotista-repository.interface.ts
+├── application/
+│   ├── use-cases/
+│   │   ├── create-tarotista.use-case.ts
+│   │   ├── update-config.use-case.ts
+│   │   └── manage-card-meanings.use-case.ts
+│   ├── services/
+│   │   └── tarotistas-orchestrator.service.ts
+│   └── dto/
+│       └── (13 archivos DTOs)
+├── infrastructure/
+│   ├── repositories/
+│   │   └── typeorm-tarotista.repository.ts
+│   ├── controllers/
+│   │   └── (4 controllers)
+│   └── entities/
+│       └── (7 entidades TypeORM)
+└── tarotistas.module.ts
+```
+
+### Fases de Implementación
+
+**Fase 1: Análisis y Preparación (1 día)**
+
+- Analizar dependencias del módulo tarotistas
+- Identificar lógica de dominio vs infraestructura
+- Documentar casos de uso principales
+- Crear baseline de tests
+
+**Fase 2: Crear Estructura Layered (2-3 días)**
+
+- Crear interfaces de dominio
+- Implementar repositorios
+- Migrar entidades a capas correspondientes
+
+**Fase 3: Extraer Use Cases (2-3 días)**
+
+- Crear use-cases específicos desde services actuales
+- Implementar orquestador simplificado
+- Actualizar controllers para usar use-cases
+
+**Fase 4: Tests y Validación (1-2 días)**
+
+- Migrar tests a nueva estructura
+- Validar coverage >= baseline
+- Pruebas de integración con módulo AI (PromptBuilder)
+
+**Fase 5: Cleanup y Documentación (1 día)**
+
+- Eliminar código antiguo
+- Actualizar documentación
+- Validar `validate-architecture.js` ✅
+
+### Precondiciones
+
+- ✅ TASK-ARCH-007 completada (validación sin ERRORES)
+- ✅ Build, lint, tests pasando
+- ✅ Coverage documentado como baseline
+- ⭐ Funcionalidad marketplace validada
+
+### Criterios de Éxito
+
+- ✅ Estructura layered completa
+- ✅ `validate-architecture.js` sin WARNINGS en tarotistas
+- ✅ Coverage >= baseline
+- ⭐ Marketplace funcionando (integración con AI/PromptBuilder)
+- ✅ 0 dependencias circulares
+- ✅ Build OK, Tests OK
+
+### Riesgos
+
+- **Alto:** Módulo crítico para marketplace
+- **Medio:** Integración con AIModule (PromptBuilderService)
+- **Medio:** Muchas entidades relacionadas (3252 líneas)
+
+### Estrategia de Mitigación
+
+1. **PRESERVE-VERIFY-REFACTOR:**
+
+   - Duplicar código (no mover)
+   - Validar completamente
+   - Solo entonces eliminar código antiguo
+
+2. **Tests primero:**
+
+   - Aumentar coverage antes de refactorizar
+   - Tests e2e de marketplace antes/después
+
+3. **Commits incrementales:**
+   - 1 commit por capa (domain, application, infrastructure)
+   - Validación completa entre commits
+
+**Documentación detallada:** Crear `docs/TASK-ARCH-008-REFACTORIZAR-TAROTISTAS-LAYERED.md`
+
+---
+
+## TASK-ARCH-009: Documentación y Governance (Renombrado)
 
 **Prioridad:** 🟡 Media  
 **Duración estimada:** 5-7 días  

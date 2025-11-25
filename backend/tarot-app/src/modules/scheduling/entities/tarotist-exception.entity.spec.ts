@@ -1,5 +1,5 @@
 import { TarotistException } from './tarotist-exception.entity';
-import { ExceptionType } from '../domain/enums';
+import { ExceptionType } from '../enums';
 
 describe('TarotistException Entity', () => {
   it('should create an instance', () => {

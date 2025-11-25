@@ -24,7 +24,7 @@ import {
   SessionResponseDto,
   AvailableSlotDto,
 } from '../dto';
-import { SessionStatus } from '../domain/enums';
+import { SessionStatus } from '../enums';
 import { AuthenticatedRequest } from '../interfaces/authenticated-request.interface';
 
 @ApiTags('User Scheduling')

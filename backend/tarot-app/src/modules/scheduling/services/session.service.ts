@@ -14,7 +14,7 @@ import {
   CompleteSessionDto,
   SessionResponseDto,
 } from '../dto';
-import { SessionStatus, SessionType, PaymentStatus } from '../domain/enums';
+import { SessionStatus, SessionType, PaymentStatus } from '../enums';
 import { generateGoogleMeetLink } from '../helpers/google-meet.helper';
 import { AvailabilityService } from './availability.service';
 

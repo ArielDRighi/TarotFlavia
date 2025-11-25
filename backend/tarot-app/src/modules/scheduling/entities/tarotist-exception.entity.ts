@@ -8,7 +8,7 @@ import {
   Index,
 } from 'typeorm';
 import { Tarotista } from '../../tarotistas/entities/tarotista.entity';
-import { ExceptionType } from '../domain/enums';
+import { ExceptionType } from '../enums';
 
 /**
  * Tarotist availability exceptions

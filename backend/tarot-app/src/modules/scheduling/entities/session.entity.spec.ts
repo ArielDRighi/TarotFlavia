@@ -1,5 +1,5 @@
 import { Session } from './session.entity';
-import { SessionType, SessionStatus, PaymentStatus } from '../domain/enums';
+import { SessionType, SessionStatus, PaymentStatus } from '../enums';
 
 describe('Session Entity', () => {
   it('should create an instance', () => {

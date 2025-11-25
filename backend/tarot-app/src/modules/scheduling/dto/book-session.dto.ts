@@ -8,7 +8,7 @@ import {
   Matches,
   Min,
 } from 'class-validator';
-import { SessionType } from '../domain/enums';
+import { SessionType } from '../enums';
 
 export class BookSessionDto {
   @ApiProperty({
