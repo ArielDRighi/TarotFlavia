@@ -28,9 +28,12 @@ export class UsersService {
   async create(createUserDto: CreateUserDto): Promise<UserWithoutPassword> {
     const { email, password, name } = createUserDto;
 
+    // Normalize email to lowercase - BUG ENCONTRADO POR TEST
+    const normalizedEmail = email.toLowerCase();
+
     // Check if user already exists
     const existingUser = await this.usersRepository.findOne({
-      where: { email },
+      where: { email: normalizedEmail },
     });
     if (existingUser) {
       throw new ConflictException('Email already registered');
@@ -42,7 +45,7 @@ export class UsersService {
 
     // Create new user
     const user = this.usersRepository.create({
-      email,
+      email: normalizedEmail,
       password: hashedPassword,
       name,
     });
@@ -70,7 +73,10 @@ export class UsersService {
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    return this.usersRepository.findOne({ where: { email } });
+    // Normalize email to lowercase para búsqueda consistente
+    return this.usersRepository.findOne({
+      where: { email: email.toLowerCase() },
+    });
   }
 
   async findById(id: number): Promise<User | null> {

@@ -213,7 +213,9 @@ export class AuthService {
     return { message: 'All sessions logged out successfully' };
   }
 
-  async forgotPassword(email: string): Promise<{ message: string }> {
+  async forgotPassword(
+    email: string,
+  ): Promise<{ message: string; token?: string }> {
     const { token } = await this.passwordResetService.generateResetToken(email);
 
     // TODO: For now, log the link to console (until real email integration is implemented)
@@ -222,7 +224,12 @@ export class AuthService {
     console.log(`/reset-password?token=${token}`);
     console.log('========================================');
 
-    return { message: 'Password reset email sent' };
+    // INTEGRATION TESTS: Return token for testing purposes
+    // In production with real email, this should NOT be returned
+    return {
+      message: 'Password reset email sent',
+      token: process.env.NODE_ENV !== 'production' ? token : undefined,
+    };
   }
 
   async resetPassword(

@@ -527,7 +527,10 @@ describe('AuthService', () => {
       expect(consoleLogSpy).toHaveBeenCalledWith(
         expect.stringContaining(mockToken),
       );
-      expect(result).toEqual({ message: 'Password reset email sent' });
+      expect(result).toEqual({
+        message: 'Password reset email sent',
+        token: mockToken, // Token returned in non-production for testing
+      });
     });
 
     it('should handle errors from password reset service', async () => {

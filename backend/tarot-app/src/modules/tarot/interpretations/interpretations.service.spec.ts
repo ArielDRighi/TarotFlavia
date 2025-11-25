@@ -11,6 +11,7 @@ import { AIProviderType } from '../../ai/domain/interfaces/ai-provider.interface
 import { InterpretationCacheService } from '../../cache/application/services/interpretation-cache.service';
 import { PromptBuilderService } from '../../ai/application/services/prompt-builder.service';
 import { OutputSanitizerService } from '../../../common/services/output-sanitizer.service';
+import { AIQuotaService } from '../../ai-usage/ai-quota.service';
 
 describe('InterpretationsService', () => {
   let service: InterpretationsService;
@@ -67,6 +68,13 @@ describe('InterpretationsService', () => {
     sanitizeBatch: jest.fn(),
   };
 
+  const mockAIQuotaService = {
+    checkQuota: jest.fn(),
+    incrementUsage: jest.fn(),
+    getRemainingQuota: jest.fn(),
+    resetMonthlyQuota: jest.fn(),
+  };
+
   const mockCards: TarotCard[] = [
     {
       id: 1,
@@ -119,6 +127,10 @@ describe('InterpretationsService', () => {
         {
           provide: OutputSanitizerService,
           useValue: mockOutputSanitizerService,
+        },
+        {
+          provide: AIQuotaService,
+          useValue: mockAIQuotaService,
         },
       ],
     }).compile();

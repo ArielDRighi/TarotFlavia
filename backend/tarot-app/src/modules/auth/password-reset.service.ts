@@ -51,16 +51,22 @@ export class PasswordResetService {
 
   async validateToken(plainToken: string): Promise<PasswordResetToken> {
     // Find all unused and non-expired tokens to reduce comparison overhead
+    const now = new Date();
     const tokens = await this.passwordResetTokenRepository
       .createQueryBuilder('token')
       .where('token.usedAt IS NULL')
-      .andWhere('token.expiresAt > :now', { now: new Date() })
+      .andWhere('token.expiresAt > :now', { now })
       .getMany();
 
     // Check each hashed token
     for (const token of tokens) {
       const isValid = await bcrypt.compare(plainToken, token.token);
       if (isValid) {
+        // CRITICAL BUG FIX: Double-check expiration after finding the correct token
+        // The query filter may not catch race conditions or clock skew
+        if (token.expiresAt <= now) {
+          throw new BadRequestException('Token has expired');
+        }
         return token;
       }
     }
