@@ -415,14 +415,17 @@ describe('TarotistasAdminController', () => {
 
       const req = { user: { userId: 100 } };
 
-      const expectedResult = {
+      const application = {
         id: 1,
         status: ApplicationStatus.APPROVED,
         reviewedByUserId: 100,
         adminNotes: 'Excelente perfil',
       } as unknown as TarotistaApplication;
 
-      mockOrchestrator.approveApplication.mockResolvedValue(expectedResult);
+      mockOrchestrator.approveApplication.mockResolvedValue({
+        application,
+        tarotista: {} as any,
+      });
 
       const result = await controller.approveApplication(1, req, approveDto);
 
@@ -431,7 +434,7 @@ describe('TarotistasAdminController', () => {
         100,
         approveDto,
       );
-      expect(result).toEqual(expectedResult);
+      expect(result).toEqual(application);
     });
   });
 
