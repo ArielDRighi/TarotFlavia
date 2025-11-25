@@ -1,0 +1,16 @@
+
+> tarot-app@0.0.1 test
+> jest --no-watchman --all
+
+[33m[Nest] 18696  - [39m24/11/2025, 10:22:49 [33m   WARN[39m [38;5;3m[CustomThrottlerGuard] [39m[33mIPBlockingService not provided. IP blocking and violation tracking disabled.[39m
+[33m[Nest] 18696  - [39m24/11/2025, 10:22:49 [33m   WARN[39m [38;5;3m[CustomThrottlerGuard] [39m[33mIPWhitelistService not provided. IP whitelisting disabled.[39m
+[95m[Nest] 18696  - [39m24/11/2025, 10:22:49 [95m  DEBUG[39m [38;5;3m[CustomThrottlerGuard] [39m[95mWhitelisted IP bypassing rate limit: 192.168.1.1[39m
+[95m[Nest] 18696  - [39m24/11/2025, 10:22:49 [95m  DEBUG[39m [38;5;3m[CustomThrottlerGuard] [39m[95mWhitelisted IP bypassing rate limit: 192.168.1.1[39m
+[33m[Nest] 18696  - [39m24/11/2025, 10:22:49 [33m   WARN[39m [38;5;3m[CustomThrottlerGuard] [39m[33mBlocked request from IP: 192.168.1.100[39m
+[33m[Nest] 18696  - [39m24/11/2025, 10:22:49 [33m   WARN[39m [38;5;3m[CustomThrottlerGuard] [39m[33mBlocked request from IP: 192.168.1.100[39m
+[33m[Nest] 18696  - [39m24/11/2025, 10:22:49 [33m   WARN[39m [38;5;3m[CustomThrottlerGuard] [39m[33mBlocked request from IP: 10.0.0.1[39m
+[33m[Nest] 18696  - [39m24/11/2025, 10:22:49 [33m   WARN[39m [38;5;3m[CustomThrottlerGuard] [39m[33mIPBlockingService not provided. IP blocking and violation tracking disabled.[39m
+[33m[Nest] 18696  - [39m24/11/2025, 10:22:49 [33m   WARN[39m [38;5;3m[CustomThrottlerGuard] [39m[33mIPWhitelistService not provided. IP whitelisting disabled.[39m
+[95m[Nest] 18696  - [39m24/11/2025, 10:22:49 [95m  DEBUG[39m [38;5;3m[CustomThrottlerGuard] [39m[95mWhitelisted IP bypassing rate limit: 127.0.0.1[39m
+[95m[Nest] 18696  - [39m24/11/2025, 10:22:49 [95m  DEBUG[39m [38;5;3m[CustomThrottlerGuard] [39m[95mWhitelisted IP bypassing rate limit: ::1[39m
+[95m[Nest] 18696  - [39m24/11/2025, 10:22:49 [95m  DEBUG[39m [38;5;3m[CustomThrottlerGuard] [39m[95mCustom rate limit metadata detected for undefined: 5 req/30000s[39m

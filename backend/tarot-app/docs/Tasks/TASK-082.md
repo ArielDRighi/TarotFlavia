@@ -46,7 +46,7 @@ Crear suite completa de tests de integración que validen las interacciones entr
   - ✅ **BUG ENCONTRADO #3:** Test tokens no retornados → CORREGIDO en auth.service.ts
 - ✅ **Readings + Interpretations + AI Integration** (9 tests passing, 2 skipped):
   - ✅ Crear lectura llama a InterpretationsService
-  - ✅ InterpretationsService llama a AIProviderService  
+  - ✅ InterpretationsService llama a AIProviderService
   - ✅ Respuesta de IA se guarda en BD correctamente
   - ✅ Cache de interpretaciones funciona entre requests
   - ✅ **BUG ENCONTRADO #4:** Validación tarotistaId permite valores inválidos → DOCUMENTADO
@@ -201,7 +201,7 @@ Crear suite completa de tests de integración que validen las interacciones entr
 **Bugs Encontrados (TDD Methodology):**
 
 1. ✅ **Email normalization** - users.service.ts no normalizaba a lowercase → CORREGIDO
-2. ✅ **Token expiration** - password-reset.service.ts check insuficiente → CORREGIDO  
+2. ✅ **Token expiration** - password-reset.service.ts check insuficiente → CORREGIDO
 3. ✅ **Test token return** - auth.service.ts no retornaba tokens en testing → CORREGIDO
 4. 📝 **Tarotista userId validation** - Permite valores inválidos → DOCUMENTADO
 5. 📝 **Spread positions bounds** - No valida posiciones fuera de rango → DOCUMENTADO
