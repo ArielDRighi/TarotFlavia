@@ -8,6 +8,7 @@ import { ApproveApplicationUseCase } from '../use-cases/approve-application.use-
 import { RejectApplicationUseCase } from '../use-cases/reject-application.use-case';
 import { ToggleActiveStatusUseCase } from '../use-cases/toggle-active-status.use-case';
 import { GetTarotistaDetailsUseCase } from '../use-cases/get-tarotista-details.use-case';
+import { TarotistasAdminService } from '../../services/tarotistas-admin.service';
 
 describe('TarotistasOrchestratorService', () => {
   let service: TarotistasOrchestratorService;
@@ -27,6 +28,12 @@ describe('TarotistasOrchestratorService', () => {
   const mockRejectUseCase = { execute: jest.fn() };
   const mockToggleUseCase = { execute: jest.fn(), setStatus: jest.fn() };
   const mockGetDetailsUseCase = { execute: jest.fn(), byUserId: jest.fn() };
+  const mockLegacyService = {
+    updateTarotista: jest.fn(),
+    getTarotistaConfig: jest.fn(),
+    getAllApplications: jest.fn(),
+    bulkImportCustomMeanings: jest.fn(),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -46,6 +53,7 @@ describe('TarotistasOrchestratorService', () => {
           provide: GetTarotistaDetailsUseCase,
           useValue: mockGetDetailsUseCase,
         },
+        { provide: TarotistasAdminService, useValue: mockLegacyService },
       ],
     }).compile();
 

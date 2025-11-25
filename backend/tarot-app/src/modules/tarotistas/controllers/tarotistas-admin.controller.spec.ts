@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TarotistasAdminController } from './tarotistas-admin.controller';
-import { TarotistasAdminService } from '../services/tarotistas-admin.service';
+import { TarotistasOrchestratorService } from '../application/services/tarotistas-orchestrator.service';
 import {
   CreateTarotistaDto,
   UpdateTarotistaDto,
@@ -20,18 +20,17 @@ import {
 
 describe('TarotistasAdminController', () => {
   let controller: TarotistasAdminController;
-  let service: TarotistasAdminService;
+  let orchestrator: TarotistasOrchestratorService;
 
-  const mockTarotistaAdminService = {
+  const mockOrchestrator = {
     createTarotista: jest.fn(),
     getAllTarotistas: jest.fn(),
     updateTarotista: jest.fn(),
-    deactivateTarotista: jest.fn(),
-    reactivateTarotista: jest.fn(),
+    setActiveStatus: jest.fn(),
     getTarotistaConfig: jest.fn(),
-    updateTarotistaConfig: jest.fn(),
-    resetTarotistaConfigToDefault: jest.fn(),
-    setCustomCardMeaning: jest.fn(),
+    updateConfig: jest.fn(),
+    resetConfigToDefault: jest.fn(),
+    setCustomMeaning: jest.fn(),
     getAllCustomMeanings: jest.fn(),
     deleteCustomMeaning: jest.fn(),
     bulkImportCustomMeanings: jest.fn(),
@@ -45,8 +44,8 @@ describe('TarotistasAdminController', () => {
       controllers: [TarotistasAdminController],
       providers: [
         {
-          provide: TarotistasAdminService,
-          useValue: mockTarotistaAdminService,
+          provide: TarotistasOrchestratorService,
+          useValue: mockOrchestrator,
         },
       ],
     }).compile();
@@ -54,7 +53,9 @@ describe('TarotistasAdminController', () => {
     controller = module.get<TarotistasAdminController>(
       TarotistasAdminController,
     );
-    service = module.get<TarotistasAdminService>(TarotistasAdminService);
+    orchestrator = module.get<TarotistasOrchestratorService>(
+      TarotistasOrchestratorService,
+    );
   });
 
   afterEach(() => {
@@ -79,13 +80,11 @@ describe('TarotistasAdminController', () => {
         isActive: true,
       } as unknown as Tarotista;
 
-      mockTarotistaAdminService.createTarotista.mockResolvedValue(
-        expectedResult,
-      );
+      mockOrchestrator.createTarotista.mockResolvedValue(expectedResult);
 
       const result = await controller.createTarotista(createDto);
 
-      expect(service.createTarotista).toHaveBeenCalledWith(createDto);
+      expect(orchestrator.createTarotista).toHaveBeenCalledWith(createDto);
       expect(result).toEqual(expectedResult);
     });
   });
@@ -110,13 +109,11 @@ describe('TarotistasAdminController', () => {
         totalPages: 1,
       };
 
-      mockTarotistaAdminService.getAllTarotistas.mockResolvedValue(
-        expectedResult,
-      );
+      mockOrchestrator.getAllTarotistas.mockResolvedValue(expectedResult);
 
       const result = await controller.getAllTarotistas(filterDto);
 
-      expect(service.getAllTarotistas).toHaveBeenCalledWith(filterDto);
+      expect(orchestrator.getAllTarotistas).toHaveBeenCalledWith(filterDto);
       expect(result).toEqual(expectedResult);
     });
 
@@ -140,13 +137,11 @@ describe('TarotistasAdminController', () => {
         totalPages: 1,
       };
 
-      mockTarotistaAdminService.getAllTarotistas.mockResolvedValue(
-        expectedResult,
-      );
+      mockOrchestrator.getAllTarotistas.mockResolvedValue(expectedResult);
 
       const result = await controller.getAllTarotistas(filterDto);
 
-      expect(service.getAllTarotistas).toHaveBeenCalledWith(filterDto);
+      expect(orchestrator.getAllTarotistas).toHaveBeenCalledWith(filterDto);
       expect(result).toEqual(expectedResult);
     });
 
@@ -157,7 +152,7 @@ describe('TarotistasAdminController', () => {
         isActive: true,
       } as unknown as GetTarotistasFilterDto;
 
-      mockTarotistaAdminService.getAllTarotistas.mockResolvedValue({
+      mockOrchestrator.getAllTarotistas.mockResolvedValue({
         data: [],
         total: 0,
         page: 1,
@@ -167,7 +162,7 @@ describe('TarotistasAdminController', () => {
 
       await controller.getAllTarotistas(filterDto);
 
-      expect(service.getAllTarotistas).toHaveBeenCalledWith(filterDto);
+      expect(orchestrator.getAllTarotistas).toHaveBeenCalledWith(filterDto);
     });
   });
 
@@ -182,13 +177,11 @@ describe('TarotistasAdminController', () => {
         nombrePublico: 'Luna Mística Actualizada',
       } as unknown as Tarotista;
 
-      mockTarotistaAdminService.updateTarotista.mockResolvedValue(
-        expectedResult,
-      );
+      mockOrchestrator.updateTarotista.mockResolvedValue(expectedResult);
 
       const result = await controller.updateTarotista(1, updateDto);
 
-      expect(service.updateTarotista).toHaveBeenCalledWith(1, updateDto);
+      expect(orchestrator.updateTarotista).toHaveBeenCalledWith(1, updateDto);
       expect(result).toEqual(expectedResult);
     });
   });
@@ -200,13 +193,11 @@ describe('TarotistasAdminController', () => {
         isActive: false,
       } as unknown as Tarotista;
 
-      mockTarotistaAdminService.deactivateTarotista.mockResolvedValue(
-        expectedResult,
-      );
+      mockOrchestrator.setActiveStatus.mockResolvedValue(expectedResult);
 
       const result = await controller.deactivateTarotista(1);
 
-      expect(service.deactivateTarotista).toHaveBeenCalledWith(1);
+      expect(orchestrator.deactivateTarotista).toHaveBeenCalledWith(1);
       expect(result).toEqual(expectedResult);
     });
   });
@@ -218,13 +209,11 @@ describe('TarotistasAdminController', () => {
         isActive: true,
       } as unknown as Tarotista;
 
-      mockTarotistaAdminService.reactivateTarotista.mockResolvedValue(
-        expectedResult,
-      );
+      mockOrchestrator.setActiveStatus.mockResolvedValue(expectedResult);
 
       const result = await controller.reactivateTarotista(1);
 
-      expect(service.reactivateTarotista).toHaveBeenCalledWith(1);
+      expect(orchestrator.reactivateTarotista).toHaveBeenCalledWith(1);
       expect(result).toEqual(expectedResult);
     });
   });
@@ -239,18 +228,16 @@ describe('TarotistasAdminController', () => {
         maxTokens: 500,
       } as unknown as TarotistaConfig;
 
-      mockTarotistaAdminService.getTarotistaConfig.mockResolvedValue(
-        expectedResult,
-      );
+      mockOrchestrator.getTarotistaConfig.mockResolvedValue(expectedResult);
 
       const result = await controller.getTarotistaConfig(1);
 
-      expect(service.getTarotistaConfig).toHaveBeenCalledWith(1);
+      expect(orchestrator.getTarotistaConfig).toHaveBeenCalledWith(1);
       expect(result).toEqual(expectedResult);
     });
   });
 
-  describe('updateTarotistaConfig', () => {
+  describe('updateConfig', () => {
     it('should update tarotista config', async () => {
       const updateDto = {
         temperature: 0.8,
@@ -262,13 +249,11 @@ describe('TarotistasAdminController', () => {
         temperature: 0.8,
       } as unknown as TarotistaConfig;
 
-      mockTarotistaAdminService.updateTarotistaConfig.mockResolvedValue(
-        expectedResult,
-      );
+      mockOrchestrator.updateConfig.mockResolvedValue(expectedResult);
 
       const result = await controller.updateTarotistaConfig(1, updateDto);
 
-      expect(service.updateTarotistaConfig).toHaveBeenCalledWith(1, updateDto);
+      expect(orchestrator.updateConfig).toHaveBeenCalledWith(1, updateDto);
       expect(result).toEqual(expectedResult);
     });
   });
@@ -285,13 +270,11 @@ describe('TarotistasAdminController', () => {
         styleConfig: null,
       } as unknown as TarotistaConfig;
 
-      mockTarotistaAdminService.resetTarotistaConfigToDefault.mockResolvedValue(
-        expectedResult,
-      );
+      mockOrchestrator.resetConfigToDefault.mockResolvedValue(expectedResult);
 
       const result = await controller.resetConfigToDefault(1);
 
-      expect(service.resetTarotistaConfigToDefault).toHaveBeenCalledWith(1);
+      expect(orchestrator.resetConfigToDefault).toHaveBeenCalledWith(1);
       expect(result).toEqual(expectedResult);
     });
   });
@@ -310,13 +293,11 @@ describe('TarotistasAdminController', () => {
         customMeaningUpright: 'Significado personalizado',
       } as unknown as TarotistaCardMeaning;
 
-      mockTarotistaAdminService.setCustomCardMeaning.mockResolvedValue(
-        expectedResult,
-      );
+      mockOrchestrator.setCustomMeaning.mockResolvedValue(expectedResult);
 
       const result = await controller.setCustomMeaning(1, meaningDto);
 
-      expect(service.setCustomCardMeaning).toHaveBeenCalledWith(1, meaningDto);
+      expect(orchestrator.setCustomMeaning).toHaveBeenCalledWith(1, meaningDto);
       expect(result).toEqual(expectedResult);
     });
   });
@@ -332,26 +313,22 @@ describe('TarotistasAdminController', () => {
         } as unknown as TarotistaCardMeaning,
       ];
 
-      mockTarotistaAdminService.getAllCustomMeanings.mockResolvedValue(
-        expectedResult,
-      );
+      mockOrchestrator.getAllCustomMeanings.mockResolvedValue(expectedResult);
 
       const result = await controller.getAllCustomMeanings(1);
 
-      expect(service.getAllCustomMeanings).toHaveBeenCalledWith(1);
+      expect(orchestrator.getAllCustomMeanings).toHaveBeenCalledWith(1);
       expect(result).toEqual(expectedResult);
     });
   });
 
   describe('deleteCustomMeaning', () => {
     it('should delete custom meaning', async () => {
-      mockTarotistaAdminService.deleteCustomMeaning.mockResolvedValue(
-        undefined,
-      );
+      mockOrchestrator.deleteCustomMeaning.mockResolvedValue(undefined);
 
       await controller.deleteCustomMeaning(1, 5);
 
-      expect(service.deleteCustomMeaning).toHaveBeenCalledWith(1, 5);
+      expect(orchestrator.deleteCustomMeaning).toHaveBeenCalledWith(1, 5);
     });
   });
 
@@ -385,13 +362,13 @@ describe('TarotistasAdminController', () => {
         } as unknown as TarotistaCardMeaning,
       ];
 
-      mockTarotistaAdminService.bulkImportCustomMeanings.mockResolvedValue(
+      mockOrchestrator.bulkImportCustomMeanings.mockResolvedValue(
         expectedResult,
       );
 
       const result = await controller.bulkImportMeanings(1, bulkDto as any);
 
-      expect(service.bulkImportCustomMeanings).toHaveBeenCalledWith(
+      expect(orchestrator.bulkImportCustomMeanings).toHaveBeenCalledWith(
         1,
         meanings,
       );
@@ -421,13 +398,11 @@ describe('TarotistasAdminController', () => {
         totalPages: 1,
       };
 
-      mockTarotistaAdminService.getAllApplications.mockResolvedValue(
-        expectedResult,
-      );
+      mockOrchestrator.getAllApplications.mockResolvedValue(expectedResult);
 
       const result = await controller.getAllApplications(filterDto);
 
-      expect(service.getAllApplications).toHaveBeenCalledWith(filterDto);
+      expect(orchestrator.getAllApplications).toHaveBeenCalledWith(filterDto);
       expect(result).toEqual(expectedResult);
     });
   });
@@ -447,13 +422,11 @@ describe('TarotistasAdminController', () => {
         adminNotes: 'Excelente perfil',
       } as unknown as TarotistaApplication;
 
-      mockTarotistaAdminService.approveApplication.mockResolvedValue(
-        expectedResult,
-      );
+      mockOrchestrator.approveApplication.mockResolvedValue(expectedResult);
 
       const result = await controller.approveApplication(1, req, approveDto);
 
-      expect(service.approveApplication).toHaveBeenCalledWith(
+      expect(orchestrator.approveApplication).toHaveBeenCalledWith(
         1,
         100,
         approveDto,
@@ -477,13 +450,15 @@ describe('TarotistasAdminController', () => {
         adminNotes: 'No cumple con los requisitos',
       } as unknown as TarotistaApplication;
 
-      mockTarotistaAdminService.rejectApplication.mockResolvedValue(
-        expectedResult,
-      );
+      mockOrchestrator.rejectApplication.mockResolvedValue(expectedResult);
 
       const result = await controller.rejectApplication(1, req, rejectDto);
 
-      expect(service.rejectApplication).toHaveBeenCalledWith(1, 100, rejectDto);
+      expect(orchestrator.rejectApplication).toHaveBeenCalledWith(
+        1,
+        100,
+        rejectDto,
+      );
       expect(result).toEqual(expectedResult);
     });
   });
