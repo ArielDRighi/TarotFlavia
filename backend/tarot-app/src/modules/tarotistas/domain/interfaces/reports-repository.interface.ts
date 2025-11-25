@@ -83,5 +83,3 @@ export interface PlatformReport {
     revenueGrowth: number;
   };
 }
-
-export const REPORTS_REPOSITORY = 'IReportsRepository';

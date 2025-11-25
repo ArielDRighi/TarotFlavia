@@ -75,5 +75,3 @@ export interface TarotistaStatistics {
   customMeaningsCount: number;
   subscribersCount: number;
 }
-
-export const METRICS_REPOSITORY = 'IMetricsRepository';

@@ -70,5 +70,3 @@ export interface TarotistaFindOptions {
   includeConfig?: boolean;
   includeUser?: boolean;
 }
-
-export const TAROTISTA_REPOSITORY = 'ITarotistaRepository';
