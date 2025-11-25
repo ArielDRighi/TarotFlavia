@@ -84,9 +84,6 @@ Crear suite completa de tests de integración que validen las interacciones entr
   - ✅ Soft-delete de categoría no rompe preguntas (cascade behavior validated)
   - ✅ ReadingCategory requires 'color' field (NOT NULL constraint)
   - ✅ Duplicate slug validation (400 Bad Request)
-  - Preguntas asociadas a categoría correcta
-  - Filtrado por categoría retorna preguntas correctas
-  - Soft-delete de categoría no rompe preguntas
 
 **Ubicación:** `test/integration/*.spec.ts`  
 **Importancia:** ⭐⭐⭐ CRÍTICA - Sin estos tests, no se validan interacciones críticas

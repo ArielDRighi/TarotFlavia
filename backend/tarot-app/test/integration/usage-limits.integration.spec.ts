@@ -14,6 +14,9 @@ import { Tarotista } from '../../src/modules/tarotistas/entities/tarotista.entit
 import { TarotDeck } from '../../src/modules/tarot/decks/entities/tarot-deck.entity';
 import { TarotCard } from '../../src/modules/tarot/cards/entities/tarot-card.entity';
 import { TarotSpread } from '../../src/modules/tarot/spreads/entities/tarot-spread.entity';
+
+// Helpers
+import { setupDefaultTarotista } from '../helpers/setup-default-tarotista';
 import {
   UsageLimit,
   UsageFeature,
@@ -67,47 +70,7 @@ describe('UsageLimits + Readings Integration Tests', () => {
     usageLimitRepository = dataSource.getRepository(UsageLimit);
 
     // Crear tarotista Flavia por defecto si no existe
-    const userRepo = dataSource.getRepository(User);
-    const tarotistaRepo = dataSource.getRepository(Tarotista);
-
-    let flaviaUser = await userRepo.findOne({
-      where: { email: 'flavia@tarot.local' },
-    });
-
-    if (!flaviaUser) {
-      const createdUser = await usersService.create({
-        email: 'flavia@tarot.local',
-        password: 'FlaviaSecretPass123!',
-        name: 'Flavia Sistema',
-      });
-
-      flaviaUser = (await userRepo.findOne({
-        where: { id: createdUser.id },
-      }))!;
-    }
-
-    const flaviaTarotista = await tarotistaRepo.findOne({
-      where: { userId: flaviaUser.id },
-    });
-
-    if (!flaviaTarotista) {
-      await tarotistaRepo.save({
-        userId: flaviaUser.id,
-        nombrePublico: 'Flavia',
-        bio: 'Tarotista predeterminada del sistema',
-        especialidades: ['amor', 'trabajo', 'espiritualidad'],
-        idiomas: ['español', 'inglés'],
-        añosExperiencia: 15,
-        isActive: true,
-        ofreceSesionesVirtuales: false,
-        precioSesionUsd: 50.0,
-        comisionPorcentaje: 70.0,
-        ratingPromedio: 4.8,
-        totalReseñas: 0,
-        isFeatured: true,
-        ordenVisualizacion: 1,
-      });
-    }
+    await setupDefaultTarotista(dataSource, usersService);
   });
 
   afterAll(async () => {
@@ -166,6 +129,7 @@ describe('UsageLimits + Readings Integration Tests', () => {
       testDeck = await deckRepo.save({
         name: 'Test Deck',
         description: 'Deck for integration tests',
+        imageUrl: 'https://example.com/test-deck.png',
         isActive: true,
       });
     }

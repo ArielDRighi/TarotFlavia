@@ -15,6 +15,9 @@ import { TarotCard as _TarotCard } from '../../src/modules/tarot/cards/entities/
 import { TarotSpread as _TarotSpread } from '../../src/modules/tarot/spreads/entities/tarot-spread.entity';
 import { CachedInterpretation } from '../../src/modules/cache/infrastructure/entities/cached-interpretation.entity';
 
+// Helpers
+import { setupDefaultTarotista } from '../helpers/setup-default-tarotista';
+
 // NOTE: Estos tests validan la estructura y configuración del sistema de cache
 // Los tests que requieren llamadas reales a OpenAI API se marcan como .skip()
 // debido a que requieren API key configurada
@@ -58,47 +61,7 @@ describe('Cache + AI Integration Tests', () => {
     _cacheRepository = dataSource.getRepository(CachedInterpretation);
 
     // Setup tarotista Flavia
-    const userRepo = dataSource.getRepository(User);
-    const tarotistaRepo = dataSource.getRepository(Tarotista);
-
-    let flaviaUser = await userRepo.findOne({
-      where: { email: 'flavia@tarot.local' },
-    });
-
-    if (!flaviaUser) {
-      const createdUser = await usersService.create({
-        email: 'flavia@tarot.local',
-        password: 'FlaviaSecretPass123!',
-        name: 'Flavia Sistema',
-      });
-
-      flaviaUser = (await userRepo.findOne({
-        where: { id: createdUser.id },
-      }))!;
-    }
-
-    const flaviaTarotista = await tarotistaRepo.findOne({
-      where: { userId: flaviaUser.id },
-    });
-
-    if (!flaviaTarotista) {
-      await tarotistaRepo.save({
-        userId: flaviaUser.id,
-        nombrePublico: 'Flavia',
-        bio: 'Tarotista predeterminada del sistema',
-        especialidades: ['amor', 'trabajo', 'espiritualidad'],
-        idiomas: ['español', 'inglés'],
-        añosExperiencia: 15,
-        isActive: true,
-        ofreceSesionesVirtuales: false,
-        precioSesionUsd: 50.0,
-        comisionPorcentaje: 70.0,
-        ratingPromedio: 4.8,
-        totalReseñas: 0,
-        isFeatured: true,
-        ordenVisualizacion: 1,
-      });
-    }
+    await setupDefaultTarotista(dataSource, usersService);
   });
 
   afterAll(async () => {

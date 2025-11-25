@@ -19,6 +19,7 @@ import { TarotSpread } from '../../src/modules/tarot/spreads/entities/tarot-spre
 import { TarotDeck } from '../../src/modules/tarot/decks/entities/tarot-deck.entity';
 import { TarotInterpretation } from '../../src/modules/tarot/interpretations/entities/tarot-interpretation.entity';
 import { Tarotista } from '../../src/modules/tarotistas/entities/tarotista.entity';
+import { setupDefaultTarotista } from '../helpers/setup-default-tarotista';
 
 describe('Readings + Interpretations + AI Integration Tests', () => {
   let app: INestApplication;
@@ -68,47 +69,7 @@ describe('Readings + Interpretations + AI Integration Tests', () => {
     usersService = moduleFixture.get<UsersService>(UsersService);
 
     // Crear tarotista Flavia por defecto si no existe
-    const userRepo = dataSource.getRepository(User);
-    const tarotistaRepo = dataSource.getRepository(Tarotista);
-
-    let flaviaUser = await userRepo.findOne({
-      where: { email: 'flavia@tarot.local' },
-    });
-
-    if (!flaviaUser) {
-      const createdUser = await usersService.create({
-        email: 'flavia@tarot.local',
-        password: 'FlaviaSecretPass123!',
-        name: 'Flavia Sistema',
-      });
-
-      flaviaUser = (await userRepo.findOne({
-        where: { id: createdUser.id },
-      }))!;
-    }
-
-    let flaviaTarotista = await tarotistaRepo.findOne({
-      where: { userId: flaviaUser.id },
-    });
-
-    if (!flaviaTarotista) {
-      flaviaTarotista = await tarotistaRepo.save({
-        userId: flaviaUser.id,
-        nombrePublico: 'Flavia',
-        bio: 'Tarotista predeterminada del sistema',
-        especialidades: ['amor', 'trabajo', 'espiritualidad'],
-        idiomas: ['español', 'inglés'],
-        añosExperiencia: 15,
-        isActive: true,
-        ofreceSesionesVirtuales: false,
-        precioSesionUsd: 50.0,
-        comisionPorcentaje: 70.0,
-        ratingPromedio: 4.8,
-        totalReseñas: 0,
-        isFeatured: true,
-        ordenVisualizacion: 1,
-      });
-    }
+    await setupDefaultTarotista(dataSource, usersService);
   });
 
   afterAll(async () => {
@@ -158,6 +119,7 @@ describe('Readings + Interpretations + AI Integration Tests', () => {
       testDeck = await deckRepo.save({
         name: 'Test Deck',
         description: 'Deck for integration tests',
+        imageUrl: 'https://example.com/test-deck.png',
         isActive: true,
       });
     }
