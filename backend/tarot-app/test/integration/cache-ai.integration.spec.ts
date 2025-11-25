@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import * as request from 'supertest';
 import { AppModule } from '../../src/app.module';
 
 // Services
@@ -11,9 +10,9 @@ import { AuthService } from '../../src/modules/auth/auth.service';
 // Entities
 import { User } from '../../src/modules/users/entities/user.entity';
 import { Tarotista } from '../../src/modules/tarotistas/entities/tarotista.entity';
-import { TarotDeck } from '../../src/modules/tarot/decks/entities/tarot-deck.entity';
-import { TarotCard } from '../../src/modules/tarot/cards/entities/tarot-card.entity';
-import { TarotSpread } from '../../src/modules/tarot/spreads/entities/tarot-spread.entity';
+import { TarotDeck as _TarotDeck } from '../../src/modules/tarot/decks/entities/tarot-deck.entity';
+import { TarotCard as _TarotCard } from '../../src/modules/tarot/cards/entities/tarot-card.entity';
+import { TarotSpread as _TarotSpread } from '../../src/modules/tarot/spreads/entities/tarot-spread.entity';
 import { CachedInterpretation } from '../../src/modules/cache/infrastructure/entities/cached-interpretation.entity';
 
 // NOTE: Estos tests validan la estructura y configuración del sistema de cache
@@ -28,11 +27,11 @@ describe('Cache + AI Integration Tests', () => {
 
   // Test data
   let testUser: User;
-  let authToken: string;
+  let _authToken: string;
 
   // Repositories
   let userRepository: any;
-  let cacheRepository: any;
+  let _cacheRepository: any;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -56,7 +55,7 @@ describe('Cache + AI Integration Tests', () => {
 
     // Inicializar repositorios
     userRepository = dataSource.getRepository(User);
-    cacheRepository = dataSource.getRepository(CachedInterpretation);
+    _cacheRepository = dataSource.getRepository(CachedInterpretation);
 
     // Setup tarotista Flavia
     const userRepo = dataSource.getRepository(User);
@@ -140,7 +139,7 @@ describe('Cache + AI Integration Tests', () => {
       'test-user-agent',
       '127.0.0.1',
     );
-    authToken = loginResponse.access_token;
+    _authToken = loginResponse.access_token;
   });
 
   afterEach(async () => {

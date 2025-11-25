@@ -4,9 +4,9 @@ import { AppModule } from '../../src/app.module';
 import { DataSource } from 'typeorm';
 import { AuthService } from '../../src/modules/auth/auth.service';
 import { UsersService } from '../../src/modules/users/users.service';
-import { User } from '../../src/modules/users/entities/user.entity';
+import { User as _User } from '../../src/modules/users/entities/user.entity';
 import { RefreshToken } from '../../src/modules/auth/entities/refresh-token.entity';
-import { PasswordResetToken } from '../../src/modules/auth/entities/password-reset-token.entity';
+import { PasswordResetToken as _PasswordResetToken } from '../../src/modules/auth/entities/password-reset-token.entity';
 
 // Interfaces para queries SQL raw (snake_case como en DB)
 interface RefreshTokenRow {
@@ -134,7 +134,7 @@ describe('Auth + Users Integration Tests', () => {
         emailWithCaps.toLowerCase(),
       ]);
 
-      const result = await authService.register(
+      const _result = await authService.register(
         {
           email: emailWithCaps,
           password: testUserData.password,
