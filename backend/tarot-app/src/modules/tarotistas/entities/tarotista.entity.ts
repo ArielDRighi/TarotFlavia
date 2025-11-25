@@ -143,6 +143,10 @@ export class Tarotista {
     precision: 5,
     scale: 2,
     default: 30.0,
+    transformer: {
+      to: (value: number) => value,
+      from: (value: string) => parseFloat(value),
+    },
   })
   comisiónPorcentaje: number;
 

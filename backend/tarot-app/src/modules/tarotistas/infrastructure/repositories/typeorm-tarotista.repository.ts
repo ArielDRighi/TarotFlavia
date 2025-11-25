@@ -142,8 +142,18 @@ export class TypeOrmTarotistaRepository implements ITarotistaRepository {
     let config = await this.findConfigByTarotistaId(tarotistaId);
 
     if (!config) {
-      // Create if not exists
-      config = await this.createConfig({ tarotistaId, ...data });
+      // Create if not exists with default values
+      const defaultConfig = {
+        tarotistaId,
+        systemPrompt:
+          data.systemPrompt ||
+          'Eres un tarotista profesional y empático con años de experiencia en lecturas de tarot.',
+        temperature: data.temperature ?? 0.7,
+        maxTokens: data.maxTokens ?? 1000,
+        topP: data.topP ?? 0.9,
+        styleConfig: data.styleConfig ?? null,
+      };
+      config = await this.createConfig(defaultConfig);
     } else {
       Object.assign(config, data);
       config = await this.configRepo.save(config);

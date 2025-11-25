@@ -54,6 +54,10 @@ export class TarotistaConfig {
     precision: 3,
     scale: 2,
     default: 0.7,
+    transformer: {
+      to: (value: number) => value,
+      from: (value: string) => parseFloat(value),
+    },
   })
   temperature: number;
 
@@ -74,6 +78,10 @@ export class TarotistaConfig {
     precision: 3,
     scale: 2,
     default: 0.9,
+    transformer: {
+      to: (value: number) => value,
+      from: (value: string) => parseFloat(value),
+    },
   })
   topP: number;
 

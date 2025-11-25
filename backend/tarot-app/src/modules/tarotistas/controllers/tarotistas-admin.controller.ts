@@ -186,11 +186,13 @@ export class TarotistasAdminController {
     @Request() req: { user: { userId: number } },
     @Body() approveDto: ApproveApplicationDto,
   ) {
-    return await this.orchestrator.approveApplication(
+    const result = await this.orchestrator.approveApplication(
       id,
       req.user.userId,
       approveDto,
     );
+    // Return only application to maintain backward compatibility
+    return result.application;
   }
 
   @Post('applications/:id/reject')
