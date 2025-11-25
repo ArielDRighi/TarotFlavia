@@ -8,8 +8,8 @@ import {
   TopTarotistasMetrics,
   TarotistaStatistics,
 } from '../../domain/interfaces/metrics-repository.interface';
-import { TarotistaRevenueMetrics } from '../entities/tarotista-revenue-metrics.entity';
-import { Tarotista } from '../entities/tarotista.entity';
+import { TarotistaRevenueMetrics } from '../../entities/tarotista-revenue-metrics.entity';
+import { Tarotista } from '../../entities/tarotista.entity';
 import { TarotReading } from '../../../tarot/readings/entities/tarot-reading.entity';
 
 /**

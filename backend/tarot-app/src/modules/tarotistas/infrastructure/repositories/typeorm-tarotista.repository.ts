@@ -5,13 +5,13 @@ import {
   ITarotistaRepository,
   TarotistaFindOptions,
 } from '../../domain/interfaces/tarotista-repository.interface';
-import { Tarotista } from '../entities/tarotista.entity';
-import { TarotistaConfig } from '../entities/tarotista-config.entity';
-import { TarotistaCardMeaning } from '../entities/tarotista-card-meaning.entity';
+import { Tarotista } from '../../entities/tarotista.entity';
+import { TarotistaConfig } from '../../entities/tarotista-config.entity';
+import { TarotistaCardMeaning } from '../../entities/tarotista-card-meaning.entity';
 import {
   TarotistaApplication,
   ApplicationStatus,
-} from '../entities/tarotista-application.entity';
+} from '../../entities/tarotista-application.entity';
 
 /**
  * TypeORM implementation of ITarotistaRepository
@@ -59,7 +59,7 @@ export class TypeOrmTarotistaRepository implements ITarotistaRepository {
       where.isActive = isActive;
     }
 
-    const relations = [];
+    const relations: string[] = [];
     if (includeConfig) relations.push('configs');
     if (includeUser) relations.push('user');
 
@@ -91,10 +91,11 @@ export class TypeOrmTarotistaRepository implements ITarotistaRepository {
   }
 
   async findBySlug(slug: string): Promise<Tarotista | null> {
-    return await this.tarotistaRepo.findOne({
-      where: { slug },
-      relations: ['configs'],
-    });
+    // NOTE: Tarotista entity does not have a slug field
+    // This method would need slug field added to entity or removed from interface
+    throw new Error(
+      'findBySlug not implemented: Tarotista entity has no slug field',
+    );
   }
 
   async create(data: Partial<Tarotista>): Promise<Tarotista> {
@@ -222,14 +223,14 @@ export class TypeOrmTarotistaRepository implements ITarotistaRepository {
   ): Promise<TarotistaApplication[]> {
     return await this.applicationRepo.find({
       where: { userId },
-      order: { submittedAt: 'DESC' },
+      order: { createdAt: 'DESC' },
     });
   }
 
   async findPendingApplications(): Promise<TarotistaApplication[]> {
     return await this.applicationRepo.find({
       where: { status: ApplicationStatus.PENDING },
-      order: { submittedAt: 'ASC' },
+      order: { createdAt: 'ASC' },
       relations: ['user'],
     });
   }
@@ -238,7 +239,7 @@ export class TypeOrmTarotistaRepository implements ITarotistaRepository {
     id: number,
     status: ApplicationStatus,
     reviewedBy?: number,
-    reviewNotes?: string,
+    adminNotes?: string,
   ): Promise<TarotistaApplication> {
     const application = await this.findApplicationById(id);
 
@@ -247,8 +248,8 @@ export class TypeOrmTarotistaRepository implements ITarotistaRepository {
     }
 
     application.status = status;
-    if (reviewedBy) application.reviewedBy = reviewedBy;
-    if (reviewNotes) application.reviewNotes = reviewNotes;
+    if (reviewedBy) application.reviewedByUserId = reviewedBy;
+    if (adminNotes) application.adminNotes = adminNotes;
     application.reviewedAt = new Date();
 
     return await this.applicationRepo.save(application);
