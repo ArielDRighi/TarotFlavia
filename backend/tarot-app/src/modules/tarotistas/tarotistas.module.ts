@@ -38,6 +38,9 @@ import { RejectApplicationUseCase } from './application/use-cases/reject-applica
 import { ToggleActiveStatusUseCase } from './application/use-cases/toggle-active-status.use-case';
 import { GetTarotistaDetailsUseCase } from './application/use-cases/get-tarotista-details.use-case';
 
+// Orchestrator
+import { TarotistasOrchestratorService } from './application/services/tarotistas-orchestrator.service';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([
@@ -86,6 +89,9 @@ import { GetTarotistaDetailsUseCase } from './application/use-cases/get-tarotist
     RejectApplicationUseCase,
     ToggleActiveStatusUseCase,
     GetTarotistaDetailsUseCase,
+
+    // Orchestrator
+    TarotistasOrchestratorService,
   ],
   exports: [
     TarotistasService,
@@ -94,6 +100,7 @@ import { GetTarotistaDetailsUseCase } from './application/use-cases/get-tarotist
     RevenueCalculationService,
     MetricsService,
     ReportsService,
+    TarotistasOrchestratorService, // Export orchestrator
     TypeOrmModule,
   ],
 })
