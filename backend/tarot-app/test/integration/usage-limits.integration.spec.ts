@@ -197,6 +197,7 @@ describe('UsageLimits + Readings Integration Tests', () => {
           { name: 'Present', description: 'The current situation' },
           { name: 'Future', description: 'What lies ahead' },
         ],
+        whenToUse: 'Quick insights into past, present, and future situations',
       });
     }
   });
