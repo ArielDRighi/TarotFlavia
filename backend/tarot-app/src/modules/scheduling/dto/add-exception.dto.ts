@@ -6,7 +6,7 @@ import {
   IsOptional,
   Matches,
 } from 'class-validator';
-import { ExceptionType } from '../domain/enums';
+import { ExceptionType } from '../enums';
 
 export class AddExceptionDto {
   @ApiProperty({

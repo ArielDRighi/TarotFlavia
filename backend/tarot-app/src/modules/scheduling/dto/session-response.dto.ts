@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { SessionStatus, SessionType, PaymentStatus } from '../domain/enums';
+import { SessionStatus, SessionType, PaymentStatus } from '../enums';
 
 export class SessionResponseDto {
   @ApiProperty({ example: 1 })

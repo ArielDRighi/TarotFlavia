@@ -1,5 +1,5 @@
 import { TarotistAvailability } from './tarotist-availability.entity';
-import { DayOfWeek } from '../domain/enums';
+import { DayOfWeek } from '../enums';
 
 describe('TarotistAvailability Entity', () => {
   it('should create an instance', () => {
