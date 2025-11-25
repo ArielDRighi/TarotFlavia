@@ -5,12 +5,12 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
-import { TarotCard } from '../entities/tarot-card.entity';
-import { TarotistaCardMeaning } from '../../../tarotistas/entities/tarotista-card-meaning.entity';
+import { TarotCard } from './entities/tarot-card.entity';
+import { TarotistaCardMeaning } from '../../tarotistas/entities/tarotista-card-meaning.entity';
 import {
   CardMeaningResult,
   CardMeaningRequest,
-} from '../../../tarot-core/interfaces/card-meaning.interface';
+} from '../../tarot-core/interfaces/card-meaning.interface';
 
 /**
  * Service for managing card meanings with inheritance pattern:
