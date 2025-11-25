@@ -32,7 +32,7 @@ export class TypeOrmMetricsRepository implements IMetricsRepository {
     startDate?: Date,
     endDate?: Date,
   ): Promise<number> {
-    const where: any = { tarotistaId };
+    const where: Record<string, unknown> = { tarotistaId };
 
     if (startDate && endDate) {
       where.createdAt = Between(startDate, endDate);
@@ -41,23 +41,16 @@ export class TypeOrmMetricsRepository implements IMetricsRepository {
     return await this.readingRepo.count({ where });
   }
 
-  async getReadingCountsByPeriod(
-    tarotistaId: number,
-    period: 'day' | 'week' | 'month' | 'year',
-    startDate?: Date,
-    endDate?: Date,
-  ): Promise<MetricsByPeriod[]> {
+  getReadingCountsByPeriod(): Promise<MetricsByPeriod[]> {
     // This is a complex aggregation query
     // Implementation will use raw SQL or query builder
     // For now, return empty array to allow compilation
     // TODO: Implement using TypeORM query builder
-    return [];
+    return Promise.resolve([]);
   }
 
   async findRevenueMetrics(
     tarotistaId: number,
-    month: number,
-    year: number,
   ): Promise<TarotistaRevenueMetrics | null> {
     return await this.revenueRepo.findOne({
       where: { tarotistaId },
@@ -77,7 +70,14 @@ export class TypeOrmMetricsRepository implements IMetricsRepository {
     startDate: Date,
     endDate: Date,
   ): Promise<RevenueCalculation> {
-    const metricsRaw = await this.revenueRepo
+    const metricsRaw:
+      | {
+          totalReadings?: string;
+          totalRevenueShare?: string;
+          totalPlatformFee?: string;
+          totalGrossRevenue?: string;
+        }
+      | undefined = await this.revenueRepo
       .createQueryBuilder('revenue')
       .where('revenue.tarotistaId = :tarotistaId', { tarotistaId })
       .andWhere('revenue.calculationDate >= :start', { start: startDate })
@@ -104,14 +104,10 @@ export class TypeOrmMetricsRepository implements IMetricsRepository {
     };
   }
 
-  async getTopTarotistas(
-    limit: number,
-    metric: 'readings' | 'revenue' | 'rating',
-    period?: { start: Date; end: Date },
-  ): Promise<TopTarotistasMetrics[]> {
+  getTopTarotistas(): Promise<TopTarotistasMetrics[]> {
     // Complex aggregation query
     // TODO: Implement using TypeORM query builder
-    return [];
+    return Promise.resolve([]);
   }
 
   async getTarotistaStatistics(

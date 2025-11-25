@@ -90,7 +90,7 @@ export class TypeOrmTarotistaRepository implements ITarotistaRepository {
     });
   }
 
-  async findBySlug(slug: string): Promise<Tarotista | null> {
+  findBySlug(): Promise<Tarotista | null> {
     // NOTE: Tarotista entity does not have a slug field
     // This method would need slug field added to entity or removed from interface
     throw new Error(
@@ -267,7 +267,7 @@ export class TypeOrmTarotistaRepository implements ITarotistaRepository {
 
   // ==================== Utility ====================
 
-  async count(where?: any): Promise<number> {
+  async count(where?: Record<string, unknown>): Promise<number> {
     return await this.tarotistaRepo.count({ where });
   }
 }

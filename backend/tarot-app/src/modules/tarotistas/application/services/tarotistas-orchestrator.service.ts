@@ -61,7 +61,7 @@ export class TarotistasOrchestratorService {
       search: filterDto.search,
       isActive: filterDto.isActive,
       sortBy: filterDto.sortBy || 'createdAt',
-      sortOrder: (filterDto.sortOrder || 'DESC') as 'ASC' | 'DESC',
+      sortOrder: filterDto.sortOrder || 'DESC',
       includeConfig: true,
       includeUser: true,
     };

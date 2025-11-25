@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import {
   IReportsRepository,
-  ReportOptions,
   TarotistaReport,
   PlatformReport,
 } from '../../domain/interfaces/reports-repository.interface';
@@ -14,35 +13,26 @@ import {
  */
 @Injectable()
 export class TypeOrmReportsRepository implements IReportsRepository {
-  async generateTarotistaReport(
-    tarotistaId: number,
-    startDate: Date,
-    endDate: Date,
-    options?: ReportOptions,
-  ): Promise<TarotistaReport> {
+  generateTarotistaReport(): Promise<TarotistaReport> {
     // Complex report generation logic
     // This is primarily handled by ReportsService
     // Repository just provides data access methods
     throw new Error('Not implemented - use ReportsService');
   }
 
-  async generatePlatformReport(
-    startDate: Date,
-    endDate: Date,
-    options?: ReportOptions,
-  ): Promise<PlatformReport> {
+  generatePlatformReport(): Promise<PlatformReport> {
     // Complex report generation logic
     // This is primarily handled by ReportsService
     throw new Error('Not implemented - use ReportsService');
   }
 
-  async exportToCSV(data: any[], columns: string[]): Promise<string> {
+  exportToCSV(): Promise<string> {
     // CSV export logic
     // This should remain in ReportsService
     throw new Error('Not implemented - use ReportsService');
   }
 
-  async exportToPDF(data: any, template: string): Promise<Buffer> {
+  exportToPDF(): Promise<Buffer> {
     // PDF export logic
     // This should remain in ReportsService
     throw new Error('Not implemented - use ReportsService');
