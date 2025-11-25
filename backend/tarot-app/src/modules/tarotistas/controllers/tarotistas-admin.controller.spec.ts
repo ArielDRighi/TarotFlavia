@@ -197,7 +197,7 @@ describe('TarotistasAdminController', () => {
 
       const result = await controller.deactivateTarotista(1);
 
-      expect(orchestrator.deactivateTarotista).toHaveBeenCalledWith(1);
+      expect(orchestrator.setActiveStatus).toHaveBeenCalledWith(1, false);
       expect(result).toEqual(expectedResult);
     });
   });
@@ -213,7 +213,7 @@ describe('TarotistasAdminController', () => {
 
       const result = await controller.reactivateTarotista(1);
 
-      expect(orchestrator.reactivateTarotista).toHaveBeenCalledWith(1);
+      expect(orchestrator.setActiveStatus).toHaveBeenCalledWith(1, true);
       expect(result).toEqual(expectedResult);
     });
   });
