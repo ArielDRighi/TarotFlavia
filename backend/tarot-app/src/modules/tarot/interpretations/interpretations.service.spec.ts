@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { InterpretationsService } from './interpretations.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { TarotInterpretation } from './entities/tarot-interpretation.entity';
-import { Tarotista } from '../../tarotistas/infrastructure/entities/tarotista.entity';
+import { Tarotista } from '../../tarotistas/entities/tarotista.entity';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { TarotCard } from '../cards/entities/tarot-card.entity';

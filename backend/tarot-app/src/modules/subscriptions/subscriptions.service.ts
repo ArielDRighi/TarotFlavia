@@ -10,9 +10,9 @@ import {
   UserTarotistaSubscription,
   SubscriptionType,
   SubscriptionStatus,
-} from '../tarotistas/infrastructure/entities/user-tarotista-subscription.entity';
+} from '../tarotistas/entities/user-tarotista-subscription.entity';
 import { User, UserPlan } from '../users/entities/user.entity';
-import { Tarotista } from '../tarotistas/infrastructure/entities/tarotista.entity';
+import { Tarotista } from '../tarotistas/entities/tarotista.entity';
 
 const COOLDOWN_DAYS = 30;
 const FLAVIA_TAROTISTA_ID = 1; // ID de Flavia (default)

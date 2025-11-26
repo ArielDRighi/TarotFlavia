@@ -13,10 +13,10 @@ import { DeepSeekProvider } from './infrastructure/providers/deepseek.provider';
 import { OpenAIProvider } from './infrastructure/providers/openai.provider';
 
 // External dependencies for PromptBuilderService
-import { TarotistaConfig } from '../tarotistas/infrastructure/entities/tarotista-config.entity';
+import { TarotistaConfig } from '../tarotistas/entities/tarotista-config.entity';
 import { TarotCard } from '../tarot/cards/entities/tarot-card.entity';
-import { TarotistaCardMeaning } from '../tarotistas/infrastructure/entities/tarotista-card-meaning.entity';
-import { Tarotista } from '../tarotistas/infrastructure/entities/tarotista.entity';
+import { TarotistaCardMeaning } from '../tarotistas/entities/tarotista-card-meaning.entity';
+import { Tarotista } from '../tarotistas/entities/tarotista.entity';
 
 // External dependency for AIProviderService
 import { AIUsageModule } from '../ai-usage/ai-usage.module';

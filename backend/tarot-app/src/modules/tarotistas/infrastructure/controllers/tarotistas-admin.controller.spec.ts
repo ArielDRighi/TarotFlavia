@@ -10,13 +10,13 @@ import {
   RejectApplicationDto,
   GetTarotistasFilterDto,
 } from '../../application/dto';
-import { Tarotista } from '../../infrastructure/entities/tarotista.entity';
-import { TarotistaConfig } from '../../infrastructure/entities/tarotista-config.entity';
-import { TarotistaCardMeaning } from '../../infrastructure/entities/tarotista-card-meaning.entity';
+import { Tarotista } from '../../entities/tarotista.entity';
+import { TarotistaConfig } from '../../entities/tarotista-config.entity';
+import { TarotistaCardMeaning } from '../../entities/tarotista-card-meaning.entity';
 import {
   TarotistaApplication,
   ApplicationStatus,
-} from '../../infrastructure/entities/tarotista-application.entity';
+} from '../../entities/tarotista-application.entity';
 
 describe('TarotistasAdminController', () => {
   let controller: TarotistasAdminController;
