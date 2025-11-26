@@ -67,7 +67,9 @@ describe('Auth + Users Integration Tests', () => {
     await app.init();
 
     dataSource = moduleFixture.get<DataSource>(DataSource);
-    authService = moduleFixture.get<AuthOrchestratorService>(AuthOrchestratorService);
+    authService = moduleFixture.get<AuthOrchestratorService>(
+      AuthOrchestratorService,
+    );
     usersService = moduleFixture.get<UsersService>(UsersService);
   });
 
@@ -222,7 +224,8 @@ describe('Auth + Users Integration Tests', () => {
       if (!validated) return;
 
       const loginResult = await authService.login(
-        validated,
+        validated.id,
+        validated.email,
         '127.0.0.1',
         'Integration Test Agent',
       );
@@ -272,7 +275,8 @@ describe('Auth + Users Integration Tests', () => {
       }
 
       const _loginResult = await authService.login(
-        validated,
+        validated.id,
+        validated.email,
         '127.0.0.1',
         'Integration Test Agent',
       );
@@ -442,7 +446,8 @@ describe('Auth + Users Integration Tests', () => {
 
       if (validated) {
         const _loginResult = await authService.login(
-          validated,
+          validated.id,
+          validated.email,
           '127.0.0.1',
           'Integration Test Agent',
         );
@@ -461,7 +466,8 @@ describe('Auth + Users Integration Tests', () => {
 
       if (validated) {
         await authService.login(
-          validated,
+          validated.id,
+          validated.email,
           '127.0.0.1',
           'Integration Test Agent',
         );
@@ -557,7 +563,12 @@ describe('Auth + Users Integration Tests', () => {
         'Device 1',
       );
       if (validated1) {
-        await authService.login(validated1, '127.0.0.1', 'Device 1');
+        await authService.login(
+          validated1.id,
+          validated1.email,
+          '127.0.0.1',
+          'Device 1',
+        );
       }
 
       const validated2 = await authService.validateUser(
@@ -567,7 +578,12 @@ describe('Auth + Users Integration Tests', () => {
         'Device 2',
       );
       if (validated2) {
-        await authService.login(validated2, '192.168.1.1', 'Device 2');
+        await authService.login(
+          validated2.id,
+          validated2.email,
+          '192.168.1.1',
+          'Device 2',
+        );
       }
 
       await authService.logoutAll(user.id);

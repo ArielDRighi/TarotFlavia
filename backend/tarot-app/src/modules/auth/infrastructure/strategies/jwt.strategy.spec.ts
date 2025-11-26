@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtStrategy } from './jwt.strategy';
 import { ConfigService } from '@nestjs/config';
-import { UsersService } from '../../users/users.service';
+import { UsersService } from '../../../users/users.service';
 import { UnauthorizedException } from '@nestjs/common';
-import { UserRole } from '../../../common/enums/user-role.enum';
-import { UserPlan } from '../../users/entities/user.entity';
+import { UserRole } from '../../../../common/enums/user-role.enum';
+import { UserPlan } from '../../../users/entities/user.entity';
 
 describe('JwtStrategy', () => {
   let strategy: JwtStrategy;
