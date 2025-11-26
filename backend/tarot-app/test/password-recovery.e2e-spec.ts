@@ -246,6 +246,8 @@ describe('Password Recovery (e2e)', () => {
     });
 
     it('should handle password reset for non-existent user', async () => {
+      // Security: Returns 200 (not 404) to prevent user enumeration attacks
+      // Attackers shouldn't be able to determine if an email exists in the database
       await request(app.getHttpServer())
         .post('/auth/forgot-password')
         .send({ email: 'nonexistent@example.com' })

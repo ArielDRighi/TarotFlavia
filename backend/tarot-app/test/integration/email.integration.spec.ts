@@ -46,7 +46,9 @@ describe('Email Integration Tests', () => {
     dataSource = moduleFixture.get<DataSource>(DataSource);
     usersService = moduleFixture.get<UsersService>(UsersService);
     emailService = moduleFixture.get<EmailService>(EmailService);
-    authService = moduleFixture.get<AuthOrchestratorService>(AuthOrchestratorService);
+    authService = moduleFixture.get<AuthOrchestratorService>(
+      AuthOrchestratorService,
+    );
   });
 
   afterAll(async () => {

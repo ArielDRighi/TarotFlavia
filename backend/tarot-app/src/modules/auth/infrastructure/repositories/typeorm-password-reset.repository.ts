@@ -1,7 +1,4 @@
-import {
-  Injectable,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PasswordResetToken } from '../../entities/password-reset-token.entity';
@@ -28,8 +25,10 @@ export class TypeOrmPasswordResetRepository
     if (!user) {
       // Security: Don't reveal whether email exists (prevent user enumeration)
       // Return dummy values that won't work but don't expose information
+      // Note: Using constant dummy token to avoid wasteful random generation
       return {
-        token: crypto.randomBytes(32).toString('hex'),
+        token:
+          '0000000000000000000000000000000000000000000000000000000000000000',
         expiresAt: new Date(Date.now() + 3600000),
       };
     }

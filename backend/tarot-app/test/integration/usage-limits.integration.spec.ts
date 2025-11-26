@@ -66,6 +66,8 @@ describe('UsageLimits + Readings Integration Tests', () => {
     authService = moduleFixture.get<AuthOrchestratorService>(
       AuthOrchestratorService,
     );
+    // Note: login() signature changed from login(user, userAgent, ip) to login(userId, email, ip, userAgent)
+    // This is a breaking change for better separation of concerns (primitive types instead of entities)
 
     // Inicializar repositorios
     userRepository = dataSource.getRepository(User);
