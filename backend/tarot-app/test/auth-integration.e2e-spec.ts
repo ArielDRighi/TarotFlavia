@@ -438,7 +438,7 @@ describe('Auth Integration Tests (E2E)', () => {
         .send({
           refreshToken: originalRefreshToken,
         })
-        .expect(201);
+        .expect(200);
 
       // Second refresh with same token (should fail due to rotation)
       await request(app.getHttpServer())
