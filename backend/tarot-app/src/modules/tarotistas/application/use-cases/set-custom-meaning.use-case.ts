@@ -40,7 +40,7 @@ export class SetCustomMeaningUseCase {
     return await this.tarotistaRepo.findAllCardMeanings(tarotistaId);
   }
 
-  async deleteMeaning(tarotistaId: number, cardId: number): Promise<void> {
-    await this.tarotistaRepo.deleteCardMeaning(tarotistaId, cardId);
+  async deleteMeaning(tarotistaId: number, meaningId: number): Promise<void> {
+    await this.tarotistaRepo.deleteCardMeaning(tarotistaId, meaningId);
   }
 }

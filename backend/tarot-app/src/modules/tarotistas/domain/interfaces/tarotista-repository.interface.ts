@@ -51,7 +51,7 @@ export interface ITarotistaRepository {
   upsertCardMeaning(
     data: Partial<TarotistaCardMeaning>,
   ): Promise<TarotistaCardMeaning>;
-  deleteCardMeaning(tarotistaId: number, cardId: number): Promise<void>;
+  deleteCardMeaning(tarotistaId: number, meaningId: number): Promise<void>;
 
   // Applications
   createApplication(

@@ -175,11 +175,11 @@ export class TarotistasOrchestratorService {
 
   async deleteCustomMeaning(
     tarotistaId: number,
-    cardId: number,
+    meaningId: number,
   ): Promise<void> {
     return await this.setCustomMeaningUseCase.deleteMeaning(
       tarotistaId,
-      cardId,
+      meaningId,
     );
   }
 

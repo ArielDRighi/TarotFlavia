@@ -200,15 +200,18 @@ export class TypeOrmTarotistaRepository implements ITarotistaRepository {
     return await this.meaningRepo.save(meaning);
   }
 
-  async deleteCardMeaning(tarotistaId: number, cardId: number): Promise<void> {
+  async deleteCardMeaning(
+    tarotistaId: number,
+    meaningId: number,
+  ): Promise<void> {
     const result = await this.meaningRepo.delete({
+      id: meaningId,
       tarotistaId,
-      cardId,
     });
 
     if (!result.affected || result.affected === 0) {
       throw new NotFoundException(
-        `Custom meaning for card ${cardId} not found for tarotista ${tarotistaId}`,
+        `Custom meaning ${meaningId} not found for tarotista ${tarotistaId}`,
       );
     }
   }
