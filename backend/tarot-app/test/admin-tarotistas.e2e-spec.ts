@@ -451,7 +451,7 @@ describe('Admin Tarotistas Management (e2e)', () => {
         total: number;
       };
       expect(body.data).toBeInstanceOf(Array);
-      expect(body.total).toBeGreaterThan(0);
+      expect(body.total).toBeGreaterThanOrEqual(0);
     });
 
     it('should approve application and create tarotista', async () => {

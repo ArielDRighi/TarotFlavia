@@ -261,9 +261,7 @@ describe('Revenue Sharing and Metrics (e2e)', () => {
 
       expect(response.body).toHaveProperty('filename');
       expect(response.body.filename).toContain('.csv');
-      expect(response.body.filename).toContain(
-        `tarotista-${flaviaTarotistaId}`,
-      );
+      expect(response.body.filename).toContain(`T${flaviaTarotistaId}`);
       expect(response.body).toHaveProperty('content');
       expect(response.body).toHaveProperty('format', 'csv');
 
@@ -289,9 +287,7 @@ describe('Revenue Sharing and Metrics (e2e)', () => {
 
       expect(response.body).toHaveProperty('filename');
       expect(response.body.filename).toContain('.pdf');
-      expect(response.body.filename).toContain(
-        `tarotista-${flaviaTarotistaId}`,
-      );
+      expect(response.body.filename).toContain(`T${flaviaTarotistaId}`);
       expect(response.body).toHaveProperty('content');
       expect(response.body).toHaveProperty('format', 'pdf');
 
@@ -312,7 +308,7 @@ describe('Revenue Sharing and Metrics (e2e)', () => {
         })
         .expect(200);
 
-      expect(response.body.filename).toContain('platform');
+      expect(response.body.filename).toContain('PLATFORM');
       expect(response.body.filename).toContain('.csv');
       expect(response.body.format).toBe('csv');
 
@@ -334,7 +330,7 @@ describe('Revenue Sharing and Metrics (e2e)', () => {
         })
         .expect(200);
 
-      expect(response.body.filename).toContain('platform');
+      expect(response.body.filename).toContain('PLATFORM');
       expect(response.body.filename).toContain('.pdf');
       expect(response.body.format).toBe('pdf');
 
