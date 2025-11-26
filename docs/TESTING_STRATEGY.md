@@ -124,6 +124,31 @@ describe("Readings Integration", () => {
 });
 ```
 
+**Tests de integración existentes:**
+
+- ✅ `test/integration/admin.integration.spec.ts` - Flujos administrativos completos
+- ✅ `test/integration/auth-users.integration.spec.ts` - Autenticación y gestión de usuarios
+- ✅ `test/integration/cache-ai.integration.spec.ts` - Cache de interpretaciones AI
+- ✅ `test/integration/categories-questions.integration.spec.ts` - Categorías y preguntas predefinidas
+- ✅ `test/integration/email.integration.spec.ts` - Envío de emails
+- ✅ `test/integration/readings-interpretations-ai.integration.spec.ts` - Creación de lecturas con AI
+- ✅ `test/integration/usage-limits.integration.spec.ts` - Sistema de límites por plan
+
+**Ejecución:**
+
+```bash
+# Ejecutar solo tests de integración
+npm run test:integration
+
+# Con coverage
+npm run test:integration -- --coverage
+
+# Watch mode (desarrollo)
+npm run test:integration:watch
+```
+
+**Incluidos en CI:** ✅ SÍ - Job dedicado `integration-tests` en paralelo con unit tests (`.github/workflows/ci.yml` Job 4.5)
+
 **Cobertura objetivo:** **70%** de flujos completos
 
 ---

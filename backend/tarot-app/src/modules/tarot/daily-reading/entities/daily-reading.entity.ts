@@ -12,7 +12,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { TarotCard } from '../../cards/entities/tarot-card.entity';
 import { User } from '../../../users/entities/user.entity';
-import { Tarotista } from '../../../tarotistas/entities/tarotista.entity';
+import { Tarotista } from '../../../tarotistas/infrastructure/entities/tarotista.entity';
 
 @Entity('daily_readings')
 @Unique(['userId', 'readingDate', 'tarotistaId'])

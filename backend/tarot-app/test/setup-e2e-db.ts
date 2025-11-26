@@ -73,10 +73,10 @@ export default async function globalSetup() {
     );
     const { User } = await import('../src/modules/users/entities/user.entity');
     const { Tarotista } = await import(
-      '../src/modules/tarotistas/entities/tarotista.entity'
+      '../src/modules/tarotistas/infrastructure/entities/tarotista.entity'
     );
     const { TarotistaConfig } = await import(
-      '../src/modules/tarotistas/entities/tarotista-config.entity'
+      '../src/modules/tarotistas/infrastructure/entities/tarotista-config.entity'
     );
 
     // Execute seeders

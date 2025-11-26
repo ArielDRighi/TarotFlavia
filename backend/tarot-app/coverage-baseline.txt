@@ -1,0 +1,25 @@
+  rate-limit.decorator.ts                               |     100 |    57.14 |     100 |     100 | 51-53                                                                        
+  roles.decorator.ts                                    |     100 |      100 |     100 |     100 |                                                                              
+  sanitize.decorator.ts                                 |   52.27 |       25 |      40 |   52.27 | 11,41-46,65-68,76-80,88-92,101-113                                           
+ src/common/enums                                       |     100 |      100 |     100 |     100 |                                                                              
+  user-role.enum.ts                                     |     100 |      100 |     100 |     100 |                                                                              
+ src/common/filters                                     |   33.33 |        0 |       0 |   23.07 |                                                                              
+  throttler-exception.filter.ts                         |   33.33 |        0 |       0 |   23.07 | 17-35                                                                        
+ src/common/guards                                      |   82.85 |     62.5 |      75 |   81.53 |                                                                              
+  custom-throttler.guard.ts                             |   77.77 |       55 |      60 |   76.92 | 105-107,121-149                                                              
+  roles.guard.ts                                        |     100 |      100 |     100 |     100 |                                                                              
+ src/common/interceptors                                |     100 |    81.25 |     100 |     100 |                                                                              
+--
+
+=============================== Coverage summary ===============================
+Statements   : 79.69% ( 5235/6569 )
+Branches     : 59.85% ( 990/1654 )
+Functions    : 74.72% ( 736/985 )
+Lines        : 79.32% ( 4899/6176 )
+================================================================================
+
+Test Suites: 137 passed, 137 total
+Tests:       10 skipped, 1750 passed, 1760 total
+Snapshots:   0 total
+Time:        221.145 s
+Ran all test suites.

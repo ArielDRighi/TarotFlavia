@@ -17,7 +17,7 @@ import { DecksService } from '../../../decks/decks.service';
 import { PredefinedQuestionsService } from '../../../../predefined-questions/predefined-questions.service';
 import { SubscriptionsService } from '../../../../subscriptions/subscriptions.service';
 import { RevenueCalculationService } from '../../../../tarotistas/services/revenue-calculation.service';
-import { SubscriptionType } from '../../../../tarotistas/entities/user-tarotista-subscription.entity';
+import { SubscriptionType } from '../../../../tarotistas/infrastructure/entities/user-tarotista-subscription.entity';
 
 @Injectable()
 export class CreateReadingUseCase {

@@ -1,5 +1,5 @@
 import { Repository } from 'typeorm';
-import { Tarotista } from '../../modules/tarotistas/entities/tarotista.entity';
+import { Tarotista } from '../../modules/tarotistas/infrastructure/entities/tarotista.entity';
 import { User } from '../../modules/users/entities/user.entity';
 import { flaviaTarotistaData } from './data/flavia-tarotista.data';
 

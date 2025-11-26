@@ -9,7 +9,7 @@ import {
 import {
   SubscriptionType,
   SubscriptionStatus,
-} from '../tarotistas/entities/user-tarotista-subscription.entity';
+} from '../tarotistas/infrastructure/entities/user-tarotista-subscription.entity';
 
 describe('SubscriptionsController', () => {
   let controller: SubscriptionsController;

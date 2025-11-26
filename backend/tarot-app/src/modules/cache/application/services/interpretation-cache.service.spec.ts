@@ -7,8 +7,8 @@ import { Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InterpretationCacheService } from './interpretation-cache.service';
 import { CachedInterpretation } from '../../infrastructure/entities/cached-interpretation.entity';
-import { TarotistaConfig } from '../../../tarotistas/entities/tarotista-config.entity';
-import { TarotistaCardMeaning } from '../../../tarotistas/entities/tarotista-card-meaning.entity';
+import { TarotistaConfig } from '../../../tarotistas/infrastructure/entities/tarotista-config.entity';
+import { TarotistaCardMeaning } from '../../../tarotistas/infrastructure/entities/tarotista-card-meaning.entity';
 
 describe('InterpretationCacheService', () => {
   let service: InterpretationCacheService;

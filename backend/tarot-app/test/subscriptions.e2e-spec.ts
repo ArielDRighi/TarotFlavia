@@ -5,13 +5,13 @@ import { AppModule } from '../src/app.module';
 import { E2EDatabaseHelper } from './helpers/e2e-database.helper';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Tarotista } from '../src/modules/tarotistas/entities/tarotista.entity';
+import { Tarotista } from '../src/modules/tarotistas/infrastructure/entities/tarotista.entity';
 import { User, UserPlan } from '../src/modules/users/entities/user.entity';
 import {
   UserTarotistaSubscription,
   SubscriptionType,
   SubscriptionStatus,
-} from '../src/modules/tarotistas/entities/user-tarotista-subscription.entity';
+} from '../src/modules/tarotistas/infrastructure/entities/user-tarotista-subscription.entity';
 
 /**
  * E2E Tests para Sistema de Suscripciones a Tarotistas

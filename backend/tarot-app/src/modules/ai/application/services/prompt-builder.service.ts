@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
-import { TarotistaConfig } from '../../../tarotistas/entities/tarotista-config.entity';
+import { TarotistaConfig } from '../../../tarotistas/infrastructure/entities/tarotista-config.entity';
 import { TarotCard } from '../../../tarot/cards/entities/tarot-card.entity';
-import { TarotistaCardMeaning } from '../../../tarotistas/entities/tarotista-card-meaning.entity';
-import { Tarotista } from '../../../tarotistas/entities/tarotista.entity';
+import { TarotistaCardMeaning } from '../../../tarotistas/infrastructure/entities/tarotista-card-meaning.entity';
+import { Tarotista } from '../../../tarotistas/infrastructure/entities/tarotista.entity';
 
 interface CardMeaning {
   meaning: string;

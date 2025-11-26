@@ -7,8 +7,8 @@ import { TarotCard } from '../../modules/tarot/cards/entities/tarot-card.entity'
 import { ReadingCategory } from '../../modules/categories/entities/reading-category.entity';
 import { PredefinedQuestion } from '../../modules/predefined-questions/entities/predefined-question.entity';
 import { User } from '../../modules/users/entities/user.entity';
-import { Tarotista } from '../../modules/tarotistas/entities/tarotista.entity';
-import { TarotistaConfig } from '../../modules/tarotistas/entities/tarotista-config.entity';
+import { Tarotista } from '../../modules/tarotistas/infrastructure/entities/tarotista.entity';
+import { TarotistaConfig } from '../../modules/tarotistas/infrastructure/entities/tarotista-config.entity';
 import { seedTarotDecks } from './tarot-decks.seeder';
 import { seedTarotCards } from './tarot-cards.seeder';
 import { seedTarotSpreads } from './tarot-spreads.seeder';

@@ -8,7 +8,7 @@ import {
   JoinColumn,
   Index,
 } from 'typeorm';
-import { Tarotista } from '../../tarotistas/entities/tarotista.entity';
+import { Tarotista } from '../../tarotistas/infrastructure/entities/tarotista.entity';
 import { DayOfWeek } from '../enums';
 
 /**

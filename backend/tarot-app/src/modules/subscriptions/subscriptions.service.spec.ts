@@ -6,9 +6,9 @@ import {
   UserTarotistaSubscription,
   SubscriptionType,
   SubscriptionStatus,
-} from '../tarotistas/entities/user-tarotista-subscription.entity';
+} from '../tarotistas/infrastructure/entities/user-tarotista-subscription.entity';
 import { User, UserPlan } from '../users/entities/user.entity';
-import { Tarotista } from '../tarotistas/entities/tarotista.entity';
+import { Tarotista } from '../tarotistas/infrastructure/entities/tarotista.entity';
 import {
   BadRequestException,
   NotFoundException,

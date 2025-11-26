@@ -74,14 +74,39 @@ describe('InterpretationsService', () => {
 
 ### 2. Integration Tests (E2E con DB real)
 
-**Ubicación:** `test/*-integration.e2e-spec.ts`
+**Ubicación:** `test/integration/*.spec.ts`
 
-**Propósito:** Testear flujos completos con base de datos REAL
+**Propósito:** Testear flujos completos entre múltiples servicios con base de datos REAL
+
+**Tests existentes:**
+
+- ✅ `test/integration/admin.integration.spec.ts` - Flujos administrativos completos
+- ✅ `test/integration/auth-users.integration.spec.ts` - Autenticación y gestión de usuarios
+- ✅ `test/integration/cache-ai.integration.spec.ts` - Cache de interpretaciones AI
+- ✅ `test/integration/categories-questions.integration.spec.ts` - Categorías y preguntas predefinidas
+- ✅ `test/integration/email.integration.spec.ts` - Envío de emails
+- ✅ `test/integration/readings-interpretations-ai.integration.spec.ts` - Creación de lecturas con AI
+- ✅ `test/integration/usage-limits.integration.spec.ts` - Sistema de límites por plan
+
+**Ejecución:**
+
+```bash
+# Ejecutar solo tests de integración
+npm run test:integration
+
+# Con coverage
+npm run test:integration -- --coverage
+
+# Watch mode (desarrollo)
+npm run test:integration:watch
+```
+
+**CI/CD:** ✅ Incluidos en pipeline - Job dedicado `integration-tests` en `.github/workflows/ci.yml`
 
 **Ejemplo:**
 
 ```typescript
-// test/auth-integration.e2e-spec.ts
+// test/integration/auth-users.integration.spec.ts
 describe('Auth Integration (e2e)', () => {
   let app: INestApplication;
 
