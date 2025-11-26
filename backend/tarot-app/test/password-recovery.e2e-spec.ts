@@ -249,7 +249,7 @@ describe('Password Recovery (e2e)', () => {
       await request(app.getHttpServer())
         .post('/auth/forgot-password')
         .send({ email: 'nonexistent@example.com' })
-        .expect(404);
+        .expect(200);
     });
 
     it('should validate password strength on reset', async () => {

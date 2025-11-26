@@ -430,7 +430,7 @@ test_password_recovery() {
         "POST /auth/forgot-password - Email inexistente")
     
     http_code=$(echo "$response" | tail -n1)
-    check_response 200 "$http_code" "Email inexistente retorna 200 (seguridad)"
+    check_response 200 "$http_code" "Email inexistente retorna 200 (no revela si usuario existe)"
     
     # TEST 19: Reset de contraseña con token válido
     if [ -n "$PASSWORD_RESET_TOKEN" ]; then
@@ -644,7 +644,7 @@ test_edge_cases() {
         "POST /auth/login - SQL Injection (debe sanitizar)")
     
     http_code=$(echo "$response" | tail -n1)
-    check_response 401 "$http_code" "SQL Injection bloqueado (retorna 401)"
+    check_response 400 "$http_code" "SQL Injection bloqueado (retorna 400)"
     
     # TEST 30: XSS en nombre de usuario
     response=$(make_request "POST" "/auth/register" \

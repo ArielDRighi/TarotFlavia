@@ -186,6 +186,7 @@ export class AuthController {
   }
 
   @Post('refresh')
+  @HttpCode(200)
   @ApiOperation({
     summary: 'Refrescar token de acceso',
     description:
@@ -248,6 +249,7 @@ export class AuthController {
   }
 
   @Post('logout')
+  @HttpCode(200)
   @ApiOperation({
     summary: 'Cerrar sesión (revocar refresh token actual)',
     description:
@@ -294,6 +296,7 @@ export class AuthController {
   }
 
   @Post('logout-all')
+  @HttpCode(200)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({

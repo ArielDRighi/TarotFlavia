@@ -27,7 +27,12 @@ export class TypeOrmPasswordResetRepository
     // Verify that user exists
     const user = await this.usersService.findByEmail(email);
     if (!user) {
-      throw new NotFoundException('User not found');
+      // Security: Don't reveal whether email exists (prevent user enumeration)
+      // Return dummy values that won't work but don't expose information
+      return {
+        token: crypto.randomBytes(32).toString('hex'),
+        expiresAt: new Date(Date.now() + 3600000),
+      };
     }
 
     // Generate random 32-byte token
