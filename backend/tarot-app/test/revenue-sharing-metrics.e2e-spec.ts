@@ -263,7 +263,7 @@ describe('Revenue Sharing and Metrics (e2e)', () => {
       expect(response.body.filename).toContain('.csv');
       expect(response.body.filename).toContain(`T${flaviaTarotistaId}`);
       expect(response.body).toHaveProperty('content');
-      expect(response.body).toHaveProperty('format', 'csv');
+      expect(response.body).toHaveProperty('mimeType', 'text/csv');
 
       // Verify CSV content
       const csvContent = Buffer.from(response.body.content, 'base64').toString(
@@ -289,7 +289,7 @@ describe('Revenue Sharing and Metrics (e2e)', () => {
       expect(response.body.filename).toContain('.pdf');
       expect(response.body.filename).toContain(`T${flaviaTarotistaId}`);
       expect(response.body).toHaveProperty('content');
-      expect(response.body).toHaveProperty('format', 'pdf');
+      expect(response.body).toHaveProperty('mimeType', 'application/pdf');
 
       // Decode base64 and verify PDF header
       const pdfContent = Buffer.from(response.body.content, 'base64').toString(
@@ -310,7 +310,7 @@ describe('Revenue Sharing and Metrics (e2e)', () => {
 
       expect(response.body.filename).toContain('PLATFORM');
       expect(response.body.filename).toContain('.csv');
-      expect(response.body.format).toBe('csv');
+      expect(response.body.mimeType).toBe('text/csv');
 
       // Verify CSV content structure
       const csvContent = Buffer.from(response.body.content, 'base64').toString(
@@ -332,7 +332,7 @@ describe('Revenue Sharing and Metrics (e2e)', () => {
 
       expect(response.body.filename).toContain('PLATFORM');
       expect(response.body.filename).toContain('.pdf');
-      expect(response.body.format).toBe('pdf');
+      expect(response.body.mimeType).toBe('application/pdf');
 
       // Verify PDF header
       const pdfContent = Buffer.from(response.body.content, 'base64').toString(
