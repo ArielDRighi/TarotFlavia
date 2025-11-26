@@ -6,13 +6,13 @@ import {
   TarotistaFindOptions,
 } from '../../domain/interfaces/tarotista-repository.interface';
 import { GetPublicTarotistasFilterDto } from '../../application/dto';
-import { Tarotista } from '../entities/tarotista.entity';
-import { TarotistaConfig } from '../entities/tarotista-config.entity';
-import { TarotistaCardMeaning } from '../entities/tarotista-card-meaning.entity';
+import { Tarotista } from '../../entities/tarotista.entity';
+import { TarotistaConfig } from '../../entities/tarotista-config.entity';
+import { TarotistaCardMeaning } from '../../entities/tarotista-card-meaning.entity';
 import {
   TarotistaApplication,
   ApplicationStatus,
-} from '../entities/tarotista-application.entity';
+} from '../../entities/tarotista-application.entity';
 
 /**
  * TypeORM implementation of ITarotistaRepository

@@ -10,7 +10,7 @@ import { AuthService } from '../../src/modules/auth/auth.service';
 
 // Entities
 import { User, UserPlan } from '../../src/modules/users/entities/user.entity';
-import { Tarotista } from '../../src/modules/tarotistas/infrastructure/entities/tarotista.entity';
+import { Tarotista } from '../../src/modules/tarotistas/entities/tarotista.entity';
 import { TarotDeck } from '../../src/modules/tarot/decks/entities/tarot-deck.entity';
 import { TarotCard } from '../../src/modules/tarot/cards/entities/tarot-card.entity';
 import { TarotSpread } from '../../src/modules/tarot/spreads/entities/tarot-spread.entity';

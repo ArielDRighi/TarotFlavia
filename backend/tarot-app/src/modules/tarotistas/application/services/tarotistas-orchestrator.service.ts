@@ -16,10 +16,10 @@ import { GetPublicProfileUseCase } from '../use-cases/get-public-profile.use-cas
 import { GetTarotistaMetricsUseCase } from '../use-cases/get-tarotista-metrics.use-case';
 import { GetPlatformMetricsUseCase } from '../use-cases/get-platform-metrics.use-case';
 import { GenerateReportUseCase } from '../use-cases/generate-report.use-case';
-import { Tarotista } from '../../infrastructure/entities/tarotista.entity';
-import { TarotistaApplication } from '../../infrastructure/entities/tarotista-application.entity';
-import { TarotistaConfig } from '../../infrastructure/entities/tarotista-config.entity';
-import { TarotistaCardMeaning } from '../../infrastructure/entities/tarotista-card-meaning.entity';
+import { Tarotista } from '../../entities/tarotista.entity';
+import { TarotistaApplication } from '../../entities/tarotista-application.entity';
+import { TarotistaConfig } from '../../entities/tarotista-config.entity';
+import { TarotistaCardMeaning } from '../../entities/tarotista-card-meaning.entity';
 import { CreateTarotistaDto } from '../dto/create-tarotista.dto';
 import { GetTarotistasFilterDto } from '../dto/get-tarotistas-filter.dto';
 import { UpdateTarotistaConfigDto } from '../dto/update-tarotista-config.dto';

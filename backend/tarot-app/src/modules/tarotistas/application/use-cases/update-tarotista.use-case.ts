@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { ITarotistaRepository } from '../../domain/interfaces/tarotista-repository.interface';
 import { UpdateTarotistaDto } from '../dto/update-tarotista.dto';
-import { Tarotista } from '../../infrastructure/entities/tarotista.entity';
+import { Tarotista } from '../../entities/tarotista.entity';
 
 /**
  * Use Case: Update Tarotista Information

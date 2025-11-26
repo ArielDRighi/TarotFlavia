@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TarotistasPublicController } from './tarotistas-public.controller';
 import { TarotistasOrchestratorService } from '../../application/services/tarotistas-orchestrator.service';
 import { GetPublicTarotistasFilterDto } from '../../application/dto';
-import { Tarotista } from '../entities/tarotista.entity';
+import { Tarotista } from '../../entities/tarotista.entity';
 
 describe('TarotistasPublicController', () => {
   let controller: TarotistasPublicController;

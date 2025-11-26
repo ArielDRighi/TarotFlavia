@@ -2,14 +2,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RevenueCalculationService } from './revenue-calculation.service';
-import { TarotistaRevenueMetrics } from '../infrastructure/entities/tarotista-revenue-metrics.entity';
-import { Tarotista } from '../infrastructure/entities/tarotista.entity';
+import { TarotistaRevenueMetrics } from '../entities/tarotista-revenue-metrics.entity';
+import { Tarotista } from '../entities/tarotista.entity';
 import { User } from '../../users/entities/user.entity';
 import {
   CalculateRevenueDto,
   RevenueCalculationResponseDto,
 } from '../application/dto/revenue-calculation.dto';
-import { SubscriptionType } from '../infrastructure/entities/user-tarotista-subscription.entity';
+import { SubscriptionType } from '../entities/user-tarotista-subscription.entity';
 import { NotFoundException } from '@nestjs/common';
 
 describe('RevenueCalculationService', () => {

@@ -8,12 +8,12 @@ import { ReportsController } from './infrastructure/controllers/reports.controll
 import { TarotistasPublicController } from './infrastructure/controllers/tarotistas-public.controller';
 
 // ==================== Entities ====================
-import { TarotistaConfig } from './infrastructure/entities/tarotista-config.entity';
-import { TarotistaCardMeaning } from './infrastructure/entities/tarotista-card-meaning.entity';
-import { TarotistaApplication } from './infrastructure/entities/tarotista-application.entity';
-import { Tarotista } from './infrastructure/entities/tarotista.entity';
-import { TarotistaRevenueMetrics } from './infrastructure/entities/tarotista-revenue-metrics.entity';
-import { UserTarotistaSubscription } from './infrastructure/entities/user-tarotista-subscription.entity';
+import { TarotistaConfig } from './entities/tarotista-config.entity';
+import { TarotistaCardMeaning } from './entities/tarotista-card-meaning.entity';
+import { TarotistaApplication } from './entities/tarotista-application.entity';
+import { Tarotista } from './entities/tarotista.entity';
+import { TarotistaRevenueMetrics } from './entities/tarotista-revenue-metrics.entity';
+import { UserTarotistaSubscription } from './entities/user-tarotista-subscription.entity';
 import { User } from '../users/entities/user.entity';
 import { TarotReading } from '../tarot/readings/entities/tarot-reading.entity';
 

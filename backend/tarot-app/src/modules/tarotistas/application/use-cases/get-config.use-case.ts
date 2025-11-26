@@ -1,6 +1,6 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { ITarotistaRepository } from '../../domain/interfaces/tarotista-repository.interface';
-import { TarotistaConfig } from '../../infrastructure/entities/tarotista-config.entity';
+import { TarotistaConfig } from '../../entities/tarotista-config.entity';
 
 /**
  * Use Case: Get Tarotista Configuration

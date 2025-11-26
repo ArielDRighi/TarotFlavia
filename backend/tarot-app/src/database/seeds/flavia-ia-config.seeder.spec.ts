@@ -1,6 +1,6 @@
 import { Repository } from 'typeorm';
-import { TarotistaConfig } from '../../modules/tarotistas/infrastructure/entities/tarotista-config.entity';
-import { Tarotista } from '../../modules/tarotistas/infrastructure/entities/tarotista.entity';
+import { TarotistaConfig } from '../../modules/tarotistas/entities/tarotista-config.entity';
+import { Tarotista } from '../../modules/tarotistas/entities/tarotista.entity';
 import { seedFlaviaIAConfig } from './flavia-ia-config.seeder';
 import { flaviaIAConfigData } from './data/flavia-ia-config.data';
 

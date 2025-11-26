@@ -6,7 +6,7 @@ import { DataSource } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import { UserRole } from '../src/common/enums/user-role.enum';
 import { UserPlan } from '../src/modules/users/entities/user.entity';
-import { ApplicationStatus } from '../src/modules/tarotistas/infrastructure/entities/tarotista-application.entity';
+import { ApplicationStatus } from '../src/modules/tarotistas/entities/tarotista-application.entity';
 
 const TEST_DOMAIN = 'test-admin-tarotistas.com';
 

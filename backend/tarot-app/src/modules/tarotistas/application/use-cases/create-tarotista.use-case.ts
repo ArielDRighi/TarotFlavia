@@ -1,7 +1,7 @@
 import { Injectable, BadRequestException, Inject } from '@nestjs/common';
 import { ITarotistaRepository } from '../../domain/interfaces/tarotista-repository.interface';
 import { CreateTarotistaDto } from '../dto/create-tarotista.dto';
-import { Tarotista } from '../../infrastructure/entities/tarotista.entity';
+import { Tarotista } from '../../entities/tarotista.entity';
 
 /**
  * Use Case: Create a new Tarotista

@@ -20,7 +20,7 @@
     "test:cov:summary": "jest --coverage --no-watchman --all --coverageReporters=text-summary",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand --no-watchman --all",
     "test:unit": "jest --no-watchman --testPathIgnorePatterns=test/integration",
-    "test:integration": "jest --no-watchman --testPathPattern=test/integration --coverageDirectory=./coverage-integration",
+    "test:integration": "jest --no-watchman --testPathPattern=test/integration --coverageDirectory=./coverage-integration --coverage --coverageThreshold={}",
     "test:integration:watch": "jest --watch --no-watchman --testPathPattern=test/integration",
     "test:e2e": "jest --config ./test/jest-e2e.json --no-watchman",
     "test:e2e:watch": "jest --config ./test/jest-e2e.json --watch --no-watchman",
