@@ -3,7 +3,7 @@ import {
   SubscriptionType,
   SubscriptionStatus,
 } from './user-tarotista-subscription.entity';
-import { User } from '../../users/entities/user.entity';
+import { User } from '../../../users/entities/user.entity';
 import { Tarotista } from './tarotista.entity';
 
 describe('UserTarotistaSubscription Entity', () => {

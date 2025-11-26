@@ -1,6 +1,6 @@
 import { DataSource } from 'typeorm';
 import { User } from '../../src/modules/users/entities/user.entity';
-import { Tarotista } from '../../src/modules/tarotistas/entities/tarotista.entity';
+import { Tarotista } from '../../src/modules/tarotistas/infrastructure/entities/tarotista.entity';
 import { UsersService } from '../../src/modules/users/users.service';
 
 /**

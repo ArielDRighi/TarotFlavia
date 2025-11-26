@@ -18,7 +18,7 @@ import { TarotCard } from '../../src/modules/tarot/cards/entities/tarot-card.ent
 import { TarotSpread } from '../../src/modules/tarot/spreads/entities/tarot-spread.entity';
 import { TarotDeck } from '../../src/modules/tarot/decks/entities/tarot-deck.entity';
 import { TarotInterpretation } from '../../src/modules/tarot/interpretations/entities/tarot-interpretation.entity';
-import { Tarotista } from '../../src/modules/tarotistas/entities/tarotista.entity';
+import { Tarotista } from '../../src/modules/tarotistas/infrastructure/entities/tarotista.entity';
 import { setupDefaultTarotista } from '../helpers/setup-default-tarotista';
 
 describe('Readings + Interpretations + AI Integration Tests', () => {

@@ -5,13 +5,14 @@ import {
   ITarotistaRepository,
   TarotistaFindOptions,
 } from '../../domain/interfaces/tarotista-repository.interface';
-import { Tarotista } from '../../entities/tarotista.entity';
-import { TarotistaConfig } from '../../entities/tarotista-config.entity';
-import { TarotistaCardMeaning } from '../../entities/tarotista-card-meaning.entity';
+import { GetPublicTarotistasFilterDto } from '../../application/dto';
+import { Tarotista } from '../entities/tarotista.entity';
+import { TarotistaConfig } from '../entities/tarotista-config.entity';
+import { TarotistaCardMeaning } from '../entities/tarotista-card-meaning.entity';
 import {
   TarotistaApplication,
   ApplicationStatus,
-} from '../../entities/tarotista-application.entity';
+} from '../entities/tarotista-application.entity';
 
 /**
  * TypeORM implementation of ITarotistaRepository
@@ -263,6 +264,86 @@ export class TypeOrmTarotistaRepository implements ITarotistaRepository {
     application.reviewedAt = new Date();
 
     return await this.applicationRepo.save(application);
+  }
+
+  // ==================== Public Endpoints ====================
+
+  async findAllPublic(filterDto: GetPublicTarotistasFilterDto): Promise<{
+    data: Tarotista[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }> {
+    const page = filterDto.page ?? 1;
+    const limit = filterDto.limit ?? 20;
+    const search = filterDto.search;
+    const especialidad = filterDto.especialidad;
+    const orderBy = filterDto.orderBy ?? 'createdAt';
+    const order = filterDto.order ?? 'DESC';
+
+    const skip = (page - 1) * limit;
+
+    const queryBuilder = this.tarotistaRepo.createQueryBuilder('tarotista');
+
+    // Only show active tarotistas
+    queryBuilder.where('tarotista.isActive = :isActive', { isActive: true });
+
+    // Search filter (nombrePublico or bio)
+    if (search) {
+      // Escape special characters to prevent SQL injection
+      const escapedSearch = search.replace(/[%_]/g, '\\$&');
+      queryBuilder.andWhere(
+        '(LOWER(tarotista.nombrePublico) LIKE LOWER(:search) OR LOWER(tarotista.bio) LIKE LOWER(:search))',
+        { search: `%${escapedSearch}%` },
+      );
+    }
+
+    // Especialidad filter (array contains)
+    if (especialidad) {
+      queryBuilder.andWhere(':especialidad = ANY(tarotista.especialidades)', {
+        especialidad,
+      });
+    }
+
+    // Sorting
+    const orderByField = this.getOrderByFieldPublic(orderBy);
+    queryBuilder.orderBy(orderByField, order, 'NULLS LAST');
+
+    // Pagination
+    queryBuilder.skip(skip).take(limit);
+
+    const [data, total] = await queryBuilder.getManyAndCount();
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  async findPublicProfile(id: number): Promise<Tarotista | null> {
+    const queryBuilder = this.tarotistaRepo.createQueryBuilder('tarotista');
+
+    queryBuilder.where(
+      'tarotista.id = :id AND tarotista.isActive = :isActive',
+      { id, isActive: true },
+    );
+
+    return await queryBuilder.getOne();
+  }
+
+  private getOrderByFieldPublic(orderBy: string): string {
+    const orderByMap: Record<string, string> = {
+      rating: 'tarotista.ratingPromedio',
+      totalLecturas: 'tarotista.totalLecturas',
+      nombrePublico: 'tarotista.nombrePublico',
+      createdAt: 'tarotista.createdAt',
+    };
+
+    return orderByMap[orderBy] || 'tarotista.createdAt';
   }
 
   // ==================== Utility ====================

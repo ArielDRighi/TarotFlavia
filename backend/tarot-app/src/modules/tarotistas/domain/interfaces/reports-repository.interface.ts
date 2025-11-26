@@ -1,8 +1,17 @@
+import { ExportReportDto } from '../../application/dto/report-export.dto';
+
 /**
  * Interface for Reports repository operations
  * Handles report generation and export
  */
 export interface IReportsRepository {
+  // Main report endpoint
+  generateReport(dto: ExportReportDto): Promise<{
+    filename: string;
+    content: string;
+    mimeType: string;
+  }>;
+
   // Report generation
   generateTarotistaReport(
     tarotistaId: number,

@@ -1,13 +1,13 @@
 import { Controller, Post, Body, UseGuards, HttpCode } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { ReportsService } from '../services/reports.service';
-import { ExportReportDto } from '../dto/report-export.dto';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { TarotistasOrchestratorService } from '../../application/services/tarotistas-orchestrator.service';
+import { ExportReportDto } from '../../application/dto';
+import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
 
 @ApiTags('Tarotistas - Reports')
 @Controller('tarotistas/reports')
 export class ReportsController {
-  constructor(private readonly reportsService: ReportsService) {}
+  constructor(private readonly orchestrator: TarotistasOrchestratorService) {}
 
   @Post('export')
   @HttpCode(200)
@@ -30,6 +30,6 @@ export class ReportsController {
     description: 'Tarotista not found',
   })
   async exportReport(@Body() dto: ExportReportDto) {
-    return this.reportsService.generateReport(dto);
+    return this.orchestrator.generateReport(dto);
   }
 }

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsPositive, IsEnum, Min, IsOptional } from 'class-validator';
-import { SubscriptionType } from '../entities/user-tarotista-subscription.entity';
+import { SubscriptionType } from '../../infrastructure/entities/user-tarotista-subscription.entity';
 
 /**
  * DTO para calcular revenue de una lectura específica

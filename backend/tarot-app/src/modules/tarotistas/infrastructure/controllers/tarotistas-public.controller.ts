@@ -13,16 +13,14 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import { TarotistasPublicService } from '../services/tarotistas-public.service';
-import { GetPublicTarotistasFilterDto } from '../dto';
+import { TarotistasOrchestratorService } from '../../application/services/tarotistas-orchestrator.service';
+import { GetPublicTarotistasFilterDto } from '../../application/dto';
 import { Tarotista } from '../entities/tarotista.entity';
 
 @ApiTags('Tarotistas Públicos')
 @Controller('tarotistas')
 export class TarotistasPublicController {
-  constructor(
-    private readonly tarotistasPublicService: TarotistasPublicService,
-  ) {}
+  constructor(private readonly orchestrator: TarotistasOrchestratorService) {}
 
   @Get()
   @ApiOperation({
@@ -47,7 +45,7 @@ export class TarotistasPublicController {
     limit: number;
     totalPages: number;
   }> {
-    return await this.tarotistasPublicService.getAllPublic(filterDto);
+    return await this.orchestrator.listPublicTarotistas(filterDto);
   }
 
   @Get(':id')
@@ -67,7 +65,7 @@ export class TarotistasPublicController {
   async getPublicProfile(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<Tarotista> {
-    const tarotista = await this.tarotistasPublicService.getPublicProfile(id);
+    const tarotista = await this.orchestrator.getPublicProfile(id);
 
     if (!tarotista) {
       throw new NotFoundException('Tarotista no encontrado o inactivo');

@@ -19,11 +19,11 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../../../common/guards/roles.guard';
-import { Roles } from '../../../common/decorators/roles.decorator';
-import { UserRole } from '../../../common/enums/user-role.enum';
-import { TarotistasOrchestratorService } from '../application/services/tarotistas-orchestrator.service';
+import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../../../../common/guards/roles.guard';
+import { Roles } from '../../../../common/decorators/roles.decorator';
+import { UserRole } from '../../../../common/enums/user-role.enum';
+import { TarotistasOrchestratorService } from '../../application/services/tarotistas-orchestrator.service';
 import {
   CreateTarotistaDto,
   UpdateTarotistaDto,
@@ -33,7 +33,7 @@ import {
   ApproveApplicationDto,
   RejectApplicationDto,
   GetTarotistasFilterDto,
-} from '../dto';
+} from '../../application/dto';
 
 @ApiTags('Admin - Tarotistas')
 @ApiBearerAuth()

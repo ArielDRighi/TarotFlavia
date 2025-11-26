@@ -1,14 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { TarotistaRevenueMetrics } from '../entities/tarotista-revenue-metrics.entity';
-import { Tarotista } from '../entities/tarotista.entity';
+import { TarotistaRevenueMetrics } from '../infrastructure/entities/tarotista-revenue-metrics.entity';
+import { Tarotista } from '../infrastructure/entities/tarotista.entity';
 import { User } from '../../users/entities/user.entity';
 import {
   CalculateRevenueDto,
   RevenueCalculationResponseDto,
-} from '../dto/revenue-calculation.dto';
-import { SubscriptionType } from '../entities/user-tarotista-subscription.entity';
+} from '../application/dto/revenue-calculation.dto';
+import { SubscriptionType } from '../infrastructure/entities/user-tarotista-subscription.entity';
 
 @Injectable()
 export class RevenueCalculationService {

@@ -1,10 +1,11 @@
-import { Tarotista } from '../../entities/tarotista.entity';
-import { TarotistaConfig } from '../../entities/tarotista-config.entity';
-import { TarotistaCardMeaning } from '../../entities/tarotista-card-meaning.entity';
+import { Tarotista } from '../../infrastructure/entities/tarotista.entity';
+import { TarotistaConfig } from '../../infrastructure/entities/tarotista-config.entity';
+import { TarotistaCardMeaning } from '../../infrastructure/entities/tarotista-card-meaning.entity';
 import {
   TarotistaApplication,
   ApplicationStatus,
-} from '../../entities/tarotista-application.entity';
+} from '../../infrastructure/entities/tarotista-application.entity';
+import { GetPublicTarotistasFilterDto } from '../../application/dto';
 
 /**
  * Interface for Tarotista repository operations
@@ -22,6 +23,16 @@ export interface ITarotistaRepository {
   create(data: Partial<Tarotista>): Promise<Tarotista>;
   update(id: number, data: Partial<Tarotista>): Promise<Tarotista>;
   delete(id: number): Promise<void>;
+
+  // Public endpoints
+  findAllPublic(filterDto: GetPublicTarotistasFilterDto): Promise<{
+    data: Tarotista[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }>;
+  findPublicProfile(id: number): Promise<Tarotista | null>;
 
   // Config operations
   findConfigByTarotistaId(tarotistaId: number): Promise<TarotistaConfig | null>;

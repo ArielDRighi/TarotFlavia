@@ -85,7 +85,7 @@ describe('RevenueCalculationService', () => {
 
       jest
         .spyOn(tarotistaRepository, 'findOne')
-        .mockResolvedValue(mockTarotista as Tarotista);
+        .mockResolvedValue(mockTarotista);
 
       const result: RevenueCalculationResponseDto =
         await service.calculateRevenue(dto);
@@ -146,7 +146,7 @@ describe('RevenueCalculationService', () => {
 
       jest
         .spyOn(tarotistaRepository, 'findOne')
-        .mockResolvedValue(mockTarotista as Tarotista);
+        .mockResolvedValue(mockTarotista);
 
       const result = await service.calculateRevenue(dto);
 
@@ -165,7 +165,7 @@ describe('RevenueCalculationService', () => {
 
       jest
         .spyOn(tarotistaRepository, 'findOne')
-        .mockResolvedValue(mockTarotista as Tarotista);
+        .mockResolvedValue(mockTarotista);
 
       const result = await service.calculateRevenue(dto);
 
@@ -190,7 +190,7 @@ describe('RevenueCalculationService', () => {
 
       jest
         .spyOn(tarotistaRepository, 'findOne')
-        .mockResolvedValue(mockTarotista as Tarotista);
+        .mockResolvedValue(mockTarotista);
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser as User);
 
       const mockRevenueMetric: Partial<TarotistaRevenueMetrics> = {
@@ -209,10 +209,10 @@ describe('RevenueCalculationService', () => {
 
       jest
         .spyOn(revenueMetricsRepository, 'create')
-        .mockReturnValue(mockRevenueMetric as TarotistaRevenueMetrics);
+        .mockReturnValue(mockRevenueMetric);
       jest
         .spyOn(revenueMetricsRepository, 'save')
-        .mockResolvedValue(mockRevenueMetric as TarotistaRevenueMetrics);
+        .mockResolvedValue(mockRevenueMetric);
 
       const result = await service.recordRevenue(dto);
 
@@ -235,7 +235,7 @@ describe('RevenueCalculationService', () => {
 
       jest
         .spyOn(tarotistaRepository, 'findOne')
-        .mockResolvedValue(mockTarotista as Tarotista);
+        .mockResolvedValue(mockTarotista);
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
 
       await expect(service.recordRevenue(dto)).rejects.toThrow(
@@ -254,7 +254,7 @@ describe('RevenueCalculationService', () => {
 
       jest
         .spyOn(tarotistaRepository, 'findOne')
-        .mockResolvedValue(mockTarotista as Tarotista);
+        .mockResolvedValue(mockTarotista);
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser as User);
 
       const mockRevenueMetric: Partial<TarotistaRevenueMetrics> = {
@@ -273,10 +273,10 @@ describe('RevenueCalculationService', () => {
 
       jest
         .spyOn(revenueMetricsRepository, 'create')
-        .mockReturnValue(mockRevenueMetric as TarotistaRevenueMetrics);
+        .mockReturnValue(mockRevenueMetric);
       jest
         .spyOn(revenueMetricsRepository, 'save')
-        .mockResolvedValue(mockRevenueMetric as TarotistaRevenueMetrics);
+        .mockResolvedValue(mockRevenueMetric);
 
       const result = await service.recordRevenue(dto);
 
@@ -294,7 +294,7 @@ describe('RevenueCalculationService', () => {
 
       jest
         .spyOn(tarotistaRepository, 'findOne')
-        .mockResolvedValue(mockTarotista as Tarotista);
+        .mockResolvedValue(mockTarotista);
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser as User);
 
       const mockRevenueMetric: Partial<TarotistaRevenueMetrics> = {
@@ -325,10 +325,10 @@ describe('RevenueCalculationService', () => {
 
       jest
         .spyOn(revenueMetricsRepository, 'create')
-        .mockReturnValue(mockRevenueMetric as TarotistaRevenueMetrics);
+        .mockReturnValue(mockRevenueMetric);
       jest
         .spyOn(revenueMetricsRepository, 'save')
-        .mockResolvedValue(mockRevenueMetric as TarotistaRevenueMetrics);
+        .mockResolvedValue(mockRevenueMetric);
 
       const result = await service.recordRevenue(dto);
 
@@ -355,7 +355,7 @@ describe('RevenueCalculationService', () => {
 
       jest
         .spyOn(tarotistaRepository, 'findOne')
-        .mockResolvedValue(mockTarotista as Tarotista);
+        .mockResolvedValue(mockTarotista);
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser as User);
 
       const mockRevenueMetric: Partial<TarotistaRevenueMetrics> = {
@@ -374,10 +374,10 @@ describe('RevenueCalculationService', () => {
 
       jest
         .spyOn(revenueMetricsRepository, 'create')
-        .mockReturnValue(mockRevenueMetric as TarotistaRevenueMetrics);
+        .mockReturnValue(mockRevenueMetric);
       jest
         .spyOn(revenueMetricsRepository, 'save')
-        .mockResolvedValue(mockRevenueMetric as TarotistaRevenueMetrics);
+        .mockResolvedValue(mockRevenueMetric);
 
       const result = await service.calculateRevenueForReading(
         readingId,

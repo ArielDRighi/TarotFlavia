@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
 import { CreateTarotistaUseCase } from './create-tarotista.use-case';
-import { CreateTarotistaDto } from '../../dto/create-tarotista.dto';
+import { CreateTarotistaDto } from '../dto/create-tarotista.dto';
 
 describe('CreateTarotistaUseCase', () => {
   let useCase: CreateTarotistaUseCase;

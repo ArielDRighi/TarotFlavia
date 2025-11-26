@@ -1,25 +1,19 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-// ==================== Old Structure (PRESERVING) ====================
-import { TarotistasService } from './tarotistas.service';
-import { TarotistasAdminService } from './services/tarotistas-admin.service';
-import { TarotistasPublicService } from './services/tarotistas-public.service';
-import { RevenueCalculationService } from './services/revenue-calculation.service';
-import { MetricsService } from './services/metrics.service';
-import { ReportsService } from './services/reports.service';
-import { TarotistasAdminController } from './controllers/tarotistas-admin.controller';
-import { TarotistasPublicController } from './controllers/tarotistas-public.controller';
-import { MetricsController } from './controllers/metrics.controller';
-import { ReportsController } from './controllers/reports.controller';
+// ==================== Controllers ====================
+import { TarotistasAdminController } from './infrastructure/controllers/tarotistas-admin.controller';
+import { MetricsController } from './infrastructure/controllers/metrics.controller';
+import { ReportsController } from './infrastructure/controllers/reports.controller';
+import { TarotistasPublicController } from './infrastructure/controllers/tarotistas-public.controller';
 
 // ==================== Entities ====================
-import { TarotistaConfig } from './entities/tarotista-config.entity';
-import { TarotistaCardMeaning } from './entities/tarotista-card-meaning.entity';
-import { TarotistaApplication } from './entities/tarotista-application.entity';
-import { Tarotista } from './entities/tarotista.entity';
-import { TarotistaRevenueMetrics } from './entities/tarotista-revenue-metrics.entity';
-import { UserTarotistaSubscription } from './entities/user-tarotista-subscription.entity';
+import { TarotistaConfig } from './infrastructure/entities/tarotista-config.entity';
+import { TarotistaCardMeaning } from './infrastructure/entities/tarotista-card-meaning.entity';
+import { TarotistaApplication } from './infrastructure/entities/tarotista-application.entity';
+import { Tarotista } from './infrastructure/entities/tarotista.entity';
+import { TarotistaRevenueMetrics } from './infrastructure/entities/tarotista-revenue-metrics.entity';
+import { UserTarotistaSubscription } from './infrastructure/entities/user-tarotista-subscription.entity';
 import { User } from '../users/entities/user.entity';
 import { TarotReading } from '../tarot/readings/entities/tarot-reading.entity';
 
@@ -27,6 +21,7 @@ import { TarotReading } from '../tarot/readings/entities/tarot-reading.entity';
 // Repositories
 import { TypeOrmTarotistaRepository } from './infrastructure/repositories/typeorm-tarotista.repository';
 import { TypeOrmMetricsRepository } from './infrastructure/repositories/typeorm-metrics.repository';
+import { TypeOrmReportsRepository } from './infrastructure/repositories/typeorm-reports.repository';
 
 // Use Cases
 import { CreateTarotistaUseCase } from './application/use-cases/create-tarotista.use-case';
@@ -37,6 +32,15 @@ import { ApproveApplicationUseCase } from './application/use-cases/approve-appli
 import { RejectApplicationUseCase } from './application/use-cases/reject-application.use-case';
 import { ToggleActiveStatusUseCase } from './application/use-cases/toggle-active-status.use-case';
 import { GetTarotistaDetailsUseCase } from './application/use-cases/get-tarotista-details.use-case';
+import { UpdateTarotistaUseCase } from './application/use-cases/update-tarotista.use-case';
+import { GetConfigUseCase } from './application/use-cases/get-config.use-case';
+import { ListApplicationsUseCase } from './application/use-cases/list-applications.use-case';
+import { BulkImportMeaningsUseCase } from './application/use-cases/bulk-import-meanings.use-case';
+import { ListPublicTarotistasUseCase } from './application/use-cases/list-public-tarotistas.use-case';
+import { GetPublicProfileUseCase } from './application/use-cases/get-public-profile.use-case';
+import { GetTarotistaMetricsUseCase } from './application/use-cases/get-tarotista-metrics.use-case';
+import { GetPlatformMetricsUseCase } from './application/use-cases/get-platform-metrics.use-case';
+import { GenerateReportUseCase } from './application/use-cases/generate-report.use-case';
 
 // Orchestrator
 import { TarotistasOrchestratorService } from './application/services/tarotistas-orchestrator.service';
@@ -56,21 +60,12 @@ import { TarotistasOrchestratorService } from './application/services/tarotistas
   ],
   controllers: [
     TarotistasAdminController,
-    TarotistasPublicController,
     MetricsController,
     ReportsController,
+    TarotistasPublicController,
   ],
   providers: [
-    // ==================== Old Services (PRESERVING - will be deprecated later) ====================
-    TarotistasService,
-    TarotistasAdminService,
-    TarotistasPublicService,
-    RevenueCalculationService,
-    MetricsService,
-    ReportsService,
-
-    // ==================== Clean Architecture (NEW) ====================
-    // Repositories
+    // ==================== Repositories ====================
     {
       provide: 'ITarotistaRepository',
       useClass: TypeOrmTarotistaRepository,
@@ -79,8 +74,12 @@ import { TarotistasOrchestratorService } from './application/services/tarotistas
       provide: 'IMetricsRepository',
       useClass: TypeOrmMetricsRepository,
     },
+    {
+      provide: 'IReportsRepository',
+      useClass: TypeOrmReportsRepository,
+    },
 
-    // Use-cases
+    // ==================== Use-cases ====================
     CreateTarotistaUseCase,
     ListTarotistasUseCase,
     UpdateConfigUseCase,
@@ -89,19 +88,19 @@ import { TarotistasOrchestratorService } from './application/services/tarotistas
     RejectApplicationUseCase,
     ToggleActiveStatusUseCase,
     GetTarotistaDetailsUseCase,
+    UpdateTarotistaUseCase,
+    GetConfigUseCase,
+    ListApplicationsUseCase,
+    BulkImportMeaningsUseCase,
+    ListPublicTarotistasUseCase,
+    GetPublicProfileUseCase,
+    GetTarotistaMetricsUseCase,
+    GetPlatformMetricsUseCase,
+    GenerateReportUseCase,
 
-    // Orchestrator
+    // ==================== Orchestrator ====================
     TarotistasOrchestratorService,
   ],
-  exports: [
-    TarotistasService,
-    TarotistasAdminService,
-    TarotistasPublicService,
-    RevenueCalculationService,
-    MetricsService,
-    ReportsService,
-    TarotistasOrchestratorService, // Export orchestrator
-    TypeOrmModule,
-  ],
+  exports: [TarotistasOrchestratorService, TypeOrmModule],
 })
 export class TarotistasModule {}

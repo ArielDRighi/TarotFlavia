@@ -3,7 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { NotFoundException } from '@nestjs/common';
 import { CardMeaningService } from './card-meaning.service';
 import { TarotCard } from './entities/tarot-card.entity';
-import { TarotistaCardMeaning } from '../../tarotistas/entities/tarotista-card-meaning.entity';
+import { TarotistaCardMeaning } from '../../tarotistas/infrastructure/entities/tarotista-card-meaning.entity';
 import { CardMeaningRequest } from '../../tarot-core/interfaces/card-meaning.interface';
 
 describe('CardMeaningService', () => {

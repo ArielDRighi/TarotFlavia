@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { ITarotistaRepository } from '../../domain/interfaces/tarotista-repository.interface';
-import { SetCustomMeaningDto } from '../../dto/set-custom-meaning.dto';
-import { TarotistaCardMeaning } from '../../entities/tarotista-card-meaning.entity';
+import { SetCustomMeaningDto } from '../dto/set-custom-meaning.dto';
+import { TarotistaCardMeaning } from '../../infrastructure/entities/tarotista-card-meaning.entity';
 
 /**
  * Use Case: Set Custom Card Meaning for a Tarotista

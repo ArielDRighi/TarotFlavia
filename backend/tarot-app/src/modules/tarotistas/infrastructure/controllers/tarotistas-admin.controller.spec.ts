@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TarotistasAdminController } from './tarotistas-admin.controller';
-import { TarotistasOrchestratorService } from '../application/services/tarotistas-orchestrator.service';
+import { TarotistasOrchestratorService } from '../../application/services/tarotistas-orchestrator.service';
 import {
   CreateTarotistaDto,
   UpdateTarotistaDto,
@@ -9,14 +9,14 @@ import {
   ApproveApplicationDto,
   RejectApplicationDto,
   GetTarotistasFilterDto,
-} from '../dto';
-import { Tarotista } from '../entities/tarotista.entity';
-import { TarotistaConfig } from '../entities/tarotista-config.entity';
-import { TarotistaCardMeaning } from '../entities/tarotista-card-meaning.entity';
+} from '../../application/dto';
+import { Tarotista } from '../../infrastructure/entities/tarotista.entity';
+import { TarotistaConfig } from '../../infrastructure/entities/tarotista-config.entity';
+import { TarotistaCardMeaning } from '../../infrastructure/entities/tarotista-card-meaning.entity';
 import {
   TarotistaApplication,
   ApplicationStatus,
-} from '../entities/tarotista-application.entity';
+} from '../../infrastructure/entities/tarotista-application.entity';
 
 describe('TarotistasAdminController', () => {
   let controller: TarotistasAdminController;

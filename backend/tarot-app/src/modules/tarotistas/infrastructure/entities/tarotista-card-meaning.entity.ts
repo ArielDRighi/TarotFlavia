@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Tarotista } from './tarotista.entity';
-import { TarotCard } from '../../tarot/cards/entities/tarot-card.entity';
+import { TarotCard } from '../../../tarot/cards/entities/tarot-card.entity';
 
 @Entity('tarotista_card_meanings')
 @Index(['tarotistaId', 'cardId'], { unique: true })

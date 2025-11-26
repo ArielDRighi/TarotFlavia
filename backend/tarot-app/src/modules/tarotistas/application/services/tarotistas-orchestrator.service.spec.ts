@@ -8,7 +8,10 @@ import { ApproveApplicationUseCase } from '../use-cases/approve-application.use-
 import { RejectApplicationUseCase } from '../use-cases/reject-application.use-case';
 import { ToggleActiveStatusUseCase } from '../use-cases/toggle-active-status.use-case';
 import { GetTarotistaDetailsUseCase } from '../use-cases/get-tarotista-details.use-case';
-import { TarotistasAdminService } from '../../services/tarotistas-admin.service';
+import { UpdateTarotistaUseCase } from '../use-cases/update-tarotista.use-case';
+import { GetConfigUseCase } from '../use-cases/get-config.use-case';
+import { ListApplicationsUseCase } from '../use-cases/list-applications.use-case';
+import { BulkImportMeaningsUseCase } from '../use-cases/bulk-import-meanings.use-case';
 
 describe('TarotistasOrchestratorService', () => {
   let service: TarotistasOrchestratorService;
@@ -28,12 +31,10 @@ describe('TarotistasOrchestratorService', () => {
   const mockRejectUseCase = { execute: jest.fn() };
   const mockToggleUseCase = { execute: jest.fn(), setStatus: jest.fn() };
   const mockGetDetailsUseCase = { execute: jest.fn(), byUserId: jest.fn() };
-  const mockLegacyService = {
-    updateTarotista: jest.fn(),
-    getTarotistaConfig: jest.fn(),
-    getAllApplications: jest.fn(),
-    bulkImportCustomMeanings: jest.fn(),
-  };
+  const mockUpdateTarotistaUseCase = { execute: jest.fn() };
+  const mockGetConfigUseCase = { execute: jest.fn() };
+  const mockListApplicationsUseCase = { execute: jest.fn() };
+  const mockBulkImportMeaningsUseCase = { execute: jest.fn() };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -53,7 +54,19 @@ describe('TarotistasOrchestratorService', () => {
           provide: GetTarotistaDetailsUseCase,
           useValue: mockGetDetailsUseCase,
         },
-        { provide: TarotistasAdminService, useValue: mockLegacyService },
+        {
+          provide: UpdateTarotistaUseCase,
+          useValue: mockUpdateTarotistaUseCase,
+        },
+        { provide: GetConfigUseCase, useValue: mockGetConfigUseCase },
+        {
+          provide: ListApplicationsUseCase,
+          useValue: mockListApplicationsUseCase,
+        },
+        {
+          provide: BulkImportMeaningsUseCase,
+          useValue: mockBulkImportMeaningsUseCase,
+        },
       ],
     }).compile();
 

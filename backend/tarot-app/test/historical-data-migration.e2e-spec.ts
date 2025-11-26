@@ -5,7 +5,7 @@ import { AppModule } from '../src/app.module';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { User, UserRole } from '../src/modules/users/entities/user.entity';
 import { TarotReading } from '../src/modules/tarot/readings/entities/tarot-reading.entity';
-import { Tarotista } from '../src/modules/tarotistas/entities/tarotista.entity';
+import { Tarotista } from '../src/modules/tarotistas/infrastructure/entities/tarotista.entity';
 import { CachedInterpretation } from '../src/modules/cache/infrastructure/entities/cached-interpretation.entity';
 import { HistoricalDataMigration } from '../migrate-historical-data';
 

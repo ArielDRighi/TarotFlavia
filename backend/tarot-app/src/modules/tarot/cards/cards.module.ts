@@ -5,7 +5,7 @@ import { CardsService } from './cards.service';
 import { CardMeaningService } from './card-meaning.service';
 import { TarotCard } from './entities/tarot-card.entity';
 import { TarotDeck } from '../decks/entities/tarot-deck.entity';
-import { TarotistaCardMeaning } from '../../tarotistas/entities/tarotista-card-meaning.entity';
+import { TarotistaCardMeaning } from '../../tarotistas/infrastructure/entities/tarotista-card-meaning.entity';
 
 @Module({
   imports: [

@@ -1,10 +1,20 @@
-import { TarotistaRevenueMetrics } from '../../entities/tarotista-revenue-metrics.entity';
+import { TarotistaRevenueMetrics } from '../../infrastructure/entities/tarotista-revenue-metrics.entity';
+import {
+  MetricsQueryDto,
+  TarotistaMetricsDto,
+  PlatformMetricsQueryDto,
+  PlatformMetricsDto,
+} from '../../application/dto/metrics-query.dto';
 
 /**
  * Interface for Metrics repository operations
  * Handles tarotista metrics and analytics
  */
 export interface IMetricsRepository {
+  // Main metrics endpoints
+  getTarotistaMetrics(dto: MetricsQueryDto): Promise<TarotistaMetricsDto>;
+  getPlatformMetrics(dto: PlatformMetricsQueryDto): Promise<PlatformMetricsDto>;
+
   // Reading counts
   getReadingCountsByTarotista(
     tarotistaId: number,

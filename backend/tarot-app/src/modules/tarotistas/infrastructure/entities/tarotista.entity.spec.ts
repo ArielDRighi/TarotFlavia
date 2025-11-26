@@ -1,5 +1,5 @@
 import { Tarotista } from './tarotista.entity';
-import { User } from '../../users/entities/user.entity';
+import { User } from '../../../users/entities/user.entity';
 
 describe('Tarotista Entity', () => {
   describe('creation and validation', () => {

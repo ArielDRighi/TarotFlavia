@@ -10,3 +10,11 @@ export { ApproveApplicationDto } from './approve-application.dto';
 export { RejectApplicationDto } from './reject-application.dto';
 export { GetTarotistasFilterDto } from './get-tarotistas-filter.dto';
 export { GetPublicTarotistasFilterDto } from './get-public-tarotistas-filter.dto';
+export {
+  MetricsQueryDto,
+  TarotistaMetricsDto,
+  PlatformMetricsQueryDto,
+  PlatformMetricsDto,
+  MetricsPeriod,
+} from './metrics-query.dto';
+export { ExportReportDto, ReportFormat } from './report-export.dto';

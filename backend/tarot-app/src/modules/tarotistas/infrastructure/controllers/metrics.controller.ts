@@ -1,19 +1,19 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { MetricsService } from '../services/metrics.service';
+import { TarotistasOrchestratorService } from '../../application/services/tarotistas-orchestrator.service';
 import {
   MetricsQueryDto,
   TarotistaMetricsDto,
   PlatformMetricsDto,
   PlatformMetricsQueryDto,
-} from '../dto/metrics-query.dto';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { AdminGuard } from '../../auth/guards/admin.guard';
+} from '../../application/dto';
+import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
+import { AdminGuard } from '../../../auth/guards/admin.guard';
 
 @ApiTags('Tarotistas - Metrics')
 @Controller('tarotistas/metrics')
 export class MetricsController {
-  constructor(private readonly metricsService: MetricsService) {}
+  constructor(private readonly orchestrator: TarotistasOrchestratorService) {}
 
   @Get('tarotista')
   @UseGuards(JwtAuthGuard)
@@ -30,7 +30,7 @@ export class MetricsController {
   async getTarotistaMetrics(
     @Query() query: MetricsQueryDto,
   ): Promise<TarotistaMetricsDto> {
-    return this.metricsService.getTarotistaMetrics(query);
+    return this.orchestrator.getTarotistaMetrics(query);
   }
 
   @Get('platform')
@@ -44,6 +44,6 @@ export class MetricsController {
   async getPlatformMetrics(
     @Query() query: PlatformMetricsQueryDto,
   ): Promise<PlatformMetricsDto> {
-    return this.metricsService.getPlatformMetrics(query);
+    return this.orchestrator.getPlatformMetrics(query);
   }
 }

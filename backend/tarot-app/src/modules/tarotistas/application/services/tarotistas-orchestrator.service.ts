@@ -7,25 +7,38 @@ import { ApproveApplicationUseCase } from '../use-cases/approve-application.use-
 import { RejectApplicationUseCase } from '../use-cases/reject-application.use-case';
 import { ToggleActiveStatusUseCase } from '../use-cases/toggle-active-status.use-case';
 import { GetTarotistaDetailsUseCase } from '../use-cases/get-tarotista-details.use-case';
-import { TarotistasAdminService } from '../../services/tarotistas-admin.service';
-import { Tarotista } from '../../entities/tarotista.entity';
-import { TarotistaApplication } from '../../entities/tarotista-application.entity';
-import { TarotistaConfig } from '../../entities/tarotista-config.entity';
-import { TarotistaCardMeaning } from '../../entities/tarotista-card-meaning.entity';
-import { CreateTarotistaDto } from '../../dto/create-tarotista.dto';
-import { GetTarotistasFilterDto } from '../../dto/get-tarotistas-filter.dto';
-import { UpdateTarotistaConfigDto } from '../../dto/update-tarotista-config.dto';
-import { SetCustomMeaningDto } from '../../dto/set-custom-meaning.dto';
-import { ApproveApplicationDto } from '../../dto/approve-application.dto';
-import { RejectApplicationDto } from '../../dto/reject-application.dto';
-import { UpdateTarotistaDto } from '../../dto/update-tarotista.dto';
+import { UpdateTarotistaUseCase } from '../use-cases/update-tarotista.use-case';
+import { GetConfigUseCase } from '../use-cases/get-config.use-case';
+import { ListApplicationsUseCase } from '../use-cases/list-applications.use-case';
+import { BulkImportMeaningsUseCase } from '../use-cases/bulk-import-meanings.use-case';
+import { ListPublicTarotistasUseCase } from '../use-cases/list-public-tarotistas.use-case';
+import { GetPublicProfileUseCase } from '../use-cases/get-public-profile.use-case';
+import { GetTarotistaMetricsUseCase } from '../use-cases/get-tarotista-metrics.use-case';
+import { GetPlatformMetricsUseCase } from '../use-cases/get-platform-metrics.use-case';
+import { GenerateReportUseCase } from '../use-cases/generate-report.use-case';
+import { Tarotista } from '../../infrastructure/entities/tarotista.entity';
+import { TarotistaApplication } from '../../infrastructure/entities/tarotista-application.entity';
+import { TarotistaConfig } from '../../infrastructure/entities/tarotista-config.entity';
+import { TarotistaCardMeaning } from '../../infrastructure/entities/tarotista-card-meaning.entity';
+import { CreateTarotistaDto } from '../dto/create-tarotista.dto';
+import { GetTarotistasFilterDto } from '../dto/get-tarotistas-filter.dto';
+import { UpdateTarotistaConfigDto } from '../dto/update-tarotista-config.dto';
+import { SetCustomMeaningDto } from '../dto/set-custom-meaning.dto';
+import { ApproveApplicationDto } from '../dto/approve-application.dto';
+import { RejectApplicationDto } from '../dto/reject-application.dto';
+import { UpdateTarotistaDto } from '../dto/update-tarotista.dto';
+import {
+  GetPublicTarotistasFilterDto,
+  MetricsQueryDto,
+  TarotistaMetricsDto,
+  PlatformMetricsQueryDto,
+  PlatformMetricsDto,
+  ExportReportDto,
+} from '../dto';
 
 /**
  * Orchestrator Service - Coordinates use-cases for tarotistas module
  * Provides backward-compatible interface for existing controllers
- *
- * NOTE: Some methods still delegate to TarotistasAdminService (PRESERVE phase)
- * TODO: Create use-cases for remaining methods and remove delegation
  */
 @Injectable()
 export class TarotistasOrchestratorService {
@@ -38,8 +51,15 @@ export class TarotistasOrchestratorService {
     private readonly rejectApplicationUseCase: RejectApplicationUseCase,
     private readonly toggleActiveStatusUseCase: ToggleActiveStatusUseCase,
     private readonly getTarotistaDetailsUseCase: GetTarotistaDetailsUseCase,
-    // PRESERVE: Keep old service for methods without use-cases yet
-    private readonly legacyService: TarotistasAdminService,
+    private readonly updateTarotistaUseCase: UpdateTarotistaUseCase,
+    private readonly getConfigUseCase: GetConfigUseCase,
+    private readonly listApplicationsUseCase: ListApplicationsUseCase,
+    private readonly bulkImportMeaningsUseCase: BulkImportMeaningsUseCase,
+    private readonly listPublicTarotistasUseCase: ListPublicTarotistasUseCase,
+    private readonly getPublicProfileUseCase: GetPublicProfileUseCase,
+    private readonly getTarotistaMetricsUseCase: GetTarotistaMetricsUseCase,
+    private readonly getPlatformMetricsUseCase: GetPlatformMetricsUseCase,
+    private readonly generateReportUseCase: GenerateReportUseCase,
   ) {}
 
   // ==================== Tarotista Management ====================
@@ -95,20 +115,19 @@ export class TarotistasOrchestratorService {
     return await this.toggleActiveStatusUseCase.setStatus(id, isActive);
   }
 
-  // TODO: Create UpdateTarotistaUseCase
+  // ==================== Tarotista Updates ====================
+
   async updateTarotista(
     id: number,
     dto: UpdateTarotistaDto,
   ): Promise<Tarotista> {
-    return await this.legacyService.updateTarotista(id, dto);
+    return await this.updateTarotistaUseCase.execute(id, dto);
   }
 
-  // TODO: Create GetConfigUseCase
   async getTarotistaConfig(tarotistaId: number): Promise<TarotistaConfig> {
-    return await this.legacyService.getTarotistaConfig(tarotistaId);
+    return await this.getConfigUseCase.execute(tarotistaId);
   }
 
-  // TODO: Create GetAllApplicationsUseCase
   async getAllApplications(filterDto: GetTarotistasFilterDto): Promise<{
     data: TarotistaApplication[];
     total: number;
@@ -116,23 +135,14 @@ export class TarotistasOrchestratorService {
     limit: number;
     totalPages: number;
   }> {
-    return await this.legacyService.getAllApplications(filterDto);
+    return await this.listApplicationsUseCase.execute(filterDto);
   }
 
-  // TODO: Create BulkImportMeaningsUseCase
   async bulkImportCustomMeanings(
     tarotistaId: number,
     meanings: SetCustomMeaningDto[],
   ): Promise<TarotistaCardMeaning[]> {
-    // Map SetCustomMeaningDto[] to the format expected by legacy service
-    const mappedMeanings = meanings.map((m) => ({
-      cardId: m.cardId,
-      customMeaning: m.customMeaningUpright || m.customDescription || '',
-    }));
-    return await this.legacyService.bulkImportCustomMeanings(
-      tarotistaId,
-      mappedMeanings,
-    );
+    return await this.bulkImportMeaningsUseCase.execute(tarotistaId, meanings);
   }
 
   // ==================== Configuration Management ====================
@@ -197,5 +207,43 @@ export class TarotistasOrchestratorService {
       reviewedBy,
       dto.adminNotes,
     );
+  }
+
+  // ==================== Public Endpoints ====================
+
+  async listPublicTarotistas(filterDto: GetPublicTarotistasFilterDto): Promise<{
+    data: Tarotista[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }> {
+    return await this.listPublicTarotistasUseCase.execute(filterDto);
+  }
+
+  async getPublicProfile(id: number): Promise<Tarotista | null> {
+    return await this.getPublicProfileUseCase.execute(id);
+  }
+
+  // ==================== Metrics Endpoints ====================
+
+  async getTarotistaMetrics(
+    dto: MetricsQueryDto,
+  ): Promise<TarotistaMetricsDto> {
+    return await this.getTarotistaMetricsUseCase.execute(dto);
+  }
+
+  async getPlatformMetrics(
+    dto: PlatformMetricsQueryDto,
+  ): Promise<PlatformMetricsDto> {
+    return await this.getPlatformMetricsUseCase.execute(dto);
+  }
+
+  // ==================== Reports Endpoints ====================
+
+  async generateReport(
+    dto: ExportReportDto,
+  ): Promise<{ filename: string; content: string; mimeType: string }> {
+    return await this.generateReportUseCase.execute(dto);
   }
 }

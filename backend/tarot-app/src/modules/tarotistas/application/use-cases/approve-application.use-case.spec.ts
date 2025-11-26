@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ApproveApplicationUseCase } from './approve-application.use-case';
-import { ApplicationStatus } from '../../entities/tarotista-application.entity';
+import { ApplicationStatus } from '../../infrastructure/entities/tarotista-application.entity';
 
 describe('ApproveApplicationUseCase', () => {
   let useCase: ApproveApplicationUseCase;

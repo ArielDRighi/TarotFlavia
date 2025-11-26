@@ -11,8 +11,8 @@ import {
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Tarotista } from './tarotista.entity';
-import { User } from '../../users/entities/user.entity';
-import { TarotReading } from '../../tarot/readings/entities/tarot-reading.entity';
+import { User } from '../../../users/entities/user.entity';
+import { TarotReading } from '../../../tarot/readings/entities/tarot-reading.entity';
 
 @Entity('tarotista_reviews')
 @Index(['userId', 'tarotistaId'], { unique: true })

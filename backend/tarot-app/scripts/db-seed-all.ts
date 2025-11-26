@@ -15,8 +15,8 @@ import { TarotCard } from '../src/modules/tarot/cards/entities/tarot-card.entity
 import { ReadingCategory } from '../src/modules/categories/entities/reading-category.entity';
 import { PredefinedQuestion } from '../src/modules/predefined-questions/entities/predefined-question.entity';
 import { User } from '../src/modules/users/entities/user.entity';
-import { Tarotista } from '../src/modules/tarotistas/entities/tarotista.entity';
-import { TarotistaConfig } from '../src/modules/tarotistas/entities/tarotista-config.entity';
+import { Tarotista } from '../src/modules/tarotistas/infrastructure/entities/tarotista.entity';
+import { TarotistaConfig } from '../src/modules/tarotistas/infrastructure/entities/tarotista-config.entity';
 import { seedTarotDecks } from '../src/database/seeds/tarot-decks.seeder';
 import { seedTarotCards } from '../src/database/seeds/tarot-cards.seeder';
 import { seedTarotSpreads } from '../src/database/seeds/tarot-spreads.seeder';
