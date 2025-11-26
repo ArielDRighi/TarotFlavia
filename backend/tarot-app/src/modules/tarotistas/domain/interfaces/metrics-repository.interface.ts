@@ -1,4 +1,4 @@
-import { TarotistaRevenueMetrics } from '../../infrastructure/entities/tarotista-revenue-metrics.entity';
+import { TarotistaRevenueMetrics } from '../../entities/tarotista-revenue-metrics.entity';
 import {
   MetricsQueryDto,
   TarotistaMetricsDto,

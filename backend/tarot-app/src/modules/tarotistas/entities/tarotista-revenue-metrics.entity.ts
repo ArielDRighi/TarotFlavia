@@ -10,8 +10,8 @@ import {
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Tarotista } from './tarotista.entity';
-import { User } from '../../../users/entities/user.entity';
-import { TarotReading } from '../../../tarot/readings/entities/tarot-reading.entity';
+import { User } from '../../users/entities/user.entity';
+import { TarotReading } from '../../tarot/readings/entities/tarot-reading.entity';
 import { SubscriptionType } from './user-tarotista-subscription.entity';
 
 @Entity('tarotista_revenue_metrics')

@@ -11,8 +11,8 @@ import {
   Check,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from '../../../users/entities/user.entity';
-import { TarotReading } from '../../../tarot/readings/entities/tarot-reading.entity';
+import { User } from '../../users/entities/user.entity';
+import { TarotReading } from '../../tarot/readings/entities/tarot-reading.entity';
 import { UserTarotistaSubscription } from './user-tarotista-subscription.entity';
 
 @Entity('tarotistas')
