@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { ITarotistaRepository } from '../../domain/interfaces/tarotista-repository.interface';
-import { Tarotista } from '../../infrastructure/entities/tarotista.entity';
+import { Tarotista } from '../../entities/tarotista.entity';
 
 @Injectable()
 export class GetPublicProfileUseCase {

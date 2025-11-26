@@ -4,7 +4,7 @@ import {
   TarotistaFindOptions,
 } from '../../domain/interfaces/tarotista-repository.interface';
 import { GetTarotistasFilterDto } from '../dto/get-tarotistas-filter.dto';
-import { Tarotista } from '../../infrastructure/entities/tarotista.entity';
+import { Tarotista } from '../../entities/tarotista.entity';
 
 /**
  * Use Case: List Tarotistas with filtering and pagination

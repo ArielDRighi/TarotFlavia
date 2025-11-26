@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { ITarotistaRepository } from '../../domain/interfaces/tarotista-repository.interface';
-import { TarotistaApplication } from '../../infrastructure/entities/tarotista-application.entity';
+import { TarotistaApplication } from '../../entities/tarotista-application.entity';
 import { GetTarotistasFilterDto } from '../dto/get-tarotistas-filter.dto';
 
 /**
