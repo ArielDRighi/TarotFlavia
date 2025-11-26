@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
+import { AuthOrchestratorService } from './application/services/auth-orchestrator.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
-import { LoginDto } from './dto/login.dto';
-import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { LoginDto } from './application/dto/login.dto';
+import { RefreshTokenDto } from './application/dto/refresh-token.dto';
 import { UnauthorizedException } from '@nestjs/common';
 import { Request } from 'express';
 
 describe('AuthController', () => {
   let controller: AuthController;
-  let authServiceMock: Partial<AuthService>;
+  let authServiceMock: Partial<AuthOrchestratorService>;
 
   beforeEach(async () => {
     authServiceMock = {
@@ -85,7 +85,9 @@ describe('AuthController', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
-      providers: [{ provide: AuthService, useValue: authServiceMock }],
+      providers: [
+        { provide: AuthOrchestratorService, useValue: authServiceMock },
+      ],
     }).compile();
 
     controller = module.get<AuthController>(AuthController);
