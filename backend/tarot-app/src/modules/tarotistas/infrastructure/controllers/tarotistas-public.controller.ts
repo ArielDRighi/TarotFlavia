@@ -15,7 +15,7 @@ import {
 } from '@nestjs/swagger';
 import { TarotistasOrchestratorService } from '../../application/services/tarotistas-orchestrator.service';
 import { GetPublicTarotistasFilterDto } from '../../application/dto';
-import { Tarotista } from '../entities/tarotista.entity';
+import { Tarotista } from '../../entities/tarotista.entity';
 
 @ApiTags('Tarotistas Públicos')
 @Controller('tarotistas')

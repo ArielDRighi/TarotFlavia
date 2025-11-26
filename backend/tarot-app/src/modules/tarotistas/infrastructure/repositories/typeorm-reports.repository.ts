@@ -11,8 +11,8 @@ import {
   ReportFormat,
   MetricsPeriod,
 } from '../../application/dto';
-import { TarotistaRevenueMetrics } from '../entities/tarotista-revenue-metrics.entity';
-import { Tarotista } from '../entities/tarotista.entity';
+import { TarotistaRevenueMetrics } from '../../entities/tarotista-revenue-metrics.entity';
+import { Tarotista } from '../../entities/tarotista.entity';
 import * as PDFDocument from 'pdfkit';
 
 /**
