@@ -108,6 +108,28 @@ export class ReadingsService {
 - Desacoplamiento de TypeORM
 - Preparado para cambiar ORM (Prisma, Drizzle, etc.)
 
+**Enfoque Pragmático (ADR-003):**
+
+El proyecto adopta un enfoque **pragmático** donde las entidades TypeORM se comparten entre capas:
+
+- ✅ Las interfaces de repositorio **pueden usar entidades TypeORM directamente** (no se requieren entidades de dominio separadas)
+- ✅ Las entidades TypeORM se ubican en **`entities/` en la raíz del módulo** (no en `infrastructure/entities/`)
+- ❌ Domain NO debe importar de `infrastructure/` (excepto entidades con TODO documentado)
+
+**Ubicación correcta de entidades:**
+
+```
+module/
+├── entities/                    ← Entidades TypeORM compartidas
+│   └── entity.entity.ts
+├── domain/
+│   └── interfaces/
+│       └── repository.interface.ts  (importa de ../../entities/)
+└── infrastructure/
+    └── repositories/
+        └── typeorm-repository.ts    (importa de ../../entities/)
+```
+
 **Referencia:** [ADR-003: Repository Pattern](docs/architecture/decisions/ADR-003-repository-pattern.md)
 
 ---
@@ -367,18 +389,29 @@ application/
 **Ejemplo:**
 
 ```typescript
-// ✅ BIEN
+// ✅ BIEN - Inyectar interface del repositorio
 constructor(
   @Inject('IUserRepository')
   private readonly userRepo: IUserRepository,
 ) {}
 
-// ❌ MAL
+// ❌ MAL - Inyectar TypeORM Repository en services
 constructor(
   @InjectRepository(User)
   private readonly userRepo: Repository<User>, // Acoplamiento a TypeORM
 ) {}
+
+// ✅ BIEN - TypeORM solo en infrastructure/repositories
+@Injectable()
+export class TypeOrmUserRepository implements IUserRepository {
+  constructor(
+    @InjectRepository(User) // OK aquí
+    private readonly repo: Repository<User>,
+  ) {}
+}
 ```
+
+**Nota:** Según ADR-003, las entidades TypeORM (User, Reading, etc.) se comparten entre capas ubicándolas en `entities/` en la raíz del módulo, no en `infrastructure/entities/`.
 
 ---
 

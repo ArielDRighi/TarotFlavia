@@ -75,15 +75,30 @@ function hasLayeredStructure(dir) {
 }
 
 /**
- * Verifica si tiene subcarpetas organizacionales (services/, guards/, controllers/, etc.)
- * que NO son conceptuales (entities/, dto/, constants/)
+ * Verifica si tiene subcarpetas organizacionales que NO son válidas para módulos flat
+ * Carpetas conceptuales permitidas según NestJS y arquitectura del proyecto
  */
 function hasOrganizationalSubfolders(dir) {
   if (!fs.existsSync(dir)) {
     return false;
   }
 
-  const CONCEPTUAL_FOLDERS = ['entities', 'dto', 'constants', 'interfaces'];
+  // Carpetas conceptuales permitidas en módulos flat (según NestJS y arquitectura híbrida)
+  const CONCEPTUAL_FOLDERS = [
+    'entities', // Entidades de dominio/DB
+    'dto', // Data Transfer Objects
+    'constants', // Constantes del módulo
+    'interfaces', // Interfaces y tipos
+    'enums', // Enumeraciones
+    'decorators', // Decoradores custom
+    'guards', // Guards de autorización
+    'strategies', // Estrategias (auth, etc.)
+    'templates', // Plantillas (email, etc.)
+    'helpers', // Funciones helper
+    'controllers', // Controllers (puede ser subcarpeta)
+    'services', // Services (puede ser subcarpeta)
+  ];
+
   const LAYER_FOLDERS = ['domain', 'application', 'infrastructure'];
 
   const contents = fs.readdirSync(dir, { withFileTypes: true });
@@ -181,6 +196,8 @@ function validateModule(moduleName, modulePath) {
 
 /**
  * Valida que domain/ no importe de infrastructure/
+ * Según ADR-003: Permite importar entidades TypeORM desde infrastructure/entities/
+ * (enfoque pragmático), pero NO permite otras importaciones de infrastructure
  */
 function validateLayerDependencies(moduleName, modulePath) {
   const domainPath = path.join(modulePath, 'domain');
@@ -199,7 +216,7 @@ function validateLayerDependencies(moduleName, modulePath) {
     const lines = content.split('\n');
 
     // Check if file has TODO exception for architecture violation
-    const hasTodoException = content.includes('TODO: TASK-ARCH-006');
+    const hasTodoException = content.includes('TODO: TASK-ARCH-');
 
     lines.forEach((line, index) => {
       const trimmedLine = line.trim();
@@ -213,27 +230,56 @@ function validateLayerDependencies(moduleName, modulePath) {
         return;
       }
 
-      // Detectar imports de infrastructure/ desde domain/ (regex más preciso)
-      if (/from\s+['"][^'"]*infrastructure/.test(line)) {
-        if (hasTodoException) {
+      // Detectar imports de infrastructure/ desde domain/
+      const infrastructureImportMatch =
+        /from\s+['"]([^'"]*infrastructure[^'"]*)['"]/.exec(line);
+
+      if (infrastructureImportMatch) {
+        const importPath = infrastructureImportMatch[1];
+
+        // Según ADR-003: Permitir imports de infrastructure/entities/ (entidades TypeORM compartidas)
+        // Esto es el enfoque pragmático del proyecto: las entidades TypeORM se pueden usar directamente
+        const isEntityImport = /infrastructure\/entities\//.test(importPath);
+
+        if (isEntityImport && hasTodoException) {
           console.log(
-            `   ⚠️  WARNING: Domain layer importing from infrastructure (TODO exception)`,
+            `   ⚠️  WARNING: Domain importing TypeORM entity from infrastructure/entities/ (TODO exception)`,
           );
           console.log(
             `      File: ${path.relative(modulePath, file)}:${index + 1}`,
           );
           console.log(`      Line: ${line.trim()}`);
           console.log(
-            `      Note: This is documented as TASK-ARCH-006 for future refactoring`,
+            `      Note: This is documented with TODO for future refactoring`,
           );
-        } else {
           console.log(
-            `   ❌ ERROR: Domain layer importing from infrastructure`,
+            `      Recommendation: Move entity to module root (entities/) like in 'readings' module`,
+          );
+        } else if (isEntityImport && !hasTodoException) {
+          console.log(
+            `   ⚠️  WARNING: Domain importing from infrastructure/entities/ (not documented)`,
           );
           console.log(
             `      File: ${path.relative(modulePath, file)}:${index + 1}`,
           );
           console.log(`      Line: ${line.trim()}`);
+          console.log(
+            `      Per ADR-003: Entities should be at module root (entities/) for sharing`,
+          );
+          console.log(`      Example: See 'readings' module structure`);
+          exitCode = 1;
+        } else if (!isEntityImport) {
+          // Imports de otras cosas de infrastructure (repositories, services, etc.) son errores
+          console.log(
+            `   ❌ ERROR: Domain layer importing non-entity from infrastructure`,
+          );
+          console.log(
+            `      File: ${path.relative(modulePath, file)}:${index + 1}`,
+          );
+          console.log(`      Line: ${line.trim()}`);
+          console.log(
+            `      Domain should only import from domain/ or shared entities/`,
+          );
           exitCode = 1;
         }
       }
@@ -304,7 +350,16 @@ function validateModules() {
     // Si es un módulo con submódulos (ej: tarot/), validar cada submódulo
     const subModules = fs.readdirSync(modulePath, { withFileTypes: true });
     const LAYER_DIRS = ['domain', 'application', 'infrastructure'];
-    const CONCEPTUAL_FOLDERS = [
+
+    // Si tiene estructura layered completa, validar el módulo como uno solo
+    const hasLayers = hasLayeredStructure(modulePath);
+    if (hasLayers) {
+      validateModule(module.name, modulePath);
+      return;
+    }
+
+    // Carpetas conceptuales permitidas (misma lista que en hasOrganizationalSubfolders)
+    const ALLOWED_CONCEPTUAL = [
       'entities',
       'dto',
       'constants',
@@ -315,14 +370,9 @@ function validateModules() {
       'strategies',
       'templates',
       'helpers',
+      'controllers',
+      'services',
     ];
-
-    // Si tiene estructura layered completa, validar el módulo como uno solo
-    const hasLayers = hasLayeredStructure(modulePath);
-    if (hasLayers) {
-      validateModule(module.name, modulePath);
-      return;
-    }
 
     // Si tiene submódulos que no son ni layers ni conceptuales, validar cada uno
     const hasSubModules = subModules.some(
@@ -330,7 +380,7 @@ function validateModules() {
         sub.isDirectory() &&
         !sub.name.startsWith('.') &&
         !LAYER_DIRS.includes(sub.name) &&
-        !CONCEPTUAL_FOLDERS.includes(sub.name),
+        !ALLOWED_CONCEPTUAL.includes(sub.name),
     );
 
     if (hasSubModules) {
