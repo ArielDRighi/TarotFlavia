@@ -1,18 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { MetricsController } from './metrics.controller';
-import { MetricsService } from '../services/metrics.service';
+import { TarotistasOrchestratorService } from '../../application/services/tarotistas-orchestrator.service';
 import {
   MetricsQueryDto,
   TarotistaMetricsDto,
   PlatformMetricsDto,
   PlatformMetricsQueryDto,
   MetricsPeriod,
-} from '../dto/metrics-query.dto';
+} from '../../application/dto/metrics-query.dto';
 import { NotFoundException } from '@nestjs/common';
 
 describe('MetricsController', () => {
   let controller: MetricsController;
-  let metricsService: MetricsService;
+  let orchestrator: TarotistasOrchestratorService;
 
   const mockTarotistaMetrics: TarotistaMetricsDto = {
     tarotistaId: 1,
@@ -48,7 +48,7 @@ describe('MetricsController', () => {
       controllers: [MetricsController],
       providers: [
         {
-          provide: MetricsService,
+          provide: TarotistasOrchestratorService,
           useValue: {
             getTarotistaMetrics: jest.fn(),
             getPlatformMetrics: jest.fn(),
@@ -58,7 +58,9 @@ describe('MetricsController', () => {
     }).compile();
 
     controller = module.get<MetricsController>(MetricsController);
-    metricsService = module.get<MetricsService>(MetricsService);
+    orchestrator = module.get<TarotistasOrchestratorService>(
+      TarotistasOrchestratorService,
+    );
   });
 
   describe('getTarotistaMetrics', () => {
@@ -69,13 +71,13 @@ describe('MetricsController', () => {
       };
 
       jest
-        .spyOn(metricsService, 'getTarotistaMetrics')
+        .spyOn(orchestrator, 'getTarotistaMetrics')
         .mockResolvedValue(mockTarotistaMetrics);
 
       const result = await controller.getTarotistaMetrics(query);
 
       expect(result).toEqual(mockTarotistaMetrics);
-      expect(metricsService.getTarotistaMetrics).toHaveBeenCalledWith(query);
+      expect(orchestrator.getTarotistaMetrics).toHaveBeenCalledWith(query);
     });
 
     it('should throw NotFoundException if tarotista does not exist', async () => {
@@ -85,7 +87,7 @@ describe('MetricsController', () => {
       };
 
       jest
-        .spyOn(metricsService, 'getTarotistaMetrics')
+        .spyOn(orchestrator, 'getTarotistaMetrics')
         .mockRejectedValue(
           new NotFoundException('Tarotista with ID 999 not found'),
         );
@@ -104,7 +106,7 @@ describe('MetricsController', () => {
       };
 
       jest
-        .spyOn(metricsService, 'getTarotistaMetrics')
+        .spyOn(orchestrator, 'getTarotistaMetrics')
         .mockResolvedValue(mockTarotistaMetrics);
 
       const result = await controller.getTarotistaMetrics(query);
@@ -120,13 +122,13 @@ describe('MetricsController', () => {
       };
 
       jest
-        .spyOn(metricsService, 'getPlatformMetrics')
+        .spyOn(orchestrator, 'getPlatformMetrics')
         .mockResolvedValue(mockPlatformMetrics);
 
       const result = await controller.getPlatformMetrics(query);
 
       expect(result).toEqual(mockPlatformMetrics);
-      expect(metricsService.getPlatformMetrics).toHaveBeenCalledWith(query);
+      expect(orchestrator.getPlatformMetrics).toHaveBeenCalledWith(query);
     });
 
     it('should handle different periods', async () => {
@@ -135,7 +137,7 @@ describe('MetricsController', () => {
       };
 
       jest
-        .spyOn(metricsService, 'getPlatformMetrics')
+        .spyOn(orchestrator, 'getPlatformMetrics')
         .mockResolvedValue(mockPlatformMetrics);
 
       const result = await controller.getPlatformMetrics(query);

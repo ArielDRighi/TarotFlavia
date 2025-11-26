@@ -1,26 +1,29 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ReportsController } from './reports.controller';
-import { ReportsService } from '../services/reports.service';
-import { ExportReportDto, ReportFormat } from '../dto/report-export.dto';
-import { MetricsPeriod } from '../dto/metrics-query.dto';
+import { TarotistasOrchestratorService } from '../../application/services/tarotistas-orchestrator.service';
+import {
+  ExportReportDto,
+  ReportFormat,
+} from '../../application/dto/report-export.dto';
+import { MetricsPeriod } from '../../application/dto/metrics-query.dto';
 import { NotFoundException } from '@nestjs/common';
 
 describe('ReportsController', () => {
   let controller: ReportsController;
-  let reportsService: ReportsService;
+  let orchestrator: TarotistasOrchestratorService;
 
   const mockCsvReport = {
     filename: 'report-tarotista-1-2025-01.csv',
     content: Buffer.from(
       'tarotistaId,nombrePublico,totalReadings\n1,Flavia,150',
     ).toString('base64'),
-    format: ReportFormat.CSV,
+    mimeType: 'text/csv',
   };
 
   const mockPdfReport = {
     filename: 'report-platform-2025-01.pdf',
     content: Buffer.from('%PDF-1.3\n...').toString('base64'),
-    format: ReportFormat.PDF,
+    mimeType: 'application/pdf',
   };
 
   beforeEach(async () => {
@@ -28,7 +31,7 @@ describe('ReportsController', () => {
       controllers: [ReportsController],
       providers: [
         {
-          provide: ReportsService,
+          provide: TarotistasOrchestratorService,
           useValue: {
             generateReport: jest.fn(),
           },
@@ -37,7 +40,9 @@ describe('ReportsController', () => {
     }).compile();
 
     controller = module.get<ReportsController>(ReportsController);
-    reportsService = module.get<ReportsService>(ReportsService);
+    orchestrator = module.get<TarotistasOrchestratorService>(
+      TarotistasOrchestratorService,
+    );
   });
 
   describe('exportReport', () => {
@@ -49,13 +54,13 @@ describe('ReportsController', () => {
       };
 
       jest
-        .spyOn(reportsService, 'generateReport')
+        .spyOn(orchestrator, 'generateReport')
         .mockResolvedValue(mockCsvReport);
 
       const result = await controller.exportReport(dto);
 
       expect(result).toEqual(mockCsvReport);
-      expect(reportsService.generateReport).toHaveBeenCalledWith(dto);
+      expect(orchestrator.generateReport).toHaveBeenCalledWith(dto);
     });
 
     it('should generate PDF report for a tarotista', async () => {
@@ -66,13 +71,13 @@ describe('ReportsController', () => {
       };
 
       jest
-        .spyOn(reportsService, 'generateReport')
+        .spyOn(orchestrator, 'generateReport')
         .mockResolvedValue(mockPdfReport);
 
       const result = await controller.exportReport(dto);
 
       expect(result).toEqual(mockPdfReport);
-      expect(reportsService.generateReport).toHaveBeenCalledWith(dto);
+      expect(orchestrator.generateReport).toHaveBeenCalledWith(dto);
     });
 
     it('should generate platform-wide report (admin)', async () => {
@@ -82,13 +87,13 @@ describe('ReportsController', () => {
       };
 
       jest
-        .spyOn(reportsService, 'generateReport')
+        .spyOn(orchestrator, 'generateReport')
         .mockResolvedValue(mockCsvReport);
 
       const result = await controller.exportReport(dto);
 
       expect(result).toEqual(mockCsvReport);
-      expect(reportsService.generateReport).toHaveBeenCalledWith(dto);
+      expect(orchestrator.generateReport).toHaveBeenCalledWith(dto);
     });
 
     it('should throw NotFoundException for invalid tarotista', async () => {
@@ -99,7 +104,7 @@ describe('ReportsController', () => {
       };
 
       jest
-        .spyOn(reportsService, 'generateReport')
+        .spyOn(orchestrator, 'generateReport')
         .mockRejectedValue(
           new NotFoundException('Tarotista with ID 999 not found'),
         );
@@ -119,7 +124,7 @@ describe('ReportsController', () => {
       };
 
       jest
-        .spyOn(reportsService, 'generateReport')
+        .spyOn(orchestrator, 'generateReport')
         .mockResolvedValue(mockPdfReport);
 
       const result = await controller.exportReport(dto);

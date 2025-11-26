@@ -12,6 +12,11 @@ import { UpdateTarotistaUseCase } from '../use-cases/update-tarotista.use-case';
 import { GetConfigUseCase } from '../use-cases/get-config.use-case';
 import { ListApplicationsUseCase } from '../use-cases/list-applications.use-case';
 import { BulkImportMeaningsUseCase } from '../use-cases/bulk-import-meanings.use-case';
+import { ListPublicTarotistasUseCase } from '../use-cases/list-public-tarotistas.use-case';
+import { GetPublicProfileUseCase } from '../use-cases/get-public-profile.use-case';
+import { GetTarotistaMetricsUseCase } from '../use-cases/get-tarotista-metrics.use-case';
+import { GetPlatformMetricsUseCase } from '../use-cases/get-platform-metrics.use-case';
+import { GenerateReportUseCase } from '../use-cases/generate-report.use-case';
 
 describe('TarotistasOrchestratorService', () => {
   let service: TarotistasOrchestratorService;
@@ -35,6 +40,11 @@ describe('TarotistasOrchestratorService', () => {
   const mockGetConfigUseCase = { execute: jest.fn() };
   const mockListApplicationsUseCase = { execute: jest.fn() };
   const mockBulkImportMeaningsUseCase = { execute: jest.fn() };
+  const mockListPublicTarotistasUseCase = { execute: jest.fn() };
+  const mockGetPublicProfileUseCase = { execute: jest.fn() };
+  const mockGetTarotistaMetricsUseCase = { execute: jest.fn() };
+  const mockGetPlatformMetricsUseCase = { execute: jest.fn() };
+  const mockGenerateReportUseCase = { execute: jest.fn() };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -66,6 +76,26 @@ describe('TarotistasOrchestratorService', () => {
         {
           provide: BulkImportMeaningsUseCase,
           useValue: mockBulkImportMeaningsUseCase,
+        },
+        {
+          provide: ListPublicTarotistasUseCase,
+          useValue: mockListPublicTarotistasUseCase,
+        },
+        {
+          provide: GetPublicProfileUseCase,
+          useValue: mockGetPublicProfileUseCase,
+        },
+        {
+          provide: GetTarotistaMetricsUseCase,
+          useValue: mockGetTarotistaMetricsUseCase,
+        },
+        {
+          provide: GetPlatformMetricsUseCase,
+          useValue: mockGetPlatformMetricsUseCase,
+        },
+        {
+          provide: GenerateReportUseCase,
+          useValue: mockGenerateReportUseCase,
         },
       ],
     }).compile();

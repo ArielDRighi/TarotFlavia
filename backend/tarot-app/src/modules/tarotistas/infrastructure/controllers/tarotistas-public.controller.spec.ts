@@ -1,25 +1,25 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TarotistasPublicController } from './tarotistas-public.controller';
-import { TarotistasPublicService } from '../services/tarotistas-public.service';
-import { GetPublicTarotistasFilterDto } from '../dto';
+import { TarotistasOrchestratorService } from '../../application/services/tarotistas-orchestrator.service';
+import { GetPublicTarotistasFilterDto } from '../../application/dto';
 import { Tarotista } from '../entities/tarotista.entity';
 
 describe('TarotistasPublicController', () => {
   let controller: TarotistasPublicController;
-  let service: jest.Mocked<TarotistasPublicService>;
+  let orchestrator: jest.Mocked<TarotistasOrchestratorService>;
 
   beforeEach(async () => {
-    const mockService: jest.Mocked<TarotistasPublicService> = {
-      getAllPublic: jest.fn(),
+    const mockOrchestrator: jest.Mocked<TarotistasOrchestratorService> = {
+      listPublicTarotistas: jest.fn(),
       getPublicProfile: jest.fn(),
-    } as unknown as jest.Mocked<TarotistasPublicService>;
+    } as unknown as jest.Mocked<TarotistasOrchestratorService>;
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [TarotistasPublicController],
       providers: [
         {
-          provide: TarotistasPublicService,
-          useValue: mockService,
+          provide: TarotistasOrchestratorService,
+          useValue: mockOrchestrator,
         },
       ],
     }).compile();
@@ -27,7 +27,7 @@ describe('TarotistasPublicController', () => {
     controller = module.get<TarotistasPublicController>(
       TarotistasPublicController,
     );
-    service = module.get(TarotistasPublicService);
+    orchestrator = module.get(TarotistasOrchestratorService);
   });
 
   afterEach(() => {
@@ -53,14 +53,14 @@ describe('TarotistasPublicController', () => {
         totalPages: 1,
       };
 
-      service.getAllPublic.mockResolvedValue(mockResponse);
+      orchestrator.listPublicTarotistas.mockResolvedValue(mockResponse);
 
       const filterDto: GetPublicTarotistasFilterDto = {};
       const result = await controller.getAllPublic(filterDto);
 
       expect(result).toEqual(mockResponse);
-      expect(service.getAllPublic).toHaveBeenCalledWith(filterDto);
-      expect(service.getAllPublic).toHaveBeenCalledTimes(1);
+      expect(orchestrator.listPublicTarotistas).toHaveBeenCalledWith(filterDto);
+      expect(orchestrator.listPublicTarotistas).toHaveBeenCalledTimes(1);
     });
 
     it('should return list with custom pagination', async () => {
@@ -72,7 +72,7 @@ describe('TarotistasPublicController', () => {
         totalPages: 3,
       };
 
-      service.getAllPublic.mockResolvedValue(mockResponse);
+      orchestrator.listPublicTarotistas.mockResolvedValue(mockResponse);
 
       const filterDto: GetPublicTarotistasFilterDto = {
         page: 3,
@@ -81,7 +81,7 @@ describe('TarotistasPublicController', () => {
       const result = await controller.getAllPublic(filterDto);
 
       expect(result).toEqual(mockResponse);
-      expect(service.getAllPublic).toHaveBeenCalledWith(filterDto);
+      expect(orchestrator.listPublicTarotistas).toHaveBeenCalledWith(filterDto);
     });
 
     it('should return list with search filter', async () => {
@@ -99,13 +99,13 @@ describe('TarotistasPublicController', () => {
         totalPages: 1,
       };
 
-      service.getAllPublic.mockResolvedValue(mockResponse);
+      orchestrator.listPublicTarotistas.mockResolvedValue(mockResponse);
 
       const filterDto: GetPublicTarotistasFilterDto = { search: 'Luna' };
       const result = await controller.getAllPublic(filterDto);
 
       expect(result).toEqual(mockResponse);
-      expect(service.getAllPublic).toHaveBeenCalledWith(filterDto);
+      expect(orchestrator.listPublicTarotistas).toHaveBeenCalledWith(filterDto);
     });
 
     it('should return list filtered by especialidad', async () => {
@@ -123,7 +123,7 @@ describe('TarotistasPublicController', () => {
         totalPages: 1,
       };
 
-      service.getAllPublic.mockResolvedValue(mockResponse);
+      orchestrator.listPublicTarotistas.mockResolvedValue(mockResponse);
 
       const filterDto: GetPublicTarotistasFilterDto = {
         especialidad: 'Amor',
@@ -131,7 +131,7 @@ describe('TarotistasPublicController', () => {
       const result = await controller.getAllPublic(filterDto);
 
       expect(result).toEqual(mockResponse);
-      expect(service.getAllPublic).toHaveBeenCalledWith(filterDto);
+      expect(orchestrator.listPublicTarotistas).toHaveBeenCalledWith(filterDto);
     });
 
     it('should return list ordered by rating DESC', async () => {
@@ -146,7 +146,7 @@ describe('TarotistasPublicController', () => {
         totalPages: 1,
       };
 
-      service.getAllPublic.mockResolvedValue(mockResponse);
+      orchestrator.listPublicTarotistas.mockResolvedValue(mockResponse);
 
       const filterDto: GetPublicTarotistasFilterDto = {
         orderBy: 'rating',
@@ -155,7 +155,7 @@ describe('TarotistasPublicController', () => {
       const result = await controller.getAllPublic(filterDto);
 
       expect(result).toEqual(mockResponse);
-      expect(service.getAllPublic).toHaveBeenCalledWith(filterDto);
+      expect(orchestrator.listPublicTarotistas).toHaveBeenCalledWith(filterDto);
     });
 
     it('should return list ordered by totalLecturas ASC', async () => {
@@ -170,7 +170,7 @@ describe('TarotistasPublicController', () => {
         totalPages: 1,
       };
 
-      service.getAllPublic.mockResolvedValue(mockResponse);
+      orchestrator.listPublicTarotistas.mockResolvedValue(mockResponse);
 
       const filterDto: GetPublicTarotistasFilterDto = {
         orderBy: 'totalLecturas',
@@ -179,7 +179,7 @@ describe('TarotistasPublicController', () => {
       const result = await controller.getAllPublic(filterDto);
 
       expect(result).toEqual(mockResponse);
-      expect(service.getAllPublic).toHaveBeenCalledWith(filterDto);
+      expect(orchestrator.listPublicTarotistas).toHaveBeenCalledWith(filterDto);
     });
 
     it('should return empty list when no results', async () => {
@@ -191,7 +191,7 @@ describe('TarotistasPublicController', () => {
         totalPages: 0,
       };
 
-      service.getAllPublic.mockResolvedValue(mockResponse);
+      orchestrator.listPublicTarotistas.mockResolvedValue(mockResponse);
 
       const filterDto: GetPublicTarotistasFilterDto = {
         search: 'NonexistentName',
@@ -212,7 +212,7 @@ describe('TarotistasPublicController', () => {
         totalPages: 0,
       };
 
-      service.getAllPublic.mockResolvedValue(mockResponse);
+      orchestrator.listPublicTarotistas.mockResolvedValue(mockResponse);
 
       const filterDto: GetPublicTarotistasFilterDto = {
         search: 'Luna',
@@ -225,7 +225,7 @@ describe('TarotistasPublicController', () => {
       const result = await controller.getAllPublic(filterDto);
 
       expect(result).toEqual(mockResponse);
-      expect(service.getAllPublic).toHaveBeenCalledWith(filterDto);
+      expect(orchestrator.listPublicTarotistas).toHaveBeenCalledWith(filterDto);
     });
   });
 
@@ -244,40 +244,40 @@ describe('TarotistasPublicController', () => {
         idiomas: ['Español', 'Inglés'],
       } as unknown as Tarotista;
 
-      service.getPublicProfile.mockResolvedValue(mockTarotista);
+      orchestrator.getPublicProfile.mockResolvedValue(mockTarotista);
 
       const result = await controller.getPublicProfile(1);
 
       expect(result).toEqual(mockTarotista);
-      expect(service.getPublicProfile).toHaveBeenCalledWith(1);
-      expect(service.getPublicProfile).toHaveBeenCalledTimes(1);
+      expect(orchestrator.getPublicProfile).toHaveBeenCalledWith(1);
+      expect(orchestrator.getPublicProfile).toHaveBeenCalledTimes(1);
     });
 
     it('should throw NotFoundException when tarotista not found', async () => {
-      service.getPublicProfile.mockResolvedValue(null);
+      orchestrator.getPublicProfile.mockResolvedValue(null);
 
       await expect(controller.getPublicProfile(999)).rejects.toThrow(
         'Tarotista no encontrado o inactivo',
       );
-      expect(service.getPublicProfile).toHaveBeenCalledWith(999);
+      expect(orchestrator.getPublicProfile).toHaveBeenCalledWith(999);
     });
 
     it('should throw NotFoundException for inactive tarotista', async () => {
-      service.getPublicProfile.mockResolvedValue(null);
+      orchestrator.getPublicProfile.mockResolvedValue(null);
 
       await expect(controller.getPublicProfile(1)).rejects.toThrow(
         'Tarotista no encontrado o inactivo',
       );
-      expect(service.getPublicProfile).toHaveBeenCalledWith(1);
+      expect(orchestrator.getPublicProfile).toHaveBeenCalledWith(1);
     });
 
     it('should throw NotFoundException when id = 0', async () => {
-      service.getPublicProfile.mockResolvedValue(null);
+      orchestrator.getPublicProfile.mockResolvedValue(null);
 
       await expect(controller.getPublicProfile(0)).rejects.toThrow(
         'Tarotista no encontrado o inactivo',
       );
-      expect(service.getPublicProfile).toHaveBeenCalledWith(0);
+      expect(orchestrator.getPublicProfile).toHaveBeenCalledWith(0);
     });
 
     it('should NOT expose sensitive data (configs, customCardMeanings)', async () => {
@@ -291,7 +291,7 @@ describe('TarotistasPublicController', () => {
         // (service layer already filters them)
       } as unknown as Tarotista;
 
-      service.getPublicProfile.mockResolvedValue(mockTarotista);
+      orchestrator.getPublicProfile.mockResolvedValue(mockTarotista);
 
       const result = await controller.getPublicProfile(1);
 
@@ -304,7 +304,7 @@ describe('TarotistasPublicController', () => {
   describe('Edge cases', () => {
     it('should handle service throwing error', async () => {
       const error = new Error('Database connection failed');
-      service.getAllPublic.mockRejectedValue(error);
+      orchestrator.listPublicTarotistas.mockRejectedValue(error);
 
       const filterDto: GetPublicTarotistasFilterDto = {};
 
@@ -315,7 +315,7 @@ describe('TarotistasPublicController', () => {
 
     it('should handle service throwing error on getPublicProfile', async () => {
       const error = new Error('Database error');
-      service.getPublicProfile.mockRejectedValue(error);
+      orchestrator.getPublicProfile.mockRejectedValue(error);
 
       await expect(controller.getPublicProfile(1)).rejects.toThrow(
         'Database error',
@@ -331,13 +331,13 @@ describe('TarotistasPublicController', () => {
         totalPages: 0,
       };
 
-      service.getAllPublic.mockResolvedValue(mockResponse);
+      orchestrator.listPublicTarotistas.mockResolvedValue(mockResponse);
 
       // Empty object = default values
       const result = await controller.getAllPublic({});
 
       expect(result).toEqual(mockResponse);
-      expect(service.getAllPublic).toHaveBeenCalledWith({});
+      expect(orchestrator.listPublicTarotistas).toHaveBeenCalledWith({});
     });
   });
 });

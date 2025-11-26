@@ -45,6 +45,9 @@ import { GenerateReportUseCase } from './application/use-cases/generate-report.u
 // Orchestrator
 import { TarotistasOrchestratorService } from './application/services/tarotistas-orchestrator.service';
 
+// Legacy Services (still used by other modules)
+import { RevenueCalculationService } from './services/revenue-calculation.service';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([
@@ -100,7 +103,14 @@ import { TarotistasOrchestratorService } from './application/services/tarotistas
 
     // ==================== Orchestrator ====================
     TarotistasOrchestratorService,
+
+    // ==================== Legacy Services ====================
+    RevenueCalculationService,
   ],
-  exports: [TarotistasOrchestratorService, TypeOrmModule],
+  exports: [
+    TarotistasOrchestratorService,
+    RevenueCalculationService,
+    TypeOrmModule,
+  ],
 })
 export class TarotistasModule {}
