@@ -6,8 +6,8 @@ import {
   ApiBearerAuth,
   ApiBody,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { AdminGuard } from '../../auth/guards/admin.guard';
+import { JwtAuthGuard } from '../../auth/infrastructure/guards/jwt-auth.guard';
+import { AdminGuard } from '../../auth/infrastructure/guards/admin.guard';
 import { AIQuotaGuard } from '../../ai-usage/ai-quota.guard';
 import { InterpretationsService } from './interpretations.service';
 import { InterpretationCacheService } from '../../cache/application/services/interpretation-cache.service';

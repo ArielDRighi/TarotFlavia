@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { AppModule } from '../../src/app.module';
 import { DataSource } from 'typeorm';
-import { AuthService } from '../../src/modules/auth/auth.service';
+import { AuthOrchestratorService } from '../../src/modules/auth/application/services/auth-orchestrator.service';
 import { UsersService } from '../../src/modules/users/users.service';
 import { User as _User } from '../../src/modules/users/entities/user.entity';
 import { RefreshToken } from '../../src/modules/auth/entities/refresh-token.entity';
@@ -33,7 +33,7 @@ interface PasswordResetTokenRow {
 /**
  * AUTH + USERS INTEGRATION TESTS
  *
- * Objetivo: Validar las interacciones entre AuthService y UsersService con BD real
+ * Objetivo: Validar las interacciones entre AuthOrchestratorService y UsersService con BD real
  * Diferencia con E2E: No prueba endpoints HTTP, sino la integración directa de servicios
  *
  * REGLA DE ORO: Estos tests deben BUSCAR ERRORES REALES, no asumir que todo funciona
@@ -41,7 +41,7 @@ interface PasswordResetTokenRow {
 describe('Auth + Users Integration Tests', () => {
   let app: INestApplication;
   let dataSource: DataSource;
-  let authService: AuthService;
+  let authService: AuthOrchestratorService;
   let usersService: UsersService;
 
   const testUserData = {
@@ -67,7 +67,7 @@ describe('Auth + Users Integration Tests', () => {
     await app.init();
 
     dataSource = moduleFixture.get<DataSource>(DataSource);
-    authService = moduleFixture.get<AuthService>(AuthService);
+    authService = moduleFixture.get<AuthOrchestratorService>(AuthOrchestratorService);
     usersService = moduleFixture.get<UsersService>(UsersService);
   });
 
@@ -93,7 +93,7 @@ describe('Auth + Users Integration Tests', () => {
     ]);
   });
 
-  describe('Register Flow - AuthService + UsersService', () => {
+  describe('Register Flow - AuthOrchestratorService + UsersService', () => {
     it('should create user in database when registering', async () => {
       // TDD RED: Este test debe fallar si hay algún problema en la integración
       const result = await authService.register(
@@ -106,7 +106,7 @@ describe('Auth + Users Integration Tests', () => {
         'Integration Test Agent', // userAgent
       );
 
-      // Verificar que AuthService retorna los datos correctos
+      // Verificar que AuthOrchestratorService retorna los datos correctos
       expect(result).toBeDefined();
       expect(result.user).toBeDefined();
       expect(result.access_token).toBeDefined();
@@ -187,7 +187,7 @@ describe('Auth + Users Integration Tests', () => {
     });
   });
 
-  describe('Login Flow - AuthService + UsersService', () => {
+  describe('Login Flow - AuthOrchestratorService + UsersService', () => {
     let registeredUser: {
       id: number;
       email: string;

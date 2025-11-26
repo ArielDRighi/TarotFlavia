@@ -19,7 +19,7 @@ import {
   SubscriptionInfo,
 } from './subscriptions.service';
 import { SetFavoriteTarotistaDto } from './dto/set-favorite-tarotista.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/infrastructure/guards/jwt-auth.guard';
 import { UserTarotistaSubscription } from '../tarotistas/entities/user-tarotista-subscription.entity';
 
 @ApiTags('subscriptions')

@@ -2,7 +2,7 @@ import { Controller, Post, Body, UseGuards, HttpCode } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { TarotistasOrchestratorService } from '../../application/services/tarotistas-orchestrator.service';
 import { ExportReportDto } from '../../application/dto';
-import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
 
 @ApiTags('Tarotistas - Reports')
 @Controller('tarotistas/reports')

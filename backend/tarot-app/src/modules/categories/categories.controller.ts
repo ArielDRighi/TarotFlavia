@@ -20,8 +20,8 @@ import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { ReadingCategory } from './entities/reading-category.entity';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { AdminGuard } from '../auth/guards/admin.guard';
+import { JwtAuthGuard } from '../auth/infrastructure/guards/jwt-auth.guard';
+import { AdminGuard } from '../auth/infrastructure/guards/admin.guard';
 
 @ApiTags('categories')
 @Controller('categories')

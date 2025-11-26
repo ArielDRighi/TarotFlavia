@@ -36,12 +36,6 @@ import { ResetPasswordUseCase } from './application/use-cases/reset-password.use
 import { UsersModule } from '../users/users.module';
 import { SecurityModule } from '../security/security.module';
 
-// Old services (mantener temporalmente para compatibilidad)
-import { AuthService } from './auth.service';
-import { RefreshTokenService } from './refresh-token.service';
-import { PasswordResetService } from './password-reset.service';
-import { PasswordResetCleanupService } from './password-reset-cleanup.service';
-
 @Module({
   imports: [
     forwardRef(() => UsersModule),
@@ -60,8 +54,6 @@ import { PasswordResetCleanupService } from './password-reset-cleanup.service';
   ],
   controllers: [AuthController],
   providers: [
-    // ========== NEW LAYERED ARCHITECTURE ==========
-
     // Infrastructure - Repositories
     {
       provide: REFRESH_TOKEN_REPOSITORY,
@@ -86,24 +78,13 @@ import { PasswordResetCleanupService } from './password-reset-cleanup.service';
     // Application - Services
     AuthOrchestratorService,
     TokenCleanupService,
-
-    // ========== OLD SERVICES (for backward compatibility) ==========
-    AuthService,
-    RefreshTokenService,
-    PasswordResetService,
-    PasswordResetCleanupService,
   ],
   exports: [
-    // Export new orchestrator
+    // Export orchestrator and repositories
     AuthOrchestratorService,
     REFRESH_TOKEN_REPOSITORY,
     PASSWORD_RESET_REPOSITORY,
-
-    // Export old services for backward compatibility
-    AuthService,
     JwtModule,
-    RefreshTokenService,
-    PasswordResetService,
   ],
 })
 export class AuthModule {}
