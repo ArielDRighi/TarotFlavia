@@ -1,5 +1,4 @@
 import { Session } from '../../entities/session.entity';
-import { BookSessionDto } from '../../application/dto/book-session.dto';
 import { SessionStatus } from '../enums/session-status.enum';
 
 export interface ISessionRepository {

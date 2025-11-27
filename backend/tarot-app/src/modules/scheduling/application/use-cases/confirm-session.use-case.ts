@@ -10,6 +10,8 @@ import { ConfirmSessionDto } from '../dto/confirm-session.dto';
 import { SessionResponseDto } from '../dto/session-response.dto';
 import { SessionStatus } from '../../domain/enums';
 
+import { Session } from '../../entities/session.entity';
+
 @Injectable()
 export class ConfirmSessionUseCase {
   constructor(
@@ -47,7 +49,7 @@ export class ConfirmSessionUseCase {
     return this.mapToResponseDto(updated);
   }
 
-  private mapToResponseDto(session: any): SessionResponseDto {
+  private mapToResponseDto(session: Session): SessionResponseDto {
     return {
       id: session.id,
       tarotistaId: session.tarotistaId,

@@ -9,6 +9,7 @@ import { SESSION_REPOSITORY } from '../../domain/interfaces/repository.tokens';
 import { CompleteSessionDto } from '../dto/complete-session.dto';
 import { SessionResponseDto } from '../dto/session-response.dto';
 import { SessionStatus } from '../../domain/enums';
+import { Session } from '../../entities/session.entity';
 
 @Injectable()
 export class CompleteSessionUseCase {
@@ -45,7 +46,7 @@ export class CompleteSessionUseCase {
     return this.mapToResponseDto(updated);
   }
 
-  private mapToResponseDto(session: any): SessionResponseDto {
+  private mapToResponseDto(session: Session): SessionResponseDto {
     return {
       id: session.id,
       tarotistaId: session.tarotistaId,

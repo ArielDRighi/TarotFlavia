@@ -9,6 +9,7 @@ import { SESSION_REPOSITORY } from '../../domain/interfaces/repository.tokens';
 import { CancelSessionDto } from '../dto/cancel-session.dto';
 import { SessionResponseDto } from '../dto/session-response.dto';
 import { SessionStatus } from '../../domain/enums';
+import { Session } from '../../entities/session.entity';
 
 @Injectable()
 export class CancelSessionUseCase {
@@ -61,7 +62,7 @@ export class CancelSessionUseCase {
     return this.mapToResponseDto(updated);
   }
 
-  private mapToResponseDto(session: any): SessionResponseDto {
+  private mapToResponseDto(session: Session): SessionResponseDto {
     return {
       id: session.id,
       tarotistaId: session.tarotistaId,

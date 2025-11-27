@@ -85,7 +85,7 @@ export class BookSessionUseCase {
           tarotistaId: dto.tarotistaId,
           sessionDate: dto.sessionDate,
           sessionTime: dto.sessionTime,
-          status: SessionStatus.PENDING as any,
+          status: SessionStatus.PENDING,
         },
       });
 
