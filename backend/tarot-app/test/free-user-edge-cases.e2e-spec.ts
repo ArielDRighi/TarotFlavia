@@ -292,7 +292,7 @@ describe('Free User Edge Cases E2E (SUBTASK-18)', () => {
       const logoutResponse = await request(app.getHttpServer())
         .post('/auth/logout-all')
         .set('Authorization', `Bearer ${freeUserToken}`)
-        .expect(201);
+        .expect(200);
 
       expect(logoutResponse.body).toHaveProperty('message');
 
@@ -384,7 +384,7 @@ describe('Free User Edge Cases E2E (SUBTASK-18)', () => {
         await request(app.getHttpServer())
           .post('/auth/logout-all')
           .set('Authorization', `Bearer ${freeUserToken}`)
-          .expect(201);
+          .expect(200);
 
         // Re-login
         const loginResponse = await request(app.getHttpServer())

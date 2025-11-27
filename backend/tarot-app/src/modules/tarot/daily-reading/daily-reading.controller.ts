@@ -15,7 +15,7 @@ import {
   ApiBearerAuth,
   ApiQuery,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../auth/infrastructure/guards/jwt-auth.guard';
 import { AIQuotaGuard } from '../../ai-usage/ai-quota.guard';
 import { DailyReadingService } from './daily-reading.service';
 import { DailyReadingResponseDto } from './dto/daily-reading-response.dto';

@@ -6,7 +6,7 @@ import { AppModule } from '../../src/app.module';
 
 // Services
 import { UsersService } from '../../src/modules/users/users.service';
-import { AuthService } from '../../src/modules/auth/auth.service';
+import { AuthOrchestratorService } from '../../src/modules/auth/application/services/auth-orchestrator.service';
 
 // Entities
 import { User } from '../../src/modules/users/entities/user.entity';
@@ -18,7 +18,7 @@ describe('Categories + Questions Integration Tests', () => {
   let app: INestApplication;
   let dataSource: DataSource;
   let usersService: UsersService;
-  let authService: AuthService;
+  let authService: AuthOrchestratorService;
 
   // Test data
   let adminUser: User;
@@ -49,7 +49,9 @@ describe('Categories + Questions Integration Tests', () => {
 
     dataSource = moduleFixture.get<DataSource>(DataSource);
     usersService = moduleFixture.get<UsersService>(UsersService);
-    authService = moduleFixture.get<AuthService>(AuthService);
+    authService = moduleFixture.get<AuthOrchestratorService>(
+      AuthOrchestratorService,
+    );
 
     // Inicializar repositorios
     userRepository = dataSource.getRepository(User);
@@ -78,9 +80,10 @@ describe('Categories + Questions Integration Tests', () => {
     await userRepository.save(adminUser);
 
     const adminLoginResponse = await authService.login(
-      adminUser,
-      'test-admin-agent',
+      adminUser.id,
+      adminUser.email,
       '127.0.0.1',
+      'test-admin-agent',
     );
     adminToken = adminLoginResponse.access_token;
 
@@ -437,10 +440,14 @@ describe('Categories + Questions Integration Tests', () => {
         name: 'Regular User',
       });
 
+      const foundUser1 = await userRepository.findOne({
+        where: { id: regularUser.id },
+      });
       const regularLogin = await authService.login(
-        await userRepository.findOne({ where: { id: regularUser.id } }),
-        'test-user-agent',
+        foundUser1.id,
+        foundUser1.email,
         '127.0.0.1',
+        'test-user-agent',
       );
 
       const createDto = {
@@ -471,10 +478,14 @@ describe('Categories + Questions Integration Tests', () => {
         name: 'Regular User',
       });
 
+      const foundUser2 = await userRepository.findOne({
+        where: { id: regularUser.id },
+      });
       const regularLogin = await authService.login(
-        await userRepository.findOne({ where: { id: regularUser.id } }),
-        'test-user-agent',
+        foundUser2.id,
+        foundUser2.email,
         '127.0.0.1',
+        'test-user-agent',
       );
 
       // ACT & ASSERT

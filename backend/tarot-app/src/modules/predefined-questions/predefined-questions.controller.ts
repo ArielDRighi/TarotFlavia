@@ -20,8 +20,8 @@ import {
 import { PredefinedQuestionsService } from './predefined-questions.service';
 import { CreatePredefinedQuestionDto } from './dto/create-predefined-question.dto';
 import { UpdatePredefinedQuestionDto } from './dto/update-predefined-question.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { AdminGuard } from '../auth/guards/admin.guard';
+import { JwtAuthGuard } from '../auth/infrastructure/guards/jwt-auth.guard';
+import { AdminGuard } from '../auth/infrastructure/guards/admin.guard';
 
 @ApiTags('Preguntas Predefinidas')
 @Controller('predefined-questions')

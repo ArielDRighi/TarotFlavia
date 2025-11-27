@@ -1,6 +1,6 @@
 import { ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { AdminGuard } from './admin.guard';
-import { UserRole } from '../../../common/enums/user-role.enum';
+import { UserRole } from '../../../../common/enums/user-role.enum';
 
 describe('AdminGuard', () => {
   let guard: AdminGuard;

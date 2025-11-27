@@ -23,7 +23,7 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../auth/infrastructure/guards/jwt-auth.guard';
 import { RequiresPremiumForCustomQuestionGuard } from './guards/requires-premium-for-custom-question.guard';
 import {
   CheckUsageLimitGuard,

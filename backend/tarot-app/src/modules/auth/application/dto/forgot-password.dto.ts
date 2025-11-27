@@ -1,6 +1,6 @@
 import { IsEmail, IsNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { SanitizeEmail } from '../../../common/decorators/sanitize.decorator';
+import { SanitizeEmail } from '../../../../common/decorators/sanitize.decorator';
 
 export class ForgotPasswordDto {
   @ApiProperty({

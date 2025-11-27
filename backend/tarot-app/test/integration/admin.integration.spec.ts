@@ -6,7 +6,7 @@ import { AppModule } from '../../src/app.module';
 
 // Services
 import { UsersService } from '../../src/modules/users/users.service';
-import { AuthService } from '../../src/modules/auth/auth.service';
+import { AuthOrchestratorService } from '../../src/modules/auth/application/services/auth-orchestrator.service';
 
 // Entities
 import { User, UserPlan } from '../../src/modules/users/entities/user.entity';
@@ -17,7 +17,7 @@ describe('Admin Operations Integration Tests', () => {
   let app: INestApplication;
   let dataSource: DataSource;
   let usersService: UsersService;
-  let authService: AuthService;
+  let authService: AuthOrchestratorService;
 
   // Test data
   let adminUser: User;
@@ -56,7 +56,9 @@ describe('Admin Operations Integration Tests', () => {
 
     dataSource = moduleFixture.get<DataSource>(DataSource);
     usersService = moduleFixture.get<UsersService>(UsersService);
-    authService = moduleFixture.get<AuthService>(AuthService);
+    authService = moduleFixture.get<AuthOrchestratorService>(
+      AuthOrchestratorService,
+    );
 
     // Inicializar repositorios
     userRepository = dataSource.getRepository(User);
@@ -86,9 +88,10 @@ describe('Admin Operations Integration Tests', () => {
 
     // Obtener token de admin
     const adminLoginResponse = await authService.login(
-      adminUser,
-      'test-admin-agent',
+      adminUser.id,
+      adminUser.email,
       '127.0.0.1',
+      'test-admin-agent',
     );
     adminToken = adminLoginResponse.access_token;
 
@@ -329,9 +332,10 @@ describe('Admin Operations Integration Tests', () => {
     it('should deny access to admin endpoints for regular users', async () => {
       // ARRANGE: Obtener token de usuario regular
       const regularLogin = await authService.login(
-        regularUser,
-        'test-user-agent',
+        regularUser.id,
+        regularUser.email,
         '127.0.0.1',
+        'test-user-agent',
       );
       const regularToken = regularLogin.access_token;
 

@@ -1,6 +1,6 @@
 import { Controller, Get, Request, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../modules/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../modules/auth/infrastructure/guards/jwt-auth.guard';
 import { RateLimitService } from './rate-limit.service';
 
 @ApiTags('Rate Limiting')

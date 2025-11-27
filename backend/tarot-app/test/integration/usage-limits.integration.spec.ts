@@ -6,7 +6,7 @@ import { AppModule } from '../../src/app.module';
 
 // Services
 import { UsersService } from '../../src/modules/users/users.service';
-import { AuthService } from '../../src/modules/auth/auth.service';
+import { AuthOrchestratorService } from '../../src/modules/auth/application/services/auth-orchestrator.service';
 
 // Entities
 import { User, UserPlan } from '../../src/modules/users/entities/user.entity';
@@ -26,7 +26,7 @@ describe('UsageLimits + Readings Integration Tests', () => {
   let app: INestApplication;
   let dataSource: DataSource;
   let usersService: UsersService;
-  let authService: AuthService;
+  let authService: AuthOrchestratorService;
 
   // Test data
   let testUser: User;
@@ -63,7 +63,11 @@ describe('UsageLimits + Readings Integration Tests', () => {
 
     dataSource = moduleFixture.get<DataSource>(DataSource);
     usersService = moduleFixture.get<UsersService>(UsersService);
-    authService = moduleFixture.get<AuthService>(AuthService);
+    authService = moduleFixture.get<AuthOrchestratorService>(
+      AuthOrchestratorService,
+    );
+    // Note: login() signature changed from login(user, userAgent, ip) to login(userId, email, ip, userAgent)
+    // This is a breaking change for better separation of concerns (primitive types instead of entities)
 
     // Inicializar repositorios
     userRepository = dataSource.getRepository(User);
@@ -115,9 +119,10 @@ describe('UsageLimits + Readings Integration Tests', () => {
 
     // Obtener auth token
     const loginResponse = await authService.login(
-      testUser,
-      'test-user-agent',
+      testUser.id,
+      testUser.email,
       '127.0.0.1',
+      'test-user-agent',
     );
     authToken = loginResponse.access_token;
 

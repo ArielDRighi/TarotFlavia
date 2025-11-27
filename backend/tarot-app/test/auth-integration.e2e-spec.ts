@@ -171,7 +171,7 @@ describe('Auth Integration Tests (E2E)', () => {
         .send({
           refreshToken: originalRefreshToken,
         })
-        .expect(201);
+        .expect(200);
 
       expect(refreshResponse.body).toBeDefined();
       expect(refreshResponse.body.access_token).toBeDefined();
@@ -200,7 +200,7 @@ describe('Auth Integration Tests (E2E)', () => {
         .send({
           refreshToken: refreshToken,
         })
-        .expect(201);
+        .expect(200);
 
       // Attempt to refresh with logged-out token should fail
       await request(app.getHttpServer())
@@ -250,7 +250,7 @@ describe('Auth Integration Tests (E2E)', () => {
       await request(app.getHttpServer())
         .post('/auth/logout-all')
         .set('Authorization', `Bearer ${accessToken}`)
-        .expect(201);
+        .expect(200);
 
       // All refresh tokens should be revoked
       await request(app.getHttpServer())
@@ -438,7 +438,7 @@ describe('Auth Integration Tests (E2E)', () => {
         .send({
           refreshToken: originalRefreshToken,
         })
-        .expect(201);
+        .expect(200);
 
       // Second refresh with same token (should fail due to rotation)
       await request(app.getHttpServer())

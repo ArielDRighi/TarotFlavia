@@ -13,8 +13,8 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { AdminGuard } from '../../auth/guards/admin.guard';
+import { JwtAuthGuard } from '../../auth/infrastructure/guards/jwt-auth.guard';
+import { AdminGuard } from '../../auth/infrastructure/guards/admin.guard';
 import { ReadingsOrchestratorService } from './application/services/readings-orchestrator.service';
 import { PaginatedReadingsResponseDto } from './dto/paginated-readings-response.dto';
 

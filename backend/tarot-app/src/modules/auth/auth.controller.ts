@@ -9,12 +9,12 @@ import {
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { RateLimit } from '../../common/decorators/rate-limit.decorator';
-import { AuthService } from './auth.service';
+import { AuthOrchestratorService } from './application/services/auth-orchestrator.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
-import { LoginDto } from './dto/login.dto';
-import { RefreshTokenDto } from './dto/refresh-token.dto';
-import { ForgotPasswordDto } from './dto/forgot-password.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
+import { LoginDto } from './application/dto/login.dto';
+import { RefreshTokenDto } from './application/dto/refresh-token.dto';
+import { ForgotPasswordDto } from './application/dto/forgot-password.dto';
+import { ResetPasswordDto } from './application/dto/reset-password.dto';
 import {
   ApiTags,
   ApiOperation,
@@ -23,12 +23,12 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { Request } from 'express';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { JwtAuthGuard } from './infrastructure/guards/jwt-auth.guard';
 
 @ApiTags('Autenticación')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthOrchestratorService) {}
 
   @Post('register')
   @RateLimit({ ttl: 3600, limit: 3, blockDuration: 3600 }) // 3 registros/hora por IP
@@ -182,10 +182,11 @@ export class AuthController {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
-    return this.authService.login(user, ipAddress, userAgent);
+    return this.authService.login(user.id, user.email, ipAddress, userAgent);
   }
 
   @Post('refresh')
+  @HttpCode(200)
   @ApiOperation({
     summary: 'Refrescar token de acceso',
     description:
@@ -248,6 +249,7 @@ export class AuthController {
   }
 
   @Post('logout')
+  @HttpCode(200)
   @ApiOperation({
     summary: 'Cerrar sesión (revocar refresh token actual)',
     description:
@@ -294,6 +296,7 @@ export class AuthController {
   }
 
   @Post('logout-all')
+  @HttpCode(200)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({

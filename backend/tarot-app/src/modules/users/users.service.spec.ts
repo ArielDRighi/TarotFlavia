@@ -3,7 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User, UserRole, UserPlan } from './entities/user.entity';
-import { RefreshTokenService } from '../auth/refresh-token.service';
+import { REFRESH_TOKEN_REPOSITORY } from '../auth/domain/interfaces/repository.tokens';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -40,7 +40,7 @@ describe('UsersService', () => {
           useValue: mockUserRepository,
         },
         {
-          provide: RefreshTokenService,
+          provide: REFRESH_TOKEN_REPOSITORY,
           useValue: mockRefreshTokenService,
         },
       ],

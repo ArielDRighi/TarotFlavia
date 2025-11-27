@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsString, MinLength, MaxLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsStrongPassword } from './is-strong-password.validator';
-import { Trim } from '../../../common/decorators/sanitize.decorator';
+import { Trim } from '../../../../common/decorators/sanitize.decorator';
 
 export class ResetPasswordDto {
   @ApiProperty({

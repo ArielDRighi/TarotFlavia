@@ -8,7 +8,7 @@ import {
 } from '@nestjs/swagger';
 import { SecurityEventService } from './security-event.service';
 import { QuerySecurityEventDto } from './dto/query-security-event.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/infrastructure/guards/jwt-auth.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../common/enums/user-role.enum';
 import { RolesGuard } from '../../common/guards/roles.guard';

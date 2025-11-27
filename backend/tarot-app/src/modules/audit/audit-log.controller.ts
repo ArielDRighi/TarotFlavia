@@ -5,8 +5,8 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { AdminGuard } from '../auth/guards/admin.guard';
+import { JwtAuthGuard } from '../auth/infrastructure/guards/jwt-auth.guard';
+import { AdminGuard } from '../auth/infrastructure/guards/admin.guard';
 import { AuditLogService, AuditLogListResponse } from './audit-log.service';
 import { QueryAuditLogDto } from './dto/query-audit-log.dto';
 

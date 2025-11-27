@@ -2,13 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Repository, IsNull } from 'typeorm';
-import { RefreshToken } from './entities/refresh-token.entity';
-import { User } from '../users/entities/user.entity';
+import { RefreshToken } from '../../entities/refresh-token.entity';
+import { User } from '../../../users/entities/user.entity';
+import { IRefreshTokenRepository } from '../../domain/interfaces/refresh-token-repository.interface';
 import * as crypto from 'crypto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
-export class RefreshTokenService {
+export class TypeOrmRefreshTokenRepository implements IRefreshTokenRepository {
   constructor(
     @InjectRepository(RefreshToken)
     private readonly refreshTokenRepository: Repository<RefreshToken>,
@@ -18,7 +19,7 @@ export class RefreshTokenService {
   /**
    * Genera un token aleatorio y seguro
    */
-  async generateToken(): Promise<string> {
+  private async generateToken(): Promise<string> {
     return new Promise((resolve, reject) => {
       crypto.randomBytes(64, (err, buffer) => {
         if (err) reject(err);
@@ -30,7 +31,7 @@ export class RefreshTokenService {
   /**
    * Hashea un token usando bcrypt
    */
-  async hashToken(token: string): Promise<string> {
+  private async hashToken(token: string): Promise<string> {
     const saltRounds = 10;
     return bcrypt.hash(token, saltRounds);
   }
@@ -42,10 +43,6 @@ export class RefreshTokenService {
     return crypto.createHash('sha256').update(token).digest('hex');
   }
 
-  /**
-   * Crea un nuevo refresh token para un usuario
-   * @returns Objeto con el token en texto plano y la entidad guardada
-   */
   async createRefreshToken(
     user: User,
     ipAddress: string | null = null,
@@ -76,10 +73,6 @@ export class RefreshTokenService {
     };
   }
 
-  /**
-   * Encuentra un refresh token por el hash del token sin conocer el userId
-   * Usa SHA-256 hash para búsqueda rápida O(1) con índice, luego valida con bcrypt
-   */
   async findTokenByPlainToken(
     plainToken: string,
   ): Promise<RefreshToken | null> {
@@ -105,10 +98,6 @@ export class RefreshTokenService {
     return token;
   }
 
-  /**
-   * Encuentra un refresh token por el hash del token
-   * Compara el token en texto plano con todos los tokens hasheados del usuario
-   */
   async findTokenByHash(
     plainToken: string,
     userId: number,
@@ -128,9 +117,6 @@ export class RefreshTokenService {
     return null;
   }
 
-  /**
-   * Revoca un refresh token específico
-   */
   async revokeToken(tokenId: string): Promise<void> {
     await this.refreshTokenRepository.update(
       { id: tokenId },
@@ -138,9 +124,6 @@ export class RefreshTokenService {
     );
   }
 
-  /**
-   * Revoca todos los refresh tokens de un usuario
-   */
   async revokeAllUserTokens(userId: number): Promise<void> {
     await this.refreshTokenRepository.update(
       { userId, revokedAt: IsNull() },
@@ -148,10 +131,6 @@ export class RefreshTokenService {
     );
   }
 
-  /**
-   * Elimina tokens expirados hace más de N días (configurable)
-   * @returns Número de tokens eliminados
-   */
   async deleteExpiredTokens(): Promise<number> {
     const retentionDays =
       this.configService.get<number>('REFRESH_TOKEN_RETENTION_DAYS') || 30;

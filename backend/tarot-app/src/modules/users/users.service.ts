@@ -4,6 +4,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
   BadRequestException,
+  Inject,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DeleteResult } from 'typeorm';
@@ -12,7 +13,8 @@ import { User, UserWithoutPassword, UserRole } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateUserPlanDto } from './dto/update-user-plan.dto';
-import { RefreshTokenService } from '../auth/refresh-token.service';
+import { IRefreshTokenRepository } from '../auth/domain/interfaces/refresh-token-repository.interface';
+import { REFRESH_TOKEN_REPOSITORY } from '../auth/domain/interfaces/repository.tokens';
 import { UserQueryDto } from './dto/user-query.dto';
 import { UserListResponseDto } from './dto/user-list-response.dto';
 import { UserDetailDto } from './dto/user-detail.dto';
@@ -22,7 +24,8 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
-    private refreshTokenService: RefreshTokenService,
+    @Inject(REFRESH_TOKEN_REPOSITORY)
+    private refreshTokenRepository: IRefreshTokenRepository,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<UserWithoutPassword> {
@@ -161,7 +164,7 @@ export class UsersService {
       await this.usersRepository.save(user);
 
       // Invalidar todos los refresh tokens del usuario para forzar re-login
-      await this.refreshTokenService.revokeAllUserTokens(id);
+      await this.refreshTokenRepository.revokeAllUserTokens(id);
 
       // Retornar usuario sin contraseña
       // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -5,7 +5,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
-import { UserRole } from '../../../common/enums/user-role.enum';
+import { UserRole } from '../../../../common/enums/user-role.enum';
 
 interface RequestWithUser extends Request {
   user?: {

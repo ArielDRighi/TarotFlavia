@@ -6,7 +6,7 @@ import { AppModule } from '../../src/app.module';
 // Services
 import { UsersService } from '../../src/modules/users/users.service';
 import { EmailService } from '../../src/modules/email/email.service';
-import { AuthService } from '../../src/modules/auth/auth.service';
+import { AuthOrchestratorService } from '../../src/modules/auth/application/services/auth-orchestrator.service';
 
 // Entities
 import { User, UserPlan } from '../../src/modules/users/entities/user.entity';
@@ -16,7 +16,7 @@ describe('Email Integration Tests', () => {
   let dataSource: DataSource;
   let usersService: UsersService;
   let emailService: EmailService;
-  let authService: AuthService;
+  let authService: AuthOrchestratorService;
 
   // Test data
   let testUser: User;
@@ -46,7 +46,9 @@ describe('Email Integration Tests', () => {
     dataSource = moduleFixture.get<DataSource>(DataSource);
     usersService = moduleFixture.get<UsersService>(UsersService);
     emailService = moduleFixture.get<EmailService>(EmailService);
-    authService = moduleFixture.get<AuthService>(AuthService);
+    authService = moduleFixture.get<AuthOrchestratorService>(
+      AuthOrchestratorService,
+    );
   });
 
   afterAll(async () => {
@@ -95,9 +97,9 @@ describe('Email Integration Tests', () => {
 
   describe('Password Reset Email', () => {
     /**
-     * TODO: Implementar integración completa de email en AuthService.forgotPassword()
+     * TODO: Implementar integración completa de email en AuthOrchestratorService.forgotPassword()
      *
-     * Actualmente AuthService.forgotPassword() solo hace console.log() del token
+     * Actualmente AuthOrchestratorService.forgotPassword() solo hace console.log() del token
      * (ver src/modules/auth/auth.service.ts línea 221)
      *
      * Cuando se implemente EmailService.sendPasswordResetEmail() en ese método,

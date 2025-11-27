@@ -15,8 +15,8 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 import { IPWhitelistService } from '../../../common/services/ip-whitelist.service';
-import { AdminGuard } from '../../auth/guards/admin.guard';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { AdminGuard } from '../../auth/infrastructure/guards/admin.guard';
+import { JwtAuthGuard } from '../../auth/infrastructure/guards/jwt-auth.guard';
 import { IsIP, IsNotEmpty } from 'class-validator';
 
 class AddIPDto {

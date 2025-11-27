@@ -5,7 +5,7 @@ import { AppModule } from '../../src/app.module';
 
 // Services
 import { UsersService } from '../../src/modules/users/users.service';
-import { AuthService } from '../../src/modules/auth/auth.service';
+import { AuthOrchestratorService } from '../../src/modules/auth/application/services/auth-orchestrator.service';
 
 // Entities
 import { User } from '../../src/modules/users/entities/user.entity';
@@ -26,7 +26,7 @@ describe('Cache + AI Integration Tests', () => {
   let app: INestApplication;
   let dataSource: DataSource;
   let usersService: UsersService;
-  let authService: AuthService;
+  let authService: AuthOrchestratorService;
 
   // Test data
   let testUser: User;
@@ -54,7 +54,9 @@ describe('Cache + AI Integration Tests', () => {
 
     dataSource = moduleFixture.get<DataSource>(DataSource);
     usersService = moduleFixture.get<UsersService>(UsersService);
-    authService = moduleFixture.get<AuthService>(AuthService);
+    authService = moduleFixture.get<AuthOrchestratorService>(
+      AuthOrchestratorService,
+    );
 
     // Inicializar repositorios
     userRepository = dataSource.getRepository(User);
@@ -98,9 +100,10 @@ describe('Cache + AI Integration Tests', () => {
     });
 
     const loginResponse = await authService.login(
-      testUser,
-      'test-user-agent',
+      testUser.id,
+      testUser.email,
       '127.0.0.1',
+      'test-user-agent',
     );
     _authToken = loginResponse.access_token;
   });

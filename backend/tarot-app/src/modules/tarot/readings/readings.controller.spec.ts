@@ -3,7 +3,7 @@ import { ReadingsController } from './readings.controller';
 import { ReadingsOrchestratorService } from './application/services/readings-orchestrator.service';
 import { CreateReadingDto } from './dto/create-reading.dto';
 import { QueryReadingsDto, SortBy, SortOrder } from './dto/query-readings.dto';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../auth/infrastructure/guards/jwt-auth.guard';
 import { RequiresPremiumForCustomQuestionGuard } from './guards/requires-premium-for-custom-question.guard';
 import { CheckUsageLimitGuard } from '../../usage-limits/guards/check-usage-limit.guard';
 import { AIQuotaGuard } from '../../ai-usage/ai-quota.guard';

@@ -1,17 +1,16 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { PasswordResetToken } from './entities/password-reset-token.entity';
-import { UsersService } from '../users/users.service';
+import { PasswordResetToken } from '../../entities/password-reset-token.entity';
+import { UsersService } from '../../../users/users.service';
+import { IPasswordResetRepository } from '../../domain/interfaces/password-reset-repository.interface';
 import * as crypto from 'crypto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
-export class PasswordResetService {
+export class TypeOrmPasswordResetRepository
+  implements IPasswordResetRepository
+{
   constructor(
     @InjectRepository(PasswordResetToken)
     private readonly passwordResetTokenRepository: Repository<PasswordResetToken>,
@@ -24,7 +23,14 @@ export class PasswordResetService {
     // Verify that user exists
     const user = await this.usersService.findByEmail(email);
     if (!user) {
-      throw new NotFoundException('User not found');
+      // Security: Don't reveal whether email exists (prevent user enumeration)
+      // Return dummy values that won't work but don't expose information
+      // Note: Using constant dummy token to avoid wasteful random generation
+      return {
+        token:
+          '0000000000000000000000000000000000000000000000000000000000000000',
+        expiresAt: new Date(Date.now() + 3600000),
+      };
     }
 
     // Generate random 32-byte token

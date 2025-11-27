@@ -7,8 +7,8 @@ import {
   PlatformMetricsDto,
   PlatformMetricsQueryDto,
 } from '../../application/dto';
-import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
-import { AdminGuard } from '../../../auth/guards/admin.guard';
+import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
+import { AdminGuard } from '../../../auth/infrastructure/guards/admin.guard';
 
 @ApiTags('Tarotistas - Metrics')
 @Controller('tarotistas/metrics')
