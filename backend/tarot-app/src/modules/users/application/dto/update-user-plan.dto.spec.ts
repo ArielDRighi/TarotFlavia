@@ -1,6 +1,6 @@
 import { validate } from 'class-validator';
 import { UpdateUserPlanDto } from './update-user-plan.dto';
-import { UserPlan, SubscriptionStatus } from '../entities/user.entity';
+import { UserPlan, SubscriptionStatus } from '../../entities/user.entity';
 
 describe('UpdateUserPlanDto', () => {
   describe('validation', () => {

@@ -5,15 +5,15 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { UsersController } from './users.controller';
-import { UsersService } from './users.service';
-import { UserRole } from '../../common/enums/user-role.enum';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { UpdateUserPlanDto } from './dto/update-user-plan.dto';
-import { User, UserPlan } from './entities/user.entity';
+import { UsersOrchestratorService } from '../../application/services/users-orchestrator.service';
+import { UserRole } from '../../../../common/enums/user-role.enum';
+import { UpdateUserDto } from '../../application/dto/update-user.dto';
+import { UpdateUserPlanDto } from '../../application/dto/update-user-plan.dto';
+import { User, UserPlan } from '../../entities/user.entity';
 
 describe('UsersController', () => {
   let controller: UsersController;
-  let service: UsersService;
+  let service: UsersOrchestratorService;
 
   const mockUser: Partial<User> = {
     id: 1,
@@ -41,14 +41,14 @@ describe('UsersController', () => {
       controllers: [UsersController],
       providers: [
         {
-          provide: UsersService,
+          provide: UsersOrchestratorService,
           useValue: mockUsersService,
         },
       ],
     }).compile();
 
     controller = module.get<UsersController>(UsersController);
-    service = module.get<UsersService>(UsersService);
+    service = module.get<UsersOrchestratorService>(UsersOrchestratorService);
 
     jest.clearAllMocks();
   });
