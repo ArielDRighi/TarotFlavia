@@ -9,7 +9,7 @@ describe('RefreshTokenUseCase', () => {
   let useCase: RefreshTokenUseCase;
   let jwtService: jest.Mocked<JwtService>;
   let refreshTokenRepository: any;
-  let usersService: jest.Mocked<UsersService>;
+  let _usersService: jest.Mocked<UsersService>;
 
   const mockUser = {
     id: 1,
@@ -61,7 +61,7 @@ describe('RefreshTokenUseCase', () => {
     useCase = module.get<RefreshTokenUseCase>(RefreshTokenUseCase);
     jwtService = module.get(JwtService);
     refreshTokenRepository = module.get(REFRESH_TOKEN_REPOSITORY);
-    usersService = module.get(UsersService);
+    _usersService = module.get(UsersService);
   });
 
   describe('execute', () => {
