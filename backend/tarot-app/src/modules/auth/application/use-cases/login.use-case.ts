@@ -8,6 +8,7 @@ import { REFRESH_TOKEN_REPOSITORY } from '../../domain/interfaces/repository.tok
 import { SecurityEventService } from '../../../security/security-event.service';
 import { SecurityEventType } from '../../../security/enums/security-event-type.enum';
 import { SecurityEventSeverity } from '../../../security/enums/security-event-severity.enum';
+import { UserRole } from '../../../../common/enums/user-role.enum';
 
 @Injectable()
 export class LoginUseCase {
@@ -122,6 +123,13 @@ export class LoginUseCase {
       console.error('Failed to log security event:', error);
     }
 
+    // Get tarotistaId if user is a tarotist
+    let tarotistaId: number | undefined;
+    if (user.roles.includes(UserRole.TAROTIST)) {
+      const tarotista = await this.usersService.getTarotistaByUserId(user.id);
+      tarotistaId = tarotista?.id;
+    }
+
     // Generate tokens
     const payload = {
       email: user.email,
@@ -129,6 +137,7 @@ export class LoginUseCase {
       isAdmin: user.isAdmin,
       roles: user.roles,
       plan: user.plan,
+      ...(tarotistaId && { tarotistaId }),
     };
 
     const { token: refreshToken } =

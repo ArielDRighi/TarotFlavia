@@ -4,6 +4,7 @@ import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User, UserRole, UserPlan } from './entities/user.entity';
 import { REFRESH_TOKEN_REPOSITORY } from '../auth/domain/interfaces/repository.tokens';
+import { Tarotista } from '../tarotistas/entities/tarotista.entity';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -31,6 +32,13 @@ describe('UsersService', () => {
     revokeAllUserTokens: jest.fn(),
   };
 
+  const mockTarotistaRepository = {
+    findOne: jest.fn(),
+    find: jest.fn(),
+    save: jest.fn(),
+    create: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -38,6 +46,10 @@ describe('UsersService', () => {
         {
           provide: getRepositoryToken(User),
           useValue: mockUserRepository,
+        },
+        {
+          provide: getRepositoryToken(Tarotista),
+          useValue: mockTarotistaRepository,
         },
         {
           provide: REFRESH_TOKEN_REPOSITORY,

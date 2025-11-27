@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsEnum, Matches } from 'class-validator';
-import { DayOfWeek } from '../enums';
+import { DayOfWeek } from '../../domain/enums';
 
 export class SetWeeklyAvailabilityDto {
   @ApiProperty({

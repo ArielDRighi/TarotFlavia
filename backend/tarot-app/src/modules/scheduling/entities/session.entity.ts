@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 import { Tarotista } from '../../tarotistas/entities/tarotista.entity';
 import { User } from '../../users/entities/user.entity';
-import { SessionType, SessionStatus, PaymentStatus } from '../enums';
+import { SessionType, SessionStatus, PaymentStatus } from '../domain/enums';
 
 /**
  * Session (scheduled appointment) between user and tarotist

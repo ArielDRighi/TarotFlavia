@@ -17,7 +17,7 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import { AvailabilityService, SessionService } from '../services';
+import { AvailabilityService, SessionService } from '../../services';
 import {
   SetWeeklyAvailabilityDto,
   AddExceptionDto,
@@ -25,10 +25,10 @@ import {
   CompleteSessionDto,
   CancelSessionDto,
   SessionResponseDto,
-} from '../dto';
-import { TarotistAvailability, TarotistException } from '../entities';
-import { SessionStatus } from '../enums';
-import { AuthenticatedRequest } from '../interfaces/authenticated-request.interface';
+} from '../../application/dto';
+import { TarotistAvailability, TarotistException } from '../../entities';
+import { SessionStatus } from '../../domain/enums';
+import { AuthenticatedRequest } from '../../interfaces/authenticated-request.interface';
 
 @ApiTags('Tarotist Scheduling')
 @ApiBearerAuth('JWT-auth')

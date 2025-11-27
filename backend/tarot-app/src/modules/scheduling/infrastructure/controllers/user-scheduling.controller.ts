@@ -17,15 +17,15 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import { SessionService, AvailabilityService } from '../services';
+import { SessionService, AvailabilityService } from '../../services';
 import {
   BookSessionDto,
   CancelSessionDto,
   SessionResponseDto,
   AvailableSlotDto,
-} from '../dto';
-import { SessionStatus } from '../enums';
-import { AuthenticatedRequest } from '../interfaces/authenticated-request.interface';
+} from '../../application/dto';
+import { SessionStatus } from '../../domain/enums';
+import { AuthenticatedRequest } from '../../interfaces/authenticated-request.interface';
 
 @ApiTags('User Scheduling')
 @ApiBearerAuth('JWT-auth')
