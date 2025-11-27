@@ -6,15 +6,14 @@ import { LoginUseCase } from './login.use-case';
 import { UsersService } from '../../../users/users.service';
 import { SecurityEventService } from '../../../security/security-event.service';
 import { REFRESH_TOKEN_REPOSITORY } from '../../domain/interfaces/repository.tokens';
-import { User } from '../../../users/entities/user.entity';
 
 jest.mock('bcryptjs');
 
 describe('LoginUseCase', () => {
   let useCase: LoginUseCase;
   let usersService: jest.Mocked<UsersService>;
-  let jwtService: jest.Mocked<JwtService>;
-  let refreshTokenRepository: any;
+  let _jwtService: jest.Mocked<JwtService>;
+  let _refreshTokenRepository: any;
   let securityEventService: jest.Mocked<SecurityEventService>;
 
   const mockUser = {
@@ -65,12 +64,10 @@ describe('LoginUseCase', () => {
     }).compile();
 
     useCase = module.get<LoginUseCase>(LoginUseCase);
-    usersService = module.get(UsersService) as jest.Mocked<UsersService>;
-    jwtService = module.get(JwtService) as jest.Mocked<JwtService>;
-    refreshTokenRepository = module.get(REFRESH_TOKEN_REPOSITORY);
-    securityEventService = module.get(
-      SecurityEventService,
-    ) as jest.Mocked<SecurityEventService>;
+    usersService = module.get(UsersService);
+    _jwtService = module.get(JwtService);
+    _refreshTokenRepository = module.get(REFRESH_TOKEN_REPOSITORY);
+    securityEventService = module.get(SecurityEventService);
   });
 
   describe('validateUser', () => {

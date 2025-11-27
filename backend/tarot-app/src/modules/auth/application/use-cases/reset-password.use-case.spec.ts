@@ -49,7 +49,7 @@ describe('ResetPasswordUseCase', () => {
     useCase = module.get<ResetPasswordUseCase>(ResetPasswordUseCase);
     passwordResetRepository = module.get(PASSWORD_RESET_REPOSITORY);
     refreshTokenRepository = module.get(REFRESH_TOKEN_REPOSITORY);
-    usersService = module.get(UsersService) as jest.Mocked<UsersService>;
+    usersService = module.get(UsersService);
   });
 
   describe('execute', () => {
@@ -91,17 +91,17 @@ describe('ResetPasswordUseCase', () => {
       passwordResetRepository.validateToken.mockResolvedValue(mockResetToken);
       const callOrder: string[] = [];
 
-      usersService.update.mockImplementation(async () => {
+      usersService.update.mockImplementation(() => {
         callOrder.push('update');
-        return {} as any;
+        return Promise.resolve({} as any);
       });
-      refreshTokenRepository.revokeAllUserTokens.mockImplementation(
-        async () => {
-          callOrder.push('revoke');
-        },
-      );
-      passwordResetRepository.markTokenAsUsed.mockImplementation(async () => {
+      refreshTokenRepository.revokeAllUserTokens.mockImplementation(() => {
+        callOrder.push('revoke');
+        return Promise.resolve();
+      });
+      passwordResetRepository.markTokenAsUsed.mockImplementation(() => {
         callOrder.push('markUsed');
+        return Promise.resolve();
       });
 
       await useCase.execute('valid_reset_token', 'NewSecurePass123!');
