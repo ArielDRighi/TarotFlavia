@@ -3,11 +3,13 @@ import { UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { RefreshTokenUseCase } from './refresh-token.use-case';
 import { REFRESH_TOKEN_REPOSITORY } from '../../domain/interfaces/repository.tokens';
+import { UsersService } from '../../../users/users.service';
 
 describe('RefreshTokenUseCase', () => {
   let useCase: RefreshTokenUseCase;
   let jwtService: jest.Mocked<JwtService>;
   let refreshTokenRepository: any;
+  let usersService: jest.Mocked<UsersService>;
 
   const mockUser = {
     id: 1,
@@ -47,12 +49,19 @@ describe('RefreshTokenUseCase', () => {
             }),
           },
         },
+        {
+          provide: UsersService,
+          useValue: {
+            getTarotistaByUserId: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
     useCase = module.get<RefreshTokenUseCase>(RefreshTokenUseCase);
     jwtService = module.get(JwtService);
     refreshTokenRepository = module.get(REFRESH_TOKEN_REPOSITORY);
+    usersService = module.get(UsersService);
   });
 
   describe('execute', () => {

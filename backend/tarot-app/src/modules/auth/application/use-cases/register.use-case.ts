@@ -4,6 +4,7 @@ import { UsersService } from '../../../users/users.service';
 import { CreateUserDto } from '../../../users/dto/create-user.dto';
 import { IRefreshTokenRepository } from '../../domain/interfaces/refresh-token-repository.interface';
 import { REFRESH_TOKEN_REPOSITORY } from '../../domain/interfaces/repository.tokens';
+import { UserRole } from '../../../../common/enums/user-role.enum';
 
 @Injectable()
 export class RegisterUseCase {
@@ -38,12 +39,20 @@ export class RegisterUseCase {
     }
 
     // Generate tokens
+    // Get tarotistaId if user is a tarotist
+    let tarotistaId: number | undefined;
+    if (user.roles.includes(UserRole.TAROTIST)) {
+      const tarotista = await this.usersService.getTarotistaByUserId(user.id);
+      tarotistaId = tarotista?.id;
+    }
+
     const payload = {
       email: user.email,
       sub: user.id,
       isAdmin: user.isAdmin,
       roles: user.roles,
       plan: user.plan,
+      ...(tarotistaId && { tarotistaId }),
     };
 
     const { token: refreshToken } =

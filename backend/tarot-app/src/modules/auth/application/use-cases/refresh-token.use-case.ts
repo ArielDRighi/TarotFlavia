@@ -2,6 +2,8 @@ import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { IRefreshTokenRepository } from '../../domain/interfaces/refresh-token-repository.interface';
 import { REFRESH_TOKEN_REPOSITORY } from '../../domain/interfaces/repository.tokens';
+import { UsersService } from '../../../users/users.service';
+import { UserRole } from '../../../../common/enums/user-role.enum';
 
 @Injectable()
 export class RefreshTokenUseCase {
@@ -9,6 +11,7 @@ export class RefreshTokenUseCase {
     private readonly jwtService: JwtService,
     @Inject(REFRESH_TOKEN_REPOSITORY)
     private readonly refreshTokenRepository: IRefreshTokenRepository,
+    private readonly usersService: UsersService,
   ) {}
 
   async execute(
@@ -38,6 +41,13 @@ export class RefreshTokenUseCase {
     // Revoke the old token (token rotation)
     await this.refreshTokenRepository.revokeToken(tokenEntity.id);
 
+    // Get tarotistaId if user is a tarotist
+    let tarotistaId: number | undefined;
+    if (user.roles.includes(UserRole.TAROTIST)) {
+      const tarotista = await this.usersService.getTarotistaByUserId(user.id);
+      tarotistaId = tarotista?.id;
+    }
+
     // Generate new tokens
     const payload = {
       email: user.email,
@@ -45,6 +55,7 @@ export class RefreshTokenUseCase {
       isAdmin: user.isAdmin,
       roles: user.roles,
       plan: user.plan,
+      ...(tarotistaId && { tarotistaId }),
     };
     const accessToken = this.jwtService.sign(payload);
 

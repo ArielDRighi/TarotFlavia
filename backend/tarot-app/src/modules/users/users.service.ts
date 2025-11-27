@@ -18,12 +18,15 @@ import { REFRESH_TOKEN_REPOSITORY } from '../auth/domain/interfaces/repository.t
 import { UserQueryDto } from './dto/user-query.dto';
 import { UserListResponseDto } from './dto/user-list-response.dto';
 import { UserDetailDto } from './dto/user-detail.dto';
+import { Tarotista } from '../tarotistas/entities/tarotista.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    @InjectRepository(Tarotista)
+    private tarotistasRepository: Repository<Tarotista>,
     @Inject(REFRESH_TOKEN_REPOSITORY)
     private refreshTokenRepository: IRefreshTokenRepository,
   ) {}
@@ -413,6 +416,17 @@ export class UsersService {
         totalPages,
       },
     };
+  }
+
+  /**
+   * Obtiene el perfil de tarotista de un usuario si existe
+   * @param userId - ID del usuario
+   * @returns Perfil de tarotista o null si no existe
+   */
+  async getTarotistaByUserId(userId: number): Promise<Tarotista | null> {
+    return this.tarotistasRepository.findOne({
+      where: { userId },
+    });
   }
 
   /**
