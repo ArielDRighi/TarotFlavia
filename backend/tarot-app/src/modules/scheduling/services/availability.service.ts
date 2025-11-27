@@ -10,8 +10,8 @@ import {
   SetWeeklyAvailabilityDto,
   AddExceptionDto,
   AvailableSlotDto,
-} from '../dto';
-import { DayOfWeek, ExceptionType, SessionStatus } from '../enums';
+} from '../application/dto';
+import { DayOfWeek, ExceptionType, SessionStatus } from '../domain/enums';
 
 @Injectable()
 export class AvailabilityService {

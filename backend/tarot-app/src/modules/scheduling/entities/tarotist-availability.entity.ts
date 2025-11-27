@@ -9,7 +9,7 @@ import {
   Index,
 } from 'typeorm';
 import { Tarotista } from '../../tarotistas/entities/tarotista.entity';
-import { DayOfWeek } from '../enums';
+import { DayOfWeek } from '../domain/enums';
 
 /**
  * Tarotist weekly availability configuration
