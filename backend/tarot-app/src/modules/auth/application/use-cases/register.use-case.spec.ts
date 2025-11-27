@@ -4,7 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { RegisterUseCase } from './register.use-case';
 import { UsersService } from '../../../users/users.service';
 import { REFRESH_TOKEN_REPOSITORY } from '../../domain/interfaces/repository.tokens';
-import { CreateUserDto } from '../../../users/dto/create-user.dto';
+import { CreateUserDto } from '../../../users/application/dto/create-user.dto';
 
 describe('RegisterUseCase', () => {
   let useCase: RegisterUseCase;

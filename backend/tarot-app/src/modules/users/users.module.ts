@@ -19,7 +19,10 @@ import { ManageUserBanUseCase } from './application/use-cases/manage-user-ban.us
 import { GetUserDetailUseCase } from './application/use-cases/get-user-detail.use-case';
 
 // Domain
-import { USER_REPOSITORY, TAROTISTA_REPOSITORY } from './domain/interfaces/repository.tokens';
+import {
+  USER_REPOSITORY,
+  TAROTISTA_REPOSITORY,
+} from './domain/interfaces/repository.tokens';
 
 // Legacy service (temporary - for backward compatibility)
 import { UsersService } from './users.service';

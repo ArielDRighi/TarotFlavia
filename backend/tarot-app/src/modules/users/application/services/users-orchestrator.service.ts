@@ -8,7 +8,10 @@ import { ManageUserBanUseCase } from '../use-cases/manage-user-ban.use-case';
 import { GetUserDetailUseCase } from '../use-cases/get-user-detail.use-case';
 import { IUserRepository } from '../../domain/interfaces/user-repository.interface';
 import { ITarotistaRepository } from '../../domain/interfaces/tarotista-repository.interface';
-import { USER_REPOSITORY, TAROTISTA_REPOSITORY } from '../../domain/interfaces/repository.tokens';
+import {
+  USER_REPOSITORY,
+  TAROTISTA_REPOSITORY,
+} from '../../domain/interfaces/repository.tokens';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { UpdateUserPlanDto } from '../dto/update-user-plan.dto';
@@ -57,7 +60,10 @@ export class UsersOrchestratorService {
     return this.userRepository.findById(id);
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<UserWithoutPassword> {
+  async update(
+    id: number,
+    updateUserDto: UpdateUserDto,
+  ): Promise<UserWithoutPassword> {
     return this.updateUserUseCase.execute(id, updateUserDto);
   }
 
@@ -67,7 +73,10 @@ export class UsersOrchestratorService {
 
   // === PLAN MANAGEMENT ===
 
-  async updatePlan(id: number, updateUserPlanDto: UpdateUserPlanDto): Promise<UserWithoutPassword> {
+  async updatePlan(
+    id: number,
+    updateUserPlanDto: UpdateUserPlanDto,
+  ): Promise<UserWithoutPassword> {
     return this.updateUserPlanUseCase.execute(id, updateUserPlanDto);
   }
 
@@ -81,7 +90,10 @@ export class UsersOrchestratorService {
     return this.manageUserRolesUseCase.addAdminRole(userId);
   }
 
-  async removeRole(userId: number, role: UserRole): Promise<UserWithoutPassword> {
+  async removeRole(
+    userId: number,
+    role: UserRole,
+  ): Promise<UserWithoutPassword> {
     return this.manageUserRolesUseCase.removeRole(userId, role);
   }
 

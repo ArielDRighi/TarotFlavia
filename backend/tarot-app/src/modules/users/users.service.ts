@@ -10,14 +10,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DeleteResult } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import { User, UserWithoutPassword, UserRole } from './entities/user.entity';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { UpdateUserPlanDto } from './dto/update-user-plan.dto';
+import { CreateUserDto } from './application/dto/create-user.dto';
+import { UpdateUserDto } from './application/dto/update-user.dto';
+import { UpdateUserPlanDto } from './application/dto/update-user-plan.dto';
 import { IRefreshTokenRepository } from '../auth/domain/interfaces/refresh-token-repository.interface';
 import { REFRESH_TOKEN_REPOSITORY } from '../auth/domain/interfaces/repository.tokens';
-import { UserQueryDto } from './dto/user-query.dto';
-import { UserListResponseDto } from './dto/user-list-response.dto';
-import { UserDetailDto } from './dto/user-detail.dto';
+import { UserQueryDto } from './application/dto/user-query.dto';
+import { UserListResponseDto } from './application/dto/user-list-response.dto';
+import { UserDetailDto } from './application/dto/user-detail.dto';
 import { Tarotista } from '../tarotistas/entities/tarotista.entity';
 
 @Injectable()

@@ -21,9 +21,9 @@ import { JwtAuthGuard } from '../auth/infrastructure/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../common/enums/user-role.enum';
-import { BanUserDto } from '../users/dto/ban-user.dto';
-import { UserQueryDto } from '../users/dto/user-query.dto';
-import { UpdateUserPlanDto } from '../users/dto/update-user-plan.dto';
+import { BanUserDto } from '../users/application/dto/ban-user.dto';
+import { UserQueryDto } from '../users/application/dto/user-query.dto';
+import { UpdateUserPlanDto } from '../users/application/dto/update-user-plan.dto';
 import { AuditLogService } from '../audit/audit-log.service';
 import { AuditAction } from '../audit/enums/audit-action.enum';
 import {
