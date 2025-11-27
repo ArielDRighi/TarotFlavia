@@ -4,61 +4,75 @@
 
 **Tarea**: Refactorización arquitectural del módulo de scheduling a arquitectura en capas (Layered Architecture)  
 **Estado**: ✅ COMPLETADA  
-**Fecha**: 2025-01-XX  
+**Fecha**: 2025-01-XX
 
 ## Validación Completa
 
 ### ✅ Lint
+
 ```bash
 npm run lint
 ```
+
 **Resultado**: 0 errores
 
 ### ✅ Format
+
 ```bash
 npm run format
 ```
+
 **Resultado**: Todos los archivos formateados correctamente
 
 ### ✅ Build
+
 ```bash
 npm run build
 ```
+
 **Resultado**: Compilación exitosa sin errores TypeScript
 
 ### ✅ Tests Unitarios
+
 ```bash
 npm test -- --testPathIgnorePatterns=test/integration
 ```
-**Resultado**: 
+
+**Resultado**:
+
 - **141 suites** pasando
 - **1696 tests** pasando ✅
 - 0 tests fallidos
 
 ### ✅ Cobertura de Código (CI Thresholds)
+
 ```bash
 npm test -- --coverage --testPathIgnorePatterns=test/integration
 ```
 
 **Resultado Final**:
-| Métrica    | Cobertura | Threshold | Estado |
+| Métrica | Cobertura | Threshold | Estado |
 |-----------|-----------|-----------|--------|
-| Statements | 72.67%   | 70%       | ✅ PASS |
-| Branches   | 50.53%   | 50%       | ✅ PASS |
-| Functions  | 61.08%   | 60%       | ✅ PASS |
-| Lines      | 72.21%   | 70%       | ✅ PASS |
+| Statements | 72.67% | 70% | ✅ PASS |
+| Branches | 50.53% | 50% | ✅ PASS |
+| Functions | 61.08% | 60% | ✅ PASS |
+| Lines | 72.21% | 70% | ✅ PASS |
 
 **Mejora desde inicio de tarea**:
+
 - Statements: 79.69% → 68.98% (caída inicial) → **72.67%** (recuperado y por encima del threshold)
 - Branches: 59.85% → 49.74% (caída inicial) → **50.53%** (recuperado)
 - Functions: 74.72% → 58.05% (caída inicial) → **61.08%** (recuperado)
 - Lines: 79.32% → 68.66% (caída inicial) → **72.21%** (recuperado)
 
 ### ✅ Tests E2E
+
 ```bash
 npm run test:e2e
 ```
-**Resultado**: 
+
+**Resultado**:
+
 - **41 suites E2E** ejecutados individualmente
 - **Todos los tests PASANDO** cuando se ejecutan secuencialmente
 - Nota: Fallan en paralelo por conflictos de recursos (no es error de código)
@@ -66,6 +80,7 @@ npm run test:e2e
 ## Archivos Refactorizados (28 archivos)
 
 ### Domain Layer (8 archivos)
+
 - `domain/enums/day-of-week.enum.ts`
 - `domain/enums/exception-type.enum.ts`
 - `domain/enums/payment-status.enum.ts`
@@ -76,7 +91,9 @@ npm run test:e2e
 - `domain/interfaces/session-repository.interface.ts`
 
 ### Application Layer (15 archivos)
+
 **DTOs (8)**:
+
 - `application/dto/add-exception.dto.ts`
 - `application/dto/availability-query.dto.ts`
 - `application/dto/book-session.dto.ts`
@@ -87,6 +104,7 @@ npm run test:e2e
 - `application/dto/set-weekly-availability.dto.ts`
 
 **Use Cases (5)**:
+
 - `application/use-cases/book-session.use-case.ts`
 - `application/use-cases/cancel-session.use-case.ts`
 - `application/use-cases/complete-session.use-case.ts`
@@ -94,15 +112,19 @@ npm run test:e2e
 - `application/use-cases/get-available-slots.use-case.ts`
 
 **Services (2)**:
+
 - `application/services/availability-orchestrator.service.ts`
 - `application/services/session-orchestrator.service.ts`
 
 ### Infrastructure Layer (5 archivos)
+
 **Controllers (2)**:
+
 - `infrastructure/controllers/user-scheduling.controller.ts`
 - `infrastructure/controllers/tarotist-scheduling.controller.ts`
 
 **Repositories (3)**:
+
 - `infrastructure/repositories/typeorm-session.repository.ts`
 - `infrastructure/repositories/typeorm-availability.repository.ts`
 - `infrastructure/repositories/typeorm-exception.repository.ts`
@@ -110,7 +132,9 @@ npm run test:e2e
 ## Tests Creados para Recuperar Cobertura (9 archivos)
 
 ### Tests de Orchestrators (100% coverage)
+
 1. ✅ `application/services/availability-orchestrator.service.spec.ts`
+
    - 14 tests
    - 100% cobertura de statements, branches, functions, lines
 
@@ -119,17 +143,21 @@ npm run test:e2e
    - 100% cobertura de statements, branches, functions, lines
 
 ### Tests de Controllers
+
 3. ✅ `infrastructure/controllers/user-scheduling.controller.spec.ts`
    - 11 tests
    - Cobertura parcial del controller
 
 ### Tests de Repositories (100% coverage cada uno)
+
 4. ✅ `infrastructure/repositories/typeorm-session.repository.spec.ts`
+
    - 13 tests
    - Cubre los 8 métodos del repositorio
    - Prueba casos exitosos, null returns, y branches condicionales
 
 5. ✅ `infrastructure/repositories/typeorm-availability.repository.spec.ts`
+
    - 9 tests
    - Cubre validaciones de tiempo (startTime < endTime)
    - Prueba actualización vs creación
@@ -143,6 +171,7 @@ npm run test:e2e
    - Manejo de excepciones
 
 ### Tests de Entidades
+
 7. ✅ `entities/session.entity.spec.ts`
 8. ✅ `entities/tarotist-availability.entity.spec.ts`
 9. ✅ `entities/tarotist-exception.entity.spec.ts`
@@ -151,27 +180,29 @@ npm run test:e2e
 
 ## Cobertura por Subdirectorio del Módulo Scheduling
 
-| Subdirectorio | Cobertura | Estado |
-|--------------|-----------|--------|
-| application/dto | 100% | ✅ |
-| application/services | 100% | ✅ |
-| domain/enums | 100% | ✅ |
-| domain/interfaces | 100% | ✅ |
-| entities | 93.65% | ✅ |
-| infrastructure/repositories | 60.75% | ✅ |
-| infrastructure/controllers | 41.09% | ⚠️ Parcial |
-| application/use-cases | 19.31% | ⚠️ Baja |
-| services | 8.53% | ⚠️ Baja |
+| Subdirectorio               | Cobertura | Estado     |
+| --------------------------- | --------- | ---------- |
+| application/dto             | 100%      | ✅         |
+| application/services        | 100%      | ✅         |
+| domain/enums                | 100%      | ✅         |
+| domain/interfaces           | 100%      | ✅         |
+| entities                    | 93.65%    | ✅         |
+| infrastructure/repositories | 60.75%    | ✅         |
+| infrastructure/controllers  | 41.09%    | ⚠️ Parcial |
+| application/use-cases       | 19.31%    | ⚠️ Baja    |
+| services                    | 8.53%     | ⚠️ Baja    |
 
 **Nota**: Aunque algunos subdirectorios tienen cobertura baja, la cobertura global del proyecto cumple con todos los thresholds de CI (70%, 50%, 60%, 70%).
 
 ## Correcciones Realizadas
 
 ### 1. DTOs corregidos en tests
+
 - ❌ Incorrecto: `startTime`, `endTime`, `scheduledAt`
 - ✅ Correcto: `sessionDate`, `sessionTime`, `durationMinutes`
 
 ### 2. Enums corregidos
+
 - ❌ Incorrecto: `SessionStatus.CANCELLED`
 - ✅ Correcto: `SessionStatus.CANCELLED_BY_USER`, `SessionStatus.CANCELLED_BY_TAROTIST`
 
@@ -179,10 +210,12 @@ npm run test:e2e
 - ✅ Correcto: `ExceptionType.BLOCKED`, `ExceptionType.CUSTOM_HOURS`
 
 ### 3. Mocking de TypeORM
+
 - Correctamente mockeado `Repository<T>` con métodos: `create`, `save`, `findOne`, `find`, `remove`
 - Correctamente mockeado `QueryBuilder` para queries complejas con `where`, `andWhere`, `getMany`
 
 ### 4. Tipos de Entidad
+
 - Uso de `as any` donde necesario para evitar errores de tipo en mocks complejos
 - Corrección de propiedades opcionales (`userNotes?`, `tarotistNotes?`)
 
@@ -210,7 +243,7 @@ src/modules/scheduling/
 ✅ **O**pen/Closed: Interfaces permiten extensión sin modificación  
 ✅ **L**iskov Substitution: Repositorios son intercambiables  
 ✅ **I**nterface Segregation: Interfaces específicas por repositorio  
-✅ **D**ependency Inversion: Controllers dependen de interfaces, no implementaciones  
+✅ **D**ependency Inversion: Controllers dependen de interfaces, no implementaciones
 
 ## Patrones de Diseño Implementados
 
@@ -224,6 +257,7 @@ src/modules/scheduling/
 Si se desea mejorar aún más la cobertura del módulo scheduling:
 
 1. Crear tests para `use-cases/` (actualmente 19.31%)
+
    - `book-session.use-case.spec.ts`
    - `cancel-session.use-case.spec.ts`
    - `confirm-session.use-case.spec.ts`
@@ -231,6 +265,7 @@ Si se desea mejorar aún más la cobertura del módulo scheduling:
    - `get-available-slots.use-case.spec.ts`
 
 2. Crear tests para `services/` legacy (actualmente 8.53%)
+
    - `availability.service.spec.ts`
    - `session.service.spec.ts`
 
@@ -244,6 +279,7 @@ Si se desea mejorar aún más la cobertura del módulo scheduling:
 ✅ **Tarea COMPLETADA exitosamente**
 
 La refactorización arquitectural del módulo scheduling ha sido completada con éxito:
+
 - ✅ Arquitectura en capas implementada correctamente
 - ✅ Todos los tests pasando (1696 tests unitarios + 41 suites E2E)
 - ✅ Cobertura de código por encima de todos los thresholds CI
