@@ -27,9 +27,9 @@ jobs:
             postgres:
                 image: postgres:16-alpine
                 env:
-                    POSTGRES_USER: tarot_test_user
-                    POSTGRES_PASSWORD: tarot_test_pass
-                    POSTGRES_DB: tarot_test
+                    POSTGRES_USER: tarot_e2e_user
+                    POSTGRES_PASSWORD: tarot_e2e_password_secure
+                    POSTGRES_DB: tarot_e2e
                 ports:
                     - 5436:5432
                 options: >-
@@ -58,19 +58,19 @@ jobs:
               env:
                   POSTGRES_HOST: localhost
                   POSTGRES_PORT: 5436
-                  POSTGRES_USER: tarot_test_user
-                  POSTGRES_PASSWORD: tarot_test_pass
-                  POSTGRES_DB: tarot_test
+                  POSTGRES_USER: tarot_e2e_user
+                  POSTGRES_PASSWORD: tarot_e2e_password_secure
+                  POSTGRES_DB: tarot_e2e
                   TAROT_DB_HOST: localhost
                   TAROT_DB_PORT: 5436
-                  TAROT_DB_USER: tarot_test_user
-                  TAROT_DB_PASSWORD: tarot_test_pass
-                  TAROT_DB_NAME: tarot_test
+                  TAROT_DB_USER: tarot_e2e_user
+                  TAROT_DB_PASSWORD: tarot_e2e_password_secure
+                  TAROT_DB_NAME: tarot_e2e
                   TAROT_E2E_DB_HOST: localhost
                   TAROT_E2E_DB_PORT: 5436
-                  TAROT_E2E_DB_USER: tarot_test_user
-                  TAROT_E2E_DB_PASSWORD: tarot_test_pass
-                  TAROT_E2E_DB_NAME: tarot_test
+                  TAROT_E2E_DB_USER: tarot_e2e_user
+                  TAROT_E2E_DB_PASSWORD: tarot_e2e_password_secure
+                  TAROT_E2E_DB_NAME: tarot_e2e
                   TAROT_E2E_DB_SYNCHRONIZE: false
                   TAROT_E2E_DB_LOGGING: false
                   JWT_SECRET: test-jwt-secret-for-ci-only-minimum-32-characters-required
@@ -84,19 +84,19 @@ jobs:
               env:
                   POSTGRES_HOST: localhost
                   POSTGRES_PORT: 5436
-                  POSTGRES_USER: tarot_test_user
-                  POSTGRES_PASSWORD: tarot_test_pass
-                  POSTGRES_DB: tarot_test
+                  POSTGRES_USER: tarot_e2e_user
+                  POSTGRES_PASSWORD: tarot_e2e_password_secure
+                  POSTGRES_DB: tarot_e2e
                   TAROT_DB_HOST: localhost
                   TAROT_DB_PORT: 5436
-                  TAROT_DB_USER: tarot_test_user
-                  TAROT_DB_PASSWORD: tarot_test_pass
-                  TAROT_DB_NAME: tarot_test
+                  TAROT_DB_USER: tarot_e2e_user
+                  TAROT_DB_PASSWORD: tarot_e2e_password_secure
+                  TAROT_DB_NAME: tarot_e2e
                   TAROT_E2E_DB_HOST: localhost
                   TAROT_E2E_DB_PORT: 5436
-                  TAROT_E2E_DB_USER: tarot_test_user
-                  TAROT_E2E_DB_PASSWORD: tarot_test_pass
-                  TAROT_E2E_DB_NAME: tarot_test
+                  TAROT_E2E_DB_USER: tarot_e2e_user
+                  TAROT_E2E_DB_PASSWORD: tarot_e2e_password_secure
+                  TAROT_E2E_DB_NAME: tarot_e2e
                   TAROT_E2E_DB_SYNCHRONIZE: false
                   TAROT_E2E_DB_LOGGING: false
                   JWT_SECRET: test-jwt-secret-for-ci-only-minimum-32-characters-required
