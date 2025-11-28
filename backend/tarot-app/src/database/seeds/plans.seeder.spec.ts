@@ -18,7 +18,7 @@ describe('Plans Seeder', () => {
     jest.clearAllMocks();
   });
 
-  it('should seed all three plans when database is empty', async () => {
+  it('should seed all four plans when database is empty', async () => {
     // Mock empty database
     (planRepository.count as jest.Mock).mockResolvedValue(0);
 
@@ -26,6 +26,14 @@ describe('Plans Seeder', () => {
     const mockPlans = [
       {
         id: 1,
+        planType: UserPlan.GUEST,
+        name: 'Plan Invitado',
+        price: 0,
+        readingsLimit: 3,
+        aiQuotaMonthly: 0,
+      },
+      {
+        id: 2,
         planType: UserPlan.FREE,
         name: 'Plan Gratuito',
         price: 0,
@@ -33,7 +41,7 @@ describe('Plans Seeder', () => {
         aiQuotaMonthly: 100,
       },
       {
-        id: 2,
+        id: 3,
         planType: UserPlan.PREMIUM,
         name: 'Plan Premium',
         price: 9.99,
@@ -41,7 +49,7 @@ describe('Plans Seeder', () => {
         aiQuotaMonthly: -1,
       },
       {
-        id: 3,
+        id: 4,
         planType: UserPlan.PROFESSIONAL,
         name: 'Plan Profesional',
         price: 19.99,
@@ -64,8 +72,20 @@ describe('Plans Seeder', () => {
 
     // Verify repository methods were called
     expect(planRepository.count).toHaveBeenCalledTimes(1);
-    expect(planRepository.create).toHaveBeenCalledTimes(3);
-    expect(planRepository.save).toHaveBeenCalledTimes(3);
+    expect(planRepository.create).toHaveBeenCalledTimes(4);
+    expect(planRepository.save).toHaveBeenCalledTimes(4);
+
+    // Verify GUEST plan was created
+    expect(planRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        planType: UserPlan.GUEST,
+        name: 'Plan Invitado',
+        price: 0,
+        readingsLimit: 3,
+        aiQuotaMonthly: 0,
+        allowCustomQuestions: false,
+      }),
+    );
 
     // Verify FREE plan was created
     expect(planRepository.create).toHaveBeenCalledWith(
@@ -147,6 +167,16 @@ describe('Plans Seeder', () => {
     jest.spyOn(console, 'log').mockImplementation();
 
     await seedPlans(planRepository);
+
+    // Check GUEST plan features
+    expect(planRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        planType: UserPlan.GUEST,
+        allowCustomQuestions: false,
+        allowSharing: false,
+        allowAdvancedSpreads: false,
+      }),
+    );
 
     // Check FREE plan features
     expect(planRepository.create).toHaveBeenCalledWith(

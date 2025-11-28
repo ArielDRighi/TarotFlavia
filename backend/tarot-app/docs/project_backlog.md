@@ -13224,7 +13224,14 @@ Implementar sistema de logging estructurado JSON con Winston, incluyendo correla
 
 #### 📋 Descripción
 
-Implementar sistema de configuración dinámica de planes de usuario mediante base de datos, reemplazando las constantes hardcodeadas actuales. Incluye dashboard administrativo para gestionar features, límites y capacidades de cada plan (FREE, PREMIUM, PROFESSIONAL) sin necesidad de redesplegar la aplicación.
+Implementar sistema de configuración dinámica de planes de usuario mediante base de datos, reemplazando las constantes hardcodeadas actuales. Incluye dashboard administrativo para gestionar features, límites y capacidades de cada plan (GUEST, FREE, PREMIUM, PROFESSIONAL) sin necesidad de redesplegar la aplicación.
+
+**Planes Disponibles:**
+
+- **GUEST/ANONYMOUS**: Usuarios no registrados (3 lecturas/mes, sin IA, sin guardar historial)
+- **FREE**: Usuarios registrados gratuitos (10 lecturas/mes, 100 requests IA, guardar historial)
+- **PREMIUM**: Plan de pago individual ($9.99/mes, lecturas ilimitadas, IA ilimitada, todas las features)
+- **PROFESSIONAL**: Plan para tarotistas profesionales ($19.99/mes, todo PREMIUM + soporte prioritario + features exclusivas)
 
 **Problema Actual:**
 
@@ -13249,10 +13256,12 @@ Sistema de configuración basado en base de datos con:
 
 **Casos de Uso:**
 
-- ✅ Admin actualiza límite de lecturas FREE de 3 a 5 sin redeploy
+- ✅ Usuario no registrado (GUEST) puede hacer 3 lecturas para probar la app
+- ✅ Usuario registrado FREE tiene 10 lecturas/mes y puede guardar historial
+- ✅ Admin actualiza límite de lecturas FREE de 10 a 15 sin redeploy
 - ✅ Admin crea promoción temporal: PREMIUM gratis por 30 días
 - ✅ Admin ajusta cuotas de IA según uso real y costos
-- ✅ Admin deshabilita feature específica temporalmente
+- ✅ Admin deshabilita feature específica temporalmente para testing
 - ✅ Admin ve historial de cambios en configuración de planes
 - ✅ Sistema aplica cambios en tiempo real con cache de 5 minutos
 

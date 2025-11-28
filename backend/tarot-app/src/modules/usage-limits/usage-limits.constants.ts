@@ -2,13 +2,18 @@ import { UserPlan } from '../users/entities/user.entity';
 import { UsageFeature } from './entities/usage-limit.entity';
 
 /**
- * Constantes de límites de uso para planes FREE y PREMIUM
+ * Constantes de límites de uso para todos los planes
  * Estructura: USAGE_LIMITS[plan][feature] = límite
  * -1 significa ilimitado
  */
 export const USAGE_LIMITS: Record<UserPlan, Record<UsageFeature, number>> = {
-  [UserPlan.FREE]: {
+  [UserPlan.GUEST]: {
     [UsageFeature.TAROT_READING]: 3,
+    [UsageFeature.INTERPRETATION_REGENERATION]: 0,
+    [UsageFeature.ORACLE_QUERY]: 0,
+  },
+  [UserPlan.FREE]: {
+    [UsageFeature.TAROT_READING]: 10,
     [UsageFeature.INTERPRETATION_REGENERATION]: 0,
     [UsageFeature.ORACLE_QUERY]: 5,
   },

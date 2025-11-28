@@ -10,7 +10,14 @@ Tarea: TASK-00x: **TASK-076: Dashboard de Configuración Dinámica de Planes** �
 
 #### 📋 Descripción
 
-Implementar sistema de configuración dinámica de planes de usuario mediante base de datos, reemplazando las constantes hardcodeadas actuales. Incluye dashboard administrativo para gestionar features, límites y capacidades de cada plan (FREE, PREMIUM, PROFESSIONAL) sin necesidad de redesplegar la aplicación.
+Implementar sistema de configuración dinámica de planes de usuario mediante base de datos, reemplazando las constantes hardcodeadas actuales. Incluye dashboard administrativo para gestionar features, límites y capacidades de cada plan (GUEST, FREE, PREMIUM, PROFESSIONAL) sin necesidad de redesplegar la aplicación.
+
+**Planes Disponibles:**
+
+- **GUEST/ANONYMOUS**: Usuarios no registrados (3 lecturas/mes, sin IA, sin guardar historial)
+- **FREE**: Usuarios registrados gratuitos (10 lecturas/mes, 100 requests IA, guardar historial)
+- **PREMIUM**: Plan de pago individual ($9.99/mes, lecturas ilimitadas, IA ilimitada, todas las features)
+- **PROFESSIONAL**: Plan para tarotistas profesionales ($19.99/mes, todo PREMIUM + soporte prioritario + features exclusivas)
 
 Workflow de Ejecución:
 

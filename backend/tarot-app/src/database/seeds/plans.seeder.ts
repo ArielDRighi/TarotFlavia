@@ -8,8 +8,12 @@ import { UserPlan } from '../../modules/users/entities/user.entity';
  *
  * Features:
  * - Idempotent: Can be run multiple times without duplicating data
- * - Creates FREE, PREMIUM, and PROFESSIONAL plans
+ * - Creates GUEST, FREE, PREMIUM, and PROFESSIONAL plans
  * - Configures limits and features for each plan
+ * - GUEST: For non-registered users (3 readings, no AI, no history)
+ * - FREE: For registered users (10 readings, 100 AI requests, save history)
+ * - PREMIUM: Paid plan (unlimited, all features)
+ * - PROFESSIONAL: For professional tarotists (unlimited + priority support)
  */
 export async function seedPlans(
   planRepository: Repository<Plan>,
@@ -28,10 +32,23 @@ export async function seedPlans(
   // Define plan configurations
   const plansData = [
     {
+      planType: UserPlan.GUEST,
+      name: 'Plan Invitado',
+      description:
+        'Plan para usuarios no registrados con acceso limitado para probar la aplicación',
+      price: 0,
+      readingsLimit: 3,
+      aiQuotaMonthly: 0, // No AI for guests
+      allowCustomQuestions: false,
+      allowSharing: false,
+      allowAdvancedSpreads: false,
+      isActive: true,
+    },
+    {
       planType: UserPlan.FREE,
       name: 'Plan Gratuito',
       description:
-        'Plan básico con lecturas limitadas y funcionalidades esenciales',
+        'Plan básico con lecturas limitadas y funcionalidades esenciales para usuarios registrados',
       price: 0,
       readingsLimit: 10,
       aiQuotaMonthly: 100,
