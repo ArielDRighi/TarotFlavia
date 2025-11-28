@@ -40,7 +40,8 @@ export class SubscriptionsService {
   /**
    * Establece el tarotista favorito para un usuario
    * FREE: cooldown de 30 días entre cambios
-   * PREMIUM: sin cooldown
+   * PREMIUM: sin cooldown, asigna tarotista individual
+   * PROFESSIONAL: activa all-access automáticamente (ignora tarotistaId)
    */
   async setFavoriteTarotista(
     userId: number,
@@ -115,10 +116,22 @@ export class SubscriptionsService {
       return this.subscriptionRepo.save(currentSubscription);
     } else {
       // Crear nueva suscripción
-      const subscriptionType =
-        user.plan === UserPlan.FREE
-          ? SubscriptionType.FAVORITE
-          : SubscriptionType.PREMIUM_INDIVIDUAL;
+      // PROFESSIONAL: all-access por defecto
+      // PREMIUM: individual por defecto
+      // FREE: favorito con cooldown
+      let subscriptionType: SubscriptionType;
+      let tarotistaIdToSet: number | null;
+
+      if (user.plan === UserPlan.PROFESSIONAL) {
+        subscriptionType = SubscriptionType.PREMIUM_ALL_ACCESS;
+        tarotistaIdToSet = null; // all-access no tiene tarotista específico
+      } else if (user.plan === UserPlan.PREMIUM) {
+        subscriptionType = SubscriptionType.PREMIUM_INDIVIDUAL;
+        tarotistaIdToSet = tarotistaId;
+      } else {
+        subscriptionType = SubscriptionType.FAVORITE;
+        tarotistaIdToSet = tarotistaId;
+      }
 
       const canChangeAt =
         user.plan === UserPlan.FREE
@@ -128,7 +141,7 @@ export class SubscriptionsService {
       const newSubscription = this.subscriptionRepo.create({
         userId,
         user,
-        tarotistaId,
+        tarotistaId: tarotistaIdToSet,
         subscriptionType,
         status: SubscriptionStatus.ACTIVE,
         startedAt: new Date(),
