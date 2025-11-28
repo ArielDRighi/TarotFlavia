@@ -30,24 +30,30 @@ export class UpdateUserUseCase {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    // Si hay un nuevo email, verificar que no exista ya
-    if (updateUserDto.email && updateUserDto.email !== user.email) {
-      const existingUser = await this.userRepository.findByEmail(
-        updateUserDto.email,
-      );
-      if (existingUser) {
-        throw new ConflictException('Email already in use');
+    // Preparar campos actualizados sin mutar el DTO
+    const updatedFields: Partial<UpdateUserDto> = { ...updateUserDto };
+
+    // Normalizar y validar email si se proporciona
+    if (updatedFields.email) {
+      updatedFields.email = updatedFields.email.toLowerCase();
+      if (updatedFields.email !== user.email) {
+        const existingUser = await this.userRepository.findByEmail(
+          updatedFields.email,
+        );
+        if (existingUser) {
+          throw new ConflictException('Email already in use');
+        }
       }
     }
 
     // Si hay una nueva contraseña, hashearla
-    if (updateUserDto.password) {
+    if (updatedFields.password) {
       const salt = await bcrypt.genSalt();
-      updateUserDto.password = await bcrypt.hash(updateUserDto.password, salt);
+      updatedFields.password = await bcrypt.hash(updatedFields.password, salt);
     }
 
     // Actualizar usuario
-    Object.assign(user, updateUserDto);
+    Object.assign(user, updatedFields);
 
     try {
       return await this.userRepository.save(user);

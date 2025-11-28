@@ -1,10 +1,6 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { IUserRepository } from '../../domain/interfaces/user-repository.interface';
-import { ITarotistaRepository } from '../../domain/interfaces/tarotista-repository.interface';
-import {
-  USER_REPOSITORY,
-  TAROTISTA_REPOSITORY,
-} from '../../domain/interfaces/repository.tokens';
+import { USER_REPOSITORY } from '../../domain/interfaces/repository.tokens';
 import { UserDetailDto } from '../dto/user-detail.dto';
 import { UserWithoutPassword } from '../../entities/user.entity';
 
@@ -17,8 +13,6 @@ export class GetUserDetailUseCase {
   constructor(
     @Inject(USER_REPOSITORY)
     private readonly userRepository: IUserRepository,
-    @Inject(TAROTISTA_REPOSITORY)
-    private readonly tarotistaRepository: ITarotistaRepository,
   ) {}
 
   async execute(userId: number): Promise<UserDetailDto> {
@@ -32,7 +26,7 @@ export class GetUserDetailUseCase {
     const totalReadings = user.readings?.length || 0;
     const lastReading =
       user.readings && user.readings.length > 0
-        ? user.readings.sort(
+        ? [...user.readings].sort(
             (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
           )[0]
         : null;

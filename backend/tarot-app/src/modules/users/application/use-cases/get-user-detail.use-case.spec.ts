@@ -2,10 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { GetUserDetailUseCase } from './get-user-detail.use-case';
 import { IUserRepository } from '../../domain/interfaces/user-repository.interface';
-import {
-  USER_REPOSITORY,
-  TAROTISTA_REPOSITORY,
-} from '../../domain/interfaces/repository.tokens';
+import { USER_REPOSITORY } from '../../domain/interfaces/repository.tokens';
 import { User, UserRole, UserPlan } from '../../entities/user.entity';
 
 describe('GetUserDetailUseCase', () => {
@@ -17,18 +14,12 @@ describe('GetUserDetailUseCase', () => {
       findByIdWithReadings: jest.fn(),
     };
 
-    const mockTarotistaRepository = {};
-
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GetUserDetailUseCase,
         {
           provide: USER_REPOSITORY,
           useValue: mockUserRepository,
-        },
-        {
-          provide: TAROTISTA_REPOSITORY,
-          useValue: mockTarotistaRepository,
         },
       ],
     }).compile();
