@@ -5,6 +5,12 @@ on:
     branches: [main, develop]
   pull_request:
     branches: [main, develop]
+  workflow_dispatch:
+    inputs:
+      debug_enabled:
+        description: "Enable debug mode"
+        required: false
+        default: "false"
 
 # Cancelar ejecuciones anteriores del mismo workflow en el mismo branch
 concurrency:

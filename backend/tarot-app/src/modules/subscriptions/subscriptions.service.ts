@@ -101,16 +101,32 @@ export class SubscriptionsService {
 
     // 5. Si tiene suscripción, actualizar. Si no, crear nueva
     if (currentSubscription) {
-      currentSubscription.tarotistaId = tarotistaId;
-      currentSubscription.changeCount += 1;
-
-      // Solo FREE tiene cooldown
-      if (user.plan === UserPlan.FREE) {
-        const nextChangeDate = new Date();
-        nextChangeDate.setDate(nextChangeDate.getDate() + COOLDOWN_DAYS);
-        currentSubscription.canChangeAt = nextChangeDate;
-      } else {
+      // PROFESSIONAL siempre mantiene all-access con tarotistaId = null
+      if (user.plan === UserPlan.PROFESSIONAL) {
+        currentSubscription.subscriptionType =
+          SubscriptionType.PREMIUM_ALL_ACCESS;
+        currentSubscription.tarotistaId = null;
         currentSubscription.canChangeAt = null;
+        currentSubscription.changeCount += 1;
+      } else {
+        // PREMIUM y FREE actualizan normalmente
+        currentSubscription.tarotistaId = tarotistaId;
+        currentSubscription.changeCount += 1;
+
+        // Solo FREE tiene cooldown
+        if (user.plan === UserPlan.FREE) {
+          const nextChangeDate = new Date();
+          nextChangeDate.setDate(nextChangeDate.getDate() + COOLDOWN_DAYS);
+          currentSubscription.canChangeAt = nextChangeDate;
+        } else {
+          currentSubscription.canChangeAt = null;
+        }
+
+        // Actualizar tipo de suscripción si es PREMIUM
+        if (user.plan === UserPlan.PREMIUM) {
+          currentSubscription.subscriptionType =
+            SubscriptionType.PREMIUM_INDIVIDUAL;
+        }
       }
 
       return this.subscriptionRepo.save(currentSubscription);

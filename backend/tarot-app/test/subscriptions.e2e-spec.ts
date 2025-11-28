@@ -26,8 +26,10 @@ describe('Subscriptions System E2E', () => {
   const dbHelper = new E2EDatabaseHelper();
   let freeUserToken: string;
   let premiumUserToken: string;
+  let professionalUserToken: string;
   let freeUserId: number;
   let premiumUserId: number;
+  let professionalUserId: number;
   let tarotistaRepo: Repository<Tarotista>;
   let userRepo: Repository<User>;
   let subscriptionRepo: Repository<UserTarotistaSubscription>;
@@ -112,6 +114,24 @@ describe('Subscriptions System E2E', () => {
       plan: UserPlan.PREMIUM,
       planStartedAt: new Date(),
     });
+
+    // Registrar usuario PROFESSIONAL
+    const professionalUser = await request(app.getHttpServer())
+      .post('/auth/register')
+      .send({
+        email: `professional-user-${testTimestamp}@test.com`,
+        password: 'Test1234!',
+        name: 'Professional User',
+      });
+
+    professionalUserId = professionalUser.body.user.id;
+    professionalUserToken = professionalUser.body.access_token;
+
+    // Actualizar usuario a PROFESSIONAL
+    await userRepo.update(professionalUserId, {
+      plan: UserPlan.PROFESSIONAL,
+      planStartedAt: new Date(),
+    });
   });
 
   afterAll(async () => {
@@ -119,9 +139,11 @@ describe('Subscriptions System E2E', () => {
     try {
       await subscriptionRepo.delete({ userId: freeUserId });
       await subscriptionRepo.delete({ userId: premiumUserId });
+      await subscriptionRepo.delete({ userId: professionalUserId });
       await tarotistaRepo.delete({ id: testTarotistaId });
       await userRepo.delete({ id: freeUserId });
       await userRepo.delete({ id: premiumUserId });
+      await userRepo.delete({ id: professionalUserId });
       await userRepo.delete({ email: `tarotista-${testTimestamp}@test.com` });
     } catch (error) {
       console.warn('E2E cleanup failed:', error);
@@ -237,6 +259,51 @@ describe('Subscriptions System E2E', () => {
     });
   });
 
+  describe('POST /subscriptions/set-favorite (PROFESSIONAL user)', () => {
+    it('debería crear automáticamente all-access en primera suscripción', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/subscriptions/set-favorite')
+        .set('Authorization', `Bearer ${professionalUserToken}`)
+        .send({ tarotistaId: flaviaId })
+        .expect(200);
+
+      expect(response.body.subscription.subscriptionType).toBe(
+        SubscriptionType.PREMIUM_ALL_ACCESS,
+      );
+      expect(response.body.subscription.tarotistaId).toBeNull(); // All-access no tiene tarotista específico
+      expect(response.body.subscription.canChangeAt).toBeNull(); // Sin cooldown
+    });
+
+    it('debería mantener all-access al intentar cambiar de tarotista', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/subscriptions/set-favorite')
+        .set('Authorization', `Bearer ${professionalUserToken}`)
+        .send({ tarotistaId: testTarotistaId })
+        .expect(200);
+
+      // PROFESSIONAL ignora el tarotistaId específico y mantiene all-access
+      expect(response.body.subscription.subscriptionType).toBe(
+        SubscriptionType.PREMIUM_ALL_ACCESS,
+      );
+      expect(response.body.subscription.tarotistaId).toBeNull();
+      expect(response.body.subscription.canChangeAt).toBeNull();
+    });
+
+    it('debería retornar información all-access en my-subscription', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/subscriptions/my-subscription')
+        .set('Authorization', `Bearer ${professionalUserToken}`)
+        .expect(200);
+
+      expect(response.body.subscriptionType).toBe(
+        SubscriptionType.PREMIUM_ALL_ACCESS,
+      );
+      expect(response.body.tarotistaId).toBeNull();
+      expect(response.body.canChange).toBe(true); // Siempre puede "cambiar" (aunque mantiene all-access)
+      expect(response.body.canChangeAt).toBeNull();
+    });
+  });
+
   describe('POST /subscriptions/enable-all-access', () => {
     it('debería permitir a PREMIUM activar modo all-access', async () => {
       const response = await request(app.getHttpServer())
@@ -278,6 +345,19 @@ describe('Subscriptions System E2E', () => {
 
       expect(response.body.message).toContain('Solo usuarios PREMIUM');
     });
+
+    it('PROFESSIONAL ya tiene all-access por defecto (idempotente)', async () => {
+      // PROFESSIONAL puede llamar a enable-all-access pero ya lo tiene
+      const response = await request(app.getHttpServer())
+        .post('/subscriptions/enable-all-access')
+        .set('Authorization', `Bearer ${professionalUserToken}`)
+        .expect(200);
+
+      expect(response.body.subscription.subscriptionType).toBe(
+        SubscriptionType.PREMIUM_ALL_ACCESS,
+      );
+      expect(response.body.subscription.tarotistaId).toBeNull();
+    });
   });
 
   describe('Flujo completo: Upgrade FREE → PREMIUM', () => {
@@ -315,6 +395,69 @@ describe('Subscriptions System E2E', () => {
 
       expect(response.body.subscription.tarotistaId).toBe(testTarotistaId);
       expect(response.body.subscription.canChangeAt).toBeNull(); // Sin cooldown
+    });
+  });
+
+  describe('Flujo completo: Upgrade FREE → PROFESSIONAL', () => {
+    it('debería obtener all-access automático después de upgrade a PROFESSIONAL', async () => {
+      // Crear nuevo usuario FREE temporal para este test
+      const tempFreeUser = await request(app.getHttpServer())
+        .post('/auth/register')
+        .send({
+          email: `temp-free-${testTimestamp}@test.com`,
+          password: 'Test1234!',
+          name: 'Temp Free User',
+        });
+
+      const tempFreeUserId = tempFreeUser.body.user.id;
+      const tempFreeToken = tempFreeUser.body.access_token;
+
+      try {
+        // Crear suscripción FREE inicial con cooldown
+        await subscriptionRepo.save({
+          userId: tempFreeUserId,
+          tarotistaId: flaviaId,
+          subscriptionType: SubscriptionType.FAVORITE,
+          status: SubscriptionStatus.ACTIVE,
+          startedAt: new Date(),
+          canChangeAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          changeCount: 0,
+        });
+
+        // Upgrade a PROFESSIONAL
+        await userRepo.update(tempFreeUserId, {
+          plan: UserPlan.PROFESSIONAL,
+          planStartedAt: new Date(),
+        });
+
+        // Hacer login de nuevo para obtener token actualizado con plan PROFESSIONAL
+        const loginResponse = await request(app.getHttpServer())
+          .post('/auth/login')
+          .send({
+            email: `temp-free-${testTimestamp}@test.com`,
+            password: 'Test1234!',
+          })
+          .expect(200);
+
+        const updatedToken = loginResponse.body.access_token;
+
+        // Intentar establecer favorito debería actualizar a all-access automáticamente
+        const response = await request(app.getHttpServer())
+          .post('/subscriptions/set-favorite')
+          .set('Authorization', `Bearer ${updatedToken}`)
+          .send({ tarotistaId: testTarotistaId })
+          .expect(200);
+
+        expect(response.body.subscription.subscriptionType).toBe(
+          SubscriptionType.PREMIUM_ALL_ACCESS,
+        );
+        expect(response.body.subscription.tarotistaId).toBeNull(); // PROFESSIONAL ignora tarotistaId
+        expect(response.body.subscription.canChangeAt).toBeNull(); // Sin cooldown
+      } finally {
+        // Cleanup
+        await subscriptionRepo.delete({ userId: tempFreeUserId });
+        await userRepo.delete({ id: tempFreeUserId });
+      }
     });
   });
 
