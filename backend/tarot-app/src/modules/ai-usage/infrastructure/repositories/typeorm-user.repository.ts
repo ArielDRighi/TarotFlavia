@@ -1,6 +1,6 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { MoreThanOrEqual, Repository } from 'typeorm';
 import { User, UserPlan } from '../../../users/entities/user.entity';
 import { IUserRepository } from '../../domain/interfaces/user-repository.interface';
 import { AI_MONTHLY_QUOTAS } from '../../constants/ai-usage.constants';
@@ -15,11 +15,7 @@ export class TypeOrmUserRepository implements IUserRepository {
   ) {}
 
   async findById(id: number): Promise<User | null> {
-    const user = await this.repository.findOne({ where: { id } });
-    if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
-    }
-    return user;
+    return this.repository.findOne({ where: { id } });
   }
 
   async incrementAIRequestsMonth(userId: number): Promise<void> {
@@ -33,15 +29,14 @@ export class TypeOrmUserRepository implements IUserRepository {
   }
 
   async findUsersApproachingQuota(): Promise<User[]> {
-    const users = await this.repository.find({
-      where: { plan: UserPlan.FREE },
-    });
+    const quota = AI_MONTHLY_QUOTAS[UserPlan.FREE];
+    const threshold = Math.floor(quota.hardLimit * 0.8);
 
-    // Filter users who have reached 80% of their quota
-    return users.filter((user) => {
-      const quota = AI_MONTHLY_QUOTAS[user.plan];
-      const percentageUsed = (user.aiRequestsUsedMonth / quota.hardLimit) * 100;
-      return percentageUsed >= 80;
+    return this.repository.find({
+      where: {
+        plan: UserPlan.FREE,
+        aiRequestsUsedMonth: MoreThanOrEqual(threshold),
+      },
     });
   }
 

@@ -19,6 +19,7 @@ interface RawStatisticsRow {
   successCalls: string;
   errorCalls: string;
   cachedCalls: string;
+  fallbackCalls: string;
   totalTokens: string;
   totalCost: string;
   avgDuration: string;
@@ -63,6 +64,10 @@ export class TypeOrmAIUsageLogRepository implements IAIUsageLogRepository {
         "COUNT(CASE WHEN log.status = 'cached' THEN 1 END)",
         'cachedCalls',
       )
+      .addSelect(
+        "COUNT(CASE WHEN log.status = 'fallback' THEN 1 END)",
+        'fallbackCalls',
+      )
       .addSelect('SUM(log.total_tokens)', 'totalTokens')
       .addSelect('SUM(log.cost_usd)', 'totalCost')
       .addSelect('AVG(log.duration_ms)', 'avgDuration')
@@ -86,7 +91,7 @@ export class TypeOrmAIUsageLogRepository implements IAIUsageLogRepository {
       const errorCalls = parseInt(row.errorCalls, 10);
       const cachedCalls = parseInt(row.cachedCalls, 10);
       const successCalls = parseInt(row.successCalls, 10);
-      const fallbackCalls = 0;
+      const fallbackCalls = parseInt(row.fallbackCalls || '0', 10);
 
       return {
         provider: row.provider,

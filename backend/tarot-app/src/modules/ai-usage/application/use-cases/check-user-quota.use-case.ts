@@ -1,4 +1,10 @@
-import { Injectable, Inject, Logger, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  Logger,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { IUserRepository } from '../../domain/interfaces/user-repository.interface';
 import { USER_REPOSITORY } from '../../domain/interfaces/repository.tokens';
 import { UserPlan } from '../../../users/entities/user.entity';
@@ -29,13 +35,14 @@ export class CheckUserQuotaUseCase {
 
   /**
    * Check if user has quota available
+   * @throws NotFoundException if user not found
    * @throws ForbiddenException if quota exceeded
    */
   async execute(userId: number): Promise<boolean> {
     const user = await this.userRepo.findById(userId);
 
     if (!user) {
-      throw new Error(`User ${userId} not found`);
+      throw new NotFoundException(`User ${userId} not found`);
     }
 
     // PREMIUM and PROFESSIONAL users have unlimited quota
@@ -60,12 +67,13 @@ export class CheckUserQuotaUseCase {
 
   /**
    * Get detailed quota information for a user
+   * @throws NotFoundException if user not found
    */
   async getQuotaInfo(userId: number): Promise<QuotaInfo> {
     const user = await this.userRepo.findById(userId);
 
     if (!user) {
-      throw new Error(`User ${userId} not found`);
+      throw new NotFoundException(`User ${userId} not found`);
     }
 
     const quota = AI_MONTHLY_QUOTAS[user.plan];

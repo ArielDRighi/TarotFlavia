@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ForbiddenException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { CheckUserQuotaUseCase } from './check-user-quota.use-case';
 import { IUserRepository } from '../../domain/interfaces/user-repository.interface';
 import { USER_REPOSITORY } from '../../domain/interfaces/repository.tokens';
@@ -80,9 +80,23 @@ describe('CheckUserQuotaUseCase', () => {
 
       await expect(useCase.execute(1)).rejects.toThrow(ForbiddenException);
     });
+
+    it('should throw NotFoundException when user not found', async () => {
+      userRepo.findById.mockResolvedValue(null);
+
+      await expect(useCase.execute(999)).rejects.toThrow(NotFoundException);
+    });
   });
 
   describe('getQuotaInfo', () => {
+    it('should throw NotFoundException when user not found', async () => {
+      userRepo.findById.mockResolvedValue(null);
+
+      await expect(useCase.getQuotaInfo(999)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
     it('should return unlimited quota info for PREMIUM users', async () => {
       const user = {
         id: 1,
