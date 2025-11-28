@@ -350,7 +350,7 @@ export class UsersService {
       sortOrder = 'DESC',
       page = 1,
       limit = 10,
-    } = query;
+    } = query as Required<UserQueryDto>;
 
     const queryBuilder = this.usersRepository.createQueryBuilder('user');
 
@@ -364,12 +364,14 @@ export class UsersService {
 
     // Filtrar por rol
     if (role) {
-      queryBuilder.andWhere(':role = ANY(user.roles)', { role });
+      queryBuilder.andWhere(':role = ANY(user.roles)', {
+        role: role as string,
+      });
     }
 
     // Filtrar por plan
     if (plan) {
-      queryBuilder.andWhere('user.plan = :plan', { plan });
+      queryBuilder.andWhere('user.plan = :plan', { plan: plan as string });
     }
 
     // Filtrar por estado de ban
