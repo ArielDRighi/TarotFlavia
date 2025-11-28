@@ -410,7 +410,6 @@ describe('Subscriptions System E2E', () => {
         });
 
       const tempFreeUserId = tempFreeUser.body.user.id;
-      const tempFreeToken = tempFreeUser.body.access_token;
 
       try {
         // Crear suscripción FREE inicial con cooldown
