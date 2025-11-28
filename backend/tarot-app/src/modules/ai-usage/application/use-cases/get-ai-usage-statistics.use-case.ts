@@ -22,9 +22,9 @@ export class GetAIUsageStatisticsUseCase {
     startDate?: Date,
     endDate?: Date,
   ): Promise<AIUsageStatistics[]> {
-    this.logger.debug(
-      `Getting AI usage statistics from ${startDate} to ${endDate}`,
-    );
+    const start = startDate?.toISOString() ?? 'beginning';
+    const end = endDate?.toISOString() ?? 'now';
+    this.logger.debug(`Getting AI usage statistics from ${start} to ${end}`);
 
     return this.aiUsageLogRepo.getStatistics(startDate, endDate);
   }

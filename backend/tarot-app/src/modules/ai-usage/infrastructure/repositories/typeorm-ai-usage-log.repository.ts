@@ -13,6 +13,17 @@ import {
 } from '../../domain/interfaces/ai-usage-log-repository.interface';
 import { startOfMonth } from 'date-fns';
 
+interface RawStatisticsRow {
+  provider: AIProvider;
+  totalCalls: string;
+  successCalls: string;
+  errorCalls: string;
+  cachedCalls: string;
+  totalTokens: string;
+  totalCost: string;
+  avgDuration: string;
+}
+
 @Injectable()
 export class TypeOrmAIUsageLogRepository implements IAIUsageLogRepository {
   private readonly logger = new Logger(TypeOrmAIUsageLogRepository.name);
@@ -68,7 +79,7 @@ export class TypeOrmAIUsageLogRepository implements IAIUsageLogRepository {
       queryBuilder.where('log.created_at <= :endDate', { endDate });
     }
 
-    const results = await queryBuilder.getRawMany();
+    const results = await queryBuilder.getRawMany<RawStatisticsRow>();
 
     return results.map((row) => {
       const totalCalls = parseInt(row.totalCalls, 10);
@@ -83,9 +94,9 @@ export class TypeOrmAIUsageLogRepository implements IAIUsageLogRepository {
         successCalls,
         errorCalls,
         cachedCalls,
-        totalTokens: parseInt(row.totalTokens || 0, 10),
-        totalCost: parseFloat(row.totalCost || 0),
-        avgDuration: parseFloat(row.avgDuration || 0),
+        totalTokens: parseInt(row.totalTokens || '0', 10),
+        totalCost: parseFloat(row.totalCost || '0'),
+        avgDuration: parseFloat(row.avgDuration || '0'),
         errorRate: totalCalls > 0 ? (errorCalls / totalCalls) * 100 : 0,
         cacheHitRate: totalCalls > 0 ? (cachedCalls / totalCalls) * 100 : 0,
         fallbackRate: totalCalls > 0 ? (fallbackCalls / totalCalls) * 100 : 0,
@@ -95,10 +106,12 @@ export class TypeOrmAIUsageLogRepository implements IAIUsageLogRepository {
 
   async getTotalRequestsByUserThisMonth(userId: number): Promise<number> {
     const startOfCurrentMonth = startOfMonth(new Date());
+    const dateRange = Between(startOfCurrentMonth, new Date());
+
     const count = await this.repository.count({
       where: {
         userId,
-        createdAt: Between(startOfCurrentMonth, new Date()) as any,
+        createdAt: dateRange,
         status: AIUsageStatus.SUCCESS,
       },
     });
@@ -110,7 +123,7 @@ export class TypeOrmAIUsageLogRepository implements IAIUsageLogRepository {
     startDate?: Date,
     endDate?: Date,
   ): Promise<AIUsageLog[]> {
-    const query: any = { userId };
+    const query: Record<string, unknown> = { userId };
 
     if (startDate && endDate) {
       query.createdAt = Between(startDate, endDate);
@@ -129,7 +142,7 @@ export class TypeOrmAIUsageLogRepository implements IAIUsageLogRepository {
     startDate?: Date,
     endDate?: Date,
   ): Promise<AIUsageLog[]> {
-    const query: any = { provider };
+    const query: Record<string, unknown> = { provider };
 
     if (startDate && endDate) {
       query.createdAt = Between(startDate, endDate);

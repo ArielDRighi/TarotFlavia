@@ -156,9 +156,7 @@ describe('AIUsageOrchestratorService', () => {
 
       await service.incrementUserRequests(userId);
 
-      expect(incrementUserRequestsUseCase.execute).toHaveBeenCalledWith(
-        userId,
-      );
+      expect(incrementUserRequestsUseCase.execute).toHaveBeenCalledWith(userId);
     });
   });
 });

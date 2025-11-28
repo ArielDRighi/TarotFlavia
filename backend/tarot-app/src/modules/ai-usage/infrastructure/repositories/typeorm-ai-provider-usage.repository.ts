@@ -24,7 +24,7 @@ export class TypeOrmAIProviderUsageRepository
     const monthStart = startOfMonth(month);
 
     let usage = await this.repository.findOne({
-      where: { provider, month: monthStart as any },
+      where: { provider, month: monthStart },
     });
 
     if (!usage) {
@@ -67,7 +67,11 @@ export class TypeOrmAIProviderUsageRepository
   }
 
   async hasReachedLimit(provider: AIProvider, month: Date): Promise<boolean> {
-    const usage = await this.getCurrentMonthUsage(provider);
+    const monthStart = startOfMonth(month);
+    const usage = await this.repository.findOne({
+      where: { provider, month: monthStart },
+    });
+
     if (!usage) {
       return false;
     }
@@ -81,7 +85,7 @@ export class TypeOrmAIProviderUsageRepository
     const monthStart = startOfMonth(new Date());
 
     return this.repository.findOne({
-      where: { provider, month: monthStart as any },
+      where: { provider, month: monthStart },
     });
   }
 
@@ -89,7 +93,7 @@ export class TypeOrmAIProviderUsageRepository
     const monthStart = startOfMonth(month);
 
     return this.repository.find({
-      where: { month: monthStart as any },
+      where: { month: monthStart },
       order: { provider: 'ASC' },
     });
   }
