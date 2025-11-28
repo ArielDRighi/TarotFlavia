@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthOrchestratorService } from './application/services/auth-orchestrator.service';
-import { CreateUserDto } from '../users/dto/create-user.dto';
+import { CreateUserDto } from '../users/application/dto/create-user.dto';
 import { LoginDto } from './application/dto/login.dto';
 import { RefreshTokenDto } from './application/dto/refresh-token.dto';
 import { UnauthorizedException } from '@nestjs/common';

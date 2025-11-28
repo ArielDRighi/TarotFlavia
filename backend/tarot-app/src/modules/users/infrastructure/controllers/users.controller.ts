@@ -13,14 +13,14 @@ import {
   BadRequestException,
   ParseIntPipe,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { UpdateUserPlanDto } from './dto/update-user-plan.dto';
-import { JwtAuthGuard } from '../auth/infrastructure/guards/jwt-auth.guard';
-import { AdminGuard } from '../auth/infrastructure/guards/admin.guard';
-import { RolesGuard } from '../../common/guards/roles.guard';
-import { Roles } from '../../common/decorators/roles.decorator';
-import { UserRole } from '../../common/enums/user-role.enum';
+import { UsersOrchestratorService } from '../../application/services/users-orchestrator.service';
+import { UpdateUserDto } from '../../application/dto/update-user.dto';
+import { UpdateUserPlanDto } from '../../application/dto/update-user-plan.dto';
+import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
+import { AdminGuard } from '../../../auth/infrastructure/guards/admin.guard';
+import { RolesGuard } from '../../../../common/guards/roles.guard';
+import { Roles } from '../../../../common/decorators/roles.decorator';
+import { UserRole } from '../../../../common/enums/user-role.enum';
 import {
   ApiTags,
   ApiOperation,
@@ -34,7 +34,7 @@ import {
 @ApiBearerAuth('JWT-auth')
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersOrchestratorService) {}
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')

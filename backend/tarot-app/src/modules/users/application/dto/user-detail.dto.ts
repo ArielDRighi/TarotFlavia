@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { UserWithoutPassword } from '../entities/user.entity';
+import { UserWithoutPassword } from '../../entities/user.entity';
 
 export class UserStatisticsDto {
   @ApiProperty({

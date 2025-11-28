@@ -9,7 +9,7 @@ import {
   Max,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { UserPlan, UserRole } from '../entities/user.entity';
+import { UserPlan, UserRole } from '../../entities/user.entity';
 
 export class UserQueryDto {
   @ApiPropertyOptional({

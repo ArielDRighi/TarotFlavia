@@ -263,6 +263,50 @@ describe('SubscriptionsService', () => {
         service.setFavoriteTarotista(userId, tarotistaId),
       ).rejects.toThrow(BadRequestException);
     });
+
+    it('debería crear suscripción all-access automáticamente para usuario PROFESSIONAL', async () => {
+      const userId = 1;
+      const tarotistaId = 2;
+      const user: Partial<User> = {
+        id: userId,
+        plan: UserPlan.PROFESSIONAL,
+      };
+      const tarotista: Partial<Tarotista> = {
+        id: tarotistaId,
+        isActive: true,
+      };
+
+      jest.spyOn(userRepo, 'findOne').mockResolvedValue(user as User);
+      jest
+        .spyOn(tarotistaRepo, 'findOne')
+        .mockResolvedValue(tarotista as Tarotista);
+      jest.spyOn(subscriptionRepo, 'findOne').mockResolvedValue(null); // Sin suscripción previa
+
+      const newSubscription = {
+        id: 1,
+        userId,
+        tarotistaId: null, // all-access no tiene tarotista específico
+        subscriptionType: SubscriptionType.PREMIUM_ALL_ACCESS,
+        status: SubscriptionStatus.ACTIVE,
+        startedAt: new Date(),
+        canChangeAt: null, // Sin cooldown
+        changeCount: 0,
+      };
+
+      jest
+        .spyOn(subscriptionRepo, 'create')
+        .mockReturnValue(newSubscription as any);
+      jest
+        .spyOn(subscriptionRepo, 'save')
+        .mockResolvedValue(newSubscription as any);
+
+      const result = await service.setFavoriteTarotista(userId, tarotistaId);
+
+      expect(result).toBeDefined();
+      expect(result.tarotistaId).toBeNull(); // all-access
+      expect(result.subscriptionType).toBe(SubscriptionType.PREMIUM_ALL_ACCESS);
+      expect(result.canChangeAt).toBeNull();
+    });
   });
 
   describe('resolveTarotistaForReading', () => {

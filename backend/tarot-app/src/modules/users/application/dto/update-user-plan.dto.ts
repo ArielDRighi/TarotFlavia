@@ -1,7 +1,7 @@
 import { IsEnum, IsOptional, IsString, IsDate } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { UserPlan, SubscriptionStatus } from '../entities/user.entity';
+import { UserPlan, SubscriptionStatus } from '../../entities/user.entity';
 
 export class UpdateUserPlanDto {
   @ApiProperty({

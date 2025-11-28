@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../../../users/users.service';
-import { CreateUserDto } from '../../../users/dto/create-user.dto';
+import { CreateUserDto } from '../../../users/application/dto/create-user.dto';
 import { IRefreshTokenRepository } from '../../domain/interfaces/refresh-token-repository.interface';
 import { REFRESH_TOKEN_REPOSITORY } from '../../domain/interfaces/repository.tokens';
 import { UserRole } from '../../../../common/enums/user-role.enum';

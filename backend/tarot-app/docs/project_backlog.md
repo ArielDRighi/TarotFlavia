@@ -13214,6 +13214,470 @@ Implementar sistema de logging estructurado JSON con Winston, incluyendo correla
 
 ---
 
+### **TASK-076: Dashboard de Configuración Dinámica de Planes** ⭐⭐⭐
+
+**Prioridad:** 🟡 ALTA  
+**Estimación:** 4 días  
+**Dependencias:** TASK-ARCH-012 (Users Module), TASK-071 (Subscriptions), TASK-075 (Logging)  
+**Marcador MVP:** ⭐⭐⭐ **IMPORTANTE PARA MVP** - Gestión flexible de planes y límites  
+**Estado:** ⏳ PENDIENTE
+
+#### 📋 Descripción
+
+Implementar sistema de configuración dinámica de planes de usuario mediante base de datos, reemplazando las constantes hardcodeadas actuales. Incluye dashboard administrativo para gestionar features, límites y capacidades de cada plan (FREE, PREMIUM, PROFESSIONAL) sin necesidad de redesplegar la aplicación.
+
+**Problema Actual:**
+
+Los límites de planes están hardcodeados en:
+
+- `usage-limits.constants.ts` - Límites de lecturas, regeneraciones, consultas
+- `ai-usage.constants.ts` - Cuotas mensuales de IA
+- Requiere redeploy para cualquier cambio
+- No permite ajustes dinámicos, promociones o pruebas A/B
+- Dificulta la gestión de planes en diferentes ambientes (dev/staging/prod)
+
+**Solución Propuesta:**
+
+Sistema de configuración basado en base de datos con:
+
+1. **Tabla `plan_features`** para almacenar límites y capacidades
+2. **Servicio con cache** para optimizar rendimiento
+3. **Endpoints administrativos** para CRUD de configuraciones
+4. **Migración gradual** con fallback a constantes actuales
+5. **Auditoría de cambios** (quién, cuándo, qué cambió)
+6. **Validaciones** para prevenir configuraciones inválidas
+
+**Casos de Uso:**
+
+- ✅ Admin actualiza límite de lecturas FREE de 3 a 5 sin redeploy
+- ✅ Admin crea promoción temporal: PREMIUM gratis por 30 días
+- ✅ Admin ajusta cuotas de IA según uso real y costos
+- ✅ Admin deshabilita feature específica temporalmente
+- ✅ Admin ve historial de cambios en configuración de planes
+- ✅ Sistema aplica cambios en tiempo real con cache de 5 minutos
+
+---
+
+#### 🎯 Criterios de aceptación
+
+**Funcionales:**
+
+- [ ] Tabla `plan_features` creada con columnas: id, plan, feature, limit_value, is_active, updated_at, updated_by
+- [ ] Tabla `plan_feature_audit` para auditoría de cambios
+- [ ] Migración seed con valores actuales de constantes
+- [ ] Servicio `PlanConfigurationService` con métodos CRUD y cache
+- [ ] Endpoints admin: GET, POST, PATCH para configuración de planes
+- [ ] Fallback a constantes si BD no disponible (resilencia)
+- [ ] Cache TTL de 5 minutos para optimizar queries
+- [ ] Validaciones: límites no negativos (excepto -1 = ilimitado)
+- [ ] Endpoint GET público para consultar capacidades de planes (para frontend)
+- [ ] Integración con `UsageLimitsService` y `AIUsageService`
+
+**No Funcionales:**
+
+- [ ] Performance: <50ms para consultas cacheadas
+- [ ] Logging de todos los cambios de configuración
+- [ ] Tests unitarios: 100% cobertura en servicio
+- [ ] Tests E2E: validar flujo completo de cambio de config
+- [ ] Documentación: API endpoints y ejemplos en Swagger
+- [ ] Backward compatibility: constantes siguen funcionando durante migración
+
+---
+
+#### 🏗️ Diseño de Base de Datos
+
+**Tabla `plan_features`:**
+
+```sql
+CREATE TABLE plan_features (
+  id SERIAL PRIMARY KEY,
+  plan user_plan_enum NOT NULL,
+  feature VARCHAR(100) NOT NULL,
+  limit_value INTEGER NOT NULL, -- -1 = ilimitado
+  description TEXT,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW(),
+  updated_by INTEGER REFERENCES users(id),
+  UNIQUE(plan, feature)
+);
+
+CREATE INDEX idx_plan_features_active ON plan_features(plan, is_active);
+```
+
+**Features soportadas:**
+
+- `tarot_reading` - Lecturas de tarot diarias
+- `oracle_query` - Consultas al oráculo
+- `interpretation_regeneration` - Regeneraciones de interpretación
+- `ai_monthly_quota` - Cuota mensual de IA
+- `favorite_tarotistas` - Cantidad de tarotistas favoritos
+- `change_favorite_cooldown_days` - Días de cooldown para cambiar favorito
+
+**Tabla `plan_feature_audit`:**
+
+```sql
+CREATE TABLE plan_feature_audit (
+  id SERIAL PRIMARY KEY,
+  plan_feature_id INTEGER REFERENCES plan_features(id),
+  plan user_plan_enum NOT NULL,
+  feature VARCHAR(100) NOT NULL,
+  old_value INTEGER,
+  new_value INTEGER NOT NULL,
+  changed_by INTEGER REFERENCES users(id),
+  changed_at TIMESTAMP DEFAULT NOW(),
+  reason TEXT
+);
+
+CREATE INDEX idx_audit_plan_feature ON plan_feature_audit(plan_feature_id);
+CREATE INDEX idx_audit_date ON plan_feature_audit(changed_at DESC);
+```
+
+---
+
+#### 🧩 Arquitectura de Módulos
+
+**Nueva Estructura:**
+
+```
+src/modules/plan-configuration/
+├── domain/
+│   └── entities/
+│       ├── plan-feature.entity.ts
+│       └── plan-feature-audit.entity.ts
+├── application/
+│   ├── dto/
+│   │   ├── create-plan-feature.dto.ts
+│   │   ├── update-plan-feature.dto.ts
+│   │   ├── get-plan-features-filter.dto.ts
+│   │   └── plan-capabilities-response.dto.ts
+│   ├── use-cases/
+│   │   ├── get-feature-limit.use-case.ts
+│   │   ├── update-feature-limit.use-case.ts
+│   │   ├── get-plan-capabilities.use-case.ts
+│   │   └── get-audit-history.use-case.ts
+│   └── services/
+│       └── plan-configuration-orchestrator.service.ts
+├── infrastructure/
+│   ├── controllers/
+│   │   ├── plan-configuration-admin.controller.ts
+│   │   └── plan-capabilities-public.controller.ts
+│   └── repositories/
+│       ├── plan-feature.repository.ts
+│       └── plan-feature-audit.repository.ts
+├── plan-configuration.module.ts
+└── constants/
+    └── default-plan-features.ts (fallback)
+```
+
+---
+
+#### 📝 Endpoints API
+
+**Administrativos (requiere rol ADMIN):**
+
+```typescript
+// Listar configuraciones actuales
+GET /admin/plans/features
+GET /admin/plans/:plan/features
+GET /admin/plans/:plan/features/:feature
+
+// Actualizar límite de feature
+PATCH /admin/plans/:plan/features/:feature
+Body: {
+  limit_value: number,
+  reason: string
+}
+
+// Crear nueva feature (casos especiales)
+POST /admin/plans/features
+Body: {
+  plan: 'free' | 'premium' | 'professional',
+  feature: string,
+  limit_value: number,
+  description: string
+}
+
+// Ver historial de cambios
+GET /admin/plans/features/audit
+GET /admin/plans/:plan/features/:feature/audit
+```
+
+**Públicos (sin autenticación):**
+
+```typescript
+// Consultar capacidades de un plan
+GET /plans/capabilities/:plan
+Response: {
+  plan: 'free',
+  features: {
+    tarot_reading: 3,
+    oracle_query: 5,
+    interpretation_regeneration: 0,
+    ai_monthly_quota: 100,
+    favorite_tarotistas: 1,
+    change_favorite_cooldown_days: 30
+  },
+  subscription_types: ['favorite'],
+  description: 'Plan gratuito con 3 lecturas diarias'
+}
+
+// Comparar todos los planes
+GET /plans/capabilities
+Response: [
+  { plan: 'free', features: {...} },
+  { plan: 'premium', features: {...} },
+  { plan: 'professional', features: {...} }
+]
+```
+
+---
+
+#### 🧪 Testing
+
+**Unit Tests (60 tests esperados):**
+
+- [ ] **PlanFeatureEntity:**
+  - Validación de constraint UNIQUE(plan, feature)
+  - Validación de limit_value >= -1
+- [ ] **GetFeatureLimitUseCase:**
+  - Obtiene límite desde BD correctamente
+  - Cache funciona (no hace query en 2da llamada)
+  - Fallback a constantes si BD falla
+  - Retorna -1 para features ilimitadas
+  - Retorna feature inactiva como 0 (deshabilitada)
+- [ ] **UpdateFeatureLimitUseCase:**
+  - Actualiza límite correctamente
+  - Crea registro de auditoría
+  - Invalida cache después de actualización
+  - Valida límite no negativo (excepto -1)
+  - Requiere permisos de admin
+  - Loggea cambio con correlationId
+- [ ] **GetPlanCapabilitiesUseCase:**
+  - Retorna todas las features de un plan
+  - Agrupa features por plan correctamente
+  - Incluye solo features activas
+- [ ] **PlanConfigurationOrchestrator:**
+  - Integración entre use cases
+  - Manejo de errores y rollback
+  - Cache invalidation strategy
+
+**E2E Tests (20 tests esperados):**
+
+- [ ] **Admin Endpoints:**
+  - Admin puede actualizar límite de lectura FREE
+  - Admin puede ver historial de cambios
+  - Usuario regular NO puede actualizar configuración (403)
+  - Cambio se refleja inmediatamente después de cache TTL
+  - Validación de valores inválidos (límite negativo no -1)
+- [ ] **Public Endpoints:**
+  - Usuario no autenticado puede ver capacidades de planes
+  - Endpoint /plans/capabilities retorna 3 planes
+  - Datos coinciden con configuración en BD
+- [ ] **Integration Tests:**
+  - UsageLimitsService consulta BD en lugar de constantes
+  - AIUsageService consulta BD para cuotas
+  - Cambio en BD se refleja en validación de uso
+  - Fallback a constantes si BD no responde
+- [ ] **Cache Tests:**
+  - Primera llamada hace query a BD
+  - Segunda llamada usa cache (no query)
+  - Cache se invalida después de update
+  - Cache expira después de TTL (5 min)
+
+**Ubicación:** `src/modules/plan-configuration/**/*.spec.ts`, `test/plan-configuration.e2e-spec.ts`
+
+---
+
+#### ✅ Tareas específicas
+
+**Día 1: Diseño e Infraestructura (8h)**
+
+- [ ] **Migración de BD (2h):**
+  - Crear `CreatePlanFeaturesTables` migration
+  - Definir enums y constraints
+  - Crear índices necesarios
+  - Seed inicial con valores de constantes actuales
+- [ ] **Entidades (2h):**
+  - `PlanFeature` entity con validaciones
+  - `PlanFeatureAudit` entity
+  - Relations y decoradores TypeORM
+  - Unit tests de entidades (10 tests)
+- [ ] **Repositorios (2h):**
+  - `PlanFeatureRepository` con métodos custom
+  - `PlanFeatureAuditRepository`
+  - Query builders para filtros complejos
+  - Unit tests de repositorios (15 tests)
+- [ ] **DTOs (2h):**
+  - `CreatePlanFeatureDto` con class-validator
+  - `UpdatePlanFeatureDto`
+  - `GetPlanFeaturesFilterDto`
+  - `PlanCapabilitiesResponseDto`
+  - Unit tests de validación (10 tests)
+
+**Día 2: Lógica de Negocio (8h)**
+
+- [ ] **Use Cases (4h):**
+  - `GetFeatureLimitUseCase` con cache
+  - `UpdateFeatureLimitUseCase` con auditoría
+  - `GetPlanCapabilitiesUseCase`
+  - `GetAuditHistoryUseCase`
+  - Unit tests (25 tests)
+- [ ] **Orchestrator (2h):**
+  - `PlanConfigurationOrchestratorService`
+  - Integración de use cases
+  - Manejo de transacciones
+  - Unit tests (10 tests)
+- [ ] **Cache Service (2h):**
+  - Implementar cache con TTL 5 minutos
+  - Invalidación selectiva por plan+feature
+  - Invalidación completa
+  - Tests de cache (5 tests)
+
+**Día 3: API y Controllers (8h)**
+
+- [ ] **Controllers Admin (3h):**
+  - `PlanConfigurationAdminController`
+  - Endpoints CRUD completos
+  - Guards (JwtAuthGuard, AdminGuard)
+  - Swagger documentation
+  - Unit tests (15 tests)
+- [ ] **Controllers Public (2h):**
+  - `PlanCapabilitiesPublicController`
+  - Endpoint GET sin autenticación
+  - Cache headers (max-age=300)
+  - Swagger documentation
+  - Unit tests (8 tests)
+- [ ] **Integration con módulos existentes (3h):**
+  - Modificar `UsageLimitsService` para consultar BD
+  - Modificar `AIUsageService` para consultar BD
+  - Mantener fallback a constantes
+  - Tests de integración (10 tests)
+
+**Día 4: Testing E2E y Documentación (8h)**
+
+- [ ] **E2E Tests (4h):**
+  - Setup de base de datos de test
+  - Tests de flujos completos admin
+  - Tests de endpoints públicos
+  - Tests de integración con módulos
+  - Tests de cache y performance
+  - Total: 20 E2E tests
+- [ ] **Documentación (2h):**
+  - Actualizar `docs/API_DOCUMENTATION.md`
+  - Crear `docs/PLAN_CONFIGURATION.md`
+  - Ejemplos de uso de endpoints
+  - Guía de migración desde constantes
+  - Troubleshooting común
+- [ ] **Script de testing manual (1h):**
+  - Crear `test-plan-configuration.sh`
+  - Tests con curl para validación manual
+  - Ejemplos de payloads
+- [ ] **Code Review y Ajustes (1h):**
+  - Lint y format
+  - Coverage check (target: >85%)
+  - Performance testing
+  - Security review
+
+---
+
+#### 📦 Dependencias
+
+```json
+{
+  "dependencies": {
+    "@nestjs/cache-manager": "^2.1.0",
+    "cache-manager": "^5.2.4"
+  }
+}
+```
+
+**Nota:** Cache manager ya está en el proyecto, no requiere instalación adicional.
+
+---
+
+#### 🔄 Migración Gradual
+
+**Fase 1: Crear infraestructura (TASK-076)**
+
+- Tabla `plan_features` con seed de valores actuales
+- Endpoints admin funcionando
+- Fallback a constantes activo
+
+**Fase 2: Integración opcional (Post-MVP)**
+
+- `UsageLimitsService` consulta BD primero, luego constantes
+- `AIUsageService` consulta BD primero, luego constantes
+- Monitoreo de performance
+
+**Fase 3: Migración completa (Post-MVP)**
+
+- Eliminar constantes hardcodeadas
+- BD como única fuente de verdad
+- Documentar nuevo flujo
+
+---
+
+#### ⚠️ Consideraciones
+
+**Performance:**
+
+- Cache de 5 minutos para queries frecuentes
+- Índices en columnas de filtro (plan, is_active)
+- Consultas optimizadas con query builder
+
+**Seguridad:**
+
+- Solo ADMIN puede modificar configuración
+- Validación de valores (-1 o >= 0)
+- Auditoría completa de cambios (quién, cuándo, por qué)
+- Logs estructurados con correlationId
+
+**Resilencia:**
+
+- Fallback a constantes si BD falla
+- Cache permite operación sin BD por 5 minutos
+- Validaciones previenen configuraciones inválidas
+
+**Backward Compatibility:**
+
+- Constantes siguen funcionando durante migración
+- Cambios no rompen código existente
+- Tests garantizan compatibilidad
+
+**Extensibilidad:**
+
+- Fácil agregar nuevas features
+- Soporta features custom por plan
+- Diseño permite features boolean o numéricos
+
+---
+
+#### 🎁 Beneficios del Sistema
+
+**Operacionales:**
+
+- ✅ Cambios sin redeploy (↓ downtime)
+- ✅ Ajustes basados en métricas reales
+- ✅ Promociones y experimentos rápidos
+- ✅ Configuración por ambiente (dev/prod)
+
+**Técnicos:**
+
+- ✅ Auditoría completa de cambios
+- ✅ Cache optimiza performance
+- ✅ Resilente a fallos de BD
+- ✅ Extensible para nuevas features
+
+**Negocio:**
+
+- ✅ Flexibilidad en pricing
+- ✅ Pruebas A/B de límites
+- ✅ Respuesta rápida a competencia
+- ✅ Optimización de costos de IA
+
+---
+
 ### **TASK-082: Tests de Integración Completos** ⭐⭐⭐
 
 **Prioridad:** 🔴 CRÍTICA  

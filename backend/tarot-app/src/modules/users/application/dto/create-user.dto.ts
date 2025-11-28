@@ -10,7 +10,7 @@ import {
   SanitizeEmail,
   SanitizeHtml,
   Trim,
-} from '../../../common/decorators/sanitize.decorator';
+} from '../../../../common/decorators/sanitize.decorator';
 
 export class CreateUserDto {
   @ApiProperty({

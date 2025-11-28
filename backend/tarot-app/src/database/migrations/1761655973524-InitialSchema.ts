@@ -32,7 +32,7 @@ export class InitialSchema1761655973524 implements MigrationInterface {
       `CREATE INDEX "IDX_tarot_reading_shared_token" ON "tarot_reading" ("sharedToken")`,
     );
     await queryRunner.query(
-      `CREATE TYPE "user_plan_enum" AS ENUM('free', 'premium')`,
+      `CREATE TYPE "user_plan_enum" AS ENUM('free', 'premium', 'professional')`,
     );
     await queryRunner.query(
       `CREATE TYPE "user_subscription_status_enum" AS ENUM('active', 'cancelled', 'expired')`,

@@ -6,7 +6,7 @@ import { RefreshTokenUseCase } from '../use-cases/refresh-token.use-case';
 import { LogoutUseCase } from '../use-cases/logout.use-case';
 import { ForgotPasswordUseCase } from '../use-cases/forgot-password.use-case';
 import { ResetPasswordUseCase } from '../use-cases/reset-password.use-case';
-import { CreateUserDto } from '../../../users/dto/create-user.dto';
+import { CreateUserDto } from '../../../users/application/dto/create-user.dto';
 
 describe('AuthOrchestratorService', () => {
   let service: AuthOrchestratorService;
