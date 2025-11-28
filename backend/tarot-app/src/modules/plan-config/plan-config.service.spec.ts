@@ -8,9 +8,9 @@ import { NotFoundException, ConflictException } from '@nestjs/common';
 
 describe('PlanConfigService', () => {
   let service: PlanConfigService;
-  let repository: Repository<Plan>;
+  let _repository: Repository<Plan>;
 
-  const mockPlanRepository = {
+  const mockRepository = {
     find: jest.fn(),
     findOne: jest.fn(),
     create: jest.fn(),
@@ -24,13 +24,13 @@ describe('PlanConfigService', () => {
         PlanConfigService,
         {
           provide: getRepositoryToken(Plan),
-          useValue: mockPlanRepository,
+          useValue: mockRepository,
         },
       ],
     }).compile();
 
     service = module.get<PlanConfigService>(PlanConfigService);
-    repository = module.get<Repository<Plan>>(getRepositoryToken(Plan));
+    _repository = module.get<Repository<Plan>>(getRepositoryToken(Plan));
   });
 
   afterEach(() => {
@@ -57,18 +57,18 @@ describe('PlanConfigService', () => {
         } as Plan,
       ];
 
-      mockPlanRepository.find.mockResolvedValue(mockPlans);
+      mockRepository.find.mockResolvedValue(mockPlans);
 
       const result = await service.findAll();
 
       expect(result).toEqual(mockPlans);
-      expect(mockPlanRepository.find).toHaveBeenCalledWith({
+      expect(mockRepository.find).toHaveBeenCalledWith({
         order: { planType: 'ASC' },
       });
     });
 
     it('should return empty array when no plans exist', async () => {
-      mockPlanRepository.find.mockResolvedValue([]);
+      mockRepository.find.mockResolvedValue([]);
 
       const result = await service.findAll();
 
@@ -94,18 +94,18 @@ describe('PlanConfigService', () => {
         updatedAt: new Date(),
       } as Plan;
 
-      mockPlanRepository.findOne.mockResolvedValue(mockPlan);
+      mockRepository.findOne.mockResolvedValue(mockPlan);
 
       const result = await service.findByPlanType(UserPlan.FREE);
 
       expect(result).toEqual(mockPlan);
-      expect(mockPlanRepository.findOne).toHaveBeenCalledWith({
+      expect(mockRepository.findOne).toHaveBeenCalledWith({
         where: { planType: UserPlan.FREE },
       });
     });
 
     it('should throw NotFoundException when plan not found', async () => {
-      mockPlanRepository.findOne.mockResolvedValue(null);
+      mockRepository.findOne.mockResolvedValue(null);
 
       await expect(service.findByPlanType(UserPlan.PREMIUM)).rejects.toThrow(
         NotFoundException,
@@ -138,18 +138,18 @@ describe('PlanConfigService', () => {
         updatedAt: new Date(),
       } as Plan;
 
-      mockPlanRepository.findOne.mockResolvedValue(null);
-      mockPlanRepository.create.mockReturnValue(mockPlan);
-      mockPlanRepository.save.mockResolvedValue(mockPlan);
+      mockRepository.findOne.mockResolvedValue(null);
+      mockRepository.create.mockReturnValue(mockPlan);
+      mockRepository.save.mockResolvedValue(mockPlan);
 
       const result = await service.create(createDto);
 
       expect(result).toEqual(mockPlan);
-      expect(mockPlanRepository.findOne).toHaveBeenCalledWith({
+      expect(mockRepository.findOne).toHaveBeenCalledWith({
         where: { planType: createDto.planType },
       });
-      expect(mockPlanRepository.create).toHaveBeenCalledWith(createDto);
-      expect(mockPlanRepository.save).toHaveBeenCalledWith(mockPlan);
+      expect(mockRepository.create).toHaveBeenCalledWith(createDto);
+      expect(mockRepository.save).toHaveBeenCalledWith(mockPlan);
     });
 
     it('should throw ConflictException if plan already exists', async () => {
@@ -173,7 +173,7 @@ describe('PlanConfigService', () => {
         updatedAt: new Date(),
       } as Plan;
 
-      mockPlanRepository.findOne.mockResolvedValue(existingPlan);
+      mockRepository.findOne.mockResolvedValue(existingPlan);
 
       await expect(service.create(createDto)).rejects.toThrow(
         ConflictException,
@@ -212,22 +212,22 @@ describe('PlanConfigService', () => {
         ...updateDto,
       } as Plan;
 
-      mockPlanRepository.findOne.mockResolvedValue(existingPlan);
-      mockPlanRepository.save.mockResolvedValue(updatedPlan);
+      mockRepository.findOne.mockResolvedValue(existingPlan);
+      mockRepository.save.mockResolvedValue(updatedPlan);
 
       const result = await service.update(UserPlan.FREE, updateDto);
 
       expect(result).toEqual(updatedPlan);
-      expect(mockPlanRepository.findOne).toHaveBeenCalledWith({
+      expect(mockRepository.findOne).toHaveBeenCalledWith({
         where: { planType: UserPlan.FREE },
       });
-      expect(mockPlanRepository.save).toHaveBeenCalledWith(updatedPlan);
+      expect(mockRepository.save).toHaveBeenCalledWith(updatedPlan);
     });
 
     it('should throw NotFoundException when plan not found', async () => {
       const updateDto = { name: 'Updated Plan' };
 
-      mockPlanRepository.findOne.mockResolvedValue(null);
+      mockRepository.findOne.mockResolvedValue(null);
 
       await expect(service.update(UserPlan.PREMIUM, updateDto)).rejects.toThrow(
         NotFoundException,
@@ -255,7 +255,7 @@ describe('PlanConfigService', () => {
         updatedAt: new Date(),
       } as Plan;
 
-      mockPlanRepository.findOne.mockResolvedValue(existingPlan);
+      mockRepository.findOne.mockResolvedValue(existingPlan);
 
       // The service should ignore planType in updates
       const updatedPlan = {
@@ -264,7 +264,7 @@ describe('PlanConfigService', () => {
         planType: UserPlan.FREE, // Should remain FREE
       };
 
-      mockPlanRepository.save.mockResolvedValue(updatedPlan);
+      mockRepository.save.mockResolvedValue(updatedPlan);
 
       const result = await service.update(UserPlan.FREE, updateDto);
 
@@ -290,19 +290,19 @@ describe('PlanConfigService', () => {
         updatedAt: new Date(),
       } as Plan;
 
-      mockPlanRepository.findOne.mockResolvedValue(existingPlan);
-      mockPlanRepository.delete.mockResolvedValue({ affected: 1 });
+      mockRepository.findOne.mockResolvedValue(existingPlan);
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
 
       await service.remove(UserPlan.PROFESSIONAL);
 
-      expect(mockPlanRepository.findOne).toHaveBeenCalledWith({
+      expect(mockRepository.findOne).toHaveBeenCalledWith({
         where: { planType: UserPlan.PROFESSIONAL },
       });
-      expect(mockPlanRepository.delete).toHaveBeenCalledWith(existingPlan.id);
+      expect(mockRepository.delete).toHaveBeenCalledWith(existingPlan.id);
     });
 
     it('should throw NotFoundException when plan not found', async () => {
-      mockPlanRepository.findOne.mockResolvedValue(null);
+      mockRepository.findOne.mockResolvedValue(null);
 
       await expect(service.remove(UserPlan.PREMIUM)).rejects.toThrow(
         NotFoundException,
@@ -328,7 +328,7 @@ describe('PlanConfigService', () => {
         updatedAt: new Date(),
       } as Plan;
 
-      mockPlanRepository.findOne.mockResolvedValue(mockPlan);
+      mockRepository.findOne.mockResolvedValue(mockPlan);
 
       const result = await service.getReadingsLimit(UserPlan.FREE);
 
@@ -352,7 +352,7 @@ describe('PlanConfigService', () => {
         updatedAt: new Date(),
       } as Plan;
 
-      mockPlanRepository.findOne.mockResolvedValue(mockPlan);
+      mockRepository.findOne.mockResolvedValue(mockPlan);
 
       const result = await service.getReadingsLimit(UserPlan.PREMIUM);
 
@@ -378,7 +378,7 @@ describe('PlanConfigService', () => {
         updatedAt: new Date(),
       } as Plan;
 
-      mockPlanRepository.findOne.mockResolvedValue(mockPlan);
+      mockRepository.findOne.mockResolvedValue(mockPlan);
 
       const result = await service.getAiQuota(UserPlan.FREE);
 
@@ -405,7 +405,7 @@ describe('PlanConfigService', () => {
         hasFeature: jest.fn().mockReturnValue(true),
       } as unknown as Plan;
 
-      mockPlanRepository.findOne.mockResolvedValue(mockPlan);
+      mockRepository.findOne.mockResolvedValue(mockPlan);
 
       const result = await service.hasFeature(
         UserPlan.PREMIUM,
@@ -434,7 +434,7 @@ describe('PlanConfigService', () => {
         hasFeature: jest.fn().mockReturnValue(false),
       } as unknown as Plan;
 
-      mockPlanRepository.findOne.mockResolvedValue(mockPlan);
+      mockRepository.findOne.mockResolvedValue(mockPlan);
 
       const result = await service.hasFeature(UserPlan.FREE, 'allowSharing');
 

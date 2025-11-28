@@ -76,8 +76,9 @@ export class PlanConfigService {
   ): Promise<Plan> {
     const plan = await this.findByPlanType(planType);
 
-    // Evitar que se cambie el planType
-    const { planType: _, ...updateData } = updatePlanDto;
+    // Evitar que se cambie el planType (destructuring para excluir)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { planType: _ignored, ...updateData } = updatePlanDto;
 
     Object.assign(plan, updateData);
 

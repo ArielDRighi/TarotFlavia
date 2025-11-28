@@ -58,7 +58,9 @@ describe('Plans Seeder', () => {
       },
     ];
 
-    (planRepository.create as jest.Mock).mockImplementation((data) => data);
+    (planRepository.create as jest.Mock).mockImplementation(
+      (data: Partial<Plan>) => data as Plan,
+    );
     (planRepository.save as jest.Mock).mockImplementation((plan) => {
       const index = mockPlans.findIndex((p) => p.planType === plan.planType);
       return Promise.resolve(mockPlans[index]);
@@ -159,7 +161,9 @@ describe('Plans Seeder', () => {
 
   it('should create plans with correct feature flags', async () => {
     (planRepository.count as jest.Mock).mockResolvedValue(0);
-    (planRepository.create as jest.Mock).mockImplementation((data) => data);
+    (planRepository.create as jest.Mock).mockImplementation(
+      (data: Partial<Plan>) => data as Plan,
+    );
     (planRepository.save as jest.Mock).mockImplementation((plan) =>
       Promise.resolve({ ...plan, id: 1 }),
     );

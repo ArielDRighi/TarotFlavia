@@ -8,7 +8,8 @@ export class AddGuestToPlanTypeEnum1764368721422 implements MigrationInterface {
     `);
   }
 
-  public async down(queryRunner: QueryRunner): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/require-await, @typescript-eslint/no-unused-vars
+  public async down(_queryRunner: QueryRunner): Promise<void> {
     // Note: PostgreSQL does not support removing enum values directly
     // This would require recreating the enum type and all dependent objects
     // For this migration, we'll leave the enum as-is in the down migration
