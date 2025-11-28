@@ -2,8 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AIQuotaGuard } from './ai-quota.guard';
-import { AIQuotaService } from './ai-quota.service';
-import { UserPlan } from '../users/entities/user.entity';
+import { AIQuotaService } from '../../ai-quota.service';
+import { UserPlan } from '../../../users/entities/user.entity';
 
 describe('AIQuotaGuard', () => {
   let guard: AIQuotaGuard;

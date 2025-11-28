@@ -6,11 +6,11 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/infrastructure/guards/jwt-auth.guard';
-import { AdminGuard } from '../auth/infrastructure/guards/admin.guard';
-import { AIUsageService } from './ai-usage.service';
-import { AIUsageStatsDto } from './dto/ai-usage-stats.dto';
-import { AIProvider } from './entities/ai-usage-log.entity';
+import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
+import { AdminGuard } from '../../../auth/infrastructure/guards/admin.guard';
+import { AIUsageService } from '../../ai-usage.service';
+import { AIUsageStatsDto } from '../../application/dto/ai-usage-stats.dto';
+import { AIProvider } from '../../entities/ai-usage-log.entity';
 
 @ApiTags('Admin - AI Usage')
 @ApiBearerAuth('JWT-auth')

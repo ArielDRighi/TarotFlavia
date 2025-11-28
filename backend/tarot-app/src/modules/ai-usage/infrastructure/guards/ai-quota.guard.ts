@@ -5,8 +5,8 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { AIQuotaService } from './ai-quota.service';
-import { SKIP_QUOTA_CHECK_KEY } from './skip-quota-check.decorator';
+import { AIQuotaService } from '../../ai-quota.service';
+import { SKIP_QUOTA_CHECK_KEY } from '../../skip-quota-check.decorator';
 import { format } from 'date-fns/format';
 import { es } from 'date-fns/locale/es';
 

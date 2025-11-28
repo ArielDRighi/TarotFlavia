@@ -31,7 +31,7 @@ import {
   CheckUsageLimit,
   UsageFeature,
 } from '../../usage-limits';
-import { AIQuotaGuard } from '../../ai-usage/ai-quota.guard';
+import { AIQuotaGuard } from '../../ai-usage/infrastructure/guards/ai-quota.guard';
 import { ReadingsOrchestratorService } from './application/services/readings-orchestrator.service';
 import { CreateReadingDto } from './dto/create-reading.dto';
 import { QueryReadingsDto } from './dto/query-readings.dto';

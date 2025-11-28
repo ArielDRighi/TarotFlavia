@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { AIProvider } from '../entities/ai-usage-log.entity';
+import { AIProvider } from '../../entities/ai-usage-log.entity';
 
 export class ProviderStatisticsDto {
   @ApiProperty({

@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AIUsageController } from './ai-usage.controller';
-import { AIUsageService } from './ai-usage.service';
-import { AIProvider } from './entities/ai-usage-log.entity';
+import { AIUsageService } from '../../ai-usage.service';
+import { AIProvider } from '../../entities/ai-usage-log.entity';
 
 describe('AIUsageController', () => {
   let controller: AIUsageController;
