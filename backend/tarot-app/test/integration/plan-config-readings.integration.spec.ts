@@ -281,6 +281,7 @@ describe('PlanConfig + Readings Integration Tests', () => {
     if (!testCategory) {
       testCategory = await categoryRepo.save({
         name: 'General',
+        slug: 'general',
         description: 'General readings',
         iconUrl: 'https://example.com/icon.png',
         is_active: true,
