@@ -283,8 +283,10 @@ describe('PlanConfig + Readings Integration Tests', () => {
         name: 'General',
         slug: 'general',
         description: 'General readings',
-        iconUrl: 'https://example.com/icon.png',
-        is_active: true,
+        icon: '🔮',
+        color: '#9333EA',
+        order: 0,
+        isActive: true,
       });
     }
 
