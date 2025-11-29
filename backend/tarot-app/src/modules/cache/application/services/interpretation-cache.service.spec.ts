@@ -336,15 +336,22 @@ describe('InterpretationCacheService', () => {
       repository.create.mockReturnValue(mockSavedEntry);
       repository.save.mockResolvedValue(mockSavedEntry);
 
+      const beforeCall = Date.now();
       await service.saveToCache('key', 1, mockCardCombination, 'hash', 'text');
+      const afterCall = Date.now();
 
       const createCall = repository.create.mock
         .calls[0][0] as CachedInterpretation;
-      const daysDiff = Math.floor(
-        (createCall.expires_at.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
-      );
+      const expiresAt = createCall.expires_at.getTime();
 
-      expect(daysDiff).toBeCloseTo(30, 0);
+      // expires_at should be approximately 30 days from now
+      // Allow for execution time by checking it's within the expected range
+      const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000;
+      const expectedMin = beforeCall + thirtyDaysInMs;
+      const expectedMax = afterCall + thirtyDaysInMs;
+
+      expect(expiresAt).toBeGreaterThanOrEqual(expectedMin);
+      expect(expiresAt).toBeLessThanOrEqual(expectedMax);
     });
   });
 

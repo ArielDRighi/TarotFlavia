@@ -274,6 +274,30 @@ describe('PlanConfig + Readings Integration Tests', () => {
         isActive: true,
       });
     }
+
+    // Seed predefined question and category if needed
+    const categoryRepo = dataSource.getRepository('ReadingCategory');
+    let testCategory = await categoryRepo.findOne({ where: {} });
+    if (!testCategory) {
+      testCategory = await categoryRepo.save({
+        name: 'General',
+        description: 'General readings',
+        iconUrl: 'https://example.com/icon.png',
+        is_active: true,
+      });
+    }
+
+    const questionRepo = dataSource.getRepository('PredefinedQuestion');
+    const existingQuestion = await questionRepo.findOne({ where: { id: 1 } });
+    if (!existingQuestion) {
+      await questionRepo.save({
+        id: 1,
+        question_text: '¿Qué me depara el futuro?',
+        category_id: testCategory.id,
+        is_active: true,
+        sort_order: 1,
+      });
+    }
   });
 
   afterEach(async () => {
