@@ -15,6 +15,8 @@ import { Tarotista } from '../../src/modules/tarotistas/entities/tarotista.entit
 import { TarotDeck } from '../../src/modules/tarot/decks/entities/tarot-deck.entity';
 import { TarotCard } from '../../src/modules/tarot/cards/entities/tarot-card.entity';
 import { TarotSpread } from '../../src/modules/tarot/spreads/entities/tarot-spread.entity';
+import { ReadingCategory } from '../../src/modules/categories/entities/reading-category.entity';
+import { PredefinedQuestion } from '../../src/modules/predefined-questions/entities/predefined-question.entity';
 
 // Helpers
 import { setupDefaultTarotista } from '../helpers/setup-default-tarotista';
@@ -276,7 +278,7 @@ describe('PlanConfig + Readings Integration Tests', () => {
     }
 
     // Seed predefined question and category if needed
-    const categoryRepo = dataSource.getRepository('ReadingCategory');
+    const categoryRepo = dataSource.getRepository(ReadingCategory);
     let testCategory = await categoryRepo.findOne({ where: {} });
     if (!testCategory) {
       testCategory = await categoryRepo.save({
@@ -290,7 +292,7 @@ describe('PlanConfig + Readings Integration Tests', () => {
       });
     }
 
-    const questionRepo = dataSource.getRepository('PredefinedQuestion');
+    const questionRepo = dataSource.getRepository(PredefinedQuestion);
     const existingQuestion = await questionRepo.findOne({ where: { id: 1 } });
     if (!existingQuestion) {
       await questionRepo.save({
