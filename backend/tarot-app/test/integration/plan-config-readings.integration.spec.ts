@@ -295,10 +295,11 @@ describe('PlanConfig + Readings Integration Tests', () => {
     if (!existingQuestion) {
       await questionRepo.save({
         id: 1,
-        question_text: '¿Qué me depara el futuro?',
-        category_id: testCategory.id,
-        is_active: true,
-        sort_order: 1,
+        questionText: '¿Qué me depara el futuro?',
+        categoryId: testCategory.id,
+        isActive: true,
+        order: 1,
+        usageCount: 0,
       });
     }
   });
