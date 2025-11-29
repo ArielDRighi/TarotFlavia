@@ -11,3 +11,8 @@ mvp-test.sh
 *-results.txt
 e2e-*.txt
 test-results*.txt
+
+# Coverage reports
+coverage/
+coverage-integration/
+.nyc_output/
