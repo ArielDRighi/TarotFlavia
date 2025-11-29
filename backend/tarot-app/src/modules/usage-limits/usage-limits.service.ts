@@ -8,7 +8,7 @@ import { Repository } from 'typeorm';
 import { UsageLimit, UsageFeature } from './entities/usage-limit.entity';
 import { UsersService } from '../users/users.service';
 import { PlanConfigService } from '../plan-config/plan-config.service';
-import { USAGE_RETENTION_DAYS } from './usage-limits.constants';
+import { USAGE_RETENTION_DAYS, USAGE_LIMITS } from './usage-limits.constants';
 
 @Injectable()
 export class UsageLimitsService {
@@ -32,7 +32,6 @@ export class UsageLimitsService {
     } else {
       // For other features, fall back to constants for now
       // TODO: Add AI quota and other features to plan-config
-      const { USAGE_LIMITS } = await import('./usage-limits.constants');
       limit = USAGE_LIMITS[user.plan]?.[feature];
       if (limit === undefined) {
         throw new BadRequestException(
@@ -129,7 +128,6 @@ export class UsageLimitsService {
     } else {
       // For other features, fall back to constants for now
       // TODO: Add AI quota and other features to plan-config
-      const { USAGE_LIMITS } = await import('./usage-limits.constants');
       limit = USAGE_LIMITS[user.plan]?.[feature];
       if (limit === undefined) {
         throw new BadRequestException(

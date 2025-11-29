@@ -122,10 +122,19 @@ export class Plan {
    * Verifica si el plan tiene una característica específica habilitada
    * @param feature - Nombre de la característica a verificar
    * @returns true si la característica está habilitada
+   * @throws Error si el nombre de la característica es inválido
    */
   hasFeature(
     feature: 'allowCustomQuestions' | 'allowSharing' | 'allowAdvancedSpreads',
   ): boolean {
+    const validFeatures = [
+      'allowCustomQuestions',
+      'allowSharing',
+      'allowAdvancedSpreads',
+    ];
+    if (!validFeatures.includes(feature)) {
+      throw new Error(`Invalid feature name: ${feature}`);
+    }
     return this[feature] === true;
   }
 

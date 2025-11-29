@@ -110,10 +110,12 @@ describe('Plan Entity', () => {
       expect(plan.hasFeature('allowCustomQuestions')).toBe(false);
     });
 
-    it('should return false for invalid feature name', () => {
+    it('should throw error for invalid feature name', () => {
       const plan = new Plan();
 
-      expect(plan.hasFeature('invalidFeature' as any)).toBe(false);
+      expect(() => plan.hasFeature('invalidFeature' as any)).toThrow(
+        'Invalid feature name: invalidFeature',
+      );
     });
   });
 

@@ -3,6 +3,7 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
 export class AddGuestToUserPlanEnum1770300000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Add 'guest' value to the existing user_plan_enum
+    // NOTE: This migration requires PostgreSQL 9.3+ due to the use of 'ADD VALUE IF NOT EXISTS'
     await queryRunner.query(`
       ALTER TYPE user_plan_enum ADD VALUE IF NOT EXISTS 'guest'
     `);
