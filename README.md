@@ -48,6 +48,18 @@ TarotFlavia es una plataforma completa de lecturas de tarot que combina:
 - Roles: user, premium, admin
 - Límites de uso por plan (3 lecturas/día free, ilimitadas premium)
 - Gestión de sesiones con refresh tokens
+- **4 planes configurables**: GUEST, FREE, PREMIUM, PROFESSIONAL
+
+**Planes de Usuario:**
+
+| Plan             | Lecturas  | IA Quota  | Custom Questions | Sharing | Advanced Spreads | Precio |
+| ---------------- | --------- | --------- | ---------------- | ------- | ---------------- | ------ |
+| **GUEST**        | 3/mes     | 0         | ❌               | ❌      | ❌               | Gratis |
+| **FREE**         | 10/mes    | 100/mes   | ❌               | ❌      | ❌               | Gratis |
+| **PREMIUM**      | Ilimitado | Ilimitado | ✅               | ✅      | ✅               | $9.99  |
+| **PROFESSIONAL** | Ilimitado | Ilimitado | ✅               | ✅      | ✅               | $19.99 |
+
+Los límites y features son **configurables dinámicamente** desde el admin panel sin necesidad de redeploy.
 
 ✅ **Admin Panel Completo**
 
@@ -57,6 +69,8 @@ TarotFlavia es una plataforma completa de lecturas de tarot que combina:
 - Significados personalizados de cartas
 - Dashboard con métricas y analytics
 - Audit logging de acciones administrativas
+- **Configuración dinámica de planes** (readingsLimit, aiQuota, features)
+- Límites y capacidades actualizables sin redeploy
 
 ✅ **Arquitectura Escalable**
 
@@ -389,6 +403,64 @@ readings/
 ```
 
 Ver [ARCHITECTURE.md](backend/tarot-app/docs/ARCHITECTURE.md) para más detalles.
+
+## 🎛️ Configuración Dinámica de Planes
+
+El proyecto implementa un sistema de configuración de planes **database-driven** que permite ajustar límites y capacidades sin redesplegar la aplicación.
+
+### Endpoints Admin (plan-config)
+
+**Base URL**: `/plan-config` (Requiere: JwtAuthGuard + AdminGuard)
+
+| Método | Endpoint                 | Descripción                                               |
+| ------ | ------------------------ | --------------------------------------------------------- |
+| GET    | `/plan-config`           | Lista todos los planes configurados                       |
+| GET    | `/plan-config/:planType` | Obtiene plan específico (guest/free/premium/professional) |
+| POST   | `/plan-config`           | Crea nuevo plan con configuración personalizada           |
+| PUT    | `/plan-config/:planType` | Actualiza límites y features de plan existente            |
+| DELETE | `/plan-config/:planType` | Elimina plan (solo si no hay usuarios)                    |
+
+### Campos Configurables
+
+```typescript
+{
+  planType: 'FREE' | 'PREMIUM' | 'PROFESSIONAL' | 'GUEST',
+  name: string,                    // Nombre del plan
+  description: string,             // Descripción
+  price: number,                   // Precio mensual
+  readingsLimit: number,           // Lecturas/mes (-1 = ilimitado)
+  aiQuotaMonthly: number,          // Requests IA/mes (-1 = ilimitado)
+  allowCustomQuestions: boolean,   // Preguntas personalizadas
+  allowSharing: boolean,           // Compartir lecturas
+  allowAdvancedSpreads: boolean,   // Tiradas avanzadas
+  isActive: boolean                // Plan activo/inactivo
+}
+```
+
+### Integración con UsageLimits
+
+El `UsageLimitsService` lee dinámicamente los límites de lecturas desde `PlanConfigService`:
+
+```typescript
+// Enforcement en tiempo real
+async checkLimit(user: User, feature: UsageFeatureType): Promise<boolean> {
+  // Para TAROT_READING, leer límite dinámico de BD
+  if (feature === UsageFeatureType.TAROT_READING) {
+    const limit = await this.planConfigService.getReadingsLimit(user.plan);
+    // Validar contra límite dinámico
+  }
+}
+```
+
+**Ventajas:**
+
+- ✅ Cambios inmediatos sin redeploy
+- ✅ Promociones temporales (ej: PREMIUM gratis 30 días)
+- ✅ Ajustes de cuotas de IA según costos reales
+- ✅ Testing A/B de diferentes límites
+- ✅ Gestión diferenciada por ambiente (dev/staging/prod)
+
+Ver [docs/Tasks/TASK-076.md](backend/tarot-app/docs/Tasks/TASK-076.md) para documentación completa.
 
 ## 📚 Documentación
 

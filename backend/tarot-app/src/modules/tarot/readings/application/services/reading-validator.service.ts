@@ -10,6 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { TarotReading } from '../../entities/tarot-reading.entity';
 import { User, UserPlan } from '../../../../users/entities/user.entity';
+import { PlanConfigService } from '../../../../plan-config/plan-config.service';
 
 @Injectable()
 export class ReadingValidatorService {
@@ -18,6 +19,7 @@ export class ReadingValidatorService {
     private readonly userRepo: Repository<User>,
     @InjectRepository(TarotReading)
     private readonly readingRepo: Repository<TarotReading>,
+    private readonly planConfigService: PlanConfigService,
   ) {}
 
   async validateUser(userId: number): Promise<User> {
@@ -110,10 +112,10 @@ export class ReadingValidatorService {
     }
   }
 
-  validateFreeUserReadingsLimit(
+  async validateFreeUserReadingsLimit(
     totalReadings: number,
     userPlan: UserPlan,
-  ): void {
+  ): Promise<void> {
     // BUG FIX: Validate that totalReadings is a valid number
     if (
       totalReadings === null ||
@@ -132,10 +134,18 @@ export class ReadingValidatorService {
       throw new BadRequestException('Invalid user plan');
     }
 
-    const FREE_USER_LIMIT = 10;
-    if (userPlan === UserPlan.FREE && totalReadings >= FREE_USER_LIMIT) {
+    // Get limit from database configuration (dynamic)
+    const planLimit = await this.planConfigService.getReadingsLimit(userPlan);
+
+    // -1 means unlimited (PREMIUM, PROFESSIONAL)
+    if (planLimit === -1) {
+      return; // No limit for unlimited plans
+    }
+
+    // Check if user has reached the limit
+    if (totalReadings >= planLimit) {
       throw new ForbiddenException(
-        `Los usuarios free están limitados a ${FREE_USER_LIMIT} lecturas`,
+        `Los usuarios ${userPlan} están limitados a ${planLimit} lecturas`,
       );
     }
   }

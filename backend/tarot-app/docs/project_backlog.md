@@ -13214,19 +13214,65 @@ Implementar sistema de logging estructurado JSON con Winston, incluyendo correla
 
 ---
 
-### **TASK-076: Dashboard de Configuración Dinámica de Planes** ⭐⭐⭐
+### **TASK-076: Dashboard de Configuración Dinámica de Planes** ⭐⭐⭐ ✅ COMPLETADA
 
 **Prioridad:** 🟡 ALTA  
 **Estimación:** 4 días  
+**Tiempo Real:** 2 días  
 **Dependencias:** TASK-ARCH-012 (Users Module), TASK-071 (Subscriptions), TASK-075 (Logging)  
 **Marcador MVP:** ⭐⭐⭐ **IMPORTANTE PARA MVP** - Gestión flexible de planes y límites  
-**Estado:** ⏳ PENDIENTE
+**Tags:** mvp, plan-config, dynamic-limits, admin-dashboard, database-driven  
+**Estado:** ✅ COMPLETADA  
+**Branch:** `feature/TASK-076-dashboard-configuracion-dinamica-planes`  
+**Fecha Finalización:** 2025-11-28
 
 #### 📋 Descripción
 
-Implementar sistema de configuración dinámica de planes de usuario mediante base de datos, reemplazando las constantes hardcodeadas actuales. Incluye dashboard administrativo para gestionar features, límites y capacidades de cada plan (FREE, PREMIUM, PROFESSIONAL) sin necesidad de redesplegar la aplicación.
+Implementar sistema de configuración dinámica de planes de usuario mediante base de datos, reemplazando las constantes hardcodeadas actuales. Incluye dashboard administrativo para gestionar features, límites y capacidades de cada plan (GUEST, FREE, PREMIUM, PROFESSIONAL) sin necesidad de redesplegar la aplicación.
 
-**Problema Actual:**
+**Planes Disponibles:**
+
+- **GUEST/ANONYMOUS**: Usuarios no registrados (3 lecturas/mes, sin IA, sin guardar historial)
+- **FREE**: Usuarios registrados gratuitos (10 lecturas/mes, 100 requests IA, guardar historial)
+- **PREMIUM**: Plan de pago individual ($9.99/mes, lecturas ilimitadas, IA ilimitada, todas las features)
+- **PROFESSIONAL**: Plan para tarotistas profesionales ($19.99/mes, todo PREMIUM + soporte prioritario + features exclusivas)
+
+---
+
+#### ✅ Resultado Final
+
+**Implementación completada exitosamente con:**
+
+- ✅ All unit tests passing (15/15 - UsageLimitsService)
+- ✅ All integration tests passing (22/22)
+  - 16/16 plan-config-users integration tests
+  - 6/6 plan-config-readings integration tests
+- ✅ All E2E tests passing (curl script: 27/27 validations)
+- ✅ 1 critical bug discovered and fixed
+- ✅ Lint clean
+- ✅ Build successful
+- ✅ Architecture validation passed
+
+**Bug Crítico Descubierto por Tests:**
+
+**BUG #1: Dynamic Plan Limits Not Enforced**
+
+- **Archivos afectados**: `usage-limits.service.ts`
+- **Error**: UsageLimitsService usaba constantes hardcodeadas (USAGE_LIMITS) en lugar de leer límites dinámicos de PlanConfigService
+- **Impacto**: Cambios en límites de planes desde admin dashboard NO se aplicaban en producción
+- **Causa raíz**: Dos sistemas paralelos de límites sin comunicación
+- **Fix**: Integrar PlanConfigService.getReadingsLimit() en UsageLimitsService.checkLimit()
+- **Validación**: Tests de integración verifican que límites dinámicos se aplican inmediatamente
+
+**Mejora de Validación:**
+
+- Agregado ParseEnumPipe a controller para validar planType correctamente
+- Antes: 500 Internal Server Error con planType inválido
+- Después: 400 Bad Request con mensaje descriptivo
+
+---
+
+#### 📋 Descripción
 
 Los límites de planes están hardcodeados en:
 
@@ -13249,10 +13295,12 @@ Sistema de configuración basado en base de datos con:
 
 **Casos de Uso:**
 
-- ✅ Admin actualiza límite de lecturas FREE de 3 a 5 sin redeploy
+- ✅ Usuario no registrado (GUEST) puede hacer 3 lecturas para probar la app
+- ✅ Usuario registrado FREE tiene 10 lecturas/mes y puede guardar historial
+- ✅ Admin actualiza límite de lecturas FREE de 10 a 15 sin redeploy
 - ✅ Admin crea promoción temporal: PREMIUM gratis por 30 días
 - ✅ Admin ajusta cuotas de IA según uso real y costos
-- ✅ Admin deshabilita feature específica temporalmente
+- ✅ Admin deshabilita feature específica temporalmente para testing
 - ✅ Admin ve historial de cambios en configuración de planes
 - ✅ Sistema aplica cambios en tiempo real con cache de 5 minutos
 

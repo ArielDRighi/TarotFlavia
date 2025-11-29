@@ -17,6 +17,7 @@ import { PredefinedQuestion } from '../src/modules/predefined-questions/entities
 import { User } from '../src/modules/users/entities/user.entity';
 import { Tarotista } from '../src/modules/tarotistas/entities/tarotista.entity';
 import { TarotistaConfig } from '../src/modules/tarotistas/entities/tarotista-config.entity';
+import { Plan } from '../src/modules/plan-config/entities/plan.entity';
 import { seedTarotDecks } from '../src/database/seeds/tarot-decks.seeder';
 import { seedTarotCards } from '../src/database/seeds/tarot-cards.seeder';
 import { seedTarotSpreads } from '../src/database/seeds/tarot-spreads.seeder';
@@ -26,6 +27,7 @@ import { seedUsers } from '../src/database/seeds/users.seeder';
 import { seedFlaviaUser } from '../src/database/seeds/flavia-user.seeder';
 import { seedFlaviaTarotista } from '../src/database/seeds/flavia-tarotista.seeder';
 import { seedFlaviaIAConfig } from '../src/database/seeds/flavia-ia-config.seeder';
+import { seedPlans } from '../src/database/seeds/plans.seeder';
 
 interface SeederStep {
   name: string;
@@ -55,6 +57,7 @@ async function bootstrap() {
   const tarotistaConfigRepository = app.get<Repository<TarotistaConfig>>(
     getRepositoryToken(TarotistaConfig),
   );
+  const planRepository = app.get<Repository<Plan>>(getRepositoryToken(Plan));
 
   try {
     console.log(
@@ -63,6 +66,13 @@ async function bootstrap() {
 
     // Definir seeders con sus dependencias
     const seeders: SeederStep[] = [
+      {
+        name: 'Plans',
+        dependencies: [],
+        execute: async () => {
+          await seedPlans(planRepository);
+        },
+      },
       {
         name: 'Reading Categories',
         dependencies: [],

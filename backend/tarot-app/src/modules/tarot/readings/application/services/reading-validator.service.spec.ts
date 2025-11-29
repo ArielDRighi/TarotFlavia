@@ -10,6 +10,7 @@ import {
 import { ReadingValidatorService } from './reading-validator.service';
 import { TarotReading } from '../../entities/tarot-reading.entity';
 import { User, UserPlan } from '../../../../users/entities/user.entity';
+import { PlanConfigService } from '../../../../plan-config/plan-config.service';
 
 // Helper types for test cases
 type PartialUser = Partial<User> & { id: number; plan?: UserPlan | null };
@@ -31,6 +32,10 @@ describe('ReadingValidatorService - BUG HUNTING', () => {
     createQueryBuilder: jest.fn(),
   };
 
+  const mockPlanConfigService = {
+    getReadingsLimit: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -42,6 +47,10 @@ describe('ReadingValidatorService - BUG HUNTING', () => {
         {
           provide: getRepositoryToken(TarotReading),
           useValue: mockReadingRepository,
+        },
+        {
+          provide: PlanConfigService,
+          useValue: mockPlanConfigService,
         },
       ],
     }).compile();
@@ -634,131 +643,157 @@ describe('ReadingValidatorService - BUG HUNTING', () => {
   });
 
   describe('validateFreeUserReadingsLimit', () => {
-    it('should not throw when free user has less than 10 readings', () => {
-      expect(() =>
+    it('should not throw when free user has less than 10 readings', async () => {
+      mockPlanConfigService.getReadingsLimit.mockResolvedValue(10);
+
+      await expect(
         service.validateFreeUserReadingsLimit(5, UserPlan.FREE),
-      ).not.toThrow();
+      ).resolves.not.toThrow();
     });
 
-    it('should not throw when free user has exactly 9 readings', () => {
-      expect(() =>
+    it('should not throw when free user has exactly 9 readings', async () => {
+      mockPlanConfigService.getReadingsLimit.mockResolvedValue(10);
+
+      await expect(
         service.validateFreeUserReadingsLimit(9, UserPlan.FREE),
-      ).not.toThrow();
+      ).resolves.not.toThrow();
     });
 
-    it('should throw ForbiddenException when free user has 10 readings', () => {
-      expect(() =>
+    it('should throw ForbiddenException when free user has 10 readings', async () => {
+      mockPlanConfigService.getReadingsLimit.mockResolvedValue(10);
+
+      await expect(
         service.validateFreeUserReadingsLimit(10, UserPlan.FREE),
-      ).toThrow(ForbiddenException);
-      expect(() =>
+      ).rejects.toThrow(ForbiddenException);
+      await expect(
         service.validateFreeUserReadingsLimit(10, UserPlan.FREE),
-      ).toThrow('Los usuarios free están limitados a 10 lecturas');
+      ).rejects.toThrow('Los usuarios free están limitados a 10 lecturas');
     });
 
-    it('should throw when free user exceeds 10 readings', () => {
-      expect(() =>
+    it('should throw when free user exceeds 10 readings', async () => {
+      mockPlanConfigService.getReadingsLimit.mockResolvedValue(10);
+
+      await expect(
         service.validateFreeUserReadingsLimit(15, UserPlan.FREE),
-      ).toThrow(ForbiddenException);
+      ).rejects.toThrow(ForbiddenException);
     });
 
-    it('should not throw for premium users regardless of reading count', () => {
-      expect(() =>
+    it('should not throw for premium users regardless of reading count', async () => {
+      mockPlanConfigService.getReadingsLimit.mockResolvedValue(-1); // Unlimited
+
+      await expect(
         service.validateFreeUserReadingsLimit(0, UserPlan.PREMIUM),
-      ).not.toThrow();
-      expect(() =>
+      ).resolves.not.toThrow();
+      await expect(
         service.validateFreeUserReadingsLimit(10, UserPlan.PREMIUM),
-      ).not.toThrow();
-      expect(() =>
+      ).resolves.not.toThrow();
+      await expect(
         service.validateFreeUserReadingsLimit(100, UserPlan.PREMIUM),
-      ).not.toThrow();
+      ).resolves.not.toThrow();
+    });
+
+    it('should respect GUEST plan limit (3 readings)', async () => {
+      mockPlanConfigService.getReadingsLimit.mockResolvedValue(3);
+
+      await expect(
+        service.validateFreeUserReadingsLimit(2, UserPlan.GUEST),
+      ).resolves.not.toThrow();
+      await expect(
+        service.validateFreeUserReadingsLimit(3, UserPlan.GUEST),
+      ).rejects.toThrow(ForbiddenException);
+      await expect(
+        service.validateFreeUserReadingsLimit(3, UserPlan.GUEST),
+      ).rejects.toThrow('Los usuarios guest están limitados a 3 lecturas');
     });
 
     // BUG HUNTING: Negative reading count
-    it('should handle negative reading count for free user', () => {
-      // Now should throw BadRequestException
-      expect(() =>
+    it('should handle negative reading count for free user', async () => {
+      await expect(
         service.validateFreeUserReadingsLimit(-5, UserPlan.FREE),
-      ).toThrow(BadRequestException);
-      expect(() =>
+      ).rejects.toThrow(BadRequestException);
+      await expect(
         service.validateFreeUserReadingsLimit(-5, UserPlan.FREE),
-      ).toThrow('Invalid totalReadings value: must be a non-negative number');
+      ).rejects.toThrow(
+        'Invalid totalReadings value: must be a non-negative number',
+      );
     });
 
     // BUG HUNTING: null/undefined totalReadings
-    it('should handle null totalReadings for free user', () => {
-      // Now should throw BadRequestException
-      expect(() =>
+    it('should handle null totalReadings for free user', async () => {
+      await expect(
         service.validateFreeUserReadingsLimit(
           null as unknown as number,
           UserPlan.FREE,
         ),
-      ).toThrow(BadRequestException);
-      expect(() =>
+      ).rejects.toThrow(BadRequestException);
+      await expect(
         service.validateFreeUserReadingsLimit(
           null as unknown as number,
           UserPlan.FREE,
         ),
-      ).toThrow('Invalid totalReadings value: must be a non-negative number');
+      ).rejects.toThrow(
+        'Invalid totalReadings value: must be a non-negative number',
+      );
     });
 
-    it('should handle undefined totalReadings for free user', () => {
-      expect(() =>
+    it('should handle undefined totalReadings for free user', async () => {
+      await expect(
         service.validateFreeUserReadingsLimit(
           undefined as unknown as number,
           UserPlan.FREE,
         ),
-      ).toThrow(BadRequestException);
+      ).rejects.toThrow(BadRequestException);
     });
 
     // BUG HUNTING: String totalReadings
-    it('should handle string totalReadings', () => {
-      // Should throw BadRequestException due to type validation
-      expect(() =>
+    it('should handle string totalReadings', async () => {
+      await expect(
         service.validateFreeUserReadingsLimit(
           '15' as unknown as number,
           UserPlan.FREE,
         ),
-      ).toThrow(BadRequestException);
+      ).rejects.toThrow(BadRequestException);
     });
 
     // BUG HUNTING: Decimal totalReadings
-    it('should handle decimal totalReadings', () => {
-      expect(() =>
-        service.validateFreeUserReadingsLimit(9.9, UserPlan.FREE),
-      ).not.toThrow();
+    it('should handle decimal totalReadings', async () => {
+      mockPlanConfigService.getReadingsLimit.mockResolvedValue(10);
 
-      expect(() =>
+      await expect(
+        service.validateFreeUserReadingsLimit(9.9, UserPlan.FREE),
+      ).resolves.not.toThrow();
+
+      await expect(
         service.validateFreeUserReadingsLimit(10.1, UserPlan.FREE),
-      ).toThrow(ForbiddenException);
+      ).rejects.toThrow(ForbiddenException);
     });
 
     // BUG HUNTING: null/undefined/invalid userPlan
-    it('should handle null userPlan', () => {
-      // Now should throw BadRequestException
-      expect(() =>
+    it('should handle null userPlan', async () => {
+      await expect(
         service.validateFreeUserReadingsLimit(15, null as unknown as UserPlan),
-      ).toThrow(BadRequestException);
-      expect(() =>
+      ).rejects.toThrow(BadRequestException);
+      await expect(
         service.validateFreeUserReadingsLimit(15, null as unknown as UserPlan),
-      ).toThrow('Invalid user plan');
+      ).rejects.toThrow('Invalid user plan');
     });
 
-    it('should handle undefined userPlan', () => {
-      expect(() =>
+    it('should handle undefined userPlan', async () => {
+      await expect(
         service.validateFreeUserReadingsLimit(
           15,
           undefined as unknown as UserPlan,
         ),
-      ).toThrow(BadRequestException);
+      ).rejects.toThrow(BadRequestException);
     });
 
-    it('should handle invalid userPlan string', () => {
-      expect(() =>
+    it('should handle invalid userPlan string', async () => {
+      await expect(
         service.validateFreeUserReadingsLimit(
           15,
           'INVALID' as unknown as UserPlan,
         ),
-      ).toThrow(BadRequestException);
+      ).rejects.toThrow(BadRequestException);
     });
   });
 });
