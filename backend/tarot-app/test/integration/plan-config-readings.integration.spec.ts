@@ -48,12 +48,15 @@ describe('PlanConfig + Readings Integration Tests', () => {
   // Repositories
   let userRepository: any;
   let planRepository: any;
+  let testPredefinedQuestionId: number;
 
   const testPassword = 'TestPass123!';
 
   // Helper function to create reading payload
   const createReadingPayload = (customQuestion?: string) => ({
-    ...(customQuestion ? { customQuestion } : { predefinedQuestionId: 1 }), // Use predefined question for non-premium
+    ...(customQuestion
+      ? { customQuestion }
+      : { predefinedQuestionId: testPredefinedQuestionId }), // Use predefined question for non-premium
     deckId: testDeck.id,
     spreadId: testSpread.id,
     cardIds: testCards.map((c) => c.id),
@@ -293,10 +296,9 @@ describe('PlanConfig + Readings Integration Tests', () => {
     }
 
     const questionRepo = dataSource.getRepository(PredefinedQuestion);
-    const existingQuestion = await questionRepo.findOne({ where: { id: 1 } });
+    let existingQuestion = await questionRepo.findOne({ where: {} });
     if (!existingQuestion) {
-      await questionRepo.save({
-        id: 1,
+      existingQuestion = await questionRepo.save({
         questionText: '¿Qué me depara el futuro?',
         categoryId: testCategory.id,
         isActive: true,
@@ -304,6 +306,7 @@ describe('PlanConfig + Readings Integration Tests', () => {
         usageCount: 0,
       });
     }
+    testPredefinedQuestionId = existingQuestion.id;
   });
 
   afterEach(async () => {
