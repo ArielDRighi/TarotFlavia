@@ -7,7 +7,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UsageLimit, UsageFeature } from './entities/usage-limit.entity';
 import { UsersService } from '../users/users.service';
-import { USAGE_LIMITS, USAGE_RETENTION_DAYS } from './usage-limits.constants';
+import { PlanConfigService } from '../plan-config/plan-config.service';
+import { USAGE_RETENTION_DAYS } from './usage-limits.constants';
 
 @Injectable()
 export class UsageLimitsService {
@@ -15,6 +16,7 @@ export class UsageLimitsService {
     @InjectRepository(UsageLimit)
     private usageLimitRepository: Repository<UsageLimit>,
     private usersService: UsersService,
+    private planConfigService: PlanConfigService,
   ) {}
 
   async checkLimit(userId: number, feature: UsageFeature): Promise<boolean> {
@@ -23,14 +25,23 @@ export class UsageLimitsService {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
 
-    const limit = USAGE_LIMITS[user.plan]?.[feature];
-    if (limit === undefined) {
-      throw new BadRequestException(
-        `Invalid feature '${feature}' for plan '${user.plan}'`,
-      );
+    // Get limit from database configuration (dynamic)
+    let limit: number;
+    if (feature === UsageFeature.TAROT_READING) {
+      limit = await this.planConfigService.getReadingsLimit(user.plan);
+    } else {
+      // For other features, fall back to constants for now
+      // TODO: Add AI quota and other features to plan-config
+      const { USAGE_LIMITS } = await import('./usage-limits.constants');
+      limit = USAGE_LIMITS[user.plan]?.[feature];
+      if (limit === undefined) {
+        throw new BadRequestException(
+          `Invalid feature '${feature}' for plan '${user.plan}'`,
+        );
+      }
     }
 
-    // Premium users have unlimited access
+    // Premium/Professional users have unlimited access (-1)
     if (limit === -1) {
       return true;
     }
@@ -111,14 +122,23 @@ export class UsageLimitsService {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
 
-    const limit = USAGE_LIMITS[user.plan]?.[feature];
-    if (limit === undefined) {
-      throw new BadRequestException(
-        `Invalid feature '${feature}' for plan '${user.plan}'`,
-      );
+    // Get limit from database configuration (dynamic)
+    let limit: number;
+    if (feature === UsageFeature.TAROT_READING) {
+      limit = await this.planConfigService.getReadingsLimit(user.plan);
+    } else {
+      // For other features, fall back to constants for now
+      // TODO: Add AI quota and other features to plan-config
+      const { USAGE_LIMITS } = await import('./usage-limits.constants');
+      limit = USAGE_LIMITS[user.plan]?.[feature];
+      if (limit === undefined) {
+        throw new BadRequestException(
+          `Invalid feature '${feature}' for plan '${user.plan}'`,
+        );
+      }
     }
 
-    // Premium users have unlimited access
+    // Premium/Professional users have unlimited access (-1)
     if (limit === -1) {
       return -1;
     }

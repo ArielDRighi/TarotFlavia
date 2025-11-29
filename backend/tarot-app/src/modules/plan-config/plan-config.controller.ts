@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  ParseEnumPipe,
   UseGuards,
   HttpCode,
   HttpStatus,
@@ -53,7 +54,9 @@ export class PlanConfigController {
     status: 404,
     description: 'Plan no encontrado',
   })
-  async findOne(@Param('planType') planType: UserPlan): Promise<Plan> {
+  async findOne(
+    @Param('planType', new ParseEnumPipe(UserPlan)) planType: UserPlan,
+  ): Promise<Plan> {
     return this.planConfigService.findByPlanType(planType);
   }
 
@@ -84,7 +87,7 @@ export class PlanConfigController {
     description: 'Plan no encontrado',
   })
   async update(
-    @Param('planType') planType: UserPlan,
+    @Param('planType', new ParseEnumPipe(UserPlan)) planType: UserPlan,
     @Body() updatePlanDto: UpdatePlanDto,
   ): Promise<Plan> {
     return this.planConfigService.update(planType, updatePlanDto);
@@ -101,7 +104,9 @@ export class PlanConfigController {
     status: 404,
     description: 'Plan no encontrado',
   })
-  async remove(@Param('planType') planType: UserPlan): Promise<void> {
+  async remove(
+    @Param('planType', new ParseEnumPipe(UserPlan)) planType: UserPlan,
+  ): Promise<void> {
     return this.planConfigService.remove(planType);
   }
 }
