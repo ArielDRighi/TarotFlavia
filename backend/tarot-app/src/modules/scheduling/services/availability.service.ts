@@ -225,8 +225,9 @@ export class AvailabilityService {
     });
 
     // Iterar por cada día en el rango
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+    // Usar T12:00:00 para evitar problemas con zonas horarias
+    const start = new Date(`${startDate}T12:00:00`);
+    const end = new Date(`${endDate}T12:00:00`);
     const now = new Date();
     const minAdvanceHours = 2; // Mínimo 2 horas de anticipación
 
