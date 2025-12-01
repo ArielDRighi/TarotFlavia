@@ -8,6 +8,8 @@ import {
   Request,
   Query,
   NotFoundException,
+  UseGuards,
+  HttpCode,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -26,9 +28,11 @@ import {
 } from '../../application/dto';
 import { SessionStatus } from '../../domain/enums';
 import { AuthenticatedRequest } from '../../interfaces/authenticated-request.interface';
+import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
 
 @ApiTags('User Scheduling')
 @ApiBearerAuth('JWT-auth')
+@UseGuards(JwtAuthGuard)
 @Controller('scheduling')
 export class UserSchedulingController {
   constructor(
@@ -98,7 +102,7 @@ export class UserSchedulingController {
     @Request() req: AuthenticatedRequest,
     @Body() dto: BookSessionDto,
   ): Promise<SessionResponseDto> {
-    const userId = req.user.id;
+    const userId = req.user.userId;
     const userEmail = req.user.email;
     return this.sessionService.bookSession(userId, userEmail, dto);
   }
@@ -120,7 +124,7 @@ export class UserSchedulingController {
     @Request() req: AuthenticatedRequest,
     @Query('status') status?: SessionStatus,
   ): Promise<SessionResponseDto[]> {
-    const userId = req.user.id;
+    const userId = req.user.userId;
     return this.sessionService.getUserSessions(userId, status);
   }
 
@@ -137,7 +141,7 @@ export class UserSchedulingController {
     @Request() req: AuthenticatedRequest,
     @Param('id', ParseIntPipe) id: number,
   ): Promise<SessionResponseDto> {
-    const userId = req.user.id;
+    const userId = req.user.userId;
     const sessions = await this.sessionService.getUserSessions(userId);
     const session = sessions.find((s) => s.id === id);
 
@@ -149,6 +153,7 @@ export class UserSchedulingController {
   }
 
   @Post('my-sessions/:id/cancel')
+  @HttpCode(200)
   @ApiOperation({
     summary: 'Cancelar una sesión (debe ser con >24h de anticipación)',
   })
@@ -168,7 +173,7 @@ export class UserSchedulingController {
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: CancelSessionDto,
   ): Promise<SessionResponseDto> {
-    const userId = req.user.id;
+    const userId = req.user.userId;
     return this.sessionService.cancelSession(id, userId, dto);
   }
 }

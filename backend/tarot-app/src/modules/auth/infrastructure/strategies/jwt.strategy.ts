@@ -11,6 +11,7 @@ interface JwtPayload {
   isAdmin?: boolean;
   roles?: UserRole[];
   plan?: string;
+  tarotistaId?: number;
 }
 
 @Injectable()
@@ -46,6 +47,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       isAdmin: payload.isAdmin || false,
       roles: payload.roles || [],
       plan: payload.plan || 'free',
+      tarotistaId: payload.tarotistaId,
     };
   }
 }

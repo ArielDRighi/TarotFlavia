@@ -374,11 +374,12 @@ src/
 
 ---
 
-### **TASK-001-a: Refactorizar Estructura del Proyecto según Best Practices** ⭐⭐
+### **TASK-001-a: Refactorizar Estructura del Proyecto según Best Practices** ⭐⭐ ✅
 
-**Prioridad:** � ALTA  
+**Prioridad:** 🟡 ALTA  
 **Estimación:** 0.5-1 día  
 **Dependencias:** TASK-001  
+**Estado:** ✅ COMPLETADO  
 **Marcador MVP:** ⭐⭐ **NECESARIO ANTES DE CONTINUAR MVP** - Evita refactor masivo futuro
 
 > **CRÍTICO:** Ejecutar AHORA antes de agregar más features. Con 7 módulos es simple, con 15+ será una pesadilla de imports rotos.
@@ -845,35 +846,6 @@ Crear seeders completos para las 78 cartas del Tarot de Rider-Waite con toda su 
 
 ---
 
-### **TASK-005-a: Crear Seeders para Mazos (Decks) Predeterminados**
-
-**Prioridad:** 🟡 ALTA  
-**Estimación:** 1 día  
-**Dependencias:** TASK-004
-
-#### 📋 Descripción
-
-Crear seeder para al menos un mazo predeterminado (Rider-Waite) que agrupe las 78 cartas creadas. Preparar la estructura para futuros mazos adicionales.
-
-#### ✅ Tareas específicas
-
-- [ ] Crear seeder para entidad `tarot_decks` con el mazo "Rider-Waite Classic"
-- [ ] Establecer este mazo como `is_default: true`
-- [ ] Documentar la estructura para agregar mazos adicionales en el futuro (ej: Marsella, Thoth)
-- [ ] Crear relación entre el mazo y las 78 cartas existentes (tabla intermedia si es necesario)
-- [ ] Agregar descripción completa del mazo con información histórica
-- [ ] Incluir metadata del mazo: año de creación, artista, tradición
-- [ ] Implementar validación que asegure que siempre exista al menos un mazo default
-- [ ] Crear endpoint `GET /decks/default` que retorne el mazo predeterminado
-
-#### 🎯 Criterios de aceptación
-
-- ✓ Existe un mazo "Rider-Waite Classic" marcado como default
-- ✓ El mazo está correctamente vinculado a las 78 cartas
-- ✓ El sistema puede manejar múltiples mazos (aunque solo exista uno)
-
----
-
 ### **TASK-005-a: Crear Seeders para Mazos (Decks) Predeterminados** ✅
 
 **Prioridad:** 🟡 ALTA  
@@ -1092,11 +1064,12 @@ Crear la entidad `ReadingCategory` con sus 6 categorías principales (Amor, Trab
 
 ---
 
-### **TASK-008: Crear Seeders de Categorías con Iconos y Descripciones** ⭐⭐
+### **TASK-008: Crear Seeders de Categorías con Iconos y Descripciones** ⭐⭐ ✅
 
 **Prioridad:** 🔴 CRÍTICA  
 **Estimación:** 1 día  
 **Dependencias:** TASK-007  
+**Estado:** ✅ COMPLETADO  
 **Marcador MVP:** ⭐⭐ **NECESARIO PARA MVP** - UX fundamental
 
 #### 📋 Descripción
@@ -1137,11 +1110,12 @@ Crear seeder con las 6 categorías predefinidas incluyendo iconos (emoji o refer
 
 ---
 
-### **TASK-009: Implementar Entidad y Módulo de Preguntas Predefinidas** ⭐⭐
+### **TASK-009: Implementar Entidad y Módulo de Preguntas Predefinidas** ⭐⭐ ✅
 
 **Prioridad:** 🔴 CRÍTICA  
 **Estimación:** 3 días  
 **Dependencias:** TASK-007  
+**Estado:** ✅ COMPLETADO  
 **Marcador MVP:** ⭐⭐ **NECESARIO PARA MVP** - Diferenciador free vs premium
 
 #### 📋 Descripción
@@ -1831,11 +1805,12 @@ Mejorar el sistema de rate limiting básico implementado en TASK-014 con protecc
 
 ---
 
-### **TASK-015: Implementar Sistema de Refresh Tokens**
+### **TASK-015: Implementar Sistema de Refresh Tokens** ✅
 
 **Prioridad:** 🟡 ALTA  
 **Estimación:** 3 días  
-**Dependencias:** TASK-002
+**Dependencias:** TASK-002  
+**Estado:** ✅ COMPLETADO
 
 #### 📋 Descripción
 
@@ -1843,26 +1818,47 @@ Implementar refresh tokens para mejorar seguridad y UX. Los access tokens serán
 
 #### ✅ Tareas específicas
 
-- [ ] Crear entidad `RefreshToken` con campos:
+- [x] Crear entidad `RefreshToken` con campos:
   - `id`, `user_id` (FK), `token` (hashed), `expires_at`, `created_at`, `revoked_at`, `ip_address`, `user_agent`
-- [ ] Generar refresh token aleatorio y seguro (usar `crypto.randomBytes`)
-- [ ] Almacenar hash del refresh token en DB (no el token en texto plano)
-- [ ] Configurar access token con duración corta (15 minutos)
-- [ ] Configurar refresh token con duración larga (7 días)
-- [ ] Implementar endpoint `POST /auth/refresh` que reciba refresh token y retorne nuevo access token
-- [ ] Validar que el refresh token no esté expirado ni revocado
-- [ ] Implementar rotación de refresh tokens (generar nuevo refresh token en cada renovación)
-- [ ] Revocar el refresh token viejo automáticamente al generar uno nuevo
-- [ ] Implementar endpoint `POST /auth/logout` que revoque el refresh token actual
-- [ ] Implementar endpoint `POST /auth/logout-all` que revoque todos los refresh tokens del usuario
-- [ ] Agregar índice en `user_id` y `token` para búsquedas eficientes
-- [ ] Implementar tarea cron que elimine refresh tokens expirados (más de 30 días)
+- [x] Generar refresh token aleatorio y seguro (usar `crypto.randomBytes`)
+- [x] Almacenar hash del refresh token en DB (no el token en texto plano)
+- [x] Configurar access token con duración corta (15 minutos)
+- [x] Configurar refresh token con duración larga (7 días)
+- [x] Implementar endpoint `POST /auth/refresh` que reciba refresh token y retorne nuevo access token
+- [x] Validar que el refresh token no esté expirado ni revocado
+- [x] Implementar rotación de refresh tokens (generar nuevo refresh token en cada renovación)
+- [x] Revocar el refresh token viejo automáticamente al generar uno nuevo
+- [x] Implementar endpoint `POST /auth/logout` que revoque el refresh token actual
+- [x] Implementar endpoint `POST /auth/logout-all` que revoque todos los refresh tokens del usuario
+- [x] Agregar índice en `user_id` y `token` para búsquedas eficientes
+- [x] Implementar tarea cron que elimine refresh tokens expirados (más de 30 días)
 
 #### 🎯 Criterios de aceptación
 
-- ✓ Los access tokens tienen duración corta (15 min)
-- ✓ El sistema renueva access tokens usando refresh tokens correctamente
-- ✓ Los refresh tokens se revocan apropiadamente en logout
+- ✅ Los access tokens tienen duración corta (15 min)
+- ✅ El sistema renueva access tokens usando refresh tokens correctamente
+- ✅ Los refresh tokens se revocan apropiadamente en logout
+
+#### 📝 Notas de implementación
+
+**Archivos creados:**
+
+- `src/modules/auth/entities/refresh-token.entity.ts` - Entidad con FK a User, índices compuestos
+- `src/modules/auth/entities/refresh-token.entity.spec.ts` - Tests unitarios
+- `src/modules/auth/application/dto/refresh-token.dto.ts` - DTO de validación
+- `src/modules/auth/application/use-cases/refresh-token.use-case.ts` - Caso de uso
+- `src/modules/auth/application/use-cases/refresh-token.use-case.spec.ts` - Tests unitarios
+- `src/modules/auth/domain/interfaces/refresh-token-repository.interface.ts` - Interface del repositorio
+
+**Endpoints implementados:**
+
+- `POST /auth/refresh` - Renueva access token con refresh token válido
+- `POST /auth/logout` - Revoca refresh token actual
+- `POST /auth/logout-all` - Revoca todos los refresh tokens del usuario (requiere auth)
+
+**Tests de endpoints:**
+
+- Tests incluidos en `test-auth-endpoints.sh` (tests 10-16)
 
 ---
 

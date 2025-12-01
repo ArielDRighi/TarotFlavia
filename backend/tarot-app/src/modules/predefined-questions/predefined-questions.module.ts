@@ -3,9 +3,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { PredefinedQuestionsService } from './predefined-questions.service';
 import { PredefinedQuestionsController } from './predefined-questions.controller';
 import { PredefinedQuestion } from './entities/predefined-question.entity';
+import { CategoriesModule } from '../categories/categories.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([PredefinedQuestion])],
+  imports: [TypeOrmModule.forFeature([PredefinedQuestion]), CategoriesModule],
   controllers: [PredefinedQuestionsController],
   providers: [PredefinedQuestionsService],
   exports: [PredefinedQuestionsService],
