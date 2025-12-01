@@ -4,7 +4,6 @@ import * as request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
 import { E2EDatabaseHelper } from './helpers/e2e-database.helper';
-import { ReadingCategory } from '../src/modules/categories/entities/reading-category.entity';
 
 /**
  * E2E Tests for Categories Module

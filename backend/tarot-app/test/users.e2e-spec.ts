@@ -312,7 +312,6 @@ describe('Users (e2e)', () => {
   // ============================================
   describe('PATCH /users/:id/plan', () => {
     let testUserId: number;
-    let testUserToken: string;
 
     beforeEach(async () => {
       // Create a test user for plan updates
@@ -327,7 +326,6 @@ describe('Users (e2e)', () => {
 
       const body = registerResponse.body as LoginResponse;
       testUserId = body.user.id;
-      testUserToken = body.access_token;
     });
 
     afterEach(async () => {
