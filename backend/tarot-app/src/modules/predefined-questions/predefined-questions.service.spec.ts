@@ -5,6 +5,7 @@ import { PredefinedQuestionsService } from './predefined-questions.service';
 import { PredefinedQuestion } from './entities/predefined-question.entity';
 import { CreatePredefinedQuestionDto } from './dto/create-predefined-question.dto';
 import { UpdatePredefinedQuestionDto } from './dto/update-predefined-question.dto';
+import { CategoriesService } from '../categories/categories.service';
 
 describe('PredefinedQuestionsService', () => {
   let service: PredefinedQuestionsService;
@@ -32,6 +33,11 @@ describe('PredefinedQuestionsService', () => {
     increment: jest.fn(),
   };
 
+  const mockCategoriesService = {
+    findOne: jest.fn(),
+    findAll: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -39,6 +45,10 @@ describe('PredefinedQuestionsService', () => {
         {
           provide: getRepositoryToken(PredefinedQuestion),
           useValue: mockRepository,
+        },
+        {
+          provide: CategoriesService,
+          useValue: mockCategoriesService,
         },
       ],
     }).compile();
