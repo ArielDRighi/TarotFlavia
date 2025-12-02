@@ -5,6 +5,23 @@ import { AppModule } from '../src/app.module';
 import { E2EDatabaseHelper } from './helpers/e2e-database.helper';
 
 /**
+ * Interface for AI provider statistics returned by the API
+ */
+interface ProviderStatistic {
+  provider: string;
+  totalCalls: number;
+  successCalls: number;
+  errorCalls: number;
+  cachedCalls: number;
+  totalTokens: number;
+  totalCost: number;
+  avgDuration: number;
+  errorRate: number;
+  cacheHitRate: number;
+  fallbackRate: number;
+}
+
+/**
  * E2E Tests for AI Usage Statistics Controller
  *
  * Tests the GET /admin/ai-usage endpoint which provides:
@@ -253,7 +270,7 @@ describe('AI Usage Statistics (e2e)', () => {
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);
 
-        response.body.statistics.forEach((stat: any) => {
+        response.body.statistics.forEach((stat: ProviderStatistic) => {
           expect(stat.totalCalls).toBeGreaterThanOrEqual(0);
           expect(stat.successCalls).toBeGreaterThanOrEqual(0);
           expect(stat.errorCalls).toBeGreaterThanOrEqual(0);
@@ -286,7 +303,7 @@ describe('AI Usage Statistics (e2e)', () => {
           'deepseek',
         ];
 
-        response.body.statistics.forEach((stat: any) => {
+        response.body.statistics.forEach((stat: ProviderStatistic) => {
           expect(validProviders).toContain(stat.provider);
         });
       });
@@ -297,7 +314,7 @@ describe('AI Usage Statistics (e2e)', () => {
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);
 
-        response.body.statistics.forEach((stat: any) => {
+        response.body.statistics.forEach((stat: ProviderStatistic) => {
           expect(stat.errorRate).toBeGreaterThanOrEqual(0);
           expect(stat.errorRate).toBeLessThanOrEqual(100);
           expect(stat.cacheHitRate).toBeGreaterThanOrEqual(0);

@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from './src/app.module';
 
@@ -17,15 +17,15 @@ async function main() {
     .post('/readings')
     .set('Authorization', 'Bearer fake-token')
     .send({ test: 'data' });
-    
+
   console.log('Status:', res.status);
   console.log('Body:', JSON.stringify(res.body, null, 2));
-  
+
   await app.close();
   process.exit(0);
 }
 
-main().catch(e => {
+main().catch((e) => {
   console.error(e);
   process.exit(1);
 });
