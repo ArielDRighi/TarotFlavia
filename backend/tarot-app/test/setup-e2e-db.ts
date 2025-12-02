@@ -58,6 +58,7 @@ export default async function globalSetup() {
     const { seedFlaviaIAConfig } = await import(
       '../src/database/seeds/flavia-ia-config.seeder'
     );
+    const { seedPlans } = await import('../src/database/seeds/plans.seeder');
 
     const { ReadingCategory } = await import(
       '../src/modules/categories/entities/reading-category.entity'
@@ -78,8 +79,12 @@ export default async function globalSetup() {
     const { TarotistaConfig } = await import(
       '../src/modules/tarotistas/entities/tarotista-config.entity'
     );
+    const { Plan } = await import(
+      '../src/modules/plan-config/entities/plan.entity'
+    );
 
     // Execute seeders
+    await seedPlans(dataSource.getRepository(Plan)); // Plans first - needed by usage limits
     await seedReadingCategories(dataSource.getRepository(ReadingCategory));
     await seedTarotDecks(dataSource.getRepository(TarotDeck));
     await seedTarotCards(

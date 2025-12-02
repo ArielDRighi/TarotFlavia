@@ -10,7 +10,7 @@
  * Filosofía: Identificar problemas reales de performance en DB
  */
 
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 import { App } from 'supertest/types';
@@ -87,6 +87,7 @@ describe('Performance Tests - Database Queries (SUBTASK-23)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
     await app.init();
     httpServer = app.getHttpServer() as App;
 
