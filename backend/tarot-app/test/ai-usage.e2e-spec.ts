@@ -278,10 +278,12 @@ describe('AI Usage Statistics (e2e)', () => {
           'OPENAI',
           'ANTHROPIC',
           'LOCAL',
+          'DEEPSEEK',
           'groq',
           'openai',
           'anthropic',
           'local',
+          'deepseek',
         ];
 
         response.body.statistics.forEach((stat: any) => {
