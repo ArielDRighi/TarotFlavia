@@ -568,36 +568,41 @@ describe('Plan Config Management (e2e)', () => {
     });
 
     it('should reject admin operations with regular user token', async () => {
-      const operations = [
-        request(app.getHttpServer())
-          .get('/plan-config')
-          .set('Authorization', `Bearer ${userToken}`),
-        request(app.getHttpServer())
-          .post('/plan-config')
-          .set('Authorization', `Bearer ${userToken}`)
-          .send({
-            planType: UserPlan.PREMIUM,
-            name: 'Test',
-            description: 'Test',
-            readingsLimit: 10,
-            aiQuotaMonthly: 10,
-            price: 10,
-            allowCustomQuestions: false,
-            allowSharing: false,
-            allowAdvancedSpreads: false,
-          }),
-        request(app.getHttpServer())
-          .put('/plan-config/free')
-          .set('Authorization', `Bearer ${userToken}`)
-          .send({ name: 'Test' }),
-        request(app.getHttpServer())
-          .delete('/plan-config/premium')
-          .set('Authorization', `Bearer ${userToken}`),
-      ];
+      // Test GET /plan-config
+      await request(app.getHttpServer())
+        .get('/plan-config')
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(403);
 
-      for (const operation of operations) {
-        await operation.expect(403);
-      }
+      // Test POST /plan-config
+      await request(app.getHttpServer())
+        .post('/plan-config')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({
+          planType: UserPlan.PREMIUM,
+          name: 'Test',
+          description: 'Test',
+          readingsLimit: 10,
+          aiQuotaMonthly: 10,
+          price: 10,
+          allowCustomQuestions: false,
+          allowSharing: false,
+          allowAdvancedSpreads: false,
+        })
+        .expect(403);
+
+      // Test PUT /plan-config/:planType
+      await request(app.getHttpServer())
+        .put('/plan-config/free')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({ name: 'Test' })
+        .expect(403);
+
+      // Test DELETE /plan-config/:planType
+      await request(app.getHttpServer())
+        .delete('/plan-config/premium')
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(403);
     });
   });
 });
