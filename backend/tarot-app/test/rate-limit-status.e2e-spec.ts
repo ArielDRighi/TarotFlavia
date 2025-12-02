@@ -29,9 +29,15 @@ describe('Rate Limit Status (e2e)', () => {
 
     // Ensure users have correct plans before tests (might have been modified by other tests)
     const ds = dbHelper.getDataSource();
-    await ds.query(`UPDATE "user" SET plan = 'free' WHERE email = 'free@test.com'`);
-    await ds.query(`UPDATE "user" SET plan = 'premium' WHERE email = 'premium@test.com'`);
-    await ds.query(`UPDATE "user" SET plan = 'premium' WHERE email = 'admin@test.com'`);
+    await ds.query(
+      `UPDATE "user" SET plan = 'free' WHERE email = 'free@test.com'`,
+    );
+    await ds.query(
+      `UPDATE "user" SET plan = 'premium' WHERE email = 'premium@test.com'`,
+    );
+    await ds.query(
+      `UPDATE "user" SET plan = 'premium' WHERE email = 'admin@test.com'`,
+    );
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],

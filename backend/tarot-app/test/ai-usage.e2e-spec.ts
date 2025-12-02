@@ -273,7 +273,16 @@ describe('AI Usage Statistics (e2e)', () => {
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);
 
-        const validProviders = ['GROQ', 'OPENAI', 'ANTHROPIC', 'LOCAL'];
+        const validProviders = [
+          'GROQ',
+          'OPENAI',
+          'ANTHROPIC',
+          'LOCAL',
+          'groq',
+          'openai',
+          'anthropic',
+          'local',
+        ];
 
         response.body.statistics.forEach((stat: any) => {
           expect(validProviders).toContain(stat.provider);

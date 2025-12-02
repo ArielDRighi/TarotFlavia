@@ -38,8 +38,12 @@ describe('DailyReading (e2e)', () => {
 
     // Ensure users have correct plans before tests (might have been modified by other tests)
     const ds = dbHelper.getDataSource();
-    await ds.query(`UPDATE "user" SET plan = 'free' WHERE email = 'free@test.com'`);
-    await ds.query(`UPDATE "user" SET plan = 'premium' WHERE email = 'premium@test.com'`);
+    await ds.query(
+      `UPDATE "user" SET plan = 'free' WHERE email = 'free@test.com'`,
+    );
+    await ds.query(
+      `UPDATE "user" SET plan = 'premium' WHERE email = 'premium@test.com'`,
+    );
 
     // Create NestJS application with mocked InterpretationsService
     const moduleFixture: TestingModule = await Test.createTestingModule({

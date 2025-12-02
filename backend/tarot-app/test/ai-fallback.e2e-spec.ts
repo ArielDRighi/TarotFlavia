@@ -45,13 +45,22 @@ describe('AI Provider Fallback (e2e)', () => {
 
     // Get seeded IDs dynamically
     const ds = dbHelper.getDataSource();
-    const questions = await ds.query('SELECT id FROM predefined_question LIMIT 1');
+    const questions = await ds.query(
+      'SELECT id FROM predefined_question LIMIT 1',
+    );
     const decks = await ds.query('SELECT id FROM tarot_deck LIMIT 1');
     const spreads = await ds.query('SELECT id FROM tarot_spread LIMIT 1');
     const cards = await ds.query('SELECT id FROM tarot_card LIMIT 3');
 
-    if (!questions.length || !decks.length || !spreads.length || cards.length < 3) {
-      throw new Error('Seeded data not found. Make sure global setup has run correctly.');
+    if (
+      !questions.length ||
+      !decks.length ||
+      !spreads.length ||
+      cards.length < 3
+    ) {
+      throw new Error(
+        'Seeded data not found. Make sure global setup has run correctly.',
+      );
     }
 
     predefinedQuestionId = questions[0].id;

@@ -55,7 +55,7 @@ describe('Plan Config Management (e2e)', () => {
     // Create admin user
     const hashedPassword = await bcrypt.hash('AdminPass123!', 10);
     await dataSource.query(
-      `INSERT INTO "user" (email, "password", name, "emailVerified", roles, plan)
+      `INSERT INTO "user" (email, "password", name, "isAdmin", roles, plan)
        VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING id, email, name`,
       [
@@ -70,14 +70,14 @@ describe('Plan Config Management (e2e)', () => {
 
     // Create regular user
     await dataSource.query(
-      `INSERT INTO "user" (email, "password", name, "emailVerified", roles, plan)
+      `INSERT INTO "user" (email, "password", name, "isAdmin", roles, plan)
        VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING id, email, name`,
       [
         `user@${TEST_DOMAIN}`,
         hashedPassword,
         'Test User',
-        true,
+        false,
         [],
         UserPlan.FREE,
       ],
