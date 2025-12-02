@@ -20,6 +20,12 @@ describe('AI Provider Fallback (e2e)', () => {
   let premiumUserId: number;
   let aiProviderService: AIProviderService;
 
+  // Dynamic IDs from seeded data
+  let predefinedQuestionId: number;
+  let deckId: number;
+  let spreadId: number;
+  let cardIds: number[];
+
   beforeAll(async () => {
     // Initialize E2E database helper
     dbHelper = new E2EDatabaseHelper();
@@ -36,6 +42,31 @@ describe('AI Provider Fallback (e2e)', () => {
 
     // Get service instances
     aiProviderService = moduleFixture.get<AIProviderService>(AIProviderService);
+
+    // Get seeded IDs dynamically
+    const ds = dbHelper.getDataSource();
+    const questions = await ds.query(
+      'SELECT id FROM predefined_question LIMIT 1',
+    );
+    const decks = await ds.query('SELECT id FROM tarot_deck LIMIT 1');
+    const spreads = await ds.query('SELECT id FROM tarot_spread LIMIT 1');
+    const cards = await ds.query('SELECT id FROM tarot_card LIMIT 3');
+
+    if (
+      !questions.length ||
+      !decks.length ||
+      !spreads.length ||
+      cards.length < 3
+    ) {
+      throw new Error(
+        'Seeded data not found. Make sure global setup has run correctly.',
+      );
+    }
+
+    predefinedQuestionId = questions[0].id;
+    deckId = decks[0].id;
+    spreadId = spreads[0].id;
+    cardIds = cards.map((c: { id: number }) => c.id);
 
     // Login as premium user (to avoid AI quota issues in CI)
     const premiumLoginResponse = await request(app.getHttpServer())
@@ -77,14 +108,14 @@ describe('AI Provider Fallback (e2e)', () => {
         .post('/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
-          predefinedQuestionId: 1,
-          deckId: 1,
-          spreadId: 1,
-          cardIds: [1, 2, 3],
+          predefinedQuestionId: predefinedQuestionId,
+          deckId: deckId,
+          spreadId: spreadId,
+          cardIds: cardIds,
           cardPositions: [
-            { cardId: 1, position: 'pasado', isReversed: false },
-            { cardId: 2, position: 'presente', isReversed: false },
-            { cardId: 3, position: 'futuro', isReversed: false },
+            { cardId: cardIds[0], position: 'pasado', isReversed: false },
+            { cardId: cardIds[1], position: 'presente', isReversed: false },
+            { cardId: cardIds[2], position: 'futuro', isReversed: false },
           ],
           generateInterpretation: true,
         })
@@ -113,14 +144,14 @@ describe('AI Provider Fallback (e2e)', () => {
         .post('/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
-          predefinedQuestionId: 1,
-          deckId: 1,
-          spreadId: 1,
-          cardIds: [1, 2, 3],
+          predefinedQuestionId: predefinedQuestionId,
+          deckId: deckId,
+          spreadId: spreadId,
+          cardIds: cardIds,
           cardPositions: [
-            { cardId: 1, position: 'pasado', isReversed: false },
-            { cardId: 2, position: 'presente', isReversed: false },
-            { cardId: 3, position: 'futuro', isReversed: false },
+            { cardId: cardIds[0], position: 'pasado', isReversed: false },
+            { cardId: cardIds[1], position: 'presente', isReversed: false },
+            { cardId: cardIds[2], position: 'futuro', isReversed: false },
           ],
           generateInterpretation: true,
         })
@@ -200,14 +231,14 @@ describe('AI Provider Fallback (e2e)', () => {
             .post('/readings')
             .set('Authorization', `Bearer ${premiumUserToken}`)
             .send({
-              predefinedQuestionId: 1,
-              deckId: 1,
-              spreadId: 1,
-              cardIds: [1, 2, 3],
+              predefinedQuestionId: predefinedQuestionId,
+              deckId: deckId,
+              spreadId: spreadId,
+              cardIds: cardIds,
               cardPositions: [
-                { cardId: 1, position: 'pasado', isReversed: false },
-                { cardId: 2, position: 'presente', isReversed: false },
-                { cardId: 3, position: 'futuro', isReversed: false },
+                { cardId: cardIds[0], position: 'pasado', isReversed: false },
+                { cardId: cardIds[1], position: 'presente', isReversed: false },
+                { cardId: cardIds[2], position: 'futuro', isReversed: false },
               ],
               generateInterpretation: true,
             })
