@@ -188,7 +188,7 @@ export class E2EDatabaseHelper {
       // Eliminar tarotistas NO seeders (Flavia es la seeder)
       try {
         await this.dataSource.query(
-          `DELETE FROM "tarotistas" WHERE "userId" NOT IN (SELECT id FROM "user" WHERE email = $1)`,
+          `DELETE FROM "tarotistas" WHERE "user_id" NOT IN (SELECT id FROM "user" WHERE email = $1)`,
           ['flavia@test.com'],
         );
       } catch (error: unknown) {
