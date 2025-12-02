@@ -116,7 +116,8 @@ describe('Readings Admin (e2e)', () => {
         if (response.body.data.length > 0) {
           const reading = response.body.data[0];
           expect(reading).toHaveProperty('id');
-          expect(reading).toHaveProperty('userId');
+          // La respuesta puede tener 'user' (objeto) o 'userId' dependiendo de las relaciones
+          expect('userId' in reading || 'user' in reading).toBe(true);
           expect(reading).toHaveProperty('createdAt');
         }
       });

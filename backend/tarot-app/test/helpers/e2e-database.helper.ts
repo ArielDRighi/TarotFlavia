@@ -110,24 +110,17 @@ export class E2EDatabaseHelper {
   /**
    * Limpia solo las tablas de datos de usuario, preservando los seeders base
    * Útil para tests que necesitan limpiar datos entre tests pero mantener categorías, cartas, etc.
-   * IMPORTANTE: Preserva los usuarios seeders (admin@test.com, free@test.com, premium@test.com)
    */
   async cleanUserData(): Promise<void> {
     await this.initialize();
     console.log('[E2E Database Helper] Limpiando datos de usuario...');
 
-    // Emails de usuarios seeders que NO deben ser eliminados
-    const seederEmails = [
-      'admin@test.com',
-      'free@test.com',
-      'premium@test.com',
-      'flavia@test.com',
-    ];
-
-    // Tablas a limpiar completamente (no tienen usuarios seeder)
-    const tablesToTruncate = [
+    // Tablas a limpiar (datos de usuario, NO seeders base)
+    const userTables = [
       'tarot_reading',
       'tarot_interpretation',
+      'user',
+      'tarotistas',
       'tarotista_config',
       'tarotista_card_meanings',
       'tarotista_reviews',
@@ -143,8 +136,8 @@ export class E2EDatabaseHelper {
     // Desactivar foreign keys temporalmente y asegurarse de restaurarlas
     await this.dataSource.query('SET session_replication_role = replica;');
     try {
-      // Truncar tablas que no tienen datos seeder
-      for (const tableName of tablesToTruncate) {
+      // Truncar solo las tablas de usuario
+      for (const tableName of userTables) {
         try {
           await this.dataSource.query(
             `TRUNCATE TABLE "${tableName}" RESTART IDENTITY CASCADE;`,
@@ -166,38 +159,6 @@ export class E2EDatabaseHelper {
               error,
             );
           }
-        }
-      }
-
-      // Eliminar usuarios NO seeders (preservando admin, free, premium, flavia)
-      try {
-        await this.dataSource.query(
-          `DELETE FROM "user" WHERE email NOT IN ($1, $2, $3, $4)`,
-          seederEmails,
-        );
-      } catch (error: unknown) {
-        const pgError = error as { code?: string; message?: string };
-        if (!pgError?.message?.includes('does not exist')) {
-          console.error(
-            '[E2E Database Helper] Error cleaning non-seeder users:',
-            error,
-          );
-        }
-      }
-
-      // Eliminar tarotistas NO seeders (Flavia es la seeder)
-      try {
-        await this.dataSource.query(
-          `DELETE FROM "tarotistas" WHERE "user_id" NOT IN (SELECT id FROM "user" WHERE email = $1)`,
-          ['flavia@test.com'],
-        );
-      } catch (error: unknown) {
-        const pgError = error as { code?: string; message?: string };
-        if (!pgError?.message?.includes('does not exist')) {
-          console.error(
-            '[E2E Database Helper] Error cleaning non-seeder tarotistas:',
-            error,
-          );
         }
       }
     } finally {
