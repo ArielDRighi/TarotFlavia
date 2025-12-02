@@ -163,7 +163,10 @@ describe('Plan Config Management (e2e)', () => {
 
       const planTypes = response.body.map((p: PlanResponse) => p.planType);
       const sortedPlanTypes = [...planTypes].sort();
+      // Verify the API returns plans in sorted order
       expect(planTypes).toEqual(sortedPlanTypes);
+      // Verify all expected plan types are present
+      expect(planTypes).toEqual(expect.arrayContaining(['free', 'premium']));
     });
   });
 
@@ -354,6 +357,12 @@ describe('Plan Config Management (e2e)', () => {
     });
 
     it('should update only provided fields', async () => {
+      // First get the current plan to know the original name
+      const originalPlan = await request(app.getHttpServer())
+        .get('/plan-config/free')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200);
+
       const updateData = {
         readingsLimit: 20,
       };
@@ -365,7 +374,8 @@ describe('Plan Config Management (e2e)', () => {
         .expect(200);
 
       expect(response.body.readingsLimit).toBe(20);
-      expect(response.body.name).toBe('Updated Free Plan'); // From previous test or default
+      // Name should remain unchanged from what it was before this update
+      expect(response.body.name).toBe(originalPlan.body.name);
     });
 
     it('should update feature flags', async () => {
