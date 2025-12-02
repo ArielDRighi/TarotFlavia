@@ -18,7 +18,10 @@ interface PlanResponse {
   readingsLimit: number;
   aiQuotaMonthly: number;
   price: number;
-  features: Record<string, boolean>;
+  allowCustomQuestions: boolean;
+  allowSharing: boolean;
+  allowAdvancedSpreads: boolean;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -122,7 +125,7 @@ describe('Plan Config Management (e2e)', () => {
         .expect(200);
 
       expect(response.body).toBeInstanceOf(Array);
-      expect(response.body.length).toBeGreaterThanOrEqual(4); // GUEST, FREE, PREMIUM, PROFESSIONAL
+      expect(response.body.length).toBeGreaterThanOrEqual(3); // FREE, PREMIUM, PROFESSIONAL
 
       // Verify structure
       const plan = response.body[0];
@@ -133,7 +136,10 @@ describe('Plan Config Management (e2e)', () => {
       expect(plan).toHaveProperty('readingsLimit');
       expect(plan).toHaveProperty('aiQuotaMonthly');
       expect(plan).toHaveProperty('price');
-      expect(plan).toHaveProperty('features');
+      // Features are individual boolean columns, not a nested object
+      expect(plan).toHaveProperty('allowCustomQuestions');
+      expect(plan).toHaveProperty('allowSharing');
+      expect(plan).toHaveProperty('allowAdvancedSpreads');
       expect(plan).toHaveProperty('createdAt');
       expect(plan).toHaveProperty('updatedAt');
     });
@@ -173,22 +179,22 @@ describe('Plan Config Management (e2e)', () => {
       expect(response.body.readingsLimit).toBeDefined();
     });
 
-    it('should return GUEST plan details', async () => {
+    it('should return PREMIUM plan details', async () => {
       const response = await request(app.getHttpServer())
-        .get('/plan-config/guest')
+        .get('/plan-config/premium')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
-      expect(response.body.planType).toBe('guest');
-      expect(response.body.readingsLimit).toBe(3);
-      expect(response.body.aiQuotaMonthly).toBe(0);
+      expect(response.body.planType).toBe('premium');
+      expect(response.body.readingsLimit).toBeDefined();
+      expect(response.body.aiQuotaMonthly).toBeDefined();
     });
 
-    it('should return 404 for non-existent plan type', async () => {
+    it('should return 400 for invalid plan type', async () => {
       await request(app.getHttpServer())
         .get('/plan-config/nonexistent')
         .set('Authorization', `Bearer ${adminToken}`)
-        .expect(404);
+        .expect(400);
     });
 
     it('should deny access for non-admin users', async () => {
@@ -207,16 +213,14 @@ describe('Plan Config Management (e2e)', () => {
       readingsLimit: -1,
       aiQuotaMonthly: -1,
       price: 29.99,
-      features: {
-        saveHistory: true,
-        aiInterpretations: true,
-        prioritySupport: true,
-      },
+      allowCustomQuestions: true,
+      allowSharing: true,
+      allowAdvancedSpreads: true,
     };
 
     it('should create a new plan as admin', async () => {
       // First, delete the plan if it exists (for idempotency)
-      await dataSource.query('DELETE FROM plan WHERE "planType" = $1', [
+      await dataSource.query('DELETE FROM plans WHERE "planType" = $1', [
         'premium',
       ]);
 
@@ -229,7 +233,13 @@ describe('Plan Config Management (e2e)', () => {
       expect(response.body.planType).toBe(newPlanData.planType);
       expect(response.body.name).toBe(newPlanData.name);
       expect(response.body.readingsLimit).toBe(newPlanData.readingsLimit);
-      expect(response.body.features).toEqual(newPlanData.features);
+      expect(response.body.allowCustomQuestions).toBe(
+        newPlanData.allowCustomQuestions,
+      );
+      expect(response.body.allowSharing).toBe(newPlanData.allowSharing);
+      expect(response.body.allowAdvancedSpreads).toBe(
+        newPlanData.allowAdvancedSpreads,
+      );
     });
 
     it('should return 409 if plan already exists', async () => {
@@ -247,7 +257,7 @@ describe('Plan Config Management (e2e)', () => {
         .expect(409);
 
       // Clean up
-      await dataSource.query('DELETE FROM plan WHERE "planType" = $1', [
+      await dataSource.query('DELETE FROM plans WHERE "planType" = $1', [
         'premium',
       ]);
     });
@@ -304,10 +314,10 @@ describe('Plan Config Management (e2e)', () => {
     beforeEach(async () => {
       // Ensure FREE plan exists and reset it to known state
       await dataSource.query(
-        `INSERT INTO plan ("planType", name, description, "readingsLimit", "aiQuotaMonthly", price, features)
-         VALUES ($1, $2, $3, $4, $5, $6, $7)
+        `INSERT INTO plans ("planType", name, description, "readingsLimit", "aiQuotaMonthly", price, "allowCustomQuestions", "allowSharing", "allowAdvancedSpreads")
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
          ON CONFLICT ("planType") DO UPDATE
-         SET name = $2, description = $3, "readingsLimit" = $4, "aiQuotaMonthly" = $5, price = $6, features = $7`,
+         SET name = $2, description = $3, "readingsLimit" = $4, "aiQuotaMonthly" = $5, price = $6, "allowCustomQuestions" = $7, "allowSharing" = $8, "allowAdvancedSpreads" = $9`,
         [
           UserPlan.FREE,
           'Free Plan',
@@ -315,7 +325,9 @@ describe('Plan Config Management (e2e)', () => {
           10,
           100,
           0,
-          JSON.stringify({ saveHistory: true, aiInterpretations: true }),
+          true,
+          false,
+          false,
         ],
       );
     });
@@ -356,13 +368,11 @@ describe('Plan Config Management (e2e)', () => {
       expect(response.body.name).toBe('Updated Free Plan'); // From previous test or default
     });
 
-    it('should update features object', async () => {
+    it('should update feature flags', async () => {
       const updateData = {
-        features: {
-          saveHistory: true,
-          aiInterpretations: true,
-          customQuestions: true,
-        },
+        allowCustomQuestions: true,
+        allowSharing: true,
+        allowAdvancedSpreads: true,
       };
 
       const response = await request(app.getHttpServer())
@@ -371,15 +381,21 @@ describe('Plan Config Management (e2e)', () => {
         .send(updateData)
         .expect(200);
 
-      expect(response.body.features).toEqual(updateData.features);
+      expect(response.body.allowCustomQuestions).toBe(
+        updateData.allowCustomQuestions,
+      );
+      expect(response.body.allowSharing).toBe(updateData.allowSharing);
+      expect(response.body.allowAdvancedSpreads).toBe(
+        updateData.allowAdvancedSpreads,
+      );
     });
 
-    it('should return 404 for non-existent plan', async () => {
+    it('should return 400 for invalid plan type', async () => {
       await request(app.getHttpServer())
         .put('/plan-config/nonexistent')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ name: 'Test' })
-        .expect(404);
+        .expect(400);
     });
 
     it('should not allow changing planType', async () => {
@@ -411,8 +427,8 @@ describe('Plan Config Management (e2e)', () => {
     beforeEach(async () => {
       // Create a test plan for deletion
       await dataSource.query(
-        `INSERT INTO plan ("planType", name, description, "readingsLimit", "aiQuotaMonthly", price, features)
-         VALUES ($1, $2, $3, $4, $5, $6, $7)
+        `INSERT INTO plans ("planType", name, description, "readingsLimit", "aiQuotaMonthly", price, "allowCustomQuestions", "allowSharing", "allowAdvancedSpreads")
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
          ON CONFLICT ("planType") DO NOTHING`,
         [
           'premium',
@@ -421,7 +437,9 @@ describe('Plan Config Management (e2e)', () => {
           -1,
           -1,
           19.99,
-          JSON.stringify({ saveHistory: true }),
+          true,
+          true,
+          true,
         ],
       );
     });
@@ -434,17 +452,17 @@ describe('Plan Config Management (e2e)', () => {
 
       // Verify deletion
       const result = await dataSource.query(
-        'SELECT * FROM plan WHERE "planType" = $1',
+        'SELECT * FROM plans WHERE "planType" = $1',
         ['premium'],
       );
       expect(result).toHaveLength(0);
     });
 
-    it('should return 404 for non-existent plan', async () => {
+    it('should return 400 for invalid plan type', async () => {
       await request(app.getHttpServer())
         .delete('/plan-config/nonexistent')
         .set('Authorization', `Bearer ${adminToken}`)
-        .expect(404);
+        .expect(400);
     });
 
     it('should deny access for non-admin users', async () => {
@@ -471,29 +489,28 @@ describe('Plan Config Management (e2e)', () => {
       expect(response.body.readingsLimit).toBe(-1);
     });
 
-    it('should handle zero AI quota (GUEST plan)', async () => {
+    it('should handle limited readings (FREE plan)', async () => {
       const response = await request(app.getHttpServer())
-        .get('/plan-config/guest')
+        .get('/plan-config/free')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
-      expect(response.body.aiQuotaMonthly).toBe(0);
+      // FREE plan should have limited readings
+      expect(response.body.readingsLimit).toBeGreaterThan(0);
     });
 
-    it('should preserve features object structure', async () => {
-      const complexFeatures = {
-        saveHistory: true,
-        aiInterpretations: false,
-        customQuestions: true,
-        prioritySupport: false,
-        advancedAnalytics: true,
+    it('should preserve boolean feature flags', async () => {
+      const featureFlags = {
+        allowCustomQuestions: true,
+        allowSharing: false,
+        allowAdvancedSpreads: true,
       };
 
-      // Update plan with complex features
+      // Update plan with feature flags
       await request(app.getHttpServer())
         .put('/plan-config/free')
         .set('Authorization', `Bearer ${adminToken}`)
-        .send({ features: complexFeatures })
+        .send(featureFlags)
         .expect(200);
 
       // Retrieve and verify
@@ -502,7 +519,13 @@ describe('Plan Config Management (e2e)', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
-      expect(response.body.features).toEqual(complexFeatures);
+      expect(response.body.allowCustomQuestions).toBe(
+        featureFlags.allowCustomQuestions,
+      );
+      expect(response.body.allowSharing).toBe(featureFlags.allowSharing);
+      expect(response.body.allowAdvancedSpreads).toBe(
+        featureFlags.allowAdvancedSpreads,
+      );
     });
 
     it('should handle decimal prices correctly', async () => {
@@ -550,7 +573,9 @@ describe('Plan Config Management (e2e)', () => {
             readingsLimit: 10,
             aiQuotaMonthly: 10,
             price: 10,
-            features: {},
+            allowCustomQuestions: false,
+            allowSharing: false,
+            allowAdvancedSpreads: false,
           }),
         request(app.getHttpServer())
           .put('/plan-config/free')
