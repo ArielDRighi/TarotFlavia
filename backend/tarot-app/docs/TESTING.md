@@ -803,6 +803,6 @@ Esta guía incluye:
 
 ---
 
-**Última actualización:** 2025-11-19  
-**Versión:** 1.0.0  
-**Próxima revisión:** Al completar TASK-059
+**Última actualización:** 2025-12-20  
+**Versión:** 1.1.0  
+**Próxima revisión:** Al completar nuevos tests

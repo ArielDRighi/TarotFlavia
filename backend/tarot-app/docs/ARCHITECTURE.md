@@ -8,10 +8,10 @@ Backend del marketplace de tarotistas construido con **NestJS**, aplicando arqui
 
 - **Framework:** NestJS 10.x (Node.js + TypeScript)
 - **ORM:** TypeORM 0.3.x
-- **Database:** PostgreSQL 15+
+- **Database:** PostgreSQL 16 (Docker)
 - **Cache:** In-memory (preparado para Redis)
-- **AI Providers:** OpenAI, Anthropic Claude
-- **Testing:** Jest
+- **AI Providers:** Groq Llama 3.1 70B (principal), OpenAI GPT-4, DeepSeek (fallback)
+- **Testing:** Jest (TDD)
 - **Validation:** class-validator, class-transformer
 
 ---
@@ -32,7 +32,12 @@ src/modules/
 ├── tarotistas/         # Marketplace de tarotistas
 ├── users/              # Gestión de usuarios
 ├── auth/               # Autenticación y autorización
-└── ai/                 # Abstracción de proveedores IA
+├── ai/                 # Abstracción de proveedores IA
+├── ai-usage/           # Monitoreo de uso de IA
+├── scheduling/         # Programación de sesiones
+├── security/           # Eventos de seguridad
+├── subscriptions/      # Gestión de suscripciones
+└── plan-config/        # Configuración de planes
 ```
 
 **Beneficios:**
@@ -218,11 +223,15 @@ export class ReadingCreatedHandler {
 
 ### Módulos con Capas (Complejos)
 
-| Módulo       | Archivos | Líneas | Razón                                               |
-| ------------ | -------- | ------ | --------------------------------------------------- |
-| **readings** | 28       | ~2400  | CQRS + eventos + validaciones complejas             |
-| **cache**    | 8        | ~780   | Lógica compleja de invalidación + multi-provider    |
-| **ai**       | 12       | ~1800  | Abstracción multi-provider + retry + error handling |
+| Módulo         | Archivos | Líneas | Razón                                                   |
+| -------------- | -------- | ------ | ------------------------------------------------------- |
+| **readings**   | 28       | ~2400  | CQRS + eventos + validaciones complejas                 |
+| **tarotistas** | 20+      | ~3000  | Gestión completa: CRUD, config IA, aplicaciones, perfil |
+| **ai**         | 15       | ~2200  | Multi-provider + circuit breaker + retry + fallback     |
+| **cache**      | 8        | ~780   | Lógica compleja de invalidación + multi-provider        |
+| **users**      | 15       | ~1500  | Gestión de usuarios con capas                           |
+| **scheduling** | 12       | ~1200  | Programación de sesiones con tarotistas                 |
+| **ai-usage**   | 10       | ~900   | Monitoreo y estadísticas de uso de IA                   |
 
 **Estructura:**
 
@@ -253,11 +262,14 @@ readings/
 
 ### Módulos Flat (Simples)
 
-| Módulo              | Archivos | Líneas | Razón               |
-| ------------------- | -------- | ------ | ------------------- |
-| **interpretations** | 5        | ~600   | Simplificado (CRUD) |
-| **spreads**         | 6        | ~480   | CRUD simple         |
-| **cards**           | 7        | ~950   | Catálogo            |
+| Módulo              | Archivos | Líneas | Razón                     |
+| ------------------- | -------- | ------ | ------------------------- |
+| **interpretations** | 5        | ~600   | Simplificado (CRUD)       |
+| **spreads**         | 6        | ~480   | CRUD simple               |
+| **cards/decks**     | 7        | ~950   | Catálogo de cartas        |
+| **categories**      | 5        | ~400   | Categorías de preguntas   |
+| **plan-config**     | 4        | ~350   | Configuración de planes   |
+| **health**          | 4        | ~300   | Health checks del sistema |
 
 ### Módulos con Capas (Nuevos)
 
@@ -312,7 +324,7 @@ spreads/
 
 - ✅ `readings/` - IReadingRepository + TypeOrmReadingRepository
 - ✅ `cache/` - ICacheRepository + InMemoryCacheRepository
-- ✅ `ai/` - IAIProviderRepository + OpenAIRepository, ClaudeRepository
+- ✅ `ai/` - IAIProviderRepository + GroqRepository, OpenAIRepository, DeepSeekRepository
 
 **Convención:**
 
@@ -600,10 +612,10 @@ npm run test:cov
 ```
 1. InterpretationsService → AIService.generateInterpretation()
 2. AIService:
-   - Detecta provider configurado (openai/claude)
+   - Detecta provider configurado (groq/openai/deepseek)
    - Construye prompt usando TarotistaConfig
    - Llama AIProviderFactory.create(provider)
-3. AIProviderFactory → OpenAIRepository o ClaudeRepository
+3. AIProviderFactory → GroqRepository, OpenAIRepository o DeepSeekRepository
 4. Provider:
    - Intenta llamada a IA
    - Retry con backoff exponencial (3 intentos)
@@ -660,8 +672,8 @@ npm run test:cov
 ### Autenticación y Autorización
 
 - **JWT tokens** (access + refresh)
-- **Roles:** user, tarotista, admin
-- **Guards:** JwtAuthGuard, RolesGuard, AdminGuard
+- **Roles:** CONSUMER, TAROTIST, ADMIN
+- **Guards:** JwtAuthGuard, RolesGuard, AdminGuard, CheckUsageLimitGuard
 
 ### Rate Limiting
 
@@ -701,23 +713,28 @@ npm run test:cov
 
 ## Migración y Evolución
 
-### Estado Actual (2025-11-11)
+### Estado Actual (Diciembre 2025)
 
 **Completadas:**
 
-- ✅ TASK-ARCH-001: Extraer módulo cache con capas
-- ✅ TASK-ARCH-002: Extraer módulo AI con capas
-- ✅ TASK-ARCH-003: Dividir readings.service en use-cases
-- ✅ TASK-ARCH-004: Repository Pattern explícito
-- ✅ TASK-ARCH-006: Evaluar módulos restantes
-- ✅ TASK-ARCH-007: Documentación y governance
+- ✅ Arquitectura híbrida feature-based con capas
+- ✅ Módulo AI con multi-provider (Groq, OpenAI, DeepSeek)
+- ✅ Repository Pattern en módulos complejos
+- ✅ CQRS en readings
+- ✅ Sistema de caché con invalidación por eventos
+- ✅ Rate limiting global y por plan
+- ✅ Sistema de roles y permisos
+- ✅ Módulo scheduling para citas con tarotistas
+- ✅ Monitoreo de uso de IA (ai-usage)
+- ✅ Sistema de eventos de seguridad
+- ✅ Circuit breaker para proveedores de IA
 
 **Pendientes/Futuras:**
 
-- ⏳ TASK-ARCH-005: CQRS en interpretations (opcional)
 - ⏳ Migrar caché a Redis
 - ⏳ Separar read/write DBs
 - ⏳ Event Sourcing
+- ⏳ WebSockets para lecturas en tiempo real
 
 ---
 
@@ -804,6 +821,6 @@ Para dudas arquitecturales:
 
 ---
 
-**Última actualización:** 2025-11-11  
-**Versión:** 1.0.0  
-**Próxima revisión:** 2026-05-11 (6 meses)
+**Última actualización:** 2025-12-02  
+**Versión:** 1.1.0  
+**Próxima revisión:** 2026-06-02 (6 meses)

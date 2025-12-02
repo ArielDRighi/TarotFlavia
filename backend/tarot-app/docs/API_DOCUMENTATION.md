@@ -16,6 +16,8 @@
   - [Preguntas Predefinidas](#preguntas-predefinidas)
   - [Lectura Diaria](#lectura-diaria)
   - [Tarotistas Públicos](#tarotistas-públicos)
+  - [Scheduling (Programación de Sesiones)](#scheduling-programación-de-sesiones)
+  - [Health Checks](#health-checks)
   - [Admin](#admin)
 - [Error Handling](#error-handling)
 - [Ejemplos de Uso](#ejemplos-de-uso)
@@ -27,13 +29,15 @@
 
 La API de TarotFlavia es una API RESTful construida con NestJS que proporciona:
 
-- **Generación de lecturas de tarot con IA** (OpenAI GPT-4, Anthropic Claude)
-- **Sistema completo de usuarios** con roles y permisos
+- **Generación de lecturas de tarot con IA** (Groq Llama 3.1 70B como principal, OpenAI GPT-4 y DeepSeek como fallback)
+- **Sistema completo de usuarios** con roles y permisos (CONSUMER, TAROTIST, ADMIN)
 - **78 cartas del tarot Rider-Waite** con interpretaciones detalladas
 - **5+ tipos de tiradas** (Cruz Celta, Tres Cartas, etc.)
+- **Sistema de programación de sesiones** con tarotistas
 - **Caché inteligente** para optimizar costos de IA
 - **Rate limiting** por usuario y plan
 - **Seguridad robusta** con JWT, validación de inputs y sanitización
+- **Monitoreo de uso de IA** y alertas de rate limit
 
 ### Base URL
 
@@ -598,8 +602,8 @@ Authorization: Bearer <token>
         "interpretation": "El Diablo invertido sugiere..."
       }
     ],
-    "aiProvider": "openai",
-    "model": "gpt-4-turbo"
+    "aiProvider": "groq",
+    "model": "llama-3.1-70b-versatile"
   },
   "createdAt": "2025-11-20T10:30:00.000Z"
 }
@@ -1146,7 +1150,7 @@ curl https://api.tarotflavia.com/api/tarotistas/invalid
 - ✅ Endpoint público (sin JWT requerido)
 - ✅ Prevención de SQL injection (caracteres especiales escapados)
 - ✅ Rate limiting aplicado (mismos límites que endpoints autenticados)
-- ✅ Sanitización de búsqueda (LIKE con escape de % y _)
+- ✅ Sanitización de búsqueda (LIKE con escape de % y \_)
 - ✅ Solo datos públicos expuestos (no configs ni datos internos)
 
 ---
@@ -1284,10 +1288,12 @@ Content-Type: application/json
   "temperature": 0.8,
   "maxTokens": 600,
   "topP": 0.95,
-  "provider": "openai",
-  "model": "gpt-4-turbo"
+  "provider": "groq",
+  "model": "llama-3.1-70b-versatile"
 }
 ```
+
+> 💡 **Proveedores disponibles:** `groq` (default), `openai`, `deepseek`
 
 ```http
 POST /api/admin/tarotistas/:id/config/reset
@@ -1413,9 +1419,10 @@ Authorization: Bearer <admin_token>
     "this_month": 2341
   },
   "ai": {
-    "openai_calls": 3421,
-    "anthropic_calls": 1813,
-    "total_cost": 125.45
+    "groq_calls": 4500,
+    "openai_calls": 421,
+    "deepseek_calls": 313,
+    "total_cost": 45.25
   },
   "cache": {
     "hit_rate": 0.78,
@@ -1446,6 +1453,197 @@ Authorization: Bearer <admin_token>
 ```http
 GET /api/admin/audit-logs?action=user.ban&userId=5
 Authorization: Bearer <admin_token>
+```
+
+#### 📊 Admin - AI Usage (Uso de IA)
+
+Endpoints para monitorear el uso de proveedores de IA.
+
+```http
+GET /api/admin/ai-usage?startDate=2025-12-01&endDate=2025-12-31
+Authorization: Bearer <admin_token>
+```
+
+**Response: `200 OK`**
+
+```json
+{
+  "statistics": [
+    {
+      "provider": "groq",
+      "totalCalls": 1523,
+      "successfulCalls": 1498,
+      "failedCalls": 25,
+      "totalTokens": 245000,
+      "averageLatencyMs": 1200,
+      "estimatedCost": 0.45
+    },
+    {
+      "provider": "openai",
+      "totalCalls": 25,
+      "successfulCalls": 24,
+      "failedCalls": 1,
+      "totalTokens": 8500,
+      "averageLatencyMs": 2100,
+      "estimatedCost": 0.85
+    }
+  ],
+  "groqCallsToday": 156,
+  "groqRateLimitAlert": false,
+  "highErrorRateAlert": false,
+  "highFallbackRateAlert": false,
+  "highDailyCostAlert": false
+}
+```
+
+#### 🔒 Admin - Security Events (Eventos de Seguridad)
+
+```http
+GET /api/admin/security/events?page=1&limit=20&severity=high
+Authorization: Bearer <admin_token>
+```
+
+**Query Parameters:**
+
+- `page`, `limit`: Paginación
+- `userId`: Filtrar por usuario
+- `eventType`: Tipo de evento (login_failed, suspicious_activity, etc.)
+- `severity`: low, medium, high, critical
+- `startDate`, `endDate`: Rango de fechas
+
+---
+
+### Scheduling (Programación de Sesiones)
+
+Endpoints para gestión de citas con tarotistas. Requieren autenticación.
+
+#### 📅 Obtener Slots Disponibles
+
+```http
+GET /api/scheduling/available-slots?tarotistaId=1&startDate=2025-12-15&endDate=2025-12-22&durationMinutes=30
+Authorization: Bearer <token>
+```
+
+**Query Parameters:**
+
+- `tarotistaId` (number): ID del tarotista
+- `startDate` (string): Fecha inicio (YYYY-MM-DD)
+- `endDate` (string): Fecha fin (YYYY-MM-DD)
+- `durationMinutes` (number): Duración (30, 60 o 90 minutos)
+
+**Response: `200 OK`**
+
+```json
+[
+  {
+    "date": "2025-12-15",
+    "startTime": "10:00",
+    "endTime": "10:30",
+    "tarotistaId": 1,
+    "available": true
+  },
+  {
+    "date": "2025-12-15",
+    "startTime": "10:30",
+    "endTime": "11:00",
+    "tarotistaId": 1,
+    "available": true
+  }
+]
+```
+
+#### 📝 Reservar Sesión
+
+```http
+POST /api/scheduling/sessions
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "tarotistaId": 1,
+  "date": "2025-12-15",
+  "startTime": "10:00",
+  "durationMinutes": 30,
+  "notes": "Consulta sobre relaciones"
+}
+```
+
+#### 📋 Mis Sesiones
+
+```http
+GET /api/scheduling/my-sessions?status=scheduled&page=1&limit=10
+Authorization: Bearer <token>
+```
+
+#### ❌ Cancelar Sesión
+
+```http
+POST /api/scheduling/sessions/:id/cancel
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "reason": "Conflicto de horario"
+}
+```
+
+---
+
+### Health Checks
+
+#### 🏥 Health General
+
+```http
+GET /api/health
+```
+
+**Response: `200 OK`**
+
+```json
+{
+  "status": "ok",
+  "info": {
+    "database": { "status": "up" },
+    "memory": { "status": "up" }
+  }
+}
+```
+
+#### 🤖 AI Health (Estado de Proveedores de IA)
+
+```http
+GET /api/health/ai
+```
+
+**Response: `200 OK`**
+
+```json
+{
+  "status": "healthy",
+  "primary": {
+    "provider": "groq",
+    "model": "llama-3.1-70b-versatile",
+    "configured": true
+  },
+  "fallbacks": [
+    {
+      "provider": "openai",
+      "model": "gpt-4-turbo",
+      "configured": true,
+      "priority": 1
+    },
+    {
+      "provider": "deepseek",
+      "model": "deepseek-chat",
+      "configured": true,
+      "priority": 2
+    }
+  ],
+  "circuitBreakers": [
+    { "provider": "groq", "state": "CLOSED", "failures": 0 },
+    { "provider": "openai", "state": "CLOSED", "failures": 0 }
+  ]
+}
 ```
 
 ---
@@ -1609,14 +1807,25 @@ curl http://localhost:3000/api/readings?page=1&limit=10 \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
-### Ejemplo: Regenerar Interpretación con Claude
+### Ejemplo: Regenerar Interpretación con Otro Proveedor
+
+Por defecto se usa **Groq (Llama 3.1 70B)**. Puedes forzar un proveedor específico:
 
 ```bash
+# Usar OpenAI GPT-4 como alternativa
 curl -X POST http://localhost:3000/api/readings/123/regenerate \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
   -d '{
-    "aiProvider": "anthropic"
+    "aiProvider": "openai"
+  }'
+
+# Usar DeepSeek como alternativa
+curl -X POST http://localhost:3000/api/readings/123/regenerate \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
+  -d '{
+    "aiProvider": "deepseek"
   }'
 ```
 
@@ -1802,5 +2011,5 @@ Para preguntas sobre la API:
 ---
 
 **Versión**: 1.0.0  
-**Última actualización**: Noviembre 2025  
+**Última actualización**: Diciembre 2025  
 **OpenAPI Version**: 3.0.0
