@@ -51,11 +51,36 @@ tarot-monorepo/
 
 ## 📦 FASE 0: SETUP INICIAL
 
-### TAREA 0.1: Inicializar proyecto Next.js 14 en monorepo existente
+### ✅ TAREA 0.1: Inicializar proyecto Next.js 14 en monorepo existente
 
+**Estado:** ✅ COMPLETADA (2025-12-03)
 **Prioridad:** CRÍTICA
 **Estimación:** 30 min
 **Dependencias:** Ninguna
+
+**Resumen de Implementación:**
+
+- Next.js 16.0.6 inicializado con App Router, TypeScript y Tailwind CSS 4
+- Puerto configurado en 3001 para evitar conflictos con backend
+- Estructura de carpetas creada según arquitectura: `components/ui`, `components/features`, `hooks/api`, `hooks/utils`, `stores`, `lib/api`, `lib/utils`, `lib/validations`, `lib/constants`, `types`, `styles`
+- Variables de entorno configuradas (.env.local)
+- Dependencias core instaladas: Axios, TanStack Query, Zod, Zustand, React Hook Form, clsx, tailwind-merge
+- Testing configurado: Vitest + Testing Library con 100% coverage en utils
+- Scripts agregados: test, test:cov, type-check, format, lint
+
+**Archivos creados:**
+
+- `src/lib/api/axios-config.ts` - Cliente Axios con interceptors JWT
+- `src/lib/api/endpoints.ts` - Definición centralizada de endpoints
+- `src/lib/utils/cn.ts` - Merge de clases Tailwind
+- `src/lib/utils/format.ts` - Utilidades de formateo
+- `src/lib/constants/routes.ts` - Rutas de la app
+- `src/lib/constants/config.ts` - Configuraciones globales
+- `src/lib/validations/auth.schemas.ts` - Schemas Zod para auth
+- `src/lib/validations/reading.schemas.ts` - Schemas Zod para readings
+- `src/types/*.ts` - Tipos TypeScript globales
+- `vitest.config.ts`, `vitest.setup.ts` - Configuración de tests
+- `.prettierrc`, `.prettierignore` - Configuración de Prettier
 
 **Consigna:**
 Inicializar Next.js 14 en la carpeta `frontend/` existente del monorepo. Configurar App Router, TypeScript, Tailwind CSS y estructura de carpetas.
@@ -1329,13 +1354,11 @@ DEBE USAR: useRequireAuth()
 ESTRUCTURA:
 
 - Header:
-
   - Título font-serif: "Tu camino revelado"
   - Dropdown filtro por fecha: "Más recientes", "Más antiguas", "Esta semana", "Este mes"
   - Buscador (input) para filtrar por pregunta
 
 - Lista de lecturas:
-
   - Usar componente ReadingCard
   - Grid vertical con gap-4
   - Paginación abajo (10 lecturas por página)
@@ -1394,18 +1417,15 @@ ESTRUCTURA:
 
 - Breadcrumb: "Historial > Lectura"
 - Header:
-
   - Pregunta realizada (font-serif, grande)
   - Fecha y hora completa
   - Badges: categoría y tipo de tirada
 
 - Sección Cartas:
-
   - Grid con cartas reveladas según layout del spread
   - Debajo de cada carta: nombre, posición y significado corto
 
 - Sección Interpretación:
-
   - Título: "Interpretación"
   - Texto completo renderizado como markdown
   - Usar react-markdown con estilos customizados
@@ -1480,17 +1500,14 @@ CREAR ARCHIVO: src/hooks/queries/use-daily-reading.ts
 HOOKS:
 
 1. useDailyReading()
-
    - useMutation con mutationFn: getDailyReading
    - No usar useQuery porque es un POST
 
 2. useDailyReadingToday()
-
    - useQuery con queryKey: ['daily-reading', 'today']
    - queryFn: getDailyReadingToday
 
 3. useDailyReadingHistory(page, limit)
-
    - useQuery con queryKey: ['daily-reading', 'history', page, limit]
 
 4. useRegenerateDailyReading()
@@ -1661,7 +1678,6 @@ CREAR ARCHIVO: src/hooks/queries/use-tarotistas.ts
 HOOKS:
 
 1. useTarotistas(filters?: TarotistaFilters)
-
    - useQuery con queryKey: ['tarotistas', filters]
    - queryFn: () => getTarotistas(filters)
 
@@ -1762,7 +1778,6 @@ ESTRUCTURA:
   - Título font-serif grande: "Nuestros Guías Espirituales"
   - Subtítulo: "Encuentra al mentor ideal para tu camino"
 - Filtros (barra horizontal):
-
   - Buscador (input con ícono de búsqueda)
   - Chips clicables de especialidades:
     - "Todos", "Amor", "Dinero", "Carrera", "Salud", "Espiritual"
@@ -1770,7 +1785,6 @@ ESTRUCTURA:
   - Chips no seleccionados: outline
 
 - Grid de Tarotistas:
-
   - CSS Grid responsive:
     - 1 columna en mobile
     - 2 columnas en tablet
