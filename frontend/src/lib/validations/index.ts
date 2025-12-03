@@ -1,7 +1,12 @@
 /**
  * Validation schemas exports
  */
-export { loginSchema, registerSchema, type LoginFormData, type RegisterFormData } from "./auth.schemas";
+export {
+  loginSchema,
+  registerSchema,
+  type LoginFormData,
+  type RegisterFormData,
+} from './auth.schemas';
 export {
   createReadingSchema,
   updateReadingSchema,
@@ -9,4 +14,4 @@ export {
   type CreateReadingFormData,
   type UpdateReadingFormData,
   type SpreadTypeValue,
-} from "./reading.schemas";
+} from './reading.schemas';

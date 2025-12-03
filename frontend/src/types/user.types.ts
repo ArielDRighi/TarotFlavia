@@ -2,7 +2,7 @@
  * User Types
  */
 
-export type UserRole = "USER" | "TAROTISTA" | "ADMIN";
+export type UserRole = 'USER' | 'TAROTISTA' | 'ADMIN';
 
 export interface User {
   id: string;
@@ -29,5 +29,5 @@ export interface UserPreferences {
   emailNotifications: boolean;
   pushNotifications: boolean;
   language: string;
-  theme: "light" | "dark" | "system";
+  theme: 'light' | 'dark' | 'system';
 }
