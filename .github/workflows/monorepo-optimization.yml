@@ -9,6 +9,11 @@ on:
         branches: [main, develop]
     workflow_dispatch:
 
+# Permisos necesarios para dorny/paths-filter
+permissions:
+    contents: read
+    pull-requests: read
+
 # Cancelar ejecuciones anteriores del mismo workflow en el mismo branch
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
