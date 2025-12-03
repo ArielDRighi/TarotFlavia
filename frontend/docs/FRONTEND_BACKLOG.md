@@ -2407,6 +2407,686 @@ IMPORTANTE:
 
 ---
 
+### TAREA 10.5: Crear página Uso de IA y Costos
+
+**Prioridad:** CRÍTICA
+**Estimación:** 70 min
+**Dependencias:** 10.1
+
+**Consigna:**
+Crear página para visualizar estadísticas de uso de IA, costos por proveedor y alertas activas. Esta es información crítica para el administrador.
+
+**Prompt:**
+
+```
+Crea página de estadísticas de uso de IA:
+
+ARCHIVO: src/app/admin/ai-usage/page.tsx
+
+CLIENT COMPONENT
+
+ESTRUCTURA:
+
+HEADER:
+- Título: "Uso de Inteligencia Artificial"
+- Selector de rango de fechas (últimos 7 días, 30 días, custom)
+
+CARDS DE ALERTAS (mostrar solo si hay alertas activas):
+- Alert cards con colores según severidad:
+  - groqRateLimitAlert: "⚠️ Límite de Groq cercano" (amarillo)
+  - highErrorRateAlert: "🔴 Tasa de errores alta" (rojo)
+  - highFallbackRateAlert: "⚠️ Muchos fallbacks a proveedores secundarios" (amarillo)
+  - highDailyCostAlert: "💰 Costo diario alto" (naranja)
+
+CARDS DE MÉTRICAS (grid 4 columnas):
+1. Total Requests
+   - Número grande
+   - Llamadas de Groq hoy vs límite diario
+2. Tokens Consumidos
+   - Total tokens (input + output)
+   - Desglose: input/output
+3. Costo Total
+   - Monto en USD
+   - Comparación vs mes anterior
+4. Tasa de Éxito
+   - Porcentaje
+   - Color verde si > 95%, amarillo si > 90%, rojo si < 90%
+
+TABLA POR PROVEEDOR:
+- Columnas:
+  - Proveedor (Groq, OpenAI, DeepSeek)
+  - Total Calls
+  - Successful Calls
+  - Failed Calls
+  - Error Rate %
+  - Total Tokens
+  - Average Latency (ms)
+  - Total Cost (USD)
+- Fila de totales al final
+
+GRÁFICOS (grid 2 columnas):
+1. Costos por día (últimos 30 días)
+   - Gráfico de barras apiladas por proveedor
+   - Usar recharts
+2. Distribución por proveedor
+   - Gráfico de dona
+
+OBTENER DATOS:
+- Crear archivo: src/lib/api/admin-ai-usage-api.ts
+- Función: getAIUsageStats(startDate?, endDate?)
+  - GET /admin/ai-usage?startDate={date}&endDate={date}
+- Crear hook: src/hooks/queries/use-admin-ai-usage.ts
+  - useAIUsageStats(startDate?, endDate?)
+
+TYPES (src/types/admin.types.ts):
+interface AIProviderStats {
+  provider: 'GROQ' | 'OPENAI' | 'DEEPSEEK';
+  totalCalls: number;
+  successfulCalls: number;
+  failedCalls: number;
+  errorRate: number;
+  totalTokens: number;
+  inputTokens: number;
+  outputTokens: number;
+  averageLatency: number;
+  totalCost: number;
+}
+
+interface AIUsageStats {
+  statistics: AIProviderStats[];
+  groqCallsToday: number;
+  groqRateLimitAlert: boolean;
+  highErrorRateAlert: boolean;
+  highFallbackRateAlert: boolean;
+  highDailyCostAlert: boolean;
+}
+
+IMPORTANTE:
+- Formatear costos con 4 decimales (ej: $0.0234)
+- Formatear tokens con separador de miles
+- Colores de proveedor consistentes en gráficos
+- Refresh automático cada 5 minutos (refetchInterval)
+```
+
+---
+
+### TAREA 10.6: Crear página Configuración de Planes
+
+**Prioridad:** ALTA
+**Estimación:** 60 min
+**Dependencias:** 10.1
+
+**Consigna:**
+Crear página para ver y editar la configuración de límites de cada plan (FREE, PREMIUM, PROFESSIONAL).
+
+**Prompt:**
+
+```
+Crea página de configuración de planes:
+
+ARCHIVO: src/app/admin/planes/page.tsx
+
+CLIENT COMPONENT
+
+ESTRUCTURA:
+
+HEADER:
+- Título: "Configuración de Planes"
+- Descripción: "Gestiona los límites y features de cada plan de suscripción"
+
+GRID DE CARDS (3 columnas, 1 por plan):
+
+CARD POR PLAN (FREE, PREMIUM, PROFESSIONAL):
+- Header con nombre del plan y badge de color
+- Formulario editable con campos:
+  - dailyReadingLimit: number (lecturas diarias)
+  - monthlyAIQuota: number (cuota mensual de IA, -1 = ilimitado)
+  - canUseCustomQuestions: boolean (toggle)
+  - canRegenerateInterpretations: boolean (toggle)
+  - maxRegenerationsPerReading: number
+  - canShareReadings: boolean (toggle)
+  - historyLimit: number (límite de historial, -1 = ilimitado)
+  - canBookSessions: boolean (toggle)
+  - price: number (precio mensual en USD)
+- Botón "Guardar Cambios" por card
+- Indicador de "sin guardar" si hay cambios
+
+TABLA COMPARATIVA (abajo):
+- Tabla visual mostrando diferencias entre planes
+- Columnas: Feature | FREE | PREMIUM | PROFESSIONAL
+- Filas con checks verdes o X rojas
+
+OBTENER DATOS:
+- Crear archivo: src/lib/api/admin-plans-api.ts
+- Funciones:
+  - getAllPlans(): GET /plan-config
+  - getPlan(planType): GET /plan-config/{planType}
+  - updatePlan(planType, data): PUT /plan-config/{planType}
+- Crear hook: src/hooks/queries/use-admin-plans.ts
+  - usePlans()
+  - useUpdatePlan()
+
+TYPES (agregar a src/types/admin.types.ts):
+interface PlanConfig {
+  id: number;
+  planType: 'guest' | 'free' | 'premium' | 'professional';
+  dailyReadingLimit: number;
+  monthlyAIQuota: number;
+  canUseCustomQuestions: boolean;
+  canRegenerateInterpretations: boolean;
+  maxRegenerationsPerReading: number;
+  canShareReadings: boolean;
+  historyLimit: number;
+  canBookSessions: boolean;
+  price: number;
+}
+
+IMPORTANTE:
+- Validación antes de guardar (números positivos o -1)
+- Confirmación modal antes de guardar cambios
+- Toast de éxito/error
+- Deshabilitar edición de GUEST (solo lectura)
+```
+
+---
+
+### TAREA 10.7: Crear página Rate Limiting y Seguridad
+
+**Prioridad:** ALTA
+**Estimación:** 55 min
+**Dependencias:** 10.1
+
+**Consigna:**
+Crear página para monitorear violaciones de rate limiting, IPs bloqueadas y eventos de seguridad.
+
+**Prompt:**
+
+```
+Crea página de rate limiting y seguridad:
+
+ARCHIVO: src/app/admin/seguridad/page.tsx
+
+CLIENT COMPONENT
+
+ESTRUCTURA:
+
+TABS:
+- "Rate Limiting"
+- "Eventos de Seguridad"
+
+TAB 1: RATE LIMITING
+
+CARDS DE STATS (grid 3 columnas):
+1. Total Violaciones
+   - Número
+2. IPs con Violaciones Activas
+   - Número
+3. IPs Bloqueadas
+   - Número (color rojo si > 0)
+
+TABLA: IPs CON VIOLACIONES
+- Columnas:
+  - IP
+  - Cantidad de violaciones
+  - Primera violación (fecha)
+  - Última violación (fecha)
+  - Acciones (botón "Bloquear IP")
+
+TABLA: IPs BLOQUEADAS
+- Columnas:
+  - IP
+  - Razón del bloqueo
+  - Bloqueada desde
+  - Expira en
+  - Acciones (botón "Desbloquear")
+
+TAB 2: EVENTOS DE SEGURIDAD
+
+FILTROS:
+- Tipo de evento (dropdown): login_failed, suspicious_activity, etc.
+- Severidad (dropdown): low, medium, high, critical
+- Rango de fechas
+- Usuario específico (input)
+
+TABLA DE EVENTOS:
+- Columnas:
+  - Fecha/Hora
+  - Tipo de evento
+  - Severidad (badge con color)
+  - Usuario (si aplica)
+  - IP
+  - Descripción
+- Paginación
+
+OBTENER DATOS:
+- Crear archivo: src/lib/api/admin-security-api.ts
+- Funciones:
+  - getRateLimitViolations(): GET /admin/rate-limits/violations
+  - getSecurityEvents(filters): GET /admin/security/events
+- Crear hooks:
+  - useRateLimitViolations()
+  - useSecurityEvents(filters)
+
+TYPES:
+interface RateLimitViolation {
+  ip: string;
+  count: number;
+  firstViolation: string;
+  lastViolation: string;
+}
+
+interface BlockedIP {
+  ip: string;
+  reason: string;
+  blockedAt: string;
+  expiresAt: string;
+}
+
+interface SecurityEvent {
+  id: number;
+  eventType: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  userId?: number;
+  ip: string;
+  description: string;
+  createdAt: string;
+}
+
+IMPORTANTE:
+- Colores de severidad: low=gris, medium=amarillo, high=naranja, critical=rojo
+- Refresh automático cada 30 segundos
+- Confirmación antes de bloquear/desbloquear IP
+```
+
+---
+
+### TAREA 10.8: Crear página Audit Logs
+
+**Prioridad:** MEDIA
+**Estimación:** 40 min
+**Dependencias:** 10.1
+
+**Consigna:**
+Crear página para ver el historial de acciones administrativas (audit trail).
+
+**Prompt:**
+
+```
+Crea página de audit logs:
+
+ARCHIVO: src/app/admin/audit/page.tsx
+
+CLIENT COMPONENT
+
+ESTRUCTURA:
+
+HEADER:
+- Título: "Registro de Auditoría"
+- Descripción: "Historial de todas las acciones administrativas"
+
+FILTROS (barra horizontal):
+- Usuario (dropdown con admins)
+- Tipo de acción (dropdown): USER_BANNED, PLAN_CHANGED, TAROTISTA_APPROVED, etc.
+- Entidad (dropdown): User, Tarotista, Reading, etc.
+- Rango de fechas
+- Botón "Limpiar filtros"
+
+TABLA DE LOGS:
+- Columnas:
+  - Fecha/Hora
+  - Admin (nombre del admin que hizo la acción)
+  - Acción (badge con color)
+  - Entidad afectada
+  - Detalles (expandible)
+  - IP del admin
+- Paginación (20 por página)
+
+DETALLES EXPANDIBLES (por fila):
+- Mostrar JSON con:
+  - oldValue: estado anterior
+  - newValue: estado nuevo
+- Formato legible con diff highlighting si aplica
+
+OBTENER DATOS:
+- Crear archivo: src/lib/api/admin-audit-api.ts
+- Función: getAuditLogs(filters): GET /admin/audit-logs
+- Hook: useAuditLogs(filters)
+
+TYPES:
+interface AuditLog {
+  id: number;
+  userId: number;
+  userName: string;
+  targetUserId?: number;
+  action: string;
+  entityType: string;
+  entityId: string;
+  oldValue?: object;
+  newValue?: object;
+  ipAddress: string;
+  userAgent: string;
+  createdAt: string;
+}
+
+IMPORTANTE:
+- Acciones con colores: destructivas=rojo, creación=verde, modificación=azul
+- JSON viewer para oldValue/newValue
+- Exportar a CSV (botón opcional)
+```
+
+---
+
+### TAREA 10.9: Crear página Cache Management
+
+**Prioridad:** BAJA
+**Estimación:** 35 min
+**Dependencias:** 10.1
+
+**Consigna:**
+Crear página para ver estadísticas de caché y poder invalidar caché manualmente.
+
+**Prompt:**
+
+```
+Crea página de gestión de caché:
+
+ARCHIVO: src/app/admin/cache/page.tsx
+
+CLIENT COMPONENT
+
+ESTRUCTURA:
+
+HEADER:
+- Título: "Gestión de Caché"
+- Botón "Refrescar Stats"
+
+CARDS DE STATS (grid 4 columnas):
+1. Total Entries
+   - Número de entradas en caché
+2. Hit Rate
+   - Porcentaje (color verde si > 80%)
+3. Miss Rate
+   - Porcentaje
+4. Memory Usage
+   - MB usados
+
+SECCIÓN: COMBINACIONES MÁS CACHEADAS
+- Tabla con top 10:
+  - Tarotista
+  - Spread
+  - Categoría
+  - Hit Count
+  - Última actualización
+
+SECCIÓN: ACCIONES DE INVALIDACIÓN
+- Card con opciones:
+  - Invalidar todo el caché (botón rojo con confirmación)
+  - Invalidar por tarotista:
+    - Dropdown para seleccionar tarotista
+    - Botón "Invalidar"
+  - Invalidar por spread:
+    - Dropdown para seleccionar spread
+    - Botón "Invalidar"
+
+SECCIÓN: WARMING STATUS
+- Estado actual del warming
+- Última ejecución
+- Próxima ejecución programada
+- Botón "Ejecutar Warming Ahora"
+
+OBTENER DATOS:
+- Crear archivo: src/lib/api/admin-cache-api.ts
+- Funciones:
+  - getCacheAnalytics(): GET /admin/cache/analytics
+  - invalidateTarotistaCache(id): DELETE /admin/cache/tarotistas/{id}
+  - triggerCacheWarming(): POST /admin/cache/warming/trigger
+- Hook: useCacheAnalytics()
+
+IMPORTANTE:
+- Confirmación para invalidar todo
+- Toast con cantidad de entradas eliminadas
+- Refresh después de invalidación
+```
+
+---
+
+### TAREA 10.10: Crear página Métricas de Plataforma
+
+**Prioridad:** MEDIA
+**Estimación:** 45 min
+**Dependencias:** 10.1
+
+**Consigna:**
+Crear página con métricas agregadas de toda la plataforma (revenue, sesiones, performance).
+
+**Prompt:**
+
+```
+Crea página de métricas de plataforma:
+
+ARCHIVO: src/app/admin/metricas/page.tsx
+
+CLIENT COMPONENT
+
+ESTRUCTURA:
+
+HEADER:
+- Título: "Métricas de Plataforma"
+- Selector de período: 7 días, 30 días, 90 días, 1 año
+
+CARDS DE MÉTRICAS PRINCIPALES (grid 4 columnas):
+1. Revenue Total
+   - Monto en USD
+   - Comparación con período anterior
+   - Tendencia (flecha arriba/abajo)
+2. Sesiones Completadas
+   - Número
+   - % de sesiones reservadas que se completaron
+3. Lecturas Totales
+   - Número
+   - Promedio por usuario
+4. Usuarios Activos
+   - Número (últimos 30 días)
+   - Nuevos registros del período
+
+GRÁFICOS (grid 2x2):
+1. Revenue por mes (barras)
+2. Lecturas por día (líneas)
+3. Distribución de usuarios por plan (dona)
+4. Sesiones por estado (barras horizontales)
+
+TABLA: TOP TAROTISTAS
+- Columnas:
+  - Posición
+  - Nombre
+  - Lecturas generadas
+  - Sesiones completadas
+  - Revenue generado
+  - Rating promedio
+
+OBTENER DATOS:
+- Usar endpoint existente: GET /tarotistas/metrics/platform
+- Crear hook: usePlatformMetrics(period)
+
+IMPORTANTE:
+- Formatear montos como currency
+- Formatear números grandes (1.2K, 15K, etc.)
+- Colores consistentes en gráficos
+- Loading skeletons mientras carga
+```
+
+---
+
+### TAREA 10.11: Actualizar sidebar de Admin con nuevas páginas
+
+**Prioridad:** ALTA
+**Estimación:** 15 min
+**Dependencias:** 10.5-10.10
+
+**Consigna:**
+Actualizar el sidebar del layout de admin para incluir todas las nuevas páginas.
+
+**Prompt:**
+
+```
+Actualiza el sidebar del admin layout:
+
+MODIFICAR: src/app/admin/layout.tsx
+
+NUEVA ESTRUCTURA DE NAVEGACIÓN:
+
+SECCIÓN: PRINCIPAL
+- Dashboard (ícono LayoutDashboard) -> /admin
+- Métricas (ícono TrendingUp) -> /admin/metricas
+
+SECCIÓN: GESTIÓN
+- Usuarios (ícono Users) -> /admin/usuarios
+- Tarotistas (ícono Sparkles) -> /admin/tarotistas
+- Lecturas (ícono BookOpen) -> /admin/lecturas
+
+SECCIÓN: SISTEMA
+- Uso de IA (ícono Brain) -> /admin/ai-usage
+- Configuración de Planes (ícono Settings) -> /admin/planes
+- Seguridad (ícono Shield) -> /admin/seguridad
+- Caché (ícono Database) -> /admin/cache
+- Audit Logs (ícono ScrollText) -> /admin/audit
+
+ESTILOS:
+- Separadores entre secciones
+- Títulos de sección en texto pequeño gris
+- Iconos de lucide-react
+- Link activo: bg-primary/10, borde izquierdo primary
+
+IMPORTANTE:
+- Mantener responsive
+- Colapsar secciones en mobile
+```
+
+---
+
+## 🔗 FASE 10.5: FUNCIONALIDADES DE USUARIO FALTANTES
+
+### TAREA 10.12: Crear página de Lectura Compartida Pública
+
+**Prioridad:** MEDIA
+**Estimación:** 35 min
+**Dependencias:** 4.3
+
+**Consigna:**
+Crear página pública (sin login requerido) para ver lecturas compartidas mediante token.
+
+**Prompt:**
+
+```
+Crea página de lectura compartida pública:
+
+ARCHIVO: src/app/lecturas/compartida/[token]/page.tsx
+
+SERVER COMPONENT (puede ser público)
+
+ESTRUCTURA:
+
+HEADER:
+- Logo de TarotFlavia centrado
+- Texto: "Lectura compartida"
+
+CONTENIDO:
+- Card principal con:
+  - Pregunta realizada (título grande, font-serif)
+  - Fecha de la lectura
+  - Tipo de tirada (badge)
+
+- Sección de cartas:
+  - Grid con las cartas reveladas
+  - Usar TarotCard component
+  - Debajo de cada carta: nombre y posición
+
+- Sección de interpretación:
+  - Texto completo renderizado como markdown
+  - Usar react-markdown
+
+FOOTER:
+- Texto: "¿Quieres tu propia lectura?"
+- Botón CTA: "Crear mi cuenta gratis" -> /registro
+
+ESTADO DE ERROR:
+- Si token inválido o expirado:
+  - Mostrar mensaje: "Esta lectura ya no está disponible"
+  - Botón: "Ir al inicio"
+
+OBTENER DATOS:
+- Crear función: getSharedReading(token): GET /readings/shared/{token}
+- Esta ruta NO requiere autenticación
+- Llamar desde el Server Component con fetch
+
+IMPORTANTE:
+- NO usar hooks de auth (es página pública)
+- SEO: exportar metadata dinámica con título de la lectura
+- Open Graph tags para preview al compartir en redes
+```
+
+---
+
+### TAREA 10.13: Agregar selector de Tarotista Favorito
+
+**Prioridad:** MEDIA
+**Estimación:** 30 min
+**Dependencias:** 7.4
+
+**Consigna:**
+Agregar funcionalidad para que usuarios FREE puedan seleccionar su tarotista favorito (con cooldown de 30 días).
+
+**Prompt:**
+
+```
+Agrega funcionalidad de tarotista favorito:
+
+MODIFICAR: src/app/tarotistas/[id]/page.tsx (Perfil de Tarotista)
+
+AGREGAR EN HERO SECTION:
+- Si usuario está logueado y es FREE:
+  - Mostrar botón "⭐ Elegir como favorito"
+  - Si ya es favorito: mostrar "⭐ Tu tarotista favorito" (badge dorado)
+  - Si tiene cooldown activo: mostrar "Podrás cambiar en X días"
+
+LÓGICA:
+- Al hacer clic en "Elegir como favorito":
+  - Modal de confirmación: "¿Establecer a {nombre} como tu tarotista favorito? Solo podrás cambiarlo en 30 días"
+  - Llamar a API
+  - Actualizar UI
+
+CREAR SERVICIO:
+- Archivo: src/lib/api/subscriptions-api.ts
+- Funciones:
+  - setFavoriteTarotista(tarotistaId): POST /subscriptions/set-favorite
+  - getMySubscription(): GET /subscriptions/my-subscription
+
+CREAR HOOK:
+- useSetFavoriteTarotista()
+- useMySubscription()
+
+TYPES:
+interface UserSubscription {
+  id: number;
+  favoriteTarotistaId: number | null;
+  lastFavoriteChange: string | null;
+  canChangeFavorite: boolean;
+  daysUntilChange: number;
+}
+
+MOSTRAR EN MI PERFIL (TAREA 8.2):
+- En la sección de cuenta, mostrar:
+  - "Tu tarotista favorito: {nombre}"
+  - Link para ver su perfil
+
+IMPORTANTE:
+- Solo mostrar para usuarios FREE (PREMIUM tiene all-access)
+- Manejar error si cooldown activo
+- Toast de éxito al establecer favorito
+```
+
+---
+
 ## ✅ FASE 11: EXTRAS Y POLISH
 
 ### TAREA 11.1: Crear página 404 custom
@@ -2706,8 +3386,8 @@ IMPORTANTE:
 
 ## 🎉 FINALIZACIÓN
 
-**RESUMEN TOTAL DE TAREAS:** ~54 tareas
-**ESTIMACIÓN TOTAL:** 38-48 horas de desarrollo
+**RESUMEN TOTAL DE TAREAS:** ~62 tareas
+**ESTIMACIÓN TOTAL:** 46-58 horas de desarrollo
 
 **ORDEN RECOMENDADO DE EJECUCIÓN:**
 
@@ -2715,18 +3395,19 @@ IMPORTANTE:
 2. FASE 1-2: UI Kit y Layout
 3. FASE 3: Autenticación
 4. FASE 4-5: Sistema de lecturas
-5. FASE 6-7: Extras (Carta día y Marketplace)
+5. FASE 6-7: Extras (Carta día, Marketplace y Compartir)
 6. FASE 8-9: Perfil y Sesiones
-7. FASE 10: Admin
+7. FASE 10: Admin (Dashboard + Métricas + Configuración completa)
 8. FASE 11: Polish final
+9. FASE 12: Testing Mínimo (Smoke tests críticos)
 
 **PRÓXIMOS PASOS POST-MVP:**
 
-- Testing E2E con Cypress/Playwright
+- Testing E2E completo con Cypress/Playwright
 - Integración con Stripe para pagos
 - PWA: notificaciones push
 - Modo offline con Service Workers
-- Analytics y tracking
+- Analytics y tracking avanzado
 - A/B testing
 - Internacionalización (i18n)
 
@@ -2753,6 +3434,21 @@ Este documento fue verificado contra el backend real. Cambios aplicados:
 - `useRestoreReading()` - Mutation para restaurar
 - `useUnshareReading()` - Mutation para dejar de compartir
 - `useDashboardStats()` - Reemplaza useDashboardMetrics
+
+### ✅ Tareas Admin Agregadas (3 Dic 2025)
+
+Se agregaron las siguientes tareas para completar el panel de administración:
+
+| Tarea | Descripción                | Endpoint Principal                 | Tiempo |
+| ----- | -------------------------- | ---------------------------------- | ------ |
+| 10.5  | Admin AI Usage & Costs     | `GET /admin/ai-usage`              | 60 min |
+| 10.6  | Admin Plan Configuration   | `GET/PUT /plan-config/:type`       | 50 min |
+| 10.7  | Admin Rate Limiting        | `GET /admin/rate-limits/*`         | 45 min |
+| 10.8  | Admin Audit Logs           | `GET /admin/audit-logs`            | 40 min |
+| 10.9  | Admin Cache Management     | `GET /admin/cache/analytics`       | 45 min |
+| 10.10 | Admin Platform Metrics     | `GET /tarotistas/metrics/platform` | 35 min |
+| 10.11 | Actualizar Sidebar Admin   | N/A                                | 15 min |
+| 7.5   | Public Shared Reading Page | `GET /readings/shared/:token`      | 35 min |
 
 ---
 
