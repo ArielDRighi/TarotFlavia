@@ -4,15 +4,23 @@ import { formatDate, formatRelativeTime, formatPrice, truncateText } from '@/lib
 describe('format utilities', () => {
   describe('formatDate', () => {
     it('should format date to Spanish locale', () => {
-      const date = new Date('2025-12-03');
+      // Use a fixed date that won't change
+      const date = new Date('2024-06-15T12:00:00.000Z');
       const result = formatDate(date);
-      expect(result).toContain('diciembre');
-      expect(result).toContain('2025');
+      expect(result).toContain('junio');
+      expect(result).toContain('2024');
     });
 
     it('should handle string dates', () => {
-      const result = formatDate('2025-06-15');
-      expect(result).toContain('junio');
+      const result = formatDate('2024-01-20');
+      expect(result).toContain('enero');
+      expect(result).toContain('2024');
+    });
+
+    it('should apply custom format options', () => {
+      const date = new Date('2024-03-15');
+      const result = formatDate(date, { month: 'short' });
+      expect(result).toContain('2024');
     });
   });
 
@@ -47,10 +55,14 @@ describe('format utilities', () => {
       expect(result).toContain('semanas');
     });
 
-    it('should return formatted date for old times', () => {
+    it('should return formatted date for old times (more than 30 days)', () => {
+      // For dates older than 30 days, it should return a formatted date string
       const oldDate = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
       const result = formatRelativeTime(oldDate);
-      expect(result).toContain('2025');
+      // Should return a formatted date, not a relative time
+      // The result will contain the year of the calculated date
+      const expectedYear = oldDate.getFullYear().toString();
+      expect(result).toContain(expectedYear);
     });
   });
 

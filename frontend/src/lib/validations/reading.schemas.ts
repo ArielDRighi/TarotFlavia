@@ -1,16 +1,20 @@
 /**
  * Zod Validation Schemas for Readings
  */
-import { z } from "zod";
-import { CONFIG } from "@/lib/constants/config";
+import { z } from 'zod';
+import { CONFIG } from '@/lib/constants/config';
 
 /**
  * Spread types enum
+ *
+ * ⚠️ IMPORTANT: These values MUST be synchronized with the backend API.
+ * See: backend/tarot-app/src/readings/enums/spread-type.enum.ts
+ * Any changes here should be reflected in the backend and vice versa.
  */
 export const SpreadType = {
-  SIMPLE: "SIMPLE",
-  THREE_CARDS: "THREE_CARDS",
-  CELTIC_CROSS: "CELTIC_CROSS",
+  SIMPLE: 'SIMPLE',
+  THREE_CARDS: 'THREE_CARDS',
+  CELTIC_CROSS: 'CELTIC_CROSS',
 } as const;
 
 export type SpreadTypeValue = (typeof SpreadType)[keyof typeof SpreadType];
