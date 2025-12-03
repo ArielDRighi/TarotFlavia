@@ -132,6 +132,11 @@ jobs:
                   TAROT_DB_USER: tarot_test_user
                   TAROT_DB_PASSWORD: tarot_test_pass
                   TAROT_DB_NAME: tarot_test
+                  TAROT_E2E_DB_HOST: localhost
+                  TAROT_E2E_DB_PORT: 5436
+                  TAROT_E2E_DB_USER: tarot_test_user
+                  TAROT_E2E_DB_PASSWORD: tarot_test_pass
+                  TAROT_E2E_DB_NAME: tarot_test
                   JWT_SECRET: test-jwt-secret-for-ci-only-minimum-32-characters-required
                   JWT_EXPIRES_IN: 1h
                   GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
@@ -151,12 +156,18 @@ jobs:
                   TAROT_DB_USER: tarot_test_user
                   TAROT_DB_PASSWORD: tarot_test_pass
                   TAROT_DB_NAME: tarot_test
+                  TAROT_E2E_DB_HOST: localhost
+                  TAROT_E2E_DB_PORT: 5436
+                  TAROT_E2E_DB_USER: tarot_test_user
+                  TAROT_E2E_DB_PASSWORD: tarot_test_pass
+                  TAROT_E2E_DB_NAME: tarot_test
                   JWT_SECRET: test-jwt-secret-for-ci-only-minimum-32-characters-required
                   JWT_EXPIRES_IN: 1h
                   GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
                   OPENAI_API_KEY: sk-test-key-for-ci-only-not-real-12345
                   DEEPSEEK_API_KEY: sk-test-key-for-ci-only-not-real-12345
                   NODE_ENV: test
+                  PORT: 3000
                   CI: true
               run: npm run test -- --coverage
 
