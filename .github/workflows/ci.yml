@@ -19,10 +19,10 @@ concurrency:
 
 jobs:
   # ============================================================================
-  # JOB 1: Linting y Formateo (Rápido)
+  # JOB 1: Linting y Formateo Backend (Rápido)
   # ============================================================================
-  lint-and-format:
-    name: Lint & Format Check
+  backend-lint-and-format:
+    name: Backend Lint & Format Check
     runs-on: ubuntu-latest
     # Solo en PRs y pushes a develop/main
     if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
@@ -48,10 +48,49 @@ jobs:
         run: npm run format -- --check
 
   # ============================================================================
-  # JOB 2: TypeScript Type Check (Rápido)
+  # JOB 1.1: Linting y Formateo Frontend (Rápido)
   # ============================================================================
-  type-check:
-    name: TypeScript Type Check
+  frontend-lint-and-format:
+    name: Frontend Lint & Format Check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies (monorepo root)
+        run: npm ci
+
+      - name: Check if frontend exists
+        id: check-frontend
+        run: |
+          if [ -f "./frontend/package.json" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run ESLint
+        if: steps.check-frontend.outputs.exists == 'true'
+        working-directory: ./frontend
+        run: npm run lint
+
+      - name: Check code formatting with Prettier
+        if: steps.check-frontend.outputs.exists == 'true'
+        working-directory: ./frontend
+        run: npm run format -- --check
+
+  # ============================================================================
+  # JOB 2: TypeScript Type Check Backend (Rápido)
+  # ============================================================================
+  backend-type-check:
+    name: Backend TypeScript Type Check
     runs-on: ubuntu-latest
 
     steps:
@@ -71,12 +110,45 @@ jobs:
         run: npx tsc --noEmit
 
   # ============================================================================
+  # JOB 2.1: TypeScript Type Check Frontend (Rápido)
+  # ============================================================================
+  frontend-type-check:
+    name: Frontend TypeScript Type Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies (monorepo root)
+        run: npm ci
+
+      - name: Check if frontend exists
+        id: check-frontend
+        run: |
+          if [ -f "./frontend/package.json" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Type check with TypeScript
+        if: steps.check-frontend.outputs.exists == 'true'
+        working-directory: ./frontend
+        run: npx tsc --noEmit
+
+  # ============================================================================
   # JOB 3: Build (Rápido)
   # ============================================================================
-  build:
-    name: Build Application
+  backend-build:
+    name: Build Backend Application
     runs-on: ubuntu-latest
-    needs: [lint-and-format, type-check]
+    needs: [backend-lint-and-format, backend-type-check]
 
     steps:
       - uses: actions/checkout@v4
@@ -103,12 +175,46 @@ jobs:
       #     retention-days: 1
 
   # ============================================================================
+  # JOB 3.1: Build Frontend (Rápido)
+  # ============================================================================
+  frontend-build:
+    name: Build Frontend Application
+    runs-on: ubuntu-latest
+    needs: [frontend-lint-and-format, frontend-type-check]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies (monorepo root)
+        run: npm ci
+
+      - name: Check if frontend exists
+        id: check-frontend
+        run: |
+          if [ -f "./frontend/package.json" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build application
+        if: steps.check-frontend.outputs.exists == 'true'
+        working-directory: ./frontend
+        run: npm run build
+
+  # ============================================================================
   # JOB 4: Unit Tests (Moderado)
   # ============================================================================
-  unit-tests:
-    name: Unit Tests
+  backend-unit-tests:
+    name: Backend Unit Tests
     runs-on: ubuntu-latest
-    needs: [lint-and-format, type-check]
+    needs: [backend-lint-and-format, backend-type-check]
 
     services:
       postgres:
@@ -208,12 +314,65 @@ jobs:
         continue-on-error: true
 
   # ============================================================================
+  # JOB 4.1: Frontend Unit Tests (Moderado)
+  # ============================================================================
+  frontend-unit-tests:
+    name: Frontend Unit Tests
+    runs-on: ubuntu-latest
+    needs: [frontend-lint-and-format, frontend-type-check]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies (monorepo root)
+        run: npm ci
+
+      - name: Check if frontend exists
+        id: check-frontend
+        run: |
+          if [ -f "./frontend/package.json" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run unit tests with coverage
+        if: steps.check-frontend.outputs.exists == 'true'
+        working-directory: ./frontend
+        env:
+          CI: true
+        run: npm run test -- --coverage --run
+
+      - name: Upload coverage artifact
+        if: steps.check-frontend.outputs.exists == 'true' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-frontend-unit-tests
+          path: frontend/coverage
+          retention-days: 7
+
+      - name: Upload coverage to Codecov
+        if: steps.check-frontend.outputs.exists == 'true' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./frontend/coverage/lcov.info
+          flags: frontend-unittests
+          name: frontend-unit-tests-coverage
+        continue-on-error: true
+
+  # ============================================================================
   # JOB 4.5: Integration Tests (Moderado)
   # ============================================================================
-  integration-tests:
-    name: Integration Tests
+  backend-integration-tests:
+    name: Backend Integration Tests
     runs-on: ubuntu-latest
-    needs: [lint-and-format, type-check]
+    needs: [backend-lint-and-format, backend-type-check]
     # ⚡ Solo en main/develop, NO en PRs (opcional)
     # if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
 
@@ -313,7 +472,7 @@ jobs:
   e2e-tests:
     name: E2E Tests
     runs-on: ubuntu-latest
-    needs: [build, unit-tests, integration-tests]
+    needs: [backend-build, backend-unit-tests, backend-integration-tests]
     # ✅ Solo en Pull Requests cuyo destino es main
     if: github.event_name == 'pull_request' && github.base_ref == 'main'
 
@@ -440,18 +599,33 @@ jobs:
   ci-success:
     name: CI Pipeline Success
     runs-on: ubuntu-latest
-    needs: [build, unit-tests, integration-tests]
+    needs:
+      [
+        backend-build,
+        backend-unit-tests,
+        backend-integration-tests,
+        frontend-build,
+        frontend-unit-tests,
+      ]
     if: success()
 
     steps:
       - name: CI Pipeline Passed
         run: |
           echo "✅ All CI checks passed successfully!"
+          echo ""
+          echo "Backend:"
           echo "- Linting & Formatting: ✓"
           echo "- Type Checking: ✓"
           echo "- Build: ✓"
           echo "- Unit Tests: ✓"
           echo "- Integration Tests: ✓"
+          echo ""
+          echo "Frontend:"
+          echo "- Linting & Formatting: ✓"
+          echo "- Type Checking: ✓"
+          echo "- Build: ✓"
+          echo "- Unit Tests: ✓"
           echo ""
           if [[ "${{ github.base_ref }}" == "main" ]]; then
             echo "🎪 E2E tests are running (PR to main)"

@@ -223,12 +223,33 @@ git checkout -b feature/TASK-X.Y-descripcion
 npm run lint
 npm run type-check
 npm run format
+node scripts/validate-architecture.js  # Validar arquitectura
 npm run build
 npm test
 npm run test:cov  # ≥80% coverage
 ```
 
-### 4. Commit y Push
+> 💡 **Tip:** Usa `npm run quality` para ejecutar todo el ciclo automáticamente.
+
+### 4. CI/CD Pipeline
+
+**Todos los Pull Requests deben pasar CI antes de mergear:**
+
+- ✅ Linting & Formatting
+- ✅ Type Checking
+- ✅ Architecture Validation (`validate-architecture.js`)
+- ✅ Build
+- ✅ Tests (coverage ≥80%)
+
+**Workflows disponibles:**
+
+- `ci.yml` - Pipeline completo (backend + frontend)
+- `architecture-validation.yml` - Validación manual de arquitectura
+- `monorepo-optimization.yml` - CI optimizado (solo corre tests de workspaces modificados)
+
+**Ver workflows en:** `.github/workflows/`
+
+### 5. Commit y Push
 
 ```bash
 git add .
