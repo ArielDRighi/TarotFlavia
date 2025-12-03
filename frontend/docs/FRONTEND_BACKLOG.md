@@ -2526,10 +2526,188 @@ IMPORTANTE:
 
 ---
 
+## 🧪 FASE 12: TESTING MÍNIMO (Smoke Tests)
+
+> **Nota:** Testing E2E completo está en "Post-MVP", pero estos smoke tests son recomendados antes de release.
+
+### TAREA 12.1: Configurar Vitest para unit tests
+
+**Prioridad:** MEDIA
+**Estimación:** 30 min
+**Dependencias:** 0.1
+
+**Consigna:**
+Configurar Vitest como framework de testing para componentes y hooks.
+
+**Prompt:**
+
+```
+Configura Vitest para testing:
+
+INSTALAR:
+npm install -D vitest @testing-library/react @testing-library/jest-dom @vitejs/plugin-react jsdom
+
+CREAR ARCHIVO: vitest.config.ts
+import { defineConfig } from 'vitest/config'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: './src/test/setup.ts',
+  },
+})
+
+CREAR ARCHIVO: src/test/setup.ts
+import '@testing-library/jest-dom'
+
+AGREGAR A package.json:
+"scripts": {
+  "test": "vitest",
+  "test:run": "vitest run",
+  "test:coverage": "vitest run --coverage"
+}
+
+IMPORTANTE:
+- NO escribas tests todavía, solo configura el entorno
+```
+
+---
+
+### TAREA 12.2: Smoke tests de componentes críticos
+
+**Prioridad:** MEDIA
+**Estimación:** 45 min
+**Dependencias:** 12.1, 1.1
+
+**Consigna:**
+Crear smoke tests básicos para verificar que los componentes principales renderizan sin errores.
+
+**Prompt:**
+
+```
+Crea smoke tests para componentes críticos:
+
+CREAR ARCHIVO: src/components/ui/__tests__/smoke.test.tsx
+
+TESTS MÍNIMOS:
+1. Button renderiza sin errores
+2. Input renderiza sin errores
+3. Card renderiza sin errores
+4. Toast puede ser invocado
+5. Modal abre y cierra correctamente
+
+EJEMPLO:
+import { render, screen } from '@testing-library/react'
+import { Button } from '../button'
+
+describe('UI Components Smoke Tests', () => {
+  it('Button renders without crashing', () => {
+    render(<Button>Click me</Button>)
+    expect(screen.getByRole('button')).toBeInTheDocument()
+  })
+})
+
+CREAR ARCHIVO: src/components/features/__tests__/smoke.test.tsx
+
+TESTS:
+1. TarotCard renderiza en estado reverso
+2. TarotCard renderiza en estado anverso
+3. PlanBadge muestra texto correcto por plan
+4. StatusBadge muestra color correcto por estado
+
+IMPORTANTE:
+- Solo verificar que renderizan sin errores
+- NO testear lógica compleja todavía
+- Usar mocks para datos
+```
+
+---
+
+### TAREA 12.3: Smoke tests de flujos de autenticación
+
+**Prioridad:** ALTA
+**Estimación:** 40 min
+**Dependencias:** 12.1, 3.3
+
+**Consigna:**
+Crear tests básicos para el flujo de autenticación.
+
+**Prompt:**
+
+```
+Crea smoke tests para autenticación:
+
+CREAR ARCHIVO: src/app/login/__tests__/login.test.tsx
+
+TESTS:
+1. Formulario de login renderiza campos email y password
+2. Botón submit está presente
+3. Validación muestra error si email inválido
+4. Validación muestra error si password muy corto
+
+CREAR ARCHIVO: src/stores/__tests__/auth-store.test.ts
+
+TESTS:
+1. Estado inicial es isAuthenticated: false
+2. setUser actualiza el estado correctamente
+3. logout limpia el usuario
+
+IMPORTANTE:
+- Mockear apiClient para evitar llamadas reales
+- Usar vi.mock() de Vitest
+- NO testear integración con backend todavía
+```
+
+---
+
+### TAREA 12.4: Script de smoke test pre-deploy
+
+**Prioridad:** MEDIA
+**Estimación:** 20 min
+**Dependencias:** 12.2, 12.3
+
+**Consigna:**
+Crear script que ejecute todos los smoke tests antes de deploy.
+
+**Prompt:**
+
+```
+Configura script de smoke tests:
+
+AGREGAR A package.json:
+"scripts": {
+  "test:smoke": "vitest run --testPathPattern=smoke",
+  "predeploy": "npm run build && npm run test:smoke"
+}
+
+CREAR ARCHIVO: .github/workflows/test.yml (opcional si usan GitHub Actions)
+name: Smoke Tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - run: npm run test:smoke
+
+IMPORTANTE:
+- Los smoke tests deben pasar en menos de 30 segundos
+- Si fallan, bloquear el deploy
+```
+
+---
+
 ## 🎉 FINALIZACIÓN
 
-**RESUMEN TOTAL DE TAREAS:** ~50 tareas
-**ESTIMACIÓN TOTAL:** 35-45 horas de desarrollo
+**RESUMEN TOTAL DE TAREAS:** ~54 tareas
+**ESTIMACIÓN TOTAL:** 38-48 horas de desarrollo
 
 **ORDEN RECOMENDADO DE EJECUCIÓN:**
 
@@ -2559,15 +2737,18 @@ IMPORTANTE:
 Este documento fue verificado contra el backend real. Cambios aplicados:
 
 ### ✅ Endpoints Agregados
+
 - `GET /readings/trash` - Obtener lecturas eliminadas (papelera)
 - `POST /readings/{id}/restore` - Restaurar lectura eliminada
 - `DELETE /readings/{id}/unshare` - Dejar de compartir lectura
 
 ### ✅ Endpoints Corregidos
+
 - `GET /admin/dashboard/metrics` → **DEPRECATED**, usar `GET /admin/dashboard/stats`
 - Agregado `GET /admin/dashboard/charts` para datos de gráficos
 
 ### ✅ Hooks Agregados
+
 - `useTrashedReadings()` - Query para papelera
 - `useRestoreReading()` - Mutation para restaurar
 - `useUnshareReading()` - Mutation para dejar de compartir
