@@ -5,6 +5,35 @@
 - [Overview](#overview)
 - [Diagrama ER](#diagrama-er)
 - [Tablas Principales](#tablas-principales)
+  - [users](#users)
+  - [tarot_reading](#tarot_reading)
+  - [tarot_interpretation](#tarot_interpretation)
+  - [tarot_card](#tarot_card)
+  - [tarot_spread](#tarot_spread)
+  - [tarot_deck](#tarot_deck)
+  - [reading_category](#reading_category)
+  - [predefined_questions](#predefined_questions)
+  - [tarotistas](#tarotistas)
+  - [tarotista_config](#tarotista_config)
+  - [tarotista_card_meanings](#tarotista_card_meanings)
+  - [tarotista_applications](#tarotista_applications)
+  - [tarotista_reviews](#tarotista_reviews) ⭐ NUEVO
+  - [tarotista_revenue_metrics](#tarotista_revenue_metrics) ⭐ NUEVO
+  - [user_tarotista_subscriptions](#user_tarotista_subscriptions) ⭐ NUEVO
+  - [daily_readings](#daily_readings)
+  - [usage_limit](#usage_limit)
+  - [audit_logs](#audit_logs)
+- [Tablas de Autenticación](#tablas-de-autenticación) ⭐ NUEVO
+  - [refresh_tokens](#refresh_tokens)
+  - [password_reset_tokens](#password_reset_tokens)
+- [Tablas de Scheduling](#tablas-de-scheduling) ⭐ NUEVO
+  - [sessions](#sessions)
+  - [tarotist_availability](#tarotist_availability)
+  - [tarotist_exceptions](#tarotist_exceptions)
+- [Tablas de Monitoreo](#tablas-de-monitoreo) ⭐ NUEVO
+  - [ai_usage_logs](#ai_usage_logs)
+  - [security_events](#security_events)
+  - [cached_interpretations](#cached_interpretations)
 - [Relaciones](#relaciones)
 - [Índices y Performance](#índices-y-performance)
 - [Migraciones](#migraciones)
@@ -18,11 +47,12 @@
 
 ### Tecnología
 
-- **DBMS**: PostgreSQL 15+
+- **DBMS**: PostgreSQL 16 (Docker, puerto 5435)
 - **ORM**: TypeORM 0.3.x
 - **Connection Pooling**: Configurado en production
 - **Migraciones**: TypeORM CLI
 - **Seeds**: Scripts TypeScript personalizados
+- **Total de Entidades**: 29 tablas
 
 ### Convenciones de Nomenclatura
 
@@ -40,55 +70,149 @@
 ### Diagrama Simplificado
 
 ```
-┌─────────────┐        ┌──────────────────┐        ┌─────────────┐
-│    User     │────────│  TarotReading    │────────│  TarotCard  │
-│             │ 1    * │                  │ *    * │             │
-│ - id        │        │ - id             │        │ - id        │
-│ - email     │        │ - userId         │        │ - name      │
-│ - password  │        │ - spreadId       │        │ - arcana    │
-│ - name      │        │ - tarotistaId    │        │ - number    │
-│ - roles[]   │        │ - questionType   │        │ - suit      │
-│ - plan      │        │ - interpretation │        └─────────────┘
-└─────────────┘        │ - cards (JSONB)  │
-      │                │ - createdAt      │        ┌─────────────┐
-      │                └──────────────────┘────────│ TarotSpread │
-      │                        │                   │             │
-      │                        │ 1                 │ - id        │
-      │                        │                   │ - name      │
-      │                        │                   │ - cardCount │
-      │                        │ *                 │ - positions │
-      │                ┌──────────────────┐        └─────────────┘
-      │                │ Tarot            │
-      │                │ Interpretation   │        ┌─────────────┐
-      │                │                  │        │ Tarotista   │
-      └────────────────│ - id             │        │             │
-                       │ - readingId      │        │ - id        │
-                       │ - interpretation │◄───────│ - userId    │
-                       │ - aiProvider     │        │ - config    │
-                       │ - model          │        │ - active    │
-                       └──────────────────┘        └─────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              MÓDULO DE USUARIOS                                 │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  ┌─────────────────┐        ┌───────────────────┐        ┌──────────────────┐  │
+│  │      users      │────────│    tarotistas     │────────│ tarotista_config │  │
+│  │                 │ 1    1 │                   │ 1    * │                  │  │
+│  │ - id            │        │ - id              │        │ - id             │  │
+│  │ - email         │        │ - user_id (FK)    │        │ - tarotista_id   │  │
+│  │ - password      │        │ - display_name    │        │ - system_prompt  │  │
+│  │ - name          │        │ - bio             │        │ - temperature    │  │
+│  │ - roles[]       │        │ - specialties[]   │        │ - max_tokens     │  │
+│  │ - plan          │        │ - rating_promedio │        │ - version        │  │
+│  │ - lastLogin     │        │ - precio_sesion   │        └──────────────────┘  │
+│  │ - aiTokensUsed  │        │ - is_featured     │                              │
+│  └─────────────────┘        │ - verification    │                              │
+│           │                 └───────────────────┘                              │
+│           │                         │                                          │
+│           │ 1                       │ 1                                        │
+│           │                         │                                          │
+│           ▼ *                       ▼ *                                        │
+│  ┌─────────────────┐        ┌───────────────────┐        ┌──────────────────┐  │
+│  │ refresh_tokens  │        │ tarotista_reviews │        │ user_tarotista_  │  │
+│  │                 │        │                   │        │   subscription   │  │
+│  │ - id            │        │ - id              │        │ - id             │  │
+│  │ - user_id (FK)  │        │ - tarotista_id    │        │ - user_id (FK)   │  │
+│  │ - token_hash    │        │ - user_id (FK)    │        │ - tarotista_id   │  │
+│  │ - expires_at    │        │ - rating          │        │ - type           │  │
+│  │ - revoked       │        │ - comment         │        │ - status         │  │
+│  └─────────────────┘        │ - moderationStatus│        │ - expires_at     │  │
+│                             └───────────────────┘        └──────────────────┘  │
+│                                                                                 │
+│  ┌─────────────────┐                                                           │
+│  │password_reset_  │                                                           │
+│  │     tokens      │                                                           │
+│  │ - id            │                                                           │
+│  │ - user_id (FK)  │                                                           │
+│  │ - token_hash    │                                                           │
+│  │ - expires_at    │                                                           │
+│  └─────────────────┘                                                           │
+└─────────────────────────────────────────────────────────────────────────────────┘
 
-┌─────────────────┐        ┌──────────────────────┐
-│ ReadingCategory │        │ PredefinedQuestion   │
-│                 │        │                      │
-│ - id            │        │ - id                 │
-│ - name          │────────│ - categoryId         │
-│ - slug          │ 1    * │ - question           │
-│ - description   │        │ - isActive           │
-│ - color         │        │ - usageCount         │
-└─────────────────┘        └──────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                           MÓDULO DE LECTURAS TAROT                              │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  ┌─────────────────┐        ┌───────────────────┐        ┌──────────────────┐  │
+│  │  tarot_reading  │────────│tarot_interpretation│───────│ tarot_card       │  │
+│  │                 │ 1    1 │                   │        │                  │  │
+│  │ - id            │        │ - id              │        │ - id             │  │
+│  │ - user_id (FK)  │        │ - reading_id (FK) │        │ - name           │  │
+│  │ - spread_id(FK) │        │ - interpretation  │        │ - arcana_type    │  │
+│  │ - tarotista_id  │        │ - ai_provider     │        │ - number         │  │
+│  │ - question      │        │ - model           │        │ - suit           │  │
+│  │ - cards (JSONB) │        │ - tokens_used     │        │ - meaning_*      │  │
+│  │ - created_at    │        │ - cached          │        │ - keywords[]     │  │
+│  └─────────────────┘        └───────────────────┘        └──────────────────┘  │
+│           │                                                      │             │
+│           │                                                      │             │
+│           ▼ 1                                                    ▼ 1           │
+│  ┌─────────────────┐        ┌───────────────────┐        ┌──────────────────┐  │
+│  │  tarot_spread   │        │ reading_category  │────────│predefined_question│ │
+│  │                 │        │                   │ 1    * │                  │  │
+│  │ - id            │        │ - id              │        │ - id             │  │
+│  │ - name          │        │ - name            │        │ - category_id    │  │
+│  │ - card_count    │        │ - slug            │        │ - question       │  │
+│  │ - positions[]   │        │ - description     │        │ - usage_count    │  │
+│  │ - description   │        │ - color           │        │ - is_active      │  │
+│  └─────────────────┘        └───────────────────┘        └──────────────────┘  │
+│                                                                                 │
+│  ┌─────────────────┐        ┌───────────────────┐                              │
+│  │ daily_readings  │        │tarotista_card_    │                              │
+│  │                 │        │    meanings       │                              │
+│  │ - id            │        │ - id              │                              │
+│  │ - user_id (FK)  │        │ - tarotista_id    │                              │
+│  │ - tarotista_id  │        │ - card_id (FK)    │                              │
+│  │ - card_id (FK)  │        │ - custom_meaning_*│                              │
+│  │ - reading_date  │        │ - private_notes   │                              │
+│  │ - interpretation│        └───────────────────┘                              │
+│  └─────────────────┘                                                           │
+└─────────────────────────────────────────────────────────────────────────────────┘
 
-┌──────────────────┐        ┌────────────────────┐
-│ DailyReading     │        │ UsageLimit         │
-│                  │        │                    │
-│ - id             │        │ - id               │
-│ - userId         │        │ - userId           │
-│ - tarotistaId    │        │ - feature          │
-│ - cardId         │        │ - usedToday        │
-│ - readingDate    │        │ - limitPerDay      │
-│ - interpretation │        │ - lastResetDate    │
-└──────────────────┘        └────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                           MÓDULO DE SCHEDULING                                  │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  ┌─────────────────┐        ┌───────────────────┐        ┌──────────────────┐  │
+│  │    sessions     │        │tarotist_availability│      │tarotist_exceptions│ │
+│  │                 │        │                   │        │                  │  │
+│  │ - id            │        │ - id              │        │ - id             │  │
+│  │ - tarotista_id  │        │ - tarotista_id    │        │ - tarotista_id   │  │
+│  │ - consumer_id   │        │ - day_of_week     │        │ - date           │  │
+│  │ - scheduled_at  │        │ - start_time      │        │ - is_available   │  │
+│  │ - duration_min  │        │ - end_time        │        │ - start_time     │  │
+│  │ - status        │        │ - is_active       │        │ - end_time       │  │
+│  │ - price_usd     │        └───────────────────┘        │ - reason         │  │
+│  │ - payment_status│                                     └──────────────────┘  │
+│  │ - notes         │                                                           │
+│  └─────────────────┘                                                           │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                       MÓDULOS DE SISTEMA Y MONITOREO                            │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  ┌─────────────────┐        ┌───────────────────┐        ┌──────────────────┐  │
+│  │  ai_usage_logs  │        │  security_events  │        │  usage_limits    │  │
+│  │                 │        │                   │        │                  │  │
+│  │ - id            │        │ - id              │        │ - id             │  │
+│  │ - user_id (FK)  │        │ - event_type      │        │ - user_id (FK)   │  │
+│  │ - provider      │        │ - severity        │        │ - feature        │  │
+│  │ - model         │        │ - user_id (FK)    │        │ - used_today     │  │
+│  │ - tokens_in     │        │ - ip_address      │        │ - limit_per_day  │  │
+│  │ - tokens_out    │        │ - user_agent      │        │ - last_reset     │  │
+│  │ - cost_usd      │        │ - details (JSONB) │        └──────────────────┘  │
+│  │ - status        │        │ - timestamp       │                              │
+│  │ - latency_ms    │        └───────────────────┘                              │
+│  └─────────────────┘                                                           │
+│                                                                                 │
+│  ┌─────────────────┐        ┌───────────────────┐                              │
+│  │cached_interpre- │        │tarotista_revenue_ │                              │
+│  │   tations       │        │    metrics        │                              │
+│  │ - id            │        │ - id              │                              │
+│  │ - cache_key     │        │ - tarotista_id    │                              │
+│  │ - interpretation│        │ - period_start    │                              │
+│  │ - hit_count     │        │ - gross_amount    │                              │
+│  │ - expires_at    │        │ - net_amount      │                              │
+│  │ - provider      │        │ - transaction_type│                              │
+│  └─────────────────┘        └───────────────────┘                              │
+└─────────────────────────────────────────────────────────────────────────────────┘
 ```
+
+### Resumen de Tablas (29 Total)
+
+| Módulo            | Tablas                                                                                                       |
+| ----------------- | ------------------------------------------------------------------------------------------------------------ |
+| **Usuarios**      | users, tarotistas, tarotista_config, tarotista_reviews, user_tarotista_subscriptions, tarotista_applications |
+| **Autenticación** | refresh_tokens, password_reset_tokens                                                                        |
+| **Tarot Core**    | tarot_card, tarot_spread, tarot_reading, tarot_interpretation, daily_readings, tarotista_card_meanings       |
+| **Catálogo**      | reading_category, predefined_question                                                                        |
+| **Scheduling**    | sessions, tarotist_availability, tarotist_exceptions                                                         |
+| **AI & Cache**    | ai_usage_logs, cached_interpretations                                                                        |
+| **Sistema**       | usage_limits, security_events, tarotista_revenue_metrics                                                     |
 
 ---
 
@@ -114,6 +238,41 @@ Almacena información de los usuarios del sistema.
 | `ai_cost_usd_month`      | DECIMAL(10,2) | DEFAULT 0            | Costo acumulado de IA este mes            |
 | `created_at`             | TIMESTAMP     | NOT NULL             | Fecha de creación                         |
 | `updated_at`             | TIMESTAMP     | NOT NULL             | Fecha de última actualización             |
+| `ai_tokens_used_month`   | INTEGER       | DEFAULT 0            | Tokens de IA usados este mes              |
+| `ai_provider_used`       | VARCHAR(50)   | NULLABLE             | Proveedor de IA predominante (groq, etc.) |
+| `quota_warning_sent`     | BOOLEAN       | DEFAULT false        | Si se envió advertencia de cuota          |
+| `ai_usage_reset_at`      | TIMESTAMP     | NULLABLE             | Fecha del último reset de uso de IA       |
+| `plan_started_at`        | TIMESTAMP     | NULLABLE             | Fecha de inicio del plan actual           |
+| `plan_expires_at`        | TIMESTAMP     | NULLABLE             | Fecha de expiración del plan              |
+| `last_login`             | TIMESTAMP     | NULLABLE             | Fecha de último inicio de sesión          |
+| `banned_at`              | TIMESTAMP     | NULLABLE             | Fecha en que el usuario fue baneado       |
+| `ban_reason`             | VARCHAR(500)  | NULLABLE             | Razón del baneo del usuario               |
+
+**Enums:**
+
+```typescript
+// UserRole
+enum UserRole {
+  CONSUMER = 'consumer',
+  TAROTIST = 'tarotist',
+  ADMIN = 'admin',
+}
+
+// UserPlan
+enum UserPlan {
+  GUEST = 'guest',
+  FREE = 'free',
+  PREMIUM = 'premium',
+  PROFESSIONAL = 'professional',
+}
+
+// SubscriptionStatus
+enum SubscriptionStatus {
+  ACTIVE = 'active',
+  CANCELLED = 'cancelled',
+  EXPIRED = 'expired',
+}
+```
 
 **Relaciones:**
 
@@ -121,6 +280,8 @@ Almacena información de los usuarios del sistema.
 - `daily_readings` → `daily_readings` (1:N)
 - `usage_limits` → `usage_limit` (1:N)
 - `tarotista` → `tarotistas` (1:1)
+- `refreshTokens` → `refresh_tokens` (1:N)
+- `subscriptions` → `user_tarotista_subscriptions` (1:N)
 
 **Índices:**
 
@@ -128,7 +289,17 @@ Almacena información de los usuarios del sistema.
 CREATE UNIQUE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_roles ON users USING GIN(roles);
 CREATE INDEX idx_users_plan ON users(plan);
+CREATE INDEX idx_users_banned_at ON users(banned_at);
 ```
+
+**Métodos de la Entidad:**
+
+- `isPremium()`: Verifica si el usuario tiene plan premium activo
+- `hasPlanExpired()`: Verifica si el plan ha expirado
+- `hasRole(role)`: Verifica si tiene un rol específico
+- `isBanned()`: Verifica si está baneado
+- `ban(reason?)`: Banea al usuario
+- `unban()`: Desbanea al usuario
 
 ---
 
@@ -201,18 +372,18 @@ CREATE UNIQUE INDEX idx_tarot_reading_shared_token ON tarot_reading(shared_token
 
 Almacena las interpretaciones generadas por IA para cada lectura.
 
-| Columna              | Tipo          | Constraints                | Descripción                                |
-| -------------------- | ------------- | -------------------------- | ------------------------------------------ |
-| `id`                 | INTEGER       | PRIMARY KEY                | ID único autoincrementable                 |
-| `reading_id`         | INTEGER       | FK tarot_reading, NOT NULL | Lectura asociada                           |
-| `interpretation`     | TEXT          | NOT NULL                   | Interpretación completa generada           |
-| `ai_provider`        | VARCHAR(50)   | NOT NULL                   | Proveedor: 'openai', 'anthropic', 'groq'   |
-| `model`              | VARCHAR(100)  | NOT NULL                   | Modelo: 'gpt-4-turbo', 'claude-3-5-sonnet' |
-| `prompt_tokens`      | INTEGER       | DEFAULT 0                  | Tokens usados en el prompt                 |
-| `completion_tokens`  | INTEGER       | DEFAULT 0                  | Tokens usados en la respuesta              |
-| `cost_usd`           | DECIMAL(10,4) | DEFAULT 0                  | Costo estimado en USD                      |
-| `generation_time_ms` | INTEGER       | NULLABLE                   | Tiempo de generación en ms                 |
-| `created_at`         | TIMESTAMP     | NOT NULL                   | Fecha de creación                          |
+| Columna              | Tipo          | Constraints                | Descripción                                      |
+| -------------------- | ------------- | -------------------------- | ------------------------------------------------ |
+| `id`                 | INTEGER       | PRIMARY KEY                | ID único autoincrementable                       |
+| `reading_id`         | INTEGER       | FK tarot_reading, NOT NULL | Lectura asociada                                 |
+| `interpretation`     | TEXT          | NOT NULL                   | Interpretación completa generada                 |
+| `ai_provider`        | VARCHAR(50)   | NOT NULL                   | Proveedor: 'groq', 'openai', 'deepseek'          |
+| `model`              | VARCHAR(100)  | NOT NULL                   | Modelo: 'llama-3.1-70b-versatile', 'gpt-4-turbo' |
+| `prompt_tokens`      | INTEGER       | DEFAULT 0                  | Tokens usados en el prompt                       |
+| `completion_tokens`  | INTEGER       | DEFAULT 0                  | Tokens usados en la respuesta                    |
+| `cost_usd`           | DECIMAL(10,4) | DEFAULT 0                  | Costo estimado en USD                            |
+| `generation_time_ms` | INTEGER       | NULLABLE                   | Tiempo de generación en ms                       |
+| `created_at`         | TIMESTAMP     | NOT NULL                   | Fecha de creación                                |
 
 **Relaciones:**
 
@@ -388,74 +559,140 @@ CREATE INDEX idx_predefined_questions_usage_count ON predefined_questions(usage_
 
 ### tarotistas
 
-Información de los tarotistas profesionales.
+Información de los tarotistas profesionales. Soporte completo para marketplace con sesiones en vivo.
 
-| Columna        | Tipo      | Constraints                | Descripción                       |
-| -------------- | --------- | -------------------------- | --------------------------------- |
-| `id`           | INTEGER   | PRIMARY KEY                | ID único autoincrementable        |
-| `user_id`      | INTEGER   | FK users, UNIQUE, NOT NULL | Usuario asociado                  |
-| `display_name` | VARCHAR   | NOT NULL                   | Nombre público                    |
-| `bio`          | TEXT      | NULLABLE                   | Biografía                         |
-| `specialties`  | VARCHAR[] | DEFAULT []                 | Especialidades                    |
-| `is_active`    | BOOLEAN   | DEFAULT true               | Si está activo                    |
-| `ai_config`    | JSONB     | NOT NULL                   | Configuración de IA personalizada |
-| `created_at`   | TIMESTAMP | NOT NULL                   | Fecha de creación                 |
-| `updated_at`   | TIMESTAMP | NOT NULL                   | Fecha de última actualización     |
+| Columna                      | Tipo          | Constraints                | Descripción                             |
+| ---------------------------- | ------------- | -------------------------- | --------------------------------------- |
+| `id`                         | INTEGER       | PRIMARY KEY                | ID único autoincrementable              |
+| `user_id`                    | INTEGER       | FK users, UNIQUE, NOT NULL | Usuario asociado                        |
+| `display_name`               | VARCHAR(100)  | NOT NULL                   | Nombre público (max 100 caracteres)     |
+| `bio`                        | TEXT          | NULLABLE                   | Biografía                               |
+| `specialties`                | VARCHAR[]     | DEFAULT []                 | Especialidades                          |
+| `is_active`                  | BOOLEAN       | DEFAULT true               | Si está activo                          |
+| `ai_config`                  | JSONB         | NOT NULL                   | Configuración de IA personalizada       |
+| `profile_image_url`          | VARCHAR(500)  | NULLABLE                   | URL de imagen de perfil                 |
+| `banner_image_url`           | VARCHAR(500)  | NULLABLE                   | URL de imagen banner                    |
+| `precio_sesion_usd`          | DECIMAL(10,2) | NULLABLE                   | Precio por sesión en USD                |
+| `duracion_sesion_minutos`    | INTEGER       | DEFAULT 30                 | Duración estándar de sesión en minutos  |
+| `rating_promedio`            | DECIMAL(3,2)  | DEFAULT 0.00               | Rating promedio (0.00-5.00)             |
+| `total_reviews`              | INTEGER       | DEFAULT 0                  | Total de reseñas recibidas              |
+| `total_readings`             | INTEGER       | DEFAULT 0                  | Total de lecturas realizadas            |
+| `total_sessions`             | INTEGER       | DEFAULT 0                  | Total de sesiones realizadas            |
+| `comision_porcentaje`        | DECIMAL(5,2)  | DEFAULT 20.00              | Porcentaje de comisión de la plataforma |
+| `is_featured`                | BOOLEAN       | DEFAULT false              | Si está destacado en el marketplace     |
+| `is_accepting_new_clients`   | BOOLEAN       | DEFAULT true               | Si acepta nuevos clientes               |
+| `years_experience`           | INTEGER       | NULLABLE                   | Años de experiencia                     |
+| `languages`                  | VARCHAR[]     | DEFAULT ['es']             | Idiomas que maneja                      |
+| `certifications`             | VARCHAR[]     | DEFAULT []                 | Certificaciones o títulos               |
+| `social_links`               | JSONB         | DEFAULT {}                 | Links a redes sociales                  |
+| `verification_status`        | VARCHAR(20)   | DEFAULT 'PENDING'          | Estado: PENDING, VERIFIED, REJECTED     |
+| `verified_at`                | TIMESTAMP     | NULLABLE                   | Fecha de verificación                   |
+| `total_earnings_usd`         | DECIMAL(12,2) | DEFAULT 0.00               | Ganancias totales acumuladas            |
+| `current_month_earnings_usd` | DECIMAL(12,2) | DEFAULT 0.00               | Ganancias del mes actual                |
+| `payout_method`              | VARCHAR(50)   | NULLABLE                   | Método de pago preferido                |
+| `payout_details`             | JSONB         | NULLABLE                   | Detalles de pago (cuenta, etc.)         |
+| `created_at`                 | TIMESTAMP     | NOT NULL                   | Fecha de creación                       |
+| `updated_at`                 | TIMESTAMP     | NOT NULL                   | Fecha de última actualización           |
 
 **Estructura de `ai_config` (JSONB):**
 
 ```json
 {
-  "provider": "openai",
-  "model": "gpt-4-turbo",
+  "provider": "groq",
+  "model": "llama-3.1-70b-versatile",
   "systemPrompt": "Eres Flavia, una tarotista profesional...",
   "temperature": 0.7
 }
 ```
+
+**Estructura de `social_links` (JSONB):**
+
+```json
+{
+  "instagram": "https://instagram.com/tarotista",
+  "youtube": "https://youtube.com/channel/xxx",
+  "website": "https://mistarot.com"
+}
+```
+
+**Valores de `verification_status`:**
+
+- `PENDING` - Pendiente de verificación
+- `VERIFIED` - Verificado por la plataforma
+- `REJECTED` - Rechazado (no cumple requisitos)
 
 **Relaciones:**
 
 - `user` ← `users` (1:1)
 - `readings` → `tarot_reading` (1:N)
 - `dailyReadings` → `daily_readings` (1:N)
+- `reviews` → `tarotista_reviews` (1:N)
+- `sessions` → `sessions` (1:N)
+- `availability` → `tarotist_availability` (1:N)
+- `exceptions` → `tarotist_exceptions` (1:N)
+- `revenueMetrics` → `tarotista_revenue_metrics` (1:N)
+- `config` → `tarotista_config` (1:1)
 
 **Índices:**
 
 ```sql
 CREATE UNIQUE INDEX idx_tarotistas_user_id ON tarotistas(user_id);
 CREATE INDEX idx_tarotistas_is_active ON tarotistas(is_active);
+CREATE INDEX idx_tarotistas_is_featured ON tarotistas(is_featured);
+CREATE INDEX idx_tarotistas_rating ON tarotistas(rating_promedio);
+CREATE INDEX idx_tarotistas_verification ON tarotistas(verification_status);
+CREATE INDEX idx_tarotistas_accepting ON tarotistas(is_accepting_new_clients);
 ```
 
 ---
 
 ### tarotista_config
 
-Configuración personalizada de IA para cada tarotista.
+Configuración personalizada de IA para cada tarotista. Permite múltiples versiones de configuración.
 
-| Columna         | Tipo         | Constraints                    | Descripción                           |
-| --------------- | ------------ | ------------------------------ | ------------------------------------- |
-| `id`            | INTEGER      | PRIMARY KEY                    | ID único autoincrementable            |
-| `tarotista_id`  | INTEGER      | FK tarotistas, UNIQUE NOT NULL | Tarotista asociado                    |
-| `system_prompt` | TEXT         | NOT NULL                       | Prompt del sistema personalizado      |
-| `temperature`   | DECIMAL(3,2) | DEFAULT 0.7                    | Creatividad del modelo (0.0-2.0)      |
-| `max_tokens`    | INTEGER      | DEFAULT 500                    | Máximo de tokens por respuesta        |
-| `top_p`         | DECIMAL(3,2) | DEFAULT 0.9                    | Nucleus sampling (0.0-1.0)            |
-| `provider`      | VARCHAR(50)  | DEFAULT 'openai'               | Proveedor de IA (openai, anthropic)   |
-| `model`         | VARCHAR(100) | NULLABLE                       | Modelo específico (gpt-4-turbo, etc.) |
-| `style_config`  | JSONB        | NULLABLE                       | Configuración de estilo adicional     |
-| `is_active`     | BOOLEAN      | DEFAULT true                   | Si la configuración está activa       |
-| `created_at`    | TIMESTAMP    | NOT NULL                       | Fecha de creación                     |
-| `updated_at`    | TIMESTAMP    | NOT NULL                       | Fecha de última actualización         |
+| Columna                   | Tipo         | Constraints             | Descripción                              |
+| ------------------------- | ------------ | ----------------------- | ---------------------------------------- |
+| `id`                      | INTEGER      | PRIMARY KEY             | ID único autoincrementable               |
+| `tarotista_id`            | INTEGER      | FK tarotistas, NOT NULL | Tarotista asociado                       |
+| `system_prompt`           | TEXT         | NOT NULL                | Prompt del sistema personalizado         |
+| `temperature`             | DECIMAL(3,2) | DEFAULT 0.7, CHECK 0-2  | Creatividad del modelo (0.0-2.0)         |
+| `max_tokens`              | INTEGER      | DEFAULT 1000            | Máximo de tokens por respuesta           |
+| `top_p`                   | DECIMAL(3,2) | DEFAULT 0.9, CHECK 0-1  | Nucleus sampling (0.0-1.0)               |
+| `custom_keywords`         | JSONB        | NULLABLE                | Keywords personalizados ["energía", ...] |
+| `additional_instructions` | TEXT         | NULLABLE                | Instrucciones adicionales para la IA     |
+| `style_config`            | JSONB        | NULLABLE                | Configuración de estilo adicional        |
+| `version`                 | INTEGER      | DEFAULT 1               | Versión de la configuración              |
+| `is_active`               | BOOLEAN      | DEFAULT true            | Si la configuración está activa          |
+| `created_at`              | TIMESTAMP    | NOT NULL                | Fecha de creación                        |
+| `updated_at`              | TIMESTAMP    | NOT NULL                | Fecha de última actualización            |
+
+**Estructura de `style_config` (JSONB):**
+
+```json
+{
+  "tone": "mystical",
+  "language": "formal",
+  "verbosity": "detailed"
+}
+```
+
+**Constraints CHECK:**
+
+```sql
+CHECK ("temperature" >= 0 AND "temperature" <= 2)
+CHECK ("top_p" >= 0 AND "top_p" <= 1)
+```
 
 **Relaciones:**
 
-- `tarotista` ← `tarotistas` (1:1)
+- `tarotista` ← `tarotistas` (N:1) - Un tarotista puede tener múltiples configuraciones
 
 **Índices:**
 
 ```sql
-CREATE UNIQUE INDEX idx_tarotista_config_tarotista_id ON tarotista_config(tarotista_id);
+CREATE INDEX idx_tarotista_config_tarotista_id ON tarotista_config(tarotista_id);
 CREATE INDEX idx_tarotista_config_is_active ON tarotista_config(is_active);
+CREATE INDEX idx_tarotista_config_version ON tarotista_config(version);
 ```
 
 ---
@@ -526,6 +763,115 @@ CREATE INDEX idx_application_status ON tarotista_applications(status);
 
 ---
 
+### tarotista_reviews
+
+Reviews y calificaciones de tarotistas por usuarios.
+
+| Columna                | Tipo      | Constraints                | Descripción                      |
+| ---------------------- | --------- | -------------------------- | -------------------------------- |
+| `id`                   | INTEGER   | PRIMARY KEY                | ID único autoincrementable       |
+| `tarotista_id`         | INTEGER   | FK tarotistas, NOT NULL    | Tarotista que recibe el review   |
+| `user_id`              | INTEGER   | FK users, NOT NULL         | Usuario que deja el review       |
+| `reading_id`           | INTEGER   | FK tarot_reading, NULLABLE | Lectura relacionada (opcional)   |
+| `rating`               | INTEGER   | NOT NULL, CHECK 1-5        | Rating del 1 al 5                |
+| `comment`              | TEXT      | NULLABLE                   | Comentario del usuario           |
+| `is_approved`          | BOOLEAN   | DEFAULT false              | Si fue aprobado por moderación   |
+| `is_hidden`            | BOOLEAN   | DEFAULT false              | Si está oculto                   |
+| `moderation_notes`     | TEXT      | NULLABLE                   | Notas internas de moderación     |
+| `tarotist_response`    | TEXT      | NULLABLE                   | Respuesta del tarotista          |
+| `tarotist_response_at` | TIMESTAMP | NULLABLE                   | Fecha de respuesta del tarotista |
+| `created_at`           | TIMESTAMP | NOT NULL                   | Fecha de creación                |
+| `updated_at`           | TIMESTAMP | NOT NULL                   | Fecha de última actualización    |
+
+**Relaciones:**
+
+- `tarotista` ← `tarotistas` (N:1)
+- `user` ← `users` (N:1)
+- `reading` ← `tarot_reading` (N:1)
+
+**Índices:**
+
+```sql
+CREATE UNIQUE INDEX idx_review_user_tarotista ON tarotista_reviews(user_id, tarotista_id);
+CREATE INDEX idx_review_tarotista ON tarotista_reviews(tarotista_id);
+CREATE INDEX idx_review_is_approved ON tarotista_reviews(is_approved);
+```
+
+---
+
+### tarotista_revenue_metrics
+
+Métricas de ingresos por tarotista.
+
+| Columna             | Tipo          | Constraints                | Descripción                             |
+| ------------------- | ------------- | -------------------------- | --------------------------------------- |
+| `id`                | INTEGER       | PRIMARY KEY                | ID único autoincrementable              |
+| `tarotista_id`      | INTEGER       | FK tarotistas, NOT NULL    | Tarotista                               |
+| `user_id`           | INTEGER       | FK users, NOT NULL         | Usuario que generó el ingreso           |
+| `reading_id`        | INTEGER       | FK tarot_reading, NULLABLE | Lectura relacionada                     |
+| `subscription_type` | ENUM          | NOT NULL                   | Tipo: favorite, premium_individual, etc |
+| `revenue_share_usd` | DECIMAL(10,2) | NOT NULL                   | Ingreso del tarotista (post-comisión)   |
+| `platform_fee_usd`  | DECIMAL(10,2) | NOT NULL                   | Comisión de la plataforma               |
+| `total_revenue_usd` | DECIMAL(10,2) | NOT NULL                   | Ingreso total                           |
+| `calculation_date`  | DATE          | NOT NULL                   | Fecha de cálculo                        |
+| `period_start`      | DATE          | NOT NULL                   | Inicio del período                      |
+| `period_end`        | DATE          | NOT NULL                   | Fin del período                         |
+| `metadata`          | JSONB         | NULLABLE                   | Metadata adicional                      |
+| `created_at`        | TIMESTAMP     | NOT NULL                   | Fecha de creación                       |
+
+**Check Constraints:**
+
+```sql
+CHECK ("revenue_share_usd" + "platform_fee_usd" = "total_revenue_usd")
+```
+
+**Índices:**
+
+```sql
+CREATE INDEX idx_revenue_tarotista_date ON tarotista_revenue_metrics(tarotista_id, calculation_date);
+CREATE INDEX idx_revenue_period ON tarotista_revenue_metrics(tarotista_id, period_start, period_end);
+```
+
+---
+
+### user_tarotista_subscriptions
+
+Suscripciones de usuarios a tarotistas específicos.
+
+| Columna                  | Tipo         | Constraints             | Descripción                           |
+| ------------------------ | ------------ | ----------------------- | ------------------------------------- |
+| `id`                     | INTEGER      | PRIMARY KEY             | ID único autoincrementable            |
+| `user_id`                | INTEGER      | FK users, NOT NULL      | Usuario suscrito                      |
+| `tarotista_id`           | INTEGER      | FK tarotistas, NULLABLE | Tarotista (null para all-access)      |
+| `subscription_type`      | ENUM         | NOT NULL                | Tipo de suscripción                   |
+| `status`                 | ENUM         | DEFAULT 'active'        | Estado de la suscripción              |
+| `started_at`             | TIMESTAMP    | DEFAULT NOW()           | Fecha de inicio                       |
+| `expires_at`             | TIMESTAMP    | NULLABLE                | Fecha de expiración                   |
+| `cancelled_at`           | TIMESTAMP    | NULLABLE                | Fecha de cancelación                  |
+| `can_change_at`          | TIMESTAMP    | NULLABLE                | Fecha permitida para cambiar favorito |
+| `change_count`           | INTEGER      | DEFAULT 0               | Veces que cambió de favorito          |
+| `stripe_subscription_id` | VARCHAR(255) | NULLABLE                | ID de suscripción en Stripe           |
+| `created_at`             | TIMESTAMP    | NOT NULL                | Fecha de creación                     |
+| `updated_at`             | TIMESTAMP    | NOT NULL                | Fecha de última actualización         |
+
+**Enums:**
+
+```typescript
+// SubscriptionType
+enum SubscriptionType {
+  FAVORITE = 'favorite', // FREE: 1 tarotista favorito
+  PREMIUM_INDIVIDUAL = 'premium_individual', // PREMIUM: 1 específico
+  PREMIUM_ALL_ACCESS = 'premium_all_access', // PREMIUM: todos
+}
+```
+
+**Relaciones:**
+
+- `user` ← `users` (N:1)
+- `tarotista` ← `tarotistas` (N:1)
+
+---
+
 ### daily_readings
 
 Carta del día generada diariamente para cada usuario.
@@ -591,27 +937,320 @@ CREATE INDEX idx_usage_limit_user_id ON usage_limit(user_id);
 
 ### audit_logs
 
-Logs de auditoría para acciones críticas.
+Logs de auditoría para acciones críticas del sistema.
 
-| Columna       | Tipo      | Constraints        | Descripción                                |
-| ------------- | --------- | ------------------ | ------------------------------------------ |
-| `id`          | INTEGER   | PRIMARY KEY        | ID único autoincrementable                 |
-| `user_id`     | INTEGER   | FK users, NULLABLE | Usuario que realizó la acción              |
-| `action`      | VARCHAR   | NOT NULL           | Acción: 'user.ban', 'reading.delete', etc. |
-| `entity_type` | VARCHAR   | NULLABLE           | Tipo de entidad afectada                   |
-| `entity_id`   | VARCHAR   | NULLABLE           | ID de la entidad afectada                  |
-| `details`     | JSONB     | NULLABLE           | Detalles adicionales                       |
-| `ip_address`  | VARCHAR   | NULLABLE           | IP del usuario                             |
-| `user_agent`  | TEXT      | NULLABLE           | User agent del navegador                   |
-| `created_at`  | TIMESTAMP | NOT NULL           | Fecha de creación                          |
+| Columna          | Tipo         | Constraints        | Descripción                    |
+| ---------------- | ------------ | ------------------ | ------------------------------ |
+| `id`             | UUID         | PRIMARY KEY        | ID único UUID                  |
+| `user_id`        | INTEGER      | FK users, NULLABLE | Usuario que realizó la acción  |
+| `target_user_id` | INTEGER      | FK users, NULLABLE | Usuario afectado por la acción |
+| `action`         | ENUM         | NOT NULL           | Acción (AuditAction enum)      |
+| `entity_type`    | VARCHAR(100) | NOT NULL           | Tipo de entidad afectada       |
+| `entity_id`      | VARCHAR(255) | NOT NULL           | ID de la entidad afectada      |
+| `old_value`      | JSONB        | NULLABLE           | Valor anterior                 |
+| `new_value`      | JSONB        | NOT NULL           | Valor nuevo                    |
+| `ip_address`     | VARCHAR(45)  | NULLABLE           | IP del usuario                 |
+| `user_agent`     | TEXT         | NULLABLE           | User agent del navegador       |
+| `created_at`     | TIMESTAMP    | NOT NULL           | Fecha de creación              |
+
+**Enum AuditAction:**
+
+```typescript
+enum AuditAction {
+  USER_CREATED = 'user_created',
+  USER_BANNED = 'user_banned',
+  USER_UNBANNED = 'user_unbanned',
+  USER_DELETED = 'user_deleted',
+  ROLE_ADDED = 'role_added',
+  ROLE_REMOVED = 'role_removed',
+  PLAN_CHANGED = 'plan_changed',
+  READING_DELETED = 'reading_deleted',
+  READING_RESTORED = 'reading_restored',
+  CARD_MODIFIED = 'card_modified',
+  SPREAD_MODIFIED = 'spread_modified',
+  CONFIG_CHANGED = 'config_changed',
+}
+```
 
 **Índices:**
 
 ```sql
-CREATE INDEX idx_audit_logs_user_id ON audit_logs(user_id);
-CREATE INDEX idx_audit_logs_action ON audit_logs(action);
-CREATE INDEX idx_audit_logs_created_at ON audit_logs(created_at DESC);
-CREATE INDEX idx_audit_logs_entity ON audit_logs(entity_type, entity_id);
+CREATE INDEX idx_audit_logs_user_id ON audit_logs(user_id, created_at);
+CREATE INDEX idx_audit_logs_action ON audit_logs(action, created_at);
+CREATE INDEX idx_audit_logs_entity ON audit_logs(entity_type, created_at);
+CREATE INDEX idx_audit_logs_target ON audit_logs(target_user_id, created_at);
+```
+
+---
+
+## Tablas de Autenticación
+
+### refresh_tokens
+
+Tokens de refresco para autenticación JWT.
+
+| Columna      | Tipo         | Constraints        | Descripción                    |
+| ------------ | ------------ | ------------------ | ------------------------------ |
+| `id`         | UUID         | PRIMARY KEY        | ID único UUID                  |
+| `user_id`    | INTEGER      | FK users, NOT NULL | Usuario propietario del token  |
+| `token`      | VARCHAR(500) | NOT NULL           | Token de refresh               |
+| `token_hash` | VARCHAR(64)  | NOT NULL           | Hash del token para validación |
+| `expires_at` | TIMESTAMP    | NOT NULL           | Fecha de expiración            |
+| `created_at` | TIMESTAMP    | NOT NULL           | Fecha de creación              |
+| `revoked_at` | TIMESTAMP    | NULLABLE           | Fecha de revocación            |
+| `ip_address` | VARCHAR(45)  | NULLABLE           | IP desde donde se creó         |
+| `user_agent` | VARCHAR(500) | NULLABLE           | User agent del navegador       |
+
+**Métodos:**
+
+- `isExpired()`: Verifica si el token ha expirado
+- `isRevoked()`: Verifica si fue revocado
+- `isValid()`: Verifica si es válido (no expirado ni revocado)
+- `revoke()`: Revoca el token
+
+**Índices:**
+
+```sql
+CREATE INDEX idx_refresh_token_user ON refresh_tokens(user_id, token);
+CREATE INDEX idx_refresh_token_hash ON refresh_tokens(token_hash);
+```
+
+---
+
+### password_reset_tokens
+
+Tokens para recuperación de contraseña.
+
+| Columna      | Tipo        | Constraints        | Descripción                   |
+| ------------ | ----------- | ------------------ | ----------------------------- |
+| `id`         | UUID        | PRIMARY KEY        | ID único UUID                 |
+| `user_id`    | INTEGER     | FK users, NOT NULL | Usuario que solicitó el reset |
+| `token`      | VARCHAR(64) | NOT NULL           | Token hasheado                |
+| `expires_at` | TIMESTAMP   | NOT NULL           | Fecha de expiración           |
+| `used_at`    | TIMESTAMP   | NULLABLE           | Fecha en que se usó           |
+| `created_at` | TIMESTAMP   | NOT NULL           | Fecha de creación             |
+
+---
+
+## Tablas de Scheduling
+
+### sessions
+
+Sesiones programadas entre usuarios y tarotistas.
+
+| Columna               | Tipo          | Constraints             | Descripción                |
+| --------------------- | ------------- | ----------------------- | -------------------------- |
+| `id`                  | INTEGER       | PRIMARY KEY             | ID único autoincrementable |
+| `tarotista_id`        | INTEGER       | FK tarotistas, NOT NULL | Tarotista de la sesión     |
+| `user_id`             | INTEGER       | FK users, NOT NULL      | Usuario que reservó        |
+| `session_date`        | DATE          | NOT NULL                | Fecha de la sesión         |
+| `session_time`        | TIME          | NOT NULL                | Hora de inicio (HH:MM)     |
+| `duration_minutes`    | INTEGER       | NOT NULL                | Duración en minutos        |
+| `session_type`        | ENUM          | NOT NULL                | Tipo de sesión             |
+| `status`              | ENUM          | DEFAULT 'pending'       | Estado de la sesión        |
+| `price_usd`           | DECIMAL(10,2) | NOT NULL                | Precio en USD              |
+| `payment_status`      | ENUM          | DEFAULT 'pending'       | Estado del pago            |
+| `google_meet_link`    | VARCHAR(255)  | NOT NULL                | Link de Google Meet        |
+| `user_email`          | VARCHAR(255)  | NOT NULL                | Email del usuario          |
+| `user_notes`          | TEXT          | NULLABLE                | Notas del usuario          |
+| `tarotist_notes`      | TEXT          | NULLABLE                | Notas del tarotista        |
+| `cancelled_at`        | TIMESTAMP     | NULLABLE                | Fecha de cancelación       |
+| `cancellation_reason` | TEXT          | NULLABLE                | Razón de cancelación       |
+| `confirmed_at`        | TIMESTAMP     | NULLABLE                | Fecha de confirmación      |
+| `completed_at`        | TIMESTAMP     | NULLABLE                | Fecha de completado        |
+| `created_at`          | TIMESTAMP     | NOT NULL                | Fecha de creación          |
+| `updated_at`          | TIMESTAMP     | NOT NULL                | Fecha de actualización     |
+
+**Enums:**
+
+```typescript
+enum SessionType {
+  VIDEO_CALL = 'video_call',
+  PHONE_CALL = 'phone_call',
+  CHAT = 'chat',
+}
+
+enum SessionStatus {
+  PENDING = 'pending',
+  CONFIRMED = 'confirmed',
+  CANCELLED = 'cancelled',
+  COMPLETED = 'completed',
+  NO_SHOW = 'no_show',
+}
+
+enum PaymentStatus {
+  PENDING = 'pending',
+  PAID = 'paid',
+  REFUNDED = 'refunded',
+  FAILED = 'failed',
+}
+```
+
+**Índices:**
+
+```sql
+CREATE INDEX idx_session_tarotista_date ON sessions(tarotista_id, session_date, session_time);
+CREATE INDEX idx_session_user_date ON sessions(user_id, session_date);
+CREATE INDEX idx_session_status ON sessions(status);
+```
+
+---
+
+### tarotist_availability
+
+Disponibilidad semanal de los tarotistas.
+
+| Columna        | Tipo      | Constraints             | Descripción                    |
+| -------------- | --------- | ----------------------- | ------------------------------ |
+| `id`           | INTEGER   | PRIMARY KEY             | ID único autoincrementable     |
+| `tarotista_id` | INTEGER   | FK tarotistas, NOT NULL | Tarotista                      |
+| `day_of_week`  | INTEGER   | NOT NULL                | Día (0=Dom, 1=Lun, ..., 6=Sab) |
+| `start_time`   | TIME      | NOT NULL                | Hora de inicio (HH:MM)         |
+| `end_time`     | TIME      | NOT NULL                | Hora de fin (HH:MM)            |
+| `is_active`    | BOOLEAN   | DEFAULT true            | Si este bloque está activo     |
+| `created_at`   | TIMESTAMP | NOT NULL                | Fecha de creación              |
+| `updated_at`   | TIMESTAMP | NOT NULL                | Fecha de actualización         |
+
+**Índices:**
+
+```sql
+CREATE INDEX idx_availability_tarotista_day ON tarotist_availability(tarotista_id, day_of_week);
+```
+
+---
+
+### tarotist_exceptions
+
+Excepciones de disponibilidad (vacaciones, horarios especiales).
+
+| Columna          | Tipo      | Constraints             | Descripción                   |
+| ---------------- | --------- | ----------------------- | ----------------------------- |
+| `id`             | INTEGER   | PRIMARY KEY             | ID único autoincrementable    |
+| `tarotista_id`   | INTEGER   | FK tarotistas, NOT NULL | Tarotista                     |
+| `exception_date` | DATE      | NOT NULL                | Fecha de la excepción         |
+| `exception_type` | ENUM      | NOT NULL                | Tipo: blocked, custom_hours   |
+| `start_time`     | TIME      | NULLABLE                | Hora inicio (si custom_hours) |
+| `end_time`       | TIME      | NULLABLE                | Hora fin (si custom_hours)    |
+| `reason`         | TEXT      | NULLABLE                | Razón de la excepción         |
+| `created_at`     | TIMESTAMP | NOT NULL                | Fecha de creación             |
+
+**Índices:**
+
+```sql
+CREATE UNIQUE INDEX idx_exception_tarotista_date ON tarotist_exceptions(tarotista_id, exception_date);
+```
+
+---
+
+## Tablas de Monitoreo
+
+### ai_usage_logs
+
+Logs de uso de proveedores de IA.
+
+| Columna             | Tipo          | Constraints            | Descripción                        |
+| ------------------- | ------------- | ---------------------- | ---------------------------------- |
+| `id`                | UUID          | PRIMARY KEY            | ID único UUID                      |
+| `user_id`           | INTEGER       | FK users, NULLABLE     | Usuario que hizo la petición       |
+| `reading_id`        | INTEGER       | FK tarot_reading, NULL | Lectura relacionada                |
+| `tarotista_id`      | INTEGER       | NULLABLE               | Tarotista asociado                 |
+| `provider`          | ENUM          | NOT NULL               | Proveedor: groq, openai, deepseek  |
+| `model_used`        | VARCHAR(100)  | NOT NULL               | Modelo usado (llama-3.1-70b, etc.) |
+| `prompt_tokens`     | INTEGER       | DEFAULT 0              | Tokens del prompt                  |
+| `completion_tokens` | INTEGER       | DEFAULT 0              | Tokens de la respuesta             |
+| `total_tokens`      | INTEGER       | DEFAULT 0              | Total de tokens                    |
+| `cost_usd`          | DECIMAL(10,6) | DEFAULT 0              | Costo en USD                       |
+| `duration_ms`       | INTEGER       | DEFAULT 0              | Duración en milisegundos           |
+| `status`            | ENUM          | DEFAULT 'success'      | Estado: success, error, cached     |
+| `error_message`     | TEXT          | NULLABLE               | Mensaje de error si falló          |
+| `fallback_used`     | BOOLEAN       | DEFAULT false          | Si se usó fallback                 |
+| `created_at`        | TIMESTAMP     | NOT NULL               | Fecha de creación                  |
+
+**Enums:**
+
+```typescript
+enum AIProvider {
+  GROQ = 'groq',
+  DEEPSEEK = 'deepseek',
+  OPENAI = 'openai',
+  GEMINI = 'gemini',
+}
+
+enum AIUsageStatus {
+  SUCCESS = 'success',
+  ERROR = 'error',
+  CACHED = 'cached',
+}
+```
+
+**Índices:**
+
+```sql
+CREATE INDEX idx_ai_usage_user ON ai_usage_logs(user_id, created_at);
+CREATE INDEX idx_ai_usage_provider ON ai_usage_logs(provider, created_at);
+```
+
+---
+
+### security_events
+
+Eventos de seguridad del sistema.
+
+| Columna      | Tipo        | Constraints        | Descripción                            |
+| ------------ | ----------- | ------------------ | -------------------------------------- |
+| `id`         | UUID        | PRIMARY KEY        | ID único UUID                          |
+| `event_type` | ENUM        | NOT NULL           | Tipo de evento de seguridad            |
+| `user_id`    | INTEGER     | FK users, NULLABLE | Usuario relacionado                    |
+| `ip_address` | VARCHAR(45) | NULLABLE           | IP del evento                          |
+| `user_agent` | TEXT        | NULLABLE           | User agent                             |
+| `severity`   | ENUM        | NOT NULL           | Severidad: low, medium, high, critical |
+| `details`    | JSONB       | NULLABLE           | Detalles adicionales                   |
+| `created_at` | TIMESTAMP   | NOT NULL           | Fecha de creación                      |
+
+**Índices:**
+
+```sql
+CREATE INDEX idx_security_user ON security_events(user_id, created_at);
+CREATE INDEX idx_security_type ON security_events(event_type, created_at);
+CREATE INDEX idx_security_severity ON security_events(severity, created_at);
+CREATE INDEX idx_security_ip ON security_events(ip_address, created_at);
+```
+
+---
+
+### cached_interpretations
+
+Caché de interpretaciones generadas por IA.
+
+| Columna               | Tipo         | Constraints      | Descripción                    |
+| --------------------- | ------------ | ---------------- | ------------------------------ |
+| `id`                  | UUID         | PRIMARY KEY      | ID único UUID                  |
+| `cache_key`           | VARCHAR(255) | UNIQUE, NOT NULL | Clave única del caché          |
+| `tarotista_id`        | INTEGER      | NULLABLE         | Tarotista asociado             |
+| `spread_id`           | INTEGER      | NULLABLE         | Tipo de tirada                 |
+| `card_combination`    | JSONB        | NOT NULL         | Combinación de cartas cacheada |
+| `question_hash`       | VARCHAR(64)  | NOT NULL         | Hash de la pregunta            |
+| `interpretation_text` | TEXT         | NOT NULL         | Interpretación cacheada        |
+| `hit_count`           | INTEGER      | DEFAULT 0        | Veces que se usó el caché      |
+| `last_used_at`        | TIMESTAMP    | NULLABLE         | Última vez que se usó          |
+| `created_at`          | TIMESTAMP    | NOT NULL         | Fecha de creación              |
+| `expires_at`          | TIMESTAMP    | NOT NULL         | Fecha de expiración            |
+
+**Estructura de `card_combination` (JSONB):**
+
+```json
+[
+  { "card_id": "1", "position": 0, "is_reversed": false },
+  { "card_id": "15", "position": 1, "is_reversed": true }
+]
+```
+
+**Índices:**
+
+```sql
+CREATE INDEX idx_cache_key ON cached_interpretations(cache_key);
+CREATE INDEX idx_cache_tarotista_spread ON cached_interpretations(tarotista_id, spread_id, question_hash);
+CREATE INDEX idx_cache_tarotista_created ON cached_interpretations(tarotista_id, created_at);
 ```
 
 ---
@@ -1066,7 +1705,8 @@ npm run migration:show
 
 ---
 
-**Versión**: 1.0.0  
-**Última actualización**: Noviembre 2025  
-**PostgreSQL Version**: 15+  
-**TypeORM Version**: 0.3.x
+**Versión**: 1.1.0  
+**Última actualización**: Diciembre 2025  
+**PostgreSQL Version**: 16  
+**TypeORM Version**: 0.3.x  
+**Relacionado**: [DATABASE_POOLING.md](./DATABASE_POOLING.md), [ARCHITECTURE.md](./ARCHITECTURE.md)

@@ -6,11 +6,33 @@ mvp-complete-test.sh
 mvp-final-corrected.sh
 mvp-test-fixed.sh
 mvp-test.sh
+test-*-endpoints.sh
+test-tarotistas-curl.*
+create-test-users.sh
+mvp-test-with-seeded-users.sh
+run-e2e-sequential.sh
 
 # Test result files
 *-results.txt
 e2e-*.txt
 test-results*.txt
+
+# Log files
+*.log
+build-baseline.log
+e2e-*.log
+test-*.log
+npm-*.log
+
+# Output/baseline files
+*-baseline.txt
+*-coverage.txt
+validation-*.txt
+before-validation.txt
+test-output.txt
+
+# Backup files
+*.bak
 
 # Coverage reports
 coverage/

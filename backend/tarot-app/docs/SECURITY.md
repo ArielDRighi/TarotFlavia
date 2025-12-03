@@ -158,6 +158,13 @@ See [INPUT_VALIDATION.md](./INPUT_VALIDATION.md) for comprehensive input securit
 - Refresh tokens: 7 days expiry
 - Secure secret keys (never committed to git)
 
+**Token Management:**
+
+- `refresh_tokens` table stores active refresh tokens
+- `password_reset_tokens` table for secure password recovery
+- Token rotation on refresh
+- Automatic revocation on logout
+
 **Best Practices:**
 
 ```bash
@@ -169,9 +176,9 @@ openssl rand -base64 64
 
 **Roles:**
 
-- `user`: Standard user (default)
-- `premium`: Paid subscription user
-- `admin`: Administrator
+- `CONSUMER`: Standard user (default)
+- `TAROTIST`: Tarotista profesional con panel propio
+- `ADMIN`: Administrator
 
 **Guards:**
 
@@ -273,14 +280,63 @@ const isValid = await bcrypt.compare(password, hashedPassword);
 - User agent
 - Request details
 
-### Security Events (Future - TASK-049)
+### Security Events
 
-**Planned:**
+**Location:** `src/modules/security/`
 
-- Real-time security event monitoring
-- Automatic alerts for critical events
-- IP blacklisting for repeated attacks
-- Integration with external monitoring tools (Datadog, Sentry)
+**Implemented:** Comprehensive security event logging system for monitoring and alerting.
+
+**What's Tracked:**
+
+- Failed login attempts
+- Suspicious activity patterns
+- XSS attempts detected
+- Rate limit violations
+- Unauthorized access attempts
+- Account lockouts
+
+**Storage:** `security_events` table with:
+
+| Field        | Description                       |
+| ------------ | --------------------------------- |
+| `event_type` | Type of security event            |
+| `severity`   | CRITICAL, HIGH, MEDIUM, LOW, INFO |
+| `user_id`    | Associated user (if any)          |
+| `ip_address` | Source IP address                 |
+| `user_agent` | Browser/client info               |
+| `endpoint`   | API endpoint involved             |
+| `details`    | JSONB with additional context     |
+| `timestamp`  | When the event occurred           |
+
+**Event Types (SecurityEventType enum):**
+
+```typescript
+enum SecurityEventType {
+  LOGIN_FAILED = 'LOGIN_FAILED',
+  LOGIN_SUCCESS = 'LOGIN_SUCCESS',
+  ACCOUNT_LOCKED = 'ACCOUNT_LOCKED',
+  PASSWORD_RESET_REQUESTED = 'PASSWORD_RESET_REQUESTED',
+  SUSPICIOUS_ACTIVITY = 'SUSPICIOUS_ACTIVITY',
+  RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED',
+  UNAUTHORIZED_ACCESS = 'UNAUTHORIZED_ACCESS',
+  XSS_ATTEMPT = 'XSS_ATTEMPT',
+  TOKEN_REVOKED = 'TOKEN_REVOKED',
+}
+```
+
+**Severity Levels:**
+
+- **CRITICAL:** Immediate attention required (breaches, mass attacks)
+- **HIGH:** Significant security concern
+- **MEDIUM:** Notable events requiring review
+- **LOW:** Minor anomalies
+- **INFO:** Informational logging
+
+**Admin Endpoints:**
+
+- `GET /admin/security-events` - List all events (paginated)
+- `GET /admin/security-events/stats` - Event statistics
+- `GET /admin/security-events/recent` - Recent critical events
 
 ## Vulnerability Management
 
@@ -585,9 +641,9 @@ this.logger.log(`User ${user.email} logged in with password ${password}`); // NE
 
 ---
 
-**Version:** 2.0.0  
-**Last Updated:** November 2025  
-**Next Review:** February 2026  
+**Version:** 2.1.0  
+**Last Updated:** December 2025  
+**Next Review:** March 2026  
 **Maintained by:** Development Team
 
 ## Related Documentation

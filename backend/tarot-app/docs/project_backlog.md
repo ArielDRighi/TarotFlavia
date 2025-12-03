@@ -1,10 +1,10 @@
 # 🎯 FASE 1: MVP - CRÍTICO PARA LANZAMIENTO
 
-> **📊 ANÁLISIS MVP ACTUALIZADO:** Ver documento `MVP_RESUMEN_EJECUTIVO.md` para resumen completo
+> **📊 ESTADO DEL MVP:** Ver documento `MVP_ESTADO_ACTUAL.md` para estado actualizado del proyecto
 >
-> **🧪 ESTRATEGIA DE TESTING:** Ver documento `TESTING_STRATEGY.md` para detalles de testing
+> **🧪 ESTRATEGIA DE TESTING:** Ver documento `TESTING.md` para detalles de testing
 >
-> **Última actualización:** 29 de Octubre, 2025
+> **Última actualización:** 2 de Diciembre, 2025
 
 ---
 
