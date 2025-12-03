@@ -6,34 +6,86 @@
 
 ---
 
+## 🏗️ CONTEXTO: MONOREPO
+
+> ⚠️ **IMPORTANTE:** Este proyecto usa una estructura **monorepo con npm workspaces**.
+
+### Estructura del repositorio:
+
+```
+tarot-monorepo/
+├── package.json          # Root - coordina workspaces
+├── node_modules/         # Dependencias compartidas (instaladas aquí)
+├── backend/
+│   └── tarot-app/        # NestJS backend (puerto 3000)
+├── frontend/             # Next.js frontend (puerto 3001) ← TRABAJAR AQUÍ
+│   ├── package.json      # Ya existe, registrado en workspaces
+│   └── docs/             # Documentación frontend
+└── docs/                 # Documentación general
+```
+
+### Reglas de trabajo en monorepo:
+
+| Acción                   | Comando                                  | Ubicación             |
+| ------------------------ | ---------------------------------------- | --------------------- |
+| Instalar dependencias    | `npm install`                            | **Raíz del proyecto** |
+| Agregar dep. al frontend | `npm install <paquete> -w frontend`      | Raíz del proyecto     |
+| Ejecutar frontend        | `npm run dev -w frontend`                | Raíz del proyecto     |
+| Ejecutar backend         | `npm run start:dev -w backend/tarot-app` | Raíz del proyecto     |
+| Ejecutar desde carpeta   | `npm run dev`                            | Dentro de `frontend/` |
+
+### Puertos por defecto:
+
+- **Backend NestJS:** `http://localhost:3000`
+- **Frontend Next.js:** `http://localhost:3001`
+- **API URL para frontend:** `http://localhost:3000/api`
+
+### Antes de comenzar:
+
+1. Asegúrate de estar en la carpeta `frontend/` del monorepo existente
+2. NO crees un nuevo repositorio ni carpeta
+3. El `package.json` de frontend ya existe y está registrado en workspaces
+4. Las dependencias se instalan desde la raíz con `-w frontend`
+
+---
+
 ## 📦 FASE 0: SETUP INICIAL
 
-### TAREA 0.1: Inicializar proyecto Next.js 14
+### TAREA 0.1: Inicializar proyecto Next.js 14 en monorepo existente
 
 **Prioridad:** CRÍTICA
 **Estimación:** 30 min
 **Dependencias:** Ninguna
 
 **Consigna:**
-Crear proyecto Next.js 14 con App Router, TypeScript, Tailwind CSS y ESLint. Configurar estructura de carpetas según convenciones establecidas.
+Inicializar Next.js 14 en la carpeta `frontend/` existente del monorepo. Configurar App Router, TypeScript, Tailwind CSS y estructura de carpetas.
 
 **Prompt:**
 
 ```
-Crea un nuevo proyecto Next.js 14 con estas especificaciones:
+Inicializa Next.js 14 en la carpeta frontend/ del monorepo existente:
 
-SETUP:
-- Usa npx create-next-app@latest con las siguientes opciones:
-  - TypeScript: Sí
-  - ESLint: Sí
-  - Tailwind CSS: Sí
-  - src/ directory: Sí
-  - App Router: Sí
-  - Import alias: @/*
+⚠️ CONTEXTO MONOREPO:
+- Ya existe la carpeta frontend/ con package.json registrado en workspaces
+- El backend NestJS corre en puerto 3000
+- El frontend debe correr en puerto 3001 para evitar conflictos
 
-ESTRUCTURA DE CARPETAS (dentro de src/):
+PASO 1 - INICIALIZAR NEXT.JS:
+Desde la carpeta frontend/, ejecuta:
+  npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias "@/*"
+
+Nota: El "." indica que se instale en la carpeta actual (frontend/), no crear subcarpeta.
+
+PASO 2 - CONFIGURAR PUERTO:
+Modificar package.json del frontend para usar puerto 3001:
+  "scripts": {
+    "dev": "next dev -p 3001",
+    ...
+  }
+
+PASO 3 - ESTRUCTURA DE CARPETAS (dentro de src/):
 src/
-├── app/              # Rutas de Next.js
+├── app/              # Rutas de Next.js (App Router)
 ├── components/
 │   ├── ui/          # Componentes shadcn/ui
 │   └── features/    # Componentes de negocio
@@ -43,11 +95,18 @@ src/
 ├── types/           # TypeScript types
 └── styles/          # CSS globales
 
-CONFIGURACIONES ADICIONALES:
-- Crear archivo .env.local con:
+PASO 4 - VARIABLES DE ENTORNO:
+Crear archivo .env.local en frontend/ con:
   NEXT_PUBLIC_API_URL=http://localhost:3000/api
-- Agregar al .gitignore: .env.local
-- Crear archivo README.md con instrucciones de instalación
+
+PASO 5 - ACTUALIZAR .gitignore:
+Agregar al .gitignore de frontend/:
+  .env.local
+  .env*.local
+
+VERIFICACIÓN:
+- Desde frontend/: npm run dev → debe abrir http://localhost:3001
+- Desde raíz: npm run dev -w frontend → mismo resultado
 
 NO incluyas ejemplos de componentes, solo la estructura base.
 ```
@@ -109,13 +168,22 @@ Instalar todas las dependencias necesarias para el proyecto: shadcn/ui, Zustand,
 ```
 Instala las siguientes dependencias en el proyecto:
 
-DEPENDENCIAS PRINCIPALES:
-npm install zustand @tanstack/react-query axios zod date-fns clsx class-variance-authority lucide-react
+⚠️ CONTEXTO MONOREPO:
+Puedes instalar de dos formas:
+- Desde la raíz: npm install <paquete> -w frontend
+- Desde frontend/: npm install <paquete>
 
-DEPENDENCIAS DE DESARROLLO:
+OPCIÓN A - DESDE CARPETA FRONTEND/:
+cd frontend
+npm install zustand @tanstack/react-query axios zod date-fns clsx class-variance-authority lucide-react
 npm install -D @tanstack/react-query-devtools
 
-CONFIGURAR SHADCN/UI:
+OPCIÓN B - DESDE RAÍZ DEL MONOREPO:
+npm install zustand @tanstack/react-query axios zod date-fns clsx class-variance-authority lucide-react -w frontend
+npm install -D @tanstack/react-query-devtools -w frontend
+
+CONFIGURAR SHADCN/UI (ejecutar desde frontend/):
+cd frontend
 npx shadcn-ui@latest init
 
 Opciones para shadcn/ui:
