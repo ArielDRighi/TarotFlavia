@@ -93,8 +93,11 @@ npm run test:watch       # Tests en modo watch
 npm run test:cov         # Tests con coverage
 npm run test:ui          # Abrir UI de Vitest
 
+# Validación de Arquitectura
+node scripts/validate-architecture.js  # Validar arquitectura feature-based
+
 # Ciclo Completo de Calidad (pre-commit)
-npm run quality          # Ejecuta: lint + type-check + format + build + test
+npm run quality          # Ejecuta: lint + type-check + format + validate + build + test
 ```
 
 ## 🏗️ Estructura del Proyecto

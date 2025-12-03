@@ -430,19 +430,31 @@ npm run format
 
 # Prettier formatea automáticamente
 
-# 4. BUILD - Compilar para producción
+# 4. VALIDATE ARCHITECTURE - Validar arquitectura
+node scripts/validate-architecture.js
+
+# Valida:
+# - Nomenclatura correcta (PascalCase, camelCase)
+# - No uso de 'any'
+# - No eslint-disable ni ts-ignore
+# - Importaciones con @/ alias
+# - Sin lógica en app/ (solo en components/features/)
+# - Estructura feature-based correcta
+# - Hooks API usan React Query
+
+# 5. BUILD - Compilar para producción
 npm run build
 
 # Debe completar sin errores
 # Warnings aceptables solo si están documentados
 
-# 5. TESTS - Ejecutar todos los tests
+# 6. TESTS - Ejecutar todos los tests
 npm test
 
 # Coverage mínimo: 80% (configurado en vitest.config.ts)
 # Todos los tests deben pasar ✅
 
-# 6. TESTS E2E (solo si aplica)
+# 7. TESTS E2E (solo si aplica)
 npm run test:e2e
 
 # Ejecutar solo si modificaste flujos completos
@@ -454,6 +466,7 @@ npm run test:e2e
 □ npm run lint → Sin errores ni warnings
 □ npm run type-check → Sin errores de tipos
 □ npm run format → Código formateado
+□ node scripts/validate-architecture.js → Arquitectura válida
 □ npm run build → Build exitoso
 □ npm test → 100% tests pasando + coverage ≥80%
 □ Manual testing → Verificar en http://localhost:3001

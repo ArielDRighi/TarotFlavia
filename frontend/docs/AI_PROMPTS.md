@@ -84,12 +84,13 @@ Sigue un ciclo TDD riguroso:
 Al finalizar la implementación, ejecuta TODOS estos comandos:
 
 ```bash
-npm run lint           # 0 errores, 0 warnings
-npm run type-check     # 0 errores de tipos
-npm run format         # Formatear con Prettier
-npm run build          # Build debe ser exitoso
-npm test               # 100% tests pasando
-npm run test:cov       # Coverage ≥ 80%
+npm run lint                          # 0 errores, 0 warnings
+npm run type-check                    # 0 errores de tipos
+npm run format                        # Formatear con Prettier
+node scripts/validate-architecture.js # Validar arquitectura
+npm run build                         # Build debe ser exitoso
+npm test                              # 100% tests pasando
+npm run test:cov                      # Coverage ≥ 80%
 ````
 
 Corrige TODOS los errores y warnings que surjan.

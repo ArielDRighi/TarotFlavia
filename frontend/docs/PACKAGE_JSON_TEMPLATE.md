@@ -20,11 +20,12 @@ Después de ejecutar `npx create-next-app@latest`, modificar `package.json`:
     "format": "prettier --write \"src/**/*.{ts,tsx,json,css,md}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,json,css,md}\"",
     "type-check": "tsc --noEmit",
+    "validate": "node scripts/validate-architecture.js",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:cov": "vitest run --coverage",
     "test:ui": "vitest --ui",
-    "quality": "npm run lint && npm run type-check && npm run format && npm run build && npm run test"
+    "quality": "npm run lint && npm run type-check && npm run format && npm run validate && npm run build && npm run test"
   },
   "dependencies": {
     "next": "14.0.4",
