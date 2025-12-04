@@ -12,7 +12,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 
 export interface ConfirmationModalProps {
   /** Whether the modal is open */
@@ -89,7 +88,7 @@ export function ConfirmationModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={isDisabled ? undefined : onOpenChange}>
       <DialogContent showCloseButton={!isDisabled}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
@@ -105,7 +104,6 @@ export function ConfirmationModal({
             data-variant={variant}
             onClick={handleConfirm}
             disabled={isDisabled}
-            className={cn(variant === 'destructive' && 'bg-destructive hover:bg-destructive/90')}
           >
             {(loading || isLoading) && (
               <Loader2Icon data-testid="loading-spinner" className="mr-2 h-4 w-4 animate-spin" />

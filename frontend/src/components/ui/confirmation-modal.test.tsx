@@ -126,6 +126,33 @@ describe('ConfirmationModal', () => {
 
       expect(onConfirm).toHaveBeenCalledTimes(1);
 
+      // Verify spinner appears during async operation (internal isLoading state)
+      expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
+
+      await waitFor(() => {
+        expect(onOpenChange).toHaveBeenCalledWith(false);
+      });
+    });
+
+    it('should disable both buttons during async operation', async () => {
+      const onConfirm = vi
+        .fn()
+        .mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 100)));
+      const onOpenChange = vi.fn();
+
+      render(
+        <ConfirmationModal {...defaultProps} onConfirm={onConfirm} onOpenChange={onOpenChange} />
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: 'Confirmar' }));
+
+      // Verify both buttons are disabled during async operation
+      const confirmButton = screen.getByRole('button', { name: /Confirmar/i });
+      const cancelButton = screen.getByRole('button', { name: 'Cancelar' });
+
+      expect(confirmButton).toBeDisabled();
+      expect(cancelButton).toBeDisabled();
+
       await waitFor(() => {
         expect(onOpenChange).toHaveBeenCalledWith(false);
       });
@@ -146,6 +173,17 @@ describe('ConfirmationModal', () => {
       });
 
       expect(onOpenChange).not.toHaveBeenCalledWith(false);
+    });
+
+    it('should prevent closing modal during loading via onOpenChange', () => {
+      const onOpenChange = vi.fn();
+      render(<ConfirmationModal {...defaultProps} loading={true} onOpenChange={onOpenChange} />);
+
+      // The onOpenChange should be undefined when loading, preventing close via ESC or overlay click
+      // We verify the modal is still visible and buttons are disabled
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Confirmar/i })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Cancelar' })).toBeDisabled();
     });
   });
 
