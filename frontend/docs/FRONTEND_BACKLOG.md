@@ -679,11 +679,51 @@ IMPORTANTE:
 
 ---
 
-### TAREA 2.2: Crear páginas base de rutas
+### ✅ TAREA 2.2: Crear páginas base de rutas
 
+**Estado:** ✅ COMPLETADA (2025-12-04)
 **Prioridad:** ALTA
 **Estimación:** 30 min
 **Dependencias:** 2.1
+
+**Resumen de Implementación:**
+
+- Creadas todas las páginas base de rutas con TDD (tests primero, luego implementación)
+- Estructura completa de rutas en `src/app/`:
+  - `login/page.tsx` - Página de Login
+  - `registro/page.tsx` - Página de Registro
+  - `recuperar-password/page.tsx` - Recuperar Contraseña
+  - `explorar/page.tsx` - Marketplace Tarotistas
+  - `tarotistas/[id]/page.tsx` - Perfil Público Tarotista (ruta dinámica)
+  - `ritual/page.tsx` - Lectura con IA
+  - `historial/page.tsx` - Historial de Lecturas
+  - `carta-del-dia/page.tsx` - Carta del Día
+  - `perfil/page.tsx` - Mi Perfil
+  - `sesiones/page.tsx` - Mis Sesiones
+  - `admin/layout.tsx` - Layout Admin con indicador visual
+  - `admin/page.tsx` - Dashboard Admin
+  - `admin/usuarios/page.tsx` - Gestión de Usuarios
+  - `admin/tarotistas/page.tsx` - Gestión de Tarotistas
+- Todas las páginas son Server Components con `min-h-screen` y `bg-bg-main`
+- Tests con 100% coverage para todas las páginas nuevas
+- Build exitoso con todas las rutas generadas correctamente
+
+**Archivos creados:**
+
+- `src/app/login/page.tsx`, `src/app/login/page.test.tsx`
+- `src/app/registro/page.tsx`, `src/app/registro/page.test.tsx`
+- `src/app/recuperar-password/page.tsx`, `src/app/recuperar-password/page.test.tsx`
+- `src/app/explorar/page.tsx`, `src/app/explorar/page.test.tsx`
+- `src/app/tarotistas/[id]/page.tsx`, `src/app/tarotistas/[id]/page.test.tsx`
+- `src/app/ritual/page.tsx`, `src/app/ritual/page.test.tsx`
+- `src/app/historial/page.tsx`, `src/app/historial/page.test.tsx`
+- `src/app/carta-del-dia/page.tsx`, `src/app/carta-del-dia/page.test.tsx`
+- `src/app/perfil/page.tsx`, `src/app/perfil/page.test.tsx`
+- `src/app/sesiones/page.tsx`, `src/app/sesiones/page.test.tsx`
+- `src/app/admin/layout.tsx`, `src/app/admin/layout.test.tsx`
+- `src/app/admin/page.tsx`, `src/app/admin/page.test.tsx`
+- `src/app/admin/usuarios/page.tsx`, `src/app/admin/usuarios/page.test.tsx`
+- `src/app/admin/tarotistas/page.tsx`, `src/app/admin/tarotistas/page.test.tsx`
 
 **Consigna:**
 Crear estructura de carpetas y archivos page.tsx vacíos para todas las rutas de la aplicación.
