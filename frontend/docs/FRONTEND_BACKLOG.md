@@ -455,14 +455,21 @@ EXPORTAR:
 
 ---
 
-### TAREA 1.3: Crear componente ConfirmationModal
+### TAREA 1.3: Crear componente ConfirmationModal ✅
 
 **Prioridad:** MEDIA
 **Estimación:** 30 min
 **Dependencias:** 1.1
+**Estado:** COMPLETADA (2025-12-04)
 
 **Consigna:**
 Crear modal de confirmación reutilizable con opciones de título, mensaje, acción confirmar y cancelar.
+
+**Implementación:**
+- Archivo: `src/components/ui/confirmation-modal.tsx`
+- Tests: `src/components/ui/confirmation-modal.test.tsx` (17 tests, 100% coverage)
+- Props implementadas: open, onOpenChange, title, description, confirmText, cancelText, onConfirm, variant, loading
+- Comportamiento: soporte para variante destructiva, estado loading con spinner, manejo de promesas async
 
 **Prompt:**
 
