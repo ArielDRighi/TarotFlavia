@@ -165,14 +165,26 @@ Configurar tailwind.config.js con los Design Tokens del documento DESIGN_HAND-OF
 
 ---
 
-### TAREA 0.3: Instalar dependencias core
+### TAREA 0.3: Instalar dependencias core ✅ COMPLETADA
 
 **Prioridad:** CRÍTICA
 **Estimación:** 15 min
 **Dependencias:** 0.1
+**Fecha completado:** 2025-12-03
+**Rama:** feature/TASK-0.3-install-core-dependencies
 
 **Consigna:**
 Instalar todas las dependencias necesarias para el proyecto: shadcn/ui, Zustand, TanStack Query, Zod, Axios, date-fns, clsx.
+
+**Resultado:**
+
+- ✅ Instaladas dependencias: zustand, @tanstack/react-query, axios, zod, date-fns, clsx, class-variance-authority, lucide-react
+- ✅ Instalado @tanstack/react-query-devtools como devDependency
+- ✅ shadcn/ui inicializado con base color Neutral y Tailwind v4
+- ✅ Archivo src/lib/utils.ts creado automáticamente con función cn()
+- ✅ tailwind-merge instalado como dependencia de shadcn
+- ✅ Todos los quality checks pasando (lint, type-check, build, tests)
+- ✅ Coverage 100%
 
 **Prompt:**
 
