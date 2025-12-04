@@ -17,6 +17,18 @@ export interface SkeletonCardProps extends React.HTMLAttributes<HTMLDivElement> 
 /**
  * SkeletonCard - A loading placeholder component with different variants
  * for different content types in the application.
+ *
+ * @example
+ * // Tarotist variant (circular photo + 3 text lines)
+ * <SkeletonCard variant="tarotist" />
+ *
+ * @example
+ * // Reading variant (rectangular card + 2 text lines)
+ * <SkeletonCard variant="reading" />
+ *
+ * @example
+ * // Session variant (line + rectangle + line)
+ * <SkeletonCard variant="session" />
  */
 export function SkeletonCard({ variant, className, ...props }: SkeletonCardProps) {
   return (

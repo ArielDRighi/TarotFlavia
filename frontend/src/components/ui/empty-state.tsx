@@ -35,6 +35,22 @@ export interface EmptyStateProps extends React.HTMLAttributes<HTMLDivElement> {
 /**
  * EmptyState - A reusable empty state component
  * Used when there's no content to display (e.g., empty lists, no search results)
+ *
+ * @example
+ * ```tsx
+ * import { EmptyState } from '@/components/ui/empty-state';
+ * import { InboxIcon } from 'lucide-react';
+ *
+ * <EmptyState
+ *   icon={<InboxIcon />}
+ *   title="No messages"
+ *   message="You have no messages in your inbox."
+ *   action={{
+ *     label: "Compose Message",
+ *     onClick: () => alert("Compose clicked"),
+ *   }}
+ * />
+ * ```
  */
 export function EmptyState({ icon, title, message, action, className, ...props }: EmptyStateProps) {
   return (

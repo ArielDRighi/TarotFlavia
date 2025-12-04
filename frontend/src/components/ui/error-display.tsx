@@ -17,6 +17,17 @@ export interface ErrorDisplayProps extends React.HTMLAttributes<HTMLDivElement> 
 /**
  * ErrorDisplay - A reusable error state component
  * Shows an error icon, message, and optional retry button
+ *
+ * @example
+ * // Basic usage without retry
+ * <ErrorDisplay message="Something went wrong." />
+ *
+ * @example
+ * // Usage with retry callback
+ * <ErrorDisplay
+ *   message="Failed to load data."
+ *   onRetry={() => fetchData()}
+ * />
  */
 export function ErrorDisplay({ message, onRetry, className, ...props }: ErrorDisplayProps) {
   return (
