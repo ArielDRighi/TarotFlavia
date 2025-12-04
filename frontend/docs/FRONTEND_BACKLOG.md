@@ -221,11 +221,30 @@ IMPORTANTE:
 
 ---
 
-### TAREA 0.4: Configurar TanStack Query Provider
+### ✅ TAREA 0.4: Configurar TanStack Query Provider (COMPLETADA)
 
 **Prioridad:** CRÍTICA
 **Estimación:** 20 min
 **Dependencias:** 0.3
+**Estado:** ✅ Completada (2025-12-03)
+
+**Archivos creados:**
+
+- `src/lib/providers/react-query-provider.tsx` - Provider con QueryClient configurado
+- `src/lib/providers/react-query-provider.test.tsx` - Tests unitarios
+
+**Archivos modificados:**
+
+- `src/app/layout.tsx` - Wrapeado children con ReactQueryProvider
+
+**Configuración implementada:**
+
+- staleTime: 5 minutos (300000ms)
+- refetchOnWindowFocus: false
+- ReactQueryDevtools en desarrollo
+- Singleton pattern para QueryClient en browser
+
+**Coverage:** 97.5% (88.88% en provider específico)
 
 **Consigna:**
 Crear provider de TanStack Query y wrapear la aplicación en app/layout.tsx.
