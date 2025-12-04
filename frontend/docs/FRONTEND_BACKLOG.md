@@ -388,16 +388,19 @@ Para mayor seguridad, se recomienda evaluar migrar a HttpOnly cookies en futuras
 - Integrado en `src/app/layout.tsx`
 
 **Tipos de Toast:**
+
 - ✅ Success: borde izquierdo verde (#48BB78), ícono Check
 - ✅ Error: borde izquierdo rojo, ícono X
 - ✅ Info: borde izquierdo azul, ícono Info
 
 **Configuración:**
+
 - ✅ Posición: top-right
 - ✅ Duración por defecto: 3000ms
 - ✅ Animación: slide-in desde la derecha (sonner default)
 
 **Archivos creados/modificados:**
+
 - `src/hooks/utils/useToast.ts` - Hook con métodos toast.success/error/info/dismiss
 - `src/hooks/utils/useToast.test.ts` - 12 tests
 - `src/components/ui/toaster.tsx` - Componente Toaster con estilos personalizados
@@ -405,6 +408,7 @@ Para mayor seguridad, se recomienda evaluar migrar a HttpOnly cookies en futuras
 - `src/app/layout.tsx` - Integración del Toaster
 
 **Uso:**
+
 ```tsx
 import { useToast } from '@/hooks/utils/useToast';
 
@@ -415,6 +419,7 @@ toast.info('Tu sesión expirará pronto', { description: 'En 5 minutos' });
 ```
 
 **Métricas:**
+
 - ✅ Lint: 0 errores
 - ✅ Type-check: 0 errores
 - ✅ Tests: 96 pasando (22 nuevos)
@@ -466,6 +471,7 @@ EXPORTAR:
 Crear modal de confirmación reutilizable con opciones de título, mensaje, acción confirmar y cancelar.
 
 **Implementación:**
+
 - Archivo: `src/components/ui/confirmation-modal.tsx`
 - Tests: `src/components/ui/confirmation-modal.test.tsx` (17 tests, 100% coverage)
 - Props implementadas: open, onOpenChange, title, description, confirmText, cancelText, onConfirm, variant, loading
