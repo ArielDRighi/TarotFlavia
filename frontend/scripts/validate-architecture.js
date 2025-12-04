@@ -25,7 +25,6 @@ const SRC_DIR = path.join(__dirname, '../src');
 const COMPONENTS_DIR = path.join(SRC_DIR, 'components/features');
 const APP_DIR = path.join(SRC_DIR, 'app');
 const HOOKS_DIR = path.join(SRC_DIR, 'hooks');
-const STORES_DIR = path.join(SRC_DIR, 'stores');
 
 let exitCode = 0;
 let errors = [];
