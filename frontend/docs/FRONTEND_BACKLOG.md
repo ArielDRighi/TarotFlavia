@@ -570,8 +570,9 @@ IMPORTANTE: Todos los componentes deben ser genéricos y reutilizables.
 
 ---
 
-### TAREA 1.5: Crear badges de Plan y Status
+### ✅ TAREA 1.5: Crear badges de Plan y Status
 
+**Estado:** ✅ COMPLETADA (2025-12-04)
 **Prioridad:** MEDIA
 **Estimación:** 25 min
 **Dependencias:** 1.1
@@ -579,34 +580,24 @@ IMPORTANTE: Todos los componentes deben ser genéricos y reutilizables.
 **Consigna:**
 Crear componentes Badge para mostrar planes de usuario y estados de sesiones según especificación del diseño.
 
-**Prompt:**
+**Resumen de Implementación:**
 
-```
-Crea dos componentes de badge personalizados:
+- **PlanBadge** (`src/components/ui/plan-badge.tsx`): Componente para mostrar planes de usuario (guest, free, premium, professional) con estilos específicos por plan. Texto en uppercase.
+- **StatusBadge** (`src/components/ui/status-badge.tsx`): Componente para mostrar estados de sesiones (pending, confirmed, completed, cancelled) con colores semánticos y texto traducido al español.
+- Tests con 100% coverage para ambos componentes
+- TDD estricto: tests escritos primero, luego implementación
 
-ARCHIVO 1: src/components/ui/plan-badge.tsx
-- Componente PlanBadge usando Badge de shadcn/ui
-- Props: plan: 'guest' | 'free' | 'premium' | 'professional'
-- Estilos por plan:
-  - guest/free: fondo gris (#F7FAFC), texto oscuro, sin borde
-  - premium: fondo amarillo pálido (#FEFCBF), texto dorado oscuro (#B7791F), borde dorado (#D69E2E)
-  - professional: fondo negro (#1A202C), texto blanco
-- Mostrar texto en uppercase: FREE, PREMIUM, etc.
+**Archivos creados:**
 
-ARCHIVO 2: src/components/ui/status-badge.tsx
-- Componente StatusBadge usando Badge de shadcn/ui
-- Props: status: 'pending' | 'confirmed' | 'completed' | 'cancelled'
-- Colores por estado:
-  - pending: amarillo (#ECC94B)
-  - confirmed: verde (#48BB78)
-  - completed: azul (#4299E1)
-  - cancelled: rojo (#F56565)
-- Mostrar texto traducido: Pendiente, Confirmada, Completada, Cancelada
+- `src/components/ui/plan-badge.tsx` - PlanBadge component
+- `src/components/ui/plan-badge.test.tsx` - 18 tests
+- `src/components/ui/status-badge.tsx` - StatusBadge component
+- `src/components/ui/status-badge.test.tsx` - 15 tests
 
-IMPORTANTE:
-- Usar Badge base de shadcn/ui y aplicar className con estilos custom
-- Usar función cn() de lib/utils para merge de clases
-```
+**Decisiones de diseño:**
+
+- StatusBadge usa texto blanco para todos los estados para mejor contraste/legibilidad sobre fondos de colores
+- Estilos aplicados via inline styles para colores específicos del design system, clases Tailwind para border-transparent
 
 ---
 
