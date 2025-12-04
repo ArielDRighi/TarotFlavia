@@ -603,14 +603,43 @@ Crear componentes Badge para mostrar planes de usuario y estados de sesiones seg
 
 ## 🏗️ FASE 2: LAYOUT Y NAVEGACIÓN
 
-### TAREA 2.1: Crear Layout principal (App Shell)
+### ✅ TAREA 2.1: Crear Layout principal (App Shell)
 
 **Prioridad:** CRÍTICA
 **Estimación:** 45 min
 **Dependencias:** 1.1, 1.2
+**Estado:** ✅ COMPLETADA
 
 **Consigna:**
 Crear layout principal con Header, Footer y background según design system. Debe ser responsive.
+
+**Resumen de Implementación:**
+
+- **Header** (`src/components/layout/Header.tsx`): Header sticky con logo centrado, navegación condicional (Explorar/Mis Sesiones solo para autenticados), hamburger menu en mobile, integración con UserMenu
+- **Footer** (`src/components/layout/Footer.tsx`): Footer simple con links legales (Términos, Privacidad, Contacto) y copyright
+- **UserMenu** (`src/components/layout/UserMenu.tsx`): Dropdown menu con Avatar para usuarios autenticados, botón "Iniciar Sesión" para no autenticados
+- **authStore** (`src/stores/authStore.ts`): Zustand store para estado de autenticación
+- **layout.tsx**: Modificado con bg-bg-main, min-h-screen, estructura Header + main + Footer
+
+**Archivos creados:**
+
+- `src/components/layout/Header.tsx` - Header component
+- `src/components/layout/Header.test.tsx` - 16 tests
+- `src/components/layout/Footer.tsx` - Footer component
+- `src/components/layout/Footer.test.tsx` - 10 tests
+- `src/components/layout/UserMenu.tsx` - UserMenu component
+- `src/components/layout/UserMenu.test.tsx` - 13 tests
+- `src/components/layout/index.ts` - Barrel exports
+- `src/stores/authStore.ts` - Auth Zustand store
+- `src/stores/authStore.test.ts` - 4 tests
+
+**Decisiones de diseño:**
+
+- Nomenclatura PascalCase para componentes según convención del proyecto
+- UserMenu usa asChild con Link para "Iniciar Sesión" (accesible como link)
+- Header responsive con hamburger visible solo en mobile (md:hidden)
+- authStore minimalista con user, token, setAuth y logout
+- Coverage 100% en todos los nuevos componentes
 
 **Prompt:**
 
