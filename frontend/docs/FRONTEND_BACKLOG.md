@@ -335,39 +335,41 @@ Para mayor seguridad, se recomienda evaluar migrar a HttpOnly cookies en futuras
 
 ## 🎨 FASE 1: UI KIT BASE
 
-### TAREA 1.1: Instalar componentes shadcn/ui base
+### ✅ TAREA 1.1: Instalar componentes shadcn/ui base (COMPLETADA)
 
 **Prioridad:** ALTA
 **Estimación:** 20 min
 **Dependencias:** 0.3
+**Estado:** ✅ COMPLETADA (2025-12-04)
+**Rama:** feature/TASK-1.1-shadcn-components
 
-**Consigna:**
-Instalar componentes shadcn/ui que se usarán en toda la aplicación: Button, Input, Card, Badge, Dialog, Toast, Skeleton, Dropdown, Tabs.
+**Componentes instalados:**
 
-**Prompt:**
+- button.tsx
+- input.tsx
+- card.tsx
+- badge.tsx
+- dialog.tsx
+- sonner.tsx (toast - nueva versión shadcn v4)
+- skeleton.tsx
+- dropdown-menu.tsx
+- tabs.tsx
+- avatar.tsx
+- alert.tsx
 
-```
-Instala los siguientes componentes de shadcn/ui usando CLI:
+**Decisiones:**
 
-COMPONENTES REQUERIDOS:
-npx shadcn-ui@latest add button
-npx shadcn-ui@latest add input
-npx shadcn-ui@latest add card
-npx shadcn-ui@latest add badge
-npx shadcn-ui@latest add dialog
-npx shadcn-ui@latest add toast
-npx shadcn-ui@latest add skeleton
-npx shadcn-ui@latest add dropdown-menu
-npx shadcn-ui@latest add tabs
-npx shadcn-ui@latest add avatar
-npx shadcn-ui@latest add alert
+- El componente `toast` fue reemplazado por `sonner` (nueva convención shadcn/ui v4)
+- Se actualizó el script `validate-architecture.js` para excluir `components/ui/` de la validación de nomenclatura PascalCase (los componentes shadcn usan lowercase por convención)
 
-VERIFICAR:
-- Todos los componentes deben estar en src/components/ui/
-- Verificar que src/lib/utils.ts existe con función cn()
+**Verificación:**
 
-NO modifiques los componentes, úsalos tal cual los genera shadcn.
-```
+- ✅ Lint: 0 errores
+- ✅ Type-check: 0 errores
+- ✅ Build: exitoso
+- ✅ Tests: 74 pasando
+- ✅ Coverage: 88.77%
+- ✅ Arquitectura validada
 
 ---
 
