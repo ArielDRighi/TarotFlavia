@@ -17,15 +17,14 @@
  * Uso: node scripts/validate-architecture.js
  */
 
-const fs = require("fs");
-const path = require("path");
+const fs = require('fs');
+const path = require('path');
 
 // Configuración
-const SRC_DIR = path.join(__dirname, "../src");
-const COMPONENTS_DIR = path.join(SRC_DIR, "components/features");
-const APP_DIR = path.join(SRC_DIR, "app");
-const HOOKS_DIR = path.join(SRC_DIR, "hooks");
-const STORES_DIR = path.join(SRC_DIR, "stores");
+const SRC_DIR = path.join(__dirname, '../src');
+const COMPONENTS_DIR = path.join(SRC_DIR, 'components/features');
+const APP_DIR = path.join(SRC_DIR, 'app');
+const HOOKS_DIR = path.join(SRC_DIR, 'hooks');
 
 let exitCode = 0;
 let errors = [];
@@ -48,10 +47,10 @@ function getAllFiles(dir, fileList = []) {
     if (file.isDirectory()) {
       getAllFiles(filePath, fileList);
     } else if (
-      (file.name.endsWith(".ts") || file.name.endsWith(".tsx")) &&
-      !file.name.endsWith(".test.ts") &&
-      !file.name.endsWith(".test.tsx") &&
-      !file.name.endsWith(".d.ts")
+      (file.name.endsWith('.ts') || file.name.endsWith('.tsx')) &&
+      !file.name.endsWith('.test.ts') &&
+      !file.name.endsWith('.test.tsx') &&
+      !file.name.endsWith('.d.ts')
     ) {
       fileList.push(filePath);
     }
@@ -62,7 +61,7 @@ function getAllFiles(dir, fileList = []) {
 
 function readFileContent(filePath) {
   try {
-    return fs.readFileSync(filePath, "utf-8");
+    return fs.readFileSync(filePath, 'utf-8');
   } catch (error) {
     return null;
   }
@@ -77,7 +76,7 @@ function getRelativePath(filePath) {
 // =============================================================================
 
 function validateFileNaming() {
-  console.log("\n📝 Validando nomenclatura de archivos...\n");
+  console.log('\n📝 Validando nomenclatura de archivos...\n');
 
   const allFiles = getAllFiles(SRC_DIR);
 
@@ -87,41 +86,47 @@ function validateFileNaming() {
     const dir = path.dirname(filePath);
 
     // Componentes React (.tsx) deben ser PascalCase
-    if (fileName.endsWith(".tsx")) {
-      if (dir.includes("components") && !fileName.match(/^[A-Z][a-zA-Z0-9]*\.tsx$/)) {
+    // Excepción: components/ui/ usa convención shadcn/ui (lowercase/kebab-case)
+    if (fileName.endsWith('.tsx')) {
+      const isUiComponent = dir.includes('components') && dir.includes('ui');
+      if (
+        dir.includes('components') &&
+        !isUiComponent &&
+        !fileName.match(/^[A-Z][a-zA-Z0-9]*\.tsx$/)
+      ) {
         errors.push({
           file: relativePath,
           message: `Component file must be PascalCase: ${fileName}`,
-          rule: "NOMENCLATURE",
+          rule: 'NOMENCLATURE',
         });
       }
     }
 
     // Hooks deben empezar con 'use' y ser camelCase
-    if (dir.includes("hooks") && fileName.endsWith(".ts")) {
+    if (dir.includes('hooks') && fileName.endsWith('.ts')) {
       if (!fileName.match(/^use[A-Z][a-zA-Z0-9]*\.ts$/)) {
         errors.push({
           file: relativePath,
           message: `Hook file must start with 'use' and be camelCase: ${fileName}`,
-          rule: "NOMENCLATURE",
+          rule: 'NOMENCLATURE',
         });
       }
     }
 
     // Stores deben terminar en 'Store.ts' y ser camelCase
-    if (dir.includes("stores") && fileName.endsWith(".ts")) {
+    if (dir.includes('stores') && fileName.endsWith('.ts')) {
       if (!fileName.match(/^[a-z][a-zA-Z0-9]*Store\.ts$/)) {
         errors.push({
           file: relativePath,
           message: `Store file must end with 'Store.ts' and be camelCase: ${fileName}`,
-          rule: "NOMENCLATURE",
+          rule: 'NOMENCLATURE',
         });
       }
     }
   });
 
-  if (errors.filter((e) => e.rule === "NOMENCLATURE").length === 0) {
-    console.log("   ✅ Nomenclatura correcta");
+  if (errors.filter((e) => e.rule === 'NOMENCLATURE').length === 0) {
+    console.log('   ✅ Nomenclatura correcta');
   }
 }
 
@@ -140,17 +145,17 @@ function validateNoAny() {
     if (!content) return;
 
     const relativePath = getRelativePath(filePath);
-    const lines = content.split("\n");
+    const lines = content.split('\n');
 
     lines.forEach((line, index) => {
       // Detectar ': any' o '<any>' pero ignorar comentarios
-      if ((line.includes(": any") || line.includes("<any>")) && !line.trim().startsWith("//")) {
+      if ((line.includes(': any') || line.includes('<any>')) && !line.trim().startsWith('//')) {
         anyCount++;
         errors.push({
           file: relativePath,
           line: index + 1,
           message: `Usage of 'any' type detected. Use specific types or 'unknown'.`,
-          rule: "NO_ANY",
+          rule: 'NO_ANY',
           code: line.trim(),
         });
       }
@@ -169,7 +174,7 @@ function validateNoAny() {
 // =============================================================================
 
 function validateNoDisables() {
-  console.log("\n🚫 Validando eslint-disable y ts-ignore...\n");
+  console.log('\n🚫 Validando eslint-disable y ts-ignore...\n');
 
   const allFiles = getAllFiles(SRC_DIR);
   let disableCount = 0;
@@ -179,17 +184,21 @@ function validateNoDisables() {
     if (!content) return;
 
     const relativePath = getRelativePath(filePath);
-    const lines = content.split("\n");
+    const lines = content.split('\n');
 
     lines.forEach((line, index) => {
       // Detectar eslint-disable, @ts-ignore, @ts-nocheck
-      if (line.includes("eslint-disable") || line.includes("@ts-ignore") || line.includes("@ts-nocheck")) {
+      if (
+        line.includes('eslint-disable') ||
+        line.includes('@ts-ignore') ||
+        line.includes('@ts-nocheck')
+      ) {
         disableCount++;
         errors.push({
           file: relativePath,
           line: index + 1,
           message: `Disable directive detected. Fix the actual problem instead.`,
-          rule: "NO_DISABLE",
+          rule: 'NO_DISABLE',
           code: line.trim(),
         });
       }
@@ -197,7 +206,7 @@ function validateNoDisables() {
   });
 
   if (disableCount === 0) {
-    console.log("   ✅ No se detectaron disable directives");
+    console.log('   ✅ No se detectaron disable directives');
   } else {
     console.log(`   ❌ ${disableCount} disable directives detectados`);
   }
@@ -208,7 +217,7 @@ function validateNoDisables() {
 // =============================================================================
 
 function validateImports() {
-  console.log("\n📦 Validando importaciones...\n");
+  console.log('\n📦 Validando importaciones...\n');
 
   const allFiles = getAllFiles(SRC_DIR);
   let relativeImportsCount = 0;
@@ -218,7 +227,7 @@ function validateImports() {
     if (!content) return;
 
     const relativePath = getRelativePath(filePath);
-    const lines = content.split("\n");
+    const lines = content.split('\n');
 
     lines.forEach((line, index) => {
       // Detectar imports relativos largos (más de 2 niveles)
@@ -233,7 +242,7 @@ function validateImports() {
             file: relativePath,
             line: index + 1,
             message: `Long relative import detected. Consider using '@/' alias.`,
-            rule: "IMPORT_ALIAS",
+            rule: 'IMPORT_ALIAS',
             code: line.trim(),
           });
         }
@@ -242,9 +251,11 @@ function validateImports() {
   });
 
   if (relativeImportsCount === 0) {
-    console.log("   ✅ Importaciones correctas");
+    console.log('   ✅ Importaciones correctas');
   } else {
-    console.log(`   ⚠️  ${relativeImportsCount} importaciones relativas largas (considerar @/ alias)`);
+    console.log(
+      `   ⚠️  ${relativeImportsCount} importaciones relativas largas (considerar @/ alias)`
+    );
   }
 }
 
@@ -253,10 +264,10 @@ function validateImports() {
 // =============================================================================
 
 function validateAppDirectory() {
-  console.log("\n📁 Validando directorio app/...\n");
+  console.log('\n📁 Validando directorio app/...\n');
 
   if (!fs.existsSync(APP_DIR)) {
-    console.log("   ⏭️  Directorio app/ no existe (aún no inicializado)");
+    console.log('   ⏭️  Directorio app/ no existe (aún no inicializado)');
     return;
   }
 
@@ -272,26 +283,26 @@ function validateAppDirectory() {
 
     // Ignorar archivos de configuración Next.js
     if (
-      fileName === "layout.tsx" ||
-      fileName === "loading.tsx" ||
-      fileName === "error.tsx" ||
-      fileName === "not-found.tsx"
+      fileName === 'layout.tsx' ||
+      fileName === 'loading.tsx' ||
+      fileName === 'error.tsx' ||
+      fileName === 'not-found.tsx'
     ) {
       return;
     }
 
     // Detectar lógica de negocio en page.tsx
-    if (fileName === "page.tsx") {
-      const lines = content.split("\n");
+    if (fileName === 'page.tsx') {
+      const lines = content.split('\n');
       let hasBusinessLogic = false;
 
       lines.forEach((line, index) => {
         // Detectar hooks de data fetching
         if (
-          line.includes("useState") ||
-          line.includes("useEffect") ||
-          line.includes("useQuery") ||
-          line.includes("useMutation")
+          line.includes('useState') ||
+          line.includes('useEffect') ||
+          line.includes('useQuery') ||
+          line.includes('useMutation')
         ) {
           hasBusinessLogic = true;
           businessLogicCount++;
@@ -299,7 +310,7 @@ function validateAppDirectory() {
             file: relativePath,
             line: index + 1,
             message: `Business logic detected in page component. Move to feature components.`,
-            rule: "APP_LOGIC",
+            rule: 'APP_LOGIC',
             code: line.trim(),
           });
         }
@@ -308,9 +319,11 @@ function validateAppDirectory() {
   });
 
   if (businessLogicCount === 0) {
-    console.log("   ✅ No se detectó lógica de negocio en app/");
+    console.log('   ✅ No se detectó lógica de negocio en app/');
   } else {
-    console.log(`   ⚠️  ${businessLogicCount} líneas de lógica detectadas en app/ (mover a components/features/)`);
+    console.log(
+      `   ⚠️  ${businessLogicCount} líneas de lógica detectadas en app/ (mover a components/features/)`
+    );
   }
 }
 
@@ -319,10 +332,10 @@ function validateAppDirectory() {
 // =============================================================================
 
 function validateFeatureStructure() {
-  console.log("\n🎯 Validando estructura feature-based...\n");
+  console.log('\n🎯 Validando estructura feature-based...\n');
 
   if (!fs.existsSync(COMPONENTS_DIR)) {
-    console.log("   ⏭️  Directorio components/features/ no existe (aún no inicializado)");
+    console.log('   ⏭️  Directorio components/features/ no existe (aún no inicializado)');
     return;
   }
 
@@ -334,23 +347,25 @@ function validateFeatureStructure() {
   if (features.length === 0) {
     warnings.push({
       message: `No features found in components/features/. Create feature folders (readings, auth, marketplace, admin).`,
-      rule: "FEATURE_STRUCTURE",
+      rule: 'FEATURE_STRUCTURE',
     });
   } else {
-    console.log(`   ✅ ${features.length} features detectadas: ${features.join(", ")}`);
+    console.log(`   ✅ ${features.length} features detectadas: ${features.join(', ')}`);
   }
 
   // Verificar que no haya componentes sueltos en components/
-  const componentsRoot = path.join(SRC_DIR, "components");
+  const componentsRoot = path.join(SRC_DIR, 'components');
   if (fs.existsSync(componentsRoot)) {
     const items = fs
       .readdirSync(componentsRoot, { withFileTypes: true })
-      .filter((item) => item.name.endsWith(".tsx") && item.name !== "index.tsx" && !item.isDirectory());
+      .filter(
+        (item) => item.name.endsWith('.tsx') && item.name !== 'index.tsx' && !item.isDirectory()
+      );
 
     if (items.length > 0) {
       warnings.push({
         message: `Components found in components/ root. Move to components/features/ or components/ui/.`,
-        rule: "FEATURE_STRUCTURE",
+        rule: 'FEATURE_STRUCTURE',
         files: items.map((i) => i.name),
       });
     }
@@ -362,12 +377,12 @@ function validateFeatureStructure() {
 // =============================================================================
 
 function validateHooksStructure() {
-  console.log("\n🪝 Validando estructura de hooks...\n");
+  console.log('\n🪝 Validando estructura de hooks...\n');
 
-  const hooksApiDir = path.join(HOOKS_DIR, "api");
+  const hooksApiDir = path.join(HOOKS_DIR, 'api');
 
   if (!fs.existsSync(hooksApiDir)) {
-    console.log("   ⏭️  Directorio hooks/api/ no existe (aún no inicializado)");
+    console.log('   ⏭️  Directorio hooks/api/ no existe (aún no inicializado)');
     return;
   }
 
@@ -380,20 +395,20 @@ function validateHooksStructure() {
     const relativePath = getRelativePath(filePath);
 
     // Verificar que use React Query
-    const hasQuery = content.includes("useQuery") || content.includes("useMutation");
-    const hasFetch = content.includes("fetch(") || content.includes("axios.");
+    const hasQuery = content.includes('useQuery') || content.includes('useMutation');
+    const hasFetch = content.includes('fetch(') || content.includes('axios.');
 
     if (!hasQuery && hasFetch) {
       errors.push({
         file: relativePath,
         message: `API hook should use React Query (useQuery/useMutation), not direct fetch.`,
-        rule: "HOOKS_QUERY",
+        rule: 'HOOKS_QUERY',
       });
     }
   });
 
-  if (errors.filter((e) => e.rule === "HOOKS_QUERY").length === 0) {
-    console.log("   ✅ Hooks API usan React Query correctamente");
+  if (errors.filter((e) => e.rule === 'HOOKS_QUERY').length === 0) {
+    console.log('   ✅ Hooks API usan React Query correctamente');
   }
 }
 
@@ -402,20 +417,20 @@ function validateHooksStructure() {
 // =============================================================================
 
 function printReport() {
-  console.log("\n" + "=".repeat(80));
-  console.log("📊 REPORTE DE VALIDACIÓN DE ARQUITECTURA");
-  console.log("=".repeat(80) + "\n");
+  console.log('\n' + '='.repeat(80));
+  console.log('📊 REPORTE DE VALIDACIÓN DE ARQUITECTURA');
+  console.log('='.repeat(80) + '\n');
 
   // Errores críticos
   if (errors.length > 0) {
     console.log(`❌ ERRORES CRÍTICOS (${errors.length}):\n`);
 
     errors.forEach((error, index) => {
-      console.log(`${index + 1}. [${error.rule}] ${error.file || ""}`);
+      console.log(`${index + 1}. [${error.rule}] ${error.file || ''}`);
       if (error.line) console.log(`   Línea ${error.line}`);
       console.log(`   ${error.message}`);
       if (error.code) console.log(`   > ${error.code}`);
-      console.log("");
+      console.log('');
     });
 
     exitCode = 1;
@@ -426,27 +441,27 @@ function printReport() {
     console.log(`⚠️  WARNINGS (${warnings.length}):\n`);
 
     warnings.forEach((warning, index) => {
-      console.log(`${index + 1}. [${warning.rule}] ${warning.file || ""}`);
+      console.log(`${index + 1}. [${warning.rule}] ${warning.file || ''}`);
       if (warning.line) console.log(`   Línea ${warning.line}`);
       console.log(`   ${warning.message}`);
       if (warning.code) console.log(`   > ${warning.code}`);
-      if (warning.files) console.log(`   Archivos: ${warning.files.join(", ")}`);
-      console.log("");
+      if (warning.files) console.log(`   Archivos: ${warning.files.join(', ')}`);
+      console.log('');
     });
   }
 
   // Resumen
-  console.log("=".repeat(80));
+  console.log('='.repeat(80));
 
   if (exitCode === 0 && warnings.length === 0) {
-    console.log("✅ VALIDACIÓN EXITOSA - Arquitectura correcta");
+    console.log('✅ VALIDACIÓN EXITOSA - Arquitectura correcta');
   } else if (exitCode === 0 && warnings.length > 0) {
-    console.log("⚠️  VALIDACIÓN CON WARNINGS - Revisar recomendaciones");
+    console.log('⚠️  VALIDACIÓN CON WARNINGS - Revisar recomendaciones');
   } else {
-    console.log("❌ VALIDACIÓN FALLIDA - Corregir errores antes de commit");
+    console.log('❌ VALIDACIÓN FALLIDA - Corregir errores antes de commit');
   }
 
-  console.log("=".repeat(80) + "\n");
+  console.log('='.repeat(80) + '\n');
 }
 
 // =============================================================================
@@ -454,12 +469,14 @@ function printReport() {
 // =============================================================================
 
 function main() {
-  console.log("🏗️  Validador de Arquitectura Frontend - TarotFlavia\n");
+  console.log('🏗️  Validador de Arquitectura Frontend - TarotFlavia\n');
 
   // Verificar que existe src/
   if (!fs.existsSync(SRC_DIR)) {
-    console.log("⏭️  Directorio src/ no existe. Proyecto aún no inicializado (ejecutar TAREA 0.1).\n");
-    console.log("✅ Validación omitida - Setup pendiente\n");
+    console.log(
+      '⏭️  Directorio src/ no existe. Proyecto aún no inicializado (ejecutar TAREA 0.1).\n'
+    );
+    console.log('✅ Validación omitida - Setup pendiente\n');
     process.exit(0);
   }
 
