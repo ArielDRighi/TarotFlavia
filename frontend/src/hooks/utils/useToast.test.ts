@@ -111,6 +111,54 @@ describe('useToast', () => {
         expect.objectContaining({ duration: 5000 })
       );
     });
+
+    it('should call base toast with correct parameters', () => {
+      const { result } = renderHook(() => useToast());
+
+      act(() => {
+        result.current.toast('Basic message');
+      });
+
+      expect(sonnerToast).toHaveBeenCalledWith('Basic message', expect.any(Object));
+    });
+
+    it('should call dismiss without ID to dismiss all toasts', () => {
+      const { result } = renderHook(() => useToast());
+
+      act(() => {
+        result.current.toast.dismiss();
+      });
+
+      expect(sonnerToast.dismiss).toHaveBeenCalledWith(undefined);
+    });
+
+    it('should call dismiss with ID to dismiss specific toast', () => {
+      const { result } = renderHook(() => useToast());
+
+      act(() => {
+        result.current.toast.dismiss('toast-123');
+      });
+
+      expect(sonnerToast.dismiss).toHaveBeenCalledWith('toast-123');
+    });
+
+    it('should support action button in toast options', () => {
+      const { result } = renderHook(() => useToast());
+      const onClick = vi.fn();
+
+      act(() => {
+        result.current.toast.success('Title', {
+          action: { label: 'Undo', onClick },
+        });
+      });
+
+      expect(sonnerToast.success).toHaveBeenCalledWith(
+        'Title',
+        expect.objectContaining({
+          action: { label: 'Undo', onClick },
+        })
+      );
+    });
   });
 });
 

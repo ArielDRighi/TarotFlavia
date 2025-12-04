@@ -8,8 +8,8 @@ import { Toaster as SonnerToaster, type ToasterProps } from 'sonner';
  *
  * Renders toast notifications with consistent styling:
  * - Success: Green left border (#48BB78), Check icon
- * - Error: Red left border, X icon
- * - Info: Blue left border, Info icon
+ * - Error: Red left border (#ef4444), X icon
+ * - Info: Blue left border (#3b82f6), Info icon
  *
  * @param props - Toaster configuration props
  *
