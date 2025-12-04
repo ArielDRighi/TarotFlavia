@@ -67,7 +67,7 @@ export function UserMenu() {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={logout} className="text-destructive cursor-pointer">
+        <DropdownMenuItem onClick={logout} variant="destructive">
           <LogOut className="mr-2 size-4" />
           Cerrar Sesión
         </DropdownMenuItem>

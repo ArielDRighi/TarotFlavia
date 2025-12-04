@@ -20,8 +20,15 @@ export function Header() {
         className="container mx-auto flex h-16 items-center justify-between px-4"
         aria-label="Navegación principal"
       >
-        {/* Mobile menu button */}
-        <Button variant="ghost" size="icon" className="md:hidden" aria-label="Menú">
+        {/* Mobile menu button - TODO: Implement mobile navigation panel in TASK 2.3 */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden"
+          aria-label="Menú"
+          aria-expanded={false}
+          aria-haspopup="true"
+        >
           <Menu className="size-5" />
         </Button>
 

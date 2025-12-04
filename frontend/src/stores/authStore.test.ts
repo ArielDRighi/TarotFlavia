@@ -1,10 +1,24 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { useAuthStore } from './authStore';
+import type { User } from '@/types';
+
+// Mock user with all required fields from User type
+const createMockUser = (overrides?: Partial<User>): User => ({
+  id: '1',
+  name: 'Test User',
+  email: 'test@test.com',
+  role: 'USER',
+  createdAt: '2025-01-01T00:00:00Z',
+  updatedAt: '2025-01-01T00:00:00Z',
+  ...overrides,
+});
 
 describe('authStore', () => {
   beforeEach(() => {
     // Reset store before each test
     useAuthStore.setState({ user: null, token: null });
+    // Clear localStorage to reset persist state
+    localStorage.removeItem('tarot-auth-storage');
   });
 
   describe('Initial State', () => {
@@ -21,7 +35,7 @@ describe('authStore', () => {
 
   describe('setAuth', () => {
     it('should set user and token', () => {
-      const user = { id: '1', name: 'Test User', email: 'test@test.com' };
+      const user = createMockUser();
       const token = 'test-token';
 
       useAuthStore.getState().setAuth(user, token);
@@ -35,7 +49,7 @@ describe('authStore', () => {
   describe('logout', () => {
     it('should clear user and token', () => {
       // First set a user
-      const user = { id: '1', name: 'Test User', email: 'test@test.com' };
+      const user = createMockUser();
       useAuthStore.getState().setAuth(user, 'token');
 
       // Then logout
