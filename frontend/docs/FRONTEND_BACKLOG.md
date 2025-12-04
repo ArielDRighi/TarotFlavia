@@ -509,14 +509,31 @@ ESTILO:
 
 ---
 
-### TAREA 1.4: Crear componentes de estado (Skeleton, Error, Empty)
+### ✅ TAREA 1.4: Crear componentes de estado (Skeleton, Error, Empty)
 
 **Prioridad:** ALTA
 **Estimación:** 40 min
 **Dependencias:** 1.1
+**Estado:** ✅ COMPLETADA (2025-12-04)
 
 **Consigna:**
 Crear tres componentes para estados de carga, error y vacío que se reutilizarán en toda la aplicación.
+
+**Archivos Creados:**
+
+- `src/components/ui/skeleton-card.tsx` - Componente con variantes tarotist/reading/session
+- `src/components/ui/skeleton-card.test.tsx` - 10 tests (100% coverage)
+- `src/components/ui/error-display.tsx` - Componente con mensaje de error y retry opcional
+- `src/components/ui/error-display.test.tsx` - 11 tests (100% coverage)
+- `src/components/ui/empty-state.tsx` - Componente con icono, título, mensaje y acción opcional
+- `src/components/ui/empty-state.test.tsx` - 13 tests (100% coverage)
+
+**Decisiones de Implementación:**
+
+- SkeletonCard usa el Skeleton base de shadcn/ui con diferentes estructuras por variante
+- ErrorDisplay incluye role="alert" y aria-live="polite" para accesibilidad
+- EmptyState permite ícono como React.ReactNode para máxima flexibilidad
+- Todos los componentes aceptan className y props adicionales para extensibilidad
 
 **Prompt:**
 
@@ -616,7 +633,7 @@ MODIFICAR: src/app/layout.tsx
 
 CREAR: src/components/layout/header.tsx
 - Componente Header con:
-  - Logo centrado usando font-serif (texto "TarotFlavia")
+  - Logo centrado usando font-serif (texto "Tarot")
   - Navegación derecha: botones "Explorar" y "Mis Sesiones" (solo si está autenticado)
   - Menú de usuario (Avatar + Dropdown) a la derecha extrema
   - En mobile: hamburger menu colapsable
