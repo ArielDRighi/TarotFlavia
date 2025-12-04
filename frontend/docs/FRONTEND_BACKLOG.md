@@ -373,11 +373,54 @@ Para mayor seguridad, se recomienda evaluar migrar a HttpOnly cookies en futuras
 
 ---
 
-### TAREA 1.2: Crear componente ToastNotification
+### ✅ TAREA 1.2: Crear componente ToastNotification
 
+**Estado:** ✅ COMPLETADA (2025-12-04)
 **Prioridad:** ALTA
 **Estimación:** 20 min
 **Dependencias:** 1.1
+
+**Resumen de Implementación:**
+
+- Sistema de notificaciones toast implementado usando sonner (shadcn/ui toast)
+- Hook `useToast` creado en `src/hooks/utils/useToast.ts`
+- Componente `Toaster` actualizado en `src/components/ui/toaster.tsx`
+- Integrado en `src/app/layout.tsx`
+
+**Tipos de Toast:**
+- ✅ Success: borde izquierdo verde (#48BB78), ícono Check
+- ✅ Error: borde izquierdo rojo, ícono X
+- ✅ Info: borde izquierdo azul, ícono Info
+
+**Configuración:**
+- ✅ Posición: top-right
+- ✅ Duración por defecto: 3000ms
+- ✅ Animación: slide-in desde la derecha (sonner default)
+
+**Archivos creados/modificados:**
+- `src/hooks/utils/useToast.ts` - Hook con métodos toast.success/error/info/dismiss
+- `src/hooks/utils/useToast.test.ts` - 12 tests
+- `src/components/ui/toaster.tsx` - Componente Toaster con estilos personalizados
+- `src/components/ui/toaster.test.tsx` - 10 tests
+- `src/app/layout.tsx` - Integración del Toaster
+
+**Uso:**
+```tsx
+import { useToast } from '@/hooks/utils/useToast';
+
+const { toast } = useToast();
+toast.success('Lectura guardada');
+toast.error('Error al guardar');
+toast.info('Tu sesión expirará pronto', { description: 'En 5 minutos' });
+```
+
+**Métricas:**
+- ✅ Lint: 0 errores
+- ✅ Type-check: 0 errores
+- ✅ Tests: 96 pasando (22 nuevos)
+- ✅ Coverage: 87.85%
+- ✅ Build: exitoso
+- ✅ Arquitectura validada
 
 **Consigna:**
 Crear sistema de notificaciones toast usando shadcn/ui toast. Debe soportar tipos: success, error, info.

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Cormorant_Garamond, Lato } from 'next/font/google';
 import { ReactQueryProvider } from '@/lib/providers';
+import { Toaster } from '@/components/ui/toaster';
 import './globals.css';
 
 /**
@@ -39,6 +40,7 @@ export default function RootLayout({
     <html lang="es">
       <body className={`${cormorantGaramond.variable} ${lato.variable} antialiased`}>
         <ReactQueryProvider>{children}</ReactQueryProvider>
+        <Toaster />
       </body>
     </html>
   );
