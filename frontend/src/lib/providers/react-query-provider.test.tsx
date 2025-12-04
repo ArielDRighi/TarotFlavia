@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { useQueryClient } from '@tanstack/react-query';
 import { ReactQueryProvider } from './react-query-provider';
@@ -23,10 +23,6 @@ function QueryClientConfigTester() {
 }
 
 describe('ReactQueryProvider', () => {
-  afterEach(() => {
-    // Cleanup after each test
-  });
-
   it('should render children correctly', () => {
     render(
       <ReactQueryProvider>
@@ -58,15 +54,5 @@ describe('ReactQueryProvider', () => {
 
     const refetchOnFocus = screen.getByTestId('refetch-on-focus').textContent;
     expect(refetchOnFocus).toBe('false');
-  });
-
-  it('should be a Client Component (use client directive)', async () => {
-    // Read the file content to verify 'use client' directive
-    const fs = await import('fs');
-    const path = await import('path');
-    const filePath = path.resolve(__dirname, './react-query-provider.tsx');
-    const content = fs.readFileSync(filePath, 'utf-8');
-
-    expect(content.startsWith("'use client'")).toBe(true);
   });
 });

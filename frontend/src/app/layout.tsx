@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Cormorant_Garamond, Lato } from 'next/font/google';
-import { ReactQueryProvider } from '@/lib/providers/react-query-provider';
+import { ReactQueryProvider } from '@/lib/providers';
 import './globals.css';
 
 /**
