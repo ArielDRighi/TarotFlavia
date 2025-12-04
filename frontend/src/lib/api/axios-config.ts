@@ -37,17 +37,31 @@ export class RateLimitError extends Error {
 let isRefreshing = false;
 // Queue of failed requests to retry after token refresh
 let failedQueue: Array<{
-  resolve: (value: AxiosResponse) => void;
+  resolve: (value?: unknown) => void;
   reject: (error: Error) => void;
+  config: ExtendedAxiosRequestConfig;
 }> = [];
+
+// Extended config type to track retry attempts
+interface ExtendedAxiosRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean;
+}
 
 /**
  * Process queued requests after token refresh
+ * On success: retries each request with the new token
+ * On error: rejects all queued requests
  */
-const processQueue = (error: Error | null): void => {
+const processQueue = (error: Error | null, token: string | null = null): void => {
   failedQueue.forEach((prom) => {
     if (error) {
       prom.reject(error);
+    } else if (token) {
+      // Update the queued request's authorization header and retry
+      if (prom.config.headers) {
+        prom.config.headers.Authorization = `Bearer ${token}`;
+      }
+      prom.resolve(apiClient.request(prom.config));
     }
   });
   failedQueue = [];
@@ -102,11 +116,6 @@ apiClient.interceptors.request.use(
 // Response Interceptor
 // ============================================================================
 
-// Extended config type to track retry attempts
-interface ExtendedAxiosRequestConfig extends InternalAxiosRequestConfig {
-  _retry?: boolean;
-}
-
 /**
  * Response interceptor to handle errors globally
  *
@@ -117,14 +126,15 @@ interface ExtendedAxiosRequestConfig extends InternalAxiosRequestConfig {
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error: AxiosError) => {
-    const originalRequest = error.config as ExtendedAxiosRequestConfig;
+    const originalRequest = error.config as ExtendedAxiosRequestConfig | undefined;
 
     // Handle 401 Unauthorized - Attempt token refresh
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Check originalRequest exists to handle network errors without config
+    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
       if (isRefreshing) {
-        // If already refreshing, queue this request
+        // If already refreshing, queue this request to retry after refresh completes
         return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
+          failedQueue.push({ resolve, reject, config: originalRequest });
         });
       }
 
@@ -132,13 +142,28 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        // Attempt to refresh the token
-        const response = await apiClient.post('/auth/refresh');
-        const { access_token } = response.data as { access_token: string };
+        // Get refresh token from localStorage
+        const refreshToken =
+          typeof window !== 'undefined' ? localStorage.getItem('refresh_token') : null;
 
-        // Save new token
+        if (!refreshToken) {
+          throw new Error('No refresh token available');
+        }
+
+        // Attempt to refresh the token with refreshToken in body
+        const response = await apiClient.post('/auth/refresh', {
+          refreshToken: refreshToken,
+        });
+
+        const { access_token, refresh_token } = response.data as {
+          access_token: string;
+          refresh_token: string;
+        };
+
+        // Save both tokens (token rotation support)
         if (typeof window !== 'undefined') {
           localStorage.setItem('access_token', access_token);
+          localStorage.setItem('refresh_token', refresh_token);
         }
 
         // Update the failed request's authorization header
@@ -146,15 +171,22 @@ apiClient.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${access_token}`;
         }
 
-        // Process queued requests
-        processQueue(null);
+        // Process queued requests with the new token
+        processQueue(null, access_token);
+
+        // Reset flag before retrying
+        isRefreshing = false;
 
         // Retry the original request
         return apiClient.request(originalRequest);
       } catch (refreshError) {
-        // Refresh failed - clear tokens and redirect to login
-        processQueue(refreshError as Error);
+        // Refresh failed - process queue with error
+        processQueue(refreshError as Error, null);
 
+        // Reset flag before redirect to avoid hanging requests
+        isRefreshing = false;
+
+        // Clear tokens and redirect to login
         if (typeof window !== 'undefined') {
           localStorage.removeItem('access_token');
           localStorage.removeItem('refresh_token');
@@ -162,8 +194,6 @@ apiClient.interceptors.response.use(
         }
 
         return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
       }
     }
 

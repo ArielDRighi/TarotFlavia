@@ -82,7 +82,6 @@ describe('axios-config', () => {
       });
       vi.mocked(axios.create).mockImplementation(mockCreate);
 
-      // Re-import to trigger module initialization
       vi.resetModules();
       await import('./axios-config');
 
@@ -151,13 +150,10 @@ describe('axios-config', () => {
       vi.resetModules();
       await import('./axios-config');
 
-      // Get the request interceptor function
       const [[successHandler]] = mockRequestUse.mock.calls;
 
-      // Mock localStorage to return a token
       localStorageMock.getItem.mockReturnValue('test-jwt-token');
 
-      // Create a mock request config
       const mockConfig: InternalAxiosRequestConfig = {
         headers: new AxiosHeaders(),
         method: 'get',
@@ -186,7 +182,6 @@ describe('axios-config', () => {
 
       const [[successHandler]] = mockRequestUse.mock.calls;
 
-      // Mock localStorage to return null
       localStorageMock.getItem.mockReturnValue(null);
 
       const mockConfig: InternalAxiosRequestConfig = {
@@ -202,7 +197,7 @@ describe('axios-config', () => {
   });
 
   describe('response interceptor - error handling', () => {
-    it('should handle 401 error by attempting token refresh', async () => {
+    it('should send refreshToken in request body when refreshing', async () => {
       const mockResponseUse = vi.fn();
       const mockPost = vi.fn();
       const mockRequest = vi.fn();
@@ -222,25 +217,62 @@ describe('axios-config', () => {
 
       const [[, errorHandler]] = mockResponseUse.mock.calls;
 
-      // Mock a 401 error
       const mockError = {
         response: { status: 401, data: {} },
         config: { url: '/test', _retry: false, headers: {} },
       } as unknown as AxiosError;
 
-      // Mock refresh token success
-      localStorageMock.getItem.mockReturnValue('refresh-token');
+      localStorageMock.getItem.mockReturnValue('stored-refresh-token');
       mockPost.mockResolvedValue({
-        data: { access_token: 'new-access-token' },
+        data: { access_token: 'new-access-token', refresh_token: 'new-refresh-token' },
       });
       mockRequest.mockResolvedValue({ data: 'success' });
 
       await errorHandler(mockError);
 
-      expect(mockPost).toHaveBeenCalledWith('/auth/refresh');
+      expect(mockPost).toHaveBeenCalledWith('/auth/refresh', {
+        refreshToken: 'stored-refresh-token',
+      });
     });
 
-    it('should save new access_token and retry original request on refresh success', async () => {
+    it('should save both access_token and refresh_token on refresh success', async () => {
+      const mockResponseUse = vi.fn();
+      const mockPost = vi.fn();
+      const mockRequest = vi.fn();
+      const mockCreate = vi.fn().mockReturnValue({
+        interceptors: {
+          request: { use: vi.fn() },
+          response: { use: mockResponseUse },
+        },
+        defaults: { headers: {} },
+        post: mockPost,
+        request: mockRequest,
+      });
+      vi.mocked(axios.create).mockImplementation(mockCreate);
+
+      vi.resetModules();
+      await import('./axios-config');
+
+      const [[, errorHandler]] = mockResponseUse.mock.calls;
+
+      const mockError = {
+        response: { status: 401, data: {} },
+        config: { url: '/test', _retry: false, headers: {} },
+      } as unknown as AxiosError;
+
+      localStorageMock.getItem.mockReturnValue('old-refresh-token');
+      mockPost.mockResolvedValue({
+        data: { access_token: 'new-access-token', refresh_token: 'new-refresh-token' },
+      });
+      mockRequest.mockResolvedValue({ data: 'success' });
+
+      await errorHandler(mockError);
+
+      expect(localStorageMock.setItem).toHaveBeenCalledWith('access_token', 'new-access-token');
+      expect(localStorageMock.setItem).toHaveBeenCalledWith('refresh_token', 'new-refresh-token');
+    });
+
+    it('should retry original request after successful token refresh', async () => {
       const mockResponseUse = vi.fn();
       const mockPost = vi.fn();
       const mockRequest = vi.fn();
@@ -261,7 +293,7 @@ describe('axios-config', () => {
       const [[, errorHandler]] = mockResponseUse.mock.calls;
 
       const originalConfig = {
-        url: '/test',
+        url: '/protected-resource',
         method: 'get',
         _retry: false,
         headers: {},
@@ -272,14 +304,49 @@ describe('axios-config', () => {
         config: originalConfig,
       } as unknown as AxiosError;
 
+      localStorageMock.getItem.mockReturnValue('refresh-token');
       mockPost.mockResolvedValue({
-        data: { access_token: 'new-access-token' },
+        data: { access_token: 'new-access-token', refresh_token: 'new-refresh-token' },
       });
       mockRequest.mockResolvedValue({ data: 'success' });
 
       await errorHandler(mockError);
 
-      expect(localStorageMock.setItem).toHaveBeenCalledWith('access_token', 'new-access-token');
+      expect(mockRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: '/protected-resource',
+          _retry: true,
+        })
+      );
+    });
+
+    it('should fail when no refresh token is available', async () => {
+      const mockResponseUse = vi.fn();
+      const mockPost = vi.fn();
+      const mockCreate = vi.fn().mockReturnValue({
+        interceptors: {
+          request: { use: vi.fn() },
+          response: { use: mockResponseUse },
+        },
+        defaults: { headers: {} },
+        post: mockPost,
+      });
+      vi.mocked(axios.create).mockImplementation(mockCreate);
+
+      vi.resetModules();
+      await import('./axios-config');
+
+      const [[, errorHandler]] = mockResponseUse.mock.calls;
+
+      const mockError = {
+        response: { status: 401, data: {} },
+        config: { url: '/test', _retry: false, headers: {} },
+      } as unknown as AxiosError;
+
+      // No refresh token available
+      localStorageMock.getItem.mockReturnValue(null);
+
+      await expect(errorHandler(mockError)).rejects.toThrow('No refresh token available');
     });
 
     it('should clear tokens and redirect to /login on refresh failure', async () => {
@@ -302,10 +369,10 @@ describe('axios-config', () => {
 
       const mockError = {
         response: { status: 401, data: {} },
-        config: { url: '/test', _retry: false },
+        config: { url: '/test', _retry: false, headers: {} },
       } as unknown as AxiosError;
 
-      // Mock refresh token failure
+      localStorageMock.getItem.mockReturnValue('refresh-token');
       mockPost.mockRejectedValue(new Error('Refresh failed'));
 
       try {
@@ -317,6 +384,32 @@ describe('axios-config', () => {
       expect(localStorageMock.removeItem).toHaveBeenCalledWith('access_token');
       expect(localStorageMock.removeItem).toHaveBeenCalledWith('refresh_token');
       expect(global.location.href).toBe('/login');
+    });
+
+    it('should handle 401 error when originalRequest config is undefined', async () => {
+      const mockResponseUse = vi.fn();
+      const mockCreate = vi.fn().mockReturnValue({
+        interceptors: {
+          request: { use: vi.fn() },
+          response: { use: mockResponseUse },
+        },
+        defaults: { headers: {} },
+      });
+      vi.mocked(axios.create).mockImplementation(mockCreate);
+
+      vi.resetModules();
+      await import('./axios-config');
+
+      const [[, errorHandler]] = mockResponseUse.mock.calls;
+
+      // Network error without config
+      const mockError = {
+        response: { status: 401, data: {} },
+        config: undefined,
+      } as unknown as AxiosError;
+
+      // Should not throw TypeError, should just reject with original error
+      await expect(errorHandler(mockError)).rejects.toBeDefined();
     });
 
     it('should throw ForbiddenError on 403 response', async () => {

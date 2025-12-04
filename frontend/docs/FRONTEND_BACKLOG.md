@@ -277,6 +277,7 @@ NO incluyas configuración de Axios ni stores todavía.
 **Estimación:** 30 min
 **Dependencias:** 0.3
 **Completada:** 2025-12-04
+**Actualizada:** 2025-12-04 (PR feedback aplicado)
 **Rama:** feature/TASK-0.5-axios-interceptors
 
 **Consigna:**
@@ -298,9 +299,12 @@ REQUEST INTERCEPTOR:
 
 RESPONSE INTERCEPTOR:
 ✅ Si error 401:
-  - Intentar refresh token (endpoint: /auth/refresh)
-  - Si refresh exitoso, guardar nuevo access_token y reintentar request original
+  - Verificar que originalRequest existe (fix para network errors)
+  - Obtener refresh_token de localStorage y enviarlo en request body
+  - Si refresh exitoso, guardar AMBOS tokens (access_token y refresh_token)
+  - Requests concurrentes se encolan y reintentan con nuevo token
   - Si refresh falla, limpiar tokens de localStorage y redirigir a /login
+  - isRefreshing flag se resetea antes del redirect (fix race condition)
 ✅ Si error 403: lanzar ForbiddenError con mensaje "sin permisos"
 ✅ Si error 429: lanzar RateLimitError con mensaje "rate limit excedido"
 
@@ -310,10 +314,22 @@ EXPORTS:
 ✅ RateLimitError - Clase de error para 429
 
 TESTS:
-✅ 15 tests unitarios (100% pasando)
-✅ Coverage: 85.71% en axios-config.ts
-✅ Coverage global del proyecto: 91.01%
+✅ 18 tests unitarios (100% pasando)
+✅ Coverage: 82.75% en axios-config.ts
+✅ Coverage global del proyecto: 88.77%
+
+PR FEEDBACK APLICADO:
+✅ Null check para originalRequest (network errors)
+✅ refreshToken enviado en request body
+✅ Guardar ambos tokens (token rotation support)
+✅ processQueue resuelve requests correctamente
+✅ isRefreshing resetea antes de redirect
+✅ Tests adicionales para nuevos escenarios
 ```
+
+**Nota de Seguridad:**
+El almacenamiento de JWT en localStorage es una decisión arquitectural heredada del backend existente.
+Para mayor seguridad, se recomienda evaluar migrar a HttpOnly cookies en futuras iteraciones.
 
 ---
 
