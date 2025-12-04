@@ -1,6 +1,6 @@
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
+/**
+ * Re-export cn utility from utils/cn.ts
+ * This file exists for shadcn/ui compatibility
+ * The actual implementation with tests is in utils/cn.ts
+ */
+export { cn } from './utils/cn';
