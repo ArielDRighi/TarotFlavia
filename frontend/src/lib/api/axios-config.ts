@@ -3,14 +3,14 @@
  *
  * Configuración base de Axios con interceptors para JWT
  */
-import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
+import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 
 // Base API configuration
 export const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
   timeout: 30000,
   headers: {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
   },
 });
 
@@ -18,8 +18,8 @@ export const apiClient = axios.create({
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     // Get token from localStorage (client-side only)
-    if (typeof window !== "undefined") {
-      const token = localStorage.getItem("access_token");
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('access_token');
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -38,9 +38,9 @@ apiClient.interceptors.response.use(
     // Handle 401 Unauthorized
     if (error.response?.status === 401) {
       // Token expired or invalid - redirect to login
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("access_token");
-        window.location.href = "/login";
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('access_token');
+        window.location.href = '/login';
       }
     }
     return Promise.reject(error);

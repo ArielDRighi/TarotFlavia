@@ -138,44 +138,30 @@ NO incluyas ejemplos de componentes, solo la estructura base.
 
 ---
 
-### TAREA 0.2: Configurar Tailwind con Design Tokens
+### TAREA 0.2: Configurar Tailwind con Design Tokens ✅ COMPLETADA
 
 **Prioridad:** CRÍTICA
 **Estimación:** 20 min
 **Dependencias:** 0.1
+**Completada:** 3 de Diciembre, 2025
 
 **Consigna:**
 Configurar tailwind.config.js con los Design Tokens del documento DESIGN_HAND-OFF.md (colores, tipografía, sombras).
 
-**Prompt:**
+**Implementación realizada:**
 
-```
-Configura tailwind.config.js con estos Design Tokens exactos:
+- ✅ Configurado `globals.css` con Design Tokens usando sintaxis Tailwind v4 (`@theme`)
+- ✅ Colores: bg-main, surface, text-primary, text-muted, primary, secondary, accent-success
+- ✅ Tipografía: font-serif (Cormorant Garamond), font-sans (Lato)
+- ✅ Sombras: shadow-soft
+- ✅ Fuentes importadas en `layout.tsx` con `next/font/google`
+- ✅ Modo Light only (sin dark mode)
+- ✅ Build exitoso, lint sin errores, tests pasando
 
-COLORES:
-- bg-main: #F9F7F2 (Crema Papiro)
-- surface: #FFFFFF (Blanco)
-- text-primary: #2D3748 (Gris Grafito)
-- text-muted: #718096 (Gris Suave)
-- primary: #805AD5 (Lavanda Místico)
-- secondary: #D69E2E (Dorado)
-- accent-success: #48BB78 (Verde)
+**Decisión técnica:**
 
-TIPOGRAFÍA:
-- font-serif: ['Cormorant Garamond', 'Playfair Display', 'serif']
-- font-sans: ['Lato', 'Inter', 'sans-serif']
-
-SOMBRAS:
-- shadow-soft: 0 4px 20px -2px rgba(128, 90, 213, 0.1)
-
-EXTRAS:
-- Bordes: rounded-xl (12px), rounded-2xl (16px)
-- Configurar theme.extend correctamente
-
-IMPORTANTE:
-- Solo modo Light (NO configurar darkMode)
-- Agregar imports de fuentes en app/layout.tsx usando next/font/google
-```
+- Tailwind v4 usa la nueva sintaxis CSS-first con `@theme` en lugar de `tailwind.config.js`
+- Las fuentes se cargan via `next/font/google` y se inyectan como CSS variables
 
 ---
 

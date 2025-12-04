@@ -6,8 +6,8 @@
 
 export const CONFIG = {
   // App info
-  APP_NAME: "TarotFlavia",
-  APP_DESCRIPTION: "Marketplace de tarotistas profesionales",
+  APP_NAME: 'TarotFlavia',
+  APP_DESCRIPTION: 'Marketplace de tarotistas profesionales',
 
   // API
   API_TIMEOUT: 30000,

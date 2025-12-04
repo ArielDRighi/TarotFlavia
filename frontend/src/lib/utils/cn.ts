@@ -3,8 +3,8 @@
  *
  * Combines clsx and tailwind-merge for proper class merging
  */
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 /**
  * Merge Tailwind CSS classes with proper conflict resolution

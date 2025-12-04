@@ -2,7 +2,7 @@
  * Reading Types
  */
 
-import type { SpreadTypeValue } from "@/lib/validations/reading.schemas";
+import type { SpreadTypeValue } from '@/lib/validations/reading.schemas';
 
 export interface Reading {
   id: string;
