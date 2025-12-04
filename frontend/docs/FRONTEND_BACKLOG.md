@@ -271,42 +271,48 @@ NO incluyas configuración de Axios ni stores todavía.
 
 ---
 
-### TAREA 0.5: Configurar Axios con interceptors
+### ✅ TAREA 0.5: Configurar Axios con interceptors (COMPLETADA)
 
 **Prioridad:** CRÍTICA
 **Estimación:** 30 min
 **Dependencias:** 0.3
+**Completada:** 2025-12-04
+**Rama:** feature/TASK-0.5-axios-interceptors
 
 **Consigna:**
 Crear instancia de Axios configurada con baseURL, interceptors para tokens JWT y manejo de errores.
 
-**Prompt:**
+**Implementación Realizada:**
 
 ```
-Crea la configuración de Axios para comunicación con el backend:
-
-CREAR ARCHIVO: src/lib/api/axios-config.ts
+ARCHIVO: src/lib/api/axios-config.ts
 
 CONFIGURACIÓN:
-- baseURL desde process.env.NEXT_PUBLIC_API_URL
-- timeout: 30000ms
-- headers por defecto: 'Content-Type': 'application/json'
+✅ baseURL desde process.env.NEXT_PUBLIC_API_URL
+✅ timeout: 30000ms
+✅ headers por defecto: 'Content-Type': 'application/json'
 
 REQUEST INTERCEPTOR:
-- Obtener token de localStorage (key: 'access_token')
-- Si existe token, agregar header: Authorization: `Bearer ${token}`
+✅ Obtener token de localStorage (key: 'access_token')
+✅ Si existe token, agregar header: Authorization: `Bearer ${token}`
 
 RESPONSE INTERCEPTOR:
-- Si error 401:
+✅ Si error 401:
   - Intentar refresh token (endpoint: /auth/refresh)
   - Si refresh exitoso, guardar nuevo access_token y reintentar request original
   - Si refresh falla, limpiar tokens de localStorage y redirigir a /login
-- Si error 403: lanzar error específico de "sin permisos"
-- Si error 429: lanzar error de "rate limit excedido"
+✅ Si error 403: lanzar ForbiddenError con mensaje "sin permisos"
+✅ Si error 429: lanzar RateLimitError con mensaje "rate limit excedido"
 
-EXPORTAR:
-- Instancia de axios configurada como 'apiClient'
-- NO crear funciones helper todavía, solo la instancia configurada
+EXPORTS:
+✅ apiClient - Instancia de axios configurada
+✅ ForbiddenError - Clase de error para 403
+✅ RateLimitError - Clase de error para 429
+
+TESTS:
+✅ 15 tests unitarios (100% pasando)
+✅ Coverage: 85.71% en axios-config.ts
+✅ Coverage global del proyecto: 91.01%
 ```
 
 ---
