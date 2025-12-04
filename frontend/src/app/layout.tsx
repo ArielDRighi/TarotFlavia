@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { Cormorant_Garamond, Lato } from 'next/font/google';
 import { ReactQueryProvider } from '@/lib/providers';
 import { Toaster } from '@/components/ui/toaster';
+import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
 import './globals.css';
 
 /**
@@ -38,8 +40,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className={`${cormorantGaramond.variable} ${lato.variable} antialiased`}>
-        <ReactQueryProvider>{children}</ReactQueryProvider>
+      <body
+        className={`${cormorantGaramond.variable} ${lato.variable} bg-bg-main min-h-screen antialiased`}
+      >
+        <ReactQueryProvider>
+          <div className="flex min-h-screen flex-col">
+            <Header />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </div>
+        </ReactQueryProvider>
         <Toaster />
       </body>
     </html>
