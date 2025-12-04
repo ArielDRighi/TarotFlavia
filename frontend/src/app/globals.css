@@ -23,12 +23,6 @@
   --color-accent-success: #48bb78; /* Verde - Confirmaciones */
 
   /* ===========================================
-     TYPOGRAPHY - Font Families
-     =========================================== */
-  --font-serif: 'Cormorant Garamond', 'Playfair Display', serif;
-  --font-sans: 'Lato', 'Inter', sans-serif;
-
-  /* ===========================================
      SHADOWS - Soft shadow for cards
      =========================================== */
   --shadow-soft: 0 4px 20px -2px rgba(128, 90, 213, 0.1);
@@ -46,5 +40,5 @@
 body {
   background-color: var(--color-bg-main);
   color: var(--color-text-primary);
-  font-family: var(--font-sans);
+  font-family: var(--font-sans), 'Lato', 'Inter', sans-serif;
 }
