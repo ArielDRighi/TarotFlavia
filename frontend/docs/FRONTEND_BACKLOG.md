@@ -1132,76 +1132,31 @@ IMPORTANTE:
 
 ---
 
-### TAREA 4.2: Crear hooks de TanStack Query para lecturas
+### ✅ TAREA 4.2: Crear hooks de TanStack Query para lecturas
 
+**Estado:** ✅ COMPLETADA (2025-12-05)
 **Prioridad:** ALTA
 **Estimación:** 35 min
 **Dependencias:** 4.1
 
+**Resumen de Implementación:**
+
+- Creados 12 hooks de TanStack Query para lecturas en `src/hooks/api/useReadings.ts`
+- Hooks de consulta (useQuery): useCategories, usePredefinedQuestions, useSpreads, useMyReadings, useReadingDetail, useTrashedReadings
+- Hooks de mutación (useMutation): useCreateReading, useDeleteReading, useRegenerateInterpretation, useShareReading, useUnshareReading, useRestoreReading
+- Implementado manejo de errores con toast (sonner)
+- Invalidación automática de queries tras mutaciones exitosas
+- staleTime: Infinity para datos estáticos (categorías, spreads)
+- Query keys consistentes para cache óptimo
+- 20 tests unitarios con 100% de cobertura en el archivo
+
+**Archivos creados:**
+
+- `src/hooks/api/useReadings.ts` - 12 hooks de TanStack Query
+- `src/hooks/api/useReadings.test.tsx` - 20 tests unitarios
+
 **Consigna:**
 Crear custom hooks usando TanStack Query para consumir API de lecturas con caching.
-
-**Prompt:**
-
-```
-Crea hooks de TanStack Query para lecturas:
-
-CREAR ARCHIVO: src/hooks/queries/use-readings.ts
-
-HOOKS:
-1. useCategories()
-   - useQuery con queryKey: ['categories']
-   - queryFn: getCategories
-   - staleTime: Infinity (categorías no cambian frecuentemente)
-
-2. usePredefinedQuestions(categoryId?: number)
-   - useQuery con queryKey: ['questions', categoryId]
-   - queryFn: () => getPredefinedQuestions(categoryId)
-   - enabled: categoryId !== undefined
-
-3. useSpreads()
-   - useQuery con queryKey: ['spreads']
-   - queryFn: getSpreads
-   - staleTime: Infinity
-
-4. useMyReadings(page: number, limit: number)
-   - useQuery con queryKey: ['readings', page, limit]
-   - queryFn: () => getMyReadings(page, limit)
-
-5. useReadingDetail(id: number)
-   - useQuery con queryKey: ['reading', id]
-   - queryFn: () => getReadingById(id)
-
-6. useCreateReading()
-   - useMutation con mutationFn: createReading
-   - onSuccess: invalidar query ['readings']
-   - Retornar toast de éxito
-
-7. useDeleteReading()
-   - useMutation con mutationFn: deleteReading
-   - onSuccess: invalidar queries ['readings']
-
-8. useRegenerateInterpretation()
-   - useMutation con mutationFn: regenerateInterpretation
-   - onSuccess: invalidar query ['reading', id]
-
-9. useUnshareReading()
-   - useMutation con mutationFn: unshareReading
-   - onSuccess: invalidar query ['reading', id]
-
-10. useTrashedReadings()
-    - useQuery con queryKey: ['readings', 'trash']
-    - queryFn: getTrashedReadings
-
-11. useRestoreReading()
-    - useMutation con mutationFn: restoreReading
-    - onSuccess: invalidar queries ['readings'] y ['readings', 'trash']
-
-IMPORTANTE:
-- Usar useQueryClient para invalidaciones
-- Manejar errores con toast
-- Exportar todos los hooks
-```
 
 ---
 
