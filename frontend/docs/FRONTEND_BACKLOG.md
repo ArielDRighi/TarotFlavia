@@ -913,11 +913,40 @@ Crear página de login completa con formulario, validación con Zod y manejo de 
 
 ---
 
-### TAREA 3.4: Crear formulario de Registro
+### TAREA 3.4: Crear formulario de Registro ✅ COMPLETADA
 
+**Estado:** ✅ COMPLETADA (2025-12-05)
 **Prioridad:** ALTA
 **Estimación:** 40 min
 **Dependencias:** 1.1, 3.2
+
+**Resumen de Implementación:**
+
+- Creado componente `RegisterForm.tsx` en `components/features/auth/`
+- Estructura idéntica a LoginForm con Card centrada y diseño consistente
+- Campos: name, email, password, confirmPassword con validación Zod
+- Validación de contraseñas coincidentes usando `.refine()`
+- Funcionalidad de registro con auto-login y redirección a `/perfil`
+- Manejo de errores del backend (email duplicado, etc.)
+- Agregada función `register` al authStore y useAuth hook
+- Actualizado tipo `AuthStore` con `RegisterCredentials`
+
+**Archivos creados/modificados:**
+
+- `src/components/features/auth/RegisterForm.tsx` - Componente principal
+- `src/components/features/auth/RegisterForm.test.tsx` - 19 tests completos
+- `src/components/features/auth/index.ts` - Export del componente
+- `src/app/registro/page.tsx` - Página usando RegisterForm
+- `src/app/registro/page.test.tsx` - Tests de la página
+- `src/stores/authStore.ts` - Añadida función register
+- `src/hooks/useAuth.ts` - Añadida función register
+- `src/types/auth.types.ts` - Añadido tipo RegisterCredentials
+
+**Tests y Coverage:**
+
+- 19 tests en RegisterForm.test.tsx (100% coverage)
+- 357 tests totales pasando
+- Lint, type-check y build sin errores
 
 **Consigna:**
 Crear página de registro similar a login pero con campos adicionales: name, confirmPassword.

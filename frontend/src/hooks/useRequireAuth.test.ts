@@ -47,6 +47,7 @@ describe('useRequireAuth', () => {
       isAuthenticated: false,
       isLoading: false,
       login: vi.fn(),
+      register: vi.fn(),
       logout: vi.fn(),
       checkAuth: vi.fn(),
     });
@@ -72,6 +73,7 @@ describe('useRequireAuth', () => {
         isAuthenticated: true,
         isLoading: false,
         login: vi.fn(),
+        register: vi.fn(),
         logout: vi.fn(),
         checkAuth: vi.fn(),
       });
@@ -87,6 +89,7 @@ describe('useRequireAuth', () => {
         isAuthenticated: false,
         isLoading: true,
         login: vi.fn(),
+        register: vi.fn(),
         logout: vi.fn(),
         checkAuth: vi.fn(),
       });
@@ -104,6 +107,7 @@ describe('useRequireAuth', () => {
         isAuthenticated: false,
         isLoading: true,
         login: vi.fn(),
+        register: vi.fn(),
         logout: vi.fn(),
         checkAuth: vi.fn(),
       });
@@ -120,6 +124,7 @@ describe('useRequireAuth', () => {
         isAuthenticated: true,
         isLoading: false,
         login: vi.fn(),
+        register: vi.fn(),
         logout: vi.fn(),
         checkAuth: vi.fn(),
       });
@@ -153,6 +158,7 @@ describe('useRequireAuth', () => {
         isAuthenticated: false,
         isLoading: true,
         login: vi.fn(),
+        register: vi.fn(),
         logout: vi.fn(),
         checkAuth: vi.fn(),
       });
@@ -169,6 +175,7 @@ describe('useRequireAuth', () => {
         isAuthenticated: true,
         isLoading: false,
         login: vi.fn(),
+        register: vi.fn(),
         logout: vi.fn(),
         checkAuth: vi.fn(),
       });
@@ -186,6 +193,7 @@ describe('useRequireAuth', () => {
         isAuthenticated: false,
         isLoading: true,
         login: vi.fn(),
+        register: vi.fn(),
         logout: vi.fn(),
         checkAuth: vi.fn(),
       });
@@ -201,6 +209,7 @@ describe('useRequireAuth', () => {
         isAuthenticated: false,
         isLoading: false,
         login: vi.fn(),
+        register: vi.fn(),
         logout: vi.fn(),
         checkAuth: vi.fn(),
       });
