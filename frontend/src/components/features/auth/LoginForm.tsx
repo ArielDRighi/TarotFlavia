@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
-import { toast } from '@/hooks/utils/useToast';
 import { loginSchema, type LoginFormData } from '@/lib/validations/auth.schemas';
 
 /**
@@ -43,7 +42,7 @@ export function LoginForm() {
       await login(data.email, data.password);
       router.push('/perfil');
     } catch {
-      toast.error('Error al iniciar sesión');
+      // Error toast is handled by authStore.login()
     } finally {
       setIsSubmitting(false);
     }
@@ -92,18 +91,6 @@ export function LoginForm() {
             {errors.password && (
               <p className="text-destructive text-sm">{errors.password.message}</p>
             )}
-          </div>
-
-          {/* Remember Me Checkbox */}
-          <div className="flex items-center space-x-2">
-            <input
-              id="rememberMe"
-              type="checkbox"
-              className="text-primary focus:ring-primary h-4 w-4 rounded border-gray-300"
-            />
-            <label htmlFor="rememberMe" className="text-muted-foreground text-sm">
-              Recordarme
-            </label>
           </div>
 
           {/* Submit Button */}

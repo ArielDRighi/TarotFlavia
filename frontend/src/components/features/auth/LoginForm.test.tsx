@@ -68,12 +68,6 @@ describe('LoginForm', () => {
       expect(screen.getByLabelText(/contraseña/i)).toBeInTheDocument();
     });
 
-    it('should render remember me checkbox', () => {
-      render(<LoginForm />);
-
-      expect(screen.getByLabelText(/recordarme/i)).toBeInTheDocument();
-    });
-
     it('should render submit button', () => {
       render(<LoginForm />);
 
@@ -186,7 +180,7 @@ describe('LoginForm', () => {
       });
     });
 
-    it('should show error toast on login failure', async () => {
+    it('should not call toast.error on login failure (authStore handles it)', async () => {
       mockLogin.mockRejectedValueOnce(new Error('Invalid credentials'));
       const user = userEvent.setup();
       render(<LoginForm />);
@@ -200,8 +194,11 @@ describe('LoginForm', () => {
       await user.click(submitButton);
 
       await waitFor(() => {
-        expect(toast.error).toHaveBeenCalledWith('Error al iniciar sesión');
+        expect(mockLogin).toHaveBeenCalled();
       });
+
+      // toast.error should NOT be called from component - authStore handles error display
+      expect(toast.error).not.toHaveBeenCalled();
     });
   });
 
