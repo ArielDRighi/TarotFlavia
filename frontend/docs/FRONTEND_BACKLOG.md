@@ -992,14 +992,30 @@ IMPORTANTE:
 
 ---
 
-### TAREA 3.5: Crear página Recuperar Contraseña
+### TAREA 3.5: Crear página Recuperar Contraseña ✅ COMPLETADA
 
 **Prioridad:** MEDIA
 **Estimación:** 35 min
 **Dependencias:** 1.1
+**Completada:** 5 de Diciembre, 2025
 
 **Consigna:**
 Crear página para solicitar reset de contraseña con input de email.
+
+**Implementación:**
+- `src/components/features/auth/ForgotPasswordForm.tsx` - Componente del formulario
+- `src/app/recuperar-password/page.tsx` - Página de la ruta
+- `src/lib/validations/auth.schemas.ts` - Schema `forgotPasswordSchema` para validación
+- Tests completos con 100% coverage
+
+**Características implementadas:**
+- Card centrada con diseño consistente con login
+- Validación de email con Zod
+- Llamada a `apiClient.post('/auth/forgot-password', { email })`
+- Toast de éxito sin revelar si el email existe (seguridad)
+- Cooldown de 60 segundos con contador visible
+- Estado de loading con spinner
+- Link de regreso a login
 
 **Prompt:**
 
