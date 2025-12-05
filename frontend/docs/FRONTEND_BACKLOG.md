@@ -1003,12 +1003,14 @@ IMPORTANTE:
 Crear página para solicitar reset de contraseña con input de email.
 
 **Implementación:**
+
 - `src/components/features/auth/ForgotPasswordForm.tsx` - Componente del formulario
 - `src/app/recuperar-password/page.tsx` - Página de la ruta
 - `src/lib/validations/auth.schemas.ts` - Schema `forgotPasswordSchema` para validación
 - Tests completos con 100% coverage
 
 **Características implementadas:**
+
 - Card centrada con diseño consistente con login
 - Validación de email con Zod
 - Llamada a `apiClient.post('/auth/forgot-password', { email })`
