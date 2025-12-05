@@ -14,11 +14,6 @@ export interface User {
   updatedAt: string;
 }
 
-export interface AuthUser extends User {
-  accessToken: string;
-  refreshToken?: string;
-}
-
 export interface UserProfile extends User {
   bio?: string;
   phoneNumber?: string;
