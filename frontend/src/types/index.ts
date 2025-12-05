@@ -10,6 +10,7 @@ export type {
   AuthUser,
   AuthState,
   LoginCredentials,
+  RegisterCredentials,
   LoginResponse,
   AuthActions,
   AuthStore,

@@ -31,6 +31,15 @@ export interface LoginCredentials {
 }
 
 /**
+ * Register credentials
+ */
+export interface RegisterCredentials {
+  name: string;
+  email: string;
+  password: string;
+}
+
+/**
  * Login response from API
  */
 export interface LoginResponse {
@@ -45,6 +54,7 @@ export interface LoginResponse {
 export interface AuthActions {
   setUser: (user: AuthUser | null) => void;
   login: (email: string, password: string) => Promise<void>;
+  register: (credentials: RegisterCredentials) => Promise<void>;
   logout: () => void;
   checkAuth: () => Promise<void>;
 }

@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { toast } from '@/hooks/utils/useToast';
 import { apiClient } from '@/lib/api/axios-config';
-import type { AuthUser, AuthStore, LoginResponse } from '@/types';
+import type { AuthUser, AuthStore, LoginResponse, RegisterCredentials } from '@/types';
 
 /**
  * Zustand store for authentication state
@@ -52,6 +52,18 @@ export const useAuthStore = create<AuthStore>()(
         } catch (error) {
           toast.error('Error al iniciar sesión');
           throw error;
+        }
+      },
+
+      register: async (credentials: RegisterCredentials) => {
+        try {
+          await apiClient.post('/auth/register', credentials);
+        } catch (error) {
+          // Extract error message from API response
+          const axiosError = error as { response?: { data?: { message?: string } } };
+          const message = axiosError.response?.data?.message || 'Error al crear la cuenta';
+          toast.error(message);
+          throw new Error(message);
         }
       },
 

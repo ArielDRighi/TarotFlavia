@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuthStore } from '@/stores/authStore';
-import type { AuthUser } from '@/types';
+import type { AuthUser, RegisterCredentials } from '@/types';
 
 /**
  * Return type for useAuth hook
@@ -11,6 +11,7 @@ export interface UseAuthReturn {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  register: (credentials: RegisterCredentials) => Promise<void>;
   logout: () => void;
   checkAuth: () => Promise<void>;
 }
@@ -40,13 +41,14 @@ export interface UseAuthReturn {
  * ```
  */
 export function useAuth(): UseAuthReturn {
-  const { user, isAuthenticated, isLoading, login, logout, checkAuth } = useAuthStore();
+  const { user, isAuthenticated, isLoading, login, register, logout, checkAuth } = useAuthStore();
 
   return {
     user,
     isAuthenticated,
     isLoading,
     login,
+    register,
     logout,
     checkAuth,
   };

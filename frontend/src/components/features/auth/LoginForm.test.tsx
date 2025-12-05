@@ -36,6 +36,7 @@ describe('LoginForm', () => {
     vi.clearAllMocks();
     vi.mocked(useAuth).mockReturnValue({
       login: mockLogin,
+      register: vi.fn(),
       isLoading: false,
       user: null,
       isAuthenticated: false,

@@ -1,12 +1,17 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import RegistroPage from './page';
 
+// Mock RegisterForm component
+vi.mock('@/components/features/auth', () => ({
+  RegisterForm: () => <div data-testid="register-form">Register Form Mock</div>,
+}));
+
 describe('RegistroPage', () => {
-  it('should render registro page with correct title', () => {
+  it('should render the RegisterForm component', () => {
     render(<RegistroPage />);
 
-    expect(screen.getByRole('heading', { level: 1, name: /registro/i })).toBeInTheDocument();
+    expect(screen.getByTestId('register-form')).toBeInTheDocument();
   });
 
   it('should have min-h-screen class', () => {
@@ -23,10 +28,12 @@ describe('RegistroPage', () => {
     expect(mainDiv).toHaveClass('bg-bg-main');
   });
 
-  it('should have font-serif class on heading', () => {
-    render(<RegistroPage />);
+  it('should center content with flexbox', () => {
+    const { container } = render(<RegistroPage />);
 
-    const heading = screen.getByRole('heading', { level: 1 });
-    expect(heading).toHaveClass('font-serif');
+    const mainDiv = container.firstChild as HTMLElement;
+    expect(mainDiv).toHaveClass('flex');
+    expect(mainDiv).toHaveClass('items-center');
+    expect(mainDiv).toHaveClass('justify-center');
   });
 });
