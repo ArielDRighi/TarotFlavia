@@ -10,8 +10,8 @@ vi.mock('@/lib/api/axios-config', () => ({
   },
 }));
 
-// Mock sonner toast
-vi.mock('sonner', () => ({
+// Mock custom toast wrapper
+vi.mock('@/hooks/utils/useToast', () => ({
   toast: {
     success: vi.fn(),
     error: vi.fn(),
@@ -20,7 +20,7 @@ vi.mock('sonner', () => ({
 
 // Import mocked modules
 import { apiClient } from '@/lib/api/axios-config';
-import { toast } from 'sonner';
+import { toast } from '@/hooks/utils/useToast';
 
 // Mock user with all required fields from AuthUser type
 const createMockUser = (overrides?: Partial<AuthUser>): AuthUser => ({

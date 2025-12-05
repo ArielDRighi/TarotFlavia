@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { toast } from 'sonner';
+import { toast } from '@/hooks/utils/useToast';
 import { apiClient } from '@/lib/api/axios-config';
 import type { AuthUser, AuthStore, LoginResponse } from '@/types';
 
@@ -39,9 +39,11 @@ export const useAuthStore = create<AuthStore>()(
 
           const { access_token, refresh_token, user } = response.data;
 
-          // Store tokens in localStorage
-          localStorage.setItem('access_token', access_token);
-          localStorage.setItem('refresh_token', refresh_token);
+          // Store tokens in localStorage (SSR safety check)
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('access_token', access_token);
+            localStorage.setItem('refresh_token', refresh_token);
+          }
 
           // Update store state
           get().setUser(user);
@@ -54,9 +56,11 @@ export const useAuthStore = create<AuthStore>()(
       },
 
       logout: () => {
-        // Clear tokens from localStorage
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
+        // Clear tokens from localStorage (SSR safety check)
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
+        }
 
         // Clear user state
         set({
@@ -67,7 +71,8 @@ export const useAuthStore = create<AuthStore>()(
 
       checkAuth: async () => {
         try {
-          const token = localStorage.getItem('access_token');
+          // SSR safety check
+          const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
 
           if (!token) {
             set({ isLoading: false });
@@ -77,9 +82,11 @@ export const useAuthStore = create<AuthStore>()(
           const response = await apiClient.get<AuthUser>('/users/profile');
           get().setUser(response.data);
         } catch {
-          // Clear invalid tokens
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('refresh_token');
+          // Clear invalid tokens (SSR safety check)
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+          }
           get().setUser(null);
         } finally {
           set({ isLoading: false });
