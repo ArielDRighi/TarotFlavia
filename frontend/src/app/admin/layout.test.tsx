@@ -14,29 +14,7 @@ describe('AdminLayout', () => {
     expect(screen.getByText('Child Content')).toBeInTheDocument();
   });
 
-  it('should have admin wrapper with min-h-screen', () => {
-    const { container } = render(
-      <AdminLayout>
-        <div>Content</div>
-      </AdminLayout>
-    );
-
-    const wrapper = container.firstChild as HTMLElement;
-    expect(wrapper).toHaveClass('min-h-screen');
-  });
-
-  it('should have bg-bg-main class', () => {
-    const { container } = render(
-      <AdminLayout>
-        <div>Content</div>
-      </AdminLayout>
-    );
-
-    const wrapper = container.firstChild as HTMLElement;
-    expect(wrapper).toHaveClass('bg-bg-main');
-  });
-
-  it('should have admin indicator', () => {
+  it('should render admin indicator banner', () => {
     render(
       <AdminLayout>
         <div>Content</div>
@@ -44,5 +22,32 @@ describe('AdminLayout', () => {
     );
 
     expect(screen.getByText(/panel de administración/i)).toBeInTheDocument();
+  });
+
+  it('should have admin banner with correct styling', () => {
+    render(
+      <AdminLayout>
+        <div>Content</div>
+      </AdminLayout>
+    );
+
+    const banner = screen.getByText(/panel de administración/i);
+    expect(banner).toHaveClass('bg-primary/10');
+    expect(banner).toHaveClass('text-primary');
+    expect(banner).toHaveClass('text-center');
+    expect(banner).toHaveClass('font-medium');
+  });
+
+  it('should not add redundant wrapper (uses fragment)', () => {
+    const { container } = render(
+      <AdminLayout>
+        <div data-testid="child">Content</div>
+      </AdminLayout>
+    );
+
+    // El primer hijo debe ser el banner, no un wrapper div
+    const firstChild = container.firstChild as HTMLElement;
+    expect(firstChild.tagName).toBe('DIV');
+    expect(firstChild).toHaveClass('bg-primary/10');
   });
 });
