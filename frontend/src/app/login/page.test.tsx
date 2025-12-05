@@ -1,12 +1,17 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import LoginPage from './page';
 
+// Mock LoginForm to avoid complex setup
+vi.mock('@/components/features/auth', () => ({
+  LoginForm: () => <div data-testid="login-form">LoginForm Component</div>,
+}));
+
 describe('LoginPage', () => {
-  it('should render login page with correct title', () => {
+  it('should render login page with LoginForm', () => {
     render(<LoginPage />);
 
-    expect(screen.getByRole('heading', { level: 1, name: /login/i })).toBeInTheDocument();
+    expect(screen.getByTestId('login-form')).toBeInTheDocument();
   });
 
   it('should have min-h-screen class', () => {
@@ -23,10 +28,12 @@ describe('LoginPage', () => {
     expect(mainDiv).toHaveClass('bg-bg-main');
   });
 
-  it('should have font-serif class on heading', () => {
-    render(<LoginPage />);
+  it('should center content vertically and horizontally', () => {
+    const { container } = render(<LoginPage />);
 
-    const heading = screen.getByRole('heading', { level: 1 });
-    expect(heading).toHaveClass('font-serif');
+    const mainDiv = container.firstChild as HTMLElement;
+    expect(mainDiv).toHaveClass('flex');
+    expect(mainDiv).toHaveClass('items-center');
+    expect(mainDiv).toHaveClass('justify-center');
   });
 });

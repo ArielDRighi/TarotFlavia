@@ -878,57 +878,38 @@ Crear custom hook que facilite el uso del auth store en componentes.
 
 ---
 
-### TAREA 3.3: Crear formulario de Login
+### TAREA 3.3: Crear formulario de Login ✅ COMPLETADA
 
 **Prioridad:** CRÍTICA
 **Estimación:** 45 min
 **Dependencias:** 1.1, 3.2
+**Completada:** 2025-12-05
+**Rama:** feature/TASK-3.3-login-form
 
 **Consigna:**
 Crear página de login completa con formulario, validación con Zod y manejo de errores.
 
-**Prompt:**
+**Archivos creados:**
 
-```
-Crea la página de Login completa:
+- `src/components/features/auth/LoginForm.tsx` - Componente de formulario de login
+- `src/components/features/auth/LoginForm.test.tsx` - Tests con 100% coverage (18 tests)
+- `src/components/features/auth/index.ts` - Barrel export
 
-ARCHIVO: src/app/login/page.tsx
+**Archivos modificados:**
 
-DEBE SER CLIENT COMPONENT ('use client')
+- `src/app/login/page.tsx` - Actualizada para usar LoginForm
+- `src/app/login/page.test.tsx` - Tests actualizados
 
-ESTRUCTURA:
-- Contenedor centrado (vertical y horizontal)
-- Card blanca con shadow-soft y rounded-2xl
-- Header: Logo/título "Bienvenido al Oráculo" en font-serif
-- Formulario:
-  - Input email (type="email")
-  - Input password (type="password")
-  - Checkbox "Recordarme"
-  - Botón "Iniciar Sesión" ancho completo, bg-primary
-- Footer:
-  - Link "¿Olvidaste tu contraseña?" (text-muted, text-sm)
-  - Link "Crear cuenta nueva" -> /registro
+**Notas de implementación:**
 
-VALIDACIÓN CON ZOD:
-- Crear schema: z.object({ email: z.string().email(), password: z.string().min(6) })
-- Usar react-hook-form (instalarlo: npm install react-hook-form @hookform/resolvers)
-- Validar con zodResolver
-
-COMPORTAMIENTO:
-- Al submit, llamar a login() de useAuth
-- Mostrar spinner en botón mientras carga
-- Si error, mostrar toast de error con mensaje
-- Si éxito, redirigir a /perfil
-
-DISEÑO:
-- Fondo: bg-main
-- Inputs: bg-gray-50, focus:border-primary
-- Usar componentes Input y Button de shadcn/ui
-
-IMPORTANTE:
-- Manejar estados de loading
-- Deshabilitar botón mientras está enviando
-```
+- Sigue arquitectura feature-based (components/features/auth/)
+- Usa react-hook-form + zodResolver para validación
+- Usa loginSchema de lib/validations/auth.schemas.ts (ya existía)
+- Integra con useAuth hook para login
+- Spinner con Loader2 de lucide-react durante submit
+- Links a /recuperar-password y /registro
+- Design tokens aplicados: shadow-soft, font-serif, bg-primary
+- 100% coverage en LoginForm.tsx
 
 ---
 
