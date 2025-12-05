@@ -773,11 +773,38 @@ NO agregues contenido real, solo estructura.
 
 ## 🔐 FASE 3: AUTENTICACIÓN
 
-### TAREA 3.1: Crear Zustand store de autenticación
+### TAREA 3.1: Crear Zustand store de autenticación ✅
 
+**Estado:** COMPLETADA
+**Fecha:** 2025-12-04
 **Prioridad:** CRÍTICA
 **Estimación:** 40 min
 **Dependencias:** 0.5
+
+**Resumen de Implementación:**
+
+- Creado `src/types/auth.types.ts` con tipos: AuthUser, AuthState, LoginCredentials, LoginResponse, AuthActions, AuthStore
+- Expandido `src/stores/authStore.ts` con nuevo store completo:
+  - Estado inicial: user: null, isAuthenticated: false, isLoading: true
+  - Acciones implementadas: setUser, login, logout, checkAuth
+  - Persistencia con middleware persist de Zustand (key: 'auth-storage')
+  - Solo persiste: user, isAuthenticated (no isLoading)
+  - Integración con apiClient y toast de sonner para mensajes
+- Tests con 100% coverage (19 tests)
+
+**Decisiones técnicas:**
+
+- Se reutilizó `authStore.ts` existente expandiendo su funcionalidad
+- El tipo AuthUser usa `id: number` y `roles: string[]` según spec del backend
+- No se implementó redirección en logout (se manejará en componente/hook consumidor)
+- Tokens se almacenan en localStorage via store, no directamente
+
+**Archivos modificados:**
+
+- `src/types/auth.types.ts` (nuevo)
+- `src/types/index.ts` (exports agregados)
+- `src/stores/authStore.ts` (expandido)
+- `src/stores/authStore.test.ts` (reescrito con 19 tests)
 
 **Consigna:**
 Crear store de Zustand para manejar estado de autenticación: usuario, tokens, login, logout, verificación.
