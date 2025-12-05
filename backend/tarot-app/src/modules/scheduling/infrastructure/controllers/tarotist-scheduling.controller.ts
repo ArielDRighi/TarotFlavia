@@ -8,6 +8,7 @@ import {
   ParseIntPipe,
   Request,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -29,9 +30,11 @@ import {
 import { TarotistAvailability, TarotistException } from '../../entities';
 import { SessionStatus } from '../../domain/enums';
 import { AuthenticatedRequest } from '../../interfaces/authenticated-request.interface';
+import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
 
 @ApiTags('Tarotist Scheduling')
 @ApiBearerAuth('JWT-auth')
+@UseGuards(JwtAuthGuard)
 @Controller('tarotist/scheduling')
 export class TarotistSchedulingController {
   constructor(

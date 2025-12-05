@@ -4,6 +4,7 @@ import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { UsageLimitsService } from './usage-limits.service';
 import { UsageLimit, UsageFeature } from './entities/usage-limit.entity';
 import { UsersService } from '../users/users.service';
+import { PlanConfigService } from '../plan-config/plan-config.service';
 import {
   User,
   UserPlan,
@@ -24,6 +25,10 @@ describe('UsageLimitsService', () => {
     findById: jest.fn(),
   };
 
+  const mockPlanConfigService = {
+    getReadingsLimit: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -35,6 +40,10 @@ describe('UsageLimitsService', () => {
         {
           provide: UsersService,
           useValue: mockUsersService,
+        },
+        {
+          provide: PlanConfigService,
+          useValue: mockPlanConfigService,
         },
       ],
     }).compile();
@@ -57,6 +66,7 @@ describe('UsageLimitsService', () => {
       };
 
       mockUsersService.findById.mockResolvedValue(freeUser);
+      mockPlanConfigService.getReadingsLimit.mockResolvedValue(10); // FREE plan limit from DB
       mockUsageLimitRepository.findOne.mockResolvedValue({
         count: 2, // Less than 3 (FREE_DAILY_READINGS)
       });
@@ -74,8 +84,9 @@ describe('UsageLimitsService', () => {
       };
 
       mockUsersService.findById.mockResolvedValue(freeUser);
+      mockPlanConfigService.getReadingsLimit.mockResolvedValue(10); // FREE plan limit from DB
       mockUsageLimitRepository.findOne.mockResolvedValue({
-        count: 3, // Reached limit (FREE_DAILY_READINGS)
+        count: 10, // Reached limit (10 readings)
       });
 
       const result = await service.checkLimit(1, UsageFeature.TAROT_READING);
@@ -91,6 +102,7 @@ describe('UsageLimitsService', () => {
       };
 
       mockUsersService.findById.mockResolvedValue(premiumUser);
+      mockPlanConfigService.getReadingsLimit.mockResolvedValue(-1); // Unlimited for PREMIUM
 
       const result = await service.checkLimit(2, UsageFeature.TAROT_READING);
 
@@ -106,6 +118,7 @@ describe('UsageLimitsService', () => {
       };
 
       mockUsersService.findById.mockResolvedValue(freeUser);
+      mockPlanConfigService.getReadingsLimit.mockResolvedValue(10); // FREE plan limit from DB
       mockUsageLimitRepository.findOne.mockResolvedValue(null);
 
       const result = await service.checkLimit(1, UsageFeature.TAROT_READING);
@@ -233,6 +246,7 @@ describe('UsageLimitsService', () => {
       };
 
       mockUsersService.findById.mockResolvedValue(freeUser);
+      mockPlanConfigService.getReadingsLimit.mockResolvedValue(10); // FREE plan limit from DB
       mockUsageLimitRepository.findOne.mockResolvedValue({
         count: 2,
       });
@@ -242,7 +256,7 @@ describe('UsageLimitsService', () => {
         UsageFeature.TAROT_READING,
       );
 
-      expect(result).toBe(1); // 3 - 2 = 1
+      expect(result).toBe(8); // 10 - 2 = 8
     });
 
     it('should return -1 (unlimited) for PREMIUM user', async () => {
@@ -253,6 +267,7 @@ describe('UsageLimitsService', () => {
       };
 
       mockUsersService.findById.mockResolvedValue(premiumUser);
+      mockPlanConfigService.getReadingsLimit.mockResolvedValue(-1); // Unlimited for PREMIUM
 
       const result = await service.getRemainingUsage(
         2,
@@ -269,6 +284,7 @@ describe('UsageLimitsService', () => {
       };
 
       mockUsersService.findById.mockResolvedValue(freeUser);
+      mockPlanConfigService.getReadingsLimit.mockResolvedValue(10); // FREE plan limit from DB
       mockUsageLimitRepository.findOne.mockResolvedValue(null);
 
       const result = await service.getRemainingUsage(
@@ -276,7 +292,7 @@ describe('UsageLimitsService', () => {
         UsageFeature.TAROT_READING,
       );
 
-      expect(result).toBe(3); // FREE_DAILY_READINGS
+      expect(result).toBe(10); // Full FREE limit
     });
 
     it('should throw NotFoundException when user not found', async () => {

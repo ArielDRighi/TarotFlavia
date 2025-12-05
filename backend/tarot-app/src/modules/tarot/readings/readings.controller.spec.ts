@@ -6,7 +6,7 @@ import { QueryReadingsDto, SortBy, SortOrder } from './dto/query-readings.dto';
 import { JwtAuthGuard } from '../../auth/infrastructure/guards/jwt-auth.guard';
 import { RequiresPremiumForCustomQuestionGuard } from './guards/requires-premium-for-custom-question.guard';
 import { CheckUsageLimitGuard } from '../../usage-limits/guards/check-usage-limit.guard';
-import { AIQuotaGuard } from '../../ai-usage/ai-quota.guard';
+import { AIQuotaGuard } from '../../ai-usage/infrastructure/guards/ai-quota.guard';
 import { IncrementUsageInterceptor } from '../../usage-limits/interceptors/increment-usage.interceptor';
 import { ReadingsCacheInterceptor } from './interceptors/readings-cache.interceptor';
 

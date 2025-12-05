@@ -29,6 +29,7 @@ import { AdminModule } from './modules/admin/admin.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { SecurityModule } from './modules/security/security.module';
 import { SchedulingModule } from './modules/scheduling/scheduling.module';
+import { PlanConfigModule } from './modules/plan-config/plan-config.module';
 import { CustomThrottlerGuard } from './common/guards/custom-throttler.guard';
 import { ThrottlerExceptionFilter } from './common/filters/throttler-exception.filter';
 import { RateLimitingModule } from './common/rate-limiting/rate-limiting.module';
@@ -84,6 +85,7 @@ import { validate } from './config/env-validator';
     TarotistasModule,
     SubscriptionsModule,
     SchedulingModule,
+    PlanConfigModule,
     InterpretationCacheModule,
     AIModule,
     CardsModule,

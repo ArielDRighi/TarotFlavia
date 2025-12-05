@@ -16,7 +16,7 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/infrastructure/guards/jwt-auth.guard';
-import { AIQuotaGuard } from '../../ai-usage/ai-quota.guard';
+import { AIQuotaGuard } from '../../ai-usage/infrastructure/guards/ai-quota.guard';
 import { DailyReadingService } from './daily-reading.service';
 import { DailyReadingResponseDto } from './dto/daily-reading-response.dto';
 import { DailyReadingHistoryDto } from './dto/daily-reading-history.dto';

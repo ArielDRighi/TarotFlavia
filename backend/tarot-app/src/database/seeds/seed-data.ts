@@ -9,6 +9,7 @@ import { PredefinedQuestion } from '../../modules/predefined-questions/entities/
 import { User } from '../../modules/users/entities/user.entity';
 import { Tarotista } from '../../modules/tarotistas/entities/tarotista.entity';
 import { TarotistaConfig } from '../../modules/tarotistas/entities/tarotista-config.entity';
+import { Plan } from '../../modules/plan-config/entities/plan.entity';
 import { seedTarotDecks } from './tarot-decks.seeder';
 import { seedTarotCards } from './tarot-cards.seeder';
 import { seedTarotSpreads } from './tarot-spreads.seeder';
@@ -18,6 +19,7 @@ import { seedUsers } from './users.seeder';
 import { seedFlaviaUser } from './flavia-user.seeder';
 import { seedFlaviaTarotista } from './flavia-tarotista.seeder';
 import { seedFlaviaIAConfig } from './flavia-ia-config.seeder';
+import { seedPlans } from './plans.seeder';
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppModule);
@@ -41,6 +43,7 @@ async function bootstrap() {
   const tarotistaConfigRepository = app.get<Repository<TarotistaConfig>>(
     getRepositoryToken(TarotistaConfig),
   );
+  const planRepository = app.get<Repository<Plan>>(getRepositoryToken(Plan));
 
   try {
     console.log('🌱 Starting database seeding process...\n');
@@ -74,6 +77,9 @@ async function bootstrap() {
 
     // ========== EXISTING SEEDERS ==========
     console.log('📍 Step 2: Seeding existing data...\n');
+
+    // Seed Plans first (required for users and other features)
+    await seedPlans(planRepository);
 
     // Seed Reading Categories first
     await seedReadingCategories(categoryRepository);

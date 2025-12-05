@@ -48,6 +48,15 @@ describe('Readings Hybrid Questions (E2E)', () => {
     await dbHelper.initialize();
     // NOTE: NO limpiar base de datos aquí - los seeders ya se ejecutaron en globalSetup
 
+    // Ensure users have correct plans before tests (might have been modified by other tests)
+    const ds = dbHelper.getDataSource();
+    await ds.query(
+      `UPDATE "user" SET plan = 'free' WHERE email = 'free@test.com'`,
+    );
+    await ds.query(
+      `UPDATE "user" SET plan = 'premium' WHERE email = 'premium@test.com'`,
+    );
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -113,11 +122,19 @@ describe('Readings Hybrid Questions (E2E)', () => {
 
   afterEach(async () => {
     // Limpiar solo las readings de este test, no los usuarios
+    // y asegurar que los planes estén correctos
     const ds = dbHelper.getDataSource();
     await ds.query('DELETE FROM tarot_reading WHERE "userId" IN ($1, $2)', [
       freeUserId,
       premiumUserId,
     ]);
+    // Restore user plans to correct state
+    await ds.query(
+      `UPDATE "user" SET plan = 'free' WHERE email = 'free@test.com'`,
+    );
+    await ds.query(
+      `UPDATE "user" SET plan = 'premium' WHERE email = 'premium@test.com'`,
+    );
   });
 
   afterAll(async () => {
@@ -127,6 +144,13 @@ describe('Readings Hybrid Questions (E2E)', () => {
       freeUserId,
       premiumUserId,
     ]);
+    // Restore user plans to correct state for other tests
+    await ds.query(
+      `UPDATE "user" SET plan = 'free' WHERE email = 'free@test.com'`,
+    );
+    await ds.query(
+      `UPDATE "user" SET plan = 'premium' WHERE email = 'premium@test.com'`,
+    );
     // NO eliminar los usuarios porque son seeded y los necesitan otros tests
     await dbHelper.close();
     await app.close();

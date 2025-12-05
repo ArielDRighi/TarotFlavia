@@ -29,7 +29,7 @@ La implementación actual utiliza `@nestjs/cache-manager` con caché en memoria,
 #### 1. **Escalamiento Horizontal** ⚠️ CRÍTICO
 
 - **Problema**: Con múltiples instancias del backend, cada una tiene su propio caché in-memory
-- **Resultado**: Duplicación innecesaria de llamadas a OpenAI
+- **Resultado**: Duplicación innecesaria de llamadas a IA (Groq/OpenAI/DeepSeek)
 - **Solución**: Redis como caché compartido entre instancias
 - **Umbral**: Cuando tengas más de 1 instancia del backend
 
@@ -295,3 +295,9 @@ CacheModule.register({
 ## Conclusión
 
 **No necesitas Redis para MVP**, pero cuando escales horizontalmente o notes degradación de performance, esta documentación te guiará en la migración. El sistema actual de doble caché (in-memory + DB) es robusto y suficiente para etapas tempranas.
+
+---
+
+**Última actualización:** Diciembre 2025  
+**Versión:** 1.0.0  
+**Relacionado:** [ARCHITECTURE.md](./ARCHITECTURE.md)

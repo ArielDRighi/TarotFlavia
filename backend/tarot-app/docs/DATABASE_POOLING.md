@@ -5,7 +5,7 @@
 Este documento describe la configuración de connection pooling optimizado para PostgreSQL en la aplicación Tarot, implementado para manejar carga concurrente eficientemente y prevenir problemas de timeout bajo tráfico alto.
 
 **Implementado en:** TASK-043  
-**Fecha:** Noviembre 2025  
+**Fecha:** Diciembre 2025  
 **Tecnología:** TypeORM + node-postgres (pg)
 
 ---
@@ -515,6 +515,6 @@ Error final
 
 ---
 
-**Última actualización:** Noviembre 2025  
-**Autor:** TASK-043  
-**Versión:** 1.0.0
+**Última actualización:** Diciembre 2025  
+**Versión:** 1.0.0  
+**Relacionado:** [ARCHITECTURE.md](./ARCHITECTURE.md), [CACHE_STRATEGY.md](./CACHE_STRATEGY.md)
