@@ -265,13 +265,15 @@ describe('RegisterForm', () => {
       await user.type(confirmPasswordInput, 'password123');
       await user.click(submitButton);
 
+      // Registration error toast is handled by authStore, not the component
       await waitFor(() => {
-        expect(toast.error).toHaveBeenCalledWith('Email ya registrado');
+        expect(mockRegister).toHaveBeenCalled();
       });
     });
 
-    it('should show generic error toast when error has no message', async () => {
-      mockRegister.mockRejectedValueOnce(new Error());
+    it('should handle auto-login failure after successful registration', async () => {
+      mockRegister.mockResolvedValueOnce(undefined);
+      mockLogin.mockRejectedValueOnce(new Error('Login failed'));
       const user = userEvent.setup();
       render(<RegisterForm />);
 
@@ -288,8 +290,44 @@ describe('RegisterForm', () => {
       await user.click(submitButton);
 
       await waitFor(() => {
-        expect(toast.error).toHaveBeenCalledWith('Error al crear la cuenta');
+        expect(toast.success).toHaveBeenCalledWith('Cuenta creada exitosamente');
       });
+
+      await waitFor(() => {
+        expect(toast.error).toHaveBeenCalledWith(
+          'Cuenta creada. Por favor, inicia sesión manualmente'
+        );
+      });
+
+      await waitFor(() => {
+        expect(mockPush).toHaveBeenCalledWith('/login');
+      });
+    });
+
+    it('should not show component error toast on registration failure (handled by store)', async () => {
+      mockRegister.mockRejectedValueOnce(new Error('Error del servidor'));
+      const user = userEvent.setup();
+      render(<RegisterForm />);
+
+      const nameInput = screen.getByLabelText(/nombre/i);
+      const emailInput = screen.getByLabelText(/email/i);
+      const passwordInput = screen.getByLabelText(/^contraseña$/i);
+      const confirmPasswordInput = screen.getByLabelText(/confirmar contraseña/i);
+      const submitButton = screen.getByRole('button', { name: /crear cuenta/i });
+
+      await user.type(nameInput, 'Test User');
+      await user.type(emailInput, 'test@test.com');
+      await user.type(passwordInput, 'password123');
+      await user.type(confirmPasswordInput, 'password123');
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(mockRegister).toHaveBeenCalled();
+      });
+
+      // Registration errors are shown by authStore via toast.error
+      // The component itself doesn't call toast.error for registration failures
+      expect(toast.success).not.toHaveBeenCalled();
     });
   });
 

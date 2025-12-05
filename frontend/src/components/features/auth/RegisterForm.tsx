@@ -50,12 +50,17 @@ export function RegisterForm() {
       toast.success('Cuenta creada exitosamente');
 
       // Auto-login with the new credentials
-      await login(data.email, data.password);
-      router.push('/perfil');
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error && error.message ? error.message : 'Error al crear la cuenta';
-      toast.error(errorMessage);
+      try {
+        await login(data.email, data.password);
+        router.push('/perfil');
+      } catch {
+        // Account was created but auto-login failed
+        toast.error('Cuenta creada. Por favor, inicia sesión manualmente');
+        router.push('/login');
+      }
+    } catch {
+      // Registration failed - error toast is handled by authStore
+      // We still need to catch to prevent unhandled rejection
     } finally {
       setIsSubmitting(false);
     }

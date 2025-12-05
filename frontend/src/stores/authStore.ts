@@ -62,6 +62,7 @@ export const useAuthStore = create<AuthStore>()(
           // Extract error message from API response
           const axiosError = error as { response?: { data?: { message?: string } } };
           const message = axiosError.response?.data?.message || 'Error al crear la cuenta';
+          toast.error(message);
           throw new Error(message);
         }
       },
