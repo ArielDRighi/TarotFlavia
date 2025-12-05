@@ -14,12 +14,30 @@ export const API_ENDPOINTS = {
     PROFILE: '/auth/profile',
   },
 
+  // Categories
+  CATEGORIES: {
+    BASE: '/categories',
+  },
+
+  // Predefined Questions
+  PREDEFINED_QUESTIONS: {
+    BASE: '/predefined-questions',
+  },
+
+  // Spreads (Tiradas)
+  SPREADS: {
+    BASE: '/spreads',
+    BY_ID: (id: number) => `/spreads/${id}`,
+  },
+
   // Readings
   READINGS: {
     BASE: '/readings',
-    BY_ID: (id: string) => `/readings/${id}`,
+    BY_ID: (id: number) => `/readings/${id}`,
     TRASH: '/readings/trash',
-    RESTORE: (id: string) => `/readings/${id}/restore`,
+    RESTORE: (id: number) => `/readings/${id}/restore`,
+    REGENERATE: (id: number) => `/readings/${id}/regenerate`,
+    SHARE: (id: number) => `/readings/${id}/share`,
   },
 
   // Users

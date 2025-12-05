@@ -5,6 +5,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { apiClient } from './axios-config';
+import { API_ENDPOINTS } from './endpoints';
 import {
   getCategories,
   getPredefinedQuestions,
@@ -75,7 +76,7 @@ describe('readings-api', () => {
 
       const result = await getCategories();
 
-      expect(apiClient.get).toHaveBeenCalledWith('/categories');
+      expect(apiClient.get).toHaveBeenCalledWith(API_ENDPOINTS.CATEGORIES.BASE);
       expect(result).toEqual(mockCategories);
     });
 
@@ -114,7 +115,7 @@ describe('readings-api', () => {
 
       const result = await getPredefinedQuestions();
 
-      expect(apiClient.get).toHaveBeenCalledWith('/predefined-questions', {
+      expect(apiClient.get).toHaveBeenCalledWith(API_ENDPOINTS.PREDEFINED_QUESTIONS.BASE, {
         params: undefined,
       });
       expect(result).toEqual(mockQuestions);
@@ -125,7 +126,7 @@ describe('readings-api', () => {
 
       const result = await getPredefinedQuestions(1);
 
-      expect(apiClient.get).toHaveBeenCalledWith('/predefined-questions', {
+      expect(apiClient.get).toHaveBeenCalledWith(API_ENDPOINTS.PREDEFINED_QUESTIONS.BASE, {
         params: { categoryId: 1 },
       });
       expect(result).toEqual(mockQuestions);
@@ -166,7 +167,7 @@ describe('readings-api', () => {
 
       const result = await getSpreads();
 
-      expect(apiClient.get).toHaveBeenCalledWith('/spreads');
+      expect(apiClient.get).toHaveBeenCalledWith(API_ENDPOINTS.SPREADS.BASE);
       expect(result).toEqual(mockSpreads);
     });
 
@@ -225,7 +226,7 @@ describe('readings-api', () => {
 
       const result = await createReading(createData);
 
-      expect(apiClient.post).toHaveBeenCalledWith('/readings', createData);
+      expect(apiClient.post).toHaveBeenCalledWith(API_ENDPOINTS.READINGS.BASE, createData);
       expect(result).toEqual(mockReading);
     });
 
@@ -240,7 +241,7 @@ describe('readings-api', () => {
 
       const result = await createReading(createData);
 
-      expect(apiClient.post).toHaveBeenCalledWith('/readings', createData);
+      expect(apiClient.post).toHaveBeenCalledWith(API_ENDPOINTS.READINGS.BASE, createData);
       expect(result).toEqual(mockReading);
     });
 
@@ -281,7 +282,7 @@ describe('readings-api', () => {
 
       const result = await getMyReadings(1, 10);
 
-      expect(apiClient.get).toHaveBeenCalledWith('/readings', {
+      expect(apiClient.get).toHaveBeenCalledWith(API_ENDPOINTS.READINGS.BASE, {
         params: { page: 1, limit: 10 },
       });
       expect(result).toEqual(mockPaginatedReadings);
@@ -319,7 +320,7 @@ describe('readings-api', () => {
 
       const result = await getReadingById(123);
 
-      expect(apiClient.get).toHaveBeenCalledWith('/readings/123');
+      expect(apiClient.get).toHaveBeenCalledWith(API_ENDPOINTS.READINGS.BY_ID(123));
       expect(result).toEqual(mockReadingDetail);
     });
 
@@ -339,7 +340,7 @@ describe('readings-api', () => {
 
       await deleteReading(123);
 
-      expect(apiClient.delete).toHaveBeenCalledWith('/readings/123');
+      expect(apiClient.delete).toHaveBeenCalledWith(API_ENDPOINTS.READINGS.BY_ID(123));
     });
 
     it('should throw error with clear message on failure', async () => {
@@ -374,7 +375,7 @@ describe('readings-api', () => {
 
       const result = await regenerateInterpretation(123);
 
-      expect(apiClient.post).toHaveBeenCalledWith('/readings/123/regenerate');
+      expect(apiClient.post).toHaveBeenCalledWith(API_ENDPOINTS.READINGS.REGENERATE(123));
       expect(result).toEqual(mockReadingDetail);
     });
 
@@ -400,7 +401,7 @@ describe('readings-api', () => {
 
       const result = await shareReading(123);
 
-      expect(apiClient.post).toHaveBeenCalledWith('/readings/123/share');
+      expect(apiClient.post).toHaveBeenCalledWith(API_ENDPOINTS.READINGS.SHARE(123));
       expect(result).toEqual(mockShareResponse);
     });
 
@@ -420,7 +421,7 @@ describe('readings-api', () => {
 
       await unshareReading(123);
 
-      expect(apiClient.delete).toHaveBeenCalledWith('/readings/123/share');
+      expect(apiClient.delete).toHaveBeenCalledWith(API_ENDPOINTS.READINGS.SHARE(123));
     });
 
     it('should throw error with clear message on failure', async () => {
@@ -450,7 +451,7 @@ describe('readings-api', () => {
 
       const result = await getTrashedReadings();
 
-      expect(apiClient.get).toHaveBeenCalledWith('/readings/trash');
+      expect(apiClient.get).toHaveBeenCalledWith(API_ENDPOINTS.READINGS.TRASH);
       expect(result).toEqual(mockTrashedReadings);
     });
 
@@ -478,7 +479,7 @@ describe('readings-api', () => {
 
       const result = await restoreReading(123);
 
-      expect(apiClient.post).toHaveBeenCalledWith('/readings/123/restore');
+      expect(apiClient.post).toHaveBeenCalledWith(API_ENDPOINTS.READINGS.RESTORE(123));
       expect(result).toEqual(mockRestoredReading);
     });
 

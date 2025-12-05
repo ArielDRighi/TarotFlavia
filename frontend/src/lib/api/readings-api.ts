@@ -5,6 +5,7 @@
  * These are pure API functions - use TanStack Query hooks in hooks/api/ for data fetching.
  */
 import { apiClient } from './axios-config';
+import { API_ENDPOINTS } from './endpoints';
 import type {
   Category,
   PredefinedQuestion,
@@ -28,7 +29,7 @@ import type {
  */
 export async function getCategories(): Promise<Category[]> {
   try {
-    const response = await apiClient.get<Category[]>('/categories');
+    const response = await apiClient.get<Category[]>(API_ENDPOINTS.CATEGORIES.BASE);
     return response.data;
   } catch {
     throw new Error('Error al obtener categorías');
@@ -47,9 +48,12 @@ export async function getCategories(): Promise<Category[]> {
  */
 export async function getPredefinedQuestions(categoryId?: number): Promise<PredefinedQuestion[]> {
   try {
-    const response = await apiClient.get<PredefinedQuestion[]>('/predefined-questions', {
-      params: categoryId ? { categoryId } : undefined,
-    });
+    const response = await apiClient.get<PredefinedQuestion[]>(
+      API_ENDPOINTS.PREDEFINED_QUESTIONS.BASE,
+      {
+        params: categoryId ? { categoryId } : undefined,
+      }
+    );
     return response.data;
   } catch {
     throw new Error('Error al obtener preguntas predefinidas');
@@ -67,7 +71,7 @@ export async function getPredefinedQuestions(categoryId?: number): Promise<Prede
  */
 export async function getSpreads(): Promise<Spread[]> {
   try {
-    const response = await apiClient.get<Spread[]>('/spreads');
+    const response = await apiClient.get<Spread[]>(API_ENDPOINTS.SPREADS.BASE);
     return response.data;
   } catch {
     throw new Error('Error al obtener tiradas');
@@ -86,7 +90,7 @@ export async function getSpreads(): Promise<Spread[]> {
  */
 export async function createReading(data: CreateReadingDto): Promise<ReadingDetail> {
   try {
-    const response = await apiClient.post<ReadingDetail>('/readings', data);
+    const response = await apiClient.post<ReadingDetail>(API_ENDPOINTS.READINGS.BASE, data);
     return response.data;
   } catch {
     throw new Error('Error al crear lectura');
@@ -102,7 +106,7 @@ export async function createReading(data: CreateReadingDto): Promise<ReadingDeta
  */
 export async function getMyReadings(page: number, limit: number): Promise<PaginatedReadings> {
   try {
-    const response = await apiClient.get<PaginatedReadings>('/readings', {
+    const response = await apiClient.get<PaginatedReadings>(API_ENDPOINTS.READINGS.BASE, {
       params: { page, limit },
     });
     return response.data;
@@ -119,7 +123,7 @@ export async function getMyReadings(page: number, limit: number): Promise<Pagina
  */
 export async function getReadingById(id: number): Promise<ReadingDetail> {
   try {
-    const response = await apiClient.get<ReadingDetail>(`/readings/${id}`);
+    const response = await apiClient.get<ReadingDetail>(API_ENDPOINTS.READINGS.BY_ID(id));
     return response.data;
   } catch {
     throw new Error('Error al obtener lectura');
@@ -133,7 +137,7 @@ export async function getReadingById(id: number): Promise<ReadingDetail> {
  */
 export async function deleteReading(id: number): Promise<void> {
   try {
-    await apiClient.delete(`/readings/${id}`);
+    await apiClient.delete(API_ENDPOINTS.READINGS.BY_ID(id));
   } catch {
     throw new Error('Error al eliminar lectura');
   }
@@ -151,7 +155,9 @@ export async function deleteReading(id: number): Promise<void> {
  */
 export async function regenerateInterpretation(readingId: number): Promise<ReadingDetail> {
   try {
-    const response = await apiClient.post<ReadingDetail>(`/readings/${readingId}/regenerate`);
+    const response = await apiClient.post<ReadingDetail>(
+      API_ENDPOINTS.READINGS.REGENERATE(readingId)
+    );
     return response.data;
   } catch {
     throw new Error('Error al regenerar interpretación');
@@ -170,7 +176,9 @@ export async function regenerateInterpretation(readingId: number): Promise<Readi
  */
 export async function shareReading(readingId: number): Promise<ShareReadingResponse> {
   try {
-    const response = await apiClient.post<ShareReadingResponse>(`/readings/${readingId}/share`);
+    const response = await apiClient.post<ShareReadingResponse>(
+      API_ENDPOINTS.READINGS.SHARE(readingId)
+    );
     return response.data;
   } catch {
     throw new Error('Error al compartir lectura');
@@ -184,7 +192,7 @@ export async function shareReading(readingId: number): Promise<ShareReadingRespo
  */
 export async function unshareReading(readingId: number): Promise<void> {
   try {
-    await apiClient.delete(`/readings/${readingId}/share`);
+    await apiClient.delete(API_ENDPOINTS.READINGS.SHARE(readingId));
   } catch {
     throw new Error('Error al dejar de compartir lectura');
   }
@@ -201,7 +209,7 @@ export async function unshareReading(readingId: number): Promise<void> {
  */
 export async function getTrashedReadings(): Promise<TrashedReading[]> {
   try {
-    const response = await apiClient.get<TrashedReading[]>('/readings/trash');
+    const response = await apiClient.get<TrashedReading[]>(API_ENDPOINTS.READINGS.TRASH);
     return response.data;
   } catch {
     throw new Error('Error al obtener lecturas eliminadas');
@@ -216,7 +224,7 @@ export async function getTrashedReadings(): Promise<TrashedReading[]> {
  */
 export async function restoreReading(readingId: number): Promise<Reading> {
   try {
-    const response = await apiClient.post<Reading>(`/readings/${readingId}/restore`);
+    const response = await apiClient.post<Reading>(API_ENDPOINTS.READINGS.RESTORE(readingId));
     return response.data;
   } catch {
     throw new Error('Error al restaurar lectura');
