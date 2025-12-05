@@ -1,34 +1,39 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import RecuperarPasswordPage from './page';
+import ForgotPasswordPage from './page';
 
-describe('RecuperarPasswordPage', () => {
-  it('should render recuperar password page with correct title', () => {
-    render(<RecuperarPasswordPage />);
+// Mock ForgotPasswordForm component
+vi.mock('@/components/features/auth', () => ({
+  ForgotPasswordForm: () => <div data-testid="forgot-password-form">ForgotPasswordForm Mock</div>,
+}));
 
-    expect(
-      screen.getByRole('heading', { level: 1, name: /recuperar contraseña/i })
-    ).toBeInTheDocument();
+describe('ForgotPasswordPage', () => {
+  it('should render the ForgotPasswordForm component', () => {
+    render(<ForgotPasswordPage />);
+
+    expect(screen.getByTestId('forgot-password-form')).toBeInTheDocument();
   });
 
   it('should have min-h-screen class', () => {
-    const { container } = render(<RecuperarPasswordPage />);
+    const { container } = render(<ForgotPasswordPage />);
 
     const mainDiv = container.firstChild as HTMLElement;
     expect(mainDiv).toHaveClass('min-h-screen');
   });
 
   it('should have bg-bg-main class', () => {
-    const { container } = render(<RecuperarPasswordPage />);
+    const { container } = render(<ForgotPasswordPage />);
 
     const mainDiv = container.firstChild as HTMLElement;
     expect(mainDiv).toHaveClass('bg-bg-main');
   });
 
-  it('should have font-serif class on heading', () => {
-    render(<RecuperarPasswordPage />);
+  it('should have centered layout', () => {
+    const { container } = render(<ForgotPasswordPage />);
 
-    const heading = screen.getByRole('heading', { level: 1 });
-    expect(heading).toHaveClass('font-serif');
+    const wrapper = container.firstChild;
+    expect(wrapper).toHaveClass('flex');
+    expect(wrapper).toHaveClass('items-center');
+    expect(wrapper).toHaveClass('justify-center');
   });
 });

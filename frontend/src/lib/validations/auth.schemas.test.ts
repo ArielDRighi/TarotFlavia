@@ -2,8 +2,10 @@ import { describe, it, expect } from 'vitest';
 import {
   loginSchema,
   registerSchema,
+  forgotPasswordSchema,
   type LoginFormData,
   type RegisterFormData,
+  type ForgotPasswordFormData,
 } from './auth.schemas';
 import { CONFIG } from '@/lib/constants/config';
 
@@ -179,6 +181,43 @@ describe('Auth Validation Schemas', () => {
 
       const result = registerSchema.safeParse(boundaryData);
       expect(result.success).toBe(true);
+    });
+  });
+
+  describe('forgotPasswordSchema', () => {
+    it('should validate correct email', () => {
+      const validData: ForgotPasswordFormData = {
+        email: 'test@example.com',
+      };
+
+      const result = forgotPasswordSchema.safeParse(validData);
+      expect(result.success).toBe(true);
+    });
+
+    it('should reject invalid email', () => {
+      const invalidData = {
+        email: 'invalid-email',
+      };
+
+      const result = forgotPasswordSchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].message).toBe('Email inválido');
+      }
+    });
+
+    it('should reject empty email', () => {
+      const invalidData = {
+        email: '',
+      };
+
+      const result = forgotPasswordSchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject missing email field', () => {
+      const result = forgotPasswordSchema.safeParse({});
+      expect(result.success).toBe(false);
     });
   });
 });
