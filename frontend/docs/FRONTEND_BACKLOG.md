@@ -851,44 +851,30 @@ IMPORTANTE:
 
 ---
 
-### TAREA 3.2: Crear hook useAuth
+### TAREA 3.2: Crear hook useAuth ✅ COMPLETADA
 
 **Prioridad:** ALTA
 **Estimación:** 15 min
 **Dependencias:** 3.1
+**Completada:** 2025-12-05
+**Rama:** feature/TASK-3.2-use-auth-hook
 
 **Consigna:**
 Crear custom hook que facilite el uso del auth store en componentes.
 
-**Prompt:**
+**Archivos creados:**
 
-```
-Crea un custom hook para autenticación:
+- `src/hooks/useAuth.ts` - Hook principal para acceso al auth store
+- `src/hooks/useAuth.test.ts` - Tests con 100% coverage
+- `src/hooks/useRequireAuth.ts` - Hook para proteger páginas
+- `src/hooks/useRequireAuth.test.ts` - Tests con 100% coverage
 
-CREAR ARCHIVO: src/hooks/use-auth.ts
+**Notas de implementación:**
 
-DEBE EXPORTAR:
-- Hook useAuth() que retorna:
-  - user: User | null
-  - isAuthenticated: boolean
-  - isLoading: boolean
-  - login: (email: string, password: string) => Promise<void>
-  - logout: () => void
-  - checkAuth: () => Promise<void>
-
-IMPLEMENTACIÓN:
-- Usar useAuthStore de stores/auth-store
-- Simplemente extraer y retornar las propiedades del store
-
-TAMBIÉN CREAR: src/hooks/use-require-auth.ts
-- Hook useRequireAuth() que:
-  - Usa useAuth()
-  - Si NO está autenticado y NO está cargando, redirige a /login
-  - Usar useRouter y useEffect de Next.js
-  - Retornar isLoading para mostrar spinner mientras verifica
-
-Este hook se usará en páginas protegidas.
-```
+- Los archivos usan nomenclatura camelCase (useAuth.ts, no use-auth.ts) siguiendo convenciones del proyecto
+- useAuth expone: user, isAuthenticated, isLoading, login, logout, checkAuth
+- useRequireAuth redirige a /login cuando no autenticado y no cargando
+- Tests: 20 tests, 100% coverage en ambos hooks
 
 ---
 
