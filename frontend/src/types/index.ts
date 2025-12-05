@@ -20,7 +20,23 @@ export type {
 export type { User, UserProfile, UserPreferences, UserRole } from './user.types';
 
 // Reading Types
-export type { Reading, ReadingCard, TrashedReading, ReadingFilters } from './reading.types';
+export type {
+  Category,
+  PredefinedQuestion,
+  Spread,
+  SpreadPosition,
+  Reading,
+  ReadingCard,
+  ReadingDetail,
+  TrashedReading,
+  CreateReadingDto,
+  PaginatedReadings,
+  PaginationMeta,
+  ShareReadingResponse,
+  Interpretation,
+  CardInterpretation,
+  ReadingFilters,
+} from './reading.types';
 
 // Tarotista Types
 export type { Tarotista, TarotistaReview, TarotistaFilters, BookingSlot } from './tarotista.types';

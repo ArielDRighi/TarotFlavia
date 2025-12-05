@@ -1057,13 +1057,32 @@ IMPORTANTE:
 
 ## 📖 FASE 4: SISTEMA DE LECTURAS
 
-### TAREA 4.1: Crear servicio de API para lecturas
+### ✅ TAREA 4.1: Crear servicio de API para lecturas [COMPLETADA]
 
 **Prioridad:** CRÍTICA
 **Estimación:** 30 min
 **Dependencias:** 0.5
+**Estado:** ✅ COMPLETADA (2025-12-05)
+**Rama:** `feature/TASK-4.1-readings-api-service`
 
-**Consigna:**
+**Resumen de implementación:**
+- Creado `src/lib/api/readings-api.ts` con 12 funciones de API
+- Extendido `src/types/reading.types.ts` con tipos completos:
+  - Category, PredefinedQuestion, Spread, SpreadPosition
+  - Reading, ReadingDetail, ReadingCard, TrashedReading
+  - CreateReadingDto, PaginatedReadings, ShareReadingResponse
+  - Interpretation, CardInterpretation
+- Tests con 100% de cobertura (26 tests)
+- Todas las validaciones pasadas: lint, type-check, build, architecture
+
+**Archivos creados/modificados:**
+- `src/lib/api/readings-api.ts` (nuevo)
+- `src/lib/api/readings-api.test.ts` (nuevo)
+- `src/lib/api/index.ts` (actualizado exports)
+- `src/types/reading.types.ts` (extendido con nuevos tipos)
+- `src/types/index.ts` (actualizado exports)
+
+**Consigna original:**
 Crear funciones helper para todas las llamadas a API relacionadas con lecturas usando TanStack Query.
 
 **Prompt:**
