@@ -997,7 +997,7 @@ IMPORTANTE:
 **Prioridad:** MEDIA
 **Estimación:** 35 min
 **Dependencias:** 1.1
-**Completada:** 5 de Diciembre, 2025
+**Completada:** 2025-12-05
 
 **Consigna:**
 Crear página para solicitar reset de contraseña con input de email.

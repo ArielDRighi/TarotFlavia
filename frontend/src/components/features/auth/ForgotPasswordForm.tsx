@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
@@ -47,7 +47,7 @@ export function ForgotPasswordForm() {
     return () => clearInterval(timer);
   }, [cooldownSeconds]);
 
-  const onSubmit = useCallback(async (data: ForgotPasswordFormData) => {
+  const onSubmit = async (data: ForgotPasswordFormData) => {
     setIsSubmitting(true);
     try {
       await apiClient.post('/auth/forgot-password', { email: data.email });
@@ -60,7 +60,7 @@ export function ForgotPasswordForm() {
       // Start cooldown timer
       setCooldownSeconds(COOLDOWN_SECONDS);
     }
-  }, []);
+  };
 
   const isButtonDisabled = isSubmitting || cooldownSeconds > 0;
 
