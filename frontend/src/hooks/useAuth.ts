@@ -1,3 +1,5 @@
+'use client';
+
 import { useAuthStore } from '@/stores/authStore';
 import type { AuthUser } from '@/types';
 
