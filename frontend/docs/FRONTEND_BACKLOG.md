@@ -1066,6 +1066,7 @@ IMPORTANTE:
 **Rama:** `feature/TASK-4.1-readings-api-service`
 
 **Resumen de implementación:**
+
 - Creado `src/lib/api/readings-api.ts` con 12 funciones de API
 - Extendido `src/types/reading.types.ts` con tipos completos:
   - Category, PredefinedQuestion, Spread, SpreadPosition
@@ -1076,6 +1077,7 @@ IMPORTANTE:
 - Todas las validaciones pasadas: lint, type-check, build, architecture
 
 **Archivos creados/modificados:**
+
 - `src/lib/api/readings-api.ts` (nuevo)
 - `src/lib/api/readings-api.test.ts` (nuevo)
 - `src/lib/api/index.ts` (actualizado exports)
