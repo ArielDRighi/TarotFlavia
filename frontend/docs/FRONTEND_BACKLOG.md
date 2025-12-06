@@ -1160,11 +1160,38 @@ Crear custom hooks usando TanStack Query para consumir API de lecturas con cachi
 
 ---
 
-### TAREA 4.3: Crear componente TarotCard
+### ✅ TAREA 4.3: Crear componente TarotCard
 
+**Estado:** ✅ COMPLETADA (2025-12-06)
 **Prioridad:** ALTA
 **Estimación:** 40 min
 **Dependencias:** 1.1
+
+**Resumen de Implementación:**
+
+- Componente TarotCard creado en `src/components/features/readings/TarotCard.tsx`
+- Props implementadas: `card`, `isRevealed`, `onClick`, `size` (sm/md/lg), `className`
+- Estados: Reverso (isRevealed=false) con patrón geométrico dorado, Anverso (isRevealed=true) con imagen y nombre
+- Animación 3D flip usando CSS `transform: rotateY()` con duración de 600ms
+- Hover effect (`-translate-y-1`) cuando no está revelada y tiene onClick
+- Tamaños: sm (w-32 h-48), md (w-40 h-60 - default), lg (w-48 h-72)
+- Soporte para cartas invertidas (orientation: 'reversed') con rotación 180°
+- Accesibilidad completa: role="button", tabIndex, aria-label, keyboard navigation (Enter/Space)
+- Placeholder con emoji cuando no hay imageUrl
+- Usa Next.js Image component para optimización
+- Custom CSS utility class `rotate-y-180` agregada a globals.css
+- Index file creado para exportar componente: `src/components/features/readings/index.ts`
+- 32 tests con 100% coverage
+
+**Archivos creados:**
+
+- `src/components/features/readings/TarotCard.tsx` - Componente principal
+- `src/components/features/readings/TarotCard.test.tsx` - Tests unitarios (32 tests)
+- `src/components/features/readings/index.ts` - Barrel export
+
+**Archivos modificados:**
+
+- `src/app/globals.css` - Agregada utility class `rotate-y-180` para animación 3D
 
 **Consigna:**
 Crear componente de carta de tarot con estados: reverso, anverso, animación de volteo.

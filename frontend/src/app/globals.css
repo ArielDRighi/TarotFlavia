@@ -167,3 +167,13 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* ===========================================
+   Custom Utility Classes for TarotCard
+   3D Card Flip Animation Support
+   =========================================== */
+@layer utilities {
+  .rotate-y-180 {
+    transform: rotateY(180deg);
+  }
+}
