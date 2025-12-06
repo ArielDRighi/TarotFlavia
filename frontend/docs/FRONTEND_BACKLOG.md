@@ -1236,11 +1236,29 @@ IMPORTANTE:
 
 ---
 
-### TAREA 4.4: Crear página selector de categoría
+### ~~TAREA 4.4: Crear página selector de categoría~~ ✅ COMPLETADA
 
 **Prioridad:** ALTA
 **Estimación:** 45 min
 **Dependencias:** 4.2, 1.4
+**Estado:** ✅ COMPLETADA - 6 Diciembre 2025
+
+**Implementación:**
+
+- Página `/ritual` como cliente component con protección de ruta (`useRequireAuth`)
+- Grid responsive de categorías (1 col mobile, 2 col tablet, 3 col desktop)
+- `CategoryCard` inline con iconos de lucide-react (Heart, Briefcase, DollarSign, Activity, Sparkles, Star)
+- Colores por categoría: rosa (amor), azul (carrera), verde (dinero), naranja (salud), púrpura (espiritual), amarillo (general)
+- Efectos hover con `scale-105` y borde secondary
+- Estados de loading (skeleton cards), error (ErrorDisplay) y vacío (EmptyState)
+- Navegación a `/ritual/preguntas?categoryId={id}` al hacer clic
+- Accesibilidad: role="button", tabIndex, keyboard navigation (Enter/Space)
+- 18 tests pasando, 100% coverage en el archivo
+
+**Archivos creados/modificados:**
+
+- `src/app/ritual/page.tsx` - Implementación completa
+- `src/app/ritual/page.test.tsx` - 18 tests
 
 **Consigna:**
 Crear interfaz para que usuario seleccione categoría de consulta antes de hacer lectura.
