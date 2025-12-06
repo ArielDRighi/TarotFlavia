@@ -21,6 +21,7 @@ import {
   useUnshareReading,
   useTrashedReadings,
   useRestoreReading,
+  readingQueryKeys,
 } from './useReadings';
 import * as readingsApi from '@/lib/api/readings-api';
 import type {
@@ -36,8 +37,8 @@ import type {
 // Mock the API module
 vi.mock('@/lib/api/readings-api');
 
-// Mock sonner toast
-vi.mock('sonner', () => ({
+// Mock custom toast wrapper
+vi.mock('@/hooks/utils/useToast', () => ({
   toast: {
     success: vi.fn(),
     error: vi.fn(),
@@ -445,7 +446,7 @@ describe('use-readings hooks', () => {
       });
 
       expect(readingsApi.createReading).toHaveBeenCalledWith(createData);
-      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['readings'] });
+      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: readingQueryKeys.all });
     });
 
     it('should handle error when creating reading', async () => {
@@ -490,7 +491,7 @@ describe('use-readings hooks', () => {
       });
 
       expect(readingsApi.deleteReading).toHaveBeenCalledWith(1);
-      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['readings'] });
+      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: readingQueryKeys.all });
     });
   });
 
@@ -517,7 +518,7 @@ describe('use-readings hooks', () => {
       });
 
       expect(readingsApi.regenerateInterpretation).toHaveBeenCalledWith(1);
-      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['reading', 1] });
+      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: readingQueryKeys.detail(1) });
     });
   });
 
@@ -545,7 +546,7 @@ describe('use-readings hooks', () => {
 
       expect(readingsApi.shareReading).toHaveBeenCalledWith(1);
       expect(result.current.data).toEqual(mockShareResponse);
-      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['reading', 1] });
+      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: readingQueryKeys.detail(1) });
     });
   });
 
@@ -572,7 +573,7 @@ describe('use-readings hooks', () => {
       });
 
       expect(readingsApi.unshareReading).toHaveBeenCalledWith(1);
-      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['reading', 1] });
+      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: readingQueryKeys.detail(1) });
     });
   });
 
@@ -626,8 +627,8 @@ describe('use-readings hooks', () => {
       });
 
       expect(readingsApi.restoreReading).toHaveBeenCalledWith(3);
-      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['readings'] });
-      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['readings', 'trash'] });
+      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: readingQueryKeys.all });
+      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: readingQueryKeys.trash() });
     });
   });
 });

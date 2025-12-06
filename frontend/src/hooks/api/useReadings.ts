@@ -7,7 +7,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { toast } from '@/hooks/utils/useToast';
 
 import {
   getCategories,
@@ -91,7 +91,7 @@ export function useSpreads() {
  */
 export function useMyReadings(page: number, limit: number) {
   return useQuery({
-    queryKey: ['readings', page, limit],
+    queryKey: readingQueryKeys.list(page, limit),
     queryFn: () => getMyReadings(page, limit),
   });
 }
@@ -102,7 +102,7 @@ export function useMyReadings(page: number, limit: number) {
  */
 export function useReadingDetail(id: number) {
   return useQuery({
-    queryKey: ['reading', id],
+    queryKey: readingQueryKeys.detail(id),
     queryFn: () => getReadingById(id),
     enabled: id > 0,
   });
@@ -122,7 +122,7 @@ export function useCreateReading() {
   return useMutation({
     mutationFn: (data: CreateReadingDto) => createReading(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['readings'] });
+      queryClient.invalidateQueries({ queryKey: readingQueryKeys.all });
       toast.success('Lectura creada exitosamente');
     },
     onError: (error: Error) => {
@@ -141,7 +141,7 @@ export function useDeleteReading() {
   return useMutation({
     mutationFn: (id: number) => deleteReading(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['readings'] });
+      queryClient.invalidateQueries({ queryKey: readingQueryKeys.all });
       toast.success('Lectura eliminada');
     },
     onError: (error: Error) => {
@@ -160,7 +160,7 @@ export function useRegenerateInterpretation() {
   return useMutation({
     mutationFn: (readingId: number) => regenerateInterpretation(readingId),
     onSuccess: (_, readingId) => {
-      queryClient.invalidateQueries({ queryKey: ['reading', readingId] });
+      queryClient.invalidateQueries({ queryKey: readingQueryKeys.detail(readingId) });
       toast.success('Interpretación regenerada');
     },
     onError: (error: Error) => {
@@ -183,7 +183,7 @@ export function useShareReading() {
   return useMutation({
     mutationFn: (readingId: number) => shareReading(readingId),
     onSuccess: (_, readingId) => {
-      queryClient.invalidateQueries({ queryKey: ['reading', readingId] });
+      queryClient.invalidateQueries({ queryKey: readingQueryKeys.detail(readingId) });
       toast.success('Lectura compartida');
     },
     onError: (error: Error) => {
@@ -202,7 +202,7 @@ export function useUnshareReading() {
   return useMutation({
     mutationFn: (readingId: number) => unshareReading(readingId),
     onSuccess: (_, readingId) => {
-      queryClient.invalidateQueries({ queryKey: ['reading', readingId] });
+      queryClient.invalidateQueries({ queryKey: readingQueryKeys.detail(readingId) });
       toast.success('Lectura dejada de compartir');
     },
     onError: (error: Error) => {
@@ -220,7 +220,7 @@ export function useUnshareReading() {
  */
 export function useTrashedReadings() {
   return useQuery({
-    queryKey: ['readings', 'trash'],
+    queryKey: readingQueryKeys.trash(),
     queryFn: getTrashedReadings,
   });
 }
@@ -235,8 +235,8 @@ export function useRestoreReading() {
   return useMutation({
     mutationFn: (readingId: number) => restoreReading(readingId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['readings'] });
-      queryClient.invalidateQueries({ queryKey: ['readings', 'trash'] });
+      queryClient.invalidateQueries({ queryKey: readingQueryKeys.all });
+      queryClient.invalidateQueries({ queryKey: readingQueryKeys.trash() });
       toast.success('Lectura restaurada');
     },
     onError: (error: Error) => {
