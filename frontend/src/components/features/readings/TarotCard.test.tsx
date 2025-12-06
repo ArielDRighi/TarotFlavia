@@ -3,6 +3,21 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { TarotCard } from './TarotCard';
 import type { ReadingCard } from '@/types/reading.types';
 
+// Mock Next.js Image component
+vi.mock('next/image', () => ({
+  default: function MockImage({
+    src,
+    alt,
+    className,
+  }: {
+    src: string;
+    alt: string;
+    className?: string;
+  }) {
+    return <img src={src} alt={alt} className={className} data-testid="next-image" />;
+  },
+}));
+
 /**
  * TarotCard Component Tests
  *
@@ -201,15 +216,27 @@ describe('TarotCard', () => {
 
       render(<TarotCard card={reversedCard} isRevealed={true} />);
 
-      const cardImage = screen.getByRole('img');
+      const cardImage = screen.getByRole('img', { name: /the fool.*invertida/i });
       expect(cardImage).toHaveClass('rotate-180');
     });
 
     it('should not rotate upright cards', () => {
       render(<TarotCard card={mockCard} isRevealed={true} />);
 
-      const cardImage = screen.getByRole('img');
+      const cardImage = screen.getByRole('img', { name: /the fool/i });
       expect(cardImage).not.toHaveClass('rotate-180');
+    });
+
+    it('should include reversed indicator in alt text for reversed cards', () => {
+      const reversedCard: ReadingCard = {
+        ...mockCard,
+        orientation: 'reversed',
+      };
+
+      render(<TarotCard card={reversedCard} isRevealed={true} />);
+
+      const cardImage = screen.getByRole('img', { name: /the fool.*invertida/i });
+      expect(cardImage).toBeInTheDocument();
     });
   });
 

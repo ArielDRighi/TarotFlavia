@@ -28,6 +28,13 @@ const sizeClasses = {
   lg: 'w-48 h-72',
 } as const;
 
+/** Image sizes for Next.js Image optimization */
+const imageSizes = {
+  sm: '(max-width: 768px) 128px, 128px',
+  md: '(max-width: 768px) 160px, 160px',
+  lg: '(max-width: 768px) 192px, 192px',
+} as const;
+
 /**
  * TarotCard Component
  *
@@ -144,7 +151,7 @@ export function TarotCard({ card, isRevealed, onClick, size = 'md', className }:
                 src={card.imageUrl}
                 alt={`Carta de tarot: ${card.name}${isReversed ? ' (invertida)' : ''}`}
                 fill
-                sizes="(max-width: 768px) 128px, 160px"
+                sizes={imageSizes[size]}
                 className={cn('object-cover', isReversed && 'rotate-180')}
               />
             ) : (
