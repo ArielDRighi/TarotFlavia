@@ -1310,11 +1310,38 @@ IMPORTANTE:
 
 ---
 
-### TAREA 4.5: Crear página selector de pregunta
+### ~~TAREA 4.5: Crear página selector de pregunta~~ ✅ COMPLETADA
 
 **Prioridad:** ALTA
 **Estimación:** 50 min
 **Dependencias:** 4.2, 4.4
+**Estado:** ✅ COMPLETADA - 6 Diciembre 2025
+
+**Implementación:**
+
+- Página `/ritual/preguntas` con protección de ruta (`useRequireAuth`)
+- Componente `QuestionSelector` en `components/features/readings/`
+- Breadcrumb con navegación: "Ritual > {Nombre Categoría}"
+- Lista vertical de preguntas predefinidas con selección (borde primary + check icon)
+- Botón "Continuar con esta pregunta" (habilitado solo cuando hay selección)
+- Sección de pregunta personalizada con Textarea (max 500 caracteres)
+- Contador de caracteres en tiempo real
+- Badge "Premium" en sección custom
+- Mensaje "Actualiza a Premium" para usuarios FREE que intentan usar pregunta custom
+- Usuarios PREMIUM pueden escribir preguntas personalizadas
+- Navegación a `/ritual/tirada` con queryParams (categoryId, questionId o customQuestion)
+- Estados de loading (skeleton cards), error (ErrorDisplay) y vacío (EmptyState)
+- Accesibilidad: role="button", tabIndex, keyboard navigation (Enter/Space)
+- Suspense boundary para useSearchParams
+- 40 tests pasando, 90%+ coverage
+
+**Archivos creados/modificados:**
+
+- `src/app/ritual/preguntas/page.tsx` - Página con Suspense boundary
+- `src/app/ritual/preguntas/page.test.tsx` - 40 tests
+- `src/components/features/readings/QuestionSelector.tsx` - Componente principal
+- `src/components/features/readings/index.ts` - Export actualizado
+- `src/components/ui/textarea.tsx` - Componente shadcn/ui agregado
 
 **Consigna:**
 Crear interfaz para seleccionar pregunta predefinida o escribir pregunta custom (solo Premium).
