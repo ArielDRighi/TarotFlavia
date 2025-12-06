@@ -118,7 +118,6 @@ export function QuestionSelector({ categoryId }: QuestionSelectorProps) {
   const isPremium = user?.plan === 'PREMIUM';
   const category = categories?.find((c) => c.id === categoryIdNumber);
   const hasCustomQuestion = customQuestion.trim().length > 0;
-  const canUseCustomQuestion = isPremium && hasCustomQuestion;
 
   const handleQuestionSelect = useCallback((questionId: number) => {
     setSelectedQuestionId(questionId);
@@ -302,7 +301,7 @@ export function QuestionSelector({ categoryId }: QuestionSelectorProps) {
                 <Button
                   className="w-full"
                   variant="secondary"
-                  disabled={!canUseCustomQuestion && !(hasCustomQuestion && !isPremium)}
+                  disabled={!hasCustomQuestion}
                   onClick={handleUseCustomQuestion}
                 >
                   Usar mi pregunta
