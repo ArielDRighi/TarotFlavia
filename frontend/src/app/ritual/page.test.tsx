@@ -345,7 +345,7 @@ describe('RitualPage', () => {
       });
     });
 
-    it('should be keyboard navigable', () => {
+    it('should be keyboard navigable with Enter key', () => {
       (useCategories as Mock).mockReturnValue({
         data: mockCategories,
         isLoading: false,
@@ -359,6 +359,22 @@ describe('RitualPage', () => {
       fireEvent.keyDown(amorCard!, { key: 'Enter' });
 
       expect(mockPush).toHaveBeenCalledWith('/ritual/preguntas?categoryId=1');
+    });
+
+    it('should be keyboard navigable with Space key', () => {
+      (useCategories as Mock).mockReturnValue({
+        data: mockCategories,
+        isLoading: false,
+        error: null,
+      });
+
+      render(<RitualPage />);
+
+      const carreraCard = screen.getByText('Carrera').closest('[data-testid="category-card"]');
+
+      fireEvent.keyDown(carreraCard!, { key: ' ' });
+
+      expect(mockPush).toHaveBeenCalledWith('/ritual/preguntas?categoryId=2');
     });
   });
 });
