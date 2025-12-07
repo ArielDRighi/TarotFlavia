@@ -14,6 +14,9 @@ import { UserRole } from '../../src/common/enums/user-role.enum';
 import { ReadingCategory } from '../../src/modules/categories/entities/reading-category.entity';
 import { PredefinedQuestion } from '../../src/modules/predefined-questions/entities/predefined-question.entity';
 
+// Helpers
+import { API_PREFIX } from '../helpers/create-test-app';
+
 describe('Categories + Questions Integration Tests', () => {
   let app: INestApplication;
   let dataSource: DataSource;
@@ -37,6 +40,10 @@ describe('Categories + Questions Integration Tests', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+
+    // Set global API prefix (must match main.ts)
+    app.setGlobalPrefix(API_PREFIX);
+
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -195,7 +202,7 @@ describe('Categories + Questions Integration Tests', () => {
     it('should list all categories', async () => {
       // ACT
       const response = await request(app.getHttpServer())
-        .get('/categories')
+        .get(`/${API_PREFIX}/categories`)
         .expect(200);
 
       // ASSERT
@@ -223,7 +230,7 @@ describe('Categories + Questions Integration Tests', () => {
 
       // ACT
       const response = await request(app.getHttpServer())
-        .get('/categories')
+        .get(`/${API_PREFIX}/categories`)
         .query({ activeOnly: 'true' })
         .expect(200);
 
@@ -239,7 +246,7 @@ describe('Categories + Questions Integration Tests', () => {
     it('should get category by ID', async () => {
       // ACT
       const response = await request(app.getHttpServer())
-        .get(`/categories/${testCategory.id}`)
+        .get(`/${API_PREFIX}/categories/${testCategory.id}`)
         .expect(200);
 
       // ASSERT
@@ -251,7 +258,7 @@ describe('Categories + Questions Integration Tests', () => {
     it('should get category by slug', async () => {
       // ACT
       const response = await request(app.getHttpServer())
-        .get(`/categories/slug/${testCategory.slug}`)
+        .get(`/${API_PREFIX}/categories/slug/${testCategory.slug}`)
         .expect(200);
 
       // ASSERT
@@ -272,7 +279,7 @@ describe('Categories + Questions Integration Tests', () => {
 
       // ACT
       const response = await request(app.getHttpServer())
-        .post('/categories')
+        .post(`/${API_PREFIX}/categories`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send(createDto)
         .expect(201);
@@ -302,7 +309,7 @@ describe('Categories + Questions Integration Tests', () => {
 
       // ACT
       const response = await request(app.getHttpServer())
-        .patch(`/categories/${testCategory.id}`)
+        .patch(`/${API_PREFIX}/categories/${testCategory.id}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send(updateDto)
         .expect(200);
@@ -324,7 +331,7 @@ describe('Categories + Questions Integration Tests', () => {
 
       // ACT
       const response = await request(app.getHttpServer())
-        .patch(`/categories/${testCategory.id}/toggle-active`)
+        .patch(`/${API_PREFIX}/categories/${testCategory.id}/toggle-active`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -349,7 +356,7 @@ describe('Categories + Questions Integration Tests', () => {
 
       // ACT: Soft-delete category
       await request(app.getHttpServer())
-        .delete(`/categories/${testCategory.id}`)
+        .delete(`/${API_PREFIX}/categories/${testCategory.id}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -384,13 +391,13 @@ describe('Categories + Questions Integration Tests', () => {
     it('should not return soft-deleted categories in list', async () => {
       // ACT: Soft-delete category
       await request(app.getHttpServer())
-        .delete(`/categories/${testCategory.id}`)
+        .delete(`/${API_PREFIX}/categories/${testCategory.id}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
       // ASSERT: No aparece en la lista
       const response = await request(app.getHttpServer())
-        .get('/categories')
+        .get(`/${API_PREFIX}/categories`)
         .expect(200);
 
       const categoryIds = response.body.map((cat: ReadingCategory) => cat.id);
@@ -402,7 +409,7 @@ describe('Categories + Questions Integration Tests', () => {
     it('should get questions by category', async () => {
       // ACT
       const response = await request(app.getHttpServer())
-        .get('/predefined-questions')
+        .get(`/${API_PREFIX}/predefined-questions`)
         .query({ categoryId: testCategory.id })
         .expect(200);
 
@@ -461,7 +468,7 @@ describe('Categories + Questions Integration Tests', () => {
 
       // ACT & ASSERT
       await request(app.getHttpServer())
-        .post('/categories')
+        .post(`/${API_PREFIX}/categories`)
         .set('Authorization', `Bearer ${regularLogin.access_token}`)
         .send(createDto)
         .expect(403);
@@ -490,7 +497,7 @@ describe('Categories + Questions Integration Tests', () => {
 
       // ACT & ASSERT
       await request(app.getHttpServer())
-        .patch(`/categories/${testCategory.id}`)
+        .patch(`/${API_PREFIX}/categories/${testCategory.id}`)
         .set('Authorization', `Bearer ${regularLogin.access_token}`)
         .send({ name: 'Unauthorized Update' })
         .expect(403);
@@ -501,14 +508,16 @@ describe('Categories + Questions Integration Tests', () => {
 
     it('should allow public access to GET endpoints', async () => {
       // ACT & ASSERT: Sin token
-      await request(app.getHttpServer()).get('/categories').expect(200);
-
       await request(app.getHttpServer())
-        .get(`/categories/${testCategory.id}`)
+        .get(`/${API_PREFIX}/categories`)
         .expect(200);
 
       await request(app.getHttpServer())
-        .get(`/categories/slug/${testCategory.slug}`)
+        .get(`/${API_PREFIX}/categories/${testCategory.id}`)
+        .expect(200);
+
+      await request(app.getHttpServer())
+        .get(`/${API_PREFIX}/categories/slug/${testCategory.slug}`)
         .expect(200);
     });
   });
@@ -516,13 +525,15 @@ describe('Categories + Questions Integration Tests', () => {
   describe('Edge Cases', () => {
     it('should handle non-existent category ID', async () => {
       // ACT & ASSERT
-      await request(app.getHttpServer()).get('/categories/999999').expect(404);
+      await request(app.getHttpServer())
+        .get(`/${API_PREFIX}/categories/999999`)
+        .expect(404);
     });
 
     it('should handle non-existent category slug', async () => {
       // ACT & ASSERT
       await request(app.getHttpServer())
-        .get('/categories/slug/non-existent-slug-12345')
+        .get(`/${API_PREFIX}/categories/slug/non-existent-slug-12345`)
         .expect(404);
     });
 
@@ -539,7 +550,7 @@ describe('Categories + Questions Integration Tests', () => {
 
       // ACT & ASSERT: Puede devolver 400 (validation) o 409 (conflict)
       const response = await request(app.getHttpServer())
-        .post('/categories')
+        .post(`/${API_PREFIX}/categories`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send(duplicateDto);
 
@@ -556,7 +567,7 @@ describe('Categories + Questions Integration Tests', () => {
 
       // ACT & ASSERT
       await request(app.getHttpServer())
-        .post('/categories')
+        .post(`/${API_PREFIX}/categories`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send(invalidDto)
         .expect(400);

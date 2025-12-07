@@ -13,6 +13,9 @@ import { User, UserPlan } from '../../src/modules/users/entities/user.entity';
 import { UserRole } from '../../src/common/enums/user-role.enum';
 import { AuditLog } from '../../src/modules/audit/entities/audit-log.entity';
 
+// Helpers
+import { API_PREFIX } from '../helpers/create-test-app';
+
 describe('Admin Operations Integration Tests', () => {
   let app: INestApplication;
   let dataSource: DataSource;
@@ -44,6 +47,10 @@ describe('Admin Operations Integration Tests', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+
+    // Set global API prefix (must match main.ts)
+    app.setGlobalPrefix(API_PREFIX);
+
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -121,7 +128,7 @@ describe('Admin Operations Integration Tests', () => {
     it('should list all users with pagination', async () => {
       // ACT
       const response = await request(app.getHttpServer())
-        .get('/admin/users')
+        .get(`/${API_PREFIX}/admin/users`)
         .set('Authorization', `Bearer ${adminToken}`)
         .query({ page: 1, limit: 10 })
         .expect(200);
@@ -341,14 +348,16 @@ describe('Admin Operations Integration Tests', () => {
 
       // ACT & ASSERT
       await request(app.getHttpServer())
-        .get('/admin/users')
+        .get(`/${API_PREFIX}/admin/users`)
         .set('Authorization', `Bearer ${regularToken}`)
         .expect(403);
     });
 
     it('should deny access without authentication', async () => {
       // ACT & ASSERT
-      await request(app.getHttpServer()).get('/admin/users').expect(401);
+      await request(app.getHttpServer())
+        .get(`/${API_PREFIX}/admin/users`)
+        .expect(401);
     });
 
     it('should validate plan enum values', async () => {
