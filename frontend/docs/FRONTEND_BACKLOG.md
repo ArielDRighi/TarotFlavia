@@ -1587,58 +1587,36 @@ IMPORTANTE:
 
 ## 📚 FASE 5: HISTORIAL DE LECTURAS
 
-### TAREA 5.1: Crear componente ReadingCard
+### TAREA 5.1: Crear componente ReadingCard ✅
 
 **Prioridad:** ALTA
 **Estimación:** 35 min
 **Dependencias:** 1.1, 1.5
+**Estado:** ✅ COMPLETADA (2025-12-07)
 
-**Consigna:**
-Crear componente de tarjeta para mostrar lectura en el historial con preview y acciones.
+**Implementación:**
 
-**Prompt:**
+- Archivo: `src/components/features/readings/ReadingCard.tsx`
+- Tests: `src/components/features/readings/ReadingCard.test.tsx` (19 tests)
+- Coverage: 100%
 
-```
+**Características implementadas:**
 
-Crea el componente ReadingCard para el historial:
+- Card responsive (vertical en mobile, horizontal en desktop)
+- Thumbnail de carta o ícono placeholder
+- Pregunta con truncado line-clamp-2
+- Fecha relativa con date-fns (español)
+- Badge con tipo de tirada
+- Botones Ver/Eliminar con iconos lucide-react
+- Modal de confirmación para eliminar
+- Accesibilidad: labels ARIA, navegación por teclado
+- Hover effects: shadow-lg, scale-[1.02]
 
-CREAR ARCHIVO: src/components/features/reading-card.tsx
+**Decisiones:**
 
-PROPS:
-
-- reading: Reading (incluye: id, question, createdAt, cards, category, spread)
-- onView: (id: number) => void
-- onDelete: (id: number) => void
-
-ESTRUCTURA:
-
-- Card horizontal en desktop, vertical en mobile
-- Sección izquierda:
-  - Miniatura de la primera carta revelada (pequeña)
-  - O ícono de carta si no hay imagen
-- Sección centro:
-  - Pregunta (text-primary, font-semibold, truncate después de 2 líneas)
-  - Fecha relativa (date-fns: "hace 2 días")
-  - Badge con tipo de tirada (ej: "Cruz Céltica")
-  - Badge con categoría
-- Sección derecha:
-  - Botón "Ver" (ojo icon)
-  - Botón "Eliminar" (trash icon) - solo icono, confirmar antes de eliminar
-
-ESTILOS:
-
-- Fondo surface (blanco)
-- Sombra shadow-soft
-- hover: shadow-lg y scale-102
-- Responsive con flexbox
-
-IMPORTANTE:
-
-- Usar date-fns para formatear fecha: formatDistanceToNow
-- Truncar texto largo con line-clamp-2
-- Usar iconos de lucide-react
-
-```
+- Se usó el tipo `ReadingCard` existente para cards opcionales
+- El modal de confirmación reutiliza `ConfirmationModal` de `@/components/ui`
+- Se agregó soporte para locale español en date-fns
 
 ---
 
