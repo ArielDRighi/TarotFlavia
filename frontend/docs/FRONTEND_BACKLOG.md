@@ -1479,14 +1479,48 @@ IMPORTANTE:
 
 ---
 
-### TAREA 4.7: Crear página de lectura (ritual)
+### TAREA 4.7: Crear página de lectura (ritual) ✅ COMPLETADA
 
 **Prioridad:** CRÍTICA
 **Estimación:** 90 min
 **Dependencias:** 4.3, 4.6
+**Completada:** 6 de Enero, 2025
+**Rama:** feature/TASK-4.7-lectura-ritual-page
 
 **Consigna:**
 Crear la experiencia completa de lectura con 3 estados: selección de cartas, loading IA, resultado.
+
+**Implementación realizada:**
+
+- ✅ Componente `ReadingExperience.tsx` con 3 estados: selección, loading, resultado
+- ✅ Estado 1: Grid de cartas seleccionables según spreadId (1, 3, 5, 10 cartas)
+- ✅ Estado 2: Animación de loading con mensajes cósmicos rotativos
+- ✅ Estado 3: Cartas reveladas + interpretación con react-markdown
+- ✅ Integración con hooks: useCreateReading, useRegenerateInterpretation, useShareReading
+- ✅ Botones de acción: Regenerar (Premium), Compartir (con clipboard), Nueva Lectura
+- ✅ Página `/ritual/lectura` con Suspense wrapper para useSearchParams
+- ✅ 35 tests pasando (29 componente + 6 página)
+- ✅ Coverage: 84.78% statements, 89.15% lines
+
+**Archivos creados:**
+
+- `src/components/features/readings/ReadingExperience.tsx` - Componente principal
+- `src/components/features/readings/ReadingExperience.test.tsx` - Tests del componente
+- `src/app/ritual/lectura/page.tsx` - Página de ruta
+- `src/app/ritual/lectura/page.test.tsx` - Tests de la página
+
+**Dependencia agregada:**
+
+- `react-markdown` para renderizar la interpretación
+
+**Decisiones técnicas:**
+
+- Se usa Set<number> para tracking de cartas seleccionadas (eficiencia O(1))
+- Animación de progress bar con CSS keyframes custom (`animate-progress`)
+- Mensajes de loading rotan cada 2 segundos con useEffect interval
+- La regeneración solo disponible para usuarios premium (verificado via authStore)
+- El botón "Compartir" copia el link al clipboard y muestra feedback
+- La página valida `spreadId` en searchParams y muestra error si falta
 
 **Prompt:**
 
@@ -1540,23 +1574,6 @@ LÓGICA:
 - La API ya retorna las cartas e interpretación
 
 IMPORTANTE:
-- Usar componente T
-
-
-# 🎯 Backlog Técnico Frontend - TarotFlavia (Parte 2)
-
-**Continuación desde TAREA 4.7**
-
----
-
-### TAREA 4.7: Crear página de lectura (ritual) - CONTINUACIÓN
-
-**Prompt (continuación):**
-```
-
-...continuación de TAREA 4.7
-
-IMPORTANTE:
 
 - Usar componente TarotCard para mostrar cartas
 - Animación de volteo secuencial (delay entre cartas)
@@ -1571,6 +1588,7 @@ IMPORTANTE:
 ## 📚 FASE 5: HISTORIAL DE LECTURAS
 
 ### TAREA 5.1: Crear componente ReadingCard
+
 **Prioridad:** ALTA
 **Estimación:** 35 min
 **Dependencias:** 1.1, 1.5
@@ -1579,6 +1597,7 @@ IMPORTANTE:
 Crear componente de tarjeta para mostrar lectura en el historial con preview y acciones.
 
 **Prompt:**
+
 ```
 
 Crea el componente ReadingCard para el historial:
@@ -1624,6 +1643,7 @@ IMPORTANTE:
 ---
 
 ### TAREA 5.2: Crear página Historial de Lecturas
+
 **Prioridad:** ALTA
 **Estimación:** 55 min
 **Dependencias:** 5.1, 4.2
@@ -1632,6 +1652,7 @@ IMPORTANTE:
 Crear página con lista paginada de lecturas del usuario, filtros y búsqueda.
 
 **Prompt:**
+
 ```
 
 Crea la página de Historial de Lecturas:
@@ -1686,6 +1707,7 @@ IMPORTANTE:
 ---
 
 ### TAREA 5.3: Crear página detalle de lectura
+
 **Prioridad:** ALTA
 **Estimación:** 45 min
 **Dependencias:** 4.3, 4.2
@@ -1694,6 +1716,7 @@ IMPORTANTE:
 Crear página que muestra lectura completa con cartas, interpretación y opciones de compartir/regenerar.
 
 **Prompt:**
+
 ```
 
 Crea la página de detalle de lectura:
@@ -1757,6 +1780,7 @@ IMPORTANTE:
 ## 🌅 FASE 6: CARTA DEL DÍA
 
 ### TAREA 6.1: Crear servicio API para Daily Reading
+
 **Prioridad:** ALTA
 **Estimación:** 20 min
 **Dependencias:** 0.5
@@ -1765,6 +1789,7 @@ IMPORTANTE:
 Crear funciones API y hooks para obtener carta del día.
 
 **Prompt:**
+
 ```
 
 Crea el servicio API para Carta del Día:
@@ -1814,6 +1839,7 @@ IMPORTANTE:
 ---
 
 ### TAREA 6.2: Crear página Carta del Día
+
 **Prioridad:** ALTA
 **Estimación:** 60 min
 **Dependencias:** 6.1, 4.3
@@ -1822,6 +1848,7 @@ IMPORTANTE:
 Crear experiencia de carta del día con dos estados: bloqueado (antes de revelar) y revelado.
 
 **Prompt:**
+
 ```
 
 Crea la página Carta del Día:
@@ -1881,6 +1908,7 @@ IMPORTANTE:
 ---
 
 ### TAREA 6.3: Crear página Historial Carta del Día
+
 **Prioridad:** MEDIA
 **Estimación:** 35 min
 **Dependencias:** 6.1, 5.1
@@ -1889,6 +1917,7 @@ IMPORTANTE:
 Crear historial de cartas del día previas con calendario visual.
 
 **Prompt:**
+
 ```
 
 Crea la página de historial de Carta del Día:
@@ -1937,6 +1966,7 @@ IMPORTANTE:
 ## 🏪 FASE 7: MARKETPLACE DE TAROTISTAS
 
 ### TAREA 7.1: Crear servicio API para tarotistas
+
 **Prioridad:** ALTA
 **Estimación:** 25 min
 **Dependencias:** 0.5
@@ -1945,6 +1975,7 @@ IMPORTANTE:
 Crear funciones API y hooks para listar tarotistas y ver perfiles.
 
 **Prompt:**
+
 ```
 
 Crea el servicio API para Tarotistas:
@@ -1985,6 +2016,7 @@ IMPORTANTE:
 ---
 
 ### TAREA 7.2: Crear componente TarotistaCard
+
 **Prioridad:** ALTA
 **Estimación:** 40 min
 **Dependencias:** 1.1, 1.5
@@ -1993,6 +2025,7 @@ IMPORTANTE:
 Crear tarjeta de tarotista para el marketplace con foto, info y acciones.
 
 **Prompt:**
+
 ```
 
 Crea el componente TarotistaCard:
@@ -2047,6 +2080,7 @@ IMPORTANTE:
 ---
 
 ### TAREA 7.3: Crear página Explorar Tarotistas
+
 **Prioridad:** ALTA
 **Estimación:** 55 min
 **Dependencias:** 7.2, 7.1
@@ -2055,6 +2089,7 @@ IMPORTANTE:
 Crear marketplace con grid de tarotistas, filtros y búsqueda.
 
 **Prompt:**
+
 ```
 
 Crea la página Explorar Tarotistas:
@@ -2109,6 +2144,7 @@ IMPORTANTE:
 ---
 
 ### TAREA 7.4: Crear página Perfil Público de Tarotista
+
 **Prioridad:** ALTA
 **Estimación:** 70 min
 **Dependencias:** 7.1
@@ -2117,6 +2153,7 @@ IMPORTANTE:
 Crear perfil completo de tarotista con información detallada y opciones de agendar sesión o lectura IA.
 
 **Prompt:**
+
 ```
 
 Crea la página de perfil público de tarotista:
@@ -2200,11 +2237,13 @@ Crear funciones API para gestión de perfil de usuario.
 **Prompt:**
 
 ```
+
 Crea servicio API para perfil de usuario:
 
 ARCHIVO: src/lib/api/user-api.ts
 
 FUNCIONES:
+
 - getProfile(): Promise<UserProfile>
   - GET /users/profile
 - updateProfile(data: UpdateProfileDto): Promise<UserProfile>
@@ -2213,18 +2252,21 @@ FUNCIONES:
   - DELETE /users/:id
 
 TYPES (src/types/user.types.ts):
+
 - UserProfile: { id, name, email, plan, roles, createdAt, usageStats }
 - UpdateProfileDto: { name?: string, email?: string, password?: string }
 
 ARCHIVO: src/hooks/queries/use-user.ts
 
 HOOKS:
+
 - useProfile()
   - useQuery ['profile']
 - useUpdateProfile()
   - useMutation con invalidación de ['profile']
 - useDeleteAccount()
   - useMutation que limpia auth después
+
 ```
 
 ---
@@ -2241,6 +2283,7 @@ Crear página de perfil con tabs: Cuenta, Suscripción, Ajustes.
 **Prompt:**
 
 ```
+
 Crea página Mi Perfil:
 
 ARCHIVO: src/app/perfil/page.tsx
@@ -2250,6 +2293,7 @@ CLIENT COMPONENT con useRequireAuth()
 ESTRUCTURA:
 
 HEADER:
+
 - Card con gradiente primary suave
 - Avatar grande
 - Nombre usuario
@@ -2258,6 +2302,7 @@ HEADER:
 TABS (usar Tabs de shadcn/ui):
 
 TAB 1: CUENTA
+
 - Formulario editar:
   - Input nombre
   - Input email (readonly)
@@ -2269,6 +2314,7 @@ TAB 1: CUENTA
   - Botón "Actualizar contraseña"
 
 TAB 2: SUSCRIPCIÓN
+
 - Card con plan actual
 - Fecha de renovación (si Premium/Pro)
 - Estadísticas de uso:
@@ -2280,6 +2326,7 @@ TAB 2: SUSCRIPCIÓN
 - Botón destacado: "Mejorar a Premium" (si es Free)
 
 TAB 3: AJUSTES
+
 - Notificaciones (toggles):
   - Email para nuevas lecturas
   - Recordatorio carta del día
@@ -2289,17 +2336,21 @@ TAB 3: AJUSTES
   - Botón rojo "Eliminar cuenta" (modal confirmación)
 
 OBTENER DATOS:
+
 - useProfile()
 - useAuth() para plan actual
 
 ACCIONES:
+
 - Guardar cambios: useUpdateProfile()
 - Eliminar cuenta: useDeleteAccount() con modal doble confirmación
 
 IMPORTANTE:
+
 - Validación con Zod
 - Feedback con toast
 - Modal destructivo para eliminar cuenta
+
 ```
 
 ---
@@ -2318,11 +2369,13 @@ Crear funciones API para gestión de sesiones.
 **Prompt:**
 
 ```
+
 Crea servicios API para sesiones:
 
 ARCHIVO: src/lib/api/sessions-api.ts
 
 FUNCIONES:
+
 - getAvailableSlots(tarotistaId: number, date: string): Promise<TimeSlot[]>
   - GET /scheduling/available-slots?tarotistaId={id}&date={date}
 - bookSession(data: BookSessionDto): Promise<Session>
@@ -2335,6 +2388,7 @@ FUNCIONES:
   - POST /scheduling/my-sessions/{id}/cancel
 
 TYPES (src/types/session.types.ts):
+
 - TimeSlot: { time: string, available: boolean }
 - Session: { id, tarotistaId, userId, date, time, duration, status, meetLink }
 - BookSessionDto: { tarotistaId, date, time, duration }
@@ -2342,11 +2396,13 @@ TYPES (src/types/session.types.ts):
 ARCHIVO: src/hooks/queries/use-sessions.ts
 
 HOOKS:
+
 - useAvailableSlots(tarotistaId, date)
 - useBookSession()
 - useMySessions(status?)
 - useSessionDetail(id)
 - useCancelSession()
+
 ```
 
 ---
@@ -2363,17 +2419,20 @@ Crear calendario interactivo para seleccionar fecha y hora de sesión.
 **Prompt:**
 
 ```
+
 Crea componente BookingCalendar:
 
 ARCHIVO: src/components/features/booking-calendar.tsx
 
 PROPS:
+
 - tarotistaId: number
 - onBook: (date: string, time: string, duration: number) => void
 
 ESTRUCTURA:
 
 SELECTOR DE FECHA:
+
 - Scroll horizontal de días (próximos 30 días)
 - Cada día como chip/píldora:
   - Formato: "Lun 2"
@@ -2382,6 +2441,7 @@ SELECTOR DE FECHA:
   - Día con disponibilidad: outline clickable
 
 SELECTOR DE HORA:
+
 - Al seleccionar día, mostrar slots disponibles abajo
 - Chips de horarios: "09:00", "10:00", etc.
 - Slot disponible: outline clickable
@@ -2389,10 +2449,12 @@ SELECTOR DE HORA:
 - Slot seleccionado: bg-primary
 
 SELECTOR DE DURACIÓN:
+
 - Radio buttons: 30 min, 60 min, 90 min
 - Mostrar precio por duración
 
 RESUMEN:
+
 - Card sticky/fixed mostrando:
   - Fecha seleccionada
   - Hora seleccionada
@@ -2401,13 +2463,16 @@ RESUMEN:
 - Botón: "Confirmar y Reservar"
 
 OBTENER DATOS:
+
 - useAvailableSlots(tarotistaId, selectedDate)
 - Recargar slots cuando cambia fecha
 
 IMPORTANTE:
+
 - Validar que usuario seleccionó fecha, hora y duración
 - Deshabilitar botón si falta algo
 - Responsive: en mobile, lista vertical
+
 ```
 
 ---
@@ -2424,6 +2489,7 @@ Crear flujo completo de reserva de sesión con tarotista.
 **Prompt:**
 
 ```
+
 Crea página de reserva:
 
 ARCHIVO: src/app/tarotistas/[id]/reservar/page.tsx
@@ -2431,6 +2497,7 @@ ARCHIVO: src/app/tarotistas/[id]/reservar/page.tsx
 CLIENT COMPONENT con useRequireAuth()
 
 ESTRUCTURA:
+
 - Breadcrumb: "Explorar > {Nombre Tarotista} > Reservar"
 - Info tarotista en header (mini card):
   - Avatar, nombre, rating
@@ -2446,8 +2513,10 @@ ESTRUCTURA:
   - Si falla: toast con error
 
 IMPORTANTE:
+
 - Validar que usuario tiene saldo/plan suficiente
 - Mostrar loading mientras reserva
+
 ```
 
 ---
@@ -2464,16 +2533,19 @@ Crear tarjeta para mostrar sesión reservada.
 **Prompt:**
 
 ```
+
 Crea componente SessionCard:
 
 ARCHIVO: src/components/features/session-card.tsx
 
 PROPS:
+
 - session: Session
 - onCancel?: (id: number) => void
 - onJoin?: (meetLink: string) => void
 
 ESTRUCTURA:
+
 - Card horizontal
 - Izquierda:
   - Avatar del tarotista
@@ -2488,13 +2560,16 @@ ESTRUCTURA:
   - Si status=completed: ícono check verde
 
 ESTILOS:
+
 - Borde izquierdo coloreado según status
 - Shadow suave
 - Responsive
 
 IMPORTANTE:
+
 - Calcular si sesión es "próxima" (dentro de 24hs)
 - Deshabilitar cancelación si faltan menos de 24hs
+
 ```
 
 ---
@@ -2511,6 +2586,7 @@ Crear lista de sesiones del usuario con filtros por estado.
 **Prompt:**
 
 ```
+
 Crea página Mis Sesiones:
 
 ARCHIVO: src/app/sesiones/page.tsx
@@ -2518,6 +2594,7 @@ ARCHIVO: src/app/sesiones/page.tsx
 CLIENT COMPONENT con useRequireAuth()
 
 ESTRUCTURA:
+
 - Título: "Mis Sesiones"
 - Tabs para filtrar:
   - "Próximas" (pending + confirmed)
@@ -2535,17 +2612,21 @@ ESTRUCTURA:
   - etc.
 
 OBTENER DATOS:
+
 - useMySessions(statusFilter)
 - Filtrar por tab seleccionado
 
 ACCIONES:
+
 - Cancelar: modal confirmación, luego useCancelSession()
 - Unirse: abrir meetLink en nueva pestaña
 - Ver detalle: navegar a /sesiones/{id}
 
 IMPORTANTE:
+
 - Mostrar SkeletonCard mientras carga
 - Ordenamiento correcto por fecha
+
 ```
 
 ---
@@ -2564,6 +2645,7 @@ Crear layout específico para sección admin con sidebar de navegación.
 **Prompt:**
 
 ```
+
 Crea layout admin:
 
 ARCHIVO: src/app/admin/layout.tsx
@@ -2571,14 +2653,17 @@ ARCHIVO: src/app/admin/layout.tsx
 CLIENT COMPONENT
 
 DEBE VERIFICAR:
+
 - useAuth() para verificar rol 'admin'
 - Si NO es admin: redirect a /perfil
 
 ESTRUCTURA:
+
 - Sidebar fijo izquierdo (desktop) / drawer colapsable (mobile)
 - Contenido main a la derecha
 
 SIDEBAR:
+
 - Logo arriba
 - Items de navegación:
   - Dashboard (ícono LayoutDashboard)
@@ -2589,14 +2674,17 @@ SIDEBAR:
 - Link activo: bg-primary/10, borde izquierdo primary
 
 MAIN:
+
 - Padding adecuado
 - Background bg-main
 - {children}
 
 IMPORTANTE:
+
 - Responsive con hamburger menu en mobile
 - Active link styling
 - Guard de autorización
+
 ```
 
 ---
@@ -2613,6 +2701,7 @@ Crear dashboard con métricas principales y gráficos.
 **Prompt:**
 
 ```
+
 Crea dashboard admin:
 
 ARCHIVO: src/app/admin/page.tsx
@@ -2622,6 +2711,7 @@ CLIENT COMPONENT
 ESTRUCTURA:
 
 CARDS DE MÉTRICAS (grid 4 columnas):
+
 1. Total Usuarios
    - Número grande
    - Comparación vs mes anterior (+5%)
@@ -2633,6 +2723,7 @@ CARDS DE MÉTRICAS (grid 4 columnas):
    - Monto en $
 
 GRÁFICOS (grid 2 columnas):
+
 1. Lecturas por día (últimos 30 días)
    - Gráfico de líneas
    - Usar recharts: npm install recharts
@@ -2640,20 +2731,24 @@ GRÁFICOS (grid 2 columnas):
    - Gráfico de dona
 
 TABLA RECIENTE:
+
 - Últimas 10 lecturas realizadas
 - Columnas: Usuario, Fecha, Tipo de tirada, Status
 - Link a detalle
 
 OBTENER DATOS:
+
 - Crear hook useDashboardStats()
 - GET /admin/dashboard/stats (métricas completas)
 - GET /admin/dashboard/charts (datos para gráficos)
 - NOTA: /admin/dashboard/metrics está deprecated, usar /stats
 
 IMPORTANTE:
+
 - Instalar recharts para gráficos
 - Cards con iconos de lucide-react
 - Números formateados (separador de miles)
+
 ```
 
 ---
@@ -2670,6 +2765,7 @@ Crear tabla de usuarios con búsqueda, filtros y acciones de administración.
 **Prompt:**
 
 ```
+
 Crea gestión de usuarios admin:
 
 ARCHIVO: src/app/admin/usuarios/page.tsx
@@ -2677,6 +2773,7 @@ ARCHIVO: src/app/admin/usuarios/page.tsx
 CLIENT COMPONENT
 
 ESTRUCTURA:
+
 - Header:
   - Título: "Gestión de Usuarios"
   - Input de búsqueda (nombre o email)
@@ -2701,6 +2798,7 @@ ESTRUCTURA:
   - Eliminar cuenta
 
 MODALES:
+
 - Modal Cambiar Plan:
   - Select con opciones: Free, Premium, Professional
   - Botón confirmar
@@ -2709,13 +2807,16 @@ MODALES:
   - Botón confirmar destructivo
 
 OBTENER DATOS:
+
 - Crear hook useAdminUsers(filters, page, limit)
 - API: GET /admin/users
 
 IMPORTANTE:
+
 - Tabla responsive (en mobile: cards)
 - Búsqueda con debounce
 - Confirmación para acciones destructivas
+
 ```
 
 ---
@@ -2732,6 +2833,7 @@ Crear gestión de tarotistas con aprobación de aplicaciones.
 **Prompt:**
 
 ```
+
 Crea gestión de tarotistas admin:
 
 ARCHIVO: src/app/admin/tarotistas/page.tsx
@@ -2741,6 +2843,7 @@ CLIENT COMPONENT
 TABS:
 
 TAB 1: TAROTISTAS ACTIVOS
+
 - Tabla similar a usuarios
 - Columnas:
   - Avatar + Nombre
@@ -2757,6 +2860,7 @@ TAB 1: TAROTISTAS ACTIVOS
   - Ver métricas
 
 TAB 2: APLICACIONES PENDIENTES
+
 - Lista de aplicaciones para ser tarotista
 - Card por aplicación:
   - Datos del usuario
@@ -2765,17 +2869,21 @@ TAB 2: APLICACIONES PENDIENTES
   - Botones: "Aprobar" (verde) / "Rechazar" (rojo)
 
 OBTENER DATOS:
+
 - Hooks: useAdminTarotistas(), useTarotistApplications()
 - APIs: GET /admin/tarotistas, GET /admin/tarotistas/applications
 
 ACCIONES:
+
 - Aprobar: POST /admin/tarotistas/applications/{id}/approve
 - Rechazar: POST /admin/tarotistas/applications/{id}/reject
 
 IMPORTANTE:
+
 - Confirmación antes de aprobar/rechazar
 - Toast con feedback
 - Actualizar lista después de acción
+
 ```
 
 ---
@@ -2792,6 +2900,7 @@ Crear página para visualizar estadísticas de uso de IA, costos por proveedor y
 **Prompt:**
 
 ```
+
 Crea página de estadísticas de uso de IA:
 
 ARCHIVO: src/app/admin/ai-usage/page.tsx
@@ -2801,10 +2910,12 @@ CLIENT COMPONENT
 ESTRUCTURA:
 
 HEADER:
+
 - Título: "Uso de Inteligencia Artificial"
 - Selector de rango de fechas (últimos 7 días, 30 días, custom)
 
 CARDS DE ALERTAS (mostrar solo si hay alertas activas):
+
 - Alert cards con colores según severidad:
   - groqRateLimitAlert: "⚠️ Límite de Groq cercano" (amarillo)
   - highErrorRateAlert: "🔴 Tasa de errores alta" (rojo)
@@ -2812,6 +2923,7 @@ CARDS DE ALERTAS (mostrar solo si hay alertas activas):
   - highDailyCostAlert: "💰 Costo diario alto" (naranja)
 
 CARDS DE MÉTRICAS (grid 4 columnas):
+
 1. Total Requests
    - Número grande
    - Llamadas de Groq hoy vs límite diario
@@ -2826,6 +2938,7 @@ CARDS DE MÉTRICAS (grid 4 columnas):
    - Color verde si > 95%, amarillo si > 90%, rojo si < 90%
 
 TABLA POR PROVEEDOR:
+
 - Columnas:
   - Proveedor (Groq, OpenAI, DeepSeek)
   - Total Calls
@@ -2838,6 +2951,7 @@ TABLA POR PROVEEDOR:
 - Fila de totales al final
 
 GRÁFICOS (grid 2 columnas):
+
 1. Costos por día (últimos 30 días)
    - Gráfico de barras apiladas por proveedor
    - Usar recharts
@@ -2845,6 +2959,7 @@ GRÁFICOS (grid 2 columnas):
    - Gráfico de dona
 
 OBTENER DATOS:
+
 - Crear archivo: src/lib/api/admin-ai-usage-api.ts
 - Función: getAIUsageStats(startDate?, endDate?)
   - GET /admin/ai-usage?startDate={date}&endDate={date}
@@ -2853,32 +2968,34 @@ OBTENER DATOS:
 
 TYPES (src/types/admin.types.ts):
 interface AIProviderStats {
-  provider: 'GROQ' | 'OPENAI' | 'DEEPSEEK';
-  totalCalls: number;
-  successfulCalls: number;
-  failedCalls: number;
-  errorRate: number;
-  totalTokens: number;
-  inputTokens: number;
-  outputTokens: number;
-  averageLatency: number;
-  totalCost: number;
+provider: 'GROQ' | 'OPENAI' | 'DEEPSEEK';
+totalCalls: number;
+successfulCalls: number;
+failedCalls: number;
+errorRate: number;
+totalTokens: number;
+inputTokens: number;
+outputTokens: number;
+averageLatency: number;
+totalCost: number;
 }
 
 interface AIUsageStats {
-  statistics: AIProviderStats[];
-  groqCallsToday: number;
-  groqRateLimitAlert: boolean;
-  highErrorRateAlert: boolean;
-  highFallbackRateAlert: boolean;
-  highDailyCostAlert: boolean;
+statistics: AIProviderStats[];
+groqCallsToday: number;
+groqRateLimitAlert: boolean;
+highErrorRateAlert: boolean;
+highFallbackRateAlert: boolean;
+highDailyCostAlert: boolean;
 }
 
 IMPORTANTE:
+
 - Formatear costos con 4 decimales (ej: $0.0234)
 - Formatear tokens con separador de miles
 - Colores de proveedor consistentes en gráficos
 - Refresh automático cada 5 minutos (refetchInterval)
+
 ```
 
 ---
@@ -2895,6 +3012,7 @@ Crear página para ver y editar la configuración de límites de cada plan (FREE
 **Prompt:**
 
 ```
+
 Crea página de configuración de planes:
 
 ARCHIVO: src/app/admin/planes/page.tsx
@@ -2904,12 +3022,14 @@ CLIENT COMPONENT
 ESTRUCTURA:
 
 HEADER:
+
 - Título: "Configuración de Planes"
 - Descripción: "Gestiona los límites y features de cada plan de suscripción"
 
 GRID DE CARDS (3 columnas, 1 por plan):
 
 CARD POR PLAN (FREE, PREMIUM, PROFESSIONAL):
+
 - Header con nombre del plan y badge de color
 - Formulario editable con campos:
   - dailyReadingLimit: number (lecturas diarias)
@@ -2925,11 +3045,13 @@ CARD POR PLAN (FREE, PREMIUM, PROFESSIONAL):
 - Indicador de "sin guardar" si hay cambios
 
 TABLA COMPARATIVA (abajo):
+
 - Tabla visual mostrando diferencias entre planes
 - Columnas: Feature | FREE | PREMIUM | PROFESSIONAL
 - Filas con checks verdes o X rojas
 
 OBTENER DATOS:
+
 - Crear archivo: src/lib/api/admin-plans-api.ts
 - Funciones:
   - getAllPlans(): GET /plan-config
@@ -2941,24 +3063,26 @@ OBTENER DATOS:
 
 TYPES (agregar a src/types/admin.types.ts):
 interface PlanConfig {
-  id: number;
-  planType: 'guest' | 'free' | 'premium' | 'professional';
-  dailyReadingLimit: number;
-  monthlyAIQuota: number;
-  canUseCustomQuestions: boolean;
-  canRegenerateInterpretations: boolean;
-  maxRegenerationsPerReading: number;
-  canShareReadings: boolean;
-  historyLimit: number;
-  canBookSessions: boolean;
-  price: number;
+id: number;
+planType: 'guest' | 'free' | 'premium' | 'professional';
+dailyReadingLimit: number;
+monthlyAIQuota: number;
+canUseCustomQuestions: boolean;
+canRegenerateInterpretations: boolean;
+maxRegenerationsPerReading: number;
+canShareReadings: boolean;
+historyLimit: number;
+canBookSessions: boolean;
+price: number;
 }
 
 IMPORTANTE:
+
 - Validación antes de guardar (números positivos o -1)
 - Confirmación modal antes de guardar cambios
 - Toast de éxito/error
 - Deshabilitar edición de GUEST (solo lectura)
+
 ```
 
 ---
@@ -2975,6 +3099,7 @@ Crear página para monitorear violaciones de rate limiting, IPs bloqueadas y eve
 **Prompt:**
 
 ```
+
 Crea página de rate limiting y seguridad:
 
 ARCHIVO: src/app/admin/seguridad/page.tsx
@@ -2984,12 +3109,14 @@ CLIENT COMPONENT
 ESTRUCTURA:
 
 TABS:
+
 - "Rate Limiting"
 - "Eventos de Seguridad"
 
 TAB 1: RATE LIMITING
 
 CARDS DE STATS (grid 3 columnas):
+
 1. Total Violaciones
    - Número
 2. IPs con Violaciones Activas
@@ -2998,6 +3125,7 @@ CARDS DE STATS (grid 3 columnas):
    - Número (color rojo si > 0)
 
 TABLA: IPs CON VIOLACIONES
+
 - Columnas:
   - IP
   - Cantidad de violaciones
@@ -3006,6 +3134,7 @@ TABLA: IPs CON VIOLACIONES
   - Acciones (botón "Bloquear IP")
 
 TABLA: IPs BLOQUEADAS
+
 - Columnas:
   - IP
   - Razón del bloqueo
@@ -3016,12 +3145,14 @@ TABLA: IPs BLOQUEADAS
 TAB 2: EVENTOS DE SEGURIDAD
 
 FILTROS:
+
 - Tipo de evento (dropdown): login_failed, suspicious_activity, etc.
 - Severidad (dropdown): low, medium, high, critical
 - Rango de fechas
 - Usuario específico (input)
 
 TABLA DE EVENTOS:
+
 - Columnas:
   - Fecha/Hora
   - Tipo de evento
@@ -3032,6 +3163,7 @@ TABLA DE EVENTOS:
 - Paginación
 
 OBTENER DATOS:
+
 - Crear archivo: src/lib/api/admin-security-api.ts
 - Funciones:
   - getRateLimitViolations(): GET /admin/rate-limits/violations
@@ -3042,33 +3174,35 @@ OBTENER DATOS:
 
 TYPES:
 interface RateLimitViolation {
-  ip: string;
-  count: number;
-  firstViolation: string;
-  lastViolation: string;
+ip: string;
+count: number;
+firstViolation: string;
+lastViolation: string;
 }
 
 interface BlockedIP {
-  ip: string;
-  reason: string;
-  blockedAt: string;
-  expiresAt: string;
+ip: string;
+reason: string;
+blockedAt: string;
+expiresAt: string;
 }
 
 interface SecurityEvent {
-  id: number;
-  eventType: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  userId?: number;
-  ip: string;
-  description: string;
-  createdAt: string;
+id: number;
+eventType: string;
+severity: 'low' | 'medium' | 'high' | 'critical';
+userId?: number;
+ip: string;
+description: string;
+createdAt: string;
 }
 
 IMPORTANTE:
+
 - Colores de severidad: low=gris, medium=amarillo, high=naranja, critical=rojo
 - Refresh automático cada 30 segundos
 - Confirmación antes de bloquear/desbloquear IP
+
 ```
 
 ---
@@ -3085,6 +3219,7 @@ Crear página para ver el historial de acciones administrativas (audit trail).
 **Prompt:**
 
 ```
+
 Crea página de audit logs:
 
 ARCHIVO: src/app/admin/audit/page.tsx
@@ -3094,10 +3229,12 @@ CLIENT COMPONENT
 ESTRUCTURA:
 
 HEADER:
+
 - Título: "Registro de Auditoría"
 - Descripción: "Historial de todas las acciones administrativas"
 
 FILTROS (barra horizontal):
+
 - Usuario (dropdown con admins)
 - Tipo de acción (dropdown): USER_BANNED, PLAN_CHANGED, TAROTISTA_APPROVED, etc.
 - Entidad (dropdown): User, Tarotista, Reading, etc.
@@ -3105,6 +3242,7 @@ FILTROS (barra horizontal):
 - Botón "Limpiar filtros"
 
 TABLA DE LOGS:
+
 - Columnas:
   - Fecha/Hora
   - Admin (nombre del admin que hizo la acción)
@@ -3115,36 +3253,40 @@ TABLA DE LOGS:
 - Paginación (20 por página)
 
 DETALLES EXPANDIBLES (por fila):
+
 - Mostrar JSON con:
   - oldValue: estado anterior
   - newValue: estado nuevo
 - Formato legible con diff highlighting si aplica
 
 OBTENER DATOS:
+
 - Crear archivo: src/lib/api/admin-audit-api.ts
 - Función: getAuditLogs(filters): GET /admin/audit-logs
 - Hook: useAuditLogs(filters)
 
 TYPES:
 interface AuditLog {
-  id: number;
-  userId: number;
-  userName: string;
-  targetUserId?: number;
-  action: string;
-  entityType: string;
-  entityId: string;
-  oldValue?: object;
-  newValue?: object;
-  ipAddress: string;
-  userAgent: string;
-  createdAt: string;
+id: number;
+userId: number;
+userName: string;
+targetUserId?: number;
+action: string;
+entityType: string;
+entityId: string;
+oldValue?: object;
+newValue?: object;
+ipAddress: string;
+userAgent: string;
+createdAt: string;
 }
 
 IMPORTANTE:
+
 - Acciones con colores: destructivas=rojo, creación=verde, modificación=azul
 - JSON viewer para oldValue/newValue
 - Exportar a CSV (botón opcional)
+
 ```
 
 ---
@@ -3161,6 +3303,7 @@ Crear página para ver estadísticas de caché y poder invalidar caché manualme
 **Prompt:**
 
 ```
+
 Crea página de gestión de caché:
 
 ARCHIVO: src/app/admin/cache/page.tsx
@@ -3170,10 +3313,12 @@ CLIENT COMPONENT
 ESTRUCTURA:
 
 HEADER:
+
 - Título: "Gestión de Caché"
 - Botón "Refrescar Stats"
 
 CARDS DE STATS (grid 4 columnas):
+
 1. Total Entries
    - Número de entradas en caché
 2. Hit Rate
@@ -3184,6 +3329,7 @@ CARDS DE STATS (grid 4 columnas):
    - MB usados
 
 SECCIÓN: COMBINACIONES MÁS CACHEADAS
+
 - Tabla con top 10:
   - Tarotista
   - Spread
@@ -3192,6 +3338,7 @@ SECCIÓN: COMBINACIONES MÁS CACHEADAS
   - Última actualización
 
 SECCIÓN: ACCIONES DE INVALIDACIÓN
+
 - Card con opciones:
   - Invalidar todo el caché (botón rojo con confirmación)
   - Invalidar por tarotista:
@@ -3202,12 +3349,14 @@ SECCIÓN: ACCIONES DE INVALIDACIÓN
     - Botón "Invalidar"
 
 SECCIÓN: WARMING STATUS
+
 - Estado actual del warming
 - Última ejecución
 - Próxima ejecución programada
 - Botón "Ejecutar Warming Ahora"
 
 OBTENER DATOS:
+
 - Crear archivo: src/lib/api/admin-cache-api.ts
 - Funciones:
   - getCacheAnalytics(): GET /admin/cache/analytics
@@ -3216,9 +3365,11 @@ OBTENER DATOS:
 - Hook: useCacheAnalytics()
 
 IMPORTANTE:
+
 - Confirmación para invalidar todo
 - Toast con cantidad de entradas eliminadas
 - Refresh después de invalidación
+
 ```
 
 ---
@@ -3235,6 +3386,7 @@ Crear página con métricas agregadas de toda la plataforma (revenue, sesiones, 
 **Prompt:**
 
 ```
+
 Crea página de métricas de plataforma:
 
 ARCHIVO: src/app/admin/metricas/page.tsx
@@ -3244,10 +3396,12 @@ CLIENT COMPONENT
 ESTRUCTURA:
 
 HEADER:
+
 - Título: "Métricas de Plataforma"
 - Selector de período: 7 días, 30 días, 90 días, 1 año
 
 CARDS DE MÉTRICAS PRINCIPALES (grid 4 columnas):
+
 1. Revenue Total
    - Monto en USD
    - Comparación con período anterior
@@ -3263,12 +3417,14 @@ CARDS DE MÉTRICAS PRINCIPALES (grid 4 columnas):
    - Nuevos registros del período
 
 GRÁFICOS (grid 2x2):
+
 1. Revenue por mes (barras)
 2. Lecturas por día (líneas)
 3. Distribución de usuarios por plan (dona)
 4. Sesiones por estado (barras horizontales)
 
 TABLA: TOP TAROTISTAS
+
 - Columnas:
   - Posición
   - Nombre
@@ -3278,14 +3434,17 @@ TABLA: TOP TAROTISTAS
   - Rating promedio
 
 OBTENER DATOS:
+
 - Usar endpoint existente: GET /tarotistas/metrics/platform
 - Crear hook: usePlatformMetrics(period)
 
 IMPORTANTE:
+
 - Formatear montos como currency
 - Formatear números grandes (1.2K, 15K, etc.)
 - Colores consistentes en gráficos
 - Loading skeletons mientras carga
+
 ```
 
 ---
@@ -3302,6 +3461,7 @@ Actualizar el sidebar del layout de admin para incluir todas las nuevas páginas
 **Prompt:**
 
 ```
+
 Actualiza el sidebar del admin layout:
 
 MODIFICAR: src/app/admin/layout.tsx
@@ -3309,15 +3469,18 @@ MODIFICAR: src/app/admin/layout.tsx
 NUEVA ESTRUCTURA DE NAVEGACIÓN:
 
 SECCIÓN: PRINCIPAL
+
 - Dashboard (ícono LayoutDashboard) -> /admin
 - Métricas (ícono TrendingUp) -> /admin/metricas
 
 SECCIÓN: GESTIÓN
+
 - Usuarios (ícono Users) -> /admin/usuarios
 - Tarotistas (ícono Sparkles) -> /admin/tarotistas
 - Lecturas (ícono BookOpen) -> /admin/lecturas
 
 SECCIÓN: SISTEMA
+
 - Uso de IA (ícono Brain) -> /admin/ai-usage
 - Configuración de Planes (ícono Settings) -> /admin/planes
 - Seguridad (ícono Shield) -> /admin/seguridad
@@ -3325,14 +3488,17 @@ SECCIÓN: SISTEMA
 - Audit Logs (ícono ScrollText) -> /admin/audit
 
 ESTILOS:
+
 - Separadores entre secciones
 - Títulos de sección en texto pequeño gris
 - Iconos de lucide-react
 - Link activo: bg-primary/10, borde izquierdo primary
 
 IMPORTANTE:
+
 - Mantener responsive
 - Colapsar secciones en mobile
+
 ```
 
 ---
@@ -3351,6 +3517,7 @@ Crear página pública (sin login requerido) para ver lecturas compartidas media
 **Prompt:**
 
 ```
+
 Crea página de lectura compartida pública:
 
 ARCHIVO: src/app/lecturas/compartida/[token]/page.tsx
@@ -3360,10 +3527,12 @@ SERVER COMPONENT (puede ser público)
 ESTRUCTURA:
 
 HEADER:
+
 - Logo de TarotFlavia centrado
 - Texto: "Lectura compartida"
 
 CONTENIDO:
+
 - Card principal con:
   - Pregunta realizada (título grande, font-serif)
   - Fecha de la lectura
@@ -3379,23 +3548,28 @@ CONTENIDO:
   - Usar react-markdown
 
 FOOTER:
+
 - Texto: "¿Quieres tu propia lectura?"
 - Botón CTA: "Crear mi cuenta gratis" -> /registro
 
 ESTADO DE ERROR:
+
 - Si token inválido o expirado:
   - Mostrar mensaje: "Esta lectura ya no está disponible"
   - Botón: "Ir al inicio"
 
 OBTENER DATOS:
+
 - Crear función: getSharedReading(token): GET /readings/shared/{token}
 - Esta ruta NO requiere autenticación
 - Llamar desde el Server Component con fetch
 
 IMPORTANTE:
+
 - NO usar hooks de auth (es página pública)
 - SEO: exportar metadata dinámica con título de la lectura
 - Open Graph tags para preview al compartir en redes
+
 ```
 
 ---
@@ -3412,50 +3586,58 @@ Agregar funcionalidad para que usuarios FREE puedan seleccionar su tarotista fav
 **Prompt:**
 
 ```
+
 Agrega funcionalidad de tarotista favorito:
 
 MODIFICAR: src/app/tarotistas/[id]/page.tsx (Perfil de Tarotista)
 
 AGREGAR EN HERO SECTION:
+
 - Si usuario está logueado y es FREE:
   - Mostrar botón "⭐ Elegir como favorito"
   - Si ya es favorito: mostrar "⭐ Tu tarotista favorito" (badge dorado)
   - Si tiene cooldown activo: mostrar "Podrás cambiar en X días"
 
 LÓGICA:
+
 - Al hacer clic en "Elegir como favorito":
   - Modal de confirmación: "¿Establecer a {nombre} como tu tarotista favorito? Solo podrás cambiarlo en 30 días"
   - Llamar a API
   - Actualizar UI
 
 CREAR SERVICIO:
+
 - Archivo: src/lib/api/subscriptions-api.ts
 - Funciones:
   - setFavoriteTarotista(tarotistaId): POST /subscriptions/set-favorite
   - getMySubscription(): GET /subscriptions/my-subscription
 
 CREAR HOOK:
+
 - useSetFavoriteTarotista()
 - useMySubscription()
 
 TYPES:
 interface UserSubscription {
-  id: number;
-  favoriteTarotistaId: number | null;
-  lastFavoriteChange: string | null;
-  canChangeFavorite: boolean;
-  daysUntilChange: number;
+id: number;
+favoriteTarotistaId: number | null;
+lastFavoriteChange: string | null;
+canChangeFavorite: boolean;
+daysUntilChange: number;
 }
 
 MOSTRAR EN MI PERFIL (TAREA 8.2):
+
 - En la sección de cuenta, mostrar:
   - "Tu tarotista favorito: {nombre}"
   - Link para ver su perfil
 
 IMPORTANTE:
+
 - Solo mostrar para usuarios FREE (PREMIUM tiene all-access)
 - Manejar error si cooldown activo
 - Toast de éxito al establecer favorito
+
 ```
 
 ---
@@ -3470,11 +3652,13 @@ IMPORTANTE:
 **Prompt:**
 
 ```
+
 Crea página 404:
 
 ARCHIVO: src/app/not-found.tsx
 
 ESTRUCTURA:
+
 - Centrada vertical y horizontal
 - Ícono grande de carta boca abajo
 - Título font-serif: "404 - Camino no encontrado"
@@ -3482,8 +3666,10 @@ ESTRUCTURA:
 - Botón: "Volver al inicio"
 
 ESTILO:
+
 - Fondo bg-main
 - Temática mística consistente
+
 ```
 
 ---
@@ -3496,21 +3682,26 @@ ESTILO:
 **Prompt:**
 
 ```
+
 Crea loading.tsx para rutas principales:
 
 ARCHIVOS:
+
 - src/app/loading.tsx (global)
 - src/app/ritual/loading.tsx
 - src/app/historial/loading.tsx
 - src/app/explorar/loading.tsx
 
 CADA LOADING:
+
 - Spinner centrado con animación
 - Texto: "Cargando..."
 - Usar componente de shadcn/ui o custom
 
 IMPORTANTE:
+
 - Next.js usa automáticamente loading.tsx como Suspense boundary
+
 ```
 
 ---
@@ -3523,30 +3714,34 @@ IMPORTANTE:
 **Prompt:**
 
 ```
+
 Configura SEO y metadata:
 
 MODIFICAR: Cada page.tsx debe exportar metadata
 
 EJEMPLO src/app/page.tsx:
 export const metadata: Metadata = {
-  title: 'TarotFlavia - Tu guía espiritual',
-  description: 'Lecturas de tarot con IA y sesiones con tarotistas profesionales',
-  openGraph: {
-    title: 'TarotFlavia',
-    description: 'Descubre tu destino',
-    images: ['/og-image.png'],
-  },
+title: 'TarotFlavia - Tu guía espiritual',
+description: 'Lecturas de tarot con IA y sesiones con tarotistas profesionales',
+openGraph: {
+title: 'TarotFlavia',
+description: 'Descubre tu destino',
+images: ['/og-image.png'],
+},
 };
 
 PAGES A CONFIGURAR:
+
 - Home, Login, Registro
 - Ritual, Historial, Carta del día
 - Explorar, Perfil tarotista
 - Mi Perfil
 
 IMPORTANTE:
+
 - Metadata dinámica para perfiles de tarotista
 - Open Graph para compartir lecturas
+
 ```
 
 ---
@@ -3559,9 +3754,11 @@ IMPORTANTE:
 **Prompt:**
 
 ```
+
 Optimiza assets:
 
 TAREAS:
+
 1. Usar next/image en lugar de <img>
 2. Agregar logo SVG en /public
 3. Crear placeholder para cartas de tarot
@@ -3569,12 +3766,15 @@ TAREAS:
 5. Agregar favicon y manifest.json para PWA
 
 CONFIGURAR en next.config.js:
+
 - remotePatterns para imágenes externas
 - Configuración de compresión
 
 IMPORTANTE:
+
 - Usar Image de Next.js con priority para above-the-fold
 - Lazy loading para resto
+
 ```
 
 ---
@@ -3595,6 +3795,7 @@ Configurar Vitest como framework de testing para componentes y hooks.
 **Prompt:**
 
 ```
+
 Configura Vitest para testing:
 
 INSTALAR:
@@ -3605,12 +3806,12 @@ import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
-  plugins: [react()],
-  test: {
-    environment: 'jsdom',
-    globals: true,
-    setupFiles: './src/test/setup.ts',
-  },
+plugins: [react()],
+test: {
+environment: 'jsdom',
+globals: true,
+setupFiles: './src/test/setup.ts',
+},
 })
 
 CREAR ARCHIVO: src/test/setup.ts
@@ -3618,13 +3819,15 @@ import '@testing-library/jest-dom'
 
 AGREGAR A package.json:
 "scripts": {
-  "test": "vitest",
-  "test:run": "vitest run",
-  "test:coverage": "vitest run --coverage"
+"test": "vitest",
+"test:run": "vitest run",
+"test:coverage": "vitest run --coverage"
 }
 
 IMPORTANTE:
+
 - NO escribas tests todavía, solo configura el entorno
+
 ```
 
 ---
@@ -3641,11 +3844,13 @@ Crear smoke tests básicos para verificar que los componentes principales render
 **Prompt:**
 
 ```
+
 Crea smoke tests para componentes críticos:
 
-CREAR ARCHIVO: src/components/ui/__tests__/smoke.test.tsx
+CREAR ARCHIVO: src/components/ui/**tests**/smoke.test.tsx
 
 TESTS MÍNIMOS:
+
 1. Button renderiza sin errores
 2. Input renderiza sin errores
 3. Card renderiza sin errores
@@ -3657,24 +3862,27 @@ import { render, screen } from '@testing-library/react'
 import { Button } from '../button'
 
 describe('UI Components Smoke Tests', () => {
-  it('Button renders without crashing', () => {
-    render(<Button>Click me</Button>)
-    expect(screen.getByRole('button')).toBeInTheDocument()
-  })
+it('Button renders without crashing', () => {
+render(<Button>Click me</Button>)
+expect(screen.getByRole('button')).toBeInTheDocument()
+})
 })
 
-CREAR ARCHIVO: src/components/features/__tests__/smoke.test.tsx
+CREAR ARCHIVO: src/components/features/**tests**/smoke.test.tsx
 
 TESTS:
+
 1. TarotCard renderiza en estado reverso
 2. TarotCard renderiza en estado anverso
 3. PlanBadge muestra texto correcto por plan
 4. StatusBadge muestra color correcto por estado
 
 IMPORTANTE:
+
 - Solo verificar que renderizan sin errores
 - NO testear lógica compleja todavía
 - Usar mocks para datos
+
 ```
 
 ---
@@ -3691,27 +3899,32 @@ Crear tests básicos para el flujo de autenticación.
 **Prompt:**
 
 ```
+
 Crea smoke tests para autenticación:
 
-CREAR ARCHIVO: src/app/login/__tests__/login.test.tsx
+CREAR ARCHIVO: src/app/login/**tests**/login.test.tsx
 
 TESTS:
+
 1. Formulario de login renderiza campos email y password
 2. Botón submit está presente
 3. Validación muestra error si email inválido
 4. Validación muestra error si password muy corto
 
-CREAR ARCHIVO: src/stores/__tests__/auth-store.test.ts
+CREAR ARCHIVO: src/stores/**tests**/auth-store.test.ts
 
 TESTS:
+
 1. Estado inicial es isAuthenticated: false
 2. setUser actualiza el estado correctamente
 3. logout limpia el usuario
 
 IMPORTANTE:
+
 - Mockear apiClient para evitar llamadas reales
 - Usar vi.mock() de Vitest
 - NO testear integración con backend todavía
+
 ```
 
 ---
@@ -3728,31 +3941,30 @@ Crear script que ejecute todos los smoke tests antes de deploy.
 **Prompt:**
 
 ```
+
 Configura script de smoke tests:
 
 AGREGAR A package.json:
 "scripts": {
-  "test:smoke": "vitest run --testPathPattern=smoke",
-  "predeploy": "npm run build && npm run test:smoke"
+"test:smoke": "vitest run --testPathPattern=smoke",
+"predeploy": "npm run build && npm run test:smoke"
 }
 
 CREAR ARCHIVO: .github/workflows/test.yml (opcional si usan GitHub Actions)
 name: Smoke Tests
 on: [push, pull_request]
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - run: npm ci
-      - run: npm run test:smoke
+test:
+runs-on: ubuntu-latest
+steps: - uses: actions/checkout@v4 - uses: actions/setup-node@v4
+with:
+node-version: '20' - run: npm ci - run: npm run test:smoke
 
 IMPORTANTE:
+
 - Los smoke tests deben pasar en menos de 30 segundos
 - Si fallan, bloquear el deploy
+
 ```
 
 ---
@@ -3826,3 +4038,4 @@ Se agregaron las siguientes tareas para completar el panel de administración:
 ---
 
 **FIN DEL BACKLOG TÉCNICO**
+```
