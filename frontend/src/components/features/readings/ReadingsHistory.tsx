@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, Layers, ChevronDown } from 'lucide-react';
-import { startOfWeek, startOfMonth, isAfter } from 'date-fns';
+import { startOfWeek, startOfMonth, isAfter, isSameDay } from 'date-fns';
 
 import { useMyReadings, useDeleteReading } from '@/hooks/api/useReadings';
 import { ReadingCard } from '@/components/features/readings/ReadingCard';
@@ -38,6 +38,12 @@ const DATE_FILTER_OPTIONS: DateFilterConfig[] = [
 
 /**
  * Filter and sort readings based on date filter and search query
+ *
+ * NOTE: This filtering is client-side and operates on the current page's data only.
+ * For 'this-week' and 'this-month' filters, this means readings outside the current
+ * page are not considered. This is a known limitation that provides quick filtering
+ * without requiring server-side changes. The sorting (recent/oldest) works correctly
+ * for the current page's data.
  */
 function filterReadings(
   readings: Reading[],
@@ -52,14 +58,20 @@ function filterReadings(
     filtered = filtered.filter((reading) => reading.question.toLowerCase().includes(query));
   }
 
-  // Filter by date range
+  // Filter by date range (inclusive - include readings on the start date)
   const now = new Date();
   if (dateFilter === 'this-week') {
     const weekStart = startOfWeek(now, { weekStartsOn: 1 });
-    filtered = filtered.filter((reading) => isAfter(new Date(reading.createdAt), weekStart));
+    filtered = filtered.filter((reading) => {
+      const readingDate = new Date(reading.createdAt);
+      return isAfter(readingDate, weekStart) || isSameDay(readingDate, weekStart);
+    });
   } else if (dateFilter === 'this-month') {
     const monthStart = startOfMonth(now);
-    filtered = filtered.filter((reading) => isAfter(new Date(reading.createdAt), monthStart));
+    filtered = filtered.filter((reading) => {
+      const readingDate = new Date(reading.createdAt);
+      return isAfter(readingDate, monthStart) || isSameDay(readingDate, monthStart);
+    });
   }
 
   // Sort by date
@@ -224,12 +236,20 @@ export function ReadingsHistory() {
         />
       )}
 
-      {/* No search results */}
-      {!isReadingsLoading && !isError && hasReadings && !hasFilteredReadings && isSearching && (
-        <div className="p-8 text-center">
-          <p className="text-muted-foreground">No se encontraron lecturas para tu búsqueda.</p>
-        </div>
-      )}
+      {/* No search/filter results */}
+      {!isReadingsLoading &&
+        !isError &&
+        hasReadings &&
+        !hasFilteredReadings &&
+        (isSearching || dateFilter === 'this-week' || dateFilter === 'this-month') && (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">
+              {isSearching
+                ? 'No se encontraron lecturas para tu búsqueda.'
+                : 'No se encontraron lecturas en este período.'}
+            </p>
+          </div>
+        )}
 
       {/* Readings List */}
       {!isReadingsLoading && !isError && hasFilteredReadings && (

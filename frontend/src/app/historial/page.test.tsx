@@ -421,6 +421,165 @@ describe('HistorialPage', () => {
     });
   });
 
+  describe('Date Filter Behavior', () => {
+    it('should filter readings by "Esta semana" and show message if none match', async () => {
+      // Use dates far in the past so they won't match "this week"
+      const oldReadings: Reading[] = [
+        {
+          id: 1,
+          spreadId: 1,
+          spreadName: 'Cruz Celta',
+          question: '¿Pregunta antigua?',
+          createdAt: '2020-01-15T10:00:00Z',
+          cardsCount: 10,
+        },
+      ];
+
+      vi.mocked(useReadingsModule.useMyReadings).mockReturnValue({
+        data: {
+          data: oldReadings,
+          meta: { page: 1, limit: 10, totalItems: 1, totalPages: 1 },
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: vi.fn(),
+      } as unknown as ReturnType<typeof useReadingsModule.useMyReadings>);
+
+      renderWithProviders(<HistorialPage />);
+
+      // Open filter dropdown and select "Esta semana"
+      const filterTrigger = screen.getByTestId('date-filter');
+      await userEvent.click(filterTrigger);
+
+      await waitFor(() => {
+        expect(screen.getByRole('menuitem', { name: /esta semana/i })).toBeInTheDocument();
+      });
+
+      await userEvent.click(screen.getByRole('menuitem', { name: /esta semana/i }));
+
+      // Should show no results message for date filter
+      await waitFor(() => {
+        expect(screen.getByText(/no se encontraron lecturas en este período/i)).toBeInTheDocument();
+      });
+    });
+
+    it('should filter readings by "Este mes" and show message if none match', async () => {
+      // Use dates far in the past so they won't match "this month"
+      const oldReadings: Reading[] = [
+        {
+          id: 1,
+          spreadId: 1,
+          spreadName: 'Cruz Celta',
+          question: '¿Pregunta antigua?',
+          createdAt: '2020-01-15T10:00:00Z',
+          cardsCount: 10,
+        },
+      ];
+
+      vi.mocked(useReadingsModule.useMyReadings).mockReturnValue({
+        data: {
+          data: oldReadings,
+          meta: { page: 1, limit: 10, totalItems: 1, totalPages: 1 },
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: vi.fn(),
+      } as unknown as ReturnType<typeof useReadingsModule.useMyReadings>);
+
+      renderWithProviders(<HistorialPage />);
+
+      // Open filter dropdown and select "Este mes"
+      const filterTrigger = screen.getByTestId('date-filter');
+      await userEvent.click(filterTrigger);
+
+      await waitFor(() => {
+        expect(screen.getByRole('menuitem', { name: /este mes/i })).toBeInTheDocument();
+      });
+
+      await userEvent.click(screen.getByRole('menuitem', { name: /este mes/i }));
+
+      // Should show no results message for date filter
+      await waitFor(() => {
+        expect(screen.getByText(/no se encontraron lecturas en este período/i)).toBeInTheDocument();
+      });
+    });
+
+    it('should include readings from start of week (inclusive filtering)', async () => {
+      // Create a reading with today's date to ensure it matches "this week"
+      const todayReadings: Reading[] = [
+        {
+          id: 1,
+          spreadId: 1,
+          spreadName: 'Cruz Celta',
+          question: '¿Pregunta de hoy?',
+          createdAt: new Date().toISOString(),
+          cardsCount: 10,
+        },
+      ];
+
+      vi.mocked(useReadingsModule.useMyReadings).mockReturnValue({
+        data: {
+          data: todayReadings,
+          meta: { page: 1, limit: 10, totalItems: 1, totalPages: 1 },
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: vi.fn(),
+      } as unknown as ReturnType<typeof useReadingsModule.useMyReadings>);
+
+      renderWithProviders(<HistorialPage />);
+
+      // Open filter dropdown and select "Esta semana"
+      const filterTrigger = screen.getByTestId('date-filter');
+      await userEvent.click(filterTrigger);
+
+      await waitFor(() => {
+        expect(screen.getByRole('menuitem', { name: /esta semana/i })).toBeInTheDocument();
+      });
+
+      await userEvent.click(screen.getByRole('menuitem', { name: /esta semana/i }));
+
+      // Should show the reading since it's from today
+      await waitFor(() => {
+        expect(screen.getByText(/pregunta de hoy/i)).toBeInTheDocument();
+      });
+    });
+
+    it('should sort readings by oldest first when "Más antiguas" is selected', async () => {
+      vi.mocked(useReadingsModule.useMyReadings).mockReturnValue({
+        data: mockPaginatedReadings,
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: vi.fn(),
+      } as unknown as ReturnType<typeof useReadingsModule.useMyReadings>);
+
+      renderWithProviders(<HistorialPage />);
+
+      // Open filter dropdown and select "Más antiguas"
+      const filterTrigger = screen.getByTestId('date-filter');
+      await userEvent.click(filterTrigger);
+
+      await waitFor(() => {
+        expect(screen.getByRole('menuitem', { name: /más antiguas/i })).toBeInTheDocument();
+      });
+
+      await userEvent.click(screen.getByRole('menuitem', { name: /más antiguas/i }));
+
+      // Check that readings are sorted by oldest first
+      await waitFor(() => {
+        const readingCards = screen.getAllByTestId('reading-card');
+        // mockReadings[2] is the oldest (2025-11-30), should be first
+        expect(
+          within(readingCards[0]).getByText(/debería cambiar de trabajo/i)
+        ).toBeInTheDocument();
+      });
+    });
+  });
+
   // ===========================================================================
   // Pagination Tests
   // ===========================================================================
