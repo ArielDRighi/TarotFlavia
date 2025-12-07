@@ -1,6 +1,7 @@
 import { DataSource } from 'typeorm';
 import { User } from '../../src/modules/users/entities/user.entity';
 import { Tarotista } from '../../src/modules/tarotistas/entities/tarotista.entity';
+import { TarotistaConfig } from '../../src/modules/tarotistas/entities/tarotista-config.entity';
 import { UsersService } from '../../src/modules/users/users.service';
 
 /**
@@ -76,6 +77,33 @@ export async function setupDefaultTarotista(
     flaviaTarotista = await tarotistaRepo.save({
       userId: flaviaUser.id,
       ...DEFAULT_TAROTISTA_CONFIG.tarotista,
+    });
+  }
+
+  // Crear configuración de IA para Flavia si no existe
+  const tarotistaConfigRepo = dataSource.getRepository(TarotistaConfig);
+  const existingConfig = await tarotistaConfigRepo.findOne({
+    where: { tarotistaId: flaviaTarotista.id, isActive: true },
+  });
+
+  if (!existingConfig) {
+    await tarotistaConfigRepo.save({
+      tarotistaId: flaviaTarotista.id,
+      systemPrompt:
+        'Eres Flavia, una tarotista experimentada y empática. Tu estilo es cálido y directo.',
+      styleConfig: {
+        tone: 'warm',
+        formality: 'informal',
+        language: 'es',
+      },
+      temperature: 0.7,
+      maxTokens: 1024,
+      topP: 0.9,
+      customKeywords: ['tarot', 'lectura', 'cartas'],
+      additionalInstructions:
+        'Responde siempre en español. Sé amable y comprensiva.',
+      version: 1,
+      isActive: true,
     });
   }
 
