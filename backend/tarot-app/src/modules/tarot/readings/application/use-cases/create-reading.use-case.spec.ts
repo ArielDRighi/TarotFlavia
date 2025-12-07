@@ -140,6 +140,11 @@ describe('CreateReadingUseCase', () => {
           provide: SubscriptionsService,
           useValue: {
             resolveTarotistaForReading: jest.fn().mockResolvedValue(1), // Default to Flavia
+            getSubscriptionInfo: jest.fn().mockResolvedValue({
+              subscriptionType: 'favorite',
+              tarotistaId: 1,
+              status: 'active',
+            }),
           },
         },
         {
