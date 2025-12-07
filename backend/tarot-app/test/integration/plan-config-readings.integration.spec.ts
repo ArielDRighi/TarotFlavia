@@ -20,6 +20,7 @@ import { PredefinedQuestion } from '../../src/modules/predefined-questions/entit
 
 // Helpers
 import { setupDefaultTarotista } from '../helpers/setup-default-tarotista';
+import { API_PREFIX } from '../helpers/create-test-app';
 
 /**
  * Integration Tests: PlanConfig + Readings
@@ -74,6 +75,10 @@ describe('PlanConfig + Readings Integration Tests', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+
+    // Set global API prefix (must match main.ts)
+    app.setGlobalPrefix(API_PREFIX);
+
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -329,7 +334,7 @@ describe('PlanConfig + Readings Integration Tests', () => {
       // BUG HUNT: Can GUEST create 3 readings?
       for (let i = 0; i < 3; i++) {
         await request(app.getHttpServer())
-          .post('/readings')
+          .post(`/${API_PREFIX}/readings`)
           .set('Authorization', `Bearer ${guestToken}`)
           .send(createReadingPayload())
           .expect(201);
@@ -337,7 +342,7 @@ describe('PlanConfig + Readings Integration Tests', () => {
 
       // BUG HUNT: 4th reading should be blocked
       await request(app.getHttpServer())
-        .post('/readings')
+        .post(`/${API_PREFIX}/readings`)
         .set('Authorization', `Bearer ${guestToken}`)
         .send(createReadingPayload())
         .expect(403);
@@ -350,7 +355,7 @@ describe('PlanConfig + Readings Integration Tests', () => {
       // BUG HUNT: Can FREE create 10 readings?
       for (let i = 0; i < 10; i++) {
         await request(app.getHttpServer())
-          .post('/readings')
+          .post(`/${API_PREFIX}/readings`)
           .set('Authorization', `Bearer ${freeToken}`)
           .send(createReadingPayload())
           .expect(201);
@@ -358,7 +363,7 @@ describe('PlanConfig + Readings Integration Tests', () => {
 
       // BUG HUNT: 11th reading should be blocked
       await request(app.getHttpServer())
-        .post('/readings')
+        .post(`/${API_PREFIX}/readings`)
         .set('Authorization', `Bearer ${freeToken}`)
         .send(createReadingPayload())
         .expect(403);
@@ -373,7 +378,7 @@ describe('PlanConfig + Readings Integration Tests', () => {
       // BUG HUNT: Can PREMIUM create more than FREE limit?
       for (let i = 0; i < 15; i++) {
         await request(app.getHttpServer())
-          .post('/readings')
+          .post(`/${API_PREFIX}/readings`)
           .set('Authorization', `Bearer ${premiumToken}`)
           .send(createReadingPayload('What does the future hold?'))
           .expect(201);
@@ -392,7 +397,7 @@ describe('PlanConfig + Readings Integration Tests', () => {
       // BUG HUNT: Are new limits enforced immediately?
       for (let i = 0; i < 5; i++) {
         await request(app.getHttpServer())
-          .post('/readings')
+          .post(`/${API_PREFIX}/readings`)
           .set('Authorization', `Bearer ${freeToken}`)
           .send(createReadingPayload())
           .expect(201);
@@ -400,7 +405,7 @@ describe('PlanConfig + Readings Integration Tests', () => {
 
       // 6th reading should fail with new limit
       await request(app.getHttpServer())
-        .post('/readings')
+        .post(`/${API_PREFIX}/readings`)
         .set('Authorization', `Bearer ${freeToken}`)
         .send(createReadingPayload())
         .expect(403);
@@ -416,7 +421,7 @@ describe('PlanConfig + Readings Integration Tests', () => {
       // Create 3 readings for GUEST (reaches limit)
       for (let i = 0; i < 3; i++) {
         await request(app.getHttpServer())
-          .post('/readings')
+          .post(`/${API_PREFIX}/readings`)
           .set('Authorization', `Bearer ${guestToken}`)
           .send(createReadingPayload())
           .expect(201);
@@ -424,7 +429,7 @@ describe('PlanConfig + Readings Integration Tests', () => {
 
       // 4th reading fails
       await request(app.getHttpServer())
-        .post('/readings')
+        .post(`/${API_PREFIX}/readings`)
         .set('Authorization', `Bearer ${guestToken}`)
         .send(createReadingPayload())
         .expect(403);
@@ -437,7 +442,7 @@ describe('PlanConfig + Readings Integration Tests', () => {
 
       // BUG HUNT: Can user now create more readings?
       await request(app.getHttpServer())
-        .post('/readings')
+        .post(`/${API_PREFIX}/readings`)
         .set('Authorization', `Bearer ${guestToken}`)
         .send(createReadingPayload())
         .expect(201);
