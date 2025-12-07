@@ -243,7 +243,8 @@ export function ReadingExperience({
       const result = await createReading(createDto);
       setReadingResult(result);
       setState('result');
-    } catch {
+    } catch (error) {
+      console.error('Failed to create reading:', error);
       setState('error');
       setError('Error al crear la lectura. Por favor, intenta de nuevo.');
     }
