@@ -11,6 +11,10 @@ export interface AuthUser {
   name: string;
   roles: string[];
   plan: string;
+  /** Number of readings used today (for limit tracking) */
+  dailyReadingsCount: number;
+  /** Maximum daily readings allowed by plan */
+  dailyReadingsLimit: number;
 }
 
 /**
