@@ -1395,11 +1395,39 @@ IMPORTANTE:
 
 ---
 
-### TAREA 4.6: Crear página selector de tirada
+### ✅ TAREA 4.6: Crear página selector de tirada
 
+**Estado:** ✅ COMPLETADA (2025-12-07)
 **Prioridad:** ALTA
 **Estimación:** 45 min
 **Dependencias:** 4.2, 4.5
+
+**Resumen de Implementación:**
+
+- Creado componente `SpreadSelector` en `src/components/features/readings/SpreadSelector.tsx`
+- Creada página `/ritual/tirada` en `src/app/ritual/tirada/page.tsx`
+- Implementado grid responsive 2x2 con cards de tiradas
+- Cada card muestra: nombre, descripción, número de cartas, dificultad (badge), tiempo estimado
+- Validación de límites diarios de usuario FREE (muestra modal de upgrade a Premium)
+- Tests completos con 25 tests para SpreadSelector y 6 tests para la página
+- Coverage > 97% en componentes nuevos
+
+**Archivos creados:**
+
+- `src/components/features/readings/SpreadSelector.tsx` - Componente principal
+- `src/components/features/readings/SpreadSelector.test.tsx` - Tests del componente (25 tests)
+- `src/app/ritual/tirada/page.tsx` - Página de la ruta
+- `src/app/ritual/tirada/page.test.tsx` - Tests de la página (6 tests)
+
+**Funcionalidades implementadas:**
+
+- Breadcrumb navegable: Ritual > Pregunta > Tipo de Tirada
+- Grid responsive con 4 tipos de tiradas
+- Badges de dificultad (Principiante/Intermedio/Avanzado)
+- Tiempo estimado de lectura
+- Modal de límite diario alcanzado con opción de upgrade a Premium
+- Navegación con parámetros: spreadId, questionId o customQuestion
+- Estados de carga y error con skeletons y retry
 
 **Consigna:**
 Crear interfaz para que usuario seleccione tipo de tirada (1, 3, 5 o 10 cartas).

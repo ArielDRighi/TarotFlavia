@@ -22,7 +22,7 @@ function QuestionsPageLoading() {
     <div className="bg-bg-main min-h-screen p-8">
       <div className="mx-auto max-w-2xl">
         <div className="mb-6 h-4 w-32 animate-pulse rounded bg-gray-200" />
-        <div className="mb-8 mx-auto h-10 w-64 animate-pulse rounded bg-gray-200" />
+        <div className="mx-auto mb-8 h-10 w-64 animate-pulse rounded bg-gray-200" />
         <div className="space-y-4">
           {Array.from({ length: 3 }).map((_, index) => (
             <div key={index} className="bg-card animate-pulse rounded-lg border p-4">
