@@ -214,9 +214,15 @@ describe('UsageLimits + Readings Integration Tests', () => {
 
   afterEach(async () => {
     if (testUser?.id) {
+      // Delete AI usage logs first (foreign key to user)
+      const aiUsageLogRepo = dataSource.getRepository('AIUsageLog');
+      await aiUsageLogRepo.delete({ userId: testUser.id });
+
+      // Delete readings (foreign key to user)
       const readingRepo = dataSource.getRepository('TarotReading');
       await readingRepo.delete({ user: { id: testUser.id } });
 
+      // Delete user last
       await userRepository.delete({ id: testUser.id });
     }
   });
