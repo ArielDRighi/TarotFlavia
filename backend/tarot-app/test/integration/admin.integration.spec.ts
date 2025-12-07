@@ -153,7 +153,7 @@ describe('Admin Operations Integration Tests', () => {
     it('should get user detail with statistics', async () => {
       // ACT
       const response = await request(app.getHttpServer())
-        .get(`/admin/users/${regularUser.id}`)
+        .get(`/${API_PREFIX}/admin/users/${regularUser.id}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -173,7 +173,7 @@ describe('Admin Operations Integration Tests', () => {
 
       // ACT
       const response = await request(app.getHttpServer())
-        .patch(`/admin/users/${regularUser.id}/plan`)
+        .patch(`/${API_PREFIX}/admin/users/${regularUser.id}/plan`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send(updatePayload)
         .expect(200);
@@ -209,7 +209,7 @@ describe('Admin Operations Integration Tests', () => {
 
       // ACT
       const response = await request(app.getHttpServer())
-        .post(`/admin/users/${regularUser.id}/ban`)
+        .post(`/${API_PREFIX}/admin/users/${regularUser.id}/ban`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send(banPayload)
         .expect(201);
@@ -245,7 +245,7 @@ describe('Admin Operations Integration Tests', () => {
 
       // ACT
       const response = await request(app.getHttpServer())
-        .post(`/admin/users/${regularUser.id}/unban`)
+        .post(`/${API_PREFIX}/admin/users/${regularUser.id}/unban`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(201);
 
@@ -267,7 +267,7 @@ describe('Admin Operations Integration Tests', () => {
     it('should promote user to TAROTIST role', async () => {
       // ACT
       const response = await request(app.getHttpServer())
-        .post(`/admin/users/${regularUser.id}/roles/tarotist`)
+        .post(`/${API_PREFIX}/admin/users/${regularUser.id}/roles/tarotist`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(201);
 
@@ -297,7 +297,7 @@ describe('Admin Operations Integration Tests', () => {
     it('should promote user to ADMIN role', async () => {
       // ACT
       const response = await request(app.getHttpServer())
-        .post(`/admin/users/${regularUser.id}/roles/admin`)
+        .post(`/${API_PREFIX}/admin/users/${regularUser.id}/roles/admin`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(201);
 
@@ -318,7 +318,7 @@ describe('Admin Operations Integration Tests', () => {
 
       // ACT
       const response = await request(app.getHttpServer())
-        .delete(`/admin/users/${regularUser.id}/roles/tarotist`)
+        .delete(`/${API_PREFIX}/admin/users/${regularUser.id}/roles/tarotist`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -366,7 +366,7 @@ describe('Admin Operations Integration Tests', () => {
 
       // ACT & ASSERT
       await request(app.getHttpServer())
-        .patch(`/admin/users/${regularUser.id}/plan`)
+        .patch(`/${API_PREFIX}/admin/users/${regularUser.id}/plan`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send(invalidPayload)
         .expect(400);
@@ -382,18 +382,18 @@ describe('Admin Operations Integration Tests', () => {
 
       // ACT: Realizar varias acciones
       await request(app.getHttpServer())
-        .patch(`/admin/users/${regularUser.id}/plan`)
+        .patch(`/${API_PREFIX}/admin/users/${regularUser.id}/plan`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ plan: UserPlan.PREMIUM })
         .expect(200);
 
       await request(app.getHttpServer())
-        .post(`/admin/users/${regularUser.id}/roles/tarotist`)
+        .post(`/${API_PREFIX}/admin/users/${regularUser.id}/roles/tarotist`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(201);
 
       await request(app.getHttpServer())
-        .delete(`/admin/users/${regularUser.id}/roles/tarotist`)
+        .delete(`/${API_PREFIX}/admin/users/${regularUser.id}/roles/tarotist`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -420,7 +420,7 @@ describe('Admin Operations Integration Tests', () => {
     it('should store IP address and user agent in audit log', async () => {
       // ACT
       await request(app.getHttpServer())
-        .patch(`/admin/users/${regularUser.id}/plan`)
+        .patch(`/${API_PREFIX}/admin/users/${regularUser.id}/plan`)
         .set('Authorization', `Bearer ${adminToken}`)
         .set('User-Agent', 'TestAgent/1.0')
         .send({ plan: UserPlan.PREMIUM })
@@ -448,7 +448,7 @@ describe('Admin Operations Integration Tests', () => {
 
       // ACT & ASSERT
       await request(app.getHttpServer())
-        .patch(`/admin/users/${nonExistentId}/plan`)
+        .patch(`/${API_PREFIX}/admin/users/${nonExistentId}/plan`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ plan: UserPlan.PREMIUM })
         .expect(404);
@@ -460,7 +460,7 @@ describe('Admin Operations Integration Tests', () => {
 
       // ACT
       const response = await request(app.getHttpServer())
-        .post(`/admin/users/${regularUser.id}/ban`)
+        .post(`/${API_PREFIX}/admin/users/${regularUser.id}/ban`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ reason: 'Second ban' })
         .expect(201);
@@ -475,7 +475,7 @@ describe('Admin Operations Integration Tests', () => {
 
       // ACT & ASSERT
       await request(app.getHttpServer())
-        .post(`/admin/users/${regularUser.id}/roles/tarotist`)
+        .post(`/${API_PREFIX}/admin/users/${regularUser.id}/roles/tarotist`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(400);
     });
@@ -483,7 +483,7 @@ describe('Admin Operations Integration Tests', () => {
     it('should handle removing non-existent role', async () => {
       // ACT & ASSERT: Usuario regular no tiene rol TAROTIST
       await request(app.getHttpServer())
-        .delete(`/admin/users/${regularUser.id}/roles/tarotist`)
+        .delete(`/${API_PREFIX}/admin/users/${regularUser.id}/roles/tarotist`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(400);
     });
