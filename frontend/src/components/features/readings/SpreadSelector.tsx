@@ -21,6 +21,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
+import { CONFIG } from '@/lib/constants/config';
 import type { Spread } from '@/types';
 
 /**
@@ -77,6 +78,8 @@ function getDifficultyVariant(
 
 /**
  * Get estimated reading time based on card count
+ * Expected spread sizes: 1, 3, 5, 10 cards
+ * Fallback uses 2 min per card for any unexpected sizes
  */
 function getEstimatedTime(cardsCount: number): string {
   const timeMap: Record<number, string> = {
@@ -172,8 +175,8 @@ export function SpreadSelector({ categoryId, questionId, customQuestion }: Sprea
     if (!user) return false;
     if (user.plan === 'PREMIUM') return false;
 
-    const dailyCount = (user as { dailyReadingsCount?: number }).dailyReadingsCount ?? 0;
-    const dailyLimit = (user as { dailyReadingsLimit?: number }).dailyReadingsLimit ?? 3;
+    const dailyCount = user.dailyReadingsCount ?? 0;
+    const dailyLimit = user.dailyReadingsLimit ?? CONFIG.DEFAULT_FREE_DAILY_LIMIT;
 
     return dailyCount >= dailyLimit;
   }, [user]);
@@ -201,7 +204,8 @@ export function SpreadSelector({ categoryId, questionId, customQuestion }: Sprea
   );
 
   const handleBackToQuestions = useCallback(() => {
-    router.push(`/ritual/preguntas?categoryId=${categoryId}`);
+    const url = categoryId ? `/ritual/preguntas?categoryId=${categoryId}` : '/ritual/preguntas';
+    router.push(url);
   }, [router, categoryId]);
 
   const handleCloseLimitModal = useCallback(() => {
@@ -235,7 +239,7 @@ export function SpreadSelector({ categoryId, questionId, customQuestion }: Sprea
           </Link>
           <ChevronRight className="h-4 w-4" aria-hidden="true" />
           <Link
-            href={`/ritual/preguntas?categoryId=${categoryId}`}
+            href={categoryId ? `/ritual/preguntas?categoryId=${categoryId}` : '/ritual/preguntas'}
             className="hover:text-primary transition-colors"
           >
             Pregunta

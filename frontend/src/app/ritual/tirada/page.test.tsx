@@ -4,7 +4,7 @@ import { useSearchParams } from 'next/navigation';
 
 import SpreadSelectorPage from './page';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
-import { useSpreads, useCategories } from '@/hooks/api/useReadings';
+import { useSpreads } from '@/hooks/api/useReadings';
 import { useAuthStore } from '@/stores/authStore';
 
 // Mock modules
@@ -19,7 +19,6 @@ vi.mock('@/hooks/useRequireAuth', () => ({
 
 vi.mock('@/hooks/api/useReadings', () => ({
   useSpreads: vi.fn(),
-  useCategories: vi.fn(),
 }));
 
 vi.mock('@/stores/authStore', () => ({
@@ -27,16 +26,6 @@ vi.mock('@/stores/authStore', () => ({
 }));
 
 // Mock data
-const mockCategory = {
-  id: 1,
-  name: 'Amor',
-  slug: 'amor',
-  description: 'Preguntas sobre el amor',
-  color: '#FFB6C1',
-  icon: 'heart',
-  isActive: true,
-};
-
 const mockSpreads = [
   {
     id: 1,
@@ -64,11 +53,6 @@ describe('SpreadSelectorPage', () => {
     vi.clearAllMocks();
     (useRequireAuth as Mock).mockReturnValue({ isLoading: false });
     (useAuthStore as unknown as Mock).mockReturnValue({ user: mockUser });
-    (useCategories as Mock).mockReturnValue({
-      data: [mockCategory],
-      isLoading: false,
-      error: null,
-    });
     (useSpreads as Mock).mockReturnValue({
       data: mockSpreads,
       isLoading: false,

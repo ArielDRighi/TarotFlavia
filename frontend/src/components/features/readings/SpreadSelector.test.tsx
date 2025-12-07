@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 
 import { SpreadSelector } from './SpreadSelector';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
-import { useSpreads, useCategories } from '@/hooks/api/useReadings';
+import { useSpreads } from '@/hooks/api/useReadings';
 import { useAuthStore } from '@/stores/authStore';
 
 // Mock modules
@@ -19,7 +19,6 @@ vi.mock('@/hooks/useRequireAuth', () => ({
 
 vi.mock('@/hooks/api/useReadings', () => ({
   useSpreads: vi.fn(),
-  useCategories: vi.fn(),
 }));
 
 vi.mock('@/stores/authStore', () => ({
@@ -27,16 +26,6 @@ vi.mock('@/stores/authStore', () => ({
 }));
 
 // Mock data
-const mockCategory = {
-  id: 1,
-  name: 'Amor',
-  slug: 'amor',
-  description: 'Preguntas sobre el amor',
-  color: '#FFB6C1',
-  icon: 'heart',
-  isActive: true,
-};
-
 const mockSpreads = [
   {
     id: 1,
@@ -128,11 +117,6 @@ describe('SpreadSelector', () => {
     (useRouter as Mock).mockReturnValue({ push: mockPush });
     (useRequireAuth as Mock).mockReturnValue({ isLoading: false });
     (useAuthStore as unknown as Mock).mockReturnValue({ user: mockUserFree });
-    (useCategories as Mock).mockReturnValue({
-      data: [mockCategory],
-      isLoading: false,
-      error: null,
-    });
   });
 
   describe('Authentication Protection', () => {
@@ -430,6 +414,15 @@ describe('SpreadSelector', () => {
       fireEvent.click(backButton);
 
       expect(mockPush).toHaveBeenCalledWith('/ritual/preguntas?categoryId=1');
+    });
+
+    it('should navigate to questions without categoryId when categoryId is null', () => {
+      render(<SpreadSelector categoryId={null} questionId={null} customQuestion={null} />);
+
+      const backButton = screen.getByRole('button', { name: /volver a preguntas/i });
+      fireEvent.click(backButton);
+
+      expect(mockPush).toHaveBeenCalledWith('/ritual/preguntas');
     });
   });
 
