@@ -58,6 +58,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -85,7 +86,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
 
     // Login with seeded premium user (to avoid 3/day limit)
     const loginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({
         email: 'premium@test.com',
         password: 'Test123456!',
@@ -106,7 +107,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
 
     it('should create reading with predefined question', async () => {
       const response = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
           deckId,
@@ -142,7 +143,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
       const customQuestion = '¿Qué me depara el futuro en mi carrera?';
 
       const response = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
           deckId,
@@ -170,7 +171,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
 
       for (let i = 0; i < 3; i++) {
         const response = await request(app.getHttpServer())
-          .post('/readings')
+          .post('/api/v1/readings')
           .set('Authorization', `Bearer ${userToken}`)
           .send({
             deckId,
@@ -212,7 +213,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
 
     it('should generate AI interpretation', async () => {
       const response = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
           deckId,
@@ -242,7 +243,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
     it('should retrieve created reading', async () => {
       // Create reading
       const createResponse = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
           deckId,
@@ -262,7 +263,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
 
       // Retrieve reading
       const getResponse = await request(app.getHttpServer())
-        .get(`/readings/${readingId}`)
+        .get(`/api/v1/readings/${readingId}`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(200);
 
@@ -274,7 +275,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
     it('should list user readings', async () => {
       // Create 2 readings
       await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
           deckId,
@@ -291,7 +292,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
         .expect(201);
 
       await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
           deckId,
@@ -309,7 +310,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
 
       // List readings
       const response = await request(app.getHttpServer())
-        .get('/readings')
+        .get('/api/v1/readings')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(200);
 
@@ -324,7 +325,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
   describe('Reading Validation', () => {
     it('should reject reading without authentication', async () => {
       await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .send({
           deckId,
           spreadId,
@@ -335,7 +336,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
 
     it('should reject reading without deck', async () => {
       await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
           spreadId,
@@ -353,7 +354,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
 
     it('should reject reading without spread', async () => {
       await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
           deckId,
@@ -371,7 +372,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
 
     it('should reject reading without question', async () => {
       await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
           deckId,
@@ -389,7 +390,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
 
     it('should reject reading with both question types', async () => {
       await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
           deckId,
@@ -409,7 +410,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
 
     it('should reject reading with invalid deck', async () => {
       await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
           deckId: 99999,
@@ -428,7 +429,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
 
     it('should reject reading with invalid spread', async () => {
       await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
           deckId,
@@ -454,7 +455,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
       const startTime = Date.now();
 
       await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
           deckId,
@@ -481,7 +482,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
       const startTime = Date.now();
 
       await request(app.getHttpServer())
-        .get('/readings')
+        .get('/api/v1/readings')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(200);
 
@@ -500,7 +501,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
     it('should cache interpretation results', async () => {
       // First reading - generates interpretation
       const firstResponse = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
           deckId,
@@ -522,7 +523,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
 
       // Retrieve same reading - should use cache
       const secondResponse = await request(app.getHttpServer())
-        .get(`/readings/${readingId}`)
+        .get(`/api/v1/readings/${readingId}`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(200);
 
@@ -540,7 +541,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
 
     it('should use Flavia (ID 1) as default tarotista when user has no subscription', async () => {
       const response = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
           deckId,
@@ -566,7 +567,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
 
     it('should persist tarotistaId to database correctly', async () => {
       const response = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
           deckId,
@@ -600,7 +601,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
     it('should retrieve reading with tarotistaId included', async () => {
       // Create reading
       const createResponse = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
           deckId,
@@ -620,7 +621,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
 
       // Retrieve reading
       const getResponse = await request(app.getHttpServer())
-        .get(`/readings/${readingId}`)
+        .get(`/api/v1/readings/${readingId}`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(200);
 
@@ -634,7 +635,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
     it('should list readings with tarotistaId in each reading', async () => {
       // Create 2 readings
       await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
           deckId,
@@ -651,7 +652,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
         .expect(201);
 
       await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
           deckId,
@@ -669,7 +670,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
 
       // List readings
       const response = await request(app.getHttpServer())
-        .get('/readings')
+        .get('/api/v1/readings')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(200);
 
@@ -691,7 +692,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
 
       // Primera lectura con Flavia (tarotistaId=1)
       const firstResponse = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
           deckId,

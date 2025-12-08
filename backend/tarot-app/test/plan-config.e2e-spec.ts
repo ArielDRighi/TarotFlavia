@@ -38,6 +38,7 @@ describe('Plan Config Management (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -88,7 +89,7 @@ describe('Plan Config Management (e2e)', () => {
 
     // Login as admin
     const adminLoginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({
         email: `admin@${TEST_DOMAIN}`,
         password: 'AdminPass123!',
@@ -99,7 +100,7 @@ describe('Plan Config Management (e2e)', () => {
 
     // Login as regular user
     const userLoginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({
         email: `user@${TEST_DOMAIN}`,
         password: 'AdminPass123!',
@@ -120,7 +121,7 @@ describe('Plan Config Management (e2e)', () => {
   describe('GET /plan-config', () => {
     it('should return all plans for admin', async () => {
       const response = await request(app.getHttpServer())
-        .get('/plan-config')
+        .get('/api/v1/plan-config')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -146,18 +147,18 @@ describe('Plan Config Management (e2e)', () => {
 
     it('should deny access for non-admin users', async () => {
       await request(app.getHttpServer())
-        .get('/plan-config')
+        .get('/api/v1/plan-config')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(403);
     });
 
     it('should deny access for unauthenticated users', async () => {
-      await request(app.getHttpServer()).get('/plan-config').expect(401);
+      await request(app.getHttpServer()).get('/api/v1/plan-config').expect(401);
     });
 
     it('should return plans ordered by planType', async () => {
       const response = await request(app.getHttpServer())
-        .get('/plan-config')
+        .get('/api/v1/plan-config')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -172,7 +173,7 @@ describe('Plan Config Management (e2e)', () => {
   describe('GET /plan-config/:planType', () => {
     it('should return specific plan by type for admin', async () => {
       const response = await request(app.getHttpServer())
-        .get('/plan-config/free')
+        .get('/api/v1/plan-config/free')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -183,7 +184,7 @@ describe('Plan Config Management (e2e)', () => {
 
     it('should return PREMIUM plan details', async () => {
       const response = await request(app.getHttpServer())
-        .get('/plan-config/premium')
+        .get('/api/v1/plan-config/premium')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -194,14 +195,14 @@ describe('Plan Config Management (e2e)', () => {
 
     it('should return 400 for invalid plan type', async () => {
       await request(app.getHttpServer())
-        .get('/plan-config/nonexistent')
+        .get('/api/v1/plan-config/nonexistent')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(400);
     });
 
     it('should deny access for non-admin users', async () => {
       await request(app.getHttpServer())
-        .get('/plan-config/free')
+        .get('/api/v1/plan-config/free')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(403);
     });
@@ -227,7 +228,7 @@ describe('Plan Config Management (e2e)', () => {
       ]);
 
       const response = await request(app.getHttpServer())
-        .post('/plan-config')
+        .post('/api/v1/plan-config')
         .set('Authorization', `Bearer ${adminToken}`)
         .send(newPlanData)
         .expect(201);
@@ -247,13 +248,13 @@ describe('Plan Config Management (e2e)', () => {
     it('should return 409 if plan already exists', async () => {
       // Create plan first
       await request(app.getHttpServer())
-        .post('/plan-config')
+        .post('/api/v1/plan-config')
         .set('Authorization', `Bearer ${adminToken}`)
         .send(newPlanData);
 
       // Try to create again
       await request(app.getHttpServer())
-        .post('/plan-config')
+        .post('/api/v1/plan-config')
         .set('Authorization', `Bearer ${adminToken}`)
         .send(newPlanData)
         .expect(409);
@@ -271,7 +272,7 @@ describe('Plan Config Management (e2e)', () => {
       };
 
       await request(app.getHttpServer())
-        .post('/plan-config')
+        .post('/api/v1/plan-config')
         .set('Authorization', `Bearer ${adminToken}`)
         .send(invalidData)
         .expect(400);
@@ -284,7 +285,7 @@ describe('Plan Config Management (e2e)', () => {
       };
 
       await request(app.getHttpServer())
-        .post('/plan-config')
+        .post('/api/v1/plan-config')
         .set('Authorization', `Bearer ${adminToken}`)
         .send(invalidData)
         .expect(400);
@@ -297,7 +298,7 @@ describe('Plan Config Management (e2e)', () => {
       };
 
       await request(app.getHttpServer())
-        .post('/plan-config')
+        .post('/api/v1/plan-config')
         .set('Authorization', `Bearer ${adminToken}`)
         .send(invalidData)
         .expect(400);
@@ -305,7 +306,7 @@ describe('Plan Config Management (e2e)', () => {
 
     it('should deny access for non-admin users', async () => {
       await request(app.getHttpServer())
-        .post('/plan-config')
+        .post('/api/v1/plan-config')
         .set('Authorization', `Bearer ${userToken}`)
         .send(newPlanData)
         .expect(403);
@@ -343,7 +344,7 @@ describe('Plan Config Management (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .put('/plan-config/free')
+        .put('/api/v1/plan-config/free')
         .set('Authorization', `Bearer ${adminToken}`)
         .send(updateData)
         .expect(200);
@@ -358,7 +359,7 @@ describe('Plan Config Management (e2e)', () => {
     it('should update only provided fields', async () => {
       // First get the current plan to know the original name
       const originalPlan = await request(app.getHttpServer())
-        .get('/plan-config/free')
+        .get('/api/v1/plan-config/free')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -367,7 +368,7 @@ describe('Plan Config Management (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .put('/plan-config/free')
+        .put('/api/v1/plan-config/free')
         .set('Authorization', `Bearer ${adminToken}`)
         .send(updateData)
         .expect(200);
@@ -385,7 +386,7 @@ describe('Plan Config Management (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .put('/plan-config/free')
+        .put('/api/v1/plan-config/free')
         .set('Authorization', `Bearer ${adminToken}`)
         .send(updateData)
         .expect(200);
@@ -401,7 +402,7 @@ describe('Plan Config Management (e2e)', () => {
 
     it('should return 400 for invalid plan type', async () => {
       await request(app.getHttpServer())
-        .put('/plan-config/nonexistent')
+        .put('/api/v1/plan-config/nonexistent')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ name: 'Test' })
         .expect(400);
@@ -414,7 +415,7 @@ describe('Plan Config Management (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .put('/plan-config/free')
+        .put('/api/v1/plan-config/free')
         .set('Authorization', `Bearer ${adminToken}`)
         .send(updateData)
         .expect(200);
@@ -425,7 +426,7 @@ describe('Plan Config Management (e2e)', () => {
 
     it('should deny access for non-admin users', async () => {
       await request(app.getHttpServer())
-        .put('/plan-config/free')
+        .put('/api/v1/plan-config/free')
         .set('Authorization', `Bearer ${userToken}`)
         .send({ name: 'Test' })
         .expect(403);
@@ -455,7 +456,7 @@ describe('Plan Config Management (e2e)', () => {
 
     it('should delete an existing plan as admin', async () => {
       await request(app.getHttpServer())
-        .delete('/plan-config/premium')
+        .delete('/api/v1/plan-config/premium')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(204);
 
@@ -469,21 +470,21 @@ describe('Plan Config Management (e2e)', () => {
 
     it('should return 400 for invalid plan type', async () => {
       await request(app.getHttpServer())
-        .delete('/plan-config/nonexistent')
+        .delete('/api/v1/plan-config/nonexistent')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(400);
     });
 
     it('should deny access for non-admin users', async () => {
       await request(app.getHttpServer())
-        .delete('/plan-config/premium')
+        .delete('/api/v1/plan-config/premium')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(403);
     });
 
     it('should deny deletion for unauthenticated users', async () => {
       await request(app.getHttpServer())
-        .delete('/plan-config/premium')
+        .delete('/api/v1/plan-config/premium')
         .expect(401);
     });
   });
@@ -491,7 +492,7 @@ describe('Plan Config Management (e2e)', () => {
   describe('Plan Config - Edge Cases', () => {
     it('should handle unlimited readings (-1)', async () => {
       const response = await request(app.getHttpServer())
-        .get('/plan-config/premium')
+        .get('/api/v1/plan-config/premium')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -500,7 +501,7 @@ describe('Plan Config Management (e2e)', () => {
 
     it('should handle limited readings (FREE plan)', async () => {
       const response = await request(app.getHttpServer())
-        .get('/plan-config/free')
+        .get('/api/v1/plan-config/free')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -517,14 +518,14 @@ describe('Plan Config Management (e2e)', () => {
 
       // Update plan with feature flags
       await request(app.getHttpServer())
-        .put('/plan-config/free')
+        .put('/api/v1/plan-config/free')
         .set('Authorization', `Bearer ${adminToken}`)
         .send(featureFlags)
         .expect(200);
 
       // Retrieve and verify
       const response = await request(app.getHttpServer())
-        .get('/plan-config/free')
+        .get('/api/v1/plan-config/free')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -543,7 +544,7 @@ describe('Plan Config Management (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .put('/plan-config/free')
+        .put('/api/v1/plan-config/free')
         .set('Authorization', `Bearer ${adminToken}`)
         .send(updateData)
         .expect(200);
@@ -555,14 +556,14 @@ describe('Plan Config Management (e2e)', () => {
   describe('Plan Config - Authorization Edge Cases', () => {
     it('should reject invalid JWT token', async () => {
       await request(app.getHttpServer())
-        .get('/plan-config')
+        .get('/api/v1/plan-config')
         .set('Authorization', 'Bearer invalid-token')
         .expect(401);
     });
 
     it('should reject malformed Authorization header', async () => {
       await request(app.getHttpServer())
-        .get('/plan-config')
+        .get('/api/v1/plan-config')
         .set('Authorization', adminToken) // Missing "Bearer"
         .expect(401);
     });
@@ -570,13 +571,13 @@ describe('Plan Config Management (e2e)', () => {
     it('should reject admin operations with regular user token', async () => {
       // Test GET /plan-config
       await request(app.getHttpServer())
-        .get('/plan-config')
+        .get('/api/v1/plan-config')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(403);
 
       // Test POST /plan-config
       await request(app.getHttpServer())
-        .post('/plan-config')
+        .post('/api/v1/plan-config')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
           planType: UserPlan.PREMIUM,
@@ -593,14 +594,14 @@ describe('Plan Config Management (e2e)', () => {
 
       // Test PUT /plan-config/:planType
       await request(app.getHttpServer())
-        .put('/plan-config/free')
+        .put('/api/v1/plan-config/free')
         .set('Authorization', `Bearer ${userToken}`)
         .send({ name: 'Test' })
         .expect(403);
 
       // Test DELETE /plan-config/:planType
       await request(app.getHttpServer())
-        .delete('/plan-config/premium')
+        .delete('/api/v1/plan-config/premium')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(403);
     });

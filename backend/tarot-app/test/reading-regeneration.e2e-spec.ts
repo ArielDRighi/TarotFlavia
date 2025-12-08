@@ -52,6 +52,7 @@ describe('Reading Regeneration E2E', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
     await app.init();
 
@@ -96,7 +97,7 @@ describe('Reading Regeneration E2E', () => {
 
     // Login usuarios
     const freeLoginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({
         email: `free-regen-${testTimestamp}@test.com`,
         password: 'Password123!',
@@ -104,7 +105,7 @@ describe('Reading Regeneration E2E', () => {
     freeUserToken = (freeLoginResponse.body as LoginResponse).access_token;
 
     const premiumLoginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({
         email: `premium-regen-${testTimestamp}@test.com`,
         password: 'Password123!',
@@ -205,7 +206,7 @@ describe('Reading Regeneration E2E', () => {
     // Crear una lectura para el usuario premium usando el endpoint
     // Esto asegura que la lectura se crea correctamente con todas las validaciones
     const createReadingResponse = await request(app.getHttpServer())
-      .post('/readings')
+      .post('/api/v1/readings')
       .set('Authorization', `Bearer ${premiumUserToken}`)
       .send({
         predefinedQuestionId: predefinedQuestionId,
@@ -331,7 +332,7 @@ describe('Reading Regeneration E2E', () => {
   describe('POST /readings/:id/regenerate - Authentication', () => {
     it('should return 401 without authentication', async () => {
       const response = await request(app.getHttpServer())
-        .post(`/readings/${readingId}/regenerate`)
+        .post(`/api/v1/readings/${readingId}/regenerate`)
         .expect(401);
 
       expect(response.body).toHaveProperty('message');
@@ -345,7 +346,7 @@ describe('Reading Regeneration E2E', () => {
     it('should return 403 for free users', async () => {
       // Crear una lectura para el usuario free usando el endpoint
       const createResponse = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
           predefinedQuestionId: predefinedQuestionId,
@@ -365,7 +366,7 @@ describe('Reading Regeneration E2E', () => {
       expect(freeReadingId).toBeDefined();
 
       const response = await request(app.getHttpServer())
-        .post(`/readings/${freeReadingId}/regenerate`)
+        .post(`/api/v1/readings/${freeReadingId}/regenerate`)
         .set('Authorization', `Bearer ${freeUserToken}`)
         .expect(403);
 
@@ -383,7 +384,7 @@ describe('Reading Regeneration E2E', () => {
     it('should return 403 when trying to regenerate another user reading', async () => {
       // Crear una lectura para el usuario free usando el endpoint
       const createResponse = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
           predefinedQuestionId: predefinedQuestionId,
@@ -404,7 +405,7 @@ describe('Reading Regeneration E2E', () => {
 
       // Intentar regenerar con token de premium user
       const response = await request(app.getHttpServer())
-        .post(`/readings/${otherReadingId}/regenerate`)
+        .post(`/api/v1/readings/${otherReadingId}/regenerate`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(403);
 
@@ -444,7 +445,7 @@ describe('Reading Regeneration E2E', () => {
 
       // Usar la reading global creada en beforeAll - es más estable en CI
       const response = await request(app.getHttpServer())
-        .post(`/readings/${readingId}/regenerate`)
+        .post(`/api/v1/readings/${readingId}/regenerate`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(201);
 
@@ -497,13 +498,13 @@ describe('Reading Regeneration E2E', () => {
    * TEST: Límite de 3 regeneraciones por lectura
    */
   describe('POST /readings/:id/regenerate - Regeneration Limit', () => {
-    // Increase timeout for regeneration tests (can be slow)
-    jest.setTimeout(90000);
+    // Increase timeout for regeneration tests (can be slow due to AI provider rate limits)
+    jest.setTimeout(180000);
 
     it('should allow up to 3 regenerations and then return 429', async () => {
       // Crear una nueva lectura específica para este test (sin regeneraciones previas)
       const createResponse = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           predefinedQuestionId: predefinedQuestionId,
@@ -524,17 +525,17 @@ describe('Reading Regeneration E2E', () => {
 
       // Hacer 3 regeneraciones
       await request(app.getHttpServer())
-        .post(`/readings/${freshReadingId}/regenerate`)
+        .post(`/api/v1/readings/${freshReadingId}/regenerate`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(201);
 
       await request(app.getHttpServer())
-        .post(`/readings/${freshReadingId}/regenerate`)
+        .post(`/api/v1/readings/${freshReadingId}/regenerate`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(201);
 
       await request(app.getHttpServer())
-        .post(`/readings/${freshReadingId}/regenerate`)
+        .post(`/api/v1/readings/${freshReadingId}/regenerate`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(201);
 
@@ -547,14 +548,14 @@ describe('Reading Regeneration E2E', () => {
 
       // La cuarta debe fallar con 429
       const response = await request(app.getHttpServer())
-        .post(`/readings/${freshReadingId}/regenerate`)
+        .post(`/api/v1/readings/${freshReadingId}/regenerate`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(429);
 
       expect(response.body).toHaveProperty('message');
 
       expect(String(response.body.message)).toContain('máximo');
-    }, 60000);
+    }, 180000);
   });
 
   /**
@@ -563,7 +564,7 @@ describe('Reading Regeneration E2E', () => {
   describe('POST /readings/:id/regenerate - Not Found', () => {
     it('should return 404 for non-existent reading', async () => {
       const response = await request(app.getHttpServer())
-        .post('/readings/999999/regenerate')
+        .post('/api/v1/readings/999999/regenerate')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(404);
 
@@ -581,7 +582,7 @@ describe('Reading Regeneration E2E', () => {
     it('should update the updatedAt field on regeneration', async () => {
       // Crear nueva lectura usando el endpoint
       const createResponse = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           predefinedQuestionId: predefinedQuestionId,
@@ -612,7 +613,7 @@ describe('Reading Regeneration E2E', () => {
 
       // Regenerar
       await request(app.getHttpServer())
-        .post(`/readings/${newReadingId}/regenerate`)
+        .post(`/api/v1/readings/${newReadingId}/regenerate`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(201);
 

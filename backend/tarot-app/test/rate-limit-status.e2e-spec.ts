@@ -44,12 +44,13 @@ describe('Rate Limit Status (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
     await app.init();
 
     // Login with seeded test users from globalSetup
     const freeLogin = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({
         email: 'free@test.com',
         password: 'Test123456!',
@@ -59,7 +60,7 @@ describe('Rate Limit Status (e2e)', () => {
     freeAccessToken = (freeLogin.body as LoginResponse).access_token;
 
     const premiumLogin = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({
         email: 'premium@test.com',
         password: 'Test123456!',
@@ -69,7 +70,7 @@ describe('Rate Limit Status (e2e)', () => {
     premiumAccessToken = (premiumLogin.body as LoginResponse).access_token;
 
     const adminLogin = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({
         email: 'admin@test.com',
         password: 'Test123456!',
@@ -94,7 +95,7 @@ describe('Rate Limit Status (e2e)', () => {
   describe('GET /rate-limit/status', () => {
     it('should require authentication', async () => {
       const response = await request(app.getHttpServer())
-        .get('/rate-limit/status')
+        .get('/api/v1/rate-limit/status')
         .expect(401);
 
       expect(response.body.message).toContain('Unauthorized');
@@ -102,7 +103,7 @@ describe('Rate Limit Status (e2e)', () => {
 
     it('should return rate limit status for FREE user', async () => {
       const response = await request(app.getHttpServer())
-        .get('/rate-limit/status')
+        .get('/api/v1/rate-limit/status')
         .set('Authorization', `Bearer ${freeAccessToken}`)
         .expect(200);
 
@@ -129,7 +130,7 @@ describe('Rate Limit Status (e2e)', () => {
 
     it('should return rate limit status for PREMIUM user', async () => {
       const response = await request(app.getHttpServer())
-        .get('/rate-limit/status')
+        .get('/api/v1/rate-limit/status')
         .set('Authorization', `Bearer ${premiumAccessToken}`)
         .expect(200);
 
@@ -156,7 +157,7 @@ describe('Rate Limit Status (e2e)', () => {
 
     it('should return unlimited status for ADMIN users', async () => {
       const response = await request(app.getHttpServer())
-        .get('/rate-limit/status')
+        .get('/api/v1/rate-limit/status')
         .set('Authorization', `Bearer ${adminAccessToken}`)
         .expect(200);
 

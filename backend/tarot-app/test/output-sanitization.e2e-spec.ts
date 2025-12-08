@@ -19,6 +19,7 @@ describe('Output Sanitization & Security Headers (e2e) - TASK-048-a', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
 
     // Apply same configuration as main.ts
     app.use(
@@ -63,7 +64,7 @@ describe('Output Sanitization & Security Headers (e2e) - TASK-048-a', () => {
 
     // Get auth token using seeded test user
     const loginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({
         email: 'free@test.com',
         password: 'Test123456!',
@@ -79,25 +80,25 @@ describe('Output Sanitization & Security Headers (e2e) - TASK-048-a', () => {
 
   describe('Security Headers', () => {
     it('should have X-Content-Type-Options header', async () => {
-      const response = await request(app.getHttpServer()).get('/').expect(200);
+      const response = await request(app.getHttpServer()).get('/api/v1/').expect(200);
 
       expect(response.headers['x-content-type-options']).toBe('nosniff');
     });
 
     it('should have X-Frame-Options header', async () => {
-      const response = await request(app.getHttpServer()).get('/').expect(200);
+      const response = await request(app.getHttpServer()).get('/api/v1/').expect(200);
 
       expect(response.headers['x-frame-options']).toBe('DENY');
     });
 
     it('should have X-XSS-Protection header', async () => {
-      const response = await request(app.getHttpServer()).get('/').expect(200);
+      const response = await request(app.getHttpServer()).get('/api/v1/').expect(200);
 
       expect(response.headers['x-xss-protection']).toBe('0');
     });
 
     it('should have Strict-Transport-Security header', async () => {
-      const response = await request(app.getHttpServer()).get('/').expect(200);
+      const response = await request(app.getHttpServer()).get('/api/v1/').expect(200);
 
       expect(response.headers['strict-transport-security']).toContain(
         'max-age=31536000',
@@ -108,7 +109,7 @@ describe('Output Sanitization & Security Headers (e2e) - TASK-048-a', () => {
     });
 
     it('should have Content-Security-Policy header', async () => {
-      const response = await request(app.getHttpServer()).get('/').expect(200);
+      const response = await request(app.getHttpServer()).get('/api/v1/').expect(200);
 
       expect(response.headers['content-security-policy']).toBeDefined();
       expect(response.headers['content-security-policy']).toContain(
@@ -127,7 +128,7 @@ describe('Output Sanitization & Security Headers (e2e) - TASK-048-a', () => {
       // we verify sanitization through a simpler endpoint
 
       // Test that the sanitizer is available and working through any endpoint
-      const response = await request(app.getHttpServer()).get('/').expect(200);
+      const response = await request(app.getHttpServer()).get('/api/v1/').expect(200);
 
       // Verify the sanitizer service is loaded (by checking app is working)
       expect(response.body).toBeDefined();
@@ -149,7 +150,7 @@ describe('Output Sanitization & Security Headers (e2e) - TASK-048-a', () => {
   describe('API Error Responses', () => {
     it('should have security headers even in error responses', async () => {
       const response = await request(app.getHttpServer())
-        .get('/health/nonexistent')
+        .get('/api/v1/health/nonexistent')
         .expect(404);
 
       expect(response.headers['x-content-type-options']).toBe('nosniff');
@@ -158,7 +159,7 @@ describe('Output Sanitization & Security Headers (e2e) - TASK-048-a', () => {
 
     it('should have security headers on auth errors', async () => {
       const response = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: 'invalid@example.com',
           password: 'wrong',

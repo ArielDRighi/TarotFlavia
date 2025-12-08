@@ -77,6 +77,7 @@ describe('Readings Pagination E2E', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(
       new ValidationPipe({ whitelist: true, transform: true }),
     );
@@ -119,7 +120,7 @@ describe('Readings Pagination E2E', () => {
 
     // Login usuarios
     const freeLoginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({
         email: `free-pagination-${testTimestamp}@test.com`,
         password: 'Password123!',
@@ -127,7 +128,7 @@ describe('Readings Pagination E2E', () => {
     freeUserToken = (freeLoginResponse.body as LoginResponse).access_token;
 
     const premiumLoginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({
         email: `premium-pagination-${testTimestamp}@test.com`,
         password: 'Password123!',
@@ -260,7 +261,7 @@ describe('Readings Pagination E2E', () => {
     console.log('Creating 15 test readings for premium user...');
     for (let i = 0; i < 15; i++) {
       await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           predefinedQuestionId: predefinedQuestionIds[i % 2],
@@ -283,7 +284,7 @@ describe('Readings Pagination E2E', () => {
     console.log('Creating 12 test readings for free user...');
     for (let i = 0; i < 12; i++) {
       await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
           predefinedQuestionId: predefinedQuestionIds[i % 2],
@@ -390,7 +391,7 @@ describe('Readings Pagination E2E', () => {
   describe('GET /readings - Pagination', () => {
     it('should return paginated results with default parameters', async () => {
       const response = await request(app.getHttpServer())
-        .get('/readings')
+        .get('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(200);
 
@@ -416,7 +417,7 @@ describe('Readings Pagination E2E', () => {
 
     it('should respect custom page and limit parameters', async () => {
       const response = await request(app.getHttpServer())
-        .get('/readings?page=2&limit=5')
+        .get('/api/v1/readings?page=2&limit=5')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(200);
 
@@ -430,7 +431,7 @@ describe('Readings Pagination E2E', () => {
 
     it('should not allow limit greater than 50', async () => {
       const response = await request(app.getHttpServer())
-        .get('/readings?limit=100')
+        .get('/api/v1/readings?limit=100')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(400);
 
@@ -439,7 +440,7 @@ describe('Readings Pagination E2E', () => {
 
     it('should return empty data for page beyond total pages', async () => {
       const response = await request(app.getHttpServer())
-        .get('/readings?page=999')
+        .get('/api/v1/readings?page=999')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(200);
 
@@ -456,7 +457,7 @@ describe('Readings Pagination E2E', () => {
   describe('GET /readings - Sorting', () => {
     it('should sort by created_at DESC by default', async () => {
       const response = await request(app.getHttpServer())
-        .get('/readings')
+        .get('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(200);
 
@@ -474,7 +475,7 @@ describe('Readings Pagination E2E', () => {
 
     it('should sort by created_at ASC when specified', async () => {
       const response = await request(app.getHttpServer())
-        .get('/readings?sortBy=created_at&sortOrder=ASC')
+        .get('/api/v1/readings?sortBy=created_at&sortOrder=ASC')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(200);
 
@@ -492,7 +493,7 @@ describe('Readings Pagination E2E', () => {
 
     it('should sort by updated_at when specified', async () => {
       const response = await request(app.getHttpServer())
-        .get('/readings?sortBy=updated_at&sortOrder=DESC')
+        .get('/api/v1/readings?sortBy=updated_at&sortOrder=DESC')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(200);
 
@@ -510,7 +511,7 @@ describe('Readings Pagination E2E', () => {
       // Skip: Readings are created without categoryId in current implementation
       // This test validates the filter works but returns 0 results since no readings have category
       const response = await request(app.getHttpServer())
-        .get(`/readings?categoryId=${categoryIds[0]}`)
+        .get(`/api/v1/readings?categoryId=${categoryIds[0]}`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(200);
 
@@ -527,7 +528,7 @@ describe('Readings Pagination E2E', () => {
       const dateTo = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString();
 
       const response = await request(app.getHttpServer())
-        .get(`/readings?dateFrom=${dateFrom}&dateTo=${dateTo}`)
+        .get(`/api/v1/readings?dateFrom=${dateFrom}&dateTo=${dateTo}`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(200);
 
@@ -546,7 +547,7 @@ describe('Readings Pagination E2E', () => {
   describe('GET /readings - Free User Limit', () => {
     it('should limit free users to last 10 readings regardless of actual count', async () => {
       const response = await request(app.getHttpServer())
-        .get('/readings')
+        .get('/api/v1/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .expect(200);
 
@@ -556,7 +557,7 @@ describe('Readings Pagination E2E', () => {
 
       // Free user no debería poder acceder a página 2 si tiene más de 10 lecturas
       const page2Response = await request(app.getHttpServer())
-        .get('/readings?page=2')
+        .get('/api/v1/readings?page=2')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .expect(200);
 
@@ -566,7 +567,7 @@ describe('Readings Pagination E2E', () => {
 
     it('should allow premium users unlimited history access', async () => {
       const response = await request(app.getHttpServer())
-        .get('/readings')
+        .get('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(200);
 
@@ -581,7 +582,7 @@ describe('Readings Pagination E2E', () => {
   describe('GET /readings - Performance', () => {
     it('should include necessary relations (cards, spread)', async () => {
       const response = await request(app.getHttpServer())
-        .get('/readings?limit=1')
+        .get('/api/v1/readings?limit=1')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(200);
 
@@ -600,7 +601,7 @@ describe('Readings Pagination E2E', () => {
    */
   describe('GET /readings - Authentication', () => {
     it('should return 401 without authentication', async () => {
-      await request(app.getHttpServer()).get('/readings').expect(401);
+      await request(app.getHttpServer()).get('/api/v1/readings').expect(401);
     });
   });
 
@@ -610,7 +611,7 @@ describe('Readings Pagination E2E', () => {
   describe('GET /readings - Validation', () => {
     it('should reject invalid page number', async () => {
       const response = await request(app.getHttpServer())
-        .get('/readings?page=0')
+        .get('/api/v1/readings?page=0')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(400);
 
@@ -620,7 +621,7 @@ describe('Readings Pagination E2E', () => {
 
     it('should reject invalid sortBy value', async () => {
       const response = await request(app.getHttpServer())
-        .get('/readings?sortBy=invalid_field')
+        .get('/api/v1/readings?sortBy=invalid_field')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(400);
 
@@ -630,7 +631,7 @@ describe('Readings Pagination E2E', () => {
 
     it('should reject invalid date format', async () => {
       const response = await request(app.getHttpServer())
-        .get('/readings?dateFrom=invalid-date')
+        .get('/api/v1/readings?dateFrom=invalid-date')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(400);
 
@@ -645,7 +646,7 @@ describe('Readings Pagination E2E', () => {
   describe('GET /readings - Multi-Tarotista (TASK-074)', () => {
     it('should include tarotistaId in all paginated readings', async () => {
       const response = await request(app.getHttpServer())
-        .get('/readings?page=1&limit=10')
+        .get('/api/v1/readings?page=1&limit=10')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(200);
 
@@ -667,7 +668,7 @@ describe('Readings Pagination E2E', () => {
     it('should maintain tarotistaId across different pages', async () => {
       // Get first page
       const page1Response = await request(app.getHttpServer())
-        .get('/readings?page=1&limit=5')
+        .get('/api/v1/readings?page=1&limit=5')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(200);
 
@@ -675,7 +676,7 @@ describe('Readings Pagination E2E', () => {
 
       // Get second page
       const page2Response = await request(app.getHttpServer())
-        .get('/readings?page=2&limit=5')
+        .get('/api/v1/readings?page=2&limit=5')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(200);
 

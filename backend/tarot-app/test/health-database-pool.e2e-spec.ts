@@ -37,6 +37,7 @@ describe('Health - Database Pool (E2E)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     await app.init();
     httpServer = app.getHttpServer() as Server;
   });
@@ -48,7 +49,7 @@ describe('Health - Database Pool (E2E)', () => {
   describe('GET /health/database', () => {
     it('should return database pool metrics', async () => {
       const response = await request(httpServer)
-        .get('/health/database')
+        .get('/api/v1/health/database')
         .expect(200);
 
       const body = response.body as DatabaseHealthResponse;
@@ -104,7 +105,7 @@ describe('Health - Database Pool (E2E)', () => {
     it('should still work with comprehensive health check', async () => {
       // Accept both 200 (all healthy) and 503 (some checks down)
       // This test validates the health endpoint integration, not specific health states
-      const response = await request(httpServer).get('/health');
+      const response = await request(httpServer).get('/api/v1/health');
 
       expect([200, 503]).toContain(response.status);
 

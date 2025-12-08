@@ -64,6 +64,7 @@ describe('Free User Edge Cases E2E (SUBTASK-18)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
     await app.init();
 
@@ -100,7 +101,7 @@ describe('Free User Edge Cases E2E (SUBTASK-18)', () => {
 
     // Register free user
     const registerResponse = await request(app.getHttpServer())
-      .post('/auth/register')
+      .post('/api/v1/auth/register')
       .send({
         email: `free-edge-${testTimestamp}@test.com`,
         password: 'SecurePass123!',
@@ -149,7 +150,7 @@ describe('Free User Edge Cases E2E (SUBTASK-18)', () => {
         .fill(null)
         .map(() =>
           request(app.getHttpServer())
-            .post('/readings')
+            .post('/api/v1/readings')
             .set('Authorization', `Bearer ${freeUserToken}`)
             .send({
               predefinedQuestionId: predefinedQuestionId,
@@ -207,7 +208,7 @@ describe('Free User Edge Cases E2E (SUBTASK-18)', () => {
         .fill(null)
         .map(() =>
           request(app.getHttpServer())
-            .post('/readings')
+            .post('/api/v1/readings')
             .set('Authorization', `Bearer ${freeUserToken}`)
             .send({
               predefinedQuestionId: predefinedQuestionId,
@@ -266,7 +267,7 @@ describe('Free User Edge Cases E2E (SUBTASK-18)', () => {
       const invalidToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.invalid.token';
 
       const response = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${invalidToken}`)
         .send({
           predefinedQuestionId: predefinedQuestionId,
@@ -290,7 +291,7 @@ describe('Free User Edge Cases E2E (SUBTASK-18)', () => {
     it('should allow re-authentication after logout (all sessions)', async () => {
       // Logout all sessions using access token
       const logoutResponse = await request(app.getHttpServer())
-        .post('/auth/logout-all')
+        .post('/api/v1/auth/logout-all')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .expect(200);
 
@@ -303,7 +304,7 @@ describe('Free User Edge Cases E2E (SUBTASK-18)', () => {
 
       // Re-login to get fresh tokens
       const loginResponse = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: `free-edge-${testTimestamp}@test.com`,
           password: 'SecurePass123!',
@@ -315,7 +316,7 @@ describe('Free User Edge Cases E2E (SUBTASK-18)', () => {
 
       // Use new token - should work
       const validRequest = await request(app.getHttpServer())
-        .get('/readings')
+        .get('/api/v1/readings')
         .set('Authorization', `Bearer ${newToken}`)
         .expect(200);
 
@@ -324,7 +325,7 @@ describe('Free User Edge Cases E2E (SUBTASK-18)', () => {
 
     it('should reject requests without authorization header', async () => {
       const response = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .send({
           predefinedQuestionId: predefinedQuestionId,
           deckId: deckId,
@@ -358,7 +359,7 @@ describe('Free User Edge Cases E2E (SUBTASK-18)', () => {
 
       // Create a reading
       const createResponse = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
           predefinedQuestionId: predefinedQuestionId,
@@ -382,13 +383,13 @@ describe('Free User Edge Cases E2E (SUBTASK-18)', () => {
 
         // Logout all sessions
         await request(app.getHttpServer())
-          .post('/auth/logout-all')
+          .post('/api/v1/auth/logout-all')
           .set('Authorization', `Bearer ${freeUserToken}`)
           .expect(200);
 
         // Re-login
         const loginResponse = await request(app.getHttpServer())
-          .post('/auth/login')
+          .post('/api/v1/auth/login')
           .send({
             email: `free-edge-${testTimestamp}@test.com`,
             password: 'SecurePass123!',
@@ -400,7 +401,7 @@ describe('Free User Edge Cases E2E (SUBTASK-18)', () => {
 
         // Reading should still exist
         const historyResponse = await request(app.getHttpServer())
-          .get('/readings')
+          .get('/api/v1/readings')
           .set('Authorization', `Bearer ${newToken}`)
           .expect(200);
 
@@ -448,7 +449,7 @@ describe('Free User Edge Cases E2E (SUBTASK-18)', () => {
 
       // Create a reading
       const response = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
           predefinedQuestionId: predefinedQuestionId,

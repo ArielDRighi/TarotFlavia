@@ -27,6 +27,7 @@ describe('User Scheduling (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -41,7 +42,7 @@ describe('User Scheduling (e2e)', () => {
 
     // Login as regular user
     const userLogin = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: 'free@test.com', password: 'Test123456!' });
     userToken = userLogin.body.access_token;
   });
@@ -59,7 +60,7 @@ describe('User Scheduling (e2e)', () => {
       endDate.setDate(endDate.getDate() + 7);
 
       const response = await request(app.getHttpServer())
-        .get('/scheduling/available-slots')
+        .get('/api/v1/scheduling/available-slots')
         .query({
           tarotistaId: 1,
           startDate: startDate.toISOString().split('T')[0],
@@ -74,7 +75,7 @@ describe('User Scheduling (e2e)', () => {
 
     it('should return 401 when not authenticated', async () => {
       await request(app.getHttpServer())
-        .get('/scheduling/available-slots')
+        .get('/api/v1/scheduling/available-slots')
         .query({
           tarotistaId: 1,
           startDate: '2025-12-01',
@@ -86,7 +87,7 @@ describe('User Scheduling (e2e)', () => {
 
     it('should return 400 for invalid tarotistaId', async () => {
       await request(app.getHttpServer())
-        .get('/scheduling/available-slots')
+        .get('/api/v1/scheduling/available-slots')
         .query({
           tarotistaId: 'invalid',
           startDate: '2025-12-01',
@@ -99,7 +100,7 @@ describe('User Scheduling (e2e)', () => {
 
     it('should return 400 for invalid durationMinutes', async () => {
       await request(app.getHttpServer())
-        .get('/scheduling/available-slots')
+        .get('/api/v1/scheduling/available-slots')
         .query({
           tarotistaId: 1,
           startDate: '2025-12-01',
@@ -117,7 +118,7 @@ describe('User Scheduling (e2e)', () => {
       endDate.setDate(endDate.getDate() + 7);
 
       const response = await request(app.getHttpServer())
-        .get('/scheduling/available-slots')
+        .get('/api/v1/scheduling/available-slots')
         .query({
           tarotistaId: 1,
           startDate: startDate.toISOString().split('T')[0],
@@ -137,7 +138,7 @@ describe('User Scheduling (e2e)', () => {
       endDate.setDate(endDate.getDate() + 7);
 
       const response = await request(app.getHttpServer())
-        .get('/scheduling/available-slots')
+        .get('/api/v1/scheduling/available-slots')
         .query({
           tarotistaId: 1,
           startDate: startDate.toISOString().split('T')[0],
@@ -154,7 +155,7 @@ describe('User Scheduling (e2e)', () => {
   describe('GET /scheduling/my-sessions', () => {
     it('should return user sessions when authenticated', async () => {
       const response = await request(app.getHttpServer())
-        .get('/scheduling/my-sessions')
+        .get('/api/v1/scheduling/my-sessions')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(200);
 
@@ -163,13 +164,13 @@ describe('User Scheduling (e2e)', () => {
 
     it('should return 401 when not authenticated', async () => {
       await request(app.getHttpServer())
-        .get('/scheduling/my-sessions')
+        .get('/api/v1/scheduling/my-sessions')
         .expect(401);
     });
 
     it('should filter by status when provided', async () => {
       const response = await request(app.getHttpServer())
-        .get('/scheduling/my-sessions')
+        .get('/api/v1/scheduling/my-sessions')
         .query({ status: 'PENDING' })
         .set('Authorization', `Bearer ${userToken}`)
         .expect(200);
@@ -179,7 +180,7 @@ describe('User Scheduling (e2e)', () => {
 
     it('should return empty array when no sessions exist', async () => {
       const response = await request(app.getHttpServer())
-        .get('/scheduling/my-sessions')
+        .get('/api/v1/scheduling/my-sessions')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(200);
 
@@ -190,20 +191,20 @@ describe('User Scheduling (e2e)', () => {
   describe('GET /scheduling/my-sessions/:id', () => {
     it('should return 401 when not authenticated', async () => {
       await request(app.getHttpServer())
-        .get('/scheduling/my-sessions/1')
+        .get('/api/v1/scheduling/my-sessions/1')
         .expect(401);
     });
 
     it('should return 404 for non-existent session', async () => {
       await request(app.getHttpServer())
-        .get('/scheduling/my-sessions/999999')
+        .get('/api/v1/scheduling/my-sessions/999999')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(404);
     });
 
     it('should return 400 for invalid session id', async () => {
       await request(app.getHttpServer())
-        .get('/scheduling/my-sessions/invalid')
+        .get('/api/v1/scheduling/my-sessions/invalid')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(400);
     });
@@ -212,7 +213,7 @@ describe('User Scheduling (e2e)', () => {
   describe('POST /scheduling/book', () => {
     it('should return 401 when not authenticated', async () => {
       await request(app.getHttpServer())
-        .post('/scheduling/book')
+        .post('/api/v1/scheduling/book')
         .send({
           tarotistaId: 1,
           startTime: new Date().toISOString(),
@@ -223,7 +224,7 @@ describe('User Scheduling (e2e)', () => {
 
     it('should return 400 for missing required fields', async () => {
       await request(app.getHttpServer())
-        .post('/scheduling/book')
+        .post('/api/v1/scheduling/book')
         .set('Authorization', `Bearer ${userToken}`)
         .send({})
         .expect(400);
@@ -231,7 +232,7 @@ describe('User Scheduling (e2e)', () => {
 
     it('should return 400 for invalid tarotistaId', async () => {
       await request(app.getHttpServer())
-        .post('/scheduling/book')
+        .post('/api/v1/scheduling/book')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
           tarotistaId: 'invalid',
@@ -245,14 +246,14 @@ describe('User Scheduling (e2e)', () => {
   describe('POST /scheduling/my-sessions/:id/cancel', () => {
     it('should return 401 when not authenticated', async () => {
       await request(app.getHttpServer())
-        .post('/scheduling/my-sessions/1/cancel')
+        .post('/api/v1/scheduling/my-sessions/1/cancel')
         .send({ reason: 'Test cancellation' })
         .expect(401);
     });
 
     it('should return 404 for non-existent session', async () => {
       await request(app.getHttpServer())
-        .post('/scheduling/my-sessions/999999/cancel')
+        .post('/api/v1/scheduling/my-sessions/999999/cancel')
         .set('Authorization', `Bearer ${userToken}`)
         .send({ reason: 'Test cancellation' })
         .expect(404);
@@ -260,7 +261,7 @@ describe('User Scheduling (e2e)', () => {
 
     it('should return 400 for invalid session id', async () => {
       await request(app.getHttpServer())
-        .post('/scheduling/my-sessions/invalid/cancel')
+        .post('/api/v1/scheduling/my-sessions/invalid/cancel')
         .set('Authorization', `Bearer ${userToken}`)
         .send({ reason: 'Test cancellation' })
         .expect(400);
@@ -270,7 +271,7 @@ describe('User Scheduling (e2e)', () => {
   describe('Edge Cases', () => {
     it('should handle date range in the past gracefully', async () => {
       const response = await request(app.getHttpServer())
-        .get('/scheduling/available-slots')
+        .get('/api/v1/scheduling/available-slots')
         .query({
           tarotistaId: 1,
           startDate: '2020-01-01',
@@ -292,7 +293,7 @@ describe('User Scheduling (e2e)', () => {
 
       // Non-existent tarotista should return empty slots or 404
       const response = await request(app.getHttpServer())
-        .get('/scheduling/available-slots')
+        .get('/api/v1/scheduling/available-slots')
         .query({
           tarotistaId: 999999,
           startDate: startDate.toISOString().split('T')[0],

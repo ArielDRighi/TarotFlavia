@@ -17,6 +17,7 @@ describe('Input Validation and Security (E2E)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
 
     // Configure ValidationPipe with security settings
     app.useGlobalPipes(
@@ -49,7 +50,7 @@ describe('Input Validation and Security (E2E)', () => {
   describe('SQL Injection Protection', () => {
     it('should reject SQL injection attempts in email field', async () => {
       const response = await request(app.getHttpServer() as never)
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: "admin'--",
           password: 'password',
@@ -64,7 +65,7 @@ describe('Input Validation and Security (E2E)', () => {
     it('should reject excessively long strings', async () => {
       const longString = 'a'.repeat(1001);
       const response = await request(app.getHttpServer() as never)
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           email: 'longstring@example.com',
           password: 'password123',
@@ -81,7 +82,7 @@ describe('Input Validation and Security (E2E)', () => {
   describe('Input Validation - Email Format', () => {
     it('should reject invalid email format', async () => {
       const response = await request(app.getHttpServer() as never)
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           email: 'notanemail',
           password: 'password123',
@@ -94,7 +95,7 @@ describe('Input Validation and Security (E2E)', () => {
 
     it('should accept valid email format and trim whitespace', async () => {
       const response = await request(app.getHttpServer() as never)
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           email: '  validuser@example.com  ',
           password: 'password123',
@@ -111,7 +112,7 @@ describe('Input Validation and Security (E2E)', () => {
   describe('Input Validation - Required Fields', () => {
     it('should reject missing required fields', async () => {
       const response = await request(app.getHttpServer() as never)
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           email: 'incomplete@example.com',
           // missing password and name
@@ -125,7 +126,7 @@ describe('Input Validation and Security (E2E)', () => {
   describe('Password Security', () => {
     it('should reject passwords shorter than minimum length', async () => {
       const response = await request(app.getHttpServer() as never)
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           email: 'shortpass@example.com',
           password: '12345', // Less than 6 characters

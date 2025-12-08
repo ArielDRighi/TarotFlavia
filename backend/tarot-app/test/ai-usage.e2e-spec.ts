@@ -43,6 +43,7 @@ describe('AI Usage Statistics (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -57,13 +58,13 @@ describe('AI Usage Statistics (e2e)', () => {
 
     // Login as admin
     const adminLogin = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: 'admin@test.com', password: 'Test123456!' });
     adminToken = adminLogin.body.access_token;
 
     // Login as regular user
     const userLogin = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: 'free@test.com', password: 'Test123456!' });
     userToken = userLogin.body.access_token;
   });
@@ -77,7 +78,7 @@ describe('AI Usage Statistics (e2e)', () => {
     describe('Authentication & Authorization', () => {
       it('should return AI usage statistics when authenticated as admin', async () => {
         const response = await request(app.getHttpServer())
-          .get('/admin/ai-usage')
+          .get('/api/v1/admin/ai-usage')
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);
 
@@ -91,18 +92,18 @@ describe('AI Usage Statistics (e2e)', () => {
 
       it('should return 403 when authenticated as non-admin user', async () => {
         await request(app.getHttpServer())
-          .get('/admin/ai-usage')
+          .get('/api/v1/admin/ai-usage')
           .set('Authorization', `Bearer ${userToken}`)
           .expect(403);
       });
 
       it('should return 401 when not authenticated', async () => {
-        await request(app.getHttpServer()).get('/admin/ai-usage').expect(401);
+        await request(app.getHttpServer()).get('/api/v1/admin/ai-usage').expect(401);
       });
 
       it('should return 401 with invalid token', async () => {
         await request(app.getHttpServer())
-          .get('/admin/ai-usage')
+          .get('/api/v1/admin/ai-usage')
           .set('Authorization', 'Bearer invalid-token')
           .expect(401);
       });
@@ -111,7 +112,7 @@ describe('AI Usage Statistics (e2e)', () => {
     describe('Response Structure', () => {
       it('should return statistics as an array', async () => {
         const response = await request(app.getHttpServer())
-          .get('/admin/ai-usage')
+          .get('/api/v1/admin/ai-usage')
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);
 
@@ -120,7 +121,7 @@ describe('AI Usage Statistics (e2e)', () => {
 
       it('should return boolean values for alert flags', async () => {
         const response = await request(app.getHttpServer())
-          .get('/admin/ai-usage')
+          .get('/api/v1/admin/ai-usage')
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);
 
@@ -132,7 +133,7 @@ describe('AI Usage Statistics (e2e)', () => {
 
       it('should return numeric value for groqCallsToday', async () => {
         const response = await request(app.getHttpServer())
-          .get('/admin/ai-usage')
+          .get('/api/v1/admin/ai-usage')
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);
 
@@ -142,7 +143,7 @@ describe('AI Usage Statistics (e2e)', () => {
 
       it('should return provider statistics with correct structure when data exists', async () => {
         const response = await request(app.getHttpServer())
-          .get('/admin/ai-usage')
+          .get('/api/v1/admin/ai-usage')
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);
 
@@ -170,7 +171,7 @@ describe('AI Usage Statistics (e2e)', () => {
         startDate.setDate(startDate.getDate() - 7);
 
         const response = await request(app.getHttpServer())
-          .get('/admin/ai-usage')
+          .get('/api/v1/admin/ai-usage')
           .query({ startDate: startDate.toISOString() })
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);
@@ -182,7 +183,7 @@ describe('AI Usage Statistics (e2e)', () => {
         const endDate = new Date();
 
         const response = await request(app.getHttpServer())
-          .get('/admin/ai-usage')
+          .get('/api/v1/admin/ai-usage')
           .query({ endDate: endDate.toISOString() })
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);
@@ -196,7 +197,7 @@ describe('AI Usage Statistics (e2e)', () => {
         const endDate = new Date();
 
         const response = await request(app.getHttpServer())
-          .get('/admin/ai-usage')
+          .get('/api/v1/admin/ai-usage')
           .query({
             startDate: startDate.toISOString(),
             endDate: endDate.toISOString(),
@@ -213,7 +214,7 @@ describe('AI Usage Statistics (e2e)', () => {
         const endDate = new Date('2020-01-02');
 
         const response = await request(app.getHttpServer())
-          .get('/admin/ai-usage')
+          .get('/api/v1/admin/ai-usage')
           .query({
             startDate: startDate.toISOString(),
             endDate: endDate.toISOString(),
@@ -229,7 +230,7 @@ describe('AI Usage Statistics (e2e)', () => {
     describe('Edge Cases', () => {
       it('should handle missing query parameters', async () => {
         const response = await request(app.getHttpServer())
-          .get('/admin/ai-usage')
+          .get('/api/v1/admin/ai-usage')
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);
 
@@ -238,7 +239,7 @@ describe('AI Usage Statistics (e2e)', () => {
 
       it('should handle empty string query parameters', async () => {
         const response = await request(app.getHttpServer())
-          .get('/admin/ai-usage')
+          .get('/api/v1/admin/ai-usage')
           .query({ startDate: '', endDate: '' })
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);
@@ -248,12 +249,12 @@ describe('AI Usage Statistics (e2e)', () => {
 
       it('should return consistent structure across multiple calls', async () => {
         const response1 = await request(app.getHttpServer())
-          .get('/admin/ai-usage')
+          .get('/api/v1/admin/ai-usage')
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);
 
         const response2 = await request(app.getHttpServer())
-          .get('/admin/ai-usage')
+          .get('/api/v1/admin/ai-usage')
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);
 
@@ -266,7 +267,7 @@ describe('AI Usage Statistics (e2e)', () => {
     describe('Provider Statistics Validation', () => {
       it('should return non-negative values for all numeric fields', async () => {
         const response = await request(app.getHttpServer())
-          .get('/admin/ai-usage')
+          .get('/api/v1/admin/ai-usage')
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);
 
@@ -286,7 +287,7 @@ describe('AI Usage Statistics (e2e)', () => {
 
       it('should have valid provider enum values', async () => {
         const response = await request(app.getHttpServer())
-          .get('/admin/ai-usage')
+          .get('/api/v1/admin/ai-usage')
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);
 
@@ -310,7 +311,7 @@ describe('AI Usage Statistics (e2e)', () => {
 
       it('should have rates between 0 and 100', async () => {
         const response = await request(app.getHttpServer())
-          .get('/admin/ai-usage')
+          .get('/api/v1/admin/ai-usage')
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);
 
