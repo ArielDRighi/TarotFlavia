@@ -8,3 +8,4 @@ export { QuestionSelector, type QuestionSelectorProps } from './QuestionSelector
 export { SpreadSelector, type SpreadSelectorProps } from './SpreadSelector';
 export { ReadingExperience, type ReadingExperienceProps } from './ReadingExperience';
 export { ReadingCard, type ReadingCardProps } from './ReadingCard';
+export { ReadingsHistory } from './ReadingsHistory';

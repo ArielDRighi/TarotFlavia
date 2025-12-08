@@ -11,6 +11,9 @@ import { PlanConfigService } from '../../src/modules/plan-config/plan-config.ser
 import { User, UserPlan } from '../../src/modules/users/entities/user.entity';
 import { Plan } from '../../src/modules/plan-config/entities/plan.entity';
 
+// Increase timeout for integration tests
+jest.setTimeout(30000);
+
 /**
  * Integration Tests: PlanConfig + Users
  * Tests how plan configuration integrates with user management

@@ -1620,11 +1620,39 @@ IMPORTANTE:
 
 ---
 
-### TAREA 5.2: Crear página Historial de Lecturas
+### ✅ TAREA 5.2: Crear página Historial de Lecturas
 
+**Estado:** ✅ COMPLETADA (2025-12-07)
 **Prioridad:** ALTA
 **Estimación:** 55 min
 **Dependencias:** 5.1, 4.2
+
+**Resumen de Implementación:**
+
+- Página de historial con lista paginada de lecturas
+- Filtros por fecha: "Más recientes", "Más antiguas", "Esta semana", "Este mes"
+- Búsqueda local por pregunta con filtrado en tiempo real
+- Paginación con botones Anterior/Siguiente y estado "Página X de Y"
+- Empty State con CTA para hacer primera lectura → /ritual
+- Loading state con SkeletonCard (variant: 'reading')
+- Error state con botón de reintentar
+- Integración con useMyReadings, useDeleteReading
+- Modal de confirmación para eliminar lecturas
+- Arquitectura refactorizada: lógica movida a ReadingsHistory component
+
+**Archivos creados/modificados:**
+
+- `src/app/historial/page.tsx` - Página simple que usa ReadingsHistory
+- `src/app/historial/page.test.tsx` - 33 tests completos
+- `src/components/features/readings/ReadingsHistory.tsx` - Componente con lógica
+- `src/components/features/readings/ReadingsHistory.test.tsx` - 10 tests
+- `src/components/features/readings/index.ts` - Export actualizado
+
+**Decisiones:**
+
+- La lógica de estado (page, searchQuery, dateFilter) se movió a ReadingsHistory para cumplir con la arquitectura feature-based
+- Filtrado y ordenamiento se hace localmente en el cliente
+- Las lecturas se ordenan por fecha más reciente por defecto
 
 **Consigna:**
 Crear página con lista paginada de lecturas del usuario, filtros y búsqueda.

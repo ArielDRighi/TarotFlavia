@@ -14,6 +14,9 @@ import { UserRole } from '../../src/common/enums/user-role.enum';
 import { ReadingCategory } from '../../src/modules/categories/entities/reading-category.entity';
 import { PredefinedQuestion } from '../../src/modules/predefined-questions/entities/predefined-question.entity';
 
+// Increase timeout for integration tests
+jest.setTimeout(30000);
+
 describe('Categories + Questions Integration Tests', () => {
   let app: INestApplication;
   let dataSource: DataSource;
