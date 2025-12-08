@@ -18,6 +18,9 @@ import { CachedInterpretation } from '../../src/modules/cache/infrastructure/ent
 // Helpers
 import { setupDefaultTarotista } from '../helpers/setup-default-tarotista';
 
+// Increase timeout for integration tests with AI
+jest.setTimeout(30000);
+
 // NOTE: Estos tests validan la estructura y configuración del sistema de cache
 // Los tests que requieren llamadas reales a OpenAI API se marcan como .skip()
 // debido a que requieren API key configurada
@@ -110,6 +113,10 @@ describe('Cache + AI Integration Tests', () => {
 
   afterEach(async () => {
     if (testUser?.id) {
+      // Delete AI usage logs first
+      const aiUsageLogRepo = dataSource.getRepository('AIUsageLog');
+      await aiUsageLogRepo.delete({ userId: testUser.id });
+
       const readingRepo = dataSource.getRepository('TarotReading');
       await readingRepo.delete({ user: { id: testUser.id } });
       await userRepository.delete({ id: testUser.id });

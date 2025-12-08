@@ -22,6 +22,9 @@ import {
   UsageFeature,
 } from '../../src/modules/usage-limits/entities/usage-limit.entity';
 
+// Increase timeout for integration tests with AI/HTTP calls
+jest.setTimeout(30000);
+
 describe('UsageLimits + Readings Integration Tests', () => {
   let app: INestApplication;
   let dataSource: DataSource;
@@ -209,9 +212,15 @@ describe('UsageLimits + Readings Integration Tests', () => {
 
   afterEach(async () => {
     if (testUser?.id) {
+      // Delete AI usage logs first (references user)
+      const aiUsageLogRepo = dataSource.getRepository('AIUsageLog');
+      await aiUsageLogRepo.delete({ userId: testUser.id });
+
+      // Delete readings
       const readingRepo = dataSource.getRepository('TarotReading');
       await readingRepo.delete({ user: { id: testUser.id } });
 
+      // Delete user last
       await userRepository.delete({ id: testUser.id });
     }
   });
