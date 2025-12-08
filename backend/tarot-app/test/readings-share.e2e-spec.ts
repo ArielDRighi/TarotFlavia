@@ -62,6 +62,7 @@ describe('Readings Share System (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -73,7 +74,7 @@ describe('Readings Share System (e2e)', () => {
 
     // Crear usuario premium
     const premiumUserResponse = await request(app.getHttpServer())
-      .post('/auth/register')
+      .post('/api/v1/auth/register')
       .send({
         email: `premium-share-${testTimestamp}@test.com`,
         password: 'Test123456!',
@@ -92,7 +93,7 @@ describe('Readings Share System (e2e)', () => {
 
     // Login premium
     const premiumLoginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({
         email: `premium-share-${testTimestamp}@test.com`,
         password: 'Test123456!',
@@ -104,7 +105,7 @@ describe('Readings Share System (e2e)', () => {
 
     // Crear usuario free
     const freeUserResponse = await request(app.getHttpServer())
-      .post('/auth/register')
+      .post('/api/v1/auth/register')
       .send({
         email: `free-share-${testTimestamp}@test.com`,
         password: 'Test123456!',
@@ -116,7 +117,7 @@ describe('Readings Share System (e2e)', () => {
 
     // Login free
     const freeLoginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({
         email: `free-share-${testTimestamp}@test.com`,
         password: 'Test123456!',
@@ -127,7 +128,7 @@ describe('Readings Share System (e2e)', () => {
 
     // Crear una lectura para el usuario premium
     const readingResponse = await request(app.getHttpServer())
-      .post('/readings')
+      .post('/api/v1/readings')
       .set('Authorization', `Bearer ${premiumUserToken}`)
       .send({
         predefinedQuestionId: 1,
@@ -162,20 +163,20 @@ describe('Readings Share System (e2e)', () => {
   describe('POST /readings/:id/share', () => {
     it('should fail when user is not authenticated', () => {
       return request(app.getHttpServer())
-        .post(`/readings/${readingId}/share`)
+        .post(`/api/v1/readings/${readingId}/share`)
         .expect(401);
     });
 
     it('should fail when user is free (not premium)', () => {
       return request(app.getHttpServer())
-        .post(`/readings/${readingId}/share`)
+        .post(`/api/v1/readings/${readingId}/share`)
         .set('Authorization', `Bearer ${freeUserToken}`)
         .expect(403);
     });
 
     it('should successfully share a reading for premium user', async () => {
       const response = await request(app.getHttpServer())
-        .post(`/readings/${readingId}/share`)
+        .post(`/api/v1/readings/${readingId}/share`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(201);
 
@@ -189,12 +190,12 @@ describe('Readings Share System (e2e)', () => {
 
     it('should return same token if reading is already shared', async () => {
       const firstResponse = await request(app.getHttpServer())
-        .post(`/readings/${readingId}/share`)
+        .post(`/api/v1/readings/${readingId}/share`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(201);
 
       const secondResponse = await request(app.getHttpServer())
-        .post(`/readings/${readingId}/share`)
+        .post(`/api/v1/readings/${readingId}/share`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(201);
 
@@ -205,14 +206,14 @@ describe('Readings Share System (e2e)', () => {
 
     it('should fail when trying to share reading of another user', async () => {
       await request(app.getHttpServer())
-        .post(`/readings/${readingId}/share`)
+        .post(`/api/v1/readings/${readingId}/share`)
         .set('Authorization', `Bearer ${freeUserToken}`)
         .expect(403);
     });
 
     it('should fail when reading does not exist', () => {
       return request(app.getHttpServer())
-        .post('/readings/999999/share')
+        .post('/api/v1/readings/999999/share')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(404);
     });
@@ -222,19 +223,19 @@ describe('Readings Share System (e2e)', () => {
     beforeEach(async () => {
       // Compartir la lectura antes de cada test
       await request(app.getHttpServer())
-        .post(`/readings/${readingId}/share`)
+        .post(`/api/v1/readings/${readingId}/share`)
         .set('Authorization', `Bearer ${premiumUserToken}`);
     });
 
     it('should fail when user is not authenticated', () => {
       return request(app.getHttpServer())
-        .delete(`/readings/${readingId}/unshare`)
+        .delete(`/api/v1/readings/${readingId}/unshare`)
         .expect(401);
     });
 
     it('should successfully unshare a reading', async () => {
       const response = await request(app.getHttpServer())
-        .delete(`/readings/${readingId}/unshare`)
+        .delete(`/api/v1/readings/${readingId}/unshare`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(200);
 
@@ -253,7 +254,7 @@ describe('Readings Share System (e2e)', () => {
       );
 
       await request(app.getHttpServer())
-        .delete(`/readings/${readingId}/unshare`)
+        .delete(`/api/v1/readings/${readingId}/unshare`)
         .set('Authorization', `Bearer ${freeUserToken}`)
         .expect(403);
 
@@ -265,7 +266,7 @@ describe('Readings Share System (e2e)', () => {
 
     it('should fail when reading does not exist', () => {
       return request(app.getHttpServer())
-        .delete('/readings/999999/unshare')
+        .delete('/api/v1/readings/999999/unshare')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(404);
     });
@@ -273,12 +274,12 @@ describe('Readings Share System (e2e)', () => {
     it('should succeed even if reading is not shared', async () => {
       // Primero, dejar de compartir
       await request(app.getHttpServer())
-        .delete(`/readings/${readingId}/unshare`)
+        .delete(`/api/v1/readings/${readingId}/unshare`)
         .set('Authorization', `Bearer ${premiumUserToken}`);
 
       // Intentar dejar de compartir nuevamente
       const response = await request(app.getHttpServer())
-        .delete(`/readings/${readingId}/unshare`)
+        .delete(`/api/v1/readings/${readingId}/unshare`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(200);
 
@@ -293,7 +294,7 @@ describe('Readings Share System (e2e)', () => {
     beforeAll(async () => {
       // Compartir la lectura y obtener el token
       const response = await request(app.getHttpServer())
-        .post(`/readings/${readingId}/share`)
+        .post(`/api/v1/readings/${readingId}/share`)
         .set('Authorization', `Bearer ${premiumUserToken}`);
 
       const shareResponse = response.body as ShareResponse;
@@ -302,7 +303,7 @@ describe('Readings Share System (e2e)', () => {
 
     it('should successfully get shared reading without authentication', async () => {
       const response = await request(app.getHttpServer())
-        .get(`/shared/${sharedToken}`)
+        .get(`/api/v1/shared/${sharedToken}`)
         .expect(200);
 
       const sharedReading = response.body as SharedReadingResponse;
@@ -319,14 +320,14 @@ describe('Readings Share System (e2e)', () => {
 
     it('should increment view count on each access', async () => {
       const firstResponse = await request(app.getHttpServer())
-        .get(`/shared/${sharedToken}`)
+        .get(`/api/v1/shared/${sharedToken}`)
         .expect(200);
 
       const firstReading = firstResponse.body as SharedReadingResponse;
       const firstViewCount = firstReading.viewCount;
 
       const secondResponse = await request(app.getHttpServer())
-        .get(`/shared/${sharedToken}`)
+        .get(`/api/v1/shared/${sharedToken}`)
         .expect(200);
 
       const secondReading = secondResponse.body as SharedReadingResponse;
@@ -335,24 +336,24 @@ describe('Readings Share System (e2e)', () => {
 
     it('should fail when token does not exist', () => {
       return request(app.getHttpServer())
-        .get('/shared/invalidtoken123')
+        .get('/api/v1/shared/invalidtoken123')
         .expect(404);
     });
 
     it('should fail when reading is unshared', async () => {
       // Dejar de compartir la lectura
       await request(app.getHttpServer())
-        .delete(`/readings/${readingId}/unshare`)
+        .delete(`/api/v1/readings/${readingId}/unshare`)
         .set('Authorization', `Bearer ${premiumUserToken}`);
 
       // Intentar acceder con el token
       await request(app.getHttpServer())
-        .get(`/shared/${sharedToken}`)
+        .get(`/api/v1/shared/${sharedToken}`)
         .expect(404);
 
       // Volver a compartir para no afectar otros tests
       await request(app.getHttpServer())
-        .post(`/readings/${readingId}/share`)
+        .post(`/api/v1/readings/${readingId}/share`)
         .set('Authorization', `Bearer ${premiumUserToken}`);
     });
 
@@ -362,7 +363,7 @@ describe('Readings Share System (e2e)', () => {
 
       // Primero compartir la lectura nuevamente si fue unshared en tests anteriores
       const shareResponse = await request(app.getHttpServer())
-        .post(`/readings/${readingId}/share`)
+        .post(`/api/v1/readings/${readingId}/share`)
         .set('Authorization', `Bearer ${premiumUserToken}`);
 
       const currentToken = (shareResponse.body as ShareResponse).sharedToken;
@@ -370,7 +371,7 @@ describe('Readings Share System (e2e)', () => {
       // Hacer algunas peticiones rápidas
       for (let i = 0; i < 5; i++) {
         await request(app.getHttpServer())
-          .get(`/shared/${currentToken}`)
+          .get(`/api/v1/shared/${currentToken}`)
           .expect(200);
       }
 
@@ -383,7 +384,7 @@ describe('Readings Share System (e2e)', () => {
     it('should generate unique tokens for different readings', async () => {
       // Crear otra lectura
       const secondReadingResponse = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           predefinedQuestionId: 2,
@@ -404,12 +405,12 @@ describe('Readings Share System (e2e)', () => {
 
       // Compartir ambas lecturas
       const firstShare = await request(app.getHttpServer())
-        .post(`/readings/${readingId}/share`)
+        .post(`/api/v1/readings/${readingId}/share`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(201);
 
       const secondShare = await request(app.getHttpServer())
-        .post(`/readings/${secondReadingId}/share`)
+        .post(`/api/v1/readings/${secondReadingId}/share`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(201);
 
@@ -434,7 +435,7 @@ describe('Readings Share System (e2e)', () => {
     it('should include tarotistaId in shared reading response', async () => {
       // Create a new reading specifically for this test
       const createResponse = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           customQuestion: 'Test reading for multi-tarotista sharing',
@@ -458,7 +459,7 @@ describe('Readings Share System (e2e)', () => {
 
       // Share the reading
       const shareResponse = await request(app.getHttpServer())
-        .post(`/readings/${newReadingId}/share`)
+        .post(`/api/v1/readings/${newReadingId}/share`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(201);
 
@@ -470,7 +471,7 @@ describe('Readings Share System (e2e)', () => {
 
       // Access shared reading publicly
       const publicResponse = await request(app.getHttpServer())
-        .get(`/shared/${sharedToken}`)
+        .get(`/api/v1/shared/${sharedToken}`)
         .expect(200);
 
       const sharedReading = publicResponse.body as SharedReadingResponse;
@@ -480,7 +481,7 @@ describe('Readings Share System (e2e)', () => {
 
     it('should include tarotistaId when creating reading for sharing', async () => {
       const createResponse = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           customQuestion: 'Test reading for sharing with tarotista',

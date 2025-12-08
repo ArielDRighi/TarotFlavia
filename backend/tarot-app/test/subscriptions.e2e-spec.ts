@@ -45,6 +45,7 @@ describe('Subscriptions System E2E', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -88,7 +89,7 @@ describe('Subscriptions System E2E', () => {
 
     // Registrar usuarios de prueba
     const freeUser = await request(app.getHttpServer())
-      .post('/auth/register')
+      .post('/api/v1/auth/register')
       .send({
         email: `free-user-${testTimestamp}@test.com`,
         password: 'Test1234!',
@@ -99,7 +100,7 @@ describe('Subscriptions System E2E', () => {
     freeUserToken = freeUser.body.access_token;
 
     const premiumUser = await request(app.getHttpServer())
-      .post('/auth/register')
+      .post('/api/v1/auth/register')
       .send({
         email: `premium-user-${testTimestamp}@test.com`,
         password: 'Test1234!',
@@ -117,7 +118,7 @@ describe('Subscriptions System E2E', () => {
 
     // Registrar usuario PROFESSIONAL
     const professionalUser = await request(app.getHttpServer())
-      .post('/auth/register')
+      .post('/api/v1/auth/register')
       .send({
         email: `professional-user-${testTimestamp}@test.com`,
         password: 'Test1234!',
@@ -155,7 +156,7 @@ describe('Subscriptions System E2E', () => {
   describe('POST /subscriptions/set-favorite (FREE user)', () => {
     it('debería permitir elegir primer tarotista favorito', async () => {
       const response = await request(app.getHttpServer())
-        .post('/subscriptions/set-favorite')
+        .post('/api/v1/subscriptions/set-favorite')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({ tarotistaId: flaviaId })
         .expect(200);
@@ -181,7 +182,7 @@ describe('Subscriptions System E2E', () => {
 
     it('debería rechazar cambio antes del cooldown de 30 días', async () => {
       const response = await request(app.getHttpServer())
-        .post('/subscriptions/set-favorite')
+        .post('/api/v1/subscriptions/set-favorite')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({ tarotistaId: testTarotistaId })
         .expect(400);
@@ -193,7 +194,7 @@ describe('Subscriptions System E2E', () => {
 
     it('debería rechazar si tarotista no existe', async () => {
       const response = await request(app.getHttpServer())
-        .post('/subscriptions/set-favorite')
+        .post('/api/v1/subscriptions/set-favorite')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({ tarotistaId: 99999 })
         .expect(404);
@@ -205,7 +206,7 @@ describe('Subscriptions System E2E', () => {
   describe('POST /subscriptions/set-favorite (PREMIUM user)', () => {
     it('debería permitir elegir tarotista sin cooldown', async () => {
       const response = await request(app.getHttpServer())
-        .post('/subscriptions/set-favorite')
+        .post('/api/v1/subscriptions/set-favorite')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({ tarotistaId: flaviaId })
         .expect(200);
@@ -219,7 +220,7 @@ describe('Subscriptions System E2E', () => {
 
     it('debería permitir cambiar inmediatamente a otro tarotista', async () => {
       const response = await request(app.getHttpServer())
-        .post('/subscriptions/set-favorite')
+        .post('/api/v1/subscriptions/set-favorite')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({ tarotistaId: testTarotistaId })
         .expect(200);
@@ -232,7 +233,7 @@ describe('Subscriptions System E2E', () => {
   describe('GET /subscriptions/my-subscription', () => {
     it('debería retornar información de suscripción FREE', async () => {
       const response = await request(app.getHttpServer())
-        .get('/subscriptions/my-subscription')
+        .get('/api/v1/subscriptions/my-subscription')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .expect(200);
 
@@ -246,7 +247,7 @@ describe('Subscriptions System E2E', () => {
 
     it('debería retornar información de suscripción PREMIUM', async () => {
       const response = await request(app.getHttpServer())
-        .get('/subscriptions/my-subscription')
+        .get('/api/v1/subscriptions/my-subscription')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(200);
 
@@ -262,7 +263,7 @@ describe('Subscriptions System E2E', () => {
   describe('POST /subscriptions/set-favorite (PROFESSIONAL user)', () => {
     it('debería crear automáticamente all-access en primera suscripción', async () => {
       const response = await request(app.getHttpServer())
-        .post('/subscriptions/set-favorite')
+        .post('/api/v1/subscriptions/set-favorite')
         .set('Authorization', `Bearer ${professionalUserToken}`)
         .send({ tarotistaId: flaviaId })
         .expect(200);
@@ -276,7 +277,7 @@ describe('Subscriptions System E2E', () => {
 
     it('debería mantener all-access al intentar cambiar de tarotista', async () => {
       const response = await request(app.getHttpServer())
-        .post('/subscriptions/set-favorite')
+        .post('/api/v1/subscriptions/set-favorite')
         .set('Authorization', `Bearer ${professionalUserToken}`)
         .send({ tarotistaId: testTarotistaId })
         .expect(200);
@@ -291,7 +292,7 @@ describe('Subscriptions System E2E', () => {
 
     it('debería retornar información all-access en my-subscription', async () => {
       const response = await request(app.getHttpServer())
-        .get('/subscriptions/my-subscription')
+        .get('/api/v1/subscriptions/my-subscription')
         .set('Authorization', `Bearer ${professionalUserToken}`)
         .expect(200);
 
@@ -307,7 +308,7 @@ describe('Subscriptions System E2E', () => {
   describe('POST /subscriptions/enable-all-access', () => {
     it('debería permitir a PREMIUM activar modo all-access', async () => {
       const response = await request(app.getHttpServer())
-        .post('/subscriptions/enable-all-access')
+        .post('/api/v1/subscriptions/enable-all-access')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(200);
 
@@ -339,7 +340,7 @@ describe('Subscriptions System E2E', () => {
       }
 
       const response = await request(app.getHttpServer())
-        .post('/subscriptions/enable-all-access')
+        .post('/api/v1/subscriptions/enable-all-access')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .expect(403);
 
@@ -349,7 +350,7 @@ describe('Subscriptions System E2E', () => {
     it('PROFESSIONAL ya tiene all-access por defecto (idempotente)', async () => {
       // PROFESSIONAL puede llamar a enable-all-access pero ya lo tiene
       const response = await request(app.getHttpServer())
-        .post('/subscriptions/enable-all-access')
+        .post('/api/v1/subscriptions/enable-all-access')
         .set('Authorization', `Bearer ${professionalUserToken}`)
         .expect(200);
 
@@ -388,7 +389,7 @@ describe('Subscriptions System E2E', () => {
 
       // Ahora debería poder cambiar inmediatamente
       const response = await request(app.getHttpServer())
-        .post('/subscriptions/set-favorite')
+        .post('/api/v1/subscriptions/set-favorite')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({ tarotistaId: testTarotistaId })
         .expect(200);
@@ -402,7 +403,7 @@ describe('Subscriptions System E2E', () => {
     it('debería obtener all-access automático después de upgrade a PROFESSIONAL', async () => {
       // Crear nuevo usuario FREE temporal para este test
       const tempFreeUser = await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           email: `temp-free-${testTimestamp}@test.com`,
           password: 'Test1234!',
@@ -431,7 +432,7 @@ describe('Subscriptions System E2E', () => {
 
         // Hacer login de nuevo para obtener token actualizado con plan PROFESSIONAL
         const loginResponse = await request(app.getHttpServer())
-          .post('/auth/login')
+          .post('/api/v1/auth/login')
           .send({
             email: `temp-free-${testTimestamp}@test.com`,
             password: 'Test1234!',
@@ -442,7 +443,7 @@ describe('Subscriptions System E2E', () => {
 
         // Intentar establecer favorito debería actualizar a all-access automáticamente
         const response = await request(app.getHttpServer())
-          .post('/subscriptions/set-favorite')
+          .post('/api/v1/subscriptions/set-favorite')
           .set('Authorization', `Bearer ${updatedToken}`)
           .send({ tarotistaId: testTarotistaId })
           .expect(200);
@@ -463,7 +464,7 @@ describe('Subscriptions System E2E', () => {
   describe('Validaciones de negocio', () => {
     it('debería rechazar tarotistaId inválido (string)', async () => {
       const response = await request(app.getHttpServer())
-        .post('/subscriptions/set-favorite')
+        .post('/api/v1/subscriptions/set-favorite')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({ tarotistaId: 'invalid' })
         .expect(400);
@@ -477,7 +478,7 @@ describe('Subscriptions System E2E', () => {
 
     it('debería rechazar tarotistaId negativo', async () => {
       const response = await request(app.getHttpServer())
-        .post('/subscriptions/set-favorite')
+        .post('/api/v1/subscriptions/set-favorite')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({ tarotistaId: -1 })
         .expect(400);
@@ -491,7 +492,7 @@ describe('Subscriptions System E2E', () => {
 
     it('debería rechazar tarotistaId faltante', async () => {
       const response = await request(app.getHttpServer())
-        .post('/subscriptions/set-favorite')
+        .post('/api/v1/subscriptions/set-favorite')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({})
         .expect(400);
@@ -504,7 +505,7 @@ describe('Subscriptions System E2E', () => {
 
     it('debería rechazar acceso sin autenticación', async () => {
       await request(app.getHttpServer())
-        .get('/subscriptions/my-subscription')
+        .get('/api/v1/subscriptions/my-subscription')
         .expect(401);
     });
   });

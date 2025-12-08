@@ -68,6 +68,7 @@ describe('AI Health (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     await app.init();
   });
 
@@ -80,7 +81,7 @@ describe('AI Health (e2e)', () => {
   describe('GET /health/ai', () => {
     it('should return 200 with health status when Groq is configured', () => {
       return request(app.getHttpServer())
-        .get('/health/ai')
+        .get('/api/v1/health/ai')
         .expect(200)
         .expect((res) => {
           expect(res.body).toHaveProperty('primary');
@@ -97,7 +98,7 @@ describe('AI Health (e2e)', () => {
 
     it('should work with only Groq configured (no fallbacks)', () => {
       return request(app.getHttpServer())
-        .get('/health/ai')
+        .get('/api/v1/health/ai')
         .expect(200)
         .expect((res) => {
           expect(res.body.primary.provider).toBe('groq');
@@ -107,7 +108,7 @@ describe('AI Health (e2e)', () => {
 
     it('should include circuit breaker stats', () => {
       return request(app.getHttpServer())
-        .get('/health/ai')
+        .get('/api/v1/health/ai')
         .expect(200)
         .expect((res) => {
           expect(res.body).toHaveProperty('circuitBreakers');
@@ -124,7 +125,7 @@ describe('AI Health (e2e)', () => {
 
     it('should include model information for configured provider', () => {
       return request(app.getHttpServer())
-        .get('/health/ai')
+        .get('/api/v1/health/ai')
         .expect(200)
         .expect((res) => {
           expect(res.body.primary.model).toBe('llama-3.1-70b-versatile');

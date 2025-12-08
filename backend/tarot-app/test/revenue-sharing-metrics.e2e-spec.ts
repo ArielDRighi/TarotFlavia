@@ -30,6 +30,7 @@ describe('Revenue Sharing and Metrics (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -42,7 +43,7 @@ describe('Revenue Sharing and Metrics (e2e)', () => {
 
     // Get Flavia tarotista ID from public endpoint
     const tarotistasResponse = await request(app.getHttpServer())
-      .get('/tarotistas')
+      .get('/api/v1/tarotistas')
       .expect(200);
 
     const flavia = tarotistasResponse.body.data.find(
@@ -71,7 +72,7 @@ describe('Revenue Sharing and Metrics (e2e)', () => {
 
     // Login with seeded users
     const adminLogin = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({
         email: 'admin@test.com',
         password: 'Test123456!',
@@ -80,7 +81,7 @@ describe('Revenue Sharing and Metrics (e2e)', () => {
     adminToken = (adminLogin.body as LoginResponse).access_token;
 
     const premiumLogin = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({
         email: 'premium@test.com',
         password: 'Test123456!',
@@ -90,7 +91,7 @@ describe('Revenue Sharing and Metrics (e2e)', () => {
 
     // Create a reading to generate revenue metrics
     const readingResponse = await request(app.getHttpServer())
-      .post('/readings')
+      .post('/api/v1/readings')
       .set('Authorization', `Bearer ${premiumToken}`)
       .send({
         deckId,
@@ -121,7 +122,7 @@ describe('Revenue Sharing and Metrics (e2e)', () => {
     it('should return metrics for Flavia tarotista', async () => {
       const response = await request(app.getHttpServer())
         .get(
-          `/tarotistas/metrics/tarotista?tarotistaId=${flaviaTarotistaId}&period=month`,
+          `/api/v1/tarotistas/metrics/tarotista?tarotistaId=${flaviaTarotistaId}&period=month`,
         )
         .set('Authorization', `Bearer ${premiumToken}`)
         .expect(200);
@@ -144,14 +145,16 @@ describe('Revenue Sharing and Metrics (e2e)', () => {
     it('should return 401 if user is not authenticated', async () => {
       await request(app.getHttpServer())
         .get(
-          `/tarotistas/metrics/tarotista?tarotistaId=${flaviaTarotistaId}&period=month`,
+          `/api/v1/tarotistas/metrics/tarotista?tarotistaId=${flaviaTarotistaId}&period=month`,
         )
         .expect(401);
     });
 
     it('should return 404 for non-existent tarotista', async () => {
       await request(app.getHttpServer())
-        .get('/tarotistas/metrics/tarotista?tarotistaId=99999&period=month')
+        .get(
+          '/api/v1/tarotistas/metrics/tarotista?tarotistaId=99999&period=month',
+        )
         .set('Authorization', `Bearer ${premiumToken}`)
         .expect(404);
     });
@@ -162,7 +165,7 @@ describe('Revenue Sharing and Metrics (e2e)', () => {
       for (const period of periods) {
         const response = await request(app.getHttpServer())
           .get(
-            `/tarotistas/metrics/tarotista?tarotistaId=${flaviaTarotistaId}&period=${period}`,
+            `/api/v1/tarotistas/metrics/tarotista?tarotistaId=${flaviaTarotistaId}&period=${period}`,
           )
           .set('Authorization', `Bearer ${premiumToken}`)
           .expect(200);
@@ -180,7 +183,7 @@ describe('Revenue Sharing and Metrics (e2e)', () => {
 
       const response = await request(app.getHttpServer())
         .get(
-          `/tarotistas/metrics/tarotista?tarotistaId=${flaviaTarotistaId}&period=custom&startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`,
+          `/api/v1/tarotistas/metrics/tarotista?tarotistaId=${flaviaTarotistaId}&period=custom&startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`,
         )
         .set('Authorization', `Bearer ${premiumToken}`)
         .expect(200);
@@ -194,7 +197,7 @@ describe('Revenue Sharing and Metrics (e2e)', () => {
   describe('Platform Metrics Endpoint (Admin Only)', () => {
     it('should return platform-wide metrics for admin', async () => {
       const response = await request(app.getHttpServer())
-        .get('/tarotistas/metrics/platform?period=month')
+        .get('/api/v1/tarotistas/metrics/platform?period=month')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -216,20 +219,20 @@ describe('Revenue Sharing and Metrics (e2e)', () => {
 
     it('should return 403 for non-admin users', async () => {
       await request(app.getHttpServer())
-        .get('/tarotistas/metrics/platform?period=month')
+        .get('/api/v1/tarotistas/metrics/platform?period=month')
         .set('Authorization', `Bearer ${premiumToken}`)
         .expect(403);
     });
 
     it('should return 401 for unauthenticated requests', async () => {
       await request(app.getHttpServer())
-        .get('/tarotistas/metrics/platform?period=month')
+        .get('/api/v1/tarotistas/metrics/platform?period=month')
         .expect(401);
     });
 
     it('should include top tarotistas with correct structure', async () => {
       const response = await request(app.getHttpServer())
-        .get('/tarotistas/metrics/platform?period=month')
+        .get('/api/v1/tarotistas/metrics/platform?period=month')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -250,7 +253,7 @@ describe('Revenue Sharing and Metrics (e2e)', () => {
   describe('Report Export Endpoint', () => {
     it('should export CSV report for Flavia tarotista', async () => {
       const response = await request(app.getHttpServer())
-        .post('/tarotistas/reports/export')
+        .post('/api/v1/tarotistas/reports/export')
         .set('Authorization', `Bearer ${premiumToken}`)
         .send({
           tarotistaId: flaviaTarotistaId,
@@ -276,7 +279,7 @@ describe('Revenue Sharing and Metrics (e2e)', () => {
 
     it('should export PDF report for Flavia tarotista', async () => {
       const response = await request(app.getHttpServer())
-        .post('/tarotistas/reports/export')
+        .post('/api/v1/tarotistas/reports/export')
         .set('Authorization', `Bearer ${premiumToken}`)
         .send({
           tarotistaId: flaviaTarotistaId,
@@ -300,7 +303,7 @@ describe('Revenue Sharing and Metrics (e2e)', () => {
 
     it('should allow admin to export platform-wide CSV reports', async () => {
       const response = await request(app.getHttpServer())
-        .post('/tarotistas/reports/export')
+        .post('/api/v1/tarotistas/reports/export')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           period: 'year',
@@ -322,7 +325,7 @@ describe('Revenue Sharing and Metrics (e2e)', () => {
 
     it('should allow admin to export platform-wide PDF reports', async () => {
       const response = await request(app.getHttpServer())
-        .post('/tarotistas/reports/export')
+        .post('/api/v1/tarotistas/reports/export')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           period: 'month',
@@ -343,7 +346,7 @@ describe('Revenue Sharing and Metrics (e2e)', () => {
 
     it('should return 401 for unauthenticated export requests', async () => {
       await request(app.getHttpServer())
-        .post('/tarotistas/reports/export')
+        .post('/api/v1/tarotistas/reports/export')
         .send({
           tarotistaId: flaviaTarotistaId,
           period: 'month',
@@ -355,7 +358,7 @@ describe('Revenue Sharing and Metrics (e2e)', () => {
     it('should use default format (CSV) when not specified', async () => {
       // Missing format field should use default CSV
       const response = await request(app.getHttpServer())
-        .post('/tarotistas/reports/export')
+        .post('/api/v1/tarotistas/reports/export')
         .set('Authorization', `Bearer ${premiumToken}`)
         .send({
           tarotistaId: flaviaTarotistaId,
@@ -373,7 +376,7 @@ describe('Revenue Sharing and Metrics (e2e)', () => {
 
     it('should reject invalid format values', async () => {
       await request(app.getHttpServer())
-        .post('/tarotistas/reports/export')
+        .post('/api/v1/tarotistas/reports/export')
         .set('Authorization', `Bearer ${premiumToken}`)
         .send({
           tarotistaId: flaviaTarotistaId,
@@ -389,7 +392,7 @@ describe('Revenue Sharing and Metrics (e2e)', () => {
       const endDate = new Date();
 
       const response = await request(app.getHttpServer())
-        .post('/tarotistas/reports/export')
+        .post('/api/v1/tarotistas/reports/export')
         .set('Authorization', `Bearer ${premiumToken}`)
         .send({
           tarotistaId: flaviaTarotistaId,
@@ -410,7 +413,7 @@ describe('Revenue Sharing and Metrics (e2e)', () => {
       // Query metrics to verify revenue was calculated
       const response = await request(app.getHttpServer())
         .get(
-          `/tarotistas/metrics/tarotista?tarotistaId=${flaviaTarotistaId}&period=month`,
+          `/api/v1/tarotistas/metrics/tarotista?tarotistaId=${flaviaTarotistaId}&period=month`,
         )
         .set('Authorization', `Bearer ${premiumToken}`)
         .expect(200);
@@ -430,7 +433,7 @@ describe('Revenue Sharing and Metrics (e2e)', () => {
 
     it('should show reading in platform-wide metrics', async () => {
       const response = await request(app.getHttpServer())
-        .get('/tarotistas/metrics/platform?period=month')
+        .get('/api/v1/tarotistas/metrics/platform?period=month')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -449,7 +452,7 @@ describe('Revenue Sharing and Metrics (e2e)', () => {
     it('should apply default 30% commission for Flavia', async () => {
       const response = await request(app.getHttpServer())
         .get(
-          `/tarotistas/metrics/tarotista?tarotistaId=${flaviaTarotistaId}&period=month`,
+          `/api/v1/tarotistas/metrics/tarotista?tarotistaId=${flaviaTarotistaId}&period=month`,
         )
         .set('Authorization', `Bearer ${premiumToken}`)
         .expect(200);

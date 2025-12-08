@@ -38,6 +38,7 @@ describe('Password Recovery (e2e)', () => {
       .compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
 
     // Configure validation pipe globally
     app.useGlobalPipes(
@@ -89,7 +90,7 @@ describe('Password Recovery (e2e)', () => {
   describe('Password Recovery Flow', () => {
     it('should register a new user', async () => {
       const response = await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send(testUser)
         .expect(201);
 
@@ -113,7 +114,7 @@ describe('Password Recovery (e2e)', () => {
         });
 
       const response = await request(app.getHttpServer())
-        .post('/auth/forgot-password')
+        .post('/api/v1/auth/forgot-password')
         .send({ email: testUser.email })
         .expect(200);
 
@@ -129,7 +130,7 @@ describe('Password Recovery (e2e)', () => {
 
     it('should fail to reset password with invalid token', async () => {
       await request(app.getHttpServer())
-        .post('/auth/reset-password')
+        .post('/api/v1/auth/reset-password')
         .send({
           token: 'invalid-token-123',
           newPassword: 'NewPassword123!',
@@ -141,7 +142,7 @@ describe('Password Recovery (e2e)', () => {
       const newPassword = 'NewPassword123!';
 
       const response = await request(app.getHttpServer())
-        .post('/auth/reset-password')
+        .post('/api/v1/auth/reset-password')
         .send({
           token: resetToken,
           newPassword,
@@ -156,7 +157,7 @@ describe('Password Recovery (e2e)', () => {
 
     it('should not allow reusing the same reset token', async () => {
       await request(app.getHttpServer())
-        .post('/auth/reset-password')
+        .post('/api/v1/auth/reset-password')
         .send({
           token: resetToken,
           newPassword: 'AnotherPassword123!',
@@ -166,7 +167,7 @@ describe('Password Recovery (e2e)', () => {
 
     it('should fail to login with old password', async () => {
       await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: testUser.email,
           password: testUser.password,
@@ -178,7 +179,7 @@ describe('Password Recovery (e2e)', () => {
       const newPassword = 'NewPassword123!';
 
       const response = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: testUser.email,
           password: newPassword,
@@ -205,7 +206,7 @@ describe('Password Recovery (e2e)', () => {
         });
 
       await request(app.getHttpServer())
-        .post('/auth/forgot-password')
+        .post('/api/v1/auth/forgot-password')
         .send({ email: testUser.email })
         .expect(200);
 
@@ -213,7 +214,7 @@ describe('Password Recovery (e2e)', () => {
 
       // Get a refresh token before password reset
       const loginResponse = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: testUser.email,
           password: 'NewPassword123!',
@@ -229,7 +230,7 @@ describe('Password Recovery (e2e)', () => {
 
       // Reset password
       await request(app.getHttpServer())
-        .post('/auth/reset-password')
+        .post('/api/v1/auth/reset-password')
         .send({
           token: resetToken,
           newPassword: 'AnotherNewPassword123!',
@@ -238,7 +239,7 @@ describe('Password Recovery (e2e)', () => {
 
       // Try to use old refresh token - should fail
       await request(app.getHttpServer())
-        .post('/auth/refresh')
+        .post('/api/v1/auth/refresh')
         .send({
           refreshToken: oldRefreshToken,
         })
@@ -249,7 +250,7 @@ describe('Password Recovery (e2e)', () => {
       // Security: Returns 200 (not 404) to prevent user enumeration attacks
       // Attackers shouldn't be able to determine if an email exists in the database
       await request(app.getHttpServer())
-        .post('/auth/forgot-password')
+        .post('/api/v1/auth/forgot-password')
         .send({ email: 'nonexistent@example.com' })
         .expect(200);
     });
@@ -268,7 +269,7 @@ describe('Password Recovery (e2e)', () => {
         });
 
       await request(app.getHttpServer())
-        .post('/auth/forgot-password')
+        .post('/api/v1/auth/forgot-password')
         .send({ email: testUser.email })
         .expect(200);
 
@@ -276,7 +277,7 @@ describe('Password Recovery (e2e)', () => {
 
       // Try with weak password (no numbers) - validates IsStrongPassword decorator
       await request(app.getHttpServer())
-        .post('/auth/reset-password')
+        .post('/api/v1/auth/reset-password')
         .send({
           token: resetToken,
           newPassword: 'WeakPassword',

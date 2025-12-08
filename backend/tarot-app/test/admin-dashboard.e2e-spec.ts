@@ -74,12 +74,13 @@ describe('Admin Dashboard E2E', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
     await app.init();
 
     // Login as admin (admin@test.com is seeded)
     const adminLoginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({
         email: 'admin@test.com',
         password: 'Test123456!',
@@ -91,7 +92,7 @@ describe('Admin Dashboard E2E', () => {
 
     // Create regular user
     const regularUserResponse = await request(app.getHttpServer())
-      .post('/auth/register')
+      .post('/api/v1/auth/register')
       .send({
         email: `regular-dashboard-${testTimestamp}@test.com`,
         password: 'SecurePass123!',
@@ -118,7 +119,7 @@ describe('Admin Dashboard E2E', () => {
   describe('GET /admin/dashboard/metrics', () => {
     it('✅ Admin puede acceder a métricas', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/dashboard/metrics')
+        .get('/api/v1/admin/dashboard/metrics')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -169,20 +170,20 @@ describe('Admin Dashboard E2E', () => {
 
     it('❌ Usuario regular NO puede acceder a métricas', async () => {
       await request(app.getHttpServer())
-        .get('/admin/dashboard/metrics')
+        .get('/api/v1/admin/dashboard/metrics')
         .set('Authorization', `Bearer ${regularUserToken}`)
         .expect(403);
     });
 
     it('❌ Sin token NO puede acceder', async () => {
       await request(app.getHttpServer())
-        .get('/admin/dashboard/metrics')
+        .get('/api/v1/admin/dashboard/metrics')
         .expect(401);
     });
 
     it('✅ Las métricas retornan datos correctos', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/dashboard/metrics')
+        .get('/api/v1/admin/dashboard/metrics')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -218,7 +219,7 @@ describe('Admin Dashboard E2E', () => {
 
     it('✅ Lecturas recientes tienen la estructura correcta', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/dashboard/metrics')
+        .get('/api/v1/admin/dashboard/metrics')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -245,7 +246,7 @@ describe('Admin Dashboard E2E', () => {
 
     it('✅ Usuarios recientes tienen la estructura correcta', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/dashboard/metrics')
+        .get('/api/v1/admin/dashboard/metrics')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -266,7 +267,7 @@ describe('Admin Dashboard E2E', () => {
 
     it('✅ Métricas de IA tienen estructura correcta', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/dashboard/metrics')
+        .get('/api/v1/admin/dashboard/metrics')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -288,7 +289,7 @@ describe('Admin Dashboard E2E', () => {
       // Primera llamada (sin caché)
       const start1 = Date.now();
       await request(app.getHttpServer())
-        .get('/admin/dashboard/metrics')
+        .get('/api/v1/admin/dashboard/metrics')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
       const duration1 = Date.now() - start1;
@@ -296,7 +297,7 @@ describe('Admin Dashboard E2E', () => {
       // Segunda llamada (con caché, debería ser más rápida)
       const start2 = Date.now();
       const response2 = await request(app.getHttpServer())
-        .get('/admin/dashboard/metrics')
+        .get('/api/v1/admin/dashboard/metrics')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
       const duration2 = Date.now() - start2;

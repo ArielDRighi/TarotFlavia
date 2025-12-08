@@ -32,6 +32,7 @@ describe('Auth Integration Tests (E2E)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -63,7 +64,7 @@ describe('Auth Integration Tests (E2E)', () => {
   describe('Complete Auth Flow: Register → Login → Refresh → Logout', () => {
     it('should register new user', async () => {
       const response = await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           email: testUserData.email,
           password: testUserData.password,
@@ -84,7 +85,7 @@ describe('Auth Integration Tests (E2E)', () => {
     it('should not register user with duplicate email', async () => {
       // First registration
       await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           email: testUserData.email,
           password: testUserData.password,
@@ -94,7 +95,7 @@ describe('Auth Integration Tests (E2E)', () => {
 
       // Attempt duplicate registration
       await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           email: testUserData.email,
           password: 'AnotherPassword123!',
@@ -106,7 +107,7 @@ describe('Auth Integration Tests (E2E)', () => {
     it('should login after registration', async () => {
       // Register
       await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           email: testUserData.email,
           password: testUserData.password,
@@ -116,7 +117,7 @@ describe('Auth Integration Tests (E2E)', () => {
 
       // Login
       const loginResponse = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: testUserData.email,
           password: testUserData.password,
@@ -133,7 +134,7 @@ describe('Auth Integration Tests (E2E)', () => {
     it('should not login with wrong password', async () => {
       // Register
       await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           email: testUserData.email,
           password: testUserData.password,
@@ -143,7 +144,7 @@ describe('Auth Integration Tests (E2E)', () => {
 
       // Attempt login with wrong password
       await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: testUserData.email,
           password: 'WrongPassword123!',
@@ -154,7 +155,7 @@ describe('Auth Integration Tests (E2E)', () => {
     it('should refresh access token', async () => {
       // Register
       const registerResponse = await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           email: testUserData.email,
           password: testUserData.password,
@@ -167,7 +168,7 @@ describe('Auth Integration Tests (E2E)', () => {
 
       // Refresh
       const refreshResponse = await request(app.getHttpServer())
-        .post('/auth/refresh')
+        .post('/api/v1/auth/refresh')
         .send({
           refreshToken: originalRefreshToken,
         })
@@ -183,7 +184,7 @@ describe('Auth Integration Tests (E2E)', () => {
     it('should logout user', async () => {
       // Register
       const registerResponse = await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           email: testUserData.email,
           password: testUserData.password,
@@ -196,7 +197,7 @@ describe('Auth Integration Tests (E2E)', () => {
 
       // Logout
       await request(app.getHttpServer())
-        .post('/auth/logout')
+        .post('/api/v1/auth/logout')
         .send({
           refreshToken: refreshToken,
         })
@@ -204,7 +205,7 @@ describe('Auth Integration Tests (E2E)', () => {
 
       // Attempt to refresh with logged-out token should fail
       await request(app.getHttpServer())
-        .post('/auth/refresh')
+        .post('/api/v1/auth/refresh')
         .send({
           refreshToken: refreshToken,
         })
@@ -214,7 +215,7 @@ describe('Auth Integration Tests (E2E)', () => {
     it('should logout from all sessions', async () => {
       // Register
       const registerResponse = await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           email: testUserData.email,
           password: testUserData.password,
@@ -226,7 +227,7 @@ describe('Auth Integration Tests (E2E)', () => {
 
       // Create multiple sessions (login multiple times)
       const session1Response = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: testUserData.email,
           password: testUserData.password,
@@ -234,7 +235,7 @@ describe('Auth Integration Tests (E2E)', () => {
         .expect(200);
 
       const session2Response = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: testUserData.email,
           password: testUserData.password,
@@ -248,20 +249,20 @@ describe('Auth Integration Tests (E2E)', () => {
 
       // Logout from all sessions
       await request(app.getHttpServer())
-        .post('/auth/logout-all')
+        .post('/api/v1/auth/logout-all')
         .set('Authorization', `Bearer ${accessToken}`)
         .expect(200);
 
       // All refresh tokens should be revoked
       await request(app.getHttpServer())
-        .post('/auth/refresh')
+        .post('/api/v1/auth/refresh')
         .send({
           refreshToken: session1RefreshToken,
         })
         .expect(401);
 
       await request(app.getHttpServer())
-        .post('/auth/refresh')
+        .post('/api/v1/auth/refresh')
         .send({
           refreshToken: session2RefreshToken,
         })
@@ -272,7 +273,7 @@ describe('Auth Integration Tests (E2E)', () => {
     it.skip('should not login banned user', async () => {
       // Register
       await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           email: testUserData.email,
           password: testUserData.password,
@@ -282,7 +283,7 @@ describe('Auth Integration Tests (E2E)', () => {
 
       // Ban user (requires admin access)
       const adminLoginResponse = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: 'admin@test.com',
           password: 'Test123456!',
@@ -293,7 +294,7 @@ describe('Auth Integration Tests (E2E)', () => {
 
       // Get user ID
       const usersResponse = await request(app.getHttpServer())
-        .get('/users')
+        .get('/api/v1/users')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -302,7 +303,7 @@ describe('Auth Integration Tests (E2E)', () => {
       );
 
       await request(app.getHttpServer())
-        .post(`/users/${testUser.id}/ban`)
+        .post(`/api/v1/users/${testUser.id}/ban`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           reason: 'Test ban',
@@ -311,7 +312,7 @@ describe('Auth Integration Tests (E2E)', () => {
 
       // Attempt login
       await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: testUserData.email,
           password: testUserData.password,
@@ -324,7 +325,7 @@ describe('Auth Integration Tests (E2E)', () => {
     it('should prevent duplicate registration with different email case', async () => {
       // Register with lowercase email
       await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           email: testUserData.email.toLowerCase(),
           password: testUserData.password,
@@ -334,7 +335,7 @@ describe('Auth Integration Tests (E2E)', () => {
 
       // Attempt to register with same email but different case
       await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           email: testUserData.email.toUpperCase(), // TEST@EXAMPLE.COM
           password: 'AnotherPassword123!',
@@ -346,7 +347,7 @@ describe('Auth Integration Tests (E2E)', () => {
     it('should login with any email case variation', async () => {
       // Register with lowercase
       await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           email: testUserData.email.toLowerCase(),
           password: testUserData.password,
@@ -356,7 +357,7 @@ describe('Auth Integration Tests (E2E)', () => {
 
       // Login with uppercase should work
       const loginResponse = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: testUserData.email.toUpperCase(),
           password: testUserData.password,
@@ -373,7 +374,7 @@ describe('Auth Integration Tests (E2E)', () => {
   describe('Password validation', () => {
     it('should reject weak passwords', async () => {
       await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           email: testUserData.email,
           password: 'weak',
@@ -384,7 +385,7 @@ describe('Auth Integration Tests (E2E)', () => {
 
     it('should reject registration without email', async () => {
       await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           password: testUserData.password,
           name: testUserData.name,
@@ -394,7 +395,7 @@ describe('Auth Integration Tests (E2E)', () => {
 
     it('should reject registration without name', async () => {
       await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           email: testUserData.email,
           password: testUserData.password,
@@ -406,7 +407,7 @@ describe('Auth Integration Tests (E2E)', () => {
   describe('Token security', () => {
     it('should reject invalid refresh token', async () => {
       await request(app.getHttpServer())
-        .post('/auth/refresh')
+        .post('/api/v1/auth/refresh')
         .send({
           refreshToken: 'invalid-token',
         })
@@ -421,7 +422,7 @@ describe('Auth Integration Tests (E2E)', () => {
     it('should not allow reusing refresh token after rotation', async () => {
       // Register
       const registerResponse = await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           email: testUserData.email,
           password: testUserData.password,
@@ -434,7 +435,7 @@ describe('Auth Integration Tests (E2E)', () => {
 
       // First refresh (should work)
       await request(app.getHttpServer())
-        .post('/auth/refresh')
+        .post('/api/v1/auth/refresh')
         .send({
           refreshToken: originalRefreshToken,
         })
@@ -442,7 +443,7 @@ describe('Auth Integration Tests (E2E)', () => {
 
       // Second refresh with same token (should fail due to rotation)
       await request(app.getHttpServer())
-        .post('/auth/refresh')
+        .post('/api/v1/auth/refresh')
         .send({
           refreshToken: originalRefreshToken,
         })

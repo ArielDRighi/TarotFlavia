@@ -26,6 +26,7 @@ describe('IP Whitelist Admin (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -40,13 +41,13 @@ describe('IP Whitelist Admin (e2e)', () => {
 
     // Login as admin
     const adminLogin = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: 'admin@test.com', password: 'Test123456!' });
     adminToken = adminLogin.body.access_token;
 
     // Login as regular user
     const userLogin = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: 'free@test.com', password: 'Test123456!' });
     userToken = userLogin.body.access_token;
   });
@@ -59,7 +60,7 @@ describe('IP Whitelist Admin (e2e)', () => {
   describe('GET /admin/ip-whitelist', () => {
     it('should return whitelist when authenticated as admin', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/ip-whitelist')
+        .get('/api/v1/admin/ip-whitelist')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -71,18 +72,18 @@ describe('IP Whitelist Admin (e2e)', () => {
 
     it('should return 403 when authenticated as non-admin user', async () => {
       await request(app.getHttpServer())
-        .get('/admin/ip-whitelist')
+        .get('/api/v1/admin/ip-whitelist')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(403);
     });
 
     it('should return 401 when not authenticated', async () => {
-      await request(app.getHttpServer()).get('/admin/ip-whitelist').expect(401);
+      await request(app.getHttpServer()).get('/api/v1/admin/ip-whitelist').expect(401);
     });
 
     it('should return count matching ips array length', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/ip-whitelist')
+        .get('/api/v1/admin/ip-whitelist')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -96,14 +97,14 @@ describe('IP Whitelist Admin (e2e)', () => {
     afterEach(async () => {
       // Clean up: try to remove the test IP
       await request(app.getHttpServer())
-        .delete('/admin/ip-whitelist')
+        .delete('/api/v1/admin/ip-whitelist')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ ip: testIP });
     });
 
     it('should add IP to whitelist when authenticated as admin', async () => {
       const response = await request(app.getHttpServer())
-        .post('/admin/ip-whitelist')
+        .post('/api/v1/admin/ip-whitelist')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ ip: testIP })
         .expect(201);
@@ -116,14 +117,14 @@ describe('IP Whitelist Admin (e2e)', () => {
     it('should include added IP in whitelist', async () => {
       // Add IP
       await request(app.getHttpServer())
-        .post('/admin/ip-whitelist')
+        .post('/api/v1/admin/ip-whitelist')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ ip: testIP })
         .expect(201);
 
       // Verify it's in the list
       const response = await request(app.getHttpServer())
-        .get('/admin/ip-whitelist')
+        .get('/api/v1/admin/ip-whitelist')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -132,7 +133,7 @@ describe('IP Whitelist Admin (e2e)', () => {
 
     it('should return 403 when authenticated as non-admin user', async () => {
       await request(app.getHttpServer())
-        .post('/admin/ip-whitelist')
+        .post('/api/v1/admin/ip-whitelist')
         .set('Authorization', `Bearer ${userToken}`)
         .send({ ip: testIP })
         .expect(403);
@@ -140,14 +141,14 @@ describe('IP Whitelist Admin (e2e)', () => {
 
     it('should return 401 when not authenticated', async () => {
       await request(app.getHttpServer())
-        .post('/admin/ip-whitelist')
+        .post('/api/v1/admin/ip-whitelist')
         .send({ ip: testIP })
         .expect(401);
     });
 
     it('should return 400 for invalid IP format', async () => {
       await request(app.getHttpServer())
-        .post('/admin/ip-whitelist')
+        .post('/api/v1/admin/ip-whitelist')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ ip: 'not-an-ip' })
         .expect(400);
@@ -155,7 +156,7 @@ describe('IP Whitelist Admin (e2e)', () => {
 
     it('should return 400 for empty IP', async () => {
       await request(app.getHttpServer())
-        .post('/admin/ip-whitelist')
+        .post('/api/v1/admin/ip-whitelist')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ ip: '' })
         .expect(400);
@@ -165,7 +166,7 @@ describe('IP Whitelist Admin (e2e)', () => {
       const ipv6 = '2001:db8::1';
 
       const response = await request(app.getHttpServer())
-        .post('/admin/ip-whitelist')
+        .post('/api/v1/admin/ip-whitelist')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ ip: ipv6 })
         .expect(201);
@@ -174,7 +175,7 @@ describe('IP Whitelist Admin (e2e)', () => {
 
       // Cleanup
       await request(app.getHttpServer())
-        .delete('/admin/ip-whitelist')
+        .delete('/api/v1/admin/ip-whitelist')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ ip: ipv6 });
     });
@@ -186,14 +187,14 @@ describe('IP Whitelist Admin (e2e)', () => {
     beforeEach(async () => {
       // Add a test IP to delete
       await request(app.getHttpServer())
-        .post('/admin/ip-whitelist')
+        .post('/api/v1/admin/ip-whitelist')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ ip: testIP });
     });
 
     it('should remove IP from whitelist when authenticated as admin', async () => {
       const response = await request(app.getHttpServer())
-        .delete('/admin/ip-whitelist')
+        .delete('/api/v1/admin/ip-whitelist')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ ip: testIP })
         .expect(200);
@@ -206,14 +207,14 @@ describe('IP Whitelist Admin (e2e)', () => {
     it('should not include removed IP in whitelist', async () => {
       // Remove IP
       await request(app.getHttpServer())
-        .delete('/admin/ip-whitelist')
+        .delete('/api/v1/admin/ip-whitelist')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ ip: testIP })
         .expect(200);
 
       // Verify it's not in the list
       const response = await request(app.getHttpServer())
-        .get('/admin/ip-whitelist')
+        .get('/api/v1/admin/ip-whitelist')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -222,7 +223,7 @@ describe('IP Whitelist Admin (e2e)', () => {
 
     it('should return 403 when authenticated as non-admin user', async () => {
       await request(app.getHttpServer())
-        .delete('/admin/ip-whitelist')
+        .delete('/api/v1/admin/ip-whitelist')
         .set('Authorization', `Bearer ${userToken}`)
         .send({ ip: testIP })
         .expect(403);
@@ -230,14 +231,14 @@ describe('IP Whitelist Admin (e2e)', () => {
 
     it('should return 401 when not authenticated', async () => {
       await request(app.getHttpServer())
-        .delete('/admin/ip-whitelist')
+        .delete('/api/v1/admin/ip-whitelist')
         .send({ ip: testIP })
         .expect(401);
     });
 
     it('should return 400 when IP is not provided', async () => {
       await request(app.getHttpServer())
-        .delete('/admin/ip-whitelist')
+        .delete('/api/v1/admin/ip-whitelist')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({})
         .expect(400);
@@ -248,7 +249,7 @@ describe('IP Whitelist Admin (e2e)', () => {
 
       // Should not throw error for non-existent IP
       await request(app.getHttpServer())
-        .delete('/admin/ip-whitelist')
+        .delete('/api/v1/admin/ip-whitelist')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ ip: nonExistentIP })
         .expect(200);
@@ -262,7 +263,7 @@ describe('IP Whitelist Admin (e2e)', () => {
       // Add all IPs
       for (const ip of testIPs) {
         await request(app.getHttpServer())
-          .post('/admin/ip-whitelist')
+          .post('/api/v1/admin/ip-whitelist')
           .set('Authorization', `Bearer ${adminToken}`)
           .send({ ip })
           .expect(201);
@@ -270,7 +271,7 @@ describe('IP Whitelist Admin (e2e)', () => {
 
       // Verify all are in the list
       const response = await request(app.getHttpServer())
-        .get('/admin/ip-whitelist')
+        .get('/api/v1/admin/ip-whitelist')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -281,7 +282,7 @@ describe('IP Whitelist Admin (e2e)', () => {
       // Cleanup
       for (const ip of testIPs) {
         await request(app.getHttpServer())
-          .delete('/admin/ip-whitelist')
+          .delete('/api/v1/admin/ip-whitelist')
           .set('Authorization', `Bearer ${adminToken}`)
           .send({ ip });
       }
@@ -293,7 +294,7 @@ describe('IP Whitelist Admin (e2e)', () => {
       // Localhost should typically be whitelisted by default
       // Just verify the endpoint handles it properly
       const response = await request(app.getHttpServer())
-        .post('/admin/ip-whitelist')
+        .post('/api/v1/admin/ip-whitelist')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ ip: localhost })
         .expect(201);

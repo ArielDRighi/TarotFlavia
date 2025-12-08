@@ -61,12 +61,13 @@ describe('Admin User Journey - Edge Cases E2E', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
     await app.init();
 
     // Login as seeded admin user
     const adminLoginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({
         email: 'admin@test.com',
         password: 'Test123456!',
@@ -79,7 +80,7 @@ describe('Admin User Journey - Edge Cases E2E', () => {
     // Create test user for edge case testing
     testUserEmail = `admin-edge-${testTimestamp}@test.com`;
     const registerResponse = await request(app.getHttpServer())
-      .post('/auth/register')
+      .post('/api/v1/auth/register')
       .send({
         email: testUserEmail,
         password: 'SecurePass123!',
@@ -127,7 +128,7 @@ describe('Admin User Journey - Edge Cases E2E', () => {
 
       // 1. Ban user
       const banResponse = await request(app.getHttpServer())
-        .post(`/admin/users/${testUserId}/ban`)
+        .post(`/api/v1/admin/users/${testUserId}/ban`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ reason: 'Test simultaneous operations' })
         .expect(201);
@@ -141,7 +142,7 @@ describe('Admin User Journey - Edge Cases E2E', () => {
 
       // 2. Update plan (usuario sigue baneado)
       const planResponse = await request(app.getHttpServer())
-        .patch(`/admin/users/${testUserId}/plan`)
+        .patch(`/api/v1/admin/users/${testUserId}/plan`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ plan: UserPlan.PREMIUM })
         .expect(200);
@@ -166,7 +167,7 @@ describe('Admin User Journey - Edge Cases E2E', () => {
     it('✅ Usuario baneado no puede acceder a endpoints protegidos', async () => {
       // Intentar login con usuario baneado
       const loginResponse = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: testUserEmail,
           password: 'SecurePass123!',
@@ -185,7 +186,7 @@ describe('Admin User Journey - Edge Cases E2E', () => {
 
       // Unban usuario
       const unbanResponse = await request(app.getHttpServer())
-        .post(`/admin/users/${testUserId}/unban`)
+        .post(`/api/v1/admin/users/${testUserId}/unban`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(201);
 
@@ -195,7 +196,7 @@ describe('Admin User Journey - Edge Cases E2E', () => {
 
       // Ahora el usuario puede hacer login
       const loginResponse = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: testUserEmail,
           password: 'SecurePass123!',
@@ -218,7 +219,7 @@ describe('Admin User Journey - Edge Cases E2E', () => {
 
       // Login inicial
       const loginResponse = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: testUserEmail,
           password: 'SecurePass123!',
@@ -230,7 +231,7 @@ describe('Admin User Journey - Edge Cases E2E', () => {
 
       // Verificar que NO es admin con token actual
       const userListBefore = await request(app.getHttpServer())
-        .get('/admin/users')
+        .get('/api/v1/admin/users')
         .set('Authorization', `Bearer ${oldToken}`);
 
       expect(userListBefore.status).toBe(403); // Forbidden
@@ -238,13 +239,13 @@ describe('Admin User Journey - Edge Cases E2E', () => {
       // Admin agrega rol ADMIN al usuario
       await new Promise((resolve) => setTimeout(resolve, 1000));
       await request(app.getHttpServer())
-        .post(`/admin/users/${testUserId}/roles/admin`)
+        .post(`/api/v1/admin/users/${testUserId}/roles/admin`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(201);
 
       // Token antiguo aún NO tiene permisos de admin (JWT inmutable)
       const userListWithOldToken = await request(app.getHttpServer())
-        .get('/admin/users')
+        .get('/api/v1/admin/users')
         .set('Authorization', `Bearer ${oldToken}`);
 
       expect(userListWithOldToken.status).toBe(403); // Forbidden
@@ -252,7 +253,7 @@ describe('Admin User Journey - Edge Cases E2E', () => {
       // Re-autenticarse para obtener nuevo token con roles actualizados
       await new Promise((resolve) => setTimeout(resolve, 1000));
       const reLoginResponse = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: testUserEmail,
           password: 'SecurePass123!',
@@ -267,7 +268,7 @@ describe('Admin User Journey - Edge Cases E2E', () => {
 
       // Ahora con nuevo token puede acceder a endpoints de admin
       const userListWithNewToken = await request(app.getHttpServer())
-        .get('/admin/users')
+        .get('/api/v1/admin/users')
         .set('Authorization', `Bearer ${newToken}`)
         .expect(200);
 
@@ -280,7 +281,7 @@ describe('Admin User Journey - Edge Cases E2E', () => {
 
       // Login con usuario que tiene rol ADMIN
       const loginResponse = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: testUserEmail,
           password: 'SecurePass123!',
@@ -292,21 +293,21 @@ describe('Admin User Journey - Edge Cases E2E', () => {
 
       // Verificar que tiene acceso a endpoints de admin
       await request(app.getHttpServer())
-        .get('/admin/users')
+        .get('/api/v1/admin/users')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(200);
 
       // Admin remueve rol ADMIN
       await new Promise((resolve) => setTimeout(resolve, 1000));
       await request(app.getHttpServer())
-        .delete(`/admin/users/${testUserId}/roles/admin`)
+        .delete(`/api/v1/admin/users/${testUserId}/roles/admin`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
       // NOTE: RolesGuard verifica roles desde JWT (inmutable), NO desde BD
       // Por lo tanto, el token antiguo SIGUE funcionando hasta que expire
       const stillWorksResponse = await request(app.getHttpServer())
-        .get('/admin/users')
+        .get('/api/v1/admin/users')
         .set('Authorization', `Bearer ${userToken}`);
 
       // Token antiguo sigue teniendo acceso (roles en JWT)
@@ -315,7 +316,7 @@ describe('Admin User Journey - Edge Cases E2E', () => {
       // Usuario debe re-autenticarse para perder permisos de admin
       await new Promise((resolve) => setTimeout(resolve, 1000));
       const newLoginResponse = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: testUserEmail,
           password: 'SecurePass123!',
@@ -327,7 +328,7 @@ describe('Admin User Journey - Edge Cases E2E', () => {
 
       // Ahora con token fresh (sin rol ADMIN) debe ser rechazado
       const blockedResponse = await request(app.getHttpServer())
-        .get('/admin/users')
+        .get('/api/v1/admin/users')
         .set('Authorization', `Bearer ${freshToken}`);
 
       expect(blockedResponse.status).toBe(403); // Forbidden
@@ -353,7 +354,7 @@ describe('Admin User Journey - Edge Cases E2E', () => {
 
       // 2. Upgrade a PREMIUM
       await request(app.getHttpServer())
-        .patch(`/admin/users/${testUserId}/plan`)
+        .patch(`/api/v1/admin/users/${testUserId}/plan`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ plan: UserPlan.PREMIUM })
         .expect(200);
@@ -362,7 +363,7 @@ describe('Admin User Journey - Edge Cases E2E', () => {
 
       // 3. Agregar rol TAROTIST
       await request(app.getHttpServer())
-        .post(`/admin/users/${testUserId}/roles/tarotist`)
+        .post(`/api/v1/admin/users/${testUserId}/roles/tarotist`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(201);
 
@@ -377,7 +378,7 @@ describe('Admin User Journey - Edge Cases E2E', () => {
 
       // 5. Ban usuario
       await request(app.getHttpServer())
-        .post(`/admin/users/${testUserId}/ban`)
+        .post(`/api/v1/admin/users/${testUserId}/ban`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ reason: 'Consistency test' })
         .expect(201);
@@ -394,7 +395,7 @@ describe('Admin User Journey - Edge Cases E2E', () => {
 
       // 7. Unban usuario
       await request(app.getHttpServer())
-        .post(`/admin/users/${testUserId}/unban`)
+        .post(`/api/v1/admin/users/${testUserId}/unban`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(201);
 
@@ -402,7 +403,7 @@ describe('Admin User Journey - Edge Cases E2E', () => {
 
       // 8. Remover rol TAROTIST
       await request(app.getHttpServer())
-        .delete(`/admin/users/${testUserId}/roles/tarotist`)
+        .delete(`/api/v1/admin/users/${testUserId}/roles/tarotist`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -410,7 +411,7 @@ describe('Admin User Journey - Edge Cases E2E', () => {
 
       // 9. Downgrade a FREE
       await request(app.getHttpServer())
-        .patch(`/admin/users/${testUserId}/plan`)
+        .patch(`/api/v1/admin/users/${testUserId}/plan`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ plan: UserPlan.FREE })
         .expect(200);
@@ -436,7 +437,7 @@ describe('Admin User Journey - Edge Cases E2E', () => {
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const response = await request(app.getHttpServer())
-        .post('/admin/users/999999/ban')
+        .post('/api/v1/admin/users/999999/ban')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ reason: 'Test' });
 
@@ -446,7 +447,7 @@ describe('Admin User Journey - Edge Cases E2E', () => {
 
     it('✅ Unban usuario inexistente retorna 404', async () => {
       const response = await request(app.getHttpServer())
-        .post('/admin/users/999999/unban')
+        .post('/api/v1/admin/users/999999/unban')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(404);
 
@@ -457,7 +458,7 @@ describe('Admin User Journey - Edge Cases E2E', () => {
 
     it('✅ Actualizar plan de usuario inexistente retorna 404', async () => {
       const response = await request(app.getHttpServer())
-        .patch('/admin/users/999999/plan')
+        .patch('/api/v1/admin/users/999999/plan')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ plan: UserPlan.PREMIUM })
         .expect(404);
@@ -469,7 +470,7 @@ describe('Admin User Journey - Edge Cases E2E', () => {
 
     it('✅ Agregar rol a usuario inexistente retorna 404', async () => {
       const response = await request(app.getHttpServer())
-        .post('/admin/users/999999/roles/tarotist')
+        .post('/api/v1/admin/users/999999/roles/tarotist')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(404);
 
@@ -480,7 +481,7 @@ describe('Admin User Journey - Edge Cases E2E', () => {
 
     it('✅ Remover rol de usuario inexistente retorna 404', async () => {
       const response = await request(app.getHttpServer())
-        .delete('/admin/users/999999/roles/admin')
+        .delete('/api/v1/admin/users/999999/roles/admin')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(404);
 
@@ -491,7 +492,7 @@ describe('Admin User Journey - Edge Cases E2E', () => {
 
     it('✅ Eliminar usuario inexistente retorna 404', async () => {
       const response = await request(app.getHttpServer())
-        .delete('/admin/users/999999')
+        .delete('/api/v1/admin/users/999999')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(404);
 
@@ -510,7 +511,7 @@ describe('Admin User Journey - Edge Cases E2E', () => {
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const response = await request(app.getHttpServer())
-        .delete(`/admin/users/${testUserId}/roles/consumer`)
+        .delete(`/api/v1/admin/users/${testUserId}/roles/consumer`)
         .set('Authorization', `Bearer ${adminToken}`);
 
       // Endpoint valida que rol sea 'tarotist' o 'admin'
@@ -523,14 +524,14 @@ describe('Admin User Journey - Edge Cases E2E', () => {
     it('✅ Agregar rol TAROTIST que ya tiene retorna error (no es idempotente)', async () => {
       // Primero agregar rol TAROTIST
       await request(app.getHttpServer())
-        .post(`/admin/users/${testUserId}/roles/tarotist`)
+        .post(`/api/v1/admin/users/${testUserId}/roles/tarotist`)
         .set('Authorization', `Bearer ${adminToken}`);
 
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Agregar nuevamente (NO es idempotente - retorna 400)
       const response = await request(app.getHttpServer())
-        .post(`/admin/users/${testUserId}/roles/tarotist`)
+        .post(`/api/v1/admin/users/${testUserId}/roles/tarotist`)
         .set('Authorization', `Bearer ${adminToken}`);
 
       // Endpoint retorna 400 si el usuario ya tiene el rol
@@ -540,14 +541,14 @@ describe('Admin User Journey - Edge Cases E2E', () => {
     it('✅ Remover rol que no tiene retorna 400', async () => {
       // Primero remover rol TAROTIST si lo tiene
       await request(app.getHttpServer())
-        .delete(`/admin/users/${testUserId}/roles/tarotist`)
+        .delete(`/api/v1/admin/users/${testUserId}/roles/tarotist`)
         .set('Authorization', `Bearer ${adminToken}`);
 
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Intentar remover nuevamente (usuario ya no tiene el rol)
       const response = await request(app.getHttpServer())
-        .delete(`/admin/users/${testUserId}/roles/tarotist`)
+        .delete(`/api/v1/admin/users/${testUserId}/roles/tarotist`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(400);
 

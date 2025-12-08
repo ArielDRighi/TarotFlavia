@@ -87,6 +87,7 @@ describe('Performance Tests - Database Queries (SUBTASK-23)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
     await app.init();
     httpServer = app.getHttpServer() as App;
@@ -96,7 +97,7 @@ describe('Performance Tests - Database Queries (SUBTASK-23)', () => {
 
     // Login premium user
     const premiumLogin = await request(httpServer)
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: 'premium@test.com', password: 'Test123456!' })
       .expect(200);
     premiumUserToken = (premiumLogin.body as LoginResponse).access_token;
@@ -133,7 +134,7 @@ describe('Performance Tests - Database Queries (SUBTASK-23)', () => {
     // Create test readings for query testing
     for (let i = 0; i < 20; i++) {
       await request(httpServer)
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           deckId,
@@ -162,7 +163,7 @@ describe('Performance Tests - Database Queries (SUBTASK-23)', () => {
   describe('GET /readings - N+1 Prevention', () => {
     it('should load all relations in a single query (no N+1 problem)', async () => {
       const response = await request(httpServer)
-        .get('/readings?limit=10')
+        .get('/api/v1/readings?limit=10')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(200);
 
@@ -185,7 +186,7 @@ describe('Performance Tests - Database Queries (SUBTASK-23)', () => {
       const startTime = Date.now();
 
       const response = await request(httpServer)
-        .get('/readings?limit=20')
+        .get('/api/v1/readings?limit=20')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(200);
 
@@ -201,7 +202,7 @@ describe('Performance Tests - Database Queries (SUBTASK-23)', () => {
       // Este test verifica que el repository usa leftJoinAndSelect correctamente
       // Los readings deben incluir deck, cards, category automáticamente
       const response = await request(httpServer)
-        .get('/readings?limit=1')
+        .get('/api/v1/readings?limit=1')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(200);
 

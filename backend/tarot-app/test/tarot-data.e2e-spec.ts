@@ -90,6 +90,7 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -101,12 +102,12 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
 
     // Obtener tokens de autenticación (usuarios seeded en globalSetup)
     const adminLoginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: 'admin@test.com', password: 'Test123456!' })
       .expect(200);
 
     const userLoginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: 'free@test.com', password: 'Test123456!' })
       .expect(200);
 
@@ -136,7 +137,7 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
   describe('/decks (GET) - Listar mazos', () => {
     it('debería retornar lista de mazos (endpoint público)', async () => {
       const response = await request(app.getHttpServer())
-        .get('/decks')
+        .get('/api/v1/decks')
         .expect(200);
 
       const decks = response.body as TarotDeckResponse[];
@@ -149,7 +150,7 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
 
     it('cada mazo debería tener los campos requeridos', async () => {
       const response = await request(app.getHttpServer())
-        .get('/decks')
+        .get('/api/v1/decks')
         .expect(200);
 
       const decks = response.body as TarotDeckResponse[];
@@ -168,7 +169,7 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
   describe('/decks/default (GET) - Mazo predeterminado', () => {
     it('debería retornar el mazo Rider-Waite como default', async () => {
       const response = await request(app.getHttpServer())
-        .get('/decks/default')
+        .get('/api/v1/decks/default')
         .expect(200);
 
       const deck = response.body as TarotDeckResponse;
@@ -181,7 +182,7 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
 
     it('el mazo default debería incluir las 78 cartas', async () => {
       const response = await request(app.getHttpServer())
-        .get('/decks/default')
+        .get('/api/v1/decks/default')
         .expect(200);
 
       const deck = response.body as TarotDeckResponse;
@@ -197,12 +198,12 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
     it('debería retornar mazo existente con sus cartas', async () => {
       // Primero obtener un ID válido
       const decksResponse = await request(app.getHttpServer())
-        .get('/decks')
+        .get('/api/v1/decks')
         .expect(200);
       const deckId = (decksResponse.body as TarotDeckResponse[])[0].id;
 
       const response = await request(app.getHttpServer())
-        .get(`/decks/${deckId}`)
+        .get(`/api/v1/decks/${deckId}`)
         .expect(200);
 
       const deck = response.body as TarotDeckResponse;
@@ -213,7 +214,7 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
 
     it('debería retornar 404 para mazo inexistente', async () => {
       const response = await request(app.getHttpServer())
-        .get('/decks/99999')
+        .get('/api/v1/decks/99999')
         .expect(404);
 
       const error = response.body as ErrorResponse;
@@ -222,13 +223,13 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
     });
 
     it('debería retornar 400 para ID no numérico', async () => {
-      await request(app.getHttpServer()).get('/decks/abc').expect(400);
+      await request(app.getHttpServer()).get('/api/v1/decks/abc').expect(400);
     });
 
     it('debería retornar 400 para ID negativo', async () => {
       // ParseIntPipe debería aceptar pero el servicio podría no encontrarlo
       const response = await request(app.getHttpServer())
-        .get('/decks/-1')
+        .get('/api/v1/decks/-1')
         .expect(404);
 
       expect(response.body).toHaveProperty('statusCode');
@@ -242,7 +243,7 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
   describe('/cards (GET) - Listar cartas', () => {
     it('debería retornar las 78 cartas del tarot', async () => {
       const response = await request(app.getHttpServer())
-        .get('/cards')
+        .get('/api/v1/cards')
         .expect(200);
 
       const cards = response.body as TarotCardResponse[];
@@ -255,7 +256,7 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
 
     it('debería incluir 22 Arcanos Mayores', async () => {
       const response = await request(app.getHttpServer())
-        .get('/cards')
+        .get('/api/v1/cards')
         .expect(200);
 
       const cards = response.body as TarotCardResponse[];
@@ -267,7 +268,7 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
 
     it('debería incluir 56 Arcanos Menores (4 palos x 14 cartas)', async () => {
       const response = await request(app.getHttpServer())
-        .get('/cards')
+        .get('/api/v1/cards')
         .expect(200);
 
       const cards = response.body as TarotCardResponse[];
@@ -279,7 +280,7 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
 
     it('cada carta debería tener los campos requeridos', async () => {
       const response = await request(app.getHttpServer())
-        .get('/cards')
+        .get('/api/v1/cards')
         .expect(200);
 
       const cards = response.body as TarotCardResponse[];
@@ -297,7 +298,7 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
 
     it('los Arcanos Menores deberían tener categoría de palo', async () => {
       const response = await request(app.getHttpServer())
-        .get('/cards')
+        .get('/api/v1/cards')
         .expect(200);
 
       const cards = response.body as TarotCardResponse[];
@@ -313,7 +314,7 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
 
     it('los 4 palos deberían tener 14 cartas cada uno', async () => {
       const response = await request(app.getHttpServer())
-        .get('/cards')
+        .get('/api/v1/cards')
         .expect(200);
 
       const cards = response.body as TarotCardResponse[];
@@ -330,12 +331,12 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
     it('debería retornar carta existente', async () => {
       // Primero obtener un ID válido
       const cardsResponse = await request(app.getHttpServer())
-        .get('/cards')
+        .get('/api/v1/cards')
         .expect(200);
       const cardId = (cardsResponse.body as TarotCardResponse[])[0].id;
 
       const response = await request(app.getHttpServer())
-        .get(`/cards/${cardId}`)
+        .get(`/api/v1/cards/${cardId}`)
         .expect(200);
 
       const card = response.body as TarotCardResponse;
@@ -345,7 +346,7 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
 
     it('debería retornar 404 para carta inexistente', async () => {
       const response = await request(app.getHttpServer())
-        .get('/cards/99999')
+        .get('/api/v1/cards/99999')
         .expect(404);
 
       const error = response.body as ErrorResponse;
@@ -354,7 +355,7 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
     });
 
     it('debería retornar 400 para ID no numérico', async () => {
-      await request(app.getHttpServer()).get('/cards/invalid').expect(400);
+      await request(app.getHttpServer()).get('/api/v1/cards/invalid').expect(400);
     });
   });
 
@@ -362,12 +363,12 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
     it('debería retornar cartas del mazo especificado', async () => {
       // Obtener ID del mazo default
       const deckResponse = await request(app.getHttpServer())
-        .get('/decks/default')
+        .get('/api/v1/decks/default')
         .expect(200);
       const deckId = (deckResponse.body as TarotDeckResponse).id;
 
       const response = await request(app.getHttpServer())
-        .get(`/cards/deck/${deckId}`)
+        .get(`/api/v1/cards/deck/${deckId}`)
         .expect(200);
 
       const cards = response.body as TarotCardResponse[];
@@ -382,7 +383,7 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
 
     it('debería retornar 404 para mazo inexistente', async () => {
       const response = await request(app.getHttpServer())
-        .get('/cards/deck/99999')
+        .get('/api/v1/cards/deck/99999')
         .expect(404);
 
       const error = response.body as ErrorResponse;
@@ -398,7 +399,7 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
   describe('/spreads (GET) - Listar tiradas', () => {
     it('debería retornar al menos 4 tipos de tiradas', async () => {
       const response = await request(app.getHttpServer())
-        .get('/spreads')
+        .get('/api/v1/spreads')
         .expect(200);
 
       const spreads = response.body as TarotSpreadResponse[];
@@ -411,7 +412,7 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
 
     it('cada tirada debería tener los campos requeridos', async () => {
       const response = await request(app.getHttpServer())
-        .get('/spreads')
+        .get('/api/v1/spreads')
         .expect(200);
 
       const spreads = response.body as TarotSpreadResponse[];
@@ -428,7 +429,7 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
 
     it('debería incluir tirada de 1 carta', async () => {
       const response = await request(app.getHttpServer())
-        .get('/spreads')
+        .get('/api/v1/spreads')
         .expect(200);
 
       const spreads = response.body as TarotSpreadResponse[];
@@ -438,7 +439,7 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
 
     it('debería incluir tirada de 3 cartas (Pasado-Presente-Futuro)', async () => {
       const response = await request(app.getHttpServer())
-        .get('/spreads')
+        .get('/api/v1/spreads')
         .expect(200);
 
       const spreads = response.body as TarotSpreadResponse[];
@@ -448,7 +449,7 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
 
     it('debería incluir Cruz Céltica (10 cartas)', async () => {
       const response = await request(app.getHttpServer())
-        .get('/spreads')
+        .get('/api/v1/spreads')
         .expect(200);
 
       const spreads = response.body as TarotSpreadResponse[];
@@ -458,7 +459,7 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
 
     it('las posiciones deberían coincidir con cardCount', async () => {
       const response = await request(app.getHttpServer())
-        .get('/spreads')
+        .get('/api/v1/spreads')
         .expect(200);
 
       const spreads = response.body as TarotSpreadResponse[];
@@ -474,12 +475,12 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
     it('debería retornar tirada existente', async () => {
       // Primero obtener un ID válido
       const spreadsResponse = await request(app.getHttpServer())
-        .get('/spreads')
+        .get('/api/v1/spreads')
         .expect(200);
       const spreadId = (spreadsResponse.body as TarotSpreadResponse[])[0].id;
 
       const response = await request(app.getHttpServer())
-        .get(`/spreads/${spreadId}`)
+        .get(`/api/v1/spreads/${spreadId}`)
         .expect(200);
 
       const spread = response.body as TarotSpreadResponse;
@@ -489,7 +490,7 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
 
     it('debería retornar 404 para tirada inexistente', async () => {
       const response = await request(app.getHttpServer())
-        .get('/spreads/99999')
+        .get('/api/v1/spreads/99999')
         .expect(404);
 
       const error = response.body as ErrorResponse;
@@ -498,7 +499,7 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
     });
 
     it('debería retornar 400 para ID no numérico', async () => {
-      await request(app.getHttpServer()).get('/spreads/invalid').expect(400);
+      await request(app.getHttpServer()).get('/api/v1/spreads/invalid').expect(400);
     });
   });
 
@@ -510,7 +511,7 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
     describe('POST /decks (crear mazo)', () => {
       it('debería rechazar sin autenticación (401)', async () => {
         await request(app.getHttpServer())
-          .post('/decks')
+          .post('/api/v1/decks')
           .send({ name: 'Test Deck', description: 'Test' })
           .expect(401);
       });
@@ -518,7 +519,7 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
       it('debería rechazar usuario no-admin con DTO válido (403)', async () => {
         // Nota: La validación del DTO ocurre ANTES del guard, por eso enviamos DTO completo
         const response = await request(app.getHttpServer())
-          .post('/decks')
+          .post('/api/v1/decks')
           .set('Authorization', `Bearer ${userToken}`)
           .send({
             name: 'Test Deck Usuario',
@@ -536,7 +537,7 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
     describe('POST /cards (crear carta)', () => {
       it('debería rechazar sin autenticación (401)', async () => {
         await request(app.getHttpServer())
-          .post('/cards')
+          .post('/api/v1/cards')
           .send({
             name: 'Test Card',
             category: 'arcanos_mayores',
@@ -552,12 +553,12 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
       it('debería rechazar usuario no-admin con DTO válido (403)', async () => {
         // Primero obtenemos un deckId válido
         const decksResponse = await request(app.getHttpServer())
-          .get('/decks')
+          .get('/api/v1/decks')
           .expect(200);
         const deckId = (decksResponse.body as TarotDeckResponse[])[0].id;
 
         const response = await request(app.getHttpServer())
-          .post('/cards')
+          .post('/api/v1/cards')
           .set('Authorization', `Bearer ${userToken}`)
           .send({
             name: 'Test Card Usuario',
@@ -580,7 +581,7 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
     describe('POST /spreads (crear tirada)', () => {
       it('debería rechazar sin autenticación (401)', async () => {
         await request(app.getHttpServer())
-          .post('/spreads')
+          .post('/api/v1/spreads')
           .send({
             name: 'Test Spread',
             description: 'Test',
@@ -592,7 +593,7 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
 
       it('debería rechazar usuario no-admin con DTO válido (403)', async () => {
         const response = await request(app.getHttpServer())
-          .post('/spreads')
+          .post('/api/v1/spreads')
           .set('Authorization', `Bearer ${userToken}`)
           .send({
             name: 'Test Spread Usuario',
@@ -621,7 +622,7 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
       // Este test verifica que el endpoint no falla aunque retorne array vacío
       // En producción tenemos seeders, pero la API debe ser robusta
       const response = await request(app.getHttpServer())
-        .get('/cards')
+        .get('/api/v1/cards')
         .expect(200);
 
       expect(Array.isArray(response.body)).toBe(true);
@@ -629,7 +630,7 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
 
     it('GET /spreads con BD vacía de spreads no debería fallar', async () => {
       const response = await request(app.getHttpServer())
-        .get('/spreads')
+        .get('/api/v1/spreads')
         .expect(200);
 
       expect(Array.isArray(response.body)).toBe(true);
@@ -637,7 +638,7 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
 
     it('keywords de cartas debería ser string con palabras separadas por coma', async () => {
       const response = await request(app.getHttpServer())
-        .get('/cards')
+        .get('/api/v1/cards')
         .expect(200);
 
       const cards = response.body as TarotCardResponse[];
@@ -652,7 +653,7 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
 
     it('positions de spread debería tener estructura correcta', async () => {
       const response = await request(app.getHttpServer())
-        .get('/spreads')
+        .get('/api/v1/spreads')
         .expect(200);
 
       const spreads = response.body as TarotSpreadResponse[];

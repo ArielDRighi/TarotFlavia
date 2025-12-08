@@ -13,6 +13,7 @@ describe('Cache Admin Endpoints (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     await app.init();
   });
 
@@ -23,7 +24,7 @@ describe('Cache Admin Endpoints (e2e)', () => {
   describe('DELETE /admin/cache/tarotistas/:id', () => {
     it('should invalidate cache for a specific tarotista', async () => {
       const response = await request(app.getHttpServer())
-        .delete('/admin/cache/tarotistas/1')
+        .delete('/api/v1/admin/cache/tarotistas/1')
         .expect(200);
 
       expect(response.body).toHaveProperty('deletedCount');
@@ -35,7 +36,7 @@ describe('Cache Admin Endpoints (e2e)', () => {
 
     it('should return 400 for invalid tarotista ID', async () => {
       await request(app.getHttpServer())
-        .delete('/admin/cache/tarotistas/invalid')
+        .delete('/api/v1/admin/cache/tarotistas/invalid')
         .expect(400);
     });
   });
@@ -43,7 +44,7 @@ describe('Cache Admin Endpoints (e2e)', () => {
   describe('DELETE /admin/cache/tarotistas/:id/meanings', () => {
     it('should invalidate cache for specific card meanings', async () => {
       const response = await request(app.getHttpServer())
-        .delete('/admin/cache/tarotistas/1/meanings')
+        .delete('/api/v1/admin/cache/tarotistas/1/meanings')
         .query({ cardIds: '5,10,15' })
         .expect(200);
 
@@ -55,13 +56,13 @@ describe('Cache Admin Endpoints (e2e)', () => {
 
     it('should require cardIds query parameter', async () => {
       await request(app.getHttpServer())
-        .delete('/admin/cache/tarotistas/1/meanings')
+        .delete('/api/v1/admin/cache/tarotistas/1/meanings')
         .expect(400);
     });
 
     it('should validate cardIds format', async () => {
       await request(app.getHttpServer())
-        .delete('/admin/cache/tarotistas/1/meanings')
+        .delete('/api/v1/admin/cache/tarotistas/1/meanings')
         .query({ cardIds: 'invalid,ids' })
         .expect(400);
     });
@@ -70,7 +71,7 @@ describe('Cache Admin Endpoints (e2e)', () => {
   describe('DELETE /admin/cache/global', () => {
     it('should clear all cache entries', async () => {
       const response = await request(app.getHttpServer())
-        .delete('/admin/cache/global')
+        .delete('/api/v1/admin/cache/global')
         .expect(200);
 
       expect(response.body).toHaveProperty('message');
@@ -83,7 +84,7 @@ describe('Cache Admin Endpoints (e2e)', () => {
   describe('GET /admin/cache/stats', () => {
     it('should return cache statistics', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/cache/stats')
+        .get('/api/v1/admin/cache/stats')
         .expect(200);
 
       expect(response.body).toHaveProperty('total');
@@ -103,7 +104,7 @@ describe('Cache Admin Endpoints (e2e)', () => {
 
     it('should include invalidation metrics', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/cache/stats')
+        .get('/api/v1/admin/cache/stats')
         .expect(200);
 
       const body = response.body as {
@@ -122,7 +123,7 @@ describe('Cache Admin Endpoints (e2e)', () => {
   describe('Cache Invalidation Logs', () => {
     it('should log invalidation when deleting tarotista cache', async () => {
       const response = await request(app.getHttpServer())
-        .delete('/admin/cache/tarotistas/1')
+        .delete('/api/v1/admin/cache/tarotistas/1')
         .expect(200);
 
       expect(response.body).toHaveProperty('timestamp');

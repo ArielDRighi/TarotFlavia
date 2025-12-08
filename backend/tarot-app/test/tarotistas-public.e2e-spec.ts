@@ -19,6 +19,7 @@ describe('Tarotistas Públicos E2E', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -203,7 +204,7 @@ describe('Tarotistas Públicos E2E', () => {
 
   describe('GET /tarotistas - Listar tarotistas públicos', () => {
     it('should return list of active tarotistas without authentication', async () => {
-      const response = await request(httpServer).get('/tarotistas').expect(200);
+      const response = await request(httpServer).get('/api/v1/tarotistas').expect(200);
 
       type TarotistasList = {
         data: unknown[];
@@ -230,7 +231,7 @@ describe('Tarotistas Públicos E2E', () => {
 
     it('should apply search filter by nombrePublico', async () => {
       const response = await request(httpServer)
-        .get('/tarotistas')
+        .get('/api/v1/tarotistas')
         .query({ search: 'Luna' })
         .expect(200);
 
@@ -247,7 +248,7 @@ describe('Tarotistas Públicos E2E', () => {
 
     it('should apply search filter by bio', async () => {
       const response = await request(httpServer)
-        .get('/tarotistas')
+        .get('/api/v1/tarotistas')
         .query({ search: 'finanzas' })
         .expect(200);
 
@@ -264,7 +265,7 @@ describe('Tarotistas Públicos E2E', () => {
 
     it('should filter by especialidad (Amor)', async () => {
       const response = await request(httpServer)
-        .get('/tarotistas')
+        .get('/api/v1/tarotistas')
         .query({ especialidad: 'Amor' })
         .expect(200);
 
@@ -281,7 +282,7 @@ describe('Tarotistas Públicos E2E', () => {
 
     it('should filter by especialidad (Trabajo)', async () => {
       const response = await request(httpServer)
-        .get('/tarotistas')
+        .get('/api/v1/tarotistas')
         .query({ especialidad: 'Trabajo' })
         .expect(200);
 
@@ -298,7 +299,7 @@ describe('Tarotistas Públicos E2E', () => {
 
     it('should order by rating DESC (default for rating)', async () => {
       const response = await request(httpServer)
-        .get('/tarotistas')
+        .get('/api/v1/tarotistas')
         .query({ orderBy: 'rating', order: 'DESC' })
         .expect(200);
 
@@ -318,7 +319,7 @@ describe('Tarotistas Públicos E2E', () => {
 
     it('should order by totalLecturas DESC', async () => {
       const response = await request(httpServer)
-        .get('/tarotistas')
+        .get('/api/v1/tarotistas')
         .query({ orderBy: 'totalLecturas', order: 'DESC' })
         .expect(200);
 
@@ -337,7 +338,7 @@ describe('Tarotistas Públicos E2E', () => {
 
     it('should order by nombrePublico ASC (alphabetical)', async () => {
       const response = await request(httpServer)
-        .get('/tarotistas')
+        .get('/api/v1/tarotistas')
         .query({ orderBy: 'nombrePublico', order: 'ASC' })
         .expect(200);
 
@@ -356,7 +357,7 @@ describe('Tarotistas Públicos E2E', () => {
 
     it('should apply pagination (page 1, limit 1)', async () => {
       const response = await request(httpServer)
-        .get('/tarotistas')
+        .get('/api/v1/tarotistas')
         .query({ page: 1, limit: 1 })
         .expect(200);
 
@@ -378,27 +379,27 @@ describe('Tarotistas Públicos E2E', () => {
 
     it('should validate page (reject page = 0)', async () => {
       await request(httpServer)
-        .get('/tarotistas')
+        .get('/api/v1/tarotistas')
         .query({ page: 0 })
         .expect(400);
     });
 
     it('should validate limit (reject limit > 100)', async () => {
       await request(httpServer)
-        .get('/tarotistas')
+        .get('/api/v1/tarotistas')
         .query({ limit: 101 })
         .expect(400);
     });
 
     it('should validate orderBy (reject invalid value)', async () => {
       await request(httpServer)
-        .get('/tarotistas')
+        .get('/api/v1/tarotistas')
         .query({ orderBy: 'invalidField' })
         .expect(400);
     });
 
     it('should NOT expose sensitive data (configs, customCardMeanings)', async () => {
-      const response = await request(httpServer).get('/tarotistas').expect(200);
+      const response = await request(httpServer).get('/api/v1/tarotistas').expect(200);
 
       type TarotistaData = {
         id: number;
@@ -421,7 +422,7 @@ describe('Tarotistas Públicos E2E', () => {
   describe('GET /tarotistas/:id - Ver perfil público', () => {
     it('should return public profile of active tarotista', async () => {
       const response = await request(httpServer)
-        .get(`/tarotistas/${tarotistaId1}`)
+        .get(`/api/v1/tarotistas/${tarotistaId1}`)
         .expect(200);
 
       type TarotistaProfile = {
@@ -454,20 +455,20 @@ describe('Tarotistas Públicos E2E', () => {
 
     it('should return 404 for inactive tarotista', async () => {
       // Tarotista3 is inactive
-      await request(httpServer).get(`/tarotistas/${tarotistaId3}`).expect(404);
+      await request(httpServer).get(`/api/v1/tarotistas/${tarotistaId3}`).expect(404);
     });
 
     it('should return 404 for non-existent tarotista', async () => {
-      await request(httpServer).get('/tarotistas/99999').expect(404);
+      await request(httpServer).get('/api/v1/tarotistas/99999').expect(404);
     });
 
     it('should reject invalid id (non-numeric)', async () => {
-      await request(httpServer).get('/tarotistas/invalid').expect(400);
+      await request(httpServer).get('/api/v1/tarotistas/invalid').expect(400);
     });
 
     it('should NOT expose sensitive data in profile', async () => {
       const response = await request(httpServer)
-        .get(`/tarotistas/${tarotistaId1}`)
+        .get(`/api/v1/tarotistas/${tarotistaId1}`)
         .expect(200);
 
       type TarotistaProfile = {
@@ -490,7 +491,7 @@ describe('Tarotistas Públicos E2E', () => {
   describe('Security - SQL Injection Prevention', () => {
     it('should escape special characters in search query', async () => {
       const response = await request(httpServer)
-        .get('/tarotistas')
+        .get('/api/v1/tarotistas')
         .query({ search: "%'; DROP TABLE tarotistas; --" })
         .expect(200);
 
@@ -504,7 +505,7 @@ describe('Tarotistas Públicos E2E', () => {
 
     it('should handle special characters in especialidad filter', async () => {
       const response = await request(httpServer)
-        .get('/tarotistas')
+        .get('/api/v1/tarotistas')
         .query({ especialidad: "'; DROP TABLE tarotistas; --" })
         .expect(200);
 
@@ -520,7 +521,7 @@ describe('Tarotistas Públicos E2E', () => {
   describe('Edge Cases', () => {
     it('should return empty list when no tarotistas match filters', async () => {
       const response = await request(httpServer)
-        .get('/tarotistas')
+        .get('/api/v1/tarotistas')
         .query({ search: 'NonexistentTarotista12345' })
         .expect(200);
 
@@ -538,7 +539,7 @@ describe('Tarotistas Públicos E2E', () => {
 
     it('should handle multiple filters combined', async () => {
       const response = await request(httpServer)
-        .get('/tarotistas')
+        .get('/api/v1/tarotistas')
         .query({
           search: 'Luna',
           especialidad: 'Amor',
