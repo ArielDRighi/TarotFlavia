@@ -21,6 +21,9 @@ import { TarotInterpretation } from '../../src/modules/tarot/interpretations/ent
 import { Tarotista } from '../../src/modules/tarotistas/entities/tarotista.entity';
 import { setupDefaultTarotista } from '../helpers/setup-default-tarotista';
 
+// Increase timeout for AI integration tests (AI calls can take longer)
+jest.setTimeout(30000);
+
 describe('Readings + Interpretations + AI Integration Tests', () => {
   let app: INestApplication;
   let dataSource: DataSource;
@@ -196,11 +199,11 @@ describe('Readings + Interpretations + AI Integration Tests', () => {
   afterEach(async () => {
     // Limpiar usando repositories para evitar problemas de nombres de columnas
     if (testUser?.id) {
-      // Delete AI usage logs first (foreign key to user)
+      // Delete AI usage logs first (references user)
       const aiUsageLogRepo = dataSource.getRepository('AIUsageLog');
       await aiUsageLogRepo.delete({ userId: testUser.id });
 
-      // Delete readings (foreign key to user)
+      // Delete readings (foreign key)
       const readingRepo = dataSource.getRepository('TarotReading');
       await readingRepo.delete({ user: { id: testUser.id } });
 

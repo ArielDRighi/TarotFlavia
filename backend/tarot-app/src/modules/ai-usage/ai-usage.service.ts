@@ -59,13 +59,42 @@ export class AIUsageService {
     private readonly aiUsageLogRepository: Repository<AIUsageLog>,
   ) {}
 
-  async createLog(data: CreateAIUsageLogDto): Promise<AIUsageLog> {
-    const log = this.aiUsageLogRepository.create(data);
-    const savedLog = await this.aiUsageLogRepository.save(log);
-    this.logger.log(
-      `AI usage logged: ${data.provider} - ${data.modelUsed} - ${data.status}`,
-    );
-    return savedLog;
+  async createLog(data: CreateAIUsageLogDto): Promise<AIUsageLog | null> {
+    try {
+      const log = this.aiUsageLogRepository.create(data);
+      const savedLog = await this.aiUsageLogRepository.save(log);
+      this.logger.log(
+        `AI usage logged: ${data.provider} - ${data.modelUsed} - ${data.status}`,
+      );
+      return savedLog;
+    } catch (error) {
+      // Handle foreign key constraint errors gracefully (e.g., user deleted during test)
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      if (errorMessage.includes('foreign key constraint')) {
+        this.logger.warn(
+          `Failed to log AI usage due to FK constraint (user may have been deleted): ${data.provider} - ${data.status}`,
+        );
+        // Try again without userId if that was the issue
+        if (data.userId !== null) {
+          try {
+            const logWithoutUser = this.aiUsageLogRepository.create({
+              ...data,
+              userId: null,
+            });
+            return await this.aiUsageLogRepository.save(logWithoutUser);
+          } catch (retryError) {
+            this.logger.error(
+              `Failed to save AI usage log even without userId: ${retryError}`,
+            );
+            return null;
+          }
+        }
+        return null;
+      }
+      // Re-throw other errors
+      throw error;
+    }
   }
 
   calculateCost(

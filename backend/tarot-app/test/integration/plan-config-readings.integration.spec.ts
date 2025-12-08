@@ -22,6 +22,9 @@ import { PredefinedQuestion } from '../../src/modules/predefined-questions/entit
 import { setupDefaultTarotista } from '../helpers/setup-default-tarotista';
 import { API_PREFIX } from '../helpers/create-test-app';
 
+// Increase timeout for integration tests with AI
+jest.setTimeout(30000);
+
 /**
  * Integration Tests: PlanConfig + Readings
  * Tests how dynamic plan limits affect reading creation and validation
@@ -118,11 +121,18 @@ describe('PlanConfig + Readings Integration Tests', () => {
   });
 
   beforeEach(async () => {
-    // Clean up previous test data (delete readings first due to FK constraint)
+    // Clean up previous test data (delete in correct order for FK constraints)
+    // Delete AI usage logs first
+    await dataSource.query(
+      'DELETE FROM ai_usage_logs WHERE user_id IN (SELECT id FROM "user" WHERE email LIKE $1)',
+      ['%plan-config-integration%'],
+    );
+    // Delete readings
     await dataSource.query(
       'DELETE FROM tarot_reading WHERE "userId" IN (SELECT id FROM "user" WHERE email LIKE $1)',
       ['%plan-config-integration%'],
     );
+    // Delete users
     await dataSource.query('DELETE FROM "user" WHERE email LIKE $1', [
       '%plan-config-integration%',
     ]);

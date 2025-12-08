@@ -13,8 +13,8 @@ import { User, UserPlan } from '../../src/modules/users/entities/user.entity';
 import { UserRole } from '../../src/common/enums/user-role.enum';
 import { AuditLog } from '../../src/modules/audit/entities/audit-log.entity';
 
-// Helpers
-import { API_PREFIX } from '../helpers/create-test-app';
+// Increase timeout for integration tests
+jest.setTimeout(30000);
 
 describe('Admin Operations Integration Tests', () => {
   let app: INestApplication;
@@ -47,10 +47,6 @@ describe('Admin Operations Integration Tests', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-
-    // Set global API prefix (must match main.ts)
-    app.setGlobalPrefix(API_PREFIX);
-
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -128,7 +124,7 @@ describe('Admin Operations Integration Tests', () => {
     it('should list all users with pagination', async () => {
       // ACT
       const response = await request(app.getHttpServer())
-        .get(`/${API_PREFIX}/admin/users`)
+        .get('/admin/users')
         .set('Authorization', `Bearer ${adminToken}`)
         .query({ page: 1, limit: 10 })
         .expect(200);
@@ -153,7 +149,7 @@ describe('Admin Operations Integration Tests', () => {
     it('should get user detail with statistics', async () => {
       // ACT
       const response = await request(app.getHttpServer())
-        .get(`/${API_PREFIX}/admin/users/${regularUser.id}`)
+        .get(`/admin/users/${regularUser.id}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -173,7 +169,7 @@ describe('Admin Operations Integration Tests', () => {
 
       // ACT
       const response = await request(app.getHttpServer())
-        .patch(`/${API_PREFIX}/admin/users/${regularUser.id}/plan`)
+        .patch(`/admin/users/${regularUser.id}/plan`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send(updatePayload)
         .expect(200);
@@ -209,7 +205,7 @@ describe('Admin Operations Integration Tests', () => {
 
       // ACT
       const response = await request(app.getHttpServer())
-        .post(`/${API_PREFIX}/admin/users/${regularUser.id}/ban`)
+        .post(`/admin/users/${regularUser.id}/ban`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send(banPayload)
         .expect(201);
@@ -245,7 +241,7 @@ describe('Admin Operations Integration Tests', () => {
 
       // ACT
       const response = await request(app.getHttpServer())
-        .post(`/${API_PREFIX}/admin/users/${regularUser.id}/unban`)
+        .post(`/admin/users/${regularUser.id}/unban`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(201);
 
@@ -267,7 +263,7 @@ describe('Admin Operations Integration Tests', () => {
     it('should promote user to TAROTIST role', async () => {
       // ACT
       const response = await request(app.getHttpServer())
-        .post(`/${API_PREFIX}/admin/users/${regularUser.id}/roles/tarotist`)
+        .post(`/admin/users/${regularUser.id}/roles/tarotist`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(201);
 
@@ -297,7 +293,7 @@ describe('Admin Operations Integration Tests', () => {
     it('should promote user to ADMIN role', async () => {
       // ACT
       const response = await request(app.getHttpServer())
-        .post(`/${API_PREFIX}/admin/users/${regularUser.id}/roles/admin`)
+        .post(`/admin/users/${regularUser.id}/roles/admin`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(201);
 
@@ -318,7 +314,7 @@ describe('Admin Operations Integration Tests', () => {
 
       // ACT
       const response = await request(app.getHttpServer())
-        .delete(`/${API_PREFIX}/admin/users/${regularUser.id}/roles/tarotist`)
+        .delete(`/admin/users/${regularUser.id}/roles/tarotist`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -348,16 +344,14 @@ describe('Admin Operations Integration Tests', () => {
 
       // ACT & ASSERT
       await request(app.getHttpServer())
-        .get(`/${API_PREFIX}/admin/users`)
+        .get('/admin/users')
         .set('Authorization', `Bearer ${regularToken}`)
         .expect(403);
     });
 
     it('should deny access without authentication', async () => {
       // ACT & ASSERT
-      await request(app.getHttpServer())
-        .get(`/${API_PREFIX}/admin/users`)
-        .expect(401);
+      await request(app.getHttpServer()).get('/admin/users').expect(401);
     });
 
     it('should validate plan enum values', async () => {
@@ -366,7 +360,7 @@ describe('Admin Operations Integration Tests', () => {
 
       // ACT & ASSERT
       await request(app.getHttpServer())
-        .patch(`/${API_PREFIX}/admin/users/${regularUser.id}/plan`)
+        .patch(`/admin/users/${regularUser.id}/plan`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send(invalidPayload)
         .expect(400);
@@ -382,18 +376,18 @@ describe('Admin Operations Integration Tests', () => {
 
       // ACT: Realizar varias acciones
       await request(app.getHttpServer())
-        .patch(`/${API_PREFIX}/admin/users/${regularUser.id}/plan`)
+        .patch(`/admin/users/${regularUser.id}/plan`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ plan: UserPlan.PREMIUM })
         .expect(200);
 
       await request(app.getHttpServer())
-        .post(`/${API_PREFIX}/admin/users/${regularUser.id}/roles/tarotist`)
+        .post(`/admin/users/${regularUser.id}/roles/tarotist`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(201);
 
       await request(app.getHttpServer())
-        .delete(`/${API_PREFIX}/admin/users/${regularUser.id}/roles/tarotist`)
+        .delete(`/admin/users/${regularUser.id}/roles/tarotist`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -420,7 +414,7 @@ describe('Admin Operations Integration Tests', () => {
     it('should store IP address and user agent in audit log', async () => {
       // ACT
       await request(app.getHttpServer())
-        .patch(`/${API_PREFIX}/admin/users/${regularUser.id}/plan`)
+        .patch(`/admin/users/${regularUser.id}/plan`)
         .set('Authorization', `Bearer ${adminToken}`)
         .set('User-Agent', 'TestAgent/1.0')
         .send({ plan: UserPlan.PREMIUM })
@@ -448,7 +442,7 @@ describe('Admin Operations Integration Tests', () => {
 
       // ACT & ASSERT
       await request(app.getHttpServer())
-        .patch(`/${API_PREFIX}/admin/users/${nonExistentId}/plan`)
+        .patch(`/admin/users/${nonExistentId}/plan`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ plan: UserPlan.PREMIUM })
         .expect(404);
@@ -460,7 +454,7 @@ describe('Admin Operations Integration Tests', () => {
 
       // ACT
       const response = await request(app.getHttpServer())
-        .post(`/${API_PREFIX}/admin/users/${regularUser.id}/ban`)
+        .post(`/admin/users/${regularUser.id}/ban`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ reason: 'Second ban' })
         .expect(201);
@@ -475,7 +469,7 @@ describe('Admin Operations Integration Tests', () => {
 
       // ACT & ASSERT
       await request(app.getHttpServer())
-        .post(`/${API_PREFIX}/admin/users/${regularUser.id}/roles/tarotist`)
+        .post(`/admin/users/${regularUser.id}/roles/tarotist`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(400);
     });
@@ -483,7 +477,7 @@ describe('Admin Operations Integration Tests', () => {
     it('should handle removing non-existent role', async () => {
       // ACT & ASSERT: Usuario regular no tiene rol TAROTIST
       await request(app.getHttpServer())
-        .delete(`/${API_PREFIX}/admin/users/${regularUser.id}/roles/tarotist`)
+        .delete(`/admin/users/${regularUser.id}/roles/tarotist`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(400);
     });

@@ -64,6 +64,7 @@ describe('AIUsageService', () => {
 
       expect(mockRepository.create).toHaveBeenCalledWith(logData);
       expect(mockRepository.save).toHaveBeenCalledWith(logData);
+      expect(result).not.toBeNull();
       expect(result).toEqual(savedLog);
     });
 
@@ -89,9 +90,10 @@ describe('AIUsageService', () => {
 
       const result = await service.createLog(logData);
 
-      expect(result.status).toBe(AIUsageStatus.ERROR);
-      expect(result.errorMessage).toBe('Rate limit exceeded');
-      expect(result.fallbackUsed).toBe(true);
+      expect(result).not.toBeNull();
+      expect(result!.status).toBe(AIUsageStatus.ERROR);
+      expect(result!.errorMessage).toBe('Rate limit exceeded');
+      expect(result!.fallbackUsed).toBe(true);
     });
 
     it('should create a log with cached status', async () => {
@@ -116,9 +118,10 @@ describe('AIUsageService', () => {
 
       const result = await service.createLog(logData);
 
-      expect(result.status).toBe(AIUsageStatus.CACHED);
-      expect(result.totalTokens).toBe(0);
-      expect(result.costUsd).toBe(0);
+      expect(result).not.toBeNull();
+      expect(result!.status).toBe(AIUsageStatus.CACHED);
+      expect(result!.totalTokens).toBe(0);
+      expect(result!.costUsd).toBe(0);
     });
   });
 

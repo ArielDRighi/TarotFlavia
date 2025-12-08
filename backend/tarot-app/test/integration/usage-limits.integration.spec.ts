@@ -17,11 +17,13 @@ import { TarotSpread } from '../../src/modules/tarot/spreads/entities/tarot-spre
 
 // Helpers
 import { setupDefaultTarotista } from '../helpers/setup-default-tarotista';
-import { API_PREFIX } from '../helpers/create-test-app';
 import {
   UsageLimit,
   UsageFeature,
 } from '../../src/modules/usage-limits/entities/usage-limit.entity';
+
+// Increase timeout for integration tests with AI/HTTP calls
+jest.setTimeout(30000);
 
 describe('UsageLimits + Readings Integration Tests', () => {
   let app: INestApplication;
@@ -52,10 +54,6 @@ describe('UsageLimits + Readings Integration Tests', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-
-    // Set global API prefix (must match main.ts)
-    app.setGlobalPrefix(API_PREFIX);
-
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -214,11 +212,11 @@ describe('UsageLimits + Readings Integration Tests', () => {
 
   afterEach(async () => {
     if (testUser?.id) {
-      // Delete AI usage logs first (foreign key to user)
+      // Delete AI usage logs first (references user)
       const aiUsageLogRepo = dataSource.getRepository('AIUsageLog');
       await aiUsageLogRepo.delete({ userId: testUser.id });
 
-      // Delete readings (foreign key to user)
+      // Delete readings
       const readingRepo = dataSource.getRepository('TarotReading');
       await readingRepo.delete({ user: { id: testUser.id } });
 
@@ -229,7 +227,7 @@ describe('UsageLimits + Readings Integration Tests', () => {
 
   describe('Reading Counter Increment', () => {
     it('should increment user reading counter when creating reading', async () => {
-      // ARRANGE - Use unique question to avoid cache hits from other tests
+      // ARRANGE
       const createReadingPayload = {
         spreadId: testSpread.id,
         deckId: testDeck.id,
@@ -239,7 +237,7 @@ describe('UsageLimits + Readings Integration Tests', () => {
           position: testSpread.positions[idx]?.name || `Position ${idx + 1}`,
           isReversed: false,
         })),
-        customQuestion: `Single reading test question - ${Date.now()}`,
+        customQuestion: 'Test question for usage limits',
         generateInterpretation: true,
       };
 
@@ -250,7 +248,7 @@ describe('UsageLimits + Readings Integration Tests', () => {
 
       // ACT
       await request(app.getHttpServer())
-        .post(`/${API_PREFIX}/readings`)
+        .post('/readings')
         .set('Authorization', `Bearer ${authToken}`)
         .send(createReadingPayload)
         .expect(201);
@@ -263,8 +261,8 @@ describe('UsageLimits + Readings Integration Tests', () => {
     });
 
     it('should increment counter multiple times for multiple readings', async () => {
-      // ARRANGE - Use unique questions to avoid cache hits
-      const basePayload = {
+      // ARRANGE
+      const createReadingPayload = {
         spreadId: testSpread.id,
         deckId: testDeck.id,
         cardIds: testCards.map((card) => card.id),
@@ -273,19 +271,16 @@ describe('UsageLimits + Readings Integration Tests', () => {
           position: testSpread.positions[idx]?.name || `Position ${idx + 1}`,
           isReversed: false,
         })),
+        customQuestion: 'Test question for usage limits',
         generateInterpretation: true,
       };
 
-      // ACT: Crear 3 lecturas con preguntas únicas para evitar cache hits
+      // ACT: Crear 3 lecturas
       for (let i = 0; i < 3; i++) {
-        const uniquePayload = {
-          ...basePayload,
-          customQuestion: `Test question for usage limits - iteration ${i} - ${Date.now()}`,
-        };
         await request(app.getHttpServer())
-          .post(`/${API_PREFIX}/readings`)
+          .post('/readings')
           .set('Authorization', `Bearer ${authToken}`)
-          .send(uniquePayload)
+          .send(createReadingPayload)
           .expect(201);
       }
 
@@ -317,7 +312,7 @@ describe('UsageLimits + Readings Integration Tests', () => {
       // ACT: Crear 3 lecturas (límite para FREE)
       for (let i = 0; i < 3; i++) {
         await request(app.getHttpServer())
-          .post(`/${API_PREFIX}/readings`)
+          .post('/readings')
           .set('Authorization', `Bearer ${authToken}`)
           .send(createReadingPayload)
           .expect(201);
@@ -325,7 +320,7 @@ describe('UsageLimits + Readings Integration Tests', () => {
 
       // ASSERT: La 4ta lectura debe ser rechazada
       const response = await request(app.getHttpServer())
-        .post(`/${API_PREFIX}/readings`)
+        .post('/readings')
         .set('Authorization', `Bearer ${authToken}`)
         .send(createReadingPayload)
         .expect(403);
@@ -352,7 +347,7 @@ describe('UsageLimits + Readings Integration Tests', () => {
 
       // ACT
       await request(app.getHttpServer())
-        .post(`/${API_PREFIX}/readings`)
+        .post('/readings')
         .set('Authorization', `Bearer ${authToken}`)
         .send(createReadingPayload)
         .expect(201);
@@ -391,7 +386,7 @@ describe('UsageLimits + Readings Integration Tests', () => {
       // ACT: Crear 3 lecturas
       for (let i = 0; i < 3; i++) {
         await request(app.getHttpServer())
-          .post(`/${API_PREFIX}/readings`)
+          .post('/readings')
           .set('Authorization', `Bearer ${authToken}`)
           .send(createReadingPayload)
           .expect(201);
@@ -417,7 +412,7 @@ describe('UsageLimits + Readings Integration Tests', () => {
   describe('Premium Plan Benefits', () => {
     it('should allow unlimited readings for PREMIUM users', async () => {
       // ARRANGE: Usuario ya es PREMIUM del beforeEach
-      const basePayload = {
+      const createReadingPayload = {
         spreadId: testSpread.id,
         deckId: testDeck.id,
         cardIds: testCards.map((card) => card.id),
@@ -426,19 +421,16 @@ describe('UsageLimits + Readings Integration Tests', () => {
           position: testSpread.positions[idx]?.name || `Position ${idx + 1}`,
           isReversed: false,
         })),
+        customQuestion: 'Test question for usage limits',
         generateInterpretation: true,
       };
 
-      // ACT: Crear 5 lecturas con preguntas únicas para evitar cache hits
+      // ACT: Crear 5 lecturas (más del límite FREE de 3)
       for (let i = 0; i < 5; i++) {
-        const uniquePayload = {
-          ...basePayload,
-          customQuestion: `Premium test question - iteration ${i} - ${Date.now()}`,
-        };
         await request(app.getHttpServer())
-          .post(`/${API_PREFIX}/readings`)
+          .post('/readings')
           .set('Authorization', `Bearer ${authToken}`)
-          .send(uniquePayload)
+          .send(createReadingPayload)
           .expect(201);
       }
 

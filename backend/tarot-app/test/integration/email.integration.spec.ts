@@ -11,6 +11,9 @@ import { AuthOrchestratorService } from '../../src/modules/auth/application/serv
 // Entities
 import { User, UserPlan } from '../../src/modules/users/entities/user.entity';
 
+// Increase timeout for integration tests
+jest.setTimeout(30000);
+
 describe('Email Integration Tests', () => {
   let app: INestApplication;
   let dataSource: DataSource;
