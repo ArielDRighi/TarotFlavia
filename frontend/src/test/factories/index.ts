@@ -8,5 +8,6 @@
 export {
   createMockTarotCard,
   createMockDailyReading,
+  createMockDailyReadingHistoryItem,
   createMockUser,
 } from './dailyReading.factory';
