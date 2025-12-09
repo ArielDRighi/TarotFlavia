@@ -1825,20 +1825,23 @@ Crear funciones API y hooks para obtener carta del día.
 
 Archivos creados:
 
-- `src/types/reading.types.ts` - Tipos DailyReading, DailyReadingCard, PaginatedDailyReadings
+- `src/types/reading.types.ts` - Tipos TarotCard, DailyReading, DailyReadingHistoryItem, PaginatedDailyReadings
 - `src/lib/api/endpoints.ts` - Endpoints DAILY_READING (BASE, TODAY, HISTORY, REGENERATE)
-- `src/lib/api/daily-reading-api.ts` - Funciones API con manejo de errores Premium
-- `src/lib/api/daily-reading-api.test.ts` - 11 tests (100% coverage)
-- `src/hooks/api/useDailyReading.ts` - Hooks TanStack Query
-- `src/hooks/api/useDailyReading.test.tsx` - 11 tests (100% coverage)
+- `src/lib/api/daily-reading-api.ts` - Funciones API con manejo de errores Premium y 409
+- `src/lib/api/daily-reading-api.test.ts` - Tests (100% coverage)
+- `src/hooks/api/useDailyReading.ts` - Hooks TanStack Query con invalidación completa
+- `src/hooks/api/useDailyReading.test.tsx` - Tests (100% coverage)
 
 Decisiones:
 
 - Hooks ubicados en `hooks/api/` (siguiendo patrón existente, no `hooks/queries/`)
 - Manejo específico de error 403 para Premium requerido
-- Manejo específico de error 404 retornando null en getDailyReadingToday
+- Manejo específico de error 409 para "ya tienes carta del día"
+- GET /today retorna null (status 200) cuando no existe daily reading
+- Tipos coinciden exactamente con backend DTOs (readingDate, wasRegenerated, isReversed)
+- PaginatedDailyReadings usa estructura plana (items, total, page, limit, totalPages)
 
-Tests: 22 tests nuevos, 712 tests totales pasando
+Tests actualizados tras PR feedback
 Coverage: 100% en nuevos archivos
 
 ---

@@ -12,7 +12,7 @@ import {
   getDailyReadingHistory,
   regenerateDailyReading,
 } from './daily-reading-api';
-import type { DailyReading, PaginatedDailyReadings } from '@/types';
+import type { DailyReading, PaginatedDailyReadings, DailyReadingHistoryItem } from '@/types';
 
 // Mock apiClient
 vi.mock('./axios-config', () => ({
@@ -22,47 +22,59 @@ vi.mock('./axios-config', () => ({
   },
 }));
 
-// Mock data
+// Mock data matching backend DailyReadingResponseDto
 const mockDailyReading: DailyReading = {
   id: 1,
   userId: 1,
+  tarotistaId: 1,
   card: {
     id: 1,
     name: 'El Mago',
-    arcana: 'major',
     number: 1,
-    suit: null,
-    orientation: 'upright',
+    category: 'arcanos_mayores',
     imageUrl: '/cards/magician.jpg',
+    reversedImageUrl: '/cards/magician-reversed.jpg',
+    meaningUpright: 'Manifestación, poder personal',
+    meaningReversed: 'Manipulación, engaño',
+    description: 'El Mago representa el poder de la voluntad',
+    keywords: 'voluntad, acción, manifestación',
+    deckId: 1,
+    createdAt: new Date('2025-01-01'),
+    updatedAt: new Date('2025-01-01'),
   },
+  isReversed: false,
   interpretation:
     'El Mago te indica que tienes todas las herramientas necesarias para lograr tus metas hoy.',
-  date: '2025-12-09',
-  isRegenerated: false,
-  createdAt: '2025-12-09T08:00:00Z',
+  readingDate: '2025-12-09',
+  wasRegenerated: false,
+  createdAt: new Date('2025-12-09T08:00:00Z'),
+};
+
+// Mock data matching backend DailyReadingHistoryDto (flat structure)
+const mockHistoryItem: DailyReadingHistoryItem = {
+  id: 1,
+  readingDate: '2025-12-09',
+  cardName: 'El Mago',
+  isReversed: false,
+  interpretationSummary: 'El Mago te indica que tienes todas las herramientas necesarias...',
+  wasRegenerated: false,
+  createdAt: new Date('2025-12-09T08:00:00Z'),
 };
 
 const mockPaginatedDailyReadings: PaginatedDailyReadings = {
-  data: [
-    mockDailyReading,
+  items: [
+    mockHistoryItem,
     {
-      ...mockDailyReading,
+      ...mockHistoryItem,
       id: 2,
-      date: '2025-12-08',
-      card: {
-        ...mockDailyReading.card,
-        id: 2,
-        name: 'La Sacerdotisa',
-        number: 2,
-      },
+      readingDate: '2025-12-08',
+      cardName: 'La Sacerdotisa',
     },
   ],
-  meta: {
-    page: 1,
-    limit: 10,
-    totalItems: 2,
-    totalPages: 1,
-  },
+  total: 2,
+  page: 1,
+  limit: 10,
+  totalPages: 1,
 };
 
 describe('daily-reading-api', () => {
@@ -83,10 +95,17 @@ describe('daily-reading-api', () => {
       expect(result).toEqual(mockDailyReading);
     });
 
-    it('should throw error with clear message on failure', async () => {
+    it('should throw specific error when daily reading already exists (409)', async () => {
+      const error = { response: { status: 409 } };
+      vi.mocked(apiClient.post).mockRejectedValueOnce(error);
+
+      await expect(getDailyReading()).rejects.toThrow('Ya tienes una carta del día para hoy');
+    });
+
+    it('should throw generic error for non-409 errors', async () => {
       vi.mocked(apiClient.post).mockRejectedValueOnce(new Error('Network error'));
 
-      await expect(getDailyReading()).rejects.toThrow('Error al obtener carta del día');
+      await expect(getDailyReading()).rejects.toThrow('Error al crear carta del día');
     });
   });
 
@@ -103,19 +122,13 @@ describe('daily-reading-api', () => {
       expect(result).toEqual(mockDailyReading);
     });
 
-    it('should return null when no daily reading exists for today (404)', async () => {
-      const error = { response: { status: 404 } };
-      vi.mocked(apiClient.get).mockRejectedValueOnce(error);
+    it('should return null when no daily reading exists (backend returns null with 200)', async () => {
+      // Backend returns null in response body with 200 status, NOT 404
+      vi.mocked(apiClient.get).mockResolvedValueOnce({ data: null });
 
       const result = await getDailyReadingToday();
 
       expect(result).toBeNull();
-    });
-
-    it('should throw error for non-404 errors', async () => {
-      vi.mocked(apiClient.get).mockRejectedValueOnce(new Error('Network error'));
-
-      await expect(getDailyReadingToday()).rejects.toThrow('Error al obtener carta del día');
     });
   });
 
@@ -158,14 +171,14 @@ describe('daily-reading-api', () => {
   // ==========================================================================
   describe('regenerateDailyReading', () => {
     it('should POST to regenerate endpoint and return new daily reading', async () => {
-      const regeneratedReading = { ...mockDailyReading, isRegenerated: true };
+      const regeneratedReading = { ...mockDailyReading, wasRegenerated: true };
       vi.mocked(apiClient.post).mockResolvedValueOnce({ data: regeneratedReading });
 
       const result = await regenerateDailyReading();
 
       expect(apiClient.post).toHaveBeenCalledWith(API_ENDPOINTS.DAILY_READING.REGENERATE);
       expect(result).toEqual(regeneratedReading);
-      expect(result.isRegenerated).toBe(true);
+      expect(result.wasRegenerated).toBe(true);
     });
 
     it('should throw PremiumRequiredError when user is not premium', async () => {

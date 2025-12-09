@@ -36,8 +36,9 @@ export type {
   Interpretation,
   CardInterpretation,
   ReadingFilters,
+  TarotCard,
   DailyReading,
-  DailyReadingCard,
+  DailyReadingHistoryItem,
   PaginatedDailyReadings,
 } from './reading.types';
 

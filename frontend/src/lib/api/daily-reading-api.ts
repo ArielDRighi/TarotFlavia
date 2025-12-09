@@ -13,30 +13,17 @@ import type { DailyReading, PaginatedDailyReadings } from '@/types';
 // ============================================================================
 
 /**
- * Get or create the daily reading for today
- * @returns Promise<DailyReading> The daily reading for today
- * @throws Error with clear message on failure
+ * Create the daily reading for today.
+ * Only creates a new daily reading; errors if one already exists for today.
+ * @returns Promise<DailyReading> The newly created daily reading for today
+ * @throws Error with clear message on failure, including if one already exists (409)
  */
 export async function getDailyReading(): Promise<DailyReading> {
   try {
     const response = await apiClient.post<DailyReading>(API_ENDPOINTS.DAILY_READING.BASE);
     return response.data;
-  } catch {
-    throw new Error('Error al obtener carta del día');
-  }
-}
-
-/**
- * Get today's daily reading if it exists
- * @returns Promise<DailyReading | null> The daily reading or null if not exists
- * @throws Error with clear message on failure (except 404)
- */
-export async function getDailyReadingToday(): Promise<DailyReading | null> {
-  try {
-    const response = await apiClient.get<DailyReading>(API_ENDPOINTS.DAILY_READING.TODAY);
-    return response.data;
   } catch (error: unknown) {
-    // Return null if no daily reading exists for today
+    // If daily reading already exists for today, show a clear message
     if (
       error &&
       typeof error === 'object' &&
@@ -44,12 +31,23 @@ export async function getDailyReadingToday(): Promise<DailyReading | null> {
       error.response &&
       typeof error.response === 'object' &&
       'status' in error.response &&
-      error.response.status === 404
+      error.response.status === 409
     ) {
-      return null;
+      throw new Error('Ya tienes una carta del día para hoy');
     }
-    throw new Error('Error al obtener carta del día');
+    throw new Error('Error al crear carta del día');
   }
+}
+
+/**
+ * Get today's daily reading if it exists
+ * Backend returns null with 200 status when no reading exists (NOT 404)
+ * @returns Promise<DailyReading | null> The daily reading or null if not exists
+ * @throws Error with clear message on failure
+ */
+export async function getDailyReadingToday(): Promise<DailyReading | null> {
+  const response = await apiClient.get<DailyReading | null>(API_ENDPOINTS.DAILY_READING.TODAY);
+  return response.data;
 }
 
 /**

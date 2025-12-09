@@ -217,35 +217,63 @@ export interface ReadingFilters {
 // ============================================================================
 
 /**
- * Card data for daily reading (single card)
+ * Tarot card data (matches backend TarotCard entity)
+ * Used in DailyReading responses
  */
-export interface DailyReadingCard {
+export interface TarotCard {
   id: number;
   name: string;
-  arcana: 'major' | 'minor';
   number: number;
-  suit: string | null;
-  orientation: 'upright' | 'reversed';
-  imageUrl?: string;
+  category: string;
+  imageUrl: string;
+  reversedImageUrl?: string;
+  meaningUpright: string;
+  meaningReversed: string;
+  description: string;
+  keywords: string;
+  deckId: number;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 /**
  * Daily reading (carta del día)
+ * Matches backend DailyReadingResponseDto contract
  */
 export interface DailyReading {
   id: number;
   userId: number;
-  card: DailyReadingCard;
+  tarotistaId: number;
+  card: TarotCard;
+  isReversed: boolean;
   interpretation: string;
-  date: string;
-  isRegenerated: boolean;
-  createdAt: string;
+  readingDate: string;
+  wasRegenerated: boolean;
+  createdAt: Date;
+}
+
+/**
+ * Daily reading history item (simplified for history list)
+ * Matches backend DailyReadingHistoryItemDto contract
+ */
+export interface DailyReadingHistoryItem {
+  id: number;
+  readingDate: string;
+  cardName: string;
+  isReversed: boolean;
+  interpretationSummary: string;
+  wasRegenerated: boolean;
+  createdAt: Date;
 }
 
 /**
  * Paginated daily readings response (for history)
+ * Matches backend DailyReadingHistoryDto contract (flat structure)
  */
 export interface PaginatedDailyReadings {
-  data: DailyReading[];
-  meta: PaginationMeta;
+  items: DailyReadingHistoryItem[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 }

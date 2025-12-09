@@ -16,7 +16,7 @@ import {
   dailyReadingQueryKeys,
 } from './useDailyReading';
 import * as dailyReadingApi from '@/lib/api/daily-reading-api';
-import type { DailyReading, PaginatedDailyReadings } from '@/types';
+import type { DailyReading, PaginatedDailyReadings, DailyReadingHistoryItem } from '@/types';
 
 // Mock the API module
 vi.mock('@/lib/api/daily-reading-api');
@@ -52,33 +52,50 @@ function createWrapper() {
   };
 }
 
-// Mock data
+// Mock data matching backend DailyReadingResponseDto
 const mockDailyReading: DailyReading = {
   id: 1,
   userId: 1,
+  tarotistaId: 1,
   card: {
     id: 1,
     name: 'El Mago',
-    arcana: 'major',
     number: 1,
-    suit: null,
-    orientation: 'upright',
+    category: 'arcanos_mayores',
     imageUrl: '/cards/magician.jpg',
+    reversedImageUrl: '/cards/magician-reversed.jpg',
+    meaningUpright: 'Manifestación, poder personal',
+    meaningReversed: 'Manipulación, engaño',
+    description: 'El Mago representa el poder de la voluntad',
+    keywords: 'voluntad, acción, manifestación',
+    deckId: 1,
+    createdAt: new Date('2025-01-01'),
+    updatedAt: new Date('2025-01-01'),
   },
+  isReversed: false,
   interpretation: 'El Mago te indica que tienes todas las herramientas necesarias.',
-  date: '2025-12-09',
-  isRegenerated: false,
-  createdAt: '2025-12-09T08:00:00Z',
+  readingDate: '2025-12-09',
+  wasRegenerated: false,
+  createdAt: new Date('2025-12-09T08:00:00Z'),
+};
+
+// Mock data matching backend DailyReadingHistoryDto (flat structure)
+const mockHistoryItem: DailyReadingHistoryItem = {
+  id: 1,
+  readingDate: '2025-12-09',
+  cardName: 'El Mago',
+  isReversed: false,
+  interpretationSummary: 'El Mago te indica...',
+  wasRegenerated: false,
+  createdAt: new Date('2025-12-09T08:00:00Z'),
 };
 
 const mockPaginatedDailyReadings: PaginatedDailyReadings = {
-  data: [mockDailyReading],
-  meta: {
-    page: 1,
-    limit: 10,
-    totalItems: 1,
-    totalPages: 1,
-  },
+  items: [mockHistoryItem],
+  total: 1,
+  page: 1,
+  limit: 10,
+  totalPages: 1,
 };
 
 describe('useDailyReading hooks', () => {
@@ -238,7 +255,7 @@ describe('useDailyReading hooks', () => {
     });
 
     it('should call regenerateDailyReading API when mutated', async () => {
-      const regeneratedReading = { ...mockDailyReading, isRegenerated: true };
+      const regeneratedReading = { ...mockDailyReading, wasRegenerated: true };
       vi.mocked(dailyReadingApi.regenerateDailyReading).mockResolvedValueOnce(regeneratedReading);
 
       const { result } = renderHook(() => useRegenerateDailyReading(), {

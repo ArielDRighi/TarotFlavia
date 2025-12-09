@@ -59,9 +59,9 @@ export function useDailyReadingHistory(page: number, limit: number) {
 // ============================================================================
 
 /**
- * Hook to get or create daily reading
- * Uses POST because it creates a new reading if one doesn't exist
- * On success: invalidates today's query and shows toast
+ * Hook to create today's daily reading.
+ * Creates a new daily reading for today. Errors if one already exists (409).
+ * On success: invalidates all daily reading queries and shows toast.
  */
 export function useDailyReading() {
   const queryClient = useQueryClient();
@@ -69,18 +69,18 @@ export function useDailyReading() {
   return useMutation({
     mutationFn: getDailyReading,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: dailyReadingQueryKeys.today() });
+      queryClient.invalidateQueries({ queryKey: dailyReadingQueryKeys.all });
       toast.success('¡Tu carta del día está lista!');
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Error al obtener carta del día');
+      toast.error(error.message || 'Error al crear carta del día');
     },
   });
 }
 
 /**
  * Hook to regenerate daily reading (Premium only)
- * On success: invalidates today's query and shows toast
+ * On success: invalidates all daily reading queries (today + history) and shows toast
  * On error: shows specific message for Premium required
  */
 export function useRegenerateDailyReading() {
@@ -89,7 +89,7 @@ export function useRegenerateDailyReading() {
   return useMutation({
     mutationFn: regenerateDailyReading,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: dailyReadingQueryKeys.today() });
+      queryClient.invalidateQueries({ queryKey: dailyReadingQueryKeys.all });
       toast.success('Carta del día regenerada');
     },
     onError: (error: Error) => {
