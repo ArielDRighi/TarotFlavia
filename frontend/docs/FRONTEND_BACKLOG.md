@@ -1712,11 +1712,37 @@ IMPORTANTE:
 
 ---
 
-### TAREA 5.3: Crear página detalle de lectura
+### ✅ TAREA 5.3: Crear página detalle de lectura
 
+**Estado:** ✅ COMPLETADA (2025-12-09)
 **Prioridad:** ALTA
 **Estimación:** 45 min
 **Dependencias:** 4.3, 4.2
+
+**Resumen de Implementación:**
+
+- Creado componente `ReadingDetail` en `components/features/readings/`
+- Creada página `/historial/[id]` que delega lógica al componente
+- Implementado breadcrumb navigation (Historial > Lectura)
+- Mostrado header con pregunta (font-serif), fecha formateada y badge de tipo de tirada
+- Sección de cartas con grid responsive usando `TarotCard` component
+- Indicador visual para cartas invertidas
+- Interpretación renderizada como markdown con `react-markdown` y estilos customizados
+- Acción compartir: genera link con shareToken y copia al portapapeles
+- Acción regenerar: modal de confirmación antes de consumir regeneración
+- Skeleton loading state y error state (lectura no encontrada)
+- Tests completos con 90%+ coverage
+
+**Archivos creados:**
+
+- `src/components/features/readings/ReadingDetail.tsx` - Componente principal
+- `src/components/features/readings/ReadingDetail.test.tsx` - Tests del componente
+- `src/app/historial/[id]/page.tsx` - Página de la ruta
+- `src/app/historial/[id]/page.test.tsx` - Tests de la página
+
+**Archivos modificados:**
+
+- `src/components/features/readings/index.ts` - Export del nuevo componente
 
 **Consigna:**
 Crear página que muestra lectura completa con cartas, interpretación y opciones de compartir/regenerar.

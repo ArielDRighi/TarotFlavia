@@ -9,3 +9,4 @@ export { SpreadSelector, type SpreadSelectorProps } from './SpreadSelector';
 export { ReadingExperience, type ReadingExperienceProps } from './ReadingExperience';
 export { ReadingCard, type ReadingCardProps } from './ReadingCard';
 export { ReadingsHistory } from './ReadingsHistory';
+export { ReadingDetail, type ReadingDetailProps } from './ReadingDetail';

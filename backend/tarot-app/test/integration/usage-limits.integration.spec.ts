@@ -261,22 +261,21 @@ describe('UsageLimits + Readings Integration Tests', () => {
     });
 
     it('should increment counter multiple times for multiple readings', async () => {
-      // ARRANGE
-      const createReadingPayload = {
-        spreadId: testSpread.id,
-        deckId: testDeck.id,
-        cardIds: testCards.map((card) => card.id),
-        cardPositions: testCards.map((card, idx) => ({
-          cardId: card.id,
-          position: testSpread.positions[idx]?.name || `Position ${idx + 1}`,
-          isReversed: false,
-        })),
-        customQuestion: 'Test question for usage limits',
-        generateInterpretation: true,
-      };
-
-      // ACT: Crear 3 lecturas
+      // ACT: Crear 3 lecturas con preguntas únicas para evitar cache hits
       for (let i = 0; i < 3; i++) {
+        const createReadingPayload = {
+          spreadId: testSpread.id,
+          deckId: testDeck.id,
+          cardIds: testCards.map((card) => card.id),
+          cardPositions: testCards.map((card, idx) => ({
+            cardId: card.id,
+            position: testSpread.positions[idx]?.name || `Position ${idx + 1}`,
+            isReversed: false,
+          })),
+          // Pregunta única por iteración para evitar cache y asegurar llamada a AI
+          customQuestion: `Test question ${i + 1} - ${Date.now()} - ${Math.random()}`,
+          generateInterpretation: true,
+        };
         await request(app.getHttpServer())
           .post('/readings')
           .set('Authorization', `Bearer ${authToken}`)
@@ -412,21 +411,22 @@ describe('UsageLimits + Readings Integration Tests', () => {
   describe('Premium Plan Benefits', () => {
     it('should allow unlimited readings for PREMIUM users', async () => {
       // ARRANGE: Usuario ya es PREMIUM del beforeEach
-      const createReadingPayload = {
-        spreadId: testSpread.id,
-        deckId: testDeck.id,
-        cardIds: testCards.map((card) => card.id),
-        cardPositions: testCards.map((card, idx) => ({
-          cardId: card.id,
-          position: testSpread.positions[idx]?.name || `Position ${idx + 1}`,
-          isReversed: false,
-        })),
-        customQuestion: 'Test question for usage limits',
-        generateInterpretation: true,
-      };
-
       // ACT: Crear 5 lecturas (más del límite FREE de 3)
+      // Usamos preguntas únicas para evitar cache hits y asegurar llamada a AI
       for (let i = 0; i < 5; i++) {
+        const createReadingPayload = {
+          spreadId: testSpread.id,
+          deckId: testDeck.id,
+          cardIds: testCards.map((card) => card.id),
+          cardPositions: testCards.map((card, idx) => ({
+            cardId: card.id,
+            position: testSpread.positions[idx]?.name || `Position ${idx + 1}`,
+            isReversed: false,
+          })),
+          // Pregunta única por iteración para evitar cache y asegurar llamada a AI
+          customQuestion: `Premium test question ${i + 1} - ${Date.now()} - ${Math.random()}`,
+          generateInterpretation: true,
+        };
         await request(app.getHttpServer())
           .post('/readings')
           .set('Authorization', `Bearer ${authToken}`)
