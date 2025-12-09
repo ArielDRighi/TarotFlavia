@@ -1951,6 +1951,7 @@ IMPORTANTE:
 **Completada:** 9 Diciembre 2025
 
 **Archivos creados:**
+
 - `src/app/carta-del-dia/historial/page.tsx` - Página de historial
 - `src/app/carta-del-dia/historial/page.test.tsx` - Tests de la página
 - `src/components/features/daily-reading/DailyReadingCard.tsx` - Componente de tarjeta
@@ -1958,6 +1959,7 @@ IMPORTANTE:
 - `src/components/features/daily-reading/DailyReadingHistoryList.tsx` - Componente de lista con paginación
 
 **Decisiones de implementación:**
+
 - Se creó DailyReadingCard como componente separado para reutilización
 - La lógica de negocio se movió a DailyReadingHistoryList para seguir arquitectura feature-based
 - Se usa date-fns con locale es para formateo de fechas en español
