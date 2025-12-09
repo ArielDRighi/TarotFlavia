@@ -1846,11 +1846,39 @@ Coverage: 100% en nuevos archivos
 
 ---
 
-### TAREA 6.2: Crear página Carta del Día
+### ✅ TAREA 6.2: Crear página Carta del Día
 
+**Estado:** ✅ COMPLETADA (2025-12-09)
 **Prioridad:** ALTA
 **Estimación:** 60 min
 **Dependencias:** 6.1, 4.3
+
+**Resumen de Implementación:**
+
+- Página creada en `src/app/carta-del-dia/page.tsx` siguiendo arquitectura feature-based
+- Componente `DailyCardExperience` creado en `src/components/features/daily-reading/`
+- Dos estados implementados: UNREVEALED (carta boca abajo con animación flotante) y REVEALED (carta revelada con interpretación)
+- Autenticación requerida vía `useRequireAuth()`
+- Funcionalidad Premium: modal de upgrade para usuarios FREE, confirmación para regenerar
+- Animaciones CSS: `bounce-slow` para estado unrevealed, `fade-in` para estado revealed
+- Botones de acción: Compartir (clipboard), Ver historial, Regenerar (premium)
+- Tests: 45 tests (26 en page.test.tsx + 19 en DailyCardExperience.test.tsx)
+- Coverage: 100% en archivos nuevos
+
+**Archivos creados/modificados:**
+
+- `src/app/carta-del-dia/page.tsx` - Página wrapper (Server Component)
+- `src/app/carta-del-dia/page.test.tsx` - Tests de la página (26 tests)
+- `src/components/features/daily-reading/DailyCardExperience.tsx` - Componente principal
+- `src/components/features/daily-reading/DailyCardExperience.test.tsx` - Tests del componente (19 tests)
+- `src/components/features/daily-reading/index.ts` - Barrel export
+- `src/app/globals.css` - Animaciones CSS (bounce-slow, fade-in)
+
+**Decisiones técnicas:**
+
+- Se separó la lógica en `DailyCardExperience` para cumplir con arquitectura (no lógica en `app/`)
+- Se reutiliza `TarotCard` component existente para la visualización de cartas
+- Modal de Radix UI vía shadcn/ui Dialog para confirmaciones
 
 **Consigna:**
 Crear experiencia de carta del día con dos estados: bloqueado (antes de revelar) y revelado.
@@ -2225,6 +2253,9 @@ IMPORTANTE:
 - Botones con hover effects
 - Responsive
 
+---
+```
+
 # 🎯 Backlog Frontend - TarotFlavia (Parte 3 - FINAL)
 
 **Fases finales: Perfil, Sesiones y Admin**
@@ -2276,8 +2307,6 @@ HOOKS:
   - useMutation que limpia auth después
 
 ```
-
----
 
 ### TAREA 8.2: Crear página Mi Perfil
 
@@ -4046,4 +4075,7 @@ Se agregaron las siguientes tareas para completar el panel de administración:
 ---
 
 **FIN DEL BACKLOG TÉCNICO**
+
+```
+
 ```
