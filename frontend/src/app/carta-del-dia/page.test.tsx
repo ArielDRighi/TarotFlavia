@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import CartaDelDiaPage from './page';
-import type { DailyReading, TarotCard, AuthUser } from '@/types';
+import { createMockTarotCard, createMockDailyReading, createMockUser } from '@/test/factories';
 
 // Create mock functions
 const mockPush = vi.fn();
@@ -63,54 +63,6 @@ vi.mock('@/hooks/utils/useToast', () => ({
     info: vi.fn(),
   },
 }));
-
-// Test data factories
-function createMockTarotCard(overrides: Partial<TarotCard> = {}): TarotCard {
-  return {
-    id: 1,
-    name: 'El Loco',
-    number: 0,
-    category: 'major',
-    imageUrl: '/cards/the-fool.jpg',
-    reversedImageUrl: '/cards/the-fool-reversed.jpg',
-    meaningUpright: 'Nuevos comienzos, aventura',
-    meaningReversed: 'Imprudencia, riesgos',
-    description: 'Representa el inicio del viaje',
-    keywords: 'libertad, espontaneidad, inocencia',
-    deckId: 1,
-    createdAt: new Date('2025-01-01'),
-    updatedAt: new Date('2025-01-01'),
-    ...overrides,
-  };
-}
-
-function createMockDailyReading(overrides: Partial<DailyReading> = {}): DailyReading {
-  return {
-    id: 1,
-    userId: 1,
-    tarotistaId: 1,
-    card: createMockTarotCard(),
-    isReversed: false,
-    interpretation: 'Hoy es un día de nuevos comienzos. El Loco te invita a dar ese salto de fe.',
-    readingDate: '2025-12-09',
-    wasRegenerated: false,
-    createdAt: new Date('2025-12-09T08:00:00Z'),
-    ...overrides,
-  };
-}
-
-function createMockUser(overrides: Partial<AuthUser> = {}): AuthUser {
-  return {
-    id: 1,
-    email: 'test@example.com',
-    name: 'Test User',
-    roles: ['user'],
-    plan: 'FREE',
-    dailyReadingsCount: 0,
-    dailyReadingsLimit: 3,
-    ...overrides,
-  };
-}
 
 // Test wrapper with QueryClient
 function createTestQueryClient() {

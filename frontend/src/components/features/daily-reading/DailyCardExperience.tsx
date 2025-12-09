@@ -27,6 +27,26 @@ import { cn } from '@/lib/utils';
 import type { DailyReading, ReadingCard } from '@/types';
 
 /**
+ * Transform DailyReading card to ReadingCard format for TarotCard component
+ * Defined outside component as it doesn't depend on component state
+ */
+function transformToReadingCard(reading: DailyReading): ReadingCard {
+  return {
+    id: reading.card.id,
+    name: reading.card.name,
+    arcana: reading.card.category === 'major' ? 'major' : 'minor',
+    number: reading.card.number,
+    suit: null,
+    orientation: reading.isReversed ? 'reversed' : 'upright',
+    position: 1,
+    positionName: 'Carta del Día',
+    imageUrl: reading.isReversed
+      ? reading.card.reversedImageUrl || reading.card.imageUrl
+      : reading.card.imageUrl,
+  };
+}
+
+/**
  * DailyCardExperience Component
  *
  * Displays the daily card experience with two main states:
@@ -128,31 +148,15 @@ export function DailyCardExperience() {
     });
   }, [regenerateReading]);
 
-  /**
-   * Transform DailyReading card to ReadingCard format for TarotCard component
-   */
-  const transformToReadingCard = useCallback(
-    (reading: DailyReading): ReadingCard => ({
-      id: reading.card.id,
-      name: reading.card.name,
-      arcana: reading.card.category === 'major' ? 'major' : 'minor',
-      number: reading.card.number,
-      suit: null,
-      orientation: reading.isReversed ? 'reversed' : 'upright',
-      position: 1,
-      positionName: 'Carta del Día',
-      imageUrl: reading.isReversed
-        ? reading.card.reversedImageUrl || reading.card.imageUrl
-        : reading.card.imageUrl,
-    }),
-    []
-  );
-
   // Show loading spinner while checking auth
   if (isAuthLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div data-testid="loading-spinner" className="animate-spin">
+        <div
+          data-testid="loading-spinner"
+          className="animate-spin"
+          aria-label="Cargando carta del día"
+        >
           <Sparkles className="text-primary h-8 w-8" />
         </div>
       </div>
@@ -162,7 +166,7 @@ export function DailyCardExperience() {
   // Show skeleton while fetching daily reading
   if (isFetching) {
     return (
-      <div className="flex flex-col items-center gap-8">
+      <div className="flex flex-col items-center gap-8" aria-label="Cargando carta del día">
         <Skeleton data-testid="loading-skeleton" className="h-12 w-64" />
         <Skeleton className="h-72 w-48 rounded-xl" />
         <Skeleton className="h-32 w-full max-w-lg" />
@@ -173,7 +177,7 @@ export function DailyCardExperience() {
   // Show error state
   if (error) {
     return (
-      <div className="text-center">
+      <div className="text-center" role="alert">
         <p className="text-destructive">Error al cargar tu carta del día</p>
         <Button variant="outline" className="mt-4" onClick={() => window.location.reload()}>
           Reintentar
