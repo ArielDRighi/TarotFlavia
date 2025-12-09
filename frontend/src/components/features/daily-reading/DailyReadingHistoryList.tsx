@@ -28,7 +28,7 @@ export interface DailyReadingHistoryListProps {
 function LoadingState() {
   return (
     <div data-testid="history-loading" className="space-y-4">
-      {[1, 2, 3].map((i) => (
+      {[1, 2, 3, 4, 5].map((i) => (
         <Skeleton key={i} className="h-40 w-full rounded-xl" />
       ))}
     </div>

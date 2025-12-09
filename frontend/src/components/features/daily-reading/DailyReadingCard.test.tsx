@@ -181,7 +181,45 @@ describe('DailyReadingCard', () => {
       expect(viewButton).toBeVisible();
     });
 
-    it('should be keyboard navigable', async () => {
+    it('should allow card to be focused via keyboard', () => {
+      const reading = createTestDailyReading();
+
+      render(<DailyReadingCard reading={reading} onView={mockOnView} />);
+
+      const card = screen.getByTestId('daily-reading-card');
+      expect(card).toHaveAttribute('tabIndex', '0');
+      expect(card).toHaveAttribute('role', 'button');
+    });
+
+    it('should trigger onView when pressing Enter on focused card', async () => {
+      const user = userEvent.setup();
+      const reading = createTestDailyReading({ id: 42 });
+
+      render(<DailyReadingCard reading={reading} onView={mockOnView} />);
+
+      const card = screen.getByTestId('daily-reading-card');
+      card.focus();
+
+      await user.keyboard('{Enter}');
+
+      expect(mockOnView).toHaveBeenCalledWith(42);
+    });
+
+    it('should trigger onView when pressing Space on focused card', async () => {
+      const user = userEvent.setup();
+      const reading = createTestDailyReading({ id: 99 });
+
+      render(<DailyReadingCard reading={reading} onView={mockOnView} />);
+
+      const card = screen.getByTestId('daily-reading-card');
+      card.focus();
+
+      await user.keyboard(' ');
+
+      expect(mockOnView).toHaveBeenCalledWith(99);
+    });
+
+    it('should be keyboard navigable via Ver completa button', async () => {
       const user = userEvent.setup();
       const reading = createTestDailyReading({ id: 1 });
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { Skeleton } from '@/components/ui/skeleton';
+import { Loader2 } from 'lucide-react';
 import { DailyReadingHistoryPage as DailyReadingHistoryPageContent } from '@/components/features/daily-reading/DailyReadingHistoryList';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 
@@ -20,7 +20,7 @@ export default function DailyReadingHistoryPage() {
   if (isAuthLoading) {
     return (
       <div data-testid="auth-loading" className="flex min-h-screen items-center justify-center">
-        <Skeleton className="h-12 w-48" />
+        <Loader2 className="text-primary h-8 w-8 animate-spin" />
       </div>
     );
   }
