@@ -1943,11 +1943,26 @@ IMPORTANTE:
 
 ---
 
-### TAREA 6.3: Crear página Historial Carta del Día
+### TAREA 6.3: Crear página Historial Carta del Día ✅ COMPLETADA
 
 **Prioridad:** MEDIA
 **Estimación:** 35 min
 **Dependencias:** 6.1, 5.1
+**Completada:** 9 Diciembre 2025
+
+**Archivos creados:**
+- `src/app/carta-del-dia/historial/page.tsx` - Página de historial
+- `src/app/carta-del-dia/historial/page.test.tsx` - Tests de la página
+- `src/components/features/daily-reading/DailyReadingCard.tsx` - Componente de tarjeta
+- `src/components/features/daily-reading/DailyReadingCard.test.tsx` - Tests del componente
+- `src/components/features/daily-reading/DailyReadingHistoryList.tsx` - Componente de lista con paginación
+
+**Decisiones de implementación:**
+- Se creó DailyReadingCard como componente separado para reutilización
+- La lógica de negocio se movió a DailyReadingHistoryList para seguir arquitectura feature-based
+- Se usa date-fns con locale es para formateo de fechas en español
+- Paginación con 10 items por página
+- Tests con 27 casos de prueba (15 para DailyReadingCard + 12 para la página)
 
 **Consigna:**
 Crear historial de cartas del día previas con calendario visual.

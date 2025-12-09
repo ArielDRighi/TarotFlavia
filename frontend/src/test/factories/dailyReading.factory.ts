@@ -5,7 +5,7 @@
  * Usage: Import and call with optional overrides for specific test cases.
  */
 
-import type { DailyReading, TarotCard, AuthUser } from '@/types';
+import type { DailyReading, TarotCard, AuthUser, DailyReadingHistoryItem } from '@/types';
 
 /**
  * Creates a mock TarotCard with sensible defaults
@@ -43,6 +43,26 @@ export function createMockDailyReading(overrides: Partial<DailyReading> = {}): D
     isReversed: false,
     interpretation: 'Hoy es un día de nuevos comienzos. El Loco te invita a dar ese salto de fe.',
     readingDate: '2025-12-09',
+    wasRegenerated: false,
+    createdAt: new Date('2025-12-09T08:00:00Z'),
+    ...overrides,
+  };
+}
+
+/**
+ * Creates a mock DailyReadingHistoryItem with sensible defaults
+ * @param overrides - Partial DailyReadingHistoryItem to override defaults
+ */
+export function createMockDailyReadingHistoryItem(
+  overrides: Partial<DailyReadingHistoryItem> = {}
+): DailyReadingHistoryItem {
+  return {
+    id: 1,
+    readingDate: '2025-12-09T00:00:00Z',
+    cardName: 'El Loco',
+    isReversed: false,
+    interpretationSummary:
+      'Hoy es un día de nuevos comienzos. El Loco te invita a dar ese salto de fe.',
     wasRegenerated: false,
     createdAt: new Date('2025-12-09T08:00:00Z'),
     ...overrides,
