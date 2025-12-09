@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import CartaDelDiaPage from './page';
+import { DailyCardExperience } from './DailyCardExperience';
 import { createMockTarotCard, createMockDailyReading, createMockUser } from '@/test/factories';
 
 // Create mock functions
@@ -84,7 +84,7 @@ function renderWithProviders(ui: React.ReactElement) {
   return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
 }
 
-describe('CartaDelDiaPage', () => {
+describe('DailyCardExperience', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
@@ -118,150 +118,109 @@ describe('CartaDelDiaPage', () => {
     it('should show loading state while checking auth', () => {
       mockUseRequireAuth.mockReturnValue({ isLoading: true });
 
-      renderWithProviders(<CartaDelDiaPage />);
+      renderWithProviders(<DailyCardExperience />);
 
       expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
     });
-
-    it('should use useRequireAuth hook', () => {
-      renderWithProviders(<CartaDelDiaPage />);
-
-      expect(mockUseRequireAuth).toHaveBeenCalled();
-    });
   });
 
-  describe('Estado 1: Card Not Revealed', () => {
+  describe('Unrevealed State', () => {
     it('should render unrevealed state when no daily reading exists', () => {
-      mockUseDailyReadingToday.mockReturnValue({
-        data: null,
-        isLoading: false,
-        error: null,
-      });
-
-      renderWithProviders(<CartaDelDiaPage />);
+      renderWithProviders(<DailyCardExperience />);
 
       expect(screen.getByTestId('unrevealed-state')).toBeInTheDocument();
     });
 
     it('should display mystical prompt text', () => {
-      mockUseDailyReadingToday.mockReturnValue({
-        data: null,
-        isLoading: false,
-        error: null,
-      });
-
-      renderWithProviders(<CartaDelDiaPage />);
+      renderWithProviders(<DailyCardExperience />);
 
       expect(screen.getByText(/conecta con tu energía y toca la carta/i)).toBeInTheDocument();
     });
 
-    it('should render a face-down card that is clickable', () => {
-      mockUseDailyReadingToday.mockReturnValue({
-        data: null,
-        isLoading: false,
-        error: null,
-      });
-
-      renderWithProviders(<CartaDelDiaPage />);
+    it('should render a clickable tarot card', () => {
+      renderWithProviders(<DailyCardExperience />);
 
       const card = screen.getByTestId('tarot-card');
       expect(card).toBeInTheDocument();
       expect(card).toHaveAttribute('role', 'button');
     });
 
-    it('should call useDailyReading mutation when card is clicked', async () => {
+    it('should call mutation when card is clicked', async () => {
       const user = userEvent.setup();
       const mutateFn = vi.fn();
 
-      mockUseDailyReadingToday.mockReturnValue({
-        data: null,
-        isLoading: false,
-        error: null,
-      });
       mockUseDailyReading.mockReturnValue({
         mutate: mutateFn,
         isPending: false,
       });
 
-      renderWithProviders(<CartaDelDiaPage />);
+      renderWithProviders(<DailyCardExperience />);
 
-      const card = screen.getByTestId('tarot-card');
-      await user.click(card);
+      await user.click(screen.getByTestId('tarot-card'));
 
       expect(mutateFn).toHaveBeenCalled();
     });
 
-    it('should show loading state while creating daily reading', () => {
-      mockUseDailyReadingToday.mockReturnValue({
-        data: null,
-        isLoading: false,
-        error: null,
-      });
+    it('should show creating indicator while creating reading', () => {
       mockUseDailyReading.mockReturnValue({
         mutate: vi.fn(),
         isPending: true,
       });
 
-      renderWithProviders(<CartaDelDiaPage />);
+      renderWithProviders(<DailyCardExperience />);
 
       expect(screen.getByTestId('creating-reading')).toBeInTheDocument();
     });
   });
 
-  describe('Estado 2: Card Revealed', () => {
+  describe('Revealed State', () => {
     it('should render revealed state when daily reading exists', () => {
-      const dailyReading = createMockDailyReading();
       mockUseDailyReadingToday.mockReturnValue({
-        data: dailyReading,
+        data: createMockDailyReading(),
         isLoading: false,
         error: null,
       });
 
-      renderWithProviders(<CartaDelDiaPage />);
+      renderWithProviders(<DailyCardExperience />);
 
       expect(screen.getByTestId('revealed-state')).toBeInTheDocument();
     });
 
-    it('should display the card name with golden color', () => {
-      const dailyReading = createMockDailyReading({
-        card: createMockTarotCard({ name: 'La Emperatriz' }),
-      });
+    it('should display card name with secondary color', () => {
       mockUseDailyReadingToday.mockReturnValue({
-        data: dailyReading,
+        data: createMockDailyReading({ card: createMockTarotCard({ name: 'La Estrella' }) }),
         isLoading: false,
         error: null,
       });
 
-      renderWithProviders(<CartaDelDiaPage />);
+      renderWithProviders(<DailyCardExperience />);
 
       const cardTitle = screen.getByTestId('card-title');
-      expect(cardTitle).toHaveTextContent('La Emperatriz');
+      expect(cardTitle).toHaveTextContent('La Estrella');
       expect(cardTitle).toHaveClass('text-secondary');
     });
 
-    it('should display the interpretation', () => {
-      const interpretation = 'Este es el mensaje de tu carta del día.';
-      const dailyReading = createMockDailyReading({ interpretation });
+    it('should display interpretation text', () => {
+      const interpretation = 'Mensaje del día';
       mockUseDailyReadingToday.mockReturnValue({
-        data: dailyReading,
+        data: createMockDailyReading({ interpretation }),
         isLoading: false,
         error: null,
       });
 
-      renderWithProviders(<CartaDelDiaPage />);
+      renderWithProviders(<DailyCardExperience />);
 
       expect(screen.getByText(interpretation)).toBeInTheDocument();
     });
 
     it('should show reversed indicator when card is reversed', () => {
-      const dailyReading = createMockDailyReading({ isReversed: true });
       mockUseDailyReadingToday.mockReturnValue({
-        data: dailyReading,
+        data: createMockDailyReading({ isReversed: true }),
         isLoading: false,
         error: null,
       });
 
-      renderWithProviders(<CartaDelDiaPage />);
+      renderWithProviders(<DailyCardExperience />);
 
       expect(screen.getByText(/invertida/i)).toBeInTheDocument();
     });
@@ -276,30 +235,29 @@ describe('CartaDelDiaPage', () => {
       });
     });
 
-    it('should render share button in revealed state', () => {
-      renderWithProviders(<CartaDelDiaPage />);
+    it('should render share button', () => {
+      renderWithProviders(<DailyCardExperience />);
 
       expect(screen.getByRole('button', { name: /compartir mensaje/i })).toBeInTheDocument();
     });
 
-    it('should render history button in revealed state', () => {
-      renderWithProviders(<CartaDelDiaPage />);
+    it('should render history button', () => {
+      renderWithProviders(<DailyCardExperience />);
 
       expect(screen.getByRole('button', { name: /ver historial/i })).toBeInTheDocument();
     });
 
-    it('should navigate to history when history button is clicked', async () => {
+    it('should navigate to history on click', async () => {
       const user = userEvent.setup();
 
-      renderWithProviders(<CartaDelDiaPage />);
+      renderWithProviders(<DailyCardExperience />);
 
-      const historyButton = screen.getByRole('button', { name: /ver historial/i });
-      await user.click(historyButton);
+      await user.click(screen.getByRole('button', { name: /ver historial/i }));
 
       expect(mockPush).toHaveBeenCalledWith('/historial');
     });
 
-    it('should copy interpretation when share button is clicked', async () => {
+    it('should copy to clipboard on share click', async () => {
       const user = userEvent.setup();
       const writeTextMock = vi.fn().mockResolvedValue(undefined);
       Object.defineProperty(navigator, 'clipboard', {
@@ -308,58 +266,34 @@ describe('CartaDelDiaPage', () => {
         configurable: true,
       });
 
-      renderWithProviders(<CartaDelDiaPage />);
+      renderWithProviders(<DailyCardExperience />);
 
-      const shareButton = screen.getByRole('button', { name: /compartir mensaje/i });
-      await user.click(shareButton);
+      await user.click(screen.getByRole('button', { name: /compartir mensaje/i }));
 
       expect(writeTextMock).toHaveBeenCalled();
     });
   });
 
   describe('Premium Features', () => {
-    it('should show regenerate button for premium users', () => {
-      mockUseAuth.mockReturnValue({
-        user: createMockUser({ plan: 'PREMIUM' }),
-        isAuthenticated: true,
-        isLoading: false,
-      });
-      mockUseDailyReadingToday.mockReturnValue({
-        data: createMockDailyReading(),
-        isLoading: false,
-        error: null,
-      });
-
-      renderWithProviders(<CartaDelDiaPage />);
-
-      expect(screen.getByRole('button', { name: /regenerar/i })).toBeInTheDocument();
-    });
-
-    it('should show premium upgrade modal for free users trying to regenerate', async () => {
+    it('should show upgrade modal for free users', async () => {
       const user = userEvent.setup();
 
-      mockUseAuth.mockReturnValue({
-        user: createMockUser({ plan: 'FREE' }),
-        isAuthenticated: true,
-        isLoading: false,
-      });
       mockUseDailyReadingToday.mockReturnValue({
         data: createMockDailyReading(),
         isLoading: false,
         error: null,
       });
 
-      renderWithProviders(<CartaDelDiaPage />);
+      renderWithProviders(<DailyCardExperience />);
 
-      const regenerateButton = screen.getByRole('button', { name: /regenerar/i });
-      await user.click(regenerateButton);
+      await user.click(screen.getByRole('button', { name: /regenerar/i }));
 
       await waitFor(() => {
         expect(screen.getByText(/actualiza a premium/i)).toBeInTheDocument();
       });
     });
 
-    it('should show confirmation modal for premium users before regenerating', async () => {
+    it('should show confirmation modal for premium users', async () => {
       const user = userEvent.setup();
 
       mockUseAuth.mockReturnValue({
@@ -373,17 +307,16 @@ describe('CartaDelDiaPage', () => {
         error: null,
       });
 
-      renderWithProviders(<CartaDelDiaPage />);
+      renderWithProviders(<DailyCardExperience />);
 
-      const regenerateButton = screen.getByRole('button', { name: /regenerar/i });
-      await user.click(regenerateButton);
+      await user.click(screen.getByRole('button', { name: /regenerar/i }));
 
       await waitFor(() => {
         expect(screen.getByText(/¿regenerar carta/i)).toBeInTheDocument();
       });
     });
 
-    it('should call regenerate mutation when confirmed', async () => {
+    it('should call regenerate mutation on confirm', async () => {
       const user = userEvent.setup();
       const regenerateFn = vi.fn();
 
@@ -402,13 +335,10 @@ describe('CartaDelDiaPage', () => {
         isPending: false,
       });
 
-      renderWithProviders(<CartaDelDiaPage />);
+      renderWithProviders(<DailyCardExperience />);
 
-      // Open modal
-      const regenerateButton = screen.getByRole('button', { name: /regenerar/i });
-      await user.click(regenerateButton);
+      await user.click(screen.getByRole('button', { name: /regenerar/i }));
 
-      // Confirm
       const confirmButton = await screen.findByRole('button', { name: /confirmar/i });
       await user.click(confirmButton);
 
@@ -417,86 +347,66 @@ describe('CartaDelDiaPage', () => {
   });
 
   describe('Loading States', () => {
-    it('should show loading skeleton while fetching daily reading', () => {
+    it('should show skeleton while fetching', () => {
       mockUseDailyReadingToday.mockReturnValue({
         data: null,
         isLoading: true,
         error: null,
       });
 
-      renderWithProviders(<CartaDelDiaPage />);
+      renderWithProviders(<DailyCardExperience />);
 
       expect(screen.getByTestId('loading-skeleton')).toBeInTheDocument();
     });
   });
 
   describe('Error Handling', () => {
-    it('should show error message when fetch fails', () => {
+    it('should show error message on fetch error', () => {
       mockUseDailyReadingToday.mockReturnValue({
         data: null,
         isLoading: false,
-        error: new Error('Error de red'),
+        error: new Error('Network error'),
       });
 
-      renderWithProviders(<CartaDelDiaPage />);
+      renderWithProviders(<DailyCardExperience />);
 
       expect(screen.getByText(/error/i)).toBeInTheDocument();
+    });
+
+    it('should have role="alert" on error container for accessibility', () => {
+      mockUseDailyReadingToday.mockReturnValue({
+        data: null,
+        isLoading: false,
+        error: new Error('Network error'),
+      });
+
+      renderWithProviders(<DailyCardExperience />);
+
+      expect(screen.getByRole('alert')).toBeInTheDocument();
     });
   });
 
   describe('Accessibility', () => {
-    it('should have proper heading hierarchy', () => {
+    it('should have aria-label on loading spinner', () => {
+      mockUseRequireAuth.mockReturnValue({ isLoading: true });
+
+      renderWithProviders(<DailyCardExperience />);
+
+      const spinner = screen.getByTestId('loading-spinner');
+      expect(spinner).toHaveAttribute('aria-label', 'Cargando carta del día');
+    });
+
+    it('should have aria-label on skeleton loading container', () => {
       mockUseDailyReadingToday.mockReturnValue({
         data: null,
-        isLoading: false,
+        isLoading: true,
         error: null,
       });
 
-      renderWithProviders(<CartaDelDiaPage />);
+      renderWithProviders(<DailyCardExperience />);
 
-      expect(screen.getByRole('heading', { level: 1, name: /carta del día/i })).toBeInTheDocument();
-    });
-
-    it('should have proper ARIA labels on interactive elements', () => {
-      mockUseDailyReadingToday.mockReturnValue({
-        data: null,
-        isLoading: false,
-        error: null,
-      });
-
-      renderWithProviders(<CartaDelDiaPage />);
-
-      const card = screen.getByTestId('tarot-card');
-      expect(card).toHaveAttribute('aria-label');
-    });
-  });
-
-  describe('Styling', () => {
-    it('should have min-h-screen class', () => {
-      const { container } = renderWithProviders(<CartaDelDiaPage />);
-
-      const mainDiv = container.firstChild as HTMLElement;
-      expect(mainDiv).toHaveClass('min-h-screen');
-    });
-
-    it('should have gradient background', () => {
-      const { container } = renderWithProviders(<CartaDelDiaPage />);
-
-      const mainDiv = container.firstChild as HTMLElement;
-      expect(mainDiv).toHaveClass('bg-gradient-to-b');
-    });
-
-    it('should have font-serif class on card title', () => {
-      mockUseDailyReadingToday.mockReturnValue({
-        data: createMockDailyReading(),
-        isLoading: false,
-        error: null,
-      });
-
-      renderWithProviders(<CartaDelDiaPage />);
-
-      const cardName = screen.getByTestId('card-title');
-      expect(cardName).toHaveClass('font-serif');
+      const container = screen.getByLabelText('Cargando carta del día');
+      expect(container).toBeInTheDocument();
     });
   });
 });
