@@ -36,6 +36,9 @@ export type {
   Interpretation,
   CardInterpretation,
   ReadingFilters,
+  DailyReading,
+  DailyReadingCard,
+  PaginatedDailyReadings,
 } from './reading.types';
 
 // Tarotista Types

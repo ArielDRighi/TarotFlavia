@@ -211,3 +211,41 @@ export interface ReadingFilters {
   endDate?: string;
   search?: string;
 }
+
+// ============================================================================
+// Daily Reading Types
+// ============================================================================
+
+/**
+ * Card data for daily reading (single card)
+ */
+export interface DailyReadingCard {
+  id: number;
+  name: string;
+  arcana: 'major' | 'minor';
+  number: number;
+  suit: string | null;
+  orientation: 'upright' | 'reversed';
+  imageUrl?: string;
+}
+
+/**
+ * Daily reading (carta del día)
+ */
+export interface DailyReading {
+  id: number;
+  userId: number;
+  card: DailyReadingCard;
+  interpretation: string;
+  date: string;
+  isRegenerated: boolean;
+  createdAt: string;
+}
+
+/**
+ * Paginated daily readings response (for history)
+ */
+export interface PaginatedDailyReadings {
+  data: DailyReading[];
+  meta: PaginationMeta;
+}

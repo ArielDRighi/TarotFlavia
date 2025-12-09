@@ -40,6 +40,14 @@ export const API_ENDPOINTS = {
     SHARE: (id: number) => `/readings/${id}/share`,
   },
 
+  // Daily Reading (Carta del Día)
+  DAILY_READING: {
+    BASE: '/daily-reading',
+    TODAY: '/daily-reading/today',
+    HISTORY: '/daily-reading/history',
+    REGENERATE: '/daily-reading/regenerate',
+  },
+
   // Users
   USERS: {
     BASE: '/users',

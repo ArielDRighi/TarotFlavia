@@ -1811,62 +1811,35 @@ IMPORTANTE:
 
 ## 🌅 FASE 6: CARTA DEL DÍA
 
-### TAREA 6.1: Crear servicio API para Daily Reading
+### TAREA 6.1: Crear servicio API para Daily Reading ✅
 
 **Prioridad:** ALTA
 **Estimación:** 20 min
 **Dependencias:** 0.5
+**Estado:** ✅ COMPLETADA (9 Diciembre 2025)
 
 **Consigna:**
 Crear funciones API y hooks para obtener carta del día.
 
-**Prompt:**
+**Implementación:**
 
-```
+Archivos creados:
 
-Crea el servicio API para Carta del Día:
+- `src/types/reading.types.ts` - Tipos DailyReading, DailyReadingCard, PaginatedDailyReadings
+- `src/lib/api/endpoints.ts` - Endpoints DAILY_READING (BASE, TODAY, HISTORY, REGENERATE)
+- `src/lib/api/daily-reading-api.ts` - Funciones API con manejo de errores Premium
+- `src/lib/api/daily-reading-api.test.ts` - 11 tests (100% coverage)
+- `src/hooks/api/useDailyReading.ts` - Hooks TanStack Query
+- `src/hooks/api/useDailyReading.test.tsx` - 11 tests (100% coverage)
 
-CREAR ARCHIVO: src/lib/api/daily-reading-api.ts
+Decisiones:
 
-FUNCIONES:
+- Hooks ubicados en `hooks/api/` (siguiendo patrón existente, no `hooks/queries/`)
+- Manejo específico de error 403 para Premium requerido
+- Manejo específico de error 404 retornando null en getDailyReadingToday
 
-- getDailyReading(): Promise<DailyReading>
-  - POST /daily-reading (retorna o crea la del día)
-- getDailyReadingToday(): Promise<DailyReading | null>
-  - GET /daily-reading/today
-- getDailyReadingHistory(page: number, limit: number): Promise<PaginatedDailyReadings>
-  - GET /daily-reading/history?page={page}&limit={limit}
-- regenerateDailyReading(): Promise<DailyReading>
-  - POST /daily-reading/regenerate (solo Premium)
-
-TYPES (agregar a src/types/reading.types.ts):
-
-- DailyReading: { id, userId, card, interpretation, date, isRegenerated }
-
-CREAR ARCHIVO: src/hooks/queries/use-daily-reading.ts
-
-HOOKS:
-
-1. useDailyReading()
-   - useMutation con mutationFn: getDailyReading
-   - No usar useQuery porque es un POST
-
-2. useDailyReadingToday()
-   - useQuery con queryKey: ['daily-reading', 'today']
-   - queryFn: getDailyReadingToday
-
-3. useDailyReadingHistory(page, limit)
-   - useQuery con queryKey: ['daily-reading', 'history', page, limit]
-
-4. useRegenerateDailyReading()
-   - useMutation con mutationFn: regenerateDailyReading
-   - onSuccess: invalidar ['daily-reading', 'today']
-
-IMPORTANTE:
-
-- Manejar errores Premium requerido
-
-```
+Tests: 22 tests nuevos, 712 tests totales pasando
+Coverage: 100% en nuevos archivos
 
 ---
 
