@@ -2085,11 +2085,48 @@ IMPORTANTE:
 
 ---
 
-### TAREA 7.2: Crear componente TarotistaCard
+### TAREA 7.2: Crear componente TarotistaCard ✅ COMPLETADA
 
 **Prioridad:** ALTA
 **Estimación:** 40 min
 **Dependencias:** 1.1, 1.5
+**Completada:** 10 de Diciembre, 2025
+
+**Resumen de Implementación:**
+
+- Componente TarotistaCard creado en `src/components/features/marketplace/TarotistaCard.tsx`
+- 23 tests unitarios cubriendo rendering, interacciones, estilos y casos edge
+- Características implementadas:
+  - Avatar con borde dorado (border-secondary) y fallback a iniciales
+  - Indicador de disponibilidad (verde/gris)
+  - Sistema de rating con estrellas dinámicas
+  - Badges de especialidades con colores pastel por categoría
+  - Bio truncada a 3 líneas
+  - Precio por sesión o "Consultar precio"
+  - Botón "Ver Perfil" con callback
+  - Hover con scale-105 y shadow-lg
+- Estilos usando Design Tokens del proyecto
+- Exportaciones del módulo marketplace creadas
+
+**Archivos creados:**
+
+- `src/components/features/marketplace/TarotistaCard.tsx`
+- `src/components/features/marketplace/TarotistaCard.test.tsx`
+- `src/components/features/marketplace/index.ts`
+
+**Decisiones técnicas:**
+
+- Se usó AvatarImage de Radix UI sin next/image para simplificar el testing
+- RatingStars extraído como componente interno para reusabilidad
+- Colores de especialidades definidos en constante SPECIALTY_COLORS
+
+**Validaciones pasadas:**
+✅ 23 tests pasando
+✅ Coverage ≥ 80%
+✅ Lint sin errores
+✅ Type check sin errores
+✅ Build exitoso
+✅ Arquitectura validada (4 features detectadas)
 
 **Consigna:**
 Crear tarjeta de tarotista para el marketplace con foto, info y acciones.
