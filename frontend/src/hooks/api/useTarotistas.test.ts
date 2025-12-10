@@ -224,4 +224,35 @@ describe('useTarotistaDetail', () => {
 
     expect(result.current.data).toBeDefined();
   });
+
+  it('should handle tarotista with nullable fields (bio, ratingPromedio, añosExperiencia)', async () => {
+    const mockTarotista: TarotistaDetail = {
+      id: 2,
+      nombrePublico: 'Nuevo Tarotista',
+      bio: null,
+      especialidades: ['Trabajo'],
+      fotoPerfil: undefined,
+      ratingPromedio: null,
+      totalLecturas: 0,
+      totalReviews: 0,
+      añosExperiencia: null,
+      idiomas: ['Español'],
+      isActive: true,
+      createdAt: '2025-01-01T00:00:00Z',
+      updatedAt: '2025-01-01T00:00:00Z',
+    };
+
+    vi.mocked(tarotistasApi.getTarotistaById).mockResolvedValue(mockTarotista);
+
+    const { result } = renderHook(() => useTarotistaDetail(2), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(result.current.data).toEqual(mockTarotista);
+    expect(result.current.data?.bio).toBeNull();
+    expect(result.current.data?.ratingPromedio).toBeNull();
+    expect(result.current.data?.añosExperiencia).toBeNull();
+  });
 });

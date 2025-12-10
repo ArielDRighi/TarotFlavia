@@ -9,13 +9,13 @@
 export interface Tarotista {
   id: number;
   nombrePublico: string;
-  bio: string;
+  bio: string | null;
   especialidades: string[];
   fotoPerfil?: string;
-  ratingPromedio: number;
+  ratingPromedio: number | null;
   totalLecturas: number;
   totalReviews: number;
-  añosExperiencia: number;
+  añosExperiencia: number | null;
   idiomas: string[];
   createdAt: string;
 }

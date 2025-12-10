@@ -50,6 +50,37 @@ describe('Tarotistas API', () => {
       expect(result).toEqual(mockResponse);
     });
 
+    it('should handle tarotistas with nullable fields', async () => {
+      const mockResponse: PaginatedTarotistas = {
+        data: [
+          {
+            id: 2,
+            nombrePublico: 'Nuevo Tarotista',
+            bio: null, // Nuevo tarotista sin bio
+            especialidades: [],
+            ratingPromedio: null, // Sin calificaciones aún
+            totalLecturas: 0,
+            totalReviews: 0,
+            añosExperiencia: null, // No especificó años
+            idiomas: ['Español'],
+            createdAt: '2024-12-01T10:00:00Z',
+          },
+        ],
+        total: 1,
+        page: 1,
+        limit: 20,
+        totalPages: 1,
+      };
+
+      vi.mocked(apiClient.get).mockResolvedValue({ data: mockResponse });
+
+      const result = await getTarotistas();
+
+      expect(result.data[0].bio).toBeNull();
+      expect(result.data[0].ratingPromedio).toBeNull();
+      expect(result.data[0].añosExperiencia).toBeNull();
+    });
+
     it('should fetch tarotistas with filters', async () => {
       const mockResponse: PaginatedTarotistas = {
         data: [],
