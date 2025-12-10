@@ -18,7 +18,27 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ErrorDisplay } from '@/components/ui/error-display';
 import { cn } from '@/lib/utils';
-import type { ReadingDetail, ReadingCard, CreateReadingDto, CardPositionDto } from '@/types';
+import type {
+  ReadingDetail,
+  ReadingCard,
+  CreateReadingDto,
+  CardPositionDto,
+  Interpretation,
+} from '@/types';
+
+// ============================================================================
+// Helpers
+// ============================================================================
+
+/**
+ * Safely extract the general interpretation from the reading
+ * Handles string, object, or null interpretation types
+ */
+function getGeneralInterpretation(interpretation: Interpretation | string | null): string {
+  if (!interpretation) return '';
+  if (typeof interpretation === 'string') return interpretation;
+  return interpretation.generalInterpretation || '';
+}
 
 // ============================================================================
 // Constants
@@ -301,6 +321,11 @@ export function ReadingExperience({
       };
 
       const result = await createReading(createDto);
+      // DEBUG
+      console.log('=== RESULT FROM API ===');
+      console.log('Full result:', result);
+      console.log('Interpretation:', result.interpretation);
+      console.log('Type of interpretation:', typeof result.interpretation);
       setReadingResult(result);
       setState('result');
     } catch (error) {
@@ -464,10 +489,7 @@ export function ReadingExperience({
 
           {/* Interpretation */}
           <InterpretationSection
-            interpretation={
-              readingResult.interpretation?.generalInterpretation ||
-              (typeof readingResult.interpretation === 'string' ? readingResult.interpretation : '')
-            }
+            interpretation={getGeneralInterpretation(readingResult.interpretation)}
           />
 
           {/* Action Buttons */}

@@ -4093,6 +4093,244 @@ Se agregaron las siguientes tareas para completar el panel de administración:
 
 **FIN DEL BACKLOG TÉCNICO**
 
+---
+
+## 🐛 FASE 13: DEBUGGING Y CORRECCIONES
+
+> Esta sección documenta tareas de debugging, corrección de bugs y mejoras de estabilidad que se realizaron durante el desarrollo.
+
+### ✅ TAREA 13.1: Corrección de Visualización de Interpretaciones AI
+
+**Estado:** ✅ COMPLETADA (2025-12-10)
+**Prioridad:** ALTA
+**Estimación:** 90 min
+**Rama:** `feature/ai-config-and-business-plan`
+**Dependencias:** TASK 4.4 (Sistema de Lecturas)
+
+**Problema Detectado:**
+
+Las interpretaciones de las lecturas de tarot no se mostraban en el frontend a pesar de que el backend las generaba correctamente. La sección de interpretación aparecía vacía.
+
+**Síntomas:**
+
+- Las cartas de la lectura se mostraban correctamente
+- La sección de interpretación aparecía vacía
+- El backend retornaba la interpretación correctamente (verificado con `curl`)
+- No había errores visibles en consola del navegador
+
+**Causa Raíz:**
+
+Type mismatch entre backend y frontend:
+
+- **Backend retorna:** `interpretation: string` (texto plano con markdown)
+- **Frontend esperaba:** `interpretation: { generalInterpretation: string, cardInterpretations: [...] }`
+
+**Solución Implementada:**
+
+1. **Actualización de tipos** (`types/reading.types.ts`):
+
+```typescript
+interface ReadingDetail {
+  interpretation: Interpretation | string | null; // Flexible para ambos formatos
+}
+```
+
+2. **Función de transformación en capa API** (`lib/api/readings-api.ts`):
+
+```typescript
+interface ApiReadingResponse {
+  // ... campos del backend con interpretation: string | null
+}
+
+function transformReadingResponse(raw: ApiReadingResponse): ReadingDetail {
+  // Transforma respuesta API al formato del frontend
+}
+```
+
+3. **Aplicación del transform en todas las funciones API**:
+   - `createReading()` - Usa `transformReadingResponse()`
+   - `getReadingById()` - Usa `transformReadingResponse()`
+   - `regenerateInterpretation()` - Usa `transformReadingResponse()`
+
+4. **Helpers type-safe en componentes**:
+
+```typescript
+// ReadingDetail.tsx
+function getInterpretationData(interpretation: Interpretation | string | null): {
+  generalInterpretation: string;
+  cardInterpretations: Array<{ cardId: number; interpretation: string }>;
+};
+
+// ReadingExperience.tsx
+function getGeneralInterpretation(interpretation: Interpretation | string | null): string;
+```
+
+**Archivos Modificados (Frontend):**
+
+- `frontend/src/types/reading.types.ts` - Tipo flexible para interpretation
+- `frontend/src/lib/api/readings-api.ts` - ApiReadingResponse interface + transformReadingResponse()
+- `frontend/src/components/features/readings/ReadingDetail.tsx` - Helper getInterpretationData()
+- `frontend/src/components/features/readings/ReadingExperience.tsx` - Helper getGeneralInterpretation()
+
+**Testing:**
+
+- Verificación manual: interpretaciones se muestran correctamente
+- TypeScript compila sin errores (`npm run type-check`)
+- Build exitoso (`npm run build`)
+
+**Lección Aprendida:**
+
+> ⚠️ Siempre verificar con `curl` la respuesta real del backend antes de asumir la estructura de datos. Los tipos del frontend deben coincidir con el contrato real de la API.
+
+---
+
+### ✅ TAREA 13.2: Optimización de Formato de Interpretaciones AI (Anti-Truncamiento)
+
+**Estado:** ✅ COMPLETADA (2025-12-10)
+**Prioridad:** ALTA
+**Estimación:** 45 min
+**Rama:** `feature/ai-config-and-business-plan`
+**Dependencias:** TASK 13.1
+
+**Problema Detectado:**
+
+Las interpretaciones de lecturas de 5+ cartas se cortaban antes de completarse, mostrando el mensaje "(La interpretación puede haber sido truncada por límites del modelo de IA)".
+
+**Síntomas:**
+
+- Lecturas de 1-3 cartas: OK
+- Lecturas de 5 cartas: Se cortan en la sección "Conexiones y Flujo Energético"
+- Lecturas de 10 cartas: Truncamiento severo
+
+**Causa Raíz:**
+
+El formato de prompt generaba contenido muy extenso que excedía el límite de tokens:
+
+- Formato anterior: ~2000-2800 tokens para 5 cartas
+- maxTokens configurado: 3000 (al límite)
+
+**Solución Implementada (Backend):**
+
+1. **Nuevo formato conciso** en `prompt-builder.service.ts`:
+
+```typescript
+// Límites de palabras por número de cartas:
+// - 1 carta: máx 400 palabras
+// - 2-3 cartas: máx 600 palabras
+// - 4-5 cartas: máx 800 palabras
+// - 6+ cartas: máx 1000 palabras
+```
+
+2. **Secciones simplificadas**:
+   - `📖 Visión General de la Lectura` → `📖 Mensaje Central`
+   - `🎴 Análisis Detallado por Posición` → `🎴 Las Cartas` (2-3 oraciones por carta)
+   - `🔮 Conexiones y Flujo Energético` → `🔮 Conexiones` (1 párrafo)
+   - `💡 Consejos Prácticos` → `💡 Consejos` (numerados)
+   - `✨ Conclusión` → `✨ Cierre` (2-3 oraciones)
+
+3. **Instrucciones anti-truncamiento**:
+
+```
+**⚠️ LÍMITE ESTRICTO:** Mantén la respuesta CONCISA. Máximo X palabras total.
+**RECUERDA:** Sé directo y evita repeticiones.
+```
+
+4. **Aumento de maxTokens en BD**:
+
+```sql
+UPDATE tarotista_config SET max_tokens = 4000 WHERE is_active = true;
+```
+
+**Archivos Modificados (Backend):**
+
+- `backend/tarot-app/src/modules/ai/application/services/prompt-builder.service.ts` - Método `getAdaptiveInstructions()` reescrito
+- Base de datos: `tarotista_config.max_tokens` = 4000
+
+**Testing:**
+
+- Lecturas de 1, 3, 5 cartas verificadas manualmente
+- Interpretaciones completas sin truncamiento
+
+---
+
+### ✅ TAREA 13.3: Corrección de Autenticación con Hydration de Zustand
+
+**Estado:** ✅ COMPLETADA (2025-12-10)
+**Prioridad:** ALTA
+**Estimación:** 30 min
+**Rama:** `feature/ai-config-and-business-plan`
+**Dependencias:** TASK 3.x (Autenticación)
+
+**Problema Detectado:**
+
+Error 401 Unauthorized al crear lecturas después de recargar la página, a pesar de que el usuario aparecía como "logueado" en la UI.
+
+**Síntomas:**
+
+- Usuario aparece logueado en UI
+- Crear lectura retorna 401
+- Token en localStorage expirado
+- Zustand persistía estado "isAuthenticated: true" sin validar
+
+**Causa Raíz:**
+
+Zustand con `persist` middleware restauraba el estado de autenticación antes de que se validara el token con el backend. La UI renderizaba con datos stale.
+
+**Solución Implementada:**
+
+1. **Flag de hydration en store** (`stores/authStore.ts`):
+
+```typescript
+interface AuthState {
+  _hasHydrated: boolean;
+  setHasHydrated: (state: boolean) => void;
+}
+
+// En persist config:
+onRehydrateStorage: () => (state) => {
+  state?.setHasHydrated(true);
+};
+```
+
+2. **AuthProvider espera hydration** (`lib/providers/auth-provider.tsx`):
+
+```typescript
+function AuthProvider({ children }) {
+  const hasHydrated = useAuthStore((s) => s._hasHydrated);
+
+  useEffect(() => {
+    if (hasHydrated) {
+      checkAuth(); // Valida token solo después de hydration
+    }
+  }, [hasHydrated]);
+
+  if (!hasHydrated || isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  return children;
+}
+```
+
+**Archivos Modificados:**
+
+- `frontend/src/stores/authStore.ts` - `_hasHydrated` state y `onRehydrateStorage`
+- `frontend/src/types/auth.types.ts` - Tipos actualizados
+- `frontend/src/lib/providers/auth-provider.tsx` - Espera hydration antes de render
+
+**Testing:**
+
+- Login → Refresh page → Crear lectura: Funciona correctamente
+- Token expirado → Redirect a login automático
+
+---
+
+**Documentación Adicional:**
+
+Los problemas y soluciones de esta fase están documentados en detalle en:
+
+- `frontend/docs/AI_DEVELOPMENT_GUIDE.md` - Sección "🐛 Problemas Conocidos y Soluciones"
+
 ```
 
 ```

@@ -21,6 +21,27 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ConfirmationModal } from '@/components/ui/confirmation-modal';
 import { cn } from '@/lib/utils';
+import type { Interpretation } from '@/types/reading.types';
+
+/**
+ * Helper to safely extract interpretation data
+ * Handles the case where interpretation can be string, object, or null
+ */
+function getInterpretationData(interpretation: Interpretation | string | null): {
+  generalInterpretation: string;
+  cardInterpretations: Array<{ cardId: number; interpretation: string }>;
+} {
+  if (!interpretation) {
+    return { generalInterpretation: '', cardInterpretations: [] };
+  }
+  if (typeof interpretation === 'string') {
+    return { generalInterpretation: interpretation, cardInterpretations: [] };
+  }
+  return {
+    generalInterpretation: interpretation.generalInterpretation || '',
+    cardInterpretations: interpretation.cardInterpretations || [],
+  };
+}
 
 /**
  * Reading Detail Skeleton
@@ -303,8 +324,9 @@ export function ReadingDetail({ readingId }: ReadingDetailProps) {
   }
 
   // Get card interpretations map
-  const cardInterpretations = reading.interpretation.cardInterpretations.reduce(
-    (acc, ci) => {
+  const interpretationData = getInterpretationData(reading.interpretation);
+  const cardInterpretations = interpretationData.cardInterpretations.reduce(
+    (acc: Record<number, string>, ci: { cardId: number; interpretation: string }) => {
       acc[ci.cardId] = ci.interpretation;
       return acc;
     },
@@ -376,7 +398,7 @@ export function ReadingDetail({ readingId }: ReadingDetailProps) {
                 className={cn('prose prose-slate max-w-none', isRegenerating && 'animate-pulse')}
               >
                 <ReactMarkdown components={markdownComponents}>
-                  {reading.interpretation.generalInterpretation}
+                  {interpretationData.generalInterpretation}
                 </ReactMarkdown>
               </div>
             </CardContent>

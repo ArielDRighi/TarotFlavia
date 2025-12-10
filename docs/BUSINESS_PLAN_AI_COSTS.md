@@ -12,9 +12,9 @@ Este documento presenta el análisis de costos de inteligencia artificial para T
 
 ### Propuesta de Planes
 
-| Plan        | Precio          | Lecturas Incluidas                        |
-| ----------- | --------------- | ----------------------------------------- |
-| **Free**    | $0/mes          | 1 tirada personal/día + Tirada del Día    |
+| Plan        | Precio            | Lecturas Incluidas                        |
+| ----------- | ----------------- | ----------------------------------------- |
+| **Free**    | $0/mes            | 1 tirada personal/día + Tirada del Día    |
 | **Premium** | **$4.99 USD/mes** | 3 tiradas personales/día + Tirada del Día |
 
 ---
@@ -221,23 +221,23 @@ Resultado:            +$159.43 USD/mes (ganancia)
 
 ### Comparación con Mercado
 
-| Plataforma             | Precio        | Oferta                        | Mercado Principal |
-| ---------------------- | ------------- | ----------------------------- | ----------------- |
-| Co-Star (astrología)   | $2.99/mes     | Lecturas premium              | USA/Europa        |
-| Sanctuary (astrología) | $4.99/mes     | Lecturas ilimitadas           | USA               |
-| Tarot.com              | $6.99/mes     | Lecturas premium              | USA/Global        |
-| Pattern (astrología)   | $9.99/mes     | Premium completo              | USA               |
-| **TarotFlavia**        | **$4.99/mes** | **3 tiradas/día + diaria**    | **LATAM**         |
+| Plataforma             | Precio        | Oferta                     | Mercado Principal |
+| ---------------------- | ------------- | -------------------------- | ----------------- |
+| Co-Star (astrología)   | $2.99/mes     | Lecturas premium           | USA/Europa        |
+| Sanctuary (astrología) | $4.99/mes     | Lecturas ilimitadas        | USA               |
+| Tarot.com              | $6.99/mes     | Lecturas premium           | USA/Global        |
+| Pattern (astrología)   | $9.99/mes     | Premium completo           | USA               |
+| **TarotFlavia**        | **$4.99/mes** | **3 tiradas/día + diaria** | **LATAM**         |
 
 ### Análisis de Opciones de Precio
 
-| Precio    | Margen Neto | Break-even (1000 free) | Ventajas                            | Desventajas                  |
-| --------- | ----------- | ---------------------- | ----------------------------------- | ---------------------------- |
-| $2.99/mes | $2.40       | 22 usuarios            | Alta conversión esperada            | Margen muy bajo              |
-| $3.99/mes | $3.25       | 17 usuarios            | Accesible LATAM                     | Por debajo del mercado       |
-| **$4.99/mes** | **$4.10** | **13 usuarios**     | **Balance óptimo**                  | -                            |
-| $5.99/mes | $4.95       | 11 usuarios            | Buen margen                         | Puede limitar conversiones   |
-| $6.99/mes | $5.80       | 10 usuarios            | Margen alto, percepción premium     | Barrera de entrada alta LATAM|
+| Precio        | Margen Neto | Break-even (1000 free) | Ventajas                        | Desventajas                   |
+| ------------- | ----------- | ---------------------- | ------------------------------- | ----------------------------- |
+| $2.99/mes     | $2.40       | 22 usuarios            | Alta conversión esperada        | Margen muy bajo               |
+| $3.99/mes     | $3.25       | 17 usuarios            | Accesible LATAM                 | Por debajo del mercado        |
+| **$4.99/mes** | **$4.10**   | **13 usuarios**        | **Balance óptimo**              | -                             |
+| $5.99/mes     | $4.95       | 11 usuarios            | Buen margen                     | Puede limitar conversiones    |
+| $6.99/mes     | $5.80       | 10 usuarios            | Margen alto, percepción premium | Barrera de entrada alta LATAM |
 
 ### 🎯 Recomendación: $4.99 USD/mes
 
@@ -261,12 +261,12 @@ Resultado:            +$159.43 USD/mes (ganancia)
 
 ### Recomendación de Precios Alternativos
 
-| Escenario            | Precio Recomendado | Cuándo Usar                                |
-| -------------------- | ------------------ | ------------------------------------------ |
-| **Lanzamiento**      | **$4.99/mes**      | Precio estándar, equilibrado               |
-| Promoción inicial    | $2.99/mes          | Primeros 3 meses para captar usuarios      |
-| Plan anual           | $39.99/año         | ~$3.33/mes - incentiva compromiso          |
-| Mercado premium      | $6.99/mes          | Si la demanda valida el precio más alto    |
+| Escenario         | Precio Recomendado | Cuándo Usar                             |
+| ----------------- | ------------------ | --------------------------------------- |
+| **Lanzamiento**   | **$4.99/mes**      | Precio estándar, equilibrado            |
+| Promoción inicial | $2.99/mes          | Primeros 3 meses para captar usuarios   |
+| Plan anual        | $39.99/año         | ~$3.33/mes - incentiva compromiso       |
+| Mercado premium   | $6.99/mes          | Si la demanda valida el precio más alto |
 
 **Veredicto: $4.99 USD/mes es el precio recomendado ✅**
 
@@ -276,25 +276,25 @@ Resultado:            +$159.43 USD/mes (ganancia)
 
 ### Plan Free ($0/mes)
 
-| Característica     | Límite                     |
-| ------------------ | -------------------------- |
+| Característica     | Límite                                 |
+| ------------------ | -------------------------------------- |
 | Tirada del Día     | ✅ Incluida (carta aleatoria personal) |
-| Tiradas personales | 1/día                      |
-| Tipos de tirada    | 1-3 cartas                 |
-| Historial          | Últimas 10                 |
-| Guardar favoritos  | ❌ No                      |
+| Tiradas personales | 1/día                                  |
+| Tipos de tirada    | 1-3 cartas                             |
+| Historial          | Últimas 10                             |
+| Guardar favoritos  | ❌ No                                  |
 
 ### Plan Premium ($4.99 USD/mes)
 
-| Característica           | Límite                     |
-| ------------------------ | -------------------------- |
+| Característica           | Límite                                 |
+| ------------------------ | -------------------------------------- |
 | Tirada del Día           | ✅ Incluida (carta aleatoria personal) |
-| Tiradas personales       | 3/día                      |
-| Tipos de tirada          | Todas (1-10 cartas)        |
-| Historial                | Ilimitado                  |
-| Guardar favoritos        | ✅ Sí                      |
-| Regenerar interpretación | ✅ Sí                      |
-| Sin publicidad           | ✅ Sí                      |
+| Tiradas personales       | 3/día                                  |
+| Tipos de tirada          | Todas (1-10 cartas)                    |
+| Historial                | Ilimitado                              |
+| Guardar favoritos        | ✅ Sí                                  |
+| Regenerar interpretación | ✅ Sí                                  |
+| Sin publicidad           | ✅ Sí                                  |
 
 ---
 
@@ -326,15 +326,15 @@ Resultado:            +$159.43 USD/mes (ganancia)
 
 ## 📊 Tabla Resumen Final
 
-| Métrica                      | Valor                                            |
-| ---------------------------- | ------------------------------------------------ |
-| **Costo IA por lectura personal** | $0.00074 USD                                |
-| **Costo IA tirada del día**  | $0.00015 USD                                     |
-| **Costo IA 1,000 free/mes**  | $26.82 USD (sin imp.) / $52.57 USD (con imp. AR) |
-| **Ganancia por premium**     | $4.10 USD/mes                                    |
-| **Break-even 1,000 free**    | 13 usuarios premium                              |
-| **Conversión mínima viable** | 1.3%                                             |
-| **Precio recomendado**       | $4.99 USD/mes ✅                                 |
+| Métrica                           | Valor                                            |
+| --------------------------------- | ------------------------------------------------ |
+| **Costo IA por lectura personal** | $0.00074 USD                                     |
+| **Costo IA tirada del día**       | $0.00015 USD                                     |
+| **Costo IA 1,000 free/mes**       | $26.82 USD (sin imp.) / $52.57 USD (con imp. AR) |
+| **Ganancia por premium**          | $4.10 USD/mes                                    |
+| **Break-even 1,000 free**         | 13 usuarios premium                              |
+| **Conversión mínima viable**      | 1.3%                                             |
+| **Precio recomendado**            | $4.99 USD/mes ✅                                 |
 
 ---
 

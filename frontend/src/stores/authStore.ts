@@ -13,6 +13,7 @@ import type { AuthUser, AuthStore, LoginResponse, RegisterCredentials } from '@/
  * - Token management in localStorage
  * - Session verification with checkAuth
  * - Persistence of user and isAuthenticated state
+ * - Proper hydration handling to prevent stale auth state
  */
 export const useAuthStore = create<AuthStore>()(
   persist(
@@ -21,6 +22,12 @@ export const useAuthStore = create<AuthStore>()(
       user: null,
       isAuthenticated: false,
       isLoading: true,
+      _hasHydrated: false,
+
+      // Hydration setter
+      setHasHydrated: (state: boolean) => {
+        set({ _hasHydrated: state });
+      },
 
       // Actions
       setUser: (user: AuthUser | null) => {
@@ -111,6 +118,10 @@ export const useAuthStore = create<AuthStore>()(
         user: state.user,
         isAuthenticated: state.isAuthenticated,
       }),
+      onRehydrateStorage: () => (state) => {
+        // Called when hydration is complete
+        state?.setHasHydrated(true);
+      },
     }
   )
 );

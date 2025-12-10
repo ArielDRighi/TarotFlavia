@@ -144,7 +144,12 @@ export interface ReadingDetail {
   tarotistaId?: number;
   question: string;
   cards: ReadingCard[];
-  interpretation: Interpretation;
+  /**
+   * Interpretation can be either:
+   * - A string (direct AI response from backend)
+   * - An Interpretation object (structured format)
+   */
+  interpretation: Interpretation | string | null;
   createdAt: string;
   deletedAt?: string | null;
   shareToken?: string | null;
