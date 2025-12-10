@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   AIProviderType,
+  AIProviderConfig,
   AIMessage,
   AIResponse,
   IAIProvider,
@@ -82,11 +83,13 @@ export class AIProviderService {
   /**
    * Generate completion with automatic fallback, retry, and circuit breaker
    * Tries providers in priority order until one succeeds
+   * @param config Optional AI config (temperature, maxTokens, topP) from tarotista settings
    */
   async generateCompletion(
     messages: AIMessage[],
     userId?: number | null,
     readingId?: number | null,
+    config?: Partial<AIProviderConfig>,
   ): Promise<AIResponse> {
     const errors: Array<{ provider: string; error: string }> = [];
     let fallbackUsed = false;
@@ -117,9 +120,9 @@ export class AIProviderService {
       try {
         this.logger.log(`Attempting completion with ${providerType}`);
 
-        // Wrap provider call with retry logic
+        // Wrap provider call with retry logic, passing config to provider
         const response = await retryWithBackoff(async () => {
-          return await provider.generateCompletion(messages, {});
+          return await provider.generateCompletion(messages, config || {});
         }, this.MAX_RETRY_ATTEMPTS);
 
         const durationMs = Date.now() - startTime;

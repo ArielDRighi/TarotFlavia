@@ -132,6 +132,25 @@ export class DeepSeekProvider implements IAIProvider {
         );
       }
 
+      // Check for 402 (Insufficient balance - FREE TOKENS EXHAUSTED)
+      // This is NOT retryable - we don't want to fallback to paid providers
+      if (
+        statusCode === 402 ||
+        errorMessage.includes('402') ||
+        errorMessage.toLowerCase().includes('insufficient balance') ||
+        errorMessage.toLowerCase().includes('insufficient_balance') ||
+        errorMessage.toLowerCase().includes('quota exceeded') ||
+        errorMessage.toLowerCase().includes('balance')
+      ) {
+        throw new AIProviderException(
+          AIProviderType.DEEPSEEK,
+          AIErrorType.INSUFFICIENT_BALANCE,
+          `DeepSeek free credits exhausted: ${errorMessage}. Provider disabled to prevent paid usage.`,
+          false, // NOT retryable - prevents fallback to paid providers
+          error as Error,
+        );
+      }
+
       // Check for 429 (Rate limit)
       if (
         statusCode === 429 ||
