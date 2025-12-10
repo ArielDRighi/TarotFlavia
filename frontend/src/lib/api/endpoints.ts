@@ -58,9 +58,9 @@ export const API_ENDPOINTS = {
   // Tarotistas (Marketplace)
   TAROTISTAS: {
     BASE: '/tarotistas',
-    BY_ID: (id: string) => `/tarotistas/${id}`,
+    BY_ID: (id: number) => `/tarotistas/${id}`,
     AVAILABLE: '/tarotistas/available',
-    REVIEWS: (id: string) => `/tarotistas/${id}/reviews`,
+    REVIEWS: (id: number) => `/tarotistas/${id}/reviews`,
   },
 
   // Sessions (Live readings)

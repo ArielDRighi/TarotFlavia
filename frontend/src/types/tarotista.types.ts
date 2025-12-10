@@ -2,44 +2,77 @@
  * Tarotista Types (Marketplace)
  */
 
+/**
+ * Tarotista básico para listados
+ * Coincide con GET /api/tarotistas response
+ */
 export interface Tarotista {
-  id: string;
-  userId: string;
-  displayName: string;
-  bio: string;
-  avatarUrl?: string;
-  specialties: string[];
-  pricePerSession: number;
-  currency: string;
-  rating: number;
+  id: number;
+  nombrePublico: string;
+  bio: string | null;
+  especialidades: string[];
+  fotoPerfil?: string;
+  ratingPromedio: number | null;
+  totalLecturas: number;
   totalReviews: number;
-  totalSessions: number;
-  isAvailable: boolean;
+  añosExperiencia: number | null;
+  idiomas: string[];
   createdAt: string;
+}
+
+/**
+ * Detalle completo de tarotista (perfil público)
+ * Coincide con GET /api/tarotistas/:id response
+ */
+export interface TarotistaDetail extends Tarotista {
+  isActive: boolean;
   updatedAt: string;
 }
 
+/**
+ * Filtros para búsqueda de tarotistas
+ * Coincide con query params de GET /api/tarotistas
+ */
+export interface TarotistaFilters {
+  page?: number;
+  limit?: number;
+  search?: string;
+  especialidad?: string;
+  orderBy?: 'rating' | 'totalLecturas' | 'nombrePublico' | 'createdAt';
+  order?: 'ASC' | 'DESC';
+}
+
+/**
+ * Respuesta paginada de tarotistas
+ * Coincide con estructura del backend
+ */
+export interface PaginatedTarotistas {
+  data: Tarotista[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+/**
+ * Review de tarotista (para futuras implementaciones)
+ */
 export interface TarotistaReview {
-  id: string;
-  tarotistaId: string;
-  userId: string;
+  id: number;
+  tarotistaId: number;
+  userId: number;
   userName: string;
   rating: number;
   comment?: string;
   createdAt: string;
 }
 
-export interface TarotistaFilters {
-  specialty?: string;
-  minRating?: number;
-  maxPrice?: number;
-  isAvailable?: boolean;
-  search?: string;
-}
-
+/**
+ * Slot de reserva (para futuras implementaciones)
+ */
 export interface BookingSlot {
-  id: string;
-  tarotistaId: string;
+  id: number;
+  tarotistaId: number;
   startTime: string;
   endTime: string;
   isBooked: boolean;

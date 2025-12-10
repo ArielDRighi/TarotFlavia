@@ -44,4 +44,11 @@ export type {
 } from './reading.types';
 
 // Tarotista Types
-export type { Tarotista, TarotistaReview, TarotistaFilters, BookingSlot } from './tarotista.types';
+export type {
+  Tarotista,
+  TarotistaDetail,
+  TarotistaReview,
+  TarotistaFilters,
+  PaginatedTarotistas,
+  BookingSlot,
+} from './tarotista.types';

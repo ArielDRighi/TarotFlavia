@@ -17,3 +17,4 @@ export {
   getTrashedReadings,
   restoreReading,
 } from './readings-api';
+export { getTarotistas, getTarotistaById } from './tarotistas-api';

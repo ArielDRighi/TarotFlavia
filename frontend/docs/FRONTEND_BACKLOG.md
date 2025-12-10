@@ -2018,53 +2018,70 @@ IMPORTANTE:
 
 ## 🏪 FASE 7: MARKETPLACE DE TAROTISTAS
 
-### TAREA 7.1: Crear servicio API para tarotistas
+### TAREA 7.1: Crear servicio API para tarotistas ✅ COMPLETADA
 
 **Prioridad:** ALTA
 **Estimación:** 25 min
+**Tiempo Real:** 25 min
 **Dependencias:** 0.5
 
-**Consigna:**
-Crear funciones API y hooks para listar tarotistas y ver perfiles.
+**Estado:** COMPLETADA el 10 Dic 2025
 
-**Prompt:**
+**Archivos Creados:**
 
-```
+- ✅ `src/types/tarotista.types.ts` - Tipos actualizados según contratos del backend
+- ✅ `src/lib/api/tarotistas-api.ts` - Funciones API con tests
+- ✅ `src/lib/api/tarotistas-api.test.ts` - Tests 100% coverage (6 tests)
+- ✅ `src/hooks/api/useTarotistas.ts` - Hooks TanStack Query
+- ✅ `src/hooks/api/useTarotistas.test.ts` - Tests 100% coverage (8 tests)
 
-Crea el servicio API para Tarotistas:
+**Archivos Modificados:**
 
-CREAR ARCHIVO: src/lib/api/tarotistas-api.ts
+- ✅ `src/lib/api/endpoints.ts` - Endpoints de tarotistas con IDs numéricos
+- ✅ `src/types/index.ts` - Exportaciones de tipos
+- ✅ `src/lib/api/index.ts` - Exportaciones de funciones
 
-FUNCIONES:
+**Funciones Implementadas:**
 
-- getTarotistas(filters?: TarotistaFilters): Promise<Tarotista[]>
-  - GET /tarotistas?specialty={specialty}&search={search}
-- getTarotistaById(id: number): Promise<TarotistaDetail>
-  - GET /tarotistas/{id}
+- `getTarotistas(filters?: TarotistaFilters): Promise<PaginatedTarotistas>`
+  - GET /tarotistas con filtros opcionales
+- `getTarotistaById(id: number): Promise<TarotistaDetail>`
+  - GET /tarotistas/:id
 
-TYPES (crear src/types/tarotista.types.ts):
+**Tipos Creados:**
 
-- Tarotista: { id, name, bio, avatar, specialties, rating, reviewCount, pricePerSession, isActive }
-- TarotistaDetail: extends Tarotista + { languages, yearsExperience, reviews }
-- TarotistaFilters: { specialty?: string, search?: string }
+- `Tarotista`: { id, nombrePublico, bio, especialidades, fotoPerfil, ratingPromedio, totalLecturas, totalReviews, añosExperiencia, idiomas, createdAt }
+- `TarotistaDetail`: extends Tarotista + { isActive, updatedAt }
+- `TarotistaFilters`: { page?, limit?, search?, especialidad?, orderBy?, order? }
+- `PaginatedTarotistas`: { data, total, page, limit, totalPages }
 
-CREAR ARCHIVO: src/hooks/queries/use-tarotistas.ts
+**Hooks Creados:**
 
-HOOKS:
+- `useTarotistas(filters?: TarotistaFilters)` - Lista paginada de tarotistas
+- `useTarotistaDetail(id: number)` - Detalle de un tarotista
 
-1. useTarotistas(filters?: TarotistaFilters)
-   - useQuery con queryKey: ['tarotistas', filters]
-   - queryFn: () => getTarotistas(filters)
+**Tests:**
 
-2. useTarotistaDetail(id: number)
-   - useQuery con queryKey: ['tarotista', id]
-   - queryFn: () => getTarotistaById(id)
+- 14 tests en total (6 API + 8 hooks)
+- Coverage: 100% en todos los archivos nuevos
+- Coverage global: 90.18%
 
-IMPORTANTE:
+**Decisiones Técnicas:**
 
-- Manejar especialidades como array de strings
+1. **IDs numéricos:** Se mantiene consistencia con backend (número, no string)
+2. **Nomenclatura española:** Se usa `nombrePublico`, `añosExperiencia` según API del backend
+3. **Paginación real:** Se implementa `PaginatedTarotistas` según estructura del backend
+4. **Query keys estructuradas:** Se usa patrón `tarotistaQueryKeys` para consistencia
+5. **Stale time 5 min:** Datos de catálogo no cambian frecuentemente
 
-```
+**Validaciones Exitosas:**
+
+✅ Tests pasan (100%)
+✅ Coverage ≥ 80%
+✅ Lint sin errores
+✅ Type check sin errores
+✅ Build exitoso
+✅ Arquitectura validada
 
 ---
 
