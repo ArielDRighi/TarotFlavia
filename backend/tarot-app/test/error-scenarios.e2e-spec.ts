@@ -200,7 +200,9 @@ describe('Error Scenarios (E2E)', () => {
     });
 
     it('✅ GET /readings sin token retorna 401', async () => {
-      const response = await request(httpServer).get('/api/v1/readings').expect(401);
+      const response = await request(httpServer)
+        .get('/api/v1/readings')
+        .expect(401);
 
       const body = response.body as ErrorResponse;
       expect(body.statusCode).toBe(401);

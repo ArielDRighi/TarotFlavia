@@ -61,10 +61,12 @@ describe('Security Events E2E', () => {
     datasource = moduleFixture.get<DataSource>(DataSource);
 
     // Get admin token
-    const adminResponse = await request(httpServer).post('/api/v1/auth/login').send({
-      email: 'admin@test.com',
-      password: 'Test123456!',
-    });
+    const adminResponse = await request(httpServer)
+      .post('/api/v1/auth/login')
+      .send({
+        email: 'admin@test.com',
+        password: 'Test123456!',
+      });
 
     adminToken = (adminResponse.body as unknown as LoginResponse).access_token;
 
@@ -75,10 +77,12 @@ describe('Security Events E2E', () => {
       name: 'Security Test User',
     });
 
-    const userResponse = await request(httpServer).post('/api/v1/auth/login').send({
-      email: 'securitytest@test.com',
-      password: 'Test123456!',
-    });
+    const userResponse = await request(httpServer)
+      .post('/api/v1/auth/login')
+      .send({
+        email: 'securitytest@test.com',
+        password: 'Test123456!',
+      });
 
     regularUserToken = (userResponse.body as unknown as LoginResponse)
       .access_token;
@@ -97,7 +101,9 @@ describe('Security Events E2E', () => {
 
   describe('Authentication', () => {
     it('should reject unauthenticated requests', () => {
-      return request(httpServer).get('/api/v1/admin/security/events').expect(401);
+      return request(httpServer)
+        .get('/api/v1/admin/security/events')
+        .expect(401);
     });
 
     it('should reject non-admin users', () => {

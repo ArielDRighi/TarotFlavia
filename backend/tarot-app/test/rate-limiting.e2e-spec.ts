@@ -124,7 +124,9 @@ describe('Rate Limiting (e2e)', () => {
 
       // Hacer 4 requests para exceder el límite de 3
       for (let i = 0; i < 4; i++) {
-        const response = await request(app.getHttpServer()).post('/api/v1/auth');
+        const response = await request(app.getHttpServer()).post(
+          '/api/v1/auth',
+        );
         responses.push(response.status);
       }
 
@@ -141,7 +143,9 @@ describe('Rate Limiting (e2e)', () => {
 
       // Hacer 5 requests para exceder el límite de 4
       for (let i = 0; i < 5; i++) {
-        const response = await request(app.getHttpServer()).get('/api/v1/readings');
+        const response = await request(app.getHttpServer()).get(
+          '/api/v1/readings',
+        );
         responses.push(response.status);
       }
 

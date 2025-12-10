@@ -87,7 +87,9 @@ describe('Tarotistas Admin (e2e)', () => {
     });
 
     it('should return 401 when not authenticated', async () => {
-      await request(app.getHttpServer()).get('/api/v1/admin/tarotistas').expect(401);
+      await request(app.getHttpServer())
+        .get('/api/v1/admin/tarotistas')
+        .expect(401);
     });
   });
 

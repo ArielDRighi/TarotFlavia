@@ -194,16 +194,20 @@ export class InterpretationsService {
         : undefined;
 
       // Usar PromptBuilder para generar prompts dinámicos
-      const { systemPrompt, userPrompt } =
-        await this.promptBuilder.buildInterpretationPrompt(
-          finalTarotistaId,
-          selectedCards,
-          questionText,
-          categoryName,
-          spreadInfo, // Now passing spread information for adaptive formatting
-        );
+      const {
+        systemPrompt,
+        userPrompt,
+        config: aiConfig,
+      } = await this.promptBuilder.buildInterpretationPrompt(
+        finalTarotistaId,
+        selectedCards,
+        questionText,
+        categoryName,
+        spreadInfo, // Now passing spread information for adaptive formatting
+      );
 
       // Intentar generar con el sistema de providers con fallback automático
+      // Pass aiConfig (temperature, maxTokens, topP) from tarotista settings
       const response = await this.aiProviderService.generateCompletion(
         [
           { role: 'system', content: systemPrompt },
@@ -211,6 +215,7 @@ export class InterpretationsService {
         ],
         userId,
         readingId,
+        aiConfig, // Pass maxTokens from DB config (default: 4000)
       );
 
       // Sanitize AI response before using it (TASK-048-a: Output Sanitization)
