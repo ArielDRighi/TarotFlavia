@@ -138,12 +138,14 @@ function transformReadingResponse(raw: ApiReadingResponse): ReadingDetail {
   // Transform cards array to include position info
   const transformedCards: ReadingCard[] = raw.cards.map((card, index) => {
     const posInfo = positionMap.get(card.id);
+    // Determine arcana from category, not number (Minor Arcana have numbers 1-14 per suit)
+    const isMajorArcana = card.category === 'arcanos_mayores';
     return {
       id: card.id,
       name: card.name,
-      arcana: (card.number <= 21 ? 'major' : 'minor') as 'major' | 'minor',
+      arcana: (isMajorArcana ? 'major' : 'minor') as 'major' | 'minor',
       number: card.number,
-      suit: card.category !== 'major' ? card.category : null,
+      suit: !isMajorArcana ? card.category : null,
       orientation: (posInfo?.isReversed ? 'reversed' : 'upright') as 'upright' | 'reversed',
       position: index,
       positionName: posInfo?.position || `Posición ${index + 1}`,

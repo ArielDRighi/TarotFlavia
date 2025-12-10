@@ -321,11 +321,6 @@ export function ReadingExperience({
       };
 
       const result = await createReading(createDto);
-      // DEBUG
-      console.log('=== RESULT FROM API ===');
-      console.log('Full result:', result);
-      console.log('Interpretation:', result.interpretation);
-      console.log('Type of interpretation:', typeof result.interpretation);
       setReadingResult(result);
       setState('result');
     } catch (error) {

@@ -199,7 +199,7 @@ describe('readings-api', () => {
           id: 1,
           name: 'El Mago',
           number: 1,
-          category: 'major',
+          category: 'arcanos_mayores', // Backend uses 'arcanos_mayores' for Major Arcana
           imageUrl: '/cards/magician.jpg',
         },
       ],
@@ -288,6 +288,62 @@ describe('readings-api', () => {
       };
 
       await expect(createReading(createData)).rejects.toThrow('Error al crear lectura');
+    });
+
+    it('should correctly determine arcana from category, not number', async () => {
+      // Minor Arcana card with number 1 (As de Bastos) should be 'minor', not 'major'
+      const mockApiResponseWithMinor = {
+        id: 124,
+        userId: 1,
+        spreadId: 1,
+        tarotistaId: 1,
+        customQuestion: '¿Qué me depara el futuro?',
+        cards: [
+          {
+            id: 23,
+            name: 'As de Bastos',
+            number: 1, // Same number as El Mago, but different arcana
+            category: 'bastos', // Minor Arcana
+            imageUrl: '/cards/ace-wands.jpg',
+          },
+          {
+            id: 1,
+            name: 'El Mago',
+            number: 1, // Same number as As de Bastos
+            category: 'arcanos_mayores', // Major Arcana
+            imageUrl: '/cards/magician.jpg',
+          },
+        ],
+        cardPositions: [
+          { cardId: 23, position: 'Pasado', isReversed: false },
+          { cardId: 1, position: 'Presente', isReversed: false },
+        ],
+        interpretation: 'Tu lectura muestra...',
+        createdAt: '2025-11-20T10:30:00.000Z',
+      };
+
+      const createData: CreateReadingDto = {
+        spreadId: 1,
+        deckId: 1,
+        cardIds: [23, 1],
+        cardPositions: [
+          { cardId: 23, position: 'Pasado', isReversed: false },
+          { cardId: 1, position: 'Presente', isReversed: false },
+        ],
+        customQuestion: '¿Qué me depara el futuro?',
+      };
+
+      vi.mocked(apiClient.post).mockResolvedValueOnce({ data: mockApiResponseWithMinor });
+
+      const result = await createReading(createData);
+
+      // As de Bastos (number: 1, category: 'bastos') should be minor arcana
+      expect(result.cards[0].arcana).toBe('minor');
+      expect(result.cards[0].suit).toBe('bastos');
+
+      // El Mago (number: 1, category: 'arcanos_mayores') should be major arcana
+      expect(result.cards[1].arcana).toBe('major');
+      expect(result.cards[1].suit).toBeNull();
     });
   });
 
