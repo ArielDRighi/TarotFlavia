@@ -188,7 +188,9 @@ describe('Categories (e2e)', () => {
     });
 
     it('should return 404 for non-existent category', async () => {
-      await request(app.getHttpServer()).get('/api/v1/categories/99999').expect(404);
+      await request(app.getHttpServer())
+        .get('/api/v1/categories/99999')
+        .expect(404);
     });
 
     it('should return 500 for invalid ID format (non-numeric)', async () => {

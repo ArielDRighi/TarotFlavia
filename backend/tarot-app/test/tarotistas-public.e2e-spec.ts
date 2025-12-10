@@ -204,7 +204,9 @@ describe('Tarotistas Públicos E2E', () => {
 
   describe('GET /tarotistas - Listar tarotistas públicos', () => {
     it('should return list of active tarotistas without authentication', async () => {
-      const response = await request(httpServer).get('/api/v1/tarotistas').expect(200);
+      const response = await request(httpServer)
+        .get('/api/v1/tarotistas')
+        .expect(200);
 
       type TarotistasList = {
         data: unknown[];
@@ -399,7 +401,9 @@ describe('Tarotistas Públicos E2E', () => {
     });
 
     it('should NOT expose sensitive data (configs, customCardMeanings)', async () => {
-      const response = await request(httpServer).get('/api/v1/tarotistas').expect(200);
+      const response = await request(httpServer)
+        .get('/api/v1/tarotistas')
+        .expect(200);
 
       type TarotistaData = {
         id: number;
@@ -455,7 +459,9 @@ describe('Tarotistas Públicos E2E', () => {
 
     it('should return 404 for inactive tarotista', async () => {
       // Tarotista3 is inactive
-      await request(httpServer).get(`/api/v1/tarotistas/${tarotistaId3}`).expect(404);
+      await request(httpServer)
+        .get(`/api/v1/tarotistas/${tarotistaId3}`)
+        .expect(404);
     });
 
     it('should return 404 for non-existent tarotista', async () => {

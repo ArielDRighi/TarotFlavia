@@ -78,7 +78,9 @@ describe('IP Whitelist Admin (e2e)', () => {
     });
 
     it('should return 401 when not authenticated', async () => {
-      await request(app.getHttpServer()).get('/api/v1/admin/ip-whitelist').expect(401);
+      await request(app.getHttpServer())
+        .get('/api/v1/admin/ip-whitelist')
+        .expect(401);
     });
 
     it('should return count matching ips array length', async () => {

@@ -419,7 +419,9 @@ describe('Readings Soft Delete E2E', () => {
     });
 
     it('debe retornar 401 si no está autenticado', async () => {
-      await request(app.getHttpServer()).get('/api/v1/readings/trash').expect(401);
+      await request(app.getHttpServer())
+        .get('/api/v1/readings/trash')
+        .expect(401);
     });
   });
 
@@ -578,7 +580,9 @@ describe('Readings Soft Delete E2E', () => {
     });
 
     it('debe retornar 401 si no está autenticado', async () => {
-      await request(app.getHttpServer()).get('/api/v1/admin/readings').expect(401);
+      await request(app.getHttpServer())
+        .get('/api/v1/admin/readings')
+        .expect(401);
     });
   });
 });

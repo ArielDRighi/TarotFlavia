@@ -355,7 +355,9 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
     });
 
     it('debería retornar 400 para ID no numérico', async () => {
-      await request(app.getHttpServer()).get('/api/v1/cards/invalid').expect(400);
+      await request(app.getHttpServer())
+        .get('/api/v1/cards/invalid')
+        .expect(400);
     });
   });
 
@@ -499,7 +501,9 @@ describe('Tarot Data E2E - Cards, Decks & Spreads', () => {
     });
 
     it('debería retornar 400 para ID no numérico', async () => {
-      await request(app.getHttpServer()).get('/api/v1/spreads/invalid').expect(400);
+      await request(app.getHttpServer())
+        .get('/api/v1/spreads/invalid')
+        .expect(400);
     });
   });
 

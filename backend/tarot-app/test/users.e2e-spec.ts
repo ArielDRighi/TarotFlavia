@@ -152,7 +152,9 @@ describe('Users (e2e)', () => {
     });
 
     it('should return 401 when not authenticated', async () => {
-      await request(app.getHttpServer()).get('/api/v1/users/profile').expect(401);
+      await request(app.getHttpServer())
+        .get('/api/v1/users/profile')
+        .expect(401);
     });
 
     it('should return 401 with invalid token', async () => {

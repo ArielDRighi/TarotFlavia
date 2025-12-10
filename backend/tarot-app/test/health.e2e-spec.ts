@@ -27,7 +27,9 @@ describe('Health (E2E)', () => {
 
   describe('/health (GET)', () => {
     it('should return ok status', async () => {
-      const response = await request(httpServer).get('/api/v1/health').expect(200);
+      const response = await request(httpServer)
+        .get('/api/v1/health')
+        .expect(200);
 
       expect(response.body).toHaveProperty('status');
       expect((response.body as { status: string }).status).toBe('ok');
@@ -36,7 +38,9 @@ describe('Health (E2E)', () => {
     });
 
     it('should check database', async () => {
-      const response = await request(httpServer).get('/api/v1/health').expect(200);
+      const response = await request(httpServer)
+        .get('/api/v1/health')
+        .expect(200);
 
       const body = response.body as {
         details: { database: { status: string } };
@@ -46,7 +50,9 @@ describe('Health (E2E)', () => {
     });
 
     it('should check memory', async () => {
-      const response = await request(httpServer).get('/api/v1/health').expect(200);
+      const response = await request(httpServer)
+        .get('/api/v1/health')
+        .expect(200);
 
       const body = response.body as {
         details: { memory_heap: unknown; memory_rss: unknown };
@@ -56,14 +62,18 @@ describe('Health (E2E)', () => {
     });
 
     it('should check disk', async () => {
-      const response = await request(httpServer).get('/api/v1/health').expect(200);
+      const response = await request(httpServer)
+        .get('/api/v1/health')
+        .expect(200);
 
       const body = response.body as { details: { disk: unknown } };
       expect(body.details).toHaveProperty('disk');
     });
 
     it('should check AI providers', async () => {
-      const response = await request(httpServer).get('/api/v1/health').expect(200);
+      const response = await request(httpServer)
+        .get('/api/v1/health')
+        .expect(200);
 
       const body = response.body as { details: { ai: unknown } };
       expect(body.details).toHaveProperty('ai');

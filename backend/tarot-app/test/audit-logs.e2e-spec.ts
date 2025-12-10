@@ -116,7 +116,9 @@ describe('Audit Logs (e2e)', () => {
     });
 
     it('should return 401 when not authenticated', async () => {
-      await request(app.getHttpServer()).get('/api/v1/admin/audit-logs').expect(401);
+      await request(app.getHttpServer())
+        .get('/api/v1/admin/audit-logs')
+        .expect(401);
     });
   });
 

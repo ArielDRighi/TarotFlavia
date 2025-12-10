@@ -176,7 +176,9 @@ describe('Admin Users Management (e2e)', () => {
 
   describe('Authentication and Authorization', () => {
     it('should require authentication', async () => {
-      const response = await request(app.getHttpServer()).get('/api/v1/admin/users');
+      const response = await request(app.getHttpServer()).get(
+        '/api/v1/admin/users',
+      );
 
       expect(response.status).toBe(401);
     });
