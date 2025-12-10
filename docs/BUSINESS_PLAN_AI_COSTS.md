@@ -12,10 +12,10 @@ Este documento presenta el análisis de costos de inteligencia artificial para T
 
 ### Propuesta de Planes
 
-| Plan        | Precio     | Lecturas Incluidas                        |
-| ----------- | ---------- | ----------------------------------------- |
-| **Free**    | $0/mes     | 1 tirada personal/día + Tirada del Día    |
-| **Premium** | $4 USD/mes | 3 tiradas personales/día + Tirada del Día |
+| Plan        | Precio          | Lecturas Incluidas                        |
+| ----------- | --------------- | ----------------------------------------- |
+| **Free**    | $0/mes          | 1 tirada personal/día + Tirada del Día    |
+| **Premium** | **$4.99 USD/mes** | 3 tiradas personales/día + Tirada del Día |
 
 ---
 
@@ -23,16 +23,19 @@ Este documento presenta el análisis de costos de inteligencia artificial para T
 
 ### Tirada del Día (Gratuita para todos)
 
-- Una carta diaria con mensaje general
+- **Una carta aleatoria diaria** con interpretación personalizada
 - Disponible para TODOS los usuarios (free y premium)
-- Costo de IA: mínimo (se puede cachear para todos los usuarios)
-- **Costo estimado: ~$0** (se genera una vez y se muestra a todos)
+- **Cada usuario recibe una carta diferente** (selección aleatoria)
+- Interpretación breve generada por IA (~500 tokens output)
+- **Costo estimado:** ~$0.00015 USD por usuario/día (con DeepSeek V3)
+
+> 💡 **Nota técnica:** La tirada del día usa una interpretación más corta que las tiradas personales para optimizar costos, pero sigue siendo única para cada usuario.
 
 ### Tiradas Personales (Consumo de IA)
 
 - Tiradas de 1, 3, 5 o más cartas
-- Interpretación personalizada basada en la pregunta del usuario
-- **Cada tirada consume tokens de IA**
+- Interpretación completa y personalizada basada en la pregunta del usuario
+- **Cada tirada consume ~3,500 tokens de IA**
 
 ---
 
@@ -59,30 +62,40 @@ _Nota: GPT-4o-mini cuesta aproximadamente el doble. DeepSeek ofrece calidad simi
 ### Cálculo de Consumo
 
 ```
-Usuarios Free:        1,000
-Tiradas/día/usuario:  1
-Días/mes:             30
-Total lecturas/mes:   1,000 × 1 × 30 = 30,000 lecturas
-```
+Usuarios Free:           1,000
+─────────────────────────────────────────────────────────────
+TIRADAS PERSONALES:
+  Tiradas/día/usuario:   1
+  Días/mes:              30
+  Total lecturas/mes:    1,000 × 1 × 30 = 30,000 lecturas
+  Tokens por lectura:    3,500 (1,000 input + 2,500 output)
+  Tokens personales:     30,000 × 3,500 = 105M tokens
 
-### Cálculo de Tokens
+TIRADA DEL DÍA:
+  Tiradas/día/usuario:   1 (todos los usuarios)
+  Días/mes:              30
+  Total tiradas/mes:     1,000 × 30 = 30,000 tiradas del día
+  Tokens por tirada:     700 (200 input + 500 output)
+  Tokens tirada día:     30,000 × 700 = 21M tokens
 
-```
-Tokens por lectura:   3,500 (1,000 input + 2,500 output)
-Total tokens/mes:     30,000 × 3,500 = 105,000,000 tokens (105M)
-
-Desglose:
-- Input tokens:       30,000 × 1,000 = 30M tokens
-- Output tokens:      30,000 × 2,500 = 75M tokens
+TOTAL TOKENS/MES:        105M + 21M = 126M tokens
 ```
 
 ### Costo Mensual de IA (DeepSeek V3)
 
 ```
-Input:   30M tokens × $0.00007  = $2.10
-Output:  75M tokens × $0.00027  = $20.25
+TIRADAS PERSONALES:
+  Input:   30M × $0.00007   = $2.10
+  Output:  75M × $0.00027   = $20.25
+  Subtotal:                   $22.35
+
+TIRADA DEL DÍA:
+  Input:   6M × $0.00007    = $0.42
+  Output:  15M × $0.00027   = $4.05
+  Subtotal:                   $4.47
+
 ─────────────────────────────────────────
-Total:                           $22.35 USD/mes
+TOTAL:                        $26.82 USD/mes
 ```
 
 ### Costo con Impuestos Argentina
@@ -96,8 +109,8 @@ Los servicios digitales internacionales en Argentina tienen los siguientes impue
 **Factor total aproximado: 1.96x** (el costo se duplica aproximadamente)
 
 ```
-Costo base:           $22.35 USD
-Con impuestos AR:     $22.35 × 1.96 = $43.81 USD/mes
+Costo base:           $26.82 USD
+Con impuestos AR:     $26.82 × 1.96 = $52.57 USD/mes
 ```
 
 > ⚠️ **Nota:** Si se factura desde una empresa argentina con cuenta en el exterior, algunos impuestos pueden no aplicar. Consultar con contador.
@@ -109,29 +122,35 @@ Con impuestos AR:     $22.35 × 1.96 = $43.81 USD/mes
 ### Consumo por Usuario Premium
 
 ```
-Tiradas/día/usuario:  3
-Días/mes:             30
-Lecturas/mes:         3 × 30 = 90 lecturas
+TIRADAS PERSONALES:
+  Tiradas/día/usuario:  3
+  Días/mes:             30
+  Lecturas/mes:         3 × 30 = 90 lecturas
+  Tokens:               90 × 3,500 = 315,000 tokens
 
-Tokens/mes:           90 × 3,500 = 315,000 tokens
+TIRADA DEL DÍA:
+  Tiradas/mes:          30
+  Tokens:               30 × 700 = 21,000 tokens
+
+TOTAL:                  336,000 tokens/mes
 
 Costo por usuario premium/mes (DeepSeek):
-- Input:   90K × $0.00007 = $0.0063
-- Output:  225K × $0.00027 = $0.0608
-- Total:   $0.067 USD/mes por usuario premium
-- Con impuestos AR: $0.13 USD/mes
+- Input:   96K × $0.00007  = $0.0067
+- Output:  240K × $0.00027 = $0.0648
+- Total:   $0.072 USD/mes por usuario premium
+- Con impuestos AR: $0.14 USD/mes
 ```
 
 ### Ingreso por Usuario Premium
 
 ```
-Precio suscripción:   $4.00 USD/mes
+Precio suscripción:   $4.99 USD/mes
 Comisiones pago:      -15% (MercadoPago/Stripe ~3-4% + IVA)
-Neto:                 $3.40 USD/mes
+Neto:                 $4.24 USD/mes
 
-Costo IA por premium: -$0.13 USD/mes
+Costo IA por premium: -$0.14 USD/mes
 ─────────────────────────────────────
-Ganancia neta:        $3.27 USD/mes por usuario premium
+Ganancia neta:        $4.10 USD/mes por usuario premium
 ```
 
 ---
@@ -141,23 +160,23 @@ Ganancia neta:        $3.27 USD/mes por usuario premium
 ### ¿Cuántos premium necesito para 1,000 free?
 
 ```
-Costo mensual 1,000 free:    $43.81 USD (con impuestos)
-Ganancia por premium:         $3.27 USD
+Costo mensual 1,000 free:    $52.57 USD (con impuestos)
+Ganancia por premium:         $4.10 USD
 
-Premium necesarios:          $43.81 ÷ $3.27 = 13.4 usuarios
+Premium necesarios:          $52.57 ÷ $4.10 = 12.8 usuarios
 
-Redondeando: 14 usuarios premium
+Redondeando: 13 usuarios premium
 ```
 
 ### Tabla de Break-Even por Cantidad de Usuarios Free
 
 | Usuarios Free | Costo IA/mes | Premium Necesarios |
 | ------------- | ------------ | ------------------ |
-| 500           | $21.90       | 7                  |
-| 1,000         | $43.81       | 14                 |
-| 2,000         | $87.62       | 27                 |
-| 5,000         | $219.05      | 67                 |
-| 10,000        | $438.10      | 134                |
+| 500           | $26.29       | 7                  |
+| 1,000         | $52.57       | 13                 |
+| 2,000         | $105.14      | 26                 |
+| 5,000         | $262.85      | 65                 |
+| 10,000        | $525.70      | 129                |
 
 ---
 
@@ -168,10 +187,10 @@ Redondeando: 14 usuarios premium
 ```
 Usuarios totales:     1,000
 Conversión a premium: 1% = 10 usuarios
-Ingresos premium:     10 × $3.40 = $34.00 USD
-Costo IA free:        $43.81 USD
+Ingresos premium:     10 × $4.24 = $42.40 USD
+Costo IA free:        $52.57 USD
 ─────────────────────────────────────────────
-Resultado:            -$9.81 USD/mes (pérdida)
+Resultado:            -$10.17 USD/mes (pérdida)
 ```
 
 ### Escenario Moderado (3% conversión)
@@ -179,10 +198,10 @@ Resultado:            -$9.81 USD/mes (pérdida)
 ```
 Usuarios totales:     1,000
 Conversión a premium: 3% = 30 usuarios
-Ingresos premium:     30 × $3.40 = $102.00 USD
-Costo IA free:        $43.81 USD
+Ingresos premium:     30 × $4.24 = $127.20 USD
+Costo IA free:        $52.57 USD
 ─────────────────────────────────────────────
-Resultado:            +$58.19 USD/mes (ganancia)
+Resultado:            +$74.63 USD/mes (ganancia)
 ```
 
 ### Escenario Optimista (5% conversión)
@@ -190,45 +209,66 @@ Resultado:            +$58.19 USD/mes (ganancia)
 ```
 Usuarios totales:     1,000
 Conversión a premium: 5% = 50 usuarios
-Ingresos premium:     50 × $3.40 = $170.00 USD
-Costo IA free:        $43.81 USD
+Ingresos premium:     50 × $4.24 = $212.00 USD
+Costo IA free:        $52.57 USD
 ─────────────────────────────────────────────
-Resultado:            +$126.19 USD/mes (ganancia)
+Resultado:            +$159.43 USD/mes (ganancia)
 ```
 
 ---
 
-## 💵 Análisis del Precio de $4 USD/mes
+## 💵 Análisis y Recomendación de Precio Premium
 
 ### Comparación con Mercado
 
-| Plataforma             | Precio        | Oferta                     |
-| ---------------------- | ------------- | -------------------------- |
-| Co-Star (astrología)   | $2.99/mes     | Lecturas premium           |
-| Sanctuary (astrología) | $4.99/mes     | Lecturas ilimitadas        |
-| Tarot.com              | $6.99/mes     | Lecturas premium           |
-| Pattern (astrología)   | $9.99/mes     | Premium completo           |
-| **TarotFlavia**        | **$4.00/mes** | **3 tiradas/día + diaria** |
+| Plataforma             | Precio        | Oferta                        | Mercado Principal |
+| ---------------------- | ------------- | ----------------------------- | ----------------- |
+| Co-Star (astrología)   | $2.99/mes     | Lecturas premium              | USA/Europa        |
+| Sanctuary (astrología) | $4.99/mes     | Lecturas ilimitadas           | USA               |
+| Tarot.com              | $6.99/mes     | Lecturas premium              | USA/Global        |
+| Pattern (astrología)   | $9.99/mes     | Premium completo              | USA               |
+| **TarotFlavia**        | **$4.99/mes** | **3 tiradas/día + diaria**    | **LATAM**         |
 
-### Evaluación
+### Análisis de Opciones de Precio
 
-✅ **$4 USD/mes es un precio competitivo y adecuado:**
+| Precio    | Margen Neto | Break-even (1000 free) | Ventajas                            | Desventajas                  |
+| --------- | ----------- | ---------------------- | ----------------------------------- | ---------------------------- |
+| $2.99/mes | $2.40       | 22 usuarios            | Alta conversión esperada            | Margen muy bajo              |
+| $3.99/mes | $3.25       | 17 usuarios            | Accesible LATAM                     | Por debajo del mercado       |
+| **$4.99/mes** | **$4.10** | **13 usuarios**     | **Balance óptimo**                  | -                            |
+| $5.99/mes | $4.95       | 11 usuarios            | Buen margen                         | Puede limitar conversiones   |
+| $6.99/mes | $5.80       | 10 usuarios            | Margen alto, percepción premium     | Barrera de entrada alta LATAM|
 
-- **Margen saludable:** $3.27 de ganancia por usuario (81.75% margen)
-- **Punto de entrada bajo:** Accesible para mercado latinoamericano
-- **Valor percibido:** 90 lecturas personalizadas/mes = $0.044 por lectura
-- **Competitivo:** Por debajo de la mayoría de apps de nicho similar
+### 🎯 Recomendación: $4.99 USD/mes
+
+**¿Por qué $4.99 y no $4.00?**
+
+1. **Margen competitivo:** $4.10 de ganancia vs $3.27 (+25% más margen)
+2. **Punto psicológico:** $4.99 es un precio estándar en suscripciones digitales
+3. **Alineado con mercado:** Igual que Sanctuary, por debajo de Tarot.com
+4. **Break-even más bajo:** Solo 13 premium (vs 14 con $4.00)
+5. **Valor percibido:** 120 lecturas/mes (90 personales + 30 diarias) = $0.041/lectura
+
+### Evaluación Final
+
+✅ **$4.99 USD/mes es el precio recomendado:**
+
+- **Margen saludable:** $4.10 de ganancia por usuario (82.2% margen)
+- **Competitivo:** Igual a Sanctuary, menor que Tarot.com y Pattern
+- **Accesible LATAM:** ~$5,000 ARS/mes (precio razonable para el mercado)
+- **Valor claro:** 4 tiradas diarias (3 personales + 1 del día)
+- **Percepción premium:** No es "barato" pero tampoco inalcanzable
 
 ### Recomendación de Precios Alternativos
 
-| Opción        | Precio            | Pros                | Contras |
-| ------------- | ----------------- | ------------------- | ------- |
-| $2.99/mes     | Más conversiones  | Margen bajo ($2.40) |
-| **$4.00/mes** | **Balance ideal** | **Recomendado**     |
-| $4.99/mes     | Mayor margen      | Menor conversión    |
-| $6.99/mes     | Premium percibido | Barrera de entrada  |
+| Escenario            | Precio Recomendado | Cuándo Usar                                |
+| -------------------- | ------------------ | ------------------------------------------ |
+| **Lanzamiento**      | **$4.99/mes**      | Precio estándar, equilibrado               |
+| Promoción inicial    | $2.99/mes          | Primeros 3 meses para captar usuarios      |
+| Plan anual           | $39.99/año         | ~$3.33/mes - incentiva compromiso          |
+| Mercado premium      | $6.99/mes          | Si la demanda valida el precio más alto    |
 
-**Veredicto: $4 USD/mes es correcto ✅**
+**Veredicto: $4.99 USD/mes es el precio recomendado ✅**
 
 ---
 
@@ -236,25 +276,25 @@ Resultado:            +$126.19 USD/mes (ganancia)
 
 ### Plan Free ($0/mes)
 
-| Característica     | Límite      |
-| ------------------ | ----------- |
-| Tirada del Día     | ✅ Incluida |
-| Tiradas personales | 1/día       |
-| Tipos de tirada    | 1-3 cartas  |
-| Historial          | Últimas 10  |
-| Guardar favoritos  | ❌ No       |
+| Característica     | Límite                     |
+| ------------------ | -------------------------- |
+| Tirada del Día     | ✅ Incluida (carta aleatoria personal) |
+| Tiradas personales | 1/día                      |
+| Tipos de tirada    | 1-3 cartas                 |
+| Historial          | Últimas 10                 |
+| Guardar favoritos  | ❌ No                      |
 
-### Plan Premium ($4 USD/mes)
+### Plan Premium ($4.99 USD/mes)
 
-| Característica           | Límite              |
-| ------------------------ | ------------------- |
-| Tirada del Día           | ✅ Incluida         |
-| Tiradas personales       | 3/día               |
-| Tipos de tirada          | Todas (1-10 cartas) |
-| Historial                | Ilimitado           |
-| Guardar favoritos        | ✅ Sí               |
-| Regenerar interpretación | ✅ Sí               |
-| Sin publicidad           | ✅ Sí               |
+| Característica           | Límite                     |
+| ------------------------ | -------------------------- |
+| Tirada del Día           | ✅ Incluida (carta aleatoria personal) |
+| Tiradas personales       | 3/día                      |
+| Tipos de tirada          | Todas (1-10 cartas)        |
+| Historial                | Ilimitado                  |
+| Guardar favoritos        | ✅ Sí                      |
+| Regenerar interpretación | ✅ Sí                      |
+| Sin publicidad           | ✅ Sí                      |
 
 ---
 
@@ -262,11 +302,11 @@ Resultado:            +$126.19 USD/mes (ganancia)
 
 ### 1. Viabilidad Financiera
 
-✅ El modelo es **financieramente viable** con solo **1.4% de conversión** a premium.
+✅ El modelo es **financieramente viable** con solo **1.3% de conversión** a premium.
 
-### 2. Precio Adecuado
+### 2. Precio Recomendado
 
-✅ **$4 USD/mes** ofrece un balance óptimo entre accesibilidad y margen.
+✅ **$4.99 USD/mes** ofrece el mejor balance entre competitividad y margen.
 
 ### 3. Escalabilidad
 
@@ -274,13 +314,13 @@ Resultado:            +$126.19 USD/mes (ganancia)
 
 ### 4. Riesgo Bajo
 
-✅ Con DeepSeek V3, el costo por usuario free es de solo **$0.044 USD/mes**, lo que minimiza el riesgo de usuarios free que nunca convierten.
+✅ Con DeepSeek V3, el costo por usuario free es de solo **$0.053 USD/mes** (incluyendo tirada del día), lo que minimiza el riesgo de usuarios free que nunca convierten.
 
 ### 5. Métricas Clave a Monitorear
 
-- **Tasa de conversión:** Objetivo mínimo 1.4%
+- **Tasa de conversión:** Objetivo mínimo 1.3%
 - **Retención premium:** Objetivo >70% mes a mes
-- **Costo por lectura:** Actual $0.0015 USD (sin impuestos)
+- **Costo por lectura:** Actual $0.00089 USD (sin impuestos)
 
 ---
 
@@ -288,12 +328,13 @@ Resultado:            +$126.19 USD/mes (ganancia)
 
 | Métrica                      | Valor                                            |
 | ---------------------------- | ------------------------------------------------ |
-| **Costo IA por lectura**     | $0.00074 USD                                     |
-| **Costo IA 1,000 free/mes**  | $22.35 USD (sin imp.) / $43.81 USD (con imp. AR) |
-| **Ganancia por premium**     | $3.27 USD/mes                                    |
-| **Break-even 1,000 free**    | 14 usuarios premium                              |
-| **Conversión mínima viable** | 1.4%                                             |
-| **Precio recomendado**       | $4 USD/mes ✅                                    |
+| **Costo IA por lectura personal** | $0.00074 USD                                |
+| **Costo IA tirada del día**  | $0.00015 USD                                     |
+| **Costo IA 1,000 free/mes**  | $26.82 USD (sin imp.) / $52.57 USD (con imp. AR) |
+| **Ganancia por premium**     | $4.10 USD/mes                                    |
+| **Break-even 1,000 free**    | 13 usuarios premium                              |
+| **Conversión mínima viable** | 1.3%                                             |
+| **Precio recomendado**       | $4.99 USD/mes ✅                                 |
 
 ---
 
