@@ -93,19 +93,25 @@ const mockCategories: Category[] = [
 const mockQuestions: PredefinedQuestion[] = [
   {
     id: 1,
-    question: '¿Encontraré el amor verdadero?',
+    questionText: '¿Encontraré el amor verdadero?',
     categoryId: 1,
-    categoryName: 'Amor',
+    order: 1,
     isActive: true,
     usageCount: 150,
+    createdAt: '2025-01-01T00:00:00.000Z',
+    updatedAt: '2025-01-01T00:00:00.000Z',
+    deletedAt: null,
   },
   {
     id: 2,
-    question: '¿Mi pareja es fiel?',
+    questionText: '¿Mi pareja es fiel?',
     categoryId: 1,
-    categoryName: 'Amor',
+    order: 2,
     isActive: true,
     usageCount: 120,
+    createdAt: '2025-01-01T00:00:00.000Z',
+    updatedAt: '2025-01-01T00:00:00.000Z',
+    deletedAt: null,
   },
 ];
 
@@ -113,18 +119,16 @@ const mockSpreads: Spread[] = [
   {
     id: 1,
     name: 'Cruz Celta',
-    slug: 'cruz-celta',
     description: 'Tirada clásica de 10 cartas',
-    cardsCount: 10,
+    cardCount: 10,
     positions: [{ position: 1, name: 'Presente', description: 'Tu situación actual' }],
     difficulty: 'advanced',
   },
   {
     id: 2,
     name: 'Tres Cartas',
-    slug: 'tres-cartas',
     description: 'Pasado, presente y futuro',
-    cardsCount: 3,
+    cardCount: 3,
     positions: [{ position: 1, name: 'Pasado', description: 'Lo que ya ocurrió' }],
     difficulty: 'beginner',
   },
@@ -437,7 +441,17 @@ describe('use-readings hooks', () => {
 
       const { result } = renderHook(() => useCreateReading(), { wrapper });
 
-      const createData = { spreadId: 1, customQuestion: '¿Qué me depara el futuro?' };
+      const createData = {
+        spreadId: 1,
+        deckId: 1,
+        cardIds: [1, 5, 9],
+        cardPositions: [
+          { cardId: 1, position: 'Pasado', isReversed: false },
+          { cardId: 5, position: 'Presente', isReversed: true },
+          { cardId: 9, position: 'Futuro', isReversed: false },
+        ],
+        customQuestion: '¿Qué me depara el futuro?',
+      };
 
       result.current.mutate(createData);
 
@@ -458,7 +472,13 @@ describe('use-readings hooks', () => {
         wrapper: createWrapper(),
       });
 
-      const createData = { spreadId: 1, customQuestion: 'Test' };
+      const createData = {
+        spreadId: 1,
+        deckId: 1,
+        cardIds: [1],
+        cardPositions: [{ cardId: 1, position: 'Presente', isReversed: false }],
+        customQuestion: 'Test',
+      };
 
       result.current.mutate(createData);
 

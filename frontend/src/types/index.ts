@@ -29,6 +29,7 @@ export type {
   ReadingCard,
   ReadingDetail,
   TrashedReading,
+  CardPositionDto,
   CreateReadingDto,
   PaginatedReadings,
   PaginationMeta,

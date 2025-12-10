@@ -30,9 +30,8 @@ const mockSpreads = [
   {
     id: 1,
     name: 'Respuesta Rápida',
-    slug: 'respuesta-rapida',
     description: 'Una carta para una respuesta directa',
-    cardsCount: 1,
+    cardCount: 1,
     positions: [{ position: 1, name: 'Respuesta', description: 'Tu respuesta' }],
     difficulty: 'beginner',
   },

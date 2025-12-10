@@ -94,19 +94,25 @@ describe('readings-api', () => {
     const mockQuestions: PredefinedQuestion[] = [
       {
         id: 1,
-        question: '¿Qué me depara el futuro en el amor?',
+        questionText: '¿Qué me depara el futuro en el amor?',
         categoryId: 1,
-        categoryName: 'Amor',
+        order: 1,
         isActive: true,
         usageCount: 523,
+        createdAt: '2025-01-01T00:00:00.000Z',
+        updatedAt: '2025-01-01T00:00:00.000Z',
+        deletedAt: null,
       },
       {
         id: 2,
-        question: '¿Encontraré el amor verdadero pronto?',
+        questionText: '¿Encontraré el amor verdadero pronto?',
         categoryId: 1,
-        categoryName: 'Amor',
+        order: 2,
         isActive: true,
         usageCount: 412,
+        createdAt: '2025-01-01T00:00:00.000Z',
+        updatedAt: '2025-01-01T00:00:00.000Z',
+        deletedAt: null,
       },
     ];
 
@@ -149,9 +155,8 @@ describe('readings-api', () => {
       {
         id: 1,
         name: 'Tres Cartas',
-        slug: 'tres-cartas',
         description: 'Pasado, Presente, Futuro',
-        cardsCount: 3,
+        cardCount: 3,
         positions: [
           { position: 1, name: 'Pasado', description: 'Lo que dejaste atrás' },
           { position: 2, name: 'Presente', description: 'Tu situación actual' },
@@ -218,8 +223,14 @@ describe('readings-api', () => {
     it('should create reading with predefined question', async () => {
       const createData: CreateReadingDto = {
         spreadId: 1,
+        deckId: 1,
+        cardIds: [1, 5, 9],
+        cardPositions: [
+          { cardId: 1, position: 'Pasado', isReversed: false },
+          { cardId: 5, position: 'Presente', isReversed: true },
+          { cardId: 9, position: 'Futuro', isReversed: false },
+        ],
         predefinedQuestionId: 5,
-        tarotistaId: 1,
       };
 
       vi.mocked(apiClient.post).mockResolvedValueOnce({ data: mockReading });
@@ -233,8 +244,14 @@ describe('readings-api', () => {
     it('should create reading with custom question', async () => {
       const createData: CreateReadingDto = {
         spreadId: 2,
+        deckId: 1,
+        cardIds: [3, 7, 12],
+        cardPositions: [
+          { cardId: 3, position: 'Pasado', isReversed: false },
+          { cardId: 7, position: 'Presente', isReversed: false },
+          { cardId: 12, position: 'Futuro', isReversed: true },
+        ],
         customQuestion: '¿Qué me depara el futuro en mi carrera?',
-        tarotistaId: 1,
       };
 
       vi.mocked(apiClient.post).mockResolvedValueOnce({ data: mockReading });
@@ -248,9 +265,15 @@ describe('readings-api', () => {
     it('should throw error with clear message on failure', async () => {
       vi.mocked(apiClient.post).mockRejectedValueOnce(new Error('Network error'));
 
-      await expect(createReading({ spreadId: 1, predefinedQuestionId: 1 })).rejects.toThrow(
-        'Error al crear lectura'
-      );
+      const createData: CreateReadingDto = {
+        spreadId: 1,
+        deckId: 1,
+        cardIds: [1],
+        cardPositions: [{ cardId: 1, position: 'Presente', isReversed: false }],
+        predefinedQuestionId: 1,
+      };
+
+      await expect(createReading(createData)).rejects.toThrow('Error al crear lectura');
     });
   });
 

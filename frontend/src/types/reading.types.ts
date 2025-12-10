@@ -29,14 +29,18 @@ export interface Category {
 
 /**
  * Predefined question for readings
+ * Matches backend PredefinedQuestion entity
  */
 export interface PredefinedQuestion {
   id: number;
-  question: string;
+  questionText: string;
   categoryId: number;
-  categoryName: string;
+  order: number;
   isActive: boolean;
   usageCount: number;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
 }
 
 // ============================================================================
@@ -54,16 +58,20 @@ export interface SpreadPosition {
 
 /**
  * Spread (tirada) configuration
+ * Matches backend Spread entity
  */
 export interface Spread {
   id: number;
   name: string;
-  slug: string;
   description: string;
-  cardsCount: number;
+  cardCount: number;
   positions: SpreadPosition[];
   difficulty: 'beginner' | 'intermediate' | 'advanced';
   imageUrl?: string;
+  isBeginnerFriendly?: boolean;
+  whenToUse?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // ============================================================================
@@ -155,13 +163,26 @@ export interface TrashedReading extends Reading {
 // ============================================================================
 
 /**
+ * Card position for reading creation
+ */
+export interface CardPositionDto {
+  cardId: number;
+  position: string;
+  isReversed: boolean;
+}
+
+/**
  * DTO for creating a new reading
+ * Matches backend CreateReadingDto
  */
 export interface CreateReadingDto {
   spreadId: number;
+  deckId: number;
+  cardIds: number[];
+  cardPositions: CardPositionDto[];
   predefinedQuestionId?: number;
   customQuestion?: string;
-  tarotistaId?: number;
+  generateInterpretation?: boolean;
 }
 
 // ============================================================================

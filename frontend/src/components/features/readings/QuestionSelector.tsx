@@ -62,7 +62,7 @@ function QuestionCard({ question, isSelected, onClick }: QuestionCardProps) {
       onKeyDown={handleKeyDown}
       role="button"
       tabIndex={0}
-      aria-label={`Seleccionar pregunta: ${question.question}`}
+      aria-label={`Seleccionar pregunta: ${question.questionText}`}
       aria-pressed={isSelected}
     >
       <CardContent className="flex items-center gap-3 p-4">
@@ -76,7 +76,7 @@ function QuestionCard({ question, isSelected, onClick }: QuestionCardProps) {
             <Check data-testid="check-icon" className="h-4 w-4 text-white" aria-hidden="true" />
           )}
         </div>
-        <span className="text-text-primary flex-1">{question.question}</span>
+        <span className="text-text-primary flex-1">{question.questionText}</span>
       </CardContent>
     </Card>
   );

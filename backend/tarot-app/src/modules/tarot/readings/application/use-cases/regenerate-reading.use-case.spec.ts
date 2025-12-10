@@ -199,7 +199,7 @@ describe('RegenerateReadingUseCase', () => {
           model: 'llama-3.3-70b-versatile',
           provider: 'groq',
           temperature: 0.9,
-          maxTokens: 2000,
+          maxTokens: 3000,
         },
       });
       expect(interpretationsRepo.save).toHaveBeenCalledWith(

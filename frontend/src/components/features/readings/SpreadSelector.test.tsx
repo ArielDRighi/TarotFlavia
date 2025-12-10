@@ -30,18 +30,16 @@ const mockSpreads = [
   {
     id: 1,
     name: 'Respuesta Rápida',
-    slug: 'respuesta-rapida',
     description: 'Una carta para una respuesta directa',
-    cardsCount: 1,
+    cardCount: 1,
     positions: [{ position: 1, name: 'Respuesta', description: 'Tu respuesta' }],
     difficulty: 'beginner',
   },
   {
     id: 2,
     name: 'Pasado-Presente-Futuro',
-    slug: 'pasado-presente-futuro',
     description: 'Tres cartas que revelan la evolución de tu situación',
-    cardsCount: 3,
+    cardCount: 3,
     positions: [
       { position: 1, name: 'Pasado', description: 'Lo que fue' },
       { position: 2, name: 'Presente', description: 'Lo que es' },
@@ -52,9 +50,8 @@ const mockSpreads = [
   {
     id: 3,
     name: 'Análisis Profundo',
-    slug: 'analisis-profundo',
     description: 'Cinco cartas para un análisis detallado',
-    cardsCount: 5,
+    cardCount: 5,
     positions: [
       { position: 1, name: 'Situación', description: 'Estado actual' },
       { position: 2, name: 'Desafío', description: 'Obstáculos' },
@@ -67,9 +64,8 @@ const mockSpreads = [
   {
     id: 4,
     name: 'Cruz Céltica',
-    slug: 'cruz-celtica',
     description: 'Diez cartas para la lectura más completa',
-    cardsCount: 10,
+    cardCount: 10,
     positions: Array.from({ length: 10 }, (_, i) => ({
       position: i + 1,
       name: `Posición ${i + 1}`,

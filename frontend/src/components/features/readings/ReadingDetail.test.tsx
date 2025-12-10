@@ -109,9 +109,8 @@ const mockReadingDetail: ReadingDetailType = {
 const mockSpread: Spread = {
   id: 1,
   name: 'Dos Cartas',
-  slug: 'dos-cartas',
   description: 'Lectura simple',
-  cardsCount: 2,
+  cardCount: 2,
   positions: [
     { position: 1, name: 'Presente', description: 'Tu situación actual' },
     { position: 2, name: 'Obstáculo', description: 'Lo que te frena' },
