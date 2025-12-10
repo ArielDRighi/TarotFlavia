@@ -2,7 +2,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReadingExperience } from './ReadingExperience';
-import type { Spread, ReadingDetail, ReadingCard, Interpretation } from '@/types/reading.types';
+import type {
+  Spread,
+  ReadingDetail,
+  ReadingCard,
+  Interpretation,
+  PredefinedQuestion,
+} from '@/types/reading.types';
 
 // Mock Next.js router
 const mockPush = vi.fn();
@@ -44,18 +50,16 @@ const mockSpreads: Spread[] = [
   {
     id: 1,
     name: 'Una Carta',
-    slug: 'una-carta',
     description: 'Consulta simple',
-    cardsCount: 1,
+    cardCount: 1,
     positions: [{ position: 1, name: 'Presente', description: 'Tu situación actual' }],
     difficulty: 'beginner',
   },
   {
     id: 2,
     name: 'Tres Cartas',
-    slug: 'tres-cartas',
     description: 'Pasado, presente, futuro',
-    cardsCount: 3,
+    cardCount: 3,
     positions: [
       { position: 1, name: 'Pasado', description: 'Lo que dejaste atrás' },
       { position: 2, name: 'Presente', description: 'Tu situación actual' },
@@ -66,9 +70,8 @@ const mockSpreads: Spread[] = [
   {
     id: 3,
     name: 'Cruz Simple',
-    slug: 'cruz-simple',
     description: 'Análisis de situación',
-    cardsCount: 5,
+    cardCount: 5,
     positions: [
       { position: 1, name: 'Presente', description: 'Tu situación actual' },
       { position: 2, name: 'Desafío', description: 'El obstáculo' },
@@ -77,6 +80,31 @@ const mockSpreads: Spread[] = [
       { position: 5, name: 'Resultado', description: 'El resultado final' },
     ],
     difficulty: 'intermediate',
+  },
+];
+
+const mockPredefinedQuestions: PredefinedQuestion[] = [
+  {
+    id: 33,
+    questionText: '¿Qué debo saber sobre mi situación actual?',
+    categoryId: 1,
+    order: 1,
+    isActive: true,
+    usageCount: 100,
+    createdAt: '2025-01-01T00:00:00Z',
+    updatedAt: '2025-01-01T00:00:00Z',
+    deletedAt: null,
+  },
+  {
+    id: 34,
+    questionText: '¿Cómo puedo mejorar mi relación?',
+    categoryId: 1,
+    order: 2,
+    isActive: true,
+    usageCount: 80,
+    createdAt: '2025-01-01T00:00:00Z',
+    updatedAt: '2025-01-01T00:00:00Z',
+    deletedAt: null,
   },
 ];
 
@@ -149,6 +177,10 @@ vi.mock('@/hooks/api/useReadings', () => ({
     data: mockSpreads,
     isLoading: false,
   }),
+  usePredefinedQuestions: () => ({
+    data: mockPredefinedQuestions,
+    isLoading: false,
+  }),
   useCreateReading: () => ({
     mutate: vi.fn(),
     mutateAsync: mockCreateReadingMutateAsync,
@@ -212,25 +244,25 @@ describe('ReadingExperience', () => {
       expect(screen.getByText(/Selecciona tus cartas/i)).toBeInTheDocument();
     });
 
-    it('should display correct number of cards based on spread', () => {
+    it('should display full deck of 78 cards for selection', () => {
       renderWithProviders(<ReadingExperience spreadId={2} questionId={1} customQuestion={null} />);
 
       const cards = screen.getAllByTestId('selectable-card');
-      expect(cards).toHaveLength(3); // Tres Cartas spread
+      expect(cards).toHaveLength(78); // Full tarot deck
     });
 
-    it('should display 1 card for single card spread', () => {
+    it('should show correct selection count for 3-card spread', () => {
+      renderWithProviders(<ReadingExperience spreadId={2} questionId={1} customQuestion={null} />);
+
+      expect(screen.getByText(/0 de 3 cartas seleccionadas/i)).toBeInTheDocument();
+      expect(screen.getByText(/Elige 3 cartas del mazo/i)).toBeInTheDocument();
+    });
+
+    it('should show correct selection count for 1-card spread', () => {
       renderWithProviders(<ReadingExperience spreadId={1} questionId={1} customQuestion={null} />);
 
-      const cards = screen.getAllByTestId('selectable-card');
-      expect(cards).toHaveLength(1);
-    });
-
-    it('should display 5 cards for cruz simple spread', () => {
-      renderWithProviders(<ReadingExperience spreadId={3} questionId={1} customQuestion={null} />);
-
-      const cards = screen.getAllByTestId('selectable-card');
-      expect(cards).toHaveLength(5);
+      expect(screen.getByText(/0 de 1 cartas seleccionadas/i)).toBeInTheDocument();
+      expect(screen.getByText(/Elige 1 carta del mazo/i)).toBeInTheDocument();
     });
 
     it('should mark card as selected when clicked', () => {
@@ -242,20 +274,24 @@ describe('ReadingExperience', () => {
       expect(cards[0]).toHaveClass('ring-2');
     });
 
-    it('should allow selecting up to the required number of cards', () => {
+    it('should not allow selecting more cards than required', () => {
       renderWithProviders(<ReadingExperience spreadId={2} questionId={1} customQuestion={null} />);
 
       const cards = screen.getAllByTestId('selectable-card');
 
-      // Select all 3 cards
+      // Select 3 cards (the max for this spread)
       fireEvent.click(cards[0]);
       fireEvent.click(cards[1]);
       fireEvent.click(cards[2]);
 
-      // All cards should be selectable
-      cards.forEach((card) => {
-        expect(card).toHaveClass('ring-2');
-      });
+      // Try to select a 4th card - should not work
+      fireEvent.click(cards[3]);
+      expect(cards[3]).not.toHaveClass('ring-2');
+
+      // Only first 3 should be selected
+      expect(cards[0]).toHaveClass('ring-2');
+      expect(cards[1]).toHaveClass('ring-2');
+      expect(cards[2]).toHaveClass('ring-2');
     });
 
     it('should toggle card selection when clicking same card', () => {
@@ -569,28 +605,40 @@ describe('ReadingExperience', () => {
   });
 
   describe('Question Display', () => {
-    it('should display the user question', () => {
+    it('should display the custom question when provided', () => {
       renderWithProviders(
         <ReadingExperience spreadId={2} questionId={null} customQuestion="¿Encontraré el amor?" />
       );
 
       expect(screen.getByText(/¿Encontraré el amor?/)).toBeInTheDocument();
     });
+
+    it('should display the predefined question when questionId is provided', () => {
+      renderWithProviders(<ReadingExperience spreadId={2} questionId={33} customQuestion={null} />);
+
+      expect(screen.getByText(/¿Qué debo saber sobre mi situación actual?/)).toBeInTheDocument();
+    });
+
+    it('should display the spread name', () => {
+      renderWithProviders(<ReadingExperience spreadId={2} questionId={33} customQuestion={null} />);
+
+      expect(screen.getByText('Tres Cartas')).toBeInTheDocument();
+    });
   });
 
   describe('Card Layouts', () => {
-    it('should use centered layout for single card spread', () => {
+    it('should display full deck with responsive grid layout', () => {
       renderWithProviders(<ReadingExperience spreadId={1} questionId={1} customQuestion={null} />);
 
       const grid = screen.getByTestId('card-selection-grid');
-      expect(grid).toHaveClass('justify-center');
+      expect(grid).toHaveClass('grid');
     });
 
-    it('should use grid layout for 3 cards spread', () => {
+    it('should show 78 cards regardless of spread type', () => {
       renderWithProviders(<ReadingExperience spreadId={2} questionId={1} customQuestion={null} />);
 
-      const grid = screen.getByTestId('card-selection-grid');
-      expect(grid).toHaveClass('grid-cols-3');
+      const cards = screen.getAllByTestId('selectable-card');
+      expect(cards).toHaveLength(78);
     });
   });
 

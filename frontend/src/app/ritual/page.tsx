@@ -21,38 +21,39 @@ import type { Category } from '@/types';
 
 /**
  * Icon mapping for categories based on slug
+ * Matches backend slugs: amor-relaciones, carrera-trabajo, dinero-finanzas, etc.
  */
 const categoryIcons: Record<string, LucideIcon> = {
-  amor: Heart,
-  carrera: Briefcase,
-  dinero: DollarSign,
-  salud: Activity,
-  espiritual: Sparkles,
-  general: Star,
+  'amor-relaciones': Heart,
+  'carrera-trabajo': Briefcase,
+  'dinero-finanzas': DollarSign,
+  'salud-bienestar': Activity,
+  'crecimiento-espiritual': Sparkles,
+  'consulta-general': Star,
 };
 
 /**
  * Background color mapping for categories based on slug
  */
 const categoryColors: Record<string, string> = {
-  amor: 'bg-pink-100',
-  carrera: 'bg-blue-100',
-  dinero: 'bg-green-100',
-  salud: 'bg-orange-100',
-  espiritual: 'bg-purple-100',
-  general: 'bg-yellow-100',
+  'amor-relaciones': 'bg-pink-100',
+  'carrera-trabajo': 'bg-blue-100',
+  'dinero-finanzas': 'bg-green-100',
+  'salud-bienestar': 'bg-orange-100',
+  'crecimiento-espiritual': 'bg-purple-100',
+  'consulta-general': 'bg-yellow-100',
 };
 
 /**
  * Icon color mapping for categories based on slug
  */
 const categoryIconColors: Record<string, string> = {
-  amor: 'text-pink-500',
-  carrera: 'text-blue-500',
-  dinero: 'text-green-500',
-  salud: 'text-orange-500',
-  espiritual: 'text-purple-500',
-  general: 'text-yellow-500',
+  'amor-relaciones': 'text-pink-500',
+  'carrera-trabajo': 'text-blue-500',
+  'dinero-finanzas': 'text-green-500',
+  'salud-bienestar': 'text-orange-500',
+  'crecimiento-espiritual': 'text-purple-500',
+  'consulta-general': 'text-yellow-500',
 };
 
 /**

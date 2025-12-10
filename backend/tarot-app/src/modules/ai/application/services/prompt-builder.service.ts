@@ -28,6 +28,12 @@ interface SelectedCard {
   isReversed: boolean;
 }
 
+interface SpreadInfo {
+  name: string;
+  description: string;
+  cardCount: number;
+}
+
 /**
  * Service responsible for building dynamic prompts based on tarotista configuration
  * This is the core of the marketplace differentiation: each tarotista can have their own
@@ -168,6 +174,7 @@ export class PromptBuilderService {
    * @param cards - Array of selected cards with positions
    * @param question - User's question
    * @param category - Reading category
+   * @param spread - Optional spread information for context
    * @returns InterpretationPrompt with system prompt, user prompt, and AI config
    */
   async buildInterpretationPrompt(
@@ -175,6 +182,7 @@ export class PromptBuilderService {
     cards: SelectedCard[],
     question: string,
     category: string,
+    spread?: SpreadInfo,
   ): Promise<InterpretationPrompt> {
     // Load tarotista configuration
     const config = await this.getActiveConfig(tarotistaId);
@@ -202,9 +210,20 @@ export class PromptBuilderService {
     );
 
     // Build user prompt with card meanings
+    const cardCount = cards.length;
     let userPrompt = `# CONTEXTO DE LA LECTURA\n\n`;
     userPrompt += `**Pregunta del Consultante**: "${question}"\n`;
-    userPrompt += `**Categoría**: ${category}\n\n`;
+    userPrompt += `**Categoría**: ${category}\n`;
+
+    // Add spread information if available
+    if (spread) {
+      userPrompt += `**Tipo de Tirada**: ${spread.name} (${spread.cardCount} carta${spread.cardCount > 1 ? 's' : ''})\n`;
+      userPrompt += `**Descripción**: ${spread.description}\n`;
+    } else {
+      userPrompt += `**Número de Cartas**: ${cardCount}\n`;
+    }
+    userPrompt += `\n`;
+
     userPrompt += `# CARTAS EN LA LECTURA\n\n`;
 
     // Process each card using pre-fetched data
@@ -269,12 +288,8 @@ export class PromptBuilderService {
       userPrompt += `\n---\n\n`;
     }
 
-    userPrompt += `# INSTRUCCIONES FINALES\n\n`;
-    userPrompt += `Por favor interpreta esta lectura considerando:\n\n`;
-    userPrompt += `1. El significado específico de cada carta en su posición asignada\n`;
-    userPrompt += `2. La relación entre las cartas y su flujo temporal/energético\n`;
-    userPrompt += `3. Cómo responden a la pregunta "${question}"\n`;
-    userPrompt += `4. La categoría "${category}" para enfocar la interpretación\n\n`;
+    // Add adaptive instructions based on card count
+    userPrompt += this.getAdaptiveInstructions(cardCount, question, category);
 
     return {
       systemPrompt: config.systemPrompt,
@@ -285,6 +300,74 @@ export class PromptBuilderService {
         topP: Number(config.topP),
       },
     };
+  }
+
+  /**
+   * Generate adaptive instructions based on the number of cards in the spread
+   * This ensures consistent response format across all spread types
+   * Format is optimized to fit within token limits while being complete
+   */
+  private getAdaptiveInstructions(
+    cardCount: number,
+    question: string,
+    category: string,
+  ): string {
+    let instructions = `# INSTRUCCIONES FINALES\n\n`;
+    instructions += `Interpreta esta lectura de ${cardCount} carta${cardCount > 1 ? 's' : ''} para la categoría "${category}".\n\n`;
+
+    // Emphasize brevity to prevent truncation
+    instructions += `**⚠️ LÍMITE ESTRICTO:** Mantén la respuesta CONCISA. `;
+    if (cardCount === 1) {
+      instructions += `Máximo 400 palabras total.\n\n`;
+    } else if (cardCount <= 3) {
+      instructions += `Máximo 600 palabras total.\n\n`;
+    } else if (cardCount <= 5) {
+      instructions += `Máximo 800 palabras total.\n\n`;
+    } else {
+      instructions += `Máximo 1000 palabras total.\n\n`;
+    }
+
+    instructions += `**FORMATO OBLIGATORIO (Markdown):**\n\n`;
+
+    // Vision General - more concise
+    instructions += `## 📖 Mensaje Central\n`;
+    if (cardCount === 1) {
+      instructions += `(1 párrafo breve: qué dice la carta sobre "${question}")\n\n`;
+    } else {
+      instructions += `(1-2 párrafos: síntesis de la lectura respondiendo "${question}")\n\n`;
+    }
+
+    // Card analysis - streamlined
+    instructions += `## 🎴 Las Cartas\n`;
+    if (cardCount === 1) {
+      instructions += `**[Carta]**: (2-3 oraciones de interpretación específica)\n\n`;
+    } else {
+      instructions += `Por cada carta:\n`;
+      instructions += `**[Posición] - [Carta]**: (2-3 oraciones de interpretación)\n\n`;
+    }
+
+    // Connections only for multi-card spreads
+    if (cardCount > 1) {
+      instructions += `## 🔮 Conexiones\n`;
+      instructions += `(1 párrafo corto: cómo se relacionan las cartas entre sí)\n\n`;
+    }
+
+    // Practical advice - always concise
+    instructions += `## 💡 Consejos\n`;
+    const numConsejos = cardCount === 1 ? 2 : Math.min(cardCount, 3);
+    for (let i = 1; i <= numConsejos; i++) {
+      instructions += `${i}. (Acción concreta y específica)\n`;
+    }
+    instructions += `\n`;
+
+    // Conclusion - brief
+    instructions += `## ✨ Cierre\n`;
+    instructions += `(2-3 oraciones finales con mensaje esperanzador)\n\n`;
+
+    // Final reminder
+    instructions += `**RECUERDA:** Sé directo y evita repeticiones. Cada sección debe aportar valor único.`;
+
+    return instructions;
   }
 
   /**

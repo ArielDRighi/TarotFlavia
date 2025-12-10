@@ -41,27 +41,36 @@ const mockCategory = {
 const mockQuestions = [
   {
     id: 1,
-    question: '¿Encontraré el amor verdadero?',
+    questionText: '¿Encontraré el amor verdadero?',
     categoryId: 1,
-    categoryName: 'Amor',
+    order: 1,
     isActive: true,
     usageCount: 100,
+    createdAt: '2025-01-01T00:00:00.000Z',
+    updatedAt: '2025-01-01T00:00:00.000Z',
+    deletedAt: null,
   },
   {
     id: 2,
-    question: '¿Mi pareja me es fiel?',
+    questionText: '¿Mi pareja me es fiel?',
     categoryId: 1,
-    categoryName: 'Amor',
+    order: 2,
     isActive: true,
     usageCount: 80,
+    createdAt: '2025-01-01T00:00:00.000Z',
+    updatedAt: '2025-01-01T00:00:00.000Z',
+    deletedAt: null,
   },
   {
     id: 3,
-    question: '¿Debería perdonar una infidelidad?',
+    questionText: '¿Debería perdonar una infidelidad?',
     categoryId: 1,
-    categoryName: 'Amor',
+    order: 3,
     isActive: true,
     usageCount: 60,
+    createdAt: '2025-01-01T00:00:00.000Z',
+    updatedAt: '2025-01-01T00:00:00.000Z',
+    deletedAt: null,
   },
 ];
 
@@ -556,7 +565,7 @@ describe('QuestionsPage', () => {
       questionCards.forEach((card, index) => {
         expect(card).toHaveAttribute(
           'aria-label',
-          expect.stringContaining(mockQuestions[index].question)
+          expect.stringContaining(mockQuestions[index].questionText)
         );
       });
     });

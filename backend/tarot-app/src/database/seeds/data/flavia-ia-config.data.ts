@@ -67,7 +67,7 @@ Debes responder SIEMPRE siguiendo esta estructura exacta en formato Markdown:
   },
 
   temperature: 0.7,
-  maxTokens: 1000,
+  maxTokens: 3000, // Increased from 1000 - needed for full structured interpretation with 5 sections
   topP: 1.0,
 
   customKeywords: [],

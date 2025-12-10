@@ -129,9 +129,8 @@ const mockReadingDetail: ReadingDetail = {
 const mockSpread: Spread = {
   id: 1,
   name: 'Tres Cartas',
-  slug: 'tres-cartas',
   description: 'Pasado, presente y futuro',
-  cardsCount: 3,
+  cardCount: 3,
   positions: [
     { position: 1, name: 'Presente', description: 'Tu situación actual' },
     { position: 2, name: 'Obstáculo', description: 'Lo que te frena' },

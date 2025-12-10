@@ -184,6 +184,15 @@ export class InterpretationsService {
     try {
       this.logger.log('Generating interpretation with PromptBuilder');
 
+      // Prepare spread info if available
+      const spreadInfo = spread
+        ? {
+            name: spread.name,
+            description: spread.description,
+            cardCount: spread.cardCount,
+          }
+        : undefined;
+
       // Usar PromptBuilder para generar prompts dinámicos
       const { systemPrompt, userPrompt } =
         await this.promptBuilder.buildInterpretationPrompt(
@@ -191,6 +200,7 @@ export class InterpretationsService {
           selectedCards,
           questionText,
           categoryName,
+          spreadInfo, // Now passing spread information for adaptive formatting
         );
 
       // Intentar generar con el sistema de providers con fallback automático

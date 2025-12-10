@@ -7,6 +7,7 @@ import ReactMarkdown from 'react-markdown';
 
 import {
   useSpreads,
+  usePredefinedQuestions,
   useCreateReading,
   useRegenerateInterpretation,
   useShareReading,
@@ -17,7 +18,27 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ErrorDisplay } from '@/components/ui/error-display';
 import { cn } from '@/lib/utils';
-import type { ReadingDetail, ReadingCard, CreateReadingDto } from '@/types';
+import type {
+  ReadingDetail,
+  ReadingCard,
+  CreateReadingDto,
+  CardPositionDto,
+  Interpretation,
+} from '@/types';
+
+// ============================================================================
+// Helpers
+// ============================================================================
+
+/**
+ * Safely extract the general interpretation from the reading
+ * Handles string, object, or null interpretation types
+ */
+function getGeneralInterpretation(interpretation: Interpretation | string | null): string {
+  if (!interpretation) return '';
+  if (typeof interpretation === 'string') return interpretation;
+  return interpretation.generalInterpretation || '';
+}
 
 // ============================================================================
 // Constants
@@ -30,6 +51,12 @@ const LOADING_MESSAGES = [
 ];
 
 const LOADING_MESSAGE_INTERVAL = 2000;
+
+/** Total number of cards in a tarot deck */
+const DECK_SIZE = 78;
+
+/** Default deck ID (Rider-Waite) */
+const DEFAULT_DECK_ID = 1;
 
 // ============================================================================
 // Types
@@ -127,6 +154,15 @@ interface InterpretationSectionProps {
 }
 
 function InterpretationSection({ interpretation }: InterpretationSectionProps) {
+  // Check if interpretation seems truncated (ends mid-word or mid-sentence)
+  const seemsTruncated =
+    interpretation &&
+    !interpretation.trim().endsWith('.') &&
+    !interpretation.trim().endsWith('!') &&
+    !interpretation.trim().endsWith('?') &&
+    !interpretation.trim().endsWith('"') &&
+    interpretation.length > 100;
+
   return (
     <Card className="mt-8">
       <CardHeader>
@@ -136,8 +172,24 @@ function InterpretationSection({ interpretation }: InterpretationSectionProps) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="prose prose-purple max-w-none" data-testid="interpretation-content">
-          <ReactMarkdown>{interpretation}</ReactMarkdown>
+        <div
+          className="prose prose-purple prose-p:text-text-primary prose-p:leading-relaxed prose-headings:text-text-primary prose-strong:text-primary max-w-none"
+          data-testid="interpretation-content"
+        >
+          {interpretation ? (
+            <>
+              <ReactMarkdown>{interpretation}</ReactMarkdown>
+              {seemsTruncated && (
+                <p className="text-text-muted mt-4 text-sm italic">
+                  (La interpretación puede haber sido truncada por límites del modelo de IA)
+                </p>
+              )}
+            </>
+          ) : (
+            <p className="text-text-muted italic">
+              La interpretación está siendo generada. Por favor, espera un momento...
+            </p>
+          )}
         </div>
       </CardContent>
     </Card>
@@ -166,6 +218,7 @@ export function ReadingExperience({
 
   // API Hooks
   const { data: spreads, isLoading: isSpreadsLoading } = useSpreads();
+  const { data: predefinedQuestions, isLoading: isQuestionsLoading } = usePredefinedQuestions();
   const { mutateAsync: createReading } = useCreateReading();
   const { mutate: regenerateInterpretation, isPending: isRegenerating } =
     useRegenerateInterpretation();
@@ -183,9 +236,16 @@ export function ReadingExperience({
     return spreads?.find((s) => s.id === spreadId);
   }, [spreads, spreadId]);
 
-  const cardsCount = spread?.cardsCount ?? 0;
+  const selectedQuestion = useMemo(() => {
+    if (!questionId || !predefinedQuestions) return null;
+    return predefinedQuestions.find((q) => q.id === questionId);
+  }, [questionId, predefinedQuestions]);
+
+  const cardsCount = spread?.cardCount ?? 0;
   const isPremium = user?.plan === 'PREMIUM';
-  const question = customQuestion || 'Tu pregunta al tarot';
+
+  // Display the actual question text
+  const questionText = customQuestion || selectedQuestion?.questionText || 'Tu pregunta al tarot';
 
   // Rotate loading messages
   useEffect(() => {
@@ -206,14 +266,16 @@ export function ReadingExperience({
       setSelectedCards((prev) => {
         const newSelection = new Set(prev);
         if (newSelection.has(cardIndex)) {
+          // Always allow deselection
           newSelection.delete(cardIndex);
-        } else {
+        } else if (newSelection.size < cardsCount) {
+          // Only allow selection if we haven't reached the limit
           newSelection.add(cardIndex);
         }
         return newSelection;
       });
     },
-    [state]
+    [state, cardsCount]
   );
 
   const handleKeyDown = useCallback(
@@ -228,16 +290,34 @@ export function ReadingExperience({
 
   // Create reading handler
   const handleReveal = useCallback(async () => {
-    if (selectedCards.size !== cardsCount) return;
+    if (selectedCards.size !== cardsCount || !spread) return;
 
     setState('loading');
     setError(null);
 
     try {
+      // Convert selected card indices (0-77) to card IDs (1-78)
+      const selectedCardIndices = Array.from(selectedCards);
+      const cardIds = selectedCardIndices.map((index) => index + 1);
+
+      // Build card positions array using spread's position definitions
+      const cardPositions: CardPositionDto[] = selectedCardIndices.map((index, i) => {
+        const position = spread.positions?.[i];
+        return {
+          cardId: index + 1,
+          position: position?.name ?? `Posición ${i + 1}`,
+          isReversed: Math.random() < 0.3, // 30% chance of reversed
+        };
+      });
+
       const createDto: CreateReadingDto = {
         spreadId,
+        deckId: DEFAULT_DECK_ID,
+        cardIds,
+        cardPositions,
         ...(questionId ? { predefinedQuestionId: questionId } : {}),
         ...(customQuestion ? { customQuestion } : {}),
+        generateInterpretation: true,
       };
 
       const result = await createReading(createDto);
@@ -248,7 +328,7 @@ export function ReadingExperience({
       setState('error');
       setError('Error al crear la lectura. Por favor, intenta de nuevo.');
     }
-  }, [selectedCards, cardsCount, spreadId, questionId, customQuestion, createReading]);
+  }, [selectedCards, cardsCount, spread, spreadId, questionId, customQuestion, createReading]);
 
   // Action handlers
   const handleRegenerate = useCallback(() => {
@@ -272,7 +352,7 @@ export function ReadingExperience({
   }, []);
 
   // Render loading/missing spread state
-  if (isSpreadsLoading) {
+  if (isSpreadsLoading || isQuestionsLoading) {
     return (
       <div className="bg-bg-main flex min-h-screen items-center justify-center p-8">
         <div className="animate-pulse">Cargando...</div>
@@ -299,130 +379,145 @@ export function ReadingExperience({
       case 1:
         return 'flex justify-center';
       case 3:
-        return 'grid grid-cols-3 gap-4';
+        return 'grid grid-cols-3 gap-4 justify-items-center';
       case 5:
-        return 'grid grid-cols-3 gap-4'; // Cruz layout handled differently
+        return 'grid grid-cols-3 gap-4 justify-items-center'; // Cruz layout handled differently
       case 10:
-        return 'grid grid-cols-4 gap-4'; // Celtic cross layout
+        return 'grid grid-cols-4 gap-4 justify-items-center'; // Celtic cross layout
       default:
-        return 'grid grid-cols-3 gap-4';
+        return 'grid grid-cols-3 gap-4 justify-items-center';
     }
   };
 
   return (
     <div className="bg-bg-main min-h-screen p-4 md:p-8">
-      <div className="mx-auto max-w-4xl">
-        {/* Question Display */}
-        <div className="mb-8 text-center">
-          <p className="text-text-muted mb-2 text-sm">Tu consulta:</p>
-          <p className="text-text-primary font-serif text-xl md:text-2xl">{question}</p>
-        </div>
+      {/* Spread & Question Display - centrado */}
+      <div className="mb-8 text-center">
+        <p className="text-primary mb-1 text-sm font-medium">{spread.name}</p>
+        <p className="text-text-muted mb-2 text-sm">Tu consulta:</p>
+        <p className="text-text-primary font-serif text-xl md:text-2xl">{questionText}</p>
+      </div>
 
-        {/* ESTADO 1: Selección de cartas */}
-        {state === 'selecting' && (
-          <>
-            <h2 className="mb-6 text-center font-serif text-2xl">Selecciona tus cartas</h2>
+      {/* ESTADO 1: Selección de cartas */}
+      {state === 'selecting' && (
+        <>
+          <h2 className="mb-6 text-center font-serif text-2xl">Selecciona tus cartas</h2>
 
-            {/* Selection progress */}
-            <p className="text-text-muted mb-6 text-center">
-              {selectedCards.size} de {cardsCount} cartas seleccionadas
-            </p>
+          {/* Selection progress */}
+          <p className="text-text-muted mb-4 text-center">
+            {selectedCards.size} de {cardsCount} cartas seleccionadas
+          </p>
+          <p className="text-text-muted mb-6 text-center text-sm">
+            Elige {cardsCount} carta{cardsCount > 1 ? 's' : ''} del mazo
+          </p>
 
-            {/* Card Grid */}
+          {/* Full Deck Grid - 78 cards */}
+          <div className="mx-auto mb-8 w-full max-w-6xl px-2 sm:px-4">
             <div
               data-testid="card-selection-grid"
-              className={cn(getGridClasses(), 'mx-auto mb-8 max-w-2xl')}
+              className="grid grid-cols-6 justify-items-center gap-1 sm:grid-cols-8 sm:gap-2 md:grid-cols-10 lg:grid-cols-12 xl:grid-cols-13"
             >
-              {Array.from({ length: cardsCount }).map((_, index) => (
-                <div
-                  key={index}
-                  data-testid="selectable-card"
-                  role="button"
-                  tabIndex={0}
-                  className={cn(
-                    'cursor-pointer transition-all duration-300',
-                    selectedCards.has(index) && 'ring-primary ring-2 ring-offset-2'
-                  )}
-                  onClick={() => handleCardClick(index)}
-                  onKeyDown={(e) => handleKeyDown(index, e)}
-                  aria-label={`Carta ${index + 1}${selectedCards.has(index) ? ' - seleccionada' : ''}`}
-                  aria-pressed={selectedCards.has(index)}
-                >
-                  <TarotCard isRevealed={false} size="md" />
-                </div>
-              ))}
+              {Array.from({ length: DECK_SIZE }).map((_, index) => {
+                const isSelected = selectedCards.has(index);
+                const canSelect = selectedCards.size < cardsCount || isSelected;
+
+                return (
+                  <div
+                    key={index}
+                    data-testid="selectable-card"
+                    role="button"
+                    tabIndex={canSelect ? 0 : -1}
+                    className={cn(
+                      'transition-all duration-300',
+                      canSelect ? 'cursor-pointer' : 'cursor-not-allowed opacity-50',
+                      isSelected && 'ring-primary z-10 scale-110 ring-2 ring-offset-1'
+                    )}
+                    onClick={() => handleCardClick(index)}
+                    onKeyDown={(e) => handleKeyDown(index, e)}
+                    aria-label={`Carta ${index + 1}${isSelected ? ' - seleccionada' : ''}`}
+                    aria-pressed={isSelected}
+                    aria-disabled={!canSelect}
+                  >
+                    <TarotCard isRevealed={false} size="sm" />
+                  </div>
+                );
+              })}
             </div>
+          </div>
 
-            {/* Reveal Button */}
-            <div className="flex justify-center">
-              <Button
-                size="lg"
-                onClick={handleReveal}
-                disabled={selectedCards.size !== cardsCount}
-                className="px-8"
-              >
-                <Sparkles className="mr-2 h-5 w-5" />
-                Revelar mi destino
-              </Button>
-            </div>
-          </>
-        )}
-
-        {/* ESTADO 2: Loading IA */}
-        {state === 'loading' && <LoadingState message={LOADING_MESSAGES[loadingMessageIndex]} />}
-
-        {/* ESTADO 3: Resultado */}
-        {state === 'result' && readingResult && (
-          <>
-            <h2 className="mb-8 text-center font-serif text-2xl">Tu lectura del Tarot</h2>
-
-            {/* Revealed Cards */}
-            <div
-              data-testid="result-cards-grid"
-              className={cn(getGridClasses(), 'mx-auto mb-8 max-w-3xl')}
+          {/* Reveal Button */}
+          <div className="flex justify-center">
+            <Button
+              size="lg"
+              onClick={handleReveal}
+              disabled={selectedCards.size !== cardsCount}
+              className="px-8"
             >
-              {readingResult.cards.map((card, index) => (
-                <ResultCard key={card.id} card={card} index={index} />
-              ))}
-            </div>
-
-            {/* Interpretation */}
-            <InterpretationSection
-              interpretation={readingResult.interpretation.generalInterpretation}
-            />
-
-            {/* Action Buttons */}
-            <div className="mt-8 flex flex-wrap justify-center gap-4">
-              {isPremium && (
-                <Button variant="outline" onClick={handleRegenerate} disabled={isRegenerating}>
-                  <RefreshCw className={cn('mr-2 h-4 w-4', isRegenerating && 'animate-spin')} />
-                  Regenerar Interpretación
-                </Button>
-              )}
-
-              <Button variant="outline" onClick={handleShare} disabled={isSharing}>
-                <Share2 className="mr-2 h-4 w-4" />
-                Compartir
-              </Button>
-
-              <Button onClick={handleNewReading}>
-                <Plus className="mr-2 h-4 w-4" />
-                Nueva Lectura
-              </Button>
-            </div>
-          </>
-        )}
-
-        {/* ESTADO ERROR */}
-        {state === 'error' && (
-          <div className="py-12 text-center">
-            <ErrorDisplay message={error || 'Error al crear la lectura'} onRetry={handleRetry} />
-            <Button variant="outline" onClick={handleRetry} className="mt-4">
-              Reintentar
+              <Sparkles className="mr-2 h-5 w-5" />
+              Revelar mi destino
             </Button>
           </div>
-        )}
-      </div>
+        </>
+      )}
+
+      {/* ESTADO 2: Loading IA */}
+      {state === 'loading' && (
+        <div className="mx-auto max-w-4xl">
+          <LoadingState message={LOADING_MESSAGES[loadingMessageIndex]} />
+        </div>
+      )}
+
+      {/* ESTADO 3: Resultado */}
+      {state === 'result' && readingResult && (
+        <div className="mx-auto max-w-4xl">
+          <h2 className="mb-8 text-center font-serif text-2xl">Tu lectura del Tarot</h2>
+
+          {/* Revealed Cards */}
+          <div
+            data-testid="result-cards-grid"
+            className={cn(getGridClasses(), 'mx-auto mb-8 max-w-3xl')}
+          >
+            {readingResult.cards.map((card, index) => (
+              <ResultCard key={card.id} card={card} index={index} />
+            ))}
+          </div>
+
+          {/* Interpretation */}
+          <InterpretationSection
+            interpretation={getGeneralInterpretation(readingResult.interpretation)}
+          />
+
+          {/* Action Buttons */}
+          <div className="mt-8 flex flex-wrap justify-center gap-4">
+            {isPremium && (
+              <Button variant="outline" onClick={handleRegenerate} disabled={isRegenerating}>
+                <RefreshCw className={cn('mr-2 h-4 w-4', isRegenerating && 'animate-spin')} />
+                Regenerar Interpretación
+              </Button>
+            )}
+
+            <Button variant="outline" onClick={handleShare} disabled={isSharing}>
+              <Share2 className="mr-2 h-4 w-4" />
+              Compartir
+            </Button>
+
+            <Button onClick={handleNewReading}>
+              <Plus className="mr-2 h-4 w-4" />
+              Nueva Lectura
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* ESTADO ERROR */}
+      {state === 'error' && (
+        <div className="mx-auto max-w-4xl py-12 text-center">
+          <ErrorDisplay message={error || 'Error al crear la lectura'} onRetry={handleRetry} />
+          <Button variant="outline" onClick={handleRetry} className="mt-4">
+            Reintentar
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

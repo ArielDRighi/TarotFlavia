@@ -228,3 +228,10 @@ body {
 .animate-fade-in {
   animation: fade-in 0.6s ease-out forwards;
 }
+
+/* ===========================================
+   Custom Grid Utilities
+   =========================================== */
+.grid-cols-13 {
+  grid-template-columns: repeat(13, minmax(0, 1fr));
+}

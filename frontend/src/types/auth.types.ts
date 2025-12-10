@@ -24,6 +24,8 @@ export interface AuthState {
   user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  /** Internal flag to track if Zustand has hydrated from localStorage */
+  _hasHydrated: boolean;
 }
 
 /**
@@ -61,6 +63,7 @@ export interface AuthActions {
   register: (credentials: RegisterCredentials) => Promise<void>;
   logout: () => void;
   checkAuth: () => Promise<void>;
+  setHasHydrated: (state: boolean) => void;
 }
 
 /**

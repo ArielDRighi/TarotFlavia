@@ -123,12 +123,12 @@ function SpreadCard({ spread, onSelect }: SpreadCardProps) {
           <div className="flex items-center gap-1">
             <Layers className="h-4 w-4" aria-hidden="true" />
             <span>
-              {spread.cardsCount} {spread.cardsCount === 1 ? 'carta' : 'cartas'}
+              {spread.cardCount} {spread.cardCount === 1 ? 'carta' : 'cartas'}
             </span>
           </div>
           <div className="flex items-center gap-1">
             <Clock className="h-4 w-4" aria-hidden="true" />
-            <span>{getEstimatedTime(spread.cardsCount)}</span>
+            <span>{getEstimatedTime(spread.cardCount)}</span>
           </div>
         </div>
 

@@ -151,7 +151,7 @@ describe('FlaviaIAConfigSeeder', () => {
       expect(capturedConfigData.temperature).toBe(0.7);
     });
 
-    it('should create config with maxTokens 1000', async () => {
+    it('should create config with maxTokens 3000', async () => {
       // Arrange
       const mockTarotista = { id: mockTarotistaId } as Tarotista;
       tarotistaRepository.findOne.mockResolvedValue(mockTarotista);
@@ -174,7 +174,7 @@ describe('FlaviaIAConfigSeeder', () => {
       );
 
       // Assert
-      expect(capturedConfigData.maxTokens).toBe(1000);
+      expect(capturedConfigData.maxTokens).toBe(3000);
     });
 
     it('should create config with version 1 and isActive true', async () => {
