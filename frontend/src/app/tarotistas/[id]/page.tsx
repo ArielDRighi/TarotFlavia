@@ -7,7 +7,7 @@ interface TarotistaPerfilPageProps {
 }
 
 export default function TarotistaPerfilPage({ params }: TarotistaPerfilPageProps) {
-  const id = parseInt(params.id, 10);
+  const id = Number(params.id);
 
   return <TarotistaProfilePage id={id} />;
 }

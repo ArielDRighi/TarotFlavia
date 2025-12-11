@@ -9,6 +9,8 @@
 import { useRouter } from 'next/navigation';
 import { Star, Sparkles, Calendar, MessageSquare } from 'lucide-react';
 import { useTarotistaDetail } from '@/hooks/api/useTarotistas';
+import { getInitials } from '@/lib/utils/text';
+import { SPECIALTY_COLORS, DEFAULT_SPECIALTY_COLOR } from '@/lib/constants/marketplace';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -24,34 +26,6 @@ export interface TarotistaProfilePageProps {
   /** Tarotista ID (numeric) */
   id: number;
 }
-
-// ============================================================================
-// Helper Functions
-// ============================================================================
-
-/**
- * Generates initials from a name
- */
-function getInitials(name: string): string {
-  const words = name.trim().split(' ');
-  if (words.length === 1) {
-    return words[0].substring(0, 2).toUpperCase();
-  }
-  return (words[0][0] + words[1][0]).toUpperCase();
-}
-
-/**
- * Specialty color mapping for badges
- */
-const SPECIALTY_COLORS: Record<string, string> = {
-  Amor: 'bg-pink-100 text-pink-700',
-  Dinero: 'bg-green-100 text-green-700',
-  Carrera: 'bg-blue-100 text-blue-700',
-  Salud: 'bg-orange-100 text-orange-700',
-  Espiritual: 'bg-purple-100 text-purple-700',
-};
-
-const DEFAULT_SPECIALTY_COLOR = 'bg-gray-100 text-gray-700';
 
 // ============================================================================
 // Loading Skeleton

@@ -31,21 +31,23 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
 
-const mockTarotista: TarotistaDetail = {
-  id: 1,
-  nombrePublico: 'Luna Mística',
-  bio: 'Experta en lecturas de amor y trabajo con 15 años de experiencia. Me especializo en ayudar a personas a encontrar su camino.',
-  especialidades: ['Amor', 'Carrera', 'Espiritual'],
-  fotoPerfil: 'https://example.com/avatar.jpg',
-  ratingPromedio: 4.8,
-  totalLecturas: 250,
-  totalReviews: 42,
-  añosExperiencia: 15,
-  idiomas: ['Español', 'Inglés'],
-  isActive: true,
-  createdAt: '2024-01-01T00:00:00Z',
-  updatedAt: '2024-12-01T00:00:00Z',
-};
+function createMockTarotista(): TarotistaDetail {
+  return {
+    id: 1,
+    nombrePublico: 'Luna Mística',
+    bio: 'Experta en lecturas de amor y trabajo con 15 años de experiencia. Me especializo en ayudar a personas a encontrar su camino.',
+    especialidades: ['Amor', 'Carrera', 'Espiritual'],
+    fotoPerfil: 'https://example.com/avatar.jpg',
+    ratingPromedio: 4.8,
+    totalLecturas: 250,
+    totalReviews: 42,
+    añosExperiencia: 15,
+    idiomas: ['Español', 'Inglés'],
+    isActive: true,
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-12-01T00:00:00Z',
+  };
+}
 
 describe('TarotistaProfilePage', () => {
   beforeEach(() => {
@@ -94,7 +96,7 @@ describe('TarotistaProfilePage', () => {
 
   it('should render hero section with tarotista info', async () => {
     mockUseTarotistaDetail.mockReturnValue({
-      data: mockTarotista,
+      data: createMockTarotista(),
       isLoading: false,
       error: null,
     });
@@ -112,7 +114,7 @@ describe('TarotistaProfilePage', () => {
   });
   it('should display specialty badges in hero section', async () => {
     mockUseTarotistaDetail.mockReturnValue({
-      data: mockTarotista,
+      data: createMockTarotista(),
       isLoading: false,
       error: null,
     });
@@ -128,7 +130,7 @@ describe('TarotistaProfilePage', () => {
 
   it('should show "Disponible ahora" when tarotista is active', async () => {
     mockUseTarotistaDetail.mockReturnValue({
-      data: { ...mockTarotista, isActive: true },
+      data: { ...createMockTarotista(), isActive: true },
       isLoading: false,
       error: null,
     });
@@ -142,7 +144,7 @@ describe('TarotistaProfilePage', () => {
 
   it('should show "No disponible" when tarotista is inactive', async () => {
     mockUseTarotistaDetail.mockReturnValue({
-      data: { ...mockTarotista, isActive: false },
+      data: { ...createMockTarotista(), isActive: false },
       isLoading: false,
       error: null,
     });
@@ -160,7 +162,7 @@ describe('TarotistaProfilePage', () => {
 
   it('should render bio section with complete information', async () => {
     mockUseTarotistaDetail.mockReturnValue({
-      data: mockTarotista,
+      data: createMockTarotista(),
       isLoading: false,
       error: null,
     });
@@ -183,7 +185,7 @@ describe('TarotistaProfilePage', () => {
 
   it('should render both service cards (AI and Live Session)', async () => {
     mockUseTarotistaDetail.mockReturnValue({
-      data: mockTarotista,
+      data: createMockTarotista(),
       isLoading: false,
       error: null,
     });
@@ -201,7 +203,7 @@ describe('TarotistaProfilePage', () => {
 
   it('should navigate to ritual page when "Consultar el Tarot" is clicked', async () => {
     mockUseTarotistaDetail.mockReturnValue({
-      data: mockTarotista,
+      data: createMockTarotista(),
       isLoading: false,
       error: null,
     });
@@ -220,7 +222,7 @@ describe('TarotistaProfilePage', () => {
 
   it('should navigate to booking page when "Ver disponibilidad" is clicked', async () => {
     mockUseTarotistaDetail.mockReturnValue({
-      data: mockTarotista,
+      data: createMockTarotista(),
       isLoading: false,
       error: null,
     });
@@ -243,7 +245,7 @@ describe('TarotistaProfilePage', () => {
 
   it('should render reviews section with title', async () => {
     mockUseTarotistaDetail.mockReturnValue({
-      data: mockTarotista,
+      data: createMockTarotista(),
       isLoading: false,
       error: null,
     });
@@ -257,7 +259,7 @@ describe('TarotistaProfilePage', () => {
 
   it('should show placeholder for reviews (future implementation)', async () => {
     mockUseTarotistaDetail.mockReturnValue({
-      data: mockTarotista,
+      data: createMockTarotista(),
       isLoading: false,
       error: null,
     });
@@ -276,7 +278,7 @@ describe('TarotistaProfilePage', () => {
 
   it('should have responsive classes', async () => {
     mockUseTarotistaDetail.mockReturnValue({
-      data: mockTarotista,
+      data: createMockTarotista(),
       isLoading: false,
       error: null,
     });
@@ -295,7 +297,7 @@ describe('TarotistaProfilePage', () => {
 
   it('should have proper heading hierarchy', async () => {
     mockUseTarotistaDetail.mockReturnValue({
-      data: mockTarotista,
+      data: createMockTarotista(),
       isLoading: false,
       error: null,
     });
@@ -313,7 +315,7 @@ describe('TarotistaProfilePage', () => {
   });
   it('should display tarotista name as accessible heading', async () => {
     mockUseTarotistaDetail.mockReturnValue({
-      data: mockTarotista,
+      data: createMockTarotista(),
       isLoading: false,
       error: null,
     });
