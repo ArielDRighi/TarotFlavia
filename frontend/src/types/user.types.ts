@@ -2,7 +2,17 @@
  * User Types
  */
 
-export type UserRole = 'USER' | 'TAROTISTA' | 'ADMIN';
+/**
+ * User roles matching backend enum values
+ * Backend: UserRole enum with lowercase values
+ */
+export type UserRole = 'consumer' | 'tarotist' | 'admin';
+
+/**
+ * User plan types matching backend enum
+ * Backend: UserPlan enum
+ */
+export type UserPlan = 'guest' | 'free' | 'premium' | 'professional';
 
 /**
  * User entity from backend
@@ -12,15 +22,17 @@ export interface User {
   email: string;
   name: string;
   roles: UserRole[];
-  plan: string;
+  plan: UserPlan;
   profilePicture?: string;
-  lastLogin?: string;
+  lastLogin: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
 /**
- * User profile response (includes stats)
+ * User profile response (includes usage stats)
+ * Note: dailyReadingsCount and dailyReadingsLimit are calculated at runtime
+ * based on user's plan and current usage, not stored in User entity
  */
 export interface UserProfile extends User {
   dailyReadingsCount: number;

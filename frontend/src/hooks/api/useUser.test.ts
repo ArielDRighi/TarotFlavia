@@ -59,12 +59,14 @@ describe('useUser hooks', () => {
       id: 1,
       email: 'test@example.com',
       name: 'Test User',
-      roles: ['USER'],
-      plan: 'FREE',
+      roles: ['consumer'],
+      plan: 'free',
       dailyReadingsCount: 2,
       dailyReadingsLimit: 5,
       createdAt: '2024-01-01T00:00:00Z',
       updatedAt: '2024-01-01T00:00:00Z',
+      profilePicture: undefined,
+      lastLogin: null,
     };
 
     it('should fetch user profile', async () => {
@@ -119,12 +121,14 @@ describe('useUser hooks', () => {
       id: 1,
       email: 'updated@example.com',
       name: 'Updated User',
-      roles: ['USER'],
-      plan: 'FREE',
+      roles: ['consumer'],
+      plan: 'free',
       dailyReadingsCount: 2,
       dailyReadingsLimit: 5,
       createdAt: '2024-01-01T00:00:00Z',
       updatedAt: '2024-01-02T00:00:00Z',
+      profilePicture: undefined,
+      lastLogin: null,
     };
 
     it('should update user profile', async () => {
