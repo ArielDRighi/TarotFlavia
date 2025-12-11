@@ -288,7 +288,7 @@ describe('UsageLimits + Readings Integration Tests', () => {
         where: { id: testUser.id },
       });
       expect(userAfter!.aiRequestsUsedMonth).toBe(3);
-    }, 30000); // 30s timeout para 3 lecturas
+    }, 90000); // Increased timeout: 3 readings x ~30s each under CI load
 
     it.skip('should enforce daily limit for FREE users (3 readings/day)', async () => {
       // ARRANGE: Cambiar a FREE para este test

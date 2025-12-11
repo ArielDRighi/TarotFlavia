@@ -558,6 +558,6 @@ describe('Readings + Interpretations + AI Integration Tests', () => {
       expect(reading.interpretation).not.toBeNull();
       // Should have some interpretation (even if fallback)
       expect(reading.interpretation!.length).toBeGreaterThan(0);
-    });
+    }, 60000); // Increased timeout for AI calls under CI load
   });
 });
