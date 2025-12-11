@@ -2,27 +2,49 @@
  * User Types
  */
 
-export type UserRole = 'USER' | 'TAROTISTA' | 'ADMIN';
+/**
+ * User roles matching backend enum values
+ * Backend: UserRole enum with lowercase values
+ */
+export type UserRole = 'consumer' | 'tarotist' | 'admin';
 
+/**
+ * User plan types matching backend enum
+ * Backend: UserPlan enum
+ */
+export type UserPlan = 'guest' | 'free' | 'premium' | 'professional';
+
+/**
+ * User entity from backend
+ */
 export interface User {
-  id: string;
+  id: number;
   email: string;
   name: string;
-  role: UserRole;
-  avatarUrl?: string;
+  roles: UserRole[];
+  plan: UserPlan;
+  profilePicture?: string;
+  lastLogin: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
+/**
+ * User profile response (includes usage stats)
+ * Note: dailyReadingsCount and dailyReadingsLimit are calculated at runtime
+ * based on user's plan and current usage, not stored in User entity
+ */
 export interface UserProfile extends User {
-  bio?: string;
-  phoneNumber?: string;
-  preferences?: UserPreferences;
+  dailyReadingsCount: number;
+  dailyReadingsLimit: number;
 }
 
-export interface UserPreferences {
-  emailNotifications: boolean;
-  pushNotifications: boolean;
-  language: string;
-  theme: 'light' | 'dark' | 'system';
+/**
+ * DTO for updating user profile
+ */
+export interface UpdateProfileDto {
+  name?: string;
+  email?: string;
+  password?: string;
+  profilePicture?: string;
 }
