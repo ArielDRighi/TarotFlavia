@@ -16,8 +16,10 @@ export interface ProfileHeaderProps {
  */
 export function ProfileHeader({ profile }: ProfileHeaderProps) {
   // Get user initials for avatar fallback
+  // Handle edge case: filter empty strings from extra spaces
   const initials = profile.name
     .split(' ')
+    .filter((n) => n.length > 0) // Filter out empty parts
     .map((n) => n[0])
     .join('')
     .toUpperCase()

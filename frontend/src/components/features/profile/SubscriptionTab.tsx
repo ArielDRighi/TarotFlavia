@@ -51,11 +51,19 @@ export function SubscriptionTab({ profile }: SubscriptionTabProps) {
                 {profile.dailyReadingsCount} / {profile.dailyReadingsLimit}
               </span>
             </div>
+            {/* Progress bar with defensive guard against division by zero */}
             <div className="bg-secondary h-2 w-full overflow-hidden rounded-full">
               <div
                 className="bg-primary h-full transition-all"
                 style={{
-                  width: `${(profile.dailyReadingsCount / profile.dailyReadingsLimit) * 100}%`,
+                  width: `${
+                    profile.dailyReadingsLimit > 0
+                      ? Math.min(
+                          (profile.dailyReadingsCount / profile.dailyReadingsLimit) * 100,
+                          100
+                        )
+                      : 0
+                  }%`,
                 }}
               />
             </div>

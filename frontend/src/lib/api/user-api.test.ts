@@ -99,7 +99,7 @@ describe('user-api', () => {
 
       const result = await updateProfile(updateData);
 
-      expect(apiClient.patch).toHaveBeenCalledWith(API_ENDPOINTS.USERS.ME, updateData);
+      expect(apiClient.patch).toHaveBeenCalledWith(API_ENDPOINTS.USERS.PROFILE, updateData);
       expect(result).toEqual(mockUpdatedProfile);
     });
 
@@ -112,7 +112,7 @@ describe('user-api', () => {
 
       const result = await updateProfile(updateData);
 
-      expect(apiClient.patch).toHaveBeenCalledWith(API_ENDPOINTS.USERS.ME, updateData);
+      expect(apiClient.patch).toHaveBeenCalledWith(API_ENDPOINTS.USERS.PROFILE, updateData);
       expect(result.name).toBe('New Name');
     });
 
@@ -125,7 +125,7 @@ describe('user-api', () => {
 
       const result = await updateProfile(updateData);
 
-      expect(apiClient.patch).toHaveBeenCalledWith(API_ENDPOINTS.USERS.ME, updateData);
+      expect(apiClient.patch).toHaveBeenCalledWith(API_ENDPOINTS.USERS.PROFILE, updateData);
       expect(result.email).toBe('newemail@example.com');
     });
 
@@ -136,7 +136,7 @@ describe('user-api', () => {
 
       const result = await updateProfile(updateData);
 
-      expect(apiClient.patch).toHaveBeenCalledWith(API_ENDPOINTS.USERS.ME, updateData);
+      expect(apiClient.patch).toHaveBeenCalledWith(API_ENDPOINTS.USERS.PROFILE, updateData);
       expect(result).toEqual(mockUpdatedProfile);
     });
 
@@ -151,7 +151,7 @@ describe('user-api', () => {
 
       const result = await updateProfile(updateData);
 
-      expect(apiClient.patch).toHaveBeenCalledWith(API_ENDPOINTS.USERS.ME, updateData);
+      expect(apiClient.patch).toHaveBeenCalledWith(API_ENDPOINTS.USERS.PROFILE, updateData);
       expect(result.profilePicture).toBe('https://example.com/avatar.jpg');
     });
 

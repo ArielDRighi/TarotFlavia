@@ -34,7 +34,7 @@ export async function getProfile(): Promise<UserProfile> {
  */
 export async function updateProfile(data: UpdateProfileDto): Promise<UserProfile> {
   try {
-    const response = await apiClient.patch<UserProfile>(API_ENDPOINTS.USERS.ME, data);
+    const response = await apiClient.patch<UserProfile>(API_ENDPOINTS.USERS.PROFILE, data);
     return response.data;
   } catch {
     throw new Error('Error al actualizar perfil');
@@ -46,12 +46,21 @@ export async function updateProfile(data: UpdateProfileDto): Promise<UserProfile
  * @param data - UpdatePasswordDto with current and new password
  * @returns Promise<void>
  * @throws Error with clear message on failure
+ *
+ * @TODO: Backend endpoint NO implementado aún.
+ * El backend solo tiene PATCH /users/profile para actualizar perfil.
+ * Necesita implementarse endpoint específico para cambio de contraseña.
+ * Por ahora, esta función lanzará error hasta que backend lo implemente.
  */
 export async function updatePassword(data: UpdatePasswordDto): Promise<void> {
   try {
-    await apiClient.patch(API_ENDPOINTS.USERS.ME_PASSWORD, data);
+    // TODO: Backend necesita implementar endpoint para cambio de contraseña
+    // Opción 1: PATCH /users/profile/password
+    // Opción 2: PATCH /users/password
+    // Por ahora, usar endpoint temporal (fallará)
+    await apiClient.patch('/users/password', data);
   } catch {
-    throw new Error('Error al actualizar contraseña');
+    throw new Error('Error al actualizar contraseña. Funcionalidad no disponible en backend.');
   }
 }
 

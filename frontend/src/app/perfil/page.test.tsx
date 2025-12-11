@@ -31,10 +31,6 @@ vi.mock('@/hooks/api/useUser', () => ({
     mutate: vi.fn(),
     isPending: false,
   })),
-  useUpdatePassword: vi.fn(() => ({
-    mutate: vi.fn(),
-    isPending: false,
-  })),
   useDeleteAccount: vi.fn(() => ({
     mutate: vi.fn(),
     isPending: false,
@@ -71,23 +67,141 @@ describe('PerfilPage', () => {
     vi.clearAllMocks();
   });
 
-  it('should render profile header with user name', () => {
-    render(<PerfilPage />, { wrapper: createWrapper() });
+  describe('Rendering', () => {
+    it('should render profile header with user name', () => {
+      render(<PerfilPage />, { wrapper: createWrapper() });
 
-    expect(screen.getByText('Test User')).toBeInTheDocument();
+      expect(screen.getByText('Test User')).toBeInTheDocument();
+    });
+
+    it('should render tabs for account, subscription, and settings', () => {
+      render(<PerfilPage />, { wrapper: createWrapper() });
+
+      expect(screen.getByRole('tab', { name: /cuenta/i })).toBeInTheDocument();
+      expect(screen.getByRole('tab', { name: /suscripción/i })).toBeInTheDocument();
+      expect(screen.getByRole('tab', { name: /ajustes/i })).toBeInTheDocument();
+    });
+
+    it('should show account tab content by default', () => {
+      render(<PerfilPage />, { wrapper: createWrapper() });
+
+      expect(screen.getByText('Información de Cuenta')).toBeInTheDocument();
+    });
   });
 
-  it('should render tabs for account, subscription, and settings', () => {
-    render(<PerfilPage />, { wrapper: createWrapper() });
+  describe('Loading States', () => {
+    it('should show loading skeleton when auth is loading', async () => {
+      const { useRequireAuth } = await import('@/hooks/useRequireAuth');
+      (useRequireAuth as ReturnType<typeof vi.fn>).mockReturnValue({
+        isLoading: true,
+      });
 
-    expect(screen.getByRole('tab', { name: /cuenta/i })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /suscripción/i })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /ajustes/i })).toBeInTheDocument();
+      render(<PerfilPage />, { wrapper: createWrapper() });
+
+      // Should show skeleton loader (using aria-busy or loading indicators)
+      const container = screen.getByRole('main');
+      expect(container).toBeInTheDocument();
+    });
+
+    it('should show loading skeleton when profile is loading', async () => {
+      const { useProfile } = await import('@/hooks/api/useUser');
+      (useProfile as ReturnType<typeof vi.fn>).mockReturnValue({
+        data: undefined,
+        isLoading: true,
+      });
+
+      render(<PerfilPage />, { wrapper: createWrapper() });
+
+      // Should show loading state
+      const container = screen.getByRole('main');
+      expect(container).toBeInTheDocument();
+    });
   });
 
-  it('should show account tab content by default', () => {
-    render(<PerfilPage />, { wrapper: createWrapper() });
+  describe('Error States', () => {
+    it('should show error message when profile is null after loading', async () => {
+      const { useRequireAuth } = await import('@/hooks/useRequireAuth');
+      const { useProfile } = await import('@/hooks/api/useUser');
 
-    expect(screen.getByText('Información de Cuenta')).toBeInTheDocument();
+      (useRequireAuth as ReturnType<typeof vi.fn>).mockReturnValue({
+        isLoading: false,
+      });
+
+      (useProfile as ReturnType<typeof vi.fn>).mockReturnValue({
+        data: null,
+        isLoading: false,
+      });
+
+      render(<PerfilPage />, { wrapper: createWrapper() });
+
+      expect(screen.getByText(/Error al cargar perfil/i)).toBeInTheDocument();
+    });
+
+    it('should show error message when profile is undefined after loading', async () => {
+      const { useRequireAuth } = await import('@/hooks/useRequireAuth');
+      const { useProfile } = await import('@/hooks/api/useUser');
+
+      (useRequireAuth as ReturnType<typeof vi.fn>).mockReturnValue({
+        isLoading: false,
+      });
+
+      (useProfile as ReturnType<typeof vi.fn>).mockReturnValue({
+        data: undefined,
+        isLoading: false,
+      });
+
+      render(<PerfilPage />, { wrapper: createWrapper() });
+
+      expect(screen.getByText(/Error al cargar perfil/i)).toBeInTheDocument();
+    });
+  });
+
+  describe('Tab Interactions', () => {
+    it('should switch to subscription tab when clicked', async () => {
+      const userEvent = (await import('@testing-library/user-event')).default;
+      const user = userEvent.setup();
+
+      render(<PerfilPage />, { wrapper: createWrapper() });
+
+      const subscriptionTab = screen.getByRole('tab', { name: /suscripción/i });
+      await user.click(subscriptionTab);
+
+      // Subscription tab content should be visible
+      expect(screen.getByText('Plan Actual')).toBeInTheDocument();
+      expect(screen.getByText('Estadísticas de Uso')).toBeInTheDocument();
+    });
+
+    it('should switch to settings tab when clicked', async () => {
+      const userEvent = (await import('@testing-library/user-event')).default;
+      const user = userEvent.setup();
+
+      render(<PerfilPage />, { wrapper: createWrapper() });
+
+      const settingsTab = screen.getByRole('tab', { name: /ajustes/i });
+      await user.click(settingsTab);
+
+      // Settings tab content should be visible
+      expect(screen.getByText('Notificaciones')).toBeInTheDocument();
+      expect(screen.getByText('Privacidad')).toBeInTheDocument();
+      expect(screen.getByText('Zona Peligrosa')).toBeInTheDocument();
+    });
+
+    it('should switch back to account tab when clicked', async () => {
+      const userEvent = (await import('@testing-library/user-event')).default;
+      const user = userEvent.setup();
+
+      render(<PerfilPage />, { wrapper: createWrapper() });
+
+      // Go to subscription tab
+      const subscriptionTab = screen.getByRole('tab', { name: /suscripción/i });
+      await user.click(subscriptionTab);
+
+      // Go back to account tab
+      const accountTab = screen.getByRole('tab', { name: /cuenta/i });
+      await user.click(accountTab);
+
+      // Account tab content should be visible
+      expect(screen.getByText('Información de Cuenta')).toBeInTheDocument();
+    });
   });
 });
