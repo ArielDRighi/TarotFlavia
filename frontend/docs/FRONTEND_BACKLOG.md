@@ -2186,16 +2186,61 @@ IMPORTANTE:
 
 ---
 
-### TAREA 7.3: Crear página Explorar Tarotistas
+### ✅ TAREA 7.3: Crear página Explorar Tarotistas
 
 **Prioridad:** ALTA
 **Estimación:** 55 min
 **Dependencias:** 7.2, 7.1
+**Estado:** ✅ COMPLETADA (11 Dic 2025)
 
 **Consigna:**
 Crear marketplace con grid de tarotistas, filtros y búsqueda.
 
-**Prompt:**
+**Implementación realizada:**
+
+✅ **Componente TarotistasExplorer creado** (`components/features/marketplace/TarotistasExplorer.tsx`):
+
+- Header con título y subtítulo
+- Filtros de búsqueda con debounce (300ms)
+- Chips de especialidades clicables
+- Grid responsive (1/2/3 columnas)
+- Loading skeletons
+- Empty state con "Limpiar filtros"
+
+✅ **Página Explorar** (`app/explorar/page.tsx`):
+
+- Delega toda la lógica al componente TarotistasExplorer
+- Solo maneja navegación a perfil de tarotista
+
+✅ **Tests completos** (17 tests pasando):
+
+- Header y subtítulos
+- Filtros de búsqueda y especialidades
+- Grid responsive
+- Loading states
+- Empty states
+- Navegación
+
+✅ **Dependencia instalada:**
+
+- `use-debounce` para debounce en búsqueda
+
+✅ **Arquitectura:**
+
+- Lógica extraída a feature component (sin lógica en app/)
+- Nomenclatura correcta
+- Coverage > 80%
+- Build exitoso
+
+**Archivos creados/modificados:**
+
+- `src/components/features/marketplace/TarotistasExplorer.tsx` (nuevo)
+- `src/components/features/marketplace/index.ts` (actualizado)
+- `src/app/explorar/page.tsx` (refactorizado)
+- `src/app/explorar/page.test.tsx` (actualizado)
+- `package.json` (dependencia use-debounce)
+
+**Prompt original:**
 
 ```
 

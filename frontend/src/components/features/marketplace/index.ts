@@ -6,3 +6,6 @@
 
 export { TarotistaCard } from './TarotistaCard';
 export type { TarotistaCardProps } from './TarotistaCard';
+
+export { TarotistasExplorer } from './TarotistasExplorer';
+export type { TarotistasExplorerProps } from './TarotistasExplorer';
