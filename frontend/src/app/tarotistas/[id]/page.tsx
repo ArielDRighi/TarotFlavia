@@ -1,3 +1,5 @@
+import { TarotistaProfilePage } from '@/components/features/marketplace/TarotistaProfilePage';
+
 interface TarotistaPerfilPageProps {
   params: {
     id: string;
@@ -5,12 +7,7 @@ interface TarotistaPerfilPageProps {
 }
 
 export default function TarotistaPerfilPage({ params }: TarotistaPerfilPageProps) {
-  // params.id will be used for data fetching when implemented
-  void params;
+  const id = parseInt(params.id, 10);
 
-  return (
-    <div className="bg-bg-main min-h-screen p-8">
-      <h1 className="font-serif text-3xl">Perfil Tarotista</h1>
-    </div>
-  );
+  return <TarotistaProfilePage id={id} />;
 }
