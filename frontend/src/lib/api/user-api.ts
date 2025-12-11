@@ -6,7 +6,7 @@
  */
 import { apiClient } from './axios-config';
 import { API_ENDPOINTS } from './endpoints';
-import type { UserProfile, UpdateProfileDto } from '@/types';
+import type { UserProfile, UpdateProfileDto, UpdatePasswordDto } from '@/types';
 
 // ============================================================================
 // User Profile
@@ -34,10 +34,24 @@ export async function getProfile(): Promise<UserProfile> {
  */
 export async function updateProfile(data: UpdateProfileDto): Promise<UserProfile> {
   try {
-    const response = await apiClient.patch<UserProfile>(API_ENDPOINTS.USERS.PROFILE, data);
+    const response = await apiClient.patch<UserProfile>(API_ENDPOINTS.USERS.ME, data);
     return response.data;
   } catch {
     throw new Error('Error al actualizar perfil');
+  }
+}
+
+/**
+ * Update user password
+ * @param data - UpdatePasswordDto with current and new password
+ * @returns Promise<void>
+ * @throws Error with clear message on failure
+ */
+export async function updatePassword(data: UpdatePasswordDto): Promise<void> {
+  try {
+    await apiClient.patch(API_ENDPOINTS.USERS.ME_PASSWORD, data);
+  } catch {
+    throw new Error('Error al actualizar contraseña');
   }
 }
 

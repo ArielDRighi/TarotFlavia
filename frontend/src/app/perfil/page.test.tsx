@@ -1,32 +1,93 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import PerfilPage from './page';
+import React from 'react';
+
+// Mock useRequireAuth
+vi.mock('@/hooks/useRequireAuth', () => ({
+  useRequireAuth: vi.fn(() => ({ isLoading: false })),
+}));
+
+// Mock useProfile
+vi.mock('@/hooks/api/useUser', () => ({
+  useProfile: vi.fn(() => ({
+    data: {
+      id: 1,
+      email: 'test@example.com',
+      name: 'Test User',
+      roles: ['consumer'],
+      plan: 'free',
+      dailyReadingsCount: 2,
+      dailyReadingsLimit: 5,
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z',
+      profilePicture: undefined,
+      lastLogin: null,
+    },
+    isLoading: false,
+  })),
+  useUpdateProfile: vi.fn(() => ({
+    mutate: vi.fn(),
+    isPending: false,
+  })),
+  useUpdatePassword: vi.fn(() => ({
+    mutate: vi.fn(),
+    isPending: false,
+  })),
+  useDeleteAccount: vi.fn(() => ({
+    mutate: vi.fn(),
+    isPending: false,
+  })),
+}));
+
+// Mock useAuth
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: vi.fn(() => ({
+    user: {
+      id: 1,
+      email: 'test@example.com',
+      name: 'Test User',
+    },
+  })),
+}));
+
+const createTestQueryClient = () =>
+  new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+    },
+  });
+
+const createWrapper = () => {
+  const queryClient = createTestQueryClient();
+  return function Wrapper({ children }: { children: React.ReactNode }) {
+    return React.createElement(QueryClientProvider, { client: queryClient }, children);
+  };
+};
 
 describe('PerfilPage', () => {
-  it('should render perfil page with correct title', () => {
-    render(<PerfilPage />);
-
-    expect(screen.getByRole('heading', { level: 1, name: /mi perfil/i })).toBeInTheDocument();
+  beforeEach(() => {
+    vi.clearAllMocks();
   });
 
-  it('should have min-h-screen class', () => {
-    const { container } = render(<PerfilPage />);
+  it('should render profile header with user name', () => {
+    render(<PerfilPage />, { wrapper: createWrapper() });
 
-    const mainDiv = container.firstChild as HTMLElement;
-    expect(mainDiv).toHaveClass('min-h-screen');
+    expect(screen.getByText('Test User')).toBeInTheDocument();
   });
 
-  it('should have bg-bg-main class', () => {
-    const { container } = render(<PerfilPage />);
+  it('should render tabs for account, subscription, and settings', () => {
+    render(<PerfilPage />, { wrapper: createWrapper() });
 
-    const mainDiv = container.firstChild as HTMLElement;
-    expect(mainDiv).toHaveClass('bg-bg-main');
+    expect(screen.getByRole('tab', { name: /cuenta/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /suscripción/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /ajustes/i })).toBeInTheDocument();
   });
 
-  it('should have font-serif class on heading', () => {
-    render(<PerfilPage />);
+  it('should show account tab content by default', () => {
+    render(<PerfilPage />, { wrapper: createWrapper() });
 
-    const heading = screen.getByRole('heading', { level: 1 });
-    expect(heading).toHaveClass('font-serif');
+    expect(screen.getByText('Información de Cuenta')).toBeInTheDocument();
   });
 });

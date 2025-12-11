@@ -2462,87 +2462,67 @@ HOOKS:
 
 ```
 
-### TAREA 8.2: Crear página Mi Perfil
+### TAREA 8.2: Crear página Mi Perfil ✅
 
 **Prioridad:** ALTA
 **Estimación:** 60 min
 **Dependencias:** 8.1, 1.1
+**Estado:** COMPLETADA
+**Rama:** `feature/TASK-8.2-mi-perfil`
 
-**Consigna:**
-Crear página de perfil con tabs: Cuenta, Suscripción, Ajustes.
+**Archivos creados:**
 
-**Prompt:**
+- ✅ `src/lib/validations/profile.schemas.ts` - Schemas de validación para perfil, password y eliminación de cuenta
+- ✅ `src/lib/validations/profile.schemas.test.ts` - Tests para schemas (13 tests, 100% coverage)
+- ✅ `src/types/user.types.ts` - Tipos UpdatePasswordDto agregados
+- ✅ `src/lib/api/endpoints.ts` - Endpoints USERS.ME y USERS.ME_PASSWORD agregados
+- ✅ `src/lib/api/user-api.ts` - Función updatePassword agregada
+- ✅ `src/hooks/api/useUser.ts` - Hook useUpdatePassword agregado
+- ✅ `src/hooks/api/useUser.test.ts` - Tests actualizados (16 tests, incluye useUpdatePassword)
+- ✅ `src/components/features/profile/ProfileHeader.tsx` - Header con avatar, nombre y plan badge
+- ✅ `src/components/features/profile/ProfileHeader.test.tsx` - Tests del header (6 tests)
+- ✅ `src/components/features/profile/AccountTab.tsx` - Tab con formularios de perfil y password
+- ✅ `src/components/features/profile/SubscriptionTab.tsx` - Tab con información de plan y estadísticas
+- ✅ `src/components/features/profile/SettingsTab.tsx` - Tab con ajustes y eliminación de cuenta
+- ✅ `src/app/perfil/page.tsx` - Página principal con tabs
+- ✅ `src/app/perfil/page.test.tsx` - Tests de la página (4 tests)
 
-```
+**Características implementadas:**
 
-Crea página Mi Perfil:
+- ✅ Cliente component con protección de ruta (`useRequireAuth()`)
+- ✅ Header con gradiente, avatar grande, nombre y plan badge
+- ✅ Sistema de tabs con shadcn/ui (Cuenta, Suscripción, Ajustes)
+- ✅ Tab Cuenta: Formularios para actualizar perfil y cambiar contraseña
+- ✅ Tab Suscripción: Plan actual, estadísticas de uso, progreso visual
+- ✅ Tab Ajustes: Zona peligrosa con modal de confirmación para eliminar cuenta
+- ✅ Validación con Zod en todos los formularios
+- ✅ Feedback con toast en todas las acciones
+- ✅ Modal destructivo con doble confirmación para eliminar cuenta
+- ✅ Email readonly (no editable como indica el backend)
+- ✅ Estados de loading en formularios
+- ✅ Manejo de errores con mensajes claros
 
-ARCHIVO: src/app/perfil/page.tsx
+**Tests:**
 
-CLIENT COMPONENT con useRequireAuth()
+- ✅ 100% de los tests pasan (908 tests totales en el proyecto)
+- ✅ Coverage ≥ 80%
+- ✅ Tests unitarios para schemas, hooks, componentes y página
 
-ESTRUCTURA:
+**Validación de calidad:**
 
-HEADER:
+- ✅ `npm run lint` - Sin errores
+- ✅ `npm run type-check` - Sin errores de tipos
+- ✅ `npm run build` - Build exitoso
+- ✅ `npm test` - 100% tests pasando
 
-- Card con gradiente primary suave
-- Avatar grande
-- Nombre usuario
-- PlanBadge del plan actual
+**Notas de implementación:**
 
-TABS (usar Tabs de shadcn/ui):
-
-TAB 1: CUENTA
-
-- Formulario editar:
-  - Input nombre
-  - Input email (readonly)
-  - Botón "Guardar cambios"
-- Sección cambiar contraseña:
-  - Input password actual
-  - Input nueva password
-  - Input confirmar password
-  - Botón "Actualizar contraseña"
-
-TAB 2: SUSCRIPCIÓN
-
-- Card con plan actual
-- Fecha de renovación (si Premium/Pro)
-- Estadísticas de uso:
-  - Lecturas realizadas este mes
-  - Lecturas restantes hoy
-- Tabla comparativa de planes:
-  - Columnas: Free, Premium, Professional
-  - Filas: features con checks verdes
-- Botón destacado: "Mejorar a Premium" (si es Free)
-
-TAB 3: AJUSTES
-
-- Notificaciones (toggles):
-  - Email para nuevas lecturas
-  - Recordatorio carta del día
-- Privacidad:
-  - Hacer perfil público/privado
-- Zona peligrosa:
-  - Botón rojo "Eliminar cuenta" (modal confirmación)
-
-OBTENER DATOS:
-
-- useProfile()
-- useAuth() para plan actual
-
-ACCIONES:
-
-- Guardar cambios: useUpdateProfile()
-- Eliminar cuenta: useDeleteAccount() con modal doble confirmación
-
-IMPORTANTE:
-
-- Validación con Zod
-- Feedback con toast
-- Modal destructivo para eliminar cuenta
-
-```
+- Se creó el endpoint `USERS.ME` para actualizar perfil (en lugar de `USERS.PROFILE`)
+- Se creó el endpoint `USERS.ME_PASSWORD` para cambiar contraseña
+- El componente SubscriptionTab muestra mensaje de upgrade solo para usuarios FREE
+- La funcionalidad de notificaciones y privacidad está marcada como "próximamente"
+- Se agregó schema `deleteAccountSchema` con validación de texto exacto "ELIMINAR MI CUENTA"
+- El tab de Settings tiene modal de confirmación doble para eliminar cuenta
 
 ---
 

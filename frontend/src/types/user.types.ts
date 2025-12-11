@@ -48,3 +48,11 @@ export interface UpdateProfileDto {
   password?: string;
   profilePicture?: string;
 }
+
+/**
+ * DTO for updating user password
+ */
+export interface UpdatePasswordDto {
+  currentPassword: string;
+  newPassword: string;
+}

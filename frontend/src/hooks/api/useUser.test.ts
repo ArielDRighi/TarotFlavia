@@ -4,9 +4,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useProfile, useUpdateProfile, useDeleteAccount } from './useUser';
+import { useProfile, useUpdateProfile, useUpdatePassword, useDeleteAccount } from './useUser';
 import * as userApi from '@/lib/api/user-api';
-import type { UserProfile, UpdateProfileDto } from '@/types';
+import type { UserProfile, UpdateProfileDto, UpdatePasswordDto } from '@/types';
 import React from 'react';
 
 // Mock the API
@@ -212,6 +212,68 @@ describe('useUser hooks', () => {
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
       expect(userApi.updateProfile).toHaveBeenCalledWith({ name: 'Only Name' });
+    });
+  });
+
+  // ==========================================================================
+  // useUpdatePassword
+  // ==========================================================================
+  describe('useUpdatePassword', () => {
+    it('should update user password', async () => {
+      vi.mocked(userApi.updatePassword).mockResolvedValue();
+
+      const wrapper = createWrapper();
+      const { result } = renderHook(() => useUpdatePassword(), { wrapper });
+
+      const passwordData: UpdatePasswordDto = {
+        currentPassword: 'OldPassword123',
+        newPassword: 'NewPassword456',
+      };
+
+      result.current.mutate(passwordData);
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      expect(userApi.updatePassword).toHaveBeenCalledWith(passwordData);
+    });
+
+    it('should show success toast on successful password update', async () => {
+      vi.mocked(userApi.updatePassword).mockResolvedValue();
+
+      const { toast } = await import('@/hooks/utils/useToast');
+      const wrapper = createWrapper();
+      const { result } = renderHook(() => useUpdatePassword(), { wrapper });
+
+      const passwordData: UpdatePasswordDto = {
+        currentPassword: 'OldPassword123',
+        newPassword: 'NewPassword456',
+      };
+
+      result.current.mutate(passwordData);
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      expect(toast.success).toHaveBeenCalledWith('Contraseña actualizada exitosamente');
+    });
+
+    it('should show error toast on failed password update', async () => {
+      const error = new Error('Error al actualizar contraseña');
+      vi.mocked(userApi.updatePassword).mockRejectedValue(error);
+
+      const { toast } = await import('@/hooks/utils/useToast');
+      const wrapper = createWrapper();
+      const { result } = renderHook(() => useUpdatePassword(), { wrapper });
+
+      const passwordData: UpdatePasswordDto = {
+        currentPassword: 'WrongPassword',
+        newPassword: 'NewPassword456',
+      };
+
+      result.current.mutate(passwordData);
+
+      await waitFor(() => expect(result.current.isError).toBe(true));
+
+      expect(toast.error).toHaveBeenCalledWith('Error al actualizar contraseña');
     });
   });
 
