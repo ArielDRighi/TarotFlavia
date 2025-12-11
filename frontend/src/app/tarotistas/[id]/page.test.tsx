@@ -1,36 +1,45 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
 import TarotistaPerfilPage from './page';
 
-const mockParams = { id: '123' };
+// Mock next/navigation
+const mockPush = vi.fn();
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: mockPush,
+  }),
+}));
 
-describe('TarotistaPerfilPage', () => {
-  it('should render tarotista profile page with correct title', () => {
-    render(<TarotistaPerfilPage params={mockParams} />);
+// Mock TarotistaProfilePage component (will be tested separately)
+vi.mock('@/components/features/marketplace/TarotistaProfilePage', () => ({
+  TarotistaProfilePage: ({ id }: { id: number }) => (
+    <div data-testid="tarotista-profile-page">Profile for tarotista {id}</div>
+  ),
+}));
 
-    expect(
-      screen.getByRole('heading', { level: 1, name: /perfil tarotista/i })
-    ).toBeInTheDocument();
+describe('TarotistaPerfilPage (Route)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
   });
 
-  it('should have min-h-screen class', () => {
-    const { container } = render(<TarotistaPerfilPage params={mockParams} />);
+  it('should render TarotistaProfilePage component with numeric ID', async () => {
+    const params = { id: '123' };
 
-    const mainDiv = container.firstChild as HTMLElement;
-    expect(mainDiv).toHaveClass('min-h-screen');
+    render(<TarotistaPerfilPage params={params} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('tarotista-profile-page')).toBeInTheDocument();
+      expect(screen.getByText(/profile for tarotista 123/i)).toBeInTheDocument();
+    });
   });
 
-  it('should have bg-bg-main class', () => {
-    const { container } = render(<TarotistaPerfilPage params={mockParams} />);
+  it('should convert string ID to number', async () => {
+    const params = { id: '456' };
 
-    const mainDiv = container.firstChild as HTMLElement;
-    expect(mainDiv).toHaveClass('bg-bg-main');
-  });
+    render(<TarotistaPerfilPage params={params} />);
 
-  it('should have font-serif class on heading', () => {
-    render(<TarotistaPerfilPage params={mockParams} />);
-
-    const heading = screen.getByRole('heading', { level: 1 });
-    expect(heading).toHaveClass('font-serif');
+    await waitFor(() => {
+      expect(screen.getByText(/profile for tarotista 456/i)).toBeInTheDocument();
+    });
   });
 });

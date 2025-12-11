@@ -2295,14 +2295,33 @@ IMPORTANTE:
 
 ---
 
-### TAREA 7.4: Crear página Perfil Público de Tarotista
+### TAREA 7.4: Crear página Perfil Público de Tarotista ✅
 
+**Estado:** COMPLETADA (5 Dic 2025)
 **Prioridad:** ALTA
-**Estimación:** 70 min
+**Estimación:** 70 min → **Real: 75 min**
 **Dependencias:** 7.1
 
 **Consigna:**
 Crear perfil completo de tarotista con información detallada y opciones de agendar sesión o lectura IA.
+
+**Implementación:**
+
+- ✅ Componente `TarotistaProfilePage` con 4 secciones (Hero, Bio, Services, Reviews)
+- ✅ Ruta dinámica `/tarotistas/[id]` con conversión numérica de ID
+- ✅ Estados: Loading skeleton, error display, data rendering
+- ✅ Navegación: `/ritual?tarotistaId={id}` y `/tarotistas/{id}/reservar`
+- ✅ Accesibilidad: Jerarquía semántica con h1, h2 (no CardTitle)
+- ✅ Diseño: Responsive con hover effects (scale-105, shadow-lg)
+- ✅ Tests: 15 component tests + 2 route tests = **17/17 passing**
+- ✅ Coverage: **92.85%** (TarotistaProfilePage), **100%** (route)
+
+**Decisiones técnicas:**
+
+- Usé `<h2>` en lugar de `<CardTitle asChild>` para accesibilidad (CardTitle renderiza div)
+- Placeholder para sección Reviews (backend aún no tiene endpoint de reviews)
+- Indicador de disponibilidad usa `isActive` de `TarotistaDetail` type
+- Avatar fallback con iniciales usando helper `getInitials()`
 
 **Prompt:**
 

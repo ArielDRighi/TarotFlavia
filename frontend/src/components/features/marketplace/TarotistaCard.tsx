@@ -3,27 +3,12 @@
 import { Star } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
+import { getInitials } from '@/lib/utils/text';
+import { SPECIALTY_COLORS, DEFAULT_SPECIALTY_COLOR } from '@/lib/constants/marketplace';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import type { Tarotista } from '@/types/tarotista.types';
-
-/**
- * Specialty color mapping for badges
- * Uses pastel colors as per design specs
- */
-const SPECIALTY_COLORS: Record<string, string> = {
-  Amor: 'bg-pink-100 text-pink-700',
-  Dinero: 'bg-green-100 text-green-700',
-  Carrera: 'bg-blue-100 text-blue-700',
-  Salud: 'bg-orange-100 text-orange-700',
-  Espiritual: 'bg-purple-100 text-purple-700',
-};
-
-/**
- * Default color for unknown specialties
- */
-const DEFAULT_SPECIALTY_COLOR = 'bg-gray-100 text-gray-700';
 
 /**
  * TarotistaCard Component Props
@@ -39,19 +24,6 @@ export interface TarotistaCardProps {
   pricePerSession?: number;
   /** Additional CSS classes */
   className?: string;
-}
-
-/**
- * Generates initials from a name
- * @param name - Full name to extract initials from
- * @returns Two-letter initials
- */
-function getInitials(name: string): string {
-  const words = name.trim().split(' ');
-  if (words.length === 1) {
-    return words[0].substring(0, 2).toUpperCase();
-  }
-  return (words[0][0] + words[1][0]).toUpperCase();
 }
 
 /**
