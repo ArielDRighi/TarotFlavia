@@ -2399,11 +2399,30 @@ IMPORTANTE:
 
 ## 👤 FASE 8: MI PERFIL
 
-### TAREA 8.1: Crear servicio API de usuario
+### TAREA 8.1: Crear servicio API de usuario ✅
 
 **Prioridad:** ALTA
 **Estimación:** 20 min
 **Dependencias:** 0.5
+**Estado:** COMPLETADA
+**Fecha:** 2025-12-11
+
+**Archivos creados:**
+
+- ✅ `src/lib/api/user-api.ts` - Funciones API (getProfile, updateProfile, deleteAccount)
+- ✅ `src/lib/api/user-api.test.ts` - Tests completos (13 tests)
+- ✅ `src/hooks/api/useUser.ts` - Hooks React Query (useProfile, useUpdateProfile, useDeleteAccount)
+- ✅ `src/hooks/api/useUser.test.ts` - Tests completos (13 tests)
+- ✅ `src/types/user.types.ts` - Actualizado con UpdateProfileDto
+
+**Validaciones:**
+
+- ✅ 26 tests pasando (13 API + 13 hooks)
+- ✅ Coverage: 100% en user-api.ts y useUser.ts
+- ✅ Lint: 0 errores
+- ✅ Type-check: 0 errores
+- ✅ Build: Exitoso
+- ✅ Arquitectura: Validada
 
 **Consigna:**
 Crear funciones API para gestión de perfil de usuario.

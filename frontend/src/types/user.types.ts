@@ -4,25 +4,35 @@
 
 export type UserRole = 'USER' | 'TAROTISTA' | 'ADMIN';
 
+/**
+ * User entity from backend
+ */
 export interface User {
-  id: string;
+  id: number;
   email: string;
   name: string;
-  role: UserRole;
-  avatarUrl?: string;
+  roles: UserRole[];
+  plan: string;
+  profilePicture?: string;
+  lastLogin?: string;
   createdAt: string;
   updatedAt: string;
 }
 
+/**
+ * User profile response (includes stats)
+ */
 export interface UserProfile extends User {
-  bio?: string;
-  phoneNumber?: string;
-  preferences?: UserPreferences;
+  dailyReadingsCount: number;
+  dailyReadingsLimit: number;
 }
 
-export interface UserPreferences {
-  emailNotifications: boolean;
-  pushNotifications: boolean;
-  language: string;
-  theme: 'light' | 'dark' | 'system';
+/**
+ * DTO for updating user profile
+ */
+export interface UpdateProfileDto {
+  name?: string;
+  email?: string;
+  password?: string;
+  profilePicture?: string;
 }
