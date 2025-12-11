@@ -17,7 +17,14 @@ export type {
 } from './auth.types';
 
 // User Types
-export type { User, UserProfile, UserRole, UserPlan, UpdateProfileDto } from './user.types';
+export type {
+  User,
+  UserProfile,
+  UserRole,
+  UserPlan,
+  UpdateProfileDto,
+  UpdatePasswordDto,
+} from './user.types';
 
 // Reading Types
 export type {

@@ -53,6 +53,10 @@ export const API_ENDPOINTS = {
     BASE: '/users',
     BY_ID: (id: number) => `/users/${id}`,
     PROFILE: '/users/profile',
+    // TODO: Backend no tiene estos endpoints implementados aún
+    // Cuando se implementen en backend, descomentar:
+    // ME: '/users/me',
+    // ME_PASSWORD: '/users/me/password',
   },
 
   // Tarotistas (Marketplace)

@@ -9,8 +9,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/utils/useToast';
 import { useAuthStore } from '@/stores/authStore';
-import { getProfile, updateProfile, deleteAccount } from '@/lib/api/user-api';
-import type { UpdateProfileDto } from '@/types';
+import { getProfile, updateProfile, updatePassword, deleteAccount } from '@/lib/api/user-api';
+import type { UpdateProfileDto, UpdatePasswordDto } from '@/types';
 
 // ============================================================================
 // Query Keys (for consistency and type safety)
@@ -55,6 +55,22 @@ export function useUpdateProfile() {
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Error al actualizar perfil');
+    },
+  });
+}
+
+/**
+ * Hook to update user password
+ * On success: shows success toast
+ */
+export function useUpdatePassword() {
+  return useMutation({
+    mutationFn: (data: UpdatePasswordDto) => updatePassword(data),
+    onSuccess: () => {
+      toast.success('Contraseña actualizada exitosamente');
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Error al actualizar contraseña');
     },
   });
 }
