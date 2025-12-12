@@ -4,51 +4,101 @@
 
 /**
  * Time slot availability
- * Used for displaying available booking times
+ * Coincide con backend AvailableSlotDto
  */
 export interface TimeSlot {
+  date: string;
   time: string;
+  durationMinutes: number;
   available: boolean;
 }
 
 /**
- * Session status enum
+ * Session type enum
+ * DEBE coincidir exactamente con backend SessionType enum
  */
-export type SessionStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED';
+export type SessionType = 'TAROT_READING' | 'ENERGY_CLEANING' | 'HEBREW_PENDULUM' | 'CONSULTATION';
+
+/**
+ * Payment status enum
+ * DEBE coincidir exactamente con backend PaymentStatus enum
+ */
+export type PaymentStatus = 'PENDING' | 'PAID' | 'REFUNDED';
+
+/**
+ * Session status enum
+ * DEBE coincidir exactamente con backend SessionStatus enum
+ */
+export type SessionStatus =
+  | 'pending'
+  | 'confirmed'
+  | 'completed'
+  | 'cancelled_by_user'
+  | 'cancelled_by_tarotist';
 
 /**
  * Session básica para listados
- * Coincide con GET /api/scheduling/my-sessions response
+ * Coincide con backend SessionResponseDto
  */
 export interface Session {
   id: number;
   tarotistaId: number;
   userId: number;
-  date: string;
-  time: string;
-  duration: number;
+  sessionDate: string;
+  sessionTime: string;
+  durationMinutes: number;
+  sessionType: SessionType;
   status: SessionStatus;
-  meetLink: string | null;
+  priceUsd: number;
+  paymentStatus: PaymentStatus;
+  googleMeetLink: string;
+  userEmail: string;
+  userNotes?: string;
+  tarotistNotes?: string;
+  cancelledAt?: string;
+  cancellationReason?: string;
+  createdAt: string;
+  updatedAt: string;
+  confirmedAt?: string;
+  completedAt?: string;
+}
+
+/**
+ * Resumen de tarotista para detalles de sesión
+ * Usado en propiedad anidada de SessionDetail
+ */
+export interface TarotistaSummary {
+  id: number;
+  nombre: string;
+  foto?: string;
 }
 
 /**
  * Detalle completo de sesión
  * Coincide con GET /api/scheduling/my-sessions/:id response
+ * (Nota: Backend podría retornar Session + relación populate con tarotista)
  */
 export interface SessionDetail extends Session {
-  tarotistaNombre: string;
-  tarotistaFoto?: string;
-  createdAt: string;
-  updatedAt: string;
+  tarotista?: TarotistaSummary;
 }
 
 /**
  * DTO para crear una sesión (booking)
- * Coincide con POST /api/scheduling/book request body
+ * Coincide con POST /api/scheduling/sessions request body (backend BookSessionDto)
  */
 export interface BookSessionDto {
   tarotistaId: number;
-  date: string;
-  time: string;
-  duration: number;
+  sessionDate: string;
+  sessionTime: string;
+  durationMinutes: number;
+  sessionType: SessionType;
+  userNotes?: string;
+}
+
+/**
+ * DTO para cancelar una sesión
+ * Coincide con POST /api/scheduling/sessions/:id/cancel request body (backend CancelSessionDto)
+ */
+export interface CancelSessionDto {
+  reason: string;
 }

@@ -50,17 +50,17 @@ describe('useSessions Hooks', () => {
   // ============================================================================
 
   describe('useAvailableSlots', () => {
-    it('should fetch available slots for a tarotista on a specific date', async () => {
+    it('should fetch available slots for a tarotista in a date range', async () => {
       const mockSlots: TimeSlot[] = [
-        { time: '09:00', available: true },
-        { time: '10:00', available: false },
-        { time: '11:00', available: true },
+        { date: '2025-12-15', time: '09:00', durationMinutes: 30, available: true },
+        { date: '2025-12-15', time: '10:00', durationMinutes: 30, available: false },
+        { date: '2025-12-15', time: '11:00', durationMinutes: 30, available: true },
       ];
 
       vi.mocked(sessionsApi.getAvailableSlots).mockResolvedValue(mockSlots);
 
       const queryClient = createTestQueryClient();
-      const { result } = renderHook(() => useAvailableSlots(1, '2025-12-15'), {
+      const { result } = renderHook(() => useAvailableSlots(1, '2025-12-15', '2025-12-22', 30), {
         wrapper: createWrapper(queryClient),
       });
 
@@ -68,7 +68,7 @@ describe('useSessions Hooks', () => {
 
       expect(result.current.data).toEqual(mockSlots);
       expect(result.current.data).toHaveLength(3);
-      expect(sessionsApi.getAvailableSlots).toHaveBeenCalledWith(1, '2025-12-15');
+      expect(sessionsApi.getAvailableSlots).toHaveBeenCalledWith(1, '2025-12-15', '2025-12-22', 30);
     });
 
     it('should handle errors when fetching slots fails', async () => {
@@ -77,7 +77,7 @@ describe('useSessions Hooks', () => {
       );
 
       const queryClient = createTestQueryClient();
-      const { result } = renderHook(() => useAvailableSlots(1, '2025-12-15'), {
+      const { result } = renderHook(() => useAvailableSlots(1, '2025-12-15', '2025-12-22', 30), {
         wrapper: createWrapper(queryClient),
       });
 
@@ -88,7 +88,7 @@ describe('useSessions Hooks', () => {
 
     it('should not fetch when tarotistaId is invalid', () => {
       const queryClient = createTestQueryClient();
-      const { result } = renderHook(() => useAvailableSlots(0, '2025-12-15'), {
+      const { result } = renderHook(() => useAvailableSlots(0, '2025-12-15', '2025-12-22', 30), {
         wrapper: createWrapper(queryClient),
       });
 
@@ -107,11 +107,17 @@ describe('useSessions Hooks', () => {
         id: 1,
         tarotistaId: 1,
         userId: 100,
-        date: '2025-12-15',
-        time: '09:00',
-        duration: 30,
-        status: 'PENDING',
-        meetLink: null,
+        sessionDate: '2025-12-15',
+        sessionTime: '09:00',
+        durationMinutes: 30,
+        sessionType: 'TAROT_READING',
+        status: 'pending',
+        priceUsd: 50,
+        paymentStatus: 'PENDING',
+        googleMeetLink: 'https://meet.google.com/abc-defg-hij',
+        userEmail: 'user@example.com',
+        createdAt: '2025-12-10T10:00:00Z',
+        updatedAt: '2025-12-10T10:00:00Z',
       };
 
       vi.mocked(sessionsApi.bookSession).mockResolvedValue(mockSession);
@@ -123,9 +129,10 @@ describe('useSessions Hooks', () => {
 
       result.current.mutate({
         tarotistaId: 1,
-        date: '2025-12-15',
-        time: '09:00',
-        duration: 30,
+        sessionDate: '2025-12-15',
+        sessionTime: '09:00',
+        durationMinutes: 30,
+        sessionType: 'TAROT_READING',
       });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -136,9 +143,10 @@ describe('useSessions Hooks', () => {
       const callArgs = vi.mocked(sessionsApi.bookSession).mock.calls[0];
       expect(callArgs[0]).toEqual({
         tarotistaId: 1,
-        date: '2025-12-15',
-        time: '09:00',
-        duration: 30,
+        sessionDate: '2025-12-15',
+        sessionTime: '09:00',
+        durationMinutes: 30,
+        sessionType: 'TAROT_READING',
       });
     });
 
@@ -152,9 +160,10 @@ describe('useSessions Hooks', () => {
 
       result.current.mutate({
         tarotistaId: 1,
-        date: '2025-12-15',
-        time: '09:00',
-        duration: 30,
+        sessionDate: '2025-12-15',
+        sessionTime: '09:00',
+        durationMinutes: 30,
+        sessionType: 'TAROT_READING',
       });
 
       await waitFor(() => expect(result.current.isError).toBe(true));
@@ -174,21 +183,33 @@ describe('useSessions Hooks', () => {
           id: 1,
           tarotistaId: 1,
           userId: 100,
-          date: '2025-12-15',
-          time: '09:00',
-          duration: 30,
-          status: 'CONFIRMED',
-          meetLink: 'https://meet.example.com/abc',
+          sessionDate: '2025-12-15',
+          sessionTime: '09:00',
+          durationMinutes: 30,
+          sessionType: 'TAROT_READING',
+          status: 'confirmed',
+          priceUsd: 50,
+          paymentStatus: 'PAID',
+          googleMeetLink: 'https://meet.google.com/abc-defg-hij',
+          userEmail: 'user@example.com',
+          createdAt: '2025-12-10T10:00:00Z',
+          updatedAt: '2025-12-10T10:00:00Z',
         },
         {
           id: 2,
           tarotistaId: 2,
           userId: 100,
-          date: '2025-12-16',
-          time: '10:00',
-          duration: 60,
-          status: 'PENDING',
-          meetLink: null,
+          sessionDate: '2025-12-16',
+          sessionTime: '10:00',
+          durationMinutes: 60,
+          sessionType: 'CONSULTATION',
+          status: 'pending',
+          priceUsd: 75,
+          paymentStatus: 'PENDING',
+          googleMeetLink: 'https://meet.google.com/xyz-qwer-tyu',
+          userEmail: 'user@example.com',
+          createdAt: '2025-12-10T11:00:00Z',
+          updatedAt: '2025-12-10T11:00:00Z',
         },
       ];
 
@@ -212,25 +233,31 @@ describe('useSessions Hooks', () => {
           id: 1,
           tarotistaId: 1,
           userId: 100,
-          date: '2025-12-15',
-          time: '09:00',
-          duration: 30,
-          status: 'CONFIRMED',
-          meetLink: 'https://meet.example.com/abc',
+          sessionDate: '2025-12-15',
+          sessionTime: '09:00',
+          durationMinutes: 30,
+          sessionType: 'TAROT_READING',
+          status: 'confirmed',
+          priceUsd: 50,
+          paymentStatus: 'PAID',
+          googleMeetLink: 'https://meet.google.com/abc-defg-hij',
+          userEmail: 'user@example.com',
+          createdAt: '2025-12-10T10:00:00Z',
+          updatedAt: '2025-12-10T10:00:00Z',
         },
       ];
 
       vi.mocked(sessionsApi.getMySessions).mockResolvedValue(mockSessions);
 
       const queryClient = createTestQueryClient();
-      const { result } = renderHook(() => useMySessions('CONFIRMED'), {
+      const { result } = renderHook(() => useMySessions('confirmed'), {
         wrapper: createWrapper(queryClient),
       });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
       expect(result.current.data).toEqual(mockSessions);
-      expect(sessionsApi.getMySessions).toHaveBeenCalledWith('CONFIRMED');
+      expect(sessionsApi.getMySessions).toHaveBeenCalledWith('confirmed');
     });
 
     it('should handle errors when fetching sessions fails', async () => {
@@ -257,15 +284,22 @@ describe('useSessions Hooks', () => {
         id: 1,
         tarotistaId: 1,
         userId: 100,
-        date: '2025-12-15',
-        time: '09:00',
-        duration: 30,
-        status: 'CONFIRMED',
-        meetLink: 'https://meet.example.com/abc',
-        tarotistaNombre: 'Luna Mística',
-        tarotistaFoto: 'https://example.com/photo.jpg',
+        sessionDate: '2025-12-15',
+        sessionTime: '09:00',
+        durationMinutes: 30,
+        sessionType: 'TAROT_READING',
+        status: 'confirmed',
+        priceUsd: 50,
+        paymentStatus: 'PAID',
+        googleMeetLink: 'https://meet.google.com/abc-defg-hij',
+        userEmail: 'user@example.com',
         createdAt: '2025-12-10T10:00:00Z',
         updatedAt: '2025-12-11T14:30:00Z',
+        tarotista: {
+          id: 1,
+          nombre: 'Luna Mística',
+          foto: 'https://example.com/photo.jpg',
+        },
       };
 
       vi.mocked(sessionsApi.getSessionDetail).mockResolvedValue(mockDetail);
@@ -278,7 +312,7 @@ describe('useSessions Hooks', () => {
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
       expect(result.current.data).toEqual(mockDetail);
-      expect(result.current.data?.tarotistaNombre).toBe('Luna Mística');
+      expect(result.current.data?.tarotista?.nombre).toBe('Luna Mística');
       expect(sessionsApi.getSessionDetail).toHaveBeenCalledWith(1);
     });
 
@@ -319,14 +353,15 @@ describe('useSessions Hooks', () => {
         wrapper: createWrapper(queryClient),
       });
 
-      result.current.mutate(1);
+      result.current.mutate({ id: 1, reason: 'No podré asistir' });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
       expect(sessionsApi.cancelSession).toHaveBeenCalled();
-      // Verify the first argument (id) of the mutation
+      // Verify the arguments of the mutation
       const callArgs = vi.mocked(sessionsApi.cancelSession).mock.calls[0];
       expect(callArgs[0]).toBe(1);
+      expect(callArgs[1]).toEqual({ reason: 'No podré asistir' });
     });
 
     it('should handle errors when cancellation fails', async () => {
@@ -337,7 +372,7 @@ describe('useSessions Hooks', () => {
         wrapper: createWrapper(queryClient),
       });
 
-      result.current.mutate(1);
+      result.current.mutate({ id: 1, reason: 'Cancelación' });
 
       await waitFor(() => expect(result.current.isError).toBe(true));
 
@@ -354,7 +389,7 @@ describe('useSessions Hooks', () => {
         wrapper: createWrapper(queryClient),
       });
 
-      result.current.mutate(1);
+      result.current.mutate({ id: 1, reason: 'Cancelación' });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
 

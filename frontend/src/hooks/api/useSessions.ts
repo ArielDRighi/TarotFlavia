@@ -26,8 +26,12 @@ export const sessionQueryKeys = {
   details: () => [...sessionQueryKeys.all, 'detail'] as const,
   detail: (id: number) => [...sessionQueryKeys.details(), id] as const,
   slots: () => [...sessionQueryKeys.all, 'slots'] as const,
-  availableSlots: (tarotistaId: number, date: string) =>
-    [...sessionQueryKeys.slots(), tarotistaId, date] as const,
+  availableSlots: (
+    tarotistaId: number,
+    startDate: string,
+    endDate: string,
+    durationMinutes: number
+  ) => [...sessionQueryKeys.slots(), tarotistaId, startDate, endDate, durationMinutes] as const,
 } as const;
 
 // ============================================================================
@@ -35,16 +39,23 @@ export const sessionQueryKeys = {
 // ============================================================================
 
 /**
- * Hook to fetch available time slots for a tarotista on a specific date
+ * Hook to fetch available time slots for a tarotista in a date range
  * @param tarotistaId - Tarotista ID (numeric)
- * @param date - Date in YYYY-MM-DD format
+ * @param startDate - Start date in YYYY-MM-DD format
+ * @param endDate - End date in YYYY-MM-DD format
+ * @param durationMinutes - Duration in minutes (30, 60, or 90)
  * @returns TanStack Query result with available slots
  */
-export function useAvailableSlots(tarotistaId: number, date: string) {
+export function useAvailableSlots(
+  tarotistaId: number,
+  startDate: string,
+  endDate: string,
+  durationMinutes: number
+) {
   return useQuery({
-    queryKey: sessionQueryKeys.availableSlots(tarotistaId, date),
-    queryFn: () => getAvailableSlots(tarotistaId, date),
-    enabled: tarotistaId > 0 && date.length > 0, // Only fetch if valid params
+    queryKey: sessionQueryKeys.availableSlots(tarotistaId, startDate, endDate, durationMinutes),
+    queryFn: () => getAvailableSlots(tarotistaId, startDate, endDate, durationMinutes),
+    enabled: tarotistaId > 0 && startDate.length > 0 && endDate.length > 0 && durationMinutes > 0,
     staleTime: 2 * 60 * 1000, // 2 minutes - slots change frequently
   });
 }
@@ -65,6 +76,8 @@ export function useBookSession() {
     onSuccess: () => {
       // Invalidate sessions list to refetch after booking
       queryClient.invalidateQueries({ queryKey: sessionQueryKeys.lists() });
+      // Invalidate available slots queries to update slot availability after booking
+      queryClient.invalidateQueries({ queryKey: sessionQueryKeys.slots() });
     },
   });
 }
@@ -116,11 +129,13 @@ export function useCancelSession() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: cancelSession,
+    mutationFn: ({ id, reason }: { id: number; reason: string }) => cancelSession(id, { reason }),
     onSuccess: () => {
       // Invalidate sessions queries to refetch after cancellation
       queryClient.invalidateQueries({ queryKey: sessionQueryKeys.lists() });
       queryClient.invalidateQueries({ queryKey: sessionQueryKeys.details() });
+      // Invalidate available slots queries since cancelling makes slot available again
+      queryClient.invalidateQueries({ queryKey: sessionQueryKeys.slots() });
     },
   });
 }

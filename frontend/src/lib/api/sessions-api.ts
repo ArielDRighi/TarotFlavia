@@ -6,23 +6,30 @@
  */
 import { apiClient } from './axios-config';
 import { API_ENDPOINTS } from './endpoints';
-import type { TimeSlot, Session, SessionDetail, BookSessionDto } from '@/types';
+import type { TimeSlot, Session, SessionDetail, BookSessionDto, CancelSessionDto } from '@/types';
 
 // ============================================================================
 // Available Slots
 // ============================================================================
 
 /**
- * Fetch available time slots for a tarotista on a specific date
+ * Fetch available time slots for a tarotista in a date range
  * @param tarotistaId - Tarotista ID (numeric)
- * @param date - Date in YYYY-MM-DD format
+ * @param startDate - Start date in YYYY-MM-DD format
+ * @param endDate - End date in YYYY-MM-DD format
+ * @param durationMinutes - Duration in minutes (30, 60, or 90)
  * @returns Promise<TimeSlot[]> Array of time slots with availability
  * @throws Error with clear message on failure
  */
-export async function getAvailableSlots(tarotistaId: number, date: string): Promise<TimeSlot[]> {
+export async function getAvailableSlots(
+  tarotistaId: number,
+  startDate: string,
+  endDate: string,
+  durationMinutes: number
+): Promise<TimeSlot[]> {
   try {
     const response = await apiClient.get<TimeSlot[]>(API_ENDPOINTS.SCHEDULING.AVAILABLE_SLOTS, {
-      params: { tarotistaId, date },
+      params: { tarotistaId, startDate, endDate, durationMinutes },
     });
     return response.data;
   } catch {
@@ -112,12 +119,13 @@ export async function getSessionDetail(id: number): Promise<SessionDetail> {
 /**
  * Cancel a session
  * @param id - Session ID (numeric)
+ * @param data - Cancellation data with reason
  * @returns Promise<void>
- * @throws Error with clear message on failure
+ * @throws {Error} Session not found (404) or cancellation error
  */
-export async function cancelSession(id: number): Promise<void> {
+export async function cancelSession(id: number, data: CancelSessionDto): Promise<void> {
   try {
-    await apiClient.post(API_ENDPOINTS.SCHEDULING.CANCEL_SESSION(id));
+    await apiClient.post(API_ENDPOINTS.SCHEDULING.CANCEL_SESSION(id), data);
   } catch (error: unknown) {
     // Handle 404 specifically for non-existent sessions
     if (error && typeof error === 'object' && 'response' in error) {

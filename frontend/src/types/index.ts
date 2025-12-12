@@ -64,7 +64,11 @@ export type {
 export type {
   TimeSlot,
   SessionStatus,
+  SessionType,
+  PaymentStatus,
   Session,
   SessionDetail,
+  TarotistaSummary,
   BookSessionDto,
+  CancelSessionDto,
 } from './session.types';

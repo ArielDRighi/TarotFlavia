@@ -2573,11 +2573,19 @@ Crear funciones API para gestión de sesiones.
 **Decisiones técnicas:**
 
 1. Se usó el patrón establecido de endpoints centralizados en `API_ENDPOINTS.SCHEDULING`
-2. Los IDs son numéricos (coincide con backend)
-3. Se maneja específicamente error 409 (Conflict) para slots ya reservados
-4. Se maneja específicamente error 404 para sesiones no encontradas
-5. Los hooks invalidan queries apropiadamente después de mutaciones (booking y cancellation)
-6. Query keys organizados con patrón jerárquico para mejor cache management
+2. **CONTRATO BACKEND CORREGIDO:** Todos los campos, enums y parámetros coinciden exactamente con el backend
+   - Campos de Session: `sessionDate`, `sessionTime`, `durationMinutes`, `sessionType`, `googleMeetLink`, `priceUsd`, `paymentStatus`, `userEmail`
+   - SessionStatus lowercase: `'pending' | 'confirmed' | 'completed' | 'cancelled_by_user' | 'cancelled_by_tarotist'`
+   - getAvailableSlots requiere 4 parámetros: `(tarotistaId, startDate, endDate, durationMinutes)`
+   - cancelSession requiere body: `(id, { reason })`
+3. Los IDs son numéricos (coincide con backend)
+4. Se maneja específicamente error 409 (Conflict) para slots ya reservados
+5. Se maneja específicamente error 404 para sesiones no encontradas
+6. Los hooks invalidan queries apropiadamente después de mutaciones:
+   - `useBookSession`: invalida `lists()` y `slots()`
+   - `useCancelSession`: invalida `lists()`, `details()` y `slots()`
+7. Query keys organizados con patrón jerárquico para mejor cache management
+8. Tests completos (29 tests) verifican contrato correcto del backend - 100% coverage
 
 **Prompt:**
 
