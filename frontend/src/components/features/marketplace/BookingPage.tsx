@@ -7,7 +7,10 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { useTarotistaDetail } from '@/hooks/api/useTarotistas';
 import { useBookSession } from '@/hooks/api/useSessions';
 import { BookingCalendar } from './BookingCalendar';
@@ -143,12 +146,14 @@ export function BookingPage({ tarotistaId }: BookingPageProps) {
       <Breadcrumb className="mb-6">
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink href="/explorar">Explorar</BreadcrumbLink>
+            <BreadcrumbLink asChild>
+              <Link href="/explorar">Explorar</Link>
+            </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink href={`/tarotistas/${tarotistaId}`}>
-              {tarotista.nombrePublico}
+            <BreadcrumbLink asChild>
+              <Link href={`/tarotistas/${tarotistaId}`}>{tarotista.nombrePublico}</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
@@ -216,11 +221,8 @@ export function BookingPage({ tarotistaId }: BookingPageProps) {
                 <div>
                   <p className="font-medium">Fecha y hora</p>
                   <p className="text-sm text-gray-600">
-                    {new Date(confirmationData.sessionDate).toLocaleDateString('es-ES', {
-                      weekday: 'long',
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
+                    {format(new Date(confirmationData.sessionDate), "EEEE d 'de' MMMM 'de' yyyy", {
+                      locale: es,
                     })}
                     {' a las '}
                     {confirmationData.sessionTime}

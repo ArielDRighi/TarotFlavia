@@ -12,6 +12,14 @@ vi.mock('next/navigation', () => ({
   }),
 }));
 
+// Mock sonner toast
+vi.mock('sonner', () => ({
+  toast: {
+    success: vi.fn(),
+    error: vi.fn(),
+  },
+}));
+
 // Mock useTarotistaDetail
 vi.mock('@/hooks/api/useTarotistas');
 
@@ -154,10 +162,19 @@ describe('BookingPage', () => {
     const mockMutate = vi.fn((data, callbacks) => {
       callbacks?.onSuccess({
         id: 1,
+        tarotistaId: 1,
+        userId: 42,
+        sessionType: 'TAROT_READING',
+        status: 'CONFIRMED',
+        priceUsd: 50,
+        paymentStatus: 'PAID',
+        userEmail: 'user@example.com',
         sessionDate: '2025-12-20',
         sessionTime: '10:00',
         durationMinutes: 60,
         googleMeetLink: 'https://meet.google.com/abc-def-ghi',
+        createdAt: '2025-12-01T10:00:00.000Z',
+        updatedAt: '2025-12-01T10:00:00.000Z',
       });
     });
 
