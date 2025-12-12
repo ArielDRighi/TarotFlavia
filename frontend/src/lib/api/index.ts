@@ -18,3 +18,10 @@ export {
   restoreReading,
 } from './readings-api';
 export { getTarotistas, getTarotistaById } from './tarotistas-api';
+export {
+  getAvailableSlots,
+  bookSession,
+  getMySessions,
+  getSessionDetail,
+  cancelSession,
+} from './sessions-api';

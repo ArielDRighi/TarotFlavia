@@ -59,3 +59,12 @@ export type {
   PaginatedTarotistas,
   BookingSlot,
 } from './tarotista.types';
+
+// Session Types
+export type {
+  TimeSlot,
+  SessionStatus,
+  Session,
+  SessionDetail,
+  BookSessionDto,
+} from './session.types';
