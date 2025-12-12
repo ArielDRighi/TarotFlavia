@@ -67,10 +67,12 @@ export const API_ENDPOINTS = {
     REVIEWS: (id: number) => `/tarotistas/${id}/reviews`,
   },
 
-  // Sessions (Live readings)
-  SESSIONS: {
-    BASE: '/sessions',
-    BY_ID: (id: string) => `/sessions/${id}`,
-    BOOK: '/sessions/book',
+  // Scheduling (Sessions)
+  SCHEDULING: {
+    AVAILABLE_SLOTS: '/scheduling/available-slots',
+    BOOK: '/scheduling/book',
+    MY_SESSIONS: '/scheduling/my-sessions',
+    SESSION_DETAIL: (id: number) => `/scheduling/my-sessions/${id}`,
+    CANCEL_SESSION: (id: number) => `/scheduling/my-sessions/${id}/cancel`,
   },
 } as const;

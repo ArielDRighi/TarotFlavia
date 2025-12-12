@@ -31,6 +31,10 @@ vi.mock('@/hooks/api/useUser', () => ({
     mutate: vi.fn(),
     isPending: false,
   })),
+  useUpdatePassword: vi.fn(() => ({
+    mutate: vi.fn(),
+    isPending: false,
+  })),
   useDeleteAccount: vi.fn(() => ({
     mutate: vi.fn(),
     isPending: false,
@@ -63,8 +67,30 @@ const createWrapper = () => {
 };
 
 describe('PerfilPage', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+
+    // Reset mocks to default state
+    const { useRequireAuth } = await import('@/hooks/useRequireAuth');
+    const { useProfile } = await import('@/hooks/api/useUser');
+
+    (useRequireAuth as ReturnType<typeof vi.fn>).mockReturnValue({ isLoading: false });
+    (useProfile as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: {
+        id: 1,
+        email: 'test@example.com',
+        name: 'Test User',
+        roles: ['consumer'],
+        plan: 'free',
+        dailyReadingsCount: 2,
+        dailyReadingsLimit: 5,
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-01T00:00:00Z',
+        profilePicture: undefined,
+        lastLogin: null,
+      },
+      isLoading: false,
+    });
   });
 
   describe('Rendering', () => {
@@ -96,11 +122,11 @@ describe('PerfilPage', () => {
         isLoading: true,
       });
 
-      render(<PerfilPage />, { wrapper: createWrapper() });
+      const { container } = render(<PerfilPage />, { wrapper: createWrapper() });
 
-      // Should show skeleton loader (using aria-busy or loading indicators)
-      const container = screen.getByRole('main');
-      expect(container).toBeInTheDocument();
+      // Should show skeleton loaders
+      const skeletons = container.querySelectorAll('[data-slot="skeleton"]');
+      expect(skeletons.length).toBeGreaterThan(0);
     });
 
     it('should show loading skeleton when profile is loading', async () => {
@@ -110,11 +136,11 @@ describe('PerfilPage', () => {
         isLoading: true,
       });
 
-      render(<PerfilPage />, { wrapper: createWrapper() });
+      const { container } = render(<PerfilPage />, { wrapper: createWrapper() });
 
-      // Should show loading state
-      const container = screen.getByRole('main');
-      expect(container).toBeInTheDocument();
+      // Should show skeleton loaders
+      const skeletons = container.querySelectorAll('[data-slot="skeleton"]');
+      expect(skeletons.length).toBeGreaterThan(0);
     });
   });
 
@@ -160,8 +186,14 @@ describe('PerfilPage', () => {
     it('should switch to subscription tab when clicked', async () => {
       const userEvent = (await import('@testing-library/user-event')).default;
       const user = userEvent.setup();
+      const { waitFor } = await import('@testing-library/react');
 
       render(<PerfilPage />, { wrapper: createWrapper() });
+
+      // Wait for profile to load and render
+      await waitFor(() => {
+        expect(screen.getByRole('tab', { name: /cuenta/i })).toBeInTheDocument();
+      });
 
       const subscriptionTab = screen.getByRole('tab', { name: /suscripción/i });
       await user.click(subscriptionTab);
@@ -174,8 +206,14 @@ describe('PerfilPage', () => {
     it('should switch to settings tab when clicked', async () => {
       const userEvent = (await import('@testing-library/user-event')).default;
       const user = userEvent.setup();
+      const { waitFor } = await import('@testing-library/react');
 
       render(<PerfilPage />, { wrapper: createWrapper() });
+
+      // Wait for profile to load and render
+      await waitFor(() => {
+        expect(screen.getByRole('tab', { name: /cuenta/i })).toBeInTheDocument();
+      });
 
       const settingsTab = screen.getByRole('tab', { name: /ajustes/i });
       await user.click(settingsTab);
@@ -189,8 +227,14 @@ describe('PerfilPage', () => {
     it('should switch back to account tab when clicked', async () => {
       const userEvent = (await import('@testing-library/user-event')).default;
       const user = userEvent.setup();
+      const { waitFor } = await import('@testing-library/react');
 
       render(<PerfilPage />, { wrapper: createWrapper() });
+
+      // Wait for profile to load and render
+      await waitFor(() => {
+        expect(screen.getByRole('tab', { name: /cuenta/i })).toBeInTheDocument();
+      });
 
       // Go to subscription tab
       const subscriptionTab = screen.getByRole('tab', { name: /suscripción/i });
