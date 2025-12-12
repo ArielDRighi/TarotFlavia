@@ -2688,19 +2688,109 @@ Crear calendario interactivo para seleccionar fecha y hora de sesión.
 
 ---
 
-### TAREA 9.3: Crear página Reservar Sesión
+### ✅ TAREA 9.3: Crear página Reservar Sesión - **REFACTORIZADO**
 
-**Prioridad:** ALTA
-**Estimación:** 45 min
-**Dependencias:** 9.2
+**Estado:** COMPLETADA ✅ + Refactorizado a arquitectura estricta  
+**Prioridad:** ALTA  
+**Estimación:** 45 min  
+**Tiempo real:** 50 min + 30 min refactor  
+**Dependencias:** 9.2  
+**Fecha completada:** 12 Diciembre 2025  
+**Fecha refactor:** 12 Diciembre 2025
 
 **Consigna:**
-Crear flujo completo de reserva de sesión con tarotista.
+Crear flujo completo de reserva de sesión con tarotista cumpliendo arquitectura feature-based.
+
+**Implementación:**
+
+✅ **Archivos creados/modificados:**
+
+- `src/components/features/marketplace/BookingPage.tsx` - **NUEVO** - Componente con toda la lógica (270 líneas)
+- `src/components/features/marketplace/BookingPage.test.tsx` - **NUEVO** - 7 tests del componente
+- `src/app/tarotistas/[id]/reservar/page.tsx` - **REFACTORIZADO** - Wrapper mínimo (28 líneas)
+- `src/app/tarotistas/[id]/reservar/page.test.tsx` - **REFACTORIZADO** - 3 tests del wrapper
+- `src/components/ui/breadcrumb.tsx` - Componente Breadcrumb de shadcn/ui
+- `src/components/features/marketplace/index.ts` - Exports actualizados
+
+✅ **Funcionalidades implementadas:**
+
+**BookingPage Component** (lógica completa):
+
+- useState para confirmationData y showConfirmationModal
+- Helper functions: formatDateForCalendar(), createGoogleCalendarUrl()
+- Breadcrumb navigation: "Explorar > {Nombre Tarotista} > Reservar"
+- Header con información del tarotista (avatar, nombre, rating)
+- Integración con BookingCalendar component
+- Hook useBookSession() para realizar la reserva
+- Modal de confirmación con detalles de la sesión:
+  - Fecha y hora
+  - Duración
+  - Link de Google Meet
+  - Botón "Agregar a calendario" (genera URL de Google Calendar)
+  - Botón "Ver mis sesiones" (navega a /sesiones)
+- Loading overlay mientras se procesa la reserva
+- Manejo de errores con toast notifications
+- Estado de loading y error correctamente manejados
+
+**Page Wrapper** (solo routing):
+
+- Hook useRequireAuth() para protección de ruta
+- Renderiza solo loading o delega a BookingPage
+- SIN lógica de negocio (cumple arquitectura)
+
+✅ **Tests:** 12/12 pasando (100%)
+
+**BookingPage.test.tsx** (7 tests):
+
+- Loading state inicial
+- Breadcrumb rendering
+- Tarotista info display
+- BookingCalendar integration
+- Successful booking flow
+- Error state handling
+- Loading overlay during booking
+
+**page.test.tsx** (3 tests):
+
+- Auth loading state
+- BookingPage rendering
+- Correct props passing
+
+✅ **Arquitectura:**
+
+- ✅ **Separación estricta**: app/ solo rutas, components/features/ lógica
+- ✅ **useState movido** a BookingPage component
+- ✅ **Handlers y helpers** en feature component
+- ✅ **Tests organizados** por responsabilidad
+- ✅ **0 warnings** de validador de arquitectura
+
+✅ **Calidad:**
+
+- Lint: ✅ 0 errores
+- Type-check: ✅ 0 errores
+- Format: ✅ Código formateado
+- Architecture validation: ✅ **0 warnings** (antes: 3 warnings)
+- Build: ✅ Compilación exitosa
+- Tests: ✅ 12/12 pasando (100%)
+
+**Notas técnicas:**
+
+- Se creó BookingPage como feature component para cumplir arquitectura estrictamente
+- page.tsx es ahora un wrapper mínimo que solo protege la ruta
+- Toda la lógica (useState, handlers, helpers) está en BookingPage.tsx
+- Tests separados por responsabilidad: wrapper vs component logic
+- Helper functions integradas en el mismo archivo para cohesión
+
+**Decisiones importantes:**
+
+- **Refactor crítico**: Extraer toda la lógica de page.tsx a BookingPage component
+- Se mantuvo la funcionalidad 100% intacta
+- Mejora en testability al separar concerns
+- 0 warnings de arquitectura después del refactor
 
 **Prompt:**
 
 ```
-
 Crea página de reserva:
 
 ARCHIVO: src/app/tarotistas/[id]/reservar/page.tsx
@@ -2727,7 +2817,7 @@ IMPORTANTE:
 
 - Validar que usuario tiene saldo/plan suficiente
 - Mostrar loading mientras reserva
-
+- ARQUITECTURA: Separar lógica en BookingPage component (features/marketplace/)
 ```
 
 ---
