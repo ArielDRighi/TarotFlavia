@@ -2688,14 +2688,71 @@ Crear calendario interactivo para seleccionar fecha y hora de sesión.
 
 ---
 
-### TAREA 9.3: Crear página Reservar Sesión
+### ✅ TAREA 9.3: Crear página Reservar Sesión
 
-**Prioridad:** ALTA
-**Estimación:** 45 min
-**Dependencias:** 9.2
+**Estado:** COMPLETADA ✅  
+**Prioridad:** ALTA  
+**Estimación:** 45 min  
+**Tiempo real:** 50 min  
+**Dependencias:** 9.2  
+**Fecha completada:** 12 Diciembre 2025
 
 **Consigna:**
 Crear flujo completo de reserva de sesión con tarotista.
+
+**Implementación:**
+
+✅ **Archivos creados:**
+- `src/app/tarotistas/[id]/reservar/page.tsx` - Página de reserva con breadcrumb, info del tarotista y BookingCalendar
+- `src/app/tarotistas/[id]/reservar/page.test.tsx` - 9 tests con 100% de aprobación
+- `src/components/ui/breadcrumb.tsx` - Componente Breadcrumb de shadcn/ui
+
+✅ **Funcionalidades implementadas:**
+- Breadcrumb navigation: "Explorar > {Nombre Tarotista} > Reservar"
+- Header con información del tarotista (avatar, nombre, rating)
+- Integración con BookingCalendar component
+- Hook useRequireAuth() para protección de ruta
+- Hook useBookSession() para realizar la reserva
+- Modal de confirmación con detalles de la sesión:
+  - Fecha y hora
+  - Duración
+  - Link de Google Meet
+  - Botón "Agregar a calendario" (genera URL de Google Calendar)
+  - Botón "Ver mis sesiones" (navega a /sesiones)
+- Loading overlay mientras se procesa la reserva
+- Manejo de errores con toast notifications
+- Estado de loading y error correctamente manejados
+
+✅ **Tests:** 9/9 pasando
+- Loading state (auth y tarotista)
+- Breadcrumb navigation
+- Tarotista info display
+- BookingCalendar rendering
+- Successful booking flow
+- Error state handling
+- Protected route verification
+- Loading overlay during booking
+- Navigation on error
+
+✅ **Calidad:**
+- Lint: ✅ Sin errores
+- Type-check: ✅ Sin errores
+- Format: ✅ Código formateado
+- Architecture validation: ✅ Arquitectura válida
+- Build: ✅ Compilación exitosa
+- Coverage: 43.24% (líneas críticas cubiertas)
+
+**Notas técnicas:**
+- Se creó el componente Breadcrumb reutilizable siguiendo el patrón de shadcn/ui
+- Se utilizaron helper functions `formatDateForCalendar` y `createGoogleCalendarUrl` para mantener el código limpio
+- La integración con Google Calendar permite a los usuarios agregar la sesión reservada a su calendario
+- El modal de confirmación muestra todos los detalles importantes de la reserva
+- La validación de saldo/plan se debe implementar en el backend (fuera del alcance del frontend)
+
+**Decisiones importantes:**
+- Se extrajo la lógica de generación de URL de Google Calendar a función helper para mejor testability
+- El breadcrumb se implementó como componente reutilizable en lugar de inline
+- Se utilizó Dialog de shadcn/ui para el modal de confirmación en lugar de crear uno custom
 
 **Prompt:**
 
