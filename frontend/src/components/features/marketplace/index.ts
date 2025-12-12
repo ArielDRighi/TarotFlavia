@@ -8,6 +8,8 @@ export { TarotistaCard } from './TarotistaCard';
 export type { TarotistaCardProps } from './TarotistaCard';
 
 export { TarotistasExplorer } from './TarotistasExplorer';
+
+export { BookingCalendar } from './BookingCalendar';
 export type { TarotistasExplorerProps } from './TarotistasExplorer';
 
 export { TarotistaProfilePage } from './TarotistaProfilePage';
