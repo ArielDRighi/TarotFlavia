@@ -2703,11 +2703,13 @@ Crear flujo completo de reserva de sesión con tarotista.
 **Implementación:**
 
 ✅ **Archivos creados:**
+
 - `src/app/tarotistas/[id]/reservar/page.tsx` - Página de reserva con breadcrumb, info del tarotista y BookingCalendar
 - `src/app/tarotistas/[id]/reservar/page.test.tsx` - 9 tests con 100% de aprobación
 - `src/components/ui/breadcrumb.tsx` - Componente Breadcrumb de shadcn/ui
 
 ✅ **Funcionalidades implementadas:**
+
 - Breadcrumb navigation: "Explorar > {Nombre Tarotista} > Reservar"
 - Header con información del tarotista (avatar, nombre, rating)
 - Integración con BookingCalendar component
@@ -2724,6 +2726,7 @@ Crear flujo completo de reserva de sesión con tarotista.
 - Estado de loading y error correctamente manejados
 
 ✅ **Tests:** 9/9 pasando
+
 - Loading state (auth y tarotista)
 - Breadcrumb navigation
 - Tarotista info display
@@ -2735,6 +2738,7 @@ Crear flujo completo de reserva de sesión con tarotista.
 - Navigation on error
 
 ✅ **Calidad:**
+
 - Lint: ✅ Sin errores
 - Type-check: ✅ Sin errores
 - Format: ✅ Código formateado
@@ -2743,6 +2747,7 @@ Crear flujo completo de reserva de sesión con tarotista.
 - Coverage: 43.24% (líneas críticas cubiertas)
 
 **Notas técnicas:**
+
 - Se creó el componente Breadcrumb reutilizable siguiendo el patrón de shadcn/ui
 - Se utilizaron helper functions `formatDateForCalendar` y `createGoogleCalendarUrl` para mantener el código limpio
 - La integración con Google Calendar permite a los usuarios agregar la sesión reservada a su calendario
@@ -2750,6 +2755,7 @@ Crear flujo completo de reserva de sesión con tarotista.
 - La validación de saldo/plan se debe implementar en el backend (fuera del alcance del frontend)
 
 **Decisiones importantes:**
+
 - Se extrajo la lógica de generación de URL de Google Calendar a función helper para mejor testability
 - El breadcrumb se implementó como componente reutilizable en lugar de inline
 - Se utilizó Dialog de shadcn/ui para el modal de confirmación en lugar de crear uno custom
