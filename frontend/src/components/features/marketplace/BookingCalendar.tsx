@@ -145,7 +145,11 @@ export function BookingCalendar({ tarotistaId, onBook }: BookingCalendarProps) {
       {/* Duration Selector */}
       <div>
         <h3 className="mb-3 font-serif text-lg font-medium">Duración</h3>
-        <RadioGroup value={String(selectedDuration)} onValueChange={handleDurationChange}>
+        <RadioGroup
+          value={String(selectedDuration)}
+          onValueChange={handleDurationChange}
+          aria-label="Duración de la sesión"
+        >
           <div className="space-y-2">
             {DURATIONS.map((duration) => (
               <div key={duration.value} className="flex items-center space-x-2">
@@ -169,7 +173,9 @@ export function BookingCalendar({ tarotistaId, onBook }: BookingCalendarProps) {
             <div>
               <p className="text-sm font-medium text-gray-500">Fecha seleccionada</p>
               <p className="font-serif text-base">
-                {format(new Date(selectedDate), "EEEE, d 'de' MMMM yyyy", { locale: es })}
+                {selectedDate && !isNaN(new Date(selectedDate).getTime())
+                  ? format(new Date(selectedDate), "EEEE, d 'de' MMMM yyyy", { locale: es })
+                  : 'Fecha inválida'}
               </p>
             </div>
             <div>

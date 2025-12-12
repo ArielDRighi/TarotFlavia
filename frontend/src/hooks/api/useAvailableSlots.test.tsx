@@ -78,6 +78,14 @@ describe('useAvailableSlots', () => {
     expect(schedulingApi.getAvailableSlots).not.toHaveBeenCalled();
   });
 
+  it('should not fetch when date format is invalid', () => {
+    const { result } = renderHook(() => useAvailableSlots(1, 'invalid-date'), { wrapper });
+
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.fetchStatus).toBe('idle');
+    expect(schedulingApi.getAvailableSlots).not.toHaveBeenCalled();
+  });
+
   it('should handle API errors gracefully', async () => {
     const mockError = new Error('Failed to fetch slots');
     vi.mocked(schedulingApi.getAvailableSlots).mockRejectedValue(mockError);

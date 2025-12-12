@@ -2673,8 +2673,8 @@ Crear calendario interactivo para seleccionar fecha y hora de sesión.
 
 **Dependencias Instaladas:**
 
-- `@radix-ui/react-radio-group@^1.2.2`
-- `@radix-ui/react-label@^2.1.3`
+- `@radix-ui/react-radio-group@^1.3.8`
+- `@radix-ui/react-label@^2.1.8`
 - `date-fns` (ya estaba instalado)
 
 **Validaciones Pasadas:**

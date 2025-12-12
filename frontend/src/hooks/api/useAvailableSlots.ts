@@ -32,7 +32,7 @@ export function useAvailableSlots(tarotistaId: number, date: string) {
   return useQuery({
     queryKey: availableSlotsQueryKeys.byTarotista(tarotistaId, date),
     queryFn: () => getAvailableSlots({ tarotistaId, date }),
-    enabled: tarotistaId > 0 && date.length > 0, // Only fetch if valid params
+    enabled: tarotistaId > 0 && /^\d{4}-\d{2}-\d{2}$/.test(date), // Only fetch if valid params and format
     staleTime: 1 * 60 * 1000, // 1 minute - slots can change frequently
   });
 }
