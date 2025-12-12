@@ -2628,73 +2628,63 @@ HOOKS:
 
 ---
 
-### TAREA 9.2: Crear componente Calendario de Reservas
+### ✅ TAREA 9.2: Crear componente Calendario de Reservas (COMPLETADA)
 
 **Prioridad:** ALTA
 **Estimación:** 70 min
 **Dependencias:** 9.1
+**Estado:** ✅ COMPLETADA - 12 Diciembre 2025
+**Branch:** `feature/TASK-9.2-booking-calendar`
 
 **Consigna:**
 Crear calendario interactivo para seleccionar fecha y hora de sesión.
 
-**Prompt:**
+**Implementación Completada:**
 
-```
+**Archivos Creados:**
 
-Crea componente BookingCalendar:
+1. `src/components/features/marketplace/BookingCalendar.tsx` - Componente principal con:
+   - Selector de fechas (próximos 30 días) con scroll horizontal
+   - Selector de horarios con estado (disponible/ocupado/seleccionado)
+   - Selector de duración (30/60/90 min) con precios
+   - Resumen sticky con confirmación
 
-ARCHIVO: src/components/features/booking-calendar.tsx
+2. `src/components/features/marketplace/BookingCalendar.test.tsx` - Tests completos (11 tests, 100% passing)
 
-PROPS:
+3. `src/hooks/api/useAvailableSlots.ts` - Hook de React Query para obtener slots disponibles
 
-- tarotistaId: number
-- onBook: (date: string, time: string, duration: number) => void
+4. `src/hooks/api/useAvailableSlots.test.tsx` - Tests del hook (7 tests, 100% passing)
 
-ESTRUCTURA:
+5. `src/lib/api/scheduling-api.ts` - Wrapper de sessions-api con función de conveniencia
 
-SELECTOR DE FECHA:
+6. `src/components/ui/label.tsx` - Componente UI de Radix (nuevo)
 
-- Scroll horizontal de días (próximos 30 días)
-- Cada día como chip/píldora:
-  - Formato: "Lun 2"
-  - Día seleccionado: bg-secondary (dorado), texto blanco
-  - Día sin disponibilidad: gris claro, no clicable
-  - Día con disponibilidad: outline clickable
+7. `src/components/ui/radio-group.tsx` - Componente UI de Radix (nuevo)
 
-SELECTOR DE HORA:
+**Características Implementadas:**
 
-- Al seleccionar día, mostrar slots disponibles abajo
-- Chips de horarios: "09:00", "10:00", etc.
-- Slot disponible: outline clickable
-- Slot ocupado: gris, disabled
-- Slot seleccionado: bg-primary
+- ✅ Selector de fechas con formato localizado (español)
+- ✅ Estados visuales correctos (bg-secondary para fecha seleccionada, bg-primary para hora)
+- ✅ Validación de campos completos antes de habilitar botón
+- ✅ Loading states y error handling
+- ✅ Responsive design
+- ✅ Integración con React Query
+- ✅ Coverage: 96.55%
 
-SELECTOR DE DURACIÓN:
+**Dependencias Instaladas:**
 
-- Radio buttons: 30 min, 60 min, 90 min
-- Mostrar precio por duración
+- `@radix-ui/react-radio-group@^1.3.8`
+- `@radix-ui/react-label@^2.1.8`
+- `date-fns` (ya estaba instalado)
 
-RESUMEN:
+**Validaciones Pasadas:**
 
-- Card sticky/fixed mostrando:
-  - Fecha seleccionada
-  - Hora seleccionada
-  - Duración
-  - Precio total
-- Botón: "Confirmar y Reservar"
-
-OBTENER DATOS:
-
-- useAvailableSlots(tarotistaId, selectedDate)
-- Recargar slots cuando cambia fecha
-
-IMPORTANTE:
-
-- Validar que usuario seleccionó fecha, hora y duración
-- Deshabilitar botón si falta algo
-- Responsive: en mobile, lista vertical
-
-```
+- ✅ Lint: Sin errores
+- ✅ Type-check: Sin errores
+- ✅ Tests: 11/11 passing
+- ✅ Coverage: 96.55%
+- ✅ Build: Exitoso
+- ✅ Arquitectura: Validada
 
 ---
 
