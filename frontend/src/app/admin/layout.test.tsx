@@ -214,11 +214,65 @@ describe('AdminLayout', () => {
 
       const menuButton = screen.getByRole('button', { name: /toggle.*menu/i });
 
+      // Inicialmente el drawer no debe estar visible
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
       // Click to open
       await user.click(menuButton);
 
-      // Verificar que se abre (el sidebar debe ser visible)
-      // Nota: esto depende de la implementación específica del drawer/sheet
+      // Verificar que el drawer se abre
+      const drawer = screen.getByRole('dialog', { name: /navigation menu/i });
+      expect(drawer).toBeInTheDocument();
+
+      // Click en el botón de cerrar dentro del drawer
+      const closeButton = screen.getByRole('button', { name: /close menu/i });
+      await user.click(closeButton);
+
+      // Verificar que el drawer se cierra
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it('should close drawer when clicking backdrop', async () => {
+      const user = userEvent.setup();
+      render(
+        <AdminLayout>
+          <div>Content</div>
+        </AdminLayout>
+      );
+
+      const menuButton = screen.getByRole('button', { name: /toggle.*menu/i });
+
+      // Abrir drawer
+      await user.click(menuButton);
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+      // Click en el backdrop (presentation role)
+      const backdrop = screen.getByRole('presentation');
+      await user.click(backdrop);
+
+      // Verificar que se cierra
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it('should close drawer when pressing Escape key', async () => {
+      const user = userEvent.setup();
+      render(
+        <AdminLayout>
+          <div>Content</div>
+        </AdminLayout>
+      );
+
+      const menuButton = screen.getByRole('button', { name: /toggle.*menu/i });
+
+      // Abrir drawer
+      await user.click(menuButton);
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+      // Presionar Escape
+      await user.keyboard('{Escape}');
+
+      // Verificar que se cierra
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
 
     it('should have responsive sidebar classes', () => {
@@ -275,7 +329,7 @@ describe('AdminLayout', () => {
 
       const main = container.querySelector('main');
       expect(main).toBeInTheDocument();
-      expect(main).toHaveClass('bg-main');
+      expect(main).toHaveClass('bg-bg-main');
     });
 
     it('should have sidebar on the left and content on the right', () => {

@@ -32,6 +32,18 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
+    // Cerrar drawer con tecla Escape
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isMobileMenuOpen) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isMobileMenuOpen]);
+
+  useEffect(() => {
     // Guard: Verificar que el usuario sea admin
     if (!isAuthenticated || !user || !user.roles.includes('admin')) {
       router.push('/perfil');
@@ -92,8 +104,18 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
         {/* Mobile Menu Drawer */}
         {isMobileMenuOpen && (
-          <div className="bg-opacity-50 fixed inset-0 z-50 bg-black md:hidden">
-            <div className="absolute top-0 bottom-0 left-0 w-64 bg-white shadow-xl">
+          <div
+            className="fixed inset-0 z-50 bg-black/50 md:hidden"
+            onClick={() => setIsMobileMenuOpen(false)}
+            role="presentation"
+          >
+            <div
+              className="absolute top-0 bottom-0 left-0 w-64 bg-white shadow-xl"
+              onClick={(e) => e.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Navigation menu"
+            >
               <div className="p-6">
                 <div className="flex items-center justify-between">
                   <h1 className="text-primary text-xl font-bold">TarotFlavia</h1>
@@ -136,7 +158,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         )}
 
         {/* Main Content Area */}
-        <main className="bg-main flex-1 overflow-y-auto p-6">{children}</main>
+        <main className="bg-bg-main flex-1 overflow-y-auto p-6">{children}</main>
       </div>
     </div>
   );
