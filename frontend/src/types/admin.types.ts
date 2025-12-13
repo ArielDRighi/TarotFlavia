@@ -61,12 +61,27 @@ export interface QuestionStatsDto {
   mostCommonQuestion: string;
 }
 
+/**
+ * DTO de lectura reciente desde el backend
+ */
+export interface RecentReadingDto {
+  id: number;
+  userEmail: string;
+  userName: string;
+  spreadType: string | null;
+  category: string | null;
+  question: string | null;
+  status: string;
+  createdAt: string;
+}
+
 export interface StatsResponseDto {
   users: UserStatsDto;
   readings: ReadingStatsDto;
   cards: CardStatsDto;
   openai: OpenAIStatsDto;
   questions: QuestionStatsDto;
+  recentReadings: RecentReadingDto[]; // Agregar lecturas recientes del backend
 }
 
 // --- /admin/dashboard/charts ---
@@ -86,15 +101,4 @@ export interface DashboardMetric {
   value: number;
   change?: number; // Cambio porcentual vs periodo anterior
   trend?: 'up' | 'down' | 'stable';
-}
-
-/**
- * Lectura reciente para tabla (mock temporal - backend pendiente)
- */
-export interface RecentReading {
-  id: number;
-  userName: string;
-  date: string;
-  spreadType: string;
-  status: 'completed' | 'pending' | 'failed';
 }

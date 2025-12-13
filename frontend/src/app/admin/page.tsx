@@ -14,7 +14,6 @@ import { useDashboardStats } from '@/hooks/api/useDashboardStats';
 import { useDashboardCharts } from '@/hooks/api/useDashboardCharts';
 import { Skeleton } from '@/components/ui/skeleton';
 import { transformStatsToMetrics } from '@/lib/utils/dashboard-utils';
-import type { RecentReading } from '@/types/admin.types';
 
 /**
  * Skeleton loader para las tarjetas de métricas
@@ -45,80 +44,6 @@ function ChartsSkeleton() {
 export default function AdminDashboardPage() {
   const { data: stats, isLoading: isLoadingStats, error: statsError } = useDashboardStats();
   const { data: charts, isLoading: isLoadingCharts, error: chartsError } = useDashboardCharts();
-
-  // Mock de lecturas recientes (en producción vendrá del backend)
-  const recentReadings: RecentReading[] = [
-    {
-      id: 1,
-      userName: 'Juan Pérez',
-      date: '2025-12-13T10:00:00Z',
-      spreadType: 'TRES_CARTAS',
-      status: 'completed',
-    },
-    {
-      id: 2,
-      userName: 'María García',
-      date: '2025-12-13T09:30:00Z',
-      spreadType: 'CRUZ_CELTA',
-      status: 'completed',
-    },
-    {
-      id: 3,
-      userName: 'Pedro López',
-      date: '2025-12-13T09:00:00Z',
-      spreadType: 'SIMPLE',
-      status: 'completed',
-    },
-    {
-      id: 4,
-      userName: 'Ana Martínez',
-      date: '2025-12-13T08:30:00Z',
-      spreadType: 'TRES_CARTAS',
-      status: 'pending',
-    },
-    {
-      id: 5,
-      userName: 'Carlos Rodríguez',
-      date: '2025-12-13T08:00:00Z',
-      spreadType: 'CRUZ_CELTA',
-      status: 'completed',
-    },
-    {
-      id: 6,
-      userName: 'Laura Fernández',
-      date: '2025-12-12T22:00:00Z',
-      spreadType: 'SIMPLE',
-      status: 'failed',
-    },
-    {
-      id: 7,
-      userName: 'Diego González',
-      date: '2025-12-12T20:00:00Z',
-      spreadType: 'TRES_CARTAS',
-      status: 'completed',
-    },
-    {
-      id: 8,
-      userName: 'Sofia Ruiz',
-      date: '2025-12-12T18:00:00Z',
-      spreadType: 'CRUZ_CELTA',
-      status: 'completed',
-    },
-    {
-      id: 9,
-      userName: 'Miguel Torres',
-      date: '2025-12-12T16:00:00Z',
-      spreadType: 'SIMPLE',
-      status: 'completed',
-    },
-    {
-      id: 10,
-      userName: 'Elena Ramírez',
-      date: '2025-12-12T14:00:00Z',
-      spreadType: 'TRES_CARTAS',
-      status: 'completed',
-    },
-  ];
 
   return (
     <div className="container py-8">
@@ -185,7 +110,7 @@ export default function AdminDashboardPage() {
         ) : stats?.users?.planDistribution && Array.isArray(stats.users.planDistribution) ? (
           <PlanDistributionChart data={stats.users.planDistribution} />
         ) : (
-          <div className="flex h-[400px] items-center justify-center rounded-lg border border-border bg-bg-main">
+          <div className="border-border bg-bg-main flex h-[400px] items-center justify-center rounded-lg border">
             <p className="text-text-secondary">No hay datos de distribución disponibles</p>
           </div>
         )}
@@ -194,7 +119,15 @@ export default function AdminDashboardPage() {
       {/* Tabla de Lecturas Recientes */}
       <div>
         <h2 className="mb-4 font-serif text-2xl font-semibold">Lecturas Recientes</h2>
-        <RecentReadingsTable readings={recentReadings} />
+        {isLoadingStats ? (
+          <Skeleton className="h-[400px]" />
+        ) : stats?.recentReadings ? (
+          <RecentReadingsTable readings={stats.recentReadings} />
+        ) : (
+          <div className="text-muted-foreground rounded-lg border p-8 text-center">
+            No hay lecturas recientes disponibles
+          </div>
+        )}
       </div>
     </div>
   );

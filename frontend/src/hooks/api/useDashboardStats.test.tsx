@@ -65,6 +65,7 @@ describe('useDashboardStats', () => {
       totalQuestions: 15,
       mostCommonQuestion: '¿Encontraré el amor?',
     },
+    recentReadings: [],
   };
 
   beforeEach(() => {

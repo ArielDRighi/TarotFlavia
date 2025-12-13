@@ -7,30 +7,39 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import { RecentReadingsTable } from '@/components/features/admin/RecentReadingsTable';
-import type { RecentReading } from '@/types/admin.types';
+import type { RecentReadingDto } from '@/types/admin.types';
 
 describe('RecentReadingsTable', () => {
-  const mockReadings: RecentReading[] = [
+  const mockReadings: RecentReadingDto[] = [
     {
       id: 1,
+      userEmail: 'juan@test.com',
       userName: 'Juan Pérez',
-      date: '2025-12-13T10:00:00Z',
       spreadType: 'TRES_CARTAS',
+      category: 'Amor',
+      question: '¿Encontraré el amor?',
       status: 'completed',
+      createdAt: '2025-12-13T10:00:00Z',
     },
     {
       id: 2,
+      userEmail: 'maria@test.com',
       userName: 'María García',
-      date: '2025-12-13T09:30:00Z',
       spreadType: 'CRUZ_CELTA',
+      category: 'Trabajo',
+      question: null,
       status: 'pending',
+      createdAt: '2025-12-13T09:30:00Z',
     },
     {
       id: 3,
+      userEmail: 'pedro@test.com',
       userName: 'Pedro López',
-      date: '2025-12-13T09:00:00Z',
       spreadType: 'SIMPLE',
+      category: null,
+      question: null,
       status: 'failed',
+      createdAt: '2025-12-13T09:00:00Z',
     },
   ];
 

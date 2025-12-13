@@ -61,6 +61,7 @@ describe('AdminDashboardPage', () => {
       totalQuestions: 15,
       mostCommonQuestion: '¿Encontraré el amor?',
     },
+    recentReadings: [],
   };
 
   const mockCharts: ChartsResponseDto = {

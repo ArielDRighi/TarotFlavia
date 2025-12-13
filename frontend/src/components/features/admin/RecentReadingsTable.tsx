@@ -11,11 +11,11 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import type { RecentReading } from '@/types/admin.types';
+import type { RecentReadingDto } from '@/types/admin.types';
 import { cn } from '@/lib/utils';
 
 interface RecentReadingsTableProps {
-  readings: RecentReading[];
+  readings: RecentReadingDto[];
 }
 
 /**
@@ -46,8 +46,8 @@ function formatDate(dateString: string): string {
 /**
  * Badge de status
  */
-function StatusBadge({ status }: { status: RecentReading['status'] }) {
-  const statusConfig = {
+function StatusBadge({ status }: { status: string }) {
+  const statusConfig: Record<string, { label: string; className: string }> = {
     completed: {
       label: 'Completada',
       className: 'bg-green-100 text-green-800',
@@ -62,7 +62,7 @@ function StatusBadge({ status }: { status: RecentReading['status'] }) {
     },
   };
 
-  const config = statusConfig[status];
+  const config = statusConfig[status] || statusConfig.completed;
 
   return (
     <Badge variant="secondary" className={cn(config.className)}>
@@ -95,8 +95,8 @@ export function RecentReadingsTable({ readings }: RecentReadingsTableProps) {
           {readings.map((reading) => (
             <TableRow key={reading.id}>
               <TableCell className="font-medium">{reading.userName}</TableCell>
-              <TableCell>{formatDate(reading.date)}</TableCell>
-              <TableCell>{formatSpreadType(reading.spreadType)}</TableCell>
+              <TableCell>{formatDate(reading.createdAt)}</TableCell>
+              <TableCell>{formatSpreadType(reading.spreadType || 'N/A')}</TableCell>
               <TableCell>
                 <StatusBadge status={reading.status} />
               </TableCell>
