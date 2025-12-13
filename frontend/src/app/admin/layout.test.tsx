@@ -1,53 +1,349 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import AdminLayout from './layout';
+import * as useAuthModule from '@/hooks/useAuth';
+
+// Mock del hook useAuth
+vi.mock('@/hooks/useAuth');
+
+// Mock del Next.js navigation
+const mockPush = vi.fn();
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: mockPush,
+  }),
+  usePathname: () => '/admin',
+}));
 
 describe('AdminLayout', () => {
-  it('should render children', () => {
-    render(
-      <AdminLayout>
-        <div data-testid="child-content">Child Content</div>
-      </AdminLayout>
-    );
-
-    expect(screen.getByTestId('child-content')).toBeInTheDocument();
-    expect(screen.getByText('Child Content')).toBeInTheDocument();
+  beforeEach(() => {
+    vi.clearAllMocks();
   });
 
-  it('should render admin indicator banner', () => {
-    render(
-      <AdminLayout>
-        <div>Content</div>
-      </AdminLayout>
-    );
+  describe('Authorization Guard', () => {
+    it('should redirect to /perfil if user is not admin', () => {
+      vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
+        user: {
+          id: 1,
+          email: 'user@test.com',
+          name: 'User',
+          roles: ['consumer'],
+          plan: 'free',
+          dailyReadingsCount: 0,
+          dailyReadingsLimit: 5,
+        },
+        isAuthenticated: true,
+        isLoading: false,
+        login: vi.fn(),
+        register: vi.fn(),
+        logout: vi.fn(),
+        checkAuth: vi.fn(),
+      });
 
-    expect(screen.getByText(/panel de administración/i)).toBeInTheDocument();
+      render(
+        <AdminLayout>
+          <div>Content</div>
+        </AdminLayout>
+      );
+
+      expect(mockPush).toHaveBeenCalledWith('/perfil');
+    });
+
+    it('should NOT redirect if user has admin role', () => {
+      vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
+        user: {
+          id: 1,
+          email: 'admin@test.com',
+          name: 'Admin',
+          roles: ['admin'],
+          plan: 'premium',
+          dailyReadingsCount: 0,
+          dailyReadingsLimit: 100,
+        },
+        isAuthenticated: true,
+        isLoading: false,
+        login: vi.fn(),
+        register: vi.fn(),
+        logout: vi.fn(),
+        checkAuth: vi.fn(),
+      });
+
+      render(
+        <AdminLayout>
+          <div data-testid="child">Content</div>
+        </AdminLayout>
+      );
+
+      expect(mockPush).not.toHaveBeenCalled();
+      expect(screen.getByTestId('child')).toBeInTheDocument();
+    });
+
+    it('should redirect if user is not authenticated', () => {
+      vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+        login: vi.fn(),
+        register: vi.fn(),
+        logout: vi.fn(),
+        checkAuth: vi.fn(),
+      });
+
+      render(
+        <AdminLayout>
+          <div>Content</div>
+        </AdminLayout>
+      );
+
+      expect(mockPush).toHaveBeenCalledWith('/perfil');
+    });
   });
 
-  it('should have admin banner with correct styling', () => {
-    render(
-      <AdminLayout>
-        <div>Content</div>
-      </AdminLayout>
-    );
+  describe('Sidebar Navigation', () => {
+    beforeEach(() => {
+      vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
+        user: {
+          id: 1,
+          email: 'admin@test.com',
+          name: 'Admin',
+          roles: ['admin'],
+          plan: 'premium',
+          dailyReadingsCount: 0,
+          dailyReadingsLimit: 100,
+        },
+        isAuthenticated: true,
+        isLoading: false,
+        login: vi.fn(),
+        register: vi.fn(),
+        logout: vi.fn(),
+        checkAuth: vi.fn(),
+      });
+    });
 
-    const banner = screen.getByText(/panel de administración/i);
-    expect(banner).toHaveClass('bg-primary/10');
-    expect(banner).toHaveClass('text-primary');
-    expect(banner).toHaveClass('text-center');
-    expect(banner).toHaveClass('font-medium');
+    it('should render sidebar with logo', () => {
+      render(
+        <AdminLayout>
+          <div>Content</div>
+        </AdminLayout>
+      );
+
+      // Verificar que el logo está en el sidebar (desktop)
+      const logos = screen.getAllByText(/tarotflavia/i);
+      expect(logos.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('should render all navigation items', () => {
+      render(
+        <AdminLayout>
+          <div>Content</div>
+        </AdminLayout>
+      );
+
+      expect(screen.getByText('Dashboard')).toBeInTheDocument();
+      expect(screen.getByText('Usuarios')).toBeInTheDocument();
+      expect(screen.getByText('Tarotistas')).toBeInTheDocument();
+      expect(screen.getByText('Lecturas')).toBeInTheDocument();
+      expect(screen.getByText('Configuración')).toBeInTheDocument();
+    });
+
+    it('should render navigation icons', () => {
+      render(
+        <AdminLayout>
+          <div>Content</div>
+        </AdminLayout>
+      );
+
+      // Los íconos deben estar presentes (verificar por aria-label o data-testid si los añadimos)
+      const dashboardLink = screen.getByRole('link', { name: /dashboard/i });
+      expect(dashboardLink).toBeInTheDocument();
+    });
+
+    it('should highlight active link', () => {
+      render(
+        <AdminLayout>
+          <div>Content</div>
+        </AdminLayout>
+      );
+
+      // El link activo debe tener estilos especiales
+      const activeLink = screen.getByRole('link', { name: /dashboard/i });
+      expect(activeLink).toHaveClass('bg-primary/10');
+    });
   });
 
-  it('should not add redundant wrapper (uses fragment)', () => {
-    const { container } = render(
-      <AdminLayout>
-        <div data-testid="child">Content</div>
-      </AdminLayout>
-    );
+  describe('Responsive Behavior', () => {
+    beforeEach(() => {
+      vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
+        user: {
+          id: 1,
+          email: 'admin@test.com',
+          name: 'Admin',
+          roles: ['admin'],
+          plan: 'premium',
+          dailyReadingsCount: 0,
+          dailyReadingsLimit: 100,
+        },
+        isAuthenticated: true,
+        isLoading: false,
+        login: vi.fn(),
+        register: vi.fn(),
+        logout: vi.fn(),
+        checkAuth: vi.fn(),
+      });
+    });
 
-    // El primer hijo debe ser el banner, no un wrapper div
-    const firstChild = container.firstChild as HTMLElement;
-    expect(firstChild.tagName).toBe('DIV');
-    expect(firstChild).toHaveClass('bg-primary/10');
+    it('should render hamburger menu button for mobile', () => {
+      render(
+        <AdminLayout>
+          <div>Content</div>
+        </AdminLayout>
+      );
+
+      const menuButton = screen.getByRole('button', { name: /toggle.*menu/i });
+      expect(menuButton).toBeInTheDocument();
+    });
+
+    it('should toggle mobile menu on button click', async () => {
+      const user = userEvent.setup();
+      render(
+        <AdminLayout>
+          <div>Content</div>
+        </AdminLayout>
+      );
+
+      const menuButton = screen.getByRole('button', { name: /toggle.*menu/i });
+
+      // Inicialmente el drawer no debe estar visible
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+      // Click to open
+      await user.click(menuButton);
+
+      // Verificar que el drawer se abre
+      const drawer = screen.getByRole('dialog', { name: /navigation menu/i });
+      expect(drawer).toBeInTheDocument();
+
+      // Click en el botón de cerrar dentro del drawer
+      const closeButton = screen.getByRole('button', { name: /close menu/i });
+      await user.click(closeButton);
+
+      // Verificar que el drawer se cierra
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it('should close drawer when clicking backdrop', async () => {
+      const user = userEvent.setup();
+      render(
+        <AdminLayout>
+          <div>Content</div>
+        </AdminLayout>
+      );
+
+      const menuButton = screen.getByRole('button', { name: /toggle.*menu/i });
+
+      // Abrir drawer
+      await user.click(menuButton);
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+      // Click en el backdrop (presentation role)
+      const backdrop = screen.getByRole('presentation');
+      await user.click(backdrop);
+
+      // Verificar que se cierra
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it('should close drawer when pressing Escape key', async () => {
+      const user = userEvent.setup();
+      render(
+        <AdminLayout>
+          <div>Content</div>
+        </AdminLayout>
+      );
+
+      const menuButton = screen.getByRole('button', { name: /toggle.*menu/i });
+
+      // Abrir drawer
+      await user.click(menuButton);
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+      // Presionar Escape
+      await user.keyboard('{Escape}');
+
+      // Verificar que se cierra
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it('should have responsive sidebar classes', () => {
+      const { container } = render(
+        <AdminLayout>
+          <div>Content</div>
+        </AdminLayout>
+      );
+
+      // Desktop sidebar debe estar visible
+      const sidebar = container.querySelector('aside');
+      expect(sidebar).toBeInTheDocument();
+    });
+  });
+
+  describe('Layout Structure', () => {
+    beforeEach(() => {
+      vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
+        user: {
+          id: 1,
+          email: 'admin@test.com',
+          name: 'Admin',
+          roles: ['admin'],
+          plan: 'premium',
+          dailyReadingsCount: 0,
+          dailyReadingsLimit: 100,
+        },
+        isAuthenticated: true,
+        isLoading: false,
+        login: vi.fn(),
+        register: vi.fn(),
+        logout: vi.fn(),
+        checkAuth: vi.fn(),
+      });
+    });
+
+    it('should render children in main content area', () => {
+      render(
+        <AdminLayout>
+          <div data-testid="child-content">Child Content</div>
+        </AdminLayout>
+      );
+
+      expect(screen.getByTestId('child-content')).toBeInTheDocument();
+      expect(screen.getByText('Child Content')).toBeInTheDocument();
+    });
+
+    it('should have proper background for main area', () => {
+      const { container } = render(
+        <AdminLayout>
+          <div>Content</div>
+        </AdminLayout>
+      );
+
+      const main = container.querySelector('main');
+      expect(main).toBeInTheDocument();
+      expect(main).toHaveClass('bg-bg-main');
+    });
+
+    it('should have sidebar on the left and content on the right', () => {
+      const { container } = render(
+        <AdminLayout>
+          <div>Content</div>
+        </AdminLayout>
+      );
+
+      const sidebar = container.querySelector('aside');
+      const main = container.querySelector('main');
+
+      expect(sidebar).toBeInTheDocument();
+      expect(main).toBeInTheDocument();
+    });
   });
 });
