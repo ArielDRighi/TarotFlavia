@@ -25,7 +25,10 @@ vi.mock('@/lib/api/axios-config', () => ({
 
 describe('useAdminTarotistaActions', () => {
   let queryClient: QueryClient;
-  const mockApiClient = vi.mocked(apiClient);
+  const mockApiClient = apiClient as unknown as {
+    put: ReturnType<typeof vi.fn>;
+    post: ReturnType<typeof vi.fn>;
+  };
 
   const wrapper = ({ children }: { children: ReactNode }) =>
     createElement(QueryClientProvider, { client: queryClient }, children);

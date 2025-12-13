@@ -40,6 +40,8 @@ describe('ApplicationCard', () => {
     expect(screen.getByText('Luna Mística')).toBeInTheDocument();
     expect(screen.getByText('Luna García')).toBeInTheDocument();
     expect(screen.getByText('luna@test.com')).toBeInTheDocument();
+    // Should display formatted date (es-ES: "1/12/2025")
+    expect(screen.getByText(/Aplicó: 1\/12\/2025/)).toBeInTheDocument();
   });
 
   it('should render specialties', () => {

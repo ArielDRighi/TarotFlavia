@@ -7,6 +7,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api/axios-config';
 import { API_ENDPOINTS } from '@/lib/api/endpoints';
+import { adminTarotistasQueryKeys, tarotistaApplicationsQueryKeys } from './useAdminTarotistas';
 import type { TarotistaApplication } from '@/types/admin-tarotistas.types';
 
 /**
@@ -62,8 +63,8 @@ export function useApproveApplication() {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'tarotista-applications'] });
-      queryClient.invalidateQueries({ queryKey: ['admin', 'tarotistas'] });
+      queryClient.invalidateQueries({ queryKey: tarotistaApplicationsQueryKeys.all });
+      queryClient.invalidateQueries({ queryKey: adminTarotistasQueryKeys.all });
     },
   });
 }
@@ -83,7 +84,7 @@ export function useRejectApplication() {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'tarotista-applications'] });
+      queryClient.invalidateQueries({ queryKey: tarotistaApplicationsQueryKeys.all });
     },
   });
 }

@@ -15,11 +15,31 @@ import type {
 } from '@/types/admin-tarotistas.types';
 
 /**
+ * Query keys para tarotistas admin
+ */
+export const adminTarotistasQueryKeys = {
+  all: ['admin', 'tarotistas'] as const,
+  lists: () => [...adminTarotistasQueryKeys.all, 'list'] as const,
+  list: (filters?: AdminTarotistasFilters) =>
+    [...adminTarotistasQueryKeys.lists(), filters] as const,
+};
+
+/**
+ * Query keys para aplicaciones de tarotistas
+ */
+export const tarotistaApplicationsQueryKeys = {
+  all: ['admin', 'tarotista-applications'] as const,
+  lists: () => [...tarotistaApplicationsQueryKeys.all, 'list'] as const,
+  list: (filters?: ApplicationsFilters) =>
+    [...tarotistaApplicationsQueryKeys.lists(), filters] as const,
+};
+
+/**
  * Hook para obtener lista de tarotistas (admin)
  */
 export function useAdminTarotistas(filters?: AdminTarotistasFilters) {
   return useQuery<AdminTarotistasResponse>({
-    queryKey: ['admin', 'tarotistas', filters],
+    queryKey: adminTarotistasQueryKeys.list(filters),
     queryFn: async () => {
       const params = {
         page: filters?.page ?? 1,
@@ -45,7 +65,7 @@ export function useAdminTarotistas(filters?: AdminTarotistasFilters) {
  */
 export function useTarotistaApplications(filters?: ApplicationsFilters) {
   return useQuery<ApplicationsResponse>({
-    queryKey: ['admin', 'tarotista-applications', filters],
+    queryKey: tarotistaApplicationsQueryKeys.list(filters),
     queryFn: async () => {
       const params = {
         page: filters?.page ?? 1,

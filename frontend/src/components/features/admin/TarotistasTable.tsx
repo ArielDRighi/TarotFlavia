@@ -32,6 +32,20 @@ interface TarotistasTableProps {
   onAction: (action: string, tarotista: AdminTarotista) => void;
 }
 
+// Helper functions for formatting
+const formatRevenue = (value: number | null) => {
+  if (value === null || value === undefined) return '-';
+  return new Intl.NumberFormat('es-ES', {
+    style: 'currency',
+    currency: 'USD',
+  }).format(value);
+};
+
+const formatRating = (value: number | null) => {
+  if (value === null || value === undefined) return 'N/A';
+  return value.toFixed(1);
+};
+
 export function TarotistasTable({ tarotistas, onAction }: TarotistasTableProps) {
   if (tarotistas.length === 0) {
     return (
@@ -40,19 +54,6 @@ export function TarotistasTable({ tarotistas, onAction }: TarotistasTableProps) 
       </div>
     );
   }
-
-  const formatRevenue = (value: number | null) => {
-    if (value === null || value === undefined) return '-';
-    return new Intl.NumberFormat('es-ES', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(value);
-  };
-
-  const formatRating = (value: number | null) => {
-    if (value === null || value === undefined) return 'N/A';
-    return value.toFixed(1);
-  };
 
   return (
     <div className="rounded-lg border">

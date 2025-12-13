@@ -351,7 +351,7 @@ export default function AdminTarotistasPage() {
               rows={4}
               required
             />
-            {rejectReason.length > 0 && rejectReason.length < 10 && (
+            {rejectReason.trim().length > 0 && rejectReason.trim().length < 10 && (
               <p className="mt-1 text-sm text-red-600">Mínimo 10 caracteres</p>
             )}
           </div>
@@ -359,7 +359,7 @@ export default function AdminTarotistasPage() {
             <AlertDialogCancel disabled={isPending}>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmAction}
-              disabled={isPending || rejectReason.length < 10}
+              disabled={isPending || rejectReason.trim().length < 10}
             >
               {isPending ? 'Procesando...' : 'Rechazar'}
             </AlertDialogAction>

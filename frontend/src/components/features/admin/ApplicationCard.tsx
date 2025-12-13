@@ -19,20 +19,21 @@ interface ApplicationCardProps {
   isLoading?: boolean;
 }
 
+// Helper function for date formatting
+const formatDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString('es-ES', {
+    day: 'numeric',
+    month: 'numeric',
+    year: 'numeric',
+  });
+};
+
 export function ApplicationCard({
   application,
   onApprove,
   onReject,
   isLoading = false,
 }: ApplicationCardProps) {
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-ES', {
-      day: 'numeric',
-      month: 'numeric',
-      year: 'numeric',
-    });
-  };
-
   return (
     <Card>
       <CardHeader>

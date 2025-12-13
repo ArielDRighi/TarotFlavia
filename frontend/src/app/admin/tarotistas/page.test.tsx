@@ -42,37 +42,51 @@ describe('AdminTarotistasPage', () => {
     });
 
     // Configurar mocks con estado vacío inicial
+    // Note: Mocks simplificados para tests de rendering básico
+    // Partial types son suficientes para testear solo la UI
     mockUseAdminTarotistas.mockReturnValue({
-      data: null,
+      data: undefined,
       isLoading: false,
       error: null,
-    });
+    } as Partial<ReturnType<typeof mockUseAdminTarotistas>> as ReturnType<
+      typeof mockUseAdminTarotistas
+    >);
 
     mockUseTarotistaApplications.mockReturnValue({
-      data: null,
+      data: undefined,
       isLoading: false,
       error: null,
-    });
+    } as Partial<ReturnType<typeof mockUseTarotistaApplications>> as ReturnType<
+      typeof mockUseTarotistaApplications
+    >);
 
     mockUseDeactivateTarotista.mockReturnValue({
       mutate: vi.fn(),
       isPending: false,
-    });
+    } as Partial<ReturnType<typeof mockUseDeactivateTarotista>> as ReturnType<
+      typeof mockUseDeactivateTarotista
+    >);
 
     mockUseReactivateTarotista.mockReturnValue({
       mutate: vi.fn(),
       isPending: false,
-    });
+    } as Partial<ReturnType<typeof mockUseReactivateTarotista>> as ReturnType<
+      typeof mockUseReactivateTarotista
+    >);
 
     mockUseApproveApplication.mockReturnValue({
       mutate: vi.fn(),
       isPending: false,
-    });
+    } as Partial<ReturnType<typeof mockUseApproveApplication>> as ReturnType<
+      typeof mockUseApproveApplication
+    >);
 
     mockUseRejectApplication.mockReturnValue({
       mutate: vi.fn(),
       isPending: false,
-    });
+    } as Partial<ReturnType<typeof mockUseRejectApplication>> as ReturnType<
+      typeof mockUseRejectApplication
+    >);
   });
 
   it('should render admin tarotistas page with correct title', () => {
