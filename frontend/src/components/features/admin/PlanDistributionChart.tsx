@@ -15,13 +15,16 @@ interface PlanDistributionChartProps {
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))'];
 
 export function PlanDistributionChart({ data }: PlanDistributionChartProps) {
+  // Validación defensiva: asegurar que data sea un array
+  const planData = Array.isArray(data) ? data : [];
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Distribución por Plan</CardTitle>
       </CardHeader>
       <CardContent>
-        {data.length === 0 ? (
+        {planData.length === 0 ? (
           <div className="text-muted-foreground flex h-[300px] items-center justify-center">
             No hay datos disponibles
           </div>
@@ -29,7 +32,7 @@ export function PlanDistributionChart({ data }: PlanDistributionChartProps) {
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
-                data={data}
+                data={planData}
                 cx="50%"
                 cy="50%"
                 innerRadius={60}
@@ -39,7 +42,7 @@ export function PlanDistributionChart({ data }: PlanDistributionChartProps) {
                 dataKey="count"
                 label
               >
-                {data.map((entry, index) => (
+                {planData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>

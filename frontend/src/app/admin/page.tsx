@@ -182,9 +182,13 @@ export default function AdminDashboardPage() {
           <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
             Error al cargar distribución de planes. Por favor, intenta de nuevo.
           </div>
-        ) : stats?.users.planDistribution ? (
+        ) : stats?.users?.planDistribution && Array.isArray(stats.users.planDistribution) ? (
           <PlanDistributionChart data={stats.users.planDistribution} />
-        ) : null}
+        ) : (
+          <div className="flex h-[400px] items-center justify-center rounded-lg border border-border bg-bg-main">
+            <p className="text-text-secondary">No hay datos de distribución disponibles</p>
+          </div>
+        )}
       </div>
 
       {/* Tabla de Lecturas Recientes */}
