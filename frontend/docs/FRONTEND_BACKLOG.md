@@ -2822,14 +2822,46 @@ IMPORTANTE:
 
 ---
 
-### TAREA 9.4: Crear componente SessionCard
+### TAREA 9.4: Crear componente SessionCard ✅
 
 **Prioridad:** MEDIA
 **Estimación:** 30 min
 **Dependencias:** 1.5
+**Estado:** COMPLETADA
+**Fecha de Completación:** 13 de Diciembre 2025
 
 **Consigna:**
 Crear tarjeta para mostrar sesión reservada.
+
+**Implementación:**
+
+- ✅ Componente creado en `src/components/features/marketplace/SessionCard.tsx`
+- ✅ Tests completos en `SessionCard.test.tsx` (31 tests, 100% coverage)
+- ✅ Props: session, onCancel, onJoin, className
+- ✅ Card horizontal responsive con 3 secciones
+- ✅ Avatar de tarotista con fallback a iniciales
+- ✅ Fecha/hora formateada con date-fns (español)
+- ✅ StatusBadge con variantes por estado
+- ✅ Borde izquierdo coloreado según status
+- ✅ Botón "Unirse" (verde) para sesiones confirmadas dentro de 24h
+- ✅ Botón "Cancelar" (outline rojo) deshabilitado dentro de 24h
+- ✅ Ícono check verde para sesiones completadas
+- ✅ Exportado en `index.ts` del marketplace
+
+**Decisiones de Implementación:**
+
+- Se usa `isSessionWithin24Hours()` helper para calcular proximidad
+- Se formatea fecha con `format(sessionDateTime, "EEEE d 'de' MMMM", { locale: es })`
+- Se soportan tipos Session y SessionDetail (con tarotista opcional)
+- Configuración de status centralizada en `STATUS_CONFIG`
+- Tests corregidos para evitar problemas de timezone usando formato manual de fecha/hora
+
+**Coverage:**
+
+- Statements: 100%
+- Branches: 91.66%
+- Functions: 100%
+- Lines: 100%
 
 **Prompt:**
 
