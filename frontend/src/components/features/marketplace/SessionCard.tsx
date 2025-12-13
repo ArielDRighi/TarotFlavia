@@ -111,7 +111,8 @@ export function SessionCard({ session, onCancel, onJoin, className }: SessionCar
 
   // Format date: "Lunes 2 de Diciembre - 15:00"
   const sessionDateTime = parseISO(`${session.sessionDate}T${session.sessionTime}`);
-  const formattedDate = format(sessionDateTime, "EEEE d 'de' MMMM", { locale: es });
+  const formatted = format(sessionDateTime, "EEEE d 'de' MMMM", { locale: es });
+  const formattedDate = formatted.charAt(0).toUpperCase() + formatted.slice(1);
   const formattedTime = session.sessionTime;
 
   // Determine which buttons to show
@@ -119,7 +120,8 @@ export function SessionCard({ session, onCancel, onJoin, className }: SessionCar
     (session.status === 'pending' || session.status === 'confirmed') && onCancel !== undefined;
   const canJoin = session.status === 'confirmed' && isWithin24Hours && onJoin !== undefined;
   const isCompleted = session.status === 'completed';
-  const isCancelDisabled = isWithin24Hours;
+  // Only disable cancel for confirmed sessions within 24h; pending sessions can be cancelled anytime
+  const isCancelDisabled = session.status === 'confirmed' && isWithin24Hours;
 
   const handleCancelClick = () => {
     if (onCancel) {
@@ -165,7 +167,7 @@ export function SessionCard({ session, onCancel, onJoin, className }: SessionCar
       {/* Center Section - Session Details */}
       <CardContent className="flex flex-1 flex-col justify-center gap-2 p-4">
         {/* Date and Time */}
-        <p className="text-primary text-sm font-semibold capitalize">
+        <p className="text-primary text-sm font-semibold">
           {formattedDate} - {formattedTime}
         </p>
 

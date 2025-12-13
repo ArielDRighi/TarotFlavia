@@ -47,7 +47,7 @@ describe('SessionCard', () => {
 
     it('should display session date formatted correctly', () => {
       render(<SessionCard session={baseSession} />);
-      // "Domingo 15 de Diciembre - 15:00"
+      // "Lunes 15 de Diciembre - 15:00"
       expect(screen.getByText(/15 de Diciembre/i)).toBeInTheDocument();
     });
 
@@ -253,7 +253,7 @@ describe('SessionCard', () => {
         expect(onCancel).toHaveBeenCalledWith(pendingSession.id);
       });
 
-      it('should disable cancel button within 24 hours of session', () => {
+      it('should disable cancel button for confirmed sessions within 24 hours', () => {
         const now = new Date();
         const tomorrow = new Date(now);
         tomorrow.setHours(now.getHours() + 12);
@@ -275,6 +275,29 @@ describe('SessionCard', () => {
         render(<SessionCard session={soonSession} onCancel={vi.fn()} />);
         const cancelButton = screen.getByRole('button', { name: /cancelar/i });
         expect(cancelButton).toBeDisabled();
+      });
+
+      it('should allow cancelling pending sessions even within 24 hours', () => {
+        const now = new Date();
+        const tomorrow = new Date(now);
+        tomorrow.setHours(now.getHours() + 12);
+
+        const year = tomorrow.getFullYear();
+        const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
+        const day = String(tomorrow.getDate()).padStart(2, '0');
+        const hours = String(tomorrow.getHours()).padStart(2, '0');
+        const minutes = String(tomorrow.getMinutes()).padStart(2, '0');
+
+        const pendingSession = {
+          ...baseSession,
+          status: 'pending' as const,
+          sessionDate: `${year}-${month}-${day}`,
+          sessionTime: `${hours}:${minutes}`,
+        };
+
+        render(<SessionCard session={pendingSession} onCancel={vi.fn()} />);
+        const cancelButton = screen.getByRole('button', { name: /cancelar/i });
+        expect(cancelButton).not.toBeDisabled();
       });
 
       it('should not show cancel button for completed sessions', () => {
