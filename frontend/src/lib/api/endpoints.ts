@@ -75,4 +75,10 @@ export const API_ENDPOINTS = {
     SESSION_DETAIL: (id: number) => `/scheduling/my-sessions/${id}`,
     CANCEL_SESSION: (id: number) => `/scheduling/my-sessions/${id}/cancel`,
   },
+
+  // Admin Dashboard
+  ADMIN: {
+    DASHBOARD_STATS: '/admin/dashboard/stats',
+    DASHBOARD_CHARTS: '/admin/dashboard/charts',
+  },
 } as const;
