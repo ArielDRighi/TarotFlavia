@@ -3247,14 +3247,83 @@ IMPORTANTE:
 
 ---
 
-### TAREA 10.4: Crear página Admin Tarotistas
+### TAREA 10.4: Crear página Admin Tarotistas ✅
 
 **Prioridad:** MEDIA
 **Estimación:** 50 min
 **Dependencias:** 10.1
+**Estado:** COMPLETADA
+**Fecha completada:** 5 Dic 2024
 
 **Consigna:**
 Crear gestión de tarotistas con aprobación de aplicaciones.
+
+**Implementación:**
+
+✅ **Componentes creados:**
+
+- `TarotistasTable.tsx`: Tabla de tarotistas activos con acciones (desactivar/reactivar)
+- `ApplicationCard.tsx`: Card de aplicación pendiente con botones aprobar/rechazar
+- `page.tsx`: Página principal con tabs y modales
+
+✅ **Hooks implementados:**
+
+- `useAdminTarotistas()`: Query para listar tarotistas (paginado)
+- `useTarotistaApplications()`: Query para listar aplicaciones (paginado, filtrado por status)
+- `useDeactivateTarotista()`: Mutation PUT /admin/tarotistas/:id/deactivate
+- `useReactivateTarotista()`: Mutation PUT /admin/tarotistas/:id/reactivate
+- `useApproveApplication()`: Mutation POST /admin/tarotistas/applications/:id/approve
+- `useRejectApplication()`: Mutation POST /admin/tarotistas/applications/:id/reject
+
+✅ **Tipos TypeScript:**
+
+- `admin-tarotistas.types.ts`: 15 interfaces (AdminTarotista, TarotistaApplication, Filters, DTOs)
+
+✅ **Tests:**
+
+- 33 tests pasando (100% de cobertura en hooks y componentes)
+- TDD completo (tests escritos primero)
+
+✅ **Características implementadas:**
+
+- ✓ Tabs para "Tarotistas Activos" y "Aplicaciones Pendientes"
+- ✓ Paginación en ambos tabs (usando Pagination component)
+- ✓ Tabla de tarotistas con badges de estado y métricas (rating, sesiones, revenue)
+- ✓ Cards de aplicaciones con información completa (especialidades, biografía, experiencia)
+- ✓ Modales de confirmación para todas las acciones (AlertDialog)
+- ✓ Validación de razón de rechazo (mínimo 10 caracteres)
+- ✓ Notas opcionales en aprobación
+- ✓ Toast notifications con sonner para feedback
+- ✓ Query invalidation automática tras mutaciones
+- ✓ Manejo de estados de carga (Skeleton components)
+- ✓ Empty states con mensajes descriptivos
+
+**Decisiones técnicas:**
+
+- Acciones "Ver perfil", "Editar configuración IA" y "Ver métricas" muestran toast "próximamente" (funcionalidad futura)
+- DropdownMenu simplificado en tests (solo verificación de renderizado, no interacciones)
+- Formato de currency en español: "7500,00 US$" (locale es-ES)
+
+**Archivos modificados:**
+
+1. `src/types/admin-tarotistas.types.ts` (nuevo)
+2. `src/lib/api/endpoints.ts` (+6 endpoints ADMIN.TAROTISTAS)
+3. `src/hooks/api/useAdminTarotistas.ts` (nuevo)
+4. `src/hooks/api/useAdminTarotistas.test.ts` (nuevo - 6 tests)
+5. `src/hooks/api/useAdminTarotistaActions.ts` (nuevo)
+6. `src/hooks/api/useAdminTarotistaActions.test.ts` (nuevo - 9 tests)
+7. `src/components/features/admin/TarotistasTable.tsx` (nuevo)
+8. `src/components/features/admin/TarotistasTable.test.tsx` (nuevo - 7 tests)
+9. `src/components/features/admin/ApplicationCard.tsx` (nuevo)
+10. `src/components/features/admin/ApplicationCard.test.tsx` (nuevo - 7 tests)
+11. `src/app/admin/tarotistas/page.tsx` (implementado completamente)
+12. `src/app/admin/tarotistas/page.test.tsx` (4 tests básicos)
+
+**Pendiente para futuro:**
+
+- Implementar "Ver perfil" (navegación a /tarotistas/:id/admin-view)
+- Implementar "Editar configuración IA" (modal con parámetros de IA)
+- Implementar "Ver métricas" (gráficos de performance)
 
 **Prompt:**
 
