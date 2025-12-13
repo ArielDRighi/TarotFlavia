@@ -7,15 +7,15 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import { DailyReadingsChart } from '@/components/features/admin/DailyReadingsChart';
-import type { ChartDataPoint } from '@/types/admin.types';
+import type { ReadingsPerDayDto } from '@/types/admin.types';
 
 describe('DailyReadingsChart', () => {
-  const mockData: ChartDataPoint[] = [
-    { date: '2025-12-01', value: 10 },
-    { date: '2025-12-02', value: 15 },
-    { date: '2025-12-03', value: 12 },
-    { date: '2025-12-04', value: 18 },
-    { date: '2025-12-05', value: 20 },
+  const mockData: ReadingsPerDayDto[] = [
+    { date: '2025-12-01', count: 10 },
+    { date: '2025-12-02', count: 15 },
+    { date: '2025-12-03', count: 12 },
+    { date: '2025-12-04', count: 18 },
+    { date: '2025-12-05', count: 20 },
   ];
 
   it('should render chart title', () => {

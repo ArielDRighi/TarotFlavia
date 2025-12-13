@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import AdminDashboardPage from './page';
 import * as dashboardApi from '@/lib/api/dashboard-api';
+import type { StatsResponseDto, ChartsResponseDto } from '@/types/admin.types';
 
 // Mock the API module
 vi.mock('@/lib/api/dashboard-api');
@@ -29,22 +30,46 @@ function createWrapper() {
 }
 
 describe('AdminDashboardPage', () => {
-  const mockStats = {
-    totalUsers: { value: 150, change: 5, trend: 'up' as const },
-    monthlyReadings: { value: 450, change: 12, trend: 'up' as const },
-    activeTarotistas: { value: 25, change: 0, trend: 'stable' as const },
-    monthlyRevenue: { value: 5000, change: 8, trend: 'up' as const },
+  const mockStats: StatsResponseDto = {
+    users: {
+      totalUsers: 150,
+      activeUsersLast7Days: 80,
+      activeUsersLast30Days: 120,
+      newRegistrationsPerDay: [],
+      planDistribution: [
+        { plan: 'Gratis', count: 100, percentage: 50 },
+        { plan: 'Premium', count: 100, percentage: 50 },
+      ],
+    },
+    readings: {
+      totalReadings: 450,
+      readingsLast7Days: 120,
+      readingsLast30Days: 380,
+      readingsPerDay: [],
+    },
+    cards: {
+      totalCards: 78,
+      mostDrawnCard: 'The Fool',
+      leastDrawnCard: 'The Tower',
+    },
+    openai: {
+      totalPrompts: 450,
+      totalCost: 25.5,
+      aiCostsPerDay: [],
+    },
+    questions: {
+      totalQuestions: 15,
+      mostCommonQuestion: '¿Encontraré el amor?',
+    },
   };
 
-  const mockCharts = {
-    dailyReadings: [
-      { date: '2025-12-01', value: 10 },
-      { date: '2025-12-02', value: 15 },
+  const mockCharts: ChartsResponseDto = {
+    userRegistrations: [],
+    readingsPerDay: [
+      { date: '2025-12-01', count: 10 },
+      { date: '2025-12-02', count: 15 },
     ],
-    planDistribution: [
-      { plan: 'Gratis', count: 100, percentage: 50 },
-      { plan: 'Premium', count: 100, percentage: 50 },
-    ],
+    aiCostsPerDay: [],
   };
 
   beforeEach(() => {

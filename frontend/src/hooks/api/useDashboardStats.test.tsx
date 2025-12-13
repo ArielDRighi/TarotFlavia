@@ -10,7 +10,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { ReactNode } from 'react';
 import { useDashboardStats } from '@/hooks/api/useDashboardStats';
 import * as dashboardApi from '@/lib/api/dashboard-api';
-import type { DashboardStats } from '@/types/admin.types';
+import type { StatsResponseDto } from '@/types/admin.types';
 
 // Mock the API module
 vi.mock('@/lib/api/dashboard-api');
@@ -36,12 +36,35 @@ function createWrapper() {
 }
 
 describe('useDashboardStats', () => {
-  // Mock data
-  const mockStats: DashboardStats = {
-    totalUsers: { value: 150, change: 5, trend: 'up' },
-    monthlyReadings: { value: 450, change: 12, trend: 'up' },
-    activeTarotistas: { value: 25, change: 0, trend: 'stable' },
-    monthlyRevenue: { value: 5000, change: 8, trend: 'up' },
+  // Mock data que coincide con el backend DTO
+  const mockStats: StatsResponseDto = {
+    users: {
+      totalUsers: 150,
+      activeUsersLast7Days: 80,
+      activeUsersLast30Days: 120,
+      newRegistrationsPerDay: [],
+      planDistribution: [],
+    },
+    readings: {
+      totalReadings: 450,
+      readingsLast7Days: 120,
+      readingsLast30Days: 380,
+      readingsPerDay: [],
+    },
+    cards: {
+      totalCards: 78,
+      mostDrawnCard: 'The Fool',
+      leastDrawnCard: 'The Tower',
+    },
+    openai: {
+      totalPrompts: 450,
+      totalCost: 25.5,
+      aiCostsPerDay: [],
+    },
+    questions: {
+      totalQuestions: 15,
+      mostCommonQuestion: '¿Encontraré el amor?',
+    },
   };
 
   beforeEach(() => {

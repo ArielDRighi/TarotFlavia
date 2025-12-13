@@ -5,7 +5,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, BookOpen, Star, DollarSign, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import type { DashboardMetric } from '@/types/admin.types';
-import { cn } from '@/lib/utils/cn';
+import { cn } from '@/lib/utils';
 
 interface StatsCardProps {
   title: string;

@@ -13,6 +13,7 @@ import { RecentReadingsTable } from '@/components/features/admin/RecentReadingsT
 import { useDashboardStats } from '@/hooks/api/useDashboardStats';
 import { useDashboardCharts } from '@/hooks/api/useDashboardCharts';
 import { Skeleton } from '@/components/ui/skeleton';
+import { transformStatsToMetrics } from '@/lib/utils/dashboard-utils';
 import type { RecentReading } from '@/types/admin.types';
 
 /**
@@ -133,15 +134,30 @@ export default function AdminDashboardPage() {
           </div>
         ) : stats ? (
           <>
-            <StatsCard title="Total Usuarios" metric={stats.totalUsers} icon="users" />
-            <StatsCard title="Lecturas del Mes" metric={stats.monthlyReadings} icon="book" />
-            <StatsCard title="Tarotistas Activos" metric={stats.activeTarotistas} icon="star" />
-            <StatsCard
-              title="Revenue del Mes"
-              metric={stats.monthlyRevenue}
-              icon="dollar-sign"
-              prefix="$"
-            />
+            {(() => {
+              const metrics = transformStatsToMetrics(stats);
+              return (
+                <>
+                  <StatsCard title="Total Usuarios" metric={metrics.totalUsers} icon="users" />
+                  <StatsCard
+                    title="Lecturas del Mes"
+                    metric={metrics.monthlyReadings}
+                    icon="book"
+                  />
+                  <StatsCard
+                    title="Tarotistas Activos"
+                    metric={metrics.activeTarotistas}
+                    icon="star"
+                  />
+                  <StatsCard
+                    title="Revenue del Mes"
+                    metric={metrics.monthlyRevenue}
+                    icon="dollar-sign"
+                    prefix="$"
+                  />
+                </>
+              );
+            })()}
           </>
         ) : null}
       </div>
@@ -156,8 +172,8 @@ export default function AdminDashboardPage() {
           </div>
         ) : charts ? (
           <>
-            <DailyReadingsChart data={charts.dailyReadings} />
-            <PlanDistributionChart data={charts.planDistribution} />
+            <DailyReadingsChart data={charts.readingsPerDay} />
+            <PlanDistributionChart data={stats?.users.planDistribution || []} />
           </>
         ) : null}
       </div>

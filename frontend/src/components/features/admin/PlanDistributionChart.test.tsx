@@ -7,10 +7,10 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import { PlanDistributionChart } from '@/components/features/admin/PlanDistributionChart';
-import type { PlanDistribution } from '@/types/admin.types';
+import type { PlanDistributionDto } from '@/types/admin.types';
 
 describe('PlanDistributionChart', () => {
-  const mockData: PlanDistribution[] = [
+  const mockData: PlanDistributionDto[] = [
     { plan: 'Gratis', count: 100, percentage: 50 },
     { plan: 'Básico', count: 60, percentage: 30 },
     { plan: 'Premium', count: 40, percentage: 20 },

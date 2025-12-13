@@ -6,10 +6,10 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
-import type { PlanDistribution } from '@/types/admin.types';
+import type { PlanDistributionDto } from '@/types/admin.types';
 
 interface PlanDistributionChartProps {
-  data: PlanDistribution[];
+  data: PlanDistributionDto[];
 }
 
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))'];

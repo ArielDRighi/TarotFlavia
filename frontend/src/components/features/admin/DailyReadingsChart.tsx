@@ -14,10 +14,10 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import type { ChartDataPoint } from '@/types/admin.types';
+import type { ReadingsPerDayDto } from '@/types/admin.types';
 
 interface DailyReadingsChartProps {
-  data: ChartDataPoint[];
+  data: ReadingsPerDayDto[];
 }
 
 export function DailyReadingsChart({ data }: DailyReadingsChartProps) {
@@ -51,7 +51,7 @@ export function DailyReadingsChart({ data }: DailyReadingsChartProps) {
               />
               <Line
                 type="monotone"
-                dataKey="value"
+                dataKey="count"
                 stroke="hsl(var(--primary))"
                 strokeWidth={2}
                 name="Lecturas"
