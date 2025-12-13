@@ -80,5 +80,14 @@ export const API_ENDPOINTS = {
   ADMIN: {
     DASHBOARD_STATS: '/admin/dashboard/stats',
     DASHBOARD_CHARTS: '/admin/dashboard/charts',
+    USERS: '/admin/users',
+    USER_BY_ID: (id: number) => `/admin/users/${id}`,
+    BAN_USER: (id: number) => `/admin/users/${id}/ban`,
+    UNBAN_USER: (id: number) => `/admin/users/${id}/unban`,
+    UPDATE_USER_PLAN: (id: number) => `/admin/users/${id}/plan`,
+    ADD_TAROTIST_ROLE: (id: number) => `/admin/users/${id}/roles/tarotist`,
+    REMOVE_TAROTIST_ROLE: (id: number) => `/admin/users/${id}/roles/tarotist`,
+    ADD_ADMIN_ROLE: (id: number) => `/admin/users/${id}/roles/admin`,
+    REMOVE_ADMIN_ROLE: (id: number) => `/admin/users/${id}/roles/admin`,
   },
 } as const;
