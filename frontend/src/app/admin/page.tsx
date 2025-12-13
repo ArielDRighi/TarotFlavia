@@ -28,19 +28,6 @@ function StatsCardsSkeleton() {
   );
 }
 
-/**
- * Skeleton loader para los gráficos
- */
-function ChartsSkeleton() {
-  return (
-    <>
-      {[1, 2].map((i) => (
-        <Skeleton key={i} className="h-[400px]" />
-      ))}
-    </>
-  );
-}
-
 export default function AdminDashboardPage() {
   const { data: stats, isLoading: isLoadingStats, error: statsError } = useDashboardStats();
   const { data: charts, isLoading: isLoadingCharts, error: chartsError } = useDashboardCharts();
