@@ -98,18 +98,20 @@ export interface ChartsResponseDto {
 
 /**
  * Estadísticas de un proveedor de IA
+ * Refleja exactamente el ProviderStatisticsDto del backend
  */
 export interface AIProviderStats {
   provider: 'GROQ' | 'OPENAI' | 'DEEPSEEK';
   totalCalls: number;
-  successfulCalls: number;
-  failedCalls: number;
-  errorRate: number;
+  successCalls: number;
+  errorCalls: number;
+  cachedCalls: number;
   totalTokens: number;
-  inputTokens: number;
-  outputTokens: number;
-  averageLatency: number;
   totalCost: number;
+  avgDuration: number;
+  errorRate: number;
+  cacheHitRate: number;
+  fallbackRate: number;
 }
 
 /**

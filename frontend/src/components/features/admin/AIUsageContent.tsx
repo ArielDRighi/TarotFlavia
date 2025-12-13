@@ -7,7 +7,6 @@
  * Handles state and data fetching logic
  */
 
-import { useState } from 'react';
 import { useAIUsageStats } from '@/hooks/queries/useAdminAIUsage';
 import { AIUsageAlerts } from './AIUsageAlerts';
 import { AIUsageMetricsCards } from './AIUsageMetricsCards';
@@ -17,9 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export function AIUsageContent() {
-  const [dateRange] = useState<{ startDate?: string; endDate?: string }>({});
-
-  const { data: stats, isLoading, error } = useAIUsageStats(dateRange.startDate, dateRange.endDate);
+  const { data: stats, isLoading, error } = useAIUsageStats();
 
   if (isLoading) {
     return (

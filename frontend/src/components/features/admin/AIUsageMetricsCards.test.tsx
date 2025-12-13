@@ -13,26 +13,28 @@ describe('AIUsageMetricsCards', () => {
       {
         provider: 'GROQ',
         totalCalls: 1000,
-        successfulCalls: 950,
-        failedCalls: 50,
-        errorRate: 5.0,
+        successCalls: 950,
+        errorCalls: 50,
+        cachedCalls: 20,
         totalTokens: 100000,
-        inputTokens: 60000,
-        outputTokens: 40000,
-        averageLatency: 250,
         totalCost: 0.1234,
+        avgDuration: 250,
+        errorRate: 5.0,
+        cacheHitRate: 2.0,
+        fallbackRate: 1.0,
       },
       {
         provider: 'OPENAI',
         totalCalls: 100,
-        successfulCalls: 98,
-        failedCalls: 2,
-        errorRate: 2.0,
+        successCalls: 98,
+        errorCalls: 2,
+        cachedCalls: 5,
         totalTokens: 20000,
-        inputTokens: 12000,
-        outputTokens: 8000,
-        averageLatency: 300,
         totalCost: 0.0456,
+        avgDuration: 300,
+        errorRate: 2.0,
+        cacheHitRate: 5.0,
+        fallbackRate: 0.5,
       },
     ],
     groqCallsToday: 100,
@@ -73,13 +75,11 @@ describe('AIUsageMetricsCards', () => {
     expect(screen.getByText(/120[.,]000/)).toBeInTheDocument();
   });
 
-  it('should display input/output token breakdown', () => {
+  it('should display cache hit rate', () => {
     render(<AIUsageMetricsCards stats={mockStats} />);
 
-    // 60000 + 12000 = 72000 input
-    // 40000 + 8000 = 48000 output
-    expect(screen.getByText(/72[.,]000.*input/i)).toBeInTheDocument();
-    expect(screen.getByText(/48[.,]000.*output/i)).toBeInTheDocument();
+    // (20 + 5) / (1000 + 100) = 25 / 1100 = 2.27%
+    expect(screen.getByText(/Cache hit: 2\.27%/i)).toBeInTheDocument();
   });
 
   it('should calculate and display total cost correctly', () => {
@@ -110,8 +110,8 @@ describe('AIUsageMetricsCards', () => {
       statistics: [
         {
           ...mockStats.statistics[0],
-          successfulCalls: 920,
-          failedCalls: 80,
+          successCalls: 920,
+          errorCalls: 80,
           errorRate: 8.0,
         },
       ],
@@ -130,8 +130,8 @@ describe('AIUsageMetricsCards', () => {
       statistics: [
         {
           ...mockStats.statistics[0],
-          successfulCalls: 850,
-          failedCalls: 150,
+          successCalls: 850,
+          errorCalls: 150,
           errorRate: 15.0,
         },
       ],

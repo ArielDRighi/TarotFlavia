@@ -7,6 +7,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAIUsageStats } from './useAdminAIUsage';
 import * as adminAIUsageApi from '@/lib/api/admin-ai-usage-api';
+import type { AIUsageStats } from '@/types/admin.types';
 
 vi.mock('@/lib/api/admin-ai-usage-api');
 
@@ -33,19 +34,20 @@ describe('useAdminAIUsage', () => {
 
   describe('useAIUsageStats', () => {
     it('should fetch AI usage statistics without date filters', async () => {
-      const mockData = {
+      const mockData: AIUsageStats = {
         statistics: [
           {
             provider: 'GROQ' as const,
             totalCalls: 1000,
-            successfulCalls: 950,
-            failedCalls: 50,
-            errorRate: 5.0,
+            successCalls: 950,
+            errorCalls: 50,
+            cachedCalls: 20,
             totalTokens: 100000,
-            inputTokens: 60000,
-            outputTokens: 40000,
-            averageLatency: 250,
             totalCost: 0.1234,
+            avgDuration: 250,
+            errorRate: 5.0,
+            cacheHitRate: 2.0,
+            fallbackRate: 1.0,
           },
         ],
         groqCallsToday: 100,

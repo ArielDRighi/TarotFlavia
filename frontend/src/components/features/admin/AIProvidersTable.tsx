@@ -24,25 +24,28 @@ export function AIProvidersTable({ providers }: AIProvidersTableProps) {
   const totals = providers.reduce(
     (acc, provider) => ({
       totalCalls: acc.totalCalls + provider.totalCalls,
-      successfulCalls: acc.successfulCalls + provider.successfulCalls,
-      failedCalls: acc.failedCalls + provider.failedCalls,
+      successCalls: acc.successCalls + provider.successCalls,
+      errorCalls: acc.errorCalls + provider.errorCalls,
+      cachedCalls: acc.cachedCalls + provider.cachedCalls,
       totalTokens: acc.totalTokens + provider.totalTokens,
       totalCost: acc.totalCost + provider.totalCost,
-      totalLatency: acc.totalLatency + provider.averageLatency * provider.totalCalls,
+      totalDuration: acc.totalDuration + provider.avgDuration * provider.totalCalls,
     }),
     {
       totalCalls: 0,
-      successfulCalls: 0,
-      failedCalls: 0,
+      successCalls: 0,
+      errorCalls: 0,
+      cachedCalls: 0,
       totalTokens: 0,
       totalCost: 0,
-      totalLatency: 0,
+      totalDuration: 0,
     }
   );
 
-  const averageLatency = totals.totalCalls > 0 ? totals.totalLatency / totals.totalCalls : 0;
-  const averageErrorRate =
-    totals.totalCalls > 0 ? (totals.failedCalls / totals.totalCalls) * 100 : 0;
+  const avgDuration = totals.totalCalls > 0 ? totals.totalDuration / totals.totalCalls : 0;
+  const avgErrorRate = totals.totalCalls > 0 ? (totals.errorCalls / totals.totalCalls) * 100 : 0;
+  const avgCacheHitRate =
+    totals.totalCalls > 0 ? (totals.cachedCalls / totals.totalCalls) * 100 : 0;
 
   return (
     <div className="rounded-md border">
@@ -50,13 +53,15 @@ export function AIProvidersTable({ providers }: AIProvidersTableProps) {
         <TableHeader>
           <TableRow>
             <TableHead>Proveedor</TableHead>
-            <TableHead className="text-right">Total Calls</TableHead>
-            <TableHead className="text-right">Successful</TableHead>
-            <TableHead className="text-right">Failed</TableHead>
-            <TableHead className="text-right">Error Rate %</TableHead>
-            <TableHead className="text-right">Total Tokens</TableHead>
-            <TableHead className="text-right">Avg Latency (ms)</TableHead>
-            <TableHead className="text-right">Total Cost (USD)</TableHead>
+            <TableHead className="text-right">Total</TableHead>
+            <TableHead className="text-right">Success</TableHead>
+            <TableHead className="text-right">Errors</TableHead>
+            <TableHead className="text-right">Cached</TableHead>
+            <TableHead className="text-right">Error %</TableHead>
+            <TableHead className="text-right">Cache %</TableHead>
+            <TableHead className="text-right">Tokens</TableHead>
+            <TableHead className="text-right">Avg ms</TableHead>
+            <TableHead className="text-right">Cost USD</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -64,13 +69,13 @@ export function AIProvidersTable({ providers }: AIProvidersTableProps) {
             <TableRow key={provider.provider}>
               <TableCell className="font-medium">{provider.provider}</TableCell>
               <TableCell className="text-right">{provider.totalCalls.toLocaleString()}</TableCell>
-              <TableCell className="text-right">
-                {provider.successfulCalls.toLocaleString()}
-              </TableCell>
-              <TableCell className="text-right">{provider.failedCalls.toLocaleString()}</TableCell>
+              <TableCell className="text-right">{provider.successCalls.toLocaleString()}</TableCell>
+              <TableCell className="text-right">{provider.errorCalls.toLocaleString()}</TableCell>
+              <TableCell className="text-right">{provider.cachedCalls.toLocaleString()}</TableCell>
               <TableCell className="text-right">{provider.errorRate.toFixed(2)}%</TableCell>
+              <TableCell className="text-right">{provider.cacheHitRate.toFixed(2)}%</TableCell>
               <TableCell className="text-right">{provider.totalTokens.toLocaleString()}</TableCell>
-              <TableCell className="text-right">{Math.round(provider.averageLatency)}</TableCell>
+              <TableCell className="text-right">{Math.round(provider.avgDuration)}</TableCell>
               <TableCell className="text-right">${provider.totalCost.toFixed(4)}</TableCell>
             </TableRow>
           ))}
@@ -82,16 +87,20 @@ export function AIProvidersTable({ providers }: AIProvidersTableProps) {
               {totals.totalCalls.toLocaleString()}
             </TableCell>
             <TableCell className="text-right font-bold">
-              {totals.successfulCalls.toLocaleString()}
+              {totals.successCalls.toLocaleString()}
             </TableCell>
             <TableCell className="text-right font-bold">
-              {totals.failedCalls.toLocaleString()}
+              {totals.errorCalls.toLocaleString()}
             </TableCell>
-            <TableCell className="text-right font-bold">{averageErrorRate.toFixed(2)}%</TableCell>
+            <TableCell className="text-right font-bold">
+              {totals.cachedCalls.toLocaleString()}
+            </TableCell>
+            <TableCell className="text-right font-bold">{avgErrorRate.toFixed(2)}%</TableCell>
+            <TableCell className="text-right font-bold">{avgCacheHitRate.toFixed(2)}%</TableCell>
             <TableCell className="text-right font-bold">
               {totals.totalTokens.toLocaleString()}
             </TableCell>
-            <TableCell className="text-right font-bold">{Math.round(averageLatency)}</TableCell>
+            <TableCell className="text-right font-bold">{Math.round(avgDuration)}</TableCell>
             <TableCell className="text-right font-bold">${totals.totalCost.toFixed(4)}</TableCell>
           </TableRow>
         </TableFooter>

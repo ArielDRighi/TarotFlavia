@@ -19,18 +19,17 @@ export function AIUsageMetricsCards({ stats }: AIUsageMetricsCardsProps) {
 
   const totalTokens = stats.statistics.reduce((sum, provider) => sum + provider.totalTokens, 0);
 
-  const inputTokens = stats.statistics.reduce((sum, provider) => sum + provider.inputTokens, 0);
-
-  const outputTokens = stats.statistics.reduce((sum, provider) => sum + provider.outputTokens, 0);
-
   const totalCost = stats.statistics.reduce((sum, provider) => sum + provider.totalCost, 0);
 
   const totalSuccessful = stats.statistics.reduce(
-    (sum, provider) => sum + provider.successfulCalls,
+    (sum, provider) => sum + provider.successCalls,
     0
   );
 
+  const totalCached = stats.statistics.reduce((sum, provider) => sum + provider.cachedCalls, 0);
+
   const successRate = totalRequests > 0 ? (totalSuccessful / totalRequests) * 100 : 0;
+  const cacheHitRate = totalRequests > 0 ? (totalCached / totalRequests) * 100 : 0;
 
   // Determine success rate color
   const getSuccessRateColor = (rate: number) => {
@@ -61,9 +60,7 @@ export function AIUsageMetricsCards({ stats }: AIUsageMetricsCardsProps) {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{totalTokens.toLocaleString()}</div>
-          <p className="text-muted-foreground text-xs">
-            {inputTokens.toLocaleString()} input / {outputTokens.toLocaleString()} output
-          </p>
+          <p className="text-muted-foreground text-xs">Cache hit: {cacheHitRate.toFixed(2)}%</p>
         </CardContent>
       </Card>
 
