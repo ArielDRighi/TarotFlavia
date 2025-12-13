@@ -164,17 +164,26 @@ export default function AdminDashboardPage() {
 
       {/* Gráficos */}
       <div className="mb-8 grid gap-4 md:grid-cols-2">
+        {/* Daily Readings Chart */}
         {isLoadingCharts ? (
-          <ChartsSkeleton />
+          <Skeleton className="h-[400px]" />
         ) : chartsError ? (
-          <div className="col-span-2 rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
-            Error al cargar gráficos. Por favor, intenta de nuevo.
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
+            Error al cargar gráfico de lecturas. Por favor, intenta de nuevo.
           </div>
         ) : charts ? (
-          <>
-            <DailyReadingsChart data={charts.readingsPerDay} />
-            <PlanDistributionChart data={stats?.users.planDistribution || []} />
-          </>
+          <DailyReadingsChart data={charts.readingsPerDay} />
+        ) : null}
+
+        {/* Plan Distribution Chart */}
+        {isLoadingStats ? (
+          <Skeleton className="h-[400px]" />
+        ) : statsError ? (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
+            Error al cargar distribución de planes. Por favor, intenta de nuevo.
+          </div>
+        ) : stats?.users.planDistribution ? (
+          <PlanDistributionChart data={stats.users.planDistribution} />
         ) : null}
       </div>
 
