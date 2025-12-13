@@ -89,5 +89,15 @@ export const API_ENDPOINTS = {
     REMOVE_TAROTIST_ROLE: (id: number) => `/admin/users/${id}/roles/tarotist`,
     ADD_ADMIN_ROLE: (id: number) => `/admin/users/${id}/roles/admin`,
     REMOVE_ADMIN_ROLE: (id: number) => `/admin/users/${id}/roles/admin`,
+    // Tarotistas
+    TAROTISTAS: '/admin/tarotistas',
+    TAROTISTA_BY_ID: (id: number) => `/admin/tarotistas/${id}`,
+    DEACTIVATE_TAROTISTA: (id: number) => `/admin/tarotistas/${id}/deactivate`,
+    REACTIVATE_TAROTISTA: (id: number) => `/admin/tarotistas/${id}/reactivate`,
+    TAROTISTA_CONFIG: (id: number) => `/admin/tarotistas/${id}/config`,
+    // Applications
+    TAROTISTA_APPLICATIONS: '/admin/tarotistas/applications',
+    APPROVE_APPLICATION: (id: number) => `/admin/tarotistas/applications/${id}/approve`,
+    REJECT_APPLICATION: (id: number) => `/admin/tarotistas/applications/${id}/reject`,
   },
 } as const;
