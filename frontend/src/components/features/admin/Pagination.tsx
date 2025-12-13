@@ -50,22 +50,37 @@ export function Pagination({
         </Button>
 
         <div className="flex items-center gap-1">
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page, index, pages) => {
             // Show first page, last page, current page, and pages around current
             const showPage =
               page === 1 ||
               page === totalPages ||
               (page >= currentPage - 1 && page <= currentPage + 1);
 
-            if (!showPage && page === currentPage - 2) {
-              return <span key={page}>...</span>;
-            }
-
-            if (!showPage && page === currentPage + 2) {
-              return <span key={page}>...</span>;
-            }
-
             if (!showPage) {
+              // Check if we should show ellipsis
+              const prevPage = index > 0 ? pages[index - 1] : null;
+              const shouldShowEllipsis =
+                prevPage !== null && prevPage < currentPage - 1 && page > currentPage + 1;
+
+              // Only show one ellipsis before visible range
+              if (page === currentPage - 2 && page > 2) {
+                return (
+                  <span key={page} className="px-2 text-gray-400">
+                    ...
+                  </span>
+                );
+              }
+
+              // Only show one ellipsis after visible range
+              if (page === currentPage + 2 && page < totalPages - 1 && shouldShowEllipsis) {
+                return (
+                  <span key={page} className="px-2 text-gray-400">
+                    ...
+                  </span>
+                );
+              }
+
               return null;
             }
 

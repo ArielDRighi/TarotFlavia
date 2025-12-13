@@ -51,6 +51,11 @@ export default function AdminUsuariosPage() {
       case 'unban':
         handleUnban(user);
         break;
+      case 'manage-roles':
+        // TODO: Implement ManageRolesModal in future task
+        toast.info('Gestión de roles: próximamente');
+        setSelectedUser(null);
+        break;
       default:
         break;
     }

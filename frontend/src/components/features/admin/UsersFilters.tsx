@@ -35,11 +35,13 @@ export function UsersFilters({ onFilterChange }: UsersFiltersProps) {
     const filters: Partial<UserFilters> = {};
 
     if (debouncedSearch) filters.search = debouncedSearch;
-    if (plan) filters.plan = plan as UserFilters['plan'];
-    if (role) filters.role = role as UserFilters['role'];
+    // Only add plan/role if not 'all'
+    if (plan && plan !== 'all') filters.plan = plan as UserFilters['plan'];
+    if (role && role !== 'all') filters.role = role as UserFilters['role'];
 
     onFilterChange(filters);
-  }, [debouncedSearch, plan, role, onFilterChange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch, plan, role]);
 
   const handleClearFilters = () => {
     setSearch('');
@@ -94,7 +96,12 @@ export function UsersFilters({ onFilterChange }: UsersFiltersProps) {
 
         {/* Clear Filters */}
         {hasActiveFilters && (
-          <Button variant="outline" onClick={handleClearFilters} size="icon">
+          <Button
+            variant="outline"
+            onClick={handleClearFilters}
+            size="icon"
+            aria-label="Limpiar filtros"
+          >
             <X className="h-4 w-4" />
             <span className="sr-only">Limpiar filtros</span>
           </Button>

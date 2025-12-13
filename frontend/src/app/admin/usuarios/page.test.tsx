@@ -29,8 +29,13 @@ describe('AdminUsuariosPage', () => {
 
   it('should show loading state initially', () => {
     render(<AdminUsuariosPage />);
-    // Should have skeleton elements when loading
+
+    // Should have title
     expect(screen.getByText('Gestión de Usuarios')).toBeInTheDocument();
+
+    // Should have Skeleton components (they render as divs)
+    const skeletons = document.querySelectorAll('[class*="animate-pulse"]');
+    expect(skeletons.length).toBeGreaterThan(0);
   });
 
   it('should have font-serif class on heading', () => {
