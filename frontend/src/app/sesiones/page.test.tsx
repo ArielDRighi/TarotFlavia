@@ -1,8 +1,23 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import SesionesPage from './page';
 
+// Mock useRequireAuth
+const mockUseRequireAuth = vi.fn(() => ({ isLoading: false }));
+vi.mock('@/hooks/useRequireAuth', () => ({
+  useRequireAuth: () => mockUseRequireAuth(),
+}));
+
+// Mock SessionsList component
+vi.mock('@/components/features/marketplace/SessionsList', () => ({
+  SessionsList: vi.fn(() => <div data-testid="sessions-list">SessionsList Component</div>),
+}));
+
 describe('SesionesPage', () => {
+  beforeEach(() => {
+    mockUseRequireAuth.mockReturnValue({ isLoading: false });
+  });
+
   it('should render sesiones page with correct title', () => {
     render(<SesionesPage />);
 
@@ -28,5 +43,19 @@ describe('SesionesPage', () => {
 
     const heading = screen.getByRole('heading', { level: 1 });
     expect(heading).toHaveClass('font-serif');
+  });
+
+  it('should render SessionsList component', () => {
+    render(<SesionesPage />);
+
+    expect(screen.getByTestId('sessions-list')).toBeInTheDocument();
+  });
+
+  it('should show loading state when auth is loading', () => {
+    mockUseRequireAuth.mockReturnValueOnce({ isLoading: true });
+
+    render(<SesionesPage />);
+
+    expect(screen.getByTestId('auth-loading')).toBeInTheDocument();
   });
 });
