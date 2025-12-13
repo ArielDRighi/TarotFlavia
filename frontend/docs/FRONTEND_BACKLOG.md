@@ -2907,11 +2907,73 @@ IMPORTANTE:
 
 ---
 
-### TAREA 9.5: Crear página Mis Sesiones
+### TAREA 9.5: Crear página Mis Sesiones ✅
 
 **Prioridad:** ALTA
 **Estimación:** 40 min
 **Dependencias:** 9.4, 9.1
+**Estado:** COMPLETADO
+**Fecha de completado:** 13 Diciembre 2025
+
+**Archivos creados/modificados:**
+
+- ✅ `src/app/sesiones/page.tsx` - Página con useRequireAuth y delegación a SessionsList
+- ✅ `src/app/sesiones/page.test.tsx` - Tests completos de la página
+- ✅ `src/components/features/marketplace/SessionsList.tsx` - Componente principal con tabs y filtros
+- ✅ `src/components/features/marketplace/SessionsList.test.tsx` - Tests completos del componente (16 tests)
+- ✅ `src/components/ui/alert-dialog.tsx` - Componente de shadcn para modal de confirmación
+
+**Implementación realizada:**
+
+1. **Página principal** (`src/app/sesiones/page.tsx`):
+   - Client component con `useRequireAuth()`
+   - Loading state durante autenticación
+   - Delegación completa de lógica a `SessionsList`
+
+2. **Componente SessionsList**:
+   - Sistema de tabs para filtrar sesiones:
+     - "Próximas": filtra `pending` y `confirmed`
+     - "Completadas": filtra `completed`
+     - "Canceladas": filtra `cancelled_by_user` y `cancelled_by_tarotist`
+     - "Todas": muestra todas las sesiones
+   - Ordenamiento por fecha ascendente (próximas primero)
+   - Estados de carga con Skeleton
+   - Empty states personalizados por tab
+   - Modal de confirmación para cancelación de sesiones
+   - Integración con `useMySessions()` y `useCancelSession()`
+
+3. **Acciones implementadas**:
+   - **Cancelar**: Modal de confirmación → llamada a `useCancelSession` con reason
+   - **Unirse**: Abre Google Meet en nueva pestaña con `window.open(meetLink, '_blank')`
+   - Reutilización de `SessionCard` existente con callbacks
+
+4. **Coverage de tests**:
+   - 16 tests para SessionsList cubriendo:
+     - Renderizado de tabs
+     - Switching entre tabs
+     - Estados de carga y error
+     - Filtrado por cada tab
+     - Empty states
+     - Acciones de join y cancel
+     - Ordenamiento por fecha
+   - 6 tests para la página
+   - **Coverage total: 90.35%** (superior al 80% requerido)
+
+**Decisiones técnicas:**
+
+- Filtrado client-side en lugar de server-side para mejor UX (evita re-fetching)
+- Uso de `userEvent` en tests en lugar de `fireEvent` para interacciones más realistas con tabs
+- Componente alert-dialog instalado desde shadcn/ui para modal de confirmación
+- Reutilización máxima de SessionCard existente
+
+**Validaciones pasadas:**
+
+- ✅ Lint: 0 errores, 0 warnings
+- ✅ Type-check: sin errores
+- ✅ Build: exitoso
+- ✅ Arquitectura: validación exitosa
+- ✅ Tests: 1073 tests pasando
+- ✅ Coverage: 90.35% (>80%)
 
 **Consigna:**
 Crear lista de sesiones del usuario con filtros por estado.
