@@ -40,8 +40,7 @@ export function UsersFilters({ onFilterChange }: UsersFiltersProps) {
     if (role && role !== 'all') filters.role = role as UserFilters['role'];
 
     onFilterChange(filters);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch, plan, role]);
+  }, [debouncedSearch, plan, role, onFilterChange]);
 
   const handleClearFilters = () => {
     setSearch('');

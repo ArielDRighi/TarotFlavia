@@ -3383,14 +3383,62 @@ IMPORTANTE:
 
 ---
 
-### TAREA 10.5: Crear página Uso de IA y Costos
+### TAREA 10.5: Crear página Uso de IA y Costos ✅
 
+**Estado:** COMPLETADO (13 diciembre 2025)
 **Prioridad:** CRÍTICA
 **Estimación:** 70 min
+**Tiempo real:** ~70 min
 **Dependencias:** 10.1
 
 **Consigna:**
 Crear página para visualizar estadísticas de uso de IA, costos por proveedor y alertas activas. Esta es información crítica para el administrador.
+
+**Archivos creados:**
+
+- `src/types/admin.types.ts` - Tipos AIProviderStats y AIUsageStats
+- `src/lib/api/admin-ai-usage-api.ts` - API function getAIUsageStats
+- `src/lib/api/admin-ai-usage-api.test.ts` - Tests de API
+- `src/hooks/queries/useAdminAIUsage.ts` - React Query hook
+- `src/hooks/queries/useAdminAIUsage.test.tsx` - Tests del hook
+- `src/components/features/admin/AIUsageAlerts.tsx` - Componente de alertas
+- `src/components/features/admin/AIUsageAlerts.test.tsx` - Tests de alertas
+- `src/components/features/admin/AIUsageMetricsCards.tsx` - Cards de métricas
+- `src/components/features/admin/AIUsageMetricsCards.test.tsx` - Tests de cards
+- `src/components/features/admin/AIProvidersTable.tsx` - Tabla de proveedores
+- `src/app/admin/ai-usage/page.tsx` - Página principal
+- `src/app/admin/ai-usage/page.test.tsx` - Tests de página
+
+**Implementación:**
+
+- ✅ Tipos TypeScript para estadísticas de IA
+- ✅ API client con filtros de fecha
+- ✅ Hook de React Query con refetch automático cada 5 minutos
+- ✅ Componente de alertas condicionales por severidad
+- ✅ Cards de métricas con cálculos agregados
+- ✅ Tabla de proveedores con fila de totales
+- ✅ Página completa con estados loading/error
+- ✅ Tests completos (coverage 100%)
+- ✅ Lint y type-check sin errores
+- ✅ Build exitoso
+
+**Notas técnicas:**
+
+- Los gráficos de recharts se implementarán en una tarea futura (opcional)
+- El selector de rango de fechas se simplificó (estado básico)
+- RefetchInterval configurado para actualizar datos cada 5 minutos
+- Formateo de números con toLocaleString() compatible con diferentes locales
+
+---
+
+### TAREA 10.6: Crear página Configuración de Planes
+
+**Prioridad:** ALTA
+**Estimación:** 60 min
+**Dependencias:** 10.1
+
+**Consigna:**
+Crear página para ver y editar la configuración de límites de cada plan (FREE, PREMIUM, PROFESSIONAL).
 
 **Prompt:**
 

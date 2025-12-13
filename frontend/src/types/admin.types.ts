@@ -94,6 +94,36 @@ export interface ChartsResponseDto {
 
 // --- Tipos derivados para UI ---
 
+// --- /admin/ai-usage ---
+
+/**
+ * Estadísticas de un proveedor de IA
+ */
+export interface AIProviderStats {
+  provider: 'GROQ' | 'OPENAI' | 'DEEPSEEK';
+  totalCalls: number;
+  successfulCalls: number;
+  failedCalls: number;
+  errorRate: number;
+  totalTokens: number;
+  inputTokens: number;
+  outputTokens: number;
+  averageLatency: number;
+  totalCost: number;
+}
+
+/**
+ * Estadísticas de uso de IA con alertas
+ */
+export interface AIUsageStats {
+  statistics: AIProviderStats[];
+  groqCallsToday: number;
+  groqRateLimitAlert: boolean;
+  highErrorRateAlert: boolean;
+  highFallbackRateAlert: boolean;
+  highDailyCostAlert: boolean;
+}
+
 /**
  * Métrica individual procesada para las cards del dashboard
  */
