@@ -99,5 +99,7 @@ export const API_ENDPOINTS = {
     TAROTISTA_APPLICATIONS: '/admin/tarotistas/applications',
     APPROVE_APPLICATION: (id: number) => `/admin/tarotistas/applications/${id}/approve`,
     REJECT_APPLICATION: (id: number) => `/admin/tarotistas/applications/${id}/reject`,
+    // AI Usage
+    AI_USAGE: '/admin/ai-usage',
   },
 } as const;
