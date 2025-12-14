@@ -104,5 +104,11 @@ export const API_ENDPOINTS = {
     // Plan Configuration
     PLAN_CONFIG: '/plan-config',
     PLAN_CONFIG_BY_TYPE: (planType: string) => `/plan-config/${planType}`,
+    // Security & Rate Limiting
+    RATE_LIMIT_VIOLATIONS: '/admin/rate-limits/violations',
+    BLOCKED_IPS: '/admin/rate-limits/blocked-ips',
+    BLOCK_IP: '/admin/rate-limits/block-ip',
+    UNBLOCK_IP: (ip: string) => `/admin/rate-limits/unblock-ip/${ip}`,
+    SECURITY_EVENTS: '/admin/security/events',
   },
 } as const;
