@@ -110,5 +110,7 @@ export const API_ENDPOINTS = {
     // TODO: Backend endpoints pendientes
     // BLOCK_IP: '/admin/security/block-ip',
     // UNBLOCK_IP: (ip: string) => `/admin/security/block-ip/${ip}`,
+    // Audit Logs
+    AUDIT_LOGS: '/admin/audit-logs',
   },
 } as const;
