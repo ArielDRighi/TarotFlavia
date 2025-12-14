@@ -45,28 +45,32 @@ describe('useAdminPlans', () => {
         {
           id: 1,
           planType: 'free',
-          dailyReadingLimit: 1,
-          monthlyAIQuota: 10,
-          canUseCustomQuestions: false,
-          canRegenerateInterpretations: false,
-          maxRegenerationsPerReading: 0,
-          canShareReadings: false,
-          historyLimit: 10,
-          canBookSessions: false,
+          name: 'Plan Gratuito',
+          description: 'Plan básico',
+          readingsLimit: 1,
+          aiQuotaMonthly: 10,
+          allowCustomQuestions: false,
+          allowAdvancedSpreads: false,
+          allowSharing: false,
           price: 0,
+          isActive: true,
+          createdAt: '2024-01-01T00:00:00Z',
+          updatedAt: '2024-01-01T00:00:00Z',
         },
         {
           id: 2,
           planType: 'premium',
-          dailyReadingLimit: 5,
-          monthlyAIQuota: 100,
-          canUseCustomQuestions: true,
-          canRegenerateInterpretations: true,
-          maxRegenerationsPerReading: 3,
-          canShareReadings: true,
-          historyLimit: -1,
-          canBookSessions: true,
+          name: 'Plan Premium',
+          description: 'Plan avanzado',
+          readingsLimit: 5,
+          aiQuotaMonthly: 100,
+          allowCustomQuestions: true,
+          allowAdvancedSpreads: true,
+          allowSharing: true,
           price: 9.99,
+          isActive: true,
+          createdAt: '2024-01-01T00:00:00Z',
+          updatedAt: '2024-01-01T00:00:00Z',
         },
       ];
 
@@ -104,15 +108,17 @@ describe('useAdminPlans', () => {
       const mockPlan: PlanConfig = {
         id: 2,
         planType: 'premium',
-        dailyReadingLimit: 5,
-        monthlyAIQuota: 100,
-        canUseCustomQuestions: true,
-        canRegenerateInterpretations: true,
-        maxRegenerationsPerReading: 3,
-        canShareReadings: true,
-        historyLimit: -1,
-        canBookSessions: true,
+        name: 'Plan Premium',
+        description: 'Plan avanzado',
+        readingsLimit: 5,
+        aiQuotaMonthly: 100,
+        allowCustomQuestions: true,
+        allowAdvancedSpreads: true,
+        allowSharing: true,
         price: 9.99,
+        isActive: true,
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-01T00:00:00Z',
       };
 
       vi.mocked(adminPlansApi.fetchPlanByType).mockResolvedValue(mockPlan);
@@ -135,15 +141,17 @@ describe('useAdminPlans', () => {
       const mockUpdatedPlan: PlanConfig = {
         id: 2,
         planType: 'premium',
-        dailyReadingLimit: 10,
-        monthlyAIQuota: 100,
-        canUseCustomQuestions: true,
-        canRegenerateInterpretations: true,
-        maxRegenerationsPerReading: 3,
-        canShareReadings: true,
-        historyLimit: -1,
-        canBookSessions: true,
+        name: 'Plan Premium',
+        description: 'Plan avanzado',
+        readingsLimit: 50,
+        aiQuotaMonthly: 200,
+        allowCustomQuestions: true,
+        allowSharing: true,
+        allowAdvancedSpreads: true,
         price: 12.99,
+        isActive: true,
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-01T00:00:00Z',
       };
 
       vi.mocked(adminPlansApi.updatePlanConfig).mockResolvedValue(mockUpdatedPlan);
@@ -154,7 +162,7 @@ describe('useAdminPlans', () => {
 
       result.current.mutate({
         planType: 'premium',
-        data: { dailyReadingLimit: 10, price: 12.99 },
+        data: { readingsLimit: 50, price: 12.99 },
       });
 
       await waitFor(() => {
@@ -162,7 +170,7 @@ describe('useAdminPlans', () => {
       });
 
       expect(adminPlansApi.updatePlanConfig).toHaveBeenCalledWith('premium', {
-        dailyReadingLimit: 10,
+        readingsLimit: 50,
         price: 12.99,
       });
       expect(result.current.data).toEqual(mockUpdatedPlan);
@@ -177,7 +185,7 @@ describe('useAdminPlans', () => {
 
       result.current.mutate({
         planType: 'premium',
-        data: { dailyReadingLimit: -5 },
+        data: { readingsLimit: -5 },
       });
 
       await waitFor(() => {

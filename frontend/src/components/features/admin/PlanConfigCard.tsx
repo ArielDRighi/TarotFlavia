@@ -45,8 +45,8 @@ export function PlanConfigCard({ plan, onSave, isLoading }: PlanConfigCardProps)
   // Detectar cambios comparando stringified data
   const hasChanges = JSON.stringify(formData) !== JSON.stringify(plan);
 
-  const handleNumberChange = (field: keyof PlanConfig, value: string) => {
-    const numValue = parseInt(value, 10);
+  const handleNumberChange = (field: keyof PlanConfig, value: string, useFloat = false) => {
+    const numValue = useFloat ? parseFloat(value) : parseInt(value, 10);
     setFormData((prev) => ({ ...prev, [field]: isNaN(numValue) ? 0 : numValue }));
   };
 
@@ -57,13 +57,8 @@ export function PlanConfigCard({ plan, onSave, isLoading }: PlanConfigCardProps)
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    // Validar que los números positivos o -1 (ilimitado)
-    const numberFields: (keyof PlanConfig)[] = [
-      'dailyReadingLimit',
-      'monthlyAIQuota',
-      'maxRegenerationsPerReading',
-      'historyLimit',
-    ];
+    // Validar que los números sean positivos o -1 (ilimitado)
+    const numberFields: (keyof PlanConfig)[] = ['readingsLimit', 'aiQuotaMonthly'];
 
     numberFields.forEach((field) => {
       const value = formData[field] as number;
@@ -85,15 +80,14 @@ export function PlanConfigCard({ plan, onSave, isLoading }: PlanConfigCardProps)
     if (!validateForm()) return;
 
     const updateDto: UpdatePlanConfigDto = {
-      dailyReadingLimit: formData.dailyReadingLimit,
-      monthlyAIQuota: formData.monthlyAIQuota,
-      canUseCustomQuestions: formData.canUseCustomQuestions,
-      canRegenerateInterpretations: formData.canRegenerateInterpretations,
-      maxRegenerationsPerReading: formData.maxRegenerationsPerReading,
-      canShareReadings: formData.canShareReadings,
-      historyLimit: formData.historyLimit,
-      canBookSessions: formData.canBookSessions,
+      name: formData.name,
+      description: formData.description || undefined,
       price: formData.price,
+      readingsLimit: formData.readingsLimit,
+      aiQuotaMonthly: formData.aiQuotaMonthly,
+      allowCustomQuestions: formData.allowCustomQuestions,
+      allowSharing: formData.allowSharing,
+      allowAdvancedSpreads: formData.allowAdvancedSpreads,
     };
 
     onSave(updateDto);
@@ -124,70 +118,62 @@ export function PlanConfigCard({ plan, onSave, isLoading }: PlanConfigCardProps)
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {/* Límite diario */}
+        {/* Nombre del plan */}
         <div className="space-y-2">
-          <Label htmlFor={`dailyReadingLimit-${plan.planType}`}>Lecturas diarias</Label>
+          <Label htmlFor={`name-${plan.planType}`}>Nombre del plan</Label>
           <Input
-            id={`dailyReadingLimit-${plan.planType}`}
-            type="number"
-            value={formData.dailyReadingLimit}
-            onChange={(e) => handleNumberChange('dailyReadingLimit', e.target.value)}
+            id={`name-${plan.planType}`}
+            type="text"
+            value={formData.name}
+            onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
             disabled={isGuestPlan || isLoading}
-            className={errors.dailyReadingLimit ? 'border-red-500' : ''}
           />
-          {errors.dailyReadingLimit && (
-            <p className="text-sm text-red-600">{errors.dailyReadingLimit}</p>
-          )}
+        </div>
+
+        {/* Descripción */}
+        <div className="space-y-2">
+          <Label htmlFor={`description-${plan.planType}`}>Descripción</Label>
+          <Input
+            id={`description-${plan.planType}`}
+            type="text"
+            value={formData.description || ''}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, description: e.target.value || null }))
+            }
+            disabled={isGuestPlan || isLoading}
+          />
+        </div>
+
+        {/* Límite de lecturas mensuales */}
+        <div className="space-y-2">
+          <Label htmlFor={`readingsLimit-${plan.planType}`}>
+            Lecturas mensuales (-1 = ilimitado)
+          </Label>
+          <Input
+            id={`readingsLimit-${plan.planType}`}
+            type="number"
+            value={formData.readingsLimit}
+            onChange={(e) => handleNumberChange('readingsLimit', e.target.value)}
+            disabled={isGuestPlan || isLoading}
+            className={errors.readingsLimit ? 'border-red-500' : ''}
+          />
+          {errors.readingsLimit && <p className="text-sm text-red-600">{errors.readingsLimit}</p>}
         </div>
 
         {/* Cuota mensual de IA */}
         <div className="space-y-2">
-          <Label htmlFor={`monthlyAIQuota-${plan.planType}`}>
+          <Label htmlFor={`aiQuotaMonthly-${plan.planType}`}>
             Cuota mensual de IA (-1 = ilimitado)
           </Label>
           <Input
-            id={`monthlyAIQuota-${plan.planType}`}
+            id={`aiQuotaMonthly-${plan.planType}`}
             type="number"
-            value={formData.monthlyAIQuota}
-            onChange={(e) => handleNumberChange('monthlyAIQuota', e.target.value)}
+            value={formData.aiQuotaMonthly}
+            onChange={(e) => handleNumberChange('aiQuotaMonthly', e.target.value)}
             disabled={isGuestPlan || isLoading}
-            className={errors.monthlyAIQuota ? 'border-red-500' : ''}
+            className={errors.aiQuotaMonthly ? 'border-red-500' : ''}
           />
-          {errors.monthlyAIQuota && <p className="text-sm text-red-600">{errors.monthlyAIQuota}</p>}
-        </div>
-
-        {/* Máximo de regeneraciones */}
-        <div className="space-y-2">
-          <Label htmlFor={`maxRegenerationsPerReading-${plan.planType}`}>
-            Regeneraciones por lectura
-          </Label>
-          <Input
-            id={`maxRegenerationsPerReading-${plan.planType}`}
-            type="number"
-            value={formData.maxRegenerationsPerReading}
-            onChange={(e) => handleNumberChange('maxRegenerationsPerReading', e.target.value)}
-            disabled={isGuestPlan || isLoading}
-            className={errors.maxRegenerationsPerReading ? 'border-red-500' : ''}
-          />
-          {errors.maxRegenerationsPerReading && (
-            <p className="text-sm text-red-600">{errors.maxRegenerationsPerReading}</p>
-          )}
-        </div>
-
-        {/* Límite de historial */}
-        <div className="space-y-2">
-          <Label htmlFor={`historyLimit-${plan.planType}`}>
-            Límite de historial (-1 = ilimitado)
-          </Label>
-          <Input
-            id={`historyLimit-${plan.planType}`}
-            type="number"
-            value={formData.historyLimit}
-            onChange={(e) => handleNumberChange('historyLimit', e.target.value)}
-            disabled={isGuestPlan || isLoading}
-            className={errors.historyLimit ? 'border-red-500' : ''}
-          />
-          {errors.historyLimit && <p className="text-sm text-red-600">{errors.historyLimit}</p>}
+          {errors.aiQuotaMonthly && <p className="text-sm text-red-600">{errors.aiQuotaMonthly}</p>}
         </div>
 
         {/* Precio */}
@@ -198,7 +184,7 @@ export function PlanConfigCard({ plan, onSave, isLoading }: PlanConfigCardProps)
             type="number"
             step="0.01"
             value={formData.price}
-            onChange={(e) => handleNumberChange('price', e.target.value)}
+            onChange={(e) => handleNumberChange('price', e.target.value, true)}
             disabled={isGuestPlan || isLoading}
             className={errors.price ? 'border-red-500' : ''}
           />
@@ -208,47 +194,33 @@ export function PlanConfigCard({ plan, onSave, isLoading }: PlanConfigCardProps)
         {/* Toggles de features */}
         <div className="space-y-3 border-t pt-4">
           <div className="flex items-center justify-between">
-            <Label htmlFor={`canUseCustomQuestions-${plan.planType}`}>
+            <Label htmlFor={`allowCustomQuestions-${plan.planType}`}>
               Preguntas personalizadas
             </Label>
             <Switch
-              id={`canUseCustomQuestions-${plan.planType}`}
-              checked={formData.canUseCustomQuestions}
-              onCheckedChange={(checked) => handleBooleanChange('canUseCustomQuestions', checked)}
+              id={`allowCustomQuestions-${plan.planType}`}
+              checked={formData.allowCustomQuestions}
+              onCheckedChange={(checked) => handleBooleanChange('allowCustomQuestions', checked)}
               disabled={isGuestPlan || isLoading}
             />
           </div>
 
           <div className="flex items-center justify-between">
-            <Label htmlFor={`canRegenerateInterpretations-${plan.planType}`}>
-              Regenerar interpretaciones
-            </Label>
+            <Label htmlFor={`allowSharing-${plan.planType}`}>Compartir lecturas</Label>
             <Switch
-              id={`canRegenerateInterpretations-${plan.planType}`}
-              checked={formData.canRegenerateInterpretations}
-              onCheckedChange={(checked) =>
-                handleBooleanChange('canRegenerateInterpretations', checked)
-              }
+              id={`allowSharing-${plan.planType}`}
+              checked={formData.allowSharing}
+              onCheckedChange={(checked) => handleBooleanChange('allowSharing', checked)}
               disabled={isGuestPlan || isLoading}
             />
           </div>
 
           <div className="flex items-center justify-between">
-            <Label htmlFor={`canShareReadings-${plan.planType}`}>Compartir lecturas</Label>
+            <Label htmlFor={`allowAdvancedSpreads-${plan.planType}`}>Tiradas avanzadas</Label>
             <Switch
-              id={`canShareReadings-${plan.planType}`}
-              checked={formData.canShareReadings}
-              onCheckedChange={(checked) => handleBooleanChange('canShareReadings', checked)}
-              disabled={isGuestPlan || isLoading}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <Label htmlFor={`canBookSessions-${plan.planType}`}>Reservar sesiones</Label>
-            <Switch
-              id={`canBookSessions-${plan.planType}`}
-              checked={formData.canBookSessions}
-              onCheckedChange={(checked) => handleBooleanChange('canBookSessions', checked)}
+              id={`allowAdvancedSpreads-${plan.planType}`}
+              checked={formData.allowAdvancedSpreads}
+              onCheckedChange={(checked) => handleBooleanChange('allowAdvancedSpreads', checked)}
               disabled={isGuestPlan || isLoading}
             />
           </div>

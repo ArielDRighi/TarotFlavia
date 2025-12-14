@@ -5,49 +5,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { PlanComparisonTable } from './PlanComparisonTable';
-import type { PlanConfig } from '@/types/admin.types';
-
-const mockPlans: PlanConfig[] = [
-  {
-    id: 1,
-    planType: 'free',
-    dailyReadingLimit: 1,
-    monthlyAIQuota: 10,
-    canUseCustomQuestions: false,
-    canRegenerateInterpretations: false,
-    maxRegenerationsPerReading: 0,
-    canShareReadings: false,
-    historyLimit: 10,
-    canBookSessions: false,
-    price: 0,
-  },
-  {
-    id: 2,
-    planType: 'premium',
-    dailyReadingLimit: 5,
-    monthlyAIQuota: 100,
-    canUseCustomQuestions: true,
-    canRegenerateInterpretations: true,
-    maxRegenerationsPerReading: 3,
-    canShareReadings: true,
-    historyLimit: -1,
-    canBookSessions: true,
-    price: 9.99,
-  },
-  {
-    id: 3,
-    planType: 'professional',
-    dailyReadingLimit: -1,
-    monthlyAIQuota: -1,
-    canUseCustomQuestions: true,
-    canRegenerateInterpretations: true,
-    maxRegenerationsPerReading: -1,
-    canShareReadings: true,
-    historyLimit: -1,
-    canBookSessions: true,
-    price: 29.99,
-  },
-];
+import { mockPlans } from '@/test/helpers/admin-mocks';
 
 describe('PlanComparisonTable', () => {
   it('should render table headers with plan names', () => {
@@ -62,12 +20,15 @@ describe('PlanComparisonTable', () => {
   it('should show numeric values for limits', () => {
     render(<PlanComparisonTable plans={mockPlans} />);
 
-    // Free plan
-    expect(screen.getByText('1')).toBeInTheDocument(); // dailyReadingLimit
+    // Free plan has readingsLimit: 10, aiQuotaMonthly: 50
+    expect(screen.getByText('10')).toBeInTheDocument();
 
-    // Premium plan
-    expect(screen.getByText('5')).toBeInTheDocument(); // dailyReadingLimit
-    expect(screen.getByText('100')).toBeInTheDocument(); // monthlyAIQuota
+    // Multiple plans have 50 (free aiQuotaMonthly: 50, premium readingsLimit: 50)
+    const fifties = screen.getAllByText('50');
+    expect(fifties.length).toBeGreaterThanOrEqual(2);
+
+    // Premium plan has aiQuotaMonthly: 200
+    expect(screen.getByText('200')).toBeInTheDocument();
   });
 
   it('should show "Ilimitado" for -1 values', () => {
@@ -97,12 +58,13 @@ describe('PlanComparisonTable', () => {
   it('should display all feature rows', () => {
     render(<PlanComparisonTable plans={mockPlans} />);
 
-    expect(screen.getByText(/lecturas diarias/i)).toBeInTheDocument();
+    expect(screen.getByText(/nombre/i)).toBeInTheDocument();
+    expect(screen.getByText(/lecturas mensuales/i)).toBeInTheDocument();
     expect(screen.getByText(/cuota mensual de ia/i)).toBeInTheDocument();
     expect(screen.getByText(/preguntas personalizadas/i)).toBeInTheDocument();
-    expect(screen.getByText(/regenerar interpretaciones/i)).toBeInTheDocument();
     expect(screen.getByText(/compartir lecturas/i)).toBeInTheDocument();
-    expect(screen.getByText(/reservar sesiones/i)).toBeInTheDocument();
+    expect(screen.getByText(/tiradas avanzadas/i)).toBeInTheDocument();
+    expect(screen.getByText(/precio mensual/i)).toBeInTheDocument();
   });
 
   it('should handle empty plans array', () => {

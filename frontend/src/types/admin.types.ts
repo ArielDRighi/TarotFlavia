@@ -139,39 +139,42 @@ export interface DashboardMetric {
 
 /**
  * Tipo de plan de suscripción
- * Refleja exactamente el PlanType del backend
+ * Refleja exactamente el UserPlan enum del backend
  */
 export type PlanType = 'guest' | 'free' | 'premium' | 'professional';
 
 /**
  * Configuración de un plan de suscripción
- * Refleja exactamente el PlanConfigDto del backend
+ * Refleja exactamente la entidad Plan del backend
+ * backend/tarot-app/src/modules/plan-config/entities/plan.entity.ts
  */
 export interface PlanConfig {
   id: number;
   planType: PlanType;
-  dailyReadingLimit: number;
-  monthlyAIQuota: number;
-  canUseCustomQuestions: boolean;
-  canRegenerateInterpretations: boolean;
-  maxRegenerationsPerReading: number;
-  canShareReadings: boolean;
-  historyLimit: number;
-  canBookSessions: boolean;
-  price: number; // Precio mensual en USD
+  name: string;
+  description: string | null;
+  price: number; // Precio mensual en USD (decimal)
+  readingsLimit: number; // Límite de lecturas mensuales (-1 para ilimitado)
+  aiQuotaMonthly: number; // Cuota mensual de solicitudes IA (-1 para ilimitado)
+  allowCustomQuestions: boolean; // Permite preguntas personalizadas
+  allowSharing: boolean; // Permite compartir lecturas
+  allowAdvancedSpreads: boolean; // Permite tiradas avanzadas
+  isActive: boolean;
+  createdAt: string; // ISO date
+  updatedAt: string; // ISO date
 }
 
 /**
  * DTO para actualizar configuración de un plan
+ * Refleja exactamente UpdatePlanDto del backend (PartialType<CreatePlanDto>)
  */
 export interface UpdatePlanConfigDto {
-  dailyReadingLimit?: number;
-  monthlyAIQuota?: number;
-  canUseCustomQuestions?: boolean;
-  canRegenerateInterpretations?: boolean;
-  maxRegenerationsPerReading?: number;
-  canShareReadings?: boolean;
-  historyLimit?: number;
-  canBookSessions?: boolean;
+  name?: string;
+  description?: string;
   price?: number;
+  readingsLimit?: number;
+  aiQuotaMonthly?: number;
+  allowCustomQuestions?: boolean;
+  allowSharing?: boolean;
+  allowAdvancedSpreads?: boolean;
 }

@@ -5,21 +5,17 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { PlanConfigCard } from './PlanConfigCard';
+import { createMockPlanConfig } from '@/test/helpers/admin-mocks';
 import type { PlanConfig } from '@/types/admin.types';
 
-const mockPlan: PlanConfig = {
+const mockPlan = createMockPlanConfig({
   id: 2,
   planType: 'premium',
-  dailyReadingLimit: 5,
-  monthlyAIQuota: 100,
-  canUseCustomQuestions: true,
-  canRegenerateInterpretations: true,
-  maxRegenerationsPerReading: 3,
-  canShareReadings: true,
-  historyLimit: -1,
-  canBookSessions: true,
+  name: 'Plan Premium',
+  readingsLimit: 5,
+  aiQuotaMonthly: 100,
   price: 9.99,
-};
+});
 
 describe('PlanConfigCard', () => {
   it('should render plan name and current values', () => {
@@ -28,8 +24,8 @@ describe('PlanConfigCard', () => {
 
     const premiumTexts = screen.getAllByText(/premium/i);
     expect(premiumTexts.length).toBeGreaterThan(0);
-    expect(screen.getByDisplayValue('5')).toBeInTheDocument(); // dailyReadingLimit
-    expect(screen.getByDisplayValue('100')).toBeInTheDocument(); // monthlyAIQuota
+    expect(screen.getByDisplayValue('5')).toBeInTheDocument(); // readingsLimit
+    expect(screen.getByDisplayValue('100')).toBeInTheDocument(); // aiQuotaMonthly
     expect(screen.getByDisplayValue('9.99')).toBeInTheDocument(); // price
   });
 
@@ -83,7 +79,7 @@ describe('PlanConfigCard', () => {
     await waitFor(() => {
       expect(mockOnSave).toHaveBeenCalledWith(
         expect.objectContaining({
-          dailyReadingLimit: 10,
+          readingsLimit: 10,
         })
       );
     });

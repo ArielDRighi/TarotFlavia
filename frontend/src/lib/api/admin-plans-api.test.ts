@@ -26,28 +26,32 @@ describe('admin-plans-api', () => {
         {
           id: 1,
           planType: 'free',
-          dailyReadingLimit: 1,
-          monthlyAIQuota: 10,
-          canUseCustomQuestions: false,
-          canRegenerateInterpretations: false,
-          maxRegenerationsPerReading: 0,
-          canShareReadings: false,
-          historyLimit: 10,
-          canBookSessions: false,
+          name: 'Plan Gratuito',
+          description: 'Plan básico con funcionalidades limitadas',
+          readingsLimit: 10,
+          aiQuotaMonthly: 50,
+          allowCustomQuestions: false,
+          allowSharing: false,
+          allowAdvancedSpreads: false,
           price: 0,
+          isActive: true,
+          createdAt: '2024-01-01T00:00:00Z',
+          updatedAt: '2024-01-01T00:00:00Z',
         },
         {
           id: 2,
           planType: 'premium',
-          dailyReadingLimit: 5,
-          monthlyAIQuota: 100,
-          canUseCustomQuestions: true,
-          canRegenerateInterpretations: true,
-          maxRegenerationsPerReading: 3,
-          canShareReadings: true,
-          historyLimit: -1,
-          canBookSessions: true,
+          name: 'Plan Premium',
+          description: 'Plan avanzado con todas las funcionalidades',
+          readingsLimit: -1,
+          aiQuotaMonthly: -1,
+          allowCustomQuestions: true,
+          allowSharing: true,
+          allowAdvancedSpreads: true,
           price: 9.99,
+          isActive: true,
+          createdAt: '2024-01-01T00:00:00Z',
+          updatedAt: '2024-01-01T00:00:00Z',
         },
       ];
 
@@ -71,15 +75,17 @@ describe('admin-plans-api', () => {
       const mockPlan: PlanConfig = {
         id: 2,
         planType: 'premium',
-        dailyReadingLimit: 5,
-        monthlyAIQuota: 100,
-        canUseCustomQuestions: true,
-        canRegenerateInterpretations: true,
-        maxRegenerationsPerReading: 3,
-        canShareReadings: true,
-        historyLimit: -1,
-        canBookSessions: true,
+        name: 'Plan Premium',
+        description: 'Plan avanzado con todas las funcionalidades',
+        readingsLimit: -1,
+        aiQuotaMonthly: -1,
+        allowCustomQuestions: true,
+        allowSharing: true,
+        allowAdvancedSpreads: true,
         price: 9.99,
+        isActive: true,
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-01T00:00:00Z',
       };
 
       vi.mocked(apiClient.get).mockResolvedValue({ data: mockPlan });
@@ -100,22 +106,24 @@ describe('admin-plans-api', () => {
   describe('updatePlanConfig', () => {
     it('should update plan configuration', async () => {
       const updateDto: UpdatePlanConfigDto = {
-        dailyReadingLimit: 10,
+        readingsLimit: 50,
         price: 12.99,
       };
 
       const mockUpdatedPlan: PlanConfig = {
         id: 2,
         planType: 'premium',
-        dailyReadingLimit: 10,
-        monthlyAIQuota: 100,
-        canUseCustomQuestions: true,
-        canRegenerateInterpretations: true,
-        maxRegenerationsPerReading: 3,
-        canShareReadings: true,
-        historyLimit: -1,
-        canBookSessions: true,
+        name: 'Plan Premium',
+        description: 'Plan avanzado con todas las funcionalidades',
+        readingsLimit: 50,
+        aiQuotaMonthly: -1,
+        allowCustomQuestions: true,
+        allowSharing: true,
+        allowAdvancedSpreads: true,
         price: 12.99,
+        isActive: true,
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-01T00:00:00Z',
       };
 
       vi.mocked(apiClient.put).mockResolvedValue({ data: mockUpdatedPlan });
@@ -128,7 +136,7 @@ describe('admin-plans-api', () => {
 
     it('should handle validation errors', async () => {
       const invalidDto: UpdatePlanConfigDto = {
-        dailyReadingLimit: -5, // Invalid
+        readingsLimit: -5, // Invalid
       };
 
       vi.mocked(apiClient.put).mockRejectedValue(new Error('Validation failed'));

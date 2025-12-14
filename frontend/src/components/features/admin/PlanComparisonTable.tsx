@@ -38,30 +38,27 @@ const planLabels = {
 };
 
 const features = [
-  { key: 'dailyReadingLimit', label: 'Lecturas diarias', type: 'number' as const },
-  { key: 'monthlyAIQuota', label: 'Cuota mensual de IA', type: 'number' as const },
+  { key: 'name', label: 'Nombre', type: 'text' as const },
+  { key: 'readingsLimit', label: 'Lecturas mensuales', type: 'number' as const },
+  { key: 'aiQuotaMonthly', label: 'Cuota mensual de IA', type: 'number' as const },
   {
-    key: 'canUseCustomQuestions',
+    key: 'allowCustomQuestions',
     label: 'Preguntas personalizadas',
     type: 'boolean' as const,
   },
-  {
-    key: 'canRegenerateInterpretations',
-    label: 'Regenerar interpretaciones',
-    type: 'boolean' as const,
-  },
-  {
-    key: 'maxRegenerationsPerReading',
-    label: 'Máx. regeneraciones',
-    type: 'number' as const,
-  },
-  { key: 'canShareReadings', label: 'Compartir lecturas', type: 'boolean' as const },
-  { key: 'historyLimit', label: 'Límite de historial', type: 'number' as const },
-  { key: 'canBookSessions', label: 'Reservar sesiones', type: 'boolean' as const },
+  { key: 'allowSharing', label: 'Compartir lecturas', type: 'boolean' as const },
+  { key: 'allowAdvancedSpreads', label: 'Tiradas avanzadas', type: 'boolean' as const },
   { key: 'price', label: 'Precio mensual (USD)', type: 'price' as const },
 ];
 
-function formatValue(value: unknown, type: 'number' | 'boolean' | 'price'): React.ReactNode {
+function formatValue(
+  value: unknown,
+  type: 'number' | 'boolean' | 'price' | 'text'
+): React.ReactNode {
+  if (type === 'text') {
+    return String(value);
+  }
+
   if (type === 'number') {
     const numValue = value as number;
     return numValue === -1 ? (
