@@ -3859,87 +3859,51 @@ IMPORTANTE:
 
 ---
 
-### TAREA 10.9: Crear página Audit Logs
+### ✅ TAREA 10.9: Crear página Audit Logs
 
 **Prioridad:** MEDIA
 **Estimación:** 40 min
 **Dependencias:** 10.1
 
-**Consigna:**
-Crear página para ver el historial de acciones administrativas (audit trail).
+**Estado:** COMPLETADA ✅
+**Fecha completada:** 14 Diciembre 2025
+**Rama:** feature/TASK-10.9-audit-logs
 
-**Prompt:**
+**Implementación realizada:**
 
-```
+✅ Types creados:
 
-Crea página de audit logs:
+- `src/types/admin-audit.types.ts`
+- AuditLog interface con IDs numéricos (contrato backend)
+- AuditLogFilters, PaginationMeta, AuditLogsResponse
 
-ARCHIVO: src/app/admin/audit/page.tsx
+✅ API y Hook:
 
-CLIENT COMPONENT
+- `src/lib/api/admin-audit-api.ts` (con tests)
+- `src/hooks/api/useAuditLogs.ts` (con tests)
+- Endpoint agregado en `endpoints.ts`
 
-ESTRUCTURA:
+✅ Página Admin:
 
-HEADER:
+- `src/app/admin/audit/page.tsx` (con tests)
+- Filtros completos: userId, action, entityType, dateRange
+- Tabla con paginación (20 por página)
+- Detalles expandibles con oldValue/newValue en JSON
+- Colores por acción: destructivas=rojo, creación=verde, modificación=azul
 
-- Título: "Registro de Auditoría"
-- Descripción: "Historial de todas las acciones administrativas"
+**Calidad:**
 
-FILTROS (barra horizontal):
+- ✅ Tests: 13 tests pasando (API + Hook + Page)
+- ✅ Lint: 0 errores
+- ✅ Type-check: 0 errores
+- ✅ Build: Exitoso
+- ✅ TDD aplicado en todas las capas
 
-- Usuario (dropdown con admins)
-- Tipo de acción (dropdown): USER_BANNED, PLAN_CHANGED, TAROTISTA_APPROVED, etc.
-- Entidad (dropdown): User, Tarotista, Reading, etc.
-- Rango de fechas
-- Botón "Limpiar filtros"
+**Decisiones técnicas:**
 
-TABLA DE LOGS:
-
-- Columnas:
-  - Fecha/Hora
-  - Admin (nombre del admin que hizo la acción)
-  - Acción (badge con color)
-  - Entidad afectada
-  - Detalles (expandible)
-  - IP del admin
-- Paginación (20 por página)
-
-DETALLES EXPANDIBLES (por fila):
-
-- Mostrar JSON con:
-  - oldValue: estado anterior
-  - newValue: estado nuevo
-- Formato legible con diff highlighting si aplica
-
-OBTENER DATOS:
-
-- Crear archivo: src/lib/api/admin-audit-api.ts
-- Función: getAuditLogs(filters): GET /admin/audit-logs
-- Hook: useAuditLogs(filters)
-
-TYPES:
-interface AuditLog {
-id: number;
-userId: number;
-userName: string;
-targetUserId?: number;
-action: string;
-entityType: string;
-entityId: string;
-oldValue?: object;
-newValue?: object;
-ipAddress: string;
-userAgent: string;
-createdAt: string;
-}
-
-IMPORTANTE:
-
-- Acciones con colores: destructivas=rojo, creación=verde, modificación=azul
-- JSON viewer para oldValue/newValue
-- Exportar a CSV (botón opcional)
-
-```
+- SelectItem no permite `value=""` → Usar "all" como placeholder
+- Filas expandibles con React.Fragment para evitar keys duplicadas
+- Partial<ReturnType<>> para mocks de tests evitando `any`
 
 ---
 
