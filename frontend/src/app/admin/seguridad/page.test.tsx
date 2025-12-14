@@ -26,26 +26,18 @@ const createWrapper = () => {
 
 describe('AdminSeguridadPage', () => {
   it('should render page title and description', () => {
-    vi.mocked(useAdminSecurity.useRateLimitViolations).mockReturnValue({
-      data: [],
+    vi.mocked(useAdminSecurity.useRateLimitData).mockReturnValue({
+      data: {
+        violations: [],
+        blockedIPs: [],
+        stats: {
+          totalViolations: 0,
+          totalBlockedIps: 0,
+          activeViolationsCount: 0,
+        },
+      },
       isLoading: false,
       error: null,
-    } as never);
-
-    vi.mocked(useAdminSecurity.useBlockedIPs).mockReturnValue({
-      data: [],
-      isLoading: false,
-      error: null,
-    } as never);
-
-    vi.mocked(useAdminSecurity.useUnblockIP).mockReturnValue({
-      mutate: vi.fn(),
-      isPending: false,
-    } as never);
-
-    vi.mocked(useAdminSecurity.useBlockIP).mockReturnValue({
-      mutate: vi.fn(),
-      isPending: false,
     } as never);
 
     render(<AdminSeguridadPage />, { wrapper: createWrapper() });

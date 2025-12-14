@@ -99,13 +99,21 @@ export function SecurityEventsTab() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">Todos</SelectItem>
-                  <SelectItem value="login_failed">Login Fallido</SelectItem>
-                  <SelectItem value="suspicious_activity">Actividad Sospechosa</SelectItem>
-                  <SelectItem value="rate_limit_violation">Violación Rate Limit</SelectItem>
-                  <SelectItem value="unauthorized_access">Acceso No Autorizado</SelectItem>
-                  <SelectItem value="brute_force_attempt">Intento Fuerza Bruta</SelectItem>
+                  <SelectItem value="successful_login">Login Exitoso</SelectItem>
+                  <SelectItem value="failed_login">Login Fallido</SelectItem>
+                  <SelectItem value="password_changed">Contraseña Cambiada</SelectItem>
+                  <SelectItem value="email_changed">Email Cambiado</SelectItem>
                   <SelectItem value="account_locked">Cuenta Bloqueada</SelectItem>
+                  <SelectItem value="account_unlocked">Cuenta Desbloqueada</SelectItem>
+                  <SelectItem value="invalid_token">Token Inválido</SelectItem>
+                  <SelectItem value="expired_token">Token Expirado</SelectItem>
+                  <SelectItem value="permission_denied">Permiso Denegado</SelectItem>
+                  <SelectItem value="rate_limit_exceeded">Rate Limit Excedido</SelectItem>
+                  <SelectItem value="suspicious_activity">Actividad Sospechosa</SelectItem>
                   <SelectItem value="ip_blocked">IP Bloqueada</SelectItem>
+                  <SelectItem value="ip_unblocked">IP Desbloqueada</SelectItem>
+                  <SelectItem value="session_expired">Sesión Expirada</SelectItem>
+                  <SelectItem value="other">Otro</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -157,7 +165,9 @@ export function SecurityEventsTab() {
               placeholder="Buscar por ID de usuario..."
               type="number"
               value={filters.userId || ''}
-              onChange={(e) => handleFilterChange('userId', parseInt(e.target.value) || '')}
+              onChange={(e) =>
+                handleFilterChange('userId', e.target.value ? parseInt(e.target.value) : '')
+              }
               className="max-w-xs"
             />
             <Button variant="outline" onClick={clearFilters}>
@@ -173,7 +183,7 @@ export function SecurityEventsTab() {
           <CardTitle>Eventos de Seguridad</CardTitle>
         </CardHeader>
         <CardContent>
-          {!data || data.data.length === 0 ? (
+          {!data || data.events.length === 0 ? (
             <p className="text-muted-foreground py-8 text-center">
               No se encontraron eventos de seguridad
             </p>
@@ -187,11 +197,11 @@ export function SecurityEventsTab() {
                     <TableHead>Severidad</TableHead>
                     <TableHead>Usuario</TableHead>
                     <TableHead>IP</TableHead>
-                    <TableHead>Descripción</TableHead>
+                    <TableHead>Detalles</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {data.data.map((event) => (
+                  {data.events.map((event) => (
                     <TableRow key={event.id}>
                       <TableCell className="whitespace-nowrap">
                         {new Date(event.createdAt).toLocaleString()}
@@ -203,8 +213,8 @@ export function SecurityEventsTab() {
                         </Badge>
                       </TableCell>
                       <TableCell>{event.userId || '-'}</TableCell>
-                      <TableCell className="font-mono">{event.ip}</TableCell>
-                      <TableCell>{event.description}</TableCell>
+                      <TableCell className="font-mono">{event.ipAddress}</TableCell>
+                      <TableCell>{event.details}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -214,10 +224,10 @@ export function SecurityEventsTab() {
               {data.meta.totalPages > 1 && (
                 <div className="mt-6">
                   <Pagination
-                    currentPage={data.meta.page}
+                    currentPage={data.meta.currentPage}
                     totalPages={data.meta.totalPages}
                     totalItems={data.meta.totalItems}
-                    limit={data.meta.limit}
+                    limit={data.meta.itemsPerPage}
                     onPageChange={handlePageChange}
                   />
                 </div>

@@ -26,21 +26,18 @@ const createWrapper = () => {
 
 describe('SecurityManagementContent', () => {
   it('should render tabs for Rate Limiting and Security Events', () => {
-    vi.mocked(useAdminSecurity.useRateLimitViolations).mockReturnValue({
-      data: [],
+    vi.mocked(useAdminSecurity.useRateLimitData).mockReturnValue({
+      data: {
+        violations: [],
+        blockedIPs: [],
+        stats: {
+          totalViolations: 0,
+          totalBlockedIps: 0,
+          activeViolationsCount: 0,
+        },
+      },
       isLoading: false,
       error: null,
-    } as never);
-
-    vi.mocked(useAdminSecurity.useBlockedIPs).mockReturnValue({
-      data: [],
-      isLoading: false,
-      error: null,
-    } as never);
-
-    vi.mocked(useAdminSecurity.useUnblockIP).mockReturnValue({
-      mutate: vi.fn(),
-      isPending: false,
     } as never);
 
     render(<SecurityManagementContent />, { wrapper: createWrapper() });

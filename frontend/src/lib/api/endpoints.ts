@@ -105,10 +105,10 @@ export const API_ENDPOINTS = {
     PLAN_CONFIG: '/plan-config',
     PLAN_CONFIG_BY_TYPE: (planType: string) => `/plan-config/${planType}`,
     // Security & Rate Limiting
-    RATE_LIMIT_VIOLATIONS: '/admin/rate-limits/violations',
-    BLOCKED_IPS: '/admin/rate-limits/blocked-ips',
-    BLOCK_IP: '/admin/rate-limits/block-ip',
-    UNBLOCK_IP: (ip: string) => `/admin/rate-limits/unblock-ip/${ip}`,
+    RATE_LIMIT_DATA: '/admin/rate-limits/violations', // Retorna violations + blockedIPs
     SECURITY_EVENTS: '/admin/security/events',
+    // TODO: Backend endpoints pendientes
+    // BLOCK_IP: '/admin/security/block-ip',
+    // UNBLOCK_IP: (ip: string) => `/admin/security/block-ip/${ip}`,
   },
 } as const;

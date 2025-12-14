@@ -9,7 +9,7 @@
  * Violación de rate limiting
  */
 export interface RateLimitViolation {
-  ip: string;
+  ipAddress: string;
   count: number;
   firstViolation: string;
   lastViolation: string;
@@ -19,10 +19,10 @@ export interface RateLimitViolation {
  * IP bloqueada
  */
 export interface BlockedIP {
-  ip: string;
+  ipAddress: string;
   reason: string;
   blockedAt: string;
-  expiresAt: string;
+  expiresAt: string | null; // Puede ser null si es permanente
 }
 
 /**
@@ -34,24 +34,32 @@ export type SecurityEventSeverity = 'low' | 'medium' | 'high' | 'critical';
  * Tipo de evento de seguridad
  */
 export type SecurityEventType =
-  | 'login_failed'
-  | 'suspicious_activity'
-  | 'rate_limit_violation'
-  | 'unauthorized_access'
-  | 'brute_force_attempt'
+  | 'successful_login'
+  | 'failed_login'
+  | 'password_changed'
+  | 'email_changed'
   | 'account_locked'
-  | 'ip_blocked';
+  | 'account_unlocked'
+  | 'invalid_token'
+  | 'expired_token'
+  | 'permission_denied'
+  | 'rate_limit_exceeded'
+  | 'suspicious_activity'
+  | 'ip_blocked'
+  | 'ip_unblocked'
+  | 'session_expired'
+  | 'other';
 
 /**
  * Evento de seguridad
  */
 export interface SecurityEvent {
-  id: number;
+  id: string;
   eventType: SecurityEventType;
   severity: SecurityEventSeverity;
   userId?: number;
-  ip: string;
-  description: string;
+  ipAddress: string;
+  details: string; // Descripción del evento
   createdAt: string;
 }
 
@@ -72,10 +80,10 @@ export interface SecurityEventFilters {
  * Respuesta paginada de eventos de seguridad
  */
 export interface SecurityEventsResponse {
-  data: SecurityEvent[];
+  events: SecurityEvent[];
   meta: {
-    page: number;
-    limit: number;
+    currentPage: number;
+    itemsPerPage: number;
     totalItems: number;
     totalPages: number;
   };
@@ -86,8 +94,18 @@ export interface SecurityEventsResponse {
  */
 export interface RateLimitStats {
   totalViolations: number;
-  activeViolatingIps: number;
-  blockedIps: number;
+  totalBlockedIps: number;
+  activeViolationsCount: number;
+}
+
+/**
+ * Respuesta completa del endpoint de rate limiting
+ * Backend retorna violations, blockedIPs y stats en una sola respuesta
+ */
+export interface RateLimitResponse {
+  violations: RateLimitViolation[];
+  blockedIPs: BlockedIP[];
+  stats: RateLimitStats;
 }
 
 /**
