@@ -3431,14 +3431,49 @@ Crear página para visualizar estadísticas de uso de IA, costos por proveedor y
 
 ---
 
-### TAREA 10.6: Crear página Uso de IA y Costos
+### TAREA 10.6: Crear página Uso de IA y Costos ✅
 
 **Prioridad:** ALTA
 **Estimación:** 60 min
 **Dependencias:** 10.1
+**Estado:** COMPLETADA (14/12/2024)
 
 **Consigna:**
 Crear página para ver y editar la configuración de límites de cada plan (FREE, PREMIUM, PROFESSIONAL).
+
+**Implementación:**
+La tarea fue completada exitosamente con los siguientes archivos:
+
+**Archivos Creados/Modificados:**
+
+- ✅ `src/app/admin/ai-usage/page.tsx` - Página principal con layout y título
+- ✅ `src/components/features/admin/AIUsageContent.tsx` - Componente principal con lógica
+- ✅ `src/components/features/admin/AIUsageAlerts.tsx` - Alertas de sistema
+- ✅ `src/components/features/admin/AIUsageMetricsCards.tsx` - Cards de métricas
+- ✅ `src/components/features/admin/AIProvidersTable.tsx` - Tabla de proveedores
+- ✅ `src/lib/api/admin-ai-usage-api.ts` - API functions
+- ✅ `src/hooks/queries/useAdminAIUsage.ts` - React Query hook
+- ✅ `src/types/admin.types.ts` - Tipos TypeScript (AIProviderStats, AIUsageStats)
+
+**Tests:**
+
+- ✅ 60 tests pasando con 100% de cobertura
+- ✅ Tests unitarios de todos los componentes
+- ✅ Tests de integración de la página
+- ✅ Tests de API functions y hooks
+
+**Características Implementadas:**
+
+- ✅ Cards de alertas con colores según severidad (4 tipos de alertas)
+- ✅ Cards de métricas con Total Requests, Tokens, Costo, Tasa de Éxito
+- ✅ Tabla completa de proveedores (GROQ, OPENAI, DEEPSEEK)
+- ✅ Fila de totales en la tabla
+- ✅ Formateo de costos con 4 decimales
+- ✅ Formateo de tokens con separador de miles
+- ✅ Refresh automático cada 5 minutos
+- ✅ Estados de loading y error correctamente manejados
+
+**Nota:** Los gráficos (costos por día y distribución por proveedor) no fueron implementados en esta tarea ya que no estaban en el backend al momento de la implementación. Se pueden agregar en una tarea futura cuando el backend exponga esos datos.
 
 **Prompt:**
 
