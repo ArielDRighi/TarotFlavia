@@ -101,5 +101,8 @@ export const API_ENDPOINTS = {
     REJECT_APPLICATION: (id: number) => `/admin/tarotistas/applications/${id}/reject`,
     // AI Usage
     AI_USAGE: '/admin/ai-usage',
+    // Plan Configuration
+    PLAN_CONFIG: '/plan-config',
+    PLAN_CONFIG_BY_TYPE: (planType: string) => `/plan-config/${planType}`,
   },
 } as const;
