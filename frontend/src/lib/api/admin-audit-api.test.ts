@@ -21,22 +21,26 @@ describe('admin-audit-api', () => {
   describe('fetchAuditLogs', () => {
     it('should fetch audit logs without filters', async () => {
       const mockResponse: AuditLogsResponse = {
-        data: [
+        logs: [
           {
-            id: 1,
+            id: '123e4567-e89b-12d3-a456-426614174000',
             userId: 1,
-            userName: 'Admin User',
-            action: 'USER_BANNED',
+            user: { id: 1, email: 'admin@example.com', name: 'Admin User' },
+            targetUserId: 2,
+            targetUser: { id: 2, email: 'user@example.com', name: 'Target User' },
+            action: 'user_banned',
             entityType: 'User',
             entityId: '123',
+            oldValue: null,
+            newValue: { status: 'banned' },
             ipAddress: '192.168.1.1',
             userAgent: 'Mozilla/5.0',
             createdAt: '2025-12-14T10:00:00Z',
           },
         ],
         meta: {
-          page: 1,
-          limit: 20,
+          currentPage: 1,
+          itemsPerPage: 20,
           totalItems: 1,
           totalPages: 1,
         },
@@ -55,7 +59,7 @@ describe('admin-audit-api', () => {
     it('should fetch audit logs with filters', async () => {
       const filters: AuditLogFilters = {
         userId: 1,
-        action: 'USER_BANNED',
+        action: 'user_banned',
         entityType: 'User',
         startDate: '2025-12-01',
         endDate: '2025-12-14',
@@ -64,10 +68,10 @@ describe('admin-audit-api', () => {
       };
 
       const mockResponse: AuditLogsResponse = {
-        data: [],
+        logs: [],
         meta: {
-          page: 2,
-          limit: 10,
+          currentPage: 2,
+          itemsPerPage: 10,
           totalItems: 0,
           totalPages: 0,
         },

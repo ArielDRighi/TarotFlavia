@@ -31,24 +31,21 @@ import {
 } from '@/components/ui/table';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { Pagination } from '@/components/features/admin/Pagination';
-import type { AuditLogFilters, AuditActionType, AuditEntityType } from '@/types/admin-audit.types';
+import type { AuditLogFilters, AuditActionType } from '@/types/admin-audit.types';
 
 const ACTION_COLORS: Record<string, string> = {
-  USER_BANNED: 'bg-red-100 text-red-800',
-  USER_UNBANNED: 'bg-green-100 text-green-800',
-  PLAN_CHANGED: 'bg-blue-100 text-blue-800',
-  ROLE_ADDED: 'bg-green-100 text-green-800',
-  ROLE_REMOVED: 'bg-orange-100 text-orange-800',
-  TAROTISTA_APPROVED: 'bg-green-100 text-green-800',
-  TAROTISTA_REJECTED: 'bg-red-100 text-red-800',
-  TAROTISTA_DEACTIVATED: 'bg-orange-100 text-orange-800',
-  TAROTISTA_REACTIVATED: 'bg-green-100 text-green-800',
-  IP_BLOCKED: 'bg-red-100 text-red-800',
-  IP_UNBLOCKED: 'bg-green-100 text-green-800',
-  PLAN_CONFIG_UPDATED: 'bg-blue-100 text-blue-800',
-  USER_CREATED: 'bg-green-100 text-green-800',
-  USER_UPDATED: 'bg-blue-100 text-blue-800',
-  USER_DELETED: 'bg-red-100 text-red-800',
+  user_banned: 'bg-red-100 text-red-800',
+  user_unbanned: 'bg-green-100 text-green-800',
+  plan_changed: 'bg-blue-100 text-blue-800',
+  role_added: 'bg-green-100 text-green-800',
+  role_removed: 'bg-orange-100 text-orange-800',
+  reading_deleted: 'bg-red-100 text-red-800',
+  reading_restored: 'bg-green-100 text-green-800',
+  card_modified: 'bg-blue-100 text-blue-800',
+  spread_modified: 'bg-blue-100 text-blue-800',
+  config_changed: 'bg-blue-100 text-blue-800',
+  user_created: 'bg-green-100 text-green-800',
+  user_deleted: 'bg-red-100 text-red-800',
 };
 
 export default function AuditLogsPage() {
@@ -57,14 +54,16 @@ export default function AuditLogsPage() {
     limit: 20,
   });
 
-  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
   const { data, isLoading } = useAuditLogs(filters);
 
   const handleFilterChange = (key: keyof AuditLogFilters, value: string | number) => {
+    // Si el valor es "all" o vacío, no enviar el filtro (undefined)
+    const finalValue = value === 'all' || !value ? undefined : value;
     setFilters((prev) => ({
       ...prev,
-      [key]: value || undefined,
+      [key]: finalValue,
       page: 1, // Reset page when filters change
     }));
   };
@@ -77,7 +76,7 @@ export default function AuditLogsPage() {
     setFilters({ page: 1, limit: 20 });
   };
 
-  const toggleRow = (id: number) => {
+  const toggleRow = (id: string) => {
     setExpandedRows((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(id)) {
@@ -139,7 +138,7 @@ export default function AuditLogsPage() {
               <div className="space-y-2">
                 <Label htmlFor="action">Tipo de Acción</Label>
                 <Select
-                  value={filters.action || ''}
+                  value={filters.action || 'all'}
                   onValueChange={(value) => handleFilterChange('action', value as AuditActionType)}
                 >
                   <SelectTrigger id="action">
@@ -147,21 +146,18 @@ export default function AuditLogsPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todas</SelectItem>
-                    <SelectItem value="USER_BANNED">USER_BANNED</SelectItem>
-                    <SelectItem value="USER_UNBANNED">USER_UNBANNED</SelectItem>
-                    <SelectItem value="PLAN_CHANGED">PLAN_CHANGED</SelectItem>
-                    <SelectItem value="ROLE_ADDED">ROLE_ADDED</SelectItem>
-                    <SelectItem value="ROLE_REMOVED">ROLE_REMOVED</SelectItem>
-                    <SelectItem value="TAROTISTA_APPROVED">TAROTISTA_APPROVED</SelectItem>
-                    <SelectItem value="TAROTISTA_REJECTED">TAROTISTA_REJECTED</SelectItem>
-                    <SelectItem value="TAROTISTA_DEACTIVATED">TAROTISTA_DEACTIVATED</SelectItem>
-                    <SelectItem value="TAROTISTA_REACTIVATED">TAROTISTA_REACTIVATED</SelectItem>
-                    <SelectItem value="IP_BLOCKED">IP_BLOCKED</SelectItem>
-                    <SelectItem value="IP_UNBLOCKED">IP_UNBLOCKED</SelectItem>
-                    <SelectItem value="PLAN_CONFIG_UPDATED">PLAN_CONFIG_UPDATED</SelectItem>
-                    <SelectItem value="USER_CREATED">USER_CREATED</SelectItem>
-                    <SelectItem value="USER_UPDATED">USER_UPDATED</SelectItem>
-                    <SelectItem value="USER_DELETED">USER_DELETED</SelectItem>
+                    <SelectItem value="user_created">user_created</SelectItem>
+                    <SelectItem value="user_banned">user_banned</SelectItem>
+                    <SelectItem value="user_unbanned">user_unbanned</SelectItem>
+                    <SelectItem value="user_deleted">user_deleted</SelectItem>
+                    <SelectItem value="role_added">role_added</SelectItem>
+                    <SelectItem value="role_removed">role_removed</SelectItem>
+                    <SelectItem value="plan_changed">plan_changed</SelectItem>
+                    <SelectItem value="reading_deleted">reading_deleted</SelectItem>
+                    <SelectItem value="reading_restored">reading_restored</SelectItem>
+                    <SelectItem value="card_modified">card_modified</SelectItem>
+                    <SelectItem value="spread_modified">spread_modified</SelectItem>
+                    <SelectItem value="config_changed">config_changed</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -169,10 +165,8 @@ export default function AuditLogsPage() {
               <div className="space-y-2">
                 <Label htmlFor="entityType">Entidad</Label>
                 <Select
-                  value={filters.entityType || ''}
-                  onValueChange={(value) =>
-                    handleFilterChange('entityType', value as AuditEntityType)
-                  }
+                  value={filters.entityType || 'all'}
+                  onValueChange={(value) => handleFilterChange('entityType', value)}
                 >
                   <SelectTrigger id="entityType">
                     <SelectValue placeholder="Todas" />
@@ -180,12 +174,10 @@ export default function AuditLogsPage() {
                   <SelectContent>
                     <SelectItem value="all">Todas</SelectItem>
                     <SelectItem value="User">User</SelectItem>
-                    <SelectItem value="Tarotista">Tarotista</SelectItem>
                     <SelectItem value="Reading">Reading</SelectItem>
-                    <SelectItem value="Session">Session</SelectItem>
-                    <SelectItem value="PlanConfig">PlanConfig</SelectItem>
-                    <SelectItem value="IP">IP</SelectItem>
-                    <SelectItem value="Application">Application</SelectItem>
+                    <SelectItem value="Card">Card</SelectItem>
+                    <SelectItem value="Spread">Spread</SelectItem>
+                    <SelectItem value="Config">Config</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -223,7 +215,7 @@ export default function AuditLogsPage() {
             <CardTitle>Logs de Auditoría</CardTitle>
           </CardHeader>
           <CardContent>
-            {!data || data.data.length === 0 ? (
+            {!data || data.logs.length === 0 ? (
               <p className="text-muted-foreground py-8 text-center">
                 No se encontraron logs de auditoría
               </p>
@@ -241,7 +233,7 @@ export default function AuditLogsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {data.data.map((log) => {
+                    {data.logs.map((log) => {
                       const isExpanded = expandedRows.has(log.id);
                       return (
                         <React.Fragment key={log.id}>
@@ -263,7 +255,9 @@ export default function AuditLogsPage() {
                             <TableCell className="whitespace-nowrap">
                               {new Date(log.createdAt).toLocaleString()}
                             </TableCell>
-                            <TableCell>{log.userName}</TableCell>
+                            <TableCell>
+                              {log.user ? log.user.name || log.user.email : `ID ${log.userId}`}
+                            </TableCell>
                             <TableCell>
                               <Badge
                                 variant="outline"
@@ -275,16 +269,20 @@ export default function AuditLogsPage() {
                             <TableCell>
                               {log.entityType} #{log.entityId}
                             </TableCell>
-                            <TableCell className="font-mono text-sm">{log.ipAddress}</TableCell>
+                            <TableCell className="font-mono text-sm">
+                              {log.ipAddress || 'N/A'}
+                            </TableCell>
                           </TableRow>
                           {isExpanded && (
                             <TableRow>
                               <TableCell colSpan={6} className="bg-muted/50 p-4">
                                 <div className="space-y-2">
-                                  <div>
-                                    <strong>User Agent:</strong>
-                                    <p className="font-mono text-sm">{log.userAgent}</p>
-                                  </div>
+                                  {log.userAgent && (
+                                    <div>
+                                      <strong>User Agent:</strong>
+                                      <p className="font-mono text-sm">{log.userAgent}</p>
+                                    </div>
+                                  )}
                                   {log.oldValue && (
                                     <div>
                                       <strong>Valor Anterior:</strong>
@@ -293,14 +291,12 @@ export default function AuditLogsPage() {
                                       </pre>
                                     </div>
                                   )}
-                                  {log.newValue && (
-                                    <div>
-                                      <strong>Valor Nuevo:</strong>
-                                      <pre className="mt-1 rounded bg-gray-100 p-2 text-xs">
-                                        {JSON.stringify(log.newValue, null, 2)}
-                                      </pre>
-                                    </div>
-                                  )}
+                                  <div>
+                                    <strong>Valor Nuevo:</strong>
+                                    <pre className="mt-1 rounded bg-gray-100 p-2 text-xs">
+                                      {JSON.stringify(log.newValue, null, 2)}
+                                    </pre>
+                                  </div>
                                 </div>
                               </TableCell>
                             </TableRow>
@@ -315,10 +311,10 @@ export default function AuditLogsPage() {
                 {data.meta.totalPages > 1 && (
                   <div className="mt-6">
                     <Pagination
-                      currentPage={data.meta.page}
+                      currentPage={data.meta.currentPage}
                       totalPages={data.meta.totalPages}
                       totalItems={data.meta.totalItems}
-                      limit={data.meta.limit}
+                      limit={data.meta.itemsPerPage}
                       onPageChange={handlePageChange}
                     />
                   </div>
