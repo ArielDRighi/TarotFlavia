@@ -112,5 +112,11 @@ export const API_ENDPOINTS = {
     // UNBLOCK_IP: (ip: string) => `/admin/security/block-ip/${ip}`,
     // Audit Logs
     AUDIT_LOGS: '/admin/audit-logs',
+    // Cache Management
+    CACHE_ANALYTICS: '/admin/cache/analytics',
+    INVALIDATE_ALL_CACHE: '/admin/cache/invalidate',
+    INVALIDATE_TAROTISTA_CACHE: (tarotistaId: number) => `/admin/cache/tarotistas/${tarotistaId}`,
+    INVALIDATE_SPREAD_CACHE: (spreadId: number) => `/admin/cache/spreads/${spreadId}`,
+    TRIGGER_CACHE_WARMING: '/admin/cache/warming/trigger',
   },
 } as const;
