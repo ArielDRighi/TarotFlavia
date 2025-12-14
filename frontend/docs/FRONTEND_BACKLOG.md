@@ -3578,14 +3578,53 @@ IMPORTANTE:
 
 ---
 
-### TAREA 10.7: Crear página Configuración de Planes
+### TAREA 10.7: Crear página Configuración de Planes ✅
 
+**Estado:** ✅ COMPLETADA (14 Diciembre 2025)
 **Prioridad:** ALTA
 **Estimación:** 60 min
 **Dependencias:** 10.1
 
 **Consigna:**
 Crear página para ver y editar la configuración de límites de cada plan (FREE, PREMIUM, PROFESSIONAL).
+
+**Archivos Creados:**
+
+- `src/types/admin.types.ts` - Agregados tipos `PlanType`, `PlanConfig`, `UpdatePlanConfigDto`
+- `src/lib/api/endpoints.ts` - Agregados endpoints de plan-config
+- `src/lib/api/admin-plans-api.ts` + tests - Funciones de API para planes
+- `src/hooks/queries/useAdminPlans.ts` + tests - React Query hooks
+- `src/components/features/admin/PlanConfigCard.tsx` + tests - Card editable por plan
+- `src/components/features/admin/PlanComparisonTable.tsx` + tests - Tabla comparativa
+- `src/app/admin/planes/page.tsx` + tests - Página principal
+- `src/components/ui/switch.tsx` - Componente Switch (agregado con shadcn/ui)
+
+**Tests:**
+
+- ✅ 6 tests de API functions
+- ✅ 5 tests de React Query hooks
+- ✅ 9 tests de PlanConfigCard
+- ✅ 8 tests de PlanComparisonTable
+- ✅ 6 tests de página
+- **Total:** 34 tests passing
+
+**Validaciones:**
+
+- ✅ Lint: 0 errores
+- ✅ Type-check: 0 errores
+- ✅ Build: exitoso
+- ✅ All tests: 1286 passing
+
+**Decisiones de Implementación:**
+
+1. Plan GUEST se muestra en tabla comparativa pero no es editable
+2. Valores -1 se interpretan como "Ilimitado"
+3. Modal de confirmación antes de guardar cambios
+4. Validación de números positivos o -1
+5. Reseteo de formulario usando key prop para evitar efectos secundarios
+6. Toast de feedback en operaciones
+
+**Rama:** `feature/TASK-10.7-admin-planes`
 
 **Prompt:**
 
