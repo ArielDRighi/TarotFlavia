@@ -3431,7 +3431,7 @@ Crear página para visualizar estadísticas de uso de IA, costos por proveedor y
 
 ---
 
-### TAREA 10.6: Crear página Configuración de Planes
+### TAREA 10.6: Crear página Uso de IA y Costos
 
 **Prioridad:** ALTA
 **Estimación:** 60 min
@@ -3543,7 +3543,7 @@ IMPORTANTE:
 
 ---
 
-### TAREA 10.6: Crear página Configuración de Planes
+### TAREA 10.7: Crear página Configuración de Planes
 
 **Prioridad:** ALTA
 **Estimación:** 60 min
@@ -3630,7 +3630,7 @@ IMPORTANTE:
 
 ---
 
-### TAREA 10.7: Crear página Rate Limiting y Seguridad
+### TAREA 10.8: Crear página Rate Limiting y Seguridad
 
 **Prioridad:** ALTA
 **Estimación:** 55 min
@@ -3750,7 +3750,7 @@ IMPORTANTE:
 
 ---
 
-### TAREA 10.8: Crear página Audit Logs
+### TAREA 10.9: Crear página Audit Logs
 
 **Prioridad:** MEDIA
 **Estimación:** 40 min
@@ -3834,7 +3834,7 @@ IMPORTANTE:
 
 ---
 
-### TAREA 10.9: Crear página Cache Management
+### TAREA 10.10: Crear página Cache Management
 
 **Prioridad:** BAJA
 **Estimación:** 35 min
@@ -3917,7 +3917,7 @@ IMPORTANTE:
 
 ---
 
-### TAREA 10.10: Crear página Métricas de Plataforma
+### TAREA 10.11: Crear página Métricas de Plataforma
 
 **Prioridad:** MEDIA
 **Estimación:** 45 min
@@ -3992,7 +3992,7 @@ IMPORTANTE:
 
 ---
 
-### TAREA 10.11: Actualizar sidebar de Admin con nuevas páginas
+### TAREA 10.12: Actualizar sidebar de Admin con nuevas páginas
 
 **Prioridad:** ALTA
 **Estimación:** 15 min
@@ -4048,7 +4048,7 @@ IMPORTANTE:
 
 ## 🔗 FASE 10.5: FUNCIONALIDADES DE USUARIO FALTANTES
 
-### TAREA 10.12: Crear página de Lectura Compartida Pública
+### TAREA 10.13: Crear página de Lectura Compartida Pública
 
 **Prioridad:** MEDIA
 **Estimación:** 35 min
@@ -4117,7 +4117,7 @@ IMPORTANTE:
 
 ---
 
-### TAREA 10.13: Agregar selector de Tarotista Favorito
+### TAREA 10.14: Agregar selector de Tarotista Favorito
 
 **Prioridad:** MEDIA
 **Estimación:** 30 min
