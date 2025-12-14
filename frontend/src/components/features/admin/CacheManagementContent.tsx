@@ -1,5 +1,10 @@
 /**
  * CacheManagementContent - Main component for cache management page
+ *
+ * NOTA IMPORTANTE:
+ * - Analytics y Warming Status son endpoints separados
+ * - TopCombinations usa cardIds (no nombres legibles)
+ * - No existe endpoint para invalidar por spread
  */
 
 'use client';
@@ -38,33 +43,35 @@ import { toast } from 'sonner';
 import { CacheStatsCards } from './CacheStatsCards';
 import {
   useCacheAnalytics,
+  useCacheWarmingStatus,
   useInvalidateAllCache,
   useInvalidateTarotistaCache,
-  useInvalidateSpreadCache,
   useTriggerCacheWarming,
 } from '@/hooks/api/useCacheAnalytics';
 import { useTarotistas } from '@/hooks/api/useTarotistas';
-import { useSpreads } from '@/hooks/api/useReadings';
 
 export function CacheManagementContent() {
   const [selectedTarotista, setSelectedTarotista] = useState<string>('');
-  const [selectedSpread, setSelectedSpread] = useState<string>('');
 
-  // Queries
+  // Queries separadas (endpoints diferentes)
   const { data: analytics, isLoading, error, refetch } = useCacheAnalytics();
+  const {
+    data: warmingStatus,
+    isLoading: warmingLoading,
+    error: warmingError,
+    refetch: refetchWarming,
+  } = useCacheWarmingStatus();
   const { data: tarotistasResponse } = useTarotistas();
-  const { data: spreadsResponse } = useSpreads();
 
   // Mutations
   const invalidateAll = useInvalidateAllCache();
   const invalidateTarotista = useInvalidateTarotistaCache();
-  const invalidateSpread = useInvalidateSpreadCache();
   const triggerWarming = useTriggerCacheWarming();
 
   const handleInvalidateAll = () => {
     invalidateAll.mutate(undefined, {
       onSuccess: (response) => {
-        toast.success(`Caché invalidado: ${response.entriesDeleted} entradas eliminadas`);
+        toast.success(`Caché invalidado: ${response.deletedCount} entradas eliminadas`);
         refetch();
       },
       onError: (error: Error) => {
@@ -81,7 +88,7 @@ export function CacheManagementContent() {
 
     invalidateTarotista.mutate(Number(selectedTarotista), {
       onSuccess: (response) => {
-        toast.success(`Caché de tarotista invalidado: ${response.entriesDeleted} entradas`);
+        toast.success(`Caché de tarotista invalidado: ${response.deletedCount} entradas`);
         setSelectedTarotista('');
         refetch();
       },
@@ -91,34 +98,25 @@ export function CacheManagementContent() {
     });
   };
 
-  const handleInvalidateSpread = () => {
-    if (!selectedSpread) {
-      toast.error('Selecciona un spread');
-      return;
-    }
-
-    invalidateSpread.mutate(Number(selectedSpread), {
-      onSuccess: (response) => {
-        toast.success(`Caché de spread invalidado: ${response.entriesDeleted} entradas`);
-        setSelectedSpread('');
-        refetch();
-      },
-      onError: (error: Error) => {
-        toast.error(`Error: ${error.message}`);
-      },
-    });
-  };
-
   const handleTriggerWarming = () => {
-    triggerWarming.mutate(undefined, {
-      onSuccess: (response) => {
-        toast.success(`Cache warming iniciado: ${response.entriesWarmed} entradas`);
-        refetch();
-      },
-      onError: (error: Error) => {
-        toast.error(`Error: ${error.message}`);
-      },
-    });
+    triggerWarming.mutate(
+      { topN: 100 },
+      {
+        onSuccess: (response) => {
+          if (response.started) {
+            toast.success(
+              `Cache warming iniciado: ${response.totalCombinations || 100} combinaciones`
+            );
+            refetchWarming();
+          } else {
+            toast.warning(response.message || 'Warming ya en ejecución');
+          }
+        },
+        onError: (error: Error) => {
+          toast.error(`Error: ${error.message}`);
+        },
+      }
+    );
   };
 
   if (error) {
@@ -137,7 +135,6 @@ export function CacheManagementContent() {
   }
 
   const tarotistas = tarotistasResponse?.data || [];
-  const spreads = spreadsResponse || [];
 
   return (
     <div className="space-y-6">
@@ -155,14 +152,20 @@ export function CacheManagementContent() {
         </Button>
       </div>
 
-      {/* Stats Cards */}
-      <CacheStatsCards stats={analytics.stats} />
+      {/* Stats Cards - usa estructura correcta del backend */}
+      <CacheStatsCards
+        hitRate={analytics.hitRate}
+        savings={analytics.savings}
+        responseTime={analytics.responseTime}
+      />
 
       {/* Top Combinations */}
       <Card>
         <CardHeader>
           <CardTitle>Combinaciones Más Cacheadas (Top 10)</CardTitle>
-          <CardDescription>Combinaciones tarotista-spread-categoría más frecuentes</CardDescription>
+          <CardDescription>
+            Combinaciones de cartas más frecuentemente servidas desde caché
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {analytics.topCombinations.length === 0 ? (
@@ -171,22 +174,26 @@ export function CacheManagementContent() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Tarotista</TableHead>
-                  <TableHead>Spread</TableHead>
-                  <TableHead>Categoría</TableHead>
+                  <TableHead>Cache Key</TableHead>
+                  <TableHead>Card IDs</TableHead>
+                  <TableHead>Spread ID</TableHead>
                   <TableHead className="text-right">Hit Count</TableHead>
-                  <TableHead className="text-right">Última Actualización</TableHead>
+                  <TableHead className="text-right">Última Uso</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {analytics.topCombinations.map((combo, index) => (
-                  <TableRow key={index}>
-                    <TableCell className="font-medium">{combo.tarotistaName}</TableCell>
-                    <TableCell>{combo.spreadName}</TableCell>
-                    <TableCell>{combo.categoryName}</TableCell>
+                {analytics.topCombinations.map((combo) => (
+                  <TableRow key={combo.cacheKey}>
+                    <TableCell className="font-mono text-xs">
+                      {combo.cacheKey.substring(0, 12)}...
+                    </TableCell>
+                    <TableCell className="font-mono text-xs">
+                      [{combo.cardIds.join(', ')}]
+                    </TableCell>
+                    <TableCell>{combo.spreadId ?? 'N/A'}</TableCell>
                     <TableCell className="text-right">{combo.hitCount}</TableCell>
                     <TableCell className="text-right">
-                      {new Date(combo.lastUpdated).toLocaleString('es-ES')}
+                      {new Date(combo.lastUsedAt).toLocaleString('es-ES')}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -222,9 +229,8 @@ export function CacheManagementContent() {
                 <AlertDialogHeader>
                   <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Esta acción eliminará {analytics.stats.totalEntries} entradas del caché. Los
-                    usuarios experimentarán tiempos de respuesta más lentos hasta que el caché se
-                    regenere.
+                    Esta acción eliminará todas las entradas del caché. Los usuarios experimentarán
+                    tiempos de respuesta más lentos hasta que el caché se regenere.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -263,87 +269,79 @@ export function CacheManagementContent() {
             </Button>
           </div>
 
-          {/* Invalidate by Spread */}
-          <div className="flex items-center gap-4">
-            <div className="flex-1">
-              <p className="mb-2 font-medium">Invalidar por Spread</p>
-              <Select value={selectedSpread} onValueChange={setSelectedSpread}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar spread" />
-                </SelectTrigger>
-                <SelectContent>
-                  {spreads.map((spread) => (
-                    <SelectItem key={spread.id} value={spread.id.toString()}>
-                      {spread.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <Button
-              onClick={handleInvalidateSpread}
-              disabled={!selectedSpread || invalidateSpread.isPending}
-              className="mt-8"
-            >
-              Invalidar
-            </Button>
-          </div>
+          {/* NOTA: No existe endpoint para invalidar por spread en el backend */}
         </CardContent>
       </Card>
 
       {/* Warming Status */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Cache Warming</CardTitle>
-          <CardDescription>Estado y control del precalentamiento de caché</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-3">
-            <div>
-              <p className="text-muted-foreground text-sm font-medium">Estado Actual</p>
-              <p className="text-lg font-bold">
-                {analytics.warmingStatus.isRunning ? (
-                  <span className="text-yellow-600">En ejecución...</span>
-                ) : (
-                  <span className="text-green-600">Inactivo</span>
-                )}
-              </p>
+      {warmingStatus && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Cache Warming</CardTitle>
+            <CardDescription>Estado y control del precalentamiento de caché</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-4">
+              <div>
+                <p className="text-muted-foreground text-sm font-medium">Estado Actual</p>
+                <p className="text-lg font-bold">
+                  {warmingStatus.isRunning ? (
+                    <span className="text-yellow-600">En ejecución...</span>
+                  ) : (
+                    <span className="text-green-600">Inactivo</span>
+                  )}
+                </p>
+              </div>
+              {warmingStatus.isRunning && (
+                <>
+                  <div>
+                    <p className="text-muted-foreground text-sm font-medium">Progreso</p>
+                    <p className="text-lg font-bold">{warmingStatus.progress.toFixed(1)}%</p>
+                    <p className="text-muted-foreground text-xs">
+                      {warmingStatus.processedCombinations} / {warmingStatus.totalCombinations}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground text-sm font-medium">Éxitos / Errores</p>
+                    <p className="text-lg font-bold">
+                      {warmingStatus.successCount} / {warmingStatus.errorCount}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground text-sm font-medium">Tiempo Restante</p>
+                    <p className="text-lg font-bold">
+                      ~{warmingStatus.estimatedTimeRemainingMinutes} min
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
-            <div>
-              <p className="text-muted-foreground text-sm font-medium">Última Ejecución</p>
-              <p className="text-lg font-bold">
-                {analytics.warmingStatus.lastExecutionAt
-                  ? new Date(analytics.warmingStatus.lastExecutionAt).toLocaleString('es-ES')
-                  : 'Nunca'}
-              </p>
-            </div>
-            <div>
-              <p className="text-muted-foreground text-sm font-medium">Próxima Ejecución</p>
-              <p className="text-lg font-bold">
-                {analytics.warmingStatus.nextScheduledAt
-                  ? new Date(analytics.warmingStatus.nextScheduledAt).toLocaleString('es-ES')
-                  : 'No programada'}
-              </p>
-            </div>
-          </div>
 
-          <div className="flex items-center justify-between border-t pt-4">
-            <div>
-              <p className="font-medium">Ejecutar Warming Ahora</p>
-              <p className="text-muted-foreground text-sm">
-                Precalentar el caché con las combinaciones más comunes
-              </p>
+            <div className="flex items-center justify-between border-t pt-4">
+              <div>
+                <p className="font-medium">Ejecutar Warming Ahora</p>
+                <p className="text-muted-foreground text-sm">
+                  Precalentar el caché con las top 100 combinaciones más comunes
+                </p>
+              </div>
+              <Button
+                onClick={handleTriggerWarming}
+                disabled={warmingStatus.isRunning || triggerWarming.isPending}
+              >
+                <Play className="mr-2 h-4 w-4" />
+                Ejecutar Warming
+              </Button>
             </div>
-            <Button
-              onClick={handleTriggerWarming}
-              disabled={analytics.warmingStatus.isRunning || triggerWarming.isPending}
-            >
-              <Play className="mr-2 h-4 w-4" />
-              Ejecutar Warming
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
+
+      {warmingLoading && (
+        <p className="text-muted-foreground text-center">Cargando warming status...</p>
+      )}
+      {warmingError && (
+        <p className="text-destructive text-center">Error al cargar warming status</p>
+      )}
     </div>
   );
 }

@@ -1,18 +1,20 @@
 /**
  * Tests for admin-cache-api
+ * Actualizado para coincidir con contratos reales del backend
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { apiClient } from './axios-config';
 import {
   getCacheAnalytics,
+  getCacheWarmingStatus,
   invalidateAllCache,
   invalidateTarotistaCache,
-  invalidateSpreadCache,
   triggerCacheWarming,
 } from './admin-cache-api';
 import type {
   CacheAnalytics,
+  WarmingStatus,
   InvalidateCacheResponse,
   TriggerWarmingResponse,
 } from '@/types/admin-cache.types';
@@ -25,37 +27,37 @@ describe('admin-cache-api', () => {
   });
 
   describe('getCacheAnalytics', () => {
-    it('should fetch cache analytics successfully', async () => {
-      // Arrange
+    it('should fetch cache analytics with correct structure', async () => {
+      // Arrange - estructura real del backend
       const mockData: CacheAnalytics = {
-        stats: {
-          totalEntries: 150,
-          hitRate: 85.5,
-          missRate: 14.5,
-          memoryUsageMB: 25.3,
+        hitRate: {
+          percentage: 85.5,
+          totalRequests: 1000,
+          cacheHits: 855,
+          cacheMisses: 145,
+          windowHours: 24,
+        },
+        savings: {
+          openaiSavings: 1.5525,
+          deepseekSavings: 0.276,
+          groqRateLimitSaved: 855,
+          groqRateLimitPercentage: 5.9,
+        },
+        responseTime: {
+          cacheAvg: 50,
+          aiAvg: 1500,
+          improvementFactor: 30,
         },
         topCombinations: [
           {
-            tarotistaName: 'Groq',
-            spreadName: 'Cruz Celta',
-            categoryName: 'Amor',
+            cacheKey: 'abc123def456',
             hitCount: 45,
-            lastUpdated: '2025-12-14T10:00:00Z',
-          },
-          {
-            tarotistaName: 'OpenAI',
-            spreadName: 'Tres Cartas',
-            categoryName: 'Trabajo',
-            hitCount: 38,
-            lastUpdated: '2025-12-14T09:30:00Z',
+            cardIds: ['1', '5', '10'],
+            spreadId: 2,
+            lastUsedAt: '2025-12-14T10:00:00Z',
           },
         ],
-        warmingStatus: {
-          isRunning: false,
-          lastExecutionAt: '2025-12-14T08:00:00Z',
-          nextScheduledAt: '2025-12-15T08:00:00Z',
-          entriesWarmed: 120,
-        },
+        generatedAt: '2025-12-14T12:00:00Z',
       };
 
       vi.mocked(apiClient.get).mockResolvedValue({ data: mockData });
@@ -78,12 +80,58 @@ describe('admin-cache-api', () => {
     });
   });
 
-  describe('invalidateAllCache', () => {
-    it('should invalidate all cache successfully', async () => {
+  describe('getCacheWarmingStatus', () => {
+    it('should fetch warming status from separate endpoint', async () => {
       // Arrange
+      const mockStatus: WarmingStatus = {
+        isRunning: true,
+        progress: 45.5,
+        totalCombinations: 100,
+        processedCombinations: 45,
+        successCount: 43,
+        errorCount: 2,
+        estimatedTimeRemainingMinutes: 5,
+      };
+
+      vi.mocked(apiClient.get).mockResolvedValue({ data: mockStatus });
+
+      // Act
+      const result = await getCacheWarmingStatus();
+
+      // Assert
+      expect(result).toEqual(mockStatus);
+      expect(apiClient.get).toHaveBeenCalledWith('/admin/cache/warm/status');
+    });
+
+    it('should handle inactive warming status', async () => {
+      // Arrange
+      const mockStatus: WarmingStatus = {
+        isRunning: false,
+        progress: 0,
+        totalCombinations: 0,
+        processedCombinations: 0,
+        successCount: 0,
+        errorCount: 0,
+        estimatedTimeRemainingMinutes: 0,
+      };
+
+      vi.mocked(apiClient.get).mockResolvedValue({ data: mockStatus });
+
+      // Act
+      const result = await getCacheWarmingStatus();
+
+      // Assert
+      expect(result.isRunning).toBe(false);
+    });
+  });
+
+  describe('invalidateAllCache', () => {
+    it('should call correct endpoint with deletedCount response', async () => {
+      // Arrange - estructura real del backend
       const mockResponse: InvalidateCacheResponse = {
-        entriesDeleted: 150,
-        message: 'All cache invalidated successfully',
+        deletedCount: 150,
+        message: 'All cache cleared successfully',
+        timestamp: '2025-12-14T12:00:00Z',
       };
 
       vi.mocked(apiClient.delete).mockResolvedValue({ data: mockResponse });
@@ -93,7 +141,7 @@ describe('admin-cache-api', () => {
 
       // Assert
       expect(result).toEqual(mockResponse);
-      expect(apiClient.delete).toHaveBeenCalledWith('/admin/cache/invalidate');
+      expect(apiClient.delete).toHaveBeenCalledWith('/admin/cache/global');
     });
 
     it('should throw error when API fails', async () => {
@@ -107,12 +155,14 @@ describe('admin-cache-api', () => {
   });
 
   describe('invalidateTarotistaCache', () => {
-    it('should invalidate cache for specific tarotista', async () => {
+    it('should invalidate cache for specific tarotista with reason', async () => {
       // Arrange
       const tarotistaId = 1;
       const mockResponse: InvalidateCacheResponse = {
-        entriesDeleted: 45,
-        message: 'Tarotista cache invalidated successfully',
+        deletedCount: 45,
+        message: 'Cache invalidated for tarotista 1',
+        timestamp: '2025-12-14T12:00:00Z',
+        reason: 'manual-invalidation',
       };
 
       vi.mocked(apiClient.delete).mockResolvedValue({ data: mockResponse });
@@ -122,6 +172,7 @@ describe('admin-cache-api', () => {
 
       // Assert
       expect(result).toEqual(mockResponse);
+      expect(result.reason).toBe('manual-invalidation');
       expect(apiClient.delete).toHaveBeenCalledWith('/admin/cache/tarotistas/1');
     });
 
@@ -135,42 +186,53 @@ describe('admin-cache-api', () => {
     });
   });
 
-  describe('invalidateSpreadCache', () => {
-    it('should invalidate cache for specific spread', async () => {
-      // Arrange
-      const spreadId = 2;
-      const mockResponse: InvalidateCacheResponse = {
-        entriesDeleted: 30,
-        message: 'Spread cache invalidated successfully',
+  describe('triggerCacheWarming', () => {
+    it('should trigger warming with topN parameter', async () => {
+      // Arrange - estructura real del backend
+      const mockResponse: TriggerWarmingResponse = {
+        started: true,
+        totalCombinations: 100,
+        estimatedTimeMinutes: 10,
+        message: 'Cache warming started',
       };
 
-      vi.mocked(apiClient.delete).mockResolvedValue({ data: mockResponse });
+      vi.mocked(apiClient.post).mockResolvedValue({ data: mockResponse });
 
       // Act
-      const result = await invalidateSpreadCache(spreadId);
+      const result = await triggerCacheWarming(100);
 
       // Assert
       expect(result).toEqual(mockResponse);
-      expect(apiClient.delete).toHaveBeenCalledWith('/admin/cache/spreads/2');
+      expect(result.started).toBe(true);
+      expect(apiClient.post).toHaveBeenCalledWith('/admin/cache/warm', undefined, {
+        params: { topN: 100 },
+      });
     });
 
-    it('should throw error when API fails', async () => {
-      // Arrange
-      const error = new Error('Spread not found');
-      vi.mocked(apiClient.delete).mockRejectedValue(error);
-
-      // Act & Assert
-      await expect(invalidateSpreadCache(999)).rejects.toThrow('Spread not found');
-    });
-  });
-
-  describe('triggerCacheWarming', () => {
-    it('should trigger cache warming successfully', async () => {
+    it('should use default topN when not provided', async () => {
       // Arrange
       const mockResponse: TriggerWarmingResponse = {
-        status: 'success',
-        message: 'Cache warming triggered',
-        entriesWarmed: 120,
+        started: true,
+        totalCombinations: 100,
+        estimatedTimeMinutes: 10,
+      };
+
+      vi.mocked(apiClient.post).mockResolvedValue({ data: mockResponse });
+
+      // Act
+      await triggerCacheWarming();
+
+      // Assert
+      expect(apiClient.post).toHaveBeenCalledWith('/admin/cache/warm', undefined, {
+        params: { topN: 100 },
+      });
+    });
+
+    it('should handle warming already running', async () => {
+      // Arrange
+      const mockResponse: TriggerWarmingResponse = {
+        started: false,
+        message: 'Warming already in progress',
       };
 
       vi.mocked(apiClient.post).mockResolvedValue({ data: mockResponse });
@@ -179,17 +241,17 @@ describe('admin-cache-api', () => {
       const result = await triggerCacheWarming();
 
       // Assert
-      expect(result).toEqual(mockResponse);
-      expect(apiClient.post).toHaveBeenCalledWith('/admin/cache/warming/trigger');
+      expect(result.started).toBe(false);
+      expect(result.message).toBe('Warming already in progress');
     });
 
-    it('should throw error when warming is already running', async () => {
+    it('should throw error when warming fails', async () => {
       // Arrange
-      const error = new Error('Warming already in progress');
+      const error = new Error('Internal server error');
       vi.mocked(apiClient.post).mockRejectedValue(error);
 
       // Act & Assert
-      await expect(triggerCacheWarming()).rejects.toThrow('Warming already in progress');
+      await expect(triggerCacheWarming()).rejects.toThrow('Internal server error');
     });
   });
 });

@@ -1,102 +1,182 @@
 /**
  * Tests for CacheStatsCards component
+ * Actualizado para usar props separadas (hitRate, savings, responseTime)
  */
 
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { CacheStatsCards } from './CacheStatsCards';
-import type { CacheStats } from '@/types/admin-cache.types';
+import type {
+  HitRateMetrics,
+  SavingsMetrics,
+  ResponseTimeMetrics,
+} from '@/types/admin-cache.types';
 
 describe('CacheStatsCards', () => {
-  const mockStats: CacheStats = {
-    totalEntries: 150,
-    hitRate: 85.5,
-    missRate: 14.5,
-    memoryUsageMB: 25.3,
+  const mockHitRate: HitRateMetrics = {
+    percentage: 85.5,
+    totalRequests: 1000,
+    cacheHits: 855,
+    cacheMisses: 145,
+    windowHours: 24,
   };
 
-  it('should render all stat cards', () => {
+  const mockSavings: SavingsMetrics = {
+    openaiSavings: 1.5525,
+    deepseekSavings: 0.276,
+    groqRateLimitSaved: 855,
+    groqRateLimitPercentage: 5.9,
+  };
+
+  const mockResponseTime: ResponseTimeMetrics = {
+    cacheAvg: 50,
+    aiAvg: 1500,
+    improvementFactor: 30,
+  };
+
+  it('should render all 4 stat cards', () => {
     // Act
-    render(<CacheStatsCards stats={mockStats} />);
+    render(
+      <CacheStatsCards
+        hitRate={mockHitRate}
+        savings={mockSavings}
+        responseTime={mockResponseTime}
+      />
+    );
 
     // Assert
-    expect(screen.getByText('Total Entries')).toBeInTheDocument();
+    expect(screen.getByText('Total Requests')).toBeInTheDocument();
     expect(screen.getByText('Hit Rate')).toBeInTheDocument();
     expect(screen.getByText('Miss Rate')).toBeInTheDocument();
-    expect(screen.getByText('Memory Usage')).toBeInTheDocument();
+    expect(screen.getByText('Speed Improvement')).toBeInTheDocument();
   });
 
-  it('should display total entries value', () => {
+  it('should display total requests correctly', () => {
     // Act
-    render(<CacheStatsCards stats={mockStats} />);
+    render(
+      <CacheStatsCards
+        hitRate={mockHitRate}
+        savings={mockSavings}
+        responseTime={mockResponseTime}
+      />
+    );
 
     // Assert
-    expect(screen.getByText('150')).toBeInTheDocument();
+    expect(screen.getByText(/1[,.]000/)).toBeInTheDocument(); // Handles both 1,000 and 1.000
+    expect(screen.getByText('Last 24h')).toBeInTheDocument();
   });
 
-  it('should display hit rate with percentage', () => {
+  it('should display hit rate percentage', () => {
     // Act
-    render(<CacheStatsCards stats={mockStats} />);
+    render(
+      <CacheStatsCards
+        hitRate={mockHitRate}
+        savings={mockSavings}
+        responseTime={mockResponseTime}
+      />
+    );
 
     // Assert
     expect(screen.getByText('85.5%')).toBeInTheDocument();
+    expect(screen.getByText('855 cache hits')).toBeInTheDocument();
   });
 
-  it('should display miss rate with percentage', () => {
+  it('should apply green color when hit rate > 80%', () => {
     // Act
-    render(<CacheStatsCards stats={mockStats} />);
+    render(
+      <CacheStatsCards
+        hitRate={mockHitRate}
+        savings={mockSavings}
+        responseTime={mockResponseTime}
+      />
+    );
 
     // Assert
-    expect(screen.getByText('14.5%')).toBeInTheDocument();
-  });
-
-  it('should display memory usage in MB', () => {
-    // Act
-    render(<CacheStatsCards stats={mockStats} />);
-
-    // Assert
-    expect(screen.getByText('25.3 MB')).toBeInTheDocument();
-  });
-
-  it('should apply green color to hit rate when > 80%', () => {
-    // Act
-    const { container } = render(<CacheStatsCards stats={mockStats} />);
-
-    // Assert
-    const hitRateValue = container.querySelector('[data-testid="hit-rate-card"] .text-green-600');
+    const hitRateCard = screen.getByTestId('hit-rate-card');
+    const hitRateValue = hitRateCard.querySelector('.text-green-600');
     expect(hitRateValue).toBeInTheDocument();
+    expect(hitRateValue).toHaveTextContent('85.5%');
   });
 
-  it('should not apply green color to hit rate when <= 80%', () => {
+  it('should NOT apply green color when hit rate <= 80%', () => {
     // Arrange
-    const lowHitRateStats: CacheStats = {
-      ...mockStats,
-      hitRate: 75,
+    const lowHitRate: HitRateMetrics = {
+      ...mockHitRate,
+      percentage: 75.0,
+      cacheHits: 750,
+      cacheMisses: 250,
     };
 
     // Act
-    const { container } = render(<CacheStatsCards stats={lowHitRateStats} />);
+    render(
+      <CacheStatsCards hitRate={lowHitRate} savings={mockSavings} responseTime={mockResponseTime} />
+    );
 
     // Assert
-    const hitRateValue = container.querySelector('[data-testid="hit-rate-card"] .text-green-600');
+    const hitRateCard = screen.getByTestId('hit-rate-card');
+    const hitRateValue = hitRateCard.querySelector('.text-green-600');
     expect(hitRateValue).not.toBeInTheDocument();
   });
 
-  it('should handle zero values', () => {
+  it('should calculate and display miss rate correctly', () => {
+    // Act
+    render(
+      <CacheStatsCards
+        hitRate={mockHitRate}
+        savings={mockSavings}
+        responseTime={mockResponseTime}
+      />
+    );
+
+    // Assert
+    const missRate = 100 - 85.5;
+    expect(screen.getByText(`${missRate.toFixed(1)}%`)).toBeInTheDocument();
+    expect(screen.getByText('145 AI generations')).toBeInTheDocument();
+  });
+
+  it('should display speed improvement factor', () => {
+    // Act
+    render(
+      <CacheStatsCards
+        hitRate={mockHitRate}
+        savings={mockSavings}
+        responseTime={mockResponseTime}
+      />
+    );
+
+    // Assert
+    expect(screen.getByText('30x')).toBeInTheDocument();
+    expect(screen.getByText('Cache: 50ms vs AI: 1500ms')).toBeInTheDocument();
+  });
+
+  it('should handle zero values gracefully', () => {
     // Arrange
-    const zeroStats: CacheStats = {
-      totalEntries: 0,
-      hitRate: 0,
-      missRate: 0,
-      memoryUsageMB: 0,
+    const zeroHitRate: HitRateMetrics = {
+      percentage: 0,
+      totalRequests: 0,
+      cacheHits: 0,
+      cacheMisses: 0,
+      windowHours: 24,
+    };
+
+    const zeroResponseTime: ResponseTimeMetrics = {
+      cacheAvg: 0,
+      aiAvg: 0,
+      improvementFactor: 0,
     };
 
     // Act
-    render(<CacheStatsCards stats={zeroStats} />);
+    render(
+      <CacheStatsCards
+        hitRate={zeroHitRate}
+        savings={mockSavings}
+        responseTime={zeroResponseTime}
+      />
+    );
 
     // Assert
-    expect(screen.getByText('0')).toBeInTheDocument();
-    expect(screen.getAllByText(/0%/)[0]).toBeInTheDocument();
-    expect(screen.getByText('0 MB')).toBeInTheDocument();
+    expect(screen.getByText('0')).toBeInTheDocument(); // Total requests
+    expect(screen.getByText('0.0%')).toBeInTheDocument(); // Hit rate
+    expect(screen.getByText('0x')).toBeInTheDocument(); // Speed improvement
   });
 });

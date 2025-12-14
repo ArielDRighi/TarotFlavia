@@ -1,27 +1,37 @@
 /**
  * CacheStatsCards - Grid of cache statistics cards
+ * Backend retorna estructura anidada: { hitRate, savings, responseTime }
  */
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Database, TrendingUp, TrendingDown, HardDrive } from 'lucide-react';
-import type { CacheStats } from '@/types/admin-cache.types';
+import { Database, TrendingUp, TrendingDown, Zap } from 'lucide-react';
+import type {
+  HitRateMetrics,
+  SavingsMetrics,
+  ResponseTimeMetrics,
+} from '@/types/admin-cache.types';
 import { cn } from '@/lib/utils';
 
 interface CacheStatsCardsProps {
-  stats: CacheStats;
+  hitRate: HitRateMetrics;
+  savings: SavingsMetrics; // eslint-disable-line @typescript-eslint/no-unused-vars
+  responseTime: ResponseTimeMetrics;
 }
 
-export function CacheStatsCards({ stats }: CacheStatsCardsProps) {
+export function CacheStatsCards({ hitRate, savings, responseTime }: CacheStatsCardsProps) {
+  const missRate = 100 - hitRate.percentage;
+
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      {/* Total Entries */}
+      {/* Total Requests */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total Entries</CardTitle>
+          <CardTitle className="text-sm font-medium">Total Requests</CardTitle>
           <Database className="text-muted-foreground h-4 w-4" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.totalEntries}</div>
+          <div className="text-2xl font-bold">{hitRate.totalRequests.toLocaleString()}</div>
+          <p className="text-muted-foreground text-xs">Last {hitRate.windowHours}h</p>
         </CardContent>
       </Card>
 
@@ -34,11 +44,14 @@ export function CacheStatsCards({ stats }: CacheStatsCardsProps) {
         <CardContent>
           <div
             className={cn('text-2xl font-bold', {
-              'text-green-600': stats.hitRate > 80,
+              'text-green-600': hitRate.percentage > 80,
             })}
           >
-            {stats.hitRate}%
+            {hitRate.percentage.toFixed(1)}%
           </div>
+          <p className="text-muted-foreground text-xs">
+            {hitRate.cacheHits.toLocaleString()} cache hits
+          </p>
         </CardContent>
       </Card>
 
@@ -49,18 +62,24 @@ export function CacheStatsCards({ stats }: CacheStatsCardsProps) {
           <TrendingDown className="text-muted-foreground h-4 w-4" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.missRate}%</div>
+          <div className="text-2xl font-bold">{missRate.toFixed(1)}%</div>
+          <p className="text-muted-foreground text-xs">
+            {hitRate.cacheMisses.toLocaleString()} AI generations
+          </p>
         </CardContent>
       </Card>
 
-      {/* Memory Usage */}
+      {/* Performance Improvement */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Memory Usage</CardTitle>
-          <HardDrive className="text-muted-foreground h-4 w-4" />
+          <CardTitle className="text-sm font-medium">Speed Improvement</CardTitle>
+          <Zap className="text-muted-foreground h-4 w-4" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.memoryUsageMB} MB</div>
+          <div className="text-2xl font-bold">{responseTime.improvementFactor}x</div>
+          <p className="text-muted-foreground text-xs">
+            Cache: {responseTime.cacheAvg}ms vs AI: {responseTime.aiAvg}ms
+          </p>
         </CardContent>
       </Card>
     </div>
