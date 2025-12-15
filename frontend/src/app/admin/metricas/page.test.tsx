@@ -157,4 +157,22 @@ describe('PlatformMetricsPage', () => {
       expect(selectors.length).toBeGreaterThanOrEqual(1);
     });
   });
+
+  it('should handle edge case when activeUsers is 0', async () => {
+    const metricsWithZeroUsers: PlatformMetricsDto = {
+      ...mockMetrics,
+      activeUsers: 0,
+    };
+
+    vi.mocked(platformMetricsApi.getPlatformMetrics).mockResolvedValue(metricsWithZeroUsers);
+
+    render(<PlatformMetricsPage />, { wrapper: createWrapper() });
+
+    await waitFor(() => {
+      expect(screen.getByText(/revenue total/i)).toBeInTheDocument();
+    });
+
+    // Verificar que muestra "N/A" en lugar de Infinity o NaN
+    expect(screen.getByText(/promedio: n\/a por usuario/i)).toBeInTheDocument();
+  });
 });

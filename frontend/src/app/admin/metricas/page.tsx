@@ -137,7 +137,11 @@ export default function PlatformMetricsPage() {
               <CardContent>
                 <div className="text-2xl font-bold">{formatLargeNumber(metrics.totalReadings)}</div>
                 <p className="text-xs text-gray-500">
-                  Promedio: {(metrics.totalReadings / metrics.activeUsers).toFixed(1)} por usuario
+                  Promedio:{' '}
+                  {metrics.activeUsers > 0
+                    ? (metrics.totalReadings / metrics.activeUsers).toFixed(1)
+                    : 'N/A'}{' '}
+                  por usuario
                 </p>
               </CardContent>
             </Card>
