@@ -88,16 +88,16 @@ describe('Readings + Interpretations + AI Integration Tests', () => {
     await app.init();
 
     dataSource = moduleFixture.get<DataSource>(DataSource);
+
+    // Mock GroqProvider.generateCompletion to avoid real API calls
+    const groqProvider = moduleFixture.get<GroqProvider>(GroqProvider);
+    jest
+      .spyOn(groqProvider, 'generateCompletion')
+      .mockResolvedValue(mockAIResponse);
     createReadingUseCase =
       moduleFixture.get<CreateReadingUseCase>(CreateReadingUseCase);
     usersService = moduleFixture.get<UsersService>(UsersService);
     aiProviderService = moduleFixture.get<AIProviderService>(AIProviderService);
-
-    // Mock AI providers to avoid real API calls but keep the service logic intact
-    const groqProvider = moduleFixture.get(GroqProvider);
-    jest
-      .spyOn(groqProvider, 'generateCompletion')
-      .mockResolvedValue(mockAIResponse);
 
     // Crear tarotista Flavia por defecto si no existe
     await setupDefaultTarotista(dataSource, usersService);

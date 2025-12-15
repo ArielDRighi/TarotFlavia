@@ -92,8 +92,9 @@ describe('UsageLimits + Readings Integration Tests', () => {
     );
     aiProviderService = moduleFixture.get<AIProviderService>(AIProviderService);
 
-    // Mock AI providers to avoid real API calls but keep the service logic intact
-    const groqProvider = moduleFixture.get(GroqProvider);
+    // Mock GroqProvider.generateCompletion to avoid real API calls
+    // This allows AIProviderService to execute trackMonthlyUsage correctly
+    const groqProvider = moduleFixture.get<GroqProvider>(GroqProvider);
     jest
       .spyOn(groqProvider, 'generateCompletion')
       .mockResolvedValue(mockAIResponse);
@@ -268,7 +269,8 @@ describe('UsageLimits + Readings Integration Tests', () => {
           position: testSpread.positions[idx]?.name || `Position ${idx + 1}`,
           isReversed: false,
         })),
-        customQuestion: 'Test question for usage limits',
+        // Use unique question to avoid cache hits
+        customQuestion: `Test question for usage limits - ${Date.now()} - ${Math.random()}`,
         generateInterpretation: true,
       };
 
