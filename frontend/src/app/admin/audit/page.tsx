@@ -4,8 +4,6 @@
  * Audit trail of all administrative actions
  */
 
-'use client';
-
 import { AuditLogsContent } from '@/components/features/admin/AuditLogsContent';
 
 export default function AuditLogsPage() {
@@ -17,6 +15,7 @@ export default function AuditLogsPage() {
           Historial de todas las acciones administrativas
         </p>
       </div>
+
       <AuditLogsContent />
     </div>
   );

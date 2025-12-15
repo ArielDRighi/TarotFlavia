@@ -75,6 +75,12 @@ export const API_ENDPOINTS = {
     METRICS_TAROTISTA: '/tarotistas/metrics/tarotista',
   },
 
+  // Subscriptions
+  SUBSCRIPTIONS: {
+    MY_SUBSCRIPTION: '/subscriptions/my-subscription',
+    SET_FAVORITE: '/subscriptions/set-favorite',
+  },
+
   // Scheduling (Sessions)
   SCHEDULING: {
     AVAILABLE_SLOTS: '/scheduling/available-slots',
