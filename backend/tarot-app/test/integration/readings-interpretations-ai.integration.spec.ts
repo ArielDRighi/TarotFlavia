@@ -25,6 +25,7 @@ import {
   AIProviderType,
   AIResponse,
 } from '../../src/modules/ai/domain/interfaces/ai-provider.interface';
+import { GroqProvider } from '../../src/modules/ai/infrastructure/providers/groq.provider';
 
 // No need to increase timeout - using mocked AI responses
 jest.setTimeout(10000);
@@ -92,9 +93,10 @@ describe('Readings + Interpretations + AI Integration Tests', () => {
     usersService = moduleFixture.get<UsersService>(UsersService);
     aiProviderService = moduleFixture.get<AIProviderService>(AIProviderService);
 
-    // Mock AIProviderService.generateCompletion to avoid real API calls
+    // Mock AI providers to avoid real API calls but keep the service logic intact
+    const groqProvider = moduleFixture.get(GroqProvider);
     jest
-      .spyOn(aiProviderService, 'generateCompletion')
+      .spyOn(groqProvider, 'generateCompletion')
       .mockResolvedValue(mockAIResponse);
 
     // Crear tarotista Flavia por defecto si no existe

@@ -7,6 +7,7 @@ import { AppModule } from '../../src/app.module';
 // Services
 import { UsersService } from '../../src/modules/users/users.service';
 import { AuthOrchestratorService } from '../../src/modules/auth/application/services/auth-orchestrator.service';
+import { AIProviderService } from '../../src/modules/ai/application/services/ai-provider.service';
 
 // Entities
 import { User, UserPlan } from '../../src/modules/users/entities/user.entity';
@@ -21,15 +22,21 @@ import {
   UsageLimit,
   UsageFeature,
 } from '../../src/modules/usage-limits/entities/usage-limit.entity';
+import {
+  AIProviderType,
+  AIResponse,
+} from '../../src/modules/ai/domain/interfaces/ai-provider.interface';
+import { GroqProvider } from '../../src/modules/ai/infrastructure/providers/groq.provider';
 
-// Increase timeout for integration tests with AI/HTTP calls
-jest.setTimeout(30000);
+// No need to increase timeout with mocked AI
+jest.setTimeout(10000);
 
 describe('UsageLimits + Readings Integration Tests', () => {
   let app: INestApplication;
   let dataSource: DataSource;
   let usersService: UsersService;
   let authService: AuthOrchestratorService;
+  let aiProviderService: AIProviderService;
 
   // Test data
   let testUser: User;
@@ -46,6 +53,20 @@ describe('UsageLimits + Readings Integration Tests', () => {
   const testUserData = {
     password: 'TestPass123!',
     name: 'Usage Limits Test User',
+  };
+
+  // Mock AI response
+  const mockAIResponse: AIResponse = {
+    content:
+      'Based on your cards, the reading suggests a period of transformation and growth. Trust your intuition and embrace the changes ahead.',
+    provider: AIProviderType.GROQ,
+    model: 'llama-3.1-70b-versatile',
+    tokensUsed: {
+      prompt: 500,
+      completion: 200,
+      total: 700,
+    },
+    durationMs: 1200,
   };
 
   beforeAll(async () => {
@@ -69,6 +90,14 @@ describe('UsageLimits + Readings Integration Tests', () => {
     authService = moduleFixture.get<AuthOrchestratorService>(
       AuthOrchestratorService,
     );
+    aiProviderService = moduleFixture.get<AIProviderService>(AIProviderService);
+
+    // Mock AI providers to avoid real API calls but keep the service logic intact
+    const groqProvider = moduleFixture.get(GroqProvider);
+    jest
+      .spyOn(groqProvider, 'generateCompletion')
+      .mockResolvedValue(mockAIResponse);
+
     // Note: login() signature changed from login(user, userAgent, ip) to login(userId, email, ip, userAgent)
     // This is a breaking change for better separation of concerns (primitive types instead of entities)
 
@@ -81,6 +110,8 @@ describe('UsageLimits + Readings Integration Tests', () => {
   });
 
   afterAll(async () => {
+    // Restore mocks
+    jest.restoreAllMocks();
     await app.close();
   });
 
