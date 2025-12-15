@@ -7,7 +7,6 @@ import { AppModule } from '../../src/app.module';
 // Services
 import { UsersService } from '../../src/modules/users/users.service';
 import { AuthOrchestratorService } from '../../src/modules/auth/application/services/auth-orchestrator.service';
-import { AIProviderService } from '../../src/modules/ai/application/services/ai-provider.service';
 
 // Entities
 import { User, UserPlan } from '../../src/modules/users/entities/user.entity';
@@ -36,7 +35,6 @@ describe('UsageLimits + Readings Integration Tests', () => {
   let dataSource: DataSource;
   let usersService: UsersService;
   let authService: AuthOrchestratorService;
-  let aiProviderService: AIProviderService;
 
   // Test data
   let testUser: User;
@@ -90,7 +88,6 @@ describe('UsageLimits + Readings Integration Tests', () => {
     authService = moduleFixture.get<AuthOrchestratorService>(
       AuthOrchestratorService,
     );
-    aiProviderService = moduleFixture.get<AIProviderService>(AIProviderService);
 
     // Mock GroqProvider.generateCompletion to avoid real API calls
     // This allows AIProviderService to execute trackMonthlyUsage correctly

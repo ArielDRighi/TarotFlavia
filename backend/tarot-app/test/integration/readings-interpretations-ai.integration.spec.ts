@@ -20,7 +20,6 @@ import { TarotDeck } from '../../src/modules/tarot/decks/entities/tarot-deck.ent
 import { TarotInterpretation } from '../../src/modules/tarot/interpretations/entities/tarot-interpretation.entity';
 import { Tarotista } from '../../src/modules/tarotistas/entities/tarotista.entity';
 import { setupDefaultTarotista } from '../helpers/setup-default-tarotista';
-import { AIProviderService } from '../../src/modules/ai/application/services/ai-provider.service';
 import {
   AIProviderType,
   AIResponse,
@@ -35,7 +34,6 @@ describe('Readings + Interpretations + AI Integration Tests', () => {
   let dataSource: DataSource;
   let createReadingUseCase: CreateReadingUseCase;
   let usersService: UsersService;
-  let aiProviderService: AIProviderService;
 
   let testUser: User;
   let testCards: TarotCard[];
