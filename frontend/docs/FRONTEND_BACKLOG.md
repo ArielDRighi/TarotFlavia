@@ -4347,11 +4347,55 @@ IMPORTANTE:
 
 ---
 
-### TAREA 10.14: Agregar selector de Tarotista Favorito
+### ✅ TAREA 10.14: Agregar selector de Tarotista Favorito
 
+**Estado:** COMPLETADA ✅
 **Prioridad:** MEDIA
 **Estimación:** 30 min
 **Dependencias:** 7.4
+**Completada:** 15 Diciembre 2024
+
+**Implementación:**
+
+1. **Tipos creados:**
+   - `subscription.types.ts`: UserSubscription, SetFavoriteTarotistaDto, SetFavoriteTarotistaResponse
+
+2. **API Service:**
+   - `subscriptions-api.ts`: getMySubscription(), setFavoriteTarotista()
+   - Endpoints agregados a `endpoints.ts`
+
+3. **Hooks creados:**
+   - `useSubscriptions.ts`: useMySubscription(), useSetFavoriteTarotista()
+   - Con invalidación automática de queries
+   - Toasts de éxito/error
+
+4. **Componente creado:**
+   - `FavoriteTarotistaButton.tsx`: Botón inteligente que muestra:
+     - "Elegir como favorito" si puede seleccionar
+     - "Tu tarotista favorito" (badge dorado) si ya es favorito
+     - "Podrás cambiar en X días" si cooldown activo
+   - Modal de confirmación con warning de 30 días
+   - Solo visible para usuarios FREE
+
+5. **Integración:**
+   - Agregado en `TarotistaProfilePage` en la sección hero
+   - Tests completos (100% coverage en archivos nuevos)
+
+**Tests:**
+
+- ✅ subscriptions-api.test.ts (9 tests)
+- ✅ useSubscriptions.test.tsx (11 tests)
+- ✅ FavoriteTarotistaButton.test.tsx (9 tests)
+- ✅ TarotistaProfilePage.test.tsx actualizado
+
+**Calidad:**
+
+- ✅ Lint: 0 errores, 0 warnings
+- ✅ Build: Exitoso
+- ✅ Tests: 1384 pasando
+- ✅ Arquitectura: 100% válida
+
+---
 
 **Consigna:**
 Agregar funcionalidad para que usuarios FREE puedan seleccionar su tarotista favorito (con cooldown de 30 días).

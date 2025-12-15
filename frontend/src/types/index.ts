@@ -84,3 +84,10 @@ export type {
   TopTarotistaRow,
 } from './platform-metrics.types';
 export { MetricsPeriod } from './platform-metrics.types';
+
+// Subscription Types
+export type {
+  UserSubscription,
+  SetFavoriteTarotistaDto,
+  SetFavoriteTarotistaResponse,
+} from './subscription.types';

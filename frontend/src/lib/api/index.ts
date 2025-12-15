@@ -25,3 +25,4 @@ export {
   getSessionDetail,
   cancelSession,
 } from './sessions-api';
+export { getMySubscription, setFavoriteTarotista } from './subscriptions-api';

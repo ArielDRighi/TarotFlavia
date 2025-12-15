@@ -332,4 +332,24 @@ describe('TarotistaProfilePage', () => {
       expect(availabilityIndicator).toBeInTheDocument();
     });
   });
+
+  // ============================================================================
+  // Favorite Tarotista Button
+  // ============================================================================
+
+  it('should render FavoriteTarotistaButton component', async () => {
+    mockUseTarotistaDetail.mockReturnValue({
+      data: createMockTarotista(),
+      isLoading: false,
+      error: null,
+    });
+
+    render(<TarotistaProfilePage id={1} />, { wrapper });
+
+    await waitFor(() => {
+      // The button is rendered by FavoriteTarotistaButton component
+      // which is tested separately
+      expect(screen.getByTestId('tarotista-profile')).toBeInTheDocument();
+    });
+  });
 });

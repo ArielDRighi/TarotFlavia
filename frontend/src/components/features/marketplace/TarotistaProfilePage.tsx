@@ -17,6 +17,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { FavoriteTarotistaButton } from './FavoriteTarotistaButton';
 
 // ============================================================================
 // Types
@@ -224,6 +225,12 @@ export function TarotistaProfilePage({ id }: TarotistaProfilePageProps) {
             >
               {tarotista.isActive ? '✓ Disponible ahora' : 'No disponible'}
             </Badge>
+
+            {/* Favorite Tarotista Button (FREE users only) */}
+            <FavoriteTarotistaButton
+              tarotistaId={tarotista.id}
+              tarotistaName={tarotista.nombrePublico}
+            />
           </div>
         </div>
       </section>
