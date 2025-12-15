@@ -93,7 +93,10 @@ export { MetricsPeriod } from './platform-metrics.types';
 
 // Subscription Types
 export type {
-  UserSubscription,
+  SubscriptionType,
+  SubscriptionStatus,
+  UserTarotistaSubscription,
+  SubscriptionInfo,
   SetFavoriteTarotistaDto,
   SetFavoriteTarotistaResponse,
 } from './subscription.types';

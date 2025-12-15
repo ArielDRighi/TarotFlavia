@@ -14,7 +14,7 @@ import {
   subscriptionQueryKeys,
 } from './useSubscriptions';
 import * as subscriptionsApi from '@/lib/api/subscriptions-api';
-import type { UserSubscription, SetFavoriteTarotistaResponse } from '@/types';
+import type { SubscriptionInfo, SetFavoriteTarotistaResponse } from '@/types';
 
 // Mock the API module
 vi.mock('@/lib/api/subscriptions-api');
@@ -51,40 +51,37 @@ function createWrapper() {
 }
 
 // Mock data
-const mockSubscription: UserSubscription = {
-  id: 1,
-  userId: 1,
-  plan: 'free',
-  favoriteTarotistaId: 5,
-  lastFavoriteChange: '2024-11-15T10:00:00Z',
-  canChangeFavorite: false,
-  daysUntilChange: 15,
-  createdAt: '2024-01-01T00:00:00Z',
-  updatedAt: '2024-11-15T10:00:00Z',
+const mockSubscription: SubscriptionInfo = {
+  subscriptionType: 'favorite',
+  tarotistaId: 5,
+  tarotistaNombre: 'Luna Mística',
+  canChange: false,
+  canChangeAt: '2024-12-15T10:00:00Z',
+  changeCount: 1,
 };
 
-const mockSubscriptionNoFavorite: UserSubscription = {
-  id: 1,
-  userId: 1,
-  plan: 'free',
-  favoriteTarotistaId: null,
-  lastFavoriteChange: null,
-  canChangeFavorite: true,
-  daysUntilChange: 0,
-  createdAt: '2024-01-01T00:00:00Z',
-  updatedAt: '2024-01-01T00:00:00Z',
+const mockSubscriptionNoFavorite: SubscriptionInfo = {
+  subscriptionType: 'favorite',
+  tarotistaId: null,
+  canChange: true,
+  canChangeAt: null,
+  changeCount: 0,
 };
 
 const mockSetFavoriteResponse: SetFavoriteTarotistaResponse = {
-  success: true,
+  message: 'Tarotista favorito establecido correctamente',
   subscription: {
     id: 1,
     userId: 1,
-    plan: 'free',
-    favoriteTarotistaId: 3,
-    lastFavoriteChange: '2024-12-15T10:00:00Z',
-    canChangeFavorite: false,
-    daysUntilChange: 30,
+    tarotistaId: 3,
+    subscriptionType: 'favorite',
+    status: 'active',
+    startedAt: '2024-01-01T00:00:00Z',
+    expiresAt: null,
+    cancelledAt: null,
+    canChangeAt: '2025-01-14T10:00:00Z',
+    changeCount: 1,
+    stripeSubscriptionId: null,
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-12-15T10:00:00Z',
   },
@@ -121,9 +118,9 @@ describe('useSubscriptions hooks', () => {
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-      expect(result.current.data?.favoriteTarotistaId).toBe(5);
-      expect(result.current.data?.canChangeFavorite).toBe(false);
-      expect(result.current.data?.daysUntilChange).toBe(15);
+      expect(result.current.data?.tarotistaId).toBe(5);
+      expect(result.current.data?.canChange).toBe(false);
+      expect(result.current.data?.changeCount).toBe(1);
     });
 
     it('should return subscription without favorite tarotista', async () => {
@@ -137,9 +134,9 @@ describe('useSubscriptions hooks', () => {
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-      expect(result.current.data?.favoriteTarotistaId).toBeNull();
-      expect(result.current.data?.canChangeFavorite).toBe(true);
-      expect(result.current.data?.daysUntilChange).toBe(0);
+      expect(result.current.data?.tarotistaId).toBeNull();
+      expect(result.current.data?.canChange).toBe(true);
+      expect(result.current.data?.changeCount).toBe(0);
     });
 
     it('should handle error when fetching subscription fails', async () => {

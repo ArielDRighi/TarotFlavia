@@ -8,7 +8,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { FavoriteTarotistaButton } from './FavoriteTarotistaButton';
-import type { UserSubscription } from '@/types';
+import type { SubscriptionInfo } from '@/types';
 
 // Mock hooks
 const mockUseMySubscription = vi.fn();
@@ -65,17 +65,13 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
 
-function createMockSubscription(overrides: Partial<UserSubscription> = {}): UserSubscription {
+function createMockSubscription(overrides: Partial<SubscriptionInfo> = {}): SubscriptionInfo {
   return {
-    id: 1,
-    userId: 1,
-    plan: 'free',
-    favoriteTarotistaId: null,
-    lastFavoriteChange: null,
-    canChangeFavorite: true,
-    daysUntilChange: 0,
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-01-01T00:00:00Z',
+    subscriptionType: 'favorite',
+    tarotistaId: null,
+    canChange: true,
+    canChangeAt: null,
+    changeCount: 0,
     ...overrides,
   };
 }
@@ -111,7 +107,7 @@ describe('FavoriteTarotistaButton', () => {
   it('should not render when user has premium plan', () => {
     mockUseAuthStore.mockReturnValue({ plan: 'premium' });
     mockUseMySubscription.mockReturnValue({
-      data: createMockSubscription({ plan: 'premium' }),
+      data: createMockSubscription(),
       isLoading: false,
     });
 
@@ -188,9 +184,9 @@ describe('FavoriteTarotistaButton', () => {
     mockUseAuthStore.mockReturnValue({ plan: 'free' });
     mockUseMySubscription.mockReturnValue({
       data: createMockSubscription({
-        favoriteTarotistaId: 1,
-        canChangeFavorite: false,
-        daysUntilChange: 15,
+        tarotistaId: 1,
+        canChange: false,
+        canChangeAt: '2025-01-14T00:00:00Z',
       }),
       isLoading: false,
     });
@@ -208,12 +204,15 @@ describe('FavoriteTarotistaButton', () => {
 
   it('should render cooldown message when cannot change favorite', async () => {
     mockUseAuthStore.mockReturnValue({ plan: 'free' });
+    // Mock date to calculate exact days
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + 10);
+    
     mockUseMySubscription.mockReturnValue({
       data: createMockSubscription({
-        favoriteTarotistaId: 2,
-        canChangeFavorite: false,
-        daysUntilChange: 10,
-        lastFavoriteChange: '2024-12-05T00:00:00Z',
+        tarotistaId: 2,
+        canChange: false,
+        canChangeAt: futureDate.toISOString(),
       }),
       isLoading: false,
     });
@@ -227,11 +226,14 @@ describe('FavoriteTarotistaButton', () => {
 
   it('should not render button when cooldown active and not current favorite', async () => {
     mockUseAuthStore.mockReturnValue({ plan: 'free' });
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + 10);
+    
     mockUseMySubscription.mockReturnValue({
       data: createMockSubscription({
-        favoriteTarotistaId: 2,
-        canChangeFavorite: false,
-        daysUntilChange: 10,
+        tarotistaId: 2,
+        canChange: false,
+        canChangeAt: futureDate.toISOString(),
       }),
       isLoading: false,
     });

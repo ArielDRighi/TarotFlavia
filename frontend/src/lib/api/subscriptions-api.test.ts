@@ -8,7 +8,7 @@ import { apiClient } from './axios-config';
 import { API_ENDPOINTS } from './endpoints';
 import { getMySubscription, setFavoriteTarotista } from './subscriptions-api';
 import type {
-  UserSubscription,
+  SubscriptionInfo,
   SetFavoriteTarotistaDto,
   SetFavoriteTarotistaResponse,
 } from '@/types';
@@ -30,16 +30,13 @@ describe('subscriptions-api', () => {
   // getMySubscription
   // ==========================================================================
   describe('getMySubscription', () => {
-    const mockSubscription: UserSubscription = {
-      id: 1,
-      userId: 1,
-      plan: 'free',
-      favoriteTarotistaId: 5,
-      lastFavoriteChange: '2024-11-15T10:00:00Z',
-      canChangeFavorite: false,
-      daysUntilChange: 15,
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-11-15T10:00:00Z',
+    const mockSubscription: SubscriptionInfo = {
+      subscriptionType: 'favorite',
+      tarotistaId: 5,
+      tarotistaNombre: 'Luna Mística',
+      canChange: false,
+      canChangeAt: '2024-12-15T10:00:00Z',
+      changeCount: 1,
     };
 
     it('should fetch user subscription from API', async () => {
@@ -56,26 +53,26 @@ describe('subscriptions-api', () => {
 
       const result = await getMySubscription();
 
-      expect(result.favoriteTarotistaId).toBe(5);
-      expect(result.canChangeFavorite).toBe(false);
-      expect(result.daysUntilChange).toBe(15);
+      expect(result?.tarotistaId).toBe(5);
+      expect(result?.canChange).toBe(false);
+      expect(result?.changeCount).toBe(1);
     });
 
     it('should return subscription without favorite tarotista', async () => {
-      const subscriptionNoFavorite: UserSubscription = {
-        ...mockSubscription,
-        favoriteTarotistaId: null,
-        lastFavoriteChange: null,
-        canChangeFavorite: true,
-        daysUntilChange: 0,
+      const subscriptionNoFavorite: SubscriptionInfo = {
+        subscriptionType: 'favorite',
+        tarotistaId: null,
+        canChange: true,
+        canChangeAt: null,
+        changeCount: 0,
       };
       vi.mocked(apiClient.get).mockResolvedValueOnce({ data: subscriptionNoFavorite });
 
       const result = await getMySubscription();
 
-      expect(result.favoriteTarotistaId).toBeNull();
-      expect(result.canChangeFavorite).toBe(true);
-      expect(result.daysUntilChange).toBe(0);
+      expect(result?.tarotistaId).toBeNull();
+      expect(result?.canChange).toBe(true);
+      expect(result?.changeCount).toBe(0);
     });
 
     it('should throw error with clear message on failure', async () => {
@@ -90,15 +87,19 @@ describe('subscriptions-api', () => {
   // ==========================================================================
   describe('setFavoriteTarotista', () => {
     const mockResponse: SetFavoriteTarotistaResponse = {
-      success: true,
+      message: 'Tarotista favorito establecido correctamente',
       subscription: {
         id: 1,
         userId: 1,
-        plan: 'free',
-        favoriteTarotistaId: 3,
-        lastFavoriteChange: '2024-12-15T10:00:00Z',
-        canChangeFavorite: false,
-        daysUntilChange: 30,
+        tarotistaId: 3,
+        subscriptionType: 'favorite',
+        status: 'active',
+        startedAt: '2024-01-01T00:00:00Z',
+        expiresAt: null,
+        cancelledAt: null,
+        canChangeAt: '2025-01-14T10:00:00Z',
+        changeCount: 1,
+        stripeSubscriptionId: null,
         createdAt: '2024-01-01T00:00:00Z',
         updatedAt: '2024-12-15T10:00:00Z',
       },
@@ -119,10 +120,10 @@ describe('subscriptions-api', () => {
 
       const result = await setFavoriteTarotista(3);
 
-      expect(result.success).toBe(true);
-      expect(result.subscription.favoriteTarotistaId).toBe(3);
-      expect(result.subscription.canChangeFavorite).toBe(false);
-      expect(result.subscription.daysUntilChange).toBe(30);
+      expect(result.message).toBe('Tarotista favorito establecido correctamente');
+      expect(result.subscription.tarotistaId).toBe(3);
+      expect(result.subscription.subscriptionType).toBe('favorite');
+      expect(result.subscription.canChangeAt).toBeTruthy();
     });
 
     it('should throw error with clear message on failure', async () => {

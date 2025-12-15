@@ -6,7 +6,7 @@
  */
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Star } from 'lucide-react';
 import { useMySubscription, useSetFavoriteTarotista } from '@/hooks/api/useSubscriptions';
 import { useAuthStore } from '@/stores/authStore';
@@ -52,6 +52,22 @@ export function FavoriteTarotistaButton({
   const { mutate: setFavorite, isPending } = useSetFavoriteTarotista();
 
   // ============================================================================
+  // Computed Values
+  // ============================================================================
+
+  // Calculate days until change if cooldown is active
+  const daysUntilChange = useMemo(() => {
+    if (!subscription?.canChangeAt) return 0;
+    
+    const now = new Date();
+    const changeDate = new Date(subscription.canChangeAt);
+    const diffTime = changeDate.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    return diffDays > 0 ? diffDays : 0;
+  }, [subscription]);
+
+  // ============================================================================
   // Guards
   // ============================================================================
 
@@ -66,34 +82,56 @@ export function FavoriteTarotistaButton({
   }
 
   // Don't render while loading
-  if (isLoadingSubscription || !subscription) {
+  if (isLoadingSubscription) {
     return null;
   }
 
+  // If no subscription, user can set favorite
+  if (!subscription) {
+    return (
+      <>
+        <Button
+          onClick={() => setShowConfirmDialog(true)}
+          variant="outline"
+          className="border-secondary text-secondary hover:bg-secondary/10 flex items-center gap-2"
+        >
+          <Star className="h-5 w-5" />
+          Elegir como favorito
+        </Button>
+
+        {/* Confirmation Dialog */}
+        <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>¿Confirmar tarotista favorito?</DialogTitle>
+              <DialogDescription>
+                ¿Establecer a {tarotistaName} como tu tarotista favorito? Solo podrás cambiarlo en 30
+                días.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowConfirmDialog(false)} disabled={isPending}>
+                Cancelar
+              </Button>
+              <Button onClick={() => {
+                setFavorite(tarotistaId);
+                setShowConfirmDialog(false);
+              }} disabled={isPending}>
+                {isPending ? 'Confirmando...' : 'Confirmar'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </>
+    );
+  }
+
   // ============================================================================
-  // State Checks
+  // State Checks (with subscription)
   // ============================================================================
 
-  const isFavorite = subscription.favoriteTarotistaId === tarotistaId;
-  const canChange = subscription.canChangeFavorite;
-  const daysUntilChange = subscription.daysUntilChange;
-
-  // ============================================================================
-  // Event Handlers
-  // ============================================================================
-
-  const handleSetFavorite = () => {
-    setShowConfirmDialog(true);
-  };
-
-  const handleConfirm = () => {
-    setFavorite(tarotistaId);
-    setShowConfirmDialog(false);
-  };
-
-  const handleCancel = () => {
-    setShowConfirmDialog(false);
-  };
+  const isFavorite = subscription.tarotistaId === tarotistaId;
+  const canChange = subscription.canChange;
 
   // ============================================================================
   // Render States
@@ -125,7 +163,7 @@ export function FavoriteTarotistaButton({
   return (
     <>
       <Button
-        onClick={handleSetFavorite}
+        onClick={() => setShowConfirmDialog(true)}
         variant="outline"
         className="border-secondary text-secondary hover:bg-secondary/10 flex items-center gap-2"
       >
@@ -144,10 +182,13 @@ export function FavoriteTarotistaButton({
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={handleCancel} disabled={isPending}>
+            <Button variant="outline" onClick={() => setShowConfirmDialog(false)} disabled={isPending}>
               Cancelar
             </Button>
-            <Button onClick={handleConfirm} disabled={isPending}>
+            <Button onClick={() => {
+              setFavorite(tarotistaId);
+              setShowConfirmDialog(false);
+            }} disabled={isPending}>
               {isPending ? 'Confirmando...' : 'Confirmar'}
             </Button>
           </DialogFooter>

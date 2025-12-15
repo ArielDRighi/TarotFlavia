@@ -6,17 +6,18 @@
 import { apiClient } from './axios-config';
 import { API_ENDPOINTS } from './endpoints';
 import type {
-  UserSubscription,
+  SubscriptionInfo,
   SetFavoriteTarotistaDto,
   SetFavoriteTarotistaResponse,
 } from '@/types';
 
 /**
  * Get current user's subscription information
+ * Returns SubscriptionInfo DTO, not full entity
  */
-export async function getMySubscription(): Promise<UserSubscription> {
+export async function getMySubscription(): Promise<SubscriptionInfo | null> {
   try {
-    const response = await apiClient.get<UserSubscription>(
+    const response = await apiClient.get<SubscriptionInfo | null>(
       API_ENDPOINTS.SUBSCRIPTIONS.MY_SUBSCRIPTION
     );
     return response.data;
@@ -27,6 +28,7 @@ export async function getMySubscription(): Promise<UserSubscription> {
 
 /**
  * Set favorite tarotista for current user
+ * Returns message + updated subscription entity
  */
 export async function setFavoriteTarotista(
   tarotistaId: number
