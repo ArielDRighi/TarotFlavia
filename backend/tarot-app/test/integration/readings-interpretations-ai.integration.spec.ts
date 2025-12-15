@@ -92,10 +92,10 @@ describe('Readings + Interpretations + AI Integration Tests', () => {
     jest
       .spyOn(groqProvider, 'generateCompletion')
       .mockResolvedValue(mockAIResponse);
+
     createReadingUseCase =
       moduleFixture.get<CreateReadingUseCase>(CreateReadingUseCase);
     usersService = moduleFixture.get<UsersService>(UsersService);
-    aiProviderService = moduleFixture.get<AIProviderService>(AIProviderService);
 
     // Crear tarotista Flavia por defecto si no existe
     await setupDefaultTarotista(dataSource, usersService);
