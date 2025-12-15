@@ -14,11 +14,11 @@ import { cn } from '@/lib/utils';
 
 interface CacheStatsCardsProps {
   hitRate: HitRateMetrics;
-  savings: SavingsMetrics; // eslint-disable-line @typescript-eslint/no-unused-vars
+  savings?: SavingsMetrics; // TODO: Use savings metrics when backend provides detailed cost data
   responseTime: ResponseTimeMetrics;
 }
 
-export function CacheStatsCards({ hitRate, savings, responseTime }: CacheStatsCardsProps) {
+export function CacheStatsCards({ hitRate, responseTime }: CacheStatsCardsProps) {
   const missRate = 100 - hitRate.percentage;
 
   return (

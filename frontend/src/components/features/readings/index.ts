@@ -10,3 +10,4 @@ export { ReadingExperience, type ReadingExperienceProps } from './ReadingExperie
 export { ReadingCard, type ReadingCardProps } from './ReadingCard';
 export { ReadingsHistory } from './ReadingsHistory';
 export { ReadingDetail, type ReadingDetailProps } from './ReadingDetail';
+export { SharedReadingView, type SharedReadingViewProps } from './SharedReadingView';

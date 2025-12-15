@@ -40,6 +40,11 @@ export const API_ENDPOINTS = {
     SHARE: (id: number) => `/readings/${id}/share`,
   },
 
+  // Shared Readings (Public - No authentication required)
+  SHARED: {
+    BY_TOKEN: (token: string) => `/shared/${token}`,
+  },
+
   // Daily Reading (Carta del Día)
   DAILY_READING: {
     BASE: '/daily-reading',
