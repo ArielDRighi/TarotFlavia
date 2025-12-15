@@ -65,6 +65,9 @@ export const API_ENDPOINTS = {
     BY_ID: (id: number) => `/tarotistas/${id}`,
     AVAILABLE: '/tarotistas/available',
     REVIEWS: (id: number) => `/tarotistas/${id}/reviews`,
+    // Metrics
+    METRICS_PLATFORM: '/tarotistas/metrics/platform',
+    METRICS_TAROTISTA: '/tarotistas/metrics/tarotista',
   },
 
   // Scheduling (Sessions)

@@ -72,3 +72,15 @@ export type {
   BookSessionDto,
   CancelSessionDto,
 } from './session.types';
+
+// Platform Metrics Types
+export type {
+  PlatformMetricsQueryDto,
+  TarotistaMetricsDto,
+  PlatformMetricsDto,
+  PeriodOption,
+  MetricCard,
+  ChartDataPoint,
+  TopTarotistaRow,
+} from './platform-metrics.types';
+export { MetricsPeriod } from './platform-metrics.types';

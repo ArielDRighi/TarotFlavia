@@ -4046,14 +4046,60 @@ IMPORTANTE:
 
 ---
 
-### TAREA 10.11: Crear página Métricas de Plataforma
+### TAREA 10.11: Crear página Métricas de Plataforma ✅
 
+**Estado:** COMPLETADA
 **Prioridad:** MEDIA
-**Estimación:** 45 min
+**Estimación:** 45 min → Real: 45 min
 **Dependencias:** 10.1
+**Fecha completada:** 14 Diciembre 2025
 
 **Consigna:**
 Crear página con métricas agregadas de toda la plataforma (revenue, sesiones, performance).
+
+**Implementación realizada:**
+
+1. **Tipos TypeScript** (`src/types/platform-metrics.types.ts`):
+   - `PlatformMetricsDto` - Métricas agregadas de plataforma
+   - `TarotistaMetricsDto` - Métricas individuales de tarotistas
+   - `MetricsPeriod` - Enum para períodos (DAY, WEEK, MONTH, YEAR, CUSTOM)
+   - Tipos UI auxiliares
+
+2. **API** (`src/lib/api/platform-metrics-api.ts`):
+   - `getPlatformMetrics()` - GET /tarotistas/metrics/platform
+
+3. **Hook** (`src/hooks/api/usePlatformMetrics.ts`):
+   - `usePlatformMetrics(period, customDates)` - React Query hook
+   - Coverage: 100%
+
+4. **Página** (`src/app/admin/metricas/page.tsx`):
+   - Selector de período (7 días, 30 días, 1 año)
+   - 4 cards de métricas principales:
+     - Revenue Total (USD formateado)
+     - Sesiones Completadas (placeholder)
+     - Lecturas Totales (con promedio por usuario)
+     - Usuarios Activos
+   - Tabla Top Tarotistas con:
+     - Posición, Nombre, Lecturas, Sesiones, Revenue, Rating
+   - Loading skeletons
+   - Error handling
+   - Coverage: 84.61%
+
+5. **Tests** (14 tests, 100% passing):
+   - `usePlatformMetrics.test.ts` (6 tests)
+   - `page.test.tsx` (8 tests)
+
+**Endpoints actualizados:**
+
+- Agregado `TAROTISTAS.METRICS_PLATFORM` a `src/lib/api/endpoints.ts`
+
+**Decisiones de implementación:**
+
+- Sesiones Completadas muestra placeholder (funcionalidad de sesiones pendiente)
+- No se implementaron gráficos en esta versión (pueden agregarse en futuras iteraciones)
+- Formato de moneda: USD sin decimales
+- Formato de números grandes: 1.2K, 15K, etc.
+- Período por defecto: MONTH (30 días)
 
 **Prompt:**
 
