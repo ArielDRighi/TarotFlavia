@@ -20,15 +20,21 @@ import { TarotDeck } from '../../src/modules/tarot/decks/entities/tarot-deck.ent
 import { TarotInterpretation } from '../../src/modules/tarot/interpretations/entities/tarot-interpretation.entity';
 import { Tarotista } from '../../src/modules/tarotistas/entities/tarotista.entity';
 import { setupDefaultTarotista } from '../helpers/setup-default-tarotista';
+import { AIProviderService } from '../../src/modules/ai/application/services/ai-provider.service';
+import {
+  AIProviderType,
+  AIResponse,
+} from '../../src/modules/ai/domain/interfaces/ai-provider.interface';
 
-// Increase timeout for AI integration tests (AI calls can take longer)
-jest.setTimeout(30000);
+// No need to increase timeout - using mocked AI responses
+jest.setTimeout(10000);
 
 describe('Readings + Interpretations + AI Integration Tests', () => {
   let app: INestApplication;
   let dataSource: DataSource;
   let createReadingUseCase: CreateReadingUseCase;
   let usersService: UsersService;
+  let aiProviderService: AIProviderService;
 
   let testUser: User;
   let testCards: TarotCard[];
@@ -40,6 +46,20 @@ describe('Readings + Interpretations + AI Integration Tests', () => {
     email: 'readings-integration-test@example.com',
     password: 'SecurePassword123!',
     name: 'Readings Integration User',
+  };
+
+  // Mock AI response
+  const mockAIResponse: AIResponse = {
+    content:
+      'Based on the cards drawn (The Fool, The Magician, and The High Priestess), your career path shows exciting new beginnings ahead. The Fool indicates you are ready to take a leap of faith into new opportunities. The Magician represents your skills and resources that will help you manifest success. The High Priestess suggests trusting your intuition when making career decisions. Overall, the cards indicate a positive transformation in your professional life, guided by both practical skills and inner wisdom.',
+    provider: AIProviderType.GROQ,
+    model: 'llama-3.1-70b-versatile',
+    tokensUsed: {
+      prompt: 500,
+      completion: 200,
+      total: 700,
+    },
+    durationMs: 1200,
   };
 
   // Helper para obtener posición de spread de forma segura
@@ -70,12 +90,20 @@ describe('Readings + Interpretations + AI Integration Tests', () => {
     createReadingUseCase =
       moduleFixture.get<CreateReadingUseCase>(CreateReadingUseCase);
     usersService = moduleFixture.get<UsersService>(UsersService);
+    aiProviderService = moduleFixture.get<AIProviderService>(AIProviderService);
+
+    // Mock AIProviderService.generateCompletion to avoid real API calls
+    jest
+      .spyOn(aiProviderService, 'generateCompletion')
+      .mockResolvedValue(mockAIResponse);
 
     // Crear tarotista Flavia por defecto si no existe
     await setupDefaultTarotista(dataSource, usersService);
   });
 
   afterAll(async () => {
+    // Restore mocks
+    jest.restoreAllMocks();
     // Cleanup - use Repository to avoid column name issues
     await app.close();
   });
