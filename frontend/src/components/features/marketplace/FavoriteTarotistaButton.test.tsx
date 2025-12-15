@@ -207,7 +207,7 @@ describe('FavoriteTarotistaButton', () => {
     // Mock date to calculate exact days
     const futureDate = new Date();
     futureDate.setDate(futureDate.getDate() + 10);
-    
+
     mockUseMySubscription.mockReturnValue({
       data: createMockSubscription({
         tarotistaId: 2,
@@ -228,7 +228,7 @@ describe('FavoriteTarotistaButton', () => {
     mockUseAuthStore.mockReturnValue({ plan: 'free' });
     const futureDate = new Date();
     futureDate.setDate(futureDate.getDate() + 10);
-    
+
     mockUseMySubscription.mockReturnValue({
       data: createMockSubscription({
         tarotistaId: 2,

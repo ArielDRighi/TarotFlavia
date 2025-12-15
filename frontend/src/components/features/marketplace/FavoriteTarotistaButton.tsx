@@ -58,12 +58,12 @@ export function FavoriteTarotistaButton({
   // Calculate days until change if cooldown is active
   const daysUntilChange = useMemo(() => {
     if (!subscription?.canChangeAt) return 0;
-    
+
     const now = new Date();
     const changeDate = new Date(subscription.canChangeAt);
     const diffTime = changeDate.getTime() - now.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+
     return diffDays > 0 ? diffDays : 0;
   }, [subscription]);
 
@@ -105,18 +105,25 @@ export function FavoriteTarotistaButton({
             <DialogHeader>
               <DialogTitle>¿Confirmar tarotista favorito?</DialogTitle>
               <DialogDescription>
-                ¿Establecer a {tarotistaName} como tu tarotista favorito? Solo podrás cambiarlo en 30
-                días.
+                ¿Establecer a {tarotistaName} como tu tarotista favorito? Solo podrás cambiarlo en
+                30 días.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setShowConfirmDialog(false)} disabled={isPending}>
+              <Button
+                variant="outline"
+                onClick={() => setShowConfirmDialog(false)}
+                disabled={isPending}
+              >
                 Cancelar
               </Button>
-              <Button onClick={() => {
-                setFavorite(tarotistaId);
-                setShowConfirmDialog(false);
-              }} disabled={isPending}>
+              <Button
+                onClick={() => {
+                  setFavorite(tarotistaId);
+                  setShowConfirmDialog(false);
+                }}
+                disabled={isPending}
+              >
                 {isPending ? 'Confirmando...' : 'Confirmar'}
               </Button>
             </DialogFooter>
@@ -182,13 +189,20 @@ export function FavoriteTarotistaButton({
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowConfirmDialog(false)} disabled={isPending}>
+            <Button
+              variant="outline"
+              onClick={() => setShowConfirmDialog(false)}
+              disabled={isPending}
+            >
               Cancelar
             </Button>
-            <Button onClick={() => {
-              setFavorite(tarotistaId);
-              setShowConfirmDialog(false);
-            }} disabled={isPending}>
+            <Button
+              onClick={() => {
+                setFavorite(tarotistaId);
+                setShowConfirmDialog(false);
+              }}
+              disabled={isPending}
+            >
               {isPending ? 'Confirmando...' : 'Confirmar'}
             </Button>
           </DialogFooter>
