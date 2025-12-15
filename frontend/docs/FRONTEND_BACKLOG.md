@@ -4566,10 +4566,30 @@ ESTILO:
 
 ---
 
-### TAREA 11.2: Agregar Loading States globales
+### TAREA 11.2: Agregar Loading States globales ✅
 
 **Prioridad:** MEDIA
 **Estimación:** 30 min
+**Estado:** COMPLETADA
+**Fecha de completación:** 15 Diciembre 2025
+
+**Implementación:**
+
+Archivos creados:
+
+- ✅ `src/components/ui/spinner.tsx` - Componente Spinner reutilizable con tests
+- ✅ `src/app/loading.tsx` - Loading global
+- ✅ `src/app/ritual/loading.tsx` - Loading para /ritual
+- ✅ `src/app/historial/loading.tsx` - Loading para /historial
+- ✅ `src/app/explorar/loading.tsx` - Loading para /explorar
+
+Características:
+
+- Componente Spinner con 3 tamaños (sm, md, lg)
+- Texto opcional y centrado configurable
+- 100% coverage en tests
+- Usa Loader2Icon de lucide-react
+- Consistente con el design system
 
 **Prompt:**
 
