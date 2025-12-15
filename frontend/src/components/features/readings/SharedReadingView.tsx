@@ -13,24 +13,45 @@ import { TarotCard } from '@/components/features/readings/TarotCard';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { ReadingDetail, Interpretation } from '@/types';
+import type { SharedReading, ReadingCard } from '@/types';
 
 /**
- * Helper to safely extract interpretation data
+ * Helper to get the question text from various sources
  */
-function getInterpretationText(interpretation: Interpretation | string | null): string {
-  if (!interpretation) {
-    return '';
+function getQuestionText(reading: SharedReading): string {
+  // Priority: customQuestion > predefinedQuestion.question > question (deprecated)
+  if (reading.customQuestion) {
+    return reading.customQuestion;
   }
-  if (typeof interpretation === 'string') {
-    return interpretation;
+  if (reading.predefinedQuestion?.question) {
+    return reading.predefinedQuestion.question;
   }
-  return interpretation.generalInterpretation || '';
+  return reading.question || 'Lectura de Tarot';
+}
+
+/**
+ * Helper to merge cards with their positions and orientations
+ */
+function getCardsWithPositions(reading: SharedReading): ReadingCard[] {
+  return reading.cards.map((card) => {
+    const cardPosition = reading.cardPositions.find((cp) => cp.cardId === card.id);
+    return {
+      id: card.id,
+      name: card.name,
+      arcana: card.arcana || 'major',
+      number: card.number || 0,
+      suit: card.suit || null,
+      orientation: cardPosition?.isReversed ? ('reversed' as const) : ('upright' as const),
+      position: 0,
+      positionName: cardPosition?.position || 'Posición',
+      imageUrl: card.imageUrl,
+    };
+  });
 }
 
 export interface SharedReadingViewProps {
-  reading: ReadingDetail;
-  spreadName: string;
+  reading: SharedReading;
+  spreadName?: string;
 }
 
 /**
@@ -43,7 +64,9 @@ export interface SharedReadingViewProps {
  * - CTA to register
  */
 export function SharedReadingView({ reading, spreadName }: SharedReadingViewProps) {
-  const interpretationText = getInterpretationText(reading.interpretation);
+  const questionText = getQuestionText(reading);
+  const cardsWithPositions = getCardsWithPositions(reading);
+  const displaySpreadName = spreadName || reading.deck?.name || 'Lectura de Tarot';
 
   return (
     <div className="bg-bg-main min-h-screen">
@@ -63,11 +86,11 @@ export function SharedReadingView({ reading, spreadName }: SharedReadingViewProp
             <CardHeader>
               <div className="space-y-4">
                 <h1 className="font-serif text-3xl font-bold text-gray-900 sm:text-4xl">
-                  {reading.question}
+                  {questionText}
                 </h1>
                 <div className="flex flex-wrap items-center gap-3">
                   <Badge variant="secondary" className="text-sm">
-                    {spreadName}
+                    {displaySpreadName}
                   </Badge>
                   <span className="text-sm text-gray-600">
                     {format(new Date(reading.createdAt), "d 'de' MMMM 'de' yyyy", { locale: es })}
@@ -83,7 +106,7 @@ export function SharedReadingView({ reading, spreadName }: SharedReadingViewProp
               Las Cartas Reveladas
             </h2>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {reading.cards.map((card) => (
+              {cardsWithPositions.map((card) => (
                 <div key={card.id} className="space-y-3">
                   <TarotCard card={card} isRevealed={true} size="md" />
                   <div className="text-center">
@@ -96,14 +119,14 @@ export function SharedReadingView({ reading, spreadName }: SharedReadingViewProp
           </div>
 
           {/* Interpretation */}
-          {interpretationText && (
+          {reading.interpretation && (
             <Card>
               <CardHeader>
                 <CardTitle>Interpretación</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="prose prose-purple max-w-none">
-                  <ReactMarkdown>{interpretationText}</ReactMarkdown>
+                  <ReactMarkdown>{reading.interpretation}</ReactMarkdown>
                 </div>
               </CardContent>
             </Card>

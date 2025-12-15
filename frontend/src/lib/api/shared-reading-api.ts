@@ -5,7 +5,7 @@
  */
 import axios, { type AxiosInstance } from 'axios';
 import { API_ENDPOINTS } from './endpoints';
-import type { ReadingDetail } from '@/types';
+import type { SharedReading } from '@/types';
 
 /**
  * Create a public Axios client for shared readings (no authentication)
@@ -30,12 +30,12 @@ export const publicClient = createPublicClient();
  * Get shared reading by token (public endpoint, no auth required)
  *
  * @param token - Unique share token for the reading
- * @returns Promise<ReadingDetail> The shared reading details
+ * @returns Promise<SharedReading> The shared reading details
  * @throws Error with clear message on failure
  */
-export async function getSharedReading(token: string): Promise<ReadingDetail> {
+export async function getSharedReading(token: string): Promise<SharedReading> {
   try {
-    const response = await publicClient.get<ReadingDetail>(API_ENDPOINTS.SHARED.BY_TOKEN(token));
+    const response = await publicClient.get<SharedReading>(API_ENDPOINTS.SHARED.BY_TOKEN(token));
     return response.data;
   } catch (error: unknown) {
     if (error && typeof error === 'object' && 'response' in error) {

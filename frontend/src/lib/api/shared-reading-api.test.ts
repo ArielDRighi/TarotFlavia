@@ -6,15 +6,17 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { getSharedReading, publicClient } from './shared-reading-api';
 import { API_ENDPOINTS } from './endpoints';
-import type { ReadingDetail } from '@/types';
+import type { SharedReading } from '@/types';
 
 describe('getSharedReading', () => {
   const mockToken = 'abc123xyz456';
-  const mockReading: ReadingDetail = {
+  const mockReading: SharedReading = {
     id: 1,
-    userId: 1,
-    spreadId: 1,
     question: '¿Encontraré el amor?',
+    predefinedQuestionId: null,
+    customQuestion: '¿Encontraré el amor?',
+    questionType: 'custom',
+    tarotistaId: null,
     cards: [
       {
         id: 1,
@@ -22,15 +24,29 @@ describe('getSharedReading', () => {
         arcana: 'major',
         number: 0,
         suit: null,
-        orientation: 'upright',
-        position: 1,
-        positionName: 'Present',
         imageUrl: '/cards/fool.jpg',
       },
     ],
+    cardPositions: [
+      {
+        cardId: 1,
+        position: 'Present',
+        isReversed: false,
+      },
+    ],
+    deck: {
+      id: 1,
+      name: 'Rider-Waite',
+    },
+    category: null,
+    predefinedQuestion: null,
     interpretation: 'Esta es tu interpretación...',
+    sharedToken: mockToken,
+    isPublic: true,
+    viewCount: 5,
     createdAt: '2025-12-15T10:00:00Z',
-    shareToken: mockToken,
+    updatedAt: '2025-12-15T10:00:00Z',
+    regenerationCount: 0,
   };
 
   let mockGet: ReturnType<typeof vi.fn>;

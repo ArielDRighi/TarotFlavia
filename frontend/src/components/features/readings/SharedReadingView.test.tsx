@@ -6,14 +6,16 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { SharedReadingView, type SharedReadingViewProps } from './SharedReadingView';
-import type { ReadingDetail } from '@/types';
+import type { SharedReading } from '@/types';
 
 describe('SharedReadingView', () => {
-  const mockReading: ReadingDetail = {
+  const mockReading: SharedReading = {
     id: 1,
-    userId: 1,
-    spreadId: 1,
-    question: '¿Encontraré el amor este año?',
+    question: 'deprecated field',
+    predefinedQuestionId: null,
+    customQuestion: '¿Encontraré el amor este año?',
+    questionType: 'custom',
+    tarotistaId: null,
     cards: [
       {
         id: 1,
@@ -21,9 +23,6 @@ describe('SharedReadingView', () => {
         arcana: 'major',
         number: 0,
         suit: null,
-        orientation: 'upright',
-        position: 1,
-        positionName: 'Present',
         imageUrl: '/cards/fool.jpg',
       },
       {
@@ -32,20 +31,39 @@ describe('SharedReadingView', () => {
         arcana: 'major',
         number: 1,
         suit: null,
-        orientation: 'reversed',
-        position: 2,
-        positionName: 'Challenge',
         imageUrl: '/cards/magician.jpg',
       },
     ],
+    cardPositions: [
+      {
+        cardId: 1,
+        position: 'Present',
+        isReversed: false,
+      },
+      {
+        cardId: 2,
+        position: 'Challenge',
+        isReversed: true,
+      },
+    ],
+    deck: {
+      id: 1,
+      name: 'Rider-Waite',
+    },
+    category: null,
+    predefinedQuestion: null,
     interpretation: `# Tu lectura
 
 Esta es una interpretación de ejemplo que puede contener **markdown** y otros elementos.
 
 ## Significado General
 El Loco y el Mago juntos indican un nuevo comienzo lleno de potencial.`,
+    sharedToken: 'abc123xyz456',
+    isPublic: true,
+    viewCount: 10,
     createdAt: '2025-12-15T10:00:00Z',
-    shareToken: 'abc123xyz456',
+    updatedAt: '2025-12-15T10:00:00Z',
+    regenerationCount: 0,
   };
 
   const defaultProps: SharedReadingViewProps = {

@@ -25,11 +25,18 @@ export async function generateMetadata({ params }: SharedReadingPageProps): Prom
     const { token } = await params;
     const reading = await getSharedReading(token);
 
+    // Get question text from various sources
+    const questionText =
+      reading.customQuestion ||
+      reading.predefinedQuestion?.question ||
+      reading.question ||
+      'Lectura de Tarot';
+
     return {
-      title: `${reading.question} | Lectura Compartida - TarotFlavia`,
-      description: `Descubre esta lectura del tarot: ${reading.question}`,
+      title: `${questionText} | Lectura Compartida - TarotFlavia`,
+      description: `Descubre esta lectura del tarot: ${questionText}`,
       openGraph: {
-        title: `${reading.question} - TarotFlavia`,
+        title: `${questionText} - TarotFlavia`,
         description: 'Una lectura del tarot compartida contigo',
         type: 'article',
         images: [
@@ -43,7 +50,7 @@ export async function generateMetadata({ params }: SharedReadingPageProps): Prom
       },
       twitter: {
         card: 'summary_large_image',
-        title: `${reading.question} - TarotFlavia`,
+        title: `${questionText} - TarotFlavia`,
         description: 'Una lectura del tarot compartida contigo',
       },
     };
@@ -69,8 +76,8 @@ export default async function SharedReadingPage({ params }: SharedReadingPagePro
     return <ReadingNotAvailable />;
   }
 
-  // Get spread name (fallback if not available)
-  const spreadName = 'Lectura de Tarot'; // TODO: Fetch spread name from API if needed
+  // Get spread name from deck (backend doesn't include spread relation)
+  const spreadName = reading.deck?.name || 'Lectura de Tarot';
 
   return <SharedReadingView reading={reading} spreadName={spreadName} />;
 }
