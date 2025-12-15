@@ -112,5 +112,12 @@ export const API_ENDPOINTS = {
     // UNBLOCK_IP: (ip: string) => `/admin/security/block-ip/${ip}`,
     // Audit Logs
     AUDIT_LOGS: '/admin/audit-logs',
+    // Cache Management
+    CACHE_ANALYTICS: '/admin/cache/analytics', // GET - retorna CacheAnalyticsDto
+    CACHE_WARMING_STATUS: '/admin/cache/warm/status', // GET - retorna WarmingStatus separado
+    INVALIDATE_ALL_CACHE: '/admin/cache/global', // DELETE - endpoint correcto
+    INVALIDATE_TAROTISTA_CACHE: (tarotistaId: number) => `/admin/cache/tarotistas/${tarotistaId}`, // DELETE
+    // NOTA: No existe endpoint para invalidar por spread en el backend
+    TRIGGER_CACHE_WARMING: '/admin/cache/warm', // POST - endpoint correcto
   },
 } as const;
