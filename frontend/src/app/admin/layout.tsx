@@ -2,28 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import Link from 'next/link';
+import { Menu, X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { LayoutDashboard, Users, Sparkles, BookOpen, Settings, Menu, X } from 'lucide-react';
-import { cn } from '@/lib/utils/cn';
+import { AdminSidebar } from '@/components/layout/AdminSidebar';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
-
-interface NavItem {
-  name: string;
-  href: string;
-  icon: React.ComponentType<{ className?: string }>;
-}
-
-const navItems: NavItem[] = [
-  { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-  { name: 'Usuarios', href: '/admin/usuarios', icon: Users },
-  { name: 'Tarotistas', href: '/admin/tarotistas', icon: Sparkles },
-  { name: 'Lecturas', href: '/admin/lecturas', icon: BookOpen },
-  { name: 'Configuración', href: '/admin/configuracion', icon: Settings },
-];
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const { user, isAuthenticated } = useAuth();
@@ -64,28 +49,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           <p className="mt-1 text-sm text-gray-500">Panel de Administración</p>
         </div>
 
-        <nav className="flex-1 space-y-1 px-3">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href;
-            const Icon = item.icon;
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
-                  isActive
-                    ? 'bg-primary/10 text-primary border-primary -ml-3 border-l-4 pl-6'
-                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                )}
-              >
-                <Icon className="h-5 w-5" />
-                {item.name}
-              </Link>
-            );
-          })}
-        </nav>
+        <AdminSidebar pathname={pathname} />
       </aside>
 
       {/* Main Content */}
@@ -110,7 +74,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             role="presentation"
           >
             <div
-              className="absolute top-0 bottom-0 left-0 w-64 bg-white shadow-xl"
+              className="absolute top-0 bottom-0 left-0 w-64 overflow-y-auto bg-white shadow-xl"
               onClick={(e) => e.stopPropagation()}
               role="dialog"
               aria-modal="true"
@@ -130,29 +94,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 <p className="mt-1 text-sm text-gray-500">Panel de Administración</p>
               </div>
 
-              <nav className="space-y-1 px-3">
-                {navItems.map((item) => {
-                  const isActive = pathname === item.href;
-                  const Icon = item.icon;
-
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={cn(
-                        'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
-                        isActive
-                          ? 'bg-primary/10 text-primary border-primary -ml-3 border-l-4 pl-6'
-                          : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                      )}
-                    >
-                      <Icon className="h-5 w-5" />
-                      {item.name}
-                    </Link>
-                  );
-                })}
-              </nav>
+              <AdminSidebar pathname={pathname} onNavigate={() => setIsMobileMenuOpen(false)} />
             </div>
           </div>
         )}
