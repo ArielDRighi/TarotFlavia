@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 
 interface CacheStatsCardsProps {
   hitRate: HitRateMetrics;
-  savings: SavingsMetrics;
+  savings?: SavingsMetrics; // TODO: Use savings metrics when backend provides detailed cost data
   responseTime: ResponseTimeMetrics;
 }
 

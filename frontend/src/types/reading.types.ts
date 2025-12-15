@@ -223,6 +223,77 @@ export interface ShareReadingResponse {
   shareToken: string;
 }
 
+/**
+ * Card position with orientation (from backend cardPositions JSONB)
+ */
+export interface CardPosition {
+  cardId: number;
+  position: string;
+  isReversed: boolean;
+}
+
+/**
+ * Deck info in shared reading
+ */
+export interface DeckInfo {
+  id: number;
+  name: string;
+}
+
+/**
+ * Category info in shared reading
+ */
+export interface CategoryInfo {
+  id: number;
+  name: string;
+}
+
+/**
+ * Predefined question info in shared reading
+ */
+export interface PredefinedQuestionInfo {
+  id: number;
+  question: string;
+}
+
+/**
+ * Tarot card from backend (basic fields)
+ */
+export interface TarotCardBasic {
+  id: number;
+  name: string;
+  arcana?: 'major' | 'minor';
+  number?: number;
+  suit?: string | null;
+  imageUrl?: string;
+}
+
+/**
+ * Shared reading response from backend
+ * Matches GET /api/shared/:token response (TarotReading entity)
+ * NO incluye userId ni spreadId (privacidad y normalización del backend)
+ */
+export interface SharedReading {
+  id: number;
+  question: string; // deprecated field but still exists
+  predefinedQuestionId: number | null;
+  customQuestion: string | null;
+  questionType: 'predefined' | 'custom' | null;
+  tarotistaId: number | null;
+  cards: TarotCardBasic[]; // Relación cargada
+  cardPositions: CardPosition[]; // JSONB column
+  deck: DeckInfo; // Relación cargada
+  category: CategoryInfo | null; // Relación cargada
+  predefinedQuestion: PredefinedQuestionInfo | null; // Relación cargada
+  interpretation: string | null; // Simple string from backend
+  sharedToken: string | null;
+  isPublic: boolean;
+  viewCount: number;
+  createdAt: string;
+  updatedAt: string;
+  regenerationCount: number;
+}
+
 // ============================================================================
 // Filter Types (Legacy - kept for compatibility)
 // ============================================================================

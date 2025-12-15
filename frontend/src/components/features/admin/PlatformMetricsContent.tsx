@@ -1,8 +1,9 @@
 /**
- * PlatformMetricsContent Component
+ * Platform Metrics Content Component
  *
- * Component with all platform metrics logic and UI
+ * Contains all the business logic for the platform metrics page
  */
+
 'use client';
 
 import { useState } from 'react';
@@ -26,6 +27,9 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
+/**
+ * Formatea números grandes como 1.2K, 15K, etc.
+ */
 function formatLargeNumber(num: number): string {
   if (num >= 1000000) {
     return (num / 1000000).toFixed(1) + 'M';
@@ -36,6 +40,9 @@ function formatLargeNumber(num: number): string {
   return num.toString();
 }
 
+/**
+ * Formatea montos en USD
+ */
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -45,6 +52,9 @@ function formatCurrency(amount: number): string {
   }).format(amount);
 }
 
+/**
+ * Skeleton loader para las tarjetas de métricas
+ */
 function MetricsCardsSkeleton() {
   return (
     <>
@@ -61,7 +71,12 @@ export function PlatformMetricsContent() {
 
   return (
     <>
+      {/* Header con selector de período */}
       <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="font-serif text-3xl font-bold">Métricas de Plataforma</h1>
+        </div>
+
         <Select value={period} onValueChange={(value) => setPeriod(value as MetricsPeriod)}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Seleccionar período" />
@@ -74,17 +89,20 @@ export function PlatformMetricsContent() {
         </Select>
       </div>
 
+      {/* Error State */}
       {error && (
         <div className="mb-8 rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
           Error al cargar métricas. Por favor, intenta de nuevo.
         </div>
       )}
 
+      {/* Cards de Métricas Principales */}
       <div className="mb-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {isLoading ? (
           <MetricsCardsSkeleton />
         ) : metrics ? (
           <>
+            {/* Revenue Total */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-sm font-medium text-gray-600">Revenue Total</CardTitle>
@@ -97,6 +115,7 @@ export function PlatformMetricsContent() {
               </CardContent>
             </Card>
 
+            {/* Sesiones Completadas */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-sm font-medium text-gray-600">
@@ -109,6 +128,7 @@ export function PlatformMetricsContent() {
               </CardContent>
             </Card>
 
+            {/* Lecturas Totales */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-sm font-medium text-gray-600">
@@ -127,6 +147,7 @@ export function PlatformMetricsContent() {
               </CardContent>
             </Card>
 
+            {/* Usuarios Activos */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-sm font-medium text-gray-600">
@@ -142,8 +163,9 @@ export function PlatformMetricsContent() {
         ) : null}
       </div>
 
+      {/* Tabla: TOP TAROTISTAS */}
       {!isLoading && metrics && metrics.topTarotistas.length > 0 && (
-        <Card>
+        <Card className="mb-8">
           <CardHeader>
             <CardTitle>Top Tarotistas</CardTitle>
           </CardHeader>

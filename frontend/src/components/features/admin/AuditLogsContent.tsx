@@ -1,8 +1,9 @@
 /**
- * AuditLogsContent Component
+ * Audit Logs Content Component
  *
- * Component with all audit logs logic and UI
+ * Contains all the business logic for the audit logs page
  */
+
 'use client';
 
 import React, { useState } from 'react';
@@ -97,6 +98,7 @@ export function AuditLogsContent() {
 
   return (
     <div className="space-y-6">
+      {/* Filtros */}
       <Card>
         <CardHeader>
           <CardTitle>Filtros</CardTitle>
@@ -190,6 +192,7 @@ export function AuditLogsContent() {
         </CardContent>
       </Card>
 
+      {/* Tabla de Logs */}
       <Card>
         <CardHeader>
           <CardTitle>Logs de Auditoría</CardTitle>
@@ -287,6 +290,7 @@ export function AuditLogsContent() {
                 </TableBody>
               </Table>
 
+              {/* Paginación */}
               {data.meta.totalPages > 1 && (
                 <div className="mt-6">
                   <Pagination

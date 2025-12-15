@@ -17,6 +17,7 @@ export {
   getTrashedReadings,
   restoreReading,
 } from './readings-api';
+export { getSharedReading } from './shared-reading-api';
 export { getTarotistas, getTarotistaById } from './tarotistas-api';
 export {
   getAvailableSlots,
