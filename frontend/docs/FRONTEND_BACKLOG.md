@@ -4576,6 +4576,7 @@ ESTILO:
 **Implementación:**
 
 Archivos creados:
+
 - ✅ `src/components/ui/spinner.tsx` - Componente Spinner reutilizable con tests
 - ✅ `src/app/loading.tsx` - Loading global
 - ✅ `src/app/ritual/loading.tsx` - Loading para /ritual
@@ -4583,6 +4584,7 @@ Archivos creados:
 - ✅ `src/app/explorar/loading.tsx` - Loading para /explorar
 
 Características:
+
 - Componente Spinner con 3 tamaños (sm, md, lg)
 - Texto opcional y centrado configurable
 - 100% coverage en tests
