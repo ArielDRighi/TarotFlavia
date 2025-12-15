@@ -4,7 +4,20 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
-import { LayoutDashboard, Users, Sparkles, BookOpen, Settings, Menu, X } from 'lucide-react';
+import {
+  LayoutDashboard,
+  Users,
+  Sparkles,
+  BookOpen,
+  Settings,
+  Menu,
+  X,
+  TrendingUp,
+  Brain,
+  Shield,
+  Database,
+  ScrollText,
+} from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
 interface AdminLayoutProps {
@@ -17,13 +30,80 @@ interface NavItem {
   icon: React.ComponentType<{ className?: string }>;
 }
 
-const navItems: NavItem[] = [
-  { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-  { name: 'Usuarios', href: '/admin/usuarios', icon: Users },
-  { name: 'Tarotistas', href: '/admin/tarotistas', icon: Sparkles },
-  { name: 'Lecturas', href: '/admin/lecturas', icon: BookOpen },
-  { name: 'Configuración', href: '/admin/configuracion', icon: Settings },
+interface NavSection {
+  title: string;
+  items: NavItem[];
+}
+
+const navSections: NavSection[] = [
+  {
+    title: 'PRINCIPAL',
+    items: [
+      { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+      { name: 'Métricas', href: '/admin/metricas', icon: TrendingUp },
+    ],
+  },
+  {
+    title: 'GESTIÓN',
+    items: [
+      { name: 'Usuarios', href: '/admin/usuarios', icon: Users },
+      { name: 'Tarotistas', href: '/admin/tarotistas', icon: Sparkles },
+      { name: 'Lecturas', href: '/admin/lecturas', icon: BookOpen },
+    ],
+  },
+  {
+    title: 'SISTEMA',
+    items: [
+      { name: 'Uso de IA', href: '/admin/ai-usage', icon: Brain },
+      { name: 'Configuración de Planes', href: '/admin/planes', icon: Settings },
+      { name: 'Seguridad', href: '/admin/seguridad', icon: Shield },
+      { name: 'Caché', href: '/admin/cache', icon: Database },
+      { name: 'Audit Logs', href: '/admin/audit', icon: ScrollText },
+    ],
+  },
 ];
+
+interface SidebarNavProps {
+  pathname: string;
+  onNavigate?: () => void;
+}
+
+function SidebarNav({ pathname, onNavigate }: SidebarNavProps) {
+  return (
+    <nav className="space-y-6 overflow-y-auto px-3 pb-4">
+      {navSections.map((section) => (
+        <div key={section.title}>
+          <h2 className="mb-2 px-3 text-xs font-semibold tracking-wider text-gray-400 uppercase">
+            {section.title}
+          </h2>
+          <div className="space-y-1">
+            {section.items.map((item) => {
+              const isActive = pathname === item.href;
+              const Icon = item.icon;
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={onNavigate}
+                  className={cn(
+                    'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                    isActive
+                      ? 'bg-primary/10 text-primary border-primary -ml-3 border-l-4 pl-6'
+                      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                  )}
+                >
+                  <Icon className="h-5 w-5" />
+                  {item.name}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </nav>
+  );
+}
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const { user, isAuthenticated } = useAuth();
@@ -64,28 +144,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           <p className="mt-1 text-sm text-gray-500">Panel de Administración</p>
         </div>
 
-        <nav className="flex-1 space-y-1 px-3">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href;
-            const Icon = item.icon;
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
-                  isActive
-                    ? 'bg-primary/10 text-primary border-primary -ml-3 border-l-4 pl-6'
-                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                )}
-              >
-                <Icon className="h-5 w-5" />
-                {item.name}
-              </Link>
-            );
-          })}
-        </nav>
+        <SidebarNav pathname={pathname} />
       </aside>
 
       {/* Main Content */}
@@ -110,7 +169,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             role="presentation"
           >
             <div
-              className="absolute top-0 bottom-0 left-0 w-64 bg-white shadow-xl"
+              className="absolute top-0 bottom-0 left-0 w-64 overflow-y-auto bg-white shadow-xl"
               onClick={(e) => e.stopPropagation()}
               role="dialog"
               aria-modal="true"
@@ -130,29 +189,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 <p className="mt-1 text-sm text-gray-500">Panel de Administración</p>
               </div>
 
-              <nav className="space-y-1 px-3">
-                {navItems.map((item) => {
-                  const isActive = pathname === item.href;
-                  const Icon = item.icon;
-
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={cn(
-                        'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
-                        isActive
-                          ? 'bg-primary/10 text-primary border-primary -ml-3 border-l-4 pl-6'
-                          : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                      )}
-                    >
-                      <Icon className="h-5 w-5" />
-                      {item.name}
-                    </Link>
-                  );
-                })}
-              </nav>
+              <SidebarNav pathname={pathname} onNavigate={() => setIsMobileMenuOpen(false)} />
             </div>
           </div>
         )}

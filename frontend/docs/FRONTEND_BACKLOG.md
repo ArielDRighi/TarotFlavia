@@ -4167,14 +4167,69 @@ IMPORTANTE:
 
 ---
 
-### TAREA 10.12: Actualizar sidebar de Admin con nuevas páginas
+### ✅ TAREA 10.12: Actualizar sidebar de Admin con nuevas páginas
 
+**Estado:** COMPLETADA
 **Prioridad:** ALTA
-**Estimación:** 15 min
+**Estimación:** 15 min → Real: 15 min
 **Dependencias:** 10.5-10.10
+**Fecha completada:** 15 Diciembre 2025
+**Rama:** feature/TASK-10.12-admin-sidebar-update
 
 **Consigna:**
 Actualizar el sidebar del layout de admin para incluir todas las nuevas páginas.
+
+**Implementación realizada:**
+
+✅ Archivos modificados:
+
+- `src/app/admin/layout.tsx` - Actualizado con nueva estructura de navegación
+- `src/app/admin/layout.test.tsx` - Tests actualizados para las nuevas secciones
+
+✅ Nueva estructura de navegación implementada:
+
+**SECCIÓN: PRINCIPAL**
+
+- Dashboard (ícono LayoutDashboard) -> `/admin`
+- Métricas (ícono TrendingUp) -> `/admin/metricas`
+
+**SECCIÓN: GESTIÓN**
+
+- Usuarios (ícono Users) -> `/admin/usuarios`
+- Tarotistas (ícono Sparkles) -> `/admin/tarotistas`
+- Lecturas (ícono BookOpen) -> `/admin/lecturas`
+
+**SECCIÓN: SISTEMA**
+
+- Uso de IA (ícono Brain) -> `/admin/ai-usage`
+- Configuración de Planes (ícono Settings) -> `/admin/planes`
+- Seguridad (ícono Shield) -> `/admin/seguridad`
+- Caché (ícono Database) -> `/admin/cache`
+- Audit Logs (ícono ScrollText) -> `/admin/audit`
+
+**Decisiones técnicas:**
+
+1. Creado componente `SidebarNav` reutilizable para desktop y mobile
+2. Estructura de datos con `navSections` para organizar items por sección
+3. Títulos de sección con estilos: `text-xs font-semibold uppercase text-gray-400`
+4. Mantenido responsive con drawer móvil y scroll en sidebar
+5. Links activos destacados con `bg-primary/10` y borde izquierdo primary
+
+**Validación:**
+
+- ✅ Tests: 19 tests pasando (17 de layout + 2 de ritual layout)
+- ✅ Lint: 0 errores (2 warnings pre-existentes en otros archivos)
+- ✅ Type-check: 0 errores
+- ✅ Build: Exitoso
+- ✅ All tests: 1354 pasando
+- ✅ Arquitectura: Validada (warnings pre-existentes no relacionados)
+
+**Workflow TDD aplicado:**
+
+1. 🔴 RED: Tests escritos esperando las nuevas secciones → 3 tests fallando
+2. 🟢 GREEN: Implementación de navSections y SidebarNav → Todos los tests pasando
+3. 🔵 REFACTOR: Extracción del componente SidebarNav reutilizable
+4. ✅ QUALITY: Ciclo completo de calidad ejecutado exitosamente
 
 **Prompt:**
 

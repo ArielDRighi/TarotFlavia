@@ -140,11 +140,21 @@ describe('AdminLayout', () => {
         </AdminLayout>
       );
 
-      expect(screen.getByText('Dashboard')).toBeInTheDocument();
-      expect(screen.getByText('Usuarios')).toBeInTheDocument();
-      expect(screen.getByText('Tarotistas')).toBeInTheDocument();
-      expect(screen.getByText('Lecturas')).toBeInTheDocument();
-      expect(screen.getByText('Configuración')).toBeInTheDocument();
+      // Sección Principal
+      expect(screen.getAllByText('Dashboard').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('Métricas').length).toBeGreaterThanOrEqual(1);
+
+      // Sección Gestión
+      expect(screen.getAllByText('Usuarios').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('Tarotistas').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('Lecturas').length).toBeGreaterThanOrEqual(1);
+
+      // Sección Sistema
+      expect(screen.getAllByText('Uso de IA').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('Configuración de Planes').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('Seguridad').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('Caché').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('Audit Logs').length).toBeGreaterThanOrEqual(1);
     });
 
     it('should render navigation icons', () => {
@@ -169,6 +179,41 @@ describe('AdminLayout', () => {
       // El link activo debe tener estilos especiales
       const activeLink = screen.getByRole('link', { name: /dashboard/i });
       expect(activeLink).toHaveClass('bg-primary/10');
+    });
+
+    it('should render section headers', () => {
+      render(
+        <AdminLayout>
+          <div>Content</div>
+        </AdminLayout>
+      );
+
+      expect(screen.getByText('PRINCIPAL')).toBeInTheDocument();
+      expect(screen.getByText('GESTIÓN')).toBeInTheDocument();
+      expect(screen.getByText('SISTEMA')).toBeInTheDocument();
+    });
+
+    it('should render navigation items in correct order within sections', () => {
+      const { container } = render(
+        <AdminLayout>
+          <div>Content</div>
+        </AdminLayout>
+      );
+
+      const links = container.querySelectorAll('nav a');
+      const linkTexts = Array.from(links).map((link) => link.textContent);
+
+      // Verificar que los items están en el orden esperado
+      expect(linkTexts).toContain('Dashboard');
+      expect(linkTexts).toContain('Métricas');
+      expect(linkTexts).toContain('Usuarios');
+      expect(linkTexts).toContain('Tarotistas');
+      expect(linkTexts).toContain('Lecturas');
+      expect(linkTexts).toContain('Uso de IA');
+      expect(linkTexts).toContain('Configuración de Planes');
+      expect(linkTexts).toContain('Seguridad');
+      expect(linkTexts).toContain('Caché');
+      expect(linkTexts).toContain('Audit Logs');
     });
   });
 
