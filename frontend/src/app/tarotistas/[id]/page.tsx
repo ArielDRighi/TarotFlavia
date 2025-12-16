@@ -3,6 +3,7 @@ import { TarotistaProfilePage } from '@/components/features/marketplace/Tarotist
 import { generateTarotistaMetadata } from '@/lib/metadata/seo';
 import { apiClient } from '@/lib/api/axios-config';
 import { API_ENDPOINTS } from '@/lib/api/endpoints';
+import type { TarotistaDetail } from '@/types/tarotista.types';
 
 interface TarotistaPerfilPageProps {
   params: {
@@ -18,15 +19,15 @@ export async function generateMetadata({ params }: TarotistaPerfilPageProps): Pr
 
   try {
     // Fetch tarotista data from API
-    const response = await apiClient.get(API_ENDPOINTS.TAROTISTAS.BY_ID(id));
+    const response = await apiClient.get<TarotistaDetail>(API_ENDPOINTS.TAROTISTAS.BY_ID(id));
     const tarotista = response.data;
 
     // Generate metadata with tarotista information
     return generateTarotistaMetadata(
       {
-        nombre: tarotista.nombre || 'Tarotista',
-        especialidades: tarotista.especialidades || [],
-        descripcion: tarotista.bio,
+        nombre: tarotista.nombrePublico,
+        especialidades: tarotista.especialidades,
+        descripcion: tarotista.bio || undefined,
       },
       id
     );

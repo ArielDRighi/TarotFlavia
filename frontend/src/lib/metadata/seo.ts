@@ -11,7 +11,13 @@ import type { Metadata } from 'next';
  * Base URL for the application
  * Used for canonical URLs and Open Graph images
  */
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001';
+const BASE_URL =
+  process.env.NEXT_PUBLIC_APP_URL ||
+  (process.env.NODE_ENV === 'production'
+    ? (() => {
+        throw new Error('NEXT_PUBLIC_APP_URL environment variable must be set in production.');
+      })()
+    : 'http://localhost:3001');
 
 /**
  * Default Open Graph image
