@@ -4623,9 +4623,12 @@ IMPORTANTE:
 **Estado:** COMPLETADA
 **Prioridad:** MEDIA
 **Estimación:** 40 min
-**Tiempo Real:** 42 min
+**Tiempo Real:** 50 min
 **Rama:** feature/TASK-11.3-seo-metadata
-**Commit:** 1ca6d26 - feat(seo): implement SEO and metadata configuration
+**Commits:**
+
+- 1ca6d26 - feat(seo): implement SEO and metadata configuration
+- eda5a18 - fix: apply PR feedback corrections for TASK-11.3
 
 **Implementado:**
 
@@ -4646,10 +4649,14 @@ IMPORTANTE:
 6. ✅ Robots meta tags diferenciados (público vs privado)
 7. ✅ Layouts creados para páginas client component
 8. ✅ Tests completos (38 tests) con 100% coverage en metadata
+9. ✅ **PR Feedback aplicado:**
+   - Validación de producción para BASE_URL (error si falta NEXT_PUBLIC_APP_URL)
+   - Type safety para respuesta de API con TarotistaDetail
+   - Mapeo correcto de propiedades (nombrePublico del interface)
 
 **Archivos Creados:**
 
-- `src/lib/metadata/seo.ts` - Configuración centralizada
+- `src/lib/metadata/seo.ts` - Configuración centralizada con validación de producción
 - `src/lib/metadata/seo.test.ts` - Tests de funciones metadata
 - `src/test/metadata/page-metadata.test.ts` - Tests de exports en pages
 - `src/app/carta-del-dia/layout.tsx`
@@ -4664,8 +4671,9 @@ IMPORTANTE:
 - `src/app/login/page.tsx` - loginMetadata
 - `src/app/registro/page.tsx` - registerMetadata
 - `src/app/ritual/layout.tsx` - ritualMetadata
-- `src/app/tarotistas/[id]/page.tsx` - generateMetadata()
+- `src/app/tarotistas/[id]/page.tsx` - generateMetadata() con tipos correctos
 - `src/app/compartida/[token]/page.tsx` - usa función centralizada
+- `.env.local` - Agregada NEXT_PUBLIC_APP_URL
 
 **Notas Técnicas:**
 
@@ -4674,14 +4682,17 @@ IMPORTANTE:
 - OpenGraph images apuntan a `/og-image.png` (crear en siguiente tarea)
 - Metadata respeta políticas SEO: páginas privadas con `noindex`, públicas con `index`
 - TypeScript types de Next.js 14 para Metadata son más estrictos, tests ajustados
+- **BASE_URL** ahora valida entorno de producción para prevenir errores de configuración
+- **API responses** correctamente tipadas con interfaces de domain types
 
 **Validación:**
 
 - ✅ Lint: 0 errores
 - ✅ Type-check: sin errores
-- ✅ Build: exitoso
+- ✅ Build: exitoso con variable de entorno configurada
 - ✅ Tests: 1470/1471 pasando (1 fallo pre-existente en metricas page)
 - ✅ Arquitectura: validada
+- ✅ PR Feedback: aplicado y verificado
 
 ---
 
