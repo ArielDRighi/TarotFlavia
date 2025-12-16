@@ -1,0 +1,31 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" rx="112" fill="#805AD5"/>
+  
+  <!-- Centered Moon and Stars -->
+  <g transform="translate(256, 256)">
+    <!-- Crescent Moon (larger) -->
+    <path d="M-40 -100 C-40 -40 -80 15 -130 15 C-120 15 -110 10 -100 3 C-65 -20 -40 -60 -40 -100 Z" 
+          fill="#F9F7F2" opacity="0.95"/>
+    
+    <!-- Stars around moon -->
+    <circle cx="-15" cy="-75" r="8" fill="#D69E2E"/>
+    <circle cx="25" cy="-65" r="6" fill="#D69E2E"/>
+    <circle cx="-25" cy="-40" r="7" fill="#D69E2E"/>
+    <circle cx="10" cy="-90" r="5" fill="#D69E2E"/>
+    
+    <!-- Mystical symbol (larger) -->
+    <g transform="translate(0, 50)">
+      <circle cx="0" cy="0" r="55" stroke="#F9F7F2" stroke-width="5" fill="none"/>
+      <path d="M0 -70 L0 70" stroke="#F9F7F2" stroke-width="5"/>
+      <path d="M-70 0 L70 0" stroke="#F9F7F2" stroke-width="5"/>
+      <circle cx="0" cy="0" r="15" fill="#D69E2E"/>
+      
+      <!-- Inner details -->
+      <circle cx="0" cy="-40" r="5" fill="#F9F7F2"/>
+      <circle cx="0" cy="40" r="5" fill="#F9F7F2"/>
+      <circle cx="-40" cy="0" r="5" fill="#F9F7F2"/>
+      <circle cx="40" cy="0" r="5" fill="#F9F7F2"/>
+    </g>
+  </g>
+</svg>
