@@ -4937,7 +4937,7 @@ IMPORTANTE:
 **Prioridad:** ALTA
 **Estimación:** 40 min
 **Dependencias:** 12.1, 3.3
-**Estado:** COMPLETADA
+**Estado:** COMPLETADA (Feedback PR aplicado)
 **Fecha:** 16 Diciembre 2025
 
 **Consigna:**
@@ -4945,29 +4945,30 @@ Crear tests básicos para el flujo de autenticación.
 
 **Implementación Realizada:**
 
-✅ **Archivo:** `src/app/login/__tests__/login.test.tsx`
+✅ **Tests ya existentes validados:**
 
-- 4 smoke tests implementados
-- Verifica renderizado de campos email y password
-- Verifica presencia del botón submit
-- Valida error cuando email es inválido
-- Valida error cuando password es muy corto
-- Todos los tests **PASAN**
+- `src/components/features/auth/LoginForm.test.tsx` (314 líneas)
+  - Ya incluye smoke tests de renderizado de campos
+  - Ya valida presencia del botón submit
+  - Ya verifica errores de validación (email inválido, password corto)
 
-✅ **Archivo:** `src/stores/__tests__/auth-store.test.ts`
+- `src/stores/authStore.test.ts` (321 líneas)
+  - Ya verifica estado inicial (isAuthenticated: false, user: null)
+  - Ya valida que setUser actualiza correctamente el estado
+  - Ya verifica que logout limpia el usuario y tokens
 
-- 8 smoke tests implementados
-- Verifica estado inicial (isAuthenticated: false, user: null)
-- Verifica que setUser actualiza correctamente el estado
-- Verifica que logout limpia el usuario y tokens
-- Todos los tests **PASAN**
+**Feedback de PR:**
+Durante la revisión de código se identificó que la tarea pedía crear archivos duplicados en ubicaciones que violaban la arquitectura:
 
-**Decisiones Técnicas:**
+1. ❌ `src/app/login/__tests__/login.test.tsx` - Violaba arquitectura (app/ no debe contener tests)
+2. ❌ `src/stores/__tests__/auth-store.test.ts` - Duplicaba tests existentes
 
-- Usados mocks de `vi.mock()` para `apiClient`, `useAuth`, `useRouter` y `toast`
-- Tests ubicados en carpetas `__tests__` como solicitado
-- Cobertura de casos críticos sin integración con backend
-- Nomenclatura clara y descriptiva para smoke tests
+**Decisión:**
+Los smoke tests solicitados ya están completamente cubiertos por los tests existentes. Los archivos duplicados fueron eliminados siguiendo el feedback del revisor para:
+
+- Mantener arquitectura (app/ solo rutas/layouts)
+- Evitar duplicación y doble mantenimiento
+- Aprovechar suite de tests completa existente
 
 **Ciclo de Calidad:**
 
@@ -4975,10 +4976,10 @@ Crear tests básicos para el flujo de autenticación.
 - ✅ Type-check sin errores
 - ✅ Build exitoso
 - ✅ Arquitectura validada
-- ✅ Tests pasan (12 nuevos tests)
+- ✅ Tests existentes cubren 100% de casos solicitados
 
-**Notas:**
-Los smoke tests creados son básicos y rápidos, ideal para verificación pre-deploy. Ya existían tests más completos en `LoginForm.test.tsx` y `authStore.test.ts` que cubren casos más avanzados.
+**Aprendizaje:**
+Validar arquitectura y tests existentes ANTES de crear nuevos archivos, incluso si la consigna lo pide literalmente.
 
 ---
 
