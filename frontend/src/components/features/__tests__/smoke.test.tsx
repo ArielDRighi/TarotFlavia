@@ -14,6 +14,19 @@ import { PlanBadge } from '../../ui/plan-badge';
 import { StatusBadge } from '../../ui/status-badge';
 import type { ReadingCard } from '@/types/reading.types';
 
+/**
+ * Type definitions for test data
+ */
+type PlanTestCase = {
+  plan: 'guest' | 'free' | 'premium' | 'professional';
+  text: string;
+};
+
+type StatusTestCase = {
+  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  text: string;
+};
+
 describe('Feature Components Smoke Tests', () => {
   describe('TarotCard', () => {
     it('renders in unrevealed state (face down)', () => {
@@ -105,7 +118,7 @@ describe('Feature Components Smoke Tests', () => {
     });
 
     it('shows correct text for each plan type', () => {
-      const plans: Array<{ plan: 'guest' | 'free' | 'premium' | 'professional'; text: string }> = [
+      const plans: PlanTestCase[] = [
         { plan: 'guest', text: 'GUEST' },
         { plan: 'free', text: 'FREE' },
         { plan: 'premium', text: 'PREMIUM' },
@@ -142,10 +155,7 @@ describe('Feature Components Smoke Tests', () => {
     });
 
     it('shows correct text and color for each status type', () => {
-      const statuses: Array<{
-        status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
-        text: string;
-      }> = [
+      const statuses: StatusTestCase[] = [
         { status: 'pending', text: 'Pendiente' },
         { status: 'confirmed', text: 'Confirmada' },
         { status: 'completed', text: 'Completada' },
