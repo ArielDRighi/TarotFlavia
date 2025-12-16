@@ -4761,14 +4761,43 @@ IMPORTANTE:
 
 > **Nota:** Testing E2E completo está en "Post-MVP", pero estos smoke tests son recomendados antes de release.
 
-### TAREA 12.1: Configurar Vitest para unit tests
+### ✅ TAREA 12.1: Configurar Vitest para unit tests (COMPLETADA)
 
 **Prioridad:** MEDIA
 **Estimación:** 30 min
 **Dependencias:** 0.1
+**Estado:** ✅ COMPLETADA (2025-12-15)
 
 **Consigna:**
 Configurar Vitest como framework de testing para componentes y hooks.
+
+**Resumen de Implementación:**
+
+✅ Vitest 4.0.15 configurado y funcional
+✅ @testing-library/react y @testing-library/jest-dom instalados
+✅ Setup movido de `vitest.setup.ts` a `src/test/setup.ts` según arquitectura
+✅ Configuración incluye:
+
+- Mocks de localStorage para Zustand
+- Mocks de matchMedia para componentes responsive
+- Mocks de IntersectionObserver y ResizeObserver
+- Coverage thresholds configurados a ≥ 80%
+  ✅ Scripts de package.json actualizados:
+- `test`: vitest (modo watch)
+- `test:run`: vitest run (ejecución única)
+- `test:coverage`: vitest run --coverage
+  ✅ Validaciones ejecutadas:
+- Lint: 0 errores
+- Type-check: 0 errores
+- Build: Exitoso
+- Tests existentes: Pasando (1483/1484)
+- Validación de arquitectura: Exitosa
+
+**Archivos modificados:**
+
+- `vitest.config.ts` - Actualizado setupFiles path
+- `vitest.setup.ts` → `src/test/setup.ts` - Movido según arquitectura
+- `package.json` - Scripts actualizados
 
 **Prompt:**
 
