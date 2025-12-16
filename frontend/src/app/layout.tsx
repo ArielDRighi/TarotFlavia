@@ -4,6 +4,7 @@ import { ReactQueryProvider, AuthProvider } from '@/lib/providers';
 import { Toaster } from '@/components/ui/toaster';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { defaultMetadata } from '@/lib/metadata/seo';
 import './globals.css';
 
 /**
@@ -28,10 +29,7 @@ const lato = Lato({
   display: 'swap',
 });
 
-export const metadata: Metadata = {
-  title: 'TarotFlavia',
-  description: 'Marketplace de tarotistas profesionales',
-};
+export const metadata: Metadata = defaultMetadata;
 
 export default function RootLayout({
   children,

@@ -4618,43 +4618,81 @@ IMPORTANTE:
 
 ---
 
-### TAREA 11.3: Implementar SEO y Metadata
+### ✅ TAREA 11.3: Implementar SEO y Metadata
 
+**Estado:** COMPLETADA
 **Prioridad:** MEDIA
 **Estimación:** 40 min
+**Tiempo Real:** 50 min
+**Rama:** feature/TASK-11.3-seo-metadata
+**Commits:**
 
-**Prompt:**
+- 1ca6d26 - feat(seo): implement SEO and metadata configuration
+- eda5a18 - fix: apply PR feedback corrections for TASK-11.3
 
-```
+**Implementado:**
 
-Configura SEO y metadata:
+1. ✅ Configuración centralizada de SEO en `lib/metadata/seo.ts`
+2. ✅ Metadata estática para todas las páginas principales:
+   - Home (Tu guía espiritual)
+   - Login/Registro (noindex para privacidad)
+   - Ritual (Nueva Lectura de Tarot)
+   - Historial (Mis Lecturas - privado)
+   - Carta del Día
+   - Explorar Tarotistas
+   - Mi Perfil (privado)
+3. ✅ Metadata dinámica para:
+   - Perfiles de tarotistas (usa datos del API)
+   - Lecturas compartidas (usa datos del reading)
+4. ✅ Open Graph completo para sharing en redes sociales
+5. ✅ Twitter Cards configuradas
+6. ✅ Robots meta tags diferenciados (público vs privado)
+7. ✅ Layouts creados para páginas client component
+8. ✅ Tests completos (38 tests) con 100% coverage en metadata
+9. ✅ **PR Feedback aplicado:**
+   - Validación de producción para BASE_URL (error si falta NEXT_PUBLIC_APP_URL)
+   - Type safety para respuesta de API con TarotistaDetail
+   - Mapeo correcto de propiedades (nombrePublico del interface)
 
-MODIFICAR: Cada page.tsx debe exportar metadata
+**Archivos Creados:**
 
-EJEMPLO src/app/page.tsx:
-export const metadata: Metadata = {
-title: 'TarotFlavia - Tu guía espiritual',
-description: 'Lecturas de tarot con IA y sesiones con tarotistas profesionales',
-openGraph: {
-title: 'TarotFlavia',
-description: 'Descubre tu destino',
-images: ['/og-image.png'],
-},
-};
+- `src/lib/metadata/seo.ts` - Configuración centralizada con validación de producción
+- `src/lib/metadata/seo.test.ts` - Tests de funciones metadata
+- `src/test/metadata/page-metadata.test.ts` - Tests de exports en pages
+- `src/app/carta-del-dia/layout.tsx`
+- `src/app/explorar/layout.tsx`
+- `src/app/historial/layout.tsx`
+- `src/app/perfil/layout.tsx`
 
-PAGES A CONFIGURAR:
+**Archivos Modificados:**
 
-- Home, Login, Registro
-- Ritual, Historial, Carta del día
-- Explorar, Perfil tarotista
-- Mi Perfil
+- `src/app/layout.tsx` - defaultMetadata
+- `src/app/page.tsx` - homeMetadata
+- `src/app/login/page.tsx` - loginMetadata
+- `src/app/registro/page.tsx` - registerMetadata
+- `src/app/ritual/layout.tsx` - ritualMetadata
+- `src/app/tarotistas/[id]/page.tsx` - generateMetadata() con tipos correctos
+- `src/app/compartida/[token]/page.tsx` - usa función centralizada
+- `.env.local` - Agregada NEXT_PUBLIC_APP_URL
 
-IMPORTANTE:
+**Notas Técnicas:**
 
-- Metadata dinámica para perfiles de tarotista
-- Open Graph para compartir lecturas
+- Nombre "TarotFlavia" es placeholder - actualizar cuando se defina el nombre final
+- URLs canónicas configuradas para perfiles de tarotista
+- OpenGraph images apuntan a `/og-image.png` (crear en siguiente tarea)
+- Metadata respeta políticas SEO: páginas privadas con `noindex`, públicas con `index`
+- TypeScript types de Next.js 14 para Metadata son más estrictos, tests ajustados
+- **BASE_URL** ahora valida entorno de producción para prevenir errores de configuración
+- **API responses** correctamente tipadas con interfaces de domain types
 
-```
+**Validación:**
+
+- ✅ Lint: 0 errores
+- ✅ Type-check: sin errores
+- ✅ Build: exitoso con variable de entorno configurada
+- ✅ Tests: 1470/1471 pasando (1 fallo pre-existente en metricas page)
+- ✅ Arquitectura: validada
+- ✅ PR Feedback: aplicado y verificado
 
 ---
 
