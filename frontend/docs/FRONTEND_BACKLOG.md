@@ -4928,48 +4928,57 @@ IMPORTANTE:
 - Uso de `userEvent` para eventos async del Dialog (mejor práctica)
 - Mocks correctos usando tipos del sistema (`ReadingCard`)
 - Tests simples y enfocados (solo renderizado, no lógica)
+```
 
 ---
 
-### TAREA 12.3: Smoke tests de flujos de autenticación
+### TAREA 12.3: Smoke tests de flujos de autenticación ✅
 
 **Prioridad:** ALTA
 **Estimación:** 40 min
 **Dependencias:** 12.1, 3.3
+**Estado:** COMPLETADA
+**Fecha:** 16 Diciembre 2025
 
 **Consigna:**
 Crear tests básicos para el flujo de autenticación.
 
-**Prompt:**
+**Implementación Realizada:**
 
-```
+✅ **Archivo:** `src/app/login/__tests__/login.test.tsx`
 
-Crea smoke tests para autenticación:
+- 4 smoke tests implementados
+- Verifica renderizado de campos email y password
+- Verifica presencia del botón submit
+- Valida error cuando email es inválido
+- Valida error cuando password es muy corto
+- Todos los tests **PASAN**
 
-CREAR ARCHIVO: src/app/login/**tests**/login.test.tsx
+✅ **Archivo:** `src/stores/__tests__/auth-store.test.ts`
 
-TESTS:
+- 8 smoke tests implementados
+- Verifica estado inicial (isAuthenticated: false, user: null)
+- Verifica que setUser actualiza correctamente el estado
+- Verifica que logout limpia el usuario y tokens
+- Todos los tests **PASAN**
 
-1. Formulario de login renderiza campos email y password
-2. Botón submit está presente
-3. Validación muestra error si email inválido
-4. Validación muestra error si password muy corto
+**Decisiones Técnicas:**
 
-CREAR ARCHIVO: src/stores/**tests**/auth-store.test.ts
+- Usados mocks de `vi.mock()` para `apiClient`, `useAuth`, `useRouter` y `toast`
+- Tests ubicados en carpetas `__tests__` como solicitado
+- Cobertura de casos críticos sin integración con backend
+- Nomenclatura clara y descriptiva para smoke tests
 
-TESTS:
+**Ciclo de Calidad:**
 
-1. Estado inicial es isAuthenticated: false
-2. setUser actualiza el estado correctamente
-3. logout limpia el usuario
+- ✅ Lint sin errores
+- ✅ Type-check sin errores
+- ✅ Build exitoso
+- ✅ Arquitectura validada
+- ✅ Tests pasan (12 nuevos tests)
 
-IMPORTANTE:
-
-- Mockear apiClient para evitar llamadas reales
-- Usar vi.mock() de Vitest
-- NO testear integración con backend todavía
-
-```
+**Notas:**
+Los smoke tests creados son básicos y rápidos, ideal para verificación pre-deploy. Ya existían tests más completos en `LoginForm.test.tsx` y `authStore.test.ts` que cubren casos más avanzados.
 
 ---
 
@@ -5009,7 +5018,7 @@ IMPORTANTE:
 - Los smoke tests deben pasar en menos de 30 segundos
 - Si fallan, bloquear el deploy
 
-````
+```
 
 ---
 
@@ -5123,7 +5132,7 @@ Type mismatch entre backend y frontend:
 interface ReadingDetail {
   interpretation: Interpretation | string | null; // Flexible para ambos formatos
 }
-````
+```
 
 2. **Función de transformación en capa API** (`lib/api/readings-api.ts`):
 
