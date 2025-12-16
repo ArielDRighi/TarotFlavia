@@ -1,0 +1,34 @@
+<svg width="160" height="240" viewBox="0 0 160 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Card Background -->
+  <rect width="160" height="240" rx="8" fill="#2D3748"/>
+  
+  <!-- Decorative Border -->
+  <rect x="8" y="8" width="144" height="224" rx="4" stroke="#805AD5" stroke-width="2" fill="none"/>
+  
+  <!-- Inner Decorative Pattern -->
+  <g opacity="0.3">
+    <!-- Top Ornament -->
+    <circle cx="80" cy="40" r="12" stroke="#D69E2E" stroke-width="1.5" fill="none"/>
+    <path d="M80 28 L80 52" stroke="#D69E2E" stroke-width="1"/>
+    <path d="M68 40 L92 40" stroke="#D69E2E" stroke-width="1"/>
+    
+    <!-- Center Star -->
+    <g transform="translate(80, 120)">
+      <path d="M0 -20 L5 -5 L20 0 L5 5 L0 20 L-5 5 L-20 0 L-5 -5 Z" 
+            fill="#805AD5" opacity="0.6"/>
+    </g>
+    
+    <!-- Bottom Ornament -->
+    <circle cx="80" cy="200" r="12" stroke="#D69E2E" stroke-width="1.5" fill="none"/>
+    <path d="M80 188 L80 212" stroke="#D69E2E" stroke-width="1"/>
+    <path d="M68 200 L92 200" stroke="#D69E2E" stroke-width="1"/>
+  </g>
+  
+  <!-- Mystical Elements -->
+  <g transform="translate(40, 100)" opacity="0.4">
+    <circle cx="0" cy="0" r="3" fill="#D69E2E"/>
+    <circle cx="80" cy="0" r="3" fill="#D69E2E"/>
+    <circle cx="0" cy="40" r="3" fill="#D69E2E"/>
+    <circle cx="80" cy="40" r="3" fill="#D69E2E"/>
+  </g>
+</svg>
