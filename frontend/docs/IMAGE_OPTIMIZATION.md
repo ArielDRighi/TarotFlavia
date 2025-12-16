@@ -77,7 +77,7 @@ import { UserAvatar } from '@/components/ui/user-avatar';
   size="sm"
 />
 
-// Sizes: 'sm' (32px), 'md' (48px), 'lg' (64px), 'xl' (96px)
+// Sizes: 'sm' (32px/32px), 'md' (48px/48px), 'lg' (64px/64px), 'xl' (96px/96px)
 ```
 
 ## Static Assets
@@ -91,6 +91,8 @@ Located in `/public/`:
 - **avatar-placeholder.svg** - Default avatar placeholder (100x100px)
 - **icon-192.svg** - PWA icon 192x192
 - **icon-512.svg** - PWA icon 512x512
+
+**Note:** Apple touch icon requires PNG format for iOS compatibility. Current `apple-touch-icon.png` is a placeholder and should be replaced with an actual PNG (180x180) before production deployment.
 
 ### PWA Configuration
 

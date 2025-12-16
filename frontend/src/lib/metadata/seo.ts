@@ -51,7 +51,7 @@ export const defaultMetadata: Metadata = {
       { url: '/favicon.ico', sizes: 'any' },
       { url: '/icon-192.svg', type: 'image/svg+xml', sizes: '192x192' },
     ],
-    apple: [{ url: '/icon-192.svg', sizes: '192x192', type: 'image/svg+xml' }],
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
   },
   appleWebApp: {
     capable: true,

@@ -19,11 +19,11 @@ export interface UserAvatarProps {
 }
 
 /** Size configuration mapping */
-const sizeClasses = {
-  sm: 'size-8',
-  md: 'size-12',
-  lg: 'size-16',
-  xl: 'size-24',
+const sizeConfig = {
+  sm: { className: 'size-8', imageSize: 32 },
+  md: { className: 'size-12', imageSize: 48 },
+  lg: { className: 'size-16', imageSize: 64 },
+  xl: { className: 'size-24', imageSize: 96 },
 } as const;
 
 /**
@@ -47,11 +47,13 @@ const sizeClasses = {
  * ```
  */
 export function UserAvatar({ src, alt, initials, size = 'md', className }: UserAvatarProps) {
+  const config = sizeConfig[size];
+
   return (
-    <Avatar className={cn(sizeClasses[size], className)} data-testid="user-avatar">
+    <Avatar className={cn(config.className, className)} data-testid="user-avatar">
       {src ? (
         <AvatarImage asChild>
-          <Image src={src} alt={alt} width={96} height={96} />
+          <Image src={src} alt={alt} width={config.imageSize} height={config.imageSize} />
         </AvatarImage>
       ) : null}
       <AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
