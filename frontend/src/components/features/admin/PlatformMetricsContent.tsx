@@ -71,12 +71,8 @@ export function PlatformMetricsContent() {
 
   return (
     <>
-      {/* Header con selector de período */}
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="font-serif text-3xl font-bold">Métricas de Plataforma</h1>
-        </div>
-
+      {/* Selector de período */}
+      <div className="mb-8 flex items-center justify-end">
         <Select value={period} onValueChange={(value) => setPeriod(value as MetricsPeriod)}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Seleccionar período" />

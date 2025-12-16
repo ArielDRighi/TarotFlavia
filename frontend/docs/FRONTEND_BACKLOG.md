@@ -4928,48 +4928,58 @@ IMPORTANTE:
 - Uso de `userEvent` para eventos async del Dialog (mejor práctica)
 - Mocks correctos usando tipos del sistema (`ReadingCard`)
 - Tests simples y enfocados (solo renderizado, no lógica)
+```
 
 ---
 
-### TAREA 12.3: Smoke tests de flujos de autenticación
+### TAREA 12.3: Smoke tests de flujos de autenticación ✅
 
 **Prioridad:** ALTA
 **Estimación:** 40 min
 **Dependencias:** 12.1, 3.3
+**Estado:** COMPLETADA (Feedback PR aplicado)
+**Fecha:** 16 Diciembre 2025
 
 **Consigna:**
 Crear tests básicos para el flujo de autenticación.
 
-**Prompt:**
+**Implementación Realizada:**
 
-```
+✅ **Tests ya existentes validados:**
 
-Crea smoke tests para autenticación:
+- `src/components/features/auth/LoginForm.test.tsx` (314 líneas)
+  - Ya incluye smoke tests de renderizado de campos
+  - Ya valida presencia del botón submit
+  - Ya verifica errores de validación (email inválido, password corto)
 
-CREAR ARCHIVO: src/app/login/**tests**/login.test.tsx
+- `src/stores/authStore.test.ts` (321 líneas)
+  - Ya verifica estado inicial (isAuthenticated: false, user: null)
+  - Ya valida que setUser actualiza correctamente el estado
+  - Ya verifica que logout limpia el usuario y tokens
 
-TESTS:
+**Feedback de PR:**
+Durante la revisión de código se identificó que la tarea pedía crear archivos duplicados en ubicaciones que violaban la arquitectura:
 
-1. Formulario de login renderiza campos email y password
-2. Botón submit está presente
-3. Validación muestra error si email inválido
-4. Validación muestra error si password muy corto
+1. ❌ `src/app/login/__tests__/login.test.tsx` - Violaba arquitectura (app/ no debe contener tests)
+2. ❌ `src/stores/__tests__/auth-store.test.ts` - Duplicaba tests existentes
 
-CREAR ARCHIVO: src/stores/**tests**/auth-store.test.ts
+**Decisión:**
+Los smoke tests solicitados ya están completamente cubiertos por los tests existentes. Los archivos duplicados fueron eliminados siguiendo el feedback del revisor para:
 
-TESTS:
+- Mantener arquitectura (app/ solo rutas/layouts)
+- Evitar duplicación y doble mantenimiento
+- Aprovechar suite de tests completa existente
 
-1. Estado inicial es isAuthenticated: false
-2. setUser actualiza el estado correctamente
-3. logout limpia el usuario
+**Ciclo de Calidad:**
 
-IMPORTANTE:
+- ✅ Lint sin errores
+- ✅ Type-check sin errores
+- ✅ Build exitoso
+- ✅ Arquitectura validada
+- ✅ Tests existentes cubren 100% de casos solicitados
 
-- Mockear apiClient para evitar llamadas reales
-- Usar vi.mock() de Vitest
-- NO testear integración con backend todavía
-
-```
+**Aprendizaje:**
+Validar arquitectura y tests existentes ANTES de crear nuevos archivos, incluso si la consigna lo pide literalmente.
 
 ---
 
@@ -5009,7 +5019,7 @@ IMPORTANTE:
 - Los smoke tests deben pasar en menos de 30 segundos
 - Si fallan, bloquear el deploy
 
-````
+```
 
 ---
 
@@ -5123,7 +5133,7 @@ Type mismatch entre backend y frontend:
 interface ReadingDetail {
   interpretation: Interpretation | string | null; // Flexible para ambos formatos
 }
-````
+```
 
 2. **Función de transformación en capa API** (`lib/api/readings-api.ts`):
 
