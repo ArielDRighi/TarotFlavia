@@ -5009,7 +5009,7 @@ IMPORTANTE:
 - Los smoke tests deben pasar en menos de 30 segundos
 - Si fallan, bloquear el deploy
 
-```
+````
 
 ---
 
@@ -5123,7 +5123,7 @@ Type mismatch entre backend y frontend:
 interface ReadingDetail {
   interpretation: Interpretation | string | null; // Flexible para ambos formatos
 }
-```
+````
 
 2. **Función de transformación en capa API** (`lib/api/readings-api.ts`):
 
