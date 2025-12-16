@@ -1,10 +1,7 @@
 import type { Metadata } from 'next';
+import { ritualMetadata } from '@/lib/metadata/seo';
 
-export const metadata: Metadata = {
-  title: 'Ritual de Lectura | TarotFlavia',
-  description:
-    'Inicia tu ritual de lectura de tarot seleccionando una categoría que resuene con tu alma.',
-};
+export const metadata: Metadata = ritualMetadata;
 
 export default function RitualLayout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;

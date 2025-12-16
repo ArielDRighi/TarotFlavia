@@ -1,4 +1,8 @@
+import type { Metadata } from 'next';
 import Image from 'next/image';
+import { homeMetadata } from '@/lib/metadata/seo';
+
+export const metadata: Metadata = homeMetadata;
 
 export default function Home() {
   return (

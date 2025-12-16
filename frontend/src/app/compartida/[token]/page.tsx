@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { getSharedReading } from '@/lib/api';
 import { SharedReadingView } from '@/components/features/readings';
 import { Button } from '@/components/ui/button';
+import { generateSharedReadingMetadata } from '@/lib/metadata/seo';
 
 interface SharedReadingPageProps {
   params: Promise<{
@@ -32,32 +33,21 @@ export async function generateMetadata({ params }: SharedReadingPageProps): Prom
       reading.question ||
       'Lectura de Tarot';
 
-    return {
-      title: `${questionText} | Lectura Compartida - TarotFlavia`,
-      description: `Descubre esta lectura del tarot: ${questionText}`,
-      openGraph: {
-        title: `${questionText} - TarotFlavia`,
-        description: 'Una lectura del tarot compartida contigo',
-        type: 'article',
-        images: [
-          {
-            url: '/og-image.jpg',
-            width: 1200,
-            height: 630,
-            alt: 'TarotFlavia - Lectura Compartida',
-          },
-        ],
-      },
-      twitter: {
-        card: 'summary_large_image',
-        title: `${questionText} - TarotFlavia`,
-        description: 'Una lectura del tarot compartida contigo',
-      },
-    };
+    // Get category name if available
+    const categoryName = reading.category?.name;
+
+    return generateSharedReadingMetadata({
+      question: questionText,
+      categoryName,
+    });
   } catch {
     return {
-      title: 'Lectura no disponible | TarotFlavia',
+      title: 'Lectura no disponible',
       description: 'Esta lectura compartida ya no está disponible',
+      robots: {
+        index: false,
+        follow: false,
+      },
     };
   }
 }

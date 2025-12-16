@@ -1,4 +1,8 @@
+import type { Metadata } from 'next';
 import { RegisterForm } from '@/components/features/auth';
+import { registerMetadata } from '@/lib/metadata/seo';
+
+export const metadata: Metadata = registerMetadata;
 
 export default function RegistroPage() {
   return (
