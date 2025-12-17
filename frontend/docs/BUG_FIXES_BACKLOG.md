@@ -207,29 +207,49 @@ El schema Zod está correcto con `.refine()`, pero la validación no se ejecuta.
 
 ---
 
-### ✅ BUG FIX 2.1: Mensaje de error en login fallido (#A002) - **COMPLETADO**
+### ✅ BUG FIX 2.1: Mensaje de error en login fallido (#A002) - **COMPLETADO ✅**
 
 **Prioridad:** 🟠 ALTO  
 **Área:** Frontend - Auth  
 **Estimación:** 20-30 min  
-**Tiempo Real:** 25 min + 15 min (mejoras UX)  
+**Tiempo Real:** 2.5 horas (debugging + fixes complejos)  
 **Dependencias:** Ninguna  
 **Branch:** `fix/A002-login-error-message`  
-**Commits:** `dbb42f4`, `TBD` (mejoras UX)
+**Commits:** `dbb42f4`, `abf0c31`, `deceffc`, `9b15d89`, `45e1492`, `ea01ee4`, `aabe7ae`, `f2c982b`
 
 #### Descripción del Bug
 
 Cuando el login falla (credenciales incorrectas), el modal se resetea sin mostrar ningún mensaje de error al usuario.
 
-#### Mejoras Implementadas (Iteración 2)
+#### Problema Real Identificado
 
-Después de feedback del usuario probando en la web:
+Durante el debugging se descubrió que el problema NO era solo mostrar el mensaje, sino que:
 
-1. **Eliminado toast para errores 401**: El toast desaparecía rápido causando confusión. Ahora solo el mensaje inline persiste.
-2. **Mensaje más descriptivo**: "Email o contraseña incorrectos. Por favor, verifica tus credenciales e intenta nuevamente."
-3. **Campos NO se resetean**: Los valores permanecen en el formulario para facilitar corrección.
-4. **Mejora de estilo**: Padding más generoso (p-4), rounded-lg, y font-medium para mejor legibilidad.
-5. **Accesibilidad mejorada**: Agregado `aria-live="polite"` para lectores de pantalla.
+1. **El interceptor de Axios intentaba refrescar el token** cuando `/auth/login` fallaba con 401
+2. Como no había refresh_token válido, esto fallaba y ejecutaba `window.location.href = '/login'`
+3. Esto causaba **recarga completa de página**, limpiando formulario y logs de consola
+4. El mensaje de error SÍ se mostraba, pero desaparecía instantáneamente por la recarga
+
+#### Solución Implementada
+
+**1. Fix del Interceptor (Root Cause):**
+
+- Modificado `axios-config.ts` para **excluir rutas `/auth/*` del refresh automático de token**
+- Ahora errores 401 en login se manejan correctamente sin intentar refresh
+
+**2. Mejoras de UX:**
+
+- **Eliminado toast para errores 401**: Solo mensaje inline persiste (más claro)
+- **Mensaje descriptivo**: "Email o contraseña incorrectos. Por favor, verifica tus credenciales e intenta nuevamente."
+- **Campos NO se resetean**: Los valores permanecen para facilitar corrección
+- **Estilo mejorado**: `p-4`, `rounded-lg`, `font-medium` para mejor legibilidad
+- **Accesibilidad**: `aria-live="polite"` y `role="alert"`
+
+**3. Prevención de navegación:**
+
+- `useRef(hasNavigated)` para trackear estado de navegación
+- `useEffect` que previene unmounting mientras hay error
+- Delay de 100ms antes de navegación exitosa para asegurar estado
 
 #### Tareas de Corrección
 
@@ -259,15 +279,27 @@ Después de feedback del usuario probando en la web:
   - [x] Accesibilidad: `role="alert"` y `aria-live="polite"`
   - [x] Test manual: login con password incorrecto → ver mensaje de error legible
 
+**TAREA 2.1.3: Fix axios interceptor** (Frontend) - **CRÍTICO**
+
+- **Archivo:** `frontend/src/lib/api/axios-config.ts`
+- **Acción:**
+  - Agregar check `isAuthEndpoint` para excluir `/auth/*` del refresh de token
+  - Prevenir `window.location.href = '/login'` en errores de login
+- **Criterios de aceptación:**
+  - [x] Errores 401 en `/auth/login` NO intentan refresh de token
+  - [x] Página NO se recarga al fallar login
+  - [x] Formulario mantiene estado después de error 401
+
 **Tests Agregados:**
 
 - ✅ Verificar mensaje de error se muestra
 - ✅ Verificar mensaje se limpia en nuevo intento
 - ✅ Verificar campos NO se resetean después de error
 - ✅ Verificar atributo aria-live para accesibilidad
+- ✅ 21/21 tests pasando
 
 **Estimación:** 20-30 min  
-**Tiempo Real:** 40 min (incluye mejoras UX post-feedback)
+**Tiempo Real:** 2.5 horas (debugging complejo del interceptor)
 
 ---
 
