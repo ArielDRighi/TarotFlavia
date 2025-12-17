@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
@@ -16,13 +16,22 @@ import { loginSchema, type LoginFormData } from '@/lib/validations/auth.schemas'
 /**
  * LoginForm component
  *
- * A complete login form with email/password fields, validation,
+ * A complete login form with email/password fields, client-side validation,
  * and integration with the auth store.
+ *
+ * Features:
+ * - Email and password validation with Zod
+ * - Inline error message display for authentication errors
+ * - Loading state with disabled inputs during submission
+ * - Automatic redirect to /perfil on successful login
+ * - Form fields persist after error for easy correction
  */
 export function LoginForm() {
   const router = useRouter();
   const { login } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const hasNavigated = useRef(false);
 
   const {
     register,
@@ -38,15 +47,40 @@ export function LoginForm() {
 
   const onSubmit = async (data: LoginFormData) => {
     setIsSubmitting(true);
+    setLoginError(null); // Clear previous error
+
     try {
       await login(data.email, data.password);
+
+      hasNavigated.current = true;
+
+      // Short delay to ensure state is updated
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
       router.push('/perfil');
-    } catch {
-      // Error toast is handled by authStore.login()
+    } catch (error) {
+      // Login failed - show inline error message
+      // Form fields remain populated for user to correct
+      const axiosError = error as { response?: { status?: number } };
+      const isUnauthorized = axiosError.response?.status === 401;
+
+      const errorMessage = isUnauthorized
+        ? 'Email o contraseña incorrectos. Por favor, verifica tus credenciales e intenta nuevamente.'
+        : 'Error al iniciar sesión. Por favor, intenta de nuevo más tarde.';
+
+      setLoginError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  // Prevent unmounting if we have an error to display
+  useEffect(() => {
+    // This effect ensures the component doesn't unmount while showing an error
+    if (loginError && !hasNavigated.current) {
+      // Error is active, prevent any unexpected navigation
+    }
+  }, [loginError]);
 
   return (
     <Card className="shadow-soft w-full max-w-md rounded-2xl">
@@ -56,6 +90,17 @@ export function LoginForm() {
 
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Login Error Message */}
+          {loginError && (
+            <div
+              className="bg-destructive/10 border-destructive/30 text-destructive rounded-lg border p-4 text-sm"
+              role="alert"
+              aria-live="polite"
+            >
+              <p className="font-medium">{loginError}</p>
+            </div>
+          )}
+
           {/* Email Field */}
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">

@@ -57,7 +57,19 @@ export const useAuthStore = create<AuthStore>()(
 
           toast.success('Bienvenido');
         } catch (error) {
-          toast.error('Error al iniciar sesión');
+          // Extract error details for specific messaging
+          const axiosError = error as {
+            response?: { status?: number; data?: { message?: string } };
+            message?: string;
+          };
+          const isUnauthorized = axiosError.response?.status === 401;
+
+          // Only show toast for non-401 errors (network, server errors)
+          // 401 errors are handled by inline message in LoginForm
+          if (!isUnauthorized) {
+            toast.error('Error al iniciar sesión');
+          }
+
           throw error;
         }
       },
