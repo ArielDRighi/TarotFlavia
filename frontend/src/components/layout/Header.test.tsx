@@ -95,6 +95,14 @@ describe('Header', () => {
       mockUseAuthStore.mockReturnValue({ user: mockUser });
     });
 
+    it('should show "Nueva Lectura" link when authenticated', () => {
+      render(<Header />);
+
+      const link = screen.getByRole('link', { name: /nueva lectura/i });
+      expect(link).toBeInTheDocument();
+      expect(link).toHaveAttribute('href', '/ritual/tirada');
+    });
+
     it('should show "Explorar" link when authenticated', () => {
       render(<Header />);
 

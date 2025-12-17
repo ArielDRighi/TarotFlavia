@@ -88,6 +88,6 @@ describe('Page Metadata Exports', () => {
       const sharedPage = await import('@/app/compartida/[token]/page');
       expect(sharedPage.generateMetadata).toBeDefined();
       expect(typeof sharedPage.generateMetadata).toBe('function');
-    }, 10000); // Timeout aumentado para imports lentos
+    }, 30000); // Timeout aumentado para imports lentos
   });
 });
