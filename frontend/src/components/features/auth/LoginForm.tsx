@@ -45,22 +45,34 @@ export function LoginForm() {
   });
 
   const onSubmit = async (data: LoginFormData) => {
+    console.log('[LoginForm] onSubmit called with:', { email: data.email });
+
     setIsSubmitting(true);
     setLoginError(null); // Clear previous error
+
     try {
+      console.log('[LoginForm] Calling login...');
       await login(data.email, data.password);
+
+      console.log('[LoginForm] Login successful, redirecting to /perfil');
+      // Only redirect if login succeeded (no exception thrown)
       router.push('/perfil');
     } catch (error) {
-      // Show inline error message (form fields remain populated)
+      // Login failed - show inline error message
+      // Form fields remain populated for user to correct
+      console.error('[LoginForm] Login failed:', error);
+
       const axiosError = error as { response?: { status?: number } };
       const isUnauthorized = axiosError.response?.status === 401;
 
-      setLoginError(
-        isUnauthorized
-          ? 'Email o contraseña incorrectos. Por favor, verifica tus credenciales e intenta nuevamente.'
-          : 'Error al iniciar sesión. Por favor, intenta de nuevo más tarde.'
-      );
+      const errorMessage = isUnauthorized
+        ? 'Email o contraseña incorrectos. Por favor, verifica tus credenciales e intenta nuevamente.'
+        : 'Error al iniciar sesión. Por favor, intenta de nuevo más tarde.';
+
+      console.log('[LoginForm] Setting error message:', errorMessage);
+      setLoginError(errorMessage);
     } finally {
+      console.log('[LoginForm] Setting isSubmitting to false');
       setIsSubmitting(false);
     }
   };

@@ -63,6 +63,12 @@ export const useAuthStore = create<AuthStore>()(
           };
           const isUnauthorized = axiosError.response?.status === 401;
 
+          console.error('[authStore.login] Login error:', {
+            status: axiosError.response?.status,
+            isUnauthorized,
+            error,
+          });
+
           // Only show toast for non-401 errors (network, server errors)
           // 401 errors are handled by inline message in LoginForm
           if (!isUnauthorized) {
