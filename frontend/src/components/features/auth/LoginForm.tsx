@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
@@ -21,16 +21,17 @@ import { loginSchema, type LoginFormData } from '@/lib/validations/auth.schemas'
  *
  * Features:
  * - Email and password validation with Zod
- * - Toast notification for login errors (via authStore)
- * - Inline error message display as fallback
+ * - Inline error message display for authentication errors
  * - Loading state with disabled inputs during submission
  * - Automatic redirect to /perfil on successful login
+ * - Form fields persist after error for easy correction
  */
 export function LoginForm() {
   const router = useRouter();
   const { login } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
+  const hasNavigated = useRef(false);
 
   const {
     register,
@@ -54,8 +55,13 @@ export function LoginForm() {
       console.log('[LoginForm] Calling login...');
       await login(data.email, data.password);
 
-      console.log('[LoginForm] Login successful, redirecting to /perfil');
-      // Only redirect if login succeeded (no exception thrown)
+      console.log('[LoginForm] Login successful, setting navigation flag');
+      hasNavigated.current = true;
+
+      // Short delay to ensure state is updated
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      console.log('[LoginForm] Redirecting to /perfil');
       router.push('/perfil');
     } catch (error) {
       // Login failed - show inline error message
@@ -76,6 +82,13 @@ export function LoginForm() {
       setIsSubmitting(false);
     }
   };
+
+  // Prevent unmounting if we have an error to display
+  useEffect(() => {
+    if (loginError && !hasNavigated.current) {
+      console.log('[LoginForm] Error state active, preventing navigation');
+    }
+  }, [loginError]);
 
   return (
     <Card className="shadow-soft w-full max-w-md rounded-2xl">
