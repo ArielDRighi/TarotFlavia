@@ -100,7 +100,7 @@ describe('Header', () => {
 
       const link = screen.getByRole('link', { name: /nueva lectura/i });
       expect(link).toBeInTheDocument();
-      expect(link).toHaveAttribute('href', '/ritual/tirada');
+      expect(link).toHaveAttribute('href', '/ritual');
     });
 
     it('should show "Explorar" link when authenticated', () => {

@@ -21,7 +21,7 @@ export default function Home() {
         <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
           <a
             className="bg-primary text-surface hover:bg-primary/90 flex h-12 w-full items-center justify-center gap-2 rounded-full px-5 transition-colors md:w-[158px]"
-            href="/ritual/tirada"
+            href="/ritual"
           >
             Crear Nueva Lectura
           </a>

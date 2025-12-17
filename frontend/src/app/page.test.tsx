@@ -15,11 +15,11 @@ describe('Home Page', () => {
       expect(ctaButton).toBeInTheDocument();
     });
 
-    it('should link to /ritual/tirada', () => {
+    it('should link to /ritual', () => {
       render(<Home />);
 
       const ctaButton = screen.getByRole('link', { name: /crear nueva lectura/i });
-      expect(ctaButton).toHaveAttribute('href', '/ritual/tirada');
+      expect(ctaButton).toHaveAttribute('href', '/ritual');
     });
 
     it('should have primary button styling', () => {
