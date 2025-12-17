@@ -24,6 +24,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     // Only check auth after Zustand has hydrated from localStorage
     if (hasHydrated) {
+      console.log('[AuthProvider] Calling checkAuth because hasHydrated=true');
       checkAuth();
     }
   }, [checkAuth, hasHydrated]);
