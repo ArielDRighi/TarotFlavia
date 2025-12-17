@@ -51,14 +51,14 @@ export function LoginForm() {
       await login(data.email, data.password);
       router.push('/perfil');
     } catch (error) {
-      // Show inline error message as fallback if toast doesn't work
+      // Show inline error message (form fields remain populated)
       const axiosError = error as { response?: { status?: number } };
       const isUnauthorized = axiosError.response?.status === 401;
 
       setLoginError(
         isUnauthorized
-          ? 'Email o contraseña incorrectos'
-          : 'Error al iniciar sesión. Por favor, intenta de nuevo.'
+          ? 'Email o contraseña incorrectos. Por favor, verifica tus credenciales e intenta nuevamente.'
+          : 'Error al iniciar sesión. Por favor, intenta de nuevo más tarde.'
       );
     } finally {
       setIsSubmitting(false);
@@ -76,10 +76,11 @@ export function LoginForm() {
           {/* Login Error Message */}
           {loginError && (
             <div
-              className="bg-destructive/10 border-destructive/30 text-destructive rounded-md border p-3 text-sm"
+              className="bg-destructive/10 border-destructive/30 text-destructive rounded-lg border p-4 text-sm"
               role="alert"
+              aria-live="polite"
             >
-              {loginError}
+              <p className="font-medium">{loginError}</p>
             </div>
           )}
 

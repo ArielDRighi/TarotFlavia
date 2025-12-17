@@ -63,11 +63,12 @@ export const useAuthStore = create<AuthStore>()(
           };
           const isUnauthorized = axiosError.response?.status === 401;
 
-          const message = isUnauthorized
-            ? 'Email o contraseña incorrectos'
-            : 'Error al iniciar sesión';
+          // Only show toast for non-401 errors (network, server errors)
+          // 401 errors are handled by inline message in LoginForm
+          if (!isUnauthorized) {
+            toast.error('Error al iniciar sesión');
+          }
 
-          toast.error(message);
           throw error;
         }
       },

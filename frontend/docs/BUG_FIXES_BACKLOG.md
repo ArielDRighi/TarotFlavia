@@ -212,14 +212,24 @@ El schema Zod está correcto con `.refine()`, pero la validación no se ejecuta.
 **Prioridad:** 🟠 ALTO  
 **Área:** Frontend - Auth  
 **Estimación:** 20-30 min  
-**Tiempo Real:** 25 min  
+**Tiempo Real:** 25 min + 15 min (mejoras UX)  
 **Dependencias:** Ninguna  
 **Branch:** `fix/A002-login-error-message`  
-**Commit:** Pendiente
+**Commits:** `dbb42f4`, `TBD` (mejoras UX)
 
 #### Descripción del Bug
 
 Cuando el login falla (credenciales incorrectas), el modal se resetea sin mostrar ningún mensaje de error al usuario.
+
+#### Mejoras Implementadas (Iteración 2)
+
+Después de feedback del usuario probando en la web:
+
+1. **Eliminado toast para errores 401**: El toast desaparecía rápido causando confusión. Ahora solo el mensaje inline persiste.
+2. **Mensaje más descriptivo**: "Email o contraseña incorrectos. Por favor, verifica tus credenciales e intenta nuevamente."
+3. **Campos NO se resetean**: Los valores permanecen en el formulario para facilitar corrección.
+4. **Mejora de estilo**: Padding más generoso (p-4), rounded-lg, y font-medium para mejor legibilidad.
+5. **Accesibilidad mejorada**: Agregado `aria-live="polite"` para lectores de pantalla.
 
 #### Tareas de Corrección
 
@@ -231,7 +241,8 @@ Cuando el login falla (credenciales incorrectas), el modal se resetea sin mostra
   - Confirmar que el `catch` está ejecutándose
   - Verificar que `toast.error()` se llama correctamente
 - **Criterios de aceptación:**
-  - [x] Toast se muestra en caso de error 401
+  - [x] Toast se muestra solo para errores de red/servidor (NO para 401)
+  - [x] Errores 401 se manejan con mensaje inline únicamente
 
 **TAREA 2.1.2: Mejorar manejo de errores en LoginForm** (Frontend)
 
@@ -239,13 +250,24 @@ Cuando el login falla (credenciales incorrectas), el modal se resetea sin mostra
 - **Acción:**
   - Agregar estado local para mostrar error inline si toast falla
   - Capturar error del authStore y mostrarlo en UI
+  - Asegurar que formulario NO se resetea
 - **Criterios de aceptación:**
-  - [x] Login fallido muestra toast: "Email o contraseña incorrectos"
-  - [x] Si toast no funciona, mostrar mensaje inline en formulario
-  - [x] Test manual: login con password incorrecto → ver mensaje de error
+  - [x] Login fallido muestra mensaje inline descriptivo
+  - [x] Mensaje persiste hasta nuevo intento de login
+  - [x] Campos mantienen sus valores después de error
+  - [x] Estilo consistente con otros mensajes de error
+  - [x] Accesibilidad: `role="alert"` y `aria-live="polite"`
+  - [x] Test manual: login con password incorrecto → ver mensaje de error legible
+
+**Tests Agregados:**
+
+- ✅ Verificar mensaje de error se muestra
+- ✅ Verificar mensaje se limpia en nuevo intento
+- ✅ Verificar campos NO se resetean después de error
+- ✅ Verificar atributo aria-live para accesibilidad
 
 **Estimación:** 20-30 min  
-**Tiempo Real:** 25 min
+**Tiempo Real:** 40 min (incluye mejoras UX post-feedback)
 
 ---
 
