@@ -42,6 +42,12 @@ export function Header() {
           {user && (
             <>
               <Link
+                href="/ritual"
+                className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
+              >
+                Nueva Lectura
+              </Link>
+              <Link
                 href="/explorar"
                 className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
               >

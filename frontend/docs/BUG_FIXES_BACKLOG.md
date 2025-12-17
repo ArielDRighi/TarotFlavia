@@ -69,12 +69,15 @@ Mejoras de UX y localización.
 
 ---
 
-### ✅ BUG FIX 1.1: Agregar navegación para crear lectura (#A005)
+### ✅ BUG FIX 1.1: Agregar navegación para crear lectura (#A005) - **COMPLETADO**
 
 **Prioridad:** 🔴 CRÍTICA - BLOQUEANTE  
 **Área:** Frontend - Navigation/Home  
 **Estimación:** 45-60 min  
-**Dependencias:** Ninguna
+**Tiempo Real:** 45 min  
+**Dependencias:** Ninguna  
+**Branch:** `fix/A005-add-reading-navigation`  
+**Commit:** `d0a6b54`
 
 #### Descripción del Bug
 
@@ -91,10 +94,10 @@ No existe ningún botón, enlace o call-to-action visible que permita al usuario
   - Usar componente `Button` de shadcn/ui
   - Link a `/ritual/tirada`
 - **Criterios de aceptación:**
-  - [ ] Botón visible inmediatamente después de login
-  - [ ] Click redirige a `/ritual/tirada`
-  - [ ] Estilo consistente con design system
-  - [ ] Responsive (mobile/desktop)
+  - [x] Botón visible inmediatamente después de login
+  - [x] Click redirige a `/ritual/tirada`
+  - [x] Estilo consistente con design system
+  - [x] Responsive (mobile/desktop)
 
 **TAREA 1.1.2: Agregar opción en navbar** (Frontend)
 
@@ -104,9 +107,9 @@ No existe ningún botón, enlace o call-to-action visible que permita al usuario
   - Posición: Entre logo y "Explorar" (o reemplazar "Explorar")
   - Icono: 🎴 o similar
 - **Criterios de aceptación:**
-  - [ ] Link visible en navbar autenticado
-  - [ ] Funciona en mobile y desktop
-  - [ ] Icono + texto en desktop, solo icono en mobile
+  - [x] Link visible en navbar autenticado
+  - [x] Funciona en mobile y desktop
+  - [x] Texto "Nueva Lectura" en desktop
 
 **Estimación:** 45-60 min
 
@@ -284,6 +287,7 @@ La opción "Cambiar Contraseña" existe en UI pero retorna error "Funcionalidad 
   }
   ```
 - **DTO:** Crear `UpdatePasswordDto`:
+
   ```typescript
   export class UpdatePasswordDto {
     @IsString()
@@ -297,6 +301,7 @@ La opción "Cambiar Contraseña" existe en UI pero retorna error "Funcionalidad 
     confirmPassword: string;
   }
   ```
+
 - **Criterios de aceptación:**
   - [ ] Endpoint retorna 200 con password correcta
   - [ ] Retorna 401 si currentPassword es incorrecta
