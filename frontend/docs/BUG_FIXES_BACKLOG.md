@@ -207,12 +207,15 @@ El schema Zod está correcto con `.refine()`, pero la validación no se ejecuta.
 
 ---
 
-### ✅ BUG FIX 2.1: Mensaje de error en login fallido (#A002)
+### ✅ BUG FIX 2.1: Mensaje de error en login fallido (#A002) - **COMPLETADO**
 
 **Prioridad:** 🟠 ALTO  
 **Área:** Frontend - Auth  
 **Estimación:** 20-30 min  
-**Dependencias:** Ninguna
+**Tiempo Real:** 25 min  
+**Dependencias:** Ninguna  
+**Branch:** `fix/A002-login-error-message`  
+**Commit:** Pendiente
 
 #### Descripción del Bug
 
@@ -228,7 +231,7 @@ Cuando el login falla (credenciales incorrectas), el modal se resetea sin mostra
   - Confirmar que el `catch` está ejecutándose
   - Verificar que `toast.error()` se llama correctamente
 - **Criterios de aceptación:**
-  - [ ] Toast se muestra en caso de error 401
+  - [x] Toast se muestra en caso de error 401
 
 **TAREA 2.1.2: Mejorar manejo de errores en LoginForm** (Frontend)
 
@@ -237,11 +240,12 @@ Cuando el login falla (credenciales incorrectas), el modal se resetea sin mostra
   - Agregar estado local para mostrar error inline si toast falla
   - Capturar error del authStore y mostrarlo en UI
 - **Criterios de aceptación:**
-  - [ ] Login fallido muestra toast: "Email o contraseña incorrectos"
-  - [ ] Si toast no funciona, mostrar mensaje inline en formulario
-  - [ ] Test manual: login con password incorrecto → ver mensaje de error
+  - [x] Login fallido muestra toast: "Email o contraseña incorrectos"
+  - [x] Si toast no funciona, mostrar mensaje inline en formulario
+  - [x] Test manual: login con password incorrecto → ver mensaje de error
 
-**Estimación:** 20-30 min
+**Estimación:** 20-30 min  
+**Tiempo Real:** 25 min
 
 ---
 

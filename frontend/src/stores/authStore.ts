@@ -57,7 +57,17 @@ export const useAuthStore = create<AuthStore>()(
 
           toast.success('Bienvenido');
         } catch (error) {
-          toast.error('Error al iniciar sesión');
+          // Extract error details for specific messaging
+          const axiosError = error as {
+            response?: { status?: number; data?: { message?: string } };
+          };
+          const isUnauthorized = axiosError.response?.status === 401;
+
+          const message = isUnauthorized
+            ? 'Email o contraseña incorrectos'
+            : 'Error al iniciar sesión';
+
+          toast.error(message);
           throw error;
         }
       },

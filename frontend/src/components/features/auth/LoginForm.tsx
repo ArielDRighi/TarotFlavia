@@ -16,13 +16,21 @@ import { loginSchema, type LoginFormData } from '@/lib/validations/auth.schemas'
 /**
  * LoginForm component
  *
- * A complete login form with email/password fields, validation,
+ * A complete login form with email/password fields, client-side validation,
  * and integration with the auth store.
+ *
+ * Features:
+ * - Email and password validation with Zod
+ * - Toast notification for login errors (via authStore)
+ * - Inline error message display as fallback
+ * - Loading state with disabled inputs during submission
+ * - Automatic redirect to /perfil on successful login
  */
 export function LoginForm() {
   const router = useRouter();
   const { login } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   const {
     register,
@@ -38,11 +46,20 @@ export function LoginForm() {
 
   const onSubmit = async (data: LoginFormData) => {
     setIsSubmitting(true);
+    setLoginError(null); // Clear previous error
     try {
       await login(data.email, data.password);
       router.push('/perfil');
-    } catch {
-      // Error toast is handled by authStore.login()
+    } catch (error) {
+      // Show inline error message as fallback if toast doesn't work
+      const axiosError = error as { response?: { status?: number } };
+      const isUnauthorized = axiosError.response?.status === 401;
+
+      setLoginError(
+        isUnauthorized
+          ? 'Email o contraseña incorrectos'
+          : 'Error al iniciar sesión. Por favor, intenta de nuevo.'
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -56,6 +73,16 @@ export function LoginForm() {
 
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Login Error Message */}
+          {loginError && (
+            <div
+              className="bg-destructive/10 border-destructive/30 text-destructive rounded-md border p-3 text-sm"
+              role="alert"
+            >
+              {loginError}
+            </div>
+          )}
+
           {/* Email Field */}
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">
