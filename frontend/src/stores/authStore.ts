@@ -60,13 +60,16 @@ export const useAuthStore = create<AuthStore>()(
           // Extract error details for specific messaging
           const axiosError = error as {
             response?: { status?: number; data?: { message?: string } };
+            message?: string;
           };
           const isUnauthorized = axiosError.response?.status === 401;
 
-          console.error('[authStore.login] Login error:', {
+          // Use console.log instead of console.error to avoid Next.js error overlay
+          console.log('[authStore.login] Login error:', {
             status: axiosError.response?.status,
+            message: axiosError.message,
+            data: axiosError.response?.data,
             isUnauthorized,
-            error,
           });
 
           // Only show toast for non-401 errors (network, server errors)

@@ -66,7 +66,8 @@ export function LoginForm() {
     } catch (error) {
       // Login failed - show inline error message
       // Form fields remain populated for user to correct
-      console.error('[LoginForm] Login failed:', error);
+      // Use console.log instead of console.error to avoid Next.js error overlay
+      console.log('[LoginForm] Login failed:', error);
 
       const axiosError = error as { response?: { status?: number } };
       const isUnauthorized = axiosError.response?.status === 401;
