@@ -15,6 +15,7 @@ import {
 } from '@nestjs/common';
 import { UsersOrchestratorService } from '../../application/services/users-orchestrator.service';
 import { UpdateUserDto } from '../../application/dto/update-user.dto';
+import { UpdatePasswordDto } from '../../application/dto/update-password.dto';
 import { UpdateUserPlanDto } from '../../application/dto/update-user-plan.dto';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
 import { AdminGuard } from '../../../auth/infrastructure/guards/admin.guard';
@@ -69,6 +70,30 @@ export class UsersController {
   ) {
     const userId = req.user.userId;
     return this.usersService.update(userId, updateUserDto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('profile/password')
+  @ApiOperation({ summary: 'Actualizar contraseña del usuario actual' })
+  @ApiBody({ type: UpdatePasswordDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Contraseña actualizada exitosamente',
+  })
+  @ApiResponse({ status: 400, description: 'Contraseña actual incorrecta' })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({ status: 404, description: 'Usuario no encontrado' })
+  async updatePassword(
+    @Request() req: { user: { userId: number } },
+    @Body() updatePasswordDto: UpdatePasswordDto,
+  ) {
+    const userId = req.user.userId;
+    await this.usersService.updatePassword(
+      userId,
+      updatePasswordDto.currentPassword,
+      updatePasswordDto.newPassword,
+    );
+    return { message: 'Contraseña actualizada exitosamente' };
   }
 
   @UseGuards(JwtAuthGuard)
