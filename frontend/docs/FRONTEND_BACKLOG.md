@@ -5331,6 +5331,571 @@ Los problemas y soluciones de esta fase están documentados en detalle en:
 
 - `frontend/docs/AI_DEVELOPMENT_GUIDE.md` - Sección "🐛 Problemas Conocidos y Soluciones"
 
-```
+---
+
+## 🧪 FASE 14: TESTING AUTOMATIZADO ENTERPRISE
+
+> **📋 Objetivo:** Implementar testing automatizado completo (Integration + E2E) para garantizar calidad enterprise y facilitar refactoring seguro.
+
+**Contexto:**
+Actualmente el proyecto cuenta con 139 tests unitarios (Vitest + Testing Library) con cobertura ≥80%. Para escalar a producción enterprise se requiere testing automatizado de flujos completos que validen integración entre componentes y comportamiento end-to-end con el backend real.
+
+**Stack de Testing:**
+
+- **Unit Tests:** Vitest + Testing Library (✅ Completado)
+- **Integration Tests:** Vitest + MSW (Mock Service Worker)
+- **E2E Tests:** Playwright
+- **Visual Regression:** Playwright Snapshots
+
+**Estructura Target:**
 
 ```
+frontend/
+├── src/
+│   └── **/*.test.tsx           # Tests unitarios (existentes)
+├── __tests__/
+│   ├── integration/
+│   │   ├── setup.ts
+│   │   ├── mocks/
+│   │   │   ├── handlers.ts     # MSW handlers
+│   │   │   └── data.ts         # Mock data factory
+│   │   └── flows/
+│   │       ├── auth.integration.test.tsx
+│   │       ├── readings.integration.test.tsx
+│   │       ├── marketplace.integration.test.tsx
+│   │       └── admin.integration.test.tsx
+│   │
+│   └── e2e/
+│       ├── auth.spec.ts
+│       ├── readings.spec.ts
+│       ├── marketplace.spec.ts
+│       ├── profile.spec.ts
+│       └── admin.spec.ts
+│
+├── playwright.config.ts
+├── vitest.integration.config.ts
+└── package.json
+```
+
+---
+
+### ⏳ TAREA 14.1: Configurar MSW para Integration Tests
+
+**Estado:** ⏳ PENDIENTE
+**Prioridad:** ALTA
+**Estimación:** 2-3 horas
+**Dependencias:** FASE 13 (todas las funcionalidades completadas)
+
+**Objetivo:**
+Configurar Mock Service Worker (MSW) para interceptar llamadas HTTP en tests de integración, permitiendo testear flujos completos sin depender del backend.
+
+**Alcance:**
+
+- Instalar MSW v2.x
+- Configurar handlers para todos los endpoints del backend
+- Crear factory functions para mock data
+- Configurar setup de tests de integración
+- Escribir configuración de Vitest específica para integration tests
+
+**Criterios de Aceptación:**
+
+- [ ] MSW instalado y configurado correctamente
+- [ ] Handlers creados para endpoints: auth, readings, users, categories, spreads, sessions, tarotistas, admin
+- [ ] Mock data factory con datos realistas que coincidan con tipos TypeScript
+- [ ] `vitest.integration.config.ts` configurado separado de unit tests
+- [ ] Script `npm run test:integration` funcionando
+- [ ] Documentación básica en `__tests__/integration/README.md`
+
+**Archivos a Crear:**
+
+- `__tests__/integration/setup.ts`
+- `__tests__/integration/mocks/handlers.ts`
+- `__tests__/integration/mocks/data.ts`
+- `vitest.integration.config.ts`
+- `__tests__/integration/README.md`
+
+**Referencias Técnicas:**
+
+- MSW Documentation: https://mswjs.io/docs/
+- MSW con Next.js: https://github.com/mswjs/examples/tree/main/examples/with-next-app
+- Factory Pattern para mock data
+
+---
+
+### ⏳ TAREA 14.2: Escribir Integration Tests - Flujo de Autenticación
+
+**Estado:** ⏳ PENDIENTE
+**Prioridad:** ALTA
+**Estimación:** 2-3 horas
+**Dependencias:** 14.1
+
+**Objetivo:**
+Escribir tests de integración que validen el flujo completo de autenticación, desde el formulario hasta la actualización del estado global.
+
+**Flujos a Testear:**
+
+1. **Registro de usuario:**
+   - Llenar formulario → Submit → API POST → Actualizar authStore → Redirect a /login
+2. **Login exitoso:**
+   - Llenar formulario → Submit → API POST → Guardar token → Actualizar authStore → Redirect a /dashboard
+3. **Login con credenciales inválidas:**
+   - Submit → API 401 → Mostrar error → No actualizar store
+4. **Logout:**
+   - Click logout → Limpiar authStore → Limpiar localStorage → Redirect a /login
+5. **Sesión expirada:**
+   - Token expirado → API 401 → Auto-logout → Redirect a /login
+6. **Refresh token:**
+   - Token próximo a expirar → Auto-refresh → Continuar sesión
+
+**Criterios de Aceptación:**
+
+- [ ] Tests cubren los 6 flujos principales
+- [ ] Se valida actualización de Zustand stores (authStore)
+- [ ] Se valida navegación con `useRouter` (mocked)
+- [ ] Se valida persistencia en localStorage
+- [ ] Se valida manejo de errores y mensajes al usuario
+- [ ] Cobertura ≥90% en componentes de auth
+
+**Archivo a Crear:**
+
+- `__tests__/integration/flows/auth.integration.test.tsx`
+
+**Componentes/Hooks a Testear:**
+
+- `LoginForm`, `RegisterForm`
+- `useAuth`, `useLogin`, `useRegister`, `useLogout`
+- `authStore`
+- `AuthProvider`
+
+---
+
+### ⏳ TAREA 14.3: Escribir Integration Tests - Flujo de Lecturas
+
+**Estado:** ⏳ PENDIENTE
+**Prioridad:** ALTA
+**Estimación:** 3-4 horas
+**Dependencias:** 14.1
+
+**Objetivo:**
+Escribir tests de integración para el flujo completo de gestión de lecturas (CRUD + funcionalidades especiales).
+
+**Flujos a Testear:**
+
+1. **Crear lectura:**
+   - Seleccionar categoría → Seleccionar tirada → Ingresar pregunta → Generar → Mostrar interpretación
+2. **Ver historial:**
+   - Cargar lecturas paginadas → Filtrar por categoría → Buscar por pregunta
+3. **Ver detalle:**
+   - Click en lectura → Cargar detalle → Mostrar cartas e interpretación
+4. **Eliminar lectura (soft delete):**
+   - Click eliminar → Confirmación → API DELETE → Mover a papelera → Actualizar lista
+5. **Restaurar lectura:**
+   - Ir a papelera → Click restaurar → API POST → Mover a historial
+6. **Regenerar interpretación:**
+   - Ver detalle → Click regenerar → Loading → Nueva interpretación → Actualizar UI
+7. **Compartir lectura:**
+   - Click compartir → Generar link → Copiar al clipboard → Toast confirmación
+
+**Criterios de Aceptación:**
+
+- [ ] Tests cubren los 7 flujos principales
+- [ ] Se valida interacción con TanStack Query (invalidación de cache)
+- [ ] Se valida paginación y filtros
+- [ ] Se valida estados de loading/error
+- [ ] Se valida actualización optimista (si aplica)
+- [ ] Cobertura ≥90% en componentes de readings
+
+**Archivos a Crear:**
+
+- `__tests__/integration/flows/readings.integration.test.tsx`
+
+**Componentes/Hooks a Testear:**
+
+- `ReadingExperience`, `SpreadSelector`, `ReadingDetail`, `ReadingsHistory`, `ReadingCard`
+- `useReadings`, `useCreateReading`, `useDeleteReading`, `useRegenerateReading`
+- `readingStore`
+
+---
+
+### ⏳ TAREA 14.4: Escribir Integration Tests - Flujo de Marketplace y Sesiones
+
+**Estado:** ⏳ PENDIENTE
+**Prioridad:** MEDIA
+**Estimación:** 2-3 horas
+**Dependencias:** 14.1
+
+**Objetivo:**
+Escribir tests de integración para el flujo de exploración de tarotistas y reserva de sesiones.
+
+**Flujos a Testear:**
+
+1. **Explorar tarotistas:**
+   - Cargar lista → Filtrar por especialidad → Buscar por nombre → Ver detalle
+2. **Ver perfil de tarotista:**
+   - Click en tarotista → Cargar detalle → Ver horarios disponibles → Ver reseñas
+3. **Reservar sesión:**
+   - Seleccionar fecha → Seleccionar hora → Confirmar → API POST → Ir a mis sesiones
+4. **Ver mis sesiones:**
+   - Cargar sesiones activas → Filtrar por estado → Ver detalles
+5. **Cancelar sesión:**
+   - Click cancelar → Confirmación → API PATCH → Actualizar estado
+
+**Criterios de Aceptación:**
+
+- [ ] Tests cubren los 5 flujos principales
+- [ ] Se valida calendario de disponibilidad
+- [ ] Se valida validación de formulario de reserva
+- [ ] Se valida estados de sesiones (pending, confirmed, cancelled)
+- [ ] Cobertura ≥85% en componentes de marketplace
+
+**Archivo a Crear:**
+
+- `__tests__/integration/flows/marketplace.integration.test.tsx`
+
+**Componentes/Hooks a Testear:**
+
+- `TarotistasList`, `TarotistaDetail`, `SessionBooking`, `SessionsList`
+- `useTarotistas`, `useSessions`, `useCreateSession`, `useCancelSession`
+
+---
+
+### ⏳ TAREA 14.5: Escribir Integration Tests - Flujo de Perfil y Admin
+
+**Estado:** ⏳ PENDIENTE
+**Prioridad:** MEDIA
+**Estimación:** 2 horas
+**Dependencias:** 14.1
+
+**Objetivo:**
+Escribir tests de integración para gestión de perfil de usuario y panel de administración.
+
+**Flujos a Testear:**
+
+**Perfil de Usuario:**
+
+1. **Ver perfil:**
+   - Cargar datos → Mostrar información → Tabs (Cuenta, Suscripción, Configuración)
+2. **Editar perfil:**
+   - Cambiar nombre/email → Submit → API PATCH → Actualizar UI
+3. **Cambiar contraseña:**
+   - Llenar formulario → Validaciones → Submit → Logout automático
+
+**Panel Admin:**
+
+1. **Ver dashboard:**
+   - Cargar estadísticas → Mostrar métricas → Gráficos
+2. **Gestión de usuarios:**
+   - Listar usuarios → Buscar → Cambiar rol → Desactivar usuario
+3. **Gestión de tarotistas:**
+   - Aprobar solicitud → Editar comisión → Desactivar tarotista
+
+**Criterios de Aceptación:**
+
+- [ ] Tests cubren flujos de perfil (3) y admin (3)
+- [ ] Se valida permisos (admin vs user normal)
+- [ ] Se valida validación de formularios
+- [ ] Cobertura ≥80% en componentes de profile y admin
+
+**Archivo a Crear:**
+
+- `__tests__/integration/flows/profile-admin.integration.test.tsx`
+
+**Componentes/Hooks a Testear:**
+
+- `ProfileHeader`, `AccountTab`, `SettingsTab`
+- `AdminDashboard`, `UsersTable`, `TarotistasTable`
+- `useProfile`, `useUpdatePassword`, `useAdminStats`, `useAdminUsers`
+
+---
+
+### ⏳ TAREA 14.6: Configurar Playwright para E2E Tests
+
+**Estado:** ⏳ PENDIENTE
+**Prioridad:** ALTA
+**Estimación:** 2 horas
+**Dependencias:** FASE 13
+
+**Objetivo:**
+Configurar Playwright para ejecutar tests end-to-end con el backend real, validando la aplicación completa en múltiples navegadores.
+
+**Alcance:**
+
+- Instalar Playwright con dependencias de navegadores
+- Configurar `playwright.config.ts` para múltiples proyectos (Chrome, Firefox, Mobile)
+- Configurar scripts de npm
+- Crear helpers y fixtures para tests
+- Configurar CI/CD básico (opcional)
+
+**Criterios de Aceptación:**
+
+- [ ] Playwright instalado correctamente
+- [ ] Configuración para 3 proyectos: chromium, firefox, mobile (iPhone 13)
+- [ ] WebServer configurado para levantar frontend automáticamente
+- [ ] Scripts: `test:e2e`, `test:e2e:ui`, `test:e2e:debug`
+- [ ] Helpers creados: `login()`, `createReading()`, `seedDatabase()`
+- [ ] Configuración de screenshots/videos en caso de fallo
+- [ ] Archivo `__tests__/e2e/README.md` con instrucciones
+
+**Archivos a Crear:**
+
+- `playwright.config.ts`
+- `__tests__/e2e/helpers/auth.ts`
+- `__tests__/e2e/helpers/database.ts`
+- `__tests__/e2e/fixtures.ts`
+- `__tests__/e2e/README.md`
+
+**Referencias Técnicas:**
+
+- Playwright Docs: https://playwright.dev/
+- Playwright con Next.js: https://playwright.dev/docs/test-webserver
+- Best practices: https://playwright.dev/docs/best-practices
+
+---
+
+### ⏳ TAREA 14.7: Escribir E2E Tests - User Journey Crítico (Happy Path)
+
+**Estado:** ⏳ PENDIENTE
+**Prioridad:** CRÍTICA
+**Estimación:** 2-3 horas
+**Dependencias:** 14.6
+
+**Objetivo:**
+Escribir el test E2E más importante: el happy path completo de un usuario nuevo que se registra, crea una lectura y explora la plataforma.
+
+**User Journey:**
+
+1. **Registro:**
+   - Navegar a `/registro`
+   - Llenar formulario con datos válidos
+   - Submit → Esperar redirect a `/login`
+2. **Login:**
+   - Llenar credenciales recién creadas
+   - Submit → Esperar redirect a `/dashboard`
+   - Verificar que aparece nombre de usuario
+3. **Crear lectura:**
+   - Click en "Nueva Lectura"
+   - Seleccionar categoría "Amor"
+   - Seleccionar tirada "Tres Cartas"
+   - Ingresar pregunta "¿Encontraré el amor?"
+   - Click "Generar" → Esperar loading → Ver interpretación
+   - Verificar que se muestran 3 cartas
+4. **Ver historial:**
+   - Navegar a `/sesiones`
+   - Verificar que aparece la lectura recién creada
+5. **Logout:**
+   - Click en menú de usuario
+   - Click "Cerrar Sesión" → Redirect a `/login`
+
+**Criterios de Aceptación:**
+
+- [ ] Test ejecuta en Chrome, Firefox y Mobile sin fallos
+- [ ] Todas las navegaciones esperan correctamente (no flaky)
+- [ ] Se verifica contenido en cada paso
+- [ ] Backend real se usa (no mocks)
+- [ ] Test limpia datos al finalizar (teardown)
+- [ ] Tiempo de ejecución <30 segundos
+
+**Archivo a Crear:**
+
+- `__tests__/e2e/happy-path.spec.ts`
+
+---
+
+### ⏳ TAREA 14.8: Escribir E2E Tests - Flujos de Error y Edge Cases
+
+**Estado:** ⏳ PENDIENTE
+**Prioridad:** MEDIA
+**Estimación:** 2-3 horas
+**Dependencias:** 14.7
+
+**Objetivo:**
+Validar que la aplicación maneja correctamente errores y casos extremos.
+
+**Casos a Testear:**
+
+1. **Login con credenciales inválidas:**
+   - Submit → Verificar mensaje de error → No navegar
+2. **Registro con email duplicado:**
+   - Submit → Verificar error específico
+3. **Sesión expirada:**
+   - Login → Simular token expirado → Intentar acción → Auto-redirect a login
+4. **Error de red al crear lectura:**
+   - Iniciar creación → Simular fallo de backend → Mostrar error → Permitir retry
+5. **Navegación con autenticación:**
+   - Sin login, intentar acceder a `/dashboard` → Redirect a `/login`
+6. **Validación de formularios:**
+   - Submit vacío → Verificar errores de validación
+7. **Paginación vacía:**
+   - Usuario sin lecturas → Mostrar estado vacío
+
+**Criterios de Aceptación:**
+
+- [ ] Tests cubren los 7 casos de error
+- [ ] Se verifican mensajes de error específicos
+- [ ] Se valida que no hay crashes
+- [ ] Tests son estables (no flaky)
+
+**Archivo a Crear:**
+
+- `__tests__/e2e/error-handling.spec.ts`
+
+---
+
+### ⏳ TAREA 14.9: Escribir E2E Tests - Flujos de Admin
+
+**Estado:** ⏳ PENDIENTE
+**Prioridad:** BAJA
+**Estimación:** 2 horas
+**Dependencias:** 14.6
+
+**Objetivo:**
+Validar que el panel de administración funciona correctamente con permisos adecuados.
+
+**Casos a Testear:**
+
+1. **Acceso restringido:**
+   - Login como usuario normal → Intentar acceder a `/admin` → Redirect 403
+2. **Login como admin:**
+   - Login con credenciales admin → Acceder a `/admin` → Ver dashboard
+3. **Gestión de usuarios:**
+   - Buscar usuario → Cambiar rol → Verificar actualización
+4. **Estadísticas:**
+   - Verificar que se cargan métricas → Verificar gráficos visibles
+
+**Criterios de Aceptación:**
+
+- [ ] Tests validan permisos correctamente
+- [ ] Se verifica contenido de dashboard admin
+- [ ] Tests usan cuenta admin de testing
+
+**Archivo a Crear:**
+
+- `__tests__/e2e/admin.spec.ts`
+
+---
+
+### ⏳ TAREA 14.10: Configurar Visual Regression Testing (Opcional)
+
+**Estado:** ⏳ PENDIENTE
+**Prioridad:** BAJA
+**Estimación:** 1-2 horas
+**Dependencias:** 14.6
+
+**Objetivo:**
+Configurar Playwright snapshots para detectar cambios visuales no intencionados en la UI.
+
+**Alcance:**
+
+- Configurar `expect(page).toHaveScreenshot()` en Playwright
+- Capturar snapshots de páginas clave
+- Documentar proceso de actualización de snapshots
+
+**Páginas a Capturar:**
+
+- Login page
+- Dashboard
+- Reading detail
+- Marketplace
+- Profile
+
+**Criterios de Aceptación:**
+
+- [ ] Snapshots configurados para 5 páginas clave
+- [ ] Script `test:e2e:update-snapshots` funcionando
+- [ ] Documentación de cómo actualizar snapshots en README
+
+**Archivo a Crear:**
+
+- `__tests__/e2e/visual-regression.spec.ts`
+
+---
+
+### ⏳ TAREA 14.11: Documentación y Scripts de Testing
+
+**Estado:** ⏳ PENDIENTE
+**Prioridad:** MEDIA
+**Estimación:** 1 hora
+**Dependencias:** 14.1 - 14.10
+
+**Objetivo:**
+Crear documentación completa del sistema de testing y scripts de npm convenientes.
+
+**Documentos a Crear:**
+
+1. **`__tests__/README.md`:**
+   - Overview de estrategia de testing
+   - Cuándo usar unit vs integration vs E2E
+   - Cómo ejecutar cada tipo de test
+2. **`__tests__/integration/README.md`:**
+   - Cómo agregar nuevos handlers MSW
+   - Cómo crear mock data
+3. **`__tests__/e2e/README.md`:**
+   - Cómo escribir nuevos E2E tests
+   - Debugging tips
+   - CI/CD integration
+
+**Scripts de npm a Agregar:**
+
+```json
+{
+  "scripts": {
+    "test": "vitest",
+    "test:unit": "vitest run",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:debug": "playwright test --debug",
+    "test:all": "npm run test:unit && npm run test:integration && npm run test:e2e",
+    "test:coverage": "vitest run --coverage && vitest run --coverage --config vitest.integration.config.ts"
+  }
+}
+```
+
+**Criterios de Aceptación:**
+
+- [ ] 3 archivos README creados
+- [ ] Scripts de npm funcionando
+- [ ] Documentación incluye ejemplos
+- [ ] Documentación incluye troubleshooting
+
+**Archivos a Crear:**
+
+- `__tests__/README.md`
+- Actualizar `package.json` con scripts
+
+---
+
+## 📊 Resumen de FASE 14
+
+**Total de Tareas:** 11  
+**Estimación Total:** 20-25 horas (3-4 días de trabajo)  
+**Prioridad General:** ALTA (Post-MVP)
+
+**Distribución:**
+
+- Integration Tests (Tareas 14.1-14.5): 11-15 horas
+- E2E Tests (Tareas 14.6-14.10): 9-10 horas
+- Documentación (Tarea 14.11): 1 hora
+
+**Dependencias Críticas:**
+
+- Requiere que FASE 13 esté completada (todas las funcionalidades operativas)
+- Backend debe estar estable y con datos de seed
+
+**Métricas de Éxito:**
+
+- Cobertura Integration Tests: ≥85%
+- Cobertura E2E: Happy path + 5 flujos críticos
+- Tests estables (success rate ≥95%)
+- Tiempo de ejecución:
+  - Integration: <5 min
+  - E2E: <15 min (en paralelo)
+
+**Post-Implementación:**
+
+- Integrar en CI/CD pipeline
+- Ejecutar E2E en cada PR
+- Monitorear flaky tests
+- Mantener mocks sincronizados con backend
+
+---
