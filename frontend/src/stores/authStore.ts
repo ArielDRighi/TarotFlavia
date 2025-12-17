@@ -64,14 +64,6 @@ export const useAuthStore = create<AuthStore>()(
           };
           const isUnauthorized = axiosError.response?.status === 401;
 
-          // Use console.log instead of console.error to avoid Next.js error overlay
-          console.log('[authStore.login] Login error:', {
-            status: axiosError.response?.status,
-            message: axiosError.message,
-            data: axiosError.response?.data,
-            isUnauthorized,
-          });
-
           // Only show toast for non-401 errors (network, server errors)
           // 401 errors are handled by inline message in LoginForm
           if (!isUnauthorized) {
@@ -109,24 +101,19 @@ export const useAuthStore = create<AuthStore>()(
       },
 
       checkAuth: async () => {
-        console.log('[authStore.checkAuth] Starting checkAuth...');
         try {
           // SSR safety check
           const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
 
           if (!token) {
-            console.log('[authStore.checkAuth] No token found, setting isLoading=false');
             set({ isLoading: false });
             return;
           }
 
-          console.log('[authStore.checkAuth] Token found, fetching user profile...');
           const response = await apiClient.get<AuthUser>('/users/profile');
           get().setUser(response.data);
-          console.log('[authStore.checkAuth] User profile fetched successfully');
         } catch {
           // Clear invalid tokens (SSR safety check)
-          console.log('[authStore.checkAuth] Error fetching profile, clearing tokens');
           if (typeof window !== 'undefined') {
             localStorage.removeItem('access_token');
             localStorage.removeItem('refresh_token');
@@ -134,7 +121,6 @@ export const useAuthStore = create<AuthStore>()(
           get().setUser(null);
         } finally {
           set({ isLoading: false });
-          console.log('[authStore.checkAuth] Finished checkAuth');
         }
       },
     }),

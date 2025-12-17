@@ -46,29 +46,21 @@ export function LoginForm() {
   });
 
   const onSubmit = async (data: LoginFormData) => {
-    console.log('[LoginForm] onSubmit called with:', { email: data.email });
-
     setIsSubmitting(true);
     setLoginError(null); // Clear previous error
 
     try {
-      console.log('[LoginForm] Calling login...');
       await login(data.email, data.password);
 
-      console.log('[LoginForm] Login successful, setting navigation flag');
       hasNavigated.current = true;
 
       // Short delay to ensure state is updated
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      console.log('[LoginForm] Redirecting to /perfil');
       router.push('/perfil');
     } catch (error) {
       // Login failed - show inline error message
       // Form fields remain populated for user to correct
-      // Use console.log instead of console.error to avoid Next.js error overlay
-      console.log('[LoginForm] Login failed:', error);
-
       const axiosError = error as { response?: { status?: number } };
       const isUnauthorized = axiosError.response?.status === 401;
 
@@ -76,18 +68,17 @@ export function LoginForm() {
         ? 'Email o contraseña incorrectos. Por favor, verifica tus credenciales e intenta nuevamente.'
         : 'Error al iniciar sesión. Por favor, intenta de nuevo más tarde.';
 
-      console.log('[LoginForm] Setting error message:', errorMessage);
       setLoginError(errorMessage);
     } finally {
-      console.log('[LoginForm] Setting isSubmitting to false');
       setIsSubmitting(false);
     }
   };
 
   // Prevent unmounting if we have an error to display
   useEffect(() => {
+    // This effect ensures the component doesn't unmount while showing an error
     if (loginError && !hasNavigated.current) {
-      console.log('[LoginForm] Error state active, preventing navigation');
+      // Error is active, prevent any unexpected navigation
     }
   }, [loginError]);
 
