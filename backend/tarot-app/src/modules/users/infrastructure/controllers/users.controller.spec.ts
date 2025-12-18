@@ -8,6 +8,7 @@ import { UsersController } from './users.controller';
 import { UsersOrchestratorService } from '../../application/services/users-orchestrator.service';
 import { UserRole } from '../../../../common/enums/user-role.enum';
 import { UpdateUserDto } from '../../application/dto/update-user.dto';
+import { UpdatePasswordDto } from '../../application/dto/update-password.dto';
 import { UpdateUserPlanDto } from '../../application/dto/update-user-plan.dto';
 import { User, UserPlan } from '../../entities/user.entity';
 
@@ -29,6 +30,7 @@ describe('UsersController', () => {
     findById: jest.fn(),
     findByEmail: jest.fn(),
     update: jest.fn(),
+    updatePassword: jest.fn(),
     updatePlan: jest.fn(),
     remove: jest.fn(),
     addTarotistRole: jest.fn(),
@@ -96,6 +98,67 @@ describe('UsersController', () => {
 
       expect(service.update).toHaveBeenCalledWith(1, updateDto);
       expect(result.name).toBe('Updated Name');
+    });
+  });
+
+  describe('updatePassword', () => {
+    it('should update password successfully', async () => {
+      const updatePasswordDto: UpdatePasswordDto = {
+        currentPassword: 'currentPass123',
+        newPassword: 'newPassword456',
+      };
+
+      mockUsersService.updatePassword.mockResolvedValue(undefined);
+
+      const req = { user: { userId: 1 } };
+      const result = await controller.updatePassword(req, updatePasswordDto);
+
+      expect(service.updatePassword).toHaveBeenCalledWith(
+        1,
+        'currentPass123',
+        'newPassword456',
+      );
+      expect(result.message).toBe('Contraseña actualizada exitosamente');
+    });
+
+    it('should handle BadRequestException from service', async () => {
+      const updatePasswordDto: UpdatePasswordDto = {
+        currentPassword: 'wrongPassword',
+        newPassword: 'newPassword456',
+      };
+
+      mockUsersService.updatePassword.mockRejectedValue(
+        new BadRequestException('Current password is incorrect'),
+      );
+
+      const req = { user: { userId: 1 } };
+
+      await expect(
+        controller.updatePassword(req, updatePasswordDto),
+      ).rejects.toThrow(BadRequestException);
+      await expect(
+        controller.updatePassword(req, updatePasswordDto),
+      ).rejects.toThrow('Current password is incorrect');
+    });
+
+    it('should handle NotFoundException from service', async () => {
+      const updatePasswordDto: UpdatePasswordDto = {
+        currentPassword: 'currentPass123',
+        newPassword: 'newPassword456',
+      };
+
+      mockUsersService.updatePassword.mockRejectedValue(
+        new NotFoundException('User with ID 999 not found'),
+      );
+
+      const req = { user: { userId: 999 } };
+
+      await expect(
+        controller.updatePassword(req, updatePasswordDto),
+      ).rejects.toThrow(NotFoundException);
+      await expect(
+        controller.updatePassword(req, updatePasswordDto),
+      ).rejects.toThrow('User with ID 999 not found');
     });
   });
 

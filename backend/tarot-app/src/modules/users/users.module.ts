@@ -13,6 +13,7 @@ import { UsersController } from './infrastructure/controllers/users.controller';
 import { UsersOrchestratorService } from './application/services/users-orchestrator.service';
 import { CreateUserUseCase } from './application/use-cases/create-user.use-case';
 import { UpdateUserUseCase } from './application/use-cases/update-user.use-case';
+import { UpdatePasswordUseCase } from './application/use-cases/update-password.use-case';
 import { UpdateUserPlanUseCase } from './application/use-cases/update-user-plan.use-case';
 import { ManageUserRolesUseCase } from './application/use-cases/manage-user-roles.use-case';
 import { ManageUserBanUseCase } from './application/use-cases/manage-user-ban.use-case';
@@ -49,6 +50,7 @@ import { UsersService } from './users.service';
     // Use cases
     CreateUserUseCase,
     UpdateUserUseCase,
+    UpdatePasswordUseCase,
     UpdateUserPlanUseCase,
     ManageUserRolesUseCase,
     ManageUserBanUseCase,
