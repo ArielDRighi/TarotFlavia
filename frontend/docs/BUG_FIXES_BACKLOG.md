@@ -756,7 +756,7 @@ Mensaje de error al registrar email duplicado aparece en inglés: "Email already
 **Tiempo Real:** 30 min  
 **Dependencias:** #A004 (Backend debe enviar dailyReadingsCount)  
 **Branch:** `fix/A004-nan-lecturas-restantes` (mismo branch que #A004)  
-**Commit Frontend:** `TBD`  
+**Commit Frontend:** `a88f195`  
 **Commit Backend:** `4f8ec0d` (fix circular dependency)
 
 #### Descripción del Bug
