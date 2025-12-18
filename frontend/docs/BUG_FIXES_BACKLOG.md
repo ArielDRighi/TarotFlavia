@@ -677,32 +677,65 @@ La sección "Estadísticas de Uso" en pestaña Suscripción muestra "Lecturas re
 
 ---
 
-### ✅ BUG FIX 3.2: Agregar botón "Registrarse" en navbar (#A001)
+### ✅ BUG FIX 3.2: Agregar botón "Registrarse" en navbar (#A001) - **COMPLETADO ✅**
 
 **Prioridad:** 🟠 ALTO  
 **Área:** Frontend - Navigation  
 **Estimación:** 30 min  
-**Dependencias:** Ninguna
+**Tiempo Real:** 20 min  
+**Dependencias:** Ninguna  
+**Branch:** `fix/A001-add-register-button`  
+**Commit:** `470e1b5`
 
 #### Descripción del Bug
 
 Solo existe botón "Iniciar Sesión" en navbar. No hay forma obvia de registrarse para usuarios nuevos.
 
+#### Solución Implementada
+
+**Cambios en UserMenu.tsx:**
+
+1. **Agregado botón "Registrarse"** junto a "Iniciar Sesión"
+2. **Estilo diferenciado:**
+   - `Registrarse`: variant="default" (primario, más destacado)
+   - `Iniciar Sesión`: variant="outline" (secundario)
+3. **Layout responsive:** Ambos botones en contenedor flex con gap-2
+4. **Condicional:** Solo visible cuando user === null (no autenticado)
+
 #### Tareas de Corrección
 
 **TAREA 3.2.1: Agregar botón "Registrarse"** (Frontend)
 
-- **Archivo:** `frontend/src/components/layout/Header.tsx` o navbar
+- **Archivo:** `frontend/src/components/layout/UserMenu.tsx`
 - **Acción:**
-  - Agregar botón "Registrarse" junto a "Iniciar Sesión"
+  - Agregado botón "Registrarse" junto a "Iniciar Sesión"
   - Estilo: Botón primario (más destacado que "Iniciar Sesión")
   - Link a `/registro`
 - **Criterios de aceptación:**
-  - [ ] Botón visible en navbar (solo cuando NO autenticado)
-  - [ ] Estilo diferenciado (primary vs secondary)
-  - [ ] Responsive mobile/desktop
+  - [x] Botón visible en navbar (solo cuando NO autenticado)
+  - [x] Estilo diferenciado (primary vs secondary)
+  - [x] Responsive mobile/desktop
+  - [x] Tests actualizados (Header.test.tsx y UserMenu.test.tsx)
 
-**Estimación:** 30 min
+#### Tests Verificados
+
+**Header.test.tsx:**
+- ✅ Test: "should show Registrarse button when not authenticated"
+- ✅ Test: "should render Registrarse as primary button (more prominent)"
+- ✅ Test: "should NOT show Registrarse button when authenticated"
+
+**UserMenu.test.tsx:**
+- ✅ Test: "should render Registrarse button when not authenticated"
+
+**Calidad:**
+- ✅ Tests: 1538/1538 pasando
+- ✅ Coverage: 82.84% (>80%)
+- ✅ Lint: 0 errors, 0 warnings
+- ✅ Type-check: sin errores
+- ✅ Arquitectura: validación exitosa
+
+**Estimación:** 30 min  
+**Tiempo Real:** 20 min
 
 ---
 
