@@ -34,7 +34,7 @@ import { UsersService } from './users.service';
   imports: [
     TypeOrmModule.forFeature([User, Tarotista]),
     forwardRef(() => AuthModule),
-    UsageLimitsModule,
+    forwardRef(() => UsageLimitsModule),
     PlanConfigModule,
   ],
   providers: [
