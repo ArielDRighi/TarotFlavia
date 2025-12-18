@@ -27,6 +27,14 @@ describe('UserMenu', () => {
       expect(screen.getByRole('link', { name: /iniciar sesión/i })).toBeInTheDocument();
     });
 
+    it('should render "Registrarse" button when not authenticated', () => {
+      render(<UserMenu />);
+
+      const registerButton = screen.getByRole('link', { name: /registrarse/i });
+      expect(registerButton).toBeInTheDocument();
+      expect(registerButton).toHaveAttribute('href', '/registro');
+    });
+
     it('should NOT render avatar when not authenticated', () => {
       render(<UserMenu />);
 

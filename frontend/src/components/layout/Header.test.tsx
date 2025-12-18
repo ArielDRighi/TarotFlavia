@@ -82,6 +82,24 @@ describe('Header', () => {
 
       expect(screen.getByRole('link', { name: /iniciar sesión/i })).toBeInTheDocument();
     });
+
+    it('should show "Registrarse" button when not authenticated', () => {
+      render(<Header />);
+
+      const registerButton = screen.getByRole('link', { name: /registrarse/i });
+      expect(registerButton).toBeInTheDocument();
+      expect(registerButton).toHaveAttribute('href', '/registro');
+    });
+
+    it('should render "Registrarse" as primary button (more prominent)', () => {
+      render(<Header />);
+
+      const registerButton = screen.getByRole('link', { name: /registrarse/i });
+      // Primary button has bg-primary class, outline button has border-input class
+      // Registrarse should be primary (default variant), NOT outline
+      expect(registerButton).toHaveClass('bg-primary');
+      expect(registerButton).not.toHaveClass('border-input');
+    });
   });
 
   describe('Navigation - Authenticated', () => {
@@ -123,6 +141,12 @@ describe('Header', () => {
       render(<Header />);
 
       expect(screen.queryByRole('link', { name: /iniciar sesión/i })).not.toBeInTheDocument();
+    });
+
+    it('should NOT show "Registrarse" button when authenticated', () => {
+      render(<Header />);
+
+      expect(screen.queryByRole('link', { name: /registrarse/i })).not.toBeInTheDocument();
     });
   });
 
