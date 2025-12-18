@@ -107,6 +107,54 @@ describe('SubscriptionTab', () => {
       expect(screen.getByText('10 / 10')).toBeInTheDocument();
       expect(screen.getByText('0')).toBeInTheDocument(); // remaining
     });
+
+    it('should handle undefined dailyReadingsCount gracefully', () => {
+      const profile = createMockProfile({
+        dailyReadingsCount: undefined as unknown as number,
+        dailyReadingsLimit: 10,
+      });
+      render(<SubscriptionTab profile={profile} />);
+
+      // Should show 0 instead of NaN
+      expect(screen.getByText('0 / 10')).toBeInTheDocument();
+      expect(screen.getByText('10')).toBeInTheDocument(); // remaining = 10 - 0
+    });
+
+    it('should handle undefined dailyReadingsLimit gracefully', () => {
+      const profile = createMockProfile({
+        dailyReadingsCount: 5,
+        dailyReadingsLimit: undefined as unknown as number,
+      });
+      render(<SubscriptionTab profile={profile} />);
+
+      // Should show 0 as fallback for limit
+      expect(screen.getByText('5 / 0')).toBeInTheDocument();
+      expect(screen.getByText('0')).toBeInTheDocument(); // remaining = 0 - 5 = 0 (clamped)
+    });
+
+    it('should handle both undefined values gracefully', () => {
+      const profile = createMockProfile({
+        dailyReadingsCount: undefined as unknown as number,
+        dailyReadingsLimit: undefined as unknown as number,
+      });
+      render(<SubscriptionTab profile={profile} />);
+
+      // Should show 0 / 0 instead of NaN / NaN
+      expect(screen.getByText('0 / 0')).toBeInTheDocument();
+      expect(screen.getByText('0')).toBeInTheDocument(); // remaining
+    });
+
+    it('should never display NaN in UI', () => {
+      const profile = createMockProfile({
+        dailyReadingsCount: NaN,
+        dailyReadingsLimit: NaN,
+      });
+      const { container } = render(<SubscriptionTab profile={profile} />);
+
+      // Verificar que "NaN" no aparece en el DOM
+      expect(container.textContent).not.toContain('NaN');
+      expect(screen.getByText('0 / 0')).toBeInTheDocument();
+    });
   });
 
   describe('Plan Upgrade Section', () => {
