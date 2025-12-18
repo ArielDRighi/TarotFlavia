@@ -720,14 +720,17 @@ Solo existe botón "Iniciar Sesión" en navbar. No hay forma obvia de registrars
 #### Tests Verificados
 
 **Header.test.tsx:**
+
 - ✅ Test: "should show Registrarse button when not authenticated"
 - ✅ Test: "should render Registrarse as primary button (more prominent)"
 - ✅ Test: "should NOT show Registrarse button when authenticated"
 
 **UserMenu.test.tsx:**
+
 - ✅ Test: "should render Registrarse button when not authenticated"
 
 **Calidad:**
+
 - ✅ Tests: 1538/1538 pasando
 - ✅ Coverage: 82.84% (>80%)
 - ✅ Lint: 0 errors, 0 warnings
