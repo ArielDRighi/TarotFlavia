@@ -493,7 +493,7 @@ describe('use-readings hooks', () => {
   // =========================================================================
   describe('useDeleteReading', () => {
     it('should delete reading successfully', async () => {
-      vi.mocked(readingsApi.deleteReading).mockResolvedValueOnce({ message: 'Deleted' });
+      vi.mocked(readingsApi.deleteReading).mockResolvedValueOnce(undefined);
 
       const queryClient = createTestQueryClient();
       const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
@@ -652,4 +652,3 @@ describe('use-readings hooks', () => {
     });
   });
 });
-
