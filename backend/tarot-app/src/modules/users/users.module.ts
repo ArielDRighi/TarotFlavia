@@ -3,6 +3,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Tarotista } from '../tarotistas/entities/tarotista.entity';
 import { AuthModule } from '../auth/auth.module';
+import { UsageLimitsModule } from '../usage-limits/usage-limits.module';
+import { PlanConfigModule } from '../plan-config/plan-config.module';
 
 // Infrastructure
 import { TypeOrmUserRepository } from './infrastructure/repositories/typeorm-user.repository';
@@ -32,6 +34,8 @@ import { UsersService } from './users.service';
   imports: [
     TypeOrmModule.forFeature([User, Tarotista]),
     forwardRef(() => AuthModule),
+    UsageLimitsModule,
+    PlanConfigModule,
   ],
   providers: [
     // DI tokens para repositories
