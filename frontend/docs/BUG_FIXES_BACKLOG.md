@@ -637,36 +637,43 @@ La sección "Estadísticas de Uso" en pestaña Suscripción muestra "Lecturas re
 **TAREA 3.1.3: Verificar backend envía datos correctos** (Backend - opcional)
 
 - **Acción:**
-  - Backend NO envía estos campos (confirmado)
-  - Decisión: NO modificar backend en este fix
-  - Se documenta para futura implementación
+  - Backend ahora SÍ envía `dailyReadingsCount` y `dailyReadingsLimit`
+  - Implementado en endpoint `/users/profile`
+  - Integra `UsageLimitsService` y `PlanConfigService`
 - **Criterios de aceptación:**
-  - [x] Confirmado que campos no existen en respuesta
-  - [x] Decisión documentada en commit
+  - [x] Response incluye campos `dailyReadingsCount` y `dailyReadingsLimit`
+  - [x] Cálculo correcto: `count = limit - remaining`
+  - [x] Maneja planes ilimitados (-1 → 999999)
+  - [x] Tests backend: 38/38 pasando
 
-#### Tests Agregados
+**Implementación Backend (Completada):**
 
-**5 tests nuevos para edge cases:**
+- **Archivo modificado:** `backend/tarot-app/src/modules/users/infrastructure/controllers/users.controller.ts`
+- **Cambios:**
+  - Inyectado `UsageLimitsService` y `PlanConfigService`
+  - Método `getProfile()` ahora calcula y retorna:
+    - `dailyReadingsLimit`: Límite según plan del usuario
+    - `dailyReadingsCount`: Lecturas realizadas hoy (limit - remaining)
+  - Planes ilimitados (premium/professional) retornan 999999 como límite
+- **Tests agregados:**
+  - Test con plan FREE (lecturas limitadas)
+  - Test con plan PREMIUM (lecturas ilimitadas)
+  - Test con usuario no encontrado
+- **Commit backend:** `3288919`
 
-- ✅ `should handle undefined dailyReadingsCount gracefully`
-- ✅ `should handle undefined dailyReadingsLimit gracefully`
-- ✅ `should handle both undefined values gracefully`
-- ✅ `should never display NaN in UI`
-- ✅ Test existente `should handle zero limit gracefully` sigue pasando
+#### Resultado Final
 
-**Total tests SubscriptionTab:** 20/20 pasando
+✅ **Fix completo implementado en backend + frontend:**
 
-#### Calidad
-
-- ✅ Lint: 0 errors, 0 warnings
-- ✅ Type-check: sin errores
-- ✅ Arquitectura: validación exitosa
-- ✅ Build: exitoso
-- ✅ Tests: 1534/1534 pasando
-- ✅ Coverage: 82.83% (>80%)
+1. **Frontend:** Defensive guards previenen NaN (commit `59894d4`)
+2. **Backend:** Endpoint `/users/profile` ahora envía datos reales (commit `3288919`)
+3. **Usuario verá:**
+   - Plan FREE: "Lecturas realizadas hoy: X / 3" (datos reales del backend)
+   - Plan PREMIUM: "Lecturas realizadas hoy: X / 999999" (ilimitado)
+   - Sin errores NaN ✅
 
 **Estimación:** 30-45 min  
-**Tiempo Real:** 25 min
+**Tiempo Real:** 25 min (frontend) + 30 min (backend) = **55 min total**
 
 ---
 
