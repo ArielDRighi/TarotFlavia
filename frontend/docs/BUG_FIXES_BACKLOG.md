@@ -742,45 +742,89 @@ Solo existe botón "Iniciar Sesión" en navbar. No hay forma obvia de registrars
 
 ---
 
-### ✅ BUG FIX 3.3: Traducir mensaje "Email already registered" (#M001)
+### ✅ BUG FIX 3.3: Traducir mensaje "Email already registered" (#M001) - **COMPLETADO ✅**
 
 **Prioridad:** 🟡 MEDIO  
-**Área:** Backend (o Frontend)  
+**Área:** Backend  
 **Estimación:** 15-20 min  
-**Dependencias:** Ninguna
+**Tiempo Real:** 10 min  
+**Dependencias:** Ninguna  
+**Branch:** `fix/M001-translate-email-registered`  
+**Commit:** `01f51cd`
 
 #### Descripción del Bug
 
 Mensaje de error al registrar email duplicado aparece en inglés: "Email already registered".
+
+#### Solución Implementada
+
+**Decisión:** Traducir mensaje en backend (fuente de verdad), beneficiando a todos los clientes.
+
+**Archivos modificados:**
+
+1. **Backend:**
+   - `src/modules/users/application/use-cases/create-user.use-case.ts`: Mensaje cambiado a "El email ya está registrado"
+   - `src/modules/users/users.service.ts`: Mensaje cambiado a "El email ya está registrado"
+   - Tests actualizados en ambos archivos
+
+2. **Frontend:**
+   - NO requirió cambios: `authStore.ts` ya tiene mapeo correcto que toma mensaje del backend
+   - El toast.error() mostrará automáticamente el mensaje traducido
 
 #### Tareas de Corrección
 
 **TAREA 3.3.1: Localizar origen del mensaje** (Análisis)
 
 - **Acción:**
-  - Verificar si viene de backend o frontend
-  - Buscar en código: `grep -r "Email already registered"`
+  - Verificado origen en backend usando `grep -r "Email already registered"`
+  - Encontrado en 2 archivos:
+    - `create-user.use-case.ts` (línea 32)
+    - `users.service.ts` (línea 45)
+- **Resultado:**
+  - [x] Mensaje originado en backend
 
-**TAREA 3.3.2: Traducir mensaje** (Backend o Frontend)
+**TAREA 3.3.2: Traducir mensaje en backend** (Backend)
 
-- **Opción A - Backend:**
-  - **Archivo:** `backend/tarot-app/src/modules/auth/.../register.use-case.ts`
-  - Cambiar mensaje a: "El email ya está registrado"
-- **Opción B - Frontend:**
-  - **Archivo:** `frontend/src/stores/authStore.ts`
-  - Mapear error en español:
-    ```typescript
-    const message =
-      error.response?.data?.message === 'Email already registered'
-        ? 'El email ya está registrado'
-        : error.response?.data?.message || 'Error al crear la cuenta';
-    ```
-
+- **Archivos:**
+  - `backend/tarot-app/src/modules/users/application/use-cases/create-user.use-case.ts`
+  - `backend/tarot-app/src/modules/users/users.service.ts`
+  - Tests: `create-user.use-case.spec.ts` y `users.service.spec.ts`
+- **Acción:**
+  - Cambiado mensaje a: "El email ya está registrado"
+  - Actualizados tests para usar mensaje en español
 - **Criterios de aceptación:**
-  - [ ] Mensaje en español
-  - [ ] Consistente con resto de la app
+  - [x] Mensaje en español en backend
+  - [x] Consistente con resto de la app
+  - [x] Tests backend: 216/216 pasando
+  - [x] Tests frontend: 19/19 pasando (authStore)
+  - [x] Lint: 0 errors, 0 warnings (backend + frontend)
+  - [x] Type-check: sin errores
+  - [x] Arquitectura: validación exitosa
 
-**Estimación:** 15-20 min
+**Tests Verificados:**
+
+**Backend:**
+
+- ✅ 216/216 tests pasando en módulo users
+- ✅ Tests `CreateUserUseCase` con mensaje en español
+- ✅ Tests `UsersService` con mensaje en español
+- ✅ Lint: 0 errors, 0 warnings
+
+**Frontend:**
+
+- ✅ 19/19 tests pasando en `authStore.test.ts`
+- ✅ El authStore ya maneja correctamente mensajes del backend
+- ✅ Lint: 0 errors, 0 warnings
+- ✅ Type-check: sin errores
+- ✅ Arquitectura: validación exitosa
+
+**Resultado:**
+
+- Usuario verá: "El email ya está registrado" en español ✅
+- Cambio centralizado en backend beneficia a todos los clientes ✅
+
+**Estimación:** 15-20 min  
+**Tiempo Real:** 10 min
 
 ---
 
