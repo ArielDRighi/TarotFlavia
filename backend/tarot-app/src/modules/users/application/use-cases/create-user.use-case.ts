@@ -29,7 +29,7 @@ export class CreateUserUseCase {
     // Check if user already exists
     const existingUser = await this.userRepository.findByEmail(normalizedEmail);
     if (existingUser) {
-      throw new ConflictException('Email already registered');
+      throw new ConflictException('El email ya está registrado');
     }
 
     // Hash password

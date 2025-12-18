@@ -92,7 +92,7 @@ describe('CreateUserUseCase', () => {
         ConflictException,
       );
       await expect(useCase.execute(createUserDto)).rejects.toThrow(
-        'Email already registered',
+        'El email ya está registrado',
       );
     });
 

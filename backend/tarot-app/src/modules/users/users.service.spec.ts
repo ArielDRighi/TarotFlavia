@@ -411,7 +411,7 @@ describe('UsersService', () => {
           password: 'ValidPass123!',
           name: 'Test User',
         }),
-      ).rejects.toThrow('Email already registered');
+      ).rejects.toThrow('El email ya está registrado');
     });
 
     it('should create user successfully with valid data', async () => {
