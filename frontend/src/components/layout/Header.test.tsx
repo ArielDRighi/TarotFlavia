@@ -111,10 +111,12 @@ describe('Header', () => {
       expect(screen.queryByRole('link', { name: /explorar/i })).not.toBeInTheDocument();
     });
 
-    it('should show "Mis Sesiones" link when authenticated', () => {
+    it('should NOT show "Mis Sesiones" link (MVP: user sessions not implemented)', () => {
       render(<Header />);
 
-      expect(screen.getByRole('link', { name: /mis sesiones/i })).toBeInTheDocument();
+      // Sessions endpoints exist only for tarotistas
+      // User sessions feature is not implemented yet in MVP
+      expect(screen.queryByRole('link', { name: /mis sesiones/i })).not.toBeInTheDocument();
     });
 
     it('should NOT show "Iniciar Sesión" link when authenticated', () => {

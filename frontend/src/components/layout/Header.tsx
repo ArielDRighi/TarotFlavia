@@ -55,12 +55,15 @@ export function Header() {
               >
                 Explorar
               </Link> */}
-              <Link
+              {/* "Mis Sesiones" link hidden in MVP - no user sessions implemented yet */}
+              {/* Sessions endpoints exist only for tarotistas (/tarotist/scheduling/sessions) */}
+              {/* TODO: Enable when user sessions feature is implemented */}
+              {/* <Link
                 href="/sesiones"
                 className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
               >
                 Mis Sesiones
-              </Link>
+              </Link> */}
             </>
           )}
         </div>

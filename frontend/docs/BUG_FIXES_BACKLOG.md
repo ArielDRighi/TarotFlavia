@@ -481,16 +481,30 @@ La opción "Explorar" está visible en el navbar pero el MVP solo debe trabajar 
 
 ---
 
-### ✅ BUG FIX 2.4: Ocultar "Mis Sesiones" sin funcionalidad (#A007)
+### ✅ BUG FIX 2.4: Ocultar "Mis Sesiones" sin funcionalidad (#A007) - **COMPLETADO ✅**
 
 **Prioridad:** 🟠 ALTO  
 **Área:** Frontend - Navigation  
 **Estimación:** 15-20 min  
-**Dependencias:** Ninguna
+**Tiempo Real:** 10 min  
+**Dependencias:** Ninguna  
+**Branch:** `fix/A007-hide-sessions-link`  
+**Commit:** (pendiente)
 
 #### Descripción del Bug
 
 La opción "Mis Sesiones" lleva a una página vacía sin datos. Si no está funcional, no debe mostrarse.
+
+#### Análisis Realizado
+
+**Investigación de endpoints de sesiones:**
+
+- Los endpoints de sesiones SÍ existen en el backend: `/tarotist/scheduling/sessions`
+- Sin embargo, son **exclusivos para tarotistas** (rol tarotista)
+- NO hay endpoints de sesiones para usuarios normales implementados en el MVP
+- La funcionalidad de "Mis Sesiones" para usuarios está pendiente de implementación
+
+**Decisión:** Ocultar el link "Mis Sesiones" siguiendo el mismo patrón de "Explorar" (#A006).
 
 #### Tareas de Corrección
 
@@ -500,17 +514,40 @@ La opción "Mis Sesiones" lleva a una página vacía sin datos. Si no está func
   - Revisar si backend tiene endpoints de sesiones
   - Revisar si hay datos de sesiones en BD
   - Decidir: ¿Ocultar o implementar estado vacío apropiado?
+- **Resultado:**
+  - [x] Endpoints existen solo para tarotistas (`/tarotist/scheduling/sessions`)
+  - [x] Para usuarios normales NO hay funcionalidad de sesiones
+  - [x] Decisión: Ocultar link hasta implementar feature
 
 **TAREA 2.4.2: Ocultar "Mis Sesiones" del navbar** (Frontend)
 
-- **Archivo:** `frontend/src/components/layout/Header.tsx` o navbar component
+- **Archivo:** `frontend/src/components/layout/Header.tsx`
 - **Acción:**
-  - Comentar o eliminar el link "Mis Sesiones"
-  - O mostrar con badge "Próximamente" (disabled)
+  - Comentado link "Mis Sesiones" con documentación clara
+  - Preservado código para futura reactivación
+  - Agregado comentario explicando que endpoints son solo para tarotistas
 - **Criterios de aceptación:**
-  - [ ] Link NO visible o claramente marcado como "próximamente"
+  - [x] Link NO visible en navbar
+  - [x] Test actualizado y pasando
+  - [x] Código comentado con explicación clara
+  - [x] TODO agregado para futura implementación
 
-**Estimación:** 15-20 min
+**Tests Verificados:**
+
+- ✅ 1530/1530 tests pasando
+- ✅ Coverage: 82.74% (>80%)
+- ✅ Header.test.tsx: 17/17 tests pasando
+- ✅ Test específico verifica que "Mis Sesiones" NO se muestra
+
+**Calidad:**
+
+- ✅ Lint: 0 errors, 0 warnings
+- ✅ Type-check: sin errores
+- ✅ Arquitectura: validación exitosa
+- ✅ Build: exitoso
+
+**Estimación:** 15-20 min  
+**Tiempo Real:** 10 min
 
 ---
 
