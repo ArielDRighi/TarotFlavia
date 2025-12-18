@@ -6,6 +6,7 @@
  */
 import { apiClient } from './axios-config';
 import { API_ENDPOINTS } from './endpoints';
+import { AxiosError } from 'axios';
 import type { UserProfile, UpdateProfileDto, UpdatePasswordDto } from '@/types';
 
 // ============================================================================
@@ -52,9 +53,8 @@ export async function updatePassword(data: UpdatePasswordDto): Promise<void> {
     await apiClient.patch(API_ENDPOINTS.USERS.PASSWORD, data);
   } catch (error: unknown) {
     // Manejar diferentes tipos de errores del backend
-    if (error && typeof error === 'object' && 'response' in error) {
-      const axiosError = error as { response?: { status?: number } };
-      if (axiosError.response?.status === 400) {
+    if (error instanceof AxiosError) {
+      if (error.response?.status === 400) {
         throw new Error('La contraseña actual es incorrecta');
       }
     }

@@ -73,7 +73,7 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Patch('profile/password')
+  @Patch('me/password')
   @ApiOperation({ summary: 'Actualizar contraseña del usuario actual' })
   @ApiBody({ type: UpdatePasswordDto })
   @ApiResponse({

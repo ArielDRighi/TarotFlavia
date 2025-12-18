@@ -330,7 +330,7 @@ La opción "Cambiar Contraseña" existe en UI pero retorna error "Funcionalidad 
    - Valida contraseña actual con bcrypt
    - Hashea nueva contraseña
    - Actualiza en base de datos
-3. **Agregado endpoint PATCH /users/profile/password**:
+3. **Agregado endpoint PATCH /users/me/password**:
    - Protegido con JwtAuthGuard
    - Retorna 200 con mensaje de éxito
    - Retorna 400 si contraseña actual incorrecta
@@ -340,7 +340,7 @@ La opción "Cambiar Contraseña" existe en UI pero retorna error "Funcionalidad 
 **FRONTEND:**
 
 1. **Actualizado API_ENDPOINTS**:
-   - Agregado `PASSWORD: '/users/profile/password'`
+   - Agregado `PASSWORD: '/users/me/password'`
 2. **Mejorado updatePassword en user-api.ts**:
    - Usa endpoint correcto
    - Manejo específico de error 400 (contraseña incorrecta)
@@ -380,8 +380,8 @@ La opción "Cambiar Contraseña" existe en UI pero retorna error "Funcionalidad 
   - `frontend/src/lib/api/endpoints.ts`
   - `frontend/src/lib/api/user-api.ts`
 - **Acción:**
-  - Actualizado endpoint a `/users/profile/password`
-  - Mejorado manejo de errores
+  - Actualizado endpoint a `/users/me/password`
+  - Mejorado manejo de errores con `AxiosError` type
   - Corregido tipo `any` → `unknown`
 - **Criterios de aceptación:**
   - [x] Formulario envía datos al endpoint correcto

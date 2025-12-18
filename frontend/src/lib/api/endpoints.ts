@@ -58,7 +58,7 @@ export const API_ENDPOINTS = {
     BASE: '/users',
     BY_ID: (id: number) => `/users/${id}`,
     PROFILE: '/users/profile',
-    PASSWORD: '/users/profile/password',
+    PASSWORD: '/users/me/password',
   },
 
   // Tarotistas (Marketplace)
