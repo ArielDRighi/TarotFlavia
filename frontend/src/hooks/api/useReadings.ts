@@ -8,6 +8,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/utils/useToast';
+import { useAuthStore } from '@/stores/authStore';
 
 import {
   getCategories,
@@ -114,15 +115,18 @@ export function useReadingDetail(id: number) {
 
 /**
  * Hook to create a new reading
- * On success: invalidates readings list and shows toast
+ * On success: invalidates readings list, refreshes user profile, and shows toast
  */
 export function useCreateReading() {
   const queryClient = useQueryClient();
+  const checkAuth = useAuthStore((state) => state.checkAuth);
 
   return useMutation({
     mutationFn: (data: CreateReadingDto) => createReading(data),
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: readingQueryKeys.all });
+      // Refresh user profile to update daily readings count
+      await checkAuth();
       toast.success('Lectura creada exitosamente');
     },
     onError: (error: Error) => {

@@ -37,6 +37,17 @@ import type {
 // Mock the API module
 vi.mock('@/lib/api/readings-api');
 
+// Mock auth store
+const mockCheckAuth = vi.fn();
+vi.mock('@/stores/authStore', () => ({
+  useAuthStore: vi.fn((selector) => {
+    const state = {
+      checkAuth: mockCheckAuth,
+    };
+    return selector ? selector(state) : state;
+  }),
+}));
+
 // Mock custom toast wrapper
 vi.mock('@/hooks/utils/useToast', () => ({
   toast: {
@@ -429,8 +440,13 @@ describe('use-readings hooks', () => {
   // useCreateReading
   // =========================================================================
   describe('useCreateReading', () => {
-    it('should create reading successfully', async () => {
+    beforeEach(() => {
+      mockCheckAuth.mockClear();
+    });
+
+    it('should create reading successfully and refresh user profile', async () => {
       vi.mocked(readingsApi.createReading).mockResolvedValueOnce(mockReadingDetail);
+      mockCheckAuth.mockResolvedValueOnce(undefined);
 
       const queryClient = createTestQueryClient();
       const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
@@ -461,6 +477,7 @@ describe('use-readings hooks', () => {
 
       expect(readingsApi.createReading).toHaveBeenCalledWith(createData);
       expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: readingQueryKeys.all });
+      expect(mockCheckAuth).toHaveBeenCalledOnce();
     });
 
     it('should handle error when creating reading', async () => {
@@ -485,6 +502,9 @@ describe('use-readings hooks', () => {
       await waitFor(() => {
         expect(result.current.isError).toBe(true);
       });
+
+      // checkAuth should not be called on error
+      expect(mockCheckAuth).not.toHaveBeenCalled();
     });
   });
 

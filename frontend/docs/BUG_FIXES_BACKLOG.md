@@ -4,7 +4,7 @@
 
 **Fecha de Creación:** 17 Diciembre 2025  
 **Origen:** QA Testing Manual - Fase Auth/Perfil/Navegación  
-**Total de Bugs:** 9 (1 Crítico, 7 Altos, 1 Medio)
+**Total de Bugs:** 10 (1 Crítico, 8 Altos, 1 Medio)
 
 ---
 
@@ -15,18 +15,18 @@
 | Prioridad  | Cantidad | IDs        |
 | ---------- | -------- | ---------- |
 | 🔴 Crítico | 1        | #C001      |
-| 🟠 Alto    | 7        | #A001-A007 |
+| 🟠 Alto    | 8        | #A001-A008 |
 | 🟡 Medio   | 1        | #M001      |
-| **TOTAL**  | **9**    | -          |
+| **TOTAL**  | **10**   | -          |
 
 ### Distribución Backend vs Frontend
 
-| Área         | Cantidad   | Estimación Total |
-| ------------ | ---------- | ---------------- |
-| **Backend**  | 2 bugs     | ~2-3 horas       |
-| **Frontend** | 6 bugs     | ~4-5 horas       |
-| **Ambos**    | 1 bug      | ~1 hora          |
-| **TOTAL**    | **9 bugs** | **~7-9 horas**   |
+| Área         | Cantidad    | Estimación Total |
+| ------------ | ----------- | ---------------- |
+| **Backend**  | 2 bugs      | ~2-3 horas       |
+| **Frontend** | 7 bugs      | ~5-6 horas       |
+| **Ambos**    | 1 bug       | ~1 hora          |
+| **TOTAL**    | **10 bugs** | **~8-10 horas**  |
 
 ---
 
@@ -59,7 +59,7 @@ Bugs que degradan significativamente la experiencia pero permiten uso básico.
 
 Mejoras de UX y localización.
 
-**Orden de implementación:** 7. **#A004** - Fix NaN en lecturas restantes (Frontend + validación) 8. **#A001** - Agregar botón "Registrarse" en navbar (Frontend) 9. **#M001** - Traducir mensaje "Email already registered" (Backend)
+**Orden de implementación:** 7. **#A004** - Fix NaN en lecturas restantes (Frontend + Backend) ✅ 8. **#A008** - Cache no se actualiza al crear lectura (Frontend) ✅ 9. **#A001** - Agregar botón "Registrarse" en navbar (Frontend) 10. **#M001** - Traducir mensaje "Email already registered" (Backend)
 
 **Estimación Fase 3:** 2-3 horas
 
@@ -745,6 +745,122 @@ Mensaje de error al registrar email duplicado aparece en inglés: "Email already
   - [ ] Consistente con resto de la app
 
 **Estimación:** 15-20 min
+
+---
+
+### ✅ BUG FIX 3.4: Cache no se actualiza al crear lectura (#A008) - **COMPLETADO ✅**
+
+**Prioridad:** 🟠 ALTO  
+**Área:** Frontend - State Management  
+**Estimación:** 30 min  
+**Tiempo Real:** 30 min  
+**Dependencias:** #A004 (Backend debe enviar dailyReadingsCount)  
+**Branch:** `fix/A004-nan-lecturas-restantes` (mismo branch que #A004)  
+**Commit Frontend:** `TBD`  
+**Commit Backend:** `4f8ec0d` (fix circular dependency)
+
+#### Descripción del Bug
+
+Después de crear una nueva lectura, el contador de "Lecturas realizadas hoy" en la pestaña "Estadísticas de Uso" no se actualiza automáticamente. El usuario debe refrescar la página manualmente para ver el contador actualizado.
+
+#### Análisis de Causa Raíz
+
+**Problema identificado:**
+
+- `useCreateReading()` solo invalida queries de TanStack Query (`readingQueryKeys.all`)
+- Los datos del perfil del usuario (que incluyen `dailyReadingsCount`) están en **Zustand** (`authStore`), no en TanStack Query
+- Zustand no se entera de que debe refrescar los datos después de crear una lectura
+- El componente `SubscriptionTab` usa `useAuth()` → `authStore.user` (cache estática hasta que llames `checkAuth()`)
+
+**Por qué pasa:**
+
+1. Usuario crea lectura → `useCreateReading.mutate()`
+2. Backend guarda lectura y actualiza contador interno
+3. Frontend invalida queries de lecturas ✅
+4. Frontend NO actualiza `authStore` ❌
+5. Componente `SubscriptionTab` muestra datos viejos de `authStore`
+
+#### Solución Implementada
+
+**Cambios en useReadings.ts:**
+
+1. **Importar authStore**:
+
+   ```typescript
+   import { useAuthStore } from '@/stores/authStore';
+   ```
+
+2. **Modificar `useCreateReading()` para refrescar perfil**:
+
+   ```typescript
+   export function useCreateReading() {
+     const queryClient = useQueryClient();
+     const checkAuth = useAuthStore((state) => state.checkAuth);
+
+     return useMutation({
+       mutationFn: (data: CreateReadingDto) => createReading(data),
+       onSuccess: async () => {
+         queryClient.invalidateQueries({ queryKey: readingQueryKeys.all });
+         // Refresh user profile to update daily readings count
+         await checkAuth();
+         toast.success('Lectura creada exitosamente');
+       },
+       ...
+     });
+   }
+   ```
+
+3. **Actualizar test en useReadings.test.tsx**:
+   - Mock de `useAuthStore` para simular `checkAuth`
+   - Verificar que `checkAuth()` se llama después de crear lectura exitosamente
+   - Verificar que NO se llama si hay error
+
+#### Tareas de Corrección
+
+**TAREA 3.4.1: Agregar llamada a checkAuth en useCreateReading** (Frontend)
+
+- **Archivo:** `frontend/src/hooks/api/useReadings.ts`
+- **Acción:**
+  - Importar `useAuthStore`
+  - Obtener `checkAuth` del store
+  - Llamar `await checkAuth()` en `onSuccess`
+- **Criterios de aceptación:**
+  - [x] Importa authStore correctamente
+  - [x] Llama `checkAuth()` después de crear lectura
+  - [x] No bloquea el flujo (usa `await` dentro de `onSuccess`)
+
+**TAREA 3.4.2: Actualizar tests** (Frontend)
+
+- **Archivo:** `frontend/src/hooks/api/useReadings.test.tsx`
+- **Acción:**
+  - Mock de `useAuthStore`
+  - Simular `checkAuth` con `vi.fn()`
+  - Verificar que se llama en test exitoso
+  - Verificar que NO se llama en test de error
+- **Criterios de aceptación:**
+  - [x] Mock de `useAuthStore` funciona
+  - [x] Test "should create reading successfully" verifica `checkAuth()` llamado
+  - [x] Test de error verifica que NO se llama
+  - [x] Todos los tests pasan (20/20)
+
+#### Resultado Final
+
+✅ **Fix implementado:**
+
+1. **Frontend:** `useCreateReading()` ahora refresca perfil automáticamente
+2. **Usuario verá:** Contador actualizado sin necesidad de refresh manual
+3. **Tests:** 20/20 pasando en `useReadings.test.tsx`
+
+**Flujo después del fix:**
+
+1. Usuario crea lectura → `useCreateReading.mutate()`
+2. Backend guarda lectura ✅
+3. Frontend invalida queries de lecturas ✅
+4. Frontend llama `checkAuth()` → refresca datos del usuario ✅
+5. `SubscriptionTab` muestra contador actualizado automáticamente ✅
+
+**Estimación:** 30 min  
+**Tiempo Real:** 30 min
 
 ---
 
