@@ -42,7 +42,7 @@ export class UsersService {
       where: { email: normalizedEmail },
     });
     if (existingUser) {
-      throw new ConflictException('Email already registered');
+      throw new ConflictException('El email ya está registrado');
     }
 
     // Hash password
