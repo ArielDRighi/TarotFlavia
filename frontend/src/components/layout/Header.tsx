@@ -47,12 +47,14 @@ export function Header() {
               >
                 Nueva Lectura
               </Link>
-              <Link
+              {/* "Explorar" link hidden in MVP - single tarotista (Flavia) */}
+              {/* TODO: Enable when multiple tarotistas are supported */}
+              {/* <Link
                 href="/explorar"
                 className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
               >
                 Explorar
-              </Link>
+              </Link> */}
               <Link
                 href="/sesiones"
                 className="text-text-primary hover:text-primary text-sm font-medium transition-colors"

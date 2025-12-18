@@ -103,10 +103,12 @@ describe('Header', () => {
       expect(link).toHaveAttribute('href', '/ritual');
     });
 
-    it('should show "Explorar" link when authenticated', () => {
+    it('should NOT show "Explorar" link (MVP: single tarotista)', () => {
       render(<Header />);
 
-      expect(screen.getByRole('link', { name: /explorar/i })).toBeInTheDocument();
+      // MVP solo trabaja con un tarotista (Flavia)
+      // El link "Explorar" está oculto para evitar confusión
+      expect(screen.queryByRole('link', { name: /explorar/i })).not.toBeInTheDocument();
     });
 
     it('should show "Mis Sesiones" link when authenticated', () => {
