@@ -23,6 +23,7 @@ import {
   useRestoreReading,
   readingQueryKeys,
 } from './useReadings';
+import { userQueryKeys } from './useUser';
 import * as readingsApi from '@/lib/api/readings-api';
 import type {
   Category,
@@ -429,7 +430,7 @@ describe('use-readings hooks', () => {
   // useCreateReading
   // =========================================================================
   describe('useCreateReading', () => {
-    it('should create reading successfully', async () => {
+    it('should create reading successfully and invalidate profile query', async () => {
       vi.mocked(readingsApi.createReading).mockResolvedValueOnce(mockReadingDetail);
 
       const queryClient = createTestQueryClient();
@@ -461,6 +462,7 @@ describe('use-readings hooks', () => {
 
       expect(readingsApi.createReading).toHaveBeenCalledWith(createData);
       expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: readingQueryKeys.all });
+      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: userQueryKeys.profile });
     });
 
     it('should handle error when creating reading', async () => {
@@ -489,11 +491,9 @@ describe('use-readings hooks', () => {
   });
 
   // =========================================================================
-  // useDeleteReading
-  // =========================================================================
   describe('useDeleteReading', () => {
     it('should delete reading successfully', async () => {
-      vi.mocked(readingsApi.deleteReading).mockResolvedValueOnce();
+      vi.mocked(readingsApi.deleteReading).mockResolvedValueOnce(undefined);
 
       const queryClient = createTestQueryClient();
       const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');

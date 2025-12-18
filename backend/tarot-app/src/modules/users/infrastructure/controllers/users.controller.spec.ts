@@ -6,6 +6,8 @@ import {
 } from '@nestjs/common';
 import { UsersController } from './users.controller';
 import { UsersOrchestratorService } from '../../application/services/users-orchestrator.service';
+import { UsageLimitsService } from '../../../usage-limits/usage-limits.service';
+import { PlanConfigService } from '../../../plan-config/plan-config.service';
 import { UserRole } from '../../../../common/enums/user-role.enum';
 import { UpdateUserDto } from '../../application/dto/update-user.dto';
 import { UpdatePasswordDto } from '../../application/dto/update-password.dto';
@@ -15,6 +17,8 @@ import { User, UserPlan } from '../../entities/user.entity';
 describe('UsersController', () => {
   let controller: UsersController;
   let service: UsersOrchestratorService;
+  let usageLimitsService: UsageLimitsService;
+  let planConfigService: PlanConfigService;
 
   const mockUser: Partial<User> = {
     id: 1,
@@ -38,6 +42,16 @@ describe('UsersController', () => {
     removeRole: jest.fn(),
   };
 
+  const mockUsageLimitsService = {
+    getRemainingUsage: jest.fn(),
+    checkLimit: jest.fn(),
+    incrementUsage: jest.fn(),
+  };
+
+  const mockPlanConfigService = {
+    getReadingsLimit: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UsersController],
@@ -46,11 +60,21 @@ describe('UsersController', () => {
           provide: UsersOrchestratorService,
           useValue: mockUsersService,
         },
+        {
+          provide: UsageLimitsService,
+          useValue: mockUsageLimitsService,
+        },
+        {
+          provide: PlanConfigService,
+          useValue: mockPlanConfigService,
+        },
       ],
     }).compile();
 
     controller = module.get<UsersController>(UsersController);
     service = module.get<UsersOrchestratorService>(UsersOrchestratorService);
+    usageLimitsService = module.get<UsageLimitsService>(UsageLimitsService);
+    planConfigService = module.get<PlanConfigService>(PlanConfigService);
 
     jest.clearAllMocks();
   });
@@ -62,14 +86,25 @@ describe('UsersController', () => {
   describe('getProfile', () => {
     it('should return user profile without password', async () => {
       mockUsersService.findById.mockResolvedValue(mockUser);
+      mockPlanConfigService.getReadingsLimit.mockResolvedValue(3); // FREE plan limit
+      mockUsageLimitsService.getRemainingUsage.mockResolvedValue(2); // 2 remaining
 
       const req = { user: { userId: 1 } };
       const result = await controller.getProfile(req);
 
       expect(service.findById).toHaveBeenCalledWith(1);
+      expect(planConfigService.getReadingsLimit).toHaveBeenCalledWith(
+        UserPlan.FREE,
+      );
+      expect(usageLimitsService.getRemainingUsage).toHaveBeenCalledWith(
+        1,
+        expect.any(String), // UsageFeature.TAROT_READING
+      );
       expect(result).not.toHaveProperty('password');
       expect(result.id).toBe(1);
       expect(result.email).toBe('test@test.com');
+      expect(result.dailyReadingsCount).toBe(1); // 3 - 2 = 1
+      expect(result.dailyReadingsLimit).toBe(3);
     });
 
     it('should throw NotFoundException if user not found', async () => {
@@ -83,6 +118,19 @@ describe('UsersController', () => {
       await expect(controller.getProfile(req)).rejects.toThrow(
         'Usuario no encontrado',
       );
+    });
+
+    it('should handle unlimited plan (premium/professional)', async () => {
+      const premiumUser = { ...mockUser, plan: UserPlan.PREMIUM };
+      mockUsersService.findById.mockResolvedValue(premiumUser);
+      mockPlanConfigService.getReadingsLimit.mockResolvedValue(-1); // Unlimited
+      mockUsageLimitsService.getRemainingUsage.mockResolvedValue(-1);
+
+      const req = { user: { userId: 1 } };
+      const result = await controller.getProfile(req);
+
+      expect(result.dailyReadingsCount).toBe(0); // No count for unlimited
+      expect(result.dailyReadingsLimit).toBe(999999); // Represents unlimited
     });
   });
 

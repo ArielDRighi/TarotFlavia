@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PlanBadge } from '@/components/ui/plan-badge';
 import type { UserProfile } from '@/types';
@@ -14,6 +15,27 @@ export interface SubscriptionTabProps {
  * Displays subscription information and usage statistics
  */
 export function SubscriptionTab({ profile }: SubscriptionTabProps) {
+  // Defensive guards against undefined/null/NaN values
+  const dailyReadingsCount = useMemo(() => {
+    const count = profile.dailyReadingsCount;
+    return typeof count === 'number' && !isNaN(count) ? count : 0;
+  }, [profile.dailyReadingsCount]);
+
+  const dailyReadingsLimit = useMemo(() => {
+    const limit = profile.dailyReadingsLimit;
+    return typeof limit === 'number' && !isNaN(limit) ? limit : 0;
+  }, [profile.dailyReadingsLimit]);
+
+  const lecturesRemaining = useMemo(() => {
+    const remaining = dailyReadingsLimit - dailyReadingsCount;
+    return remaining >= 0 ? remaining : 0;
+  }, [dailyReadingsLimit, dailyReadingsCount]);
+
+  const progressPercentage = useMemo(() => {
+    if (dailyReadingsLimit <= 0) return 0;
+    return Math.min((dailyReadingsCount / dailyReadingsLimit) * 100, 100);
+  }, [dailyReadingsCount, dailyReadingsLimit]);
+
   return (
     <div className="space-y-6">
       {/* Current Plan */}
@@ -48,7 +70,7 @@ export function SubscriptionTab({ profile }: SubscriptionTabProps) {
             <div className="mb-2 flex items-center justify-between">
               <span className="text-sm font-medium">Lecturas realizadas hoy</span>
               <span className="text-sm font-bold">
-                {profile.dailyReadingsCount} / {profile.dailyReadingsLimit}
+                {dailyReadingsCount} / {dailyReadingsLimit}
               </span>
             </div>
             {/* Progress bar with defensive guard against division by zero */}
@@ -56,14 +78,7 @@ export function SubscriptionTab({ profile }: SubscriptionTabProps) {
               <div
                 className="bg-primary h-full transition-all"
                 style={{
-                  width: `${
-                    profile.dailyReadingsLimit > 0
-                      ? Math.min(
-                          (profile.dailyReadingsCount / profile.dailyReadingsLimit) * 100,
-                          100
-                        )
-                      : 0
-                  }%`,
+                  width: `${progressPercentage}%`,
                 }}
               />
             </div>
@@ -71,10 +86,7 @@ export function SubscriptionTab({ profile }: SubscriptionTabProps) {
 
           <div className="text-muted-foreground text-sm">
             <p>
-              Lecturas restantes hoy:{' '}
-              <span className="font-semibold">
-                {profile.dailyReadingsLimit - profile.dailyReadingsCount}
-              </span>
+              Lecturas restantes hoy: <span className="font-semibold">{lecturesRemaining}</span>
             </p>
           </div>
         </CardContent>

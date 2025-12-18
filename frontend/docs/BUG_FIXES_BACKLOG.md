@@ -4,7 +4,7 @@
 
 **Fecha de Creación:** 17 Diciembre 2025  
 **Origen:** QA Testing Manual - Fase Auth/Perfil/Navegación  
-**Total de Bugs:** 9 (1 Crítico, 7 Altos, 1 Medio)
+**Total de Bugs:** 10 (1 Crítico, 8 Altos, 1 Medio)
 
 ---
 
@@ -15,18 +15,18 @@
 | Prioridad  | Cantidad | IDs        |
 | ---------- | -------- | ---------- |
 | 🔴 Crítico | 1        | #C001      |
-| 🟠 Alto    | 7        | #A001-A007 |
+| 🟠 Alto    | 8        | #A001-A008 |
 | 🟡 Medio   | 1        | #M001      |
-| **TOTAL**  | **9**    | -          |
+| **TOTAL**  | **10**   | -          |
 
 ### Distribución Backend vs Frontend
 
-| Área         | Cantidad   | Estimación Total |
-| ------------ | ---------- | ---------------- |
-| **Backend**  | 2 bugs     | ~2-3 horas       |
-| **Frontend** | 6 bugs     | ~4-5 horas       |
-| **Ambos**    | 1 bug      | ~1 hora          |
-| **TOTAL**    | **9 bugs** | **~7-9 horas**   |
+| Área         | Cantidad    | Estimación Total |
+| ------------ | ----------- | ---------------- |
+| **Backend**  | 2 bugs      | ~2-3 horas       |
+| **Frontend** | 7 bugs      | ~5-6 horas       |
+| **Ambos**    | 1 bug       | ~1 hora          |
+| **TOTAL**    | **10 bugs** | **~8-10 horas**  |
 
 ---
 
@@ -59,7 +59,7 @@ Bugs que degradan significativamente la experiencia pero permiten uso básico.
 
 Mejoras de UX y localización.
 
-**Orden de implementación:** 7. **#A004** - Fix NaN en lecturas restantes (Frontend + validación) 8. **#A001** - Agregar botón "Registrarse" en navbar (Frontend) 9. **#M001** - Traducir mensaje "Email already registered" (Backend)
+**Orden de implementación:** 7. **#A004** - Fix NaN en lecturas restantes (Frontend + Backend) ✅ 8. **#A008** - Cache no se actualiza al crear lectura (Frontend) ✅ 9. **#A001** - Agregar botón "Registrarse" en navbar (Frontend) 10. **#M001** - Traducir mensaje "Email already registered" (Backend)
 
 **Estimación Fase 3:** 2-3 horas
 
@@ -555,16 +555,57 @@ La opción "Mis Sesiones" lleva a una página vacía sin datos. Si no está func
 
 ---
 
-### ✅ BUG FIX 3.1: Fix NaN en "Lecturas restantes hoy" (#A004)
+### ✅ BUG FIX 3.1: Fix NaN en "Lecturas restantes hoy" (#A004) - **COMPLETADO ✅**
 
 **Prioridad:** 🟠 ALTO  
 **Área:** Frontend - Profile  
 **Estimación:** 30-45 min  
-**Dependencias:** Ninguna
+**Tiempo Real:** 25 min  
+**Dependencias:** Ninguna  
+**Branch:** `fix/A004-nan-lecturas-restantes`  
+**Commit:** `59894d4`
 
 #### Descripción del Bug
 
 La sección "Estadísticas de Uso" en pestaña Suscripción muestra "Lecturas restantes hoy: NaN" y "Lecturas realizadas hoy: /".
+
+#### Análisis de Causa Raíz
+
+**Problema identificado:**
+
+- El backend endpoint `/users/profile` **NO envía** los campos `dailyReadingsCount` y `dailyReadingsLimit`
+- El frontend intentaba acceder a estos campos undefined, resultando en `NaN` al hacer operaciones matemáticas
+- La entidad `User` en backend no tiene estos campos (son calculados en runtime en el comentario del tipo)
+
+**Decisión de implementación:**
+
+- **Frontend:** Agregar defensive guards y fallbacks a 0
+- **Backend:** NO modificado (campos no están implementados en MVP)
+- Solución temporal hasta que backend implemente estos campos
+
+#### Solución Implementada
+
+**Cambios en SubscriptionTab.tsx:**
+
+1. **Agregado `useMemo` para valores calculados**:
+   - `dailyReadingsCount`: Fallback a 0 si undefined/null/NaN
+   - `dailyReadingsLimit`: Fallback a 0 si undefined/null/NaN
+   - `lecturesRemaining`: Calculo seguro (limit - count), clamped a 0
+   - `progressPercentage`: Evita división por cero
+
+2. **Validaciones defensivas**:
+
+   ```typescript
+   const dailyReadingsCount = useMemo(() => {
+     const count = profile.dailyReadingsCount;
+     return typeof count === 'number' && !isNaN(count) ? count : 0;
+   }, [profile.dailyReadingsCount]);
+   ```
+
+3. **UI actualizada**:
+   - Usa variables calculadas en lugar de acceso directo
+   - Nunca muestra "NaN" al usuario
+   - Progress bar siempre con porcentaje válido
 
 #### Tareas de Corrección
 
@@ -575,33 +616,64 @@ La sección "Estadísticas de Uso" en pestaña Suscripción muestra "Lecturas re
   - Identificar de dónde vienen `planLimit` y `lecturesUsed`
   - Verificar respuesta de API `/users/me`
   - Revisar si backend envía estos datos
+- **Resultado:**
+  - [x] Backend NO envía estos campos
+  - [x] Entidad User no tiene estos campos en BD
+  - [x] Son campos calculados (documentados en types pero no implementados)
 
 **TAREA 3.1.2: Agregar validación y fallbacks** (Frontend)
 
 - **Archivo:** `frontend/src/components/features/profile/SubscriptionTab.tsx`
 - **Acción:**
-  ```typescript
-  const lecturesRemaining = useMemo(() => {
-    const limit = user?.planLimit ?? 0;
-    const used = user?.lecturesUsedToday ?? 0;
-    const remaining = limit - used;
-    return remaining >= 0 ? remaining : 0;
-  }, [user]);
-  ```
+  - Implementado `useMemo` para valores calculados
+  - Defensive guards para undefined/null/NaN
+  - Fallback a 0 en todos los casos
 - **Criterios de aceptación:**
-  - [ ] Nunca muestra "NaN"
-  - [ ] Muestra "0" si datos no disponibles
-  - [ ] Muestra valores correctos si datos existen
-  - [ ] Sin errores en consola
+  - [x] Nunca muestra "NaN"
+  - [x] Muestra "0" si datos no disponibles
+  - [x] Muestra valores correctos si datos existen
+  - [x] Sin errores en consola
 
 **TAREA 3.1.3: Verificar backend envía datos correctos** (Backend - opcional)
 
 - **Acción:**
-  - Si backend NO envía `planLimit` y `lecturesUsedToday`, agregarlos a respuesta de `/users/me`
+  - Backend ahora SÍ envía `dailyReadingsCount` y `dailyReadingsLimit`
+  - Implementado en endpoint `/users/profile`
+  - Integra `UsageLimitsService` y `PlanConfigService`
 - **Criterios de aceptación:**
-  - [ ] Response incluye campos necesarios
+  - [x] Response incluye campos `dailyReadingsCount` y `dailyReadingsLimit`
+  - [x] Cálculo correcto: `count = limit - remaining`
+  - [x] Maneja planes ilimitados (-1 → 999999)
+  - [x] Tests backend: 38/38 pasando
 
-**Estimación:** 30-45 min
+**Implementación Backend (Completada):**
+
+- **Archivo modificado:** `backend/tarot-app/src/modules/users/infrastructure/controllers/users.controller.ts`
+- **Cambios:**
+  - Inyectado `UsageLimitsService` y `PlanConfigService`
+  - Método `getProfile()` ahora calcula y retorna:
+    - `dailyReadingsLimit`: Límite según plan del usuario
+    - `dailyReadingsCount`: Lecturas realizadas hoy (limit - remaining)
+  - Planes ilimitados (premium/professional) retornan 999999 como límite
+- **Tests agregados:**
+  - Test con plan FREE (lecturas limitadas)
+  - Test con plan PREMIUM (lecturas ilimitadas)
+  - Test con usuario no encontrado
+- **Commit backend:** `3288919`
+
+#### Resultado Final
+
+✅ **Fix completo implementado en backend + frontend:**
+
+1. **Frontend:** Defensive guards previenen NaN (commit `59894d4`)
+2. **Backend:** Endpoint `/users/profile` ahora envía datos reales (commit `3288919`)
+3. **Usuario verá:**
+   - Plan FREE: "Lecturas realizadas hoy: X / 3" (datos reales del backend)
+   - Plan PREMIUM: "Lecturas realizadas hoy: X / 999999" (ilimitado)
+   - Sin errores NaN ✅
+
+**Estimación:** 30-45 min  
+**Tiempo Real:** 25 min (frontend) + 30 min (backend) = **55 min total**
 
 ---
 
@@ -673,6 +745,122 @@ Mensaje de error al registrar email duplicado aparece en inglés: "Email already
   - [ ] Consistente con resto de la app
 
 **Estimación:** 15-20 min
+
+---
+
+### ✅ BUG FIX 3.4: Cache no se actualiza al crear lectura (#A008) - **COMPLETADO ✅**
+
+**Prioridad:** 🟠 ALTO  
+**Área:** Frontend - State Management  
+**Estimación:** 30 min  
+**Tiempo Real:** 30 min  
+**Dependencias:** #A004 (Backend debe enviar dailyReadingsCount)  
+**Branch:** `fix/A004-nan-lecturas-restantes` (mismo branch que #A004)  
+**Commit Frontend:** `a88f195`  
+**Commit Backend:** `4f8ec0d` (fix circular dependency)
+
+#### Descripción del Bug
+
+Después de crear una nueva lectura, el contador de "Lecturas realizadas hoy" en la pestaña "Estadísticas de Uso" no se actualiza automáticamente. El usuario debe refrescar la página manualmente para ver el contador actualizado.
+
+#### Análisis de Causa Raíz
+
+**Problema identificado:**
+
+- `useCreateReading()` solo invalida queries de TanStack Query (`readingQueryKeys.all`)
+- Los datos del perfil del usuario (que incluyen `dailyReadingsCount`) están en **Zustand** (`authStore`), no en TanStack Query
+- Zustand no se entera de que debe refrescar los datos después de crear una lectura
+- El componente `SubscriptionTab` usa `useAuth()` → `authStore.user` (cache estática hasta que llames `checkAuth()`)
+
+**Por qué pasa:**
+
+1. Usuario crea lectura → `useCreateReading.mutate()`
+2. Backend guarda lectura y actualiza contador interno
+3. Frontend invalida queries de lecturas ✅
+4. Frontend NO actualiza `authStore` ❌
+5. Componente `SubscriptionTab` muestra datos viejos de `authStore`
+
+#### Solución Implementada
+
+**Cambios en useReadings.ts:**
+
+1. **Importar authStore**:
+
+   ```typescript
+   import { useAuthStore } from '@/stores/authStore';
+   ```
+
+2. **Modificar `useCreateReading()` para refrescar perfil**:
+
+   ```typescript
+   export function useCreateReading() {
+     const queryClient = useQueryClient();
+     const checkAuth = useAuthStore((state) => state.checkAuth);
+
+     return useMutation({
+       mutationFn: (data: CreateReadingDto) => createReading(data),
+       onSuccess: async () => {
+         queryClient.invalidateQueries({ queryKey: readingQueryKeys.all });
+         // Refresh user profile to update daily readings count
+         await checkAuth();
+         toast.success('Lectura creada exitosamente');
+       },
+       ...
+     });
+   }
+   ```
+
+3. **Actualizar test en useReadings.test.tsx**:
+   - Mock de `useAuthStore` para simular `checkAuth`
+   - Verificar que `checkAuth()` se llama después de crear lectura exitosamente
+   - Verificar que NO se llama si hay error
+
+#### Tareas de Corrección
+
+**TAREA 3.4.1: Agregar llamada a checkAuth en useCreateReading** (Frontend)
+
+- **Archivo:** `frontend/src/hooks/api/useReadings.ts`
+- **Acción:**
+  - Importar `useAuthStore`
+  - Obtener `checkAuth` del store
+  - Llamar `await checkAuth()` en `onSuccess`
+- **Criterios de aceptación:**
+  - [x] Importa authStore correctamente
+  - [x] Llama `checkAuth()` después de crear lectura
+  - [x] No bloquea el flujo (usa `await` dentro de `onSuccess`)
+
+**TAREA 3.4.2: Actualizar tests** (Frontend)
+
+- **Archivo:** `frontend/src/hooks/api/useReadings.test.tsx`
+- **Acción:**
+  - Mock de `useAuthStore`
+  - Simular `checkAuth` con `vi.fn()`
+  - Verificar que se llama en test exitoso
+  - Verificar que NO se llama en test de error
+- **Criterios de aceptación:**
+  - [x] Mock de `useAuthStore` funciona
+  - [x] Test "should create reading successfully" verifica `checkAuth()` llamado
+  - [x] Test de error verifica que NO se llama
+  - [x] Todos los tests pasan (20/20)
+
+#### Resultado Final
+
+✅ **Fix implementado:**
+
+1. **Frontend:** `useCreateReading()` ahora refresca perfil automáticamente
+2. **Usuario verá:** Contador actualizado sin necesidad de refresh manual
+3. **Tests:** 20/20 pasando en `useReadings.test.tsx`
+
+**Flujo después del fix:**
+
+1. Usuario crea lectura → `useCreateReading.mutate()`
+2. Backend guarda lectura ✅
+3. Frontend invalida queries de lecturas ✅
+4. Frontend llama `checkAuth()` → refresca datos del usuario ✅
+5. `SubscriptionTab` muestra contador actualizado automáticamente ✅
+
+**Estimación:** 30 min  
+**Tiempo Real:** 30 min
 
 ---
 

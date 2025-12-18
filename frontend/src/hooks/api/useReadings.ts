@@ -8,6 +8,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/utils/useToast';
+import { userQueryKeys } from './useUser';
 
 import {
   getCategories,
@@ -114,7 +115,7 @@ export function useReadingDetail(id: number) {
 
 /**
  * Hook to create a new reading
- * On success: invalidates readings list and shows toast
+ * On success: invalidates readings list, refreshes user profile, and shows toast
  */
 export function useCreateReading() {
   const queryClient = useQueryClient();
@@ -123,6 +124,8 @@ export function useCreateReading() {
     mutationFn: (data: CreateReadingDto) => createReading(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: readingQueryKeys.all });
+      // Invalidate user profile to refresh daily readings count
+      queryClient.invalidateQueries({ queryKey: userQueryKeys.profile });
       toast.success('Lectura creada exitosamente');
     },
     onError: (error: Error) => {

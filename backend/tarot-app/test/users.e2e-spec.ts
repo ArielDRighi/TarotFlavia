@@ -39,6 +39,8 @@ describe('Users (e2e)', () => {
     plan: string;
     roles: string[];
     profilePicture?: string;
+    dailyReadingsCount: number;
+    dailyReadingsLimit: number;
     createdAt: string;
     updatedAt: string;
   }
@@ -125,6 +127,18 @@ describe('Users (e2e)', () => {
       expect(profile).toHaveProperty('name');
       expect(profile).toHaveProperty('roles');
       expect(profile).not.toHaveProperty('password'); // Password should be excluded
+
+      // Validate daily readings statistics
+      expect(profile).toHaveProperty('dailyReadingsCount');
+      expect(profile).toHaveProperty('dailyReadingsLimit');
+      expect(typeof profile.dailyReadingsCount).toBe('number');
+      expect(typeof profile.dailyReadingsLimit).toBe('number');
+      expect(profile.dailyReadingsLimit).toBeGreaterThan(0); // FREE plan has a limit
+      expect(profile.dailyReadingsLimit).toBeLessThan(999999); // Not unlimited
+      expect(profile.dailyReadingsCount).toBeGreaterThanOrEqual(0);
+      expect(profile.dailyReadingsCount).toBeLessThanOrEqual(
+        profile.dailyReadingsLimit,
+      );
     });
 
     it('should return profile for authenticated premium user', async () => {
@@ -137,6 +151,12 @@ describe('Users (e2e)', () => {
       expect(profile.id).toBe(premiumUserId);
       expect(profile.email).toBe('premium@test.com');
       expect(profile.plan).toBe('premium');
+
+      // Validate daily readings statistics for unlimited plan
+      expect(profile).toHaveProperty('dailyReadingsCount');
+      expect(profile).toHaveProperty('dailyReadingsLimit');
+      expect(profile.dailyReadingsLimit).toBe(999999); // Unlimited represented as 999999
+      expect(profile.dailyReadingsCount).toBe(0); // No count for unlimited plans
     });
 
     it('should return profile for authenticated admin user', async () => {
