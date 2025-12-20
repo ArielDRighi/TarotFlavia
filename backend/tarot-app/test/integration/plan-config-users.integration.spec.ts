@@ -80,12 +80,7 @@ describe('PlanConfig + Users Integration Tests', () => {
     });
 
     it('should validate all plan types exist in plan_config', async () => {
-      const testPlans = [
-        UserPlan.GUEST,
-        UserPlan.FREE,
-        UserPlan.PREMIUM,
-        UserPlan.PROFESSIONAL,
-      ];
+      const testPlans = [UserPlan.ANONYMOUS, UserPlan.FREE, UserPlan.PREMIUM];
 
       for (const planType of testPlans) {
         // BUG HUNT: Does each plan exist in database?
@@ -118,15 +113,17 @@ describe('PlanConfig + Users Integration Tests', () => {
   });
 
   describe('Plan Limit Consistency', () => {
-    it('should have consistent GUEST plan limits', async () => {
-      const guestPlan = await planConfigService.findByPlanType(UserPlan.GUEST);
+    it('should have consistent ANONYMOUS plan limits', async () => {
+      const anonymousPlan = await planConfigService.findByPlanType(
+        UserPlan.ANONYMOUS,
+      );
 
-      // VERIFY: GUEST plan configuration matches requirements
-      expect(guestPlan.readingsLimit).toBe(3);
-      expect(guestPlan.aiQuotaMonthly).toBe(0);
-      expect(guestPlan.allowCustomQuestions).toBe(false);
-      expect(guestPlan.allowSharing).toBe(false);
-      expect(guestPlan.allowAdvancedSpreads).toBe(false);
+      // VERIFY: ANONYMOUS plan configuration matches requirements
+      expect(anonymousPlan.readingsLimit).toBe(3);
+      expect(anonymousPlan.aiQuotaMonthly).toBe(0);
+      expect(anonymousPlan.allowCustomQuestions).toBe(false);
+      expect(anonymousPlan.allowSharing).toBe(false);
+      expect(anonymousPlan.allowAdvancedSpreads).toBe(false);
     });
 
     it('should have consistent FREE plan limits', async () => {
@@ -156,8 +153,8 @@ describe('PlanConfig + Users Integration Tests', () => {
 
   describe('Plan Service Helper Methods', () => {
     it('should get correct readings limit for each plan', async () => {
-      const guestLimit = await planConfigService.getReadingsLimit(
-        UserPlan.GUEST,
+      const anonymousLimit = await planConfigService.getReadingsLimit(
+        UserPlan.ANONYMOUS,
       );
       const freeLimit = await planConfigService.getReadingsLimit(UserPlan.FREE);
       const premiumLimit = await planConfigService.getReadingsLimit(
@@ -165,29 +162,31 @@ describe('PlanConfig + Users Integration Tests', () => {
       );
 
       // VERIFY: Limits match seeder configuration
-      expect(guestLimit).toBe(3);
+      expect(anonymousLimit).toBe(3);
       expect(freeLimit).toBe(10);
       expect(premiumLimit).toBe(-1);
     });
 
     it('should get correct AI quota for each plan', async () => {
-      const guestQuota = await planConfigService.getAiQuota(UserPlan.GUEST);
+      const anonymousQuota = await planConfigService.getAiQuota(
+        UserPlan.ANONYMOUS,
+      );
       const freeQuota = await planConfigService.getAiQuota(UserPlan.FREE);
       const premiumQuota = await planConfigService.getAiQuota(UserPlan.PREMIUM);
 
       // VERIFY: AI quotas match seeder configuration
-      expect(guestQuota).toBe(0);
+      expect(anonymousQuota).toBe(0);
       expect(freeQuota).toBe(100);
       expect(premiumQuota).toBe(-1);
     });
 
     it('should check feature availability correctly', async () => {
-      // VERIFY: GUEST does not have allowSharing
-      const guestHasSharing = await planConfigService.hasFeature(
-        UserPlan.GUEST,
+      // VERIFY: ANONYMOUS does not have allowSharing
+      const anonymousHasSharing = await planConfigService.hasFeature(
+        UserPlan.ANONYMOUS,
         'allowSharing',
       );
-      expect(guestHasSharing).toBe(false);
+      expect(anonymousHasSharing).toBe(false);
 
       // VERIFY: PREMIUM has allowSharing
       const premiumHasSharing = await planConfigService.hasFeature(
@@ -278,24 +277,20 @@ describe('PlanConfig + Users Integration Tests', () => {
 
   describe('Plan Pricing', () => {
     it('should have correct pricing for each plan', async () => {
-      const guestPlan = await planConfigService.findByPlanType(UserPlan.GUEST);
+      const anonymousPlan = await planConfigService.findByPlanType(
+        UserPlan.ANONYMOUS,
+      );
       const freePlan = await planConfigService.findByPlanType(UserPlan.FREE);
       const premiumPlan = await planConfigService.findByPlanType(
         UserPlan.PREMIUM,
       );
-      const professionalPlan = await planConfigService.findByPlanType(
-        UserPlan.PROFESSIONAL,
-      );
 
       // VERIFY: Free plans cost $0
-      expect(parseFloat(guestPlan.price.toString())).toBe(0);
+      expect(parseFloat(anonymousPlan.price.toString())).toBe(0);
       expect(parseFloat(freePlan.price.toString())).toBe(0);
 
-      // VERIFY: Paid plans have prices
+      // VERIFY: Paid plan has price
       expect(parseFloat(premiumPlan.price.toString())).toBeGreaterThan(0);
-      expect(parseFloat(professionalPlan.price.toString())).toBeGreaterThan(
-        parseFloat(premiumPlan.price.toString()),
-      );
     });
   });
 

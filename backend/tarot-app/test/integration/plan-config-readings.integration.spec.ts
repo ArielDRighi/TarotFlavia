@@ -145,7 +145,7 @@ describe('PlanConfig + Readings Integration Tests', () => {
       name: 'Guest User',
     });
     await usersService.updatePlan(guestUserWithoutPassword.id, {
-      plan: UserPlan.GUEST,
+      plan: UserPlan.ANONYMOUS,
     });
     guestUser = (await userRepository.findOne({
       where: { id: guestUserWithoutPassword.id },
@@ -327,7 +327,7 @@ describe('PlanConfig + Readings Integration Tests', () => {
   afterEach(async () => {
     // Restore original plan limits after each test to ensure test isolation
     await planRepository.update(
-      { planType: UserPlan.GUEST },
+      { planType: UserPlan.ANONYMOUS },
       { readingsLimit: 3 },
     );
     await planRepository.update(
@@ -338,10 +338,12 @@ describe('PlanConfig + Readings Integration Tests', () => {
 
   describe('Reading Limits Based on Plan Config', () => {
     it('should enforce GUEST plan limit (3 readings)', async () => {
-      const guestPlan = await planConfigService.findByPlanType(UserPlan.GUEST);
-      expect(guestPlan.readingsLimit).toBe(3);
+      const anonymousPlan = await planConfigService.findByPlanType(
+        UserPlan.ANONYMOUS,
+      );
+      expect(anonymousPlan.readingsLimit).toBe(3);
 
-      // BUG HUNT: Can GUEST create 3 readings?
+      // BUG HUNT: Can ANONYMOUS create 3 readings?
       for (let i = 0; i < 3; i++) {
         await request(app.getHttpServer())
           .post(`/${API_PREFIX}/readings`)
@@ -444,9 +446,9 @@ describe('PlanConfig + Readings Integration Tests', () => {
         .send(createReadingPayload())
         .expect(403);
 
-      // Increase GUEST limit to 5
+      // Increase ANONYMOUS limit to 5
       await planRepository.update(
-        { planType: UserPlan.GUEST },
+        { planType: UserPlan.ANONYMOUS },
         { readingsLimit: 5 },
       );
 
@@ -459,7 +461,7 @@ describe('PlanConfig + Readings Integration Tests', () => {
 
       // Restore original limit
       await planRepository.update(
-        { planType: UserPlan.GUEST },
+        { planType: UserPlan.ANONYMOUS },
         { readingsLimit: 3 },
       );
     }, 15000); // Increased timeout for creating multiple readings
@@ -467,9 +469,11 @@ describe('PlanConfig + Readings Integration Tests', () => {
 
   describe('Feature Flags - Custom Questions', () => {
     it('should respect allowCustomQuestions flag', async () => {
-      // VERIFY: GUEST should not have allowCustomQuestions
-      const guestPlan = await planConfigService.findByPlanType(UserPlan.GUEST);
-      expect(guestPlan.allowCustomQuestions).toBe(false);
+      // VERIFY: ANONYMOUS should not have allowCustomQuestions
+      const anonymousPlan = await planConfigService.findByPlanType(
+        UserPlan.ANONYMOUS,
+      );
+      expect(anonymousPlan.allowCustomQuestions).toBe(false);
 
       // VERIFY: PREMIUM should have allowCustomQuestions
       const premiumPlan = await planConfigService.findByPlanType(
@@ -478,11 +482,11 @@ describe('PlanConfig + Readings Integration Tests', () => {
       expect(premiumPlan.allowCustomQuestions).toBe(true);
 
       // BUG HUNT: Does hasFeature method work correctly?
-      const guestHasCustom = await planConfigService.hasFeature(
-        UserPlan.GUEST,
+      const anonymousHasCustom = await planConfigService.hasFeature(
+        UserPlan.ANONYMOUS,
         'allowCustomQuestions',
       );
-      expect(guestHasCustom).toBe(false);
+      expect(anonymousHasCustom).toBe(false);
 
       const premiumHasCustom = await planConfigService.hasFeature(
         UserPlan.PREMIUM,
