@@ -7,7 +7,7 @@ import { UsageFeature } from './entities/usage-limit.entity';
  * -1 significa ilimitado
  */
 export const USAGE_LIMITS: Record<UserPlan, Record<UsageFeature, number>> = {
-  [UserPlan.GUEST]: {
+  [UserPlan.ANONYMOUS]: {
     [UsageFeature.TAROT_READING]: 3,
     [UsageFeature.INTERPRETATION_REGENERATION]: 0,
     [UsageFeature.ORACLE_QUERY]: 0,
@@ -18,11 +18,6 @@ export const USAGE_LIMITS: Record<UserPlan, Record<UsageFeature, number>> = {
     [UsageFeature.ORACLE_QUERY]: 5,
   },
   [UserPlan.PREMIUM]: {
-    [UsageFeature.TAROT_READING]: -1, // ilimitado
-    [UsageFeature.INTERPRETATION_REGENERATION]: -1, // ilimitado
-    [UsageFeature.ORACLE_QUERY]: -1, // ilimitado
-  },
-  [UserPlan.PROFESSIONAL]: {
     [UsageFeature.TAROT_READING]: -1, // ilimitado
     [UsageFeature.INTERPRETATION_REGENERATION]: -1, // ilimitado
     [UsageFeature.ORACLE_QUERY]: -1, // ilimitado

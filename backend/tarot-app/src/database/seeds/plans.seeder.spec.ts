@@ -18,7 +18,7 @@ describe('Plans Seeder', () => {
     jest.clearAllMocks();
   });
 
-  it('should seed all four plans when database is empty', async () => {
+  it('should seed all three plans when database is empty', async () => {
     // Mock empty database
     (planRepository.count as jest.Mock).mockResolvedValue(0);
 
@@ -26,8 +26,8 @@ describe('Plans Seeder', () => {
     const mockPlans = [
       {
         id: 1,
-        planType: UserPlan.GUEST,
-        name: 'Plan Invitado',
+        planType: UserPlan.ANONYMOUS,
+        name: 'Plan Anónimo',
         price: 0,
         readingsLimit: 3,
         aiQuotaMonthly: 0,
@@ -45,14 +45,6 @@ describe('Plans Seeder', () => {
         planType: UserPlan.PREMIUM,
         name: 'Plan Premium',
         price: 9.99,
-        readingsLimit: -1,
-        aiQuotaMonthly: -1,
-      },
-      {
-        id: 4,
-        planType: UserPlan.PROFESSIONAL,
-        name: 'Plan Profesional',
-        price: 19.99,
         readingsLimit: -1,
         aiQuotaMonthly: -1,
       },
@@ -74,14 +66,14 @@ describe('Plans Seeder', () => {
 
     // Verify repository methods were called
     expect(planRepository.count).toHaveBeenCalledTimes(1);
-    expect(planRepository.create).toHaveBeenCalledTimes(4);
-    expect(planRepository.save).toHaveBeenCalledTimes(4);
+    expect(planRepository.create).toHaveBeenCalledTimes(3);
+    expect(planRepository.save).toHaveBeenCalledTimes(3);
 
-    // Verify GUEST plan was created
+    // Verify ANONYMOUS plan was created
     expect(planRepository.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        planType: UserPlan.GUEST,
-        name: 'Plan Invitado',
+        planType: UserPlan.ANONYMOUS,
+        name: 'Plan Anónimo',
         price: 0,
         readingsLimit: 3,
         aiQuotaMonthly: 0,
@@ -107,18 +99,6 @@ describe('Plans Seeder', () => {
         planType: UserPlan.PREMIUM,
         name: 'Plan Premium',
         price: 9.99,
-        readingsLimit: -1,
-        aiQuotaMonthly: -1,
-        allowCustomQuestions: true,
-      }),
-    );
-
-    // Verify PROFESSIONAL plan was created
-    expect(planRepository.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        planType: UserPlan.PROFESSIONAL,
-        name: 'Plan Profesional',
-        price: 19.99,
         readingsLimit: -1,
         aiQuotaMonthly: -1,
         allowCustomQuestions: true,
@@ -172,10 +152,10 @@ describe('Plans Seeder', () => {
 
     await seedPlans(planRepository);
 
-    // Check GUEST plan features
+    // Check ANONYMOUS plan features
     expect(planRepository.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        planType: UserPlan.GUEST,
+        planType: UserPlan.ANONYMOUS,
         allowCustomQuestions: false,
         allowSharing: false,
         allowAdvancedSpreads: false,
@@ -196,16 +176,6 @@ describe('Plans Seeder', () => {
     expect(planRepository.create).toHaveBeenCalledWith(
       expect.objectContaining({
         planType: UserPlan.PREMIUM,
-        allowCustomQuestions: true,
-        allowSharing: true,
-        allowAdvancedSpreads: true,
-      }),
-    );
-
-    // Check PROFESSIONAL plan features
-    expect(planRepository.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        planType: UserPlan.PROFESSIONAL,
         allowCustomQuestions: true,
         allowSharing: true,
         allowAdvancedSpreads: true,

@@ -8,12 +8,11 @@ import { UserPlan } from '../../modules/users/entities/user.entity';
  *
  * Features:
  * - Idempotent: Can be run multiple times without duplicating data
- * - Creates GUEST, FREE, PREMIUM, and PROFESSIONAL plans
+ * - Creates ANONYMOUS, FREE, and PREMIUM plans
  * - Configures limits and features for each plan
- * - GUEST: For non-registered users (3 readings, no AI, no history)
+ * - ANONYMOUS: For non-registered users (3 readings, no AI, no history)
  * - FREE: For registered users (10 readings, 100 AI requests, save history)
  * - PREMIUM: Paid plan (unlimited, all features)
- * - PROFESSIONAL: For professional tarotists (unlimited + priority support)
  */
 export async function seedPlans(
   planRepository: Repository<Plan>,
@@ -32,13 +31,13 @@ export async function seedPlans(
   // Define plan configurations
   const plansData = [
     {
-      planType: UserPlan.GUEST,
-      name: 'Plan Invitado',
+      planType: UserPlan.ANONYMOUS,
+      name: 'Plan Anónimo',
       description:
         'Plan para usuarios no registrados con acceso limitado para probar la aplicación',
       price: 0,
       readingsLimit: 3,
-      aiQuotaMonthly: 0, // No AI for guests
+      aiQuotaMonthly: 0, // No AI for anonymous users
       allowCustomQuestions: false,
       allowSharing: false,
       allowAdvancedSpreads: false,
@@ -63,19 +62,6 @@ export async function seedPlans(
       description:
         'Plan completo con lecturas ilimitadas, preguntas personalizadas y compartir lecturas',
       price: 9.99,
-      readingsLimit: -1, // Ilimitado
-      aiQuotaMonthly: -1, // Ilimitado
-      allowCustomQuestions: true,
-      allowSharing: true,
-      allowAdvancedSpreads: true,
-      isActive: true,
-    },
-    {
-      planType: UserPlan.PROFESSIONAL,
-      name: 'Plan Profesional',
-      description:
-        'Plan para tarotistas profesionales con todas las funcionalidades y soporte prioritario',
-      price: 19.99,
       readingsLimit: -1, // Ilimitado
       aiQuotaMonthly: -1, // Ilimitado
       allowCustomQuestions: true,
