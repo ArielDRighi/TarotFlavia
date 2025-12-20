@@ -62,6 +62,7 @@ describe('Readings Hybrid Questions (E2E)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
     await app.init();
 
@@ -89,7 +90,7 @@ describe('Readings Hybrid Questions (E2E)', () => {
 
     // Login con usuario FREE seeded
     const freeLoginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({
         email: 'free@test.com',
         password: 'Test123456!',
@@ -101,7 +102,7 @@ describe('Readings Hybrid Questions (E2E)', () => {
 
     // Login con usuario PREMIUM seeded
     const premiumLoginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({
         email: 'premium@test.com',
         password: 'Test123456!',
@@ -159,7 +160,7 @@ describe('Readings Hybrid Questions (E2E)', () => {
   describe('POST /readings - Usuario FREE', () => {
     it('debe crear lectura con pregunta predefinida (201)', async () => {
       const response = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
           predefinedQuestionId: predefinedQuestionId,
@@ -184,7 +185,7 @@ describe('Readings Hybrid Questions (E2E)', () => {
 
     it('debe rechazar pregunta custom (403)', async () => {
       const response = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
           customQuestion: '¿Cuál es mi propósito en la vida?',
@@ -206,7 +207,7 @@ describe('Readings Hybrid Questions (E2E)', () => {
 
     it('debe rechazar si no proporciona ninguna pregunta (400)', async () => {
       const response = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
           deckId: deckId,
@@ -232,7 +233,7 @@ describe('Readings Hybrid Questions (E2E)', () => {
   describe('POST /readings - Usuario PREMIUM', () => {
     it('debe crear lectura con pregunta custom (201)', async () => {
       const response = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           customQuestion: '¿Cuál es mi propósito en la vida?',
@@ -257,7 +258,7 @@ describe('Readings Hybrid Questions (E2E)', () => {
 
     it('debe crear lectura con pregunta predefinida también (201)', async () => {
       const response = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           predefinedQuestionId: predefinedQuestionId,
@@ -282,7 +283,7 @@ describe('Readings Hybrid Questions (E2E)', () => {
 
     it('debe rechazar si proporciona ambas preguntas (400)', async () => {
       const response = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           predefinedQuestionId: predefinedQuestionId,
@@ -311,7 +312,7 @@ describe('Readings Hybrid Questions (E2E)', () => {
     it('debe rechazar pregunta custom antes de upgrade, permitirla después de upgrade', async () => {
       // 1. Login como admin para poder actualizar el plan
       const adminLoginResponse = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: 'admin@test.com',
           password: 'Test123456!',
@@ -323,7 +324,7 @@ describe('Readings Hybrid Questions (E2E)', () => {
 
       // 2. Intentar crear lectura con pregunta custom como FREE (debe fallar)
       await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
           customQuestion: '¿Cuál es mi destino?',
@@ -341,7 +342,7 @@ describe('Readings Hybrid Questions (E2E)', () => {
 
       // 3. Admin actualiza el plan del usuario FREE a PREMIUM
       await request(app.getHttpServer())
-        .patch(`/users/${freeUserId}/plan`)
+        .patch(`/api/v1/users/${freeUserId}/plan`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           plan: 'premium',
@@ -350,7 +351,7 @@ describe('Readings Hybrid Questions (E2E)', () => {
 
       // 4. Usuario FREE debe hacer re-login para obtener nuevo token
       const newLoginResponse = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: 'free@test.com',
           password: 'Test123456!',
@@ -361,7 +362,7 @@ describe('Readings Hybrid Questions (E2E)', () => {
 
       // 5. Ahora con el nuevo token (con plan=premium) puede crear lectura con pregunta custom
       const response = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${newToken}`)
         .send({
           customQuestion: '¿Cuál es mi destino?',
@@ -384,7 +385,7 @@ describe('Readings Hybrid Questions (E2E)', () => {
 
       // 6. Revertir el cambio de plan para no afectar otros tests
       await request(app.getHttpServer())
-        .patch(`/users/${freeUserId}/plan`)
+        .patch(`/api/v1/users/${freeUserId}/plan`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           plan: 'free',
@@ -393,7 +394,7 @@ describe('Readings Hybrid Questions (E2E)', () => {
 
       // Actualizar el token FREE para futuros tests
       const revertLoginResponse = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: 'free@test.com',
           password: 'Test123456!',
@@ -410,7 +411,7 @@ describe('Readings Hybrid Questions (E2E)', () => {
   describe('Multi-Tarotista Support (TASK-074)', () => {
     it('should include tarotistaId in hybrid readings (PREMIUM user with predefined)', async () => {
       const response = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           predefinedQuestionId: predefinedQuestionId,
@@ -432,7 +433,7 @@ describe('Readings Hybrid Questions (E2E)', () => {
 
     it('should include tarotistaId in hybrid readings (PREMIUM user with custom)', async () => {
       const response = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           customQuestion: 'Hybrid test for multi-tarotista',

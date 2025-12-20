@@ -22,6 +22,7 @@ describe('AI Quota (E2E)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -60,7 +61,7 @@ describe('AI Quota (E2E)', () => {
 
     // Login to get auth token
     const loginResponse = await request(getServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({
         email: 'quota.test@example.com',
         password: 'password123',
@@ -82,7 +83,7 @@ describe('AI Quota (E2E)', () => {
   describe('GET /usage/ai', () => {
     it('should return quota information for authenticated user', () => {
       return request(getServer())
-        .get('/usage/ai')
+        .get('/api/v1/usage/ai')
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200)
         .expect((res) => {
@@ -101,7 +102,7 @@ describe('AI Quota (E2E)', () => {
     });
 
     it('should not require authentication for health checks', () => {
-      return request(getServer()).get('/health').expect(200);
+      return request(getServer()).get('/api/v1/health').expect(200);
     });
   });
 
@@ -114,7 +115,7 @@ describe('AI Quota (E2E)', () => {
       });
 
       return request(getServer())
-        .post('/readings/999/regenerate')
+        .post('/api/v1/readings/999/regenerate')
         .set('Authorization', `Bearer ${authToken}`)
         .expect(403)
         .expect((res) => {
@@ -127,7 +128,7 @@ describe('AI Quota (E2E)', () => {
     it('should block POST /daily-reading/regenerate when quota exceeded', async () => {
       // User still has quota exceeded from previous test
       return request(getServer())
-        .post('/daily-reading/regenerate')
+        .post('/api/v1/daily-reading/regenerate')
         .set('Authorization', `Bearer ${authToken}`)
         .expect(403)
         .expect((res) => {
@@ -146,7 +147,7 @@ describe('AI Quota (E2E)', () => {
       // Note: This will fail because reading 999 doesn't exist,
       // but the important part is that it passes the AIQuotaGuard (not 403 quota)
       return request(getServer())
-        .post('/readings/999/regenerate')
+        .post('/api/v1/readings/999/regenerate')
         .set('Authorization', `Bearer ${authToken}`)
         .expect((res) => {
           // Should get 404 (not found) or 403 (premium/owner check), NOT 403 quota
@@ -162,7 +163,7 @@ describe('AI Quota (E2E)', () => {
     });
 
     it('should return 401 when not authenticated', () => {
-      return request(getServer()).get('/usage/ai').expect(401);
+      return request(getServer()).get('/api/v1/usage/ai').expect(401);
     });
   });
 
@@ -196,7 +197,7 @@ describe('AI Quota (E2E)', () => {
       premiumUserId = result.identifiers[0].id as number;
 
       const loginResponse = await request(getServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: 'premium.quota@example.com',
           password: 'password123',
@@ -216,7 +217,7 @@ describe('AI Quota (E2E)', () => {
 
     it('should show unlimited quota for PREMIUM user', () => {
       return request(getServer())
-        .get('/usage/ai')
+        .get('/api/v1/usage/ai')
         .set('Authorization', `Bearer ${premiumToken}`)
         .expect(200)
         .expect((res) => {
@@ -259,7 +260,7 @@ describe('AI Quota (E2E)', () => {
       exhaustedUserId = result.identifiers[0].id as number;
 
       const loginResponse = await request(getServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: 'exhausted.quota@example.com',
           password: 'password123',
@@ -279,7 +280,7 @@ describe('AI Quota (E2E)', () => {
 
     it('should show quota exhausted', () => {
       return request(getServer())
-        .get('/usage/ai')
+        .get('/api/v1/usage/ai')
         .set('Authorization', `Bearer ${exhaustedToken}`)
         .expect(200)
         .expect((res) => {

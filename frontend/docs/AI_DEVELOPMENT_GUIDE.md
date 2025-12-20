@@ -117,11 +117,11 @@ npm test
 ```tsx
 // 1. 🔴 RED - Escribir test primero
 // tests/components/ReadingCard.test.tsx
-describe("ReadingCard", () => {
-  it("should display reading question", () => {
-    const reading = { id: "1", question: "¿Amor?" };
+describe('ReadingCard', () => {
+  it('should display reading question', () => {
+    const reading = { id: '1', question: '¿Amor?' };
     render(<ReadingCard reading={reading} />);
-    expect(screen.getByText("¿Amor?")).toBeInTheDocument();
+    expect(screen.getByText('¿Amor?')).toBeInTheDocument();
   });
 });
 
@@ -229,14 +229,14 @@ export const restoreReadingSchema = z.object({
 
 // ===== 3. API HOOKS =====
 // hooks/api/useTrashedReadings.ts
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "@/lib/api/axios-config";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiClient } from '@/lib/api/axios-config';
 
 export function useTrashedReadings() {
   return useQuery({
-    queryKey: ["readings", "trash"],
+    queryKey: ['readings', 'trash'],
     queryFn: async () => {
-      const response = await apiClient.get<TrashedReading[]>("/readings/trash");
+      const response = await apiClient.get<TrashedReading[]>('/readings/trash');
       return response.data;
     },
     staleTime: 1 * 60 * 1000, // 1 minuto
@@ -252,20 +252,20 @@ export function useRestoreReading() {
     },
     onSuccess: () => {
       // Invalidar queries para refrescar datos
-      queryClient.invalidateQueries({ queryKey: ["readings", "trash"] });
-      queryClient.invalidateQueries({ queryKey: ["readings"] });
+      queryClient.invalidateQueries({ queryKey: ['readings', 'trash'] });
+      queryClient.invalidateQueries({ queryKey: ['readings'] });
     },
   });
 }
 
 // ===== 4. COMPONENTES =====
 // components/features/readings/TrashReadingsList.tsx
-("use client");
+('use client');
 
-import { useTrashedReadings, useRestoreReading } from "@/hooks/api/useTrashedReadings";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "sonner";
+import { useTrashedReadings, useRestoreReading } from '@/hooks/api/useTrashedReadings';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'sonner';
 
 export function TrashReadingsList() {
   const { data: readings, isLoading, error } = useTrashedReadings();
@@ -283,7 +283,7 @@ export function TrashReadingsList() {
 
   if (error) {
     return (
-      <div className="text-center p-8">
+      <div className="p-8 text-center">
         <p className="text-red-600">Error al cargar papelera</p>
         <Button variant="outline" onClick={() => refetch()}>
           Reintentar
@@ -293,16 +293,16 @@ export function TrashReadingsList() {
   }
 
   if (!readings || readings.length === 0) {
-    return <div className="text-center p-8 text-gray-500">No hay lecturas eliminadas</div>;
+    return <div className="p-8 text-center text-gray-500">No hay lecturas eliminadas</div>;
   }
 
   const handleRestore = (id: string) => {
     restore(id, {
       onSuccess: () => {
-        toast.success("Lectura restaurada correctamente");
+        toast.success('Lectura restaurada correctamente');
       },
       onError: (error) => {
-        toast.error("Error al restaurar: " + error.message);
+        toast.error('Error al restaurar: ' + error.message);
       },
     });
   };
@@ -310,9 +310,11 @@ export function TrashReadingsList() {
   return (
     <div className="space-y-4">
       {readings.map((reading) => (
-        <div key={reading.id} className="border rounded-lg p-4">
+        <div key={reading.id} className="rounded-lg border p-4">
           <p className="font-serif text-lg">{reading.question}</p>
-          <p className="text-sm text-gray-500">Eliminada: {new Date(reading.deletedAt).toLocaleDateString()}</p>
+          <p className="text-sm text-gray-500">
+            Eliminada: {new Date(reading.deletedAt).toLocaleDateString()}
+          </p>
           <Button
             onClick={() => handleRestore(reading.id)}
             disabled={isPending || !reading.restorable}
@@ -329,17 +331,17 @@ export function TrashReadingsList() {
 
 // ===== 5. PÁGINA =====
 // app/lecturas/papelera/page.tsx
-import { TrashReadingsList } from "@/components/features/readings/TrashReadingsList";
+import { TrashReadingsList } from '@/components/features/readings/TrashReadingsList';
 
 export const metadata = {
-  title: "Papelera | TarotFlavia",
-  description: "Lecturas eliminadas",
+  title: 'Papelera | TarotFlavia',
+  description: 'Lecturas eliminadas',
 };
 
 export default function TrashPage() {
   return (
     <div className="container py-8">
-      <h1 className="text-3xl font-serif mb-6">Papelera de Lecturas</h1>
+      <h1 className="mb-6 font-serif text-3xl">Papelera de Lecturas</h1>
       <TrashReadingsList />
     </div>
   );
@@ -347,32 +349,34 @@ export default function TrashPage() {
 
 // ===== 6. TESTS =====
 // tests/components/TrashReadingsList.test.tsx
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { TrashReadingsList } from "@/components/features/readings/TrashReadingsList";
-import { vi } from "vitest";
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { TrashReadingsList } from '@/components/features/readings/TrashReadingsList';
+import { vi } from 'vitest';
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: false } },
 });
 
-const wrapper = ({ children }) => <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+const wrapper = ({ children }) => (
+  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+);
 
-describe("TrashReadingsList", () => {
+describe('TrashReadingsList', () => {
   beforeEach(() => {
     queryClient.clear();
   });
 
-  it("should show loading state initially", () => {
+  it('should show loading state initially', () => {
     render(<TrashReadingsList />, { wrapper });
-    expect(screen.getAllByTestId("skeleton")).toHaveLength(3);
+    expect(screen.getAllByTestId('skeleton')).toHaveLength(3);
   });
 
-  it("should display trashed readings", async () => {
+  it('should display trashed readings', async () => {
     // Mock API response
-    vi.mock("@/hooks/api/useTrashedReadings", () => ({
+    vi.mock('@/hooks/api/useTrashedReadings', () => ({
       useTrashedReadings: () => ({
-        data: [{ id: "1", question: "¿Test?", deletedAt: "2025-12-01", restorable: true }],
+        data: [{ id: '1', question: '¿Test?', deletedAt: '2025-12-01', restorable: true }],
         isLoading: false,
         error: null,
       }),
@@ -381,14 +385,14 @@ describe("TrashReadingsList", () => {
     render(<TrashReadingsList />, { wrapper });
 
     await waitFor(() => {
-      expect(screen.getByText("¿Test?")).toBeInTheDocument();
+      expect(screen.getByText('¿Test?')).toBeInTheDocument();
     });
   });
 
-  it("should call restore mutation when restore button clicked", async () => {
+  it('should call restore mutation when restore button clicked', async () => {
     const mockRestore = vi.fn();
 
-    vi.mock("@/hooks/api/useTrashedReadings", () => ({
+    vi.mock('@/hooks/api/useTrashedReadings', () => ({
       useRestoreReading: () => ({
         mutate: mockRestore,
         isPending: false,
@@ -397,10 +401,10 @@ describe("TrashReadingsList", () => {
 
     render(<TrashReadingsList />, { wrapper });
 
-    const restoreBtn = screen.getByText("Restaurar");
+    const restoreBtn = screen.getByText('Restaurar');
     fireEvent.click(restoreBtn);
 
-    expect(mockRestore).toHaveBeenCalledWith("1", expect.any(Object));
+    expect(mockRestore).toHaveBeenCalledWith('1', expect.any(Object));
   });
 });
 ```
@@ -551,7 +555,7 @@ git push origin feature/TASK-X.Y-descripcion
    ```tsx
    // ❌ PROHIBIDO
    useEffect(() => {
-     fetch("/api/readings").then(setData);
+     fetch('/api/readings').then(setData);
    }, []);
 
    // ✅ CORRECTO
@@ -588,10 +592,10 @@ git push origin feature/TASK-X.Y-descripcion
 
    ```tsx
    // ❌ PROHIBIDO
-   import { Button } from "../../../components/ui/button";
+   import { Button } from '../../../components/ui/button';
 
    // ✅ CORRECTO
-   import { Button } from "@/components/ui/button";
+   import { Button } from '@/components/ui/button';
    ```
 
 7. **Componentes sin tipado de props**
@@ -653,7 +657,7 @@ function useReadingActions(readingId: string) {
   const { mutate: shareReading } = useShareReading();
 
   const handleDelete = () => {
-    if (confirm("¿Eliminar lectura?")) {
+    if (confirm('¿Eliminar lectura?')) {
       deleteReading(readingId);
     }
   };
@@ -699,23 +703,23 @@ export function useDeleteReading() {
     mutationFn: (id: string) => apiClient.delete(`/readings/${id}`),
     onMutate: async (id) => {
       // Cancelar queries en curso
-      await queryClient.cancelQueries({ queryKey: ["readings"] });
+      await queryClient.cancelQueries({ queryKey: ['readings'] });
 
       // Snapshot estado anterior
-      const previousReadings = queryClient.getQueryData(["readings"]);
+      const previousReadings = queryClient.getQueryData(['readings']);
 
       // Actualización optimista
-      queryClient.setQueryData(["readings"], (old: Reading[]) => old.filter((r) => r.id !== id));
+      queryClient.setQueryData(['readings'], (old: Reading[]) => old.filter((r) => r.id !== id));
 
       return { previousReadings };
     },
     onError: (err, id, context) => {
       // Rollback en caso de error
-      queryClient.setQueryData(["readings"], context.previousReadings);
-      toast.error("Error al eliminar");
+      queryClient.setQueryData(['readings'], context.previousReadings);
+      toast.error('Error al eliminar');
     },
     onSuccess: () => {
-      toast.success("Lectura eliminada");
+      toast.success('Lectura eliminada');
     },
   });
 }
@@ -762,7 +766,6 @@ useEffect(() => {
 ### Plan de implementación:
 
 1. **Archivos a crear:**
-
    - [ ] types/[nombre].types.ts - Interfaces TypeScript
    - [ ] lib/validations/[nombre].schemas.ts - Schemas Zod (si aplica)
    - [ ] hooks/api/use[Nombre].ts - React Query hooks
@@ -771,7 +774,6 @@ useEffect(() => {
    - [ ] tests/components/[Componente].test.tsx - Tests
 
 2. **Enfoque TDD:**
-
    - Escribir tests primero para cada componente
    - Implementar código mínimo
    - Refactorizar manteniendo tests verdes
@@ -839,9 +841,9 @@ beforeEach(() => {
 ```typescript
 // Asegurarse de invalidar queries
 onSuccess: () => {
-  queryClient.invalidateQueries({ queryKey: ["readings"] });
+  queryClient.invalidateQueries({ queryKey: ['readings'] });
   // o refetch específico
-  queryClient.refetchQueries({ queryKey: ["readings", id] });
+  queryClient.refetchQueries({ queryKey: ['readings', id] });
 };
 ```
 
@@ -901,6 +903,122 @@ Antes de considerar una tarea completada, verificar:
 
 ---
 
+## 🐛 Problemas Conocidos y Soluciones
+
+### 1. Interpretación de Lectura No Se Muestra (Type Mismatch Backend/Frontend)
+
+**Fecha:** 10 Diciembre 2025
+
+**Síntomas:**
+
+- Las cartas de la lectura se muestran correctamente
+- La sección de interpretación aparece vacía
+- El backend retorna la interpretación correctamente (verificado con `curl`)
+- No hay errores en consola del navegador
+
+**Causa Raíz:**
+El backend retorna `interpretation` como **string plano**, pero el frontend esperaba un **objeto estructurado**:
+
+```typescript
+// ❌ Frontend esperaba (incorrecto):
+interface ReadingDetail {
+  interpretation: {
+    generalInterpretation: string;
+    cardInterpretations: Array<{ cardId: number; interpretation: string }>;
+  };
+}
+
+// ✅ Backend retorna (real):
+{
+  "interpretation": "## Interpretación General\n\nEl Mago representa..."
+}
+```
+
+**Solución Implementada:**
+
+1. **Actualizar tipos para ser flexibles** (`types/reading.types.ts`):
+
+```typescript
+interface ReadingDetail {
+  interpretation: Interpretation | string | null;
+}
+```
+
+2. **Crear función de transformación en capa API** (`lib/api/readings-api.ts`):
+
+```typescript
+interface ApiReadingResponse {
+  // ... campos del backend
+  interpretation: string | null;
+}
+
+function transformReadingResponse(raw: ApiReadingResponse): ReadingDetail {
+  return {
+    // ... otros campos
+    interpretation: raw.interpretation, // Pasar tal cual
+  };
+}
+```
+
+3. **Aplicar transformación en todas las funciones API**:
+
+```typescript
+export async function createReading(data: CreateReadingDto): Promise<ReadingDetail> {
+  const response = await apiClient.post<ApiReadingResponse>(ENDPOINTS.BASE, data);
+  return transformReadingResponse(response.data);
+}
+
+export async function getReadingById(id: number): Promise<ReadingDetail> {
+  const response = await apiClient.get<ApiReadingResponse>(ENDPOINTS.BY_ID(id));
+  return transformReadingResponse(response.data);
+}
+
+export async function regenerateInterpretation(id: number): Promise<ReadingDetail> {
+  const response = await apiClient.post<ApiReadingResponse>(ENDPOINTS.REGENERATE(id));
+  return transformReadingResponse(response.data);
+}
+```
+
+4. **Crear helpers type-safe en componentes**:
+
+```typescript
+// ReadingDetail.tsx
+function getInterpretationData(interpretation: Interpretation | string | null) {
+  if (!interpretation) return { generalInterpretation: '', cardInterpretations: [] };
+  if (typeof interpretation === 'string')
+    return { generalInterpretation: interpretation, cardInterpretations: [] };
+  return interpretation;
+}
+
+// ReadingExperience.tsx
+function getGeneralInterpretation(interpretation: Interpretation | string | null): string {
+  if (!interpretation) return '';
+  if (typeof interpretation === 'string') return interpretation;
+  return interpretation.generalInterpretation || '';
+}
+```
+
+**Archivos Modificados:**
+
+- `frontend/src/types/reading.types.ts`
+- `frontend/src/lib/api/readings-api.ts`
+- `frontend/src/components/features/readings/ReadingDetail.tsx`
+- `frontend/src/components/features/readings/ReadingExperience.tsx`
+
+**Lección Aprendida:**
+
+> ⚠️ **IMPORTANTE:** Siempre verificar con `curl` la respuesta real del backend antes de asumir la estructura de datos. Los tipos del frontend deben coincidir con el contrato real de la API, no con suposiciones.
+
+**Diagnóstico Rápido:**
+
+```bash
+# Verificar respuesta real del backend
+curl -X GET http://localhost:3000/api/readings/1 \
+  -H "Authorization: Bearer <token>" | jq '.interpretation'
+```
+
+---
+
 ## ✨ Resumen Ejecutivo para IA
 
 **Antes de cada tarea:**
@@ -942,4 +1060,4 @@ Antes de considerar una tarea completada, verificar:
 
 ---
 
-**Última actualización:** 3 Diciembre 2025
+**Última actualización:** 10 Diciembre 2025

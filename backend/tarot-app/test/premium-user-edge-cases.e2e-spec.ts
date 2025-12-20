@@ -68,6 +68,7 @@ describe('Premium User Edge Cases E2E', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(new ValidationPipe({ transform: true }));
     await app.init();
 
@@ -94,7 +95,7 @@ describe('Premium User Edge Cases E2E', () => {
 
     // Register premium user
     const registerResponse = await request(app.getHttpServer())
-      .post('/auth/register')
+      .post('/api/v1/auth/register')
       .send({
         email: `premium-edge-${testTimestamp}@test.com`,
         password: 'Test1234!',
@@ -114,7 +115,7 @@ describe('Premium User Edge Cases E2E', () => {
 
     // Re-login to get fresh token with PREMIUM plan
     const loginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({
         email: `premium-edge-${testTimestamp}@test.com`,
         password: 'Test1234!',
@@ -154,7 +155,7 @@ describe('Premium User Edge Cases E2E', () => {
 
       for (let i = 0; i < 11; i++) {
         const response = await request(app.getHttpServer())
-          .post('/readings')
+          .post('/api/v1/readings')
           .set('Authorization', `Bearer ${premiumUserToken}`)
           .send({
             customQuestion: `Test question ${i + 1}`,
@@ -201,7 +202,7 @@ describe('Premium User Edge Cases E2E', () => {
   describe('2. Custom Question Edge Cases', () => {
     it('should reject empty custom question', async () => {
       const response = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           customQuestion: '',
@@ -224,7 +225,7 @@ describe('Premium User Edge Cases E2E', () => {
       const longQuestion = 'A'.repeat(501);
 
       const response = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           customQuestion: longQuestion,
@@ -247,7 +248,7 @@ describe('Premium User Edge Cases E2E', () => {
       const specialCharQuestion = '¿Qué me depara el futuro? 🔮 (pregunta #1)';
 
       const response = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           customQuestion: specialCharQuestion,
@@ -272,7 +273,7 @@ describe('Premium User Edge Cases E2E', () => {
       const maxQuestion = 'A'.repeat(500);
 
       const response = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           customQuestion: maxQuestion,
@@ -298,7 +299,7 @@ describe('Premium User Edge Cases E2E', () => {
     it('should track regeneration count correctly after multiple regenerations', async () => {
       // Create reading WITHOUT interpretation to avoid AI provider rate limits
       const createResponse = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           customQuestion: 'Test regeneration count',
@@ -321,7 +322,7 @@ describe('Premium User Edge Cases E2E', () => {
       // Accept that AI may fail (fallback will be used), focus on testing regeneration count
       for (let i = 1; i <= 3; i++) {
         const regenResponse = await request(app.getHttpServer())
-          .post(`/readings/${readingId}/regenerate`)
+          .post(`/api/v1/readings/${readingId}/regenerate`)
           .set('Authorization', `Bearer ${premiumUserToken}`)
           .send({
             customQuestion: `Regenerated question ${i}`,
@@ -339,7 +340,7 @@ describe('Premium User Edge Cases E2E', () => {
 
       // 4th regeneration should fail (limit exceeded OR rate limited)
       const fourthRegen = await request(app.getHttpServer())
-        .post(`/readings/${readingId}/regenerate`)
+        .post(`/api/v1/readings/${readingId}/regenerate`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           customQuestion: 'Fourth regeneration (should fail)',
@@ -362,7 +363,7 @@ describe('Premium User Edge Cases E2E', () => {
     it('should preserve original reading data after failed regeneration', async () => {
       // Create reading WITHOUT interpretation to avoid AI provider rate limits
       const createResponse = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           customQuestion: 'Original question',
@@ -384,7 +385,7 @@ describe('Premium User Edge Cases E2E', () => {
       // Note: Regeneration ALWAYS generates interpretation (business rule)
       for (let i = 0; i < 3; i++) {
         const regenResponse = await request(app.getHttpServer())
-          .post(`/readings/${readingId}/regenerate`)
+          .post(`/api/v1/readings/${readingId}/regenerate`)
           .set('Authorization', `Bearer ${premiumUserToken}`)
           .send({
             customQuestion: `Regen ${i + 1}`,
@@ -399,7 +400,7 @@ describe('Premium User Edge Cases E2E', () => {
 
       // Attempt 4th regeneration - should fail due to limit exceeded OR rate limiting
       const fourthRegen = await request(app.getHttpServer())
-        .post(`/readings/${readingId}/regenerate`)
+        .post(`/api/v1/readings/${readingId}/regenerate`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           customQuestion: 'Fourth regeneration attempt',
@@ -417,7 +418,7 @@ describe('Premium User Edge Cases E2E', () => {
 
       // Verify reading data is intact regardless of failure reason
       const getResponse = await request(app.getHttpServer())
-        .get(`/readings/${readingId}`)
+        .get(`/api/v1/readings/${readingId}`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(200);
 
@@ -433,7 +434,7 @@ describe('Premium User Edge Cases E2E', () => {
     it('should preserve existing readings after downgrade to FREE', async () => {
       // Create 2 readings as premium
       const reading1 = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           customQuestion: 'Premium reading 1',
@@ -454,7 +455,7 @@ describe('Premium User Edge Cases E2E', () => {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       const reading2 = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           customQuestion: 'Premium reading 2',
@@ -481,12 +482,12 @@ describe('Premium User Edge Cases E2E', () => {
 
       // Verify readings still accessible
       await request(app.getHttpServer())
-        .get(`/readings/${readingId1}`)
+        .get(`/api/v1/readings/${readingId1}`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(200);
 
       await request(app.getHttpServer())
-        .get(`/readings/${readingId2}`)
+        .get(`/api/v1/readings/${readingId2}`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(200);
 
@@ -507,7 +508,7 @@ describe('Premium User Edge Cases E2E', () => {
 
       // Attempt custom question (should fail)
       await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           customQuestion: 'Should be rejected',
@@ -537,7 +538,7 @@ describe('Premium User Edge Cases E2E', () => {
   describe('5. Multi-Tarotista Support (TASK-074)', () => {
     it('should include tarotistaId in PREMIUM user readings', async () => {
       const response = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           customQuestion: 'Multi-tarotista test for premium',
@@ -559,7 +560,7 @@ describe('Premium User Edge Cases E2E', () => {
 
     it('should validate tarotistaId persists in database for PREMIUM readings', async () => {
       const createResponse = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           customQuestion: 'Persistence test',

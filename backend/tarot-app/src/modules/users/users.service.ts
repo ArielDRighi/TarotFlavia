@@ -42,7 +42,7 @@ export class UsersService {
       where: { email: normalizedEmail },
     });
     if (existingUser) {
-      throw new ConflictException('Email already registered');
+      throw new ConflictException('El email ya está registrado');
     }
 
     // Hash password
@@ -127,6 +127,47 @@ export class UsersService {
 
   async remove(id: number): Promise<DeleteResult> {
     return this.usersRepository.delete(id);
+  }
+
+  /**
+   * Actualiza la contraseña de un usuario
+   * @param id - ID del usuario
+   * @param currentPassword - Contraseña actual del usuario
+   * @param newPassword - Nueva contraseña
+   * @throws NotFoundException si el usuario no existe
+   * @throws BadRequestException si la contraseña actual es incorrecta
+   */
+  async updatePassword(
+    id: number,
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<void> {
+    const user = await this.findById(id);
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    // Verificar que la contraseña actual es correcta
+    const isPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.password,
+    );
+    if (!isPasswordValid) {
+      throw new BadRequestException('Current password is incorrect');
+    }
+
+    // Hashear la nueva contraseña
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Actualizar la contraseña
+    user.password = hashedPassword;
+
+    try {
+      await this.usersRepository.save(user);
+    } catch {
+      throw new InternalServerErrorException('Error updating password');
+    }
   }
 
   /**

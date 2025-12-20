@@ -12,6 +12,7 @@ export enum AIErrorType {
   SERVER_ERROR = 'server_error',
   NETWORK_ERROR = 'network_error',
   PROVIDER_UNAVAILABLE = 'provider_unavailable',
+  INSUFFICIENT_BALANCE = 'insufficient_balance', // Credits/tokens exhausted - NOT retryable
 }
 
 /**

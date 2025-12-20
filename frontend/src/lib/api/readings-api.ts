@@ -11,6 +11,7 @@ import type {
   PredefinedQuestion,
   Spread,
   ReadingDetail,
+  ReadingCard,
   CreateReadingDto,
   PaginatedReadings,
   Reading,
@@ -90,11 +91,80 @@ export async function getSpreads(): Promise<Spread[]> {
  */
 export async function createReading(data: CreateReadingDto): Promise<ReadingDetail> {
   try {
-    const response = await apiClient.post<ReadingDetail>(API_ENDPOINTS.READINGS.BASE, data);
-    return response.data;
+    const response = await apiClient.post<ApiReadingResponse>(API_ENDPOINTS.READINGS.BASE, data);
+    return transformReadingResponse(response.data);
   } catch {
     throw new Error('Error al crear lectura');
   }
+}
+
+/**
+ * Raw API response type (before transformation)
+ */
+interface ApiReadingResponse {
+  id: number;
+  userId?: number;
+  spreadId?: number;
+  tarotistaId?: number;
+  question?: string;
+  predefinedQuestionId?: number;
+  customQuestion?: string;
+  cards: Array<{
+    id: number;
+    name: string;
+    number: number;
+    category: string;
+    imageUrl: string;
+  }>;
+  cardPositions: Array<{
+    cardId: number;
+    position: string;
+    isReversed: boolean;
+  }>;
+  interpretation: string | null;
+  createdAt: string;
+  deletedAt?: string | null;
+  sharedToken?: string | null;
+  user?: { id: number };
+}
+
+/**
+ * Transform raw API response to frontend ReadingDetail format
+ */
+function transformReadingResponse(raw: ApiReadingResponse): ReadingDetail {
+  // Create a map of cardId -> position info for quick lookup
+  const positionMap = new Map(raw.cardPositions.map((cp) => [cp.cardId, cp]));
+
+  // Transform cards array to include position info
+  const transformedCards: ReadingCard[] = raw.cards.map((card, index) => {
+    const posInfo = positionMap.get(card.id);
+    // Determine arcana from category, not number (Minor Arcana have numbers 1-14 per suit)
+    const isMajorArcana = card.category === 'arcanos_mayores';
+    return {
+      id: card.id,
+      name: card.name,
+      arcana: (isMajorArcana ? 'major' : 'minor') as 'major' | 'minor',
+      number: card.number,
+      suit: !isMajorArcana ? card.category : null,
+      orientation: (posInfo?.isReversed ? 'reversed' : 'upright') as 'upright' | 'reversed',
+      position: index,
+      positionName: posInfo?.position || `Posición ${index + 1}`,
+      imageUrl: card.imageUrl,
+    };
+  });
+
+  return {
+    id: raw.id,
+    userId: raw.user?.id || raw.userId || 0,
+    spreadId: raw.spreadId || 0,
+    tarotistaId: raw.tarotistaId,
+    question: raw.customQuestion || raw.question || '',
+    cards: transformedCards,
+    interpretation: raw.interpretation,
+    createdAt: raw.createdAt,
+    deletedAt: raw.deletedAt,
+    shareToken: raw.sharedToken,
+  };
 }
 
 /**
@@ -123,8 +193,8 @@ export async function getMyReadings(page: number, limit: number): Promise<Pagina
  */
 export async function getReadingById(id: number): Promise<ReadingDetail> {
   try {
-    const response = await apiClient.get<ReadingDetail>(API_ENDPOINTS.READINGS.BY_ID(id));
-    return response.data;
+    const response = await apiClient.get<ApiReadingResponse>(API_ENDPOINTS.READINGS.BY_ID(id));
+    return transformReadingResponse(response.data);
   } catch {
     throw new Error('Error al obtener lectura');
   }
@@ -155,10 +225,10 @@ export async function deleteReading(id: number): Promise<void> {
  */
 export async function regenerateInterpretation(readingId: number): Promise<ReadingDetail> {
   try {
-    const response = await apiClient.post<ReadingDetail>(
+    const response = await apiClient.post<ApiReadingResponse>(
       API_ENDPOINTS.READINGS.REGENERATE(readingId)
     );
-    return response.data;
+    return transformReadingResponse(response.data);
   } catch {
     throw new Error('Error al regenerar interpretación');
   }

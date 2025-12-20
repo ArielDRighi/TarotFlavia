@@ -2,6 +2,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import { DeleteResult } from 'typeorm';
 import { CreateUserUseCase } from '../use-cases/create-user.use-case';
 import { UpdateUserUseCase } from '../use-cases/update-user.use-case';
+import { UpdatePasswordUseCase } from '../use-cases/update-password.use-case';
 import { UpdateUserPlanUseCase } from '../use-cases/update-user-plan.use-case';
 import { ManageUserRolesUseCase } from '../use-cases/manage-user-roles.use-case';
 import { ManageUserBanUseCase } from '../use-cases/manage-user-ban.use-case';
@@ -32,6 +33,7 @@ export class UsersOrchestratorService {
   constructor(
     private readonly createUserUseCase: CreateUserUseCase,
     private readonly updateUserUseCase: UpdateUserUseCase,
+    private readonly updatePasswordUseCase: UpdatePasswordUseCase,
     private readonly updateUserPlanUseCase: UpdateUserPlanUseCase,
     private readonly manageUserRolesUseCase: ManageUserRolesUseCase,
     private readonly manageUserBanUseCase: ManageUserBanUseCase,
@@ -69,6 +71,20 @@ export class UsersOrchestratorService {
 
   async remove(id: number): Promise<DeleteResult> {
     return this.userRepository.delete(id);
+  }
+
+  // === PASSWORD MANAGEMENT ===
+
+  async updatePassword(
+    userId: number,
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<void> {
+    return this.updatePasswordUseCase.execute(
+      userId,
+      currentPassword,
+      newPassword,
+    );
   }
 
   // === PLAN MANAGEMENT ===

@@ -37,6 +37,7 @@ describe('Tarotistas Admin (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -51,13 +52,13 @@ describe('Tarotistas Admin (e2e)', () => {
 
     // Login as admin
     const adminLogin = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: 'admin@test.com', password: 'Test123456!' });
     adminToken = adminLogin.body.access_token;
 
     // Login as regular user
     const userLogin = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: 'free@test.com', password: 'Test123456!' });
     userToken = userLogin.body.access_token;
   });
@@ -70,7 +71,7 @@ describe('Tarotistas Admin (e2e)', () => {
   describe('GET /admin/tarotistas', () => {
     it('should return tarotistas list when authenticated as admin', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/tarotistas')
+        .get('/api/v1/admin/tarotistas')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -80,20 +81,22 @@ describe('Tarotistas Admin (e2e)', () => {
 
     it('should return 403 when authenticated as non-admin user', async () => {
       await request(app.getHttpServer())
-        .get('/admin/tarotistas')
+        .get('/api/v1/admin/tarotistas')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(403);
     });
 
     it('should return 401 when not authenticated', async () => {
-      await request(app.getHttpServer()).get('/admin/tarotistas').expect(401);
+      await request(app.getHttpServer())
+        .get('/api/v1/admin/tarotistas')
+        .expect(401);
     });
   });
 
   describe('POST /admin/tarotistas', () => {
     it('should return 401 when not authenticated', async () => {
       await request(app.getHttpServer())
-        .post('/admin/tarotistas')
+        .post('/api/v1/admin/tarotistas')
         .send({
           userId: 1,
           displayName: 'Test Tarotista',
@@ -104,7 +107,7 @@ describe('Tarotistas Admin (e2e)', () => {
 
     it('should return 403 when authenticated as non-admin user', async () => {
       await request(app.getHttpServer())
-        .post('/admin/tarotistas')
+        .post('/api/v1/admin/tarotistas')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
           userId: 1,
@@ -116,7 +119,7 @@ describe('Tarotistas Admin (e2e)', () => {
 
     it('should return 400 for missing required fields', async () => {
       await request(app.getHttpServer())
-        .post('/admin/tarotistas')
+        .post('/api/v1/admin/tarotistas')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({})
         .expect(400);
@@ -126,14 +129,14 @@ describe('Tarotistas Admin (e2e)', () => {
   describe('PUT /admin/tarotistas/:id', () => {
     it('should return 401 when not authenticated', async () => {
       await request(app.getHttpServer())
-        .put('/admin/tarotistas/1')
+        .put('/api/v1/admin/tarotistas/1')
         .send({ displayName: 'Updated Name' })
         .expect(401);
     });
 
     it('should return 403 when authenticated as non-admin user', async () => {
       await request(app.getHttpServer())
-        .put('/admin/tarotistas/1')
+        .put('/api/v1/admin/tarotistas/1')
         .set('Authorization', `Bearer ${userToken}`)
         .send({ displayName: 'Updated Name' })
         .expect(403);
@@ -141,7 +144,7 @@ describe('Tarotistas Admin (e2e)', () => {
 
     it('should return 400 for invalid id', async () => {
       await request(app.getHttpServer())
-        .put('/admin/tarotistas/invalid')
+        .put('/api/v1/admin/tarotistas/invalid')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ displayName: 'Updated Name' })
         .expect(400);
@@ -151,20 +154,20 @@ describe('Tarotistas Admin (e2e)', () => {
   describe('PUT /admin/tarotistas/:id/deactivate', () => {
     it('should return 401 when not authenticated', async () => {
       await request(app.getHttpServer())
-        .put('/admin/tarotistas/1/deactivate')
+        .put('/api/v1/admin/tarotistas/1/deactivate')
         .expect(401);
     });
 
     it('should return 403 when authenticated as non-admin user', async () => {
       await request(app.getHttpServer())
-        .put('/admin/tarotistas/1/deactivate')
+        .put('/api/v1/admin/tarotistas/1/deactivate')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(403);
     });
 
     it('should return 400 for invalid id', async () => {
       await request(app.getHttpServer())
-        .put('/admin/tarotistas/invalid/deactivate')
+        .put('/api/v1/admin/tarotistas/invalid/deactivate')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(400);
     });
@@ -173,13 +176,13 @@ describe('Tarotistas Admin (e2e)', () => {
   describe('PUT /admin/tarotistas/:id/reactivate', () => {
     it('should return 401 when not authenticated', async () => {
       await request(app.getHttpServer())
-        .put('/admin/tarotistas/1/reactivate')
+        .put('/api/v1/admin/tarotistas/1/reactivate')
         .expect(401);
     });
 
     it('should return 403 when authenticated as non-admin user', async () => {
       await request(app.getHttpServer())
-        .put('/admin/tarotistas/1/reactivate')
+        .put('/api/v1/admin/tarotistas/1/reactivate')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(403);
     });
@@ -188,20 +191,20 @@ describe('Tarotistas Admin (e2e)', () => {
   describe('GET /admin/tarotistas/:id/config', () => {
     it('should return 401 when not authenticated', async () => {
       await request(app.getHttpServer())
-        .get('/admin/tarotistas/1/config')
+        .get('/api/v1/admin/tarotistas/1/config')
         .expect(401);
     });
 
     it('should return 403 when authenticated as non-admin user', async () => {
       await request(app.getHttpServer())
-        .get('/admin/tarotistas/1/config')
+        .get('/api/v1/admin/tarotistas/1/config')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(403);
     });
 
     it('should return config for existing tarotista', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/tarotistas/1/config')
+        .get('/api/v1/admin/tarotistas/1/config')
         .set('Authorization', `Bearer ${adminToken}`);
 
       // Either 200 with config or 404 if tarotista doesn't exist
@@ -210,7 +213,7 @@ describe('Tarotistas Admin (e2e)', () => {
 
     it('should return 400 for invalid id', async () => {
       await request(app.getHttpServer())
-        .get('/admin/tarotistas/invalid/config')
+        .get('/api/v1/admin/tarotistas/invalid/config')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(400);
     });
@@ -219,14 +222,14 @@ describe('Tarotistas Admin (e2e)', () => {
   describe('PUT /admin/tarotistas/:id/config', () => {
     it('should return 401 when not authenticated', async () => {
       await request(app.getHttpServer())
-        .put('/admin/tarotistas/1/config')
+        .put('/api/v1/admin/tarotistas/1/config')
         .send({})
         .expect(401);
     });
 
     it('should return 403 when authenticated as non-admin user', async () => {
       await request(app.getHttpServer())
-        .put('/admin/tarotistas/1/config')
+        .put('/api/v1/admin/tarotistas/1/config')
         .set('Authorization', `Bearer ${userToken}`)
         .send({})
         .expect(403);
@@ -236,13 +239,13 @@ describe('Tarotistas Admin (e2e)', () => {
   describe('POST /admin/tarotistas/:id/config/reset', () => {
     it('should return 401 when not authenticated', async () => {
       await request(app.getHttpServer())
-        .post('/admin/tarotistas/1/config/reset')
+        .post('/api/v1/admin/tarotistas/1/config/reset')
         .expect(401);
     });
 
     it('should return 403 when authenticated as non-admin user', async () => {
       await request(app.getHttpServer())
-        .post('/admin/tarotistas/1/config/reset')
+        .post('/api/v1/admin/tarotistas/1/config/reset')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(403);
     });
@@ -251,20 +254,20 @@ describe('Tarotistas Admin (e2e)', () => {
   describe('GET /admin/tarotistas/:id/meanings', () => {
     it('should return 401 when not authenticated', async () => {
       await request(app.getHttpServer())
-        .get('/admin/tarotistas/1/meanings')
+        .get('/api/v1/admin/tarotistas/1/meanings')
         .expect(401);
     });
 
     it('should return 403 when authenticated as non-admin user', async () => {
       await request(app.getHttpServer())
-        .get('/admin/tarotistas/1/meanings')
+        .get('/api/v1/admin/tarotistas/1/meanings')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(403);
     });
 
     it('should return meanings for existing tarotista', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/tarotistas/1/meanings')
+        .get('/api/v1/admin/tarotistas/1/meanings')
         .set('Authorization', `Bearer ${adminToken}`);
 
       // Either 200 with meanings array or 404 if tarotista doesn't exist
@@ -278,14 +281,14 @@ describe('Tarotistas Admin (e2e)', () => {
   describe('POST /admin/tarotistas/:id/meanings', () => {
     it('should return 401 when not authenticated', async () => {
       await request(app.getHttpServer())
-        .post('/admin/tarotistas/1/meanings')
+        .post('/api/v1/admin/tarotistas/1/meanings')
         .send({})
         .expect(401);
     });
 
     it('should return 403 when authenticated as non-admin user', async () => {
       await request(app.getHttpServer())
-        .post('/admin/tarotistas/1/meanings')
+        .post('/api/v1/admin/tarotistas/1/meanings')
         .set('Authorization', `Bearer ${userToken}`)
         .send({})
         .expect(403);
@@ -293,7 +296,7 @@ describe('Tarotistas Admin (e2e)', () => {
 
     it('should return 400 for missing required fields', async () => {
       await request(app.getHttpServer())
-        .post('/admin/tarotistas/1/meanings')
+        .post('/api/v1/admin/tarotistas/1/meanings')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({})
         .expect(400);
@@ -303,27 +306,27 @@ describe('Tarotistas Admin (e2e)', () => {
   describe('DELETE /admin/tarotistas/:id/meanings/:meaningId', () => {
     it('should return 401 when not authenticated', async () => {
       await request(app.getHttpServer())
-        .delete('/admin/tarotistas/1/meanings/1')
+        .delete('/api/v1/admin/tarotistas/1/meanings/1')
         .expect(401);
     });
 
     it('should return 403 when authenticated as non-admin user', async () => {
       await request(app.getHttpServer())
-        .delete('/admin/tarotistas/1/meanings/1')
+        .delete('/api/v1/admin/tarotistas/1/meanings/1')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(403);
     });
 
     it('should return 400 for invalid id', async () => {
       await request(app.getHttpServer())
-        .delete('/admin/tarotistas/invalid/meanings/1')
+        .delete('/api/v1/admin/tarotistas/invalid/meanings/1')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(400);
     });
 
     it('should return 400 for invalid meaningId', async () => {
       await request(app.getHttpServer())
-        .delete('/admin/tarotistas/1/meanings/invalid')
+        .delete('/api/v1/admin/tarotistas/1/meanings/invalid')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(400);
     });
@@ -332,7 +335,7 @@ describe('Tarotistas Admin (e2e)', () => {
   describe('GET /admin/tarotistas/applications', () => {
     it('should return applications list when authenticated as admin', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/tarotistas/applications')
+        .get('/api/v1/admin/tarotistas/applications')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -342,13 +345,13 @@ describe('Tarotistas Admin (e2e)', () => {
 
     it('should return 401 when not authenticated', async () => {
       await request(app.getHttpServer())
-        .get('/admin/tarotistas/applications')
+        .get('/api/v1/admin/tarotistas/applications')
         .expect(401);
     });
 
     it('should return 403 when authenticated as non-admin user', async () => {
       await request(app.getHttpServer())
-        .get('/admin/tarotistas/applications')
+        .get('/api/v1/admin/tarotistas/applications')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(403);
     });
@@ -357,14 +360,14 @@ describe('Tarotistas Admin (e2e)', () => {
   describe('POST /admin/tarotistas/applications/:id/approve', () => {
     it('should return 401 when not authenticated', async () => {
       await request(app.getHttpServer())
-        .post('/admin/tarotistas/applications/1/approve')
+        .post('/api/v1/admin/tarotistas/applications/1/approve')
         .send({})
         .expect(401);
     });
 
     it('should return 403 when authenticated as non-admin user', async () => {
       await request(app.getHttpServer())
-        .post('/admin/tarotistas/applications/1/approve')
+        .post('/api/v1/admin/tarotistas/applications/1/approve')
         .set('Authorization', `Bearer ${userToken}`)
         .send({})
         .expect(403);
@@ -372,7 +375,7 @@ describe('Tarotistas Admin (e2e)', () => {
 
     it('should return 404 for non-existent application', async () => {
       await request(app.getHttpServer())
-        .post('/admin/tarotistas/applications/999999/approve')
+        .post('/api/v1/admin/tarotistas/applications/999999/approve')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({})
         .expect(404);
@@ -382,14 +385,14 @@ describe('Tarotistas Admin (e2e)', () => {
   describe('POST /admin/tarotistas/applications/:id/reject', () => {
     it('should return 401 when not authenticated', async () => {
       await request(app.getHttpServer())
-        .post('/admin/tarotistas/applications/1/reject')
+        .post('/api/v1/admin/tarotistas/applications/1/reject')
         .send({ reason: 'Test rejection' })
         .expect(401);
     });
 
     it('should return 403 when authenticated as non-admin user', async () => {
       await request(app.getHttpServer())
-        .post('/admin/tarotistas/applications/1/reject')
+        .post('/api/v1/admin/tarotistas/applications/1/reject')
         .set('Authorization', `Bearer ${userToken}`)
         .send({ reason: 'Test rejection' })
         .expect(403);
@@ -397,7 +400,7 @@ describe('Tarotistas Admin (e2e)', () => {
 
     it('should return error for non-existent application', async () => {
       const response = await request(app.getHttpServer())
-        .post('/admin/tarotistas/applications/999999/reject')
+        .post('/api/v1/admin/tarotistas/applications/999999/reject')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ reason: 'Test rejection' });
 

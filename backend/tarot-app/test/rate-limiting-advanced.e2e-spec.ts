@@ -18,6 +18,7 @@ describe('Rate Limiting Advanced (IP Blocking) E2E Tests', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -129,23 +130,23 @@ describe('Rate Limiting Advanced (IP Blocking) E2E Tests', () => {
       const email3 = `user3-${Date.now() + 2}@test.com`;
 
       await request(httpServer)
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({ email: email1, password: 'Pass123!', name: 'User 1' })
         .expect(201);
 
       await request(httpServer)
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({ email: email2, password: 'Pass123!', name: 'User 2' })
         .expect(201);
 
       await request(httpServer)
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({ email: email3, password: 'Pass123!', name: 'User 3' })
         .expect(201);
 
       // 4th request should be rate limited (limit is 3 per hour)
       const fourthResponse = await request(httpServer)
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           email: `user4-${Date.now() + 3}@test.com`,
           password: 'Pass123!',

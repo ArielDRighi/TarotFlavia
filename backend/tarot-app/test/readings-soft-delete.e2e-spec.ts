@@ -56,6 +56,7 @@ describe('Readings Soft Delete E2E', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(
       new ValidationPipe({ whitelist: true, transform: true }),
     );
@@ -105,19 +106,19 @@ describe('Readings Soft Delete E2E', () => {
 
     // Login usuarios
     const userLoginRes = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: regularUser.email, password: 'Password123!' })
       .expect(200);
     userToken = (userLoginRes.body as LoginResponse).access_token;
 
     const adminLoginRes = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: adminUser.email, password: 'Password123!' })
       .expect(200);
     adminToken = (adminLoginRes.body as LoginResponse).access_token;
 
     const otherLoginRes = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: otherUser.email, password: 'Password123!' })
       .expect(200);
     otherUserToken = (otherLoginRes.body as LoginResponse).access_token;
@@ -235,7 +236,7 @@ describe('Readings Soft Delete E2E', () => {
    */
   async function createTestReading(token: string): Promise<number> {
     const response = await request(app.getHttpServer())
-      .post('/readings')
+      .post('/api/v1/readings')
       .set('Authorization', `Bearer ${token}`)
       .send({
         deckId,
@@ -259,7 +260,7 @@ describe('Readings Soft Delete E2E', () => {
       const readingId = await createTestReading(userToken);
 
       await request(app.getHttpServer())
-        .delete(`/readings/${readingId}`)
+        .delete(`/api/v1/readings/${readingId}`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(200);
 
@@ -277,7 +278,7 @@ describe('Readings Soft Delete E2E', () => {
       const readingId = await createTestReading(userToken);
 
       await request(app.getHttpServer())
-        .delete(`/readings/${readingId}`)
+        .delete(`/api/v1/readings/${readingId}`)
         .set('Authorization', `Bearer ${otherUserToken}`)
         .expect(403);
 
@@ -292,7 +293,7 @@ describe('Readings Soft Delete E2E', () => {
 
     it('debe retornar 404 si la lectura no existe', async () => {
       await request(app.getHttpServer())
-        .delete('/readings/999999')
+        .delete('/api/v1/readings/999999')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(404);
     });
@@ -301,7 +302,7 @@ describe('Readings Soft Delete E2E', () => {
       const readingId = await createTestReading(userToken);
 
       await request(app.getHttpServer())
-        .delete(`/readings/${readingId}`)
+        .delete(`/api/v1/readings/${readingId}`)
         .expect(401);
     });
 
@@ -310,13 +311,13 @@ describe('Readings Soft Delete E2E', () => {
 
       // Eliminar la lectura
       await request(app.getHttpServer())
-        .delete(`/readings/${readingId}`)
+        .delete(`/api/v1/readings/${readingId}`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(200);
 
       // Verificar que no aparece en el listado
       const response = await request(app.getHttpServer())
-        .get('/readings')
+        .get('/api/v1/readings')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(200);
 
@@ -331,13 +332,13 @@ describe('Readings Soft Delete E2E', () => {
 
       // Eliminar la lectura
       await request(app.getHttpServer())
-        .delete(`/readings/${readingId}`)
+        .delete(`/api/v1/readings/${readingId}`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(200);
 
       // Intentar acceder a la lectura eliminada
       await request(app.getHttpServer())
-        .get(`/readings/${readingId}`)
+        .get(`/api/v1/readings/${readingId}`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(404);
     });
@@ -350,18 +351,18 @@ describe('Readings Soft Delete E2E', () => {
 
       // Eliminar ambas lecturas
       await request(app.getHttpServer())
-        .delete(`/readings/${readingId1}`)
+        .delete(`/api/v1/readings/${readingId1}`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(200);
 
       await request(app.getHttpServer())
-        .delete(`/readings/${readingId2}`)
+        .delete(`/api/v1/readings/${readingId2}`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(200);
 
       // Obtener papelera
       const response = await request(app.getHttpServer())
-        .get('/readings/trash')
+        .get('/api/v1/readings/trash')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(200);
 
@@ -378,13 +379,13 @@ describe('Readings Soft Delete E2E', () => {
 
       // Otro usuario elimina su lectura
       await request(app.getHttpServer())
-        .delete(`/readings/${readingId}`)
+        .delete(`/api/v1/readings/${readingId}`)
         .set('Authorization', `Bearer ${otherUserToken}`)
         .expect(200);
 
       // El usuario actual no debe verla en su papelera
       const response = await request(app.getHttpServer())
-        .get('/readings/trash')
+        .get('/api/v1/readings/trash')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(200);
 
@@ -407,7 +408,7 @@ describe('Readings Soft Delete E2E', () => {
 
       // Verificar que no aparece en la papelera
       const response = await request(app.getHttpServer())
-        .get('/readings/trash')
+        .get('/api/v1/readings/trash')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(200);
 
@@ -418,7 +419,9 @@ describe('Readings Soft Delete E2E', () => {
     });
 
     it('debe retornar 401 si no está autenticado', async () => {
-      await request(app.getHttpServer()).get('/readings/trash').expect(401);
+      await request(app.getHttpServer())
+        .get('/api/v1/readings/trash')
+        .expect(401);
     });
   });
 
@@ -428,13 +431,13 @@ describe('Readings Soft Delete E2E', () => {
 
       // Eliminar la lectura
       await request(app.getHttpServer())
-        .delete(`/readings/${readingId}`)
+        .delete(`/api/v1/readings/${readingId}`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(200);
 
       // Restaurar la lectura
       await request(app.getHttpServer())
-        .post(`/readings/${readingId}/restore`)
+        .post(`/api/v1/readings/${readingId}/restore`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(200);
 
@@ -452,13 +455,13 @@ describe('Readings Soft Delete E2E', () => {
 
       // Eliminar la lectura
       await request(app.getHttpServer())
-        .delete(`/readings/${readingId}`)
+        .delete(`/api/v1/readings/${readingId}`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(200);
 
       // Otro usuario intenta restaurar
       await request(app.getHttpServer())
-        .post(`/readings/${readingId}/restore`)
+        .post(`/api/v1/readings/${readingId}/restore`)
         .set('Authorization', `Bearer ${otherUserToken}`)
         .expect(403);
 
@@ -472,7 +475,7 @@ describe('Readings Soft Delete E2E', () => {
 
     it('debe retornar 404 si la lectura no existe', async () => {
       await request(app.getHttpServer())
-        .post('/readings/999999/restore')
+        .post('/api/v1/readings/999999/restore')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(404);
     });
@@ -481,7 +484,7 @@ describe('Readings Soft Delete E2E', () => {
       const readingId = await createTestReading(userToken);
 
       await request(app.getHttpServer())
-        .post(`/readings/${readingId}/restore`)
+        .post(`/api/v1/readings/${readingId}/restore`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(400);
     });
@@ -490,7 +493,7 @@ describe('Readings Soft Delete E2E', () => {
       const readingId = await createTestReading(userToken);
 
       await request(app.getHttpServer())
-        .post(`/readings/${readingId}/restore`)
+        .post(`/api/v1/readings/${readingId}/restore`)
         .expect(401);
     });
 
@@ -499,13 +502,13 @@ describe('Readings Soft Delete E2E', () => {
 
       // Eliminar
       await request(app.getHttpServer())
-        .delete(`/readings/${readingId}`)
+        .delete(`/api/v1/readings/${readingId}`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(200);
 
       // Restaurar
       await request(app.getHttpServer())
-        .post(`/readings/${readingId}/restore`)
+        .post(`/api/v1/readings/${readingId}/restore`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(200);
 
@@ -519,7 +522,7 @@ describe('Readings Soft Delete E2E', () => {
 
       // Verificar que es accesible mediante GET /readings/:id
       await request(app.getHttpServer())
-        .get(`/readings/${readingId}`)
+        .get(`/api/v1/readings/${readingId}`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(200);
     });
@@ -531,13 +534,13 @@ describe('Readings Soft Delete E2E', () => {
 
       // Eliminar la lectura
       await request(app.getHttpServer())
-        .delete(`/readings/${readingId}`)
+        .delete(`/api/v1/readings/${readingId}`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(200);
 
       // Admin solicita con includeDeleted=true
       const response = await request(app.getHttpServer())
-        .get('/admin/readings?includeDeleted=true')
+        .get('/api/v1/admin/readings?includeDeleted=true')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -553,13 +556,13 @@ describe('Readings Soft Delete E2E', () => {
 
       // Eliminar la lectura
       await request(app.getHttpServer())
-        .delete(`/readings/${readingId}`)
+        .delete(`/api/v1/readings/${readingId}`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(200);
 
       // Admin solicita sin includeDeleted
       const response = await request(app.getHttpServer())
-        .get('/admin/readings')
+        .get('/api/v1/admin/readings')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -571,13 +574,15 @@ describe('Readings Soft Delete E2E', () => {
 
     it('usuario no admin no debe poder acceder al endpoint admin', async () => {
       await request(app.getHttpServer())
-        .get('/admin/readings')
+        .get('/api/v1/admin/readings')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(403);
     });
 
     it('debe retornar 401 si no está autenticado', async () => {
-      await request(app.getHttpServer()).get('/admin/readings').expect(401);
+      await request(app.getHttpServer())
+        .get('/api/v1/admin/readings')
+        .expect(401);
     });
   });
 });

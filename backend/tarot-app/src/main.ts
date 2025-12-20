@@ -33,6 +33,9 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule);
 
+  // Set global API prefix for versioning
+  app.setGlobalPrefix('api/v1');
+
   // Get custom logger from the app context
   const loggerService = app.get(LoggerService);
   app.useLogger(loggerService);
@@ -106,9 +109,9 @@ async function bootstrap() {
       'soporte@tarot-api.com',
     )
     .setLicense('MIT', 'https://opensource.org/licenses/MIT')
-    .addServer('http://localhost:3000', 'Desarrollo Local')
-    .addServer('https://api-staging.tarot.com', 'Staging')
-    .addServer('https://api.tarot.com', 'Producción')
+    .addServer('http://localhost:3000/api/v1', 'Desarrollo Local')
+    .addServer('https://api-staging.tarot.com/api/v1', 'Staging')
+    .addServer('https://api.tarot.com/api/v1', 'Producción')
     .addBearerAuth(
       {
         type: 'http',

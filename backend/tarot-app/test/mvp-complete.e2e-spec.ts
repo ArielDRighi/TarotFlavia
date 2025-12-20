@@ -105,6 +105,7 @@ describe('MVP Complete Flow E2E', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
     await app.init();
 
@@ -188,7 +189,7 @@ describe('MVP Complete Flow E2E', () => {
   describe('1. Authentication Flow', () => {
     it('✅ Usuario puede registrarse', async () => {
       const response = await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           email: `mvp-free-${testTimestamp}@test.com`,
           password: 'SecurePass123!',
@@ -208,7 +209,7 @@ describe('MVP Complete Flow E2E', () => {
     it('✅ Usuario puede hacer login y recibir JWT', async () => {
       // Usar usuario premium seeded (premium@test.com)
       const loginResponse = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: 'premium@test.com',
           password: 'Test123456!',
@@ -231,7 +232,7 @@ describe('MVP Complete Flow E2E', () => {
   describe('2. Categories & Questions', () => {
     it('✅ Lista categorías correctamente (debe haber al menos 1)', async () => {
       const response = await request(app.getHttpServer())
-        .get('/categories')
+        .get('/api/v1/categories')
         .expect(200);
 
       const body = response.body as CategoryResponse[];
@@ -246,7 +247,7 @@ describe('MVP Complete Flow E2E', () => {
 
     it('✅ Lista preguntas predefinidas por categoría', async () => {
       const response = await request(app.getHttpServer())
-        .get(`/predefined-questions?categoryId=${categoryId}`)
+        .get(`/api/v1/predefined-questions?categoryId=${categoryId}`)
         .expect(200);
 
       const body = response.body as PredefinedQuestionResponse[];
@@ -264,7 +265,7 @@ describe('MVP Complete Flow E2E', () => {
   describe('3. Reading Creation (FREE user)', () => {
     it('✅ Usuario FREE crea lectura con pregunta predefinida', async () => {
       const response = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
           predefinedQuestionId: predefinedQuestionId,
@@ -294,7 +295,7 @@ describe('MVP Complete Flow E2E', () => {
 
     it('✅ Usuario FREE rechazado con pregunta custom', async () => {
       const response = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
           customQuestion: '¿Qué me depara el futuro?',
@@ -347,7 +348,7 @@ describe('MVP Complete Flow E2E', () => {
       // Crear exactamente el límite de lecturas
       for (let i = 0; i < freeLimit; i++) {
         await request(app.getHttpServer())
-          .post('/readings')
+          .post('/api/v1/readings')
           .set('Authorization', `Bearer ${freeUserToken}`)
           .send({
             predefinedQuestionId: predefinedQuestionId,
@@ -383,7 +384,7 @@ describe('MVP Complete Flow E2E', () => {
       // Intentar una lectura más allá del límite - debería fallar
       // (podría dar 403 por límite de uso o 429 de rate limiting)
       const extraReading = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
           predefinedQuestionId: predefinedQuestionId,
@@ -409,7 +410,7 @@ describe('MVP Complete Flow E2E', () => {
   describe('4. Reading Creation (PREMIUM user)', () => {
     it('✅ Usuario PREMIUM crea lectura con pregunta custom', async () => {
       const response = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           customQuestion: '¿Cuál es mi propósito de vida?',
@@ -442,7 +443,7 @@ describe('MVP Complete Flow E2E', () => {
       // Verificar que el usuario premium no tiene límite en usage_limits
       // Crear una lectura como muestra
       const readingResponse = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           customQuestion: 'Test unlimited reading',
@@ -462,7 +463,7 @@ describe('MVP Complete Flow E2E', () => {
 
       // Verificar que el usuario premium tiene múltiples lecturas en el historial
       const historyResponse = await request(app.getHttpServer())
-        .get('/readings')
+        .get('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(200);
 
@@ -504,7 +505,7 @@ describe('MVP Complete Flow E2E', () => {
       await new Promise((resolve) => setTimeout(resolve, 4000));
 
       const response = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           customQuestion: 'Test AI interpretation',
@@ -538,7 +539,7 @@ describe('MVP Complete Flow E2E', () => {
     it('✅ Usuario puede ver su historial de lecturas', async () => {
       // Usar premium user que tiene varias lecturas creadas
       const response = await request(app.getHttpServer())
-        .get('/readings')
+        .get('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(200);
 
@@ -565,7 +566,7 @@ describe('MVP Complete Flow E2E', () => {
     it('✅ Rate limiting protege endpoints', async () => {
       // Verificar que los headers de rate limit están presentes
       const response = await request(app.getHttpServer())
-        .get('/categories')
+        .get('/api/v1/categories')
         .expect(200);
 
       // Verificar que el endpoint responde correctamente
@@ -594,7 +595,7 @@ describe('MVP Complete Flow E2E', () => {
 
     it('✅ Health check de AI retorna status', async () => {
       const response = await request(app.getHttpServer())
-        .get('/health/ai')
+        .get('/api/v1/health/ai')
         .expect(200);
 
       const body = response.body as {
@@ -607,7 +608,7 @@ describe('MVP Complete Flow E2E', () => {
     });
 
     it('✅ Endpoint funciona sin autenticación', async () => {
-      await request(app.getHttpServer()).get('/health/ai').expect(200);
+      await request(app.getHttpServer()).get('/api/v1/health/ai').expect(200);
     });
   });
 
@@ -626,7 +627,7 @@ describe('MVP Complete Flow E2E', () => {
 
     it('✅ Usuario FREE sin suscripción recibe Flavia (ID=1) como tarotista predeterminada', async () => {
       const response = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
           predefinedQuestionId: predefinedQuestionId,
@@ -648,7 +649,7 @@ describe('MVP Complete Flow E2E', () => {
 
     it('✅ Usuario PREMIUM sin suscripción recibe Flavia (ID=1) como tarotista predeterminada', async () => {
       const response = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           customQuestion: 'Multi-tarotista test question',
@@ -671,7 +672,7 @@ describe('MVP Complete Flow E2E', () => {
     it('✅ tarotistaId persiste correctamente en base de datos', async () => {
       // Crear una lectura
       const createResponse = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
           predefinedQuestionId: predefinedQuestionId,
@@ -704,7 +705,7 @@ describe('MVP Complete Flow E2E', () => {
     it('✅ GET /readings/:id incluye tarotistaId en la respuesta', async () => {
       // Crear una lectura primero
       const createResponse = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
           predefinedQuestionId: predefinedQuestionId,
@@ -724,7 +725,7 @@ describe('MVP Complete Flow E2E', () => {
 
       // Obtener la lectura por ID
       const getResponse = await request(app.getHttpServer())
-        .get(`/readings/${createdReading.id}`)
+        .get(`/api/v1/readings/${createdReading.id}`)
         .set('Authorization', `Bearer ${freeUserToken}`)
         .expect(200);
 
@@ -739,7 +740,7 @@ describe('MVP Complete Flow E2E', () => {
 
       // Usar usuario PREMIUM para evitar límites diarios (FREE ya agotó 3 lecturas)
       await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           customQuestion: 'Test reading para validar tarotistaId en lista',
@@ -757,7 +758,7 @@ describe('MVP Complete Flow E2E', () => {
 
       // Obtener lista de lecturas del usuario PREMIUM
       const listResponse = await request(app.getHttpServer())
-        .get('/readings')
+        .get('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(200);
 

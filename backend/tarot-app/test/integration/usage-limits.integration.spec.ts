@@ -21,6 +21,14 @@ import {
   UsageLimit,
   UsageFeature,
 } from '../../src/modules/usage-limits/entities/usage-limit.entity';
+import {
+  AIProviderType,
+  AIResponse,
+} from '../../src/modules/ai/domain/interfaces/ai-provider.interface';
+import { GroqProvider } from '../../src/modules/ai/infrastructure/providers/groq.provider';
+
+// No need to increase timeout with mocked AI
+jest.setTimeout(10000);
 
 describe('UsageLimits + Readings Integration Tests', () => {
   let app: INestApplication;
@@ -45,6 +53,20 @@ describe('UsageLimits + Readings Integration Tests', () => {
     name: 'Usage Limits Test User',
   };
 
+  // Mock AI response
+  const mockAIResponse: AIResponse = {
+    content:
+      'Based on your cards, the reading suggests a period of transformation and growth. Trust your intuition and embrace the changes ahead.',
+    provider: AIProviderType.GROQ,
+    model: 'llama-3.1-70b-versatile',
+    tokensUsed: {
+      prompt: 500,
+      completion: 200,
+      total: 700,
+    },
+    durationMs: 1200,
+  };
+
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
@@ -66,6 +88,14 @@ describe('UsageLimits + Readings Integration Tests', () => {
     authService = moduleFixture.get<AuthOrchestratorService>(
       AuthOrchestratorService,
     );
+
+    // Mock GroqProvider.generateCompletion to avoid real API calls
+    // This allows AIProviderService to execute trackMonthlyUsage correctly
+    const groqProvider = moduleFixture.get<GroqProvider>(GroqProvider);
+    jest
+      .spyOn(groqProvider, 'generateCompletion')
+      .mockResolvedValue(mockAIResponse);
+
     // Note: login() signature changed from login(user, userAgent, ip) to login(userId, email, ip, userAgent)
     // This is a breaking change for better separation of concerns (primitive types instead of entities)
 
@@ -78,6 +108,8 @@ describe('UsageLimits + Readings Integration Tests', () => {
   });
 
   afterAll(async () => {
+    // Restore mocks
+    jest.restoreAllMocks();
     await app.close();
   });
 
@@ -209,9 +241,15 @@ describe('UsageLimits + Readings Integration Tests', () => {
 
   afterEach(async () => {
     if (testUser?.id) {
+      // Delete AI usage logs first (references user)
+      const aiUsageLogRepo = dataSource.getRepository('AIUsageLog');
+      await aiUsageLogRepo.delete({ userId: testUser.id });
+
+      // Delete readings
       const readingRepo = dataSource.getRepository('TarotReading');
       await readingRepo.delete({ user: { id: testUser.id } });
 
+      // Delete user last
       await userRepository.delete({ id: testUser.id });
     }
   });
@@ -228,7 +266,8 @@ describe('UsageLimits + Readings Integration Tests', () => {
           position: testSpread.positions[idx]?.name || `Position ${idx + 1}`,
           isReversed: false,
         })),
-        customQuestion: 'Test question for usage limits',
+        // Use unique question to avoid cache hits
+        customQuestion: `Test question for usage limits - ${Date.now()} - ${Math.random()}`,
         generateInterpretation: true,
       };
 
@@ -252,22 +291,21 @@ describe('UsageLimits + Readings Integration Tests', () => {
     });
 
     it('should increment counter multiple times for multiple readings', async () => {
-      // ARRANGE
-      const createReadingPayload = {
-        spreadId: testSpread.id,
-        deckId: testDeck.id,
-        cardIds: testCards.map((card) => card.id),
-        cardPositions: testCards.map((card, idx) => ({
-          cardId: card.id,
-          position: testSpread.positions[idx]?.name || `Position ${idx + 1}`,
-          isReversed: false,
-        })),
-        customQuestion: 'Test question for usage limits',
-        generateInterpretation: true,
-      };
-
-      // ACT: Crear 3 lecturas
+      // ACT: Crear 3 lecturas con preguntas únicas para evitar cache hits
       for (let i = 0; i < 3; i++) {
+        const createReadingPayload = {
+          spreadId: testSpread.id,
+          deckId: testDeck.id,
+          cardIds: testCards.map((card) => card.id),
+          cardPositions: testCards.map((card, idx) => ({
+            cardId: card.id,
+            position: testSpread.positions[idx]?.name || `Position ${idx + 1}`,
+            isReversed: false,
+          })),
+          // Pregunta única por iteración para evitar cache y asegurar llamada a AI
+          customQuestion: `Test question ${i + 1} - ${Date.now()} - ${Math.random()}`,
+          generateInterpretation: true,
+        };
         await request(app.getHttpServer())
           .post('/readings')
           .set('Authorization', `Bearer ${authToken}`)
@@ -280,7 +318,7 @@ describe('UsageLimits + Readings Integration Tests', () => {
         where: { id: testUser.id },
       });
       expect(userAfter!.aiRequestsUsedMonth).toBe(3);
-    }, 30000); // 30s timeout para 3 lecturas
+    }, 90000); // Increased timeout: 3 readings x ~30s each under CI load
 
     it.skip('should enforce daily limit for FREE users (3 readings/day)', async () => {
       // ARRANGE: Cambiar a FREE para este test
@@ -403,21 +441,22 @@ describe('UsageLimits + Readings Integration Tests', () => {
   describe('Premium Plan Benefits', () => {
     it('should allow unlimited readings for PREMIUM users', async () => {
       // ARRANGE: Usuario ya es PREMIUM del beforeEach
-      const createReadingPayload = {
-        spreadId: testSpread.id,
-        deckId: testDeck.id,
-        cardIds: testCards.map((card) => card.id),
-        cardPositions: testCards.map((card, idx) => ({
-          cardId: card.id,
-          position: testSpread.positions[idx]?.name || `Position ${idx + 1}`,
-          isReversed: false,
-        })),
-        customQuestion: 'Test question for usage limits',
-        generateInterpretation: true,
-      };
-
       // ACT: Crear 5 lecturas (más del límite FREE de 3)
+      // Usamos preguntas únicas para evitar cache hits y asegurar llamada a AI
       for (let i = 0; i < 5; i++) {
+        const createReadingPayload = {
+          spreadId: testSpread.id,
+          deckId: testDeck.id,
+          cardIds: testCards.map((card) => card.id),
+          cardPositions: testCards.map((card, idx) => ({
+            cardId: card.id,
+            position: testSpread.positions[idx]?.name || `Position ${idx + 1}`,
+            isReversed: false,
+          })),
+          // Pregunta única por iteración para evitar cache y asegurar llamada a AI
+          customQuestion: `Premium test question ${i + 1} - ${Date.now()} - ${Math.random()}`,
+          generateInterpretation: true,
+        };
         await request(app.getHttpServer())
           .post('/readings')
           .set('Authorization', `Bearer ${authToken}`)

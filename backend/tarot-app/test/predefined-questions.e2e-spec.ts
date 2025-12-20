@@ -36,17 +36,18 @@ describe('PredefinedQuestions (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(new ValidationPipe());
     await app.init();
 
     // Login to get tokens (using seeded users)
     const adminLoginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: 'admin@test.com', password: 'Test123456!' })
       .expect(200);
 
     const userLoginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: 'free@test.com', password: 'Test123456!' })
       .expect(200);
 
@@ -77,7 +78,7 @@ describe('PredefinedQuestions (e2e)', () => {
     it('should return all active questions', async () => {
       // Usar las preguntas seeded del globalSetup (42 preguntas)
       const response = await request(app.getHttpServer())
-        .get('/predefined-questions')
+        .get('/api/v1/predefined-questions')
         .expect(200);
 
       expect(response.body.length).toBeGreaterThanOrEqual(42);
@@ -87,7 +88,7 @@ describe('PredefinedQuestions (e2e)', () => {
     it('should filter questions by categoryId', async () => {
       // Usar las preguntas seeded del globalSetup
       const response = await request(app.getHttpServer())
-        .get(`/predefined-questions?categoryId=${categoryId}`)
+        .get(`/api/v1/predefined-questions?categoryId=${categoryId}`)
         .expect(200);
 
       expect(Array.isArray(response.body)).toBe(true);
@@ -109,7 +110,7 @@ describe('PredefinedQuestions (e2e)', () => {
       const questionId = seededQuestion[0].id;
 
       const response = await request(app.getHttpServer())
-        .get(`/predefined-questions/${questionId}`)
+        .get(`/api/v1/predefined-questions/${questionId}`)
         .expect(200);
 
       expect(response.body.id).toBe(questionId);
@@ -118,7 +119,7 @@ describe('PredefinedQuestions (e2e)', () => {
 
     it('should return 404 when question not found', async () => {
       await request(app.getHttpServer())
-        .get('/predefined-questions/99999')
+        .get('/api/v1/predefined-questions/99999')
         .expect(404);
     });
   });
@@ -133,7 +134,7 @@ describe('PredefinedQuestions (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .post('/predefined-questions')
+        .post('/api/v1/predefined-questions')
         .set('Authorization', `Bearer ${adminToken}`)
         .send(createDto)
         .expect(201);
@@ -158,7 +159,7 @@ describe('PredefinedQuestions (e2e)', () => {
       };
 
       await request(app.getHttpServer())
-        .post('/predefined-questions')
+        .post('/api/v1/predefined-questions')
         .set('Authorization', `Bearer ${userToken}`)
         .send(createDto)
         .expect(403);
@@ -173,7 +174,7 @@ describe('PredefinedQuestions (e2e)', () => {
       };
 
       await request(app.getHttpServer())
-        .post('/predefined-questions')
+        .post('/api/v1/predefined-questions')
         .set('Authorization', `Bearer ${adminToken}`)
         .send(createDto)
         .expect(400);
@@ -197,7 +198,7 @@ describe('PredefinedQuestions (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .patch(`/predefined-questions/${questionId}`)
+        .patch(`/api/v1/predefined-questions/${questionId}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send(updateDto)
         .expect(200);
@@ -222,7 +223,7 @@ describe('PredefinedQuestions (e2e)', () => {
       const questionId = questionResult[0].id;
 
       await request(app.getHttpServer())
-        .patch(`/predefined-questions/${questionId}`)
+        .patch(`/api/v1/predefined-questions/${questionId}`)
         .set('Authorization', `Bearer ${userToken}`)
         .send({ questionText: 'Updated' })
         .expect(403);
@@ -247,7 +248,7 @@ describe('PredefinedQuestions (e2e)', () => {
       const questionId = questionResult[0].id;
 
       await request(app.getHttpServer())
-        .delete(`/predefined-questions/${questionId}`)
+        .delete(`/api/v1/predefined-questions/${questionId}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -277,7 +278,7 @@ describe('PredefinedQuestions (e2e)', () => {
       const questionId = questionResult[0].id;
 
       await request(app.getHttpServer())
-        .delete(`/predefined-questions/${questionId}`)
+        .delete(`/api/v1/predefined-questions/${questionId}`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(403);
 

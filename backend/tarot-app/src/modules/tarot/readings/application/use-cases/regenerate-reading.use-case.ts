@@ -17,7 +17,7 @@ const REGENERATION_AI_CONFIG = {
   model: 'llama-3.3-70b-versatile',
   provider: 'groq',
   temperature: 0.9, // Higher temperature for more creative variations
-  maxTokens: 2000,
+  maxTokens: 3000, // Sufficient for full structured interpretation
 };
 
 @Injectable()

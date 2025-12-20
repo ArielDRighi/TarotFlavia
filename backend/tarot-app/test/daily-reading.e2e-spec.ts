@@ -54,12 +54,13 @@ describe('DailyReading (e2e)', () => {
       .compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(new ValidationPipe());
     await app.init();
 
     // Login as free user
     const freeLoginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: 'free@test.com', password: 'Test123456!' })
       .expect(200);
 
@@ -68,7 +69,7 @@ describe('DailyReading (e2e)', () => {
 
     // Login as premium user
     const premiumLoginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: 'premium@test.com', password: 'Test123456!' })
       .expect(200);
 
@@ -107,7 +108,7 @@ describe('DailyReading (e2e)', () => {
   describe('POST /daily-reading', () => {
     it('should generate daily card for authenticated user', async () => {
       const response = await request(app.getHttpServer())
-        .post('/daily-reading')
+        .post('/api/v1/daily-reading')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({ tarotistaId: 1 })
         .expect(201);
@@ -123,7 +124,7 @@ describe('DailyReading (e2e)', () => {
 
     it('should fail without authentication', async () => {
       await request(app.getHttpServer())
-        .post('/daily-reading')
+        .post('/api/v1/daily-reading')
         .send({ tarotistaId: 1 })
         .expect(401);
     });
@@ -131,14 +132,14 @@ describe('DailyReading (e2e)', () => {
     it('should fail if user already has daily card for today', async () => {
       // First request - should succeed
       await request(app.getHttpServer())
-        .post('/daily-reading')
+        .post('/api/v1/daily-reading')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({ tarotistaId: 1 })
         .expect(201);
 
       // Second request - should fail with 409 Conflict
       const response = await request(app.getHttpServer())
-        .post('/daily-reading')
+        .post('/api/v1/daily-reading')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({ tarotistaId: 1 })
         .expect(409);
@@ -148,13 +149,13 @@ describe('DailyReading (e2e)', () => {
 
     it('should generate different cards for different users', async () => {
       const response1 = await request(app.getHttpServer())
-        .post('/daily-reading')
+        .post('/api/v1/daily-reading')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({ tarotistaId: 1 })
         .expect(201);
 
       const response2 = await request(app.getHttpServer())
-        .post('/daily-reading')
+        .post('/api/v1/daily-reading')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({ tarotistaId: 1 })
         .expect(201);
@@ -166,7 +167,7 @@ describe('DailyReading (e2e)', () => {
   describe('GET /daily-reading/today', () => {
     it('should return null if no daily card exists for today', async () => {
       const response = await request(app.getHttpServer())
-        .get('/daily-reading/today')
+        .get('/api/v1/daily-reading/today')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .expect(200);
 
@@ -180,14 +181,14 @@ describe('DailyReading (e2e)', () => {
     it("should return today's card if it exists", async () => {
       // First create a daily card
       const createResponse = await request(app.getHttpServer())
-        .post('/daily-reading')
+        .post('/api/v1/daily-reading')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({ tarotistaId: 1 })
         .expect(201);
 
       // Then retrieve it
       const getResponse = await request(app.getHttpServer())
-        .get('/daily-reading/today')
+        .get('/api/v1/daily-reading/today')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .expect(200);
 
@@ -198,7 +199,7 @@ describe('DailyReading (e2e)', () => {
 
     it('should fail without authentication', async () => {
       await request(app.getHttpServer())
-        .get('/daily-reading/today')
+        .get('/api/v1/daily-reading/today')
         .expect(401);
     });
   });
@@ -206,7 +207,7 @@ describe('DailyReading (e2e)', () => {
   describe('GET /daily-reading/history', () => {
     it('should return empty history for new user', async () => {
       const response = await request(app.getHttpServer())
-        .get('/daily-reading/history')
+        .get('/api/v1/daily-reading/history')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .expect(200);
 
@@ -242,7 +243,7 @@ describe('DailyReading (e2e)', () => {
 
       // Request with pagination
       const response = await request(app.getHttpServer())
-        .get('/daily-reading/history?page=1&limit=10')
+        .get('/api/v1/daily-reading/history?page=1&limit=10')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .expect(200);
 
@@ -254,7 +255,7 @@ describe('DailyReading (e2e)', () => {
 
     it('should fail without authentication', async () => {
       await request(app.getHttpServer())
-        .get('/daily-reading/history')
+        .get('/api/v1/daily-reading/history')
         .expect(401);
     });
   });
@@ -262,7 +263,7 @@ describe('DailyReading (e2e)', () => {
   describe('POST /daily-reading/regenerate', () => {
     it('should fail if no daily card exists', async () => {
       await request(app.getHttpServer())
-        .post('/daily-reading/regenerate')
+        .post('/api/v1/daily-reading/regenerate')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({ tarotistaId: 1 })
         .expect(404);
@@ -271,14 +272,14 @@ describe('DailyReading (e2e)', () => {
     it('should fail for free users', async () => {
       // First create a daily card
       await request(app.getHttpServer())
-        .post('/daily-reading')
+        .post('/api/v1/daily-reading')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({ tarotistaId: 1 })
         .expect(201);
 
       // Try to regenerate as free user
       const response = await request(app.getHttpServer())
-        .post('/daily-reading/regenerate')
+        .post('/api/v1/daily-reading/regenerate')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({ tarotistaId: 1 })
         .expect(403);
@@ -289,14 +290,14 @@ describe('DailyReading (e2e)', () => {
     it('should regenerate daily card for premium users', async () => {
       // First create a daily card
       await request(app.getHttpServer())
-        .post('/daily-reading')
+        .post('/api/v1/daily-reading')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({ tarotistaId: 1 })
         .expect(201);
 
       // Regenerate
       const regenerateResponse = await request(app.getHttpServer())
-        .post('/daily-reading/regenerate')
+        .post('/api/v1/daily-reading/regenerate')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({ tarotistaId: 1 })
         .expect(200);
@@ -313,7 +314,7 @@ describe('DailyReading (e2e)', () => {
 
     it('should fail without authentication', async () => {
       await request(app.getHttpServer())
-        .post('/daily-reading/regenerate')
+        .post('/api/v1/daily-reading/regenerate')
         .send({ tarotistaId: 1 })
         .expect(401);
     });
@@ -323,7 +324,7 @@ describe('DailyReading (e2e)', () => {
     it('should complete full daily card workflow', async () => {
       // Step 1: Check no card exists
       let todayCheck = await request(app.getHttpServer())
-        .get('/daily-reading/today')
+        .get('/api/v1/daily-reading/today')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(200);
 
@@ -335,7 +336,7 @@ describe('DailyReading (e2e)', () => {
 
       // Step 2: Generate daily card
       const createResponse = await request(app.getHttpServer())
-        .post('/daily-reading')
+        .post('/api/v1/daily-reading')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({ tarotistaId: 1 })
         .expect(201);
@@ -345,7 +346,7 @@ describe('DailyReading (e2e)', () => {
 
       // Step 3: Verify card exists for today
       todayCheck = await request(app.getHttpServer())
-        .get('/daily-reading/today')
+        .get('/api/v1/daily-reading/today')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(200);
       expect(todayCheck.body).not.toBeNull();
@@ -353,14 +354,14 @@ describe('DailyReading (e2e)', () => {
 
       // Step 4: Try to generate again (should fail)
       await request(app.getHttpServer())
-        .post('/daily-reading')
+        .post('/api/v1/daily-reading')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({ tarotistaId: 1 })
         .expect(409);
 
       // Step 5: Regenerate as premium user
       const regenerateResponse = await request(app.getHttpServer())
-        .post('/daily-reading/regenerate')
+        .post('/api/v1/daily-reading/regenerate')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({ tarotistaId: 1 })
         .expect(200);
@@ -369,7 +370,7 @@ describe('DailyReading (e2e)', () => {
 
       // Step 6: Verify today's card is the regenerated one
       const finalCheck = await request(app.getHttpServer())
-        .get('/daily-reading/today')
+        .get('/api/v1/daily-reading/today')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(200);
       expect(finalCheck.body.wasRegenerated).toBe(true);

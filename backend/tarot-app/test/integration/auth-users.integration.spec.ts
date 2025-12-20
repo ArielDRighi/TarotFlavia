@@ -8,6 +8,9 @@ import { User as _User } from '../../src/modules/users/entities/user.entity';
 import { RefreshToken } from '../../src/modules/auth/entities/refresh-token.entity';
 import { PasswordResetToken as _PasswordResetToken } from '../../src/modules/auth/entities/password-reset-token.entity';
 
+// Increase timeout for integration tests
+jest.setTimeout(30000);
+
 // Interfaces para queries SQL raw (snake_case como en DB)
 interface RefreshTokenRow {
   id: string;

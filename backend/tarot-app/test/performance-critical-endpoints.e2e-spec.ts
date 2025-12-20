@@ -141,6 +141,7 @@ describe('Performance Tests - Critical Endpoints (SUBTASK-22)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     await app.init();
     httpServer = app.getHttpServer() as App;
 
@@ -150,13 +151,13 @@ describe('Performance Tests - Critical Endpoints (SUBTASK-22)', () => {
 
     // Login con usuarios de seeders
     const freeLogin = await request(httpServer)
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: 'free@test.com', password: 'Test123456!' })
       .expect(200);
     freeUserToken = (freeLogin.body as LoginResponse).access_token;
 
     const premiumLogin = await request(httpServer)
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: 'premium@test.com', password: 'Test123456!' })
       .expect(200);
     premiumUserToken = (premiumLogin.body as LoginResponse).access_token;
@@ -226,7 +227,7 @@ describe('Performance Tests - Critical Endpoints (SUBTASK-22)', () => {
     it('should create reading in <3s without AI interpretation', async () => {
       const { duration, response } = await measureResponseTime(() =>
         request(httpServer)
-          .post('/readings')
+          .post('/api/v1/readings')
           .set('Authorization', `Bearer ${premiumUserToken}`)
           .send(createReadingPayload),
       );
@@ -243,7 +244,7 @@ describe('Performance Tests - Critical Endpoints (SUBTASK-22)', () => {
 
       const { duration, response } = await measureResponseTime(() =>
         request(httpServer)
-          .post('/readings')
+          .post('/api/v1/readings')
           .set('Authorization', `Bearer ${premiumUserToken}`)
           .send(payloadWithAI),
       );
@@ -257,7 +258,7 @@ describe('Performance Tests - Critical Endpoints (SUBTASK-22)', () => {
     it('should handle 10 concurrent reading creations (load test)', async () => {
       const metrics = await runConcurrentRequests(10, () =>
         request(httpServer)
-          .post('/readings')
+          .post('/api/v1/readings')
           .set('Authorization', `Bearer ${premiumUserToken}`)
           .send(createReadingPayload),
       );
@@ -282,7 +283,7 @@ describe('Performance Tests - Critical Endpoints (SUBTASK-22)', () => {
     it.skip('should handle 50 concurrent reading creations (stress test)', async () => {
       const metrics = await runConcurrentRequests(50, () =>
         request(httpServer)
-          .post('/readings')
+          .post('/api/v1/readings')
           .set('Authorization', `Bearer ${premiumUserToken}`)
           .send(createReadingPayload),
       );
@@ -312,7 +313,7 @@ describe('Performance Tests - Critical Endpoints (SUBTASK-22)', () => {
     it('should list readings in <500ms', async () => {
       const { duration, response } = await measureResponseTime(() =>
         request(httpServer)
-          .get('/readings')
+          .get('/api/v1/readings')
           .set('Authorization', `Bearer ${premiumUserToken}`),
       );
 
@@ -324,7 +325,7 @@ describe('Performance Tests - Critical Endpoints (SUBTASK-22)', () => {
     it('should list readings with pagination in <500ms', async () => {
       const { duration, response } = await measureResponseTime(() =>
         request(httpServer)
-          .get('/readings?page=1&limit=10')
+          .get('/api/v1/readings?page=1&limit=10')
           .set('Authorization', `Bearer ${premiumUserToken}`),
       );
 
@@ -338,7 +339,7 @@ describe('Performance Tests - Critical Endpoints (SUBTASK-22)', () => {
     it('should list readings with filters in <500ms', async () => {
       const { duration, response } = await measureResponseTime(() =>
         request(httpServer)
-          .get('/readings?categoryId=1')
+          .get('/api/v1/readings?categoryId=1')
           .set('Authorization', `Bearer ${premiumUserToken}`),
       );
 
@@ -349,7 +350,7 @@ describe('Performance Tests - Critical Endpoints (SUBTASK-22)', () => {
     it('should handle 10 concurrent listing requests (load test)', async () => {
       const metrics = await runConcurrentRequests(10, () =>
         request(httpServer)
-          .get('/readings')
+          .get('/api/v1/readings')
           .set('Authorization', `Bearer ${premiumUserToken}`),
       );
 
@@ -373,7 +374,7 @@ describe('Performance Tests - Critical Endpoints (SUBTASK-22)', () => {
     it.skip('should handle 50 concurrent listing requests (stress test)', async () => {
       const metrics = await runConcurrentRequests(50, () =>
         request(httpServer)
-          .get('/readings')
+          .get('/api/v1/readings')
           .set('Authorization', `Bearer ${premiumUserToken}`),
       );
 
@@ -402,7 +403,7 @@ describe('Performance Tests - Critical Endpoints (SUBTASK-22)', () => {
     it('should login in <2s', async () => {
       const { duration, response } = await measureResponseTime(() =>
         request(httpServer)
-          .post('/auth/login')
+          .post('/api/v1/auth/login')
           .send({ email: 'free@test.com', password: 'Test123456!' }),
       );
 
@@ -415,7 +416,7 @@ describe('Performance Tests - Critical Endpoints (SUBTASK-22)', () => {
     it('should handle 10 concurrent login requests (load test)', async () => {
       const metrics = await runConcurrentRequests(10, () =>
         request(httpServer)
-          .post('/auth/login')
+          .post('/api/v1/auth/login')
           .send({ email: 'free@test.com', password: 'Test123456!' }),
       );
 
@@ -439,7 +440,7 @@ describe('Performance Tests - Critical Endpoints (SUBTASK-22)', () => {
     it.skip('should handle 50 concurrent login requests (stress test)', async () => {
       const metrics = await runConcurrentRequests(50, () =>
         request(httpServer)
-          .post('/auth/login')
+          .post('/api/v1/auth/login')
           .send({ email: 'premium@test.com', password: 'Test123456!' }),
       );
 
@@ -469,7 +470,7 @@ describe('Performance Tests - Critical Endpoints (SUBTASK-22)', () => {
         // 3 users creating readings
         () =>
           request(httpServer)
-            .post('/readings')
+            .post('/api/v1/readings')
             .set('Authorization', `Bearer ${premiumUserToken}`)
             .send({
               deckId,
@@ -485,7 +486,7 @@ describe('Performance Tests - Critical Endpoints (SUBTASK-22)', () => {
             }),
         () =>
           request(httpServer)
-            .post('/readings')
+            .post('/api/v1/readings')
             .set('Authorization', `Bearer ${freeUserToken}`)
             .send({
               deckId,
@@ -501,7 +502,7 @@ describe('Performance Tests - Critical Endpoints (SUBTASK-22)', () => {
             }),
         () =>
           request(httpServer)
-            .post('/readings')
+            .post('/api/v1/readings')
             .set('Authorization', `Bearer ${premiumUserToken}`)
             .send({
               deckId,
@@ -519,33 +520,33 @@ describe('Performance Tests - Critical Endpoints (SUBTASK-22)', () => {
         // 4 users listing readings
         () =>
           request(httpServer)
-            .get('/readings')
+            .get('/api/v1/readings')
             .set('Authorization', `Bearer ${premiumUserToken}`),
         () =>
           request(httpServer)
-            .get('/readings?page=1&limit=5')
+            .get('/api/v1/readings?page=1&limit=5')
             .set('Authorization', `Bearer ${freeUserToken}`),
         () =>
           request(httpServer)
-            .get('/readings')
+            .get('/api/v1/readings')
             .set('Authorization', `Bearer ${premiumUserToken}`),
         () =>
           request(httpServer)
-            .get('/readings?categoryId=1')
+            .get('/api/v1/readings?categoryId=1')
             .set('Authorization', `Bearer ${freeUserToken}`),
 
         // 3 users logging in
         () =>
           request(httpServer)
-            .post('/auth/login')
+            .post('/api/v1/auth/login')
             .send({ email: 'free@test.com', password: 'Test123456!' }),
         () =>
           request(httpServer)
-            .post('/auth/login')
+            .post('/api/v1/auth/login')
             .send({ email: 'premium@test.com', password: 'Test123456!' }),
         () =>
           request(httpServer)
-            .post('/auth/login')
+            .post('/api/v1/auth/login')
             .send({ email: 'free@test.com', password: 'Test123456!' }),
       ];
 

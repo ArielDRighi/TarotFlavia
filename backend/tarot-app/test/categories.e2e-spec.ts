@@ -53,17 +53,18 @@ describe('Categories (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(new ValidationPipe());
     await app.init();
 
     // Login to get tokens (using seeded users)
     const adminLoginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: 'admin@test.com', password: 'Test123456!' })
       .expect(200);
 
     const userLoginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: 'free@test.com', password: 'Test123456!' })
       .expect(200);
 
@@ -90,7 +91,7 @@ describe('Categories (e2e)', () => {
   describe('GET /categories', () => {
     it('should return all categories (6 seeded categories)', async () => {
       const response = await request(app.getHttpServer())
-        .get('/categories')
+        .get('/api/v1/categories')
         .expect(200);
 
       const categories = response.body as CategoryResponse[];
@@ -100,7 +101,7 @@ describe('Categories (e2e)', () => {
 
     it('should return categories with correct structure', async () => {
       const response = await request(app.getHttpServer())
-        .get('/categories')
+        .get('/api/v1/categories')
         .expect(200);
 
       const categories = response.body as CategoryResponse[];
@@ -120,7 +121,7 @@ describe('Categories (e2e)', () => {
 
     it('should filter by activeOnly=true', async () => {
       const response = await request(app.getHttpServer())
-        .get('/categories?activeOnly=true')
+        .get('/api/v1/categories?activeOnly=true')
         .expect(200);
 
       const categories = response.body as CategoryResponse[];
@@ -133,7 +134,7 @@ describe('Categories (e2e)', () => {
 
     it('should include seeded categories (Amor, Trabajo, Dinero, Salud, Espiritual, General)', async () => {
       const response = await request(app.getHttpServer())
-        .get('/categories')
+        .get('/api/v1/categories')
         .expect(200);
 
       const categories = response.body as CategoryResponse[];
@@ -150,7 +151,7 @@ describe('Categories (e2e)', () => {
 
     it('should order categories correctly', async () => {
       const response = await request(app.getHttpServer())
-        .get('/categories')
+        .get('/api/v1/categories')
         .expect(200);
 
       const categories = response.body as CategoryResponse[];
@@ -170,14 +171,14 @@ describe('Categories (e2e)', () => {
     it('should return category by ID', async () => {
       // Get first category ID
       const listResponse = await request(app.getHttpServer())
-        .get('/categories')
+        .get('/api/v1/categories')
         .expect(200);
 
       const categories = listResponse.body as CategoryResponse[];
       const categoryId = categories[0].id;
 
       const response = await request(app.getHttpServer())
-        .get(`/categories/${categoryId}`)
+        .get(`/api/v1/categories/${categoryId}`)
         .expect(200);
 
       const category = response.body as CategoryResponse;
@@ -187,7 +188,9 @@ describe('Categories (e2e)', () => {
     });
 
     it('should return 404 for non-existent category', async () => {
-      await request(app.getHttpServer()).get('/categories/99999').expect(404);
+      await request(app.getHttpServer())
+        .get('/api/v1/categories/99999')
+        .expect(404);
     });
 
     it('should return 500 for invalid ID format (non-numeric)', async () => {
@@ -195,7 +198,7 @@ describe('Categories (e2e)', () => {
       // in NaN for non-numeric strings, causing a database error (500)
       // This is the actual behavior of the system
       await request(app.getHttpServer())
-        .get('/categories/invalid-id')
+        .get('/api/v1/categories/invalid-id')
         .expect(500);
     });
   });
@@ -206,7 +209,7 @@ describe('Categories (e2e)', () => {
   describe('GET /categories/slug/:slug', () => {
     it('should return category by slug', async () => {
       const response = await request(app.getHttpServer())
-        .get('/categories/slug/amor-relaciones')
+        .get('/api/v1/categories/slug/amor-relaciones')
         .expect(200);
 
       const category = response.body as CategoryResponse;
@@ -217,7 +220,7 @@ describe('Categories (e2e)', () => {
 
     it('should return category with all seeded data', async () => {
       const response = await request(app.getHttpServer())
-        .get('/categories/slug/amor-relaciones')
+        .get('/api/v1/categories/slug/amor-relaciones')
         .expect(200);
 
       const category = response.body as CategoryResponse;
@@ -228,7 +231,7 @@ describe('Categories (e2e)', () => {
 
     it('should return 404 for non-existent slug', async () => {
       await request(app.getHttpServer())
-        .get('/categories/slug/non-existent-slug')
+        .get('/api/v1/categories/slug/non-existent-slug')
         .expect(404);
     });
   });
@@ -256,7 +259,7 @@ describe('Categories (e2e)', () => {
 
     it('should create category when authenticated as admin', async () => {
       const response = await request(app.getHttpServer())
-        .post('/categories')
+        .post('/api/v1/categories')
         .set('Authorization', `Bearer ${adminToken}`)
         .send(validCreateDto)
         .expect(201);
@@ -273,14 +276,14 @@ describe('Categories (e2e)', () => {
 
     it('should return 401 when not authenticated', async () => {
       await request(app.getHttpServer())
-        .post('/categories')
+        .post('/api/v1/categories')
         .send(validCreateDto)
         .expect(401);
     });
 
     it('should return 403 when authenticated as non-admin user', async () => {
       await request(app.getHttpServer())
-        .post('/categories')
+        .post('/api/v1/categories')
         .set('Authorization', `Bearer ${userToken}`)
         .send(validCreateDto)
         .expect(403);
@@ -288,7 +291,7 @@ describe('Categories (e2e)', () => {
 
     it('should return 400 when missing required fields', async () => {
       const response = await request(app.getHttpServer())
-        .post('/categories')
+        .post('/api/v1/categories')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ name: 'Only Name' })
         .expect(400);
@@ -298,7 +301,7 @@ describe('Categories (e2e)', () => {
 
     it('should return 400 for invalid slug format', async () => {
       await request(app.getHttpServer())
-        .post('/categories')
+        .post('/api/v1/categories')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           ...validCreateDto,
@@ -309,7 +312,7 @@ describe('Categories (e2e)', () => {
 
     it('should return 400 for invalid color format', async () => {
       await request(app.getHttpServer())
-        .post('/categories')
+        .post('/api/v1/categories')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           ...validCreateDto,
@@ -321,14 +324,14 @@ describe('Categories (e2e)', () => {
     it('should return 409 when slug already exists', async () => {
       // First create the category
       await request(app.getHttpServer())
-        .post('/categories')
+        .post('/api/v1/categories')
         .set('Authorization', `Bearer ${adminToken}`)
         .send(validCreateDto)
         .expect(201);
 
       // Try to create again with same slug
       await request(app.getHttpServer())
-        .post('/categories')
+        .post('/api/v1/categories')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           ...validCreateDto,
@@ -370,7 +373,7 @@ describe('Categories (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .patch(`/categories/${testCategoryId}`)
+        .patch(`/api/v1/categories/${testCategoryId}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send(updateDto)
         .expect(200);
@@ -384,14 +387,14 @@ describe('Categories (e2e)', () => {
 
     it('should return 401 when not authenticated', async () => {
       await request(app.getHttpServer())
-        .patch(`/categories/${testCategoryId}`)
+        .patch(`/api/v1/categories/${testCategoryId}`)
         .send({ name: 'Updated Name' })
         .expect(401);
     });
 
     it('should return 403 when authenticated as non-admin user', async () => {
       await request(app.getHttpServer())
-        .patch(`/categories/${testCategoryId}`)
+        .patch(`/api/v1/categories/${testCategoryId}`)
         .set('Authorization', `Bearer ${userToken}`)
         .send({ name: 'Updated Name' })
         .expect(403);
@@ -399,7 +402,7 @@ describe('Categories (e2e)', () => {
 
     it('should return 404 for non-existent category', async () => {
       await request(app.getHttpServer())
-        .patch('/categories/99999')
+        .patch('/api/v1/categories/99999')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ name: 'Updated Name' })
         .expect(404);
@@ -407,7 +410,7 @@ describe('Categories (e2e)', () => {
 
     it('should allow partial update (only name)', async () => {
       const response = await request(app.getHttpServer())
-        .patch(`/categories/${testCategoryId}`)
+        .patch(`/api/v1/categories/${testCategoryId}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ name: 'Only Name Updated' })
         .expect(200);
@@ -445,32 +448,32 @@ describe('Categories (e2e)', () => {
 
     it('should delete category when authenticated as admin', async () => {
       await request(app.getHttpServer())
-        .delete(`/categories/${testCategoryId}`)
+        .delete(`/api/v1/categories/${testCategoryId}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
       // Verify category is deleted
       await request(app.getHttpServer())
-        .get(`/categories/${testCategoryId}`)
+        .get(`/api/v1/categories/${testCategoryId}`)
         .expect(404);
     });
 
     it('should return 401 when not authenticated', async () => {
       await request(app.getHttpServer())
-        .delete(`/categories/${testCategoryId}`)
+        .delete(`/api/v1/categories/${testCategoryId}`)
         .expect(401);
     });
 
     it('should return 403 when authenticated as non-admin user', async () => {
       await request(app.getHttpServer())
-        .delete(`/categories/${testCategoryId}`)
+        .delete(`/api/v1/categories/${testCategoryId}`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(403);
     });
 
     it('should return 404 for non-existent category', async () => {
       await request(app.getHttpServer())
-        .delete('/categories/99999')
+        .delete('/api/v1/categories/99999')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(404);
     });
@@ -503,7 +506,7 @@ describe('Categories (e2e)', () => {
 
     it('should toggle active status from true to false', async () => {
       const response = await request(app.getHttpServer())
-        .patch(`/categories/${testCategoryId}/toggle-active`)
+        .patch(`/api/v1/categories/${testCategoryId}/toggle-active`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -514,13 +517,13 @@ describe('Categories (e2e)', () => {
     it('should toggle active status from false to true', async () => {
       // First toggle to false
       await request(app.getHttpServer())
-        .patch(`/categories/${testCategoryId}/toggle-active`)
+        .patch(`/api/v1/categories/${testCategoryId}/toggle-active`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
       // Then toggle back to true
       const response = await request(app.getHttpServer())
-        .patch(`/categories/${testCategoryId}/toggle-active`)
+        .patch(`/api/v1/categories/${testCategoryId}/toggle-active`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -530,20 +533,20 @@ describe('Categories (e2e)', () => {
 
     it('should return 401 when not authenticated', async () => {
       await request(app.getHttpServer())
-        .patch(`/categories/${testCategoryId}/toggle-active`)
+        .patch(`/api/v1/categories/${testCategoryId}/toggle-active`)
         .expect(401);
     });
 
     it('should return 403 when authenticated as non-admin user', async () => {
       await request(app.getHttpServer())
-        .patch(`/categories/${testCategoryId}/toggle-active`)
+        .patch(`/api/v1/categories/${testCategoryId}/toggle-active`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(403);
     });
 
     it('should return 404 for non-existent category', async () => {
       await request(app.getHttpServer())
-        .patch('/categories/99999/toggle-active')
+        .patch('/api/v1/categories/99999/toggle-active')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(404);
     });
@@ -556,7 +559,7 @@ describe('Categories (e2e)', () => {
     it('should validate hex color format correctly', async () => {
       // Valid formats
       const response = await request(app.getHttpServer())
-        .post('/categories')
+        .post('/api/v1/categories')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           name: 'Color Test',
@@ -581,7 +584,7 @@ describe('Categories (e2e)', () => {
       const longName = 'A'.repeat(101); // 101 characters, max is 100
 
       await request(app.getHttpServer())
-        .post('/categories')
+        .post('/api/v1/categories')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           name: longName,
@@ -597,7 +600,7 @@ describe('Categories (e2e)', () => {
       const longDescription = 'A'.repeat(501); // 501 characters, max is 500
 
       await request(app.getHttpServer())
-        .post('/categories')
+        .post('/api/v1/categories')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           name: 'Long Desc Test',
@@ -611,7 +614,7 @@ describe('Categories (e2e)', () => {
 
     it('should reject slug with uppercase letters', async () => {
       await request(app.getHttpServer())
-        .post('/categories')
+        .post('/api/v1/categories')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           name: 'Upper Test',
@@ -625,7 +628,7 @@ describe('Categories (e2e)', () => {
 
     it('should reject slug with special characters', async () => {
       await request(app.getHttpServer())
-        .post('/categories')
+        .post('/api/v1/categories')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           name: 'Special Test',
@@ -639,7 +642,7 @@ describe('Categories (e2e)', () => {
 
     it('should handle order as optional with default value', async () => {
       const response = await request(app.getHttpServer())
-        .post('/categories')
+        .post('/api/v1/categories')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           name: 'No Order Test',

@@ -83,6 +83,7 @@ describe('Admin Users Management (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -146,7 +147,7 @@ describe('Admin Users Management (e2e)', () => {
 
     // Login as admin
     const adminLoginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({
         email: `admin@${TEST_DOMAIN}`,
         password: 'Admin123!',
@@ -156,7 +157,7 @@ describe('Admin Users Management (e2e)', () => {
 
     // Login as regular user
     const userLoginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({
         email: `user@${TEST_DOMAIN}`,
         password: 'Admin123!',
@@ -175,14 +176,16 @@ describe('Admin Users Management (e2e)', () => {
 
   describe('Authentication and Authorization', () => {
     it('should require authentication', async () => {
-      const response = await request(app.getHttpServer()).get('/admin/users');
+      const response = await request(app.getHttpServer()).get(
+        '/api/v1/admin/users',
+      );
 
       expect(response.status).toBe(401);
     });
 
     it('should require admin role', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/users')
+        .get('/api/v1/admin/users')
         .set('Authorization', `Bearer ${userToken}`);
 
       expect(response.status).toBe(403);
@@ -190,7 +193,7 @@ describe('Admin Users Management (e2e)', () => {
 
     it('should allow admin access', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/users')
+        .get('/api/v1/admin/users')
         .set('Authorization', `Bearer ${adminToken}`);
 
       expect(response.status).toBe(200);
@@ -200,7 +203,7 @@ describe('Admin Users Management (e2e)', () => {
   describe('GET /admin/users - List users with filters', () => {
     it('should return paginated users', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/users')
+        .get('/api/v1/admin/users')
         .set('Authorization', `Bearer ${adminToken}`);
 
       expect(response.status).toBe(200);
@@ -216,7 +219,7 @@ describe('Admin Users Management (e2e)', () => {
 
     it('should filter by search term', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/users')
+        .get('/api/v1/admin/users')
         .query({ search: 'admin@test-admin-users.com' })
         .set('Authorization', `Bearer ${adminToken}`);
 
@@ -231,7 +234,7 @@ describe('Admin Users Management (e2e)', () => {
 
     it('should filter by role', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/users')
+        .get('/api/v1/admin/users')
         .query({ role: UserRole.ADMIN })
         .set('Authorization', `Bearer ${adminToken}`);
 
@@ -245,7 +248,7 @@ describe('Admin Users Management (e2e)', () => {
 
     it('should support pagination', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/users')
+        .get('/api/v1/admin/users')
         .query({ page: 1, limit: 2 })
         .set('Authorization', `Bearer ${adminToken}`);
 
@@ -259,7 +262,7 @@ describe('Admin Users Management (e2e)', () => {
   describe('GET /admin/users/:id - Get user detail', () => {
     it('should return user details with statistics', async () => {
       const response = await request(app.getHttpServer())
-        .get(`/admin/users/${testUserId}`)
+        .get(`/api/v1/admin/users/${testUserId}`)
         .set('Authorization', `Bearer ${adminToken}`);
 
       expect(response.status).toBe(200);
@@ -274,7 +277,7 @@ describe('Admin Users Management (e2e)', () => {
 
     it('should return 404 for non-existent user', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/users/999999')
+        .get('/api/v1/admin/users/999999')
         .set('Authorization', `Bearer ${adminToken}`);
 
       expect(response.status).toBe(404);
@@ -284,7 +287,7 @@ describe('Admin Users Management (e2e)', () => {
   describe('POST /admin/users/:id/ban - Ban user', () => {
     it('should ban a user with reason', async () => {
       const response = await request(app.getHttpServer())
-        .post(`/admin/users/${testUserId}/ban`)
+        .post(`/api/v1/admin/users/${testUserId}/ban`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ reason: 'Test ban reason' });
 
@@ -298,7 +301,7 @@ describe('Admin Users Management (e2e)', () => {
 
     it('should require ban reason', async () => {
       const response = await request(app.getHttpServer())
-        .post(`/admin/users/${testUserId}/ban`)
+        .post(`/api/v1/admin/users/${testUserId}/ban`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ reason: '' });
 
@@ -309,7 +312,7 @@ describe('Admin Users Management (e2e)', () => {
   describe('Banned user login blocking', () => {
     it('should block banned user from logging in', async () => {
       const response = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: `testuser@${TEST_DOMAIN}`,
           password: 'Admin123!',
@@ -324,7 +327,7 @@ describe('Admin Users Management (e2e)', () => {
   describe('POST /admin/users/:id/unban - Unban user', () => {
     it('should unban a user', async () => {
       const response = await request(app.getHttpServer())
-        .post(`/admin/users/${testUserId}/unban`)
+        .post(`/api/v1/admin/users/${testUserId}/unban`)
         .set('Authorization', `Bearer ${adminToken}`);
 
       expect(response.status).toBe(201);
@@ -339,7 +342,7 @@ describe('Admin Users Management (e2e)', () => {
   describe('PATCH /admin/users/:id/plan - Update user plan', () => {
     it('should update user plan', async () => {
       const response = await request(app.getHttpServer())
-        .patch(`/admin/users/${testUserId}/plan`)
+        .patch(`/api/v1/admin/users/${testUserId}/plan`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ plan: UserPlan.PREMIUM });
 
@@ -353,7 +356,7 @@ describe('Admin Users Management (e2e)', () => {
   describe('POST /admin/users/:id/roles/tarotist - Add TAROTIST role', () => {
     it('should add TAROTIST role to user', async () => {
       const response = await request(app.getHttpServer())
-        .post(`/admin/users/${testUserId}/roles/tarotist`)
+        .post(`/api/v1/admin/users/${testUserId}/roles/tarotist`)
         .set('Authorization', `Bearer ${adminToken}`);
 
       expect(response.status).toBe(201);
@@ -366,7 +369,7 @@ describe('Admin Users Management (e2e)', () => {
   describe('DELETE /admin/users/:id/roles/:role - Remove role', () => {
     it('should remove TAROTIST role from user', async () => {
       const response = await request(app.getHttpServer())
-        .delete(`/admin/users/${testUserId}/roles/tarotist`)
+        .delete(`/api/v1/admin/users/${testUserId}/roles/tarotist`)
         .set('Authorization', `Bearer ${adminToken}`);
 
       expect(response.status).toBe(200);
@@ -379,7 +382,7 @@ describe('Admin Users Management (e2e)', () => {
   describe('DELETE /admin/users/:id - Delete user', () => {
     it('should delete a user (soft delete)', async () => {
       const response = await request(app.getHttpServer())
-        .delete(`/admin/users/${testUserId}`)
+        .delete(`/api/v1/admin/users/${testUserId}`)
         .set('Authorization', `Bearer ${adminToken}`);
 
       expect(response.status).toBe(200);
@@ -388,7 +391,7 @@ describe('Admin Users Management (e2e)', () => {
 
     it('should return 404 when deleting non-existent user', async () => {
       const response = await request(app.getHttpServer())
-        .delete('/admin/users/999999')
+        .delete('/api/v1/admin/users/999999')
         .set('Authorization', `Bearer ${adminToken}`);
 
       expect(response.status).toBe(404);

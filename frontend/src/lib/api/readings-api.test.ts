@@ -94,19 +94,25 @@ describe('readings-api', () => {
     const mockQuestions: PredefinedQuestion[] = [
       {
         id: 1,
-        question: '¿Qué me depara el futuro en el amor?',
+        questionText: '¿Qué me depara el futuro en el amor?',
         categoryId: 1,
-        categoryName: 'Amor',
+        order: 1,
         isActive: true,
         usageCount: 523,
+        createdAt: '2025-01-01T00:00:00.000Z',
+        updatedAt: '2025-01-01T00:00:00.000Z',
+        deletedAt: null,
       },
       {
         id: 2,
-        question: '¿Encontraré el amor verdadero pronto?',
+        questionText: '¿Encontraré el amor verdadero pronto?',
         categoryId: 1,
-        categoryName: 'Amor',
+        order: 2,
         isActive: true,
         usageCount: 412,
+        createdAt: '2025-01-01T00:00:00.000Z',
+        updatedAt: '2025-01-01T00:00:00.000Z',
+        deletedAt: null,
       },
     ];
 
@@ -149,9 +155,8 @@ describe('readings-api', () => {
       {
         id: 1,
         name: 'Tres Cartas',
-        slug: 'tres-cartas',
         description: 'Pasado, Presente, Futuro',
-        cardsCount: 3,
+        cardCount: 3,
         positions: [
           { position: 1, name: 'Pasado', description: 'Lo que dejaste atrás' },
           { position: 2, name: 'Presente', description: 'Tu situación actual' },
@@ -182,7 +187,29 @@ describe('readings-api', () => {
   // createReading
   // ==========================================================================
   describe('createReading', () => {
-    const mockReading: ReadingDetail = {
+    // Mock API response (raw backend format)
+    const mockApiResponse = {
+      id: 123,
+      userId: 1,
+      spreadId: 1,
+      tarotistaId: 1,
+      customQuestion: '¿Qué me depara el futuro amoroso?',
+      cards: [
+        {
+          id: 1,
+          name: 'El Mago',
+          number: 1,
+          category: 'arcanos_mayores', // Backend uses 'arcanos_mayores' for Major Arcana
+          imageUrl: '/cards/magician.jpg',
+        },
+      ],
+      cardPositions: [{ cardId: 1, position: 'Presente', isReversed: false }],
+      interpretation: 'Tu lectura muestra...',
+      createdAt: '2025-11-20T10:30:00.000Z',
+    };
+
+    // Expected transformed result
+    const expectedReading: ReadingDetail = {
       id: 123,
       userId: 1,
       spreadId: 1,
@@ -196,61 +223,127 @@ describe('readings-api', () => {
           number: 1,
           suit: null,
           orientation: 'upright',
-          position: 1,
+          position: 0,
           positionName: 'Presente',
+          imageUrl: '/cards/magician.jpg',
         },
       ],
-      interpretation: {
-        id: 456,
-        generalInterpretation: 'Tu lectura muestra...',
-        cardInterpretations: [
-          {
-            cardId: 1,
-            interpretation: 'El Mago en posición derecha indica...',
-          },
-        ],
-        aiProvider: 'groq',
-        model: 'llama-3.1-70b-versatile',
-      },
+      interpretation: 'Tu lectura muestra...',
       createdAt: '2025-11-20T10:30:00.000Z',
+      deletedAt: undefined,
+      shareToken: undefined,
     };
 
     it('should create reading with predefined question', async () => {
       const createData: CreateReadingDto = {
         spreadId: 1,
+        deckId: 1,
+        cardIds: [1, 5, 9],
+        cardPositions: [
+          { cardId: 1, position: 'Pasado', isReversed: false },
+          { cardId: 5, position: 'Presente', isReversed: true },
+          { cardId: 9, position: 'Futuro', isReversed: false },
+        ],
         predefinedQuestionId: 5,
-        tarotistaId: 1,
       };
 
-      vi.mocked(apiClient.post).mockResolvedValueOnce({ data: mockReading });
+      vi.mocked(apiClient.post).mockResolvedValueOnce({ data: mockApiResponse });
 
       const result = await createReading(createData);
 
       expect(apiClient.post).toHaveBeenCalledWith(API_ENDPOINTS.READINGS.BASE, createData);
-      expect(result).toEqual(mockReading);
+      expect(result).toEqual(expectedReading);
     });
 
     it('should create reading with custom question', async () => {
       const createData: CreateReadingDto = {
         spreadId: 2,
+        deckId: 1,
+        cardIds: [3, 7, 12],
+        cardPositions: [
+          { cardId: 3, position: 'Pasado', isReversed: false },
+          { cardId: 7, position: 'Presente', isReversed: false },
+          { cardId: 12, position: 'Futuro', isReversed: true },
+        ],
         customQuestion: '¿Qué me depara el futuro en mi carrera?',
-        tarotistaId: 1,
       };
 
-      vi.mocked(apiClient.post).mockResolvedValueOnce({ data: mockReading });
+      vi.mocked(apiClient.post).mockResolvedValueOnce({ data: mockApiResponse });
 
       const result = await createReading(createData);
 
       expect(apiClient.post).toHaveBeenCalledWith(API_ENDPOINTS.READINGS.BASE, createData);
-      expect(result).toEqual(mockReading);
+      expect(result).toEqual(expectedReading);
     });
 
     it('should throw error with clear message on failure', async () => {
       vi.mocked(apiClient.post).mockRejectedValueOnce(new Error('Network error'));
 
-      await expect(createReading({ spreadId: 1, predefinedQuestionId: 1 })).rejects.toThrow(
-        'Error al crear lectura'
-      );
+      const createData: CreateReadingDto = {
+        spreadId: 1,
+        deckId: 1,
+        cardIds: [1],
+        cardPositions: [{ cardId: 1, position: 'Presente', isReversed: false }],
+        predefinedQuestionId: 1,
+      };
+
+      await expect(createReading(createData)).rejects.toThrow('Error al crear lectura');
+    });
+
+    it('should correctly determine arcana from category, not number', async () => {
+      // Minor Arcana card with number 1 (As de Bastos) should be 'minor', not 'major'
+      const mockApiResponseWithMinor = {
+        id: 124,
+        userId: 1,
+        spreadId: 1,
+        tarotistaId: 1,
+        customQuestion: '¿Qué me depara el futuro?',
+        cards: [
+          {
+            id: 23,
+            name: 'As de Bastos',
+            number: 1, // Same number as El Mago, but different arcana
+            category: 'bastos', // Minor Arcana
+            imageUrl: '/cards/ace-wands.jpg',
+          },
+          {
+            id: 1,
+            name: 'El Mago',
+            number: 1, // Same number as As de Bastos
+            category: 'arcanos_mayores', // Major Arcana
+            imageUrl: '/cards/magician.jpg',
+          },
+        ],
+        cardPositions: [
+          { cardId: 23, position: 'Pasado', isReversed: false },
+          { cardId: 1, position: 'Presente', isReversed: false },
+        ],
+        interpretation: 'Tu lectura muestra...',
+        createdAt: '2025-11-20T10:30:00.000Z',
+      };
+
+      const createData: CreateReadingDto = {
+        spreadId: 1,
+        deckId: 1,
+        cardIds: [23, 1],
+        cardPositions: [
+          { cardId: 23, position: 'Pasado', isReversed: false },
+          { cardId: 1, position: 'Presente', isReversed: false },
+        ],
+        customQuestion: '¿Qué me depara el futuro?',
+      };
+
+      vi.mocked(apiClient.post).mockResolvedValueOnce({ data: mockApiResponseWithMinor });
+
+      const result = await createReading(createData);
+
+      // As de Bastos (number: 1, category: 'bastos') should be minor arcana
+      expect(result.cards[0].arcana).toBe('minor');
+      expect(result.cards[0].suit).toBe('bastos');
+
+      // El Mago (number: 1, category: 'arcanos_mayores') should be major arcana
+      expect(result.cards[1].arcana).toBe('major');
+      expect(result.cards[1].suit).toBeNull();
     });
   });
 
@@ -299,29 +392,39 @@ describe('readings-api', () => {
   // getReadingById
   // ==========================================================================
   describe('getReadingById', () => {
-    const mockReadingDetail: ReadingDetail = {
+    // Mock API response (raw backend format)
+    const mockApiResponse = {
       id: 123,
       userId: 1,
       spreadId: 1,
-      question: '¿Qué me depara el futuro?',
+      customQuestion: '¿Qué me depara el futuro?',
       cards: [],
-      interpretation: {
-        id: 456,
-        generalInterpretation: 'Tu lectura muestra...',
-        cardInterpretations: [],
-        aiProvider: 'groq',
-        model: 'llama-3.1-70b-versatile',
-      },
+      cardPositions: [],
+      interpretation: 'Tu lectura muestra...',
       createdAt: '2025-11-20T10:30:00.000Z',
     };
 
+    // Expected transformed result
+    const expectedReading: ReadingDetail = {
+      id: 123,
+      userId: 1,
+      spreadId: 1,
+      tarotistaId: undefined,
+      question: '¿Qué me depara el futuro?',
+      cards: [],
+      interpretation: 'Tu lectura muestra...',
+      createdAt: '2025-11-20T10:30:00.000Z',
+      deletedAt: undefined,
+      shareToken: undefined,
+    };
+
     it('should fetch reading by id', async () => {
-      vi.mocked(apiClient.get).mockResolvedValueOnce({ data: mockReadingDetail });
+      vi.mocked(apiClient.get).mockResolvedValueOnce({ data: mockApiResponse });
 
       const result = await getReadingById(123);
 
       expect(apiClient.get).toHaveBeenCalledWith(API_ENDPOINTS.READINGS.BY_ID(123));
-      expect(result).toEqual(mockReadingDetail);
+      expect(result).toEqual(expectedReading);
     });
 
     it('should throw error with clear message on failure', async () => {
@@ -354,29 +457,39 @@ describe('readings-api', () => {
   // regenerateInterpretation
   // ==========================================================================
   describe('regenerateInterpretation', () => {
-    const mockReadingDetail: ReadingDetail = {
+    // Mock API response (raw backend format)
+    const mockApiResponse = {
       id: 123,
       userId: 1,
       spreadId: 1,
-      question: '¿Qué me depara el futuro?',
+      customQuestion: '¿Qué me depara el futuro?',
       cards: [],
-      interpretation: {
-        id: 789,
-        generalInterpretation: 'Nueva interpretación regenerada...',
-        cardInterpretations: [],
-        aiProvider: 'anthropic',
-        model: 'claude-3',
-      },
+      cardPositions: [],
+      interpretation: 'Nueva interpretación regenerada...',
       createdAt: '2025-11-20T10:30:00.000Z',
     };
 
+    // Expected transformed result
+    const expectedReading: ReadingDetail = {
+      id: 123,
+      userId: 1,
+      spreadId: 1,
+      tarotistaId: undefined,
+      question: '¿Qué me depara el futuro?',
+      cards: [],
+      interpretation: 'Nueva interpretación regenerada...',
+      createdAt: '2025-11-20T10:30:00.000Z',
+      deletedAt: undefined,
+      shareToken: undefined,
+    };
+
     it('should regenerate reading interpretation', async () => {
-      vi.mocked(apiClient.post).mockResolvedValueOnce({ data: mockReadingDetail });
+      vi.mocked(apiClient.post).mockResolvedValueOnce({ data: mockApiResponse });
 
       const result = await regenerateInterpretation(123);
 
       expect(apiClient.post).toHaveBeenCalledWith(API_ENDPOINTS.READINGS.REGENERATE(123));
-      expect(result).toEqual(mockReadingDetail);
+      expect(result).toEqual(expectedReading);
     });
 
     it('should throw error with clear message on failure', async () => {

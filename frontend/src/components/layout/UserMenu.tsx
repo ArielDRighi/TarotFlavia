@@ -15,17 +15,22 @@ import { useAuthStore } from '@/stores/authStore';
 
 /**
  * UserMenu component
- * Displays login button when unauthenticated, or avatar with dropdown menu when authenticated
+ * Displays login and register buttons when unauthenticated, or avatar with dropdown menu when authenticated
  */
 export function UserMenu() {
   const { user, logout } = useAuthStore();
 
-  // Show login button when not authenticated
+  // Show login and register buttons when not authenticated
   if (!user) {
     return (
-      <Button variant="outline" asChild>
-        <Link href="/login">Iniciar Sesión</Link>
-      </Button>
+      <div className="flex items-center gap-2">
+        <Button variant="outline" asChild>
+          <Link href="/login">Iniciar Sesión</Link>
+        </Button>
+        <Button variant="default" asChild>
+          <Link href="/registro">Registrarse</Link>
+        </Button>
+      </div>
     );
   }
 

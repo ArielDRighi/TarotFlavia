@@ -79,6 +79,7 @@ describe('Error Scenarios (E2E)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
 
     // Configure ValidationPipe
     app.useGlobalPipes(
@@ -97,7 +98,7 @@ describe('Error Scenarios (E2E)', () => {
 
     // Login test users
     const freeLogin = await request(httpServer)
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: 'free@test.com', password: 'Test123456!' })
       .expect(200);
     const freeLoginBody = freeLogin.body as LoginResponse;
@@ -105,14 +106,14 @@ describe('Error Scenarios (E2E)', () => {
     freeUserId = freeLoginBody.user.id;
 
     const premiumLogin = await request(httpServer)
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: 'premium@test.com', password: 'Test123456!' })
       .expect(200);
     const premiumLoginBody = premiumLogin.body as LoginResponse;
     premiumUserToken = premiumLoginBody.access_token;
 
     const adminLogin = await request(httpServer)
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: 'admin@test.com', password: 'Test123456!' })
       .expect(200);
     const adminLoginBody = adminLogin.body as LoginResponse;
@@ -167,7 +168,7 @@ describe('Error Scenarios (E2E)', () => {
   describe('1. Errores de autenticación (401)', () => {
     it('✅ POST /readings sin token retorna 401', async () => {
       const response = await request(httpServer)
-        .post('/readings')
+        .post('/api/v1/readings')
         .send({
           deckId: validDeckId,
           spreadId: validSpreadId,
@@ -185,7 +186,7 @@ describe('Error Scenarios (E2E)', () => {
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.invalid.signature';
 
       const response = await request(httpServer)
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${invalidToken}`)
         .send({
           deckId: validDeckId,
@@ -199,7 +200,9 @@ describe('Error Scenarios (E2E)', () => {
     });
 
     it('✅ GET /readings sin token retorna 401', async () => {
-      const response = await request(httpServer).get('/readings').expect(401);
+      const response = await request(httpServer)
+        .get('/api/v1/readings')
+        .expect(401);
 
       const body = response.body as ErrorResponse;
       expect(body.statusCode).toBe(401);
@@ -207,7 +210,7 @@ describe('Error Scenarios (E2E)', () => {
 
     it('✅ GET /admin/users sin token retorna 401', async () => {
       const response = await request(httpServer)
-        .get('/admin/users')
+        .get('/api/v1/admin/users')
         .expect(401);
 
       const body = response.body as ErrorResponse;
@@ -216,7 +219,7 @@ describe('Error Scenarios (E2E)', () => {
 
     it('✅ POST /auth/login con credenciales incorrectas retorna 401', async () => {
       const response = await request(httpServer)
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: 'free@test.com',
           password: 'wrongpassword',
@@ -235,7 +238,7 @@ describe('Error Scenarios (E2E)', () => {
   describe('2. Errores de autorización (403)', () => {
     it('✅ GET /admin/users sin rol admin retorna 403', async () => {
       const response = await request(httpServer)
-        .get('/admin/users')
+        .get('/api/v1/admin/users')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .expect(403);
 
@@ -245,7 +248,7 @@ describe('Error Scenarios (E2E)', () => {
 
     it('✅ POST /admin/users/:id/ban sin rol admin retorna 403', async () => {
       const response = await request(httpServer)
-        .post(`/admin/users/${freeUserId}/ban`)
+        .post(`/api/v1/admin/users/${freeUserId}/ban`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({ reason: 'Test ban' })
         .expect(403);
@@ -256,7 +259,7 @@ describe('Error Scenarios (E2E)', () => {
 
     it('✅ PATCH /admin/users/:id/plan sin rol admin retorna 403', async () => {
       const response = await request(httpServer)
-        .patch(`/admin/users/${freeUserId}/plan`)
+        .patch(`/api/v1/admin/users/${freeUserId}/plan`)
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({ plan: 'PREMIUM' })
         .expect(403);
@@ -267,7 +270,7 @@ describe('Error Scenarios (E2E)', () => {
 
     it('✅ Usuario FREE intenta usar customQuestion retorna 403', async () => {
       const response = await request(httpServer)
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
           deckId: validDeckId,
@@ -287,7 +290,7 @@ describe('Error Scenarios (E2E)', () => {
   describe('3. Errores de recursos no encontrados (404)', () => {
     it('✅ GET /readings/:id inexistente retorna 404', async () => {
       const response = await request(httpServer)
-        .get('/readings/999999')
+        .get('/api/v1/readings/999999')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .expect(404);
 
@@ -297,7 +300,7 @@ describe('Error Scenarios (E2E)', () => {
 
     it('✅ GET /admin/users/:id inexistente retorna 404', async () => {
       const response = await request(httpServer)
-        .get('/admin/users/999999')
+        .get('/api/v1/admin/users/999999')
         .set('Authorization', `Bearer ${adminUserToken}`)
         .expect(404);
 
@@ -307,7 +310,7 @@ describe('Error Scenarios (E2E)', () => {
 
     it('✅ POST /readings con deckId inexistente retorna 404', async () => {
       const response = await request(httpServer)
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
           deckId: 999999,
@@ -321,7 +324,7 @@ describe('Error Scenarios (E2E)', () => {
 
     it('✅ POST /readings con spreadId inexistente retorna 404', async () => {
       const response = await request(httpServer)
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
           deckId: validDeckId,
@@ -335,7 +338,7 @@ describe('Error Scenarios (E2E)', () => {
 
     it('✅ POST /readings con questionId inexistente retorna 404', async () => {
       const response = await request(httpServer)
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
           deckId: validDeckId,
@@ -350,7 +353,7 @@ describe('Error Scenarios (E2E)', () => {
     it('✅ DELETE /readings/:id de otro usuario retorna 404', async () => {
       // Create reading with free user
       const createResponse = await request(httpServer)
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
           deckId: validDeckId,
@@ -370,7 +373,7 @@ describe('Error Scenarios (E2E)', () => {
 
       // Try to delete with premium user (different user)
       const deleteResponse = await request(httpServer)
-        .delete(`/readings/${readingId}`)
+        .delete(`/api/v1/readings/${readingId}`)
         .set('Authorization', `Bearer ${premiumUserToken}`);
 
       // May return 404 (not found) or 400 (rate limit/validation)
@@ -384,7 +387,7 @@ describe('Error Scenarios (E2E)', () => {
   describe('4. Errores de validación (400)', () => {
     it('✅ POST /readings sin deckId retorna 400', async () => {
       const response = await request(httpServer)
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
           spreadId: validSpreadId,
@@ -399,7 +402,7 @@ describe('Error Scenarios (E2E)', () => {
 
     it('✅ POST /readings sin spreadId retorna 400', async () => {
       const response = await request(httpServer)
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
           deckId: validDeckId,
@@ -413,7 +416,7 @@ describe('Error Scenarios (E2E)', () => {
 
     it('✅ POST /readings con deckId negativo retorna 400', async () => {
       const response = await request(httpServer)
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
           deckId: -1,
@@ -428,7 +431,7 @@ describe('Error Scenarios (E2E)', () => {
 
     it('✅ POST /readings con spreadId negativo retorna 400', async () => {
       const response = await request(httpServer)
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
           deckId: validDeckId,
@@ -443,7 +446,7 @@ describe('Error Scenarios (E2E)', () => {
 
     it('✅ POST /auth/register sin email retorna 400', async () => {
       const response = await request(httpServer)
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           password: 'password123',
           name: 'Test User',
@@ -456,7 +459,7 @@ describe('Error Scenarios (E2E)', () => {
 
     it('✅ POST /auth/register sin password retorna 400', async () => {
       const response = await request(httpServer)
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           email: 'newuser@test.com',
           name: 'Test User',
@@ -469,7 +472,7 @@ describe('Error Scenarios (E2E)', () => {
 
     it('✅ POST /auth/register con email inválido retorna 400', async () => {
       const response = await request(httpServer)
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           email: 'not-an-email',
           password: 'password123',
@@ -483,7 +486,7 @@ describe('Error Scenarios (E2E)', () => {
 
     it('✅ POST /auth/register con password corto retorna 400', async () => {
       const response = await request(httpServer)
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           email: 'newuser@test.com',
           password: '123',
@@ -497,7 +500,7 @@ describe('Error Scenarios (E2E)', () => {
 
     it('✅ POST /admin/users/:id/ban sin reason retorna 400', async () => {
       const response = await request(httpServer)
-        .post(`/admin/users/${freeUserId}/ban`)
+        .post(`/api/v1/admin/users/${freeUserId}/ban`)
         .set('Authorization', `Bearer ${adminUserToken}`)
         .send({})
         .expect(400);
@@ -508,7 +511,7 @@ describe('Error Scenarios (E2E)', () => {
 
     it('✅ PATCH /admin/users/:id/plan sin plan retorna 400', async () => {
       const response = await request(httpServer)
-        .patch(`/admin/users/${freeUserId}/plan`)
+        .patch(`/api/v1/admin/users/${freeUserId}/plan`)
         .set('Authorization', `Bearer ${adminUserToken}`)
         .send({})
         .expect(400);
@@ -519,7 +522,7 @@ describe('Error Scenarios (E2E)', () => {
 
     it('✅ PATCH /admin/users/:id/plan con plan inválido retorna 400', async () => {
       const response = await request(httpServer)
-        .patch(`/admin/users/${freeUserId}/plan`)
+        .patch(`/api/v1/admin/users/${freeUserId}/plan`)
         .set('Authorization', `Bearer ${adminUserToken}`)
         .send({ plan: 'INVALID_PLAN' })
         .expect(400);
@@ -530,7 +533,7 @@ describe('Error Scenarios (E2E)', () => {
 
     it('✅ POST /readings con customQuestion vacío retorna 400', async () => {
       const response = await request(httpServer)
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           deckId: validDeckId,
@@ -547,7 +550,7 @@ describe('Error Scenarios (E2E)', () => {
       const longQuestion = 'A'.repeat(501);
 
       const response = await request(httpServer)
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           deckId: validDeckId,
@@ -567,7 +570,7 @@ describe('Error Scenarios (E2E)', () => {
   describe('5. Errores de conflicto de estado (409)', () => {
     it('✅ POST /auth/register con email duplicado retorna 409', async () => {
       const response = await request(httpServer)
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           email: 'free@test.com', // Already exists
           password: 'password123',
@@ -587,7 +590,7 @@ describe('Error Scenarios (E2E)', () => {
   describe('6. Errores de formato de datos', () => {
     it('✅ POST /readings con deckId como string retorna 400', async () => {
       const response = await request(httpServer)
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
           deckId: 'not-a-number',
@@ -602,7 +605,7 @@ describe('Error Scenarios (E2E)', () => {
 
     it('✅ POST /readings con spreadId como string retorna 400', async () => {
       const response = await request(httpServer)
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
           deckId: validDeckId,
@@ -617,7 +620,7 @@ describe('Error Scenarios (E2E)', () => {
 
     it('✅ POST /readings con questionId como string retorna 400', async () => {
       const response = await request(httpServer)
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
           deckId: validDeckId,
@@ -632,7 +635,7 @@ describe('Error Scenarios (E2E)', () => {
 
     it('✅ POST /readings con campos extra no permitidos retorna 400', async () => {
       const response = await request(httpServer)
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
           deckId: validDeckId,
@@ -663,7 +666,7 @@ describe('Error Scenarios (E2E)', () => {
 
       // Attempt to create reading with invalid spreadId (should fail)
       const failedRequest = await request(httpServer)
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
           deckId: validDeckId,
@@ -698,7 +701,7 @@ describe('Error Scenarios (E2E)', () => {
 
       // Attempt invalid operation
       const failedRequest = await request(httpServer)
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({
           deckId: 999999,

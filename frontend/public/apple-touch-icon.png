@@ -1,0 +1,24 @@
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background with rounded corners for iOS -->
+  <rect width="180" height="180" fill="#805AD5"/>
+  
+  <!-- Centered Moon and Stars -->
+  <g transform="translate(90, 90)">
+    <!-- Crescent Moon -->
+    <path d="M-14 -37 C-14 -14 -28 5 -47 5 C-42 5 -37 3 -34 0 C-22 -7 -14 -21 -14 -37 Z" 
+          fill="#F9F7F2" opacity="0.95"/>
+    
+    <!-- Stars around moon -->
+    <circle cx="-5" cy="-28" r="2.8" fill="#D69E2E"/>
+    <circle cx="9" cy="-23" r="1.8" fill="#D69E2E"/>
+    <circle cx="-9" cy="-14" r="2.3" fill="#D69E2E"/>
+    
+    <!-- Mystical symbol -->
+    <g transform="translate(0, 19)">
+      <circle cx="0" cy="0" r="19" stroke="#F9F7F2" stroke-width="1.8" fill="none"/>
+      <path d="M0 -23 L0 23" stroke="#F9F7F2" stroke-width="1.8"/>
+      <path d="M-23 0 L23 0" stroke="#F9F7F2" stroke-width="1.8"/>
+      <circle cx="0" cy="0" r="4.7" fill="#D69E2E"/>
+    </g>
+  </g>
+</svg>

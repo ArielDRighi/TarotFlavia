@@ -56,17 +56,18 @@ describe('Audit Logs (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(new ValidationPipe({ transform: true }));
     await app.init();
 
     // Login to get tokens
     const adminLoginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: 'admin@test.com', password: 'Test123456!' })
       .expect(200);
 
     const userLoginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: 'free@test.com', password: 'Test123456!' })
       .expect(200);
 
@@ -93,7 +94,7 @@ describe('Audit Logs (e2e)', () => {
   describe('GET /admin/audit-logs', () => {
     it('should return audit logs when authenticated as admin', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/audit-logs')
+        .get('/api/v1/admin/audit-logs')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -109,13 +110,15 @@ describe('Audit Logs (e2e)', () => {
 
     it('should return 403 when authenticated as non-admin user', async () => {
       await request(app.getHttpServer())
-        .get('/admin/audit-logs')
+        .get('/api/v1/admin/audit-logs')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(403);
     });
 
     it('should return 401 when not authenticated', async () => {
-      await request(app.getHttpServer()).get('/admin/audit-logs').expect(401);
+      await request(app.getHttpServer())
+        .get('/api/v1/admin/audit-logs')
+        .expect(401);
     });
   });
 
@@ -125,7 +128,7 @@ describe('Audit Logs (e2e)', () => {
   describe('Pagination', () => {
     it('should respect page parameter', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/audit-logs?page=1')
+        .get('/api/v1/admin/audit-logs?page=1')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -135,7 +138,7 @@ describe('Audit Logs (e2e)', () => {
 
     it('should respect limit parameter', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/audit-logs?limit=5')
+        .get('/api/v1/admin/audit-logs?limit=5')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -146,7 +149,7 @@ describe('Audit Logs (e2e)', () => {
 
     it('should use default pagination values when not provided', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/audit-logs')
+        .get('/api/v1/admin/audit-logs')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -157,14 +160,14 @@ describe('Audit Logs (e2e)', () => {
 
     it('should return 400 for invalid page number', async () => {
       await request(app.getHttpServer())
-        .get('/admin/audit-logs?page=0')
+        .get('/api/v1/admin/audit-logs?page=0')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(400);
     });
 
     it('should return 400 for limit exceeding maximum', async () => {
       await request(app.getHttpServer())
-        .get('/admin/audit-logs?limit=101')
+        .get('/api/v1/admin/audit-logs?limit=101')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(400);
     });
@@ -176,7 +179,7 @@ describe('Audit Logs (e2e)', () => {
   describe('Filters', () => {
     it('should filter by action type', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/audit-logs?action=user_banned')
+        .get('/api/v1/admin/audit-logs?action=user_banned')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -189,7 +192,7 @@ describe('Audit Logs (e2e)', () => {
 
     it('should filter by entityType', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/audit-logs?entityType=User')
+        .get('/api/v1/admin/audit-logs?entityType=User')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -201,7 +204,7 @@ describe('Audit Logs (e2e)', () => {
 
     it('should filter by userId', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/audit-logs?userId=1')
+        .get('/api/v1/admin/audit-logs?userId=1')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -215,7 +218,7 @@ describe('Audit Logs (e2e)', () => {
       const startDate = '2025-01-01T00:00:00Z';
 
       const response = await request(app.getHttpServer())
-        .get(`/admin/audit-logs?startDate=${startDate}`)
+        .get(`/api/v1/admin/audit-logs?startDate=${startDate}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -231,7 +234,7 @@ describe('Audit Logs (e2e)', () => {
       const endDate = '2025-12-31T23:59:59Z';
 
       const response = await request(app.getHttpServer())
-        .get(`/admin/audit-logs?endDate=${endDate}`)
+        .get(`/api/v1/admin/audit-logs?endDate=${endDate}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -245,7 +248,7 @@ describe('Audit Logs (e2e)', () => {
 
     it('should combine multiple filters', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/audit-logs?entityType=User&page=1&limit=10')
+        .get('/api/v1/admin/audit-logs?entityType=User&page=1&limit=10')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -259,14 +262,14 @@ describe('Audit Logs (e2e)', () => {
 
     it('should return 400 for invalid action enum', async () => {
       await request(app.getHttpServer())
-        .get('/admin/audit-logs?action=invalid_action')
+        .get('/api/v1/admin/audit-logs?action=invalid_action')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(400);
     });
 
     it('should return 400 for invalid date format', async () => {
       await request(app.getHttpServer())
-        .get('/admin/audit-logs?startDate=not-a-date')
+        .get('/api/v1/admin/audit-logs?startDate=not-a-date')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(400);
     });
@@ -278,7 +281,7 @@ describe('Audit Logs (e2e)', () => {
   describe('Response Structure', () => {
     it('should return proper audit log entry structure', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/audit-logs?limit=1')
+        .get('/api/v1/admin/audit-logs?limit=1')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -295,7 +298,7 @@ describe('Audit Logs (e2e)', () => {
 
     it('should calculate totalPages correctly', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/audit-logs?limit=5')
+        .get('/api/v1/admin/audit-logs?limit=5')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -314,7 +317,7 @@ describe('Audit Logs (e2e)', () => {
     it('should handle empty result set gracefully', async () => {
       // Query for a very specific filter that likely has no results
       const response = await request(app.getHttpServer())
-        .get('/admin/audit-logs?userId=999999')
+        .get('/api/v1/admin/audit-logs?userId=999999')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -325,7 +328,7 @@ describe('Audit Logs (e2e)', () => {
 
     it('should handle page beyond available data', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/audit-logs?page=9999')
+        .get('/api/v1/admin/audit-logs?page=9999')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -336,7 +339,7 @@ describe('Audit Logs (e2e)', () => {
 
     it('should handle minimum valid limit', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/audit-logs?limit=1')
+        .get('/api/v1/admin/audit-logs?limit=1')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -347,7 +350,7 @@ describe('Audit Logs (e2e)', () => {
 
     it('should handle maximum valid limit', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/audit-logs?limit=100')
+        .get('/api/v1/admin/audit-logs?limit=100')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 

@@ -17,3 +17,13 @@ export {
   getTrashedReadings,
   restoreReading,
 } from './readings-api';
+export { getSharedReading } from './shared-reading-api';
+export { getTarotistas, getTarotistaById } from './tarotistas-api';
+export {
+  getAvailableSlots,
+  bookSession,
+  getMySessions,
+  getSessionDetail,
+  cancelSession,
+} from './sessions-api';
+export { getMySubscription, setFavoriteTarotista } from './subscriptions-api';

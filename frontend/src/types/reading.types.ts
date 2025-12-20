@@ -29,14 +29,18 @@ export interface Category {
 
 /**
  * Predefined question for readings
+ * Matches backend PredefinedQuestion entity
  */
 export interface PredefinedQuestion {
   id: number;
-  question: string;
+  questionText: string;
   categoryId: number;
-  categoryName: string;
+  order: number;
   isActive: boolean;
   usageCount: number;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
 }
 
 // ============================================================================
@@ -54,16 +58,20 @@ export interface SpreadPosition {
 
 /**
  * Spread (tirada) configuration
+ * Matches backend Spread entity
  */
 export interface Spread {
   id: number;
   name: string;
-  slug: string;
   description: string;
-  cardsCount: number;
+  cardCount: number;
   positions: SpreadPosition[];
   difficulty: 'beginner' | 'intermediate' | 'advanced';
   imageUrl?: string;
+  isBeginnerFriendly?: boolean;
+  whenToUse?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // ============================================================================
@@ -136,7 +144,12 @@ export interface ReadingDetail {
   tarotistaId?: number;
   question: string;
   cards: ReadingCard[];
-  interpretation: Interpretation;
+  /**
+   * Interpretation can be either:
+   * - A string (direct AI response from backend)
+   * - An Interpretation object (structured format)
+   */
+  interpretation: Interpretation | string | null;
   createdAt: string;
   deletedAt?: string | null;
   shareToken?: string | null;
@@ -155,13 +168,26 @@ export interface TrashedReading extends Reading {
 // ============================================================================
 
 /**
+ * Card position for reading creation
+ */
+export interface CardPositionDto {
+  cardId: number;
+  position: string;
+  isReversed: boolean;
+}
+
+/**
  * DTO for creating a new reading
+ * Matches backend CreateReadingDto
  */
 export interface CreateReadingDto {
   spreadId: number;
+  deckId: number;
+  cardIds: number[];
+  cardPositions: CardPositionDto[];
   predefinedQuestionId?: number;
   customQuestion?: string;
-  tarotistaId?: number;
+  generateInterpretation?: boolean;
 }
 
 // ============================================================================
@@ -197,6 +223,77 @@ export interface ShareReadingResponse {
   shareToken: string;
 }
 
+/**
+ * Card position with orientation (from backend cardPositions JSONB)
+ */
+export interface CardPosition {
+  cardId: number;
+  position: string;
+  isReversed: boolean;
+}
+
+/**
+ * Deck info in shared reading
+ */
+export interface DeckInfo {
+  id: number;
+  name: string;
+}
+
+/**
+ * Category info in shared reading
+ */
+export interface CategoryInfo {
+  id: number;
+  name: string;
+}
+
+/**
+ * Predefined question info in shared reading
+ */
+export interface PredefinedQuestionInfo {
+  id: number;
+  question: string;
+}
+
+/**
+ * Tarot card from backend (basic fields)
+ */
+export interface TarotCardBasic {
+  id: number;
+  name: string;
+  arcana?: 'major' | 'minor';
+  number?: number;
+  suit?: string | null;
+  imageUrl?: string;
+}
+
+/**
+ * Shared reading response from backend
+ * Matches GET /api/shared/:token response (TarotReading entity)
+ * NO incluye userId ni spreadId (privacidad y normalización del backend)
+ */
+export interface SharedReading {
+  id: number;
+  question: string; // deprecated field but still exists
+  predefinedQuestionId: number | null;
+  customQuestion: string | null;
+  questionType: 'predefined' | 'custom' | null;
+  tarotistaId: number | null;
+  cards: TarotCardBasic[]; // Relación cargada
+  cardPositions: CardPosition[]; // JSONB column
+  deck: DeckInfo; // Relación cargada
+  category: CategoryInfo | null; // Relación cargada
+  predefinedQuestion: PredefinedQuestionInfo | null; // Relación cargada
+  interpretation: string | null; // Simple string from backend
+  sharedToken: string | null;
+  isPublic: boolean;
+  viewCount: number;
+  createdAt: string;
+  updatedAt: string;
+  regenerationCount: number;
+}
+
 // ============================================================================
 // Filter Types (Legacy - kept for compatibility)
 // ============================================================================
@@ -210,4 +307,70 @@ export interface ReadingFilters {
   startDate?: string;
   endDate?: string;
   search?: string;
+}
+
+// ============================================================================
+// Daily Reading Types
+// ============================================================================
+
+/**
+ * Tarot card data (matches backend TarotCard entity)
+ * Used in DailyReading responses
+ */
+export interface TarotCard {
+  id: number;
+  name: string;
+  number: number;
+  category: string;
+  imageUrl: string;
+  reversedImageUrl?: string;
+  meaningUpright: string;
+  meaningReversed: string;
+  description: string;
+  keywords: string;
+  deckId: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * Daily reading (carta del día)
+ * Matches backend DailyReadingResponseDto contract
+ */
+export interface DailyReading {
+  id: number;
+  userId: number;
+  tarotistaId: number;
+  card: TarotCard;
+  isReversed: boolean;
+  interpretation: string;
+  readingDate: string;
+  wasRegenerated: boolean;
+  createdAt: Date;
+}
+
+/**
+ * Daily reading history item (simplified for history list)
+ * Matches backend DailyReadingHistoryItemDto contract
+ */
+export interface DailyReadingHistoryItem {
+  id: number;
+  readingDate: string;
+  cardName: string;
+  isReversed: boolean;
+  interpretationSummary: string;
+  wasRegenerated: boolean;
+  createdAt: Date;
+}
+
+/**
+ * Paginated daily readings response (for history)
+ * Matches backend DailyReadingHistoryDto contract (flat structure)
+ */
+export interface PaginatedDailyReadings {
+  items: DailyReadingHistoryItem[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 }

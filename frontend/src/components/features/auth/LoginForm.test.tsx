@@ -201,6 +201,124 @@ describe('LoginForm', () => {
       // toast.error should NOT be called from component - authStore handles error display
       expect(toast.error).not.toHaveBeenCalled();
     });
+
+    it('should display inline error message when login fails', async () => {
+      const mockError = {
+        response: {
+          status: 401,
+          data: { message: 'Invalid credentials' },
+        },
+      };
+      mockLogin.mockRejectedValueOnce(mockError);
+      const user = userEvent.setup();
+      render(<LoginForm />);
+
+      const emailInput = screen.getByLabelText(/email/i);
+      const passwordInput = screen.getByLabelText(/contraseña/i);
+      const submitButton = screen.getByRole('button', { name: /iniciar sesión/i });
+
+      await user.type(emailInput, 'test@test.com');
+      await user.type(passwordInput, 'wrongpassword');
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(/email o contraseña incorrectos.*verifica tus credenciales/i)
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('should clear inline error message on new submission attempt', async () => {
+      const mockError = {
+        response: {
+          status: 401,
+          data: { message: 'Invalid credentials' },
+        },
+      };
+      mockLogin.mockRejectedValueOnce(mockError);
+      const user = userEvent.setup();
+      render(<LoginForm />);
+
+      const emailInput = screen.getByLabelText(/email/i);
+      const passwordInput = screen.getByLabelText(/contraseña/i);
+      const submitButton = screen.getByRole('button', { name: /iniciar sesión/i });
+
+      // First failed attempt
+      await user.type(emailInput, 'test@test.com');
+      await user.type(passwordInput, 'wrongpassword');
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(/email o contraseña incorrectos.*verifica tus credenciales/i)
+        ).toBeInTheDocument();
+      });
+
+      // Second attempt - error should be cleared
+      mockLogin.mockResolvedValueOnce(undefined);
+      await user.clear(passwordInput);
+      await user.type(passwordInput, 'correctpassword');
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(screen.queryByText(/email o contraseña incorrectos/i)).not.toBeInTheDocument();
+      });
+    });
+
+    it('should keep form fields populated after login failure', async () => {
+      const mockError = {
+        response: {
+          status: 401,
+          data: { message: 'Invalid credentials' },
+        },
+      };
+      mockLogin.mockRejectedValueOnce(mockError);
+      const user = userEvent.setup();
+      render(<LoginForm />);
+
+      const emailInput = screen.getByLabelText(/email/i);
+      const passwordInput = screen.getByLabelText(/contraseña/i);
+      const submitButton = screen.getByRole('button', { name: /iniciar sesión/i });
+
+      // Type credentials and submit
+      await user.type(emailInput, 'test@test.com');
+      await user.type(passwordInput, 'wrongpassword');
+      await user.click(submitButton);
+
+      // Wait for error to appear
+      await waitFor(() => {
+        expect(screen.getByText(/email o contraseña incorrectos/i)).toBeInTheDocument();
+      });
+
+      // Verify fields still have values
+      expect(emailInput).toHaveValue('test@test.com');
+      expect(passwordInput).toHaveValue('wrongpassword');
+    });
+
+    it('should have aria-live attribute for accessibility', async () => {
+      const mockError = {
+        response: {
+          status: 401,
+          data: { message: 'Invalid credentials' },
+        },
+      };
+      mockLogin.mockRejectedValueOnce(mockError);
+      const user = userEvent.setup();
+      render(<LoginForm />);
+
+      const emailInput = screen.getByLabelText(/email/i);
+      const passwordInput = screen.getByLabelText(/contraseña/i);
+      const submitButton = screen.getByRole('button', { name: /iniciar sesión/i });
+
+      await user.type(emailInput, 'test@test.com');
+      await user.type(passwordInput, 'wrongpassword');
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        const alert = screen.getByRole('alert');
+        expect(alert).toHaveAttribute('aria-live', 'polite');
+      });
+    });
   });
 
   describe('Loading State', () => {

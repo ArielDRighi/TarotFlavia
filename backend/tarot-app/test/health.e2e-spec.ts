@@ -16,6 +16,7 @@ describe('Health (E2E)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     await app.init();
     httpServer = app.getHttpServer();
   }, 30000); // Increase timeout for health checks in CI
@@ -26,7 +27,9 @@ describe('Health (E2E)', () => {
 
   describe('/health (GET)', () => {
     it('should return ok status', async () => {
-      const response = await request(httpServer).get('/health').expect(200);
+      const response = await request(httpServer)
+        .get('/api/v1/health')
+        .expect(200);
 
       expect(response.body).toHaveProperty('status');
       expect((response.body as { status: string }).status).toBe('ok');
@@ -35,7 +38,9 @@ describe('Health (E2E)', () => {
     });
 
     it('should check database', async () => {
-      const response = await request(httpServer).get('/health').expect(200);
+      const response = await request(httpServer)
+        .get('/api/v1/health')
+        .expect(200);
 
       const body = response.body as {
         details: { database: { status: string } };
@@ -45,7 +50,9 @@ describe('Health (E2E)', () => {
     });
 
     it('should check memory', async () => {
-      const response = await request(httpServer).get('/health').expect(200);
+      const response = await request(httpServer)
+        .get('/api/v1/health')
+        .expect(200);
 
       const body = response.body as {
         details: { memory_heap: unknown; memory_rss: unknown };
@@ -55,14 +62,18 @@ describe('Health (E2E)', () => {
     });
 
     it('should check disk', async () => {
-      const response = await request(httpServer).get('/health').expect(200);
+      const response = await request(httpServer)
+        .get('/api/v1/health')
+        .expect(200);
 
       const body = response.body as { details: { disk: unknown } };
       expect(body.details).toHaveProperty('disk');
     });
 
     it('should check AI providers', async () => {
-      const response = await request(httpServer).get('/health').expect(200);
+      const response = await request(httpServer)
+        .get('/api/v1/health')
+        .expect(200);
 
       const body = response.body as { details: { ai: unknown } };
       expect(body.details).toHaveProperty('ai');
@@ -72,7 +83,7 @@ describe('Health (E2E)', () => {
   describe('/health/ready (GET)', () => {
     it('should return ok status when services are ready', async () => {
       const response = await request(httpServer)
-        .get('/health/ready')
+        .get('/api/v1/health/ready')
         .expect(200);
 
       expect(response.body).toHaveProperty('status');
@@ -81,7 +92,7 @@ describe('Health (E2E)', () => {
 
     it('should check critical services only', async () => {
       const response = await request(httpServer)
-        .get('/health/ready')
+        .get('/api/v1/health/ready')
         .expect(200);
 
       const body = response.body as {
@@ -95,7 +106,7 @@ describe('Health (E2E)', () => {
   describe('/health/live (GET)', () => {
     it('should return ok status', async () => {
       const response = await request(httpServer)
-        .get('/health/live')
+        .get('/api/v1/health/live')
         .expect(200);
 
       expect(response.body).toHaveProperty('status');
@@ -105,7 +116,7 @@ describe('Health (E2E)', () => {
 
     it('should return timestamp in ISO format', async () => {
       const response = await request(httpServer)
-        .get('/health/live')
+        .get('/api/v1/health/live')
         .expect(200);
 
       const timestamp = (response.body as { timestamp: string }).timestamp;
@@ -116,7 +127,7 @@ describe('Health (E2E)', () => {
   describe('/health/details (GET)', () => {
     it('should return detailed health information', async () => {
       const response = await request(httpServer)
-        .get('/health/details')
+        .get('/api/v1/health/details')
         .expect(200);
 
       expect(response.body).toHaveProperty('status');
@@ -126,7 +137,7 @@ describe('Health (E2E)', () => {
 
     it('should include all component details', async () => {
       const response = await request(httpServer)
-        .get('/health/details')
+        .get('/api/v1/health/details')
         .expect(200);
 
       const body = response.body as {
@@ -147,7 +158,7 @@ describe('Health (E2E)', () => {
 
     it('should include AI provider details', async () => {
       const response = await request(httpServer)
-        .get('/health/details')
+        .get('/api/v1/health/details')
         .expect(200);
 
       const aiDetails = (
@@ -164,7 +175,7 @@ describe('Health (E2E)', () => {
 
     it('should include circuit breaker stats if available', async () => {
       const response = await request(httpServer)
-        .get('/health/details')
+        .get('/api/v1/health/details')
         .expect(200);
 
       const aiDetails = (
@@ -182,7 +193,7 @@ describe('Health (E2E)', () => {
     it('/health should respond within 30 seconds', async () => {
       const startTime = Date.now();
 
-      await request(httpServer).get('/health').expect(200);
+      await request(httpServer).get('/api/v1/health').expect(200);
 
       const responseTime = Date.now() - startTime;
       // Relaxed for CI environment (AI provider latency)
@@ -192,7 +203,7 @@ describe('Health (E2E)', () => {
     it('/health/ready should respond within 15 seconds', async () => {
       const startTime = Date.now();
 
-      await request(httpServer).get('/health/ready').expect(200);
+      await request(httpServer).get('/api/v1/health/ready').expect(200);
 
       const responseTime = Date.now() - startTime;
       // Relaxed for CI environment
@@ -202,7 +213,7 @@ describe('Health (E2E)', () => {
     it('/health/live should respond within 100ms', async () => {
       const startTime = Date.now();
 
-      await request(httpServer).get('/health/live').expect(200);
+      await request(httpServer).get('/api/v1/health/live').expect(200);
 
       const responseTime = Date.now() - startTime;
       expect(responseTime).toBeLessThan(100);

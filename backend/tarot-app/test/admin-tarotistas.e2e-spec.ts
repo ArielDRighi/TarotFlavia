@@ -67,6 +67,7 @@ describe('Admin Tarotistas Management (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -146,7 +147,7 @@ describe('Admin Tarotistas Management (e2e)', () => {
 
     // Login as admin
     const adminLoginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({
         email: `admin@${TEST_DOMAIN}`,
         password: 'AdminPass123!',
@@ -155,7 +156,7 @@ describe('Admin Tarotistas Management (e2e)', () => {
 
     // Login as normal user
     const normalUserLoginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({
         email: `normaluser@${TEST_DOMAIN}`,
         password: 'AdminPass123!',
@@ -195,7 +196,7 @@ describe('Admin Tarotistas Management (e2e)', () => {
   describe('POST /admin/tarotistas - Create Tarotista', () => {
     it('should require admin role', async () => {
       const response = await request(app.getHttpServer())
-        .post('/admin/tarotistas')
+        .post('/api/v1/admin/tarotistas')
         .set('Authorization', `Bearer ${normalUserToken}`)
         .send({
           userId: testUserId,
@@ -209,7 +210,7 @@ describe('Admin Tarotistas Management (e2e)', () => {
 
     it('should create a new tarotista (admin only)', async () => {
       const response = await request(app.getHttpServer())
-        .post('/admin/tarotistas')
+        .post('/api/v1/admin/tarotistas')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           userId: tarotistaUserId,
@@ -231,7 +232,7 @@ describe('Admin Tarotistas Management (e2e)', () => {
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const response = await request(app.getHttpServer())
-        .post('/admin/tarotistas')
+        .post('/api/v1/admin/tarotistas')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           // Missing userId
@@ -245,7 +246,7 @@ describe('Admin Tarotistas Management (e2e)', () => {
   describe('GET /admin/tarotistas - List Tarotistas', () => {
     it('should require admin role', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/tarotistas')
+        .get('/api/v1/admin/tarotistas')
         .set('Authorization', `Bearer ${normalUserToken}`);
 
       expect(response.status).toBe(403);
@@ -255,7 +256,7 @@ describe('Admin Tarotistas Management (e2e)', () => {
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const response = await request(app.getHttpServer())
-        .get('/admin/tarotistas')
+        .get('/api/v1/admin/tarotistas')
         .set('Authorization', `Bearer ${adminToken}`)
         .query({ page: 1, limit: 20 });
 
@@ -271,7 +272,7 @@ describe('Admin Tarotistas Management (e2e)', () => {
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const response = await request(app.getHttpServer())
-        .get('/admin/tarotistas')
+        .get('/api/v1/admin/tarotistas')
         .set('Authorization', `Bearer ${adminToken}`)
         .query({ search: 'Luna' });
 
@@ -286,7 +287,7 @@ describe('Admin Tarotistas Management (e2e)', () => {
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const response = await request(app.getHttpServer())
-        .get('/admin/tarotistas')
+        .get('/api/v1/admin/tarotistas')
         .set('Authorization', `Bearer ${adminToken}`)
         .query({ isActive: true });
 
@@ -321,7 +322,7 @@ describe('Admin Tarotistas Management (e2e)', () => {
       }
 
       const response = await request(app.getHttpServer())
-        .put(`/admin/tarotistas/${tarotistaId}`)
+        .put(`/api/v1/admin/tarotistas/${tarotistaId}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           nombrePublico: 'Luna Mística Actualizada',
@@ -338,7 +339,7 @@ describe('Admin Tarotistas Management (e2e)', () => {
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const response = await request(app.getHttpServer())
-        .put('/admin/tarotistas/99999')
+        .put('/api/v1/admin/tarotistas/99999')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           nombrePublico: 'Test',
@@ -370,7 +371,7 @@ describe('Admin Tarotistas Management (e2e)', () => {
       }
 
       const response = await request(app.getHttpServer())
-        .put(`/admin/tarotistas/${tarotistaId}/deactivate`)
+        .put(`/api/v1/admin/tarotistas/${tarotistaId}/deactivate`)
         .set('Authorization', `Bearer ${adminToken}`);
 
       expect(response.status).toBe(200);
@@ -401,7 +402,7 @@ describe('Admin Tarotistas Management (e2e)', () => {
       }
 
       const response = await request(app.getHttpServer())
-        .put(`/admin/tarotistas/${tarotistaId}/reactivate`)
+        .put(`/api/v1/admin/tarotistas/${tarotistaId}/reactivate`)
         .set('Authorization', `Bearer ${adminToken}`);
 
       expect(response.status).toBe(200);
@@ -441,7 +442,7 @@ describe('Admin Tarotistas Management (e2e)', () => {
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const response = await request(app.getHttpServer())
-        .get('/admin/tarotistas/applications')
+        .get('/api/v1/admin/tarotistas/applications')
         .set('Authorization', `Bearer ${adminToken}`)
         .query({ page: 1, limit: 20 });
 
@@ -458,7 +459,7 @@ describe('Admin Tarotistas Management (e2e)', () => {
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const response = await request(app.getHttpServer())
-        .post(`/admin/tarotistas/applications/${applicationId}/approve`)
+        .post(`/api/v1/admin/tarotistas/applications/${applicationId}/approve`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           adminNotes: 'Excelente perfil, aprobado',
@@ -488,7 +489,7 @@ describe('Admin Tarotistas Management (e2e)', () => {
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const response = await request(app.getHttpServer())
-        .post(`/admin/tarotistas/applications/${applicationId}/approve`)
+        .post(`/api/v1/admin/tarotistas/applications/${applicationId}/approve`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           adminNotes: 'Test',
@@ -522,7 +523,7 @@ describe('Admin Tarotistas Management (e2e)', () => {
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const response = await request(app.getHttpServer())
-        .post(`/admin/tarotistas/applications/${newAppId}/reject`)
+        .post(`/api/v1/admin/tarotistas/applications/${newAppId}/reject`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           adminNotes: 'No cumple con los requisitos mínimos',
@@ -559,7 +560,7 @@ describe('Admin Tarotistas Management (e2e)', () => {
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const response = await request(app.getHttpServer())
-        .post(`/admin/tarotistas/applications/${newAppId}/reject`)
+        .post(`/api/v1/admin/tarotistas/applications/${newAppId}/reject`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           // Missing adminNotes
@@ -591,7 +592,7 @@ describe('Admin Tarotistas Management (e2e)', () => {
       }
 
       const response = await request(app.getHttpServer())
-        .get(`/admin/tarotistas/${tarotistaId}/config`)
+        .get(`/api/v1/admin/tarotistas/${tarotistaId}/config`)
         .set('Authorization', `Bearer ${adminToken}`);
 
       // 404 is OK if config doesn't exist yet
@@ -607,7 +608,7 @@ describe('Admin Tarotistas Management (e2e)', () => {
       }
 
       const response = await request(app.getHttpServer())
-        .put(`/admin/tarotistas/${tarotistaId}/config`)
+        .put(`/api/v1/admin/tarotistas/${tarotistaId}/config`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           temperature: 0.8,
@@ -632,7 +633,7 @@ describe('Admin Tarotistas Management (e2e)', () => {
       }
 
       const response = await request(app.getHttpServer())
-        .post(`/admin/tarotistas/${tarotistaId}/config/reset`)
+        .post(`/api/v1/admin/tarotistas/${tarotistaId}/config/reset`)
         .set('Authorization', `Bearer ${adminToken}`);
 
       expect(response.status).toBe(200);

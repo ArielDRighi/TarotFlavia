@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import { Cormorant_Garamond, Lato } from 'next/font/google';
-import { ReactQueryProvider } from '@/lib/providers';
+import { ReactQueryProvider, AuthProvider } from '@/lib/providers';
 import { Toaster } from '@/components/ui/toaster';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { defaultMetadata } from '@/lib/metadata/seo';
 import './globals.css';
 
 /**
@@ -28,10 +29,7 @@ const lato = Lato({
   display: 'swap',
 });
 
-export const metadata: Metadata = {
-  title: 'TarotFlavia',
-  description: 'Marketplace de tarotistas profesionales',
-};
+export const metadata: Metadata = defaultMetadata;
 
 export default function RootLayout({
   children,
@@ -44,11 +42,13 @@ export default function RootLayout({
         className={`${cormorantGaramond.variable} ${lato.variable} bg-bg-main min-h-screen antialiased`}
       >
         <ReactQueryProvider>
-          <div className="flex min-h-screen flex-col">
-            <Header />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </div>
+          <AuthProvider>
+            <div className="flex min-h-screen flex-col">
+              <Header />
+              <main className="flex-1">{children}</main>
+              <Footer />
+            </div>
+          </AuthProvider>
         </ReactQueryProvider>
         <Toaster />
       </body>

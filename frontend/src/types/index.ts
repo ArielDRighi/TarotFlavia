@@ -17,7 +17,14 @@ export type {
 } from './auth.types';
 
 // User Types
-export type { User, UserProfile, UserPreferences, UserRole } from './user.types';
+export type {
+  User,
+  UserProfile,
+  UserRole,
+  UserPlan,
+  UpdateProfileDto,
+  UpdatePasswordDto,
+} from './user.types';
 
 // Reading Types
 export type {
@@ -29,14 +36,67 @@ export type {
   ReadingCard,
   ReadingDetail,
   TrashedReading,
+  CardPositionDto,
   CreateReadingDto,
   PaginatedReadings,
   PaginationMeta,
   ShareReadingResponse,
+  SharedReading,
+  CardPosition,
+  DeckInfo,
+  CategoryInfo,
+  PredefinedQuestionInfo,
+  TarotCardBasic,
   Interpretation,
   CardInterpretation,
   ReadingFilters,
+  TarotCard,
+  DailyReading,
+  DailyReadingHistoryItem,
+  PaginatedDailyReadings,
 } from './reading.types';
 
 // Tarotista Types
-export type { Tarotista, TarotistaReview, TarotistaFilters, BookingSlot } from './tarotista.types';
+export type {
+  Tarotista,
+  TarotistaDetail,
+  TarotistaReview,
+  TarotistaFilters,
+  PaginatedTarotistas,
+  BookingSlot,
+} from './tarotista.types';
+
+// Session Types
+export type {
+  TimeSlot,
+  SessionStatus,
+  SessionType,
+  PaymentStatus,
+  Session,
+  SessionDetail,
+  TarotistaSummary,
+  BookSessionDto,
+  CancelSessionDto,
+} from './session.types';
+
+// Platform Metrics Types
+export type {
+  PlatformMetricsQueryDto,
+  TarotistaMetricsDto,
+  PlatformMetricsDto,
+  PeriodOption,
+  MetricCard,
+  ChartDataPoint,
+  TopTarotistaRow,
+} from './platform-metrics.types';
+export { MetricsPeriod } from './platform-metrics.types';
+
+// Subscription Types
+export type {
+  SubscriptionType,
+  SubscriptionStatus,
+  UserTarotistaSubscription,
+  SubscriptionInfo,
+  SetFavoriteTarotistaDto,
+  SetFavoriteTarotistaResponse,
+} from './subscription.types';

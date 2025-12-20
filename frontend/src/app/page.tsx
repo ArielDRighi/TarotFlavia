@@ -1,4 +1,8 @@
+import type { Metadata } from 'next';
 import Image from 'next/image';
+import { homeMetadata } from '@/lib/metadata/seo';
+
+export const metadata: Metadata = homeMetadata;
 
 export default function Home() {
   return (
@@ -17,9 +21,9 @@ export default function Home() {
         <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
           <a
             className="bg-primary text-surface hover:bg-primary/90 flex h-12 w-full items-center justify-center gap-2 rounded-full px-5 transition-colors md:w-[158px]"
-            href="#"
+            href="/ritual"
           >
-            Comenzar
+            Crear Nueva Lectura
           </a>
           <a
             className="border-secondary text-secondary hover:bg-secondary/10 flex h-12 w-full items-center justify-center rounded-full border px-5 transition-colors md:w-[158px]"

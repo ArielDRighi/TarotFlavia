@@ -61,6 +61,7 @@ describe('Rate Limiting (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     await app.init();
   });
 
@@ -71,7 +72,7 @@ describe('Rate Limiting (e2e)', () => {
   describe('Global Rate Limiting', () => {
     it('should allow requests under global limit', async () => {
       for (let i = 0; i < 3; i++) {
-        const response = await request(app.getHttpServer()).get('/');
+        const response = await request(app.getHttpServer()).get('/api/v1/');
         expect(response.status).toBe(200);
         expect(response.text).toBe('Hello World!');
         // Verificar headers X-RateLimit
@@ -85,7 +86,7 @@ describe('Rate Limiting (e2e)', () => {
       const responses: request.Response[] = [];
 
       for (let i = 0; i < 6; i++) {
-        const response = await request(app.getHttpServer()).get('/');
+        const response = await request(app.getHttpServer()).get('/api/v1/');
         responses.push(response);
       }
 
@@ -123,7 +124,9 @@ describe('Rate Limiting (e2e)', () => {
 
       // Hacer 4 requests para exceder el límite de 3
       for (let i = 0; i < 4; i++) {
-        const response = await request(app.getHttpServer()).post('/auth');
+        const response = await request(app.getHttpServer()).post(
+          '/api/v1/auth',
+        );
         responses.push(response.status);
       }
 
@@ -140,7 +143,9 @@ describe('Rate Limiting (e2e)', () => {
 
       // Hacer 5 requests para exceder el límite de 4
       for (let i = 0; i < 5; i++) {
-        const response = await request(app.getHttpServer()).get('/readings');
+        const response = await request(app.getHttpServer()).get(
+          '/api/v1/readings',
+        );
         responses.push(response.status);
       }
 

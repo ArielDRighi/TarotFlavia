@@ -11,6 +11,10 @@ export interface AuthUser {
   name: string;
   roles: string[];
   plan: string;
+  /** Number of readings used today (for limit tracking) */
+  dailyReadingsCount: number;
+  /** Maximum daily readings allowed by plan */
+  dailyReadingsLimit: number;
 }
 
 /**
@@ -20,6 +24,8 @@ export interface AuthState {
   user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  /** Internal flag to track if Zustand has hydrated from localStorage */
+  _hasHydrated: boolean;
 }
 
 /**
@@ -57,6 +63,7 @@ export interface AuthActions {
   register: (credentials: RegisterCredentials) => Promise<void>;
   logout: () => void;
   checkAuth: () => Promise<void>;
+  setHasHydrated: (state: boolean) => void;
 }
 
 /**

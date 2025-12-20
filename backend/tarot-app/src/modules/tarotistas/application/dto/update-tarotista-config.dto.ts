@@ -37,13 +37,13 @@ export class UpdateTarotistaConfigDto {
     description: 'Máximo de tokens en las respuestas',
     example: 500,
     minimum: 100,
-    maximum: 2000,
+    maximum: 4000,
     required: false,
   })
   @IsOptional()
   @IsNumber()
   @Min(100)
-  @Max(2000)
+  @Max(4000)
   maxTokens?: number;
 
   @ApiProperty({

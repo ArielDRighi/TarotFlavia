@@ -37,6 +37,7 @@ describe('AI Provider Fallback (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(new ValidationPipe());
     await app.init();
 
@@ -70,7 +71,7 @@ describe('AI Provider Fallback (e2e)', () => {
 
     // Login as premium user (to avoid AI quota issues in CI)
     const premiumLoginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: 'premium@test.com', password: 'Test123456!' })
       .expect(200);
 
@@ -105,7 +106,7 @@ describe('AI Provider Fallback (e2e)', () => {
   describe('AI Provider Integration', () => {
     it('should successfully generate interpretation with available provider', async () => {
       const response = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           predefinedQuestionId: predefinedQuestionId,
@@ -141,7 +142,7 @@ describe('AI Provider Fallback (e2e)', () => {
 
     it('should log complete usage information in ai_usage_logs', async () => {
       const response = await request(app.getHttpServer())
-        .post('/readings')
+        .post('/api/v1/readings')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .send({
           predefinedQuestionId: predefinedQuestionId,
@@ -184,7 +185,7 @@ describe('AI Provider Fallback (e2e)', () => {
   describe('Health Check - AI Providers', () => {
     it('GET /health should show system status', async () => {
       const response = await request(app.getHttpServer())
-        .get('/health')
+        .get('/api/v1/health')
         .expect(200);
 
       expect(response.body).toHaveProperty('status');
@@ -228,7 +229,7 @@ describe('AI Provider Fallback (e2e)', () => {
       for (let i = 0; i < 3; i++) {
         promises.push(
           request(app.getHttpServer())
-            .post('/readings')
+            .post('/api/v1/readings')
             .set('Authorization', `Bearer ${premiumUserToken}`)
             .send({
               predefinedQuestionId: predefinedQuestionId,

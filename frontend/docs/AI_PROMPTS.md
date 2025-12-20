@@ -15,7 +15,7 @@ Tarea: TASK-X.Y: [Pega aquí la descripción detallada de la tarea del FRONTEND_
 
 **Autonomía Total:** Ejecuta la tarea de principio a fin sin solicitar confirmaciones intermedias.
 
-**Rama:** Estás en develop (o main). Crea la rama feature/TASK-X.Y-descripcion-corta y trabaja en ella.
+**Rama:** Estás en develop (o main). Crea la rama feature/TASK-X.Y-descripcion-corta a partir de develop y trabaja en ella.
 
 **Lectura Obligatoria (CRÍTICO):**
 
@@ -248,7 +248,7 @@ ANTES de corregir, escribe un test que FALLE y demuestre el bug:
 
 ```typescript
 // tests/components/[Component].test.tsx
-it("should [comportamiento correcto esperado]", () => {
+it('should [comportamiento correcto esperado]', () => {
   // Setup que reproduce el bug
 
   // Assertion que falla actualmente
@@ -443,32 +443,32 @@ Para cada archivo, determina:
 
 ```typescript
 // Estructura recomendada
-describe("ComponentName", () => {
+describe('ComponentName', () => {
   // Setup común
   beforeEach(() => {
     // Limpiar estado
   });
 
-  describe("Rendering", () => {
-    it("should render with required props", () => {});
-    it("should render loading state", () => {});
-    it("should render error state", () => {});
-    it("should render empty state", () => {});
+  describe('Rendering', () => {
+    it('should render with required props', () => {});
+    it('should render loading state', () => {});
+    it('should render error state', () => {});
+    it('should render empty state', () => {});
   });
 
-  describe("User Interactions", () => {
-    it("should handle click events", () => {});
-    it("should handle form submissions", () => {});
+  describe('User Interactions', () => {
+    it('should handle click events', () => {});
+    it('should handle form submissions', () => {});
   });
 
-  describe("Data Fetching", () => {
-    it("should fetch data on mount", () => {});
-    it("should refetch on dependency change", () => {});
+  describe('Data Fetching', () => {
+    it('should fetch data on mount', () => {});
+    it('should refetch on dependency change', () => {});
   });
 
-  describe("Edge Cases", () => {
-    it("should handle null/undefined props", () => {});
-    it("should handle network errors", () => {});
+  describe('Edge Cases', () => {
+    it('should handle null/undefined props', () => {});
+    it('should handle network errors', () => {});
   });
 });
 ```
@@ -477,7 +477,7 @@ describe("ComponentName", () => {
 
 ```typescript
 // Mock de React Query
-vi.mock("@/hooks/api/useReadings", () => ({
+vi.mock('@/hooks/api/useReadings', () => ({
   useReadings: vi.fn(() => ({
     data: mockData,
     isLoading: false,
@@ -486,10 +486,10 @@ vi.mock("@/hooks/api/useReadings", () => ({
 }));
 
 // Mock de Zustand
-vi.mock("@/stores/authStore", () => ({
+vi.mock('@/stores/authStore', () => ({
   useAuthStore: vi.fn(() => ({
     user: mockUser,
-    token: "mock-token",
+    token: 'mock-token',
   })),
 }));
 ```
@@ -575,9 +575,9 @@ Orden de desarrollo:
 Usa componentes de `@/components/ui/`:
 
 ```tsx
-import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 
 // NO reimplementes componentes que ya existen
 ```
@@ -701,7 +701,7 @@ Encapsula la dependencia en un wrapper:
 
 ```typescript
 // lib/[nombre]/[nombre]-client.ts
-import ExternalLib from "external-lib";
+import ExternalLib from 'external-lib';
 
 // Wrapper para aislar dependencia
 export const clientInstance = new ExternalLib({
@@ -731,9 +731,9 @@ Actualiza:
 
 ```typescript
 // tests/lib/[nombre].test.ts
-describe("[Nombre] Client", () => {
-  it("should initialize correctly", () => {});
-  it("should handle errors", () => {});
+describe('[Nombre] Client', () => {
+  it('should initialize correctly', () => {});
+  it('should handle errors', () => {});
 });
 ```
 
@@ -818,7 +818,7 @@ const ExpensiveComponent = memo(({ data }) => {
 
 ```tsx
 // Lazy load componentes pesados
-const AdminDashboard = lazy(() => import("@/components/features/admin/Dashboard"));
+const AdminDashboard = lazy(() => import('@/components/features/admin/Dashboard'));
 
 function AdminPage() {
   return (
@@ -833,7 +833,7 @@ function AdminPage() {
 
 ```tsx
 // Usar next/image siempre
-import Image from "next/image";
+import Image from 'next/image';
 
 <Image
   src={tarotista.avatar}
@@ -851,7 +851,7 @@ import Image from "next/image";
 // Configurar staleTime adecuado
 export function useReadings() {
   return useQuery({
-    queryKey: ["readings"],
+    queryKey: ['readings'],
     queryFn: fetchReadings,
     staleTime: 5 * 60 * 1000, // 5 min (datos no cambian frecuentemente)
     gcTime: 10 * 60 * 1000, // 10 min (garbage collection)

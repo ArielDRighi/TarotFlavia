@@ -15,12 +15,16 @@ import {
 } from '@nestjs/common';
 import { UsersOrchestratorService } from '../../application/services/users-orchestrator.service';
 import { UpdateUserDto } from '../../application/dto/update-user.dto';
+import { UpdatePasswordDto } from '../../application/dto/update-password.dto';
 import { UpdateUserPlanDto } from '../../application/dto/update-user-plan.dto';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
 import { AdminGuard } from '../../../auth/infrastructure/guards/admin.guard';
 import { RolesGuard } from '../../../../common/guards/roles.guard';
 import { Roles } from '../../../../common/decorators/roles.decorator';
 import { UserRole } from '../../../../common/enums/user-role.enum';
+import { UsageLimitsService } from '../../../usage-limits/usage-limits.service';
+import { UsageFeature } from '../../../usage-limits/entities/usage-limit.entity';
+import { PlanConfigService } from '../../../plan-config/plan-config.service';
 import {
   ApiTags,
   ApiOperation,
@@ -34,7 +38,11 @@ import {
 @ApiBearerAuth('JWT-auth')
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersOrchestratorService) {}
+  constructor(
+    private readonly usersService: UsersOrchestratorService,
+    private readonly usageLimitsService: UsageLimitsService,
+    private readonly planConfigService: PlanConfigService,
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
@@ -50,10 +58,32 @@ export class UsersController {
       throw new NotFoundException('Usuario no encontrado');
     }
 
+    // Get daily readings usage stats
+    const dailyReadingsLimit = await this.planConfigService.getReadingsLimit(
+      user.plan,
+    );
+    const dailyReadingsRemaining =
+      await this.usageLimitsService.getRemainingUsage(
+        userId,
+        UsageFeature.TAROT_READING,
+      );
+
+    // Calculate count from remaining and limit
+    const dailyReadingsCount =
+      dailyReadingsLimit === -1
+        ? 0
+        : Math.max(0, dailyReadingsLimit - dailyReadingsRemaining);
+
     // No devolver la contraseña en la respuesta
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: _password, ...result } = user;
-    return result;
+
+    return {
+      ...result,
+      dailyReadingsCount,
+      dailyReadingsLimit:
+        dailyReadingsLimit === -1 ? 999999 : dailyReadingsLimit,
+    };
   }
 
   @UseGuards(JwtAuthGuard)
@@ -69,6 +99,30 @@ export class UsersController {
   ) {
     const userId = req.user.userId;
     return this.usersService.update(userId, updateUserDto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('me/password')
+  @ApiOperation({ summary: 'Actualizar contraseña del usuario actual' })
+  @ApiBody({ type: UpdatePasswordDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Contraseña actualizada exitosamente',
+  })
+  @ApiResponse({ status: 400, description: 'Contraseña actual incorrecta' })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({ status: 404, description: 'Usuario no encontrado' })
+  async updatePassword(
+    @Request() req: { user: { userId: number } },
+    @Body() updatePasswordDto: UpdatePasswordDto,
+  ) {
+    const userId = req.user.userId;
+    await this.usersService.updatePassword(
+      userId,
+      updatePasswordDto.currentPassword,
+      updatePasswordDto.newPassword,
+    );
+    return { message: 'Contraseña actualizada exitosamente' };
   }
 
   @UseGuards(JwtAuthGuard)

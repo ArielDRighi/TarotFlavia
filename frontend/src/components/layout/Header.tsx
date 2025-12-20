@@ -42,17 +42,28 @@ export function Header() {
           {user && (
             <>
               <Link
+                href="/ritual"
+                className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
+              >
+                Nueva Lectura
+              </Link>
+              {/* "Explorar" link hidden in MVP - single tarotista (Flavia) */}
+              {/* TODO: Enable when multiple tarotistas are supported */}
+              {/* <Link
                 href="/explorar"
                 className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
               >
                 Explorar
-              </Link>
-              <Link
+              </Link> */}
+              {/* "Mis Sesiones" link hidden in MVP - no user sessions implemented yet */}
+              {/* Sessions endpoints exist only for tarotistas (/tarotist/scheduling/sessions) */}
+              {/* TODO: Enable when user sessions feature is implemented */}
+              {/* <Link
                 href="/sesiones"
                 className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
               >
                 Mis Sesiones
-              </Link>
+              </Link> */}
             </>
           )}
         </div>

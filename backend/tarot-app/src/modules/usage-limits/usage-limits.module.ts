@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsageLimitsService } from './usage-limits.service';
 import { UsageLimit } from './entities/usage-limit.entity';
@@ -10,7 +10,7 @@ import { IncrementUsageInterceptor } from './interceptors/increment-usage.interc
 @Module({
   imports: [
     TypeOrmModule.forFeature([UsageLimit]),
-    UsersModule,
+    forwardRef(() => UsersModule),
     PlanConfigModule,
   ],
   providers: [

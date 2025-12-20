@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UsersOrchestratorService } from './users-orchestrator.service';
 import { CreateUserUseCase } from '../use-cases/create-user.use-case';
 import { UpdateUserUseCase } from '../use-cases/update-user.use-case';
+import { UpdatePasswordUseCase } from '../use-cases/update-password.use-case';
 import { UpdateUserPlanUseCase } from '../use-cases/update-user-plan.use-case';
 import { ManageUserRolesUseCase } from '../use-cases/manage-user-roles.use-case';
 import { ManageUserBanUseCase } from '../use-cases/manage-user-ban.use-case';
@@ -38,6 +39,10 @@ describe('UsersOrchestratorService', () => {
         },
         {
           provide: UpdateUserUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: UpdatePasswordUseCase,
           useValue: { execute: jest.fn() },
         },
         {

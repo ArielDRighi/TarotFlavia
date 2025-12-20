@@ -24,6 +24,7 @@ describe('Readings Admin (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -38,13 +39,13 @@ describe('Readings Admin (e2e)', () => {
 
     // Login as admin
     const adminLogin = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: 'admin@test.com', password: 'Test123456!' });
     adminToken = adminLogin.body.access_token;
 
     // Login as regular user
     const userLogin = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: 'free@test.com', password: 'Test123456!' });
     userToken = userLogin.body.access_token;
   });
@@ -58,7 +59,7 @@ describe('Readings Admin (e2e)', () => {
     describe('Authentication & Authorization', () => {
       it('should return readings list when authenticated as admin', async () => {
         const response = await request(app.getHttpServer())
-          .get('/admin/readings')
+          .get('/api/v1/admin/readings')
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);
 
@@ -68,18 +69,20 @@ describe('Readings Admin (e2e)', () => {
 
       it('should return 403 when authenticated as non-admin user', async () => {
         await request(app.getHttpServer())
-          .get('/admin/readings')
+          .get('/api/v1/admin/readings')
           .set('Authorization', `Bearer ${userToken}`)
           .expect(403);
       });
 
       it('should return 401 when not authenticated', async () => {
-        await request(app.getHttpServer()).get('/admin/readings').expect(401);
+        await request(app.getHttpServer())
+          .get('/api/v1/admin/readings')
+          .expect(401);
       });
 
       it('should return 401 with invalid token', async () => {
         await request(app.getHttpServer())
-          .get('/admin/readings')
+          .get('/api/v1/admin/readings')
           .set('Authorization', 'Bearer invalid-token')
           .expect(401);
       });
@@ -88,7 +91,7 @@ describe('Readings Admin (e2e)', () => {
     describe('Response Structure', () => {
       it('should return proper pagination structure', async () => {
         const response = await request(app.getHttpServer())
-          .get('/admin/readings')
+          .get('/api/v1/admin/readings')
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);
 
@@ -100,7 +103,7 @@ describe('Readings Admin (e2e)', () => {
 
       it('should return readings array', async () => {
         const response = await request(app.getHttpServer())
-          .get('/admin/readings')
+          .get('/api/v1/admin/readings')
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);
 
@@ -109,7 +112,7 @@ describe('Readings Admin (e2e)', () => {
 
       it('should return reading objects with expected properties when data exists', async () => {
         const response = await request(app.getHttpServer())
-          .get('/admin/readings')
+          .get('/api/v1/admin/readings')
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);
 
@@ -126,7 +129,7 @@ describe('Readings Admin (e2e)', () => {
     describe('includeDeleted Filter', () => {
       it('should accept includeDeleted=false parameter', async () => {
         const response = await request(app.getHttpServer())
-          .get('/admin/readings')
+          .get('/api/v1/admin/readings')
           .query({ includeDeleted: false })
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);
@@ -136,7 +139,7 @@ describe('Readings Admin (e2e)', () => {
 
       it('should accept includeDeleted=true parameter', async () => {
         const response = await request(app.getHttpServer())
-          .get('/admin/readings')
+          .get('/api/v1/admin/readings')
           .query({ includeDeleted: true })
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);
@@ -146,7 +149,7 @@ describe('Readings Admin (e2e)', () => {
 
       it('should work without includeDeleted parameter (default behavior)', async () => {
         const response = await request(app.getHttpServer())
-          .get('/admin/readings')
+          .get('/api/v1/admin/readings')
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);
 
@@ -155,13 +158,13 @@ describe('Readings Admin (e2e)', () => {
 
       it('should potentially return more results with includeDeleted=true', async () => {
         const withoutDeleted = await request(app.getHttpServer())
-          .get('/admin/readings')
+          .get('/api/v1/admin/readings')
           .query({ includeDeleted: false })
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);
 
         const withDeleted = await request(app.getHttpServer())
-          .get('/admin/readings')
+          .get('/api/v1/admin/readings')
           .query({ includeDeleted: true })
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);
@@ -176,7 +179,7 @@ describe('Readings Admin (e2e)', () => {
     describe('Edge Cases', () => {
       it('should handle string "true" for includeDeleted', async () => {
         const response = await request(app.getHttpServer())
-          .get('/admin/readings')
+          .get('/api/v1/admin/readings')
           .query({ includeDeleted: 'true' })
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);
@@ -186,7 +189,7 @@ describe('Readings Admin (e2e)', () => {
 
       it('should handle string "false" for includeDeleted', async () => {
         const response = await request(app.getHttpServer())
-          .get('/admin/readings')
+          .get('/api/v1/admin/readings')
           .query({ includeDeleted: 'false' })
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);
@@ -196,12 +199,12 @@ describe('Readings Admin (e2e)', () => {
 
       it('should return consistent response on multiple calls', async () => {
         const response1 = await request(app.getHttpServer())
-          .get('/admin/readings')
+          .get('/api/v1/admin/readings')
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);
 
         const response2 = await request(app.getHttpServer())
-          .get('/admin/readings')
+          .get('/api/v1/admin/readings')
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);
 
@@ -212,7 +215,7 @@ describe('Readings Admin (e2e)', () => {
 
       it('should return non-negative total count', async () => {
         const response = await request(app.getHttpServer())
-          .get('/admin/readings')
+          .get('/api/v1/admin/readings')
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);
 

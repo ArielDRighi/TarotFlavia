@@ -82,6 +82,24 @@ describe('Header', () => {
 
       expect(screen.getByRole('link', { name: /iniciar sesión/i })).toBeInTheDocument();
     });
+
+    it('should show "Registrarse" button when not authenticated', () => {
+      render(<Header />);
+
+      const registerButton = screen.getByRole('link', { name: /registrarse/i });
+      expect(registerButton).toBeInTheDocument();
+      expect(registerButton).toHaveAttribute('href', '/registro');
+    });
+
+    it('should render "Registrarse" as primary button (more prominent)', () => {
+      render(<Header />);
+
+      const registerButton = screen.getByRole('link', { name: /registrarse/i });
+      // Primary button has bg-primary class, outline button has border-input class
+      // Registrarse should be primary (default variant), NOT outline
+      expect(registerButton).toHaveClass('bg-primary');
+      expect(registerButton).not.toHaveClass('border-input');
+    });
   });
 
   describe('Navigation - Authenticated', () => {
@@ -95,22 +113,40 @@ describe('Header', () => {
       mockUseAuthStore.mockReturnValue({ user: mockUser });
     });
 
-    it('should show "Explorar" link when authenticated', () => {
+    it('should show "Nueva Lectura" link when authenticated', () => {
       render(<Header />);
 
-      expect(screen.getByRole('link', { name: /explorar/i })).toBeInTheDocument();
+      const link = screen.getByRole('link', { name: /nueva lectura/i });
+      expect(link).toBeInTheDocument();
+      expect(link).toHaveAttribute('href', '/ritual');
     });
 
-    it('should show "Mis Sesiones" link when authenticated', () => {
+    it('should NOT show "Explorar" link (MVP: single tarotista)', () => {
       render(<Header />);
 
-      expect(screen.getByRole('link', { name: /mis sesiones/i })).toBeInTheDocument();
+      // MVP solo trabaja con un tarotista (Flavia)
+      // El link "Explorar" está oculto para evitar confusión
+      expect(screen.queryByRole('link', { name: /explorar/i })).not.toBeInTheDocument();
+    });
+
+    it('should NOT show "Mis Sesiones" link (MVP: user sessions not implemented)', () => {
+      render(<Header />);
+
+      // Sessions endpoints exist only for tarotistas
+      // User sessions feature is not implemented yet in MVP
+      expect(screen.queryByRole('link', { name: /mis sesiones/i })).not.toBeInTheDocument();
     });
 
     it('should NOT show "Iniciar Sesión" link when authenticated', () => {
       render(<Header />);
 
       expect(screen.queryByRole('link', { name: /iniciar sesión/i })).not.toBeInTheDocument();
+    });
+
+    it('should NOT show "Registrarse" button when authenticated', () => {
+      render(<Header />);
+
+      expect(screen.queryByRole('link', { name: /registrarse/i })).not.toBeInTheDocument();
     });
   });
 

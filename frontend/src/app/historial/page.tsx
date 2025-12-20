@@ -1,7 +1,34 @@
+'use client';
+
+import { Loader2 } from 'lucide-react';
+
+import { useRequireAuth } from '@/hooks/useRequireAuth';
+import { ReadingsHistory } from '@/components/features/readings/ReadingsHistory';
+
+/**
+ * Historial Page - Reading History
+ *
+ * Protected page that displays user's reading history.
+ * All business logic is delegated to ReadingsHistory component.
+ */
 export default function HistorialPage() {
+  const { isLoading: isAuthLoading } = useRequireAuth();
+
+  // Show auth loading state
+  if (isAuthLoading) {
+    return (
+      <div
+        data-testid="auth-loading"
+        className="bg-bg-main flex min-h-screen items-center justify-center"
+      >
+        <Loader2 className="text-primary h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-bg-main min-h-screen p-8">
-      <h1 className="font-serif text-3xl">Historial</h1>
+    <div data-testid="historial-container" className="bg-bg-main min-h-screen px-4 py-8 md:px-8">
+      <ReadingsHistory />
     </div>
   );
 }

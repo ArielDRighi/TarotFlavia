@@ -39,6 +39,8 @@ describe('Users (e2e)', () => {
     plan: string;
     roles: string[];
     profilePicture?: string;
+    dailyReadingsCount: number;
+    dailyReadingsLimit: number;
     createdAt: string;
     updatedAt: string;
   }
@@ -63,22 +65,23 @@ describe('Users (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(new ValidationPipe());
     await app.init();
 
     // Login to get tokens (using seeded users)
     const adminLoginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: 'admin@test.com', password: 'Test123456!' })
       .expect(200);
 
     const freeLoginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: 'free@test.com', password: 'Test123456!' })
       .expect(200);
 
     const premiumLoginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: 'premium@test.com', password: 'Test123456!' })
       .expect(200);
 
@@ -113,7 +116,7 @@ describe('Users (e2e)', () => {
   describe('GET /users/profile', () => {
     it('should return profile for authenticated free user', async () => {
       const response = await request(app.getHttpServer())
-        .get('/users/profile')
+        .get('/api/v1/users/profile')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .expect(200);
 
@@ -124,11 +127,23 @@ describe('Users (e2e)', () => {
       expect(profile).toHaveProperty('name');
       expect(profile).toHaveProperty('roles');
       expect(profile).not.toHaveProperty('password'); // Password should be excluded
+
+      // Validate daily readings statistics
+      expect(profile).toHaveProperty('dailyReadingsCount');
+      expect(profile).toHaveProperty('dailyReadingsLimit');
+      expect(typeof profile.dailyReadingsCount).toBe('number');
+      expect(typeof profile.dailyReadingsLimit).toBe('number');
+      expect(profile.dailyReadingsLimit).toBeGreaterThan(0); // FREE plan has a limit
+      expect(profile.dailyReadingsLimit).toBeLessThan(999999); // Not unlimited
+      expect(profile.dailyReadingsCount).toBeGreaterThanOrEqual(0);
+      expect(profile.dailyReadingsCount).toBeLessThanOrEqual(
+        profile.dailyReadingsLimit,
+      );
     });
 
     it('should return profile for authenticated premium user', async () => {
       const response = await request(app.getHttpServer())
-        .get('/users/profile')
+        .get('/api/v1/users/profile')
         .set('Authorization', `Bearer ${premiumUserToken}`)
         .expect(200);
 
@@ -136,11 +151,17 @@ describe('Users (e2e)', () => {
       expect(profile.id).toBe(premiumUserId);
       expect(profile.email).toBe('premium@test.com');
       expect(profile.plan).toBe('premium');
+
+      // Validate daily readings statistics for unlimited plan
+      expect(profile).toHaveProperty('dailyReadingsCount');
+      expect(profile).toHaveProperty('dailyReadingsLimit');
+      expect(profile.dailyReadingsLimit).toBe(999999); // Unlimited represented as 999999
+      expect(profile.dailyReadingsCount).toBe(0); // No count for unlimited plans
     });
 
     it('should return profile for authenticated admin user', async () => {
       const response = await request(app.getHttpServer())
-        .get('/users/profile')
+        .get('/api/v1/users/profile')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -151,12 +172,14 @@ describe('Users (e2e)', () => {
     });
 
     it('should return 401 when not authenticated', async () => {
-      await request(app.getHttpServer()).get('/users/profile').expect(401);
+      await request(app.getHttpServer())
+        .get('/api/v1/users/profile')
+        .expect(401);
     });
 
     it('should return 401 with invalid token', async () => {
       await request(app.getHttpServer())
-        .get('/users/profile')
+        .get('/api/v1/users/profile')
         .set('Authorization', 'Bearer invalid-token')
         .expect(401);
     });
@@ -170,7 +193,7 @@ describe('Users (e2e)', () => {
       const newName = 'Updated Free User';
 
       const response = await request(app.getHttpServer())
-        .patch('/users/profile')
+        .patch('/api/v1/users/profile')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({ name: newName })
         .expect(200);
@@ -180,7 +203,7 @@ describe('Users (e2e)', () => {
 
       // Verify the change persisted
       const verifyResponse = await request(app.getHttpServer())
-        .get('/users/profile')
+        .get('/api/v1/users/profile')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .expect(200);
 
@@ -191,7 +214,7 @@ describe('Users (e2e)', () => {
       const newPicture = 'https://example.com/new-profile.jpg';
 
       const response = await request(app.getHttpServer())
-        .patch('/users/profile')
+        .patch('/api/v1/users/profile')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({ profilePicture: newPicture })
         .expect(200);
@@ -202,7 +225,7 @@ describe('Users (e2e)', () => {
 
     it('should return 400 for invalid email format', async () => {
       await request(app.getHttpServer())
-        .patch('/users/profile')
+        .patch('/api/v1/users/profile')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({ email: 'invalid-email' })
         .expect(400);
@@ -210,7 +233,7 @@ describe('Users (e2e)', () => {
 
     it('should return 400 for password too short', async () => {
       await request(app.getHttpServer())
-        .patch('/users/profile')
+        .patch('/api/v1/users/profile')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({ password: '12345' }) // Less than 6 characters
         .expect(400);
@@ -218,14 +241,14 @@ describe('Users (e2e)', () => {
 
     it('should return 401 when not authenticated', async () => {
       await request(app.getHttpServer())
-        .patch('/users/profile')
+        .patch('/api/v1/users/profile')
         .send({ name: 'Test' })
         .expect(401);
     });
 
     it('should allow empty update (no changes)', async () => {
       const response = await request(app.getHttpServer())
-        .patch('/users/profile')
+        .patch('/api/v1/users/profile')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({})
         .expect(200);
@@ -240,7 +263,7 @@ describe('Users (e2e)', () => {
   describe('GET /users', () => {
     it('should return all users when authenticated as admin', async () => {
       const response = await request(app.getHttpServer())
-        .get('/users')
+        .get('/api/v1/users')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -251,13 +274,13 @@ describe('Users (e2e)', () => {
 
     it('should return 403 when authenticated as non-admin user', async () => {
       await request(app.getHttpServer())
-        .get('/users')
+        .get('/api/v1/users')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .expect(403);
     });
 
     it('should return 401 when not authenticated', async () => {
-      await request(app.getHttpServer()).get('/users').expect(401);
+      await request(app.getHttpServer()).get('/api/v1/users').expect(401);
     });
   });
 
@@ -267,7 +290,7 @@ describe('Users (e2e)', () => {
   describe('GET /users/:id', () => {
     it('should return own user data', async () => {
       const response = await request(app.getHttpServer())
-        .get(`/users/${freeUserId}`)
+        .get(`/api/v1/users/${freeUserId}`)
         .set('Authorization', `Bearer ${freeUserToken}`)
         .expect(200);
 
@@ -278,7 +301,7 @@ describe('Users (e2e)', () => {
 
     it('should allow admin to view any user', async () => {
       const response = await request(app.getHttpServer())
-        .get(`/users/${freeUserId}`)
+        .get(`/api/v1/users/${freeUserId}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -288,21 +311,21 @@ describe('Users (e2e)', () => {
 
     it('should return 403 when non-admin tries to view other user', async () => {
       await request(app.getHttpServer())
-        .get(`/users/${adminUserId}`)
+        .get(`/api/v1/users/${adminUserId}`)
         .set('Authorization', `Bearer ${freeUserToken}`)
         .expect(403);
     });
 
     it('should return 404 for non-existent user', async () => {
       await request(app.getHttpServer())
-        .get('/users/99999')
+        .get('/api/v1/users/99999')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(404);
     });
 
     it('should return 401 when not authenticated', async () => {
       await request(app.getHttpServer())
-        .get(`/users/${freeUserId}`)
+        .get(`/api/v1/users/${freeUserId}`)
         .expect(401);
     });
   });
@@ -316,7 +339,7 @@ describe('Users (e2e)', () => {
     beforeEach(async () => {
       // Create a test user for plan updates
       const registerResponse = await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           email: `plantest-${Date.now()}@test.com`,
           password: 'Test123456!',
@@ -340,7 +363,7 @@ describe('Users (e2e)', () => {
 
     it('should update user plan when authenticated as admin', async () => {
       const response = await request(app.getHttpServer())
-        .patch(`/users/${testUserId}/plan`)
+        .patch(`/api/v1/users/${testUserId}/plan`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ plan: 'premium' })
         .expect(200);
@@ -351,7 +374,7 @@ describe('Users (e2e)', () => {
 
     it('should return 403 when non-admin tries to update plan', async () => {
       await request(app.getHttpServer())
-        .patch(`/users/${testUserId}/plan`)
+        .patch(`/api/v1/users/${testUserId}/plan`)
         .set('Authorization', `Bearer ${freeUserToken}`)
         .send({ plan: 'premium' })
         .expect(403);
@@ -359,14 +382,14 @@ describe('Users (e2e)', () => {
 
     it('should return 401 when not authenticated', async () => {
       await request(app.getHttpServer())
-        .patch(`/users/${testUserId}/plan`)
+        .patch(`/api/v1/users/${testUserId}/plan`)
         .send({ plan: 'premium' })
         .expect(401);
     });
 
     it('should return 404 for non-existent user', async () => {
       await request(app.getHttpServer())
-        .patch('/users/99999/plan')
+        .patch('/api/v1/users/99999/plan')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ plan: 'premium' })
         .expect(404);
@@ -382,7 +405,7 @@ describe('Users (e2e)', () => {
     beforeEach(async () => {
       // Create a test user for role tests
       const registerResponse = await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           email: `roletest-${Date.now()}@test.com`,
           password: 'Test123456!',
@@ -405,7 +428,7 @@ describe('Users (e2e)', () => {
 
     it('should add tarotist role when authenticated as admin', async () => {
       const response = await request(app.getHttpServer())
-        .post(`/users/${testUserId}/roles/tarotist`)
+        .post(`/api/v1/users/${testUserId}/roles/tarotist`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(201);
 
@@ -415,20 +438,20 @@ describe('Users (e2e)', () => {
 
     it('should return 403 when non-admin tries to add role', async () => {
       await request(app.getHttpServer())
-        .post(`/users/${testUserId}/roles/tarotist`)
+        .post(`/api/v1/users/${testUserId}/roles/tarotist`)
         .set('Authorization', `Bearer ${freeUserToken}`)
         .expect(403);
     });
 
     it('should return 401 when not authenticated', async () => {
       await request(app.getHttpServer())
-        .post(`/users/${testUserId}/roles/tarotist`)
+        .post(`/api/v1/users/${testUserId}/roles/tarotist`)
         .expect(401);
     });
 
     it('should return 404 for non-existent user', async () => {
       await request(app.getHttpServer())
-        .post('/users/99999/roles/tarotist')
+        .post('/api/v1/users/99999/roles/tarotist')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(404);
     });
@@ -442,7 +465,7 @@ describe('Users (e2e)', () => {
 
     beforeEach(async () => {
       const registerResponse = await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           email: `adminroletest-${Date.now()}@test.com`,
           password: 'Test123456!',
@@ -464,7 +487,7 @@ describe('Users (e2e)', () => {
 
     it('should add admin role when authenticated as admin', async () => {
       const response = await request(app.getHttpServer())
-        .post(`/users/${testUserId}/roles/admin`)
+        .post(`/api/v1/users/${testUserId}/roles/admin`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(201);
 
@@ -474,7 +497,7 @@ describe('Users (e2e)', () => {
 
     it('should return 403 when non-admin tries to add admin role', async () => {
       await request(app.getHttpServer())
-        .post(`/users/${testUserId}/roles/admin`)
+        .post(`/api/v1/users/${testUserId}/roles/admin`)
         .set('Authorization', `Bearer ${freeUserToken}`)
         .expect(403);
     });
@@ -489,7 +512,7 @@ describe('Users (e2e)', () => {
     beforeEach(async () => {
       // Create user and add tarotist role
       const registerResponse = await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           email: `removeroletest-${Date.now()}@test.com`,
           password: 'Test123456!',
@@ -501,7 +524,7 @@ describe('Users (e2e)', () => {
 
       // Add tarotist role
       await request(app.getHttpServer())
-        .post(`/users/${testUserId}/roles/tarotist`)
+        .post(`/api/v1/users/${testUserId}/roles/tarotist`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(201);
     });
@@ -517,7 +540,7 @@ describe('Users (e2e)', () => {
 
     it('should remove tarotist role when authenticated as admin', async () => {
       const response = await request(app.getHttpServer())
-        .delete(`/users/${testUserId}/roles/tarotist`)
+        .delete(`/api/v1/users/${testUserId}/roles/tarotist`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -527,20 +550,20 @@ describe('Users (e2e)', () => {
 
     it('should return 403 when non-admin tries to remove role', async () => {
       await request(app.getHttpServer())
-        .delete(`/users/${testUserId}/roles/tarotist`)
+        .delete(`/api/v1/users/${testUserId}/roles/tarotist`)
         .set('Authorization', `Bearer ${freeUserToken}`)
         .expect(403);
     });
 
     it('should return 401 when not authenticated', async () => {
       await request(app.getHttpServer())
-        .delete(`/users/${testUserId}/roles/tarotist`)
+        .delete(`/api/v1/users/${testUserId}/roles/tarotist`)
         .expect(401);
     });
 
     it('should return 400 for invalid role name', async () => {
       await request(app.getHttpServer())
-        .delete(`/users/${testUserId}/roles/invalid-role`)
+        .delete(`/api/v1/users/${testUserId}/roles/invalid-role`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(400);
     });
@@ -553,7 +576,7 @@ describe('Users (e2e)', () => {
     it('should allow admin to delete user', async () => {
       // Create a user to delete
       const registerResponse = await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           email: `deletetest-${Date.now()}@test.com`,
           password: 'Test123456!',
@@ -564,7 +587,7 @@ describe('Users (e2e)', () => {
       const userToDeleteId = (registerResponse.body as LoginResponse).user.id;
 
       const response = await request(app.getHttpServer())
-        .delete(`/users/${userToDeleteId}`)
+        .delete(`/api/v1/users/${userToDeleteId}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -572,28 +595,28 @@ describe('Users (e2e)', () => {
 
       // Verify user is deleted
       await request(app.getHttpServer())
-        .get(`/users/${userToDeleteId}`)
+        .get(`/api/v1/users/${userToDeleteId}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(404);
     });
 
     it('should return 403 when non-admin tries to delete other user', async () => {
       await request(app.getHttpServer())
-        .delete(`/users/${adminUserId}`)
+        .delete(`/api/v1/users/${adminUserId}`)
         .set('Authorization', `Bearer ${freeUserToken}`)
         .expect(403);
     });
 
     it('should return 404 for non-existent user', async () => {
       await request(app.getHttpServer())
-        .delete('/users/99999')
+        .delete('/api/v1/users/99999')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(404);
     });
 
     it('should return 401 when not authenticated', async () => {
       await request(app.getHttpServer())
-        .delete(`/users/${freeUserId}`)
+        .delete(`/api/v1/users/${freeUserId}`)
         .expect(401);
     });
   });
@@ -606,11 +629,11 @@ describe('Users (e2e)', () => {
       // Send multiple update requests simultaneously
       const updates = await Promise.all([
         request(app.getHttpServer())
-          .patch('/users/profile')
+          .patch('/api/v1/users/profile')
           .set('Authorization', `Bearer ${premiumUserToken}`)
           .send({ name: 'Update 1' }),
         request(app.getHttpServer())
-          .patch('/users/profile')
+          .patch('/api/v1/users/profile')
           .set('Authorization', `Bearer ${premiumUserToken}`)
           .send({ name: 'Update 2' }),
       ]);
@@ -622,7 +645,7 @@ describe('Users (e2e)', () => {
 
     it('should not expose sensitive data in user responses', async () => {
       const response = await request(app.getHttpServer())
-        .get('/users/profile')
+        .get('/api/v1/users/profile')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .expect(200);
 

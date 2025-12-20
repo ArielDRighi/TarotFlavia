@@ -22,6 +22,10 @@ export const CONFIG = {
   MIN_QUESTION_LENGTH: 10,
   MAX_QUESTION_LENGTH: 500,
 
+  // Plan limits
+  /** Default daily reading limit for FREE users */
+  DEFAULT_FREE_DAILY_LIMIT: 3,
+
   // Validation
   PASSWORD_MIN_LENGTH: 8,
   USERNAME_MIN_LENGTH: 3,

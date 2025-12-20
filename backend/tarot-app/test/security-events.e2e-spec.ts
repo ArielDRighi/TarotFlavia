@@ -44,6 +44,7 @@ describe('Security Events E2E', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -60,24 +61,28 @@ describe('Security Events E2E', () => {
     datasource = moduleFixture.get<DataSource>(DataSource);
 
     // Get admin token
-    const adminResponse = await request(httpServer).post('/auth/login').send({
-      email: 'admin@test.com',
-      password: 'Test123456!',
-    });
+    const adminResponse = await request(httpServer)
+      .post('/api/v1/auth/login')
+      .send({
+        email: 'admin@test.com',
+        password: 'Test123456!',
+      });
 
     adminToken = (adminResponse.body as unknown as LoginResponse).access_token;
 
     // Create regular user and get token
-    await request(httpServer).post('/auth/register').send({
+    await request(httpServer).post('/api/v1/auth/register').send({
       email: 'securitytest@test.com',
       password: 'Test123456!',
       name: 'Security Test User',
     });
 
-    const userResponse = await request(httpServer).post('/auth/login').send({
-      email: 'securitytest@test.com',
-      password: 'Test123456!',
-    });
+    const userResponse = await request(httpServer)
+      .post('/api/v1/auth/login')
+      .send({
+        email: 'securitytest@test.com',
+        password: 'Test123456!',
+      });
 
     regularUserToken = (userResponse.body as unknown as LoginResponse)
       .access_token;
@@ -96,19 +101,21 @@ describe('Security Events E2E', () => {
 
   describe('Authentication', () => {
     it('should reject unauthenticated requests', () => {
-      return request(httpServer).get('/admin/security/events').expect(401);
+      return request(httpServer)
+        .get('/api/v1/admin/security/events')
+        .expect(401);
     });
 
     it('should reject non-admin users', () => {
       return request(httpServer)
-        .get('/admin/security/events')
+        .get('/api/v1/admin/security/events')
         .set('Authorization', `Bearer ${regularUserToken}`)
         .expect(403);
     });
 
     it('should return security events for admin', async () => {
       const response = await request(httpServer)
-        .get('/admin/security/events')
+        .get('/api/v1/admin/security/events')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -124,7 +131,7 @@ describe('Security Events E2E', () => {
 
     it('should filter by event type', async () => {
       const response = await request(httpServer)
-        .get('/admin/security/events?eventType=failed_login')
+        .get('/api/v1/admin/security/events?eventType=failed_login')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -137,7 +144,7 @@ describe('Security Events E2E', () => {
 
     it('should filter by severity', async () => {
       const response = await request(httpServer)
-        .get('/admin/security/events?severity=high')
+        .get('/api/v1/admin/security/events?severity=high')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -150,7 +157,7 @@ describe('Security Events E2E', () => {
 
     it('should paginate results', async () => {
       const response = await request(httpServer)
-        .get('/admin/security/events?page=1&limit=5')
+        .get('/api/v1/admin/security/events?page=1&limit=5')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -162,12 +169,12 @@ describe('Security Events E2E', () => {
 
     it('should validate pagination parameters', async () => {
       await request(httpServer)
-        .get('/admin/security/events?page=-1')
+        .get('/api/v1/admin/security/events?page=-1')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(400);
 
       await request(httpServer)
-        .get('/admin/security/events?limit=0')
+        .get('/api/v1/admin/security/events?limit=0')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(400);
     });
@@ -177,7 +184,7 @@ describe('Security Events E2E', () => {
     it('should log failed login attempts', async () => {
       // Attempt failed login
       await request(httpServer)
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: 'admin@test.com',
           password: 'WrongPassword123!',
@@ -186,7 +193,7 @@ describe('Security Events E2E', () => {
 
       // Query security events
       const response = await request(httpServer)
-        .get('/admin/security/events?eventType=failed_login')
+        .get('/api/v1/admin/security/events?eventType=failed_login')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -209,7 +216,7 @@ describe('Security Events E2E', () => {
     it('should log successful login attempts', async () => {
       // Successful login
       await request(httpServer)
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: 'admin@test.com',
           password: 'Test123456!',
@@ -218,7 +225,7 @@ describe('Security Events E2E', () => {
 
       // Query security events
       const response = await request(httpServer)
-        .get('/admin/security/events?eventType=successful_login')
+        .get('/api/v1/admin/security/events?eventType=successful_login')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 

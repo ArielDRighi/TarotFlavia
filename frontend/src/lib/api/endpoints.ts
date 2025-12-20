@@ -40,25 +40,95 @@ export const API_ENDPOINTS = {
     SHARE: (id: number) => `/readings/${id}/share`,
   },
 
+  // Shared Readings (Public - No authentication required)
+  SHARED: {
+    BY_TOKEN: (token: string) => `/shared/${token}`,
+  },
+
+  // Daily Reading (Carta del Día)
+  DAILY_READING: {
+    BASE: '/daily-reading',
+    TODAY: '/daily-reading/today',
+    HISTORY: '/daily-reading/history',
+    REGENERATE: '/daily-reading/regenerate',
+  },
+
   // Users
   USERS: {
     BASE: '/users',
-    BY_ID: (id: string) => `/users/${id}`,
+    BY_ID: (id: number) => `/users/${id}`,
     PROFILE: '/users/profile',
+    PASSWORD: '/users/me/password',
   },
 
   // Tarotistas (Marketplace)
   TAROTISTAS: {
     BASE: '/tarotistas',
-    BY_ID: (id: string) => `/tarotistas/${id}`,
+    BY_ID: (id: number) => `/tarotistas/${id}`,
     AVAILABLE: '/tarotistas/available',
-    REVIEWS: (id: string) => `/tarotistas/${id}/reviews`,
+    REVIEWS: (id: number) => `/tarotistas/${id}/reviews`,
+    // Metrics
+    METRICS_PLATFORM: '/tarotistas/metrics/platform',
+    METRICS_TAROTISTA: '/tarotistas/metrics/tarotista',
   },
 
-  // Sessions (Live readings)
-  SESSIONS: {
-    BASE: '/sessions',
-    BY_ID: (id: string) => `/sessions/${id}`,
-    BOOK: '/sessions/book',
+  // Subscriptions
+  SUBSCRIPTIONS: {
+    MY_SUBSCRIPTION: '/subscriptions/my-subscription',
+    SET_FAVORITE: '/subscriptions/set-favorite',
+  },
+
+  // Scheduling (Sessions)
+  SCHEDULING: {
+    AVAILABLE_SLOTS: '/scheduling/available-slots',
+    BOOK: '/scheduling/book',
+    MY_SESSIONS: '/scheduling/my-sessions',
+    SESSION_DETAIL: (id: number) => `/scheduling/my-sessions/${id}`,
+    CANCEL_SESSION: (id: number) => `/scheduling/my-sessions/${id}/cancel`,
+  },
+
+  // Admin Dashboard
+  ADMIN: {
+    DASHBOARD_STATS: '/admin/dashboard/stats',
+    DASHBOARD_CHARTS: '/admin/dashboard/charts',
+    USERS: '/admin/users',
+    USER_BY_ID: (id: number) => `/admin/users/${id}`,
+    BAN_USER: (id: number) => `/admin/users/${id}/ban`,
+    UNBAN_USER: (id: number) => `/admin/users/${id}/unban`,
+    UPDATE_USER_PLAN: (id: number) => `/admin/users/${id}/plan`,
+    ADD_TAROTIST_ROLE: (id: number) => `/admin/users/${id}/roles/tarotist`,
+    REMOVE_TAROTIST_ROLE: (id: number) => `/admin/users/${id}/roles/tarotist`,
+    ADD_ADMIN_ROLE: (id: number) => `/admin/users/${id}/roles/admin`,
+    REMOVE_ADMIN_ROLE: (id: number) => `/admin/users/${id}/roles/admin`,
+    // Tarotistas
+    TAROTISTAS: '/admin/tarotistas',
+    TAROTISTA_BY_ID: (id: number) => `/admin/tarotistas/${id}`,
+    DEACTIVATE_TAROTISTA: (id: number) => `/admin/tarotistas/${id}/deactivate`,
+    REACTIVATE_TAROTISTA: (id: number) => `/admin/tarotistas/${id}/reactivate`,
+    TAROTISTA_CONFIG: (id: number) => `/admin/tarotistas/${id}/config`,
+    // Applications
+    TAROTISTA_APPLICATIONS: '/admin/tarotistas/applications',
+    APPROVE_APPLICATION: (id: number) => `/admin/tarotistas/applications/${id}/approve`,
+    REJECT_APPLICATION: (id: number) => `/admin/tarotistas/applications/${id}/reject`,
+    // AI Usage
+    AI_USAGE: '/admin/ai-usage',
+    // Plan Configuration
+    PLAN_CONFIG: '/plan-config',
+    PLAN_CONFIG_BY_TYPE: (planType: string) => `/plan-config/${planType}`,
+    // Security & Rate Limiting
+    RATE_LIMIT_DATA: '/admin/rate-limits/violations', // Retorna violations + blockedIPs
+    SECURITY_EVENTS: '/admin/security/events',
+    // TODO: Backend endpoints pendientes
+    // BLOCK_IP: '/admin/security/block-ip',
+    // UNBLOCK_IP: (ip: string) => `/admin/security/block-ip/${ip}`,
+    // Audit Logs
+    AUDIT_LOGS: '/admin/audit-logs',
+    // Cache Management
+    CACHE_ANALYTICS: '/admin/cache/analytics', // GET - retorna CacheAnalyticsDto
+    CACHE_WARMING_STATUS: '/admin/cache/warm/status', // GET - retorna WarmingStatus separado
+    INVALIDATE_ALL_CACHE: '/admin/cache/global', // DELETE - endpoint correcto
+    INVALIDATE_TAROTISTA_CACHE: (tarotistaId: number) => `/admin/cache/tarotistas/${tarotistaId}`, // DELETE
+    // NOTA: No existe endpoint para invalidar por spread en el backend
+    TRIGGER_CACHE_WARMING: '/admin/cache/warm', // POST - endpoint correcto
   },
 } as const;
