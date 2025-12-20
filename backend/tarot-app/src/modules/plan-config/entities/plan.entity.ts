@@ -23,7 +23,7 @@ export class Plan {
 
   @ApiProperty({
     example: 'free',
-    description: 'Tipo de plan (free, premium, professional)',
+    description: 'Tipo de plan (anonymous, free, premium)',
     enum: UserPlan,
   })
   @Column({

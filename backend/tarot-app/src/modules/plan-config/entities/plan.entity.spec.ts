@@ -32,18 +32,6 @@ describe('Plan Entity', () => {
       expect(plan.readingsLimit).toBe(-1);
       expect(plan.aiQuotaMonthly).toBe(-1);
     });
-
-    it('should create a PROFESSIONAL plan with unlimited limits', () => {
-      const plan = new Plan();
-      plan.planType = UserPlan.PROFESSIONAL;
-      plan.name = 'Plan Profesional';
-      plan.price = 19.99;
-      plan.readingsLimit = -1;
-      plan.aiQuotaMonthly = -1;
-
-      expect(plan.planType).toBe(UserPlan.PROFESSIONAL);
-      expect(plan.readingsLimit).toBe(-1);
-    });
   });
 
   describe('feature flags', () => {

@@ -14,10 +14,9 @@ import { UserRole } from '../../../common/enums/user-role.enum';
 export { UserRole };
 
 export enum UserPlan {
-  GUEST = 'guest',
+  ANONYMOUS = 'anonymous',
   FREE = 'free',
   PREMIUM = 'premium',
-  PROFESSIONAL = 'professional',
 }
 
 export enum SubscriptionStatus {

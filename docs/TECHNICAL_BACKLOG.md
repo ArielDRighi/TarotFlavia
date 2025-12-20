@@ -58,16 +58,32 @@ Eliminar uso de IA en planes FREE y ANONYMOUS para reducir costos operativos a $
 
 ---
 
-### 📝 TASK-001: Renombrar enum UserPlan (GUEST → ANONYMOUS)
+### 📝 TASK-001: Renombrar enum UserPlan (GUEST → ANONYMOUS) ✅ COMPLETADO
 
 **Prioridad:** 🔴 P0 - CRÍTICO  
 **Área:** Backend - User Entity  
 **Estimación:** 2 horas  
 **Dependencias:** Ninguna  
 **Feature:** F001  
-**Branch sugerido:** `refactor/rename-guest-to-anonymous`
+**Branch:** `refactor/rename-guest-to-anonymous`  
+**Estado:** ✅ COMPLETADO (20 Diciembre 2025)
 
-#### Descripción
+#### Cambios Realizados
+
+- ✅ Actualizado enum `UserPlan` en `user.entity.ts`: solo `ANONYMOUS`, `FREE`, `PREMIUM`
+- ✅ Actualizadas todas las referencias en código (usage-limits, ai-usage, subscriptions, readings, etc.)
+- ✅ Actualizados todos los tests unitarios y specs
+- ✅ Actualizados seeders (plans.seeder.ts)
+- ✅ Lint, format, build: ✅ PASS
+- ✅ Tests unitarios: 1926/1926 PASS (165 test suites)
+
+#### Notas Técnicas
+
+- ⚠️ Tests de integración `plan-config-*` requieren migración de DB (TASK-002)
+- Los cambios en TypeScript están completos y funcionan
+- Sin errores de compilación
+
+#### Descripción Original
 
 Renombrar plan `GUEST` a `ANONYMOUS` en el enum UserPlan siguiendo convenciones de la industria. Eliminar plan `PROFESSIONAL` del enum (se migrará a PREMIUM en DB).
 

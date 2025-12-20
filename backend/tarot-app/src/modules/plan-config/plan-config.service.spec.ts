@@ -276,10 +276,10 @@ describe('PlanConfigService', () => {
     it('should remove a plan', async () => {
       const existingPlan = {
         id: 1,
-        planType: UserPlan.PROFESSIONAL,
-        name: 'Plan Profesional',
-        description: 'Plan profesional',
-        price: 19.99,
+        planType: UserPlan.PREMIUM,
+        name: 'Plan Premium',
+        description: 'Plan premium',
+        price: 9.99,
         readingsLimit: -1,
         aiQuotaMonthly: -1,
         allowCustomQuestions: true,
@@ -293,10 +293,10 @@ describe('PlanConfigService', () => {
       mockRepository.findOne.mockResolvedValue(existingPlan);
       mockRepository.delete.mockResolvedValue({ affected: 1 });
 
-      await service.remove(UserPlan.PROFESSIONAL);
+      await service.remove(UserPlan.PREMIUM);
 
       expect(mockRepository.findOne).toHaveBeenCalledWith({
-        where: { planType: UserPlan.PROFESSIONAL },
+        where: { planType: UserPlan.PREMIUM },
       });
       expect(mockRepository.delete).toHaveBeenCalledWith(existingPlan.id);
     });

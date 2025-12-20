@@ -40,7 +40,7 @@ export class UsageLimitsService {
       }
     }
 
-    // Premium/Professional users have unlimited access (-1)
+    // Premium users have unlimited access (-1)
     if (limit === -1) {
       return true;
     }
@@ -136,7 +136,7 @@ export class UsageLimitsService {
       }
     }
 
-    // Premium/Professional users have unlimited access (-1)
+    // Premium users have unlimited access (-1)
     if (limit === -1) {
       return -1;
     }

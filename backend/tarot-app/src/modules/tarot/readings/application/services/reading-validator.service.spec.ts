@@ -692,18 +692,18 @@ describe('ReadingValidatorService - BUG HUNTING', () => {
       ).resolves.not.toThrow();
     });
 
-    it('should respect GUEST plan limit (3 readings)', async () => {
+    it('should respect ANONYMOUS plan limit (3 readings)', async () => {
       mockPlanConfigService.getReadingsLimit.mockResolvedValue(3);
 
       await expect(
-        service.validateFreeUserReadingsLimit(2, UserPlan.GUEST),
+        service.validateFreeUserReadingsLimit(2, UserPlan.ANONYMOUS),
       ).resolves.not.toThrow();
       await expect(
-        service.validateFreeUserReadingsLimit(3, UserPlan.GUEST),
+        service.validateFreeUserReadingsLimit(3, UserPlan.ANONYMOUS),
       ).rejects.toThrow(ForbiddenException);
       await expect(
-        service.validateFreeUserReadingsLimit(3, UserPlan.GUEST),
-      ).rejects.toThrow('Los usuarios guest están limitados a 3 lecturas');
+        service.validateFreeUserReadingsLimit(3, UserPlan.ANONYMOUS),
+      ).rejects.toThrow('Los usuarios anonymous están limitados a 3 lecturas');
     });
 
     // BUG HUNTING: Negative reading count

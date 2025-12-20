@@ -41,7 +41,6 @@ export class SubscriptionsService {
    * Establece el tarotista favorito para un usuario
    * FREE: cooldown de 30 días entre cambios
    * PREMIUM: sin cooldown, asigna tarotista individual
-   * PROFESSIONAL: activa all-access automáticamente (ignora tarotistaId)
    */
   async setFavoriteTarotista(
     userId: number,
@@ -101,47 +100,34 @@ export class SubscriptionsService {
 
     // 5. Si tiene suscripción, actualizar. Si no, crear nueva
     if (currentSubscription) {
-      // PROFESSIONAL siempre mantiene all-access con tarotistaId = null
-      if (user.plan === UserPlan.PROFESSIONAL) {
-        currentSubscription.subscriptionType =
-          SubscriptionType.PREMIUM_ALL_ACCESS;
-        currentSubscription.tarotistaId = null;
-        currentSubscription.canChangeAt = null;
-        currentSubscription.changeCount += 1;
+      // PREMIUM y FREE actualizan normalmente
+      currentSubscription.tarotistaId = tarotistaId;
+      currentSubscription.changeCount += 1;
+
+      // Solo FREE tiene cooldown
+      if (user.plan === UserPlan.FREE) {
+        const nextChangeDate = new Date();
+        nextChangeDate.setDate(nextChangeDate.getDate() + COOLDOWN_DAYS);
+        currentSubscription.canChangeAt = nextChangeDate;
       } else {
-        // PREMIUM y FREE actualizan normalmente
-        currentSubscription.tarotistaId = tarotistaId;
-        currentSubscription.changeCount += 1;
+        currentSubscription.canChangeAt = null;
+      }
 
-        // Solo FREE tiene cooldown
-        if (user.plan === UserPlan.FREE) {
-          const nextChangeDate = new Date();
-          nextChangeDate.setDate(nextChangeDate.getDate() + COOLDOWN_DAYS);
-          currentSubscription.canChangeAt = nextChangeDate;
-        } else {
-          currentSubscription.canChangeAt = null;
-        }
-
-        // Actualizar tipo de suscripción si es PREMIUM
-        if (user.plan === UserPlan.PREMIUM) {
-          currentSubscription.subscriptionType =
-            SubscriptionType.PREMIUM_INDIVIDUAL;
-        }
+      // Actualizar tipo de suscripción si es PREMIUM
+      if (user.plan === UserPlan.PREMIUM) {
+        currentSubscription.subscriptionType =
+          SubscriptionType.PREMIUM_INDIVIDUAL;
       }
 
       return this.subscriptionRepo.save(currentSubscription);
     } else {
       // Crear nueva suscripción
-      // PROFESSIONAL: all-access por defecto
       // PREMIUM: individual por defecto
       // FREE: favorito con cooldown
       let subscriptionType: SubscriptionType;
       let tarotistaIdToSet: number | null;
 
-      if (user.plan === UserPlan.PROFESSIONAL) {
-        subscriptionType = SubscriptionType.PREMIUM_ALL_ACCESS;
-        tarotistaIdToSet = null; // all-access no tiene tarotista específico
-      } else if (user.plan === UserPlan.PREMIUM) {
+      if (user.plan === UserPlan.PREMIUM) {
         subscriptionType = SubscriptionType.PREMIUM_INDIVIDUAL;
         tarotistaIdToSet = tarotistaId;
       } else {
@@ -276,9 +262,9 @@ export class SubscriptionsService {
       throw new NotFoundException('Usuario no encontrado');
     }
 
-    if (user.plan !== UserPlan.PREMIUM && user.plan !== UserPlan.PROFESSIONAL) {
+    if (user.plan !== UserPlan.PREMIUM) {
       throw new ForbiddenException(
-        'Solo usuarios PREMIUM o PROFESSIONAL pueden activar modo all-access',
+        'Solo usuarios PREMIUM pueden activar modo all-access',
       );
     }
 

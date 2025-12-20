@@ -120,7 +120,7 @@ describe('UsersController', () => {
       );
     });
 
-    it('should handle unlimited plan (premium/professional)', async () => {
+    it('should handle unlimited plan (premium)', async () => {
       const premiumUser = { ...mockUser, plan: UserPlan.PREMIUM };
       mockUsersService.findById.mockResolvedValue(premiumUser);
       mockPlanConfigService.getReadingsLimit.mockResolvedValue(-1); // Unlimited
