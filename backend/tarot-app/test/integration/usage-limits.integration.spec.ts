@@ -235,7 +235,15 @@ describe('UsageLimits + Readings Integration Tests', () => {
           { name: 'Future', description: 'What lies ahead' },
         ],
         whenToUse: 'Quick insights into past, present, and future situations',
+        isActive: true,
       });
+    }
+
+    // Ensure all test data is properly initialized
+    if (!testSpread || !testDeck || !testCards || testCards.length < 3) {
+      throw new Error(
+        `Test setup failed: spread=${!!testSpread}, deck=${!!testDeck}, cards=${testCards?.length}`,
+      );
     }
   });
 
