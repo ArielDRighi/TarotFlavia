@@ -5,8 +5,11 @@ import { join } from 'path';
 /**
  * Configuración de TypeORM para Tests de Integración
  *
- * Usa PostgreSQL dedicado (tarot_integration) en Docker puerto 5437.
+ * Usa PostgreSQL dedicado (tarot_integration) en Docker puerto 5439.
  * Base de datos aislada de dev (5435) y E2E (5436).
+ *
+ * IMPORTANTE: synchronize=false y dropSchema=false porque en CI la base de datos
+ * se configura mediante migraciones + seeders antes de ejecutar los tests.
  */
 export const integrationDataSourceOptions: TypeOrmModuleOptions &
   DataSourceOptions = {
@@ -19,8 +22,8 @@ export const integrationDataSourceOptions: TypeOrmModuleOptions &
     'tarot_integration_password_2024',
   database: process.env.TAROT_INTEGRATION_DB_NAME || 'tarot_integration',
   entities: [join(__dirname, '../src/**/*.entity{.ts,.js}')],
-  synchronize: true, // Auto-crear esquema en cada ejecución
-  dropSchema: true, // Limpiar antes de cada suite de tests
+  synchronize: false, // NO auto-crear: usar migraciones + seeders
+  dropSchema: false, // NO limpiar: confiar en setup de CI/local
   logging: false,
   migrations: [],
 };
