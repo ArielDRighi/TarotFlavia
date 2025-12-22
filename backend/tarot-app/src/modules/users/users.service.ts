@@ -214,7 +214,8 @@ export class UsersService {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password: _password, ...result } = user;
       return result as UserWithoutPassword;
-    } catch {
+    } catch (error) {
+      console.error('Error updating user plan:', error);
       throw new InternalServerErrorException('Error updating user plan');
     }
   }

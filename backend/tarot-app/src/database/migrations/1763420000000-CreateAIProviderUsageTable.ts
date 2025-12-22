@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CreateAIProviderUsageTable1763420000000
-  implements MigrationInterface
-{
+export class CreateAIProviderUsageTable1763420000000 implements MigrationInterface {
   name = 'CreateAIProviderUsageTable1763420000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

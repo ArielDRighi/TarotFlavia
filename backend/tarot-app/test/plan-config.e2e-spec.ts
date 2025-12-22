@@ -126,7 +126,7 @@ describe('Plan Config Management (e2e)', () => {
         .expect(200);
 
       expect(response.body).toBeInstanceOf(Array);
-      expect(response.body.length).toBeGreaterThanOrEqual(3); // FREE, PREMIUM, PROFESSIONAL
+      expect(response.body.length).toBeGreaterThanOrEqual(3); // ANONYMOUS, FREE, PREMIUM
 
       // Verify structure
       const plan = response.body[0];

@@ -7,9 +7,7 @@ import { IAIProviderUsageRepository } from '../../domain/interfaces/ai-provider-
 import { startOfMonth } from 'date-fns';
 
 @Injectable()
-export class TypeOrmAIProviderUsageRepository
-  implements IAIProviderUsageRepository
-{
+export class TypeOrmAIProviderUsageRepository implements IAIProviderUsageRepository {
   private readonly logger = new Logger(TypeOrmAIProviderUsageRepository.name);
 
   constructor(

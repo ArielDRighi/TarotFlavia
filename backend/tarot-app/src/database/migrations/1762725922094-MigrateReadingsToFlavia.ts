@@ -4,9 +4,7 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
  * Migration to assign all existing readings to Flavia tarotista
  * This migration should run after Flavia user and tarotista profile are seeded
  */
-export class MigrateReadingsToFlavia1762725922094
-  implements MigrationInterface
-{
+export class MigrateReadingsToFlavia1762725922094 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     console.log('🔄 Starting migration of readings to Flavia...');
 

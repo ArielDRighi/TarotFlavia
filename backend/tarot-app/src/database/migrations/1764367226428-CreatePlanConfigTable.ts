@@ -4,7 +4,7 @@ export class CreatePlanConfigTable1764367226428 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Create enum type for plan types
     await queryRunner.query(`
-      CREATE TYPE plans_plantype_enum AS ENUM('free', 'premium', 'professional')
+      CREATE TYPE plans_plantype_enum AS ENUM('anonymous', 'free', 'premium')
     `);
 
     // Create plans table

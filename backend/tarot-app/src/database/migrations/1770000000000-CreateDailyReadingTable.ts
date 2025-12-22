@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CreateDailyReadingTable1770000000000
-  implements MigrationInterface
-{
+export class CreateDailyReadingTable1770000000000 implements MigrationInterface {
   name = 'CreateDailyReadingTable1770000000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
