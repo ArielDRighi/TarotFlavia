@@ -59,10 +59,10 @@ describe('Plan Configuration Integration Tests', () => {
 
       expect(plan).toBeDefined();
       expect(plan.planType).toBe(UserPlan.ANONYMOUS);
-      // NOTE: Tests reflect CURRENT DB values, not MVP Strategy
+      // NOTE: Tests reflect ACTUAL SEEDER VALUES in plans.seeder.ts
       // TASK-003 will update seeder to match MVP Strategy
-      expect(plan.readingsLimit).toBe(5); // TODO TASK-003: should be 1
-      expect(plan.aiQuotaMonthly).toBe(0);
+      expect(plan.readingsLimit).toBe(3); // Current seeder value
+      expect(plan.aiQuotaMonthly).toBe(0); // Current seeder value
       expect(parseFloat(plan.price.toString())).toBe(0);
     });
 
@@ -71,7 +71,7 @@ describe('Plan Configuration Integration Tests', () => {
 
       expect(plan).toBeDefined();
       expect(plan.planType).toBe(UserPlan.FREE);
-      // NOTE: Tests reflect CURRENT DB values, not MVP Strategy
+      // NOTE: Tests reflect ACTUAL SEEDER VALUES in plans.seeder.ts
       // TASK-003 will update seeder to match MVP Strategy
       expect(plan.readingsLimit).toBe(10); // TODO TASK-003: should be 2
       expect(plan.aiQuotaMonthly).toBe(100); // TODO TASK-003: should be 0 (CRITICAL)
@@ -83,10 +83,10 @@ describe('Plan Configuration Integration Tests', () => {
 
       expect(plan).toBeDefined();
       expect(plan.planType).toBe(UserPlan.PREMIUM);
-      // NOTE: Tests reflect CURRENT DB values, not MVP Strategy
+      // NOTE: Tests reflect ACTUAL SEEDER VALUES in plans.seeder.ts
       // TASK-003 will update seeder to match MVP Strategy
-      expect(plan.readingsLimit).toBe(50); // TODO TASK-003: should be 3
-      expect(plan.aiQuotaMonthly).toBe(500); // TODO TASK-003: should be 100
+      expect(plan.readingsLimit).toBe(-1); // Current seeder value (unlimited)
+      expect(plan.aiQuotaMonthly).toBe(-1); // Current seeder value (unlimited)
       expect(parseFloat(plan.price.toString())).toBeGreaterThan(0);
     });
   });
@@ -127,18 +127,18 @@ describe('Plan Configuration Integration Tests', () => {
     it('should correctly identify unlimited plans', async () => {
       const premium = await planService.findByPlanType(UserPlan.PREMIUM);
 
-      // NOTE: Tests reflect CURRENT DB values
-      // TASK-003 will update seeder to match MVP Strategy (readingsLimit: -1)
-      expect(premium.isUnlimited()).toBe(false); // TODO TASK-003: should be true
-      expect(premium.readingsLimit).toBe(50); // TODO TASK-003: should be -1
+      // NOTE: Tests reflect ACTUAL SEEDER VALUES in plans.seeder.ts
+      // Seeder defines PREMIUM as unlimited (-1)
+      expect(premium.isUnlimited()).toBe(true);
+      expect(premium.readingsLimit).toBe(-1);
     });
 
     it('should get effective AI quota correctly', async () => {
       const premium = await planService.findByPlanType(UserPlan.PREMIUM);
 
-      // NOTE: Tests reflect CURRENT DB values
-      // TASK-003 will update seeder to match MVP Strategy (aiQuotaMonthly: -1)
-      expect(premium.getEffectiveAiQuota()).toBe(500); // TODO TASK-003: should be MAX_SAFE_INTEGER
+      // NOTE: Tests reflect ACTUAL SEEDER VALUES in plans.seeder.ts
+      // PREMIUM has unlimited AI quota (-1 converts to MAX_SAFE_INTEGER)
+      expect(premium.getEffectiveAiQuota()).toBe(Number.MAX_SAFE_INTEGER);
     });
   });
 

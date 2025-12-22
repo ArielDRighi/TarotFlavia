@@ -382,14 +382,14 @@ jobs:
     # if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
 
     services:
-      postgres:
+      postgres-integration:
         image: postgres:16-alpine
         env:
-          POSTGRES_USER: tarot_test_user
-          POSTGRES_PASSWORD: tarot_test_pass
-          POSTGRES_DB: tarot_test
+          POSTGRES_USER: tarot_integration_user
+          POSTGRES_PASSWORD: tarot_integration_pass
+          POSTGRES_DB: tarot_integration
         ports:
-          - 5436:5432
+          - 5439:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -412,20 +412,15 @@ jobs:
         working-directory: ./backend/tarot-app
         env:
           POSTGRES_HOST: localhost
-          POSTGRES_PORT: 5436
-          POSTGRES_USER: tarot_test_user
-          POSTGRES_PASSWORD: tarot_test_pass
-          POSTGRES_DB: tarot_test
-          TAROT_DB_HOST: localhost
-          TAROT_DB_PORT: 5436
-          TAROT_DB_USER: tarot_test_user
-          TAROT_DB_PASSWORD: tarot_test_pass
-          TAROT_DB_NAME: tarot_test
-          TAROT_E2E_DB_HOST: localhost
-          TAROT_E2E_DB_PORT: 5436
-          TAROT_E2E_DB_USER: tarot_test_user
-          TAROT_E2E_DB_PASSWORD: tarot_test_pass
-          TAROT_E2E_DB_NAME: tarot_test
+          POSTGRES_PORT: 5439
+          POSTGRES_USER: tarot_integration_user
+          POSTGRES_PASSWORD: tarot_integration_pass
+          POSTGRES_DB: tarot_integration
+          TAROT_INTEGRATION_DB_HOST: localhost
+          TAROT_INTEGRATION_DB_PORT: 5439
+          TAROT_INTEGRATION_DB_USER: tarot_integration_user
+          TAROT_INTEGRATION_DB_PASSWORD: tarot_integration_pass
+          TAROT_INTEGRATION_DB_NAME: tarot_integration
           JWT_SECRET: test-jwt-secret-for-ci-only-minimum-32-characters-required
           JWT_EXPIRES_IN: 1h
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
@@ -436,20 +431,15 @@ jobs:
         working-directory: ./backend/tarot-app
         env:
           POSTGRES_HOST: localhost
-          POSTGRES_PORT: 5436
-          POSTGRES_USER: tarot_test_user
-          POSTGRES_PASSWORD: tarot_test_pass
-          POSTGRES_DB: tarot_test
-          TAROT_DB_HOST: localhost
-          TAROT_DB_PORT: 5436
-          TAROT_DB_USER: tarot_test_user
-          TAROT_DB_PASSWORD: tarot_test_pass
-          TAROT_DB_NAME: tarot_test
-          TAROT_E2E_DB_HOST: localhost
-          TAROT_E2E_DB_PORT: 5436
-          TAROT_E2E_DB_USER: tarot_test_user
-          TAROT_E2E_DB_PASSWORD: tarot_test_pass
-          TAROT_E2E_DB_NAME: tarot_test
+          POSTGRES_PORT: 5439
+          POSTGRES_USER: tarot_integration_user
+          POSTGRES_PASSWORD: tarot_integration_pass
+          POSTGRES_DB: tarot_integration
+          TAROT_INTEGRATION_DB_HOST: localhost
+          TAROT_INTEGRATION_DB_PORT: 5439
+          TAROT_INTEGRATION_DB_USER: tarot_integration_user
+          TAROT_INTEGRATION_DB_PASSWORD: tarot_integration_pass
+          TAROT_INTEGRATION_DB_NAME: tarot_integration
           JWT_SECRET: test-jwt-secret-for-ci-only-minimum-32-characters-required
           JWT_EXPIRES_IN: 1h
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
