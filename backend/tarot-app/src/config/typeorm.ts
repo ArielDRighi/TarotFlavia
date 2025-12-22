@@ -17,32 +17,56 @@ if (fs.existsSync(envPath)) {
   }
 }
 
-// Detectar si estamos en modo E2E testing
+// Detectar si estamos en modo E2E testing o Integration testing
 const isE2ETesting =
   process.env.NODE_ENV === 'test' || process.env.E2E_TESTING === 'true';
+const isIntegrationTesting = process.env.INTEGRATION_TESTING === 'true';
 
 // Configuración de la base de datos usando variables de entorno
-// Si estamos en E2E testing, usar la base de datos E2E dedicada
+// Prioridad: Integration Testing > E2E Testing > Production
 const config = {
   type: 'postgres',
-  host: isE2ETesting
-    ? process.env.TAROT_E2E_DB_HOST || 'localhost'
-    : process.env.TAROT_DB_HOST || process.env.POSTGRES_HOST || 'localhost',
-  port: isE2ETesting
-    ? parseInt(process.env.TAROT_E2E_DB_PORT || '5436', 10)
-    : parseInt(
-        process.env.TAROT_DB_PORT || process.env.POSTGRES_PORT || '5435',
+  host: isIntegrationTesting
+    ? process.env.TAROT_INTEGRATION_DB_HOST ||
+      process.env.POSTGRES_HOST ||
+      'localhost'
+    : isE2ETesting
+      ? process.env.TAROT_E2E_DB_HOST || 'localhost'
+      : process.env.TAROT_DB_HOST || process.env.POSTGRES_HOST || 'localhost',
+  port: isIntegrationTesting
+    ? parseInt(
+        process.env.TAROT_INTEGRATION_DB_PORT ||
+          process.env.POSTGRES_PORT ||
+          '5439',
         10,
-      ),
-  username: isE2ETesting
-    ? process.env.TAROT_E2E_DB_USER || 'tarot_e2e_user'
-    : process.env.TAROT_DB_USER || process.env.POSTGRES_USER || 'tarot_user',
-  password: isE2ETesting
-    ? process.env.TAROT_E2E_DB_PASSWORD || 'tarot_e2e_password_2024'
-    : process.env.TAROT_DB_PASSWORD || process.env.POSTGRES_PASSWORD,
-  database: isE2ETesting
-    ? process.env.TAROT_E2E_DB_NAME || 'tarot_e2e'
-    : process.env.TAROT_DB_NAME || process.env.POSTGRES_DB || 'tarot_db',
+      )
+    : isE2ETesting
+      ? parseInt(process.env.TAROT_E2E_DB_PORT || '5436', 10)
+      : parseInt(
+          process.env.TAROT_DB_PORT || process.env.POSTGRES_PORT || '5435',
+          10,
+        ),
+  username: isIntegrationTesting
+    ? process.env.TAROT_INTEGRATION_DB_USER ||
+      process.env.POSTGRES_USER ||
+      'tarot_integration_user'
+    : isE2ETesting
+      ? process.env.TAROT_E2E_DB_USER || 'tarot_e2e_user'
+      : process.env.TAROT_DB_USER || process.env.POSTGRES_USER || 'tarot_user',
+  password: isIntegrationTesting
+    ? process.env.TAROT_INTEGRATION_DB_PASSWORD ||
+      process.env.POSTGRES_PASSWORD ||
+      'tarot_integration_pass'
+    : isE2ETesting
+      ? process.env.TAROT_E2E_DB_PASSWORD || 'tarot_e2e_password_2024'
+      : process.env.TAROT_DB_PASSWORD || process.env.POSTGRES_PASSWORD,
+  database: isIntegrationTesting
+    ? process.env.TAROT_INTEGRATION_DB_NAME ||
+      process.env.POSTGRES_DB ||
+      'tarot_integration'
+    : isE2ETesting
+      ? process.env.TAROT_E2E_DB_NAME || 'tarot_e2e'
+      : process.env.TAROT_DB_NAME || process.env.POSTGRES_DB || 'tarot_db',
   synchronize: false, // Desactivado - ahora usamos migraciones
   autoLoadEntities: true,
   logging:
@@ -95,11 +119,13 @@ const config = {
 };
 
 // Verificar que las variables críticas estén definidas
-if (process.env.NODE_ENV !== 'test' && !isE2ETesting) {
+if (process.env.NODE_ENV !== 'test' && !isE2ETesting && !isIntegrationTesting) {
   console.log(
     '[TypeORM Config] Verificando configuración de la base de datos:',
   );
-  console.log(`Modo: ${isE2ETesting ? 'E2E Testing' : 'Production'}`);
+  console.log(
+    `Modo: ${isIntegrationTesting ? 'Integration Testing' : isE2ETesting ? 'E2E Testing' : 'Production'}`,
+  );
   console.log(`Host: ${config.host}`);
   console.log(`Puerto: ${config.port}`);
   console.log(`Usuario: ${config.username}`);

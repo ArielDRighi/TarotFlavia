@@ -421,6 +421,7 @@ jobs:
           TAROT_INTEGRATION_DB_USER: tarot_integration_user
           TAROT_INTEGRATION_DB_PASSWORD: tarot_integration_pass
           TAROT_INTEGRATION_DB_NAME: tarot_integration
+          INTEGRATION_TESTING: true
           JWT_SECRET: test-jwt-secret-for-ci-only-minimum-32-characters-required
           JWT_EXPIRES_IN: 1h
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
@@ -440,6 +441,7 @@ jobs:
           TAROT_INTEGRATION_DB_USER: tarot_integration_user
           TAROT_INTEGRATION_DB_PASSWORD: tarot_integration_pass
           TAROT_INTEGRATION_DB_NAME: tarot_integration
+          INTEGRATION_TESTING: true
           JWT_SECRET: test-jwt-secret-for-ci-only-minimum-32-characters-required
           JWT_EXPIRES_IN: 1h
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
@@ -459,6 +461,7 @@ jobs:
           TAROT_INTEGRATION_DB_USER: tarot_integration_user
           TAROT_INTEGRATION_DB_PASSWORD: tarot_integration_pass
           TAROT_INTEGRATION_DB_NAME: tarot_integration
+          INTEGRATION_TESTING: true
           JWT_SECRET: test-jwt-secret-for-ci-only-minimum-32-characters-required
           JWT_EXPIRES_IN: 1h
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
