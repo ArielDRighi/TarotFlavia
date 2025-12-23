@@ -60,7 +60,7 @@ export async function seedPlans(
       planType: UserPlan.PREMIUM,
       name: 'Plan Premium',
       description:
-        'Plan completo con lecturas ilimitadas, preguntas personalizadas y compartir lecturas',
+        'Plan completo con hasta 3 lecturas mensuales, interpretaciones con IA y preguntas personalizadas',
       price: 9.99,
       readingsLimit: 3,
       aiQuotaMonthly: 100,
