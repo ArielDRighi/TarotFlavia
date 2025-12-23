@@ -137,7 +137,7 @@ export class ReadingValidatorService {
     // Get limit from database configuration (dynamic)
     const planLimit = await this.planConfigService.getReadingsLimit(userPlan);
 
-    // -1 means unlimited (PREMIUM, PROFESSIONAL)
+    // -1 means unlimited (PREMIUM)
     if (planLimit === -1) {
       return; // No limit for unlimited plans
     }

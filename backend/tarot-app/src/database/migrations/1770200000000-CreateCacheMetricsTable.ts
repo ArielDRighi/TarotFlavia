@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CreateCacheMetricsTable1770200000000
-  implements MigrationInterface
-{
+export class CreateCacheMetricsTable1770200000000 implements MigrationInterface {
   name = 'CreateCacheMetricsTable1770200000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

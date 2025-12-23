@@ -45,8 +45,8 @@ export class CheckUserQuotaUseCase {
       throw new NotFoundException(`User ${userId} not found`);
     }
 
-    // PREMIUM and PROFESSIONAL users have unlimited quota
-    if (user.plan === UserPlan.PREMIUM || user.plan === UserPlan.PROFESSIONAL) {
+    // PREMIUM users have unlimited quota
+    if (user.plan === UserPlan.PREMIUM) {
       return true;
     }
 
@@ -77,8 +77,7 @@ export class CheckUserQuotaUseCase {
     }
 
     const quota = AI_MONTHLY_QUOTAS[user.plan];
-    const isPremium =
-      user.plan === UserPlan.PREMIUM || user.plan === UserPlan.PROFESSIONAL;
+    const isPremium = user.plan === UserPlan.PREMIUM;
 
     const resetDate = this.getNextMonthStart();
     const requestsUsed = user.aiRequestsUsedMonth;

@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddMonthlyAIQuotaFieldsToUser1770100000000
-  implements MigrationInterface
-{
+export class AddMonthlyAIQuotaFieldsToUser1770100000000 implements MigrationInterface {
   name = 'AddMonthlyAIQuotaFieldsToUser1770100000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

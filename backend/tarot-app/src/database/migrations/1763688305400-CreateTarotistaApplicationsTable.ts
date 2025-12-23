@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CreateTarotistaApplicationsTable1763688305400
-  implements MigrationInterface
-{
+export class CreateTarotistaApplicationsTable1763688305400 implements MigrationInterface {
   name = 'CreateTarotistaApplicationsTable1763688305400';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

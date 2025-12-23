@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CreateAuditLogTableClean1762989000000
-  implements MigrationInterface
-{
+export class CreateAuditLogTableClean1762989000000 implements MigrationInterface {
   name = 'CreateAuditLogTableClean1762989000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

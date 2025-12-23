@@ -8,9 +8,7 @@ import * as crypto from 'crypto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
-export class TypeOrmPasswordResetRepository
-  implements IPasswordResetRepository
-{
+export class TypeOrmPasswordResetRepository implements IPasswordResetRepository {
   constructor(
     @InjectRepository(PasswordResetToken)
     private readonly passwordResetTokenRepository: Repository<PasswordResetToken>,

@@ -1,6 +1,38 @@
 import { User, UserPlan, SubscriptionStatus, UserRole } from './user.entity';
 
 describe('User Entity', () => {
+  describe('UserPlan Enum', () => {
+    it('should only contain ANONYMOUS, FREE, and PREMIUM plans', () => {
+      const planValues = Object.values(UserPlan);
+      expect(planValues).toHaveLength(3);
+      expect(planValues).toContain(UserPlan.ANONYMOUS);
+      expect(planValues).toContain(UserPlan.FREE);
+      expect(planValues).toContain(UserPlan.PREMIUM);
+    });
+
+    it('should not contain GUEST plan', () => {
+      const planValues = Object.values(UserPlan);
+      expect(planValues).not.toContain('guest');
+    });
+
+    it('should not contain PROFESSIONAL plan', () => {
+      const planValues = Object.values(UserPlan);
+      expect(planValues).not.toContain('professional');
+    });
+
+    it('should have ANONYMOUS value as "anonymous"', () => {
+      expect(UserPlan.ANONYMOUS).toBe('anonymous');
+    });
+
+    it('should have FREE value as "free"', () => {
+      expect(UserPlan.FREE).toBe('free');
+    });
+
+    it('should have PREMIUM value as "premium"', () => {
+      expect(UserPlan.PREMIUM).toBe('premium');
+    });
+  });
+
   describe('Role Helper Methods', () => {
     describe('hasRole', () => {
       it('should return true when user has the specified role', () => {

@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddUserBanAndLastLoginFieldsClean1762973040894
-  implements MigrationInterface
-{
+export class AddUserBanAndLastLoginFieldsClean1762973040894 implements MigrationInterface {
   name = 'AddUserBanAndLastLoginFieldsClean1762973040894';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

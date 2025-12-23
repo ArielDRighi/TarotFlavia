@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddIndexesForAdminDashboard1763000000000
-  implements MigrationInterface
-{
+export class AddIndexesForAdminDashboard1763000000000 implements MigrationInterface {
   name = 'AddIndexesForAdminDashboard1763000000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

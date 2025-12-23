@@ -33,16 +33,17 @@ describe('Plan Entity', () => {
       expect(plan.aiQuotaMonthly).toBe(-1);
     });
 
-    it('should create a PROFESSIONAL plan with unlimited limits', () => {
+    it('should create an ANONYMOUS plan with limited access', () => {
       const plan = new Plan();
-      plan.planType = UserPlan.PROFESSIONAL;
-      plan.name = 'Plan Profesional';
-      plan.price = 19.99;
-      plan.readingsLimit = -1;
-      plan.aiQuotaMonthly = -1;
+      plan.planType = UserPlan.ANONYMOUS;
+      plan.name = 'Plan Anónimo';
+      plan.price = 0;
+      plan.readingsLimit = 3;
+      plan.aiQuotaMonthly = 0;
 
-      expect(plan.planType).toBe(UserPlan.PROFESSIONAL);
-      expect(plan.readingsLimit).toBe(-1);
+      expect(plan.planType).toBe(UserPlan.ANONYMOUS);
+      expect(plan.readingsLimit).toBe(3);
+      expect(plan.aiQuotaMonthly).toBe(0);
     });
   });
 

@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner, Table, TableIndex } from 'typeorm';
 
-export class CreateSecurityEventsTable1763378576976
-  implements MigrationInterface
-{
+export class CreateSecurityEventsTable1763378576976 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Create ENUM types
     await queryRunner.query(`

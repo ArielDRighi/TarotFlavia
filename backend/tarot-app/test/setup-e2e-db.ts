@@ -33,55 +33,40 @@ export default async function globalSetup() {
     const dataSource = dbHelper.getDataSource();
 
     // Import seeders
-    const { seedReadingCategories } = await import(
-      '../src/database/seeds/reading-categories.seeder'
-    );
-    const { seedTarotDecks } = await import(
-      '../src/database/seeds/tarot-decks.seeder'
-    );
-    const { seedTarotCards } = await import(
-      '../src/database/seeds/tarot-cards.seeder'
-    );
-    const { seedTarotSpreads } = await import(
-      '../src/database/seeds/tarot-spreads.seeder'
-    );
-    const { seedPredefinedQuestions } = await import(
-      '../src/database/seeds/predefined-questions.seeder'
-    );
+    const { seedReadingCategories } =
+      await import('../src/database/seeds/reading-categories.seeder');
+    const { seedTarotDecks } =
+      await import('../src/database/seeds/tarot-decks.seeder');
+    const { seedTarotCards } =
+      await import('../src/database/seeds/tarot-cards.seeder');
+    const { seedTarotSpreads } =
+      await import('../src/database/seeds/tarot-spreads.seeder');
+    const { seedPredefinedQuestions } =
+      await import('../src/database/seeds/predefined-questions.seeder');
     const { seedUsers } = await import('../src/database/seeds/users.seeder');
-    const { seedFlaviaUser } = await import(
-      '../src/database/seeds/flavia-user.seeder'
-    );
-    const { seedFlaviaTarotista } = await import(
-      '../src/database/seeds/flavia-tarotista.seeder'
-    );
-    const { seedFlaviaIAConfig } = await import(
-      '../src/database/seeds/flavia-ia-config.seeder'
-    );
+    const { seedFlaviaUser } =
+      await import('../src/database/seeds/flavia-user.seeder');
+    const { seedFlaviaTarotista } =
+      await import('../src/database/seeds/flavia-tarotista.seeder');
+    const { seedFlaviaIAConfig } =
+      await import('../src/database/seeds/flavia-ia-config.seeder');
     const { seedPlans } = await import('../src/database/seeds/plans.seeder');
 
-    const { ReadingCategory } = await import(
-      '../src/modules/categories/entities/reading-category.entity'
-    );
-    const { TarotDeck } = await import(
-      '../src/modules/tarot/decks/entities/tarot-deck.entity'
-    );
-    const { TarotCard } = await import(
-      '../src/modules/tarot/cards/entities/tarot-card.entity'
-    );
-    const { PredefinedQuestion } = await import(
-      '../src/modules/predefined-questions/entities/predefined-question.entity'
-    );
+    const { ReadingCategory } =
+      await import('../src/modules/categories/entities/reading-category.entity');
+    const { TarotDeck } =
+      await import('../src/modules/tarot/decks/entities/tarot-deck.entity');
+    const { TarotCard } =
+      await import('../src/modules/tarot/cards/entities/tarot-card.entity');
+    const { PredefinedQuestion } =
+      await import('../src/modules/predefined-questions/entities/predefined-question.entity');
     const { User } = await import('../src/modules/users/entities/user.entity');
-    const { Tarotista } = await import(
-      '../src/modules/tarotistas/entities/tarotista.entity'
-    );
-    const { TarotistaConfig } = await import(
-      '../src/modules/tarotistas/entities/tarotista-config.entity'
-    );
-    const { Plan } = await import(
-      '../src/modules/plan-config/entities/plan.entity'
-    );
+    const { Tarotista } =
+      await import('../src/modules/tarotistas/entities/tarotista.entity');
+    const { TarotistaConfig } =
+      await import('../src/modules/tarotistas/entities/tarotista-config.entity');
+    const { Plan } =
+      await import('../src/modules/plan-config/entities/plan.entity');
 
     // Execute seeders
     await seedPlans(dataSource.getRepository(Plan)); // Plans first - needed by usage limits

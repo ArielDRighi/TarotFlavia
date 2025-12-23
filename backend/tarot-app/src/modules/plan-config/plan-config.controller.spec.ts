@@ -129,9 +129,9 @@ describe('PlanConfigController', () => {
     it('should remove a plan', async () => {
       mockPlanConfigService.remove.mockResolvedValue(undefined);
 
-      await controller.remove(UserPlan.PROFESSIONAL);
+      await controller.remove(UserPlan.PREMIUM);
 
-      expect(service.remove).toHaveBeenCalledWith(UserPlan.PROFESSIONAL);
+      expect(service.remove).toHaveBeenCalledWith(UserPlan.PREMIUM);
     });
   });
 });

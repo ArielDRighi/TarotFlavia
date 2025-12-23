@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CreateMultiTarotistSchema1762555582744
-  implements MigrationInterface
-{
+export class CreateMultiTarotistSchema1762555582744 implements MigrationInterface {
   name = 'CreateMultiTarotistSchema1762555582744';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

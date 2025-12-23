@@ -580,7 +580,7 @@ describe('Error Scenarios (E2E)', () => {
 
       const body = response.body as ErrorResponse;
       expect(body.statusCode).toBe(409);
-      expect(body.message).toContain('already registered');
+      expect(body.message).toContain('ya está registrado');
     });
   });
 
