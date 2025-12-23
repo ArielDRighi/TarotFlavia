@@ -25,6 +25,7 @@ import {
 
 import { JwtAuthGuard } from '../../auth/infrastructure/guards/jwt-auth.guard';
 import { RequiresPremiumForCustomQuestionGuard } from './guards/requires-premium-for-custom-question.guard';
+import { RequiresPremiumForAIGuard } from './guards/requires-premium-for-ai.guard';
 import {
   CheckUsageLimitGuard,
   IncrementUsageInterceptor,
@@ -47,6 +48,7 @@ export class ReadingsController {
   @UseGuards(
     JwtAuthGuard,
     RequiresPremiumForCustomQuestionGuard,
+    RequiresPremiumForAIGuard,
     CheckUsageLimitGuard,
   )
   @UseInterceptors(IncrementUsageInterceptor)
@@ -56,7 +58,7 @@ export class ReadingsController {
   @ApiOperation({
     summary: 'Crear una nueva lectura de tarot',
     description:
-      'Procesa una lectura completa con cartas seleccionadas, generando interpretación. Los usuarios free solo pueden usar preguntas predefinidas, mientras que los usuarios premium pueden usar preguntas personalizadas.',
+      'Procesa una lectura completa con cartas seleccionadas, generando interpretación. Los usuarios free solo pueden usar preguntas predefinidas, mientras que los usuarios premium pueden usar preguntas personalizadas. Las interpretaciones con IA están disponibles solo para usuarios premium.',
   })
   @ApiBody({ type: CreateReadingDto })
   @ApiResponse({
@@ -66,7 +68,7 @@ export class ReadingsController {
   @ApiResponse({
     status: 403,
     description:
-      'Usuario free intentando usar pregunta personalizada (requiere plan premium) o límite de lecturas alcanzado',
+      'Usuario free intentando usar pregunta personalizada (requiere plan premium), usuario free/anonymous intentando generar interpretación con IA (requiere plan premium), o límite de lecturas alcanzado',
   })
   @ApiResponse({
     status: 400,
