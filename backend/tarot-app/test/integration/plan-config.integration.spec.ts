@@ -59,10 +59,9 @@ describe('Plan Configuration Integration Tests', () => {
 
       expect(plan).toBeDefined();
       expect(plan.planType).toBe(UserPlan.ANONYMOUS);
-      // NOTE: Tests reflect ACTUAL SEEDER VALUES in plans.seeder.ts
-      // TASK-003 will update seeder to match MVP Strategy
-      expect(plan.readingsLimit).toBe(3); // Current seeder value
-      expect(plan.aiQuotaMonthly).toBe(0); // Current seeder value
+      // Updated by TASK-003: MVP Strategy values
+      expect(plan.readingsLimit).toBe(1); // 1 daily card reading
+      expect(plan.aiQuotaMonthly).toBe(0); // No AI for anonymous
       expect(parseFloat(plan.price.toString())).toBe(0);
     });
 
@@ -71,10 +70,9 @@ describe('Plan Configuration Integration Tests', () => {
 
       expect(plan).toBeDefined();
       expect(plan.planType).toBe(UserPlan.FREE);
-      // NOTE: Tests reflect ACTUAL SEEDER VALUES in plans.seeder.ts
-      // TASK-003 will update seeder to match MVP Strategy
-      expect(plan.readingsLimit).toBe(10); // TODO TASK-003: should be 2
-      expect(plan.aiQuotaMonthly).toBe(100); // TODO TASK-003: should be 0 (CRITICAL)
+      // Updated by TASK-003: MVP Strategy values - COST OPTIMIZATION
+      expect(plan.readingsLimit).toBe(2); // 2 readings (1 daily card + 1 spread)
+      expect(plan.aiQuotaMonthly).toBe(0); // No AI for FREE (cost saving)
       expect(parseFloat(plan.price.toString())).toBe(0);
     });
 
@@ -83,10 +81,9 @@ describe('Plan Configuration Integration Tests', () => {
 
       expect(plan).toBeDefined();
       expect(plan.planType).toBe(UserPlan.PREMIUM);
-      // NOTE: Tests reflect ACTUAL SEEDER VALUES in plans.seeder.ts
-      // TASK-003 will update seeder to match MVP Strategy
-      expect(plan.readingsLimit).toBe(-1); // Current seeder value (unlimited)
-      expect(plan.aiQuotaMonthly).toBe(-1); // Current seeder value (unlimited)
+      // Updated by TASK-003: MVP Strategy values - LIMITED BUT SUFFICIENT
+      expect(plan.readingsLimit).toBe(3); // 3 readings monthly
+      expect(plan.aiQuotaMonthly).toBe(100); // 100 AI requests monthly
       expect(parseFloat(plan.price.toString())).toBeGreaterThan(0);
     });
   });
@@ -127,18 +124,16 @@ describe('Plan Configuration Integration Tests', () => {
     it('should correctly identify unlimited plans', async () => {
       const premium = await planService.findByPlanType(UserPlan.PREMIUM);
 
-      // NOTE: Tests reflect ACTUAL SEEDER VALUES in plans.seeder.ts
-      // Seeder defines PREMIUM as unlimited (-1)
-      expect(premium.isUnlimited()).toBe(true);
-      expect(premium.readingsLimit).toBe(-1);
+      // Updated by TASK-003: PREMIUM is now LIMITED (3 readings)
+      expect(premium.isUnlimited()).toBe(false);
+      expect(premium.readingsLimit).toBe(3);
     });
 
     it('should get effective AI quota correctly', async () => {
       const premium = await planService.findByPlanType(UserPlan.PREMIUM);
 
-      // NOTE: Tests reflect ACTUAL SEEDER VALUES in plans.seeder.ts
-      // PREMIUM has unlimited AI quota (-1 converts to MAX_SAFE_INTEGER)
-      expect(premium.getEffectiveAiQuota()).toBe(Number.MAX_SAFE_INTEGER);
+      // Updated by TASK-003: PREMIUM has limited AI quota (100)
+      expect(premium.getEffectiveAiQuota()).toBe(100);
     });
   });
 

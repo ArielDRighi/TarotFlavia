@@ -10,9 +10,9 @@ import { UserPlan } from '../../modules/users/entities/user.entity';
  * - Idempotent: Can be run multiple times without duplicating data
  * - Creates ANONYMOUS, FREE, and PREMIUM plans
  * - Configures limits and features for each plan
- * - ANONYMOUS: For non-registered users (3 readings, no AI, no history)
- * - FREE: For registered users (10 readings, 100 AI requests, save history)
- * - PREMIUM: Paid plan (unlimited, all features)
+ * - ANONYMOUS: For non-registered users (1 daily card reading, no AI)
+ * - FREE: For registered users (2 readings, no AI - cost optimization)
+ * - PREMIUM: Paid plan (3 readings, 100 AI requests monthly, all features)
  */
 export async function seedPlans(
   planRepository: Repository<Plan>,
@@ -36,7 +36,7 @@ export async function seedPlans(
       description:
         'Plan para usuarios no registrados con acceso limitado para probar la aplicación',
       price: 0,
-      readingsLimit: 3,
+      readingsLimit: 1,
       aiQuotaMonthly: 0, // No AI for anonymous users
       allowCustomQuestions: false,
       allowSharing: false,
@@ -45,12 +45,12 @@ export async function seedPlans(
     },
     {
       planType: UserPlan.FREE,
-      name: 'Plan Gratuito',
+      name: 'Plan Gratis',
       description:
         'Plan básico con lecturas limitadas y funcionalidades esenciales para usuarios registrados',
       price: 0,
-      readingsLimit: 10,
-      aiQuotaMonthly: 100,
+      readingsLimit: 2,
+      aiQuotaMonthly: 0,
       allowCustomQuestions: false,
       allowSharing: false,
       allowAdvancedSpreads: false,
@@ -62,8 +62,8 @@ export async function seedPlans(
       description:
         'Plan completo con lecturas ilimitadas, preguntas personalizadas y compartir lecturas',
       price: 9.99,
-      readingsLimit: -1, // Ilimitado
-      aiQuotaMonthly: -1, // Ilimitado
+      readingsLimit: 3,
+      aiQuotaMonthly: 100,
       allowCustomQuestions: true,
       allowSharing: true,
       allowAdvancedSpreads: true,

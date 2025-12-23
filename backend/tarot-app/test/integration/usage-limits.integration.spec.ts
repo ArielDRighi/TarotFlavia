@@ -447,11 +447,11 @@ describe('UsageLimits + Readings Integration Tests', () => {
   });
 
   describe('Premium Plan Benefits', () => {
-    it('should allow unlimited readings for PREMIUM users', async () => {
+    it('should allow 3 readings for PREMIUM users (TASK-003 updated)', async () => {
       // ARRANGE: Usuario ya es PREMIUM del beforeEach
-      // ACT: Crear 5 lecturas (más del límite FREE de 3)
+      // ACT: Crear 3 lecturas (límite PREMIUM según MVP Strategy TASK-003)
       // Usamos preguntas únicas para evitar cache hits y asegurar llamada a AI
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < 3; i++) {
         const createReadingPayload = {
           spreadId: testSpread.id,
           deckId: testDeck.id,
@@ -476,7 +476,26 @@ describe('UsageLimits + Readings Integration Tests', () => {
       const userAfter = await userRepository.findOne({
         where: { id: testUser.id },
       });
-      expect(userAfter!.aiRequestsUsedMonth).toBe(5);
-    }, 50000); // 50s timeout para 5 lecturas
+      expect(userAfter!.aiRequestsUsedMonth).toBe(3);
+
+      // TASK-003: Verify that 4th reading is blocked
+      const createReadingPayload = {
+        spreadId: testSpread.id,
+        deckId: testDeck.id,
+        cardIds: testCards.map((card) => card.id),
+        cardPositions: testCards.map((card, idx) => ({
+          cardId: card.id,
+          position: testSpread.positions[idx]?.name || `Position ${idx + 1}`,
+          isReversed: false,
+        })),
+        customQuestion: `Premium test question 4 - ${Date.now()} - ${Math.random()}`,
+        generateInterpretation: true,
+      };
+      await request(app.getHttpServer())
+        .post('/readings')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(createReadingPayload)
+        .expect(403); // Debe fallar el 4to intento
+    }, 50000); // 50s timeout
   });
 });
