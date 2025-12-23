@@ -116,17 +116,17 @@ describe('Subscriptions System E2E', () => {
       planStartedAt: new Date(),
     });
 
-    // Registrar usuario PREMIUM
-    const professionalUser = await request(app.getHttpServer())
+    // Registrar segundo usuario PREMIUM
+    const premiumUser2 = await request(app.getHttpServer())
       .post('/api/v1/auth/register')
       .send({
-        email: `professional-user-${testTimestamp}@test.com`,
+        email: `premium-user-2-${testTimestamp}@test.com`,
         password: 'Test1234!',
-        name: 'Professional User',
+        name: 'Premium User 2',
       });
 
-    professionalUserId = professionalUser.body.user.id;
-    professionalUserToken = professionalUser.body.access_token;
+    professionalUserId = premiumUser2.body.user.id;
+    professionalUserToken = premiumUser2.body.access_token;
 
     // Actualizar usuario a PREMIUM
     await userRepo.update(professionalUserId, {
