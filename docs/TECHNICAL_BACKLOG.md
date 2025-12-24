@@ -7,6 +7,25 @@
 
 ---
 
+## 📊 Estado de Tareas - Sprint 1 (Crítico)
+
+| Tarea    | Estado | Prioridad     | Área              | Estimación | Completada  |
+| -------- | ------ | ------------- | ----------------- | ---------- | ----------- |
+| TASK-001 | ✅     | 🔴 P0 CRÍTICO | Backend - Entity  | 2h         | 21 Dic 2025 |
+| TASK-002 | ✅     | 🔴 P0 CRÍTICO | Backend - DB      | 4h         | 21 Dic 2025 |
+| TASK-003 | ✅     | 🔴 P0 CRÍTICO | Backend - Seeder  | 1.5h       | 21 Dic 2025 |
+| TASK-004 | ✅     | 🔴 P0 CRÍTICO | Backend - Guards  | 2h         | 22 Dic 2025 |
+| TASK-005 | ✅     | 🔴 P0 CRÍTICO | Backend - DTOs    | 0.5h       | 23 Dic 2025 |
+| TASK-006 | 📝     | 🔴 P0 CRÍTICO | Backend - Service | 1h         | -           |
+| TASK-007 | 📝     | 🔴 P0 CRÍTICO | Backend - Cron    | 4h         | -           |
+| TASK-008 | 📝     | 🔴 P0 CRÍTICO | Backend - Service | 2.5h       | -           |
+
+**Progreso:** 5/8 tareas completadas (62.5%)  
+**Tiempo invertido:** ~7h / 16-18h estimado  
+**Ahorro proyectado:** $100 USD/mes por cada 1,000 usuarios FREE
+
+---
+
 ## 📊 Resumen Ejecutivo
 
 **Decisiones Confirmadas:**
