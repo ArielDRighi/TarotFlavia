@@ -589,46 +589,54 @@ Crear un nuevo guard `RequiresPremiumForAIGuard` que bloquee la generación de i
 
 ---
 
-### 📝 TASK-005: Cambiar default de generateInterpretation a false
+### ✅ TASK-005: Cambiar default de generateInterpretation a false
 
+**Estado:** ✅ COMPLETADA  
 **Prioridad:** 🔴 P0 - CRÍTICO (Ahorro de Costos)  
 **Área:** Backend - DTOs  
 **Estimación:** 30 min  
 **Dependencias:** TASK-004  
 **Feature:** F004, F005  
-**Branch sugerido:** `chore/interpretation-default-false`
+**Branch:** `feature/TASK-005-interpretation-default-false`  
+**Fecha Completada:** 23 Diciembre 2024
 
 #### Descripción
 
 Cambiar el valor por defecto del campo `generateInterpretation` en CreateReadingDto de `true` a `false`. Esto asegura que si el frontend no envía el campo, NO se generará interpretación con IA.
 
-#### Archivos a Modificar
+#### Archivos Modificados
 
-- `backend/tarot-app/src/modules/tarot/readings/dto/create-reading.dto.ts`
+- ✅ `backend/tarot-app/src/modules/tarot/readings/dto/create-reading.dto.ts`
+- ✅ `backend/tarot-app/test/readings/create-reading.dto.spec.ts` (tests añadidos)
 
-#### Cambios Específicos
+#### Cambios Realizados
 
 **Campo `generateInterpretation`:**
 
-- Cambiar `default: true` → `default: false`
-- Cambiar `example: true` → `example: false`
-- Actualizar description: "Si se debe generar interpretación con IA (solo Premium)"
-- Cambiar valor inicial: `generateInterpretation: boolean = true` → `= false`
+- ✅ Cambiado `default: true` → `default: false`
+- ✅ Cambiado `example: true` → `example: false`
+- ✅ Actualizada description: "Si se debe generar interpretación con IA (solo Premium)"
+- ✅ Cambiado valor inicial: `generateInterpretation: boolean = true` → `= false`
 
-#### Archivos de Tests a Actualizar
+#### Tests Actualizados
 
-- `create-reading.dto.spec.ts` - Verificar que default es false
-- `create-reading.use-case.spec.ts` - Ajustar tests que asuman true por defecto
-- `readings.controller.spec.ts` - Ajustar tests de integración
+- ✅ `create-reading.dto.spec.ts` - Añadidos tests para validar default false
+  - Test: debe tener false como valor por defecto cuando no se proporciona
+  - Test: debe respetar el valor true cuando se proporciona explícitamente
+  - Test: debe respetar el valor false cuando se proporciona explícitamente
+- ✅ Tests del use case no requirieron cambios (ya probaban comportamiento con generateInterpretation explícito)
+- ✅ Tests del controller no requirieron cambios (ya probaban comportamiento con generateInterpretation explícito)
 
 #### Criterios de Aceptación
 
-- [ ] Default del campo es `false`
-- [ ] Documentación Swagger actualizada (example: false)
-- [ ] Si frontend omite el campo → se asume `false`
-- [ ] Tests actualizados para reflejar nuevo default
-- [ ] No hay errores de compilación
-- [ ] Tests de DTO pasando con coverage 100%
+- ✅ Default del campo es `false`
+- ✅ Documentación Swagger actualizada (example: false)
+- ✅ Si frontend omite el campo → se asume `false`
+- ✅ Tests actualizados para reflejar nuevo default
+- ✅ No hay errores de compilación
+- ✅ Tests de DTO pasando con coverage 100% (12/12 tests passed)
+- ✅ Todos los tests del backend pasan (1958 passed, 11 skipped)
+- ✅ Lint, format y build exitosos
 
 #### Impacto
 
