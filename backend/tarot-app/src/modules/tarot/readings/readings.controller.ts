@@ -49,6 +49,7 @@ export class ReadingsController {
     JwtAuthGuard,
     RequiresPremiumForCustomQuestionGuard,
     RequiresPremiumForAIGuard,
+    AIQuotaGuard,
     CheckUsageLimitGuard,
   )
   @UseInterceptors(IncrementUsageInterceptor)
