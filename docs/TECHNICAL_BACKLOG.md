@@ -519,14 +519,16 @@ La lógica ya existe en:
 
 ---
 
-### 📝 TASK-004: Crear guard para bloquear IA en planes FREE y ANONYMOUS
+### ✅ TASK-004: Crear guard para bloquear IA en planes FREE y ANONYMOUS - COMPLETADA
 
 **Prioridad:** 🔴 P0 - CRÍTICO (Ahorro de Costos)  
 **Área:** Backend - Guards  
 **Estimación:** 2 horas  
+**Tiempo Real:** 2 horas  
 **Dependencias:** TASK-001  
 **Feature:** F004, F005  
-**Branch sugerido:** `feat/premium-ai-guard`
+**Branch:** `feature/TASK-004-premium-ai-guard`  
+**Estado:** ✅ COMPLETADA (23 Dic 2025)
 
 #### Descripción
 
@@ -555,14 +557,14 @@ Crear un nuevo guard `RequiresPremiumForAIGuard` que bloquee la generación de i
 
 #### Criterios de Aceptación
 
-- [ ] Guard creado e implementa `CanActivate`
-- [ ] Bloquea `generateInterpretation: true` para FREE y ANONYMOUS
-- [ ] Permite `generateInterpretation: true` solo para PREMIUM
-- [ ] Permite `generateInterpretation: false` para todos los planes
-- [ ] Mensaje de error claro y localizado
-- [ ] Guard aplicado en controller de readings
-- [ ] Tests del guard con 100% coverage
-- [ ] Tests de integración del endpoint pasando
+- [x] Guard creado e implementa `CanActivate`
+- [x] Bloquea `generateInterpretation: true` para FREE y ANONYMOUS
+- [x] Permite `generateInterpretation: true` solo para PREMIUM
+- [x] Permite `generateInterpretation: false` para todos los planes
+- [x] Mensaje de error claro y localizado
+- [x] Guard aplicado en controller de readings
+- [x] Tests del guard con 100% coverage (8/8 tests passing)
+- [x] Tests de integración del endpoint validando comportamiento correcto
 
 #### Tests a Implementar
 
