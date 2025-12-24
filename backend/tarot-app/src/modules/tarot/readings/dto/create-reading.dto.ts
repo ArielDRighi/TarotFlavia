@@ -138,11 +138,11 @@ export class CreateReadingDto {
   cardPositions: CardPositionDto[];
 
   @ApiProperty({
-    example: true,
-    description: 'Si se debe generar una interpretación automática',
-    default: true,
+    example: false,
+    description: 'Si se debe generar interpretación con IA (solo Premium)',
+    default: false,
   })
   @IsBoolean()
   @IsOptional()
-  generateInterpretation: boolean = true;
+  generateInterpretation: boolean = false;
 }

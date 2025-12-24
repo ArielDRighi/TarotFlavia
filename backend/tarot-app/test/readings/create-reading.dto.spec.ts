@@ -184,4 +184,61 @@ describe('CreateReadingDto', () => {
       expect(errors).toHaveLength(0);
     });
   });
+
+  describe('Campo generateInterpretation', () => {
+    it('debe tener false como valor por defecto cuando no se proporciona', () => {
+      const dto = plainToInstance(CreateReadingDto, {
+        deckId: 1,
+        spreadId: 1,
+        cardIds: [1, 2, 3],
+        cardPositions: [
+          { cardId: 1, position: 'pasado', isReversed: false },
+          { cardId: 2, position: 'presente', isReversed: false },
+          { cardId: 3, position: 'futuro', isReversed: false },
+        ],
+        predefinedQuestionId: 5,
+        // No se proporciona generateInterpretation
+      });
+
+      expect(dto.generateInterpretation).toBe(false);
+    });
+
+    it('debe respetar el valor true cuando se proporciona explícitamente', async () => {
+      const dto = plainToInstance(CreateReadingDto, {
+        deckId: 1,
+        spreadId: 1,
+        cardIds: [1, 2, 3],
+        cardPositions: [
+          { cardId: 1, position: 'pasado', isReversed: false },
+          { cardId: 2, position: 'presente', isReversed: false },
+          { cardId: 3, position: 'futuro', isReversed: false },
+        ],
+        predefinedQuestionId: 5,
+        generateInterpretation: true,
+      });
+
+      const errors = await validate(dto);
+      expect(errors).toHaveLength(0);
+      expect(dto.generateInterpretation).toBe(true);
+    });
+
+    it('debe respetar el valor false cuando se proporciona explícitamente', async () => {
+      const dto = plainToInstance(CreateReadingDto, {
+        deckId: 1,
+        spreadId: 1,
+        cardIds: [1, 2, 3],
+        cardPositions: [
+          { cardId: 1, position: 'pasado', isReversed: false },
+          { cardId: 2, position: 'presente', isReversed: false },
+          { cardId: 3, position: 'futuro', isReversed: false },
+        ],
+        predefinedQuestionId: 5,
+        generateInterpretation: false,
+      });
+
+      const errors = await validate(dto);
+      expect(errors).toHaveLength(0);
+      expect(dto.generateInterpretation).toBe(false);
+    });
+  });
 });
