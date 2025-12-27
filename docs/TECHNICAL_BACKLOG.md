@@ -683,71 +683,69 @@ curl -X POST http://localhost:3000/api/readings \
 
 ---
 
-### 📝 TASK-006: Actualizar usage limits constants
+### ✅ TASK-006: Actualizar usage limits constants
 
+**Estado:** ✅ COMPLETADA  
 **Prioridad:** 🔴 P0 - CRÍTICO  
 **Área:** Backend - Usage Limits  
 **Estimación:** 1 hora  
 **Dependencias:** TASK-001  
 **Feature:** F002  
-**Branch sugerido:** `chore/update-usage-limits`
+**Branch:** `feature/TASK-006-update-usage-limits`  
+**Commit:** `32eb9f2`
 
 #### Descripción
 
 Actualizar constantes de límites de uso (`USAGE_LIMITS`) para reflejar nuevos valores de planes: eliminar PROFESSIONAL, renombrar GUEST a ANONYMOUS, y ajustar límites diarios.
 
-#### Archivos a Modificar
+#### Archivos Modificados
 
 - `backend/tarot-app/src/modules/usage-limits/usage-limits.constants.ts`
+- `backend/tarot-app/src/modules/usage-limits/usage-limits.service.spec.ts`
 
-#### Cambios por Plan
+#### Cambios Implementados
 
 **ANONYMOUS (antes GUEST):**
 
-- `TAROT_READING`: Cambiar de 3 a **1**
-- `INTERPRETATION_REGENERATION`: Mantener en **0**
-- `ORACLE_QUERY`: Mantener en **0**
+- `TAROT_READING`: Cambiado de 3 a **1** ✅
+- `INTERPRETATION_REGENERATION`: Mantener en **0** ✅
+- `ORACLE_QUERY`: Mantener en **0** ✅
 
 **FREE:**
 
-- `TAROT_READING`: Cambiar a **2** (carta del día + 1 tirada 3 cartas)
-- `INTERPRETATION_REGENERATION`: Mantener en **0**
-- `ORACLE_QUERY`: Mantener en **5**
+- `TAROT_READING`: Cambiado a **2** (carta del día + 1 tirada 3 cartas) ✅
+- `INTERPRETATION_REGENERATION`: Mantener en **0** ✅
+- `ORACLE_QUERY`: Mantener en **5** ✅
 
 **PREMIUM:**
 
-- `TAROT_READING`: Cambiar de -1 a **3** (límite de 3 tiradas/día)
-- `INTERPRETATION_REGENERATION`: Mantener en **-1** (ilimitado)
-- `ORACLE_QUERY`: Mantener en **-1** (ilimitado)
-
-**PROFESSIONAL:**
-
-- **ELIMINAR** completamente la entrada
+- `TAROT_READING`: Cambiado de -1 a **3** (límite de 3 tiradas/día) ✅
+- `INTERPRETATION_REGENERATION`: Mantener en **-1** (ilimitado) ✅
+- `ORACLE_QUERY`: Mantener en **-1** (ilimitado) ✅
 
 #### Criterios de Aceptación
 
-- [ ] Constante `USAGE_LIMITS` no contiene `UserPlan.PROFESSIONAL`
-- [ ] `UserPlan.GUEST` renombrado a `UserPlan.ANONYMOUS`
-- [ ] Límites actualizados según nueva estrategia
-- [ ] No hay errores de compilación TypeScript
-- [ ] Tests que usen estas constantes actualizados
-- [ ] Comentarios en código actualizados (eliminar referencia a "unlimited PROFESSIONAL")
+- [x] Constante `USAGE_LIMITS` no contiene `UserPlan.PROFESSIONAL`
+- [x] `UserPlan.GUEST` renombrado a `UserPlan.ANONYMOUS`
+- [x] Límites actualizados según nueva estrategia
+- [x] No hay errores de compilación TypeScript
+- [x] Tests que usen estas constantes actualizados
+- [x] Comentarios en código actualizados
 
-#### Testing
+#### Resultados de Testing
 
 ```bash
-# Verificar que los imports funcionan
-npm run build
-
-# Ejecutar tests de usage limits
-npm test -- usage-limits
+✅ Build exitoso
+✅ Lint y format exitosos
+✅ 167 test suites passed (1963 tests)
+✅ Validación de arquitectura exitosa
 ```
 
 #### Notas
 
-- Este archivo trabaja junto con el sistema de plan-config (DB)
-- Los límites aquí son defaults/fallback
-- La fuente de verdad final son los valores en DB (tabla `plans`)
+- Los límites funcionan como fallback para características no configurables por DB
+- TAROT_READING lee de `plan-config` (DB), no de estas constantes
+- Tests actualizados para reflejar nuevos límites por plan
 
 ---
 
