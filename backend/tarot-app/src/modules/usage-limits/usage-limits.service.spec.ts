@@ -58,7 +58,43 @@ describe('UsageLimitsService', () => {
   });
 
   describe('checkLimit', () => {
-    it('should return true when FREE user has not exceeded daily reading limit', async () => {
+    it('should return true when ANONYMOUS user has not exceeded daily reading limit (1 reading)', async () => {
+      const anonymousUser: Partial<User> = {
+        id: 1,
+        plan: UserPlan.ANONYMOUS,
+        subscriptionStatus: undefined,
+      };
+
+      mockUsersService.findById.mockResolvedValue(anonymousUser);
+      mockPlanConfigService.getReadingsLimit.mockResolvedValue(1); // ANONYMOUS plan limit from DB
+      mockUsageLimitRepository.findOne.mockResolvedValue({
+        count: 0, // Less than 1
+      });
+
+      const result = await service.checkLimit(1, UsageFeature.TAROT_READING);
+
+      expect(result).toBe(true);
+    });
+
+    it('should return false when ANONYMOUS user has exceeded daily reading limit', async () => {
+      const anonymousUser: Partial<User> = {
+        id: 1,
+        plan: UserPlan.ANONYMOUS,
+        subscriptionStatus: undefined,
+      };
+
+      mockUsersService.findById.mockResolvedValue(anonymousUser);
+      mockPlanConfigService.getReadingsLimit.mockResolvedValue(1); // ANONYMOUS plan limit from DB
+      mockUsageLimitRepository.findOne.mockResolvedValue({
+        count: 1, // Reached limit (1 reading)
+      });
+
+      const result = await service.checkLimit(1, UsageFeature.TAROT_READING);
+
+      expect(result).toBe(false);
+    });
+
+    it('should return true when FREE user has not exceeded daily reading limit (2 readings)', async () => {
       const freeUser: Partial<User> = {
         id: 1,
         plan: UserPlan.FREE,
@@ -66,9 +102,9 @@ describe('UsageLimitsService', () => {
       };
 
       mockUsersService.findById.mockResolvedValue(freeUser);
-      mockPlanConfigService.getReadingsLimit.mockResolvedValue(10); // FREE plan limit from DB
+      mockPlanConfigService.getReadingsLimit.mockResolvedValue(2); // FREE plan limit from DB
       mockUsageLimitRepository.findOne.mockResolvedValue({
-        count: 2, // Less than 3 (FREE_DAILY_READINGS)
+        count: 1, // Less than 2
       });
 
       const result = await service.checkLimit(1, UsageFeature.TAROT_READING);
@@ -84,9 +120,9 @@ describe('UsageLimitsService', () => {
       };
 
       mockUsersService.findById.mockResolvedValue(freeUser);
-      mockPlanConfigService.getReadingsLimit.mockResolvedValue(10); // FREE plan limit from DB
+      mockPlanConfigService.getReadingsLimit.mockResolvedValue(2); // FREE plan limit from DB
       mockUsageLimitRepository.findOne.mockResolvedValue({
-        count: 10, // Reached limit (10 readings)
+        count: 2, // Reached limit (2 readings)
       });
 
       const result = await service.checkLimit(1, UsageFeature.TAROT_READING);
@@ -94,7 +130,7 @@ describe('UsageLimitsService', () => {
       expect(result).toBe(false);
     });
 
-    it('should return true when PREMIUM user always has unlimited access', async () => {
+    it('should return true when PREMIUM user has not exceeded daily reading limit (3 readings)', async () => {
       const premiumUser: Partial<User> = {
         id: 2,
         plan: UserPlan.PREMIUM,
@@ -102,12 +138,32 @@ describe('UsageLimitsService', () => {
       };
 
       mockUsersService.findById.mockResolvedValue(premiumUser);
-      mockPlanConfigService.getReadingsLimit.mockResolvedValue(-1); // Unlimited for PREMIUM
+      mockPlanConfigService.getReadingsLimit.mockResolvedValue(3); // PREMIUM plan limit from DB (now limited to 3/day)
+      mockUsageLimitRepository.findOne.mockResolvedValue({
+        count: 2, // Less than 3
+      });
 
       const result = await service.checkLimit(2, UsageFeature.TAROT_READING);
 
       expect(result).toBe(true);
-      expect(mockUsageLimitRepository.findOne).not.toHaveBeenCalled();
+    });
+
+    it('should return false when PREMIUM user has exceeded daily reading limit', async () => {
+      const premiumUser: Partial<User> = {
+        id: 2,
+        plan: UserPlan.PREMIUM,
+        subscriptionStatus: SubscriptionStatus.ACTIVE,
+      };
+
+      mockUsersService.findById.mockResolvedValue(premiumUser);
+      mockPlanConfigService.getReadingsLimit.mockResolvedValue(3); // PREMIUM plan limit from DB
+      mockUsageLimitRepository.findOne.mockResolvedValue({
+        count: 3, // Reached limit (3 readings)
+      });
+
+      const result = await service.checkLimit(2, UsageFeature.TAROT_READING);
+
+      expect(result).toBe(false);
     });
 
     it('should return true when FREE user has no usage record yet', async () => {
@@ -118,12 +174,31 @@ describe('UsageLimitsService', () => {
       };
 
       mockUsersService.findById.mockResolvedValue(freeUser);
-      mockPlanConfigService.getReadingsLimit.mockResolvedValue(10); // FREE plan limit from DB
+      mockPlanConfigService.getReadingsLimit.mockResolvedValue(2); // FREE plan limit from DB
       mockUsageLimitRepository.findOne.mockResolvedValue(null);
 
       const result = await service.checkLimit(1, UsageFeature.TAROT_READING);
 
       expect(result).toBe(true);
+    });
+
+    it('should return true for PREMIUM user regeneration feature (unlimited)', async () => {
+      const premiumUser: Partial<User> = {
+        id: 2,
+        plan: UserPlan.PREMIUM,
+        subscriptionStatus: SubscriptionStatus.ACTIVE,
+      };
+
+      mockUsersService.findById.mockResolvedValue(premiumUser);
+      // INTERPRETATION_REGENERATION uses constants fallback (not in DB yet)
+
+      const result = await service.checkLimit(
+        2,
+        UsageFeature.INTERPRETATION_REGENERATION,
+      );
+
+      expect(result).toBe(true);
+      expect(mockUsageLimitRepository.findOne).not.toHaveBeenCalled();
     });
 
     it('should throw NotFoundException when user not found', async () => {
@@ -246,9 +321,9 @@ describe('UsageLimitsService', () => {
       };
 
       mockUsersService.findById.mockResolvedValue(freeUser);
-      mockPlanConfigService.getReadingsLimit.mockResolvedValue(10); // FREE plan limit from DB
+      mockPlanConfigService.getReadingsLimit.mockResolvedValue(2); // FREE plan limit from DB
       mockUsageLimitRepository.findOne.mockResolvedValue({
-        count: 2,
+        count: 1,
       });
 
       const result = await service.getRemainingUsage(
@@ -256,10 +331,10 @@ describe('UsageLimitsService', () => {
         UsageFeature.TAROT_READING,
       );
 
-      expect(result).toBe(8); // 10 - 2 = 8
+      expect(result).toBe(1); // 2 - 1 = 1
     });
 
-    it('should return -1 (unlimited) for PREMIUM user', async () => {
+    it('should return correct remaining usage for PREMIUM user (limited to 3)', async () => {
       const premiumUser: Partial<User> = {
         id: 2,
         plan: UserPlan.PREMIUM,
@@ -267,14 +342,35 @@ describe('UsageLimitsService', () => {
       };
 
       mockUsersService.findById.mockResolvedValue(premiumUser);
-      mockPlanConfigService.getReadingsLimit.mockResolvedValue(-1); // Unlimited for PREMIUM
+      mockPlanConfigService.getReadingsLimit.mockResolvedValue(3); // PREMIUM plan limit from DB (now 3/day)
+      mockUsageLimitRepository.findOne.mockResolvedValue({
+        count: 1,
+      });
 
       const result = await service.getRemainingUsage(
         2,
         UsageFeature.TAROT_READING,
       );
 
-      expect(result).toBe(-1);
+      expect(result).toBe(2); // 3 - 1 = 2
+    });
+
+    it('should return -1 (unlimited) for PREMIUM user regeneration feature', async () => {
+      const premiumUser: Partial<User> = {
+        id: 2,
+        plan: UserPlan.PREMIUM,
+        subscriptionStatus: SubscriptionStatus.ACTIVE,
+      };
+
+      mockUsersService.findById.mockResolvedValue(premiumUser);
+      // INTERPRETATION_REGENERATION uses constants fallback (unlimited for PREMIUM)
+
+      const result = await service.getRemainingUsage(
+        2,
+        UsageFeature.INTERPRETATION_REGENERATION,
+      );
+
+      expect(result).toBe(-1); // Unlimited
     });
 
     it('should return full limit when no usage record exists', async () => {
@@ -284,7 +380,7 @@ describe('UsageLimitsService', () => {
       };
 
       mockUsersService.findById.mockResolvedValue(freeUser);
-      mockPlanConfigService.getReadingsLimit.mockResolvedValue(10); // FREE plan limit from DB
+      mockPlanConfigService.getReadingsLimit.mockResolvedValue(2); // FREE plan limit from DB
       mockUsageLimitRepository.findOne.mockResolvedValue(null);
 
       const result = await service.getRemainingUsage(
@@ -292,7 +388,7 @@ describe('UsageLimitsService', () => {
         UsageFeature.TAROT_READING,
       );
 
-      expect(result).toBe(10); // Full FREE limit
+      expect(result).toBe(2); // Full FREE limit
     });
 
     it('should throw NotFoundException when user not found', async () => {
