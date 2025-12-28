@@ -921,23 +921,24 @@ Asegurar que todas las validaciones de planes estén correctas y que el contenid
 
 ---
 
-### 📝 TASK-009: Actualizar guard de custom questions para validar solo PREMIUM
+### ✅ TASK-009: Actualizar guard de custom questions para validar solo PREMIUM
 
 **Prioridad:** 🟠 P1 - ALTO (Backend)  
 **Área:** Backend - Guards  
 **Estimación:** 1 hora  
 **Dependencias:** TASK-001  
 **Feature:** F012  
-**Branch sugerido:** `fix/custom-question-guard-premium`
+**Branch:** `fix/custom-question-guard-premium`  
+**Estado:** ✅ COMPLETADA (28 Diciembre 2025)
 
 #### Descripción
 
 Actualizar `RequiresPremiumForCustomQuestionGuard` para que valide SOLO usuarios PREMIUM (no solo bloquear FREE). Actualmente el guard solo verifica `if (plan === FREE)`, pero con 3 planes (ANONYMOUS, FREE, PREMIUM) debe ser `if (plan !== PREMIUM)`.
 
-#### Archivos a Modificar
+#### Archivos Modificados
 
 - `backend/tarot-app/src/modules/tarot/readings/guards/requires-premium-for-custom-question.guard.ts`
-- `backend/tarot-app/src/modules/tarot/readings/guards/requires-premium-for-custom-question.guard.spec.ts`
+- `backend/tarot-app/src/modules/tarot/readings/guards/requires-premium-for-custom-question.guard.spec.ts` (creado)
 
 #### Lógica Actual vs Nueva
 
@@ -949,20 +950,29 @@ Actualizar `RequiresPremiumForCustomQuestionGuard` para que valide SOLO usuarios
 
 #### Criterios de Aceptación
 
-- [ ] Guard bloquea ANONYMOUS con custom question → 403
-- [ ] Guard bloquea FREE con custom question → 403
-- [ ] Guard permite PREMIUM con custom question → pasa
-- [ ] Guard permite todos los planes sin custom question → pasa
-- [ ] Mensaje de error actualizado
-- [ ] Tests cubren los 3 planes
-- [ ] Coverage 100% del guard
+- [x] Guard bloquea ANONYMOUS con custom question → 403
+- [x] Guard bloquea FREE con custom question → 403
+- [x] Guard permite PREMIUM con custom question → pasa
+- [x] Guard permite todos los planes sin custom question → pasa
+- [x] Mensaje de error actualizado (sin cambios, el mensaje era correcto)
+- [x] Tests cubren los 3 planes
+- [x] Coverage 100% del guard
 
-#### Tests a Agregar
+#### Tests Implementados
 
-1. **Test: ANONYMOUS + customQuestion → 403**
-2. **Test: FREE + customQuestion → 403** (ya existe)
-3. **Test: PREMIUM + customQuestion → pasa**
-4. **Test: ANONYMOUS sin customQuestion → pasa**
+1. ✅ **Test: ANONYMOUS + customQuestion → 403**
+2. ✅ **Test: FREE + customQuestion → 403**
+3. ✅ **Test: PREMIUM + customQuestion → pasa**
+4. ✅ **Test: ANONYMOUS sin customQuestion → pasa**
+5. ✅ **Test: FREE sin customQuestion → pasa**
+6. ✅ **Test: PREMIUM sin customQuestion → pasa**
+
+#### Resultado
+
+- **Coverage:** 100% (Statements, Branches, Functions, Lines)
+- **Tests:** 12 passed (6 unitarios nuevos + 6 existentes en test/)
+- **Validación:** Lint, format, build ✅
+- **Arquitectura:** Validación passed ✅
 
 ---
 
