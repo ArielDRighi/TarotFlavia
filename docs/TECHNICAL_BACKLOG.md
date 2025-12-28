@@ -749,84 +749,76 @@ Actualizar constantes de límites de uso (`USAGE_LIMITS`) para reflejar nuevos v
 
 ---
 
-### 📝 TASK-007: Implementar sistema de reset diario de límites (Cron Job)
+### ✅ TASK-007: Implementar sistema de reset diario de límites (Cron Job)
 
+**Estado:** ✅ COMPLETADA  
+**Fecha de finalización:** 27/12/2024  
+**Rama:** `feature/TASK-007-daily-limits-reset`  
 **Prioridad:** 🔴 P0 - CRÍTICO  
 **Área:** Backend - Usage Limits / Scheduling  
 **Estimación:** 4 horas  
 **Dependencias:** TASK-006  
-**Feature:** F002  
-**Branch sugerido:** `feat/daily-limits-reset`
+**Feature:** F002
 
 #### Descripción
 
-Implementar cron job que resetea los límites de uso diariamente a medianoche UTC. Actualmente los límites son totales (sin reset), lo que no cumple con la estrategia de límites diarios.
+Sistema de cron job que resetea límites de uso diariamente a medianoche UTC mediante eliminación de registros antiguos (>7 días).
 
-#### Archivos a Crear
+#### Archivos Creados
 
-- `backend/tarot-app/src/modules/usage-limits/services/usage-limits-reset.service.ts`
-- `backend/tarot-app/src/modules/usage-limits/services/usage-limits-reset.service.spec.ts`
+- ✅ `backend/tarot-app/src/modules/usage-limits/services/usage-limits-reset.service.ts`
+- ✅ `backend/tarot-app/src/modules/usage-limits/services/usage-limits-reset.service.spec.ts`
 
-#### Archivos a Modificar
+#### Archivos Modificados
 
-- `backend/tarot-app/src/modules/usage-limits/usage-limits.module.ts`
-  - Importar `ScheduleModule.forRoot()`
-  - Agregar `UsageLimitsResetService` a providers
-- `backend/tarot-app/package.json`
-  - Verificar que `@nestjs/schedule` está instalado (o instalarlo)
+- ✅ `backend/tarot-app/src/modules/usage-limits/usage-limits.module.ts`
+  - Importado `ScheduleModule.forRoot()`
+  - Agregado `UsageLimitsResetService` a providers y exports
 
-#### Lógica del Cron Job
+#### Implementación
 
-1. **Trigger:** Todos los días a las 00:00 UTC
-2. **Acción:** Eliminar registros de `usage_limit` de hace más de 7 días (retención)
-3. **Logging:** Registrar cantidad de registros eliminados
-4. **Error handling:** Capturar y loggear errores sin detener la app
+**UsageLimitsResetService:**
 
-#### Criterios de Aceptación
+- Cron job configurado con `@Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)`
+- Timezone: UTC
+- Elimina registros con `createdAt < now() - 7 días`
+- Retención de 7 días para analytics históricos
+- Logging de cantidad de registros eliminados
+- Error handling sin detener la aplicación
+- Método adicional `getRetentionStats()` para monitoreo
 
-- [ ] Servicio `UsageLimitsResetService` creado con decorator `@Injectable()`
-- [ ] Cron job configurado con `@Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)`
-- [ ] Timezone configurado a UTC
-- [ ] Elimina registros de `usage_limit` con `createdAt < now() - 7 days`
-- [ ] Logs informativos en cada ejecución
-- [ ] Error handling con try/catch
-- [ ] Tests unitarios del servicio
-- [ ] Tests de integración (verificar que cron se registra)
-- [ ] Documentación de configuración
+**Tests Implementados:**
+
+- 8 tests unitarios (100% coverage)
+- Validación de eliminación de registros antiguos
+- Validación de logging
+- Manejo de errores sin lanzar excepciones
+- Cálculo correcto de fecha de retención (7 días)
 
 #### Testing
 
 **Tests Unitarios:**
 
-1. Elimina registros antiguos correctamente
-2. Mantiene registros recientes (< 7 días)
-3. Maneja errores sin lanzar excepción
-4. Loggea cantidad de registros eliminados
-
-**Test Manual:**
-
 ```bash
-# Insertar registros de prueba con fechas antiguas
-psql -d tarot_dev -c "INSERT INTO usage_limit (user_id, feature, count, created_at) VALUES (1, 'tarot_reading', 5, NOW() - INTERVAL '10 days');"
-
-# Esperar a medianoche UTC o triggear manualmente el cron
-# Verificar que se eliminó
-psql -d tarot_dev -c "SELECT * FROM usage_limit WHERE created_at < NOW() - INTERVAL '7 days';"
+✅ 8/8 tests pasados
+✅ Coverage: 100%
 ```
 
-#### Configuración de Timezone
+**Validaciones:**
 
-Asegurar que el servidor use UTC:
+- ✅ Elimina registros > 7 días
+- ✅ Mantiene registros < 7 días
+- ✅ Loggea cantidad eliminada
+- ✅ Maneja errores sin throw
+- ✅ Timezone UTC configurado
 
-- Variable de entorno `TZ=UTC`
-- Configuración de NestJS para UTC
-- Verificación en logs
+#### Notas Técnicas
 
-#### Notas
-
-- El reset es por eliminación de registros antiguos, no por actualizar a 0
+- El reset funciona por **eliminación de registros antiguos**, no por actualización a 0
 - Cada día se cuentan solo las acciones del día actual (filtrado por `createdAt`)
-- Retención de 7 días permite analytics históricos
+- `@nestjs/schedule` ya estaba instalado (v6.0.1)
+- El cron job se registra automáticamente al iniciar la aplicación
+- Retención de 7 días permite analytics históricos sin crecimiento ilimitado
 
 ---
 

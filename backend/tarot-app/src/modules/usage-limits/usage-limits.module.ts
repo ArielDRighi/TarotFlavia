@@ -1,6 +1,7 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsageLimitsService } from './usage-limits.service';
+import { UsageLimitsResetService } from './services/usage-limits-reset.service';
 import { UsageLimit } from './entities/usage-limit.entity';
 import { UsersModule } from '../users/users.module';
 import { PlanConfigModule } from '../plan-config/plan-config.module';
@@ -15,11 +16,13 @@ import { IncrementUsageInterceptor } from './interceptors/increment-usage.interc
   ],
   providers: [
     UsageLimitsService,
+    UsageLimitsResetService,
     CheckUsageLimitGuard,
     IncrementUsageInterceptor,
   ],
   exports: [
     UsageLimitsService,
+    UsageLimitsResetService,
     CheckUsageLimitGuard,
     IncrementUsageInterceptor,
   ],
