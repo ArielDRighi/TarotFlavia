@@ -315,6 +315,60 @@ describe('MVP Complete Flow E2E', () => {
       expect(body.message).toContain('premium');
     });
 
+    it('✅ Usuario ANONYMOUS rechazado con pregunta custom (TASK-009)', async () => {
+      // Crear usuario ANONYMOUS temporal (no registrado)
+      const anonymousEmail = `anonymous-test-${testTimestamp}-${Math.random()}@example.com`;
+
+      await request(app.getHttpServer())
+        .post('/api/v1/auth/register')
+        .send({
+          email: anonymousEmail,
+          password: 'Test123456!',
+          name: 'Anonymous Test User',
+        })
+        .expect(201);
+
+      // Cambiar el plan a ANONYMOUS directamente en BD
+      const ds = dbHelper.getDataSource();
+      await ds.query('UPDATE "user" SET plan = $1 WHERE email = $2', [
+        UserPlan.ANONYMOUS,
+        anonymousEmail,
+      ]);
+
+      // Login para obtener token
+      const loginResponse = await request(app.getHttpServer())
+        .post('/api/v1/auth/login')
+        .send({
+          email: anonymousEmail,
+          password: 'Test123456!',
+        })
+        .expect(200);
+
+      const anonymousToken = loginResponse.body.access_token;
+
+      // Intentar crear lectura con custom question - debe ser rechazado
+      const response = await request(app.getHttpServer())
+        .post('/api/v1/readings')
+        .set('Authorization', `Bearer ${anonymousToken}`)
+        .send({
+          customQuestion: '¿Mi pregunta personalizada?',
+          deckId: deckId,
+          spreadId: spreadId,
+          cardIds: cardIds,
+          cardPositions: [
+            { cardId: cardIds[0], position: 'past', isReversed: false },
+            { cardId: cardIds[1], position: 'present', isReversed: false },
+            { cardId: cardIds[2], position: 'future', isReversed: false },
+          ],
+          generateInterpretation: false,
+        })
+        .expect(403);
+
+      const body = response.body as ErrorResponse;
+      expect(body.message).toContain('premium');
+      expect(body.message).toContain('preguntas personalizadas');
+    });
+
     it('✅ Usuario FREE bloqueado después de alcanzar límite diario', async () => {
       // Esperar para evitar rate limiting del throttler global
       await new Promise((resolve) => setTimeout(resolve, 2000));

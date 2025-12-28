@@ -7,29 +7,51 @@ import { e2eConnectionSource } from '../../src/config/typeorm-e2e.config';
  */
 export class E2EDatabaseHelper {
   private dataSource: DataSource;
+  private static initializationPromise: Promise<void> | null = null;
 
   constructor() {
     this.dataSource = e2eConnectionSource;
   }
 
   /**
-   * Inicializa la conexión a la base de datos E2E
+   * Inicializa la conexión a la base de datos E2E (thread-safe)
+   * Evita múltiples inicializaciones simultáneas usando un lock pattern
    */
   async initialize(): Promise<void> {
-    if (!this.dataSource.isInitialized) {
-      await this.dataSource.initialize();
-      console.log('[E2E Database Helper] Conexión E2E inicializada');
+    // Si ya está inicializado, retornar inmediatamente
+    if (this.dataSource.isInitialized) {
+      return;
     }
+
+    // Si hay una inicialización en progreso, esperar a que termine
+    if (E2EDatabaseHelper.initializationPromise) {
+      await E2EDatabaseHelper.initializationPromise;
+      return;
+    }
+
+    // Crear promesa de inicialización
+    E2EDatabaseHelper.initializationPromise = (async () => {
+      try {
+        if (!this.dataSource.isInitialized) {
+          await this.dataSource.initialize();
+          console.log('[E2E Database Helper] Conexión E2E inicializada');
+        }
+      } finally {
+        E2EDatabaseHelper.initializationPromise = null;
+      }
+    })();
+
+    await E2EDatabaseHelper.initializationPromise;
   }
 
   /**
    * Cierra la conexión a la base de datos E2E
+   * NOTA: En Jest con maxWorkers:1, NO debemos cerrar la conexión entre tests
+   * solo al final de toda la suite (en globalTeardown)
    */
   async close(): Promise<void> {
-    if (this.dataSource.isInitialized) {
-      await this.dataSource.destroy();
-      console.log('[E2E Database Helper] Conexión E2E cerrada');
-    }
+    // NO hacer nada aquí - la conexión se cierra en globalTeardown
+    // Esto evita conflictos cuando múltiples tests intentan usar/cerrar la misma conexión
   }
 
   /**

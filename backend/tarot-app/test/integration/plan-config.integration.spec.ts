@@ -206,7 +206,13 @@ describe('Plan Configuration Integration Tests', () => {
 /**
  * Helper para seed de planes iniciales
  * Updated to match TASK-003 MVP cost optimization strategy values
- * Now UPDATES existing plans to ensure data consistency
+ *
+ * IMPORTANT: This function uses UPDATE-or-INSERT (UPSERT) strategy intentionally:
+ * - On every test run, existing plans are UPDATED to match current strategy values
+ * - This ensures data consistency across test runs and prevents stale data issues
+ * - Tests should NOT depend on mutations between each other (test isolation principle)
+ * - This approach guarantees that all tests start with the same baseline data
+ * - If a test needs to modify plan configs, it should restore them in afterEach
  */
 async function seedPlans(dataSource: DataSource) {
   const planRepository = dataSource.getRepository(Plan);

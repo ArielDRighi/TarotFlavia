@@ -41,31 +41,41 @@ describe('RequiresPremiumForCustomQuestionGuard', () => {
   describe('cuando HAY customQuestion en el body', () => {
     it('debe bloquear usuario ANONYMOUS con 403', () => {
       const mockContext = createMockContext({
-        user: { userId: 1, plan: UserPlan.ANONYMOUS },
+        user: { userId: 1, plan: 'anonymous' }, // JWT devuelve strings
         body: { customQuestion: '¿Qué me depara el futuro?' },
       });
 
-      expect(() => guard.canActivate(mockContext)).toThrow(ForbiddenException);
-      expect(() => guard.canActivate(mockContext)).toThrow(
-        'Las preguntas personalizadas requieren un plan premium. Por favor, elige una pregunta predefinida o actualiza tu plan.',
-      );
+      try {
+        guard.canActivate(mockContext);
+        fail('Expected ForbiddenException to be thrown');
+      } catch (error) {
+        expect(error).toBeInstanceOf(ForbiddenException);
+        expect(error.message).toBe(
+          'Las preguntas personalizadas requieren un plan premium. Por favor, elige una pregunta predefinida o actualiza tu plan.',
+        );
+      }
     });
 
     it('debe bloquear usuario FREE con 403', () => {
       const mockContext = createMockContext({
-        user: { userId: 1, plan: UserPlan.FREE },
+        user: { userId: 1, plan: 'free' }, // JWT devuelve strings
         body: { customQuestion: '¿Qué me depara el futuro?' },
       });
 
-      expect(() => guard.canActivate(mockContext)).toThrow(ForbiddenException);
-      expect(() => guard.canActivate(mockContext)).toThrow(
-        'Las preguntas personalizadas requieren un plan premium. Por favor, elige una pregunta predefinida o actualiza tu plan.',
-      );
+      try {
+        guard.canActivate(mockContext);
+        fail('Expected ForbiddenException to be thrown');
+      } catch (error) {
+        expect(error).toBeInstanceOf(ForbiddenException);
+        expect(error.message).toBe(
+          'Las preguntas personalizadas requieren un plan premium. Por favor, elige una pregunta predefinida o actualiza tu plan.',
+        );
+      }
     });
 
     it('debe permitir usuario PREMIUM', () => {
       const mockContext = createMockContext({
-        user: { userId: 1, plan: UserPlan.PREMIUM },
+        user: { userId: 1, plan: 'premium' }, // JWT devuelve strings
         body: { customQuestion: '¿Qué me depara el futuro?' },
       });
 
@@ -76,7 +86,7 @@ describe('RequiresPremiumForCustomQuestionGuard', () => {
 
 // Helper para crear mock del ExecutionContext
 function createMockContext(request: {
-  user: { userId: number; plan: UserPlan };
+  user: { userId: number; plan: string }; // JWT devuelve string
   body: { customQuestion?: string; predefinedQuestionId?: number };
 }): ExecutionContext {
   return {

@@ -4,12 +4,11 @@ import {
   ExecutionContext,
   ForbiddenException,
 } from '@nestjs/common';
-import { UserPlan } from '../../../users/entities/user.entity';
 
 interface RequestWithUser {
   user: {
     userId: number;
-    plan: UserPlan;
+    plan: string; // JWT devuelve string ('premium', 'free', 'anonymous')
   };
   body: {
     customQuestion?: string;
@@ -33,7 +32,8 @@ export class RequiresPremiumForCustomQuestionGuard implements CanActivate {
     }
 
     // Si hay pregunta personalizada, solo permitir a usuarios premium
-    if (user.plan !== UserPlan.PREMIUM) {
+    // NOTA: Comparar con string porque JWT serializa enums como strings
+    if (user.plan !== 'premium') {
       throw new ForbiddenException(
         'Las preguntas personalizadas requieren un plan premium. Por favor, elige una pregunta predefinida o actualiza tu plan.',
       );
