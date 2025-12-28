@@ -45,14 +45,19 @@ export class UsageLimitsService {
       return true;
     }
 
+    // Get start of today in UTC (00:00:00 UTC)
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    today.setUTCHours(0, 0, 0, 0);
+
+    // Convert to 'YYYY-MM-DD' string for PostgreSQL date type comparison
+    // TypeORM accepts string for PostgreSQL DATE columns
+    const dateString = today.toISOString().split('T')[0];
 
     const usageRecord = await this.usageLimitRepository.findOne({
       where: {
         userId,
         feature,
-        date: today,
+        date: dateString,
       },
     });
 
@@ -64,8 +69,12 @@ export class UsageLimitsService {
     userId: number,
     feature: UsageFeature,
   ): Promise<UsageLimit> {
+    // Get start of today in UTC (00:00:00 UTC)
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    today.setUTCHours(0, 0, 0, 0);
+
+    // Convert to 'YYYY-MM-DD' string for PostgreSQL date type comparison
+    const dateString = today.toISOString().split('T')[0];
 
     // First, try to create a new record (if it doesn't exist)
     // This leverages the unique constraint on (userId, feature, date)
@@ -77,7 +86,7 @@ export class UsageLimitsService {
         .values({
           userId,
           feature,
-          date: today,
+          date: dateString,
           count: 0, // Start at 0, will be incremented below
         })
         .orIgnore() // If record exists, do nothing
@@ -93,7 +102,7 @@ export class UsageLimitsService {
       .set({ count: () => '"count" + 1' })
       .where('userId = :userId', { userId })
       .andWhere('feature = :feature', { feature })
-      .andWhere('date = :date', { date: today })
+      .andWhere('date = :date', { date: dateString })
       .execute();
 
     // Return the updated record
@@ -101,7 +110,7 @@ export class UsageLimitsService {
       where: {
         userId,
         feature,
-        date: today,
+        date: dateString,
       },
     });
 
@@ -141,14 +150,18 @@ export class UsageLimitsService {
       return -1;
     }
 
+    // Get start of today in UTC (00:00:00 UTC)
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    today.setUTCHours(0, 0, 0, 0);
+
+    // Convert to 'YYYY-MM-DD' string for PostgreSQL date type comparison
+    const dateString = today.toISOString().split('T')[0];
 
     const usageRecord = await this.usageLimitRepository.findOne({
       where: {
         userId,
         feature,
-        date: today,
+        date: dateString,
       },
     });
 
@@ -157,14 +170,18 @@ export class UsageLimitsService {
   }
 
   async cleanOldRecords(): Promise<number> {
+    // Get start of cutoff date in UTC (00:00:00 UTC)
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - USAGE_RETENTION_DAYS);
-    cutoffDate.setHours(0, 0, 0, 0);
+    cutoffDate.setUTCHours(0, 0, 0, 0);
+
+    // Convert to 'YYYY-MM-DD' string for PostgreSQL date type comparison
+    const cutoffDateString = cutoffDate.toISOString().split('T')[0];
 
     const result = await this.usageLimitRepository
       .createQueryBuilder()
       .delete()
-      .where('date < :cutoffDate', { cutoffDate })
+      .where('date < :cutoffDate', { cutoffDate: cutoffDateString })
       .execute();
 
     return result.affected || 0;

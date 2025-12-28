@@ -38,10 +38,13 @@ export class UsageLimitsResetService {
     try {
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - USAGE_RETENTION_DAYS);
-      cutoffDate.setHours(0, 0, 0, 0);
+      cutoffDate.setUTCHours(0, 0, 0, 0);
+
+      // Convert to 'YYYY-MM-DD' string for PostgreSQL date type comparison
+      const cutoffDateString = cutoffDate.toISOString().split('T')[0];
 
       const deleteResult = await this.usageLimitRepository.delete({
-        date: LessThan(cutoffDate),
+        date: LessThan(cutoffDateString),
       });
 
       const deletedCount = deleteResult.affected || 0;
@@ -69,11 +72,14 @@ export class UsageLimitsResetService {
   }> {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - USAGE_RETENTION_DAYS);
-    cutoffDate.setHours(0, 0, 0, 0);
+    cutoffDate.setUTCHours(0, 0, 0, 0);
+
+    // Convert to 'YYYY-MM-DD' string for PostgreSQL date type comparison
+    const cutoffDateString = cutoffDate.toISOString().split('T')[0];
 
     const count = await this.usageLimitRepository.count({
       where: {
-        date: LessThan(cutoffDate),
+        date: LessThan(cutoffDateString),
       },
     });
 

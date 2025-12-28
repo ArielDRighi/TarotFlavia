@@ -14,6 +14,7 @@ import { Tarotista } from '../../src/modules/tarotistas/entities/tarotista.entit
 import { TarotDeck } from '../../src/modules/tarot/decks/entities/tarot-deck.entity';
 import { TarotCard } from '../../src/modules/tarot/cards/entities/tarot-card.entity';
 import { TarotSpread } from '../../src/modules/tarot/spreads/entities/tarot-spread.entity';
+import { Plan } from '../../src/modules/plan-config/entities/plan.entity';
 
 // Helpers
 import { setupDefaultTarotista } from '../helpers/setup-default-tarotista';
@@ -103,6 +104,11 @@ describe('UsageLimits + Readings Integration Tests', () => {
     userRepository = dataSource.getRepository(User);
     usageLimitRepository = dataSource.getRepository(UsageLimit);
 
+    // Fix: Update PREMIUM plan to have readingsLimit = 3 instead of -1
+    // This is needed because the seeder is idempotent and won't update existing plans
+    const planRepo = dataSource.getRepository(Plan);
+    await planRepo.update({ planType: UserPlan.PREMIUM }, { readingsLimit: 3 });
+
     // Crear tarotista Flavia por defecto si no existe
     await setupDefaultTarotista(dataSource, usersService);
   });
@@ -126,6 +132,9 @@ describe('UsageLimits + Readings Integration Tests', () => {
     testUser = (await userRepository.findOne({
       where: { id: userWithoutPassword.id },
     }))!;
+
+    // Limpiar registros de uso previos para este usuario
+    await usageLimitRepository.delete({ userId: testUser.id });
 
     // Cambiar usuario a PREMIUM para permitir customQuestion
     testUser.plan = UserPlan.PREMIUM;
@@ -465,18 +474,42 @@ describe('UsageLimits + Readings Integration Tests', () => {
           customQuestion: `Premium test question ${i + 1} - ${Date.now()} - ${Math.random()}`,
           generateInterpretation: true,
         };
-        await request(app.getHttpServer())
+        const response = await request(app.getHttpServer())
           .post('/readings')
           .set('Authorization', `Bearer ${authToken}`)
-          .send(createReadingPayload)
-          .expect(201);
+          .send(createReadingPayload);
+
+        if (response.status !== 201) {
+          console.error(
+            `Reading ${i + 1} failed with status ${response.status}:`,
+            response.body,
+          );
+        }
+        expect(response.status).toBe(201); // Verify each reading was created successfully
       }
+
+      // Wait a bit for interceptor to finish incrementing
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       // ASSERT: Todas deben pasar sin error
       const userAfter = await userRepository.findOne({
         where: { id: testUser.id },
       });
       expect(userAfter!.aiRequestsUsedMonth).toBe(3);
+
+      // Verify usage counter is at 3
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0);
+      const dateString = today.toISOString().split('T')[0];
+      const usageRecord = await usageLimitRepository.findOne({
+        where: {
+          userId: testUser.id,
+          feature: UsageFeature.TAROT_READING,
+          date: dateString,
+        },
+      });
+      expect(usageRecord).toBeDefined();
+      expect(usageRecord!.count).toBe(3);
 
       // TASK-003: Verify that 4th reading is blocked
       const createReadingPayload = {

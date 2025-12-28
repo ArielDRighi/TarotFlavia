@@ -8,7 +8,10 @@ import { USAGE_LIMIT_FEATURE_KEY } from '../decorators/check-usage-limit.decorat
 
 describe('CheckUsageLimitGuard', () => {
   let guard: CheckUsageLimitGuard;
-  let usageLimitsService: { checkLimit: jest.Mock };
+  let usageLimitsService: {
+    checkLimit: jest.Mock;
+    getRemainingUsage: jest.Mock;
+  };
   let reflector: { getAllAndOverride: jest.Mock };
 
   const mockExecutionContext = (userId: number): ExecutionContext => {
@@ -27,6 +30,7 @@ describe('CheckUsageLimitGuard', () => {
 
   beforeEach(async () => {
     const mockCheckLimit = jest.fn();
+    const mockGetRemainingUsage = jest.fn();
     const mockGetAllAndOverride = jest.fn();
 
     const module: TestingModule = await Test.createTestingModule({
@@ -36,6 +40,7 @@ describe('CheckUsageLimitGuard', () => {
           provide: UsageLimitsService,
           useValue: {
             checkLimit: mockCheckLimit,
+            getRemainingUsage: mockGetRemainingUsage,
           },
         },
         {
@@ -79,12 +84,13 @@ describe('CheckUsageLimitGuard', () => {
       const context = mockExecutionContext(1);
       reflector.getAllAndOverride.mockReturnValue(UsageFeature.TAROT_READING);
       usageLimitsService.checkLimit.mockResolvedValue(false);
+      usageLimitsService.getRemainingUsage.mockResolvedValue(0);
 
       await expect(guard.canActivate(context)).rejects.toThrow(
         ForbiddenException,
       );
       await expect(guard.canActivate(context)).rejects.toThrow(
-        'Has alcanzado el límite diario para esta función. Por favor, actualiza tu plan o intenta mañana.',
+        'Has alcanzado tu límite diario para esta función. Tu cuota se restablecerá a medianoche (00:00 UTC). Intenta nuevamente mañana o actualiza tu plan para obtener más acceso.',
       );
     });
 
