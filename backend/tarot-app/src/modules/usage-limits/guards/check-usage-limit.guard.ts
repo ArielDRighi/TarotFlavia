@@ -43,7 +43,7 @@ export class CheckUsageLimitGuard implements CanActivate {
 
     if (!canUse) {
       throw new ForbiddenException(
-        'Has alcanzado el límite diario para esta función. Por favor, actualiza tu plan o intenta mañana.',
+        `Has alcanzado tu límite diario para esta función. Tu cuota se restablecerá a medianoche (00:00 UTC). Intenta nuevamente mañana o actualiza tu plan para obtener más acceso.`,
       );
     }
 

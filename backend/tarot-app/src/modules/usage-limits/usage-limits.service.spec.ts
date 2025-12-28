@@ -433,4 +433,243 @@ describe('UsageLimitsService', () => {
       expect(mockQueryBuilder.execute).toHaveBeenCalled();
     });
   });
+
+  describe('Daily Limit Validation (TASK-008)', () => {
+    describe("Count only today's actions", () => {
+      it('should count only actions from today, not yesterday', async () => {
+        const freeUser: Partial<User> = {
+          id: 1,
+          plan: UserPlan.FREE,
+        };
+
+        // Mock user found
+        mockUsersService.findById.mockResolvedValue(freeUser);
+        mockPlanConfigService.getReadingsLimit.mockResolvedValue(2); // FREE plan limit
+
+        // Mock usage record showing 1 reading today
+        mockUsageLimitRepository.findOne.mockResolvedValue({
+          count: 1, // Only 1 reading today (yesterday's readings don't count)
+        });
+
+        const result = await service.checkLimit(1, UsageFeature.TAROT_READING);
+
+        expect(result).toBe(true); // Should allow because only 1 < 2
+
+        // Verify that findOne was called with today's date as string (YYYY-MM-DD format for PostgreSQL DATE)
+        const callArgs = mockUsageLimitRepository.findOne.mock.calls[0][0];
+        expect(callArgs.where.userId).toBe(1);
+        expect(callArgs.where.feature).toBe(UsageFeature.TAROT_READING);
+        expect(typeof callArgs.where.date).toBe('string');
+
+        // Verify date is in 'YYYY-MM-DD' format
+        const dateArg = callArgs.where.date;
+        expect(dateArg).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+
+        // Verify it's today's date
+        const today = new Date();
+        today.setUTCHours(0, 0, 0, 0);
+        const expectedDateString = today.toISOString().split('T')[0];
+        expect(dateArg).toBe(expectedDateString);
+      });
+
+      it("should return remaining usage based only on today's count", async () => {
+        const freeUser: Partial<User> = {
+          id: 1,
+          plan: UserPlan.FREE,
+        };
+
+        mockUsersService.findById.mockResolvedValue(freeUser);
+        mockPlanConfigService.getReadingsLimit.mockResolvedValue(2);
+
+        // User has 1 reading today (yesterday's 5 readings don't count)
+        mockUsageLimitRepository.findOne.mockResolvedValue({
+          count: 1,
+        });
+
+        const result = await service.getRemainingUsage(
+          1,
+          UsageFeature.TAROT_READING,
+        );
+
+        expect(result).toBe(1); // 2 - 1 = 1 remaining
+      });
+    });
+
+    describe('Implicit daily reset', () => {
+      it('should allow new actions after midnight UTC (implicit reset)', async () => {
+        const freeUser: Partial<User> = {
+          id: 1,
+          plan: UserPlan.FREE,
+        };
+
+        mockUsersService.findById.mockResolvedValue(freeUser);
+        mockPlanConfigService.getReadingsLimit.mockResolvedValue(2);
+
+        // No record for today (yesterday's record doesn't matter)
+        mockUsageLimitRepository.findOne.mockResolvedValue(null);
+
+        const result = await service.checkLimit(1, UsageFeature.TAROT_READING);
+
+        expect(result).toBe(true); // Should allow because count is 0 today
+      });
+
+      it('should return full limit when no record exists for today', async () => {
+        const freeUser: Partial<User> = {
+          id: 1,
+          plan: UserPlan.FREE,
+        };
+
+        mockUsersService.findById.mockResolvedValue(freeUser);
+        mockPlanConfigService.getReadingsLimit.mockResolvedValue(2);
+        mockUsageLimitRepository.findOne.mockResolvedValue(null);
+
+        const result = await service.getRemainingUsage(
+          1,
+          UsageFeature.TAROT_READING,
+        );
+
+        expect(result).toBe(2); // Full limit available
+      });
+    });
+
+    describe('Separate counters per feature', () => {
+      it('should not sum different features together', async () => {
+        const freeUser: Partial<User> = {
+          id: 1,
+          plan: UserPlan.FREE,
+        };
+
+        mockUsersService.findById.mockResolvedValue(freeUser);
+        mockPlanConfigService.getReadingsLimit.mockResolvedValue(2);
+
+        // User has 2 TAROT_READING today (at limit)
+        mockUsageLimitRepository.findOne.mockResolvedValueOnce({
+          count: 2,
+        });
+
+        const readingResult = await service.checkLimit(
+          1,
+          UsageFeature.TAROT_READING,
+        );
+        expect(readingResult).toBe(false); // At limit for readings
+
+        // But ORACLE_QUERY should have separate counter
+        mockUsageLimitRepository.findOne.mockResolvedValueOnce({
+          count: 0, // No oracle queries today
+        });
+
+        const oracleResult = await service.checkLimit(
+          1,
+          UsageFeature.ORACLE_QUERY,
+        );
+        expect(oracleResult).toBe(true); // Should allow oracle query
+      });
+    });
+
+    describe('Separate counters per user', () => {
+      it('should not interfere between different users', async () => {
+        const userA: Partial<User> = {
+          id: 1,
+          plan: UserPlan.FREE,
+        };
+        const userB: Partial<User> = {
+          id: 2,
+          plan: UserPlan.FREE,
+        };
+
+        // User A has 2 readings (at limit)
+        mockUsersService.findById.mockResolvedValueOnce(userA);
+        mockPlanConfigService.getReadingsLimit.mockResolvedValueOnce(2);
+        mockUsageLimitRepository.findOne.mockResolvedValueOnce({
+          count: 2,
+        });
+
+        const resultA = await service.checkLimit(1, UsageFeature.TAROT_READING);
+        expect(resultA).toBe(false);
+
+        // User B has 1 reading (still has quota)
+        mockUsersService.findById.mockResolvedValueOnce(userB);
+        mockPlanConfigService.getReadingsLimit.mockResolvedValueOnce(2);
+        mockUsageLimitRepository.findOne.mockResolvedValueOnce({
+          count: 1,
+        });
+
+        const resultB = await service.checkLimit(2, UsageFeature.TAROT_READING);
+        expect(resultB).toBe(true);
+      });
+    });
+
+    describe('UTC date handling', () => {
+      it('should use UTC timezone for date calculations', async () => {
+        const freeUser: Partial<User> = {
+          id: 1,
+          plan: UserPlan.FREE,
+        };
+
+        mockUsersService.findById.mockResolvedValue(freeUser);
+        mockPlanConfigService.getReadingsLimit.mockResolvedValue(2);
+        mockUsageLimitRepository.findOne.mockResolvedValue({ count: 1 });
+
+        await service.checkLimit(1, UsageFeature.TAROT_READING);
+
+        // Verify the date passed to repository is a UTC string in 'YYYY-MM-DD' format
+        const callArgs = mockUsageLimitRepository.findOne.mock.calls[0][0];
+        const dateArg = callArgs.where.date;
+
+        // Should be a string in 'YYYY-MM-DD' format
+        expect(typeof dateArg).toBe('string');
+        expect(dateArg).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+
+        // Should match today's date in UTC
+        const today = new Date();
+        today.setUTCHours(0, 0, 0, 0);
+        const expectedDateString = today.toISOString().split('T')[0];
+        expect(dateArg).toBe(expectedDateString);
+      });
+
+      it("should increment usage for today's date in UTC", async () => {
+        const mockInsertQueryBuilder = {
+          insert: jest.fn().mockReturnThis(),
+          into: jest.fn().mockReturnThis(),
+          values: jest.fn().mockReturnThis(),
+          orIgnore: jest.fn().mockReturnThis(),
+          execute: jest.fn().mockResolvedValue({}),
+        };
+
+        const mockUpdateQueryBuilder = {
+          update: jest.fn().mockReturnThis(),
+          set: jest.fn().mockReturnThis(),
+          where: jest.fn().mockReturnThis(),
+          andWhere: jest.fn().mockReturnThis(),
+          execute: jest.fn().mockResolvedValue({ affected: 1 }),
+        };
+
+        mockUsageLimitRepository.createQueryBuilder
+          .mockReturnValueOnce(mockInsertQueryBuilder)
+          .mockReturnValueOnce(mockUpdateQueryBuilder);
+
+        mockUsageLimitRepository.findOne.mockResolvedValue({
+          id: 1,
+          userId: 1,
+          feature: UsageFeature.TAROT_READING,
+          count: 1,
+          date: new Date(),
+          createdAt: new Date(),
+        });
+
+        await service.incrementUsage(1, UsageFeature.TAROT_READING);
+
+        // Verify insert was called with UTC date as string in 'YYYY-MM-DD' format
+        const insertValues = mockInsertQueryBuilder.values.mock.calls[0][0];
+        expect(typeof insertValues.date).toBe('string');
+        expect(insertValues.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+
+        // Verify it's today's date in UTC
+        const today = new Date();
+        today.setUTCHours(0, 0, 0, 0);
+        const expectedDateString = today.toISOString().split('T')[0];
+        expect(insertValues.date).toBe(expectedDateString);
+      });
+    });
+  });
 });

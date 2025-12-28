@@ -66,7 +66,7 @@ export class UsageLimit {
     description: 'Fecha del uso (solo fecha, sin hora)',
   })
   @Column({ type: 'date' })
-  date: Date;
+  date: string | Date;
 
   @ApiProperty({
     example: '2023-10-30T12:00:00Z',
