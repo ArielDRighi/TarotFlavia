@@ -205,6 +205,14 @@ describe('Plan Configuration Integration Tests', () => {
 
 /**
  * Helper para seed de planes iniciales
+ * Updated to match TASK-003 MVP cost optimization strategy values
+ *
+ * IMPORTANT: This function uses UPDATE-or-INSERT (UPSERT) strategy intentionally:
+ * - On every test run, existing plans are UPDATED to match current strategy values
+ * - This ensures data consistency across test runs and prevents stale data issues
+ * - Tests should NOT depend on mutations between each other (test isolation principle)
+ * - This approach guarantees that all tests start with the same baseline data
+ * - If a test needs to modify plan configs, it should restore them in afterEach
  */
 async function seedPlans(dataSource: DataSource) {
   const planRepository = dataSource.getRepository(Plan);
@@ -215,8 +223,8 @@ async function seedPlans(dataSource: DataSource) {
       name: 'Plan Anónimo',
       description: 'Plan básico sin registro',
       price: 0,
-      readingsLimit: 3,
-      aiQuotaMonthly: 0,
+      readingsLimit: 1, // Updated TASK-003: 1 daily card only
+      aiQuotaMonthly: 0, // No AI for anonymous
       allowCustomQuestions: false,
       allowSharing: false,
       allowAdvancedSpreads: false,
@@ -227,11 +235,11 @@ async function seedPlans(dataSource: DataSource) {
       name: 'Plan Gratuito',
       description: 'Plan gratuito con registro',
       price: 0,
-      readingsLimit: 10,
-      aiQuotaMonthly: 100,
-      allowCustomQuestions: false,
+      readingsLimit: 2, // Updated TASK-003: 2 readings (1 daily + 1 spread)
+      aiQuotaMonthly: 0, // Updated TASK-003: No AI for cost optimization
+      allowCustomQuestions: false, // Updated TASK-009: Only PREMIUM allowed
       allowSharing: false,
-      allowAdvancedSpreads: false,
+      allowAdvancedSpreads: false, // Only PREMIUM allowed
       isActive: true,
     },
     {
@@ -239,8 +247,8 @@ async function seedPlans(dataSource: DataSource) {
       name: 'Plan Premium',
       description: 'Plan premium con todas las funciones',
       price: 9.99,
-      readingsLimit: -1,
-      aiQuotaMonthly: -1,
+      readingsLimit: 3, // Updated TASK-003: 3 readings monthly
+      aiQuotaMonthly: 100, // Updated TASK-003: 100 AI requests monthly
       allowCustomQuestions: true,
       allowSharing: true,
       allowAdvancedSpreads: true,
@@ -253,7 +261,11 @@ async function seedPlans(dataSource: DataSource) {
       where: { planType: planData.planType },
     });
 
-    if (!existing) {
+    if (existing) {
+      // UPDATE existing plan to match current strategy
+      await planRepository.update({ planType: planData.planType }, planData);
+    } else {
+      // INSERT new plan
       await planRepository.save(planData);
     }
   }
