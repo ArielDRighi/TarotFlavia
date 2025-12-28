@@ -38,9 +38,10 @@ export class UsageLimitsResetService {
     try {
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - USAGE_RETENTION_DAYS);
+      cutoffDate.setHours(0, 0, 0, 0);
 
       const deleteResult = await this.usageLimitRepository.delete({
-        createdAt: LessThan(cutoffDate),
+        date: LessThan(cutoffDate),
       });
 
       const deletedCount = deleteResult.affected || 0;
@@ -68,10 +69,11 @@ export class UsageLimitsResetService {
   }> {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - USAGE_RETENTION_DAYS);
+    cutoffDate.setHours(0, 0, 0, 0);
 
     const count = await this.usageLimitRepository.count({
       where: {
-        createdAt: LessThan(cutoffDate),
+        date: LessThan(cutoffDate),
       },
     });
 

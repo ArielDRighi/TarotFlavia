@@ -51,8 +51,8 @@ describe('UsageLimitsResetService', () => {
       // Assert
       expect(repository.delete).toHaveBeenCalledTimes(1);
       const callArgs = repository.delete.mock.calls[0][0] as any;
-      expect(callArgs).toHaveProperty('createdAt');
-      expect(callArgs.createdAt).toBeDefined();
+      expect(callArgs).toHaveProperty('date');
+      expect(callArgs.date).toBeDefined();
     });
 
     it('should log the number of deleted records', async () => {
@@ -119,21 +119,24 @@ describe('UsageLimitsResetService', () => {
     it('should use correct date calculation for 7 days retention', async () => {
       // Arrange
       const mockDeleteResult = { affected: 2 };
-
       repository.delete.mockResolvedValue(mockDeleteResult as any);
 
       const now = new Date('2025-12-27T00:00:00Z');
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      jest.spyOn(global, 'Date').mockImplementation(() => now as any);
+      jest.useFakeTimers().setSystemTime(now);
 
-      // Act
-      await service.handleDailyReset();
+      try {
+        // Act
+        await service.handleDailyReset();
 
-      // Assert
-      const expectedDate = new Date(now);
-      expectedDate.setDate(expectedDate.getDate() - 7);
+        // Assert
+        const expectedDate = new Date(now);
+        expectedDate.setDate(expectedDate.getDate() - 7);
+        expectedDate.setHours(0, 0, 0, 0);
 
-      expect(repository.delete).toHaveBeenCalledTimes(1);
+        expect(repository.delete).toHaveBeenCalledTimes(1);
+      } finally {
+        jest.useRealTimers();
+      }
     });
   });
 
