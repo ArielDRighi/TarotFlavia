@@ -248,12 +248,16 @@ describe('UsageLimitsService', () => {
         .mockReturnValueOnce(mockInsertQueryBuilder)
         .mockReturnValueOnce(mockUpdateQueryBuilder);
 
+      const todayMock = new Date();
+      todayMock.setUTCHours(0, 0, 0, 0);
+      const todayDateString = todayMock.toISOString().split('T')[0];
+
       const updatedRecord = {
         id: 1,
         userId: 1,
         feature: UsageFeature.TAROT_READING,
         count: 3,
-        date: new Date(),
+        date: todayDateString,
         createdAt: new Date(),
       };
 
@@ -291,12 +295,16 @@ describe('UsageLimitsService', () => {
         .mockReturnValueOnce(mockInsertQueryBuilder)
         .mockReturnValueOnce(mockUpdateQueryBuilder);
 
+      const todayMock = new Date();
+      todayMock.setUTCHours(0, 0, 0, 0);
+      const todayDateString = todayMock.toISOString().split('T')[0];
+
       const newRecord = {
         id: 1,
         userId: 1,
         feature: UsageFeature.TAROT_READING,
         count: 1,
-        date: new Date(),
+        date: todayDateString,
         createdAt: new Date(),
       };
 
@@ -648,12 +656,16 @@ describe('UsageLimitsService', () => {
           .mockReturnValueOnce(mockInsertQueryBuilder)
           .mockReturnValueOnce(mockUpdateQueryBuilder);
 
+        const todayMock = new Date();
+        todayMock.setUTCHours(0, 0, 0, 0);
+        const todayDateString = todayMock.toISOString().split('T')[0];
+
         mockUsageLimitRepository.findOne.mockResolvedValue({
           id: 1,
           userId: 1,
           feature: UsageFeature.TAROT_READING,
           count: 1,
-          date: new Date(),
+          date: todayDateString,
           createdAt: new Date(),
         });
 

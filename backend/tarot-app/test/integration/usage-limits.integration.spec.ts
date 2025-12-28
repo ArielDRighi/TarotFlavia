@@ -14,6 +14,7 @@ import { Tarotista } from '../../src/modules/tarotistas/entities/tarotista.entit
 import { TarotDeck } from '../../src/modules/tarot/decks/entities/tarot-deck.entity';
 import { TarotCard } from '../../src/modules/tarot/cards/entities/tarot-card.entity';
 import { TarotSpread } from '../../src/modules/tarot/spreads/entities/tarot-spread.entity';
+import { Plan } from '../../src/modules/plan-config/entities/plan.entity';
 
 // Helpers
 import { setupDefaultTarotista } from '../helpers/setup-default-tarotista';
@@ -105,7 +106,7 @@ describe('UsageLimits + Readings Integration Tests', () => {
 
     // Fix: Update PREMIUM plan to have readingsLimit = 3 instead of -1
     // This is needed because the seeder is idempotent and won't update existing plans
-    const planRepo = dataSource.getRepository('Plan');
+    const planRepo = dataSource.getRepository(Plan);
     await planRepo.update({ planType: UserPlan.PREMIUM }, { readingsLimit: 3 });
 
     // Crear tarotista Flavia por defecto si no existe
