@@ -1,6 +1,8 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ScheduleModule } from '@nestjs/schedule';
 import { UsageLimitsService } from './usage-limits.service';
+import { UsageLimitsResetService } from './services/usage-limits-reset.service';
 import { UsageLimit } from './entities/usage-limit.entity';
 import { UsersModule } from '../users/users.module';
 import { PlanConfigModule } from '../plan-config/plan-config.module';
@@ -10,16 +12,19 @@ import { IncrementUsageInterceptor } from './interceptors/increment-usage.interc
 @Module({
   imports: [
     TypeOrmModule.forFeature([UsageLimit]),
+    ScheduleModule.forRoot(),
     forwardRef(() => UsersModule),
     PlanConfigModule,
   ],
   providers: [
     UsageLimitsService,
+    UsageLimitsResetService,
     CheckUsageLimitGuard,
     IncrementUsageInterceptor,
   ],
   exports: [
     UsageLimitsService,
+    UsageLimitsResetService,
     CheckUsageLimitGuard,
     IncrementUsageInterceptor,
   ],
