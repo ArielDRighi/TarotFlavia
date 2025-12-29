@@ -43,8 +43,10 @@ describe('User Scheduling (e2e)', () => {
     // Reset usage limits to ensure login doesn't fail due to daily limits
     const dataSource = dbHelper.getDataSource();
     try {
-      await dataSource.query('TRUNCATE TABLE usage_limit RESTART IDENTITY CASCADE');
-    } catch (error) {
+      await dataSource.query(
+        'TRUNCATE TABLE usage_limit RESTART IDENTITY CASCADE',
+      );
+    } catch {
       // Ignore if table doesn't exist
     }
 

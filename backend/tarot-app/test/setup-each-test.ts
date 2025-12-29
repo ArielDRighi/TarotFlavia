@@ -12,13 +12,18 @@ beforeEach(async () => {
         'TRUNCATE TABLE usage_limit RESTART IDENTITY CASCADE',
       );
     }
-  } catch (error: any) {
+  } catch (error) {
     // Ignore errors if table doesn't exist or connection is not ready
-    if (
-      !error.message?.includes('does not exist') &&
-      !error.message?.includes('Connection')
-    ) {
-      console.warn('[Setup Each Test] Could not reset usage limits:', error.message);
+    if (error instanceof Error) {
+      if (
+        !error.message.includes('does not exist') &&
+        !error.message.includes('Connection')
+      ) {
+        console.warn(
+          '[Setup Each Test] Could not reset usage limits:',
+          error.message,
+        );
+      }
     }
   }
 });

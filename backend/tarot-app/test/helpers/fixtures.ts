@@ -252,17 +252,21 @@ export const MOCK_REQUEST_DATA = {
  * Helper function to reset usage limits for a user
  * Useful in tests to ensure tests don't hit daily limits
  */
-export async function resetUsageLimits(dataSource: any): Promise<void> {
+export async function resetUsageLimits(dataSource: {
+  query?: (sql: string) => Promise<unknown>;
+}): Promise<void> {
   if (!dataSource || !dataSource.query) {
     console.warn('[resetUsageLimits] DataSource not available, skipping reset');
     return;
   }
 
   try {
-    await dataSource.query('TRUNCATE TABLE usage_limit RESTART IDENTITY CASCADE');
-  } catch (error: any) {
+    await dataSource.query(
+      'TRUNCATE TABLE usage_limit RESTART IDENTITY CASCADE',
+    );
+  } catch (error) {
     // Only log if it's not a "table doesn't exist" error
-    if (!error.message?.includes('does not exist')) {
+    if (error instanceof Error && !error.message.includes('does not exist')) {
       console.error('[resetUsageLimits] Error resetting usage limits:', error);
     }
   }
