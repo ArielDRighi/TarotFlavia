@@ -317,4 +317,115 @@ describe('TarotCards Seeder', () => {
       });
     });
   });
+
+  describe('Content Quality Validation (TASK-011)', () => {
+    it('should have non-empty description for all cards', async () => {
+      jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
+      const saveSpy = jest
+        .spyOn(cardRepository, 'save')
+        .mockImplementation((cards) => Promise.resolve(cards as any));
+
+      await seedTarotCards(cardRepository, deckRepository);
+
+      const savedCards = saveSpy.mock.calls[0][0] as TarotCard[];
+
+      savedCards.forEach((card) => {
+        expect(card.description).toBeDefined();
+        expect(card.description.trim()).not.toBe('');
+        expect(card.description.length).toBeGreaterThan(20);
+      });
+    });
+
+    it('should have non-empty meaningUpright for all cards', async () => {
+      jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
+      const saveSpy = jest
+        .spyOn(cardRepository, 'save')
+        .mockImplementation((cards) => Promise.resolve(cards as any));
+
+      await seedTarotCards(cardRepository, deckRepository);
+
+      const savedCards = saveSpy.mock.calls[0][0] as TarotCard[];
+
+      savedCards.forEach((card) => {
+        expect(card.meaningUpright).toBeDefined();
+        expect(card.meaningUpright.trim()).not.toBe('');
+        expect(card.meaningUpright.length).toBeGreaterThan(30);
+      });
+    });
+
+    it('should have non-empty meaningReversed for all cards', async () => {
+      jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
+      const saveSpy = jest
+        .spyOn(cardRepository, 'save')
+        .mockImplementation((cards) => Promise.resolve(cards as any));
+
+      await seedTarotCards(cardRepository, deckRepository);
+
+      const savedCards = saveSpy.mock.calls[0][0] as TarotCard[];
+
+      savedCards.forEach((card) => {
+        expect(card.meaningReversed).toBeDefined();
+        expect(card.meaningReversed.trim()).not.toBe('');
+        expect(card.meaningReversed.length).toBeGreaterThan(30);
+      });
+    });
+
+    it('should have at least 3 keywords for all cards', async () => {
+      jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
+      const saveSpy = jest
+        .spyOn(cardRepository, 'save')
+        .mockImplementation((cards) => Promise.resolve(cards as any));
+
+      await seedTarotCards(cardRepository, deckRepository);
+
+      const savedCards = saveSpy.mock.calls[0][0] as TarotCard[];
+
+      savedCards.forEach((card) => {
+        expect(card.keywords).toBeDefined();
+        expect(card.keywords.trim()).not.toBe('');
+
+        // Count keywords (comma-separated)
+        const keywordCount = card.keywords.split(',').length;
+        expect(keywordCount).toBeGreaterThanOrEqual(3);
+      });
+    });
+
+    it('should have valid imageUrl for all cards', async () => {
+      jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
+      const saveSpy = jest
+        .spyOn(cardRepository, 'save')
+        .mockImplementation((cards) => Promise.resolve(cards as any));
+
+      await seedTarotCards(cardRepository, deckRepository);
+
+      const savedCards = saveSpy.mock.calls[0][0] as TarotCard[];
+
+      savedCards.forEach((card) => {
+        expect(card.imageUrl).toBeDefined();
+        expect(card.imageUrl.trim()).not.toBe('');
+        expect(card.imageUrl).toMatch(/^https?:\/\/.+/);
+      });
+    });
+
+    it('should have proper Spanish text (no lorem ipsum)', async () => {
+      jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
+      const saveSpy = jest
+        .spyOn(cardRepository, 'save')
+        .mockImplementation((cards) => Promise.resolve(cards as any));
+
+      await seedTarotCards(cardRepository, deckRepository);
+
+      const savedCards = saveSpy.mock.calls[0][0] as TarotCard[];
+
+      savedCards.forEach((card) => {
+        // Check for placeholder text
+        expect(card.description.toLowerCase()).not.toContain('lorem ipsum');
+        expect(card.description.toLowerCase()).not.toContain('todo:');
+        expect(card.description.toLowerCase()).not.toContain('placeholder');
+
+        expect(card.meaningUpright.toLowerCase()).not.toContain('lorem ipsum');
+        expect(card.meaningReversed.toLowerCase()).not.toContain('lorem ipsum');
+      });
+    });
+  });
 });

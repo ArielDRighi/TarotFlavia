@@ -12,6 +12,7 @@ import { ALL_TAROT_CARDS } from './data/tarot-cards.data';
  * - Idempotent: Can be run multiple times without duplicating data
  * - Validates deck existence before seeding
  * - Comprehensive card data with Spanish descriptions
+ * - Content quality validation (TASK-011)
  */
 export async function seedTarotCards(
   cardRepository: Repository<TarotCard>,
@@ -49,8 +50,11 @@ export async function seedTarotCards(
     `📦 Found deck: ${riderWaiteDeck.name} (ID: ${riderWaiteDeck.id})`,
   );
 
-  // Prepare cards data
-  const cardsToSeed = ALL_TAROT_CARDS.map((cardData) => {
+  // Prepare cards data with validation
+  const cardsToSeed = ALL_TAROT_CARDS.map((cardData, index) => {
+    // Content quality validation (TASK-011)
+    validateCardContent(cardData, index);
+
     const card = new TarotCard();
     card.name = cardData.name;
     card.number = cardData.number;
@@ -92,5 +96,93 @@ export async function seedTarotCards(
   console.log('💾 Saving cards to database...');
   await cardRepository.save(cardsToSeed);
 
-  console.log('✅ Successfully seeded 78 tarot cards!');
+  console.log('✅ Successfully seeded 78 tarot cards with complete content!');
+}
+
+/**
+ * Validates that a card has complete content (TASK-011)
+ * Throws error if any required field is missing or incomplete
+ */
+function validateCardContent(
+  cardData: {
+    name: string;
+    description: string;
+    meaningUpright: string;
+    meaningReversed: string;
+    keywords: string;
+    imageUrl: string;
+  },
+  index: number,
+): void {
+  const errors: string[] = [];
+
+  // Validate description
+  if (!cardData.description || cardData.description.trim().length < 20) {
+    errors.push(
+      `Description missing or too short (min 20 chars, got ${cardData.description?.length || 0})`,
+    );
+  }
+
+  // Validate meaningUpright
+  if (!cardData.meaningUpright || cardData.meaningUpright.trim().length < 30) {
+    errors.push(
+      `MeaningUpright missing or too short (min 30 chars, got ${cardData.meaningUpright?.length || 0})`,
+    );
+  }
+
+  // Validate meaningReversed
+  if (
+    !cardData.meaningReversed ||
+    cardData.meaningReversed.trim().length < 30
+  ) {
+    errors.push(
+      `MeaningReversed missing or too short (min 30 chars, got ${cardData.meaningReversed?.length || 0})`,
+    );
+  }
+
+  // Validate keywords (at least 3)
+  if (!cardData.keywords || cardData.keywords.trim() === '') {
+    errors.push('Keywords missing');
+  } else {
+    const keywordCount = cardData.keywords.split(',').length;
+    if (keywordCount < 3) {
+      errors.push(
+        `Keywords insufficient (min 3, got ${keywordCount}): ${cardData.keywords}`,
+      );
+    }
+  }
+
+  // Validate imageUrl
+  if (!cardData.imageUrl || !cardData.imageUrl.match(/^https?:\/\/.+/)) {
+    errors.push(
+      `ImageUrl missing or invalid: ${cardData.imageUrl || 'undefined'}`,
+    );
+  }
+
+  // Check for placeholder text (only in specific problematic patterns)
+  const placeholderPatterns = [
+    /lorem ipsum/i,
+    /todo:/i,
+    /\bplaceholder\b/i,
+    /pendiente de/i, // "pendiente de completar", etc.
+    /\bpendiente\b(?!\s*(de|s))/i, // "pendiente" solo, no "pendientes" o "pendiente de"
+  ];
+  const textToCheck = [
+    cardData.description,
+    cardData.meaningUpright,
+    cardData.meaningReversed,
+  ].join(' ');
+
+  placeholderPatterns.forEach((pattern) => {
+    if (pattern.test(textToCheck)) {
+      errors.push(`Contains placeholder text matching pattern: ${pattern}`);
+    }
+  });
+
+  // If any validation failed, throw error with details
+  if (errors.length > 0) {
+    throw new Error(
+      `Card #${index + 1} "${cardData.name}" has incomplete content:\n${errors.map((e) => `  - ${e}`).join('\n')}`,
+    );
+  }
 }
