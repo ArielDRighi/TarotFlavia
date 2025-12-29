@@ -22,6 +22,13 @@ export class ReadingValidatorService {
     private readonly planConfigService: PlanConfigService,
   ) {}
 
+  /**
+   * Validate that a user exists by their ID.
+   *
+   * @param userId - The user's unique identifier
+   * @returns The user entity if found
+   * @throws NotFoundException if user doesn't exist
+   */
   async validateUser(userId: number): Promise<User> {
     const user = await this.userRepo.findOne({ where: { id: userId } });
 
@@ -32,6 +39,15 @@ export class ReadingValidatorService {
     return user;
   }
 
+  /**
+   * Validate that a user has PREMIUM plan.
+   * Users with ANONYMOUS or FREE plans will be rejected.
+   *
+   * @param userId - The user's unique identifier
+   * @returns The user entity if they have PREMIUM plan
+   * @throws NotFoundException if user doesn't exist
+   * @throws ForbiddenException if user doesn't have PREMIUM plan
+   */
   async validateUserIsPremium(userId: number): Promise<User> {
     const user = await this.validateUser(userId);
 
@@ -44,6 +60,18 @@ export class ReadingValidatorService {
     return user;
   }
 
+  /**
+   * Validate that a user owns a specific reading.
+   * Works for users with any plan (ANONYMOUS, FREE, or PREMIUM).
+   *
+   * @param readingId - The reading's unique identifier
+   * @param userId - The user's unique identifier
+   * @param includeDeleted - Whether to include soft-deleted readings
+   * @returns The reading entity if owned by the user
+   * @throws NotFoundException if reading doesn't exist
+   * @throws ForbiddenException if user doesn't own the reading
+   * @throws BadRequestException if reading data is corrupted
+   */
   async validateReadingOwnership(
     readingId: number,
     userId: number,
@@ -78,18 +106,38 @@ export class ReadingValidatorService {
     return reading;
   }
 
+  /**
+   * Validate that a reading is not soft-deleted.
+   *
+   * @param reading - The reading entity to validate
+   * @throws BadRequestException if reading is deleted
+   */
   validateReadingNotDeleted(reading: TarotReading): void {
     if (reading.deletedAt) {
       throw new BadRequestException('Reading is deleted');
     }
   }
 
+  /**
+   * Validate that a reading is soft-deleted.
+   *
+   * @param reading - The reading entity to validate
+   * @throws BadRequestException if reading is not deleted
+   */
   validateReadingDeleted(reading: TarotReading): void {
     if (!reading.deletedAt) {
       throw new BadRequestException('Reading is not deleted');
     }
   }
 
+  /**
+   * Validate that a reading hasn't exceeded the maximum regeneration count.
+   * Maximum: 3 regenerations per reading (applies to all plans).
+   *
+   * @param reading - The reading entity to validate
+   * @throws HttpException (TOO_MANY_REQUESTS) if maximum regenerations reached
+   * @throws BadRequestException if regenerationCount is invalid/corrupted
+   */
   validateRegenerationCount(reading: TarotReading): void {
     // BUG FIX: Validate that regenerationCount is a valid number
     if (
@@ -112,6 +160,16 @@ export class ReadingValidatorService {
     }
   }
 
+  /**
+   * Validate that the user has not reached their reading limit.
+   * Applies only to FREE and ANONYMOUS plans (PREMIUM has no limit).
+   * The limit is fetched dynamically from the database configuration.
+   *
+   * @param totalReadings - Current count of active readings
+   * @param userPlan - The user's subscription plan (ANONYMOUS, FREE, or PREMIUM)
+   * @throws ForbiddenException if limit is reached
+   * @throws BadRequestException if inputs are invalid
+   */
   async validateFreeUserReadingsLimit(
     totalReadings: number,
     userPlan: UserPlan,

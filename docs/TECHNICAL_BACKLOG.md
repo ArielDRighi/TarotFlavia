@@ -976,55 +976,75 @@ Actualizar `RequiresPremiumForCustomQuestionGuard` para que valide SOLO usuarios
 
 ---
 
-### 📝 TASK-010: Actualizar validaciones en reading-validator.service
+### ✅ TASK-010: Actualizar validaciones en reading-validator.service
 
 **Prioridad:** 🟠 P1 - ALTO (Backend)  
 **Área:** Backend - Services  
 **Estimación:** 1.5 horas  
 **Dependencias:** TASK-001  
 **Feature:** F001, F002  
-**Branch sugerido:** `refactor/reading-validator-plans`
+**Branch:** `refactor/TASK-010-reading-validator-plans`  
+**Estado:** ✅ COMPLETADA (29/12/2024)
 
 #### Descripción
 
 Actualizar `ReadingValidatorService` para eliminar referencias a PROFESSIONAL y asegurar que las validaciones funcionen con los 3 planes correctos (ANONYMOUS, FREE, PREMIUM).
 
-#### Archivos a Modificar
+#### Archivos Modificados
 
-- `backend/tarot-app/src/modules/tarot/readings/application/services/reading-validator.service.ts`
-- `backend/tarot-app/src/modules/tarot/readings/application/services/reading-validator.service.spec.ts`
+- ✅ `backend/tarot-app/src/modules/tarot/readings/application/services/reading-validator.service.ts`
+- ✅ Tests ya cubrían los 3 planes correctamente (no requirió cambios)
 
-#### Cambios Específicos
+#### Cambios Realizados
 
-**Método `validateUserIsPremium`:**
+**JSDoc agregado a todos los métodos:**
 
-- Ya existe y valida correctamente `user.plan !== UserPlan.PREMIUM`
-- Verificar que funcione con nuevos planes
+1. `validateUser()` - Valida existencia de usuario
+2. `validateUserIsPremium()` - Documenta que rechaza ANONYMOUS y FREE
+3. `validateReadingOwnership()` - Funciona para los 3 planes
+4. `validateReadingNotDeleted()` - Valida soft-delete
+5. `validateReadingDeleted()` - Valida que esté eliminado
+6. `validateRegenerationCount()` - Máximo 3 regeneraciones (todos los planes)
+7. `validateFreeUserReadingsLimit()` - Documenta límites para ANONYMOUS, FREE y PREMIUM
 
-**Método `validateFreeUserReadingsLimit`:**
+**Verificaciones:**
 
-- Comentario menciona "PREMIUM, PROFESSIONAL" → actualizar a solo "PREMIUM"
-- Lógica está correcta (usa DB config), solo actualizar comentarios
-
-**Comentarios y documentación:**
-
-- Buscar y eliminar referencias a "professional"
-- Actualizar JSDoc de métodos
+- ✅ No hay referencias a "professional" en el código
+- ✅ Todos los métodos documentados mencionan los 3 planes correctos
+- ✅ Lógica ya era correcta (usa `PlanConfigService` para límites dinámicos)
 
 #### Criterios de Aceptación
 
-- [ ] No hay referencias a "professional" en el archivo
-- [ ] Comentarios actualizados para 3 planes
-- [ ] Método `validateUserIsPremium` funciona con ANONYMOUS, FREE
-- [ ] Tests cubren los 3 planes
-- [ ] No hay regresión en funcionalidad existente
+- ✅ No hay referencias a "professional" en el archivo
+- ✅ Comentarios actualizados para 3 planes
+- ✅ Método `validateUserIsPremium` funciona con ANONYMOUS, FREE
+- ✅ Tests cubren los 3 planes (56 tests pasando)
+- ✅ No hay regresión en funcionalidad existente
 
-#### Tests a Verificar
+#### Tests Ejecutados
 
-1. ANONYMOUS alcanza límite → ForbiddenException
-2. FREE alcanza límite → ForbiddenException
-3. PREMIUM sin límite → pasa
-4. Validación de ownership funciona para todos los planes
+**Tests Unitarios:**
+
+- ✅ 56/56 tests en reading-validator.service.spec.ts pasando
+- ✅ 1985/1985 tests unitarios totales pasando
+- ✅ Lint, format y build exitosos
+
+**Tests de Integración (verificados específicamente):**
+
+- ✅ `test/integration/plan-config.integration.spec.ts` - 14/14 tests pasando
+- ✅ `test/integration/readings-interpretations-ai.integration.spec.ts` - 8/11 tests pasando (3 skipped)
+- ✅ `test/integration/usage-limits.integration.spec.ts` - 3/6 tests pasando (3 skipped)
+
+**Verificación de límites por plan:**
+
+1. ✅ ANONYMOUS alcanza límite → ForbiddenException
+2. ✅ FREE alcanza límite → ForbiddenException
+3. ✅ PREMIUM sin límite → pasa
+4. ✅ Validación de ownership funciona para todos los planes
+
+#### Impacto
+
+✅ **Ningún test e2e o de integración requirió actualización**. Los cambios fueron únicamente documentación (JSDoc) sin modificar la lógica existente que ya funcionaba correctamente con los 3 planes (ANONYMOUS, FREE, PREMIUM).
 
 ---
 
