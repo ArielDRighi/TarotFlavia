@@ -62,6 +62,16 @@ describe('Output Sanitization & Security Headers (e2e) - TASK-048-a', () => {
 
     await app.init();
 
+    // Reset usage limits to ensure login doesn't fail
+    try {
+      const dataSource = (app as any).get('DataSource');
+      if (dataSource && dataSource.query) {
+        await dataSource.query('TRUNCATE TABLE usage_limit RESTART IDENTITY CASCADE');
+      }
+    } catch (error) {
+      // Ignore if table doesn't exist or DataSource not available
+    }
+
     // Get auth token using seeded test user
     const loginResponse = await request(app.getHttpServer())
       .post('/api/v1/auth/login')
@@ -70,6 +80,11 @@ describe('Output Sanitization & Security Headers (e2e) - TASK-048-a', () => {
         password: 'Test123456!',
       })
       .expect(200);
+
+    // Verify token was received
+    expect(loginResponse.body).toHaveProperty('access_token');
+    expect(loginResponse.body.access_token).toBeDefined();
+    expect(typeof loginResponse.body.access_token).toBe('string');
 
     authToken = loginResponse.body.access_token as string;
   });

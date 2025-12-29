@@ -87,7 +87,7 @@ export class UsageLimitsService {
           userId,
           feature,
           date: dateString,
-          count: 0, // Start at 0, will be incremented below
+          count: 1, // Start at 1 since we're incrementing
         })
         .orIgnore() // If record exists, do nothing
         .execute();
@@ -95,7 +95,7 @@ export class UsageLimitsService {
       // Ignore unique constraint violations (record already exists)
     }
 
-    // Now atomically increment the count
+    // Now try to atomically increment the count (if record already existed)
     await this.usageLimitRepository
       .createQueryBuilder()
       .update(UsageLimit)
@@ -103,6 +103,7 @@ export class UsageLimitsService {
       .where('userId = :userId', { userId })
       .andWhere('feature = :feature', { feature })
       .andWhere('date = :date', { date: dateString })
+      .andWhere('count > 0') // Only update if it wasn't just created with count=1
       .execute();
 
     // Return the updated record

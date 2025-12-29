@@ -1,4 +1,10 @@
-import { Injectable, Inject, Logger, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  Logger,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { IReadingRepository } from '../../domain/interfaces/reading-repository.interface';
@@ -9,6 +15,11 @@ import { InterpretationsService } from '../../../interpretations/interpretations
 import { CardsService } from '../../../cards/cards.service';
 import { SpreadsService } from '../../../spreads/spreads.service';
 import { PredefinedQuestionsService } from '../../../../predefined-questions/predefined-questions.service';
+import { AIQuotaService } from '../../../../ai-usage/ai-quota.service';
+import {
+  UsageLimitsService,
+  UsageFeature,
+} from '../../../../usage-limits';
 
 const DEFAULT_SPREAD_ID = 1;
 
@@ -34,6 +45,8 @@ export class RegenerateReadingUseCase {
     private readonly cardsService: CardsService,
     private readonly spreadsService: SpreadsService,
     private readonly predefinedQuestionsService: PredefinedQuestionsService,
+    private readonly aiQuotaService: AIQuotaService,
+    private readonly usageLimitsService: UsageLimitsService,
   ) {}
 
   async execute(readingId: number, userId: number): Promise<TarotReading> {
@@ -48,6 +61,33 @@ export class RegenerateReadingUseCase {
 
     // Verificar límite de regeneraciones
     this.validator.validateRegenerationCount(reading);
+
+    // Verificar cuota mensual de AI
+    const hasAIQuota = await this.aiQuotaService.checkMonthlyQuota(userId);
+    if (!hasAIQuota) {
+      const quotaInfo = await this.aiQuotaService.getRemainingQuota(userId);
+      const resetDate = quotaInfo.resetDate.toLocaleDateString('es-ES', {
+        day: 'numeric',
+        month: 'numeric',
+        year: 'numeric',
+      });
+      throw new ForbiddenException(
+        `Has alcanzado tu límite mensual de ${quotaInfo.quotaLimit} interpretaciones de IA. ` +
+          `Tu cuota se renovará el ${resetDate}. ` +
+          `Actualiza a Premium para interpretaciones ilimitadas.`,
+      );
+    }
+
+    // Verificar límite diario de regeneraciones
+    const hasRegenerationLimit = await this.usageLimitsService.checkLimit(
+      userId,
+      UsageFeature.INTERPRETATION_REGENERATION,
+    );
+    if (!hasRegenerationLimit) {
+      throw new ForbiddenException(
+        'Has alcanzado tu límite diario para esta función. Tu cuota se restablecerá a medianoche (00:00 UTC). Intenta nuevamente mañana o actualiza tu plan para obtener más acceso.',
+      );
+    }
 
     // Obtener las cartas
     const cards = await this.cardsService.findByIds(
@@ -115,6 +155,12 @@ export class RegenerateReadingUseCase {
 
     this.logger.log(
       `Interpretation regenerated successfully for reading ${readingId}. Total regenerations: ${updatedReading.regenerationCount}`,
+    );
+
+    // Incrementar el uso después de la regeneración exitosa
+    await this.usageLimitsService.incrementUsage(
+      userId,
+      UsageFeature.INTERPRETATION_REGENERATION,
     );
 
     return updatedReading;

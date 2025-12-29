@@ -247,3 +247,23 @@ export const MOCK_REQUEST_DATA = {
   ipAddress: '127.0.0.1',
   userAgent: 'Mozilla/5.0 (Test Browser)',
 };
+
+/**
+ * Helper function to reset usage limits for a user
+ * Useful in tests to ensure tests don't hit daily limits
+ */
+export async function resetUsageLimits(dataSource: any): Promise<void> {
+  if (!dataSource || !dataSource.query) {
+    console.warn('[resetUsageLimits] DataSource not available, skipping reset');
+    return;
+  }
+
+  try {
+    await dataSource.query('TRUNCATE TABLE usage_limit RESTART IDENTITY CASCADE');
+  } catch (error: any) {
+    // Only log if it's not a "table doesn't exist" error
+    if (!error.message?.includes('does not exist')) {
+      console.error('[resetUsageLimits] Error resetting usage limits:', error);
+    }
+  }
+}

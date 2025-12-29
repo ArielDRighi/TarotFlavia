@@ -152,11 +152,11 @@ describe('Users (e2e)', () => {
       expect(profile.email).toBe('premium@test.com');
       expect(profile.plan).toBe('premium');
 
-      // Validate daily readings statistics for unlimited plan
+      // Validate daily readings statistics for premium plan (limit of 3)
       expect(profile).toHaveProperty('dailyReadingsCount');
       expect(profile).toHaveProperty('dailyReadingsLimit');
-      expect(profile.dailyReadingsLimit).toBe(999999); // Unlimited represented as 999999
-      expect(profile.dailyReadingsCount).toBe(0); // No count for unlimited plans
+      expect(profile.dailyReadingsLimit).toBe(3); // Premium plan has 3 readings limit
+      expect(profile.dailyReadingsCount).toBe(0); // No readings created yet
     });
 
     it('should return profile for authenticated admin user', async () => {

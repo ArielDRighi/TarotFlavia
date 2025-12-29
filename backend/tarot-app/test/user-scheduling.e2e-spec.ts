@@ -40,10 +40,25 @@ describe('User Scheduling (e2e)', () => {
     dbHelper = new E2EDatabaseHelper();
     await dbHelper.initialize();
 
+    // Reset usage limits to ensure login doesn't fail due to daily limits
+    const dataSource = dbHelper.getDataSource();
+    try {
+      await dataSource.query('TRUNCATE TABLE usage_limit RESTART IDENTITY CASCADE');
+    } catch (error) {
+      // Ignore if table doesn't exist
+    }
+
     // Login as regular user
     const userLogin = await request(app.getHttpServer())
       .post('/api/v1/auth/login')
-      .send({ email: 'free@test.com', password: 'Test123456!' });
+      .send({ email: 'free@test.com', password: 'Test123456!' })
+      .expect(200);
+
+    // Verify token was received
+    expect(userLogin.body).toHaveProperty('access_token');
+    expect(userLogin.body.access_token).toBeDefined();
+    expect(typeof userLogin.body.access_token).toBe('string');
+
     userToken = userLogin.body.access_token;
   });
 

@@ -187,9 +187,7 @@ export class ReadingsController {
     return this.orchestrator.findOne(id, userId, isAdmin);
   }
 
-  @UseGuards(JwtAuthGuard, AIQuotaGuard, CheckUsageLimitGuard)
-  @UseInterceptors(IncrementUsageInterceptor)
-  @CheckUsageLimit(UsageFeature.INTERPRETATION_REGENERATION)
+  @UseGuards(JwtAuthGuard)
   @Post(':id/regenerate')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({

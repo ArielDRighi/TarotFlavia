@@ -14,6 +14,7 @@
   "forceExit": true,
   "detectOpenHandles": false,
   "setupFiles": ["<rootDir>/setup-env.ts"],
+  "setupFilesAfterEnv": ["<rootDir>/setup-each-test.ts"],
   "collectCoverageFrom": [
     "../src/**/*.ts",
     "!../src/**/*.spec.ts",
