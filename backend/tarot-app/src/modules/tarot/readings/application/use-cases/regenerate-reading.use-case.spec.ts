@@ -15,6 +15,8 @@ import { TarotSpread } from '../../../spreads/entities/tarot-spread.entity';
 import { PredefinedQuestion } from '../../../../predefined-questions/entities/predefined-question.entity';
 import { NotFoundException } from '@nestjs/common';
 import { User, UserPlan } from '../../../../users/entities/user.entity';
+import { AIQuotaService } from '../../../../ai-usage/ai-quota.service';
+import { UsageLimitsService } from '../../../../usage-limits/usage-limits.service';
 
 describe('RegenerateReadingUseCase', () => {
   let useCase: RegenerateReadingUseCase;
@@ -75,6 +77,21 @@ describe('RegenerateReadingUseCase', () => {
             findOne: jest.fn(),
           },
         },
+        {
+          provide: AIQuotaService,
+          useValue: {
+            checkMonthlyQuota: jest.fn(),
+            getRemainingQuota: jest.fn(),
+            decrementQuota: jest.fn(),
+          },
+        },
+        {
+          provide: UsageLimitsService,
+          useValue: {
+            checkLimit: jest.fn(),
+            incrementUsage: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
@@ -86,6 +103,12 @@ describe('RegenerateReadingUseCase', () => {
     cardsService = module.get(CardsService);
     spreadsService = module.get(SpreadsService);
     predefinedQuestionsService = module.get(PredefinedQuestionsService);
+    const aiQuotaService = module.get(AIQuotaService);
+    const usageLimitsService = module.get(UsageLimitsService);
+
+    // Setup default mocks for AI quota and usage limits
+    (aiQuotaService.checkMonthlyQuota as jest.Mock).mockResolvedValue(true);
+    (usageLimitsService.checkLimit as jest.Mock).mockResolvedValue(true);
   });
 
   const createMockUser = (userId: number): User => {
