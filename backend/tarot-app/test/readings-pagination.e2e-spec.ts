@@ -7,7 +7,6 @@ import { DataSource } from 'typeorm';
 import { User, UserPlan } from '../src/modules/users/entities/user.entity';
 import { TarotReading } from '../src/modules/tarot/readings/entities/tarot-reading.entity';
 import { TarotDeck } from '../src/modules/tarot/decks/entities/tarot-deck.entity';
-import { TarotSpread } from '../src/modules/tarot/spreads/entities/tarot-spread.entity';
 import { TarotCard } from '../src/modules/tarot/cards/entities/tarot-card.entity';
 import { ReadingCategory } from '../src/modules/categories/entities/reading-category.entity';
 import { PredefinedQuestion } from '../src/modules/predefined-questions/entities/predefined-question.entity';
@@ -67,7 +66,6 @@ describe('Readings Pagination E2E', () => {
   let categoryIds: number[];
   let predefinedQuestionIds: number[];
   let deckId: number;
-  let spreadIds: number[];
   let cardIds: number[];
   const testTimestamp = Date.now();
 
@@ -229,77 +227,80 @@ describe('Readings Pagination E2E', () => {
       .save(cardsToCreate);
     cardIds = createdCards.map((card) => card.id);
 
-    // Crear spreads
-    const spreads = await dataSource.getRepository(TarotSpread).save([
-      {
-        name: `Three Card Spread Pag ${testTimestamp}`,
-        description: 'Past, Present, Future',
-        cardCount: 3,
-        positions: [
-          { name: 'Past', description: 'The past' },
-          { name: 'Present', description: 'The present' },
-          { name: 'Future', description: 'The future' },
-        ],
-        difficulty: 'beginner',
-        isBeginnerFriendly: true,
-        whenToUse: 'For general guidance',
-      },
-      {
-        name: `Single Card Spread Pag ${testTimestamp}`,
-        description: 'Single card',
-        cardCount: 1,
-        positions: [{ name: 'Card', description: 'The card' }],
-        difficulty: 'beginner',
-        isBeginnerFriendly: true,
-        whenToUse: 'For quick guidance',
-      },
-    ]);
-    spreadIds = spreads.map((s) => s.id);
-
-    // Crear 15 lecturas para el usuario premium usando el endpoint
+    // Crear 15 lecturas para el usuario premium directamente en la BD (bypass daily limits)
     // Esto permitirá probar la paginación con datos reales
     console.log('Creating 15 test readings for premium user...');
     for (let i = 0; i < 15; i++) {
-      await request(app.getHttpServer())
-        .post('/api/v1/readings')
-        .set('Authorization', `Bearer ${premiumUserToken}`)
-        .send({
-          predefinedQuestionId: predefinedQuestionIds[i % 2],
-          deckId: deckId,
-          spreadId: spreadIds[i % 2],
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'Past', isReversed: false },
-            { cardId: cardIds[1], position: 'Present', isReversed: false },
-            { cardId: cardIds[2], position: 'Future', isReversed: false },
-          ],
-          generateInterpretation: false,
-        });
+      // Insert directly with SQL to bypass TypeORM relations
+      // Note: spreadId is NOT stored in DB, only used during creation for validation
+      const cardPositions = JSON.stringify([
+        { cardId: cardIds[0], position: 'Past', isReversed: false },
+        { cardId: cardIds[1], position: 'Present', isReversed: false },
+        { cardId: cardIds[2], position: 'Future', isReversed: i % 2 === 0 },
+      ]);
+
+      const result = await dataSource.query(
+        `INSERT INTO tarot_reading ("userId", "predefinedQuestionId", "deckId", "questionType", "tarotista_id", "cardPositions", "createdAt")
+         VALUES ($1, $2, $3, $4, $5, $6, $7)
+         RETURNING id`,
+        [
+          premiumUserId,
+          predefinedQuestionIds[i % 2],
+          deckId,
+          'predefined',
+          1, // Flavia
+          cardPositions,
+          new Date(Date.now() - i * 1000), // Different timestamps
+        ],
+      );
+      const readingId = result[0].id;
+
+      // Associate cards with reading
+      await dataSource.query(
+        `INSERT INTO tarot_reading_cards_tarot_card ("tarotReadingId", "tarotCardId")
+         VALUES ($1, $2), ($1, $3), ($1, $4)`,
+        [readingId, cardIds[0], cardIds[1], cardIds[2]],
+      );
 
       // Pequeña pausa para asegurar diferentes timestamps
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 10));
     }
 
-    // Crear 12 lecturas para el usuario free
+    // Crear 12 lecturas para el usuario free directamente en la BD (bypass daily limits)
     console.log('Creating 12 test readings for free user...');
     for (let i = 0; i < 12; i++) {
-      await request(app.getHttpServer())
-        .post('/api/v1/readings')
-        .set('Authorization', `Bearer ${freeUserToken}`)
-        .send({
-          predefinedQuestionId: predefinedQuestionIds[i % 2],
-          deckId: deckId,
-          spreadId: spreadIds[i % 2],
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'Past', isReversed: false },
-            { cardId: cardIds[1], position: 'Present', isReversed: false },
-            { cardId: cardIds[2], position: 'Future', isReversed: false },
-          ],
-          generateInterpretation: false,
-        });
+      // Insert directly with SQL to bypass TypeORM relations
+      // Note: spreadId is NOT stored in DB, only used during creation for validation
+      const cardPositions = JSON.stringify([
+        { cardId: cardIds[0], position: 'Past', isReversed: false },
+        { cardId: cardIds[1], position: 'Present', isReversed: false },
+        { cardId: cardIds[2], position: 'Future', isReversed: i % 2 === 0 },
+      ]);
 
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      const result = await dataSource.query(
+        `INSERT INTO tarot_reading ("userId", "predefinedQuestionId", "deckId", "questionType", "tarotista_id", "cardPositions", "createdAt")
+         VALUES ($1, $2, $3, $4, $5, $6, $7)
+         RETURNING id`,
+        [
+          freeUserId,
+          predefinedQuestionIds[i % 2],
+          deckId,
+          'predefined',
+          1, // Flavia
+          cardPositions,
+          new Date(Date.now() - i * 1000), // Different timestamps
+        ],
+      );
+      const readingId = result[0].id;
+
+      // Associate cards with reading
+      await dataSource.query(
+        `INSERT INTO tarot_reading_cards_tarot_card ("tarotReadingId", "tarotCardId")
+         VALUES ($1, $2), ($1, $3), ($1, $4)`,
+        [readingId, cardIds[0], cardIds[1], cardIds[2]],
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
     }
 
     console.log('✓ Test data created successfully');
@@ -352,13 +353,6 @@ describe('Readings Pagination E2E', () => {
           await dataSource.query(
             `DELETE FROM reading_category WHERE id = ANY($1::int[])`,
             [categoryIds],
-          );
-        }
-
-        if (spreadIds && spreadIds.length > 0) {
-          await dataSource.query(
-            `DELETE FROM tarot_spread WHERE id = ANY($1::int[])`,
-            [spreadIds],
           );
         }
 
@@ -542,27 +536,36 @@ describe('Readings Pagination E2E', () => {
   });
 
   /**
-   * TEST: Usuarios free deben ver solo las últimas 10 lecturas
+   * TEST: Both free and premium users can view their full reading history
+   * (Usage limits only apply to CREATING readings, not viewing history)
    */
-  describe('GET /readings - Free User Limit', () => {
-    it('should limit free users to last 10 readings regardless of actual count', async () => {
+  describe('GET /readings - Reading History Access', () => {
+    it('should allow free users to view all their reading history', async () => {
       const response = await request(app.getHttpServer())
         .get('/api/v1/readings')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .expect(200);
 
       const body = asTypedResponse<PaginatedResponse>(response.body);
-      expect(body.data.length).toBeLessThanOrEqual(10);
-      expect(body.meta.totalItems).toBeLessThanOrEqual(10);
+      // Free users can view all 12 readings they created
+      expect(body.meta.totalItems).toBe(12);
+      // First page should have 10 items (default limit)
+      expect(body.data.length).toBe(10);
+      expect(body.meta.totalPages).toBe(2);
+      expect(body.meta.hasNextPage).toBe(true);
+    });
 
-      // Free user no debería poder acceder a página 2 si tiene más de 10 lecturas
+    it('should allow free users to access page 2 of their history', async () => {
       const page2Response = await request(app.getHttpServer())
         .get('/api/v1/readings?page=2')
         .set('Authorization', `Bearer ${freeUserToken}`)
         .expect(200);
 
       const page2Body = asTypedResponse<PaginatedResponse>(page2Response.body);
-      expect(page2Body.meta.totalItems).toBeLessThanOrEqual(10);
+      // Page 2 should have remaining 2 readings
+      expect(page2Body.data.length).toBe(2);
+      expect(page2Body.meta.totalItems).toBe(12);
+      expect(page2Body.meta.hasNextPage).toBe(false);
     });
 
     it('should allow premium users unlimited history access', async () => {
@@ -572,7 +575,9 @@ describe('Readings Pagination E2E', () => {
         .expect(200);
 
       const body = asTypedResponse<PaginatedResponse>(response.body);
-      expect(body.meta.totalItems).toBeGreaterThan(10);
+      expect(body.meta.totalItems).toBe(15);
+      expect(body.data.length).toBe(10);
+      expect(body.meta.totalPages).toBe(2);
     });
   });
 

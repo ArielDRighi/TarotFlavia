@@ -6,7 +6,7 @@ import {
 } from '../../domain/interfaces/reading-repository.interface';
 import { QueryReadingsDto } from '../../dto/query-readings.dto';
 import { PaginatedReadingsResponseDto } from '../../dto/paginated-readings-response.dto';
-import { User, UserPlan } from '../../../../users/entities/user.entity';
+import { User } from '../../../../users/entities/user.entity';
 
 @Injectable()
 export class ListReadingsUseCase {
@@ -51,11 +51,9 @@ export class ListReadingsUseCase {
       options,
     );
 
-    // Free users can only see 10 most recent readings
-    const isFreeUser = user.plan === UserPlan.FREE;
-    const effectiveTotalItems = isFreeUser
-      ? Math.min(totalItems, 10)
-      : totalItems;
+    // Free and premium users can see all their reading history
+    // (Usage limits only apply to CREATING new readings, not viewing history)
+    const effectiveTotalItems = totalItems;
 
     // Calculate pagination metadata
     const totalPages = Math.ceil(effectiveTotalItems / limit);
