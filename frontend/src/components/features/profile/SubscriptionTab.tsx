@@ -46,7 +46,9 @@ export function SubscriptionTab({ profile }: SubscriptionTabProps) {
         <CardContent>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-lg font-semibold">Plan {profile.plan.toUpperCase()}</p>
+              <p className="text-lg font-semibold">
+                Plan {profile.plan === 'anonymous' ? 'ANÓNIMO' : profile.plan === 'free' ? 'GRATUITO' : 'PREMIUM'}
+              </p>
               <p className="text-muted-foreground text-sm">
                 {profile.plan === 'free'
                   ? 'Plan gratuito con funcionalidades básicas'

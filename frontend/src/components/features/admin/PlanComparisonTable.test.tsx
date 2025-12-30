@@ -12,7 +12,7 @@ describe('PlanComparisonTable', () => {
     render(<PlanComparisonTable plans={mockPlans} />);
 
     expect(screen.getByText(/feature/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/anónimo|free/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/anónimo|gratuito/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/premium/i).length).toBeGreaterThan(0);
   });
 

@@ -25,7 +25,10 @@ describe('SubscriptionTab', () => {
       const profile = createMockProfile({ plan: 'free' });
       render(<SubscriptionTab profile={profile} />);
 
-      expect(screen.getByText(/Plan FREE/i)).toBeInTheDocument();
+      // Buscar por el párrafo con clase text-lg (el título del plan)
+      expect(screen.getByText((content, element) => {
+        return element?.classList.contains('text-lg') && /Plan GRATUITO/i.test(content);
+      })).toBeInTheDocument();
       expect(screen.getByText(/plan gratuito con funcionalidades básicas/i)).toBeInTheDocument();
     });
 
@@ -41,7 +44,10 @@ describe('SubscriptionTab', () => {
       const profile = createMockProfile({ plan: 'anonymous' });
       render(<SubscriptionTab profile={profile} />);
 
-      expect(screen.getByText(/Plan ANONYMOUS/i)).toBeInTheDocument();
+      // Buscar por el párrafo con clase text-lg (el título del plan)
+      expect(screen.getByText((content, element) => {
+        return element?.classList.contains('text-lg') && /Plan ANÓNIMO/i.test(content);
+      })).toBeInTheDocument();
       expect(screen.getByText(/plan anónimo con funcionalidades limitadas/i)).toBeInTheDocument();
     });
   });
