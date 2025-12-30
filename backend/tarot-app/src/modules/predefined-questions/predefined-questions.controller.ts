@@ -32,9 +32,9 @@ export class PredefinedQuestionsController {
 
   @Get()
   @ApiOperation({
-    summary: 'Listar preguntas predefinidas',
+    summary: 'Listar preguntas predefinidas (público)',
     description:
-      'Retorna todas las preguntas predefinidas, opcionalmente filtradas por categoría',
+      'Endpoint público para listar preguntas predefinidas. Útil para mostrar ejemplos en landing page. Opcionalmente filtradas por categoría. No requiere autenticación.',
   })
   @ApiQuery({
     name: 'categoryId',
@@ -58,8 +58,9 @@ export class PredefinedQuestionsController {
 
   @Get(':id')
   @ApiOperation({
-    summary: 'Obtener pregunta predefinida por ID',
-    description: 'Retorna una pregunta predefinida específica',
+    summary: 'Obtener pregunta predefinida por ID (público)',
+    description:
+      'Endpoint público para obtener pregunta predefinida específica. No requiere autenticación.',
   })
   @ApiResponse({
     status: 200,

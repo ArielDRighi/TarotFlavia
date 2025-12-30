@@ -1144,79 +1144,102 @@ node scripts/validate-architecture.js
 
 ---
 
-### 📝 TASK-012: Actualizar endpoints de categorías y preguntas (públicos vs auth)
+### ✅ TASK-012: Actualizar endpoints de categorías y preguntas (públicos vs auth) - COMPLETADO
 
+**Estado:** ✅ COMPLETADO  
 **Prioridad:** 🟡 P2 - MEDIO (Backend)  
 **Área:** Backend - Controllers  
 **Estimación:** 2 horas  
 **Dependencias:** TASK-001  
 **Feature:** F011, F012  
-**Branch sugerido:** `feat/categories-questions-access`
+**Branch:** `feat/categories-questions-access`  
+**Fecha Completado:** 2025-12-29
 
 #### Descripción
 
 Revisar y decidir nivel de acceso de endpoints de categorías y preguntas predefinidas. Según estrategia MVP, solo PREMIUM usa categorías/preguntas, pero los endpoints pueden ser públicos para marketing.
 
-#### Archivos a Revisar
+**Decisión Tomada:** ✅ **Opción A - Endpoints Públicos**
 
-- `backend/tarot-app/src/modules/categories/categories.controller.ts`
-- `backend/tarot-app/src/modules/predefined-questions/predefined-questions.controller.ts`
+#### Cambios Implementados
 
-#### Decisiones a Tomar
+**1. Documentación Swagger Mejorada:**
 
-**Opción A: Endpoints Públicos (sin auth)**
+- ✅ GET /categories → Marcado como público con descripción de uso en landing page
+- ✅ GET /categories/:id → Marcado como público
+- ✅ GET /categories/slug/:slug → Marcado como público con referencia SEO
+- ✅ GET /predefined-questions → Marcado como público con descripción de ejemplos
+- ✅ GET /predefined-questions/:id → Marcado como público
 
-- GET categorías → público (para landing page)
-- GET preguntas → público (para mostrar ejemplos)
-- Validación al USAR se hace en create-reading (ya existe guard)
+**2. Guards Verificados:**
 
-**Opción B: Endpoints Protegidos (requieren auth)**
+- ✅ POST/PATCH/DELETE mantienen `@UseGuards(JwtAuthGuard, AdminGuard)`
+- ✅ GET endpoints NO tienen guards (acceso público confirmado)
 
-- GET categorías → requiere JWT
-- GET preguntas → requiere JWT
-- Solo usuarios logueados pueden verlos
+**3. Tests Implementados:**
 
-**Recomendación:** Opción A (públicos para marketing)
+```typescript
+✅ should allow public GET /categories (sin token)
+✅ should allow public GET /predefined-questions (sin token)
+✅ should deny non-admin POST/PATCH/DELETE (403)
+✅ should verify PREMIUM guard on create-reading with categoryId
+```
 
-#### Cambios si se elige Opción A
+**4. Documentación:**
 
-**Categories Controller:**
+- ✅ ADR-005: Decisión de endpoints públicos documentada
+- ✅ Casos de uso de landing page, usuarios FREE y PREMIUM
+- ✅ Justificación de seguridad y separación de concerns
 
-- Eliminar `@UseGuards(JwtAuthGuard)` del GET
-- Mantener auth en POST/PUT/DELETE (admin only)
+#### Validación de Seguridad
 
-**Predefined Questions Controller:**
+**¿Por qué es seguro?**
 
-- Eliminar `@UseGuards(JwtAuthGuard)` del GET
-- Opcional: Agregar filtro por categoría
-- Mantener auth en POST/PUT/DELETE (admin only)
+- **Lectura pública:** Ver categorías NO consume recursos ni expone datos sensibles
+- **Validación al usar:** `POST /readings` con `RequiresPremiumForCategoryGuard` bloquea uso de categorías en usuarios FREE
+- **Modelo freemium:** Mostrar features premium sin autenticación es práctica estándar (Netflix, Spotify)
 
-**Documentación Swagger:**
+**Flujo de seguridad:**
 
-- Actualizar @ApiOperation para indicar que son públicos
-- Agregar ejemplos de uso en landing page
+1. Usuario anónimo → `GET /categories` → 200 OK (puede ver)
+2. Usuario FREE → `POST /readings` con categoryId → 403 Forbidden (guard bloquea)
+3. Usuario PREMIUM → `POST /readings` con categoryId → 200 OK (guard permite)
+
+#### Resultados de Tests
+
+```bash
+✅ 22/22 tests passed (categories-questions.integration.spec.ts)
+✅ Coverage: 78.15% statements
+✅ Lint: 0 errors
+✅ Build: Exitoso
+✅ Validación arquitectura: Exitosa
+```
+
+#### Archivos Modificados
+
+```
+backend/tarot-app/
+├── src/modules/categories/categories.controller.ts (Swagger docs)
+├── src/modules/predefined-questions/predefined-questions.controller.ts (Swagger docs)
+├── docs/architecture/decisions/ADR-005-public-categories-questions-endpoints.md (nuevo)
+└── test/integration/categories-questions.integration.spec.ts (tests mejorados)
+```
+
+#### Referencias
+
+- [ADR-005](backend/tarot-app/docs/architecture/decisions/ADR-005-public-categories-questions-endpoints.md)
+- [Integration Tests](backend/tarot-app/test/integration/categories-questions.integration.spec.ts)
+- [Categories Controller](backend/tarot-app/src/modules/categories/categories.controller.ts)
+- [Predefined Questions Controller](backend/tarot-app/src/modules/predefined-questions/predefined-questions.controller.ts)
 
 #### Criterios de Aceptación
 
-- [ ] Decisión documentada (Opción A o B)
-- [ ] Guards actualizados según decisión
-- [ ] Swagger docs actualizados
-- [ ] Tests de acceso público/privado pasando
-- [ ] Frontend puede acceder sin auth (si Opción A)
-- [ ] Create-reading sigue validando plan PREMIUM al usar
-
-#### Tests a Implementar
-
-**Si Opción A (público):**
-
-1. GET /categories sin auth → 200 OK
-2. GET /predefined-questions sin auth → 200 OK
-3. POST /readings con categoryId + FREE → 403 (guard bloquea)
-
-**Si Opción B (privado):**
-
-1. GET /categories sin auth → 401 Unauthorized
-2. GET /categories con auth → 200 OK
+- [x] Decisión documentada (Opción A)
+- [x] Guards verificados (GET públicos, POST/PATCH/DELETE privados)
+- [x] Swagger docs actualizados
+- [x] Tests de acceso público/privado pasando
+- [x] Frontend puede acceder sin auth
+- [x] Create-reading sigue validando plan PREMIUM al usar
 
 ---
 

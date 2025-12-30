@@ -29,7 +29,11 @@ export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Obtener todas las categorías' })
+  @ApiOperation({
+    summary: 'Obtener todas las categorías (público)',
+    description:
+      'Endpoint público para listar categorías de lecturas. Útil para landing page y marketing. No requiere autenticación.',
+  })
   @ApiQuery({
     name: 'activeOnly',
     required: false,
@@ -47,7 +51,11 @@ export class CategoriesController {
   }
 
   @Get('slug/:slug')
-  @ApiOperation({ summary: 'Obtener una categoría por slug' })
+  @ApiOperation({
+    summary: 'Obtener una categoría por slug (público)',
+    description:
+      'Endpoint público para obtener categoría por slug SEO-friendly. No requiere autenticación.',
+  })
   @ApiResponse({
     status: 200,
     description: 'Categoría encontrada',
@@ -59,7 +67,11 @@ export class CategoriesController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Obtener una categoría por ID' })
+  @ApiOperation({
+    summary: 'Obtener una categoría por ID (público)',
+    description:
+      'Endpoint público para obtener categoría específica por ID. No requiere autenticación.',
+  })
   @ApiResponse({
     status: 200,
     description: 'Categoría encontrada',
