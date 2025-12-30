@@ -317,4 +317,122 @@ describe('TarotCards Seeder', () => {
       });
     });
   });
+
+  describe('Content Quality Validation (TASK-011)', () => {
+    it('should have non-empty description for all cards', async () => {
+      jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
+      const saveSpy = jest
+        .spyOn(cardRepository, 'save')
+        .mockImplementation((cards) => Promise.resolve(cards as any));
+
+      await seedTarotCards(cardRepository, deckRepository);
+
+      const savedCards = saveSpy.mock.calls[0][0] as TarotCard[];
+
+      savedCards.forEach((card) => {
+        expect(card.description).toBeDefined();
+        expect(card.description.trim()).not.toBe('');
+        expect(card.description.trim().length).toBeGreaterThanOrEqual(20);
+      });
+    });
+
+    it('should have non-empty meaningUpright for all cards', async () => {
+      jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
+      const saveSpy = jest
+        .spyOn(cardRepository, 'save')
+        .mockImplementation((cards) => Promise.resolve(cards as any));
+
+      await seedTarotCards(cardRepository, deckRepository);
+
+      const savedCards = saveSpy.mock.calls[0][0] as TarotCard[];
+
+      savedCards.forEach((card) => {
+        expect(card.meaningUpright).toBeDefined();
+        expect(card.meaningUpright.trim()).not.toBe('');
+        expect(card.meaningUpright.trim().length).toBeGreaterThanOrEqual(30);
+      });
+    });
+
+    it('should have non-empty meaningReversed for all cards', async () => {
+      jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
+      const saveSpy = jest
+        .spyOn(cardRepository, 'save')
+        .mockImplementation((cards) => Promise.resolve(cards as any));
+
+      await seedTarotCards(cardRepository, deckRepository);
+
+      const savedCards = saveSpy.mock.calls[0][0] as TarotCard[];
+
+      savedCards.forEach((card) => {
+        expect(card.meaningReversed).toBeDefined();
+        expect(card.meaningReversed.trim()).not.toBe('');
+        expect(card.meaningReversed.trim().length).toBeGreaterThanOrEqual(30);
+      });
+    });
+
+    it('should have at least 3 keywords for all cards', async () => {
+      jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
+      const saveSpy = jest
+        .spyOn(cardRepository, 'save')
+        .mockImplementation((cards) => Promise.resolve(cards as any));
+
+      await seedTarotCards(cardRepository, deckRepository);
+
+      const savedCards = saveSpy.mock.calls[0][0] as TarotCard[];
+
+      savedCards.forEach((card) => {
+        expect(card.keywords).toBeDefined();
+        expect(card.keywords.trim()).not.toBe('');
+
+        // Count keywords (comma-separated)
+        const keywordCount = card.keywords.split(',').length;
+        expect(keywordCount).toBeGreaterThanOrEqual(3);
+      });
+    });
+
+    it('should have valid imageUrl for all cards', async () => {
+      jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
+      const saveSpy = jest
+        .spyOn(cardRepository, 'save')
+        .mockImplementation((cards) => Promise.resolve(cards as any));
+
+      await seedTarotCards(cardRepository, deckRepository);
+
+      const savedCards = saveSpy.mock.calls[0][0] as TarotCard[];
+
+      savedCards.forEach((card) => {
+        expect(card.imageUrl).toBeDefined();
+        expect(card.imageUrl.trim()).not.toBe('');
+        expect(card.imageUrl).toMatch(/^https?:\/\/.+/);
+      });
+    });
+
+    it('should not contain placeholder text', async () => {
+      jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
+      const saveSpy = jest
+        .spyOn(cardRepository, 'save')
+        .mockImplementation((cards) => Promise.resolve(cards as any));
+
+      await seedTarotCards(cardRepository, deckRepository);
+
+      const savedCards = saveSpy.mock.calls[0][0] as TarotCard[];
+
+      savedCards.forEach((card) => {
+        const textToCheck = [
+          card.description,
+          card.meaningUpright,
+          card.meaningReversed,
+        ].join(' ');
+
+        // Check for placeholder text patterns (matching seeder validation)
+        expect(textToCheck.toLowerCase()).not.toContain('lorem ipsum');
+        expect(textToCheck.toLowerCase()).not.toContain('todo:');
+        expect(textToCheck.toLowerCase()).not.toContain('placeholder');
+        expect(textToCheck.toLowerCase()).not.toMatch(/pendiente de/i);
+        expect(textToCheck.toLowerCase()).not.toMatch(
+          /\bpendiente\b(?!\s*(de|s))/i,
+        );
+      });
+    });
+  });
 });
