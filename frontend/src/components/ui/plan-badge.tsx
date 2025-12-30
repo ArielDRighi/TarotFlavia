@@ -4,8 +4,9 @@ import { cn } from '@/lib/utils';
 
 /**
  * Plan types for user subscription levels
+ * UPDATED: 'guest' -> 'anonymous', removed 'professional'
  */
-export type PlanType = 'guest' | 'free' | 'premium' | 'professional';
+export type PlanType = 'anonymous' | 'free' | 'premium';
 
 export interface PlanBadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   /**
@@ -18,7 +19,7 @@ export interface PlanBadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
  * Style configurations for each plan type
  */
 const planStyles: Record<PlanType, React.CSSProperties> = {
-  guest: {
+  anonymous: {
     backgroundColor: '#F7FAFC',
     color: '#1A202C',
   },
@@ -31,20 +32,15 @@ const planStyles: Record<PlanType, React.CSSProperties> = {
     color: '#B7791F',
     borderColor: '#D69E2E',
   },
-  professional: {
-    backgroundColor: '#1A202C',
-    color: '#FFFFFF',
-  },
 };
 
 /**
  * Label mappings for each plan type (uppercase)
  */
 const planLabels: Record<PlanType, string> = {
-  guest: 'GUEST',
-  free: 'FREE',
+  anonymous: 'ANÓNIMO',
+  free: 'GRATUITO',
   premium: 'PREMIUM',
-  professional: 'PROFESSIONAL',
 };
 
 /**
@@ -56,7 +52,7 @@ const planLabels: Record<PlanType, string> = {
  *
  * <PlanBadge plan="premium" />
  * <PlanBadge plan="free" />
- * <PlanBadge plan="professional" />
+ * <PlanBadge plan="anonymous" />
  * ```
  */
 export function PlanBadge({ plan, className, ...props }: PlanBadgeProps) {

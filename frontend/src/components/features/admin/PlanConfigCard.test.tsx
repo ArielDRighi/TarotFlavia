@@ -95,13 +95,13 @@ describe('PlanConfigCard', () => {
     });
   });
 
-  it('should disable editing for guest plan', () => {
-    const guestPlan: PlanConfig = {
+  it('should disable editing for anonymous plan', () => {
+    const anonymousPlan: PlanConfig = {
       ...mockPlan,
-      planType: 'guest',
+      planType: 'anonymous',
     };
     const mockOnSave = vi.fn();
-    render(<PlanConfigCard plan={guestPlan} onSave={mockOnSave} isLoading={false} />);
+    render(<PlanConfigCard plan={anonymousPlan} onSave={mockOnSave} isLoading={false} />);
 
     const saveButton = screen.queryByRole('button', { name: /guardar/i });
     expect(saveButton).not.toBeInTheDocument();
@@ -136,7 +136,7 @@ describe('PlanConfigCard', () => {
 
     const freePlan: PlanConfig = { ...mockPlan, planType: 'free' };
     rerender(<PlanConfigCard plan={freePlan} onSave={vi.fn()} isLoading={false} />);
-    const freeTexts = screen.getAllByText(/free/i);
+    const freeTexts = screen.getAllByText(/gratuito/i);
     expect(freeTexts.length).toBeGreaterThan(0);
   });
 });

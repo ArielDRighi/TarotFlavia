@@ -46,13 +46,15 @@ export function SubscriptionTab({ profile }: SubscriptionTabProps) {
         <CardContent>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-lg font-semibold">Plan {profile.plan.toUpperCase()}</p>
+              <p className="text-lg font-semibold">
+                Plan {profile.plan === 'anonymous' ? 'ANÓNIMO' : profile.plan === 'free' ? 'GRATUITO' : 'PREMIUM'}
+              </p>
               <p className="text-muted-foreground text-sm">
                 {profile.plan === 'free'
                   ? 'Plan gratuito con funcionalidades básicas'
                   : profile.plan === 'premium'
                     ? 'Plan premium con funcionalidades avanzadas'
-                    : 'Plan profesional con todas las funcionalidades'}
+                    : 'Plan anónimo con funcionalidades limitadas'}
               </p>
             </div>
             <PlanBadge plan={profile.plan} />
@@ -101,7 +103,7 @@ export function SubscriptionTab({ profile }: SubscriptionTabProps) {
           <CardContent>
             <div className="space-y-4">
               <p className="text-muted-foreground text-sm">
-                Actualiza a Premium o Professional para desbloquear más funcionalidades:
+                Actualiza a Premium para desbloquear más funcionalidades:
               </p>
 
               <ul className="text-muted-foreground space-y-2 text-sm">

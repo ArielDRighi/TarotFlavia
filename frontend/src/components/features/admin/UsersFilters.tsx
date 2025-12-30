@@ -73,10 +73,9 @@ export function UsersFilters({ onFilterChange }: UsersFiltersProps) {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos los planes</SelectItem>
-            <SelectItem value="guest">Guest</SelectItem>
-            <SelectItem value="free">Free</SelectItem>
+            <SelectItem value="anonymous">Anónimo</SelectItem>
+            <SelectItem value="free">Gratuito</SelectItem>
             <SelectItem value="premium">Premium</SelectItem>
-            <SelectItem value="professional">Professional</SelectItem>
           </SelectContent>
         </Select>
 

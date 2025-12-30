@@ -140,8 +140,9 @@ export interface DashboardMetric {
 /**
  * Tipo de plan de suscripción
  * Refleja exactamente el UserPlan enum del backend
+ * UPDATED: 'guest' -> 'anonymous', removed 'professional'
  */
-export type PlanType = 'guest' | 'free' | 'premium' | 'professional';
+export type PlanType = 'anonymous' | 'free' | 'premium';
 
 /**
  * Configuración de un plan de suscripción

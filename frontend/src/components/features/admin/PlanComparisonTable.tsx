@@ -21,20 +21,18 @@ interface PlanComparisonTableProps {
   plans: PlanConfig[];
 }
 
-const planOrder: PlanType[] = ['guest', 'free', 'premium', 'professional'];
+const planOrder: PlanType[] = ['anonymous', 'free', 'premium'];
 
 const planColors = {
-  guest: 'bg-gray-100 text-gray-800 border-gray-300',
+  anonymous: 'bg-gray-100 text-gray-800 border-gray-300',
   free: 'bg-blue-100 text-blue-800 border-blue-300',
   premium: 'bg-purple-100 text-purple-800 border-purple-300',
-  professional: 'bg-amber-100 text-amber-800 border-amber-300',
 };
 
 const planLabels = {
-  guest: 'Guest',
-  free: 'Free',
+  anonymous: 'Anónimo',
+  free: 'Gratuito',
   premium: 'Premium',
-  professional: 'Professional',
 };
 
 const features = [

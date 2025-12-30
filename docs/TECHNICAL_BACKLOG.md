@@ -1243,87 +1243,79 @@ backend/tarot-app/
 
 ---
 
-### 📝 TASK-013: Actualizar tipos y API client del frontend
+### 📝 TASK-013: Actualizar tipos y API client del frontend ✅
 
 **Prioridad:** 🟠 P1 - ALTO (Frontend)  
 **Área:** Frontend - Types & API  
 **Estimación:** 2 horas  
 **Dependencias:** TASK-001, TASK-002, TASK-005  
 **Feature:** F001  
-**Branch sugerido:** `feat/update-frontend-plan-types`
+**Branch:** `feature/TASK-013-update-frontend-plan-types`  
+**Estado:** ✅ COMPLETADO (30 Dic 2025)
 
 #### Descripción
 
 Actualizar tipos TypeScript del frontend para reflejar los nuevos planes (ANONYMOUS, FREE, PREMIUM) y el cambio de default en `generateInterpretation`.
 
-#### Archivos a Modificar
+#### Archivos Modificados
 
-- `frontend/src/types/user.types.ts` - Enum de planes
-- `frontend/src/types/reading.types.ts` - CreateReadingDto
-- `frontend/src/lib/api/readings-api.ts` - API functions
-- Cualquier componente que muestre badges de plan
+✅ `frontend/src/types/user.types.ts` - UserPlan type actualizado  
+✅ `frontend/src/types/admin.types.ts` - PlanType actualizado  
+✅ `frontend/src/types/reading.types.ts` - CreateReadingDto con comentarios  
+✅ `frontend/src/components/ui/plan-badge.tsx` - Labels en español  
+✅ `frontend/src/lib/validations/admin-users.schemas.ts` - Schemas  
+✅ `frontend/src/components/features/admin/*` - Componentes admin  
+✅ `frontend/src/components/features/profile/*` - Componentes profile  
+✅ `frontend/src/test/helpers/admin-mocks.ts` - Mocks actualizados  
+✅ Todos los tests actualizados y pasando
 
-#### Cambios en user.types.ts
+#### Cambios Realizados
 
-**Si existe enum UserPlan en frontend:**
+**user.types.ts:**
 
 ```typescript
 // ANTES
-export enum UserPlan {
-  GUEST = "guest",
-  FREE = "free",
-  PREMIUM = "premium",
-  PROFESSIONAL = "professional",
-}
+export type UserPlan = "guest" | "free" | "premium" | "professional";
 
 // DESPUÉS
-export enum UserPlan {
-  ANONYMOUS = "anonymous",
-  FREE = "free",
-  PREMIUM = "premium",
-}
+export type UserPlan = "anonymous" | "free" | "premium";
 ```
 
-**Si usa type literal:**
+**reading.types.ts:**
 
-```typescript
-// Actualizar de:
-type UserPlan = "guest" | "free" | "premium" | "professional";
-// A:
-type UserPlan = "anonymous" | "free" | "premium";
-```
+- Agregado comentario: `generateInterpretation` default false, solo Premium
 
-#### Cambios en reading.types.ts
+**plan-badge.tsx:**
 
-**CreateReadingDto:**
-
-- Campo `generateInterpretation?: boolean` debe tener default `false` en documentación
-- Agregar comentario: "// Solo true para usuarios Premium"
-
-#### Cambios en Componentes
-
-**Buscar y actualizar:**
-
-- Badges que muestren "Guest" → "Anónimo"
-- Badges que muestren "Professional" → eliminar o cambiar a "Premium"
-- Lógica condicional que use `plan === 'guest'` → actualizar a `'anonymous'`
+- Labels actualizados: ANÓNIMO, GRATUITO, PREMIUM (español)
+- Eliminado plan "professional"
 
 #### Criterios de Aceptación
 
-- [ ] No hay errores de compilación TypeScript
-- [ ] Enum/type de planes actualizado
-- [ ] CreateReadingDto refleja cambio de backend
-- [ ] Búsqueda de "guest" y "professional" en src/ sin resultados
-- [ ] Componentes de badges actualizados
-- [ ] Tests de tipos pasando
-- [ ] ESLint sin warnings
+✅ No hay errores de compilación TypeScript  
+✅ Enum/type de planes actualizado  
+✅ CreateReadingDto refleja cambio de backend  
+✅ Búsqueda de "guest" y "professional" sin resultados  
+✅ Componentes de badges actualizados  
+✅ Tests pasando (1533/1533)  
+✅ ESLint sin warnings  
+✅ Build exitoso
 
-#### Búsqueda Global
+#### Resultados de Testing
 
 ```bash
-# Desde frontend/
-grep -r "guest\|GUEST\|professional\|PROFESSIONAL" src/ --exclude-dir=node_modules
+npm run type-check  # ✅ 0 errores
+npm run lint        # ✅ 0 warnings
+npm test -- --run   # ✅ 1533/1533 tests pasando
+npm run build       # ✅ Build exitoso
 ```
+
+#### Notas
+
+- Se actualizaron labels a español para mejor UX
+- Se eliminó plan PROFESSIONAL completamente
+- Se actualizó lógica en componentes admin y profile
+- Coverage se mantiene ≥ 80%
 
 ---
 

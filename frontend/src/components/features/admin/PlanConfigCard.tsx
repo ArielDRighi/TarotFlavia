@@ -22,17 +22,15 @@ interface PlanConfigCardProps {
 }
 
 const planColors = {
-  guest: 'bg-gray-100 text-gray-800 border-gray-300',
+  anonymous: 'bg-gray-100 text-gray-800 border-gray-300',
   free: 'bg-blue-100 text-blue-800 border-blue-300',
   premium: 'bg-purple-100 text-purple-800 border-purple-300',
-  professional: 'bg-amber-100 text-amber-800 border-amber-300',
 };
 
 const planLabels = {
-  guest: 'Guest',
-  free: 'Free',
+  anonymous: 'Anónimo',
+  free: 'Gratuito',
   premium: 'Premium',
-  professional: 'Professional',
 };
 
 export function PlanConfigCard({ plan, onSave, isLoading }: PlanConfigCardProps) {
@@ -40,7 +38,7 @@ export function PlanConfigCard({ plan, onSave, isLoading }: PlanConfigCardProps)
   const [formData, setFormData] = useState<PlanConfig>(plan);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const isGuestPlan = plan.planType === 'guest';
+  const isAnonymousPlan = plan.planType === 'anonymous';
 
   // Detectar cambios comparando stringified data
   const hasChanges = JSON.stringify(formData) !== JSON.stringify(plan);
@@ -105,7 +103,7 @@ export function PlanConfigCard({ plan, onSave, isLoading }: PlanConfigCardProps)
               </Badge>
             </CardTitle>
             <CardDescription>
-              {isGuestPlan ? 'Plan de invitado (solo lectura)' : 'Configura los límites del plan'}
+              {isAnonymousPlan ? 'Plan anónimo (solo lectura)' : 'Configura los límites del plan'}
             </CardDescription>
           </div>
           {hasChanges && (
@@ -126,7 +124,7 @@ export function PlanConfigCard({ plan, onSave, isLoading }: PlanConfigCardProps)
             type="text"
             value={formData.name}
             onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-            disabled={isGuestPlan || isLoading}
+            disabled={isAnonymousPlan || isLoading}
           />
         </div>
 
@@ -140,7 +138,7 @@ export function PlanConfigCard({ plan, onSave, isLoading }: PlanConfigCardProps)
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, description: e.target.value || null }))
             }
-            disabled={isGuestPlan || isLoading}
+            disabled={isAnonymousPlan || isLoading}
           />
         </div>
 
@@ -154,7 +152,7 @@ export function PlanConfigCard({ plan, onSave, isLoading }: PlanConfigCardProps)
             type="number"
             value={formData.readingsLimit}
             onChange={(e) => handleNumberChange('readingsLimit', e.target.value)}
-            disabled={isGuestPlan || isLoading}
+            disabled={isAnonymousPlan || isLoading}
             className={errors.readingsLimit ? 'border-red-500' : ''}
           />
           {errors.readingsLimit && <p className="text-sm text-red-600">{errors.readingsLimit}</p>}
@@ -170,7 +168,7 @@ export function PlanConfigCard({ plan, onSave, isLoading }: PlanConfigCardProps)
             type="number"
             value={formData.aiQuotaMonthly}
             onChange={(e) => handleNumberChange('aiQuotaMonthly', e.target.value)}
-            disabled={isGuestPlan || isLoading}
+            disabled={isAnonymousPlan || isLoading}
             className={errors.aiQuotaMonthly ? 'border-red-500' : ''}
           />
           {errors.aiQuotaMonthly && <p className="text-sm text-red-600">{errors.aiQuotaMonthly}</p>}
@@ -185,7 +183,7 @@ export function PlanConfigCard({ plan, onSave, isLoading }: PlanConfigCardProps)
             step="0.01"
             value={formData.price}
             onChange={(e) => handleNumberChange('price', e.target.value, true)}
-            disabled={isGuestPlan || isLoading}
+            disabled={isAnonymousPlan || isLoading}
             className={errors.price ? 'border-red-500' : ''}
           />
           {errors.price && <p className="text-sm text-red-600">{errors.price}</p>}
@@ -201,7 +199,7 @@ export function PlanConfigCard({ plan, onSave, isLoading }: PlanConfigCardProps)
               id={`allowCustomQuestions-${plan.planType}`}
               checked={formData.allowCustomQuestions}
               onCheckedChange={(checked) => handleBooleanChange('allowCustomQuestions', checked)}
-              disabled={isGuestPlan || isLoading}
+              disabled={isAnonymousPlan || isLoading}
             />
           </div>
 
@@ -211,7 +209,7 @@ export function PlanConfigCard({ plan, onSave, isLoading }: PlanConfigCardProps)
               id={`allowSharing-${plan.planType}`}
               checked={formData.allowSharing}
               onCheckedChange={(checked) => handleBooleanChange('allowSharing', checked)}
-              disabled={isGuestPlan || isLoading}
+              disabled={isAnonymousPlan || isLoading}
             />
           </div>
 
@@ -221,13 +219,13 @@ export function PlanConfigCard({ plan, onSave, isLoading }: PlanConfigCardProps)
               id={`allowAdvancedSpreads-${plan.planType}`}
               checked={formData.allowAdvancedSpreads}
               onCheckedChange={(checked) => handleBooleanChange('allowAdvancedSpreads', checked)}
-              disabled={isGuestPlan || isLoading}
+              disabled={isAnonymousPlan || isLoading}
             />
           </div>
         </div>
 
         {/* Botón de guardar */}
-        {!isGuestPlan && (
+        {!isAnonymousPlan && (
           <Button
             onClick={handleSave}
             disabled={!hasChanges || isLoading}
