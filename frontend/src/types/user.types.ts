@@ -11,8 +11,9 @@ export type UserRole = 'consumer' | 'tarotist' | 'admin';
 /**
  * User plan types matching backend enum
  * Backend: UserPlan enum
+ * UPDATED: 'guest' -> 'anonymous', removed 'professional'
  */
-export type UserPlan = 'guest' | 'free' | 'premium' | 'professional';
+export type UserPlan = 'anonymous' | 'free' | 'premium';
 
 /**
  * User entity from backend

@@ -45,10 +45,9 @@ interface ChangePlanModalProps {
 }
 
 const PLANS = [
-  { value: 'guest', label: 'Guest' },
-  { value: 'free', label: 'Free' },
+  { value: 'anonymous', label: 'Anónimo' },
+  { value: 'free', label: 'Gratuito' },
   { value: 'premium', label: 'Premium' },
-  { value: 'professional', label: 'Professional' },
 ] as const;
 
 export function ChangePlanModal({

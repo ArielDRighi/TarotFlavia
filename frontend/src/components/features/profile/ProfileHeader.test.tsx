@@ -27,7 +27,7 @@ describe('ProfileHeader', () => {
   it('should render user plan badge', () => {
     render(<ProfileHeader profile={mockProfile} />);
 
-    expect(screen.getByText('FREE')).toBeInTheDocument();
+    expect(screen.getByText('GRATUITO')).toBeInTheDocument();
   });
 
   it('should render user avatar with fallback initials', () => {
@@ -57,11 +57,11 @@ describe('ProfileHeader', () => {
     expect(screen.getByText('PREMIUM')).toBeInTheDocument();
   });
 
-  it('should render professional plan badge', () => {
-    const proProfile = { ...mockProfile, plan: 'professional' as const };
+  it('should render anonymous plan badge', () => {
+    const anonProfile = { ...mockProfile, plan: 'anonymous' as const };
 
-    render(<ProfileHeader profile={proProfile} />);
+    render(<ProfileHeader profile={anonProfile} />);
 
-    expect(screen.getByText('PROFESSIONAL')).toBeInTheDocument();
+    expect(screen.getByText('ANÓNIMO')).toBeInTheDocument();
   });
 });

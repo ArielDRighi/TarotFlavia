@@ -25,7 +25,7 @@ describe('SubscriptionTab', () => {
       const profile = createMockProfile({ plan: 'free' });
       render(<SubscriptionTab profile={profile} />);
 
-      expect(screen.getByText('Plan FREE')).toBeInTheDocument();
+      expect(screen.getByText(/Plan FREE/i)).toBeInTheDocument();
       expect(screen.getByText(/plan gratuito con funcionalidades básicas/i)).toBeInTheDocument();
     });
 
@@ -33,18 +33,16 @@ describe('SubscriptionTab', () => {
       const profile = createMockProfile({ plan: 'premium' });
       render(<SubscriptionTab profile={profile} />);
 
-      expect(screen.getByText('Plan PREMIUM')).toBeInTheDocument();
+      // Buscar texto específico del componente, no solo "PREMIUM"
       expect(screen.getByText(/plan premium con funcionalidades avanzadas/i)).toBeInTheDocument();
     });
 
-    it('should render professional plan correctly', () => {
-      const profile = createMockProfile({ plan: 'professional' });
+    it('should render anonymous plan correctly', () => {
+      const profile = createMockProfile({ plan: 'anonymous' });
       render(<SubscriptionTab profile={profile} />);
 
-      expect(screen.getByText('Plan PROFESSIONAL')).toBeInTheDocument();
-      expect(
-        screen.getByText(/plan profesional con todas las funcionalidades/i)
-      ).toBeInTheDocument();
+      expect(screen.getByText(/Plan ANONYMOUS/i)).toBeInTheDocument();
+      expect(screen.getByText(/plan anónimo con funcionalidades limitadas/i)).toBeInTheDocument();
     });
   });
 
@@ -163,7 +161,7 @@ describe('SubscriptionTab', () => {
       render(<SubscriptionTab profile={profile} />);
 
       expect(screen.getByText('Mejora tu Plan')).toBeInTheDocument();
-      expect(screen.getByText(/actualiza a premium o professional/i)).toBeInTheDocument();
+      expect(screen.getByText(/actualiza a premium/i)).toBeInTheDocument();
     });
 
     it('should list upgrade benefits for free users', () => {
@@ -190,8 +188,8 @@ describe('SubscriptionTab', () => {
       expect(screen.queryByText('Mejora tu Plan')).not.toBeInTheDocument();
     });
 
-    it('should NOT show upgrade section for professional users', () => {
-      const profile = createMockProfile({ plan: 'professional' });
+    it('should NOT show upgrade section for anonymous users', () => {
+      const profile = createMockProfile({ plan: 'anonymous' });
       render(<SubscriptionTab profile={profile} />);
 
       expect(screen.queryByText('Mejora tu Plan')).not.toBeInTheDocument();

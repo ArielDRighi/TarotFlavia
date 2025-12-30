@@ -77,7 +77,7 @@ export function FavoriteTarotistaButton({
   }
 
   // Don't render if user is premium (has access to all tarotistas)
-  if (user.plan === 'premium' || user.plan === 'professional') {
+  if (user.plan === 'premium') {
     return null;
   }
 

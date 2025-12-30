@@ -4,16 +4,16 @@ import { PlanBadge } from './plan-badge';
 
 describe('PlanBadge', () => {
   describe('rendering', () => {
-    it('should render with guest plan', () => {
-      render(<PlanBadge plan="guest" />);
+    it('should render with anonymous plan', () => {
+      render(<PlanBadge plan="anonymous" />);
 
-      expect(screen.getByText('GUEST')).toBeInTheDocument();
+      expect(screen.getByText('ANÓNIMO')).toBeInTheDocument();
     });
 
     it('should render with free plan', () => {
       render(<PlanBadge plan="free" />);
 
-      expect(screen.getByText('FREE')).toBeInTheDocument();
+      expect(screen.getByText('GRATUITO')).toBeInTheDocument();
     });
 
     it('should render with premium plan', () => {
@@ -21,34 +21,28 @@ describe('PlanBadge', () => {
 
       expect(screen.getByText('PREMIUM')).toBeInTheDocument();
     });
-
-    it('should render with professional plan', () => {
-      render(<PlanBadge plan="professional" />);
-
-      expect(screen.getByText('PROFESSIONAL')).toBeInTheDocument();
-    });
   });
 
   describe('styles by plan', () => {
-    describe('guest plan', () => {
+    describe('anonymous plan', () => {
       it('should have gray background', () => {
-        render(<PlanBadge plan="guest" />);
+        render(<PlanBadge plan="anonymous" />);
 
-        const badge = screen.getByText('GUEST');
+        const badge = screen.getByText('ANÓNIMO');
         expect(badge).toHaveStyle({ backgroundColor: '#F7FAFC' });
       });
 
       it('should have dark text', () => {
-        render(<PlanBadge plan="guest" />);
+        render(<PlanBadge plan="anonymous" />);
 
-        const badge = screen.getByText('GUEST');
+        const badge = screen.getByText('ANÓNIMO');
         expect(badge).toHaveStyle({ color: '#1A202C' });
       });
 
       it('should not have border', () => {
-        render(<PlanBadge plan="guest" />);
+        render(<PlanBadge plan="anonymous" />);
 
-        const badge = screen.getByText('GUEST');
+        const badge = screen.getByText('ANÓNIMO');
         expect(badge).toHaveClass('border-transparent');
       });
     });
@@ -57,21 +51,21 @@ describe('PlanBadge', () => {
       it('should have gray background', () => {
         render(<PlanBadge plan="free" />);
 
-        const badge = screen.getByText('FREE');
+        const badge = screen.getByText('GRATUITO');
         expect(badge).toHaveStyle({ backgroundColor: '#F7FAFC' });
       });
 
       it('should have dark text', () => {
         render(<PlanBadge plan="free" />);
 
-        const badge = screen.getByText('FREE');
+        const badge = screen.getByText('GRATUITO');
         expect(badge).toHaveStyle({ color: '#1A202C' });
       });
 
       it('should not have border', () => {
         render(<PlanBadge plan="free" />);
 
-        const badge = screen.getByText('FREE');
+        const badge = screen.getByText('GRATUITO');
         expect(badge).toHaveClass('border-transparent');
       });
     });
@@ -98,30 +92,13 @@ describe('PlanBadge', () => {
         expect(badge).toHaveStyle({ borderColor: '#D69E2E' });
       });
     });
-
-    describe('professional plan', () => {
-      it('should have black background', () => {
-        render(<PlanBadge plan="professional" />);
-
-        const badge = screen.getByText('PROFESSIONAL');
-        expect(badge).toHaveStyle({ backgroundColor: '#1A202C' });
-      });
-
-      it('should have white text', () => {
-        render(<PlanBadge plan="professional" />);
-
-        const badge = screen.getByText('PROFESSIONAL');
-        expect(badge).toHaveStyle({ color: '#FFFFFF' });
-      });
-    });
   });
 
   describe('text formatting', () => {
     it('should display text in uppercase', () => {
       render(<PlanBadge plan="free" />);
 
-      expect(screen.getByText('FREE')).toBeInTheDocument();
-      expect(screen.queryByText('free')).not.toBeInTheDocument();
+      expect(screen.getByText('GRATUITO')).toBeInTheDocument();
     });
   });
 
@@ -138,7 +115,7 @@ describe('PlanBadge', () => {
     it('should accept and apply custom className', () => {
       render(<PlanBadge plan="free" className="custom-class" />);
 
-      const badge = screen.getByText('FREE');
+      const badge = screen.getByText('GRATUITO');
       expect(badge).toHaveClass('custom-class');
     });
   });

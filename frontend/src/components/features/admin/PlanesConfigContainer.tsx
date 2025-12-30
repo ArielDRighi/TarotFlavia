@@ -91,8 +91,8 @@ export function PlanesConfigContainer() {
     );
   }
 
-  // Filtrar guest plan para las cards editables
-  const editablePlans = plans?.filter((p) => p.planType !== 'guest') || [];
+  // Filtrar anonymous plan para las cards editables
+  const editablePlans = plans?.filter((p) => p.planType !== 'anonymous') || [];
 
   return (
     <div className="container py-8">

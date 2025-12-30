@@ -179,6 +179,9 @@ export interface CardPositionDto {
 /**
  * DTO for creating a new reading
  * Matches backend CreateReadingDto
+ *
+ * @property generateInterpretation - Solo true para usuarios Premium (default: false)
+ * ACTUALIZADO: Default cambiado de true a false para reflejar cambio en backend
  */
 export interface CreateReadingDto {
   spreadId: number;
@@ -187,6 +190,11 @@ export interface CreateReadingDto {
   cardPositions: CardPositionDto[];
   predefinedQuestionId?: number;
   customQuestion?: string;
+  /**
+   * Solicitar interpretación IA al crear lectura
+   * @default false
+   * Solo true para usuarios Premium
+   */
   generateInterpretation?: boolean;
 }
 

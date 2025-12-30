@@ -38,10 +38,9 @@ interface UsersTableProps {
  */
 function getPlanVariant(plan: UserPlan): 'default' | 'secondary' | 'outline' {
   const variants: Record<UserPlan, 'default' | 'secondary' | 'outline'> = {
-    guest: 'outline',
+    anonymous: 'outline',
     free: 'secondary',
     premium: 'default',
-    professional: 'default',
   };
   return variants[plan] || 'default';
 }

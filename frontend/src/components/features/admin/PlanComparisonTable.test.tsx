@@ -12,9 +12,8 @@ describe('PlanComparisonTable', () => {
     render(<PlanComparisonTable plans={mockPlans} />);
 
     expect(screen.getByText(/feature/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/free/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/anónimo|free/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/premium/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/professional/i).length).toBeGreaterThan(0);
   });
 
   it('should show numeric values for limits', () => {
@@ -23,26 +22,18 @@ describe('PlanComparisonTable', () => {
     // Free plan has readingsLimit: 10, aiQuotaMonthly: 50
     expect(screen.getByText('10')).toBeInTheDocument();
 
-    // Multiple plans have 50 (free aiQuotaMonthly: 50, premium readingsLimit: 50)
+    // Premium plan has readingsLimit: 50
     const fifties = screen.getAllByText('50');
-    expect(fifties.length).toBeGreaterThanOrEqual(2);
+    expect(fifties.length).toBeGreaterThanOrEqual(1);
 
     // Premium plan has aiQuotaMonthly: 200
     expect(screen.getByText('200')).toBeInTheDocument();
   });
 
-  it('should show "Ilimitado" for -1 values', () => {
-    render(<PlanComparisonTable plans={mockPlans} />);
-
-    const ilimitadoTexts = screen.getAllByText(/ilimitado/i);
-    // Professional plan tiene varios ilimitados
-    expect(ilimitadoTexts.length).toBeGreaterThan(0);
-  });
-
   it('should show checkmarks for enabled features', () => {
     render(<PlanComparisonTable plans={mockPlans} />);
 
-    // Premium y Professional tienen features habilitadas
+    // Premium tiene features habilitadas
     const table = screen.getByRole('table');
     expect(table).toBeInTheDocument();
   });
@@ -73,8 +64,8 @@ describe('PlanComparisonTable', () => {
     expect(screen.getByText(/no hay planes/i)).toBeInTheDocument();
   });
 
-  it('should sort plans by type (free, premium, professional)', () => {
-    const unsortedPlans = [mockPlans[2], mockPlans[0], mockPlans[1]]; // professional, free, premium
+  it('should sort plans by type (anonymous, free, premium)', () => {
+    const unsortedPlans = [mockPlans[2], mockPlans[0], mockPlans[1]]; // premium, anonymous, free
     render(<PlanComparisonTable plans={unsortedPlans} />);
 
     const table = screen.getByRole('table');
@@ -82,9 +73,8 @@ describe('PlanComparisonTable', () => {
       th.textContent?.toLowerCase()
     );
 
-    // Debería mostrar en orden: Feature, Free, Premium, Professional
-    expect(headers).toContain('free');
+    // Debería mostrar en orden: Feature, Anónimo, Gratuito, Premium
+    expect(headers).toContain('gratuito');
     expect(headers).toContain('premium');
-    expect(headers).toContain('professional');
   });
 });

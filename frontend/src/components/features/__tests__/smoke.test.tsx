@@ -18,7 +18,7 @@ import type { ReadingCard } from '@/types/reading.types';
  * Type definitions for test data
  */
 type PlanTestCase = {
-  plan: 'guest' | 'free' | 'premium' | 'professional';
+  plan: 'anonymous' | 'free' | 'premium';
   text: string;
 };
 
@@ -97,14 +97,14 @@ describe('Feature Components Smoke Tests', () => {
   });
 
   describe('PlanBadge', () => {
-    it('renders guest plan badge', () => {
-      render(<PlanBadge plan="guest" />);
-      expect(screen.getByText('GUEST')).toBeInTheDocument();
+    it('renders anonymous plan badge', () => {
+      render(<PlanBadge plan="anonymous" />);
+      expect(screen.getByText('ANÓNIMO')).toBeInTheDocument();
     });
 
     it('renders free plan badge', () => {
       render(<PlanBadge plan="free" />);
-      expect(screen.getByText('FREE')).toBeInTheDocument();
+      expect(screen.getByText('GRATUITO')).toBeInTheDocument();
     });
 
     it('renders premium plan badge', () => {
@@ -112,17 +112,11 @@ describe('Feature Components Smoke Tests', () => {
       expect(screen.getByText('PREMIUM')).toBeInTheDocument();
     });
 
-    it('renders professional plan badge', () => {
-      render(<PlanBadge plan="professional" />);
-      expect(screen.getByText('PROFESSIONAL')).toBeInTheDocument();
-    });
-
     it('shows correct text for each plan type', () => {
       const plans: PlanTestCase[] = [
-        { plan: 'guest', text: 'GUEST' },
-        { plan: 'free', text: 'FREE' },
+        { plan: 'anonymous', text: 'ANÓNIMO' },
+        { plan: 'free', text: 'GRATUITO' },
         { plan: 'premium', text: 'PREMIUM' },
-        { plan: 'professional', text: 'PROFESSIONAL' },
       ];
 
       plans.forEach(({ plan, text }) => {

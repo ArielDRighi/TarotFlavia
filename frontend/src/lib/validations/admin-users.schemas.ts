@@ -20,9 +20,10 @@ export type BanUserForm = z.infer<typeof banUserSchema>;
 
 /**
  * Schema para cambiar plan de usuario
+ * UPDATED: 'guest' -> 'anonymous', removed 'professional'
  */
 export const updateUserPlanSchema = z.object({
-  plan: z.enum(['guest', 'free', 'premium', 'professional'], {
+  plan: z.enum(['anonymous', 'free', 'premium'], {
     errorMap: () => ({ message: 'Selecciona un plan válido' }),
   }),
 });
@@ -31,11 +32,12 @@ export type UpdateUserPlanForm = z.infer<typeof updateUserPlanSchema>;
 
 /**
  * Schema para filtros de búsqueda (validación en frontend)
+ * UPDATED: 'guest' -> 'anonymous', removed 'professional'
  */
 export const userFiltersSchema = z.object({
   search: z.string().optional(),
   role: z.enum(['consumer', 'tarotist', 'admin']).optional(),
-  plan: z.enum(['guest', 'free', 'premium', 'professional']).optional(),
+  plan: z.enum(['anonymous', 'free', 'premium']).optional(),
   banned: z.boolean().optional(),
   sortBy: z.enum(['createdAt', 'lastLogin', 'email', 'name']).optional(),
   sortOrder: z.enum(['ASC', 'DESC']).optional(),
