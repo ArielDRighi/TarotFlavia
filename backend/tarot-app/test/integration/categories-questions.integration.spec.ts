@@ -435,74 +435,7 @@ describe('Categories + Questions Integration Tests', () => {
   });
 
   describe('Authorization and Security', () => {
-    it('should deny category creation to non-admin users', async () => {
-      // ARRANGE: Crear usuario regular
-      const regularUser = await usersService.create({
-        email: `regular-${Date.now()}@example.com`,
-        password: 'RegularPass123!',
-        name: 'Regular User',
-      });
-
-      const foundUser1 = await userRepository.findOne({
-        where: { id: regularUser.id },
-      });
-      const regularLogin = await authService.login(
-        foundUser1.id,
-        foundUser1.email,
-        '127.0.0.1',
-        'test-user-agent',
-      );
-
-      const createDto = {
-        name: 'Unauthorized Category',
-        slug: 'unauthorized-cat',
-        description: 'Should not be created',
-        icon: 'unauthorized-icon',
-        color: '#FF00FF',
-        order: 99,
-      };
-
-      // ACT & ASSERT
-      await request(app.getHttpServer())
-        .post('/categories')
-        .set('Authorization', `Bearer ${regularLogin.access_token}`)
-        .send(createDto)
-        .expect(403);
-
-      // Cleanup
-      await userRepository.delete({ id: regularUser.id });
-    });
-
-    it('should deny category update to non-admin users', async () => {
-      // ARRANGE: Crear usuario regular
-      const regularUser = await usersService.create({
-        email: `regular-${Date.now()}@example.com`,
-        password: 'RegularPass123!',
-        name: 'Regular User',
-      });
-
-      const foundUser2 = await userRepository.findOne({
-        where: { id: regularUser.id },
-      });
-      const regularLogin = await authService.login(
-        foundUser2.id,
-        foundUser2.email,
-        '127.0.0.1',
-        'test-user-agent',
-      );
-
-      // ACT & ASSERT
-      await request(app.getHttpServer())
-        .patch(`/categories/${testCategory.id}`)
-        .set('Authorization', `Bearer ${regularLogin.access_token}`)
-        .send({ name: 'Unauthorized Update' })
-        .expect(403);
-
-      // Cleanup
-      await userRepository.delete({ id: regularUser.id });
-    });
-
-    it('should allow public access to GET endpoints', async () => {
+    it('should allow public access to GET categories endpoints', async () => {
       // ACT & ASSERT: Sin token
       await request(app.getHttpServer()).get('/categories').expect(200);
 
@@ -513,6 +446,133 @@ describe('Categories + Questions Integration Tests', () => {
       await request(app.getHttpServer())
         .get(`/categories/slug/${testCategory.slug}`)
         .expect(200);
+    });
+
+    it('should allow public access to GET predefined-questions endpoints', async () => {
+      // ACT & ASSERT: Sin token - GET todas las preguntas
+      const allQuestionsResponse = await request(app.getHttpServer())
+        .get('/predefined-questions')
+        .expect(200);
+
+      expect(Array.isArray(allQuestionsResponse.body)).toBe(true);
+      expect(allQuestionsResponse.body.length).toBeGreaterThan(0);
+
+      // ACT & ASSERT: Sin token - GET preguntas por categoría
+      const categoryQuestionsResponse = await request(app.getHttpServer())
+        .get('/predefined-questions')
+        .query({ categoryId: testCategory.id })
+        .expect(200);
+
+      expect(Array.isArray(categoryQuestionsResponse.body)).toBe(true);
+      const foundQuestion = categoryQuestionsResponse.body.find(
+        (q: PredefinedQuestion) => q.id === testQuestion.id,
+      );
+      expect(foundQuestion).toBeDefined();
+      expect(foundQuestion.questionText).toBe(testQuestion.questionText);
+
+      // ACT & ASSERT: Sin token - GET pregunta específica
+      await request(app.getHttpServer())
+        .get(`/predefined-questions/${testQuestion.id}`)
+        .expect(200);
+    });
+
+    it('should deny non-admin access to POST/PATCH/DELETE category endpoints', async () => {
+      // ARRANGE: Crear usuario regular
+      const regularUser = await usersService.create({
+        email: `regular-${Date.now()}@example.com`,
+        password: 'RegularPass123!',
+        name: 'Regular User',
+      });
+
+      const foundUser = await userRepository.findOne({
+        where: { id: regularUser.id },
+      });
+      const regularLogin = await authService.login(
+        foundUser.id,
+        foundUser.email,
+        '127.0.0.1',
+        'test-user-agent',
+      );
+
+      const createDto = {
+        name: 'Test Category',
+        slug: 'test-slug',
+        description: 'Test',
+        icon: 'test-icon',
+        color: '#FFFFFF',
+        order: 1,
+      };
+
+      // ACT & ASSERT: POST sin admin
+      await request(app.getHttpServer())
+        .post('/categories')
+        .set('Authorization', `Bearer ${regularLogin.access_token}`)
+        .send(createDto)
+        .expect(403);
+
+      // ACT & ASSERT: PATCH sin admin
+      await request(app.getHttpServer())
+        .patch(`/categories/${testCategory.id}`)
+        .set('Authorization', `Bearer ${regularLogin.access_token}`)
+        .send({ name: 'Updated' })
+        .expect(403);
+
+      // ACT & ASSERT: DELETE sin admin
+      await request(app.getHttpServer())
+        .delete(`/categories/${testCategory.id}`)
+        .set('Authorization', `Bearer ${regularLogin.access_token}`)
+        .expect(403);
+
+      // Cleanup
+      await userRepository.delete({ id: regularUser.id });
+    });
+
+    it('should deny non-admin access to POST/PATCH/DELETE question endpoints', async () => {
+      // ARRANGE: Crear usuario regular
+      const regularUser = await usersService.create({
+        email: `regular-${Date.now()}@example.com`,
+        password: 'RegularPass123!',
+        name: 'Regular User',
+      });
+
+      const foundUser = await userRepository.findOne({
+        where: { id: regularUser.id },
+      });
+      const regularLogin = await authService.login(
+        foundUser.id,
+        foundUser.email,
+        '127.0.0.1',
+        'test-user-agent',
+      );
+
+      const createDto = {
+        categoryId: testCategory.id,
+        questionText: 'Test question?',
+        order: 1,
+      };
+
+      // ACT & ASSERT: POST sin admin
+      await request(app.getHttpServer())
+        .post('/predefined-questions')
+        .set('Authorization', `Bearer ${regularLogin.access_token}`)
+        .send(createDto)
+        .expect(403);
+
+      // ACT & ASSERT: PATCH sin admin
+      await request(app.getHttpServer())
+        .patch(`/predefined-questions/${testQuestion.id}`)
+        .set('Authorization', `Bearer ${regularLogin.access_token}`)
+        .send({ questionText: 'Updated?' })
+        .expect(403);
+
+      // ACT & ASSERT: DELETE sin admin
+      await request(app.getHttpServer())
+        .delete(`/predefined-questions/${testQuestion.id}`)
+        .set('Authorization', `Bearer ${regularLogin.access_token}`)
+        .expect(403);
+
+      // Cleanup
+      await userRepository.delete({ id: regularUser.id });
     });
   });
 
