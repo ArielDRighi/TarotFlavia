@@ -13,10 +13,13 @@ import {
   useShareReading,
 } from '@/hooks/api/useReadings';
 import { useAuthStore } from '@/stores/authStore';
+import { useUserPlanFeatures } from '@/hooks/utils/useUserPlanFeatures';
 import { TarotCard } from './TarotCard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ErrorDisplay } from '@/components/ui/error-display';
+import UpgradeBanner from './UpgradeBanner';
+import UpgradeModal from './UpgradeModal';
 import { cn } from '@/lib/utils';
 import type {
   ReadingDetail,
@@ -215,6 +218,7 @@ export function ReadingExperience({
 }: ReadingExperienceProps) {
   const router = useRouter();
   const { user } = useAuthStore();
+  const { canUseAI } = useUserPlanFeatures();
 
   // API Hooks
   const { data: spreads, isLoading: isSpreadsLoading } = useSpreads();
@@ -230,6 +234,7 @@ export function ReadingExperience({
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
   const [readingResult, setReadingResult] = useState<ReadingDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   // Derived values
   const spread = useMemo(() => {
@@ -487,6 +492,13 @@ export function ReadingExperience({
             interpretation={getGeneralInterpretation(readingResult.interpretation)}
           />
 
+          {/* Upgrade Banner for non-premium users */}
+          {!canUseAI && (
+            <div className="mt-6">
+              <UpgradeBanner onUpgradeClick={() => setShowUpgradeModal(true)} />
+            </div>
+          )}
+
           {/* Action Buttons */}
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             {isPremium && (
@@ -518,6 +530,9 @@ export function ReadingExperience({
           </Button>
         </div>
       )}
+
+      {/* Upgrade Modal */}
+      <UpgradeModal open={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
     </div>
   );
 }

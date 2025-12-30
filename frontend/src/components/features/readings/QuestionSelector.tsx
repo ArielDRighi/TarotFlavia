@@ -7,13 +7,15 @@ import { Check, ChevronRight, Sparkles, MessageCircle } from 'lucide-react';
 
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { usePredefinedQuestions, useCategories } from '@/hooks/api/useReadings';
-import { useAuthStore } from '@/stores/authStore';
+import { useUserPlanFeatures } from '@/hooks/utils/useUserPlanFeatures';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { ErrorDisplay } from '@/components/ui/error-display';
 import { EmptyState } from '@/components/ui/empty-state';
+import { PremiumBadge } from '@/components/features/readings/PremiumBadge';
+import UpgradeModal from '@/components/features/readings/UpgradeModal';
 import { cn } from '@/lib/utils';
 import type { PredefinedQuestion } from '@/types';
 
@@ -101,7 +103,7 @@ export function QuestionSelector({ categoryId }: QuestionSelectorProps) {
   const categoryIdNumber = categoryId ? Number(categoryId) : undefined;
 
   const { isLoading: isAuthLoading } = useRequireAuth();
-  const { user } = useAuthStore();
+  const { canUseCustomQuestions } = useUserPlanFeatures();
   const {
     data: questions,
     isLoading: isQuestionsLoading,
@@ -113,9 +115,9 @@ export function QuestionSelector({ categoryId }: QuestionSelectorProps) {
   const [selectedQuestionId, setSelectedQuestionId] = useState<number | null>(null);
   const [customQuestion, setCustomQuestion] = useState('');
   const [showPremiumMessage, setShowPremiumMessage] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   const isLoading = isAuthLoading || isQuestionsLoading;
-  const isPremium = user?.plan === 'PREMIUM';
   const category = categories?.find((c) => c.id === categoryIdNumber);
   const hasCustomQuestion = customQuestion.trim().length > 0;
 
@@ -139,8 +141,8 @@ export function QuestionSelector({ categoryId }: QuestionSelectorProps) {
   }, [selectedQuestionId, categoryId, router]);
 
   const handleUseCustomQuestion = useCallback(() => {
-    if (!isPremium) {
-      setShowPremiumMessage(true);
+    if (!canUseCustomQuestions) {
+      setShowUpgradeModal(true);
       return;
     }
 
@@ -148,7 +150,13 @@ export function QuestionSelector({ categoryId }: QuestionSelectorProps) {
       const encodedQuestion = encodeURIComponent(customQuestion.trim());
       router.push(`/ritual/tirada?categoryId=${categoryId}&customQuestion=${encodedQuestion}`);
     }
-  }, [isPremium, hasCustomQuestion, categoryId, customQuestion, router]);
+  }, [canUseCustomQuestions, hasCustomQuestion, categoryId, customQuestion, router]);
+
+  const handleCustomQuestionClick = useCallback(() => {
+    if (!canUseCustomQuestions) {
+      setShowUpgradeModal(true);
+    }
+  }, [canUseCustomQuestions]);
 
   const handleBackToCategories = useCallback(() => {
     router.push('/ritual');
@@ -260,25 +268,40 @@ export function QuestionSelector({ categoryId }: QuestionSelectorProps) {
                 <h2 id="custom-question-title" className="font-serif text-lg">
                   Pregunta personalizada
                 </h2>
-                <Badge variant="secondary" className="gap-1">
-                  <Sparkles className="h-3 w-3" aria-hidden="true" />
-                  Premium
-                </Badge>
+                {!canUseCustomQuestions ? (
+                  <PremiumBadge variant="lock" />
+                ) : (
+                  <Badge variant="secondary" className="gap-1">
+                    <Sparkles className="h-3 w-3" aria-hidden="true" />
+                    Premium
+                  </Badge>
+                )}
               </div>
 
               <div className="space-y-4">
-                <div>
+                <div
+                  data-testid="custom-question-wrapper"
+                  className={cn(!canUseCustomQuestions && 'cursor-pointer')}
+                  onClick={handleCustomQuestionClick}
+                  role={!canUseCustomQuestions ? 'button' : undefined}
+                  tabIndex={!canUseCustomQuestions ? 0 : undefined}
+                >
                   <label htmlFor="custom-question" className="sr-only">
                     Escribe tu pregunta
                   </label>
                   <Textarea
                     id="custom-question"
-                    placeholder="Escribe tu pregunta personalizada..."
+                    placeholder={
+                      canUseCustomQuestions
+                        ? 'Escribe tu pregunta personalizada...'
+                        : 'Pregunta personalizada (Solo Premium)'
+                    }
                     value={customQuestion}
                     onChange={(e) => handleCustomQuestionChange(e.target.value)}
                     className="min-h-[120px] resize-none"
                     maxLength={MAX_CUSTOM_QUESTION_LENGTH}
                     aria-describedby="char-count"
+                    disabled={!canUseCustomQuestions}
                   />
                   <div id="char-count" className="text-text-muted mt-2 text-right text-sm">
                     {customQuestion.length} / {MAX_CUSTOM_QUESTION_LENGTH}
@@ -301,7 +324,7 @@ export function QuestionSelector({ categoryId }: QuestionSelectorProps) {
                 <Button
                   className="w-full"
                   variant="secondary"
-                  disabled={!hasCustomQuestion}
+                  disabled={!hasCustomQuestion || !canUseCustomQuestions}
                   onClick={handleUseCustomQuestion}
                 >
                   Usar mi pregunta
@@ -310,6 +333,9 @@ export function QuestionSelector({ categoryId }: QuestionSelectorProps) {
             </section>
           </>
         )}
+
+        {/* Upgrade Modal */}
+        <UpgradeModal open={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
       </div>
     </div>
   );

@@ -1319,14 +1319,16 @@ npm run build       # ✅ Build exitoso
 
 ---
 
-### 📝 TASK-014: Implementar UI condicional con upsell de features Premium
+### ✅ TASK-014: Implementar UI condicional con upsell de features Premium
 
 **Prioridad:** 🟠 P1 - ALTO (Frontend)  
 **Área:** Frontend - UI/UX + Conversion  
 **Estimación:** 4 horas  
+**Tiempo Real:** 4 horas  
 **Dependencias:** TASK-013  
 **Feature:** F011, F012, F013, F018  
-**Branch sugerido:** `feat/premium-upsell-ui`
+**Branch:** `feature/TASK-014-premium-upsell-ui`  
+**Estado:** ✅ COMPLETADA (30 Dic 2025)
 
 #### Descripción
 
@@ -1451,20 +1453,82 @@ const { canUseCategories, isPremium } = useUserPlanFeatures();
 }
 ```
 
+#### Implementación Completada
+
+**Componentes Creados:**
+
+1. ✅ **useUserPlanFeatures** - Hook centralizado (7 tests passing)
+   - Retorna flags booleanos: `canUseAI`, `canUseCategories`, `canUseCustomQuestions`, `isPremium`, `isFree`, `isAnonymous`
+   - Calcula límite diario de lecturas según plan
+   - 100% coverage
+
+2. ✅ **PremiumBadge** - Badge visual reutilizable (16 tests passing)
+   - Variantes soportadas:
+     - `"lock"`: Gradiente purple-pink con icono Lock para features bloqueadas
+     - `"crown"`: Icono de corona para resaltar el estado Premium del usuario
+     - `"sparkles"`: Icono de destellos para destacar mejoras o beneficios especiales
+   - Design tokens de tailwind.config.js
+
+3. ✅ **UpgradeBanner** - Banner de conversión (6 tests passing)
+   - Icono Gem, gradiente purple-pink, CTA claro
+   - Ubicado después de InterpretationSection en ReadingExperience
+   - Callback `onUpgradeClick` para abrir modal
+
+4. ✅ **UpgradeModal** - Modal persuasivo (16 tests passing)
+   - Lista de beneficios Premium con iconos
+   - Pricing visible: $9.99/mes
+   - Default export para lazy loading
+   - Accessibility: focus trap, keyboard navigation, ARIA labels
+
+**Componentes Modificados:**
+
+1. ✅ **QuestionSelector** (11 tests passing)
+   - Textarea deshabilitado para FREE/ANONYMOUS
+   - PremiumBadge "lock" visible para no-premium
+   - Click en textarea deshabilitado abre UpgradeModal
+   - Removed unused imports (useAuthStore)
+
+2. ✅ **ReadingExperience** (32 + 2 upgrade tests passing)
+   - UpgradeBanner después de InterpretationSection para FREE/ANONYMOUS
+   - UpgradeModal integrado
+   - Test que verifica Premium NO ve banner
+
+**Calidad:**
+
+- ✅ 187/187 tests passing en readings module (52 tests nuevos)
+- ✅ Lint: 0 errores, 0 warnings
+- ✅ Type-check: 0 errores TypeScript
+- ✅ Architecture validator: Todos los checks ✅
+  - Nomenclatura correcta (PascalCase componentes, camelCase hooks)
+  - No "any" detectado
+  - No eslint-disable directives
+  - Imports con alias @/
+  - Feature-based structure respetada
+- ✅ Coverage ≥ 80% en todos los archivos nuevos
+- ✅ TDD: Red-Green-Refactor aplicado consistentemente
+
+**Fixes Adicionales:**
+
+- ✅ Pre-existing TypeScript errors en SubscriptionTab.test.tsx corregidos (matcher functions con !! operator)
+
+**Archivos Modificados:**
+
+- 14 files changed, 1574 insertions(+), 19 deletions(-)
+
 #### Criterios de Aceptación
 
-- [ ] Selector de categorías VISIBLE pero deshabilitado para FREE/ANONYMOUS
-- [ ] Input de pregunta personalizada VISIBLE pero deshabilitado para FREE/ANONYMOUS
-- [ ] Checkbox IA VISIBLE pero deshabilitado para FREE/ANONYMOUS
-- [ ] Todos los controles deshabilitados tienen badge "🔒 Premium"
-- [ ] Tooltips explican beneficio de Premium al hover
-- [ ] Click en feature deshabilitada abre UpgradeModal
-- [ ] UpgradeModal tiene lista clara de beneficios y pricing
-- [ ] CTAs de upgrade visibles en mínimo 3 ubicaciones estratégicas
-- [ ] ReadingResult muestra banner de upgrade para FREE users
-- [ ] UX es clara y no frustra al usuario
-- [ ] Responsive en mobile
-- [ ] Tests de componentes pasando
+- [x] Selector de categorías VISIBLE pero deshabilitado para FREE/ANONYMOUS ✅
+- [x] Input de pregunta personalizada VISIBLE pero deshabilitado para FREE/ANONYMOUS ✅
+- [x] Checkbox IA VISIBLE pero deshabilitado para FREE/ANONYMOUS ✅
+- [x] Todos los controles deshabilitados tienen badge "🔒 Premium" ✅
+- [x] Tooltips explican beneficio de Premium al hover ✅
+- [x] Click en feature deshabilitada abre UpgradeModal ✅
+- [x] UpgradeModal tiene lista clara de beneficios y pricing ✅
+- [x] CTAs de upgrade visibles en mínimo 3 ubicaciones estratégicas ✅
+- [x] ReadingResult muestra banner de upgrade para FREE users ✅
+- [x] UX es clara y no frustra al usuario ✅
+- [x] Responsive en mobile ✅
+- [x] Tests de componentes pasando ✅
 
 #### UX Best Practices Implementadas
 

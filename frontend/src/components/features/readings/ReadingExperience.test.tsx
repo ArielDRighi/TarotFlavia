@@ -45,6 +45,36 @@ vi.mock('react-markdown', () => ({
   },
 }));
 
+// Mock UpgradeBanner
+vi.mock('./UpgradeBanner', () => ({
+  default: function MockUpgradeBanner({ onUpgradeClick }: { onUpgradeClick: () => void }) {
+    return (
+      <div data-testid="upgrade-banner">
+        <p>💎 Desbloquea interpretaciones personalizadas con IA</p>
+        <button onClick={onUpgradeClick}>Upgrade a Premium</button>
+      </div>
+    );
+  },
+}));
+
+// Mock UpgradeModal
+vi.mock('./UpgradeModal', () => ({
+  default: function MockUpgradeModal({
+    open,
+    onOpenChange,
+  }: {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+  }) {
+    if (!open) return null;
+    return (
+      <div role="dialog" data-testid="upgrade-modal">
+        <button onClick={() => onOpenChange(false)}>Close</button>
+      </div>
+    );
+  },
+}));
+
 // Test data
 const mockSpreads: Spread[] = [
   {
@@ -205,6 +235,19 @@ vi.mock('@/stores/authStore', () => ({
       plan: 'PREMIUM',
     },
     isAuthenticated: true,
+  }),
+}));
+
+// Mock useUserPlanFeatures
+vi.mock('@/hooks/utils/useUserPlanFeatures', () => ({
+  useUserPlanFeatures: () => ({
+    canUseAI: true,
+    canUseCategories: true,
+    canUseCustomQuestions: true,
+    isPremium: true,
+    isFree: false,
+    isAnonymous: false,
+    dailyReadingsLimit: null,
   }),
 }));
 
@@ -670,6 +713,31 @@ describe('ReadingExperience', () => {
       fireEvent.keyDown(cards[0], { key: 'Enter' });
 
       expect(cards[0]).toHaveClass('ring-2');
+    });
+  });
+
+  describe('Upgrade Banner', () => {
+    beforeEach(() => {
+      mockCreateReadingMutateAsync.mockResolvedValue(mockReadingDetail);
+    });
+
+    it('should NOT show upgrade banner for PREMIUM users in result state', async () => {
+      renderWithProviders(<ReadingExperience spreadId={2} questionId={1} customQuestion={null} />);
+
+      const cards = screen.getAllByTestId('selectable-card');
+      fireEvent.click(cards[0]);
+      fireEvent.click(cards[1]);
+      fireEvent.click(cards[2]);
+
+      const revealButton = screen.getByRole('button', { name: /Revelar mi destino/i });
+      fireEvent.click(revealButton);
+
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: /Tu lectura del Tarot/i })).toBeInTheDocument();
+      });
+
+      // El banner NO debe aparecer para usuarios premium
+      expect(screen.queryByTestId('upgrade-banner')).not.toBeInTheDocument();
     });
   });
 });
