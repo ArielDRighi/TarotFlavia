@@ -26,9 +26,11 @@ describe('SubscriptionTab', () => {
       render(<SubscriptionTab profile={profile} />);
 
       // Buscar por el párrafo con clase text-lg (el título del plan)
-      expect(screen.getByText((content, element) => {
-        return element?.classList.contains('text-lg') && /Plan GRATUITO/i.test(content);
-      })).toBeInTheDocument();
+      expect(
+        screen.getByText((content, element) => {
+          return !!(element?.classList.contains('text-lg') && /Plan GRATUITO/i.test(content));
+        })
+      ).toBeInTheDocument();
       expect(screen.getByText(/plan gratuito con funcionalidades básicas/i)).toBeInTheDocument();
     });
 
@@ -45,9 +47,11 @@ describe('SubscriptionTab', () => {
       render(<SubscriptionTab profile={profile} />);
 
       // Buscar por el párrafo con clase text-lg (el título del plan)
-      expect(screen.getByText((content, element) => {
-        return element?.classList.contains('text-lg') && /Plan ANÓNIMO/i.test(content);
-      })).toBeInTheDocument();
+      expect(
+        screen.getByText((content, element) => {
+          return !!(element?.classList.contains('text-lg') && /Plan ANÓNIMO/i.test(content));
+        })
+      ).toBeInTheDocument();
       expect(screen.getByText(/plan anónimo con funcionalidades limitadas/i)).toBeInTheDocument();
     });
   });
