@@ -1463,8 +1463,10 @@ const { canUseCategories, isPremium } = useUserPlanFeatures();
    - 100% coverage
 
 2. ✅ **PremiumBadge** - Badge visual reutilizable (16 tests passing)
-   - Variante "lock": Gradiente purple-pink con icono Lock para features bloqueadas
-   - Variante "unlock": Verde con icono Check para features desbloqueadas
+   - Variantes soportadas:
+     - `"lock"`: Gradiente purple-pink con icono Lock para features bloqueadas
+     - `"crown"`: Icono de corona para resaltar el estado Premium del usuario
+     - `"sparkles"`: Icono de destellos para destacar mejoras o beneficios especiales
    - Design tokens de tailwind.config.js
 
 3. ✅ **UpgradeBanner** - Banner de conversión (6 tests passing)

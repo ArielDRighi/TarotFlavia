@@ -226,7 +226,7 @@ describe('ReadingExperience - Upgrade Banner for FREE users', () => {
       user: {
         id: 1,
         email: 'test@example.com',
-        plan: 'FREE',
+        plan: 'free',
       },
       isAuthenticated: true,
     }),

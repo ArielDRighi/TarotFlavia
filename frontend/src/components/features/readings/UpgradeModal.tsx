@@ -69,7 +69,7 @@ const PREMIUM_BENEFITS = [
  */
 export default function UpgradeModal({ open, onClose }: UpgradeModalProps) {
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle className="mb-2 text-center font-serif text-3xl">

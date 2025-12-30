@@ -114,11 +114,11 @@ describe('PremiumBadge', () => {
       expect(badge).toHaveAttribute('aria-label', 'Actualiza tu plan');
     });
 
-    it('should not have aria-label without tooltip', () => {
+    it('should have aria-label with fallback when no tooltip provided', () => {
       render(<PremiumBadge />);
 
       const badge = screen.getByText(/premium/i).closest('[data-slot="badge"]');
-      expect(badge).not.toHaveAttribute('aria-label');
+      expect(badge).toHaveAttribute('aria-label', 'Premium');
     });
   });
 });

@@ -77,7 +77,7 @@ export function useUserPlanFeatures(): UseUserPlanFeaturesReturn {
   const { user } = useAuth();
 
   return useMemo(() => {
-    const plan: UserPlan = (user?.plan as UserPlan) || 'ANONYMOUS';
+    const plan: UserPlan = (user?.plan as UserPlan) || 'anonymous';
     const isPremium = plan === 'premium';
     const isFree = plan === 'free';
     const isAnonymous = plan === 'anonymous';

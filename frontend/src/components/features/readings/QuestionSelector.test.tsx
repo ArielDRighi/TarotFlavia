@@ -6,12 +6,14 @@ import { QuestionSelector } from './QuestionSelector';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { usePredefinedQuestions, useCategories } from '@/hooks/api/useReadings';
 import { useAuthStore } from '@/stores/authStore';
+import { useUserPlanFeatures } from '@/hooks/utils/useUserPlanFeatures';
 
 // Mocks
 vi.mock('next/navigation');
 vi.mock('@/hooks/useRequireAuth');
 vi.mock('@/hooks/api/useReadings');
 vi.mock('@/stores/authStore');
+vi.mock('@/hooks/utils/useUserPlanFeatures');
 
 const mockPush = vi.fn();
 const mockRefetch = vi.fn();
@@ -48,12 +50,39 @@ describe('QuestionSelector', () => {
       isLoading: false,
       error: null,
     });
+
+    // Mock default: PREMIUM user (can use all features)
+    (useUserPlanFeatures as ReturnType<typeof vi.fn>).mockReturnValue({
+      canUseAI: true,
+      canUseCategories: true,
+      canUseCustomQuestions: true,
+      canShare: true,
+      isPremium: true,
+      isFree: false,
+      isAnonymous: false,
+      dailyReadingsLimit: 3,
+      plan: 'premium',
+      planLabel: 'PREMIUM',
+    });
   });
 
   describe('Premium Upsell Flow', () => {
     it('should show UpgradeModal when FREE user clicks on custom question textarea', async () => {
       (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         user: { id: 1, plan: 'free', email: 'test@test.com' },
+      });
+
+      (useUserPlanFeatures as ReturnType<typeof vi.fn>).mockReturnValue({
+        canUseAI: false,
+        canUseCategories: false,
+        canUseCustomQuestions: false,
+        canShare: true,
+        isPremium: false,
+        isFree: true,
+        isAnonymous: false,
+        dailyReadingsLimit: 2,
+        plan: 'free',
+        planLabel: 'GRATUITO',
       });
 
       render(<QuestionSelector categoryId="1" />);
@@ -75,6 +104,19 @@ describe('QuestionSelector', () => {
     it('should show UpgradeModal when ANONYMOUS user clicks on custom question textarea', async () => {
       (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         user: { id: 1, plan: 'anonymous', email: 'test@test.com' },
+      });
+
+      (useUserPlanFeatures as ReturnType<typeof vi.fn>).mockReturnValue({
+        canUseAI: false,
+        canUseCategories: false,
+        canUseCustomQuestions: false,
+        canShare: false,
+        isPremium: false,
+        isFree: false,
+        isAnonymous: true,
+        dailyReadingsLimit: 1,
+        plan: 'anonymous',
+        planLabel: 'ANÓNIMO',
       });
 
       render(<QuestionSelector categoryId="1" />);
@@ -111,6 +153,19 @@ describe('QuestionSelector', () => {
         user: { id: 1, plan: 'free', email: 'test@test.com' },
       });
 
+      (useUserPlanFeatures as ReturnType<typeof vi.fn>).mockReturnValue({
+        canUseAI: false,
+        canUseCategories: false,
+        canUseCustomQuestions: false,
+        canShare: true,
+        isPremium: false,
+        isFree: true,
+        isAnonymous: false,
+        dailyReadingsLimit: 2,
+        plan: 'free',
+        planLabel: 'GRATUITO',
+      });
+
       render(<QuestionSelector categoryId="1" />);
 
       await waitFor(() => {
@@ -125,6 +180,19 @@ describe('QuestionSelector', () => {
     it('should open UpgradeModal when clicking disabled textarea wrapper', async () => {
       (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         user: { id: 1, plan: 'free', email: 'test@test.com' },
+      });
+
+      (useUserPlanFeatures as ReturnType<typeof vi.fn>).mockReturnValue({
+        canUseAI: false,
+        canUseCategories: false,
+        canUseCustomQuestions: false,
+        canShare: true,
+        isPremium: false,
+        isFree: true,
+        isAnonymous: false,
+        dailyReadingsLimit: 2,
+        plan: 'free',
+        planLabel: 'GRATUITO',
       });
 
       render(<QuestionSelector categoryId="1" />);

@@ -2,7 +2,7 @@
 
 import { Lock, Crown, Sparkles } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils/cn';
+import { cn } from '@/lib/utils';
 
 /**
  * Badge variants for premium features
@@ -86,7 +86,7 @@ export function PremiumBadge({
         SIZE_CLASSES[size],
         className
       )}
-      aria-label={tooltip}
+      aria-label={tooltip ?? text ?? 'Premium feature'}
     >
       <Icon
         data-testid={`${variant}-icon`}
