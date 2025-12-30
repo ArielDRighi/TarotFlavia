@@ -2,7 +2,7 @@
 -- Script de Verificación de Contenido de Cartas de Tarot
 -- =============================================================================
 -- Este script verifica que todas las cartas del tarot tengan contenido completo
--- Ejecutar: docker exec -i tarotflavia-postgres-db psql -U tarotflavia_user -d tarot_db -f verify-cards-content.sql
+-- Ejecutar: docker exec -i tarotflavia-postgres-db psql -U tarotflavia_user -d tarot_db < backend/tarot-app/scripts/verify-cards-content.sql
 --
 -- Criterios de verificación:
 -- 1. Todas las cartas deben tener descripción no nula

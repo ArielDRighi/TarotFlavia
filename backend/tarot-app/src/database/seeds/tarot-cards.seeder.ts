@@ -164,8 +164,8 @@ function validateCardContent(
     /lorem ipsum/i,
     /todo:/i,
     /\bplaceholder\b/i,
-    /pendiente de/i, // "pendiente de completar", etc.
-    /\bpendiente\b(?!\s*(de|s))/i, // "pendiente" solo, no "pendientes" o "pendiente de"
+    /pendiente de/i, // "pendiente de completar", "pendiente de traducir", etc.
+    /\bpendiente\b(?!\s*(de|s))/i, // "pendiente" aislado (rechaza), permite "pendiente de" y "pendientes"
   ];
   const textToCheck = [
     cardData.description,

@@ -332,7 +332,7 @@ describe('TarotCards Seeder', () => {
       savedCards.forEach((card) => {
         expect(card.description).toBeDefined();
         expect(card.description.trim()).not.toBe('');
-        expect(card.description.length).toBeGreaterThan(20);
+        expect(card.description.trim().length).toBeGreaterThanOrEqual(20);
       });
     });
 
@@ -349,7 +349,7 @@ describe('TarotCards Seeder', () => {
       savedCards.forEach((card) => {
         expect(card.meaningUpright).toBeDefined();
         expect(card.meaningUpright.trim()).not.toBe('');
-        expect(card.meaningUpright.length).toBeGreaterThan(30);
+        expect(card.meaningUpright.trim().length).toBeGreaterThanOrEqual(30);
       });
     });
 
@@ -366,7 +366,7 @@ describe('TarotCards Seeder', () => {
       savedCards.forEach((card) => {
         expect(card.meaningReversed).toBeDefined();
         expect(card.meaningReversed.trim()).not.toBe('');
-        expect(card.meaningReversed.length).toBeGreaterThan(30);
+        expect(card.meaningReversed.trim().length).toBeGreaterThanOrEqual(30);
       });
     });
 
@@ -407,7 +407,7 @@ describe('TarotCards Seeder', () => {
       });
     });
 
-    it('should have proper Spanish text (no lorem ipsum)', async () => {
+    it('should not contain placeholder text', async () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
         .spyOn(cardRepository, 'save')
@@ -418,13 +418,20 @@ describe('TarotCards Seeder', () => {
       const savedCards = saveSpy.mock.calls[0][0] as TarotCard[];
 
       savedCards.forEach((card) => {
-        // Check for placeholder text
-        expect(card.description.toLowerCase()).not.toContain('lorem ipsum');
-        expect(card.description.toLowerCase()).not.toContain('todo:');
-        expect(card.description.toLowerCase()).not.toContain('placeholder');
+        const textToCheck = [
+          card.description,
+          card.meaningUpright,
+          card.meaningReversed,
+        ].join(' ');
 
-        expect(card.meaningUpright.toLowerCase()).not.toContain('lorem ipsum');
-        expect(card.meaningReversed.toLowerCase()).not.toContain('lorem ipsum');
+        // Check for placeholder text patterns (matching seeder validation)
+        expect(textToCheck.toLowerCase()).not.toContain('lorem ipsum');
+        expect(textToCheck.toLowerCase()).not.toContain('todo:');
+        expect(textToCheck.toLowerCase()).not.toContain('placeholder');
+        expect(textToCheck.toLowerCase()).not.toMatch(/pendiente de/i);
+        expect(textToCheck.toLowerCase()).not.toMatch(
+          /\bpendiente\b(?!\s*(de|s))/i,
+        );
       });
     });
   });
