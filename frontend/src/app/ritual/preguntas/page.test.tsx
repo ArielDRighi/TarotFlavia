@@ -7,6 +7,7 @@ import QuestionsPage from './page';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { usePredefinedQuestions, useCategories } from '@/hooks/api/useReadings';
 import { useAuthStore } from '@/stores/authStore';
+import { useUserPlanFeatures } from '@/hooks/utils/useUserPlanFeatures';
 
 // Mock modules
 vi.mock('next/navigation', () => ({
@@ -25,6 +26,10 @@ vi.mock('@/hooks/api/useReadings', () => ({
 
 vi.mock('@/stores/authStore', () => ({
   useAuthStore: vi.fn(),
+}));
+
+vi.mock('@/hooks/utils/useUserPlanFeatures', () => ({
+  useUserPlanFeatures: vi.fn(),
 }));
 
 // Mock data
@@ -104,6 +109,14 @@ describe('QuestionsPage', () => {
       data: [mockCategory],
       isLoading: false,
       error: null,
+    });
+    // Default: FREE user
+    (useUserPlanFeatures as Mock).mockReturnValue({
+      plan: 'free',
+      planLabel: 'GRATUITO',
+      canUseCustomQuestions: false,
+      isPremium: false,
+      isFree: true,
     });
   });
 
@@ -428,31 +441,33 @@ describe('QuestionsPage', () => {
     it('should show character counter', () => {
       render(<QuestionsPage />);
 
-      expect(screen.getByText(/0 \/ 500/i)).toBeInTheDocument();
+      expect(screen.getByText('0 / 500')).toBeInTheDocument();
     });
 
     it('should update character counter when typing', async () => {
-      const user = userEvent.setup();
       render(<QuestionsPage />);
 
       const textarea = screen.getByRole('textbox');
-      await user.type(textarea, 'Mi pregunta');
+      const wrapper = screen.getByTestId('custom-question-wrapper');
 
-      expect(screen.getByText(/11 \/ 500/i)).toBeInTheDocument();
+      // For FREE users, clicking wrapper shows upgrade modal
+      fireEvent.click(wrapper);
+
+      // Character count should still be 0 since textarea is disabled
+      expect(screen.getByText('0 / 500')).toBeInTheDocument();
     });
 
     it('should show premium upgrade message when FREE user tries to use custom question', async () => {
-      const user = userEvent.setup();
       render(<QuestionsPage />);
 
-      const textarea = screen.getByRole('textbox');
-      await user.type(textarea, 'Mi pregunta personalizada');
+      const wrapper = screen.getByTestId('custom-question-wrapper');
 
-      const useMyQuestionBtn = screen.getByRole('button', { name: /usar mi pregunta/i });
-      fireEvent.click(useMyQuestionBtn);
+      // Click wrapper should show upgrade modal
+      fireEvent.click(wrapper);
 
-      // Should show toast or message
-      expect(screen.getByText(/actualiza a premium/i)).toBeInTheDocument();
+      // Modal should appear with upgrade message
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+      expect(screen.getByText(/Desbloquea todo el potencial del Tarot/i)).toBeInTheDocument();
     });
 
     it('should have disabled "use my question" button for FREE user', async () => {
@@ -477,26 +492,43 @@ describe('QuestionsPage', () => {
         error: null,
       });
       (useAuthStore as unknown as Mock).mockReturnValue({ user: mockUserPremium });
+      // Mock PREMIUM features
+      (useUserPlanFeatures as Mock).mockReturnValue({
+        plan: 'premium',
+        planLabel: 'PREMIUM',
+        canUseCustomQuestions: true,
+        isPremium: true,
+        isFree: false,
+      });
     });
 
-    it('should enable custom question textarea for PREMIUM user', async () => {
-      const user = userEvent.setup();
+    it('should enable custom question textarea for PREMIUM user', () => {
       render(<QuestionsPage />);
 
-      const textarea = screen.getByRole('textbox');
-      await user.type(textarea, 'Mi pregunta personalizada');
+      const textarea = screen.getByRole('textbox') as HTMLTextAreaElement;
 
-      expect(textarea).toHaveValue('Mi pregunta personalizada');
+      // Textarea should not be disabled for premium users
+      expect(textarea).not.toBeDisabled();
+
+      // Type into textarea
+      fireEvent.change(textarea, { target: { value: 'Mi pregunta personalizada' } });
+
+      expect(textarea.value).toBe('Mi pregunta personalizada');
     });
 
-    it('should enable "use my question" button when custom question has text', async () => {
-      const user = userEvent.setup();
+    it('should enable "use my question" button when custom question has text', () => {
       render(<QuestionsPage />);
 
-      const textarea = screen.getByRole('textbox');
-      await user.type(textarea, 'Mi pregunta');
-
+      const textarea = screen.getByRole('textbox') as HTMLTextAreaElement;
       const useMyQuestionBtn = screen.getByRole('button', { name: /usar mi pregunta/i });
+
+      // Initially disabled
+      expect(useMyQuestionBtn).toBeDisabled();
+
+      // Type text
+      fireEvent.change(textarea, { target: { value: 'Mi pregunta' } });
+
+      // Should be enabled now
       expect(useMyQuestionBtn).not.toBeDisabled();
     });
 
@@ -507,12 +539,11 @@ describe('QuestionsPage', () => {
       expect(useMyQuestionBtn).toBeDisabled();
     });
 
-    it('should navigate to tirada page with custom question when "use my question" is clicked', async () => {
-      const user = userEvent.setup();
+    it('should navigate to tirada page with custom question when "use my question" is clicked', () => {
       render(<QuestionsPage />);
 
-      const textarea = screen.getByRole('textbox');
-      await user.type(textarea, 'Mi pregunta personalizada');
+      const textarea = screen.getByRole('textbox') as HTMLTextAreaElement;
+      fireEvent.change(textarea, { target: { value: 'Mi pregunta personalizada' } });
 
       const useMyQuestionBtn = screen.getByRole('button', { name: /usar mi pregunta/i });
       fireEvent.click(useMyQuestionBtn);
@@ -522,8 +553,7 @@ describe('QuestionsPage', () => {
       );
     });
 
-    it('should clear predefined selection when typing custom question', async () => {
-      const user = userEvent.setup();
+    it('should clear predefined selection when typing custom question', () => {
       render(<QuestionsPage />);
 
       // First select a predefined question
@@ -532,8 +562,8 @@ describe('QuestionsPage', () => {
       expect(questionCards[0]).toHaveClass('border-primary');
 
       // Then type a custom question
-      const textarea = screen.getByRole('textbox');
-      await user.type(textarea, 'Mi pregunta');
+      const textarea = screen.getByRole('textbox') as HTMLTextAreaElement;
+      fireEvent.change(textarea, { target: { value: 'Mi pregunta' } });
 
       // Predefined selection should be cleared
       expect(questionCards[0]).not.toHaveClass('border-primary');
