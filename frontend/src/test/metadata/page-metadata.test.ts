@@ -10,11 +10,13 @@ import { Metadata } from 'next';
 
 describe('Page Metadata Exports', () => {
   describe('Static Pages', () => {
-    it('home page should export homeMetadata', async () => {
-      const homePage = await import('@/app/page');
-      expect(homePage.metadata).toBeDefined();
-      expect((homePage.metadata as Metadata).title).toBe('Tu guía espiritual');
-    });
+    // HomePage is now a 'use client' component with dual logic (TASK-017)
+    // Metadata is handled in root layout.tsx instead
+    // it('home page should export homeMetadata', async () => {
+    //   const homePage = await import('@/app/page');
+    //   expect(homePage.metadata).toBeDefined();
+    //   expect((homePage.metadata as Metadata).title).toBe('Tu guía espiritual');
+    // });
 
     it('login page should export loginMetadata', async () => {
       const loginPage = await import('@/app/login/page');

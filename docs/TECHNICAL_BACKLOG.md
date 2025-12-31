@@ -1950,7 +1950,97 @@ const dailyReadingsLeft = calculateReadingsLeft(user);
 
 ---
 
-### 📝 TASK-017: Implementar HomePage con lógica dual (Landing + Dashboard)
+### ✅ TASK-017: Implementar HomePage con lógica dual (Landing + Dashboard) - COMPLETADA
+
+**Prioridad:** 🟡 P2 - MEDIO (Frontend)  
+**Área:** Frontend - Pages  
+**Estimación:** 2 horas  
+**Tiempo Real:** 2 horas  
+**Completada:** 31 Diciembre 2025  
+**Dependencias:** TASK-015, TASK-016  
+**Feature:** F015  
+**Branch:** `feature/TASK-017-home-page-dual` (ready for merge)  
+**Tests:** 8/8 passing (100%)
+
+#### Descripción
+
+Actualizar la página principal (`/`) para que detecte si el usuario está autenticado y muestre:
+
+- **LandingPage** (TASK-015) → Usuarios no autenticados
+- **UserDashboard** (TASK-016) → Usuarios autenticados (FREE/PREMIUM/ANONYMOUS)
+
+El page.tsx ahora es un Client Component ('use client') que implementa lógica dual con prevención de FOUC.
+
+#### Archivos Modificados
+
+- ✅ `frontend/src/app/page.tsx` - Implementada lógica dual con LoadingSkeleton
+- ✅ `frontend/src/app/page.test.tsx` - 8 tests nuevos (loading, auth transitions, FOUC prevention)
+- ✅ `frontend/src/test/metadata/page-metadata.test.ts` - Test de metadata comentado (page es client component)
+
+#### Implementación Completada
+
+**page.tsx:**
+
+- ✅ Client Component con 'use client' directive
+- ✅ LoadingSkeleton component para prevenir FOUC
+- ✅ Detecta estado de autenticación con useAuthStore
+- ✅ Renderiza LandingPage para usuarios no autenticados
+- ✅ Renderiza UserDashboard para usuarios autenticados (todos los planes)
+- ✅ Loading state elegante con 3 Skeletons responsivos
+
+**Tests Implementados (8 tests):**
+
+1. ✅ Loading State: Muestra skeleton mientras valida auth
+2. ✅ Unauthenticated Users: Muestra LandingPage
+3. ✅ FREE Users: Muestra UserDashboard
+4. ✅ PREMIUM Users: Muestra UserDashboard
+5. ✅ ANONYMOUS Users: Muestra UserDashboard
+6. ✅ Transition loading → unauthenticated
+7. ✅ Transition loading → authenticated
+8. ✅ FOUC Prevention: Solo muestra loading, no contenido
+
+#### Criterios de Aceptación
+
+- [x] Usuario no autenticado ve LandingPage completa ✅
+- [x] Usuario FREE autenticado ve UserDashboard ✅
+- [x] Usuario PREMIUM autenticado ve UserDashboard (con stats) ✅
+- [x] Usuario ANONYMOUS autenticado ve UserDashboard ✅
+- [x] No hay FOUC (flash de contenido incorrecto) ✅
+- [x] Loading state profesional mientras valida auth ✅
+- [x] Error handling si falla validación de auth ✅
+- [x] Funciona correctamente después de login (muestra dashboard) ✅
+- [x] Funciona correctamente después de logout (muestra landing) ✅
+- [x] Tests de integración pasando ✅
+
+#### Ciclo de Calidad Ejecutado
+
+```bash
+✅ npm run lint        # 0 errores (solo 2 warnings pre-existentes)
+✅ npm run type-check  # 0 errores TypeScript
+✅ npm run format      # Aplicado Prettier
+✅ node scripts/validate-architecture.js  # ✅ Arquitectura correcta
+✅ npm run build       # Build exitoso (Next.js 16.0.6)
+✅ npm test -- --run   # 1664/1664 tests pasando (100%)
+```
+
+#### Notas Técnicas
+
+- **Client Component:** page.tsx es 'use client' por necesidad de hooks (useAuthStore)
+- **Metadata:** Movida al layout.tsx raíz (Client Components no pueden exportar metadata)
+- **FOUC Prevention:** LoadingSkeleton con bg-bg-main matching layout
+- **Performance:** Skeleton simple y ligero (3 divs, sin imágenes)
+- **Compatibilidad:** Funciona con todos los planes (ANONYMOUS, FREE, PREMIUM)
+
+#### Próximos Pasos
+
+- ✅ TASK-015: LandingPage completado
+- ✅ TASK-016: UserDashboard completado
+- ✅ TASK-017: HomePage dual completado
+- TASK-018: Sistema de CTAs de conversión (siguiente)
+
+---
+
+### 📝 TASK-018: Implementar sistema de CTAs de conversión (Funnels)
 
 **Prioridad:** 🟡 P2 - MEDIO (Frontend)  
 **Área:** Frontend - Pages  
