@@ -16,13 +16,45 @@
 | TASK-003 | ✅     | 🔴 P0 CRÍTICO | Backend - Seeder  | 1.5h       | 21 Dic 2025 |
 | TASK-004 | ✅     | 🔴 P0 CRÍTICO | Backend - Guards  | 2h         | 22 Dic 2025 |
 | TASK-005 | ✅     | 🔴 P0 CRÍTICO | Backend - DTOs    | 0.5h       | 23 Dic 2025 |
-| TASK-006 | 📝     | 🔴 P0 CRÍTICO | Backend - Service | 1h         | -           |
-| TASK-007 | 📝     | 🔴 P0 CRÍTICO | Backend - Cron    | 4h         | -           |
-| TASK-008 | 📝     | 🔴 P0 CRÍTICO | Backend - Service | 2.5h       | -           |
+| TASK-006 | ✅     | 🔴 P0 CRÍTICO | Backend - Service | 1h         | 27 Dic 2025 |
+| TASK-007 | ✅     | 🔴 P0 CRÍTICO | Backend - Cron    | 4h         | 27 Dic 2025 |
+| TASK-008 | ✅     | 🔴 P0 CRÍTICO | Backend - Service | 2.5h       | 28 Dic 2025 |
 
-**Progreso:** 5/8 tareas completadas (62.5%)  
-**Tiempo invertido:** ~7h / 16-18h estimado  
+**Progreso:** 8/8 tareas completadas (100%) ✅  
+**Tiempo invertido:** ~17h / 16-18h estimado  
 **Ahorro proyectado:** $100 USD/mes por cada 1,000 usuarios FREE
+
+---
+
+## 📊 Estado de Tareas - Sprint 2 (Validaciones)
+
+| Tarea    | Estado | Prioridad   | Área                  | Estimación | Completada  |
+| -------- | ------ | ----------- | --------------------- | ---------- | ----------- |
+| TASK-009 | ✅     | 🟠 P1 ALTO  | Backend - Guards      | 1h         | 28 Dic 2025 |
+| TASK-010 | ✅     | 🟠 P1 ALTO  | Backend - Service     | 1.5h       | 29 Dic 2025 |
+| TASK-011 | ✅     | 🟡 P2 MEDIO | Backend - Content     | 3-4h       | 29 Dic 2025 |
+| TASK-012 | ✅     | 🟡 P2 MEDIO | Backend - Controllers | 2h         | 29 Dic 2025 |
+| TASK-013 | ✅     | 🟠 P1 ALTO  | Frontend - Types      | 2h         | 30 Dic 2025 |
+| TASK-014 | ✅     | 🟠 P1 ALTO  | Frontend - UI         | 4h         | 30 Dic 2025 |
+
+**Progreso:** 6/6 tareas completadas (100%) ✅  
+**Tiempo invertido:** ~13.5h / 12-14h estimado
+
+---
+
+## 📊 Estado de Tareas - Sprint 3 (UX y Monetización)
+
+| Tarea    | Estado | Prioridad   | Área                 | Estimación | Completada  |
+| -------- | ------ | ----------- | -------------------- | ---------- | ----------- |
+| TASK-015 | ✅     | 🟡 P2 MEDIO | Frontend - Landing   | 8-10h      | 30 Dic 2025 |
+| TASK-016 | ✅     | 🟡 P2 MEDIO | Frontend - Dashboard | 8-10h      | 6 Dic 2025  |
+| TASK-017 | 📝     | 🟡 P2 MEDIO | Frontend - HomePage  | 2h         | -           |
+| TASK-018 | 📝     | 🟢 P3 BAJO  | Frontend - CTAs      | 4-5h       | -           |
+| TASK-019 | 📝     | ⚪ P4 BAJO  | Frontend - Ads       | 3-4h       | -           |
+
+**Progreso:** 2/5 tareas completadas (40%)  
+**Tiempo invertido:** ~13h / 25-30h estimado  
+**Pendiente:** HomePage dual logic, sistema de CTAs, Google Ads placeholders
 
 ---
 
@@ -1896,17 +1928,17 @@ Crear dashboard personalizado que se mostrará en la home (`/`) para usuarios au
 - Card pequeña con: fecha, pregunta (truncada), tipo de spread
 - Link a lectura completa: `/historial/{readingId}`
 
-#### Criterios de Aceptación
+#### Criterios de Aceptación ✅
 
-- [ ] Dashboard se renderiza solo para usuarios autenticados
-- [ ] Saludo personalizado con nombre del usuario
-- [ ] Badge de plan visible y correcto
-- [ ] Quick Actions funcionales y navigables
-- [ ] "Did You Know" se muestra correctamente
-- [ ] Stats solo visibles para Premium
-- [ ] Upgrade banner solo visible para Free
-- [ ] Responsive en todos los dispositivos
-- [ ] Loading state mientras carga datos del usuario
+- [x] Dashboard se renderiza solo para usuarios autenticados ✅ (UserDashboard es 'use client')
+- [x] Saludo personalizado con nombre del usuario ✅ (WelcomeHeader usa user.name de useAuth)
+- [x] Badge de plan visible y correcto ✅ (PlanBadge con planLabel de useUserPlanFeatures)
+- [x] Quick Actions funcionales y navigables ✅ (3 cards con Link de Next.js funcionando)
+- [x] "Did You Know" se muestra correctamente ✅ (6 tests passing, random fact on mount)
+- [x] Stats solo visibles para Premium ✅ (condicional {isPremium && <StatsSection />})
+- [x] Upgrade banner solo visible para Free ✅ (condicional {!isPremium && <UpgradeBanner />})
+- [x] Responsive en todos los dispositivos ✅ (grid responsive: grid-cols-1 md:grid-cols-2 lg:grid-cols-3)
+- [x] Loading state mientras carga datos del usuario ✅ (StatsSection usa Skeleton de shadcn/ui)
 
 #### Personalización por Plan
 
