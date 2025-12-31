@@ -8,7 +8,7 @@ export const ROUTES = {
   // Public
   HOME: '/',
   LOGIN: '/login',
-  REGISTER: '/register',
+  REGISTER: '/registro',
 
   // Dashboard (authenticated)
   DASHBOARD: '/dashboard',
