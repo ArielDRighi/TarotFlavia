@@ -160,3 +160,4 @@ docker/postgres/data/
 # Docker Compose override files (for local customization)
 docker-compose.override.yml
 
+.playwright-mcp/
