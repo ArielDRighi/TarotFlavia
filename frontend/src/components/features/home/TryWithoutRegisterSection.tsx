@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Sparkles } from 'lucide-react';
+import { ROUTES } from '@/lib/constants/routes';
 
 export function TryWithoutRegisterSection() {
   return (
@@ -29,7 +30,7 @@ export function TryWithoutRegisterSection() {
 
           {/* CTA Button */}
           <Button asChild size="lg" className="bg-purple-600 hover:bg-purple-700">
-            <Link href="/carta-del-dia">Carta del Día Gratis</Link>
+            <Link href={ROUTES.CARTA_DEL_DIA}>Carta del Día Gratis</Link>
           </Button>
         </CardContent>
       </Card>

@@ -9,6 +9,7 @@ export const ROUTES = {
   HOME: '/',
   LOGIN: '/login',
   REGISTER: '/registro',
+  CARTA_DEL_DIA: '/carta-del-dia',
 
   // Dashboard (authenticated)
   DASHBOARD: '/dashboard',

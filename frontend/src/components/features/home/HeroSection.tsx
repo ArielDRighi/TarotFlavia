@@ -25,7 +25,7 @@ export function HeroSection() {
             </Button>
 
             <Button asChild variant="outline" size="lg">
-              <Link href="/carta-del-dia">Probar sin registro</Link>
+              <Link href={ROUTES.CARTA_DEL_DIA}>Probar sin registro</Link>
             </Button>
           </div>
         </div>

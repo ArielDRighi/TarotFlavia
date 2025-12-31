@@ -46,12 +46,12 @@ export function PremiumBenefitsSection() {
 
       {/* Benefits Grid */}
       <div className="mb-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {benefits.map((benefit, index) => {
+        {benefits.map((benefit) => {
           const Icon = benefit.icon;
 
           return (
             <Card
-              key={index}
+              key={benefit.title}
               data-testid="benefit-item"
               className="transition-shadow hover:shadow-lg"
             >
