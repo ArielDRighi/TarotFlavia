@@ -1700,7 +1700,7 @@ Crear landing page completa para usuarios no autenticados. Objetivo: explicar pr
 
 #### Próximos Pasos
 
-- TASK-016: Crear UserDashboard (home para usuarios autenticados)
+- ✅ TASK-016: UserDashboard completado (6 Dic 2025) - 39 tests passing, coverage 90%
 - TASK-017: Implementar HomePage con lógica dual (Landing + Dashboard)
 
 ---
@@ -1781,14 +1781,18 @@ Crear landing page completa para usuarios no autenticados. Objetivo: explicar pr
 
 ---
 
-### 📝 TASK-016: Crear componente UserDashboard (home para usuarios autenticados)
+### 📝 TASK-016: Crear componente UserDashboard (home para usuarios autenticados) ✅
 
 **Prioridad:** 🟡 P2 - MEDIO (Frontend)  
 **Área:** Frontend - Pages/Components  
 **Estimación:** 8-10 horas  
+**Tiempo Real:** 10 horas  
+**Completada:** 6 Diciembre 2025  
+**Tests:** 39/39 passing  
+**Coverage:** 90% Statements, 96.55% Branch, 81.81% Functions, 89.65% Lines  
+**Branch:** `feature/TASK-016-user-dashboard`  
 **Dependencias:** TASK-013, TASK-014  
-**Feature:** F015  
-**Branch sugerido:** `feat/user-dashboard`
+**Feature:** F015
 
 #### Descripción
 
@@ -1796,27 +1800,61 @@ Crear dashboard personalizado que se mostrará en la home (`/`) para usuarios au
 
 **⚠️ NOTA IMPORTANTE:** Esto es diferente a `/perfil` (que ya existe). El UserDashboard es la página principal después del login, mientras que `/perfil` es para configuración de cuenta.
 
+#### Archivos Creados ✅
+
+- ✅ `frontend/src/components/features/dashboard/UserDashboard.tsx` (7 tests)
+- ✅ `frontend/src/components/features/dashboard/WelcomeHeader.tsx` (5 tests)
+- ✅ `frontend/src/components/features/dashboard/QuickActions.tsx` (9 tests)
+- ✅ `frontend/src/components/features/dashboard/DidYouKnowSection.tsx` (6 tests)
+- ✅ `frontend/src/components/features/dashboard/StatsSection.tsx` (6 tests)
+- ✅ `frontend/src/components/features/dashboard/index.ts` (exports)
+- ✅ Reutilizó: `UpgradeBanner.tsx` y `UpgradeModal.tsx` desde readings feature
+
 #### Diferencia con `/perfil`
 
-| Página            | Ruta              | Propósito                                | Estado                |
-| ----------------- | ----------------- | ---------------------------------------- | --------------------- |
-| **UserDashboard** | `/` (autenticado) | Quick actions, bienvenida, nueva lectura | ❌ A CREAR (TASK-016) |
-| **Profile**       | `/perfil`         | Configuración cuenta, editar datos, plan | ✅ YA EXISTE          |
+| Página            | Ruta              | Propósito                                | Estado                   |
+| ----------------- | ----------------- | ---------------------------------------- | ------------------------ |
+| **UserDashboard** | `/` (autenticado) | Quick actions, bienvenida, nueva lectura | ✅ COMPLETADO (TASK-016) |
+| **Profile**       | `/perfil`         | Configuración cuenta, editar datos, plan | ✅ YA EXISTE             |
 
-#### Archivos a Crear
+#### Implementación Realizada
 
-- `frontend/src/components/features/dashboard/UserDashboard.tsx`
-- `frontend/src/components/features/dashboard/WelcomeHeader.tsx`
-- `frontend/src/components/features/dashboard/QuickActions.tsx`
-- `frontend/src/components/features/dashboard/DidYouKnowSection.tsx`
-- `frontend/src/components/features/dashboard/StatsSection.tsx` (solo Premium)
-- `frontend/src/components/features/dashboard/UpgradeBanner.tsx` (solo Free)
+**1. Welcome Header ✅**
 
-#### Archivos a Modificar
+- Saludo personalizado: "¡Hola, {nombre}!"
+- Badge de plan: "GRATUITO" o "PREMIUM"
+- Link a perfil: "Ver perfil" → `/perfil`
+- Usa `useAuth()` y `useUserPlanFeatures()`
 
-- `frontend/src/app/page.tsx` - Lógica dual (ver TASK-017)
+**2. Quick Actions ✅**
 
-#### Secciones del Dashboard
+- **Primario:** "Nueva Lectura" → `/ritual/tirada` (gradient purple, icon Plus)
+- **Secundario:** "Historial de Lecturas" → `/historial` (icon History)
+- **Secundario:** "Carta del Día" → `/carta-del-dia` (icon Sparkles)
+- Responsive grid layout con hover effects
+
+**3. Did You Know Section ✅**
+
+- 10 datos curiosos sobre tarot en array estático
+- Selección aleatoria con `useState(() => getRandomFact())`
+- Card con icon de Lightbulb
+- Objetivo: educar y engagement
+
+**4. Stats Section (solo PREMIUM) ✅**
+
+- Muestra lecturas diarias: X/Y
+- Loading state con Skeleton
+- Error handling con retry button
+- Solo visible para usuarios Premium
+- Usa `useProfile()` hook
+
+**5. Upgrade Banner (solo FREE) ✅**
+
+- Reutiliza componente existente de readings
+- Modal con call-to-action para PREMIUM
+- Solo visible para usuarios Free
+
+#### Secciones del Dashboard (original requirements)
 
 **1. Welcome Header**
 
