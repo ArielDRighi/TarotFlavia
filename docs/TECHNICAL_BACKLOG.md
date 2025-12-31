@@ -2193,16 +2193,16 @@ frontend/src/hooks/utils/
 
 ### 📝 TASK-019: Preparar integración de Google Ads (componentes placeholder)
 
-**Prioridad:** 🟢 P3 - BAJO (Frontend)  
-**Área:** Frontend - Components/UX  
-**Estimación:** 4-5 horas  
-**Dependencias:** TASK-014, TASK-016  
-**Feature:** F018  
-**Branch sugerido:** `feat/conversion-funnels`
+**Prioridad:** ⚪ P4 - BAJA (Frontend)  
+**Área:** Frontend - Components/Integration  
+**Estimación:** 3-4 horas  
+**Dependencias:** TASK-013, TASK-014  
+**Feature:** F016  
+**Branch sugerido:** `feat/google-ads-placeholders`
 
 #### Descripción
 
-Implementar CTAs (Call-to-Actions) estratégicos en diferentes puntos de la aplicación para convertir usuarios ANONYMOUS → FREE → PREMIUM.
+Crear componentes placeholder para Google AdSense que se renderizarán solo para usuarios FREE y ANONYMOUS. Preparar estructura para futura activación de cuenta AdSense.
 
 #### Ubicaciones de CTAs
 

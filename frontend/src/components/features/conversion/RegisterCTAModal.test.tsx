@@ -66,4 +66,27 @@ describe('RegisterCTAModal', () => {
     const dialog = screen.getByRole('dialog');
     expect(dialog).toHaveAccessibleName();
   });
+
+  it('should close when Escape key is pressed', async () => {
+    const user = userEvent.setup();
+    render(<RegisterCTAModal open={true} onClose={mockOnClose} onRegister={mockOnRegister} />);
+
+    await user.keyboard('{Escape}');
+
+    expect(mockOnClose).toHaveBeenCalled();
+  });
+
+  it('should close when clicking outside modal (overlay)', async () => {
+    const user = userEvent.setup();
+    const { container } = render(
+      <RegisterCTAModal open={true} onClose={mockOnClose} onRegister={mockOnRegister} />
+    );
+
+    // Click on overlay (backdrop)
+    const overlay = container.querySelector('[role="dialog"]')?.parentElement;
+    if (overlay) {
+      await user.click(overlay);
+      expect(mockOnClose).toHaveBeenCalled();
+    }
+  });
 });

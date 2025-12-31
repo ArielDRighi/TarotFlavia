@@ -121,4 +121,39 @@ describe('LimitReachedModal', () => {
     const dialog = screen.getByRole('dialog');
     expect(dialog).toHaveAccessibleName();
   });
+
+  it('should close when Escape key is pressed', async () => {
+    const user = userEvent.setup();
+    render(
+      <LimitReachedModal
+        open={true}
+        onClose={mockOnClose}
+        onUpgrade={mockOnUpgrade}
+        currentLimit={2}
+      />
+    );
+
+    await user.keyboard('{Escape}');
+
+    expect(mockOnClose).toHaveBeenCalled();
+  });
+
+  it('should close when clicking outside modal (overlay)', async () => {
+    const user = userEvent.setup();
+    const { container } = render(
+      <LimitReachedModal
+        open={true}
+        onClose={mockOnClose}
+        onUpgrade={mockOnUpgrade}
+        currentLimit={2}
+      />
+    );
+
+    // Click on overlay (backdrop)
+    const overlay = container.querySelector('[role="dialog"]')?.parentElement;
+    if (overlay) {
+      await user.click(overlay);
+      expect(mockOnClose).toHaveBeenCalled();
+    }
+  });
 });

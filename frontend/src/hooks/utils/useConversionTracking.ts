@@ -18,6 +18,30 @@ export type CTALocation =
 export type CTAAction = 'upgrade' | 'register' | 'dismiss';
 
 /**
+ * Maximum number of times a user can dismiss a CTA before it stops showing.
+ * 
+ * UX Decision: 3 strikes balances visibility with avoiding user annoyance.
+ * This prevents CTA fatigue while giving users multiple opportunities to engage.
+ * 
+ * If per-location thresholds are needed in the future, this can be refactored
+ * into a configuration map: Record<CTALocation, number>
+ */
+const MAX_DISMISSAL_COUNT = 3;
+
+/**
+ * Helper to safely check if localStorage is available
+ * Handles SSR and environments where localStorage might be undefined
+ */
+function isLocalStorageAvailable(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    return typeof window.localStorage !== 'undefined';
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Return type for useConversionTracking hook
  */
 export interface UseConversionTrackingReturn {
@@ -36,8 +60,6 @@ export interface UseConversionTrackingReturn {
   /** Get dismissal count */
   getDismissalCount: (location: CTALocation) => number;
 }
-
-const MAX_DISMISSAL_COUNT = 3;
 
 /**
  * useConversionTracking Hook
@@ -70,9 +92,12 @@ const MAX_DISMISSAL_COUNT = 3;
 export default function useConversionTracking(): UseConversionTrackingReturn {
   /**
    * Track CTA shown event
+   * 
+   * @param location - Where the CTA was shown
+   * @param _plan - User plan (reserved for future Google Analytics integration)
    */
   const trackCTAShown = useCallback((location: CTALocation, _plan: string) => {
-    if (typeof window === 'undefined') return;
+    if (!isLocalStorageAvailable()) return;
 
     const timestamp = new Date().toISOString();
     localStorage.setItem(`cta_shown_${location}`, timestamp);
@@ -85,9 +110,12 @@ export default function useConversionTracking(): UseConversionTrackingReturn {
 
   /**
    * Track CTA clicked event
+   * 
+   * @param location - Where the CTA was clicked
+   * @param _action - Action taken (reserved for future Google Analytics integration)
    */
   const trackCTAClicked = useCallback((location: CTALocation, _action: CTAAction) => {
-    if (typeof window === 'undefined') return;
+    if (!isLocalStorageAvailable()) return;
 
     const timestamp = new Date().toISOString();
     localStorage.setItem(`cta_clicked_${location}`, timestamp);
@@ -102,7 +130,7 @@ export default function useConversionTracking(): UseConversionTrackingReturn {
    * Track modal open event
    */
   const trackModalOpen = useCallback((modalName: string) => {
-    if (typeof window === 'undefined') return;
+    if (!isLocalStorageAvailable()) return;
 
     const timestamp = new Date().toISOString();
     localStorage.setItem(`modal_open_${modalName}`, timestamp);
@@ -117,7 +145,7 @@ export default function useConversionTracking(): UseConversionTrackingReturn {
    * Track upgrade intent (user clicked upgrade button)
    */
   const trackUpgradeIntent = useCallback((source: string) => {
-    if (typeof window === 'undefined') return;
+    if (!isLocalStorageAvailable()) return;
 
     const timestamp = new Date().toISOString();
     localStorage.setItem(`upgrade_intent_${source}`, timestamp);
@@ -132,7 +160,7 @@ export default function useConversionTracking(): UseConversionTrackingReturn {
    * Dismiss CTA (increment dismissal count)
    */
   const dismissCTA = useCallback((location: CTALocation) => {
-    if (typeof window === 'undefined') return;
+    if (!isLocalStorageAvailable()) return;
 
     const key = `cta_dismissed_${location}`;
     const current = parseInt(localStorage.getItem(key) || '0', 10);
@@ -143,7 +171,7 @@ export default function useConversionTracking(): UseConversionTrackingReturn {
    * Check if CTA was dismissed MAX_DISMISSAL_COUNT or more times
    */
   const wasCTADismissed = useCallback((location: CTALocation): boolean => {
-    if (typeof window === 'undefined') return false;
+    if (!isLocalStorageAvailable()) return false;
 
     const key = `cta_dismissed_${location}`;
     const count = parseInt(localStorage.getItem(key) || '0', 10);
@@ -154,7 +182,7 @@ export default function useConversionTracking(): UseConversionTrackingReturn {
    * Get dismissal count for a CTA
    */
   const getDismissalCount = useCallback((location: CTALocation): number => {
-    if (typeof window === 'undefined') return 0;
+    if (!isLocalStorageAvailable()) return 0;
 
     const key = `cta_dismissed_${location}`;
     return parseInt(localStorage.getItem(key) || '0', 10);

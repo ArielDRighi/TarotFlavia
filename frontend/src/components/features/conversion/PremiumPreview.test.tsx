@@ -85,4 +85,17 @@ describe('PremiumPreview', () => {
     const mainContainer = container.querySelector('.relative');
     expect(mainContainer).toBeInTheDocument();
   });
+
+  it('should display custom message when provided', () => {
+    const customMessage = 'Accede a estadísticas avanzadas';
+
+    render(
+      <PremiumPreview onUpgrade={mockOnUpgrade} message={customMessage}>
+        <div>Premium Stats</div>
+      </PremiumPreview>
+    );
+
+    expect(screen.getByText(customMessage)).toBeInTheDocument();
+    expect(screen.queryByText(/desbloquea este contenido/i)).not.toBeInTheDocument();
+  });
 });

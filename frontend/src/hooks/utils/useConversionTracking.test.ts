@@ -100,4 +100,39 @@ describe('useConversionTracking', () => {
     result.current.dismissCTA('dashboard');
     expect(result.current.getDismissalCount('dashboard')).toBe(2);
   });
+
+  it('should handle SSR scenario (window undefined)', () => {
+    // Test that localStorage is safely accessed with optional chaining
+    const { result } = renderHook(() => useConversionTracking());
+
+    // Mock localStorage to be undefined (simulating SSR)
+    const originalLocalStorage = Object.getOwnPropertyDescriptor(
+      window,
+      'localStorage'
+    );
+    
+    Object.defineProperty(window, 'localStorage', {
+      value: undefined,
+      writable: true,
+      configurable: true,
+    });
+
+    // All methods should safely return early without errors
+    expect(() => {
+      result.current.trackCTAShown('post_reading', 'free');
+      result.current.trackCTAClicked('post_reading', 'upgrade');
+      result.current.trackModalOpen('TestModal');
+      result.current.trackUpgradeIntent('test');
+      result.current.dismissCTA('post_reading');
+    }).not.toThrow();
+
+    // Methods that return values should handle SSR gracefully
+    expect(result.current.wasCTADismissed('post_reading')).toBe(false);
+    expect(result.current.getDismissalCount('post_reading')).toBe(0);
+
+    // Restore localStorage
+    if (originalLocalStorage) {
+      Object.defineProperty(window, 'localStorage', originalLocalStorage);
+    }
+  });
 });

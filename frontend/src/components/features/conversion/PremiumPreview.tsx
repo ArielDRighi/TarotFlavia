@@ -44,8 +44,10 @@ export default function PremiumPreview({
 }: PremiumPreviewProps) {
   return (
     <div className="relative overflow-hidden rounded-lg border">
-      {/* Blurred content */}
-      <div className="pointer-events-none blur-sm select-none">{children}</div>
+      {/* Blurred content - hidden from screen readers */}
+      <div className="pointer-events-none blur-sm" aria-hidden="true">
+        {children}
+      </div>
 
       {/* Overlay with CTA */}
       <div className="from-background/95 via-background/80 to-background/60 absolute inset-0 flex items-center justify-center bg-gradient-to-t backdrop-blur-sm">
