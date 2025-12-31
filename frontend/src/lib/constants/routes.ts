@@ -8,7 +8,8 @@ export const ROUTES = {
   // Public
   HOME: '/',
   LOGIN: '/login',
-  REGISTER: '/register',
+  REGISTER: '/registro',
+  CARTA_DEL_DIA: '/carta-del-dia',
 
   // Dashboard (authenticated)
   DASHBOARD: '/dashboard',

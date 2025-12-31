@@ -47,7 +47,12 @@ export function SubscriptionTab({ profile }: SubscriptionTabProps) {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-lg font-semibold">
-                Plan {profile.plan === 'anonymous' ? 'ANÓNIMO' : profile.plan === 'free' ? 'GRATUITO' : 'PREMIUM'}
+                Plan{' '}
+                {profile.plan === 'anonymous'
+                  ? 'ANÓNIMO'
+                  : profile.plan === 'free'
+                    ? 'GRATUITO'
+                    : 'PREMIUM'}
               </p>
               <p className="text-muted-foreground text-sm">
                 {profile.plan === 'free'
