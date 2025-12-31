@@ -1,38 +1,55 @@
-import type { Metadata } from 'next';
-import Image from 'next/image';
-import { homeMetadata } from '@/lib/metadata/seo';
+'use client';
 
-export const metadata: Metadata = homeMetadata;
+import { LandingPage } from '@/components/features/home';
+import { UserDashboard } from '@/components/features/dashboard';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useAuthStore } from '@/stores/authStore';
 
-export default function Home() {
+/**
+ * Loading Skeleton for auth validation
+ * Prevents FOUC (Flash Of Unauthed Content)
+ */
+function LoadingSkeleton() {
   return (
-    <div className="bg-bg-main flex min-h-screen items-center justify-center font-sans">
-      <main className="bg-surface flex min-h-screen w-full max-w-3xl flex-col items-center justify-between px-16 py-32 sm:items-start">
-        <Image src="/next.svg" alt="Next.js logo" width={100} height={20} priority />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="text-text-primary max-w-xs font-serif text-3xl leading-10 font-semibold tracking-tight">
-            Bienvenido a TarotFlavia
-          </h1>
-          <p className="text-text-muted max-w-md text-lg leading-8">
-            Marketplace de tarotistas profesionales. Conecta con guías espirituales y descubre tu
-            camino.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="bg-primary text-surface hover:bg-primary/90 flex h-12 w-full items-center justify-center gap-2 rounded-full px-5 transition-colors md:w-[158px]"
-            href="/ritual"
-          >
-            Crear Nueva Lectura
-          </a>
-          <a
-            className="border-secondary text-secondary hover:bg-secondary/10 flex h-12 w-full items-center justify-center rounded-full border px-5 transition-colors md:w-[158px]"
-            href="#"
-          >
-            Explorar
-          </a>
-        </div>
-      </main>
+    <div className="bg-bg-main flex min-h-screen items-center justify-center">
+      <div className="w-full max-w-4xl space-y-8 px-4">
+        <Skeleton className="mx-auto h-24 w-3/4" />
+        <Skeleton className="mx-auto h-16 w-full" />
+        <Skeleton className="mx-auto h-64 w-full" />
+      </div>
     </div>
   );
+}
+
+/**
+ * Home Page with Dual Logic
+ * TASK-017: Implement dual HomePage (LandingPage + UserDashboard)
+ *
+ * Behavior:
+ * - Shows loading skeleton while checking auth (prevents FOUC)
+ * - Shows LandingPage for unauthenticated users
+ * - Shows UserDashboard for authenticated users (all plans)
+ *
+ * @example
+ * // Unauthenticated
+ * → LandingPage with hero, benefits, try without register
+ *
+ * // Authenticated (FREE/PREMIUM/ANONYMOUS)
+ * → UserDashboard with welcome, quick actions, stats
+ */
+export default function Home() {
+  const { user, isAuthenticated, isLoading } = useAuthStore();
+
+  // Show loading skeleton while validating auth (prevent FOUC)
+  if (isLoading) {
+    return <LoadingSkeleton />;
+  }
+
+  // Show LandingPage for unauthenticated users
+  if (!isAuthenticated || !user) {
+    return <LandingPage />;
+  }
+
+  // Show UserDashboard for authenticated users (all plans)
+  return <UserDashboard />;
 }
