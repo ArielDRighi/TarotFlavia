@@ -19,10 +19,10 @@ export type CTAAction = 'upgrade' | 'register' | 'dismiss';
 
 /**
  * Maximum number of times a user can dismiss a CTA before it stops showing.
- * 
+ *
  * UX Decision: 3 strikes balances visibility with avoiding user annoyance.
  * This prevents CTA fatigue while giving users multiple opportunities to engage.
- * 
+ *
  * If per-location thresholds are needed in the future, this can be refactored
  * into a configuration map: Record<CTALocation, number>
  */
@@ -92,10 +92,11 @@ export interface UseConversionTrackingReturn {
 export default function useConversionTracking(): UseConversionTrackingReturn {
   /**
    * Track CTA shown event
-   * 
+   *
    * @param location - Where the CTA was shown
    * @param _plan - User plan (reserved for future Google Analytics integration)
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const trackCTAShown = useCallback((location: CTALocation, _plan: string) => {
     if (!isLocalStorageAvailable()) return;
 
@@ -110,10 +111,11 @@ export default function useConversionTracking(): UseConversionTrackingReturn {
 
   /**
    * Track CTA clicked event
-   * 
+   *
    * @param location - Where the CTA was clicked
    * @param _action - Action taken (reserved for future Google Analytics integration)
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const trackCTAClicked = useCallback((location: CTALocation, _action: CTAAction) => {
     if (!isLocalStorageAvailable()) return;
 

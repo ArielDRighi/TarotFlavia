@@ -106,11 +106,8 @@ describe('useConversionTracking', () => {
     const { result } = renderHook(() => useConversionTracking());
 
     // Mock localStorage to be undefined (simulating SSR)
-    const originalLocalStorage = Object.getOwnPropertyDescriptor(
-      window,
-      'localStorage'
-    );
-    
+    const originalLocalStorage = Object.getOwnPropertyDescriptor(window, 'localStorage');
+
     Object.defineProperty(window, 'localStorage', {
       value: undefined,
       writable: true,
