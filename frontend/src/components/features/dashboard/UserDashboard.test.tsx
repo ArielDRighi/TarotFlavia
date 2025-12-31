@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { UserDashboard } from './UserDashboard';
 import * as useAuthModule from '@/hooks/useAuth';
 import * as useUserPlanFeaturesModule from '@/hooks/utils/useUserPlanFeatures';
@@ -320,5 +320,102 @@ describe('UserDashboard', () => {
     expect(
       screen.queryByText(/Desbloquea interpretaciones personalizadas/i)
     ).not.toBeInTheDocument();
+  });
+
+  it('should open UpgradeModal when upgrade banner is clicked', () => {
+    const mockUser: AuthUser = {
+      id: 1,
+      email: 'free@test.com',
+      name: 'Free User',
+      roles: ['consumer'],
+      plan: 'free',
+      dailyReadingsCount: 1,
+      dailyReadingsLimit: 2,
+    };
+
+    vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
+      user: mockUser,
+      isAuthenticated: true,
+      isLoading: false,
+      login: vi.fn(),
+      register: vi.fn(),
+      logout: vi.fn(),
+      checkAuth: vi.fn(),
+    });
+
+    vi.spyOn(useUserPlanFeaturesModule, 'useUserPlanFeatures').mockReturnValue({
+      plan: 'free',
+      planLabel: 'GRATUITO',
+      canUseAI: false,
+      canUseCategories: false,
+      canUseCustomQuestions: false,
+      canShare: true,
+      isPremium: false,
+      isFree: true,
+      isAnonymous: false,
+      dailyReadingsLimit: 2,
+    });
+
+    render(<UserDashboard />);
+
+    // Click on upgrade banner
+    const upgradeButton = screen.getByText(/Upgrade a Premium/i);
+    fireEvent.click(upgradeButton);
+
+    // Modal should be visible
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByText(/Desbloquea todo el potencial del Tarot/i)).toBeInTheDocument();
+  });
+
+  it('should close UpgradeModal when close button is clicked', async () => {
+    const mockUser: AuthUser = {
+      id: 1,
+      email: 'free@test.com',
+      name: 'Free User',
+      roles: ['consumer'],
+      plan: 'free',
+      dailyReadingsCount: 1,
+      dailyReadingsLimit: 2,
+    };
+
+    vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
+      user: mockUser,
+      isAuthenticated: true,
+      isLoading: false,
+      login: vi.fn(),
+      register: vi.fn(),
+      logout: vi.fn(),
+      checkAuth: vi.fn(),
+    });
+
+    vi.spyOn(useUserPlanFeaturesModule, 'useUserPlanFeatures').mockReturnValue({
+      plan: 'free',
+      planLabel: 'GRATUITO',
+      canUseAI: false,
+      canUseCategories: false,
+      canUseCustomQuestions: false,
+      canShare: true,
+      isPremium: false,
+      isFree: true,
+      isAnonymous: false,
+      dailyReadingsLimit: 2,
+    });
+
+    const { container } = render(<UserDashboard />);
+
+    // Open modal
+    const upgradeButton = screen.getByText(/Upgrade a Premium/i);
+    fireEvent.click(upgradeButton);
+
+    // Modal is open
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+    // Press Escape to close modal
+    fireEvent.keyDown(container, { key: 'Escape', code: 'Escape', keyCode: 27 });
+
+    // Modal should be closed
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
   });
 });

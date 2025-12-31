@@ -1,9 +1,10 @@
 'use client';
 
-import { BarChart3, BookOpen } from 'lucide-react';
+import { BarChart3, BookOpen, RefreshCw } from 'lucide-react';
 import { useProfile } from '@/hooks/api/useUser';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 
 /**
  * Stat card component
@@ -46,7 +47,7 @@ function StatCard({ icon, label, value, description }: StatCardProps) {
  * ```
  */
 export function StatsSection() {
-  const { data: profile, isLoading, error } = useProfile();
+  const { data: profile, isLoading, error, refetch } = useProfile();
 
   if (isLoading) {
     return (
@@ -68,8 +69,20 @@ export function StatsSection() {
         <CardHeader>
           <CardTitle className="font-serif text-xl">Tus Estadísticas</CardTitle>
         </CardHeader>
-        <CardContent>
-          <p className="text-red-600">Error al cargar estadísticas</p>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-red-600">
+            No pudimos cargar tus estadísticas. Por favor, intenta nuevamente.
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => refetch()}
+            className="gap-2"
+            data-testid="retry-button"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Reintentar
+          </Button>
         </CardContent>
       </Card>
     );

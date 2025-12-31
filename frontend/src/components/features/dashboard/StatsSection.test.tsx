@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, within, fireEvent } from '@testing-library/react';
 import { StatsSection } from './StatsSection';
 import * as useUserModule from '@/hooks/api/useUser';
 import type { UseQueryResult } from '@tanstack/react-query';
@@ -81,7 +81,37 @@ describe('StatsSection', () => {
 
     render(<StatsSection />);
 
-    expect(screen.getByText(/Error al cargar/)).toBeInTheDocument();
+    expect(screen.getByText(/No pudimos cargar tus estadísticas/i)).toBeInTheDocument();
+  });
+
+  it('should call refetch when retry button is clicked', () => {
+    const mockRefetch = vi.fn();
+    vi.spyOn(useUserModule, 'useProfile').mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: new Error('Failed to load'),
+      refetch: mockRefetch,
+    } as unknown as UseQueryResult<UserProfile>);
+
+    render(<StatsSection />);
+
+    const retryButton = screen.getByTestId('retry-button');
+    fireEvent.click(retryButton);
+
+    expect(mockRefetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('should return null when profile is explicitly null', () => {
+    vi.spyOn(useUserModule, 'useProfile').mockReturnValue({
+      data: null,
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    } as unknown as UseQueryResult<UserProfile>);
+
+    const { container } = render(<StatsSection />);
+
+    expect(container.firstChild).toBeNull();
   });
 
   it('should display remaining readings', () => {

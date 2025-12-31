@@ -27,6 +27,7 @@ function QuickActionCard({
   return (
     <Link
       href={href}
+      aria-label={`${title}: ${description}`}
       className={cn(
         'block rounded-lg p-6 transition-all duration-200',
         'hover:scale-105 hover:shadow-lg',
