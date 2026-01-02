@@ -254,7 +254,7 @@ describe('Readings + Interpretations + AI Integration Tests', () => {
           isReversed: false,
         })),
         customQuestion: 'What does the future hold for my career?',
-        generateInterpretation: true,
+        useAI: true,
       };
 
       // ACT
@@ -294,7 +294,7 @@ describe('Readings + Interpretations + AI Integration Tests', () => {
           isReversed: false,
         })),
         customQuestion: 'Should I make a career change?',
-        generateInterpretation: true,
+        useAI: true,
       };
 
       // ACT
@@ -390,7 +390,7 @@ describe('Readings + Interpretations + AI Integration Tests', () => {
           isReversed: false,
         })),
         customQuestion: 'What is my destiny?',
-        generateInterpretation: true,
+        useAI: true,
       };
 
       // ACT - Primera lectura (genera caché)
@@ -431,7 +431,7 @@ describe('Readings + Interpretations + AI Integration Tests', () => {
           isReversed: false,
         })),
         customQuestion: 'What is my future?',
-        generateInterpretation: true,
+        useAI: true,
       };
 
       // Segunda lectura con cartas invertidas
@@ -471,7 +471,7 @@ describe('Readings + Interpretations + AI Integration Tests', () => {
           isReversed: false,
         })),
         customQuestion: 'What should I know today?',
-        generateInterpretation: true,
+        useAI: true,
       };
 
       // ACT
@@ -498,7 +498,7 @@ describe('Readings + Interpretations + AI Integration Tests', () => {
           isReversed: false,
         })),
         customQuestion: 'Tell me about my journey',
-        generateInterpretation: true,
+        useAI: true,
       };
 
       // ACT
@@ -530,7 +530,7 @@ describe('Readings + Interpretations + AI Integration Tests', () => {
           isReversed: false,
         })),
         customQuestion: 'Invalid spread test',
-        generateInterpretation: true,
+        useAI: true,
       };
 
       // ACT & ASSERT
@@ -551,7 +551,7 @@ describe('Readings + Interpretations + AI Integration Tests', () => {
           { cardId: 99997, position: 'Future', isReversed: false },
         ],
         customQuestion: 'Invalid cards test',
-        generateInterpretation: true,
+        useAI: true,
       };
 
       // ACT & ASSERT
@@ -572,7 +572,7 @@ describe('Readings + Interpretations + AI Integration Tests', () => {
           isReversed: false,
         })),
         customQuestion: 'Test AI error handling',
-        generateInterpretation: true,
+        useAI: true,
       };
 
       // ACT - Even if AI fails, reading should be created with fallback

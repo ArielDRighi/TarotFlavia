@@ -143,7 +143,7 @@ describe('ReadingsController', () => {
           { cardId: 1, position: 'past', isReversed: false },
           { cardId: 2, position: 'present', isReversed: true },
         ],
-        generateInterpretation: true,
+        useAI: true,
       };
 
       const req = { user: { userId: mockUser.id } };
@@ -170,7 +170,7 @@ describe('ReadingsController', () => {
           { cardId: 1, position: 'past', isReversed: false },
           { cardId: 2, position: 'present', isReversed: true },
         ],
-        generateInterpretation: true,
+        useAI: true,
       };
 
       const req = { user: { userId: mockUser.id } };

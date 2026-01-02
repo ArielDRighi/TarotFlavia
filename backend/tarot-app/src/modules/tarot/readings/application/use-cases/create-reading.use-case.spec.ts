@@ -57,7 +57,7 @@ describe('CreateReadingUseCase', () => {
       { cardId: 3, position: 'future', isReversed: true },
     ],
     customQuestion: 'What is my future?',
-    generateInterpretation: false,
+    useAI: false,
   };
 
   const createMockReading = (
@@ -214,7 +214,7 @@ describe('CreateReadingUseCase', () => {
         ...mockDto,
         predefinedQuestionId: 5,
         customQuestion: undefined,
-        generateInterpretation: false,
+        useAI: false,
       };
       const mockReading = createMockReading({
         predefinedQuestionId: 5,
@@ -312,7 +312,7 @@ describe('CreateReadingUseCase', () => {
   describe('execute - with interpretation', () => {
     const dtoWithInterpretation: CreateReadingDto = {
       ...mockDto,
-      generateInterpretation: true,
+      useAI: true,
     };
 
     it('should generate interpretation for custom question', async () => {
@@ -357,7 +357,7 @@ describe('CreateReadingUseCase', () => {
         ...mockDto,
         predefinedQuestionId: 5,
         customQuestion: undefined,
-        generateInterpretation: true,
+        useAI: true,
       };
       const mockReading = createMockReading({
         predefinedQuestionId: 5,
@@ -457,7 +457,7 @@ describe('CreateReadingUseCase', () => {
         ...mockDto,
         predefinedQuestionId: 999,
         customQuestion: undefined,
-        generateInterpretation: true,
+        useAI: true,
       };
       const mockReading = createMockReading();
       const mockFallbackReading = createMockReading({
@@ -507,6 +507,260 @@ describe('CreateReadingUseCase', () => {
     });
   });
 
+  describe('useAI flag - dual flow (TASK-005)', () => {
+    describe('when useAI is false', () => {
+      it('should create reading without AI interpretation', async () => {
+        const dtoWithoutAI: CreateReadingDto = {
+          ...mockDto,
+          useAI: false,
+        };
+        const mockReading = createMockReading({ interpretation: null });
+
+        validator.validateUser.mockResolvedValue(mockUser);
+        decksService.findDeckById.mockResolvedValue(mockDeck);
+        spreadsService.findById.mockResolvedValue(mockSpread);
+        cardsService.findByIds.mockResolvedValue(mockCards);
+        readingRepo.create.mockResolvedValue(mockReading);
+
+        const result = await useCase.execute(mockUser, dtoWithoutAI);
+
+        // No debe llamar a generateInterpretation
+        expect(
+          interpretationsService.generateInterpretation,
+        ).not.toHaveBeenCalled();
+        expect(result.interpretation).toBeNull();
+        expect(readingRepo.create).toHaveBeenCalledWith({
+          predefinedQuestionId: null,
+          customQuestion: mockDto.customQuestion,
+          questionType: 'custom',
+          user: mockUser,
+          tarotistaId: 1,
+          deck: mockDeck,
+          cards: mockCards,
+          cardPositions: mockDto.cardPositions,
+          interpretation: null,
+        });
+      });
+
+      it('should return only card information from database when useAI is false', async () => {
+        const dtoWithoutAI: CreateReadingDto = {
+          ...mockDto,
+          useAI: false,
+        };
+        const mockReading = createMockReading({
+          interpretation: null,
+          cards: mockCards,
+        });
+
+        validator.validateUser.mockResolvedValue(mockUser);
+        decksService.findDeckById.mockResolvedValue(mockDeck);
+        spreadsService.findById.mockResolvedValue(mockSpread);
+        cardsService.findByIds.mockResolvedValue(mockCards);
+        readingRepo.create.mockResolvedValue(mockReading);
+
+        const result = await useCase.execute(mockUser, dtoWithoutAI);
+
+        expect(result.cards).toEqual(mockCards);
+        expect(result.interpretation).toBeNull();
+        expect(cardsService.findByIds).toHaveBeenCalledWith([1, 2, 3]);
+      });
+
+      it('should still increment usage counter when useAI is false', async () => {
+        const dtoWithoutAI: CreateReadingDto = {
+          ...mockDto,
+          useAI: false,
+        };
+        const mockReading = createMockReading();
+
+        validator.validateUser.mockResolvedValue(mockUser);
+        decksService.findDeckById.mockResolvedValue(mockDeck);
+        spreadsService.findById.mockResolvedValue(mockSpread);
+        cardsService.findByIds.mockResolvedValue(mockCards);
+        readingRepo.create.mockResolvedValue(mockReading);
+
+        await useCase.execute(mockUser, dtoWithoutAI);
+
+        // Verifica que se guardó en DB (contador se incrementa)
+        expect(readingRepo.create).toHaveBeenCalled();
+      });
+    });
+
+    describe('when useAI is true', () => {
+      it('should generate AI interpretation when useAI is true', async () => {
+        const dtoWithAI: CreateReadingDto = {
+          ...mockDto,
+          useAI: true,
+        };
+        const mockReading = createMockReading();
+        const mockUpdatedReading = createMockReading({
+          interpretation: 'AI-powered interpretation in Markdown format',
+        });
+
+        validator.validateUser.mockResolvedValue(mockUser);
+        decksService.findDeckById.mockResolvedValue(mockDeck);
+        spreadsService.findById.mockResolvedValue(mockSpread);
+        cardsService.findByIds.mockResolvedValue(mockCards);
+        readingRepo.create.mockResolvedValue(mockReading);
+        interpretationsService.generateInterpretation.mockResolvedValue({
+          interpretation: 'AI-powered interpretation in Markdown format',
+          fromCache: false,
+        });
+        readingRepo.update.mockResolvedValue(mockUpdatedReading);
+
+        const result = await useCase.execute(mockUser, dtoWithAI);
+
+        expect(
+          interpretationsService.generateInterpretation,
+        ).toHaveBeenCalledWith(
+          mockCards,
+          mockDto.cardPositions,
+          mockDto.customQuestion,
+          mockSpread,
+          undefined,
+          mockUser.id,
+          mockReading.id,
+          1,
+        );
+        expect(result.interpretation).toContain('AI-powered interpretation');
+      });
+
+      it('should return Markdown formatted interpretation when useAI is true', async () => {
+        const dtoWithAI: CreateReadingDto = {
+          ...mockDto,
+          useAI: true,
+        };
+        const markdownInterpretation = `## Interpretación General\n\nTu lectura revela...`;
+        const mockReading = createMockReading();
+        const mockUpdatedReading = createMockReading({
+          interpretation: markdownInterpretation,
+        });
+
+        validator.validateUser.mockResolvedValue(mockUser);
+        decksService.findDeckById.mockResolvedValue(mockDeck);
+        spreadsService.findById.mockResolvedValue(mockSpread);
+        cardsService.findByIds.mockResolvedValue(mockCards);
+        readingRepo.create.mockResolvedValue(mockReading);
+        interpretationsService.generateInterpretation.mockResolvedValue({
+          interpretation: markdownInterpretation,
+          fromCache: false,
+        });
+        readingRepo.update.mockResolvedValue(mockUpdatedReading);
+
+        const result = await useCase.execute(mockUser, dtoWithAI);
+
+        expect(result.interpretation).toContain('## Interpretación General');
+      });
+
+      it('should increment usage counter when useAI is true', async () => {
+        const dtoWithAI: CreateReadingDto = {
+          ...mockDto,
+          useAI: true,
+        };
+        const mockReading = createMockReading();
+        const mockUpdatedReading = createMockReading({
+          interpretation: 'AI interpretation',
+        });
+
+        validator.validateUser.mockResolvedValue(mockUser);
+        decksService.findDeckById.mockResolvedValue(mockDeck);
+        spreadsService.findById.mockResolvedValue(mockSpread);
+        cardsService.findByIds.mockResolvedValue(mockCards);
+        readingRepo.create.mockResolvedValue(mockReading);
+        interpretationsService.generateInterpretation.mockResolvedValue({
+          interpretation: 'AI interpretation',
+          fromCache: false,
+        });
+        readingRepo.update.mockResolvedValue(mockUpdatedReading);
+
+        await useCase.execute(mockUser, dtoWithAI);
+
+        expect(readingRepo.create).toHaveBeenCalled();
+        expect(readingRepo.update).toHaveBeenCalled();
+      });
+    });
+
+    describe('when useAI is undefined', () => {
+      it('should default to no AI interpretation when useAI is undefined', async () => {
+        const dtoUndefinedAI: CreateReadingDto = {
+          ...mockDto,
+          useAI: undefined,
+        };
+        const mockReading = createMockReading({ interpretation: null });
+
+        validator.validateUser.mockResolvedValue(mockUser);
+        decksService.findDeckById.mockResolvedValue(mockDeck);
+        spreadsService.findById.mockResolvedValue(mockSpread);
+        cardsService.findByIds.mockResolvedValue(mockCards);
+        readingRepo.create.mockResolvedValue(mockReading);
+
+        const result = await useCase.execute(mockUser, dtoUndefinedAI);
+
+        expect(
+          interpretationsService.generateInterpretation,
+        ).not.toHaveBeenCalled();
+        expect(result.interpretation).toBeNull();
+      });
+    });
+
+    describe('both readings saved in tarot_readings table', () => {
+      it('should save reading with useAI:false in tarot_readings table', async () => {
+        const dtoWithoutAI: CreateReadingDto = {
+          ...mockDto,
+          useAI: false,
+        };
+        const mockReading = createMockReading();
+
+        validator.validateUser.mockResolvedValue(mockUser);
+        decksService.findDeckById.mockResolvedValue(mockDeck);
+        spreadsService.findById.mockResolvedValue(mockSpread);
+        cardsService.findByIds.mockResolvedValue(mockCards);
+        readingRepo.create.mockResolvedValue(mockReading);
+
+        await useCase.execute(mockUser, dtoWithoutAI);
+
+        expect(readingRepo.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            user: mockUser,
+            deck: mockDeck,
+            cards: mockCards,
+          }),
+        );
+      });
+
+      it('should save reading with useAI:true in tarot_readings table', async () => {
+        const dtoWithAI: CreateReadingDto = {
+          ...mockDto,
+          useAI: true,
+        };
+        const mockReading = createMockReading();
+        const mockUpdatedReading = createMockReading({
+          interpretation: 'AI interpretation',
+        });
+
+        validator.validateUser.mockResolvedValue(mockUser);
+        decksService.findDeckById.mockResolvedValue(mockDeck);
+        spreadsService.findById.mockResolvedValue(mockSpread);
+        cardsService.findByIds.mockResolvedValue(mockCards);
+        readingRepo.create.mockResolvedValue(mockReading);
+        interpretationsService.generateInterpretation.mockResolvedValue({
+          interpretation: 'AI interpretation',
+          fromCache: false,
+        });
+        readingRepo.update.mockResolvedValue(mockUpdatedReading);
+
+        await useCase.execute(mockUser, dtoWithAI);
+
+        expect(readingRepo.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            user: mockUser,
+            deck: mockDeck,
+            cards: mockCards,
+          }),
+        );
+      });
+    });
+  });
+
   describe('edge cases', () => {
     it('should handle empty cardIds array', async () => {
       const dtoWithEmptyCards: CreateReadingDto = {
@@ -538,7 +792,7 @@ describe('CreateReadingUseCase', () => {
         ...mockDto,
         customQuestion: undefined,
         predefinedQuestionId: undefined,
-        generateInterpretation: false,
+        useAI: false,
       };
       const mockReading = createMockReading({
         customQuestion: null,
@@ -598,7 +852,7 @@ describe('CreateReadingUseCase', () => {
         ...mockDto,
         customQuestion: undefined,
         predefinedQuestionId: undefined,
-        generateInterpretation: true,
+        useAI: true,
       };
       const mockReading = createMockReading();
       const mockUpdatedReading = createMockReading({

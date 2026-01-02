@@ -89,7 +89,7 @@ describe('ReadingsController', () => {
           { cardId: 2, position: 'present', isReversed: true },
           { cardId: 3, position: 'future', isReversed: false },
         ],
-        generateInterpretation: true,
+        useAI: true,
       };
 
       mockOrchestrator.create.mockResolvedValue(mockReading);
@@ -115,7 +115,7 @@ describe('ReadingsController', () => {
           { cardId: 2, position: 'present', isReversed: true },
           { cardId: 3, position: 'future', isReversed: false },
         ],
-        generateInterpretation: true,
+        useAI: true,
       };
 
       const readingWithCustom = {

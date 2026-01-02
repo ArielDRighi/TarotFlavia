@@ -137,24 +137,16 @@ export class CreateReadingDto {
   @Type(() => CardPositionDto)
   cardPositions: CardPositionDto[];
 
-  @ApiProperty({
-    example: false,
-    description: 'Si se debe generar interpretación con IA (solo Premium)',
-    default: false,
-  })
-  @IsBoolean()
-  @IsOptional()
-  generateInterpretation: boolean = false;
-
   /**
-   * Campo para controlar el acceso a funcionalidades con IA
+   * Campo para controlar el acceso a funcionalidades con IA (TASK-005)
    *
    * @remarks
    * - Este campo es validado por el `RequiresPremiumForAIGuard` para control de acceso
-   * - Si `true`: Requiere plan PREMIUM, bloquea usuarios FREE/ANONYMOUS
-   * - Si `false` o `undefined`: Permite acceso a todos los usuarios
-   * - **Nota:** TASK-004 implementó solo el control de acceso en el guard
-   * - **Pendiente:** TASK-005 implementará la lógica de generación dual en el servicio
+   * - Si `true`: Requiere plan PREMIUM, genera interpretación con IA en formato Markdown
+   * - Si `false` o `undefined`: Permite acceso a todos los usuarios, solo retorna info de cartas desde DB
+   * - Ambos flujos se guardan en `tarot_readings` y incrementan contador de uso
+   * - **TASK-004:** Implementó control de acceso en el guard
+   * - **TASK-005:** Implementó lógica de generación dual en el servicio
    *
    * @see RequiresPremiumForAIGuard - Guard que valida este campo
    */
