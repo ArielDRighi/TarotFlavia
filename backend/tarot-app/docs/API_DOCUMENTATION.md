@@ -544,7 +544,8 @@ Authorization: Bearer <token>
 {
   "spreadId": 1,
   "predefinedQuestionId": 5,
-  "tarotistaId": 1
+  "tarotistaId": 1,
+  "useAI": false
 }
 ```
 
@@ -554,9 +555,21 @@ Authorization: Bearer <token>
 {
   "spreadId": 2,
   "customQuestion": "¿Qué me depara el futuro en mi carrera?",
-  "tarotistaId": 1
+  "tarotistaId": 1,
+  "useAI": true
 }
 ```
+
+**Campos del Request:**
+
+- `spreadId` (number, requerido): ID de la tirada a usar
+- `predefinedQuestionId` (number, opcional): ID de pregunta predefinida
+- `customQuestion` (string, opcional): Pregunta personalizada (requiere plan Premium)
+- `tarotistaId` (number, requerido): ID del tarotista
+- `useAI` (boolean, opcional): Si se debe usar IA para generar la lectura
+  - `true`: Genera interpretación con IA (requiere plan Premium)
+  - `false` o `undefined`: Lectura sin IA (disponible para todos los planes)
+  - **Nota:** Este campo controla el acceso a funciones de IA. TASK-005 implementará la lógica de generación dual.
 
 **Response: `201 Created`**
 

@@ -146,6 +146,18 @@ export class CreateReadingDto {
   @IsOptional()
   generateInterpretation: boolean = false;
 
+  /**
+   * Campo para controlar el acceso a funcionalidades con IA
+   *
+   * @remarks
+   * - Este campo es validado por el `RequiresPremiumForAIGuard` para control de acceso
+   * - Si `true`: Requiere plan PREMIUM, bloquea usuarios FREE/ANONYMOUS
+   * - Si `false` o `undefined`: Permite acceso a todos los usuarios
+   * - **Nota:** TASK-004 implementó solo el control de acceso en el guard
+   * - **Pendiente:** TASK-005 implementará la lógica de generación dual en el servicio
+   *
+   * @see RequiresPremiumForAIGuard - Guard que valida este campo
+   */
   @ApiProperty({
     example: true,
     description: 'Si se debe usar IA para generar la lectura (solo Premium)',
