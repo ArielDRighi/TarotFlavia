@@ -1255,6 +1255,76 @@ La aplicación tiene una **base sólida** en términos de:
 
 ---
 
+---
+
+### ✅ TASK-003: Remover useRequireAuth de Daily Reading (Frontend)
+
+**[FRONTEND]** [COMPLETADA]
+
+**Archivos modificados:**
+
+- ✅ `frontend/src/components/features/daily-reading/DailyCardExperience.tsx`
+- ✅ `frontend/src/app/carta-del-dia/page.tsx` (sin cambios necesarios)
+- ✅ Creado: `frontend/src/components/features/daily-reading/AnonymousLimitReached.tsx`
+- ✅ Creado: `frontend/src/components/features/daily-reading/AnonymousLimitReached.test.tsx`
+- ✅ Creado: `frontend/src/components/features/daily-reading/DailyCardExperience.anonymous.test.tsx`
+
+**Cambios implementados:**
+
+1. ✅ **Remover autenticación forzada:**
+   - Eliminado `useRequireAuth()` de `DailyCardExperience`
+   - Detectar estado de auth con `useAuth()` (sin redirect automático)
+
+2. ✅ **Implementar flujo dual:**
+   - **Usuario anónimo:**
+     - Llamar a `GET /api/v1/public/daily-reading/today`
+     - Mostrar carta con info de DB (sin IA)
+     - Banner/Modal post-lectura: "¿Te gustó? Regístrate gratis para obtener lecturas completas"
+   - **Usuario autenticado:**
+     - Llamar a `GET /api/v1/daily-reading/today` (endpoint protegido)
+     - Mostrar carta según plan (FREE: DB, PREMIUM: IA)
+
+3. ✅ **Manejo de límite alcanzado (anónimo):**
+   - Si backend retorna 403 con mensaje "Ya viste tu carta del día"
+   - Mostrar componente `AnonymousLimitReached`:
+     - Mensaje: "Ya viste tu carta del día. Regístrate para acceder a más lecturas."
+     - CTA principal: "Crear cuenta gratis"
+     - CTA secundario: "Iniciar sesión"
+
+4. ✅ **CTAs de conversión:**
+   - Después de mostrar carta anónima: CTA con beneficios FREE
+   - Botones: "Crear cuenta gratis" y "Iniciar sesión"
+
+**Dependencias:** TASK-001, TASK-002
+
+**Criterios de aceptación cumplidos:**
+
+- ✅ Usuario sin login puede ver `/carta-del-dia` sin redirect a login
+- ✅ Primera visita anónima muestra carta correctamente
+- ✅ Segunda visita anónima (mismo día) muestra mensaje de límite + CTAs
+- ✅ Usuario autenticado ve experiencia normal según su plan
+- ✅ Navegación desde landing page funciona sin problemas
+- ✅ CTAs de conversión son claros y visibles
+
+**Tests implementados:**
+
+- ✅ `AnonymousLimitReached.test.tsx`: 6 tests, todos pasando
+- ✅ `DailyCardExperience.anonymous.test.tsx`: 10 tests, todos pasando
+
+**Ciclo de calidad:**
+
+- ✅ Lint: Sin errores en archivos modificados
+- ✅ Type-check: Sin errores
+- ✅ Format: Aplicado con Prettier
+- ✅ Build: Exitoso
+- ✅ Tests: 16 nuevos tests, todos pasando
+
+**Commit:** `ba2562c - feat(daily-reading): implement anonymous access flow`
+
+**Fecha de completación:** 2 Enero 2026
+
+---
+
 ### TASK-003: Remover useRequireAuth de Daily Reading (Frontend)
 
 **[FRONTEND]**
