@@ -145,4 +145,13 @@ export class CreateReadingDto {
   @IsBoolean()
   @IsOptional()
   generateInterpretation: boolean = false;
+
+  @ApiProperty({
+    example: true,
+    description: 'Si se debe usar IA para generar la lectura (solo Premium)',
+    required: false,
+  })
+  @IsBoolean()
+  @IsOptional()
+  useAI?: boolean;
 }

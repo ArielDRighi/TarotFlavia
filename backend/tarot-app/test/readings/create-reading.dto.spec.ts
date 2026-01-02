@@ -241,4 +241,87 @@ describe('CreateReadingDto', () => {
       expect(dto.generateInterpretation).toBe(false);
     });
   });
+
+  describe('Campo useAI', () => {
+    it('debe aceptar useAI como true', async () => {
+      const dto = plainToInstance(CreateReadingDto, {
+        deckId: 1,
+        spreadId: 1,
+        cardIds: [1, 2, 3],
+        cardPositions: [
+          { cardId: 1, position: 'pasado', isReversed: false },
+          { cardId: 2, position: 'presente', isReversed: false },
+          { cardId: 3, position: 'futuro', isReversed: false },
+        ],
+        predefinedQuestionId: 5,
+        useAI: true,
+      });
+
+      const errors = await validate(dto);
+      expect(errors).toHaveLength(0);
+      expect(dto.useAI).toBe(true);
+    });
+
+    it('debe aceptar useAI como false', async () => {
+      const dto = plainToInstance(CreateReadingDto, {
+        deckId: 1,
+        spreadId: 1,
+        cardIds: [1, 2, 3],
+        cardPositions: [
+          { cardId: 1, position: 'pasado', isReversed: false },
+          { cardId: 2, position: 'presente', isReversed: false },
+          { cardId: 3, position: 'futuro', isReversed: false },
+        ],
+        predefinedQuestionId: 5,
+        useAI: false,
+      });
+
+      const errors = await validate(dto);
+      expect(errors).toHaveLength(0);
+      expect(dto.useAI).toBe(false);
+    });
+
+    it('debe aceptar useAI como undefined (campo opcional)', async () => {
+      const dto = plainToInstance(CreateReadingDto, {
+        deckId: 1,
+        spreadId: 1,
+        cardIds: [1, 2, 3],
+        cardPositions: [
+          { cardId: 1, position: 'pasado', isReversed: false },
+          { cardId: 2, position: 'presente', isReversed: false },
+          { cardId: 3, position: 'futuro', isReversed: false },
+        ],
+        predefinedQuestionId: 5,
+        // useAI no se proporciona
+      });
+
+      const errors = await validate(dto);
+      expect(errors).toHaveLength(0);
+      expect(dto.useAI).toBeUndefined();
+    });
+
+    it('debe rechazar useAI si no es booleano', async () => {
+      const dto = plainToInstance(CreateReadingDto, {
+        deckId: 1,
+        spreadId: 1,
+        cardIds: [1, 2, 3],
+        cardPositions: [
+          { cardId: 1, position: 'pasado', isReversed: false },
+          { cardId: 2, position: 'presente', isReversed: false },
+          { cardId: 3, position: 'futuro', isReversed: false },
+        ],
+        predefinedQuestionId: 5,
+        useAI: 'invalid',
+      });
+
+      const errors = await validate(dto);
+      expect(errors.length).toBeGreaterThan(0);
+      const errorMessages = errors.map((e) =>
+        Object.values(e.constraints || {}),
+      );
+      expect(errorMessages.flat().some((msg) => msg.includes('boolean'))).toBe(
+        true,
+      );
+    });
+  });
 });

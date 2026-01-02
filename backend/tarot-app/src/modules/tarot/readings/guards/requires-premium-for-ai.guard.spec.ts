@@ -9,7 +9,132 @@ describe('RequiresPremiumForAIGuard', () => {
     guard = new RequiresPremiumForAIGuard();
   });
 
-  describe('canActivate', () => {
+  describe('canActivate - campo useAI', () => {
+    it('debe permitir useAI: true para usuarios PREMIUM', () => {
+      const mockContext = {
+        switchToHttp: () => ({
+          getRequest: () => ({
+            user: { userId: 1, plan: UserPlan.PREMIUM },
+            body: { useAI: true },
+          }),
+        }),
+      } as ExecutionContext;
+
+      expect(guard.canActivate(mockContext)).toBe(true);
+    });
+
+    it('debe bloquear useAI: true para usuarios FREE', () => {
+      const mockContext = {
+        switchToHttp: () => ({
+          getRequest: () => ({
+            user: { userId: 1, plan: UserPlan.FREE },
+            body: { useAI: true },
+          }),
+        }),
+      } as ExecutionContext;
+
+      expect(() => guard.canActivate(mockContext)).toThrow(ForbiddenException);
+      expect(() => guard.canActivate(mockContext)).toThrow(
+        'Las funciones con IA están disponibles solo para usuarios Premium. Actualiza tu plan para desbloquear esta funcionalidad.',
+      );
+    });
+
+    it('debe bloquear useAI: true para usuarios ANONYMOUS', () => {
+      const mockContext = {
+        switchToHttp: () => ({
+          getRequest: () => ({
+            user: { userId: 1, plan: UserPlan.ANONYMOUS },
+            body: { useAI: true },
+          }),
+        }),
+      } as ExecutionContext;
+
+      expect(() => guard.canActivate(mockContext)).toThrow(ForbiddenException);
+      expect(() => guard.canActivate(mockContext)).toThrow(
+        'Las funciones con IA están disponibles solo para usuarios Premium. Actualiza tu plan para desbloquear esta funcionalidad.',
+      );
+    });
+
+    it('debe permitir useAI: false para usuarios FREE', () => {
+      const mockContext = {
+        switchToHttp: () => ({
+          getRequest: () => ({
+            user: { userId: 1, plan: UserPlan.FREE },
+            body: { useAI: false },
+          }),
+        }),
+      } as ExecutionContext;
+
+      expect(guard.canActivate(mockContext)).toBe(true);
+    });
+
+    it('debe permitir useAI: false para usuarios ANONYMOUS', () => {
+      const mockContext = {
+        switchToHttp: () => ({
+          getRequest: () => ({
+            user: { userId: 1, plan: UserPlan.ANONYMOUS },
+            body: { useAI: false },
+          }),
+        }),
+      } as ExecutionContext;
+
+      expect(guard.canActivate(mockContext)).toBe(true);
+    });
+
+    it('debe permitir cuando useAI es undefined para usuarios FREE', () => {
+      const mockContext = {
+        switchToHttp: () => ({
+          getRequest: () => ({
+            user: { userId: 1, plan: UserPlan.FREE },
+            body: {},
+          }),
+        }),
+      } as ExecutionContext;
+
+      expect(guard.canActivate(mockContext)).toBe(true);
+    });
+
+    it('debe permitir cuando useAI es undefined para usuarios ANONYMOUS', () => {
+      const mockContext = {
+        switchToHttp: () => ({
+          getRequest: () => ({
+            user: { userId: 1, plan: UserPlan.ANONYMOUS },
+            body: {},
+          }),
+        }),
+      } as ExecutionContext;
+
+      expect(guard.canActivate(mockContext)).toBe(true);
+    });
+
+    it('debe permitir useAI: false para usuarios PREMIUM', () => {
+      const mockContext = {
+        switchToHttp: () => ({
+          getRequest: () => ({
+            user: { userId: 1, plan: UserPlan.PREMIUM },
+            body: { useAI: false },
+          }),
+        }),
+      } as ExecutionContext;
+
+      expect(guard.canActivate(mockContext)).toBe(true);
+    });
+
+    it('debe permitir useAI: undefined para usuarios PREMIUM', () => {
+      const mockContext = {
+        switchToHttp: () => ({
+          getRequest: () => ({
+            user: { userId: 1, plan: UserPlan.PREMIUM },
+            body: {},
+          }),
+        }),
+      } as ExecutionContext;
+
+      expect(guard.canActivate(mockContext)).toBe(true);
+    });
+  });
+
+  describe('canActivate - campo generateInterpretation (legacy)', () => {
     it('debe permitir generateInterpretation: true para usuarios PREMIUM', () => {
       const mockContext = {
         switchToHttp: () => ({
