@@ -44,7 +44,7 @@ interface ReadingResponse {
  * cubiertos por mvp-complete.e2e-spec.ts ni reading-regeneration.e2e-spec.ts
  *
  * Coverage:
- * - Unlimited readings verification (stress test)
+ * - Premium readings limit verification (4 lecturas/día: 1 carta + 3 tiradas)
  * - Custom question edge cases (empty, very long, special chars)
  * - Regeneration workflow edge cases
  * - Premium downgrade scenarios
@@ -147,13 +147,13 @@ describe('Premium User Edge Cases E2E', () => {
     await app.close();
   });
 
-  describe('1. Unlimited Readings Verification', () => {
-    it('should allow creating more than 10 readings without limit', async () => {
-      // FREE users have 3/day limit, PREMIUM should have no limit
-      // Create 11 readings to verify unlimited (more than 3x FREE limit)
+  describe('1. Premium Readings Limit Verification', () => {
+    it('should allow creating 4 readings per day (1 carta + 3 tiradas)', async () => {
+      // PREMIUM users have 4 readings/day limit (1 carta del día + 3 tiradas)
+      // Create 4 readings to verify limit
       const createdReadingIds: number[] = [];
 
-      for (let i = 0; i < 11; i++) {
+      for (let i = 0; i < 4; i++) {
         const response = await request(app.getHttpServer())
           .post('/api/v1/readings')
           .set('Authorization', `Bearer ${premiumUserToken}`)
@@ -178,10 +178,10 @@ describe('Premium User Edge Cases E2E', () => {
         await new Promise((resolve) => setTimeout(resolve, 100));
       }
 
-      // Verify all 11 readings were created successfully
-      expect(createdReadingIds).toHaveLength(11);
+      // Verify all 4 readings were created successfully
+      expect(createdReadingIds).toHaveLength(4);
 
-      // Verify no usage_limit record for premium (or count is NOT enforced)
+      // Verify usage_limit record shows 4 readings consumed
       const ds = dbHelper.getDataSource();
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -191,12 +191,39 @@ describe('Premium User Edge Cases E2E', () => {
         [premiumUserId, 'tarot_reading', today],
       );
 
-      // Premium users might have NO usage_limit record, or count is tracked but not enforced
-
-      if (usageLimits.length > 0) {
-        expect(usageLimits[0].count).toBeGreaterThanOrEqual(11);
-      }
+      expect(usageLimits.length).toBeGreaterThan(0);
+      expect(usageLimits[0].count).toBe(4);
     }, 30000);
+
+    it('should block 5th reading attempt with 403 (limit exceeded)', async () => {
+      // Attempt to create 5th reading should fail
+      const response = await request(app.getHttpServer())
+        .post('/api/v1/readings')
+        .set('Authorization', `Bearer ${premiumUserToken}`)
+        .send({
+          customQuestion: 'Fifth reading attempt (should fail)',
+          deckId: deckId,
+          spreadId: spreadId,
+          cardIds: cardIds,
+          cardPositions: [
+            { cardId: cardIds[0], position: 'past', isReversed: false },
+            { cardId: cardIds[1], position: 'present', isReversed: false },
+            { cardId: cardIds[2], position: 'future', isReversed: false },
+          ],
+          generateInterpretation: false,
+        })
+        .expect(403);
+
+      expect(response.body.message).toContain('límite diario');
+    });
+
+    // Reset usage limits after this test group
+    afterAll(async () => {
+      const ds = dbHelper.getDataSource();
+      await ds.query('DELETE FROM usage_limit WHERE user_id = $1', [
+        premiumUserId,
+      ]);
+    });
   });
 
   describe('2. Custom Question Edge Cases', () => {
@@ -292,6 +319,14 @@ describe('Premium User Edge Cases E2E', () => {
       const body = response.body as ReadingResponse;
       expect(body.customQuestion).toBe(maxQuestion);
       expect(body.customQuestion?.length).toBe(500);
+    });
+
+    // Reset usage limits after this test group
+    afterAll(async () => {
+      const ds = dbHelper.getDataSource();
+      await ds.query('DELETE FROM usage_limit WHERE user_id = $1', [
+        premiumUserId,
+      ]);
     });
   });
 
@@ -428,6 +463,14 @@ describe('Premium User Edge Cases E2E', () => {
       // Note: customQuestion will be from last successful regen, not necessarily "Original question"
       expect(body.customQuestion).toBeTruthy();
     }, 30000); // Reasonable timeout: 3 regenerations + delays + buffer for AI calls/fallbacks
+
+    // Reset usage limits after this test group
+    afterAll(async () => {
+      const ds = dbHelper.getDataSource();
+      await ds.query('DELETE FROM usage_limit WHERE user_id = $1', [
+        premiumUserId,
+      ]);
+    });
   });
 
   describe('4. Premium Downgrade Scenarios', () => {
@@ -527,6 +570,14 @@ describe('Premium User Edge Cases E2E', () => {
       // Restore premium status
       await ds.query('UPDATE "user" SET plan = $1 WHERE id = $2', [
         UserPlan.PREMIUM,
+        premiumUserId,
+      ]);
+    });
+
+    // Reset usage limits after this test group
+    afterAll(async () => {
+      const ds = dbHelper.getDataSource();
+      await ds.query('DELETE FROM usage_limit WHERE user_id = $1', [
         premiumUserId,
       ]);
     });

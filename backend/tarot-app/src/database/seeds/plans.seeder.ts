@@ -12,7 +12,7 @@ import { UserPlan } from '../../modules/users/entities/user.entity';
  * - Configures limits and features for each plan
  * - ANONYMOUS: For non-registered users (1 daily card reading, no AI)
  * - FREE: For registered users (2 readings, no AI - cost optimization)
- * - PREMIUM: Paid plan (3 readings, 100 AI requests monthly, all features)
+ * - PREMIUM: Paid plan (4 readings, 100 AI requests monthly, all features)
  */
 export async function seedPlans(
   planRepository: Repository<Plan>,
@@ -60,9 +60,9 @@ export async function seedPlans(
       planType: UserPlan.PREMIUM,
       name: 'Plan Premium',
       description:
-        'Plan completo con hasta 3 lecturas mensuales, interpretaciones con IA y preguntas personalizadas',
+        'Plan completo con 4 lecturas diarias (1 carta + 3 tiradas), interpretaciones con IA y preguntas personalizadas',
       price: 9.99,
-      readingsLimit: 3,
+      readingsLimit: 4, // 1 carta del día + 3 tiradas
       aiQuotaMonthly: 100,
       allowCustomQuestions: true,
       allowSharing: true,
