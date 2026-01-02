@@ -35,9 +35,11 @@ export class DailyReadingResponseDto {
   @ApiProperty({
     example:
       '**Energía del Día**: El Mago trae la energía de la manifestación y el poder personal. Hoy es un día para tomar acción y utilizar tus recursos disponibles.\n\n**Ventajas**:\n- Alta capacidad de concentración y enfoque\n- Habilidad para comunicar ideas efectivamente\n- Momento favorable para iniciar proyectos\n\n**Cuidados**:\n- Evitar la manipulación o el engaño\n- No dispersar la energía en demasiadas direcciones\n- Cuidado con el exceso de confianza\n\n**Consejo del Día**: Confía en tus habilidades y usa todas las herramientas a tu disposición. Es momento de actuar con determinación.',
-    description: 'Interpretación de la carta del día',
+    description:
+      'Interpretación de la carta del día. Null para acceso público sin autenticación.',
+    nullable: true,
   })
-  interpretation: string;
+  interpretation: string | null;
 
   @ApiProperty({
     example: '2025-01-15',

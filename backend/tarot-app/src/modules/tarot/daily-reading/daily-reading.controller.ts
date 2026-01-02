@@ -206,3 +206,43 @@ export class DailyReadingController {
     };
   }
 }
+
+@ApiTags('Daily Card - Public')
+@Controller('public/daily-reading')
+export class DailyReadingPublicController {
+  constructor(private readonly dailyReadingService: DailyReadingService) {}
+
+  @Get('today')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Obtener carta del día de hoy (público, sin autenticación)',
+    description:
+      'Retorna la carta del día de hoy si existe, o null si aún no se ha generado. No requiere autenticación. Solo retorna información de base de datos (sin interpretación IA).',
+  })
+  @ApiResponse({
+    status: 200,
+    description:
+      'Carta del día de hoy (puede ser null). Sin interpretación IA.',
+    type: DailyReadingResponseDto,
+    isArray: false,
+  })
+  async getTodayCardPublic(): Promise<DailyReadingResponseDto | null> {
+    const dailyReading = await this.dailyReadingService.getTodayCardPublic();
+
+    if (!dailyReading) {
+      return null;
+    }
+
+    return {
+      id: dailyReading.id,
+      userId: dailyReading.userId,
+      tarotistaId: dailyReading.tarotistaId,
+      card: dailyReading.card,
+      isReversed: dailyReading.isReversed,
+      interpretation: null, // No incluir interpretación para usuarios anónimos
+      readingDate: dailyReading.readingDate.toString(),
+      wasRegenerated: dailyReading.wasRegenerated,
+      createdAt: dailyReading.createdAt,
+    };
+  }
+}

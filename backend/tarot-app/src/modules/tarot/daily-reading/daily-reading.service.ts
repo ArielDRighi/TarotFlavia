@@ -116,6 +116,23 @@ export class DailyReadingService {
   }
 
   /**
+   * Obtiene la carta del día de hoy para acceso público (sin autenticación)
+   * Retorna la primera carta del día generada hoy (carta oficial del día)
+   * No incluye interpretación IA (solo info de DB)
+   */
+  async getTodayCardPublic(): Promise<DailyReading | null> {
+    const todayStr = this.getTodayLocalDateString();
+
+    return this.dailyReadingRepository
+      .createQueryBuilder('daily_reading')
+      .where('daily_reading.reading_date = :date', { date: todayStr })
+      .leftJoinAndSelect('daily_reading.card', 'card')
+      .orderBy('daily_reading.created_at', 'ASC')
+      .limit(1)
+      .getOne();
+  }
+
+  /**
    * Regenera la carta del día (solo usuarios premium)
    */
   async regenerateDailyCard(
