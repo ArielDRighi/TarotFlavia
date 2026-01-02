@@ -344,6 +344,8 @@ export interface TarotCard {
 /**
  * Daily reading (carta del día)
  * Matches backend DailyReadingResponseDto contract
+ *
+ * Note: interpretation is null for anonymous users (public endpoint)
  */
 export interface DailyReading {
   id: number;
@@ -351,7 +353,7 @@ export interface DailyReading {
   tarotistaId: number;
   card: TarotCard;
   isReversed: boolean;
-  interpretation: string;
+  interpretation: string | null; // null for anonymous users
   readingDate: string;
   wasRegenerated: boolean;
   createdAt: Date;

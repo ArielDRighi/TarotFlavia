@@ -12,6 +12,7 @@ import { toast } from '@/hooks/utils/useToast';
 import {
   getDailyReading,
   getDailyReadingToday,
+  getDailyReadingTodayPublic,
   getDailyReadingHistory,
   regenerateDailyReading,
 } from '@/lib/api/daily-reading-api';
@@ -32,13 +33,25 @@ export const dailyReadingQueryKeys = {
 // ============================================================================
 
 /**
- * Hook to fetch today's daily reading if it exists
+ * Hook to fetch today's daily reading if it exists (authenticated)
  * Returns null if no daily reading exists for today
  */
 export function useDailyReadingToday() {
   return useQuery({
     queryKey: dailyReadingQueryKeys.today(),
     queryFn: getDailyReadingToday,
+  });
+}
+
+/**
+ * Hook to fetch today's daily reading if it exists (public - no auth required)
+ * Returns null if no daily reading exists for today
+ * This endpoint returns only DB info, no AI interpretation
+ */
+export function useDailyReadingTodayPublic() {
+  return useQuery({
+    queryKey: [...dailyReadingQueryKeys.all, 'today-public'] as const,
+    queryFn: getDailyReadingTodayPublic,
   });
 }
 
