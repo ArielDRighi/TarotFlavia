@@ -49,6 +49,7 @@ export const API_ENDPOINTS = {
   DAILY_READING: {
     BASE: '/daily-reading',
     TODAY: '/daily-reading/today',
+    TODAY_PUBLIC: '/public/daily-reading/today',
     HISTORY: '/daily-reading/history',
     REGENERATE: '/daily-reading/regenerate',
   },

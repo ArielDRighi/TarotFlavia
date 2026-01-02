@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Copy, History, RefreshCw, Sparkles } from 'lucide-react';
+import { AxiosError } from 'axios';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -15,13 +16,14 @@ import {
 } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TarotCard } from '@/components/features/readings/TarotCard';
+import { AnonymousLimitReached } from './AnonymousLimitReached';
 import {
   useDailyReadingToday,
+  useDailyReadingTodayPublic,
   useDailyReading,
   useRegenerateDailyReading,
 } from '@/hooks/api/useDailyReading';
 import { useAuth } from '@/hooks/useAuth';
-import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { toast } from '@/hooks/utils/useToast';
 import { cn } from '@/lib/utils';
 import type { DailyReading, ReadingCard } from '@/types';
@@ -54,19 +56,37 @@ function transformToReadingCard(reading: DailyReading): ReadingCard {
  * - REVEALED: Face-up card with interpretation and actions
  *
  * Features:
- * - Authentication required via useRequireAuth
+ * - Dual flow: anonymous (public endpoint) vs authenticated (protected endpoint)
+ * - Anonymous users: See card with DB info only, no AI interpretation
+ * - Authenticated users: See card with full interpretation (FREE: DB, PREMIUM: AI)
  * - Smooth flip animation on reveal
  * - Premium regenerate feature with confirmation modal
  * - Share functionality (copy to clipboard)
  * - Navigation to history
+ * - Anonymous limit reached state with conversion CTAs
  */
 export function DailyCardExperience() {
   const router = useRouter();
-  const { isLoading: isAuthLoading } = useRequireAuth();
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
-  // Daily reading state
-  const { data: dailyReading, isLoading: isFetching, error } = useDailyReadingToday();
+  // Conditionally fetch from authenticated or public endpoint
+  // Only one query executes based on authentication state (enabled option)
+  const {
+    data: dailyReadingAuth,
+    isLoading: isFetchingAuth,
+    error: errorAuth,
+  } = useDailyReadingToday({ enabled: isAuthenticated });
+  const {
+    data: dailyReadingPublic,
+    isLoading: isFetchingPublic,
+    error: errorPublic,
+  } = useDailyReadingTodayPublic({ enabled: !isAuthenticated });
+
+  // Use appropriate data based on authentication status
+  const dailyReading = isAuthenticated ? dailyReadingAuth : dailyReadingPublic;
+  const isFetching = isAuthenticated ? isFetchingAuth : isFetchingPublic;
+  const error = isAuthenticated ? errorAuth : errorPublic;
+
   const { mutate: createDailyReading, isPending: isCreating } = useDailyReading();
   const { mutate: regenerateReading, isPending: isRegenerating } = useRegenerateDailyReading();
 
@@ -82,6 +102,19 @@ export function DailyCardExperience() {
   const isPremium = user?.plan === 'PREMIUM';
   const currentReading = localReading || dailyReading;
   const isRevealed = Boolean(currentReading);
+
+  // Type guard for AxiosError
+  const isAxiosError = (err: unknown): err is AxiosError => {
+    return (
+      typeof err === 'object' &&
+      err !== null &&
+      'isAxiosError' in err &&
+      (err as any).isAxiosError === true
+    );
+  };
+
+  const isAnonymousLimitReached =
+    !isAuthenticated && isAxiosError(error) && error.response?.status === 403;
 
   /**
    * Handle card click to create daily reading
@@ -148,17 +181,11 @@ export function DailyCardExperience() {
     });
   }, [regenerateReading]);
 
-  // Show loading spinner while checking auth
-  if (isAuthLoading) {
+  // Show AnonymousLimitReached when anonymous user reached limit (403)
+  if (isAnonymousLimitReached) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <div
-          data-testid="loading-spinner"
-          className="animate-spin"
-          aria-label="Cargando carta del día"
-        >
-          <Sparkles className="text-primary h-8 w-8" />
-        </div>
+      <div className="flex w-full justify-center">
+        <AnonymousLimitReached />
       </div>
     );
   }
@@ -174,8 +201,8 @@ export function DailyCardExperience() {
     );
   }
 
-  // Show error state
-  if (error) {
+  // Show error state (but not for 403 anonymous, already handled above)
+  if (error && !isAnonymousLimitReached) {
     return (
       <div className="text-center" role="alert">
         <p className="text-destructive">Error al cargar tu carta del día</p>
@@ -244,39 +271,66 @@ export function DailyCardExperience() {
             )}
           </div>
 
-          {/* Interpretation */}
-          <div className="bg-surface shadow-soft w-full max-w-lg rounded-xl p-6">
-            <p className="text-text-primary leading-relaxed whitespace-pre-line">
-              {currentReading?.interpretation}
-            </p>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex flex-wrap justify-center gap-3">
-            <Button variant="outline" onClick={handleShare} aria-label="Compartir mensaje">
-              <Copy className="h-4 w-4" />
-              Compartir mensaje
-            </Button>
-
-            <Button
-              variant="outline"
-              onClick={handleViewHistory}
-              aria-label="Ver historial de cartas"
+          {/* Interpretation (only if exists - authenticated users) */}
+          {currentReading?.interpretation && (
+            <div
+              data-testid="interpretation-section"
+              className="bg-surface shadow-soft w-full max-w-lg rounded-xl p-6"
             >
-              <History className="h-4 w-4" />
-              Ver historial
-            </Button>
+              <p className="text-text-primary leading-relaxed whitespace-pre-line">
+                {currentReading.interpretation}
+              </p>
+            </div>
+          )}
 
-            <Button
-              variant="secondary"
-              onClick={handleRegenerateClick}
-              disabled={isRegenerating}
-              aria-label="Regenerar carta"
+          {/* Anonymous User CTA (shown when no interpretation) */}
+          {!currentReading?.interpretation && !isAuthenticated && (
+            <div
+              data-testid="anonymous-cta"
+              className="bg-primary/5 border-primary/20 w-full max-w-lg rounded-xl border p-6 text-center"
             >
-              <RefreshCw className={cn('h-4 w-4', isRegenerating && 'animate-spin')} />
-              Regenerar
-            </Button>
-          </div>
+              <p className="text-text-primary mb-4 font-medium">
+                ¿Te gustó? Regístrate gratis para obtener lecturas completas
+              </p>
+              <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+                <Button onClick={() => router.push('/register')} size="lg">
+                  Crear cuenta gratis
+                </Button>
+                <Button onClick={() => router.push('/login')} variant="outline" size="lg">
+                  Iniciar sesión
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Action Buttons (only for authenticated users with interpretation) */}
+          {isAuthenticated && currentReading?.interpretation && (
+            <div className="flex flex-wrap justify-center gap-3">
+              <Button variant="outline" onClick={handleShare} aria-label="Compartir mensaje">
+                <Copy className="h-4 w-4" />
+                Compartir mensaje
+              </Button>
+
+              <Button
+                variant="outline"
+                onClick={handleViewHistory}
+                aria-label="Ver historial de cartas"
+              >
+                <History className="h-4 w-4" />
+                Ver historial
+              </Button>
+
+              <Button
+                variant="secondary"
+                onClick={handleRegenerateClick}
+                disabled={isRegenerating}
+                aria-label="Regenerar carta"
+              >
+                <RefreshCw className={cn('h-4 w-4', isRegenerating && 'animate-spin')} />
+                Regenerar
+              </Button>
+            </div>
+          )}
         </div>
       )}
 
