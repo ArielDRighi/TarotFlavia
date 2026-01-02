@@ -1376,30 +1376,42 @@ La aplicación tiene una **base sólida** en términos de:
 
 ## Módulo: Reading System (Guards & Interceptors)
 
-### TASK-004: Modificar RequiresPremiumForAIGuard para ser condicional
+### TASK-004: Modificar RequiresPremiumForAIGuard para ser condicional ✅
+
+**Estado:** ✅ COMPLETADA (02/01/2026)
 
 **[BACKEND]**
 
-**Archivos a modificar:**
+**Archivos modificados:**
 
 - `backend/tarot-app/src/modules/tarot/readings/guards/requires-premium-for-ai.guard.ts`
 - `backend/tarot-app/src/modules/tarot/readings/dto/create-reading.dto.ts`
+- Tests correspondientes
 
-**Cambios requeridos:**
+**Cambios implementados:**
 
-1. Agregar campo opcional `useAI: boolean` en CreateReadingDto
-2. Guard solo debe bloquear si `useAI === true` Y usuario NO es PREMIUM
-3. Si `useAI === false` o `useAI` es undefined, permitir para todos los usuarios
-4. Mantener bloqueo para custom questions (ya existente)
+1. ✅ Campo opcional `useAI: boolean` agregado en CreateReadingDto
+2. ✅ Guard actualizado para bloquear solo si `useAI === true` Y usuario NO es PREMIUM
+3. ✅ Si `useAI === false` o `useAI` es undefined, permite acceso para todos los usuarios
+4. ✅ Bloqueo para custom questions mantenido (funcionalidad existente)
 
-**Dependencias:** Ninguna
+**Resultados de validación:**
 
-**Criterios de aceptación:**
+- ✅ Tests unitarios: 2012 passed (100% de nuevos tests)
+- ✅ Tests de integración: Pasan correctamente (11 fallos pre-existentes no relacionados)
+- ✅ Lint: Sin errores
+- ✅ Build: Exitoso
+- ✅ Validación de arquitectura: Passed
 
-- Usuario FREE puede crear lectura con `useAI: false`
-- Usuario FREE recibe 403 si envía `useAI: true`
-- Usuario PREMIUM puede crear lectura con `useAI: true` o `false`
-- Custom questions siguen bloqueadas para FREE
+**Criterios de aceptación verificados:**
+
+- ✅ Usuario FREE puede crear lectura con `useAI: false`
+- ✅ Usuario FREE recibe 403 si envía `useAI: true`
+- ✅ Usuario PREMIUM puede crear lectura con `useAI: true` o `false`
+- ✅ Custom questions siguen bloqueadas para FREE
+
+**Rama:** `feature/TASK-004-conditional-premium-ai-guard`
+**Commit:** `ca69af7` - feat: Add conditional AI guard based on useAI field
 
 ---
 
