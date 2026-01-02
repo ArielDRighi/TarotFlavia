@@ -1130,25 +1130,33 @@ La aplicación tiene una **base sólida** en términos de:
 
 ## Módulo: Authentication & Authorization
 
-### TASK-001: Crear endpoint público para Daily Reading
+### ✅ TASK-001: Crear endpoint público para Daily Reading [COMPLETADA]
 **[BACKEND]**
 
-**Archivos a modificar:**
+**Archivos modificados:**
 - `backend/tarot-app/src/modules/tarot/daily-reading/daily-reading.controller.ts`
 - `backend/tarot-app/src/modules/tarot/daily-reading/daily-reading.service.ts`
+- `backend/tarot-app/src/modules/tarot/daily-reading/daily-reading.service.spec.ts`
+- `backend/tarot-app/src/modules/tarot/daily-reading/daily-reading.module.ts`
+- `backend/tarot-app/src/modules/tarot/daily-reading/dto/daily-reading-response.dto.ts`
+- `backend/tarot-app/test/daily-reading.e2e-spec.ts`
 
-**Cambios requeridos:**
-1. Crear nuevo endpoint `GET /api/v1/public/daily-reading/today` sin `JwtAuthGuard`
-2. Mantener endpoint existente `/api/v1/daily-reading/today` con `JwtAuthGuard` para usuarios autenticados
-3. Service debe detectar si request tiene JWT o no para diferenciar usuario autenticado vs anónimo
+**Cambios implementados:**
+1. ✅ Creado nuevo controller `DailyReadingPublicController` con endpoint `GET /api/v1/public/daily-reading/today` sin `JwtAuthGuard`
+2. ✅ Mantenido endpoint existente `/api/v1/daily-reading/today` con `JwtAuthGuard` para usuarios autenticados
+3. ✅ Service implementa método `getTodayCardPublic()` que retorna la primera carta del día creada (carta oficial del día)
+4. ✅ Response DTO actualizado para soportar `interpretation: string | null` (null para acceso público)
+5. ✅ Tests unitarios agregados para `getTodayCardPublic()`
+6. ✅ Tests E2E agregados para endpoint público (4 tests nuevos)
 
-**Dependencias:** Ninguna
-
-**Criterios de aceptación:**
-- Usuario sin JWT puede hacer GET a `/api/v1/public/daily-reading/today`
-- Respuesta incluye solo info de DB (sin IA)
-- Usuario autenticado sigue usando endpoint protegido
-- Ambos endpoints funcionan simultáneamente
+**Criterios de aceptación cumplidos:**
+- ✅ Usuario sin JWT puede hacer GET a `/api/v1/public/daily-reading/today`
+- ✅ Respuesta incluye solo info de DB (sin IA) - `interpretation` es `null`
+- ✅ Usuario autenticado sigue usando endpoint protegido con interpretación completa
+- ✅ Ambos endpoints funcionan simultáneamente
+- ✅ Todos los tests pasan (15 unitarios + 19 E2E)
+- ✅ Build, lint y format ejecutados sin errores
+- ✅ Validación de arquitectura exitosa
 
 ---
 

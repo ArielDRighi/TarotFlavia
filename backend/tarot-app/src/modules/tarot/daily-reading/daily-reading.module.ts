@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { DailyReadingController } from './daily-reading.controller';
+import {
+  DailyReadingController,
+  DailyReadingPublicController,
+} from './daily-reading.controller';
 import { DailyReadingService } from './daily-reading.service';
 import { DailyReading } from './entities/daily-reading.entity';
 import { TarotCard } from '../cards/entities/tarot-card.entity';
@@ -13,7 +16,7 @@ import { AIUsageModule } from '../../ai-usage/ai-usage.module';
     InterpretationsModule,
     AIUsageModule,
   ],
-  controllers: [DailyReadingController],
+  controllers: [DailyReadingController, DailyReadingPublicController],
   providers: [DailyReadingService],
   exports: [DailyReadingService],
 })

@@ -19,6 +19,7 @@ interface MockQueryBuilder {
   orderBy: jest.Mock;
   skip: jest.Mock;
   take: jest.Mock;
+  limit: jest.Mock;
   getOne: jest.Mock;
   getManyAndCount: jest.Mock;
 }
@@ -52,6 +53,7 @@ describe('DailyReadingService', () => {
       orderBy: jest.fn().mockReturnThis(),
       skip: jest.fn().mockReturnThis(),
       take: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
       getOne: jest.fn(),
       getManyAndCount: jest.fn(),
     };
@@ -64,6 +66,7 @@ describe('DailyReadingService', () => {
       orderBy: jest.fn().mockReturnThis(),
       skip: jest.fn().mockReturnThis(),
       take: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
       getOne: jest.fn(),
       getManyAndCount: jest.fn(),
     };
@@ -360,6 +363,59 @@ describe('DailyReadingService', () => {
       );
       await expect(service.generateDailyCard(1, 1)).rejects.toThrow(
         'No se pudo seleccionar una carta',
+      );
+    });
+  });
+
+  describe('getTodayCardPublic', () => {
+    it('should return null if no card exists for today', async () => {
+      mockDailyReadingQueryBuilder.getOne.mockResolvedValue(null);
+
+      const result = await service.getTodayCardPublic();
+
+      expect(result).toBeNull();
+      expect(mockDailyReadingRepo.createQueryBuilder).toHaveBeenCalledWith(
+        'daily_reading',
+      );
+    });
+
+    it('should return the first daily card of the day (for public access)', async () => {
+      const mockReading = {
+        id: 1,
+        userId: 1,
+        cardId: 1,
+        card: { id: 1, name: 'El Mago' },
+        interpretation: 'Test interpretation',
+        createdAt: new Date(),
+      };
+
+      mockDailyReadingQueryBuilder.getOne.mockResolvedValue(mockReading);
+
+      const result = await service.getTodayCardPublic();
+
+      expect(result).toEqual(mockReading);
+      expect(mockDailyReadingQueryBuilder.orderBy).toHaveBeenCalledWith(
+        'daily_reading.created_at',
+        'ASC',
+      );
+    });
+
+    it('should return first card of the day regardless of user', async () => {
+      const mockReading = {
+        id: 1,
+        userId: 1,
+        cardId: 1,
+        card: { id: 1, name: 'El Mago' },
+      };
+
+      mockDailyReadingQueryBuilder.getOne.mockResolvedValue(mockReading);
+
+      const result = await service.getTodayCardPublic();
+
+      expect(result).toEqual(mockReading);
+      expect(mockDailyReadingQueryBuilder.where).toHaveBeenCalledWith(
+        'daily_reading.reading_date = :date',
+        expect.any(Object),
       );
     });
   });
