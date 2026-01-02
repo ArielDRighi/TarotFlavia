@@ -1461,6 +1461,153 @@ La aplicación tiene una **base sólida** en términos de:
 
 ---
 
+### TASK-005A: Corregir generación aleatoria de carta del día - Backend
+
+**[BACKEND]**
+
+**Problema actual:**
+
+- Endpoint público `GET /public/daily-reading/today` retorna la primera carta generada del día (misma para todos los anónimos)
+- Comportamiento esperado: CADA usuario (ANÓNIMO, FREE, PREMIUM) debe recibir una carta aleatoria única
+
+**Archivos a modificar:**
+
+- `backend/tarot-app/src/modules/tarot/daily-reading/daily-reading.controller.ts`
+- `backend/tarot-app/src/modules/tarot/daily-reading/daily-reading.service.ts`
+- `backend/tarot-app/src/modules/tarot/daily-reading/daily-reading.service.spec.ts`
+- `backend/tarot-app/src/modules/tarot/daily-reading/dto/daily-reading-response.dto.ts`
+- `backend/tarot-app/test/daily-reading.e2e-spec.ts`
+- Migración: nueva columna `anonymous_fingerprint` en tabla `daily_reading`
+
+**Cambios requeridos:**
+
+1. **Eliminar endpoint GET público actual:**
+   - Remover `GET /api/v1/public/daily-reading/today` de `DailyReadingPublicController`
+   - Remover método `getTodayCardPublic()` del service
+
+2. **Crear nuevo endpoint POST público:**
+   - Ruta: `POST /api/v1/public/daily-reading`
+   - Sin autenticación (sin `JwtAuthGuard`)
+   - Aplicar decorador `@AllowAnonymous()` para tracking
+   - Recibir `fingerprint` en body (generado por frontend)
+   - Generar carta aleatoria por fingerprint
+   - Guardar con `userId: null` y `anonymousFingerprint: fingerprint`
+   - Retornar: `{ card, cardMeaning, interpretation: null }`
+
+3. **Modificar DailyReadingService.generateDailyCard():**
+   - Agregar parámetro opcional `anonymousFingerprint?: string`
+   - Si `anonymousFingerprint` presente: NO llamar a IA, usar info de DB
+   - Si `userId` presente: detectar plan (FREE vs PREMIUM)
+     - FREE: NO usar IA, solo DB (usar `card.meaningUpright` o `card.meaningReversed`)
+     - PREMIUM: usar IA
+   - Cada llamada genera:
+     - Carta aleatoria con `selectRandomCard()`
+     - Orientación aleatoria: `isReversed = Math.random() < 0.5` (50% probabilidad)
+     - Retornar `{ card, isReversed }`
+
+4. **Crear método unificado para generación:**
+
+   ```typescript
+   async generateDailyCard(
+     userId: number | null,
+     tarotistaId: number,
+     anonymousFingerprint?: string
+   ): Promise<DailyReading> {
+     // Verificar si ya generó carta hoy
+     // Generar carta aleatoria + orientación aleatoria (upright/reversed)
+     // Decidir si usa IA según plan (PREMIUM) o no (FREE/ANONYMOUS)
+     // Si no usa IA:
+     //   - Si isReversed = false: usar card.meaningUpright
+     //   - Si isReversed = true: usar card.meaningReversed
+     // Guardar con userId O anonymousFingerprint
+   }
+   ```
+
+5. **Migración de base de datos:**
+   - Agregar columna `anonymous_fingerprint VARCHAR(64) NULLABLE` a `daily_reading`
+   - Agregar constraint: CHECK (userId IS NOT NULL OR anonymous_fingerprint IS NOT NULL)
+   - Index compuesto: `[anonymous_fingerprint, reading_date]`
+
+6. **Actualizar DTO DailyReadingResponseDto:**
+   - Agregar campo `cardMeaning: string | null`
+   - Si interpretation es null, incluir `card.meaningUpright` o `card.meaningReversed` según orientación
+
+**Impacto en otros flujos:**
+
+- **Usuarios FREE:** Modificar endpoint autenticado para NO usar IA (similar a TASK-007)
+- **Usuarios PREMIUM:** Sin cambios, siguen usando IA
+- **Frontend:** Requerirá cambios (ver TASK-005B)
+
+**Dependencias:** TASK-002 (AnonymousTrackingService)
+
+**Criterios de aceptación:**
+
+- ✅ Endpoint POST público acepta fingerprint y genera carta aleatoria
+- ✅ Cada fingerprint recibe carta aleatoria DIFERENTE
+- ✅ Orientación de la carta es aleatoria (50% upright / 50% reversed)
+- ✅ Mismo fingerprint/día recibe LA MISMA carta y orientación (ConflictException en segundo intento)
+- ✅ Response incluye `cardMeaning` correcto según orientación:
+  - Si `isReversed = false`: retornar `card.meaningUpright`
+  - Si `isReversed = true`: retornar `card.meaningReversed`
+- ✅ Usuarios PREMIUM reciben `interpretation` generada con IA
+- ✅ CheckUsageLimitGuard funciona con `@AllowAnonymous()`
+- ✅ Tests unitarios y E2E actualizados
+- ✅ Migración ejecuta sin romper datos existentes
+
+---
+
+### TASK-005B: Adaptar frontend para carta del día aleatoria con fingerprint
+
+**[FRONTEND]**
+
+**Archivos a modificar:**
+
+- `frontend/src/hooks/api/useDailyReading.ts`
+- `frontend/src/components/features/daily-reading/DailyCardExperience.tsx`
+- `frontend/src/components/features/daily-reading/DailyCardExperience.anonymous.test.tsx`
+- `frontend/src/types/index.ts` (actualizar tipo `DailyReading`)
+
+**Cambios requeridos:**
+
+1. **Generar fingerprint en cliente:**
+   - Crear utilidad para generar fingerprint único por sesión
+   - Usar combinación de UserAgent + timestamp de inicio de sesión
+   - Almacenar en sessionStorage para mantener consistencia durante sesión
+   - Función sugerida: `generateSessionFingerprint(): string`
+
+2. **Modificar hook useDailyReading:**
+   - Cambiar de GET a POST para usuarios anónimos
+   - Incluir fingerprint en body del request
+   - Endpoint: `POST /api/v1/public/daily-reading`
+   - Body: `{ fingerprint: string }`
+
+3. **Actualizar tipo DailyReading:**
+   - Agregar campo `cardMeaning?: string`
+   - Campo presente cuando `interpretation === null`
+
+4. **Modificar DailyCardExperience.tsx:**
+   - Renderizar `cardMeaning` si no hay `interpretation`
+   - Mostrar nombre de carta + orientación (Upright/Reversed)
+   - Mantener CTA de conversión para usuarios anónimos
+
+5. **Manejar error de límite alcanzado:**
+   - Si backend retorna 409 (ConflictException): mostrar carta existente
+   - Si backend retorna 403 (límite): mostrar componente `AnonymousLimitReached`
+
+**Dependencias:** TASK-005A (Backend), TASK-003 (Frontend anonymous flow)
+
+**Criterios de aceptación:**
+
+- ✅ Frontend genera fingerprint único por sesión
+- ✅ Usuarios anónimos llaman a POST en lugar de GET
+- ✅ `cardMeaning` se renderiza correctamente cuando no hay `interpretation`
+- ✅ Mismo usuario/sesión ve la misma carta (no regenera)
+- ✅ Errores 409 y 403 se manejan apropiadamente
+- ✅ Tests actualizados para nuevo flujo
+- ✅ Build y type-check sin errores
+
+---
+
 ### TASK-006: Modificar frontend para enviar flag useAI según plan
 
 **[FRONTEND]**
