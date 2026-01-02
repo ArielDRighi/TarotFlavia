@@ -24,7 +24,9 @@ export class AnonymousUsage {
 
   @ApiProperty({
     example: '192.168.1.1',
-    description: 'IP del usuario anónimo',
+    description:
+      'IP del usuario anónimo (soporta IPv4 e IPv6, incluyendo mapped addresses como ::ffff:192.168.1.1)',
+    maxLength: 45,
   })
   @Column({ type: 'varchar', length: 45 })
   ip: string;

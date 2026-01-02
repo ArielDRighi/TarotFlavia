@@ -1236,7 +1236,22 @@ La aplicación tiene una **base sólida** en términos de:
 - ✅ Límite se resetea automáticamente al día siguiente (00:00)
 - ✅ Cambiar navegador o IP permite nuevo acceso (comportamiento aceptable)
 - ✅ No afecta tracking de usuarios autenticados
-- ✅ Tabla `anonymous_usage` registra correctamente cada acceso
+- ✅ Tabla `anonymous_usage` registra correctamente cada acceso (implementado con recordUsage en guard)
+
+**⚠️ Nota sobre aplicación del decorator:**
+
+- El decorator `@AllowAnonymous()` está implementado y testeado
+- Actualmente NO hay endpoint público que lo utilice
+- Para activar el tracking anónimo, aplicar `@AllowAnonymous()` al endpoint público de daily reading cuando se cree (TASK-003)
+
+**Correcciones aplicadas (PR Feedback):**
+
+- ✅ Agregado llamada a `recordUsage()` después de `canAccess()` en CheckUsageLimitGuard
+- ✅ Tests actualizados para verificar que `recordUsage` se llama correctamente
+- ✅ Agregado test de edge case para IP undefined
+- ✅ Migration actualizada para usar enum type en lugar de varchar genérico
+- ✅ Mejorada documentación de timezone UTC y campo IP (IPv4/IPv6 support)
+- ✅ Actualizado header comment de plans.seeder (PREMIUM: 4 readings)
 
 ---
 

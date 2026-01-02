@@ -16,6 +16,7 @@ describe('CheckUsageLimitGuard', () => {
   };
   let anonymousTrackingService: {
     canAccess: jest.Mock;
+    recordUsage: jest.Mock;
   };
   let reflector: { getAllAndOverride: jest.Mock };
 
@@ -45,6 +46,7 @@ describe('CheckUsageLimitGuard', () => {
     const mockCheckLimit = jest.fn();
     const mockGetRemainingUsage = jest.fn();
     const mockCanAccess = jest.fn();
+    const mockRecordUsage = jest.fn();
     const mockGetAllAndOverride = jest.fn();
 
     const module: TestingModule = await Test.createTestingModule({
@@ -61,6 +63,7 @@ describe('CheckUsageLimitGuard', () => {
           provide: AnonymousTrackingService,
           useValue: {
             canAccess: mockCanAccess,
+            recordUsage: mockRecordUsage,
           },
         },
         {
@@ -204,11 +207,19 @@ describe('CheckUsageLimitGuard', () => {
           .mockReturnValueOnce(UsageFeature.TAROT_READING)
           .mockReturnValueOnce(true); // allowAnonymous = true
         anonymousTrackingService.canAccess.mockResolvedValue(true);
+        anonymousTrackingService.recordUsage.mockResolvedValue({
+          id: 1,
+          fingerprint: 'test-fingerprint',
+          ip: '192.168.1.1',
+          date: '2025-01-02',
+          feature: UsageFeature.TAROT_READING,
+        } as any);
 
         const result = await guard.canActivate(context);
 
         expect(result).toBe(true);
         expect(anonymousTrackingService.canAccess).toHaveBeenCalled();
+        expect(anonymousTrackingService.recordUsage).toHaveBeenCalled();
         expect(usageLimitsService.checkLimit).not.toHaveBeenCalled();
       });
 
@@ -224,6 +235,9 @@ describe('CheckUsageLimitGuard', () => {
         await expect(guard.canActivate(context)).rejects.toThrow(
           ForbiddenException,
         );
+
+        // Verify recordUsage is NOT called when access is denied
+        expect(anonymousTrackingService.recordUsage).not.toHaveBeenCalled();
 
         // Create new context for second assertion
         const context2 = mockExecutionContext(undefined);

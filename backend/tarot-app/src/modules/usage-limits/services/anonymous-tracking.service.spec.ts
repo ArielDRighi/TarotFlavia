@@ -188,5 +188,36 @@ describe('AnonymousTrackingService', () => {
       expect(mockAnonymousUsageRepository.create).toHaveBeenCalled();
       expect(mockAnonymousUsageRepository.save).toHaveBeenCalled();
     });
+
+    it('should handle missing IP by using empty string', async () => {
+      const requestWithoutIP = {
+        ip: undefined,
+        headers: {
+          'user-agent': 'Mozilla/5.0',
+        },
+      };
+
+      const mockAnonymousUsage = {
+        id: 1,
+        fingerprint: expect.any(String),
+        ip: '',
+        date: expect.any(String),
+        feature: UsageFeature.TAROT_READING,
+      };
+
+      mockAnonymousUsageRepository.create.mockReturnValue(mockAnonymousUsage);
+      mockAnonymousUsageRepository.save.mockResolvedValue(mockAnonymousUsage);
+
+      await service.recordUsage(requestWithoutIP as any);
+
+      // Verify that IP is stored as empty string
+      expect(mockAnonymousUsageRepository.create).toHaveBeenCalledWith({
+        fingerprint: expect.any(String),
+        ip: '',
+        date: expect.any(String),
+        feature: UsageFeature.TAROT_READING,
+      });
+      expect(mockAnonymousUsageRepository.save).toHaveBeenCalled();
+    });
   });
 });

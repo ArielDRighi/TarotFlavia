@@ -67,6 +67,9 @@ export class CheckUsageLimitGuard implements CanActivate {
         );
       }
 
+      // Record usage after successful access check
+      await this.anonymousTrackingService.recordUsage(request);
+
       return true;
     }
 

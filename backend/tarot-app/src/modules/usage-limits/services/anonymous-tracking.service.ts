@@ -34,7 +34,8 @@ export class AnonymousTrackingService {
     const userAgent = req.headers['user-agent'] || '';
     const fingerprint = this.generateFingerprint(ip, userAgent);
 
-    // Get start of today in UTC (00:00:00 UTC)
+    // Get start of today in UTC
+    // All dates are normalized to UTC 00:00:00 for consistency across timezones
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
     const dateString = today.toISOString().split('T')[0];
@@ -61,7 +62,8 @@ export class AnonymousTrackingService {
     const userAgent = req.headers['user-agent'] || '';
     const fingerprint = this.generateFingerprint(ip, userAgent);
 
-    // Get start of today in UTC (00:00:00 UTC)
+    // Get start of today in UTC
+    // All dates are normalized to UTC 00:00:00 for consistency across timezones
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
     const dateString = today.toISOString().split('T')[0];

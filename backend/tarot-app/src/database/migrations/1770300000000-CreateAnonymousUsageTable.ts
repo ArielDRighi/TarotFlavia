@@ -6,12 +6,15 @@ export class CreateAnonymousUsageTable1770300000000 implements MigrationInterfac
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Create table anonymous_usage
     await queryRunner.query(`
+      CREATE TYPE "anonymous_usage_feature_enum" AS ENUM('TAROT_READING');
+    `);
+    await queryRunner.query(`
       CREATE TABLE "anonymous_usage" (
         "id" SERIAL NOT NULL,
         "fingerprint" character varying(64) NOT NULL,
         "ip" character varying(45) NOT NULL,
         "date" date NOT NULL,
-        "feature" character varying NOT NULL,
+        "feature" "anonymous_usage_feature_enum" NOT NULL,
         "created_at" TIMESTAMP NOT NULL DEFAULT now(),
         CONSTRAINT "PK_anonymous_usage" PRIMARY KEY ("id")
       )

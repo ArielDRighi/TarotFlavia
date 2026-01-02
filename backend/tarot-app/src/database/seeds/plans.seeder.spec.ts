@@ -99,7 +99,7 @@ describe('Plans Seeder', () => {
         planType: UserPlan.PREMIUM,
         name: 'Plan Premium',
         price: 9.99,
-        readingsLimit: 3,
+        readingsLimit: 4,
         aiQuotaMonthly: 100,
         allowCustomQuestions: true,
       }),

@@ -12,7 +12,7 @@ import { UserPlan } from '../../modules/users/entities/user.entity';
  * - Configures limits and features for each plan
  * - ANONYMOUS: For non-registered users (1 daily card reading, no AI)
  * - FREE: For registered users (2 readings, no AI - cost optimization)
- * - PREMIUM: Paid plan (3 readings, 100 AI requests monthly, all features)
+ * - PREMIUM: Paid plan (4 readings, 100 AI requests monthly, all features)
  */
 export async function seedPlans(
   planRepository: Repository<Plan>,

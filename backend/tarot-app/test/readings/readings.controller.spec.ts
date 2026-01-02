@@ -11,6 +11,7 @@ import { TarotDeck } from '../../src/modules/tarot/decks/entities/tarot-deck.ent
 import { CheckUsageLimitGuard } from '../../src/modules/usage-limits/guards/check-usage-limit.guard';
 import { IncrementUsageInterceptor } from '../../src/modules/usage-limits/interceptors/increment-usage.interceptor';
 import { UsageLimitsService } from '../../src/modules/usage-limits/usage-limits.service';
+import { AnonymousTrackingService } from '../../src/modules/usage-limits/services/anonymous-tracking.service';
 import { AIQuotaService } from '../../src/modules/ai-usage/ai-quota.service';
 
 describe('ReadingsController', () => {
@@ -93,6 +94,14 @@ describe('ReadingsController', () => {
         {
           provide: UsageLimitsService,
           useValue: mockUsageLimitsService,
+        },
+        {
+          provide: AnonymousTrackingService,
+          useValue: {
+            canAccess: jest.fn().mockResolvedValue(true),
+            recordUsage: jest.fn().mockResolvedValue(undefined),
+            generateFingerprint: jest.fn().mockReturnValue('test-fingerprint'),
+          },
         },
         {
           provide: CACHE_MANAGER,
