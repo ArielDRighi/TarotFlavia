@@ -60,9 +60,9 @@ export async function seedPlans(
       planType: UserPlan.PREMIUM,
       name: 'Plan Premium',
       description:
-        'Plan completo con hasta 3 lecturas mensuales, interpretaciones con IA y preguntas personalizadas',
+        'Plan completo con 4 lecturas diarias (1 carta + 3 tiradas), interpretaciones con IA y preguntas personalizadas',
       price: 9.99,
-      readingsLimit: 3,
+      readingsLimit: 4, // 1 carta del día + 3 tiradas
       aiQuotaMonthly: 100,
       allowCustomQuestions: true,
       allowSharing: true,

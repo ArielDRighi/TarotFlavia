@@ -14,27 +14,30 @@
 
 ### Límites y Funcionalidades por Plan
 
-| Plan | Carta del Día | Tiradas | Interpretación IA | Total Lecturas/Día |
-|------|---------------|---------|-------------------|-------------------|
-| **PREMIUM** | 1/día CON IA | 3 interpretaciones/día CON IA<br>(1, 3, 5 cartas o Cruz Céltica) | ✅ SÍ | 4 lecturas<br>(1 carta día + 3 tiradas) |
-| **FREE** | 1/día SIN IA | 1 tirada/día SIN IA<br>(solo 1 o 3 cartas) | ❌ NO | 2 lecturas<br>(1 carta día + 1 tirada) |
-| **ANÓNIMO** | 1/día SIN IA | ❌ NO tiene acceso | ❌ NO | 1 lectura<br>(solo carta día) |
+| Plan        | Carta del Día | Tiradas                                                          | Interpretación IA | Total Lecturas/Día                      |
+| ----------- | ------------- | ---------------------------------------------------------------- | ----------------- | --------------------------------------- |
+| **PREMIUM** | 1/día CON IA  | 3 interpretaciones/día CON IA<br>(1, 3, 5 cartas o Cruz Céltica) | ✅ SÍ             | 4 lecturas<br>(1 carta día + 3 tiradas) |
+| **FREE**    | 1/día SIN IA  | 1 tirada/día SIN IA<br>(solo 1 o 3 cartas)                       | ❌ NO             | 2 lecturas<br>(1 carta día + 1 tirada)  |
+| **ANÓNIMO** | 1/día SIN IA  | ❌ NO tiene acceso                                               | ❌ NO             | 1 lectura<br>(solo carta día)           |
 
 ### Detalles Clave de Implementación
 
 **Para Usuario PREMIUM:**
+
 - ✅ Carta del día: Genera interpretación personalizada con IA (Energía, Ventajas, Cuidados, Consejo)
 - ✅ Tiradas: 3 interpretaciones/día con IA para CUALQUIER tipo (1, 3, 5 cartas o Cruz Céltica)
 - ✅ Formato: Markdown enriquecido con secciones estructuradas
 - ✅ Consume cuota de IA del plan
 
 **Para Usuario FREE:**
+
 - ❌ Carta del día: Solo información estática de DB (nombre, imagen, significado básico)
 - ❌ Tiradas: 1 tirada/día sin IA, solo 1 o 3 cartas (NO tiene acceso a 5 cartas o Cruz Céltica)
 - ❌ Formato: Texto plano de DB, sin interpretación
 - ❌ NO consume cuota de IA
 
 **Para Usuario ANÓNIMO:**
+
 - ❌ Solo carta del día sin IA (igual que FREE)
 - ❌ Sin acceso a tiradas de ningún tipo
 
@@ -1066,19 +1069,20 @@ La aplicación tiene una **base sólida** en términos de:
 
 ### Tabla Comparativa de Hallazgos
 
-| # | Error | Testing Auto | Testing Manual | Severidad | Estado |
-|---|-------|--------------|----------------|-----------|--------|
-| 1 | Acceso anónimo bloqueado | ✅ Detectado | ✅ Confirmado | 🔴 CRÍTICO | Sin implementar |
-| 2 | Usuario FREE no puede crear lecturas | ✅ Detectado (403) | ✅ Confirmado (guard IA) | 🔴 CRÍTICO | Arquitectura incorrecta |
-| 3 | Carta del día usa IA | ❌ No detectado | ✅ Detectado | 🔴 CRÍTICO | Consume recursos innecesarios |
-| 4 | Contador de uso no incrementa | ❌ No detectado | ✅ Detectado | 🔴 ALTA | Interceptor mal configurado |
-| 5 | UX post-registro rota | ❌ No detectado | ✅ Detectado | 🟡 ALTA | Redirect a perfil |
-| 6 | Branding incorrecto | ❌ No detectado | ✅ Detectado | 🔴 ALTA | Nombre viejo en toda la app |
-| 7 | Textos mencionan IA explícitamente | ❌ No detectado | ✅ Detectado | 🟢 MEDIA | Preferencia de comunicación |
+| #   | Error                                | Testing Auto       | Testing Manual           | Severidad  | Estado                        |
+| --- | ------------------------------------ | ------------------ | ------------------------ | ---------- | ----------------------------- |
+| 1   | Acceso anónimo bloqueado             | ✅ Detectado       | ✅ Confirmado            | 🔴 CRÍTICO | Sin implementar               |
+| 2   | Usuario FREE no puede crear lecturas | ✅ Detectado (403) | ✅ Confirmado (guard IA) | 🔴 CRÍTICO | Arquitectura incorrecta       |
+| 3   | Carta del día usa IA                 | ❌ No detectado    | ✅ Detectado             | 🔴 CRÍTICO | Consume recursos innecesarios |
+| 4   | Contador de uso no incrementa        | ❌ No detectado    | ✅ Detectado             | 🔴 ALTA    | Interceptor mal configurado   |
+| 5   | UX post-registro rota                | ❌ No detectado    | ✅ Detectado             | 🟡 ALTA    | Redirect a perfil             |
+| 6   | Branding incorrecto                  | ❌ No detectado    | ✅ Detectado             | 🔴 ALTA    | Nombre viejo en toda la app   |
+| 7   | Textos mencionan IA explícitamente   | ❌ No detectado    | ✅ Detectado             | 🟢 MEDIA   | Preferencia de comunicación   |
 
 ### Valor Agregado de Cada Tipo de Testing
 
 **Testing Automatizado (Playwright):**
+
 - ✅ Detectó síntomas visibles (403, redirects)
 - ✅ Validó flujos completos end-to-end
 - ✅ Capturó screenshots de evidencia
@@ -1087,6 +1091,7 @@ La aplicación tiene una **base sólida** en términos de:
 - ❌ No validó expectativas de negocio
 
 **Testing Manual (Usuario):**
+
 - ✅ Identificó causas raíz (arquitectura, guards)
 - ✅ Validó expectativas de negocio
 - ✅ Detectó problemas de UX/onboarding
@@ -1131,9 +1136,11 @@ La aplicación tiene una **base sólida** en términos de:
 ## Módulo: Authentication & Authorization
 
 ### ✅ TASK-001: Crear endpoint público para Daily Reading [COMPLETADA]
+
 **[BACKEND]**
 
 **Archivos modificados:**
+
 - `backend/tarot-app/src/modules/tarot/daily-reading/daily-reading.controller.ts`
 - `backend/tarot-app/src/modules/tarot/daily-reading/daily-reading.service.ts`
 - `backend/tarot-app/src/modules/tarot/daily-reading/daily-reading.service.spec.ts`
@@ -1142,6 +1149,7 @@ La aplicación tiene una **base sólida** en términos de:
 - `backend/tarot-app/test/daily-reading.e2e-spec.ts`
 
 **Cambios implementados:**
+
 1. ✅ Creado nuevo controller `DailyReadingPublicController` con endpoint `GET /api/v1/public/daily-reading/today` sin `JwtAuthGuard`
 2. ✅ Mantenido endpoint existente `/api/v1/daily-reading/today` con `JwtAuthGuard` para usuarios autenticados
 3. ✅ Service implementa método `getTodayCardPublic()` que retorna la primera carta del día creada (carta oficial del día)
@@ -1150,6 +1158,7 @@ La aplicación tiene una **base sólida** en términos de:
 6. ✅ Tests E2E agregados para endpoint público (4 tests nuevos)
 
 **Criterios de aceptación cumplidos:**
+
 - ✅ Usuario sin JWT puede hacer GET a `/api/v1/public/daily-reading/today`
 - ✅ Respuesta incluye solo info de DB (sin IA) - `interpretation` es `null`
 - ✅ Usuario autenticado sigue usando endpoint protegido con interpretación completa
@@ -1160,56 +1169,89 @@ La aplicación tiene una **base sólida** en términos de:
 
 ---
 
-### TASK-002: Implementar tracking de uso para usuarios anónimos
+### ✅ TASK-002: Implementar tracking de uso para usuarios anónimos [COMPLETADA]
+
 **[BACKEND]**
 
-**Archivos a modificar:**
-- Crear: `backend/tarot-app/src/modules/usage-limits/services/anonymous-tracking.service.ts`
-- Crear: `backend/tarot-app/src/modules/usage-limits/entities/anonymous-usage.entity.ts`
-- Crear migration: `backend/tarot-app/src/database/migrations/XXXX-create-anonymous-usage-table.ts`
-- `backend/tarot-app/src/modules/usage-limits/guards/check-usage-limit.guard.ts`
+**Archivos modificados:**
 
-**Cambios requeridos:**
-1. **Crear tabla `anonymous_usage`:**
+- Creado: `backend/tarot-app/src/modules/usage-limits/services/anonymous-tracking.service.ts`
+- Creado: `backend/tarot-app/src/modules/usage-limits/services/anonymous-tracking.service.spec.ts`
+- Creado: `backend/tarot-app/src/modules/usage-limits/entities/anonymous-usage.entity.ts`
+- Creado: `backend/tarot-app/src/modules/usage-limits/decorators/allow-anonymous.decorator.ts`
+- Creado: `backend/tarot-app/src/database/migrations/1770300000000-CreateAnonymousUsageTable.ts`
+- Modificado: `backend/tarot-app/src/modules/usage-limits/guards/check-usage-limit.guard.ts`
+- Modificado: `backend/tarot-app/src/modules/usage-limits/guards/check-usage-limit.guard.spec.ts`
+- Modificado: `backend/tarot-app/src/modules/usage-limits/usage-limits.module.ts`
+- Modificado: `backend/tarot-app/src/modules/usage-limits/index.ts`
+- Modificado: `backend/tarot-app/src/database/seeds/plans.seeder.ts` (PREMIUM readingsLimit: 4)
+- Modificado: `backend/tarot-app/test/premium-user-edge-cases.e2e-spec.ts` (tests actualizados para límite correcto)
+
+**Cambios implementados:**
+
+1. ✅ **Tabla `anonymous_usage` creada:**
    - Campos: `id`, `fingerprint` (hash de IP + User Agent), `ip`, `date`, `feature`, `createdAt`
-   - Index en `[fingerprint, date, feature]` para búsquedas rápidas
+   - Index compuesto en `[fingerprint, date, feature]` para búsquedas rápidas
+   - Migración ejecutada exitosamente
 
-2. **Crear `AnonymousTrackingService`:**
+2. ✅ **AnonymousTrackingService implementado:**
    - Método `generateFingerprint(ip, userAgent)`: Genera SHA-256 de IP + User Agent
    - Método `canAccess(req)`: Verifica si fingerprint ya accedió hoy a DAILY_CARD
    - Método `recordUsage(req)`: Registra uso en tabla `anonymous_usage`
+   - 10 tests unitarios implementados, todos pasando
 
-3. **Modificar `CheckUsageLimitGuard`:**
-   - Detectar si request tiene JWT (usuario autenticado) o no (anónimo)
-   - Si anónimo: llamar a `anonymousTrackingService.canAccess(req)`
-   - Si autenticado: usar lógica actual con userId
+3. ✅ **CheckUsageLimitGuard modificado:**
+   - Detecta si request tiene JWT (usuario autenticado) o no (anónimo)
+   - Si anónimo Y endpoint con `@AllowAnonymous()`: llama a `anonymousTrackingService.canAccess(req)`
+   - Si autenticado: usa lógica actual con userId
+   - 12 tests unitarios implementados (4 nuevos para anonymous), todos pasando
 
-4. **Estrategia de tracking:**
+4. ✅ **Estrategia de tracking:**
    - Combinación de IP + User Agent (balance seguridad/simplicidad)
    - No requiere cookies ni JavaScript
-   - Más difícil de burlar que solo IP
+   - Fingerprint único por combinación IP+navegador
 
-**Dependencias:** TASK-001
+5. ✅ **Tests E2E validados:**
+   - daily-reading.e2e-spec.ts: 19/19 tests pasando
+   - free-user-edge-cases.e2e-spec.ts: 7/7 tests pasando
+   - premium-user-edge-cases.e2e-spec.ts: 12/12 tests pasando (actualizados con límite correcto)
 
-**Criterios de aceptación:**
-- Usuario anónimo puede ver 1 carta del día por día (mismo IP + navegador)
-- Segundo intento del mismo fingerprint/día retorna mensaje: "Ya viste tu carta del día. Regístrate para más lecturas."
-- Límite se resetea automáticamente al día siguiente (00:00)
-- Cambiar navegador o IP permite nuevo acceso (comportamiento aceptable)
-- No afecta tracking de usuarios autenticados
-- Tabla `anonymous_usage` registra correctamente cada acceso
+6. ✅ **Plans seeder corregido:**
+   - PREMIUM plan: `readingsLimit: 4` (1 carta del día + 3 tiradas)
+   - Descripción actualizada: "4 lecturas diarias (1 carta + 3 tiradas)"
+
+**Tests ejecutados:**
+
+- ✅ Unit tests: 69 passing (usage-limits module)
+- ✅ E2E tests: 38 passing (daily-reading, free-user, premium-user)
+- ✅ Lint: Passed
+- ✅ Format: Passed
+- ✅ Build: Successful
+- ✅ Architecture validation: Passed
+
+**Criterios de aceptación cumplidos:**
+
+- ✅ Usuario anónimo puede ver 1 carta del día por día (mismo IP + navegador)
+- ✅ Segundo intento del mismo fingerprint/día retorna mensaje: "Ya viste tu carta del día. Regístrate para más lecturas."
+- ✅ Límite se resetea automáticamente al día siguiente (00:00)
+- ✅ Cambiar navegador o IP permite nuevo acceso (comportamiento aceptable)
+- ✅ No afecta tracking de usuarios autenticados
+- ✅ Tabla `anonymous_usage` registra correctamente cada acceso
 
 ---
 
 ### TASK-003: Remover useRequireAuth de Daily Reading (Frontend)
+
 **[FRONTEND]**
 
 **Archivos a modificar:**
+
 - `frontend/src/components/features/daily-reading/DailyCardExperience.tsx`
 - `frontend/src/app/carta-del-dia/page.tsx`
 - Crear: `frontend/src/components/features/daily-reading/AnonymousLimitReached.tsx`
 
 **Cambios requeridos:**
+
 1. **Remover autenticación forzada:**
    - Eliminar `useRequireAuth()` de `DailyCardExperience`
    - Detectar estado de auth con `useAuth()` (sin redirect automático)
@@ -1237,6 +1279,7 @@ La aplicación tiene una **base sólida** en términos de:
 **Dependencias:** TASK-001, TASK-002
 
 **Criterios de aceptación:**
+
 - Usuario sin login puede ver `/carta-del-dia` sin redirect a login
 - Primera visita anónima muestra carta correctamente
 - Segunda visita anónima (mismo día) muestra mensaje de límite + CTAs
@@ -1249,13 +1292,16 @@ La aplicación tiene una **base sólida** en términos de:
 ## Módulo: Reading System (Guards & Interceptors)
 
 ### TASK-004: Modificar RequiresPremiumForAIGuard para ser condicional
+
 **[BACKEND]**
 
 **Archivos a modificar:**
+
 - `backend/tarot-app/src/modules/tarot/readings/guards/requires-premium-for-ai.guard.ts`
 - `backend/tarot-app/src/modules/tarot/readings/dto/create-reading.dto.ts`
 
 **Cambios requeridos:**
+
 1. Agregar campo opcional `useAI: boolean` en CreateReadingDto
 2. Guard solo debe bloquear si `useAI === true` Y usuario NO es PREMIUM
 3. Si `useAI === false` o `useAI` es undefined, permitir para todos los usuarios
@@ -1264,6 +1310,7 @@ La aplicación tiene una **base sólida** en términos de:
 **Dependencias:** Ninguna
 
 **Criterios de aceptación:**
+
 - Usuario FREE puede crear lectura con `useAI: false`
 - Usuario FREE recibe 403 si envía `useAI: true`
 - Usuario PREMIUM puede crear lectura con `useAI: true` o `false`
@@ -1272,12 +1319,15 @@ La aplicación tiene una **base sólida** en términos de:
 ---
 
 ### TASK-005: Implementar flujo dual en ReadingsService (con/sin IA)
+
 **[BACKEND]**
 
 **Archivos a modificar:**
+
 - `backend/tarot-app/src/modules/tarot/readings/readings.service.ts`
 
 **Cambios requeridos:**
+
 1. Detectar flag `useAI` del DTO
 2. Si `useAI === true`:
    - Generar interpretación con IA (flujo actual)
@@ -1291,6 +1341,7 @@ La aplicación tiene una **base sólida** en términos de:
 **Dependencias:** TASK-004
 
 **Criterios de aceptación:**
+
 - Lectura con `useAI: false` retorna solo info de DB
 - Lectura con `useAI: true` genera interpretación IA
 - Ambas se guardan en tabla `tarot_readings`
@@ -1299,15 +1350,18 @@ La aplicación tiene una **base sólida** en términos de:
 ---
 
 ### TASK-006: Modificar frontend para enviar flag useAI según plan
+
 **[FRONTEND]**
 
 **Archivos a modificar:**
+
 - `frontend/src/components/features/readings/SpreadSelector.tsx`
 - `frontend/src/components/features/readings/QuestionSelector.tsx`
 - `frontend/src/app/ritual/tirada/page.tsx` (si existe)
 - Hooks de creación de lectura
 
 **Cambios requeridos:**
+
 1. Detectar plan del usuario autenticado
 2. Si usuario es FREE: enviar `useAI: false` en request
 3. Si usuario es PREMIUM: enviar `useAI: true` en request
@@ -1318,6 +1372,7 @@ La aplicación tiene una **base sólida** en términos de:
 **Dependencias:** TASK-004, TASK-005
 
 **Criterios de aceptación:**
+
 - Usuario FREE crea lecturas sin IA correctamente
 - Usuario PREMIUM crea lecturas con IA correctamente
 - Mensajes en UI reflejan el tipo de lectura que recibirán
@@ -1326,12 +1381,15 @@ La aplicación tiene una **base sólida** en términos de:
 ---
 
 ### TASK-007: Aplicar mismo flujo dual a Daily Reading Service
+
 **[BACKEND]**
 
 **Archivos a modificar:**
+
 - `backend/tarot-app/src/modules/tarot/daily-reading/daily-reading.service.ts`
 
 **Cambios requeridos:**
+
 1. Detectar plan del usuario (FREE, PREMIUM, ANONYMOUS)
 2. Si PREMIUM:
    - Generar interpretación con IA
@@ -1344,6 +1402,7 @@ La aplicación tiene una **base sólida** en términos de:
 **Dependencias:** TASK-001, TASK-005
 
 **Criterios de aceptación:**
+
 - Usuario PREMIUM recibe interpretación IA en carta del día
 - Usuario FREE recibe solo info de DB en carta del día
 - Usuario ANÓNIMO recibe solo info de DB en carta del día
@@ -1352,12 +1411,15 @@ La aplicación tiene una **base sólida** en términos de:
 ---
 
 ### TASK-008: Configurar IncrementUsageInterceptor en DailyReadingController
+
 **[BACKEND]**
 
 **Archivos a modificar:**
+
 - `backend/tarot-app/src/modules/tarot/daily-reading/daily-reading.controller.ts`
 
 **Cambios requeridos:**
+
 1. Agregar `@UseInterceptors(IncrementUsageInterceptor)` al endpoint de daily reading
 2. Configurar feature como `UsageFeature.TAROT_READING`
 3. Interceptor debe funcionar tanto para usuarios autenticados como anónimos
@@ -1366,6 +1428,7 @@ La aplicación tiene una **base sólida** en términos de:
 **Dependencias:** TASK-002, TASK-007
 
 **Criterios de aceptación:**
+
 - Contador se incrementa después de obtener carta del día
 - Usuario FREE ve "1/2" en estadísticas después de carta del día
 - Usuario puede verificar su uso en `/profile`
@@ -1376,15 +1439,18 @@ La aplicación tiene una **base sólida** en términos de:
 ## Módulo: User Experience
 
 ### TASK-009: Proteger ruta /ritual y mejorar landing page
+
 **[FULLSTACK]**
 
 **Archivos a modificar:**
+
 - `frontend/src/app/ritual/page.tsx`
 - `frontend/src/app/page.tsx` (landing page)
 - `frontend/src/components/landing/HeroSection.tsx` (si existe)
 - `frontend/src/components/landing/PlanComparison.tsx` (crear si no existe)
 
 **Cambios requeridos:**
+
 1. **Proteger `/ritual` de acceso anónimo:**
    - Agregar `useRequireAuth()` en página de ritual
    - Si usuario no autenticado: redirect a `/register` con mensaje
@@ -1420,6 +1486,7 @@ La aplicación tiene una **base sólida** en términos de:
 **Dependencias:** TASK-003
 
 **Criterios de aceptación:**
+
 - Usuario anónimo que intenta ir a `/ritual` es redirigido a `/register`
 - Landing page muestra claramente beneficios de cada plan
 - CTA "Ver mi carta del día gratis" funciona sin registro
@@ -1430,14 +1497,17 @@ La aplicación tiene una **base sólida** en términos de:
 ---
 
 ### TASK-010: Implementar onboarding post-registro
+
 **[FULLSTACK]**
 
 **Archivos a modificar:**
+
 - `backend/tarot-app/src/modules/auth/auth.controller.ts`
 - `frontend/src/app/register/page.tsx` (o componente de registro)
 - Crear: `frontend/src/components/onboarding/WelcomeModal.tsx`
 
 **Cambios requeridos:**
+
 1. Backend: Después de registro exitoso, retornar flag `isNewUser: true`
 2. Frontend: Detectar `isNewUser` y mostrar modal de bienvenida
 3. Modal debe explicar:
@@ -1450,6 +1520,7 @@ La aplicación tiene una **base sólida** en términos de:
 **Dependencias:** Ninguna
 
 **Criterios de aceptación:**
+
 - Usuario ve modal de bienvenida después de registrarse
 - Modal explica claramente funcionalidad FREE (2 lecturas/día sin IA)
 - Usuario entiende diferencia con PREMIUM
@@ -1459,9 +1530,11 @@ La aplicación tiene una **base sólida** en términos de:
 ---
 
 ### TASK-011: Actualizar branding a Auguria (Global)
+
 **[FULLSTACK]**
 
 **Archivos a modificar:**
+
 - Buscar y reemplazar en TODO el proyecto:
   - `frontend/`: Títulos, meta tags, componentes, footer
   - `backend/`: Mensajes de error, logs, documentación
@@ -1469,6 +1542,7 @@ La aplicación tiene una **base sólida** en términos de:
   - Variables de entorno (si aplica)
 
 **Cambios requeridos:**
+
 1. Reemplazar "TarotFlavia" → "Auguria"
 2. Reemplazar "Tarot Flavia" → "Auguria"
 3. Reemplazar "tarot-flavia" → "auguria" (URLs, slugs)
@@ -1478,6 +1552,7 @@ La aplicación tiene una **base sólida** en términos de:
 **Dependencias:** Ninguna
 
 **Criterios de aceptación:**
+
 - NO hay referencias a "TarotFlavia" en el código
 - Títulos de página muestran "Auguria"
 - Meta tags actualizados
@@ -1486,15 +1561,18 @@ La aplicación tiene una **base sólida** en términos de:
 ---
 
 ### TASK-012: Remover menciones explícitas a IA en textos
+
 **[FRONTEND]**
 
 **Archivos a modificar:**
+
 - `frontend/src/app/page.tsx` (landing)
 - Componentes de planes/suscripciones
 - Tooltips y textos de ayuda
 - Footer/About
 
 **Cambios requeridos:**
+
 1. Cambiar "interpretación con IA" → "interpretación personalizada"
 2. Cambiar "análisis generado por IA" → "análisis detallado"
 3. Remover badges "Powered by AI"
@@ -1503,6 +1581,7 @@ La aplicación tiene una **base sólida** en términos de:
 **Dependencias:** Ninguna
 
 **Criterios de aceptación:**
+
 - Textos NO mencionan "IA" o "Inteligencia Artificial"
 - Diferenciación de planes sigue siendo clara
 - Usuarios entienden qué ofrece cada plan
@@ -1512,14 +1591,17 @@ La aplicación tiene una **base sólida** en términos de:
 ## Módulo: Access Control & Spreads
 
 ### TASK-013: Bloquear tiradas de 5 cartas y Cruz Céltica para FREE
+
 **[FULLSTACK]**
 
 **Archivos a modificar:**
+
 - `backend/tarot-app/src/modules/tarot/spreads/spreads.controller.ts`
 - `backend/tarot-app/src/modules/tarot/spreads/spreads.service.ts`
 - `frontend/src/components/features/readings/SpreadSelector.tsx`
 
 **Cambios requeridos:**
+
 1. Backend: Agregar campo `requiredPlan` en entity Spread (PREMIUM, FREE, ANONYMOUS)
 2. Seed: Configurar tiradas de 5 y Cruz Céltica como `requiredPlan: PREMIUM`
 3. Endpoint GET /spreads: filtrar según plan del usuario
@@ -1529,6 +1611,7 @@ La aplicación tiene una **base sólida** en términos de:
 **Dependencias:** Ninguna
 
 **Criterios de aceptación:**
+
 - Usuario FREE solo ve tiradas de 1 y 3 cartas
 - Usuario PREMIUM ve todas las tiradas (1, 3, 5, Cruz Céltica)
 - Intento de acceso no autorizado muestra modal de upgrade
@@ -1539,12 +1622,15 @@ La aplicación tiene una **base sólida** en términos de:
 ## Módulo: Data & Testing
 
 ### TASK-014: Limpiar datos de usuario de testing
+
 **[DATABASE]**
 
 **Archivos a modificar:**
+
 - Ninguno (operación de base de datos)
 
 **Cambios requeridos:**
+
 1. Ejecutar SQL para limpiar datos:
    ```sql
    DELETE FROM usage_limits WHERE userId = (SELECT id FROM users WHERE email = 'test@example.com');
@@ -1558,20 +1644,24 @@ La aplicación tiene una **base sólida** en términos de:
 **Dependencias:** Ninguna
 
 **Criterios de aceptación:**
+
 - Usuario `test@example.com` tiene límites reseteados
 - Testing automatizado puede ejecutarse nuevamente
 
 ---
 
 ### TASK-015: Actualizar tests automatizados
+
 **[FULLSTACK]**
 
 **Archivos a modificar:**
+
 - `backend/tarot-app/test/readings/readings.controller.spec.ts`
 - `frontend/src/components/features/daily-reading/DailyCardExperience.test.tsx`
 - Tests de Playwright (si existen)
 
 **Cambios requeridos:**
+
 1. Actualizar tests para reflejar nueva arquitectura:
    - Flujo con `useAI: true` (PREMIUM)
    - Flujo con `useAI: false` (FREE)
@@ -1583,6 +1673,7 @@ La aplicación tiene una **base sólida** en términos de:
 **Dependencias:** TASK-001 hasta TASK-008
 
 **Criterios de aceptación:**
+
 - Todos los tests pasan
 - Cobertura de código no disminuye
 - Nuevos flujos tienen tests correspondientes
@@ -1592,14 +1683,17 @@ La aplicación tiene una **base sólida** en términos de:
 ## Módulo: Monitoring & Polish
 
 ### TASK-016: Agregar autocomplete a campos de password
+
 **[FRONTEND]**
 
 **Archivos a modificar:**
+
 - `frontend/src/app/login/page.tsx`
 - `frontend/src/app/register/page.tsx`
 - Cualquier otro formulario con passwords
 
 **Cambios requeridos:**
+
 1. Agregar `autocomplete="current-password"` en campo de login
 2. Agregar `autocomplete="new-password"` en campo de registro
 3. Verificar que warnings de consola desaparezcan
@@ -1607,6 +1701,7 @@ La aplicación tiene una **base sólida** en términos de:
 **Dependencias:** Ninguna
 
 **Criterios de aceptación:**
+
 - NO hay warnings de autocomplete en consola
 - Autofill del navegador funciona correctamente
 
@@ -1654,6 +1749,7 @@ La aplicación tiene una **base sólida** en términos de:
 **Método de Tracking Seleccionado: IP + User Agent**
 
 **Justificación:**
+
 - ✅ Balance óptimo entre seguridad y simplicidad
 - ✅ No requiere JavaScript ni cookies
 - ✅ Más difícil de burlar que solo IP
@@ -1661,8 +1757,9 @@ La aplicación tiene una **base sólida** en términos de:
 - ⚠️ Aceptamos que cambiar navegador o VPN permite nuevo acceso (trade-off aceptable)
 
 **Implementación:**
+
 ```typescript
-fingerprint = SHA256(IP + UserAgent)
+fingerprint = SHA256(IP + UserAgent);
 // Ejemplo: SHA256("192.168.1.1:Mozilla/5.0...")
 ```
 
@@ -1711,19 +1808,20 @@ fingerprint = SHA256(IP + UserAgent)
 
 ### Rutas Públicas vs Protegidas
 
-| Ruta | Acceso Anónimo | Acceso FREE | Acceso PREMIUM |
-|------|----------------|-------------|----------------|
-| `/` (Landing) | ✅ Sí | ✅ Sí (home personalizado) | ✅ Sí (home personalizado) |
-| `/carta-del-dia` | ✅ 1 vez/día (DB) | ✅ 1 vez/día (DB) | ✅ 1 vez/día (IA) |
-| `/ritual` | ❌ Redirect a `/register` | ✅ 1 lectura/día (1-3 cartas, DB) | ✅ 3 lecturas/día (todas, IA) |
-| `/profile` | ❌ Redirect a `/login` | ✅ Sí | ✅ Sí |
-| `/planes` | ✅ Sí | ✅ Sí | ✅ Sí |
-| `/login` | ✅ Sí | N/A | N/A |
-| `/register` | ✅ Sí | N/A | N/A |
+| Ruta             | Acceso Anónimo            | Acceso FREE                       | Acceso PREMIUM                |
+| ---------------- | ------------------------- | --------------------------------- | ----------------------------- |
+| `/` (Landing)    | ✅ Sí                     | ✅ Sí (home personalizado)        | ✅ Sí (home personalizado)    |
+| `/carta-del-dia` | ✅ 1 vez/día (DB)         | ✅ 1 vez/día (DB)                 | ✅ 1 vez/día (IA)             |
+| `/ritual`        | ❌ Redirect a `/register` | ✅ 1 lectura/día (1-3 cartas, DB) | ✅ 3 lecturas/día (todas, IA) |
+| `/profile`       | ❌ Redirect a `/login`    | ✅ Sí                             | ✅ Sí                         |
+| `/planes`        | ✅ Sí                     | ✅ Sí                             | ✅ Sí                         |
+| `/login`         | ✅ Sí                     | N/A                               | N/A                           |
+| `/register`      | ✅ Sí                     | N/A                               | N/A                           |
 
 ### Estructura de Landing Page
 
 **Hero Section:**
+
 - Título: "Auguria - Descubre tu destino a través del Tarot"
 - Subtítulo: Descripción breve del servicio
 - CTA Principal: "Ver mi carta del día gratis" (sin registro)
@@ -1731,26 +1829,29 @@ fingerprint = SHA256(IP + UserAgent)
 
 **Comparativa de Planes:**
 
-| Feature | ANÓNIMO | FREE | PREMIUM |
-|---------|---------|------|---------|
-| **Carta del día** | ✅ 1/día | ✅ 1/día | ✅ 1/día |
-| **Lecturas de Tarot** | ❌ | ✅ 1/día (1-3 cartas) | ✅ 3/día (todas) |
-| **Interpretación IA** | ❌ | ❌ | ✅ |
-| **Tipos de tirada** | - | 1 o 3 cartas | Todas (1, 3, 5, Cruz Céltica) |
-| **Preguntas personalizadas** | ❌ | ❌ | ✅ |
-| **Costo** | Gratis | Gratis | $/mes |
+| Feature                      | ANÓNIMO  | FREE                  | PREMIUM                       |
+| ---------------------------- | -------- | --------------------- | ----------------------------- |
+| **Carta del día**            | ✅ 1/día | ✅ 1/día              | ✅ 1/día                      |
+| **Lecturas de Tarot**        | ❌       | ✅ 1/día (1-3 cartas) | ✅ 3/día (todas)              |
+| **Interpretación IA**        | ❌       | ❌                    | ✅                            |
+| **Tipos de tirada**          | -        | 1 o 3 cartas          | Todas (1, 3, 5, Cruz Céltica) |
+| **Preguntas personalizadas** | ❌       | ❌                    | ✅                            |
+| **Costo**                    | Gratis   | Gratis                | $/mes                         |
 
 **Sección: Cómo funciona**
+
 1. Elige tu pregunta (categoría + pregunta predefinida)
 2. Selecciona tus cartas (1, 3, 5 o Cruz Céltica según plan)
 3. Recibe tu lectura (info de DB o interpretación IA según plan)
 
 **Footer CTA:**
+
 - "Comienza tu viaje espiritual" → `/register`
 
 ### Mensajes de Conversión
 
 **Después de ver carta del día (anónimo):**
+
 ```
 Modal de Conversión:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1767,6 +1868,7 @@ Regístrate gratis para obtener:
 ```
 
 **Si intenta acceder segunda vez (límite alcanzado):**
+
 ```
 Límite Alcanzado:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1782,6 +1884,7 @@ Regístrate para acceder a:
 ```
 
 **Si intenta acceder a /ritual sin auth:**
+
 ```
 Redirect a /register con query param:
 ?message=register-for-readings
@@ -1795,11 +1898,13 @@ Mensaje en página de registro:
 ## Notas de Implementación
 
 **Archivos que importan guards/interceptors afectados:**
+
 - `readings.controller.ts` - Usa RequiresPremiumForAIGuard, CheckUsageLimitGuard, IncrementUsageInterceptor
 - `daily-reading.controller.ts` - Debe agregar IncrementUsageInterceptor
 - Todos los controllers con `JwtAuthGuard`: Verificar que no se rompan con endpoints públicos
 
 **Verificaciones críticas antes de deploy:**
+
 - Usuario FREE puede crear lecturas sin IA ✓
 - Usuario PREMIUM puede crear lecturas con IA ✓
 - Usuario ANÓNIMO puede ver carta del día ✓
