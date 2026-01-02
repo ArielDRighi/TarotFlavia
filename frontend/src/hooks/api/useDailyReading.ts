@@ -35,11 +35,13 @@ export const dailyReadingQueryKeys = {
 /**
  * Hook to fetch today's daily reading if it exists (authenticated)
  * Returns null if no daily reading exists for today
+ * @param options - Query options (e.g., enabled flag)
  */
-export function useDailyReadingToday() {
+export function useDailyReadingToday(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: dailyReadingQueryKeys.today(),
     queryFn: getDailyReadingToday,
+    enabled: options?.enabled ?? true, // Default to true if not specified
   });
 }
 
@@ -47,11 +49,13 @@ export function useDailyReadingToday() {
  * Hook to fetch today's daily reading if it exists (public - no auth required)
  * Returns null if no daily reading exists for today
  * This endpoint returns only DB info, no AI interpretation
+ * @param options - Query options (e.g., enabled flag)
  */
-export function useDailyReadingTodayPublic() {
+export function useDailyReadingTodayPublic(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: [...dailyReadingQueryKeys.all, 'today-public'] as const,
     queryFn: getDailyReadingTodayPublic,
+    enabled: options?.enabled ?? true, // Default to true if not specified
   });
 }
 

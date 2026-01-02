@@ -36,6 +36,7 @@ vi.mock('next/image', () => ({
 
 // Mock hooks
 const mockUseDailyReadingToday = vi.fn();
+const mockUseDailyReadingTodayPublic = vi.fn();
 const mockUseDailyReading = vi.fn();
 const mockUseRegenerateDailyReading = vi.fn();
 const mockUseAuth = vi.fn();
@@ -43,6 +44,7 @@ const mockUseRequireAuth = vi.fn();
 
 vi.mock('@/hooks/api/useDailyReading', () => ({
   useDailyReadingToday: () => mockUseDailyReadingToday(),
+  useDailyReadingTodayPublic: () => mockUseDailyReadingTodayPublic(),
   useDailyReading: () => mockUseDailyReading(),
   useRegenerateDailyReading: () => mockUseRegenerateDailyReading(),
 }));
@@ -100,6 +102,11 @@ describe('DailyCardExperience', () => {
       isLoading: false,
       error: null,
     });
+    mockUseDailyReadingTodayPublic.mockReturnValue({
+      data: null,
+      isLoading: false,
+      error: null,
+    });
     mockUseDailyReading.mockReturnValue({
       mutate: vi.fn(),
       isPending: false,
@@ -112,16 +119,6 @@ describe('DailyCardExperience', () => {
 
   afterEach(() => {
     vi.clearAllMocks();
-  });
-
-  describe('Authentication', () => {
-    it('should show loading state while checking auth', () => {
-      mockUseRequireAuth.mockReturnValue({ isLoading: true });
-
-      renderWithProviders(<DailyCardExperience />);
-
-      expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
-    });
   });
 
   describe('Unrevealed State', () => {
@@ -387,15 +384,6 @@ describe('DailyCardExperience', () => {
   });
 
   describe('Accessibility', () => {
-    it('should have aria-label on loading spinner', () => {
-      mockUseRequireAuth.mockReturnValue({ isLoading: true });
-
-      renderWithProviders(<DailyCardExperience />);
-
-      const spinner = screen.getByTestId('loading-spinner');
-      expect(spinner).toHaveAttribute('aria-label', 'Cargando carta del día');
-    });
-
     it('should have aria-label on skeleton loading container', () => {
       mockUseDailyReadingToday.mockReturnValue({
         data: null,

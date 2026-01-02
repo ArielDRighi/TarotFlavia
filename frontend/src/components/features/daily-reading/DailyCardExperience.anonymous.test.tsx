@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 
 import { DailyCardExperience } from './DailyCardExperience';
 import { createMockTarotCard, createMockDailyReading } from '@/test/factories';
@@ -65,6 +66,20 @@ function createTestQueryClient() {
 function renderWithProviders(ui: React.ReactElement) {
   const queryClient = createTestQueryClient();
   return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
+}
+
+// Helper to create an AxiosError mock
+function createMockAxiosError(status: number, message?: string): AxiosError {
+  const error = new Error(message || 'Request failed') as AxiosError;
+  error.isAxiosError = true;
+  error.response = {
+    status,
+    data: { message },
+    statusText: '',
+    headers: {},
+    config: {} as any,
+  };
+  return error;
 }
 
 describe('DailyCardExperience - Anonymous User Flow', () => {
@@ -179,12 +194,7 @@ describe('DailyCardExperience - Anonymous User Flow', () => {
       mockUseDailyReadingTodayPublic.mockReturnValue({
         data: null,
         isLoading: false,
-        error: {
-          response: {
-            status: 403,
-            data: { message: 'Ya viste tu carta del día' },
-          },
-        },
+        error: createMockAxiosError(403, 'Ya viste tu carta del día'),
       });
 
       renderWithProviders(<DailyCardExperience />);
@@ -207,11 +217,7 @@ describe('DailyCardExperience - Anonymous User Flow', () => {
       mockUseDailyReadingTodayPublic.mockReturnValue({
         data: null,
         isLoading: false,
-        error: {
-          response: {
-            status: 403,
-          },
-        },
+        error: createMockAxiosError(403),
       });
 
       renderWithProviders(<DailyCardExperience />);

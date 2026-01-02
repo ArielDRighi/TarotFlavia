@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Copy, History, RefreshCw, Sparkles } from 'lucide-react';
+import { AxiosError } from 'axios';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -68,17 +69,18 @@ export function DailyCardExperience() {
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
 
-  // Determine which endpoint to use based on authentication
+  // Conditionally fetch from authenticated or public endpoint
+  // Only one query executes based on authentication state (enabled option)
   const {
     data: dailyReadingAuth,
     isLoading: isFetchingAuth,
     error: errorAuth,
-  } = useDailyReadingToday();
+  } = useDailyReadingToday({ enabled: isAuthenticated });
   const {
     data: dailyReadingPublic,
     isLoading: isFetchingPublic,
     error: errorPublic,
-  } = useDailyReadingTodayPublic();
+  } = useDailyReadingTodayPublic({ enabled: !isAuthenticated });
 
   // Use appropriate data based on authentication status
   const dailyReading = isAuthenticated ? dailyReadingAuth : dailyReadingPublic;
@@ -100,15 +102,19 @@ export function DailyCardExperience() {
   const isPremium = user?.plan === 'PREMIUM';
   const currentReading = localReading || dailyReading;
   const isRevealed = Boolean(currentReading);
+
+  // Type guard for AxiosError
+  const isAxiosError = (err: unknown): err is AxiosError => {
+    return (
+      typeof err === 'object' &&
+      err !== null &&
+      'isAxiosError' in err &&
+      (err as any).isAxiosError === true
+    );
+  };
+
   const isAnonymousLimitReached =
-    !isAuthenticated &&
-    error &&
-    typeof error === 'object' &&
-    'response' in error &&
-    error.response &&
-    typeof error.response === 'object' &&
-    'status' in error.response &&
-    error.response.status === 403;
+    !isAuthenticated && isAxiosError(error) && error.response?.status === 403;
 
   /**
    * Handle card click to create daily reading
