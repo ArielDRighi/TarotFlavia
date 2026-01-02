@@ -207,6 +207,11 @@ export class DailyReadingController {
   }
 }
 
+/**
+ * TODO: Add rate limiting to prevent abuse (TASK-005)
+ * This public endpoint should have rate limiting similar to other public endpoints
+ * (e.g., 100 requests per 15 minutes) to protect against excessive anonymous requests.
+ */
 @ApiTags('Daily Card - Public')
 @Controller('public/daily-reading')
 export class DailyReadingPublicController {
@@ -226,6 +231,13 @@ export class DailyReadingPublicController {
     type: DailyReadingResponseDto,
     isArray: false,
   })
+  @ApiResponse({
+    status: 200,
+    description: 'No existe carta del día para hoy (respuesta null).',
+    schema: {
+      type: 'null',
+    },
+  })
   async getTodayCardPublic(): Promise<DailyReadingResponseDto | null> {
     const dailyReading = await this.dailyReadingService.getTodayCardPublic();
 
@@ -235,8 +247,8 @@ export class DailyReadingPublicController {
 
     return {
       id: dailyReading.id,
-      userId: dailyReading.userId,
-      tarotistaId: dailyReading.tarotistaId,
+      userId: null, // Privacy: no exponer userId en endpoint público
+      tarotistaId: dailyReading.tarotistaId, // Mantenido para identificar tarotista que generó la carta
       card: dailyReading.card,
       isReversed: dailyReading.isReversed,
       interpretation: null, // No incluir interpretación para usuarios anónimos

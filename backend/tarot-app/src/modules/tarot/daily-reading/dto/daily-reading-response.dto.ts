@@ -10,9 +10,11 @@ export class DailyReadingResponseDto {
 
   @ApiProperty({
     example: 1,
-    description: 'ID del usuario',
+    description:
+      'ID del usuario. Null para acceso público sin autenticación (privacidad).',
+    nullable: true,
   })
-  userId: number;
+  userId: number | null;
 
   @ApiProperty({
     example: 1,

@@ -383,9 +383,10 @@ describe('DailyReading (e2e)', () => {
         .get('/api/v1/public/daily-reading/today')
         .expect(200);
 
-      // Should return null or empty when no card exists
+      // Should return null or empty object when no card exists
+      // NestJS converts null to {} in HTTP response
       expect(
-        response.body == null ||
+        response.body === null ||
           Object.keys(response.body as object).length === 0,
       ).toBe(true);
     });
@@ -410,6 +411,9 @@ describe('DailyReading (e2e)', () => {
       expect(response.body).toHaveProperty('readingDate');
       expect(response.body).toHaveProperty('wasRegenerated');
 
+      // Privacy: userId should be null for public access
+      expect(response.body.userId).toBeNull();
+
       // Should NOT include interpretation (only DB info)
       expect(response.body.interpretation).toBeNull();
     }, 30000);
@@ -429,6 +433,7 @@ describe('DailyReading (e2e)', () => {
 
       expect(anonResponse.body).toHaveProperty('card');
       expect(anonResponse.body.interpretation).toBeNull();
+      expect(anonResponse.body.userId).toBeNull();
 
       // Access with auth (should still work on public endpoint)
       const authResponse = await request(app.getHttpServer())
@@ -438,6 +443,7 @@ describe('DailyReading (e2e)', () => {
 
       expect(authResponse.body).toHaveProperty('card');
       expect(authResponse.body.interpretation).toBeNull();
+      expect(authResponse.body.userId).toBeNull();
     }, 30000);
 
     it('should return different data for authenticated endpoint vs public endpoint', async () => {
@@ -459,12 +465,14 @@ describe('DailyReading (e2e)', () => {
         .get('/api/v1/public/daily-reading/today')
         .expect(200);
 
-      // Authenticated should have interpretation
+      // Authenticated should have interpretation and userId
       expect(authResponse.body.interpretation).toBeTruthy();
       expect(typeof authResponse.body.interpretation).toBe('string');
+      expect(authResponse.body.userId).toBeTruthy();
 
-      // Public should NOT have interpretation
+      // Public should NOT have interpretation and userId (privacy)
       expect(publicResponse.body.interpretation).toBeNull();
+      expect(publicResponse.body.userId).toBeNull();
 
       // Both should have same card
       expect(authResponse.body.card.id).toBe(publicResponse.body.card.id);
