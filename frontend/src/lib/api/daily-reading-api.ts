@@ -40,13 +40,27 @@ export async function getDailyReading(): Promise<DailyReading> {
 }
 
 /**
- * Get today's daily reading if it exists
+ * Get today's daily reading if it exists (authenticated endpoint)
  * Backend returns null with 200 status when no reading exists (NOT 404)
  * @returns Promise<DailyReading | null> The daily reading or null if not exists
  * @throws Error with clear message on failure
  */
 export async function getDailyReadingToday(): Promise<DailyReading | null> {
   const response = await apiClient.get<DailyReading | null>(API_ENDPOINTS.DAILY_READING.TODAY);
+  return response.data;
+}
+
+/**
+ * Get today's daily reading if it exists (public endpoint - no authentication required)
+ * This endpoint is for anonymous users and returns only DB info (no AI interpretation)
+ * Backend returns null with 200 status when no reading exists (NOT 404)
+ * @returns Promise<DailyReading | null> The daily reading or null if not exists
+ * @throws Error with clear message on failure
+ */
+export async function getDailyReadingTodayPublic(): Promise<DailyReading | null> {
+  const response = await apiClient.get<DailyReading | null>(
+    API_ENDPOINTS.DAILY_READING.TODAY_PUBLIC
+  );
   return response.data;
 }
 

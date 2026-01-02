@@ -8,3 +8,4 @@ export { DailyReadingCard } from './DailyReadingCard';
 export type { DailyReadingCardProps } from './DailyReadingCard';
 export { DailyReadingHistoryList, DailyReadingHistoryPage } from './DailyReadingHistoryList';
 export type { DailyReadingHistoryListProps } from './DailyReadingHistoryList';
+export { AnonymousLimitReached } from './AnonymousLimitReached';
