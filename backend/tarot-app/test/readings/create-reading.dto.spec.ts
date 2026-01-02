@@ -15,7 +15,7 @@ describe('CreateReadingDto', () => {
           { cardId: 3, position: 'futuro', isReversed: false },
         ],
         predefinedQuestionId: 5,
-        generateInterpretation: true,
+        useAI: true,
       });
 
       const errors = await validate(dto);
@@ -33,7 +33,7 @@ describe('CreateReadingDto', () => {
           { cardId: 3, position: 'futuro', isReversed: false },
         ],
         customQuestion: '¿Cuál es mi propósito en la vida?',
-        generateInterpretation: true,
+        useAI: true,
       });
 
       const errors = await validate(dto);
@@ -52,7 +52,7 @@ describe('CreateReadingDto', () => {
         ],
         predefinedQuestionId: 5,
         customQuestion: '¿Cuál es mi propósito en la vida?',
-        generateInterpretation: true,
+        useAI: true,
       });
 
       const errors = await validate(dto);
@@ -75,7 +75,7 @@ describe('CreateReadingDto', () => {
           { cardId: 2, position: 'presente', isReversed: false },
           { cardId: 3, position: 'futuro', isReversed: false },
         ],
-        generateInterpretation: true,
+        useAI: true,
       });
 
       const errors = await validate(dto);
@@ -99,7 +99,7 @@ describe('CreateReadingDto', () => {
           { cardId: 3, position: 'futuro', isReversed: false },
         ],
         predefinedQuestionId: 'invalid',
-        generateInterpretation: true,
+        useAI: true,
       });
 
       const errors = await validate(dto);
@@ -117,7 +117,7 @@ describe('CreateReadingDto', () => {
           { cardId: 3, position: 'futuro', isReversed: false },
         ],
         customQuestion: '',
-        generateInterpretation: true,
+        useAI: true,
       });
 
       const errors = await validate(dto);
@@ -141,7 +141,7 @@ describe('CreateReadingDto', () => {
           { cardId: 3, position: 'futuro', isReversed: false },
         ],
         customQuestion: 'a'.repeat(501),
-        generateInterpretation: true,
+        useAI: true,
       });
 
       const errors = await validate(dto);
@@ -159,7 +159,7 @@ describe('CreateReadingDto', () => {
     it('debe validar campos requeridos', async () => {
       const dto = plainToInstance(CreateReadingDto, {
         predefinedQuestionId: 1,
-        generateInterpretation: true,
+        useAI: true,
       });
 
       const errors = await validate(dto);
@@ -177,7 +177,7 @@ describe('CreateReadingDto', () => {
           { cardId: 3, position: 'futuro', isReversed: false },
         ],
         predefinedQuestionId: 3,
-        generateInterpretation: true,
+        useAI: true,
       });
 
       const errors = await validate(dto);
@@ -185,62 +185,7 @@ describe('CreateReadingDto', () => {
     });
   });
 
-  describe('Campo generateInterpretation', () => {
-    it('debe tener false como valor por defecto cuando no se proporciona', () => {
-      const dto = plainToInstance(CreateReadingDto, {
-        deckId: 1,
-        spreadId: 1,
-        cardIds: [1, 2, 3],
-        cardPositions: [
-          { cardId: 1, position: 'pasado', isReversed: false },
-          { cardId: 2, position: 'presente', isReversed: false },
-          { cardId: 3, position: 'futuro', isReversed: false },
-        ],
-        predefinedQuestionId: 5,
-        // No se proporciona generateInterpretation
-      });
-
-      expect(dto.generateInterpretation).toBe(false);
-    });
-
-    it('debe respetar el valor true cuando se proporciona explícitamente', async () => {
-      const dto = plainToInstance(CreateReadingDto, {
-        deckId: 1,
-        spreadId: 1,
-        cardIds: [1, 2, 3],
-        cardPositions: [
-          { cardId: 1, position: 'pasado', isReversed: false },
-          { cardId: 2, position: 'presente', isReversed: false },
-          { cardId: 3, position: 'futuro', isReversed: false },
-        ],
-        predefinedQuestionId: 5,
-        generateInterpretation: true,
-      });
-
-      const errors = await validate(dto);
-      expect(errors).toHaveLength(0);
-      expect(dto.generateInterpretation).toBe(true);
-    });
-
-    it('debe respetar el valor false cuando se proporciona explícitamente', async () => {
-      const dto = plainToInstance(CreateReadingDto, {
-        deckId: 1,
-        spreadId: 1,
-        cardIds: [1, 2, 3],
-        cardPositions: [
-          { cardId: 1, position: 'pasado', isReversed: false },
-          { cardId: 2, position: 'presente', isReversed: false },
-          { cardId: 3, position: 'futuro', isReversed: false },
-        ],
-        predefinedQuestionId: 5,
-        generateInterpretation: false,
-      });
-
-      const errors = await validate(dto);
-      expect(errors).toHaveLength(0);
-      expect(dto.generateInterpretation).toBe(false);
-    });
-  });
+  // TASK-005: Campo generateInterpretation eliminado, reemplazado por useAI
 
   describe('Campo useAI', () => {
     it('debe aceptar useAI como true', async () => {

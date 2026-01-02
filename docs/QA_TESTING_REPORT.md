@@ -1415,34 +1415,49 @@ La aplicación tiene una **base sólida** en términos de:
 
 ---
 
-### TASK-005: Implementar flujo dual en ReadingsService (con/sin IA)
+### ✅ TASK-005: Implementar flujo dual en ReadingsService (con/sin IA) - COMPLETADO
 
 **[BACKEND]**
 
-**Archivos a modificar:**
+**Estado:** ✅ COMPLETADO - 2 Enero 2026
 
-- `backend/tarot-app/src/modules/tarot/readings/readings.service.ts`
+**Archivos modificados:**
 
-**Cambios requeridos:**
+- `backend/tarot-app/src/modules/tarot/readings/application/use-cases/create-reading.use-case.ts`
+- `backend/tarot-app/src/modules/tarot/readings/dto/create-reading.dto.ts`
+- Tests actualizados en múltiples archivos
 
-1. Detectar flag `useAI` del DTO
-2. Si `useAI === true`:
+**Cambios implementados:**
+
+1. ✅ Detectar flag `useAI` del DTO
+2. ✅ Si `useAI === true`:
    - Generar interpretación con IA (flujo actual)
    - Formato Markdown con secciones estructuradas
-3. Si `useAI === false` o undefined:
+3. ✅ Si `useAI === false` o undefined:
    - Solo obtener información de cartas desde DB
    - Retornar array de cartas con: nombre, significado, imagen
    - SIN interpretación IA, SIN formato Markdown
-4. Ambos flujos deben incrementar contador de uso
+4. ✅ Ambos flujos incrementan contador de uso
 
-**Dependencias:** TASK-004
+**Cambios adicionales:**
 
-**Criterios de aceptación:**
+- Eliminado campo obsoleto `generateInterpretation` del DTO
+- Consolidado toda la lógica en campo `useAI`
+- Actualizados todos los tests (unitarios e integración)
+- Documentación actualizada en comentarios del código
 
-- Lectura con `useAI: false` retorna solo info de DB
-- Lectura con `useAI: true` genera interpretación IA
-- Ambas se guardan en tabla `tarot_readings`
-- Contador de uso se incrementa correctamente en ambos casos
+**Dependencias:** TASK-004 ✅
+
+**Criterios de aceptación (todos cumplidos):**
+
+- ✅ Lectura con `useAI: false` retorna solo info de DB
+- ✅ Lectura con `useAI: true` genera interpretación IA
+- ✅ Ambas se guardan en tabla `tarot_readings`
+- ✅ Contador de uso se incrementa correctamente en ambos casos
+
+**Tests:** 2046 tests pasando (11 skipped)  
+**Coverage:** Mantenido en >80%  
+**Branch:** `feature/TASK-005-flujo-dual-readings`
 
 ---
 
@@ -1810,9 +1825,9 @@ La aplicación tiene una **base sólida** en términos de:
 
 **Objetivo:** Habilitar flujo dual (con/sin IA) y acceso anónimo a carta del día
 
-1. **TASK-004** - Modificar RequiresPremiumForAIGuard (base para flujo dual) [BACKEND]
-2. **TASK-005** - Implementar flujo dual en ReadingsService [BACKEND]
-3. **TASK-006** - Frontend envía flag useAI según plan [FRONTEND]
+1. **✅ TASK-004** - Modificar RequiresPremiumForAIGuard (base para flujo dual) [BACKEND] - COMPLETADO
+2. **✅ TASK-005** - Implementar flujo dual en ReadingsService [BACKEND] - COMPLETADO
+3. **TASK-006** - Frontend envía flag useAI según plan [FRONTEND] - PENDIENTE
 4. **TASK-007** - Aplicar flujo dual a Daily Reading Service [BACKEND]
 5. **TASK-001** - Crear endpoint público para Daily Reading [BACKEND]
 6. **TASK-002** - Tracking de usuarios anónimos (IP + User Agent) [BACKEND]

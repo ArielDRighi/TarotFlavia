@@ -167,7 +167,7 @@ describe('ReadingsOrchestratorService', () => {
           deckId: 1,
           cardIds: [1, 2, 3],
           cardPositions: [],
-          generateInterpretation: true,
+          useAI: true,
         };
 
         createReadingUC.execute.mockResolvedValue(mockReading);
@@ -185,7 +185,7 @@ describe('ReadingsOrchestratorService', () => {
           deckId: 1,
           cardIds: [1, 2, 3],
           cardPositions: [],
-          generateInterpretation: true,
+          useAI: true,
         };
 
         await service.create(null as unknown as User, dto);
@@ -206,7 +206,7 @@ describe('ReadingsOrchestratorService', () => {
           deckId: 1,
           cardIds: [1, 2, 3],
           cardPositions: [],
-          generateInterpretation: true,
+          useAI: true,
         };
 
         createReadingUC.execute.mockRejectedValue(new Error('Creation failed'));

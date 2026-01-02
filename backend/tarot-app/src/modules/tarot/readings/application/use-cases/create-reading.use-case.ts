@@ -97,8 +97,9 @@ export class CreateReadingUseCase {
       interpretation: null,
     });
 
-    // Generar interpretación si se solicita
-    if (createReadingDto.generateInterpretation) {
+    // TASK-005: Generar interpretación con IA si useAI es true
+    // Si useAI es false o undefined, solo retorna info de cartas desde DB
+    if (createReadingDto.useAI === true) {
       try {
         this.logger.log(
           `Generating interpretation for reading ${reading.id} with tarotista ${tarotistaId}`,

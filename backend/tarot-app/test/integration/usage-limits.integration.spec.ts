@@ -285,7 +285,7 @@ describe('UsageLimits + Readings Integration Tests', () => {
         })),
         // Use unique question to avoid cache hits
         customQuestion: `Test question for usage limits - ${Date.now()} - ${Math.random()}`,
-        generateInterpretation: true,
+        useAI: true,
       };
 
       const userBefore = await userRepository.findOne({
@@ -321,7 +321,7 @@ describe('UsageLimits + Readings Integration Tests', () => {
           })),
           // Pregunta única por iteración para evitar cache y asegurar llamada a AI
           customQuestion: `Test question ${i + 1} - ${Date.now()} - ${Math.random()}`,
-          generateInterpretation: true,
+          useAI: true,
         };
         await request(app.getHttpServer())
           .post('/readings')
@@ -352,7 +352,7 @@ describe('UsageLimits + Readings Integration Tests', () => {
           isReversed: false,
         })),
         // FREE users no pueden usar customQuestion, omitir
-        generateInterpretation: true,
+        useAI: true,
       };
 
       // ACT: Crear 3 lecturas (límite para FREE)
@@ -388,7 +388,7 @@ describe('UsageLimits + Readings Integration Tests', () => {
           isReversed: false,
         })),
         customQuestion: 'Test question for usage limits',
-        generateInterpretation: true,
+        useAI: true,
       };
 
       // ACT
@@ -426,7 +426,7 @@ describe('UsageLimits + Readings Integration Tests', () => {
           isReversed: false,
         })),
         customQuestion: 'Test question for usage limits',
-        generateInterpretation: true,
+        useAI: true,
       };
 
       // ACT: Crear 3 lecturas
@@ -472,7 +472,7 @@ describe('UsageLimits + Readings Integration Tests', () => {
           })),
           // Pregunta única por iteración para evitar cache y asegurar llamada a AI
           customQuestion: `Premium test question ${i + 1} - ${Date.now()} - ${Math.random()}`,
-          generateInterpretation: true,
+          useAI: true,
         };
         const response = await request(app.getHttpServer())
           .post('/readings')
@@ -522,7 +522,7 @@ describe('UsageLimits + Readings Integration Tests', () => {
           isReversed: false,
         })),
         customQuestion: `Premium test question 4 - ${Date.now()} - ${Math.random()}`,
-        generateInterpretation: true,
+        useAI: true,
       };
       await request(app.getHttpServer())
         .post('/readings')
