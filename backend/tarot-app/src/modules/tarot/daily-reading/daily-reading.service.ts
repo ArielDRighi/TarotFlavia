@@ -79,9 +79,10 @@ export class DailyReadingService {
     } else {
       // Si no se pasó el user, consultarlo de la base de datos
       const fullUser = await this.usersService.findById(userId);
-      if (fullUser) {
-        userPlan = fullUser.plan;
+      if (!fullUser) {
+        throw new NotFoundException('Usuario no encontrado');
       }
+      userPlan = fullUser.plan;
     }
 
     // Seleccionar carta aleatoria

@@ -199,6 +199,12 @@ describe('DailyReadingService', () => {
     });
 
     it('should throw InternalServerErrorException if save fails', async () => {
+      const mockUser = {
+        id: userId,
+        email: 'premium@test.com',
+        plan: UserPlan.PREMIUM,
+      };
+
       mockDailyReadingQueryBuilder.getOne.mockResolvedValue(null);
       mockCardRepo.count.mockResolvedValue(78);
       mockCardQueryBuilder.getOne.mockResolvedValue({
@@ -215,7 +221,7 @@ describe('DailyReadingService', () => {
       mockDailyReadingRepo.findOne.mockResolvedValue(null); // Simulate save failure
 
       await expect(
-        service.generateDailyCard(userId, tarotistaId),
+        service.generateDailyCard(userId, tarotistaId, mockUser),
       ).rejects.toThrow(InternalServerErrorException);
     });
   });
@@ -382,6 +388,13 @@ describe('DailyReadingService', () => {
       mockCardRepo.count.mockResolvedValue(78);
       mockCardQueryBuilder.getOne.mockResolvedValue(null);
       mockDailyReadingQueryBuilder.getOne.mockResolvedValue(null);
+
+      // Mock UsersService to return a valid user
+      mockUsersService.findById.mockResolvedValue({
+        id: 1,
+        email: 'test@test.com',
+        plan: UserPlan.FREE,
+      });
 
       await expect(service.generateDailyCard(1, 1)).rejects.toThrow(
         InternalServerErrorException,
@@ -608,13 +621,14 @@ describe('DailyReadingService', () => {
     });
 
     it('should work without user object (backward compatibility)', async () => {
-      mockDailyReadingQueryBuilder.getOne
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce({
-          id: 1,
-          userId,
-          user: { id: userId, plan: UserPlan.PREMIUM },
-        });
+      mockDailyReadingQueryBuilder.getOne.mockResolvedValue(null);
+
+      // Mock UsersService.findById to return a PREMIUM user
+      mockUsersService.findById.mockResolvedValue({
+        id: userId,
+        email: 'premium@test.com',
+        plan: UserPlan.PREMIUM,
+      });
 
       mockCardRepo.count.mockResolvedValue(78);
       mockCardQueryBuilder.getOne.mockResolvedValue({
@@ -649,6 +663,27 @@ describe('DailyReadingService', () => {
       const result = await service.generateDailyCard(userId, tarotistaId);
 
       expect(result).toBeDefined();
+      expect(result.interpretation).toBe('**Energía del Día**: Test');
+      expect(mockUsersService.findById).toHaveBeenCalledWith(userId);
+      expect(
+        mockInterpretationsService.generateDailyCardInterpretation,
+      ).toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException when user does not exist and user object not provided', async () => {
+      mockDailyReadingQueryBuilder.getOne.mockResolvedValue(null);
+
+      // Mock UsersService.findById to return null (user not found)
+      mockUsersService.findById.mockResolvedValue(null);
+
+      await expect(
+        service.generateDailyCard(userId, tarotistaId),
+      ).rejects.toThrow(NotFoundException);
+      await expect(
+        service.generateDailyCard(userId, tarotistaId),
+      ).rejects.toThrow('Usuario no encontrado');
+
+      expect(mockUsersService.findById).toHaveBeenCalledWith(userId);
     });
   });
 
