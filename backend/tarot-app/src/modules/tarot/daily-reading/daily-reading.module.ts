@@ -10,6 +10,7 @@ import { TarotCard } from '../cards/entities/tarot-card.entity';
 import { InterpretationsModule } from '../interpretations/interpretations.module';
 import { AIUsageModule } from '../../ai-usage/ai-usage.module';
 import { UsageLimitsModule } from '../../usage-limits/usage-limits.module';
+import { UsersModule } from '../../users/users.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { UsageLimitsModule } from '../../usage-limits/usage-limits.module';
     InterpretationsModule,
     AIUsageModule,
     UsageLimitsModule,
+    UsersModule,
   ],
   controllers: [DailyReadingController, DailyReadingPublicController],
   providers: [DailyReadingService],

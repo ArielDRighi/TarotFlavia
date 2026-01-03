@@ -10,7 +10,8 @@ import { Repository } from 'typeorm';
 import { DailyReading } from './entities/daily-reading.entity';
 import { TarotCard } from '../cards/entities/tarot-card.entity';
 import { InterpretationsService } from '../interpretations/interpretations.service';
-import { UserPlan } from '../../users/entities/user.entity';
+import { User, UserPlan } from '../../users/entities/user.entity';
+import { UsersService } from '../../users/users.service';
 import {
   DailyReadingHistoryDto,
   DailyReadingHistoryItemDto,
@@ -24,6 +25,7 @@ export class DailyReadingService {
     @InjectRepository(TarotCard)
     private readonly tarotCardRepository: Repository<TarotCard>,
     private readonly interpretationsService: InterpretationsService,
+    private readonly usersService: UsersService,
   ) {}
 
   /**
@@ -41,10 +43,18 @@ export class DailyReadingService {
   /**
    * Genera la carta del día para un usuario
    * Solo permite 1 carta por día
+   * TASK-007: Aplica flujo dual según plan del usuario:
+   * - PREMIUM: Genera interpretación con IA (formato Markdown)
+   * - FREE/ANONYMOUS: Solo info de DB (texto plano, sin interpretación)
+   *
+   * @param userId - ID del usuario
+   * @param tarotistaId - ID del tarotista
+   * @param user - Objeto User completo (opcional). Si no se pasa, se consulta de DB
    */
   async generateDailyCard(
     userId: number,
     tarotistaId: number,
+    user?: Partial<User>,
   ): Promise<DailyReading> {
     const todayStr = this.getTodayLocalDateString();
 
@@ -53,6 +63,7 @@ export class DailyReadingService {
       .createQueryBuilder('daily_reading')
       .where('daily_reading.user_id = :userId', { userId })
       .andWhere('daily_reading.reading_date = :date', { date: todayStr })
+      .leftJoinAndSelect('daily_reading.user', 'user')
       .getOne();
 
     if (existingReading) {
@@ -61,16 +72,31 @@ export class DailyReadingService {
       );
     }
 
+    // TASK-007: Determinar el plan del usuario
+    let userPlan: UserPlan = UserPlan.FREE;
+    if (user?.plan) {
+      userPlan = user.plan;
+    } else {
+      // Si no se pasó el user, consultarlo de la base de datos
+      const fullUser = await this.usersService.findById(userId);
+      if (fullUser) {
+        userPlan = fullUser.plan;
+      }
+    }
+
     // Seleccionar carta aleatoria
     const { card, isReversed } = await this.selectRandomCard();
 
-    // Generar interpretación con prompt específico de "carta del día"
-    const interpretation =
-      await this.interpretationsService.generateDailyCardInterpretation(
-        card,
-        isReversed,
-        tarotistaId,
-      );
+    // TASK-007: Generar interpretación solo si el usuario es PREMIUM
+    let interpretation: string | null = null;
+    if (userPlan === UserPlan.PREMIUM) {
+      interpretation =
+        await this.interpretationsService.generateDailyCardInterpretation(
+          card,
+          isReversed,
+          tarotistaId,
+        );
+    }
 
     // Guardar en daily_reading
     const dailyReading = this.dailyReadingRepository.create({
@@ -89,7 +115,7 @@ export class DailyReadingService {
     // Retornar con la relación de card
     const result = await this.dailyReadingRepository.findOne({
       where: { id: saved.id },
-      relations: ['card'],
+      relations: ['card', 'user'],
     });
 
     if (!result) {
