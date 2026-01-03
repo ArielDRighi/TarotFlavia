@@ -1906,11 +1906,12 @@ La aplicación tiene una **base sólida** en términos de:
 
 **Cambios implementados:**
 
-1. ✅ Agregado `@UseInterceptors(IncrementUsageInterceptor)` al endpoint `generateDailyCard()`
-2. ✅ Configurado `@CheckUsageLimit(UsageFeature.TAROT_READING)`
-3. ✅ Interceptor incrementa uso solo para usuarios autenticados
-4. ✅ Usuarios anónimos usan `AnonymousTrackingService` (ya implementado en TASK-002)
-5. ✅ Tests completos creados (10 tests, todos pasan)
+1. ✅ Agregado `@UseGuards(CheckUsageLimitGuard)` al endpoint `generateDailyCard()`
+2. ✅ Agregado `@UseInterceptors(IncrementUsageInterceptor)` al endpoint
+3. ✅ Configurado `@CheckUsageLimit(UsageFeature.TAROT_READING)`
+4. ✅ Interceptor incrementa uso solo para usuarios autenticados
+5. ✅ Usuarios anónimos usan `AnonymousTrackingService` (ya implementado en TASK-002)
+6. ✅ Tests enfocados en flujo del controller (7 tests, todos pasan)
 
 **Dependencias:** TASK-002, TASK-007
 
@@ -1923,12 +1924,11 @@ La aplicación tiene una **base sólida** en términos de:
 
 **Tests:**
 
-```bash
-✓ 10 tests passed
-✓ Coverage: 100%
+````bash
+✓ 7 tests ejecutados (todos pasan)
+✓ Cobertura de líneas: Tests enfocados en flujo del controller
 ✓ Arquitectura validada
-```
-
+✓ Verificación de incrementUsage delegada a tests unitarios del interceptor
 **Rama:** `feature/TASK-008-increment-usage-daily-reading`
 
 **Fecha completado:** 3 Enero 2026
@@ -2134,7 +2134,8 @@ La aplicación tiene una **base sólida** en términos de:
    ```sql
    DELETE FROM usage_limits WHERE userId = (SELECT id FROM users WHERE email = 'test@example.com');
    DELETE FROM tarot_readings WHERE user_id = (SELECT id FROM users WHERE email = 'test@example.com');
-   ```
+````
+
 2. O alternativamente, eliminar usuario completo:
    ```sql
    DELETE FROM users WHERE email = 'test@example.com';

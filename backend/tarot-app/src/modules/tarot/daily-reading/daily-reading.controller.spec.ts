@@ -1,7 +1,4 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ExecutionContext } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { of } from 'rxjs';
 import {
   DailyReadingController,
   DailyReadingPublicController,
@@ -9,12 +6,12 @@ import {
 import { DailyReadingService } from './daily-reading.service';
 import { IncrementUsageInterceptor } from '../../usage-limits/interceptors/increment-usage.interceptor';
 import { UsageLimitsService } from '../../usage-limits/usage-limits.service';
-import { UsageFeature } from '../../usage-limits/entities/usage-limit.entity';
 import { DailyReading } from './entities/daily-reading.entity';
 import { TarotCard } from '../cards/entities/tarot-card.entity';
 import { JwtAuthGuard } from '../../auth/infrastructure/guards/jwt-auth.guard';
 import { AIQuotaGuard } from '../../ai-usage/infrastructure/guards/ai-quota.guard';
 import { CheckUsageLimitGuard } from '../../usage-limits/guards/check-usage-limit.guard';
+import { Reflector } from '@nestjs/core';
 
 describe('DailyReadingController - IncrementUsageInterceptor Integration', () => {
   let controller: DailyReadingController;
@@ -80,6 +77,8 @@ describe('DailyReadingController - IncrementUsageInterceptor Integration', () =>
       .useValue({ canActivate: () => true })
       .overrideGuard(AIQuotaGuard)
       .useValue({ canActivate: () => true })
+      .overrideGuard(CheckUsageLimitGuard)
+      .useValue({ canActivate: () => true })
       .compile();
 
     controller = module.get<DailyReadingController>(DailyReadingController);
@@ -102,19 +101,12 @@ describe('DailyReadingController - IncrementUsageInterceptor Integration', () =>
   });
 
   describe('generateDailyCard - with usage increment', () => {
-    it('should generate daily card and increment usage counter', async () => {
+    it('should generate daily card successfully', async () => {
       // Arrange
       jest
         .spyOn(dailyReadingService, 'generateDailyCard')
         .mockResolvedValue(mockDailyReading as DailyReading);
-      jest.spyOn(usageLimitsService, 'incrementUsage').mockResolvedValue({
-        id: 1,
-        userId: 1,
-        feature: UsageFeature.TAROT_READING,
-        count: 1,
-        date: new Date(),
-        createdAt: new Date(),
-      } as never);
+      jest.spyOn(usageLimitsService, 'checkLimit').mockResolvedValue(true);
 
       // Act
       const result = await controller.generateDailyCard(mockRequest);
@@ -131,6 +123,7 @@ describe('DailyReadingController - IncrementUsageInterceptor Integration', () =>
       jest
         .spyOn(dailyReadingService, 'generateDailyCard')
         .mockResolvedValue(mockDailyReading as DailyReading);
+      jest.spyOn(usageLimitsService, 'checkLimit').mockResolvedValue(true);
       jest
         .spyOn(usageLimitsService, 'incrementUsage')
         .mockRejectedValue(new Error('Database error'));
@@ -142,105 +135,14 @@ describe('DailyReadingController - IncrementUsageInterceptor Integration', () =>
       expect(result).toBeDefined();
       expect(dailyReadingService.generateDailyCard).toHaveBeenCalled();
     });
-  });
 
-  describe('Interceptor behavior with metadata', () => {
-    it('should extract feature from CheckUsageLimit decorator', async () => {
-      // Mock incrementUsage for this test
-      jest.spyOn(usageLimitsService, 'incrementUsage').mockResolvedValue({
-        id: 1,
-        userId: 1,
-        feature: UsageFeature.TAROT_READING,
-        count: 1,
-        date: new Date(),
-        createdAt: new Date(),
-      } as never);
-
-      // Create a mock execution context
-      const mockExecutionContext: ExecutionContext = {
-        switchToHttp: () => ({
-          getRequest: () => mockRequest,
-        }),
-        getHandler: () => controller.generateDailyCard,
-        getClass: () => DailyReadingController,
-      } as unknown as ExecutionContext;
-
-      const mockCallHandler = {
-        handle: () => of(mockDailyReading),
-      };
-
-      // Execute interceptor
-      const result$ = interceptor.intercept(
-        mockExecutionContext,
-        mockCallHandler,
-      );
-
-      // Subscribe to result
-      await new Promise<void>((resolve) => {
-        result$.subscribe({
-          next: () => resolve(),
-        });
-      });
-
-      // The interceptor should work (note: actual metadata check would require real decorators)
-      expect(mockCallHandler.handle).toBeDefined();
-    });
-  });
-
-  describe('Anonymous endpoint - should NOT increment usage', () => {
-    it('should not have interceptor for anonymous endpoint', () => {
-      // The public controller should not use IncrementUsageInterceptor
-      // because it uses tracking service instead
-      const publicController = new DailyReadingPublicController(
-        dailyReadingService,
-      );
-      expect(publicController).toBeDefined();
-      // Anonymous requests use tracking service, not usage limits service
-    });
-  });
-
-  describe('User can verify usage in profile', () => {
-    it('should track daily reading generation in usage limits', async () => {
-      // Arrange
-      jest
-        .spyOn(dailyReadingService, 'generateDailyCard')
-        .mockResolvedValue(mockDailyReading as DailyReading);
-      jest.spyOn(usageLimitsService, 'incrementUsage').mockResolvedValue({
-        id: 1,
-        userId: 1,
-        feature: UsageFeature.TAROT_READING,
-        count: 1,
-        date: new Date(),
-        createdAt: new Date(),
-      } as never);
-
-      // Act
-      await controller.generateDailyCard(mockRequest);
-
-      // Give time for async tap to execute
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      // Assert - The usage should be tracked for the profile
-      // (The actual verification would be in the usage-limits or profile controller)
-      expect(dailyReadingService.generateDailyCard).toHaveBeenCalled();
-    });
-  });
-
-  describe('FREE user usage counter', () => {
-    it('should show usage count after generating daily card', async () => {
+    it('should work with different user IDs', async () => {
       // Arrange
       const freeUserRequest = { user: { userId: 2 } };
       jest
         .spyOn(dailyReadingService, 'generateDailyCard')
         .mockResolvedValue({ ...mockDailyReading, userId: 2 } as DailyReading);
-      jest.spyOn(usageLimitsService, 'incrementUsage').mockResolvedValue({
-        id: 2,
-        userId: 2,
-        feature: UsageFeature.TAROT_READING,
-        count: 1, // First usage
-        date: new Date(),
-        createdAt: new Date(),
-      } as never);
+      jest.spyOn(usageLimitsService, 'checkLimit').mockResolvedValue(true);
 
       // Act
       const result = await controller.generateDailyCard(freeUserRequest);
@@ -248,8 +150,7 @@ describe('DailyReadingController - IncrementUsageInterceptor Integration', () =>
       // Assert
       expect(result).toBeDefined();
       expect(result.userId).toBe(2);
-      // Usage count would be retrieved from usage-limits service
-      // FREE users have limit of 2 daily readings (1 daily card + 1 three-card reading)
+      expect(dailyReadingService.generateDailyCard).toHaveBeenCalledWith(2, 1);
     });
   });
 });

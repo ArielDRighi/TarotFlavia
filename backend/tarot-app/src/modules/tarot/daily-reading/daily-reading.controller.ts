@@ -44,6 +44,7 @@ export class DailyReadingController {
   constructor(private readonly dailyReadingService: DailyReadingService) {}
 
   @Post()
+  @UseGuards(CheckUsageLimitGuard)
   @UseInterceptors(IncrementUsageInterceptor)
   @CheckUsageLimit(UsageFeature.TAROT_READING)
   @HttpCode(HttpStatus.CREATED)
