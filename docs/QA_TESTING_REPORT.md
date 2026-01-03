@@ -1924,11 +1924,13 @@ La aplicación tiene una **base sólida** en términos de:
 
 **Tests:**
 
-````bash
+```bash
 ✓ 7 tests ejecutados (todos pasan)
 ✓ Cobertura de líneas: Tests enfocados en flujo del controller
 ✓ Arquitectura validada
 ✓ Verificación de incrementUsage delegada a tests unitarios del interceptor
+```
+
 **Rama:** `feature/TASK-008-increment-usage-daily-reading`
 
 **Fecha completado:** 3 Enero 2026
@@ -2134,6 +2136,8 @@ La aplicación tiene una **base sólida** en términos de:
    ```sql
    DELETE FROM usage_limits WHERE userId = (SELECT id FROM users WHERE email = 'test@example.com');
    DELETE FROM tarot_readings WHERE user_id = (SELECT id FROM users WHERE email = 'test@example.com');
+   ```
+
 ````
 
 2. O alternativamente, eliminar usuario completo:
@@ -2411,3 +2415,4 @@ Mensaje en página de registro:
 - Contadores se incrementan correctamente ✓
 - Límites se aplican según plan ✓
 - NO hay regresiones en funcionalidad existente ✓
+````
