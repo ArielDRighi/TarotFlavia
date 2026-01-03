@@ -4,6 +4,7 @@ import {
   Post,
   Query,
   UseGuards,
+  UseInterceptors,
   Request,
   HttpCode,
   HttpStatus,
@@ -23,7 +24,12 @@ import { DailyReadingResponseDto } from './dto/daily-reading-response.dto';
 import { DailyReadingHistoryDto } from './dto/daily-reading-history.dto';
 import { CreateAnonymousDailyReadingDto } from './dto/create-anonymous-daily-reading.dto';
 import { AllowAnonymous } from '../../usage-limits/decorators/allow-anonymous.decorator';
-import { CheckUsageLimitGuard } from '../../usage-limits/guards/check-usage-limit.guard';
+import {
+  CheckUsageLimitGuard,
+  IncrementUsageInterceptor,
+  CheckUsageLimit,
+  UsageFeature,
+} from '../../usage-limits';
 
 /**
  * Default tarotista ID (Flavia)
@@ -38,6 +44,8 @@ export class DailyReadingController {
   constructor(private readonly dailyReadingService: DailyReadingService) {}
 
   @Post()
+  @UseInterceptors(IncrementUsageInterceptor)
+  @CheckUsageLimit(UsageFeature.TAROT_READING)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Generar carta del día',
