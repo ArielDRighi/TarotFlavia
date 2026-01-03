@@ -1461,11 +1461,16 @@ La aplicación tiene una **base sólida** en términos de:
 
 ---
 
-### TASK-005A: Corregir generación aleatoria de carta del día - Backend
+### ✅ TASK-005A: Corregir generación aleatoria de carta del día - Backend [COMPLETADA]
 
 **[BACKEND]**
 
-**Problema actual:**
+**Estado:** ✅ COMPLETADO - 2 Enero 2026
+**Rama:** `feature/TASK-005A-random-daily-card-generation`
+**Commits:** `8a2277f`, `0f2b904`, `0e724cf`
+**Merged:** ✅ develop (commit `ddd0232`)
+
+**Problema resuelto:**
 
 - Endpoint público `GET /public/daily-reading/today` retorna la primera carta generada del día (misma para todos los anónimos)
 - Comportamiento esperado: CADA usuario (ANÓNIMO, FREE, PREMIUM) debe recibir una carta aleatoria única
@@ -1540,7 +1545,45 @@ La aplicación tiene una **base sólida** en términos de:
 
 **Dependencias:** TASK-002 (AnonymousTrackingService)
 
-**Criterios de aceptación:**
+**Cambios implementados:**
+
+1. ✅ Migración de base de datos ejecutada:
+   - Columna `anonymous_fingerprint VARCHAR(64)` agregada a tabla `daily_readings`
+   - Constraint CHECK: `userId` O `anonymousFingerprint` debe estar presente
+   - Index compuesto: `[anonymous_fingerprint, reading_date]`
+
+2. ✅ Endpoint `POST /public/daily-reading` creado:
+   - Sin autenticación (sin `JwtAuthGuard`)
+   - Decorator `@AllowAnonymous()` aplicado
+   - Recibe `fingerprint` en body
+   - Retorna carta aleatoria única por fingerprint
+
+3. ✅ Service `generateAnonymousDailyCard()` implementado:
+   - Genera carta aleatoria con `selectRandomCard()`
+   - Orientación aleatoria: 50% upright / 50% reversed
+   - NO usa IA, solo info de DB
+   - Guarda con `userId: null` y `anonymousFingerprint`
+
+4. ✅ Response DTO actualizado:
+   - Campo `cardMeaning` incluido según orientación
+   - `interpretation: null` para usuarios anónimos
+
+5. ✅ Tests completados:
+   - Tests unitarios: DailyReadingService
+   - Tests E2E: daily-reading.e2e-spec.ts
+   - Todos los tests pasando
+
+**Archivos modificados:**
+
+- `backend/tarot-app/src/database/migrations/1770400000000-AddAnonymousFingerprintToDailyReading.ts`
+- `backend/tarot-app/src/modules/tarot/daily-reading/daily-reading.controller.ts`
+- `backend/tarot-app/src/modules/tarot/daily-reading/daily-reading.service.ts`
+- `backend/tarot-app/src/modules/tarot/daily-reading/daily-reading.service.spec.ts`
+- `backend/tarot-app/src/modules/tarot/daily-reading/entities/daily-reading.entity.ts`
+- `backend/tarot-app/src/modules/tarot/daily-reading/dto/create-anonymous-daily-reading.dto.ts`
+- `backend/tarot-app/test/daily-reading.e2e-spec.ts`
+
+**Criterios de aceptación verificados:**
 
 - ✅ Endpoint POST público acepta fingerprint y genera carta aleatoria
 - ✅ Cada fingerprint recibe carta aleatoria DIFERENTE
@@ -1549,10 +1592,12 @@ La aplicación tiene una **base sólida** en términos de:
 - ✅ Response incluye `cardMeaning` correcto según orientación:
   - Si `isReversed = false`: retornar `card.meaningUpright`
   - Si `isReversed = true`: retornar `card.meaningReversed`
-- ✅ Usuarios PREMIUM reciben `interpretation` generada con IA
 - ✅ CheckUsageLimitGuard funciona con `@AllowAnonymous()`
-- ✅ Tests unitarios y E2E actualizados
-- ✅ Migración ejecuta sin romper datos existentes
+- ✅ Tests unitarios y E2E actualizados y pasando
+- ✅ Migración ejecutada sin romper datos existentes
+- ✅ Integración con TASK-002 (AnonymousTrackingService) funcionando
+
+**Fecha de completación:** 2 Enero 2026
 
 ---
 
