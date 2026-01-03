@@ -12,7 +12,7 @@ import { toast } from '@/hooks/utils/useToast';
 import {
   getDailyReading,
   getDailyReadingToday,
-  getDailyReadingTodayPublic,
+  createDailyReadingPublic,
   getDailyReadingHistory,
   regenerateDailyReading,
 } from '@/lib/api/daily-reading-api';
@@ -45,19 +45,8 @@ export function useDailyReadingToday(options?: { enabled?: boolean }) {
   });
 }
 
-/**
- * Hook to fetch today's daily reading if it exists (public - no auth required)
- * Returns null if no daily reading exists for today
- * This endpoint returns only DB info, no AI interpretation
- * @param options - Query options (e.g., enabled flag)
- */
-export function useDailyReadingTodayPublic(options?: { enabled?: boolean }) {
-  return useQuery({
-    queryKey: [...dailyReadingQueryKeys.all, 'today-public'] as const,
-    queryFn: getDailyReadingTodayPublic,
-    enabled: options?.enabled ?? true, // Default to true if not specified
-  });
-}
+// Note: useDailyReadingTodayPublic hook removed in TASK-005A
+// Public daily reading now uses POST with fingerprint via useDailyReadingPublic() mutation
 
 /**
  * Hook to fetch paginated history of daily readings
@@ -91,6 +80,28 @@ export function useDailyReading() {
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Error al crear carta del día');
+    },
+  });
+}
+
+/**
+ * Hook to create daily reading for anonymous users (public)
+ * Accepts fingerprint and generates random card for that fingerprint.
+ * On success: invalidates all daily reading queries (no toast for anonymous).
+ * On error: errors are returned to caller for specific handling
+ */
+export function useDailyReadingPublic() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: createDailyReadingPublic,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: dailyReadingQueryKeys.all });
+      // No toast for anonymous users - component handles UI feedback
+    },
+    onError: () => {
+      // Errors are exposed to component for specific handling (409, 403)
+      // Component will show appropriate UI based on error
     },
   });
 }

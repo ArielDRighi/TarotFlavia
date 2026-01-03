@@ -49,7 +49,7 @@ export const API_ENDPOINTS = {
   DAILY_READING: {
     BASE: '/daily-reading',
     TODAY: '/daily-reading/today',
-    TODAY_PUBLIC: '/public/daily-reading/today',
+    PUBLIC: '/public/daily-reading', // POST - Anonymous users with fingerprint
     HISTORY: '/daily-reading/history',
     REGENERATE: '/daily-reading/regenerate',
   },

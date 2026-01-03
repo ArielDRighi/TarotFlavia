@@ -354,6 +354,7 @@ export interface DailyReading {
   card: TarotCard;
   isReversed: boolean;
   interpretation: string | null; // null for anonymous users
+  cardMeaning?: string; // Present when interpretation is null (DB info)
   readingDate: string;
   wasRegenerated: boolean;
   createdAt: Date;

@@ -34,18 +34,24 @@ vi.mock('next/image', () => ({
   },
 }));
 
+// Mock fingerprint utilities
+vi.mock('@/lib/utils/fingerprint', () => ({
+  getSessionFingerprint: vi.fn().mockResolvedValue('mock-fingerprint-12345'),
+  generateSessionFingerprint: vi.fn().mockResolvedValue('mock-fingerprint-12345'),
+}));
+
 // Mock hooks
 const mockUseDailyReadingToday = vi.fn();
-const mockUseDailyReadingTodayPublic = vi.fn();
 const mockUseDailyReading = vi.fn();
+const mockUseDailyReadingPublic = vi.fn();
 const mockUseRegenerateDailyReading = vi.fn();
 const mockUseAuth = vi.fn();
 const mockUseRequireAuth = vi.fn();
 
 vi.mock('@/hooks/api/useDailyReading', () => ({
   useDailyReadingToday: () => mockUseDailyReadingToday(),
-  useDailyReadingTodayPublic: () => mockUseDailyReadingTodayPublic(),
   useDailyReading: () => mockUseDailyReading(),
+  useDailyReadingPublic: () => mockUseDailyReadingPublic(),
   useRegenerateDailyReading: () => mockUseRegenerateDailyReading(),
 }));
 
@@ -102,12 +108,11 @@ describe('DailyCardExperience', () => {
       isLoading: false,
       error: null,
     });
-    mockUseDailyReadingTodayPublic.mockReturnValue({
-      data: null,
-      isLoading: false,
-      error: null,
-    });
     mockUseDailyReading.mockReturnValue({
+      mutate: vi.fn(),
+      isPending: false,
+    });
+    mockUseDailyReadingPublic.mockReturnValue({
       mutate: vi.fn(),
       isPending: false,
     });
