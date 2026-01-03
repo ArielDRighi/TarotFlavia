@@ -28,9 +28,11 @@ export class DailyReadingHistoryItemDto {
   @ApiProperty({
     example:
       'El Mago trae la energía de la manifestación y el poder personal. Hoy es un día para tomar acción...',
-    description: 'Primeras 150 caracteres de la interpretación',
+    description:
+      'Primeras 150 caracteres de la interpretación. Null para lecturas sin IA.',
+    nullable: true,
   })
-  interpretationSummary: string;
+  interpretationSummary: string | null;
 
   @ApiProperty({
     example: false,

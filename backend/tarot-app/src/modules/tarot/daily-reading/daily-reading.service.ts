@@ -133,6 +133,65 @@ export class DailyReadingService {
   }
 
   /**
+   * Genera una carta del día aleatoria para usuario anónimo
+   * Cada fingerprint recibe una carta única y aleatoria
+   * No usa IA, solo información de la base de datos
+   */
+  async generateAnonymousDailyCard(
+    fingerprint: string,
+    tarotistaId: number,
+  ): Promise<DailyReading> {
+    const todayStr = this.getTodayLocalDateString();
+
+    // Verificar que NO existe carta del día para este fingerprint hoy
+    const existingReading = await this.dailyReadingRepository
+      .createQueryBuilder('daily_reading')
+      .where('daily_reading.anonymous_fingerprint = :fingerprint', {
+        fingerprint,
+      })
+      .andWhere('daily_reading.reading_date = :date', { date: todayStr })
+      .getOne();
+
+    if (existingReading) {
+      throw new ConflictException(
+        'Ya viste tu carta del día. Regístrate para más lecturas.',
+      );
+    }
+
+    // Seleccionar carta aleatoria
+    const { card, isReversed } = await this.selectRandomCard();
+
+    // NO generar interpretación IA para usuarios anónimos
+    // Guardar en daily_reading
+    const dailyReading = this.dailyReadingRepository.create({
+      userId: null,
+      anonymousFingerprint: fingerprint,
+      tarotistaId,
+      cardId: card.id,
+      isReversed,
+      interpretation: null, // Sin IA para anónimos
+      readingDate: todayStr as unknown as Date,
+      wasRegenerated: false,
+    });
+
+    const saved = await this.dailyReadingRepository.save(dailyReading);
+
+    // Retornar con la relación de card
+    const result = await this.dailyReadingRepository.findOne({
+      where: { id: saved.id },
+      relations: ['card'],
+    });
+
+    if (!result) {
+      throw new InternalServerErrorException(
+        'Error al guardar la carta del día',
+      );
+    }
+
+    return result;
+  }
+
+  /**
    * Regenera la carta del día (solo usuarios premium)
    */
   async regenerateDailyCard(
@@ -221,10 +280,9 @@ export class DailyReadingService {
       readingDate: reading.readingDate.toString(),
       cardName: reading.card.name,
       isReversed: reading.isReversed,
-      interpretationSummary: this.truncateInterpretation(
-        reading.interpretation,
-        150,
-      ),
+      interpretationSummary: reading.interpretation
+        ? this.truncateInterpretation(reading.interpretation, 150)
+        : null,
       wasRegenerated: reading.wasRegenerated,
       createdAt: reading.createdAt,
     }));

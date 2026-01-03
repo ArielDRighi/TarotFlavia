@@ -172,7 +172,7 @@ describe('Readings Hybrid Questions (E2E)', () => {
             { cardId: 2, position: 'presente', isReversed: false },
             { cardId: 3, position: 'futuro', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(201);
 
@@ -197,7 +197,7 @@ describe('Readings Hybrid Questions (E2E)', () => {
             { cardId: 2, position: 'presente', isReversed: false },
             { cardId: 3, position: 'futuro', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(403);
 
@@ -218,7 +218,7 @@ describe('Readings Hybrid Questions (E2E)', () => {
             { cardId: 2, position: 'presente', isReversed: false },
             { cardId: 3, position: 'futuro', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(400);
 
@@ -245,7 +245,7 @@ describe('Readings Hybrid Questions (E2E)', () => {
             { cardId: 2, position: 'presente', isReversed: false },
             { cardId: 3, position: 'futuro', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(201);
 
@@ -270,7 +270,7 @@ describe('Readings Hybrid Questions (E2E)', () => {
             { cardId: 2, position: 'presente', isReversed: false },
             { cardId: 3, position: 'futuro', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(201);
 
@@ -296,7 +296,7 @@ describe('Readings Hybrid Questions (E2E)', () => {
             { cardId: 2, position: 'presente', isReversed: false },
             { cardId: 3, position: 'futuro', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(400);
 
@@ -336,7 +336,7 @@ describe('Readings Hybrid Questions (E2E)', () => {
             { cardId: 2, position: 'presente', isReversed: false },
             { cardId: 3, position: 'futuro', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(403);
 
@@ -374,7 +374,7 @@ describe('Readings Hybrid Questions (E2E)', () => {
             { cardId: 2, position: 'presente', isReversed: false },
             { cardId: 3, position: 'futuro', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(201);
 
@@ -423,7 +423,7 @@ describe('Readings Hybrid Questions (E2E)', () => {
             { cardId: 2, position: 'present', isReversed: false },
             { cardId: 3, position: 'future', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(201);
 
@@ -445,7 +445,7 @@ describe('Readings Hybrid Questions (E2E)', () => {
             { cardId: 2, position: 'present', isReversed: false },
             { cardId: 3, position: 'future', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(201);
 

@@ -167,7 +167,7 @@ describe('Premium User Edge Cases E2E', () => {
               { cardId: cardIds[1], position: 'present', isReversed: false },
               { cardId: cardIds[2], position: 'future', isReversed: false },
             ],
-            generateInterpretation: false,
+            useAI: false, // Changed from generateInterpretation to useAI
           })
           .expect(201);
 
@@ -184,11 +184,11 @@ describe('Premium User Edge Cases E2E', () => {
       // Verify usage_limit record shows 4 readings consumed
       const ds = dbHelper.getDataSource();
       const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      const todayStr = today.toISOString().split('T')[0]; // Format as YYYY-MM-DD
 
       const usageLimits = await ds.query(
         'SELECT * FROM usage_limit WHERE user_id = $1 AND feature = $2 AND date = $3',
-        [premiumUserId, 'tarot_reading', today],
+        [premiumUserId, 'tarot_reading', todayStr],
       );
 
       expect(usageLimits.length).toBeGreaterThan(0);
@@ -210,7 +210,7 @@ describe('Premium User Edge Cases E2E', () => {
             { cardId: cardIds[1], position: 'present', isReversed: false },
             { cardId: cardIds[2], position: 'future', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(403);
 
@@ -241,7 +241,7 @@ describe('Premium User Edge Cases E2E', () => {
             { cardId: cardIds[1], position: 'present', isReversed: false },
             { cardId: cardIds[2], position: 'future', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(400);
 
@@ -264,7 +264,7 @@ describe('Premium User Edge Cases E2E', () => {
             { cardId: cardIds[1], position: 'present', isReversed: false },
             { cardId: cardIds[2], position: 'future', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(400);
 
@@ -287,7 +287,7 @@ describe('Premium User Edge Cases E2E', () => {
             { cardId: cardIds[1], position: 'present', isReversed: false },
             { cardId: cardIds[2], position: 'future', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(201);
 
@@ -312,7 +312,7 @@ describe('Premium User Edge Cases E2E', () => {
             { cardId: cardIds[1], position: 'present', isReversed: false },
             { cardId: cardIds[2], position: 'future', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(201);
 
@@ -346,7 +346,7 @@ describe('Premium User Edge Cases E2E', () => {
             { cardId: cardIds[1], position: 'present', isReversed: false },
             { cardId: cardIds[2], position: 'future', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(201);
 
@@ -410,7 +410,7 @@ describe('Premium User Edge Cases E2E', () => {
             { cardId: cardIds[1], position: 'present', isReversed: false },
             { cardId: cardIds[2], position: 'future', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(201);
 
@@ -489,7 +489,7 @@ describe('Premium User Edge Cases E2E', () => {
             { cardId: cardIds[1], position: 'present', isReversed: false },
             { cardId: cardIds[2], position: 'future', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(201);
 
@@ -510,7 +510,7 @@ describe('Premium User Edge Cases E2E', () => {
             { cardId: cardIds[1], position: 'present', isReversed: false },
             { cardId: cardIds[2], position: 'future', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(201);
 
@@ -563,7 +563,7 @@ describe('Premium User Edge Cases E2E', () => {
             { cardId: cardIds[1], position: 'present', isReversed: false },
             { cardId: cardIds[2], position: 'future', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(403);
 
@@ -601,7 +601,7 @@ describe('Premium User Edge Cases E2E', () => {
             { cardId: cardIds[1], position: 'present', isReversed: false },
             { cardId: cardIds[2], position: 'future', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(201);
 
@@ -623,7 +623,7 @@ describe('Premium User Edge Cases E2E', () => {
             { cardId: cardIds[1], position: 'present', isReversed: false },
             { cardId: cardIds[2], position: 'future', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(201);
 

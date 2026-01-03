@@ -277,7 +277,7 @@ describe('MVP Complete Flow E2E', () => {
             { cardId: cardIds[1], position: 'present', isReversed: false },
             { cardId: cardIds[2], position: 'future', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(201);
 
@@ -307,7 +307,7 @@ describe('MVP Complete Flow E2E', () => {
             { cardId: cardIds[1], position: 'present', isReversed: false },
             { cardId: cardIds[2], position: 'future', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(403);
 
@@ -360,7 +360,7 @@ describe('MVP Complete Flow E2E', () => {
             { cardId: cardIds[1], position: 'present', isReversed: false },
             { cardId: cardIds[2], position: 'future', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(403);
 
@@ -414,7 +414,7 @@ describe('MVP Complete Flow E2E', () => {
               { cardId: cardIds[1], position: 'present', isReversed: false },
               { cardId: cardIds[2], position: 'future', isReversed: false },
             ],
-            generateInterpretation: false,
+            useAI: false,
           })
           .expect(201);
         // Pequeño delay entre requests
@@ -450,7 +450,7 @@ describe('MVP Complete Flow E2E', () => {
             { cardId: cardIds[1], position: 'present', isReversed: false },
             { cardId: cardIds[2], position: 'future', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         });
 
       // Debería rechazarse - por límite de uso (403) o por rate limiting (429)
@@ -476,7 +476,7 @@ describe('MVP Complete Flow E2E', () => {
             { cardId: cardIds[1], position: 'present', isReversed: false },
             { cardId: cardIds[2], position: 'future', isReversed: true },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(201);
 
@@ -509,7 +509,7 @@ describe('MVP Complete Flow E2E', () => {
             { cardId: cardIds[1], position: 'present', isReversed: false },
             { cardId: cardIds[2], position: 'future', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         });
 
       // Si no es 429 de rate limiting, debería ser 201
@@ -571,7 +571,7 @@ describe('MVP Complete Flow E2E', () => {
             { cardId: cardIds[1], position: 'present', isReversed: false },
             { cardId: cardIds[2], position: 'future', isReversed: true },
           ],
-          generateInterpretation: false,
+          useAI: false,
         });
 
       // Should always succeed now (no AI call)
@@ -581,7 +581,7 @@ describe('MVP Complete Flow E2E', () => {
       expect(body.id).toBeDefined();
       expect(body.customQuestion).toBe('Test AI interpretation');
 
-      // No interpretation when generateInterpretation: false
+      // No interpretation when useAI: false
       expect(body.interpretation).toBeNull();
     }, 30000);
   });
@@ -693,7 +693,7 @@ describe('MVP Complete Flow E2E', () => {
             { cardId: cardIds[1], position: 'present', isReversed: false },
             { cardId: cardIds[2], position: 'future', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(201);
 
@@ -715,7 +715,7 @@ describe('MVP Complete Flow E2E', () => {
             { cardId: cardIds[1], position: 'present', isReversed: false },
             { cardId: cardIds[2], position: 'future', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(201);
 
@@ -738,7 +738,7 @@ describe('MVP Complete Flow E2E', () => {
             { cardId: cardIds[1], position: 'present', isReversed: false },
             { cardId: cardIds[2], position: 'future', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(201);
 
@@ -771,7 +771,7 @@ describe('MVP Complete Flow E2E', () => {
             { cardId: cardIds[1], position: 'present', isReversed: false },
             { cardId: cardIds[2], position: 'future', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(201);
 
@@ -806,7 +806,7 @@ describe('MVP Complete Flow E2E', () => {
             { cardId: cardIds[1], position: 'present', isReversed: false },
             { cardId: cardIds[2], position: 'future', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(201);
 

@@ -103,7 +103,7 @@ describe('Revenue Sharing and Metrics (e2e)', () => {
           { cardId: 2, position: 'presente', isReversed: false },
           { cardId: 3, position: 'futuro', isReversed: false },
         ],
-        generateInterpretation: false, // Skip AI to speed up test
+        useAI: false, // Skip AI to speed up test
       })
       .expect(201);
 

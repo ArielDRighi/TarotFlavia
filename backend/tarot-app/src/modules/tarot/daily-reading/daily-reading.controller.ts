@@ -7,6 +7,7 @@ import {
   Request,
   HttpCode,
   HttpStatus,
+  Body,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -20,6 +21,9 @@ import { AIQuotaGuard } from '../../ai-usage/infrastructure/guards/ai-quota.guar
 import { DailyReadingService } from './daily-reading.service';
 import { DailyReadingResponseDto } from './dto/daily-reading-response.dto';
 import { DailyReadingHistoryDto } from './dto/daily-reading-history.dto';
+import { CreateAnonymousDailyReadingDto } from './dto/create-anonymous-daily-reading.dto';
+import { AllowAnonymous } from '../../usage-limits/decorators/allow-anonymous.decorator';
+import { CheckUsageLimitGuard } from '../../usage-limits/guards/check-usage-limit.guard';
 
 /**
  * Default tarotista ID (Flavia)
@@ -64,6 +68,14 @@ export class DailyReadingController {
       tarotistaId,
     );
 
+    // Determinar cardMeaning según orientación (para usuarios FREE)
+    const cardMeaning =
+      !dailyReading.interpretation && dailyReading.card
+        ? dailyReading.isReversed
+          ? dailyReading.card.meaningReversed
+          : dailyReading.card.meaningUpright
+        : null;
+
     return {
       id: dailyReading.id,
       userId: dailyReading.userId,
@@ -71,6 +83,7 @@ export class DailyReadingController {
       card: dailyReading.card,
       isReversed: dailyReading.isReversed,
       interpretation: dailyReading.interpretation,
+      cardMeaning,
       readingDate: dailyReading.readingDate.toString(),
       wasRegenerated: dailyReading.wasRegenerated,
       createdAt: dailyReading.createdAt,
@@ -104,6 +117,14 @@ export class DailyReadingController {
       return null;
     }
 
+    // Determinar cardMeaning según orientación (para usuarios FREE)
+    const cardMeaning =
+      !dailyReading.interpretation && dailyReading.card
+        ? dailyReading.isReversed
+          ? dailyReading.card.meaningReversed
+          : dailyReading.card.meaningUpright
+        : null;
+
     return {
       id: dailyReading.id,
       userId: dailyReading.userId,
@@ -111,6 +132,7 @@ export class DailyReadingController {
       card: dailyReading.card,
       isReversed: dailyReading.isReversed,
       interpretation: dailyReading.interpretation,
+      cardMeaning,
       readingDate: dailyReading.readingDate.toString(),
       wasRegenerated: dailyReading.wasRegenerated,
       createdAt: dailyReading.createdAt,
@@ -193,6 +215,7 @@ export class DailyReadingController {
       tarotistaId,
     );
 
+    // Regenerar siempre incluye interpretation (solo PREMIUM puede regenerar)
     return {
       id: dailyReading.id,
       userId: dailyReading.userId,
@@ -200,6 +223,7 @@ export class DailyReadingController {
       card: dailyReading.card,
       isReversed: dailyReading.isReversed,
       interpretation: dailyReading.interpretation,
+      cardMeaning: null, // PREMIUM siempre tiene interpretation
       readingDate: dailyReading.readingDate.toString(),
       wasRegenerated: dailyReading.wasRegenerated,
       createdAt: dailyReading.createdAt,
@@ -208,52 +232,68 @@ export class DailyReadingController {
 }
 
 /**
- * TODO: Add rate limiting to prevent abuse (TASK-005)
- * This public endpoint should have rate limiting similar to other public endpoints
- * (e.g., 100 requests per 15 minutes) to protect against excessive anonymous requests.
+ * Public controller for anonymous users
+ * Rate limiting should be applied to prevent abuse
  */
 @ApiTags('Daily Card - Public')
 @Controller('public/daily-reading')
 export class DailyReadingPublicController {
   constructor(private readonly dailyReadingService: DailyReadingService) {}
 
-  @Get('today')
-  @HttpCode(HttpStatus.OK)
+  @Post()
+  @UseGuards(CheckUsageLimitGuard)
+  @AllowAnonymous()
+  @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
-    summary: 'Obtener carta del día de hoy (público, sin autenticación)',
+    summary: 'Generar carta del día para usuario anónimo',
     description:
-      'Retorna la carta del día de hoy si existe, o null si aún no se ha generado. No requiere autenticación. Solo retorna información de base de datos (sin interpretación IA).',
+      'Genera una carta del día aleatoria y única para cada fingerprint. Solo se permite 1 carta por día por fingerprint. No requiere autenticación. No incluye interpretación IA, solo información de la base de datos.',
   })
   @ApiResponse({
-    status: 200,
+    status: 201,
     description:
-      'Carta del día de hoy (puede ser null). Sin interpretación IA.',
+      'Carta del día generada exitosamente. Incluye cardMeaning según orientación (upright/reversed).',
     type: DailyReadingResponseDto,
-    isArray: false,
   })
   @ApiResponse({
-    status: 200,
-    description: 'No existe carta del día para hoy (respuesta null).',
-    schema: {
-      type: 'null',
-    },
+    status: 409,
+    description: 'Ya viste tu carta del día. Regístrate para más lecturas.',
   })
-  async getTodayCardPublic(): Promise<DailyReadingResponseDto | null> {
-    const dailyReading = await this.dailyReadingService.getTodayCardPublic();
+  @ApiResponse({
+    status: 403,
+    description:
+      'Límite alcanzado. Ya viste tu carta del día. Regístrate para más lecturas.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Fingerprint inválido',
+  })
+  async generateAnonymousDailyCard(
+    @Body() dto: CreateAnonymousDailyReadingDto,
+  ): Promise<DailyReadingResponseDto> {
+    const tarotistaId = DEFAULT_TAROTISTA_ID;
 
-    if (!dailyReading) {
-      return null;
-    }
+    const dailyReading =
+      await this.dailyReadingService.generateAnonymousDailyCard(
+        dto.fingerprint,
+        tarotistaId,
+      );
+
+    // Determinar cardMeaning según orientación
+    const cardMeaning = dailyReading.isReversed
+      ? dailyReading.card.meaningReversed
+      : dailyReading.card.meaningUpright;
 
     return {
       id: dailyReading.id,
-      userId: null, // Privacy: no exponer userId en endpoint público
-      tarotistaId: dailyReading.tarotistaId, // Mantenido para identificar tarotista que generó la carta
+      userId: null, // Usuario anónimo
+      tarotistaId: dailyReading.tarotistaId,
       card: dailyReading.card,
       isReversed: dailyReading.isReversed,
-      interpretation: null, // No incluir interpretación para usuarios anónimos
+      interpretation: null, // Sin IA para anónimos
+      cardMeaning, // Significado desde DB
       readingDate: dailyReading.readingDate.toString(),
-      wasRegenerated: dailyReading.wasRegenerated,
+      wasRegenerated: false, // Anónimos no pueden regenerar
       createdAt: dailyReading.createdAt,
     };
   }

@@ -377,105 +377,108 @@ describe('DailyReading (e2e)', () => {
     }, 90000);
   });
 
-  describe('GET /public/daily-reading/today', () => {
-    it('should return null for anonymous users when no card exists for today', async () => {
+  describe('POST /public/daily-reading (Anonymous)', () => {
+    const fingerprint1 =
+      'a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456';
+    const fingerprint2 =
+      'f6789012345678901234567890abcdef1234567890abcdef1234567890abcdef';
+
+    it('should generate a random daily card for anonymous user with valid fingerprint', async () => {
       const response = await request(app.getHttpServer())
-        .get('/api/v1/public/daily-reading/today')
-        .expect(200);
-
-      // Should return null or empty object when no card exists
-      // NestJS converts null to {} in HTTP response
-      expect(
-        response.body === null ||
-          Object.keys(response.body as object).length === 0,
-      ).toBe(true);
-    });
-
-    it('should return today card data without interpretation for anonymous users', async () => {
-      // First create a daily card as authenticated user
-      await request(app.getHttpServer())
-        .post('/api/v1/daily-reading')
-        .set('Authorization', `Bearer ${freeUserToken}`)
-        .send({ tarotistaId: 1 })
+        .post('/api/v1/public/daily-reading')
+        .send({ fingerprint: fingerprint1 })
         .expect(201);
 
-      // Then retrieve it as anonymous user via public endpoint
-      const response = await request(app.getHttpServer())
-        .get('/api/v1/public/daily-reading/today')
-        .expect(200);
-
-      // Should return basic card info without AI interpretation
+      // Should return complete card data
       expect(response.body).toHaveProperty('id');
       expect(response.body).toHaveProperty('card');
       expect(response.body).toHaveProperty('isReversed');
       expect(response.body).toHaveProperty('readingDate');
-      expect(response.body).toHaveProperty('wasRegenerated');
+      expect(response.body).toHaveProperty('cardMeaning');
+      expect(response.body).toHaveProperty('createdAt');
 
-      // Privacy: userId should be null for public access
+      // Anonymous user: userId should be null
       expect(response.body.userId).toBeNull();
 
-      // Should NOT include interpretation (only DB info)
+      // No AI interpretation for anonymous
       expect(response.body.interpretation).toBeNull();
+
+      // Should have cardMeaning from DB
+      expect(response.body.cardMeaning).toBeTruthy();
+      expect(typeof response.body.cardMeaning).toBe('string');
+
+      // wasRegenerated should be false (anons can't regenerate)
+      expect(response.body.wasRegenerated).toBe(false);
     }, 30000);
 
-    it('should allow both authenticated and anonymous access to public endpoint', async () => {
-      // Create a daily card
+    it('should throw ConflictException if same fingerprint tries again same day', async () => {
+      // First request
       await request(app.getHttpServer())
-        .post('/api/v1/daily-reading')
-        .set('Authorization', `Bearer ${freeUserToken}`)
-        .send({ tarotistaId: 1 })
+        .post('/api/v1/public/daily-reading')
+        .send({ fingerprint: fingerprint1 })
         .expect(201);
 
-      // Access without auth (anonymous)
-      const anonResponse = await request(app.getHttpServer())
-        .get('/api/v1/public/daily-reading/today')
-        .expect(200);
+      // Second request with same fingerprint (should fail)
+      const response = await request(app.getHttpServer())
+        .post('/api/v1/public/daily-reading')
+        .send({ fingerprint: fingerprint1 })
+        .expect(409);
 
-      expect(anonResponse.body).toHaveProperty('card');
-      expect(anonResponse.body.interpretation).toBeNull();
-      expect(anonResponse.body.userId).toBeNull();
-
-      // Access with auth (should still work on public endpoint)
-      const authResponse = await request(app.getHttpServer())
-        .get('/api/v1/public/daily-reading/today')
-        .set('Authorization', `Bearer ${freeUserToken}`)
-        .expect(200);
-
-      expect(authResponse.body).toHaveProperty('card');
-      expect(authResponse.body.interpretation).toBeNull();
-      expect(authResponse.body.userId).toBeNull();
+      expect(response.body.message).toContain(
+        'Ya viste tu carta del día. Regístrate para más lecturas.',
+      );
     }, 30000);
 
-    it('should return different data for authenticated endpoint vs public endpoint', async () => {
-      // Create a daily card
-      await request(app.getHttpServer())
-        .post('/api/v1/daily-reading')
-        .set('Authorization', `Bearer ${freeUserToken}`)
-        .send({ tarotistaId: 1 })
+    it('should generate different random cards for different fingerprints', async () => {
+      // First fingerprint
+      const response1 = await request(app.getHttpServer())
+        .post('/api/v1/public/daily-reading')
+        .send({ fingerprint: fingerprint1 })
         .expect(201);
 
-      // Get via authenticated endpoint
-      const authResponse = await request(app.getHttpServer())
-        .get('/api/v1/daily-reading/today')
-        .set('Authorization', `Bearer ${freeUserToken}`)
-        .expect(200);
+      // Second fingerprint
+      const response2 = await request(app.getHttpServer())
+        .post('/api/v1/public/daily-reading')
+        .send({ fingerprint: fingerprint2 })
+        .expect(201);
 
-      // Get via public endpoint
-      const publicResponse = await request(app.getHttpServer())
-        .get('/api/v1/public/daily-reading/today')
-        .expect(200);
+      // Both should have valid cards
+      expect(response1.body.card).toBeDefined();
+      expect(response2.body.card).toBeDefined();
 
-      // Authenticated should have interpretation and userId
-      expect(authResponse.body.interpretation).toBeTruthy();
-      expect(typeof authResponse.body.interpretation).toBe('string');
-      expect(authResponse.body.userId).toBeTruthy();
-
-      // Public should NOT have interpretation and userId (privacy)
-      expect(publicResponse.body.interpretation).toBeNull();
-      expect(publicResponse.body.userId).toBeNull();
-
-      // Both should have same card
-      expect(authResponse.body.card.id).toBe(publicResponse.body.card.id);
+      // Cards might be the same or different (random), but both should have data
+      expect(response1.body.card.name).toBeTruthy();
+      expect(response2.body.card.name).toBeTruthy();
     }, 30000);
+
+    it('should return cardMeaning according to card orientation (upright)', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/api/v1/public/daily-reading')
+        .send({ fingerprint: fingerprint1 })
+        .expect(201);
+
+      const { isReversed, card, cardMeaning } = response.body;
+
+      // If not reversed, cardMeaning should match meaningUpright
+      if (!isReversed) {
+        expect(cardMeaning).toBe(card.meaningUpright);
+      } else {
+        expect(cardMeaning).toBe(card.meaningReversed);
+      }
+    }, 30000);
+
+    it('should reject invalid fingerprint format', async () => {
+      await request(app.getHttpServer())
+        .post('/api/v1/public/daily-reading')
+        .send({ fingerprint: 'invalid' })
+        .expect(400);
+    });
+
+    it('should reject missing fingerprint', async () => {
+      await request(app.getHttpServer())
+        .post('/api/v1/public/daily-reading')
+        .send({})
+        .expect(400);
+    });
   });
 });

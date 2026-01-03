@@ -209,7 +209,7 @@ describe('Performance Tests - Critical Endpoints (SUBTASK-22)', () => {
       predefinedQuestionId: 0, // Will be set in test
       cardIds: [] as number[],
       cardPositions: [] as unknown[],
-      generateInterpretation: false, // Skip AI for performance testing
+      useAI: false, // Skip AI for performance testing
     };
 
     beforeEach(() => {
@@ -239,7 +239,7 @@ describe('Performance Tests - Critical Endpoints (SUBTASK-22)', () => {
     it('should create reading with AI interpretation in <15s', async () => {
       const payloadWithAI = {
         ...createReadingPayload,
-        generateInterpretation: true,
+        useAI: true,
       };
 
       const { duration, response } = await measureResponseTime(() =>
@@ -482,7 +482,7 @@ describe('Performance Tests - Critical Endpoints (SUBTASK-22)', () => {
                 position: `pos_${idx}`,
                 isReversed: false,
               })),
-              generateInterpretation: false,
+              useAI: false,
             }),
         () =>
           request(httpServer)
@@ -498,7 +498,7 @@ describe('Performance Tests - Critical Endpoints (SUBTASK-22)', () => {
                 position: `pos_${idx}`,
                 isReversed: false,
               })),
-              generateInterpretation: false,
+              useAI: false,
             }),
         () =>
           request(httpServer)
@@ -514,7 +514,7 @@ describe('Performance Tests - Critical Endpoints (SUBTASK-22)', () => {
                 position: `pos_${idx}`,
                 isReversed: false,
               })),
-              generateInterpretation: false,
+              useAI: false,
             }),
 
         // 4 users listing readings
