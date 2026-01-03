@@ -380,8 +380,6 @@ describe('DailyReading (e2e)', () => {
   describe('POST /public/daily-reading (Anonymous)', () => {
     const fingerprint1 =
       'a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456';
-    const fingerprint2 =
-      'f6789012345678901234567890abcdef1234567890abcdef1234567890abcdef';
 
     it('should generate a random daily card for anonymous user with valid fingerprint', async () => {
       const response = await request(app.getHttpServer())
@@ -430,16 +428,20 @@ describe('DailyReading (e2e)', () => {
     }, 30000);
 
     it('should generate different random cards for different fingerprints', async () => {
-      // First fingerprint
+      // First fingerprint (unique for this test)
+      const uniqueFingerprint1 =
+        'b1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456';
       const response1 = await request(app.getHttpServer())
         .post('/api/v1/public/daily-reading')
-        .send({ fingerprint: fingerprint1 })
+        .send({ fingerprint: uniqueFingerprint1 })
         .expect(201);
 
-      // Second fingerprint
+      // Second fingerprint (unique for this test)
+      const uniqueFingerprint2 =
+        'c2c3d4e5f6789012345678901234567890abcdef1234567890abcdef1234567';
       const response2 = await request(app.getHttpServer())
         .post('/api/v1/public/daily-reading')
-        .send({ fingerprint: fingerprint2 })
+        .send({ fingerprint: uniqueFingerprint2 })
         .expect(201);
 
       // Both should have valid cards
@@ -452,9 +454,11 @@ describe('DailyReading (e2e)', () => {
     }, 30000);
 
     it('should return cardMeaning according to card orientation (upright)', async () => {
+      const uniqueFingerprint =
+        'd3d4e5f6789012345678901234567890abcdef1234567890abcdef12345678';
       const response = await request(app.getHttpServer())
         .post('/api/v1/public/daily-reading')
-        .send({ fingerprint: fingerprint1 })
+        .send({ fingerprint: uniqueFingerprint })
         .expect(201);
 
       const { isReversed, card, cardMeaning } = response.body;

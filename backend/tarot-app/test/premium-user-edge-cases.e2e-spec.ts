@@ -167,7 +167,7 @@ describe('Premium User Edge Cases E2E', () => {
               { cardId: cardIds[1], position: 'present', isReversed: false },
               { cardId: cardIds[2], position: 'future', isReversed: false },
             ],
-            useAI: false, // Changed from generateInterpretation to useAI
+            useAI: false,
           })
           .expect(201);
 

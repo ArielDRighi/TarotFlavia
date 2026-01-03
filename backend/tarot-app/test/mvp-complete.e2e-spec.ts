@@ -581,7 +581,6 @@ describe('MVP Complete Flow E2E', () => {
       expect(body.id).toBeDefined();
       expect(body.customQuestion).toBe('Test AI interpretation');
 
-      // No interpretation when useAI: false
       expect(body.interpretation).toBeNull();
     }, 30000);
   });
