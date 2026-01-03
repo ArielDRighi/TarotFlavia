@@ -49,7 +49,8 @@ export const API_ENDPOINTS = {
   DAILY_READING: {
     BASE: '/daily-reading',
     TODAY: '/daily-reading/today',
-    TODAY_PUBLIC: '/public/daily-reading/today', // GET - Legacy endpoint
+    /** @deprecated Endpoint removed in backend TASK-005A. Use PUBLIC instead with POST. */
+    TODAY_PUBLIC: '/public/daily-reading/today', // Legacy GET endpoint - REMOVED
     PUBLIC: '/public/daily-reading', // POST - New endpoint with fingerprint
     HISTORY: '/daily-reading/history',
     REGENERATE: '/daily-reading/regenerate',

@@ -56,9 +56,13 @@ export async function getDailyReadingToday(): Promise<DailyReading | null> {
  * Backend returns null with 200 status when no reading exists (NOT 404)
  * @returns Promise<DailyReading | null> The daily reading or null if not exists
  * @throws Error with clear message on failure
- * @deprecated Use createDailyReadingPublic instead (POST with fingerprint)
+ * @deprecated This endpoint was removed in TASK-005A. Use createDailyReadingPublic instead (POST with fingerprint).
+ * Keeping function for backwards compatibility but it will always throw 404.
  */
 export async function getDailyReadingTodayPublic(): Promise<DailyReading | null> {
+  console.warn(
+    'getDailyReadingTodayPublic is deprecated. Backend endpoint removed. Use createDailyReadingPublic with POST instead.'
+  );
   const response = await apiClient.get<DailyReading | null>(
     API_ENDPOINTS.DAILY_READING.TODAY_PUBLIC
   );

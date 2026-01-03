@@ -36,7 +36,6 @@ vi.mock('next/image', () => ({
 
 // Mock hooks
 const mockUseDailyReadingToday = vi.fn();
-const mockUseDailyReadingTodayPublic = vi.fn();
 const mockUseDailyReading = vi.fn();
 const mockUseDailyReadingPublic = vi.fn();
 const mockUseRegenerateDailyReading = vi.fn();
@@ -45,7 +44,6 @@ const mockUseRequireAuth = vi.fn();
 
 vi.mock('@/hooks/api/useDailyReading', () => ({
   useDailyReadingToday: () => mockUseDailyReadingToday(),
-  useDailyReadingTodayPublic: () => mockUseDailyReadingTodayPublic(),
   useDailyReading: () => mockUseDailyReading(),
   useDailyReadingPublic: () => mockUseDailyReadingPublic(),
   useRegenerateDailyReading: () => mockUseRegenerateDailyReading(),
@@ -100,11 +98,6 @@ describe('DailyCardExperience', () => {
       isLoading: false,
     });
     mockUseDailyReadingToday.mockReturnValue({
-      data: null,
-      isLoading: false,
-      error: null,
-    });
-    mockUseDailyReadingTodayPublic.mockReturnValue({
       data: null,
       isLoading: false,
       error: null,

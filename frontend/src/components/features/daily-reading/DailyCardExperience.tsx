@@ -19,7 +19,6 @@ import { TarotCard } from '@/components/features/readings/TarotCard';
 import { AnonymousLimitReached } from './AnonymousLimitReached';
 import {
   useDailyReadingToday,
-  useDailyReadingTodayPublic,
   useDailyReading,
   useDailyReadingPublic,
   useRegenerateDailyReading,
@@ -71,23 +70,13 @@ export function DailyCardExperience() {
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
 
-  // Conditionally fetch from authenticated or public endpoint
-  // Only one query executes based on authentication state (enabled option)
+  // Fetch today's reading for authenticated users only
+  // Anonymous users don't fetch initial data - they generate on click (POST with fingerprint)
   const {
-    data: dailyReadingAuth,
-    isLoading: isFetchingAuth,
-    error: errorAuth,
+    data: dailyReading,
+    isLoading: isFetching,
+    error,
   } = useDailyReadingToday({ enabled: isAuthenticated });
-  const {
-    data: dailyReadingPublic,
-    isLoading: isFetchingPublic,
-    error: errorPublic,
-  } = useDailyReadingTodayPublic({ enabled: !isAuthenticated });
-
-  // Use appropriate data based on authentication status
-  const dailyReading = isAuthenticated ? dailyReadingAuth : dailyReadingPublic;
-  const isFetching = isAuthenticated ? isFetchingAuth : isFetchingPublic;
-  const error = isAuthenticated ? errorAuth : errorPublic;
 
   const { mutate: createDailyReading, isPending: isCreating } = useDailyReading();
   const { mutate: createDailyReadingPublic, isPending: isCreatingPublic } = useDailyReadingPublic();
