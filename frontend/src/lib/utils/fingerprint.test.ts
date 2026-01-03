@@ -4,54 +4,13 @@
  * Testing session fingerprint generation for anonymous tracking
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { generateSessionFingerprint, getSessionFingerprint } from './fingerprint';
+import { getSessionFingerprint } from './fingerprint';
 
 describe('fingerprint utils', () => {
   beforeEach(() => {
     // Clear sessionStorage before each test
     sessionStorage.clear();
     vi.clearAllMocks();
-  });
-
-  describe('generateSessionFingerprint', () => {
-    it('should generate a non-empty fingerprint', async () => {
-      const fingerprint = await generateSessionFingerprint();
-
-      expect(fingerprint).toBeDefined();
-      expect(typeof fingerprint).toBe('string');
-      expect(fingerprint.length).toBeGreaterThan(0);
-    });
-
-    it('should generate different fingerprints on different calls', async () => {
-      const fingerprint1 = await generateSessionFingerprint();
-
-      // Wait 1ms to ensure different timestamp
-      await new Promise((resolve) => setTimeout(resolve, 1));
-
-      const fingerprint2 = await generateSessionFingerprint();
-
-      // Since it includes timestamp, should be different
-      expect(fingerprint1).not.toBe(fingerprint2);
-    });
-
-    it('should include user agent in fingerprint', async () => {
-      const originalUserAgent = navigator.userAgent;
-
-      // Mock navigator.userAgent
-      Object.defineProperty(navigator, 'userAgent', {
-        value: 'TestBrowser/1.0',
-        configurable: true,
-      });
-
-      const fingerprint = await generateSessionFingerprint();
-      expect(fingerprint).toBeDefined();
-
-      // Restore original
-      Object.defineProperty(navigator, 'userAgent', {
-        value: originalUserAgent,
-        configurable: true,
-      });
-    });
   });
 
   describe('getSessionFingerprint', () => {
@@ -78,11 +37,52 @@ describe('fingerprint utils', () => {
       expect(stored).toBe(fingerprint);
     });
 
-    it('should return same fingerprint on subsequent calls', async () => {
+    it('should return same fingerprint on subsequent calls (session stability)', async () => {
       const fingerprint1 = await getSessionFingerprint();
+
+      // Wait to ensure timestamp would be different if function regenerated
+      await new Promise((resolve) => setTimeout(resolve, 2));
+
       const fingerprint2 = await getSessionFingerprint();
 
+      // Should be SAME because it's cached in sessionStorage
       expect(fingerprint1).toBe(fingerprint2);
+    });
+
+    it('should generate unique fingerprints for different sessions', async () => {
+      // First session
+      const fingerprint1 = await getSessionFingerprint();
+
+      // Simulate new session (clear storage)
+      sessionStorage.clear();
+
+      // Wait 1ms to ensure different timestamp seed
+      await new Promise((resolve) => setTimeout(resolve, 1));
+
+      // Second session (new fingerprint generated)
+      const fingerprint2 = await getSessionFingerprint();
+
+      // Different sessions should have different fingerprints
+      expect(fingerprint1).not.toBe(fingerprint2);
+    });
+
+    it('should include user agent in fingerprint calculation', async () => {
+      const originalUserAgent = navigator.userAgent;
+
+      // Mock navigator.userAgent
+      Object.defineProperty(navigator, 'userAgent', {
+        value: 'TestBrowser/1.0',
+        configurable: true,
+      });
+
+      const fingerprint = await getSessionFingerprint();
+      expect(fingerprint).toBeDefined();
+
+      // Restore original
+      Object.defineProperty(navigator, 'userAgent', {
+        value: originalUserAgent,
+        configurable: true,
+      });
     });
 
     it('should handle sessionStorage errors gracefully', async () => {

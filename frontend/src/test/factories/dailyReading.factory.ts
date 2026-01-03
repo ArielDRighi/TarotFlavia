@@ -37,7 +37,7 @@ export function createMockTarotCard(overrides: Partial<TarotCard> = {}): TarotCa
 export function createMockDailyReading(overrides: Partial<DailyReading> = {}): DailyReading {
   const defaultCard = createMockTarotCard();
 
-  return {
+  const baseReading = {
     id: 1,
     userId: 1,
     tarotistaId: 1,
@@ -49,16 +49,19 @@ export function createMockDailyReading(overrides: Partial<DailyReading> = {}): D
     wasRegenerated: false,
     createdAt: new Date('2025-12-09T08:00:00Z'),
     ...overrides,
-    // If interpretation is explicitly null, add cardMeaning (anonymous flow)
-    ...(overrides.interpretation === null && !overrides.cardMeaning
-      ? {
-          cardMeaning:
-            overrides.isReversed !== false
-              ? defaultCard.meaningReversed
-              : defaultCard.meaningUpright,
-        }
-      : {}),
   };
+
+  // If interpretation is explicitly null, add cardMeaning (anonymous flow)
+  // Use the final isReversed value after applying overrides
+  if (overrides.interpretation === null && !overrides.cardMeaning) {
+    const finalCard = baseReading.card;
+    const finalIsReversed = baseReading.isReversed;
+    baseReading.cardMeaning = finalIsReversed
+      ? finalCard.meaningReversed
+      : finalCard.meaningUpright;
+  }
+
+  return baseReading;
 }
 
 /**

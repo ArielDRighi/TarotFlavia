@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Copy, History, RefreshCw, Sparkles } from 'lucide-react';
-import { isAxiosError } from 'axios';
+import { isAxiosError, AxiosError } from 'axios';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -130,6 +130,12 @@ export function DailyCardExperience() {
         onSuccess: (data) => {
           setLocalReading(data);
           setAnonymousError(null);
+          // Mark that anonymous user consumed their daily card (for home page UI)
+          try {
+            sessionStorage.setItem('tarot_daily_card_consumed', new Date().toISOString());
+          } catch {
+            // Ignore storage errors
+          }
           setTimeout(() => setIsRevealing(false), 600);
         },
         onError: (err) => {

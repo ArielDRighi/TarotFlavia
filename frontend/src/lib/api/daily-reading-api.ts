@@ -57,22 +57,21 @@ export async function getDailyReadingToday(): Promise<DailyReading | null> {
  * Create today's daily reading for anonymous user (public endpoint - no authentication)
  * Generates a random card for the anonymous user based on their fingerprint.
  * Each fingerprint gets a unique random card per day.
+ *
+ * Note: This function deliberately does NOT catch/transform errors.
+ * It re-throws the original AxiosError to preserve response.status,
+ * which components need to check (409 for duplicate, 403 for limit) to show AnonymousLimitReached.
+ *
  * @param fingerprint - Unique identifier for anonymous session
  * @returns Promise<DailyReading> The newly created daily reading
  * @throws AxiosError with response.status 409 if fingerprint already has a card for today
  * @throws AxiosError with response.status 403 if anonymous limit reached (future use)
  */
 export async function createDailyReadingPublic(fingerprint: string): Promise<DailyReading> {
-  try {
-    const response = await apiClient.post<DailyReading>(API_ENDPOINTS.DAILY_READING.PUBLIC, {
-      fingerprint,
-    });
-    return response.data;
-  } catch (error: unknown) {
-    // Re-throw AxiosError to preserve response.status for component error handling
-    // Component needs to check status codes (409, 403) to show AnonymousLimitReached
-    throw error;
-  }
+  const response = await apiClient.post<DailyReading>(API_ENDPOINTS.DAILY_READING.PUBLIC, {
+    fingerprint,
+  });
+  return response.data;
 }
 
 /**
