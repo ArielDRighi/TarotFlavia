@@ -180,8 +180,9 @@ export interface CardPositionDto {
  * DTO for creating a new reading
  * Matches backend CreateReadingDto
  *
- * @property generateInterpretation - Solo true para usuarios Premium (default: false)
- * ACTUALIZADO: Default cambiado de true a false para reflejar cambio en backend
+ * @property useAI - Indica si se debe usar IA para generar interpretación
+ * ACTUALIZADO (TASK-006): Campo 'generateInterpretation' reemplazado por 'useAI'
+ * Default: undefined (backend determina según plan)
  */
 export interface CreateReadingDto {
   spreadId: number;
@@ -192,10 +193,12 @@ export interface CreateReadingDto {
   customQuestion?: string;
   /**
    * Solicitar interpretación IA al crear lectura
-   * @default false
-   * Solo true para usuarios Premium
+   * - true: Generar interpretación con IA (solo PREMIUM)
+   * - false: Solo info de cartas de DB (FREE/ANONYMOUS)
+   * - undefined: Backend decide según plan del usuario
+   * @default undefined
    */
-  generateInterpretation?: boolean;
+  useAI?: boolean;
 }
 
 // ============================================================================

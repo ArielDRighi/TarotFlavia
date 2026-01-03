@@ -96,7 +96,6 @@ export default function useConversionTracking(): UseConversionTrackingReturn {
    * @param location - Where the CTA was shown
    * @param _plan - User plan (reserved for future Google Analytics integration)
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const trackCTAShown = useCallback((location: CTALocation, _plan: string) => {
     if (!isLocalStorageAvailable()) return;
 
@@ -104,6 +103,8 @@ export default function useConversionTracking(): UseConversionTrackingReturn {
     localStorage.setItem(`cta_shown_${location}`, timestamp);
 
     // Integration point for analytics
+    // Reserved parameter for future use: _plan
+    void _plan; // Prevent unused variable warning
     if (process.env.NODE_ENV === 'production') {
       // gtag('event', 'cta_shown', { location, plan: _plan });
     }
@@ -115,7 +116,6 @@ export default function useConversionTracking(): UseConversionTrackingReturn {
    * @param location - Where the CTA was clicked
    * @param _action - Action taken (reserved for future Google Analytics integration)
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const trackCTAClicked = useCallback((location: CTALocation, _action: CTAAction) => {
     if (!isLocalStorageAvailable()) return;
 
@@ -123,6 +123,8 @@ export default function useConversionTracking(): UseConversionTrackingReturn {
     localStorage.setItem(`cta_clicked_${location}`, timestamp);
 
     // Integration point for analytics
+    // Reserved parameter for future use: _action
+    void _action; // Prevent unused variable warning
     if (process.env.NODE_ENV === 'production') {
       // gtag('event', 'cta_clicked', { location, action: _action });
     }

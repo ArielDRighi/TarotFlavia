@@ -1747,6 +1747,75 @@ La aplicación tiene una **base sólida** en términos de:
 
 ---
 
+### TASK-006: Modificar frontend para enviar flag useAI según plan ✅
+
+**Estado:** ✅ COMPLETADO - 3 Enero 2026
+
+**[FRONTEND]**
+
+**Archivos modificados:**
+
+- `frontend/src/types/reading.types.ts`
+- `frontend/src/components/features/readings/ReadingExperience.tsx`
+- `frontend/src/hooks/utils/useConversionTracking.ts` (corrección arquitectura)
+- Creado: `frontend/src/components/features/readings/ReadingExperience.useAI.test.tsx`
+
+**Cambios implementados:**
+
+1. ✅ **Actualizado tipo CreateReadingDto:**
+   - Campo `generateInterpretation` reemplazado por `useAI`
+   - Documentación actualizada con comportamiento por plan
+
+2. ✅ **Modificado componente ReadingExperience:**
+   - Detecta plan del usuario con `useUserPlanFeatures()`
+   - Envía `useAI: true` para usuarios PREMIUM
+   - Envía `useAI: false` para usuarios FREE
+   - Agrega `canUseAI` a las dependencias del useCallback
+
+3. ✅ **Agregados mensajes de UI condicionales:**
+   - PREMIUM: "✨ Recibirás interpretación personalizada"
+   - FREE: "Verás las cartas y sus significados"
+   - Mensajes se muestran en estado de selección de cartas
+
+4. ✅ **Tests implementados:**
+   - 6 tests nuevos en ReadingExperience.useAI.test.tsx
+   - Verifica envío correcto de flag useAI según plan
+   - Verifica mensajes de UI según plan
+   - Verifica upgrade banner para usuarios FREE
+   - Todos los tests pasando (32 + 6 = 38 tests)
+
+5. ✅ **Corrección de problemas de arquitectura pre-existentes:**
+   - Eliminados comentarios `eslint-disable-next-line` en useConversionTracking.ts
+   - Agregado `void _plan` y `void _action` para referenciar parámetros reservados
+   - Validador de arquitectura ahora pasa sin errores
+
+**Ciclo de calidad:**
+
+- ✅ Lint: 0 errores, 2 warnings (pre-existentes en archivos no relacionados)
+- ✅ Type-check: Passed
+- ✅ Format: Applied
+- ✅ Build: Successful (Next.js 16.0.6)
+- ✅ Tests: 1732 passed | 2 skipped (1734)
+- ✅ Architecture validation: ✅ VALIDACIÓN EXITOSA - Sin errores críticos
+
+**Dependencias:** TASK-004 ✅, TASK-005 ✅
+
+**Criterios de aceptación cumplidos:**
+
+- ✅ Usuario FREE crea lecturas sin IA correctamente (useAI: false)
+- ✅ Usuario PREMIUM crea lecturas con IA correctamente (useAI: true)
+- ✅ Mensajes en UI reflejan el tipo de lectura que recibirán
+- ✅ Error 403 ya no ocurre para usuarios FREE (backend lo maneja)
+- ✅ Problemas de arquitectura pre-existentes resueltos
+
+**Rama:** `feature/TASK-006-useai-flag-by-plan`
+
+**Commit:** (próximo)
+
+**Fecha de completación:** 3 Enero 2026
+
+---
+
 ### TASK-006: Modificar frontend para enviar flag useAI según plan
 
 **[FRONTEND]**

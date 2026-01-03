@@ -322,7 +322,10 @@ export function ReadingExperience({
         cardPositions,
         ...(questionId ? { predefinedQuestionId: questionId } : {}),
         ...(customQuestion ? { customQuestion } : {}),
-        generateInterpretation: true,
+        // TASK-006: Send useAI flag based on user plan
+        // - PREMIUM: useAI: true (generates AI interpretation)
+        // - FREE/ANONYMOUS: useAI: false (DB info only)
+        useAI: canUseAI,
       };
 
       const result = await createReading(createDto);
@@ -333,7 +336,16 @@ export function ReadingExperience({
       setState('error');
       setError('Error al crear la lectura. Por favor, intenta de nuevo.');
     }
-  }, [selectedCards, cardsCount, spread, spreadId, questionId, customQuestion, createReading]);
+  }, [
+    selectedCards,
+    cardsCount,
+    spread,
+    spreadId,
+    questionId,
+    customQuestion,
+    createReading,
+    canUseAI,
+  ]);
 
   // Action handlers
   const handleRegenerate = useCallback(() => {
@@ -415,6 +427,15 @@ export function ReadingExperience({
           <p className="text-text-muted mb-6 text-center text-sm">
             Elige {cardsCount} carta{cardsCount > 1 ? 's' : ''} del mazo
           </p>
+
+          {/* TASK-006: Show different message based on user plan */}
+          <div className="text-text-muted mb-6 text-center text-sm">
+            {canUseAI ? (
+              <p className="text-primary font-medium">✨ Recibirás interpretación personalizada</p>
+            ) : (
+              <p>Verás las cartas y sus significados</p>
+            )}
+          </div>
 
           {/* Full Deck Grid - 78 cards */}
           <div className="mx-auto mb-8 w-full max-w-6xl px-2 sm:px-4">
