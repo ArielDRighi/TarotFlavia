@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { InterpretationsService } from '../interpretations/interpretations.service';
 import { UserPlan } from '../../users/entities/user.entity';
+import { UsersService } from '../../users/users.service';
 
 interface MockQueryBuilder {
   where: jest.Mock;
@@ -36,11 +37,16 @@ interface MockInterpretationsService {
   generateDailyCardInterpretation: jest.Mock;
 }
 
+interface MockUsersService {
+  findById: jest.Mock;
+}
+
 describe('DailyReadingService', () => {
   let service: DailyReadingService;
   let mockDailyReadingRepo: MockRepository;
   let mockCardRepo: MockRepository;
   let mockInterpretationsService: MockInterpretationsService;
+  let mockUsersService: MockUsersService;
   let mockDailyReadingQueryBuilder: MockQueryBuilder;
   let mockCardQueryBuilder: MockQueryBuilder;
 
@@ -93,6 +99,10 @@ describe('DailyReadingService', () => {
       generateDailyCardInterpretation: jest.fn(),
     };
 
+    mockUsersService = {
+      findById: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DailyReadingService,
@@ -107,6 +117,10 @@ describe('DailyReadingService', () => {
         {
           provide: InterpretationsService,
           useValue: mockInterpretationsService,
+        },
+        {
+          provide: UsersService,
+          useValue: mockUsersService,
         },
       ],
     }).compile();
@@ -136,6 +150,12 @@ describe('DailyReadingService', () => {
     });
 
     it('should generate a daily card successfully', async () => {
+      const mockUser = {
+        id: userId,
+        email: 'premium@test.com',
+        plan: UserPlan.PREMIUM,
+      };
+
       mockDailyReadingQueryBuilder.getOne.mockResolvedValue(null);
       mockCardRepo.count.mockResolvedValue(78);
       mockCardQueryBuilder.getOne.mockResolvedValue({
@@ -165,7 +185,11 @@ describe('DailyReadingService', () => {
         card: { id: 1, name: 'El Mago' },
       });
 
-      const result = await service.generateDailyCard(userId, tarotistaId);
+      const result = await service.generateDailyCard(
+        userId,
+        tarotistaId,
+        mockUser,
+      );
 
       expect(result.cardId).toBe(1);
       expect(result.interpretation).toContain('Energía del Día');
@@ -175,6 +199,12 @@ describe('DailyReadingService', () => {
     });
 
     it('should throw InternalServerErrorException if save fails', async () => {
+      const mockUser = {
+        id: userId,
+        email: 'premium@test.com',
+        plan: UserPlan.PREMIUM,
+      };
+
       mockDailyReadingQueryBuilder.getOne.mockResolvedValue(null);
       mockCardRepo.count.mockResolvedValue(78);
       mockCardQueryBuilder.getOne.mockResolvedValue({
@@ -191,7 +221,7 @@ describe('DailyReadingService', () => {
       mockDailyReadingRepo.findOne.mockResolvedValue(null); // Simulate save failure
 
       await expect(
-        service.generateDailyCard(userId, tarotistaId),
+        service.generateDailyCard(userId, tarotistaId, mockUser),
       ).rejects.toThrow(InternalServerErrorException);
     });
   });
@@ -359,6 +389,13 @@ describe('DailyReadingService', () => {
       mockCardQueryBuilder.getOne.mockResolvedValue(null);
       mockDailyReadingQueryBuilder.getOne.mockResolvedValue(null);
 
+      // Mock UsersService to return a valid user
+      mockUsersService.findById.mockResolvedValue({
+        id: 1,
+        email: 'test@test.com',
+        plan: UserPlan.FREE,
+      });
+
       await expect(service.generateDailyCard(1, 1)).rejects.toThrow(
         InternalServerErrorException,
       );
@@ -418,6 +455,235 @@ describe('DailyReadingService', () => {
         'daily_reading.reading_date = :date',
         expect.any(Object),
       );
+    });
+  });
+
+  describe('TASK-007: Dual Flow - Plan Detection', () => {
+    const userId = 1;
+    const tarotistaId = 1;
+
+    it('should generate interpretation with AI for PREMIUM users', async () => {
+      const mockUser = {
+        id: userId,
+        email: 'premium@test.com',
+        plan: UserPlan.PREMIUM,
+      };
+
+      mockDailyReadingQueryBuilder.getOne.mockResolvedValue(null);
+      mockCardRepo.count.mockResolvedValue(78);
+      mockCardQueryBuilder.getOne.mockResolvedValue({
+        id: 1,
+        name: 'El Mago',
+        meaningUpright: 'Poder de manifestación',
+        meaningReversed: 'Manipulación',
+      });
+
+      const aiInterpretation =
+        '**Energía del Día**: Poder de manifestación\n\n**Ventajas**: Hoy tienes la capacidad de manifestar tus deseos.';
+      mockInterpretationsService.generateDailyCardInterpretation.mockResolvedValue(
+        aiInterpretation,
+      );
+
+      const savedReading = {
+        id: 1,
+        userId,
+        tarotistaId,
+        cardId: 1,
+        isReversed: false,
+        interpretation: aiInterpretation,
+        readingDate: new Date(),
+        wasRegenerated: false,
+      };
+
+      mockDailyReadingRepo.create.mockReturnValue(savedReading);
+      mockDailyReadingRepo.save.mockResolvedValue(savedReading);
+      mockDailyReadingRepo.findOne.mockResolvedValue({
+        ...savedReading,
+        card: { id: 1, name: 'El Mago' },
+        user: mockUser,
+      });
+
+      const result = await service.generateDailyCard(
+        userId,
+        tarotistaId,
+        mockUser,
+      );
+
+      expect(result.interpretation).toBe(aiInterpretation);
+      expect(result.interpretation).toContain('**Energía del Día**');
+      expect(
+        mockInterpretationsService.generateDailyCardInterpretation,
+      ).toHaveBeenCalledTimes(1);
+    });
+
+    it('should NOT generate AI interpretation for FREE users', async () => {
+      const mockUser = {
+        id: userId,
+        email: 'free@test.com',
+        plan: UserPlan.FREE,
+      };
+
+      mockDailyReadingQueryBuilder.getOne.mockResolvedValue(null);
+      mockCardRepo.count.mockResolvedValue(78);
+      mockCardQueryBuilder.getOne.mockResolvedValue({
+        id: 1,
+        name: 'El Mago',
+        meaningUpright: 'Poder de manifestación',
+        meaningReversed: 'Manipulación',
+      });
+
+      const savedReading = {
+        id: 1,
+        userId,
+        tarotistaId,
+        cardId: 1,
+        isReversed: false,
+        interpretation: null,
+        readingDate: new Date(),
+        wasRegenerated: false,
+      };
+
+      mockDailyReadingRepo.create.mockReturnValue(savedReading);
+      mockDailyReadingRepo.save.mockResolvedValue(savedReading);
+      mockDailyReadingRepo.findOne.mockResolvedValue({
+        ...savedReading,
+        card: {
+          id: 1,
+          name: 'El Mago',
+          meaningUpright: 'Poder de manifestación',
+          meaningReversed: 'Manipulación',
+        },
+        user: mockUser,
+      });
+
+      const result = await service.generateDailyCard(
+        userId,
+        tarotistaId,
+        mockUser,
+      );
+
+      expect(result.interpretation).toBeNull();
+      expect(
+        mockInterpretationsService.generateDailyCardInterpretation,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('should NOT generate AI interpretation for ANONYMOUS users', async () => {
+      const mockUser = {
+        id: userId,
+        email: 'anonymous@test.com',
+        plan: UserPlan.ANONYMOUS,
+      };
+
+      mockDailyReadingQueryBuilder.getOne.mockResolvedValue(null);
+      mockCardRepo.count.mockResolvedValue(78);
+      mockCardQueryBuilder.getOne.mockResolvedValue({
+        id: 1,
+        name: 'El Mago',
+        meaningUpright: 'Poder de manifestación',
+        meaningReversed: 'Manipulación',
+      });
+
+      const savedReading = {
+        id: 1,
+        userId,
+        tarotistaId,
+        cardId: 1,
+        isReversed: false,
+        interpretation: null,
+        readingDate: new Date(),
+        wasRegenerated: false,
+      };
+
+      mockDailyReadingRepo.create.mockReturnValue(savedReading);
+      mockDailyReadingRepo.save.mockResolvedValue(savedReading);
+      mockDailyReadingRepo.findOne.mockResolvedValue({
+        ...savedReading,
+        card: {
+          id: 1,
+          name: 'El Mago',
+          meaningUpright: 'Poder de manifestación',
+          meaningReversed: 'Manipulación',
+        },
+        user: mockUser,
+      });
+
+      const result = await service.generateDailyCard(
+        userId,
+        tarotistaId,
+        mockUser,
+      );
+
+      expect(result.interpretation).toBeNull();
+      expect(
+        mockInterpretationsService.generateDailyCardInterpretation,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('should work without user object (backward compatibility)', async () => {
+      mockDailyReadingQueryBuilder.getOne.mockResolvedValue(null);
+
+      // Mock UsersService.findById to return a PREMIUM user
+      mockUsersService.findById.mockResolvedValue({
+        id: userId,
+        email: 'premium@test.com',
+        plan: UserPlan.PREMIUM,
+      });
+
+      mockCardRepo.count.mockResolvedValue(78);
+      mockCardQueryBuilder.getOne.mockResolvedValue({
+        id: 1,
+        name: 'El Mago',
+      });
+
+      mockInterpretationsService.generateDailyCardInterpretation.mockResolvedValue(
+        '**Energía del Día**: Test',
+      );
+
+      const savedReading = {
+        id: 1,
+        userId,
+        tarotistaId,
+        cardId: 1,
+        isReversed: false,
+        interpretation: '**Energía del Día**: Test',
+        readingDate: new Date(),
+        wasRegenerated: false,
+      };
+
+      mockDailyReadingRepo.create.mockReturnValue(savedReading);
+      mockDailyReadingRepo.save.mockResolvedValue(savedReading);
+      mockDailyReadingRepo.findOne.mockResolvedValue({
+        ...savedReading,
+        card: { id: 1, name: 'El Mago' },
+        user: { id: userId, plan: UserPlan.PREMIUM },
+      });
+
+      // Call without user parameter
+      const result = await service.generateDailyCard(userId, tarotistaId);
+
+      expect(result).toBeDefined();
+      expect(result.interpretation).toBe('**Energía del Día**: Test');
+      expect(mockUsersService.findById).toHaveBeenCalledWith(userId);
+      expect(
+        mockInterpretationsService.generateDailyCardInterpretation,
+      ).toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException when user does not exist and user object not provided', async () => {
+      mockDailyReadingQueryBuilder.getOne.mockResolvedValue(null);
+
+      // Mock UsersService.findById to return null (user not found)
+      mockUsersService.findById.mockResolvedValue(null);
+
+      await expect(
+        service.generateDailyCard(userId, tarotistaId),
+      ).rejects.toThrow(NotFoundException);
+      await expect(
+        service.generateDailyCard(userId, tarotistaId),
+      ).rejects.toThrow('Usuario no encontrado');
+
+      expect(mockUsersService.findById).toHaveBeenCalledWith(userId);
     });
   });
 
