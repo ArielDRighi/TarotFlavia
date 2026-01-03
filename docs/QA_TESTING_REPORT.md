@@ -1556,6 +1556,93 @@ La aplicación tiene una **base sólida** en términos de:
 
 ---
 
+### ✅ TASK-005B: Adaptar frontend para carta del día aleatoria con fingerprint [COMPLETADA]
+
+**[FRONTEND]** [COMPLETADA - 2 Enero 2026]
+
+**Archivos modificados:**
+
+- `frontend/src/lib/utils/fingerprint.ts` (NUEVO)
+- `frontend/src/lib/utils/fingerprint.test.ts` (NUEVO)
+- `frontend/src/lib/utils/index.ts`
+- `frontend/src/hooks/api/useDailyReading.ts`
+- `frontend/src/hooks/api/useDailyReading.public.test.tsx` (NUEVO)
+- `frontend/src/components/features/daily-reading/DailyCardExperience.tsx`
+- `frontend/src/components/features/daily-reading/DailyCardExperience.test.tsx`
+- `frontend/src/components/features/daily-reading/DailyCardExperience.anonymous.test.tsx`
+- `frontend/src/lib/api/daily-reading-api.ts`
+- `frontend/src/lib/api/endpoints.ts`
+- `frontend/src/types/reading.types.ts`
+- `frontend/src/test/factories/dailyReading.factory.ts`
+
+**Cambios implementados:**
+
+1. ✅ Creada utilidad `generateSessionFingerprint()` y `getSessionFingerprint()`:
+   - Combina UserAgent + timestamp para generar fingerprint único
+   - Usa base64 encoding con replace de caracteres especiales
+   - Almacena en sessionStorage para consistencia durante la sesión
+   - Maneja errores de storage gracefully (fallback sin storage)
+   - 8 tests unitarios implementados
+
+2. ✅ Actualizado tipo `DailyReading`:
+   - Agregado campo opcional `cardMeaning?: string`
+   - Campo presente cuando `interpretation === null` (usuarios anónimos)
+
+3. ✅ Modificado hook `useDailyReading`:
+   - Agregada nueva función de API `createDailyReadingPublic(fingerprint: string)`
+   - Creado hook `useDailyReadingPublic()` para mutación POST con fingerprint
+   - Manejo de errores 409 (ya generaste carta) y 403 (límite alcanzado)
+   - 4 tests unitarios nuevos
+
+4. ✅ Modificado componente `DailyCardExperience`:
+   - Detecta si usuario es autenticado o anónimo
+   - Flujo dual:
+     - **Autenticado:** Llama a `createDailyReading()` (endpoint protegido)
+     - **Anónimo:** Llama a `createDailyReadingPublic(fingerprint)` con fingerprint de sesión
+   - Renderiza `cardMeaning` cuando no hay `interpretation`
+   - Muestra CTA de conversión para usuarios anónimos
+   - Manejo correcto de errores 409 y 403
+
+5. ✅ Actualizados tests existentes:
+   - Agregado mock `useDailyReadingPublic` a todos los tests de `DailyCardExperience`
+   - Actualizado factory `createMockDailyReading` para agregar `cardMeaning` cuando `interpretation === null`
+   - Todos los tests pasan (83 tests en total)
+
+**Dependencias:** TASK-005A (Backend), TASK-003 (Frontend anonymous flow)
+
+**Criterios de aceptación cumplidos:**
+
+- ✅ Frontend genera fingerprint único por sesión
+- ✅ Usuarios anónimos llaman a POST en lugar de GET
+- ✅ `cardMeaning` se renderiza correctamente cuando no hay `interpretation`
+- ✅ Mismo usuario/sesión ve la misma carta (fingerprint persiste en sessionStorage)
+- ✅ Errores 409 y 403 se manejan apropiadamente
+- ✅ Tests actualizados para nuevo flujo (83 tests pasando)
+- ✅ Build y type-check sin errores
+- ✅ Lint sin errores (solo warnings pre-existentes)
+- ✅ Format aplicado con Prettier
+
+**Ciclo de calidad:**
+
+- ✅ Lint: 0 errores (2 warnings pre-existentes en otro archivo)
+- ✅ Type-check: Passed
+- ✅ Format: Applied
+- ✅ Tests: 83 passed (8 test files)
+- ✅ Build: Successful
+- ✅ Architecture validation: 2 disable directives pre-existentes (fuera de alcance)
+
+**Rama:** `feature/TASK-005B-fingerprint-daily-reading`
+**Commits:**
+
+- `feat(lib): add session fingerprint utilities for anonymous tracking`
+- `feat(daily-reading): add POST endpoint with fingerprint for anonymous users`
+- `feat(daily-reading): implement dual flow for authenticated/anonymous users`
+- `test(daily-reading): update mocks and factories for new anonymous flow`
+
+**Fecha de completación:** 2 Enero 2026
+
+---
+
 ### TASK-005B: Adaptar frontend para carta del día aleatoria con fingerprint
 
 **[FRONTEND]**

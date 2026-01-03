@@ -12,6 +12,7 @@ const mockPush = vi.fn();
 const mockUseDailyReadingTodayPublic = vi.fn();
 const mockUseDailyReadingToday = vi.fn();
 const mockUseDailyReading = vi.fn();
+const mockUseDailyReadingPublic = vi.fn();
 const mockUseAuth = vi.fn();
 
 // Mock next/navigation
@@ -29,6 +30,7 @@ vi.mock('@/hooks/api/useDailyReading', () => ({
   useDailyReadingTodayPublic: () => mockUseDailyReadingTodayPublic(),
   useDailyReadingToday: () => mockUseDailyReadingToday(),
   useDailyReading: () => mockUseDailyReading(),
+  useDailyReadingPublic: () => mockUseDailyReadingPublic(),
   useRegenerateDailyReading: () => ({
     mutate: vi.fn(),
     isPending: false,
@@ -77,7 +79,7 @@ function createMockAxiosError(status: number, message?: string): AxiosError {
     data: { message },
     statusText: '',
     headers: {},
-    config: {} as any,
+    config: {} as Record<string, unknown>,
   };
   return error;
 }
@@ -88,6 +90,12 @@ describe('DailyCardExperience - Anonymous User Flow', () => {
 
     // Default mocks for useDailyReading mutation
     mockUseDailyReading.mockReturnValue({
+      mutate: vi.fn(),
+      isPending: false,
+    });
+
+    // Default mock for useDailyReadingPublic mutation
+    mockUseDailyReadingPublic.mockReturnValue({
       mutate: vi.fn(),
       isPending: false,
     });

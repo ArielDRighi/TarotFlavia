@@ -35,17 +35,29 @@ export function createMockTarotCard(overrides: Partial<TarotCard> = {}): TarotCa
  * @param overrides - Partial DailyReading to override defaults
  */
 export function createMockDailyReading(overrides: Partial<DailyReading> = {}): DailyReading {
+  const defaultCard = createMockTarotCard();
+
   return {
     id: 1,
     userId: 1,
     tarotistaId: 1,
-    card: createMockTarotCard(),
+    card: defaultCard,
     isReversed: false,
     interpretation: 'Hoy es un día de nuevos comienzos. El Loco te invita a dar ese salto de fe.',
+    cardMeaning: undefined, // Only present for anonymous users
     readingDate: '2025-12-09',
     wasRegenerated: false,
     createdAt: new Date('2025-12-09T08:00:00Z'),
     ...overrides,
+    // If interpretation is explicitly null, add cardMeaning (anonymous flow)
+    ...(overrides.interpretation === null && !overrides.cardMeaning
+      ? {
+          cardMeaning:
+            overrides.isReversed !== false
+              ? defaultCard.meaningReversed
+              : defaultCard.meaningUpright,
+        }
+      : {}),
   };
 }
 

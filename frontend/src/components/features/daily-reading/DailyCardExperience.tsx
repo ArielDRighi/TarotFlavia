@@ -21,11 +21,13 @@ import {
   useDailyReadingToday,
   useDailyReadingTodayPublic,
   useDailyReading,
+  useDailyReadingPublic,
   useRegenerateDailyReading,
 } from '@/hooks/api/useDailyReading';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/utils/useToast';
 import { cn } from '@/lib/utils';
+import { getSessionFingerprint } from '@/lib/utils/fingerprint';
 import type { DailyReading, ReadingCard } from '@/types';
 
 /**
@@ -88,6 +90,7 @@ export function DailyCardExperience() {
   const error = isAuthenticated ? errorAuth : errorPublic;
 
   const { mutate: createDailyReading, isPending: isCreating } = useDailyReading();
+  const { mutate: createDailyReadingPublic, isPending: isCreatingPublic } = useDailyReadingPublic();
   const { mutate: regenerateReading, isPending: isRegenerating } = useRegenerateDailyReading();
 
   // Modal state
@@ -102,6 +105,7 @@ export function DailyCardExperience() {
   const isPremium = user?.plan === 'PREMIUM';
   const currentReading = localReading || dailyReading;
   const isRevealed = Boolean(currentReading);
+  const isCreatingReading = isCreating || isCreatingPublic;
 
   // Type guard for AxiosError
   const isAxiosError = (err: unknown): err is AxiosError => {
@@ -109,7 +113,7 @@ export function DailyCardExperience() {
       typeof err === 'object' &&
       err !== null &&
       'isAxiosError' in err &&
-      (err as any).isAxiosError === true
+      (err as AxiosError).isAxiosError === true
     );
   };
 
@@ -120,20 +124,42 @@ export function DailyCardExperience() {
    * Handle card click to create daily reading
    */
   const handleRevealCard = useCallback(() => {
-    if (isCreating || isRevealing || currentReading) return;
+    if (isCreatingReading || isRevealing || currentReading) return;
 
     setIsRevealing(true);
-    createDailyReading(undefined, {
-      onSuccess: (data) => {
-        setLocalReading(data);
-        // Keep revealing state for animation duration
-        setTimeout(() => setIsRevealing(false), 600);
-      },
-      onError: () => {
-        setIsRevealing(false);
-      },
-    });
-  }, [createDailyReading, isCreating, isRevealing, currentReading]);
+
+    if (isAuthenticated) {
+      // Authenticated users: call protected endpoint
+      createDailyReading(undefined, {
+        onSuccess: (data) => {
+          setLocalReading(data);
+          setTimeout(() => setIsRevealing(false), 600);
+        },
+        onError: () => {
+          setIsRevealing(false);
+        },
+      });
+    } else {
+      // Anonymous users: call public endpoint with fingerprint
+      const fingerprint = getSessionFingerprint();
+      createDailyReadingPublic(fingerprint, {
+        onSuccess: (data) => {
+          setLocalReading(data);
+          setTimeout(() => setIsRevealing(false), 600);
+        },
+        onError: () => {
+          setIsRevealing(false);
+        },
+      });
+    }
+  }, [
+    createDailyReading,
+    createDailyReadingPublic,
+    isAuthenticated,
+    isCreatingReading,
+    isRevealing,
+    currentReading,
+  ]);
 
   /**
    * Handle share button - copy interpretation to clipboard
@@ -229,7 +255,7 @@ export function DailyCardExperience() {
           <div
             className={cn(
               'transition-transform duration-300',
-              !isCreating && !isRevealing && 'animate-bounce-slow hover:scale-105'
+              !isCreatingReading && !isRevealing && 'animate-bounce-slow hover:scale-105'
             )}
           >
             <TarotCard
@@ -241,7 +267,7 @@ export function DailyCardExperience() {
           </div>
 
           {/* Loading state while creating */}
-          {(isCreating || isRevealing) && (
+          {(isCreatingReading || isRevealing) && (
             <div data-testid="creating-reading" className="text-primary flex items-center gap-2">
               <Sparkles className="h-5 w-5 animate-pulse" />
               <span className="text-sm">Revelando tu carta...</span>
@@ -271,8 +297,9 @@ export function DailyCardExperience() {
             )}
           </div>
 
-          {/* Interpretation (only if exists - authenticated users) */}
-          {currentReading?.interpretation && (
+          {/* Interpretation (authenticated users) or Card Meaning (anonymous users) */}
+          {currentReading?.interpretation ? (
+            // Authenticated users: Full interpretation
             <div
               data-testid="interpretation-section"
               className="bg-surface shadow-soft w-full max-w-lg rounded-xl p-6"
@@ -281,10 +308,18 @@ export function DailyCardExperience() {
                 {currentReading.interpretation}
               </p>
             </div>
-          )}
+          ) : currentReading?.cardMeaning ? (
+            // Anonymous users: Card meaning from DB
+            <div
+              data-testid="card-meaning-section"
+              className="bg-surface shadow-soft w-full max-w-lg rounded-xl p-6"
+            >
+              <p className="text-text-primary leading-relaxed">{currentReading.cardMeaning}</p>
+            </div>
+          ) : null}
 
           {/* Anonymous User CTA (shown when no interpretation) */}
-          {!currentReading?.interpretation && !isAuthenticated && (
+          {!isAuthenticated && currentReading?.cardMeaning && (
             <div
               data-testid="anonymous-cta"
               className="bg-primary/5 border-primary/20 w-full max-w-lg rounded-xl border p-6 text-center"

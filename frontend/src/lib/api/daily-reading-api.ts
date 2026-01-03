@@ -56,12 +56,55 @@ export async function getDailyReadingToday(): Promise<DailyReading | null> {
  * Backend returns null with 200 status when no reading exists (NOT 404)
  * @returns Promise<DailyReading | null> The daily reading or null if not exists
  * @throws Error with clear message on failure
+ * @deprecated Use createDailyReadingPublic instead (POST with fingerprint)
  */
 export async function getDailyReadingTodayPublic(): Promise<DailyReading | null> {
   const response = await apiClient.get<DailyReading | null>(
     API_ENDPOINTS.DAILY_READING.TODAY_PUBLIC
   );
   return response.data;
+}
+
+/**
+ * Create today's daily reading for anonymous user (public endpoint - no authentication)
+ * Generates a random card for the anonymous user based on their fingerprint.
+ * Each fingerprint gets a unique random card per day.
+ * @param fingerprint - Unique identifier for anonymous session
+ * @returns Promise<DailyReading> The newly created daily reading
+ * @throws Error (409) if fingerprint already has a card for today
+ * @throws Error (403) if anonymous limit reached
+ */
+export async function createDailyReadingPublic(fingerprint: string): Promise<DailyReading> {
+  try {
+    const response = await apiClient.post<DailyReading>(API_ENDPOINTS.DAILY_READING.PUBLIC, {
+      fingerprint,
+    });
+    return response.data;
+  } catch (error: unknown) {
+    // Type guard for AxiosError
+    if (
+      error &&
+      typeof error === 'object' &&
+      'response' in error &&
+      error.response &&
+      typeof error.response === 'object' &&
+      'status' in error.response
+    ) {
+      const status = (error.response as { status?: number }).status;
+
+      // 409: Already generated card for today
+      if (status === 409) {
+        throw new Error('Ya generaste tu carta del día');
+      }
+
+      // 403: Anonymous limit reached
+      if (status === 403) {
+        throw new Error('Ya viste tu carta del día. Regístrate para más lecturas.');
+      }
+    }
+
+    throw new Error('Error al crear carta del día');
+  }
 }
 
 /**

@@ -13,6 +13,7 @@ import {
   getDailyReading,
   getDailyReadingToday,
   getDailyReadingTodayPublic,
+  createDailyReadingPublic,
   getDailyReadingHistory,
   regenerateDailyReading,
 } from '@/lib/api/daily-reading-api';
@@ -91,6 +92,28 @@ export function useDailyReading() {
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Error al crear carta del día');
+    },
+  });
+}
+
+/**
+ * Hook to create daily reading for anonymous users (public)
+ * Accepts fingerprint and generates random card for that fingerprint.
+ * On success: invalidates all daily reading queries (no toast for anonymous).
+ * On error: errors are returned to caller for specific handling
+ */
+export function useDailyReadingPublic() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: createDailyReadingPublic,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: dailyReadingQueryKeys.all });
+      // No toast for anonymous users - component handles UI feedback
+    },
+    onError: () => {
+      // Errors are exposed to component for specific handling (409, 403)
+      // Component will show appropriate UI based on error
     },
   });
 }
