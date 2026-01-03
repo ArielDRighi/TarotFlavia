@@ -140,7 +140,7 @@ describe('Readings Share System (e2e)', () => {
           { cardId: 2, position: 'present', isReversed: false },
           { cardId: 3, position: 'future', isReversed: false },
         ],
-        generateInterpretation: false,
+        useAI: false,
       })
       .expect(201);
 
@@ -396,7 +396,7 @@ describe('Readings Share System (e2e)', () => {
             { cardId: 5, position: 'present', isReversed: false },
             { cardId: 6, position: 'future', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(201);
 
@@ -447,7 +447,7 @@ describe('Readings Share System (e2e)', () => {
             { cardId: 2, position: 'present', isReversed: false },
             { cardId: 3, position: 'future', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(201);
 
@@ -493,7 +493,7 @@ describe('Readings Share System (e2e)', () => {
             { cardId: 2, position: 'present', isReversed: false },
             { cardId: 3, position: 'future', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(201);
 

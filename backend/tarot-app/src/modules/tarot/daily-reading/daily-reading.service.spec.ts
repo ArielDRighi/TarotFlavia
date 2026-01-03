@@ -337,7 +337,8 @@ describe('DailyReadingService', () => {
       expect(result.total).toBe(1);
       expect(result.page).toBe(1);
       expect(result.totalPages).toBe(1);
-      expect(result.items[0].interpretationSummary.length).toBeLessThanOrEqual(
+      expect(result.items[0].interpretationSummary).toBeDefined();
+      expect(result.items[0].interpretationSummary?.length).toBeLessThanOrEqual(
         153,
       ); // 150 + '...'
     });
@@ -417,6 +418,209 @@ describe('DailyReadingService', () => {
         'daily_reading.reading_date = :date',
         expect.any(Object),
       );
+    });
+  });
+
+  describe('generateAnonymousDailyCard', () => {
+    const fingerprint = 'a1b2c3d4e5f6789012345678901234567890abcd';
+    const tarotistaId = 1;
+
+    it('should throw ConflictException if fingerprint already has a daily card for today', async () => {
+      mockDailyReadingQueryBuilder.getOne.mockResolvedValue({
+        id: 1,
+        anonymousFingerprint: fingerprint,
+      });
+
+      await expect(
+        service.generateAnonymousDailyCard(fingerprint, tarotistaId),
+      ).rejects.toThrow(ConflictException);
+      await expect(
+        service.generateAnonymousDailyCard(fingerprint, tarotistaId),
+      ).rejects.toThrow(
+        'Ya viste tu carta del día. Regístrate para más lecturas.',
+      );
+    });
+
+    it('should generate a random daily card for anonymous user', async () => {
+      mockDailyReadingQueryBuilder.getOne.mockResolvedValue(null);
+      mockCardRepo.count.mockResolvedValue(78);
+      mockCardQueryBuilder.getOne.mockResolvedValue({
+        id: 5,
+        name: 'El Hierofante',
+        meaningUpright: 'Sabiduría y tradición',
+        meaningReversed: 'Rebelión contra normas',
+      });
+
+      const savedReading = {
+        id: 1,
+        anonymousFingerprint: fingerprint,
+        userId: null,
+        cardId: 5,
+        isReversed: false,
+        interpretation: null,
+        readingDate: new Date().toISOString().split('T')[0],
+        wasRegenerated: false,
+      };
+
+      mockDailyReadingRepo.create.mockReturnValue(savedReading);
+      mockDailyReadingRepo.save.mockResolvedValue(savedReading);
+      mockDailyReadingRepo.findOne.mockResolvedValue({
+        ...savedReading,
+        card: {
+          id: 5,
+          name: 'El Hierofante',
+          meaningUpright: 'Sabiduría y tradición',
+          meaningReversed: 'Rebelión contra normas',
+        },
+      });
+
+      const result = await service.generateAnonymousDailyCard(
+        fingerprint,
+        tarotistaId,
+      );
+
+      expect(result).toBeDefined();
+      expect(result.anonymousFingerprint).toBe(fingerprint);
+      expect(result.userId).toBeNull();
+      expect(result.interpretation).toBeNull();
+      expect(mockDailyReadingRepo.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          anonymousFingerprint: fingerprint,
+          userId: null,
+          interpretation: null,
+        }),
+      );
+      expect(
+        mockInterpretationsService.generateDailyCardInterpretation,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('should generate card with random orientation (upright or reversed)', async () => {
+      mockDailyReadingQueryBuilder.getOne.mockResolvedValue(null);
+      mockCardRepo.count.mockResolvedValue(78);
+
+      const mockCard = {
+        id: 10,
+        name: 'La Rueda de la Fortuna',
+        meaningUpright: 'Cambio positivo',
+        meaningReversed: 'Mala suerte',
+      };
+
+      mockCardQueryBuilder.getOne.mockResolvedValue(mockCard);
+
+      // Mock Math.random para forzar reversed = true
+      jest
+        .spyOn(Math, 'random')
+        .mockReturnValueOnce(0.1)
+        .mockReturnValueOnce(0.6);
+
+      const savedReading = {
+        id: 2,
+        anonymousFingerprint: fingerprint,
+        userId: null,
+        cardId: 10,
+        isReversed: true,
+        interpretation: null,
+        readingDate: new Date().toISOString().split('T')[0],
+      };
+
+      mockDailyReadingRepo.create.mockReturnValue(savedReading);
+      mockDailyReadingRepo.save.mockResolvedValue(savedReading);
+      mockDailyReadingRepo.findOne.mockResolvedValue({
+        ...savedReading,
+        card: mockCard,
+      });
+
+      const result = await service.generateAnonymousDailyCard(
+        fingerprint,
+        tarotistaId,
+      );
+
+      expect(result.isReversed).toBe(true);
+    });
+
+    it('should use meaningReversed when card is reversed', async () => {
+      mockDailyReadingQueryBuilder.getOne.mockResolvedValue(null);
+      mockCardRepo.count.mockResolvedValue(78);
+
+      const mockCard = {
+        id: 7,
+        name: 'El Carro',
+        meaningUpright: 'Victoria y control',
+        meaningReversed: 'Falta de dirección',
+      };
+
+      mockCardQueryBuilder.getOne.mockResolvedValue(mockCard);
+
+      // Force isReversed = true
+      jest
+        .spyOn(Math, 'random')
+        .mockReturnValueOnce(0.1)
+        .mockReturnValueOnce(0.8);
+
+      const savedReading = {
+        id: 3,
+        anonymousFingerprint: fingerprint,
+        userId: null,
+        cardId: 7,
+        isReversed: true,
+        interpretation: null,
+        readingDate: new Date().toISOString().split('T')[0],
+      };
+
+      mockDailyReadingRepo.create.mockReturnValue(savedReading);
+      mockDailyReadingRepo.save.mockResolvedValue(savedReading);
+      mockDailyReadingRepo.findOne.mockResolvedValue({
+        ...savedReading,
+        card: mockCard,
+      });
+
+      const result = await service.generateAnonymousDailyCard(
+        fingerprint,
+        tarotistaId,
+      );
+
+      expect(result.card.meaningReversed).toBe('Falta de dirección');
+    });
+
+    it('should select different random cards for different fingerprints', async () => {
+      mockDailyReadingQueryBuilder.getOne.mockResolvedValue(null);
+      mockCardRepo.count.mockResolvedValue(78);
+
+      const card1 = { id: 1, name: 'El Mago', meaningUpright: 'Poder' };
+      const card2 = {
+        id: 2,
+        name: 'La Sacerdotisa',
+        meaningUpright: 'Intuición',
+      };
+
+      mockCardQueryBuilder.getOne
+        .mockResolvedValueOnce(card1)
+        .mockResolvedValueOnce(card2);
+
+      mockDailyReadingRepo.create
+        .mockReturnValueOnce({ id: 1, cardId: 1 })
+        .mockReturnValueOnce({ id: 2, cardId: 2 });
+
+      mockDailyReadingRepo.save
+        .mockResolvedValueOnce({ id: 1, cardId: 1 })
+        .mockResolvedValueOnce({ id: 2, cardId: 2 });
+
+      mockDailyReadingRepo.findOne
+        .mockResolvedValueOnce({ id: 1, card: card1 })
+        .mockResolvedValueOnce({ id: 2, card: card2 });
+
+      const result1 = await service.generateAnonymousDailyCard(
+        'fingerprint1',
+        tarotistaId,
+      );
+      const result2 = await service.generateAnonymousDailyCard(
+        'fingerprint2',
+        tarotistaId,
+      );
+
+      // Different fingerprints can get different cards
+      expect(result1.card.id).not.toBe(result2.card.id);
     });
   });
 });

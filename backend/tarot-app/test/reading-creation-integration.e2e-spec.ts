@@ -119,7 +119,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
             { cardId: 2, position: 'presente', isReversed: false },
             { cardId: 3, position: 'futuro', isReversed: false },
           ],
-          generateInterpretation: true,
+          useAI: true,
         })
         .expect(201);
 
@@ -155,7 +155,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
             { cardId: 5, position: 'presente', isReversed: false },
             { cardId: 6, position: 'futuro', isReversed: false },
           ],
-          generateInterpretation: true,
+          useAI: true,
         })
         .expect(201);
 
@@ -183,7 +183,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
               { cardId: i * 3 + 2, position: 'presente', isReversed: false },
               { cardId: i * 3 + 3, position: 'futuro', isReversed: false },
             ],
-            generateInterpretation: false,
+            useAI: false,
           })
           .expect(201);
 
@@ -225,7 +225,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
             { cardId: 11, position: 'presente', isReversed: false },
             { cardId: 12, position: 'futuro', isReversed: false },
           ],
-          generateInterpretation: true,
+          useAI: true,
         })
         .expect(201);
 
@@ -255,7 +255,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
             { cardId: 14, position: 'presente', isReversed: false },
             { cardId: 15, position: 'futuro', isReversed: false },
           ],
-          generateInterpretation: true,
+          useAI: true,
         })
         .expect(201);
 
@@ -287,7 +287,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
             { cardId: 17, position: 'presente', isReversed: false },
             { cardId: 18, position: 'futuro', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(201);
 
@@ -304,7 +304,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
             { cardId: 20, position: 'presente', isReversed: false },
             { cardId: 21, position: 'futuro', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(201);
 
@@ -347,7 +347,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
             { cardId: 2, position: 'presente', isReversed: false },
             { cardId: 3, position: 'futuro', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(400); // DTO validation
     });
@@ -365,7 +365,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
             { cardId: 2, position: 'presente', isReversed: false },
             { cardId: 3, position: 'futuro', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(400); // DTO validation
     });
@@ -383,7 +383,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
             { cardId: 2, position: 'presente', isReversed: false },
             { cardId: 3, position: 'futuro', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(400); // DTO validation - should fail because no question provided
     });
@@ -403,7 +403,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
             { cardId: 2, position: 'presente', isReversed: false },
             { cardId: 3, position: 'futuro', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(400); // DTO validation rejects both questions (PREMIUM user passes guard)
     });
@@ -422,7 +422,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
             { cardId: 2, position: 'presente', isReversed: false },
             { cardId: 3, position: 'futuro', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(404); // Deck not found
     });
@@ -441,7 +441,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
             { cardId: 2, position: 'presente', isReversed: false },
             { cardId: 3, position: 'futuro', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(404); // Spread not found
     });
@@ -467,7 +467,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
             { cardId: 23, position: 'presente', isReversed: false },
             { cardId: 24, position: 'futuro', isReversed: false },
           ],
-          generateInterpretation: true,
+          useAI: true,
         })
         .expect(201);
 
@@ -513,7 +513,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
             { cardId: 26, position: 'presente', isReversed: false },
             { cardId: 27, position: 'futuro', isReversed: false },
           ],
-          generateInterpretation: true,
+          useAI: true,
         })
         .expect(201);
 
@@ -553,7 +553,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
             { cardId: 29, position: 'presente', isReversed: false },
             { cardId: 30, position: 'futuro', isReversed: false },
           ],
-          generateInterpretation: true,
+          useAI: true,
         })
         .expect(201);
 
@@ -579,7 +579,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
             { cardId: 32, position: 'presente', isReversed: false },
             { cardId: 33, position: 'futuro', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(201);
 
@@ -613,7 +613,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
             { cardId: 35, position: 'presente', isReversed: false },
             { cardId: 36, position: 'futuro', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(201);
 
@@ -647,7 +647,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
             { cardId: 38, position: 'presente', isReversed: false },
             { cardId: 39, position: 'futuro', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(201);
 
@@ -664,7 +664,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
             { cardId: 41, position: 'presente', isReversed: false },
             { cardId: 42, position: 'futuro', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(201);
 
@@ -704,7 +704,7 @@ describe('Reading Creation Flow Integration (E2E)', () => {
             { cardId: 44, position: 'presente', isReversed: false },
             { cardId: 45, position: 'futuro', isReversed: false },
           ],
-          generateInterpretation: true,
+          useAI: true,
         })
         .expect(201);
 

@@ -248,7 +248,7 @@ describe('Readings Soft Delete E2E', () => {
           { cardId: cardIds[1], position: 'Present', isReversed: false },
           { cardId: cardIds[2], position: 'Future', isReversed: true },
         ],
-        generateInterpretation: false,
+        useAI: false,
       })
       .expect(201);
 

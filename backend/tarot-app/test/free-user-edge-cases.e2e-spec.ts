@@ -162,7 +162,7 @@ describe('Free User Edge Cases E2E (SUBTASK-18)', () => {
                 { cardId: cardIds[1], position: 'present', isReversed: false },
                 { cardId: cardIds[2], position: 'future', isReversed: false },
               ],
-              generateInterpretation: false,
+              useAI: false,
             }),
         );
 
@@ -220,7 +220,7 @@ describe('Free User Edge Cases E2E (SUBTASK-18)', () => {
                 { cardId: cardIds[1], position: 'present', isReversed: false },
                 { cardId: cardIds[2], position: 'future', isReversed: false },
               ],
-              generateInterpretation: false,
+              useAI: false,
             }),
         );
 
@@ -279,7 +279,7 @@ describe('Free User Edge Cases E2E (SUBTASK-18)', () => {
             { cardId: cardIds[1], position: 'present', isReversed: false },
             { cardId: cardIds[2], position: 'future', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(401);
 
@@ -336,7 +336,7 @@ describe('Free User Edge Cases E2E (SUBTASK-18)', () => {
             { cardId: cardIds[1], position: 'present', isReversed: false },
             { cardId: cardIds[2], position: 'future', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(401);
 
@@ -371,7 +371,7 @@ describe('Free User Edge Cases E2E (SUBTASK-18)', () => {
             { cardId: cardIds[1], position: 'present', isReversed: false },
             { cardId: cardIds[2], position: 'future', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         });
 
       // Should succeed (201) or be rate-limited (429)
@@ -461,7 +461,7 @@ describe('Free User Edge Cases E2E (SUBTASK-18)', () => {
             { cardId: cardIds[1], position: 'present', isReversed: false },
             { cardId: cardIds[2], position: 'future', isReversed: false },
           ],
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(201);
 

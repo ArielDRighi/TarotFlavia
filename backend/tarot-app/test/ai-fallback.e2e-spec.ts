@@ -118,7 +118,7 @@ describe('AI Provider Fallback (e2e)', () => {
             { cardId: cardIds[1], position: 'presente', isReversed: false },
             { cardId: cardIds[2], position: 'futuro', isReversed: false },
           ],
-          generateInterpretation: true,
+          useAI: true,
         })
         .expect(201);
 
@@ -154,7 +154,7 @@ describe('AI Provider Fallback (e2e)', () => {
             { cardId: cardIds[1], position: 'presente', isReversed: false },
             { cardId: cardIds[2], position: 'futuro', isReversed: false },
           ],
-          generateInterpretation: true,
+          useAI: true,
         })
         .expect(201);
 
@@ -241,7 +241,7 @@ describe('AI Provider Fallback (e2e)', () => {
                 { cardId: cardIds[1], position: 'presente', isReversed: false },
                 { cardId: cardIds[2], position: 'futuro', isReversed: false },
               ],
-              generateInterpretation: true,
+              useAI: true,
             })
             .expect(201),
         );

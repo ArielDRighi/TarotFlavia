@@ -146,7 +146,7 @@ describe('Performance Tests - Database Queries (SUBTASK-23)', () => {
             position: `pos_${idx}`,
             isReversed: false,
           })),
-          generateInterpretation: false,
+          useAI: false,
         })
         .expect(201);
     }
