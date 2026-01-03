@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Copy, History, RefreshCw, Sparkles } from 'lucide-react';
-import { AxiosError } from 'axios';
+import { isAxiosError } from 'axios';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -89,6 +89,7 @@ export function DailyCardExperience() {
   // Local state for animation
   const [isRevealing, setIsRevealing] = useState(false);
   const [localReading, setLocalReading] = useState<DailyReading | null>(null);
+  const [anonymousError, setAnonymousError] = useState<AxiosError | null>(null);
 
   // Computed values
   const isPremium = user?.plan === 'PREMIUM';
@@ -96,23 +97,17 @@ export function DailyCardExperience() {
   const isRevealed = Boolean(currentReading);
   const isCreatingReading = isCreating || isCreatingPublic;
 
-  // Type guard for AxiosError
-  const isAxiosError = (err: unknown): err is AxiosError => {
-    return (
-      typeof err === 'object' &&
-      err !== null &&
-      'isAxiosError' in err &&
-      (err as AxiosError).isAxiosError === true
-    );
-  };
-
+  // Check if anonymous user reached limit (backend returns 409 or 403)
   const isAnonymousLimitReached =
-    !isAuthenticated && isAxiosError(error) && error.response?.status === 403;
+    !isAuthenticated &&
+    ((isAxiosError(error) && (error.response?.status === 403 || error.response?.status === 409)) ||
+      (isAxiosError(anonymousError) &&
+        (anonymousError.response?.status === 403 || anonymousError.response?.status === 409)));
 
   /**
    * Handle card click to create daily reading
    */
-  const handleRevealCard = useCallback(() => {
+  const handleRevealCard = useCallback(async () => {
     if (isCreatingReading || isRevealing || currentReading) return;
 
     setIsRevealing(true);
@@ -130,14 +125,18 @@ export function DailyCardExperience() {
       });
     } else {
       // Anonymous users: call public endpoint with fingerprint
-      const fingerprint = getSessionFingerprint();
+      const fingerprint = await getSessionFingerprint();
       createDailyReadingPublic(fingerprint, {
         onSuccess: (data) => {
           setLocalReading(data);
+          setAnonymousError(null);
           setTimeout(() => setIsRevealing(false), 600);
         },
-        onError: () => {
+        onError: (err) => {
           setIsRevealing(false);
+          if (isAxiosError(err)) {
+            setAnonymousError(err);
+          }
         },
       });
     }

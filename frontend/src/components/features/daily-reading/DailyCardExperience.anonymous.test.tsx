@@ -24,6 +24,12 @@ vi.mock('next/navigation', () => ({
   }),
 }));
 
+// Mock fingerprint utilities
+vi.mock('@/lib/utils/fingerprint', () => ({
+  getSessionFingerprint: vi.fn().mockResolvedValue('mock-fingerprint-12345'),
+  generateSessionFingerprint: vi.fn().mockResolvedValue('mock-fingerprint-12345'),
+}));
+
 // Mock hooks
 vi.mock('@/hooks/api/useDailyReading', () => ({
   useDailyReadingToday: () => mockUseDailyReadingToday(),
@@ -77,7 +83,11 @@ function createMockAxiosError(status: number, message?: string): AxiosError {
     data: { message },
     statusText: '',
     headers: {},
-    config: {} as Record<string, unknown>,
+    config: {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      headers: {} as any,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any,
   };
   return error;
 }
@@ -136,9 +146,9 @@ describe('DailyCardExperience - Anonymous User Flow', () => {
 
       renderWithProviders(<DailyCardExperience />);
 
-      // Click on unrevealed card to trigger generation
-      const unrevealedCard = screen.getByTestId('unrevealed-state');
-      await user.click(unrevealedCard);
+      // Click on tarot card to trigger generation
+      const tarotCard = screen.getByTestId('tarot-card');
+      await user.click(tarotCard);
 
       // Verify POST mutation was called with fingerprint
       await waitFor(() => {
@@ -174,8 +184,8 @@ describe('DailyCardExperience - Anonymous User Flow', () => {
       renderWithProviders(<DailyCardExperience />);
 
       // Click to reveal card
-      const unrevealedCard = screen.getByTestId('unrevealed-state');
-      await user.click(unrevealedCard);
+      const tarotCard = screen.getByTestId('tarot-card');
+      await user.click(tarotCard);
 
       // Wait for reveal animation to complete (600ms)
       await waitFor(
@@ -215,8 +225,8 @@ describe('DailyCardExperience - Anonymous User Flow', () => {
       renderWithProviders(<DailyCardExperience />);
 
       // Click to reveal
-      const unrevealedCard = screen.getByTestId('unrevealed-state');
-      await user.click(unrevealedCard);
+      const tarotCard = screen.getByTestId('tarot-card');
+      await user.click(tarotCard);
 
       await waitFor(
         () => {
@@ -229,10 +239,10 @@ describe('DailyCardExperience - Anonymous User Flow', () => {
       expect(screen.getByRole('button', { name: /crear cuenta gratis/i })).toBeInTheDocument();
     });
 
-    it('should show AnonymousLimitReached when limit is reached (403)', async () => {
+    it('should show AnonymousLimitReached when limit is reached (409)', async () => {
       // For anonymous limit reached, component doesn't make initial fetch
       // Error will come from POST mutation when user clicks card
-      const mockError = createMockAxiosError(403, 'Ya viste tu carta del día');
+      const mockError = createMockAxiosError(409, 'Ya viste tu carta del día');
 
       const mockMutate = vi.fn((fingerprint, { onError }) => {
         onError(mockError);
@@ -255,18 +265,24 @@ describe('DailyCardExperience - Anonymous User Flow', () => {
     it('should navigate to register when clicking primary CTA in limit reached state', async () => {
       const user = userEvent.setup();
 
-      // Simulate limit reached error from useDailyReadingPublic hook
-      const mockError = createMockAxiosError(403);
+      // Simulate limit reached error when user clicks card
+      const mockError = createMockAxiosError(409, 'Ya viste tu carta del día');
+      const mockMutate = vi.fn((fingerprint, { onError }) => {
+        onError(mockError);
+      });
+
       mockUseDailyReadingPublic.mockReturnValue({
-        mutate: vi.fn(),
+        mutate: mockMutate,
         isPending: false,
-        error: mockError,
       });
 
       renderWithProviders(<DailyCardExperience />);
 
-      // With error present on hook, AnonymousLimitReached should show
-      // (This is the new pattern after error occurs)
+      // Click card to trigger error
+      const tarotCard = screen.getByTestId('tarot-card');
+      await user.click(tarotCard);
+
+      // Wait for AnonymousLimitReached to show after error
       await waitFor(() => {
         expect(screen.getByRole('alert')).toBeInTheDocument();
       });
@@ -297,8 +313,8 @@ describe('DailyCardExperience - Anonymous User Flow', () => {
       renderWithProviders(<DailyCardExperience />);
 
       // Click to reveal
-      const unrevealedCard = screen.getByTestId('unrevealed-state');
-      await user.click(unrevealedCard);
+      const tarotCard = screen.getByTestId('tarot-card');
+      await user.click(tarotCard);
 
       await waitFor(
         () => {
@@ -331,8 +347,8 @@ describe('DailyCardExperience - Anonymous User Flow', () => {
       renderWithProviders(<DailyCardExperience />);
 
       // Click to reveal
-      const unrevealedCard = screen.getByTestId('unrevealed-state');
-      await user.click(unrevealedCard);
+      const tarotCard = screen.getByTestId('tarot-card');
+      await user.click(tarotCard);
 
       await waitFor(
         () => {

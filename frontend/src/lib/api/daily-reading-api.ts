@@ -50,24 +50,8 @@ export async function getDailyReadingToday(): Promise<DailyReading | null> {
   return response.data;
 }
 
-/**
- * Get today's daily reading if it exists (public endpoint - no authentication required)
- * This endpoint is for anonymous users and returns only DB info (no AI interpretation)
- * Backend returns null with 200 status when no reading exists (NOT 404)
- * @returns Promise<DailyReading | null> The daily reading or null if not exists
- * @throws Error with clear message on failure
- * @deprecated This endpoint was removed in TASK-005A. Use createDailyReadingPublic instead (POST with fingerprint).
- * Keeping function for backwards compatibility but it will always throw 404.
- */
-export async function getDailyReadingTodayPublic(): Promise<DailyReading | null> {
-  console.warn(
-    'getDailyReadingTodayPublic is deprecated. Backend endpoint removed. Use createDailyReadingPublic with POST instead.'
-  );
-  const response = await apiClient.get<DailyReading | null>(
-    API_ENDPOINTS.DAILY_READING.TODAY_PUBLIC
-  );
-  return response.data;
-}
+// Note: getDailyReadingTodayPublic function removed in TASK-005A
+// Public daily reading now uses POST with fingerprint via createDailyReadingPublic()
 
 /**
  * Create today's daily reading for anonymous user (public endpoint - no authentication)
@@ -75,8 +59,8 @@ export async function getDailyReadingTodayPublic(): Promise<DailyReading | null>
  * Each fingerprint gets a unique random card per day.
  * @param fingerprint - Unique identifier for anonymous session
  * @returns Promise<DailyReading> The newly created daily reading
- * @throws Error (409) if fingerprint already has a card for today
- * @throws Error (403) if anonymous limit reached
+ * @throws AxiosError with response.status 409 if fingerprint already has a card for today
+ * @throws AxiosError with response.status 403 if anonymous limit reached (future use)
  */
 export async function createDailyReadingPublic(fingerprint: string): Promise<DailyReading> {
   try {
@@ -85,29 +69,9 @@ export async function createDailyReadingPublic(fingerprint: string): Promise<Dai
     });
     return response.data;
   } catch (error: unknown) {
-    // Type guard for AxiosError
-    if (
-      error &&
-      typeof error === 'object' &&
-      'response' in error &&
-      error.response &&
-      typeof error.response === 'object' &&
-      'status' in error.response
-    ) {
-      const status = (error.response as { status?: number }).status;
-
-      // 409: Already generated card for today
-      if (status === 409) {
-        throw new Error('Ya generaste tu carta del día');
-      }
-
-      // 403: Anonymous limit reached
-      if (status === 403) {
-        throw new Error('Ya viste tu carta del día. Regístrate para más lecturas.');
-      }
-    }
-
-    throw new Error('Error al crear carta del día');
+    // Re-throw AxiosError to preserve response.status for component error handling
+    // Component needs to check status codes (409, 403) to show AnonymousLimitReached
+    throw error;
   }
 }
 

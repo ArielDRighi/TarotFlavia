@@ -12,33 +12,51 @@ const STORAGE_KEY = 'daily-card-fingerprint';
  * This creates a unique identifier per session that is reasonably difficult to bypass
  * while maintaining simplicity.
  *
- * @returns {string} A unique fingerprint string
+ * Uses Web Crypto API for SHA-256 hashing when available, falls back to simple hash.
+ *
+ * @returns {Promise<string>} A unique hexadecimal fingerprint string
  */
-export function generateSessionFingerprint(): string {
+export async function generateSessionFingerprint(): Promise<string> {
   const userAgent = navigator.userAgent;
   const timestamp = Date.now();
 
   // Combine user agent with timestamp for uniqueness
-  // Using base64 encoding for a consistent string format
   const rawFingerprint = `${userAgent}-${timestamp}`;
 
-  // Use btoa for simple encoding (works in all browsers)
-  // In production, could use crypto.subtle.digest for SHA-256 hash
-  const fingerprint = btoa(rawFingerprint)
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=/g, '');
+  try {
+    // Use Web Crypto API for SHA-256 hash
+    const encoder = new TextEncoder();
+    const data = encoder.encode(rawFingerprint);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
 
-  return fingerprint;
+    // Convert ArrayBuffer to hex string
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hexHash = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+
+    return hexHash; // Returns 64-char hex string
+  } catch (error) {
+    // Fallback: simple hash function if crypto.subtle is not available
+    // This generates a hex string of ~40 characters
+    let hash = 0;
+    for (let i = 0; i < rawFingerprint.length; i++) {
+      const char = rawFingerprint.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+
+    // Convert to hex and pad to ensure minimum 32 chars
+    const hexHash = Math.abs(hash).toString(16).padStart(32, '0');
+    return hexHash + timestamp.toString(16).padStart(12, '0'); // ~44 chars total
+  }
 }
 
 /**
  * Get session fingerprint from storage or generate new one
  * Ensures the same fingerprint is used throughout the session
  *
- * @returns {string} The session fingerprint
+ * @returns {Promise<string>} The session fingerprint
  */
-export function getSessionFingerprint(): string {
+export async function getSessionFingerprint(): Promise<string> {
   try {
     // Try to get existing fingerprint from sessionStorage
     const stored = sessionStorage.getItem(STORAGE_KEY);
@@ -48,7 +66,7 @@ export function getSessionFingerprint(): string {
     }
 
     // Generate new fingerprint if not found
-    const newFingerprint = generateSessionFingerprint();
+    const newFingerprint = await generateSessionFingerprint();
     sessionStorage.setItem(STORAGE_KEY, newFingerprint);
 
     return newFingerprint;

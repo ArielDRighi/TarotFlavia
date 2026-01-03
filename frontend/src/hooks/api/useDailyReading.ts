@@ -12,7 +12,6 @@ import { toast } from '@/hooks/utils/useToast';
 import {
   getDailyReading,
   getDailyReadingToday,
-  getDailyReadingTodayPublic,
   createDailyReadingPublic,
   getDailyReadingHistory,
   regenerateDailyReading,
@@ -46,19 +45,8 @@ export function useDailyReadingToday(options?: { enabled?: boolean }) {
   });
 }
 
-/**
- * Hook to fetch today's daily reading if it exists (public - no auth required)
- * Returns null if no daily reading exists for today
- * This endpoint returns only DB info, no AI interpretation
- * @param options - Query options (e.g., enabled flag)
- */
-export function useDailyReadingTodayPublic(options?: { enabled?: boolean }) {
-  return useQuery({
-    queryKey: [...dailyReadingQueryKeys.all, 'today-public'] as const,
-    queryFn: getDailyReadingTodayPublic,
-    enabled: options?.enabled ?? true, // Default to true if not specified
-  });
-}
+// Note: useDailyReadingTodayPublic hook removed in TASK-005A
+// Public daily reading now uses POST with fingerprint via useDailyReadingPublic() mutation
 
 /**
  * Hook to fetch paginated history of daily readings

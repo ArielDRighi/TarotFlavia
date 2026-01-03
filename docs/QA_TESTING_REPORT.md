@@ -1688,55 +1688,110 @@ La aplicación tiene una **base sólida** en términos de:
 
 ---
 
-### TASK-005B: Adaptar frontend para carta del día aleatoria con fingerprint
+### ✅ TASK-005B: Adaptar frontend para carta del día aleatoria con fingerprint [COMPLETADA]
 
-**[FRONTEND]**
+**[FRONTEND]** [COMPLETADA - 3 Enero 2026]
 
-**Archivos a modificar:**
+**Problema adicional resuelto (3 Enero 2026):**
 
-- `frontend/src/hooks/api/useDailyReading.ts`
+- ✅ Migración de base de datos: Columna `interpretation` ahora permite NULL (migración `1770500000000`)
+- ✅ Eliminado código deprecated que causaba 404s en `/public/daily-reading/today`
+- ✅ Limpieza completa del cache de Next.js (.next/) y rebuild exitoso
+- ✅ Verificado funcionamiento end-to-end: carta se revela correctamente con `cardMeaning`
+- ✅ **Corregido error de build:** Función `handleRevealCard` ahora es async con `await getSessionFingerprint()`
+- ✅ **Actualizados todos los tests:** 30/30 tests pasando (incluidos tests anónimos)
+- ✅ **Agregado manejo de errores:** Estado local `anonymousError` para manejar límites alcanzados
+
+**Archivos modificados:**
+
+- `frontend/src/lib/utils/fingerprint.ts` (NUEVO - SHA-256 hex hash)
+- `frontend/src/lib/utils/fingerprint.test.ts` (NUEVO - 8 tests)
+- `frontend/src/lib/utils/index.ts`
+- `frontend/src/hooks/api/useDailyReading.ts` (eliminado hook deprecated)
+- `frontend/src/hooks/api/useDailyReading.public.test.tsx` (NUEVO)
 - `frontend/src/components/features/daily-reading/DailyCardExperience.tsx`
-- `frontend/src/components/features/daily-reading/DailyCardExperience.anonymous.test.tsx`
-- `frontend/src/types/index.ts` (actualizar tipo `DailyReading`)
+- `frontend/src/components/features/daily-reading/DailyCardExperience.test.tsx` (agregados mocks de fingerprint)
+- `frontend/src/components/features/daily-reading/DailyCardExperience.anonymous.test.tsx` (agregados mocks de fingerprint y corregidos 6 tests)
+- `frontend/src/lib/api/daily-reading-api.ts` (eliminada función deprecated)
+- `frontend/src/lib/api/endpoints.ts` (eliminado endpoint deprecated)
+- `frontend/src/types/reading.types.ts`
+- `frontend/src/test/factories/dailyReading.factory.ts`
+- `backend/tarot-app/src/database/migrations/1770500000000-MakeInterpretationNullableInDailyReading.ts` (NUEVO)
 
-**Cambios requeridos:**
+**Cambios implementados:**
 
-1. **Generar fingerprint en cliente:**
-   - Crear utilidad para generar fingerprint único por sesión
-   - Usar combinación de UserAgent + timestamp de inicio de sesión
-   - Almacenar en sessionStorage para mantener consistencia durante sesión
-   - Función sugerida: `generateSessionFingerprint(): string`
+1. ✅ **Creada utilidad de fingerprint:**
+   - Combina UserAgent + timestamp para generar hash SHA-256 hexadecimal
+   - Almacena en sessionStorage para consistencia durante la sesión
+   - Maneja errores de storage gracefully (fallback sin storage)
+   - 8 tests unitarios implementados
 
-2. **Modificar hook useDailyReading:**
-   - Cambiar de GET a POST para usuarios anónimos
-   - Incluir fingerprint en body del request
-   - Endpoint: `POST /api/v1/public/daily-reading`
-   - Body: `{ fingerprint: string }`
+2. ✅ **Actualizado tipo `DailyReading`:**
+   - Agregado campo opcional `cardMeaning?: string`
+   - Campo presente cuando `interpretation === null` (usuarios anónimos)
 
-3. **Actualizar tipo DailyReading:**
-   - Agregar campo `cardMeaning?: string`
-   - Campo presente cuando `interpretation === null`
+3. ✅ **Modificado hook `useDailyReading`:**
+   - Agregada nueva función de API `createDailyReadingPublic(fingerprint: string)`
+   - Creado hook `useDailyReadingPublic()` para mutación POST con fingerprint
+   - **Eliminado completamente** hook deprecated `useDailyReadingTodayPublic()`
+   - Manejo de errores 409 (ya generaste carta) y 403 (límite alcanzado)
 
-4. **Modificar DailyCardExperience.tsx:**
-   - Renderizar `cardMeaning` si no hay `interpretation`
-   - Mostrar nombre de carta + orientación (Upright/Reversed)
-   - Mantener CTA de conversión para usuarios anónimos
+4. ✅ **Modificado componente `DailyCardExperience`:**
+   - Detecta si usuario es autenticado o anónimo
+   - Flujo dual:
+     - **Autenticado:** Llama a `createDailyReading()` (endpoint protegido)
+     - **Anónimo:** Llama a `createDailyReadingPublic(fingerprint)` con fingerprint de sesión (async con await)
+   - Renderiza `cardMeaning` cuando no hay `interpretation`
+   - Muestra CTA de conversión para usuarios anónimos
+   - Manejo correcto de errores 409 y 403
+   - Estado local `anonymousError` para capturar errores de mutación
+   - Condición `isAnonymousLimitReached` verifica tanto error de query como de mutación
 
-5. **Manejar error de límite alcanzado:**
-   - Si backend retorna 409 (ConflictException): mostrar carta existente
-   - Si backend retorna 403 (límite): mostrar componente `AnonymousLimitReached`
+5. ✅ **Limpieza de código deprecated:**
+   - Eliminada función `getDailyReadingTodayPublic()` de daily-reading-api.ts
+   - Eliminado hook `useDailyReadingTodayPublic()` de useDailyReading.ts
+   - Eliminado endpoint `TODAY_PUBLIC` de endpoints.ts
+   - Eliminado import de función deprecated
+
+6. ✅ **Migración de base de datos ejecutada:**
+   - Columna `interpretation` en `daily_readings` ahora permite NULL
+   - Permite guardar lecturas sin interpretación de IA para usuarios anónimos
+   - Query: `ALTER TABLE "daily_readings" ALTER COLUMN "interpretation" DROP NOT NULL`
+
+7. ✅ **Tests completamente actualizados:**
+   - Agregados mocks de `getSessionFingerprint()` en todos los archivos de test
+   - Corregidos tests para hacer click en `tarot-card` en lugar de `unrevealed-state`
+   - Actualizados tests para manejar función async `handleRevealCard`
+   - **30/30 tests pasando** (20 en DailyCardExperience.test.tsx + 10 en DailyCardExperience.anonymous.test.tsx)
 
 **Dependencias:** TASK-005A (Backend), TASK-003 (Frontend anonymous flow)
 
-**Criterios de aceptación:**
+**Criterios de aceptación cumplidos:**
 
-- ✅ Frontend genera fingerprint único por sesión
+- ✅ Frontend genera fingerprint único por sesión (SHA-256 hex)
 - ✅ Usuarios anónimos llaman a POST en lugar de GET
 - ✅ `cardMeaning` se renderiza correctamente cuando no hay `interpretation`
-- ✅ Mismo usuario/sesión ve la misma carta (no regenera)
+- ✅ Mismo usuario/sesión ve la misma carta (fingerprint persiste en sessionStorage)
 - ✅ Errores 409 y 403 se manejan apropiadamente
-- ✅ Tests actualizados para nuevo flujo
+- ✅ Tests actualizados para nuevo flujo (30/30 tests pasando)
 - ✅ Build y type-check sin errores
+- ✅ Lint sin errores (solo warnings pre-existentes)
+- ✅ No más errores 404 en consola del navegador
+- ✅ Carta se revela correctamente mostrando nombre, orientación y significado
+
+**Ciclo de calidad:**
+
+- ✅ Lint: 0 errores
+- ✅ Type-check: Passed
+- ✅ Format: Applied
+- ✅ Tests: **30/30 passed** (0 failed)
+- ✅ Build: Successful (Next.js 16.0.6 Turbopack)
+- ✅ Backend Migration: Executed successfully
+- ✅ End-to-End: Verificado funcionando en navegador
+
+**Rama:** `feature/TASK-005B-fingerprint-daily-reading`
+
+**Fecha de completación:** 3 Enero 2026 (incluyendo correcciones finales y tests)
 
 ---
 

@@ -34,6 +34,12 @@ vi.mock('next/image', () => ({
   },
 }));
 
+// Mock fingerprint utilities
+vi.mock('@/lib/utils/fingerprint', () => ({
+  getSessionFingerprint: vi.fn().mockResolvedValue('mock-fingerprint-12345'),
+  generateSessionFingerprint: vi.fn().mockResolvedValue('mock-fingerprint-12345'),
+}));
+
 // Mock hooks
 const mockUseDailyReadingToday = vi.fn();
 const mockUseDailyReading = vi.fn();
