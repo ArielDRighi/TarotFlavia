@@ -796,4 +796,69 @@ describe('ReadingValidatorService - BUG HUNTING', () => {
       ).rejects.toThrow(BadRequestException);
     });
   });
+
+  describe('validateSpreadAccess', () => {
+    it('should allow PREMIUM user to access PREMIUM spread', () => {
+      expect(() =>
+        service.validateSpreadAccess(UserPlan.PREMIUM, UserPlan.PREMIUM),
+      ).not.toThrow();
+    });
+
+    it('should allow PREMIUM user to access FREE spread', () => {
+      expect(() =>
+        service.validateSpreadAccess(UserPlan.PREMIUM, UserPlan.FREE),
+      ).not.toThrow();
+    });
+
+    it('should allow PREMIUM user to access ANONYMOUS spread', () => {
+      expect(() =>
+        service.validateSpreadAccess(UserPlan.PREMIUM, UserPlan.ANONYMOUS),
+      ).not.toThrow();
+    });
+
+    it('should allow FREE user to access FREE spread', () => {
+      expect(() =>
+        service.validateSpreadAccess(UserPlan.FREE, UserPlan.FREE),
+      ).not.toThrow();
+    });
+
+    it('should allow FREE user to access ANONYMOUS spread', () => {
+      expect(() =>
+        service.validateSpreadAccess(UserPlan.FREE, UserPlan.ANONYMOUS),
+      ).not.toThrow();
+    });
+
+    it('should NOT allow FREE user to access PREMIUM spread', () => {
+      expect(() =>
+        service.validateSpreadAccess(UserPlan.FREE, UserPlan.PREMIUM),
+      ).toThrow(ForbiddenException);
+      expect(() =>
+        service.validateSpreadAccess(UserPlan.FREE, UserPlan.PREMIUM),
+      ).toThrow('Esta tirada requiere plan premium');
+    });
+
+    it('should allow ANONYMOUS user to access ANONYMOUS spread', () => {
+      expect(() =>
+        service.validateSpreadAccess(UserPlan.ANONYMOUS, UserPlan.ANONYMOUS),
+      ).not.toThrow();
+    });
+
+    it('should NOT allow ANONYMOUS user to access FREE spread', () => {
+      expect(() =>
+        service.validateSpreadAccess(UserPlan.ANONYMOUS, UserPlan.FREE),
+      ).toThrow(ForbiddenException);
+      expect(() =>
+        service.validateSpreadAccess(UserPlan.ANONYMOUS, UserPlan.FREE),
+      ).toThrow('Esta tirada requiere plan gratuito');
+    });
+
+    it('should NOT allow ANONYMOUS user to access PREMIUM spread', () => {
+      expect(() =>
+        service.validateSpreadAccess(UserPlan.ANONYMOUS, UserPlan.PREMIUM),
+      ).toThrow(ForbiddenException);
+      expect(() =>
+        service.validateSpreadAccess(UserPlan.ANONYMOUS, UserPlan.PREMIUM),
+      ).toThrow('Esta tirada requiere plan premium');
+    });
+  });
 });

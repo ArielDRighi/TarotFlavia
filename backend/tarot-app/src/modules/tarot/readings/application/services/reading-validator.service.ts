@@ -207,4 +207,37 @@ export class ReadingValidatorService {
       );
     }
   }
+
+  /**
+   * Validate that a user has access to a specific spread based on their plan.
+   * Users can only use spreads that match their plan or lower.
+   * Plan hierarchy: ANONYMOUS < FREE < PREMIUM
+   *
+   * @param userPlan - The user's subscription plan
+   * @param spreadRequiredPlan - The minimum plan required for the spread
+   * @throws ForbiddenException if user doesn't have access to the spread
+   */
+  validateSpreadAccess(userPlan: UserPlan, spreadRequiredPlan: UserPlan): void {
+    // Define plan hierarchy
+    const planHierarchy = {
+      [UserPlan.ANONYMOUS]: 0,
+      [UserPlan.FREE]: 1,
+      [UserPlan.PREMIUM]: 2,
+    };
+
+    const userPlanLevel = planHierarchy[userPlan];
+    const requiredPlanLevel = planHierarchy[spreadRequiredPlan];
+
+    if (userPlanLevel < requiredPlanLevel) {
+      const planNames = {
+        [UserPlan.ANONYMOUS]: 'anónimo',
+        [UserPlan.FREE]: 'gratuito',
+        [UserPlan.PREMIUM]: 'premium',
+      };
+
+      throw new ForbiddenException(
+        `Esta tirada requiere plan ${planNames[spreadRequiredPlan]}. Tu plan actual es ${planNames[userPlan]}`,
+      );
+    }
+  }
 }

@@ -40,6 +40,7 @@ describe('CreateReadingUseCase', () => {
   const mockSpread = {
     id: 1,
     name: 'Test Spread',
+    requiredPlan: UserPlan.FREE,
   } as unknown as TarotSpread;
   const mockCards = [
     { id: 1, name: 'Card 1' },
@@ -104,6 +105,7 @@ describe('CreateReadingUseCase', () => {
           provide: ReadingValidatorService,
           useValue: {
             validateUser: jest.fn(),
+            validateSpreadAccess: jest.fn(),
           },
         },
         {

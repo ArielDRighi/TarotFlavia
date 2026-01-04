@@ -6,6 +6,8 @@
  * La IA usará esta estructura + los significados de las cartas para generar interpretaciones.
  */
 
+import { UserPlan } from '../../../modules/users/entities/user.entity';
+
 export interface SpreadPosition {
   position: number;
   name: string;
@@ -22,6 +24,7 @@ export interface TarotSpreadData {
   is_beginner_friendly: boolean;
   when_to_use: string;
   imageUrl?: string;
+  requiredPlan: UserPlan;
 }
 
 export const TAROT_SPREADS_DATA: TarotSpreadData[] = [
@@ -47,6 +50,7 @@ export const TAROT_SPREADS_DATA: TarotSpreadData[] = [
     when_to_use:
       'Respuestas rápidas, orientación diaria, consejo sobre una decisión simple, carta del día, cuando necesitas claridad inmediata.',
     imageUrl: 'https://example.com/spreads/one-card.jpg',
+    requiredPlan: UserPlan.FREE,
   },
 
   // ========================================
@@ -85,6 +89,7 @@ export const TAROT_SPREADS_DATA: TarotSpreadData[] = [
     when_to_use:
       'Panorama general de una situación, entender la evolución temporal de un asunto, preguntas sobre relaciones, trabajo o proyectos personales.',
     imageUrl: 'https://example.com/spreads/three-cards.jpg',
+    requiredPlan: UserPlan.FREE,
   },
 
   // ========================================
@@ -137,6 +142,7 @@ export const TAROT_SPREADS_DATA: TarotSpreadData[] = [
     when_to_use:
       'Análisis profundo de una situación compleja, cuando necesitas entender obstáculos específicos, decisiones importantes, evaluación de proyectos o relaciones.',
     imageUrl: 'https://example.com/spreads/five-cards.jpg',
+    requiredPlan: UserPlan.PREMIUM,
   },
 
   // ========================================
@@ -224,5 +230,6 @@ export const TAROT_SPREADS_DATA: TarotSpreadData[] = [
     when_to_use:
       'Lecturas profundas y completas, situaciones complejas que requieren análisis exhaustivo, momentos de transición importantes, cuando necesitas máxima claridad sobre todos los aspectos de un asunto.',
     imageUrl: 'https://example.com/spreads/celtic-cross.jpg',
+    requiredPlan: UserPlan.PREMIUM,
   },
 ];
