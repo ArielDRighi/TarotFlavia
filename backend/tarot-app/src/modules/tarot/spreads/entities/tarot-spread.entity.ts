@@ -81,14 +81,14 @@ export class TarotSpread {
   whenToUse: string;
 
   @ApiProperty({
-    example: 'free',
+    example: 'anonymous',
     description: 'Plan mínimo requerido para usar esta tirada',
     enum: UserPlan,
   })
   @Column({
     type: 'enum',
     enum: UserPlan,
-    default: UserPlan.FREE,
+    default: UserPlan.ANONYMOUS,
   })
   requiredPlan: UserPlan;
 

@@ -32,15 +32,18 @@ export class SpreadsController {
 
   @Get()
   @ApiOperation({
-    summary: 'Obtener tiradas para usuarios anónimos (solo tiradas básicas)',
+    summary:
+      'Obtener tiradas públicas (endpoint sin autenticación, retorna tiradas básicas)',
   })
   @ApiResponse({
     status: 200,
-    description: 'Lista de tiradas para anónimos',
+    description:
+      'Lista de tiradas públicas accesibles para todos los usuarios sin autenticación',
     type: [TarotSpread],
   })
   async getAllSpreads() {
-    // Sin autenticación, mostrar solo spreads para anónimos
+    // Endpoint público: retorna solo spreads para usuarios anónimos
+    // Estos spreads son accesibles sin necesidad de registro
     return this.spreadsService.findAllByPlan(UserPlan.ANONYMOUS);
   }
 
@@ -58,8 +61,15 @@ export class SpreadsController {
   async getMyAvailableSpreads(
     @Request() req: { user: { userId?: number; plan?: string } },
   ) {
-    const userPlan = req.user.plan || UserPlan.FREE;
-    return this.spreadsService.findAllByPlan(userPlan as UserPlan);
+    const userPlanString = req.user.plan || UserPlan.FREE;
+
+    // Validate that the plan is a valid UserPlan enum value
+    if (!Object.values(UserPlan).includes(userPlanString as UserPlan)) {
+      // If invalid plan, default to FREE (safe fallback)
+      return this.spreadsService.findAllByPlan(UserPlan.FREE);
+    }
+
+    return this.spreadsService.findAllByPlan(userPlanString as UserPlan);
   }
 
   @Get(':id')

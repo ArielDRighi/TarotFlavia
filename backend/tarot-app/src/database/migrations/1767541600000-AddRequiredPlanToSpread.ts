@@ -7,17 +7,17 @@ export class AddRequiredPlanToSpread1767541600000 implements MigrationInterface 
       CREATE TYPE "tarot_spread_requiredplan_enum" AS ENUM('anonymous', 'free', 'premium')
     `);
 
-    // Agregar la columna requiredPlan con default 'free'
+    // Agregar la columna requiredPlan con default 'anonymous'
     await queryRunner.query(`
       ALTER TABLE "tarot_spread" 
-      ADD COLUMN "requiredPlan" "tarot_spread_requiredplan_enum" NOT NULL DEFAULT 'free'
+      ADD COLUMN "requiredPlan" "tarot_spread_requiredplan_enum" NOT NULL DEFAULT 'anonymous'
     `);
 
     // Actualizar spreads existentes:
-    // Tiradas de 1 y 3 cartas -> FREE
+    // Tiradas de 1 y 3 cartas -> ANONYMOUS (accesibles sin registro)
     await queryRunner.query(`
       UPDATE "tarot_spread" 
-      SET "requiredPlan" = 'free' 
+      SET "requiredPlan" = 'anonymous' 
       WHERE "cardCount" IN (1, 3)
     `);
 

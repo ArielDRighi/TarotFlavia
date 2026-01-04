@@ -6,8 +6,19 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactNode } from 'react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 
-import { useSpreads, useMyAvailableSpreads } from './useReadings';
+import {
+  useSpreads,
+  useMyAvailableSpreads,
+  useCategories,
+  usePredefinedQuestions,
+  useMyReadings,
+  useReadingDetail,
+  useCreateReading,
+  useDeleteReading,
+  useRestoreReading,
+} from './useReadings';
 import * as readingsApi from '@/lib/api/readings-api';
+import type { Reading, ReadingDetail, Category, PredefinedQuestion } from '@/types/reading.types';
 
 // Mock the API functions
 vi.mock('@/lib/api/readings-api');
@@ -265,6 +276,228 @@ describe('useReadings - Spreads Hooks', () => {
       // Verify all spreads are included
       expect(result.current.data).toEqual(mockAllSpreads);
       expect(result.current.data).toHaveLength(4);
+    });
+  });
+
+  // =========================================================================
+  // useCategories
+  // =========================================================================
+  describe('useCategories', () => {
+    it('should fetch categories successfully', async () => {
+      const mockCategories: Category[] = [
+        {
+          id: 1,
+          name: 'Amor',
+          slug: 'amor',
+          description: 'Preguntas sobre amor',
+          color: '#FF6B9D',
+          icon: 'heart',
+          isActive: true,
+        },
+        {
+          id: 2,
+          name: 'Trabajo',
+          slug: 'trabajo',
+          description: 'Preguntas sobre trabajo',
+          color: '#4CAF50',
+          icon: 'briefcase',
+          isActive: true,
+        },
+      ];
+
+      vi.mocked(readingsApi.getCategories).mockResolvedValue(mockCategories);
+
+      const { result } = renderHook(() => useCategories(), { wrapper: Wrapper });
+
+      await waitFor(() => {
+        expect(result.current.isSuccess).toBe(true);
+      });
+
+      expect(result.current.data).toEqual(mockCategories);
+    });
+  });
+
+  // =========================================================================
+  // usePredefinedQuestions
+  // =========================================================================
+  describe('usePredefinedQuestions', () => {
+    it('should fetch predefined questions for a category', async () => {
+      const mockQuestions: PredefinedQuestion[] = [
+        {
+          id: 1,
+          questionText: '¿Encontraré el amor este año?',
+          categoryId: 1,
+          order: 1,
+          isActive: true,
+          usageCount: 10,
+          createdAt: '2025-01-01T00:00:00Z',
+          updatedAt: '2025-01-01T00:00:00Z',
+          deletedAt: null,
+        },
+      ];
+
+      vi.mocked(readingsApi.getPredefinedQuestions).mockResolvedValue(mockQuestions);
+
+      const { result } = renderHook(() => usePredefinedQuestions(1), { wrapper: Wrapper });
+
+      await waitFor(() => {
+        expect(result.current.isSuccess).toBe(true);
+      });
+
+      expect(result.current.data).toEqual(mockQuestions);
+      expect(readingsApi.getPredefinedQuestions).toHaveBeenCalledWith(1);
+    });
+  });
+
+  // =========================================================================
+  // useMyReadings
+  // =========================================================================
+  describe('useMyReadings', () => {
+    it('should fetch paginated readings', async () => {
+      const mockReadingsData = {
+        data: [
+          {
+            id: 1,
+            question: '¿Cómo será mi año?',
+            spreadId: 1,
+            spreadName: 'Tirada de 1 Carta',
+            createdAt: '2025-01-01T00:00:00Z',
+            cardsCount: 1,
+          },
+        ] as Reading[],
+        meta: {
+          page: 1,
+          limit: 10,
+          totalItems: 1,
+          totalPages: 1,
+        },
+      };
+
+      vi.mocked(readingsApi.getMyReadings).mockResolvedValue(mockReadingsData);
+
+      const { result } = renderHook(() => useMyReadings(1, 10), { wrapper: Wrapper });
+
+      await waitFor(() => {
+        expect(result.current.isSuccess).toBe(true);
+      });
+
+      expect(result.current.data).toEqual(mockReadingsData);
+    });
+  });
+
+  // =========================================================================
+  // useReadingDetail
+  // =========================================================================
+  describe('useReadingDetail', () => {
+    it('should fetch reading detail by ID', async () => {
+      const mockReading: ReadingDetail = {
+        id: 1,
+        userId: 1,
+        question: '¿Cómo será mi año?',
+        spreadId: 1,
+        cards: [],
+        interpretation: 'Interpretación de prueba',
+        createdAt: '2025-01-01T00:00:00Z',
+      };
+
+      vi.mocked(readingsApi.getReadingById).mockResolvedValue(mockReading);
+
+      const { result } = renderHook(() => useReadingDetail(1), { wrapper: Wrapper });
+
+      await waitFor(() => {
+        expect(result.current.isSuccess).toBe(true);
+      });
+
+      expect(result.current.data).toEqual(mockReading);
+    });
+  });
+
+  // =========================================================================
+  // useCreateReading
+  // =========================================================================
+  describe('useCreateReading', () => {
+    it('should create reading successfully', async () => {
+      const mockReading: ReadingDetail = {
+        id: 1,
+        userId: 1,
+        question: 'Nueva pregunta',
+        spreadId: 1,
+        cards: [],
+        interpretation: null,
+        createdAt: '2025-01-01T00:00:00Z',
+      };
+
+      vi.mocked(readingsApi.createReading).mockResolvedValue(mockReading);
+
+      const { result } = renderHook(() => useCreateReading(), { wrapper: Wrapper });
+
+      result.current.mutate({
+        spreadId: 1,
+        deckId: 1,
+        cardIds: [1],
+        cardPositions: [{ cardId: 1, position: 'Respuesta', isReversed: false }],
+        customQuestion: 'Nueva pregunta',
+      });
+
+      await waitFor(() => {
+        expect(result.current.isSuccess).toBe(true);
+      });
+
+      expect(readingsApi.createReading).toHaveBeenCalledWith({
+        spreadId: 1,
+        deckId: 1,
+        cardIds: [1],
+        cardPositions: [{ cardId: 1, position: 'Respuesta', isReversed: false }],
+        customQuestion: 'Nueva pregunta',
+      });
+    });
+  });
+
+  // =========================================================================
+  // useDeleteReading
+  // =========================================================================
+  describe('useDeleteReading', () => {
+    it('should soft delete reading successfully', async () => {
+      vi.mocked(readingsApi.deleteReading).mockResolvedValue(undefined);
+
+      const { result } = renderHook(() => useDeleteReading(), { wrapper: Wrapper });
+
+      result.current.mutate(1);
+
+      await waitFor(() => {
+        expect(result.current.isSuccess).toBe(true);
+      });
+
+      expect(readingsApi.deleteReading).toHaveBeenCalledWith(1);
+    });
+  });
+
+  // =========================================================================
+  // useRestoreReading
+  // =========================================================================
+  describe('useRestoreReading', () => {
+    it('should restore reading successfully', async () => {
+      const restoredReading: ReadingDetail = {
+        id: 1,
+        userId: 1,
+        question: 'Lectura restaurada',
+        spreadId: 1,
+        cards: [],
+        interpretation: null,
+        createdAt: '2025-01-01T00:00:00Z',
+      };
+
+      vi.mocked(readingsApi.restoreReading).mockResolvedValue(restoredReading);
+
+      const { result } = renderHook(() => useRestoreReading(), { wrapper: Wrapper });
+
+      result.current.mutate(1);
+
+      await waitFor(() => {
+        expect(result.current.isSuccess).toBe(true);
+      });
+
+      expect(readingsApi.restoreReading).toHaveBeenCalledWith(1);
     });
   });
 });

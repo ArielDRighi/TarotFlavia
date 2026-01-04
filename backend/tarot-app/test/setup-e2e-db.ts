@@ -27,9 +27,14 @@ export default async function globalSetup() {
     await dbHelper.resetDatabase();
     console.log('[Global Setup E2E] Base de datos E2E reseteada ✓');
 
+    // Ejecutar migraciones
+    console.log('[Global Setup E2E] Ejecutando migraciones...');
+    await dbHelper.initialize(); // Re-conectar después del reset
+    await dbHelper.runMigrations();
+    console.log('[Global Setup E2E] Migraciones ejecutadas ✓');
+
     // Ejecutar seeders base para todos los tests
     console.log('[Global Setup E2E] Ejecutando seeders base...');
-    await dbHelper.initialize(); // Re-conectar después del reset
     const dataSource = dbHelper.getDataSource();
 
     // Import seeders

@@ -50,7 +50,7 @@ export const TAROT_SPREADS_DATA: TarotSpreadData[] = [
     when_to_use:
       'Respuestas rápidas, orientación diaria, consejo sobre una decisión simple, carta del día, cuando necesitas claridad inmediata.',
     imageUrl: 'https://example.com/spreads/one-card.jpg',
-    requiredPlan: UserPlan.FREE,
+    requiredPlan: UserPlan.ANONYMOUS,
   },
 
   // ========================================
@@ -89,7 +89,7 @@ export const TAROT_SPREADS_DATA: TarotSpreadData[] = [
     when_to_use:
       'Panorama general de una situación, entender la evolución temporal de un asunto, preguntas sobre relaciones, trabajo o proyectos personales.',
     imageUrl: 'https://example.com/spreads/three-cards.jpg',
-    requiredPlan: UserPlan.FREE,
+    requiredPlan: UserPlan.ANONYMOUS,
   },
 
   // ========================================
