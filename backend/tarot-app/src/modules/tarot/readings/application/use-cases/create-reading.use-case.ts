@@ -68,6 +68,9 @@ export class CreateReadingUseCase {
       );
     }
 
+    // Validar que el usuario tiene acceso al spread según su plan
+    this.validator.validateSpreadAccess(user.plan, spread.requiredPlan);
+
     // Determinar tipo de pregunta
     const questionType = createReadingDto.predefinedQuestionId
       ? ('predefined' as const)

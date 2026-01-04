@@ -14,6 +14,7 @@ import {
   getCategories,
   getPredefinedQuestions,
   getSpreads,
+  getMyAvailableSpreads,
   getMyReadings,
   getReadingById,
   createReading,
@@ -40,6 +41,7 @@ export const readingQueryKeys = {
   categories: ['categories'] as const,
   questions: (categoryId?: number) => ['questions', categoryId] as const,
   spreads: ['spreads'] as const,
+  myAvailableSpreads: ['spreads', 'my-available'] as const,
 } as const;
 
 // ============================================================================
@@ -78,6 +80,18 @@ export function useSpreads() {
     queryKey: readingQueryKeys.spreads,
     queryFn: getSpreads,
     staleTime: Infinity,
+  });
+}
+
+/**
+ * Hook to fetch spreads available for the authenticated user based on their plan
+ * For authenticated users, this filters spreads based on their subscription tier
+ */
+export function useMyAvailableSpreads() {
+  return useQuery({
+    queryKey: readingQueryKeys.myAvailableSpreads,
+    queryFn: getMyAvailableSpreads,
+    staleTime: 5 * 60 * 1000, // 5 minutes - can change if user upgrades
   });
 }
 

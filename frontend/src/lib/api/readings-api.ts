@@ -66,7 +66,7 @@ export async function getPredefinedQuestions(categoryId?: number): Promise<Prede
 // ============================================================================
 
 /**
- * Fetch all available spreads
+ * Fetch all available spreads (anonymous access - only basic spreads)
  * @returns Promise<Spread[]> Array of spreads
  * @throws Error with clear message on failure
  */
@@ -76,6 +76,20 @@ export async function getSpreads(): Promise<Spread[]> {
     return response.data;
   } catch {
     throw new Error('Error al obtener tiradas');
+  }
+}
+
+/**
+ * Fetch spreads available for the authenticated user based on their plan
+ * @returns Promise<Spread[]> Array of spreads available to the user
+ * @throws Error with clear message on failure
+ */
+export async function getMyAvailableSpreads(): Promise<Spread[]> {
+  try {
+    const response = await apiClient.get<Spread[]>(API_ENDPOINTS.SPREADS.MY_AVAILABLE);
+    return response.data;
+  } catch {
+    throw new Error('Error al obtener tiradas disponibles');
   }
 }
 

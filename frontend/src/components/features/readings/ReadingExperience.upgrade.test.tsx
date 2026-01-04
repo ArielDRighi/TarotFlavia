@@ -88,6 +88,7 @@ const mockSpreads: Spread[] = [
       { position: 3, name: 'Futuro', description: 'Lo que vendrá' },
     ],
     difficulty: 'beginner',
+    requiredPlan: 'free',
   },
 ];
 

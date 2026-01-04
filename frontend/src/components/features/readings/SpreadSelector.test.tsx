@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 
 import { SpreadSelector } from './SpreadSelector';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
-import { useSpreads } from '@/hooks/api/useReadings';
+import { useMyAvailableSpreads } from '@/hooks/api/useReadings';
 import { useAuthStore } from '@/stores/authStore';
 
 // Mock modules
@@ -18,7 +18,7 @@ vi.mock('@/hooks/useRequireAuth', () => ({
 }));
 
 vi.mock('@/hooks/api/useReadings', () => ({
-  useSpreads: vi.fn(),
+  useMyAvailableSpreads: vi.fn(),
 }));
 
 vi.mock('@/stores/authStore', () => ({
@@ -117,7 +117,7 @@ describe('SpreadSelector', () => {
 
   describe('Authentication Protection', () => {
     it('should call useRequireAuth to protect the route', () => {
-      (useSpreads as Mock).mockReturnValue({
+      (useMyAvailableSpreads as Mock).mockReturnValue({
         data: mockSpreads,
         isLoading: false,
         error: null,
@@ -130,7 +130,7 @@ describe('SpreadSelector', () => {
 
     it('should show loading state when auth is loading', () => {
       (useRequireAuth as Mock).mockReturnValue({ isLoading: true });
-      (useSpreads as Mock).mockReturnValue({
+      (useMyAvailableSpreads as Mock).mockReturnValue({
         data: undefined,
         isLoading: false,
         error: null,
@@ -144,7 +144,7 @@ describe('SpreadSelector', () => {
 
   describe('Page Layout', () => {
     beforeEach(() => {
-      (useSpreads as Mock).mockReturnValue({
+      (useMyAvailableSpreads as Mock).mockReturnValue({
         data: mockSpreads,
         isLoading: false,
         error: null,
@@ -170,7 +170,7 @@ describe('SpreadSelector', () => {
 
   describe('Loading State', () => {
     it('should show loading skeletons when spreads are loading', () => {
-      (useSpreads as Mock).mockReturnValue({
+      (useMyAvailableSpreads as Mock).mockReturnValue({
         data: undefined,
         isLoading: true,
         error: null,
@@ -184,7 +184,7 @@ describe('SpreadSelector', () => {
 
   describe('Error State', () => {
     it('should show error message when spreads fail to load', () => {
-      (useSpreads as Mock).mockReturnValue({
+      (useMyAvailableSpreads as Mock).mockReturnValue({
         data: undefined,
         isLoading: false,
         error: new Error('Failed to load'),
@@ -198,7 +198,7 @@ describe('SpreadSelector', () => {
 
     it('should show retry button on error', () => {
       const mockRefetch = vi.fn();
-      (useSpreads as Mock).mockReturnValue({
+      (useMyAvailableSpreads as Mock).mockReturnValue({
         data: undefined,
         isLoading: false,
         error: new Error('Failed to load'),
@@ -215,7 +215,7 @@ describe('SpreadSelector', () => {
 
   describe('Spread Cards Display', () => {
     beforeEach(() => {
-      (useSpreads as Mock).mockReturnValue({
+      (useMyAvailableSpreads as Mock).mockReturnValue({
         data: mockSpreads,
         isLoading: false,
         error: null,
@@ -267,7 +267,7 @@ describe('SpreadSelector', () => {
 
   describe('Spread Selection', () => {
     beforeEach(() => {
-      (useSpreads as Mock).mockReturnValue({
+      (useMyAvailableSpreads as Mock).mockReturnValue({
         data: mockSpreads,
         isLoading: false,
         error: null,
@@ -314,7 +314,7 @@ describe('SpreadSelector', () => {
 
   describe('Daily Limit Validation', () => {
     beforeEach(() => {
-      (useSpreads as Mock).mockReturnValue({
+      (useMyAvailableSpreads as Mock).mockReturnValue({
         data: mockSpreads,
         isLoading: false,
         error: null,
@@ -384,7 +384,7 @@ describe('SpreadSelector', () => {
 
   describe('Missing Parameters', () => {
     beforeEach(() => {
-      (useSpreads as Mock).mockReturnValue({
+      (useMyAvailableSpreads as Mock).mockReturnValue({
         data: mockSpreads,
         isLoading: false,
         error: null,
@@ -424,7 +424,7 @@ describe('SpreadSelector', () => {
 
   describe('Accessibility', () => {
     beforeEach(() => {
-      (useSpreads as Mock).mockReturnValue({
+      (useMyAvailableSpreads as Mock).mockReturnValue({
         data: mockSpreads,
         isLoading: false,
         error: null,
@@ -457,7 +457,7 @@ describe('SpreadSelector', () => {
 
   describe('Responsive Grid', () => {
     beforeEach(() => {
-      (useSpreads as Mock).mockReturnValue({
+      (useMyAvailableSpreads as Mock).mockReturnValue({
         data: mockSpreads,
         isLoading: false,
         error: null,

@@ -8,6 +8,7 @@ import { Repository } from 'typeorm';
 import { TarotSpread } from './entities/tarot-spread.entity';
 import { CreateSpreadDto } from './dto/create-spread.dto';
 import { UpdateSpreadDto } from './dto/update-spread.dto';
+import { UserPlan } from '../../users/entities/user.entity';
 
 @Injectable()
 export class SpreadsService {
@@ -18,6 +19,32 @@ export class SpreadsService {
 
   async findAll(): Promise<TarotSpread[]> {
     return this.spreadRepository.find();
+  }
+
+  async findAllByPlan(userPlan?: UserPlan): Promise<TarotSpread[]> {
+    if (!userPlan) {
+      return this.findAll();
+    }
+
+    const allSpreads = await this.findAll();
+    const allowedPlans = this.getAllowedPlansForUser(userPlan);
+
+    return allSpreads.filter((spread) =>
+      allowedPlans.includes(spread.requiredPlan),
+    );
+  }
+
+  private getAllowedPlansForUser(userPlan: UserPlan): UserPlan[] {
+    switch (userPlan) {
+      case UserPlan.PREMIUM:
+        return [UserPlan.ANONYMOUS, UserPlan.FREE, UserPlan.PREMIUM];
+      case UserPlan.FREE:
+        return [UserPlan.ANONYMOUS, UserPlan.FREE];
+      case UserPlan.ANONYMOUS:
+        return [UserPlan.ANONYMOUS];
+      default:
+        return [UserPlan.ANONYMOUS];
+    }
   }
 
   async findById(id: number): Promise<TarotSpread> {

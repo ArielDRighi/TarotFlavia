@@ -23,6 +23,7 @@ import { SpreadsService } from './spreads.service';
 import { CreateSpreadDto } from './dto/create-spread.dto';
 import { UpdateSpreadDto } from './dto/update-spread.dto';
 import { TarotSpread } from './entities/tarot-spread.entity';
+import { UserPlan } from '../../users/entities/user.entity';
 
 @ApiTags('Tiradas')
 @Controller('spreads')
@@ -30,14 +31,45 @@ export class SpreadsController {
   constructor(private readonly spreadsService: SpreadsService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Obtener todas las tiradas disponibles' })
+  @ApiOperation({
+    summary:
+      'Obtener tiradas públicas (endpoint sin autenticación, retorna tiradas básicas)',
+  })
   @ApiResponse({
     status: 200,
-    description: 'Lista de tiradas',
+    description:
+      'Lista de tiradas públicas accesibles para todos los usuarios sin autenticación',
     type: [TarotSpread],
   })
   async getAllSpreads() {
-    return this.spreadsService.findAll();
+    // Endpoint público: retorna solo spreads para usuarios anónimos
+    // Estos spreads son accesibles sin necesidad de registro
+    return this.spreadsService.findAllByPlan(UserPlan.ANONYMOUS);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('my-available')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: 'Obtener tiradas disponibles según plan del usuario autenticado',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de tiradas disponibles para el usuario',
+    type: [TarotSpread],
+  })
+  async getMyAvailableSpreads(
+    @Request() req: { user: { userId?: number; plan?: string } },
+  ) {
+    const userPlanString = req.user.plan || UserPlan.FREE;
+
+    // Validate that the plan is a valid UserPlan enum value
+    if (!Object.values(UserPlan).includes(userPlanString as UserPlan)) {
+      // If invalid plan, default to FREE (safe fallback)
+      return this.spreadsService.findAllByPlan(UserPlan.FREE);
+    }
+
+    return this.spreadsService.findAllByPlan(userPlanString as UserPlan);
   }
 
   @Get(':id')

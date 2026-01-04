@@ -28,6 +28,7 @@ export const API_ENDPOINTS = {
   SPREADS: {
     BASE: '/spreads',
     BY_ID: (id: number) => `/spreads/${id}`,
+    MY_AVAILABLE: '/spreads/my-available',
   },
 
   // Readings

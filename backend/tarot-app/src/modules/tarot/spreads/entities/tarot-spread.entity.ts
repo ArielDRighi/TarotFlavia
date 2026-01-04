@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
+import { UserPlan } from '../../../users/entities/user.entity';
 
 @Entity()
 export class TarotSpread {
@@ -78,6 +79,18 @@ export class TarotSpread {
   })
   @Column('text')
   whenToUse: string;
+
+  @ApiProperty({
+    example: 'anonymous',
+    description: 'Plan mínimo requerido para usar esta tirada',
+    enum: UserPlan,
+  })
+  @Column({
+    type: 'enum',
+    enum: UserPlan,
+    default: UserPlan.ANONYMOUS,
+  })
+  requiredPlan: UserPlan;
 
   @CreateDateColumn()
   createdAt: Date;

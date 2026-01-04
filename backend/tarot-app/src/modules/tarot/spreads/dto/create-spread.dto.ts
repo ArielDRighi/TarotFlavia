@@ -8,6 +8,7 @@ import {
   IsUrl,
   IsOptional,
   MaxLength,
+  IsEnum,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
@@ -17,6 +18,7 @@ import {
   SanitizeHtml,
   Trim,
 } from '../../../../common/decorators/sanitize.decorator';
+import { UserPlan } from '../../../users/entities/user.entity';
 
 class SpreadPositionDto {
   @ApiProperty({
@@ -102,4 +104,16 @@ export class CreateSpreadDto {
   @IsOptional()
   @Trim()
   imageUrl?: string;
+
+  @ApiProperty({
+    example: UserPlan.FREE,
+    description: 'Plan mínimo requerido para usar esta tirada',
+    enum: UserPlan,
+    required: false,
+  })
+  @IsEnum(UserPlan, {
+    message: 'El plan requerido debe ser uno de: anonymous, free, premium',
+  })
+  @IsOptional()
+  requiredPlan?: UserPlan;
 }

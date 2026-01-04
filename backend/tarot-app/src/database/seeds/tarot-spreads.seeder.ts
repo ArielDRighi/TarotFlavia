@@ -33,6 +33,7 @@ export async function seedTarotSpreads(dataSource: DataSource): Promise<void> {
       difficulty: spreadData.difficulty,
       isBeginnerFriendly: spreadData.is_beginner_friendly,
       whenToUse: spreadData.when_to_use,
+      requiredPlan: spreadData.requiredPlan,
     });
   });
 

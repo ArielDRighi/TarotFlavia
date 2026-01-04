@@ -10,6 +10,7 @@ import {
   getCategories,
   getPredefinedQuestions,
   getSpreads,
+  getMyAvailableSpreads,
   createReading,
   getMyReadings,
   getReadingById,
@@ -163,6 +164,7 @@ describe('readings-api', () => {
           { position: 3, name: 'Futuro', description: 'Lo que viene' },
         ],
         difficulty: 'beginner',
+        requiredPlan: 'free',
         imageUrl: '/images/spreads/tres-cartas.jpg',
       },
     ];
@@ -180,6 +182,43 @@ describe('readings-api', () => {
       vi.mocked(apiClient.get).mockRejectedValueOnce(new Error('Network error'));
 
       await expect(getSpreads()).rejects.toThrow('Error al obtener tiradas');
+    });
+  });
+
+  // ==========================================================================
+  // getMyAvailableSpreads
+  // ==========================================================================
+  describe('getMyAvailableSpreads', () => {
+    const mockFilteredSpreads: Spread[] = [
+      {
+        id: 1,
+        name: 'Tres Cartas',
+        description: 'Pasado, Presente, Futuro',
+        cardCount: 3,
+        positions: [
+          { position: 1, name: 'Pasado', description: 'Lo que dejaste atrás' },
+          { position: 2, name: 'Presente', description: 'Tu situación actual' },
+          { position: 3, name: 'Futuro', description: 'Lo que viene' },
+        ],
+        difficulty: 'beginner',
+        imageUrl: '/images/spreads/tres-cartas.jpg',
+        requiredPlan: 'free',
+      },
+    ];
+
+    it('should fetch user-available spreads from API', async () => {
+      vi.mocked(apiClient.get).mockResolvedValueOnce({ data: mockFilteredSpreads });
+
+      const result = await getMyAvailableSpreads();
+
+      expect(apiClient.get).toHaveBeenCalledWith(API_ENDPOINTS.SPREADS.MY_AVAILABLE);
+      expect(result).toEqual(mockFilteredSpreads);
+    });
+
+    it('should throw error with clear message on failure', async () => {
+      vi.mocked(apiClient.get).mockRejectedValueOnce(new Error('Unauthorized'));
+
+      await expect(getMyAvailableSpreads()).rejects.toThrow('Error al obtener tiradas disponibles');
     });
   });
 

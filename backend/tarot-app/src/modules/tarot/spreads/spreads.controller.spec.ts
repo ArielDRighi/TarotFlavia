@@ -5,6 +5,7 @@ import { SpreadsService } from './spreads.service';
 import { CreateSpreadDto } from './dto/create-spread.dto';
 import { UpdateSpreadDto } from './dto/update-spread.dto';
 import { TarotSpread } from './entities/tarot-spread.entity';
+import { UserPlan } from '../../users/entities/user.entity';
 
 describe('SpreadsController', () => {
   let controller: SpreadsController;
@@ -21,6 +22,7 @@ describe('SpreadsController', () => {
     ],
     imageUrl: 'https://example.com/three-card.jpg',
     difficulty: 'beginner',
+    requiredPlan: UserPlan.FREE,
     isBeginnerFriendly: true,
     whenToUse:
       'Ideal para consultas rápidas sobre situaciones con pasado, presente y futuro',
@@ -30,6 +32,7 @@ describe('SpreadsController', () => {
 
   const mockSpreadsService = {
     findAll: jest.fn(),
+    findAllByPlan: jest.fn(),
     findById: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
@@ -61,12 +64,81 @@ describe('SpreadsController', () => {
   describe('getAllSpreads', () => {
     it('should return an array of spreads', async () => {
       const spreads = [mockSpread];
-      mockSpreadsService.findAll.mockResolvedValue(spreads);
+      mockSpreadsService.findAllByPlan.mockResolvedValue(spreads);
 
       const result = await controller.getAllSpreads();
 
       expect(result).toEqual(spreads);
-      expect(mockSpreadsService.findAll).toHaveBeenCalled();
+      expect(mockSpreadsService.findAllByPlan).toHaveBeenCalledWith(
+        UserPlan.ANONYMOUS,
+      );
+    });
+  });
+
+  describe('getMyAvailableSpreads', () => {
+    it('should return spreads for PREMIUM users', async () => {
+      const premiumSpreads = [mockSpread, { ...mockSpread, id: 2 }];
+      mockSpreadsService.findAllByPlan.mockResolvedValue(premiumSpreads);
+
+      const req = { user: { userId: 1, plan: UserPlan.PREMIUM } };
+      const result = await controller.getMyAvailableSpreads(req);
+
+      expect(result).toEqual(premiumSpreads);
+      expect(mockSpreadsService.findAllByPlan).toHaveBeenCalledWith(
+        UserPlan.PREMIUM,
+      );
+    });
+
+    it('should return spreads for FREE users', async () => {
+      const freeSpreads = [mockSpread];
+      mockSpreadsService.findAllByPlan.mockResolvedValue(freeSpreads);
+
+      const req = { user: { userId: 1, plan: UserPlan.FREE } };
+      const result = await controller.getMyAvailableSpreads(req);
+
+      expect(result).toEqual(freeSpreads);
+      expect(mockSpreadsService.findAllByPlan).toHaveBeenCalledWith(
+        UserPlan.FREE,
+      );
+    });
+
+    it('should return spreads for ANONYMOUS users', async () => {
+      const anonymousSpreads = [mockSpread];
+      mockSpreadsService.findAllByPlan.mockResolvedValue(anonymousSpreads);
+
+      const req = { user: { userId: 1, plan: UserPlan.ANONYMOUS } };
+      const result = await controller.getMyAvailableSpreads(req);
+
+      expect(result).toEqual(anonymousSpreads);
+      expect(mockSpreadsService.findAllByPlan).toHaveBeenCalledWith(
+        UserPlan.ANONYMOUS,
+      );
+    });
+
+    it('should default to FREE when plan is missing', async () => {
+      const freeSpreads = [mockSpread];
+      mockSpreadsService.findAllByPlan.mockResolvedValue(freeSpreads);
+
+      const req = { user: { userId: 1 } };
+      const result = await controller.getMyAvailableSpreads(req);
+
+      expect(result).toEqual(freeSpreads);
+      expect(mockSpreadsService.findAllByPlan).toHaveBeenCalledWith(
+        UserPlan.FREE,
+      );
+    });
+
+    it('should default to FREE when plan is invalid', async () => {
+      const freeSpreads = [mockSpread];
+      mockSpreadsService.findAllByPlan.mockResolvedValue(freeSpreads);
+
+      const req = { user: { userId: 1, plan: 'invalid-plan' } };
+      const result = await controller.getMyAvailableSpreads(req);
+
+      expect(result).toEqual(freeSpreads);
+      expect(mockSpreadsService.findAllByPlan).toHaveBeenCalledWith(
+        UserPlan.FREE,
+      );
     });
   });
 

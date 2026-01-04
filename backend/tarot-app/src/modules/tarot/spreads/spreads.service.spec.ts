@@ -5,6 +5,7 @@ import { SpreadsService } from './spreads.service';
 import { TarotSpread } from './entities/tarot-spread.entity';
 import { CreateSpreadDto } from './dto/create-spread.dto';
 import { UpdateSpreadDto } from './dto/update-spread.dto';
+import { UserPlan } from '../../users/entities/user.entity';
 
 describe('SpreadsService', () => {
   let service: SpreadsService;
@@ -24,6 +25,7 @@ describe('SpreadsService', () => {
     isBeginnerFriendly: true,
     whenToUse:
       'Ideal para consultas rápidas sobre situaciones con pasado, presente y futuro',
+    requiredPlan: UserPlan.FREE,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -172,6 +174,105 @@ describe('SpreadsService', () => {
       await expect(service.remove(999)).rejects.toThrow(
         'Tirada con ID 999 no encontrada',
       );
+    });
+  });
+
+  describe('findAllByPlan', () => {
+    it('should return all spreads for PREMIUM plan', async () => {
+      const freeSpreads: TarotSpread[] = [
+        { ...mockSpread, id: 1, cardCount: 1, requiredPlan: UserPlan.FREE },
+        { ...mockSpread, id: 2, cardCount: 3, requiredPlan: UserPlan.FREE },
+      ];
+      const premiumSpreads: TarotSpread[] = [
+        { ...mockSpread, id: 3, cardCount: 5, requiredPlan: UserPlan.PREMIUM },
+        { ...mockSpread, id: 4, cardCount: 10, requiredPlan: UserPlan.PREMIUM },
+      ];
+      const allSpreads = [...freeSpreads, ...premiumSpreads];
+
+      mockSpreadRepository.find.mockResolvedValue(allSpreads);
+
+      const result = await service.findAllByPlan(UserPlan.PREMIUM);
+
+      expect(result).toEqual(allSpreads);
+      expect(result).toHaveLength(4);
+    });
+
+    it('should return only FREE and ANONYMOUS spreads for FREE plan', async () => {
+      const freeSpreads: TarotSpread[] = [
+        { ...mockSpread, id: 1, cardCount: 1, requiredPlan: UserPlan.FREE },
+        { ...mockSpread, id: 2, cardCount: 3, requiredPlan: UserPlan.FREE },
+      ];
+      const anonymousSpreads: TarotSpread[] = [
+        {
+          ...mockSpread,
+          id: 5,
+          cardCount: 1,
+          requiredPlan: UserPlan.ANONYMOUS,
+        },
+      ];
+      const premiumSpreads: TarotSpread[] = [
+        { ...mockSpread, id: 3, cardCount: 5, requiredPlan: UserPlan.PREMIUM },
+        { ...mockSpread, id: 4, cardCount: 10, requiredPlan: UserPlan.PREMIUM },
+      ];
+      const allSpreads = [
+        ...freeSpreads,
+        ...anonymousSpreads,
+        ...premiumSpreads,
+      ];
+
+      mockSpreadRepository.find.mockResolvedValue(allSpreads);
+
+      const result = await service.findAllByPlan(UserPlan.FREE);
+
+      expect(result).toHaveLength(3);
+      expect(result.every((s) => s.requiredPlan !== UserPlan.PREMIUM)).toBe(
+        true,
+      );
+    });
+
+    it('should return only ANONYMOUS spreads for ANONYMOUS plan', async () => {
+      const anonymousSpreads: TarotSpread[] = [
+        {
+          ...mockSpread,
+          id: 5,
+          cardCount: 1,
+          requiredPlan: UserPlan.ANONYMOUS,
+        },
+      ];
+      const freeSpreads: TarotSpread[] = [
+        { ...mockSpread, id: 1, cardCount: 1, requiredPlan: UserPlan.FREE },
+        { ...mockSpread, id: 2, cardCount: 3, requiredPlan: UserPlan.FREE },
+      ];
+      const premiumSpreads: TarotSpread[] = [
+        { ...mockSpread, id: 3, cardCount: 5, requiredPlan: UserPlan.PREMIUM },
+      ];
+      const allSpreads = [
+        ...anonymousSpreads,
+        ...freeSpreads,
+        ...premiumSpreads,
+      ];
+
+      mockSpreadRepository.find.mockResolvedValue(allSpreads);
+
+      const result = await service.findAllByPlan(UserPlan.ANONYMOUS);
+
+      expect(result).toHaveLength(1);
+      expect(result.every((s) => s.requiredPlan === UserPlan.ANONYMOUS)).toBe(
+        true,
+      );
+    });
+
+    it('should return all spreads when no plan is provided (backwards compatibility)', async () => {
+      const allSpreads: TarotSpread[] = [
+        { ...mockSpread, id: 1, requiredPlan: UserPlan.FREE },
+        { ...mockSpread, id: 2, requiredPlan: UserPlan.PREMIUM },
+      ];
+
+      mockSpreadRepository.find.mockResolvedValue(allSpreads);
+
+      const result = await service.findAllByPlan();
+
+      expect(result).toEqual(allSpreads);
     });
   });
 });

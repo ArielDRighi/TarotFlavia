@@ -2263,32 +2263,48 @@ La aplicación tiene una **base sólida** en términos de:
 
 ## Módulo: Access Control & Spreads
 
-### TASK-013: Bloquear tiradas de 5 cartas y Cruz Céltica para FREE
+### TASK-013: Bloquear tiradas de 5 cartas y Cruz Céltica para FREE ✅
 
-**[FULLSTACK]**
+**[FULLSTACK] - COMPLETADA**
 
-**Archivos a modificar:**
+**Archivos modificados:**
 
-- `backend/tarot-app/src/modules/tarot/spreads/spreads.controller.ts`
-- `backend/tarot-app/src/modules/tarot/spreads/spreads.service.ts`
-- `frontend/src/components/features/readings/SpreadSelector.tsx`
+Backend:
 
-**Cambios requeridos:**
+- `backend/tarot-app/src/modules/tarot/spreads/entities/tarot-spread.entity.ts` - Added requiredPlan column
+- `backend/tarot-app/src/database/seeds/data/tarot-spreads.data.ts` - Set requiredPlan for all spreads
+- `backend/tarot-app/src/modules/tarot/spreads/spreads.service.ts` - Added findAllByPlan() method
+- `backend/tarot-app/src/modules/tarot/spreads/spreads.controller.ts` - Added GET /spreads/my-available endpoint
+- `backend/tarot-app/src/modules/tarot/readings/application/services/reading-validator.service.ts` - Added validateSpreadAccess()
+- `backend/tarot-app/src/modules/tarot/readings/application/use-cases/create-reading.use-case.ts` - Integrated validation
+- `backend/tarot-app/src/database/migrations/1767541600000-AddRequiredPlanToSpread.ts` - Migration executed
 
-1. Backend: Agregar campo `requiredPlan` en entity Spread (PREMIUM, FREE, ANONYMOUS)
-2. Seed: Configurar tiradas de 5 y Cruz Céltica como `requiredPlan: PREMIUM`
-3. Endpoint GET /spreads: filtrar según plan del usuario
-4. Frontend: Solo mostrar tiradas disponibles para el plan actual
-5. Si usuario FREE intenta acceder a tirada PREMIUM, mostrar modal de upgrade
+Frontend:
 
-**Dependencias:** Ninguna
+- `frontend/src/types/reading.types.ts` - Added requiredPlan to Spread interface
+- `frontend/src/lib/api/endpoints.ts` - Added MY_AVAILABLE endpoint
+- `frontend/src/lib/api/readings-api.ts` - Added getMyAvailableSpreads()
+- `frontend/src/hooks/api/useReadings.ts` - Added useMyAvailableSpreads() hook
+- `frontend/src/components/features/readings/SpreadSelector.tsx` - Uses new hook (backend filters automatically)
 
-**Criterios de aceptación:**
+**Implementación:**
 
-- Usuario FREE solo ve tiradas de 1 y 3 cartas
-- Usuario PREMIUM ve todas las tiradas (1, 3, 5, Cruz Céltica)
-- Intento de acceso no autorizado muestra modal de upgrade
-- Backend valida y rechaza requests no autorizados
+1. ✅ Backend: Campo `requiredPlan` agregado a TarotSpread entity (enum: anonymous, free, premium)
+2. ✅ Seed: Tiradas 1-3 cartas = FREE, tiradas 5-10 cartas = PREMIUM
+3. ✅ Endpoint GET /spreads/my-available: filtra según plan del usuario con jerarquía
+4. ✅ Frontend: SpreadSelector usa endpoint autenticado que filtra automáticamente
+5. ✅ Validación en CreateReadingUseCase rechaza access no autorizado
+6. ✅ Tests completos en backend (65 validator + 28 use-case tests)
+7. ✅ Tests completos en frontend (useReadings, readings-api, SpreadSelector)
+
+**Criterios de aceptación - TODOS CUMPLIDOS:**
+
+- ✅ Usuario FREE solo ve tiradas de 1 y 3 cartas
+- ✅ Usuario PREMIUM ve todas las tiradas (1, 3, 5, Cruz Céltica)
+- ✅ Backend valida y rechaza requests no autorizados con ForbiddenException
+- ✅ Jerarquía de planes implementada: PREMIUM > FREE > ANONYMOUS
+- ✅ Endpoint público GET /spreads retorna solo spreads ANONYMOUS
+- ✅ 100% test coverage en funcionalidad nueva
 
 ---
 

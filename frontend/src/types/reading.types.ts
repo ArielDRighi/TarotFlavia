@@ -70,6 +70,7 @@ export interface Spread {
   imageUrl?: string;
   isBeginnerFriendly?: boolean;
   whenToUse?: string;
+  requiredPlan: 'anonymous' | 'free' | 'premium';
   createdAt?: string;
   updatedAt?: string;
 }
