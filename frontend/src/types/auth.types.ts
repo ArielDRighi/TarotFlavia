@@ -55,12 +55,22 @@ export interface LoginResponse {
 }
 
 /**
+ * Register response from API
+ */
+export interface RegisterResponse {
+  access_token: string;
+  refresh_token: string;
+  user: AuthUser;
+  isNewUser: boolean;
+}
+
+/**
  * Authentication actions for the store
  */
 export interface AuthActions {
   setUser: (user: AuthUser | null) => void;
   login: (email: string, password: string) => Promise<void>;
-  register: (credentials: RegisterCredentials) => Promise<void>;
+  register: (credentials: RegisterCredentials) => Promise<RegisterResponse>;
   logout: () => void;
   checkAuth: () => Promise<void>;
   setHasHydrated: (state: boolean) => void;

@@ -12,6 +12,7 @@ export type {
   LoginCredentials,
   RegisterCredentials,
   LoginResponse,
+  RegisterResponse,
   AuthActions,
   AuthStore,
 } from './auth.types';

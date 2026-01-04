@@ -56,12 +56,16 @@ export class AuthController {
     description: 'Usuario registrado exitosamente',
     schema: {
       example: {
-        id: 1,
-        email: 'usuario@ejemplo.com',
-        name: 'Juan Pérez',
-        plan: 'free',
-        roles: ['consumer'],
-        createdAt: '2024-01-01T00:00:00.000Z',
+        user: {
+          id: 1,
+          email: 'usuario@ejemplo.com',
+          name: 'Juan Pérez',
+          plan: 'free',
+          isAdmin: false,
+        },
+        access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+        refresh_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+        isNewUser: true,
       },
     },
   })

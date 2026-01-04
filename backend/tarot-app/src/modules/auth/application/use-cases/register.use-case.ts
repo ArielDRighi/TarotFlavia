@@ -29,6 +29,7 @@ export class RegisterUseCase {
     };
     access_token: string;
     refresh_token: string;
+    isNewUser: boolean;
   }> {
     const createdUser = await this.usersService.create(createUserDto);
 
@@ -72,6 +73,7 @@ export class RegisterUseCase {
       },
       access_token: this.jwtService.sign(payload),
       refresh_token: refreshToken,
+      isNewUser: true,
     };
   }
 }

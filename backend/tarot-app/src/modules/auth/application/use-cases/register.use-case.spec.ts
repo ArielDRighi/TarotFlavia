@@ -117,5 +117,18 @@ describe('RegisterUseCase', () => {
         'Chrome',
       );
     });
+
+    it('should return isNewUser: true for new registration', async () => {
+      usersService.create.mockResolvedValue(mockUser);
+      usersService.findById.mockResolvedValue(mockUser);
+
+      const result = await useCase.execute(
+        createUserDto,
+        '127.0.0.1',
+        'Mozilla',
+      );
+
+      expect(result.isNewUser).toBe(true);
+    });
   });
 });

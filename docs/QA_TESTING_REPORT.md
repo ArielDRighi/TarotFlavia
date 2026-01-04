@@ -2039,36 +2039,125 @@ La aplicación tiene una **base sólida** en términos de:
 
 ---
 
-### TASK-010: Implementar onboarding post-registro
+### ✅ TASK-010: Implementar onboarding post-registro
 
-**[FULLSTACK]**
+**[FULLSTACK]** | **Estado:** ✅ COMPLETADA - 3 Enero 2026
 
-**Archivos a modificar:**
+**Rama:** `feature/TASK-010-onboarding-post-registro`
 
+**Archivos modificados:**
+
+**Backend:**
+
+- `backend/tarot-app/src/modules/auth/application/use-cases/register.use-case.ts`
+- `backend/tarot-app/src/modules/auth/application/use-cases/register.use-case.spec.ts`
 - `backend/tarot-app/src/modules/auth/auth.controller.ts`
-- `frontend/src/app/register/page.tsx` (o componente de registro)
-- Crear: `frontend/src/components/onboarding/WelcomeModal.tsx`
+- `backend/tarot-app/src/modules/auth/auth.controller.spec.ts`
+- `backend/tarot-app/src/modules/auth/application/services/auth-orchestrator.service.spec.ts`
 
-**Cambios requeridos:**
+**Frontend:**
 
-1. Backend: Después de registro exitoso, retornar flag `isNewUser: true`
-2. Frontend: Detectar `isNewUser` y mostrar modal de bienvenida
-3. Modal debe explicar:
-   - Qué puede hacer el usuario FREE
-   - Cómo funcionan los límites (1 carta del día + 1 lectura/día)
-   - Diferencia vs PREMIUM (sin IA vs con IA)
-   - CTA para ir a "carta del día" o "crear lectura"
-4. Después de cerrar modal, redirect a `/` (landing/home) en lugar de `/profile`
+- `frontend/src/types/auth.types.ts`
+- `frontend/src/types/index.ts`
+- `frontend/src/stores/authStore.ts`
+- `frontend/src/hooks/useAuth.ts`
+- `frontend/src/components/features/auth/RegisterForm.tsx`
+- `frontend/src/components/features/auth/RegisterForm.test.tsx`
 
-**Dependencias:** Ninguna
+**Archivos creados:**
 
-**Criterios de aceptación:**
+- `frontend/src/components/features/onboarding/WelcomeModal.tsx`
+- `frontend/src/components/features/onboarding/WelcomeModal.test.tsx`
+- `frontend/src/components/features/onboarding/index.ts`
 
-- Usuario ve modal de bienvenida después de registrarse
-- Modal explica claramente funcionalidad FREE (2 lecturas/día sin IA)
-- Usuario entiende diferencia con PREMIUM
-- Usuario va a home después de cerrar modal
-- NO se redirige a `/profile` automáticamente
+**Cambios implementados:**
+
+1. ✅ **Backend - Flag `isNewUser` agregado:**
+   - Tipo de retorno de `RegisterUseCase` actualizado: `{ user, access_token, refresh_token, isNewUser: boolean }`
+   - `RegisterUseCase.execute()` siempre retorna `isNewUser: true`
+   - ApiResponse de Swagger actualizada con ejemplo completo
+   - Tests unitarios agregados (5 tests pasando)
+
+2. ✅ **Frontend - Tipo `RegisterResponse` creado:**
+   - Interface `RegisterResponse` con campos: `user`, `access_token`, `refresh_token`, `isNewUser`
+   - Tipo exportado en `types/index.ts`
+   - Método `register()` del authStore ahora retorna `Promise<RegisterResponse>`
+   - Hook `useAuth` actualizado con tipo de retorno correcto
+
+3. ✅ **Componente `WelcomeModal` implementado:**
+   - Muestra explicación de plan FREE: "1 carta del día" + "1 lectura por día (sin IA)"
+   - Comparativa con PREMIUM: "Lecturas ilimitadas con interpretación de IA personalizada"
+   - Iconos visuales: Calendar (carta del día), Wand2 (lectura), Sparkles (premium)
+   - CTA principal: "Comenzar a Explorar"
+   - 7 tests unitarios (todos pasando)
+
+4. ✅ **RegisterForm integrado con WelcomeModal:**
+   - Detecta `isNewUser: true` después de registro exitoso
+   - Muestra modal de bienvenida automáticamente
+   - Maneja cierre de modal con redirect a `/` (home)
+   - Si `isNewUser: false`, redirige a `/perfil` (comportamiento legacy)
+   - Tests actualizados: 3 tests nuevos para onboarding (23 tests pasando)
+
+5. ✅ **Flujo completo:**
+   - Usuario se registra → auto-login → detecta `isNewUser: true` → muestra modal
+   - Usuario cierra modal → redirect a `/` (landing page)
+   - Usuario NO es redirigido a `/perfil` automáticamente
+
+**Tests implementados:**
+
+**Backend:**
+
+- `register.use-case.spec.ts`: 5 tests (incluyendo test para `isNewUser: true`)
+- `auth.controller.spec.ts`: 17 tests (incluyendo test para `isNewUser` en response)
+- `auth-orchestrator.service.spec.ts`: Tests actualizados con `isNewUser` en mock
+
+**Frontend:**
+
+- `WelcomeModal.test.tsx`: 7 tests
+  - Renderizado condicional (abierto/cerrado)
+  - Título de bienvenida
+  - Explicación de plan FREE
+  - Explicación de diferencias con PREMIUM
+  - CTA "Comenzar a Explorar"
+  - Callback `onClose` al hacer click en CTA
+  - Callback `onClose` al hacer click en botón cerrar
+- `RegisterForm.test.tsx`: 23 tests (3 nuevos para onboarding)
+  - Muestra modal cuando `isNewUser: true`
+  - NO muestra modal cuando `isNewUser: false`
+  - Redirige a home después de cerrar modal
+
+**Ciclo de calidad:**
+
+**Backend:**
+
+- ✅ Lint: Passed
+- ✅ Format: Passed
+- ✅ Build: Successful
+- ✅ Tests: 2065 passed | 11 skipped
+
+**Frontend:**
+
+- ✅ Lint: 0 errores (2 warnings pre-existentes no relacionados)
+- ✅ Type-check: Passed
+- ✅ Format: Applied
+- ✅ Build: Successful
+- ✅ Tests: 168 test files passed (1732 tests)
+- ✅ Architecture validation: Passed
+
+**Criterios de aceptación cumplidos:**
+
+- ✅ Usuario ve modal de bienvenida después de registrarse
+- ✅ Modal explica claramente funcionalidad FREE (1 carta del día + 1 lectura/día sin IA)
+- ✅ Usuario entiende diferencia con PREMIUM (lecturas ilimitadas con IA)
+- ✅ Usuario va a home (`/`) después de cerrar modal
+- ✅ NO se redirige a `/perfil` automáticamente
+- ✅ Backend retorna `isNewUser: true` en response de registro
+- ✅ Frontend detecta flag y muestra modal correctamente
+- ✅ Tests exhaustivos implementados (37 tests nuevos)
+
+**Dependencias satisfechas:** Ninguna
+
+**Fecha de completación:** 3 Enero 2026
 
 ---
 
