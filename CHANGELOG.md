@@ -40,7 +40,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Core Features
 
 - **Authentication System** (TASK-001)
-
   - JWT-based authentication with access and refresh tokens
   - Email/password registration and login
   - Password hashing with bcrypt (10 salt rounds)
@@ -48,7 +47,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Token refresh mechanism (7-day expiry for refresh tokens)
 
 - **Tarot Reading System** (TASK-002, TASK-003)
-
   - Multiple spread types: Single Card, Three Card, Celtic Cross, etc.
   - 78 Rider-Waite tarot cards catalog with full descriptions
   - Card positioning with upright/reversed interpretations
@@ -59,7 +57,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Predefined and custom questions (premium)
 
 - **AI Integration** (TASK-004, TASK-041)
-
   - Multi-provider AI support: OpenAI GPT-4 Turbo, Anthropic Claude 3.5 Sonnet
   - Tarotista personality profiles (Flavia, Solange, Celestina, etc.)
   - Context-aware interpretations based on card positions
@@ -68,7 +65,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - AI cost tracking per user and request
 
 - **Daily Readings** (TASK-005)
-
   - Automated daily card draw for users
   - One card per day per tarotista
   - Regeneration allowed for premium users
@@ -84,7 +80,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Admin Features
 
 - **User Management** (TASK-008, TASK-030)
-
   - View all users with pagination and filters
   - Ban/unban users with reason tracking
   - User statistics and activity metrics
@@ -92,7 +87,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Audit logging for all admin actions
 
 - **Tarotista Management** (TASK-009)
-
   - Tarotista profile creation and configuration
   - Custom AI prompts per tarotista
   - Tarotista activation/deactivation
@@ -107,7 +101,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Technical Infrastructure
 
 - **Database** (TASK-011)
-
   - PostgreSQL 15+ with TypeORM 0.3.x
   - Migration system with TypeORM CLI
   - Seed scripts for cards, users, categories
@@ -116,7 +109,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Indexes for performance optimization
 
 - **Caching** (TASK-012, TASK-042)
-
   - In-memory cache for readings (30-minute TTL)
   - AI interpretation caching (1-hour TTL)
   - Cache invalidation on updates/deletes
@@ -124,7 +116,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Cache interceptors for automatic caching
 
 - **Security** (TASK-048, INPUT_VALIDATION)
-
   - Helmet.js security headers (CSP, HSTS, XSS protection)
   - Input validation with class-validator
   - Output sanitization for AI-generated content
@@ -135,7 +126,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Custom sanitizers: @SanitizeHtml, @SanitizeEmail
 
 - **Logging & Monitoring** (TASK-013, TASK-030)
-
   - Winston logger with file and console transports
   - Request/response logging
   - Error logging with stack traces
@@ -258,7 +248,7 @@ When adding entries to the changelog:
 
 ## Links
 
-- **Repository**: [GitHub](https://github.com/ArielDRighi/TarotFlavia)
+- **Repository**: [GitHub](https://github.com/ArielDRighi/Auguria)
 - **Documentation**: [README.md](README.md)
 - **API Documentation**: [API_DOCUMENTATION.md](backend/tarot-app/docs/API_DOCUMENTATION.md)
 - **Deployment Guide**: [DEPLOYMENT.md](backend/tarot-app/docs/DEPLOYMENT.md)

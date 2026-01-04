@@ -1,4 +1,4 @@
-# 📋 Resumen de Estrategia MVP - TarotFlavia
+# 📋 Resumen de Estrategia MVP - Auguria
 
 > **Documento de Análisis y Planificación**  
 > Fecha: 16 Diciembre 2025  

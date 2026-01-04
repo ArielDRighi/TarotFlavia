@@ -13,7 +13,7 @@ describe('Footer', () => {
     it('should render copyright text', () => {
       render(<Footer />);
 
-      expect(screen.getByText(/© 2025 TarotFlavia/i)).toBeInTheDocument();
+      expect(screen.getByText(/© 2025 Auguria/i)).toBeInTheDocument();
     });
   });
 

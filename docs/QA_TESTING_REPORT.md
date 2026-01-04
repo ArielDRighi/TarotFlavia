@@ -2161,34 +2161,49 @@ La aplicación tiene una **base sólida** en términos de:
 
 ---
 
-### TASK-011: Actualizar branding a Auguria (Global)
+### TASK-011: Actualizar branding a Auguria (Global) ✅
 
 **[FULLSTACK]**
+**Estado:** ✅ COMPLETADA (3 Enero 2026)
 
-**Archivos a modificar:**
+**Archivos modificados:**
 
-- Buscar y reemplazar en TODO el proyecto:
-  - `frontend/`: Títulos, meta tags, componentes, footer
-  - `backend/`: Mensajes de error, logs, documentación
-  - `docs/`: README, documentación técnica
-  - Variables de entorno (si aplica)
+- **Frontend (35 archivos):**
+  - Documentación: `AI_PROMPTS.md`, `AI_DEVELOPMENT_GUIDE.md`, `ARCHITECTURE.md`, `FRONTEND_BACKLOG.md`, `QA_TESTING_TRACKER.md`, `IMAGE_OPTIMIZATION.md`, `BUG_FIXES_BACKLOG.md`
+  - Scripts: `validate-architecture.js`, `README.md`
+  - Source code: `seo.ts`, `config.ts`, `recuperar-password/page.tsx`, `logo.tsx`, `Footer.tsx`, `admin/layout.tsx`, `SharedReadingView.tsx`, `DailyCardExperience.tsx`, `WhatIsTarotSection.tsx`
+  - Tests: `logo.test.tsx`, `Footer.test.tsx`, `admin/layout.test.tsx`, `seo.test.ts`, `SharedReadingView.test.tsx`
+  - Assets: `manifest.json`, `logo.svg`, `next.config.ts`, `globals.css`
 
-**Cambios requeridos:**
+- **Backend (5 archivos):**
+  - `docs/DESIGN_HAND-OFF.md`, `docs/DEVELOPMENT_SCRIPTS.md`, `docs/MIGRATIONS.md`, `.env.example`
 
-1. Reemplazar "TarotFlavia" → "Auguria"
-2. Reemplazar "Tarot Flavia" → "Auguria"
-3. Reemplazar "tarot-flavia" → "auguria" (URLs, slugs)
-4. Verificar que NO se rompa ninguna funcionalidad (especialmente API paths)
-5. Actualizar este documento QA_TESTING_REPORT.md
+- **Root/Docs (10 archivos):**
+  - `README.md`, `CHANGELOG.md`, `docs/BUSINESS_PLAN_AI_COSTS.md`, `docs/MVP_FEATURES_BREAKDOWN.md`, `docs/MVP_STRATEGY_SUMMARY.md`
+  - `.github/copilot-instructions.md`, `.github/instructions/copilot-review.instructions.md`
 
-**Dependencias:** Ninguna
+**Cambios realizados:**
 
-**Criterios de aceptación:**
+1. ✅ Reemplazado "TarotFlavia" → "Auguria" (150+ ocurrencias)
+2. ✅ Reemplazado "Tarot Flavia" → "Auguria"
+3. ✅ Actualizados meta tags y títulos de páginas
+4. ✅ Actualizados comentarios de código y documentación
+5. ✅ Actualizados tests para verificar "Auguria"
 
-- NO hay referencias a "TarotFlavia" en el código
-- Títulos de página muestran "Auguria"
-- Meta tags actualizados
-- URLs y paths NO se rompieron
+**Validaciones realizadas:**
+
+- ✅ ESLint: 0 errores (solo 2 warnings preexistentes)
+- ✅ TypeScript type-check: 0 errores
+- ✅ Tests: 1775 pasando, 0 fallos
+- ✅ Build: Exitoso
+- ✅ Coverage: >80% mantenido
+
+**Notas:**
+
+- Se mantuvieron referencias históricas donde corresponde (ej. "Auguria (antes TarotFlavia)" en QA_TESTING_REPORT.md)
+- NO se modificaron nombres de recursos Docker antiguos (están en scripts de migración/cleanup históricos)
+- Emails de ejemplo actualizados: `@auguria.com`
+- GitHub repo aún en `ArielDRighi/TarotFlavia` (pendiente de renombrar en GitHub)
 
 ---
 

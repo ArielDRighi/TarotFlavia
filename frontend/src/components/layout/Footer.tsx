@@ -29,7 +29,7 @@ export function Footer() {
           </li>
         </ul>
       </nav>
-      <p className="text-sm">© 2025 TarotFlavia</p>
+      <p className="text-sm">© 2025 Auguria</p>
     </footer>
   );
 }

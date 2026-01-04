@@ -22,7 +22,7 @@ describe('SEO Metadata Configuration', () => {
 
     it('should have OpenGraph configuration', () => {
       expect(defaultMetadata.openGraph).toBeDefined();
-      expect(defaultMetadata.openGraph?.siteName).toBe('TarotFlavia');
+      expect(defaultMetadata.openGraph?.siteName).toBe('Auguria');
       expect(defaultMetadata.openGraph?.locale).toBe('es_ES');
     });
 
@@ -42,7 +42,7 @@ describe('SEO Metadata Configuration', () => {
     });
 
     it('should have OpenGraph metadata', () => {
-      expect(homeMetadata.openGraph?.title).toContain('TarotFlavia');
+      expect(homeMetadata.openGraph?.title).toContain('Auguria');
       expect(homeMetadata.openGraph?.description).toBeDefined();
     });
   });

@@ -655,4 +655,4 @@ npm run db:e2e:reset:win    # En lugar de db:e2e:reset
 ---
 
 **Última actualización:** Noviembre 2025  
-**Mantenido por:** Equipo TarotFlavia
+**Mantenido por:** Equipo Auguria

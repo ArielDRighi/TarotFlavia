@@ -1,6 +1,6 @@
 # Image and Asset Optimization
 
-This document describes the optimized image and asset components created for TarotFlavia.
+This document describes the optimized image and asset components created for Auguria.
 
 ## Components
 
@@ -41,7 +41,7 @@ import { OptimizedImage } from '@/components/ui/optimized-image';
 
 ### 2. Logo
 
-TarotFlavia brand logo component.
+Auguria brand logo component.
 
 ```tsx
 import { Logo } from '@/components/ui/logo';
@@ -86,7 +86,7 @@ import { UserAvatar } from '@/components/ui/user-avatar';
 
 Located in `/public/`:
 
-- **logo.svg** - TarotFlavia brand logo (180x60px)
+- **logo.svg** - Auguria brand logo (180x60px)
 - **card-placeholder.svg** - Placeholder for tarot cards (160x240px)
 - **avatar-placeholder.svg** - Default avatar placeholder (100x100px)
 - **icon-192.svg** - PWA icon 192x192

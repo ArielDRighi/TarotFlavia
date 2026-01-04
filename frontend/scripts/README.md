@@ -24,12 +24,10 @@ node scripts/validate-architecture.js
 **Valida:**
 
 - ✅ Componentes React (`.tsx`) → `PascalCase.tsx`
-
   - ✅ Correcto: `ReadingCard.tsx`, `LoginForm.tsx`
   - ❌ Incorrecto: `readingCard.tsx`, `reading-card.tsx`
 
 - ✅ Hooks (en `hooks/`) → `useCamelCase.ts`
-
   - ✅ Correcto: `useReadings.ts`, `useAuth.ts`
   - ❌ Incorrecto: `readings.ts`, `UseReadings.ts`
 
@@ -94,10 +92,10 @@ const response: unknown = await fetch();
 
 ```typescript
 // ⚠️ WARNING
-import { Button } from "../../../components/ui/button";
+import { Button } from '../../../components/ui/button';
 
 // ✅ CORRECTO
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 ```
 
 **Severidad:** ⚠️ WARNING
@@ -209,7 +207,7 @@ El script genera un reporte detallado:
 ### Ejemplo de Salida Exitosa
 
 ```
-🏗️  Validador de Arquitectura Frontend - TarotFlavia
+🏭️  Validador de Arquitectura Frontend - Auguria
 
 📝 Validando nomenclatura de archivos...
    ✅ Nomenclatura correcta
@@ -337,17 +335,14 @@ Si `src/` no existe (proyecto no inicializado con Next.js), el script:
 ## 📝 Notas Importantes
 
 1. **Severidades:**
-
    - ❌ **ERROR**: Bloquea commit (exit code 1)
    - ⚠️ **WARNING**: No bloquea, pero debe revisarse
 
 2. **Ignorar Archivos:**
-
    - Automáticamente ignora: `.test.ts`, `.test.tsx`, `.d.ts`
    - No valida: `node_modules/`, `.next/`
 
 3. **Falsos Positivos:**
-
    - Muy raros gracias a reglas específicas
    - Si encuentras uno, reportar para ajustar el script
 
@@ -364,15 +359,15 @@ Para agregar nuevas validaciones, editar `scripts/validate-architecture.js`:
 ```javascript
 // Agregar nueva función de validación
 function validateNewRule() {
-  console.log("\n🔍 Validando nueva regla...\n");
+  console.log('\n🔍 Validando nueva regla...\n');
 
   // Lógica de validación
 
   if (errorFound) {
     errors.push({
       file: relativePath,
-      message: "Descripción del error",
-      rule: "NEW_RULE",
+      message: 'Descripción del error',
+      rule: 'NEW_RULE',
     });
   }
 }

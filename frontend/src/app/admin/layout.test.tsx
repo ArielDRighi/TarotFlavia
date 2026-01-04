@@ -129,7 +129,7 @@ describe('AdminLayout', () => {
       );
 
       // Verificar que el logo está en el sidebar (desktop)
-      const logos = screen.getAllByText(/tarotflavia/i);
+      const logos = screen.getAllByText(/auguria/i);
       expect(logos.length).toBeGreaterThanOrEqual(1);
     });
 

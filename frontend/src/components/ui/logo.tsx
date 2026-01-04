@@ -18,7 +18,7 @@ export interface LogoProps {
 /**
  * Logo Component
  *
- * Displays the TarotFlavia brand logo using optimized SVG.
+ * Displays the Auguria brand logo using optimized SVG.
  *
  * @example
  * ```tsx
@@ -35,7 +35,7 @@ export interface LogoProps {
 export function Logo({ width = 180, height = 60, priority = false, className }: LogoProps) {
   return (
     <div className={cn('relative', className)}>
-      <Image src="/logo.svg" alt="TarotFlavia" width={width} height={height} priority={priority} />
+      <Image src="/logo.svg" alt="Auguria" width={width} height={height} priority={priority} />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-# 📝 MVP Features Breakdown - TarotFlavia
+# 📏 MVP Features Breakdown - Auguria
 
 > **Documento de Análisis de Features**  
 > Fecha: 18 Diciembre 2025  

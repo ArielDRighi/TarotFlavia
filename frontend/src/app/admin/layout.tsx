@@ -45,7 +45,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       {/* Sidebar Desktop */}
       <aside className="hidden border-r border-gray-200 bg-white md:flex md:w-64 md:flex-col">
         <div className="p-6">
-          <h1 className="text-primary text-2xl font-bold">TarotFlavia</h1>
+          <h1 className="text-primary text-2xl font-bold">Auguria</h1>
           <p className="mt-1 text-sm text-gray-500">Panel de Administración</p>
         </div>
 
@@ -56,7 +56,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Mobile Header */}
         <div className="flex items-center justify-between border-b border-gray-200 bg-white px-4 py-3 md:hidden">
-          <h1 className="text-primary text-lg font-bold">TarotFlavia Admin</h1>
+          <h1 className="text-primary text-lg font-bold">Auguria Admin</h1>
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="rounded-md p-2 text-gray-600 hover:bg-gray-100"
@@ -82,7 +82,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             >
               <div className="p-6">
                 <div className="flex items-center justify-between">
-                  <h1 className="text-primary text-xl font-bold">TarotFlavia</h1>
+                  <h1 className="text-primary text-xl font-bold">Auguria</h1>
                   <button
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="rounded-md p-1 text-gray-600 hover:bg-gray-100"

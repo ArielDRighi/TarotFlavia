@@ -1,4 +1,4 @@
-# Copilot Code Review Instructions - TarotFlavia
+# Copilot Code Review Instructions - Auguria
 
 > 📋 **Propósito:** Este documento proporciona contexto completo del proyecto para que Copilot realice revisiones de código más precisas y evite sugerencias que contradigan los contratos ya definidos.
 
@@ -6,7 +6,7 @@
 
 ## 🎯 Contexto del Proyecto
 
-TarotFlavia es un **monorepo** con:
+Auguria es un **monorepo** con:
 
 ```
 tarot/

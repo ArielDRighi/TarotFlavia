@@ -137,9 +137,9 @@ El Loco y el Mago juntos indican un nuevo comienzo lleno de potencial.`,
     expect(screen.getByText('Esta es una interpretación simple como string')).toBeInTheDocument();
   });
 
-  it('should display TarotFlavia logo', () => {
+  it('should display Auguria logo', () => {
     render(<SharedReadingView {...defaultProps} />);
 
-    expect(screen.getByText('TarotFlavia')).toBeInTheDocument();
+    expect(screen.getByText('Auguria')).toBeInTheDocument();
   });
 });

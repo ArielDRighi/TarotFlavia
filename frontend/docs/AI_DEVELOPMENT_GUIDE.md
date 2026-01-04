@@ -1,4 +1,4 @@
-# Guía de Desarrollo con IA - Frontend TarotFlavia
+# Guía de Desarrollo con IA - Frontend Auguria
 
 > 📋 **Propósito:** Este documento guía a las IAs en el desarrollo del frontend siguiendo buenas prácticas de Next.js, React y arquitectura limpia. Copiar y pegar antes de cada tarea junto con la tarea específica del backlog.
 
@@ -334,7 +334,7 @@ export function TrashReadingsList() {
 import { TrashReadingsList } from '@/components/features/readings/TrashReadingsList';
 
 export const metadata = {
-  title: 'Papelera | TarotFlavia',
+  title: 'Papelera | Auguria',
   description: 'Lecturas eliminadas',
 };
 
