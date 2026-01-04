@@ -7,7 +7,7 @@ import { Sparkles, Layers, MessageSquare, BarChart3, ShieldOff } from 'lucide-re
 const benefits = [
   {
     icon: Sparkles,
-    title: 'Interpretaciones con IA personalizadas',
+    title: 'Interpretaciones personalizadas y profundas',
     description: 'Análisis profundos adaptados a tu situación',
   },
   {

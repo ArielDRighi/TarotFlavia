@@ -14,12 +14,12 @@ describe('PremiumBenefitsSection', () => {
     expect(title).toBeInTheDocument();
   });
 
-  it('should render AI interpretations benefit', () => {
+  it('should render premium interpretations benefit', () => {
     render(<PremiumBenefitsSection />);
 
-    const aiBenefit = screen.getByText(/interpretaciones con ia personalizadas/i);
+    const interpretationsBenefit = screen.getByText(/interpretaciones personalizadas y profundas/i);
 
-    expect(aiBenefit).toBeInTheDocument();
+    expect(interpretationsBenefit).toBeInTheDocument();
   });
 
   it('should render all spreads benefit', () => {

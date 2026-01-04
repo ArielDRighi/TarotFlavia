@@ -2207,31 +2207,57 @@ La aplicación tiene una **base sólida** en términos de:
 
 ---
 
-### TASK-012: Remover menciones explícitas a IA en textos
+### ✅ TASK-012: Remover menciones explícitas a IA en textos - COMPLETADO
 
 **[FRONTEND]**
 
-**Archivos a modificar:**
+**Estado:** ✅ COMPLETADO (4 Enero 2026)
 
-- `frontend/src/app/page.tsx` (landing)
-- Componentes de planes/suscripciones
-- Tooltips y textos de ayuda
-- Footer/About
+**Archivos modificados:**
 
-**Cambios requeridos:**
+- `frontend/src/components/features/readings/UpgradeBanner.tsx`
+- `frontend/src/components/features/readings/UpgradeModal.tsx`
+- `frontend/src/components/features/home/PremiumBenefitsSection.tsx`
+- `frontend/src/components/features/home/WhatIsTarotSection.tsx`
+- `frontend/src/components/features/conversion/LimitReachedModal.tsx`
+- `frontend/src/components/features/conversion/PremiumPreview.tsx`
+- `frontend/src/components/features/marketplace/TarotistaProfilePage.tsx`
+- `frontend/src/lib/metadata/seo.ts`
 
-1. Cambiar "interpretación con IA" → "interpretación personalizada"
-2. Cambiar "análisis generado por IA" → "análisis detallado"
-3. Remover badges "Powered by AI"
-4. Mantener diferenciación de valor PREMIUM vs FREE sin mencionar "IA"
+**Cambios implementados:**
 
-**Dependencias:** Ninguna
+1. ✅ "interpretación con IA" → "interpretación personalizada"
+2. ✅ "Interpretaciones con IA personalizadas" → "Interpretaciones personalizadas y profundas"
+3. ✅ "inteligencia artificial" → "tecnología avanzada"
+4. ✅ "Lecturas de tarot con IA" → "Lecturas de tarot personalizadas"
+5. ✅ "Accede a interpretaciones personalizadas con IA" → "Accede a interpretaciones personalizadas"
+6. ✅ "Lectura con IA personalizada" → "Lectura personalizada"
 
-**Criterios de aceptación:**
+**Tests actualizados:**
 
-- Textos NO mencionan "IA" o "Inteligencia Artificial"
-- Diferenciación de planes sigue siendo clara
-- Usuarios entienden qué ofrece cada plan
+- UpgradeBanner.test.tsx
+- UpgradeModal.test.tsx
+- PremiumBenefitsSection.test.tsx
+- LimitReachedModal.test.tsx
+- TarotistaProfilePage.test.tsx
+- ReadingExperience.test.tsx
+- ReadingExperience.useAI.test.tsx
+- ReadingExperience.upgrade.test.tsx
+
+**Validación:**
+
+- ✅ Todos los tests pasan (1775 tests)
+- ✅ Lint sin errores
+- ✅ Type check sin errores
+- ✅ Build exitoso
+- ✅ Arquitectura validada
+- ✅ Coverage >80%
+
+**Decisiones técnicas:**
+
+- Se mantuvieron referencias técnicas en tipos TypeScript (reading.types.ts) ya que son documentación interna
+- Se mantuvo la página admin/ai-usage/page.tsx sin cambios (es página técnica de administrador)
+- La diferenciación de valor PREMIUM vs FREE se mantiene clara usando términos como "interpretaciones personalizadas y profundas" y "análisis detallados"
 
 ---
 

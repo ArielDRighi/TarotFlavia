@@ -23,9 +23,7 @@ describe('UpgradeBanner', () => {
   it('debe renderizar el banner con el mensaje correcto', () => {
     render(<UpgradeBanner onUpgradeClick={vi.fn()} />);
 
-    expect(
-      screen.getByText(/desbloquea interpretaciones personalizadas con ia/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/desbloquea interpretaciones personalizadas/i)).toBeInTheDocument();
     expect(screen.getByText(/upgrade a premium/i)).toBeInTheDocument();
   });
 

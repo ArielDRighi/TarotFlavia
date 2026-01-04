@@ -35,7 +35,7 @@ const PREMIUM_BENEFITS_LIMIT = [
   },
   {
     icon: Sparkles,
-    text: 'Interpretaciones con IA',
+    text: 'Interpretaciones personalizadas',
   },
 ] as const;
 

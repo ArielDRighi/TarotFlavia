@@ -194,7 +194,7 @@ describe('TarotistaProfilePage', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/oráculo digital/i)).toBeInTheDocument();
-      expect(screen.getByText(/lectura con ia personalizada/i)).toBeInTheDocument();
+      expect(screen.getByText(/lectura personalizada/i)).toBeInTheDocument();
 
       expect(screen.getByText(/sesión privada/i)).toBeInTheDocument();
       expect(screen.getByText(/sesión en vivo/i)).toBeInTheDocument();

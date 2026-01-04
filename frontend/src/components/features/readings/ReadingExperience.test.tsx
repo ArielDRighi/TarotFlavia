@@ -50,7 +50,7 @@ vi.mock('./UpgradeBanner', () => ({
   default: function MockUpgradeBanner({ onUpgradeClick }: { onUpgradeClick: () => void }) {
     return (
       <div data-testid="upgrade-banner">
-        <p>💎 Desbloquea interpretaciones personalizadas con IA</p>
+        <p>💎 Desbloquea interpretaciones personalizadas</p>
         <button onClick={onUpgradeClick}>Upgrade a Premium</button>
       </div>
     );

@@ -25,7 +25,7 @@ describe('UpgradeModal', () => {
     it('should render all premium benefits', () => {
       render(<UpgradeModal open={true} onClose={mockOnClose} />);
 
-      expect(screen.getByText(/Interpretaciones con IA personalizadas/i)).toBeInTheDocument();
+      expect(screen.getByText(/Interpretaciones personalizadas y profundas/i)).toBeInTheDocument();
       expect(screen.getByText(/Todas las tiradas disponibles/i)).toBeInTheDocument();
       expect(screen.getByText(/Preguntas personalizadas/i)).toBeInTheDocument();
       expect(screen.getByText(/Sin publicidad/i)).toBeInTheDocument();
@@ -102,7 +102,7 @@ describe('UpgradeModal', () => {
 
       const benefits = screen.getAllByRole('listitem');
 
-      expect(benefits[0]).toHaveTextContent(/IA/i);
+      expect(benefits[0]).toHaveTextContent(/personalizadas y profundas/i);
       expect(benefits[1]).toHaveTextContent(/tiradas/i);
       expect(benefits[2]).toHaveTextContent(/preguntas/i);
       expect(benefits[3]).toHaveTextContent(/publicidad/i);
