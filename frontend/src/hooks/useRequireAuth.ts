@@ -68,23 +68,24 @@ export function useRequireAuth(options?: UseRequireAuthOptions): UseRequireAuthR
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
 
+  // Destructure options to stabilize references for useEffect dependencies
+  const redirectTo = options?.redirectTo ?? '/login';
+  const redirectQuery = options?.redirectQuery;
+
   useEffect(() => {
     // Only redirect when we're sure the user is not authenticated
     // and auth check has completed (not loading)
     if (!isAuthenticated && !isLoading) {
-      const redirectTo = options?.redirectTo ?? '/login';
-      const query = options?.redirectQuery;
-
       let redirectUrl = redirectTo;
 
-      if (query && Object.keys(query).length > 0) {
-        const params = new URLSearchParams(query);
+      if (redirectQuery && Object.keys(redirectQuery).length > 0) {
+        const params = new URLSearchParams(redirectQuery);
         redirectUrl = `${redirectTo}?${params.toString()}`;
       }
 
       router.push(redirectUrl);
     }
-  }, [isAuthenticated, isLoading, router, options?.redirectTo, options?.redirectQuery]);
+  }, [isAuthenticated, isLoading, router, redirectTo, redirectQuery]);
 
   return { isLoading };
 }

@@ -116,8 +116,8 @@ export function PlanComparison() {
             <CardContent className="space-y-6">
               {/* Features List */}
               <ul className="space-y-3">
-                {plan.features.map((feature, index) => (
-                  <li key={index} className="flex items-start gap-2">
+                {plan.features.map((feature) => (
+                  <li key={feature.text} className="flex items-start gap-2">
                     {feature.included ? (
                       <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-600 dark:text-green-400" />
                     ) : (

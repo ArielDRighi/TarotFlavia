@@ -2028,8 +2028,12 @@ La aplicación tiene una **base sólida** en términos de:
 
 ⚠️ `/registro` page convertida a Client Component (usa `useSearchParams`)
 
-- Ya no exporta static metadata (manejado en layout)
-- Test de metadata comentado con explicación
+- Metadata exportada desde `layout.tsx` (patrón estándar Next.js)
+- Test de metadata actualizado para usar layout en vez de page
+
+**Archivos adicionales creados (post-PR feedback):**
+
+- `frontend/src/app/registro/layout.tsx` - Exports registerMetadata
 
 **Dependencias satisfechas:** TASK-003 (anonymous access components)
 
