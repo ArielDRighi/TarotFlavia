@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { toast } from '@/hooks/utils/useToast';
 import { apiClient } from '@/lib/api/axios-config';
+import { API_ENDPOINTS } from '@/lib/api/endpoints';
 import type {
   AuthUser,
   AuthStore,
@@ -45,7 +46,7 @@ export const useAuthStore = create<AuthStore>()(
 
       login: async (email: string, password: string) => {
         try {
-          const response = await apiClient.post<LoginResponse>('/auth/login', {
+          const response = await apiClient.post<LoginResponse>(API_ENDPOINTS.AUTH.LOGIN, {
             email,
             password,
           });
@@ -82,7 +83,10 @@ export const useAuthStore = create<AuthStore>()(
 
       register: async (credentials: RegisterCredentials) => {
         try {
-          const response = await apiClient.post<RegisterResponse>('/auth/register', credentials);
+          const response = await apiClient.post<RegisterResponse>(
+            API_ENDPOINTS.AUTH.REGISTER,
+            credentials
+          );
           return response.data;
         } catch (error) {
           // Extract error message from API response
