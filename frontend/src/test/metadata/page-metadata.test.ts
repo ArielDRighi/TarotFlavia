@@ -27,16 +27,6 @@ describe('Page Metadata Exports', () => {
         follow: true,
       });
     });
-
-    it('register page should export registerMetadata', async () => {
-      const registerPage = await import('@/app/registro/page');
-      expect(registerPage.metadata).toBeDefined();
-      expect((registerPage.metadata as Metadata).title).toBe('Crear Cuenta');
-      expect((registerPage.metadata as Metadata).robots).toEqual({
-        index: false,
-        follow: true,
-      });
-    });
   });
 
   describe('Layout Metadata', () => {
@@ -44,6 +34,16 @@ describe('Page Metadata Exports', () => {
       const ritualLayout = await import('@/app/ritual/layout');
       expect(ritualLayout.metadata).toBeDefined();
       expect((ritualLayout.metadata as Metadata).title).toBe('Nueva Lectura de Tarot');
+    });
+
+    it('registro layout should export registerMetadata', async () => {
+      const registroLayout = await import('@/app/registro/layout');
+      expect(registroLayout.metadata).toBeDefined();
+      expect((registroLayout.metadata as Metadata).title).toBe('Crear Cuenta');
+      expect((registroLayout.metadata as Metadata).robots).toEqual({
+        index: false,
+        follow: true,
+      });
     });
 
     it('historial layout should export historialMetadata', async () => {

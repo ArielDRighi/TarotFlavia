@@ -119,9 +119,15 @@ function CategoryCard({ category, onClick }: CategoryCardProps) {
  *
  * Protected page where users select a category before proceeding to questions.
  * Displays categories in a responsive grid with icons and hover effects.
+ *
+ * AUTHENTICATION REQUIRED:
+ * - Redirects to /registro with message=register-for-readings if not authenticated
  */
 export default function RitualPage() {
-  const { isLoading: isAuthLoading } = useRequireAuth();
+  const { isLoading: isAuthLoading } = useRequireAuth({
+    redirectTo: '/registro',
+    redirectQuery: { message: 'register-for-readings' },
+  });
   const { data: categories, isLoading: isCategoriesLoading, error, refetch } = useCategories();
   const router = useRouter();
 

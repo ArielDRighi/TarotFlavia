@@ -7,8 +7,14 @@ describe('LandingPage', () => {
     render(<LandingPage />);
 
     // Verificar que todas las secciones están presentes
-    expect(screen.getByRole('heading', { name: /descubre tu destino/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /auguria.*descubre tu destino/i })
+    ).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /prueba sin compromiso/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /¿qué plan se adapta a ti\?/i })
+    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /¿cómo funciona\?/i })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /¿por qué elegir premium\?/i })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /¿qué es el tarot\?/i })).toBeInTheDocument();
   });
@@ -27,7 +33,7 @@ describe('LandingPage', () => {
     const firstSection = container.querySelector('main > section:first-child');
     const heroHeading = firstSection?.querySelector('h1');
 
-    expect(heroHeading).toHaveTextContent(/descubre tu destino/i);
+    expect(heroHeading).toHaveTextContent(/auguria.*descubre tu destino/i);
   });
 
   it('should be accessible with proper heading hierarchy', () => {
@@ -39,18 +45,24 @@ describe('LandingPage', () => {
 
     // Múltiples H2
     const h2s = screen.getAllByRole('heading', { level: 2 });
-    expect(h2s.length).toBeGreaterThanOrEqual(3);
+    expect(h2s.length).toBeGreaterThanOrEqual(5); // 5 sections with H2: TryWithout, PlanComparison, HowItWorks, Premium, WhatIs
   });
 
-  it('should render all CTAs (register and try without)', () => {
+  it('should render all CTAs', () => {
     render(<LandingPage />);
 
     // Hero CTAs
-    expect(screen.getByRole('link', { name: /comenzar gratis/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /probar sin registro/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: /^ver mi carta del día gratis$/i })
+    ).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^crear cuenta gratis$/i })).toBeInTheDocument();
 
-    // Try without register CTA
-    expect(screen.getByRole('link', { name: /carta del día gratis/i })).toBeInTheDocument();
+    // Try without register section has its own CTA (case insensitive)
+    const dailyCardLinks = screen.getAllByRole('link', { name: /carta del día gratis/i });
+    expect(dailyCardLinks.length).toBeGreaterThanOrEqual(1);
+
+    // HowItWorks CTA
+    expect(screen.getByRole('link', { name: /comienza tu viaje/i })).toBeInTheDocument();
 
     // Premium CTA
     expect(screen.getByRole('link', { name: /actualizar a premium/i })).toBeInTheDocument();
