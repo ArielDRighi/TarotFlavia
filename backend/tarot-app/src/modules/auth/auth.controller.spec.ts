@@ -20,11 +20,13 @@ describe('AuthController', () => {
           user: { id: number; email: string };
           access_token: string;
           refresh_token: string;
+          isNewUser: boolean;
         }> => {
           return Promise.resolve({
             user: { id: 1, email: dto.email },
             access_token: 't',
             refresh_token: 'refresh_t',
+            isNewUser: true,
           });
         },
       ),
@@ -125,6 +127,26 @@ describe('AuthController', () => {
       if (res.user && 'email' in res.user) {
         expect(res.user.email).toEqual(dto.email);
       }
+    });
+
+    it('should return isNewUser: true for new registration', async () => {
+      const dto: CreateUserDto = {
+        email: 'new@e.com',
+        name: 'New',
+        password: 'pass',
+      };
+      const mockReq = {
+        ip: '127.0.0.1',
+        get: jest.fn((name: string) => {
+          if (name === 'user-agent') {
+            return 'test-user-agent';
+          }
+          return undefined;
+        }) as Request['get'],
+      } as Request;
+
+      const res = await controller.register(dto, mockReq);
+      expect(res).toHaveProperty('isNewUser', true);
     });
   });
 

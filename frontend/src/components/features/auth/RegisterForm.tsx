@@ -10,6 +10,7 @@ import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { WelcomeModal } from '@/components/features/onboarding';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/utils/useToast';
 import { registerSchema, type RegisterFormData } from '@/lib/validations/auth.schemas';
@@ -24,6 +25,7 @@ export function RegisterForm() {
   const router = useRouter();
   const { login, register: registerUser } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
 
   const {
     register,
@@ -42,17 +44,24 @@ export function RegisterForm() {
   const onSubmit = async (data: RegisterFormData) => {
     setIsSubmitting(true);
     try {
-      await registerUser({
+      const response = await registerUser({
         name: data.name,
         email: data.email,
         password: data.password,
       });
+
       toast.success('Cuenta creada exitosamente');
 
       // Auto-login with the new credentials
       try {
         await login(data.email, data.password);
-        router.push('/perfil');
+
+        // Show welcome modal if isNewUser is true
+        if (response.isNewUser) {
+          setShowWelcomeModal(true);
+        } else {
+          router.push('/perfil');
+        }
       } catch {
         // Account was created but auto-login failed
         toast.error('Cuenta creada. Por favor, inicia sesión manualmente');
@@ -66,110 +75,119 @@ export function RegisterForm() {
     }
   };
 
+  const handleWelcomeModalClose = () => {
+    setShowWelcomeModal(false);
+    router.push('/');
+  };
+
   return (
-    <Card className="shadow-soft w-full max-w-md rounded-2xl">
-      <CardHeader className="text-center">
-        <h1 className="text-primary font-serif text-3xl">Únete al Oráculo</h1>
-      </CardHeader>
+    <>
+      <Card className="shadow-soft w-full max-w-md rounded-2xl">
+        <CardHeader className="text-center">
+          <h1 className="text-primary font-serif text-3xl">Únete al Oráculo</h1>
+        </CardHeader>
 
-      <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* Name Field */}
-          <div className="space-y-2">
-            <label htmlFor="name" className="text-sm font-medium">
-              Nombre
-            </label>
-            <Input
-              id="name"
-              type="text"
-              placeholder="Tu nombre"
-              autoComplete="name"
-              disabled={isSubmitting}
-              className="focus:border-primary bg-gray-50"
-              {...register('name')}
-              aria-invalid={errors.name ? 'true' : 'false'}
-            />
-            {errors.name && <p className="text-destructive text-sm">{errors.name.message}</p>}
-          </div>
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {/* Name Field */}
+            <div className="space-y-2">
+              <label htmlFor="name" className="text-sm font-medium">
+                Nombre
+              </label>
+              <Input
+                id="name"
+                type="text"
+                placeholder="Tu nombre"
+                autoComplete="name"
+                disabled={isSubmitting}
+                className="focus:border-primary bg-gray-50"
+                {...register('name')}
+                aria-invalid={errors.name ? 'true' : 'false'}
+              />
+              {errors.name && <p className="text-destructive text-sm">{errors.name.message}</p>}
+            </div>
 
-          {/* Email Field */}
-          <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium">
-              Email
-            </label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="tu@email.com"
-              autoComplete="email"
-              disabled={isSubmitting}
-              className="focus:border-primary bg-gray-50"
-              {...register('email')}
-              aria-invalid={errors.email ? 'true' : 'false'}
-            />
-            {errors.email && <p className="text-destructive text-sm">{errors.email.message}</p>}
-          </div>
+            {/* Email Field */}
+            <div className="space-y-2">
+              <label htmlFor="email" className="text-sm font-medium">
+                Email
+              </label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="tu@email.com"
+                autoComplete="email"
+                disabled={isSubmitting}
+                className="focus:border-primary bg-gray-50"
+                {...register('email')}
+                aria-invalid={errors.email ? 'true' : 'false'}
+              />
+              {errors.email && <p className="text-destructive text-sm">{errors.email.message}</p>}
+            </div>
 
-          {/* Password Field */}
-          <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium">
-              Contraseña
-            </label>
-            <Input
-              id="password"
-              type="password"
-              autoComplete="new-password"
-              disabled={isSubmitting}
-              className="focus:border-primary bg-gray-50"
-              {...register('password')}
-              aria-invalid={errors.password ? 'true' : 'false'}
-            />
-            {errors.password && (
-              <p className="text-destructive text-sm">{errors.password.message}</p>
-            )}
-          </div>
+            {/* Password Field */}
+            <div className="space-y-2">
+              <label htmlFor="password" className="text-sm font-medium">
+                Contraseña
+              </label>
+              <Input
+                id="password"
+                type="password"
+                autoComplete="new-password"
+                disabled={isSubmitting}
+                className="focus:border-primary bg-gray-50"
+                {...register('password')}
+                aria-invalid={errors.password ? 'true' : 'false'}
+              />
+              {errors.password && (
+                <p className="text-destructive text-sm">{errors.password.message}</p>
+              )}
+            </div>
 
-          {/* Confirm Password Field */}
-          <div className="space-y-2">
-            <label htmlFor="confirmPassword" className="text-sm font-medium">
-              Confirmar Contraseña
-            </label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              autoComplete="new-password"
-              disabled={isSubmitting}
-              className="focus:border-primary bg-gray-50"
-              {...register('confirmPassword')}
-              aria-invalid={errors.confirmPassword ? 'true' : 'false'}
-            />
-            {errors.confirmPassword && (
-              <p className="text-destructive text-sm">{errors.confirmPassword.message}</p>
-            )}
-          </div>
+            {/* Confirm Password Field */}
+            <div className="space-y-2">
+              <label htmlFor="confirmPassword" className="text-sm font-medium">
+                Confirmar Contraseña
+              </label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                autoComplete="new-password"
+                disabled={isSubmitting}
+                className="focus:border-primary bg-gray-50"
+                {...register('confirmPassword')}
+                aria-invalid={errors.confirmPassword ? 'true' : 'false'}
+              />
+              {errors.confirmPassword && (
+                <p className="text-destructive text-sm">{errors.confirmPassword.message}</p>
+              )}
+            </div>
 
-          {/* Submit Button */}
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creando...
-              </>
-            ) : (
-              'Crear Cuenta'
-            )}
-          </Button>
-        </form>
-      </CardContent>
+            {/* Submit Button */}
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creando...
+                </>
+              ) : (
+                'Crear Cuenta'
+              )}
+            </Button>
+          </form>
+        </CardContent>
 
-      <CardFooter className="flex justify-center">
-        <p className="text-muted-foreground text-sm">
-          ¿Ya tienes cuenta?{' '}
-          <Link href="/login" className="text-primary hover:underline">
-            Inicia sesión
-          </Link>
-        </p>
-      </CardFooter>
-    </Card>
+        <CardFooter className="flex justify-center">
+          <p className="text-muted-foreground text-sm">
+            ¿Ya tienes cuenta?{' '}
+            <Link href="/login" className="text-primary hover:underline">
+              Inicia sesión
+            </Link>
+          </p>
+        </CardFooter>
+      </Card>
+
+      <WelcomeModal isOpen={showWelcomeModal} onClose={handleWelcomeModalClose} />
+    </>
   );
 }

@@ -221,7 +221,13 @@ describe('RegisterForm', () => {
     });
 
     it('should auto-login and redirect to /perfil on successful registration', async () => {
-      mockRegister.mockResolvedValueOnce(undefined);
+      // Mock register to return isNewUser: false (existing behavior)
+      mockRegister.mockResolvedValueOnce({
+        user: { id: 1, email: 'test@test.com', name: 'Test User' },
+        access_token: 'token',
+        refresh_token: 'refresh',
+        isNewUser: false,
+      });
       mockLogin.mockResolvedValueOnce(undefined);
       const user = userEvent.setup();
       render(<RegisterForm />);
@@ -376,6 +382,111 @@ describe('RegisterForm', () => {
 
       await waitFor(() => {
         expect(screen.getByText(/creando.../i)).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Onboarding Modal', () => {
+    it('should show welcome modal when isNewUser is true', async () => {
+      const user = userEvent.setup();
+
+      // Mock register to return isNewUser: true
+      mockRegister.mockResolvedValue({
+        user: { id: 1, email: 'test@example.com', name: 'Test User' },
+        access_token: 'token',
+        refresh_token: 'refresh',
+        isNewUser: true,
+      });
+
+      // Mock login success
+      mockLogin.mockResolvedValue(undefined);
+
+      render(<RegisterForm />);
+
+      // Fill form
+      await user.type(screen.getByLabelText(/nombre/i), 'Test User');
+      await user.type(screen.getByLabelText(/email/i), 'test@example.com');
+      await user.type(screen.getByLabelText(/^contraseña$/i), 'SecurePass123!');
+      await user.type(screen.getByLabelText(/confirmar contraseña/i), 'SecurePass123!');
+
+      // Submit form
+      await user.click(screen.getByRole('button', { name: /crear cuenta/i }));
+
+      // Wait for modal to appear
+      await waitFor(() => {
+        expect(screen.getByRole('dialog')).toBeInTheDocument();
+        expect(screen.getByText(/bienvenid[ao]/i)).toBeInTheDocument();
+      });
+    });
+
+    it('should not show welcome modal when isNewUser is false', async () => {
+      const user = userEvent.setup();
+
+      // Mock register to return isNewUser: false (shouldn't happen in real app, but for testing)
+      mockRegister.mockResolvedValue({
+        user: { id: 1, email: 'test@example.com', name: 'Test User' },
+        access_token: 'token',
+        refresh_token: 'refresh',
+        isNewUser: false,
+      });
+
+      // Mock login success
+      mockLogin.mockResolvedValue(undefined);
+
+      render(<RegisterForm />);
+
+      // Fill form
+      await user.type(screen.getByLabelText(/nombre/i), 'Test User');
+      await user.type(screen.getByLabelText(/email/i), 'test@example.com');
+      await user.type(screen.getByLabelText(/^contraseña$/i), 'SecurePass123!');
+      await user.type(screen.getByLabelText(/confirmar contraseña/i), 'SecurePass123!');
+
+      // Submit form
+      await user.click(screen.getByRole('button', { name: /crear cuenta/i }));
+
+      // Wait for redirect
+      await waitFor(() => {
+        expect(mockPush).toHaveBeenCalled();
+      });
+
+      // Modal should not be present
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it('should redirect to home after closing welcome modal', async () => {
+      const user = userEvent.setup();
+
+      // Mock register to return isNewUser: true
+      mockRegister.mockResolvedValue({
+        user: { id: 1, email: 'test@example.com', name: 'Test User' },
+        access_token: 'token',
+        refresh_token: 'refresh',
+        isNewUser: true,
+      });
+
+      // Mock login success
+      mockLogin.mockResolvedValue(undefined);
+
+      render(<RegisterForm />);
+
+      // Fill and submit form
+      await user.type(screen.getByLabelText(/nombre/i), 'Test User');
+      await user.type(screen.getByLabelText(/email/i), 'test@example.com');
+      await user.type(screen.getByLabelText(/^contraseña$/i), 'SecurePass123!');
+      await user.type(screen.getByLabelText(/confirmar contraseña/i), 'SecurePass123!');
+      await user.click(screen.getByRole('button', { name: /crear cuenta/i }));
+
+      // Wait for modal and close it
+      await waitFor(() => {
+        expect(screen.getByRole('dialog')).toBeInTheDocument();
+      });
+
+      const ctaButton = screen.getByRole('button', { name: /comenzar|explorar|empezar/i });
+      await user.click(ctaButton);
+
+      // Should redirect to home
+      await waitFor(() => {
+        expect(mockPush).toHaveBeenCalledWith('/');
       });
     });
   });

@@ -2,7 +2,13 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { toast } from '@/hooks/utils/useToast';
 import { apiClient } from '@/lib/api/axios-config';
-import type { AuthUser, AuthStore, LoginResponse, RegisterCredentials } from '@/types';
+import type {
+  AuthUser,
+  AuthStore,
+  LoginResponse,
+  RegisterCredentials,
+  RegisterResponse,
+} from '@/types';
 
 /**
  * Zustand store for authentication state
@@ -76,7 +82,8 @@ export const useAuthStore = create<AuthStore>()(
 
       register: async (credentials: RegisterCredentials) => {
         try {
-          await apiClient.post('/auth/register', credentials);
+          const response = await apiClient.post<RegisterResponse>('/auth/register', credentials);
+          return response.data;
         } catch (error) {
           // Extract error message from API response
           const axiosError = error as { response?: { data?: { message?: string } } };
