@@ -1,4 +1,4 @@
-# 🔮 Tarot Flavia - Plataforma de Tarot con IA
+# 🔮 Auguria - Plataforma de Tarot con IA
 
 Marketplace de tarotistas profesionales con generación de lecturas de tarot asistidas por inteligencia artificial.
 
@@ -18,7 +18,7 @@ Marketplace de tarotistas profesionales con generación de lecturas de tarot asi
 
 ## 🎯 Descripción
 
-TarotFlavia es una plataforma completa de lecturas de tarot que combina:
+Auguria es una plataforma completa de lecturas de tarot que combina:
 
 - **Backend NestJS**: API RESTful robusta con arquitectura escalable
 - **Base de datos PostgreSQL**: Almacenamiento de usuarios, lecturas e interpretaciones
@@ -136,8 +136,8 @@ docker --version  # Opcional para PostgreSQL en contenedor
 ### 1. Clonar el Repositorio
 
 ```bash
-git clone https://github.com/ArielDRighi/TarotFlavia.git
-cd TarotFlavia
+git clone https://github.com/ArielDRighi/Auguria.git
+cd Auguria
 ```
 
 ### 2. Instalar Dependencias
@@ -518,7 +518,7 @@ test(cache): agregar tests de invalidación
 
 ## 🔒 Seguridad
 
-Para reportar vulnerabilidades de seguridad, por favor **NO** crear un issue público. Enviar un email a: [seguridad@tarotflavia.com] (o contactar directamente al mantenedor).
+Para reportar vulnerabilidades de seguridad, por favor **NO** crear un issue público. Enviar un email a: [seguridad@auguria.com] (o contactar directamente al mantenedor).
 
 Ver [SECURITY.md](backend/tarot-app/docs/SECURITY.md) para más información sobre políticas de seguridad.
 
@@ -536,8 +536,8 @@ Este proyecto es privado y propietario. Todos los derechos reservados.
 
 Para preguntas o soporte:
 
-- **Issues**: [GitHub Issues](https://github.com/ArielDRighi/TarotFlavia/issues)
-- **Email**: soporte@tarotflavia.com
+- **Issues**: [GitHub Issues](https://github.com/ArielDRighi/Auguria/issues)
+- **Email**: soporte@auguria.com
 - **Documentación**: Ver carpeta `docs/`
 
 ## 🗺️ Roadmap

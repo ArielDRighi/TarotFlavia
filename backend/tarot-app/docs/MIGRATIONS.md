@@ -2,7 +2,7 @@
 
 ## Descripción General
 
-Este documento describe el sistema de migraciones de base de datos implementado para TarotFlavia Backend. Hemos migrado de usar `synchronize: true` de TypeORM a un sistema controlado de migraciones para mayor control y seguridad en los cambios del esquema de base de datos.
+Este documento describe el sistema de migraciones de base de datos implementado para Auguria Backend. Hemos migrado de usar `synchronize: true` de TypeORM a un sistema controlado de migraciones para mayor control y seguridad en los cambios del esquema de base de datos.
 
 ## ¿Por qué Migraciones?
 

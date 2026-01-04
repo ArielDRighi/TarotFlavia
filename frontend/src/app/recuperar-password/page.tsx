@@ -1,8 +1,8 @@
 import { ForgotPasswordForm } from '@/components/features/auth';
 
 export const metadata = {
-  title: 'Recuperar Contraseña | TarotFlavia',
-  description: 'Recupera tu contraseña de TarotFlavia',
+  title: 'Recuperar Contraseña | Auguria',
+  description: 'Recupera tu contraseña de Auguria',
 };
 
 export default function ForgotPasswordPage() {

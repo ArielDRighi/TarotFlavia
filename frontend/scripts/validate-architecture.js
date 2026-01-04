@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Validador de Arquitectura Frontend - TarotFlavia
+ * Validador de Arquitectura Frontend - Auguria
  *
  * Valida que el código siga la arquitectura feature-based definida en ARCHITECTURE.md
  *
@@ -469,7 +469,7 @@ function printReport() {
 // =============================================================================
 
 function main() {
-  console.log('🏗️  Validador de Arquitectura Frontend - TarotFlavia\n');
+  console.log('🏭️  Validador de Arquitectura Frontend - Auguria\n');
 
   // Verificar que existe src/
   if (!fs.existsSync(SRC_DIR)) {

@@ -1,4 +1,4 @@
-# Arquitectura - Tarot Frontend
+# Arquitectura - Auguria Frontend
 
 ## Visión General
 
@@ -128,10 +128,10 @@ Cada tipo de archivo tiene **una responsabilidad clara**:
 
 ```tsx
 // app/lecturas/page.tsx
-import { ReadingsList } from "@/components/features/readings/ReadingsList";
+import { ReadingsList } from '@/components/features/readings/ReadingsList';
 
 export const metadata = {
-  title: "Mis Lecturas | TarotFlavia",
+  title: 'Mis Lecturas | Auguria',
 };
 
 export default function ReadingsPage() {
@@ -170,8 +170,8 @@ export function ReadingCard({ reading, onDelete }: ReadingCardProps) {
 // hooks/api/useReadings.ts
 export function useReadings() {
   return useQuery({
-    queryKey: ["readings"],
-    queryFn: () => apiClient.get("/readings"),
+    queryKey: ['readings'],
+    queryFn: () => apiClient.get('/readings'),
   });
 }
 
@@ -181,7 +181,7 @@ export function useDeleteReading() {
   return useMutation({
     mutationFn: (id: string) => apiClient.delete(`/readings/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["readings"] });
+      queryClient.invalidateQueries({ queryKey: ['readings'] });
     },
   });
 }
@@ -233,7 +233,7 @@ const apiClient = axios.create({
 
 // Interceptor para JWT
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem("access_token");
+  const token = localStorage.getItem('access_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -243,8 +243,8 @@ apiClient.interceptors.request.use((config) => {
 // 2. Crear hooks de React Query (hooks/api/useReadings.ts)
 export function useReadings(filters?: ReadingFilters) {
   return useQuery({
-    queryKey: ["readings", filters],
-    queryFn: () => apiClient.get("/readings", { params: filters }),
+    queryKey: ['readings', filters],
+    queryFn: () => apiClient.get('/readings', { params: filters }),
     staleTime: 5 * 60 * 1000, // 5 minutos
   });
 }
@@ -277,8 +277,8 @@ function ReadingsList() {
 ```tsx
 // 1. Schema de validación (lib/validations/reading.schemas.ts)
 export const createReadingSchema = z.object({
-  question: z.string().min(10, "Mínimo 10 caracteres"),
-  spreadType: z.enum(["SIMPLE", "CRUZ_CELTA", "TRES_CARTAS"]),
+  question: z.string().min(10, 'Mínimo 10 caracteres'),
+  spreadType: z.enum(['SIMPLE', 'CRUZ_CELTA', 'TRES_CARTAS']),
   isPrivate: z.boolean().default(true),
 });
 
@@ -295,17 +295,19 @@ function ReadingForm() {
 
   const onSubmit = (data: CreateReadingForm) => {
     mutate(data, {
-      onSuccess: () => toast.success("Lectura creada"),
+      onSuccess: () => toast.success('Lectura creada'),
       onError: (error) => toast.error(error.message),
     });
   };
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)}>
-      <Input {...form.register("question")} />
-      {form.formState.errors.question && <ErrorMessage>{form.formState.errors.question.message}</ErrorMessage>}
+      <Input {...form.register('question')} />
+      {form.formState.errors.question && (
+        <ErrorMessage>{form.formState.errors.question.message}</ErrorMessage>
+      )}
       <Button type="submit" disabled={isPending}>
-        {isPending ? "Creando..." : "Crear Lectura"}
+        {isPending ? 'Creando...' : 'Crear Lectura'}
       </Button>
     </form>
   );
@@ -324,24 +326,24 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        "bg-main": "#F9F7F2",
-        primary: "#805AD5",
-        secondary: "#D69E2E",
+        'bg-main': '#F9F7F2',
+        primary: '#805AD5',
+        secondary: '#D69E2E',
       },
       fontFamily: {
-        serif: ["Cormorant Garamond", "serif"],
-        sans: ["Lato", "sans-serif"],
+        serif: ['Cormorant Garamond', 'serif'],
+        sans: ['Lato', 'sans-serif'],
       },
       boxShadow: {
-        soft: "0 4px 20px -2px rgba(128, 90, 213, 0.1)",
+        soft: '0 4px 20px -2px rgba(128, 90, 213, 0.1)',
       },
     },
   },
 };
 
 // 2. Utility para merge clases (lib/utils/cn.ts)
-import { clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -349,7 +351,7 @@ export function cn(...inputs: ClassValue[]) {
 
 // 3. Uso en componentes
 function ReadingCard({ className, ...props }) {
-  return <Card className={cn("shadow-soft", className)}>{/* Merge automático de clases */}</Card>;
+  return <Card className={cn('shadow-soft', className)}>{/* Merge automático de clases */}</Card>;
 }
 ```
 
@@ -375,7 +377,7 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       // Refresh token o redirect a login
     }
-    throw new ApiError(error.response?.data?.message || "Error desconocido");
+    throw new ApiError(error.response?.data?.message || 'Error desconocido');
   }
 );
 
@@ -408,25 +410,25 @@ function ReadingsList() {
 
 ```tsx
 // tests/components/ReadingCard.test.tsx
-import { render, screen, fireEvent } from "@testing-library/react";
-import { ReadingCard } from "@/components/features/readings/ReadingCard";
+import { render, screen, fireEvent } from '@testing-library/react';
+import { ReadingCard } from '@/components/features/readings/ReadingCard';
 
-describe("ReadingCard", () => {
-  it("should render reading question", () => {
-    const reading = { id: "1", question: "¿Encontraré el amor?" };
+describe('ReadingCard', () => {
+  it('should render reading question', () => {
+    const reading = { id: '1', question: '¿Encontraré el amor?' };
     render(<ReadingCard reading={reading} />);
 
-    expect(screen.getByText("¿Encontraré el amor?")).toBeInTheDocument();
+    expect(screen.getByText('¿Encontraré el amor?')).toBeInTheDocument();
   });
 
-  it("should call onDelete when delete button clicked", () => {
+  it('should call onDelete when delete button clicked', () => {
     const onDelete = vi.fn();
-    const reading = { id: "1", question: "Test" };
+    const reading = { id: '1', question: 'Test' };
 
     render(<ReadingCard reading={reading} onDelete={onDelete} />);
-    fireEvent.click(screen.getByRole("button", { name: /eliminar/i }));
+    fireEvent.click(screen.getByRole('button', { name: /eliminar/i }));
 
-    expect(onDelete).toHaveBeenCalledWith("1");
+    expect(onDelete).toHaveBeenCalledWith('1');
   });
 });
 ```
@@ -474,7 +476,7 @@ export function getReadings() { } // Hooks deben empezar con 'use'
 
 ```tsx
 // Lazy loading de componentes pesados
-const AdminDashboard = lazy(() => import("@/components/features/admin/Dashboard"));
+const AdminDashboard = lazy(() => import('@/components/features/admin/Dashboard'));
 
 function AdminPage() {
   return (
@@ -488,7 +490,7 @@ function AdminPage() {
 ### 2. Image Optimization
 
 ```tsx
-import Image from "next/image";
+import Image from 'next/image';
 
 function TarotistaCard({ tarotista }) {
   return (
@@ -522,7 +524,7 @@ const ExpensiveComponent = memo(({ data }) => {
 
 ```tsx
 // ✅ CORRECTO - Sanitizar HTML del backend
-import DOMPurify from "dompurify";
+import DOMPurify from 'dompurify';
 
 function InterpretationView({ html }) {
   return (
@@ -545,7 +547,7 @@ function InterpretationView({ html }) {
 // Configurado en el backend
 
 // ✅ ACEPTABLE - localStorage con precauciones
-const token = localStorage.getItem("access_token");
+const token = localStorage.getItem('access_token');
 
 // ❌ INCORRECTO - sessionStorage (se pierde al cerrar)
 ```
@@ -655,11 +657,15 @@ function ReadingsPage() {
 
 ```tsx
 // MALO
-return <div>{data.filter((x) => x.active).map((x) => (x.type === "A" ? <ComponentA /> : <ComponentB />))}</div>;
+return (
+  <div>
+    {data.filter((x) => x.active).map((x) => (x.type === 'A' ? <ComponentA /> : <ComponentB />))}
+  </div>
+);
 
 // BUENO - Extraer a variables/funciones
 const activeItems = data.filter((x) => x.active);
-const renderItem = (item) => (item.type === "A" ? <ComponentA /> : <ComponentB />);
+const renderItem = (item) => (item.type === 'A' ? <ComponentA /> : <ComponentB />);
 
 return <div>{activeItems.map(renderItem)}</div>;
 ```

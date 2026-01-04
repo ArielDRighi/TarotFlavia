@@ -1,4 +1,4 @@
-# 🐛 Bug Fixes Backlog - TarotFlavia MVP
+# 🐛 Bug Fixes Backlog - Auguria MVP
 
 > 📋 **Propósito:** Backlog de correcciones de bugs encontrados durante QA manual (rama `qa/integration-testing`).
 

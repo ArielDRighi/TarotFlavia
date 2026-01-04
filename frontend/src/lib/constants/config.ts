@@ -6,7 +6,7 @@
 
 export const CONFIG = {
   // App info
-  APP_NAME: 'TarotFlavia',
+  APP_NAME: 'Auguria',
   APP_DESCRIPTION: 'Marketplace de tarotistas profesionales',
 
   // API

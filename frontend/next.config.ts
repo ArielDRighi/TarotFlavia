@@ -20,7 +20,7 @@ const nextConfig: NextConfig = {
       // Add patterns for avatar/profile images if using external CDN
       // {
       //   protocol: 'https',
-      //   hostname: 'cdn.tarotflavia.com',
+      //   hostname: 'cdn.auguria.com',
       //   pathname: '/avatars/**',
       // },
     ],

@@ -10,7 +10,7 @@
     <circle cx="8" cy="2" r="1" fill="#D69E2E"/>
   </g>
   
-  <!-- Text: TarotFlavia -->
+  <!-- Text: Auguria -->
   <text x="45" y="40" font-family="Cormorant Garamond, serif" font-size="28" font-weight="600" fill="#2D3748">
     Tarot<tspan fill="#805AD5">Flavia</tspan>
   </text>

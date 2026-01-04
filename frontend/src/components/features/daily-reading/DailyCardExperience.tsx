@@ -161,7 +161,7 @@ export function DailyCardExperience() {
   const handleShare = useCallback(async () => {
     if (!currentReading) return;
 
-    const shareText = `🌟 Mi Carta del Día: ${currentReading.card.name}${currentReading.isReversed ? ' (Invertida)' : ''}\n\n${currentReading.interpretation}\n\n✨ Descubre tu carta en TarotFlavia`;
+    const shareText = `🌟 Mi Carta del Día: ${currentReading.card.name}${currentReading.isReversed ? ' (Invertida)' : ''}\n\n${currentReading.interpretation}\n\n✨ Descubre tu carta en Auguria`;
 
     try {
       await navigator.clipboard.writeText(shareText);

@@ -1,8 +1,8 @@
-# Copilot Code Review Instructions - TarotFlavia
+# Copilot Code Review Instructions - Auguria
 
 ## 🎯 Contexto del Proyecto
 
-TarotFlavia es un **monorepo**:
+Auguria es un **monorepo**:
 
 - `backend/tarot-app/` - NestJS API (puerto 3000)
 - `frontend/` - Next.js App (puerto 3001)

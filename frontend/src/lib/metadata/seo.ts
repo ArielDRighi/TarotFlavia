@@ -1,10 +1,9 @@
 import type { Metadata } from 'next';
 
 /**
- * SEO Configuration for TarotFlavia
+ * SEO Configuration for Auguria
  *
  * Centralized metadata configuration for consistent SEO across all pages.
- * Note: Using placeholder name "TarotFlavia" - will be updated when final brand name is decided.
  */
 
 /**
@@ -28,7 +27,7 @@ const DEFAULT_OG_IMAGE = `${BASE_URL}/og-image.png`;
 /**
  * Site name used across all metadata
  */
-const SITE_NAME = 'TarotFlavia';
+const SITE_NAME = 'Auguria';
 
 /**
  * Default metadata shared across all pages

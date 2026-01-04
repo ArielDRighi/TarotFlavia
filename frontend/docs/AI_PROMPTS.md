@@ -1,4 +1,4 @@
-# Prompts para Desarrollo - Frontend TarotFlavia
+# Prompts para Desarrollo - Frontend Auguria
 
 > 📋 **Uso:** Copiar y pegar el prompt correspondiente según el tipo de tarea junto con la descripción específica de la tarea del backlog.
 

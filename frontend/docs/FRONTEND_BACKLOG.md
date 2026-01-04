@@ -1,6 +1,6 @@
-# 🎯 Backlog Técnico Frontend - TarotFlavia
+# 🎯 Backlog Técnico Frontend - Auguria
 
-**Proyecto:** TarotFlavia MVP
+**Proyecto:** Auguria MVP
 **Stack:** Next.js 14 + shadcn/ui + Zustand + TanStack Query + Zod
 **Prioridad:** Desarrollo secuencial de menor a mayor complejidad
 
@@ -664,7 +664,7 @@ CREAR: src/components/layout/footer.tsx
 - Componente Footer simple
 - Links: "Términos" | "Privacidad" | "Contacto"
 - Centrado, text-muted, padding vertical
-- Copyright: "© 2025 TarotFlavia"
+- Copyright: "© 2025 Auguria"
 
 CREAR: src/components/layout/user-menu.tsx
 - Dropdown usando DropdownMenu de shadcn/ui
@@ -2391,7 +2391,7 @@ IMPORTANTE:
 ---
 ```
 
-# 🎯 Backlog Frontend - TarotFlavia (Parte 3 - FINAL)
+# 🎯 Backlog Frontend - Auguria (Parte 3 - FINAL)
 
 **Fases finales: Perfil, Sesiones y Admin**
 
@@ -4355,7 +4355,7 @@ ESTRUCTURA:
 
 HEADER:
 
-- Logo de TarotFlavia centrado
+- Logo de Auguria centrado
 - Texto: "Lectura compartida"
 
 CONTENIDO:
@@ -4677,7 +4677,6 @@ IMPORTANTE:
 
 **Notas Técnicas:**
 
-- Nombre "TarotFlavia" es placeholder - actualizar cuando se defina el nombre final
 - URLs canónicas configuradas para perfiles de tarotista
 - OpenGraph images apuntan a `/og-image.png` (crear en siguiente tarea)
 - Metadata respeta políticas SEO: páginas privadas con `noindex`, públicas con `index`
@@ -4709,12 +4708,12 @@ IMPORTANTE:
 ✅ **Componentes creados:**
 
 - `OptimizedImage` - Wrapper para next/image con defaults optimizados
-- `Logo` - Componente de logo TarotFlavia con SVG
+- `Logo` - Componente de logo Auguria con SVG
 - `UserAvatar` - Avatar optimizado con fallback a iniciales
 
 ✅ **Assets SVG agregados en `/public`:**
 
-- `logo.svg` - Logo TarotFlavia (180x60px)
+- `logo.svg` - Logo Auguria (180x60px)
 - `card-placeholder.svg` - Placeholder para cartas (160x240px)
 - `avatar-placeholder.svg` - Placeholder de avatar (100x100px)
 - `icon-192.svg` - Icono PWA 192x192

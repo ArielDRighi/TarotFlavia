@@ -1,4 +1,4 @@
-# QA Testing Tracker - TarotFlavia MVP
+# QA Testing Tracker - Auguria MVP
 
 > 📋 **Propósito:** Documento para trackear bugs, issues y mejoras encontradas durante las pruebas de integración del MVP.
 
@@ -14,12 +14,12 @@
 
 **IMPORTANTE:** Todos usan la misma contraseña: `Test123456!`
 
-| Usuario                | Email                    | Contraseña                  | Plan    | Rol              | Propósito                            |
-| ---------------------- | ------------------------ | --------------------------- | ------- | ---------------- | ------------------------------------ |
-| **Free User**          | `free@test.com`          | `Test123456!`               | FREE    | Consumer         | Testing con límites de plan gratuito |
-| **Premium User**       | `premium@test.com`       | `Test123456!`               | PREMIUM | Consumer         | Testing con acceso completo premium  |
-| **Admin User**         | `admin@test.com`         | `Test123456!`               | PREMIUM | Admin + Consumer | Testing panel admin                  |
-| **Flavia (Tarotista)** | `flavia@tarotflavia.com` | `FlaviaSecurePassword2024!` | PREMIUM | Tarotist + Admin | Cuenta principal tarotista           |
+| Usuario                | Email                | Contraseña                  | Plan    | Rol              | Propósito                            |
+| ---------------------- | -------------------- | --------------------------- | ------- | ---------------- | ------------------------------------ |
+| **Free User**          | `free@test.com`      | `Test123456!`               | FREE    | Consumer         | Testing con límites de plan gratuito |
+| **Premium User**       | `premium@test.com`   | `Test123456!`               | PREMIUM | Consumer         | Testing con acceso completo premium  |
+| **Admin User**         | `admin@test.com`     | `Test123456!`               | PREMIUM | Admin + Consumer | Testing panel admin                  |
+| **Flavia (Tarotista)** | `flavia@auguria.com` | `FlaviaSecurePassword2024!` | PREMIUM | Tarotist + Admin | Cuenta principal tarotista           |
 
 ### 📂 Categorías Disponibles
 

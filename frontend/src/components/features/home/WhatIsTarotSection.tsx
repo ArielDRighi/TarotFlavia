@@ -43,9 +43,9 @@ export function WhatIsTarotSection() {
             </Card>
 
             <p className="text-gray-700 dark:text-gray-300">
-              En TarotFlavia, combinamos la sabiduría tradicional del tarot con inteligencia
-              artificial para ofrecerte interpretaciones personalizadas que te ayuden en tu camino
-              de autoconocimiento y reflexión.
+              En Auguria, combinamos la sabiduría tradicional del tarot con inteligencia artificial
+              para ofrecerte interpretaciones personalizadas que te ayuden en tu camino de
+              autoconocimiento y reflexión.
             </p>
           </div>
 

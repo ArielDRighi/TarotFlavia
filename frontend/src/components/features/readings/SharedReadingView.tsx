@@ -73,7 +73,7 @@ export function SharedReadingView({ reading, spreadName }: SharedReadingViewProp
       {/* Header */}
       <header className="border-b bg-white">
         <div className="container mx-auto px-4 py-6 text-center">
-          <h2 className="font-serif text-2xl font-bold text-purple-700">TarotFlavia</h2>
+          <h2 className="font-serif text-2xl font-bold text-purple-700">Auguria</h2>
           <p className="mt-1 text-sm text-gray-600">Lectura compartida</p>
         </div>
       </header>

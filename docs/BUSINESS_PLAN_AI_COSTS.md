@@ -1,4 +1,4 @@
-# TarotFlavia - Plan de Negocios: Costos de IA y Estrategia de Pricing
+# Auguria - Plan de Negocios: Costos de IA y Estrategia de Pricing
 
 > 📊 **Documento de Análisis Financiero**  
 > Fecha: 9 de Diciembre 2025  
@@ -227,7 +227,7 @@ Resultado:            +$159.43 USD/mes (ganancia)
 | Sanctuary (astrología) | $4.99/mes     | Lecturas ilimitadas        | USA               |
 | Tarot.com              | $6.99/mes     | Lecturas premium           | USA/Global        |
 | Pattern (astrología)   | $9.99/mes     | Premium completo           | USA               |
-| **TarotFlavia**        | **$4.99/mes** | **3 tiradas/día + diaria** | **LATAM**         |
+| **Auguria**            | **$4.99/mes** | **3 tiradas/día + diaria** | **LATAM**         |
 
 ### Análisis de Opciones de Precio
 
@@ -338,9 +338,9 @@ Resultado:            +$159.43 USD/mes (ganancia)
 
 ---
 
-**Documento preparado para:** Propietario de TarotFlavia  
+**Documento preparado para:** Propietario de Auguria  
 **Fecha:** 9 de Diciembre 2025  
-**Autor:** Equipo de Desarrollo TarotFlavia
+**Autor:** Equipo de Desarrollo Auguria
 
 ---
 
