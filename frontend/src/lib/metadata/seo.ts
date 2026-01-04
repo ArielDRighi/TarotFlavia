@@ -79,7 +79,7 @@ export const defaultMetadata: Metadata = {
 export const homeMetadata: Metadata = {
   title: 'Tu guía espiritual',
   description:
-    'Lecturas de tarot con IA y sesiones con tarotistas profesionales. Descubre tu destino y conecta con guías espirituales.',
+    'Lecturas de tarot personalizadas y sesiones con tarotistas profesionales. Descubre tu destino y conecta con guías espirituales.',
   openGraph: {
     title: `${SITE_NAME} - Tu guía espiritual`,
     description:

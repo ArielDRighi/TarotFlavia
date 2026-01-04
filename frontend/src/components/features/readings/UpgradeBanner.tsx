@@ -12,9 +12,7 @@ export default function UpgradeBanner({ onUpgradeClick }: UpgradeBannerProps) {
         <div className="flex items-start gap-3">
           <Gem className="mt-1 h-6 w-6 flex-shrink-0" />
           <div>
-            <h3 className="mb-1 font-semibold">
-              💎 Desbloquea interpretaciones personalizadas con IA
-            </h3>
+            <h3 className="mb-1 font-semibold">💎 Desbloquea interpretaciones personalizadas</h3>
             <p className="text-sm text-white/90">
               Con Premium, obtén análisis detallados, lecturas ilimitadas y acceso a todas las
               tiradas especiales.

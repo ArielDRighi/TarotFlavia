@@ -23,7 +23,7 @@ export interface PremiumPreviewProps {
  * que invita a actualizar a Premium.
  *
  * Usado para mostrar previews de:
- * - Interpretaciones con IA (blurred)
+ * - Interpretaciones personalizadas (blurred)
  * - Estadísticas avanzadas (blurred)
  * - Features premium en general
  *
@@ -31,7 +31,7 @@ export interface PremiumPreviewProps {
  * ```tsx
  * <PremiumPreview onUpgrade={() => router.push('/registro')}>
  *   <div className="p-4">
- *     <h3>Interpretación con IA</h3>
+ *     <h3>Interpretación personalizada</h3>
  *     <p>Esta es una interpretación profunda...</p>
  *   </div>
  * </PremiumPreview>
@@ -58,7 +58,7 @@ export default function PremiumPreview({
           <div className="space-y-2">
             <h3 className="text-foreground font-serif text-lg font-semibold">{message}</h3>
             <p className="text-muted-foreground text-sm">
-              Accede a interpretaciones personalizadas con IA y todas las funcionalidades avanzadas
+              Accede a interpretaciones personalizadas y todas las funcionalidades avanzadas
             </p>
           </div>
           <Button

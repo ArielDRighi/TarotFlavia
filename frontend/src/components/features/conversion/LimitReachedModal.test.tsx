@@ -58,7 +58,7 @@ describe('LimitReachedModal', () => {
     );
 
     expect(screen.getByText(/3 lecturas diarias/i)).toBeInTheDocument();
-    expect(screen.getByText(/Interpretaciones con IA/i)).toBeInTheDocument();
+    expect(screen.getByText(/Interpretaciones personalizadas/i)).toBeInTheDocument();
   });
 
   it('should call onUpgrade when clicking upgrade button', async () => {

@@ -285,7 +285,7 @@ export function TarotistaProfilePage({ id }: TarotistaProfilePageProps) {
                 <Sparkles className="text-primary h-8 w-8" />
               </div>
               <h2 className="font-serif text-2xl font-semibold tracking-tight">Oráculo Digital</h2>
-              <CardDescription className="text-base">Lectura con IA personalizada</CardDescription>
+              <CardDescription className="text-base">Lectura personalizada</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 text-center">
               <p className="text-gray-600">

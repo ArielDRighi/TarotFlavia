@@ -50,7 +50,7 @@ vi.mock('./UpgradeBanner', () => ({
   default: function MockUpgradeBanner({ onUpgradeClick }: { onUpgradeClick: () => void }) {
     return (
       <div data-testid="upgrade-banner">
-        <p>💎 Desbloquea interpretaciones personalizadas con IA</p>
+        <p>💎 Desbloquea interpretaciones personalizadas</p>
         <button onClick={onUpgradeClick}>Upgrade a Premium</button>
       </div>
     );
@@ -260,9 +260,7 @@ describe('ReadingExperience - Upgrade Banner for FREE users', () => {
       expect(screen.getByTestId('upgrade-banner')).toBeInTheDocument();
     });
 
-    expect(
-      screen.getByText(/desbloquea interpretaciones personalizadas con ia/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/desbloquea interpretaciones personalizadas/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /upgrade a premium/i })).toBeInTheDocument();
   });
 

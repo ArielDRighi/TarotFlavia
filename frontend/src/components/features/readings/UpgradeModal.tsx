@@ -26,7 +26,7 @@ export interface UpgradeModalProps {
 const PREMIUM_BENEFITS = [
   {
     icon: Sparkles,
-    text: 'Interpretaciones con IA personalizadas',
+    text: 'Interpretaciones personalizadas y profundas',
     description: 'Análisis profundos adaptados a tu situación',
   },
   {
@@ -76,7 +76,7 @@ export default function UpgradeModal({ open, onClose }: UpgradeModalProps) {
             Desbloquea todo el potencial del Tarot
           </DialogTitle>
           <DialogDescription className="text-center text-base">
-            Accede a interpretaciones personalizadas con IA y todas las funcionalidades avanzadas
+            Accede a interpretaciones personalizadas y todas las funcionalidades avanzadas
           </DialogDescription>
         </DialogHeader>
 
