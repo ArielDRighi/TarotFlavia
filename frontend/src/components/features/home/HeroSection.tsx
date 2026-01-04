@@ -10,22 +10,22 @@ export function HeroSection() {
         {/* Content */}
         <div className="space-y-6">
           <h1 className="font-serif text-4xl font-bold text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
-            Descubre tu destino con Tarot personalizado
+            Auguria: Descubre tu destino a través del Tarot
           </h1>
 
           <p className="text-lg text-gray-600 md:text-xl dark:text-gray-300">
-            Interpretaciones con inteligencia artificial guiadas por la experiencia de Flavia,
-            tarotista profesional con más de 15 años de experiencia.
+            Lecturas de tarot personalizadas que iluminan tu camino. Desde consultas rápidas hasta
+            interpretaciones profundas, encuentra las respuestas que buscas.
           </p>
 
           {/* CTAs */}
           <div className="flex flex-col gap-4 sm:flex-row">
             <Button asChild size="lg">
-              <Link href={ROUTES.REGISTER}>Comenzar Gratis</Link>
+              <Link href={ROUTES.CARTA_DEL_DIA}>Ver mi carta del día gratis</Link>
             </Button>
 
             <Button asChild variant="outline" size="lg">
-              <Link href={ROUTES.CARTA_DEL_DIA}>Probar sin registro</Link>
+              <Link href={ROUTES.REGISTER}>Crear cuenta gratis</Link>
             </Button>
           </div>
         </div>

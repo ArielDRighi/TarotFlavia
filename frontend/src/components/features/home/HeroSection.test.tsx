@@ -3,11 +3,11 @@ import { describe, it, expect } from 'vitest';
 import { HeroSection } from './HeroSection';
 
 describe('HeroSection', () => {
-  it('should render main headline', () => {
+  it('should render main headline with Auguria branding', () => {
     render(<HeroSection />);
 
     const headline = screen.getByRole('heading', {
-      name: /descubre tu destino con tarot personalizado/i,
+      name: /auguria.*descubre tu destino a través del tarot/i,
       level: 1,
     });
 
@@ -17,27 +17,27 @@ describe('HeroSection', () => {
   it('should render subheadline with value proposition', () => {
     render(<HeroSection />);
 
-    const subheadline = screen.getByText(/interpretaciones con inteligencia artificial/i);
+    const subheadline = screen.getByText(/lecturas de tarot personalizadas/i);
 
     expect(subheadline).toBeInTheDocument();
   });
 
-  it('should render primary CTA button with correct link', () => {
+  it('should render primary CTA button "Ver mi carta del día gratis"', () => {
     render(<HeroSection />);
 
-    const primaryCTA = screen.getByRole('link', { name: /comenzar gratis/i });
+    const primaryCTA = screen.getByRole('link', { name: /ver mi carta del día gratis/i });
 
     expect(primaryCTA).toBeInTheDocument();
-    expect(primaryCTA).toHaveAttribute('href', '/registro');
+    expect(primaryCTA).toHaveAttribute('href', '/carta-del-dia');
   });
 
-  it('should render secondary CTA button with correct link', () => {
+  it('should render secondary CTA button "Crear cuenta gratis"', () => {
     render(<HeroSection />);
 
-    const secondaryCTA = screen.getByRole('link', { name: /probar sin registro/i });
+    const secondaryCTA = screen.getByRole('link', { name: /crear cuenta gratis/i });
 
     expect(secondaryCTA).toBeInTheDocument();
-    expect(secondaryCTA).toHaveAttribute('href', '/carta-del-dia');
+    expect(secondaryCTA).toHaveAttribute('href', '/registro');
   });
 
   it('should render hero image with alt text', () => {

@@ -143,6 +143,41 @@ describe('useRequireAuth', () => {
     });
   });
 
+  describe('custom redirect options', () => {
+    it('should redirect to custom path with query params when provided', async () => {
+      renderHook(() =>
+        useRequireAuth({
+          redirectTo: '/registro',
+          redirectQuery: { message: 'register-for-readings' },
+        })
+      );
+
+      await waitFor(() => {
+        expect(mockPush).toHaveBeenCalledWith('/registro?message=register-for-readings');
+      });
+    });
+
+    it('should redirect to custom path without query params', async () => {
+      renderHook(() =>
+        useRequireAuth({
+          redirectTo: '/custom-page',
+        })
+      );
+
+      await waitFor(() => {
+        expect(mockPush).toHaveBeenCalledWith('/custom-page');
+      });
+    });
+
+    it('should default to /login when no redirect options provided', async () => {
+      renderHook(() => useRequireAuth());
+
+      await waitFor(() => {
+        expect(mockPush).toHaveBeenCalledWith('/login');
+      });
+    });
+  });
+
   describe('return type', () => {
     it('should return object with isLoading property', () => {
       const { result } = renderHook(() => useRequireAuth());
