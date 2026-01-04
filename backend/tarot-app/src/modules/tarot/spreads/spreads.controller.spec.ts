@@ -5,6 +5,7 @@ import { SpreadsService } from './spreads.service';
 import { CreateSpreadDto } from './dto/create-spread.dto';
 import { UpdateSpreadDto } from './dto/update-spread.dto';
 import { TarotSpread } from './entities/tarot-spread.entity';
+import { UserPlan } from '../../users/entities/user.entity';
 
 describe('SpreadsController', () => {
   let controller: SpreadsController;
@@ -21,6 +22,7 @@ describe('SpreadsController', () => {
     ],
     imageUrl: 'https://example.com/three-card.jpg',
     difficulty: 'beginner',
+    requiredPlan: UserPlan.FREE,
     isBeginnerFriendly: true,
     whenToUse:
       'Ideal para consultas rápidas sobre situaciones con pasado, presente y futuro',
@@ -30,6 +32,7 @@ describe('SpreadsController', () => {
 
   const mockSpreadsService = {
     findAll: jest.fn(),
+    findAllByPlan: jest.fn(),
     findById: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
@@ -61,12 +64,14 @@ describe('SpreadsController', () => {
   describe('getAllSpreads', () => {
     it('should return an array of spreads', async () => {
       const spreads = [mockSpread];
-      mockSpreadsService.findAll.mockResolvedValue(spreads);
+      mockSpreadsService.findAllByPlan.mockResolvedValue(spreads);
 
       const result = await controller.getAllSpreads();
 
       expect(result).toEqual(spreads);
-      expect(mockSpreadsService.findAll).toHaveBeenCalled();
+      expect(mockSpreadsService.findAllByPlan).toHaveBeenCalledWith(
+        UserPlan.ANONYMOUS,
+      );
     });
   });
 
