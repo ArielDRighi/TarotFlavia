@@ -7,6 +7,7 @@ export {
   getCategories,
   getPredefinedQuestions,
   getSpreads,
+  getMyAvailableSpreads,
   createReading,
   getMyReadings,
   getReadingById,

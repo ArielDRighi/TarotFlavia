@@ -137,6 +137,7 @@ const mockSpread: Spread = {
     { position: 3, name: 'Futuro', description: 'Lo que viene' },
   ],
   difficulty: 'beginner',
+  requiredPlan: 'free',
 };
 
 describe('ReadingDetailPage', () => {

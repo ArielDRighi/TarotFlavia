@@ -4,7 +4,7 @@ import { useSearchParams } from 'next/navigation';
 
 import SpreadSelectorPage from './page';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
-import { useSpreads } from '@/hooks/api/useReadings';
+import { useMyAvailableSpreads } from '@/hooks/api/useReadings';
 import { useAuthStore } from '@/stores/authStore';
 
 // Mock modules
@@ -18,7 +18,7 @@ vi.mock('@/hooks/useRequireAuth', () => ({
 }));
 
 vi.mock('@/hooks/api/useReadings', () => ({
-  useSpreads: vi.fn(),
+  useMyAvailableSpreads: vi.fn(),
 }));
 
 vi.mock('@/stores/authStore', () => ({
@@ -52,7 +52,7 @@ describe('SpreadSelectorPage', () => {
     vi.clearAllMocks();
     (useRequireAuth as Mock).mockReturnValue({ isLoading: false });
     (useAuthStore as unknown as Mock).mockReturnValue({ user: mockUser });
-    (useSpreads as Mock).mockReturnValue({
+    (useMyAvailableSpreads as Mock).mockReturnValue({
       data: mockSpreads,
       isLoading: false,
       error: null,
@@ -107,7 +107,7 @@ describe('SpreadSelectorPage', () => {
     const mockSearchParams = new URLSearchParams('categoryId=1&questionId=1');
     (useSearchParams as Mock).mockReturnValue(mockSearchParams);
     (useRequireAuth as Mock).mockReturnValue({ isLoading: true });
-    (useSpreads as Mock).mockReturnValue({
+    (useMyAvailableSpreads as Mock).mockReturnValue({
       data: undefined,
       isLoading: true,
       error: null,

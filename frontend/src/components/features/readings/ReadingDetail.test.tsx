@@ -116,6 +116,7 @@ const mockSpread: Spread = {
     { position: 2, name: 'Obstáculo', description: 'Lo que te frena' },
   ],
   difficulty: 'beginner',
+  requiredPlan: 'free',
 };
 
 describe('ReadingDetail', () => {

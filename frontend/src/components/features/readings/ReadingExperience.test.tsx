@@ -84,6 +84,7 @@ const mockSpreads: Spread[] = [
     cardCount: 1,
     positions: [{ position: 1, name: 'Presente', description: 'Tu situación actual' }],
     difficulty: 'beginner',
+    requiredPlan: 'free',
   },
   {
     id: 2,
@@ -96,6 +97,7 @@ const mockSpreads: Spread[] = [
       { position: 3, name: 'Futuro', description: 'Lo que vendrá' },
     ],
     difficulty: 'beginner',
+    requiredPlan: 'free',
   },
   {
     id: 3,
@@ -110,6 +112,7 @@ const mockSpreads: Spread[] = [
       { position: 5, name: 'Resultado', description: 'El resultado final' },
     ],
     difficulty: 'intermediate',
+    requiredPlan: 'premium',
   },
 ];
 

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { ChevronRight, Clock, Layers, Sparkles } from 'lucide-react';
 
 import { useRequireAuth } from '@/hooks/useRequireAuth';
-import { useSpreads } from '@/hooks/api/useReadings';
+import { useMyAvailableSpreads } from '@/hooks/api/useReadings';
 import { useAuthStore } from '@/stores/authStore';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -163,7 +163,15 @@ export function SpreadSelector({ categoryId, questionId, customQuestion }: Sprea
 
   const { isLoading: isAuthLoading } = useRequireAuth();
   const { user } = useAuthStore();
-  const { data: spreads, isLoading: isSpreadsLoading, error: spreadsError, refetch } = useSpreads();
+
+  // Use different endpoint based on authentication status
+  // For authenticated users, backend filters spreads based on their plan
+  const {
+    data: spreads,
+    isLoading: isSpreadsLoading,
+    error: spreadsError,
+    refetch,
+  } = useMyAvailableSpreads();
 
   const [showLimitModal, setShowLimitModal] = useState(false);
 
