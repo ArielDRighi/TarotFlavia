@@ -23,7 +23,7 @@ import { loginSchema, type LoginFormData } from '@/lib/validations/auth.schemas'
  * - Email and password validation with Zod
  * - Inline error message display for authentication errors
  * - Loading state with disabled inputs during submission
- * - Automatic redirect to /perfil on successful login
+ * - Automatic redirect to home page (/) on successful login
  * - Form fields persist after error for easy correction
  */
 export function LoginForm() {
@@ -57,7 +57,7 @@ export function LoginForm() {
       // Short delay to ensure state is updated
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      router.push('/perfil');
+      router.push('/');
     } catch (error) {
       // Login failed - show inline error message
       // Form fields remain populated for user to correct

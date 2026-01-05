@@ -60,7 +60,7 @@ export function RegisterForm() {
         if (response.isNewUser) {
           setShowWelcomeModal(true);
         } else {
-          router.push('/perfil');
+          router.push('/');
         }
       } catch {
         // Account was created but auto-login failed
