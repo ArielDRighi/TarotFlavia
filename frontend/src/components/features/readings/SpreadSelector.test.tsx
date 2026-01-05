@@ -151,11 +151,23 @@ describe('SpreadSelector', () => {
       });
     });
 
-    it('should render the breadcrumb', () => {
+    it('should render the breadcrumb with question link for PREMIUM users', () => {
+      (useAuthStore as unknown as Mock).mockReturnValue({ user: mockUserPremium });
+
       render(<SpreadSelector categoryId="1" questionId="1" customQuestion={null} />);
 
       expect(screen.getByText(/ritual/i)).toBeInTheDocument();
       expect(screen.getByText(/pregunta/i)).toBeInTheDocument();
+      expect(screen.getByText(/tipo de tirada/i)).toBeInTheDocument();
+    });
+
+    it('should render the breadcrumb WITHOUT question link for FREE users', () => {
+      (useAuthStore as unknown as Mock).mockReturnValue({ user: mockUserFree });
+
+      render(<SpreadSelector categoryId={null} questionId={null} customQuestion={null} />);
+
+      expect(screen.getByText(/ritual/i)).toBeInTheDocument();
+      expect(screen.queryByText(/pregunta/i)).not.toBeInTheDocument();
       expect(screen.getByText(/tipo de tirada/i)).toBeInTheDocument();
     });
 
@@ -281,7 +293,9 @@ describe('SpreadSelector', () => {
       expect(selectButtons).toHaveLength(4);
     });
 
-    it('should navigate to reading page when spread is selected with questionId', async () => {
+    it('should navigate to reading page when PREMIUM user selects spread with questionId', async () => {
+      (useAuthStore as unknown as Mock).mockReturnValue({ user: mockUserPremium });
+
       render(<SpreadSelector categoryId="1" questionId="5" customQuestion={null} />);
 
       const selectButtons = screen.getAllByRole('button', { name: /seleccionar/i });
@@ -292,7 +306,9 @@ describe('SpreadSelector', () => {
       });
     });
 
-    it('should navigate with customQuestion when provided', async () => {
+    it('should navigate with customQuestion when PREMIUM user provides it', async () => {
+      (useAuthStore as unknown as Mock).mockReturnValue({ user: mockUserPremium });
+
       render(
         <SpreadSelector
           categoryId="1"
@@ -391,34 +407,77 @@ describe('SpreadSelector', () => {
       });
     });
 
-    it('should show error when both questionId and customQuestion are missing', () => {
-      render(<SpreadSelector categoryId="1" questionId={null} customQuestion={null} />);
+    describe('PREMIUM User Flow', () => {
+      beforeEach(() => {
+        (useAuthStore as unknown as Mock).mockReturnValue({ user: mockUserPremium });
+      });
 
-      expect(screen.getByText(/selecciona una pregunta primero/i)).toBeInTheDocument();
+      it('should show error when PREMIUM user has no question', () => {
+        render(<SpreadSelector categoryId="1" questionId={null} customQuestion={null} />);
+
+        expect(screen.getByText(/selecciona una pregunta primero/i)).toBeInTheDocument();
+      });
+
+      it('should show back button to questions page', () => {
+        render(<SpreadSelector categoryId="1" questionId={null} customQuestion={null} />);
+
+        expect(screen.getByRole('button', { name: /volver a preguntas/i })).toBeInTheDocument();
+      });
+
+      it('should navigate back to questions page when back button is clicked', () => {
+        render(<SpreadSelector categoryId="1" questionId={null} customQuestion={null} />);
+
+        const backButton = screen.getByRole('button', { name: /volver a preguntas/i });
+        fireEvent.click(backButton);
+
+        expect(mockPush).toHaveBeenCalledWith('/ritual/preguntas?categoryId=1');
+      });
+
+      it('should navigate to questions without categoryId when categoryId is null', () => {
+        render(<SpreadSelector categoryId={null} questionId={null} customQuestion={null} />);
+
+        const backButton = screen.getByRole('button', { name: /volver a preguntas/i });
+        fireEvent.click(backButton);
+
+        expect(mockPush).toHaveBeenCalledWith('/ritual/preguntas');
+      });
     });
 
-    it('should show back button to questions page', () => {
-      render(<SpreadSelector categoryId="1" questionId={null} customQuestion={null} />);
+    describe('FREE User Flow', () => {
+      beforeEach(() => {
+        (useAuthStore as unknown as Mock).mockReturnValue({ user: mockUserFree });
+      });
 
-      expect(screen.getByRole('button', { name: /volver a preguntas/i })).toBeInTheDocument();
-    });
+      it('should NOT show error when FREE user has no question', () => {
+        render(<SpreadSelector categoryId={null} questionId={null} customQuestion={null} />);
 
-    it('should navigate back to questions page when back button is clicked', () => {
-      render(<SpreadSelector categoryId="1" questionId={null} customQuestion={null} />);
+        // FREE users should see spreads, not error message
+        expect(screen.queryByText(/selecciona una pregunta primero/i)).not.toBeInTheDocument();
+        expect(screen.getByText('Respuesta Rápida')).toBeInTheDocument();
+      });
 
-      const backButton = screen.getByRole('button', { name: /volver a preguntas/i });
-      fireEvent.click(backButton);
+      it('should show spreads when FREE user has no question or category', () => {
+        render(<SpreadSelector categoryId={null} questionId={null} customQuestion={null} />);
 
-      expect(mockPush).toHaveBeenCalledWith('/ritual/preguntas?categoryId=1');
-    });
+        expect(screen.getByTestId('spreads-grid')).toBeInTheDocument();
+        const selectButtons = screen.getAllByRole('button', { name: /seleccionar/i });
+        expect(selectButtons.length).toBeGreaterThan(0);
+      });
 
-    it('should navigate to questions without categoryId when categoryId is null', () => {
-      render(<SpreadSelector categoryId={null} questionId={null} customQuestion={null} />);
+      it('should navigate to reading WITHOUT categoryId or questionId for FREE users', async () => {
+        render(<SpreadSelector categoryId={null} questionId={null} customQuestion={null} />);
 
-      const backButton = screen.getByRole('button', { name: /volver a preguntas/i });
-      fireEvent.click(backButton);
+        const selectButtons = screen.getAllByRole('button', { name: /seleccionar/i });
+        fireEvent.click(selectButtons[0]); // Select first spread (id: 1)
 
-      expect(mockPush).toHaveBeenCalledWith('/ritual/preguntas');
+        await waitFor(() => {
+          expect(mockPush).toHaveBeenCalledWith('/ritual/lectura?spreadId=1');
+        });
+
+        // Should NOT include categoryId or questionId
+        expect(mockPush).not.toHaveBeenCalledWith(expect.stringContaining('categoryId'));
+        expect(mockPush).not.toHaveBeenCalledWith(expect.stringContaining('questionId'));
+      });
     });
   });
 
