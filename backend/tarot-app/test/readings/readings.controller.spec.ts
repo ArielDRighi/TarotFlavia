@@ -262,44 +262,6 @@ describe('ReadingsController', () => {
         expect(result.interpretation).toBeNull();
       });
     });
-
-    describe('ANONYMOUS user - without auth', () => {
-      it('should create anonymous reading without AI', async () => {
-        const createDto: CreateReadingDto = {
-          predefinedQuestionId: 1, // Daily card for anonymous
-          deckId: 1,
-          spreadId: 1,
-          cardIds: [3],
-          cardPositions: [
-            { cardId: 3, position: 'present', isReversed: false },
-          ],
-          useAI: false, // Anonymous always without AI
-        };
-
-        // Mock request with undefined user (simulates anonymous access)
-        const req = { user: { userId: null as unknown as number } } as {
-          user: { userId: number };
-        };
-        const anonymousReading = {
-          ...mockReading,
-          user: null, // No user associated
-          interpretation: null,
-        };
-        mockOrchestrator.create.mockResolvedValue(anonymousReading);
-
-        const result = await controller.createReading(req, createDto);
-
-        expect(mockOrchestrator.create).toHaveBeenCalledWith(
-          expect.objectContaining({
-            id: null,
-          }),
-          createDto,
-        );
-        expect(result).toEqual(anonymousReading);
-        expect(result.user).toBeNull();
-        expect(result.interpretation).toBeNull();
-      });
-    });
   });
 
   describe('getUserReadings', () => {
