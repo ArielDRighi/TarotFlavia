@@ -514,14 +514,15 @@ const requiresQuestion = isPremium && !hasQuestion;
 const handleSpreadSelect = useCallback((spreadId: number) => {
   let url = `/ritual/lectura?spreadId=${spreadId}`;
 
-  // Solo añadir parámetros de pregunta para PREMIUM
+  // Solo añadir parámetros de pregunta Y categoría para PREMIUM
   if (user?.plan === 'PREMIUM') {
+    if (categoryId) url += `&categoryId=${categoryId}`;
     if (questionId) url += `&questionId=${questionId}`;
     else if (customQuestion) url += `&customQuestion=${encodeURIComponent(customQuestion)}`;
   }
 
   router.push(url);
-}, [questionId, customQuestion, router, user]);
+}, [categoryId, questionId, customQuestion, router, user]);
 
 // 3. Breadcrumb condicional
 {isPremium && hasQuestion && (

@@ -302,7 +302,9 @@ describe('SpreadSelector', () => {
       fireEvent.click(selectButtons[0]); // Select first spread (id: 1)
 
       await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith('/ritual/lectura?spreadId=1&questionId=5');
+        expect(mockPush).toHaveBeenCalledWith(
+          '/ritual/lectura?spreadId=1&categoryId=1&questionId=5'
+        );
       });
     });
 
@@ -322,9 +324,42 @@ describe('SpreadSelector', () => {
 
       await waitFor(() => {
         expect(mockPush).toHaveBeenCalledWith(
-          expect.stringContaining('/ritual/lectura?spreadId=2&customQuestion=')
+          '/ritual/lectura?spreadId=2&categoryId=1&customQuestion=Mi%20pregunta%20personalizada'
         );
       });
+    });
+
+    it('should navigate with categoryId, questionId AND spreadId for PREMIUM users', async () => {
+      (useAuthStore as unknown as Mock).mockReturnValue({ user: mockUserPremium });
+
+      render(<SpreadSelector categoryId="3" questionId="7" customQuestion={null} />);
+
+      const selectButtons = screen.getAllByRole('button', { name: /seleccionar/i });
+      fireEvent.click(selectButtons[0]); // Select first spread (id: 1)
+
+      await waitFor(() => {
+        expect(mockPush).toHaveBeenCalledWith(
+          '/ritual/lectura?spreadId=1&categoryId=3&questionId=7'
+        );
+      });
+    });
+
+    it('should navigate WITHOUT categoryId or questionId for FREE users even if they exist in props', async () => {
+      (useAuthStore as unknown as Mock).mockReturnValue({ user: mockUserFree });
+
+      // Edge case: FREE user downgraded from PREMIUM, props still have old values
+      render(<SpreadSelector categoryId="1" questionId="5" customQuestion={null} />);
+
+      const selectButtons = screen.getAllByRole('button', { name: /seleccionar/i });
+      fireEvent.click(selectButtons[0]); // Select first spread (id: 1)
+
+      await waitFor(() => {
+        expect(mockPush).toHaveBeenCalledWith('/ritual/lectura?spreadId=1');
+      });
+
+      // Should NOT include categoryId or questionId
+      expect(mockPush).not.toHaveBeenCalledWith(expect.stringContaining('categoryId'));
+      expect(mockPush).not.toHaveBeenCalledWith(expect.stringContaining('questionId'));
     });
   });
 

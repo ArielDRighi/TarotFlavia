@@ -202,6 +202,11 @@ export function SpreadSelector({ categoryId, questionId, customQuestion }: Sprea
 
       // Only add question params for PREMIUM users
       if (user?.plan === 'PREMIUM') {
+        // Add categoryId if present
+        if (categoryId) {
+          url += `&categoryId=${categoryId}`;
+        }
+        // Add questionId or customQuestion if present
         if (questionId) {
           url += `&questionId=${questionId}`;
         } else if (customQuestion) {
@@ -211,7 +216,7 @@ export function SpreadSelector({ categoryId, questionId, customQuestion }: Sprea
 
       router.push(url);
     },
-    [questionId, customQuestion, router, hasReachedLimit, user]
+    [categoryId, questionId, customQuestion, router, hasReachedLimit, user]
   );
 
   const handleBackToQuestions = useCallback(() => {
