@@ -705,16 +705,55 @@ SELECT id, name, card_count FROM tarot_spread;
 
 **Criterios de aceptación:**
 
-- [ ] Seeder existe y tiene spreads correctos
-- [ ] Seed se ejecuta sin errores
-- [ ] DB tiene spreads con IDs 1, 2, 3+
-- [ ] cardCount es correcto para cada spread
-- [ ] Frontend puede hacer fetch de spreads sin error
+- [x] Seeder existe y tiene spreads correctos
+- [x] Seed se ejecuta sin errores
+- [x] DB tiene spreads con IDs 1, 2, 3+
+- [x] cardCount es correcto para cada spread
+- [x] Frontend puede hacer fetch de spreads sin error
 
 **Prioridad:** 🟠 MEDIA
 **Estimación:** 15-30 minutos
+**Tiempo real:** 30 minutos
 **Tipo:** Investigación / Bugfix
 **Dependencias:** Ninguna
+**Estado:** ✅ COMPLETADA
+
+**Fecha de Finalización:** 2026-01-05
+
+**Implementación:**
+
+Verificación completada exitosamente. Los spreads están correctamente seeded en la base de datos:
+
+**Spreads en DB:**
+
+| ID  | Nombre             | Card Count | Required Plan | Difficulty   |
+| --- | ------------------ | ---------- | ------------- | ------------ |
+| 1   | Tirada de 1 Carta  | 1          | free          | beginner     |
+| 2   | Tirada de 3 Cartas | 3          | free          | beginner     |
+| 3   | Tirada de 5 Cartas | 5          | premium       | intermediate |
+| 4   | Cruz Céltica       | 10         | premium       | advanced     |
+
+**Archivos verificados:**
+
+- `backend/tarot-app/src/database/seeds/tarot-spreads.seeder.ts` ✅
+- `backend/tarot-app/src/database/seeds/data/tarot-spreads.data.ts` ✅
+- Base de datos PostgreSQL (puerto 5435) ✅
+
+**Documentación:**
+
+- Reporte completo: `backend/tarot-app/docs/TASK-005-SPREADS-VERIFICATION.md`
+
+**Hallazgos:**
+
+- ✅ Spreads correctamente seeded
+- ✅ IDs coinciden con frontend (1-4)
+- ✅ cardCount correcto para cada spread
+- ⚠️ Problema menor: DB de integración no tiene migraciones aplicadas (11 tests fallando)
+
+**Conclusión:**
+El error "Tirada no encontrada" NO es causado por problemas en los seeders. Los spreads están correctos. El problema debe investigarse en la lógica de validación del endpoint de creación de lecturas o en los parámetros enviados desde el frontend.
+
+**Rama:** feature/TASK-005-verify-spreads-seeder
 
 ---
 
