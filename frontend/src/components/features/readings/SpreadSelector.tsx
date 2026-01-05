@@ -200,15 +200,23 @@ export function SpreadSelector({ categoryId, questionId, customQuestion }: Sprea
       // Build navigation URL
       let url = `/ritual/lectura?spreadId=${spreadId}`;
 
-      if (questionId) {
-        url += `&questionId=${questionId}`;
-      } else if (customQuestion) {
-        url += `&customQuestion=${encodeURIComponent(customQuestion)}`;
+      // Only add question params for PREMIUM users
+      if (user?.plan === 'PREMIUM') {
+        // Add categoryId if present
+        if (categoryId) {
+          url += `&categoryId=${categoryId}`;
+        }
+        // Add questionId or customQuestion if present
+        if (questionId) {
+          url += `&questionId=${questionId}`;
+        } else if (customQuestion) {
+          url += `&customQuestion=${encodeURIComponent(customQuestion)}`;
+        }
       }
 
       router.push(url);
     },
-    [questionId, customQuestion, router, hasReachedLimit]
+    [categoryId, questionId, customQuestion, router, hasReachedLimit, user]
   );
 
   const handleBackToQuestions = useCallback(() => {
@@ -220,8 +228,11 @@ export function SpreadSelector({ categoryId, questionId, customQuestion }: Sprea
     setShowLimitModal(false);
   }, []);
 
-  // Handle missing question
-  if (!hasQuestion && !isLoading) {
+  // Handle missing question - only required for PREMIUM users
+  const isPremium = user?.plan === 'PREMIUM';
+  const requiresQuestion = isPremium && !hasQuestion;
+
+  if (requiresQuestion && !isLoading) {
     return (
       <div className="bg-bg-main min-h-screen p-8">
         <div className="mx-auto max-w-4xl">
@@ -245,13 +256,20 @@ export function SpreadSelector({ categoryId, questionId, customQuestion }: Sprea
           <Link href="/ritual" className="hover:text-primary transition-colors">
             Ritual
           </Link>
-          <ChevronRight className="h-4 w-4" aria-hidden="true" />
-          <Link
-            href={categoryId ? `/ritual/preguntas?categoryId=${categoryId}` : '/ritual/preguntas'}
-            className="hover:text-primary transition-colors"
-          >
-            Pregunta
-          </Link>
+          {/* Show question step only for PREMIUM users */}
+          {isPremium && hasQuestion && (
+            <>
+              <ChevronRight className="h-4 w-4" aria-hidden="true" />
+              <Link
+                href={
+                  categoryId ? `/ritual/preguntas?categoryId=${categoryId}` : '/ritual/preguntas'
+                }
+                className="hover:text-primary transition-colors"
+              >
+                Pregunta
+              </Link>
+            </>
+          )}
           <ChevronRight className="h-4 w-4" aria-hidden="true" />
           <span className="text-text-primary">Tipo de Tirada</span>
         </nav>

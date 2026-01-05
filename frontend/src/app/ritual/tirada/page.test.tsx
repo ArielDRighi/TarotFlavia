@@ -70,13 +70,16 @@ describe('SpreadSelectorPage', () => {
     ).toBeInTheDocument();
   });
 
-  it('should pass categoryId from search params', () => {
+  it('should pass categoryId from search params for PREMIUM users', () => {
     const mockSearchParams = new URLSearchParams('categoryId=1&questionId=1');
     (useSearchParams as Mock).mockReturnValue(mockSearchParams);
+    (useAuthStore as unknown as Mock).mockReturnValue({
+      user: { ...mockUser, plan: 'PREMIUM' },
+    });
 
     render(<SpreadSelectorPage />);
 
-    // Verify breadcrumb link includes categoryId
+    // Verify breadcrumb link includes categoryId for PREMIUM users
     const questionLink = screen.getByRole('link', { name: /pregunta/i });
     expect(questionLink).toHaveAttribute('href', '/ritual/preguntas?categoryId=1');
   });
@@ -119,13 +122,29 @@ describe('SpreadSelectorPage', () => {
     expect(screen.getAllByTestId('skeleton-spread-card')).toHaveLength(4);
   });
 
-  it('should handle missing search params gracefully', () => {
+  it('should handle missing search params gracefully for FREE users', () => {
     const mockSearchParams = new URLSearchParams('');
     (useSearchParams as Mock).mockReturnValue(mockSearchParams);
+    (useAuthStore as unknown as Mock).mockReturnValue({
+      user: { ...mockUser, plan: 'FREE' },
+    });
 
     render(<SpreadSelectorPage />);
 
-    // Should show error state when no question is selected
+    // FREE users should see spreads even without question
+    expect(screen.getByText('Respuesta Rápida')).toBeInTheDocument();
+  });
+
+  it('should show error when PREMIUM user has no question', () => {
+    const mockSearchParams = new URLSearchParams('');
+    (useSearchParams as Mock).mockReturnValue(mockSearchParams);
+    (useAuthStore as unknown as Mock).mockReturnValue({
+      user: { ...mockUser, plan: 'PREMIUM' },
+    });
+
+    render(<SpreadSelectorPage />);
+
+    // PREMIUM users need a question
     expect(screen.getByText(/selecciona una pregunta primero/i)).toBeInTheDocument();
   });
 });
