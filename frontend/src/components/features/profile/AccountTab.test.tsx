@@ -250,4 +250,18 @@ describe('AccountTab', () => {
       });
     });
   });
+
+  describe('Accessibility - Password Form', () => {
+    it('should have proper autocomplete attributes on password fields', () => {
+      render(<AccountTab profile={mockProfile} />, { wrapper: createWrapper() });
+
+      const currentPasswordInput = screen.getByLabelText(/contraseña actual/i);
+      const newPasswordInput = screen.getByLabelText(/^nueva contraseña$/i);
+      const confirmPasswordInput = screen.getByLabelText(/confirmar nueva contraseña/i);
+
+      expect(currentPasswordInput).toHaveAttribute('autocomplete', 'current-password');
+      expect(newPasswordInput).toHaveAttribute('autocomplete', 'new-password');
+      expect(confirmPasswordInput).toHaveAttribute('autocomplete', 'new-password');
+    });
+  });
 });

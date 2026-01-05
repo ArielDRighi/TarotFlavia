@@ -504,5 +504,19 @@ describe('RegisterForm', () => {
         expect(nameInput).toHaveAttribute('aria-invalid', 'true');
       });
     });
+
+    it('should have proper autocomplete attributes', () => {
+      render(<RegisterForm />);
+
+      const nameInput = screen.getByLabelText(/nombre/i);
+      const emailInput = screen.getByLabelText(/email/i);
+      const passwordInput = screen.getByLabelText(/^contraseña$/i);
+      const confirmPasswordInput = screen.getByLabelText(/confirmar contraseña/i);
+
+      expect(nameInput).toHaveAttribute('autocomplete', 'name');
+      expect(emailInput).toHaveAttribute('autocomplete', 'email');
+      expect(passwordInput).toHaveAttribute('autocomplete', 'new-password');
+      expect(confirmPasswordInput).toHaveAttribute('autocomplete', 'new-password');
+    });
   });
 });

@@ -143,6 +143,7 @@ export function AccountTab({ profile }: AccountTabProps) {
               <Input
                 id="currentPassword"
                 type="password"
+                autoComplete="current-password"
                 {...passwordForm.register('currentPassword')}
                 disabled={isUpdatingPassword}
                 aria-invalid={passwordForm.formState.errors.currentPassword ? 'true' : 'false'}
@@ -162,6 +163,7 @@ export function AccountTab({ profile }: AccountTabProps) {
               <Input
                 id="newPassword"
                 type="password"
+                autoComplete="new-password"
                 {...passwordForm.register('newPassword')}
                 disabled={isUpdatingPassword}
                 aria-invalid={passwordForm.formState.errors.newPassword ? 'true' : 'false'}
@@ -181,6 +183,7 @@ export function AccountTab({ profile }: AccountTabProps) {
               <Input
                 id="confirmPassword"
                 type="password"
+                autoComplete="new-password"
                 {...passwordForm.register('confirmPassword')}
                 disabled={isUpdatingPassword}
                 aria-invalid={passwordForm.formState.errors.confirmPassword ? 'true' : 'false'}
