@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import QuestionsPage from './page';
@@ -447,7 +446,6 @@ describe('QuestionsPage', () => {
     it('should update character counter when typing', async () => {
       render(<QuestionsPage />);
 
-      const textarea = screen.getByRole('textbox');
       const wrapper = screen.getByTestId('custom-question-wrapper');
 
       // For FREE users, clicking wrapper shows upgrade modal

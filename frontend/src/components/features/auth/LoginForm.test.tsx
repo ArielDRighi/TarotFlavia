@@ -163,7 +163,7 @@ describe('LoginForm', () => {
       });
     });
 
-    it('should redirect to /perfil on successful login', async () => {
+    it('should redirect to home page (/) on successful login', async () => {
       mockLogin.mockResolvedValueOnce(undefined);
       const user = userEvent.setup();
       render(<LoginForm />);
@@ -177,7 +177,7 @@ describe('LoginForm', () => {
       await user.click(submitButton);
 
       await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith('/perfil');
+        expect(mockPush).toHaveBeenCalledWith('/');
       });
     });
 
