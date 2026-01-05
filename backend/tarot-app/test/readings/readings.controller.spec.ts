@@ -133,62 +133,172 @@ describe('ReadingsController', () => {
   });
 
   describe('create', () => {
-    it('should create a new reading with predefined question', async () => {
-      const createDto: CreateReadingDto = {
-        predefinedQuestionId: 5,
-        deckId: 1,
-        spreadId: 1,
-        cardIds: [1, 2],
-        cardPositions: [
-          { cardId: 1, position: 'past', isReversed: false },
-          { cardId: 2, position: 'present', isReversed: true },
-        ],
-        useAI: true,
-      };
+    describe('PREMIUM user - with AI (useAI: true)', () => {
+      it('should create a new reading with predefined question and AI interpretation', async () => {
+        const createDto: CreateReadingDto = {
+          predefinedQuestionId: 5,
+          deckId: 1,
+          spreadId: 1,
+          cardIds: [1, 2],
+          cardPositions: [
+            { cardId: 1, position: 'past', isReversed: false },
+            { cardId: 2, position: 'present', isReversed: true },
+          ],
+          useAI: true,
+        };
 
-      const req = { user: { userId: mockUser.id } };
-      mockOrchestrator.create.mockResolvedValue(mockReading);
+        const req = { user: { userId: mockUser.id } };
+        mockOrchestrator.create.mockResolvedValue(mockReading);
 
-      const result = await controller.createReading(req, createDto);
+        const result = await controller.createReading(req, createDto);
 
-      expect(mockOrchestrator.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: mockUser.id,
-        }),
-        createDto,
-      );
-      expect(result).toEqual(mockReading);
+        expect(mockOrchestrator.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: mockUser.id,
+          }),
+          createDto,
+        );
+        expect(result).toEqual(mockReading);
+        expect(result.interpretation).toBeDefined();
+      });
+
+      it('should create a new reading with custom question and AI interpretation', async () => {
+        const createDto: CreateReadingDto = {
+          customQuestion: '¿Cuál es mi propósito en la vida?',
+          deckId: 1,
+          spreadId: 1,
+          cardIds: [1, 2],
+          cardPositions: [
+            { cardId: 1, position: 'past', isReversed: false },
+            { cardId: 2, position: 'present', isReversed: true },
+          ],
+          useAI: true,
+        };
+
+        const req = { user: { userId: mockUser.id } };
+        const readingWithCustom = {
+          ...mockReading,
+          customQuestion: createDto.customQuestion,
+        };
+        mockOrchestrator.create.mockResolvedValue(readingWithCustom);
+
+        const result = await controller.createReading(req, createDto);
+
+        expect(mockOrchestrator.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: mockUser.id,
+          }),
+          createDto,
+        );
+        expect(result).toEqual(readingWithCustom);
+        expect(result.interpretation).toBeDefined();
+      });
     });
 
-    it('should create a new reading with custom question', async () => {
-      const createDto: CreateReadingDto = {
-        customQuestion: '¿Cuál es mi propósito en la vida?',
-        deckId: 1,
-        spreadId: 1,
-        cardIds: [1, 2],
-        cardPositions: [
-          { cardId: 1, position: 'past', isReversed: false },
-          { cardId: 2, position: 'present', isReversed: true },
-        ],
-        useAI: true,
-      };
+    describe('FREE user - without AI (useAI: false)', () => {
+      it('should create a new reading without AI interpretation', async () => {
+        const createDto: CreateReadingDto = {
+          predefinedQuestionId: 5,
+          deckId: 1,
+          spreadId: 1,
+          cardIds: [1, 2],
+          cardPositions: [
+            { cardId: 1, position: 'past', isReversed: false },
+            { cardId: 2, position: 'present', isReversed: true },
+          ],
+          useAI: false,
+        };
 
-      const req = { user: { userId: mockUser.id } };
-      const readingWithCustom = {
-        ...mockReading,
-        customQuestion: createDto.customQuestion,
-      };
-      mockOrchestrator.create.mockResolvedValue(readingWithCustom);
+        const req = { user: { userId: mockUser.id } };
+        const readingWithoutAI = {
+          ...mockReading,
+          interpretation: null, // No AI interpretation
+        };
+        mockOrchestrator.create.mockResolvedValue(readingWithoutAI);
 
-      const result = await controller.createReading(req, createDto);
+        const result = await controller.createReading(req, createDto);
 
-      expect(mockOrchestrator.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: mockUser.id,
-        }),
-        createDto,
-      );
-      expect(result).toEqual(readingWithCustom);
+        expect(mockOrchestrator.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: mockUser.id,
+          }),
+          createDto,
+        );
+        expect(result).toEqual(readingWithoutAI);
+        expect(result.interpretation).toBeNull();
+      });
+
+      it('should create daily card reading without AI', async () => {
+        const createDto: CreateReadingDto = {
+          predefinedQuestionId: 1, // Daily card question
+          deckId: 1,
+          spreadId: 1, // Single card spread
+          cardIds: [5],
+          cardPositions: [
+            { cardId: 5, position: 'present', isReversed: false },
+          ],
+          useAI: false,
+        };
+
+        const req = { user: { userId: mockUser.id } };
+        const dailyCardReading = {
+          ...mockReading,
+          cardPositions: [
+            { cardId: 5, position: 'present', isReversed: false },
+          ],
+          interpretation: null,
+        };
+        mockOrchestrator.create.mockResolvedValue(dailyCardReading);
+
+        const result = await controller.createReading(req, createDto);
+
+        expect(mockOrchestrator.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: mockUser.id,
+          }),
+          createDto,
+        );
+        expect(result).toEqual(dailyCardReading);
+        expect(result.interpretation).toBeNull();
+      });
+    });
+
+    describe('ANONYMOUS user - without auth', () => {
+      it('should create anonymous reading without AI', async () => {
+        const createDto: CreateReadingDto = {
+          predefinedQuestionId: 1, // Daily card for anonymous
+          deckId: 1,
+          spreadId: 1,
+          cardIds: [3],
+          cardPositions: [
+            { cardId: 3, position: 'present', isReversed: false },
+          ],
+          useAI: false, // Anonymous always without AI
+        };
+
+        // Mock request with undefined user (simulates anonymous access)
+        const req = { user: { userId: null as unknown as number } } as {
+          user: { userId: number };
+        };
+        const anonymousReading = {
+          ...mockReading,
+          user: null, // No user associated
+          interpretation: null,
+        };
+        mockOrchestrator.create.mockResolvedValue(anonymousReading);
+
+        const result = await controller.createReading(req, createDto);
+
+        expect(mockOrchestrator.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: null,
+          }),
+          createDto,
+        );
+        expect(result).toEqual(anonymousReading);
+        expect(result.user).toBeNull();
+        expect(result.interpretation).toBeNull();
+      });
     });
   });
 

@@ -147,11 +147,34 @@ describe('DailyCardExperience', () => {
       expect(card).toHaveAttribute('role', 'button');
     });
 
-    it('should call mutation when card is clicked', async () => {
+    it('should call mutation when card is clicked - authenticated user (FREE)', async () => {
       const user = userEvent.setup();
       const mutateFn = vi.fn();
 
       mockUseDailyReading.mockReturnValue({
+        mutate: mutateFn,
+        isPending: false,
+      });
+
+      renderWithProviders(<DailyCardExperience />);
+
+      await user.click(screen.getByTestId('tarot-card'));
+
+      expect(mutateFn).toHaveBeenCalled();
+    });
+
+    it('should call public mutation when card is clicked - anonymous user', async () => {
+      const user = userEvent.setup();
+      const mutateFn = vi.fn();
+
+      // Mock anonymous user (not authenticated)
+      mockUseAuth.mockReturnValue({
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+      });
+
+      mockUseDailyReadingPublic.mockReturnValue({
         mutate: mutateFn,
         isPending: false,
       });
@@ -175,10 +198,15 @@ describe('DailyCardExperience', () => {
     });
   });
 
-  describe('Revealed State', () => {
-    it('should render revealed state when daily reading exists', () => {
+  describe('Revealed State - with AI interpretation (PREMIUM)', () => {
+    it('should render revealed state when daily reading exists with AI interpretation', () => {
+      mockUseAuth.mockReturnValue({
+        user: createMockUser({ plan: 'PREMIUM' }),
+        isAuthenticated: true,
+        isLoading: false,
+      });
       mockUseDailyReadingToday.mockReturnValue({
-        data: createMockDailyReading(),
+        data: createMockDailyReading({ interpretation: 'Interpretación con IA' }),
         isLoading: false,
         error: null,
       });
@@ -186,11 +214,20 @@ describe('DailyCardExperience', () => {
       renderWithProviders(<DailyCardExperience />);
 
       expect(screen.getByTestId('revealed-state')).toBeInTheDocument();
+      expect(screen.getByText('Interpretación con IA')).toBeInTheDocument();
     });
 
-    it('should display card name with secondary color', () => {
+    it('should display card name with secondary color - PREMIUM user', () => {
+      mockUseAuth.mockReturnValue({
+        user: createMockUser({ plan: 'PREMIUM' }),
+        isAuthenticated: true,
+        isLoading: false,
+      });
       mockUseDailyReadingToday.mockReturnValue({
-        data: createMockDailyReading({ card: createMockTarotCard({ name: 'La Estrella' }) }),
+        data: createMockDailyReading({
+          card: createMockTarotCard({ name: 'La Estrella' }),
+          interpretation: 'Interpretación detallada con IA',
+        }),
         isLoading: false,
         error: null,
       });
@@ -201,23 +238,67 @@ describe('DailyCardExperience', () => {
       expect(cardTitle).toHaveTextContent('La Estrella');
       expect(cardTitle).toHaveClass('text-secondary');
     });
+  });
 
-    it('should display interpretation text', () => {
-      const interpretation = 'Mensaje del día';
+  describe('Revealed State - without AI (FREE/ANONYMOUS)', () => {
+    it('should render revealed state for FREE user without AI interpretation', () => {
+      mockUseAuth.mockReturnValue({
+        user: createMockUser({ plan: 'FREE' }),
+        isAuthenticated: true,
+        isLoading: false,
+      });
       mockUseDailyReadingToday.mockReturnValue({
-        data: createMockDailyReading({ interpretation }),
+        data: createMockDailyReading({
+          interpretation: null, // No AI interpretation for FREE users
+        }),
         isLoading: false,
         error: null,
       });
 
       renderWithProviders(<DailyCardExperience />);
 
-      expect(screen.getByText(interpretation)).toBeInTheDocument();
+      expect(screen.getByTestId('revealed-state')).toBeInTheDocument();
+      expect(screen.getByTestId('card-title')).toBeInTheDocument();
+      expect(screen.getByTestId('card-meaning-section')).toBeInTheDocument();
+      // Verify NO premium interpretation is shown (only basic card info)
+      expect(screen.queryByText(/actualiza a premium/i)).not.toBeInTheDocument();
     });
 
-    it('should show reversed indicator when card is reversed', () => {
+    it('should render revealed state for ANONYMOUS user without AI interpretation', () => {
+      mockUseAuth.mockReturnValue({
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+      });
       mockUseDailyReadingToday.mockReturnValue({
-        data: createMockDailyReading({ isReversed: true }),
+        data: createMockDailyReading({
+          interpretation: null, // No AI interpretation for ANONYMOUS users
+        }),
+        isLoading: false,
+        error: null,
+      });
+
+      renderWithProviders(<DailyCardExperience />);
+
+      expect(screen.getByTestId('revealed-state')).toBeInTheDocument();
+      expect(screen.getByTestId('card-title')).toBeInTheDocument();
+      expect(screen.getByTestId('card-meaning-section')).toBeInTheDocument();
+      // Verify anonymous CTA is shown
+      expect(screen.getByTestId('anonymous-cta')).toBeInTheDocument();
+      expect(screen.getByText(/regístrate gratis/i)).toBeInTheDocument();
+    });
+
+    it('should show reversed indicator when card is reversed - FREE user', () => {
+      mockUseAuth.mockReturnValue({
+        user: createMockUser({ plan: 'FREE' }),
+        isAuthenticated: true,
+        isLoading: false,
+      });
+      mockUseDailyReadingToday.mockReturnValue({
+        data: createMockDailyReading({
+          isReversed: true,
+          interpretation: null,
+        }),
         isLoading: false,
         error: null,
       });
