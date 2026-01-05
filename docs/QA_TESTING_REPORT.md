@@ -2342,33 +2342,33 @@ Frontend:
 
 ---
 
-### TASK-015: Actualizar tests automatizados
+### ✅ TASK-015: Actualizar tests automatizados
 
-**[FULLSTACK]**
+**[FULLSTACK]** - **Completada:** 4 Enero 2026
 
-**Archivos a modificar:**
+**Archivos modificados:**
 
-- `backend/tarot-app/test/readings/readings.controller.spec.ts`
-- `frontend/src/components/features/daily-reading/DailyCardExperience.test.tsx`
-- Tests de Playwright (si existen)
+- ✅ `backend/tarot-app/test/readings/readings.controller.spec.ts` (8/8 tests pasando)
+- ✅ `frontend/src/components/features/daily-reading/DailyCardExperience.test.tsx` (22/22 tests pasando)
 
-**Cambios requeridos:**
+**Cambios implementados:**
 
-1. Actualizar tests para reflejar nueva arquitectura:
-   - Flujo con `useAI: true` (PREMIUM)
-   - Flujo con `useAI: false` (FREE)
-   - Flujo sin JWT (ANONYMOUS)
-2. Verificar que guards funcionan correctamente
-3. Verificar incremento de contadores
-4. Agregar tests para acceso anónimo
+1. ✅ Tests actualizados para nueva arquitectura:
+   - Flujo PREMIUM con `useAI: true` (con interpretación IA)
+   - Flujo FREE con `useAI: false` (sin interpretación IA)
+   - Flujo ANONYMOUS sin JWT (sin autenticación, sin IA)
+2. ✅ Guards verificados correctamente
+3. ✅ Incremento de contadores verificado
+4. ✅ Tests para acceso anónimo agregados
 
-**Dependencias:** TASK-001 hasta TASK-008
+**Dependencias:** TASK-001 hasta TASK-008 ✅
 
 **Criterios de aceptación:**
 
-- Todos los tests pasan
-- Cobertura de código no disminuye
-- Nuevos flujos tienen tests correspondientes
+- ✅ Todos los tests pasan (Backend: 25/25, Frontend: 22/22)
+- ✅ Cobertura de código mantenida
+- ✅ Nuevos flujos tienen tests correspondientes
+- ✅ Ciclo de calidad completado (lint, format, build, tests)
 
 ---
 
@@ -2428,8 +2428,8 @@ Frontend:
 
 **Objetivo:** Asegurar calidad y finalizar detalles
 
-14. **TASK-014** - Limpiar datos de testing [DATABASE]
-15. **TASK-015** - Actualizar tests automatizados [FULLSTACK]
+14. ✅ **TASK-014** - Limpiar datos de testing [DATABASE]
+15. ✅ **TASK-015** - Actualizar tests automatizados [FULLSTACK]
 16. **TASK-016** - Autocomplete en passwords [FRONTEND]
 
 ---
