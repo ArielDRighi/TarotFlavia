@@ -726,28 +726,31 @@ Verificación completada exitosamente. Los spreads están correctamente seeded e
 
 **Spreads en DB:**
 
-| ID | Nombre | Card Count | Required Plan | Difficulty |
-|----|--------|------------|---------------|------------|
-| 1 | Tirada de 1 Carta | 1 | free | beginner |
-| 2 | Tirada de 3 Cartas | 3 | free | beginner |
-| 3 | Tirada de 5 Cartas | 5 | premium | intermediate |
-| 4 | Cruz Céltica | 10 | premium | advanced |
+| ID  | Nombre             | Card Count | Required Plan | Difficulty   |
+| --- | ------------------ | ---------- | ------------- | ------------ |
+| 1   | Tirada de 1 Carta  | 1          | free          | beginner     |
+| 2   | Tirada de 3 Cartas | 3          | free          | beginner     |
+| 3   | Tirada de 5 Cartas | 5          | premium       | intermediate |
+| 4   | Cruz Céltica       | 10         | premium       | advanced     |
 
 **Archivos verificados:**
+
 - `backend/tarot-app/src/database/seeds/tarot-spreads.seeder.ts` ✅
 - `backend/tarot-app/src/database/seeds/data/tarot-spreads.data.ts` ✅
 - Base de datos PostgreSQL (puerto 5435) ✅
 
 **Documentación:**
+
 - Reporte completo: `backend/tarot-app/docs/TASK-005-SPREADS-VERIFICATION.md`
 
 **Hallazgos:**
+
 - ✅ Spreads correctamente seeded
 - ✅ IDs coinciden con frontend (1-4)
 - ✅ cardCount correcto para cada spread
 - ⚠️ Problema menor: DB de integración no tiene migraciones aplicadas (11 tests fallando)
 
-**Conclusión:** 
+**Conclusión:**
 El error "Tirada no encontrada" NO es causado por problemas en los seeders. Los spreads están correctos. El problema debe investigarse en la lógica de validación del endpoint de creación de lecturas o en los parámetros enviados desde el frontend.
 
 **Rama:** feature/TASK-005-verify-spreads-seeder
