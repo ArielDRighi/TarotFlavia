@@ -7,11 +7,9 @@ import { test, expect } from '@playwright/test';
  * los usuarios son redirigidos al home (/) después de login exitoso.
  */
 test.describe('Login Flow', () => {
-  const BASE_URL = 'http://localhost:3001';
-
   test('FREE user should redirect to home after login', async ({ page }) => {
-    // Navegar a página de login
-    await page.goto(`${BASE_URL}/login`);
+    // Ir a login
+    await page.goto('/login');
 
     // Verificar que estamos en la página de login
     await expect(page).toHaveTitle(/Iniciar Sesión/);
@@ -35,7 +33,7 @@ test.describe('Login Flow', () => {
   });
 
   test('PREMIUM user should redirect to home after login', async ({ page }) => {
-    await page.goto(`${BASE_URL}/login`);
+    await page.goto('/login');
 
     // Llenar formulario con credenciales PREMIUM
     await page.getByLabel('Email').fill('premium@test.com');

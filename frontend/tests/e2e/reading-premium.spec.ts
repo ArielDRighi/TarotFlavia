@@ -12,15 +12,13 @@ import { test, expect } from '@playwright/test';
  * - Recibir interpretación IA en resultados
  */
 test.describe('PREMIUM User - Reading Creation', () => {
-  const BASE_URL = 'http://localhost:3001';
-
   test.beforeEach(async ({ page }) => {
-    // Login como usuario PREMIUM antes de cada test
-    await page.goto(`${BASE_URL}/login`);
+    // Login como PREMIUM
+    await page.goto('/login');
     await page.getByLabel('Email').fill('premium@test.com');
     await page.getByLabel('Contraseña').fill('Test123456!');
     await page.getByRole('button', { name: 'Iniciar Sesión' }).click();
-    await page.waitForURL(`${BASE_URL}/`);
+    await page.waitForURL('/');
   });
 
   test('PREMIUM user SHOULD see categories', async ({ page }) => {
@@ -54,7 +52,7 @@ test.describe('PREMIUM User - Reading Creation', () => {
   });
 
   test('PREMIUM user can use predefined question', async ({ page }) => {
-    await page.goto(`${BASE_URL}/ritual`);
+    await page.goto('/ritual');
 
     // Seleccionar categoría
     await page.getByRole('button', { name: /Amor y Relaciones/ }).click();
@@ -85,7 +83,7 @@ test.describe('PREMIUM User - Reading Creation', () => {
   });
 
   test('PREMIUM user can write custom question', async ({ page }) => {
-    await page.goto(`${BASE_URL}/ritual`);
+    await page.goto('/ritual');
 
     // Seleccionar categoría
     await page.getByRole('button', { name: /Amor y Relaciones/ }).click();
@@ -100,7 +98,7 @@ test.describe('PREMIUM User - Reading Creation', () => {
 
     // NO debe tener badge "Premium" bloqueándolo
     const premiumBadge = page.locator('[data-testid="premium-badge"]').filter({
-      has: customInput
+      has: customInput,
     });
     // Si hay badge, no debe estar bloqueando el input (depende de implementación)
 
@@ -200,7 +198,10 @@ test.describe('PREMIUM User - Reading Creation', () => {
     await page.getByRole('button', { name: /Amor y Relaciones/ }).click();
 
     // 2. Seleccionar pregunta predefinida
-    await page.getByRole('button', { name: /Seleccionar pregunta:/ }).first().click();
+    await page
+      .getByRole('button', { name: /Seleccionar pregunta:/ })
+      .first()
+      .click();
     await page.getByRole('button', { name: 'Continuar con esta pregunta' }).click();
 
     // 3. Seleccionar tirada de 3 cartas
@@ -243,7 +244,10 @@ test.describe('PREMIUM User - Reading Creation', () => {
     expect(categoryId).toBeTruthy();
 
     // Seleccionar pregunta
-    await page.getByRole('button', { name: /Seleccionar pregunta:/ }).first().click();
+    await page
+      .getByRole('button', { name: /Seleccionar pregunta:/ })
+      .first()
+      .click();
     await page.getByRole('button', { name: 'Continuar con esta pregunta' }).click();
 
     // Verificar que ambos params están en URL de tiradas

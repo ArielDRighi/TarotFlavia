@@ -52,6 +52,7 @@ tests/e2e/
 ## 🧪 Cobertura de Tests
 
 ### `auth.spec.ts` - Autenticación
+
 - ✅ Login FREE redirige a home (/)
 - ✅ Login PREMIUM redirige a home (/)
 - ✅ Error con credenciales inválidas
@@ -59,6 +60,7 @@ tests/e2e/
 - ✅ Logout funciona correctamente
 
 ### `reading-free.spec.ts` - Usuario FREE
+
 - ✅ FREE NO ve categorías (redirige automáticamente)
 - ✅ FREE solo ve tiradas de 1-3 cartas
 - ✅ FREE puede crear lectura de 1 carta
@@ -69,6 +71,7 @@ tests/e2e/
 - ✅ Resultado muestra cartas sin IA
 
 ### `reading-premium.spec.ts` - Usuario PREMIUM
+
 - ✅ PREMIUM ve categorías
 - ✅ PREMIUM puede seleccionar categoría
 - ✅ PREMIUM puede usar pregunta predefinida
@@ -80,6 +83,7 @@ tests/e2e/
 - ✅ Parámetros de URL se mantienen en navegación
 
 ### `daily-card.spec.ts` - Carta del Día
+
 - ✅ Usuario ANÓNIMO puede obtener carta
 - ✅ Usuario FREE puede obtener carta
 - ✅ Usuario PREMIUM puede obtener carta
@@ -90,6 +94,7 @@ tests/e2e/
 - ✅ Click en carta revelada no hace nada
 
 ### `plan-restrictions.spec.ts` - Restricciones
+
 - ✅ FREE no puede escribir pregunta personalizada
 - ✅ FREE no ve spreads avanzados
 - ✅ FREE no tiene interpretación IA
@@ -150,11 +155,13 @@ export default defineConfig({
 ## 📝 Convenciones
 
 ### Selectores
+
 - Preferir `data-testid` para elementos clave
 - Usar roles de ARIA cuando sea posible
 - Evitar selectores CSS frágiles
 
 ### Estructura de Tests
+
 ```typescript
 test.describe('Feature Name', () => {
   test.beforeEach(async ({ page }) => {
@@ -170,6 +177,7 @@ test.describe('Feature Name', () => {
 ```
 
 ### Timeouts
+
 - Tests normales: 30s (default)
 - Tests con IA: 35s (timeout explícito)
 - Carta del día: animación 1-1.5s
@@ -225,7 +233,7 @@ npx playwright show-report
 
 Estos tests están escritos con el **flujo esperado** (correcto), pero fallarán hasta que se implementen las correcciones:
 
-- ❌ `auth.spec.ts` → Login redirige a /perfil en lugar de /
+- ✅ `auth.spec.ts` → Login ahora redirige correctamente a / (FIXED)
 - ❌ `reading-free.spec.ts` → FREE ve categorías (no debería)
 - ❌ `reading-free.spec.ts` → Página /ritual/tirada no existe
 - ❌ `reading-premium.spec.ts` → Página /ritual/lectura no existe o incompleta

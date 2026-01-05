@@ -249,7 +249,7 @@ describe('RegisterForm', () => {
       });
 
       await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith('/perfil');
+        expect(mockPush).toHaveBeenCalledWith('/');
       });
     });
 

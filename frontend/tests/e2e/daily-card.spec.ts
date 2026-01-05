@@ -160,7 +160,7 @@ test.describe('Daily Card (Carta del Día)', () => {
 
   test('cannot get second daily card same day', async ({ page }) => {
     // Login
-    await page.goto(`${BASE_URL}/login`);
+    await page.goto('/login');
     await page.getByLabel('Email').fill('free@test.com');
     await page.getByLabel('Contraseña').fill('Test123456!');
     await page.getByRole('button', { name: 'Iniciar Sesión' }).click();

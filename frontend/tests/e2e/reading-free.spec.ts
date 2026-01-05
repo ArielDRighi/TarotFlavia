@@ -12,15 +12,13 @@ import { test, expect } from '@playwright/test';
  * - NO tener interpretación IA en resultados
  */
 test.describe('FREE User - Reading Creation', () => {
-  const BASE_URL = 'http://localhost:3001';
-
   test.beforeEach(async ({ page }) => {
-    // Login como usuario FREE antes de cada test
-    await page.goto(`${BASE_URL}/login`);
+    // Login como FREE
+    await page.goto('/login');
     await page.getByLabel('Email').fill('free@test.com');
     await page.getByLabel('Contraseña').fill('Test123456!');
     await page.getByRole('button', { name: 'Iniciar Sesión' }).click();
-    await page.waitForURL(`${BASE_URL}/`);
+    await page.waitForURL('/');
   });
 
   test('FREE user should NOT see categories', async ({ page }) => {
