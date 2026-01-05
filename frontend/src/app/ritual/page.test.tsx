@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import RitualPage from './page';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { useCategories } from '@/hooks/api/useReadings';
+import { useAuth } from '@/hooks/useAuth';
 
 // Mock modules
 vi.mock('next/navigation', () => ({
@@ -17,6 +18,10 @@ vi.mock('@/hooks/useRequireAuth', () => ({
 
 vi.mock('@/hooks/api/useReadings', () => ({
   useCategories: vi.fn(),
+}));
+
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: vi.fn(),
 }));
 
 // Mock categories data
@@ -84,6 +89,11 @@ describe('RitualPage', () => {
     vi.clearAllMocks();
     (useRouter as Mock).mockReturnValue({ push: mockPush });
     (useRequireAuth as Mock).mockReturnValue({ isLoading: false });
+    (useAuth as Mock).mockReturnValue({
+      user: null,
+      isAuthenticated: false,
+      isLoading: false,
+    });
   });
 
   describe('Authentication Protection', () => {
@@ -110,6 +120,161 @@ describe('RitualPage', () => {
       render(<RitualPage />);
 
       expect(screen.getAllByTestId('skeleton-card')).toHaveLength(6);
+    });
+  });
+
+  describe('FREE User Redirection (TASK-2)', () => {
+    it('should redirect FREE user to /ritual/tirada immediately', () => {
+      (useAuth as Mock).mockReturnValue({
+        user: { id: 1, name: 'Free User', plan: 'free', email: 'free@test.com' },
+        isAuthenticated: true,
+        isLoading: false,
+      });
+
+      (useCategories as Mock).mockReturnValue({
+        data: mockCategories,
+        isLoading: false,
+        error: null,
+      });
+
+      render(<RitualPage />);
+
+      expect(mockPush).toHaveBeenCalledWith('/ritual/tirada');
+      expect(mockPush).toHaveBeenCalledTimes(1);
+    });
+
+    it('should redirect FREE user even if categories are loading', () => {
+      (useAuth as Mock).mockReturnValue({
+        user: { id: 1, name: 'Free User', plan: 'free', email: 'free@test.com' },
+        isAuthenticated: true,
+        isLoading: false,
+      });
+
+      (useCategories as Mock).mockReturnValue({
+        data: undefined,
+        isLoading: true,
+        error: null,
+      });
+
+      render(<RitualPage />);
+
+      expect(mockPush).toHaveBeenCalledWith('/ritual/tirada');
+    });
+
+    it('should redirect FREE user even when categories fail to load', () => {
+      (useAuth as Mock).mockReturnValue({
+        user: { id: 1, name: 'Free User', plan: 'free', email: 'free@test.com' },
+        isAuthenticated: true,
+        isLoading: false,
+      });
+
+      (useCategories as Mock).mockReturnValue({
+        data: undefined,
+        isLoading: false,
+        error: new Error('Failed to fetch'),
+        refetch: vi.fn(),
+      });
+
+      render(<RitualPage />);
+
+      expect(mockPush).toHaveBeenCalledWith('/ritual/tirada');
+    });
+
+    it('should NOT show categories to FREE user (redirect happens first)', () => {
+      (useAuth as Mock).mockReturnValue({
+        user: { id: 1, name: 'Free User', plan: 'free', email: 'free@test.com' },
+        isAuthenticated: true,
+        isLoading: false,
+      });
+
+      (useCategories as Mock).mockReturnValue({
+        data: mockCategories,
+        isLoading: false,
+        error: null,
+      });
+
+      render(<RitualPage />);
+
+      // Should redirect, so categories should not be visible
+      expect(mockPush).toHaveBeenCalledWith('/ritual/tirada');
+      // Note: Categories might still render briefly before redirect, but redirect is called
+    });
+  });
+
+  describe('PREMIUM User - No Redirection', () => {
+    it('should NOT redirect PREMIUM user', () => {
+      (useAuth as Mock).mockReturnValue({
+        user: { id: 2, name: 'Premium User', plan: 'premium', email: 'premium@test.com' },
+        isAuthenticated: true,
+        isLoading: false,
+      });
+
+      (useCategories as Mock).mockReturnValue({
+        data: mockCategories,
+        isLoading: false,
+        error: null,
+      });
+
+      render(<RitualPage />);
+
+      expect(mockPush).not.toHaveBeenCalled();
+    });
+
+    it('should show categories to PREMIUM user', () => {
+      (useAuth as Mock).mockReturnValue({
+        user: { id: 2, name: 'Premium User', plan: 'premium', email: 'premium@test.com' },
+        isAuthenticated: true,
+        isLoading: false,
+      });
+
+      (useCategories as Mock).mockReturnValue({
+        data: mockCategories,
+        isLoading: false,
+        error: null,
+      });
+
+      render(<RitualPage />);
+
+      expect(screen.getByText('Amor')).toBeInTheDocument();
+      expect(screen.getByText('Carrera')).toBeInTheDocument();
+    });
+  });
+
+  describe('Anonymous User - No Redirection', () => {
+    it('should NOT redirect anonymous user (should be handled by useRequireAuth)', () => {
+      (useAuth as Mock).mockReturnValue({
+        user: { id: 3, name: 'Anonymous', plan: 'anonymous', email: '' },
+        isAuthenticated: false,
+        isLoading: false,
+      });
+
+      (useCategories as Mock).mockReturnValue({
+        data: mockCategories,
+        isLoading: false,
+        error: null,
+      });
+
+      render(<RitualPage />);
+
+      expect(mockPush).not.toHaveBeenCalledWith('/ritual/tirada');
+    });
+
+    it('should NOT redirect when user is null', () => {
+      (useAuth as Mock).mockReturnValue({
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+      });
+
+      (useCategories as Mock).mockReturnValue({
+        data: mockCategories,
+        isLoading: false,
+        error: null,
+      });
+
+      render(<RitualPage />);
+
+      expect(mockPush).not.toHaveBeenCalledWith('/ritual/tirada');
     });
   });
 

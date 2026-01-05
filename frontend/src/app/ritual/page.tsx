@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Heart,
@@ -12,6 +13,7 @@ import {
 } from 'lucide-react';
 
 import { useRequireAuth } from '@/hooks/useRequireAuth';
+import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/api/useReadings';
 import { Card, CardContent } from '@/components/ui/card';
 import { ErrorDisplay } from '@/components/ui/error-display';
@@ -122,16 +124,28 @@ function CategoryCard({ category, onClick }: CategoryCardProps) {
  *
  * AUTHENTICATION REQUIRED:
  * - Redirects to /registro with message=register-for-readings if not authenticated
+ *
+ * PLAN-BASED BEHAVIOR:
+ * - FREE users: Automatically redirected to /ritual/tirada (no category selection)
+ * - PREMIUM users: Select category first, then proceed to questions
  */
 export default function RitualPage() {
   const { isLoading: isAuthLoading } = useRequireAuth({
     redirectTo: '/registro',
     redirectQuery: { message: 'register-for-readings' },
   });
+  const { user } = useAuth();
   const { data: categories, isLoading: isCategoriesLoading, error, refetch } = useCategories();
   const router = useRouter();
 
   const isLoading = isAuthLoading || isCategoriesLoading;
+
+  // TASK-2: Redirect FREE users to /ritual/tirada (skip category selection)
+  useEffect(() => {
+    if (user?.plan === 'free') {
+      router.push('/ritual/tirada');
+    }
+  }, [user, router]);
 
   const handleCategoryClick = (categoryId: number) => {
     router.push(`/ritual/preguntas?categoryId=${categoryId}`);
