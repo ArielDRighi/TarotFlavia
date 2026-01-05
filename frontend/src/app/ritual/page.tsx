@@ -142,7 +142,7 @@ export default function RitualPage() {
 
   // TASK-2: Redirect FREE users to /ritual/tirada (skip category selection)
   useEffect(() => {
-    if (user && user.plan.toLowerCase() === 'free') {
+    if (user?.plan === 'free') {
       router.push('/ritual/tirada');
     }
   }, [user, router]);

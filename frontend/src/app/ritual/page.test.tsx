@@ -143,24 +143,6 @@ describe('RitualPage', () => {
       expect(mockPush).toHaveBeenCalledTimes(1);
     });
 
-    it('should redirect FREE user with uppercase plan', () => {
-      (useAuth as Mock).mockReturnValue({
-        user: { id: 1, name: 'Free User', plan: 'FREE' as 'free', email: 'free@test.com' },
-        isAuthenticated: true,
-        isLoading: false,
-      });
-
-      (useCategories as Mock).mockReturnValue({
-        data: mockCategories,
-        isLoading: false,
-        error: null,
-      });
-
-      render(<RitualPage />);
-
-      expect(mockPush).toHaveBeenCalledWith('/ritual/tirada');
-    });
-
     it('should redirect FREE user even if categories are loading', () => {
       (useAuth as Mock).mockReturnValue({
         user: { id: 1, name: 'Free User', plan: 'free', email: 'free@test.com' },
@@ -255,29 +237,6 @@ describe('RitualPage', () => {
 
       expect(screen.getByText('Amor')).toBeInTheDocument();
       expect(screen.getByText('Carrera')).toBeInTheDocument();
-    });
-
-    it('should NOT redirect PREMIUM user with uppercase plan', () => {
-      (useAuth as Mock).mockReturnValue({
-        user: {
-          id: 2,
-          name: 'Premium User',
-          plan: 'PREMIUM' as 'premium',
-          email: 'premium@test.com',
-        },
-        isAuthenticated: true,
-        isLoading: false,
-      });
-
-      (useCategories as Mock).mockReturnValue({
-        data: mockCategories,
-        isLoading: false,
-        error: null,
-      });
-
-      render(<RitualPage />);
-
-      expect(mockPush).not.toHaveBeenCalled();
     });
   });
 

@@ -457,11 +457,12 @@ export default function RitualPage() {
 - **Coverage:** 100% en el archivo modificado (87.17% total)
 - **Archivos modificados:**
   - `frontend/src/app/ritual/page.tsx` (agregado useEffect con redirección)
-  - `frontend/src/app/ritual/page.test.tsx` (5 nuevos tests)
+  - `frontend/src/app/ritual/page.test.tsx` (3 nuevos tests)
 - **Decisiones técnicas:**
-  - Se usa `user.plan.toLowerCase()` para manejar casos donde el backend envíe 'FREE' o 'free'
+  - Se compara directamente `user?.plan === 'free'` (sin toLowerCase) por consistencia con el resto del código (ej: FavoriteTarotistaButton.tsx)
+  - Según `backend/tarot-app/docs/API_DOCUMENTATION.md` línea 292, el backend siempre retorna plan en lowercase ('free', 'premium')
   - La redirección ocurre inmediatamente al montar el componente si el usuario es FREE
-  - Los tests verifican redirección con categorías cargando, con errores, y con diferentes casos del plan
+  - Los tests verifican redirección con categorías cargando, con errores, y diferentes estados de usuario
 
 **Prioridad:** 🔴 ALTA
 **Estimación:** 15 minutos
