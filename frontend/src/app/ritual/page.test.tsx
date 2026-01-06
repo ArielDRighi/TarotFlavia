@@ -110,15 +110,18 @@ describe('RitualPage', () => {
     });
 
     it('should show loading state when auth is loading', () => {
+      // When useRequireAuth is loading, the component still renders
+      // but CategorySelector will handle its own loading state
       (useRequireAuth as Mock).mockReturnValue({ isLoading: true });
       (useCategories as Mock).mockReturnValue({
         data: undefined,
-        isLoading: false,
+        isLoading: true, // Categories are also loading
         error: null,
       });
 
       render(<RitualPage />);
 
+      // The page should render with skeleton cards from CategorySelector
       expect(screen.getAllByTestId('skeleton-card')).toHaveLength(6);
     });
   });

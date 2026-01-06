@@ -6,7 +6,7 @@ import { RefreshCw, Share2, Plus, Sparkles } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
 import {
-  useSpreads,
+  useMyAvailableSpreads,
   usePredefinedQuestions,
   useCreateReading,
   useRegenerateInterpretation,
@@ -154,9 +154,10 @@ function ResultCard({ card, index }: ResultCardProps) {
  */
 interface InterpretationSectionProps {
   interpretation: string;
+  cards: ReadingCard[];
 }
 
-function InterpretationSection({ interpretation }: InterpretationSectionProps) {
+function InterpretationSection({ interpretation, cards }: InterpretationSectionProps) {
   // Check if interpretation seems truncated (ends mid-word or mid-sentence)
   const seemsTruncated =
     interpretation &&
@@ -171,7 +172,7 @@ function InterpretationSection({ interpretation }: InterpretationSectionProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2 font-serif text-2xl">
           <Sparkles className="text-primary h-6 w-6" />
-          Tu lectura del Tarot
+          {interpretation ? 'Interpretación Personalizada' : 'Significado de las Cartas'}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -180,6 +181,7 @@ function InterpretationSection({ interpretation }: InterpretationSectionProps) {
           data-testid="interpretation-content"
         >
           {interpretation ? (
+            // Para usuarios PREMIUM: Interpretación IA
             <>
               <ReactMarkdown>{interpretation}</ReactMarkdown>
               {seemsTruncated && (
@@ -188,6 +190,29 @@ function InterpretationSection({ interpretation }: InterpretationSectionProps) {
                 </p>
               )}
             </>
+          ) : cards && cards.length > 0 ? (
+            // Para usuarios FREE: Significado de cada carta desde DB
+            <div className="space-y-6">
+              {cards.map((card) => (
+                <div key={card.id} className="border-b pb-4 last:border-b-0">
+                  <h3 className="text-primary mb-2 font-serif text-lg font-semibold">
+                    {card.name}
+                    {card.isReversed && (
+                      <span className="text-text-muted ml-2 text-sm">(Invertida)</span>
+                    )}
+                  </h3>
+                  <p className="text-text-muted mb-2 text-sm font-medium">{card.position}</p>
+                  <p className="text-text-primary leading-relaxed">
+                    {card.isReversed ? card.meaningReversed : card.meaningUpright}
+                  </p>
+                  {card.keywords && (
+                    <p className="text-text-muted mt-2 text-sm italic">
+                      Palabras clave: {card.keywords}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
           ) : (
             <p className="text-text-muted italic">
               La interpretación está siendo generada. Por favor, espera un momento...
@@ -221,7 +246,7 @@ export function ReadingExperience({
   const { canUseAI } = useUserPlanFeatures();
 
   // API Hooks
-  const { data: spreads, isLoading: isSpreadsLoading } = useSpreads();
+  const { data: spreads, isLoading: isSpreadsLoading } = useMyAvailableSpreads();
   const { data: predefinedQuestions, isLoading: isQuestionsLoading } = usePredefinedQuestions();
   const { mutateAsync: createReading } = useCreateReading();
   const { mutate: regenerateInterpretation, isPending: isRegenerating } =
@@ -250,7 +275,9 @@ export function ReadingExperience({
   const isPremium = user?.plan === 'PREMIUM';
 
   // Display the actual question text
-  const questionText = customQuestion || selectedQuestion?.questionText || 'Tu pregunta al tarot';
+  // For FREE users without question, show "Lectura general" instead of "Tu pregunta al tarot"
+  const hasQuestion = !!(customQuestion || selectedQuestion);
+  const questionText = customQuestion || selectedQuestion?.questionText || 'Lectura general';
 
   // Rotate loading messages
   useEffect(() => {
@@ -411,8 +438,12 @@ export function ReadingExperience({
       {/* Spread & Question Display - centrado */}
       <div className="mb-8 text-center">
         <p className="text-primary mb-1 text-sm font-medium">{spread.name}</p>
-        <p className="text-text-muted mb-2 text-sm">Tu consulta:</p>
-        <p className="text-text-primary font-serif text-xl md:text-2xl">{questionText}</p>
+        {hasQuestion && (
+          <>
+            <p className="text-text-muted mb-2 text-sm">Tu consulta:</p>
+            <p className="text-text-primary font-serif text-xl md:text-2xl">{questionText}</p>
+          </>
+        )}
       </div>
 
       {/* ESTADO 1: Selección de cartas */}
@@ -511,6 +542,7 @@ export function ReadingExperience({
           {/* Interpretation */}
           <InterpretationSection
             interpretation={getGeneralInterpretation(readingResult.interpretation)}
+            cards={readingResult.cards}
           />
 
           {/* Upgrade Banner for non-premium users */}

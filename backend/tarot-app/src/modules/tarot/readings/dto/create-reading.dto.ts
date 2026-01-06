@@ -21,11 +21,22 @@ import { SanitizeHtml } from '../../../../common/decorators/sanitize.decorator';
 
 /**
  * Validador que asegura que al menos uno de predefinedQuestionId o customQuestion esté presente
+ * cuando se solicita interpretación con IA (useAI === true)
+ *
+ * Para usuarios FREE (useAI === false o undefined), la pregunta NO es requerida
+ * porque no se genera interpretación personalizada.
  */
 @ValidatorConstraint({ name: 'hasQuestion', async: false })
 export class HasQuestionConstraint implements ValidatorConstraintInterface {
   validate(value: unknown, args: ValidationArguments): boolean {
     const object = args.object as CreateReadingDto;
+
+    // Si NO se usa IA, la pregunta NO es requerida
+    if (!object.useAI) {
+      return true;
+    }
+
+    // Si se usa IA (useAI === true), la pregunta SÍ es requerida
     const hasPredefined =
       object.predefinedQuestionId !== undefined &&
       object.predefinedQuestionId !== null;
@@ -38,7 +49,7 @@ export class HasQuestionConstraint implements ValidatorConstraintInterface {
   }
 
   defaultMessage(): string {
-    return 'Debes proporcionar una pregunta predefinida o una pregunta personalizada';
+    return 'Debes proporcionar una pregunta predefinida o una pregunta personalizada cuando se solicita interpretación con IA';
   }
 }
 
@@ -65,12 +76,13 @@ class CardPositionDto {
 export class CreateReadingDto {
   @ApiProperty({
     example: 5,
-    description: 'ID de la pregunta predefinida (para usuarios free)',
+    description:
+      'ID de la pregunta predefinida (opcional para usuarios FREE sin IA)',
     required: false,
   })
   @ValidateIf(
     (o: CreateReadingDto) =>
-      o.predefinedQuestionId !== undefined || !o.customQuestion,
+      o.predefinedQuestionId !== undefined && o.predefinedQuestionId !== null,
   )
   @IsInt({
     message: 'El ID de la pregunta predefinida debe ser un número entero',
@@ -79,7 +91,6 @@ export class CreateReadingDto {
     message:
       'Debes proporcionar solo una: pregunta predefinida o pregunta personalizada, no ambas',
   })
-  @Validate(HasQuestionConstraint)
   predefinedQuestionId?: number;
 
   @ApiProperty({
@@ -88,7 +99,10 @@ export class CreateReadingDto {
     required: false,
     maxLength: 500,
   })
-  @ValidateIf((o: CreateReadingDto) => o.customQuestion !== undefined)
+  @ValidateIf(
+    (o: CreateReadingDto) =>
+      o.customQuestion !== undefined && o.customQuestion !== null,
+  )
   @IsString({ message: 'La pregunta personalizada debe ser texto' })
   @IsNotEmpty({ message: 'La pregunta personalizada no puede estar vacía' })
   @MinLength(10, {
@@ -147,6 +161,7 @@ export class CreateReadingDto {
    * - Ambos flujos se guardan en `tarot_readings` y incrementan contador de uso
    * - **TASK-004:** Implementó control de acceso en el guard
    * - **TASK-005:** Implementó lógica de generación dual en el servicio
+   * - **HasQuestionConstraint:** Valida que haya pregunta cuando useAI es true
    *
    * @see RequiresPremiumForAIGuard - Guard que valida este campo
    */
@@ -157,5 +172,6 @@ export class CreateReadingDto {
   })
   @IsBoolean()
   @IsOptional()
+  @Validate(HasQuestionConstraint)
   useAI?: boolean;
 }
