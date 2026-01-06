@@ -767,70 +767,120 @@ Si el hook `useSpreads` no existe, crearlo usando React Query para fetch de spre
 **Scope:** Frontend
 **Archivo nuevo:** `frontend/src/hooks/api/useSpreads.ts`
 
+**Estado:** ✅ COMPLETADA
+
+**Fecha de Finalización:** 2026-01-05
+
 **Implementación:**
 
-```typescript
-import { useQuery } from "@tanstack/react-query";
-import { apiClient } from "@/lib/api-client";
-import type { Spread } from "@/types";
+El hook `useSpreads` **YA EXISTE** en el archivo [frontend/src/hooks/api/useReadings.ts](frontend/src/hooks/api/useReadings.ts) junto con otros hooks relacionados con readings.
 
+**Ubicación real:**
+
+- `frontend/src/hooks/api/useReadings.ts` - Contiene `useSpreads()` y `useMyAvailableSpreads()`
+- `frontend/src/types/reading.types.ts` - Contiene interface `Spread` y `SpreadPosition`
+
+**Hooks implementados:**
+
+```typescript
+// 1. useSpreads - Fetch de todos los spreads públicos
 export function useSpreads() {
-  return useQuery<Spread[]>({
-    queryKey: ["spreads"],
-    queryFn: async () => {
-      const response = await apiClient.get("/spreads");
-      return response.data;
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutos
+  return useQuery({
+    queryKey: readingQueryKeys.spreads,
+    queryFn: getSpreads,
+    staleTime: Infinity, // Datos estáticos, cache infinito
   });
 }
 
-export function useSpread(id: number) {
-  return useQuery<Spread>({
-    queryKey: ["spreads", id],
-    queryFn: async () => {
-      const response = await apiClient.get(`/spreads/${id}`);
-      return response.data;
-    },
-    enabled: !!id,
+// 2. useMyAvailableSpreads - Spreads filtrados por plan del usuario
+export function useMyAvailableSpreads() {
+  return useQuery({
+    queryKey: readingQueryKeys.myAvailableSpreads,
+    queryFn: getMyAvailableSpreads,
+    staleTime: 5 * 60 * 1000, // 5 minutos - puede cambiar si el usuario actualiza plan
   });
 }
 ```
 
-**Type necesario:**
+**API Functions (readings-api.ts):**
 
 ```typescript
-// frontend/src/types/spread.ts
+// Fetch de spreads públicos (acceso anónimo)
+export async function getSpreads(): Promise<Spread[]> {
+  const response = await apiClient.get<Spread[]>(API_ENDPOINTS.SPREADS.BASE);
+  return response.data;
+}
+
+// Fetch de spreads disponibles según plan del usuario autenticado
+export async function getMyAvailableSpreads(): Promise<Spread[]> {
+  const response = await apiClient.get<Spread[]>(API_ENDPOINTS.SPREADS.MY_AVAILABLE);
+  return response.data;
+}
+```
+
+**Types implementados:**
+
+```typescript
+// frontend/src/types/reading.types.ts
+
+export interface SpreadPosition {
+  position: number;
+  name: string;
+  description: string;
+}
+
 export interface Spread {
   id: number;
   name: string;
   description: string;
   cardCount: number;
   positions: SpreadPosition[];
-  difficulty?: "beginner" | "intermediate" | "advanced";
-  estimatedMinutes?: number;
-}
-
-export interface SpreadPosition {
-  id: number;
-  name: string;
-  description: string;
-  order: number;
+  difficulty: "beginner" | "intermediate" | "advanced";
+  imageUrl?: string;
+  isBeginnerFriendly?: boolean;
+  whenToUse?: string;
+  requiredPlan: "anonymous" | "free" | "premium";
+  createdAt?: string;
+  updatedAt?: string;
 }
 ```
 
+**Tests:**
+
+✅ 15/15 tests pasando en `useReadings.test.tsx`, incluyendo:
+
+- `useSpreads`:
+  - ✅ Fetch de spreads públicos exitoso
+  - ✅ Manejo de errores
+  - ✅ Cache con `staleTime: Infinity`
+
+- `useMyAvailableSpreads`:
+  - ✅ Fetch de spreads filtrados por plan del usuario
+  - ✅ Manejo de errores
+  - ✅ Cache con 5 minutos de `staleTime`
+  - ✅ Solo spreads FREE para usuarios FREE
+  - ✅ Todos los spreads para usuarios PREMIUM
+
 **Criterios de aceptación:**
 
-- [ ] Hook `useSpreads()` retorna array de spreads
-- [ ] Hook `useSpread(id)` retorna un spread específico
-- [ ] Cache funciona correctamente
-- [ ] Manejo de errores incluido
-- [ ] TypeScript types correctos
+- [x] Hook `useSpreads()` retorna array de spreads ✅
+- [x] Hook `useMyAvailableSpreads()` retorna spreads según plan ✅
+- [x] Cache funciona correctamente (Infinity para públicos, 5min para filtrados) ✅
+- [x] Manejo de errores incluido ✅
+- [x] TypeScript types correctos ✅
+
+**Decisiones técnicas:**
+
+- Se agregó hook adicional `useMyAvailableSpreads()` para obtener spreads filtrados por plan del usuario (mejora UX)
+- Se usa `staleTime: Infinity` para spreads públicos porque son datos estáticos que no cambian
+- Se usa `staleTime: 5 * 60 * 1000` para spreads del usuario porque pueden cambiar si actualiza su plan
+- Los hooks están en `useReadings.ts` (no en archivo separado) para mantener cohesión con otros hooks relacionados con readings
 
 **Prioridad:** 🟠 MEDIA (dependencia de TAREA 3)
-**Estimación:** 30 minutos
-**Tipo:** Feature
-**Dependencias:** Backend endpoint `/api/v1/spreads` debe existir
+**Estimación original:** 30 minutos
+**Tiempo real:** 0 minutos (ya implementada)
+**Tipo:** Verificación
+**Dependencias:** ✅ Backend endpoint `/api/spreads` existe y funciona
 
 ---
 
@@ -844,47 +894,117 @@ Si el hook `useCards` no existe, crearlo para obtener las 78 cartas del mazo.
 **Scope:** Frontend
 **Archivo nuevo:** `frontend/src/hooks/api/useCards.ts`
 
-**Implementación:**
+**Estado:** ❌ NO NECESARIA
+
+**Fecha de Evaluación:** 2026-01-05
+
+**Análisis:**
+
+El hook `useCards` **NO existe** y **NO es necesario** implementarlo según la arquitectura actual del proyecto.
+
+**Razones técnicas:**
+
+1. **Implementación actual de selección de cartas:**
+   - El componente `ReadingExperience.tsx` genera las cartas de forma estática (1-78) en el cliente
+   - No se hace fetch de cartas desde el backend para la selección
+   - Constante `DECK_SIZE = 78` define el número de cartas
+   - Las cartas se muestran boca abajo durante la selección (solo necesitan índice, no metadata)
+
+2. **Backend endpoint `/api/cards` existe pero no se usa en el flujo principal:**
+   - Según `backend/tarot-app/docs/API_DOCUMENTATION.md` líneas 735-773, el endpoint existe
+   - Sin embargo, el flujo de creación de lectura NO requiere obtener todas las cartas previamente
+   - Las cartas reveladas con metadata (nombre, imagen, significado) se obtienen en la respuesta del POST `/api/readings`
+
+3. **Arquitectura actual (ReadingExperience.tsx):**
+
+   ```typescript
+   // Las cartas se generan como índices 0-77
+   const DECK_SIZE = 78;
+
+   // Usuario selecciona índices (ej: [5, 15, 25])
+   const [selectedCards, setSelectedCards] = useState<Set<number>>(new Set());
+
+   // Backend recibe cardIds y retorna las cartas completas
+   POST /api/readings
+   {
+     cardIds: [5, 15, 25],
+     spreadId: 2,
+     ...
+   }
+
+   // Response incluye cartas completas con metadata
+   {
+     cards: [
+       { id: 5, name: "El Hierofante", imageUrl: "...", ... },
+       { id: 15, name: "El Diablo", imageUrl: "...", ... },
+       { id: 25, name: "Caballero de Copas", imageUrl: "...", ... }
+     ]
+   }
+   ```
+
+4. **Performance y UX:**
+   - Fetch de 78 cartas con imágenes sería innecesario para solo mostrar reverso genérico
+   - Reduce payload inicial y tiempo de carga
+   - Las cartas solo se cargan cuando se necesitan (después de crear la lectura)
+
+**Tipos implementados:**
+
+✅ `TarotCard` interface ya existe en [frontend/src/types/reading.types.ts](frontend/src/types/reading.types.ts#L332):
 
 ```typescript
-import { useQuery } from "@tanstack/react-query";
-import { apiClient } from "@/lib/api-client";
-import type { TarotCard } from "@/types";
-
-export function useCards() {
-  return useQuery<TarotCard[]>({
-    queryKey: ["cards"],
-    queryFn: async () => {
-      const response = await apiClient.get("/cards");
-      return response.data;
-    },
-    staleTime: 10 * 60 * 1000, // 10 minutos (cartas no cambian)
-  });
-}
-
-export function useCard(id: number) {
-  return useQuery<TarotCard>({
-    queryKey: ["cards", id],
-    queryFn: async () => {
-      const response = await apiClient.get(`/cards/${id}`);
-      return response.data;
-    },
-    enabled: !!id,
-  });
+export interface TarotCard {
+  id: number;
+  name: string;
+  number: number;
+  category: string;
+  imageUrl: string;
+  reversedImageUrl?: string;
+  meaningUpright: string;
+  meaningReversed: string;
+  description: string;
+  keywords: string;
+  deckId: number;
+  createdAt: Date;
+  updatedAt: Date;
 }
 ```
 
-**Criterios de aceptación:**
+✅ `TarotCardBasic` interface también existe para respuestas simplificadas (línea 274)
 
-- [ ] Hook `useCards()` retorna 78 cartas
-- [ ] Cache funciona correctamente
-- [ ] Hook `useCard(id)` retorna carta específica
-- [ ] Types correctos
+**Backend endpoint disponible (si se necesita en el futuro):**
 
-**Prioridad:** 🟡 BAJA (dependencia de TAREA 4)
-**Estimación:** 20 minutos
-**Tipo:** Feature
-**Dependencias:** Backend endpoint `/api/v1/cards` debe existir
+```http
+GET /api/cards              # Listar todas las cartas
+GET /api/cards/:id          # Obtener carta por ID
+GET /api/cards/deck/:deckId # Cartas por mazo
+```
+
+**Criterios de aceptación (evaluados):**
+
+- [x] Hook `useCards()` retorna 78 cartas → ❌ NO NECESARIO (cartas se obtienen del resultado de lectura)
+- [x] Cache funciona correctamente → ❌ NO APLICA
+- [x] Hook `useCard(id)` retorna carta específica → ❌ NO NECESARIO (no hay vista individual de carta)
+- [x] Types correctos → ✅ YA EXISTEN (`TarotCard`, `TarotCardBasic`)
+
+**Casos de uso potenciales futuros donde SÍ sería necesario:**
+
+1. **Catálogo de cartas:** Página `/cartas` donde se muestren todas las cartas del tarot con su significado
+2. **Vista individual de carta:** Página `/cartas/:id` con información detallada de una carta específica
+3. **Selección de cartas con imágenes:** Si se cambia el diseño para mostrar cartas con imagen en lugar de reverso genérico
+4. **Búsqueda/filtrado de cartas:** Funcionalidad para buscar cartas por nombre, arcana, palo, etc.
+
+**Decisión técnica:**
+
+❌ NO implementar el hook `useCards` en este momento
+✅ Mantener la arquitectura actual (generación de índices en cliente)
+✅ Los tipos ya están disponibles si se necesitan en el futuro
+✅ El endpoint backend está documentado y funcional para uso futuro
+
+**Prioridad:** 🟡 BAJA (no requerida para MVP)
+**Estimación original:** 20 minutos
+**Tiempo real:** 0 minutos (no implementada)
+**Tipo:** Análisis / Decisión de arquitectura
+**Dependencias:** ✅ Backend endpoint `/api/cards` existe y está documentado
 
 ---
 

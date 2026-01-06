@@ -35,16 +35,22 @@ function getQuestionText(reading: SharedReading): string {
 function getCardsWithPositions(reading: SharedReading): ReadingCard[] {
   return reading.cards.map((card) => {
     const cardPosition = reading.cardPositions.find((cp) => cp.cardId === card.id);
+    const isReversed = cardPosition?.isReversed || false;
     return {
       id: card.id,
       name: card.name,
       arcana: card.arcana || 'major',
       number: card.number || 0,
       suit: card.suit || null,
-      orientation: cardPosition?.isReversed ? ('reversed' as const) : ('upright' as const),
+      orientation: isReversed ? ('reversed' as const) : ('upright' as const),
       position: 0,
       positionName: cardPosition?.position || 'Posición',
       imageUrl: card.imageUrl,
+      isReversed: isReversed,
+      meaningUpright: undefined,
+      meaningReversed: undefined,
+      keywords: undefined,
+      description: undefined,
     };
   });
 }

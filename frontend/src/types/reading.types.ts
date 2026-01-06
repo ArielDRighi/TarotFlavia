@@ -92,6 +92,12 @@ export interface ReadingCard {
   position: number;
   positionName: string;
   imageUrl?: string;
+  isReversed: boolean;
+  // Campos adicionales necesarios para usuarios FREE (info de carta desde DB)
+  meaningUpright?: string;
+  meaningReversed?: string;
+  keywords?: string;
+  description?: string;
 }
 
 // ============================================================================

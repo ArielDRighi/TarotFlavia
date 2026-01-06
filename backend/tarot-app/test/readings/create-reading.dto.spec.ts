@@ -65,7 +65,7 @@ describe('CreateReadingDto', () => {
       );
     });
 
-    it('debe rechazar si ninguno de los campos está presente', async () => {
+    it('debe rechazar si ninguno de los campos está presente cuando useAI es true', async () => {
       const dto = plainToInstance(CreateReadingDto, {
         deckId: 1,
         spreadId: 1,
@@ -84,8 +84,42 @@ describe('CreateReadingDto', () => {
         Object.values(e.constraints || {}),
       );
       expect(errorMessages.flat()).toContain(
-        'Debes proporcionar una pregunta predefinida o una pregunta personalizada',
+        'Debes proporcionar una pregunta predefinida o una pregunta personalizada cuando se solicita interpretación con IA',
       );
+    });
+
+    it('debe ACEPTAR si no hay pregunta cuando useAI es false (usuarios FREE)', async () => {
+      const dto = plainToInstance(CreateReadingDto, {
+        deckId: 1,
+        spreadId: 1,
+        cardIds: [1, 2, 3],
+        cardPositions: [
+          { cardId: 1, position: 'pasado', isReversed: false },
+          { cardId: 2, position: 'presente', isReversed: false },
+          { cardId: 3, position: 'futuro', isReversed: false },
+        ],
+        useAI: false,
+      });
+
+      const errors = await validate(dto);
+      expect(errors).toHaveLength(0);
+    });
+
+    it('debe ACEPTAR si no hay pregunta cuando useAI es undefined (usuarios FREE)', async () => {
+      const dto = plainToInstance(CreateReadingDto, {
+        deckId: 1,
+        spreadId: 1,
+        cardIds: [1, 2, 3],
+        cardPositions: [
+          { cardId: 1, position: 'pasado', isReversed: false },
+          { cardId: 2, position: 'presente', isReversed: false },
+          { cardId: 3, position: 'futuro', isReversed: false },
+        ],
+        // useAI no definido
+      });
+
+      const errors = await validate(dto);
+      expect(errors).toHaveLength(0);
     });
 
     it('debe rechazar predefinedQuestionId si no es un número entero', async () => {

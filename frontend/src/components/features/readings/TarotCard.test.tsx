@@ -36,6 +36,11 @@ const mockCard: ReadingCard = {
   position: 1,
   positionName: 'Present',
   imageUrl: '/cards/the-fool.jpg',
+  isReversed: false,
+  meaningUpright: undefined,
+  meaningReversed: undefined,
+  keywords: undefined,
+  description: undefined,
 };
 
 describe('TarotCard', () => {

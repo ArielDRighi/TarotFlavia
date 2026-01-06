@@ -46,6 +46,11 @@ function transformToReadingCard(reading: DailyReading): ReadingCard {
     imageUrl: reading.isReversed
       ? reading.card.reversedImageUrl || reading.card.imageUrl
       : reading.card.imageUrl,
+    isReversed: reading.isReversed,
+    meaningUpright: reading.card.meaningUpright,
+    meaningReversed: reading.card.meaningReversed,
+    keywords: reading.card.keywords,
+    description: reading.card.description,
   };
 }
 

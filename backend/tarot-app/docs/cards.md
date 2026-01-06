@@ -285,7 +285,7 @@ MANTRAS
 EL LOCO
 ● Todas las experiencias nuevas me aportan valor y conocimiento.
 ● Mi ser es la fuente alegría.
-● Reconozco y valor el pasado pero no me quedo en él, avanzo con confianza.
+● Reconozco y valoro el pasado pero no me quedo en él, avanzo con confianza.
 EL MAGO
 ● Todas las experiencias nuevas me aportan valor y conocimiento.
 ● Todo es posible.

@@ -129,6 +129,10 @@ interface ApiReadingResponse {
     number: number;
     category: string;
     imageUrl: string;
+    meaningUpright?: string;
+    meaningReversed?: string;
+    keywords?: string;
+    description?: string;
   }>;
   cardPositions: Array<{
     cardId: number;
@@ -154,16 +158,22 @@ function transformReadingResponse(raw: ApiReadingResponse): ReadingDetail {
     const posInfo = positionMap.get(card.id);
     // Determine arcana from category, not number (Minor Arcana have numbers 1-14 per suit)
     const isMajorArcana = card.category === 'arcanos_mayores';
+    const isReversed = posInfo?.isReversed || false;
     return {
       id: card.id,
       name: card.name,
       arcana: (isMajorArcana ? 'major' : 'minor') as 'major' | 'minor',
       number: card.number,
       suit: !isMajorArcana ? card.category : null,
-      orientation: (posInfo?.isReversed ? 'reversed' : 'upright') as 'upright' | 'reversed',
+      orientation: (isReversed ? 'reversed' : 'upright') as 'upright' | 'reversed',
       position: index,
       positionName: posInfo?.position || `Posición ${index + 1}`,
       imageUrl: card.imageUrl,
+      isReversed: isReversed,
+      meaningUpright: card.meaningUpright,
+      meaningReversed: card.meaningReversed,
+      keywords: card.keywords,
+      description: card.description,
     };
   });
 
