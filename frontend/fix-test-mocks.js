@@ -11,7 +11,7 @@ testFiles.forEach((file) => {
 
   // Pattern 1: After imageUrl, add missing fields if they're not already there
   const pattern = /(imageUrl:\s*['"][^'"]*['"],)\s*\n(\s*)(?!isReversed)/g;
-  
+
   if (pattern.test(content)) {
     content = content.replace(pattern, (match, imageUrl, indent) => {
       return `${imageUrl}\n${indent}isReversed: false,\n${indent}meaningUpright: undefined,\n${indent}meaningReversed: undefined,\n${indent}keywords: undefined,\n${indent}description: undefined,\n${indent}`;
