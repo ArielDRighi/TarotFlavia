@@ -47,6 +47,10 @@ function getCardsWithPositions(reading: SharedReading): ReadingCard[] {
       positionName: cardPosition?.position || 'Posición',
       imageUrl: card.imageUrl,
       isReversed: isReversed,
+      meaningUpright: undefined,
+      meaningReversed: undefined,
+      keywords: undefined,
+      description: undefined,
     };
   });
 }

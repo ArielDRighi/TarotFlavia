@@ -167,6 +167,10 @@ function CardDisplay({ card, interpretation }: CardDisplayProps) {
           positionName: card.positionName,
           imageUrl: card.imageUrl,
           isReversed: isReversed,
+          meaningUpright: undefined,
+          meaningReversed: undefined,
+          keywords: undefined,
+          description: undefined,
         }}
         isRevealed={true}
         size="md"

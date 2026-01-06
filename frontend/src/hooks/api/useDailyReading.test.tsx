@@ -84,9 +84,9 @@ const mockHistoryItem: DailyReadingHistoryItem = {
   id: 1,
   readingDate: '2025-12-09',
   cardName: 'El Mago',
-  isReversed: false,
   interpretationSummary: 'El Mago te indica...',
   wasRegenerated: false,
+  isReversed: false,
   createdAt: new Date('2025-12-09T08:00:00Z'),
 };
 

@@ -52,6 +52,11 @@ function createTestCards(count: number = 3): ReadingCardType[] {
     position: index + 1,
     positionName: `Posición ${index + 1}`,
     imageUrl: `/images/cards/card-${index + 1}.jpg`,
+    isReversed: false,
+    meaningUpright: undefined,
+    meaningReversed: undefined,
+    keywords: undefined,
+    description: undefined,
   }));
 }
 

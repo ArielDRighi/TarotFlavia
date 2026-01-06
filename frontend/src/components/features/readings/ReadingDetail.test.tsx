@@ -79,6 +79,11 @@ const mockReadingDetail: ReadingDetailType = {
       position: 1,
       positionName: 'Presente',
       imageUrl: '/cards/magician.jpg',
+      isReversed: false,
+      meaningUpright: undefined,
+      meaningReversed: undefined,
+      keywords: undefined,
+      description: undefined,
     },
     {
       id: 2,
@@ -90,6 +95,11 @@ const mockReadingDetail: ReadingDetailType = {
       position: 2,
       positionName: 'Obstáculo',
       imageUrl: '/cards/empress.jpg',
+      isReversed: false,
+      meaningUpright: undefined,
+      meaningReversed: undefined,
+      keywords: undefined,
+      description: undefined,
     },
   ],
   interpretation: {
