@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { Plus, History, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuthStore } from '@/stores/authStore';
 
 /**
  * Quick action card component
@@ -74,7 +75,7 @@ function QuickActionCard({
  * Quick Actions component for user dashboard
  *
  * Displays action cards for:
- * - Nueva Lectura (primary)
+ * - Nueva Lectura (primary) - Routes to /ritual for PREMIUM, /ritual/tirada for FREE
  * - Historial de Lecturas
  * - Carta del Día
  *
@@ -84,10 +85,15 @@ function QuickActionCard({
  * ```
  */
 export function QuickActions() {
+  const { user } = useAuthStore();
+
+  // FREE users go directly to spread selection, PREMIUM users choose categories first
+  const newReadingHref = user?.plan === 'premium' ? '/ritual' : '/ritual/tirada';
+
   return (
     <div className="grid gap-4 md:grid-cols-3">
       <QuickActionCard
-        href="/ritual/tirada"
+        href={newReadingHref}
         icon={<Plus className="h-6 w-6" />}
         title="Nueva Lectura"
         description="Comienza una nueva tirada de tarot"

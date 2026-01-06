@@ -219,11 +219,6 @@ export function SpreadSelector({ categoryId, questionId, customQuestion }: Sprea
     [categoryId, questionId, customQuestion, router, hasReachedLimit, user]
   );
 
-  const handleBackToQuestions = useCallback(() => {
-    const url = categoryId ? `/ritual/preguntas?categoryId=${categoryId}` : '/ritual/preguntas';
-    router.push(url);
-  }, [router, categoryId]);
-
   const handleCloseLimitModal = useCallback(() => {
     setShowLimitModal(false);
   }, []);

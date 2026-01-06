@@ -25,6 +25,7 @@ vi.mock('next/navigation', () => ({
 vi.mock('@/hooks/api/useReadings', () => ({
   useReadingDetail: vi.fn(),
   useSpreads: vi.fn(),
+  useMyAvailableSpreads: vi.fn(),
   useRegenerateInterpretation: vi.fn(),
   useShareReading: vi.fn(),
 }));
