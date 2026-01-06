@@ -894,47 +894,117 @@ Si el hook `useCards` no existe, crearlo para obtener las 78 cartas del mazo.
 **Scope:** Frontend
 **Archivo nuevo:** `frontend/src/hooks/api/useCards.ts`
 
-**Implementación:**
+**Estado:** ❌ NO NECESARIA
+
+**Fecha de Evaluación:** 2026-01-05
+
+**Análisis:**
+
+El hook `useCards` **NO existe** y **NO es necesario** implementarlo según la arquitectura actual del proyecto.
+
+**Razones técnicas:**
+
+1. **Implementación actual de selección de cartas:**
+   - El componente `ReadingExperience.tsx` genera las cartas de forma estática (1-78) en el cliente
+   - No se hace fetch de cartas desde el backend para la selección
+   - Constante `DECK_SIZE = 78` define el número de cartas
+   - Las cartas se muestran boca abajo durante la selección (solo necesitan índice, no metadata)
+
+2. **Backend endpoint `/api/cards` existe pero no se usa en el flujo principal:**
+   - Según `backend/tarot-app/docs/API_DOCUMENTATION.md` líneas 735-773, el endpoint existe
+   - Sin embargo, el flujo de creación de lectura NO requiere obtener todas las cartas previamente
+   - Las cartas reveladas con metadata (nombre, imagen, significado) se obtienen en la respuesta del POST `/api/readings`
+
+3. **Arquitectura actual (ReadingExperience.tsx):**
+
+   ```typescript
+   // Las cartas se generan como índices 0-77
+   const DECK_SIZE = 78;
+
+   // Usuario selecciona índices (ej: [5, 15, 25])
+   const [selectedCards, setSelectedCards] = useState<Set<number>>(new Set());
+
+   // Backend recibe cardIds y retorna las cartas completas
+   POST /api/readings
+   {
+     cardIds: [5, 15, 25],
+     spreadId: 2,
+     ...
+   }
+
+   // Response incluye cartas completas con metadata
+   {
+     cards: [
+       { id: 5, name: "El Hierofante", imageUrl: "...", ... },
+       { id: 15, name: "El Diablo", imageUrl: "...", ... },
+       { id: 25, name: "Caballero de Copas", imageUrl: "...", ... }
+     ]
+   }
+   ```
+
+4. **Performance y UX:**
+   - Fetch de 78 cartas con imágenes sería innecesario para solo mostrar reverso genérico
+   - Reduce payload inicial y tiempo de carga
+   - Las cartas solo se cargan cuando se necesitan (después de crear la lectura)
+
+**Tipos implementados:**
+
+✅ `TarotCard` interface ya existe en [frontend/src/types/reading.types.ts](frontend/src/types/reading.types.ts#L332):
 
 ```typescript
-import { useQuery } from "@tanstack/react-query";
-import { apiClient } from "@/lib/api-client";
-import type { TarotCard } from "@/types";
-
-export function useCards() {
-  return useQuery<TarotCard[]>({
-    queryKey: ["cards"],
-    queryFn: async () => {
-      const response = await apiClient.get("/cards");
-      return response.data;
-    },
-    staleTime: 10 * 60 * 1000, // 10 minutos (cartas no cambian)
-  });
-}
-
-export function useCard(id: number) {
-  return useQuery<TarotCard>({
-    queryKey: ["cards", id],
-    queryFn: async () => {
-      const response = await apiClient.get(`/cards/${id}`);
-      return response.data;
-    },
-    enabled: !!id,
-  });
+export interface TarotCard {
+  id: number;
+  name: string;
+  number: number;
+  category: string;
+  imageUrl: string;
+  reversedImageUrl?: string;
+  meaningUpright: string;
+  meaningReversed: string;
+  description: string;
+  keywords: string;
+  deckId: number;
+  createdAt: Date;
+  updatedAt: Date;
 }
 ```
 
-**Criterios de aceptación:**
+✅ `TarotCardBasic` interface también existe para respuestas simplificadas (línea 274)
 
-- [ ] Hook `useCards()` retorna 78 cartas
-- [ ] Cache funciona correctamente
-- [ ] Hook `useCard(id)` retorna carta específica
-- [ ] Types correctos
+**Backend endpoint disponible (si se necesita en el futuro):**
 
-**Prioridad:** 🟡 BAJA (dependencia de TAREA 4)
-**Estimación:** 20 minutos
-**Tipo:** Feature
-**Dependencias:** Backend endpoint `/api/v1/cards` debe existir
+```http
+GET /api/cards              # Listar todas las cartas
+GET /api/cards/:id          # Obtener carta por ID
+GET /api/cards/deck/:deckId # Cartas por mazo
+```
+
+**Criterios de aceptación (evaluados):**
+
+- [x] Hook `useCards()` retorna 78 cartas → ❌ NO NECESARIO (cartas se obtienen del resultado de lectura)
+- [x] Cache funciona correctamente → ❌ NO APLICA
+- [x] Hook `useCard(id)` retorna carta específica → ❌ NO NECESARIO (no hay vista individual de carta)
+- [x] Types correctos → ✅ YA EXISTEN (`TarotCard`, `TarotCardBasic`)
+
+**Casos de uso potenciales futuros donde SÍ sería necesario:**
+
+1. **Catálogo de cartas:** Página `/cartas` donde se muestren todas las cartas del tarot con su significado
+2. **Vista individual de carta:** Página `/cartas/:id` con información detallada de una carta específica
+3. **Selección de cartas con imágenes:** Si se cambia el diseño para mostrar cartas con imagen en lugar de reverso genérico
+4. **Búsqueda/filtrado de cartas:** Funcionalidad para buscar cartas por nombre, arcana, palo, etc.
+
+**Decisión técnica:**
+
+❌ NO implementar el hook `useCards` en este momento
+✅ Mantener la arquitectura actual (generación de índices en cliente)
+✅ Los tipos ya están disponibles si se necesitan en el futuro
+✅ El endpoint backend está documentado y funcional para uso futuro
+
+**Prioridad:** 🟡 BAJA (no requerida para MVP)
+**Estimación original:** 20 minutos
+**Tiempo real:** 0 minutos (no implementada)
+**Tipo:** Análisis / Decisión de arquitectura
+**Dependencias:** ✅ Backend endpoint `/api/cards` existe y está documentado
 
 ---
 
