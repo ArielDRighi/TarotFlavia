@@ -181,7 +181,7 @@ export function SpreadSelector({ categoryId, questionId, customQuestion }: Sprea
   // Check if user has reached daily limit
   const hasReachedLimit = useCallback((): boolean => {
     if (!user) return false;
-    if (user.plan === 'PREMIUM') return false;
+    if (user.plan === 'premium') return false;
 
     const dailyCount = user.dailyReadingsCount ?? 0;
     const dailyLimit = user.dailyReadingsLimit ?? CONFIG.DEFAULT_FREE_DAILY_LIMIT;
@@ -201,7 +201,7 @@ export function SpreadSelector({ categoryId, questionId, customQuestion }: Sprea
       let url = `/ritual/lectura?spreadId=${spreadId}`;
 
       // Only add question params for PREMIUM users
-      if (user?.plan === 'PREMIUM') {
+      if (user?.plan === 'premium') {
         // Add categoryId if present
         if (categoryId) {
           url += `&categoryId=${categoryId}`;
@@ -228,25 +228,8 @@ export function SpreadSelector({ categoryId, questionId, customQuestion }: Sprea
     setShowLimitModal(false);
   }, []);
 
-  // Handle missing question - only required for PREMIUM users
-  const isPremium = user?.plan === 'PREMIUM';
-  const requiresQuestion = isPremium && !hasQuestion;
-
-  if (requiresQuestion && !isLoading) {
-    return (
-      <div className="bg-bg-main min-h-screen p-8">
-        <div className="mx-auto max-w-4xl">
-          <ErrorDisplay
-            message="Selecciona una pregunta primero."
-            onRetry={handleBackToQuestions}
-          />
-          <div className="mt-4 text-center">
-            <Button onClick={handleBackToQuestions}>Volver a preguntas</Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Check if user is PREMIUM for conditional rendering
+  const isPremium = user?.plan === 'premium';
 
   return (
     <div className="bg-bg-main min-h-screen p-8">
