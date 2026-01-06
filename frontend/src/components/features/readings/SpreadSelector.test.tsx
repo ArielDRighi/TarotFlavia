@@ -90,7 +90,7 @@ const mockUserAtLimit = {
   email: 'test@test.com',
   name: 'Test User',
   roles: ['USER'],
-  plan: 'FREE',
+  plan: 'free',
   dailyReadingsCount: 3,
   dailyReadingsLimit: 3,
 };
@@ -100,7 +100,7 @@ const mockUserPremium = {
   email: 'premium@test.com',
   name: 'Premium User',
   roles: ['USER'],
-  plan: 'PREMIUM',
+  plan: 'premium',
   dailyReadingsCount: 0,
   dailyReadingsLimit: 999,
 };
@@ -447,34 +447,25 @@ describe('SpreadSelector', () => {
         (useAuthStore as unknown as Mock).mockReturnValue({ user: mockUserPremium });
       });
 
-      it('should show error when PREMIUM user has no question', () => {
+      it('should allow PREMIUM user to continue without question (lectura general)', () => {
         render(<SpreadSelector categoryId="1" questionId={null} customQuestion={null} />);
 
-        expect(screen.getByText(/selecciona una pregunta primero/i)).toBeInTheDocument();
+        // Should NOT show error - PREMIUM can do general readings
+        expect(screen.queryByText(/selecciona una pregunta primero/i)).not.toBeInTheDocument();
+
+        // Should show spreads normally
+        expect(screen.getByTestId('spreads-grid')).toBeInTheDocument();
+        expect(screen.getAllByTestId('spread-card')).toHaveLength(4);
       });
 
-      it('should show back button to questions page', () => {
-        render(<SpreadSelector categoryId="1" questionId={null} customQuestion={null} />);
-
-        expect(screen.getByRole('button', { name: /volver a preguntas/i })).toBeInTheDocument();
-      });
-
-      it('should navigate back to questions page when back button is clicked', () => {
-        render(<SpreadSelector categoryId="1" questionId={null} customQuestion={null} />);
-
-        const backButton = screen.getByRole('button', { name: /volver a preguntas/i });
-        fireEvent.click(backButton);
-
-        expect(mockPush).toHaveBeenCalledWith('/ritual/preguntas?categoryId=1');
-      });
-
-      it('should navigate to questions without categoryId when categoryId is null', () => {
+      it('should allow PREMIUM user without categoryId to continue', () => {
         render(<SpreadSelector categoryId={null} questionId={null} customQuestion={null} />);
 
-        const backButton = screen.getByRole('button', { name: /volver a preguntas/i });
-        fireEvent.click(backButton);
+        // Should NOT show error
+        expect(screen.queryByText(/selecciona una pregunta primero/i)).not.toBeInTheDocument();
 
-        expect(mockPush).toHaveBeenCalledWith('/ritual/preguntas');
+        // Should show spreads
+        expect(screen.getByTestId('spreads-grid')).toBeInTheDocument();
       });
     });
 

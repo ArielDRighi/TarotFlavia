@@ -42,7 +42,7 @@ const mockUser = {
   email: 'test@test.com',
   name: 'Test User',
   roles: ['USER'],
-  plan: 'FREE',
+  plan: 'free',
   dailyReadingsCount: 0,
   dailyReadingsLimit: 3,
 };
@@ -74,7 +74,7 @@ describe('SpreadSelectorPage', () => {
     const mockSearchParams = new URLSearchParams('categoryId=1&questionId=1');
     (useSearchParams as Mock).mockReturnValue(mockSearchParams);
     (useAuthStore as unknown as Mock).mockReturnValue({
-      user: { ...mockUser, plan: 'PREMIUM' },
+      user: { ...mockUser, plan: 'premium' },
     });
 
     render(<SpreadSelectorPage />);
@@ -126,7 +126,7 @@ describe('SpreadSelectorPage', () => {
     const mockSearchParams = new URLSearchParams('');
     (useSearchParams as Mock).mockReturnValue(mockSearchParams);
     (useAuthStore as unknown as Mock).mockReturnValue({
-      user: { ...mockUser, plan: 'FREE' },
+      user: { ...mockUser, plan: 'free' },
     });
 
     render(<SpreadSelectorPage />);
@@ -135,7 +135,7 @@ describe('SpreadSelectorPage', () => {
     expect(screen.getByText('Respuesta Rápida')).toBeInTheDocument();
   });
 
-  it('should show error when PREMIUM user has no question', () => {
+  it('should handle missing search params gracefully for PREMIUM users', () => {
     const mockSearchParams = new URLSearchParams('');
     (useSearchParams as Mock).mockReturnValue(mockSearchParams);
     (useAuthStore as unknown as Mock).mockReturnValue({
@@ -144,7 +144,7 @@ describe('SpreadSelectorPage', () => {
 
     render(<SpreadSelectorPage />);
 
-    // PREMIUM users need a question
-    expect(screen.getByText(/selecciona una pregunta primero/i)).toBeInTheDocument();
+    // PREMIUM users can also see spreads without question (for general readings)
+    expect(screen.getByText('Respuesta Rápida')).toBeInTheDocument();
   });
 });

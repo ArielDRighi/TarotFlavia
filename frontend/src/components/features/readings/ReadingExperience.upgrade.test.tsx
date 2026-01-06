@@ -117,11 +117,11 @@ const mockReadingCards: ReadingCard[] = [
     position: 1,
     positionName: 'Pasado',
     imageUrl: '/cards/the-fool.jpg',
-      isReversed: false,
-      meaningUpright: undefined,
-      meaningReversed: undefined,
-      keywords: undefined,
-      description: undefined,
+    isReversed: false,
+    meaningUpright: undefined,
+    meaningReversed: undefined,
+    keywords: undefined,
+    description: undefined,
   },
   {
     id: 2,
@@ -133,11 +133,11 @@ const mockReadingCards: ReadingCard[] = [
     position: 2,
     positionName: 'Presente',
     imageUrl: '/cards/the-magician.jpg',
-      isReversed: false,
-      meaningUpright: undefined,
-      meaningReversed: undefined,
-      keywords: undefined,
-      description: undefined,
+    isReversed: false,
+    meaningUpright: undefined,
+    meaningReversed: undefined,
+    keywords: undefined,
+    description: undefined,
   },
   {
     id: 3,
@@ -149,11 +149,11 @@ const mockReadingCards: ReadingCard[] = [
     position: 3,
     positionName: 'Futuro',
     imageUrl: '/cards/high-priestess.jpg',
-      isReversed: false,
-      meaningUpright: undefined,
-      meaningReversed: undefined,
-      keywords: undefined,
-      description: undefined,
+    isReversed: false,
+    meaningUpright: undefined,
+    meaningReversed: undefined,
+    keywords: undefined,
+    description: undefined,
   },
 ];
 
@@ -185,6 +185,10 @@ const mockCreateReadingMutateAsync = vi.fn();
 
 vi.mock('@/hooks/api/useReadings', () => ({
   useSpreads: () => ({
+    data: mockSpreads,
+    isLoading: false,
+  }),
+  useMyAvailableSpreads: () => ({
     data: mockSpreads,
     isLoading: false,
   }),
