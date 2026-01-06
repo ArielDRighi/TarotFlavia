@@ -1,8 +1,26 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { QuickActions } from './QuickActions';
 
+// Mock authStore
+const mockUseAuthStore = vi.fn();
+vi.mock('@/stores/authStore', () => ({
+  useAuthStore: () => mockUseAuthStore(),
+}));
+
 describe('QuickActions', () => {
+  beforeEach(() => {
+    // Reset mock to default (FREE user)
+    mockUseAuthStore.mockReturnValue({
+      user: {
+        id: 1,
+        email: 'test@example.com',
+        plan: 'free',
+      },
+      isAuthenticated: true,
+    });
+  });
+
   it('should display "Nueva Lectura" button', () => {
     render(<QuickActions />);
 
@@ -10,11 +28,66 @@ describe('QuickActions', () => {
     expect(newReadingButton).toBeInTheDocument();
   });
 
-  it('should link "Nueva Lectura" button to /ritual/tirada', () => {
-    render(<QuickActions />);
+  describe('Conditional Routing based on User Plan', () => {
+    it('should link "Nueva Lectura" to /ritual/tirada for FREE users', () => {
+      mockUseAuthStore.mockReturnValue({
+        user: {
+          id: 1,
+          email: 'free@test.com',
+          plan: 'free',
+        },
+        isAuthenticated: true,
+      });
 
-    const newReadingButton = screen.getByText('Nueva Lectura');
-    expect(newReadingButton.closest('a')).toHaveAttribute('href', '/ritual/tirada');
+      render(<QuickActions />);
+
+      const newReadingButton = screen.getByText('Nueva Lectura');
+      expect(newReadingButton.closest('a')).toHaveAttribute('href', '/ritual/tirada');
+    });
+
+    it('should link "Nueva Lectura" to /ritual for PREMIUM users', () => {
+      mockUseAuthStore.mockReturnValue({
+        user: {
+          id: 2,
+          email: 'premium@test.com',
+          plan: 'premium',
+        },
+        isAuthenticated: true,
+      });
+
+      render(<QuickActions />);
+
+      const newReadingButton = screen.getByText('Nueva Lectura');
+      expect(newReadingButton.closest('a')).toHaveAttribute('href', '/ritual');
+    });
+
+    it('should default to /ritual/tirada when user is null', () => {
+      mockUseAuthStore.mockReturnValue({
+        user: null,
+        isAuthenticated: false,
+      });
+
+      render(<QuickActions />);
+
+      const newReadingButton = screen.getByText('Nueva Lectura');
+      expect(newReadingButton.closest('a')).toHaveAttribute('href', '/ritual/tirada');
+    });
+
+    it('should default to /ritual/tirada when user plan is undefined', () => {
+      mockUseAuthStore.mockReturnValue({
+        user: {
+          id: 3,
+          email: 'test@example.com',
+          plan: undefined,
+        },
+        isAuthenticated: true,
+      });
+
+      render(<QuickActions />);
+
+      const newReadingButton = screen.getByText('Nueva Lectura');
+      expect(newReadingButton.closest('a')).toHaveAttribute('href', '/ritual/tirada');
+    });
   });
 
   it('should display "Historial de Lecturas" button', () => {

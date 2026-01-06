@@ -42,7 +42,7 @@ const mockUser = {
   email: 'test@test.com',
   name: 'Test User',
   roles: ['USER'],
-  plan: 'FREE',
+  plan: 'free',
   dailyReadingsCount: 0,
   dailyReadingsLimit: 3,
 };
@@ -126,7 +126,7 @@ describe('SpreadSelectorPage', () => {
     const mockSearchParams = new URLSearchParams('');
     (useSearchParams as Mock).mockReturnValue(mockSearchParams);
     (useAuthStore as unknown as Mock).mockReturnValue({
-      user: { ...mockUser, plan: 'FREE' },
+      user: { ...mockUser, plan: 'free' },
     });
 
     render(<SpreadSelectorPage />);

@@ -87,7 +87,7 @@ function QuickActionCard({
 export function QuickActions() {
   const { user } = useAuthStore();
 
-  // FREE users go directly to spread selection, PREMIUM users choose categories first
+  // Free users skip category/question selection and go directly to spreads; premium users start at category selection flow
   const newReadingHref = user?.plan === 'premium' ? '/ritual' : '/ritual/tirada';
 
   return (
