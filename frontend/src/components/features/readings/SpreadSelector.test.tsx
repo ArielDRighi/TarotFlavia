@@ -91,7 +91,7 @@ const mockUserAtLimit = {
   name: 'Test User',
   roles: ['USER'],
   plan: 'free',
-  dailyReadingsCount: 0,
+  dailyReadingsCount: 3,
   dailyReadingsLimit: 3,
 };
 
