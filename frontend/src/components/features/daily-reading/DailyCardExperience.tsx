@@ -107,11 +107,10 @@ export function DailyCardExperience() {
 
   // Check if anonymous user reached limit
   // Anonymous users get 1 daily card per day (tracked by fingerprint)
-  // If they already have one today OR backend returns 403/409, show limit
+  // Backend returns 403/409 when limit is reached
   const isAnonymousLimitReached =
     !isAuthenticated &&
-    (!!dailyReading || // Already retrieved daily card today
-      (isAxiosError(error) && (error.response?.status === 403 || error.response?.status === 409)) ||
+    ((isAxiosError(error) && (error.response?.status === 403 || error.response?.status === 409)) ||
       (isAxiosError(anonymousError) &&
         (anonymousError.response?.status === 403 || anonymousError.response?.status === 409)));
 

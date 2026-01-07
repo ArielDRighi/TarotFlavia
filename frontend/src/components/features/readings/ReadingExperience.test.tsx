@@ -682,8 +682,10 @@ describe('ReadingExperience', () => {
 
     it('should show "Nueva Lectura" button when FREE user is under daily limit', async () => {
       // Modify mock for FREE user under limit
+      // User has created 0 readings today, limit is 2
+      // After creating 1 in this session, effectiveDailyCount = 0 + 1 = 1 < 2 ✓
       mockAuthStoreReturn.user.plan = 'free';
-      mockAuthStoreReturn.user.dailyReadingsCount = 1;
+      mockAuthStoreReturn.user.dailyReadingsCount = 0;
       mockAuthStoreReturn.user.dailyReadingsLimit = 2;
 
       mockPlanFeaturesReturn.plan = 'free';
