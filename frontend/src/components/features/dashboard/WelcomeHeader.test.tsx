@@ -24,6 +24,10 @@ describe('WelcomeHeader', () => {
       plan: 'free',
       dailyReadingsCount: 0,
       dailyReadingsLimit: 2,
+      dailyCardCount: 0,
+      dailyCardLimit: 1,
+      tarotReadingsCount: 0,
+      tarotReadingsLimit: 1,
     };
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
@@ -63,6 +67,10 @@ describe('WelcomeHeader', () => {
       plan: 'free',
       dailyReadingsCount: 1,
       dailyReadingsLimit: 2,
+      dailyCardCount: 0,
+      dailyCardLimit: 1,
+      tarotReadingsCount: 0,
+      tarotReadingsLimit: 1,
     };
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
@@ -102,6 +110,10 @@ describe('WelcomeHeader', () => {
       plan: 'premium',
       dailyReadingsCount: 2,
       dailyReadingsLimit: 3,
+      dailyCardCount: 0,
+      dailyCardLimit: 1,
+      tarotReadingsCount: 0,
+      tarotReadingsLimit: 1,
     };
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
@@ -141,6 +153,10 @@ describe('WelcomeHeader', () => {
       plan: 'free',
       dailyReadingsCount: 1,
       dailyReadingsLimit: 2,
+      dailyCardCount: 0,
+      dailyCardLimit: 1,
+      tarotReadingsCount: 0,
+      tarotReadingsLimit: 1,
     };
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
