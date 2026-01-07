@@ -126,11 +126,28 @@ export function DailyCardExperience() {
         (authenticatedError.response?.status === 403 ||
           authenticatedError.response?.status === 409)));
 
+  // Preventive check: Verify daily card limit before allowing creation
+  // Uses specific daily card counters (not tarot readings)
+  const hasReachedDailyCardLimit = useCallback((): boolean => {
+    if (!user || !isAuthenticated) return false;
+    if (isPremium) return false; // Premium users don't have hard limits on viewing
+    
+    const dailyCardCount = user.dailyCardCount ?? 0;
+    const dailyCardLimit = user.dailyCardLimit ?? 1;
+    
+    return dailyCardCount >= dailyCardLimit;
+  }, [user, isAuthenticated, isPremium]);
+
   /**
    * Handle card click to create daily reading
    */
   const handleRevealCard = useCallback(async () => {
     if (isCreatingReading || isRevealing || currentReading) return;
+
+    // Preventive check: Don't allow if limit already reached
+    if (hasReachedDailyCardLimit()) {
+      return;
+    }
 
     setIsRevealing(true);
 
@@ -179,6 +196,7 @@ export function DailyCardExperience() {
     isCreatingReading,
     isRevealing,
     currentReading,
+    hasReachedDailyCardLimit,
   ]);
 
   /**
