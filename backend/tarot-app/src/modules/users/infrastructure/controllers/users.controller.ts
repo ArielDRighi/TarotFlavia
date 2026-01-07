@@ -66,11 +66,10 @@ export class UsersController {
       await this.planConfigService.getTarotReadingsLimit(user.plan);
 
     // Get remaining usage for each feature
-    const dailyCardRemaining =
-      await this.usageLimitsService.getRemainingUsage(
-        userId,
-        UsageFeature.DAILY_CARD,
-      );
+    const dailyCardRemaining = await this.usageLimitsService.getRemainingUsage(
+      userId,
+      UsageFeature.DAILY_CARD,
+    );
     const tarotReadingsRemaining =
       await this.usageLimitsService.getRemainingUsage(
         userId,

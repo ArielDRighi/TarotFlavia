@@ -14,7 +14,12 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
  */
 export class AddSeparateReadingLimits1767800262000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // 1. Add new columns to plans table
+    // 1. Add new value to usage_feature_enum
+    await queryRunner.query(`
+      ALTER TYPE usage_feature_enum ADD VALUE IF NOT EXISTS 'daily_card'
+    `);
+
+    // 2. Add new columns to plans table
     await queryRunner.query(`
       ALTER TABLE "plans"
       ADD COLUMN "daily_card_limit" integer NOT NULL DEFAULT 1,
@@ -75,5 +80,9 @@ export class AddSeparateReadingLimits1767800262000 implements MigrationInterface
       DROP COLUMN "tarot_readings_limit",
       DROP COLUMN "daily_card_limit"
     `);
+
+    // Note: We cannot easily remove the enum value 'daily_card' from usage_feature_enum
+    // as PostgreSQL doesn't support removing enum values directly.
+    // If needed, you must create a new enum without the value and alter the column type.
   }
 }

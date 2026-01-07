@@ -255,8 +255,14 @@ const mockAuthStoreReturn = {
     email: 'test@example.com',
     plan: 'PREMIUM',
     roles: ['USER'],
+    // Legacy fields (deprecated)
     dailyReadingsCount: 0,
     dailyReadingsLimit: 999,
+    // New separate fields
+    dailyCardCount: 0,
+    dailyCardLimit: 1,
+    tarotReadingsCount: 0,
+    tarotReadingsLimit: 3,
   },
   isAuthenticated: true,
 };
@@ -645,6 +651,8 @@ describe('ReadingExperience', () => {
       mockAuthStoreReturn.user.plan = 'free';
       mockAuthStoreReturn.user.dailyReadingsCount = 2;
       mockAuthStoreReturn.user.dailyReadingsLimit = 2;
+      mockAuthStoreReturn.user.tarotReadingsCount = 1;
+      mockAuthStoreReturn.user.tarotReadingsLimit = 1;
 
       mockPlanFeaturesReturn.plan = 'free';
       mockPlanFeaturesReturn.isPremium = false;
@@ -673,6 +681,8 @@ describe('ReadingExperience', () => {
       mockAuthStoreReturn.user.plan = 'PREMIUM';
       mockAuthStoreReturn.user.dailyReadingsCount = 0;
       mockAuthStoreReturn.user.dailyReadingsLimit = 999;
+      mockAuthStoreReturn.user.tarotReadingsCount = 0;
+      mockAuthStoreReturn.user.tarotReadingsLimit = 3;
       mockPlanFeaturesReturn.plan = 'premium';
       mockPlanFeaturesReturn.isPremium = true;
       mockPlanFeaturesReturn.isFree = false;
@@ -687,6 +697,8 @@ describe('ReadingExperience', () => {
       mockAuthStoreReturn.user.plan = 'free';
       mockAuthStoreReturn.user.dailyReadingsCount = 0;
       mockAuthStoreReturn.user.dailyReadingsLimit = 2;
+      mockAuthStoreReturn.user.tarotReadingsCount = 0;
+      mockAuthStoreReturn.user.tarotReadingsLimit = 1;
 
       mockPlanFeaturesReturn.plan = 'free';
       mockPlanFeaturesReturn.isPremium = false;
@@ -715,6 +727,8 @@ describe('ReadingExperience', () => {
       mockAuthStoreReturn.user.plan = 'PREMIUM';
       mockAuthStoreReturn.user.dailyReadingsCount = 0;
       mockAuthStoreReturn.user.dailyReadingsLimit = 999;
+      mockAuthStoreReturn.user.tarotReadingsCount = 0;
+      mockAuthStoreReturn.user.tarotReadingsLimit = 3;
       mockPlanFeaturesReturn.plan = 'premium';
       mockPlanFeaturesReturn.isPremium = true;
       mockPlanFeaturesReturn.isFree = false;
@@ -727,6 +741,8 @@ describe('ReadingExperience', () => {
       mockAuthStoreReturn.user.plan = 'premium';
       mockAuthStoreReturn.user.dailyReadingsCount = 10;
       mockAuthStoreReturn.user.dailyReadingsLimit = 999;
+      mockAuthStoreReturn.user.tarotReadingsCount = 2;
+      mockAuthStoreReturn.user.tarotReadingsLimit = 3;
 
       mockPlanFeaturesReturn.plan = 'premium';
       mockPlanFeaturesReturn.isPremium = true;

@@ -131,10 +131,10 @@ export function DailyCardExperience() {
   const hasReachedDailyCardLimit = useCallback((): boolean => {
     if (!user || !isAuthenticated) return false;
     if (isPremium) return false; // Premium users don't have hard limits on viewing
-    
+
     const dailyCardCount = user.dailyCardCount ?? 0;
     const dailyCardLimit = user.dailyCardLimit ?? 1;
-    
+
     return dailyCardCount >= dailyCardLimit;
   }, [user, isAuthenticated, isPremium]);
 

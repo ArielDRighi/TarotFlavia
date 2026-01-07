@@ -34,7 +34,7 @@ export interface User {
  * User profile response (includes usage stats)
  * Note: Usage counts and limits are calculated at runtime
  * based on user's plan and current usage, not stored in User entity
- * 
+ *
  * UPDATED: Separate limits for daily cards and tarot readings
  * - dailyCardCount/Limit: For "Carta del Día" feature
  * - tarotReadingsCount/Limit: For "Tiradas de Tarot" feature
@@ -46,7 +46,7 @@ export interface UserProfile extends User {
   dailyCardLimit: number;
   tarotReadingsCount: number;
   tarotReadingsLimit: number;
-  
+
   // Deprecated fields: Maintained for backward compatibility
   dailyReadingsCount: number;
   dailyReadingsLimit: number;
