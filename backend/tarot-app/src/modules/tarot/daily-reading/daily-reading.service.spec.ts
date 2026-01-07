@@ -12,6 +12,8 @@ import {
 import { InterpretationsService } from '../interpretations/interpretations.service';
 import { UserPlan } from '../../users/entities/user.entity';
 import { UsersService } from '../../users/users.service';
+import { PlanConfigService } from '../../plan-config/plan-config.service';
+import { UsageLimitsService } from '../../usage-limits/usage-limits.service';
 
 interface MockQueryBuilder {
   where: jest.Mock;
@@ -41,12 +43,25 @@ interface MockUsersService {
   findById: jest.Mock;
 }
 
+interface MockPlanConfigService {
+  findByPlanType: jest.Mock;
+  getDailyCardLimit: jest.Mock;
+  getTarotReadingsLimit: jest.Mock;
+}
+
+interface MockUsageLimitsService {
+  checkLimit: jest.Mock;
+  incrementUsage: jest.Mock;
+}
+
 describe('DailyReadingService', () => {
   let service: DailyReadingService;
   let mockDailyReadingRepo: MockRepository;
   let mockCardRepo: MockRepository;
   let mockInterpretationsService: MockInterpretationsService;
   let mockUsersService: MockUsersService;
+  let mockPlanConfigService: MockPlanConfigService;
+  let mockUsageLimitsService: MockUsageLimitsService;
   let mockDailyReadingQueryBuilder: MockQueryBuilder;
   let mockCardQueryBuilder: MockQueryBuilder;
 
@@ -103,6 +118,17 @@ describe('DailyReadingService', () => {
       findById: jest.fn(),
     };
 
+    mockPlanConfigService = {
+      findByPlanType: jest.fn(),
+      getDailyCardLimit: jest.fn(),
+      getTarotReadingsLimit: jest.fn(),
+    };
+
+    mockUsageLimitsService = {
+      checkLimit: jest.fn(),
+      incrementUsage: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DailyReadingService,
@@ -122,6 +148,14 @@ describe('DailyReadingService', () => {
           provide: UsersService,
           useValue: mockUsersService,
         },
+        {
+          provide: PlanConfigService,
+          useValue: mockPlanConfigService,
+        },
+        {
+          provide: UsageLimitsService,
+          useValue: mockUsageLimitsService,
+        },
       ],
     }).compile();
 
@@ -137,6 +171,17 @@ describe('DailyReadingService', () => {
     const tarotistaId = 1;
 
     it('should throw ConflictException if user already has a daily card for today', async () => {
+      // Mock plan config para permitir la verificación de límites
+      mockPlanConfigService.findByPlanType.mockResolvedValue({
+        planType: UserPlan.FREE,
+        dailyCardLimit: 1,
+        tarotReadingsLimit: 3,
+      });
+
+      // Mock usage limit - usuario NO ha alcanzado límite
+      mockUsageLimitsService.checkLimit.mockResolvedValue(true);
+
+      // Mock que YA existe una carta del día
       mockDailyReadingQueryBuilder.getOne.mockResolvedValue({ id: 1 });
 
       await expect(
@@ -146,6 +191,27 @@ describe('DailyReadingService', () => {
         service.generateDailyCard(userId, tarotistaId),
       ).rejects.toThrow(
         'Ya generaste tu carta del día. Vuelve mañana para una nueva carta.',
+      );
+    });
+
+    it('should throw ForbiddenException if user has reached daily card limit', async () => {
+      // Mock plan config
+      mockPlanConfigService.findByPlanType.mockResolvedValue({
+        planType: UserPlan.FREE,
+        dailyCardLimit: 1,
+        tarotReadingsLimit: 3,
+      });
+      
+      // Mock usage limit - usuario SÍ alcanzó límite
+      mockUsageLimitsService.checkLimit.mockResolvedValue(false);
+
+      await expect(
+        service.generateDailyCard(userId, tarotistaId),
+      ).rejects.toThrow(ForbiddenException);
+      await expect(
+        service.generateDailyCard(userId, tarotistaId),
+      ).rejects.toThrow(
+        'Has alcanzado tu límite de carta del día. Actualiza tu plan para generar más cartas.',
       );
     });
 

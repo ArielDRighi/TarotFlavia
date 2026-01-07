@@ -77,13 +77,20 @@ export function DailyCardExperience() {
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
 
-  // Fetch today's reading for authenticated users only
+  // Helper: Check if daily card limit is reached based on counters
+  // Both FREE and PREMIUM have limit of 1 daily card per day
+  const dailyCardCount = user?.dailyCardCount ?? 0;
+  const dailyCardLimit = user?.dailyCardLimit ?? 1;
+  const hasReachedDailyCardLimit = isAuthenticated && dailyCardCount >= dailyCardLimit;
+
+  // Fetch today's reading for authenticated users only IF they haven't reached the limit
+  // If limit is reached, don't fetch - user should only see limit message
   // Anonymous users don't fetch initial data - they generate on click (POST with fingerprint)
   const {
     data: dailyReading,
     isLoading: isFetching,
     error,
-  } = useDailyReadingToday({ enabled: isAuthenticated });
+  } = useDailyReadingToday({ enabled: isAuthenticated && !hasReachedDailyCardLimit });
 
   const { mutate: createDailyReading, isPending: isCreating } = useDailyReading();
   const { mutate: createDailyReadingPublic, isPending: isCreatingPublic } = useDailyReadingPublic();
@@ -114,29 +121,18 @@ export function DailyCardExperience() {
       (isAxiosError(anonymousError) &&
         (anonymousError.response?.status === 403 || anonymousError.response?.status === 409)));
 
-  // Check if authenticated user already has today's card
+  // Check if authenticated user reached limit
   // Daily card is independent from tarot readings
-  // FREE/ANONYMOUS: If you have one today, limit is reached (1 per day)
-  // PREMIUM: Can view their daily card multiple times (no limit on views)
+  // FREE users: 1 daily card per day
+  // PREMIUM users: 1 daily card per day (but can regenerate)
+  // If user already used their daily card, they should see limit message
+  // The card can only be viewed in history, not here
   const isAuthenticatedLimitReached =
     isAuthenticated &&
-    !isPremium && // Premium users can view their daily card multiple times
-    (!!dailyReading || // Already retrieved daily card today
+    (hasReachedDailyCardLimit || // Already reached limit based on counters
       (isAxiosError(authenticatedError) &&
         (authenticatedError.response?.status === 403 ||
           authenticatedError.response?.status === 409)));
-
-  // Preventive check: Verify daily card limit before allowing creation
-  // Uses specific daily card counters (not tarot readings)
-  const hasReachedDailyCardLimit = useCallback((): boolean => {
-    if (!user || !isAuthenticated) return false;
-    if (isPremium) return false; // Premium users don't have hard limits on viewing
-
-    const dailyCardCount = user.dailyCardCount ?? 0;
-    const dailyCardLimit = user.dailyCardLimit ?? 1;
-
-    return dailyCardCount >= dailyCardLimit;
-  }, [user, isAuthenticated, isPremium]);
 
   /**
    * Handle card click to create daily reading
@@ -145,7 +141,7 @@ export function DailyCardExperience() {
     if (isCreatingReading || isRevealing || currentReading) return;
 
     // Preventive check: Don't allow if limit already reached
-    if (hasReachedDailyCardLimit()) {
+    if (hasReachedDailyCardLimit) {
       return;
     }
 

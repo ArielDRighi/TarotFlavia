@@ -11,6 +11,7 @@ import { InterpretationsModule } from '../interpretations/interpretations.module
 import { AIUsageModule } from '../../ai-usage/ai-usage.module';
 import { UsageLimitsModule } from '../../usage-limits/usage-limits.module';
 import { UsersModule } from '../../users/users.module';
+import { PlanConfigModule } from '../../plan-config/plan-config.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { UsersModule } from '../../users/users.module';
     AIUsageModule,
     UsageLimitsModule,
     UsersModule,
+    PlanConfigModule,
   ],
   controllers: [DailyReadingController, DailyReadingPublicController],
   providers: [DailyReadingService],
