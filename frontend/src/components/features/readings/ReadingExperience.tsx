@@ -407,6 +407,7 @@ export function ReadingExperience({
     customQuestion,
     createReading,
     canUseAI,
+    isPremium,
   ]);
 
   // Action handlers

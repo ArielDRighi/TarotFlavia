@@ -1,20 +1,12 @@
 'use client';
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Copy, History, Sparkles } from 'lucide-react';
 import { isAxiosError, AxiosError } from 'axios';
 import { ROUTES } from '@/lib/constants/routes';
 
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TarotCard } from '@/components/features/readings/TarotCard';
 import { AnonymousLimitReached } from './AnonymousLimitReached';
@@ -126,7 +118,6 @@ export function DailyCardExperience() {
   }, [isAuthenticated]);
 
   // Computed values
-  const isPremium = user?.plan === 'PREMIUM';
   const currentReading = localReading || dailyReading;
   const isRevealed = Boolean(currentReading);
   const isCreatingReading = isCreating || isCreatingPublic;

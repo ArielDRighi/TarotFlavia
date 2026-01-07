@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Heart,
@@ -137,31 +137,24 @@ export function CategorySelector() {
   const { data: categories, isLoading: isCategoriesLoading, error, refetch } = useCategories();
   const router = useRouter();
 
-  // Modal state
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [showLimitReachedModal, setShowLimitReachedModal] = useState(false);
-
   // Check user's daily limit status
   const isPremium = user?.plan?.toUpperCase() === 'PREMIUM';
   const tarotReadingsCount = user?.tarotReadingsCount ?? 0;
   const tarotReadingsLimit = user?.tarotReadingsLimit ?? (isPremium ? 3 : 1);
   const hasReachedLimit = tarotReadingsCount >= tarotReadingsLimit;
 
-  // ✅ EARLY VALIDATION: Check limit when component mounts
-  useEffect(() => {
-    if (!user) return;
-
-    if (hasReachedLimit) {
-      // User already reached their daily limit
-      if (isPremium) {
-        // PREMIUM user: show gentle "come back tomorrow" message
-        setShowLimitReachedModal(true);
-      } else {
-        // FREE user: show upgrade modal
-        setShowUpgradeModal(true);
-      }
-    }
+  // Derive modal state from user and limit status (no effect needed)
+  // This ensures modal shows immediately without setState in effect
+  const modalType = useMemo(() => {
+    if (!user || !hasReachedLimit) return null;
+    return isPremium ? 'limit' : 'upgrade';
   }, [user, hasReachedLimit, isPremium]);
+
+  // Track if user has manually closed the modal
+  const [isModalDismissed, setIsModalDismissed] = useState(false);
+
+  // Show modal only if derived state says to show it AND user hasn't dismissed it
+  const shouldShowModal = modalType !== null && !isModalDismissed;
 
   // Redirect FREE users to /ritual/tirada (skip category selection)
   useEffect(() => {
@@ -173,11 +166,7 @@ export function CategorySelector() {
   const handleCategoryClick = (categoryId: number) => {
     // Double-check limit before navigation (defensive programming)
     if (hasReachedLimit) {
-      if (isPremium) {
-        setShowLimitReachedModal(true);
-      } else {
-        setShowUpgradeModal(true);
-      }
+      // Don't navigate, modal will show via derived state
       return;
     }
 
@@ -239,18 +228,18 @@ export function CategorySelector() {
 
       {/* Modals */}
       <UpgradeModal
-        open={showUpgradeModal}
+        open={shouldShowModal && modalType === 'upgrade'}
         onClose={() => {
-          setShowUpgradeModal(false);
+          setIsModalDismissed(true);
           router.push('/');
         }}
         reason="limit-reached"
       />
 
       <DailyLimitReachedModal
-        open={showLimitReachedModal}
+        open={shouldShowModal && modalType === 'limit'}
         onClose={() => {
-          setShowLimitReachedModal(false);
+          setIsModalDismissed(true);
           router.push('/');
         }}
         usedReadings={tarotReadingsCount}

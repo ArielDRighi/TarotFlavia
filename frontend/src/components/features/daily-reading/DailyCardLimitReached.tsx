@@ -34,7 +34,7 @@ export function DailyCardLimitReached() {
   // Get specific daily card counters
   const dailyCardCount = user?.dailyCardCount ?? 0;
   const dailyCardLimit = user?.dailyCardLimit ?? 1;
-  
+
   // Detect user plan - PREMIUM users should see different message (no upgrade CTA)
   const isPremium = user?.plan?.toUpperCase() === 'PREMIUM';
 
@@ -62,7 +62,8 @@ export function DailyCardLimitReached() {
           <span className="font-semibold">
             {dailyCardCount} de {dailyCardLimit} {dailyCardLimit === 1 ? 'carta' : 'cartas'}
           </span>{' '}
-          hoy. {isPremium ? 'Tu límite se reinicia mañana.' : 'Puedes obtener una nueva carta mañana.'}
+          hoy.{' '}
+          {isPremium ? 'Tu límite se reinicia mañana.' : 'Puedes obtener una nueva carta mañana.'}
         </CardDescription>
       </CardHeader>
 
@@ -73,7 +74,7 @@ export function DailyCardLimitReached() {
             {/* Today's limit info */}
             <div className="bg-primary/5 rounded-lg p-4 text-center">
               <div className="mb-2 flex items-center justify-center gap-2">
-                <Calendar className="h-5 w-5 text-primary" />
+                <Calendar className="text-primary h-5 w-5" />
                 <p className="font-semibold">Tu límite se reinicia mañana</p>
               </div>
               <p className="text-text-muted text-sm">

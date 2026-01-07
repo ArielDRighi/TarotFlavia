@@ -369,105 +369,14 @@ describe('CartaDelDiaPage', () => {
 
       renderWithProviders(<CartaDelDiaPage />);
 
-      // Should show limit message instead of buttons
-      expect(screen.getByText(/ya recibiste tu carta del día/i)).toBeInTheDocument();
-      expect(screen.queryByRole('button', { name: /compartir mensaje/i })).not.toBeInTheDocument();
+      // FREE users should see the revealed card (not blocked)
+      expect(screen.getByTestId('revealed-state')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /compartir mensaje/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /ver historial/i })).toBeInTheDocument();
     });
   });
 
-  describe('Premium Features', () => {
-    it('should show regenerate button for premium users', () => {
-      mockUseAuth.mockReturnValue({
-        user: createMockUser({ plan: 'PREMIUM' }),
-        isAuthenticated: true,
-        isLoading: false,
-      });
-      mockUseDailyReadingToday.mockReturnValue({
-        data: createMockDailyReading(),
-        isLoading: false,
-        error: null,
-      });
 
-      renderWithProviders(<CartaDelDiaPage />);
-
-      expect(screen.getByRole('button', { name: /regenerar/i })).toBeInTheDocument();
-    });
-
-    it('should show daily card limit message for FREE users (no regenerate button)', () => {
-      mockUseAuth.mockReturnValue({
-        user: createMockUser({ plan: 'FREE' }),
-        isAuthenticated: true,
-        isLoading: false,
-      });
-      mockUseDailyReadingToday.mockReturnValue({
-        data: createMockDailyReading(),
-        isLoading: false,
-        error: null,
-      });
-
-      renderWithProviders(<CartaDelDiaPage />);
-
-      // FREE users see limit message, not regenerate button
-      expect(screen.getByText(/ya recibiste tu carta del día/i)).toBeInTheDocument();
-      expect(screen.queryByRole('button', { name: /regenerar/i })).not.toBeInTheDocument();
-    });
-
-    it('should show confirmation modal for premium users before regenerating', async () => {
-      const user = userEvent.setup();
-
-      mockUseAuth.mockReturnValue({
-        user: createMockUser({ plan: 'PREMIUM' }),
-        isAuthenticated: true,
-        isLoading: false,
-      });
-      mockUseDailyReadingToday.mockReturnValue({
-        data: createMockDailyReading(),
-        isLoading: false,
-        error: null,
-      });
-
-      renderWithProviders(<CartaDelDiaPage />);
-
-      const regenerateButton = screen.getByRole('button', { name: /regenerar/i });
-      await user.click(regenerateButton);
-
-      await waitFor(() => {
-        expect(screen.getByText(/¿regenerar carta/i)).toBeInTheDocument();
-      });
-    });
-
-    it('should call regenerate mutation when confirmed', async () => {
-      const user = userEvent.setup();
-      const regenerateFn = vi.fn();
-
-      mockUseAuth.mockReturnValue({
-        user: createMockUser({ plan: 'PREMIUM' }),
-        isAuthenticated: true,
-        isLoading: false,
-      });
-      mockUseDailyReadingToday.mockReturnValue({
-        data: createMockDailyReading(),
-        isLoading: false,
-        error: null,
-      });
-      mockUseRegenerateDailyReading.mockReturnValue({
-        mutate: regenerateFn,
-        isPending: false,
-      });
-
-      renderWithProviders(<CartaDelDiaPage />);
-
-      // Open modal
-      const regenerateButton = screen.getByRole('button', { name: /regenerar/i });
-      await user.click(regenerateButton);
-
-      // Confirm
-      const confirmButton = await screen.findByRole('button', { name: /confirmar/i });
-      await user.click(confirmButton);
-
-      expect(regenerateFn).toHaveBeenCalled();
-    });
-  });
 
   describe('Loading States', () => {
     it('should show loading skeleton while fetching daily reading', () => {

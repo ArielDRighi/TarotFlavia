@@ -113,7 +113,7 @@ describe('DailyCardExperience - Anonymous User Flow', () => {
     beforeEach(() => {
       // Clear sessionStorage to simulate fresh anonymous user session
       sessionStorage.clear();
-      
+
       // Mock anonymous user (not authenticated)
       mockUseAuth.mockReturnValue({
         user: null,
@@ -441,7 +441,7 @@ describe('DailyCardExperience - Anonymous User Flow', () => {
 
       // Should show action buttons
       expect(screen.getByRole('button', { name: /compartir/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /regenerar/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /ver historial/i })).toBeInTheDocument();
     });
   });
 });
