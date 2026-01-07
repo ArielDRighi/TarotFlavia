@@ -201,7 +201,7 @@ describe('DailyReadingService', () => {
         dailyCardLimit: 1,
         tarotReadingsLimit: 3,
       });
-      
+
       // Mock usage limit - usuario SÍ alcanzó límite
       mockUsageLimitsService.checkLimit.mockResolvedValue(false);
 

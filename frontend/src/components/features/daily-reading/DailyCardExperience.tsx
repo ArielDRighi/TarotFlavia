@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Copy, History, RefreshCw, Sparkles } from 'lucide-react';
 import { isAxiosError, AxiosError } from 'axios';
@@ -106,6 +106,27 @@ export function DailyCardExperience() {
   const [anonymousError, setAnonymousError] = useState<AxiosError | null>(null);
   const [authenticatedError, setAuthenticatedError] = useState<AxiosError | null>(null);
 
+  // Check if anonymous user already consumed their daily card today
+  // This is tracked in sessionStorage to persist across page refreshes
+  const [hasAnonymousCardToday, setHasAnonymousCardToday] = useState(false);
+
+  useEffect(() => {
+    if (!isAuthenticated && typeof window !== 'undefined') {
+      const consumed = sessionStorage.getItem('tarot_daily_card_consumed');
+      if (consumed) {
+        const consumedDate = new Date(consumed);
+        const today = new Date();
+        // Check if it's the same day
+        const isSameDay =
+          consumedDate.getDate() === today.getDate() &&
+          consumedDate.getMonth() === today.getMonth() &&
+          consumedDate.getFullYear() === today.getFullYear();
+
+        setHasAnonymousCardToday(isSameDay);
+      }
+    }
+  }, [isAuthenticated]);
+
   // Computed values
   const isPremium = user?.plan === 'PREMIUM';
   const currentReading = localReading || dailyReading;
@@ -113,11 +134,13 @@ export function DailyCardExperience() {
   const isCreatingReading = isCreating || isCreatingPublic;
 
   // Check if anonymous user reached limit
-  // Anonymous users get 1 daily card per day (tracked by fingerprint)
+  // Anonymous users get 1 daily card per day (tracked by fingerprint + sessionStorage)
   // Backend returns 403/409 when limit is reached
+  // Also check sessionStorage to prevent showing the card again after page refresh
   const isAnonymousLimitReached =
     !isAuthenticated &&
-    ((isAxiosError(error) && (error.response?.status === 403 || error.response?.status === 409)) ||
+    (hasAnonymousCardToday ||
+      (isAxiosError(error) && (error.response?.status === 403 || error.response?.status === 409)) ||
       (isAxiosError(anonymousError) &&
         (anonymousError.response?.status === 403 || anonymousError.response?.status === 409)));
 
