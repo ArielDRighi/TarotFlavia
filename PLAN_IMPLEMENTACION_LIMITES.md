@@ -286,27 +286,27 @@
 
 ## 📊 Estado de Tareas
 
-| #   | Tarea                        | Estado                      | Commit  |
-| --- | ---------------------------- | --------------------------- | ------- |
-| 1   | Plan entity: nuevos campos   | ✅ Completada                | b4dad3f |
-| 2   | Migración de DB              | ✅ Completada                | 44df98d |
-| 3   | Seeds actualizados           | ✅ Completada                | b6bf716 |
-| 4   | Enum UsageFeature.DAILY_CARD | ✅ Completada                | 216e961 |
-| 5   | PlanConfigService métodos    | ✅ Completada                | a59bc88 |
-| 6   | UsageLimitsService lógica    | ✅ Completada                | 891593d |
-| 7   | DailyReadingController       | ✅ Completada                | 318986e |
-| 8   | UsersController /me          | ✅ Completada                | 718a7a7 |
-| 9   | DTOs actualizados            | ⏰ Post-funcional           | -       |
-| 10  | Tests backend                | ⏰ Post-funcional           | -       |
-| 11  | Tipos TypeScript             | ⏳ En Progreso              | -       |
-| 12  | SpreadSelector               | ⏳ Pendiente                | -       |
-| 13  | DailyCardExperience          | ⏳ Pendiente                | -       |
-| 14  | Componentes límite           | ⏳ Pendiente                | -       |
-| 15  | AuthStore                    | ⏳ Pendiente                | -       |
-| 16  | Tests frontend               | ⏰ Post-funcional           | -       |
-| 17  | Migraciones DB               | ✅ Completada (parte de #2) | 44df98d |
-| 18  | Testing E2E                  | ⏰ Post-funcional           | -       |
-| 19  | Documentación                | ⏰ Final                    | -       |
+| #   | Tarea                        | Estado            | Commit  |
+| --- | ---------------------------- | ----------------- | ------- |
+| 1   | Plan entity: nuevos campos   | ✅ Completada     | b4dad3f |
+| 2   | Migración de DB              | ✅ Completada     | 44df98d |
+| 3   | Seeds actualizados           | ✅ Completada     | b6bf716 |
+| 4   | Enum UsageFeature.DAILY_CARD | ✅ Completada     | 216e961 |
+| 5   | PlanConfigService métodos    | ✅ Completada     | a59bc88 |
+| 6   | UsageLimitsService lógica    | ✅ Completada     | 891593d |
+| 7   | DailyReadingController       | ✅ Completada     | 318986e |
+| 8   | UsersController /me          | ✅ Completada     | 718a7a7 |
+| 9   | DTOs actualizados            | ⏰ Post-funcional | -       |
+| 10  | Tests backend                | ⏰ Post-funcional | -       |
+| 11  | Tipos TypeScript             | ✅ Completada     | 7303c9b |
+| 12  | SpreadSelector               | ✅ Completada     | ea5330b |
+| 13  | DailyCardExperience          | ✅ Completada     | 5711ff7 |
+| 14  | Componentes límite           | ✅ Completada     | 07530ec |
+| 15  | AuthStore                    | ✅ Completada     | 475fded |
+| 16  | Tests frontend               | ✅ Completada     | 76913bf |
+| 17  | Migraciones DB               | ✅ Completada     | 44df98d |
+| 18  | Testing E2E                  | ⏳ Pendiente      | -       |
+| 19  | Documentación                | ⏳ Pendiente      | -       |
 
 ---
 
