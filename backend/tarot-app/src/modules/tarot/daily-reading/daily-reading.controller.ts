@@ -46,7 +46,7 @@ export class DailyReadingController {
   @Post()
   @UseGuards(CheckUsageLimitGuard)
   @UseInterceptors(IncrementUsageInterceptor)
-  @CheckUsageLimit(UsageFeature.TAROT_READING)
+  @CheckUsageLimit(UsageFeature.DAILY_CARD)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Generar carta del día',
