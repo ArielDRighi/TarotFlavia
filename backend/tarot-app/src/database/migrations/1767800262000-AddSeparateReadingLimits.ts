@@ -15,6 +15,10 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
 export class AddSeparateReadingLimits1767800262000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // 1. Add new value to usage_feature_enum
+    // NOTE: Adding a new value to a PostgreSQL enum is effectively permanent.
+    // PostgreSQL does not support dropping enum values directly. The corresponding
+    // "down" migration does NOT remove the 'daily_card' value. If removal is ever
+    // required, a new enum type must be created and the column type migrated.
     await queryRunner.query(`
       ALTER TYPE usage_feature_enum ADD VALUE IF NOT EXISTS 'daily_card'
     `);

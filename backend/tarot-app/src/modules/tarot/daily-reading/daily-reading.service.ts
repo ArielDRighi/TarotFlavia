@@ -72,9 +72,10 @@ export class DailyReadingService {
       userPlan = user.plan;
     } else {
       const fullUser = await this.usersService.findById(userId);
-      if (fullUser) {
-        userPlan = fullUser.plan;
+      if (!fullUser) {
+        throw new NotFoundException('Usuario no encontrado');
       }
+      userPlan = fullUser.plan;
     }
 
     // Obtener el límite configurado para el plan del usuario
@@ -85,8 +86,12 @@ export class DailyReadingService {
       );
     }
 
-    // Solo verificar límites si no es plan PREMIUM (límite -1 = ilimitado)
-    if (planConfig.dailyCardLimit !== -1) {
+    // UNLIMITED_LIMIT (-1) significa que no se aplican límites (ej: PREMIUM)
+    const UNLIMITED_LIMIT = -1;
+
+    // Solo verificar límites si el plan tiene límite definido
+    // Si dailyCardLimit = -1, el usuario tiene acceso ilimitado
+    if (planConfig.dailyCardLimit !== UNLIMITED_LIMIT) {
       // Verificar cuántas cartas del día ha usado hoy el usuario
       const hasLimit = await this.usageLimitsService.checkLimit(
         userId,

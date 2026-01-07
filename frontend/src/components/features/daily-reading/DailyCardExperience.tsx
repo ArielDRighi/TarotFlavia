@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Copy, History, RefreshCw, Sparkles } from 'lucide-react';
 import { isAxiosError, AxiosError } from 'axios';
@@ -108,23 +108,23 @@ export function DailyCardExperience() {
 
   // Check if anonymous user already consumed their daily card today
   // This is tracked in sessionStorage to persist across page refreshes
-  const [hasAnonymousCardToday, setHasAnonymousCardToday] = useState(false);
+  // Backend enforces this via fingerprint, but sessionStorage improves UX
+  // by preventing unnecessary API calls and showing limit message immediately
+  const hasAnonymousCardToday = useMemo(() => {
+    if (isAuthenticated || typeof window === 'undefined') return false;
+    
+    const consumed = sessionStorage.getItem('tarot_daily_card_consumed');
+    if (!consumed) return false;
 
-  useEffect(() => {
-    if (!isAuthenticated && typeof window !== 'undefined') {
-      const consumed = sessionStorage.getItem('tarot_daily_card_consumed');
-      if (consumed) {
-        const consumedDate = new Date(consumed);
-        const today = new Date();
-        // Check if it's the same day
-        const isSameDay =
-          consumedDate.getDate() === today.getDate() &&
-          consumedDate.getMonth() === today.getMonth() &&
-          consumedDate.getFullYear() === today.getFullYear();
-
-        setHasAnonymousCardToday(isSameDay);
-      }
-    }
+    const consumedDate = new Date(consumed);
+    const today = new Date();
+    
+    // Check if it's the same day
+    return (
+      consumedDate.getDate() === today.getDate() &&
+      consumedDate.getMonth() === today.getMonth() &&
+      consumedDate.getFullYear() === today.getFullYear()
+    );
   }, [isAuthenticated]);
 
   // Computed values

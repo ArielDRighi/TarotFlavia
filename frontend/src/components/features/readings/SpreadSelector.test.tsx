@@ -85,7 +85,7 @@ const mockUserFree = {
   email: 'test@test.com',
   name: 'Test User',
   roles: ['USER'],
-  plan: 'FREE',
+  plan: 'free',
   // Legacy fields (deprecated)
   dailyReadingsCount: 0,
   dailyReadingsLimit: 3,

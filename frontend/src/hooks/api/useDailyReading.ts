@@ -9,6 +9,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 import { toast } from '@/hooks/utils/useToast';
+import { useAuthStore } from '@/stores/authStore';
 
 import {
   getDailyReading,
@@ -81,7 +82,6 @@ export function useDailyReading() {
 
       // Refresh user data to get updated dailyCardCount
       // This ensures the limit check works correctly on next visit
-      const { useAuthStore } = await import('@/stores/authStore');
       await useAuthStore.getState().checkAuth();
 
       toast.success('¡Tu carta del día está lista!');
