@@ -172,18 +172,19 @@ export function SpreadSelector({ categoryId, questionId, customQuestion }: Sprea
   const isLoading = isAuthLoading || isSpreadsLoading;
   const hasQuestion = Boolean(questionId || customQuestion);
 
-  // ✅ NEW: Check if user has reached daily limit BEFORE showing spreads
+  // ✅ Check if user has reached tarot readings limit BEFORE showing spreads
   const hasReachedLimit = useCallback((): boolean => {
     if (!user) return false;
     if (user.plan === 'premium') return false; // PREMIUM users have higher limits
 
-    const dailyCount = user.dailyReadingsCount ?? 0;
-    const dailyLimit = user.dailyReadingsLimit ?? CONFIG.DEFAULT_FREE_DAILY_LIMIT;
+    // Use specific tarot readings counters (not daily card counters)
+    const tarotCount = user.tarotReadingsCount ?? 0;
+    const tarotLimit = user.tarotReadingsLimit ?? 0;
 
-    return dailyCount >= dailyLimit;
+    return tarotCount >= tarotLimit;
   }, [user]);
 
-  // ✅ NEW: Show limit message immediately if limit reached
+  // ✅ Show limit message immediately if limit reached
   const showLimitMessage = hasReachedLimit();
 
   const handleSpreadSelect = useCallback(
