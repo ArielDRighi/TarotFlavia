@@ -36,7 +36,9 @@ export async function seedPlans(
       description:
         'Plan para usuarios no registrados con acceso limitado para probar la aplicación',
       price: 0,
-      readingsLimit: 1,
+      readingsLimit: 1, // DEPRECATED: Use dailyCardLimit + tarotReadingsLimit
+      dailyCardLimit: 1,
+      tarotReadingsLimit: 0,
       aiQuotaMonthly: 0, // No AI for anonymous users
       allowCustomQuestions: false,
       allowSharing: false,
@@ -49,7 +51,9 @@ export async function seedPlans(
       description:
         'Plan básico con lecturas limitadas y funcionalidades esenciales para usuarios registrados',
       price: 0,
-      readingsLimit: 2,
+      readingsLimit: 2, // DEPRECATED: Use dailyCardLimit + tarotReadingsLimit
+      dailyCardLimit: 1,
+      tarotReadingsLimit: 1,
       aiQuotaMonthly: 0,
       allowCustomQuestions: false,
       allowSharing: false,
@@ -62,7 +66,9 @@ export async function seedPlans(
       description:
         'Plan completo con 4 lecturas diarias (1 carta + 3 tiradas), interpretaciones con IA y preguntas personalizadas',
       price: 9.99,
-      readingsLimit: 4, // 1 carta del día + 3 tiradas
+      readingsLimit: 4, // DEPRECATED: Use dailyCardLimit + tarotReadingsLimit (1 + 3)
+      dailyCardLimit: 1,
+      tarotReadingsLimit: 3,
       aiQuotaMonthly: 100,
       allowCustomQuestions: true,
       allowSharing: true,
@@ -87,7 +93,13 @@ export async function seedPlans(
     console.log(`   • Type: ${savedPlan.planType}`);
     console.log(`   • Price: $${savedPlan.price}`);
     console.log(
-      `   • Readings Limit: ${savedPlan.readingsLimit === -1 ? 'Unlimited' : savedPlan.readingsLimit}`,
+      `   • Daily Card Limit: ${savedPlan.dailyCardLimit === -1 ? 'Unlimited' : savedPlan.dailyCardLimit}`,
+    );
+    console.log(
+      `   • Tarot Readings Limit: ${savedPlan.tarotReadingsLimit === -1 ? 'Unlimited' : savedPlan.tarotReadingsLimit}`,
+    );
+    console.log(
+      `   • Total Readings (deprecated): ${savedPlan.readingsLimit === -1 ? 'Unlimited' : savedPlan.readingsLimit}`,
     );
     console.log(
       `   • AI Quota: ${savedPlan.aiQuotaMonthly === -1 ? 'Unlimited' : savedPlan.aiQuotaMonthly}`,
