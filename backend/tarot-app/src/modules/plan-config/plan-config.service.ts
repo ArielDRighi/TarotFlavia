@@ -99,10 +99,31 @@ export class PlanConfigService {
    * Obtiene el límite de lecturas para un tipo de plan
    * @param planType - Tipo de plan
    * @returns Límite de lecturas (-1 para ilimitado)
+   * @deprecated Use getDailyCardLimit() or getTarotReadingsLimit() instead
    */
   async getReadingsLimit(planType: UserPlan): Promise<number> {
     const plan = await this.findByPlanType(planType);
     return plan.readingsLimit;
+  }
+
+  /**
+   * Obtiene el límite diario de Carta del Día para un tipo de plan
+   * @param planType - Tipo de plan
+   * @returns Límite diario de cartas (-1 para ilimitado)
+   */
+  async getDailyCardLimit(planType: UserPlan): Promise<number> {
+    const plan = await this.findByPlanType(planType);
+    return plan.dailyCardLimit;
+  }
+
+  /**
+   * Obtiene el límite diario de Tiradas de Tarot para un tipo de plan
+   * @param planType - Tipo de plan
+   * @returns Límite diario de tiradas (-1 para ilimitado)
+   */
+  async getTarotReadingsLimit(planType: UserPlan): Promise<number> {
+    const plan = await this.findByPlanType(planType);
+    return plan.tarotReadingsLimit;
   }
 
   /**
