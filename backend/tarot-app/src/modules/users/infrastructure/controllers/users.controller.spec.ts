@@ -50,6 +50,8 @@ describe('UsersController', () => {
 
   const mockPlanConfigService = {
     getReadingsLimit: jest.fn(),
+    getDailyCardLimit: jest.fn(),
+    getTarotReadingsLimit: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -86,25 +88,38 @@ describe('UsersController', () => {
   describe('getProfile', () => {
     it('should return user profile without password', async () => {
       mockUsersService.findById.mockResolvedValue(mockUser);
-      mockPlanConfigService.getReadingsLimit.mockResolvedValue(3); // FREE plan limit
-      mockUsageLimitsService.getRemainingUsage.mockResolvedValue(2); // 2 remaining
+      mockPlanConfigService.getDailyCardLimit.mockResolvedValue(1); // FREE plan daily card limit
+      mockPlanConfigService.getTarotReadingsLimit.mockResolvedValue(1); // FREE plan tarot readings limit
+      mockPlanConfigService.getReadingsLimit.mockResolvedValue(2); // Legacy deprecated field
+      mockUsageLimitsService.getRemainingUsage
+        .mockResolvedValueOnce(1) // daily card remaining
+        .mockResolvedValueOnce(1) // tarot readings remaining
+        .mockResolvedValueOnce(1); // legacy readings remaining
 
       const req = { user: { userId: 1 } };
       const result = await controller.getProfile(req);
 
       expect(service.findById).toHaveBeenCalledWith(1);
-      expect(planConfigService.getReadingsLimit).toHaveBeenCalledWith(
+      expect(planConfigService.getDailyCardLimit).toHaveBeenCalledWith(
         UserPlan.FREE,
       );
-      expect(usageLimitsService.getRemainingUsage).toHaveBeenCalledWith(
-        1,
-        expect.any(String), // UsageFeature.TAROT_READING
+      expect(planConfigService.getTarotReadingsLimit).toHaveBeenCalledWith(
+        UserPlan.FREE,
       );
+      expect(usageLimitsService.getRemainingUsage).toHaveBeenCalled();
       expect(result).not.toHaveProperty('password');
       expect(result.id).toBe(1);
       expect(result.email).toBe('test@test.com');
-      expect(result.dailyReadingsCount).toBe(1); // 3 - 2 = 1
-      expect(result.dailyReadingsLimit).toBe(3);
+      
+      // Check new separate fields
+      expect(result.dailyCardCount).toBe(0); // 1 - 1 = 0
+      expect(result.dailyCardLimit).toBe(1);
+      expect(result.tarotReadingsCount).toBe(0); // 1 - 1 = 0
+      expect(result.tarotReadingsLimit).toBe(1);
+      
+      // Check deprecated fields are still present  
+      expect(result.dailyReadingsCount).toBeDefined();
+      expect(result.dailyReadingsLimit).toBeDefined();
     });
 
     it('should throw NotFoundException if user not found', async () => {
@@ -123,14 +138,26 @@ describe('UsersController', () => {
     it('should handle unlimited plan (premium/professional)', async () => {
       const premiumUser = { ...mockUser, plan: UserPlan.PREMIUM };
       mockUsersService.findById.mockResolvedValue(premiumUser);
-      mockPlanConfigService.getReadingsLimit.mockResolvedValue(-1); // Unlimited
-      mockUsageLimitsService.getRemainingUsage.mockResolvedValue(-1);
+      mockPlanConfigService.getDailyCardLimit.mockResolvedValue(1); // PREMIUM daily card limit
+      mockPlanConfigService.getTarotReadingsLimit.mockResolvedValue(3); // PREMIUM tarot readings limit
+      mockPlanConfigService.getReadingsLimit.mockResolvedValue(4); // Legacy deprecated field
+      mockUsageLimitsService.getRemainingUsage
+        .mockResolvedValueOnce(1) // daily card remaining
+        .mockResolvedValueOnce(3) // tarot readings remaining
+        .mockResolvedValueOnce(3); // legacy readings remaining
 
       const req = { user: { userId: 1 } };
       const result = await controller.getProfile(req);
 
-      expect(result.dailyReadingsCount).toBe(0); // No count for unlimited
-      expect(result.dailyReadingsLimit).toBe(999999); // Represents unlimited
+      // Check new separate fields
+      expect(result.dailyCardCount).toBe(0); // daily card limit - remaining
+      expect(result.dailyCardLimit).toBe(1);
+      expect(result.tarotReadingsCount).toBe(0); // tarot readings limit - remaining
+      expect(result.tarotReadingsLimit).toBe(3);
+      
+      // Check deprecated fields are still present
+      expect(result.dailyReadingsCount).toBeDefined();
+      expect(result.dailyReadingsLimit).toBeDefined();
     });
   });
 
