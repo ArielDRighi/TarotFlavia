@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Heart,
@@ -19,6 +19,8 @@ import { ErrorDisplay } from '@/components/ui/error-display';
 import { EmptyState } from '@/components/ui/empty-state';
 import { cn } from '@/lib/utils';
 import type { Category } from '@/types';
+import UpgradeModal from './UpgradeModal';
+import DailyLimitReachedModal from './DailyLimitReachedModal';
 
 /**
  * Icon mapping for categories based on slug
@@ -121,6 +123,11 @@ function CategoryCard({ category, onClick }: CategoryCardProps) {
  * Displays categories in a responsive grid with icons and hover effects.
  * Handles automatic redirection for FREE users to skip category selection.
  *
+ * ✅ EARLY LIMIT VALIDATION:
+ * - Checks if user has reached their daily limit BEFORE allowing navigation
+ * - Shows appropriate modal: UpgradeModal for FREE, DailyLimitReachedModal for PREMIUM
+ * - Prevents navigation through the full flow when limit is already reached
+ *
  * PLAN-BASED BEHAVIOR:
  * - FREE users: Automatically redirected to /ritual/tirada (no category selection)
  * - PREMIUM users: Select category first, then proceed to questions
@@ -130,6 +137,32 @@ export function CategorySelector() {
   const { data: categories, isLoading: isCategoriesLoading, error, refetch } = useCategories();
   const router = useRouter();
 
+  // Modal state
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showLimitReachedModal, setShowLimitReachedModal] = useState(false);
+
+  // Check user's daily limit status
+  const isPremium = user?.plan?.toUpperCase() === 'PREMIUM';
+  const tarotReadingsCount = user?.tarotReadingsCount ?? 0;
+  const tarotReadingsLimit = user?.tarotReadingsLimit ?? (isPremium ? 3 : 1);
+  const hasReachedLimit = tarotReadingsCount >= tarotReadingsLimit;
+
+  // ✅ EARLY VALIDATION: Check limit when component mounts
+  useEffect(() => {
+    if (!user) return;
+
+    if (hasReachedLimit) {
+      // User already reached their daily limit
+      if (isPremium) {
+        // PREMIUM user: show gentle "come back tomorrow" message
+        setShowLimitReachedModal(true);
+      } else {
+        // FREE user: show upgrade modal
+        setShowUpgradeModal(true);
+      }
+    }
+  }, [user, hasReachedLimit, isPremium]);
+
   // Redirect FREE users to /ritual/tirada (skip category selection)
   useEffect(() => {
     if (user?.plan === 'free') {
@@ -138,6 +171,16 @@ export function CategorySelector() {
   }, [user, router]);
 
   const handleCategoryClick = (categoryId: number) => {
+    // Double-check limit before navigation (defensive programming)
+    if (hasReachedLimit) {
+      if (isPremium) {
+        setShowLimitReachedModal(true);
+      } else {
+        setShowUpgradeModal(true);
+      }
+      return;
+    }
+
     router.push(`/ritual/preguntas?categoryId=${categoryId}`);
   };
 
@@ -193,6 +236,27 @@ export function CategorySelector() {
           </div>
         )}
       </div>
+
+      {/* Modals */}
+      <UpgradeModal
+        open={showUpgradeModal}
+        onClose={() => {
+          setShowUpgradeModal(false);
+          router.push('/');
+        }}
+        reason="limit-reached"
+      />
+
+      <DailyLimitReachedModal
+        open={showLimitReachedModal}
+        onClose={() => {
+          setShowLimitReachedModal(false);
+          router.push('/');
+        }}
+        usedReadings={tarotReadingsCount}
+        totalReadings={tarotReadingsLimit}
+        featureType="tarot-reading"
+      />
     </div>
   );
 }

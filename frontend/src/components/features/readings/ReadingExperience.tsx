@@ -20,6 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ErrorDisplay } from '@/components/ui/error-display';
 import UpgradeBanner from './UpgradeBanner';
 import UpgradeModal from './UpgradeModal';
+import DailyLimitReachedModal from './DailyLimitReachedModal';
 import { cn } from '@/lib/utils';
 import type {
   ReadingDetail,
@@ -260,6 +261,7 @@ export function ReadingExperience({
   const [readingResult, setReadingResult] = useState<ReadingDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showLimitReachedModal, setShowLimitReachedModal] = useState(false);
   const [upgradeModalReason, setUpgradeModalReason] = useState<'limit-reached' | 'feature-locked'>(
     'feature-locked'
   );
@@ -275,7 +277,7 @@ export function ReadingExperience({
   }, [questionId, predefinedQuestions]);
 
   const cardsCount = spread?.cardCount ?? 0;
-  const isPremium = user?.plan === 'PREMIUM';
+  const isPremium = user?.plan?.toUpperCase() === 'PREMIUM';
 
   // Display the actual question text
   // For FREE users without question, show "Lectura general" instead of "Tu pregunta al tarot"
@@ -377,11 +379,18 @@ export function ReadingExperience({
 
       // ✅ NEW: Check if error is DailyLimitError (403 - limit reached)
       if (error instanceof Error && error.name === 'DailyLimitError') {
-        console.log('✅ DailyLimitError detected - showing upgrade modal');
-        // Show upgrade modal instead of generic error
+        console.log('✅ DailyLimitError detected - showing appropriate modal');
         setState('selecting');
-        setUpgradeModalReason('limit-reached');
-        setShowUpgradeModal(true);
+
+        // Show different modal based on user plan
+        if (isPremium) {
+          // PREMIUM user: show gentle "come back tomorrow" message
+          setShowLimitReachedModal(true);
+        } else {
+          // FREE user: show upgrade to Premium modal
+          setUpgradeModalReason('limit-reached');
+          setShowUpgradeModal(true);
+        }
         return;
       }
 
@@ -631,6 +640,15 @@ export function ReadingExperience({
         open={showUpgradeModal}
         onClose={() => setShowUpgradeModal(false)}
         reason={upgradeModalReason}
+      />
+
+      {/* Daily Limit Reached Modal (for PREMIUM users) */}
+      <DailyLimitReachedModal
+        open={showLimitReachedModal}
+        onClose={() => setShowLimitReachedModal(false)}
+        usedReadings={user?.tarotReadingsCount ?? 0}
+        totalReadings={user?.tarotReadingsLimit ?? 3}
+        featureType="tarot-reading"
       />
     </div>
   );

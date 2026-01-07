@@ -112,13 +112,13 @@ export function DailyCardExperience() {
   // by preventing unnecessary API calls and showing limit message immediately
   const hasAnonymousCardToday = useMemo(() => {
     if (isAuthenticated || typeof window === 'undefined') return false;
-    
+
     const consumed = sessionStorage.getItem('tarot_daily_card_consumed');
     if (!consumed) return false;
 
     const consumedDate = new Date(consumed);
     const today = new Date();
-    
+
     // Check if it's the same day
     return (
       consumedDate.getDate() === today.getDate() &&
@@ -150,8 +150,11 @@ export function DailyCardExperience() {
   // PREMIUM users: 1 daily card per day (but can regenerate)
   // If user already used their daily card, they should see limit message
   // The card can only be viewed in history, not here
+  // IMPORTANT: Only show limit if there's NO current reading
+  // If there's a reading, it means user just revealed it and should see it
   const isAuthenticatedLimitReached =
     isAuthenticated &&
+    !currentReading && // Don't show limit if we have a reading to display
     (hasReachedDailyCardLimit || // Already reached limit based on counters
       (isAxiosError(authenticatedError) &&
         (authenticatedError.response?.status === 403 ||
