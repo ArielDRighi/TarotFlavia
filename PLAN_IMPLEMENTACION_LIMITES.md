@@ -286,27 +286,27 @@
 
 ## 📊 Estado de Tareas
 
-| #   | Tarea                        | Estado       | Commit |
-| --- | ---------------------------- | ------------ | ------ |
-| 1   | Plan entity: nuevos campos   | ⏳ Pendiente | -      |
-| 2   | Migración de DB              | ⏳ Pendiente | -      |
-| 3   | Seeds actualizados           | ⏳ Pendiente | -      |
-| 4   | Enum UsageFeature.DAILY_CARD | ⏳ Pendiente | -      |
-| 5   | PlanConfigService métodos    | ⏳ Pendiente | -      |
-| 6   | UsageLimitsService lógica    | ⏳ Pendiente | -      |
-| 7   | DailyReadingController       | ⏳ Pendiente | -      |
-| 8   | UsersController /me          | ⏳ Pendiente | -      |
-| 9   | DTOs actualizados            | ⏳ Pendiente | -      |
-| 10  | Tests backend                | ⏳ Pendiente | -      |
-| 11  | Tipos TypeScript             | ⏳ Pendiente | -      |
-| 12  | SpreadSelector               | ⏳ Pendiente | -      |
-| 13  | DailyCardExperience          | ⏳ Pendiente | -      |
-| 14  | Componentes límite           | ⏳ Pendiente | -      |
-| 15  | AuthStore                    | ⏳ Pendiente | -      |
-| 16  | Tests frontend               | ⏳ Pendiente | -      |
-| 17  | Migraciones DB               | ⏳ Pendiente | -      |
-| 18  | Testing E2E                  | ⏳ Pendiente | -      |
-| 19  | Documentación                | ⏳ Pendiente | -      |
+| #   | Tarea                        | Estado                      | Commit  |
+| --- | ---------------------------- | --------------------------- | ------- |
+| 1   | Plan entity: nuevos campos   | ✅ Completada                | b4dad3f |
+| 2   | Migración de DB              | ✅ Completada                | 44df98d |
+| 3   | Seeds actualizados           | ✅ Completada                | b6bf716 |
+| 4   | Enum UsageFeature.DAILY_CARD | ✅ Completada                | 216e961 |
+| 5   | PlanConfigService métodos    | ✅ Completada                | a59bc88 |
+| 6   | UsageLimitsService lógica    | ✅ Completada                | 891593d |
+| 7   | DailyReadingController       | ✅ Completada                | 318986e |
+| 8   | UsersController /me          | ✅ Completada                | 718a7a7 |
+| 9   | DTOs actualizados            | ⏰ Post-funcional           | -       |
+| 10  | Tests backend                | ⏰ Post-funcional           | -       |
+| 11  | Tipos TypeScript             | ⏳ En Progreso              | -       |
+| 12  | SpreadSelector               | ⏳ Pendiente                | -       |
+| 13  | DailyCardExperience          | ⏳ Pendiente                | -       |
+| 14  | Componentes límite           | ⏳ Pendiente                | -       |
+| 15  | AuthStore                    | ⏳ Pendiente                | -       |
+| 16  | Tests frontend               | ⏰ Post-funcional           | -       |
+| 17  | Migraciones DB               | ✅ Completada (parte de #2) | 44df98d |
+| 18  | Testing E2E                  | ⏰ Post-funcional           | -       |
+| 19  | Documentación                | ⏰ Final                    | -       |
 
 ---
 
