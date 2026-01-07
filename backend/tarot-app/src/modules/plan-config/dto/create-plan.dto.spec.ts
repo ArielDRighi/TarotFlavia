@@ -12,6 +12,8 @@ describe('CreatePlanDto', () => {
         description: 'Plan básico gratuito',
         price: 0,
         readingsLimit: 10,
+        dailyCardLimit: 1,
+        tarotReadingsLimit: 1,
         aiQuotaMonthly: 100,
         allowCustomQuestions: false,
         allowSharing: false,
@@ -30,6 +32,8 @@ describe('CreatePlanDto', () => {
         description: 'Plan premium con todo ilimitado',
         price: 9.99,
         readingsLimit: -1,
+        dailyCardLimit: 1,
+        tarotReadingsLimit: 3,
         aiQuotaMonthly: -1,
         allowCustomQuestions: true,
         allowSharing: true,
@@ -47,6 +51,8 @@ describe('CreatePlanDto', () => {
         name: 'Basic Plan',
         price: 0,
         readingsLimit: 5,
+        dailyCardLimit: 1,
+        tarotReadingsLimit: 1,
         aiQuotaMonthly: 50,
       });
 
