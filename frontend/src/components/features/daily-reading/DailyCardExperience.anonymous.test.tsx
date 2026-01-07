@@ -290,7 +290,7 @@ describe('DailyCardExperience - Anonymous User Flow', () => {
       const registerButton = screen.getByRole('button', { name: /crear cuenta gratis/i });
       await user.click(registerButton);
 
-      expect(mockPush).toHaveBeenCalledWith('/register');
+      expect(mockPush).toHaveBeenCalledWith('/registro');
     });
 
     it('should NOT show regenerate button for anonymous users', async () => {

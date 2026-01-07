@@ -31,9 +31,11 @@ describe('ReadingLimitReached', () => {
     expect(screen.getByText('Actualiza a Premium')).toBeInTheDocument();
     expect(screen.getByText(/3 tiradas completas por día/i)).toBeInTheDocument();
     expect(screen.getByText(/Todas las tiradas disponibles/i)).toBeInTheDocument();
-    expect(screen.getByText(/Interpretaciones con IA personalizada/i)).toBeInTheDocument();
+    expect(screen.getByText(/Interpretaciones personalizadas y profundas/i)).toBeInTheDocument();
     expect(screen.getByText(/Preguntas personalizadas/i)).toBeInTheDocument();
-    expect(screen.getByText(/Carta del día con IA todos los días/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Carta del día con interpretación completa todos los días/i)
+    ).toBeInTheDocument();
   });
 
   it('should display quick actions', () => {

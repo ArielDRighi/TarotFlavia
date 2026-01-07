@@ -30,7 +30,7 @@ export interface UseUserPlanFeaturesReturn {
   plan: UserPlan;
   /** Spanish label for the plan */
   planLabel: string;
-  /** Can user generate AI interpretations? */
+  /** Can user generate personalized interpretations? */
   canUseAI: boolean;
   /** Can user use categories? */
   canUseCategories: boolean;
@@ -55,9 +55,9 @@ export interface UseUserPlanFeaturesReturn {
  * across components. Returns computed flags for UI conditional rendering.
  *
  * Features by plan:
- * - ANONYMOUS: 1 reading/day, no AI, no custom questions, no sharing
- * - FREE: 2 readings/day, no AI, no custom questions, can share
- * - PREMIUM: 3 readings/day, AI enabled, custom questions, can share
+ * - ANONYMOUS: 1 reading/day, basic interpretations, no custom questions, no sharing
+ * - FREE: 2 readings/day, basic interpretations, no custom questions, can share
+ * - PREMIUM: 3 readings/day, personalized interpretations, custom questions, can share
  *
  * @example
  * ```tsx

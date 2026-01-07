@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Copy, History, RefreshCw, Sparkles } from 'lucide-react';
 import { isAxiosError, AxiosError } from 'axios';
+import { ROUTES } from '@/lib/constants/routes';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -357,10 +358,10 @@ export function DailyCardExperience() {
                 ¿Te gustó? Regístrate gratis para obtener lecturas completas
               </p>
               <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-                <Button onClick={() => router.push('/register')} size="lg">
+                <Button onClick={() => router.push(ROUTES.REGISTER)} size="lg">
                   Crear cuenta gratis
                 </Button>
-                <Button onClick={() => router.push('/login')} variant="outline" size="lg">
+                <Button onClick={() => router.push(ROUTES.LOGIN)} variant="outline" size="lg">
                   Iniciar sesión
                 </Button>
               </div>

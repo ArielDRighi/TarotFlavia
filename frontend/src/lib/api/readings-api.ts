@@ -4,6 +4,7 @@
  * Functions for all readings-related API calls.
  * These are pure API functions - use TanStack Query hooks in hooks/api/ for data fetching.
  */
+import axios from 'axios';
 import { apiClient } from './axios-config';
 import { API_ENDPOINTS } from './endpoints';
 import type {
@@ -107,7 +108,13 @@ export async function createReading(data: CreateReadingDto): Promise<ReadingDeta
   try {
     const response = await apiClient.post<ApiReadingResponse>(API_ENDPOINTS.READINGS.BASE, data);
     return transformReadingResponse(response.data);
-  } catch {
+  } catch (error) {
+    // Check if error is an Axios error with 403 status (daily limit reached)
+    if (axios.isAxiosError(error) && error.response?.status === 403) {
+      const limitError = new Error('DAILY_LIMIT_REACHED');
+      limitError.name = 'DailyLimitError';
+      throw limitError;
+    }
     throw new Error('Error al crear lectura');
   }
 }

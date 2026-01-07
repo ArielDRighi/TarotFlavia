@@ -41,7 +41,7 @@ export const adminNavSections: NavSection[] = [
   {
     title: 'SISTEMA',
     items: [
-      { name: 'Uso de IA', href: '/admin/ai-usage', icon: Brain },
+      { name: 'Uso de Interpretaciones', href: '/admin/ai-usage', icon: Brain },
       { name: 'Configuración de Planes', href: '/admin/planes', icon: Settings },
       { name: 'Seguridad', href: '/admin/seguridad', icon: Shield },
       { name: 'Caché', href: '/admin/cache', icon: Database },

@@ -198,15 +198,15 @@ describe('DailyCardExperience', () => {
     });
   });
 
-  describe('Revealed State - with AI interpretation (PREMIUM)', () => {
-    it('should render revealed state when daily reading exists with AI interpretation', () => {
+  describe('Revealed State - with personalized interpretation (PREMIUM)', () => {
+    it('should render revealed state when daily reading exists with personalized interpretation', () => {
       mockUseAuth.mockReturnValue({
         user: createMockUser({ plan: 'PREMIUM' }),
         isAuthenticated: true,
         isLoading: false,
       });
       mockUseDailyReadingToday.mockReturnValue({
-        data: createMockDailyReading({ interpretation: 'Interpretación con IA' }),
+        data: createMockDailyReading({ interpretation: 'Interpretación personalizada completa' }),
         isLoading: false,
         error: null,
       });
@@ -214,7 +214,7 @@ describe('DailyCardExperience', () => {
       renderWithProviders(<DailyCardExperience />);
 
       expect(screen.getByTestId('revealed-state')).toBeInTheDocument();
-      expect(screen.getByText('Interpretación con IA')).toBeInTheDocument();
+      expect(screen.getByText('Interpretación personalizada completa')).toBeInTheDocument();
     });
 
     it('should display card name with secondary color - PREMIUM user', () => {
@@ -226,7 +226,7 @@ describe('DailyCardExperience', () => {
       mockUseDailyReadingToday.mockReturnValue({
         data: createMockDailyReading({
           card: createMockTarotCard({ name: 'La Estrella' }),
-          interpretation: 'Interpretación detallada con IA',
+          interpretation: 'Interpretación personalizada detallada',
         }),
         isLoading: false,
         error: null,

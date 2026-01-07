@@ -67,7 +67,7 @@ export function DailyCardLimitReached() {
             <li className="flex items-start gap-2">
               <Sparkles className="text-primary mt-0.5 h-4 w-4 shrink-0" />
               <span>
-                <strong>Carta del día TODOS los días con IA</strong> incluida
+                <strong>Carta del día con interpretación completa TODOS los días</strong>
               </span>
             </li>
             <li className="flex items-start gap-2">
@@ -85,7 +85,7 @@ export function DailyCardLimitReached() {
             <li className="flex items-start gap-2">
               <Sparkles className="text-primary mt-0.5 h-4 w-4 shrink-0" />
               <span>
-                <strong>Interpretaciones con IA personalizada</strong> en todas tus lecturas
+                <strong>Interpretaciones personalizadas y profundas</strong> en todas tus lecturas
               </span>
             </li>
             <li className="flex items-start gap-2">

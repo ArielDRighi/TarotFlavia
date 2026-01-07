@@ -47,7 +47,7 @@ describe('AnonymousLimitReached', () => {
     const registerButton = screen.getByRole('button', { name: /crear cuenta gratis/i });
     await user.click(registerButton);
 
-    expect(mockPush).toHaveBeenCalledWith('/register');
+    expect(mockPush).toHaveBeenCalledWith('/registro');
   });
 
   it('should navigate to login page when secondary CTA is clicked', async () => {

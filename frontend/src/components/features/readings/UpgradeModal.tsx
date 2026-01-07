@@ -18,6 +18,8 @@ export interface UpgradeModalProps {
   open: boolean;
   /** Callback when modal is closed */
   onClose: () => void;
+  /** Reason for showing the modal (e.g., 'limit-reached') */
+  reason?: 'limit-reached' | 'feature-locked';
 }
 
 /**
@@ -64,19 +66,36 @@ const PREMIUM_BENEFITS = [
  * <UpgradeModal
  *   open={showModal}
  *   onClose={() => setShowModal(false)}
+ *   reason="limit-reached"
  * />
  * ```
  */
-export default function UpgradeModal({ open, onClose }: UpgradeModalProps) {
+export default function UpgradeModal({ open, onClose, reason }: UpgradeModalProps) {
+  // Custom title and description based on reason
+  const getContent = () => {
+    if (reason === 'limit-reached') {
+      return {
+        title: '¡Has alcanzado tu límite diario!',
+        description: 'Pasa a Premium para obtener lecturas ilimitadas y funcionalidades avanzadas',
+      };
+    }
+    return {
+      title: 'Desbloquea todo el potencial del Tarot',
+      description: 'Accede a interpretaciones personalizadas y todas las funcionalidades avanzadas',
+    };
+  };
+
+  const content = getContent();
+
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle className="mb-2 text-center font-serif text-3xl">
-            Desbloquea todo el potencial del Tarot
+            {content.title}
           </DialogTitle>
           <DialogDescription className="text-center text-base">
-            Accede a interpretaciones personalizadas y todas las funcionalidades avanzadas
+            {content.description}
           </DialogDescription>
         </DialogHeader>
 

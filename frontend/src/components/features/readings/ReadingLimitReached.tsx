@@ -80,7 +80,7 @@ export function ReadingLimitReached() {
             <li className="flex items-start gap-2">
               <Sparkles className="text-primary mt-0.5 h-4 w-4 shrink-0" />
               <span>
-                <strong>Interpretaciones con IA personalizada</strong> en todas tus lecturas
+                <strong>Interpretaciones personalizadas y profundas</strong> en todas tus lecturas
               </span>
             </li>
             <li className="flex items-start gap-2">
@@ -92,7 +92,7 @@ export function ReadingLimitReached() {
             <li className="flex items-start gap-2">
               <Sparkles className="text-primary mt-0.5 h-4 w-4 shrink-0" />
               <span>
-                <strong>Carta del día con IA todos los días</strong>
+                <strong>Carta del día con interpretación completa todos los días</strong>
               </span>
             </li>
           </ul>

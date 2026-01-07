@@ -62,10 +62,12 @@ describe('DailyCardLimitReached', () => {
     test('should render Premium benefits list', () => {
       render(<DailyCardLimitReached />);
 
-      expect(screen.getByText(/Carta del día TODOS los días con IA/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Carta del día con interpretación completa TODOS los días/i)
+      ).toBeInTheDocument();
       expect(screen.getByText(/3 tiradas completas por día/i)).toBeInTheDocument();
       expect(screen.getByText(/Todas las tiradas disponibles/i)).toBeInTheDocument();
-      expect(screen.getByText(/Interpretaciones con IA personalizada/i)).toBeInTheDocument();
+      expect(screen.getByText(/Interpretaciones personalizadas y profundas/i)).toBeInTheDocument();
       expect(screen.getByText(/Preguntas personalizadas/i)).toBeInTheDocument();
     });
   });
