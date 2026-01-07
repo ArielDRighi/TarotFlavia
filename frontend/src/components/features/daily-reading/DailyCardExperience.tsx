@@ -136,7 +136,7 @@ export function DailyCardExperience() {
   // Check if authenticated user reached limit
   // Daily card is independent from tarot readings
   // FREE users: 1 daily card per day
-  // PREMIUM users: 1 daily card per day (but can regenerate)
+  // PREMIUM users: 1 daily card per day (with AI interpretation)
   // If user already used their daily card, they should see limit message
   // The card can only be viewed in history, not here
   // IMPORTANT: Only show limit if there's NO current reading

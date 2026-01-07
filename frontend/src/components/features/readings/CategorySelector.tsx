@@ -158,7 +158,7 @@ export function CategorySelector() {
 
   // Redirect FREE users to /ritual/tirada (skip category selection)
   useEffect(() => {
-    if (user?.plan === 'free') {
+    if (user?.plan?.toUpperCase() === 'FREE') {
       router.push('/ritual/tirada');
     }
   }, [user, router]);

@@ -91,7 +91,7 @@ export function DailyCardLimitReached() {
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-primary">✓</span> Crear una nueva lectura de tarot (tienes{' '}
-                  {user?.tarotReadingsLimit ?? 3 - (user?.tarotReadingsCount ?? 0)} disponibles)
+                  {(user?.tarotReadingsLimit ?? 3) - (user?.tarotReadingsCount ?? 0)} disponibles)
                 </li>
               </ul>
             </div>
