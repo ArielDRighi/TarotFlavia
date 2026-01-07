@@ -110,14 +110,14 @@ describe('UsersController', () => {
       expect(result).not.toHaveProperty('password');
       expect(result.id).toBe(1);
       expect(result.email).toBe('test@test.com');
-      
+
       // Check new separate fields
       expect(result.dailyCardCount).toBe(0); // 1 - 1 = 0
       expect(result.dailyCardLimit).toBe(1);
       expect(result.tarotReadingsCount).toBe(0); // 1 - 1 = 0
       expect(result.tarotReadingsLimit).toBe(1);
-      
-      // Check deprecated fields are still present  
+
+      // Check deprecated fields are still present
       expect(result.dailyReadingsCount).toBeDefined();
       expect(result.dailyReadingsLimit).toBeDefined();
     });
@@ -154,7 +154,7 @@ describe('UsersController', () => {
       expect(result.dailyCardLimit).toBe(1);
       expect(result.tarotReadingsCount).toBe(0); // tarot readings limit - remaining
       expect(result.tarotReadingsLimit).toBe(3);
-      
+
       // Check deprecated fields are still present
       expect(result.dailyReadingsCount).toBeDefined();
       expect(result.dailyReadingsLimit).toBeDefined();

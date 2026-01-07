@@ -150,7 +150,7 @@ describe('AdminLayout', () => {
       expect(screen.getAllByText('Lecturas').length).toBeGreaterThanOrEqual(1);
 
       // Sección Sistema
-      expect(screen.getAllByText('Uso de IA').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('Uso de Interpretaciones').length).toBeGreaterThanOrEqual(1);
       expect(screen.getAllByText('Configuración de Planes').length).toBeGreaterThanOrEqual(1);
       expect(screen.getAllByText('Seguridad').length).toBeGreaterThanOrEqual(1);
       expect(screen.getAllByText('Caché').length).toBeGreaterThanOrEqual(1);
@@ -209,7 +209,7 @@ describe('AdminLayout', () => {
       expect(linkTexts).toContain('Usuarios');
       expect(linkTexts).toContain('Tarotistas');
       expect(linkTexts).toContain('Lecturas');
-      expect(linkTexts).toContain('Uso de IA');
+      expect(linkTexts).toContain('Uso de Interpretaciones');
       expect(linkTexts).toContain('Configuración de Planes');
       expect(linkTexts).toContain('Seguridad');
       expect(linkTexts).toContain('Caché');

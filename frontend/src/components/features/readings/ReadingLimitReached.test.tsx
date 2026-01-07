@@ -19,10 +19,9 @@ describe('ReadingLimitReached', () => {
   it('should render limit reached message', () => {
     render(<ReadingLimitReached />);
 
-    expect(screen.getByText('Límite de lecturas alcanzado')).toBeInTheDocument();
-    expect(
-      screen.getByText(/Ya realizaste tu lectura de tarot gratuita del día/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText('Límite de tiradas alcanzado')).toBeInTheDocument();
+    expect(screen.getByText(/Ya realizaste/i)).toBeInTheDocument();
+    expect(screen.getByText(/de tarot hoy/i)).toBeInTheDocument();
   });
 
   it('should display premium benefits', () => {

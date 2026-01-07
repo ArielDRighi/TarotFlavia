@@ -14,7 +14,6 @@ import { Badge } from '@/components/ui/badge';
 import { ErrorDisplay } from '@/components/ui/error-display';
 import { ReadingLimitReached } from '@/components/features/readings/ReadingLimitReached';
 import { cn } from '@/lib/utils';
-import { CONFIG } from '@/lib/constants/config';
 import type { Spread } from '@/types';
 
 /**
