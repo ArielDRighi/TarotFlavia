@@ -95,17 +95,18 @@ describe('daily-reading-api', () => {
       expect(result).toEqual(mockDailyReading);
     });
 
-    it('should throw specific error when daily reading already exists (409)', async () => {
-      const error = { response: { status: 409 } };
+    it('should throw AxiosError when daily reading already exists (409)', async () => {
+      const error = { response: { status: 409, data: {} }, config: {} };
       vi.mocked(apiClient.post).mockRejectedValueOnce(error);
 
-      await expect(getDailyReading()).rejects.toThrow('Ya tienes una carta del día para hoy');
+      await expect(getDailyReading()).rejects.toMatchObject({ response: { status: 409 } });
     });
 
-    it('should throw generic error for non-409 errors', async () => {
-      vi.mocked(apiClient.post).mockRejectedValueOnce(new Error('Network error'));
+    it('should re-throw original error for non-409 errors', async () => {
+      const error = new Error('Network error');
+      vi.mocked(apiClient.post).mockRejectedValueOnce(error);
 
-      await expect(getDailyReading()).rejects.toThrow('Error al crear carta del día');
+      await expect(getDailyReading()).rejects.toThrow('Network error');
     });
   });
 

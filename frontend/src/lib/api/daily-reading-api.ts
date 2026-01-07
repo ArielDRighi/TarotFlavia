@@ -15,28 +15,18 @@ import type { DailyReading, PaginatedDailyReadings } from '@/types';
 /**
  * Create the daily reading for today.
  * Only creates a new daily reading; errors if one already exists for today.
+ *
+ * Note: This function deliberately does NOT catch/transform errors.
+ * It re-throws the original AxiosError to preserve response.status,
+ * which components need to check (403/409) to show DailyCardLimitReached.
+ *
  * @returns Promise<DailyReading> The newly created daily reading for today
- * @throws Error with clear message on failure, including if one already exists (409)
+ * @throws AxiosError with response.status 409 if user already has a card for today
+ * @throws AxiosError with response.status 403 if user reached usage limit
  */
 export async function getDailyReading(): Promise<DailyReading> {
-  try {
-    const response = await apiClient.post<DailyReading>(API_ENDPOINTS.DAILY_READING.BASE);
-    return response.data;
-  } catch (error: unknown) {
-    // If daily reading already exists for today, show a clear message
-    if (
-      error &&
-      typeof error === 'object' &&
-      'response' in error &&
-      error.response &&
-      typeof error.response === 'object' &&
-      'status' in error.response &&
-      error.response.status === 409
-    ) {
-      throw new Error('Ya tienes una carta del día para hoy');
-    }
-    throw new Error('Error al crear carta del día');
-  }
+  const response = await apiClient.post<DailyReading>(API_ENDPOINTS.DAILY_READING.BASE);
+  return response.data;
 }
 
 /**

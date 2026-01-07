@@ -218,6 +218,12 @@ describe('CartaDelDiaPage', () => {
 
   describe('Estado 2: Card Revealed', () => {
     it('should render revealed state when daily reading exists', () => {
+      // Mock PREMIUM user to see revealed card
+      mockUseAuth.mockReturnValue({
+        user: createMockUser({ plan: 'PREMIUM' }),
+        isAuthenticated: true,
+        isLoading: false,
+      });
       const dailyReading = createMockDailyReading();
       mockUseDailyReadingToday.mockReturnValue({
         data: dailyReading,
@@ -231,6 +237,12 @@ describe('CartaDelDiaPage', () => {
     });
 
     it('should display the card name with golden color', () => {
+      // Mock PREMIUM user to see revealed card
+      mockUseAuth.mockReturnValue({
+        user: createMockUser({ plan: 'PREMIUM' }),
+        isAuthenticated: true,
+        isLoading: false,
+      });
       const dailyReading = createMockDailyReading({
         card: createMockTarotCard({ name: 'La Emperatriz' }),
       });
@@ -248,6 +260,12 @@ describe('CartaDelDiaPage', () => {
     });
 
     it('should display the interpretation', () => {
+      // Mock PREMIUM user to see revealed card
+      mockUseAuth.mockReturnValue({
+        user: createMockUser({ plan: 'PREMIUM' }),
+        isAuthenticated: true,
+        isLoading: false,
+      });
       const interpretation = 'Este es el mensaje de tu carta del día.';
       const dailyReading = createMockDailyReading({ interpretation });
       mockUseDailyReadingToday.mockReturnValue({
@@ -262,6 +280,12 @@ describe('CartaDelDiaPage', () => {
     });
 
     it('should show reversed indicator when card is reversed', () => {
+      // Mock PREMIUM user to see revealed card
+      mockUseAuth.mockReturnValue({
+        user: createMockUser({ plan: 'PREMIUM' }),
+        isAuthenticated: true,
+        isLoading: false,
+      });
       const dailyReading = createMockDailyReading({ isReversed: true });
       mockUseDailyReadingToday.mockReturnValue({
         data: dailyReading,
@@ -277,6 +301,12 @@ describe('CartaDelDiaPage', () => {
 
   describe('Action Buttons', () => {
     beforeEach(() => {
+      // Mock PREMIUM user so they can see revealed card and buttons
+      mockUseAuth.mockReturnValue({
+        user: createMockUser({ plan: 'PREMIUM' }),
+        isAuthenticated: true,
+        isLoading: false,
+      });
       mockUseDailyReadingToday.mockReturnValue({
         data: createMockDailyReading(),
         isLoading: false,
@@ -323,6 +353,26 @@ describe('CartaDelDiaPage', () => {
 
       expect(writeTextMock).toHaveBeenCalled();
     });
+
+    it('should show daily card limit message for FREE users who already have a daily card', () => {
+      // Mock FREE user with daily reading already created
+      mockUseAuth.mockReturnValue({
+        user: createMockUser({ plan: 'FREE' }),
+        isAuthenticated: true,
+        isLoading: false,
+      });
+      mockUseDailyReadingToday.mockReturnValue({
+        data: createMockDailyReading(),
+        isLoading: false,
+        error: null,
+      });
+
+      renderWithProviders(<CartaDelDiaPage />);
+
+      // Should show limit message instead of buttons
+      expect(screen.getByText(/ya recibiste tu carta del día/i)).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /compartir mensaje/i })).not.toBeInTheDocument();
+    });
   });
 
   describe('Premium Features', () => {
@@ -343,9 +393,7 @@ describe('CartaDelDiaPage', () => {
       expect(screen.getByRole('button', { name: /regenerar/i })).toBeInTheDocument();
     });
 
-    it('should show premium upgrade modal for free users trying to regenerate', async () => {
-      const user = userEvent.setup();
-
+    it('should show daily card limit message for FREE users (no regenerate button)', () => {
       mockUseAuth.mockReturnValue({
         user: createMockUser({ plan: 'FREE' }),
         isAuthenticated: true,
@@ -359,12 +407,9 @@ describe('CartaDelDiaPage', () => {
 
       renderWithProviders(<CartaDelDiaPage />);
 
-      const regenerateButton = screen.getByRole('button', { name: /regenerar/i });
-      await user.click(regenerateButton);
-
-      await waitFor(() => {
-        expect(screen.getByText(/actualiza a premium/i)).toBeInTheDocument();
-      });
+      // FREE users see limit message, not regenerate button
+      expect(screen.getByText(/ya recibiste tu carta del día/i)).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /regenerar/i })).not.toBeInTheDocument();
     });
 
     it('should show confirmation modal for premium users before regenerating', async () => {
@@ -495,6 +540,12 @@ describe('CartaDelDiaPage', () => {
     });
 
     it('should have font-serif class on card title', () => {
+      // Mock PREMIUM user to see revealed card
+      mockUseAuth.mockReturnValue({
+        user: createMockUser({ plan: 'PREMIUM' }),
+        isAuthenticated: true,
+        isLoading: false,
+      });
       mockUseDailyReadingToday.mockReturnValue({
         data: createMockDailyReading(),
         isLoading: false,

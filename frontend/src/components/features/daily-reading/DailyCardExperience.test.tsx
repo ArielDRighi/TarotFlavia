@@ -198,15 +198,15 @@ describe('DailyCardExperience', () => {
     });
   });
 
-  describe('Revealed State - with AI interpretation (PREMIUM)', () => {
-    it('should render revealed state when daily reading exists with AI interpretation', () => {
+  describe('Revealed State - with personalized interpretation (PREMIUM)', () => {
+    it('should render revealed state when daily reading exists with personalized interpretation', () => {
       mockUseAuth.mockReturnValue({
         user: createMockUser({ plan: 'PREMIUM' }),
         isAuthenticated: true,
         isLoading: false,
       });
       mockUseDailyReadingToday.mockReturnValue({
-        data: createMockDailyReading({ interpretation: 'Interpretación con IA' }),
+        data: createMockDailyReading({ interpretation: 'Interpretación personalizada completa' }),
         isLoading: false,
         error: null,
       });
@@ -214,7 +214,7 @@ describe('DailyCardExperience', () => {
       renderWithProviders(<DailyCardExperience />);
 
       expect(screen.getByTestId('revealed-state')).toBeInTheDocument();
-      expect(screen.getByText('Interpretación con IA')).toBeInTheDocument();
+      expect(screen.getByText('Interpretación personalizada completa')).toBeInTheDocument();
     });
 
     it('should display card name with secondary color - PREMIUM user', () => {
@@ -226,7 +226,7 @@ describe('DailyCardExperience', () => {
       mockUseDailyReadingToday.mockReturnValue({
         data: createMockDailyReading({
           card: createMockTarotCard({ name: 'La Estrella' }),
-          interpretation: 'Interpretación detallada con IA',
+          interpretation: 'Interpretación personalizada detallada',
         }),
         isLoading: false,
         error: null,
@@ -241,46 +241,88 @@ describe('DailyCardExperience', () => {
   });
 
   describe('Revealed State - without AI (FREE/ANONYMOUS)', () => {
-    it('should render revealed state for FREE user without AI interpretation', () => {
+    it('should render revealed state for FREE user without AI interpretation', async () => {
+      const user = userEvent.setup();
+      const createFn = vi.fn((_, options) => {
+        options?.onSuccess?.(
+          createMockDailyReading({
+            interpretation: null, // No AI interpretation for FREE users
+          })
+        );
+      });
+
       mockUseAuth.mockReturnValue({
         user: createMockUser({ plan: 'FREE' }),
         isAuthenticated: true,
         isLoading: false,
       });
+      // No existing card - must create first
       mockUseDailyReadingToday.mockReturnValue({
-        data: createMockDailyReading({
-          interpretation: null, // No AI interpretation for FREE users
-        }),
+        data: undefined,
         isLoading: false,
         error: null,
+      });
+      mockUseDailyReading.mockReturnValue({
+        mutate: createFn,
+        isPending: false,
       });
 
       renderWithProviders(<DailyCardExperience />);
 
-      expect(screen.getByTestId('revealed-state')).toBeInTheDocument();
+      // Create daily card first - click face-down card
+      await user.click(screen.getByTestId('tarot-card'));
+
+      // Wait for card to be revealed
+      await waitFor(() => {
+        expect(screen.getByTestId('revealed-state')).toBeInTheDocument();
+      });
+
       expect(screen.getByTestId('card-title')).toBeInTheDocument();
       expect(screen.getByTestId('card-meaning-section')).toBeInTheDocument();
       // Verify NO premium interpretation is shown (only basic card info)
       expect(screen.queryByText(/actualiza a premium/i)).not.toBeInTheDocument();
     });
 
-    it('should render revealed state for ANONYMOUS user without AI interpretation', () => {
+    it('should render revealed state for ANONYMOUS user without AI interpretation', async () => {
+      const user = userEvent.setup();
+      const createFn = vi.fn((_, options) => {
+        options?.onSuccess?.(
+          createMockDailyReading({
+            interpretation: null, // No AI interpretation for ANONYMOUS users
+          })
+        );
+      });
+
       mockUseAuth.mockReturnValue({
         user: null,
         isAuthenticated: false,
         isLoading: false,
       });
+      // No existing card - must create first
       mockUseDailyReadingToday.mockReturnValue({
-        data: createMockDailyReading({
-          interpretation: null, // No AI interpretation for ANONYMOUS users
-        }),
+        data: undefined,
         isLoading: false,
         error: null,
+      });
+      mockUseDailyReading.mockReturnValue({
+        mutate: vi.fn(), // Not used for anonymous
+        isPending: false,
+      });
+      mockUseDailyReadingPublic.mockReturnValue({
+        mutate: createFn,
+        isPending: false,
       });
 
       renderWithProviders(<DailyCardExperience />);
 
-      expect(screen.getByTestId('revealed-state')).toBeInTheDocument();
+      // Create daily card first - click face-down card
+      await user.click(screen.getByTestId('tarot-card'));
+
+      // Wait for card to be revealed
+      await waitFor(() => {
+        expect(screen.getByTestId('revealed-state')).toBeInTheDocument();
+      });
+
       expect(screen.getByTestId('card-title')).toBeInTheDocument();
       expect(screen.getByTestId('card-meaning-section')).toBeInTheDocument();
       // Verify anonymous CTA is shown
@@ -288,52 +330,102 @@ describe('DailyCardExperience', () => {
       expect(screen.getByText(/regístrate gratis/i)).toBeInTheDocument();
     });
 
-    it('should show reversed indicator when card is reversed - FREE user', () => {
+    it('should show reversed indicator when card is reversed - FREE user', async () => {
+      const user = userEvent.setup();
+      const createFn = vi.fn((_, options) => {
+        options?.onSuccess?.(
+          createMockDailyReading({
+            isReversed: true,
+            interpretation: null,
+          })
+        );
+      });
+
       mockUseAuth.mockReturnValue({
         user: createMockUser({ plan: 'FREE' }),
         isAuthenticated: true,
         isLoading: false,
       });
+      // No existing card - must create first
       mockUseDailyReadingToday.mockReturnValue({
-        data: createMockDailyReading({
-          isReversed: true,
-          interpretation: null,
-        }),
+        data: undefined,
         isLoading: false,
         error: null,
+      });
+      mockUseDailyReading.mockReturnValue({
+        mutate: createFn,
+        isPending: false,
       });
 
       renderWithProviders(<DailyCardExperience />);
 
-      expect(screen.getByText(/invertida/i)).toBeInTheDocument();
+      // Create daily card first - click face-down card
+      await user.click(screen.getByTestId('tarot-card'));
+
+      // Wait for card to be revealed
+      await waitFor(() => {
+        expect(screen.getByText(/invertida/i)).toBeInTheDocument();
+      });
     });
   });
 
   describe('Action Buttons', () => {
     beforeEach(() => {
+      // No existing card - unmock to show unrevealed state
       mockUseDailyReadingToday.mockReturnValue({
-        data: createMockDailyReading(),
+        data: undefined,
         isLoading: false,
         error: null,
       });
+
+      // Mock create mutation to instantly succeed with card
+      const createFn = vi.fn((_, options) => {
+        options?.onSuccess?.(createMockDailyReading());
+      });
+      mockUseDailyReading.mockReturnValue({
+        mutate: createFn,
+        isPending: false,
+      });
     });
 
-    it('should render share button', () => {
+    it('should render share button', async () => {
+      const user = userEvent.setup();
       renderWithProviders(<DailyCardExperience />);
 
-      expect(screen.getByRole('button', { name: /compartir mensaje/i })).toBeInTheDocument();
+      // Create card first by clicking the face-down card
+      await user.click(screen.getByTestId('tarot-card'));
+
+      // Wait for reveal
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /compartir mensaje/i })).toBeInTheDocument();
+      });
     });
 
-    it('should render history button', () => {
+    it('should render history button', async () => {
+      const user = userEvent.setup();
       renderWithProviders(<DailyCardExperience />);
 
-      expect(screen.getByRole('button', { name: /ver historial/i })).toBeInTheDocument();
+      // Create card first
+      await user.click(screen.getByTestId('tarot-card'));
+
+      // Wait for reveal
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /ver historial/i })).toBeInTheDocument();
+      });
     });
 
     it('should navigate to history on click', async () => {
       const user = userEvent.setup();
 
       renderWithProviders(<DailyCardExperience />);
+
+      // Create card first
+      await user.click(screen.getByTestId('tarot-card'));
+
+      // Wait for history button and click
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /ver historial/i })).toBeInTheDocument();
+      });
 
       await user.click(screen.getByRole('button', { name: /ver historial/i }));
 
@@ -351,6 +443,14 @@ describe('DailyCardExperience', () => {
 
       renderWithProviders(<DailyCardExperience />);
 
+      // Create card first
+      await user.click(screen.getByTestId('tarot-card'));
+
+      // Wait for share button and click
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /compartir mensaje/i })).toBeInTheDocument();
+      });
+
       await user.click(screen.getByRole('button', { name: /compartir mensaje/i }));
 
       expect(writeTextMock).toHaveBeenCalled();
@@ -360,15 +460,32 @@ describe('DailyCardExperience', () => {
   describe('Premium Features', () => {
     it('should show upgrade modal for free users', async () => {
       const user = userEvent.setup();
+      const createFn = vi.fn((_, options) => {
+        options?.onSuccess?.(createMockDailyReading());
+      });
 
+      // No existing card - simulate first-time creation
       mockUseDailyReadingToday.mockReturnValue({
-        data: createMockDailyReading(),
+        data: undefined,
         isLoading: false,
         error: null,
+      });
+      mockUseDailyReading.mockReturnValue({
+        mutate: createFn,
+        isPending: false,
       });
 
       renderWithProviders(<DailyCardExperience />);
 
+      // Create daily card first - click face-down card
+      await user.click(screen.getByTestId('tarot-card'));
+
+      // Wait for card to be revealed
+      await waitFor(() => {
+        expect(screen.getByTestId('revealed-state')).toBeInTheDocument();
+      });
+
+      // Now try to regenerate
       await user.click(screen.getByRole('button', { name: /regenerar/i }));
 
       await waitFor(() => {
@@ -378,20 +495,37 @@ describe('DailyCardExperience', () => {
 
     it('should show confirmation modal for premium users', async () => {
       const user = userEvent.setup();
+      const createFn = vi.fn((_, options) => {
+        options?.onSuccess?.(createMockDailyReading());
+      });
 
       mockUseAuth.mockReturnValue({
         user: createMockUser({ plan: 'PREMIUM' }),
         isAuthenticated: true,
         isLoading: false,
       });
+      // No existing card
       mockUseDailyReadingToday.mockReturnValue({
-        data: createMockDailyReading(),
+        data: undefined,
         isLoading: false,
         error: null,
+      });
+      mockUseDailyReading.mockReturnValue({
+        mutate: createFn,
+        isPending: false,
       });
 
       renderWithProviders(<DailyCardExperience />);
 
+      // Create daily card first - click face-down card
+      await user.click(screen.getByTestId('tarot-card'));
+
+      // Wait for card to be revealed
+      await waitFor(() => {
+        expect(screen.getByTestId('revealed-state')).toBeInTheDocument();
+      });
+
+      // Now try to regenerate
       await user.click(screen.getByRole('button', { name: /regenerar/i }));
 
       await waitFor(() => {
@@ -401,6 +535,9 @@ describe('DailyCardExperience', () => {
 
     it('should call regenerate mutation on confirm', async () => {
       const user = userEvent.setup();
+      const createFn = vi.fn((_, options) => {
+        options?.onSuccess?.(createMockDailyReading());
+      });
       const regenerateFn = vi.fn();
 
       mockUseAuth.mockReturnValue({
@@ -408,10 +545,15 @@ describe('DailyCardExperience', () => {
         isAuthenticated: true,
         isLoading: false,
       });
+      // No existing card
       mockUseDailyReadingToday.mockReturnValue({
-        data: createMockDailyReading(),
+        data: undefined,
         isLoading: false,
         error: null,
+      });
+      mockUseDailyReading.mockReturnValue({
+        mutate: createFn,
+        isPending: false,
       });
       mockUseRegenerateDailyReading.mockReturnValue({
         mutate: regenerateFn,
@@ -420,6 +562,15 @@ describe('DailyCardExperience', () => {
 
       renderWithProviders(<DailyCardExperience />);
 
+      // Create daily card first - click face-down card
+      await user.click(screen.getByTestId('tarot-card'));
+
+      // Wait for card to be revealed
+      await waitFor(() => {
+        expect(screen.getByTestId('revealed-state')).toBeInTheDocument();
+      });
+
+      // Now regenerate
       await user.click(screen.getByRole('button', { name: /regenerar/i }));
 
       const confirmButton = await screen.findByRole('button', { name: /confirmar/i });

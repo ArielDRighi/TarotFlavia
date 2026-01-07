@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { UserPlus, LogIn } from 'lucide-react';
+import { ROUTES } from '@/lib/constants/routes';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -29,11 +30,11 @@ export function AnonymousLimitReached() {
   const router = useRouter();
 
   const handleRegister = () => {
-    router.push('/register');
+    router.push(ROUTES.REGISTER);
   };
 
   const handleLogin = () => {
-    router.push('/login');
+    router.push(ROUTES.LOGIN);
   };
 
   return (

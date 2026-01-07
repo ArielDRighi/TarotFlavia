@@ -248,29 +248,39 @@ vi.mock('@/hooks/api/useReadings', () => ({
   }),
 }));
 
-// Mock auth store
+// Mock auth store - mutable para tests
+const mockAuthStoreReturn = {
+  user: {
+    id: 1,
+    email: 'test@example.com',
+    plan: 'PREMIUM',
+    roles: ['USER'],
+    dailyReadingsCount: 0,
+    dailyReadingsLimit: 999,
+  },
+  isAuthenticated: true,
+};
+
 vi.mock('@/stores/authStore', () => ({
-  useAuthStore: () => ({
-    user: {
-      id: 1,
-      email: 'test@example.com',
-      plan: 'PREMIUM',
-    },
-    isAuthenticated: true,
-  }),
+  useAuthStore: () => mockAuthStoreReturn,
 }));
 
-// Mock useUserPlanFeatures
+// Mock useUserPlanFeatures - mutable para tests
+const mockPlanFeaturesReturn = {
+  plan: 'premium',
+  planLabel: 'PREMIUM',
+  canUseAI: true,
+  canUseCategories: true,
+  canUseCustomQuestions: true,
+  canShare: true,
+  isPremium: true,
+  isFree: false,
+  isAnonymous: false,
+  dailyReadingsLimit: 999,
+};
+
 vi.mock('@/hooks/utils/useUserPlanFeatures', () => ({
-  useUserPlanFeatures: () => ({
-    canUseAI: true,
-    canUseCategories: true,
-    canUseCustomQuestions: true,
-    isPremium: true,
-    isFree: false,
-    isAnonymous: false,
-    dailyReadingsLimit: null,
-  }),
+  useUserPlanFeatures: () => mockPlanFeaturesReturn,
 }));
 
 // Mock toast
@@ -628,6 +638,118 @@ describe('ReadingExperience', () => {
       fireEvent.click(newReadingButton);
 
       expect(mockPush).toHaveBeenCalledWith('/ritual');
+    });
+
+    it('should NOT show "Nueva Lectura" button when FREE user has reached daily limit', async () => {
+      // Modify mock for FREE user at limit
+      mockAuthStoreReturn.user.plan = 'free';
+      mockAuthStoreReturn.user.dailyReadingsCount = 2;
+      mockAuthStoreReturn.user.dailyReadingsLimit = 2;
+
+      mockPlanFeaturesReturn.plan = 'free';
+      mockPlanFeaturesReturn.isPremium = false;
+      mockPlanFeaturesReturn.isFree = true;
+      mockPlanFeaturesReturn.canUseAI = false;
+      mockPlanFeaturesReturn.dailyReadingsLimit = 2;
+
+      renderWithProviders(<ReadingExperience spreadId={2} questionId={1} customQuestion={null} />);
+
+      const cards = screen.getAllByTestId('selectable-card');
+      fireEvent.click(cards[0]);
+      fireEvent.click(cards[1]);
+      fireEvent.click(cards[2]);
+
+      const revealButton = screen.getByRole('button', { name: /Revelar mi destino/i });
+      fireEvent.click(revealButton);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('result-cards-grid')).toBeInTheDocument();
+      });
+
+      // ✅ Button should NOT be present
+      expect(screen.queryByRole('button', { name: /Nueva Lectura/i })).not.toBeInTheDocument();
+
+      // Restore defaults for other tests
+      mockAuthStoreReturn.user.plan = 'PREMIUM';
+      mockAuthStoreReturn.user.dailyReadingsCount = 0;
+      mockAuthStoreReturn.user.dailyReadingsLimit = 999;
+      mockPlanFeaturesReturn.plan = 'premium';
+      mockPlanFeaturesReturn.isPremium = true;
+      mockPlanFeaturesReturn.isFree = false;
+      mockPlanFeaturesReturn.canUseAI = true;
+      mockPlanFeaturesReturn.dailyReadingsLimit = 999;
+    });
+
+    it('should show "Nueva Lectura" button when FREE user is under daily limit', async () => {
+      // Modify mock for FREE user under limit
+      // User has created 0 readings today, limit is 2
+      // After creating 1 in this session, effectiveDailyCount = 0 + 1 = 1 < 2 ✓
+      mockAuthStoreReturn.user.plan = 'free';
+      mockAuthStoreReturn.user.dailyReadingsCount = 0;
+      mockAuthStoreReturn.user.dailyReadingsLimit = 2;
+
+      mockPlanFeaturesReturn.plan = 'free';
+      mockPlanFeaturesReturn.isPremium = false;
+      mockPlanFeaturesReturn.isFree = true;
+      mockPlanFeaturesReturn.canUseAI = false;
+      mockPlanFeaturesReturn.dailyReadingsLimit = 2;
+
+      renderWithProviders(<ReadingExperience spreadId={2} questionId={1} customQuestion={null} />);
+
+      const cards = screen.getAllByTestId('selectable-card');
+      fireEvent.click(cards[0]);
+      fireEvent.click(cards[1]);
+      fireEvent.click(cards[2]);
+
+      const revealButton = screen.getByRole('button', { name: /Revelar mi destino/i });
+      fireEvent.click(revealButton);
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /Nueva Lectura/i })).toBeInTheDocument();
+      });
+
+      // ✅ Button SHOULD be present
+      expect(screen.getByRole('button', { name: /Nueva Lectura/i })).toBeInTheDocument();
+
+      // Restore defaults
+      mockAuthStoreReturn.user.plan = 'PREMIUM';
+      mockAuthStoreReturn.user.dailyReadingsCount = 0;
+      mockAuthStoreReturn.user.dailyReadingsLimit = 999;
+      mockPlanFeaturesReturn.plan = 'premium';
+      mockPlanFeaturesReturn.isPremium = true;
+      mockPlanFeaturesReturn.isFree = false;
+      mockPlanFeaturesReturn.canUseAI = true;
+      mockPlanFeaturesReturn.dailyReadingsLimit = 999;
+    });
+
+    it('should always show "Nueva Lectura" button for PREMIUM users', async () => {
+      // Mock already set to PREMIUM by default, but let's be explicit
+      mockAuthStoreReturn.user.plan = 'premium';
+      mockAuthStoreReturn.user.dailyReadingsCount = 10;
+      mockAuthStoreReturn.user.dailyReadingsLimit = 999;
+
+      mockPlanFeaturesReturn.plan = 'premium';
+      mockPlanFeaturesReturn.isPremium = true;
+      mockPlanFeaturesReturn.isFree = false;
+      mockPlanFeaturesReturn.canUseAI = true;
+      mockPlanFeaturesReturn.dailyReadingsLimit = 999;
+
+      renderWithProviders(<ReadingExperience spreadId={2} questionId={1} customQuestion={null} />);
+
+      const cards = screen.getAllByTestId('selectable-card');
+      fireEvent.click(cards[0]);
+      fireEvent.click(cards[1]);
+      fireEvent.click(cards[2]);
+
+      const revealButton = screen.getByRole('button', { name: /Revelar mi destino/i });
+      fireEvent.click(revealButton);
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /Nueva Lectura/i })).toBeInTheDocument();
+      });
+
+      // ✅ Button SHOULD be present for PREMIUM
+      expect(screen.getByRole('button', { name: /Nueva Lectura/i })).toBeInTheDocument();
     });
   });
 

@@ -181,12 +181,12 @@ function InterpretationSection({ interpretation, cards }: InterpretationSectionP
           data-testid="interpretation-content"
         >
           {interpretation ? (
-            // Para usuarios PREMIUM: Interpretación IA
+            // Para usuarios PREMIUM: Interpretación personalizada completa
             <>
               <ReactMarkdown>{interpretation}</ReactMarkdown>
               {seemsTruncated && (
                 <p className="text-text-muted mt-4 text-sm italic">
-                  (La interpretación puede haber sido truncada por límites del modelo de IA)
+                  (La interpretación puede haber sido truncada por límites técnicos)
                 </p>
               )}
             </>
@@ -260,6 +260,9 @@ export function ReadingExperience({
   const [readingResult, setReadingResult] = useState<ReadingDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [upgradeModalReason, setUpgradeModalReason] = useState<'limit-reached' | 'feature-locked'>(
+    'feature-locked'
+  );
 
   // Derived values
   const spread = useMemo(() => {
@@ -278,6 +281,14 @@ export function ReadingExperience({
   // For FREE users without question, show "Lectura general" instead of "Tu pregunta al tarot"
   const hasQuestion = !!(customQuestion || selectedQuestion);
   const questionText = customQuestion || selectedQuestion?.questionText || 'Lectura general';
+
+  // Sync local increment when reading result is available
+  // Note: We use useMemo instead of useEffect to avoid setState-in-effect warning
+  // This derives the local increment from readingResult state
+  const localDailyReadingsIncrement = useMemo(() => {
+    // If a reading result exists, we've created 1 reading in this session
+    return readingResult ? 1 : 0;
+  }, [readingResult]);
 
   // Rotate loading messages
   useEffect(() => {
@@ -350,8 +361,8 @@ export function ReadingExperience({
         ...(questionId ? { predefinedQuestionId: questionId } : {}),
         ...(customQuestion ? { customQuestion } : {}),
         // TASK-006: Send useAI flag based on user plan
-        // - PREMIUM: useAI: true (generates AI interpretation)
-        // - FREE/ANONYMOUS: useAI: false (DB info only)
+        // - PREMIUM: useAI: true (generates personalized interpretation)
+        // - FREE/ANONYMOUS: useAI: false (basic card meanings from DB)
         useAI: canUseAI,
       };
 
@@ -360,6 +371,21 @@ export function ReadingExperience({
       setState('result');
     } catch (error) {
       console.error('Failed to create reading:', error);
+      console.error('Error type:', error instanceof Error ? error.constructor.name : typeof error);
+      console.error('Error name:', error instanceof Error ? error.name : 'N/A');
+      console.error('Error message:', error instanceof Error ? error.message : 'N/A');
+
+      // ✅ NEW: Check if error is DailyLimitError (403 - limit reached)
+      if (error instanceof Error && error.name === 'DailyLimitError') {
+        console.log('✅ DailyLimitError detected - showing upgrade modal');
+        // Show upgrade modal instead of generic error
+        setState('selecting');
+        setUpgradeModalReason('limit-reached');
+        setShowUpgradeModal(true);
+        return;
+      }
+
+      console.log('❌ Generic error - showing error state');
       setState('error');
       setError('Error al crear la lectura. Por favor, intenta de nuevo.');
     }
@@ -394,6 +420,19 @@ export function ReadingExperience({
     setSelectedCards(new Set());
     setError(null);
   }, []);
+
+  // ✅ Check if user can create another reading today
+  const canCreateNewReading = useCallback((): boolean => {
+    if (!user) return false;
+    if (isPremium) return true; // PREMIUM users can create more readings
+
+    const baseDailyCount = user.dailyReadingsCount ?? 0;
+    const dailyLimit = user.dailyReadingsLimit ?? 1;
+    const effectiveDailyCount = baseDailyCount + localDailyReadingsIncrement;
+
+    // User can create a new reading if they haven't reached the limit
+    return effectiveDailyCount < dailyLimit;
+  }, [user, isPremium, localDailyReadingsIncrement]);
 
   // Render loading/missing spread state
   if (isSpreadsLoading || isQuestionsLoading) {
@@ -566,10 +605,13 @@ export function ReadingExperience({
               Compartir
             </Button>
 
-            <Button onClick={handleNewReading}>
-              <Plus className="mr-2 h-4 w-4" />
-              Nueva Lectura
-            </Button>
+            {/* ✅ MODIFIED: Only show "Nueva Lectura" button if user can create another reading */}
+            {canCreateNewReading() && (
+              <Button onClick={handleNewReading}>
+                <Plus className="mr-2 h-4 w-4" />
+                Nueva Lectura
+              </Button>
+            )}
           </div>
         </div>
       )}
@@ -585,7 +627,11 @@ export function ReadingExperience({
       )}
 
       {/* Upgrade Modal */}
-      <UpgradeModal open={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
+      <UpgradeModal
+        open={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        reason={upgradeModalReason}
+      />
     </div>
   );
 }

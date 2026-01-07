@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Copy, History, RefreshCw, Sparkles } from 'lucide-react';
 import { isAxiosError, AxiosError } from 'axios';
+import { ROUTES } from '@/lib/constants/routes';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -17,6 +18,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { TarotCard } from '@/components/features/readings/TarotCard';
 import { AnonymousLimitReached } from './AnonymousLimitReached';
+import { DailyCardLimitReached } from './DailyCardLimitReached';
 import {
   useDailyReadingToday,
   useDailyReading,
@@ -95,6 +97,7 @@ export function DailyCardExperience() {
   const [isRevealing, setIsRevealing] = useState(false);
   const [localReading, setLocalReading] = useState<DailyReading | null>(null);
   const [anonymousError, setAnonymousError] = useState<AxiosError | null>(null);
+  const [authenticatedError, setAuthenticatedError] = useState<AxiosError | null>(null);
 
   // Computed values
   const isPremium = user?.plan === 'PREMIUM';
@@ -102,12 +105,26 @@ export function DailyCardExperience() {
   const isRevealed = Boolean(currentReading);
   const isCreatingReading = isCreating || isCreatingPublic;
 
-  // Check if anonymous user reached limit (backend returns 409 or 403)
+  // Check if anonymous user reached limit
+  // Anonymous users get 1 daily card per day (tracked by fingerprint)
+  // Backend returns 403/409 when limit is reached
   const isAnonymousLimitReached =
     !isAuthenticated &&
     ((isAxiosError(error) && (error.response?.status === 403 || error.response?.status === 409)) ||
       (isAxiosError(anonymousError) &&
         (anonymousError.response?.status === 403 || anonymousError.response?.status === 409)));
+
+  // Check if authenticated user already has today's card
+  // Daily card is independent from tarot readings
+  // FREE/ANONYMOUS: If you have one today, limit is reached (1 per day)
+  // PREMIUM: Can view their daily card multiple times (no limit on views)
+  const isAuthenticatedLimitReached =
+    isAuthenticated &&
+    !isPremium && // Premium users can view their daily card multiple times
+    (!!dailyReading || // Already retrieved daily card today
+      (isAxiosError(authenticatedError) &&
+        (authenticatedError.response?.status === 403 ||
+          authenticatedError.response?.status === 409)));
 
   /**
    * Handle card click to create daily reading
@@ -122,10 +139,14 @@ export function DailyCardExperience() {
       createDailyReading(undefined, {
         onSuccess: (data) => {
           setLocalReading(data);
+          setAuthenticatedError(null);
           setTimeout(() => setIsRevealing(false), 600);
         },
-        onError: () => {
+        onError: (err) => {
           setIsRevealing(false);
+          if (isAxiosError(err)) {
+            setAuthenticatedError(err);
+          }
         },
       });
     } else {
@@ -211,6 +232,15 @@ export function DailyCardExperience() {
     return (
       <div className="flex w-full justify-center">
         <AnonymousLimitReached />
+      </div>
+    );
+  }
+
+  // Show DailyCardLimitReached when authenticated user already has today's card (403/409)
+  if (isAuthenticatedLimitReached) {
+    return (
+      <div className="flex w-full justify-center">
+        <DailyCardLimitReached />
       </div>
     );
   }
@@ -327,10 +357,10 @@ export function DailyCardExperience() {
                 ¿Te gustó? Regístrate gratis para obtener lecturas completas
               </p>
               <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-                <Button onClick={() => router.push('/register')} size="lg">
+                <Button onClick={() => router.push(ROUTES.REGISTER)} size="lg">
                   Crear cuenta gratis
                 </Button>
-                <Button onClick={() => router.push('/login')} variant="outline" size="lg">
+                <Button onClick={() => router.push(ROUTES.LOGIN)} variant="outline" size="lg">
                   Iniciar sesión
                 </Button>
               </div>
