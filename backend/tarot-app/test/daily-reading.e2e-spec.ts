@@ -84,6 +84,7 @@ describe('DailyReading (e2e)', () => {
     // Final cleanup
     const dataSource = dbHelper.getDataSource();
     await dataSource.query('DELETE FROM daily_readings');
+    await dataSource.query('DELETE FROM usage_limit');
 
     if (app) {
       await app.close();
@@ -94,15 +95,17 @@ describe('DailyReading (e2e)', () => {
   });
 
   beforeEach(async () => {
-    // Clean daily readings before each test
+    // Clean daily readings and usage limits before each test
     const dataSource = dbHelper.getDataSource();
     await dataSource.query('DELETE FROM daily_readings');
+    await dataSource.query('DELETE FROM usage_limit');
   });
 
   afterEach(async () => {
-    // Clean daily readings after each test
+    // Clean daily readings and usage limits after each test
     const dataSource = dbHelper.getDataSource();
     await dataSource.query('DELETE FROM daily_readings');
+    await dataSource.query('DELETE FROM usage_limit');
   });
 
   describe('POST /daily-reading', () => {
