@@ -412,31 +412,7 @@ describe('axios-config', () => {
       await expect(errorHandler(mockError)).rejects.toBeDefined();
     });
 
-    it('should throw ForbiddenError on 403 response', async () => {
-      const mockResponseUse = vi.fn();
-      const mockCreate = vi.fn().mockReturnValue({
-        interceptors: {
-          request: { use: vi.fn() },
-          response: { use: mockResponseUse },
-        },
-        defaults: { headers: {} },
-      });
-      vi.mocked(axios.create).mockImplementation(mockCreate);
-
-      vi.resetModules();
-      const axiosModule = await import('./axios-config');
-
-      const [[, errorHandler]] = mockResponseUse.mock.calls;
-
-      const mockError = {
-        response: { status: 403, data: {} },
-        config: { url: '/test' },
-      } as unknown as AxiosError;
-
-      await expect(errorHandler(mockError)).rejects.toBeInstanceOf(axiosModule.ForbiddenError);
-    });
-
-    it('should throw ForbiddenError with permission error message on 403', async () => {
+    it('should preserve AxiosError on 403 response', async () => {
       const mockResponseUse = vi.fn();
       const mockCreate = vi.fn().mockReturnValue({
         interceptors: {
@@ -457,7 +433,32 @@ describe('axios-config', () => {
         config: { url: '/test' },
       } as unknown as AxiosError;
 
-      await expect(errorHandler(mockError)).rejects.toThrow(/permisos|forbidden/i);
+      await expect(errorHandler(mockError)).rejects.toMatchObject({ response: { status: 403 } });
+    });
+
+    it('should not transform 403 errors', async () => {
+      const mockResponseUse = vi.fn();
+      const mockCreate = vi.fn().mockReturnValue({
+        interceptors: {
+          request: { use: vi.fn() },
+          response: { use: mockResponseUse },
+        },
+        defaults: { headers: {} },
+      });
+      vi.mocked(axios.create).mockImplementation(mockCreate);
+
+      vi.resetModules();
+      await import('./axios-config');
+
+      const [[, errorHandler]] = mockResponseUse.mock.calls;
+
+      const mockError = {
+        response: { status: 403, data: { message: 'Permission denied' } },
+        config: { url: '/test' },
+      } as unknown as AxiosError;
+
+      const rejectedError = await errorHandler(mockError).catch((e: unknown) => e);
+      expect(rejectedError).toMatchObject({ response: { status: 403 } });
     });
 
     it('should throw RateLimitError on 429 response', async () => {

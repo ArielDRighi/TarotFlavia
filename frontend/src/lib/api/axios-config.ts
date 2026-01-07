@@ -205,12 +205,8 @@ apiClient.interceptors.response.use(
       }
     }
 
-    // Handle 403 Forbidden
-    if (error.response?.status === 403) {
-      return Promise.reject(new ForbiddenError());
-    }
-
     // Handle 429 Too Many Requests (Rate Limit)
+    // 403 Forbidden is NOT transformed here - preserved as AxiosError for component handling
     if (error.response?.status === 429) {
       return Promise.reject(new RateLimitError());
     }

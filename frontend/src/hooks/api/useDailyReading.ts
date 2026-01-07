@@ -7,6 +7,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { isAxiosError } from 'axios';
 import { toast } from '@/hooks/utils/useToast';
 
 import {
@@ -68,6 +69,7 @@ export function useDailyReadingHistory(page: number, limit: number) {
  * Hook to create today's daily reading.
  * Creates a new daily reading for today. Errors if one already exists (409).
  * On success: invalidates all daily reading queries and shows toast.
+ * On error: only shows toast if not 403/409 (component handles those visually)
  */
 export function useDailyReading() {
   const queryClient = useQueryClient();
@@ -79,6 +81,13 @@ export function useDailyReading() {
       toast.success('¡Tu carta del día está lista!');
     },
     onError: (error: Error) => {
+      // Don't show toast for 403/409 - component will display visual feedback
+      if (isAxiosError(error)) {
+        const status = error.response?.status;
+        if (status === 403 || status === 409) {
+          return; // Component handles this with DailyCardLimitReached
+        }
+      }
       toast.error(error.message || 'Error al crear carta del día');
     },
   });

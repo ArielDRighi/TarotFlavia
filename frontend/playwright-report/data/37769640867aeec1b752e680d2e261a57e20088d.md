@@ -1,0 +1,49 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - navigation "Navegación principal" [ref=e4]:
+        - link "Tarot" [ref=e5] [cursor=pointer]:
+          - /url: /
+        - generic [ref=e7]:
+          - link "Iniciar Sesión" [ref=e8] [cursor=pointer]:
+            - /url: /login
+          - link "Registrarse" [ref=e9] [cursor=pointer]:
+            - /url: /registro
+    - main [ref=e10]:
+      - generic [ref=e12]:
+        - heading "Carta del Día" [level=1] [ref=e13]
+        - generic [ref=e14]:
+          - paragraph [ref=e15]: Conecta con tu energía y toca la carta para descubrir el mensaje del universo para ti hoy
+          - button "Carta de tarot boca abajo" [ref=e17] [cursor=pointer]:
+            - img "Carta de tarot" [ref=e34]:
+              - generic [ref=e35]:
+                - generic [ref=e36]: 🃏
+                - text: Sin imagen
+          - generic [ref=e37]:
+            - img [ref=e38]
+            - generic [ref=e41]: Revelando tu carta...
+    - contentinfo [ref=e42]:
+      - navigation "Enlaces legales" [ref=e43]:
+        - list [ref=e44]:
+          - listitem [ref=e45]:
+            - link "Términos" [ref=e46] [cursor=pointer]:
+              - /url: /terminos
+          - listitem [ref=e47]:
+            - link "Privacidad" [ref=e48] [cursor=pointer]:
+              - /url: /privacidad
+          - listitem [ref=e49]:
+            - link "Contacto" [ref=e50] [cursor=pointer]:
+              - /url: /contacto
+      - paragraph [ref=e51]: © 2025 Auguria
+  - generic [ref=e52]:
+    - img [ref=e54]
+    - button "Open Tanstack query devtools" [ref=e102] [cursor=pointer]:
+      - img [ref=e103]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e156] [cursor=pointer]:
+    - img [ref=e157]
+  - alert [ref=e160]
+```
