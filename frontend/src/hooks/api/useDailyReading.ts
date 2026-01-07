@@ -9,6 +9,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 import { toast } from '@/hooks/utils/useToast';
+import { useAuthStore } from '@/stores/authStore';
 
 import {
   getDailyReading,
@@ -68,7 +69,7 @@ export function useDailyReadingHistory(page: number, limit: number) {
 /**
  * Hook to create today's daily reading.
  * Creates a new daily reading for today. Errors if one already exists (409).
- * On success: invalidates all daily reading queries and shows toast.
+ * On success: invalidates all daily reading queries, refreshes user data, and shows toast.
  * On error: only shows toast if not 403/409 (component handles those visually)
  */
 export function useDailyReading() {
@@ -76,8 +77,13 @@ export function useDailyReading() {
 
   return useMutation({
     mutationFn: getDailyReading,
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: dailyReadingQueryKeys.all });
+
+      // Refresh user data to get updated dailyCardCount
+      // This ensures the limit check works correctly on next visit
+      await useAuthStore.getState().checkAuth();
+
       toast.success('¡Tu carta del día está lista!');
     },
     onError: (error: Error) => {

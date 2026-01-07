@@ -56,10 +56,25 @@ export class Plan {
 
   @ApiProperty({
     example: 10,
-    description: 'Límite de lecturas mensuales (-1 para ilimitado)',
+    description:
+      'Límite de lecturas mensuales (-1 para ilimitado) - DEPRECATED: usar dailyCardLimit y tarotReadingsLimit',
   })
   @Column({ type: 'int', default: 10 })
   readingsLimit: number;
+
+  @ApiProperty({
+    example: 1,
+    description: 'Límite diario de Carta del Día (-1 para ilimitado)',
+  })
+  @Column({ type: 'int', default: 1, name: 'daily_card_limit' })
+  dailyCardLimit: number;
+
+  @ApiProperty({
+    example: 1,
+    description: 'Límite diario de Tiradas de Tarot (-1 para ilimitado)',
+  })
+  @Column({ type: 'int', default: 0, name: 'tarot_readings_limit' })
+  tarotReadingsLimit: number;
 
   @ApiProperty({
     example: 100,
@@ -113,9 +128,26 @@ export class Plan {
   /**
    * Verifica si el plan tiene límites ilimitados
    * @returns true si readingsLimit es -1 (ilimitado)
+   * @deprecated Use isDailyCardUnlimited() or isTarotReadingsUnlimited() instead
    */
   isUnlimited(): boolean {
     return this.readingsLimit === -1;
+  }
+
+  /**
+   * Verifica si el plan tiene límites ilimitados de Carta del Día
+   * @returns true si dailyCardLimit es -1 (ilimitado)
+   */
+  isDailyCardUnlimited(): boolean {
+    return this.dailyCardLimit === -1;
+  }
+
+  /**
+   * Verifica si el plan tiene límites ilimitados de Tiradas de Tarot
+   * @returns true si tarotReadingsLimit es -1 (ilimitado)
+   */
+  isTarotReadingsUnlimited(): boolean {
+    return this.tarotReadingsLimit === -1;
   }
 
   /**

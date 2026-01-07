@@ -11,3 +11,10 @@ export {
   createMockDailyReadingHistoryItem,
   createMockUser,
 } from './dailyReading.factory';
+
+export {
+  createMockAuthUser,
+  createMockAnonymousUser,
+  createMockFreeUser,
+  createMockPremiumUser,
+} from './authUser.factory';

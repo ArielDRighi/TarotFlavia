@@ -11,10 +11,18 @@ export interface AuthUser {
   name: string;
   roles: string[];
   plan: string;
-  /** Number of readings used today (for limit tracking) */
+  /** @deprecated Use dailyCardCount and tarotReadingsCount instead */
   dailyReadingsCount: number;
-  /** Maximum daily readings allowed by plan */
+  /** @deprecated Use dailyCardLimit and tarotReadingsLimit instead */
   dailyReadingsLimit: number;
+  /** Number of daily cards used today */
+  dailyCardCount: number;
+  /** Maximum daily cards allowed by plan */
+  dailyCardLimit: number;
+  /** Number of tarot readings used today */
+  tarotReadingsCount: number;
+  /** Maximum tarot readings allowed by plan */
+  tarotReadingsLimit: number;
 }
 
 /**

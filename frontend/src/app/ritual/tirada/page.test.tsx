@@ -45,6 +45,10 @@ const mockUser = {
   plan: 'free',
   dailyReadingsCount: 0,
   dailyReadingsLimit: 3,
+  dailyCardCount: 0,
+  dailyCardLimit: 1,
+  tarotReadingsCount: 0,
+  tarotReadingsLimit: 1,
 };
 
 describe('SpreadSelectorPage', () => {

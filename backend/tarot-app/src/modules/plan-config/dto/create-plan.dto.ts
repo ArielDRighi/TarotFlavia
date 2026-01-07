@@ -50,13 +50,39 @@ export class CreatePlanDto {
   price: number;
 
   @ApiProperty({
-    description: 'Límite de lecturas mensuales (-1 para ilimitado)',
+    description:
+      'Límite de lecturas mensuales (-1 para ilimitado) - DEPRECATED: usar dailyCardLimit y tarotReadingsLimit',
     example: 10,
     minimum: -1,
+    deprecated: true,
   })
   @IsNumber()
   @Min(-1)
   readingsLimit: number;
+
+  @ApiProperty({
+    description: 'Límite diario de Carta del Día (-1 para ilimitado)',
+    example: 1,
+    minimum: -1,
+    required: false,
+    default: 1,
+  })
+  @IsNumber()
+  @Min(-1)
+  @IsOptional()
+  dailyCardLimit?: number;
+
+  @ApiProperty({
+    description: 'Límite diario de Tiradas de Tarot (-1 para ilimitado)',
+    example: 1,
+    minimum: -1,
+    required: false,
+    default: 0,
+  })
+  @IsNumber()
+  @Min(-1)
+  @IsOptional()
+  tarotReadingsLimit?: number;
 
   @ApiProperty({
     description: 'Cuota mensual de solicitudes IA (-1 para ilimitado)',

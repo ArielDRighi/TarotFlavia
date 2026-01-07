@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Copy, History, RefreshCw, Sparkles } from 'lucide-react';
 import { isAxiosError, AxiosError } from 'axios';
@@ -77,13 +77,20 @@ export function DailyCardExperience() {
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
 
-  // Fetch today's reading for authenticated users only
+  // Helper: Check if daily card limit is reached based on counters
+  // Both FREE and PREMIUM have limit of 1 daily card per day
+  const dailyCardCount = user?.dailyCardCount ?? 0;
+  const dailyCardLimit = user?.dailyCardLimit ?? 1;
+  const hasReachedDailyCardLimit = isAuthenticated && dailyCardCount >= dailyCardLimit;
+
+  // Fetch today's reading for authenticated users only IF they haven't reached the limit
+  // If limit is reached, don't fetch - user should only see limit message
   // Anonymous users don't fetch initial data - they generate on click (POST with fingerprint)
   const {
     data: dailyReading,
     isLoading: isFetching,
     error,
-  } = useDailyReadingToday({ enabled: isAuthenticated });
+  } = useDailyReadingToday({ enabled: isAuthenticated && !hasReachedDailyCardLimit });
 
   const { mutate: createDailyReading, isPending: isCreating } = useDailyReading();
   const { mutate: createDailyReadingPublic, isPending: isCreatingPublic } = useDailyReadingPublic();
@@ -99,6 +106,27 @@ export function DailyCardExperience() {
   const [anonymousError, setAnonymousError] = useState<AxiosError | null>(null);
   const [authenticatedError, setAuthenticatedError] = useState<AxiosError | null>(null);
 
+  // Check if anonymous user already consumed their daily card today
+  // This is tracked in sessionStorage to persist across page refreshes
+  // Backend enforces this via fingerprint, but sessionStorage improves UX
+  // by preventing unnecessary API calls and showing limit message immediately
+  const hasAnonymousCardToday = useMemo(() => {
+    if (isAuthenticated || typeof window === 'undefined') return false;
+    
+    const consumed = sessionStorage.getItem('tarot_daily_card_consumed');
+    if (!consumed) return false;
+
+    const consumedDate = new Date(consumed);
+    const today = new Date();
+    
+    // Check if it's the same day
+    return (
+      consumedDate.getDate() === today.getDate() &&
+      consumedDate.getMonth() === today.getMonth() &&
+      consumedDate.getFullYear() === today.getFullYear()
+    );
+  }, [isAuthenticated]);
+
   // Computed values
   const isPremium = user?.plan === 'PREMIUM';
   const currentReading = localReading || dailyReading;
@@ -106,22 +134,25 @@ export function DailyCardExperience() {
   const isCreatingReading = isCreating || isCreatingPublic;
 
   // Check if anonymous user reached limit
-  // Anonymous users get 1 daily card per day (tracked by fingerprint)
+  // Anonymous users get 1 daily card per day (tracked by fingerprint + sessionStorage)
   // Backend returns 403/409 when limit is reached
+  // Also check sessionStorage to prevent showing the card again after page refresh
   const isAnonymousLimitReached =
     !isAuthenticated &&
-    ((isAxiosError(error) && (error.response?.status === 403 || error.response?.status === 409)) ||
+    (hasAnonymousCardToday ||
+      (isAxiosError(error) && (error.response?.status === 403 || error.response?.status === 409)) ||
       (isAxiosError(anonymousError) &&
         (anonymousError.response?.status === 403 || anonymousError.response?.status === 409)));
 
-  // Check if authenticated user already has today's card
+  // Check if authenticated user reached limit
   // Daily card is independent from tarot readings
-  // FREE/ANONYMOUS: If you have one today, limit is reached (1 per day)
-  // PREMIUM: Can view their daily card multiple times (no limit on views)
+  // FREE users: 1 daily card per day
+  // PREMIUM users: 1 daily card per day (but can regenerate)
+  // If user already used their daily card, they should see limit message
+  // The card can only be viewed in history, not here
   const isAuthenticatedLimitReached =
     isAuthenticated &&
-    !isPremium && // Premium users can view their daily card multiple times
-    (!!dailyReading || // Already retrieved daily card today
+    (hasReachedDailyCardLimit || // Already reached limit based on counters
       (isAxiosError(authenticatedError) &&
         (authenticatedError.response?.status === 403 ||
           authenticatedError.response?.status === 409)));
@@ -131,6 +162,11 @@ export function DailyCardExperience() {
    */
   const handleRevealCard = useCallback(async () => {
     if (isCreatingReading || isRevealing || currentReading) return;
+
+    // Preventive check: Don't allow if limit already reached
+    if (hasReachedDailyCardLimit) {
+      return;
+    }
 
     setIsRevealing(true);
 
@@ -179,6 +215,7 @@ export function DailyCardExperience() {
     isCreatingReading,
     isRevealing,
     currentReading,
+    hasReachedDailyCardLimit,
   ]);
 
   /**

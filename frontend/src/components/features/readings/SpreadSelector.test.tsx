@@ -85,9 +85,15 @@ const mockUserFree = {
   email: 'test@test.com',
   name: 'Test User',
   roles: ['USER'],
-  plan: 'FREE',
+  plan: 'free',
+  // Legacy fields (deprecated)
   dailyReadingsCount: 0,
   dailyReadingsLimit: 3,
+  // New separate fields
+  dailyCardCount: 0,
+  dailyCardLimit: 1,
+  tarotReadingsCount: 0,
+  tarotReadingsLimit: 1,
 };
 
 const mockUserAtLimit = {
@@ -96,8 +102,14 @@ const mockUserAtLimit = {
   name: 'Test User',
   roles: ['USER'],
   plan: 'free',
+  // Legacy fields (deprecated)
   dailyReadingsCount: 3,
   dailyReadingsLimit: 3,
+  // New separate fields
+  dailyCardCount: 1,
+  dailyCardLimit: 1,
+  tarotReadingsCount: 1,
+  tarotReadingsLimit: 1,
 };
 
 const mockUserPremium = {
@@ -106,8 +118,14 @@ const mockUserPremium = {
   name: 'Premium User',
   roles: ['USER'],
   plan: 'premium',
+  // Legacy fields (deprecated)
   dailyReadingsCount: 0,
   dailyReadingsLimit: 999,
+  // New separate fields
+  dailyCardCount: 0,
+  dailyCardLimit: 1,
+  tarotReadingsCount: 0,
+  tarotReadingsLimit: 3,
 };
 
 describe('SpreadSelector', () => {

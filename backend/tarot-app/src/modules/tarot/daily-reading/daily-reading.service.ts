@@ -12,6 +12,9 @@ import { TarotCard } from '../cards/entities/tarot-card.entity';
 import { InterpretationsService } from '../interpretations/interpretations.service';
 import { User, UserPlan } from '../../users/entities/user.entity';
 import { UsersService } from '../../users/users.service';
+import { PlanConfigService } from '../../plan-config/plan-config.service';
+import { UsageLimitsService } from '../../usage-limits/usage-limits.service';
+import { UsageFeature } from '../../usage-limits/entities/usage-limit.entity';
 import {
   DailyReadingHistoryDto,
   DailyReadingHistoryItemDto,
@@ -26,6 +29,8 @@ export class DailyReadingService {
     private readonly tarotCardRepository: Repository<TarotCard>,
     private readonly interpretationsService: InterpretationsService,
     private readonly usersService: UsersService,
+    private readonly planConfigService: PlanConfigService,
+    private readonly usageLimitsService: UsageLimitsService,
   ) {}
 
   /**
@@ -58,6 +63,48 @@ export class DailyReadingService {
   ): Promise<DailyReading> {
     const todayStr = this.getTodayLocalDateString();
 
+    // NUEVO: Verificar límite de carta del día ANTES de verificar existencia
+    // Si el usuario alcanzó su límite diario de cartas, lanzar error 403
+
+    // Obtener el plan del usuario
+    let userPlan: UserPlan = UserPlan.FREE;
+    if (user?.plan) {
+      userPlan = user.plan;
+    } else {
+      const fullUser = await this.usersService.findById(userId);
+      if (!fullUser) {
+        throw new NotFoundException('Usuario no encontrado');
+      }
+      userPlan = fullUser.plan;
+    }
+
+    // Obtener el límite configurado para el plan del usuario
+    const planConfig = await this.planConfigService.findByPlanType(userPlan);
+    if (!planConfig) {
+      throw new InternalServerErrorException(
+        'No se pudo verificar el límite del plan',
+      );
+    }
+
+    // UNLIMITED_LIMIT (-1) significa que no se aplican límites (ej: PREMIUM)
+    const UNLIMITED_LIMIT = -1;
+
+    // Solo verificar límites si el plan tiene límite definido
+    // Si dailyCardLimit = -1, el usuario tiene acceso ilimitado
+    if (planConfig.dailyCardLimit !== UNLIMITED_LIMIT) {
+      // Verificar cuántas cartas del día ha usado hoy el usuario
+      const hasLimit = await this.usageLimitsService.checkLimit(
+        userId,
+        UsageFeature.DAILY_CARD,
+      );
+
+      if (!hasLimit) {
+        throw new ForbiddenException(
+          'Has alcanzado tu límite de carta del día. Actualiza tu plan para generar más cartas.',
+        );
+      }
+    }
+
     // Verificar que NO existe carta del día para hoy
     const existingReading = await this.dailyReadingRepository
       .createQueryBuilder('daily_reading')
@@ -72,18 +119,8 @@ export class DailyReadingService {
       );
     }
 
-    // TASK-007: Determinar el plan del usuario
-    let userPlan: UserPlan = UserPlan.FREE;
-    if (user?.plan) {
-      userPlan = user.plan;
-    } else {
-      // Si no se pasó el user, consultarlo de la base de datos
-      const fullUser = await this.usersService.findById(userId);
-      if (!fullUser) {
-        throw new NotFoundException('Usuario no encontrado');
-      }
-      userPlan = fullUser.plan;
-    }
+    // TASK-007: Ya determinamos el plan arriba para verificar límites
+    // userPlan ya está definido
 
     // Seleccionar carta aleatoria
     const { card, isReversed } = await this.selectRandomCard();

@@ -11,16 +11,19 @@ import { UsageFeature } from './entities/usage-limit.entity';
  */
 export const USAGE_LIMITS: Record<UserPlan, Record<UsageFeature, number>> = {
   [UserPlan.ANONYMOUS]: {
+    [UsageFeature.DAILY_CARD]: 1, // 1 carta del día
     [UsageFeature.TAROT_READING]: 1, // 1 tirada diaria
     [UsageFeature.INTERPRETATION_REGENERATION]: 0, // Sin regeneración
     [UsageFeature.ORACLE_QUERY]: 0, // Sin consultas al oráculo
   },
   [UserPlan.FREE]: {
+    [UsageFeature.DAILY_CARD]: 1, // 1 carta del día
     [UsageFeature.TAROT_READING]: 2, // Carta del día + 1 tirada de 3 cartas
     [UsageFeature.INTERPRETATION_REGENERATION]: 0, // Sin regeneración
     [UsageFeature.ORACLE_QUERY]: 5, // 5 consultas al oráculo/día
   },
   [UserPlan.PREMIUM]: {
+    [UsageFeature.DAILY_CARD]: 1, // 1 carta del día
     [UsageFeature.TAROT_READING]: 3, // 3 tiradas/día
     [UsageFeature.INTERPRETATION_REGENERATION]: -1, // Regeneración ilimitada
     [UsageFeature.ORACLE_QUERY]: -1, // Consultas ilimitadas

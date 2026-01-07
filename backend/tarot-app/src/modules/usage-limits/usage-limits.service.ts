@@ -25,13 +25,15 @@ export class UsageLimitsService {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
 
-    // Get limit from database configuration (dynamic)
+    // Get limit from database configuration based on feature type
     let limit: number;
-    if (feature === UsageFeature.TAROT_READING) {
-      limit = await this.planConfigService.getReadingsLimit(user.plan);
+
+    if (feature === UsageFeature.DAILY_CARD) {
+      limit = await this.planConfigService.getDailyCardLimit(user.plan);
+    } else if (feature === UsageFeature.TAROT_READING) {
+      limit = await this.planConfigService.getTarotReadingsLimit(user.plan);
     } else {
-      // For other features, fall back to constants for now
-      // TODO: Add AI quota and other features to plan-config
+      // For other features (ORACLE_QUERY, INTERPRETATION_REGENERATION), fall back to constants
       limit = USAGE_LIMITS[user.plan]?.[feature];
       if (limit === undefined) {
         throw new BadRequestException(
@@ -130,13 +132,15 @@ export class UsageLimitsService {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
 
-    // Get limit from database configuration (dynamic)
+    // Get limit from database configuration based on feature type
     let limit: number;
-    if (feature === UsageFeature.TAROT_READING) {
-      limit = await this.planConfigService.getReadingsLimit(user.plan);
+
+    if (feature === UsageFeature.DAILY_CARD) {
+      limit = await this.planConfigService.getDailyCardLimit(user.plan);
+    } else if (feature === UsageFeature.TAROT_READING) {
+      limit = await this.planConfigService.getTarotReadingsLimit(user.plan);
     } else {
-      // For other features, fall back to constants for now
-      // TODO: Add AI quota and other features to plan-config
+      // For other features (ORACLE_QUERY, INTERPRETATION_REGENERATION), fall back to constants
       limit = USAGE_LIMITS[user.plan]?.[feature];
       if (limit === undefined) {
         throw new BadRequestException(

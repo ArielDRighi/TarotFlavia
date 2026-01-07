@@ -34,8 +34,14 @@ const mockProfile: UserProfile = {
   name: 'Test User',
   roles: ['consumer'],
   plan: 'free',
+  // Legacy fields (deprecated)
   dailyReadingsCount: 2,
   dailyReadingsLimit: 5,
+  // New separate fields
+  dailyCardCount: 1,
+  dailyCardLimit: 1,
+  tarotReadingsCount: 1,
+  tarotReadingsLimit: 1,
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-01T00:00:00Z',
   profilePicture: undefined,

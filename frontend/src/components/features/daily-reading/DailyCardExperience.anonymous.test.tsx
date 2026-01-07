@@ -111,6 +111,9 @@ describe('DailyCardExperience - Anonymous User Flow', () => {
 
   describe('when user is anonymous (not authenticated)', () => {
     beforeEach(() => {
+      // Clear sessionStorage to simulate fresh anonymous user session
+      sessionStorage.clear();
+      
       // Mock anonymous user (not authenticated)
       mockUseAuth.mockReturnValue({
         user: null,

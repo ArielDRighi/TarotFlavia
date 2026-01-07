@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { Calendar, History, Sparkles, Crown } from 'lucide-react';
 
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -20,6 +21,7 @@ import {
  * Provides CTAs to view history, create new reading, or upgrade to PREMIUM.
  *
  * Features:
+ * - Shows specific daily card usage (X/Y cartas usadas)
  * - Clear message about daily limit (1 card per day)
  * - Premium upgrade CTA with benefits
  * - Secondary CTAs: View history and create new reading
@@ -27,6 +29,11 @@ import {
  */
 export function DailyCardLimitReached() {
   const router = useRouter();
+  const { user } = useAuth();
+
+  // Get specific daily card counters
+  const dailyCardCount = user?.dailyCardCount ?? 0;
+  const dailyCardLimit = user?.dailyCardLimit ?? 1;
 
   const handleViewHistory = () => {
     router.push('/historial');
@@ -48,7 +55,11 @@ export function DailyCardLimitReached() {
       <CardHeader>
         <CardTitle className="text-center text-xl">Ya recibiste tu carta del día</CardTitle>
         <CardDescription className="text-center">
-          Puedes obtener una nueva carta mañana. Mientras tanto, explora otras opciones o{' '}
+          Obtuviste{' '}
+          <span className="font-semibold">
+            {dailyCardCount} de {dailyCardLimit} {dailyCardLimit === 1 ? 'carta' : 'cartas'}
+          </span>{' '}
+          hoy. Puedes obtener una nueva carta mañana. Mientras tanto, explora otras opciones o{' '}
           <span className="text-primary font-semibold">
             descubre todo lo que PREMIUM tiene para ti
           </span>

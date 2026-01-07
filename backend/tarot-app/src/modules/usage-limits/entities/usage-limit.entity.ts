@@ -10,6 +10,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { User } from '../../users/entities/user.entity';
 
 export enum UsageFeature {
+  DAILY_CARD = 'daily_card',
   TAROT_READING = 'tarot_reading',
   ORACLE_QUERY = 'oracle_query',
   INTERPRETATION_REGENERATION = 'interpretation_regeneration',

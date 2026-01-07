@@ -26,7 +26,8 @@ describe('UsageLimitsService', () => {
   };
 
   const mockPlanConfigService = {
-    getReadingsLimit: jest.fn(),
+    getDailyCardLimit: jest.fn(),
+    getTarotReadingsLimit: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -66,7 +67,7 @@ describe('UsageLimitsService', () => {
       };
 
       mockUsersService.findById.mockResolvedValue(anonymousUser);
-      mockPlanConfigService.getReadingsLimit.mockResolvedValue(1); // ANONYMOUS plan limit from DB
+      mockPlanConfigService.getTarotReadingsLimit.mockResolvedValue(1); // ANONYMOUS plan limit from DB
       mockUsageLimitRepository.findOne.mockResolvedValue({
         count: 0, // Less than 1
       });
@@ -84,7 +85,7 @@ describe('UsageLimitsService', () => {
       };
 
       mockUsersService.findById.mockResolvedValue(anonymousUser);
-      mockPlanConfigService.getReadingsLimit.mockResolvedValue(1); // ANONYMOUS plan limit from DB
+      mockPlanConfigService.getTarotReadingsLimit.mockResolvedValue(1); // ANONYMOUS plan limit from DB
       mockUsageLimitRepository.findOne.mockResolvedValue({
         count: 1, // Reached limit (1 reading)
       });
@@ -102,7 +103,7 @@ describe('UsageLimitsService', () => {
       };
 
       mockUsersService.findById.mockResolvedValue(freeUser);
-      mockPlanConfigService.getReadingsLimit.mockResolvedValue(2); // FREE plan limit from DB
+      mockPlanConfigService.getTarotReadingsLimit.mockResolvedValue(2); // FREE plan limit from DB
       mockUsageLimitRepository.findOne.mockResolvedValue({
         count: 1, // Less than 2
       });
@@ -120,7 +121,7 @@ describe('UsageLimitsService', () => {
       };
 
       mockUsersService.findById.mockResolvedValue(freeUser);
-      mockPlanConfigService.getReadingsLimit.mockResolvedValue(2); // FREE plan limit from DB
+      mockPlanConfigService.getTarotReadingsLimit.mockResolvedValue(2); // FREE plan limit from DB
       mockUsageLimitRepository.findOne.mockResolvedValue({
         count: 2, // Reached limit (2 readings)
       });
@@ -138,7 +139,7 @@ describe('UsageLimitsService', () => {
       };
 
       mockUsersService.findById.mockResolvedValue(premiumUser);
-      mockPlanConfigService.getReadingsLimit.mockResolvedValue(3); // PREMIUM plan limit from DB (now limited to 3/day)
+      mockPlanConfigService.getTarotReadingsLimit.mockResolvedValue(3); // PREMIUM plan limit from DB (now limited to 3/day)
       mockUsageLimitRepository.findOne.mockResolvedValue({
         count: 2, // Less than 3
       });
@@ -156,7 +157,7 @@ describe('UsageLimitsService', () => {
       };
 
       mockUsersService.findById.mockResolvedValue(premiumUser);
-      mockPlanConfigService.getReadingsLimit.mockResolvedValue(3); // PREMIUM plan limit from DB
+      mockPlanConfigService.getTarotReadingsLimit.mockResolvedValue(3); // PREMIUM plan limit from DB
       mockUsageLimitRepository.findOne.mockResolvedValue({
         count: 3, // Reached limit (3 readings)
       });
@@ -174,7 +175,7 @@ describe('UsageLimitsService', () => {
       };
 
       mockUsersService.findById.mockResolvedValue(freeUser);
-      mockPlanConfigService.getReadingsLimit.mockResolvedValue(2); // FREE plan limit from DB
+      mockPlanConfigService.getTarotReadingsLimit.mockResolvedValue(2); // FREE plan limit from DB
       mockUsageLimitRepository.findOne.mockResolvedValue(null);
 
       const result = await service.checkLimit(1, UsageFeature.TAROT_READING);
@@ -329,7 +330,7 @@ describe('UsageLimitsService', () => {
       };
 
       mockUsersService.findById.mockResolvedValue(freeUser);
-      mockPlanConfigService.getReadingsLimit.mockResolvedValue(2); // FREE plan limit from DB
+      mockPlanConfigService.getTarotReadingsLimit.mockResolvedValue(2); // FREE plan limit from DB
       mockUsageLimitRepository.findOne.mockResolvedValue({
         count: 1,
       });
@@ -350,7 +351,7 @@ describe('UsageLimitsService', () => {
       };
 
       mockUsersService.findById.mockResolvedValue(premiumUser);
-      mockPlanConfigService.getReadingsLimit.mockResolvedValue(3); // PREMIUM plan limit from DB (now 3/day)
+      mockPlanConfigService.getTarotReadingsLimit.mockResolvedValue(3); // PREMIUM plan limit from DB (now 3/day)
       mockUsageLimitRepository.findOne.mockResolvedValue({
         count: 1,
       });
@@ -388,7 +389,7 @@ describe('UsageLimitsService', () => {
       };
 
       mockUsersService.findById.mockResolvedValue(freeUser);
-      mockPlanConfigService.getReadingsLimit.mockResolvedValue(2); // FREE plan limit from DB
+      mockPlanConfigService.getTarotReadingsLimit.mockResolvedValue(2); // FREE plan limit from DB
       mockUsageLimitRepository.findOne.mockResolvedValue(null);
 
       const result = await service.getRemainingUsage(
@@ -452,7 +453,7 @@ describe('UsageLimitsService', () => {
 
         // Mock user found
         mockUsersService.findById.mockResolvedValue(freeUser);
-        mockPlanConfigService.getReadingsLimit.mockResolvedValue(2); // FREE plan limit
+        mockPlanConfigService.getTarotReadingsLimit.mockResolvedValue(2); // FREE plan limit
 
         // Mock usage record showing 1 reading today
         mockUsageLimitRepository.findOne.mockResolvedValue({
@@ -487,7 +488,7 @@ describe('UsageLimitsService', () => {
         };
 
         mockUsersService.findById.mockResolvedValue(freeUser);
-        mockPlanConfigService.getReadingsLimit.mockResolvedValue(2);
+        mockPlanConfigService.getTarotReadingsLimit.mockResolvedValue(2);
 
         // User has 1 reading today (yesterday's 5 readings don't count)
         mockUsageLimitRepository.findOne.mockResolvedValue({
@@ -511,7 +512,7 @@ describe('UsageLimitsService', () => {
         };
 
         mockUsersService.findById.mockResolvedValue(freeUser);
-        mockPlanConfigService.getReadingsLimit.mockResolvedValue(2);
+        mockPlanConfigService.getTarotReadingsLimit.mockResolvedValue(2);
 
         // No record for today (yesterday's record doesn't matter)
         mockUsageLimitRepository.findOne.mockResolvedValue(null);
@@ -528,7 +529,7 @@ describe('UsageLimitsService', () => {
         };
 
         mockUsersService.findById.mockResolvedValue(freeUser);
-        mockPlanConfigService.getReadingsLimit.mockResolvedValue(2);
+        mockPlanConfigService.getTarotReadingsLimit.mockResolvedValue(2);
         mockUsageLimitRepository.findOne.mockResolvedValue(null);
 
         const result = await service.getRemainingUsage(
@@ -548,7 +549,7 @@ describe('UsageLimitsService', () => {
         };
 
         mockUsersService.findById.mockResolvedValue(freeUser);
-        mockPlanConfigService.getReadingsLimit.mockResolvedValue(2);
+        mockPlanConfigService.getTarotReadingsLimit.mockResolvedValue(2);
 
         // User has 2 TAROT_READING today (at limit)
         mockUsageLimitRepository.findOne.mockResolvedValueOnce({
@@ -587,7 +588,7 @@ describe('UsageLimitsService', () => {
 
         // User A has 2 readings (at limit)
         mockUsersService.findById.mockResolvedValueOnce(userA);
-        mockPlanConfigService.getReadingsLimit.mockResolvedValueOnce(2);
+        mockPlanConfigService.getTarotReadingsLimit.mockResolvedValueOnce(2);
         mockUsageLimitRepository.findOne.mockResolvedValueOnce({
           count: 2,
         });
@@ -597,7 +598,7 @@ describe('UsageLimitsService', () => {
 
         // User B has 1 reading (still has quota)
         mockUsersService.findById.mockResolvedValueOnce(userB);
-        mockPlanConfigService.getReadingsLimit.mockResolvedValueOnce(2);
+        mockPlanConfigService.getTarotReadingsLimit.mockResolvedValueOnce(2);
         mockUsageLimitRepository.findOne.mockResolvedValueOnce({
           count: 1,
         });
@@ -615,7 +616,7 @@ describe('UsageLimitsService', () => {
         };
 
         mockUsersService.findById.mockResolvedValue(freeUser);
-        mockPlanConfigService.getReadingsLimit.mockResolvedValue(2);
+        mockPlanConfigService.getTarotReadingsLimit.mockResolvedValue(2);
         mockUsageLimitRepository.findOne.mockResolvedValue({ count: 1 });
 
         await service.checkLimit(1, UsageFeature.TAROT_READING);

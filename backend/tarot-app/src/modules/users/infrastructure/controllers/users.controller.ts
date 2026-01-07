@@ -58,7 +58,35 @@ export class UsersController {
       throw new NotFoundException('Usuario no encontrado');
     }
 
-    // Get daily readings usage stats
+    // Get separate limits for daily cards and tarot readings
+    const dailyCardLimit = await this.planConfigService.getDailyCardLimit(
+      user.plan,
+    );
+    const tarotReadingsLimit =
+      await this.planConfigService.getTarotReadingsLimit(user.plan);
+
+    // Get remaining usage for each feature
+    const dailyCardRemaining = await this.usageLimitsService.getRemainingUsage(
+      userId,
+      UsageFeature.DAILY_CARD,
+    );
+    const tarotReadingsRemaining =
+      await this.usageLimitsService.getRemainingUsage(
+        userId,
+        UsageFeature.TAROT_READING,
+      );
+
+    // Calculate counts from remaining and limits
+    const dailyCardCount =
+      dailyCardLimit === -1
+        ? 0
+        : Math.max(0, dailyCardLimit - dailyCardRemaining);
+    const tarotReadingsCount =
+      tarotReadingsLimit === -1
+        ? 0
+        : Math.max(0, tarotReadingsLimit - tarotReadingsRemaining);
+
+    // Legacy: Total readings count (deprecated, but maintained for backward compatibility)
     const dailyReadingsLimit = await this.planConfigService.getReadingsLimit(
       user.plan,
     );
@@ -67,8 +95,6 @@ export class UsersController {
         userId,
         UsageFeature.TAROT_READING,
       );
-
-    // Calculate count from remaining and limit
     const dailyReadingsCount =
       dailyReadingsLimit === -1
         ? 0
@@ -80,6 +106,13 @@ export class UsersController {
 
     return {
       ...result,
+      // New fields: Separate counters per feature type
+      dailyCardCount,
+      dailyCardLimit: dailyCardLimit === -1 ? 999999 : dailyCardLimit,
+      tarotReadingsCount,
+      tarotReadingsLimit:
+        tarotReadingsLimit === -1 ? 999999 : tarotReadingsLimit,
+      // Deprecated fields: Maintained for backward compatibility
       dailyReadingsCount,
       dailyReadingsLimit:
         dailyReadingsLimit === -1 ? 999999 : dailyReadingsLimit,

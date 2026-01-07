@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { Calendar, History, Crown, Sparkles } from 'lucide-react';
 
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -20,6 +21,7 @@ import {
  * Provides CTAs to view history or upgrade to PREMIUM for more readings.
  *
  * Features:
+ * - Shows specific tarot readings usage (X/Y tiradas usadas)
  * - Clear message about daily limit (1 tarot reading per day for FREE users)
  * - Premium upgrade CTA with benefits
  * - Secondary CTAs: View history and daily card
@@ -27,6 +29,11 @@ import {
  */
 export function ReadingLimitReached() {
   const router = useRouter();
+  const { user } = useAuth();
+
+  // Get specific tarot readings counters
+  const tarotCount = user?.tarotReadingsCount ?? 0;
+  const tarotLimit = user?.tarotReadingsLimit ?? 1;
 
   const handleViewHistory = () => {
     router.push('/historial');
@@ -46,12 +53,15 @@ export function ReadingLimitReached() {
       className="bg-surface shadow-soft animate-fade-in border-primary/20 w-full max-w-lg"
     >
       <CardHeader>
-        <CardTitle className="text-center text-xl">Límite de lecturas alcanzado</CardTitle>
+        <CardTitle className="text-center text-xl">Límite de tiradas alcanzado</CardTitle>
         <CardDescription className="text-center">
-          Ya realizaste tu lectura de tarot gratuita del día. Puedes crear una nueva lectura mañana,
-          o{' '}
+          Ya realizaste{' '}
+          <span className="font-semibold">
+            {tarotCount} de {tarotLimit} {tarotLimit === 1 ? 'tirada' : 'tiradas'}
+          </span>{' '}
+          de tarot hoy. Puedes crear una nueva tirada mañana, o{' '}
           <span className="text-primary font-semibold">
-            actualiza a PREMIUM para más lecturas diarias
+            actualiza a PREMIUM para 3 tiradas diarias
           </span>
           .
         </CardDescription>
