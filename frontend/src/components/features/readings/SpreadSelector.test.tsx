@@ -25,6 +25,11 @@ vi.mock('@/stores/authStore', () => ({
   useAuthStore: vi.fn(),
 }));
 
+// Mock ReadingLimitReached component
+vi.mock('./ReadingLimitReached', () => ({
+  ReadingLimitReached: () => <div data-testid="reading-limit-reached">Límite alcanzado</div>,
+}));
+
 // Mock data
 const mockSpreads = [
   {
@@ -372,30 +377,26 @@ describe('SpreadSelector', () => {
       });
     });
 
-    it('should show limit modal when user has reached daily limit', async () => {
+    it('should show ReadingLimitReached component when FREE user has reached daily limit', () => {
       (useAuthStore as unknown as Mock).mockReturnValue({ user: mockUserAtLimit });
 
       render(<SpreadSelector categoryId="1" questionId="1" customQuestion={null} />);
 
-      const selectButtons = screen.getAllByRole('button', { name: /seleccionar/i });
-      fireEvent.click(selectButtons[0]);
+      // Should show ReadingLimitReached component
+      expect(screen.getByTestId('reading-limit-reached')).toBeInTheDocument();
 
-      await waitFor(() => {
-        expect(screen.getByText(/has alcanzado tu límite/i)).toBeInTheDocument();
-      });
+      // Should NOT show spreads
+      expect(screen.queryByTestId('spreads-grid')).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /seleccionar/i })).not.toBeInTheDocument();
     });
 
-    it('should show upgrade to premium message in limit modal', async () => {
+    it('should show limit message immediately without requiring user to click spread', () => {
       (useAuthStore as unknown as Mock).mockReturnValue({ user: mockUserAtLimit });
 
       render(<SpreadSelector categoryId="1" questionId="1" customQuestion={null} />);
 
-      const selectButtons = screen.getAllByRole('button', { name: /seleccionar/i });
-      fireEvent.click(selectButtons[0]);
-
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: /actualiza a premium/i })).toBeInTheDocument();
-      });
+      // Limit message shows immediately - no need to click anything
+      expect(screen.getByTestId('reading-limit-reached')).toBeInTheDocument();
     });
 
     it('should allow navigation for premium users regardless of count', async () => {
@@ -403,32 +404,15 @@ describe('SpreadSelector', () => {
 
       render(<SpreadSelector categoryId="1" questionId="1" customQuestion={null} />);
 
+      // Should NOT show limit message
+      expect(screen.queryByTestId('reading-limit-reached')).not.toBeInTheDocument();
+
+      // Should show spreads and allow selection
       const selectButtons = screen.getAllByRole('button', { name: /seleccionar/i });
       fireEvent.click(selectButtons[0]);
 
       await waitFor(() => {
         expect(mockPush).toHaveBeenCalled();
-      });
-      expect(screen.queryByText(/has alcanzado tu límite/i)).not.toBeInTheDocument();
-    });
-
-    it('should close limit modal when clicking close button', async () => {
-      (useAuthStore as unknown as Mock).mockReturnValue({ user: mockUserAtLimit });
-
-      render(<SpreadSelector categoryId="1" questionId="1" customQuestion={null} />);
-
-      const selectButtons = screen.getAllByRole('button', { name: /seleccionar/i });
-      fireEvent.click(selectButtons[0]);
-
-      await waitFor(() => {
-        expect(screen.getByText(/has alcanzado tu límite/i)).toBeInTheDocument();
-      });
-
-      const closeButton = screen.getByRole('button', { name: /cerrar|entendido/i });
-      fireEvent.click(closeButton);
-
-      await waitFor(() => {
-        expect(screen.queryByText(/has alcanzado tu límite/i)).not.toBeInTheDocument();
       });
     });
   });

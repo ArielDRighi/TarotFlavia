@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ChevronRight, Clock, Layers, Sparkles } from 'lucide-react';
+import { ChevronRight, Clock, Layers } from 'lucide-react';
 
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { useMyAvailableSpreads } from '@/hooks/api/useReadings';
@@ -12,14 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ErrorDisplay } from '@/components/ui/error-display';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog';
+import { ReadingLimitReached } from '@/components/features/readings/ReadingLimitReached';
 import { cn } from '@/lib/utils';
 import { CONFIG } from '@/lib/constants/config';
 import type { Spread } from '@/types';
@@ -173,15 +166,16 @@ export function SpreadSelector({ categoryId, questionId, customQuestion }: Sprea
     refetch,
   } = useMyAvailableSpreads();
 
-  const [showLimitModal, setShowLimitModal] = useState(false);
+  // ❌ REMOVED: Modal state no longer needed - we show full limit component instead
+  // const [showLimitModal, setShowLimitModal] = useState(false);
 
   const isLoading = isAuthLoading || isSpreadsLoading;
   const hasQuestion = Boolean(questionId || customQuestion);
 
-  // Check if user has reached daily limit
+  // ✅ NEW: Check if user has reached daily limit BEFORE showing spreads
   const hasReachedLimit = useCallback((): boolean => {
     if (!user) return false;
-    if (user.plan === 'premium') return false;
+    if (user.plan === 'premium') return false; // PREMIUM users have higher limits
 
     const dailyCount = user.dailyReadingsCount ?? 0;
     const dailyLimit = user.dailyReadingsLimit ?? CONFIG.DEFAULT_FREE_DAILY_LIMIT;
@@ -189,14 +183,12 @@ export function SpreadSelector({ categoryId, questionId, customQuestion }: Sprea
     return dailyCount >= dailyLimit;
   }, [user]);
 
+  // ✅ NEW: Show limit message immediately if limit reached
+  const showLimitMessage = hasReachedLimit();
+
   const handleSpreadSelect = useCallback(
     (spreadId: number) => {
-      // Check daily limit
-      if (hasReachedLimit()) {
-        setShowLimitModal(true);
-        return;
-      }
-
+      // ❌ REMOVED: No need to check limit here - already checked at component level
       // Build navigation URL
       let url = `/ritual/lectura?spreadId=${spreadId}`;
 
@@ -216,15 +208,25 @@ export function SpreadSelector({ categoryId, questionId, customQuestion }: Sprea
 
       router.push(url);
     },
-    [categoryId, questionId, customQuestion, router, hasReachedLimit, user]
+    [categoryId, questionId, customQuestion, router, user]
   );
 
-  const handleCloseLimitModal = useCallback(() => {
-    setShowLimitModal(false);
-  }, []);
+  // ❌ REMOVED: Modal handler no longer needed
+  // const handleCloseLimitModal = useCallback(() => {
+  //   setShowLimitModal(false);
+  // }, []);
 
   // Check if user is PREMIUM for conditional rendering
   const isPremium = user?.plan === 'premium';
+
+  // ✅ NEW: If limit reached, show limit message instead of spreads
+  if (showLimitMessage && !isLoading) {
+    return (
+      <div className="bg-bg-main flex min-h-screen items-center justify-center p-8">
+        <ReadingLimitReached />
+      </div>
+    );
+  }
 
   return (
     <div className="bg-bg-main min-h-screen p-8">
@@ -287,30 +289,7 @@ export function SpreadSelector({ categoryId, questionId, customQuestion }: Sprea
           </div>
         )}
       </div>
-
-      {/* Daily Limit Modal */}
-      <Dialog open={showLimitModal} onOpenChange={setShowLimitModal}>
-        <DialogContent>
-          <DialogHeader>
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-yellow-100">
-              <Sparkles className="h-6 w-6 text-yellow-600" aria-hidden="true" />
-            </div>
-            <DialogTitle className="text-center">Has alcanzado tu límite</DialogTitle>
-            <DialogDescription className="text-center">
-              Has alcanzado el límite diario de lecturas gratuitas. Actualiza a Premium para
-              lecturas ilimitadas y acceso a preguntas personalizadas.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="flex flex-col gap-2 sm:flex-col">
-            <Button className="w-full" onClick={() => router.push('/perfil/upgrade')}>
-              Actualiza a Premium
-            </Button>
-            <Button variant="outline" className="w-full" onClick={handleCloseLimitModal}>
-              Entendido
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* ❌ REMOVED: Daily Limit Modal - replaced with full ReadingLimitReached component */}
     </div>
   );
 }

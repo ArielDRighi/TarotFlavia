@@ -395,6 +395,18 @@ export function ReadingExperience({
     setError(null);
   }, []);
 
+  // ✅ NEW: Check if user can create another reading today
+  const canCreateNewReading = useCallback((): boolean => {
+    if (!user) return false;
+    if (isPremium) return true; // PREMIUM users can create more readings
+
+    const dailyCount = user.dailyReadingsCount ?? 0;
+    const dailyLimit = user.dailyReadingsLimit ?? 1;
+
+    // User can create a new reading if they haven't reached the limit
+    return dailyCount < dailyLimit;
+  }, [user, isPremium]);
+
   // Render loading/missing spread state
   if (isSpreadsLoading || isQuestionsLoading) {
     return (
@@ -566,10 +578,13 @@ export function ReadingExperience({
               Compartir
             </Button>
 
-            <Button onClick={handleNewReading}>
-              <Plus className="mr-2 h-4 w-4" />
-              Nueva Lectura
-            </Button>
+            {/* ✅ MODIFIED: Only show "Nueva Lectura" button if user can create another reading */}
+            {canCreateNewReading() && (
+              <Button onClick={handleNewReading}>
+                <Plus className="mr-2 h-4 w-4" />
+                Nueva Lectura
+              </Button>
+            )}
           </div>
         </div>
       )}
