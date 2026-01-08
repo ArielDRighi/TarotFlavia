@@ -488,17 +488,20 @@ Refactorizar el componente para usar el nuevo hook de capabilities.
 #### 📊 Resultados
 
 **Tests:**
+
 - ✅ 29 tests passing (100%)
 - ✅ Coverage: 100% statements, 86.48% branches
 - ✅ Todos los casos de uso validados (FREE, PREMIUM, límites)
 
 **Cambios:**
+
 - Eliminada dependencia de `useAuthStore()` para límites
 - Reemplazado por `useUserCapabilities()` (single source of truth)
 - Simplificada lógica de validación de límites
 - Tests actualizados para usar mock de capabilities
 
 **Archivos modificados:**
+
 - `components/features/readings/SpreadSelector.tsx` - Refactorizado
 - `components/features/readings/SpreadSelector.test.tsx` - Tests actualizados
 
