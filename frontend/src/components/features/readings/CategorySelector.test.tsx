@@ -33,25 +33,6 @@ vi.mock('@/hooks/api/useUserCapabilities', () => ({
   useUserCapabilities: vi.fn(),
 }));
 
-// Mock child components to simplify testing
-vi.mock('./UpgradeModal', () => ({
-  default: ({ open, onClose }: { open: boolean; onClose: () => void }) =>
-    open ? (
-      <div data-testid="upgrade-modal">
-        <button onClick={onClose}>Close</button>
-      </div>
-    ) : null,
-}));
-
-vi.mock('./DailyLimitReachedModal', () => ({
-  default: ({ open, onClose }: { open: boolean; onClose: () => void }) =>
-    open ? (
-      <div data-testid="limit-modal">
-        <button onClick={onClose}>Close</button>
-      </div>
-    ) : null,
-}));
-
 vi.mock('@/components/ui/error-display', () => ({
   ErrorDisplay: ({ message, onRetry }: { message: string; onRetry: () => void }) => (
     <div data-testid="error-display">
@@ -106,7 +87,7 @@ function setupMocks({
   isLoadingCategories = false,
   categoriesError = null,
 }: {
-  capabilities?: ReturnType<typeof createMockPremiumCapabilities>;
+  capabilities?: ReturnType<typeof createMockPremiumCapabilities> | undefined;
   categories?: Category[];
   isLoadingCapabilities?: boolean;
   isLoadingCategories?: boolean;
@@ -156,26 +137,26 @@ describe('CategorySelector', () => {
   // ==========================================================================
 
   describe('Access Control', () => {
-    it('should redirect FREE users to spread selector', () => {
+    it('should redirect FREE users to spread selector', async () => {
       const { mockReplace } = setupMocks({
         capabilities: createMockFreeCapabilities(),
       });
 
       render(<CategorySelector />);
 
-      waitFor(() => {
+      await waitFor(() => {
         expect(mockReplace).toHaveBeenCalledWith('/ritual/tirada');
       });
     });
 
-    it('should redirect ANONYMOUS users to spread selector', () => {
+    it('should redirect ANONYMOUS users to spread selector', async () => {
       const { mockReplace } = setupMocks({
         capabilities: createMockAnonymousCapabilities(),
       });
 
       render(<CategorySelector />);
 
-      waitFor(() => {
+      await waitFor(() => {
         expect(mockReplace).toHaveBeenCalledWith('/ritual/tirada');
       });
     });
