@@ -350,12 +350,13 @@ Crear el hook que será la ÚNICA fuente de verdad para capabilities en el front
 
 ---
 
-### **TASK-REFACTOR-005: Refactorizar DailyCardExperience**
+### **TASK-REFACTOR-005: Refactorizar DailyCardExperience** ✅
 
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 6 horas
 **Área:** Frontend
 **Dependencias:** TASK-REFACTOR-004
+**Estado:** ✅ COMPLETADA (8 Enero 2026)
 
 #### 📋 Descripción
 
@@ -363,7 +364,7 @@ Refactorizar el componente para usar el nuevo hook de capabilities, eliminando t
 
 #### ✅ Tareas específicas
 
-- [ ] Reemplazar lógica actual de límites:
+- [x] Reemplazar lógica actual de límites:
 
   ```typescript
   // ❌ ELIMINAR
@@ -376,7 +377,7 @@ Refactorizar el componente para usar el nuevo hook de capabilities, eliminando t
   const canCreateDailyReading = capabilities?.canCreateDailyReading ?? false;
   ```
 
-- [ ] Simplificar lógica de `isAuthenticatedLimitReached`:
+- [x] Simplificar lógica de `isAuthenticatedLimitReached`:
 
   ```typescript
   // ❌ ELIMINAR lógica compleja
@@ -392,8 +393,8 @@ Refactorizar el componente para usar el nuevo hook de capabilities, eliminando t
     capabilities?.isAuthenticated && !capabilities?.canCreateDailyReading && !localReading; // Solo mantener esta excepción para carta recién creada
   ```
 
-- [ ] Eliminar dependencia de `useAuth()` para límites (solo usar para isAuthenticated)
-- [ ] Actualizar mutation `onSuccess` para invalidar capabilities:
+- [x] Eliminar dependencia de `useAuth()` para límites (solo usar para isAuthenticated)
+- [x] Actualizar mutation `onSuccess` para invalidar capabilities:
   ```typescript
   createDailyReading(undefined, {
     onSuccess: (data) => {
@@ -402,8 +403,8 @@ Refactorizar el componente para usar el nuevo hook de capabilities, eliminando t
     },
   });
   ```
-- [ ] Eliminar código muerto y comentarios obsoletos
-- [ ] Actualizar tests del componente
+- [x] Eliminar código muerto y comentarios obsoletos
+- [x] Actualizar tests del componente
 
 #### 🎯 Criterios de aceptación
 
@@ -412,6 +413,24 @@ Refactorizar el componente para usar el nuevo hook de capabilities, eliminando t
 - ✓ Modal aparece inmediatamente al regresar tras consumir límite
 - ✓ NO muestra carta cacheada cuando límite alcanzado
 - ✓ Tests existentes pasan (actualizar si es necesario)
+
+#### 📝 Notas de implementación
+
+- Tests: 35 tests creados/actualizados (26 tests principales + 9 tests anónimos)
+- Metodología TDD aplicada (red → green → refactor)
+- Componente refactorizado de 405 a 378 líneas (~27 líneas eliminadas)
+- Creado factory `capabilities.factory.ts` con 7 funciones helper para tests
+- Eliminado test obsoleto sobre navegación tras error (capabilities previenen creación de carta cuando límite alcanzado)
+- Removidos imports no usados: `useMemo`, `isAxiosError`, `AxiosError`
+- Ciclo de calidad completo:
+  - ✅ `npm run lint` - Sin errores
+  - ✅ `npm run type-check` - Sin errores TypeScript
+  - ✅ `npm run format` - Formateado con Prettier
+  - ✅ `node scripts/validate-architecture.js` - Arquitectura correcta
+  - ✅ `npm run build` - Build exitoso
+  - ✅ `npm test` - 35/35 tests pasando (100% coverage)
+- Branch: `feature/TASK-REFACTOR-005-refactor-daily-card`
+- Commit: `e8c45b5`
 
 ---
 
