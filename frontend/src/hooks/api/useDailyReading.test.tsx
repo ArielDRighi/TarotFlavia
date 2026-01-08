@@ -16,10 +16,12 @@ import {
   dailyReadingQueryKeys,
 } from './useDailyReading';
 import * as dailyReadingApi from '@/lib/api/daily-reading-api';
+import * as invalidateUserDataUtil from '@/lib/utils/invalidate-user-data';
 import type { DailyReading, PaginatedDailyReadings, DailyReadingHistoryItem } from '@/types';
 
 // Mock the API module
 vi.mock('@/lib/api/daily-reading-api');
+vi.mock('@/lib/utils/invalidate-user-data');
 
 // Mock custom toast wrapper
 vi.mock('@/hooks/utils/useToast', () => ({
@@ -149,6 +151,25 @@ describe('useDailyReading hooks', () => {
         expect(dailyReadingApi.getDailyReading).toHaveBeenCalled();
         expect(result.current.isSuccess).toBe(true);
       });
+    });
+
+    it('should call invalidateUserData on successful creation', async () => {
+      vi.mocked(dailyReadingApi.getDailyReading).mockResolvedValueOnce(mockDailyReading);
+      vi.mocked(invalidateUserDataUtil.invalidateUserData).mockResolvedValue(undefined);
+
+      const queryClient = createTestQueryClient();
+      const wrapper = ({ children }: { children: ReactNode }) => (
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      );
+
+      const { result } = renderHook(() => useDailyReading(), { wrapper });
+
+      result.current.mutate();
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      expect(invalidateUserDataUtil.invalidateUserData).toHaveBeenCalledWith(queryClient);
+      expect(invalidateUserDataUtil.invalidateUserData).toHaveBeenCalledTimes(1);
     });
 
     it('should handle mutation error', async () => {

@@ -18,10 +18,18 @@ import {
   useRestoreReading,
 } from './useReadings';
 import * as readingsApi from '@/lib/api/readings-api';
-import type { Reading, ReadingDetail, Category, PredefinedQuestion } from '@/types/reading.types';
+import * as invalidateUserDataUtil from '@/lib/utils/invalidate-user-data';
+import type {
+  Reading,
+  ReadingDetail,
+  Category,
+  PredefinedQuestion,
+  CreateReadingDto,
+} from '@/types/reading.types';
 
 // Mock the API functions
 vi.mock('@/lib/api/readings-api');
+vi.mock('@/lib/utils/invalidate-user-data');
 
 describe('useReadings - Spreads Hooks', () => {
   let queryClient: QueryClient;
@@ -498,6 +506,84 @@ describe('useReadings - Spreads Hooks', () => {
       });
 
       expect(readingsApi.restoreReading).toHaveBeenCalledWith(1);
+    });
+  });
+
+  // =========================================================================
+  // useCreateReading - Mutation invalidation tests (TASK-REFACTOR-008)
+  // =========================================================================
+  describe('useCreateReading - invalidation behavior', () => {
+    it('should call invalidateUserData on successful reading creation', async () => {
+      const mockReading: ReadingDetail = {
+        id: 1,
+        userId: 1,
+        question: 'Test question',
+        spreadId: 1,
+        cards: [],
+        interpretation: 'Test interpretation',
+        createdAt: '2025-01-01T00:00:00Z',
+      };
+
+      vi.mocked(readingsApi.createReading).mockResolvedValue(mockReading);
+      vi.mocked(invalidateUserDataUtil.invalidateUserData).mockResolvedValue(undefined);
+
+      const { result } = renderHook(() => useCreateReading(), { wrapper: Wrapper });
+
+      const createReadingDto: CreateReadingDto = {
+        spreadId: 1,
+        deckId: 1,
+        cardIds: [1, 2, 3],
+        cardPositions: [
+          { cardId: 1, position: 'past', isReversed: false },
+          { cardId: 2, position: 'present', isReversed: false },
+          { cardId: 3, position: 'future', isReversed: false },
+        ],
+      };
+
+      result.current.mutate(createReadingDto);
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      expect(invalidateUserDataUtil.invalidateUserData).toHaveBeenCalledWith(queryClient);
+      expect(invalidateUserDataUtil.invalidateUserData).toHaveBeenCalledTimes(1);
+    });
+
+    it('should invalidate readings queries on success', async () => {
+      const mockReading: ReadingDetail = {
+        id: 1,
+        userId: 1,
+        question: 'Test question',
+        spreadId: 1,
+        cards: [],
+        interpretation: 'Test interpretation',
+        createdAt: '2025-01-01T00:00:00Z',
+      };
+
+      vi.mocked(readingsApi.createReading).mockResolvedValue(mockReading);
+      vi.mocked(invalidateUserDataUtil.invalidateUserData).mockResolvedValue(undefined);
+
+      const invalidateQueriesSpy = vi.spyOn(queryClient, 'invalidateQueries');
+
+      const { result } = renderHook(() => useCreateReading(), { wrapper: Wrapper });
+
+      const createReadingDto: CreateReadingDto = {
+        spreadId: 1,
+        deckId: 1,
+        cardIds: [1, 2, 3],
+        cardPositions: [
+          { cardId: 1, position: 'past', isReversed: false },
+          { cardId: 2, position: 'present', isReversed: false },
+          { cardId: 3, position: 'future', isReversed: false },
+        ],
+      };
+
+      result.current.mutate(createReadingDto);
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+        queryKey: ['readings'],
+      });
     });
   });
 });

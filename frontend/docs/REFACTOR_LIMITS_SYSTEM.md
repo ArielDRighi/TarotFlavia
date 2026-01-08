@@ -571,12 +571,13 @@ Refactorizar el componente para usar capabilities y verificar acceso a categorí
 
 ---
 
-### **TASK-REFACTOR-008: Actualizar Mutations para Invalidar Capabilities**
+### **TASK-REFACTOR-008: Actualizar Mutations para Invalidar Capabilities** ✅
 
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 3 horas
 **Área:** Frontend
 **Dependencias:** TASK-REFACTOR-004
+**Estado:** ✅ COMPLETADA (8 Enero 2026)
 
 #### 📋 Descripción
 
@@ -584,7 +585,7 @@ Asegurar que todas las mutations que afectan límites invaliden las capabilities
 
 #### ✅ Tareas específicas
 
-- [ ] Crear helper reutilizable:
+- [x] Crear helper reutilizable:
   ```typescript
   // frontend/src/lib/utils/invalidate-user-data.ts
   export async function invalidateUserData(queryClient: QueryClient) {
@@ -594,29 +595,54 @@ Asegurar que todas las mutations que afectan límites invaliden las capabilities
     ]);
   }
   ```
-- [ ] Actualizar `useCreateReading` en `useReadings.ts`:
+- [x] Actualizar `useCreateReading` en `useReadings.ts`:
   ```typescript
   onSuccess: async () => {
     await invalidateUserData(queryClient);
     toast.success('Lectura creada exitosamente');
   },
   ```
-- [ ] Actualizar `useDailyReading` en `useDailyReading.ts`:
+- [x] Actualizar `useDailyReading` en `useDailyReading.ts`:
   ```typescript
-  onSuccess: async (data) => {
+  onSuccess: async () => {
     await invalidateUserData(queryClient);
-    return data;
   },
   ```
-- [ ] **ELIMINAR** llamada a `checkAuth()` de authStore (ya no necesario)
-- [ ] Verificar que NO se use `checkAuth()` para sincronizar límites
-- [ ] Actualizar tests de hooks
+  ```
+
+  ```
+- [x] **ELIMINAR** llamada a `checkAuth()` de authStore (ya no necesario)
+- [x] Verificar que NO se use `checkAuth()` para sincronizar límites
+- [x] Actualizar tests de hooks
 
 #### 🎯 Criterios de aceptación
 
 - ✓ Después de crear lectura, capabilities se actualizan
 - ✓ NO se usa `checkAuth()` para sincronizar límites
 - ✓ Tests pasan
+
+#### 📝 Notas de implementación
+
+- Tests: 21 tests total (5 helper + 2 useCreateReading adicionales + 12 useDailyReading + tests originales de useReadings preservados)
+- Metodología TDD aplicada (red → green → refactor)
+- Helper `invalidateUserData` creado con tests de invalidación paralela y manejo de errores
+- Tests creados para verificar que `invalidateUserData` es llamado tras crear lecturas
+- Removido import no usado `userQueryKeys` de `useReadings.ts`
+- `checkAuth()` solo usado en `auth-provider.tsx` para validación de sesión (no sincronización de límites)
+- **Correcciones post-PR review:**
+  - Corregido query key de profile: `['profile']` (no `['user', 'profile']`)
+  - Uso de constantes `capabilitiesQueryKeys` y `userQueryKeys` en lugar de strings hardcodeados
+  - Tests actualizados para validar comportamiento correcto
+  - Tests originales de useReadings preservados y nuevos tests agregados (no reemplazo)
+- Ciclo de calidad completo:
+  - ✅ `npm run lint` - Sin errores
+  - ✅ `npm run type-check` - Sin errores TypeScript
+  - ✅ `npm run format` - Formateado con Prettier
+  - ✅ `node scripts/validate-architecture.js` - Arquitectura correcta
+  - ✅ `npm run build` - Build exitoso
+  - ✅ `npm test` - 21/21 tests nuevos/modificados pasando (100% coverage en archivos de esta tarea)
+- Branch: `feature/TASK-REFACTOR-008-invalidate-capabilities`
+- Commit: (pendiente)
 
 ---
 
