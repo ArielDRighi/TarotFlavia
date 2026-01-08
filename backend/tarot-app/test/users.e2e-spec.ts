@@ -39,8 +39,13 @@ describe('Users (e2e)', () => {
     plan: string;
     roles: string[];
     profilePicture?: string;
+    dailyCardCount: number;
+    dailyCardLimit: number;
+    tarotReadingsCount: number;
+    tarotReadingsLimit: number;
     dailyReadingsCount: number;
     dailyReadingsLimit: number;
+    capabilities?: Record<string, unknown>;
     createdAt: string;
     updatedAt: string;
   }
@@ -152,11 +157,28 @@ describe('Users (e2e)', () => {
       expect(profile.email).toBe('premium@test.com');
       expect(profile.plan).toBe('premium');
 
-      // Validate daily readings statistics for unlimited plan
+      // Validate separate limits (new fields)
+      expect(profile).toHaveProperty('dailyCardCount');
+      expect(profile).toHaveProperty('dailyCardLimit');
+      expect(profile).toHaveProperty('tarotReadingsCount');
+      expect(profile).toHaveProperty('tarotReadingsLimit');
+      expect(profile.dailyCardLimit).toBe(1); // 1 carta del día
+      expect(profile.tarotReadingsLimit).toBe(3); // 3 tiradas de tarot
+
+      // Validate legacy field (deprecated but maintained for backward compatibility)
       expect(profile).toHaveProperty('dailyReadingsCount');
       expect(profile).toHaveProperty('dailyReadingsLimit');
-      expect(profile.dailyReadingsLimit).toBe(999999); // Unlimited represented as 999999
-      expect(profile.dailyReadingsCount).toBe(0); // No count for unlimited plans
+      expect(profile.dailyReadingsLimit).toBe(4); // 1 carta + 3 tiradas = 4 (legacy)
+      expect(typeof profile.dailyReadingsCount).toBe('number'); // Usage count is a number
+      expect(profile.dailyReadingsCount).toBeGreaterThanOrEqual(0); // Non-negative
+
+      // Validate capabilities are included
+      expect(profile).toHaveProperty('capabilities');
+      const capabilities = profile.capabilities as Record<string, unknown>;
+      expect(capabilities.plan).toBe('premium');
+      expect(capabilities.canUseAI).toBe(true);
+      expect(capabilities.canUseCustomQuestions).toBe(true);
+      expect(capabilities.canUseAdvancedSpreads).toBe(true);
     });
 
     it('should return profile for authenticated admin user', async () => {
@@ -652,6 +674,130 @@ describe('Users (e2e)', () => {
       const user = response.body as Record<string, unknown>;
       expect(user).not.toHaveProperty('password');
       expect(user).not.toHaveProperty('refreshToken');
+    });
+  });
+
+  // ============================================
+  // User Capabilities Tests
+  // ============================================
+  describe('GET /users/capabilities', () => {
+    it('should return capabilities for authenticated user', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/api/v1/users/capabilities')
+        .set('Authorization', `Bearer ${freeUserToken}`)
+        .expect(200);
+
+      const capabilities = response.body;
+
+      // Verificar estructura de la respuesta
+      expect(capabilities).toHaveProperty('dailyCard');
+      expect(capabilities).toHaveProperty('tarotReadings');
+      expect(capabilities).toHaveProperty('canCreateDailyReading');
+      expect(capabilities).toHaveProperty('canCreateTarotReading');
+      expect(capabilities).toHaveProperty('canUseAI');
+      expect(capabilities).toHaveProperty('canUseCustomQuestions');
+      expect(capabilities).toHaveProperty('canUseAdvancedSpreads');
+      expect(capabilities).toHaveProperty('plan');
+      expect(capabilities).toHaveProperty('isAuthenticated');
+
+      // Verificar que es un usuario autenticado
+      expect(capabilities.isAuthenticated).toBe(true);
+      expect(capabilities.plan).toBe('free');
+
+      // Verificar estructura de límites
+      expect(capabilities.dailyCard).toHaveProperty('used');
+      expect(capabilities.dailyCard).toHaveProperty('limit');
+      expect(capabilities.dailyCard).toHaveProperty('canUse');
+      expect(capabilities.dailyCard).toHaveProperty('resetAt');
+    });
+
+    it('should return capabilities for anonymous user (no auth)', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/api/v1/users/capabilities')
+        .expect(200);
+
+      const capabilities = response.body;
+
+      // Verificar que es anónimo
+      expect(capabilities.isAuthenticated).toBe(false);
+      expect(capabilities.plan).toBe('anonymous');
+
+      // Anónimos pueden ver carta del día pero no tiradas
+      expect(capabilities.canCreateDailyReading).toBe(true);
+      expect(capabilities.canCreateTarotReading).toBe(false);
+      expect(capabilities.canUseAI).toBe(false);
+    });
+
+    it('should return premium capabilities for premium user', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/api/v1/users/capabilities')
+        .set('Authorization', `Bearer ${premiumUserToken}`)
+        .expect(200);
+
+      const capabilities = response.body;
+
+      expect(capabilities.plan).toBe('premium');
+      expect(capabilities.canUseAI).toBe(true);
+      expect(capabilities.canUseCustomQuestions).toBe(true);
+      expect(capabilities.canUseAdvancedSpreads).toBe(true);
+    });
+
+    it('should work with invalid token (treat as anonymous)', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/api/v1/users/capabilities')
+        .set('Authorization', 'Bearer invalid-token')
+        .expect(200);
+
+      const capabilities = response.body;
+
+      // Token inválido se trata como anónimo
+      expect(capabilities.isAuthenticated).toBe(false);
+      expect(capabilities.plan).toBe('anonymous');
+    });
+  });
+
+  describe('GET /users/profile - Capabilities Integration', () => {
+    it('should include capabilities in profile response', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/api/v1/users/profile')
+        .set('Authorization', `Bearer ${freeUserToken}`)
+        .expect(200);
+
+      const profile = response.body as Record<string, unknown>;
+
+      // Verificar que capabilities está presente
+      expect(profile).toHaveProperty('capabilities');
+
+      const capabilities = profile.capabilities as Record<string, unknown>;
+      expect(capabilities).toHaveProperty('dailyCard');
+      expect(capabilities).toHaveProperty('tarotReadings');
+      expect(capabilities).toHaveProperty('canCreateDailyReading');
+      expect(capabilities).toHaveProperty('plan');
+
+      // Verificar que el plan coincide
+      expect(capabilities.plan).toBe(profile.plan);
+    });
+
+    it('should have consistent capabilities between profile and direct endpoint', async () => {
+      // Obtener capabilities del endpoint dedicado
+      const capabilitiesResponse = await request(app.getHttpServer())
+        .get('/api/v1/users/capabilities')
+        .set('Authorization', `Bearer ${premiumUserToken}`)
+        .expect(200);
+
+      // Obtener profile que incluye capabilities
+      const profileResponse = await request(app.getHttpServer())
+        .get('/api/v1/users/profile')
+        .set('Authorization', `Bearer ${premiumUserToken}`)
+        .expect(200);
+
+      const directCapabilities = capabilitiesResponse.body;
+      const profileCapabilities = (
+        profileResponse.body as Record<string, unknown>
+      ).capabilities;
+
+      // Ambas respuestas deben ser idénticas
+      expect(directCapabilities).toEqual(profileCapabilities);
     });
   });
 });
