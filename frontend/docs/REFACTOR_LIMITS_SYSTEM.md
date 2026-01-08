@@ -255,12 +255,13 @@ Crear nuevo endpoint para obtener capabilities y modificar el endpoint de profil
 
 ---
 
-### **TASK-REFACTOR-004: Crear Hook useUserCapabilities en Frontend**
+### **TASK-REFACTOR-004: Crear Hook useUserCapabilities en Frontend** ✅
 
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 4 horas
 **Área:** Frontend
 **Dependencias:** TASK-REFACTOR-003
+**Estado:** ✅ COMPLETADA (8 Enero 2026)
 
 #### 📋 Descripción
 
@@ -268,8 +269,8 @@ Crear el hook que será la ÚNICA fuente de verdad para capabilities en el front
 
 #### ✅ Tareas específicas
 
-- [ ] Crear `frontend/src/hooks/api/useUserCapabilities.ts`
-- [ ] Definir tipos TypeScript que coincidan con backend DTO:
+- [x] Crear `frontend/src/hooks/api/useUserCapabilities.ts`
+- [x] Definir tipos TypeScript que coincidan con backend DTO:
 
   ```typescript
   export interface FeatureLimit {
@@ -292,7 +293,7 @@ Crear el hook que será la ÚNICA fuente de verdad para capabilities en el front
   }
   ```
 
-- [ ] Implementar hook `useUserCapabilities()`:
+- [x] Implementar hook `useUserCapabilities()`:
 
   ```typescript
   export function useUserCapabilities() {
@@ -311,7 +312,7 @@ Crear el hook que será la ÚNICA fuente de verdad para capabilities en el front
   }
   ```
 
-- [ ] Crear función helper `invalidateCapabilities()`:
+- [x] Crear función helper `invalidateCapabilities()`:
   ```typescript
   export function useInvalidateCapabilities() {
     const queryClient = useQueryClient();
@@ -320,8 +321,8 @@ Crear el hook que será la ÚNICA fuente de verdad para capabilities en el front
     }, [queryClient]);
   }
   ```
-- [ ] Escribir tests unitarios para el hook
-- [ ] Exportar desde `index.ts`
+- [x] Escribir tests unitarios para el hook
+- [x] Exportar desde `index.ts` (no necesario, se importa directamente)
 
 #### 🎯 Criterios de aceptación
 
@@ -329,6 +330,23 @@ Crear el hook que será la ÚNICA fuente de verdad para capabilities en el front
 - ✓ Tipos coinciden con backend DTO
 - ✓ `staleTime: 0` asegura datos frescos
 - ✓ Tests unitarios pasan
+
+#### 📝 Notas de implementación
+
+- Tests: 9 tests unitarios creados (100% coverage)
+- Metodología TDD aplicada (red → green → refactor)
+- Tipos creados en `types/capabilities.types.ts` y exportados desde `types/index.ts`
+- Endpoint agregado a `lib/api/endpoints.ts`
+- Documentación JSDoc completa en el hook
+- Ciclo de calidad completo:
+  - ✅ `npm run lint` - Sin errores
+  - ✅ `npm run type-check` - Sin errores TypeScript
+  - ✅ `npm run format` - Formateado con Prettier
+  - ✅ `node scripts/validate-architecture.js` - Arquitectura correcta
+  - ✅ `npm run build` - Build exitoso
+  - ✅ `npm test` - 9/9 tests pasando, 100% coverage
+- Branch: `feature/TASK-REFACTOR-004-user-capabilities-hook`
+- Commit: `e0f1501`
 
 ---
 
