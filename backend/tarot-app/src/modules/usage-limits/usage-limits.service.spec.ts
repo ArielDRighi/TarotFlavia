@@ -322,6 +322,51 @@ describe('UsageLimitsService', () => {
     });
   });
 
+  describe('getUsage', () => {
+    it('should return 0 when no usage record exists', async () => {
+      mockUsageLimitRepository.findOne.mockResolvedValue(null);
+
+      const result = await service.getUsage(1, UsageFeature.DAILY_CARD);
+
+      expect(result).toBe(0);
+      expect(mockUsageLimitRepository.findOne).toHaveBeenCalledWith({
+        where: {
+          userId: 1,
+          feature: UsageFeature.DAILY_CARD,
+          date: expect.any(String),
+        },
+      });
+    });
+
+    it('should return current count when usage record exists', async () => {
+      mockUsageLimitRepository.findOne.mockResolvedValue({
+        count: 3,
+      });
+
+      const result = await service.getUsage(1, UsageFeature.TAROT_READING);
+
+      expect(result).toBe(3);
+    });
+
+    it('should query for today UTC date', async () => {
+      mockUsageLimitRepository.findOne.mockResolvedValue(null);
+
+      await service.getUsage(1, UsageFeature.DAILY_CARD);
+
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0);
+      const expectedDate = today.toISOString().split('T')[0];
+
+      expect(mockUsageLimitRepository.findOne).toHaveBeenCalledWith({
+        where: {
+          userId: 1,
+          feature: UsageFeature.DAILY_CARD,
+          date: expectedDate,
+        },
+      });
+    });
+  });
+
   describe('getRemainingUsage', () => {
     it('should return correct remaining usage for FREE user', async () => {
       const freeUser: Partial<User> = {

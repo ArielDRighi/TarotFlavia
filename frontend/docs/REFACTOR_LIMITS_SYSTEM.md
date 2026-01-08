@@ -141,12 +141,13 @@ Crear el DTO que define la estructura de capabilities que el backend retornará.
 
 ---
 
-### **TASK-REFACTOR-002: Crear UserCapabilitiesService en Backend**
+### **TASK-REFACTOR-002: Crear UserCapabilitiesService en Backend** ✅
 
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 6 horas
 **Área:** Backend
 **Dependencias:** TASK-REFACTOR-001
+**Estado:** ✅ COMPLETADA (8 Enero 2026)
 
 #### 📋 Descripción
 
@@ -154,63 +155,17 @@ Implementar el servicio que calcula las capabilities del usuario basándose en s
 
 #### ✅ Tareas específicas
 
-- [ ] Crear `backend/tarot-app/src/modules/users/services/user-capabilities.service.ts`
-- [ ] Inyectar dependencias:
+- [x] Crear `backend/tarot-app/src/modules/users/services/user-capabilities.service.ts`
+- [x] Inyectar dependencias:
   - `UsageLimitsService` (para obtener contadores)
   - `PlanConfigService` (para obtener límites del plan)
   - `UsersService` (para datos del usuario)
-- [ ] Implementar método `getCapabilities(userId: number | null): Promise<UserCapabilitiesDto>`:
-
-  ```typescript
-  async getCapabilities(userId: number | null): Promise<UserCapabilitiesDto> {
-    // Si no hay userId, retornar capabilities anónimas
-    if (!userId) {
-      return this.getAnonymousCapabilities();
-    }
-
-    const user = await this.usersService.findById(userId);
-    const planConfig = await this.planConfigService.findByPlanType(user.plan);
-
-    // Obtener uso actual de cada feature
-    const dailyCardUsage = await this.usageLimitsService.getUsage(userId, UsageFeature.DAILY_CARD);
-    const tarotUsage = await this.usageLimitsService.getUsage(userId, UsageFeature.TAROT_READING);
-
-    // Calcular capabilities
-    const dailyCardLimit = planConfig.dailyCardLimit === -1 ? 999999 : planConfig.dailyCardLimit;
-    const tarotLimit = planConfig.tarotReadingsLimit === -1 ? 999999 : planConfig.tarotReadingsLimit;
-
-    return {
-      dailyCard: {
-        used: dailyCardUsage,
-        limit: dailyCardLimit,
-        canUse: dailyCardUsage < dailyCardLimit,
-        resetAt: this.getNextMidnightUTC(),
-      },
-      tarotReadings: {
-        used: tarotUsage,
-        limit: tarotLimit,
-        canUse: tarotUsage < tarotLimit,
-        resetAt: this.getNextMidnightUTC(),
-      },
-      canCreateDailyReading: dailyCardUsage < dailyCardLimit,
-      canCreateTarotReading: tarotUsage < tarotLimit,
-      canUseAI: user.plan === 'premium',
-      canUseCustomQuestions: user.plan === 'premium',
-      canUseAdvancedSpreads: user.plan === 'premium',
-      plan: user.plan,
-      isAuthenticated: true,
-    };
-  }
-  ```
-
-- [ ] Implementar método privado `getAnonymousCapabilities()`:
-  - `canCreateDailyReading`: Verificar por fingerprint (sessionStorage en frontend)
-  - `canCreateTarotReading`: false (anónimos no pueden)
-  - `plan`: 'anonymous'
-  - `isAuthenticated`: false
-- [ ] Implementar método privado `getNextMidnightUTC(): string`
-- [ ] Registrar servicio en `UsersModule`
-- [ ] Escribir tests unitarios para cada caso:
+- [x] Implementar método `getCapabilities(userId: number | null): Promise<UserCapabilitiesDto>`
+- [x] Implementar método privado `getAnonymousCapabilities()`
+- [x] Implementar método privado `getNextMidnightUTC(): string`
+- [x] Registrar servicio en `UsersModule` y exportarlo
+- [x] Agregar método `getUsage()` a `UsageLimitsService`
+- [x] Escribir tests unitarios para cada caso:
   - Usuario anónimo
   - Usuario FREE sin uso
   - Usuario FREE con límite alcanzado
@@ -218,10 +173,19 @@ Implementar el servicio que calcula las capabilities del usuario basándose en s
 
 #### 🎯 Criterios de aceptación
 
-- ✓ Tests unitarios pasan (>90% coverage del servicio)
+- ✓ Tests unitarios pasan (12 tests, 96.96% coverage del servicio)
 - ✓ `canUse` es `false` cuando `used >= limit`
 - ✓ PREMIUM retorna `canUseAI: true`
 - ✓ FREE y ANONYMOUS retornan `canUseAI: false`
+
+#### 📝 Notas de implementación
+
+- Tests: 12 tests unitarios creados (>95% coverage)
+- Metodología TDD aplicada (red → green → refactor)
+- Agregado método `getUsage()` en `UsageLimitsService` con 3 tests adicionales
+- Servicio exportado desde `UsersModule` para uso en otros módulos
+- Branch: `feature/TASK-REFACTOR-002-user-capabilities-service`
+- Commit: `a3f0ad3`
 
 ---
 

@@ -67,6 +67,25 @@ export class UsageLimitsService {
     return currentCount < limit;
   }
 
+  async getUsage(userId: number, feature: UsageFeature): Promise<number> {
+    // Get start of today in UTC (00:00:00 UTC)
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+
+    // Convert to 'YYYY-MM-DD' string for PostgreSQL date type comparison
+    const dateString = today.toISOString().split('T')[0];
+
+    const usageRecord = await this.usageLimitRepository.findOne({
+      where: {
+        userId,
+        feature,
+        date: dateString,
+      },
+    });
+
+    return usageRecord?.count || 0;
+  }
+
   async incrementUsage(
     userId: number,
     feature: UsageFeature,

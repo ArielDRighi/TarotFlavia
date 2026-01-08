@@ -13,6 +13,7 @@ import { UsersController } from './infrastructure/controllers/users.controller';
 
 // Application
 import { UsersOrchestratorService } from './application/services/users-orchestrator.service';
+import { UserCapabilitiesService } from './application/services/user-capabilities.service';
 import { CreateUserUseCase } from './application/use-cases/create-user.use-case';
 import { UpdateUserUseCase } from './application/use-cases/update-user.use-case';
 import { UpdatePasswordUseCase } from './application/use-cases/update-password.use-case';
@@ -51,6 +52,9 @@ import { UsersService } from './users.service';
     // Orchestrator (facade)
     UsersOrchestratorService,
 
+    // Services
+    UserCapabilitiesService,
+
     // Use cases
     CreateUserUseCase,
     UpdateUserUseCase,
@@ -65,6 +69,7 @@ import { UsersService } from './users.service';
   ],
   exports: [
     UsersOrchestratorService,
+    UserCapabilitiesService,
     UsersService, // Mantener para backward compatibility
     USER_REPOSITORY,
     TAROTISTA_REPOSITORY,
