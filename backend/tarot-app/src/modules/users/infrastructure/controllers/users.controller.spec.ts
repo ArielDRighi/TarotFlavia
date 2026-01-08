@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { UsersController } from './users.controller';
 import { UsersOrchestratorService } from '../../application/services/users-orchestrator.service';
+import { UserCapabilitiesService } from '../../application/services/user-capabilities.service';
 import { UsageLimitsService } from '../../../usage-limits/usage-limits.service';
 import { PlanConfigService } from '../../../plan-config/plan-config.service';
 import { UserRole } from '../../../../common/enums/user-role.enum';
@@ -54,6 +55,10 @@ describe('UsersController', () => {
     getTarotReadingsLimit: jest.fn(),
   };
 
+  const mockUserCapabilitiesService = {
+    getCapabilities: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UsersController],
@@ -61,6 +66,10 @@ describe('UsersController', () => {
         {
           provide: UsersOrchestratorService,
           useValue: mockUsersService,
+        },
+        {
+          provide: UserCapabilitiesService,
+          useValue: mockUserCapabilitiesService,
         },
         {
           provide: UsageLimitsService,
