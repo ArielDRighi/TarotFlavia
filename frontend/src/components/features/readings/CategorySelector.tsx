@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Heart,
@@ -12,15 +12,13 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
-import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/api/useReadings';
+import { useUserCapabilities } from '@/hooks/api/useUserCapabilities';
 import { Card, CardContent } from '@/components/ui/card';
 import { ErrorDisplay } from '@/components/ui/error-display';
 import { EmptyState } from '@/components/ui/empty-state';
 import { cn } from '@/lib/utils';
 import type { Category } from '@/types';
-import UpgradeModal from './UpgradeModal';
-import DailyLimitReachedModal from './DailyLimitReachedModal';
 
 /**
  * Icon mapping for categories based on slug
@@ -121,55 +119,59 @@ function CategoryCard({ category, onClick }: CategoryCardProps) {
  * Category Selector Component
  *
  * Displays categories in a responsive grid with icons and hover effects.
- * Handles automatic redirection for FREE users to skip category selection.
+ * Uses capabilities system to control access based on user plan.
  *
- * ✅ EARLY LIMIT VALIDATION:
- * - Checks if user has reached their daily limit BEFORE allowing navigation
- * - Shows appropriate modal: UpgradeModal for FREE, DailyLimitReachedModal for PREMIUM
- * - Prevents navigation through the full flow when limit is already reached
+ * ACCESS CONTROL:
+ * - Only PREMIUM users can access category selection
+ * - FREE and ANONYMOUS users are automatically redirected to /ritual/tirada
  *
- * PLAN-BASED BEHAVIOR:
- * - FREE users: Automatically redirected to /ritual/tirada (no category selection)
- * - PREMIUM users: Select category first, then proceed to questions
+ * REFACTORED:
+ * - Uses useUserCapabilities() as single source of truth (TASK-REFACTOR-007)
+ * - Replaced direct user.plan checks with capabilities.canUseCustomQuestions
+ * - Removed limit validation (handled upstream by capabilities)
  */
 export function CategorySelector() {
-  const { user } = useAuth();
+  const { data: capabilities, isLoading: isLoadingCapabilities } = useUserCapabilities();
   const { data: categories, isLoading: isCategoriesLoading, error, refetch } = useCategories();
   const router = useRouter();
 
-  // Check user's daily limit status
-  const isPremium = user?.plan?.toUpperCase() === 'PREMIUM';
-  const tarotReadingsCount = user?.tarotReadingsCount ?? 0;
-  const tarotReadingsLimit = user?.tarotReadingsLimit ?? (isPremium ? 3 : 1);
-  const hasReachedLimit = tarotReadingsCount >= tarotReadingsLimit;
+  const isLoading = isLoadingCapabilities || isCategoriesLoading;
+  const canUseCustomQuestions = capabilities?.canUseCustomQuestions ?? false;
 
-  // Derive modal state from user and limit status (no effect needed)
-  // This ensures modal shows immediately without setState in effect
-  const modalType = useMemo(() => {
-    if (!user || !hasReachedLimit) return null;
-    return isPremium ? 'limit' : 'upgrade';
-  }, [user, hasReachedLimit, isPremium]);
-
-  // Track if user has manually closed the modal
-  const [isModalDismissed, setIsModalDismissed] = useState(false);
-
-  // Show modal only if derived state says to show it AND user hasn't dismissed it
-  const shouldShowModal = modalType !== null && !isModalDismissed;
-
-  // Redirect FREE users to /ritual/tirada (skip category selection)
+  // Redirect FREE/ANONYMOUS users to spread selector (they can't use categories)
   useEffect(() => {
-    if (user?.plan?.toUpperCase() === 'FREE') {
-      router.push('/ritual/tirada');
+    if (!canUseCustomQuestions && !isLoading) {
+      router.replace('/ritual/tirada');
     }
-  }, [user, router]);
+  }, [canUseCustomQuestions, isLoading, router]);
+
+  // Show loading state while checking capabilities
+  if (isLoading) {
+    return (
+      <div className="bg-bg-main min-h-screen p-8">
+        <div className="mx-auto max-w-4xl">
+          <h1 className="mb-8 text-center font-serif text-3xl md:text-4xl">
+            ¿Qué inquieta tu alma hoy?
+          </h1>
+          <div
+            data-testid="categories-grid"
+            className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
+          >
+            {Array.from({ length: 6 }).map((_, index) => (
+              <SkeletonCategoryCard key={index} />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Redirect happens in useEffect, return null while redirecting
+  if (!canUseCustomQuestions) {
+    return null;
+  }
 
   const handleCategoryClick = (categoryId: number) => {
-    // Double-check limit before navigation (defensive programming)
-    if (hasReachedLimit) {
-      // Don't navigate, modal will show via derived state
-      return;
-    }
-
     router.push(`/ritual/preguntas?categoryId=${categoryId}`);
   };
 
@@ -180,20 +182,8 @@ export function CategorySelector() {
           ¿Qué inquieta tu alma hoy?
         </h1>
 
-        {/* Loading State */}
-        {isCategoriesLoading && (
-          <div
-            data-testid="categories-grid"
-            className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
-          >
-            {Array.from({ length: 6 }).map((_, index) => (
-              <SkeletonCategoryCard key={index} />
-            ))}
-          </div>
-        )}
-
         {/* Error State */}
-        {!isCategoriesLoading && error && (
+        {error && (
           <ErrorDisplay
             message="Error al cargar las categorías. Por favor, intenta de nuevo."
             onRetry={refetch}
@@ -201,7 +191,7 @@ export function CategorySelector() {
         )}
 
         {/* Empty State */}
-        {!isCategoriesLoading && !error && categories?.length === 0 && (
+        {!error && categories?.length === 0 && (
           <EmptyState
             icon={<Star />}
             title="Sin categorías"
@@ -210,7 +200,7 @@ export function CategorySelector() {
         )}
 
         {/* Categories Grid */}
-        {!isCategoriesLoading && !error && categories && categories.length > 0 && (
+        {!error && categories && categories.length > 0 && (
           <div
             data-testid="categories-grid"
             className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
@@ -225,27 +215,6 @@ export function CategorySelector() {
           </div>
         )}
       </div>
-
-      {/* Modals */}
-      <UpgradeModal
-        open={shouldShowModal && modalType === 'upgrade'}
-        onClose={() => {
-          setIsModalDismissed(true);
-          router.push('/');
-        }}
-        reason="limit-reached"
-      />
-
-      <DailyLimitReachedModal
-        open={shouldShowModal && modalType === 'limit'}
-        onClose={() => {
-          setIsModalDismissed(true);
-          router.push('/');
-        }}
-        usedReadings={tarotReadingsCount}
-        totalReadings={tarotReadingsLimit}
-        featureType="tarot-reading"
-      />
     </div>
   );
 }
