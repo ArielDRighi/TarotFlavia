@@ -1,0 +1,899 @@
+# Plan de Refactorización: Sistema de Límites y Capabilities
+
+**Fecha:** 8 Enero 2026
+**Branch sugerido:** `refactor/limits-capabilities-system`
+**Prioridad:** 🔴 CRÍTICA
+**Estimación total:** 5-7 días
+
+---
+
+## Resumen Ejecutivo
+
+Este plan aborda la refactorización completa del sistema de validación de límites que ha causado bugs recurrentes (5+ iteraciones de fixes). El objetivo es crear una arquitectura robusta y mantenible.
+
+### Problema Actual
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  ARQUITECTURA FRÁGIL ACTUAL                                 │
+│                                                             │
+│  Backend: Retorna counts/limits crudos                      │
+│      ↓                                                      │
+│  Frontend: Calcula capabilities en MÚLTIPLES lugares        │
+│      ↓                                                      │
+│  Dual Store: React Query + Zustand (NO sincronizados)       │
+│      ↓                                                      │
+│  Componentes: Leen de diferentes fuentes                    │
+│      ↓                                                      │
+│  RESULTADO: Bugs recurrentes, lógica duplicada, timing      │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Solución Propuesta
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  NUEVA ARQUITECTURA: Backend-Driven Capabilities            │
+│                                                             │
+│  Backend: Retorna capabilities computadas                   │
+│      ↓                                                      │
+│  Frontend: Single Source of Truth (React Query ONLY)        │
+│      ↓                                                      │
+│  Hook único: useUserCapabilities()                          │
+│      ↓                                                      │
+│  Componentes: Leen de UN solo lugar                         │
+│      ↓                                                      │
+│  RESULTADO: Sin lógica duplicada, sin timing issues         │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Modelo de Negocio (Referencia)
+
+> Fuente: `frontend/docs/MODELO_NEGOCIO_DEFINIDO.md`
+
+### Reglas de Límites
+
+| Plan | Carta del Día | Tiradas Tarot | Spreads Disponibles | Interpretación |
+|------|---------------|---------------|---------------------|----------------|
+| ANÓNIMO | 1/día | ❌ NO | ❌ N/A | DB only |
+| FREE | 1/día | 1/día | 1 y 3 cartas | DB only |
+| PREMIUM | 1/día | 3/día | 1, 3, 5, Cruz Celta | IA + DB |
+
+### Regla de Oro
+
+> **"Si reingresa tras consumir límite → Modal inmediato"**
+
+- NO mostrar carta anterior
+- NO permitir interacción
+- Mostrar modal/mensaje de límite alcanzado
+
+---
+
+## Tareas del Plan
+
+---
+
+### **TASK-REFACTOR-001: Crear DTO de Capabilities en Backend**
+
+**Prioridad:** 🔴 CRÍTICA
+**Estimación:** 4 horas
+**Área:** Backend
+**Dependencias:** Ninguna
+
+#### 📋 Descripción
+
+Crear el DTO que define la estructura de capabilities que el backend retornará. Este será el contrato entre backend y frontend.
+
+#### ✅ Tareas específicas
+
+- [ ] Crear archivo `backend/tarot-app/src/modules/users/dtos/user-capabilities.dto.ts`
+- [ ] Definir interface `FeatureLimitDto`:
+  ```typescript
+  export class FeatureLimitDto {
+    used: number;        // Cantidad usada hoy
+    limit: number;       // Límite máximo (999999 si ilimitado)
+    canUse: boolean;     // TRUE si puede usar (used < limit)
+    resetAt: string;     // ISO date cuando se resetea (midnight UTC)
+  }
+  ```
+- [ ] Definir interface `UserCapabilitiesDto`:
+  ```typescript
+  export class UserCapabilitiesDto {
+    // Límites por feature
+    dailyCard: FeatureLimitDto;
+    tarotReadings: FeatureLimitDto;
+
+    // Capabilities booleanas (convenientes)
+    canCreateDailyReading: boolean;
+    canCreateTarotReading: boolean;
+
+    // Features del plan
+    canUseAI: boolean;              // PREMIUM only
+    canUseCustomQuestions: boolean; // PREMIUM only
+    canUseAdvancedSpreads: boolean; // PREMIUM only (5+ cartas)
+
+    // Info del plan
+    plan: 'anonymous' | 'free' | 'premium';
+    isAuthenticated: boolean;
+  }
+  ```
+- [ ] Agregar decoradores Swagger para documentación automática
+- [ ] Exportar desde `index.ts` del módulo
+
+#### 🎯 Criterios de aceptación
+
+- ✓ DTO compilar sin errores TypeScript
+- ✓ Swagger muestra documentación correcta del DTO
+- ✓ Todas las propiedades tienen tipos explícitos
+
+---
+
+### **TASK-REFACTOR-002: Crear UserCapabilitiesService en Backend**
+
+**Prioridad:** 🔴 CRÍTICA
+**Estimación:** 6 horas
+**Área:** Backend
+**Dependencias:** TASK-REFACTOR-001
+
+#### 📋 Descripción
+
+Implementar el servicio que calcula las capabilities del usuario basándose en su plan y uso actual.
+
+#### ✅ Tareas específicas
+
+- [ ] Crear `backend/tarot-app/src/modules/users/services/user-capabilities.service.ts`
+- [ ] Inyectar dependencias:
+  - `UsageLimitsService` (para obtener contadores)
+  - `PlanConfigService` (para obtener límites del plan)
+  - `UsersService` (para datos del usuario)
+- [ ] Implementar método `getCapabilities(userId: number | null): Promise<UserCapabilitiesDto>`:
+  ```typescript
+  async getCapabilities(userId: number | null): Promise<UserCapabilitiesDto> {
+    // Si no hay userId, retornar capabilities anónimas
+    if (!userId) {
+      return this.getAnonymousCapabilities();
+    }
+
+    const user = await this.usersService.findById(userId);
+    const planConfig = await this.planConfigService.findByPlanType(user.plan);
+
+    // Obtener uso actual de cada feature
+    const dailyCardUsage = await this.usageLimitsService.getUsage(userId, UsageFeature.DAILY_CARD);
+    const tarotUsage = await this.usageLimitsService.getUsage(userId, UsageFeature.TAROT_READING);
+
+    // Calcular capabilities
+    const dailyCardLimit = planConfig.dailyCardLimit === -1 ? 999999 : planConfig.dailyCardLimit;
+    const tarotLimit = planConfig.tarotReadingsLimit === -1 ? 999999 : planConfig.tarotReadingsLimit;
+
+    return {
+      dailyCard: {
+        used: dailyCardUsage,
+        limit: dailyCardLimit,
+        canUse: dailyCardUsage < dailyCardLimit,
+        resetAt: this.getNextMidnightUTC(),
+      },
+      tarotReadings: {
+        used: tarotUsage,
+        limit: tarotLimit,
+        canUse: tarotUsage < tarotLimit,
+        resetAt: this.getNextMidnightUTC(),
+      },
+      canCreateDailyReading: dailyCardUsage < dailyCardLimit,
+      canCreateTarotReading: tarotUsage < tarotLimit,
+      canUseAI: user.plan === 'premium',
+      canUseCustomQuestions: user.plan === 'premium',
+      canUseAdvancedSpreads: user.plan === 'premium',
+      plan: user.plan,
+      isAuthenticated: true,
+    };
+  }
+  ```
+- [ ] Implementar método privado `getAnonymousCapabilities()`:
+  - `canCreateDailyReading`: Verificar por fingerprint (sessionStorage en frontend)
+  - `canCreateTarotReading`: false (anónimos no pueden)
+  - `plan`: 'anonymous'
+  - `isAuthenticated`: false
+- [ ] Implementar método privado `getNextMidnightUTC(): string`
+- [ ] Registrar servicio en `UsersModule`
+- [ ] Escribir tests unitarios para cada caso:
+  - Usuario anónimo
+  - Usuario FREE sin uso
+  - Usuario FREE con límite alcanzado
+  - Usuario PREMIUM
+
+#### 🎯 Criterios de aceptación
+
+- ✓ Tests unitarios pasan (>90% coverage del servicio)
+- ✓ `canUse` es `false` cuando `used >= limit`
+- ✓ PREMIUM retorna `canUseAI: true`
+- ✓ FREE y ANONYMOUS retornan `canUseAI: false`
+
+---
+
+### **TASK-REFACTOR-003: Agregar Endpoint de Capabilities al Backend**
+
+**Prioridad:** 🔴 CRÍTICA
+**Estimación:** 3 horas
+**Área:** Backend
+**Dependencias:** TASK-REFACTOR-002
+
+#### 📋 Descripción
+
+Crear nuevo endpoint para obtener capabilities y modificar el endpoint de profile existente.
+
+#### ✅ Tareas específicas
+
+- [ ] Agregar nuevo endpoint `GET /users/capabilities`:
+  ```typescript
+  @Get('capabilities')
+  @UseGuards(OptionalJwtAuthGuard) // Permite llamadas sin auth
+  async getCapabilities(@CurrentUser() user?: User): Promise<UserCapabilitiesDto> {
+    return this.userCapabilitiesService.getCapabilities(user?.id || null);
+  }
+  ```
+- [ ] Crear `OptionalJwtAuthGuard` que NO falla si no hay token (para anónimos)
+- [ ] Modificar endpoint `GET /users/profile` para incluir capabilities:
+  ```typescript
+  @Get('profile')
+  @UseGuards(JwtAuthGuard)
+  async getProfile(@CurrentUser() user: User): Promise<UserProfileWithCapabilitiesDto> {
+    const profile = await this.usersService.getProfile(user.id);
+    const capabilities = await this.userCapabilitiesService.getCapabilities(user.id);
+
+    return {
+      ...profile,
+      capabilities, // Nuevo campo
+    };
+  }
+  ```
+- [ ] Documentar endpoints con Swagger
+- [ ] Agregar tests de integración:
+  - GET /users/capabilities sin auth → retorna capabilities anónimas
+  - GET /users/capabilities con auth → retorna capabilities del usuario
+  - GET /users/profile → incluye capabilities
+
+#### 🎯 Criterios de aceptación
+
+- ✓ Endpoint `/users/capabilities` funciona sin autenticación
+- ✓ Endpoint `/users/profile` incluye campo `capabilities`
+- ✓ Swagger documenta ambos endpoints
+- ✓ Tests de integración pasan
+
+---
+
+### **TASK-REFACTOR-004: Crear Hook useUserCapabilities en Frontend**
+
+**Prioridad:** 🔴 CRÍTICA
+**Estimación:** 4 horas
+**Área:** Frontend
+**Dependencias:** TASK-REFACTOR-003
+
+#### 📋 Descripción
+
+Crear el hook que será la ÚNICA fuente de verdad para capabilities en el frontend.
+
+#### ✅ Tareas específicas
+
+- [ ] Crear `frontend/src/hooks/api/useUserCapabilities.ts`
+- [ ] Definir tipos TypeScript que coincidan con backend DTO:
+  ```typescript
+  export interface FeatureLimit {
+    used: number;
+    limit: number;
+    canUse: boolean;
+    resetAt: string;
+  }
+
+  export interface UserCapabilities {
+    dailyCard: FeatureLimit;
+    tarotReadings: FeatureLimit;
+    canCreateDailyReading: boolean;
+    canCreateTarotReading: boolean;
+    canUseAI: boolean;
+    canUseCustomQuestions: boolean;
+    canUseAdvancedSpreads: boolean;
+    plan: 'anonymous' | 'free' | 'premium';
+    isAuthenticated: boolean;
+  }
+  ```
+- [ ] Implementar hook `useUserCapabilities()`:
+  ```typescript
+  export function useUserCapabilities() {
+    const { isAuthenticated } = useAuth();
+
+    return useQuery<UserCapabilities>({
+      queryKey: ['user', 'capabilities'],
+      queryFn: async () => {
+        const response = await apiClient.get('/users/capabilities');
+        return response.data;
+      },
+      staleTime: 0, // Siempre revalidar
+      refetchOnWindowFocus: true,
+      refetchOnMount: true,
+    });
+  }
+  ```
+- [ ] Crear función helper `invalidateCapabilities()`:
+  ```typescript
+  export function useInvalidateCapabilities() {
+    const queryClient = useQueryClient();
+    return useCallback(() => {
+      queryClient.invalidateQueries({ queryKey: ['user', 'capabilities'] });
+    }, [queryClient]);
+  }
+  ```
+- [ ] Escribir tests unitarios para el hook
+- [ ] Exportar desde `index.ts`
+
+#### 🎯 Criterios de aceptación
+
+- ✓ Hook compila sin errores TypeScript
+- ✓ Tipos coinciden con backend DTO
+- ✓ `staleTime: 0` asegura datos frescos
+- ✓ Tests unitarios pasan
+
+---
+
+### **TASK-REFACTOR-005: Refactorizar DailyCardExperience**
+
+**Prioridad:** 🔴 CRÍTICA
+**Estimación:** 6 horas
+**Área:** Frontend
+**Dependencias:** TASK-REFACTOR-004
+
+#### 📋 Descripción
+
+Refactorizar el componente para usar el nuevo hook de capabilities, eliminando toda la lógica duplicada de validación de límites.
+
+#### ✅ Tareas específicas
+
+- [ ] Reemplazar lógica actual de límites:
+  ```typescript
+  // ❌ ELIMINAR
+  const dailyCardCount = user?.dailyCardCount ?? 0;
+  const dailyCardLimit = user?.dailyCardLimit ?? 1;
+  const hasReachedDailyCardLimit = isAuthenticated && dailyCardCount >= dailyCardLimit;
+
+  // ✅ NUEVO
+  const { data: capabilities, isLoading: isLoadingCapabilities } = useUserCapabilities();
+  const canCreateDailyReading = capabilities?.canCreateDailyReading ?? false;
+  ```
+- [ ] Simplificar lógica de `isAuthenticatedLimitReached`:
+  ```typescript
+  // ❌ ELIMINAR lógica compleja
+  const isAuthenticatedLimitReached =
+    isAuthenticated &&
+    hasReachedDailyCardLimit &&
+    !localReading &&
+    !isCreatingReading &&
+    !isRevealing;
+
+  // ✅ NUEVO: Simple y directo
+  const showLimitReached =
+    capabilities?.isAuthenticated &&
+    !capabilities?.canCreateDailyReading &&
+    !localReading; // Solo mantener esta excepción para carta recién creada
+  ```
+- [ ] Eliminar dependencia de `useAuth()` para límites (solo usar para isAuthenticated)
+- [ ] Actualizar mutation `onSuccess` para invalidar capabilities:
+  ```typescript
+  createDailyReading(undefined, {
+    onSuccess: (data) => {
+      setLocalReading(data);
+      invalidateCapabilities(); // Invalida React Query
+    },
+  });
+  ```
+- [ ] Eliminar código muerto y comentarios obsoletos
+- [ ] Actualizar tests del componente
+
+#### 🎯 Criterios de aceptación
+
+- ✓ Componente NO lee `dailyCardCount`/`dailyCardLimit` de authStore
+- ✓ Usa `useUserCapabilities()` como única fuente
+- ✓ Modal aparece inmediatamente al regresar tras consumir límite
+- ✓ NO muestra carta cacheada cuando límite alcanzado
+- ✓ Tests existentes pasan (actualizar si es necesario)
+
+---
+
+### **TASK-REFACTOR-006: Refactorizar SpreadSelector**
+
+**Prioridad:** 🔴 CRÍTICA
+**Estimación:** 4 horas
+**Área:** Frontend
+**Dependencias:** TASK-REFACTOR-004
+
+#### 📋 Descripción
+
+Refactorizar el componente para usar el nuevo hook de capabilities.
+
+#### ✅ Tareas específicas
+
+- [ ] Reemplazar lógica actual de límites:
+  ```typescript
+  // ❌ ELIMINAR
+  const { user } = useAuthStore();
+  const hasReachedLimit = useCallback((): boolean => {
+    if (!user) return false;
+    if (user.plan === 'premium') return false;
+    const tarotCount = user.tarotReadingsCount ?? 0;
+    const tarotLimit = user.tarotReadingsLimit ?? 1;
+    return tarotCount >= tarotLimit;
+  }, [user]);
+
+  // ✅ NUEVO
+  const { data: capabilities, isLoading: isLoadingCapabilities } = useUserCapabilities();
+  const canCreateTarotReading = capabilities?.canCreateTarotReading ?? false;
+  ```
+- [ ] Simplificar condición de mostrar límite:
+  ```typescript
+  // ✅ SIMPLE
+  if (!canCreateTarotReading && !isLoadingCapabilities) {
+    return <ReadingLimitReached />;
+  }
+  ```
+- [ ] Eliminar dependencia directa de `useAuthStore()` para límites
+- [ ] Usar `capabilities.plan` para lógica de PREMIUM
+- [ ] Actualizar tests del componente
+
+#### 🎯 Criterios de aceptación
+
+- ✓ Componente NO lee de `authStore` para límites
+- ✓ Modal aparece inmediatamente al regresar tras consumir límite
+- ✓ PREMIUM puede crear hasta 3 tiradas/día
+- ✓ FREE ve límite después de 1 tirada
+- ✓ Tests pasan
+
+---
+
+### **TASK-REFACTOR-007: Refactorizar CategorySelector**
+
+**Prioridad:** 🟡 MEDIA
+**Estimación:** 2 horas
+**Área:** Frontend
+**Dependencias:** TASK-REFACTOR-004
+
+#### 📋 Descripción
+
+Refactorizar el componente para usar capabilities y verificar acceso a categorías.
+
+#### ✅ Tareas específicas
+
+- [ ] Reemplazar lógica de verificación de PREMIUM:
+  ```typescript
+  // ❌ ELIMINAR
+  const isPremium = user?.plan === 'premium';
+
+  // ✅ NUEVO
+  const { data: capabilities } = useUserCapabilities();
+  const canUseCustomQuestions = capabilities?.canUseCustomQuestions ?? false;
+  ```
+- [ ] Redirigir usuarios FREE/ANÓNIMOS que intenten acceder:
+  ```typescript
+  if (!canUseCustomQuestions && !isLoading) {
+    // Redirigir a spread selector (FREE no selecciona categorías)
+    router.replace('/ritual/tirada');
+    return null;
+  }
+  ```
+- [ ] Actualizar tests
+
+#### 🎯 Criterios de aceptación
+
+- ✓ Solo PREMIUM puede acceder a categorías
+- ✓ FREE es redirigido automáticamente
+- ✓ Tests pasan
+
+---
+
+### **TASK-REFACTOR-008: Actualizar Mutations para Invalidar Capabilities**
+
+**Prioridad:** 🔴 CRÍTICA
+**Estimación:** 3 horas
+**Área:** Frontend
+**Dependencias:** TASK-REFACTOR-004
+
+#### 📋 Descripción
+
+Asegurar que todas las mutations que afectan límites invaliden las capabilities.
+
+#### ✅ Tareas específicas
+
+- [ ] Crear helper reutilizable:
+  ```typescript
+  // frontend/src/lib/utils/invalidate-user-data.ts
+  export async function invalidateUserData(queryClient: QueryClient) {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['user', 'capabilities'] }),
+      queryClient.invalidateQueries({ queryKey: ['user', 'profile'] }),
+    ]);
+  }
+  ```
+- [ ] Actualizar `useCreateReading` en `useReadings.ts`:
+  ```typescript
+  onSuccess: async () => {
+    await invalidateUserData(queryClient);
+    toast.success('Lectura creada exitosamente');
+  },
+  ```
+- [ ] Actualizar `useDailyReading` en `useDailyReading.ts`:
+  ```typescript
+  onSuccess: async (data) => {
+    await invalidateUserData(queryClient);
+    return data;
+  },
+  ```
+- [ ] **ELIMINAR** llamada a `checkAuth()` de authStore (ya no necesario)
+- [ ] Verificar que NO se use `checkAuth()` para sincronizar límites
+- [ ] Actualizar tests de hooks
+
+#### 🎯 Criterios de aceptación
+
+- ✓ Después de crear lectura, capabilities se actualizan
+- ✓ NO se usa `checkAuth()` para sincronizar límites
+- ✓ Tests pasan
+
+---
+
+### **TASK-REFACTOR-009: Limpiar AuthStore**
+
+**Prioridad:** 🟡 MEDIA
+**Estimación:** 3 horas
+**Área:** Frontend
+**Dependencias:** TASK-REFACTOR-005, TASK-REFACTOR-006, TASK-REFACTOR-007, TASK-REFACTOR-008
+
+#### 📋 Descripción
+
+Eliminar campos de límites del authStore ya que ahora vienen de capabilities.
+
+#### ✅ Tareas específicas
+
+- [ ] Modificar tipo `AuthUser` para eliminar campos de límites:
+  ```typescript
+  // ❌ ELIMINAR de AuthUser
+  dailyCardCount?: number;
+  dailyCardLimit?: number;
+  tarotReadingsCount?: number;
+  tarotReadingsLimit?: number;
+  dailyReadingsCount?: number;  // Legacy
+  dailyReadingsLimit?: number;  // Legacy
+  ```
+- [ ] Mantener solo campos esenciales en AuthUser:
+  ```typescript
+  interface AuthUser {
+    id: number;
+    email: string;
+    name: string;
+    profilePicture: string | null;
+    plan: 'anonymous' | 'free' | 'premium';
+    // ... otros campos de perfil, NO de límites
+  }
+  ```
+- [ ] Verificar que NINGÚN componente lea límites de `useAuth()` o `useAuthStore()`
+- [ ] Actualizar `checkAuth()` para NO fetchear campos de límites
+- [ ] Actualizar tests
+
+#### 🎯 Criterios de aceptación
+
+- ✓ AuthStore NO contiene campos de límites
+- ✓ Grep de `dailyCardCount`, `tarotReadingsCount` NO encuentra usos en componentes
+- ✓ Aplicación funciona correctamente
+- ✓ Tests pasan
+
+---
+
+### **TASK-REFACTOR-010: Actualizar Backend Profile Response**
+
+**Prioridad:** 🟡 MEDIA
+**Estimación:** 2 horas
+**Área:** Backend
+**Dependencias:** TASK-REFACTOR-003
+
+#### 📋 Descripción
+
+Mantener backward compatibility pero marcar campos como deprecated.
+
+#### ✅ Tareas específicas
+
+- [ ] En `users.controller.ts`, agregar campo `capabilities` al response
+- [ ] Marcar campos legacy como `@Deprecated()`:
+  ```typescript
+  /**
+   * @deprecated Use capabilities.dailyCard.used instead
+   */
+  dailyCardCount: number;
+
+  /**
+   * @deprecated Use capabilities.dailyCard.limit instead
+   */
+  dailyCardLimit: number;
+  ```
+- [ ] Documentar en Swagger que campos son deprecated
+- [ ] Agregar header de deprecation warning (opcional)
+- [ ] Actualizar tests
+
+#### 🎯 Criterios de aceptación
+
+- ✓ Response incluye `capabilities` y campos legacy (backward compatible)
+- ✓ Swagger documenta deprecation
+- ✓ Tests pasan
+
+---
+
+### **TASK-REFACTOR-011: Crear Tests E2E de Límites**
+
+**Prioridad:** 🟡 MEDIA
+**Estimación:** 6 horas
+**Área:** Frontend (E2E)
+**Dependencias:** Todas las anteriores
+
+#### 📋 Descripción
+
+Crear suite completa de tests E2E que validen el flujo de límites para prevenir regresiones.
+
+#### ✅ Tareas específicas
+
+- [ ] Crear `frontend/tests/e2e/limits-validation.spec.ts`
+- [ ] Implementar helper para reset de límites:
+  ```typescript
+  async function resetUserLimits(email: string) {
+    // Llamar endpoint de admin o directamente a DB
+  }
+  ```
+- [ ] Tests para ANÓNIMO:
+  - [ ] Primera carta del día: muestra carta boca abajo
+  - [ ] Click revela carta con significado DB
+  - [ ] Segunda visita: muestra modal "Regístrate"
+- [ ] Tests para FREE:
+  - [ ] Carta del día: primera vez OK, segunda vez modal
+  - [ ] Tirada tarot: primera vez OK, segunda vez modal
+  - [ ] Límites son independientes (puede usar carta + tirada)
+- [ ] Tests para PREMIUM:
+  - [ ] Carta del día: 1/día igual que FREE
+  - [ ] Tirada tarot: 3/día
+  - [ ] Interpretación incluye IA
+- [ ] Test de logout desde modal:
+  - [ ] Redirige a home correctamente
+- [ ] Agregar a CI/CD pipeline
+
+#### 🎯 Criterios de aceptación
+
+- ✓ Suite completa ejecuta sin errores
+- ✓ Todos los tests pasan
+- ✓ CI/CD ejecuta tests en cada PR
+- ✓ Documentado cómo correr tests localmente
+
+---
+
+### **TASK-REFACTOR-012: Limpieza de Código Obsoleto**
+
+**Prioridad:** 🔴 CRÍTICA
+**Estimación:** 4 horas
+**Área:** Frontend + Backend
+**Dependencias:** TASK-REFACTOR-005, TASK-REFACTOR-006, TASK-REFACTOR-007, TASK-REFACTOR-008, TASK-REFACTOR-009
+
+#### 📋 Descripción
+
+Eliminar todo código, archivos, funciones, tipos y comentarios obsoletos que quedaron tras la refactorización. El objetivo es tener un código limpio, sin dead code, y fácil de mantener.
+
+#### ✅ Tareas específicas
+
+**Frontend - Tipos y Interfaces:**
+- [ ] Eliminar de `types/auth.ts` o `types/user.ts`:
+  - `dailyCardCount`, `dailyCardLimit`
+  - `tarotReadingsCount`, `tarotReadingsLimit`
+  - `dailyReadingsCount`, `dailyReadingsLimit` (legacy)
+  - Cualquier tipo `*LimitResponse` obsoleto
+- [ ] Buscar y eliminar interfaces/tipos no usados con: `npx ts-prune`
+- [ ] Verificar que no haya tipos duplicados entre archivos
+
+**Frontend - Hooks obsoletos:**
+- [ ] Revisar `hooks/api/useReadings.ts`:
+  - Eliminar funciones helper de cálculo de límites si existen
+  - Eliminar imports no usados
+- [ ] Revisar `hooks/api/useDailyReading.ts`:
+  - Eliminar lógica de límites movida a capabilities
+- [ ] Eliminar hooks completos si quedaron sin uso
+- [ ] Buscar hooks no usados con: `grep -r "export function use" --include="*.ts" | xargs -I {} sh -c 'grep -rL "$(basename {} .ts)" --include="*.tsx" --include="*.ts" src/'`
+
+**Frontend - Componentes:**
+- [ ] En `DailyCardExperience.tsx`:
+  - Eliminar imports no usados (`useAuthStore` si ya no se usa)
+  - Eliminar variables comentadas/dead code
+  - Eliminar comentarios obsoletos tipo `// ❌ REMOVED:` o `// ANTES:`
+- [ ] En `SpreadSelector.tsx`:
+  - Mismo proceso de limpieza
+- [ ] En `CategorySelector.tsx`:
+  - Mismo proceso de limpieza
+- [ ] Buscar componentes no usados y eliminar archivos completos
+
+**Frontend - Stores:**
+- [ ] En `authStore.ts`:
+  - Eliminar campos de user relacionados a límites
+  - Eliminar métodos helper de límites si existen
+  - Simplificar `checkAuth()` si ya no necesita fetchear límites
+- [ ] Verificar que no haya otros stores con lógica de límites
+
+**Frontend - Utilidades:**
+- [ ] Revisar `lib/utils/`:
+  - Eliminar funciones de cálculo de límites
+  - Eliminar helpers de formateo de límites no usados
+- [ ] Revisar `lib/constants/`:
+  - Eliminar constantes de límites hardcodeadas (FREE_LIMIT, etc.)
+
+**Frontend - Tests:**
+- [ ] Eliminar tests de funciones/componentes eliminados
+- [ ] Actualizar mocks que incluían campos de límites
+- [ ] Eliminar fixtures/data de prueba obsoletos
+
+**Backend - DTOs:**
+- [ ] Marcar DTOs legacy como `@Deprecated` con fecha de eliminación
+- [ ] NO eliminar aún (backward compatibility) pero documentar
+
+**Backend - Código:**
+- [ ] Revisar si hay funciones duplicadas de cálculo de límites
+- [ ] Eliminar código comentado
+- [ ] Limpiar imports no usados
+
+**Verificación final:**
+- [ ] Ejecutar `npm run lint` - 0 errores
+- [ ] Ejecutar `npm run type-check` - 0 errores
+- [ ] Ejecutar `npx ts-prune` - revisar exports no usados
+- [ ] Ejecutar `npm run build` - build exitoso
+- [ ] Buscar TODOs/FIXMEs obsoletos: `grep -r "TODO\|FIXME\|HACK" src/`
+- [ ] Buscar console.logs olvidados: `grep -r "console.log" src/`
+- [ ] Verificar que no hay archivos `.bak`, `.old`, `.copy`
+
+#### 🎯 Criterios de aceptación
+
+- ✓ 0 imports no usados en todo el proyecto
+- ✓ 0 variables/funciones no usadas
+- ✓ 0 tipos/interfaces huérfanos
+- ✓ 0 archivos de componentes no usados
+- ✓ 0 comentarios de código "antes/después" o código comentado
+- ✓ `npm run lint` pasa sin warnings
+- ✓ `npm run build` exitoso
+- ✓ Bundle size igual o menor al anterior
+
+---
+
+### **TASK-REFACTOR-013: Documentación Final**
+
+**Prioridad:** 🟢 BAJA
+**Estimación:** 2 horas
+**Área:** Documentación
+**Dependencias:** TASK-REFACTOR-012
+
+#### 📋 Descripción
+
+Actualizar documentación para reflejar la nueva arquitectura.
+
+#### ✅ Tareas específicas
+
+- [ ] Actualizar `BUG_LIMITS_VALIDATION_HISTORY.md`:
+  - Agregar sección "Solución Definitiva Implementada"
+  - Marcar bugs anteriores como resueltos
+- [ ] Crear `LIMITS_ARCHITECTURE.md` con:
+  - Diagrama de flujo de capabilities
+  - Cómo agregar nuevo límite/feature
+  - Checklist para nuevos desarrolladores
+- [ ] Actualizar `FRONTEND_BACKLOG.md` si es necesario
+- [ ] Agregar comentarios JSDoc a hooks y componentes clave
+
+#### 🎯 Criterios de aceptación
+
+- ✓ Nuevo desarrollador puede entender el sistema leyendo docs
+- ✓ Diagrama de arquitectura está actualizado
+- ✓ No hay docs contradictorios
+
+---
+
+## Orden de Ejecución Recomendado
+
+```
+Semana 1 (Backend):
+├── TASK-REFACTOR-001 (DTO)          → 4h
+├── TASK-REFACTOR-002 (Service)      → 6h
+├── TASK-REFACTOR-003 (Endpoint)     → 3h
+└── TASK-REFACTOR-010 (Profile)      → 2h
+                                     ─────
+                                      15h (~2 días)
+
+Semana 1-2 (Frontend Core):
+├── TASK-REFACTOR-004 (Hook)         → 4h
+├── TASK-REFACTOR-008 (Mutations)    → 3h
+└── TASK-REFACTOR-009 (AuthStore)    → 3h
+                                     ─────
+                                      10h (~1.5 días)
+
+Semana 2 (Frontend Components):
+├── TASK-REFACTOR-005 (DailyCard)    → 6h
+├── TASK-REFACTOR-006 (Spread)       → 4h
+└── TASK-REFACTOR-007 (Category)     → 2h
+                                     ─────
+                                      12h (~1.5 días)
+
+Semana 2 (Finalización):
+├── TASK-REFACTOR-011 (E2E Tests)    → 6h
+├── TASK-REFACTOR-012 (Limpieza)     → 4h
+└── TASK-REFACTOR-013 (Docs)         → 2h
+                                     ─────
+                                      12h (~1.5 días)
+
+TOTAL: ~49h (~6-7 días de trabajo)
+```
+
+---
+
+## Diagrama de Dependencias
+
+```
+TASK-001 (DTO)
+    ↓
+TASK-002 (Service)
+    ↓
+TASK-003 (Endpoint) ────────────────┐
+    ↓                               ↓
+TASK-010 (Profile)            TASK-004 (Hook)
+                                    ↓
+                    ┌───────────────┼───────────────┐
+                    ↓               ↓               ↓
+              TASK-005        TASK-006        TASK-007
+              (DailyCard)     (Spread)        (Category)
+                    ↓               ↓               ↓
+                    └───────────────┼───────────────┘
+                                    ↓
+                              TASK-008 (Mutations)
+                                    ↓
+                              TASK-009 (AuthStore)
+                                    ↓
+                              TASK-011 (E2E Tests)
+                                    ↓
+                              TASK-012 (Limpieza) ← CÓDIGO EJEMPLAR
+                                    ↓
+                              TASK-013 (Docs)
+```
+
+---
+
+## Riesgos y Mitigaciones
+
+| Riesgo | Probabilidad | Impacto | Mitigación |
+|--------|--------------|---------|------------|
+| Breaking changes en API | Media | Alto | Mantener campos legacy con deprecation |
+| Tests existentes fallan | Alta | Medio | Actualizar tests junto con cada tarea |
+| Regresión en flujo anónimo | Media | Alto | E2E tests específicos para anónimos |
+| Timing issues persisten | Baja | Alto | `staleTime: 0` + invalidación explícita |
+
+---
+
+## Checklist Pre-Merge Final
+
+- [ ] Todos los tests unitarios pasan
+- [ ] Todos los tests E2E pasan
+- [ ] Build de producción exitoso
+- [ ] No hay warnings de TypeScript
+- [ ] Swagger está actualizado
+- [ ] Documentación actualizada
+- [ ] Code review aprobado
+- [ ] **Código limpio (TASK-012):**
+  - [ ] 0 imports no usados
+  - [ ] 0 dead code / código comentado
+  - [ ] 0 archivos huérfanos
+  - [ ] `npx ts-prune` sin exports no usados
+  - [ ] Bundle size igual o menor
+- [ ] QA manual completado:
+  - [ ] ANÓNIMO: carta del día funciona
+  - [ ] FREE: carta + tirada con límites correctos
+  - [ ] PREMIUM: 3 tiradas + IA funciona
+  - [ ] Logout redirige correctamente
+  - [ ] Modal aparece al regresar tras límite
+
+---
+
+**Autor:** AI Assistant
+**Fecha:** 8 Enero 2026
+**Última actualización:** 8 Enero 2026

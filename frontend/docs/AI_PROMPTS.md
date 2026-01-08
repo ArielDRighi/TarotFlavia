@@ -41,6 +41,10 @@ ANTES de escribir cualquier código, lee estos documentos:
    - Componentes UI base
    - Guías visuales de pantallas
 
+4. **Si la tarea involucra límites, capabilities o planes de usuario:**
+   - `frontend/docs/MODELO_NEGOCIO_DEFINIDO.md` - Reglas de negocio ANÓNIMO/FREE/PREMIUM
+   - `frontend/docs/REFACTOR_LIMITS_SYSTEM.md` - Arquitectura del sistema de capabilities
+
 **Arquitectura y Patrones (CRÍTICO):**
 
 - **Feature-Based:** El código está organizado por dominio (`components/features/readings/`, `components/features/auth/`, etc). Crea archivos en el feature correspondiente.
@@ -312,6 +316,13 @@ Fixes #[issue-number] (si aplica)
 Tengo el siguiente feedback del PR para la rama feature/TASK-X.Y.
 
 Feedback Recibido: [Pega aquí el feedback completo del revisor]
+
+**Lectura Obligatoria de Contexto:**
+
+Si el PR involucra límites, capabilities o planes de usuario, lee antes de responder:
+
+1. `frontend/docs/MODELO_NEGOCIO_DEFINIDO.md` - Reglas de negocio (fuente de verdad)
+2. `frontend/docs/REFACTOR_LIMITS_SYSTEM.md` - Arquitectura de capabilities
 
 **Tu Tarea (Análisis Senior):**
 
