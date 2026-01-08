@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { SpreadSelector } from './SpreadSelector';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { useMyAvailableSpreads } from '@/hooks/api/useReadings';
-import { useAuthStore } from '@/stores/authStore';
+import { useUserCapabilities } from '@/hooks/api/useUserCapabilities';
 
 // Mock modules
 vi.mock('next/navigation', () => ({
@@ -21,8 +21,8 @@ vi.mock('@/hooks/api/useReadings', () => ({
   useMyAvailableSpreads: vi.fn(),
 }));
 
-vi.mock('@/stores/authStore', () => ({
-  useAuthStore: vi.fn(),
+vi.mock('@/hooks/api/useUserCapabilities', () => ({
+  useUserCapabilities: vi.fn(),
 }));
 
 // Mock ReadingLimitReached component
@@ -80,52 +80,43 @@ const mockSpreads = [
   },
 ];
 
-const mockUserFree = {
-  id: 1,
-  email: 'test@test.com',
-  name: 'Test User',
-  roles: ['USER'],
-  plan: 'free',
-  // Legacy fields (deprecated)
-  dailyReadingsCount: 0,
-  dailyReadingsLimit: 3,
-  // New separate fields
-  dailyCardCount: 0,
-  dailyCardLimit: 1,
-  tarotReadingsCount: 0,
-  tarotReadingsLimit: 1,
+// Mock capabilities for FREE user who can create readings
+const mockFreeCapabilities = {
+  plan: 'free' as const,
+  dailyCard: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+  tarotReadings: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+  canCreateDailyReading: true,
+  canCreateTarotReading: true,
+  canUseAI: false,
+  canUseCustomQuestions: false,
+  canUseAdvancedSpreads: false,
+  isAuthenticated: true,
 };
 
-const mockUserAtLimit = {
-  id: 1,
-  email: 'test@test.com',
-  name: 'Test User',
-  roles: ['USER'],
-  plan: 'free',
-  // Legacy fields (deprecated)
-  dailyReadingsCount: 3,
-  dailyReadingsLimit: 3,
-  // New separate fields
-  dailyCardCount: 1,
-  dailyCardLimit: 1,
-  tarotReadingsCount: 1,
-  tarotReadingsLimit: 1,
+// Mock capabilities for FREE user who has reached daily limit
+const mockFreeCapabilitiesAtLimit = {
+  plan: 'free' as const,
+  dailyCard: { used: 1, limit: 1, canUse: false, resetAt: '2026-01-09T00:00:00Z' },
+  tarotReadings: { used: 1, limit: 1, canUse: false, resetAt: '2026-01-09T00:00:00Z' },
+  canCreateDailyReading: false,
+  canCreateTarotReading: false,
+  canUseAI: false,
+  canUseCustomQuestions: false,
+  canUseAdvancedSpreads: false,
+  isAuthenticated: true,
 };
 
-const mockUserPremium = {
-  id: 2,
-  email: 'premium@test.com',
-  name: 'Premium User',
-  roles: ['USER'],
-  plan: 'premium',
-  // Legacy fields (deprecated)
-  dailyReadingsCount: 0,
-  dailyReadingsLimit: 999,
-  // New separate fields
-  dailyCardCount: 0,
-  dailyCardLimit: 1,
-  tarotReadingsCount: 0,
-  tarotReadingsLimit: 3,
+// Mock capabilities for PREMIUM user
+const mockPremiumCapabilities = {
+  plan: 'premium' as const,
+  dailyCard: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+  tarotReadings: { used: 0, limit: 3, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+  canCreateDailyReading: true,
+  canCreateTarotReading: true,
+  canUseAI: true,
+  canUseCustomQuestions: true,
+  canUseAdvancedSpreads: true,
+  isAuthenticated: true,
 };
 
 describe('SpreadSelector', () => {
@@ -135,7 +126,11 @@ describe('SpreadSelector', () => {
     vi.clearAllMocks();
     (useRouter as Mock).mockReturnValue({ push: mockPush });
     (useRequireAuth as Mock).mockReturnValue({ isLoading: false });
-    (useAuthStore as unknown as Mock).mockReturnValue({ user: mockUserFree });
+    (useUserCapabilities as Mock).mockReturnValue({
+      data: mockFreeCapabilities,
+      isLoading: false,
+      error: null,
+    });
   });
 
   describe('Authentication Protection', () => {
@@ -175,7 +170,11 @@ describe('SpreadSelector', () => {
     });
 
     it('should render the breadcrumb with question link for PREMIUM users', () => {
-      (useAuthStore as unknown as Mock).mockReturnValue({ user: mockUserPremium });
+      (useUserCapabilities as Mock).mockReturnValue({
+        data: mockPremiumCapabilities,
+        isLoading: false,
+        error: null,
+      });
 
       render(<SpreadSelector categoryId="1" questionId="1" customQuestion={null} />);
 
@@ -185,7 +184,11 @@ describe('SpreadSelector', () => {
     });
 
     it('should render the breadcrumb WITHOUT question link for FREE users', () => {
-      (useAuthStore as unknown as Mock).mockReturnValue({ user: mockUserFree });
+      (useUserCapabilities as Mock).mockReturnValue({
+        data: mockFreeCapabilities,
+        isLoading: false,
+        error: null,
+      });
 
       render(<SpreadSelector categoryId={null} questionId={null} customQuestion={null} />);
 
@@ -317,7 +320,11 @@ describe('SpreadSelector', () => {
     });
 
     it('should navigate to reading page when PREMIUM user selects spread with questionId', async () => {
-      (useAuthStore as unknown as Mock).mockReturnValue({ user: mockUserPremium });
+      (useUserCapabilities as Mock).mockReturnValue({
+        data: mockPremiumCapabilities,
+        isLoading: false,
+        error: null,
+      });
 
       render(<SpreadSelector categoryId="1" questionId="5" customQuestion={null} />);
 
@@ -332,7 +339,11 @@ describe('SpreadSelector', () => {
     });
 
     it('should navigate with customQuestion when PREMIUM user provides it', async () => {
-      (useAuthStore as unknown as Mock).mockReturnValue({ user: mockUserPremium });
+      (useUserCapabilities as Mock).mockReturnValue({
+        data: mockPremiumCapabilities,
+        isLoading: false,
+        error: null,
+      });
 
       render(
         <SpreadSelector
@@ -353,7 +364,11 @@ describe('SpreadSelector', () => {
     });
 
     it('should navigate with categoryId, questionId AND spreadId for PREMIUM users', async () => {
-      (useAuthStore as unknown as Mock).mockReturnValue({ user: mockUserPremium });
+      (useUserCapabilities as Mock).mockReturnValue({
+        data: mockPremiumCapabilities,
+        isLoading: false,
+        error: null,
+      });
 
       render(<SpreadSelector categoryId="3" questionId="7" customQuestion={null} />);
 
@@ -368,7 +383,11 @@ describe('SpreadSelector', () => {
     });
 
     it('should navigate WITHOUT categoryId or questionId for FREE users even if they exist in props', async () => {
-      (useAuthStore as unknown as Mock).mockReturnValue({ user: mockUserFree });
+      (useUserCapabilities as Mock).mockReturnValue({
+        data: mockFreeCapabilities,
+        isLoading: false,
+        error: null,
+      });
 
       // Edge case: FREE user downgraded from PREMIUM, props still have old values
       render(<SpreadSelector categoryId="1" questionId="5" customQuestion={null} />);
@@ -396,7 +415,11 @@ describe('SpreadSelector', () => {
     });
 
     it('should show ReadingLimitReached component when FREE user has reached daily limit', () => {
-      (useAuthStore as unknown as Mock).mockReturnValue({ user: mockUserAtLimit });
+      (useUserCapabilities as Mock).mockReturnValue({
+        data: mockFreeCapabilitiesAtLimit,
+        isLoading: false,
+        error: null,
+      });
 
       render(<SpreadSelector categoryId="1" questionId="1" customQuestion={null} />);
 
@@ -409,7 +432,11 @@ describe('SpreadSelector', () => {
     });
 
     it('should show limit message immediately without requiring user to click spread', () => {
-      (useAuthStore as unknown as Mock).mockReturnValue({ user: mockUserAtLimit });
+      (useUserCapabilities as Mock).mockReturnValue({
+        data: mockFreeCapabilitiesAtLimit,
+        isLoading: false,
+        error: null,
+      });
 
       render(<SpreadSelector categoryId="1" questionId="1" customQuestion={null} />);
 
@@ -418,7 +445,11 @@ describe('SpreadSelector', () => {
     });
 
     it('should allow navigation for premium users regardless of count', async () => {
-      (useAuthStore as unknown as Mock).mockReturnValue({ user: mockUserPremium });
+      (useUserCapabilities as Mock).mockReturnValue({
+        data: mockPremiumCapabilities,
+        isLoading: false,
+        error: null,
+      });
 
       render(<SpreadSelector categoryId="1" questionId="1" customQuestion={null} />);
 
@@ -446,7 +477,11 @@ describe('SpreadSelector', () => {
 
     describe('PREMIUM User Flow', () => {
       beforeEach(() => {
-        (useAuthStore as unknown as Mock).mockReturnValue({ user: mockUserPremium });
+        (useUserCapabilities as Mock).mockReturnValue({
+          data: mockPremiumCapabilities,
+          isLoading: false,
+          error: null,
+        });
       });
 
       it('should allow PREMIUM user to continue without question (lectura general)', () => {
@@ -473,7 +508,11 @@ describe('SpreadSelector', () => {
 
     describe('FREE User Flow', () => {
       beforeEach(() => {
-        (useAuthStore as unknown as Mock).mockReturnValue({ user: mockUserFree });
+        (useUserCapabilities as Mock).mockReturnValue({
+          data: mockFreeCapabilities,
+          isLoading: false,
+          error: null,
+        });
       });
 
       it('should NOT show error when FREE user has no question', () => {
