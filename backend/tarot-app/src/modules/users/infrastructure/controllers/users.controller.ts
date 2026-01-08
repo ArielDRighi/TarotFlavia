@@ -14,13 +14,17 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { UsersOrchestratorService } from '../../application/services/users-orchestrator.service';
+import { UserCapabilitiesService } from '../../application/services/user-capabilities.service';
 import { UpdateUserDto } from '../../application/dto/update-user.dto';
 import { UpdatePasswordDto } from '../../application/dto/update-password.dto';
 import { UpdateUserPlanDto } from '../../application/dto/update-user-plan.dto';
+import { UserCapabilitiesDto } from '../../application/dto/user-capabilities.dto';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../../../auth/infrastructure/guards/optional-jwt-auth.guard';
 import { AdminGuard } from '../../../auth/infrastructure/guards/admin.guard';
 import { RolesGuard } from '../../../../common/guards/roles.guard';
 import { Roles } from '../../../../common/decorators/roles.decorator';
+import { CurrentUser } from '../../../../common/decorators/current-user.decorator';
 import { UserRole } from '../../../../common/enums/user-role.enum';
 import { UsageLimitsService } from '../../../usage-limits/usage-limits.service';
 import { UsageFeature } from '../../../usage-limits/entities/usage-limit.entity';
@@ -40,9 +44,35 @@ import {
 export class UsersController {
   constructor(
     private readonly usersService: UsersOrchestratorService,
+    private readonly userCapabilitiesService: UserCapabilitiesService,
     private readonly usageLimitsService: UsageLimitsService,
     private readonly planConfigService: PlanConfigService,
   ) {}
+
+  /**
+   * Obtener capabilities del usuario (autenticado o anónimo)
+   * Este endpoint NO requiere autenticación para soportar usuarios anónimos
+   */
+  @UseGuards(OptionalJwtAuthGuard)
+  @Get('capabilities')
+  @ApiOperation({
+    summary: 'Obtener capabilities del usuario actual',
+    description:
+      'Retorna las capabilities y límites del usuario. Funciona tanto para usuarios autenticados como anónimos.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Capabilities recuperadas exitosamente',
+    type: UserCapabilitiesDto,
+  })
+  async getCapabilities(
+    @CurrentUser() user?: { userId: number },
+  ): Promise<UserCapabilitiesDto> {
+    // Si hay usuario autenticado, user.userId existe
+    // Si es anónimo, user es undefined o null
+    const userId = user?.userId || null;
+    return this.userCapabilitiesService.getCapabilities(userId);
+  }
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
@@ -57,6 +87,10 @@ export class UsersController {
     if (!user) {
       throw new NotFoundException('Usuario no encontrado');
     }
+
+    // Get capabilities for this user
+    const capabilities =
+      await this.userCapabilitiesService.getCapabilities(userId);
 
     // Get separate limits for daily cards and tarot readings
     const dailyCardLimit = await this.planConfigService.getDailyCardLimit(
@@ -106,6 +140,8 @@ export class UsersController {
 
     return {
       ...result,
+      // New field: Capabilities object
+      capabilities,
       // New fields: Separate counters per feature type
       dailyCardCount,
       dailyCardLimit: dailyCardLimit === -1 ? 999999 : dailyCardLimit,

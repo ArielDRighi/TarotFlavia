@@ -189,12 +189,13 @@ Implementar el servicio que calcula las capabilities del usuario basándose en s
 
 ---
 
-### **TASK-REFACTOR-003: Agregar Endpoint de Capabilities al Backend**
+### **TASK-REFACTOR-003: Agregar Endpoint de Capabilities al Backend** ✅
 
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 3 horas
 **Área:** Backend
 **Dependencias:** TASK-REFACTOR-002
+**Estado:** ✅ COMPLETADA (8 Enero 2026)
 
 #### 📋 Descripción
 
@@ -202,7 +203,7 @@ Crear nuevo endpoint para obtener capabilities y modificar el endpoint de profil
 
 #### ✅ Tareas específicas
 
-- [ ] Agregar nuevo endpoint `GET /users/capabilities`:
+- [x] Agregar nuevo endpoint `GET /users/capabilities`:
   ```typescript
   @Get('capabilities')
   @UseGuards(OptionalJwtAuthGuard) // Permite llamadas sin auth
@@ -210,8 +211,8 @@ Crear nuevo endpoint para obtener capabilities y modificar el endpoint de profil
     return this.userCapabilitiesService.getCapabilities(user?.id || null);
   }
   ```
-- [ ] Crear `OptionalJwtAuthGuard` que NO falla si no hay token (para anónimos)
-- [ ] Modificar endpoint `GET /users/profile` para incluir capabilities:
+- [x] Crear `OptionalJwtAuthGuard` que NO falla si no hay token (para anónimos)
+- [x] Modificar endpoint `GET /users/profile` para incluir capabilities:
 
   ```typescript
   @Get('profile')
@@ -227,8 +228,8 @@ Crear nuevo endpoint para obtener capabilities y modificar el endpoint de profil
   }
   ```
 
-- [ ] Documentar endpoints con Swagger
-- [ ] Agregar tests de integración:
+- [x] Documentar endpoints con Swagger
+- [x] Agregar tests de integración:
   - GET /users/capabilities sin auth → retorna capabilities anónimas
   - GET /users/capabilities con auth → retorna capabilities del usuario
   - GET /users/profile → incluye capabilities
@@ -239,6 +240,18 @@ Crear nuevo endpoint para obtener capabilities y modificar el endpoint de profil
 - ✓ Endpoint `/users/profile` incluye campo `capabilities`
 - ✓ Swagger documenta ambos endpoints
 - ✓ Tests de integración pasan
+
+#### 📝 Notas de implementación
+
+- Tests E2E: 6 nuevos tests agregados (100% passing)
+- Creado `OptionalJwtAuthGuard` con tests unitarios (9 tests)
+- Creado decorador `CurrentUser` con tests unitarios (3 tests)
+- Endpoint capabilities funciona con y sin autenticación
+- Profile endpoint ahora incluye campo `capabilities`
+- Todos los tests pasan (63 E2E tests, lint OK, build OK)
+- Sin uso de tipo `any` (tipado estricto)
+- Branch: `feature/TASK-REFACTOR-003-add-capabilities-endpoint`
+- Commit: `77c09b6`
 
 ---
 
