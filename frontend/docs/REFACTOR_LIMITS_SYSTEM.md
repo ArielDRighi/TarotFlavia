@@ -604,10 +604,12 @@ Asegurar que todas las mutations que afectan límites invaliden las capabilities
   ```
 - [x] Actualizar `useDailyReading` en `useDailyReading.ts`:
   ```typescript
-  onSuccess: async (data) => {
+  onSuccess: async () => {
     await invalidateUserData(queryClient);
-    return data;
   },
+  ```
+  ```
+
   ```
 - [x] **ELIMINAR** llamada a `checkAuth()` de authStore (ya no necesario)
 - [x] Verificar que NO se use `checkAuth()` para sincronizar límites
@@ -621,19 +623,24 @@ Asegurar que todas las mutations que afectan límites invaliden las capabilities
 
 #### 📝 Notas de implementación
 
-- Tests: 19 tests total (5 helper + 2 useCreateReading + 12 useDailyReading)
+- Tests: 21 tests total (5 helper + 2 useCreateReading adicionales + 12 useDailyReading + tests originales de useReadings preservados)
 - Metodología TDD aplicada (red → green → refactor)
 - Helper `invalidateUserData` creado con tests de invalidación paralela y manejo de errores
 - Tests creados para verificar que `invalidateUserData` es llamado tras crear lecturas
 - Removido import no usado `userQueryKeys` de `useReadings.ts`
 - `checkAuth()` solo usado en `auth-provider.tsx` para validación de sesión (no sincronización de límites)
+- **Correcciones post-PR review:**
+  - Corregido query key de profile: `['profile']` (no `['user', 'profile']`)
+  - Uso de constantes `capabilitiesQueryKeys` y `userQueryKeys` en lugar de strings hardcodeados
+  - Tests actualizados para validar comportamiento correcto
+  - Tests originales de useReadings preservados y nuevos tests agregados (no reemplazo)
 - Ciclo de calidad completo:
   - ✅ `npm run lint` - Sin errores
   - ✅ `npm run type-check` - Sin errores TypeScript
   - ✅ `npm run format` - Formateado con Prettier
   - ✅ `node scripts/validate-architecture.js` - Arquitectura correcta
   - ✅ `npm run build` - Build exitoso
-  - ✅ `npm test` - 19/19 tests pasando (100% coverage)
+  - ✅ `npm test` - 21/21 tests nuevos/modificados pasando (100% coverage en archivos de esta tarea)
 - Branch: `feature/TASK-REFACTOR-008-invalidate-capabilities`
 - Commit: (pendiente)
 

@@ -7,6 +7,8 @@
  * @module invalidate-user-data
  */
 import type { QueryClient } from '@tanstack/react-query';
+import { capabilitiesQueryKeys } from '@/hooks/api/useUserCapabilities';
+import { userQueryKeys } from '@/hooks/api/useUser';
 
 /**
  * Invalidates user-related queries in parallel
@@ -28,7 +30,7 @@ import type { QueryClient } from '@tanstack/react-query';
  */
 export async function invalidateUserData(queryClient: QueryClient): Promise<void> {
   await Promise.all([
-    queryClient.invalidateQueries({ queryKey: ['user', 'capabilities'] }),
-    queryClient.invalidateQueries({ queryKey: ['user', 'profile'] }),
+    queryClient.invalidateQueries({ queryKey: capabilitiesQueryKeys.capabilities }),
+    queryClient.invalidateQueries({ queryKey: userQueryKeys.profile }),
   ]);
 }

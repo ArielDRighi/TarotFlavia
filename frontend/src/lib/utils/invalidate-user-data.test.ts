@@ -4,6 +4,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { QueryClient } from '@tanstack/react-query';
 import { invalidateUserData } from './invalidate-user-data';
+import { capabilitiesQueryKeys } from '@/hooks/api/useUserCapabilities';
+import { userQueryKeys } from '@/hooks/api/useUser';
 
 describe('invalidateUserData', () => {
   let queryClient: QueryClient;
@@ -20,7 +22,7 @@ describe('invalidateUserData', () => {
     await invalidateUserData(queryClient);
 
     expect(invalidateQueriesSpy).toHaveBeenCalledWith({
-      queryKey: ['user', 'capabilities'],
+      queryKey: capabilitiesQueryKeys.capabilities,
     });
   });
 
@@ -28,7 +30,7 @@ describe('invalidateUserData', () => {
     await invalidateUserData(queryClient);
 
     expect(invalidateQueriesSpy).toHaveBeenCalledWith({
-      queryKey: ['user', 'profile'],
+      queryKey: userQueryKeys.profile,
     });
   });
 
