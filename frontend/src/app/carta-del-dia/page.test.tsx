@@ -376,8 +376,6 @@ describe('CartaDelDiaPage', () => {
     });
   });
 
-
-
   describe('Loading States', () => {
     it('should show loading skeleton while fetching daily reading', () => {
       mockUseDailyReadingToday.mockReturnValue({
