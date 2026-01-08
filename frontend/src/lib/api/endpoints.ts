@@ -61,6 +61,7 @@ export const API_ENDPOINTS = {
     BY_ID: (id: number) => `/users/${id}`,
     PROFILE: '/users/profile',
     PASSWORD: '/users/me/password',
+    CAPABILITIES: '/users/capabilities', // NEW: User capabilities endpoint
   },
 
   // Tarotistas (Marketplace)

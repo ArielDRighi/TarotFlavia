@@ -27,6 +27,9 @@ export type {
   UpdatePasswordDto,
 } from './user.types';
 
+// Capabilities Types
+export type { FeatureLimit, UserCapabilities } from './capabilities.types';
+
 // Reading Types
 export type {
   Category,

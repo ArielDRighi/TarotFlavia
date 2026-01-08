@@ -457,8 +457,6 @@ describe('DailyCardExperience', () => {
     });
   });
 
-
-
   describe('Loading States', () => {
     it('should show skeleton while fetching', () => {
       mockUseDailyReadingToday.mockReturnValue({
