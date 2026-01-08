@@ -18,3 +18,13 @@ export {
   createMockFreeUser,
   createMockPremiumUser,
 } from './authUser.factory';
+
+export {
+  createMockFeatureLimit,
+  createMockAnonymousCapabilities,
+  createMockFreeCapabilities,
+  createMockPremiumCapabilities,
+  createMockCapabilitiesWithDailyCardLimitReached,
+  createMockCapabilitiesWithTarotReadingLimitReached,
+  createMockUserCapabilities,
+} from './capabilities.factory';

@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Copy, History, Sparkles } from 'lucide-react';
-import { isAxiosError, AxiosError } from 'axios';
 import { ROUTES } from '@/lib/constants/routes';
 
 import { Button } from '@/components/ui/button';
@@ -16,6 +15,7 @@ import {
   useDailyReading,
   useDailyReadingPublic,
 } from '@/hooks/api/useDailyReading';
+import { useUserCapabilities, useInvalidateCapabilities } from '@/hooks/api/useUserCapabilities';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/utils/useToast';
 import { cn } from '@/lib/utils';
@@ -55,99 +55,67 @@ function transformToReadingCard(reading: DailyReading): ReadingCard {
  * - REVEALED: Face-up card with interpretation and actions
  *
  * Features:
+ * - Uses capabilities system as SINGLE SOURCE OF TRUTH for limits
  * - Dual flow: anonymous (public endpoint) vs authenticated (protected endpoint)
  * - Anonymous users: See card with DB info only, no AI interpretation
  * - Authenticated users: See card with full interpretation (FREE: DB, PREMIUM: AI)
  * - Smooth flip animation on reveal
- * - Premium regenerate feature with confirmation modal
  * - Share functionality (copy to clipboard)
  * - Navigation to history
- * - Anonymous limit reached state with conversion CTAs
+ * - Limit reached states with appropriate CTAs
+ *
+ * Business Rules:
+ * - All users (anonymous, free, premium): 1 daily card per day
+ * - PREMIUM gets AI interpretation, but same limit (1/day)
+ * - Capabilities are automatically invalidated after creating a reading
  */
 export function DailyCardExperience() {
   const router = useRouter();
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
 
-  // Helper: Check if daily card limit is reached based on counters
-  // Both FREE and PREMIUM have limit of 1 daily card per day
-  const dailyCardCount = user?.dailyCardCount ?? 0;
-  const dailyCardLimit = user?.dailyCardLimit ?? 1;
-  const hasReachedDailyCardLimit = isAuthenticated && dailyCardCount >= dailyCardLimit;
+  // Fetch user capabilities - SINGLE SOURCE OF TRUTH for limits
+  const { data: capabilities, isLoading: isLoadingCapabilities } = useUserCapabilities();
+  const invalidateCapabilities = useInvalidateCapabilities();
 
-  // Fetch today's reading for authenticated users only IF they haven't reached the limit
+  // Extract boolean flags from capabilities
+  const canCreateDailyReading = capabilities?.canCreateDailyReading ?? false;
+
+  // Fetch today's reading for authenticated users only IF they can create (haven't reached limit)
   // If limit is reached, don't fetch - user should only see limit message
   // Anonymous users don't fetch initial data - they generate on click (POST with fingerprint)
   const {
     data: dailyReading,
     isLoading: isFetching,
     error,
-  } = useDailyReadingToday({ enabled: isAuthenticated && !hasReachedDailyCardLimit });
+  } = useDailyReadingToday({ enabled: isAuthenticated && canCreateDailyReading });
 
   const { mutate: createDailyReading, isPending: isCreating } = useDailyReading();
   const { mutate: createDailyReadingPublic, isPending: isCreatingPublic } = useDailyReadingPublic();
 
-  // Modal state (removed regenerate modals - feature doesn't exist)
-  // const [showPremiumModal, setShowPremiumModal] = useState(false);
-  // const [showConfirmModal, setShowConfirmModal] = useState(false);
-
-  // Local state for animation
+  // Local state
   const [isRevealing, setIsRevealing] = useState(false);
   const [localReading, setLocalReading] = useState<DailyReading | null>(null);
-  const [anonymousError, setAnonymousError] = useState<AxiosError | null>(null);
-  const [authenticatedError, setAuthenticatedError] = useState<AxiosError | null>(null);
-
-  // Check if anonymous user already consumed their daily card today
-  // This is tracked in sessionStorage to persist across page refreshes
-  // Backend enforces this via fingerprint, but sessionStorage improves UX
-  // by preventing unnecessary API calls and showing limit message immediately
-  const hasAnonymousCardToday = useMemo(() => {
-    if (isAuthenticated || typeof window === 'undefined') return false;
-
-    const consumed = sessionStorage.getItem('tarot_daily_card_consumed');
-    if (!consumed) return false;
-
-    const consumedDate = new Date(consumed);
-    const today = new Date();
-
-    // Check if it's the same day
-    return (
-      consumedDate.getDate() === today.getDate() &&
-      consumedDate.getMonth() === today.getMonth() &&
-      consumedDate.getFullYear() === today.getFullYear()
-    );
-  }, [isAuthenticated]);
 
   // Computed values
   const currentReading = localReading || dailyReading;
   const isRevealed = Boolean(currentReading);
   const isCreatingReading = isCreating || isCreatingPublic;
 
-  // Check if anonymous user reached limit
-  // Anonymous users get 1 daily card per day (tracked by fingerprint + sessionStorage)
-  // Backend returns 403/409 when limit is reached
-  // Also check sessionStorage to prevent showing the card again after page refresh
-  const isAnonymousLimitReached =
-    !isAuthenticated &&
-    (hasAnonymousCardToday ||
-      (isAxiosError(error) && (error.response?.status === 403 || error.response?.status === 409)) ||
-      (isAxiosError(anonymousError) &&
-        (anonymousError.response?.status === 403 || anonymousError.response?.status === 409)));
+  // Check if user reached limit (authenticated or anonymous)
+  // Use capabilities as SINGLE SOURCE OF TRUTH
+  // Show limit message when:
+  // 1. User can't create daily reading (capabilities say so)
+  // 2. AND there's no current reading to display
+  // 3. AND not in loading state
+  const showLimitReached =
+    !isLoadingCapabilities &&
+    !canCreateDailyReading &&
+    !currentReading && // Don't show limit if we have a reading to display (just created)
+    Boolean(capabilities); // Only show after capabilities loaded
 
-  // Check if authenticated user reached limit
-  // Daily card is independent from tarot readings
-  // FREE users: 1 daily card per day
-  // PREMIUM users: 1 daily card per day (with AI interpretation)
-  // If user already used their daily card, they should see limit message
-  // The card can only be viewed in history, not here
-  // IMPORTANT: Only show limit if there's NO current reading
-  // If there's a reading, it means user just revealed it and should see it
-  const isAuthenticatedLimitReached =
-    isAuthenticated &&
-    !currentReading && // Don't show limit if we have a reading to display
-    (hasReachedDailyCardLimit || // Already reached limit based on counters
-      (isAxiosError(authenticatedError) &&
-        (authenticatedError.response?.status === 403 ||
-          authenticatedError.response?.status === 409)));
+  // Separate limit messages for anonymous vs authenticated
+  const isAnonymousLimitReached = showLimitReached && !capabilities?.isAuthenticated;
+  const isAuthenticatedLimitReached = showLimitReached && capabilities?.isAuthenticated;
 
   /**
    * Handle card click to create daily reading
@@ -156,7 +124,7 @@ export function DailyCardExperience() {
     if (isCreatingReading || isRevealing || currentReading) return;
 
     // Preventive check: Don't allow if limit already reached
-    if (hasReachedDailyCardLimit) {
+    if (!canCreateDailyReading) {
       return;
     }
 
@@ -167,14 +135,11 @@ export function DailyCardExperience() {
       createDailyReading(undefined, {
         onSuccess: (data) => {
           setLocalReading(data);
-          setAuthenticatedError(null);
+          invalidateCapabilities(); // Invalidate capabilities after creating
           setTimeout(() => setIsRevealing(false), 600);
         },
-        onError: (err) => {
+        onError: () => {
           setIsRevealing(false);
-          if (isAxiosError(err)) {
-            setAuthenticatedError(err);
-          }
         },
       });
     } else {
@@ -183,7 +148,7 @@ export function DailyCardExperience() {
       createDailyReadingPublic(fingerprint, {
         onSuccess: (data) => {
           setLocalReading(data);
-          setAnonymousError(null);
+          invalidateCapabilities(); // Invalidate capabilities after creating
           // Mark that anonymous user consumed their daily card (for home page UI)
           try {
             sessionStorage.setItem('tarot_daily_card_consumed', new Date().toISOString());
@@ -192,11 +157,8 @@ export function DailyCardExperience() {
           }
           setTimeout(() => setIsRevealing(false), 600);
         },
-        onError: (err) => {
+        onError: () => {
           setIsRevealing(false);
-          if (isAxiosError(err)) {
-            setAnonymousError(err);
-          }
         },
       });
     }
@@ -207,7 +169,8 @@ export function DailyCardExperience() {
     isCreatingReading,
     isRevealing,
     currentReading,
-    hasReachedDailyCardLimit,
+    canCreateDailyReading,
+    invalidateCapabilities,
   ]);
 
   /**
@@ -237,26 +200,8 @@ export function DailyCardExperience() {
   // All users (FREE/PREMIUM) get 1 daily card per day
   // PREMIUM gets AI interpretation but same limit (1/day)
 
-  // Show AnonymousLimitReached when anonymous user reached limit (403)
-  if (isAnonymousLimitReached) {
-    return (
-      <div className="flex w-full justify-center">
-        <AnonymousLimitReached />
-      </div>
-    );
-  }
-
-  // Show DailyCardLimitReached when authenticated user already has today's card (403/409)
-  if (isAuthenticatedLimitReached) {
-    return (
-      <div className="flex w-full justify-center">
-        <DailyCardLimitReached />
-      </div>
-    );
-  }
-
-  // Show skeleton while fetching daily reading
-  if (isFetching) {
+  // Show skeleton while loading capabilities or fetching
+  if (isLoadingCapabilities || isFetching) {
     return (
       <div className="flex flex-col items-center gap-8" aria-label="Cargando carta del día">
         <Skeleton data-testid="loading-skeleton" className="h-12 w-64" />
@@ -266,8 +211,26 @@ export function DailyCardExperience() {
     );
   }
 
-  // Show error state (but not for 403 anonymous, already handled above)
-  if (error && !isAnonymousLimitReached) {
+  // Show AnonymousLimitReached when anonymous user reached limit
+  if (isAnonymousLimitReached) {
+    return (
+      <div className="flex w-full justify-center">
+        <AnonymousLimitReached />
+      </div>
+    );
+  }
+
+  // Show DailyCardLimitReached when authenticated user already has today's card
+  if (isAuthenticatedLimitReached) {
+    return (
+      <div className="flex w-full justify-center">
+        <DailyCardLimitReached />
+      </div>
+    );
+  }
+
+  // Show error state (but not for 403/limit related, already handled above)
+  if (error && !isAnonymousLimitReached && !isAuthenticatedLimitReached) {
     return (
       <div className="text-center" role="alert">
         <p className="text-destructive">Error al cargar tu carta del día</p>
