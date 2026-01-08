@@ -55,11 +55,11 @@ Este plan aborda la refactorización completa del sistema de validación de lím
 
 ### Reglas de Límites
 
-| Plan | Carta del Día | Tiradas Tarot | Spreads Disponibles | Interpretación |
-|------|---------------|---------------|---------------------|----------------|
-| ANÓNIMO | 1/día | ❌ NO | ❌ N/A | DB only |
-| FREE | 1/día | 1/día | 1 y 3 cartas | DB only |
-| PREMIUM | 1/día | 3/día | 1, 3, 5, Cruz Celta | IA + DB |
+| Plan    | Carta del Día | Tiradas Tarot | Spreads Disponibles | Interpretación |
+| ------- | ------------- | ------------- | ------------------- | -------------- |
+| ANÓNIMO | 1/día         | ❌ NO         | ❌ N/A              | DB only        |
+| FREE    | 1/día         | 1/día         | 1 y 3 cartas        | DB only        |
+| PREMIUM | 1/día         | 3/día         | 1, 3, 5, Cruz Celta | IA + DB        |
 
 ### Regla de Oro
 
@@ -75,12 +75,13 @@ Este plan aborda la refactorización completa del sistema de validación de lím
 
 ---
 
-### **TASK-REFACTOR-001: Crear DTO de Capabilities en Backend**
+### **TASK-REFACTOR-001: Crear DTO de Capabilities en Backend** ✅
 
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 4 horas
 **Área:** Backend
 **Dependencias:** Ninguna
+**Estado:** ✅ COMPLETADA (8 Enero 2026)
 
 #### 📋 Descripción
 
@@ -88,17 +89,18 @@ Crear el DTO que define la estructura de capabilities que el backend retornará.
 
 #### ✅ Tareas específicas
 
-- [ ] Crear archivo `backend/tarot-app/src/modules/users/dtos/user-capabilities.dto.ts`
-- [ ] Definir interface `FeatureLimitDto`:
+- [x] Crear archivo `backend/tarot-app/src/modules/users/dtos/user-capabilities.dto.ts`
+- [x] Definir interface `FeatureLimitDto`:
   ```typescript
   export class FeatureLimitDto {
-    used: number;        // Cantidad usada hoy
-    limit: number;       // Límite máximo (999999 si ilimitado)
-    canUse: boolean;     // TRUE si puede usar (used < limit)
-    resetAt: string;     // ISO date cuando se resetea (midnight UTC)
+    used: number; // Cantidad usada hoy
+    limit: number; // Límite máximo (999999 si ilimitado)
+    canUse: boolean; // TRUE si puede usar (used < limit)
+    resetAt: string; // ISO date cuando se resetea (midnight UTC)
   }
   ```
-- [ ] Definir interface `UserCapabilitiesDto`:
+- [x] Definir interface `UserCapabilitiesDto`:
+
   ```typescript
   export class UserCapabilitiesDto {
     // Límites por feature
@@ -110,7 +112,7 @@ Crear el DTO que define la estructura de capabilities que el backend retornará.
     canCreateTarotReading: boolean;
 
     // Features del plan
-    canUseAI: boolean;              // PREMIUM only
+    canUseAI: boolean; // PREMIUM only
     canUseCustomQuestions: boolean; // PREMIUM only
     canUseAdvancedSpreads: boolean; // PREMIUM only (5+ cartas)
 
@@ -119,14 +121,23 @@ Crear el DTO que define la estructura de capabilities que el backend retornará.
     isAuthenticated: boolean;
   }
   ```
-- [ ] Agregar decoradores Swagger para documentación automática
-- [ ] Exportar desde `index.ts` del módulo
+
+- [x] Agregar decoradores Swagger para documentación automática
+- [x] Exportar desde `index.ts` del módulo
 
 #### 🎯 Criterios de aceptación
 
 - ✓ DTO compilar sin errores TypeScript
 - ✓ Swagger muestra documentación correcta del DTO
 - ✓ Todas las propiedades tienen tipos explícitos
+
+#### 📝 Notas de implementación
+
+- Tests: 14 tests unitarios creados (100% coverage)
+- Se creó enum `UserPlanType` para validación de tipos
+- Validaciones con class-validator aplicadas a todos los campos
+- Archivo de barrel export creado en `application/dto/index.ts`
+- Branch: `feature/TASK-REFACTOR-001-create-dto-capabilities`
 
 ---
 
@@ -149,6 +160,7 @@ Implementar el servicio que calcula las capabilities del usuario basándose en s
   - `PlanConfigService` (para obtener límites del plan)
   - `UsersService` (para datos del usuario)
 - [ ] Implementar método `getCapabilities(userId: number | null): Promise<UserCapabilitiesDto>`:
+
   ```typescript
   async getCapabilities(userId: number | null): Promise<UserCapabilitiesDto> {
     // Si no hay userId, retornar capabilities anónimas
@@ -190,6 +202,7 @@ Implementar el servicio que calcula las capabilities del usuario basándose en s
     };
   }
   ```
+
 - [ ] Implementar método privado `getAnonymousCapabilities()`:
   - `canCreateDailyReading`: Verificar por fingerprint (sessionStorage en frontend)
   - `canCreateTarotReading`: false (anónimos no pueden)
@@ -235,6 +248,7 @@ Crear nuevo endpoint para obtener capabilities y modificar el endpoint de profil
   ```
 - [ ] Crear `OptionalJwtAuthGuard` que NO falla si no hay token (para anónimos)
 - [ ] Modificar endpoint `GET /users/profile` para incluir capabilities:
+
   ```typescript
   @Get('profile')
   @UseGuards(JwtAuthGuard)
@@ -248,6 +262,7 @@ Crear nuevo endpoint para obtener capabilities y modificar el endpoint de profil
     };
   }
   ```
+
 - [ ] Documentar endpoints con Swagger
 - [ ] Agregar tests de integración:
   - GET /users/capabilities sin auth → retorna capabilities anónimas
@@ -278,6 +293,7 @@ Crear el hook que será la ÚNICA fuente de verdad para capabilities en el front
 
 - [ ] Crear `frontend/src/hooks/api/useUserCapabilities.ts`
 - [ ] Definir tipos TypeScript que coincidan con backend DTO:
+
   ```typescript
   export interface FeatureLimit {
     used: number;
@@ -298,7 +314,9 @@ Crear el hook que será la ÚNICA fuente de verdad para capabilities en el front
     isAuthenticated: boolean;
   }
   ```
+
 - [ ] Implementar hook `useUserCapabilities()`:
+
   ```typescript
   export function useUserCapabilities() {
     const { isAuthenticated } = useAuth();
@@ -315,6 +333,7 @@ Crear el hook que será la ÚNICA fuente de verdad para capabilities en el front
     });
   }
   ```
+
 - [ ] Crear función helper `invalidateCapabilities()`:
   ```typescript
   export function useInvalidateCapabilities() {
@@ -350,6 +369,7 @@ Refactorizar el componente para usar el nuevo hook de capabilities, eliminando t
 #### ✅ Tareas específicas
 
 - [ ] Reemplazar lógica actual de límites:
+
   ```typescript
   // ❌ ELIMINAR
   const dailyCardCount = user?.dailyCardCount ?? 0;
@@ -360,7 +380,9 @@ Refactorizar el componente para usar el nuevo hook de capabilities, eliminando t
   const { data: capabilities, isLoading: isLoadingCapabilities } = useUserCapabilities();
   const canCreateDailyReading = capabilities?.canCreateDailyReading ?? false;
   ```
+
 - [ ] Simplificar lógica de `isAuthenticatedLimitReached`:
+
   ```typescript
   // ❌ ELIMINAR lógica compleja
   const isAuthenticatedLimitReached =
@@ -372,10 +394,9 @@ Refactorizar el componente para usar el nuevo hook de capabilities, eliminando t
 
   // ✅ NUEVO: Simple y directo
   const showLimitReached =
-    capabilities?.isAuthenticated &&
-    !capabilities?.canCreateDailyReading &&
-    !localReading; // Solo mantener esta excepción para carta recién creada
+    capabilities?.isAuthenticated && !capabilities?.canCreateDailyReading && !localReading; // Solo mantener esta excepción para carta recién creada
   ```
+
 - [ ] Eliminar dependencia de `useAuth()` para límites (solo usar para isAuthenticated)
 - [ ] Actualizar mutation `onSuccess` para invalidar capabilities:
   ```typescript
@@ -413,6 +434,7 @@ Refactorizar el componente para usar el nuevo hook de capabilities.
 #### ✅ Tareas específicas
 
 - [ ] Reemplazar lógica actual de límites:
+
   ```typescript
   // ❌ ELIMINAR
   const { user } = useAuthStore();
@@ -428,6 +450,7 @@ Refactorizar el componente para usar el nuevo hook de capabilities.
   const { data: capabilities, isLoading: isLoadingCapabilities } = useUserCapabilities();
   const canCreateTarotReading = capabilities?.canCreateTarotReading ?? false;
   ```
+
 - [ ] Simplificar condición de mostrar límite:
   ```typescript
   // ✅ SIMPLE
@@ -463,6 +486,7 @@ Refactorizar el componente para usar capabilities y verificar acceso a categorí
 #### ✅ Tareas específicas
 
 - [ ] Reemplazar lógica de verificación de PREMIUM:
+
   ```typescript
   // ❌ ELIMINAR
   const isPremium = user?.plan === 'premium';
@@ -471,6 +495,7 @@ Refactorizar el componente para usar capabilities y verificar acceso a categorí
   const { data: capabilities } = useUserCapabilities();
   const canUseCustomQuestions = capabilities?.canUseCustomQuestions ?? false;
   ```
+
 - [ ] Redirigir usuarios FREE/ANÓNIMOS que intenten acceder:
   ```typescript
   if (!canUseCustomQuestions && !isLoading) {
@@ -600,6 +625,7 @@ Mantener backward compatibility pero marcar campos como deprecated.
 
 - [ ] En `users.controller.ts`, agregar campo `capabilities` al response
 - [ ] Marcar campos legacy como `@Deprecated()`:
+
   ```typescript
   /**
    * @deprecated Use capabilities.dailyCard.used instead
@@ -611,6 +637,7 @@ Mantener backward compatibility pero marcar campos como deprecated.
    */
   dailyCardLimit: number;
   ```
+
 - [ ] Documentar en Swagger que campos son deprecated
 - [ ] Agregar header de deprecation warning (opcional)
 - [ ] Actualizar tests
@@ -682,6 +709,7 @@ Eliminar todo código, archivos, funciones, tipos y comentarios obsoletos que qu
 #### ✅ Tareas específicas
 
 **Frontend - Tipos y Interfaces:**
+
 - [ ] Eliminar de `types/auth.ts` o `types/user.ts`:
   - `dailyCardCount`, `dailyCardLimit`
   - `tarotReadingsCount`, `tarotReadingsLimit`
@@ -691,6 +719,7 @@ Eliminar todo código, archivos, funciones, tipos y comentarios obsoletos que qu
 - [ ] Verificar que no haya tipos duplicados entre archivos
 
 **Frontend - Hooks obsoletos:**
+
 - [ ] Revisar `hooks/api/useReadings.ts`:
   - Eliminar funciones helper de cálculo de límites si existen
   - Eliminar imports no usados
@@ -700,6 +729,7 @@ Eliminar todo código, archivos, funciones, tipos y comentarios obsoletos que qu
 - [ ] Buscar hooks no usados con: `grep -r "export function use" --include="*.ts" | xargs -I {} sh -c 'grep -rL "$(basename {} .ts)" --include="*.tsx" --include="*.ts" src/'`
 
 **Frontend - Componentes:**
+
 - [ ] En `DailyCardExperience.tsx`:
   - Eliminar imports no usados (`useAuthStore` si ya no se usa)
   - Eliminar variables comentadas/dead code
@@ -711,6 +741,7 @@ Eliminar todo código, archivos, funciones, tipos y comentarios obsoletos que qu
 - [ ] Buscar componentes no usados y eliminar archivos completos
 
 **Frontend - Stores:**
+
 - [ ] En `authStore.ts`:
   - Eliminar campos de user relacionados a límites
   - Eliminar métodos helper de límites si existen
@@ -718,6 +749,7 @@ Eliminar todo código, archivos, funciones, tipos y comentarios obsoletos que qu
 - [ ] Verificar que no haya otros stores con lógica de límites
 
 **Frontend - Utilidades:**
+
 - [ ] Revisar `lib/utils/`:
   - Eliminar funciones de cálculo de límites
   - Eliminar helpers de formateo de límites no usados
@@ -725,20 +757,24 @@ Eliminar todo código, archivos, funciones, tipos y comentarios obsoletos que qu
   - Eliminar constantes de límites hardcodeadas (FREE_LIMIT, etc.)
 
 **Frontend - Tests:**
+
 - [ ] Eliminar tests de funciones/componentes eliminados
 - [ ] Actualizar mocks que incluían campos de límites
 - [ ] Eliminar fixtures/data de prueba obsoletos
 
 **Backend - DTOs:**
+
 - [ ] Marcar DTOs legacy como `@Deprecated` con fecha de eliminación
 - [ ] NO eliminar aún (backward compatibility) pero documentar
 
 **Backend - Código:**
+
 - [ ] Revisar si hay funciones duplicadas de cálculo de límites
 - [ ] Eliminar código comentado
 - [ ] Limpiar imports no usados
 
 **Verificación final:**
+
 - [ ] Ejecutar `npm run lint` - 0 errores
 - [ ] Ejecutar `npm run type-check` - 0 errores
 - [ ] Ejecutar `npx ts-prune` - revisar exports no usados
@@ -861,12 +897,12 @@ TASK-010 (Profile)            TASK-004 (Hook)
 
 ## Riesgos y Mitigaciones
 
-| Riesgo | Probabilidad | Impacto | Mitigación |
-|--------|--------------|---------|------------|
-| Breaking changes en API | Media | Alto | Mantener campos legacy con deprecation |
-| Tests existentes fallan | Alta | Medio | Actualizar tests junto con cada tarea |
-| Regresión en flujo anónimo | Media | Alto | E2E tests específicos para anónimos |
-| Timing issues persisten | Baja | Alto | `staleTime: 0` + invalidación explícita |
+| Riesgo                     | Probabilidad | Impacto | Mitigación                              |
+| -------------------------- | ------------ | ------- | --------------------------------------- |
+| Breaking changes en API    | Media        | Alto    | Mantener campos legacy con deprecation  |
+| Tests existentes fallan    | Alta         | Medio   | Actualizar tests junto con cada tarea   |
+| Regresión en flujo anónimo | Media        | Alto    | E2E tests específicos para anónimos     |
+| Timing issues persisten    | Baja         | Alto    | `staleTime: 0` + invalidación explícita |
 
 ---
 
