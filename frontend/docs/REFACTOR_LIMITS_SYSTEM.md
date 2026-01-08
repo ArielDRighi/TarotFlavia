@@ -469,7 +469,8 @@ Refactorizar el componente para usar el nuevo hook de capabilities.
 - [x] Simplificar condición de mostrar límite:
   ```typescript
   // ✅ SIMPLE
-  if (!canCreateTarotReading && !isLoadingCapabilities) {
+  const isLoading = isAuthLoading || isSpreadsLoading || isLoadingCapabilities;
+  if (!canCreateTarotReading && !isLoading) {
     return <ReadingLimitReached />;
   }
   ```

@@ -82,41 +82,41 @@ const mockSpreads = [
 
 // Mock capabilities for FREE user who can create readings
 const mockFreeCapabilities = {
-  plan: 'free',
+  plan: 'free' as const,
   dailyCard: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
   tarotReadings: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
-  canCreateDailyCard: true,
+  canCreateDailyReading: true,
   canCreateTarotReading: true,
-  canUseCategories: false,
+  canUseAI: false,
   canUseCustomQuestions: false,
-  canAccessAdvancedSpreads: false,
-  hasAiInterpretations: false,
+  canUseAdvancedSpreads: false,
+  isAuthenticated: true,
 };
 
 // Mock capabilities for FREE user who has reached daily limit
 const mockFreeCapabilitiesAtLimit = {
-  plan: 'free',
+  plan: 'free' as const,
   dailyCard: { used: 1, limit: 1, canUse: false, resetAt: '2026-01-09T00:00:00Z' },
   tarotReadings: { used: 1, limit: 1, canUse: false, resetAt: '2026-01-09T00:00:00Z' },
-  canCreateDailyCard: false,
+  canCreateDailyReading: false,
   canCreateTarotReading: false,
-  canUseCategories: false,
+  canUseAI: false,
   canUseCustomQuestions: false,
-  canAccessAdvancedSpreads: false,
-  hasAiInterpretations: false,
+  canUseAdvancedSpreads: false,
+  isAuthenticated: true,
 };
 
 // Mock capabilities for PREMIUM user
 const mockPremiumCapabilities = {
-  plan: 'premium',
+  plan: 'premium' as const,
   dailyCard: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
   tarotReadings: { used: 0, limit: 3, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
-  canCreateDailyCard: true,
+  canCreateDailyReading: true,
   canCreateTarotReading: true,
-  canUseCategories: true,
+  canUseAI: true,
   canUseCustomQuestions: true,
-  canAccessAdvancedSpreads: true,
-  hasAiInterpretations: true,
+  canUseAdvancedSpreads: true,
+  isAuthenticated: true,
 };
 
 describe('SpreadSelector', () => {
