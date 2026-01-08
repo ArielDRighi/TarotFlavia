@@ -191,7 +191,7 @@ describe('DailyReadingService', () => {
 
       // Mock usage limit - usuario NO ha alcanzado límite
       mockUsageLimitsService.checkLimit.mockResolvedValue(true);
-      
+
       // Mock user lookup
       mockUsersService.findById.mockResolvedValue({
         id: userId,
@@ -222,7 +222,7 @@ describe('DailyReadingService', () => {
 
       // Mock usage limit - usuario SÍ alcanzó límite
       mockUsageLimitsService.checkLimit.mockResolvedValue(false);
-      
+
       // Mock user lookup
       mockUsersService.findById.mockResolvedValue({
         id: userId,
