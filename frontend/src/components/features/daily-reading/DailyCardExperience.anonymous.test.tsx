@@ -8,7 +8,6 @@ import {
   createMockTarotCard,
   createMockDailyReading,
   createMockAnonymousCapabilities,
-  createMockFreeCapabilities,
   createMockCapabilitiesWithDailyCardLimitReached,
 } from '@/test/factories';
 

@@ -204,7 +204,7 @@ describe('DailyCardExperience', () => {
       expect(mutateFn).toHaveBeenCalled();
 
       // Verify invalidateCapabilities was called in onSuccess
-      // Note: This will be verified in implementation
+      expect(invalidateFn).toHaveBeenCalled();
     });
 
     it('should NOT read dailyCardCount/dailyCardLimit from user object', () => {
