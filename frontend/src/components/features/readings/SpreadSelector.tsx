@@ -7,7 +7,7 @@ import { ChevronRight, Clock, Layers } from 'lucide-react';
 
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { useMyAvailableSpreads } from '@/hooks/api/useReadings';
-import { useAuthStore } from '@/stores/authStore';
+import { useUserCapabilities } from '@/hooks/api/useUserCapabilities';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -154,7 +154,9 @@ export function SpreadSelector({ categoryId, questionId, customQuestion }: Sprea
   const router = useRouter();
 
   const { isLoading: isAuthLoading } = useRequireAuth();
-  const { user } = useAuthStore();
+
+  // ✅ NEW: Use capabilities hook (single source of truth)
+  const { data: capabilities, isLoading: isLoadingCapabilities } = useUserCapabilities();
 
   // Use different endpoint based on authentication status
   // For authenticated users, backend filters spreads based on their plan
@@ -165,35 +167,22 @@ export function SpreadSelector({ categoryId, questionId, customQuestion }: Sprea
     refetch,
   } = useMyAvailableSpreads();
 
-  // ❌ REMOVED: Modal state no longer needed - we show full limit component instead
-  // const [showLimitModal, setShowLimitModal] = useState(false);
-
-  const isLoading = isAuthLoading || isSpreadsLoading;
+  // ✅ Move calculations and hooks BEFORE any conditional returns
+  const isLoading = isAuthLoading || isSpreadsLoading || isLoadingCapabilities;
   const hasQuestion = Boolean(questionId || customQuestion);
 
-  // ✅ Check if user has reached tarot readings limit BEFORE showing spreads
-  const hasReachedLimit = useCallback((): boolean => {
-    if (!user) return false;
-    if (user.plan === 'premium') return false; // PREMIUM users have higher limits
+  // ✅ NEW: Simple check using capabilities
+  const canCreateTarotReading = capabilities?.canCreateTarotReading ?? false;
+  const isPremium = capabilities?.plan === 'premium';
 
-    // Use specific tarot readings counters (not daily card counters)
-    const tarotCount = user.tarotReadingsCount ?? 0;
-    const tarotLimit = user.tarotReadingsLimit ?? 0;
-
-    return tarotCount >= tarotLimit;
-  }, [user]);
-
-  // ✅ Show limit message immediately if limit reached
-  const showLimitMessage = hasReachedLimit();
-
+  // ✅ Define callback BEFORE conditional return (hooks must be called in same order)
   const handleSpreadSelect = useCallback(
     (spreadId: number) => {
-      // ❌ REMOVED: No need to check limit here - already checked at component level
       // Build navigation URL
       let url = `/ritual/lectura?spreadId=${spreadId}`;
 
       // Only add question params for PREMIUM users
-      if (user?.plan === 'premium') {
+      if (isPremium) {
         // Add categoryId if present
         if (categoryId) {
           url += `&categoryId=${categoryId}`;
@@ -208,19 +197,11 @@ export function SpreadSelector({ categoryId, questionId, customQuestion }: Sprea
 
       router.push(url);
     },
-    [categoryId, questionId, customQuestion, router, user]
+    [categoryId, questionId, customQuestion, router, isPremium]
   );
 
-  // ❌ REMOVED: Modal handler no longer needed
-  // const handleCloseLimitModal = useCallback(() => {
-  //   setShowLimitModal(false);
-  // }, []);
-
-  // Check if user is PREMIUM for conditional rendering
-  const isPremium = user?.plan === 'premium';
-
-  // ✅ NEW: If limit reached, show limit message instead of spreads
-  if (showLimitMessage && !isLoading) {
+  // ✅ NEW: Show limit message immediately if limit reached
+  if (!canCreateTarotReading && !isLoading) {
     return (
       <div className="bg-bg-main flex min-h-screen items-center justify-center p-8">
         <ReadingLimitReached />
