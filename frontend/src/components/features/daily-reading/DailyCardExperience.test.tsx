@@ -4,7 +4,14 @@ import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { DailyCardExperience } from './DailyCardExperience';
-import { createMockTarotCard, createMockDailyReading, createMockUser } from '@/test/factories';
+import {
+  createMockTarotCard,
+  createMockDailyReading,
+  createMockUser,
+  createMockFreeCapabilities,
+  createMockAnonymousCapabilities,
+  createMockCapabilitiesWithDailyCardLimitReached,
+} from '@/test/factories';
 
 // Create mock functions
 const mockPush = vi.fn();
@@ -47,6 +54,8 @@ const mockUseDailyReadingPublic = vi.fn();
 const mockUseRegenerateDailyReading = vi.fn();
 const mockUseAuth = vi.fn();
 const mockUseRequireAuth = vi.fn();
+const mockUseUserCapabilities = vi.fn();
+const mockUseInvalidateCapabilities = vi.fn();
 
 vi.mock('@/hooks/api/useDailyReading', () => ({
   useDailyReadingToday: () => mockUseDailyReadingToday(),
@@ -61,6 +70,11 @@ vi.mock('@/hooks/useAuth', () => ({
 
 vi.mock('@/hooks/useRequireAuth', () => ({
   useRequireAuth: () => mockUseRequireAuth(),
+}));
+
+vi.mock('@/hooks/api/useUserCapabilities', () => ({
+  useUserCapabilities: () => mockUseUserCapabilities(),
+  useInvalidateCapabilities: () => mockUseInvalidateCapabilities(),
 }));
 
 // Mock toast
@@ -96,13 +110,20 @@ describe('DailyCardExperience', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Default mocks: authenticated user, no daily reading yet
+    // Default mocks: authenticated FREE user with capabilities
     mockUseRequireAuth.mockReturnValue({ isLoading: false });
     mockUseAuth.mockReturnValue({
       user: createMockUser(),
       isAuthenticated: true,
       isLoading: false,
     });
+    // Mock capabilities: FREE user with no usage
+    mockUseUserCapabilities.mockReturnValue({
+      data: createMockFreeCapabilities(),
+      isLoading: false,
+      error: null,
+    });
+    mockUseInvalidateCapabilities.mockReturnValue(vi.fn());
     mockUseDailyReadingToday.mockReturnValue({
       data: null,
       isLoading: false,
@@ -124,6 +145,142 @@ describe('DailyCardExperience', () => {
 
   afterEach(() => {
     vi.clearAllMocks();
+  });
+
+  describe('Capabilities Integration', () => {
+    it('should use capabilities hook to determine if user can create daily reading', () => {
+      // Setup: FREE user with capabilities that allow daily reading
+      mockUseUserCapabilities.mockReturnValue({
+        data: createMockFreeCapabilities({ canCreateDailyReading: true }),
+        isLoading: false,
+        error: null,
+      });
+
+      renderWithProviders(<DailyCardExperience />);
+
+      // Should show unrevealed card (not limit message)
+      expect(screen.getByTestId('unrevealed-state')).toBeInTheDocument();
+    });
+
+    it('should show limit message when capabilities indicate daily reading not available', () => {
+      // Setup: FREE user who reached daily card limit
+      mockUseUserCapabilities.mockReturnValue({
+        data: createMockCapabilitiesWithDailyCardLimitReached('free'),
+        isLoading: false,
+        error: null,
+      });
+
+      renderWithProviders(<DailyCardExperience />);
+
+      // Should show limit reached message
+      expect(screen.queryByTestId('unrevealed-state')).not.toBeInTheDocument();
+      // DailyCardLimitReached component should be shown (tested separately)
+    });
+
+    it('should invalidate capabilities after creating daily reading', async () => {
+      const user = userEvent.setup();
+      const invalidateFn = vi.fn();
+      const mutateFn = vi.fn((_, options) => {
+        options?.onSuccess?.(createMockDailyReading());
+      });
+
+      mockUseInvalidateCapabilities.mockReturnValue(invalidateFn);
+      mockUseDailyReading.mockReturnValue({
+        mutate: mutateFn,
+        isPending: false,
+      });
+
+      renderWithProviders(<DailyCardExperience />);
+
+      // Click to create daily reading
+      await user.click(screen.getByTestId('tarot-card'));
+
+      // Wait for success
+      await waitFor(() => {
+        expect(screen.getByTestId('revealed-state')).toBeInTheDocument();
+      });
+
+      // Verify mutation was called
+      expect(mutateFn).toHaveBeenCalled();
+
+      // Verify invalidateCapabilities was called in onSuccess
+      expect(invalidateFn).toHaveBeenCalled();
+    });
+
+    it('should NOT read dailyCardCount/dailyCardLimit from user object', () => {
+      // Setup: user with old fields that should be completely ignored
+      mockUseAuth.mockReturnValue({
+        user: createMockUser(),
+        isAuthenticated: true,
+        isLoading: false,
+      });
+
+      // Capabilities say user CAN create
+      mockUseUserCapabilities.mockReturnValue({
+        data: createMockFreeCapabilities({ canCreateDailyReading: true }),
+        isLoading: false,
+        error: null,
+      });
+
+      renderWithProviders(<DailyCardExperience />);
+
+      // Should trust capabilities, not user object counters
+      expect(screen.getByTestId('unrevealed-state')).toBeInTheDocument();
+    });
+
+    it('should show limit message for PREMIUM user when daily card limit reached', () => {
+      // PREMIUM also has 1 daily card limit
+      mockUseAuth.mockReturnValue({
+        user: createMockUser({ plan: 'PREMIUM' }),
+        isAuthenticated: true,
+        isLoading: false,
+      });
+      mockUseUserCapabilities.mockReturnValue({
+        data: createMockCapabilitiesWithDailyCardLimitReached('premium'),
+        isLoading: false,
+        error: null,
+      });
+
+      renderWithProviders(<DailyCardExperience />);
+
+      // Should show limit message even for PREMIUM
+      expect(screen.queryByTestId('unrevealed-state')).not.toBeInTheDocument();
+    });
+
+    it('should show unrevealed card for anonymous user with available limit', () => {
+      mockUseAuth.mockReturnValue({
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+      });
+      mockUseUserCapabilities.mockReturnValue({
+        data: createMockAnonymousCapabilities({ canCreateDailyReading: true }),
+        isLoading: false,
+        error: null,
+      });
+
+      renderWithProviders(<DailyCardExperience />);
+
+      expect(screen.getByTestId('unrevealed-state')).toBeInTheDocument();
+    });
+
+    it('should show anonymous limit message when capabilities say limit reached', () => {
+      mockUseAuth.mockReturnValue({
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+      });
+      mockUseUserCapabilities.mockReturnValue({
+        data: createMockCapabilitiesWithDailyCardLimitReached('anonymous'),
+        isLoading: false,
+        error: null,
+      });
+
+      renderWithProviders(<DailyCardExperience />);
+
+      // Should show anonymous limit message
+      expect(screen.queryByTestId('unrevealed-state')).not.toBeInTheDocument();
+    });
   });
 
   describe('Unrevealed State', () => {

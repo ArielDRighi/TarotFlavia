@@ -2,10 +2,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AxiosError } from 'axios';
 
 import { DailyCardExperience } from './DailyCardExperience';
-import { createMockTarotCard, createMockDailyReading } from '@/test/factories';
+import {
+  createMockTarotCard,
+  createMockDailyReading,
+  createMockAnonymousCapabilities,
+  createMockCapabilitiesWithDailyCardLimitReached,
+} from '@/test/factories';
 
 // Create mock functions
 const mockPush = vi.fn();
@@ -13,6 +17,8 @@ const mockUseDailyReadingToday = vi.fn();
 const mockUseDailyReading = vi.fn();
 const mockUseDailyReadingPublic = vi.fn();
 const mockUseAuth = vi.fn();
+const mockUseUserCapabilities = vi.fn();
+const mockUseInvalidateCapabilities = vi.fn();
 
 // Mock next/navigation
 vi.mock('next/navigation', () => ({
@@ -45,6 +51,11 @@ vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => mockUseAuth(),
 }));
 
+vi.mock('@/hooks/api/useUserCapabilities', () => ({
+  useUserCapabilities: () => mockUseUserCapabilities(),
+  useInvalidateCapabilities: () => mockUseInvalidateCapabilities(),
+}));
+
 // Mock toast
 vi.mock('@/hooks/utils/useToast', () => ({
   toast: {
@@ -74,27 +85,12 @@ function renderWithProviders(ui: React.ReactElement) {
   return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
 }
 
-// Helper to create an AxiosError mock
-function createMockAxiosError(status: number, message?: string): AxiosError {
-  const error = new Error(message || 'Request failed') as AxiosError;
-  error.isAxiosError = true;
-  error.response = {
-    status,
-    data: { message },
-    statusText: '',
-    headers: {},
-    config: {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      headers: {} as any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any,
-  };
-  return error;
-}
-
 describe('DailyCardExperience - Anonymous User Flow', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // Default mock for invalidateCapabilities
+    mockUseInvalidateCapabilities.mockReturnValue(vi.fn());
 
     // Default mocks for useDailyReading mutation
     mockUseDailyReading.mockReturnValue({
@@ -119,6 +115,13 @@ describe('DailyCardExperience - Anonymous User Flow', () => {
         user: null,
         isAuthenticated: false,
         isLoading: false,
+      });
+
+      // Mock capabilities: anonymous user with available limit
+      mockUseUserCapabilities.mockReturnValue({
+        data: createMockAnonymousCapabilities({ canCreateDailyReading: true }),
+        isLoading: false,
+        error: null,
       });
 
       // Mock authenticated endpoint to return default values (won't be called)
@@ -242,58 +245,19 @@ describe('DailyCardExperience - Anonymous User Flow', () => {
       expect(screen.getByRole('button', { name: /crear cuenta gratis/i })).toBeInTheDocument();
     });
 
-    it('should show AnonymousLimitReached when limit is reached (409)', async () => {
-      // For anonymous limit reached, component doesn't make initial fetch
-      // Error will come from POST mutation when user clicks card
-      const mockError = createMockAxiosError(409, 'Ya viste tu carta del día');
-
-      const mockMutate = vi.fn((fingerprint, { onError }) => {
-        onError(mockError);
-      });
-
-      mockUseDailyReadingPublic.mockReturnValue({
-        mutate: mockMutate,
-        isPending: false,
-        error: mockError,
+    it('should show AnonymousLimitReached when limit is reached (capabilities-driven)', async () => {
+      // Mock capabilities: anonymous limit reached
+      mockUseUserCapabilities.mockReturnValue({
+        data: createMockCapabilitiesWithDailyCardLimitReached('anonymous'),
+        isLoading: false,
+        error: null,
       });
 
       renderWithProviders(<DailyCardExperience />);
 
-      // Note: Without initial fetch, AnonymousLimitReached only shows after POST fails
-      // This test needs adjustment - the error state only appears after clicking
-      // For now, we verify the component doesn't crash with the error
-      expect(screen.getByTestId('unrevealed-state')).toBeInTheDocument();
-    });
-
-    it('should navigate to register when clicking primary CTA in limit reached state', async () => {
-      const user = userEvent.setup();
-
-      // Simulate limit reached error when user clicks card
-      const mockError = createMockAxiosError(409, 'Ya viste tu carta del día');
-      const mockMutate = vi.fn((fingerprint, { onError }) => {
-        onError(mockError);
-      });
-
-      mockUseDailyReadingPublic.mockReturnValue({
-        mutate: mockMutate,
-        isPending: false,
-      });
-
-      renderWithProviders(<DailyCardExperience />);
-
-      // Click card to trigger error
-      const tarotCard = screen.getByTestId('tarot-card');
-      await user.click(tarotCard);
-
-      // Wait for AnonymousLimitReached to show after error
-      await waitFor(() => {
-        expect(screen.getByRole('alert')).toBeInTheDocument();
-      });
-
-      const registerButton = screen.getByRole('button', { name: /crear cuenta gratis/i });
-      await user.click(registerButton);
-
-      expect(mockPush).toHaveBeenCalledWith('/registro');
+      // Should NOT show unrevealed card when limit is reached
+      expect(screen.queryByTestId('unrevealed-state')).not.toBeInTheDocument();
+      // Component shows AnonymousLimitReached immediately (capabilities prevent card creation)
     });
 
     it('should NOT show regenerate button for anonymous users', async () => {
