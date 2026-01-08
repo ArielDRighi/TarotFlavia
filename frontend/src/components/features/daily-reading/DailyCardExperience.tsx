@@ -1,20 +1,12 @@
 'use client';
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { Copy, History, RefreshCw, Sparkles } from 'lucide-react';
+import { Copy, History, Sparkles } from 'lucide-react';
 import { isAxiosError, AxiosError } from 'axios';
 import { ROUTES } from '@/lib/constants/routes';
 
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TarotCard } from '@/components/features/readings/TarotCard';
 import { AnonymousLimitReached } from './AnonymousLimitReached';
@@ -23,7 +15,6 @@ import {
   useDailyReadingToday,
   useDailyReading,
   useDailyReadingPublic,
-  useRegenerateDailyReading,
 } from '@/hooks/api/useDailyReading';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/utils/useToast';
@@ -94,11 +85,10 @@ export function DailyCardExperience() {
 
   const { mutate: createDailyReading, isPending: isCreating } = useDailyReading();
   const { mutate: createDailyReadingPublic, isPending: isCreatingPublic } = useDailyReadingPublic();
-  const { mutate: regenerateReading, isPending: isRegenerating } = useRegenerateDailyReading();
 
-  // Modal state
-  const [showPremiumModal, setShowPremiumModal] = useState(false);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  // Modal state (removed regenerate modals - feature doesn't exist)
+  // const [showPremiumModal, setShowPremiumModal] = useState(false);
+  // const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   // Local state for animation
   const [isRevealing, setIsRevealing] = useState(false);
@@ -112,13 +102,13 @@ export function DailyCardExperience() {
   // by preventing unnecessary API calls and showing limit message immediately
   const hasAnonymousCardToday = useMemo(() => {
     if (isAuthenticated || typeof window === 'undefined') return false;
-    
+
     const consumed = sessionStorage.getItem('tarot_daily_card_consumed');
     if (!consumed) return false;
 
     const consumedDate = new Date(consumed);
     const today = new Date();
-    
+
     // Check if it's the same day
     return (
       consumedDate.getDate() === today.getDate() &&
@@ -128,7 +118,6 @@ export function DailyCardExperience() {
   }, [isAuthenticated]);
 
   // Computed values
-  const isPremium = user?.plan === 'PREMIUM';
   const currentReading = localReading || dailyReading;
   const isRevealed = Boolean(currentReading);
   const isCreatingReading = isCreating || isCreatingPublic;
@@ -147,11 +136,14 @@ export function DailyCardExperience() {
   // Check if authenticated user reached limit
   // Daily card is independent from tarot readings
   // FREE users: 1 daily card per day
-  // PREMIUM users: 1 daily card per day (but can regenerate)
+  // PREMIUM users: 1 daily card per day (with AI interpretation)
   // If user already used their daily card, they should see limit message
   // The card can only be viewed in history, not here
+  // IMPORTANT: Only show limit if there's NO current reading
+  // If there's a reading, it means user just revealed it and should see it
   const isAuthenticatedLimitReached =
     isAuthenticated &&
+    !currentReading && // Don't show limit if we have a reading to display
     (hasReachedDailyCardLimit || // Already reached limit based on counters
       (isAxiosError(authenticatedError) &&
         (authenticatedError.response?.status === 403 ||
@@ -241,28 +233,9 @@ export function DailyCardExperience() {
     router.push('/historial');
   }, [router]);
 
-  /**
-   * Handle regenerate button click
-   */
-  const handleRegenerateClick = useCallback(() => {
-    if (isPremium) {
-      setShowConfirmModal(true);
-    } else {
-      setShowPremiumModal(true);
-    }
-  }, [isPremium]);
-
-  /**
-   * Handle confirmed regeneration (premium users)
-   */
-  const handleConfirmRegenerate = useCallback(() => {
-    setShowConfirmModal(false);
-    regenerateReading(undefined, {
-      onSuccess: (data) => {
-        setLocalReading(data);
-      },
-    });
-  }, [regenerateReading]);
+  // NOTE: Regenerate functionality removed - not part of business model
+  // All users (FREE/PREMIUM) get 1 daily card per day
+  // PREMIUM gets AI interpretation but same limit (1/day)
 
   // Show AnonymousLimitReached when anonymous user reached limit (403)
   if (isAnonymousLimitReached) {
@@ -420,59 +393,12 @@ export function DailyCardExperience() {
                 <History className="h-4 w-4" />
                 Ver historial
               </Button>
-
-              <Button
-                variant="secondary"
-                onClick={handleRegenerateClick}
-                disabled={isRegenerating}
-                aria-label="Regenerar carta"
-              >
-                <RefreshCw className={cn('h-4 w-4', isRegenerating && 'animate-spin')} />
-                Regenerar
-              </Button>
             </div>
           )}
         </div>
       )}
 
-      {/* Premium Upgrade Modal */}
-      <Dialog open={showPremiumModal} onOpenChange={setShowPremiumModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Actualiza a Premium</DialogTitle>
-            <DialogDescription>
-              La función de regenerar la carta del día está disponible solo para usuarios Premium.
-              Actualiza tu plan para disfrutar de esta y otras funciones exclusivas.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowPremiumModal(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={() => router.push('/perfil')}>Ver planes</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Confirm Regenerate Modal */}
-      <Dialog open={showConfirmModal} onOpenChange={setShowConfirmModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>¿Regenerar carta del día?</DialogTitle>
-            <DialogDescription>
-              Se generará una nueva carta e interpretación. Esta acción reemplazará tu carta actual.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowConfirmModal(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleConfirmRegenerate} disabled={isRegenerating}>
-              {isRegenerating ? 'Regenerando...' : 'Confirmar'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Removed regenerate modals - feature not part of business model */}
     </>
   );
 }

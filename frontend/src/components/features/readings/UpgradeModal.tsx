@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
 
 /**
  * Props for UpgradeModal component
@@ -53,7 +54,10 @@ const PREMIUM_BENEFITS = [
  *
  * Modal persuasivo que muestra los beneficios de Premium
  * con pricing y CTA claro. Usado cuando usuarios FREE/ANONYMOUS
- * intentan acceder a features premium.
+ * intentan acceder a features premium o alcanzan su límite diario.
+ *
+ * ⚠️ IMPORTANTE: Este modal es SOLO para usuarios FREE/ANONYMOUS
+ * Para usuarios PREMIUM que alcanzaron límite, usar DailyLimitReachedModal
  *
  * @example
  * ```tsx
@@ -71,12 +75,23 @@ const PREMIUM_BENEFITS = [
  * ```
  */
 export default function UpgradeModal({ open, onClose, reason }: UpgradeModalProps) {
+  const { user } = useAuth();
+
+  // Defensive: This modal should only be shown to FREE/ANONYMOUS users
+  // If user is already PREMIUM, something went wrong - log warning
+  if (open && user?.plan?.toUpperCase() === 'PREMIUM') {
+    console.warn(
+      '⚠️ UpgradeModal shown to PREMIUM user - should use DailyLimitReachedModal instead'
+    );
+  }
+
   // Custom title and description based on reason
   const getContent = () => {
     if (reason === 'limit-reached') {
       return {
         title: '¡Has alcanzado tu límite diario!',
-        description: 'Pasa a Premium para obtener lecturas ilimitadas y funcionalidades avanzadas',
+        description:
+          'Pasa a Premium para obtener más lecturas cada día y funcionalidades avanzadas',
       };
     }
     return {

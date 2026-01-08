@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Heart,
@@ -19,6 +19,8 @@ import { ErrorDisplay } from '@/components/ui/error-display';
 import { EmptyState } from '@/components/ui/empty-state';
 import { cn } from '@/lib/utils';
 import type { Category } from '@/types';
+import UpgradeModal from './UpgradeModal';
+import DailyLimitReachedModal from './DailyLimitReachedModal';
 
 /**
  * Icon mapping for categories based on slug
@@ -121,6 +123,11 @@ function CategoryCard({ category, onClick }: CategoryCardProps) {
  * Displays categories in a responsive grid with icons and hover effects.
  * Handles automatic redirection for FREE users to skip category selection.
  *
+ * ✅ EARLY LIMIT VALIDATION:
+ * - Checks if user has reached their daily limit BEFORE allowing navigation
+ * - Shows appropriate modal: UpgradeModal for FREE, DailyLimitReachedModal for PREMIUM
+ * - Prevents navigation through the full flow when limit is already reached
+ *
  * PLAN-BASED BEHAVIOR:
  * - FREE users: Automatically redirected to /ritual/tirada (no category selection)
  * - PREMIUM users: Select category first, then proceed to questions
@@ -130,14 +137,39 @@ export function CategorySelector() {
   const { data: categories, isLoading: isCategoriesLoading, error, refetch } = useCategories();
   const router = useRouter();
 
+  // Check user's daily limit status
+  const isPremium = user?.plan?.toUpperCase() === 'PREMIUM';
+  const tarotReadingsCount = user?.tarotReadingsCount ?? 0;
+  const tarotReadingsLimit = user?.tarotReadingsLimit ?? (isPremium ? 3 : 1);
+  const hasReachedLimit = tarotReadingsCount >= tarotReadingsLimit;
+
+  // Derive modal state from user and limit status (no effect needed)
+  // This ensures modal shows immediately without setState in effect
+  const modalType = useMemo(() => {
+    if (!user || !hasReachedLimit) return null;
+    return isPremium ? 'limit' : 'upgrade';
+  }, [user, hasReachedLimit, isPremium]);
+
+  // Track if user has manually closed the modal
+  const [isModalDismissed, setIsModalDismissed] = useState(false);
+
+  // Show modal only if derived state says to show it AND user hasn't dismissed it
+  const shouldShowModal = modalType !== null && !isModalDismissed;
+
   // Redirect FREE users to /ritual/tirada (skip category selection)
   useEffect(() => {
-    if (user?.plan === 'free') {
+    if (user?.plan?.toUpperCase() === 'FREE') {
       router.push('/ritual/tirada');
     }
   }, [user, router]);
 
   const handleCategoryClick = (categoryId: number) => {
+    // Double-check limit before navigation (defensive programming)
+    if (hasReachedLimit) {
+      // Don't navigate, modal will show via derived state
+      return;
+    }
+
     router.push(`/ritual/preguntas?categoryId=${categoryId}`);
   };
 
@@ -193,6 +225,27 @@ export function CategorySelector() {
           </div>
         )}
       </div>
+
+      {/* Modals */}
+      <UpgradeModal
+        open={shouldShowModal && modalType === 'upgrade'}
+        onClose={() => {
+          setIsModalDismissed(true);
+          router.push('/');
+        }}
+        reason="limit-reached"
+      />
+
+      <DailyLimitReachedModal
+        open={shouldShowModal && modalType === 'limit'}
+        onClose={() => {
+          setIsModalDismissed(true);
+          router.push('/');
+        }}
+        usedReadings={tarotReadingsCount}
+        totalReadings={tarotReadingsLimit}
+        featureType="tarot-reading"
+      />
     </div>
   );
 }
