@@ -510,12 +510,13 @@ Refactorizar el componente para usar el nuevo hook de capabilities.
 
 ---
 
-### **TASK-REFACTOR-007: Refactorizar CategorySelector**
+### **TASK-REFACTOR-007: Refactorizar CategorySelector** ✅
 
 **Prioridad:** 🟡 MEDIA
 **Estimación:** 2 horas
 **Área:** Frontend
 **Dependencias:** TASK-REFACTOR-004
+**Estado:** ✅ COMPLETADA (8 Enero 2026)
 
 #### 📋 Descripción
 
@@ -523,7 +524,7 @@ Refactorizar el componente para usar capabilities y verificar acceso a categorí
 
 #### ✅ Tareas específicas
 
-- [ ] Reemplazar lógica de verificación de PREMIUM:
+- [x] Reemplazar lógica de verificación de PREMIUM:
 
   ```typescript
   // ❌ ELIMINAR
@@ -534,7 +535,7 @@ Refactorizar el componente para usar capabilities y verificar acceso a categorí
   const canUseCustomQuestions = capabilities?.canUseCustomQuestions ?? false;
   ```
 
-- [ ] Redirigir usuarios FREE/ANÓNIMOS que intenten acceder:
+- [x] Redirigir usuarios FREE/ANÓNIMOS que intenten acceder:
   ```typescript
   if (!canUseCustomQuestions && !isLoading) {
     // Redirigir a spread selector (FREE no selecciona categorías)
@@ -542,13 +543,31 @@ Refactorizar el componente para usar capabilities y verificar acceso a categorí
     return null;
   }
   ```
-- [ ] Actualizar tests
+- [x] Actualizar tests
 
 #### 🎯 Criterios de aceptación
 
 - ✓ Solo PREMIUM puede acceder a categorías
 - ✓ FREE es redirigido automáticamente
-- ✓ Tests pasan
+- ✓ Tests pasan (11/11 tests passing)
+
+#### 📝 Notas de implementación
+
+- Tests: 11 tests creados (100% passing)
+- Metodología TDD aplicada (red → green → refactor)
+- Componente refactorizado de 252 a 215 líneas (~37 líneas eliminadas)
+- Eliminado código de validación de límites (ahora manejado por capabilities)
+- Removidos imports no usados: `UpgradeModal`, `DailyLimitReachedModal`, `useAuth`, `useState`, `useMemo`
+- Simplificada lógica de redirección usando solo `canUseCustomQuestions`
+- Ciclo de calidad completo:
+  - ✅ `npm run lint` - Sin errores
+  - ✅ `npm run type-check` - Sin errores TypeScript
+  - ✅ `npm run format` - Formateado con Prettier
+  - ✅ `node scripts/validate-architecture.js` - Arquitectura correcta
+  - ✅ `npm run build` - Build exitoso
+  - ✅ `npm test` - 11/11 tests pasando (100% coverage)
+- Branch: `feature/TASK-REFACTOR-007-category-selector`
+- Commit: (pendiente)
 
 ---
 
