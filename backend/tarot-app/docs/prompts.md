@@ -10,6 +10,13 @@ Autonomía Total: Ejecuta la tarea de principio a fin sin solicitar confirmacion
 
 Rama: Estás en develop. Crea la rama feature/TASK-00x-descripcion (usa la nomenclatura de las ramas existentes nombradas segun gitflow) y trabaja en ella.
 
+**Lectura Obligatoria de Contexto (ANTES de codificar):**
+
+Si la tarea involucra límites, capabilities, planes de usuario o validaciones de uso:
+
+1. `frontend/docs/MODELO_NEGOCIO_DEFINIDO.md` - Reglas de negocio para ANÓNIMO/FREE/PREMIUM
+2. `frontend/docs/REFACTOR_LIMITS_SYSTEM.md` - Arquitectura del sistema de capabilities
+
 Arquitectura y Patrones (CRÍTICO):
 
 - **LEE PRIMERO:** `backend/tarot-app/docs/ARCHITECTURE.md` (completo) para entender la arquitectura híbrida feature-based del proyecto.
@@ -129,6 +136,13 @@ npm run start:dev  # Probar endpoints manualmente
 Tengo el siguiente feedback del PR para la rama feature/TASK-00x.
 
 Feedback Recibido: [Pega aquí el feedback completo del revisor]
+
+**Lectura Obligatoria de Contexto:**
+
+Si el PR involucra límites, capabilities o planes de usuario, lee antes de responder:
+
+1. `frontend/docs/MODELO_NEGOCIO_DEFINIDO.md` - Reglas de negocio (fuente de verdad)
+2. `frontend/docs/REFACTOR_LIMITS_SYSTEM.md` - Arquitectura de capabilities
 
 Tu Tarea (Análisis Senior):
 
