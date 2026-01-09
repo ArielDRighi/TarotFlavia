@@ -18,6 +18,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import { apiClient } from '@/lib/api/axios-config';
 import { API_ENDPOINTS } from '@/lib/api/endpoints';
+import { getSessionFingerprint } from '@/lib/utils/fingerprint';
 import type { UserCapabilities } from '@/types';
 
 // ============================================================================
@@ -64,7 +65,12 @@ export function useUserCapabilities() {
   return useQuery<UserCapabilities>({
     queryKey: capabilitiesQueryKeys.capabilities,
     queryFn: async () => {
-      const response = await apiClient.get<UserCapabilities>(API_ENDPOINTS.USERS.CAPABILITIES);
+      // Get fingerprint for anonymous users to track usage
+      const fingerprint = await getSessionFingerprint();
+
+      const response = await apiClient.get<UserCapabilities>(API_ENDPOINTS.USERS.CAPABILITIES, {
+        params: { fingerprint },
+      });
       return response.data;
     },
     staleTime: 0, // Always revalidate for fresh data

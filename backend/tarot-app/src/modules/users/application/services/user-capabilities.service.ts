@@ -1,7 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, MoreThanOrEqual } from 'typeorm';
 import { UsersService } from '../../users.service';
 import { UsageLimitsService } from '../../../usage-limits/usage-limits.service';
 import { PlanConfigService } from '../../../plan-config/plan-config.service';
+import { DailyReading } from '../../../tarot/daily-reading/entities/daily-reading.entity';
 import {
   UserCapabilitiesDto,
   UserPlanType,
@@ -15,17 +18,23 @@ export class UserCapabilitiesService {
     private readonly usersService: UsersService,
     private readonly usageLimitsService: UsageLimitsService,
     private readonly planConfigService: PlanConfigService,
+    @InjectRepository(DailyReading)
+    private readonly dailyReadingRepository: Repository<DailyReading>,
   ) {}
 
   /**
    * Obtiene las capabilities computadas para un usuario
    * @param userId - ID del usuario (null para anónimos)
+   * @param fingerprint - Fingerprint del cliente (solo para anónimos, para verificar uso previo)
    * @returns UserCapabilitiesDto con todos los límites y permisos
    */
-  async getCapabilities(userId: number | null): Promise<UserCapabilitiesDto> {
+  async getCapabilities(
+    userId: number | null,
+    fingerprint?: string | null,
+  ): Promise<UserCapabilitiesDto> {
     // Si no hay userId, retornar capabilities anónimas
     if (!userId) {
-      return this.getAnonymousCapabilities();
+      return this.getAnonymousCapabilities(fingerprint || null);
     }
 
     // Obtener datos del usuario
@@ -85,15 +94,45 @@ export class UserCapabilitiesService {
    * Según MODELO_NEGOCIO_DEFINIDO.md:
    * - 1 carta del día
    * - 0 tiradas de tarot
+   *
+   * Consulta directamente la tabla daily_readings por anonymous_fingerprint
+   * para verificar si el usuario anónimo ya usó su carta del día.
+   *
+   * @param fingerprint - Fingerprint del cliente (generado en frontend)
    */
-  private getAnonymousCapabilities(): UserCapabilitiesDto {
+  private async getAnonymousCapabilities(
+    fingerprint: string | null,
+  ): Promise<UserCapabilitiesDto> {
     const resetAt = this.getNextMidnightUTC();
+
+    // Check actual usage for anonymous user via fingerprint
+    let dailyCardUsed = 0;
+    let canCreateDailyReading = true;
+
+    // Solo verificar si tenemos fingerprint válido
+    if (fingerprint && fingerprint.length > 0) {
+      // Query the daily_reading table directly for today's reading
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0);
+
+      const existingReading = await this.dailyReadingRepository.findOne({
+        where: {
+          anonymousFingerprint: fingerprint,
+          readingDate: MoreThanOrEqual(today),
+        },
+      });
+
+      if (existingReading) {
+        dailyCardUsed = 1;
+        canCreateDailyReading = false;
+      }
+    }
 
     return {
       dailyCard: {
-        used: 0,
+        used: dailyCardUsed,
         limit: 1,
-        canUse: true,
+        canUse: canCreateDailyReading,
         resetAt,
       },
       tarotReadings: {
@@ -102,7 +141,7 @@ export class UserCapabilitiesService {
         canUse: false,
         resetAt,
       },
-      canCreateDailyReading: true,
+      canCreateDailyReading,
       canCreateTarotReading: false,
       canUseAI: false,
       canUseCustomQuestions: false,

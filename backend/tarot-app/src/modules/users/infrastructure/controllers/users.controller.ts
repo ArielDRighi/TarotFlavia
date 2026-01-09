@@ -6,6 +6,7 @@ import {
   Post,
   Param,
   Body,
+  Query,
   UseGuards,
   Request,
   NotFoundException,
@@ -53,13 +54,14 @@ export class UsersController {
   /**
    * Obtener capabilities del usuario (autenticado o anónimo)
    * Este endpoint NO requiere autenticación para soportar usuarios anónimos
+   * Para usuarios anónimos, usa el fingerprint (query param) para verificar uso previo
    */
   @UseGuards(OptionalJwtAuthGuard)
   @Get('capabilities')
   @ApiOperation({
     summary: 'Obtener capabilities del usuario actual',
     description:
-      'Retorna las capabilities y límites del usuario. Funciona tanto para usuarios autenticados como anónimos.',
+      'Retorna las capabilities y límites del usuario. Funciona tanto para usuarios autenticados como anónimos. Para usuarios anónimos, se debe enviar el fingerprint como query param para verificar uso previo.',
   })
   @ApiResponse({
     status: 200,
@@ -67,12 +69,17 @@ export class UsersController {
     type: UserCapabilitiesDto,
   })
   async getCapabilities(
-    @CurrentUser() user?: { userId: number },
+    @CurrentUser() user: { userId: number } | undefined,
+    @Query('fingerprint') fingerprint?: string,
   ): Promise<UserCapabilitiesDto> {
     // Si hay usuario autenticado, user.userId existe
     // Si es anónimo, user es undefined o null
     const userId = user?.userId || null;
-    return this.userCapabilitiesService.getCapabilities(userId);
+
+    // Para usuarios anónimos, usar el fingerprint del query param
+    const anonymousFingerprint = userId ? null : fingerprint || null;
+
+    return this.userCapabilitiesService.getCapabilities(userId, anonymousFingerprint);
   }
 
   @UseGuards(JwtAuthGuard)

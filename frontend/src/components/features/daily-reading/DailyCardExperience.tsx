@@ -255,9 +255,11 @@ export function DailyCardExperience() {
 
           {/* Face-down card with floating animation */}
           <div
+            data-testid="card-container"
+            data-can-create={canCreateDailyReading ? 'true' : 'false'}
             className={cn(
               'transition-transform duration-300',
-              !isCreatingReading && !isRevealing && 'animate-bounce-slow hover:scale-105'
+              !isCreatingReading && !isRevealing && 'hover:scale-105'
             )}
           >
             <TarotCard
