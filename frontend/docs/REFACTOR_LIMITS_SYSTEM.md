@@ -769,7 +769,7 @@ Mantener backward compatibility pero marcar campos como deprecated.
   - ✅ `npm run build` - Build exitoso
   - ✅ `npm run test:e2e -- --testPathPattern="users"` - 63/63 tests pasando
 - Branch: `feature/TASK-REFACTOR-010-update-profile-response`
-- Commit: (pendiente)
+- Commit: `cac7df7`
 
 ---
 
