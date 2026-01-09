@@ -837,7 +837,8 @@ Crear suite completa de tests E2E que validen el flujo de límites para prevenir
   - Tirada tarot: primera OK, segunda modal
   - Límites independientes (carta + tirada separados)
   - Solo ve spreads de 1 y 3 cartas
-  - No puede usar preguntas personalizadas
+  - **NO puede acceder a categorías** (redirige a /ritual/tirada)
+  - **NO puede usar preguntas** (ni predefinidas ni personalizadas)
 
 - **PREMIUM (5 tests):**
   - Carta del día: límite 1/día (igual que FREE)

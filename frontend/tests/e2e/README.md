@@ -123,7 +123,8 @@ tests/e2e/
 - ✅ Tirada tarot: primera vez OK, segunda vez modal upgrade
 - ✅ Límites son independientes (puede usar carta + tirada)
 - ✅ Solo ve spreads de 1 y 3 cartas
-- ✅ No puede usar preguntas personalizadas
+- ✅ **NO puede acceder a categorías** (redirige a /ritual/tirada)
+- ✅ **NO puede usar preguntas** (ni predefinidas ni personalizadas)
 
 **PREMIUM:**
 

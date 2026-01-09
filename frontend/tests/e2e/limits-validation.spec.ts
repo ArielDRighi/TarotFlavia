@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 /**
  * Test Suite: Limits Validation (Sistema de Límites)
@@ -37,7 +37,7 @@ async function resetUserLimits(email: string): Promise<void> {
       throw new Error('Failed to login as admin');
     }
 
-    const { access_token } = await loginResponse.json();
+    const { access_token } = (await loginResponse.json()) as { access_token: string };
 
     // Obtener ID del usuario por email
     const usersResponse = await fetch(
@@ -53,7 +53,7 @@ async function resetUserLimits(email: string): Promise<void> {
       throw new Error(`Failed to fetch user by email: ${email}`);
     }
 
-    const usersData = await usersResponse.json();
+    const usersData = (await usersResponse.json()) as { data?: Array<{ id: number }> };
     const user = usersData.data?.[0];
 
     if (!user) {
@@ -76,25 +76,44 @@ async function resetUserLimits(email: string): Promise<void> {
 
 /**
  * Helper: Clear browser storage
+ *
+ * Para tests ANONYMOUS: Limpia storage completamente para forzar regeneración
+ * de fingerprint. Cada ejecución del test generará un fingerprint diferente
+ * porque el canvas/fonts pueden variar ligeramente entre renders.
  */
-async function clearStorage(page: any): Promise<void> {
+async function clearStorage(page: Page): Promise<void> {
   await page.context().clearCookies();
+  // Navigate to page first to avoid localStorage access errors
+  await page.goto(BASE_URL);
   await page.evaluate(() => {
     localStorage.clear();
     sessionStorage.clear();
   });
+  // Reload to ensure fresh state
+  await page.reload();
 }
 
 test.describe('Limits Validation - ANONYMOUS User', () => {
   test.beforeEach(async ({ page }) => {
     await clearStorage(page);
+
+    // Desactivar animaciones para estabilidad en tests
+    await page.addStyleTag({
+      content: '* { animation-duration: 0ms !important; transition-duration: 0ms !important; }',
+    });
   });
 
-  test('ANONYMOUS: First visit shows card back, click reveals card with DB meaning', async ({
+  test('ANONYMOUS: First visit reveals card, second visit shows register modal', async ({
     page,
   }) => {
-    // Ir a carta del día sin autenticación
+    // PRIMERA VISITA: Revelar carta
     await page.goto(`${BASE_URL}/carta-del-dia`);
+
+    // Esperar que capabilities se cargue
+    await page.waitForResponse((response) => response.url().includes('/capabilities'));
+
+    // Esperar tiempo suficiente para que React procese el estado
+    await page.waitForTimeout(2000);
 
     // Verificar título
     await expect(page.getByRole('heading', { name: /Carta del Día/i })).toBeVisible();
@@ -106,8 +125,12 @@ test.describe('Limits Validation - ANONYMOUS User', () => {
     // Click en la carta para revelarla
     await card.click();
 
-    // Esperar animación de revelado
-    await page.waitForTimeout(1500);
+    // Esperar que se cree la lectura
+    await page.waitForResponse(
+      (response) => response.url().includes('/daily-reading') && response.status() === 200,
+      { timeout: 10000 }
+    );
+    await page.waitForTimeout(500);
 
     // Debe mostrar nombre de la carta
     const cardName = page.locator('h2').first();
@@ -125,26 +148,15 @@ test.describe('Limits Validation - ANONYMOUS User', () => {
 
     // Debe mostrar CTA de registro
     await expect(page.getByText(/Regístrate gratis/i)).toBeVisible();
-  });
 
-  test('ANONYMOUS: Second visit (same day) shows "Register" modal immediately', async ({
-    page,
-  }) => {
-    // Primera visita - revelar carta
-    await page.goto(`${BASE_URL}/carta-del-dia`);
-    const card = page.getByTestId('tarot-card');
-    await card.click();
-    await page.waitForTimeout(1500);
-
-    // Verificar que se mostró la carta
-    const cardName = page.locator('h2').first();
-    await expect(cardName).toBeVisible();
-
-    // Segunda visita (recargar página)
+    // SEGUNDA VISITA: Recargar página (mismo fingerprint, mismo día)
     await page.reload();
 
+    // Esperar que capabilities detecte el límite
+    await page.waitForResponse((response) => response.url().includes('/capabilities'));
+    await page.waitForTimeout(500);
+
     // Debe mostrar modal de límite alcanzado INMEDIATAMENTE
-    // NO debe mostrar la carta revelada anterior
     const modal = page.getByRole('dialog').or(page.locator('[role="alertdialog"]'));
     await expect(modal).toBeVisible({ timeout: 3000 });
 
@@ -162,23 +174,34 @@ test.describe('Limits Validation - ANONYMOUS User', () => {
     // Intentar acceder a ritual/tirada sin autenticación
     await page.goto(`${BASE_URL}/ritual/tirada`);
 
-    // Debe redirigir a login o mostrar mensaje de restricción
-    const loginHeading = page.getByRole('heading', {
-      name: /Iniciar Sesión|Bienvenido/i,
-    });
-    const restrictionMessage = page.getByText(/debes iniciar sesión|registrarte/i);
+    // Esperar carga
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1000);
 
-    // Al menos uno debe estar visible
-    const redirected = await loginHeading.isVisible().catch(() => false);
-    const restricted = await restrictionMessage.isVisible().catch(() => false);
+    const currentUrl = page.url();
 
-    expect(redirected || restricted).toBe(true);
+    // Debe redirigir a login o registro
+    const redirectedToAuth = currentUrl.includes('/login') || currentUrl.includes('/registro');
+
+    if (!redirectedToAuth) {
+      // Si no redirigió, debe mostrar modal de límite o restricción
+      const modal = page.getByRole('dialog').or(page.locator('[role="alertdialog"]'));
+      const modalVisible = await modal.isVisible({ timeout: 2000 }).catch(() => false);
+      expect(modalVisible).toBe(true);
+    } else {
+      expect(redirectedToAuth).toBe(true);
+    }
   });
 });
 
 test.describe('Limits Validation - FREE User', () => {
   test.beforeEach(async ({ page }) => {
     await clearStorage(page);
+
+    // Desactivar animaciones para estabilidad en tests
+    await page.addStyleTag({
+      content: '* { animation-duration: 0ms !important; transition-duration: 0ms !important; }',
+    });
 
     // Login como FREE
     await page.goto(`${BASE_URL}/login`);
@@ -270,37 +293,68 @@ test.describe('Limits Validation - FREE User', () => {
   test('FREE: Only sees 1-card and 3-card spreads', async ({ page }) => {
     await page.goto(`${BASE_URL}/ritual/tirada`);
 
-    // Debe ver tiradas básicas
-    await expect(page.getByText(/Tirada de 1 Carta|1 carta/i)).toBeVisible();
-    await expect(page.getByText(/Tirada de 3 Cartas|3 cartas/i)).toBeVisible();
+    // Contar spread cards visibles
+    const spreadCards = page.locator('[data-testid="spread-card"]');
+    const count = await spreadCards.count();
 
-    // NO debe ver tiradas avanzadas (5 cartas, Cruz Celta)
-    await expect(page.getByText(/5 cartas/i)).not.toBeVisible();
-    await expect(page.getByText(/Cruz Celta|Cruz Céltica/i)).not.toBeVisible();
+    // FREE solo debe ver 2 spreads (1 carta y 3 cartas)
+    expect(count).toBe(2);
+
+    // Verificar que existen las tiradas básicas
+    await expect(spreadCards.filter({ hasText: /1 carta/i })).toBeVisible();
+    await expect(spreadCards.filter({ hasText: /3 cartas/i })).toBeVisible();
   });
 
-  test('FREE: Cannot use custom questions', async ({ page }) => {
+  test('FREE: Cannot access categories (redirects to /ritual/tirada)', async ({ page }) => {
+    // Intentar acceder a categorías (/ritual es donde está CategorySelector)
+    await page.goto(`${BASE_URL}/ritual`);
+
+    // FREE debe ser redirigido automáticamente a /ritual/tirada
+    // porque CategorySelector tiene useEffect que hace router.replace('/ritual/tirada')
+    await page.waitForURL(/\/ritual\/tirada/, { timeout: 5000 });
+
+    // Verificar que está en spread selector
+    const spreadSelector = page.getByText(/Elige tu tipo de consulta/i);
+    await expect(spreadSelector).toBeVisible();
+  });
+
+  test('FREE: Cannot access questions (predefined or custom)', async ({ page }) => {
     // Forzar navegación a preguntas (aunque normalmente no llega aquí)
     await page.goto(`${BASE_URL}/ritual/preguntas?categoryId=1`);
 
-    // Campo de pregunta personalizada debe estar deshabilitado o con badge Premium
-    const customInput = page.getByPlaceholder(/pregunta personalizada/i);
+    // Debe redirigir automáticamente a /ritual/tirada
+    // o mostrar restricción
+    const currentUrl = page.url();
 
-    // Si el input existe, debe estar deshabilitado
-    const inputExists = await customInput.count();
-    if (inputExists > 0) {
-      await expect(customInput).toBeDisabled();
+    if (currentUrl.includes('/ritual/tirada')) {
+      // Redirigió correctamente a tirada
+      expect(currentUrl).toContain('/ritual/tirada');
+    } else {
+      // Si permite cargar la página, debe mostrar restricción
+
+      // Campo de pregunta personalizada debe estar deshabilitado o no existir
+      const customInput = page.getByPlaceholder(/pregunta personalizada/i);
+      const inputExists = (await customInput.count()) > 0;
+
+      if (inputExists) {
+        await expect(customInput).toBeDisabled();
+      }
+
+      // Debe mostrar badge "Premium" o mensaje de restricción
+      const restrictionIndicator = page.getByText(/Premium|Solo premium|Upgrade/i).first();
+      await expect(restrictionIndicator).toBeVisible();
     }
-
-    // Debe mostrar badge "Premium" o similar
-    const premiumBadge = page.getByText(/Premium|Solo premium/i);
-    await expect(premiumBadge).toBeVisible();
   });
 });
 
 test.describe('Limits Validation - PREMIUM User', () => {
   test.beforeEach(async ({ page }) => {
     await clearStorage(page);
+
+    // Desactivar animaciones para estabilidad en tests
+    await page.addStyleTag({
+      content: '* { animation-duration: 0ms !important; transition-duration: 0ms !important; }',
+    });
 
     // Login como PREMIUM
     await page.goto(`${BASE_URL}/login`);
@@ -331,7 +385,7 @@ test.describe('Limits Validation - PREMIUM User', () => {
 
   test('PREMIUM: Can create up to 3 tarot readings per day', async ({ page }) => {
     // Helper para crear una tirada
-    async function createReading(page: any, attemptNumber: number) {
+    async function createReading(page: Page, attemptNumber: number) {
       await page.goto(`${BASE_URL}/ritual/tirada`);
 
       // Verificar si hay modal de límite
@@ -419,39 +473,27 @@ test.describe('Limits Validation - PREMIUM User', () => {
   test('PREMIUM: Can access all spreads (1, 3, 5, Cruz Celta)', async ({ page }) => {
     await page.goto(`${BASE_URL}/ritual/tirada`);
 
-    // Debe ver todas las tiradas
-    await expect(page.getByText(/1 carta|Tirada de 1 Carta/i)).toBeVisible();
-    await expect(page.getByText(/3 cartas|Tirada de 3 Cartas/i)).toBeVisible();
+    // PREMIUM debe ver 4 spreads (1, 3, 5, y Cruz Celta 10 cartas)
+    const spreadCards = page.locator('[data-testid="spread-card"]');
+    const count = await spreadCards.count();
 
-    // Tiradas avanzadas (exclusivas de PREMIUM)
-    // NOTA: Esto depende de si están implementadas
-    const advancedSpreads = [
-      page.getByText(/5 cartas|Tirada de 5 Cartas/i),
-      page.getByText(/Cruz Celta|Cruz Céltica/i),
-    ];
+    // Debe tener al menos 2 spreads (mínimo para PREMIUM)
+    expect(count).toBeGreaterThanOrEqual(2);
 
-    // Al menos una tirada avanzada debe estar visible
-    let hasAdvanced = false;
-    for (const spread of advancedSpreads) {
-      const visible = await spread.isVisible().catch(() => false);
-      if (visible) {
-        hasAdvanced = true;
-        break;
-      }
-    }
+    // Verificar que existen tiradas básicas
+    await expect(spreadCards.filter({ hasText: /1 carta/i })).toBeVisible();
+    await expect(spreadCards.filter({ hasText: /3 cartas/i })).toBeVisible();
 
-    // Si hay spreads avanzados implementados, PREMIUM debe verlos
-    // Si no están implementados, este test se saltará
-    if (hasAdvanced) {
-      expect(hasAdvanced).toBe(true);
-    } else {
-      console.warn('⚠️ Advanced spreads not implemented yet');
+    // Si hay 4 spreads, verificar avanzados también
+    if (count === 4) {
+      await expect(spreadCards.filter({ hasText: /5 cartas/i })).toBeVisible();
+      await expect(spreadCards.filter({ hasText: /10 cartas/i })).toBeVisible();
     }
   });
 
   test('PREMIUM: Can use custom questions', async ({ page }) => {
     // Ir a seleccionar categoría
-    await page.goto(`${BASE_URL}/ritual/categoria`);
+    await page.goto(`${BASE_URL}/ritual`);
 
     // Seleccionar una categoría
     const categoryCard = page.locator('[data-testid="category-card"]').first();

@@ -3,6 +3,7 @@ import { UserCapabilitiesService } from './user-capabilities.service';
 import { UsersService } from '../../users.service';
 import { UsageLimitsService } from '../../../usage-limits/usage-limits.service';
 import { PlanConfigService } from '../../../plan-config/plan-config.service';
+import { AnonymousTrackingService } from '../../../usage-limits/services/anonymous-tracking.service';
 import { UserPlanType } from '../dto/user-capabilities.dto';
 import { UserPlan } from '../../entities/user.entity';
 import { UsageFeature } from '../../../usage-limits/entities/usage-limit.entity';
@@ -12,6 +13,7 @@ describe('UserCapabilitiesService', () => {
   let usersService: jest.Mocked<UsersService>;
   let usageLimitsService: jest.Mocked<UsageLimitsService>;
   let planConfigService: jest.Mocked<PlanConfigService>;
+  let anonymousTrackingService: jest.Mocked<AnonymousTrackingService>;
 
   const mockUser = {
     id: 1,
@@ -56,6 +58,13 @@ describe('UserCapabilitiesService', () => {
             findByPlanType: jest.fn(),
           },
         },
+        {
+          provide: AnonymousTrackingService,
+          useValue: {
+            getUsageByIpAndUserAgent: jest.fn(),
+            canAccessByIpAndUserAgent: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
@@ -63,6 +72,7 @@ describe('UserCapabilitiesService', () => {
     usersService = module.get(UsersService);
     usageLimitsService = module.get(UsageLimitsService);
     planConfigService = module.get(PlanConfigService);
+    anonymousTrackingService = module.get(AnonymousTrackingService);
   });
 
   afterEach(() => {
@@ -71,8 +81,9 @@ describe('UserCapabilitiesService', () => {
 
   describe('getCapabilities', () => {
     describe('Anonymous User', () => {
-      it('should return anonymous capabilities when userId is null', async () => {
-        const result = await service.getCapabilities(null);
+      it('should return anonymous capabilities when userId is null and no IP', async () => {
+        // No IP means we can't track usage, so return default (can create)
+        const result = await service.getCapabilities(null, '', '');
 
         expect(result).toEqual({
           dailyCard: {
@@ -100,8 +111,42 @@ describe('UserCapabilitiesService', () => {
         expect(() => new Date(result.dailyCard.resetAt)).not.toThrow();
       });
 
-      it('should not call any service when userId is null', async () => {
-        await service.getCapabilities(null);
+      it('should check anonymous usage via fingerprint when IP is provided', async () => {
+        const ip = '192.168.1.1';
+        const userAgent = 'Mozilla/5.0';
+
+        // Mock: anonymous user has already used daily card
+        anonymousTrackingService.getUsageByIpAndUserAgent.mockResolvedValue(1);
+
+        const result = await service.getCapabilities(null, ip, userAgent);
+
+        expect(anonymousTrackingService.getUsageByIpAndUserAgent).toHaveBeenCalledWith(
+          ip,
+          userAgent,
+          UsageFeature.DAILY_CARD,
+        );
+
+        expect(result.dailyCard.used).toBe(1);
+        expect(result.dailyCard.canUse).toBe(false);
+        expect(result.canCreateDailyReading).toBe(false);
+      });
+
+      it('should allow daily card if anonymous user has not used it', async () => {
+        const ip = '192.168.1.1';
+        const userAgent = 'Mozilla/5.0';
+
+        // Mock: anonymous user has NOT used daily card
+        anonymousTrackingService.getUsageByIpAndUserAgent.mockResolvedValue(0);
+
+        const result = await service.getCapabilities(null, ip, userAgent);
+
+        expect(result.dailyCard.used).toBe(0);
+        expect(result.dailyCard.canUse).toBe(true);
+        expect(result.canCreateDailyReading).toBe(true);
+      });
+
+      it('should not call user services when userId is null', async () => {
+        await service.getCapabilities(null, '192.168.1.1', 'Mozilla/5.0');
 
         expect(usersService.findById).not.toHaveBeenCalled();
         expect(usageLimitsService.getUsage).not.toHaveBeenCalled();
@@ -322,7 +367,7 @@ describe('UserCapabilitiesService', () => {
 
     describe('resetAt calculation', () => {
       it('should return next midnight UTC', async () => {
-        const result = await service.getCapabilities(null);
+        const result = await service.getCapabilities(null, '', '');
         const resetDate = new Date(result.dailyCard.resetAt);
 
         // Should be a valid date

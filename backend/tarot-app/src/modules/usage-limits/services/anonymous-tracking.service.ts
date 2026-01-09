@@ -32,6 +32,21 @@ export class AnonymousTrackingService {
   async canAccess(req: Request): Promise<boolean> {
     const ip = req.ip || '';
     const userAgent = req.headers['user-agent'] || '';
+    return this.canAccessByIpAndUserAgent(ip, userAgent, UsageFeature.DAILY_CARD);
+  }
+
+  /**
+   * Checks if an anonymous user can access a specific feature by IP and User-Agent
+   * @param ip - IP address
+   * @param userAgent - User-Agent header
+   * @param feature - The feature to check
+   * @returns true if user can access, false if limit reached
+   */
+  async canAccessByIpAndUserAgent(
+    ip: string,
+    userAgent: string,
+    feature: UsageFeature,
+  ): Promise<boolean> {
     const fingerprint = this.generateFingerprint(ip, userAgent);
 
     // Get start of today in UTC
@@ -40,16 +55,47 @@ export class AnonymousTrackingService {
     today.setUTCHours(0, 0, 0, 0);
     const dateString = today.toISOString().split('T')[0];
 
-    // Check if fingerprint already accessed today
+    // Check if fingerprint already accessed today for this feature
     const existingUsage = await this.anonymousUsageRepository.findOne({
       where: {
         fingerprint,
         date: dateString,
-        feature: UsageFeature.TAROT_READING,
+        feature,
       },
     });
 
     return !existingUsage; // Can access if no existing usage found
+  }
+
+  /**
+   * Gets the usage count for an anonymous user for a specific feature today
+   * @param ip - IP address
+   * @param userAgent - User-Agent header
+   * @param feature - The feature to check
+   * @returns Number of times the feature was used today (0 or 1 for daily limits)
+   */
+  async getUsageByIpAndUserAgent(
+    ip: string,
+    userAgent: string,
+    feature: UsageFeature,
+  ): Promise<number> {
+    const fingerprint = this.generateFingerprint(ip, userAgent);
+
+    // Get start of today in UTC
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    const dateString = today.toISOString().split('T')[0];
+
+    // Count usage for this fingerprint today
+    const count = await this.anonymousUsageRepository.count({
+      where: {
+        fingerprint,
+        date: dateString,
+        feature,
+      },
+    });
+
+    return count;
   }
 
   /**
