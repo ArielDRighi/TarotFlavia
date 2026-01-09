@@ -19,6 +19,7 @@ import { UpdateUserDto } from '../../application/dto/update-user.dto';
 import { UpdatePasswordDto } from '../../application/dto/update-password.dto';
 import { UpdateUserPlanDto } from '../../application/dto/update-user-plan.dto';
 import { UserCapabilitiesDto } from '../../application/dto/user-capabilities.dto';
+import { UserProfileResponseDto } from '../../application/dto/user-profile-response.dto';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../../../auth/infrastructure/guards/optional-jwt-auth.guard';
 import { AdminGuard } from '../../../auth/infrastructure/guards/admin.guard';
@@ -76,11 +77,22 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  @ApiOperation({ summary: 'Obtener perfil del usuario actual' })
-  @ApiResponse({ status: 200, description: 'Perfil recuperado exitosamente' })
+  @ApiOperation({
+    summary: 'Obtener perfil del usuario actual',
+    description:
+      'Retorna el perfil completo del usuario incluyendo capabilities. Los campos dailyCardCount, dailyCardLimit, tarotReadingsCount, tarotReadingsLimit, dailyReadingsCount y dailyReadingsLimit están deprecated y serán removidos en una versión futura. Use capabilities.dailyCard y capabilities.tarotReadings en su lugar.',
+  })
+  @ApiResponse({
+    status: 200,
+    description:
+      'Perfil recuperado exitosamente. NOTA: Los campos de contadores y límites están deprecated. Use el objeto capabilities en su lugar.',
+    type: UserProfileResponseDto,
+  })
   @ApiResponse({ status: 401, description: 'No autorizado' })
   @ApiResponse({ status: 404, description: 'Usuario no encontrado' })
-  async getProfile(@Request() req: { user: { userId: number } }) {
+  async getProfile(
+    @Request() req: { user: { userId: number } },
+  ): Promise<UserProfileResponseDto> {
     const userId = req.user.userId;
     const user = await this.usersService.findById(userId);
 
@@ -142,13 +154,13 @@ export class UsersController {
       ...result,
       // New field: Capabilities object
       capabilities,
-      // New fields: Separate counters per feature type
+      // DEPRECATED fields below - maintained for backward compatibility
+      // Use capabilities.dailyCard and capabilities.tarotReadings instead
       dailyCardCount,
       dailyCardLimit: dailyCardLimit === -1 ? 999999 : dailyCardLimit,
       tarotReadingsCount,
       tarotReadingsLimit:
         tarotReadingsLimit === -1 ? 999999 : tarotReadingsLimit,
-      // Deprecated fields: Maintained for backward compatibility
       dailyReadingsCount,
       dailyReadingsLimit:
         dailyReadingsLimit === -1 ? 999999 : dailyReadingsLimit,

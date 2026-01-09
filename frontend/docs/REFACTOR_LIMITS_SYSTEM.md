@@ -719,8 +719,9 @@ Eliminar campos de límites del authStore ya que ahora vienen de capabilities.
 
 ---
 
-### **TASK-REFACTOR-010: Actualizar Backend Profile Response**
+### **TASK-REFACTOR-010: Actualizar Backend Profile Response** ✅
 
+**Estado:** ✅ COMPLETADA (9 Enero 2026)
 **Prioridad:** 🟡 MEDIA
 **Estimación:** 2 horas
 **Área:** Backend
@@ -732,8 +733,8 @@ Mantener backward compatibility pero marcar campos como deprecated.
 
 #### ✅ Tareas específicas
 
-- [ ] En `users.controller.ts`, agregar campo `capabilities` al response
-- [ ] Marcar campos legacy como `@Deprecated()`:
+- [x] En `users.controller.ts`, agregar campo `capabilities` al response
+- [x] Marcar campos legacy como `@Deprecated()`:
 
   ```typescript
   /**
@@ -747,15 +748,28 @@ Mantener backward compatibility pero marcar campos como deprecated.
   dailyCardLimit: number;
   ```
 
-- [ ] Documentar en Swagger que campos son deprecated
-- [ ] Agregar header de deprecation warning (opcional)
-- [ ] Actualizar tests
+- [x] Documentar en Swagger que campos son deprecated
+- [x] Agregar header de deprecation warning (opcional)
+- [x] Actualizar tests
 
 #### 🎯 Criterios de aceptación
 
 - ✓ Response incluye `capabilities` y campos legacy (backward compatible)
 - ✓ Swagger documenta deprecation
-- ✓ Tests pasan
+- ✓ Tests pasan (63/63 tests E2E users passing)
+
+#### 📝 Notas de implementación
+
+- DTO: Creado `UserProfileResponseDto` con 6 campos deprecated documentados con `@deprecated` en Swagger
+- Controller: Actualizado método `getProfile()` con documentación completa de deprecation
+- Tests: 63 tests E2E pasando (users.e2e-spec.ts y admin-users.e2e-spec.ts)
+- Swagger: Documentación actualizada con advertencias de deprecation en descripción y response
+- Ciclo de calidad completo:
+  - ✅ `npm run lint` - Sin errores
+  - ✅ `npm run build` - Build exitoso
+  - ✅ `npm run test:e2e -- --testPathPattern="users"` - 63/63 tests pasando
+- Branch: `feature/TASK-REFACTOR-010-update-profile-response`
+- Commit: (pendiente)
 
 ---
 
