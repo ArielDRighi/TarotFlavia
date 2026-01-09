@@ -1,10 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, MoreThanOrEqual } from 'typeorm';
+import { Repository, MoreThanOrEqual, IsNull } from 'typeorm';
 import { UsersService } from '../../users.service';
 import { UsageLimitsService } from '../../../usage-limits/usage-limits.service';
 import { PlanConfigService } from '../../../plan-config/plan-config.service';
 import { DailyReading } from '../../../tarot/daily-reading/entities/daily-reading.entity';
+import { TarotReading } from '../../../tarot/readings/entities/tarot-reading.entity';
 import {
   UserCapabilitiesDto,
   UserPlanType,
@@ -20,6 +21,8 @@ export class UserCapabilitiesService {
     private readonly planConfigService: PlanConfigService,
     @InjectRepository(DailyReading)
     private readonly dailyReadingRepository: Repository<DailyReading>,
+    @InjectRepository(TarotReading)
+    private readonly tarotReadingRepository: Repository<TarotReading>,
   ) {}
 
   /**
@@ -60,11 +63,17 @@ export class UserCapabilitiesService {
 
     const dailyCardUsage = existingDailyReading ? 1 : 0;
 
-    // Obtener uso de tiradas de tarot desde usage_limits
-    const tarotUsage = await this.usageLimitsService.getUsage(
-      userId,
-      UsageFeature.TAROT_READING,
-    );
+    // Obtener uso de tiradas de tarot consultando directamente la tabla tarot_reading
+    // Esto garantiza consistencia con la tabla real de lecturas
+    const tarotReadingsCount = await this.tarotReadingRepository.count({
+      where: {
+        user: { id: userId },
+        createdAt: MoreThanOrEqual(today),
+        deletedAt: IsNull(), // Solo contar lecturas no eliminadas
+      },
+    });
+
+    const tarotUsage = tarotReadingsCount;
 
     // Calcular capabilities
     const dailyCardLimit =

@@ -124,11 +124,12 @@ function CategoryCard({ category, onClick }: CategoryCardProps) {
  * ACCESS CONTROL:
  * - Only PREMIUM users can access category selection
  * - FREE and ANONYMOUS users are automatically redirected to /ritual/tirada
+ * - Users who reached their tarot reading limit are redirected to home with limit message
  *
  * REFACTORED:
  * - Uses useUserCapabilities() as single source of truth (TASK-REFACTOR-007)
  * - Replaced direct user.plan checks with capabilities.canUseCustomQuestions
- * - Removed limit validation (handled upstream by capabilities)
+ * - Added limit validation to prevent poor UX (TASK-REFACTOR-011)
  */
 export function CategorySelector() {
   const { data: capabilities, isLoading: isLoadingCapabilities } = useUserCapabilities();
@@ -137,13 +138,21 @@ export function CategorySelector() {
 
   const isLoading = isLoadingCapabilities || isCategoriesLoading;
   const canUseCustomQuestions = capabilities?.canUseCustomQuestions ?? false;
+  const canCreateTarotReading = capabilities?.canCreateTarotReading ?? false;
+
+  // Redirect to home if user reached tarot reading limit
+  useEffect(() => {
+    if (!canCreateTarotReading && !isLoading) {
+      router.replace('/');
+    }
+  }, [canCreateTarotReading, isLoading, router]);
 
   // Redirect FREE/ANONYMOUS users to spread selector (they can't use categories)
   useEffect(() => {
-    if (!canUseCustomQuestions && !isLoading) {
+    if (!canUseCustomQuestions && !isLoading && canCreateTarotReading) {
       router.replace('/ritual/tirada');
     }
-  }, [canUseCustomQuestions, isLoading, router]);
+  }, [canUseCustomQuestions, isLoading, canCreateTarotReading, router]);
 
   // Show loading state while checking capabilities
   if (isLoading) {
@@ -167,7 +176,7 @@ export function CategorySelector() {
   }
 
   // Redirect happens in useEffect, return null while redirecting
-  if (!canUseCustomQuestions) {
+  if (!canUseCustomQuestions || !canCreateTarotReading) {
     return null;
   }
 

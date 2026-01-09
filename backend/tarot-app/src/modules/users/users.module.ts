@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Tarotista } from '../tarotistas/entities/tarotista.entity';
 import { DailyReading } from '../tarot/daily-reading/entities/daily-reading.entity';
+import { TarotReading } from '../tarot/readings/entities/tarot-reading.entity';
 import { AuthModule } from '../auth/auth.module';
 import { UsageLimitsModule } from '../usage-limits/usage-limits.module';
 import { PlanConfigModule } from '../plan-config/plan-config.module';
@@ -34,7 +35,7 @@ import { UsersService } from './users.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Tarotista, DailyReading]),
+    TypeOrmModule.forFeature([User, Tarotista, DailyReading, TarotReading]),
     forwardRef(() => AuthModule),
     forwardRef(() => UsageLimitsModule),
     PlanConfigModule,
