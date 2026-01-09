@@ -46,7 +46,8 @@ tests/e2e/
 ├── reading-free.spec.ts          # Flujo completo usuario FREE
 ├── reading-premium.spec.ts       # Flujo completo usuario PREMIUM
 ├── daily-card.spec.ts            # Carta del día (todos los usuarios)
-└── plan-restrictions.spec.ts     # Verificación de restricciones por plan
+├── plan-restrictions.spec.ts     # Verificación de restricciones por plan
+└── limits-validation.spec.ts     # Tests de sistema de límites (ANÓNIMO, FREE, PREMIUM)
 ```
 
 ## 🧪 Cobertura de Tests
@@ -107,6 +108,34 @@ tests/e2e/
 - ✅ Comparación de IA en resultados
 - ✅ Backend rechaza custom question de FREE (403)
 - ✅ Backend NO genera IA para FREE
+
+### `limits-validation.spec.ts` - Sistema de Límites
+
+**ANÓNIMO:**
+
+- ✅ Primera visita: carta boca abajo → click revela carta con significado DB
+- ✅ Segunda visita (mismo día): modal "Regístrate" inmediato
+- ✅ No puede acceder a tiradas de tarot
+
+**FREE:**
+
+- ✅ Carta del día: primera vez OK, segunda vez modal upgrade
+- ✅ Tirada tarot: primera vez OK, segunda vez modal upgrade
+- ✅ Límites son independientes (puede usar carta + tirada)
+- ✅ Solo ve spreads de 1 y 3 cartas
+- ✅ No puede usar preguntas personalizadas
+
+**PREMIUM:**
+
+- ✅ Carta del día: límite 1/día (igual que FREE)
+- ✅ Tirada tarot: puede crear hasta 3/día
+- ✅ Interpretación incluye IA (no solo DB)
+- ✅ Puede acceder a todos los spreads (1, 3, 5, Cruz Celta)
+- ✅ Puede usar preguntas personalizadas
+
+**Logout:**
+
+- ✅ Logout desde modal de límite redirige correctamente a home
 
 ## ⚙️ Configuración
 
