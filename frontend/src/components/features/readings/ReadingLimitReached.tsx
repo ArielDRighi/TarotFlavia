@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { Calendar, History, Crown, Sparkles } from 'lucide-react';
 
-import { useAuth } from '@/hooks/useAuth';
+import { useUserCapabilities } from '@/hooks/api/useUserCapabilities';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -29,11 +29,11 @@ import {
  */
 export function ReadingLimitReached() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { data: capabilities } = useUserCapabilities();
 
-  // Get specific tarot readings counters
-  const tarotCount = user?.tarotReadingsCount ?? 0;
-  const tarotLimit = user?.tarotReadingsLimit ?? 1;
+  // Get specific tarot readings counters from capabilities
+  const tarotCount = capabilities?.tarotReadings.used ?? 0;
+  const tarotLimit = capabilities?.tarotReadings.limit ?? 1;
 
   const handleViewHistory = () => {
     router.push('/historial');

@@ -95,12 +95,7 @@ export function createMockUser(overrides: Partial<AuthUser> = {}): AuthUser {
     name: 'Test User',
     roles: ['user'],
     plan: 'FREE',
-    dailyReadingsCount: 0,
-    dailyReadingsLimit: 3,
-    dailyCardCount: 0,
-    dailyCardLimit: 1,
-    tarotReadingsCount: 0,
-    tarotReadingsLimit: 3,
+    profilePicture: null,
     ...overrides,
   };
 }

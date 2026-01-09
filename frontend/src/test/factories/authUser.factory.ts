@@ -10,14 +10,7 @@ export function createMockAuthUser(overrides?: Partial<AuthUser>): AuthUser {
     name: 'Test User',
     roles: ['user'],
     plan: 'free',
-    // Legacy fields (deprecated)
-    dailyReadingsCount: 0,
-    dailyReadingsLimit: 2,
-    // New separate fields
-    dailyCardCount: 0,
-    dailyCardLimit: 1,
-    tarotReadingsCount: 0,
-    tarotReadingsLimit: 1,
+    profilePicture: null,
     ...overrides,
   };
 }
@@ -28,12 +21,6 @@ export function createMockAuthUser(overrides?: Partial<AuthUser>): AuthUser {
 export function createMockAnonymousUser(overrides?: Partial<AuthUser>): AuthUser {
   return createMockAuthUser({
     plan: 'anonymous',
-    dailyReadingsCount: 0,
-    dailyReadingsLimit: 1,
-    dailyCardCount: 0,
-    dailyCardLimit: 1,
-    tarotReadingsCount: 0,
-    tarotReadingsLimit: 0,
     ...overrides,
   });
 }
@@ -44,12 +31,6 @@ export function createMockAnonymousUser(overrides?: Partial<AuthUser>): AuthUser
 export function createMockFreeUser(overrides?: Partial<AuthUser>): AuthUser {
   return createMockAuthUser({
     plan: 'free',
-    dailyReadingsCount: 0,
-    dailyReadingsLimit: 2,
-    dailyCardCount: 0,
-    dailyCardLimit: 1,
-    tarotReadingsCount: 0,
-    tarotReadingsLimit: 1,
     ...overrides,
   });
 }
@@ -60,12 +41,6 @@ export function createMockFreeUser(overrides?: Partial<AuthUser>): AuthUser {
 export function createMockPremiumUser(overrides?: Partial<AuthUser>): AuthUser {
   return createMockAuthUser({
     plan: 'premium',
-    dailyReadingsCount: 0,
-    dailyReadingsLimit: 4,
-    dailyCardCount: 0,
-    dailyCardLimit: 1,
-    tarotReadingsCount: 0,
-    tarotReadingsLimit: 3,
     ...overrides,
   });
 }

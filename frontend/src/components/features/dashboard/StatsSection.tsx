@@ -1,7 +1,7 @@
 'use client';
 
 import { BarChart3, BookOpen, RefreshCw } from 'lucide-react';
-import { useProfile } from '@/hooks/api/useUser';
+import { useUserCapabilities } from '@/hooks/api/useUserCapabilities';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -47,7 +47,7 @@ function StatCard({ icon, label, value, description }: StatCardProps) {
  * ```
  */
 export function StatsSection() {
-  const { data: profile, isLoading, error, refetch } = useProfile();
+  const { data: capabilities, isLoading, error, refetch } = useUserCapabilities();
 
   if (isLoading) {
     return (
@@ -88,11 +88,12 @@ export function StatsSection() {
     );
   }
 
-  if (!profile) {
+  if (!capabilities) {
     return null;
   }
 
-  const { dailyReadingsCount, dailyReadingsLimit } = profile;
+  const dailyReadingsCount = capabilities.tarotReadings.used;
+  const dailyReadingsLimit = capabilities.tarotReadings.limit;
   const remaining = dailyReadingsLimit - dailyReadingsCount;
 
   return (

@@ -10,6 +10,8 @@ vi.mock('@/hooks/useRequireAuth', () => ({
 }));
 
 // Mock useProfile
+// Note: Backend still sends limit fields for backward compatibility,
+// but components should use useUserCapabilities() hook instead of these fields
 vi.mock('@/hooks/api/useUser', () => ({
   useProfile: vi.fn(() => ({
     data: {
@@ -18,12 +20,13 @@ vi.mock('@/hooks/api/useUser', () => ({
       name: 'Test User',
       roles: ['consumer'],
       plan: 'free',
-      dailyReadingsCount: 2,
-      dailyReadingsLimit: 5,
+      // Backend sends these but components should use useUserCapabilities()
       dailyCardCount: 0,
       dailyCardLimit: 1,
       tarotReadingsCount: 0,
       tarotReadingsLimit: 1,
+      dailyReadingsCount: 0,
+      dailyReadingsLimit: 1,
       createdAt: '2024-01-01T00:00:00Z',
       updatedAt: '2024-01-01T00:00:00Z',
       profilePicture: undefined,
@@ -86,12 +89,13 @@ describe('PerfilPage', () => {
         name: 'Test User',
         roles: ['consumer'],
         plan: 'free',
-        dailyReadingsCount: 2,
-        dailyReadingsLimit: 5,
+        // Backend sends these but components should use useUserCapabilities()
         dailyCardCount: 0,
         dailyCardLimit: 1,
         tarotReadingsCount: 0,
         tarotReadingsLimit: 1,
+        dailyReadingsCount: 0,
+        dailyReadingsLimit: 1,
         createdAt: '2024-01-01T00:00:00Z',
         updatedAt: '2024-01-01T00:00:00Z',
         profilePicture: undefined,

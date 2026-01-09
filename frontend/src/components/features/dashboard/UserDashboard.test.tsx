@@ -4,13 +4,28 @@ import { UserDashboard } from './UserDashboard';
 import * as useAuthModule from '@/hooks/useAuth';
 import * as useUserPlanFeaturesModule from '@/hooks/utils/useUserPlanFeatures';
 import * as useUserModule from '@/hooks/api/useUser';
-import type { AuthUser, UserProfile } from '@/types';
+import * as useUserCapabilitiesModule from '@/hooks/api/useUserCapabilities';
+import type { AuthUser, UserProfile, UserCapabilities } from '@/types';
 import type { UseQueryResult } from '@tanstack/react-query';
 
 // Mocks
 vi.mock('@/hooks/useAuth');
 vi.mock('@/hooks/utils/useUserPlanFeatures');
 vi.mock('@/hooks/api/useUser');
+vi.mock('@/hooks/api/useUserCapabilities');
+
+// Helper to create AuthUser mock without limits fields
+function createMockAuthUser(overrides?: Partial<AuthUser>): AuthUser {
+  return {
+    id: 1,
+    email: 'user@test.com',
+    name: 'Test User',
+    roles: ['consumer'],
+    plan: 'free',
+    profilePicture: null,
+    ...overrides,
+  };
+}
 
 describe('UserDashboard', () => {
   beforeEach(() => {
@@ -18,19 +33,7 @@ describe('UserDashboard', () => {
   });
 
   it('should render WelcomeHeader', () => {
-    const mockUser: AuthUser = {
-      id: 1,
-      email: 'user@test.com',
-      name: 'María',
-      roles: ['consumer'],
-      plan: 'free',
-      dailyReadingsCount: 0,
-      dailyReadingsLimit: 2,
-      dailyCardCount: 0,
-      dailyCardLimit: 1,
-      tarotReadingsCount: 0,
-      tarotReadingsLimit: 1,
-    };
+    const mockUser = createMockAuthUser({ name: 'María' });
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       user: mockUser,
@@ -52,7 +55,6 @@ describe('UserDashboard', () => {
       isPremium: false,
       isFree: true,
       isAnonymous: false,
-      dailyReadingsLimit: 2,
     });
 
     render(<UserDashboard />);
@@ -61,19 +63,7 @@ describe('UserDashboard', () => {
   });
 
   it('should render QuickActions', () => {
-    const mockUser: AuthUser = {
-      id: 1,
-      email: 'user@test.com',
-      name: 'Carlos',
-      roles: ['consumer'],
-      plan: 'free',
-      dailyReadingsCount: 1,
-      dailyReadingsLimit: 2,
-      dailyCardCount: 0,
-      dailyCardLimit: 1,
-      tarotReadingsCount: 0,
-      tarotReadingsLimit: 1,
-    };
+    const mockUser = createMockAuthUser({ name: 'Carlos', plan: 'free' });
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       user: mockUser,
@@ -95,7 +85,6 @@ describe('UserDashboard', () => {
       isPremium: false,
       isFree: true,
       isAnonymous: false,
-      dailyReadingsLimit: 2,
     });
 
     render(<UserDashboard />);
@@ -106,19 +95,7 @@ describe('UserDashboard', () => {
   });
 
   it('should render DidYouKnowSection', () => {
-    const mockUser: AuthUser = {
-      id: 1,
-      email: 'user@test.com',
-      name: 'Ana',
-      roles: ['consumer'],
-      plan: 'free',
-      dailyReadingsCount: 0,
-      dailyReadingsLimit: 2,
-      dailyCardCount: 0,
-      dailyCardLimit: 1,
-      tarotReadingsCount: 0,
-      tarotReadingsLimit: 1,
-    };
+    const mockUser = createMockAuthUser({ name: 'Ana', plan: 'free' });
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       user: mockUser,
@@ -140,7 +117,6 @@ describe('UserDashboard', () => {
       isPremium: false,
       isFree: true,
       isAnonymous: false,
-      dailyReadingsLimit: 2,
     });
 
     render(<UserDashboard />);
@@ -149,19 +125,7 @@ describe('UserDashboard', () => {
   });
 
   it('should render StatsSection for premium users', () => {
-    const mockUser: AuthUser = {
-      id: 1,
-      email: 'premium@test.com',
-      name: 'Premium User',
-      roles: ['consumer'],
-      plan: 'premium',
-      dailyReadingsCount: 2,
-      dailyReadingsLimit: 3,
-      dailyCardCount: 0,
-      dailyCardLimit: 1,
-      tarotReadingsCount: 0,
-      tarotReadingsLimit: 1,
-    };
+    const mockUser = createMockAuthUser({ name: 'Premium User', plan: 'premium' });
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       user: mockUser,
@@ -183,7 +147,6 @@ describe('UserDashboard', () => {
       isPremium: true,
       isFree: false,
       isAnonymous: false,
-      dailyReadingsLimit: 3,
     });
 
     vi.spyOn(useUserModule, 'useProfile').mockReturnValue({
@@ -200,25 +163,30 @@ describe('UserDashboard', () => {
       refetch: vi.fn(),
     } as unknown as UseQueryResult<UserProfile>);
 
+    vi.spyOn(useUserCapabilitiesModule, 'useUserCapabilities').mockReturnValue({
+      data: {
+        dailyCard: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+        tarotReadings: { used: 1, limit: 3, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+        canCreateDailyReading: true,
+        canCreateTarotReading: true,
+        canUseAI: true,
+        canUseCustomQuestions: true,
+        canUseAdvancedSpreads: true,
+        plan: 'premium',
+        isAuthenticated: true,
+      },
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    } as unknown as UseQueryResult<UserCapabilities>);
+
     render(<UserDashboard />);
 
     expect(screen.getByText('Tus Estadísticas')).toBeInTheDocument();
   });
 
   it('should NOT render StatsSection for free users', () => {
-    const mockUser: AuthUser = {
-      id: 1,
-      email: 'free@test.com',
-      name: 'Free User',
-      roles: ['consumer'],
-      plan: 'free',
-      dailyReadingsCount: 1,
-      dailyReadingsLimit: 2,
-      dailyCardCount: 0,
-      dailyCardLimit: 1,
-      tarotReadingsCount: 0,
-      tarotReadingsLimit: 1,
-    };
+    const mockUser = createMockAuthUser({ name: 'Free User', plan: 'free' });
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       user: mockUser,
@@ -240,7 +208,6 @@ describe('UserDashboard', () => {
       isPremium: false,
       isFree: true,
       isAnonymous: false,
-      dailyReadingsLimit: 2,
     });
 
     render(<UserDashboard />);
@@ -249,19 +216,7 @@ describe('UserDashboard', () => {
   });
 
   it('should render UpgradeBanner for free users', () => {
-    const mockUser: AuthUser = {
-      id: 1,
-      email: 'free@test.com',
-      name: 'Free User',
-      roles: ['consumer'],
-      plan: 'free',
-      dailyReadingsCount: 1,
-      dailyReadingsLimit: 2,
-      dailyCardCount: 0,
-      dailyCardLimit: 1,
-      tarotReadingsCount: 0,
-      tarotReadingsLimit: 1,
-    };
+    const mockUser = createMockAuthUser({ name: 'Free User', plan: 'free' });
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       user: mockUser,
@@ -283,7 +238,6 @@ describe('UserDashboard', () => {
       isPremium: false,
       isFree: true,
       isAnonymous: false,
-      dailyReadingsLimit: 2,
     });
 
     render(<UserDashboard />);
@@ -292,19 +246,7 @@ describe('UserDashboard', () => {
   });
 
   it('should NOT render UpgradeBanner for premium users', () => {
-    const mockUser: AuthUser = {
-      id: 1,
-      email: 'premium@test.com',
-      name: 'Premium User',
-      roles: ['consumer'],
-      plan: 'premium',
-      dailyReadingsCount: 2,
-      dailyReadingsLimit: 3,
-      dailyCardCount: 0,
-      dailyCardLimit: 1,
-      tarotReadingsCount: 0,
-      tarotReadingsLimit: 1,
-    };
+    const mockUser = createMockAuthUser({ name: 'Premium User', plan: 'premium' });
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       user: mockUser,
@@ -326,7 +268,6 @@ describe('UserDashboard', () => {
       isPremium: true,
       isFree: false,
       isAnonymous: false,
-      dailyReadingsLimit: 3,
     });
 
     vi.spyOn(useUserModule, 'useProfile').mockReturnValue({
@@ -342,6 +283,23 @@ describe('UserDashboard', () => {
       error: null,
       refetch: vi.fn(),
     } as unknown as UseQueryResult<UserProfile>);
+
+    vi.spyOn(useUserCapabilitiesModule, 'useUserCapabilities').mockReturnValue({
+      data: {
+        dailyCard: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+        tarotReadings: { used: 1, limit: 3, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+        canCreateDailyReading: true,
+        canCreateTarotReading: true,
+        canUseAI: true,
+        canUseCustomQuestions: true,
+        canUseAdvancedSpreads: true,
+        plan: 'premium',
+        isAuthenticated: true,
+      },
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    } as unknown as UseQueryResult<UserCapabilities>);
 
     render(<UserDashboard />);
 
@@ -351,19 +309,7 @@ describe('UserDashboard', () => {
   });
 
   it('should open UpgradeModal when upgrade banner is clicked', () => {
-    const mockUser: AuthUser = {
-      id: 1,
-      email: 'free@test.com',
-      name: 'Free User',
-      roles: ['consumer'],
-      plan: 'free',
-      dailyReadingsCount: 1,
-      dailyReadingsLimit: 2,
-      dailyCardCount: 0,
-      dailyCardLimit: 1,
-      tarotReadingsCount: 0,
-      tarotReadingsLimit: 1,
-    };
+    const mockUser = createMockAuthUser({ name: 'Free User', plan: 'free' });
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       user: mockUser,
@@ -385,7 +331,6 @@ describe('UserDashboard', () => {
       isPremium: false,
       isFree: true,
       isAnonymous: false,
-      dailyReadingsLimit: 2,
     });
 
     render(<UserDashboard />);
@@ -400,19 +345,7 @@ describe('UserDashboard', () => {
   });
 
   it('should close UpgradeModal when close button is clicked', async () => {
-    const mockUser: AuthUser = {
-      id: 1,
-      email: 'free@test.com',
-      name: 'Free User',
-      roles: ['consumer'],
-      plan: 'free',
-      dailyReadingsCount: 1,
-      dailyReadingsLimit: 2,
-      dailyCardCount: 0,
-      dailyCardLimit: 1,
-      tarotReadingsCount: 0,
-      tarotReadingsLimit: 1,
-    };
+    const mockUser = createMockAuthUser({ name: 'Free User', plan: 'free' });
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       user: mockUser,
@@ -434,7 +367,6 @@ describe('UserDashboard', () => {
       isPremium: false,
       isFree: true,
       isAnonymous: false,
-      dailyReadingsLimit: 2,
     });
 
     const { container } = render(<UserDashboard />);

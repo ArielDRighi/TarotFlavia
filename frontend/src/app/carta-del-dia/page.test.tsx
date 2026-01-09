@@ -41,6 +41,8 @@ const mockUseDailyReadingPublic = vi.fn();
 const mockUseRegenerateDailyReading = vi.fn();
 const mockUseAuth = vi.fn();
 const mockUseRequireAuth = vi.fn();
+const mockUseUserCapabilities = vi.fn();
+const mockUseInvalidateCapabilities = vi.fn(() => vi.fn());
 
 vi.mock('@/hooks/api/useDailyReading', () => ({
   useDailyReadingToday: () => mockUseDailyReadingToday(),
@@ -55,6 +57,11 @@ vi.mock('@/hooks/useAuth', () => ({
 
 vi.mock('@/hooks/useRequireAuth', () => ({
   useRequireAuth: () => mockUseRequireAuth(),
+}));
+
+vi.mock('@/hooks/api/useUserCapabilities', () => ({
+  useUserCapabilities: () => mockUseUserCapabilities(),
+  useInvalidateCapabilities: () => mockUseInvalidateCapabilities(),
 }));
 
 // Mock toast
@@ -96,6 +103,21 @@ describe('CartaDelDiaPage', () => {
       user: createMockUser(),
       isAuthenticated: true,
       isLoading: false,
+    });
+    mockUseUserCapabilities.mockReturnValue({
+      data: {
+        dailyCard: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+        tarotReadings: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+        canCreateDailyReading: true,
+        canCreateTarotReading: true,
+        canUseAI: false,
+        canUseCustomQuestions: false,
+        canUseAdvancedSpreads: false,
+        plan: 'free',
+        isAuthenticated: true,
+      },
+      isLoading: false,
+      error: null,
     });
     mockUseDailyReadingToday.mockReturnValue({
       data: null,

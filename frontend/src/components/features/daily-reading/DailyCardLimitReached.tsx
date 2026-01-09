@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { Calendar, History, Sparkles, Crown } from 'lucide-react';
 
-import { useAuth } from '@/hooks/useAuth';
+import { useUserCapabilities } from '@/hooks/api/useUserCapabilities';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -29,14 +29,19 @@ import {
  */
 export function DailyCardLimitReached() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { data: capabilities } = useUserCapabilities();
 
-  // Get specific daily card counters
-  const dailyCardCount = user?.dailyCardCount ?? 0;
-  const dailyCardLimit = user?.dailyCardLimit ?? 1;
+  // Get specific daily card counters from capabilities
+  const dailyCardCount = capabilities?.dailyCard.used ?? 0;
+  const dailyCardLimit = capabilities?.dailyCard.limit ?? 1;
+
+  // Get tarot readings info from capabilities
+  const tarotReadingsUsed = capabilities?.tarotReadings.used ?? 0;
+  const tarotReadingsLimit = capabilities?.tarotReadings.limit ?? 0;
+  const tarotReadingsAvailable = tarotReadingsLimit - tarotReadingsUsed;
 
   // Detect user plan - PREMIUM users should see different message (no upgrade CTA)
-  const isPremium = user?.plan?.toUpperCase() === 'PREMIUM';
+  const isPremium = capabilities?.plan === 'premium';
 
   const handleViewHistory = () => {
     router.push('/historial');
@@ -91,7 +96,7 @@ export function DailyCardLimitReached() {
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-primary">✓</span> Crear una nueva lectura de tarot (tienes{' '}
-                  {(user?.tarotReadingsLimit ?? 3) - (user?.tarotReadingsCount ?? 0)} disponibles)
+                  {tarotReadingsAvailable} disponibles)
                 </li>
               </ul>
             </div>

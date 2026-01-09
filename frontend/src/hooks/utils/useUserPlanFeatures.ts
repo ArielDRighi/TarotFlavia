@@ -14,15 +14,6 @@ const PLAN_LABELS: Record<UserPlan, string> = {
 };
 
 /**
- * Daily readings limits by plan
- */
-const DAILY_READINGS_LIMITS: Record<UserPlan, number> = {
-  anonymous: 1,
-  free: 2,
-  premium: 3,
-};
-
-/**
  * Return type for useUserPlanFeatures hook
  */
 export interface UseUserPlanFeaturesReturn {
@@ -44,8 +35,6 @@ export interface UseUserPlanFeaturesReturn {
   isFree: boolean;
   /** Is user anonymous (not registered)? */
   isAnonymous: boolean;
-  /** Daily readings limit for current plan */
-  dailyReadingsLimit: number;
 }
 
 /**
@@ -54,20 +43,26 @@ export interface UseUserPlanFeaturesReturn {
  * Centralizes all plan-based permissions logic to avoid duplication
  * across components. Returns computed flags for UI conditional rendering.
  *
+ * IMPORTANT: For usage limits (daily readings, tarot readings, etc.),
+ * use useUserCapabilities() instead - it's the single source of truth
+ * for limits and usage counts.
+ *
  * Features by plan:
- * - ANONYMOUS: 1 reading/day, basic interpretations, no custom questions, no sharing
- * - FREE: 2 readings/day, basic interpretations, no custom questions, can share
- * - PREMIUM: 3 readings/day, personalized interpretations, custom questions, can share
+ * - ANONYMOUS: Daily card only, basic interpretations, no custom questions, no sharing
+ * - FREE: 1 card + 1 reading/day, basic interpretations, no custom questions, can share
+ * - PREMIUM: 1 card + 3 readings/day, personalized interpretations, custom questions, can share
  *
  * @example
  * ```tsx
  * function ReadingForm() {
  *   const { canUseAI, isPremium } = useUserPlanFeatures();
+ *   const { data: capabilities } = useUserCapabilities(); // For limits
  *
  *   return (
  *     <div>
  *       <input disabled={!isPremium} />
  *       {!canUseAI && <PremiumBadge />}
+ *       <p>Readings: {capabilities?.tarotReadings.used} / {capabilities?.tarotReadings.limit}</p>
  *     </div>
  *   );
  * }
@@ -92,7 +87,6 @@ export function useUserPlanFeatures(): UseUserPlanFeaturesReturn {
       isPremium,
       isFree,
       isAnonymous,
-      dailyReadingsLimit: DAILY_READINGS_LIMITS[plan],
     };
   }, [user?.plan]);
 }

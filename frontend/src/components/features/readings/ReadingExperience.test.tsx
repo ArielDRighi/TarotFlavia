@@ -75,6 +75,12 @@ vi.mock('./UpgradeModal', () => ({
   },
 }));
 
+// Mock useUserCapabilities
+const mockUseUserCapabilities = vi.fn();
+vi.mock('@/hooks/api/useUserCapabilities', () => ({
+  useUserCapabilities: () => mockUseUserCapabilities(),
+}));
+
 // Test data
 const mockSpreads: Spread[] = [
   {
@@ -249,20 +255,15 @@ vi.mock('@/hooks/api/useReadings', () => ({
 }));
 
 // Mock auth store - mutable para tests
+// Note: AuthUser no longer contains limit fields - use useUserCapabilities() instead
 const mockAuthStoreReturn = {
   user: {
     id: 1,
     email: 'test@example.com',
-    plan: 'PREMIUM',
-    roles: ['USER'],
-    // Legacy fields (deprecated)
-    dailyReadingsCount: 0,
-    dailyReadingsLimit: 999,
-    // New separate fields
-    dailyCardCount: 0,
-    dailyCardLimit: 1,
-    tarotReadingsCount: 0,
-    tarotReadingsLimit: 3,
+    name: 'Test User',
+    plan: 'premium',
+    roles: ['consumer'],
+    profilePicture: null,
   },
   isAuthenticated: true,
 };
@@ -272,6 +273,7 @@ vi.mock('@/stores/authStore', () => ({
 }));
 
 // Mock useUserPlanFeatures - mutable para tests
+// Note: dailyReadingsLimit removed - use useUserCapabilities() for limits
 const mockPlanFeaturesReturn = {
   plan: 'premium',
   planLabel: 'PREMIUM',
@@ -282,7 +284,6 @@ const mockPlanFeaturesReturn = {
   isPremium: true,
   isFree: false,
   isAnonymous: false,
-  dailyReadingsLimit: 999,
 };
 
 vi.mock('@/hooks/utils/useUserPlanFeatures', () => ({
@@ -316,6 +317,22 @@ describe('ReadingExperience', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockCreateReadingMutateAsync.mockReset();
+
+    // Default mock: FREE user with available readings
+    mockUseUserCapabilities.mockReturnValue({
+      data: {
+        dailyCard: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+        tarotReadings: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+        canCreateDailyReading: true,
+        canCreateTarotReading: true,
+        canUseAI: false,
+        canUseCustomQuestions: false,
+        canUseAdvancedSpreads: false,
+        plan: 'free',
+        isAuthenticated: true,
+      },
+      isLoading: false,
+    });
   });
 
   describe('Card Selection State', () => {
@@ -648,17 +665,20 @@ describe('ReadingExperience', () => {
 
     it('should NOT show "Nueva Lectura" button when FREE user has reached daily limit', async () => {
       // Modify mock for FREE user at limit
-      mockAuthStoreReturn.user.plan = 'free';
-      mockAuthStoreReturn.user.dailyReadingsCount = 2;
-      mockAuthStoreReturn.user.dailyReadingsLimit = 2;
-      mockAuthStoreReturn.user.tarotReadingsCount = 1;
-      mockAuthStoreReturn.user.tarotReadingsLimit = 1;
-
-      mockPlanFeaturesReturn.plan = 'free';
-      mockPlanFeaturesReturn.isPremium = false;
-      mockPlanFeaturesReturn.isFree = true;
-      mockPlanFeaturesReturn.canUseAI = false;
-      mockPlanFeaturesReturn.dailyReadingsLimit = 2;
+      mockUseUserCapabilities.mockReturnValue({
+        data: {
+          dailyCard: { used: 1, limit: 1, canUse: false, resetAt: '2026-01-09T00:00:00Z' },
+          tarotReadings: { used: 1, limit: 1, canUse: false, resetAt: '2026-01-09T00:00:00Z' },
+          canCreateDailyReading: false,
+          canCreateTarotReading: false, // 🔴 This is the key - user CANNOT create more readings
+          canUseAI: false,
+          canUseCustomQuestions: false,
+          canUseAdvancedSpreads: false,
+          plan: 'free',
+          isAuthenticated: true,
+        },
+        isLoading: false,
+      });
 
       renderWithProviders(<ReadingExperience spreadId={2} questionId={1} customQuestion={null} />);
 
@@ -676,35 +696,24 @@ describe('ReadingExperience', () => {
 
       // ✅ Button should NOT be present
       expect(screen.queryByRole('button', { name: /Nueva Lectura/i })).not.toBeInTheDocument();
-
-      // Restore defaults for other tests
-      mockAuthStoreReturn.user.plan = 'PREMIUM';
-      mockAuthStoreReturn.user.dailyReadingsCount = 0;
-      mockAuthStoreReturn.user.dailyReadingsLimit = 999;
-      mockAuthStoreReturn.user.tarotReadingsCount = 0;
-      mockAuthStoreReturn.user.tarotReadingsLimit = 3;
-      mockPlanFeaturesReturn.plan = 'premium';
-      mockPlanFeaturesReturn.isPremium = true;
-      mockPlanFeaturesReturn.isFree = false;
-      mockPlanFeaturesReturn.canUseAI = true;
-      mockPlanFeaturesReturn.dailyReadingsLimit = 999;
     });
 
     it('should show "Nueva Lectura" button when FREE user is under daily limit', async () => {
-      // Modify mock for FREE user under limit
-      // User has created 0 readings today, limit is 2
-      // After creating 1 in this session, effectiveDailyCount = 0 + 1 = 1 < 2 ✓
-      mockAuthStoreReturn.user.plan = 'free';
-      mockAuthStoreReturn.user.dailyReadingsCount = 0;
-      mockAuthStoreReturn.user.dailyReadingsLimit = 2;
-      mockAuthStoreReturn.user.tarotReadingsCount = 0;
-      mockAuthStoreReturn.user.tarotReadingsLimit = 1;
-
-      mockPlanFeaturesReturn.plan = 'free';
-      mockPlanFeaturesReturn.isPremium = false;
-      mockPlanFeaturesReturn.isFree = true;
-      mockPlanFeaturesReturn.canUseAI = false;
-      mockPlanFeaturesReturn.dailyReadingsLimit = 2;
+      // Modify mock for FREE user under limit - can still create readings
+      mockUseUserCapabilities.mockReturnValue({
+        data: {
+          dailyCard: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+          tarotReadings: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+          canCreateDailyReading: true,
+          canCreateTarotReading: true, // 🟢 User CAN create readings
+          canUseAI: false,
+          canUseCustomQuestions: false,
+          canUseAdvancedSpreads: false,
+          plan: 'free',
+          isAuthenticated: true,
+        },
+        isLoading: false,
+      });
 
       renderWithProviders(<ReadingExperience spreadId={2} questionId={1} customQuestion={null} />);
 
@@ -722,33 +731,24 @@ describe('ReadingExperience', () => {
 
       // ✅ Button SHOULD be present
       expect(screen.getByRole('button', { name: /Nueva Lectura/i })).toBeInTheDocument();
-
-      // Restore defaults
-      mockAuthStoreReturn.user.plan = 'PREMIUM';
-      mockAuthStoreReturn.user.dailyReadingsCount = 0;
-      mockAuthStoreReturn.user.dailyReadingsLimit = 999;
-      mockAuthStoreReturn.user.tarotReadingsCount = 0;
-      mockAuthStoreReturn.user.tarotReadingsLimit = 3;
-      mockPlanFeaturesReturn.plan = 'premium';
-      mockPlanFeaturesReturn.isPremium = true;
-      mockPlanFeaturesReturn.isFree = false;
-      mockPlanFeaturesReturn.canUseAI = true;
-      mockPlanFeaturesReturn.dailyReadingsLimit = 999;
     });
 
     it('should always show "Nueva Lectura" button for PREMIUM users', async () => {
-      // Mock already set to PREMIUM by default, but let's be explicit
-      mockAuthStoreReturn.user.plan = 'premium';
-      mockAuthStoreReturn.user.dailyReadingsCount = 10;
-      mockAuthStoreReturn.user.dailyReadingsLimit = 999;
-      mockAuthStoreReturn.user.tarotReadingsCount = 2;
-      mockAuthStoreReturn.user.tarotReadingsLimit = 3;
-
-      mockPlanFeaturesReturn.plan = 'premium';
-      mockPlanFeaturesReturn.isPremium = true;
-      mockPlanFeaturesReturn.isFree = false;
-      mockPlanFeaturesReturn.canUseAI = true;
-      mockPlanFeaturesReturn.dailyReadingsLimit = 999;
+      // Premium users always have canCreateTarotReading = true
+      mockUseUserCapabilities.mockReturnValue({
+        data: {
+          dailyCard: { used: 3, limit: 999, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+          tarotReadings: { used: 10, limit: 999, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+          canCreateDailyReading: true,
+          canCreateTarotReading: true, // 🟢 Premium always true
+          canUseAI: true,
+          canUseCustomQuestions: true,
+          canUseAdvancedSpreads: true,
+          plan: 'premium',
+          isAuthenticated: true,
+        },
+        isLoading: false,
+      });
 
       renderWithProviders(<ReadingExperience spreadId={2} questionId={1} customQuestion={null} />);
 

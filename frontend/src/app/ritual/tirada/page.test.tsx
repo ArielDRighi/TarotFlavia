@@ -6,6 +6,7 @@ import SpreadSelectorPage from './page';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { useMyAvailableSpreads } from '@/hooks/api/useReadings';
 import { useAuthStore } from '@/stores/authStore';
+import { useUserCapabilities } from '@/hooks/api/useUserCapabilities';
 
 // Mock modules
 vi.mock('next/navigation', () => ({
@@ -23,6 +24,11 @@ vi.mock('@/hooks/api/useReadings', () => ({
 
 vi.mock('@/stores/authStore', () => ({
   useAuthStore: vi.fn(),
+}));
+
+// Mock useUserCapabilities
+vi.mock('@/hooks/api/useUserCapabilities', () => ({
+  useUserCapabilities: vi.fn(),
 }));
 
 // Mock data
@@ -43,17 +49,29 @@ const mockUser = {
   name: 'Test User',
   roles: ['USER'],
   plan: 'free',
-  dailyReadingsCount: 0,
-  dailyReadingsLimit: 3,
-  dailyCardCount: 0,
-  dailyCardLimit: 1,
-  tarotReadingsCount: 0,
-  tarotReadingsLimit: 1,
+  profilePicture: null,
 };
 
 describe('SpreadSelectorPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // Default mock for capabilities - FREE user with daily card used
+    (useUserCapabilities as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: {
+        dailyCard: { used: 1, limit: 1, canUse: false, resetAt: '2026-01-09T00:00:00Z' },
+        tarotReadings: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+        canCreateDailyReading: false,
+        canCreateTarotReading: true,
+        canUseAI: false,
+        canUseCustomQuestions: false,
+        canUseAdvancedSpreads: false,
+        plan: 'free',
+        isAuthenticated: true,
+      },
+      isLoading: false,
+    });
+
     (useRequireAuth as Mock).mockReturnValue({ isLoading: false });
     (useAuthStore as unknown as Mock).mockReturnValue({ user: mockUser });
     (useMyAvailableSpreads as Mock).mockReturnValue({
@@ -79,6 +97,23 @@ describe('SpreadSelectorPage', () => {
     (useSearchParams as Mock).mockReturnValue(mockSearchParams);
     (useAuthStore as unknown as Mock).mockReturnValue({
       user: { ...mockUser, plan: 'premium' },
+    });
+
+    // Mock PREMIUM capabilities
+    (useUserCapabilities as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: {
+        dailyCard: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+        tarotReadings: { used: 0, limit: 3, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+        canCreateDailyReading: true,
+        canCreateTarotReading: true,
+        canUseAI: true,
+        canUseCustomQuestions: true,
+        canUseAdvancedSpreads: true,
+        plan: 'premium',
+        isAuthenticated: true,
+      },
+      isLoading: false,
+      error: null,
     });
 
     render(<SpreadSelectorPage />);
