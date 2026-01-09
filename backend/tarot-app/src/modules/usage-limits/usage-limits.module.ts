@@ -5,6 +5,7 @@ import { UsageLimitsResetService } from './services/usage-limits-reset.service';
 import { AnonymousTrackingService } from './services/anonymous-tracking.service';
 import { UsageLimit } from './entities/usage-limit.entity';
 import { AnonymousUsage } from './entities/anonymous-usage.entity';
+import { DailyReading } from '../tarot/daily-reading/entities/daily-reading.entity';
 import { UsersModule } from '../users/users.module';
 import { PlanConfigModule } from '../plan-config/plan-config.module';
 import { CheckUsageLimitGuard } from './guards/check-usage-limit.guard';
@@ -12,7 +13,7 @@ import { IncrementUsageInterceptor } from './interceptors/increment-usage.interc
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UsageLimit, AnonymousUsage]),
+    TypeOrmModule.forFeature([UsageLimit, AnonymousUsage, DailyReading]),
     forwardRef(() => UsersModule),
     PlanConfigModule,
   ],

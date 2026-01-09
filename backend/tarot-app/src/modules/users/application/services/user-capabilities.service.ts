@@ -46,11 +46,21 @@ export class UserCapabilitiesService {
     // Obtener configuración del plan
     const planConfig = await this.planConfigService.findByPlanType(user.plan);
 
-    // Obtener uso actual de cada feature
-    const dailyCardUsage = await this.usageLimitsService.getUsage(
-      userId,
-      UsageFeature.DAILY_CARD,
-    );
+    // Obtener uso actual de carta del día consultando directamente daily_reading
+    // Esto garantiza consistencia con la tabla real de lecturas
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+
+    const existingDailyReading = await this.dailyReadingRepository.findOne({
+      where: {
+        userId,
+        readingDate: MoreThanOrEqual(today),
+      },
+    });
+
+    const dailyCardUsage = existingDailyReading ? 1 : 0;
+
+    // Obtener uso de tiradas de tarot desde usage_limits
     const tarotUsage = await this.usageLimitsService.getUsage(
       userId,
       UsageFeature.TAROT_READING,

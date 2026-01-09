@@ -8,6 +8,7 @@ import { SharedReadingsController } from './shared-readings.controller';
 import { TarotReading } from './entities/tarot-reading.entity';
 import { TarotInterpretation } from '../interpretations/entities/tarot-interpretation.entity';
 import { User } from '../../users/entities/user.entity';
+import { DailyReading } from '../daily-reading/entities/daily-reading.entity';
 import { RequiresPremiumForCustomQuestionGuard } from './guards/requires-premium-for-custom-question.guard';
 import { ReadingsCacheInterceptor } from './interceptors/readings-cache.interceptor';
 import { InterpretationsModule } from '../interpretations/interpretations.module';
@@ -41,7 +42,12 @@ import { RestoreReadingUseCase } from './application/use-cases/restore-reading.u
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([TarotReading, TarotInterpretation, User]),
+    TypeOrmModule.forFeature([
+      TarotReading,
+      TarotInterpretation,
+      User,
+      DailyReading,
+    ]),
     InterpretationsModule,
     CardsModule,
     DecksModule,

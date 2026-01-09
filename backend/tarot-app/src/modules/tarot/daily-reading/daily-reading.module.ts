@@ -24,6 +24,6 @@ import { PlanConfigModule } from '../../plan-config/plan-config.module';
   ],
   controllers: [DailyReadingController, DailyReadingPublicController],
   providers: [DailyReadingService],
-  exports: [DailyReadingService],
+  exports: [DailyReadingService, TypeOrmModule],
 })
 export class DailyReadingModule {}
