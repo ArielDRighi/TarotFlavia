@@ -1,9 +1,29 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { UserCapabilitiesDto } from './user-capabilities.dto';
+import { UserRole } from '../../entities/user.entity';
+
+/**
+ * Enum para el plan del usuario
+ */
+export enum UserPlan {
+  ANONYMOUS = 'anonymous',
+  FREE = 'free',
+  PREMIUM = 'premium',
+}
+
+/**
+ * Enum para el estado de la suscripción
+ */
+export enum SubscriptionStatus {
+  ACTIVE = 'active',
+  CANCELLED = 'cancelled',
+  EXPIRED = 'expired',
+}
 
 /**
  * DTO para la respuesta del endpoint GET /users/profile
  * Incluye campos deprecated para backward compatibility
+ * Este DTO refleja TODOS los campos que el endpoint retorna (User entity sin password)
  */
 export class UserProfileResponseDto {
   @ApiProperty({
@@ -41,9 +61,104 @@ export class UserProfileResponseDto {
   @ApiProperty({
     description: 'Roles del usuario',
     example: ['user'],
-    type: [String],
+    enum: UserRole,
+    isArray: true,
   })
-  roles: string[];
+  roles: UserRole[];
+
+  @ApiProperty({
+    description: 'Indica si el usuario tiene permisos de administrador',
+    example: false,
+  })
+  isAdmin: boolean;
+
+  @ApiProperty({
+    description: 'Fecha de inicio del plan actual',
+    example: '2024-01-01T00:00:00.000Z',
+    nullable: true,
+  })
+  planStartedAt: Date | null;
+
+  @ApiProperty({
+    description: 'Fecha de expiración del plan',
+    example: '2024-12-31T23:59:59.000Z',
+    nullable: true,
+  })
+  planExpiresAt: Date | null;
+
+  @ApiProperty({
+    description: 'Estado de la suscripción',
+    enum: SubscriptionStatus,
+    example: SubscriptionStatus.ACTIVE,
+    nullable: true,
+  })
+  subscriptionStatus: SubscriptionStatus | null;
+
+  @ApiProperty({
+    description: 'ID del cliente en Stripe',
+    example: 'cus_123456789',
+    nullable: true,
+  })
+  stripeCustomerId: string | null;
+
+  @ApiProperty({
+    description: 'Número de requests de IA usados este mes',
+    example: 0,
+  })
+  aiRequestsUsedMonth: number;
+
+  @ApiProperty({
+    description: 'Costo acumulado en USD de IA este mes',
+    example: 0.0,
+  })
+  aiCostUsdMonth: number;
+
+  @ApiProperty({
+    description: 'Tokens de IA usados este mes',
+    example: 0,
+  })
+  aiTokensUsedMonth: number;
+
+  @ApiProperty({
+    description: 'Proveedor de IA usado mayoritariamente',
+    example: 'groq',
+    nullable: true,
+  })
+  aiProviderUsed: string | null;
+
+  @ApiProperty({
+    description: 'Indica si se envió advertencia de cuota al usuario',
+    example: false,
+  })
+  quotaWarningSent: boolean;
+
+  @ApiProperty({
+    description: 'Fecha del último reset de uso de IA',
+    example: '2024-01-01T00:00:00.000Z',
+    nullable: true,
+  })
+  aiUsageResetAt: Date | null;
+
+  @ApiProperty({
+    description: 'Fecha de último inicio de sesión',
+    example: '2024-01-01T00:00:00.000Z',
+    nullable: true,
+  })
+  lastLogin: Date | null;
+
+  @ApiProperty({
+    description: 'Fecha en que el usuario fue baneado',
+    example: null,
+    nullable: true,
+  })
+  bannedAt: Date | null;
+
+  @ApiProperty({
+    description: 'Razón del baneo del usuario',
+    example: null,
+    nullable: true,
+  })
+  banReason: string | null;
 
   @ApiProperty({
     description: 'Fecha de creación del usuario',
