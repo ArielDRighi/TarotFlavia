@@ -12,3 +12,4 @@ export {
   UserCapabilitiesDto,
   UserPlanType,
 } from './user-capabilities.dto';
+export { UserProfileResponseDto } from './user-profile-response.dto';
