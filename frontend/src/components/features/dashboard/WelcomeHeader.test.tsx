@@ -23,7 +23,6 @@ function createMockAuthUser(overrides?: Partial<AuthUser>): AuthUser {
   };
 }
 
-
 describe('WelcomeHeader', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -52,7 +51,6 @@ describe('WelcomeHeader', () => {
       isPremium: false,
       isFree: true,
       isAnonymous: false,
-      dailyReadingsLimit: 2,
     });
 
     render(<WelcomeHeader />);
@@ -83,7 +81,6 @@ describe('WelcomeHeader', () => {
       isPremium: false,
       isFree: true,
       isAnonymous: false,
-      dailyReadingsLimit: 2,
     });
 
     render(<WelcomeHeader />);
@@ -114,7 +111,6 @@ describe('WelcomeHeader', () => {
       isPremium: true,
       isFree: false,
       isAnonymous: false,
-      dailyReadingsLimit: 3,
     });
 
     render(<WelcomeHeader />);
@@ -145,7 +141,6 @@ describe('WelcomeHeader', () => {
       isPremium: false,
       isFree: true,
       isAnonymous: false,
-      dailyReadingsLimit: 2,
     });
 
     render(<WelcomeHeader />);
@@ -176,7 +171,6 @@ describe('WelcomeHeader', () => {
       isPremium: false,
       isFree: false,
       isAnonymous: true,
-      dailyReadingsLimit: 1,
     });
 
     render(<WelcomeHeader />);

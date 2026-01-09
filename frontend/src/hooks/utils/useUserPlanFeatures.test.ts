@@ -33,7 +33,7 @@ describe('useUserPlanFeatures', () => {
       expect(result.current.isPremium).toBe(false);
       expect(result.current.isFree).toBe(false);
       expect(result.current.isAnonymous).toBe(true);
-      expect(result.current.dailyReadingsLimit).toBe(1);
+      // Note: dailyReadingsLimit removed - use useUserCapabilities() for limits
     });
   });
 
@@ -58,7 +58,7 @@ describe('useUserPlanFeatures', () => {
       expect(result.current.isPremium).toBe(false);
       expect(result.current.isFree).toBe(true);
       expect(result.current.isAnonymous).toBe(false);
-      expect(result.current.dailyReadingsLimit).toBe(2);
+      // Note: dailyReadingsLimit removed - use useUserCapabilities() for limits
     });
   });
 
@@ -83,7 +83,7 @@ describe('useUserPlanFeatures', () => {
       expect(result.current.isPremium).toBe(true);
       expect(result.current.isFree).toBe(false);
       expect(result.current.isAnonymous).toBe(false);
-      expect(result.current.dailyReadingsLimit).toBe(3);
+      // Note: dailyReadingsLimit removed - use useUserCapabilities() for limits
     });
   });
 
@@ -108,7 +108,7 @@ describe('useUserPlanFeatures', () => {
       expect(result.current.isPremium).toBe(false);
       expect(result.current.isFree).toBe(false);
       expect(result.current.isAnonymous).toBe(true);
-      expect(result.current.dailyReadingsLimit).toBe(1);
+      // Note: dailyReadingsLimit removed - use useUserCapabilities() for limits
     });
   });
 

@@ -3,6 +3,8 @@
 import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PlanBadge } from '@/components/ui/plan-badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useUserCapabilities } from '@/hooks/api/useUserCapabilities';
 import type { UserProfile } from '@/types';
 
 export interface SubscriptionTabProps {
@@ -12,29 +14,33 @@ export interface SubscriptionTabProps {
 /**
  * SubscriptionTab component
  *
- * Displays subscription information and usage statistics
+ * Displays subscription information and usage statistics.
+ * Uses useUserCapabilities() as single source of truth for limits/usage.
  */
 export function SubscriptionTab({ profile }: SubscriptionTabProps) {
-  // Defensive guards against undefined/null/NaN values
-  const dailyReadingsCount = useMemo(() => {
-    const count = profile.dailyReadingsCount;
-    return typeof count === 'number' && !isNaN(count) ? count : 0;
-  }, [profile.dailyReadingsCount]);
+  // Use capabilities as single source of truth for usage stats
+  const { data: capabilities, isLoading: capabilitiesLoading } = useUserCapabilities();
 
-  const dailyReadingsLimit = useMemo(() => {
-    const limit = profile.dailyReadingsLimit;
-    return typeof limit === 'number' && !isNaN(limit) ? limit : 0;
-  }, [profile.dailyReadingsLimit]);
+  // Get tarot readings usage from capabilities (single source of truth)
+  const tarotReadingsUsed = capabilities?.tarotReadings.used ?? 0;
+  const tarotReadingsLimit = capabilities?.tarotReadings.limit ?? 0;
+  const dailyCardUsed = capabilities?.dailyCard.used ?? 0;
+  const dailyCardLimit = capabilities?.dailyCard.limit ?? 0;
 
-  const lecturesRemaining = useMemo(() => {
-    const remaining = dailyReadingsLimit - dailyReadingsCount;
+  const tarotReadingsRemaining = useMemo(() => {
+    const remaining = tarotReadingsLimit - tarotReadingsUsed;
     return remaining >= 0 ? remaining : 0;
-  }, [dailyReadingsLimit, dailyReadingsCount]);
+  }, [tarotReadingsLimit, tarotReadingsUsed]);
 
-  const progressPercentage = useMemo(() => {
-    if (dailyReadingsLimit <= 0) return 0;
-    return Math.min((dailyReadingsCount / dailyReadingsLimit) * 100, 100);
-  }, [dailyReadingsCount, dailyReadingsLimit]);
+  const tarotProgressPercentage = useMemo(() => {
+    if (tarotReadingsLimit <= 0) return 0;
+    return Math.min((tarotReadingsUsed / tarotReadingsLimit) * 100, 100);
+  }, [tarotReadingsUsed, tarotReadingsLimit]);
+
+  const dailyCardProgressPercentage = useMemo(() => {
+    if (dailyCardLimit <= 0) return 0;
+    return Math.min((dailyCardUsed / dailyCardLimit) * 100, 100);
+  }, [dailyCardUsed, dailyCardLimit]);
 
   return (
     <div className="space-y-6">
@@ -72,30 +78,59 @@ export function SubscriptionTab({ profile }: SubscriptionTabProps) {
         <CardHeader>
           <CardTitle>Estadísticas de Uso</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <div className="mb-2 flex items-center justify-between">
-              <span className="text-sm font-medium">Lecturas realizadas hoy</span>
-              <span className="text-sm font-bold">
-                {dailyReadingsCount} / {dailyReadingsLimit}
-              </span>
+        <CardContent className="space-y-6">
+          {capabilitiesLoading ? (
+            <div className="space-y-4">
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
             </div>
-            {/* Progress bar with defensive guard against division by zero */}
-            <div className="bg-secondary h-2 w-full overflow-hidden rounded-full">
-              <div
-                className="bg-primary h-full transition-all"
-                style={{
-                  width: `${progressPercentage}%`,
-                }}
-              />
-            </div>
-          </div>
+          ) : (
+            <>
+              {/* Tarot Readings */}
+              <div>
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-sm font-medium">Tiradas de Tarot hoy</span>
+                  <span className="text-sm font-bold">
+                    {tarotReadingsUsed} / {tarotReadingsLimit}
+                  </span>
+                </div>
+                <div className="bg-secondary h-2 w-full overflow-hidden rounded-full">
+                  <div
+                    className="bg-primary h-full transition-all"
+                    style={{
+                      width: `${tarotProgressPercentage}%`,
+                    }}
+                  />
+                </div>
+                <p className="text-muted-foreground mt-1 text-xs">
+                  Restantes: <span className="font-semibold">{tarotReadingsRemaining}</span>
+                </p>
+              </div>
 
-          <div className="text-muted-foreground text-sm">
-            <p>
-              Lecturas restantes hoy: <span className="font-semibold">{lecturesRemaining}</span>
-            </p>
-          </div>
+              {/* Daily Card */}
+              <div>
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-sm font-medium">Carta del Día</span>
+                  <span className="text-sm font-bold">
+                    {dailyCardUsed} / {dailyCardLimit}
+                  </span>
+                </div>
+                <div className="bg-secondary h-2 w-full overflow-hidden rounded-full">
+                  <div
+                    className="bg-primary h-full transition-all"
+                    style={{
+                      width: `${dailyCardProgressPercentage}%`,
+                    }}
+                  />
+                </div>
+                <p className="text-muted-foreground mt-1 text-xs">
+                  {dailyCardUsed >= dailyCardLimit
+                    ? 'Ya recibiste tu carta del día'
+                    : 'Disponible para hoy'}
+                </p>
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
 
@@ -113,20 +148,20 @@ export function SubscriptionTab({ profile }: SubscriptionTabProps) {
 
               <ul className="text-muted-foreground space-y-2 text-sm">
                 <li className="flex items-center gap-2">
-                  <span className="text-green-600">✓</span>
-                  Lecturas ilimitadas
+                  <span className="text-green-600">✓</span>3 tiradas de tarot por día (vs 1
+                  gratuita)
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-green-600">✓</span>
-                  Acceso a todos los tipos de tiradas
+                  Interpretaciones personalizadas con IA
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-green-600">✓</span>
-                  Historial completo de lecturas
+                  Acceso a todas las tiradas (Cruz Céltica, 5 cartas)
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-green-600">✓</span>
-                  Soporte prioritario
+                  Preguntas personalizadas
                 </li>
               </ul>
 

@@ -255,20 +255,15 @@ vi.mock('@/hooks/api/useReadings', () => ({
 }));
 
 // Mock auth store - mutable para tests
+// Note: AuthUser no longer contains limit fields - use useUserCapabilities() instead
 const mockAuthStoreReturn = {
   user: {
     id: 1,
     email: 'test@example.com',
-    plan: 'PREMIUM',
-    roles: ['USER'],
-    // Legacy fields (deprecated)
-    dailyReadingsCount: 0,
-    dailyReadingsLimit: 999,
-    // New separate fields
-    dailyCardCount: 0,
-    dailyCardLimit: 1,
-    tarotReadingsCount: 0,
-    tarotReadingsLimit: 3,
+    name: 'Test User',
+    plan: 'premium',
+    roles: ['consumer'],
+    profilePicture: null,
   },
   isAuthenticated: true,
 };
@@ -278,6 +273,7 @@ vi.mock('@/stores/authStore', () => ({
 }));
 
 // Mock useUserPlanFeatures - mutable para tests
+// Note: dailyReadingsLimit removed - use useUserCapabilities() for limits
 const mockPlanFeaturesReturn = {
   plan: 'premium',
   planLabel: 'PREMIUM',
@@ -288,7 +284,6 @@ const mockPlanFeaturesReturn = {
   isPremium: true,
   isFree: false,
   isAnonymous: false,
-  dailyReadingsLimit: 999,
 };
 
 vi.mock('@/hooks/utils/useUserPlanFeatures', () => ({

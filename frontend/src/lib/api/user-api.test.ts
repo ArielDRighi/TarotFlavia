@@ -27,18 +27,21 @@ describe('user-api', () => {
   // getProfile
   // ==========================================================================
   describe('getProfile', () => {
+    // Note: Backend still sends limit fields for backward compatibility,
+    // but components should use useUserCapabilities() hook instead of these fields
     const mockProfile: UserProfile = {
       id: 1,
       email: 'test@example.com',
       name: 'Test User',
       roles: ['consumer'],
       plan: 'free',
-      dailyReadingsCount: 2,
-      dailyReadingsLimit: 5,
+      // Backend sends these but components should use useUserCapabilities()
       dailyCardCount: 0,
       dailyCardLimit: 1,
       tarotReadingsCount: 0,
       tarotReadingsLimit: 1,
+      dailyReadingsCount: 0,
+      dailyReadingsLimit: 1,
       createdAt: '2024-01-01T00:00:00Z',
       updatedAt: '2024-01-01T00:00:00Z',
       profilePicture: undefined,
@@ -60,7 +63,9 @@ describe('user-api', () => {
       await expect(getProfile()).rejects.toThrow('Error al obtener perfil de usuario');
     });
 
-    it('should return profile with usage stats', async () => {
+    it('should return profile with usage stats (legacy fields from backend)', async () => {
+      // Note: These fields are sent by backend for backward compatibility
+      // Components should use useUserCapabilities() instead
       const profileWithStats = {
         ...mockProfile,
         dailyReadingsCount: 3,
@@ -70,6 +75,7 @@ describe('user-api', () => {
 
       const result = await getProfile();
 
+      // Verify backend still sends legacy fields (for backward compat)
       expect(result.dailyReadingsCount).toBe(3);
       expect(result.dailyReadingsLimit).toBe(10);
     });
@@ -79,18 +85,21 @@ describe('user-api', () => {
   // updateProfile
   // ==========================================================================
   describe('updateProfile', () => {
+    // Note: Backend still sends limit fields for backward compatibility,
+    // but components should use useUserCapabilities() hook instead of these fields
     const mockUpdatedProfile: UserProfile = {
       id: 1,
       email: 'updated@example.com',
       name: 'Updated User',
       roles: ['consumer'],
       plan: 'free',
-      dailyReadingsCount: 2,
-      dailyReadingsLimit: 5,
+      // Backend sends these but components should use useUserCapabilities()
       dailyCardCount: 0,
       dailyCardLimit: 1,
       tarotReadingsCount: 0,
       tarotReadingsLimit: 1,
+      dailyReadingsCount: 0,
+      dailyReadingsLimit: 1,
       createdAt: '2024-01-01T00:00:00Z',
       updatedAt: '2024-01-02T00:00:00Z',
       profilePicture: undefined,

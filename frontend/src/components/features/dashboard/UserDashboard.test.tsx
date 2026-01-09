@@ -55,7 +55,6 @@ describe('UserDashboard', () => {
       isPremium: false,
       isFree: true,
       isAnonymous: false,
-      dailyReadingsLimit: 2,
     });
 
     render(<UserDashboard />);
@@ -86,7 +85,6 @@ describe('UserDashboard', () => {
       isPremium: false,
       isFree: true,
       isAnonymous: false,
-      dailyReadingsLimit: 2,
     });
 
     render(<UserDashboard />);
@@ -119,7 +117,6 @@ describe('UserDashboard', () => {
       isPremium: false,
       isFree: true,
       isAnonymous: false,
-      dailyReadingsLimit: 2,
     });
 
     render(<UserDashboard />);
@@ -150,7 +147,6 @@ describe('UserDashboard', () => {
       isPremium: true,
       isFree: false,
       isAnonymous: false,
-      dailyReadingsLimit: 3,
     });
 
     vi.spyOn(useUserModule, 'useProfile').mockReturnValue({
@@ -212,7 +208,6 @@ describe('UserDashboard', () => {
       isPremium: false,
       isFree: true,
       isAnonymous: false,
-      dailyReadingsLimit: 2,
     });
 
     render(<UserDashboard />);
@@ -243,7 +238,6 @@ describe('UserDashboard', () => {
       isPremium: false,
       isFree: true,
       isAnonymous: false,
-      dailyReadingsLimit: 2,
     });
 
     render(<UserDashboard />);
@@ -274,7 +268,6 @@ describe('UserDashboard', () => {
       isPremium: true,
       isFree: false,
       isAnonymous: false,
-      dailyReadingsLimit: 3,
     });
 
     vi.spyOn(useUserModule, 'useProfile').mockReturnValue({
@@ -338,7 +331,6 @@ describe('UserDashboard', () => {
       isPremium: false,
       isFree: true,
       isAnonymous: false,
-      dailyReadingsLimit: 2,
     });
 
     render(<UserDashboard />);
@@ -375,7 +367,6 @@ describe('UserDashboard', () => {
       isPremium: false,
       isFree: true,
       isAnonymous: false,
-      dailyReadingsLimit: 2,
     });
 
     const { container } = render(<UserDashboard />);
