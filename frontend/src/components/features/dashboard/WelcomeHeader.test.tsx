@@ -10,25 +10,27 @@ vi.mock('@/hooks/useAuth');
 // Mock useUserPlanFeatures hook
 vi.mock('@/hooks/utils/useUserPlanFeatures');
 
+// Helper to create AuthUser mock without limits fields
+function createMockAuthUser(overrides?: Partial<AuthUser>): AuthUser {
+  return {
+    id: 1,
+    email: 'user@test.com',
+    name: 'Test User',
+    roles: ['consumer'],
+    plan: 'free',
+    profilePicture: null,
+    ...overrides,
+  };
+}
+
+
 describe('WelcomeHeader', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('should display personalized greeting with user name', () => {
-    const mockUser: AuthUser = {
-      id: 1,
-      email: 'user@test.com',
-      name: 'María',
-      roles: ['consumer'],
-      plan: 'free',
-      dailyReadingsCount: 0,
-      dailyReadingsLimit: 2,
-      dailyCardCount: 0,
-      dailyCardLimit: 1,
-      tarotReadingsCount: 0,
-      tarotReadingsLimit: 1,
-    };
+    const mockUser = createMockAuthUser({ name: 'María', plan: 'free' });
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       user: mockUser,
@@ -59,19 +61,7 @@ describe('WelcomeHeader', () => {
   });
 
   it('should display plan badge with correct label for free users', () => {
-    const mockUser: AuthUser = {
-      id: 1,
-      email: 'user@test.com',
-      name: 'Carlos',
-      roles: ['consumer'],
-      plan: 'free',
-      dailyReadingsCount: 1,
-      dailyReadingsLimit: 2,
-      dailyCardCount: 0,
-      dailyCardLimit: 1,
-      tarotReadingsCount: 0,
-      tarotReadingsLimit: 1,
-    };
+    const mockUser = createMockAuthUser({ name: 'Carlos', plan: 'free' });
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       user: mockUser,
@@ -102,19 +92,7 @@ describe('WelcomeHeader', () => {
   });
 
   it('should display plan badge with correct label for premium users', () => {
-    const mockUser: AuthUser = {
-      id: 1,
-      email: 'premium@test.com',
-      name: 'Ana',
-      roles: ['consumer'],
-      plan: 'premium',
-      dailyReadingsCount: 2,
-      dailyReadingsLimit: 3,
-      dailyCardCount: 0,
-      dailyCardLimit: 1,
-      tarotReadingsCount: 0,
-      tarotReadingsLimit: 1,
-    };
+    const mockUser = createMockAuthUser({ name: 'Ana', plan: 'premium' });
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       user: mockUser,
@@ -145,19 +123,7 @@ describe('WelcomeHeader', () => {
   });
 
   it('should display link to profile page', () => {
-    const mockUser: AuthUser = {
-      id: 1,
-      email: 'user@test.com',
-      name: 'Luis',
-      roles: ['consumer'],
-      plan: 'free',
-      dailyReadingsCount: 1,
-      dailyReadingsLimit: 2,
-      dailyCardCount: 0,
-      dailyCardLimit: 1,
-      tarotReadingsCount: 0,
-      tarotReadingsLimit: 1,
-    };
+    const mockUser = createMockAuthUser({ name: 'Luis', plan: 'free' });
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       user: mockUser,

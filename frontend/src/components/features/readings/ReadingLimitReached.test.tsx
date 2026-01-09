@@ -11,9 +11,26 @@ vi.mock('next/navigation', () => ({
   }),
 }));
 
+// Mock useUserCapabilities
+const mockUseUserCapabilities = vi.fn();
+vi.mock('@/hooks/api/useUserCapabilities', () => ({
+  useUserCapabilities: () => mockUseUserCapabilities(),
+}));
+
 describe('ReadingLimitReached', () => {
   beforeEach(() => {
     mockPush.mockClear();
+
+    // Default mock: FREE user at limit
+    mockUseUserCapabilities.mockReturnValue({
+      data: {
+        tarotReadings: {
+          used: 1,
+          limit: 1,
+        },
+      },
+      isLoading: false,
+    });
   });
 
   it('should render limit reached message', () => {

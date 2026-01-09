@@ -4,10 +4,16 @@ import userEvent from '@testing-library/user-event';
 import { useRouter } from 'next/navigation';
 
 import { DailyCardLimitReached } from './DailyCardLimitReached';
+import { useUserCapabilities } from '@/hooks/api/useUserCapabilities';
 
 // Mock next/navigation
 vi.mock('next/navigation', () => ({
   useRouter: vi.fn(),
+}));
+
+// Mock useUserCapabilities
+vi.mock('@/hooks/api/useUserCapabilities', () => ({
+  useUserCapabilities: vi.fn(),
 }));
 
 describe('DailyCardLimitReached', () => {
@@ -15,6 +21,23 @@ describe('DailyCardLimitReached', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // Default mock for capabilities - FREE user with daily card used
+    (useUserCapabilities as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: {
+        dailyCard: { used: 1, limit: 1, canUse: false, resetAt: '2026-01-09T00:00:00Z' },
+        tarotReadings: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+        canCreateDailyReading: false,
+        canCreateTarotReading: true,
+        canUseAI: false,
+        canUseCustomQuestions: false,
+        canUseAdvancedSpreads: false,
+        plan: 'free',
+        isAuthenticated: true,
+      },
+      isLoading: false,
+    });
+
     (useRouter as ReturnType<typeof vi.fn>).mockReturnValue({
       push: mockPush,
     });

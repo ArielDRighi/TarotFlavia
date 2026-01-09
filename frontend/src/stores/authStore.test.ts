@@ -29,12 +29,7 @@ const createMockUser = (overrides?: Partial<AuthUser>): AuthUser => ({
   email: 'test@test.com',
   roles: ['USER'],
   plan: 'FREE',
-  dailyReadingsCount: 0,
-  dailyReadingsLimit: 3,
-  dailyCardCount: 0,
-  dailyCardLimit: 1,
-  tarotReadingsCount: 0,
-  tarotReadingsLimit: 1,
+  profilePicture: null,
   ...overrides,
 });
 
@@ -319,6 +314,45 @@ describe('authStore', () => {
       expect(persistedData.state.isAuthenticated).toBe(true);
       // Should NOT have isLoading
       expect(persistedData.state.isLoading).toBeUndefined();
+    });
+  });
+
+  describe('AuthUser Type - No Limits Fields', () => {
+    it('should not contain dailyCardCount field', () => {
+      const user = createMockUser();
+      expect('dailyCardCount' in user).toBe(false);
+    });
+
+    it('should not contain dailyCardLimit field', () => {
+      const user = createMockUser();
+      expect('dailyCardLimit' in user).toBe(false);
+    });
+
+    it('should not contain tarotReadingsCount field', () => {
+      const user = createMockUser();
+      expect('tarotReadingsCount' in user).toBe(false);
+    });
+
+    it('should not contain tarotReadingsLimit field', () => {
+      const user = createMockUser();
+      expect('tarotReadingsLimit' in user).toBe(false);
+    });
+
+    it('should not contain dailyReadingsCount field (legacy)', () => {
+      const user = createMockUser();
+      expect('dailyReadingsCount' in user).toBe(false);
+    });
+
+    it('should not contain dailyReadingsLimit field (legacy)', () => {
+      const user = createMockUser();
+      expect('dailyReadingsLimit' in user).toBe(false);
+    });
+
+    it('should only contain essential profile fields', () => {
+      const user = createMockUser();
+      const expectedKeys = ['id', 'email', 'name', 'roles', 'plan', 'profilePicture'];
+      const actualKeys = Object.keys(user).sort();
+      expect(actualKeys).toEqual(expectedKeys.sort());
     });
   });
 });

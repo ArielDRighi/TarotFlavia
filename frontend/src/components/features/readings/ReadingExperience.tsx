@@ -14,6 +14,7 @@ import {
 } from '@/hooks/api/useReadings';
 import { useAuthStore } from '@/stores/authStore';
 import { useUserPlanFeatures } from '@/hooks/utils/useUserPlanFeatures';
+import { useUserCapabilities } from '@/hooks/api/useUserCapabilities';
 import { TarotCard } from './TarotCard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -284,14 +285,6 @@ export function ReadingExperience({
   const hasQuestion = !!(customQuestion || selectedQuestion);
   const questionText = customQuestion || selectedQuestion?.questionText || 'Lectura general';
 
-  // Sync local increment when reading result is available
-  // Note: We use useMemo instead of useEffect to avoid setState-in-effect warning
-  // This derives the local increment from readingResult state
-  const localDailyReadingsIncrement = useMemo(() => {
-    // If a reading result exists, we've created 1 reading in this session
-    return readingResult ? 1 : 0;
-  }, [readingResult]);
-
   // Rotate loading messages
   useEffect(() => {
     if (state !== 'loading') return;
@@ -431,18 +424,12 @@ export function ReadingExperience({
     setError(null);
   }, []);
 
-  // ✅ Check if user can create another reading today
+  // ✅ Check if user can create another reading today using capabilities
+  const { data: capabilities } = useUserCapabilities();
   const canCreateNewReading = useCallback((): boolean => {
     if (!user) return false;
-    if (isPremium) return true; // PREMIUM users can create more readings
-
-    const baseDailyCount = user.dailyReadingsCount ?? 0;
-    const dailyLimit = user.dailyReadingsLimit ?? 1;
-    const effectiveDailyCount = baseDailyCount + localDailyReadingsIncrement;
-
-    // User can create a new reading if they haven't reached the limit
-    return effectiveDailyCount < dailyLimit;
-  }, [user, isPremium, localDailyReadingsIncrement]);
+    return capabilities?.canCreateTarotReading ?? false;
+  }, [user, capabilities]);
 
   // Render loading/missing spread state
   if (isSpreadsLoading || isQuestionsLoading) {
@@ -647,8 +634,8 @@ export function ReadingExperience({
       <DailyLimitReachedModal
         open={showLimitReachedModal}
         onClose={() => setShowLimitReachedModal(false)}
-        usedReadings={user?.tarotReadingsCount ?? 0}
-        totalReadings={user?.tarotReadingsLimit ?? 3}
+        usedReadings={capabilities?.tarotReadings.used ?? 0}
+        totalReadings={capabilities?.tarotReadings.limit ?? 3}
         featureType="tarot-reading"
       />
     </div>

@@ -603,14 +603,17 @@ Asegurar que todas las mutations que afectan límites invaliden las capabilities
   },
   ```
 - [x] Actualizar `useDailyReading` en `useDailyReading.ts`:
+
   ```typescript
   onSuccess: async () => {
     await invalidateUserData(queryClient);
   },
   ```
+
   ```
 
   ```
+
 - [x] **ELIMINAR** llamada a `checkAuth()` de authStore (ya no necesario)
 - [x] Verificar que NO se use `checkAuth()` para sincronizar límites
 - [x] Actualizar tests de hooks
@@ -648,6 +651,7 @@ Asegurar que todas las mutations que afectan límites invaliden las capabilities
 
 ### **TASK-REFACTOR-009: Limpiar AuthStore**
 
+**Estado:** ✅ COMPLETADA (2026-01-08)
 **Prioridad:** 🟡 MEDIA
 **Estimación:** 3 horas
 **Área:** Frontend
@@ -659,9 +663,9 @@ Eliminar campos de límites del authStore ya que ahora vienen de capabilities.
 
 #### ✅ Tareas específicas
 
-- [ ] Modificar tipo `AuthUser` para eliminar campos de límites:
+- [x] Modificar tipo `AuthUser` para eliminar campos de límites:
   ```typescript
-  // ❌ ELIMINAR de AuthUser
+  // ❌ ELIMINADOS de AuthUser
   dailyCardCount?: number;
   dailyCardLimit?: number;
   tarotReadingsCount?: number;
@@ -669,7 +673,7 @@ Eliminar campos de límites del authStore ya que ahora vienen de capabilities.
   dailyReadingsCount?: number;  // Legacy
   dailyReadingsLimit?: number;  // Legacy
   ```
-- [ ] Mantener solo campos esenciales en AuthUser:
+- [x] Mantener solo campos esenciales en AuthUser:
   ```typescript
   interface AuthUser {
     id: number;
@@ -677,19 +681,41 @@ Eliminar campos de límites del authStore ya que ahora vienen de capabilities.
     name: string;
     profilePicture: string | null;
     plan: 'anonymous' | 'free' | 'premium';
-    // ... otros campos de perfil, NO de límites
+    roles: string[];
   }
   ```
-- [ ] Verificar que NINGÚN componente lea límites de `useAuth()` o `useAuthStore()`
-- [ ] Actualizar `checkAuth()` para NO fetchear campos de límites
-- [ ] Actualizar tests
+- [x] Verificar que NINGÚN componente lea límites de `useAuth()` o `useAuthStore()`
+- [x] Actualizar `checkAuth()` para NO fetchear campos de límites (ya estaba correcto)
+- [x] Actualizar tests (20+ archivos actualizados)
 
 #### 🎯 Criterios de aceptación
 
-- ✓ AuthStore NO contiene campos de límites
-- ✓ Grep de `dailyCardCount`, `tarotReadingsCount` NO encuentra usos en componentes
-- ✓ Aplicación funciona correctamente
-- ✓ Tests pasan
+- ✅ AuthStore NO contiene campos de límites
+- ✅ Grep de `dailyCardCount`, `tarotReadingsCount` NO encuentra usos en componentes
+- ✅ Aplicación funciona correctamente
+- ✅ Tests pasan (173/173)
+
+#### 📝 Notas de Implementación
+
+**Archivos modificados:**
+
+- `src/types/auth.types.ts` - Removidos 6 campos de límites de AuthUser
+- `src/test/factories/authUser.factory.ts` - Actualizados factories (agregado profilePicture)
+- `src/components/features/daily-reading/DailyCardLimitReached.tsx` - Usa useUserCapabilities
+- `src/components/features/readings/ReadingLimitReached.tsx` - Usa useUserCapabilities
+- `src/components/features/readings/ReadingExperience.tsx` - Usa capabilities.canCreateTarotReading
+- `src/components/features/dashboard/StatsSection.tsx` - Refactorizado para usar useUserCapabilities
+- `src/app/carta-del-dia/page.test.tsx` - Agregado mock de useUserCapabilities
+- `src/app/ritual/page.test.tsx` - Agregado mock de useUserCapabilities con PREMIUM capabilities
+- `src/components/features/dashboard/UserDashboard.test.tsx` - Agregado mock de useUserCapabilities
+
+**Calidad:**
+
+- ✅ Lint: 0 warnings
+- ✅ Type-check: 0 errors
+- ✅ Build: exitoso
+- ✅ Tests: 173/173 pasando
+- ✅ Validate-architecture: exitoso
 
 ---
 

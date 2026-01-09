@@ -11,18 +11,7 @@ export interface AuthUser {
   name: string;
   roles: string[];
   plan: string;
-  /** @deprecated Use dailyCardCount and tarotReadingsCount instead */
-  dailyReadingsCount: number;
-  /** @deprecated Use dailyCardLimit and tarotReadingsLimit instead */
-  dailyReadingsLimit: number;
-  /** Number of daily cards used today */
-  dailyCardCount: number;
-  /** Maximum daily cards allowed by plan */
-  dailyCardLimit: number;
-  /** Number of tarot readings used today */
-  tarotReadingsCount: number;
-  /** Maximum tarot readings allowed by plan */
-  tarotReadingsLimit: number;
+  profilePicture: string | null;
 }
 
 /**

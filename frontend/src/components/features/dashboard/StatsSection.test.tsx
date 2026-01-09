@@ -1,36 +1,31 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, within, fireEvent } from '@testing-library/react';
 import { StatsSection } from './StatsSection';
-import * as useUserModule from '@/hooks/api/useUser';
-import type { UseQueryResult } from '@tanstack/react-query';
-import type { UserProfile } from '@/types';
 
-// Mock useProfile hook
-vi.mock('@/hooks/api/useUser');
+// Mock useUserCapabilities hook
+const mockUseUserCapabilities = vi.fn();
+vi.mock('@/hooks/api/useUserCapabilities', () => ({
+  useUserCapabilities: () => mockUseUserCapabilities(),
+}));
 
 describe('StatsSection', () => {
   it('should display section title', () => {
-    vi.spyOn(useUserModule, 'useProfile').mockReturnValue({
+    mockUseUserCapabilities.mockReturnValue({
       data: {
-        id: 1,
-        email: 'test@test.com',
-        name: 'Test User',
-        roles: ['consumer'],
+        tarotReadings: { used: 2, limit: 3, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+        dailyCard: { used: 1, limit: 1, canUse: false, resetAt: '2026-01-09T00:00:00Z' },
+        canCreateDailyReading: false,
+        canCreateTarotReading: true,
+        canUseAI: true,
+        canUseCustomQuestions: true,
+        canUseAdvancedSpreads: true,
         plan: 'premium',
-        createdAt: '2025-01-01',
-        updatedAt: '2025-01-01',
-        lastLogin: null,
-        dailyReadingsCount: 2,
-        dailyReadingsLimit: 3,
-        dailyCardCount: 0,
-        dailyCardLimit: 1,
-        tarotReadingsCount: 0,
-        tarotReadingsLimit: 1,
+        isAuthenticated: true,
       },
       isLoading: false,
       error: null,
       refetch: vi.fn(),
-    } as unknown as UseQueryResult<UserProfile>);
+    });
 
     render(<StatsSection />);
 
@@ -38,27 +33,22 @@ describe('StatsSection', () => {
   });
 
   it('should display daily readings count', () => {
-    vi.spyOn(useUserModule, 'useProfile').mockReturnValue({
+    mockUseUserCapabilities.mockReturnValue({
       data: {
-        id: 1,
-        email: 'test@test.com',
-        name: 'Test User',
-        roles: ['consumer'],
+        tarotReadings: { used: 2, limit: 3, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+        dailyCard: { used: 1, limit: 1, canUse: false, resetAt: '2026-01-09T00:00:00Z' },
+        canCreateDailyReading: false,
+        canCreateTarotReading: true,
+        canUseAI: true,
+        canUseCustomQuestions: true,
+        canUseAdvancedSpreads: true,
         plan: 'premium',
-        createdAt: '2025-01-01',
-        updatedAt: '2025-01-01',
-        lastLogin: null,
-        dailyReadingsCount: 2,
-        dailyReadingsLimit: 3,
-        dailyCardCount: 0,
-        dailyCardLimit: 1,
-        tarotReadingsCount: 0,
-        tarotReadingsLimit: 1,
+        isAuthenticated: true,
       },
       isLoading: false,
       error: null,
       refetch: vi.fn(),
-    } as unknown as UseQueryResult<UserProfile>);
+    });
 
     render(<StatsSection />);
 
@@ -67,12 +57,12 @@ describe('StatsSection', () => {
   });
 
   it('should show loading state', () => {
-    vi.spyOn(useUserModule, 'useProfile').mockReturnValue({
+    mockUseUserCapabilities.mockReturnValue({
       data: undefined,
       isLoading: true,
       error: null,
       refetch: vi.fn(),
-    } as unknown as UseQueryResult<UserProfile>);
+    });
 
     render(<StatsSection />);
 
@@ -80,12 +70,12 @@ describe('StatsSection', () => {
   });
 
   it('should show error state', () => {
-    vi.spyOn(useUserModule, 'useProfile').mockReturnValue({
+    mockUseUserCapabilities.mockReturnValue({
       data: undefined,
       isLoading: false,
       error: new Error('Failed to load'),
       refetch: vi.fn(),
-    } as unknown as UseQueryResult<UserProfile>);
+    });
 
     render(<StatsSection />);
 
@@ -94,12 +84,12 @@ describe('StatsSection', () => {
 
   it('should call refetch when retry button is clicked', () => {
     const mockRefetch = vi.fn();
-    vi.spyOn(useUserModule, 'useProfile').mockReturnValue({
+    mockUseUserCapabilities.mockReturnValue({
       data: undefined,
       isLoading: false,
       error: new Error('Failed to load'),
       refetch: mockRefetch,
-    } as unknown as UseQueryResult<UserProfile>);
+    });
 
     render(<StatsSection />);
 
@@ -109,13 +99,13 @@ describe('StatsSection', () => {
     expect(mockRefetch).toHaveBeenCalledTimes(1);
   });
 
-  it('should return null when profile is explicitly null', () => {
-    vi.spyOn(useUserModule, 'useProfile').mockReturnValue({
+  it('should return null when capabilities are explicitly null', () => {
+    mockUseUserCapabilities.mockReturnValue({
       data: null,
       isLoading: false,
       error: null,
       refetch: vi.fn(),
-    } as unknown as UseQueryResult<UserProfile>);
+    });
 
     const { container } = render(<StatsSection />);
 
@@ -123,27 +113,22 @@ describe('StatsSection', () => {
   });
 
   it('should display remaining readings', () => {
-    vi.spyOn(useUserModule, 'useProfile').mockReturnValue({
+    mockUseUserCapabilities.mockReturnValue({
       data: {
-        id: 1,
-        email: 'test@test.com',
-        name: 'Test User',
-        roles: ['consumer'],
+        tarotReadings: { used: 1, limit: 3, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+        dailyCard: { used: 1, limit: 1, canUse: false, resetAt: '2026-01-09T00:00:00Z' },
+        canCreateDailyReading: false,
+        canCreateTarotReading: true,
+        canUseAI: true,
+        canUseCustomQuestions: true,
+        canUseAdvancedSpreads: true,
         plan: 'premium',
-        createdAt: '2025-01-01',
-        updatedAt: '2025-01-01',
-        lastLogin: null,
-        dailyReadingsCount: 1,
-        dailyReadingsLimit: 3,
-        dailyCardCount: 0,
-        dailyCardLimit: 1,
-        tarotReadingsCount: 0,
-        tarotReadingsLimit: 1,
+        isAuthenticated: true,
       },
       isLoading: false,
       error: null,
       refetch: vi.fn(),
-    } as unknown as UseQueryResult<UserProfile>);
+    });
 
     render(<StatsSection />);
 
@@ -153,27 +138,22 @@ describe('StatsSection', () => {
   });
 
   it('should have appropriate styling', () => {
-    vi.spyOn(useUserModule, 'useProfile').mockReturnValue({
+    mockUseUserCapabilities.mockReturnValue({
       data: {
-        id: 1,
-        email: 'test@test.com',
-        name: 'Test User',
-        roles: ['consumer'],
+        tarotReadings: { used: 2, limit: 3, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+        dailyCard: { used: 1, limit: 1, canUse: false, resetAt: '2026-01-09T00:00:00Z' },
+        canCreateDailyReading: false,
+        canCreateTarotReading: true,
+        canUseAI: true,
+        canUseCustomQuestions: true,
+        canUseAdvancedSpreads: true,
         plan: 'premium',
-        createdAt: '2025-01-01',
-        updatedAt: '2025-01-01',
-        lastLogin: null,
-        dailyReadingsCount: 2,
-        dailyReadingsLimit: 3,
-        dailyCardCount: 0,
-        dailyCardLimit: 1,
-        tarotReadingsCount: 0,
-        tarotReadingsLimit: 1,
+        isAuthenticated: true,
       },
       isLoading: false,
       error: null,
       refetch: vi.fn(),
-    } as unknown as UseQueryResult<UserProfile>);
+    });
 
     render(<StatsSection />);
 

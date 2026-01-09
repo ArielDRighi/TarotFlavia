@@ -6,6 +6,7 @@ import RitualPage from './page';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { useCategories } from '@/hooks/api/useReadings';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserCapabilities } from '@/hooks/api/useUserCapabilities';
 
 // Mock modules
 vi.mock('next/navigation', () => ({
@@ -22,6 +23,11 @@ vi.mock('@/hooks/api/useReadings', () => ({
 
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: vi.fn(),
+}));
+
+// Mock useUserCapabilities
+vi.mock('@/hooks/api/useUserCapabilities', () => ({
+  useUserCapabilities: vi.fn(),
 }));
 
 // Mock categories data
@@ -84,10 +90,28 @@ const mockCategories = [
 
 describe('RitualPage', () => {
   const mockPush = vi.fn();
+  const mockReplace = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (useRouter as Mock).mockReturnValue({ push: mockPush });
+
+    // Default mock for capabilities - FREE user with daily card used
+    (useUserCapabilities as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: {
+        dailyCard: { used: 1, limit: 1, canUse: false, resetAt: '2026-01-09T00:00:00Z' },
+        tarotReadings: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+        canCreateDailyReading: false,
+        canCreateTarotReading: true,
+        canUseAI: false,
+        canUseCustomQuestions: false,
+        canUseAdvancedSpreads: false,
+        plan: 'free',
+        isAuthenticated: true,
+      },
+      isLoading: false,
+    });
+
+    (useRouter as Mock).mockReturnValue({ push: mockPush, replace: mockReplace });
     (useRequireAuth as Mock).mockReturnValue({ isLoading: false });
     (useAuth as Mock).mockReturnValue({
       user: null,
@@ -142,8 +166,8 @@ describe('RitualPage', () => {
 
       render(<RitualPage />);
 
-      expect(mockPush).toHaveBeenCalledWith('/ritual/tirada');
-      expect(mockPush).toHaveBeenCalledTimes(1);
+      expect(mockReplace).toHaveBeenCalledWith('/ritual/tirada');
+      expect(mockReplace).toHaveBeenCalledTimes(1);
     });
 
     it('should redirect FREE user even if categories are loading', () => {
@@ -161,7 +185,9 @@ describe('RitualPage', () => {
 
       render(<RitualPage />);
 
-      expect(mockPush).toHaveBeenCalledWith('/ritual/tirada');
+      // Redirect will NOT happen while categories are still loading
+      // because CategorySelector waits for isLoading to be false
+      expect(mockReplace).not.toHaveBeenCalled();
     });
 
     it('should redirect FREE user even when categories fail to load', () => {
@@ -180,7 +206,7 @@ describe('RitualPage', () => {
 
       render(<RitualPage />);
 
-      expect(mockPush).toHaveBeenCalledWith('/ritual/tirada');
+      expect(mockReplace).toHaveBeenCalledWith('/ritual/tirada');
     });
 
     it('should NOT show categories to FREE user (redirect happens first)', () => {
@@ -199,13 +225,29 @@ describe('RitualPage', () => {
       render(<RitualPage />);
 
       // Should redirect, so categories should not be visible
-      expect(mockPush).toHaveBeenCalledWith('/ritual/tirada');
+      expect(mockReplace).toHaveBeenCalledWith('/ritual/tirada');
       // Note: Categories might still render briefly before redirect, but redirect is called
     });
   });
 
   describe('PREMIUM User - No Redirection', () => {
     it('should NOT redirect PREMIUM user', () => {
+      // Need to mock PREMIUM capabilities
+      (useUserCapabilities as ReturnType<typeof vi.fn>).mockReturnValue({
+        data: {
+          dailyCard: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+          tarotReadings: { used: 0, limit: 3, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+          canCreateDailyReading: true,
+          canCreateTarotReading: true,
+          canUseAI: true,
+          canUseCustomQuestions: true,
+          canUseAdvancedSpreads: true,
+          plan: 'premium',
+          isAuthenticated: true,
+        },
+        isLoading: false,
+      });
+
       (useAuth as Mock).mockReturnValue({
         user: { id: 2, name: 'Premium User', plan: 'premium', email: 'premium@test.com' },
         isAuthenticated: true,
@@ -220,10 +262,26 @@ describe('RitualPage', () => {
 
       render(<RitualPage />);
 
-      expect(mockPush).not.toHaveBeenCalled();
+      expect(mockReplace).not.toHaveBeenCalled();
     });
 
     it('should show categories to PREMIUM user', () => {
+      // Need to mock PREMIUM capabilities
+      (useUserCapabilities as ReturnType<typeof vi.fn>).mockReturnValue({
+        data: {
+          dailyCard: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+          tarotReadings: { used: 0, limit: 3, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+          canCreateDailyReading: true,
+          canCreateTarotReading: true,
+          canUseAI: true,
+          canUseCustomQuestions: true,
+          canUseAdvancedSpreads: true,
+          plan: 'premium',
+          isAuthenticated: true,
+        },
+        isLoading: false,
+      });
+
       (useAuth as Mock).mockReturnValue({
         user: { id: 2, name: 'Premium User', plan: 'premium', email: 'premium@test.com' },
         isAuthenticated: true,
@@ -243,8 +301,24 @@ describe('RitualPage', () => {
     });
   });
 
-  describe('Anonymous User - No Redirection', () => {
-    it('should NOT redirect anonymous user (should be handled by useRequireAuth)', () => {
+  describe('Anonymous User - Redirection', () => {
+    it('should redirect anonymous user to /ritual/tirada (no custom questions capability)', () => {
+      // Anonymous users have canUseCustomQuestions: false
+      (useUserCapabilities as ReturnType<typeof vi.fn>).mockReturnValue({
+        data: {
+          dailyCard: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+          tarotReadings: { used: 0, limit: 0, canUse: false, resetAt: '2026-01-09T00:00:00Z' },
+          canCreateDailyReading: true,
+          canCreateTarotReading: false,
+          canUseAI: false,
+          canUseCustomQuestions: false,
+          canUseAdvancedSpreads: false,
+          plan: 'anonymous',
+          isAuthenticated: false,
+        },
+        isLoading: false,
+      });
+
       (useAuth as Mock).mockReturnValue({
         user: { id: 3, name: 'Anonymous', plan: 'anonymous', email: '' },
         isAuthenticated: false,
@@ -259,10 +333,11 @@ describe('RitualPage', () => {
 
       render(<RitualPage />);
 
-      expect(mockPush).not.toHaveBeenCalledWith('/ritual/tirada');
+      expect(mockReplace).toHaveBeenCalledWith('/ritual/tirada');
     });
 
-    it('should NOT redirect when user is null', () => {
+    it('should redirect when user is null (no custom questions capability)', () => {
+      // Default capabilities from beforeEach has canUseCustomQuestions: false
       (useAuth as Mock).mockReturnValue({
         user: null,
         isAuthenticated: false,
@@ -277,11 +352,29 @@ describe('RitualPage', () => {
 
       render(<RitualPage />);
 
-      expect(mockPush).not.toHaveBeenCalledWith('/ritual/tirada');
+      expect(mockReplace).toHaveBeenCalledWith('/ritual/tirada');
     });
   });
 
   describe('Page Layout', () => {
+    beforeEach(() => {
+      // Mock PREMIUM capabilities so CategorySelector doesn't redirect
+      (useUserCapabilities as ReturnType<typeof vi.fn>).mockReturnValue({
+        data: {
+          dailyCard: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+          tarotReadings: { used: 0, limit: 3, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+          canCreateDailyReading: true,
+          canCreateTarotReading: true,
+          canUseAI: true,
+          canUseCustomQuestions: true,
+          canUseAdvancedSpreads: true,
+          plan: 'premium',
+          isAuthenticated: true,
+        },
+        isLoading: false,
+      });
+    });
+
     it('should render the main title with correct text', () => {
       (useCategories as Mock).mockReturnValue({
         data: mockCategories,
@@ -351,6 +444,24 @@ describe('RitualPage', () => {
   });
 
   describe('Error State', () => {
+    beforeEach(() => {
+      // Mock PREMIUM capabilities so CategorySelector doesn't redirect
+      (useUserCapabilities as ReturnType<typeof vi.fn>).mockReturnValue({
+        data: {
+          dailyCard: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+          tarotReadings: { used: 0, limit: 3, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+          canCreateDailyReading: true,
+          canCreateTarotReading: true,
+          canUseAI: true,
+          canUseCustomQuestions: true,
+          canUseAdvancedSpreads: true,
+          plan: 'premium',
+          isAuthenticated: true,
+        },
+        isLoading: false,
+      });
+    });
+
     it('should show error display when categories fail to load', () => {
       (useCategories as Mock).mockReturnValue({
         data: undefined,
@@ -385,6 +496,24 @@ describe('RitualPage', () => {
   });
 
   describe('Empty State', () => {
+    beforeEach(() => {
+      // Mock PREMIUM capabilities so CategorySelector doesn't redirect
+      (useUserCapabilities as ReturnType<typeof vi.fn>).mockReturnValue({
+        data: {
+          dailyCard: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+          tarotReadings: { used: 0, limit: 3, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+          canCreateDailyReading: true,
+          canCreateTarotReading: true,
+          canUseAI: true,
+          canUseCustomQuestions: true,
+          canUseAdvancedSpreads: true,
+          plan: 'premium',
+          isAuthenticated: true,
+        },
+        isLoading: false,
+      });
+    });
+
     it('should show empty state when no categories exist', () => {
       (useCategories as Mock).mockReturnValue({
         data: [],
@@ -399,6 +528,24 @@ describe('RitualPage', () => {
   });
 
   describe('Categories Display', () => {
+    beforeEach(() => {
+      // Mock PREMIUM capabilities so CategorySelector doesn't redirect
+      (useUserCapabilities as ReturnType<typeof vi.fn>).mockReturnValue({
+        data: {
+          dailyCard: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+          tarotReadings: { used: 0, limit: 3, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+          canCreateDailyReading: true,
+          canCreateTarotReading: true,
+          canUseAI: true,
+          canUseCustomQuestions: true,
+          canUseAdvancedSpreads: true,
+          plan: 'premium',
+          isAuthenticated: true,
+        },
+        isLoading: false,
+      });
+    });
+
     it('should render all category cards', () => {
       (useCategories as Mock).mockReturnValue({
         data: mockCategories,
@@ -446,6 +593,24 @@ describe('RitualPage', () => {
   });
 
   describe('Navigation', () => {
+    beforeEach(() => {
+      // Mock PREMIUM capabilities so CategorySelector doesn't redirect
+      (useUserCapabilities as ReturnType<typeof vi.fn>).mockReturnValue({
+        data: {
+          dailyCard: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+          tarotReadings: { used: 0, limit: 3, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+          canCreateDailyReading: true,
+          canCreateTarotReading: true,
+          canUseAI: true,
+          canUseCustomQuestions: true,
+          canUseAdvancedSpreads: true,
+          plan: 'premium',
+          isAuthenticated: true,
+        },
+        isLoading: false,
+      });
+    });
+
     it('should navigate to questions page when category is clicked', () => {
       (useCategories as Mock).mockReturnValue({
         data: mockCategories,
@@ -480,6 +645,24 @@ describe('RitualPage', () => {
   });
 
   describe('Hover Effects', () => {
+    beforeEach(() => {
+      // Mock PREMIUM capabilities so CategorySelector doesn't redirect
+      (useUserCapabilities as ReturnType<typeof vi.fn>).mockReturnValue({
+        data: {
+          dailyCard: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+          tarotReadings: { used: 0, limit: 3, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+          canCreateDailyReading: true,
+          canCreateTarotReading: true,
+          canUseAI: true,
+          canUseCustomQuestions: true,
+          canUseAdvancedSpreads: true,
+          plan: 'premium',
+          isAuthenticated: true,
+        },
+        isLoading: false,
+      });
+    });
+
     it('should have hover scale effect class on category cards', () => {
       (useCategories as Mock).mockReturnValue({
         data: mockCategories,
@@ -497,6 +680,24 @@ describe('RitualPage', () => {
   });
 
   describe('Accessibility', () => {
+    beforeEach(() => {
+      // Mock PREMIUM capabilities so CategorySelector doesn't redirect
+      (useUserCapabilities as ReturnType<typeof vi.fn>).mockReturnValue({
+        data: {
+          dailyCard: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+          tarotReadings: { used: 0, limit: 3, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+          canCreateDailyReading: true,
+          canCreateTarotReading: true,
+          canUseAI: true,
+          canUseCustomQuestions: true,
+          canUseAdvancedSpreads: true,
+          plan: 'premium',
+          isAuthenticated: true,
+        },
+        isLoading: false,
+      });
+    });
+
     it('should have accessible card buttons', () => {
       (useCategories as Mock).mockReturnValue({
         data: mockCategories,
