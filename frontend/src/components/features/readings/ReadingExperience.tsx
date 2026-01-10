@@ -250,6 +250,7 @@ export function ReadingExperience({
   // API Hooks
   const { data: spreads, isLoading: isSpreadsLoading } = useMyAvailableSpreads();
   const { data: predefinedQuestions, isLoading: isQuestionsLoading } = usePredefinedQuestions();
+  const { data: capabilities } = useUserCapabilities();
   const { mutateAsync: createReading } = useCreateReading();
   const { mutate: regenerateInterpretation, isPending: isRegenerating } =
     useRegenerateInterpretation();
@@ -331,6 +332,18 @@ export function ReadingExperience({
   const handleReveal = useCallback(async () => {
     if (selectedCards.size !== cardsCount || !spread) return;
 
+    // VALIDATE LIMITS BEFORE SENDING REQUEST TO BACKEND
+    if (capabilities && !capabilities.canCreateTarotReading) {
+      // Show appropriate modal based on user plan
+      if (isPremium) {
+        setShowLimitReachedModal(true);
+      } else {
+        setUpgradeModalReason('limit-reached');
+        setShowUpgradeModal(true);
+      }
+      return;
+    }
+
     setState('loading');
     setError(null);
 
@@ -407,7 +420,8 @@ export function ReadingExperience({
     createReading,
     canUseAI,
     isPremium,
-    user?.plan, // Added for exhaustive-deps
+    user?.plan,
+    capabilities,
   ]);
 
   // Action handlers
@@ -432,7 +446,6 @@ export function ReadingExperience({
   }, []);
 
   // ✅ Check if user can create another reading today using capabilities
-  const { data: capabilities } = useUserCapabilities();
   const canCreateNewReading = useCallback((): boolean => {
     if (!user) return false;
     return capabilities?.canCreateTarotReading ?? false;

@@ -14,7 +14,6 @@ import { User, UserPlan } from '../../users/entities/user.entity';
 import { UsersService } from '../../users/users.service';
 import { PlanConfigService } from '../../plan-config/plan-config.service';
 import { UsageLimitsService } from '../../usage-limits/usage-limits.service';
-import { UsageFeature } from '../../usage-limits/entities/usage-limit.entity';
 import {
   DailyReadingHistoryDto,
   DailyReadingHistoryItemDto,
@@ -39,9 +38,12 @@ export class DailyReadingService {
    */
   private getTodayLocalDateString(): string {
     const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
+    // BUGFIX: Use UTC date to match the guard's date filtering logic
+    // This ensures consistency: both daily card creation and limit checking
+    // use the same timezone (UTC), preventing timezone mismatches
+    const year = now.getUTCFullYear();
+    const month = String(now.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(now.getUTCDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   }
 
@@ -78,31 +80,15 @@ export class DailyReadingService {
       userPlan = fullUser.plan;
     }
 
-    // Obtener el límite configurado para el plan del usuario
+    // BUGFIX: La validación de límites se hace en CheckUsageLimitGuard
+    // No necesitamos verificar aquí porque el guard ya lo hizo
+    // Solo obtenemos planConfig para decidir si usar IA
+
     const planConfig = await this.planConfigService.findByPlanType(userPlan);
     if (!planConfig) {
       throw new InternalServerErrorException(
         'No se pudo verificar el límite del plan',
       );
-    }
-
-    // UNLIMITED_LIMIT (-1) significa que no se aplican límites (ej: PREMIUM)
-    const UNLIMITED_LIMIT = -1;
-
-    // Solo verificar límites si el plan tiene límite definido
-    // Si dailyCardLimit = -1, el usuario tiene acceso ilimitado
-    if (planConfig.dailyCardLimit !== UNLIMITED_LIMIT) {
-      // Verificar cuántas cartas del día ha usado hoy el usuario
-      const hasLimit = await this.usageLimitsService.checkLimit(
-        userId,
-        UsageFeature.DAILY_CARD,
-      );
-
-      if (!hasLimit) {
-        throw new ForbiddenException(
-          'Has alcanzado tu límite de carta del día. Actualiza tu plan para generar más cartas.',
-        );
-      }
     }
 
     // Verificar que NO existe carta del día para hoy

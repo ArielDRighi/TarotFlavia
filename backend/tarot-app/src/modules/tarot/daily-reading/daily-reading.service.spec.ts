@@ -212,32 +212,12 @@ describe('DailyReadingService', () => {
       );
     });
 
-    it('should throw ForbiddenException if user has reached daily card limit', async () => {
-      // Mock plan config
-      mockPlanConfigService.findByPlanType.mockResolvedValue({
-        planType: UserPlan.FREE,
-        dailyCardLimit: 1,
-        tarotReadingsLimit: 3,
-      });
-
-      // Mock usage limit - usuario SÍ alcanzó límite
-      mockUsageLimitsService.checkLimit.mockResolvedValue(false);
-
-      // Mock user lookup
-      mockUsersService.findById.mockResolvedValue({
-        id: userId,
-        email: 'test@test.com',
-        plan: UserPlan.FREE,
-      });
-
-      await expect(
-        service.generateDailyCard(userId, tarotistaId),
-      ).rejects.toThrow(ForbiddenException);
-      await expect(
-        service.generateDailyCard(userId, tarotistaId),
-      ).rejects.toThrow(
-        'Has alcanzado tu límite de carta del día. Actualiza tu plan para generar más cartas.',
-      );
+    // REMOVED TEST: Limit checking now done in CheckUsageLimitGuard, not in service
+    // The service no longer validates limits - that's the guard's responsibility
+    // Original test: "should throw ForbiddenException if user has reached daily card limit"
+    it.skip('limit validation is now handled by CheckUsageLimitGuard', () => {
+      // This test is obsolete after bugfix: moved limit validation to guard layer
+      // See: check-usage-limit.guard.spec.ts for limit validation tests
     });
 
     it('should skip limit check when dailyCardLimit is -1 (unlimited)', async () => {

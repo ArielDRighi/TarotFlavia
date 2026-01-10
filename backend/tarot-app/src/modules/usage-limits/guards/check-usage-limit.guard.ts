@@ -33,14 +33,21 @@ export class CheckUsageLimitGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    console.log('[CheckUsageLimitGuard] === GUARD STARTED ===');
+
     // Extract feature from decorator metadata
     const feature = this.reflector.getAllAndOverride<UsageFeature>(
       USAGE_LIMIT_FEATURE_KEY,
       [context.getHandler(), context.getClass()],
     );
 
+    console.log(`[CheckUsageLimitGuard] Feature extracted: ${feature}`);
+
     // If no feature is specified, skip the guard
     if (!feature) {
+      console.log(
+        '[CheckUsageLimitGuard] No feature specified, skipping guard',
+      );
       return true;
     }
 
@@ -55,6 +62,8 @@ export class CheckUsageLimitGuard implements CanActivate {
       .switchToHttp()
       .getRequest<Request & { user?: { userId: number } }>();
     const userId = request.user?.userId;
+
+    console.log(`[CheckUsageLimitGuard] UserId: ${userId}`);
 
     // If user is authenticated, use normal usage limit checking
     if (userId) {
@@ -89,8 +98,9 @@ export class CheckUsageLimitGuard implements CanActivate {
 
       // For TAROT_READING, check the tarot_reading table directly
       if (feature === UsageFeature.TAROT_READING) {
-        console.log(
-          `[CheckUsageLimitGuard] Checking TAROT_READING for userId=${userId}, today=${today.toISOString()}`,
+        process.stdout.write(`\n\n=== TAROT_READING GUARD CHECK START ===\n`);
+        process.stdout.write(
+          `userId=${userId}, today=${today.toISOString()}\n`,
         );
 
         // Get user's plan and limits
@@ -98,6 +108,7 @@ export class CheckUsageLimitGuard implements CanActivate {
         if (!user) {
           throw new ForbiddenException('Usuario no encontrado');
         }
+        process.stdout.write(`User found: plan=${user.plan}\n`);
 
         const planConfig = await this.planConfigService.findByPlanType(
           user.plan,
@@ -105,12 +116,13 @@ export class CheckUsageLimitGuard implements CanActivate {
         if (!planConfig) {
           throw new ForbiddenException('Configuración de plan no encontrada');
         }
+        process.stdout.write(
+          `Plan config: limit=${planConfig.tarotReadingsLimit}\n`,
+        );
 
         // Check if user has unlimited access (-1)
         if (planConfig.tarotReadingsLimit === -1) {
-          console.log(
-            `[CheckUsageLimitGuard] User has unlimited tarot readings`,
-          );
+          process.stdout.write(`UNLIMITED ACCESS - ALLOWING\n`);
           return true;
         }
 
@@ -123,16 +135,18 @@ export class CheckUsageLimitGuard implements CanActivate {
           },
         });
 
-        console.log(
-          `[CheckUsageLimitGuard] TAROT_READING check: count=${readingsCount}, limit=${planConfig.tarotReadingsLimit}`,
+        process.stdout.write(
+          `COUNT=${readingsCount}, LIMIT=${planConfig.tarotReadingsLimit}\n`,
         );
 
         if (readingsCount >= planConfig.tarotReadingsLimit) {
+          process.stdout.write(`BLOCKING - COUNT >= LIMIT\n\n`);
           throw new ForbiddenException(
             `Has alcanzado tu límite diario para esta función. Tu cuota se restablecerá a medianoche (00:00 UTC). Intenta nuevamente mañana o actualiza tu plan para obtener más acceso.`,
           );
         }
 
+        process.stdout.write(`ALLOWING - COUNT < LIMIT\n\n`);
         return true;
       }
 
