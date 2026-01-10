@@ -111,9 +111,26 @@ export async function createReading(data: CreateReadingDto): Promise<ReadingDeta
   } catch (error) {
     // Check if error is an Axios error with 403 status (daily limit reached)
     if (axios.isAxiosError(error) && error.response?.status === 403) {
-      const limitError = new Error('DAILY_LIMIT_REACHED');
-      limitError.name = 'DailyLimitError';
-      throw limitError;
+      // Extract error message to verify it's a limit error
+      const errorMessage = error.response.data?.message || '';
+      const errorType = error.response.data?.error || '';
+
+      console.log('[createReading] 403 error details:', {
+        status: error.response.status,
+        message: errorMessage,
+        errorType,
+      });
+
+      // Check if error message indicates limit reached
+      if (
+        errorMessage.toLowerCase().includes('límite') ||
+        errorMessage.toLowerCase().includes('limit') ||
+        errorType === 'Forbidden'
+      ) {
+        const limitError = new Error('DAILY_LIMIT_REACHED');
+        limitError.name = 'DailyLimitError';
+        throw limitError;
+      }
     }
     throw new Error('Error al crear lectura');
   }

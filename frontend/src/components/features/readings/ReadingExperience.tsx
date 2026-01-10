@@ -278,7 +278,8 @@ export function ReadingExperience({
   }, [questionId, predefinedQuestions]);
 
   const cardsCount = spread?.cardCount ?? 0;
-  const isPremium = user?.plan?.toUpperCase() === 'PREMIUM';
+  // More robust isPremium check - ensure user and plan exist
+  const isPremium = Boolean(user?.plan) && user?.plan?.toUpperCase() === 'PREMIUM';
 
   // Display the actual question text
   // For FREE users without question, show "Lectura general" instead of "Tu pregunta al tarot"
@@ -365,6 +366,16 @@ export function ReadingExperience({
       setReadingResult(result);
       setState('result');
     } catch (error) {
+      // Debug logging for error analysis
+      console.log('❌ Reading creation error:', {
+        error,
+        errorName: error instanceof Error ? error.name : 'unknown',
+        errorMessage: error instanceof Error ? error.message : 'unknown',
+        isPremium,
+        userPlan: user?.plan,
+        isDailyLimitError: error instanceof Error && error.name === 'DailyLimitError',
+      });
+
       // Check if error is DailyLimitError (403 - limit reached)
       if (error instanceof Error && error.name === 'DailyLimitError') {
         setState('selecting');
@@ -372,9 +383,11 @@ export function ReadingExperience({
         // Show different modal based on user plan
         if (isPremium) {
           // PREMIUM user: show gentle "come back tomorrow" message
+          console.log('✅ Showing DailyLimitReachedModal to PREMIUM user');
           setShowLimitReachedModal(true);
         } else {
           // FREE user: show upgrade to Premium modal
+          console.log('✅ Showing UpgradeModal to FREE/ANONYMOUS user');
           setUpgradeModalReason('limit-reached');
           setShowUpgradeModal(true);
         }
@@ -394,6 +407,7 @@ export function ReadingExperience({
     createReading,
     canUseAI,
     isPremium,
+    user?.plan, // Added for exhaustive-deps
   ]);
 
   // Action handlers
