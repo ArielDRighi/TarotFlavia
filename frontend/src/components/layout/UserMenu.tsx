@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { User, Settings, BookOpen, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -18,6 +19,7 @@ import { useAuthStore } from '@/stores/authStore';
  * Displays login and register buttons when unauthenticated, or avatar with dropdown menu when authenticated
  */
 export function UserMenu() {
+  const router = useRouter();
   const { user, logout } = useAuthStore();
 
   // Show login and register buttons when not authenticated
@@ -36,6 +38,11 @@ export function UserMenu() {
 
   // Get user initial for avatar
   const userInitial = user.name ? user.name.charAt(0).toUpperCase() : '?';
+
+  const handleLogout = () => {
+    logout();
+    router.replace('/');
+  };
 
   return (
     <DropdownMenu>
@@ -72,7 +79,7 @@ export function UserMenu() {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={logout} variant="destructive">
+        <DropdownMenuItem onClick={handleLogout} variant="destructive">
           <LogOut className="mr-2 size-4" />
           Cerrar Sesión
         </DropdownMenuItem>

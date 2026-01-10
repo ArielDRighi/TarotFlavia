@@ -20,7 +20,7 @@ import { ReadingLimitReached } from '@/components/features/readings/ReadingLimit
  * PLAN-BASED BEHAVIOR:
  * - FREE users: Automatically redirected to /ritual/tirada (no category selection)
  * - PREMIUM users: Select category first, then proceed to questions
- * 
+ *
  * LIMIT VALIDATION:
  * - Users who reached their tarot reading limit see ReadingLimitReached modal
  * - Prevents poor UX where user selects category/question before seeing limit (TASK-REFACTOR-011)
