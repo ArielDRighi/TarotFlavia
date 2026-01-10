@@ -137,7 +137,7 @@ describe('CategorySelector', () => {
   // ==========================================================================
 
   describe('Access Control', () => {
-    it('should redirect FREE users to spread selector', async () => {
+    it('should redirect FREE users to spread selector (can create readings but not use categories)', async () => {
       const { mockReplace } = setupMocks({
         capabilities: createMockFreeCapabilities(),
       });
@@ -149,7 +149,7 @@ describe('CategorySelector', () => {
       });
     });
 
-    it('should redirect ANONYMOUS users to spread selector', async () => {
+    it('should redirect ANONYMOUS users to home (they cannot create tarot readings)', async () => {
       const { mockReplace } = setupMocks({
         capabilities: createMockAnonymousCapabilities(),
       });
@@ -157,7 +157,7 @@ describe('CategorySelector', () => {
       render(<CategorySelector />);
 
       await waitFor(() => {
-        expect(mockReplace).toHaveBeenCalledWith('/ritual/tirada');
+        expect(mockReplace).toHaveBeenCalledWith('/');
       });
     });
 

@@ -365,14 +365,8 @@ export function ReadingExperience({
       setReadingResult(result);
       setState('result');
     } catch (error) {
-      console.error('Failed to create reading:', error);
-      console.error('Error type:', error instanceof Error ? error.constructor.name : typeof error);
-      console.error('Error name:', error instanceof Error ? error.name : 'N/A');
-      console.error('Error message:', error instanceof Error ? error.message : 'N/A');
-
-      // ✅ NEW: Check if error is DailyLimitError (403 - limit reached)
+      // Check if error is DailyLimitError (403 - limit reached)
       if (error instanceof Error && error.name === 'DailyLimitError') {
-        console.log('✅ DailyLimitError detected - showing appropriate modal');
         setState('selecting');
 
         // Show different modal based on user plan
@@ -387,7 +381,6 @@ export function ReadingExperience({
         return;
       }
 
-      console.log('❌ Generic error - showing error state');
       setState('error');
       setError('Error al crear la lectura. Por favor, intenta de nuevo.');
     }
