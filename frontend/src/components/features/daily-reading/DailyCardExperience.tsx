@@ -80,8 +80,9 @@ export function DailyCardExperience() {
   // Extract boolean flags from capabilities
   const canCreateDailyReading = capabilities?.canCreateDailyReading ?? false;
 
-  // Fetch today's reading for authenticated users only IF they can create (haven't reached limit)
-  // If limit is reached, don't fetch - user should only see limit message
+  // Fetch today's reading ONLY if user can still create (hasn't reached limit)
+  // MODELO_NEGOCIO_DEFINIDO: "Si reingresa tras consumir límite → Modal inmediato"
+  // By NOT fetching when limit reached, we ensure modal shows instead of old card
   // Anonymous users don't fetch initial data - they generate on click (POST with fingerprint)
   const {
     data: dailyReading,
@@ -105,13 +106,13 @@ export function DailyCardExperience() {
   // Use capabilities as SINGLE SOURCE OF TRUTH
   // Show limit message when:
   // 1. User can't create daily reading (capabilities say so)
-  // 2. AND there's no current reading to display
+  // 2. AND there's no LOCAL reading (just created in this session)
   // 3. AND not in loading state
+  // MODELO_NEGOCIO_DEFINIDO.md: "Si reingresa tras consumir límite → Modal inmediato"
+  // The key: if localReading exists, user JUST created it, so show the card
+  // If user REenters page after creating, dailyReading will be fetched but localReading will be null
   const showLimitReached =
-    !isLoadingCapabilities &&
-    !canCreateDailyReading &&
-    !currentReading && // Don't show limit if we have a reading to display (just created)
-    Boolean(capabilities); // Only show after capabilities loaded
+    !isLoadingCapabilities && !canCreateDailyReading && !localReading && Boolean(capabilities);
 
   // Separate limit messages for anonymous vs authenticated
   const isAnonymousLimitReached = showLimitReached && !capabilities?.isAuthenticated;
@@ -200,8 +201,9 @@ export function DailyCardExperience() {
   // All users (FREE/PREMIUM) get 1 daily card per day
   // PREMIUM gets AI interpretation but same limit (1/day)
 
-  // Show skeleton while loading capabilities or fetching
-  if (isLoadingCapabilities || isFetching) {
+  // CRITICAL: Show skeleton while loading capabilities OR if capabilities not loaded yet
+  // This prevents showing the card before we know if user has reached limit
+  if (isLoadingCapabilities || !capabilities) {
     return (
       <div className="flex flex-col items-center gap-8" aria-label="Cargando carta del día">
         <Skeleton data-testid="loading-skeleton" className="h-12 w-64" />
@@ -225,6 +227,17 @@ export function DailyCardExperience() {
     return (
       <div className="flex w-full justify-center">
         <DailyCardLimitReached />
+      </div>
+    );
+  }
+
+  // Show skeleton while fetching reading (after capabilities check passed)
+  if (isFetching) {
+    return (
+      <div className="flex flex-col items-center gap-8" aria-label="Cargando carta del día">
+        <Skeleton data-testid="loading-skeleton" className="h-12 w-64" />
+        <Skeleton className="h-72 w-48 rounded-xl" />
+        <Skeleton className="h-32 w-full max-w-lg" />
       </div>
     );
   }

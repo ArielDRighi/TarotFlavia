@@ -1,10 +1,15 @@
 import { ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import { CheckUsageLimitGuard } from './check-usage-limit.guard';
 import { UsageLimitsService } from '../usage-limits.service';
 import { AnonymousTrackingService } from '../services/anonymous-tracking.service';
 import { UsageFeature } from '../entities/usage-limit.entity';
+import { DailyReading } from '../../tarot/daily-reading/entities/daily-reading.entity';
+import { TarotReading } from '../../tarot/readings/entities/tarot-reading.entity';
+import { UsersService } from '../../users/users.service';
+import { PlanConfigService } from '../../plan-config/plan-config.service';
 import { USAGE_LIMIT_FEATURE_KEY } from '../decorators/check-usage-limit.decorator';
 import { ALLOW_ANONYMOUS_KEY } from '../decorators/allow-anonymous.decorator';
 
@@ -17,6 +22,15 @@ describe('CheckUsageLimitGuard', () => {
   let anonymousTrackingService: {
     canAccess: jest.Mock;
     recordUsage: jest.Mock;
+  };
+  let usersService: {
+    findById: jest.Mock;
+  };
+  let planConfigService: {
+    findByPlanType: jest.Mock;
+  };
+  let tarotReadingRepository: {
+    count: jest.Mock;
   };
   let reflector: { getAllAndOverride: jest.Mock };
 
@@ -48,6 +62,22 @@ describe('CheckUsageLimitGuard', () => {
     const mockCanAccess = jest.fn();
     const mockRecordUsage = jest.fn();
     const mockGetAllAndOverride = jest.fn();
+    const mockFindById = jest.fn();
+    const mockFindByPlanType = jest.fn();
+    const mockCountTarotReading = jest.fn();
+
+    // Default mocks for user and plan config (needed for TAROT_READING feature)
+    mockFindById.mockResolvedValue({
+      id: 1,
+      email: 'test@test.com',
+      plan: 'FREE',
+    });
+    mockFindByPlanType.mockResolvedValue({
+      id: 1,
+      planType: 'FREE',
+      tarotReadingsLimit: 1,
+    });
+    mockCountTarotReading.mockResolvedValue(0);
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -67,15 +97,34 @@ describe('CheckUsageLimitGuard', () => {
           },
         },
         {
+          provide: UsersService,
+          useValue: {
+            findById: mockFindById,
+          },
+        },
+        {
+          provide: PlanConfigService,
+          useValue: {
+            findByPlanType: mockFindByPlanType,
+          },
+        },
+        {
           provide: Reflector,
           useValue: {
             getAllAndOverride: mockGetAllAndOverride,
           },
         },
         {
-          provide: 'DailyReadingRepository',
+          provide: getRepositoryToken(DailyReading),
           useValue: {
             count: jest.fn(),
+            find: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(TarotReading),
+          useValue: {
+            count: mockCountTarotReading,
             find: jest.fn(),
           },
         },
@@ -85,6 +134,9 @@ describe('CheckUsageLimitGuard', () => {
     guard = module.get<CheckUsageLimitGuard>(CheckUsageLimitGuard);
     usageLimitsService = module.get(UsageLimitsService);
     anonymousTrackingService = module.get(AnonymousTrackingService);
+    usersService = module.get(UsersService);
+    planConfigService = module.get(PlanConfigService);
+    tarotReadingRepository = module.get(getRepositoryToken(TarotReading));
     reflector = module.get(Reflector);
   });
 
@@ -98,30 +150,24 @@ describe('CheckUsageLimitGuard', () => {
       reflector.getAllAndOverride
         .mockReturnValueOnce(UsageFeature.TAROT_READING)
         .mockReturnValueOnce(false);
-      usageLimitsService.checkLimit.mockResolvedValue(true);
+      // Mock that user has 0 readings (limit not reached)
+      tarotReadingRepository.count.mockResolvedValue(0);
 
       const result = await guard.canActivate(context);
 
       expect(result).toBe(true);
-      expect(usageLimitsService.checkLimit).toHaveBeenCalledWith(
-        1,
-        UsageFeature.TAROT_READING,
-      );
-      expect(reflector.getAllAndOverride).toHaveBeenCalledWith(
-        USAGE_LIMIT_FEATURE_KEY,
-        [expect.any(Function), expect.any(Function)],
-      );
+      // Verify new direct table query logic was used
+      expect(usersService.findById).toHaveBeenCalledWith(1);
+      expect(tarotReadingRepository.count).toHaveBeenCalled();
     });
 
     it('should block action when limit is reached (403)', async () => {
       const context = mockExecutionContext(1);
       reflector.getAllAndOverride
         .mockReturnValueOnce(UsageFeature.TAROT_READING)
-        .mockReturnValueOnce(false)
-        .mockReturnValueOnce(UsageFeature.TAROT_READING) // second call
-        .mockReturnValueOnce(false); // allowAnonymous (second call)
-      usageLimitsService.checkLimit.mockResolvedValue(false);
-      usageLimitsService.getRemainingUsage.mockResolvedValue(0);
+        .mockReturnValueOnce(false);
+      // Mock that user already has 1 reading (the limit for FREE)
+      tarotReadingRepository.count.mockResolvedValue(1);
 
       await expect(guard.canActivate(context)).rejects.toThrow(
         ForbiddenException,
@@ -129,6 +175,9 @@ describe('CheckUsageLimitGuard', () => {
 
       // Create new context for second assertion
       const context2 = mockExecutionContext(1);
+      reflector.getAllAndOverride
+        .mockReturnValueOnce(UsageFeature.TAROT_READING)
+        .mockReturnValueOnce(false);
       await expect(guard.canActivate(context2)).rejects.toThrow(
         'Has alcanzado tu límite diario para esta función. Tu cuota se restablecerá a medianoche (00:00 UTC). Intenta nuevamente mañana o actualiza tu plan para obtener más acceso.',
       );
@@ -137,17 +186,23 @@ describe('CheckUsageLimitGuard', () => {
     it('should handle premium users with unlimited limit (-1)', async () => {
       const context = mockExecutionContext(2);
       reflector.getAllAndOverride
-        .mockReturnValueOnce(UsageFeature.INTERPRETATION_REGENERATION)
+        .mockReturnValueOnce(UsageFeature.TAROT_READING)
         .mockReturnValueOnce(false);
-      usageLimitsService.checkLimit.mockResolvedValue(true);
+      // Mock PREMIUM user with unlimited readings
+      usersService.findById.mockResolvedValue({
+        id: 2,
+        email: 'premium@test.com',
+        plan: 'PREMIUM',
+      });
+      planConfigService.findByPlanType.mockResolvedValue({
+        id: 2,
+        planType: 'PREMIUM',
+        tarotReadingsLimit: -1, // unlimited
+      });
 
       const result = await guard.canActivate(context);
 
       expect(result).toBe(true);
-      expect(usageLimitsService.checkLimit).toHaveBeenCalledWith(
-        2,
-        UsageFeature.INTERPRETATION_REGENERATION,
-      );
     });
 
     it('should extract feature correctly from decorator metadata', async () => {
@@ -174,9 +229,8 @@ describe('CheckUsageLimitGuard', () => {
       reflector.getAllAndOverride
         .mockReturnValueOnce(UsageFeature.TAROT_READING)
         .mockReturnValueOnce(false);
-      usageLimitsService.checkLimit.mockRejectedValue(
-        new Error('Service error'),
-      );
+      // Mock user service to throw error
+      usersService.findById.mockRejectedValue(new Error('Service error'));
 
       await expect(guard.canActivate(context)).rejects.toThrow('Service error');
     });
@@ -197,14 +251,18 @@ describe('CheckUsageLimitGuard', () => {
       reflector.getAllAndOverride
         .mockReturnValueOnce(UsageFeature.TAROT_READING)
         .mockReturnValueOnce(false);
-      usageLimitsService.checkLimit.mockResolvedValue(true);
+      // Mock user for userId=42
+      usersService.findById.mockResolvedValue({
+        id: 42,
+        email: 'test42@test.com',
+        plan: 'FREE',
+      });
+      tarotReadingRepository.count.mockResolvedValue(0);
 
       await guard.canActivate(context);
 
-      expect(usageLimitsService.checkLimit).toHaveBeenCalledWith(
-        42,
-        UsageFeature.TAROT_READING,
-      );
+      // Verify correct userId was extracted
+      expect(usersService.findById).toHaveBeenCalledWith(42);
     });
 
     describe('anonymous access', () => {

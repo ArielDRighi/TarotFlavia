@@ -250,6 +250,7 @@ export function ReadingExperience({
   // API Hooks
   const { data: spreads, isLoading: isSpreadsLoading } = useMyAvailableSpreads();
   const { data: predefinedQuestions, isLoading: isQuestionsLoading } = usePredefinedQuestions();
+  const { data: capabilities } = useUserCapabilities();
   const { mutateAsync: createReading } = useCreateReading();
   const { mutate: regenerateInterpretation, isPending: isRegenerating } =
     useRegenerateInterpretation();
@@ -278,7 +279,8 @@ export function ReadingExperience({
   }, [questionId, predefinedQuestions]);
 
   const cardsCount = spread?.cardCount ?? 0;
-  const isPremium = user?.plan?.toUpperCase() === 'PREMIUM';
+  // More robust isPremium check - ensure user and plan exist
+  const isPremium = Boolean(user?.plan) && user?.plan?.toUpperCase() === 'PREMIUM';
 
   // Display the actual question text
   // For FREE users without question, show "Lectura general" instead of "Tu pregunta al tarot"
@@ -329,6 +331,18 @@ export function ReadingExperience({
   // Create reading handler
   const handleReveal = useCallback(async () => {
     if (selectedCards.size !== cardsCount || !spread) return;
+
+    // VALIDATE LIMITS BEFORE SENDING REQUEST TO BACKEND
+    if (capabilities && !capabilities.canCreateTarotReading) {
+      // Show appropriate modal based on user plan
+      if (isPremium) {
+        setShowLimitReachedModal(true);
+      } else {
+        setUpgradeModalReason('limit-reached');
+        setShowUpgradeModal(true);
+      }
+      return;
+    }
 
     setState('loading');
     setError(null);
@@ -394,6 +408,7 @@ export function ReadingExperience({
     createReading,
     canUseAI,
     isPremium,
+    capabilities,
   ]);
 
   // Action handlers
@@ -418,7 +433,6 @@ export function ReadingExperience({
   }, []);
 
   // ✅ Check if user can create another reading today using capabilities
-  const { data: capabilities } = useUserCapabilities();
   const canCreateNewReading = useCallback((): boolean => {
     if (!user) return false;
     return capabilities?.canCreateTarotReading ?? false;

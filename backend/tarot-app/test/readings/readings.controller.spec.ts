@@ -13,6 +13,10 @@ import { IncrementUsageInterceptor } from '../../src/modules/usage-limits/interc
 import { UsageLimitsService } from '../../src/modules/usage-limits/usage-limits.service';
 import { AnonymousTrackingService } from '../../src/modules/usage-limits/services/anonymous-tracking.service';
 import { AIQuotaService } from '../../src/modules/ai-usage/ai-quota.service';
+import { UsersService } from '../../src/modules/users/users.service';
+import { PlanConfigService } from '../../src/modules/plan-config/plan-config.service';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { DailyReading } from '../../src/modules/tarot/daily-reading/entities/daily-reading.entity';
 
 describe('ReadingsController', () => {
   let controller: ReadingsController;
@@ -104,6 +108,19 @@ describe('ReadingsController', () => {
           },
         },
         {
+          provide: UsersService,
+          useValue: {
+            findOne: jest.fn(),
+            findById: jest.fn(),
+          },
+        },
+        {
+          provide: PlanConfigService,
+          useValue: {
+            getPlanConfig: jest.fn(),
+          },
+        },
+        {
           provide: CACHE_MANAGER,
           useValue: mockCacheManager,
         },
@@ -119,10 +136,22 @@ describe('ReadingsController', () => {
         IncrementUsageInterceptor,
         Reflector,
         {
-          provide: 'DailyReadingRepository',
+          provide: getRepositoryToken(DailyReading),
           useValue: {
             count: jest.fn(),
             find: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(TarotReading),
+          useValue: {
+            count: jest.fn(),
+            find: jest.fn(),
+            createQueryBuilder: jest.fn().mockReturnValue({
+              where: jest.fn().mockReturnThis(),
+              andWhere: jest.fn().mockReturnThis(),
+              getCount: jest.fn().mockResolvedValue(0),
+            }),
           },
         },
       ],

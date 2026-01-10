@@ -212,32 +212,20 @@ describe('DailyReadingService', () => {
       );
     });
 
-    it('should throw ForbiddenException if user has reached daily card limit', async () => {
-      // Mock plan config
-      mockPlanConfigService.findByPlanType.mockResolvedValue({
-        planType: UserPlan.FREE,
-        dailyCardLimit: 1,
-        tarotReadingsLimit: 3,
-      });
-
-      // Mock usage limit - usuario SÍ alcanzó límite
-      mockUsageLimitsService.checkLimit.mockResolvedValue(false);
-
-      // Mock user lookup
-      mockUsersService.findById.mockResolvedValue({
-        id: userId,
-        email: 'test@test.com',
-        plan: UserPlan.FREE,
-      });
-
-      await expect(
-        service.generateDailyCard(userId, tarotistaId),
-      ).rejects.toThrow(ForbiddenException);
-      await expect(
-        service.generateDailyCard(userId, tarotistaId),
-      ).rejects.toThrow(
-        'Has alcanzado tu límite de carta del día. Actualiza tu plan para generar más cartas.',
-      );
+    /**
+     * REMOVED TEST: Limit validation moved to guard layer
+     *
+     * After bugfix/daily-limits-reset, limit validation is no longer the service's responsibility.
+     * The CheckUsageLimitGuard now handles ALL limit validation for both DAILY_CARD and TAROT_READING
+     * by querying the source tables directly (daily_reading and tarot_reading).
+     *
+     * Original test: "should throw ForbiddenException if user has reached daily card limit"
+     *
+     * For limit validation tests, see:
+     * - backend/tarot-app/src/modules/usage-limits/guards/check-usage-limit.guard.spec.ts
+     */
+    it.skip('limit validation is now handled by CheckUsageLimitGuard', () => {
+      // Test intentionally skipped - validation moved to guard layer
     });
 
     it('should skip limit check when dailyCardLimit is -1 (unlimited)', async () => {
