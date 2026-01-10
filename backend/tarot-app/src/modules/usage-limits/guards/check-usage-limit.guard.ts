@@ -3,6 +3,8 @@ import {
   CanActivate,
   ExecutionContext,
   ForbiddenException,
+  UnauthorizedException,
+  Logger,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -20,6 +22,8 @@ import { ALLOW_ANONYMOUS_KEY } from '../decorators/allow-anonymous.decorator';
 
 @Injectable()
 export class CheckUsageLimitGuard implements CanActivate {
+  private readonly logger = new Logger(CheckUsageLimitGuard.name);
+
   constructor(
     private readonly usageLimitsService: UsageLimitsService,
     private readonly anonymousTrackingService: AnonymousTrackingService,
@@ -33,7 +37,7 @@ export class CheckUsageLimitGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    console.log('[CheckUsageLimitGuard] === GUARD STARTED ===');
+    this.logger.debug('Guard execution started');
 
     // Extract feature from decorator metadata
     const feature = this.reflector.getAllAndOverride<UsageFeature>(
@@ -41,13 +45,11 @@ export class CheckUsageLimitGuard implements CanActivate {
       [context.getHandler(), context.getClass()],
     );
 
-    console.log(`[CheckUsageLimitGuard] Feature extracted: ${feature}`);
+    this.logger.debug(`Feature extracted: ${feature}`);
 
     // If no feature is specified, skip the guard
     if (!feature) {
-      console.log(
-        '[CheckUsageLimitGuard] No feature specified, skipping guard',
-      );
+      this.logger.debug('No feature specified, skipping guard');
       return true;
     }
 
@@ -63,7 +65,7 @@ export class CheckUsageLimitGuard implements CanActivate {
       .getRequest<Request & { user?: { userId: number } }>();
     const userId = request.user?.userId;
 
-    console.log(`[CheckUsageLimitGuard] UserId: ${userId}`);
+    this.logger.debug(`UserId: ${userId}`);
 
     // If user is authenticated, use normal usage limit checking
     if (userId) {
@@ -72,8 +74,8 @@ export class CheckUsageLimitGuard implements CanActivate {
 
       // For DAILY_CARD, check the daily_reading table directly
       if (feature === UsageFeature.DAILY_CARD) {
-        console.log(
-          `[CheckUsageLimitGuard] Checking DAILY_CARD for userId=${userId}, today=${today.toISOString()}`,
+        this.logger.debug(
+          `Checking DAILY_CARD for userId=${userId}, today=${today.toISOString()}`,
         );
 
         const existingReading = await this.dailyReadingRepository.findOne({
@@ -83,8 +85,8 @@ export class CheckUsageLimitGuard implements CanActivate {
           },
         });
 
-        console.log(
-          `[CheckUsageLimitGuard] DAILY_CARD check result: existingReading=${!!existingReading}`,
+        this.logger.debug(
+          `DAILY_CARD check result: existingReading=${!!existingReading}`,
         );
 
         if (existingReading) {
@@ -98,17 +100,20 @@ export class CheckUsageLimitGuard implements CanActivate {
 
       // For TAROT_READING, check the tarot_reading table directly
       if (feature === UsageFeature.TAROT_READING) {
-        process.stdout.write(`\n\n=== TAROT_READING GUARD CHECK START ===\n`);
-        process.stdout.write(
-          `userId=${userId}, today=${today.toISOString()}\n`,
-        );
+        this.logger.debug('=== TAROT_READING GUARD CHECK START ===');
+        this.logger.debug(`userId=${userId}, today=${today.toISOString()}`);
 
         // Get user's plan and limits
         const user = await this.usersService.findById(userId);
         if (!user) {
-          throw new ForbiddenException('Usuario no encontrado');
+          this.logger.warn(
+            `User not found for userId=${userId}. This may indicate stale JWT token or data integrity issue.`,
+          );
+          throw new UnauthorizedException(
+            'Usuario no encontrado. Por favor, inicia sesión nuevamente.',
+          );
         }
-        process.stdout.write(`User found: plan=${user.plan}\n`);
+        this.logger.debug(`User found: plan=${user.plan}`);
 
         const planConfig = await this.planConfigService.findByPlanType(
           user.plan,
@@ -116,13 +121,13 @@ export class CheckUsageLimitGuard implements CanActivate {
         if (!planConfig) {
           throw new ForbiddenException('Configuración de plan no encontrada');
         }
-        process.stdout.write(
-          `Plan config: limit=${planConfig.tarotReadingsLimit}\n`,
+        this.logger.debug(
+          `Plan config: limit=${planConfig.tarotReadingsLimit}`,
         );
 
         // Check if user has unlimited access (-1)
         if (planConfig.tarotReadingsLimit === -1) {
-          process.stdout.write(`UNLIMITED ACCESS - ALLOWING\n`);
+          this.logger.debug('UNLIMITED ACCESS - ALLOWING');
           return true;
         }
 
@@ -135,27 +140,27 @@ export class CheckUsageLimitGuard implements CanActivate {
           },
         });
 
-        process.stdout.write(
-          `COUNT=${readingsCount}, LIMIT=${planConfig.tarotReadingsLimit}\n`,
+        this.logger.debug(
+          `COUNT=${readingsCount}, LIMIT=${planConfig.tarotReadingsLimit}`,
         );
 
         if (readingsCount >= planConfig.tarotReadingsLimit) {
-          process.stdout.write(`BLOCKING - COUNT >= LIMIT\n\n`);
+          this.logger.debug('BLOCKING - COUNT >= LIMIT');
           throw new ForbiddenException(
             `Has alcanzado tu límite diario para esta función. Tu cuota se restablecerá a medianoche (00:00 UTC). Intenta nuevamente mañana o actualiza tu plan para obtener más acceso.`,
           );
         }
 
-        process.stdout.write(`ALLOWING - COUNT < LIMIT\n\n`);
+        this.logger.debug('ALLOWING - COUNT < LIMIT');
         return true;
       }
 
       // For other features, use usage_limits table
-      console.log(
-        `[CheckUsageLimitGuard] Checking ${feature} using usage_limits table for userId=${userId}`,
+      this.logger.debug(
+        `Checking ${feature} using usage_limits table for userId=${userId}`,
       );
       const canUse = await this.usageLimitsService.checkLimit(userId, feature);
-      console.log(`[CheckUsageLimitGuard] Result: canUse=${canUse}`);
+      this.logger.debug(`Result: canUse=${canUse}`);
 
       if (!canUse) {
         throw new ForbiddenException(

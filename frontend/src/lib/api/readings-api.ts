@@ -115,12 +115,6 @@ export async function createReading(data: CreateReadingDto): Promise<ReadingDeta
       const errorMessage = error.response.data?.message || '';
       const errorType = error.response.data?.error || '';
 
-      console.log('[createReading] 403 error details:', {
-        status: error.response.status,
-        message: errorMessage,
-        errorType,
-      });
-
       // Check if error message indicates limit reached
       if (
         errorMessage.toLowerCase().includes('límite') ||

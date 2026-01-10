@@ -36,7 +36,6 @@ import { IncrementUsageInterceptor } from './interceptors/increment-usage.interc
     AnonymousTrackingService,
     CheckUsageLimitGuard,
     IncrementUsageInterceptor,
-    TypeOrmModule, // Export TypeOrmModule to make repositories available to importing modules
   ],
 })
 export class UsageLimitsModule {}

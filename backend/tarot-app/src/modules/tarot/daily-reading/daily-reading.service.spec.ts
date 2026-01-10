@@ -212,12 +212,20 @@ describe('DailyReadingService', () => {
       );
     });
 
-    // REMOVED TEST: Limit checking now done in CheckUsageLimitGuard, not in service
-    // The service no longer validates limits - that's the guard's responsibility
-    // Original test: "should throw ForbiddenException if user has reached daily card limit"
+    /**
+     * REMOVED TEST: Limit validation moved to guard layer
+     *
+     * After bugfix/daily-limits-reset, limit validation is no longer the service's responsibility.
+     * The CheckUsageLimitGuard now handles ALL limit validation for both DAILY_CARD and TAROT_READING
+     * by querying the source tables directly (daily_reading and tarot_reading).
+     *
+     * Original test: "should throw ForbiddenException if user has reached daily card limit"
+     *
+     * For limit validation tests, see:
+     * - backend/tarot-app/src/modules/usage-limits/guards/check-usage-limit.guard.spec.ts
+     */
     it.skip('limit validation is now handled by CheckUsageLimitGuard', () => {
-      // This test is obsolete after bugfix: moved limit validation to guard layer
-      // See: check-usage-limit.guard.spec.ts for limit validation tests
+      // Test intentionally skipped - validation moved to guard layer
     });
 
     it('should skip limit check when dailyCardLimit is -1 (unlimited)', async () => {
