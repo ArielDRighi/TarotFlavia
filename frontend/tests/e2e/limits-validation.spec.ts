@@ -18,60 +18,26 @@ const API_URL = process.env.BACKEND_URL || 'http://localhost:3000';
 /**
  * Helper: Reset user limits
  *
- * Llama al backend directamente para resetear los contadores de uso.
- * Esto permite probar el flujo de límites de forma aislada.
+ * NOTA IMPORTANTE:
+ * Actualmente no existe un endpoint de backend dedicado para resetear los
+ * contadores de uso (daily_reading / tarot_reading) de un usuario.
+ *
+ * Por este motivo, los tests que dependen de un estado "limpio" de límites
+ * deben ejecutarse contra una base de datos que se resetea entre corridas
+ * (por ejemplo, mediante un entorno de testing efímero o scripts de reset).
+ *
+ * Esta función está deshabilitada para evitar la falsa impresión de que
+ * los límites están siendo reseteados.
  */
 async function resetUserLimits(email: string): Promise<void> {
-  try {
-    // Login como admin para obtener token
-    const loginResponse = await fetch(`${API_URL}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: 'admin@test.com',
-        password: 'Admin123456!',
-      }),
-    });
-
-    if (!loginResponse.ok) {
-      throw new Error('Failed to login as admin');
-    }
-
-    const { access_token } = (await loginResponse.json()) as { access_token: string };
-
-    // Obtener ID del usuario por email
-    const usersResponse = await fetch(
-      `${API_URL}/admin/users?search=${encodeURIComponent(email)}&limit=1`,
-      {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-        },
-      }
-    );
-
-    if (!usersResponse.ok) {
-      throw new Error(`Failed to fetch user by email: ${email}`);
-    }
-
-    const usersData = (await usersResponse.json()) as { data?: Array<{ id: number }> };
-    const user = usersData.data?.[0];
-
-    if (!user) {
-      throw new Error(`User not found: ${email}`);
-    }
-
-    // Resetear límites ejecutando DELETE directo en la base de datos
-    // Como no hay endpoint dedicado, usamos una query directa a través de un endpoint temporal
-    // o simplemente esperamos a que el cron job ejecute el reset diario
-
-    // ALTERNATIVA: Si no existe endpoint, los tests deben ejecutarse en días diferentes
-    // o usar una base de datos de prueba que se resetea entre tests
-
-    console.log(`✓ Reset limits for user: ${email} (userId: ${user.id})`);
-  } catch (error) {
-    console.error(`Failed to reset limits for ${email}:`, error);
-    throw error;
-  }
+  console.warn(
+    `[E2E] resetUserLimits("${email}") fue llamado, pero no existe una implementación ` +
+      'de backend para resetear los límites. Los tests deben ejecutarse contra una ' +
+      'base de datos que se resetea entre corridas.'
+  );
+  
+  // No hacer nada - la función existe solo para documentación
+  // Los tests E2E asumen que cada corrida tiene la DB limpia
 }
 
 /**

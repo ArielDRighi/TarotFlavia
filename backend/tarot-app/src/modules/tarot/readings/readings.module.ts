@@ -91,6 +91,6 @@ import { RestoreReadingUseCase } from './application/use-cases/restore-reading.u
     DeleteReadingUseCase,
     RestoreReadingUseCase,
   ],
-  exports: [ReadingsOrchestratorService],
+  exports: [ReadingsOrchestratorService, TypeOrmModule],
 })
 export class ReadingsModule {}

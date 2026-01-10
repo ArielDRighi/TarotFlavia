@@ -204,6 +204,8 @@ describe('UserCapabilitiesService', () => {
         );
         // Should check daily_reading table
         expect(dailyReadingRepository.findOne).toHaveBeenCalled();
+        // Should check tarot_reading table (not usageLimitsService)
+        expect(tarotReadingRepository.count).toHaveBeenCalled();
       });
 
       it('should return canUse: false when daily card limit is reached', async () => {

@@ -254,7 +254,7 @@ describe('RitualPage', () => {
         isLoading: false,
       });
 
-      const { container } = render(<RitualPage />);
+      render(<RitualPage />);
 
       // When capabilities are undefined, defaults to false, so should show limit modal
       expect(screen.getByTestId('limit-reached-modal')).toBeInTheDocument();
