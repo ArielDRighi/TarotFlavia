@@ -35,7 +35,7 @@ async function resetUserLimits(email: string): Promise<void> {
       'de backend para resetear los límites. Los tests deben ejecutarse contra una ' +
       'base de datos que se resetea entre corridas.'
   );
-  
+
   // No hacer nada - la función existe solo para documentación
   // Los tests E2E asumen que cada corrida tiene la DB limpia
 }

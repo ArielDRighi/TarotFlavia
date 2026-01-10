@@ -29,9 +29,7 @@ vi.mock('@/components/features/readings/CategorySelector', () => ({
 }));
 
 vi.mock('@/components/features/readings/ReadingLimitReached', () => ({
-  ReadingLimitReached: () => (
-    <div data-testid="limit-reached-modal">Reading Limit Reached</div>
-  ),
+  ReadingLimitReached: () => <div data-testid="limit-reached-modal">Reading Limit Reached</div>,
 }));
 
 describe('RitualPage', () => {
@@ -40,12 +38,12 @@ describe('RitualPage', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     (useRouter as Mock).mockReturnValue({
       push: mockPush,
       replace: mockReplace,
     });
-    
+
     (useRequireAuth as Mock).mockReturnValue({ isLoading: false });
   });
 
@@ -56,7 +54,7 @@ describe('RitualPage', () => {
         isAuthenticated: true,
         isLoading: false,
       });
-      
+
       (useUserCapabilities as Mock).mockReturnValue({
         data: {
           canCreateTarotReading: true,
@@ -81,7 +79,7 @@ describe('RitualPage', () => {
         isAuthenticated: false,
         isLoading: false,
       });
-      
+
       (useUserCapabilities as Mock).mockReturnValue({
         data: null,
         isLoading: false,
@@ -98,7 +96,7 @@ describe('RitualPage', () => {
         isAuthenticated: true,
         isLoading: false,
       });
-      
+
       (useUserCapabilities as Mock).mockReturnValue({
         data: null,
         isLoading: true,
@@ -117,7 +115,7 @@ describe('RitualPage', () => {
         isAuthenticated: true,
         isLoading: false,
       });
-      
+
       (useUserCapabilities as Mock).mockReturnValue({
         data: {
           canCreateTarotReading: true,
@@ -139,7 +137,7 @@ describe('RitualPage', () => {
         isAuthenticated: true,
         isLoading: false,
       });
-      
+
       (useUserCapabilities as Mock).mockReturnValue({
         data: {
           canCreateTarotReading: true,
@@ -163,7 +161,7 @@ describe('RitualPage', () => {
         isAuthenticated: true,
         isLoading: false,
       });
-      
+
       (useUserCapabilities as Mock).mockReturnValue({
         data: {
           canCreateTarotReading: false,
@@ -183,7 +181,7 @@ describe('RitualPage', () => {
         isAuthenticated: true,
         isLoading: false,
       });
-      
+
       (useUserCapabilities as Mock).mockReturnValue({
         data: {
           canCreateTarotReading: false,
@@ -205,7 +203,7 @@ describe('RitualPage', () => {
         isAuthenticated: true,
         isLoading: false,
       });
-      
+
       (useUserCapabilities as Mock).mockReturnValue({
         data: {
           canCreateTarotReading: true,
@@ -225,7 +223,7 @@ describe('RitualPage', () => {
         isAuthenticated: true,
         isLoading: false,
       });
-      
+
       (useUserCapabilities as Mock).mockReturnValue({
         data: {
           canCreateTarotReading: true,
@@ -248,7 +246,7 @@ describe('RitualPage', () => {
         isAuthenticated: true,
         isLoading: false,
       });
-      
+
       (useUserCapabilities as Mock).mockReturnValue({
         data: undefined,
         isLoading: false,
@@ -266,7 +264,7 @@ describe('RitualPage', () => {
         isAuthenticated: true,
         isLoading: false,
       });
-      
+
       (useUserCapabilities as Mock).mockReturnValue({
         data: null,
         isLoading: true,
