@@ -9,7 +9,6 @@ import { DailyReading } from '../../../tarot/daily-reading/entities/daily-readin
 import { TarotReading } from '../../../tarot/readings/entities/tarot-reading.entity';
 import { UserPlanType } from '../dto/user-capabilities.dto';
 import { UserPlan } from '../../entities/user.entity';
-import { UsageFeature } from '../../../usage-limits/entities/usage-limit.entity';
 
 describe('UserCapabilitiesService', () => {
   let service: UserCapabilitiesService;

@@ -3,6 +3,14 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { UserMenu } from './UserMenu';
 
+// Mock next/navigation
+vi.mock('next/navigation', () => ({
+  useRouter: vi.fn(() => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+  })),
+}));
+
 // Mock useAuthStore
 const mockLogout = vi.fn();
 const mockUseAuthStore = vi.fn();

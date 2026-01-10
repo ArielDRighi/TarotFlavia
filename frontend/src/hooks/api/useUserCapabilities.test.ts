@@ -12,6 +12,14 @@ import { apiClient } from '@/lib/api/axios-config';
 import type { UserCapabilities } from '@/types';
 import React from 'react';
 
+// Mock next/navigation
+vi.mock('next/navigation', () => ({
+  useRouter: vi.fn(() => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+  })),
+}));
+
 // Mock axios
 vi.mock('@/lib/api/axios-config', () => ({
   apiClient: {
@@ -126,7 +134,15 @@ describe('useUserCapabilities', () => {
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
       expect(result.current.data).toEqual(mockAnonymousCapabilities);
-      expect(apiClient.get).toHaveBeenCalledWith('/users/capabilities');
+      // Should call with fingerprint params
+      expect(apiClient.get).toHaveBeenCalledWith(
+        '/users/capabilities',
+        expect.objectContaining({
+          params: expect.objectContaining({
+            fingerprint: expect.any(String),
+          }),
+        })
+      );
       expect(apiClient.get).toHaveBeenCalledTimes(1);
     });
 
