@@ -98,7 +98,7 @@ describe('AnonymousTrackingService', () => {
         where: {
           fingerprint: expect.any(String),
           date: expect.any(String),
-          feature: UsageFeature.TAROT_READING,
+          feature: UsageFeature.DAILY_CARD, // canAccess hardcodes DAILY_CARD
         },
       });
     });

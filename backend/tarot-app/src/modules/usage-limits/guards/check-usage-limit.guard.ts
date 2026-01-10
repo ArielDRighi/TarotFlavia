@@ -5,10 +5,13 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, MoreThanOrEqual } from 'typeorm';
 import { Request } from 'express';
 import { UsageLimitsService } from '../usage-limits.service';
 import { AnonymousTrackingService } from '../services/anonymous-tracking.service';
 import { UsageFeature } from '../entities/usage-limit.entity';
+import { DailyReading } from '../../tarot/daily-reading/entities/daily-reading.entity';
 import { USAGE_LIMIT_FEATURE_KEY } from '../decorators/check-usage-limit.decorator';
 import { ALLOW_ANONYMOUS_KEY } from '../decorators/allow-anonymous.decorator';
 
@@ -18,6 +21,8 @@ export class CheckUsageLimitGuard implements CanActivate {
     private readonly usageLimitsService: UsageLimitsService,
     private readonly anonymousTrackingService: AnonymousTrackingService,
     private readonly reflector: Reflector,
+    @InjectRepository(DailyReading)
+    private readonly dailyReadingRepository: Repository<DailyReading>,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -46,6 +51,28 @@ export class CheckUsageLimitGuard implements CanActivate {
 
     // If user is authenticated, use normal usage limit checking
     if (userId) {
+      // For DAILY_CARD, check the daily_reading table directly
+      if (feature === UsageFeature.DAILY_CARD) {
+        const today = new Date();
+        today.setUTCHours(0, 0, 0, 0);
+
+        const existingReading = await this.dailyReadingRepository.findOne({
+          where: {
+            userId,
+            readingDate: MoreThanOrEqual(today),
+          },
+        });
+
+        if (existingReading) {
+          throw new ForbiddenException(
+            `Has alcanzado tu límite diario para esta función. Tu cuota se restablecerá a medianoche (00:00 UTC). Intenta nuevamente mañana o actualiza tu plan para obtener más acceso.`,
+          );
+        }
+
+        return true;
+      }
+
+      // For other features, use usage_limits table
       const canUse = await this.usageLimitsService.checkLimit(userId, feature);
 
       if (!canUse) {

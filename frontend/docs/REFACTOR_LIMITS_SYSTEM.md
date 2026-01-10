@@ -773,12 +773,13 @@ Mantener backward compatibility pero marcar campos como deprecated.
 
 ---
 
-### **TASK-REFACTOR-011: Crear Tests E2E de Límites**
+### **TASK-REFACTOR-011: Crear Tests E2E de Límites** ✅
 
 **Prioridad:** 🟡 MEDIA
 **Estimación:** 6 horas
 **Área:** Frontend (E2E)
 **Dependencias:** Todas las anteriores
+**Estado:** ✅ COMPLETADA (9 Enero 2026)
 
 #### 📋 Descripción
 
@@ -786,28 +787,28 @@ Crear suite completa de tests E2E que validen el flujo de límites para prevenir
 
 #### ✅ Tareas específicas
 
-- [ ] Crear `frontend/tests/e2e/limits-validation.spec.ts`
-- [ ] Implementar helper para reset de límites:
+- [x] Crear `frontend/tests/e2e/limits-validation.spec.ts`
+- [x] Implementar helper para reset de límites:
   ```typescript
   async function resetUserLimits(email: string) {
     // Llamar endpoint de admin o directamente a DB
   }
   ```
-- [ ] Tests para ANÓNIMO:
-  - [ ] Primera carta del día: muestra carta boca abajo
-  - [ ] Click revela carta con significado DB
-  - [ ] Segunda visita: muestra modal "Regístrate"
-- [ ] Tests para FREE:
-  - [ ] Carta del día: primera vez OK, segunda vez modal
-  - [ ] Tirada tarot: primera vez OK, segunda vez modal
-  - [ ] Límites son independientes (puede usar carta + tirada)
-- [ ] Tests para PREMIUM:
-  - [ ] Carta del día: 1/día igual que FREE
-  - [ ] Tirada tarot: 3/día
-  - [ ] Interpretación incluye IA
-- [ ] Test de logout desde modal:
-  - [ ] Redirige a home correctamente
-- [ ] Agregar a CI/CD pipeline
+- [x] Tests para ANÓNIMO:
+  - [x] Primera carta del día: muestra carta boca abajo
+  - [x] Click revela carta con significado DB
+  - [x] Segunda visita: muestra modal "Regístrate"
+- [x] Tests para FREE:
+  - [x] Carta del día: primera vez OK, segunda vez modal
+  - [x] Tirada tarot: primera vez OK, segunda vez modal
+  - [x] Límites son independientes (puede usar carta + tirada)
+- [x] Tests para PREMIUM:
+  - [x] Carta del día: 1/día igual que FREE
+  - [x] Tirada tarot: 3/día
+  - [x] Interpretación incluye IA
+- [x] Test de logout desde modal:
+  - [x] Redirige a home correctamente
+- [x] Agregar a CI/CD pipeline
 
 #### 🎯 Criterios de aceptación
 
@@ -815,6 +816,59 @@ Crear suite completa de tests E2E que validen el flujo de límites para prevenir
 - ✓ Todos los tests pasan
 - ✓ CI/CD ejecuta tests en cada PR
 - ✓ Documentado cómo correr tests localmente
+
+#### 📝 Notas de implementación
+
+**Tests creados:**
+
+- `tests/e2e/limits-validation.spec.ts` - 490 líneas con cobertura completa
+- 3 test suites (ANONYMOUS, FREE, PREMIUM) + 1 test suite de logout
+- Total: 15 tests E2E implementados
+
+**Cobertura de tests:**
+
+- **ANONYMOUS (3 tests):**
+  - Primera visita: carta boca abajo → click revela con significado DB
+  - Segunda visita: modal "Regístrate" inmediato
+  - No puede acceder a tiradas de tarot
+
+- **FREE (6 tests):**
+  - Carta del día: primera OK, segunda modal
+  - Tirada tarot: primera OK, segunda modal
+  - Límites independientes (carta + tirada separados)
+  - Solo ve spreads de 1 y 3 cartas
+  - **NO puede acceder a categorías** (redirige a /ritual/tirada)
+  - **NO puede usar preguntas** (ni predefinidas ni personalizadas)
+
+- **PREMIUM (5 tests):**
+  - Carta del día: límite 1/día (igual que FREE)
+  - Puede crear hasta 3 tiradas/día
+  - Interpretación incluye IA
+  - Acceso a todos los spreads (1, 3, 5, Cruz Celta)
+  - Puede usar preguntas personalizadas
+
+- **Logout (1 test):**
+  - Logout desde modal redirige correctamente
+
+**Helper implementado:**
+
+- `resetUserLimits(email)` - Llama a endpoint admin para resetear contadores
+- `clearStorage(page)` - Limpia cookies, localStorage, sessionStorage
+
+**Documentación:**
+
+- Actualizado `tests/e2e/README.md` con nueva suite de tests
+- Documentados todos los casos de uso y cobertura
+
+**Ciclo de calidad:**
+
+- ✅ `npm run lint` - Sin errores
+- ✅ `npm run type-check` - Sin errores TypeScript
+- ✅ `npm run format` - Código formateado
+- ✅ `node scripts/validate-architecture.js` - Arquitectura correcta
+
+**Branch:** `feature/TASK-REFACTOR-011-e2e-limits-tests`
+**Commit:** (pendiente)
 
 ---
 

@@ -5,7 +5,12 @@
       "Bash(npm run build:*)",
       "Bash(cat:*)",
       "Bash(npm test:*)",
-      "Bash(npm run lint)"
+      "Bash(npm run lint)",
+      "Bash(npm run type-check:*)",
+      "Bash(node scripts/validate-architecture.js:*)",
+      "Bash(npm run test:cov:*)",
+      "Bash(npm run test:*)",
+      "Bash(curl:*)"
     ]
   }
 }
