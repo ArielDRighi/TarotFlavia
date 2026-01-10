@@ -72,6 +72,13 @@ describe('CheckUsageLimitGuard', () => {
             getAllAndOverride: mockGetAllAndOverride,
           },
         },
+        {
+          provide: 'DailyReadingRepository',
+          useValue: {
+            count: jest.fn(),
+            find: jest.fn(),
+          },
+        },
       ],
     }).compile();
 

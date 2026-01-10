@@ -118,6 +118,13 @@ describe('ReadingsController', () => {
         CheckUsageLimitGuard,
         IncrementUsageInterceptor,
         Reflector,
+        {
+          provide: 'DailyReadingRepository',
+          useValue: {
+            count: jest.fn(),
+            find: jest.fn(),
+          },
+        },
       ],
     }).compile();
 

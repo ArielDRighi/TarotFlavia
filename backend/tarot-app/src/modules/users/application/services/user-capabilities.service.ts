@@ -10,7 +10,6 @@ import {
   UserCapabilitiesDto,
   UserPlanType,
 } from '../dto/user-capabilities.dto';
-import { UsageFeature } from '../../../usage-limits/entities/usage-limit.entity';
 import { UserPlan } from '../../entities/user.entity';
 
 @Injectable()

@@ -32,7 +32,11 @@ export class AnonymousTrackingService {
   async canAccess(req: Request): Promise<boolean> {
     const ip = req.ip || '';
     const userAgent = req.headers['user-agent'] || '';
-    return this.canAccessByIpAndUserAgent(ip, userAgent, UsageFeature.DAILY_CARD);
+    return this.canAccessByIpAndUserAgent(
+      ip,
+      userAgent,
+      UsageFeature.DAILY_CARD,
+    );
   }
 
   /**

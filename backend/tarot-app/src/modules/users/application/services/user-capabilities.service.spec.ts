@@ -6,6 +6,7 @@ import { UsersService } from '../../users.service';
 import { UsageLimitsService } from '../../../usage-limits/usage-limits.service';
 import { PlanConfigService } from '../../../plan-config/plan-config.service';
 import { DailyReading } from '../../../tarot/daily-reading/entities/daily-reading.entity';
+import { TarotReading } from '../../../tarot/readings/entities/tarot-reading.entity';
 import { UserPlanType } from '../dto/user-capabilities.dto';
 import { UserPlan } from '../../entities/user.entity';
 import { UsageFeature } from '../../../usage-limits/entities/usage-limit.entity';
@@ -16,6 +17,7 @@ describe('UserCapabilitiesService', () => {
   let usageLimitsService: jest.Mocked<UsageLimitsService>;
   let planConfigService: jest.Mocked<PlanConfigService>;
   let dailyReadingRepository: jest.Mocked<Repository<DailyReading>>;
+  let tarotReadingRepository: jest.Mocked<Repository<TarotReading>>;
 
   const mockUser = {
     id: 1,
@@ -64,6 +66,13 @@ describe('UserCapabilitiesService', () => {
           provide: getRepositoryToken(DailyReading),
           useValue: {
             findOne: jest.fn(),
+            count: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(TarotReading),
+          useValue: {
+            count: jest.fn(),
           },
         },
       ],
@@ -74,6 +83,7 @@ describe('UserCapabilitiesService', () => {
     usageLimitsService = module.get(UsageLimitsService);
     planConfigService = module.get(PlanConfigService);
     dailyReadingRepository = module.get(getRepositoryToken(DailyReading));
+    tarotReadingRepository = module.get(getRepositoryToken(TarotReading));
   });
 
   afterEach(() => {
@@ -163,7 +173,7 @@ describe('UserCapabilitiesService', () => {
         // No daily reading found (hasn't used daily card)
         dailyReadingRepository.findOne.mockResolvedValue(null);
         // No tarot readings used
-        usageLimitsService.getUsage.mockResolvedValue(0);
+        tarotReadingRepository.count.mockResolvedValue(0);
 
         const result = await service.getCapabilities(1);
 
@@ -195,11 +205,6 @@ describe('UserCapabilitiesService', () => {
         );
         // Should check daily_reading table
         expect(dailyReadingRepository.findOne).toHaveBeenCalled();
-        // Should check tarot readings from usage_limits
-        expect(usageLimitsService.getUsage).toHaveBeenCalledWith(
-          1,
-          UsageFeature.TAROT_READING,
-        );
       });
 
       it('should return canUse: false when daily card limit is reached', async () => {
@@ -233,7 +238,7 @@ describe('UserCapabilitiesService', () => {
         );
         dailyReadingRepository.findOne.mockResolvedValue(null);
         // Tarot reading used once (limit = 1)
-        usageLimitsService.getUsage.mockResolvedValue(1);
+        tarotReadingRepository.count.mockResolvedValue(1);
 
         const result = await service.getCapabilities(1);
 
@@ -301,7 +306,7 @@ describe('UserCapabilitiesService', () => {
           userId: 1,
           readingDate: new Date(),
         } as DailyReading);
-        usageLimitsService.getUsage.mockResolvedValue(1);
+        tarotReadingRepository.count.mockResolvedValue(1);
 
         const result = await service.getCapabilities(1);
 
@@ -334,7 +339,7 @@ describe('UserCapabilitiesService', () => {
           premiumPlanConfig as any,
         );
         dailyReadingRepository.findOne.mockResolvedValue(null);
-        usageLimitsService.getUsage.mockResolvedValue(3); // Limit reached
+        tarotReadingRepository.count.mockResolvedValue(3); // Limit reached
 
         const result = await service.getCapabilities(1);
 
@@ -398,7 +403,7 @@ describe('UserCapabilitiesService', () => {
           mockPlanConfig as any,
         );
         dailyReadingRepository.findOne.mockResolvedValue(null);
-        usageLimitsService.getUsage.mockResolvedValue(0);
+        tarotReadingRepository.count.mockResolvedValue(0);
 
         const result = await service.getCapabilities(1);
 

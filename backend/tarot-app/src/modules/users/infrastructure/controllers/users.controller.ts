@@ -79,7 +79,10 @@ export class UsersController {
     // Para usuarios anónimos, usar el fingerprint del query param
     const anonymousFingerprint = userId ? null : fingerprint || null;
 
-    return this.userCapabilitiesService.getCapabilities(userId, anonymousFingerprint);
+    return this.userCapabilitiesService.getCapabilities(
+      userId,
+      anonymousFingerprint,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
