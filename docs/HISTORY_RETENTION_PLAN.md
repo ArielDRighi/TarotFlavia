@@ -189,15 +189,16 @@ archiveOldReadings(userPlan: UserPlan, retentionDays: number): Promise<number>;
 
 ---
 
-### TAREA 4: Implementar metodo en TypeORM repository [BACKEND]
+### ✅ TAREA 4: Implementar metodo en TypeORM repository [BACKEND] - COMPLETADA
 
 **Archivo:** `backend/tarot-app/src/modules/tarot/readings/infrastructure/repositories/typeorm-reading.repository.ts`
 **Esfuerzo:** Medio
+**Estado:** ✅ COMPLETADA (2026-01-12) - Implementado junto con TAREA 3
 
 **Descripcion:**
 Implementar el metodo `archiveOldReadings` que busca lecturas antiguas por plan de usuario y las soft-delete.
 
-**Codigo a agregar:**
+**Código implementado:**
 
 ```typescript
 async archiveOldReadings(userPlan: UserPlan, retentionDays: number): Promise<number> {
@@ -218,16 +219,37 @@ async archiveOldReadings(userPlan: UserPlan, retentionDays: number): Promise<num
   }
 
   // Soft-delete las lecturas antiguas
-  const ids = result.map(r => r.id);
+  const ids = result.map((r) => r.id);
   await this.readingRepo.softDelete(ids);
 
   return ids.length;
 }
 ```
 
-**Dependencias:** Importar `UserPlan`.
+**Verificación realizada:**
 
-**Riesgo:** Bajo - metodo nuevo, no modifica logica existente.
+- ✅ Método implementado en el repository TypeORM
+- ✅ Tests ya existentes de TAREA 3 (6 tests unitarios):
+  - Archive FREE user readings older than 30 days
+  - Archive PREMIUM user readings older than 365 days
+  - Return 0 if no readings found
+  - Not archive readings already soft-deleted
+  - Not archive readings within retention period
+  - Handle errors gracefully
+- ✅ Todos los tests pasan correctamente
+- ✅ Implementación usa QueryBuilder con joins correctos
+- ✅ Soft-delete para respetar periodo de gracia
+- ✅ Retorna cantidad de lecturas archivadas
+
+**Archivos modificados:**
+
+- `backend/tarot-app/src/modules/tarot/readings/infrastructure/repositories/typeorm-reading.repository.ts` - Implementación del método
+
+**Dependencias implementadas:**
+
+- ✅ Import de `UserPlan` ya agregado en TAREA 3
+
+**Riesgo:** Ninguno - Método nuevo, completamente testeado, no modifica lógica existente.
 
 ---
 
@@ -460,13 +482,13 @@ export class DailyReadingModule {}
 | 1   | Fix enlace menu           | FRONTEND | `UserMenu.tsx`                     | Modificar | ✅ COMPLETADO | Ninguno |
 | 2   | Constantes de retencion   | BACKEND  | `readings.constants.ts`            | Crear     | ✅ COMPLETADO | Ninguno |
 | 3   | Extender interface        | BACKEND  | `reading-repository.interface.ts`  | Modificar | ✅ COMPLETADO | Ninguno |
-| 4   | Implementar en repository | BACKEND  | `typeorm-reading.repository.ts`    | Modificar | ⏳ Pendiente  | Bajo    |
+| 4   | Implementar en repository | BACKEND  | `typeorm-reading.repository.ts`    | Modificar | ✅ COMPLETADO | Ninguno |
 | 5   | Agregar al orchestrator   | BACKEND  | `readings-orchestrator.service.ts` | Modificar | ⏳ Pendiente  | Bajo    |
 | 6   | Modificar cleanup service | BACKEND  | `readings-cleanup.service.ts`      | Modificar | ⏳ Pendiente  | Bajo    |
 | 7   | Crear daily cleanup       | BACKEND  | `daily-reading-cleanup.service.ts` | Crear     | ⏳ Pendiente  | Ninguno |
 | 8   | Registrar en modulo       | BACKEND  | `daily-reading.module.ts`          | Modificar | ⏳ Pendiente  | Ninguno |
 
-**Progreso:** 3/8 tareas completadas (37.5%)
+**Progreso:** 4/8 tareas completadas (50%)
 
 ---
 
@@ -482,7 +504,7 @@ export class DailyReadingModule {}
 ✅ TAREA 3 (Backend) -----> COMPLETADA (2026-01-12)
                 |
                 v
-TAREA 4 (Backend) -----> Implementacion del repository
+✅ TAREA 4 (Backend) -----> COMPLETADA (2026-01-12) [Implementado junto con TAREA 3]
                 |
                 v
 TAREA 5 (Backend) -----> Orchestrator usa repository
