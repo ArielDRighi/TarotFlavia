@@ -1,7 +1,7 @@
 # Plan de Implementacion: Sistema de Historial con Politica de Retencion
 
 **Fecha:** 2026-01-12
-**Estado:** Pendiente de implementacion
+**Estado:** En progreso (1/8 tareas completadas)
 **Prioridad:** Media
 
 ---
@@ -9,7 +9,8 @@
 ## Resumen
 
 Implementar sistema completo de historial de lecturas con:
-1. Fix del enlace roto `/lecturas` -> `/historial`
+
+1. ✅ Fix del enlace roto `/lecturas` -> `/historial` (COMPLETADO)
 2. Politica de retencion: FREE (30 dias) / PREMIUM (1 ano)
 3. Servicio de limpieza automatica (cleanup job nocturno)
 
@@ -17,16 +18,18 @@ Implementar sistema completo de historial de lecturas con:
 
 ## Tareas de Implementacion
 
-### TAREA 1: Fix enlace del menu [FRONTEND]
+### ✅ TAREA 1: Fix enlace del menu [FRONTEND] - COMPLETADA
 
 **Archivo:** `frontend/src/components/layout/UserMenu.tsx`
-**Linea:** ~70
+**Linea:** 70
 **Esfuerzo:** Minimo
+**Estado:** ✅ COMPLETADA (2026-01-12)
 
 **Descripcion:**
 El menu de usuario tiene un enlace "Mis Lecturas" que apunta a `/lecturas`, pero esa ruta no existe. Cambiar a `/historial` que es la ruta correcta existente.
 
-**Cambio:**
+**Cambio implementado:**
+
 ```diff
 - <Link href="/lecturas" className="flex items-center">
 + <Link href="/historial" className="flex items-center">
@@ -35,10 +38,25 @@ El menu de usuario tiene un enlace "Mis Lecturas" que apunta a `/lecturas`, pero
   </Link>
 ```
 
-**Verificacion:**
-- Login -> Click avatar -> "Mis Lecturas" -> Debe ir a `/historial` sin 404
+**Verificacion realizada:**
+
+- ✅ Test agregado: "should link 'Mis Lecturas' to /historial route"
+- ✅ Test pasa correctamente
+- ✅ Todos los tests del componente pasan (15/15)
+- ✅ Build exitoso
+- ✅ Lint sin errores
+- ✅ Type check sin errores
+- ✅ Coverage general: 82.37% (>80%)
+- ✅ Arquitectura validada
+
+**Archivos modificados:**
+
+- `frontend/src/components/layout/UserMenu.tsx` - Cambio del href
+- `frontend/src/components/layout/UserMenu.test.tsx` - Test agregado
 
 **Riesgo:** Ninguno - la ruta destino ya existe y funciona.
+
+**Rama:** feature/TASK-001-fix-historial-link
 
 ---
 
@@ -51,8 +69,9 @@ El menu de usuario tiene un enlace "Mis Lecturas" que apunta a `/lecturas`, pero
 Crear archivo con las constantes que definen los dias de retencion por tipo de plan.
 
 **Codigo:**
+
 ```typescript
-import { UserPlan } from '../../users/entities/user.entity';
+import { UserPlan } from "../../users/entities/user.entity";
 
 /**
  * Dias de retencion de lecturas de tarot segun el plan del usuario
@@ -121,6 +140,7 @@ archiveOldReadings(userPlan: UserPlan, retentionDays: number): Promise<number>;
 Implementar el metodo `archiveOldReadings` que busca lecturas antiguas por plan de usuario y las soft-delete.
 
 **Codigo a agregar:**
+
 ```typescript
 async archiveOldReadings(userPlan: UserPlan, retentionDays: number): Promise<number> {
   const cutoffDate = new Date();
@@ -162,6 +182,7 @@ async archiveOldReadings(userPlan: UserPlan, retentionDays: number): Promise<num
 Exponer el metodo de archivado desde el orchestrator para que el cleanup service pueda usarlo.
 
 **Codigo a agregar:**
+
 ```typescript
 /**
  * Archiva lecturas antiguas segun politica de retencion
@@ -202,12 +223,13 @@ async getRetentionStats(): Promise<{
 Extender el cron job existente para incluir la logica de retencion por plan.
 
 **Codigo modificado:**
+
 ```typescript
-import { Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
-import { ReadingsOrchestratorService } from './application/services/readings-orchestrator.service';
-import { UserPlan } from '../users/entities/user.entity';
-import { READING_RETENTION_DAYS } from './readings.constants';
+import { Injectable, Logger } from "@nestjs/common";
+import { Cron, CronExpression } from "@nestjs/schedule";
+import { ReadingsOrchestratorService } from "./application/services/readings-orchestrator.service";
+import { UserPlan } from "../users/entities/user.entity";
+import { READING_RETENTION_DAYS } from "./readings.constants";
 
 @Injectable()
 export class ReadingsCleanupService {
@@ -221,7 +243,7 @@ export class ReadingsCleanupService {
    */
   @Cron(CronExpression.EVERY_DAY_AT_4AM)
   async runDailyCleanup() {
-    this.logger.log('Starting daily readings cleanup...');
+    this.logger.log("Starting daily readings cleanup...");
 
     try {
       // 1. Hard-delete lecturas soft-deleted hace mas de 30 dias
@@ -242,9 +264,9 @@ export class ReadingsCleanupService {
       );
       this.logger.log(`Archived ${archivedPremium} old readings from PREMIUM users`);
 
-      this.logger.log('Daily readings cleanup completed successfully');
+      this.logger.log("Daily readings cleanup completed successfully");
     } catch (error) {
-      this.logger.error('Error during readings cleanup:', error);
+      this.logger.error("Error during readings cleanup:", error);
     }
   }
 }
@@ -263,14 +285,15 @@ export class ReadingsCleanupService {
 Crear servicio de limpieza para las cartas del dia con la misma politica de retencion.
 
 **Codigo:**
+
 ```typescript
-import { Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, LessThan } from 'typeorm';
-import { DailyReading } from './entities/daily-reading.entity';
-import { UserPlan } from '../../users/entities/user.entity';
-import { DAILY_READING_RETENTION_DAYS } from '../readings/readings.constants';
+import { Injectable, Logger } from "@nestjs/common";
+import { Cron, CronExpression } from "@nestjs/schedule";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository, LessThan } from "typeorm";
+import { DailyReading } from "./entities/daily-reading.entity";
+import { UserPlan } from "../../users/entities/user.entity";
+import { DAILY_READING_RETENTION_DAYS } from "../readings/readings.constants";
 
 @Injectable()
 export class DailyReadingCleanupService {
@@ -278,7 +301,7 @@ export class DailyReadingCleanupService {
 
   constructor(
     @InjectRepository(DailyReading)
-    private readonly dailyReadingRepo: Repository<DailyReading>,
+    private readonly dailyReadingRepo: Repository<DailyReading>
   ) {}
 
   /**
@@ -287,7 +310,7 @@ export class DailyReadingCleanupService {
    */
   @Cron(CronExpression.EVERY_DAY_AT_5AM)
   async cleanupOldDailyReadings() {
-    this.logger.log('Starting daily readings retention cleanup...');
+    this.logger.log("Starting daily readings retention cleanup...");
 
     try {
       // 1. Limpiar lecturas de usuarios anonimos (solo mantener las del dia)
@@ -295,10 +318,7 @@ export class DailyReadingCleanupService {
       this.logger.log(`Deleted ${anonymousDeleted} old anonymous daily readings`);
 
       // 2. Limpiar lecturas de usuarios FREE (30 dias)
-      const freeDeleted = await this.cleanupByUserPlan(
-        UserPlan.FREE,
-        DAILY_READING_RETENTION_DAYS[UserPlan.FREE]
-      );
+      const freeDeleted = await this.cleanupByUserPlan(UserPlan.FREE, DAILY_READING_RETENTION_DAYS[UserPlan.FREE]);
       this.logger.log(`Deleted ${freeDeleted} old FREE user daily readings`);
 
       // 3. Limpiar lecturas de usuarios PREMIUM (1 ano)
@@ -308,9 +328,9 @@ export class DailyReadingCleanupService {
       );
       this.logger.log(`Deleted ${premiumDeleted} old PREMIUM user daily readings`);
 
-      this.logger.log('Daily readings retention cleanup completed');
+      this.logger.log("Daily readings retention cleanup completed");
     } catch (error) {
-      this.logger.error('Error during daily readings cleanup:', error);
+      this.logger.error("Error during daily readings cleanup:", error);
     }
   }
 
@@ -331,11 +351,11 @@ export class DailyReadingCleanupService {
     cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
 
     const result = await this.dailyReadingRepo
-      .createQueryBuilder('daily')
-      .leftJoin('daily.user', 'user')
+      .createQueryBuilder("daily")
+      .leftJoin("daily.user", "user")
       .delete()
-      .where('user.plan = :plan', { plan })
-      .andWhere('daily.readingDate < :cutoffDate', { cutoffDate })
+      .where("user.plan = :plan", { plan })
+      .andWhere("daily.readingDate < :cutoffDate", { cutoffDate })
       .execute();
 
     return result.affected || 0;
@@ -356,8 +376,9 @@ export class DailyReadingCleanupService {
 Registrar el nuevo `DailyReadingCleanupService` en el array de providers del modulo.
 
 **Cambio:**
+
 ```typescript
-import { DailyReadingCleanupService } from './daily-reading-cleanup.service';
+import { DailyReadingCleanupService } from "./daily-reading-cleanup.service";
 
 @Module({
   // ...imports existentes
@@ -376,23 +397,25 @@ export class DailyReadingModule {}
 
 ## Resumen de Tareas
 
-| # | Tarea | Capa | Archivo | Tipo | Riesgo |
-|---|-------|------|---------|------|--------|
-| 1 | Fix enlace menu | FRONTEND | `UserMenu.tsx` | Modificar | Ninguno |
-| 2 | Constantes de retencion | BACKEND | `readings.constants.ts` | Crear | Ninguno |
-| 3 | Extender interface | BACKEND | `reading-repository.interface.ts` | Modificar | Bajo |
-| 4 | Implementar en repository | BACKEND | `typeorm-reading.repository.ts` | Modificar | Bajo |
-| 5 | Agregar al orchestrator | BACKEND | `readings-orchestrator.service.ts` | Modificar | Bajo |
-| 6 | Modificar cleanup service | BACKEND | `readings-cleanup.service.ts` | Modificar | Bajo |
-| 7 | Crear daily cleanup | BACKEND | `daily-reading-cleanup.service.ts` | Crear | Ninguno |
-| 8 | Registrar en modulo | BACKEND | `daily-reading.module.ts` | Modificar | Ninguno |
+| #   | Tarea                     | Capa     | Archivo                            | Tipo      | Estado        | Riesgo  |
+| --- | ------------------------- | -------- | ---------------------------------- | --------- | ------------- | ------- |
+| 1   | Fix enlace menu           | FRONTEND | `UserMenu.tsx`                     | Modificar | ✅ COMPLETADO | Ninguno |
+| 2   | Constantes de retencion   | BACKEND  | `readings.constants.ts`            | Crear     | ⏳ Pendiente  | Ninguno |
+| 3   | Extender interface        | BACKEND  | `reading-repository.interface.ts`  | Modificar | ⏳ Pendiente  | Bajo    |
+| 4   | Implementar en repository | BACKEND  | `typeorm-reading.repository.ts`    | Modificar | ⏳ Pendiente  | Bajo    |
+| 5   | Agregar al orchestrator   | BACKEND  | `readings-orchestrator.service.ts` | Modificar | ⏳ Pendiente  | Bajo    |
+| 6   | Modificar cleanup service | BACKEND  | `readings-cleanup.service.ts`      | Modificar | ⏳ Pendiente  | Bajo    |
+| 7   | Crear daily cleanup       | BACKEND  | `daily-reading-cleanup.service.ts` | Crear     | ⏳ Pendiente  | Ninguno |
+| 8   | Registrar en modulo       | BACKEND  | `daily-reading.module.ts`          | Modificar | ⏳ Pendiente  | Ninguno |
+
+**Progreso:** 1/8 tareas completadas (12.5%)
 
 ---
 
 ## Orden de Ejecucion Recomendado
 
 ```
-TAREA 1 (Frontend) -----> Puede hacerse independiente
+✅ TAREA 1 (Frontend) -----> COMPLETADA (2026-01-12)
                 |
                 v
 TAREA 2 (Backend) -----> Base para las siguientes
@@ -422,18 +445,18 @@ TAREA 8 (Backend) -----> Registrar al final
 
 ### Tests Manuales
 
-1. **TAREA 1:** Navegar Menu -> "Mis Lecturas" -> Debe ir a `/historial`
+1. **✅ TAREA 1:** Navegar Menu -> "Mis Lecturas" -> Debe ir a `/historial` (VERIFICADO)
 2. **TAREA 6-7:** Revisar logs del backend a las 4-5 AM UTC o ejecutar manualmente
 3. **Integracion:** Crear lectura mock antigua y verificar que se archiva
 
 ### Tests Automatizados Sugeridos
 
 ```typescript
-describe('Readings Retention Policy', () => {
-  it('should archive FREE user readings older than 30 days');
-  it('should archive PREMIUM user readings older than 365 days');
-  it('should hard-delete soft-deleted readings older than 30 days');
-  it('should NOT archive readings within retention period');
+describe("Readings Retention Policy", () => {
+  it("should archive FREE user readings older than 30 days");
+  it("should archive PREMIUM user readings older than 365 days");
+  it("should hard-delete soft-deleted readings older than 30 days");
+  it("should NOT archive readings within retention period");
 });
 ```
 

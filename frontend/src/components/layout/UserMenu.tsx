@@ -67,7 +67,7 @@ export function UserMenu() {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/lecturas" className="flex items-center">
+          <Link href="/historial" className="flex items-center">
             <BookOpen className="mr-2 size-4" />
             Mis Lecturas
           </Link>
