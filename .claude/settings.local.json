@@ -10,7 +10,14 @@
       "Bash(node scripts/validate-architecture.js:*)",
       "Bash(npm run test:cov:*)",
       "Bash(npm run test:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(npx vitest:*)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_wait_for",
+      "mcp__playwright__browser_close"
     ]
   }
 }
