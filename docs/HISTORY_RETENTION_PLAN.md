@@ -14,6 +14,8 @@ Implementar sistema completo de historial de lecturas con:
 2. ✅ Política de retención: FREE (30 días) / PREMIUM (1 año) (COMPLETADO - 8/8 tareas)
 3. ✅ Servicio de limpieza automática (cleanup job nocturno) - COMPLETADO
 
+**Estado Final:** ✅ TODAS LAS TAREAS COMPLETADAS (8/8) - Sistema de retención implementado y funcionando
+
 ---
 
 ## Tareas de Implementación
@@ -565,31 +567,67 @@ export class DailyReadingCleanupService {
 
 ---
 
-### TAREA 8: Registrar servicio en modulo [BACKEND]
+### ✅ TAREA 8: Registrar servicio en modulo [BACKEND] - COMPLETADA
 
 **Archivo:** `backend/tarot-app/src/modules/tarot/daily-reading/daily-reading.module.ts`
 **Esfuerzo:** Minimo
+**Estado:** ✅ COMPLETADA (2026-01-12)
 
 **Descripción:**
 Registrar el nuevo `DailyReadingCleanupService` en el array de providers del modulo.
 
-**Cambio:**
+**Código implementado:**
 
 ```typescript
+import { Module } from "@nestjs/common";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { DailyReadingController, DailyReadingPublicController } from "./daily-reading.controller";
+import { DailyReadingService } from "./daily-reading.service";
 import { DailyReadingCleanupService } from "./daily-reading-cleanup.service";
+import { DailyReading } from "./entities/daily-reading.entity";
+import { TarotCard } from "../cards/entities/tarot-card.entity";
+import { TarotReading } from "../readings/entities/tarot-reading.entity";
+import { InterpretationsModule } from "../interpretations/interpretations.module";
+import { AIUsageModule } from "../../ai-usage/ai-usage.module";
+import { UsageLimitsModule } from "../../usage-limits/usage-limits.module";
+import { UsersModule } from "../../users/users.module";
+import { PlanConfigModule } from "../../plan-config/plan-config.module";
 
 @Module({
-  // ...imports existentes
-  providers: [
-    // ...providers existentes
-    DailyReadingCleanupService,
+  imports: [
+    TypeOrmModule.forFeature([DailyReading, TarotCard, TarotReading]),
+    InterpretationsModule,
+    AIUsageModule,
+    UsageLimitsModule,
+    UsersModule,
+    PlanConfigModule,
   ],
-  // ...exports existentes
+  controllers: [DailyReadingController, DailyReadingPublicController],
+  providers: [DailyReadingService, DailyReadingCleanupService],
+  exports: [DailyReadingService, TypeOrmModule],
 })
 export class DailyReadingModule {}
 ```
 
-**Riesgo:** Ninguno - solo registra provider adicional.
+**Verificación realizada:**
+
+- ✅ Servicio `DailyReadingCleanupService` ya estaba registrado en el módulo (implementado en TAREA 7)
+- ✅ Tests del módulo pasan: 46 passed, 1 skipped
+- ✅ Lint sin errores
+- ✅ Format aplicado
+- ✅ Build exitoso
+- ✅ Arquitectura validada (daily-reading module OK)
+- ✅ Módulo registra correctamente el cleanup service en providers
+
+**Archivos verificados:**
+
+- `backend/tarot-app/src/modules/tarot/daily-reading/daily-reading.module.ts` - Provider registrado
+- `backend/tarot-app/src/modules/tarot/daily-reading/daily-reading-cleanup.service.ts` - Servicio existe
+- `backend/tarot-app/src/modules/tarot/daily-reading/daily-reading-cleanup.service.spec.ts` - Tests completos
+
+**Riesgo:** Ninguno - solo verifica que el provider está correctamente registrado.
+
+**Rama:** feature/TASK-008-verify-daily-reading-cleanup-registration
 
 ---
 
@@ -604,7 +642,7 @@ export class DailyReadingModule {}
 | 5   | Agregar al orchestrator   | BACKEND  | `readings-orchestrator.service.ts` | Modificar | ✅ COMPLETADO | Bajo    |
 | 6   | Modificar cleanup service | BACKEND  | `readings-cleanup.service.ts`      | Modificar | ✅ COMPLETADO | Bajo    |
 | 7   | Crear daily cleanup       | BACKEND  | `daily-reading-cleanup.service.ts` | Crear     | ✅ COMPLETADO | Ninguno |
-| 8   | Registrar en modulo       | BACKEND  | `daily-reading.module.ts`          | Modificar | ✅ COMPLETADO | Ninguno |
+| 8   | Registrar en modulo       | BACKEND  | `daily-reading.module.ts`          | Verificar | ✅ COMPLETADO | Ninguno |
 
 **Progreso:** 8/8 tareas completadas (100%)
 
@@ -628,13 +666,13 @@ export class DailyReadingModule {}
 ✅ TAREA 5 (Backend) -----> COMPLETADA (2026-01-12)
                 |
                 v
-TAREA 6 (Backend) -----> Cleanup usa orchestrator
+✅ TAREA 6 (Backend) -----> COMPLETADA (2026-01-12)
                 |
                 v
-TAREA 7 (Backend) -----> Daily cleanup independiente (usa constantes)
+✅ TAREA 7 (Backend) -----> COMPLETADA (2026-01-12)
                 |
                 v
-TAREA 8 (Backend) -----> Registrar al final
+✅ TAREA 8 (Backend) -----> COMPLETADA (2026-01-12) [Provider registrado]
 ```
 
 ---
