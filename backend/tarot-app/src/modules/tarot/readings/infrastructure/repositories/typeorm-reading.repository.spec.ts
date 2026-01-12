@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
 import { TypeOrmReadingRepository } from './typeorm-reading.repository';
 import { TarotReading } from '../../entities/tarot-reading.entity';
+import { UserPlan } from '../../../../users/entities/user.entity';
 
 // Helper types for test cases
 type PartialTarotReading = Omit<Partial<TarotReading>, 'user'> & {
@@ -18,6 +19,7 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
   // Mock QueryBuilder
   const mockQueryBuilder = {
     leftJoinAndSelect: jest.fn().mockReturnThis(),
+    leftJoin: jest.fn().mockReturnThis(),
     where: jest.fn().mockReturnThis(),
     andWhere: jest.fn().mockReturnThis(),
     orderBy: jest.fn().mockReturnThis(),
@@ -38,6 +40,7 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
     restore: jest.fn(),
     remove: jest.fn(),
     increment: jest.fn(),
+    softDelete: jest.fn(),
     createQueryBuilder: jest.fn(() => mockQueryBuilder),
   };
 
@@ -884,6 +887,111 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
         'viewCount',
         1,
       );
+    });
+  });
+
+  describe('archiveOldReadings', () => {
+    it('should archive FREE user readings older than retention period', async () => {
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - 30);
+
+      const mockOldReadings: Partial<TarotReading>[] = [
+        { id: 1, createdAt: new Date('2020-01-01') },
+        { id: 2, createdAt: new Date('2020-01-02') },
+      ];
+
+      mockQueryBuilder.getMany.mockResolvedValue(mockOldReadings);
+      mockReadingRepository.softDelete = jest
+        .fn()
+        .mockResolvedValue({ affected: 2 });
+
+      const result = await repository.archiveOldReadings(UserPlan.FREE, 30);
+
+      expect(result).toBe(2);
+      expect(mockReadingRepository.createQueryBuilder).toHaveBeenCalledWith(
+        'reading',
+      );
+      expect(mockQueryBuilder.leftJoin).toHaveBeenCalledWith(
+        'reading.user',
+        'user',
+      );
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith(
+        'user.plan = :userPlan',
+        { userPlan: UserPlan.FREE },
+      );
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'reading.createdAt < :cutoffDate',
+        expect.any(Object),
+      );
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'reading.deletedAt IS NULL',
+      );
+      expect(mockReadingRepository.softDelete).toHaveBeenCalledWith([1, 2]);
+    });
+
+    it('should archive PREMIUM user readings older than 365 days', async () => {
+      const mockOldReadings: Partial<TarotReading>[] = [
+        { id: 10, createdAt: new Date('2020-01-01') },
+      ];
+
+      mockQueryBuilder.getMany.mockResolvedValue(mockOldReadings);
+      mockReadingRepository.softDelete = jest
+        .fn()
+        .mockResolvedValue({ affected: 1 });
+
+      const result = await repository.archiveOldReadings(UserPlan.PREMIUM, 365);
+
+      expect(result).toBe(1);
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith(
+        'user.plan = :userPlan',
+        { userPlan: UserPlan.PREMIUM },
+      );
+    });
+
+    it('should return 0 if no readings found to archive', async () => {
+      mockQueryBuilder.getMany.mockResolvedValue([]);
+
+      const result = await repository.archiveOldReadings(UserPlan.FREE, 30);
+
+      expect(result).toBe(0);
+      expect(mockReadingRepository.softDelete).not.toHaveBeenCalled();
+    });
+
+    it('should not archive readings already soft-deleted', async () => {
+      // El query filtra por deletedAt IS NULL, entonces no debería retornar ningún reading eliminado
+      mockQueryBuilder.getMany.mockResolvedValue([]);
+
+      const result = await repository.archiveOldReadings(UserPlan.FREE, 30);
+
+      // Query debería filtrar readings con deletedAt != null
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'reading.deletedAt IS NULL',
+      );
+      expect(result).toBe(0);
+    });
+
+    it('should not archive readings within retention period', async () => {
+      // Reading created today (within 30 days)
+      mockQueryBuilder.getMany.mockResolvedValue([]);
+
+      const result = await repository.archiveOldReadings(UserPlan.FREE, 30);
+
+      expect(result).toBe(0);
+      // Query should filter by createdAt < cutoffDate
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'reading.createdAt < :cutoffDate',
+        expect.any(Object),
+      );
+    });
+
+    it('should handle errors gracefully', async () => {
+      mockQueryBuilder.getMany.mockRejectedValue(
+        new Error('Database connection error'),
+      );
+
+      await expect(
+        repository.archiveOldReadings(UserPlan.FREE, 30),
+      ).rejects.toThrow('Database connection error');
     });
   });
 });

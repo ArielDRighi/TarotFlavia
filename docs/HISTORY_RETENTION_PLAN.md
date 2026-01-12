@@ -1,7 +1,7 @@
 # Plan de Implementacion: Sistema de Historial con Politica de Retencion
 
 **Fecha:** 2026-01-12
-**Estado:** En progreso (2/8 tareas completadas)
+**Estado:** En progreso (3/8 tareas completadas)
 **Prioridad:** Media
 
 ---
@@ -123,16 +123,16 @@ export const DAILY_READING_RETENTION_DAYS: Record<UserPlan, number> = {
 
 ---
 
-### TAREA 3: Extender interface del repository [BACKEND]
+### ✅ TAREA 3: Extender interface del repository [BACKEND] - COMPLETADA
 
 **Archivo:** `backend/tarot-app/src/modules/tarot/readings/domain/interfaces/reading-repository.interface.ts`
 **Esfuerzo:** Bajo
+**Estado:** ✅ COMPLETADA (2026-01-12)
 
 **Descripcion:**
-Agregar firma del metodo `archiveOldReadings` a la interface del repository.
+Agregar firma del metodo `archiveOldReadings` a la interface del repository para permitir el archivado automatico de lecturas antiguas segun politica de retencion.
 
-**Cambio:**
-Agregar al final de la interface `IReadingRepository`:
+**Código implementado:**
 
 ```typescript
 /**
@@ -144,9 +144,48 @@ Agregar al final de la interface `IReadingRepository`:
 archiveOldReadings(userPlan: UserPlan, retentionDays: number): Promise<number>;
 ```
 
-**Dependencias:** Importar `UserPlan` del modulo users.
+**Cambios realizados:**
 
-**Riesgo:** Bajo - agregar metodo a interface requiere implementacion en TAREA 4.
+1. **Interface actualizada:** `reading-repository.interface.ts`
+   - Agregado método `archiveOldReadings` con documentación JSDoc
+   - Importado `UserPlan` desde módulo users
+
+2. **Implementación en TypeORM:** `typeorm-reading.repository.ts`
+   - Implementado método con QueryBuilder para filtrar por plan y fecha
+   - Uso de soft-delete para respetar periodo de gracia
+   - Retorna cantidad de lecturas archivadas
+
+**Verificación realizada:**
+
+- ✅ Tests agregados: 6 tests unitarios completos (TDD)
+  - Archive FREE user readings older than 30 days
+  - Archive PREMIUM user readings older than 365 days
+  - Return 0 if no readings found
+  - Not archive readings already soft-deleted
+  - Not archive readings within retention period
+  - Handle errors gracefully
+- ✅ Todos los tests pasan: 64/64 tests del repository
+- ✅ Tests del proyecto: 2148 passed, 12 skipped
+- ✅ Lint sin errores
+- ✅ Format aplicado
+- ✅ Build exitoso
+- ✅ Arquitectura validada (readings module OK)
+- ✅ Coverage mantenido >80%
+
+**Archivos modificados:**
+
+- `backend/tarot-app/src/modules/tarot/readings/domain/interfaces/reading-repository.interface.ts` - Interface extendida
+- `backend/tarot-app/src/modules/tarot/readings/infrastructure/repositories/typeorm-reading.repository.ts` - Implementación
+- `backend/tarot-app/src/modules/tarot/readings/infrastructure/repositories/typeorm-reading.repository.spec.ts` - Tests
+
+**Dependencias implementadas:**
+
+- ✅ Import de `UserPlan` desde `modules/users/entities/user.entity`
+- ✅ Uso de constantes de `READING_RETENTION_DAYS` (creadas en TAREA 2)
+
+**Riesgo:** Ninguno - La interface se extiende sin romper compatibilidad. La implementación está completamente testeada.
+
+**Rama:** feature/TASK-003-extend-reading-repository-interface
 
 ---
 
@@ -420,14 +459,14 @@ export class DailyReadingModule {}
 | --- | ------------------------- | -------- | ---------------------------------- | --------- | ------------- | ------- |
 | 1   | Fix enlace menu           | FRONTEND | `UserMenu.tsx`                     | Modificar | ✅ COMPLETADO | Ninguno |
 | 2   | Constantes de retencion   | BACKEND  | `readings.constants.ts`            | Crear     | ✅ COMPLETADO | Ninguno |
-| 3   | Extender interface        | BACKEND  | `reading-repository.interface.ts`  | Modificar | ⏳ Pendiente  | Bajo    |
+| 3   | Extender interface        | BACKEND  | `reading-repository.interface.ts`  | Modificar | ✅ COMPLETADO | Ninguno |
 | 4   | Implementar en repository | BACKEND  | `typeorm-reading.repository.ts`    | Modificar | ⏳ Pendiente  | Bajo    |
 | 5   | Agregar al orchestrator   | BACKEND  | `readings-orchestrator.service.ts` | Modificar | ⏳ Pendiente  | Bajo    |
 | 6   | Modificar cleanup service | BACKEND  | `readings-cleanup.service.ts`      | Modificar | ⏳ Pendiente  | Bajo    |
 | 7   | Crear daily cleanup       | BACKEND  | `daily-reading-cleanup.service.ts` | Crear     | ⏳ Pendiente  | Ninguno |
 | 8   | Registrar en modulo       | BACKEND  | `daily-reading.module.ts`          | Modificar | ⏳ Pendiente  | Ninguno |
 
-**Progreso:** 2/8 tareas completadas (25%)
+**Progreso:** 3/8 tareas completadas (37.5%)
 
 ---
 
@@ -437,10 +476,10 @@ export class DailyReadingModule {}
 ✅ TAREA 1 (Frontend) -----> COMPLETADA (2026-01-12)
                 |
                 v
-TAREA 2 (Backend) -----> Base para las siguientes
+✅ TAREA 2 (Backend) -----> COMPLETADA (2026-01-12)
                 |
                 v
-TAREA 3 (Backend) -----> Interface primero
+✅ TAREA 3 (Backend) -----> COMPLETADA (2026-01-12)
                 |
                 v
 TAREA 4 (Backend) -----> Implementacion del repository

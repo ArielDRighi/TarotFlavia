@@ -7,6 +7,7 @@ import {
   PaginationOptions,
 } from '../../domain/interfaces/reading-repository.interface';
 import { TarotReading } from '../../entities/tarot-reading.entity';
+import { UserPlan } from '../../../../users/entities/user.entity';
 
 @Injectable()
 export class TypeOrmReadingRepository implements IReadingRepository {
@@ -269,5 +270,32 @@ export class TypeOrmReadingRepository implements IReadingRepository {
 
   async incrementViewCount(id: number): Promise<void> {
     await this.readingRepo.increment({ id }, 'viewCount', 1);
+  }
+
+  async archiveOldReadings(
+    userPlan: UserPlan,
+    retentionDays: number,
+  ): Promise<number> {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
+
+    // Buscar lecturas antiguas de usuarios con el plan especificado
+    const result = await this.readingRepo
+      .createQueryBuilder('reading')
+      .leftJoin('reading.user', 'user')
+      .where('user.plan = :userPlan', { userPlan })
+      .andWhere('reading.createdAt < :cutoffDate', { cutoffDate })
+      .andWhere('reading.deletedAt IS NULL')
+      .getMany();
+
+    if (result.length === 0) {
+      return 0;
+    }
+
+    // Soft-delete las lecturas antiguas
+    const ids = result.map((r) => r.id);
+    await this.readingRepo.softDelete(ids);
+
+    return ids.length;
   }
 }

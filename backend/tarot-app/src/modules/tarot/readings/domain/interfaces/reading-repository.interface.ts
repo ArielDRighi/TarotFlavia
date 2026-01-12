@@ -1,4 +1,5 @@
 import { TarotReading } from '../../entities/tarot-reading.entity';
+import { UserPlan } from '../../../../users/entities/user.entity';
 
 export interface IReadingRepository {
   create(reading: Partial<TarotReading>): Promise<TarotReading>;
@@ -16,6 +17,16 @@ export interface IReadingRepository {
   hardDelete(olderthanDays: number): Promise<number>;
   findByShareToken(token: string): Promise<TarotReading | null>;
   incrementViewCount(id: number): Promise<void>;
+  /**
+   * Archiva (soft-delete) lecturas que exceden el periodo de retencion
+   * @param userPlan Plan del usuario
+   * @param retentionDays Dias de retencion para ese plan
+   * @returns Numero de lecturas archivadas
+   */
+  archiveOldReadings(
+    userPlan: UserPlan,
+    retentionDays: number,
+  ): Promise<number>;
 }
 
 export interface PaginationOptions {
