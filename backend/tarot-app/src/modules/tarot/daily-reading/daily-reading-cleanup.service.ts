@@ -16,28 +16,42 @@ export class DailyReadingCleanupService {
   ) {}
 
   /**
-   * Limpia cartas del dia antiguas según política de retención
-   * Se ejecuta diariamente a las 5 AM UTC (despues de readings cleanup)
+   * Limpia cartas del día antiguas según política de retención
+   * Se ejecuta diariamente a las 5 AM UTC (después de readings cleanup)
    */
   @Cron(CronExpression.EVERY_DAY_AT_5AM)
   async cleanupOldDailyReadings() {
     this.logger.log('Starting daily readings retention cleanup...');
 
+    // 1. Limpiar lecturas de usuarios anónimos (solo mantener las del día)
     try {
-      // 1. Limpiar lecturas de usuarios anonimos (solo mantener las del dia)
       const anonymousDeleted = await this.cleanupAnonymous();
       this.logger.log(
         `Deleted ${anonymousDeleted} old anonymous daily readings`,
       );
+    } catch (error) {
+      this.logger.error(
+        'Error during anonymous daily readings cleanup:',
+        error,
+      );
+    }
 
-      // 2. Limpiar lecturas de usuarios FREE (30 días)
+    // 2. Limpiar lecturas de usuarios FREE (30 días)
+    try {
       const freeDeleted = await this.cleanupByUserPlan(
         UserPlan.FREE,
         DAILY_READING_RETENTION_DAYS[UserPlan.FREE],
       );
       this.logger.log(`Deleted ${freeDeleted} old FREE user daily readings`);
+    } catch (error) {
+      this.logger.error(
+        'Error during FREE user daily readings cleanup:',
+        error,
+      );
+    }
 
-      // 3. Limpiar lecturas de usuarios PREMIUM (1 año)
+    // 3. Limpiar lecturas de usuarios PREMIUM (1 año)
+    try {
       const premiumDeleted = await this.cleanupByUserPlan(
         UserPlan.PREMIUM,
         DAILY_READING_RETENTION_DAYS[UserPlan.PREMIUM],
@@ -45,11 +59,14 @@ export class DailyReadingCleanupService {
       this.logger.log(
         `Deleted ${premiumDeleted} old PREMIUM user daily readings`,
       );
-
-      this.logger.log('Daily readings retention cleanup completed');
     } catch (error) {
-      this.logger.error('Error during daily readings cleanup:', error);
+      this.logger.error(
+        'Error during PREMIUM user daily readings cleanup:',
+        error,
+      );
     }
+
+    this.logger.log('Daily readings retention cleanup completed');
   }
 
   private async cleanupAnonymous(): Promise<number> {

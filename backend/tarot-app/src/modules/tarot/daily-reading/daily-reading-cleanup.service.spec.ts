@@ -302,13 +302,36 @@ describe('DailyReadingCleanupService', () => {
       const error = new Error('Delete error');
       dailyReadingRepo.delete.mockRejectedValue(error);
 
+      const mockQueryBuilder = {
+        leftJoin: jest.fn().mockReturnThis(),
+        delete: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        execute: jest.fn().mockResolvedValue({ affected: 5 }),
+      };
+
+      dailyReadingRepo.createQueryBuilder.mockReturnValue(
+        mockQueryBuilder as any,
+      );
+
       const errorSpy = jest.spyOn(service['logger'], 'error');
+      const logSpy = jest.spyOn(service['logger'], 'log');
 
       await service.cleanupOldDailyReadings();
 
+      // Verify error was logged for anonymous cleanup
       expect(errorSpy).toHaveBeenCalledWith(
-        'Error during daily readings cleanup:',
+        'Error during anonymous daily readings cleanup:',
         error,
+      );
+
+      // Verify FREE and PREMIUM cleanups continued
+      expect(dailyReadingRepo.createQueryBuilder).toHaveBeenCalledTimes(2);
+      expect(logSpy).toHaveBeenCalledWith(
+        'Deleted 5 old FREE user daily readings',
+      );
+      expect(logSpy).toHaveBeenCalledWith(
+        'Deleted 5 old PREMIUM user daily readings',
       );
     });
   });
