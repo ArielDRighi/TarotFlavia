@@ -1,7 +1,7 @@
 # Plan de Implementacion: Sistema de Historial con Politica de Retencion
 
 **Fecha:** 2026-01-12
-**Estado:** En progreso (1/8 tareas completadas)
+**Estado:** En progreso (2/8 tareas completadas)
 **Prioridad:** Media
 
 ---
@@ -60,15 +60,16 @@ El menu de usuario tiene un enlace "Mis Lecturas" que apunta a `/lecturas`, pero
 
 ---
 
-### TAREA 2: Crear constantes de retencion [BACKEND]
+### ✅ TAREA 2: Crear constantes de retencion [BACKEND] - COMPLETADA
 
 **Archivo NUEVO:** `backend/tarot-app/src/modules/tarot/readings/readings.constants.ts`
 **Esfuerzo:** Bajo
+**Estado:** ✅ COMPLETADA (2026-01-12)
 
 **Descripcion:**
 Crear archivo con las constantes que definen los dias de retencion por tipo de plan.
 
-**Codigo:**
+**Codigo implementado:**
 
 ```typescript
 import { UserPlan } from "../../users/entities/user.entity";
@@ -100,7 +101,25 @@ export const DAILY_READING_RETENTION_DAYS: Record<UserPlan, number> = {
 };
 ```
 
+**Verificacion realizada:**
+
+- ✅ Test creado: `readings.constants.spec.ts` con 22 tests (TDD)
+- ✅ Todos los tests pasan correctamente
+- ✅ Coverage de constantes: 100%
+- ✅ Lint sin errores
+- ✅ Format aplicado
+- ✅ Build exitoso
+- ✅ Arquitectura validada
+- ✅ Todos los tests del proyecto pasan (2142 tests)
+
+**Archivos creados:**
+
+- `backend/tarot-app/src/modules/tarot/readings/readings.constants.ts` - Constantes de retención
+- `backend/tarot-app/src/modules/tarot/readings/readings.constants.spec.ts` - Tests unitarios
+
 **Riesgo:** Ninguno - archivo nuevo, no modifica codigo existente.
+
+**Rama:** feature/TASK-002-reading-retention-constants
 
 ---
 
@@ -400,7 +419,7 @@ export class DailyReadingModule {}
 | #   | Tarea                     | Capa     | Archivo                            | Tipo      | Estado        | Riesgo  |
 | --- | ------------------------- | -------- | ---------------------------------- | --------- | ------------- | ------- |
 | 1   | Fix enlace menu           | FRONTEND | `UserMenu.tsx`                     | Modificar | ✅ COMPLETADO | Ninguno |
-| 2   | Constantes de retencion   | BACKEND  | `readings.constants.ts`            | Crear     | ⏳ Pendiente  | Ninguno |
+| 2   | Constantes de retencion   | BACKEND  | `readings.constants.ts`            | Crear     | ✅ COMPLETADO | Ninguno |
 | 3   | Extender interface        | BACKEND  | `reading-repository.interface.ts`  | Modificar | ⏳ Pendiente  | Bajo    |
 | 4   | Implementar en repository | BACKEND  | `typeorm-reading.repository.ts`    | Modificar | ⏳ Pendiente  | Bajo    |
 | 5   | Agregar al orchestrator   | BACKEND  | `readings-orchestrator.service.ts` | Modificar | ⏳ Pendiente  | Bajo    |
@@ -408,7 +427,7 @@ export class DailyReadingModule {}
 | 7   | Crear daily cleanup       | BACKEND  | `daily-reading-cleanup.service.ts` | Crear     | ⏳ Pendiente  | Ninguno |
 | 8   | Registrar en modulo       | BACKEND  | `daily-reading.module.ts`          | Modificar | ⏳ Pendiente  | Ninguno |
 
-**Progreso:** 1/8 tareas completadas (12.5%)
+**Progreso:** 2/8 tareas completadas (25%)
 
 ---
 
