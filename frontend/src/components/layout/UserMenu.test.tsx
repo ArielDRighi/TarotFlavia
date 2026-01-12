@@ -110,6 +110,18 @@ describe('UserMenu', () => {
         });
       });
 
+      it('should link "Mis Lecturas" to /historial route', async () => {
+        const user = userEvent.setup();
+        render(<UserMenu />);
+
+        await user.click(screen.getByTestId('user-menu-trigger'));
+
+        await waitFor(() => {
+          const misLecturasLink = screen.getByRole('menuitem', { name: /mis lecturas/i });
+          expect(misLecturasLink).toHaveAttribute('href', '/historial');
+        });
+      });
+
       it('should show "Configuración" option in dropdown', async () => {
         const user = userEvent.setup();
         render(<UserMenu />);
