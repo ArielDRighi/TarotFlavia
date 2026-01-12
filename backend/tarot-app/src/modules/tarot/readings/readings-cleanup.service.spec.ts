@@ -109,13 +109,14 @@ describe('ReadingsCleanupService', () => {
     it('should handle errors gracefully and log them', async () => {
       const error = new Error('Database connection failed');
       orchestrator.cleanupOldDeletedReadings.mockRejectedValue(error);
+      orchestrator.archiveOldReadings.mockResolvedValue(0);
 
       const loggerErrorSpy = jest.spyOn(service['logger'], 'error');
 
       await service.runDailyCleanup();
 
       expect(loggerErrorSpy).toHaveBeenCalledWith(
-        'Error during readings cleanup:',
+        'Error during hard-delete cleanup:',
         error,
       );
     });
@@ -193,11 +194,21 @@ describe('ReadingsCleanupService', () => {
       orchestrator.cleanupOldDeletedReadings.mockRejectedValue(
         new Error('Hard-delete failed'),
       );
+      orchestrator.archiveOldReadings.mockResolvedValue(5);
 
       await service.runDailyCleanup();
 
       // Should still attempt archiving despite hard-delete failure
       expect(orchestrator.cleanupOldDeletedReadings).toHaveBeenCalledTimes(1);
+      expect(orchestrator.archiveOldReadings).toHaveBeenCalledTimes(2);
+      expect(orchestrator.archiveOldReadings).toHaveBeenCalledWith(
+        UserPlan.FREE,
+        READING_RETENTION_DAYS[UserPlan.FREE],
+      );
+      expect(orchestrator.archiveOldReadings).toHaveBeenCalledWith(
+        UserPlan.PREMIUM,
+        READING_RETENTION_DAYS[UserPlan.PREMIUM],
+      );
     });
 
     it('should use constants for retention days', async () => {
