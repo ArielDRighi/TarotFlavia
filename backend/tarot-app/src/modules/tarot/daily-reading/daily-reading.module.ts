@@ -5,6 +5,7 @@ import {
   DailyReadingPublicController,
 } from './daily-reading.controller';
 import { DailyReadingService } from './daily-reading.service';
+import { DailyReadingCleanupService } from './daily-reading-cleanup.service';
 import { DailyReading } from './entities/daily-reading.entity';
 import { TarotCard } from '../cards/entities/tarot-card.entity';
 import { TarotReading } from '../readings/entities/tarot-reading.entity';
@@ -24,7 +25,7 @@ import { PlanConfigModule } from '../../plan-config/plan-config.module';
     PlanConfigModule,
   ],
   controllers: [DailyReadingController, DailyReadingPublicController],
-  providers: [DailyReadingService],
+  providers: [DailyReadingService, DailyReadingCleanupService],
   exports: [DailyReadingService, TypeOrmModule],
 })
 export class DailyReadingModule {}
