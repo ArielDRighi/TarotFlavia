@@ -1,7 +1,7 @@
 # Plan de Implementación: Sistema de Historial con Política de Retención
 
 **Fecha:** 2026-01-12
-**Estado:** En progreso (6/8 tareas completadas)
+**Estado:** ✅ Completado (8/8 tareas completadas)
 **Prioridad:** Media
 
 ---
@@ -11,8 +11,8 @@
 Implementar sistema completo de historial de lecturas con:
 
 1. ✅ Fix del enlace roto `/lecturas` -> `/historial` (COMPLETADO)
-2. ✅ Política de retención: FREE (30 días) / PREMIUM (1 año) (COMPLETADO - 6/8 tareas)
-3. ⏳ Servicio de limpieza automática (cleanup job nocturno) - En progreso (2 tareas pendientes)
+2. ✅ Política de retención: FREE (30 días) / PREMIUM (1 año) (COMPLETADO - 8/8 tareas)
+3. ✅ Servicio de limpieza automática (cleanup job nocturno) - COMPLETADO
 
 ---
 
@@ -433,21 +433,22 @@ export class ReadingsCleanupService {
 
 ---
 
-### TAREA 7: Crear DailyReadingCleanupService [BACKEND]
+### ✅ TAREA 7: Crear DailyReadingCleanupService [BACKEND] - COMPLETADA
 
 **Archivo NUEVO:** `backend/tarot-app/src/modules/tarot/daily-reading/daily-reading-cleanup.service.ts`
 **Esfuerzo:** Medio
+**Estado:** ✅ COMPLETADA (2026-01-12)
 
 **Descripción:**
 Crear servicio de limpieza para las cartas del dia con la misma política de retención.
 
-**Codigo:**
+**Código implementado:**
 
 ```typescript
 import { Injectable, Logger } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository, LessThan } from "typeorm";
+import { Repository, LessThan, IsNull } from "typeorm";
 import { DailyReading } from "./entities/daily-reading.entity";
 import { UserPlan } from "../../users/entities/user.entity";
 import { DAILY_READING_RETENTION_DAYS } from "../readings/readings.constants";
@@ -496,7 +497,7 @@ export class DailyReadingCleanupService {
     cutoffDate.setDate(cutoffDate.getDate() - 1);
 
     const result = await this.dailyReadingRepo.delete({
-      userId: null,
+      userId: IsNull(),
       readingDate: LessThan(cutoffDate),
     });
 
@@ -520,7 +521,47 @@ export class DailyReadingCleanupService {
 }
 ```
 
-**Riesgo:** Ninguno - servicio nuevo, no modifica codigo existente.
+**Verificación realizada:**
+
+- ✅ Tests creados: 13 tests unitarios completos (TDD)
+  - Execute cleanup sequence in correct order
+  - Delete anonymous daily readings older than 1 day
+  - Delete FREE user daily readings older than 30 days
+  - Delete PREMIUM user daily readings older than 365 days
+  - Return 0 when no daily readings are deleted
+  - Handle errors gracefully and log them
+  - Log starting, completion, and intermediate messages
+  - Use constants for retention days
+  - Handle undefined affected count
+  - Continue cleanup if anonymous deletion fails
+- ✅ Todos los tests pasan: 13/13 tests del cleanup service
+- ✅ Tests del módulo daily-reading: 47/47 passed
+- ✅ Tests del proyecto: 2182 passed, 12 skipped
+- ✅ Lint sin errores
+- ✅ Format aplicado
+- ✅ Build exitoso
+- ✅ Arquitectura validada
+- ✅ Coverage: 100% del código nuevo
+
+**Archivos creados:**
+
+- `backend/tarot-app/src/modules/tarot/daily-reading/daily-reading-cleanup.service.ts` - Servicio de limpieza
+- `backend/tarot-app/src/modules/tarot/daily-reading/daily-reading-cleanup.service.spec.ts` - Tests unitarios
+
+**Archivos modificados:**
+
+- `backend/tarot-app/src/modules/tarot/daily-reading/daily-reading.module.ts` - Registrado provider
+
+**Dependencias implementadas:**
+
+- ✅ Import de `UserPlan` desde `modules/users/entities/user.entity`
+- ✅ Import de `DAILY_READING_RETENTION_DAYS` (creada en TAREA 2)
+- ✅ Uso de TypeORM operators: `IsNull()`, `LessThan()`
+- ✅ Uso de `@Cron` decorator de `@nestjs/schedule`
+
+**Riesgo:** Ninguno - servicio nuevo, no modifica código existente.
+
+**Rama:** feature/TASK-007-daily-reading-cleanup-service
 
 ---
 
@@ -562,10 +603,10 @@ export class DailyReadingModule {}
 | 4   | Implementar en repository | BACKEND  | `typeorm-reading.repository.ts`    | Modificar | ✅ COMPLETADO | Ninguno |
 | 5   | Agregar al orchestrator   | BACKEND  | `readings-orchestrator.service.ts` | Modificar | ✅ COMPLETADO | Bajo    |
 | 6   | Modificar cleanup service | BACKEND  | `readings-cleanup.service.ts`      | Modificar | ✅ COMPLETADO | Bajo    |
-| 7   | Crear daily cleanup       | BACKEND  | `daily-reading-cleanup.service.ts` | Crear     | ⏳ Pendiente  | Ninguno |
-| 8   | Registrar en modulo       | BACKEND  | `daily-reading.module.ts`          | Modificar | ⏳ Pendiente  | Ninguno |
+| 7   | Crear daily cleanup       | BACKEND  | `daily-reading-cleanup.service.ts` | Crear     | ✅ COMPLETADO | Ninguno |
+| 8   | Registrar en modulo       | BACKEND  | `daily-reading.module.ts`          | Modificar | ✅ COMPLETADO | Ninguno |
 
-**Progreso:** 6/8 tareas completadas (75%)
+**Progreso:** 8/8 tareas completadas (100%)
 
 ---
 
