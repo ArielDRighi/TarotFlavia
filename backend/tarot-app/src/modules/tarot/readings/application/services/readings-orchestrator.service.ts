@@ -11,7 +11,7 @@ import { CreateReadingDto } from '../../dto/create-reading.dto';
 import { QueryReadingsDto } from '../../dto/query-readings.dto';
 import { PaginatedReadingsResponseDto } from '../../dto/paginated-readings-response.dto';
 import { TarotReading } from '../../entities/tarot-reading.entity';
-import { User } from '../../../../users/entities/user.entity';
+import { User, UserPlan } from '../../../../users/entities/user.entity';
 
 /**
  * Orquestador principal para operaciones de readings.
@@ -151,5 +151,35 @@ export class ReadingsOrchestratorService {
     await this.readingRepo.incrementViewCount(reading.id);
 
     return reading;
+  }
+
+  // ==================== Retention Policy Methods ====================
+
+  /**
+   * Archiva lecturas antiguas segun politica de retencion
+   */
+  async archiveOldReadings(
+    userPlan: UserPlan,
+    retentionDays: number,
+  ): Promise<number> {
+    return this.readingRepo.archiveOldReadings(userPlan, retentionDays);
+  }
+
+  /**
+   * Obtiene estadisticas de retencion para monitoreo
+   */
+  getRetentionStats(): Promise<{
+    totalReadings: number;
+    trashedReadings: number;
+    freeUsersReadings: number;
+    premiumUsersReadings: number;
+  }> {
+    // TODO: Implementar queries de estadisticas
+    return Promise.resolve({
+      totalReadings: 0,
+      trashedReadings: 0,
+      freeUsersReadings: 0,
+      premiumUsersReadings: 0,
+    });
   }
 }

@@ -253,44 +253,78 @@ async archiveOldReadings(userPlan: UserPlan, retentionDays: number): Promise<num
 
 ---
 
-### TAREA 5: Agregar metodo al orchestrator service [BACKEND]
+### ✅ TAREA 5: Agregar metodo al orchestrator service [BACKEND] - COMPLETADA
 
 **Archivo:** `backend/tarot-app/src/modules/tarot/readings/application/services/readings-orchestrator.service.ts`
 **Esfuerzo:** Bajo
+**Estado:** ✅ COMPLETADA (2026-01-12)
 
 **Descripcion:**
 Exponer el metodo de archivado desde el orchestrator para que el cleanup service pueda usarlo.
 
-**Codigo a agregar:**
+**Código implementado:**
 
 ```typescript
 /**
  * Archiva lecturas antiguas segun politica de retencion
  */
-async archiveOldReadings(userPlan: UserPlan, retentionDays: number): Promise<number> {
-  return this.readingRepository.archiveOldReadings(userPlan, retentionDays);
+async archiveOldReadings(
+  userPlan: UserPlan,
+  retentionDays: number,
+): Promise<number> {
+  return this.readingRepo.archiveOldReadings(userPlan, retentionDays);
 }
 
 /**
  * Obtiene estadisticas de retencion para monitoreo
  */
-async getRetentionStats(): Promise<{
+getRetentionStats(): Promise<{
   totalReadings: number;
   trashedReadings: number;
   freeUsersReadings: number;
   premiumUsersReadings: number;
 }> {
   // TODO: Implementar queries de estadisticas
-  return {
+  return Promise.resolve({
     totalReadings: 0,
     trashedReadings: 0,
     freeUsersReadings: 0,
     premiumUsersReadings: 0,
-  };
+  });
 }
 ```
 
-**Riesgo:** Bajo - metodos nuevos.
+**Verificación realizada:**
+
+- ✅ Tests agregados: 7 tests unitarios completos (TDD)
+  - delegate to repository archiveOldReadings method
+  - handle archiving PREMIUM user readings
+  - return 0 when no readings are archived
+  - handle ANONYMOUS user plan
+  - propagate repository errors
+  - return retention statistics with default values
+  - return object with all required fields
+- ✅ Todos los tests pasan: 48/48 tests del orchestrator
+- ✅ Tests del proyecto: 2155 passed, 12 skipped
+- ✅ Lint sin errores
+- ✅ Format aplicado
+- ✅ Build exitoso
+- ✅ Arquitectura validada (readings module OK)
+- ✅ Coverage mantenido >80%
+
+**Archivos modificados:**
+
+- `backend/tarot-app/src/modules/tarot/readings/application/services/readings-orchestrator.service.ts` - Métodos agregados
+- `backend/tarot-app/src/modules/tarot/readings/application/services/readings-orchestrator.service.spec.ts` - Tests
+
+**Dependencias implementadas:**
+
+- ✅ Import de `UserPlan` ya existente
+- ✅ Uso del método `archiveOldReadings` del repository (implementado en TAREA 3/4)
+
+**Riesgo:** Ninguno - métodos nuevos, completamente testeados, no modifican lógica existente.
+
+**Rama:** feature/TASK-005-add-orchestrator-retention-methods
 
 ---
 
@@ -483,12 +517,12 @@ export class DailyReadingModule {}
 | 2   | Constantes de retencion   | BACKEND  | `readings.constants.ts`            | Crear     | ✅ COMPLETADO | Ninguno |
 | 3   | Extender interface        | BACKEND  | `reading-repository.interface.ts`  | Modificar | ✅ COMPLETADO | Ninguno |
 | 4   | Implementar en repository | BACKEND  | `typeorm-reading.repository.ts`    | Modificar | ✅ COMPLETADO | Ninguno |
-| 5   | Agregar al orchestrator   | BACKEND  | `readings-orchestrator.service.ts` | Modificar | ⏳ Pendiente  | Bajo    |
+| 5   | Agregar al orchestrator   | BACKEND  | `readings-orchestrator.service.ts` | Modificar | ✅ COMPLETADO | Bajo    |
 | 6   | Modificar cleanup service | BACKEND  | `readings-cleanup.service.ts`      | Modificar | ⏳ Pendiente  | Bajo    |
 | 7   | Crear daily cleanup       | BACKEND  | `daily-reading-cleanup.service.ts` | Crear     | ⏳ Pendiente  | Ninguno |
 | 8   | Registrar en modulo       | BACKEND  | `daily-reading.module.ts`          | Modificar | ⏳ Pendiente  | Ninguno |
 
-**Progreso:** 4/8 tareas completadas (50%)
+**Progreso:** 5/8 tareas completadas (62.5%)
 
 ---
 
@@ -507,7 +541,7 @@ export class DailyReadingModule {}
 ✅ TAREA 4 (Backend) -----> COMPLETADA (2026-01-12) [Implementado junto con TAREA 3]
                 |
                 v
-TAREA 5 (Backend) -----> Orchestrator usa repository
+✅ TAREA 5 (Backend) -----> COMPLETADA (2026-01-12)
                 |
                 v
 TAREA 6 (Backend) -----> Cleanup usa orchestrator

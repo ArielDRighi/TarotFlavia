@@ -73,6 +73,7 @@ describe('ReadingsOrchestratorService', () => {
       hardDelete: jest.fn(),
       findByShareToken: jest.fn(),
       incrementViewCount: jest.fn(),
+      archiveOldReadings: jest.fn(),
     };
 
     const mockCreateReadingUC = {
@@ -672,6 +673,122 @@ describe('ReadingsOrchestratorService', () => {
         expect(readingRepo.findByShareToken).toHaveBeenCalledWith(
           maliciousToken,
         );
+      });
+    });
+  });
+
+  describe('Retention Policy Methods', () => {
+    describe('archiveOldReadings', () => {
+      it('should delegate to repository archiveOldReadings method', async () => {
+        const userPlan = UserPlan.FREE;
+        const retentionDays = 30;
+        const expectedCount = 5;
+
+        readingRepo.archiveOldReadings.mockResolvedValue(expectedCount);
+
+        const result = await service.archiveOldReadings(
+          userPlan,
+          retentionDays,
+        );
+
+        expect(readingRepo.archiveOldReadings).toHaveBeenCalledWith(
+          userPlan,
+          retentionDays,
+        );
+        expect(result).toBe(expectedCount);
+      });
+
+      it('should handle archiving PREMIUM user readings', async () => {
+        const userPlan = UserPlan.PREMIUM;
+        const retentionDays = 365;
+        const expectedCount = 2;
+
+        readingRepo.archiveOldReadings.mockResolvedValue(expectedCount);
+
+        const result = await service.archiveOldReadings(
+          userPlan,
+          retentionDays,
+        );
+
+        expect(readingRepo.archiveOldReadings).toHaveBeenCalledWith(
+          userPlan,
+          retentionDays,
+        );
+        expect(result).toBe(expectedCount);
+      });
+
+      it('should return 0 when no readings are archived', async () => {
+        const userPlan = UserPlan.FREE;
+        const retentionDays = 30;
+
+        readingRepo.archiveOldReadings.mockResolvedValue(0);
+
+        const result = await service.archiveOldReadings(
+          userPlan,
+          retentionDays,
+        );
+
+        expect(readingRepo.archiveOldReadings).toHaveBeenCalledWith(
+          userPlan,
+          retentionDays,
+        );
+        expect(result).toBe(0);
+      });
+
+      it('should handle ANONYMOUS user plan', async () => {
+        const userPlan = UserPlan.ANONYMOUS;
+        const retentionDays = 0;
+
+        readingRepo.archiveOldReadings.mockResolvedValue(0);
+
+        const result = await service.archiveOldReadings(
+          userPlan,
+          retentionDays,
+        );
+
+        expect(readingRepo.archiveOldReadings).toHaveBeenCalledWith(
+          userPlan,
+          retentionDays,
+        );
+        expect(result).toBe(0);
+      });
+
+      it('should propagate repository errors', async () => {
+        const userPlan = UserPlan.FREE;
+        const retentionDays = 30;
+        const error = new Error('Database connection failed');
+
+        readingRepo.archiveOldReadings.mockRejectedValue(error);
+
+        await expect(
+          service.archiveOldReadings(userPlan, retentionDays),
+        ).rejects.toThrow('Database connection failed');
+      });
+    });
+
+    describe('getRetentionStats', () => {
+      it('should return retention statistics with default values', async () => {
+        const result = await service.getRetentionStats();
+
+        expect(result).toEqual({
+          totalReadings: 0,
+          trashedReadings: 0,
+          freeUsersReadings: 0,
+          premiumUsersReadings: 0,
+        });
+      });
+
+      it('should return object with all required fields', async () => {
+        const result = await service.getRetentionStats();
+
+        expect(result).toHaveProperty('totalReadings');
+        expect(result).toHaveProperty('trashedReadings');
+        expect(result).toHaveProperty('freeUsersReadings');
+        expect(result).toHaveProperty('premiumUsersReadings');
+        expect(typeof result.totalReadings).toBe('number');
+        expect(typeof result.trashedReadings).toBe('number');
+        expect(typeof result.freeUsersReadings).toBe('number');
+        expect(typeof result.premiumUsersReadings).toBe('number');
       });
     });
   });
