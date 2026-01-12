@@ -1,9 +1,9 @@
 import { UserPlan } from '../../users/entities/user.entity';
 
 /**
- * Dias de retencion de lecturas de tarot segun el plan del usuario
- * FREE: 30 dias de historial
- * PREMIUM: 365 dias (1 ano) de historial
+ * Días de retención de lecturas de tarot según el plan del usuario
+ * FREE: 30 días de historial
+ * PREMIUM: 365 días (1 año) de historial
  * ANONYMOUS: No tienen historial persistente
  */
 export const READING_RETENTION_DAYS: Record<UserPlan, number> = {
@@ -13,12 +13,12 @@ export const READING_RETENTION_DAYS: Record<UserPlan, number> = {
 };
 
 /**
- * Dias de gracia para lecturas soft-deleted antes de hard-delete permanente
+ * Días de gracia para lecturas soft-deleted antes de hard-delete permanente
  */
 export const SOFT_DELETE_GRACE_PERIOD_DAYS = 30;
 
 /**
- * Dias de retencion de cartas del dia segun el plan
+ * Días de retención de cartas del día según el plan
  */
 export const DAILY_READING_RETENTION_DAYS: Record<UserPlan, number> = {
   [UserPlan.ANONYMOUS]: 1,

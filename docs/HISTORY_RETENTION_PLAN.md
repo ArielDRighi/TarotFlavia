@@ -69,7 +69,7 @@ El menu de usuario tiene un enlace "Mis Lecturas" que apunta a `/lecturas`, pero
 **Descripcion:**
 Crear archivo con las constantes que definen los dias de retencion por tipo de plan.
 
-**Codigo implementado:**
+**Código implementado:**
 
 ```typescript
 import { UserPlan } from "../../users/entities/user.entity";
@@ -101,7 +101,7 @@ export const DAILY_READING_RETENTION_DAYS: Record<UserPlan, number> = {
 };
 ```
 
-**Verificacion realizada:**
+**Verificación realizada:**
 
 - ✅ Test creado: `readings.constants.spec.ts` con 22 tests (TDD)
 - ✅ Todos los tests pasan correctamente
@@ -117,7 +117,7 @@ export const DAILY_READING_RETENTION_DAYS: Record<UserPlan, number> = {
 - `backend/tarot-app/src/modules/tarot/readings/readings.constants.ts` - Constantes de retención
 - `backend/tarot-app/src/modules/tarot/readings/readings.constants.spec.ts` - Tests unitarios
 
-**Riesgo:** Ninguno - archivo nuevo, no modifica codigo existente.
+**Riesgo:** Ninguno - archivo nuevo, no modifica código existente.
 
 **Rama:** feature/TASK-002-reading-retention-constants
 
