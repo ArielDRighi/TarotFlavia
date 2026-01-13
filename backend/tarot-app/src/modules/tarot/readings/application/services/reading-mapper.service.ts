@@ -8,15 +8,9 @@ export class ReadingMapperService {
   /**
    * Transforma una entidad TarotReading en un DTO para listado
    * @param reading Entidad TarotReading con relaciones cargadas (cards, cardPositions)
-   * @param spreadId ID del spread (debe obtenerse del contexto de creación)
-   * @param spreadName Nombre del spread (debe obtenerse del contexto de creación)
    * @returns ReadingListItemDto con preview de cartas
    */
-  toListItemDto(
-    reading: TarotReading,
-    spreadId: number,
-    spreadName: string,
-  ): ReadingListItemDto {
+  toListItemDto(reading: TarotReading): ReadingListItemDto {
     // Determinar la pregunta a mostrar
     const question =
       reading.question ||
@@ -46,8 +40,8 @@ export class ReadingMapperService {
     return {
       id: reading.id,
       question,
-      spreadId,
-      spreadName,
+      spreadId: reading.spreadId || 0,
+      spreadName: reading.spreadName || 'Tirada desconocida',
       cardsCount,
       cardPreviews,
       createdAt: reading.createdAt.toISOString(),

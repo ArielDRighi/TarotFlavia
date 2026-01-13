@@ -39,6 +39,8 @@ describe('ReadingMapperService', () => {
       const mockReading: Partial<TarotReading> = {
         id: 1,
         question: '¿Qué me depara el futuro?',
+        spreadId: 1,
+        spreadName: 'Tirada de 3 cartas',
         cards: mockCards as TarotCard[],
         cardPositions: [
           { cardId: 1, position: 'past', isReversed: false },
@@ -52,8 +54,6 @@ describe('ReadingMapperService', () => {
 
       const result: ReadingListItemDto = service.toListItemDto(
         mockReading as TarotReading,
-        1,
-        'Tirada de 3 cartas',
       );
 
       expect(result).toEqual({
@@ -96,6 +96,8 @@ describe('ReadingMapperService', () => {
       const mockReading: Partial<TarotReading> = {
         id: 1,
         question: '¿Pregunta?',
+        spreadId: 1,
+        spreadName: 'Tirada simple',
         cards: mockCards as TarotCard[],
         cardPositions: [
           { cardId: 1, position: 'past', isReversed: false },
@@ -104,11 +106,7 @@ describe('ReadingMapperService', () => {
         createdAt: new Date('2023-12-01T10:00:00.000Z'),
       };
 
-      const result = service.toListItemDto(
-        mockReading as TarotReading,
-        1,
-        'Tirada simple',
-      );
+      const result = service.toListItemDto(mockReading as TarotReading);
 
       expect(result.cardsCount).toBe(2);
       expect(result.cardPreviews).toHaveLength(2);
@@ -118,16 +116,14 @@ describe('ReadingMapperService', () => {
       const mockReading: Partial<TarotReading> = {
         id: 1,
         question: '¿Pregunta?',
+        spreadId: 1,
+        spreadName: 'Tirada simple',
         cards: [],
         cardPositions: [],
         createdAt: new Date('2023-12-01T10:00:00.000Z'),
       };
 
-      const result = service.toListItemDto(
-        mockReading as TarotReading,
-        1,
-        'Tirada simple',
-      );
+      const result = service.toListItemDto(mockReading as TarotReading);
 
       expect(result.cardsCount).toBe(0);
       expect(result.cardPreviews).toEqual([]);
@@ -137,17 +133,15 @@ describe('ReadingMapperService', () => {
       const mockReading: Partial<TarotReading> = {
         id: 1,
         question: '¿Pregunta?',
+        spreadId: 1,
+        spreadName: 'Tirada simple',
         cards: [],
         cardPositions: [],
         createdAt: new Date('2023-12-01T10:00:00.000Z'),
         deletedAt: new Date('2023-12-05T10:00:00.000Z'),
       };
 
-      const result = service.toListItemDto(
-        mockReading as TarotReading,
-        1,
-        'Tirada simple',
-      );
+      const result = service.toListItemDto(mockReading as TarotReading);
 
       expect(result.deletedAt).toBe('2023-12-05T10:00:00.000Z');
     });
@@ -157,16 +151,14 @@ describe('ReadingMapperService', () => {
         id: 1,
         question: undefined,
         customQuestion: '¿Custom question?',
+        spreadId: 1,
+        spreadName: 'Tirada simple',
         cards: [],
         cardPositions: [],
         createdAt: new Date('2023-12-01T10:00:00.000Z'),
       };
 
-      const result = service.toListItemDto(
-        mockReading as TarotReading,
-        1,
-        'Tirada simple',
-      );
+      const result = service.toListItemDto(mockReading as TarotReading);
 
       expect(result.question).toBe('¿Custom question?');
     });
@@ -177,16 +169,14 @@ describe('ReadingMapperService', () => {
         question: undefined,
         customQuestion: undefined,
         predefinedQuestion: { id: 1, question: '¿Predefined question?' },
+        spreadId: 1,
+        spreadName: 'Tirada simple',
         cards: [],
         cardPositions: [],
         createdAt: new Date('2023-12-01T10:00:00.000Z'),
       };
 
-      const result = service.toListItemDto(
-        mockReading as TarotReading,
-        1,
-        'Tirada simple',
-      );
+      const result = service.toListItemDto(mockReading as TarotReading);
 
       expect(result.question).toBe('¿Predefined question?');
     });
@@ -197,16 +187,14 @@ describe('ReadingMapperService', () => {
         question: undefined,
         customQuestion: undefined,
         predefinedQuestion: undefined,
+        spreadId: 1,
+        spreadName: 'Tirada simple',
         cards: [],
         cardPositions: [],
         createdAt: new Date('2023-12-01T10:00:00.000Z'),
       };
 
-      const result = service.toListItemDto(
-        mockReading as TarotReading,
-        1,
-        'Tirada simple',
-      );
+      const result = service.toListItemDto(mockReading as TarotReading);
 
       expect(result.question).toBe('');
     });

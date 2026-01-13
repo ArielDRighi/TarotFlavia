@@ -66,11 +66,7 @@ export class ListReadingsUseCase {
 
     // Transformar entidades a DTOs usando el mapper
     const readingDtos = readings.map((reading) =>
-      this.mapper.toListItemDto(
-        reading,
-        reading.spreadId || 0,
-        reading.spreadName || 'Tirada desconocida',
-      ),
+      this.mapper.toListItemDto(reading),
     );
 
     return {

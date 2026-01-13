@@ -532,8 +532,6 @@ describe('ReadingsOrchestratorService', () => {
         expect(readingRepo.findAllForAdmin).toHaveBeenCalledWith(false);
         expect(mockReadingMapper.toListItemDto).toHaveBeenCalledWith(
           mockReading,
-          1,
-          'Test Spread',
         );
         expect(result.data).toEqual([mockDto]);
         expect(result.meta.totalItems).toBe(1);
@@ -571,7 +569,7 @@ describe('ReadingsOrchestratorService', () => {
         }));
         readingRepo.findAllForAdmin.mockResolvedValue([readings, 100]);
         mockReadingMapper.toListItemDto.mockImplementation(
-          (_, __, ___) => mockDtos.shift()!,
+          (_) => mockDtos.shift()!,
         );
 
         const result = await service.findAllForAdmin(false);

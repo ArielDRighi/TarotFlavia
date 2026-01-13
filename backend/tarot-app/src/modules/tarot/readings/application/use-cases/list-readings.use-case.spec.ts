@@ -581,11 +581,7 @@ describe('ListReadingsUseCase', () => {
 
       expect(result.data).toHaveLength(2);
       expect(mapper.toListItemDto).toHaveBeenCalledTimes(2);
-      expect(mapper.toListItemDto).toHaveBeenCalledWith(
-        mockReadings[0],
-        1,
-        'Test Spread',
-      );
+      expect(mapper.toListItemDto).toHaveBeenCalledWith(mockReadings[0]);
     });
 
     it('should handle readings with no cards', async () => {
@@ -596,11 +592,7 @@ describe('ListReadingsUseCase', () => {
       const result = await useCase.execute(mockPremiumUser as User);
 
       expect(result.data).toHaveLength(1);
-      expect(mapper.toListItemDto).toHaveBeenCalledWith(
-        mockReadings[0],
-        1,
-        'Test Spread',
-      );
+      expect(mapper.toListItemDto).toHaveBeenCalledWith(mockReadings[0]);
     });
 
     it('should use default spread name if spreadName is null', async () => {
@@ -614,11 +606,7 @@ describe('ListReadingsUseCase', () => {
 
       await useCase.execute(mockPremiumUser as User);
 
-      expect(mapper.toListItemDto).toHaveBeenCalledWith(
-        mockReading,
-        0,
-        'Tirada desconocida',
-      );
+      expect(mapper.toListItemDto).toHaveBeenCalledWith(mockReading);
     });
   });
 });

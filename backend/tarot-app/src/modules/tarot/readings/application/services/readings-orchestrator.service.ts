@@ -101,11 +101,7 @@ export class ReadingsOrchestratorService {
 
     // Mapear entidades a DTOs
     const readingDtos = data.map((reading) =>
-      this.mapper.toListItemDto(
-        reading,
-        reading.spreadId || 0,
-        reading.spreadName || 'Tirada desconocida',
-      ),
+      this.mapper.toListItemDto(reading),
     );
 
     return {
