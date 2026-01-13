@@ -26,14 +26,14 @@ Filtros:
 
 ### Design Tokens Utilizados:
 
-| Token | Valor | Uso |
-|-------|-------|-----|
-| `bg-main` | `#F9F7F2` | Fondo página |
-| `surface` | `#FFFFFF` | Fondo tarjetas |
-| `text-primary` | `#2D3748` | Pregunta (título) |
-| `text-muted` | `#718096` | Fecha relativa |
-| `primary` | `#805AD5` | Acentos, enlaces |
-| `shadow-soft` | `0 4px 20px -2px rgba(128, 90, 213, 0.1)` | Sombra tarjetas |
+| Token          | Valor                                     | Uso               |
+| -------------- | ----------------------------------------- | ----------------- |
+| `bg-main`      | `#F9F7F2`                                 | Fondo página      |
+| `surface`      | `#FFFFFF`                                 | Fondo tarjetas    |
+| `text-primary` | `#2D3748`                                 | Pregunta (título) |
+| `text-muted`   | `#718096`                                 | Fecha relativa    |
+| `primary`      | `#805AD5`                                 | Acentos, enlaces  |
+| `shadow-soft`  | `0 4px 20px -2px rgba(128, 90, 213, 0.1)` | Sombra tarjetas   |
 
 ---
 
@@ -42,33 +42,34 @@ Filtros:
 ### Capturas de Pantalla
 
 Las capturas se encuentran en `.playwright-mcp/`:
+
 - `historial-lecturas.png` - Vista actual del historial de lecturas
 - `carta-del-dia-historial.png` - Vista del historial de carta del día (mejor diseño)
 
 ### Problemas Identificados en `/historial`
 
-| Problema | Impacto | Severidad |
-|----------|---------|-----------|
-| Tarjetas enormes con espacio vacío | Desperdicio de pantalla, scroll excesivo | Alta |
-| Solo muestra fecha relativa ("hace 2 días") | Usuario no puede identificar lecturas | Alta |
-| No muestra la pregunta del usuario | Información crítica faltante | Alta |
-| No muestra tipo de tirada (spread) | Usuario no diferencia lecturas | Media |
-| No muestra cantidad de cartas | Contexto faltante | Media |
-| No muestra preview de cartas | Oportunidad visual desperdiciada | Media |
-| Icono genérico en lugar de imagen | Diseño aburrido, sin identidad | Media |
-| No diferencia lecturas de tarot vs carta del día | Si se unifican, confusión | Alta |
+| Problema                                         | Impacto                                  | Severidad |
+| ------------------------------------------------ | ---------------------------------------- | --------- |
+| Tarjetas enormes con espacio vacío               | Desperdicio de pantalla, scroll excesivo | Alta      |
+| Solo muestra fecha relativa ("hace 2 días")      | Usuario no puede identificar lecturas    | Alta      |
+| No muestra la pregunta del usuario               | Información crítica faltante             | Alta      |
+| No muestra tipo de tirada (spread)               | Usuario no diferencia lecturas           | Media     |
+| No muestra cantidad de cartas                    | Contexto faltante                        | Media     |
+| No muestra preview de cartas                     | Oportunidad visual desperdiciada         | Media     |
+| Icono genérico en lugar de imagen                | Diseño aburrido, sin identidad           | Media     |
+| No diferencia lecturas de tarot vs carta del día | Si se unifican, confusión                | Alta      |
 
 ### Comparación: Historial Lecturas vs Carta del Día
 
-| Característica | `/historial` (actual) | `/carta-del-dia/historial` |
-|----------------|----------------------|---------------------------|
-| Fecha | Relativa ("hace X") | Completa ("Lunes 2 de enero") |
-| Nombre carta | No | Sí |
-| Orientación | No | Sí (badge "Invertida") |
-| Preview texto | No | Sí (2 líneas truncadas) |
-| Indicador regeneración | No | Sí (badge) |
-| Espacio utilizado | 30% | 70% |
-| Acciones | 2 (ver, eliminar) | 1 (ver completa) |
+| Característica         | `/historial` (actual) | `/carta-del-dia/historial`    |
+| ---------------------- | --------------------- | ----------------------------- |
+| Fecha                  | Relativa ("hace X")   | Completa ("Lunes 2 de enero") |
+| Nombre carta           | No                    | Sí                            |
+| Orientación            | No                    | Sí (badge "Invertida")        |
+| Preview texto          | No                    | Sí (2 líneas truncadas)       |
+| Indicador regeneración | No                    | Sí (badge)                    |
+| Espacio utilizado      | 30%                   | 70%                           |
+| Acciones               | 2 (ver, eliminar)     | 1 (ver completa)              |
 
 ### Análisis del Código
 
@@ -79,10 +80,10 @@ Las capturas se encuentran en `.playwright-mcp/`:
 interface Reading {
   id: number;
   spreadId: number;
-  spreadName?: string;      // ❌ No mostrado
-  question: string;         // ❌ No mostrado
-  createdAt: string;        // ✅ Solo fecha relativa
-  cardsCount?: number;      // ❌ No mostrado
+  spreadName?: string; // ❌ No mostrado
+  question: string; // ❌ No mostrado
+  createdAt: string; // ✅ Solo fecha relativa
+  cardsCount?: number; // ❌ No mostrado
   deletedAt?: string | null;
   shareToken?: string | null;
 }
@@ -90,7 +91,7 @@ interface Reading {
 // Props del componente - recibe 'cards' pero casi nunca se pasa:
 interface ReadingCardProps {
   reading: Reading;
-  cards?: ReadingCard[];    // ❌ Opcional y no usado en la lista
+  cards?: ReadingCard[]; // ❌ Opcional y no usado en la lista
   onView: (id: number) => void;
   onDelete: (id: number) => void;
 }
@@ -120,6 +121,7 @@ interface ReadingCardProps {
 El documento `DESIGN_HAND-OFF.md` especifica:
 
 > **Componente ReadingItem (tarjeta fila):**
+>
 > - Izquierda: Icono o miniatura de la carta principal revelada
 > - Centro: Título grande (pregunta realizada), Fecha relativa ('hace 2 días') en gris
 > - Derecha: Badge del tipo de tirada (ej: 'Cruz Celta') y botón icono 'Ver' (ojo o flecha)
@@ -148,16 +150,19 @@ Implementación propuesta:
 
 **Tipo:** Backend
 **Archivos:**
+
 - `backend/tarot-app/src/modules/tarot/readings/domain/interfaces/reading-repository.interface.ts`
 - `backend/tarot-app/src/modules/tarot/readings/infrastructure/repositories/typeorm-reading.repository.ts`
 - `backend/tarot-app/src/modules/tarot/readings/application/services/readings-orchestrator.service.ts`
 
 **Cambios:**
+
 1. Modificar query de `findByUserId` para incluir relación con `cards` (primeras 3)
 2. Añadir campo `cardPreviews` al DTO de respuesta del listado
 3. Incluir `spreadName` en la respuesta (ya está en el tipo pero verificar que se retorna)
 
 **Nuevo DTO de respuesta:**
+
 ```typescript
 interface ReadingListItemDto {
   id: number;
@@ -178,28 +183,23 @@ interface ReadingListItemDto {
 
 ---
 
-### TASK-UI-002: Actualizar tipos TypeScript en frontend
+### TASK-UI-002: Actualizar tipos TypeScript en frontend ✅ COMPLETADA
 
+**Estado:** ✅ Completada (13 enero 2026)
+**Rama:** `feature/TASK-UI-002-reading-types`
 **Tipo:** Frontend
 **Archivos:**
-- `frontend/src/types/reading.types.ts`
 
-**Cambios:**
-1. Extender interfaz `Reading` con campos de preview:
+- `frontend/src/types/reading.types.ts`
+- `frontend/src/types/reading.types.test.ts` (NUEVO)
+- `frontend/src/hooks/api/useReadings.test.tsx` (actualizado mocks)
+- `frontend/src/lib/api/readings-api.test.ts` (actualizado mocks)
+
+**Cambios realizados:**
+
+1. ✅ Creada interfaz `CardPreview` para previews de cartas:
 
 ```typescript
-export interface Reading {
-  id: number;
-  spreadId: number;
-  spreadName: string;           // Hacer requerido
-  question: string;
-  createdAt: string;
-  cardsCount: number;           // Hacer requerido
-  cardPreviews?: CardPreview[]; // Nuevo campo
-  deletedAt?: string | null;
-  shareToken?: string | null;
-}
-
 export interface CardPreview {
   id: number;
   name: string;
@@ -208,15 +208,49 @@ export interface CardPreview {
 }
 ```
 
+2. ✅ Extendida interfaz `Reading` con campos de preview:
+
+```typescript
+export interface Reading {
+  id: number;
+  spreadId: number;
+  spreadName: string; // Cambiado de opcional a requerido
+  question: string;
+  createdAt: string;
+  cardsCount: number; // Cambiado de opcional a requerido
+  cardPreviews?: CardPreview[]; // Nuevo campo opcional
+  deletedAt?: string | null;
+  shareToken?: string | null;
+}
+```
+
+3. ✅ Actualizados mocks en tests para incluir campos requeridos
+4. ✅ Creados tests unitarios para validar tipos (12 tests)
+
+**Resultados:**
+
+- ✅ TypeCheck: 0 errores
+- ✅ Lint: 0 errores
+- ✅ Tests: 1846/1846 pasando (100%)
+- ✅ Build: Exitoso
+
+**Decisiones técnicas:**
+
+- `cardPreviews` es opcional para mantener compatibilidad con backend mientras se implementa TASK-UI-001
+- `spreadName` y `cardsCount` ahora requeridos para garantizar datos completos en listados
+
 ---
 
 ### TASK-UI-003: Rediseñar componente ReadingCard
 
+**Estado:** ⏳ Pendiente (depende de TASK-UI-001 + TASK-UI-002)
 **Tipo:** Frontend
 **Archivos:**
+
 - `frontend/src/components/features/readings/ReadingCard.tsx`
 
 **Cambios:**
+
 1. Usar fecha formateada completa (como en DailyReadingCard)
 2. Mostrar pregunta truncada a 2 líneas
 3. Mostrar badge con nombre del spread
@@ -228,6 +262,7 @@ export interface CardPreview {
 **Estructura JSX propuesta (alineada con DESIGN_HAND-OFF.md):**
 
 > Especificación original:
+>
 > - Izquierda: Icono o miniatura de la carta principal revelada
 > - Centro: Título grande (pregunta realizada), Fecha relativa ('hace 2 días') en gris
 > - Derecha: Badge del tipo de tirada (ej: 'Cruz Celta') y botón icono 'Ver' (ojo o flecha)
@@ -279,6 +314,7 @@ export interface CardPreview {
 
 **Tipo:** Frontend
 **Archivos:**
+
 - `frontend/src/components/features/readings/CardThumbnails.tsx` (NUEVO)
 
 **Descripción:**
@@ -287,13 +323,14 @@ Componente reutilizable que muestra miniaturas de cartas apiladas o en fila.
 ```typescript
 interface CardThumbnailsProps {
   cards?: CardPreview[];
-  max?: number;        // Default 3
-  size?: 'sm' | 'md';  // Default 'sm'
-  stacked?: boolean;   // Default true (cartas superpuestas)
+  max?: number; // Default 3
+  size?: "sm" | "md"; // Default 'sm'
+  stacked?: boolean; // Default true (cartas superpuestas)
 }
 ```
 
 **Visualización:**
+
 - Si `stacked=true`: Cartas superpuestas con offset de -8px
 - Si `stacked=false`: Cartas en fila con gap
 - Mostrar indicador de cartas invertidas (pequeño icono o borde)
@@ -305,20 +342,23 @@ interface CardThumbnailsProps {
 
 **Tipo:** Frontend
 **Archivos:**
+
 - `frontend/src/components/features/readings/ReadingsHistory.tsx`
 
 **Cambios:**
+
 1. Añadir filtro por tipo de spread (dropdown)
 2. Añadir toggle vista lista/grid (opcional)
 3. Mejorar búsqueda para incluir nombre de spread
 
 **Nuevo filtro:**
+
 ```typescript
 const SPREAD_FILTER_OPTIONS = [
-  { label: 'Todas las tiradas', value: 'all' },
-  { label: '3 Cartas', value: '3-cards' },
-  { label: '5 Cartas', value: '5-cards' },
-  { label: 'Cruz Celta', value: 'celtic-cross' },
+  { label: "Todas las tiradas", value: "all" },
+  { label: "3 Cartas", value: "3-cards" },
+  { label: "5 Cartas", value: "5-cards" },
+  { label: "Cruz Celta", value: "celtic-cross" },
 ];
 ```
 
@@ -328,11 +368,13 @@ const SPREAD_FILTER_OPTIONS = [
 
 **Tipo:** Frontend
 **Archivos:**
+
 - `frontend/src/components/features/readings/ReadingCard.test.tsx`
 - `frontend/src/components/features/readings/ReadingsHistory.test.tsx`
 - `frontend/src/components/features/readings/CardThumbnails.test.tsx` (NUEVO)
 
 **Cambios:**
+
 1. Actualizar mocks con nuevos campos (cardPreviews, spreadName)
 2. Añadir tests para CardThumbnails
 3. Actualizar tests de ReadingCard para validar nuevos elementos
@@ -344,6 +386,7 @@ const SPREAD_FILTER_OPTIONS = [
 
 **Tipo:** Full Stack
 **Archivos:**
+
 - `frontend/src/app/historial/page.tsx`
 - `frontend/src/components/features/readings/ReadingsHistory.tsx`
 - Backend endpoints (si se requiere nuevo endpoint unificado)
@@ -352,6 +395,7 @@ const SPREAD_FILTER_OPTIONS = [
 Evaluar si tiene sentido mostrar TODAS las lecturas (tarot + carta del día) en un solo historial con filtro por tipo.
 
 **Consideraciones:**
+
 - Ventaja: Una sola vista para todo el historial
 - Desventaja: Complejidad de implementación, diferentes estructuras de datos
 - Recomendación: Mantener separados pero con diseño consistente
@@ -360,17 +404,18 @@ Evaluar si tiene sentido mostrar TODAS las lecturas (tarot + carta del día) en 
 
 ## Priorización
 
-| Task | Prioridad | Complejidad | Impacto UX |
-|------|-----------|-------------|------------|
-| TASK-UI-003 | Alta | Media | Alto |
-| TASK-UI-004 | Alta | Baja | Alto |
-| TASK-UI-001 | Alta | Media | Alto |
-| TASK-UI-002 | Alta | Baja | Medio |
-| TASK-UI-006 | Media | Baja | Bajo |
-| TASK-UI-005 | Baja | Media | Medio |
-| TASK-UI-007 | Baja | Alta | Medio |
+| Task        | Prioridad | Complejidad | Impacto UX |
+| ----------- | --------- | ----------- | ---------- |
+| TASK-UI-003 | Alta      | Media       | Alto       |
+| TASK-UI-004 | Alta      | Baja        | Alto       |
+| TASK-UI-001 | Alta      | Media       | Alto       |
+| TASK-UI-002 | Alta      | Baja        | Medio      |
+| TASK-UI-006 | Media     | Baja        | Bajo       |
+| TASK-UI-005 | Baja      | Media       | Medio      |
+| TASK-UI-007 | Baja      | Alta        | Medio      |
 
 **Orden de implementación recomendado:**
+
 1. TASK-UI-001 (Backend - datos necesarios)
 2. TASK-UI-002 (Frontend - tipos)
 3. TASK-UI-004 (Frontend - componente helper)
@@ -384,6 +429,7 @@ Evaluar si tiene sentido mostrar TODAS las lecturas (tarot + carta del día) en 
 ## Mockup Visual (ASCII)
 
 ### Estado Actual (Problema)
+
 ```
 ┌──────────────────────────────────────────────────────────┐
 │  ┌────┐                                                  │
@@ -394,6 +440,7 @@ Evaluar si tiene sentido mostrar TODAS las lecturas (tarot + carta del día) en 
 ```
 
 ### Estado Propuesto (Alineado con DESIGN_HAND-OFF.md)
+
 ```
 ┌──────────────────────────────────────────────────────────┐
 │ ┌─────┐  "¿Qué puedo esperar en mi trabajo?"            │
@@ -408,6 +455,7 @@ Evaluar si tiene sentido mostrar TODAS las lecturas (tarot + carta del día) en 
 ```
 
 > **Nota:** El diseño sigue exactamente la especificación del DESIGN_HAND-OFF.md:
+>
 > - Izquierda: Miniatura de carta
 > - Centro: Pregunta (título grande) + fecha relativa (gris)
 > - Derecha: Badge tipo tirada + botón ver

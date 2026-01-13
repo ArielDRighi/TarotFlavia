@@ -128,15 +128,28 @@ export interface Interpretation {
 // ============================================================================
 
 /**
+ * Card preview for reading lists
+ * TASK-UI-002: Preview de cartas para el historial de lecturas
+ */
+export interface CardPreview {
+  id: number;
+  name: string;
+  imageUrl: string;
+  isReversed: boolean;
+}
+
+/**
  * Reading summary (for lists)
+ * TASK-UI-002: Extendida con campos de preview (spreadName, cardsCount, cardPreviews)
  */
 export interface Reading {
   id: number;
   spreadId: number;
-  spreadName?: string;
+  spreadName: string; // Requerido (era opcional)
   question: string;
   createdAt: string;
-  cardsCount?: number;
+  cardsCount: number; // Requerido (era opcional)
+  cardPreviews?: CardPreview[]; // Nuevo campo
   deletedAt?: string | null;
   shareToken?: string | null;
 }

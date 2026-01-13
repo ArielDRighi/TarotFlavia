@@ -485,17 +485,17 @@ describe('useReadings - Spreads Hooks', () => {
   // =========================================================================
   describe('useRestoreReading', () => {
     it('should restore reading successfully', async () => {
-      const restoredReading: ReadingDetail = {
+      const restoredReadingSummary: Reading = {
         id: 1,
-        userId: 1,
-        question: 'Lectura restaurada',
         spreadId: 1,
-        cards: [],
-        interpretation: null,
+        spreadName: '3 Cartas',
+        question: 'Lectura restaurada',
+        cardsCount: 0,
         createdAt: '2025-01-01T00:00:00Z',
+        deletedAt: null,
       };
 
-      vi.mocked(readingsApi.restoreReading).mockResolvedValue(restoredReading);
+      vi.mocked(readingsApi.restoreReading).mockResolvedValue(restoredReadingSummary);
 
       const { result } = renderHook(() => useRestoreReading(), { wrapper: Wrapper });
 

@@ -596,7 +596,9 @@ describe('readings-api', () => {
       {
         id: 123,
         spreadId: 1,
+        spreadName: 'Cruz Celta',
         question: '¿Qué me depara el futuro?',
+        cardsCount: 10,
         createdAt: '2025-11-20T10:30:00.000Z',
         deletedAt: '2025-12-01T10:00:00.000Z',
         restorable: true,
@@ -626,7 +628,9 @@ describe('readings-api', () => {
     const mockRestoredReading: Reading = {
       id: 123,
       spreadId: 1,
+      spreadName: 'Cruz Celta',
       question: '¿Qué me depara el futuro?',
+      cardsCount: 10,
       createdAt: '2025-11-20T10:30:00.000Z',
       deletedAt: null,
     };
