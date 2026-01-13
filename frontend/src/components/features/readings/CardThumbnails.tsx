@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { Sparkles } from 'lucide-react';
 
 import type { CardPreview } from '@/types/reading.types';
-import { cn } from '@/lib/utils/cn';
+import { cn } from '@/lib/utils';
 
 interface CardThumbnailsProps {
   /** Array of card previews to display */
@@ -17,6 +17,18 @@ interface CardThumbnailsProps {
   /** Whether cards should be stacked/overlapped (default: true) */
   stacked?: boolean;
 }
+
+/** Size configuration mapping */
+const sizeClasses = {
+  sm: 'h-12 w-9',
+  md: 'h-16 w-12',
+} as const;
+
+/** Icon size configuration mapping */
+const iconSizeClasses = {
+  sm: 'h-4 w-4',
+  md: 'h-5 w-5',
+} as const;
 
 /**
  * CardThumbnails component
@@ -46,23 +58,6 @@ export function CardThumbnails({
     if (shouldShowPlaceholder) return [];
     return cards.slice(0, effectiveMax);
   }, [cards, effectiveMax, shouldShowPlaceholder]);
-
-  // Size classes mapping
-  const sizeClasses = useMemo(
-    () => ({
-      sm: 'h-12 w-9',
-      md: 'h-16 w-12',
-    }),
-    []
-  );
-
-  const iconSizeClasses = useMemo(
-    () => ({
-      sm: 'h-4 w-4',
-      md: 'h-5 w-5',
-    }),
-    []
-  );
 
   if (shouldShowPlaceholder) {
     return (
