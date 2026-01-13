@@ -85,12 +85,14 @@ describe('ReadingCard', () => {
       expect(screen.getByText('hace 2 días')).toBeInTheDocument();
     });
 
-    it('should render the spread type badge', () => {
+    it('should render the spread type badge in right section', () => {
       const reading = createTestReading({ spreadName: 'Tres Cartas' });
 
       render(<ReadingCard reading={reading} onView={mockOnView} onDelete={mockOnDelete} />);
 
-      expect(screen.getByText('Tres Cartas')).toBeInTheDocument();
+      const badge = screen.getByTestId('spread-badge');
+      expect(badge).toBeInTheDocument();
+      expect(badge).toHaveTextContent('Tres Cartas');
     });
 
     it('should truncate long questions', () => {
@@ -219,10 +221,10 @@ describe('ReadingCard', () => {
       render(<ReadingCard reading={reading} onView={mockOnView} onDelete={mockOnDelete} />);
 
       const card = screen.getByTestId('reading-card');
-      // Horizontal on desktop, vertical on mobile
+      // Should have flex-row layout (horizontal)
       expect(card).toHaveClass('flex');
-      expect(card).toHaveClass('flex-col');
-      expect(card).toHaveClass('md:flex-row');
+      expect(card).toHaveClass('flex-row');
+      expect(card).toHaveClass('items-stretch');
     });
   });
 
@@ -275,21 +277,40 @@ describe('ReadingCard', () => {
 
   describe('Edge Cases', () => {
     it('should handle reading without spreadName gracefully', () => {
-      const reading = createTestReading({ spreadName: undefined });
+      const reading = createTestReading({ spreadName: '' });
 
       render(<ReadingCard reading={reading} onView={mockOnView} onDelete={mockOnDelete} />);
 
-      // Should not crash and should render without spread badge
+      // Should not show empty badge
       expect(screen.queryByTestId('spread-badge')).not.toBeInTheDocument();
     });
 
-    it('should handle reading without cardsCount', () => {
-      const reading = createTestReading({ cardsCount: undefined });
+    it('should handle reading with empty cardPreviews', () => {
+      const reading = createTestReading({ cardPreviews: [] });
 
       render(<ReadingCard reading={reading} onView={mockOnView} onDelete={mockOnDelete} />);
 
-      // Should show placeholder icon
+      // Should show placeholder icon when no cardPreviews
       expect(screen.getByTestId('card-placeholder-icon')).toBeInTheDocument();
+    });
+
+    it('should render card thumbnail from cardPreviews if available', () => {
+      const reading = createTestReading({
+        cardPreviews: [
+          {
+            id: 1,
+            name: 'El Loco',
+            imageUrl: '/images/cards/the-fool.jpg',
+            isReversed: false,
+          },
+        ],
+      });
+
+      render(<ReadingCard reading={reading} onView={mockOnView} onDelete={mockOnDelete} />);
+
+      const thumbnail = screen.getByTestId('card-thumbnail');
+      expect(thumbnail).toBeInTheDocument();
+      expect(thumbnail).toHaveAttribute('src', '/images/cards/the-fool.jpg');
     });
   });
 });

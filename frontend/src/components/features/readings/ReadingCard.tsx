@@ -33,20 +33,26 @@ export interface ReadingCardProps {
  * ReadingCard Component
  *
  * Displays a reading summary card for the history view with preview and actions.
+ * Redesigned in TASK-UI-003 following DESIGN_HAND-OFF.md specifications.
+ *
+ * Layout (horizontal flex-row):
+ * - Left: Card thumbnail or placeholder icon
+ * - Center: Question (2-line truncated, bold) + relative date (gray)
+ * - Right: Spread badge + view/delete action buttons
  *
  * Features:
- * - Responsive layout (vertical on mobile, horizontal on desktop)
- * - Card thumbnail or placeholder icon
- * - Question with 2-line truncation
+ * - Uses cardPreviews from reading (TASK-UI-002) for thumbnails
+ * - Compact design with reduced padding
+ * - Question as prominent title
  * - Relative date display (e.g., "hace 2 días")
  * - Spread type badge
  * - View and delete actions with confirmation modal
+ * - Hover scale effect
  *
  * @example
  * ```tsx
  * <ReadingCard
  *   reading={reading}
- *   cards={cards}
  *   onView={(id) => router.push(`/lecturas/${id}`)}
  *   onDelete={(id) => deleteReading(id)}
  * />
@@ -55,32 +61,37 @@ export interface ReadingCardProps {
 export function ReadingCard({ reading, cards, onView, onDelete, className }: ReadingCardProps) {
   const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState(false);
 
-  const firstCard = cards?.[0];
-  const hasCardThumbnail = firstCard?.imageUrl;
+  // Prefer cardPreviews from reading (TASK-UI-002), fallback to cards prop
+  const cardPreview = reading.cardPreviews?.[0] || cards?.[0];
+  const hasCardThumbnail = cardPreview?.imageUrl;
 
-  const relativeDate = formatDistanceToNow(new Date(reading.createdAt), {
-    addSuffix: true,
-    locale: es,
-  });
+  const relativeDate = React.useMemo(
+    () =>
+      formatDistanceToNow(new Date(reading.createdAt), {
+        addSuffix: true,
+        locale: es,
+      }),
+    [reading.createdAt]
+  );
 
-  const handleViewClick = () => {
+  const handleViewClick = React.useCallback(() => {
     onView(reading.id);
-  };
+  }, [onView, reading.id]);
 
-  const handleDeleteClick = () => {
+  const handleDeleteClick = React.useCallback(() => {
     setShowDeleteConfirmation(true);
-  };
+  }, []);
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = React.useCallback(() => {
     onDelete(reading.id);
-  };
+  }, [onDelete, reading.id]);
 
   return (
     <>
       <Card
         data-testid="reading-card"
         className={cn(
-          'flex flex-col items-stretch md:flex-row',
+          'flex flex-row items-stretch',
           'bg-card',
           'shadow-sm',
           'transition-all duration-200',
@@ -89,15 +100,15 @@ export function ReadingCard({ reading, cards, onView, onDelete, className }: Rea
         )}
       >
         {/* Left Section - Card Thumbnail */}
-        <div className="flex items-center justify-center p-4 md:p-4 md:pr-0">
-          <div className="bg-muted flex h-24 w-16 items-center justify-center overflow-hidden rounded-lg md:h-28 md:w-20">
-            {hasCardThumbnail && firstCard?.imageUrl ? (
+        <div className="flex items-center justify-center p-4">
+          <div className="bg-muted flex h-20 w-14 items-center justify-center overflow-hidden rounded-lg">
+            {hasCardThumbnail && cardPreview?.imageUrl ? (
               <Image
                 data-testid="card-thumbnail"
-                src={firstCard.imageUrl}
-                alt={`Carta ${firstCard.name}`}
-                width={80}
-                height={112}
+                src={cardPreview.imageUrl}
+                alt={`Carta ${cardPreview.name}`}
+                width={56}
+                height={80}
                 className="h-full w-full object-cover"
               />
             ) : (
@@ -111,28 +122,23 @@ export function ReadingCard({ reading, cards, onView, onDelete, className }: Rea
         </div>
 
         {/* Center Section - Content */}
-        <CardContent className="flex flex-1 flex-col justify-center gap-2 p-4">
-          {/* Question */}
-          <p className="text-primary line-clamp-2 text-sm font-semibold md:text-base">
-            {reading.question}
-          </p>
+        <CardContent className="flex flex-1 flex-col justify-center gap-1 py-3">
+          {/* Question - Título grande */}
+          <p className="text-text-primary line-clamp-2 font-semibold">{reading.question}</p>
 
-          {/* Metadata Row */}
-          <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm">
-            {/* Relative Date */}
-            <span>{relativeDate}</span>
-
-            {/* Spread Badge */}
-            {reading.spreadName && (
-              <Badge data-testid="spread-badge" variant="secondary" className="text-xs">
-                {reading.spreadName}
-              </Badge>
-            )}
-          </div>
+          {/* Fecha relativa - Gris */}
+          <span className="text-text-muted text-sm">{relativeDate}</span>
         </CardContent>
 
         {/* Right Section - Actions */}
-        <div className="border-border flex flex-row items-center justify-center gap-2 border-t p-4 md:flex-col md:border-t-0 md:border-l md:pl-0">
+        <div className="border-border flex items-center gap-2 border-l p-4">
+          {/* Badge tipo tirada */}
+          {reading.spreadName && (
+            <Badge data-testid="spread-badge" variant="secondary">
+              {reading.spreadName}
+            </Badge>
+          )}
+
           <Button variant="ghost" size="icon" onClick={handleViewClick} aria-label="Ver lectura">
             <Eye className="h-5 w-5" />
           </Button>
