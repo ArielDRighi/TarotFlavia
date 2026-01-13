@@ -32,22 +32,23 @@ export interface ReadingCardProps {
 /**
  * ReadingCard Component
  *
- * Displays a reading summary card for the history view with preview and actions.
- * Redesigned in TASK-UI-003 following DESIGN_HAND-OFF.md specifications.
+ * Displays a compact reading summary card for the history view.
+ * Redesigned following UI/UX best practices for wellness apps:
+ * - Proximity principle: related content grouped together
+ * - Minimalist aesthetic with soft shadows
+ * - Compact layout optimized for scanning
  *
- * Layout (horizontal flex-row):
- * - Left: Card thumbnail or placeholder icon
- * - Center: Question (2-line truncated, bold) + relative date (gray)
- * - Right: Spread badge + view/delete action buttons
+ * Layout (single-row compact):
+ * - Thumbnail (40x56px): Card image or placeholder icon
+ * - Content: Question (1-line) + meta row (date + spread badge)
+ * - Actions: View and delete buttons (32x32px)
  *
  * Features:
- * - Uses cardPreviews from reading (TASK-UI-002) for thumbnails
- * - Compact design with reduced padding
- * - Question as prominent title
- * - Relative date display (e.g., "hace 2 días")
- * - Spread type badge
- * - View and delete actions with confirmation modal
- * - Hover scale effect
+ * - Compact card height (~62px) for efficient list viewing
+ * - Question truncated to 1 line for consistency
+ * - Date and spread badge grouped on same line
+ * - Smaller action buttons for cleaner appearance
+ * - Subtle hover shadow (no scale) for peaceful feel
  *
  * @example
  * ```tsx
@@ -91,65 +92,67 @@ export function ReadingCard({ reading, cards, onView, onDelete, className }: Rea
       <Card
         data-testid="reading-card"
         className={cn(
-          'flex flex-row items-stretch',
+          'flex flex-row items-center gap-3',
           'bg-card',
           'shadow-sm',
+          'p-3',
           'transition-all duration-200',
-          'hover:scale-[1.02] hover:shadow-lg',
+          'hover:shadow-md',
           className
         )}
       >
-        {/* Left Section - Card Thumbnail */}
-        <div className="flex items-center justify-center p-4">
-          <div className="bg-muted flex h-20 w-14 items-center justify-center overflow-hidden rounded-lg">
-            {hasCardThumbnail && cardPreview?.imageUrl ? (
-              <Image
-                data-testid="card-thumbnail"
-                src={cardPreview.imageUrl}
-                alt={`Carta ${cardPreview.name}`}
-                width={56}
-                height={80}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <Layers
-                data-testid="card-placeholder-icon"
-                className="text-muted-foreground h-8 w-8"
-                aria-hidden="true"
-              />
+        {/* Thumbnail - Compact */}
+        <div className="bg-muted flex h-14 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md">
+          {hasCardThumbnail && cardPreview?.imageUrl ? (
+            <Image
+              data-testid="card-thumbnail"
+              src={cardPreview.imageUrl}
+              alt={`Carta ${cardPreview.name}`}
+              width={40}
+              height={56}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <Layers
+              data-testid="card-placeholder-icon"
+              className="text-muted-foreground h-5 w-5"
+              aria-hidden="true"
+            />
+          )}
+        </div>
+
+        {/* Content - Question + Meta grouped together */}
+        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <p className="text-text-primary line-clamp-1 text-sm font-medium">{reading.question}</p>
+          <div className="flex items-center gap-2">
+            <span className="text-text-muted text-xs">{relativeDate}</span>
+            {reading.spreadName && (
+              <Badge data-testid="spread-badge" variant="secondary" className="text-xs px-1.5 py-0">
+                {reading.spreadName}
+              </Badge>
             )}
           </div>
         </div>
 
-        {/* Center Section - Content */}
-        <CardContent className="flex flex-1 flex-col justify-center gap-1 py-3">
-          {/* Question - Título grande */}
-          <p className="text-text-primary line-clamp-2 font-semibold">{reading.question}</p>
-
-          {/* Fecha relativa - Gris */}
-          <span className="text-text-muted text-sm">{relativeDate}</span>
-        </CardContent>
-
-        {/* Right Section - Actions */}
-        <div className="border-border flex items-center gap-2 border-l p-4">
-          {/* Badge tipo tirada */}
-          {reading.spreadName && (
-            <Badge data-testid="spread-badge" variant="secondary">
-              {reading.spreadName}
-            </Badge>
-          )}
-
-          <Button variant="ghost" size="icon" onClick={handleViewClick} aria-label="Ver lectura">
-            <Eye className="h-5 w-5" />
-          </Button>
-
+        {/* Actions - Minimal */}
+        <div className="flex shrink-0 items-center gap-1">
           <Button
             variant="ghost"
             size="icon"
+            className="h-8 w-8"
+            onClick={handleViewClick}
+            aria-label="Ver lectura"
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
             onClick={handleDeleteClick}
             aria-label="Eliminar lectura"
           >
-            <Trash2 className="text-destructive h-5 w-5" />
+            <Trash2 className="text-destructive h-4 w-4" />
           </Button>
         </div>
       </Card>

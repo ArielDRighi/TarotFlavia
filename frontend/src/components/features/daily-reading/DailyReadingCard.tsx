@@ -1,14 +1,15 @@
 'use client';
 
 import * as React from 'react';
-import { Eye, RefreshCw } from 'lucide-react';
+import Image from 'next/image';
+import { RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import ReactMarkdown from 'react-markdown';
 
 import { cn } from '@/lib/utils';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import type { DailyReadingHistoryItem } from '@/types';
 
 /**
@@ -17,8 +18,8 @@ import type { DailyReadingHistoryItem } from '@/types';
 export interface DailyReadingCardProps {
   /** Daily reading history item data */
   reading: DailyReadingHistoryItem;
-  /** Callback when view button is clicked */
-  onView: (id: number) => void;
+  /** Callback when card is clicked (optional, card is self-contained) */
+  onView?: (id: number) => void;
   /** Additional CSS classes */
   className?: string;
 }
@@ -36,112 +37,87 @@ function formatReadingDate(dateString: string): string {
 /**
  * DailyReadingCard Component
  *
- * Displays a daily reading summary card for the history view.
+ * Displays a daily reading card for the history view.
+ * Self-contained design - shows all relevant info without needing navigation.
+ *
+ * Layout (vertical with header):
+ * - Header: Thumbnail + Date + Card name + Badges
+ * - Body: Full interpretation text (rendered as markdown)
  *
  * Features:
- * - Prominent date display in Spanish format
- * - Card name with reversed indicator
- * - Interpretation preview (2 lines truncated)
- * - "Ver completa" action button
+ * - Card thumbnail with image
+ * - Date in Spanish format (e.g., "Lunes 2 de Diciembre")
+ * - Reversed indicator badge
  * - Regenerated badge when applicable
- * - Hover effects and click interaction
+ * - Full interpretation (rendered as markdown)
+ * - Subtle hover effect
  *
  * @example
  * ```tsx
- * <DailyReadingCard
- *   reading={dailyReading}
- *   onView={(id) => router.push(`/carta-del-dia/historial/${id}`)}
- * />
+ * <DailyReadingCard reading={dailyReading} />
  * ```
  */
-export function DailyReadingCard({ reading, onView, className }: DailyReadingCardProps) {
-  const handleViewClick = React.useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      onView(reading.id);
-    },
-    [onView, reading.id]
-  );
-
-  const handleCardClick = React.useCallback(() => {
-    onView(reading.id);
-  }, [onView, reading.id]);
-
-  const handleKeyDown = React.useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        onView(reading.id);
-      }
-    },
-    [onView, reading.id]
-  );
-
+export function DailyReadingCard({ reading, className }: DailyReadingCardProps) {
   const formattedDate = formatReadingDate(reading.readingDate);
 
   return (
     <Card
       data-testid="daily-reading-card"
       className={cn(
-        'cursor-pointer',
+        'flex flex-col gap-4',
         'bg-card',
         'shadow-sm',
+        'p-4',
         'transition-all duration-200',
-        'hover:scale-[1.02] hover:shadow-lg',
+        'hover:shadow-md',
         className
       )}
-      onClick={handleCardClick}
-      onKeyDown={handleKeyDown}
-      role="button"
-      tabIndex={0}
     >
-      <CardContent className="flex flex-col gap-3 p-4 md:p-5">
-        {/* Date - Prominent Display */}
-        <div className="flex items-center justify-between">
-          <h3 className="text-primary font-serif text-lg font-semibold md:text-xl">
-            {formattedDate}
-          </h3>
-          {reading.wasRegenerated && (
-            <Badge variant="secondary" className="flex items-center gap-1 text-xs">
-              <RefreshCw className="h-3 w-3" aria-hidden="true" />
-              Regenerada
-            </Badge>
+      {/* Header: Thumbnail + Info */}
+      <div className="flex flex-row items-center gap-3">
+        {/* Thumbnail */}
+        <div className="bg-muted flex h-16 w-12 shrink-0 items-center justify-center overflow-hidden rounded-md">
+          {reading.cardImageUrl ? (
+            <Image
+              src={reading.cardImageUrl}
+              alt={`Carta ${reading.cardName}`}
+              width={48}
+              height={64}
+              className={cn('h-full w-full object-cover', reading.isReversed && 'rotate-180')}
+            />
+          ) : (
+            <span className="text-muted-foreground text-xs">?</span>
           )}
         </div>
 
-        {/* Card Name with Reversed Indicator */}
-        <div className="flex items-center gap-2">
-          <span className="text-text-primary font-serif text-base font-medium">
-            {reading.cardName}
-          </span>
-          {reading.isReversed && (
-            <Badge variant="outline" className="text-xs">
-              Invertida
-            </Badge>
-          )}
-        </div>
+        {/* Info */}
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          {/* Date + Badges */}
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="text-primary font-serif text-base font-semibold">{formattedDate}</h3>
+            {reading.isReversed && (
+              <Badge variant="outline" className="px-1.5 py-0 text-xs">
+                Invertida
+              </Badge>
+            )}
+            {reading.wasRegenerated && (
+              <Badge variant="secondary" className="flex items-center gap-1 px-1.5 py-0 text-xs">
+                <RefreshCw className="h-3 w-3" aria-hidden="true" />
+              </Badge>
+            )}
+          </div>
 
-        {/* Interpretation Preview */}
-        <p
-          data-testid="interpretation-preview"
-          className="text-muted-foreground line-clamp-2 text-sm"
-        >
-          {reading.interpretationSummary}
-        </p>
-
-        {/* Action Button */}
-        <div className="flex justify-end pt-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleViewClick}
-            className="text-primary hover:text-primary/80"
-          >
-            <Eye className="mr-2 h-4 w-4" aria-hidden="true" />
-            Ver completa
-          </Button>
+          {/* Card Name */}
+          <span className="text-text-primary text-sm font-medium">{reading.cardName}</span>
         </div>
-      </CardContent>
+      </div>
+
+      {/* Full Interpretation */}
+      {reading.interpretationSummary && (
+        <div className="prose prose-sm dark:prose-invert max-w-none">
+          <ReactMarkdown>{reading.interpretationSummary}</ReactMarkdown>
+        </div>
+      )}
     </Card>
   );
 }

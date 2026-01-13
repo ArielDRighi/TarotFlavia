@@ -20,6 +20,12 @@ export class DailyReadingHistoryItemDto {
   cardName: string;
 
   @ApiProperty({
+    example: 'https://example.com/cards/el-mago.jpg',
+    description: 'URL de la imagen de la carta',
+  })
+  cardImageUrl: string;
+
+  @ApiProperty({
     example: false,
     description: 'Si la carta estaba invertida',
   })
@@ -29,7 +35,7 @@ export class DailyReadingHistoryItemDto {
     example:
       'El Mago trae la energía de la manifestación y el poder personal. Hoy es un día para tomar acción...',
     description:
-      'Primeras 150 caracteres de la interpretación. Null para lecturas sin IA.',
+      'Interpretación completa de la carta. Null para lecturas sin IA (usuarios FREE/ANONYMOUS).',
     nullable: true,
   })
   interpretationSummary: string | null;

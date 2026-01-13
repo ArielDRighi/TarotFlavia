@@ -329,10 +329,10 @@ export class DailyReadingService {
       id: reading.id,
       readingDate: reading.readingDate.toString(),
       cardName: reading.card.name,
+      cardImageUrl: reading.card.imageUrl,
       isReversed: reading.isReversed,
-      interpretationSummary: reading.interpretation
-        ? this.truncateInterpretation(reading.interpretation, 150)
-        : null,
+      // Return full interpretation since cards are self-contained (no detail page)
+      interpretationSummary: reading.interpretation || null,
       wasRegenerated: reading.wasRegenerated,
       createdAt: reading.createdAt,
     }));
@@ -372,15 +372,5 @@ export class DailyReadingService {
     }
 
     return { card, isReversed };
-  }
-
-  /**
-   * Trunca la interpretación a N caracteres
-   */
-  private truncateInterpretation(text: string, maxLength: number): string {
-    if (text.length <= maxLength) {
-      return text;
-    }
-    return text.substring(0, maxLength) + '...';
   }
 }

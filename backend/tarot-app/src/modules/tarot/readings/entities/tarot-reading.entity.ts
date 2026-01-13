@@ -37,7 +37,7 @@ interface IReadingCategory {
 
 interface IPredefinedQuestion {
   id: number;
-  question: string;
+  questionText: string;
 }
 
 interface ITarotInterpretation {

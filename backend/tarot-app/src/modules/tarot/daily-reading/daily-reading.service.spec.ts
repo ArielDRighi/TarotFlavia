@@ -490,16 +490,17 @@ describe('DailyReadingService', () => {
   describe('getDailyHistory', () => {
     const userId = 1;
 
-    it('should return paginated history', async () => {
+    it('should return paginated history with full interpretation', async () => {
+      const fullInterpretation = 'Test interpretation ' + 'a'.repeat(200);
       const mockReadings = [
         {
           id: 1,
           userId,
           readingDate: '2024-01-01',
-          interpretation: 'Test interpretation ' + 'a'.repeat(200),
+          interpretation: fullInterpretation,
           wasRegenerated: false,
           createdAt: new Date(),
-          card: { name: 'El Mago' },
+          card: { name: 'El Mago', imageUrl: 'https://example.com/el-mago.jpg' },
           isReversed: false,
         },
       ];
@@ -516,9 +517,8 @@ describe('DailyReadingService', () => {
       expect(result.page).toBe(1);
       expect(result.totalPages).toBe(1);
       expect(result.items[0].interpretationSummary).toBeDefined();
-      expect(result.items[0].interpretationSummary?.length).toBeLessThanOrEqual(
-        153,
-      ); // 150 + '...'
+      // Full interpretation should be returned (no truncation)
+      expect(result.items[0].interpretationSummary).toBe(fullInterpretation);
     });
 
     it('should handle empty history', async () => {

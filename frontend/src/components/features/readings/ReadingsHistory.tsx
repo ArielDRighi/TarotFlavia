@@ -2,7 +2,8 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Layers, ChevronDown, Grid3x3, List } from 'lucide-react';
+import Link from 'next/link';
+import { Search, Layers, ChevronDown, Grid3x3, List, Sun } from 'lucide-react';
 import { startOfWeek, startOfMonth, isAfter, isSameDay } from 'date-fns';
 
 import { useMyReadings, useDeleteReading } from '@/hooks/api/useReadings';
@@ -190,16 +191,27 @@ export function ReadingsHistory() {
   const showPagination = readingsData && readingsData.meta.totalPages > 1;
 
   // Get list/grid classes
+  // List view: centered with max-width for better readability
+  // Grid view: full width with responsive columns
   const listClasses =
-    viewMode === 'grid' ? 'grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid gap-4';
+    viewMode === 'grid'
+      ? 'grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+      : 'mx-auto max-w-2xl space-y-3';
 
   return (
     <>
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="font-serif text-3xl font-bold text-gray-900 md:text-4xl">
           Tu camino revelado
         </h1>
+        <Link
+          href="/carta-del-dia/historial"
+          className="text-primary hover:text-primary/80 inline-flex items-center gap-2 text-sm font-medium transition-colors"
+        >
+          <Sun className="h-4 w-4" />
+          Ver historial de cartas del día
+        </Link>
       </div>
 
       {/* Filters */}

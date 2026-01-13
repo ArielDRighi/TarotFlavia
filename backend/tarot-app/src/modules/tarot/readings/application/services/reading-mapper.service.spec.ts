@@ -163,12 +163,12 @@ describe('ReadingMapperService', () => {
       expect(result.question).toBe('¿Custom question?');
     });
 
-    it('should use predefinedQuestion.question if available', () => {
+    it('should use predefinedQuestion.questionText if available', () => {
       const mockReading: Partial<TarotReading> = {
         id: 1,
         question: undefined,
         customQuestion: undefined,
-        predefinedQuestion: { id: 1, question: '¿Predefined question?' },
+        predefinedQuestion: { id: 1, questionText: '¿Predefined question?' },
         spreadId: 1,
         spreadName: 'Tirada simple',
         cards: [],
