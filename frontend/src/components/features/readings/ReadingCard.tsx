@@ -121,9 +121,15 @@ export function ReadingCard({ reading, cards, onView, onDelete, className }: Rea
           )}
         </div>
 
-        {/* Content - Question + Meta grouped together */}
+        {/* Content - Question/Cards + Meta grouped together */}
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <p className="text-text-primary line-clamp-1 text-sm font-medium">{reading.question}</p>
+          {reading.question ? (
+            <p className="text-text-primary line-clamp-1 text-sm font-medium">{reading.question}</p>
+          ) : (
+            <p className="text-text-primary line-clamp-1 text-sm font-medium">
+              {reading.cardPreviews?.map((c) => c.name).join(', ') || 'Lectura de tarot'}
+            </p>
+          )}
           <div className="flex items-center gap-2">
             <span className="text-text-muted text-xs">{relativeDate}</span>
             {reading.spreadName && (

@@ -325,17 +325,30 @@ export class DailyReadingService {
       .take(limit)
       .getManyAndCount();
 
-    const items: DailyReadingHistoryItemDto[] = readings.map((reading) => ({
-      id: reading.id,
-      readingDate: reading.readingDate.toString(),
-      cardName: reading.card.name,
-      cardImageUrl: reading.card.imageUrl,
-      isReversed: reading.isReversed,
-      // Return full interpretation since cards are self-contained (no detail page)
-      interpretationSummary: reading.interpretation || null,
-      wasRegenerated: reading.wasRegenerated,
-      createdAt: reading.createdAt,
-    }));
+    const items: DailyReadingHistoryItemDto[] = readings.map((reading) => {
+      // For PREMIUM users: use AI interpretation
+      // For FREE users: use card meaning from DB as fallback
+      let displayText: string | null = reading.interpretation;
+
+      if (!displayText && reading.card) {
+        // Fallback to card meaning for FREE users
+        const meaning = reading.isReversed
+          ? reading.card.meaningReversed
+          : reading.card.meaningUpright;
+        displayText = meaning || null;
+      }
+
+      return {
+        id: reading.id,
+        readingDate: reading.readingDate.toString(),
+        cardName: reading.card.name,
+        cardImageUrl: reading.card.imageUrl,
+        isReversed: reading.isReversed,
+        interpretationSummary: displayText,
+        wasRegenerated: reading.wasRegenerated,
+        createdAt: reading.createdAt,
+      };
+    });
 
     return {
       items,
