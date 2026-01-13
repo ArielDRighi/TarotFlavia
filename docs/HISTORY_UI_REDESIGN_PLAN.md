@@ -278,16 +278,17 @@ export interface Reading {
 
 ---
 
-````
-
 ---
 
-### TASK-UI-004: Crear componente CardThumbnails
+### TASK-UI-004: Crear componente CardThumbnails ✅ COMPLETADA
 
+**Estado:** ✅ Completada (13 enero 2026)
+**Rama:** `feature/TASK-UI-004-card-thumbnails`
 **Tipo:** Frontend
 **Archivos:**
 
 - `frontend/src/components/features/readings/CardThumbnails.tsx` (NUEVO)
+- `frontend/src/components/features/readings/CardThumbnails.test.tsx` (NUEVO)
 
 **Descripción:**
 Componente reutilizable que muestra miniaturas de cartas apiladas o en fila.
@@ -299,14 +300,33 @@ interface CardThumbnailsProps {
   size?: "sm" | "md"; // Default 'sm'
   stacked?: boolean; // Default true (cartas superpuestas)
 }
-````
+```
 
-**Visualización:**
+**Cambios realizados:**
 
-- Si `stacked=true`: Cartas superpuestas con offset de -8px
-- Si `stacked=false`: Cartas en fila con gap
-- Mostrar indicador de cartas invertidas (pequeño icono o borde)
-- Si no hay previews, mostrar icono placeholder
+1. ✅ Componente con 4 variantes configurables (size, stacked, max)
+2. ✅ Placeholder con icono Sparkles cuando no hay cartas
+3. ✅ Indicador visual para cartas invertidas (badge con flecha)
+4. ✅ Optimizado con useMemo para performance
+5. ✅ Soporte para layout stacked (superpuestas) o row (fila)
+6. ✅ JSDoc completo con ejemplos de uso
+7. ✅ 16 tests unitarios con 100% coverage
+
+**Resultados:**
+
+- ✅ TypeCheck: 0 errores
+- ✅ Lint: 0 errores
+- ✅ Tests: 16/16 pasando (100%)
+- ✅ Coverage: 100%
+- ✅ Build: Exitoso
+- ✅ Validación arquitectura: Exitosa
+
+**Decisiones técnicas:**
+
+- Usa `lucide-react` para icono Sparkles (placeholder)
+- Memoización de `displayCards` y `sizeClasses` para evitar re-cálculos
+- Design tokens del proyecto para colores (border-white, bg-secondary)
+- z-index dinámico para efecto de apilado visual
 
 ---
 
