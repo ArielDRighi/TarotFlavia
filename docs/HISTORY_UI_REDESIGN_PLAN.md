@@ -241,72 +241,44 @@ export interface Reading {
 
 ---
 
-### TASK-UI-003: Rediseñar componente ReadingCard
+### TASK-UI-003: Rediseñar componente ReadingCard ✅ COMPLETADA
 
-**Estado:** ⏳ Pendiente (depende de TASK-UI-001 + TASK-UI-002)
+**Estado:** ✅ Completada (13 enero 2026)
+**Rama:** `feature/TASK-UI-003-redesign-reading-card`
 **Tipo:** Frontend
 **Archivos:**
 
 - `frontend/src/components/features/readings/ReadingCard.tsx`
+- `frontend/src/components/features/readings/ReadingCard.test.tsx` (actualizado tests)
 
-**Cambios:**
+**Cambios realizados:**
 
-1. Usar fecha formateada completa (como en DailyReadingCard)
-2. Mostrar pregunta truncada a 2 líneas
-3. Mostrar badge con nombre del spread
-4. Mostrar badge con cantidad de cartas
-5. Mostrar miniaturas de cartas (máximo 3)
-6. Reducir padding y altura total
-7. Mejorar layout responsivo
+1. ✅ Cambiado layout a horizontal (flex-row) permanente
+2. ✅ Sección izquierda: Miniatura de carta (h-20 w-14) o placeholder icon
+3. ✅ Sección centro: Pregunta (font-semibold, line-clamp-2) + fecha relativa (text-muted)
+4. ✅ Sección derecha: Badge spread + botones ver/eliminar
+5. ✅ Reducido padding y altura total
+6. ✅ Usa cardPreviews de reading (TASK-UI-002) con fallback a cards prop
+7. ✅ Optimizado con useMemo y useCallback para performance
 
-**Estructura JSX propuesta (alineada con DESIGN_HAND-OFF.md):**
+**Resultados:**
 
-> Especificación original:
->
-> - Izquierda: Icono o miniatura de la carta principal revelada
-> - Centro: Título grande (pregunta realizada), Fecha relativa ('hace 2 días') en gris
-> - Derecha: Badge del tipo de tirada (ej: 'Cruz Celta') y botón icono 'Ver' (ojo o flecha)
+- ✅ TypeCheck: 0 errores
+- ✅ Lint: 0 errores
+- ✅ Tests: 1847/1847 pasando (100%)
+- ✅ Build: Exitoso
+- ✅ Validación arquitectura: Exitosa
 
-```tsx
-<Card className="flex flex-row items-stretch">
-  {/* Izquierda - Miniatura carta */}
-  <div className="flex items-center justify-center p-4">
-    <div className="bg-muted flex h-20 w-14 items-center justify-center rounded-lg overflow-hidden">
-      {reading.cardPreview?.imageUrl ? (
-        <Image src={reading.cardPreview.imageUrl} alt="Carta" ... />
-      ) : (
-        <Layers className="text-muted-foreground h-6 w-6" />
-      )}
-    </div>
-  </div>
+**Decisiones técnicas:**
 
-  {/* Centro - Pregunta (grande) + Fecha (gris) */}
-  <CardContent className="flex-1 flex flex-col justify-center gap-1 py-3">
-    {/* Pregunta - Título grande */}
-    <p className="text-text-primary font-semibold line-clamp-2">
-      {reading.question}
-    </p>
-    {/* Fecha relativa - Gris */}
-    <span className="text-text-muted text-sm">{relativeDate}</span>
-  </CardContent>
+- Eliminado responsive (flex-col/flex-row): Ahora siempre horizontal para consistencia
+- Preferencia cardPreviews sobre cards prop para integración con TASK-UI-002
+- Memoización de fecha relativa y callbacks para mejor performance
+- Diseño alineado exactamente con DESIGN_HAND-OFF.md especificación
 
-  {/* Derecha - Badge tirada + Acciones */}
-  <div className="flex items-center gap-2 p-4 border-l border-border">
-    {/* Badge tipo tirada */}
-    <Badge variant="secondary">{reading.spreadName}</Badge>
+---
 
-    {/* Botón Ver */}
-    <Button variant="ghost" size="icon" onClick={onView} aria-label="Ver lectura">
-      <Eye className="h-5 w-5" />
-    </Button>
-
-    {/* Botón Eliminar (adicional) */}
-    <Button variant="ghost" size="icon" onClick={onDelete} aria-label="Eliminar">
-      <Trash2 className="text-destructive h-5 w-5" />
-    </Button>
-  </div>
-</Card>
-```
+````
 
 ---
 
@@ -327,7 +299,7 @@ interface CardThumbnailsProps {
   size?: "sm" | "md"; // Default 'sm'
   stacked?: boolean; // Default true (cartas superpuestas)
 }
-```
+````
 
 **Visualización:**
 
