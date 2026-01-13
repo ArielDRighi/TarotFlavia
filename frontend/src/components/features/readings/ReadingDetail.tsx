@@ -398,14 +398,45 @@ export function ReadingDetail({ readingId }: ReadingDetailProps) {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div
-                data-testid="interpretation-content"
-                className={cn('prose prose-slate max-w-none', isRegenerating && 'animate-pulse')}
-              >
-                <ReactMarkdown components={markdownComponents}>
-                  {interpretationData.generalInterpretation}
-                </ReactMarkdown>
-              </div>
+              {interpretationData.generalInterpretation ? (
+                <div
+                  data-testid="interpretation-content"
+                  className={cn('prose prose-slate max-w-none', isRegenerating && 'animate-pulse')}
+                >
+                  <ReactMarkdown components={markdownComponents}>
+                    {interpretationData.generalInterpretation}
+                  </ReactMarkdown>
+                </div>
+              ) : (
+                <div data-testid="card-meanings-content" className="space-y-6">
+                  {reading.cards.map((card) => {
+                    const meaning = card.orientation === 'reversed'
+                      ? card.meaningReversed
+                      : card.meaningUpright;
+                    return (
+                      <div key={card.id} className="border-b border-border pb-4 last:border-0 last:pb-0">
+                        <h3 className="text-text-primary font-serif text-lg font-medium mb-2">
+                          {card.name}
+                          {card.orientation === 'reversed' && (
+                            <span className="text-secondary ml-2 text-sm font-normal">(Invertida)</span>
+                          )}
+                        </h3>
+                        {card.keywords && (
+                          <p className="text-primary text-sm mb-2">
+                            <strong>Palabras clave:</strong> {card.keywords}
+                          </p>
+                        )}
+                        {meaning && (
+                          <p className="text-text-primary leading-relaxed">{meaning}</p>
+                        )}
+                        {card.description && (
+                          <p className="text-text-muted text-sm mt-2 italic">{card.description}</p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </CardContent>
           </Card>
         </section>
