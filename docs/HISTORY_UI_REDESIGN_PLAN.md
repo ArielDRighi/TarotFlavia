@@ -353,11 +353,11 @@ interface CardThumbnailsProps {
 
 ```typescript
 const SPREAD_FILTER_OPTIONS = [
-  { label: 'Todas las tiradas', value: 'all' },
-  { label: 'Tres Cartas', value: 'Tres Cartas' },
-  { label: 'Cinco Cartas', value: 'Cinco Cartas' },
-  { label: 'Cruz Celta', value: 'Cruz Celta' },
-  { label: 'Estrella', value: 'Estrella' },
+  { label: "Todas las tiradas", value: "all" },
+  { label: "Tirada de 1 Carta", value: "Tirada de 1 Carta" },
+  { label: "Tirada de 3 Cartas", value: "Tirada de 3 Cartas" },
+  { label: "Tirada de 5 Cartas", value: "Tirada de 5 Cartas" },
+  { label: "Cruz Céltica", value: "Cruz Céltica" },
 ];
 ```
 

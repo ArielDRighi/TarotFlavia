@@ -45,10 +45,10 @@ const DATE_FILTER_OPTIONS: DateFilterConfig[] = [
 
 const SPREAD_FILTER_OPTIONS: SpreadFilterConfig[] = [
   { label: 'Todas las tiradas', value: 'all' },
-  { label: 'Tres Cartas', value: 'Tres Cartas' },
-  { label: 'Cinco Cartas', value: 'Cinco Cartas' },
-  { label: 'Cruz Celta', value: 'Cruz Celta' },
-  { label: 'Estrella', value: 'Estrella' },
+  { label: 'Tirada de 1 Carta', value: 'Tirada de 1 Carta' },
+  { label: 'Tirada de 3 Cartas', value: 'Tirada de 3 Cartas' },
+  { label: 'Tirada de 5 Cartas', value: 'Tirada de 5 Cartas' },
+  { label: 'Cruz Céltica', value: 'Cruz Céltica' },
 ];
 
 /**
@@ -260,7 +260,7 @@ export function ReadingsHistory() {
               <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
               <Input
                 type="text"
-                placeholder="Buscar por pregunta..."
+                placeholder="Buscar por pregunta o tirada..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9"

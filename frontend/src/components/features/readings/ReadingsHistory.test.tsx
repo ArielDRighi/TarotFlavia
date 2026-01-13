@@ -68,7 +68,7 @@ const mockReadings: Reading[] = [
   {
     id: 1,
     spreadId: 1,
-    spreadName: 'Cruz Celta',
+    spreadName: 'Cruz Céltica',
     question: '¿Qué me depara el futuro en mi carrera profesional?',
     createdAt: '2025-12-01T10:00:00Z',
     cardsCount: 10,
@@ -76,7 +76,7 @@ const mockReadings: Reading[] = [
   {
     id: 2,
     spreadId: 2,
-    spreadName: 'Tres Cartas',
+    spreadName: 'Tirada de 3 Cartas',
     question: '¿Encontraré el amor verdadero este año?',
     createdAt: '2025-12-02T10:00:00Z',
     cardsCount: 3,
@@ -84,7 +84,7 @@ const mockReadings: Reading[] = [
   {
     id: 3,
     spreadId: 3,
-    spreadName: 'Cinco Cartas',
+    spreadName: 'Tirada de 5 Cartas',
     question: '¿Cómo puedo mejorar mi vida laboral?',
     createdAt: '2025-12-03T10:00:00Z',
     cardsCount: 5,
@@ -261,7 +261,7 @@ describe('ReadingsHistory', () => {
       renderWithProviders(<ReadingsHistory />);
 
       const searchInput = screen.getByPlaceholderText(/buscar/i);
-      await userEvent.type(searchInput, 'Cruz Celta');
+      await userEvent.type(searchInput, 'Cruz Céltica');
 
       await waitFor(() => {
         const readingCards = screen.getAllByTestId('reading-card');
@@ -338,15 +338,15 @@ describe('ReadingsHistory', () => {
       const spreadFilter = screen.getByTestId('spread-filter');
       await userEvent.click(spreadFilter);
 
-      // Select "Tres Cartas" option - use getAllByText and select the one within menu
-      const tresCartasOptions = screen.getAllByText('Tres Cartas');
+      // Select "Tirada de 3 Cartas" option - use getAllByText and select the one within menu
+      const tresCartasOptions = screen.getAllByText('Tirada de 3 Cartas');
       const menuOption = tresCartasOptions.find((el) => el.getAttribute('role') === 'menuitem');
 
       if (menuOption) {
         await userEvent.click(menuOption);
       }
 
-      // Should show only readings with spreadName "Tres Cartas"
+      // Should show only readings with spreadName "Tirada de 3 Cartas"
       await waitFor(() => {
         const readingCards = screen.getAllByTestId('reading-card');
         expect(readingCards).toHaveLength(1);
@@ -383,11 +383,45 @@ describe('ReadingsHistory', () => {
       await userEvent.click(spreadFilter);
 
       // Select a spread type that doesn't exist in mock data
-      const spreadOption = screen.getByText('Estrella');
+      const spreadOption = screen.getByText('Tirada de 1 Carta');
       await userEvent.click(spreadOption);
 
       await waitFor(() => {
         expect(screen.getByText(/no se encontraron lecturas/i)).toBeInTheDocument();
+      });
+    });
+
+    it('should filter by spread and search query simultaneously', async () => {
+      vi.mocked(useReadingsModule.useMyReadings).mockReturnValue({
+        data: mockPaginatedReadings,
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: vi.fn(),
+      } as unknown as ReturnType<typeof useReadingsModule.useMyReadings>);
+
+      renderWithProviders(<ReadingsHistory />);
+
+      // Apply spread filter
+      const spreadFilter = screen.getByTestId('spread-filter');
+      await userEvent.click(spreadFilter);
+
+      const spreadOptions = screen.getAllByText('Tirada de 3 Cartas');
+      const menuOption = spreadOptions.find((el) => el.getAttribute('role') === 'menuitem');
+      if (menuOption) {
+        await userEvent.click(menuOption);
+      }
+
+      // Apply search query
+      const searchInput = screen.getByPlaceholderText(/buscar/i);
+      await userEvent.type(searchInput, 'amor');
+
+      // Should show only reading that matches both filters
+      await waitFor(() => {
+        const readingCards = screen.getAllByTestId('reading-card');
+        expect(readingCards).toHaveLength(1);
+        // Verify it's the correct reading (Tirada de 3 Cartas with "amor" in question)
+        expect(screen.getByText(/encontraré el amor verdadero/i)).toBeInTheDocument();
       });
     });
   });
