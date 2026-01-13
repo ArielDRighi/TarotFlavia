@@ -353,11 +353,11 @@ interface CardThumbnailsProps {
 
 ```typescript
 const SPREAD_FILTER_OPTIONS = [
-  { label: 'Todas las tiradas', value: 'all' },
-  { label: 'Tres Cartas', value: 'Tres Cartas' },
-  { label: 'Cinco Cartas', value: 'Cinco Cartas' },
-  { label: 'Cruz Celta', value: 'Cruz Celta' },
-  { label: 'Estrella', value: 'Estrella' },
+  { label: "Todas las tiradas", value: "all" },
+  { label: "Tres Cartas", value: "Tres Cartas" },
+  { label: "Cinco Cartas", value: "Cinco Cartas" },
+  { label: "Cruz Celta", value: "Cruz Celta" },
+  { label: "Estrella", value: "Estrella" },
 ];
 ```
 
