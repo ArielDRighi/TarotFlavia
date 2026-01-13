@@ -94,6 +94,8 @@ export class CreateReadingUseCase {
       questionType,
       user,
       tarotistaId,
+      spreadId: spread.id,
+      spreadName: spread.name,
       deck, // Usar el deck validado
       cards, // Agregar las cartas a la lectura
       cardPositions: createReadingDto.cardPositions,

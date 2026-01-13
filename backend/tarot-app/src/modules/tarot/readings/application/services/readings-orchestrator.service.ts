@@ -12,6 +12,7 @@ import { QueryReadingsDto } from '../../dto/query-readings.dto';
 import { PaginatedReadingsResponseDto } from '../../dto/paginated-readings-response.dto';
 import { TarotReading } from '../../entities/tarot-reading.entity';
 import { User, UserPlan } from '../../../../users/entities/user.entity';
+import { ReadingMapperService } from './reading-mapper.service';
 
 /**
  * Orquestador principal para operaciones de readings.
@@ -30,6 +31,7 @@ export class ReadingsOrchestratorService {
     private readonly regenerateReadingUC: RegenerateReadingUseCase,
     private readonly deleteReadingUC: DeleteReadingUseCase,
     private readonly restoreReadingUC: RestoreReadingUseCase,
+    private readonly mapper: ReadingMapperService,
   ) {}
 
   // ==================== Use Case Delegations ====================
@@ -97,8 +99,13 @@ export class ReadingsOrchestratorService {
     const [data, totalItems] =
       await this.readingRepo.findAllForAdmin(includeDeleted);
 
+    // Mapear entidades a DTOs
+    const readingDtos = data.map((reading) =>
+      this.mapper.toListItemDto(reading),
+    );
+
     return {
-      data,
+      data: readingDtos,
       meta: {
         page: 1,
         limit: 50,
