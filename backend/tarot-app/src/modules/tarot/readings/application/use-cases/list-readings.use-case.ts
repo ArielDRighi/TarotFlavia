@@ -7,12 +7,14 @@ import {
 import { QueryReadingsDto } from '../../dto/query-readings.dto';
 import { PaginatedReadingsResponseDto } from '../../dto/paginated-readings-response.dto';
 import { User, UserPlan } from '../../../../users/entities/user.entity';
+import { ReadingMapperService } from '../services/reading-mapper.service';
 
 @Injectable()
 export class ListReadingsUseCase {
   constructor(
     @Inject('IReadingRepository')
     private readonly readingRepo: IReadingRepository,
+    private readonly mapper: ReadingMapperService,
   ) {}
 
   async execute(
@@ -62,8 +64,17 @@ export class ListReadingsUseCase {
     const hasNextPage = page < totalPages;
     const hasPreviousPage = page > 1;
 
+    // Transformar entidades a DTOs usando el mapper
+    const readingDtos = readings.map((reading) =>
+      this.mapper.toListItemDto(
+        reading,
+        reading.spreadId || 0,
+        reading.spreadName || 'Tirada desconocida',
+      ),
+    );
+
     return {
-      data: readings,
+      data: readingDtos,
       meta: {
         page,
         limit,

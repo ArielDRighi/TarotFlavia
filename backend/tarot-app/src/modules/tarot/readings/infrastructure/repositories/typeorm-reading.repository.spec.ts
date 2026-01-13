@@ -444,6 +444,37 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
         { userId: -1 },
       );
     });
+
+    // Card previews loading
+    it('should load cards relation for each reading', async () => {
+      mockQueryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
+
+      await repository.findByUserId(1);
+
+      expect(mockQueryBuilder.leftJoinAndSelect).toHaveBeenCalledWith(
+        'reading.cards',
+        'cards',
+      );
+    });
+
+    it('should load deck, category and predefinedQuestion relations', async () => {
+      mockQueryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
+
+      await repository.findByUserId(1);
+
+      expect(mockQueryBuilder.leftJoinAndSelect).toHaveBeenCalledWith(
+        'reading.deck',
+        'deck',
+      );
+      expect(mockQueryBuilder.leftJoinAndSelect).toHaveBeenCalledWith(
+        'reading.category',
+        'category',
+      );
+      expect(mockQueryBuilder.leftJoinAndSelect).toHaveBeenCalledWith(
+        'reading.predefinedQuestion',
+        'predefinedQuestion',
+      );
+    });
   });
 
   describe('findAll', () => {

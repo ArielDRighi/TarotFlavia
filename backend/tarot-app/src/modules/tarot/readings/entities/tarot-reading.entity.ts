@@ -22,6 +22,7 @@ interface IUser {
 interface ITarotCard {
   id: number;
   name: string;
+  imageUrl: string;
 }
 
 interface ITarotDeck {
@@ -109,6 +110,22 @@ export class TarotReading {
 
   @Column({ name: 'tarotista_id', nullable: true })
   tarotistaId: number | null;
+
+  @ApiProperty({
+    description: 'ID del tipo de tirada usado',
+    example: 1,
+    required: false,
+  })
+  @Column({ nullable: true })
+  spreadId: number | null;
+
+  @ApiProperty({
+    description: 'Nombre del tipo de tirada usado',
+    example: 'Tirada de 3 cartas',
+    required: false,
+  })
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  spreadName: string | null;
 
   @ApiProperty({
     description: 'Categoría de la lectura',

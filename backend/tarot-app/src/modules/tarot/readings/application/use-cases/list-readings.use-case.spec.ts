@@ -8,10 +8,13 @@ import {
   SortBy,
   SortOrder,
 } from '../../dto/query-readings.dto';
+import { ReadingMapperService } from '../services/reading-mapper.service';
+import { ReadingListItemDto } from '../../dto/reading-list-item.dto';
 
 describe('ListReadingsUseCase', () => {
   let useCase: ListReadingsUseCase;
   let readingRepo: jest.Mocked<IReadingRepository>;
+  let mapper: jest.Mocked<ReadingMapperService>;
 
   const mockFreeUser: Partial<User> = {
     id: 1,
@@ -29,6 +32,51 @@ describe('ListReadingsUseCase', () => {
     id,
     sharedToken: null,
     isPublic: false,
+    cards: [],
+    cardPositions: [],
+    spreadId: 1,
+    spreadName: 'Test Spread',
+  });
+
+  const createMockReadingWithCards = (
+    id: number,
+    cardsCount: number,
+  ): Partial<TarotReading> => ({
+    id,
+    sharedToken: null,
+    isPublic: false,
+    cards: Array.from({ length: cardsCount }, (_, i) => ({
+      id: i + 1,
+      name: `Card ${i + 1}`,
+      imageUrl: `https://example.com/card${i + 1}.jpg`,
+      number: i,
+      category: 'arcanos_mayores',
+      reversedImageUrl: `https://example.com/card${i + 1}_reversed.jpg`,
+      meaningUpright: 'Upright meaning',
+      meaningReversed: 'Reversed meaning',
+      description: 'Description',
+      keywords: 'keywords',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    })),
+    cardPositions: Array.from({ length: cardsCount }, (_, i) => ({
+      cardId: i + 1,
+      position: `position_${i}`,
+      isReversed: i % 2 === 0,
+    })),
+    spreadId: 1,
+    spreadName: 'Test Spread',
+  });
+
+  const createMockReadingDto = (id: number): ReadingListItemDto => ({
+    id,
+    question: 'Test Question',
+    spreadId: 1,
+    spreadName: 'Test Spread',
+    cardsCount: 0,
+    cardPreviews: [],
+    createdAt: new Date().toISOString(),
+    deletedAt: undefined,
   });
 
   beforeEach(async () => {
@@ -41,11 +89,23 @@ describe('ListReadingsUseCase', () => {
             findByUserId: jest.fn(),
           },
         },
+        {
+          provide: ReadingMapperService,
+          useValue: {
+            toListItemDto: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
     useCase = module.get<ListReadingsUseCase>(ListReadingsUseCase);
     readingRepo = module.get('IReadingRepository');
+    mapper = module.get(ReadingMapperService);
+
+    // Mock mapper to return simple DTO by default
+    mapper.toListItemDto.mockImplementation((reading) =>
+      createMockReadingDto(reading.id),
+    );
   });
 
   describe('execute - default pagination', () => {
@@ -504,6 +564,60 @@ describe('ListReadingsUseCase', () => {
 
       await expect(useCase.execute(mockPremiumUser as User)).rejects.toThrow(
         'Database connection failed',
+      );
+    });
+  });
+
+  describe('execute - card previews', () => {
+    it('should return readings with card data when cards are present', async () => {
+      const mockReadings = [
+        createMockReadingWithCards(1, 5),
+        createMockReadingWithCards(2, 3),
+      ] as TarotReading[];
+
+      readingRepo.findByUserId.mockResolvedValue([mockReadings, 2]);
+
+      const result = await useCase.execute(mockPremiumUser as User);
+
+      expect(result.data).toHaveLength(2);
+      expect(mapper.toListItemDto).toHaveBeenCalledTimes(2);
+      expect(mapper.toListItemDto).toHaveBeenCalledWith(
+        mockReadings[0],
+        1,
+        'Test Spread',
+      );
+    });
+
+    it('should handle readings with no cards', async () => {
+      const mockReadings = [createMockReading(1)] as TarotReading[];
+
+      readingRepo.findByUserId.mockResolvedValue([mockReadings, 1]);
+
+      const result = await useCase.execute(mockPremiumUser as User);
+
+      expect(result.data).toHaveLength(1);
+      expect(mapper.toListItemDto).toHaveBeenCalledWith(
+        mockReadings[0],
+        1,
+        'Test Spread',
+      );
+    });
+
+    it('should use default spread name if spreadName is null', async () => {
+      const mockReading = {
+        ...createMockReading(1),
+        spreadId: null,
+        spreadName: null,
+      } as TarotReading;
+
+      readingRepo.findByUserId.mockResolvedValue([[mockReading], 1]);
+
+      await useCase.execute(mockPremiumUser as User);
+
+      expect(mapper.toListItemDto).toHaveBeenCalledWith(
+        mockReading,
+        0,
+        'Tirada desconocida',
       );
     });
   });

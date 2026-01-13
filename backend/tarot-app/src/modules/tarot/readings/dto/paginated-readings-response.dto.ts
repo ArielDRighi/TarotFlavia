@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { TarotReading } from '../entities/tarot-reading.entity';
+import { ReadingListItemDto } from './reading-list-item.dto';
 
 export class PaginationMeta {
   @ApiProperty({ description: 'Página actual', example: 1 })
@@ -23,10 +23,10 @@ export class PaginationMeta {
 
 export class PaginatedReadingsResponseDto {
   @ApiProperty({
-    type: [TarotReading],
+    type: [ReadingListItemDto],
     description: 'Lista de lecturas',
   })
-  data: TarotReading[];
+  data: ReadingListItemDto[];
 
   @ApiProperty({
     type: PaginationMeta,

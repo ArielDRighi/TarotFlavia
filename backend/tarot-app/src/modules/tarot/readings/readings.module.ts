@@ -31,6 +31,7 @@ import { TypeOrmReadingRepository } from './infrastructure/repositories/typeorm-
 import { ReadingValidatorService } from './application/services/reading-validator.service';
 import { ReadingShareService } from './application/services/reading-share.service';
 import { ReadingsOrchestratorService } from './application/services/readings-orchestrator.service';
+import { ReadingMapperService } from './application/services/reading-mapper.service';
 
 // Use Cases
 import { CreateReadingUseCase } from './application/use-cases/create-reading.use-case';
@@ -83,6 +84,7 @@ import { RestoreReadingUseCase } from './application/use-cases/restore-reading.u
     ReadingValidatorService,
     ReadingShareService,
     ReadingsOrchestratorService,
+    ReadingMapperService,
 
     // Use Cases
     CreateReadingUseCase,

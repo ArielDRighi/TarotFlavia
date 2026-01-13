@@ -44,6 +44,8 @@ describe('ReadingsController', () => {
     category: null,
     tarotista: null,
     tarotistaId: null,
+    spreadId: 1,
+    spreadName: 'Test Spread',
     cardPositions: [
       { cardId: 1, position: 'past', isReversed: false },
       { cardId: 2, position: 'present', isReversed: true },
