@@ -330,29 +330,55 @@ interface CardThumbnailsProps {
 
 ---
 
-### TASK-UI-005: Mejorar filtros del historial
+### TASK-UI-005: Mejorar filtros del historial ✅ COMPLETADA
 
+**Estado:** ✅ Completada (13 enero 2026)
+**Rama:** `feature/TASK-UI-005-improve-history-filters`
 **Tipo:** Frontend
 **Archivos:**
 
 - `frontend/src/components/features/readings/ReadingsHistory.tsx`
+- `frontend/src/components/features/readings/ReadingsHistory.test.tsx` (actualizado tests)
 
-**Cambios:**
+**Cambios realizados:**
 
-1. Añadir filtro por tipo de spread (dropdown)
-2. Añadir toggle vista lista/grid (opcional)
-3. Mejorar búsqueda para incluir nombre de spread
+1. ✅ Añadido filtro por tipo de spread (dropdown con opciones: Todas, Tres Cartas, Cinco Cartas, Cruz Celta, Estrella)
+2. ✅ Añadido toggle vista lista/grid con iconos interactivos (Grid3x3/List)
+3. ✅ Mejorada búsqueda para incluir nombre de spread además de pregunta
+4. ✅ Reorganizada UI de filtros en dos filas con mejor distribución responsiva
+5. ✅ Implementado filtrado combinado (fecha + spread + búsqueda)
+6. ✅ Añadido estado vacío cuando filtros no coinciden
 
-**Nuevo filtro:**
+**Nuevo filtro implementado:**
 
 ```typescript
 const SPREAD_FILTER_OPTIONS = [
   { label: "Todas las tiradas", value: "all" },
-  { label: "3 Cartas", value: "3-cards" },
-  { label: "5 Cartas", value: "5-cards" },
-  { label: "Cruz Celta", value: "celtic-cross" },
+  { label: "Tirada de 1 Carta", value: "Tirada de 1 Carta" },
+  { label: "Tirada de 3 Cartas", value: "Tirada de 3 Cartas" },
+  { label: "Tirada de 5 Cartas", value: "Tirada de 5 Cartas" },
+  { label: "Cruz Céltica", value: "Cruz Céltica" },
 ];
 ```
+
+**Resultados:**
+
+- ✅ TypeCheck: 0 errores
+- ✅ Lint: 0 errores
+- ✅ Tests: 19/19 pasando en ReadingsHistory (100%)
+- ✅ Tests totales: 1872/1875 pasando (99.8% - 3 skipped)
+- ✅ Coverage: 77.94% (ReadingsHistory.tsx)
+- ✅ Build: Exitoso
+- ✅ Validación arquitectura: Exitosa
+
+**Decisiones técnicas:**
+
+- Vista grid usa clases: `grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3`
+- Vista lista usa clases: `grid gap-4` (layout vertical)
+- Filtro spread busca coincidencia exacta con `reading.spreadName`
+- Búsqueda ahora incluye tanto `question` como `spreadName` (case insensitive)
+- Toggle de vista con iconos lucide-react (Grid3x3/List)
+- Estado persistente en memoria durante la sesión (no en localStorage)
 
 ---
 

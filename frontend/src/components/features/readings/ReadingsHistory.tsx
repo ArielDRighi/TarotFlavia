@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Layers, ChevronDown } from 'lucide-react';
+import { Search, Layers, ChevronDown, Grid3x3, List } from 'lucide-react';
 import { startOfWeek, startOfMonth, isAfter, isSameDay } from 'date-fns';
 
 import { useMyReadings, useDeleteReading } from '@/hooks/api/useReadings';
@@ -23,10 +23,17 @@ import type { Reading } from '@/types';
 const READINGS_PER_PAGE = 10;
 
 type DateFilterOption = 'recent' | 'oldest' | 'this-week' | 'this-month';
+type SpreadFilterOption = 'all' | string; // 'all' or specific spread name
+type ViewMode = 'list' | 'grid';
 
 interface DateFilterConfig {
   label: string;
   value: DateFilterOption;
+}
+
+interface SpreadFilterConfig {
+  label: string;
+  value: SpreadFilterOption;
 }
 
 const DATE_FILTER_OPTIONS: DateFilterConfig[] = [
@@ -36,8 +43,16 @@ const DATE_FILTER_OPTIONS: DateFilterConfig[] = [
   { label: 'Este mes', value: 'this-month' },
 ];
 
+const SPREAD_FILTER_OPTIONS: SpreadFilterConfig[] = [
+  { label: 'Todas las tiradas', value: 'all' },
+  { label: 'Tirada de 1 Carta', value: 'Tirada de 1 Carta' },
+  { label: 'Tirada de 3 Cartas', value: 'Tirada de 3 Cartas' },
+  { label: 'Tirada de 5 Cartas', value: 'Tirada de 5 Cartas' },
+  { label: 'Cruz Céltica', value: 'Cruz Céltica' },
+];
+
 /**
- * Filter and sort readings based on date filter and search query
+ * Filter and sort readings based on filters and search query
  *
  * NOTE: This filtering is client-side and operates on the current page's data only.
  * For 'this-week' and 'this-month' filters, this means readings outside the current
@@ -48,14 +63,24 @@ const DATE_FILTER_OPTIONS: DateFilterConfig[] = [
 function filterReadings(
   readings: Reading[],
   dateFilter: DateFilterOption,
+  spreadFilter: SpreadFilterOption,
   searchQuery: string
 ): Reading[] {
   let filtered = [...readings];
 
-  // Filter by search query (case insensitive)
+  // Filter by search query (case insensitive) - now includes spreadName
   if (searchQuery.trim()) {
     const query = searchQuery.toLowerCase().trim();
-    filtered = filtered.filter((reading) => reading.question.toLowerCase().includes(query));
+    filtered = filtered.filter(
+      (reading) =>
+        reading.question.toLowerCase().includes(query) ||
+        reading.spreadName.toLowerCase().includes(query)
+    );
+  }
+
+  // Filter by spread type
+  if (spreadFilter !== 'all') {
+    filtered = filtered.filter((reading) => reading.spreadName === spreadFilter);
   }
 
   // Filter by date range (inclusive - include readings on the start date)
@@ -97,6 +122,8 @@ export function ReadingsHistory() {
   const [page, setPage] = React.useState(1);
   const [searchQuery, setSearchQuery] = React.useState('');
   const [dateFilter, setDateFilter] = React.useState<DateFilterOption>('recent');
+  const [spreadFilter, setSpreadFilter] = React.useState<SpreadFilterOption>('all');
+  const [viewMode, setViewMode] = React.useState<ViewMode>('list');
 
   // Data fetching
   const {
@@ -144,20 +171,27 @@ export function ReadingsHistory() {
     router.push('/ritual');
   };
 
-  // Get current filter label
-  const currentFilterLabel =
+  // Get current filter labels
+  const currentDateFilterLabel =
     DATE_FILTER_OPTIONS.find((opt) => opt.value === dateFilter)?.label || 'Más recientes';
+  const currentSpreadFilterLabel =
+    SPREAD_FILTER_OPTIONS.find((opt) => opt.value === spreadFilter)?.label || 'Todas las tiradas';
 
-  // Filter readings based on search and date filter
+  // Filter readings based on all filters
   const filteredReadings = readingsData?.data
-    ? filterReadings(readingsData.data, dateFilter, searchQuery)
+    ? filterReadings(readingsData.data, dateFilter, spreadFilter, searchQuery)
     : [];
 
   // Check if we have readings
   const hasReadings = readingsData && readingsData.data.length > 0;
   const hasFilteredReadings = filteredReadings.length > 0;
   const isSearching = searchQuery.trim().length > 0;
+  const isSpreadFiltering = spreadFilter !== 'all';
   const showPagination = readingsData && readingsData.meta.totalPages > 1;
+
+  // Get list/grid classes
+  const listClasses =
+    viewMode === 'grid' ? 'grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid gap-4';
 
   return (
     <>
@@ -169,38 +203,81 @@ export function ReadingsHistory() {
       </div>
 
       {/* Filters */}
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        {/* Date Filter Dropdown */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              data-testid="date-filter"
-              variant="outline"
-              className="w-full justify-between sm:w-auto"
-            >
-              {currentFilterLabel}
-              <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-48">
-            {DATE_FILTER_OPTIONS.map((option) => (
-              <DropdownMenuItem key={option.value} onClick={() => setDateFilter(option.value)}>
-                {option.label}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+      <div className="mb-6 flex flex-col gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          {/* Date Filter and Spread Filter */}
+          <div className="flex flex-col gap-2 sm:flex-row sm:gap-4">
+            {/* Date Filter Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  data-testid="date-filter"
+                  variant="outline"
+                  className="w-full justify-between sm:w-auto"
+                >
+                  {currentDateFilterLabel}
+                  <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48">
+                {DATE_FILTER_OPTIONS.map((option) => (
+                  <DropdownMenuItem key={option.value} onClick={() => setDateFilter(option.value)}>
+                    {option.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-        {/* Search Input */}
-        <div className="relative w-full sm:w-64">
-          <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-          <Input
-            type="text"
-            placeholder="Buscar por pregunta..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
-          />
+            {/* Spread Filter Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  data-testid="spread-filter"
+                  variant="outline"
+                  className="w-full justify-between sm:w-auto"
+                >
+                  {currentSpreadFilterLabel}
+                  <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48">
+                {SPREAD_FILTER_OPTIONS.map((option) => (
+                  <DropdownMenuItem
+                    key={option.value}
+                    onClick={() => setSpreadFilter(option.value)}
+                  >
+                    {option.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          {/* Search Input and View Toggle */}
+          <div className="flex flex-col gap-2 sm:flex-row sm:gap-4">
+            {/* Search Input */}
+            <div className="relative w-full sm:w-64">
+              <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+              <Input
+                type="text"
+                placeholder="Buscar por pregunta o tirada..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+
+            {/* View Toggle Button */}
+            <Button
+              data-testid="view-toggle"
+              variant="outline"
+              size="icon"
+              onClick={() => setViewMode(viewMode === 'list' ? 'grid' : 'list')}
+              aria-label={viewMode === 'list' ? 'Vista en cuadrícula' : 'Vista en lista'}
+            >
+              {viewMode === 'list' ? <Grid3x3 className="h-4 w-4" /> : <List className="h-4 w-4" />}
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -241,10 +318,13 @@ export function ReadingsHistory() {
         !isError &&
         hasReadings &&
         !hasFilteredReadings &&
-        (isSearching || dateFilter === 'this-week' || dateFilter === 'this-month') && (
+        (isSearching ||
+          isSpreadFiltering ||
+          dateFilter === 'this-week' ||
+          dateFilter === 'this-month') && (
           <div className="p-8 text-center">
             <p className="text-muted-foreground">
-              {isSearching
+              {isSearching || isSpreadFiltering
                 ? 'No se encontraron lecturas para tu búsqueda.'
                 : 'No se encontraron lecturas en este período.'}
             </p>
@@ -253,7 +333,7 @@ export function ReadingsHistory() {
 
       {/* Readings List */}
       {!isReadingsLoading && !isError && hasFilteredReadings && (
-        <div data-testid="readings-list" className="grid gap-4">
+        <div data-testid="readings-list" className={listClasses}>
           {filteredReadings.map((reading) => (
             <ReadingCard
               key={reading.id}

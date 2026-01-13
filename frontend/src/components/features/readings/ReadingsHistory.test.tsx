@@ -68,7 +68,7 @@ const mockReadings: Reading[] = [
   {
     id: 1,
     spreadId: 1,
-    spreadName: 'Cruz Celta',
+    spreadName: 'Cruz Céltica',
     question: '¿Qué me depara el futuro en mi carrera profesional?',
     createdAt: '2025-12-01T10:00:00Z',
     cardsCount: 10,
@@ -76,10 +76,18 @@ const mockReadings: Reading[] = [
   {
     id: 2,
     spreadId: 2,
-    spreadName: 'Tres Cartas',
+    spreadName: 'Tirada de 3 Cartas',
     question: '¿Encontraré el amor verdadero este año?',
     createdAt: '2025-12-02T10:00:00Z',
     cardsCount: 3,
+  },
+  {
+    id: 3,
+    spreadId: 3,
+    spreadName: 'Tirada de 5 Cartas',
+    question: '¿Cómo puedo mejorar mi vida laboral?',
+    createdAt: '2025-12-03T10:00:00Z',
+    cardsCount: 5,
   },
 ];
 
@@ -221,7 +229,7 @@ describe('ReadingsHistory', () => {
   });
 
   describe('Search Filter', () => {
-    it('should filter readings locally by search query', async () => {
+    it('should filter readings locally by search query in question', async () => {
       vi.mocked(useReadingsModule.useMyReadings).mockReturnValue({
         data: mockPaginatedReadings,
         isLoading: false,
@@ -240,6 +248,47 @@ describe('ReadingsHistory', () => {
         expect(readingCards).toHaveLength(1);
       });
     });
+
+    it('should filter readings by spread name', async () => {
+      vi.mocked(useReadingsModule.useMyReadings).mockReturnValue({
+        data: mockPaginatedReadings,
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: vi.fn(),
+      } as unknown as ReturnType<typeof useReadingsModule.useMyReadings>);
+
+      renderWithProviders(<ReadingsHistory />);
+
+      const searchInput = screen.getByPlaceholderText(/buscar/i);
+      await userEvent.type(searchInput, 'Cruz Céltica');
+
+      await waitFor(() => {
+        const readingCards = screen.getAllByTestId('reading-card');
+        expect(readingCards).toHaveLength(1);
+      });
+    });
+
+    it('should show no results message when search has no matches', async () => {
+      vi.mocked(useReadingsModule.useMyReadings).mockReturnValue({
+        data: mockPaginatedReadings,
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: vi.fn(),
+      } as unknown as ReturnType<typeof useReadingsModule.useMyReadings>);
+
+      renderWithProviders(<ReadingsHistory />);
+
+      const searchInput = screen.getByPlaceholderText(/buscar/i);
+      await userEvent.type(searchInput, 'búsqueda sin resultados');
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(/no se encontraron lecturas para tu búsqueda/i)
+        ).toBeInTheDocument();
+      });
+    });
   });
 
   describe('Pagination', () => {
@@ -256,6 +305,191 @@ describe('ReadingsHistory', () => {
 
       expect(screen.getByTestId('pagination')).toBeInTheDocument();
       expect(screen.getByText(/página 1 de 3/i)).toBeInTheDocument();
+    });
+  });
+
+  describe('Spread Filter', () => {
+    it('should show spread filter dropdown', () => {
+      vi.mocked(useReadingsModule.useMyReadings).mockReturnValue({
+        data: mockPaginatedReadings,
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: vi.fn(),
+      } as unknown as ReturnType<typeof useReadingsModule.useMyReadings>);
+
+      renderWithProviders(<ReadingsHistory />);
+
+      expect(screen.getByTestId('spread-filter')).toBeInTheDocument();
+    });
+
+    it('should filter readings by spread type', async () => {
+      vi.mocked(useReadingsModule.useMyReadings).mockReturnValue({
+        data: mockPaginatedReadings,
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: vi.fn(),
+      } as unknown as ReturnType<typeof useReadingsModule.useMyReadings>);
+
+      renderWithProviders(<ReadingsHistory />);
+
+      // Open spread filter dropdown
+      const spreadFilter = screen.getByTestId('spread-filter');
+      await userEvent.click(spreadFilter);
+
+      // Select "Tirada de 3 Cartas" option - use getAllByText and select the one within menu
+      const tresCartasOptions = screen.getAllByText('Tirada de 3 Cartas');
+      const menuOption = tresCartasOptions.find((el) => el.getAttribute('role') === 'menuitem');
+
+      if (menuOption) {
+        await userEvent.click(menuOption);
+      }
+
+      // Should show only readings with spreadName "Tirada de 3 Cartas"
+      await waitFor(() => {
+        const readingCards = screen.getAllByTestId('reading-card');
+        expect(readingCards).toHaveLength(1);
+      });
+    });
+
+    it('should show "Todas las tiradas" by default', () => {
+      vi.mocked(useReadingsModule.useMyReadings).mockReturnValue({
+        data: mockPaginatedReadings,
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: vi.fn(),
+      } as unknown as ReturnType<typeof useReadingsModule.useMyReadings>);
+
+      renderWithProviders(<ReadingsHistory />);
+
+      expect(screen.getByTestId('spread-filter')).toHaveTextContent('Todas las tiradas');
+    });
+
+    it('should show no results message when spread filter has no matches', async () => {
+      vi.mocked(useReadingsModule.useMyReadings).mockReturnValue({
+        data: mockPaginatedReadings,
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: vi.fn(),
+      } as unknown as ReturnType<typeof useReadingsModule.useMyReadings>);
+
+      renderWithProviders(<ReadingsHistory />);
+
+      // Open spread filter dropdown
+      const spreadFilter = screen.getByTestId('spread-filter');
+      await userEvent.click(spreadFilter);
+
+      // Select a spread type that doesn't exist in mock data
+      const spreadOption = screen.getByText('Tirada de 1 Carta');
+      await userEvent.click(spreadOption);
+
+      await waitFor(() => {
+        expect(screen.getByText(/no se encontraron lecturas/i)).toBeInTheDocument();
+      });
+    });
+
+    it('should filter by spread and search query simultaneously', async () => {
+      vi.mocked(useReadingsModule.useMyReadings).mockReturnValue({
+        data: mockPaginatedReadings,
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: vi.fn(),
+      } as unknown as ReturnType<typeof useReadingsModule.useMyReadings>);
+
+      renderWithProviders(<ReadingsHistory />);
+
+      // Apply spread filter
+      const spreadFilter = screen.getByTestId('spread-filter');
+      await userEvent.click(spreadFilter);
+
+      const spreadOptions = screen.getAllByText('Tirada de 3 Cartas');
+      const menuOption = spreadOptions.find((el) => el.getAttribute('role') === 'menuitem');
+      if (menuOption) {
+        await userEvent.click(menuOption);
+      }
+
+      // Apply search query
+      const searchInput = screen.getByPlaceholderText(/buscar/i);
+      await userEvent.type(searchInput, 'amor');
+
+      // Should show only reading that matches both filters
+      await waitFor(() => {
+        const readingCards = screen.getAllByTestId('reading-card');
+        expect(readingCards).toHaveLength(1);
+        // Verify it's the correct reading (Tirada de 3 Cartas with "amor" in question)
+        expect(screen.getByText(/encontraré el amor verdadero/i)).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('View Toggle', () => {
+    it('should show view toggle button', () => {
+      vi.mocked(useReadingsModule.useMyReadings).mockReturnValue({
+        data: mockPaginatedReadings,
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: vi.fn(),
+      } as unknown as ReturnType<typeof useReadingsModule.useMyReadings>);
+
+      renderWithProviders(<ReadingsHistory />);
+
+      expect(screen.getByTestId('view-toggle')).toBeInTheDocument();
+    });
+
+    it('should toggle between list and grid view', async () => {
+      vi.mocked(useReadingsModule.useMyReadings).mockReturnValue({
+        data: mockPaginatedReadings,
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: vi.fn(),
+      } as unknown as ReturnType<typeof useReadingsModule.useMyReadings>);
+
+      renderWithProviders(<ReadingsHistory />);
+
+      const readingsList = screen.getByTestId('readings-list');
+
+      // Default is list view (grid gap-4)
+      expect(readingsList).toHaveClass('grid', 'gap-4');
+
+      // Toggle to grid view
+      const viewToggle = screen.getByTestId('view-toggle');
+      await userEvent.click(viewToggle);
+
+      await waitFor(() => {
+        // Grid view should have specific classes (grid-cols-1 md:grid-cols-2 lg:grid-cols-3)
+        expect(readingsList).toHaveClass('grid-cols-1', 'md:grid-cols-2', 'lg:grid-cols-3');
+      });
+    });
+
+    it('should show grid icon in list view and list icon in grid view', async () => {
+      vi.mocked(useReadingsModule.useMyReadings).mockReturnValue({
+        data: mockPaginatedReadings,
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: vi.fn(),
+      } as unknown as ReturnType<typeof useReadingsModule.useMyReadings>);
+
+      renderWithProviders(<ReadingsHistory />);
+
+      const viewToggle = screen.getByTestId('view-toggle');
+
+      // Initially in list view, should show grid icon
+      expect(viewToggle).toHaveAttribute('aria-label', 'Vista en cuadrícula');
+
+      // Toggle to grid view
+      await userEvent.click(viewToggle);
+
+      await waitFor(() => {
+        // In grid view, should show list icon
+        expect(viewToggle).toHaveAttribute('aria-label', 'Vista en lista');
+      });
     });
   });
 
