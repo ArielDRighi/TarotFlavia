@@ -4,13 +4,12 @@ import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { ArrowLeft, Share2, RefreshCw, ChevronRight, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Share2, Plus, ChevronRight, RotateCcw } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
 import {
   useReadingDetail,
   useSpreads,
-  useRegenerateInterpretation,
   useShareReading,
 } from '@/hooks/api/useReadings';
 import { toast } from '@/hooks/utils/useToast';
@@ -19,7 +18,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ConfirmationModal } from '@/components/ui/confirmation-modal';
 import { cn } from '@/lib/utils';
 import type { Interpretation } from '@/types/reading.types';
 
@@ -270,21 +268,17 @@ export interface ReadingDetailProps {
  * - Breadcrumb navigation
  * - Question display with date and spread type
  * - Card grid with positions and brief interpretations
- * - Full interpretation rendered as markdown
- * - Share and regenerate actions
+ * - Full interpretation rendered as markdown (PREMIUM) or card meanings (FREE)
+ * - Share reading and start new reading actions
  */
 export function ReadingDetail({ readingId }: ReadingDetailProps) {
   const router = useRouter();
-
-  // State
-  const [showRegenerateModal, setShowRegenerateModal] = React.useState(false);
 
   // Data fetching
   const { data: reading, isLoading: isReadingLoading, isError } = useReadingDetail(readingId);
   const { data: spreads } = useSpreads();
 
   // Mutations
-  const { mutate: regenerate, isPending: isRegenerating } = useRegenerateInterpretation();
   const { mutateAsync: shareReadingAsync, isPending: isSharing } = useShareReading();
 
   // Get spread info
@@ -308,14 +302,8 @@ export function ReadingDetail({ readingId }: ReadingDetailProps) {
     }
   };
 
-  const handleRegenerateClick = () => {
-    setShowRegenerateModal(true);
-  };
-
-  const handleRegenerateConfirm = () => {
-    if (!reading) return;
-    regenerate(reading.id);
-    setShowRegenerateModal(false);
+  const handleNewReading = () => {
+    router.push('/ritual');
   };
 
   // Loading state
@@ -401,7 +389,7 @@ export function ReadingDetail({ readingId }: ReadingDetailProps) {
               {interpretationData.generalInterpretation ? (
                 <div
                   data-testid="interpretation-content"
-                  className={cn('prose prose-slate max-w-none', isRegenerating && 'animate-pulse')}
+                  className="prose prose-slate max-w-none"
                 >
                   <ReactMarkdown components={markdownComponents}>
                     {interpretationData.generalInterpretation}
@@ -454,24 +442,13 @@ export function ReadingDetail({ readingId }: ReadingDetailProps) {
               {isSharing ? 'Compartiendo...' : 'Compartir'}
             </Button>
 
-            <Button onClick={handleRegenerateClick} disabled={isRegenerating}>
-              <RefreshCw className={cn('mr-2 h-4 w-4', isRegenerating && 'animate-spin')} />
-              {isRegenerating ? 'Regenerando...' : 'Regenerar Interpretación'}
+            <Button onClick={handleNewReading}>
+              <Plus className="mr-2 h-4 w-4" />
+              Nueva Lectura
             </Button>
           </div>
         </footer>
       </div>
-
-      {/* Regenerate Confirmation Modal */}
-      <ConfirmationModal
-        open={showRegenerateModal}
-        onOpenChange={setShowRegenerateModal}
-        title="Regenerar Interpretación"
-        description="Esto consumirá una regeneración de tu plan. ¿Deseas continuar?"
-        confirmText="Confirmar"
-        cancelText="Cancelar"
-        onConfirm={handleRegenerateConfirm}
-      />
     </>
   );
 }
