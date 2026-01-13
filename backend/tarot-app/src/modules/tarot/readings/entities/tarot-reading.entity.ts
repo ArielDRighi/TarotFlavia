@@ -116,7 +116,7 @@ export class TarotReading {
     example: 1,
     required: false,
   })
-  @Column({ nullable: true })
+  @Column({ type: 'int', nullable: true })
   spreadId: number | null;
 
   @ApiProperty({

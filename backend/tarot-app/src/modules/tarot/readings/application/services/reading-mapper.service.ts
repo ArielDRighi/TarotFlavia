@@ -28,9 +28,8 @@ export class ReadingMapperService {
     const cardsCount = reading.cards?.length || 0;
 
     // Obtener preview de las primeras 3 cartas con su orientación
-    const cardPreviews: CardPreviewDto[] = reading.cards
-      ?.slice(0, 3)
-      .map((card) => {
+    const cardPreviews: CardPreviewDto[] =
+      reading.cards?.slice(0, 3).map((card) => {
         // Buscar la orientación de esta carta en cardPositions
         const position = reading.cardPositions?.find(
           (pos) => pos.cardId === card.id,

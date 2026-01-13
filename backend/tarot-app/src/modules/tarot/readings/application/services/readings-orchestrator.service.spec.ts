@@ -14,6 +14,8 @@ import { User, UserPlan } from '../../../../users/entities/user.entity';
 import { CreateReadingDto } from '../../dto/create-reading.dto';
 import { QueryReadingsDto } from '../../dto/query-readings.dto';
 import { PaginatedReadingsResponseDto } from '../../dto/paginated-readings-response.dto';
+import { ReadingListItemDto } from '../../dto/reading-list-item.dto';
+import { ReadingMapperService } from './reading-mapper.service';
 
 describe('ReadingsOrchestratorService', () => {
   let service: ReadingsOrchestratorService;
@@ -25,6 +27,7 @@ describe('ReadingsOrchestratorService', () => {
   let regenerateReadingUC: jest.Mocked<RegenerateReadingUseCase>;
   let deleteReadingUC: jest.Mocked<DeleteReadingUseCase>;
   let restoreReadingUC: jest.Mocked<RestoreReadingUseCase>;
+  let mockReadingMapper: jest.Mocked<ReadingMapperService>;
 
   const createMockUser = (): User => {
     const user = new User();
@@ -41,6 +44,17 @@ describe('ReadingsOrchestratorService', () => {
 
   const mockUser = createMockUser();
 
+  const createMockReadingDto = (): ReadingListItemDto => ({
+    id: 1,
+    question: 'Test question',
+    spreadId: 1,
+    spreadName: 'Test Spread',
+    cardsCount: 3,
+    cardPreviews: [],
+    createdAt: new Date().toISOString(),
+    deletedAt: undefined,
+  });
+
   const createMockReading = (): TarotReading => {
     const reading = new TarotReading();
     reading.id = 1;
@@ -48,6 +62,8 @@ describe('ReadingsOrchestratorService', () => {
     reading.customQuestion = 'Test question';
     reading.questionType = 'custom';
     reading.predefinedQuestionId = null;
+    reading.spreadId = 1;
+    reading.spreadName = 'Test Spread';
     reading.cardPositions = [];
     reading.isPublic = false;
     reading.sharedToken = null;
@@ -139,6 +155,14 @@ describe('ReadingsOrchestratorService', () => {
           provide: RestoreReadingUseCase,
           useValue: mockRestoreReadingUC,
         },
+        {
+          provide: ReadingMapperService,
+          useValue: {
+            toListItemDto: jest
+              .fn()
+              .mockImplementation(() => createMockReadingDto()),
+          },
+        },
       ],
     }).compile();
 
@@ -153,6 +177,7 @@ describe('ReadingsOrchestratorService', () => {
     regenerateReadingUC = module.get(RegenerateReadingUseCase);
     deleteReadingUC = module.get(DeleteReadingUseCase);
     restoreReadingUC = module.get(RestoreReadingUseCase);
+    mockReadingMapper = module.get(ReadingMapperService);
   });
 
   afterEach(() => {
@@ -222,7 +247,7 @@ describe('ReadingsOrchestratorService', () => {
       it('should delegate to ListReadingsUseCase', async () => {
         const queryDto: QueryReadingsDto = { page: 1, limit: 10 };
         const paginatedResponse: PaginatedReadingsResponseDto = {
-          data: [mockReading],
+          data: [createMockReadingDto()],
           meta: {
             page: 1,
             limit: 10,
@@ -243,7 +268,7 @@ describe('ReadingsOrchestratorService', () => {
 
       it('should delegate to ListReadingsUseCase without query params', async () => {
         const paginatedResponse: PaginatedReadingsResponseDto = {
-          data: [mockReading],
+          data: [createMockReadingDto()],
           meta: {
             page: 1,
             limit: 10,
@@ -498,12 +523,19 @@ describe('ReadingsOrchestratorService', () => {
 
     describe('findAllForAdmin', () => {
       it('should return paginated readings for admin without deleted', async () => {
+        const mockDto = createMockReadingDto();
         readingRepo.findAllForAdmin.mockResolvedValue([[mockReading], 1]);
+        mockReadingMapper.toListItemDto.mockReturnValue(mockDto);
 
         const result = await service.findAllForAdmin(false);
 
         expect(readingRepo.findAllForAdmin).toHaveBeenCalledWith(false);
-        expect(result.data).toEqual([mockReading]);
+        expect(mockReadingMapper.toListItemDto).toHaveBeenCalledWith(
+          mockReading,
+          1,
+          'Test Spread',
+        );
+        expect(result.data).toEqual([mockDto]);
         expect(result.meta.totalItems).toBe(1);
         expect(result.meta.page).toBe(1);
         expect(result.meta.limit).toBe(50);
@@ -511,10 +543,15 @@ describe('ReadingsOrchestratorService', () => {
 
       it('should return paginated readings for admin including deleted', async () => {
         const deletedReading = { ...mockReading, deletedAt: new Date() };
+        const mockDto1 = createMockReadingDto();
+        const mockDto2 = { ...createMockReadingDto(), id: 2 };
         readingRepo.findAllForAdmin.mockResolvedValue([
           [mockReading, deletedReading],
           2,
         ]);
+        mockReadingMapper.toListItemDto
+          .mockReturnValueOnce(mockDto1)
+          .mockReturnValueOnce(mockDto2);
 
         const result = await service.findAllForAdmin(true);
 
@@ -528,7 +565,14 @@ describe('ReadingsOrchestratorService', () => {
           ...mockReading,
           id: i + 1,
         }));
+        const mockDtos = Array.from({ length: 100 }, (_, i) => ({
+          ...createMockReadingDto(),
+          id: i + 1,
+        }));
         readingRepo.findAllForAdmin.mockResolvedValue([readings, 100]);
+        mockReadingMapper.toListItemDto.mockImplementation(
+          (_, __, ___) => mockDtos.shift()!,
+        );
 
         const result = await service.findAllForAdmin(false);
 

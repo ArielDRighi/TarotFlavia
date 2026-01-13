@@ -29,7 +29,11 @@ describe('ReadingMapperService', () => {
           name: 'La Sacerdotisa',
           imageUrl: 'https://example.com/sacerdotisa.jpg',
         },
-        { id: 4, name: 'La Emperatriz', imageUrl: 'https://example.com/emperatriz.jpg' },
+        {
+          id: 4,
+          name: 'La Emperatriz',
+          imageUrl: 'https://example.com/emperatriz.jpg',
+        },
       ];
 
       const mockReading: Partial<TarotReading> = {
