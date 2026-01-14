@@ -181,7 +181,7 @@ export class CheckUsageLimitGuard implements CanActivate {
 
     const readingsCount = await this.tarotReadingRepository
       .createQueryBuilder('tarot_reading')
-      .where('tarot_reading.user_id = :userId', { userId })
+      .where('tarot_reading.userId = :userId', { userId })
       .andWhere('tarot_reading.createdAt >= :startOfToday', { startOfToday })
       .andWhere('tarot_reading.deletedAt IS NULL')
       .getCount();
