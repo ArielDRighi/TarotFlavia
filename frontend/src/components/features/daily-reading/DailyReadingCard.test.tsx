@@ -4,20 +4,14 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { DailyReadingCard } from './DailyReadingCard';
 import type { DailyReadingHistoryItem } from '@/types';
 
-// Mock date-fns
-vi.mock('date-fns', () => ({
-  format: vi.fn((date: Date, formatStr: string) => {
-    if (formatStr === "EEEE d 'de' MMMM") {
-      return 'Lunes 2 de Diciembre';
-    }
-    return '02/12/2025';
-  }),
-}));
-
-// Mock date-fns locale
-vi.mock('date-fns/locale', () => ({
-  es: {},
-}));
+// Mock the date utilities from @/lib/utils
+vi.mock('@/lib/utils', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/utils')>();
+  return {
+    ...actual,
+    formatDateFull: vi.fn(() => 'Lunes 2 de Diciembre'),
+  };
+});
 
 // Mock next/image
 vi.mock('next/image', () => ({
