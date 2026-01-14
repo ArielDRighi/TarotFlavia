@@ -23,7 +23,6 @@
       "Bash(git pull:*)",
       "Bash(git add:*)",
       "Bash(dir:*)",
-      "Bash(npx ts-node -e \"\nconst { DataSource } = require\\(''typeorm''\\);\n\nconst AppDataSource = new DataSource\\({\n  type: ''postgres'',\n  host: ''localhost'',\n  port: 5432,\n  username: ''postgres'',\n  password: ''postgres'',\n  database: ''tarot_dev'',\n  synchronize: false,\n}\\);\n\nasync function check\\(\\) {\n  await AppDataSource.initialize\\(\\);\n  \n  // Get Free Test User ID\n  const users = await AppDataSource.query\\(\"\"SELECT id, email, name, plan FROM users WHERE name LIKE ''%Free%'' OR email LIKE ''%free%''\"\"\\);\n  console.log\\(''Users found:'', JSON.stringify\\(users, null, 2\\)\\);\n  \n  if \\(users.length > 0\\) {\n    const userId = users[0].id;\n    \n    // Get all daily readings for this user\n    const dailyReadings = await AppDataSource.query\\(\n      \"\"SELECT id, user_id, reading_date, card_id, created_at FROM daily_reading WHERE user_id = $1 ORDER BY reading_date DESC LIMIT 10\"\",\n      [userId]\n    \\);\n    console.log\\(''Daily readings:'', JSON.stringify\\(dailyReadings, null, 2\\)\\);\n  }\n  \n  await AppDataSource.destroy\\(\\);\n}\ncheck\\(\\).catch\\(console.error\\);\n\")",
       "Bash(docker exec:*)",
       "Bash(docker ps:*)",
       "mcp__playwright__browser_evaluate",

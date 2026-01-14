@@ -79,8 +79,17 @@ Funciones centralizadas para manejo consistente de fechas UTC:
  * Usado para comparar con columnas DATE de PostgreSQL
  */
 export function getTodayUTCDateString(): string {
-  const now = new Date();
-  return now.toISOString().split('T')[0];
+  return formatDateToUTCString(new Date());
+}
+
+/**
+ * Formatea un Date a string YYYY-MM-DD usando componentes UTC
+ */
+export function formatDateToUTCString(date: Date): string {
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 /**
@@ -89,7 +98,8 @@ export function getTodayUTCDateString(): string {
  */
 export function getStartOfTodayUTC(): Date {
   const now = new Date();
-  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
+  now.setUTCHours(0, 0, 0, 0);
+  return now;
 }
 ```
 
@@ -128,13 +138,15 @@ Manejo de fechas que evita problemas de timezone al mostrar fechas en la UI:
  * PROBLEMA: new Date('2025-01-15') interpreta como UTC midnight.
  * En timezone UTC-3, esto muestra "14 de enero" en vez de "15 de enero".
  *
- * SOLUCIÓN: Para fechas DATE-only (YYYY-MM-DD), agregamos T12:00:00
- * para que se interprete como mediodía local, evitando el shift.
+ * SOLUCIÓN: Para fechas DATE-only (YYYY-MM-DD), construimos un Date
+ * usando el constructor explícito con hora 12:00 local, evitando
+ * ambigüedades de parsing dependientes de implementación.
  */
 export function parseDateString(dateString: string): Date {
   const isDateOnly = /^\d{4}-\d{2}-\d{2}$/.test(dateString);
   if (isDateOnly) {
-    return new Date(`${dateString}T12:00:00`);
+    const [year, month, day] = dateString.split('-').map(Number);
+    return new Date(year, month - 1, day, 12, 0, 0, 0);
   }
   return new Date(dateString);
 }

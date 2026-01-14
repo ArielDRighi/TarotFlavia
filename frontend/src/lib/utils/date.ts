@@ -18,10 +18,12 @@
  *
  * The Solution:
  * -------------
- * For DATE-only strings, we append 'T12:00:00' (noon local time) before parsing.
- * This ensures the date displays correctly in ANY timezone worldwide:
+ * For DATE-only strings, we construct a Date at noon LOCAL time using
+ * the Date constructor with explicit year, month, day, and hour values.
+ * This avoids implementation-dependent string parsing and ensures
+ * the date displays correctly in ANY timezone worldwide:
  *
- *   parseDateString('2025-01-15') → 2025-01-15T12:00:00 → Always shows Jan 15
+ *   parseDateString('2025-01-15') → new Date(2025, 0, 15, 12) → Always shows Jan 15
  *
  * Usage Guidelines:
  * -----------------
@@ -37,7 +39,7 @@ import { es } from 'date-fns/locale';
  * Parses a date string safely, handling both DATE (YYYY-MM-DD) and
  * TIMESTAMP (ISO 8601) formats from the backend.
  *
- * For DATE-only strings, appends noon time to prevent timezone date shifts.
+ * For DATE-only strings, constructs a Date at noon local time to prevent timezone date shifts.
  * For full timestamps, parses directly.
  *
  * @param dateString - Date string from backend (YYYY-MM-DD or ISO 8601)
@@ -55,8 +57,10 @@ export function parseDateString(dateString: string): Date {
   const isDateOnly = /^\d{4}-\d{2}-\d{2}$/.test(dateString);
 
   if (isDateOnly) {
-    // Append noon to prevent timezone date shift
-    return new Date(`${dateString}T12:00:00`);
+    // Construct a local Date at noon to prevent timezone date shift,
+    // without relying on implementation-dependent string parsing.
+    const [year, month, day] = dateString.split('-').map(Number);
+    return new Date(year, month - 1, day, 12, 0, 0, 0);
   }
 
   // Full timestamp - parse directly
