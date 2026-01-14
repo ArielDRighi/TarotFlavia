@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, IsNull } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Request } from 'express';
 import { UsageLimitsService } from '../usage-limits.service';
 import { AnonymousTrackingService } from '../services/anonymous-tracking.service';
@@ -206,7 +206,9 @@ export class CheckUsageLimitGuard implements CanActivate {
     userId: number,
     feature: UsageFeature,
   ): Promise<boolean> {
-    this.logger.debug(`Checking ${feature} via usage_limits for userId=${userId}`);
+    this.logger.debug(
+      `Checking ${feature} via usage_limits for userId=${userId}`,
+    );
 
     const canUse = await this.usageLimitsService.checkLimit(userId, feature);
     this.logger.debug(`${feature} check result: ${canUse}`);

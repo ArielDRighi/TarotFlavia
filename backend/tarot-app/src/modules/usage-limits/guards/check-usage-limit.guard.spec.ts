@@ -168,14 +168,18 @@ describe('CheckUsageLimitGuard', () => {
         andWhere: jest.fn().mockReturnThis(),
         getCount: jest.fn().mockResolvedValue(0),
       };
-      tarotReadingRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder);
+      tarotReadingRepository.createQueryBuilder.mockReturnValue(
+        mockQueryBuilder,
+      );
 
       const result = await guard.canActivate(context);
 
       expect(result).toBe(true);
       // Verify new direct table query logic was used
       expect(usersService.findById).toHaveBeenCalledWith(1);
-      expect(tarotReadingRepository.createQueryBuilder).toHaveBeenCalledWith('tarot_reading');
+      expect(tarotReadingRepository.createQueryBuilder).toHaveBeenCalledWith(
+        'tarot_reading',
+      );
     });
 
     it('should block action when limit is reached (403)', async () => {
@@ -189,7 +193,9 @@ describe('CheckUsageLimitGuard', () => {
         andWhere: jest.fn().mockReturnThis(),
         getCount: jest.fn().mockResolvedValue(1),
       };
-      tarotReadingRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder);
+      tarotReadingRepository.createQueryBuilder.mockReturnValue(
+        mockQueryBuilder,
+      );
 
       await expect(guard.canActivate(context)).rejects.toThrow(
         ForbiddenException,
@@ -284,7 +290,9 @@ describe('CheckUsageLimitGuard', () => {
         andWhere: jest.fn().mockReturnThis(),
         getCount: jest.fn().mockResolvedValue(0),
       };
-      tarotReadingRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder);
+      tarotReadingRepository.createQueryBuilder.mockReturnValue(
+        mockQueryBuilder,
+      );
 
       await guard.canActivate(context);
 
@@ -378,20 +386,9 @@ describe('CheckUsageLimitGuard', () => {
     });
 
     describe('daily limit reset (24-hour cycle)', () => {
-      let dailyReadingRepository: {
-        createQueryBuilder: jest.Mock;
-      };
-
-      beforeEach(() => {
-        dailyReadingRepository = {
-          createQueryBuilder: jest.fn(),
-        };
-      });
-
       it('DAILY_CARD: should reset limit when day changes (yesterday blocked, today allowed)', async () => {
         // SCENARIO: User generated daily card yesterday, should be allowed today
         const userId = 1;
-        const yesterday = '2025-01-14';
         const today = '2025-01-15';
 
         // Mock getTodayUTCDateString to return "today"
@@ -417,11 +414,19 @@ describe('CheckUsageLimitGuard', () => {
             },
             {
               provide: UsersService,
-              useValue: { findById: jest.fn().mockResolvedValue({ id: userId, plan: 'FREE' }) },
+              useValue: {
+                findById: jest
+                  .fn()
+                  .mockResolvedValue({ id: userId, plan: 'FREE' }),
+              },
             },
             {
               provide: PlanConfigService,
-              useValue: { findByPlanType: jest.fn().mockResolvedValue({ dailyCardLimit: 1 }) },
+              useValue: {
+                findByPlanType: jest
+                  .fn()
+                  .mockResolvedValue({ dailyCardLimit: 1 }),
+              },
             },
             {
               provide: Reflector,
@@ -434,7 +439,11 @@ describe('CheckUsageLimitGuard', () => {
             },
             {
               provide: getRepositoryToken(DailyReading),
-              useValue: { createQueryBuilder: jest.fn().mockReturnValue(mockDailyQueryBuilder) },
+              useValue: {
+                createQueryBuilder: jest
+                  .fn()
+                  .mockReturnValue(mockDailyQueryBuilder),
+              },
             },
             {
               provide: getRepositoryToken(TarotReading),
@@ -443,7 +452,8 @@ describe('CheckUsageLimitGuard', () => {
           ],
         }).compile();
 
-        const testGuard = module.get<CheckUsageLimitGuard>(CheckUsageLimitGuard);
+        const testGuard =
+          module.get<CheckUsageLimitGuard>(CheckUsageLimitGuard);
 
         // User has a reading from YESTERDAY (not today) - should NOT block
         // The query looks for readings WHERE reading_date = 'today', so yesterday's reading won't match
@@ -491,11 +501,19 @@ describe('CheckUsageLimitGuard', () => {
             },
             {
               provide: UsersService,
-              useValue: { findById: jest.fn().mockResolvedValue({ id: userId, plan: 'FREE' }) },
+              useValue: {
+                findById: jest
+                  .fn()
+                  .mockResolvedValue({ id: userId, plan: 'FREE' }),
+              },
             },
             {
               provide: PlanConfigService,
-              useValue: { findByPlanType: jest.fn().mockResolvedValue({ dailyCardLimit: 1 }) },
+              useValue: {
+                findByPlanType: jest
+                  .fn()
+                  .mockResolvedValue({ dailyCardLimit: 1 }),
+              },
             },
             {
               provide: Reflector,
@@ -508,7 +526,11 @@ describe('CheckUsageLimitGuard', () => {
             },
             {
               provide: getRepositoryToken(DailyReading),
-              useValue: { createQueryBuilder: jest.fn().mockReturnValue(mockDailyQueryBuilder) },
+              useValue: {
+                createQueryBuilder: jest
+                  .fn()
+                  .mockReturnValue(mockDailyQueryBuilder),
+              },
             },
             {
               provide: getRepositoryToken(TarotReading),
@@ -517,10 +539,13 @@ describe('CheckUsageLimitGuard', () => {
           ],
         }).compile();
 
-        const testGuard = module.get<CheckUsageLimitGuard>(CheckUsageLimitGuard);
+        const testGuard =
+          module.get<CheckUsageLimitGuard>(CheckUsageLimitGuard);
         const context = mockExecutionContext(userId);
 
-        await expect(testGuard.canActivate(context)).rejects.toThrow(ForbiddenException);
+        await expect(testGuard.canActivate(context)).rejects.toThrow(
+          ForbiddenException,
+        );
 
         jest.restoreAllMocks();
       });
@@ -531,9 +556,9 @@ describe('CheckUsageLimitGuard', () => {
         const today = '2025-01-15';
 
         jest.spyOn(dateUtils, 'getTodayUTCDateString').mockReturnValue(today);
-        jest.spyOn(dateUtils, 'getStartOfTodayUTC').mockReturnValue(
-          new Date('2025-01-15T00:00:00.000Z'),
-        );
+        jest
+          .spyOn(dateUtils, 'getStartOfTodayUTC')
+          .mockReturnValue(new Date('2025-01-15T00:00:00.000Z'));
 
         const mockTarotQueryBuilder = {
           where: jest.fn().mockReturnThis(),
@@ -554,12 +579,18 @@ describe('CheckUsageLimitGuard', () => {
             },
             {
               provide: UsersService,
-              useValue: { findById: jest.fn().mockResolvedValue({ id: userId, plan: 'FREE' }) },
+              useValue: {
+                findById: jest
+                  .fn()
+                  .mockResolvedValue({ id: userId, plan: 'FREE' }),
+              },
             },
             {
               provide: PlanConfigService,
               useValue: {
-                findByPlanType: jest.fn().mockResolvedValue({ tarotReadingsLimit: 1 }),
+                findByPlanType: jest
+                  .fn()
+                  .mockResolvedValue({ tarotReadingsLimit: 1 }),
               },
             },
             {
@@ -577,12 +608,17 @@ describe('CheckUsageLimitGuard', () => {
             },
             {
               provide: getRepositoryToken(TarotReading),
-              useValue: { createQueryBuilder: jest.fn().mockReturnValue(mockTarotQueryBuilder) },
+              useValue: {
+                createQueryBuilder: jest
+                  .fn()
+                  .mockReturnValue(mockTarotQueryBuilder),
+              },
             },
           ],
         }).compile();
 
-        const testGuard = module.get<CheckUsageLimitGuard>(CheckUsageLimitGuard);
+        const testGuard =
+          module.get<CheckUsageLimitGuard>(CheckUsageLimitGuard);
         const context = mockExecutionContext(userId);
 
         const result = await testGuard.canActivate(context);
@@ -602,9 +638,9 @@ describe('CheckUsageLimitGuard', () => {
         const today = '2025-01-15';
 
         jest.spyOn(dateUtils, 'getTodayUTCDateString').mockReturnValue(today);
-        jest.spyOn(dateUtils, 'getStartOfTodayUTC').mockReturnValue(
-          new Date('2025-01-15T00:00:00.000Z'),
-        );
+        jest
+          .spyOn(dateUtils, 'getStartOfTodayUTC')
+          .mockReturnValue(new Date('2025-01-15T00:00:00.000Z'));
 
         const mockTarotQueryBuilder = {
           where: jest.fn().mockReturnThis(),
@@ -625,12 +661,18 @@ describe('CheckUsageLimitGuard', () => {
             },
             {
               provide: UsersService,
-              useValue: { findById: jest.fn().mockResolvedValue({ id: userId, plan: 'FREE' }) },
+              useValue: {
+                findById: jest
+                  .fn()
+                  .mockResolvedValue({ id: userId, plan: 'FREE' }),
+              },
             },
             {
               provide: PlanConfigService,
               useValue: {
-                findByPlanType: jest.fn().mockResolvedValue({ tarotReadingsLimit: 1 }),
+                findByPlanType: jest
+                  .fn()
+                  .mockResolvedValue({ tarotReadingsLimit: 1 }),
               },
             },
             {
@@ -648,15 +690,22 @@ describe('CheckUsageLimitGuard', () => {
             },
             {
               provide: getRepositoryToken(TarotReading),
-              useValue: { createQueryBuilder: jest.fn().mockReturnValue(mockTarotQueryBuilder) },
+              useValue: {
+                createQueryBuilder: jest
+                  .fn()
+                  .mockReturnValue(mockTarotQueryBuilder),
+              },
             },
           ],
         }).compile();
 
-        const testGuard = module.get<CheckUsageLimitGuard>(CheckUsageLimitGuard);
+        const testGuard =
+          module.get<CheckUsageLimitGuard>(CheckUsageLimitGuard);
         const context = mockExecutionContext(userId);
 
-        await expect(testGuard.canActivate(context)).rejects.toThrow(ForbiddenException);
+        await expect(testGuard.canActivate(context)).rejects.toThrow(
+          ForbiddenException,
+        );
 
         jest.restoreAllMocks();
       });
@@ -666,8 +715,12 @@ describe('CheckUsageLimitGuard', () => {
         const today = '2025-01-15';
         const startOfToday = new Date('2025-01-15T00:00:00.000Z');
 
-        const getTodaySpy = jest.spyOn(dateUtils, 'getTodayUTCDateString').mockReturnValue(today);
-        const getStartSpy = jest.spyOn(dateUtils, 'getStartOfTodayUTC').mockReturnValue(startOfToday);
+        const getTodaySpy = jest
+          .spyOn(dateUtils, 'getTodayUTCDateString')
+          .mockReturnValue(today);
+        const getStartSpy = jest
+          .spyOn(dateUtils, 'getStartOfTodayUTC')
+          .mockReturnValue(startOfToday);
 
         // Test DAILY_CARD
         const mockDailyQueryBuilder = {
@@ -679,24 +732,51 @@ describe('CheckUsageLimitGuard', () => {
         const module1: TestingModule = await Test.createTestingModule({
           providers: [
             CheckUsageLimitGuard,
-            { provide: UsageLimitsService, useValue: { checkLimit: jest.fn() } },
-            { provide: AnonymousTrackingService, useValue: { canAccess: jest.fn() } },
-            { provide: UsersService, useValue: { findById: jest.fn().mockResolvedValue({ id: 1, plan: 'FREE' }) } },
-            { provide: PlanConfigService, useValue: { findByPlanType: jest.fn().mockResolvedValue({}) } },
+            {
+              provide: UsageLimitsService,
+              useValue: { checkLimit: jest.fn() },
+            },
+            {
+              provide: AnonymousTrackingService,
+              useValue: { canAccess: jest.fn() },
+            },
+            {
+              provide: UsersService,
+              useValue: {
+                findById: jest.fn().mockResolvedValue({ id: 1, plan: 'FREE' }),
+              },
+            },
+            {
+              provide: PlanConfigService,
+              useValue: { findByPlanType: jest.fn().mockResolvedValue({}) },
+            },
             {
               provide: Reflector,
               useValue: {
-                getAllAndOverride: jest.fn()
+                getAllAndOverride: jest
+                  .fn()
                   .mockReturnValueOnce(UsageFeature.DAILY_CARD)
                   .mockReturnValueOnce(false),
               },
             },
-            { provide: getRepositoryToken(DailyReading), useValue: { createQueryBuilder: jest.fn().mockReturnValue(mockDailyQueryBuilder) } },
-            { provide: getRepositoryToken(TarotReading), useValue: { createQueryBuilder: jest.fn() } },
+            {
+              provide: getRepositoryToken(DailyReading),
+              useValue: {
+                createQueryBuilder: jest
+                  .fn()
+                  .mockReturnValue(mockDailyQueryBuilder),
+              },
+            },
+            {
+              provide: getRepositoryToken(TarotReading),
+              useValue: { createQueryBuilder: jest.fn() },
+            },
           ],
         }).compile();
 
-        await module1.get<CheckUsageLimitGuard>(CheckUsageLimitGuard).canActivate(mockExecutionContext(1));
+        await module1
+          .get<CheckUsageLimitGuard>(CheckUsageLimitGuard)
+          .canActivate(mockExecutionContext(1));
         expect(getTodaySpy).toHaveBeenCalled();
 
         // Test TAROT_READING
@@ -709,24 +789,55 @@ describe('CheckUsageLimitGuard', () => {
         const module2: TestingModule = await Test.createTestingModule({
           providers: [
             CheckUsageLimitGuard,
-            { provide: UsageLimitsService, useValue: { checkLimit: jest.fn() } },
-            { provide: AnonymousTrackingService, useValue: { canAccess: jest.fn() } },
-            { provide: UsersService, useValue: { findById: jest.fn().mockResolvedValue({ id: 1, plan: 'FREE' }) } },
-            { provide: PlanConfigService, useValue: { findByPlanType: jest.fn().mockResolvedValue({ tarotReadingsLimit: 1 }) } },
+            {
+              provide: UsageLimitsService,
+              useValue: { checkLimit: jest.fn() },
+            },
+            {
+              provide: AnonymousTrackingService,
+              useValue: { canAccess: jest.fn() },
+            },
+            {
+              provide: UsersService,
+              useValue: {
+                findById: jest.fn().mockResolvedValue({ id: 1, plan: 'FREE' }),
+              },
+            },
+            {
+              provide: PlanConfigService,
+              useValue: {
+                findByPlanType: jest
+                  .fn()
+                  .mockResolvedValue({ tarotReadingsLimit: 1 }),
+              },
+            },
             {
               provide: Reflector,
               useValue: {
-                getAllAndOverride: jest.fn()
+                getAllAndOverride: jest
+                  .fn()
                   .mockReturnValueOnce(UsageFeature.TAROT_READING)
                   .mockReturnValueOnce(false),
               },
             },
-            { provide: getRepositoryToken(DailyReading), useValue: { createQueryBuilder: jest.fn() } },
-            { provide: getRepositoryToken(TarotReading), useValue: { createQueryBuilder: jest.fn().mockReturnValue(mockTarotQueryBuilder) } },
+            {
+              provide: getRepositoryToken(DailyReading),
+              useValue: { createQueryBuilder: jest.fn() },
+            },
+            {
+              provide: getRepositoryToken(TarotReading),
+              useValue: {
+                createQueryBuilder: jest
+                  .fn()
+                  .mockReturnValue(mockTarotQueryBuilder),
+              },
+            },
           ],
         }).compile();
 
-        await module2.get<CheckUsageLimitGuard>(CheckUsageLimitGuard).canActivate(mockExecutionContext(1));
+        await module2
+          .get<CheckUsageLimitGuard>(CheckUsageLimitGuard)
+          .canActivate(mockExecutionContext(1));
         expect(getStartSpy).toHaveBeenCalled();
 
         jest.restoreAllMocks();
