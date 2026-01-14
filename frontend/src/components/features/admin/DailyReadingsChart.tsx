@@ -15,6 +15,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import type { ReadingsPerDayDto } from '@/types/admin.types';
+import { formatDateCompact, formatDateLocalized } from '@/lib/utils';
 
 interface DailyReadingsChartProps {
   data: ReadingsPerDayDto[];
@@ -37,17 +38,11 @@ export function DailyReadingsChart({ data }: DailyReadingsChartProps) {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis
                 dataKey="date"
-                tickFormatter={(value) => {
-                  const date = new Date(value);
-                  return `${date.getMonth() + 1}/${date.getDate()}`;
-                }}
+                tickFormatter={(value) => formatDateCompact(value)}
               />
               <YAxis />
               <Tooltip
-                labelFormatter={(value) => {
-                  const date = new Date(value as string);
-                  return date.toLocaleDateString('es-ES');
-                }}
+                labelFormatter={(value) => formatDateLocalized(value as string)}
               />
               <Line
                 type="monotone"

@@ -5,6 +5,7 @@ import { createHash } from 'crypto';
 import { AnonymousUsage } from '../entities/anonymous-usage.entity';
 import { UsageFeature } from '../entities/usage-limit.entity';
 import { Request } from 'express';
+import { getTodayUTCDateString } from '../../../common/utils/date.utils';
 
 @Injectable()
 export class AnonymousTrackingService {
@@ -52,18 +53,13 @@ export class AnonymousTrackingService {
     feature: UsageFeature,
   ): Promise<boolean> {
     const fingerprint = this.generateFingerprint(ip, userAgent);
-
-    // Get start of today in UTC
-    // All dates are normalized to UTC 00:00:00 for consistency across timezones
-    const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
-    const dateString = today.toISOString().split('T')[0];
+    const todayStr = getTodayUTCDateString();
 
     // Check if fingerprint already accessed today for this feature
     const existingUsage = await this.anonymousUsageRepository.findOne({
       where: {
         fingerprint,
-        date: dateString,
+        date: todayStr,
         feature,
       },
     });
@@ -84,17 +80,13 @@ export class AnonymousTrackingService {
     feature: UsageFeature,
   ): Promise<number> {
     const fingerprint = this.generateFingerprint(ip, userAgent);
-
-    // Get start of today in UTC
-    const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
-    const dateString = today.toISOString().split('T')[0];
+    const todayStr = getTodayUTCDateString();
 
     // Count usage for this fingerprint today
     const count = await this.anonymousUsageRepository.count({
       where: {
         fingerprint,
-        date: dateString,
+        date: todayStr,
         feature,
       },
     });
@@ -111,17 +103,12 @@ export class AnonymousTrackingService {
     const ip = req.ip || '';
     const userAgent = req.headers['user-agent'] || '';
     const fingerprint = this.generateFingerprint(ip, userAgent);
-
-    // Get start of today in UTC
-    // All dates are normalized to UTC 00:00:00 for consistency across timezones
-    const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
-    const dateString = today.toISOString().split('T')[0];
+    const todayStr = getTodayUTCDateString();
 
     const anonymousUsage = this.anonymousUsageRepository.create({
       fingerprint,
       ip,
-      date: dateString,
+      date: todayStr,
       feature: UsageFeature.TAROT_READING,
     });
 

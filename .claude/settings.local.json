@@ -18,7 +18,17 @@
       "mcp__playwright__browser_snapshot",
       "mcp__playwright__browser_wait_for",
       "mcp__playwright__browser_close",
-      "mcp__playwright__browser_fill_form"
+      "mcp__playwright__browser_fill_form",
+      "Bash(git checkout:*)",
+      "Bash(git pull:*)",
+      "Bash(git add:*)",
+      "Bash(dir:*)",
+      "Bash(docker exec:*)",
+      "Bash(docker ps:*)",
+      "mcp__playwright__browser_evaluate",
+      "mcp__playwright__browser_press_key",
+      "Bash(git push:*)",
+      "Bash(gh pr create:*)"
     ]
   }
 }

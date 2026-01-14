@@ -18,6 +18,7 @@ import {
   DailyReadingHistoryDto,
   DailyReadingHistoryItemDto,
 } from './dto/daily-reading-history.dto';
+import { getTodayUTCDateString } from '../../../common/utils/date.utils';
 
 @Injectable()
 export class DailyReadingService {
@@ -31,21 +32,6 @@ export class DailyReadingService {
     private readonly planConfigService: PlanConfigService,
     private readonly usageLimitsService: UsageLimitsService,
   ) {}
-
-  /**
-   * Helper para obtener la fecha local del día actual sin conversión a UTC
-   * Esto evita problemas de timezone donde el día puede cambiar al convertir a UTC
-   */
-  private getTodayLocalDateString(): string {
-    const now = new Date();
-    // BUGFIX: Use UTC date to match the guard's date filtering logic
-    // This ensures consistency: both daily card creation and limit checking
-    // use the same timezone (UTC), preventing timezone mismatches
-    const year = now.getUTCFullYear();
-    const month = String(now.getUTCMonth() + 1).padStart(2, '0');
-    const day = String(now.getUTCDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }
 
   /**
    * Genera la carta del día para un usuario
@@ -63,7 +49,7 @@ export class DailyReadingService {
     tarotistaId: number,
     user?: Partial<User>,
   ): Promise<DailyReading> {
-    const todayStr = this.getTodayLocalDateString();
+    const todayStr = getTodayUTCDateString();
 
     // NUEVO: Verificar límite de carta del día ANTES de verificar existencia
     // Si el usuario alcanzó su límite diario de cartas, lanzar error 403
@@ -155,7 +141,7 @@ export class DailyReadingService {
    * Obtiene la carta del día de hoy si existe
    */
   async getTodayCard(userId: number): Promise<DailyReading | null> {
-    const todayStr = this.getTodayLocalDateString();
+    const todayStr = getTodayUTCDateString();
 
     return this.dailyReadingRepository
       .createQueryBuilder('daily_reading')
@@ -171,7 +157,7 @@ export class DailyReadingService {
    * No incluye interpretación IA (solo info de DB)
    */
   async getTodayCardPublic(): Promise<DailyReading | null> {
-    const todayStr = this.getTodayLocalDateString();
+    const todayStr = getTodayUTCDateString();
 
     return this.dailyReadingRepository
       .createQueryBuilder('daily_reading')
@@ -191,7 +177,7 @@ export class DailyReadingService {
     fingerprint: string,
     tarotistaId: number,
   ): Promise<DailyReading> {
-    const todayStr = this.getTodayLocalDateString();
+    const todayStr = getTodayUTCDateString();
 
     // Verificar que NO existe carta del día para este fingerprint hoy
     const existingReading = await this.dailyReadingRepository
@@ -248,7 +234,7 @@ export class DailyReadingService {
     userId: number,
     tarotistaId: number,
   ): Promise<DailyReading> {
-    const todayStr = this.getTodayLocalDateString();
+    const todayStr = getTodayUTCDateString();
 
     // Buscar carta del día existente
     const existingReading = await this.dailyReadingRepository

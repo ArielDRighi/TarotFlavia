@@ -3,11 +3,9 @@
 import * as React from 'react';
 import Image from 'next/image';
 import { RefreshCw } from 'lucide-react';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
 import ReactMarkdown from 'react-markdown';
 
-import { cn } from '@/lib/utils';
+import { cn, formatDateFull } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { DailyReadingHistoryItem } from '@/types';
@@ -24,15 +22,6 @@ export interface DailyReadingCardProps {
   className?: string;
 }
 
-/**
- * Format date to Spanish full format (e.g., "Lunes 2 de Diciembre")
- * Capitalizes the first letter
- */
-function formatReadingDate(dateString: string): string {
-  const date = new Date(dateString);
-  const formatted = format(date, "EEEE d 'de' MMMM", { locale: es });
-  return formatted.charAt(0).toUpperCase() + formatted.slice(1);
-}
 
 /**
  * DailyReadingCard Component
@@ -58,7 +47,7 @@ function formatReadingDate(dateString: string): string {
  * ```
  */
 export function DailyReadingCard({ reading, className }: DailyReadingCardProps) {
-  const formattedDate = formatReadingDate(reading.readingDate);
+  const formattedDate = formatDateFull(reading.readingDate);
 
   return (
     <Card

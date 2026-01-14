@@ -18,74 +18,198 @@ Marketplace de tarotistas profesionales con generación de lecturas de tarot asi
 
 ## 🎯 Descripción
 
-Auguria es una plataforma completa de lecturas de tarot que combina:
+Auguria es una plataforma completa de lecturas de tarot que combina inteligencia artificial con experiencia tradicional del tarot. El proyecto está en fase MVP con el backend completado al ~95% y el frontend en desarrollo activo.
 
-- **Backend NestJS**: API RESTful robusta con arquitectura escalable
-- **Base de datos PostgreSQL**: Almacenamiento de usuarios, lecturas e interpretaciones
-- **Integración IA**: Generación de interpretaciones mediante OpenAI GPT-4 y Anthropic Claude
-- **Sistema de Usuarios**: Autenticación JWT, roles y límites de uso
-- **Caché Inteligente**: Optimización de costos de IA mediante caché de interpretaciones
-- **Testing Completo**: Cobertura >80% con tests unitarios y E2E
+**Arquitectura:**
+
+- **Backend NestJS**: API RESTful robusta con arquitectura feature-based y capas (domain/application/infrastructure)
+- **Base de datos PostgreSQL 16**: Esquema completo con 29 tablas para usuarios, lecturas, interpretaciones y marketplace
+- **IA Multi-Provider**: Groq Llama 3.1 70B (principal), OpenAI GPT-4 Turbo y DeepSeek (fallback) con circuit breaker y retry
+- **Sistema de Usuarios**: Autenticación JWT con refresh tokens, roles (CONSUMER, TAROTIST, ADMIN) y 3 planes configurables
+- **Caché Inteligente**: Optimización de costos de IA mediante caché en memoria (preparado para Redis)
+- **Testing Completo**: >80% coverage con 147 tests unitarios + 72 tests E2E/integración
 
 ### Características Principales
 
-✅ **Lecturas de Tarot Personalizadas**
+✅ **Sistema de Lecturas de Tarot Completo**
 
-- 5+ tipos de tiradas (Cruz Celta, Tres Cartas, etc.)
-- 78 cartas con interpretaciones detalladas
-- Preguntas personalizadas del usuario
+- **78 cartas** del Rider-Waite con significados completos (upright/reversed)
+- **4 tipos de tiradas (spreads):**
+  - 1 carta (respuesta rápida) - nivel `beginner`
+  - 3 cartas (pasado-presente-futuro) - nivel `beginner`
+  - 5 cartas (análisis profundo) - nivel `intermediate`
+  - 10 cartas (Cruz Céltica) - nivel `advanced`
+- Posiciones con significados específicos e `interpretation_focus`
+- Historial de lecturas con soft-delete
+- Compartir lecturas públicamente con token único
 
-✅ **IA Multi-Provider**
+✅ **Carta del Día**
 
-- Soporte para OpenAI GPT-4 Turbo
-- Soporte para Anthropic Claude 3.5 Sonnet
-- Fallback automático entre proveedores
-- Retry con backoff exponencial
+- Generación diaria automática por usuario
+- Una carta aleatoria por día por tarotista seleccionado
+- Interpretación personalizada con IA (Premium) o descripción estática (Free/Anonymous)
+- Historial de cartas diarias consultable
 
-✅ **Sistema de Usuarios Completo**
+✅ **IA Multi-Provider con Fallback**
 
-- Registro y autenticación con JWT
-- Roles: user, premium, admin
-- Límites de uso por plan (3 lecturas/día free, ilimitadas premium)
-- Gestión de sesiones con refresh tokens
-- **4 planes configurables**: GUEST, FREE, PREMIUM, PROFESSIONAL
+- **Groq Llama 3.1 70B Versatile** como proveedor principal (más rápido y económico)
+- **OpenAI GPT-4 Turbo** como fallback secundario
+- **DeepSeek Chat** como último fallback
+- Circuit breaker pattern para resiliencia
+- Retry con backoff exponencial (3 intentos)
+- Tracking de costos y uso de IA por usuario
+- Rate limiting de AI según plan
 
-**Planes de Usuario:**
+✅ **Sistema de Usuarios y Autenticación**
 
-| Plan             | Lecturas  | IA Quota  | Custom Questions | Sharing | Advanced Spreads | Precio |
-| ---------------- | --------- | --------- | ---------------- | ------- | ---------------- | ------ |
-| **GUEST**        | 3/mes     | 0         | ❌               | ❌      | ❌               | Gratis |
-| **FREE**         | 10/mes    | 100/mes   | ❌               | ❌      | ❌               | Gratis |
-| **PREMIUM**      | Ilimitado | Ilimitado | ✅               | ✅      | ✅               | $9.99  |
-| **PROFESSIONAL** | Ilimitado | Ilimitado | ✅               | ✅      | ✅               | $19.99 |
+- Registro con validación de email único
+- Login con JWT access token (15 min) + refresh token (7 días)
+- Recuperación de contraseña por email
+- Sistema de roles: `CONSUMER`, `TAROTIST`, `ADMIN`
+- Perfiles completos con avatar, bio, especialidades
+- Guards de autenticación y autorización por rol
 
-Los límites y features son **configurables dinámicamente** desde el admin panel sin necesidad de redeploy.
+✅ **3 Planes de Usuario Configurables**
+
+**ANONYMOUS (Sin Registro):**
+
+- 1 Carta del Día/día (sin IA, solo descripción DB)
+- SIN acceso a tiradas de tarot
+- SIN historial ni compartir
+- Objetivo: Conversión a FREE
+
+**FREE (Autenticado):**
+
+- 1 Carta del Día/día + 1 tirada/día (límites independientes)
+- Spreads disponibles: 1 carta o 3 cartas
+- Solo preguntas predefinidas por categoría (sin IA)
+- ✅ Historial guardado (limitado)
+- ✅ Compartir lecturas
+- Objetivo: Conversión a PREMIUM
+
+**PREMIUM (Suscripción $9.99/mes):**
+
+- 1 Carta del Día/día + 3 tiradas/día (con IA)
+- Spreads disponibles: 1, 3, 5 cartas + Cruz Céltica
+- ✅ Preguntas personalizadas libres
+- ✅ Interpretaciones completas con IA
+- ✅ Historial ilimitado
+- ✅ Compartir lecturas
+
+Los límites y features son **configurables dinámicamente** desde el admin panel sin necesidad de redeploy (`/plan-config` endpoints).
+
+✅ **Sistema de Categorías y Preguntas**
+
+- **6 categorías temáticas:**
+  - ❤️ Amor y Relaciones
+  - 💼 Carrera y Trabajo
+  - 💰 Dinero y Finanzas
+  - 🏥 Salud y Bienestar
+  - ✨ Crecimiento Espiritual
+  - 🌟 Consulta General
+- **43 preguntas predefinidas** distribuidas por categoría
+- Iconos, colores y orden personalizables
+- Toggle active/inactive por categoría y pregunta
+- Usuarios FREE: Solo preguntas predefinidas
+- Usuarios PREMIUM: Preguntas personalizadas libres
+
+✅ **Marketplace de Tarotistas**
+
+- Perfiles completos de tarotistas profesionales
+- Especialidades e idiomas configurables
+- Sistema de reviews y ratings (5 estrellas)
+- **Configuración personalizada de IA:**
+  - Prompts personalizados por tarotista
+  - Ajuste de temperature, model y provider
+  - Significados de cartas personalizados
+  - Bulk import de custom meanings
+- **Sistema de aplicaciones:**
+  - Tarotistas aplican para unirse a la plataforma
+  - Estados: `pending` → `approved` / `rejected`
+  - Admin puede agregar notas y tracking de review
+- Métricas de revenue y estadísticas
+- 15 endpoints admin para gestión completa (CRUD + config + meanings + applications)
+
+✅ **Sistema de Scheduling (Sesiones con Tarotistas)**
+
+- **Disponibilidad de tarotistas:**
+  - Configuración semanal por día (lunes-domingo)
+  - Horarios de inicio y fin personalizables
+  - Excepciones para días específicos (vacaciones, bloqueos)
+- **Gestión de sesiones:**
+  - Reserva con duraciones: 30, 60 o 90 minutos
+  - Estados: `pending`, `confirmed`, `completed`, `cancelled`, `no_show`
+  - Cancelación con mínimo 24 horas de anticipación
+  - Confirmación por parte del tarotista
+- Integración con Google Meet (link generado automáticamente)
+- Notificaciones por email (preparado)
 
 ✅ **Admin Panel Completo**
 
-- Gestión completa de tarotistas (CRUD + configuración)
-- Sistema de aplicaciones para nuevos tarotistas
-- Configuración individual de IA por tarotista
-- Significados personalizados de cartas
-- Dashboard con métricas y analytics
-- Audit logging de acciones administrativas
-- **Configuración dinámica de planes** (readingsLimit, aiQuota, features)
-- Límites y capacidades actualizables sin redeploy
+- **Gestión de usuarios:**
+  - Lista con paginación, filtros y búsqueda
+  - Ban/unban con reason tracking
+  - Cambio de plan dinámico
+  - Asignación de roles (promote to admin/tarotist)
+  - Estadísticas y métricas de actividad
+  - Soft-delete con auditoría
+- **Gestión de tarotistas:**
+  - CRUD completo (crear, listar, actualizar, desactivar/reactivar)
+  - Filtrado avanzado (search, isActive, sortBy, sortOrder)
+  - Configuración individual de IA por tarotista
+  - Custom card meanings system
+  - Gestión de aplicaciones (aprobar/rechazar)
+- **Configuración dinámica de planes:**
+  - Endpoints `/plan-config` para CRUD de planes
+  - Campos configurables: readingsLimit, aiQuotaMonthly, allowCustomQuestions, allowSharing, allowAdvancedSpreads, price
+  - Actualización de límites sin redeploy
+- **Dashboard con métricas:**
+  - Estadísticas de usuarios por plan
+  - Uso de IA y costos
+  - Lecturas generadas por período
+  - Charts y analytics
+- **Audit Logging:**
+  - Todas las acciones admin registradas
+  - Tracking de cambios críticos
+  - Búsqueda y filtrado de logs
+- **Rate Limiting Management:**
+  - Visualización de violaciones de rate limit
+  - IP Whitelist para admins
+  - Bloqueo automático de IPs abusivas
+- **Security Events Monitoring:**
+  - Eventos de seguridad registrados
+  - Intentos de login fallidos
+  - Accesos no autorizados
+  - Paginación y filtros avanzados
 
-✅ **Arquitectura Escalable**
+✅ **Arquitectura Escalable y Robusta**
 
-- Arquitectura híbrida feature-based con capas
-- Repository Pattern para desacoplamiento
-- CQRS para operaciones complejas
-- Event-Driven Architecture
-
-✅ **Seguridad Robusta**
-
-- Validación de inputs (class-validator)
-- Sanitización de outputs (XSS protection)
-- Rate limiting por usuario
-- Security headers (Helmet.js)
-- Audit logging de acciones críticas
+- **Arquitectura híbrida feature-based:**
+  - Módulos simples (CRUD): Estructura flat
+  - Módulos complejos: Capas (domain / application / infrastructure)
+  - Repository Pattern para desacoplamiento
+  - CQRS para operaciones complejas (readings)
+  - Event-Driven Architecture preparado
+- **Seguridad:**
+  - Helmet.js security headers (CSP, HSTS, XSS protection)
+  - Input validation con class-validator
+  - Output sanitization para contenido IA
+  - SQL injection protection (TypeORM parameterized queries)
+  - Rate limiting global (100 req/min) y por endpoint
+  - IP Whitelist para admins
+  - Audit logging de acciones críticas
+- **Optimización:**
+  - Caché en memoria para interpretaciones (30 min TTL)
+  - Query optimization con indexes
+  - Connection pooling (PostgreSQL)
+  - Soft-delete para recuperación de datos
+- **Monitoreo:**
+  - Winston logger con file + console transports
+  - Request/response logging
+  - Error logging con stack traces
+  - AI request logging con tracking de costos
+  - Security events logging
+  - Performance metrics
 
 ## 🛠️ Stack Tecnológico
 
@@ -101,16 +225,17 @@ Los límites y features son **configurables dinámicamente** desde el admin pane
 
 ### IA Providers
 
-- **OpenAI**: GPT-4 Turbo
-- **Anthropic**: Claude 3.5 Sonnet
-- **Groq**: Llama 3.1 70B (futuro)
+- **Groq**: Llama 3.1 70B Versatile (principal - rápido y económico)
+- **OpenAI**: GPT-4 Turbo (fallback secundario)
+- **DeepSeek**: DeepSeek Chat (fallback terciario)
 
 ### Infraestructura
 
-- **Docker**: PostgreSQL containerizado
+- **Docker**: PostgreSQL 16 containerizado (puerto 5435)
 - **Cache**: In-memory (preparado para Redis)
-- **Logs**: Winston con rotación diaria
-- **CI/CD**: GitHub Actions
+- **Logs**: Winston con file + console transports, rotación diaria
+- **CI/CD**: Preparado para GitHub Actions
+- **Monorepo**: npm workspaces (backend + frontend)
 
 ## 📦 Requisitos Previos
 
@@ -342,38 +467,121 @@ El proyecto mantiene los siguientes umbrales de coverage:
 ## 📁 Estructura del Proyecto
 
 ```
-TarotFlavia/
+Auguria/
 ├── backend/
-│   └── tarot-app/               # Backend NestJS
+│   └── tarot-app/                   # Backend NestJS (puerto 3000)
 │       ├── src/
-│       │   ├── modules/         # Módulos por dominio (feature-based)
-│       │   │   ├── tarot/       # Dominio principal de tarot
-│       │   │   │   ├── readings/        # Lecturas de tarot (CQRS + eventos)
-│       │   │   │   ├── interpretations/ # Interpretaciones IA
-│       │   │   │   ├── spreads/         # Configuración de tiradas
-│       │   │   │   ├── cards/           # Catálogo de 78 cartas
-│       │   │   │   ├── cache/           # Sistema de caché (capas)
-│       │   │   │   └── ai/              # Abstracción multi-provider IA
-│       │   │   ├── users/       # Gestión de usuarios
-│       │   │   ├── auth/        # Autenticación JWT
-│       │   │   ├── tarotistas/  # Marketplace de tarotistas
-│       │   │   └── usage-limits/ # Límites por plan
-│       │   ├── common/          # Utilidades compartidas
-│       │   │   ├── decorators/
-│       │   │   ├── guards/
-│       │   │   ├── interceptors/
-│       │   │   ├── pipes/
-│       │   │   └── services/
-│       │   ├── config/          # Configuración (TypeORM, JWT, etc.)
-│       │   ├── database/        # Migraciones y seeders
-│       │   └── main.ts          # Entry point
-│       ├── test/                # Tests E2E
-│       ├── docs/                # Documentación técnica
-│       ├── docker-compose.yml   # Docker services
-│       └── package.json
-├── frontend/                    # Frontend (futuro)
-├── docs/                        # Documentación general
-└── package.json                 # Workspace root
+│       │   ├── modules/             # Módulos por dominio (feature-based)
+│       │   │   ├── tarot/           # Dominio principal de tarot
+│       │   │   │   ├── readings/          # Lecturas de tarot (CQRS + eventos)
+│       │   │   │   ├── interpretations/   # Interpretaciones IA (multi-provider)
+│       │   │   │   ├── spreads/           # Configuración de tiradas
+│       │   │   │   ├── cards/             # Catálogo de 78 cartas
+│       │   │   │   ├── daily-reading/     # Carta del Día
+│       │   │   │   └── decks/             # Mazos de cartas (Rider-Waite)
+│       │   │   ├── users/           # Gestión de usuarios
+│       │   │   ├── auth/            # Autenticación JWT + refresh tokens
+│       │   │   ├── tarotistas/      # Marketplace de tarotistas
+│       │   │   │   ├── domain/            # Interfaces y contratos
+│       │   │   │   ├── application/       # Servicios de aplicación
+│       │   │   │   └── infrastructure/    # Repositories, controllers, entities
+│       │   │   ├── scheduling/      # Sistema de reservas de sesiones
+│       │   │   ├── categories/      # Categorías de consulta (6 categorías)
+│       │   │   ├── predefined-questions/  # 43 preguntas predefinidas
+│       │   │   ├── subscriptions/   # Gestión de suscripciones y tarotista favorito
+│       │   │   ├── plan-config/     # Configuración dinámica de planes
+│       │   │   ├── usage-limits/    # Límites de uso por plan
+│       │   │   ├── admin/           # Panel de administración
+│       │   │   │   ├── admin-users.controller.ts      # Gestión de usuarios
+│       │   │   │   ├── admin-dashboard.controller.ts   # Métricas y analytics
+│       │   │   │   ├── rate-limits/                    # Rate limiting management
+│       │   │   │   └── ip-whitelist-admin.controller.ts
+│       │   │   ├── audit/           # Audit logging
+│       │   │   ├── security/        # Security events monitoring
+│       │   │   ├── ai/              # Abstracción multi-provider IA
+│       │   │   │   ├── providers/         # Groq, OpenAI, DeepSeek
+│       │   │   │   ├── circuit-breaker/   # Circuit breaker pattern
+│       │   │   │   └── ai.service.ts      # Servicio principal con fallback
+│       │   │   ├── ai-usage/        # Tracking de uso de IA
+│       │   │   ├── cache/           # Sistema de caché (capas)
+│       │   │   ├── email/           # Notificaciones por email
+│       │   │   └── health/          # Health checks
+│       │   ├── common/              # Utilidades compartidas
+│       │   │   ├── decorators/      # @CheckUsageLimit, @Roles, etc.
+│       │   │   ├── guards/          # JwtAuthGuard, RolesGuard, AdminGuard, AIQuotaGuard
+│       │   │   ├── interceptors/    # Logging, transformación
+│       │   │   ├── pipes/           # Validación personalizada
+│       │   │   └── services/        # Servicios compartidos
+│       │   ├── config/              # Configuración (TypeORM, JWT, IA providers)
+│       │   ├── database/            # Migraciones y seeders
+│       │   │   ├── migrations/      # TypeORM migrations
+│       │   │   └── seeds/           # 78 cartas, 6 categorías, 43 preguntas
+│       │   └── main.ts              # Entry point + Swagger setup
+│       ├── test/                    # Tests E2E e integración (72 archivos)
+│       ├── docs/                    # Documentación técnica completa
+│       │   ├── API_DOCUMENTATION.md       # Endpoints y contratos
+│       │   ├── ARCHITECTURE.md            # Arquitectura y patrones
+│       │   ├── DATABASE.md                # Esquema de 29 tablas
+│       │   ├── DEPLOYMENT.md              # Guías de deployment
+│       │   ├── DEVELOPMENT.md             # Setup de entorno
+│       │   ├── TESTING.md                 # Estrategia de testing
+│       │   ├── SECURITY.md                # Políticas de seguridad
+│       │   ├── MVP_ESTADO_ACTUAL.md       # Estado del MVP (~95% completado)
+│       │   └── CHANGELOG.md               # Historial de cambios
+│       ├── docker-compose.yml       # PostgreSQL 16 en Docker
+│       ├── .env.example             # Variables de entorno
+│       └── package.json             # Dependencias backend
+├── frontend/                        # Frontend Next.js 14 (puerto 3001) - EN DESARROLLO
+│   ├── src/
+│   │   ├── app/                     # Rutas Next.js (App Router)
+│   │   │   ├── login/               # Pantalla de login
+│   │   │   ├── registro/            # Registro de usuarios
+│   │   │   ├── carta-del-dia/       # Carta del Día
+│   │   │   ├── ritual/              # Experiencia de lectura (ritual)
+│   │   │   ├── historial/           # Historial de lecturas
+│   │   │   ├── perfil/              # Perfil de usuario
+│   │   │   ├── tarotistas/          # Marketplace de tarotistas
+│   │   │   ├── sesiones/            # Reserva de sesiones
+│   │   │   ├── admin/               # Panel admin
+│   │   │   └── compartida/          # Vista pública de lectura compartida
+│   │   ├── components/
+│   │   │   ├── ui/                  # Componentes shadcn/ui
+│   │   │   └── features/            # Componentes de negocio por dominio
+│   │   │       ├── auth/            # LoginForm, RegisterForm
+│   │   │       ├── readings/        # ReadingCard, ReadingExperience
+│   │   │       ├── daily-card/      # DailyCardDisplay
+│   │   │       ├── tarotistas/      # TarotistaCard, TarotistaProfile
+│   │   │       └── admin/           # Admin components
+│   │   ├── hooks/
+│   │   │   ├── api/                 # React Query hooks (useReadings, useAuth)
+│   │   │   └── utils/               # Utility hooks
+│   │   ├── stores/                  # Zustand stores (authStore, readingStore)
+│   │   ├── lib/
+│   │   │   ├── api/                 # Axios config + endpoints + API functions
+│   │   │   ├── utils/               # Utilidades (cn, format, etc.)
+│   │   │   ├── validations/         # Zod schemas
+│   │   │   └── constants/           # Constantes (rutas, config)
+│   │   └── types/                   # TypeScript types (API contracts)
+│   ├── docs/                        # Documentación frontend
+│   │   ├── ARCHITECTURE.md          # Arquitectura feature-based
+│   │   ├── AI_DEVELOPMENT_GUIDE.md  # Workflow TDD y reglas
+│   │   ├── FRONTEND_BACKLOG.md      # Tareas y estado actual
+│   │   ├── MODELO_NEGOCIO_DEFINIDO.md  # Reglas de negocio ANÓNIMO/FREE/PREMIUM
+│   │   ├── DESIGN_HAND-OFF.md       # Design tokens y UI
+│   │   └── AI_PROMPTS.md            # Prompts para desarrollo
+│   ├── tests/                       # Tests unitarios + E2E (Vitest + Playwright)
+│   ├── .env.local                   # NEXT_PUBLIC_API_URL=http://localhost:3000/api
+│   └── package.json                 # Dependencias frontend
+├── docs/                            # Documentación general del proyecto
+│   ├── MVP_STRATEGY_SUMMARY.md      # Estrategia de MVP
+│   ├── MVP_FEATURES_BREAKDOWN.md    # Desglose de features
+│   ├── USER_EXPERIENCE_FLOWS.md     # Flujos de usuario ANÓNIMO/FREE/PREMIUM
+│   ├── TECHNICAL_BACKLOG.md         # Backlog técnico global
+│   └── QA_TESTING_REPORT.md         # Reportes de QA
+├── .github/
+│   └── copilot-instructions.md      # Instrucciones para Copilot (contexto del proyecto)
+├── package.json                     # Root - coordina workspaces
+└── README.md                        # Este archivo
 ```
 
 ### Arquitectura de Módulos
@@ -383,23 +591,33 @@ El proyecto usa **arquitectura híbrida feature-based**:
 - **Módulos simples** (CRUD): Estructura flat (entity, dto, service, controller)
 - **Módulos complejos**: Capas (domain, application, infrastructure)
 
-Ejemplo módulo con capas (`readings/`):
+Ejemplo módulo con capas (`tarotistas/`):
 
 ```
-readings/
+tarotistas/
 ├── domain/
-│   └── interfaces/              # Contratos, abstracciones
-│       └── reading-repository.interface.ts
+│   └── interfaces/                  # Contratos, abstracciones
+│       ├── tarotista-repository.interface.ts
+│       └── tarotista-config-repository.interface.ts
 ├── application/
-│   ├── commands/                # CQRS - Comandos (escritura)
-│   ├── queries/                 # CQRS - Queries (lectura)
-│   ├── events/                  # Eventos de dominio
-│   ├── services/                # Servicios de aplicación
-│   └── dto/                     # Data Transfer Objects
+│   ├── services/                    # Servicios de aplicación
+│   │   ├── tarotistas-admin.service.ts        # CRUD + filtrado avanzado
+│   │   ├── tarotista-config.service.ts        # Config IA personalizada
+│   │   ├── tarotista-card-meanings.service.ts # Custom meanings
+│   │   └── tarotista-applications.service.ts  # Sistema de aplicaciones
+│   └── dto/                         # Data Transfer Objects
 └── infrastructure/
-    ├── repositories/            # Implementación de repositorios
-    ├── controllers/             # Controladores HTTP
-    └── entities/                # Entidades TypeORM
+    ├── repositories/                # Implementación de repositorios TypeORM
+    ├── controllers/                 # Controladores HTTP
+    │   ├── tarotistas-admin.controller.ts     # 15 endpoints admin
+    │   ├── tarotistas-public.controller.ts    # Endpoints públicos
+    │   ├── metrics.controller.ts              # Métricas
+    │   └── reports.controller.ts              # Reportes
+    └── entities/                    # Entidades TypeORM
+        ├── tarotista.entity.ts
+        ├── tarotista-config.entity.ts
+        ├── tarotista-card-meaning.entity.ts
+        └── tarotista-application.entity.ts
 ```
 
 Ver [ARCHITECTURE.md](backend/tarot-app/docs/ARCHITECTURE.md) para más detalles.
@@ -468,28 +686,75 @@ Ver [docs/Tasks/TASK-076.md](backend/tarot-app/docs/Tasks/TASK-076.md) para docu
 
 Toda la documentación técnica está en `backend/tarot-app/docs/`:
 
-- **[ARCHITECTURE.md](backend/tarot-app/docs/ARCHITECTURE.md)**: Arquitectura completa del proyecto
-- **[CONTRIBUTING.md](backend/tarot-app/CONTRIBUTING.md)**: Guía de contribución
-- **[API_DOCUMENTATION.md](backend/tarot-app/docs/API_DOCUMENTATION.md)**: Documentación de la API
-- **[DEPLOYMENT.md](backend/tarot-app/docs/DEPLOYMENT.md)**: Guía de deployment
-- **[DEVELOPMENT.md](backend/tarot-app/docs/DEVELOPMENT.md)**: Setup de entorno de desarrollo
-- **[DATABASE.md](backend/tarot-app/docs/DATABASE.md)**: Esquema y migraciones de base de datos
-- **[SECURITY.md](backend/tarot-app/docs/SECURITY.md)**: Políticas de seguridad
-- **[CHANGELOG.md](backend/tarot-app/CHANGELOG.md)**: Historial de cambios
+| Documento                                                               | Descripción                                         |
+| ----------------------------------------------------------------------- | --------------------------------------------------- |
+| **[ARCHITECTURE.md](backend/tarot-app/docs/ARCHITECTURE.md)**           | Arquitectura completa, patrones y decisiones        |
+| **[API_DOCUMENTATION.md](backend/tarot-app/docs/API_DOCUMENTATION.md)** | Documentación detallada de todos los endpoints      |
+| **[DATABASE.md](backend/tarot-app/docs/DATABASE.md)**                   | Esquema de 29 tablas, migraciones y seeders         |
+| **[MVP_ESTADO_ACTUAL.md](backend/tarot-app/docs/MVP_ESTADO_ACTUAL.md)** | Estado actual del MVP (~95% completado)             |
+| **[TESTING.md](backend/tarot-app/docs/TESTING.md)**                     | Estrategia de testing (unitarios + E2E)             |
+| **[SECURITY.md](backend/tarot-app/docs/SECURITY.md)**                   | Políticas de seguridad y vulnerabilidades           |
+| **[DEPLOYMENT.md](backend/tarot-app/docs/DEPLOYMENT.md)**               | Guías de deployment (Render, Railway, DigitalOcean) |
+| **[DEVELOPMENT.md](backend/tarot-app/docs/DEVELOPMENT.md)**             | Setup de entorno de desarrollo                      |
+| **[CONTRIBUTING.md](backend/tarot-app/CONTRIBUTING.md)**                | Guía de contribución y convenciones                 |
 
-### Documentación de Desarrollo
+### Documentación Frontend
 
-- **[TESTING.md](backend/tarot-app/docs/TESTING.md)**: Estrategia de testing
-- **[DEVELOPER_WORKFLOWS.md](backend/tarot-app/docs/DEVELOPER_WORKFLOWS.md)**: Workflows de desarrollo
-- **[FIXTURES_GUIDE.md](backend/tarot-app/docs/FIXTURES_GUIDE.md)**: Uso de fixtures
-- **[TESTING_MOCKS.md](backend/tarot-app/docs/TESTING_MOCKS.md)**: Mocking de servicios
+En `frontend/docs/`:
+
+| Documento                                                                  | Descripción                                    |
+| -------------------------------------------------------------------------- | ---------------------------------------------- |
+| **[ARCHITECTURE.md](frontend/docs/ARCHITECTURE.md)**                       | Arquitectura feature-based del frontend        |
+| **[AI_DEVELOPMENT_GUIDE.md](frontend/docs/AI_DEVELOPMENT_GUIDE.md)**       | Workflow TDD y reglas de desarrollo            |
+| **[FRONTEND_BACKLOG.md](frontend/docs/FRONTEND_BACKLOG.md)**               | Backlog técnico y estado de tareas             |
+| **[MODELO_NEGOCIO_DEFINIDO.md](frontend/docs/MODELO_NEGOCIO_DEFINIDO.md)** | Reglas de negocio ANÓNIMO/FREE/PREMIUM         |
+| **[DESIGN_HAND-OFF.md](frontend/docs/DESIGN_HAND-OFF.md)**                 | Design tokens, componentes UI y guías visuales |
+| **[AI_PROMPTS.md](frontend/docs/AI_PROMPTS.md)**                           | Prompts para desarrollo con IA                 |
+
+### Documentación General
+
+En `docs/`:
+
+| Documento                                                       | Descripción                               |
+| --------------------------------------------------------------- | ----------------------------------------- |
+| **[MVP_STRATEGY_SUMMARY.md](docs/MVP_STRATEGY_SUMMARY.md)**     | Estrategia general del MVP                |
+| **[MVP_FEATURES_BREAKDOWN.md](docs/MVP_FEATURES_BREAKDOWN.md)** | Desglose detallado de features            |
+| **[USER_EXPERIENCE_FLOWS.md](docs/USER_EXPERIENCE_FLOWS.md)**   | Flujos de experiencia por tipo de usuario |
+| **[TECHNICAL_BACKLOG.md](docs/TECHNICAL_BACKLOG.md)**           | Backlog técnico global del proyecto       |
+| **[QA_TESTING_REPORT.md](docs/QA_TESTING_REPORT.md)**           | Reportes de QA y testing manual           |
 
 ### API Documentation (Swagger)
 
-Cuando el servidor esté corriendo:
+Cuando el servidor esté corriendo, la documentación interactiva está disponible en:
 
 - **Swagger UI**: http://localhost:3000/api/docs
 - **OpenAPI JSON**: http://localhost:3000/api/docs-json
+
+### Principales Grupos de Endpoints
+
+| Grupo                       | Base Path                | Descripción                                    |
+| --------------------------- | ------------------------ | ---------------------------------------------- |
+| **Autenticación**           | `/auth`                  | Registro, login, refresh, logout               |
+| **Usuarios**                | `/users`                 | Perfil, capabilities, actualización            |
+| **Lecturas**                | `/readings`              | CRUD lecturas, compartir, trash                |
+| **Carta del Día**           | `/daily-reading`         | Generar, consultar hoy, historial              |
+| **Tarotistas Públicos**     | `/tarotistas`            | Listar, ver perfil, reviews                    |
+| **Scheduling**              | `/scheduling`            | Disponibilidad, reservas de sesiones           |
+| **Spreads**                 | `/spreads`               | Tipos de tiradas disponibles                   |
+| **Cartas**                  | `/cards`                 | Catálogo de 78 cartas                          |
+| **Categorías**              | `/categories`            | 6 categorías de consulta                       |
+| **Preguntas**               | `/predefined-questions`  | 43 preguntas predefinidas                      |
+| **Suscripciones**           | `/subscriptions`         | Gestionar tarotista favorito, all-access       |
+| **Admin - Usuarios**        | `/admin/users`           | Gestión de usuarios, ban/unban, roles          |
+| **Admin - Dashboard**       | `/admin/dashboard`       | Métricas, estadísticas, charts                 |
+| **Admin - Tarotistas**      | `/admin/tarotistas`      | CRUD, config IA, custom meanings, applications |
+| **Admin - Plan Config**     | `/plan-config`           | Configuración dinámica de planes               |
+| **Admin - Rate Limits**     | `/admin/rate-limits`     | Violaciones, IP whitelist                      |
+| **Admin - Security Events** | `/admin/security-events` | Eventos de seguridad, audit logging            |
+| **Admin - Audit Logs**      | `/audit-logs`            | Logs de auditoría de acciones críticas         |
+| **Health**                  | `/health`                | Health checks de la API                        |
+
+Ver [API_DOCUMENTATION.md](backend/tarot-app/docs/API_DOCUMENTATION.md) para documentación completa de todos los endpoints con ejemplos de request/response.
 
 ## 🤝 Contribuir
 
@@ -509,7 +774,7 @@ Cuando el servidor esté corriendo:
 Seguimos [Conventional Commits](https://www.conventionalcommits.org/):
 
 ```
-feat(readings): agregar endpoint de regeneración
+feat(readings): agregar endpoint de compartir
 fix(auth): corregir validación de token expirado
 refactor(arch): aplicar Repository Pattern
 docs(api): actualizar documentación de endpoints
@@ -542,35 +807,89 @@ Para preguntas o soporte:
 
 ## 🗺️ Roadmap
 
-### MVP (Fase Actual)
+### ✅ MVP Backend (Completado al ~95%)
 
-- ✅ Sistema de usuarios y autenticación
-- ✅ Lecturas de tarot con 5+ tiradas
-- ✅ Integración multi-provider IA (OpenAI + Claude)
-- ✅ Caché de interpretaciones
-- ✅ Límites de uso por plan
-- ✅ Testing completo (>80% coverage)
-- 🚧 Frontend React (en desarrollo)
+- ✅ Sistema de usuarios y autenticación (JWT + refresh tokens)
+- ✅ 3 planes configurables (ANONYMOUS, FREE, PREMIUM)
+- ✅ Lecturas de tarot (4 tipos de spreads, 78 cartas)
+- ✅ Carta del Día con interpretación IA (Premium) o estática (Free/Anonymous)
+- ✅ Integración multi-provider IA (Groq → OpenAI → DeepSeek con fallback)
+- ✅ Sistema de categorías (6) y preguntas predefinidas (43)
+- ✅ Marketplace de tarotistas (CRUD + config IA + custom meanings + applications)
+- ✅ Sistema de scheduling (reservas de sesiones con tarotistas)
+- ✅ Admin panel completo (gestión de usuarios, tarotistas, planes, métricas)
+- ✅ Rate limiting, security, audit logging
+- ✅ Caché de interpretaciones IA
+- ✅ Testing completo (>80% coverage, 147 tests unitarios + 72 E2E)
+- ✅ Documentación completa (API, arquitectura, database, deployment)
 
-### Próximas Features
+### 🚧 MVP Frontend (En Desarrollo Activo)
 
-- ⏳ Dashboard de usuario
-- ⏳ Marketplace de tarotistas
-- ⏳ Sistema de pagos (Stripe)
-- ⏳ Suscripciones premium
-- ⏳ Notificaciones por email
+- ✅ Setup Next.js 14 con App Router + TypeScript + Tailwind CSS
+- ✅ Configuración de testing (Vitest + Testing Library + Playwright)
+- ✅ Arquitectura feature-based definida
+- ✅ Design tokens y componentes base (shadcn/ui)
+- 🚧 Pantallas de autenticación (Login, Registro, Recuperar Password)
+- 🚧 Home page dual (Landing para anónimos + Dashboard para autenticados)
+- 🚧 Carta del Día (experiencia diferenciada ANONYMOUS/FREE/PREMIUM)
+- 🚧 Ritual de lectura (selección de cartas, spreads, interpretación)
+- 🚧 Historial de lecturas (paginado, filtros, compartir)
+- 🚧 Marketplace de tarotistas (explorar, perfiles, reviews)
+- 🚧 Sistema de reservas (calendario, horarios disponibles)
+- 🚧 Perfil de usuario (edición, cambio de plan, configuración)
+- 🚧 Panel admin (gestión de usuarios, tarotistas, configuración de planes)
+
+### 📋 Post-MVP
+
+**Monetización:**
+
+- ⏳ Integración de pagos (Stripe)
+- ⏳ Sistema de suscripciones recurrentes
+- ⏳ Trial de 7 días para Premium
+- ⏳ Google Ads para usuarios Free
+- ⏳ Sistema de referidos
+
+**Funcionalidades Avanzadas:**
+
+- ⏳ Notificaciones push y por email
+- ⏳ Sistema de favoritos (lecturas, tarotistas)
+- ⏳ Estadísticas avanzadas (gráficos, tendencias)
+- ⏳ Exportar lecturas a PDF
+- ⏳ Compartir en redes sociales (integración nativa)
+- ⏳ Chat en vivo con tarotistas (WebSocket)
+- ⏳ Videollamadas integradas (Jitsi o similar)
+
+**Infraestructura:**
+
+- ⏳ Migrar caché a Redis
+- ⏳ Implementar message queue (RabbitMQ/Bull)
+- ⏳ Escalado horizontal (Kubernetes)
+- ⏳ CDN para assets estáticos
+- ⏳ Monitoring avanzado (Prometheus + Grafana)
+
+**Expansión:**
+
 - ⏳ App móvil (React Native)
+- ⏳ Multiidioma (i18n)
+- ⏳ Más tipos de tiradas (10+ spreads)
+- ⏳ Mazos adicionales (Tarot de Marsella, Oracle, etc.)
+- ⏳ Integraciones con calendarios (Google, Outlook)
 
 ## 🙏 Agradecimientos
 
-- **OpenAI**: Por GPT-4 y la API
-- **Anthropic**: Por Claude 3.5 Sonnet
-- **NestJS**: Por el framework backend
-- **TypeORM**: Por el ORM
-- **Comunidad Open Source**: Por todas las librerías utilizadas
+- **Groq**: Por Llama 3.1 70B y la API ultrarrápida
+- **OpenAI**: Por GPT-4 Turbo y la API
+- **DeepSeek**: Por DeepSeek Chat como fallback confiable
+- **NestJS**: Por el framework backend robusto y escalable
+- **TypeORM**: Por el ORM y sistema de migraciones
+- **Next.js**: Por el framework frontend moderno
+- **shadcn/ui**: Por los componentes UI accesibles y customizables
+- **Comunidad Open Source**: Por todas las librerías y herramientas utilizadas
 
 ---
 
-**Versión**: 0.1.0  
-**Última actualización**: Noviembre 2025  
-**Estado**: MVP en desarrollo activo
+**Versión**: 0.1.0 (Backend), 0.0.1 (Frontend - en desarrollo)  
+**Última actualización**: Enero 2026  
+**Estado**: MVP Backend ~95% completado | Frontend en desarrollo activo  
+**Tipo**: Proyecto privado / propietario  
+**Arquitectura**: Monorepo (npm workspaces)
