@@ -36,6 +36,18 @@ export class CheckUsageLimitGuard implements CanActivate {
     private readonly tarotReadingRepository: Repository<TarotReading>,
   ) {}
 
+  /**
+   * Helper to get today's date as a string in 'YYYY-MM-DD' format (UTC).
+   * This ensures consistent date comparison with PostgreSQL DATE columns.
+   */
+  private getTodayDateString(): string {
+    const now = new Date();
+    const year = now.getUTCFullYear();
+    const month = String(now.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(now.getUTCDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
   async canActivate(context: ExecutionContext): Promise<boolean> {
     this.logger.debug('Guard execution started');
 
@@ -74,16 +86,20 @@ export class CheckUsageLimitGuard implements CanActivate {
 
       // For DAILY_CARD, check the daily_reading table directly
       if (feature === UsageFeature.DAILY_CARD) {
+        // FIX: Use string date format 'YYYY-MM-DD' for consistent comparison
+        // with PostgreSQL DATE column. Previously, using MoreThanOrEqual with
+        // a Date object caused timezone conversion issues, making the limit
+        // not reset properly every 24 hours.
+        const todayStr = this.getTodayDateString();
         this.logger.debug(
-          `Checking DAILY_CARD for userId=${userId}, today=${today.toISOString()}`,
+          `Checking DAILY_CARD for userId=${userId}, todayStr=${todayStr}`,
         );
 
-        const existingReading = await this.dailyReadingRepository.findOne({
-          where: {
-            userId,
-            readingDate: MoreThanOrEqual(today),
-          },
-        });
+        const existingReading = await this.dailyReadingRepository
+          .createQueryBuilder('daily_reading')
+          .where('daily_reading.user_id = :userId', { userId })
+          .andWhere('daily_reading.reading_date = :date', { date: todayStr })
+          .getOne();
 
         this.logger.debug(
           `DAILY_CARD check result: existingReading=${!!existingReading}`,
