@@ -37,7 +37,7 @@ interface IReadingCategory {
 
 interface IPredefinedQuestion {
   id: number;
-  question: string;
+  questionText: string;
 }
 
 interface ITarotInterpretation {
@@ -116,7 +116,7 @@ export class TarotReading {
     example: 1,
     required: false,
   })
-  @Column({ type: 'int', nullable: true })
+  @Column({ name: 'spread_id', type: 'int', nullable: true })
   spreadId: number | null;
 
   @ApiProperty({
@@ -124,7 +124,7 @@ export class TarotReading {
     example: 'Tirada de 3 cartas',
     required: false,
   })
-  @Column({ type: 'varchar', length: 100, nullable: true })
+  @Column({ name: 'spread_name', type: 'varchar', length: 100, nullable: true })
   spreadName: string | null;
 
   @ApiProperty({

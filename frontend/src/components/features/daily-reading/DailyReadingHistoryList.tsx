@@ -2,7 +2,8 @@
 
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Calendar, Sun } from 'lucide-react';
+import Link from 'next/link';
+import { Calendar, Sun, Layers } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -18,8 +19,6 @@ const ITEMS_PER_PAGE = 10;
 export interface DailyReadingHistoryListProps {
   /** Callback when user clicks "Ver carta de hoy" in empty state */
   onGoToToday: () => void;
-  /** Callback when user clicks to view a reading */
-  onViewReading: (id: number) => void;
 }
 
 /**
@@ -107,14 +106,13 @@ function Pagination({ page, totalPages, onPrevious, onNext }: PaginationProps) {
  */
 interface ReadingsListProps {
   items: DailyReadingHistoryItem[];
-  onViewReading: (id: number) => void;
 }
 
-function ReadingsList({ items, onViewReading }: ReadingsListProps) {
+function ReadingsList({ items }: ReadingsListProps) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {items.map((reading) => (
-        <DailyReadingCard key={reading.id} reading={reading} onView={onViewReading} />
+        <DailyReadingCard key={reading.id} reading={reading} />
       ))}
     </div>
   );
@@ -123,18 +121,16 @@ function ReadingsList({ items, onViewReading }: ReadingsListProps) {
 /**
  * DailyReadingHistoryList Component
  *
- * Displays paginated list of daily reading history with visual cards.
+ * Displays paginated list of daily reading history with compact cards.
+ * Cards are self-contained and show all info without navigation.
  *
  * Features:
  * - Paginated list (10 per page)
- * - Navigation to individual reading details
+ * - Compact card design with thumbnail
  * - Empty state with CTA to today's reading
  * - Loading and error states
  */
-export function DailyReadingHistoryList({
-  onGoToToday,
-  onViewReading,
-}: DailyReadingHistoryListProps) {
+export function DailyReadingHistoryList({ onGoToToday }: DailyReadingHistoryListProps) {
   const [page, setPage] = useState(1);
 
   const { data: historyData, isLoading, error } = useDailyReadingHistory(page, ITEMS_PER_PAGE);
@@ -169,7 +165,7 @@ export function DailyReadingHistoryList({
 
   return (
     <>
-      <ReadingsList items={items} onViewReading={onViewReading} />
+      <ReadingsList items={items} />
       {showPagination && (
         <Pagination
           page={page}
@@ -191,32 +187,34 @@ export function DailyReadingHistoryList({
 export function DailyReadingHistoryPage() {
   const router = useRouter();
 
-  const handleViewReading = useCallback(
-    (id: number) => {
-      router.push(`/carta-del-dia/historial/${id}`);
-    },
-    [router]
-  );
-
   const handleGoToToday = useCallback(() => {
     router.push('/carta-del-dia');
   }, [router]);
 
   return (
-    <div className="container mx-auto max-w-3xl px-4 py-8">
+    <div className="container mx-auto max-w-2xl px-4 py-8">
       {/* Header */}
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-text-primary font-serif text-3xl font-bold md:text-4xl">
           Tu viaje diario
         </h1>
-        <Button variant="outline" size="sm" onClick={handleGoToToday}>
-          <Sun className="mr-2 h-4 w-4" aria-hidden="true" />
-          Ver hoy
-        </Button>
+        <div className="flex items-center gap-4">
+          <Link
+            href="/historial"
+            className="text-primary hover:text-primary/80 inline-flex items-center gap-2 text-sm font-medium transition-colors"
+          >
+            <Layers className="h-4 w-4" />
+            Ver lecturas de tarot
+          </Link>
+          <Button variant="outline" size="sm" onClick={handleGoToToday}>
+            <Sun className="mr-2 h-4 w-4" aria-hidden="true" />
+            Ver hoy
+          </Button>
+        </div>
       </div>
 
       {/* Content */}
-      <DailyReadingHistoryList onGoToToday={handleGoToToday} onViewReading={handleViewReading} />
+      <DailyReadingHistoryList onGoToToday={handleGoToToday} />
     </div>
   );
 }

@@ -324,11 +324,12 @@ describe('HistorialPage', () => {
       });
     });
 
-    it('should show readings in a vertical grid with gap', () => {
+    it('should show readings in a vertical list layout by default', () => {
       renderWithProviders(<HistorialPage />);
 
       const listContainer = screen.getByTestId('readings-list');
-      expect(listContainer).toHaveClass('gap-4');
+      // Default view is list mode: centered with max-width
+      expect(listContainer).toHaveClass('mx-auto', 'max-w-2xl', 'space-y-3');
     });
   });
 

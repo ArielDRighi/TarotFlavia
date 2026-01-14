@@ -95,15 +95,15 @@ describe('ReadingCard', () => {
       expect(badge).toHaveTextContent('Tres Cartas');
     });
 
-    it('should truncate long questions', () => {
+    it('should truncate long questions to one line', () => {
       const longQuestion =
-        'Esta es una pregunta muy larga que debería ser truncada después de dos líneas para mantener un diseño consistente en las tarjetas del historial de lecturas';
+        'Esta es una pregunta muy larga que debería ser truncada después de una línea para mantener un diseño consistente en las tarjetas del historial de lecturas';
       const reading = createTestReading({ question: longQuestion });
 
       render(<ReadingCard reading={reading} onView={mockOnView} onDelete={mockOnDelete} />);
 
       const questionElement = screen.getByText(longQuestion);
-      expect(questionElement).toHaveClass('line-clamp-2');
+      expect(questionElement).toHaveClass('line-clamp-1');
     });
 
     it('should render a card icon when no cards are available', () => {
@@ -221,10 +221,10 @@ describe('ReadingCard', () => {
       render(<ReadingCard reading={reading} onView={mockOnView} onDelete={mockOnDelete} />);
 
       const card = screen.getByTestId('reading-card');
-      // Should have flex-row layout (horizontal)
+      // Should have flex-row layout (horizontal) with items-center
       expect(card).toHaveClass('flex');
       expect(card).toHaveClass('flex-row');
-      expect(card).toHaveClass('items-stretch');
+      expect(card).toHaveClass('items-center');
     });
   });
 
@@ -244,8 +244,7 @@ describe('ReadingCard', () => {
       render(<ReadingCard reading={reading} onView={mockOnView} onDelete={mockOnDelete} />);
 
       const card = screen.getByTestId('reading-card');
-      expect(card).toHaveClass('hover:shadow-lg');
-      expect(card).toHaveClass('hover:scale-[1.02]');
+      expect(card).toHaveClass('hover:shadow-md');
     });
   });
 

@@ -3,6 +3,17 @@ import { TarotReading } from '../../entities/tarot-reading.entity';
 import { ReadingListItemDto } from '../../dto/reading-list-item.dto';
 import { CardPreviewDto } from '../../dto/card-preview.dto';
 
+/**
+ * Mapeo de cantidad de cartas a nombre de tirada (fallback para lecturas antiguas)
+ * Usado cuando spreadName es null pero tenemos cartas para inferir el tipo
+ */
+const SPREAD_NAME_BY_CARD_COUNT: Record<number, string> = {
+  1: 'Tirada de 1 Carta',
+  3: 'Tirada de 3 Cartas',
+  5: 'Tirada de 5 Cartas',
+  10: 'Cruz Céltica',
+};
+
 @Injectable()
 export class ReadingMapperService {
   /**
@@ -12,10 +23,11 @@ export class ReadingMapperService {
    */
   toListItemDto(reading: TarotReading): ReadingListItemDto {
     // Determinar la pregunta a mostrar
+    // Prioridad: customQuestion (premium) > predefinedQuestion.questionText (free) > question (legacy)
     const question =
-      reading.question ||
       reading.customQuestion ||
-      reading.predefinedQuestion?.question ||
+      reading.predefinedQuestion?.questionText ||
+      reading.question ||
       '';
 
     // Obtener total de cartas
@@ -37,11 +49,17 @@ export class ReadingMapperService {
         };
       }) || [];
 
+    // Determinar spreadName con fallback inteligente para lecturas antiguas
+    const spreadName =
+      reading.spreadName ||
+      SPREAD_NAME_BY_CARD_COUNT[cardsCount] ||
+      'Tirada desconocida';
+
     return {
       id: reading.id,
       question,
       spreadId: reading.spreadId || 0,
-      spreadName: reading.spreadName || 'Tirada desconocida',
+      spreadName,
       cardsCount,
       cardPreviews,
       createdAt: reading.createdAt.toISOString(),

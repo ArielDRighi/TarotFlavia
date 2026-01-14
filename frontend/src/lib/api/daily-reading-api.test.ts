@@ -55,6 +55,7 @@ const mockHistoryItem: DailyReadingHistoryItem = {
   id: 1,
   readingDate: '2025-12-09',
   cardName: 'El Mago',
+  cardImageUrl: 'https://example.com/cards/el-mago.jpg',
   isReversed: false,
   interpretationSummary: 'El Mago te indica que tienes todas las herramientas necesarias...',
   wasRegenerated: false,

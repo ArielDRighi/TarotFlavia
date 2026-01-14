@@ -22,9 +22,9 @@ export const integrationDataSourceOptions: TypeOrmModuleOptions &
     'tarot_integration_password_2024',
   database: process.env.TAROT_INTEGRATION_DB_NAME || 'tarot_integration',
   entities: [join(__dirname, '../src/**/*.entity{.ts,.js}')],
-  synchronize: false, // NO auto-crear: usar migraciones + seeders
-  dropSchema: false, // NO limpiar: confiar en setup de CI/local
-  logging: false,
+  synchronize: false, // Usar migraciones, NO auto-sync
+  dropSchema: false, // NO eliminar schema entre tests
+  logging: false, // Desactivar logging SQL en tests
   migrations: [],
 };
 

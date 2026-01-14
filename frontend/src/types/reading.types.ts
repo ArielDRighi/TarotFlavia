@@ -391,6 +391,7 @@ export interface DailyReadingHistoryItem {
   id: number;
   readingDate: string;
   cardName: string;
+  cardImageUrl: string;
   isReversed: boolean;
   interpretationSummary: string;
   wasRegenerated: boolean;

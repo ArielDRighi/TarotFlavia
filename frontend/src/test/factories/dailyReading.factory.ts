@@ -75,6 +75,7 @@ export function createMockDailyReadingHistoryItem(
     id: 1,
     readingDate: '2025-12-09T00:00:00Z',
     cardName: 'El Loco',
+    cardImageUrl: 'https://example.com/cards/el-loco.jpg',
     isReversed: false,
     interpretationSummary:
       'Hoy es un día de nuevos comienzos. El Loco te invita a dar ese salto de fe.',
