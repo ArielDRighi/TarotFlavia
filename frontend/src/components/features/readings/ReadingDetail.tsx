@@ -7,11 +7,7 @@ import { es } from 'date-fns/locale';
 import { ArrowLeft, Share2, Plus, ChevronRight, RotateCcw } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
-import {
-  useReadingDetail,
-  useSpreads,
-  useShareReading,
-} from '@/hooks/api/useReadings';
+import { useReadingDetail, useSpreads, useShareReading } from '@/hooks/api/useReadings';
 import { toast } from '@/hooks/utils/useToast';
 import { TarotCard } from '@/components/features/readings/TarotCard';
 import { Button } from '@/components/ui/button';
@@ -387,10 +383,7 @@ export function ReadingDetail({ readingId }: ReadingDetailProps) {
             </CardHeader>
             <CardContent>
               {interpretationData.generalInterpretation ? (
-                <div
-                  data-testid="interpretation-content"
-                  className="prose prose-slate max-w-none"
-                >
+                <div data-testid="interpretation-content" className="prose prose-slate max-w-none">
                   <ReactMarkdown components={markdownComponents}>
                     {interpretationData.generalInterpretation}
                   </ReactMarkdown>
@@ -398,27 +391,29 @@ export function ReadingDetail({ readingId }: ReadingDetailProps) {
               ) : (
                 <div data-testid="card-meanings-content" className="space-y-6">
                   {reading.cards.map((card) => {
-                    const meaning = card.orientation === 'reversed'
-                      ? card.meaningReversed
-                      : card.meaningUpright;
+                    const meaning =
+                      card.orientation === 'reversed' ? card.meaningReversed : card.meaningUpright;
                     return (
-                      <div key={card.id} className="border-b border-border pb-4 last:border-0 last:pb-0">
-                        <h3 className="text-text-primary font-serif text-lg font-medium mb-2">
+                      <div
+                        key={card.id}
+                        className="border-border border-b pb-4 last:border-0 last:pb-0"
+                      >
+                        <h3 className="text-text-primary mb-2 font-serif text-lg font-medium">
                           {card.name}
                           {card.orientation === 'reversed' && (
-                            <span className="text-secondary ml-2 text-sm font-normal">(Invertida)</span>
+                            <span className="text-secondary ml-2 text-sm font-normal">
+                              (Invertida)
+                            </span>
                           )}
                         </h3>
                         {card.keywords && (
-                          <p className="text-primary text-sm mb-2">
+                          <p className="text-primary mb-2 text-sm">
                             <strong>Palabras clave:</strong> {card.keywords}
                           </p>
                         )}
-                        {meaning && (
-                          <p className="text-text-primary leading-relaxed">{meaning}</p>
-                        )}
+                        {meaning && <p className="text-text-primary leading-relaxed">{meaning}</p>}
                         {card.description && (
-                          <p className="text-text-muted text-sm mt-2 italic">{card.description}</p>
+                          <p className="text-text-muted mt-2 text-sm italic">{card.description}</p>
                         )}
                       </div>
                     );

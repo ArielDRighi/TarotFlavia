@@ -6,6 +6,7 @@
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
   },
+  "globalSetup": "<rootDir>/setup-integration-db.ts",
   "collectCoverageFrom": [
     "../src/**/*.ts",
     "!../src/**/*.spec.ts",

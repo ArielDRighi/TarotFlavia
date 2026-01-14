@@ -7,7 +7,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 import { cn } from '@/lib/utils';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ConfirmationModal } from '@/components/ui/confirmation-modal';
@@ -133,7 +133,7 @@ export function ReadingCard({ reading, cards, onView, onDelete, className }: Rea
           <div className="flex items-center gap-2">
             <span className="text-text-muted text-xs">{relativeDate}</span>
             {reading.spreadName && (
-              <Badge data-testid="spread-badge" variant="secondary" className="text-xs px-1.5 py-0">
+              <Badge data-testid="spread-badge" variant="secondary" className="px-1.5 py-0 text-xs">
                 {reading.spreadName}
               </Badge>
             )}

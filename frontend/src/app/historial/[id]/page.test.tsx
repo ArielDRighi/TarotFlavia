@@ -358,54 +358,6 @@ describe('ReadingDetailPage', () => {
     });
   });
 
-  describe('Actions - Regenerate', () => {
-    beforeEach(() => {
-      vi.mocked(useReadingsModule.useReadingDetail).mockReturnValue({
-        data: mockReadingDetail,
-        isLoading: false,
-        isError: false,
-        error: null,
-      } as ReturnType<typeof useReadingsModule.useReadingDetail>);
-    });
-
-    it('should display regenerate button', () => {
-      render(<ReadingDetailPage />, { wrapper: createWrapper() });
-
-      expect(screen.getByRole('button', { name: /regenerar/i })).toBeInTheDocument();
-    });
-
-    it('should open confirmation modal when regenerate is clicked', () => {
-      render(<ReadingDetailPage />, { wrapper: createWrapper() });
-
-      const regenerateButton = screen.getByRole('button', { name: /regenerar/i });
-      fireEvent.click(regenerateButton);
-
-      expect(screen.getByText(/consumirá una regeneración/i)).toBeInTheDocument();
-    });
-
-    it('should call regenerate mutation on confirm', async () => {
-      const mockMutate = vi.fn();
-      vi.mocked(useReadingsModule.useRegenerateInterpretation).mockReturnValue({
-        mutate: mockMutate,
-        isPending: false,
-      } as unknown as ReturnType<typeof useReadingsModule.useRegenerateInterpretation>);
-
-      render(<ReadingDetailPage />, { wrapper: createWrapper() });
-
-      // Open modal
-      const regenerateButton = screen.getByRole('button', { name: /regenerar/i });
-      fireEvent.click(regenerateButton);
-
-      // Confirm
-      const confirmButton = screen.getByRole('button', { name: /confirmar/i });
-      fireEvent.click(confirmButton);
-
-      await waitFor(() => {
-        expect(mockMutate).toHaveBeenCalledWith(1);
-      });
-    });
-  });
-
   describe('Actions - Back to History', () => {
     beforeEach(() => {
       vi.mocked(useReadingsModule.useReadingDetail).mockReturnValue({

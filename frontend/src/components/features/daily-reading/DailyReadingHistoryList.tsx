@@ -130,9 +130,7 @@ function ReadingsList({ items }: ReadingsListProps) {
  * - Empty state with CTA to today's reading
  * - Loading and error states
  */
-export function DailyReadingHistoryList({
-  onGoToToday,
-}: DailyReadingHistoryListProps) {
+export function DailyReadingHistoryList({ onGoToToday }: DailyReadingHistoryListProps) {
   const [page, setPage] = useState(1);
 
   const { data: historyData, isLoading, error } = useDailyReadingHistory(page, ITEMS_PER_PAGE);

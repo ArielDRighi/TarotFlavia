@@ -500,7 +500,10 @@ describe('DailyReadingService', () => {
           interpretation: fullInterpretation,
           wasRegenerated: false,
           createdAt: new Date(),
-          card: { name: 'El Mago', imageUrl: 'https://example.com/el-mago.jpg' },
+          card: {
+            name: 'El Mago',
+            imageUrl: 'https://example.com/el-mago.jpg',
+          },
           isReversed: false,
         },
       ];

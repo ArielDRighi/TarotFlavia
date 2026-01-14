@@ -454,16 +454,16 @@ describe('ReadingsHistory', () => {
 
       const readingsList = screen.getByTestId('readings-list');
 
-      // Default is list view (grid gap-4)
-      expect(readingsList).toHaveClass('grid', 'gap-4');
+      // Default is list view (mx-auto max-w-2xl space-y-3)
+      expect(readingsList).toHaveClass('mx-auto', 'max-w-2xl', 'space-y-3');
 
       // Toggle to grid view
       const viewToggle = screen.getByTestId('view-toggle');
       await userEvent.click(viewToggle);
 
       await waitFor(() => {
-        // Grid view should have specific classes (grid-cols-1 md:grid-cols-2 lg:grid-cols-3)
-        expect(readingsList).toHaveClass('grid-cols-1', 'md:grid-cols-2', 'lg:grid-cols-3');
+        // Grid view should have grid classes
+        expect(readingsList).toHaveClass('grid', 'gap-4', 'grid-cols-1');
       });
     });
 

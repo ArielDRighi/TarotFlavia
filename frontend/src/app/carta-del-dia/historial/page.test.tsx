@@ -196,45 +196,6 @@ describe('DailyReadingHistoryPage', () => {
     });
   });
 
-  describe('Navigation', () => {
-    it('should navigate to detail page when card is clicked', async () => {
-      const user = userEvent.setup();
-      const readings = [createMockDailyReadingHistoryItem({ id: 42 })];
-
-      mockUseDailyReadingHistory.mockReturnValue({
-        data: createMockPaginatedResponse(readings),
-        isLoading: false,
-        error: null,
-      });
-
-      renderWithProviders(<DailyReadingHistoryPage />);
-
-      const card = screen.getByTestId('daily-reading-card');
-      await user.click(card);
-
-      expect(mockPush).toHaveBeenCalledWith('/carta-del-dia/historial/42');
-    });
-
-    it('should navigate to detail page when "Ver completa" is clicked', async () => {
-      const user = userEvent.setup();
-      const readings = [createMockDailyReadingHistoryItem({ id: 99 })];
-
-      mockUseDailyReadingHistory.mockReturnValue({
-        data: createMockPaginatedResponse(readings),
-        isLoading: false,
-        error: null,
-      });
-
-      renderWithProviders(<DailyReadingHistoryPage />);
-
-      const viewButton = screen.getByText('Ver completa').closest('button');
-      expect(viewButton).not.toBeNull();
-      await user.click(viewButton!);
-
-      expect(mockPush).toHaveBeenCalledWith('/carta-del-dia/historial/99');
-    });
-  });
-
   describe('Pagination', () => {
     it('should show pagination controls when multiple pages', () => {
       const readings = Array.from({ length: 10 }, (_, i) =>

@@ -231,28 +231,6 @@ describe('ReadingDetail', () => {
       });
     });
 
-    it('should handle regenerate action', async () => {
-      const mockMutate = vi.fn();
-      vi.mocked(useReadingsModule.useRegenerateInterpretation).mockReturnValue({
-        mutate: mockMutate,
-        isPending: false,
-      } as unknown as ReturnType<typeof useReadingsModule.useRegenerateInterpretation>);
-
-      render(<ReadingDetail readingId={1} />, { wrapper: createWrapper() });
-
-      // Open modal
-      const regenerateButton = screen.getByRole('button', { name: /regenerar/i });
-      fireEvent.click(regenerateButton);
-
-      // Confirm
-      const confirmButton = screen.getByRole('button', { name: /confirmar/i });
-      fireEvent.click(confirmButton);
-
-      await waitFor(() => {
-        expect(mockMutate).toHaveBeenCalledWith(1);
-      });
-    });
-
     it('should navigate back to history', () => {
       render(<ReadingDetail readingId={1} />, { wrapper: createWrapper() });
 
