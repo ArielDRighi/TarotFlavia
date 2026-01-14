@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThan } from 'typeorm';
 import { UsageLimit } from '../entities/usage-limit.entity';
 import { USAGE_RETENTION_DAYS } from '../usage-limits.constants';
+import { getDateDaysAgoUTCString } from '../../../common/utils/date.utils';
 
 /**
  * Service responsible for daily reset of usage limits.
@@ -36,15 +37,10 @@ export class UsageLimitsResetService {
     this.logger.log('Daily usage limits reset job started');
 
     try {
-      const cutoffDate = new Date();
-      cutoffDate.setDate(cutoffDate.getDate() - USAGE_RETENTION_DAYS);
-      cutoffDate.setUTCHours(0, 0, 0, 0);
-
-      // Convert to 'YYYY-MM-DD' string for PostgreSQL date type comparison
-      const cutoffDateString = cutoffDate.toISOString().split('T')[0];
+      const cutoffDateStr = getDateDaysAgoUTCString(USAGE_RETENTION_DAYS);
 
       const deleteResult = await this.usageLimitRepository.delete({
-        date: LessThan(cutoffDateString),
+        date: LessThan(cutoffDateStr),
       });
 
       const deletedCount = deleteResult.affected || 0;
@@ -70,16 +66,11 @@ export class UsageLimitsResetService {
     recordsToDelete: number;
     retentionDays: number;
   }> {
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - USAGE_RETENTION_DAYS);
-    cutoffDate.setUTCHours(0, 0, 0, 0);
-
-    // Convert to 'YYYY-MM-DD' string for PostgreSQL date type comparison
-    const cutoffDateString = cutoffDate.toISOString().split('T')[0];
+    const cutoffDateStr = getDateDaysAgoUTCString(USAGE_RETENTION_DAYS);
 
     const count = await this.usageLimitRepository.count({
       where: {
-        date: LessThan(cutoffDateString),
+        date: LessThan(cutoffDateStr),
       },
     });
 

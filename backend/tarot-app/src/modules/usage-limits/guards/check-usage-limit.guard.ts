@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, MoreThanOrEqual, IsNull } from 'typeorm';
+import { Repository, IsNull } from 'typeorm';
 import { Request } from 'express';
 import { UsageLimitsService } from '../usage-limits.service';
 import { AnonymousTrackingService } from '../services/anonymous-tracking.service';
@@ -19,7 +19,25 @@ import { UsersService } from '../../users/users.service';
 import { PlanConfigService } from '../../plan-config/plan-config.service';
 import { USAGE_LIMIT_FEATURE_KEY } from '../decorators/check-usage-limit.decorator';
 import { ALLOW_ANONYMOUS_KEY } from '../decorators/allow-anonymous.decorator';
+import {
+  getTodayUTCDateString,
+  getStartOfTodayUTC,
+} from '../../../common/utils/date.utils';
 
+/** Standard error message for daily limit reached */
+const DAILY_LIMIT_ERROR_MESSAGE =
+  'Has alcanzado tu límite diario para esta función. Tu cuota se restablecerá a medianoche (00:00 UTC). Intenta nuevamente mañana o actualiza tu plan para obtener más acceso.';
+
+/**
+ * Guard that checks usage limits for various features.
+ *
+ * This guard supports three types of limit checking:
+ * 1. DAILY_CARD: Checks daily_readings table (1 per day, uses DATE column)
+ * 2. TAROT_READING: Checks tarot_reading table (variable limit by plan, uses TIMESTAMP)
+ * 3. Other features: Uses usage_limits table
+ *
+ * All date comparisons use UTC to ensure consistent 24-hour reset cycles.
+ */
 @Injectable()
 export class CheckUsageLimitGuard implements CanActivate {
   private readonly logger = new Logger(CheckUsageLimitGuard.name);
@@ -36,174 +54,183 @@ export class CheckUsageLimitGuard implements CanActivate {
     private readonly tarotReadingRepository: Repository<TarotReading>,
   ) {}
 
-  /**
-   * Helper to get today's date as a string in 'YYYY-MM-DD' format (UTC).
-   * This ensures consistent date comparison with PostgreSQL DATE columns.
-   */
-  private getTodayDateString(): string {
-    const now = new Date();
-    const year = now.getUTCFullYear();
-    const month = String(now.getUTCMonth() + 1).padStart(2, '0');
-    const day = String(now.getUTCDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }
-
   async canActivate(context: ExecutionContext): Promise<boolean> {
     this.logger.debug('Guard execution started');
 
-    // Extract feature from decorator metadata
-    const feature = this.reflector.getAllAndOverride<UsageFeature>(
-      USAGE_LIMIT_FEATURE_KEY,
-      [context.getHandler(), context.getClass()],
-    );
-
-    this.logger.debug(`Feature extracted: ${feature}`);
-
-    // If no feature is specified, skip the guard
+    const feature = this.extractFeature(context);
     if (!feature) {
       this.logger.debug('No feature specified, skipping guard');
       return true;
     }
 
-    // Check if anonymous access is allowed
     const allowAnonymous = this.reflector.getAllAndOverride<boolean>(
       ALLOW_ANONYMOUS_KEY,
       [context.getHandler(), context.getClass()],
     );
 
-    // Extract request and user info
     const request = context
       .switchToHttp()
       .getRequest<Request & { user?: { userId: number } }>();
     const userId = request.user?.userId;
 
-    this.logger.debug(`UserId: ${userId}`);
+    this.logger.debug(`Feature: ${feature}, UserId: ${userId}`);
 
-    // If user is authenticated, use normal usage limit checking
+    // Authenticated user flow
     if (userId) {
-      const today = new Date();
-      today.setUTCHours(0, 0, 0, 0);
-
-      // For DAILY_CARD, check the daily_reading table directly
-      if (feature === UsageFeature.DAILY_CARD) {
-        // FIX: Use string date format 'YYYY-MM-DD' for consistent comparison
-        // with PostgreSQL DATE column. Previously, using MoreThanOrEqual with
-        // a Date object caused timezone conversion issues, making the limit
-        // not reset properly every 24 hours.
-        const todayStr = this.getTodayDateString();
-        this.logger.debug(
-          `Checking DAILY_CARD for userId=${userId}, todayStr=${todayStr}`,
-        );
-
-        const existingReading = await this.dailyReadingRepository
-          .createQueryBuilder('daily_reading')
-          .where('daily_reading.user_id = :userId', { userId })
-          .andWhere('daily_reading.reading_date = :date', { date: todayStr })
-          .getOne();
-
-        this.logger.debug(
-          `DAILY_CARD check result: existingReading=${!!existingReading}`,
-        );
-
-        if (existingReading) {
-          throw new ForbiddenException(
-            `Has alcanzado tu límite diario para esta función. Tu cuota se restablecerá a medianoche (00:00 UTC). Intenta nuevamente mañana o actualiza tu plan para obtener más acceso.`,
-          );
-        }
-
-        return true;
-      }
-
-      // For TAROT_READING, check the tarot_reading table directly
-      if (feature === UsageFeature.TAROT_READING) {
-        this.logger.debug('=== TAROT_READING GUARD CHECK START ===');
-        this.logger.debug(`userId=${userId}, today=${today.toISOString()}`);
-
-        // Get user's plan and limits
-        const user = await this.usersService.findById(userId);
-        if (!user) {
-          this.logger.warn(
-            `User not found for userId=${userId}. This may indicate stale JWT token or data integrity issue.`,
-          );
-          throw new UnauthorizedException(
-            'Usuario no encontrado. Por favor, inicia sesión nuevamente.',
-          );
-        }
-        this.logger.debug(`User found: plan=${user.plan}`);
-
-        const planConfig = await this.planConfigService.findByPlanType(
-          user.plan,
-        );
-        if (!planConfig) {
-          throw new ForbiddenException('Configuración de plan no encontrada');
-        }
-        this.logger.debug(
-          `Plan config: limit=${planConfig.tarotReadingsLimit}`,
-        );
-
-        // Check if user has unlimited access (-1)
-        if (planConfig.tarotReadingsLimit === -1) {
-          this.logger.debug('UNLIMITED ACCESS - ALLOWING');
-          return true;
-        }
-
-        // Count readings created today (excluding soft-deleted ones)
-        const readingsCount = await this.tarotReadingRepository.count({
-          where: {
-            user: { id: userId },
-            createdAt: MoreThanOrEqual(today),
-            deletedAt: IsNull(),
-          },
-        });
-
-        this.logger.debug(
-          `COUNT=${readingsCount}, LIMIT=${planConfig.tarotReadingsLimit}`,
-        );
-
-        if (readingsCount >= planConfig.tarotReadingsLimit) {
-          this.logger.debug('BLOCKING - COUNT >= LIMIT');
-          throw new ForbiddenException(
-            `Has alcanzado tu límite diario para esta función. Tu cuota se restablecerá a medianoche (00:00 UTC). Intenta nuevamente mañana o actualiza tu plan para obtener más acceso.`,
-          );
-        }
-
-        this.logger.debug('ALLOWING - COUNT < LIMIT');
-        return true;
-      }
-
-      // For other features, use usage_limits table
-      this.logger.debug(
-        `Checking ${feature} using usage_limits table for userId=${userId}`,
-      );
-      const canUse = await this.usageLimitsService.checkLimit(userId, feature);
-      this.logger.debug(`Result: canUse=${canUse}`);
-
-      if (!canUse) {
-        throw new ForbiddenException(
-          `Has alcanzado tu límite diario para esta función. Tu cuota se restablecerá a medianoche (00:00 UTC). Intenta nuevamente mañana o actualiza tu plan para obtener más acceso.`,
-        );
-      }
-
-      return true;
+      return this.checkAuthenticatedUserLimit(userId, feature);
     }
 
-    // If user is not authenticated and anonymous access is allowed
+    // Anonymous user flow
     if (allowAnonymous) {
-      const canAccess = await this.anonymousTrackingService.canAccess(request);
+      return this.checkAnonymousUserLimit(request);
+    }
 
-      if (!canAccess) {
-        throw new ForbiddenException(
-          'Ya viste tu carta del día. Regístrate para más lecturas.',
-        );
-      }
+    throw new ForbiddenException('Usuario no autenticado');
+  }
 
-      // Record usage after successful access check
-      await this.anonymousTrackingService.recordUsage(request);
+  /**
+   * Extracts the usage feature from decorator metadata.
+   */
+  private extractFeature(context: ExecutionContext): UsageFeature | undefined {
+    return this.reflector.getAllAndOverride<UsageFeature>(
+      USAGE_LIMIT_FEATURE_KEY,
+      [context.getHandler(), context.getClass()],
+    );
+  }
 
+  /**
+   * Checks usage limits for authenticated users.
+   * Routes to appropriate checker based on feature type.
+   */
+  private async checkAuthenticatedUserLimit(
+    userId: number,
+    feature: UsageFeature,
+  ): Promise<boolean> {
+    switch (feature) {
+      case UsageFeature.DAILY_CARD:
+        return this.checkDailyCardLimit(userId);
+      case UsageFeature.TAROT_READING:
+        return this.checkTarotReadingLimit(userId);
+      default:
+        return this.checkGenericFeatureLimit(userId, feature);
+    }
+  }
+
+  /**
+   * Checks if user has already generated their daily card today.
+   *
+   * Uses string date comparison ('YYYY-MM-DD') for PostgreSQL DATE columns
+   * to ensure consistent behavior across timezones.
+   */
+  private async checkDailyCardLimit(userId: number): Promise<boolean> {
+    const todayStr = getTodayUTCDateString();
+    this.logger.debug(
+      `Checking DAILY_CARD for userId=${userId}, date=${todayStr}`,
+    );
+
+    const existingReading = await this.dailyReadingRepository
+      .createQueryBuilder('daily_reading')
+      .where('daily_reading.user_id = :userId', { userId })
+      .andWhere('daily_reading.reading_date = :date', { date: todayStr })
+      .getOne();
+
+    this.logger.debug(`DAILY_CARD exists: ${!!existingReading}`);
+
+    if (existingReading) {
+      throw new ForbiddenException(DAILY_LIMIT_ERROR_MESSAGE);
+    }
+
+    return true;
+  }
+
+  /**
+   * Checks if user has reached their tarot reading limit for today.
+   *
+   * Uses TIMESTAMP comparison with start of day UTC for accurate counting.
+   */
+  private async checkTarotReadingLimit(userId: number): Promise<boolean> {
+    this.logger.debug(`Checking TAROT_READING for userId=${userId}`);
+
+    // Get user and plan configuration
+    const user = await this.usersService.findById(userId);
+    if (!user) {
+      this.logger.warn(`User not found for userId=${userId}`);
+      throw new UnauthorizedException(
+        'Usuario no encontrado. Por favor, inicia sesión nuevamente.',
+      );
+    }
+
+    const planConfig = await this.planConfigService.findByPlanType(user.plan);
+    if (!planConfig) {
+      throw new ForbiddenException('Configuración de plan no encontrada');
+    }
+
+    this.logger.debug(
+      `User plan: ${user.plan}, limit: ${planConfig.tarotReadingsLimit}`,
+    );
+
+    // Unlimited access
+    if (planConfig.tarotReadingsLimit === -1) {
+      this.logger.debug('UNLIMITED ACCESS - ALLOWING');
       return true;
     }
 
-    // If user is not authenticated and anonymous access is not allowed
-    throw new ForbiddenException('Usuario no autenticado');
+    // Count today's readings using start of day UTC
+    const startOfToday = getStartOfTodayUTC();
+    const todayStr = getTodayUTCDateString();
+
+    const readingsCount = await this.tarotReadingRepository
+      .createQueryBuilder('tarot_reading')
+      .where('tarot_reading.user_id = :userId', { userId })
+      .andWhere('tarot_reading.createdAt >= :startOfToday', { startOfToday })
+      .andWhere('tarot_reading.deletedAt IS NULL')
+      .getCount();
+
+    this.logger.debug(
+      `TAROT_READING count for ${todayStr}: ${readingsCount}/${planConfig.tarotReadingsLimit}`,
+    );
+
+    if (readingsCount >= planConfig.tarotReadingsLimit) {
+      this.logger.debug('BLOCKING - limit reached');
+      throw new ForbiddenException(DAILY_LIMIT_ERROR_MESSAGE);
+    }
+
+    this.logger.debug('ALLOWING - under limit');
+    return true;
+  }
+
+  /**
+   * Checks generic feature limits using the usage_limits table.
+   */
+  private async checkGenericFeatureLimit(
+    userId: number,
+    feature: UsageFeature,
+  ): Promise<boolean> {
+    this.logger.debug(`Checking ${feature} via usage_limits for userId=${userId}`);
+
+    const canUse = await this.usageLimitsService.checkLimit(userId, feature);
+    this.logger.debug(`${feature} check result: ${canUse}`);
+
+    if (!canUse) {
+      throw new ForbiddenException(DAILY_LIMIT_ERROR_MESSAGE);
+    }
+
+    return true;
+  }
+
+  /**
+   * Checks usage limits for anonymous users.
+   */
+  private async checkAnonymousUserLimit(request: Request): Promise<boolean> {
+    const canAccess = await this.anonymousTrackingService.canAccess(request);
+
+    if (!canAccess) {
+      throw new ForbiddenException(
+        'Ya viste tu carta del día. Regístrate para más lecturas.',
+      );
+    }
+
+    await this.anonymousTrackingService.recordUsage(request);
+    return true;
   }
 }

@@ -31,6 +31,7 @@ describe('CheckUsageLimitGuard', () => {
   };
   let tarotReadingRepository: {
     count: jest.Mock;
+    createQueryBuilder: jest.Mock;
   };
   let reflector: { getAllAndOverride: jest.Mock };
 
@@ -65,6 +66,7 @@ describe('CheckUsageLimitGuard', () => {
     const mockFindById = jest.fn();
     const mockFindByPlanType = jest.fn();
     const mockCountTarotReading = jest.fn();
+    const mockCreateQueryBuilder = jest.fn();
 
     // Default mocks for user and plan config (needed for TAROT_READING feature)
     mockFindById.mockResolvedValue({
@@ -78,6 +80,14 @@ describe('CheckUsageLimitGuard', () => {
       tarotReadingsLimit: 1,
     });
     mockCountTarotReading.mockResolvedValue(0);
+
+    // Setup createQueryBuilder mock chain for tarot readings
+    const mockQueryBuilder = {
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      getCount: jest.fn().mockResolvedValue(0),
+    };
+    mockCreateQueryBuilder.mockReturnValue(mockQueryBuilder);
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -126,6 +136,7 @@ describe('CheckUsageLimitGuard', () => {
           useValue: {
             count: mockCountTarotReading,
             find: jest.fn(),
+            createQueryBuilder: mockCreateQueryBuilder,
           },
         },
       ],
@@ -151,14 +162,19 @@ describe('CheckUsageLimitGuard', () => {
         .mockReturnValueOnce(UsageFeature.TAROT_READING)
         .mockReturnValueOnce(false);
       // Mock that user has 0 readings (limit not reached)
-      tarotReadingRepository.count.mockResolvedValue(0);
+      const mockQueryBuilder = {
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getCount: jest.fn().mockResolvedValue(0),
+      };
+      tarotReadingRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder);
 
       const result = await guard.canActivate(context);
 
       expect(result).toBe(true);
       // Verify new direct table query logic was used
       expect(usersService.findById).toHaveBeenCalledWith(1);
-      expect(tarotReadingRepository.count).toHaveBeenCalled();
+      expect(tarotReadingRepository.createQueryBuilder).toHaveBeenCalledWith('tarot_reading');
     });
 
     it('should block action when limit is reached (403)', async () => {
@@ -167,7 +183,12 @@ describe('CheckUsageLimitGuard', () => {
         .mockReturnValueOnce(UsageFeature.TAROT_READING)
         .mockReturnValueOnce(false);
       // Mock that user already has 1 reading (the limit for FREE)
-      tarotReadingRepository.count.mockResolvedValue(1);
+      const mockQueryBuilder = {
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getCount: jest.fn().mockResolvedValue(1),
+      };
+      tarotReadingRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder);
 
       await expect(guard.canActivate(context)).rejects.toThrow(
         ForbiddenException,
@@ -257,7 +278,12 @@ describe('CheckUsageLimitGuard', () => {
         email: 'test42@test.com',
         plan: 'FREE',
       });
-      tarotReadingRepository.count.mockResolvedValue(0);
+      const mockQueryBuilder = {
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getCount: jest.fn().mockResolvedValue(0),
+      };
+      tarotReadingRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder);
 
       await guard.canActivate(context);
 

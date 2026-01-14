@@ -9,6 +9,10 @@ import { UsageLimit, UsageFeature } from './entities/usage-limit.entity';
 import { UsersService } from '../users/users.service';
 import { PlanConfigService } from '../plan-config/plan-config.service';
 import { USAGE_RETENTION_DAYS, USAGE_LIMITS } from './usage-limits.constants';
+import {
+  getTodayUTCDateString,
+  getDateDaysAgoUTCString,
+} from '../../common/utils/date.utils';
 
 @Injectable()
 export class UsageLimitsService {
@@ -19,70 +23,68 @@ export class UsageLimitsService {
     private planConfigService: PlanConfigService,
   ) {}
 
-  async checkLimit(userId: number, feature: UsageFeature): Promise<boolean> {
+  /**
+   * Gets the usage limit for a user and feature based on their plan.
+   */
+  private async getLimit(
+    userId: number,
+    feature: UsageFeature,
+  ): Promise<number> {
     const user = await this.usersService.findById(userId);
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
 
-    // Get limit from database configuration based on feature type
-    let limit: number;
-
     if (feature === UsageFeature.DAILY_CARD) {
-      limit = await this.planConfigService.getDailyCardLimit(user.plan);
-    } else if (feature === UsageFeature.TAROT_READING) {
-      limit = await this.planConfigService.getTarotReadingsLimit(user.plan);
-    } else {
-      // For other features (ORACLE_QUERY, INTERPRETATION_REGENERATION), fall back to constants
-      limit = USAGE_LIMITS[user.plan]?.[feature];
-      if (limit === undefined) {
-        throw new BadRequestException(
-          `Invalid feature '${feature}' for plan '${user.plan}'`,
-        );
-      }
+      return this.planConfigService.getDailyCardLimit(user.plan);
     }
 
-    // Premium users have unlimited access (-1)
+    if (feature === UsageFeature.TAROT_READING) {
+      return this.planConfigService.getTarotReadingsLimit(user.plan);
+    }
+
+    // For other features (ORACLE_QUERY, INTERPRETATION_REGENERATION), fall back to constants
+    const limit = USAGE_LIMITS[user.plan]?.[feature];
+    if (limit === undefined) {
+      throw new BadRequestException(
+        `Invalid feature '${feature}' for plan '${user.plan}'`,
+      );
+    }
+    return limit;
+  }
+
+  /**
+   * Gets the usage record for today.
+   */
+  private async getTodayUsageRecord(
+    userId: number,
+    feature: UsageFeature,
+  ): Promise<UsageLimit | null> {
+    const todayStr = getTodayUTCDateString();
+    return this.usageLimitRepository.findOne({
+      where: {
+        userId,
+        feature,
+        date: todayStr,
+      },
+    });
+  }
+
+  async checkLimit(userId: number, feature: UsageFeature): Promise<boolean> {
+    const limit = await this.getLimit(userId, feature);
+
+    // Unlimited access (-1)
     if (limit === -1) {
       return true;
     }
 
-    // Get start of today in UTC (00:00:00 UTC)
-    const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
-
-    // Convert to 'YYYY-MM-DD' string for PostgreSQL date type comparison
-    // TypeORM accepts string for PostgreSQL DATE columns
-    const dateString = today.toISOString().split('T')[0];
-
-    const usageRecord = await this.usageLimitRepository.findOne({
-      where: {
-        userId,
-        feature,
-        date: dateString,
-      },
-    });
-
+    const usageRecord = await this.getTodayUsageRecord(userId, feature);
     const currentCount = usageRecord?.count || 0;
     return currentCount < limit;
   }
 
   async getUsage(userId: number, feature: UsageFeature): Promise<number> {
-    // Get start of today in UTC (00:00:00 UTC)
-    const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
-
-    // Convert to 'YYYY-MM-DD' string for PostgreSQL date type comparison
-    const dateString = today.toISOString().split('T')[0];
-
-    const usageRecord = await this.usageLimitRepository.findOne({
-      where: {
-        userId,
-        feature,
-        date: dateString,
-      },
-    });
-
+    const usageRecord = await this.getTodayUsageRecord(userId, feature);
     return usageRecord?.count || 0;
   }
 
@@ -90,12 +92,7 @@ export class UsageLimitsService {
     userId: number,
     feature: UsageFeature,
   ): Promise<UsageLimit> {
-    // Get start of today in UTC (00:00:00 UTC)
-    const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
-
-    // Convert to 'YYYY-MM-DD' string for PostgreSQL date type comparison
-    const dateString = today.toISOString().split('T')[0];
+    const todayStr = getTodayUTCDateString();
 
     // First, try to create a new record (if it doesn't exist)
     // This leverages the unique constraint on (userId, feature, date)
@@ -107,7 +104,7 @@ export class UsageLimitsService {
         .values({
           userId,
           feature,
-          date: dateString,
+          date: todayStr,
           count: 0, // Start at 0, will be incremented below
         })
         .orIgnore() // If record exists, do nothing
@@ -123,18 +120,11 @@ export class UsageLimitsService {
       .set({ count: () => '"count" + 1' })
       .where('userId = :userId', { userId })
       .andWhere('feature = :feature', { feature })
-      .andWhere('date = :date', { date: dateString })
+      .andWhere('date = :date', { date: todayStr })
       .execute();
 
     // Return the updated record
-    const updatedRecord = await this.usageLimitRepository.findOne({
-      where: {
-        userId,
-        feature,
-        date: dateString,
-      },
-    });
-
+    const updatedRecord = await this.getTodayUsageRecord(userId, feature);
     if (!updatedRecord) {
       throw new Error('Failed to increment usage - record not found');
     }
@@ -146,65 +136,25 @@ export class UsageLimitsService {
     userId: number,
     feature: UsageFeature,
   ): Promise<number> {
-    const user = await this.usersService.findById(userId);
-    if (!user) {
-      throw new NotFoundException(`User with ID ${userId} not found`);
-    }
+    const limit = await this.getLimit(userId, feature);
 
-    // Get limit from database configuration based on feature type
-    let limit: number;
-
-    if (feature === UsageFeature.DAILY_CARD) {
-      limit = await this.planConfigService.getDailyCardLimit(user.plan);
-    } else if (feature === UsageFeature.TAROT_READING) {
-      limit = await this.planConfigService.getTarotReadingsLimit(user.plan);
-    } else {
-      // For other features (ORACLE_QUERY, INTERPRETATION_REGENERATION), fall back to constants
-      limit = USAGE_LIMITS[user.plan]?.[feature];
-      if (limit === undefined) {
-        throw new BadRequestException(
-          `Invalid feature '${feature}' for plan '${user.plan}'`,
-        );
-      }
-    }
-
-    // Premium users have unlimited access (-1)
+    // Unlimited access (-1)
     if (limit === -1) {
       return -1;
     }
 
-    // Get start of today in UTC (00:00:00 UTC)
-    const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
-
-    // Convert to 'YYYY-MM-DD' string for PostgreSQL date type comparison
-    const dateString = today.toISOString().split('T')[0];
-
-    const usageRecord = await this.usageLimitRepository.findOne({
-      where: {
-        userId,
-        feature,
-        date: dateString,
-      },
-    });
-
+    const usageRecord = await this.getTodayUsageRecord(userId, feature);
     const currentCount = usageRecord?.count || 0;
     return Math.max(0, limit - currentCount);
   }
 
   async cleanOldRecords(): Promise<number> {
-    // Get start of cutoff date in UTC (00:00:00 UTC)
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - USAGE_RETENTION_DAYS);
-    cutoffDate.setUTCHours(0, 0, 0, 0);
-
-    // Convert to 'YYYY-MM-DD' string for PostgreSQL date type comparison
-    const cutoffDateString = cutoffDate.toISOString().split('T')[0];
+    const cutoffDateStr = getDateDaysAgoUTCString(USAGE_RETENTION_DAYS);
 
     const result = await this.usageLimitRepository
       .createQueryBuilder()
       .delete()
-      .where('date < :cutoffDate', { cutoffDate: cutoffDateString })
+      .where('date < :cutoffDate', { cutoffDate: cutoffDateStr })
       .execute();
 
     return result.affected || 0;
