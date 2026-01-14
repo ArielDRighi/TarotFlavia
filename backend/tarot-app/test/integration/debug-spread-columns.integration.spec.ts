@@ -78,8 +78,12 @@ describe('DEBUG: Spread Columns Investigation', () => {
       console.log('\nColumnas mapeadas:');
 
       metadata.columns.forEach((column) => {
+        const columnType =
+          typeof column.type === 'function'
+            ? column.type.name
+            : String(column.type);
         console.log(
-          `  ${column.propertyName} -> ${column.databaseName} (${column.type})`,
+          `  ${column.propertyName} -> ${column.databaseName} (${columnType})`,
         );
       });
 
@@ -167,12 +171,12 @@ describe('DEBUG: Spread Columns Investigation', () => {
         }));
 
         // Columnas de la tabla
-        const tableColumns = await queryRunner.query(`
+        const tableColumns = (await queryRunner.query(`
           SELECT column_name
           FROM information_schema.columns
           WHERE table_name = 'tarot_reading'
           ORDER BY ordinal_position;
-        `);
+        `)) as Array<{ column_name: string }>;
 
         const tableColumnNames = tableColumns.map((c) => c.column_name);
         const entityColumnNames = entityColumns.map((c) => c.database);
@@ -217,7 +221,13 @@ describe('DEBUG: Spread Columns Investigation', () => {
   describe('DataSource Connection Test', () => {
     it('should show DataSource configuration', () => {
       console.log('\n=== DATASOURCE CONFIG ===');
-      const options = dataSource.options as any;
+      const options = dataSource.options as {
+        database?: string;
+        host?: string;
+        port?: number;
+        synchronize?: boolean;
+        dropSchema?: boolean;
+      };
       console.log('Database:', options.database);
       console.log('Host:', options.host);
       console.log('Port:', options.port);

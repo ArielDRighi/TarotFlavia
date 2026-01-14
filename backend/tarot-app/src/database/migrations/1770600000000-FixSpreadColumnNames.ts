@@ -3,12 +3,12 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
 export class FixSpreadColumnNames1770600000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Check if camelCase columns exist and rename them to snake_case
-    const hasSpreadId = await queryRunner.query(`
+    const hasSpreadId = (await queryRunner.query(`
       SELECT column_name 
       FROM information_schema.columns 
       WHERE table_name = 'tarot_reading' 
       AND column_name = 'spreadId'
-    `);
+    `)) as Array<{ column_name: string }>;
 
     if (hasSpreadId.length > 0) {
       await queryRunner.query(
@@ -16,12 +16,12 @@ export class FixSpreadColumnNames1770600000000 implements MigrationInterface {
       );
     }
 
-    const hasSpreadName = await queryRunner.query(`
+    const hasSpreadName = (await queryRunner.query(`
       SELECT column_name 
       FROM information_schema.columns 
       WHERE table_name = 'tarot_reading' 
       AND column_name = 'spreadName'
-    `);
+    `)) as Array<{ column_name: string }>;
 
     if (hasSpreadName.length > 0) {
       await queryRunner.query(`
