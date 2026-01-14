@@ -27,9 +27,16 @@ export interface DailyReadingCardProps {
 /**
  * Format date to Spanish full format (e.g., "Lunes 2 de Diciembre")
  * Capitalizes the first letter
+ *
+ * IMPORTANT: dateString comes as 'YYYY-MM-DD' from the backend.
+ * Using new Date('YYYY-MM-DD') interprets it as UTC midnight, which causes
+ * the date to shift to the previous day in negative UTC offset timezones
+ * (e.g., Argentina UTC-3). We append 'T12:00:00' to treat it as noon local
+ * time, avoiding any date shift issues across all timezones.
  */
 function formatReadingDate(dateString: string): string {
-  const date = new Date(dateString);
+  // Append noon time to avoid timezone date shift issues
+  const date = new Date(`${dateString}T12:00:00`);
   const formatted = format(date, "EEEE d 'de' MMMM", { locale: es });
   return formatted.charAt(0).toUpperCase() + formatted.slice(1);
 }

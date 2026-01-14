@@ -38,14 +38,16 @@ export function DailyReadingsChart({ data }: DailyReadingsChartProps) {
               <XAxis
                 dataKey="date"
                 tickFormatter={(value) => {
-                  const date = new Date(value);
+                  // Append noon time to avoid timezone date shift issues with YYYY-MM-DD format
+                  const date = new Date(`${value}T12:00:00`);
                   return `${date.getMonth() + 1}/${date.getDate()}`;
                 }}
               />
               <YAxis />
               <Tooltip
                 labelFormatter={(value) => {
-                  const date = new Date(value as string);
+                  // Append noon time to avoid timezone date shift issues with YYYY-MM-DD format
+                  const date = new Date(`${value}T12:00:00`);
                   return date.toLocaleDateString('es-ES');
                 }}
               />
