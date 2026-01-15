@@ -18,6 +18,7 @@ import type {
   Reading,
   TrashedReading,
   ShareReadingResponse,
+  ShareTextResponse,
 } from '@/types';
 
 // ============================================================================
@@ -307,6 +308,23 @@ export async function unshareReading(readingId: number): Promise<void> {
     await apiClient.delete(API_ENDPOINTS.READINGS.SHARE(readingId));
   } catch {
     throw new Error('Error al dejar de compartir lectura');
+  }
+}
+
+/**
+ * Get formatted share text for a reading
+ * @param readingId - Reading ID to get share text from
+ * @returns Promise<ShareTextResponse> Object with formatted share text
+ * @throws Error with clear message on failure
+ */
+export async function getShareText(readingId: number): Promise<ShareTextResponse> {
+  try {
+    const response = await apiClient.get<ShareTextResponse>(
+      API_ENDPOINTS.READINGS.SHARE_TEXT(readingId)
+    );
+    return response.data;
+  } catch {
+    throw new Error('Error al obtener texto para compartir');
   }
 }
 

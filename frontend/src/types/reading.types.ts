@@ -255,6 +255,13 @@ export interface ShareReadingResponse {
 }
 
 /**
+ * Response from fetching share text for a reading or daily reading
+ */
+export interface ShareTextResponse {
+  shareText: string;
+}
+
+/**
  * Card position with orientation (from backend cardPositions JSONB)
  */
 export interface CardPosition {

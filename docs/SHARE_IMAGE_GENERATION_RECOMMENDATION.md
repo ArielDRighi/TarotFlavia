@@ -655,12 +655,13 @@ Crear componente reutilizable que implementa Web Share API con fallback a clipbo
 
 ---
 
-### **TASK-SHARE-006: Crear Hook useShareText**
+### **TASK-SHARE-006: Crear Hook useShareText** ✅
 
 **Prioridad:** 🔴 ALTA  
 **Estimación:** 2 horas  
 **Dependencias:** TASK-SHARE-003, TASK-SHARE-005  
-**Tipo:** 🎨 Frontend
+**Tipo:** 🎨 Frontend  
+**Estado:** ✅ **COMPLETADA**
 
 #### 📋 Descripción
 
@@ -668,15 +669,15 @@ Crear hook de React Query para obtener el texto de compartir desde el backend.
 
 #### ✅ Tareas específicas
 
-- [ ] Crear `useShareText.ts` en `frontend/src/hooks/api/`
-- [ ] Añadir función API `getShareText(readingId)` en `readings-api.ts`
-- [ ] Añadir función API `getDailyShareText()` en `daily-reading-api.ts`
-- [ ] Implementar hooks:
+- [x] Crear `useShareText.ts` en `frontend/src/hooks/api/`
+- [x] Añadir función API `getShareText(readingId)` en `readings-api.ts`
+- [x] Añadir función API `getDailyShareText()` en `daily-reading-api.ts`
+- [x] Implementar hooks:
   ```typescript
   export function useReadingShareText(readingId: number);
   export function useDailyShareText();
   ```
-- [ ] Añadir endpoint a `API_ENDPOINTS`:
+- [x] Añadir endpoint a `API_ENDPOINTS`:
   ```typescript
   READINGS: {
     SHARE_TEXT: (id: number) => `/readings/${id}/share-text`,
@@ -685,12 +686,18 @@ Crear hook de React Query para obtener el texto de compartir desde el backend.
     SHARE_TEXT: '/daily-reading/share-text',
   }
   ```
+- [x] Crear tipo `ShareTextResponse` en `reading.types.ts`
+- [x] Tests completos (7 tests) con 100% de cobertura
 
 #### 🎯 Criterios de aceptación
 
-- ✓ Hook retorna texto formateado del backend
-- ✓ Maneja estados de loading/error
-- ✓ Endpoints centralizados en `API_ENDPOINTS`
+- ✅ Hook retorna texto formateado del backend
+- ✅ Maneja estados de loading/error
+- ✅ Endpoints centralizados en `API_ENDPOINTS`
+- ✅ Lint sin errores
+- ✅ Type check sin errores
+- ✅ Build exitoso
+- ✅ Todos los tests pasan (1893/1893)
 
 ---
 
