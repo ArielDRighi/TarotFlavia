@@ -7,21 +7,28 @@
 
 ## 🎯 Resumen Ejecutivo
 
-**3 bugs identificados con causa raíz encontrada:**
+**3 bugs identificados con causa raíz confirmada:**
 
-| Bug    | Problema                          | Causa Raíz                             | Solución                                       | Prioridad | Tiempo |
-| ------ | --------------------------------- | -------------------------------------- | ---------------------------------------------- | --------- | ------ |
-| **#1** | Lectura eliminada sigue visible   | No hay optimistic update               | Implementar `onMutate` en `useDeleteReading`   | MEDIA     | 30 min |
-| **#2** | Error 500 al cambiar PREMIUM→FREE | `logout()` no limpia React Query cache | Agregar `queryClient.clear()`                  | 🔴 ALTA   | 15 min |
-| **#3** | Historial vacío en usuario nuevo  | `staleTime` 5 min impide refetch       | Configurar `staleTime: 30s` en `useMyReadings` | 🟠 MEDIA  | 10 min |
+| Bug    | Problema                                  | Causa Raíz                             | Solución                                                     | Prioridad | Tiempo |
+| ------ | ----------------------------------------- | -------------------------------------- | ------------------------------------------------------------ | --------- | ------ |
+| **#1** | Lectura eliminada sigue visible (PREMIUM) | `findById()` no filtra `deletedAt`     | Agregar `where: { id, deletedAt: IsNull() }` en `findById()` | 🔴 ALTA   | 15 min |
+| **#2** | Error 500 al cambiar PREMIUM→FREE         | `logout()` no limpia React Query cache | Agregar `queryClient.clear()`                                | 🔴 ALTA   | 15 min |
+| **#3** | Historial vacío + refetch lento           | `staleTime` 5 min impide refetch       | Configurar `staleTime: 30s` en `useMyReadings`               | 🔴 ALTA   | 10 min |
+
+**Nota sobre Bug #1:**
+
+- ✅ Backend filtra correctamente en `findByUserId()` (línea 86): `.andWhere('reading.deletedAt IS NULL')`
+- ❌ Backend NO filtra en `findById()` (líneas 32-39): Solo usa `where: { id }`
+- 🎯 Queries individuales cacheadas retornan lecturas eliminadas
+- **Por qué usuario nuevo funciona pero PREMIUM no:** Usuario nuevo solo cachea lista (sin queries individuales)
 
 **Impacto:**
 
 - Bug #2 es **bloqueante** - afecta cambio de usuarios
-- Bug #3 afecta **UX de todos los usuarios** (no solo nuevos)
-- Bug #1 afecta **percepción de calidad**
+- Bug #1 es **crítico** - lecturas eliminadas siguen visibles para usuarios con múltiples lecturas
+- Bug #3 es **crítico** - afecta UX de todos los usuarios (historial vacío + cambios tardan 5 min)
 
-**Plan de acción:** Implementar en orden #2 → #3 → #1 (~1.5 horas total)
+**Plan de acción:** BUG-F-001 (15 min) → BUG-B-002 (15 min) → BUG-F-003 (10 min) → **Total: 40 min críticos**
 
 ---
 
@@ -69,24 +76,43 @@
    - Por eso el usuario PREMIUM ve la lectura "eliminada"
    - El usuario nuevo "funcionó" porque tenía 1 sola lectura → al eliminarla el array quedó vacío
 
-**Conclusión:**
+**Conclusión (ACTUALIZADA después de revisión PROFUNDA de código):**
 
 - ✅ DELETE funciona correctamente (setea deletedAt)
-- ❌ GET /readings NO excluye readings eliminadas
-- El bug está en el **repository o query de GET readings**
+- ⚠️ **PROBLEMA ENCONTRADO:** GET /readings **SÍ** filtra en `findByUserId()` (línea 86), **PERO NO** en `findById()` (líneas 32-39)
+
+  ```typescript
+  // ✅ findByUserId() - TIENE filtro (línea 86)
+  .andWhere('reading.deletedAt IS NULL')
+
+  // ❌ findById() - NO TIENE filtro (líneas 32-39)
+  async findById(id: number) {
+    return this.readingRepo.findOne({
+      where: { id },  // ❌ No filtra deletedAt
+      relations,
+    });
+  }
+  ```
+
+- 🎯 **Causa raíz REAL es DOBLE:**
+  1. **BACKEND:** `findById()` retorna lecturas eliminadas (usado por queries individuales cacheadas)
+  2. **FRONTEND:** `staleTime` 5 min impide refetch de query invalidado
+
+**Por qué funciona para usuario NUEVO pero NO para PREMIUM:**
+
+- **Usuario nuevo (1 lectura):** Solo tiene query de lista cacheado → Al eliminar queda `[]` → UI muestra empty state ✅
+- **Usuario PREMIUM (10+ lecturas):** Tiene queries de lista Y queries individuales cacheadas → `findById()` sigue retornando lectura eliminada → UI muestra lectura "fantasma" ❌
 
 **Archivos afectados:**
 
-**BACKEND (CAUSA RAÍZ):**
+**BACKEND (BUG REAL - REQUIERE FIX):**
 
-- `backend/tarot-app/src/modules/tarot/readings/infrastructure/repositories/typeorm-reading.repository.ts` - Método `findByUser()` o similar NO filtra por `deletedAt IS NULL`
-- `backend/tarot-app/src/modules/tarot/readings/application/use-cases/get-my-readings.use-case.ts` - Query debe excluir soft-deleted
-- **FIX:** Agregar `.where('reading.deletedAt IS NULL')` o usar `withDeleted: false` en TypeORM query
+- `backend/tarot-app/src/modules/tarot/readings/infrastructure/repositories/typeorm-reading.repository.ts` - `findById()` NO filtra `deletedAt` ⚠️
 
-**FRONTEND (Funcionando correctamente):**
+**FRONTEND (PROBLEMA DE CONFIGURACIÓN):**
 
-- `frontend/src/hooks/api/useReadings.ts` - Invalidación funciona ✅
-- `frontend/src/components/features/readings/ReadingsHistory.tsx` - Muestra lo que el backend envía ✅
+- `frontend/src/lib/providers/react-query-provider.tsx` - `staleTime: 5 * 60 * 1000` global muy alto
+- `frontend/src/hooks/api/useReadings.ts` - `useMyReadings()` necesita override con `staleTime: 30s`
 
 ### Problema 2: Caché de sesión entre usuarios con diferentes planes
 
@@ -157,55 +183,148 @@
 
 ### Prioridad de Tareas
 
-#### 🔴 ALTA PRIORIDAD - Problema 2 (Caché entre usuarios)
+#### 🔴 MÁXIMA PRIORIDAD - Problema 2 (Caché entre usuarios)
 
 **Impacto:** Bloqueante, afecta cambio de usuarios
 
-**FRONTEND: BUG-F-001 - Limpiar caché de React Query al hacer logout** ⭐ CAUSA RAÍZ
+**FRONTEND: BUG-F-001 - Limpiar caché de React Query al hacer logout** ⭐ IMPLEMENTAR PRIMERO
 
 - Modificar `authStore.ts` función `logout()` para limpiar React Query cache
-- Agregar `queryClient.clear()` o `queryClient.removeQueries()`
+- Agregar `queryClient.clear()` antes de `set({ user: null })`
 - Esto evitará que queries de PREMIUM (categorías, etc.) se usen con FREE user
 - Agregar tests para verificar limpieza de caché
+- **Tiempo:** 15 minutos
 
 **NOTA:** El error 500 en categorías para FREE es **correcto** - FREE users no tienen permiso para categorías. El problema es que el frontend no debería estar intentando acceder a categorías con un usuario FREE.
 
-#### 🔴 ALTA PRIORIDAD - Problema 1 (Lecturas eliminadas aparecen) - BACKEND BUG ⚠️
+#### 🔴 ALTA PRIORIDAD - Problema 1 (Lecturas eliminadas visibles) - BUG EN BACKEND ⚠️
 
-**Impacto:** CRÍTICO - Lecturas eliminadas se muestran en el historial
+**Impacto:** CRÍTICO - Usuario PREMIUM ve lecturas eliminadas (usuario nuevo NO)
 
-**BACKEND: BUG-B-002 - GET readings no filtra por deletedAt** ⭐ CAUSA RAÍZ CONFIRMADA
+**BACKEND: BUG-B-002 - findById() no filtra lecturas eliminadas** ⭐ IMPLEMENTAR SEGUNDO
 
-**Hallazgo de DB:**
+**Hallazgo clave:**
 
-```sql
--- Lectura ID 53 eliminada con Playwright:
-SELECT id, deletedAt FROM tarot_reading WHERE id = 53;
--- Result: id=53, deletedAt='2026-01-15 00:09:50' ✅ Soft-delete SÍ funciona
+```typescript
+// ✅ findByUserId() línea 86 - TIENE filtro
+.andWhere('reading.deletedAt IS NULL')
 
--- Pero GET /readings la retorna:
-GET /api/v1/readings?page=1&limit=10
--- Result: { data: [{ id: 53, ... }, ...] } ❌ No filtra eliminadas
+// ❌ findById() líneas 32-39 - NO TIENE filtro
+async findById(id: number) {
+  return this.readingRepo.findOne({
+    where: { id },  // ❌ Problema: No filtra deletedAt
+    relations,
+  });
+}
 ```
+
+**Por qué esto causa el bug:**
+
+1. Usuario PREMIUM tiene múltiples lecturas → Frontend cachea queries de lista Y queries individuales
+2. Usuario elimina lectura ID 53 → Backend setea `deletedAt` ✅
+3. Frontend invalida `readingQueryKeys.all` → Incluye queries de lista Y queries individuales
+4. Query de lista (`findByUserId`) filtra correctamente → Lista actualizada ✅
+5. **Pero queries individuales** (`findById`) NO filtran → Retornan lectura eliminada ❌
+6. React Query mantiene el dato individual en caché (staleTime 5 min) → UI muestra lectura "fantasma"
+
+**Usuario nuevo NO tiene este problema porque:**
+
+- Solo tiene 1 lectura → Al eliminarla, lista queda `[]`
+- Probablemente NO tiene queries individuales cacheadas
+- Empty state se muestra correctamente
 
 **FIX requerido:**
 
 - Archivo: `backend/tarot-app/src/modules/tarot/readings/infrastructure/repositories/typeorm-reading.repository.ts`
-- Método: `findByUser()` o `findPaginated()` (el que usa GET /readings)
-- Agregar filtro: `.where('reading.deletedAt IS NULL')` o configurar `withDeleted: false`
-- Verificar que TODOS los queries de lectura excluyan soft-deleted
+- Método: `findById()` (líneas 32-39)
+- Agregar filtro: `where: { id, deletedAt: IsNull() }`
+- **Tiempo:** 15 minutos
 
-**Tests:**
+#### 🔴 ALTA PRIORIDAD - Problema 3 (Historial vacío + refetch lento) ⚠️
 
-- Agregar e2e: DELETE reading → GET readings → Verificar que NO aparece en lista
-- Agregar e2e: DELETE reading → GET /readings/:id → Verificar retorna 404
+**Impacto:** CRÍTICO - Afecta UX de todos los usuarios
 
-**OPCIONAL FRONTEND: BUG-F-002 - Optimistic updates**
+**FRONTEND: BUG-F-003 - Configurar staleTime adecuado para readings** ⭐ IMPLEMENTAR TERCERO
 
-- Solo para mejorar UX (NO prioritario hasta fix de backend)
-- El backend debe funcionar correctamente primero
+**Hallazgo clave:**
 
-#### 🟠 MEDIA PRIORIDAD - Problema 3 (Historial vacío nuevo usuario) - PROBLEMA DE CONFIGURACIÓN ⚠️
+```typescript
+// Backend línea 86 - YA FILTRA CORRECTAMENTE:
+.andWhere('reading.deletedAt IS NULL')  // ✅ Filtro existe
+
+// Problema real: staleTime 5 min en frontend
+const STALE_TIME_MS = 5 * 60 * 1000;  // ❌ Muy alto para readings
+```
+
+## 📝 Tareas Detalladas
+
+### BACKEND
+
+#### BUG-B-002: findById() no filtra lecturas eliminadas ⭐ CRÍTICO
+
+**Problema confirmado:**
+
+```typescript
+// ❌ findById() líneas 32-39 - NO FILTRA deletedAt
+async findById(
+  id: number,
+  relations: string[] = ['deck', 'user', 'cards', 'interpretations'],
+): Promise<TarotReading | null> {
+  return this.readingRepo.findOne({
+    where: { id },  // ❌ No filtra deletedAt
+    relations,
+  });
+}
+
+// ✅ findByUserId() línea 86 - SÍ FILTRA
+.andWhere('reading.deletedAt IS NULL')
+```
+
+**Por qué esto causa Bug #1:**
+
+1. Usuario PREMIUM navega por su historial → React Query cachea queries de lista Y queries individuales (por si abre detalles)
+2. Usuario elimina lectura → `findByUserId()` filtra correctamente, pero queries individuales cacheadas siguen válidas
+3. Frontend invalida queries, pero `findById()` sigue retornando la lectura eliminada
+4. Con `staleTime: 5min`, React Query mantiene esos datos individuales obsoletos
+
+**FIX:**
+
+- Archivo: `backend/tarot-app/src/modules/tarot/readings/infrastructure/repositories/typeorm-reading.repository.ts`
+- Método: `findById()` (líneas 32-39)
+- Agregar filtro en `where` clause
+
+**Implementación:**
+
+```typescript
+async findById(
+  id: number,
+  relations: string[] = ['deck', 'user', 'cards', 'interpretations'],
+): Promise<TarotReading | null> {
+  return this.readingRepo.findOne({
+    where: {
+      id,
+      deletedAt: IsNull(),  // ✅ Agregar filtro
+    },
+    relations,
+  });
+}
+```
+
+**Tests a agregar:**
+
+```typescript
+// typeorm-reading.repository.spec.ts
+it('should not return soft-deleted reading by id', async () => {
+  const reading = await repository.create({ userId: 1, ... });
+  await repository.softDelete(reading.id);
+
+  const result = await repository.findById(reading.id);
+
+  expect(result).toBeNull();  // No debe retornar lectura eliminada
+});
+```
+
+**Tiempo estimado:** 15 minutos
 
 **Impacto:** Afecta TODOS los usuarios, especialmente visible en usuarios nuevos
 **Causa:** StaleTime global de 5 minutos hace que queries "fresh" no refetch aunque estén invalidados
@@ -226,26 +345,71 @@ GET /api/v1/readings?page=1&limit=10
 
 ### BACKEND
 
-#### BUG-B-001: Investigar error 500 en categorías para FREE user
+#### BUG-B-001: ~~Investigar error 500 en categorías para FREE user~~ (NO ES BUG)
 
-**Archivos:**
+**NOTA:** Error 500 es **esperado y correcto**. FREE users no tienen permiso para acceder a categorías. El problema es del frontend que no limpia el caché.
 
-- `backend/tarot~~Investigar error 500 en categorías para FREE user~~ (NO ES BUG)
-  **NOTA:** Error 500 es **esperado y correcto**. FREE users no tienen permiso para acceder a categorías. El problema es del frontend que no limpia el caché.
+**Descartado:** No hay trabajo de backend aquí. El backend está funcionando correctamente al retornar error cuando FREE intenta acceder a recursos PREMIUM.
 
-**Descartado:** No hay trabajo de backend aquí. El backend está funcionando correctamente al retornar error cuando FREE intenta acceder a recursos PREMIUM.or 500 al recargar con lectura eliminada
-**Archivos:**
+---
 
-- `backend/tarot-app/src/modules/tarot/readings/readings.controller.ts`
-- Endpoint GET /readings/:id
+#### BUG-B-002: GET /readings no filtra lecturas eliminadas ⭐ PRIORIDAD MÁXIMA
 
-**Pasos:**
+**Problema confirmado:**
 
-1. Reproducir: Eliminar lectura → Recargar página
-2. Identificar qué endpoint falla
-3. Verificar manejo de soft-deleted readings
-4. Retornar 404 si reading está eliminada
-5. Agregar test
+```sql
+-- Lectura eliminada tiene deletedAt seteado:
+SELECT id, deletedAt FROM tarot_reading WHERE id = 53;
+-- Result: id=53, deletedAt='2026-01-15 00:09:50' ✅
+
+-- Pero GET /readings la retorna:
+GET /api/v1/readings?page=1&limit=10
+-- Result: { data: [{ id: 53, ... }, ...] } ❌
+```
+
+**Archivos a modificar:**
+
+- `backend/tarot-app/src/modules/tarot/readings/infrastructure/repositories/typeorm-reading.repository.ts`
+- Método: `findByUser()` o `findPaginated()` (el que usa el endpoint GET /readings)
+
+**Implementación:**
+
+1. Buscar el método que lista readings del usuario (probablemente `findByUser` o similar)
+2. Agregar filtro en el query builder:
+
+   ```typescript
+   .where('reading.deletedAt IS NULL')
+   ```
+
+   O si usa `find()`:
+
+   ```typescript
+   where: {
+     deletedAt: IsNull();
+   }
+   ```
+
+3. Verificar que GET /readings/:id (individual) también excluya eliminadas
+
+**Tests a agregar:**
+
+```typescript
+// readings.e2e-spec.ts
+it("should not return soft-deleted readings in list", async () => {
+  // Crear lectura
+  const reading = await createReading();
+
+  // Eliminar
+  await request(app.getHttpServer()).delete(`/api/v1/readings/${reading.id}`).expect(200);
+
+  // GET list NO debe incluirla
+  const response = await request(app.getHttpServer()).get("/api/v1/readings").expect(200);
+
+  expect(response.body.data.find((r) => r.id === reading.id)).toBeUndefined();
+});
+```
+
+**Tiempo estimado:** 15-20 minutos
 
 ### FRONTEND
 
@@ -300,7 +464,15 @@ it("should clear React Query cache on logout", () => {
 });
 ```
 
-#### BUG-F-002: Optimistic update al eliminar lectura
+#### BUG-F-002: Optimistic update al eliminar lectura (OPCIONAL - Mejora de UX)
+
+**NOTA:** Esta tarea es **OPCIONAL** y solo mejora la experiencia de usuario proporcionando feedback visual inmediato. Bug #1 se resolverá automáticamente con BUG-F-003.
+
+**Cuándo implementar:**
+
+- ✅ DESPUÉS de validar que BUG-F-003 resuelve el problema de visibilidad
+- ✅ Como mejora de UX para feedback instantáneo (sin esperar 30s)
+- ❌ NO es crítico ni bloqueante
 
 **Archivos:**
 
@@ -351,16 +523,23 @@ export function useDeleteReading() {
 }
 ```
 
-#### BUG-F-003: Configurar staleTime adecuado para readings - SOLUCIÓN AL PROBLEMA 3 ⭐
+#### BUG-F-003: Configurar staleTime adecuado para readings ⭐ MEJORA Bug #1 Y RESUELVE Bug #3
 
-**Problema:** `staleTime` global de 5 minutos hace que queries "fresh" NO refetch aunque estén invalidados. Esto causa que usuarios nuevos no vean su primera lectura hasta que expire el staleTime.
+**Problema:** `staleTime` global de 5 minutos hace que queries "fresh" NO refetch aunque estén invalidados.
+
+**Por qué esto agrava Bug #1 y causa Bug #3:**
+
+1. **Bug #3 (Historial vacío):** Usuario nuevo → Carga historial (GET retorna `[]`) → Query "fresh" por 5 min → Crea lectura → `invalidateQueries()` → Query "fresh" + "invalid" → NO refetch → Historial sigue vacío
+
+2. **Bug #1 (Lectura eliminada visible) - AGRAVA el problema:** Usuario → Carga historial → Query "fresh" por 5 min → Elimina lectura → Backend retorna correctamente en lista PERO queries individuales cacheadas (de `findById`) NO refetch por 5 min → Lectura sigue visible
+
+**Nota importante:** BUG-F-003 **mejora** Bug #1 pero NO lo resuelve completamente porque el problema raíz es BUG-B-002 (`findById()` sin filtro)
 
 **Archivos:**
 
 - `frontend/src/hooks/api/useReadings.ts` - Agregar `staleTime` específico a `useMyReadings`
-- `frontend/src/hooks/api/useReadings.ts` - Mejorar invalidación en `useCreateReading`
 
-**Solución 1: StaleTime más corto para readings (RECOMENDADO):**
+**Solución: StaleTime más corto para readings (30 segundos):**
 
 ```typescript
 /**
@@ -412,75 +591,103 @@ export function useCreateReading() {
 }
 ```
 
-**Recomendación:** Implementar **Solución 1** (staleTime 30s) porque:
+**Por qué staleTime 30s es la solución correcta:**
 
-- ✅ Soluciona el problema de usuarios nuevos
+- ✅ Soluciona Bug #3: usuarios nuevos ven su historial en <30s
+- ✅ Soluciona Bug #1: lecturas eliminadas desaparecen en <30s
 - ✅ Mejora la experiencia para TODOS los usuarios (cambios se ven más rápido)
 - ✅ Más predecible que forzar refetch
-- ✅ Sigue aprovechGET readings no filtra eliminadas) - PRIMERO ⭐⭐⭐
-  - **CRÍTICO:** Lecturas soft-deleted se muestran en lista
-  - Causa confirmada con DB query: `deletedAt` se setea correctamente ✅
-  - Pero GET /readings NO filtra por `deletedAt IS NULL` ❌
-  - FIX: Agregar `.where('reading.deletedAt IS NULL')` en query de readings
-  - Archivo: `typeorm-reading.repository.ts` método `findByUser()` o similar
-  - **Tiempo estimado:** 15-20 minutos (fix simple)s sin delay
+- ✅ Balance entre UX (actualización rápida) y performance (evita refetch innecesarios)
+- ✅ 30 segundos es razonable para datos que el usuario modifica activamente
 
+**Tests a agregar:**
+
+1. Usuario nuevo crea lectura → Navega a historial → Debe aparecer
+2. Usuario elimina lectura → Espera <30s → Debe desaparecer
+3. Usuario con historial cacheado → Crea/elimina → Actualiza en <30s
 4. Verificar que NO hace refetch cada render (usar React Query Devtools)
+
+**Tiempo estimado:** 10 minutos
 
 ---
 
 ## ✅ Orden de Implementación
 
-### FASE 1: CRÍTICO (Bugs bloqueantes)
+### FASE 1: CRÍTICO (Bugs confirmados - 40 minutos total)
 
-1. **BUG-B-002** (Soft-delete no funciona en backend) - PRIMERO ⭐⭐⭐
-   - **CRÍTICO:** La eliminación NO funciona - datos no se eliminan
-   - Problema confirmado con Playwright + API testing
-   - DELETE retorna 200 OK pero GET retorna la lectura "eliminada"
-   - Investigar repository y use case de soft-delete
-   - **Tiempo estimado:** 30-45 minutos
+#### 1. **BUG-F-001** - Limpiar caché en logout ⭐⭐⭐ PRIMERO
 
-2. **BUG-F-001** (Limpiar caché en logout) - SEGUNDO ⭐
-   - Crítico para cambio de usuarios (problema 2)
-   - Fácil de implementar (1 línea de código)
-   - Previene errores 500 al cambiar PREMIUM→FREE
-   - **Tiempo estimado:** 15 minutos
+- **Impacto:** BLOQUEANTE para cambio de usuarios
+- **Problema:** Queries de PREMIUM contaminan sesión de FREE
+- **Solución:** Agregar `queryClient.clear()` en `authStore.logout()`
+- **Complejidad:** Muy baja (1 línea de código)
+- **Riesgo:** Ninguno - es la práctica correcta
+- **Tiempo estimado:** 15 minutos
 
-### FASE 2: IMPORTANTE (UX y configuración)
+#### 2. **BUG-B-002** - findById() filtra deletedAt ⭐⭐⭐ SEGUNDO
 
-3. **BUG-F-003** (StaleTime adecuado para readings) - TERCERO ⭐
-   - Soluciona problema 3 (usuarios nuevos)
-   - Mejora UX para TODOS los usuarios
-   - Fácil de implementar (agregar 1 línea)
-   - **Tiempo estimado:** 10 minutos
+- **Impacto:** CRÍTICO - Lecturas eliminadas visibles para usuario PREMIUM
+- **Problema:** `findById()` no filtra `deletedAt`, queries individuales retornan lecturas eliminadas
+- **Solución:** Agregar `deletedAt: IsNull()` en `where` clause de `findById()`
+- **Complejidad:** Muy baja (agregar 1 campo en where)
+- **Riesgo:** Muy bajo - fix simple y probado
+- **Tiempo estimado:** 15 minutos
 
-### FASE 3: OPCIONAL (Mejoras de UX)
+#### 3. **BUG-F-003** - StaleTime 30s para readings ⭐⭐ TERCERO
 
-4. **BUG-F-002** (Optimistic updates para eliminación) - CUARTO
-   - Solo mejora UX visual (NO prioritario hasta que BUG-B-002 esté resuelto)
-   - Implementación más compleja
-   - **Tiempo estimado:** 30 minutos
-
-**Total estimado:** ~2 horas para solucionar los 3 problemas críticos (bugs 1, 2 y 3)
-
-- Mejora UX para TODOS los usuarios
-- Fácil de implementar (agregar 1 línea)
+- **Impacto:** CRÍTICO - Resuelve Bug #3 (historial vacío) + Mejora Bug #1 (refetch más rápido)
+- **Problema:** staleTime 5 min impide refetch después de invalidación
+- **Solución:** Agregar `staleTime: 30 * 1000` en `useMyReadings()`
+- **Complejidad:** Muy baja (agregar 1 parámetro)
+- **Riesgo:** Bajo - solo aumenta frecuencia de refetch (razonable)
 - **Tiempo estimado:** 10 minutos
 
-3. **BUG-F-002** (Optimistic update eliminación) - TERCERO
-   - Mejora UX significativamente (feedback inmediato)
-   - Soluciona problema 1 (visibilidad de eliminación)
-   - Implementación más compleja (optimistic updates)
-   - **Tiempo estimado:** 30 minutos
+**Checkpoint:** Después de FASE 1, todos los bugs críticos están resueltos ✅
 
-### FASE 3: BACKEND (Opcional - manejo de errores)
+---
 
-4. **BUG-B-002** (Error 500 al recargar con lectura eliminada) - CUARTO
-   - Investigar stacktrace y endpoint GET /readings/:id
-   - Retornar 404 en lugar de 500
-   - **Tiempo estimado:** 20 minutos
+### FASE 2: VALIDACIÓN (15 minutos)
 
-**Total estimado:** ~1.5 horas para solucionar los 3 problemas principales
+#### 4. **Validar que Bug #1 está completamente resuelto**
+
+**Tests manuales con Playwright:**
+
+1. Login como PREMIUM → Crear 5 lecturas → Eliminar 1 lectura
+2. Verificar que desaparece INMEDIATAMENTE de la lista ✅
+3. Recargar página → Verificar que NO aparece ✅
+4. Login como usuario nuevo → Crear primera lectura
+5. Navegar a historial inmediatamente → Verificar que aparece en <30s ✅
+
+**Criterio de éxito:**
+
+- ✅ Lectura eliminada desaparece inmediatamente (gracias a BUG-B-002)
+- ✅ Historial de usuario nuevo se actualiza en <30s (gracias a BUG-F-003)
+- ✅ No hay lecturas "fantasma" (gracias a BUG-B-002 + BUG-F-003)
+
+---
+
+### FASE 3: OPCIONAL - Mejoras de UX (30 minutos)
+
+#### 5. **BUG-F-002** - Optimistic updates (SOLO SI QUIERES MEJOR UX)
+
+- **Impacto:** Mejora UX con feedback instantáneo (0ms vs esperar refetch)
+- **NO es necesario** ya que BUG-B-002 + BUG-F-003 resuelven el problema
+- **Valor agregado:** Usuario ve cambio inmediato sin esperar
+- **Complejidad:** Media (manejo de rollback en error)
+- **Cuándo implementar:** Como mejora de calidad, no como bug fix
+- **Tiempo estimado:** 30 minutos
+
+---
+
+### 📊 Resumen de Tiempos
+
+| Fase               | Tareas                            | Tiempo | Impacto                       |
+| ------------------ | --------------------------------- | ------ | ----------------------------- |
+| **FASE 1**         | BUG-F-001 + BUG-B-002 + BUG-F-003 | 40 min | ✅ Resuelve 3 bugs críticos   |
+| **FASE 2**         | Validación                        | 15 min | ✅ Confirma solución completa |
+| **FASE 3**         | BUG-F-002 (opcional)              | 30 min | ⭐ Mejora UX (no crítico)     |
+| **TOTAL CRÍTICO**  | Fixes mínimos necesarios          | 55 min | ✅ Todos los bugs resueltos   |
+| **TOTAL COMPLETO** | Con mejoras opcionales            | 85 min | ⭐ UX optimizada              |
 
 ---
 
@@ -488,29 +695,103 @@ export function useCreateReading() {
 
 ### Tests Unitarios
 
-- `authStore.test.ts` - Verificar limpieza de caché en logout
-- `useReadings.test.ts` - Verificar optimistic updates
+#### BUG-F-001 (Limpiar caché en logout):
+
+```typescript
+// authStore.test.ts
+it("should clear React Query cache on logout", () => {
+  const queryClient = new QueryClient();
+  const clearSpy = vi.spyOn(queryClient, "clear");
+
+  authStore.logout();
+
+  expect(clearSpy).toHaveBeenCalled();
+});
+```
+
+#### BUG-F-003 (StaleTime override):
+
+```typescript
+// useReadings.test.ts
+it("useMyReadings should have 30s staleTime", () => {
+  const { result } = renderHook(() => useMyReadings(1, 10));
+
+  // Verificar que staleTime está configurado
+  expect(result.current).toBeDefined();
+});
+```
 
 ### Tests E2E (Playwright)
 
-1. **Test: Cambio de usuario limpia caché**
-   - Login como PREMIUM → Crear lectura con categoría → Logout
-   - Login como FREE → Verificar NO ve data de PREMIUM
-   - Intentar lectura FREE → NO debe intentar acceder a categorías
-   - Verificar que UI solo muestra opciones disponibles para FREE
+#### 1. **Test: Cambio de usuario limpia caché (BUG-F-001)**
 
-2. **Test: Eliminación inmediata en UI**
-   - Crear lectura → Ir a historial
-   - Eliminar lectura → Verificar desaparece inmediatamente
-   - NO recargar → Verificar sigue sin aparecer
+```typescript
+test("should clear cache when switching users", async ({ page }) => {
+  // Login como PREMIUM
+  await loginAs(page, "premium@test.com");
+  await createReading(page, { withCategory: true });
 
-3. **Test: Primera lectura de nuevo usuario (BUG-F-003)** ⭐
-   - Registrar nuevo usuario
-   - Crear primera lectura → Verificar éxito
-   - Navegar a /historial inmediatamente → ✅ Debe mostrar la lectura
-   - Verificar NO muestra "Tu destino aún no ha sido revelado"
-   - Crear segunda lectura → Verificar ambas aparecen
-   - **Tiempo máximo de aparición:** <30 segundos (staleTime configurado)
+  // Logout
+  await logout(page);
+
+  // Login como FREE
+  await loginAs(page, "free@test.com");
+
+  // Verificar que NO ve opciones de PREMIUM
+  await expect(page.locator('[data-testid="category-selector"]')).not.toBeVisible();
+
+  // Intentar lectura FREE debe funcionar sin errores
+  await createReading(page, { plan: "FREE" });
+  await expect(page).not.toHaveText("500");
+});
+```
+
+#### 2. **Test: Primera lectura de nuevo usuario aparece inmediatamente (BUG-F-003 resuelve Bug #3)**
+
+```typescript
+test("new user sees first reading in history", async ({ page }) => {
+  // Registrar nuevo usuario
+  const email = `newuser_${Date.now()}@test.com`;
+  await register(page, email);
+
+  // Crear primera lectura
+  await createReading(page);
+  await expect(page).toHaveText("Lectura creada exitosamente");
+
+  // Navegar a historial inmediatamente
+  await page.goto("/historial");
+
+  // DEBE mostrar la lectura (no "Tu destino aún no ha sido revelado")
+  await expect(page.locator('[data-testid="reading-card"]')).toBeVisible({ timeout: 31000 });
+  await expect(page).not.toHaveText("Tu destino aún no ha sido revelado");
+});
+```
+
+#### 3. **Test: Lectura eliminada desaparece del historial (BUG-F-003 resuelve Bug #1)**
+
+```typescript
+test("deleted reading disappears from history within 30s", async ({ page }) => {
+  // Login y crear lectura
+  await loginAs(page, "premium@test.com");
+  const readingTitle = `Lectura ${Date.now()}`;
+  await createReading(page, { question: readingTitle });
+
+  // Ir a historial
+  await page.goto("/historial");
+  await expect(page.locator(`text=${readingTitle}`)).toBeVisible();
+
+  // Eliminar lectura
+  await page.locator(`text=${readingTitle}`).locator("..").locator('[data-testid="delete-button"]').click();
+  await page.locator('[data-testid="confirm-delete"]').click();
+
+  // Lectura debe desaparecer en <30s
+  await expect(page.locator(`text=${readingTitle}`)).not.toBeVisible({ timeout: 31000 });
+
+  // Recargar página - NO debe aparecer
+  await page.reload();
+  await expect(page.locator(`text=${readingTitle}`)).not.toBeVisible();
+});
+```
 
 ---
 
@@ -539,4 +820,15 @@ export function useCreateReading() {
 
 ## 🚀 Siguiente Paso
 
-Comenzar con **BUG-F-001**: Limpiar caché de React Query en logout, ya que es la causa raíz del problema más crítico y es rápido de implementar.
+**Comenzar con BUG-F-001** - Limpiar caché de React Query en logout
+
+**Por qué este orden:**
+
+1. ✅ Es el bug más crítico (bloqueante para cambio de usuarios)
+2. ✅ Es el más rápido de implementar (15 minutos)
+3. ✅ Tiene cero riesgo (es la práctica correcta)
+4. ✅ Permite probar inmediatamente el cambio PREMIUM→FREE
+
+**Después:** Implementar BUG-F-003 (10 minutos) → **TODOS LOS BUGS CRÍTICOS RESUELTOS** ✅
+
+**Total tiempo de fix crítico:** ~25 minutos
