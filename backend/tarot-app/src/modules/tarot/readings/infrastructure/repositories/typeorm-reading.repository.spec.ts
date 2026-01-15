@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
 import { TypeOrmReadingRepository } from './typeorm-reading.repository';
 import { TarotReading } from '../../entities/tarot-reading.entity';
@@ -151,7 +151,7 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
 
       expect(result).toEqual(mockReading);
       expect(mockReadingRepository.findOne).toHaveBeenCalledWith({
-        where: { id: 1 },
+        where: { id: 1, deletedAt: IsNull() },
         relations: ['deck', 'user', 'cards', 'interpretations'],
       });
     });
@@ -166,7 +166,7 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
 
       expect(result).toEqual(mockReading);
       expect(mockReadingRepository.findOne).toHaveBeenCalledWith({
-        where: { id: 1 },
+        where: { id: 1, deletedAt: IsNull() },
         relations: ['deck'],
       });
     });
@@ -187,7 +187,7 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
 
       expect(result).toBeNull();
       expect(mockReadingRepository.findOne).toHaveBeenCalledWith({
-        where: { id: 0 },
+        where: { id: 0, deletedAt: IsNull() },
         relations: expect.any(Array) as string[],
       });
     });
@@ -210,8 +210,34 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
 
       expect(result).toBeDefined();
       expect(mockReadingRepository.findOne).toHaveBeenCalledWith({
-        where: { id: 1 },
+        where: { id: 1, deletedAt: IsNull() },
         relations: [],
+      });
+    });
+
+    // BUG-B-002: findById should exclude soft-deleted readings
+    it('should not return soft-deleted readings', async () => {
+      mockReadingRepository.findOne.mockResolvedValue(null);
+
+      await repository.findById(1);
+
+      expect(mockReadingRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 1, deletedAt: IsNull() },
+        relations: expect.any(Array) as string[],
+      });
+    });
+
+    it('should return null when reading is soft-deleted', async () => {
+      // Mock: Reading exists in DB but has deletedAt set
+      // TypeORM's findOne with deletedAt: IsNull() filter returns null
+      mockReadingRepository.findOne.mockResolvedValue(null);
+
+      const result = await repository.findById(1);
+
+      expect(result).toBeNull();
+      expect(mockReadingRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 1, deletedAt: IsNull() },
+        relations: expect.any(Array) as string[],
       });
     });
   });
@@ -825,7 +851,7 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
 
       expect(result).toEqual(mockReading);
       expect(mockReadingRepository.findOne).toHaveBeenCalledWith({
-        where: { sharedToken: 'abc123', isPublic: true },
+        where: { sharedToken: 'abc123', isPublic: true, deletedAt: IsNull() },
         relations: ['cards', 'deck', 'category', 'predefinedQuestion'],
       });
     });
@@ -846,7 +872,7 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
 
       expect(result).toBeNull();
       expect(mockReadingRepository.findOne).toHaveBeenCalledWith({
-        where: { sharedToken: '', isPublic: true },
+        where: { sharedToken: '', isPublic: true, deletedAt: IsNull() },
         relations: expect.any(Array) as string[],
       });
     });
@@ -858,7 +884,7 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
       await repository.findByShareToken(null as unknown as string);
 
       expect(mockReadingRepository.findOne).toHaveBeenCalledWith({
-        where: { sharedToken: null, isPublic: true },
+        where: { sharedToken: null, isPublic: true, deletedAt: IsNull() },
         relations: expect.any(Array) as string[],
       });
     });
@@ -871,6 +897,18 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
 
       // TypeORM should escape this, but worth testing
       expect(mockReadingRepository.findOne).toHaveBeenCalled();
+    });
+
+    // BUG-B-002: Should not return soft-deleted readings via share link
+    it('should not return soft-deleted readings', async () => {
+      mockReadingRepository.findOne.mockResolvedValue(null);
+
+      await repository.findByShareToken('abc123');
+
+      expect(mockReadingRepository.findOne).toHaveBeenCalledWith({
+        where: { sharedToken: 'abc123', isPublic: true, deletedAt: IsNull() },
+        relations: expect.any(Array) as string[],
+      });
     });
   });
 
