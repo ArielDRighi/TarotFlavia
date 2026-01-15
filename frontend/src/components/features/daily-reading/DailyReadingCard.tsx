@@ -22,7 +22,6 @@ export interface DailyReadingCardProps {
   className?: string;
 }
 
-
 /**
  * DailyReadingCard Component
  *

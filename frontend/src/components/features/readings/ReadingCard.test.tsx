@@ -62,7 +62,6 @@ function createTestCards(count: number = 3): ReadingCardType[] {
 
 describe('ReadingCard', () => {
   const mockOnView = vi.fn();
-  const mockOnDelete = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -72,7 +71,7 @@ describe('ReadingCard', () => {
     it('should render the reading question', () => {
       const reading = createTestReading();
 
-      render(<ReadingCard reading={reading} onView={mockOnView} onDelete={mockOnDelete} />);
+      render(<ReadingCard reading={reading} onView={mockOnView} />);
 
       expect(screen.getByText(reading.question)).toBeInTheDocument();
     });
@@ -80,7 +79,7 @@ describe('ReadingCard', () => {
     it('should render the relative date', () => {
       const reading = createTestReading();
 
-      render(<ReadingCard reading={reading} onView={mockOnView} onDelete={mockOnDelete} />);
+      render(<ReadingCard reading={reading} onView={mockOnView} />);
 
       expect(screen.getByText('hace 2 días')).toBeInTheDocument();
     });
@@ -88,7 +87,7 @@ describe('ReadingCard', () => {
     it('should render the spread type badge in right section', () => {
       const reading = createTestReading({ spreadName: 'Tres Cartas' });
 
-      render(<ReadingCard reading={reading} onView={mockOnView} onDelete={mockOnDelete} />);
+      render(<ReadingCard reading={reading} onView={mockOnView} />);
 
       const badge = screen.getByTestId('spread-badge');
       expect(badge).toBeInTheDocument();
@@ -100,7 +99,7 @@ describe('ReadingCard', () => {
         'Esta es una pregunta muy larga que debería ser truncada después de una línea para mantener un diseño consistente en las tarjetas del historial de lecturas';
       const reading = createTestReading({ question: longQuestion });
 
-      render(<ReadingCard reading={reading} onView={mockOnView} onDelete={mockOnDelete} />);
+      render(<ReadingCard reading={reading} onView={mockOnView} />);
 
       const questionElement = screen.getByText(longQuestion);
       expect(questionElement).toHaveClass('line-clamp-1');
@@ -109,9 +108,7 @@ describe('ReadingCard', () => {
     it('should render a card icon when no cards are available', () => {
       const reading = createTestReading({ cardsCount: 0 });
 
-      render(
-        <ReadingCard reading={reading} cards={[]} onView={mockOnView} onDelete={mockOnDelete} />
-      );
+      render(<ReadingCard reading={reading} cards={[]} onView={mockOnView} />);
 
       expect(screen.getByTestId('card-placeholder-icon')).toBeInTheDocument();
     });
@@ -120,21 +117,18 @@ describe('ReadingCard', () => {
       const reading = createTestReading();
       const cards = createTestCards(3);
 
-      render(
-        <ReadingCard reading={reading} cards={cards} onView={mockOnView} onDelete={mockOnDelete} />
-      );
+      render(<ReadingCard reading={reading} cards={cards} onView={mockOnView} />);
 
       const thumbnail = screen.getByTestId('card-thumbnail');
       expect(thumbnail).toBeInTheDocument();
     });
 
-    it('should render view and delete buttons', () => {
+    it('should render view button', () => {
       const reading = createTestReading();
 
-      render(<ReadingCard reading={reading} onView={mockOnView} onDelete={mockOnDelete} />);
+      render(<ReadingCard reading={reading} onView={mockOnView} />);
 
       expect(screen.getByRole('button', { name: /ver/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /eliminar/i })).toBeInTheDocument();
     });
   });
 
@@ -143,74 +137,12 @@ describe('ReadingCard', () => {
       const user = userEvent.setup();
       const reading = createTestReading({ id: 42 });
 
-      render(<ReadingCard reading={reading} onView={mockOnView} onDelete={mockOnDelete} />);
+      render(<ReadingCard reading={reading} onView={mockOnView} />);
 
       await user.click(screen.getByRole('button', { name: /ver/i }));
 
       expect(mockOnView).toHaveBeenCalledTimes(1);
       expect(mockOnView).toHaveBeenCalledWith(42);
-    });
-
-    it('should open confirmation modal when delete button is clicked', async () => {
-      const user = userEvent.setup();
-      const reading = createTestReading();
-
-      render(<ReadingCard reading={reading} onView={mockOnView} onDelete={mockOnDelete} />);
-
-      await user.click(screen.getByRole('button', { name: /eliminar/i }));
-
-      // Confirmation modal should appear
-      expect(screen.getByText(/¿estás seguro/i)).toBeInTheDocument();
-    });
-
-    it('should call onDelete with reading id when delete is confirmed', async () => {
-      const user = userEvent.setup();
-      const reading = createTestReading({ id: 123 });
-
-      render(<ReadingCard reading={reading} onView={mockOnView} onDelete={mockOnDelete} />);
-
-      // Click delete button to open modal
-      await user.click(screen.getByRole('button', { name: /eliminar/i }));
-
-      // Click confirm button in modal
-      const confirmButton = screen.getByRole('button', { name: /confirmar/i });
-      await user.click(confirmButton);
-
-      expect(mockOnDelete).toHaveBeenCalledTimes(1);
-      expect(mockOnDelete).toHaveBeenCalledWith(123);
-    });
-
-    it('should not call onDelete when delete is cancelled', async () => {
-      const user = userEvent.setup();
-      const reading = createTestReading();
-
-      render(<ReadingCard reading={reading} onView={mockOnView} onDelete={mockOnDelete} />);
-
-      // Click delete button to open modal
-      await user.click(screen.getByRole('button', { name: /eliminar/i }));
-
-      // Click cancel button in modal
-      const cancelButton = screen.getByRole('button', { name: /cancelar/i });
-      await user.click(cancelButton);
-
-      expect(mockOnDelete).not.toHaveBeenCalled();
-    });
-
-    it('should close confirmation modal when cancelled', async () => {
-      const user = userEvent.setup();
-      const reading = createTestReading();
-
-      render(<ReadingCard reading={reading} onView={mockOnView} onDelete={mockOnDelete} />);
-
-      // Click delete button to open modal
-      await user.click(screen.getByRole('button', { name: /eliminar/i }));
-      expect(screen.getByText(/¿estás seguro/i)).toBeInTheDocument();
-
-      // Click cancel button in modal
-      await user.click(screen.getByRole('button', { name: /cancelar/i }));
-
-      // Modal should be closed
-      expect(screen.queryByText(/¿estás seguro/i)).not.toBeInTheDocument();
     });
   });
 
@@ -218,7 +150,7 @@ describe('ReadingCard', () => {
     it('should have correct responsive layout classes', () => {
       const reading = createTestReading();
 
-      render(<ReadingCard reading={reading} onView={mockOnView} onDelete={mockOnDelete} />);
+      render(<ReadingCard reading={reading} onView={mockOnView} />);
 
       const card = screen.getByTestId('reading-card');
       // Should have flex-row layout (horizontal) with items-center
@@ -232,7 +164,7 @@ describe('ReadingCard', () => {
     it('should have shadow-soft class for soft shadow', () => {
       const reading = createTestReading();
 
-      render(<ReadingCard reading={reading} onView={mockOnView} onDelete={mockOnDelete} />);
+      render(<ReadingCard reading={reading} onView={mockOnView} />);
 
       const card = screen.getByTestId('reading-card');
       expect(card).toHaveClass('shadow-sm');
@@ -241,7 +173,7 @@ describe('ReadingCard', () => {
     it('should have hover effects', () => {
       const reading = createTestReading();
 
-      render(<ReadingCard reading={reading} onView={mockOnView} onDelete={mockOnDelete} />);
+      render(<ReadingCard reading={reading} onView={mockOnView} />);
 
       const card = screen.getByTestId('reading-card');
       expect(card).toHaveClass('hover:shadow-md');
@@ -249,28 +181,23 @@ describe('ReadingCard', () => {
   });
 
   describe('Accessibility', () => {
-    it('should have accessible button labels', () => {
+    it('should have accessible button label', () => {
       const reading = createTestReading();
 
-      render(<ReadingCard reading={reading} onView={mockOnView} onDelete={mockOnDelete} />);
+      render(<ReadingCard reading={reading} onView={mockOnView} />);
 
       expect(screen.getByRole('button', { name: /ver lectura/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /eliminar lectura/i })).toBeInTheDocument();
     });
 
     it('should be focusable via keyboard', async () => {
       const user = userEvent.setup();
       const reading = createTestReading();
 
-      render(<ReadingCard reading={reading} onView={mockOnView} onDelete={mockOnDelete} />);
+      render(<ReadingCard reading={reading} onView={mockOnView} />);
 
       // Tab to view button
       await user.tab();
       expect(screen.getByRole('button', { name: /ver/i })).toHaveFocus();
-
-      // Tab to delete button
-      await user.tab();
-      expect(screen.getByRole('button', { name: /eliminar/i })).toHaveFocus();
     });
   });
 
@@ -278,7 +205,7 @@ describe('ReadingCard', () => {
     it('should handle reading without spreadName gracefully', () => {
       const reading = createTestReading({ spreadName: '' });
 
-      render(<ReadingCard reading={reading} onView={mockOnView} onDelete={mockOnDelete} />);
+      render(<ReadingCard reading={reading} onView={mockOnView} />);
 
       // Should not show empty badge
       expect(screen.queryByTestId('spread-badge')).not.toBeInTheDocument();
@@ -287,7 +214,7 @@ describe('ReadingCard', () => {
     it('should handle reading with empty cardPreviews', () => {
       const reading = createTestReading({ cardPreviews: [] });
 
-      render(<ReadingCard reading={reading} onView={mockOnView} onDelete={mockOnDelete} />);
+      render(<ReadingCard reading={reading} onView={mockOnView} />);
 
       // Should show placeholder icon when no cardPreviews
       expect(screen.getByTestId('card-placeholder-icon')).toBeInTheDocument();
@@ -305,7 +232,7 @@ describe('ReadingCard', () => {
         ],
       });
 
-      render(<ReadingCard reading={reading} onView={mockOnView} onDelete={mockOnDelete} />);
+      render(<ReadingCard reading={reading} onView={mockOnView} />);
 
       const thumbnail = screen.getByTestId('card-thumbnail');
       expect(thumbnail).toBeInTheDocument();

@@ -111,17 +111,9 @@ const mockEmptyPaginatedReadings: PaginatedReadings = {
   },
 };
 
-const mockDeleteReading = vi.fn();
-
 describe('ReadingsHistory', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-
-    // Default mock for delete mutation
-    vi.mocked(useReadingsModule.useDeleteReading).mockReturnValue({
-      mutate: mockDeleteReading,
-      isPending: false,
-    } as unknown as ReturnType<typeof useReadingsModule.useDeleteReading>);
   });
 
   afterEach(() => {

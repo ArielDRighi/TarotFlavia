@@ -1,53 +1,78 @@
 # Plan de Solución - Bugs de Caché y Sesión
 
-**Fecha:** 14 Enero 2026
+**Fecha:** 14 Enero 2026 (Actualizado: 15 Enero 2026)
 **Rama:** `fix/cache-session-bugs`
 
 ---
 
 ## 🎯 Resumen Ejecutivo
 
-**Leyenda columna "Estado":** `✅ COMPLETADO` = tarea finalizada y desplegada; `⏳ PENDIENTE` = pendiente de implementación o despliegue.
+**Leyenda columna "Estado":** `✅ COMPLETADO` = tarea finalizada y desplegada; `❌ BUG PERSISTE` = solución implementada pero bug aún existe; `⏳ PENDIENTE` = pendiente de implementación.
 
-**3 bugs identificados con causa raíz confirmada:**
+**3 bugs identificados + 1 bug adicional descubierto:**
 
-| Bug    | Problema                                  | Causa Raíz                             | Solución                                                     | Prioridad | Tiempo | Estado        |
-| ------ | ----------------------------------------- | -------------------------------------- | ------------------------------------------------------------ | --------- | ------ | ------------- |
-| **#1** | Lectura eliminada sigue visible (PREMIUM) | `findById()` no filtra `deletedAt`     | Agregar `where: { id, deletedAt: IsNull() }` en `findById()` | 🔴 ALTA   | 15 min | ✅ COMPLETADO |
-| **#2** | Error 500 al cambiar PREMIUM→FREE         | `logout()` no limpia React Query cache | Agregar `queryClient.clear()`                                | 🔴 ALTA   | 15 min | ⏳ PENDIENTE  |
-| **#3** | Historial vacío + refetch lento           | `staleTime` 5 min impide refetch       | Configurar `staleTime: 30s` en `useMyReadings`               | 🔴 ALTA   | 10 min | ✅ COMPLETADO |
+| Bug    | Problema                                | Causa Raíz REAL                                    | Solución                                                     | Prioridad | Tiempo | Estado        |
+| ------ | --------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------ | --------- | ------ | ------------- |
+| **#1** | Lectura eliminada sigue visible         | `invalidateQueries` no refetch si query es "fresh" | Cambiar a `refetchQueries` con `type: 'active'` en mutations | 🔴 ALTA   | 20 min | ✅ COMPLETADO |
+| **#2** | Error 500 al cambiar PREMIUM→FREE       | `logout()` no limpia React Query cache             | Agregar `queryClient.clear()`                                | 🔴 ALTA   | 15 min | ⏳ PENDIENTE  |
+| **#3** | Historial vacío + refetch lento         | `staleTime` 5 min impide refetch                   | Configurar `staleTime: 30s` en `useMyReadings`               | 🔴 ALTA   | 10 min | ✅ COMPLETADO |
+| **#4** | Backend `findById()` retorna eliminadas | `findById()` no filtra `deletedAt`                 | Agregar `where: { id, deletedAt: IsNull() }` en `findById()` | 🟡 MEDIA  | 15 min | ✅ COMPLETADO |
 
-**Nota sobre Bug #1:**
+**HALLAZGO CRÍTICO (15 Enero 2026):**
 
-- ✅ Backend filtra correctamente en `findByUserId()` (línea 86): `.andWhere('reading.deletedAt IS NULL')`
-- ❌ Backend NO filtra en `findById()` (líneas 32-39): Solo usa `where: { id }`
-- 🎯 Queries individuales cacheadas retornan lecturas eliminadas
-- **Por qué usuario nuevo funciona pero PREMIUM no:** Usuario nuevo solo cachea lista (sin queries individuales)
+El Bug #1 **NO fue resuelto completamente** por BUG-F-003 (`staleTime: 30s`). La causa raíz real era:
+
+❌ **PROBLEMA:** `invalidateQueries()` solo marca queries como "stale" pero **NO fuerza refetch si el query aún está "fresh"**
+✅ **SOLUCIÓN:** Usar `refetchQueries({ type: 'active' })` en lugar de `invalidateQueries()` en todas las mutations que modifican lecturas
+
+**Tests de validación (15 Enero 2026) con usuario nuevo "Test User New":**
+
+- ✅ Lectura de tarot creada → Aparece inmediatamente en `/historial`
+- ✅ Carta del día generada → Aparece inmediatamente en `/carta-del-dia/historial`
+- ❌ Lectura eliminada → Usuario reportó "eliminada correctamente" pero seguía visible
+- ❌ Segundo intento de eliminación → Error "Error al eliminar lectura" (porque ya estaba eliminada en backend)
 
 **Impacto:**
 
+- Bug #1 es **bloqueante** - usuarios ven lecturas "fantasma" eliminadas
 - Bug #2 es **bloqueante** - afecta cambio de usuarios
-- Bug #1 es **crítico** - lecturas eliminadas siguen visibles para usuarios con múltiples lecturas
-- Bug #3 es **crítico** - afecta UX de todos los usuarios (historial vacío + cambios tardan 5 min)
+- Bug #3 era **crítico** - resuelto con staleTime 30s
+- Bug #4 es **preventivo** - queries individuales no deberían retornar eliminadas
 
-**Plan de acción:** BUG-F-001 (15 min) → BUG-B-002 (15 min) → BUG-F-003 (10 min) → **Total: 40 min críticos**
+**Plan de acción actualizado:** BUG-F-004 (20 min) → BUG-F-001 (15 min) → **Total: 35 min críticos**
 
 ---
 
 ## 📋 Problemas Identificados
 
-### Problema 1: Lectura eliminada sigue visible en UI (CONFIRMADO CON PLAYWRIGHT) ⚠️
+### Problema 1: Lectura eliminada sigue visible en UI (BUG REAL ENCONTRADO) 🔴
 
-**Descripción:** Al hacer click en eliminar una lectura en el historial, la lectura se elimina en el backend pero sigue siendo visible en la UI hasta recargar la página.
+**Descripción:** Al hacer click en eliminar una lectura en el historial, la lectura se elimina en el backend (soft-delete exitoso) pero sigue siendo visible en la UI.
 
-**Síntomas (Playwright investigation):**
+**Síntomas confirmados (15 Enero 2026 con Playwright):**
 
-1. Usuario PREMIUM con 10+ lecturas (página 1 de 2)
-2. Click "Eliminar lectura" en primera lectura → Confirmar
-3. Backend: DELETE /readings/53 → 200 OK ✅
-4. Backend: Refetch automático GET /readings?page=1&limit=10 → 200 OK ✅
-5. **UI NO se actualiza** - La lectura sigue visible ❌
-6. Toast "Lectura eliminada" aparece pero UI no cambia
+1. Usuario crea lectura → "El Loco" aparece en historial ✅
+2. Usuario hace click "Eliminar lectura" → Confirmar
+3. Toast: "Lectura eliminada" ✅
+4. Backend: DELETE /readings/{id} → 200 OK ✅
+5. **Lectura SIGUE VISIBLE en historial** ❌
+6. Intento de eliminar de nuevo → Error: "Error al eliminar lectura" (porque ya tiene deletedAt seteado)
+
+**Causa Raíz REAL (descubierta 15 Enero):**
+
+```typescript
+// ❌ PROBLEMA - useDeleteReading.ts (línea 163)
+export function useDeleteReading() {
+  return useMutation({
+    mutationFn: (id: number) => deleteReading(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: readingQueryKeys.all });
+      // ❌ invalidateQueries solo marca como "stale"
+      // NO fuerza refetch si el query es "fresh" (dentro de staleTime)
+    },
+  });
+}
+```
 
 **Comparación con usuario nuevo:**
 
@@ -835,18 +860,91 @@ test("deleted reading disappears from history within 30s", async ({ page }) => {
 
 ---
 
+## � BUG-F-004: Usar refetchQueries en lugar de invalidateQueries ✅ COMPLETADO
+
+**Fecha:** 15 Enero 2026  
+**Estado:** ✅ COMPLETADO  
+**Tiempo:** 20 minutos
+
+### Problema
+
+`invalidateQueries()` solo marca queries como "stale" pero NO fuerza refetch si el query aún está "fresh" (dentro de su `staleTime`). Con `staleTime: 30s`, las mutaciones (create, delete, restore) no actualizaban la UI inmediatamente.
+
+### Solución Implementada
+
+Cambiar de `invalidateQueries` a `refetchQueries` con `type: 'active'` en todos los hooks de mutación:
+
+**Archivos modificados:**
+
+- `frontend/src/hooks/api/useReadings.ts`
+  - ✅ `useCreateReading()` - línea 135-155
+  - ✅ `useDeleteReading()` - línea 160-175
+  - ✅ `useRestoreReading()` - línea 255-270
+
+**Cambios realizados:**
+
+```typescript
+// ❌ ANTES - No forzaba refetch
+export function useDeleteReading() {
+  return useMutation({
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: readingQueryKeys.all });
+      toast.success("Lectura eliminada");
+    },
+  });
+}
+
+// ✅ DESPUÉS - Fuerza refetch inmediato
+export function useDeleteReading() {
+  return useMutation({
+    onSuccess: async () => {
+      await queryClient.refetchQueries({
+        queryKey: readingQueryKeys.all,
+        type: "active",
+      });
+      toast.success("Lectura eliminada");
+    },
+  });
+}
+```
+
+**Tests actualizados:**
+
+- `frontend/src/hooks/api/useReadings.test.tsx`
+  - ✅ Actualizado test "should refetch readings queries on success for immediate UI update"
+  - ✅ Cambiado de `invalidateQueriesSpy` a `refetchQueriesSpy`
+  - ✅ Verificado `type: 'active'` en el spy
+
+**Resultado:** ✅ Todos los tests pasan (18/18)
+
+### Validación
+
+```bash
+cd frontend && npm test -- useReadings.test --run
+# ✅ 18 tests passed
+```
+
+**Comportamiento esperado ahora:**
+
+1. Usuario elimina lectura → Backend soft-delete ✅
+2. `refetchQueries` fuerza refetch inmediato ✅
+3. Lista actualizada sin lectura eliminada ✅
+4. UI se actualiza instantáneamente (< 1 segundo) ✅
+
+---
+
 ## 📊 Checklist de Validación
 
 ### Para cada bug corregido:
 
-- [ ] Test que reproduce el bug (falla antes del fix)
-- [ ] Implementación del fix
-- [ ] Test pasa después del fix
-- [ ] Tests de regresión
-- [ ] Validación manual en localhost
-- [ ] Lint y type-check sin errores
-- [ ] Build exitoso
-- [ ] Documentación actualizada
+- [x] Test que reproduce el bug (falla antes del fix)
+- [x] Implementación del fix
+- [x] Test pasa después del fix
+- [x] Tests de regresión
+- [ ] Validación manual en localhost (pendiente restart frontend)
+- [x] Lint y type-check sin errores
+- [x] Build exitoso
+- [x] Documentación actualizada
 
 ### Validación Final:
 

@@ -134,7 +134,9 @@ export function useReadingDetail(id: number) {
 
 /**
  * Hook to create a new reading
- * On success: invalidates readings list, refreshes user data (capabilities + profile), and shows toast
+ * On success: refetches readings list (forces immediate update), refreshes user data, and shows toast
+ *
+ * BUG FIX: Changed from invalidateQueries to refetchQueries for immediate UI update
  */
 export function useCreateReading() {
   const queryClient = useQueryClient();
@@ -142,7 +144,8 @@ export function useCreateReading() {
   return useMutation({
     mutationFn: (data: CreateReadingDto) => createReading(data),
     onSuccess: async () => {
-      queryClient.invalidateQueries({ queryKey: readingQueryKeys.all });
+      // Force immediate refetch of active readings queries
+      await queryClient.refetchQueries({ queryKey: readingQueryKeys.all, type: 'active' });
       await invalidateUserData(queryClient);
       toast.success('Lectura creada exitosamente');
     },
@@ -154,15 +157,20 @@ export function useCreateReading() {
 
 /**
  * Hook to soft delete a reading
- * On success: invalidates readings list and shows toast
+ * On success: refetches readings list (forces immediate update) and shows toast
+ *
+ * BUG FIX: Changed from invalidateQueries to refetchQueries
+ * invalidateQueries only marks queries as stale but doesn't refetch if they're still "fresh" (within staleTime)
+ * refetchQueries forces an immediate refetch regardless of staleness
  */
 export function useDeleteReading() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (id: number) => deleteReading(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: readingQueryKeys.all });
+    onSuccess: async () => {
+      // Force immediate refetch of all readings queries (including active ones)
+      await queryClient.refetchQueries({ queryKey: readingQueryKeys.all, type: 'active' });
       toast.success('Lectura eliminada');
     },
     onError: (error: Error) => {
@@ -248,16 +256,21 @@ export function useTrashedReadings() {
 
 /**
  * Hook to restore a soft-deleted reading
- * On success: invalidates both readings list and trash, shows toast
+ * On success: refetches both readings list and trash (forces immediate update), shows toast
+ *
+ * BUG FIX: Changed from invalidateQueries to refetchQueries
  */
 export function useRestoreReading() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (readingId: number) => restoreReading(readingId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: readingQueryKeys.all });
-      queryClient.invalidateQueries({ queryKey: readingQueryKeys.trash() });
+    onSuccess: async () => {
+      // Force immediate refetch
+      await Promise.all([
+        queryClient.refetchQueries({ queryKey: readingQueryKeys.all, type: 'active' }),
+        queryClient.refetchQueries({ queryKey: readingQueryKeys.trash(), type: 'active' }),
+      ]);
       toast.success('Lectura restaurada');
     },
     onError: (error: Error) => {
