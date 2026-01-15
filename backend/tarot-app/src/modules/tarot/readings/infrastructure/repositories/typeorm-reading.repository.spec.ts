@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
 import { TypeOrmReadingRepository } from './typeorm-reading.repository';
 import { TarotReading } from '../../entities/tarot-reading.entity';
@@ -151,7 +151,7 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
 
       expect(result).toEqual(mockReading);
       expect(mockReadingRepository.findOne).toHaveBeenCalledWith({
-        where: { id: 1 },
+        where: { id: 1, deletedAt: IsNull() },
         relations: ['deck', 'user', 'cards', 'interpretations'],
       });
     });
@@ -166,7 +166,7 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
 
       expect(result).toEqual(mockReading);
       expect(mockReadingRepository.findOne).toHaveBeenCalledWith({
-        where: { id: 1 },
+        where: { id: 1, deletedAt: IsNull() },
         relations: ['deck'],
       });
     });
@@ -187,7 +187,7 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
 
       expect(result).toBeNull();
       expect(mockReadingRepository.findOne).toHaveBeenCalledWith({
-        where: { id: 0 },
+        where: { id: 0, deletedAt: IsNull() },
         relations: expect.any(Array) as string[],
       });
     });
@@ -210,8 +210,20 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
 
       expect(result).toBeDefined();
       expect(mockReadingRepository.findOne).toHaveBeenCalledWith({
-        where: { id: 1 },
+        where: { id: 1, deletedAt: IsNull() },
         relations: [],
+      });
+    });
+
+    // BUG-B-002: findById should exclude soft-deleted readings
+    it('should not return soft-deleted readings', async () => {
+      mockReadingRepository.findOne.mockResolvedValue(null);
+
+      await repository.findById(1);
+
+      expect(mockReadingRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 1, deletedAt: IsNull() },
+        relations: expect.any(Array) as string[],
       });
     });
   });

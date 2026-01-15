@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import type { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import {
   IReadingRepository,
@@ -34,7 +34,7 @@ export class TypeOrmReadingRepository implements IReadingRepository {
     relations: string[] = ['deck', 'user', 'cards', 'interpretations'],
   ): Promise<TarotReading | null> {
     return this.readingRepo.findOne({
-      where: { id },
+      where: { id, deletedAt: IsNull() },
       relations,
     });
   }
