@@ -107,8 +107,18 @@ export const useAuthStore = create<AuthStore>()(
 
         // Clear ALL React Query cache to prevent stale data contamination
         // between different user sessions (especially PREMIUM → FREE transitions)
-        const queryClient = getGlobalQueryClient();
-        queryClient.clear();
+        //
+        // Accessing QueryClient from this Zustand store (outside React) is safe because
+        // getGlobalQueryClient returns the same singleton instance that is provided to
+        // the ReactQueryProvider at the app root. This ensures that any cache operations
+        // performed here affect the exact same client and query cache used by React
+        // components, keeping server state consistent across the app.
+        //
+        // SSR safety check to avoid interacting with client-only query client during SSR
+        if (typeof window !== 'undefined') {
+          const queryClient = getGlobalQueryClient();
+          queryClient.clear();
+        }
 
         // Clear user state
         set({
