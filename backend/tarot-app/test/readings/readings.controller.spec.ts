@@ -3,6 +3,7 @@ import { Reflector } from '@nestjs/core';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ReadingsController } from '../../src/modules/tarot/readings/readings.controller';
 import { ReadingsOrchestratorService } from '../../src/modules/tarot/readings/application/services/readings-orchestrator.service';
+import { ShareTextGeneratorService } from '../../src/modules/tarot/readings/application/services/share-text-generator.service';
 import { CreateReadingDto } from '../../src/modules/tarot/readings/dto/create-reading.dto';
 import { QueryReadingsDto } from '../../src/modules/tarot/readings/dto/query-readings.dto';
 import { User } from '../../src/modules/users/entities/user.entity';
@@ -96,6 +97,12 @@ describe('ReadingsController', () => {
         {
           provide: ReadingsOrchestratorService,
           useValue: mockOrchestrator,
+        },
+        {
+          provide: ShareTextGeneratorService,
+          useValue: {
+            generateShareText: jest.fn(),
+          },
         },
         {
           provide: UsageLimitsService,

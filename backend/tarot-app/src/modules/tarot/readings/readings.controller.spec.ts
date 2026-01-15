@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ReadingsController } from './readings.controller';
 import { ReadingsOrchestratorService } from './application/services/readings-orchestrator.service';
+import { ShareTextGeneratorService } from './application/services/share-text-generator.service';
 import { CreateReadingDto } from './dto/create-reading.dto';
 import { QueryReadingsDto, SortBy, SortOrder } from './dto/query-readings.dto';
 import { JwtAuthGuard } from '../../auth/infrastructure/guards/jwt-auth.guard';
@@ -35,6 +36,10 @@ describe('ReadingsController', () => {
     unshareReading: jest.fn(),
   };
 
+  const mockShareTextGenerator = {
+    generateShareText: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ReadingsController],
@@ -42,6 +47,10 @@ describe('ReadingsController', () => {
         {
           provide: ReadingsOrchestratorService,
           useValue: mockOrchestrator,
+        },
+        {
+          provide: ShareTextGeneratorService,
+          useValue: mockShareTextGenerator,
         },
       ],
     })

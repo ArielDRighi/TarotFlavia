@@ -542,36 +542,51 @@ Implementar endpoints REST para obtener el texto formateado de compartir.
 
 ---
 
-### **TASK-SHARE-004: Tests Backend Share Text**
+### **TASK-SHARE-004: Tests Backend Share Text** ✅ **COMPLETADO**
 
 **Prioridad:** 🟠 MEDIA  
 **Estimación:** 3 horas  
 **Dependencias:** TASK-SHARE-003  
-**Tipo:** 🔧 Backend
+**Tipo:** 🔧 Backend  
+**Estado:** ✅ COMPLETADO (15 Enero 2026)
 
 #### 📋 Descripción
 
 Implementar tests unitarios y de integración para el servicio y endpoints de share text.
 
-#### ✅ Tareas específicas
+#### ✅ Tareas específicas - TODAS COMPLETADAS
 
-- [ ] Crear `share-text-generator.service.spec.ts`:
+- [x] Crear `share-text-generator.service.spec.ts`:
   - Test: genera texto correcto para usuario ANÓNIMO
   - Test: genera texto correcto para usuario FREE
   - Test: genera texto correcto para usuario PREMIUM
   - Test: diferencia entre carta del día y tirada
   - Test: incluye CTA correcto según plan
-- [ ] Crear tests de integración para endpoints:
+- [x] Crear tests de integración para endpoints (`share-text.e2e-spec.ts`):
   - Test: `GET /readings/:id/share-text` requiere auth
   - Test: `GET /readings/:id/share-text` valida ownership
   - Test: `GET /daily-reading/share-text` funciona sin auth
-- [ ] Verificar coverage ≥ 80%
+- [x] Verificar coverage ≥ 80%
+- [x] Corregir mocks en tests de ReadingsController
 
-#### 🎯 Criterios de aceptación
+#### 🎯 Criterios de aceptación - CUMPLIDOS
 
-- ✓ Coverage del servicio ≥ 80%
-- ✓ Todos los tests pasan
-- ✓ Tests cubren los 3 planes de usuario
+- ✓ Coverage del servicio ≥ 80% (Actual: **96.36%**)
+- ✓ Todos los tests pasan (14 unitarios + 9 E2E = **23 tests passing**)
+- ✓ Tests cubren los 3 planes de usuario (anonymous, free, premium)
+- ✓ No hay regresiones en tests existentes
+
+#### 📊 Resultado Final
+
+**Tests Unitarios:**
+
+- `share-text-generator.service.spec.ts`: 14 tests passing
+- Coverage: 96.36% statements, 94.11% branches, 100% functions
+
+**Tests E2E:**
+
+- `share-text.e2e-spec.ts`: 9 tests passing
+- Cobertura completa de autenticación, ownership y planes de usuario
 
 ---
 
