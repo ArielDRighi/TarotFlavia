@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 import { toast } from '@/hooks/utils/useToast';
 import { apiClient } from '@/lib/api/axios-config';
 import { API_ENDPOINTS } from '@/lib/api/endpoints';
+import { getGlobalQueryClient } from '@/lib/providers/react-query-provider';
 import type {
   AuthUser,
   AuthStore,
@@ -102,6 +103,21 @@ export const useAuthStore = create<AuthStore>()(
         if (typeof window !== 'undefined') {
           localStorage.removeItem('access_token');
           localStorage.removeItem('refresh_token');
+        }
+
+        // Clear ALL React Query cache to prevent stale data contamination
+        // between different user sessions (especially PREMIUM → FREE transitions)
+        //
+        // Accessing QueryClient from this Zustand store (outside React) is safe because
+        // getGlobalQueryClient returns the same singleton instance that is provided to
+        // the ReactQueryProvider at the app root. This ensures that any cache operations
+        // performed here affect the exact same client and query cache used by React
+        // components, keeping server state consistent across the app.
+        //
+        // SSR safety check to avoid interacting with client-only query client during SSR
+        if (typeof window !== 'undefined') {
+          const queryClient = getGlobalQueryClient();
+          queryClient.clear();
         }
 
         // Clear user state
