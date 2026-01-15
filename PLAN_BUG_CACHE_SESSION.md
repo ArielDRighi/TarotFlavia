@@ -15,7 +15,7 @@
 | ------ | ----------------------------------------- | -------------------------------------- | ------------------------------------------------------------ | --------- | ------ | ------------- |
 | **#1** | Lectura eliminada sigue visible (PREMIUM) | `findById()` no filtra `deletedAt`     | Agregar `where: { id, deletedAt: IsNull() }` en `findById()` | 🔴 ALTA   | 15 min | ✅ COMPLETADO |
 | **#2** | Error 500 al cambiar PREMIUM→FREE         | `logout()` no limpia React Query cache | Agregar `queryClient.clear()`                                | 🔴 ALTA   | 15 min | ⏳ PENDIENTE  |
-| **#3** | Historial vacío + refetch lento           | `staleTime` 5 min impide refetch       | Configurar `staleTime: 30s` en `useMyReadings`               | 🔴 ALTA   | 10 min | ⏳ PENDIENTE  |
+| **#3** | Historial vacío + refetch lento           | `staleTime` 5 min impide refetch       | Configurar `staleTime: 30s` en `useMyReadings`               | 🔴 ALTA   | 10 min | ✅ COMPLETADO |
 
 **Nota sobre Bug #1:**
 
@@ -581,7 +581,11 @@ export function useDeleteReading() {
 }
 ```
 
-#### BUG-F-003: Configurar staleTime adecuado para readings ⭐ MEJORA Bug #1 Y RESUELVE Bug #3
+#### BUG-F-003: Configurar staleTime adecuado para readings ⭐ MEJORA Bug #1 Y RESUELVE Bug #3 ✅ COMPLETADO
+
+**Estado:** ✅ COMPLETADO (2025-01-15)
+**Rama:** `feature/BUG-F-003-staletime-readings`
+**Commit:** `0abe5ea`
 
 **Problema:** `staleTime` global de 5 minutos hace que queries "fresh" NO refetch aunque estén invalidados.
 
@@ -593,24 +597,29 @@ export function useDeleteReading() {
 
 **Nota importante:** BUG-F-003 **mejora** Bug #1 pero NO lo resuelve completamente porque el problema raíz es BUG-B-002 (`findById()` sin filtro)
 
-**Archivos:**
+**Archivos modificados:**
 
-- `frontend/src/hooks/api/useReadings.ts` - Agregar `staleTime` específico a `useMyReadings`
+- `frontend/src/hooks/api/useReadings.ts` - Agregado `staleTime: 30s` en `useMyReadings()`
+- `frontend/src/hooks/api/useReadings.test.tsx` - Test para verificar staleTime configurado
+- `frontend/docs/FRONTEND_BACKLOG.md` - Documentado como TAREA 13.4
 
-**Solución: StaleTime más corto para readings (30 segundos):**
+**Solución implementada: StaleTime más corto para readings (30 segundos):**
 
 ```typescript
 /**
  * Hook to fetch paginated list of user's readings
  * @param page - Page number (1-indexed)
  * @param limit - Number of items per page
+ *
+ * NOTE (BUG-F-003): Uses 30s staleTime (overrides global 5min default)
+ * Readings are frequently modified by users (create, delete, regenerate),
+ * so a shorter staleTime ensures the UI updates within 30s of changes.
  */
 export function useMyReadings(page: number, limit: number) {
   return useQuery({
     queryKey: readingQueryKeys.list(page, limit),
     queryFn: () => getMyReadings(page, limit),
     staleTime: 30 * 1000, // 30 segundos - readings pueden cambiar frecuentemente
-    // Esto override el staleTime global de 5 minutos
   });
 }
 ```
@@ -622,50 +631,23 @@ export function useMyReadings(page: number, limit: number) {
 - Otros datos estáticos (categorías, spreads) mantienen `staleTime: Infinity`
 - Queries de admin/métricas mantienen su `staleTime` específico
 
-**Solución 2: Refetch forzado después de crear lectura (ALTERNATIVA):**
-
-```typescript
-export function useCreateReading() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (data: CreateReadingDto) => createReading(data),
-    onSuccess: async (newReading) => {
-      // FORZAR refetch inmediato ignorando staleTime
-      await queryClient.refetchQueries({
-        queryKey: readingQueryKeys.all,
-        type: "active", // Solo queries actualmente montadas
-      });
-
-      // También invalidar capabilities
-      await invalidateUserData(queryClient);
-
-      toast.success("Lectura creada exitosamente");
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "Error al crear lectura");
-    },
-  });
-}
-```
-
 **Por qué staleTime 30s es la solución correcta:**
 
 - ✅ Soluciona Bug #3: usuarios nuevos ven su historial en <30s
-- ✅ Soluciona Bug #1: lecturas eliminadas desaparecen en <30s
+- ✅ Mejora Bug #1: lecturas eliminadas desaparecen en <30s (problema completo resuelto con BUG-B-002)
 - ✅ Mejora la experiencia para TODOS los usuarios (cambios se ven más rápido)
 - ✅ Más predecible que forzar refetch
 - ✅ Balance entre UX (actualización rápida) y performance (evita refetch innecesarios)
 - ✅ 30 segundos es razonable para datos que el usuario modifica activamente
 
-**Tests a agregar:**
+**Tests implementados:**
 
-1. Usuario nuevo crea lectura → Navega a historial → Debe aparecer
-2. Usuario elimina lectura → Espera <30s → Debe desaparecer
-3. Usuario con historial cacheado → Crea/elimina → Actualiza en <30s
-4. Verificar que NO hace refetch cada render (usar React Query Devtools)
+- ✅ Test unitario en `useReadings.test.tsx`: "should have 30 seconds staleTime for quick cache updates"
+- ✅ 18/18 tests pasando en useReadings.test.tsx
+- ✅ Coverage: 60% en useReadings.ts
+- ✅ Lint, type-check, build exitosos
 
-**Tiempo estimado:** 10 minutos
+**Tiempo real:** 10 minutos
 
 ---
 

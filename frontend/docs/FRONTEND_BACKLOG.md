@@ -5324,6 +5324,82 @@ function AuthProvider({ children }) {
 
 ---
 
+### ✅ TAREA 13.4: Configuración de staleTime para Readings (BUG-F-003)
+
+**Estado:** ✅ COMPLETADA (2025-01-15)
+**Prioridad:** ALTA
+**Estimación:** 10 min
+**Rama:** `feature/BUG-F-003-staletime-readings`
+**Dependencias:** TASK 4.x (Sistema de Lecturas), TASK 13.1
+
+**Problema Detectado:**
+
+El historial de lecturas no se actualizaba después de crear, eliminar o modificar una lectura hasta después de ~5 minutos. Los usuarios nuevos veían historial vacío después de crear su primera lectura.
+
+**Síntomas:**
+
+- Usuario nuevo crea primera lectura → Navega a historial → Aparece vacío
+- Usuario elimina lectura → Lectura sigue visible por ~5 minutos
+- Usuario recarga página → Historial aún no se actualiza
+- Queries invalidados con `invalidateQueries()` no refetch automáticamente
+
+**Causa Raíz:**
+
+El `staleTime` global de 5 minutos (configurado en `react-query-provider.tsx`) impedía que queries marcados como "invalid" hicieran refetch si todavía estaban "fresh".
+
+**Comportamiento de React Query:**
+
+- Query "fresh" + "invalid" → NO refetch automático
+- Query "stale" + "invalid" → SÍ refetch automático
+- `invalidateQueries()` solo marca como "invalid", no fuerza refetch si está "fresh"
+
+**Solución Implementada:**
+
+Agregar `staleTime` específico de 30 segundos en `useMyReadings()` para override el global de 5 minutos:
+
+```typescript
+export function useMyReadings(page: number, limit: number) {
+  return useQuery({
+    queryKey: readingQueryKeys.list(page, limit),
+    queryFn: () => getMyReadings(page, limit),
+    staleTime: 30 * 1000, // 30 segundos - readings pueden cambiar frecuentemente
+  });
+}
+```
+
+**Justificación:**
+
+- Readings son datos que el usuario modifica activamente (crea, elimina, regenera)
+- 30 segundos es suficiente para evitar refetch innecesarios pero permite actualización rápida
+- Balance entre UX (cambios visibles en <30s) y performance (evita refetch excesivos)
+- Otros datos estáticos (categorías, spreads) mantienen `staleTime: Infinity`
+
+**Archivos Modificados:**
+
+- `frontend/src/hooks/api/useReadings.ts` - Agregado `staleTime: 30s` en `useMyReadings()`
+- `frontend/src/hooks/api/useReadings.test.tsx` - Test para verificar staleTime configurado
+
+**Testing:**
+
+- ✅ 18 tests en useReadings.test.tsx pasando (incluye test de staleTime)
+- ✅ Verificación manual: Usuario nuevo crea lectura → Historial se actualiza en <30s
+- ✅ Verificación manual: Usuario elimina lectura → Desaparece en <30s
+- ✅ Lint, type-check, build exitosos
+
+**Impacto:**
+
+- ✅ Resuelve Bug #3: Usuarios nuevos ven su historial en <30s
+- ✅ Mejora Bug #1: Lecturas eliminadas desaparecen en <30s (problema completo resuelto con BUG-B-002 en backend)
+- ✅ Mejora experiencia para TODOS los usuarios (cambios se ven más rápido)
+
+**Documentación Relacionada:**
+
+Los bugs relacionados y su análisis completo están documentados en:
+
+- `PLAN_BUG_CACHE_SESSION.md` - Análisis detallado de Bug #1, #2 y #3
+
+---
+
 **Documentación Adicional:**
 
 Los problemas y soluciones de esta fase están documentados en detalle en:
