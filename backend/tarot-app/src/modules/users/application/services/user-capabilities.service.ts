@@ -11,6 +11,10 @@ import {
   UserPlanType,
 } from '../dto/user-capabilities.dto';
 import { UserPlan } from '../../entities/user.entity';
+import {
+  getTodayUTCDateString,
+  getStartOfTodayUTC,
+} from '../../../../common/utils/date.utils';
 
 @Injectable()
 export class UserCapabilitiesService {
@@ -50,24 +54,26 @@ export class UserCapabilitiesService {
 
     // Obtener uso actual de carta del día consultando directamente daily_reading
     // Esto garantiza consistencia con la tabla real de lecturas
-    const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
+    // BUG-CAP-001 FIX: Use string comparison for DATE column (not MoreThanOrEqual with Date object)
+    // The readingDate column is type DATE (YYYY-MM-DD), so we must use string equality
+    const todayStr = getTodayUTCDateString();
 
-    const existingDailyReading = await this.dailyReadingRepository.findOne({
-      where: {
-        userId,
-        readingDate: MoreThanOrEqual(today),
-      },
-    });
+    const existingDailyReading = await this.dailyReadingRepository
+      .createQueryBuilder('daily_reading')
+      .where('daily_reading.user_id = :userId', { userId })
+      .andWhere('daily_reading.reading_date = :date', { date: todayStr })
+      .getOne();
 
     const dailyCardUsage = existingDailyReading ? 1 : 0;
 
     // Obtener uso de tiradas de tarot consultando directamente la tabla tarot_reading
     // Esto garantiza consistencia con la tabla real de lecturas
+    // For TIMESTAMP columns, MoreThanOrEqual with Date object works correctly
+    const startOfToday = getStartOfTodayUTC();
     const tarotReadingsCount = await this.tarotReadingRepository.count({
       where: {
         user: { id: userId },
-        createdAt: MoreThanOrEqual(today),
+        createdAt: MoreThanOrEqual(startOfToday),
         deletedAt: IsNull(), // Solo contar lecturas no eliminadas
       },
     });
@@ -130,15 +136,16 @@ export class UserCapabilitiesService {
     // Solo verificar si tenemos fingerprint válido
     if (fingerprint && fingerprint.length > 0) {
       // Query the daily_reading table directly for today's reading
-      const today = new Date();
-      today.setUTCHours(0, 0, 0, 0);
+      // BUG-CAP-001 FIX: Use string comparison for DATE column
+      const todayStr = getTodayUTCDateString();
 
-      const existingReading = await this.dailyReadingRepository.findOne({
-        where: {
-          anonymousFingerprint: fingerprint,
-          readingDate: MoreThanOrEqual(today),
-        },
-      });
+      const existingReading = await this.dailyReadingRepository
+        .createQueryBuilder('daily_reading')
+        .where('daily_reading.anonymous_fingerprint = :fingerprint', {
+          fingerprint,
+        })
+        .andWhere('daily_reading.reading_date = :date', { date: todayStr })
+        .getOne();
 
       if (existingReading) {
         dailyCardUsed = 1;

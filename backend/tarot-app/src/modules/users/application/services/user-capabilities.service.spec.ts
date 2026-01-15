@@ -18,6 +18,13 @@ describe('UserCapabilitiesService', () => {
   let dailyReadingRepository: jest.Mocked<Repository<DailyReading>>;
   let tarotReadingRepository: jest.Mocked<Repository<TarotReading>>;
 
+  // Mock for createQueryBuilder chain
+  let mockQueryBuilder: {
+    where: jest.Mock;
+    andWhere: jest.Mock;
+    getOne: jest.Mock;
+  };
+
   const mockUser = {
     id: 1,
     email: 'test@example.com',
@@ -40,6 +47,13 @@ describe('UserCapabilitiesService', () => {
   };
 
   beforeEach(async () => {
+    // Setup mock query builder chain
+    mockQueryBuilder = {
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      getOne: jest.fn().mockResolvedValue(null),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UserCapabilitiesService,
@@ -66,6 +80,7 @@ describe('UserCapabilitiesService', () => {
           useValue: {
             findOne: jest.fn(),
             count: jest.fn(),
+            createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
           },
         },
         {
@@ -125,7 +140,8 @@ describe('UserCapabilitiesService', () => {
         const fingerprint = 'abc123def456';
 
         // Mock: anonymous user has already used daily card (reading exists)
-        dailyReadingRepository.findOne.mockResolvedValue({
+        // BUG-CAP-001: Now uses createQueryBuilder instead of findOne
+        mockQueryBuilder.getOne.mockResolvedValue({
           id: 1,
           anonymousFingerprint: fingerprint,
           readingDate: new Date(),
@@ -133,7 +149,9 @@ describe('UserCapabilitiesService', () => {
 
         const result = await service.getCapabilities(null, fingerprint);
 
-        expect(dailyReadingRepository.findOne).toHaveBeenCalled();
+        expect(dailyReadingRepository.createQueryBuilder).toHaveBeenCalledWith(
+          'daily_reading',
+        );
         expect(result.dailyCard.used).toBe(1);
         expect(result.dailyCard.canUse).toBe(false);
         expect(result.canCreateDailyReading).toBe(false);
@@ -143,7 +161,7 @@ describe('UserCapabilitiesService', () => {
         const fingerprint = 'abc123def456';
 
         // Mock: anonymous user has NOT used daily card (no reading found)
-        dailyReadingRepository.findOne.mockResolvedValue(null);
+        mockQueryBuilder.getOne.mockResolvedValue(null);
 
         const result = await service.getCapabilities(null, fingerprint);
 
@@ -153,7 +171,7 @@ describe('UserCapabilitiesService', () => {
       });
 
       it('should not call user services when userId is null', async () => {
-        dailyReadingRepository.findOne.mockResolvedValue(null);
+        mockQueryBuilder.getOne.mockResolvedValue(null);
 
         await service.getCapabilities(null, 'fingerprint123');
 
@@ -170,7 +188,8 @@ describe('UserCapabilitiesService', () => {
           mockPlanConfig as any,
         );
         // No daily reading found (hasn't used daily card)
-        dailyReadingRepository.findOne.mockResolvedValue(null);
+        // BUG-CAP-001: Now uses createQueryBuilder
+        mockQueryBuilder.getOne.mockResolvedValue(null);
         // No tarot readings used
         tarotReadingRepository.count.mockResolvedValue(0);
 
@@ -202,8 +221,10 @@ describe('UserCapabilitiesService', () => {
         expect(planConfigService.findByPlanType).toHaveBeenCalledWith(
           UserPlan.FREE,
         );
-        // Should check daily_reading table
-        expect(dailyReadingRepository.findOne).toHaveBeenCalled();
+        // Should check daily_reading table using createQueryBuilder
+        expect(dailyReadingRepository.createQueryBuilder).toHaveBeenCalledWith(
+          'daily_reading',
+        );
         // Should check tarot_reading table (not usageLimitsService)
         expect(tarotReadingRepository.count).toHaveBeenCalled();
       });
@@ -214,12 +235,13 @@ describe('UserCapabilitiesService', () => {
           mockPlanConfig as any,
         );
         // Daily reading exists (already used today)
-        dailyReadingRepository.findOne.mockResolvedValue({
+        // BUG-CAP-001: Now uses createQueryBuilder
+        mockQueryBuilder.getOne.mockResolvedValue({
           id: 1,
           userId: 1,
           readingDate: new Date(),
         } as DailyReading);
-        usageLimitsService.getUsage.mockResolvedValue(0);
+        tarotReadingRepository.count.mockResolvedValue(0);
 
         const result = await service.getCapabilities(1);
 
@@ -237,7 +259,7 @@ describe('UserCapabilitiesService', () => {
         planConfigService.findByPlanType.mockResolvedValue(
           mockPlanConfig as any,
         );
-        dailyReadingRepository.findOne.mockResolvedValue(null);
+        mockQueryBuilder.getOne.mockResolvedValue(null);
         // Tarot reading used once (limit = 1)
         tarotReadingRepository.count.mockResolvedValue(1);
 
@@ -260,12 +282,13 @@ describe('UserCapabilitiesService', () => {
         // Edge case: user has TWO daily readings somehow (shouldn't happen but test edge case)
         // Since we query daily_reading directly, we can only get 0 or 1
         // So this test is for when daily reading exists
-        dailyReadingRepository.findOne.mockResolvedValue({
+        // BUG-CAP-001: Now uses createQueryBuilder
+        mockQueryBuilder.getOne.mockResolvedValue({
           id: 1,
           userId: 1,
           readingDate: new Date(),
         } as DailyReading);
-        usageLimitsService.getUsage.mockResolvedValue(0);
+        tarotReadingRepository.count.mockResolvedValue(0);
 
         const result = await service.getCapabilities(1);
 
@@ -302,7 +325,8 @@ describe('UserCapabilitiesService', () => {
           premiumPlanConfig as any,
         );
         // Premium user has used daily card multiple times (but unlimited)
-        dailyReadingRepository.findOne.mockResolvedValue({
+        // BUG-CAP-001: Now uses createQueryBuilder
+        mockQueryBuilder.getOne.mockResolvedValue({
           id: 5,
           userId: 1,
           readingDate: new Date(),
@@ -339,7 +363,7 @@ describe('UserCapabilitiesService', () => {
         planConfigService.findByPlanType.mockResolvedValue(
           premiumPlanConfig as any,
         );
-        dailyReadingRepository.findOne.mockResolvedValue(null);
+        mockQueryBuilder.getOne.mockResolvedValue(null);
         tarotReadingRepository.count.mockResolvedValue(3); // Limit reached
 
         const result = await service.getCapabilities(1);
@@ -377,10 +401,81 @@ describe('UserCapabilitiesService', () => {
       });
     });
 
+    describe('Daily Card Date Comparison (BUG-CAP-001)', () => {
+      it('should allow daily card creation when last reading was yesterday', async () => {
+        // This test verifies the fix for BUG-CAP-001:
+        // User has a daily reading from YESTERDAY, should be able to create TODAY
+        usersService.findById.mockResolvedValue(mockUser as any);
+        planConfigService.findByPlanType.mockResolvedValue(
+          mockPlanConfig as any,
+        );
+
+        // Simulate: no reading found for today (yesterday's reading should NOT match)
+        // The createQueryBuilder with string date comparison should return null
+        mockQueryBuilder.getOne.mockResolvedValue(null);
+        tarotReadingRepository.count.mockResolvedValue(0);
+
+        const result = await service.getCapabilities(1);
+
+        // User should be able to create daily reading
+        expect(result.canCreateDailyReading).toBe(true);
+        expect(result.dailyCard.canUse).toBe(true);
+        expect(result.dailyCard.used).toBe(0);
+      });
+
+      it('should use createQueryBuilder with string date comparison for DATE column', async () => {
+        // This test ensures the query uses createQueryBuilder with string comparison
+        // The fix uses getTodayUTCDateString() format: 'YYYY-MM-DD'
+        usersService.findById.mockResolvedValue(mockUser as any);
+        planConfigService.findByPlanType.mockResolvedValue(
+          mockPlanConfig as any,
+        );
+        mockQueryBuilder.getOne.mockResolvedValue(null);
+        tarotReadingRepository.count.mockResolvedValue(0);
+
+        await service.getCapabilities(1);
+
+        // Verify createQueryBuilder was called instead of findOne
+        expect(dailyReadingRepository.createQueryBuilder).toHaveBeenCalledWith(
+          'daily_reading',
+        );
+        // Verify the query chain was called correctly
+        expect(mockQueryBuilder.where).toHaveBeenCalledWith(
+          'daily_reading.user_id = :userId',
+          { userId: 1 },
+        );
+        expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+          'daily_reading.reading_date = :date',
+          expect.objectContaining({ date: expect.any(String) }),
+        );
+        expect(mockQueryBuilder.getOne).toHaveBeenCalled();
+      });
+
+      it('should block daily card creation when reading exists for today', async () => {
+        usersService.findById.mockResolvedValue(mockUser as any);
+        planConfigService.findByPlanType.mockResolvedValue(
+          mockPlanConfig as any,
+        );
+
+        // Today's reading exists
+        mockQueryBuilder.getOne.mockResolvedValue({
+          id: 1,
+          userId: 1,
+          readingDate: new Date(), // Today
+        } as DailyReading);
+        tarotReadingRepository.count.mockResolvedValue(0);
+
+        const result = await service.getCapabilities(1);
+
+        expect(result.canCreateDailyReading).toBe(false);
+        expect(result.dailyCard.canUse).toBe(false);
+        expect(result.dailyCard.used).toBe(1);
+      });
+    });
+
     describe('resetAt calculation', () => {
       it('should return next midnight UTC', async () => {
-        dailyReadingRepository.findOne.mockResolvedValue(null);
-
+        // No fingerprint provided, so no query is made
         const result = await service.getCapabilities(null, null);
         const resetDate = new Date(result.dailyCard.resetAt);
 
@@ -403,7 +498,7 @@ describe('UserCapabilitiesService', () => {
         planConfigService.findByPlanType.mockResolvedValue(
           mockPlanConfig as any,
         );
-        dailyReadingRepository.findOne.mockResolvedValue(null);
+        mockQueryBuilder.getOne.mockResolvedValue(null);
         tarotReadingRepository.count.mockResolvedValue(0);
 
         const result = await service.getCapabilities(1);
