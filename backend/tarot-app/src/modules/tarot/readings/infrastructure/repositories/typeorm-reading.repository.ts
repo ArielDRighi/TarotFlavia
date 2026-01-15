@@ -262,7 +262,7 @@ export class TypeOrmReadingRepository implements IReadingRepository {
   async findByShareToken(token: string): Promise<TarotReading | null> {
     // Optimización: Cargar solo las relaciones necesarias para lectura compartida
     return this.readingRepo.findOne({
-      where: { sharedToken: token, isPublic: true },
+      where: { sharedToken: token, isPublic: true, deletedAt: IsNull() },
       relations: ['cards', 'deck', 'category', 'predefinedQuestion'],
       // Nota: NO cargamos user para proteger privacidad en lecturas compartidas
     });

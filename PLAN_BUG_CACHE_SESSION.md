@@ -7,6 +7,8 @@
 
 ## 🎯 Resumen Ejecutivo
 
+**Leyenda columna "Estado":** `✅ COMPLETADO` = tarea finalizada y desplegada; `⏳ PENDIENTE` = pendiente de implementación o despliegue.
+
 **3 bugs identificados con causa raíz confirmada:**
 
 | Bug    | Problema                                  | Causa Raíz                             | Solución                                                     | Prioridad | Tiempo | Estado        |
@@ -388,15 +390,29 @@ async findById(
 }
 ```
 
-**Tests agregados:**
+3. **[PR Feedback]** Modificado método `findByShareToken()` para filtrar lecturas eliminadas compartidas:
+
+```typescript
+async findByShareToken(token: string): Promise<TarotReading | null> {
+  return this.readingRepo.findOne({
+    where: { sharedToken: token, isPublic: true, deletedAt: IsNull() },  // ✅ Ahora filtra deletedAt
+    relations: ['cards', 'deck', 'category', 'predefinedQuestion'],
+  });
+}
+```
+
+**Tests agregados/mejorados:**
 
 - Test unitario en `typeorm-reading.repository.spec.ts`:
-  - "should not return soft-deleted readings"
-  - Verifica que `findById()` incluye el filtro `deletedAt: IsNull()`
+  - "should not return soft-deleted readings" (findById)
+  - "should return null when reading is soft-deleted" (findById - comportamiento real)
+  - "should not return soft-deleted readings" (findByShareToken)
+  - Actualizados 4 tests existentes de findById para incluir filtro
+  - Actualizados 3 tests existentes de findByShareToken para incluir filtro
 
 **Validación:**
 
-- ✅ Tests unitarios: 67/67 pasando
+- ✅ Tests unitarios: 69/69 pasando (+2 nuevos)
 - ✅ Tests e2e de soft-delete: 11/20 pasando (los que fallan son por otros issues de límites de plan)
 - ✅ Lint sin errores
 - ✅ Build exitoso
@@ -405,6 +421,7 @@ async findById(
 **Resultado esperado:**
 
 - Las lecturas eliminadas ya NO serán retornadas por `findById()`
+- Las lecturas eliminadas compartidas ya NO serán accesibles vía link público
 - Queries individuales cacheadas no mostrarán lecturas eliminadas
 - Resuelve la causa raíz del Bug #1 en el backend
 
