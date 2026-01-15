@@ -18,6 +18,16 @@ vi.mock('@/hooks/utils/useToast', () => ({
   },
 }));
 
+// Mock getGlobalQueryClient
+const mockQueryClient = {
+  clear: vi.fn(),
+  invalidateQueries: vi.fn(),
+};
+
+vi.mock('@/lib/providers/react-query-provider', () => ({
+  getGlobalQueryClient: vi.fn(() => mockQueryClient),
+}));
+
 // Import mocked modules
 import { apiClient } from '@/lib/api/axios-config';
 import { toast } from '@/hooks/utils/useToast';
@@ -57,6 +67,9 @@ describe('authStore', () => {
     vi.clearAllMocks();
     // Reset store state
     resetStore();
+    // Reset queryClient mock
+    mockQueryClient.clear.mockClear();
+    mockQueryClient.invalidateQueries.mockClear();
   });
 
   afterEach(() => {
@@ -223,6 +236,15 @@ describe('authStore', () => {
 
       expect(localStorageMock.removeItem).toHaveBeenCalledWith('access_token');
       expect(localStorageMock.removeItem).toHaveBeenCalledWith('refresh_token');
+    });
+
+    it('should clear React Query cache on logout', () => {
+      // Act: logout
+      useAuthStore.getState().logout();
+
+      // Assert: queryClient.clear() was called
+      expect(mockQueryClient.clear).toHaveBeenCalled();
+      expect(mockQueryClient.clear).toHaveBeenCalledTimes(1);
     });
   });
 

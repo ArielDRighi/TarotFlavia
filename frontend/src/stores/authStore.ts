@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 import { toast } from '@/hooks/utils/useToast';
 import { apiClient } from '@/lib/api/axios-config';
 import { API_ENDPOINTS } from '@/lib/api/endpoints';
+import { getGlobalQueryClient } from '@/lib/providers/react-query-provider';
 import type {
   AuthUser,
   AuthStore,
@@ -103,6 +104,11 @@ export const useAuthStore = create<AuthStore>()(
           localStorage.removeItem('access_token');
           localStorage.removeItem('refresh_token');
         }
+
+        // Clear ALL React Query cache to prevent stale data contamination
+        // between different user sessions (especially PREMIUM → FREE transitions)
+        const queryClient = getGlobalQueryClient();
+        queryClient.clear();
 
         // Clear user state
         set({

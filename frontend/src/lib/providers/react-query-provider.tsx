@@ -43,6 +43,25 @@ function getQueryClient(): QueryClient {
   return browserQueryClient;
 }
 
+/**
+ * Get the global QueryClient instance
+ * Use this when you need to access QueryClient outside of React components
+ * (e.g., in Zustand stores, utility functions)
+ *
+ * @returns QueryClient instance
+ *
+ * @example
+ * ```typescript
+ * import { getGlobalQueryClient } from '@/lib/providers/react-query-provider';
+ *
+ * const queryClient = getGlobalQueryClient();
+ * queryClient.clear();
+ * ```
+ */
+export function getGlobalQueryClient(): QueryClient {
+  return getQueryClient();
+}
+
 interface ReactQueryProviderProps {
   children: ReactNode;
 }
