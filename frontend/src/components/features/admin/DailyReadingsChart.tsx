@@ -36,14 +36,9 @@ export function DailyReadingsChart({ data }: DailyReadingsChartProps) {
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={data}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis
-                dataKey="date"
-                tickFormatter={(value) => formatDateCompact(value)}
-              />
+              <XAxis dataKey="date" tickFormatter={(value) => formatDateCompact(value)} />
               <YAxis />
-              <Tooltip
-                labelFormatter={(value) => formatDateLocalized(value as string)}
-              />
+              <Tooltip labelFormatter={(value) => formatDateLocalized(value as string)} />
               <Line
                 type="monotone"
                 dataKey="count"

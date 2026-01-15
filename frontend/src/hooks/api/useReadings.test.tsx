@@ -583,7 +583,7 @@ describe('useReadings - Spreads Hooks', () => {
       expect(invalidateUserDataUtil.invalidateUserData).toHaveBeenCalledTimes(1);
     });
 
-    it('should invalidate readings queries on success', async () => {
+    it('should refetch readings queries on success for immediate UI update', async () => {
       const mockReading: ReadingDetail = {
         id: 1,
         userId: 1,
@@ -597,7 +597,7 @@ describe('useReadings - Spreads Hooks', () => {
       vi.mocked(readingsApi.createReading).mockResolvedValue(mockReading);
       vi.mocked(invalidateUserDataUtil.invalidateUserData).mockResolvedValue(undefined);
 
-      const invalidateQueriesSpy = vi.spyOn(queryClient, 'invalidateQueries');
+      const refetchQueriesSpy = vi.spyOn(queryClient, 'refetchQueries');
 
       const { result } = renderHook(() => useCreateReading(), { wrapper: Wrapper });
 
@@ -616,8 +616,9 @@ describe('useReadings - Spreads Hooks', () => {
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-      expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+      expect(refetchQueriesSpy).toHaveBeenCalledWith({
         queryKey: ['readings'],
+        type: 'active',
       });
     });
   });

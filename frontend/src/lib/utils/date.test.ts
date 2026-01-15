@@ -146,13 +146,7 @@ describe('date utilities', () => {
      * would show January 14 instead of January 15.
      */
     it('DATE-only strings should not shift dates due to timezone', () => {
-      const testCases = [
-        '2025-01-01',
-        '2025-01-15',
-        '2025-01-31',
-        '2025-06-15',
-        '2025-12-31',
-      ];
+      const testCases = ['2025-01-01', '2025-01-15', '2025-01-31', '2025-06-15', '2025-12-31'];
 
       for (const dateStr of testCases) {
         const parsed = parseDateString(dateStr);

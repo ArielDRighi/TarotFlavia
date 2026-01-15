@@ -762,65 +762,6 @@ describe('HistorialPage', () => {
       // First card after sorting by most recent is ID 2 (2025-12-02)
       expect(mockPush).toHaveBeenCalledWith('/historial/2');
     });
-
-    it('should show confirmation modal when Delete is clicked', async () => {
-      renderWithProviders(<HistorialPage />);
-
-      const readingCards = screen.getAllByTestId('reading-card');
-      const deleteButton = within(readingCards[0]).getByLabelText(/eliminar lectura/i);
-      await userEvent.click(deleteButton);
-
-      await waitFor(() => {
-        expect(screen.getByRole('dialog')).toBeInTheDocument();
-        expect(screen.getByText(/eliminar lectura/i)).toBeInTheDocument();
-      });
-    });
-
-    it('should call useDeleteReading when deletion is confirmed', async () => {
-      renderWithProviders(<HistorialPage />);
-
-      const readingCards = screen.getAllByTestId('reading-card');
-      const deleteButton = within(readingCards[0]).getByLabelText(/eliminar lectura/i);
-      await userEvent.click(deleteButton);
-
-      // Wait for modal to appear
-      await waitFor(() => {
-        expect(screen.getByRole('dialog')).toBeInTheDocument();
-      });
-
-      const confirmButton = screen.getByRole('button', { name: /confirmar/i });
-      await userEvent.click(confirmButton);
-
-      // First card after sorting by most recent is ID 2 (2025-12-02)
-      await waitFor(() => {
-        expect(mockDeleteReading).toHaveBeenCalledWith(
-          2,
-          expect.objectContaining({
-            onSuccess: expect.any(Function),
-            onError: expect.any(Function),
-          })
-        );
-      });
-    });
-
-    it('should close modal when Cancel is clicked', async () => {
-      renderWithProviders(<HistorialPage />);
-
-      const readingCards = screen.getAllByTestId('reading-card');
-      const deleteButton = within(readingCards[0]).getByLabelText(/eliminar lectura/i);
-      await userEvent.click(deleteButton);
-
-      await waitFor(() => {
-        expect(screen.getByRole('dialog')).toBeInTheDocument();
-      });
-
-      const cancelButton = screen.getByRole('button', { name: /cancelar/i });
-      await userEvent.click(cancelButton);
-
-      await waitFor(() => {
-        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-      });
-    });
   });
 
   // ===========================================================================

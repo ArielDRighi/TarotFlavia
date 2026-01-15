@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Image from 'next/image';
-import { Eye, Trash2, Layers } from 'lucide-react';
+import { Eye, Layers } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -10,7 +10,6 @@ import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ConfirmationModal } from '@/components/ui/confirmation-modal';
 import type { Reading, ReadingCard as ReadingCardType } from '@/types/reading.types';
 
 /**
@@ -23,8 +22,6 @@ export interface ReadingCardProps {
   cards?: ReadingCardType[];
   /** Callback when view button is clicked */
   onView: (id: number) => void;
-  /** Callback when delete is confirmed */
-  onDelete: (id: number) => void;
   /** Additional CSS classes */
   className?: string;
 }
@@ -55,13 +52,10 @@ export interface ReadingCardProps {
  * <ReadingCard
  *   reading={reading}
  *   onView={(id) => router.push(`/lecturas/${id}`)}
- *   onDelete={(id) => deleteReading(id)}
  * />
  * ```
  */
-export function ReadingCard({ reading, cards, onView, onDelete, className }: ReadingCardProps) {
-  const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState(false);
-
+export function ReadingCard({ reading, cards, onView, className }: ReadingCardProps) {
   // Prefer cardPreviews from reading (TASK-UI-002), fallback to cards prop
   const cardPreview = reading.cardPreviews?.[0] || cards?.[0];
   const hasCardThumbnail = cardPreview?.imageUrl;
@@ -78,14 +72,6 @@ export function ReadingCard({ reading, cards, onView, onDelete, className }: Rea
   const handleViewClick = React.useCallback(() => {
     onView(reading.id);
   }, [onView, reading.id]);
-
-  const handleDeleteClick = React.useCallback(() => {
-    setShowDeleteConfirmation(true);
-  }, []);
-
-  const handleConfirmDelete = React.useCallback(() => {
-    onDelete(reading.id);
-  }, [onDelete, reading.id]);
 
   return (
     <>
@@ -140,7 +126,7 @@ export function ReadingCard({ reading, cards, onView, onDelete, className }: Rea
           </div>
         </div>
 
-        {/* Actions - Minimal */}
+        {/* Actions - View only */}
         <div className="flex shrink-0 items-center gap-1">
           <Button
             variant="ghost"
@@ -151,29 +137,8 @@ export function ReadingCard({ reading, cards, onView, onDelete, className }: Rea
           >
             <Eye className="h-4 w-4" />
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={handleDeleteClick}
-            aria-label="Eliminar lectura"
-          >
-            <Trash2 className="text-destructive h-4 w-4" />
-          </Button>
         </div>
       </Card>
-
-      {/* Delete Confirmation Modal */}
-      <ConfirmationModal
-        open={showDeleteConfirmation}
-        onOpenChange={setShowDeleteConfirmation}
-        title="Eliminar lectura"
-        description="¿Estás seguro de que deseas eliminar esta lectura? Esta acción se puede deshacer desde la papelera."
-        confirmText="Confirmar"
-        cancelText="Cancelar"
-        variant="destructive"
-        onConfirm={handleConfirmDelete}
-      />
     </>
   );
 }

@@ -26,7 +26,7 @@ describe('Page Metadata Exports', () => {
         index: false,
         follow: true,
       });
-    });
+    }, 20000); // Aumentar timeout a 20s para imports dinámicos (especialmente en coverage mode)
   });
 
   describe('Layout Metadata', () => {

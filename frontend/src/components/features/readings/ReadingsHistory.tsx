@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Search, Layers, ChevronDown, Grid3x3, List, Sun } from 'lucide-react';
 import { startOfWeek, startOfMonth, isAfter, isSameDay } from 'date-fns';
 
-import { useMyReadings, useDeleteReading } from '@/hooks/api/useReadings';
+import { useMyReadings } from '@/hooks/api/useReadings';
 import { ReadingCard } from '@/components/features/readings/ReadingCard';
 import { SkeletonCard } from '@/components/ui/skeleton-card';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -135,23 +135,9 @@ export function ReadingsHistory() {
     refetch,
   } = useMyReadings(page, READINGS_PER_PAGE);
 
-  const { mutate: deleteReading } = useDeleteReading();
-
   // Handle view reading
   const handleViewReading = (id: number) => {
     router.push(`/historial/${id}`);
-  };
-
-  // Handle delete reading
-  const handleDeleteReading = (id: number) => {
-    deleteReading(id, {
-      onSuccess: () => {
-        // Refetch on success is handled by the hook
-      },
-      onError: () => {
-        // Error is handled by the hook's toast
-      },
-    });
   };
 
   // Handle pagination
@@ -347,12 +333,7 @@ export function ReadingsHistory() {
       {!isReadingsLoading && !isError && hasFilteredReadings && (
         <div data-testid="readings-list" className={listClasses}>
           {filteredReadings.map((reading) => (
-            <ReadingCard
-              key={reading.id}
-              reading={reading}
-              onView={handleViewReading}
-              onDelete={handleDeleteReading}
-            />
+            <ReadingCard key={reading.id} reading={reading} onView={handleViewReading} />
           ))}
         </div>
       )}
