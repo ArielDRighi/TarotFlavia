@@ -970,3 +970,73 @@ cd frontend && npm test -- useReadings.test --run
 **Después:** Implementar BUG-F-003 (10 minutos) → **TODOS LOS BUGS CRÍTICOS RESUELTOS** ✅
 
 **Total tiempo de fix crítico:** ~25 minutos
+
+---
+
+## 📋 Bugs Adicionales Descubiertos y Resueltos
+
+### BUG-CAP-001: Carta del día no se reseteaba para usuarios registrados ✅ COMPLETADO
+
+**Fecha:** 15 Enero 2026
+**Rama:** `bugfix/BUG-CAP-001-daily-card-capabilities-date-comparison`
+**Estado:** ✅ COMPLETADO
+
+**Descripción:** Usuarios registrados veían "límite alcanzado" para carta del día aunque su última carta era de ayer.
+
+**Síntomas:**
+- Usuario entra a /carta-del-dia
+- Modal de "límite alcanzado" aparece
+- En historial, última carta tiene fecha de ayer
+- El problema NO afectaba a usuarios anónimos
+
+**Causa Raíz:**
+
+En `UserCapabilitiesService.getCapabilities()`, la consulta usaba:
+```typescript
+// ❌ INCORRECTO - MoreThanOrEqual con Date object en columna DATE
+const today = new Date();
+today.setUTCHours(0, 0, 0, 0);
+readingDate: MoreThanOrEqual(today)
+```
+
+Esto causaba problemas porque:
+- La columna `reading_date` es tipo DATE (solo fecha: "2026-01-15")
+- Se comparaba con un `Date` object (timestamp: "2026-01-15T00:00:00.000Z")
+- PostgreSQL hacía conversión implícita inconsistente
+
+**Solución:**
+
+Usar `createQueryBuilder` con comparación de string, igual que el `CheckUsageLimitGuard`:
+```typescript
+// ✅ CORRECTO - String comparison para columnas DATE
+const todayStr = getTodayUTCDateString(); // "2026-01-15"
+await this.dailyReadingRepository
+  .createQueryBuilder('daily_reading')
+  .where('daily_reading.user_id = :userId', { userId })
+  .andWhere('daily_reading.reading_date = :date', { date: todayStr })
+  .getOne();
+```
+
+**Archivos modificados:**
+- `backend/tarot-app/src/modules/users/application/services/user-capabilities.service.ts`
+- `backend/tarot-app/src/modules/users/application/services/user-capabilities.service.spec.ts`
+
+**Tests agregados:**
+- "should allow daily card creation when last reading was yesterday"
+- "should use createQueryBuilder with string date comparison for DATE column"
+- "should block daily card creation when reading exists for today"
+
+**Validación:**
+- ✅ 17/17 tests unitarios pasando
+- ✅ 2224/2224 tests totales pasando
+- ✅ Tests e2e daily-reading pasando (21/21)
+- ✅ Tests e2e users pasando (63/63)
+- ✅ Lint, format, build exitosos
+- ✅ Validación de arquitectura exitosa
+
+**Documentación actualizada:**
+- `docs/USAGE_LIMITS_SYSTEM.md` - Agregada sección "BUG-CAP-001"
+
+**Regla importante para futuros desarrollos:**
+- Para columnas tipo DATE: usar `getTodayUTCDateString()` con igualdad de string
+- Para columnas tipo TIMESTAMP: usar `getStartOfTodayUTC()` con `MoreThanOrEqual`

@@ -350,8 +350,37 @@ describe('parseDateString', () => {
 1. El servidor está en timezone diferente al UTC
 2. La columna de fecha usa tipo incorrecto (TIMESTAMP vs DATE)
 3. La consulta no usa las funciones centralizadas
+4. **BUG-CAP-001 (resuelto):** Se usaba `MoreThanOrEqual(Date)` en columnas DATE
 
 **Solución:** Verificar que se usen `getTodayUTCDateString()` y `getStartOfTodayUTC()`.
+
+### 4. BUG-CAP-001: Carta del día no se reseteaba para usuarios registrados
+
+**Problema:** Usuarios registrados veían "límite alcanzado" para carta del día aunque su última carta era de ayer.
+
+**Causa:** En `UserCapabilitiesService.getCapabilities()`, la consulta usaba:
+```typescript
+// ❌ INCORRECTO - MoreThanOrEqual con Date object en columna DATE
+readingDate: MoreThanOrEqual(today) // today = Date object
+```
+
+Esto causaba problemas de comparación entre `Date` (TIMESTAMP) y columna `reading_date` (DATE).
+
+**Solución (2026-01-15):** Usar `createQueryBuilder` con comparación de string:
+```typescript
+// ✅ CORRECTO - String comparison para columnas DATE
+const todayStr = getTodayUTCDateString(); // "2026-01-15"
+await this.dailyReadingRepository
+  .createQueryBuilder('daily_reading')
+  .where('daily_reading.user_id = :userId', { userId })
+  .andWhere('daily_reading.reading_date = :date', { date: todayStr })
+  .getOne();
+```
+
+**Archivos afectados:**
+- `backend/tarot-app/src/modules/users/application/services/user-capabilities.service.ts`
+
+**Regla importante:** Para columnas tipo DATE siempre usar `getTodayUTCDateString()` con igualdad de string. Para columnas tipo TIMESTAMP usar `getStartOfTodayUTC()` con `MoreThanOrEqual`.
 
 ### 3. Usuario Anónimo Tiene Límite Incorrecto
 
