@@ -5,9 +5,9 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { ReadingCard } from './ReadingCard';
 import type { Reading, ReadingCard as ReadingCardType } from '@/types/reading.types';
 
-// Mock date-fns
-vi.mock('date-fns', () => ({
-  formatDistanceToNow: vi.fn(() => 'hace 2 días'),
+// Mock date utils
+vi.mock('@/lib/utils/date', () => ({
+  formatDateShort: vi.fn(() => '05/12/2025'),
 }));
 
 // Mock next/image
@@ -76,12 +76,13 @@ describe('ReadingCard', () => {
       expect(screen.getByText(reading.question)).toBeInTheDocument();
     });
 
-    it('should render the relative date', () => {
+    it('should render the date in short format', () => {
       const reading = createTestReading();
 
       render(<ReadingCard reading={reading} onView={mockOnView} />);
 
-      expect(screen.getByText('hace 2 días')).toBeInTheDocument();
+      // BUGFIX: Changed from relative time to short date format to avoid UTC issues
+      expect(screen.getByText('05/12/2025')).toBeInTheDocument();
     });
 
     it('should render the spread type badge in right section', () => {

@@ -3,10 +3,9 @@
 import * as React from 'react';
 import Image from 'next/image';
 import { Eye, Layers } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
 
 import { cn } from '@/lib/utils';
+import { formatDateShort } from '@/lib/utils/date';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -60,12 +59,10 @@ export function ReadingCard({ reading, cards, onView, className }: ReadingCardPr
   const cardPreview = reading.cardPreviews?.[0] || cards?.[0];
   const hasCardThumbnail = cardPreview?.imageUrl;
 
-  const relativeDate = React.useMemo(
-    () =>
-      formatDistanceToNow(new Date(reading.createdAt), {
-        addSuffix: true,
-        locale: es,
-      }),
+  // BUGFIX: Use formatDateShort instead of formatDistanceToNow to avoid UTC timezone issues
+  // that could show "in 3 hours" for recently created readings
+  const formattedDate = React.useMemo(
+    () => formatDateShort(reading.createdAt),
     [reading.createdAt]
   );
 
@@ -117,7 +114,7 @@ export function ReadingCard({ reading, cards, onView, className }: ReadingCardPr
             </p>
           )}
           <div className="flex items-center gap-2">
-            <span className="text-text-muted text-xs">{relativeDate}</span>
+            <span className="text-text-muted text-xs">{formattedDate}</span>
             {reading.spreadName && (
               <Badge data-testid="spread-badge" variant="secondary" className="px-1.5 py-0 text-xs">
                 {reading.spreadName}
