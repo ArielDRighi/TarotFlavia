@@ -610,7 +610,7 @@ export function useDeleteReading() {
  * Hook to fetch paginated list of user's readings
  * @param page - Page number (1-indexed)
  * @param limit - Number of items per page
- * 
+ *
  * NOTE (BUG-F-003): Uses 30s staleTime (overrides global 5min default)
  * Readings are frequently modified by users (create, delete, regenerate),
  * so a shorter staleTime ensures the UI updates within 30s of changes.
