@@ -9,6 +9,7 @@ import {
   HttpCode,
   HttpStatus,
   Body,
+  NotFoundException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -17,12 +18,16 @@ import {
   ApiBearerAuth,
   ApiQuery,
 } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../../auth/infrastructure/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../../auth/infrastructure/guards/optional-jwt-auth.guard';
 import { AIQuotaGuard } from '../../ai-usage/infrastructure/guards/ai-quota.guard';
 import { DailyReadingService } from './daily-reading.service';
+import { ShareTextGeneratorService } from '../readings/application/services/share-text-generator.service';
 import { DailyReadingResponseDto } from './dto/daily-reading-response.dto';
 import { DailyReadingHistoryDto } from './dto/daily-reading-history.dto';
 import { CreateAnonymousDailyReadingDto } from './dto/create-anonymous-daily-reading.dto';
+import { GenerateShareTextResponseDto } from '../readings/dto/generate-share-text-response.dto';
 import { AllowAnonymous } from '../../usage-limits/decorators/allow-anonymous.decorator';
 import {
   CheckUsageLimitGuard,
@@ -38,12 +43,15 @@ const DEFAULT_TAROTISTA_ID = 1;
 
 @ApiTags('Daily Card')
 @Controller('daily-reading')
-@UseGuards(JwtAuthGuard)
-@ApiBearerAuth('JWT-auth')
 export class DailyReadingController {
-  constructor(private readonly dailyReadingService: DailyReadingService) {}
+  constructor(
+    private readonly dailyReadingService: DailyReadingService,
+    private readonly shareTextGenerator: ShareTextGeneratorService,
+  ) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @UseInterceptors(IncrementUsageInterceptor)
   @CheckUsageLimit(UsageFeature.DAILY_CARD)
   @HttpCode(HttpStatus.CREATED)
@@ -99,6 +107,8 @@ export class DailyReadingController {
   }
 
   @Get('today')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Obtener carta del día de hoy',
@@ -148,6 +158,8 @@ export class DailyReadingController {
   }
 
   @Get('history')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Obtener historial de cartas del día',
@@ -189,6 +201,7 @@ export class DailyReadingController {
 
   @UseGuards(JwtAuthGuard, AIQuotaGuard)
   @Post('regenerate')
+  @ApiBearerAuth('JWT-auth')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Regenerar carta del día (solo premium)',
@@ -236,6 +249,75 @@ export class DailyReadingController {
       wasRegenerated: dailyReading.wasRegenerated,
       createdAt: dailyReading.createdAt,
     };
+  }
+
+  @UseGuards(OptionalJwtAuthGuard)
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
+  @Get('share-text')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Obtener texto formateado para compartir la carta del día',
+    description:
+      'Genera texto formateado con emojis para compartir la carta del día en redes sociales. Funciona para usuarios autenticados (FREE/PREMIUM) y anónimos (con fingerprint). El contenido varía según el plan del usuario.',
+  })
+  @ApiQuery({
+    name: 'fingerprint',
+    required: false,
+    type: String,
+    description: 'Fingerprint del usuario anónimo (opcional)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Texto de compartir generado exitosamente',
+    type: GenerateShareTextResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'No existe carta del día para hoy',
+  })
+  @ApiResponse({
+    status: 429,
+    description: 'Límite de rate limiting alcanzado (10 requests/minuto)',
+  })
+  async getDailyShareText(
+    @Request() req: { user?: { userId: number; plan?: string } },
+    @Query('fingerprint') fingerprint?: string,
+  ): Promise<GenerateShareTextResponseDto> {
+    let dailyReading;
+    let userPlan: 'anonymous' | 'free' | 'premium' = 'anonymous';
+
+    // Determinar si es usuario autenticado o anónimo
+    if (req.user) {
+      // Usuario autenticado
+      const userId = req.user.userId;
+      userPlan = (req.user.plan || 'free') as 'anonymous' | 'free' | 'premium';
+      dailyReading = await this.dailyReadingService.getTodayCard(userId);
+    } else if (fingerprint) {
+      // Usuario anónimo - buscar por fingerprint
+      userPlan = 'anonymous';
+      const todayStr = new Date().toISOString().split('T')[0];
+      dailyReading = await this.dailyReadingService.findOneByFingerprint(
+        fingerprint,
+        todayStr,
+      );
+    } else {
+      throw new NotFoundException(
+        'Se requiere autenticación o fingerprint para obtener la carta del día',
+      );
+    }
+
+    if (!dailyReading) {
+      throw new NotFoundException('No existe carta del día para hoy');
+    }
+
+    // Generar texto de compartir
+    const text = this.shareTextGenerator.generateShareText(
+      dailyReading,
+      userPlan,
+      'daily',
+    );
+
+    return { text };
   }
 }
 
