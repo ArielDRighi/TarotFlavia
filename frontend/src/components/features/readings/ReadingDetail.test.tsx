@@ -228,6 +228,13 @@ describe('ReadingDetail', () => {
 
       await waitFor(() => {
         expect(mockMutateAsync).toHaveBeenCalledWith(1);
+        // Verifica que la URL copiada sea correcta (sin /lecturas/)
+        expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+          expect.stringContaining('/compartida/share-123')
+        );
+        expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+          expect.not.stringContaining('/lecturas/compartida/')
+        );
       });
     });
 

@@ -290,7 +290,7 @@ export function ReadingDetail({ readingId }: ReadingDetailProps) {
 
     try {
       const result = await shareReadingAsync(reading.id);
-      const shareUrl = `${window.location.origin}/lecturas/compartida/${result.shareToken}`;
+      const shareUrl = `${window.location.origin}/compartida/${result.shareToken}`;
       await navigator.clipboard.writeText(shareUrl);
       toast.success('Link copiado al portapapeles');
     } catch {
