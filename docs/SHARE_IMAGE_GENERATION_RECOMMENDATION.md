@@ -925,12 +925,13 @@ Esta tarea consistió en **verificación** ya que todos los tests unitarios fuer
 
 ## 📋 FASE 2: Mejoras de UX Compartir (Opcional - Post-MVP)
 
-### **TASK-SHARE-011: Añadir Tracking de Compartidos**
+### **TASK-SHARE-011: Añadir Tracking de Compartidos** ✅ COMPLETADA
 
 **Prioridad:** 🟡 BAJA  
 **Estimación:** 2 horas  
 **Dependencias:** TASK-SHARE-003  
-**Tipo:** 🔧 Backend
+**Tipo:** 🔧 Backend  
+**Estado:** ✅ Completada (2026-01-15)
 
 #### 📋 Descripción
 
@@ -938,16 +939,25 @@ Añadir contador de veces que se ha compartido cada lectura.
 
 #### ✅ Tareas específicas
 
-- [ ] Añadir columna `shareCount` a entidad `TarotReading`
-- [ ] Crear migración `AddShareCountToReading`
-- [ ] Incrementar contador en endpoint `GET /readings/:id/share-text`
-- [ ] Exponer campo en respuesta de lectura (opcional)
+- [x] Añadir columna `shareCount` a entidad `TarotReading`
+- [x] Crear migración `AddShareCountToReading`
+- [x] Incrementar contador en endpoint `GET /readings/:id/share-text`
+- [x] Exponer campo en respuesta de lectura (opcional)
 
 #### 🎯 Criterios de aceptación
 
 - ✓ Migración ejecuta sin errores
 - ✓ Contador incrementa al compartir
 - ✓ No afecta performance de la aplicación
+
+#### 💡 Implementación Realizada
+
+- Campo `shareCount` añadido a entidad `TarotReading` con default 0
+- Migración `1770700000000-AddShareCountToReading.ts` creada y ejecutada
+- Método `incrementShareCount` añadido al orchestrator y repositorio
+- Contador se incrementa automáticamente en `GET /readings/:id/share-text`
+- Tests unitarios y e2e actualizados y pasando
+- Commit: `f7a0941` - feat(readings): add shareCount tracking to readings
 
 ---
 
