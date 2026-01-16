@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/utils/useToast';
+import { shouldUseNativeShare } from '@/lib/utils/device';
 
 /**
  * ShareButton Props
@@ -71,26 +72,25 @@ export function ShareButton({
     setIsSharing(true);
 
     try {
-      // Check if Web Share API is available (typically mobile)
-      if (navigator.share) {
+      // Solo usar Web Share API en móvil (donde muestra WhatsApp, Instagram, etc.)
+      // En PC/Windows: copiar directo al portapapeles (el diálogo de Windows no es útil)
+      if (shouldUseNativeShare()) {
         await navigator.share({
           text,
           title,
           url,
         });
-
         toast.success('¡Compartido!');
         onSuccess?.();
       } else {
-        // Fallback: Copy to clipboard (typically desktop)
+        // PC/Desktop: Copiar al portapapeles directamente
         await navigator.clipboard.writeText(text);
-        toast.success('Texto copiado');
+        toast.success('Texto copiado al portapapeles');
         onSuccess?.();
       }
     } catch (error) {
       // Don't show error if user cancelled share (AbortError)
       if (error instanceof DOMException && error.name === 'AbortError') {
-        // User cancelled - do nothing
         setIsSharing(false);
         return;
       }

@@ -51,10 +51,12 @@ export class ShareTextGeneratorService {
 
     // Interpretación o significado
     if (userPlan === 'premium' && interpretation) {
-      const truncated = this.truncateText(interpretation, 200);
+      // Premium: interpretación completa
+      const truncated = this.truncateText(interpretation, 5000);
       text += `💭 Interpretación personalizada:\n"${truncated}"\n\n`;
     } else {
-      const truncated = this.truncateText(meaning, 150);
+      // Free/Anonymous: significado básico
+      const truncated = this.truncateText(meaning, 5000);
       text += `${truncated}\n\n`;
     }
 
@@ -97,7 +99,8 @@ export class ShareTextGeneratorService {
 
     // Interpretación o significados por posición
     if (userPlan === 'premium' && interpretation) {
-      const truncated = this.truncateText(interpretation, 200);
+      // Premium: interpretación completa
+      const truncated = this.truncateText(interpretation, 5000);
       text += `💭 Interpretación personalizada:\n"${truncated}"\n\n`;
     } else {
       // FREE/ANONYMOUS: Significados de cartas por posición
@@ -110,7 +113,7 @@ export class ShareTextGeneratorService {
         const meaning = cp.isReversed
           ? card.meaningReversed
           : card.meaningUpright;
-        const truncated = this.truncateText(meaning, 80);
+        const truncated = this.truncateText(meaning, 5000);
         text += `${cp.position}: ${truncated}\n`;
       });
       text += '\n';

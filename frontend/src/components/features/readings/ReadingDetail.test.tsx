@@ -293,7 +293,7 @@ describe('ReadingDetail', () => {
         '🌟 Mi Lectura de Tarot en Auguria\n\n❓ ¿Qué me depara el futuro?\n\n🃏 El Mago, La Emperatriz ↓';
 
       vi.mocked(useShareTextModule.useReadingShareText).mockReturnValue({
-        data: { shareText: mockShareText },
+        data: { text: mockShareText },
         isLoading: false,
         isError: false,
         error: null,

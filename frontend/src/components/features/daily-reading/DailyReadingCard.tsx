@@ -2,12 +2,15 @@
 
 import * as React from 'react';
 import Image from 'next/image';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, Share2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
 import { cn, formatDateFull } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { toast } from '@/hooks/utils/useToast';
+import { shouldUseNativeShare } from '@/lib/utils/device';
 import type { DailyReadingHistoryItem } from '@/types';
 
 /**
@@ -29,7 +32,7 @@ export interface DailyReadingCardProps {
  * Self-contained design - shows all relevant info without needing navigation.
  *
  * Layout (vertical with header):
- * - Header: Thumbnail + Date + Card name + Badges
+ * - Header: Thumbnail + Date + Card name + Badges + Share button
  * - Body: Full interpretation text (rendered as markdown)
  *
  * Features:
@@ -37,6 +40,7 @@ export interface DailyReadingCardProps {
  * - Date in Spanish format (e.g., "Lunes 2 de Diciembre")
  * - Reversed indicator badge
  * - Regenerated badge when applicable
+ * - Share button (fetches text from backend)
  * - Full interpretation (rendered as markdown)
  * - Subtle hover effect
  *
@@ -47,6 +51,47 @@ export interface DailyReadingCardProps {
  */
 export function DailyReadingCard({ reading, className }: DailyReadingCardProps) {
   const formattedDate = formatDateFull(reading.readingDate);
+  const [isSharing, setIsSharing] = React.useState(false);
+
+  const handleShare = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsSharing(true);
+
+    try {
+      // For historical readings, fetch share text from backend using reading ID
+      // Note: Backend doesn't have endpoint for historical daily readings by ID yet,
+      // so we generate the text locally using the data we have
+      const cardName = `${reading.cardName}${reading.isReversed ? ' (Invertida)' : ''}`;
+      const content = reading.interpretationSummary;
+
+      const shareText = `🌟 Carta del Día en Auguria
+
+🃏 ${cardName}
+
+${content}
+
+━━━━━━━━━━━━━━━━━━
+✨ Descubre tu carta gratis:
+auguriatarot.com`;
+
+      // Solo usar Web Share API en móvil, en PC copiar al portapapeles
+      if (shouldUseNativeShare()) {
+        await navigator.share({ text: shareText });
+        toast.success('¡Compartido!');
+      } else {
+        await navigator.clipboard.writeText(shareText);
+        toast.success('Texto copiado al portapapeles');
+      }
+    } catch (error) {
+      // Don't show error if user cancelled share
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        return;
+      }
+      toast.error('Error al compartir');
+    } finally {
+      setIsSharing(false);
+    }
+  };
 
   return (
     <Card
@@ -61,7 +106,7 @@ export function DailyReadingCard({ reading, className }: DailyReadingCardProps) 
         className
       )}
     >
-      {/* Header: Thumbnail + Info */}
+      {/* Header: Thumbnail + Info + Share Button */}
       <div className="flex flex-row items-center gap-3">
         {/* Thumbnail */}
         <div className="bg-muted flex h-16 w-12 shrink-0 items-center justify-center overflow-hidden rounded-md">
@@ -98,6 +143,18 @@ export function DailyReadingCard({ reading, className }: DailyReadingCardProps) 
           {/* Card Name */}
           <span className="text-text-primary text-sm font-medium">{reading.cardName}</span>
         </div>
+
+        {/* Share Button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleShare}
+          disabled={isSharing}
+          className="shrink-0"
+          aria-label="Compartir carta"
+        >
+          <Share2 className="h-4 w-4" />
+        </Button>
       </div>
 
       {/* Full Interpretation */}

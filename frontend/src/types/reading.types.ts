@@ -256,9 +256,10 @@ export interface ShareReadingResponse {
 
 /**
  * Response from fetching share text for a reading or daily reading
+ * Note: Backend returns { text: string } from GenerateShareTextResponseDto
  */
 export interface ShareTextResponse {
-  shareText: string;
+  text: string;
 }
 
 /**

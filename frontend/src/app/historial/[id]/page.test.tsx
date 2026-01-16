@@ -186,7 +186,7 @@ describe('ReadingDetailPage', () => {
     } as unknown as ReturnType<typeof useReadingsModule.useShareReading>);
 
     vi.mocked(useShareTextModule.useReadingShareText).mockReturnValue({
-      data: { shareText: 'Mock share text' },
+      data: { text: 'Mock share text' },
       isLoading: false,
       isError: false,
       error: null,

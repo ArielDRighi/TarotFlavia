@@ -10,8 +10,10 @@ import {
   usePredefinedQuestions,
   useCreateReading,
   useRegenerateInterpretation,
-  useShareReading,
 } from '@/hooks/api/useReadings';
+import { getShareText } from '@/lib/api/readings-api';
+import { toast } from '@/hooks/utils/useToast';
+import { shouldUseNativeShare } from '@/lib/utils/device';
 import { useAuthStore } from '@/stores/authStore';
 import { useUserPlanFeatures } from '@/hooks/utils/useUserPlanFeatures';
 import { useUserCapabilities } from '@/hooks/api/useUserCapabilities';
@@ -254,7 +256,7 @@ export function ReadingExperience({
   const { mutateAsync: createReading } = useCreateReading();
   const { mutate: regenerateInterpretation, isPending: isRegenerating } =
     useRegenerateInterpretation();
-  const { mutate: shareReading, isPending: isSharing } = useShareReading();
+  const [isSharing, setIsSharing] = useState(false);
 
   // State
   const [state, setState] = useState<ExperienceState>('selecting');
@@ -417,10 +419,35 @@ export function ReadingExperience({
     regenerateInterpretation(readingResult.id);
   }, [readingResult, regenerateInterpretation]);
 
-  const handleShare = useCallback(() => {
+  const handleShare = useCallback(async () => {
     if (!readingResult) return;
-    shareReading(readingResult.id);
-  }, [readingResult, shareReading]);
+
+    setIsSharing(true);
+    try {
+      const data = await getShareText(readingResult.id);
+      const shareText = data.text;
+
+      // Solo usar Web Share API en móvil, en PC copiar al portapapeles
+      if (shouldUseNativeShare()) {
+        await navigator.share({
+          text: shareText,
+          title: 'Mi Lectura de Tarot en Auguria',
+        });
+        toast.success('¡Compartido!');
+      } else {
+        await navigator.clipboard.writeText(shareText);
+        toast.success('Texto copiado al portapapeles');
+      }
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        return;
+      }
+      console.error('Error sharing reading:', error);
+      toast.error('Error al compartir');
+    } finally {
+      setIsSharing(false);
+    }
+  }, [readingResult]);
 
   const handleNewReading = useCallback(() => {
     router.push('/ritual');

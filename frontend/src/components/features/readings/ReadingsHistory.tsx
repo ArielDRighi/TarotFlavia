@@ -7,6 +7,8 @@ import { Search, Layers, ChevronDown, Grid3x3, List, Sun } from 'lucide-react';
 import { startOfWeek, startOfMonth, isAfter, isSameDay } from 'date-fns';
 
 import { useMyReadings } from '@/hooks/api/useReadings';
+import { getShareText } from '@/lib/api/readings-api';
+import { shouldUseNativeShare } from '@/lib/utils/device';
 import { ReadingCard } from '@/components/features/readings/ReadingCard';
 import { SkeletonCard } from '@/components/ui/skeleton-card';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -144,32 +146,21 @@ export function ReadingsHistory() {
   // Handle share reading (TASK-SHARE-009)
   const handleShareReading = React.useCallback(async (readingId: number) => {
     try {
-      // Fetch share text from backend
-      const response = await fetch(`/api/v1/readings/${readingId}/share-text`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to get share text');
-      }
-
-      const data = await response.json();
+      // Fetch share text from backend using API function
+      const data = await getShareText(readingId);
       const shareText = data.text;
 
-      // Try Web Share API first (mobile)
-      if (navigator.share) {
+      // Solo usar Web Share API en móvil, en PC copiar al portapapeles
+      if (shouldUseNativeShare()) {
         await navigator.share({
           text: shareText,
           title: 'Mi Lectura de Tarot en Auguria',
-          url: 'https://auguriatarot.com',
         });
         toast.success('¡Compartido!');
       } else {
-        // Fallback: Copy to clipboard (desktop)
+        // PC/Desktop: Copiar al portapapeles directamente
         await navigator.clipboard.writeText(shareText);
-        toast.success('Texto copiado');
+        toast.success('Texto copiado al portapapeles');
       }
     } catch (error) {
       // Don't show error if user cancelled share

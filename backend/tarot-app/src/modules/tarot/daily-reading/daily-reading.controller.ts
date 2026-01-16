@@ -24,6 +24,7 @@ import { OptionalJwtAuthGuard } from '../../auth/infrastructure/guards/optional-
 import { AIQuotaGuard } from '../../ai-usage/infrastructure/guards/ai-quota.guard';
 import { DailyReadingService } from './daily-reading.service';
 import { ShareTextGeneratorService } from '../readings/application/services/share-text-generator.service';
+import { DailyReading } from './entities/daily-reading.entity';
 import { DailyReadingResponseDto } from './dto/daily-reading-response.dto';
 import { DailyReadingHistoryDto } from './dto/daily-reading-history.dto';
 import { CreateAnonymousDailyReadingDto } from './dto/create-anonymous-daily-reading.dto';
@@ -283,7 +284,7 @@ export class DailyReadingController {
     @Request() req: { user?: { userId: number; plan?: string } },
     @Query('fingerprint') fingerprint?: string,
   ): Promise<GenerateShareTextResponseDto> {
-    let dailyReading: DailyReadingResponseDto | null;
+    let dailyReading: DailyReading | null;
     let userPlan: 'anonymous' | 'free' | 'premium' = 'anonymous';
 
     // Determinar si es usuario autenticado o anónimo

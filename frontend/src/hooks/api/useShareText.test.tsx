@@ -62,7 +62,7 @@ describe('useReadingShareText', () => {
   });
 
   it('should fetch share text for a reading', async () => {
-    const mockShareText = { shareText: 'Mi lectura del tarot 🔮\n\nPregunta...' };
+    const mockShareText = { text: 'Mi lectura del tarot 🔮\n\nPregunta...' };
     vi.mocked(readingsApi.getShareText).mockResolvedValue(mockShareText);
 
     const { result } = renderHook(() => useReadingShareText(1), {
@@ -113,8 +113,8 @@ describe('useReadingShareText', () => {
   });
 
   it('should refetch when readingId changes', async () => {
-    const mockShareText1 = { shareText: 'Lectura 1' };
-    const mockShareText2 = { shareText: 'Lectura 2' };
+    const mockShareText1 = { text: 'Lectura 1' };
+    const mockShareText2 = { text: 'Lectura 2' };
     vi.mocked(readingsApi.getShareText).mockResolvedValueOnce(mockShareText1);
     vi.mocked(readingsApi.getShareText).mockResolvedValueOnce(mockShareText2);
 
@@ -154,7 +154,7 @@ describe('useDailyShareText', () => {
   });
 
   it('should fetch share text for daily reading', async () => {
-    const mockShareText = { shareText: 'Mi carta del día 🌟\n\nCarta...' };
+    const mockShareText = { text: 'Mi carta del día 🌟\n\nCarta...' };
     vi.mocked(dailyReadingApi.getDailyShareText).mockResolvedValue(mockShareText);
 
     const { result } = renderHook(() => useDailyShareText(), {

@@ -195,7 +195,7 @@ export function DailyCardExperience() {
    * Get share text - prioritize backend, fallback to local
    * TASK-SHARE-007: ShareButton integration with backend text + local fallback
    */
-  const shareText = shareTextData?.shareText || generateFallbackShareText();
+  const shareText = shareTextData?.text || generateFallbackShareText();
 
   /**
    * Handle history navigation
@@ -362,21 +362,24 @@ export function DailyCardExperience() {
             </div>
           )}
 
-          {/* Action Buttons (only for authenticated users with interpretation) */}
-          {isAuthenticated && currentReading?.interpretation && (
+          {/* Share Button - available for all users with a reading */}
+          {currentReading && (
             <div className="flex flex-wrap justify-center gap-3">
               <ShareButton text={shareText} title="Mi Carta del Día en Auguria" variant="outline">
                 Compartir mensaje
               </ShareButton>
 
-              <Button
-                variant="outline"
-                onClick={handleViewHistory}
-                aria-label="Ver historial de cartas"
-              >
-                <History className="h-4 w-4" />
-                Ver historial
-              </Button>
+              {/* History button - only for authenticated users */}
+              {isAuthenticated && (
+                <Button
+                  variant="outline"
+                  onClick={handleViewHistory}
+                  aria-label="Ver historial de cartas"
+                >
+                  <History className="h-4 w-4" />
+                  Ver historial
+                </Button>
+              )}
             </div>
           )}
         </div>
