@@ -62,6 +62,14 @@ export class User {
   profilePicture: string;
 
   @ApiProperty({
+    example: '1990-05-15',
+    description: 'Fecha de nacimiento del usuario (formato: YYYY-MM-DD)',
+    nullable: true,
+  })
+  @Column({ type: 'date', nullable: true })
+  birthDate: Date | null;
+
+  @ApiProperty({
     example: false,
     description: 'Indica si el usuario tiene permisos de administrador',
   })

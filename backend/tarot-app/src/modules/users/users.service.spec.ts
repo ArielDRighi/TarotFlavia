@@ -614,4 +614,86 @@ describe('UsersService', () => {
       );
     });
   });
+
+  describe('birthDate field', () => {
+    it('should create user without birthDate', async () => {
+      const createUserDto = {
+        email: 'test@example.com',
+        name: 'Test User',
+        password: 'password123',
+      };
+
+      const mockUser = {
+        id: 1,
+        ...createUserDto,
+        birthDate: null,
+        roles: [UserRole.CONSUMER],
+        plan: UserPlan.FREE,
+      } as User;
+
+      mockUserRepository.findOne.mockResolvedValue(null); // No existing user
+      mockUserRepository.create.mockReturnValue(mockUser);
+      mockUserRepository.save.mockResolvedValue(mockUser);
+
+      const result = await service.create(createUserDto);
+
+      expect(result.birthDate).toBeNull();
+    });
+
+    it('should create user with valid birthDate', async () => {
+      const birthDateString = '1990-05-15';
+      const createUserDto = {
+        email: 'test2@example.com',
+        name: 'Test User',
+        password: 'password123',
+        birthDate: birthDateString,
+      };
+
+      const mockUser = {
+        id: 1,
+        email: createUserDto.email,
+        name: createUserDto.name,
+        password: createUserDto.password,
+        birthDate: new Date(birthDateString),
+        roles: [UserRole.CONSUMER],
+        plan: UserPlan.FREE,
+      } as User;
+
+      mockUserRepository.findOne.mockResolvedValue(null); // No existing user
+      mockUserRepository.create.mockReturnValue(mockUser);
+      mockUserRepository.save.mockResolvedValue(mockUser);
+
+      const result = await service.create(createUserDto);
+
+      // La fecha se convierte a Date en la base de datos
+      expect(result.birthDate).toEqual(new Date(birthDateString));
+    });
+
+    it('should update user birthDate', async () => {
+      const birthDateString = '1990-05-15';
+      const existingUser = {
+        id: 1,
+        email: 'test@example.com',
+        name: 'Test User',
+        birthDate: null,
+        password: 'hashedpassword',
+      } as User;
+
+      mockUserRepository.findOne.mockResolvedValue(existingUser);
+      mockUserRepository.save.mockResolvedValue({
+        ...existingUser,
+        birthDate: birthDateString as unknown as Date, // TypeORM manejará la conversión
+      });
+
+      const result = await service.update(1, { birthDate: birthDateString });
+
+      // Verificar que se llamó save con el birthDate correcto
+      expect(mockUserRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({
+          birthDate: birthDateString,
+        }),
+      );
+      expect(result).toBeDefined();
+    });
+  });
 });
