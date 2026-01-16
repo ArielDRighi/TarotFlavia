@@ -50,20 +50,32 @@ describe('fingerprint utils', () => {
     });
 
     it('should generate unique fingerprints for different sessions', async () => {
-      // First session
-      const fingerprint1 = await getSessionFingerprint();
+      // Mock Date.now() to ensure different timestamps
+      const originalDateNow = Date.now;
+      let callCount = 0;
 
-      // Simulate new session (clear storage)
-      sessionStorage.clear();
+      Date.now = vi.fn(() => {
+        callCount++;
+        // Return different timestamps for each call (at least 10ms apart)
+        return originalDateNow() + callCount * 10;
+      });
 
-      // Wait 1ms to ensure different timestamp seed
-      await new Promise((resolve) => setTimeout(resolve, 1));
+      try {
+        // First session
+        const fingerprint1 = await getSessionFingerprint();
 
-      // Second session (new fingerprint generated)
-      const fingerprint2 = await getSessionFingerprint();
+        // Simulate new session (clear storage)
+        sessionStorage.clear();
 
-      // Different sessions should have different fingerprints
-      expect(fingerprint1).not.toBe(fingerprint2);
+        // Second session (new fingerprint generated with different timestamp)
+        const fingerprint2 = await getSessionFingerprint();
+
+        // Different sessions should have different fingerprints
+        expect(fingerprint1).not.toBe(fingerprint2);
+      } finally {
+        // Restore original Date.now
+        Date.now = originalDateNow;
+      }
     });
 
     it('should include user agent in fingerprint calculation', async () => {
