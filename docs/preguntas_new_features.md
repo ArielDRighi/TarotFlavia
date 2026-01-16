@@ -946,9 +946,19 @@ export class CacheCleanupService {
 
 ---
 
-#### 5. Ejemplo con Opciones: UsageLimitsResetService
+#### 5. ⚠️ UsageLimitsResetService (OBSOLETO - Solo Referencia Histórica)
+
+> **IMPORTANTE:** Este servicio ya **NO existe** en el código actual.
+> Según `docs/USAGE_LIMITS_SYSTEM.md`, el sistema de límites **NO usa cron jobs**.
+> Los límites se resetean automáticamente mediante consultas que solo cuentan usos del día actual:
+> - `DAILY_CARD`: `reading_date = TODAY` (columna DATE)
+> - `TAROT_READING`: `created_at >= START_OF_TODAY` (columna TIMESTAMP)
+
+**Sistema anterior (OBSOLETO):**
 
 ```typescript
+// ❌ Este código ya NO se usa - Solo documentado como referencia histórica
+
 @Injectable()
 export class UsageLimitsResetService {
   private readonly logger = new Logger(UsageLimitsResetService.name);
@@ -1053,7 +1063,10 @@ CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_NOON      // "0 0 12 1 * *"
 **Timeline de ejecución diaria:**
 
 ```
-00:00 UTC  ├─ UsageLimitsResetService (limpieza de límites antiguos)
+⚠️ NOTA: UsageLimitsResetService ya NO existe (ver docs/USAGE_LIMITS_SYSTEM.md)
+           Los límites se resetean automáticamente mediante consultas dinámicas
+           que solo cuentan usos del día actual (NO necesitan cron job)
+
 00:00 UTC  ├─ AIQuotaService (reset mensual de cuotas)
 00:00 UTC  └─ AIProviderCostService (actualización precios)
            │
@@ -1260,6 +1273,62 @@ export class AppModule {}
    - ✅ Logs claros con timestamps
    - ✅ Conteo de éxitos/fallos
    - ✅ Considerar integrar con servicio de alertas (ej: Sentry)
+
+---
+
+### 📊 Resumen: Cron Jobs Activos vs Obsoletos
+
+#### ✅ **Cron Jobs ACTIVOS** (6 servicios):
+
+| Servicio | Horario | Propósito |
+|----------|---------|-----------|
+| **TokenCleanupService** | 03:00 UTC | Limpia tokens expirados (refresh + password reset) |
+| **CacheCleanupService** | 03:00 UTC, Semanal, Cada 6h | Limpia cachés expirados/poco usados, logging de stats |
+| **ReadingsCleanupService** | 04:00 UTC | Limpieza de lecturas eliminadas (soft-delete) |
+| **DailyReadingCleanupService** | 05:00 UTC | Limpieza de lecturas diarias antiguas |
+| **AIQuotaService** | 00:00 UTC (mensual) | Reset mensual de cuotas de AI |
+| **AIProviderCostService** | 00:00 UTC | Actualización de precios de AI providers |
+
+---
+
+#### ❌ **Cron Jobs OBSOLETOS** (NO existen en código actual):
+
+| Servicio Obsoleto | Razón | Sistema Actual |
+|-------------------|-------|----------------|
+| ~~**UsageLimitsResetService**~~ | Los límites NO necesitan reseteo explícito | `CheckUsageLimitGuard` cuenta dinámicamente:<br>• `DAILY_CARD`: `reading_date = TODAY`<br>• `TAROT_READING`: `created_at >= START_OF_TODAY` |
+
+**📖 Referencia completa:** [`docs/USAGE_LIMITS_SYSTEM.md`](../USAGE_LIMITS_SYSTEM.md)
+
+**Ventajas del sistema actual sin cron job de límites:**
+- ✅ No depende de cron jobs → **menos puntos de fallo**
+- ✅ Reseteo instantáneo a las 00:00 UTC (no espera ejecución de job)
+- ✅ No hay tabla `usage_limits` extra que mantener
+- ✅ Consultas más simples: `WHERE reading_date = '2026-01-16'`
+- ✅ Compatible con usuarios anónimos (fingerprint)
+- ✅ Sin riesgo de que falle el cron y los límites no se reseteen
+
+**Cómo funciona el reseteo automático:**
+
+```typescript
+// En CheckUsageLimitGuard - Se ejecuta en CADA request
+
+// Para DAILY_CARD (columna reading_date tipo DATE)
+const today = getTodayUTCDateString(); // "2026-01-16"
+const count = await dailyReadingRepository
+  .where('reading_date = :today', { today })  // Solo cuenta HOY
+  .getCount();
+
+// Para TAROT_READING (columna created_at tipo TIMESTAMP)  
+const startOfDay = getStartOfTodayUTC(); // "2026-01-16T00:00:00.000Z"
+const count = await readingRepository
+  .where('created_at >= :startOfDay', { startOfDay })  // Solo últimas 24h
+  .getCount();
+
+// Cuando el día cambia de 2026-01-16 → 2026-01-17:
+// - Las consultas automáticamente cuentan 0 (nuevo día)
+// - El usuario puede crear lecturas nuevamente
+// - Sin necesidad de cron job que "limpie" nada
+```
 
 ---
 
