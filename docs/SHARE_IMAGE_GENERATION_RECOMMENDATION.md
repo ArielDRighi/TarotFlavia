@@ -805,29 +805,52 @@ Actualizar ReadingDetail para usar ShareButton con opción de compartir texto fo
 
 ---
 
-### **TASK-SHARE-009: Añadir Botón Compartir en ReadingsHistory**
+### **TASK-SHARE-009: Añadir Botón Compartir en ReadingsHistory** ✅
 
 **Prioridad:** 🟠 MEDIA  
 **Estimación:** 2 horas  
 **Dependencias:** TASK-SHARE-005  
-**Tipo:** 🎨 Frontend
+**Tipo:** 🎨 Frontend  
+**Estado:** ✅ **COMPLETADA** (15 Enero 2026)
 
 #### 📋 Descripción
 
 Añadir botón de compartir rápido en cada card del historial de lecturas.
 
-#### ✅ Tareas específicas
+#### ✅ Tareas específicas - TODAS COMPLETADAS
 
-- [ ] Modificar `ReadingCard.tsx` o el componente de card en historial
-- [ ] Añadir icono de compartir (Share2 de lucide-react)
-- [ ] Implementar compartir rápido (texto o link)
-- [ ] Evitar que el click en compartir navegue al detalle
+- [x] Modificar `ReadingCard.tsx` para incluir botón compartir
+- [x] Añadir icono de compartir (Share2 de lucide-react)
+- [x] Implementar compartir rápido (texto del backend)
+- [x] Evitar que el click en compartir navegue al detalle
 
-#### 🎯 Criterios de aceptación
+#### 🎯 Criterios de aceptación - CUMPLIDOS
 
-- ✓ Cada card tiene botón de compartir
-- ✓ Click en compartir no navega al detalle
-- ✓ Compartir funciona correctamente
+- ✅ Cada card tiene botón de compartir
+- ✅ Click en compartir no navega al detalle
+- ✅ Compartir funciona correctamente con Web Share API + clipboard fallback
+
+#### 📊 Resultado Final
+
+**Tests:**
+
+- ReadingCard: 22 tests passing (incluye 6 nuevos tests de share button)
+- ReadingsHistory: 20 tests passing (sin regresiones)
+- Total suite: 1905 tests passing
+
+**Archivos modificados:**
+
+- `frontend/src/components/features/readings/ReadingCard.tsx` - Añadido botón compartir
+- `frontend/src/components/features/readings/ReadingCard.test.tsx` - 6 tests nuevos
+- `frontend/src/components/features/readings/ReadingsHistory.tsx` - Handler `handleShareReading`
+
+**Funcionalidad implementada:**
+
+- Botón Share2 icon en cada ReadingCard
+- Handler `handleShareReading` que fetch texto del backend (`/api/v1/readings/:id/share-text`)
+- Web Share API con fallback a clipboard
+- Event propagation prevented (no navega al detalle)
+- Keyboard accessible (tab entre botones)
 
 ---
 

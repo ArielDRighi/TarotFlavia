@@ -18,6 +18,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { toast } from '@/hooks/utils/useToast';
 import type { Reading } from '@/types';
 
 // Constants
@@ -139,6 +140,47 @@ export function ReadingsHistory() {
   const handleViewReading = (id: number) => {
     router.push(`/historial/${id}`);
   };
+
+  // Handle share reading (TASK-SHARE-009)
+  const handleShareReading = React.useCallback(async (readingId: number) => {
+    try {
+      // Fetch share text from backend
+      const response = await fetch(`/api/v1/readings/${readingId}/share-text`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get share text');
+      }
+
+      const data = await response.json();
+      const shareText = data.text;
+
+      // Try Web Share API first (mobile)
+      if (navigator.share) {
+        await navigator.share({
+          text: shareText,
+          title: 'Mi Lectura de Tarot en Auguria',
+          url: 'https://auguriatarot.com',
+        });
+        toast.success('¡Compartido!');
+      } else {
+        // Fallback: Copy to clipboard (desktop)
+        await navigator.clipboard.writeText(shareText);
+        toast.success('Texto copiado');
+      }
+    } catch (error) {
+      // Don't show error if user cancelled share
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        return;
+      }
+
+      console.error('Error sharing reading:', error);
+      toast.error('Error al compartir');
+    }
+  }, []);
 
   // Handle pagination
   const handlePreviousPage = () => {
@@ -333,7 +375,12 @@ export function ReadingsHistory() {
       {!isReadingsLoading && !isError && hasFilteredReadings && (
         <div data-testid="readings-list" className={listClasses}>
           {filteredReadings.map((reading) => (
-            <ReadingCard key={reading.id} reading={reading} onView={handleViewReading} />
+            <ReadingCard
+              key={reading.id}
+              reading={reading}
+              onView={handleViewReading}
+              onShare={handleShareReading}
+            />
           ))}
         </div>
       )}
