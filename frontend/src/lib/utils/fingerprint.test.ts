@@ -1,28 +1,53 @@
 /**
  * Tests for fingerprint utility
  *
- * Testing session fingerprint generation for anonymous tracking
+ * Testing fingerprint generation for anonymous tracking across browser tabs
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { getSessionFingerprint } from './fingerprint';
 
 describe('fingerprint utils', () => {
+  // Create a real localStorage-like object for testing
+  let localStorageData: Record<string, string> = {};
+
   beforeEach(() => {
-    // Clear sessionStorage before each test
-    sessionStorage.clear();
+    // Reset localStorage data
+    localStorageData = {};
+
+    // Mock localStorage with actual storage behavior
+    const localStorageMock = {
+      getItem: vi.fn((key: string) => localStorageData[key] || null),
+      setItem: vi.fn((key: string, value: string) => {
+        localStorageData[key] = value;
+      }),
+      removeItem: vi.fn((key: string) => {
+        delete localStorageData[key];
+      }),
+      clear: vi.fn(() => {
+        localStorageData = {};
+      }),
+      length: 0,
+      key: vi.fn(() => null),
+    };
+
+    Object.defineProperty(global, 'localStorage', {
+      value: localStorageMock,
+      writable: true,
+    });
+
     vi.clearAllMocks();
   });
 
   describe('getSessionFingerprint', () => {
-    it('should return cached fingerprint from sessionStorage', async () => {
+    it('should return cached fingerprint from localStorage', async () => {
       const mockFingerprint = 'test-fingerprint-123';
-      sessionStorage.setItem('daily-card-fingerprint', mockFingerprint);
+      localStorageData['daily-card-fingerprint'] = mockFingerprint;
 
       const fingerprint = await getSessionFingerprint();
       expect(fingerprint).toBe(mockFingerprint);
     });
 
-    it('should generate new fingerprint if not in sessionStorage', async () => {
+    it('should generate new fingerprint if not in localStorage', async () => {
       const fingerprint = await getSessionFingerprint();
 
       expect(fingerprint).toBeDefined();
@@ -30,14 +55,14 @@ describe('fingerprint utils', () => {
       expect(fingerprint.length).toBeGreaterThan(0);
     });
 
-    it('should store new fingerprint in sessionStorage', async () => {
+    it('should store new fingerprint in localStorage', async () => {
       const fingerprint = await getSessionFingerprint();
-      const stored = sessionStorage.getItem('daily-card-fingerprint');
+      const stored = localStorageData['daily-card-fingerprint'];
 
       expect(stored).toBe(fingerprint);
     });
 
-    it('should return same fingerprint on subsequent calls (session stability)', async () => {
+    it('should return same fingerprint on subsequent calls (cross-tab stability)', async () => {
       const fingerprint1 = await getSessionFingerprint();
 
       // Wait to ensure timestamp would be different if function regenerated
@@ -45,37 +70,25 @@ describe('fingerprint utils', () => {
 
       const fingerprint2 = await getSessionFingerprint();
 
-      // Should be SAME because it's cached in sessionStorage
+      // Should be SAME because it's cached in localStorage (shared across tabs)
       expect(fingerprint1).toBe(fingerprint2);
     });
 
-    it('should generate unique fingerprints for different sessions', async () => {
-      // Mock Date.now() to ensure different timestamps
-      const originalDateNow = Date.now;
-      let callCount = 0;
+    it('should generate unique fingerprints for different browsers', async () => {
+      // First browser
+      const fingerprint1 = await getSessionFingerprint();
 
-      Date.now = vi.fn(() => {
-        callCount++;
-        // Return different timestamps for each call (at least 10ms apart)
-        return originalDateNow() + callCount * 10;
-      });
+      // Simulate new browser (clear storage)
+      localStorageData = {};
 
-      try {
-        // First session
-        const fingerprint1 = await getSessionFingerprint();
+      // Wait 1ms to ensure different timestamp seed
+      await new Promise((resolve) => setTimeout(resolve, 1));
 
-        // Simulate new session (clear storage)
-        sessionStorage.clear();
+      // Second browser (new fingerprint generated)
+      const fingerprint2 = await getSessionFingerprint();
 
-        // Second session (new fingerprint generated with different timestamp)
-        const fingerprint2 = await getSessionFingerprint();
-
-        // Different sessions should have different fingerprints
-        expect(fingerprint1).not.toBe(fingerprint2);
-      } finally {
-        // Restore original Date.now
-        Date.now = originalDateNow;
-      }
+      // Different browsers should have different fingerprints
+      expect(fingerprint1).not.toBe(fingerprint2);
     });
 
     it('should include user agent in fingerprint calculation', async () => {
@@ -97,20 +110,28 @@ describe('fingerprint utils', () => {
       });
     });
 
-    it('should handle sessionStorage errors gracefully', async () => {
-      // Mock sessionStorage to throw error
-      const originalGetItem = Storage.prototype.getItem;
-      Storage.prototype.getItem = vi.fn(() => {
-        throw new Error('Storage error');
+    it('should handle localStorage errors gracefully', async () => {
+      // Mock localStorage to throw error
+      const errorMock = {
+        getItem: vi.fn(() => {
+          throw new Error('Storage error');
+        }),
+        setItem: vi.fn(),
+        removeItem: vi.fn(),
+        clear: vi.fn(),
+        length: 0,
+        key: vi.fn(() => null),
+      };
+
+      Object.defineProperty(global, 'localStorage', {
+        value: errorMock,
+        writable: true,
       });
 
       // Should still return a fingerprint
       const fingerprint = await getSessionFingerprint();
       expect(fingerprint).toBeDefined();
       expect(typeof fingerprint).toBe('string');
-
-      // Restore
-      Storage.prototype.getItem = originalGetItem;
     });
   });
 });
