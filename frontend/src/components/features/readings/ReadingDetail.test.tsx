@@ -3,13 +3,14 @@
  *
  * @vitest-environment jsdom
  */
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { ReactNode } from 'react';
 
 import { ReadingDetail } from './ReadingDetail';
 import * as useReadingsModule from '@/hooks/api/useReadings';
+import * as useShareTextModule from '@/hooks/api/useShareText';
 import type { ReadingDetail as ReadingDetailType, Spread } from '@/types';
 
 // Mock next/navigation
@@ -30,6 +31,11 @@ vi.mock('@/hooks/api/useReadings', () => ({
   useShareReading: vi.fn(),
 }));
 
+// Mock useShareText hook
+vi.mock('@/hooks/api/useShareText', () => ({
+  useReadingShareText: vi.fn(),
+}));
+
 // Mock toast
 vi.mock('@/hooks/utils/useToast', () => ({
   toast: {
@@ -39,9 +45,10 @@ vi.mock('@/hooks/utils/useToast', () => ({
 }));
 
 // Mock clipboard API
+const mockWriteText = vi.fn().mockResolvedValue(undefined);
 Object.assign(navigator, {
   clipboard: {
-    writeText: vi.fn().mockResolvedValue(undefined),
+    writeText: mockWriteText,
   },
 });
 
@@ -133,6 +140,7 @@ const mockSpread: Spread = {
 describe('ReadingDetail', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockWriteText.mockClear();
 
     // Default mocks
     vi.mocked(useReadingsModule.useSpreads).mockReturnValue({
@@ -152,6 +160,13 @@ describe('ReadingDetail', () => {
       mutateAsync: vi.fn().mockResolvedValue({ shareToken: 'test-token' }),
       isPending: false,
     } as unknown as ReturnType<typeof useReadingsModule.useShareReading>);
+
+    vi.mocked(useShareTextModule.useReadingShareText).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as ReturnType<typeof useShareTextModule.useReadingShareText>);
   });
 
   describe('Loading State', () => {
@@ -213,24 +228,6 @@ describe('ReadingDetail', () => {
       expect(screen.getByTestId('interpretation-content')).toBeInTheDocument();
     });
 
-    it('should handle share action', async () => {
-      const mockMutateAsync = vi.fn().mockResolvedValue({ shareToken: 'share-123' });
-      vi.mocked(useReadingsModule.useShareReading).mockReturnValue({
-        mutate: vi.fn(),
-        mutateAsync: mockMutateAsync,
-        isPending: false,
-      } as unknown as ReturnType<typeof useReadingsModule.useShareReading>);
-
-      render(<ReadingDetail readingId={1} />, { wrapper: createWrapper() });
-
-      const shareButton = screen.getByRole('button', { name: /compartir/i });
-      fireEvent.click(shareButton);
-
-      await waitFor(() => {
-        expect(mockMutateAsync).toHaveBeenCalledWith(1);
-      });
-    });
-
     it('should navigate back to history', () => {
       render(<ReadingDetail readingId={1} />, { wrapper: createWrapper() });
 
@@ -238,6 +235,91 @@ describe('ReadingDetail', () => {
       fireEvent.click(backButton);
 
       expect(mockPush).toHaveBeenCalledWith('/historial');
+    });
+  });
+
+  describe('Share Functionality', () => {
+    beforeEach(() => {
+      vi.mocked(useReadingsModule.useReadingDetail).mockReturnValue({
+        data: mockReadingDetail,
+        isLoading: false,
+        isError: false,
+        error: null,
+      } as ReturnType<typeof useReadingsModule.useReadingDetail>);
+    });
+
+    it('should show share button', () => {
+      render(<ReadingDetail readingId={1} />, { wrapper: createWrapper() });
+
+      // Verificar que existe el botón de compartir
+      const shareButton = screen.getByRole('button', { name: /compartir$/i });
+      expect(shareButton).toBeInTheDocument();
+    });
+
+    it('should enable share button when share text data is available', () => {
+      const mockShareText =
+        '🌟 Mi Lectura de Tarot en Auguria\n\n❓ ¿Qué me depara el futuro?\n\n🃏 El Mago, La Emperatriz ↓';
+
+      vi.mocked(useShareTextModule.useReadingShareText).mockReturnValue({
+        data: { text: mockShareText },
+        isLoading: false,
+        isError: false,
+        error: null,
+      } as ReturnType<typeof useShareTextModule.useReadingShareText>);
+
+      render(<ReadingDetail readingId={1} />, { wrapper: createWrapper() });
+
+      // El botón de compartir debería estar habilitado cuando tiene datos
+      const shareButton = screen.getByRole('button', { name: /compartir$/i });
+      expect(shareButton).not.toBeDisabled();
+    });
+
+    it('should show "Compartir texto" option in dropdown menu when data is available', async () => {
+      const mockShareText =
+        '🌟 Mi Lectura de Tarot en Auguria\n\n❓ ¿Qué me depara el futuro?\n\n🃏 El Mago, La Emperatriz ↓';
+
+      vi.mocked(useShareTextModule.useReadingShareText).mockReturnValue({
+        data: { text: mockShareText },
+        isLoading: false,
+        isError: false,
+        error: null,
+      } as ReturnType<typeof useShareTextModule.useReadingShareText>);
+
+      render(<ReadingDetail readingId={1} />, { wrapper: createWrapper() });
+
+      // El botón de compartir debería estar habilitado cuando tiene datos
+      const shareButton = screen.getByRole('button', { name: /compartir$/i });
+      expect(shareButton).not.toBeDisabled();
+    });
+
+    it('should show loading state when fetching share text', async () => {
+      vi.mocked(useShareTextModule.useReadingShareText).mockReturnValue({
+        data: undefined,
+        isLoading: true,
+        isError: false,
+        error: null,
+      } as ReturnType<typeof useShareTextModule.useReadingShareText>);
+
+      render(<ReadingDetail readingId={1} />, { wrapper: createWrapper() });
+
+      // El botón de compartir debería estar disabled mientras carga
+      const shareButton = screen.getByRole('button', { name: /compartir$/i });
+      expect(shareButton).toBeDisabled();
+    });
+
+    it('should handle error when fetching share text', async () => {
+      vi.mocked(useShareTextModule.useReadingShareText).mockReturnValue({
+        data: undefined,
+        isLoading: false,
+        isError: true,
+        error: new Error('Failed to fetch'),
+      } as ReturnType<typeof useShareTextModule.useReadingShareText>);
+
+      render(<ReadingDetail readingId={1} />, { wrapper: createWrapper() });
+
+      // El botón de compartir debería estar disabled cuando hay error
+      const shareButton = screen.getByRole('button', { name: /compartir$/i });
+      expect(shareButton).toBeDisabled();
     });
   });
 });

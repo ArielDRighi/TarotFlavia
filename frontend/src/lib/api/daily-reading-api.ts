@@ -6,7 +6,7 @@
  */
 import { apiClient } from './axios-config';
 import { API_ENDPOINTS } from './endpoints';
-import type { DailyReading, PaginatedDailyReadings } from '@/types';
+import type { DailyReading, PaginatedDailyReadings, ShareTextResponse } from '@/types';
 
 // ============================================================================
 // Daily Reading Functions
@@ -112,5 +112,19 @@ export async function regenerateDailyReading(): Promise<DailyReading> {
       throw new Error('Se requiere suscripción Premium para regenerar la carta del día');
     }
     throw new Error('Error al regenerar carta del día');
+  }
+}
+
+/**
+ * Get formatted share text for today's daily reading
+ * @returns Promise<ShareTextResponse> Object with formatted share text
+ * @throws Error with clear message on failure
+ */
+export async function getDailyShareText(): Promise<ShareTextResponse> {
+  try {
+    const response = await apiClient.get<ShareTextResponse>(API_ENDPOINTS.DAILY_READING.SHARE_TEXT);
+    return response.data;
+  } catch {
+    throw new Error('Error al obtener texto para compartir');
   }
 }

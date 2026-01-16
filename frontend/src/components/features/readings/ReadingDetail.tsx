@@ -4,16 +4,19 @@ import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { ArrowLeft, Share2, Plus, ChevronRight, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Plus, ChevronRight, RotateCcw, FileText } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
-import { useReadingDetail, useSpreads, useShareReading } from '@/hooks/api/useReadings';
+import { useReadingDetail, useSpreads } from '@/hooks/api/useReadings';
+import { useReadingShareText } from '@/hooks/api/useShareText';
 import { toast } from '@/hooks/utils/useToast';
+import { shouldUseNativeShare } from '@/lib/utils/device';
 import { TarotCard } from '@/components/features/readings/TarotCard';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+// DropdownMenu removed - only text sharing allowed
 import { cn } from '@/lib/utils';
 import type { Interpretation } from '@/types/reading.types';
 
@@ -273,9 +276,11 @@ export function ReadingDetail({ readingId }: ReadingDetailProps) {
   // Data fetching
   const { data: reading, isLoading: isReadingLoading, isError } = useReadingDetail(readingId);
   const { data: spreads } = useSpreads();
+  const { data: shareTextData, isLoading: isLoadingShareText } = useReadingShareText(readingId);
 
+  // No longer using shareReading mutation - only text sharing allowed
   // Mutations
-  const { mutateAsync: shareReadingAsync, isPending: isSharing } = useShareReading();
+  // const { mutateAsync: shareReadingAsync, isPending: isSharing } = useShareReading();
 
   // Get spread info
   const spread = spreads?.find((s) => s.id === reading?.spreadId);
@@ -285,16 +290,29 @@ export function ReadingDetail({ readingId }: ReadingDetailProps) {
     router.push('/historial');
   };
 
-  const handleShare = async () => {
-    if (!reading) return;
+  // handleShareLink removed - only text sharing allowed
+
+  const handleShareText = async () => {
+    if (!shareTextData?.text) return;
 
     try {
-      const result = await shareReadingAsync(reading.id);
-      const shareUrl = `${window.location.origin}/lecturas/compartida/${result.shareToken}`;
-      await navigator.clipboard.writeText(shareUrl);
-      toast.success('Link copiado al portapapeles');
-    } catch {
-      toast.error('Error al compartir la lectura');
+      // Solo usar Web Share API en móvil, en PC copiar al portapapeles
+      if (shouldUseNativeShare()) {
+        await navigator.share({
+          text: shareTextData.text,
+        });
+        toast.success('¡Compartido!');
+      } else {
+        // PC/Desktop: Copiar al portapapeles directamente
+        await navigator.clipboard.writeText(shareTextData.text);
+        toast.success('Texto copiado al portapapeles');
+      }
+    } catch (error) {
+      // Don't show error if user cancelled share (AbortError)
+      if (error instanceof DOMException && (error as DOMException).name === 'AbortError') {
+        return;
+      }
+      toast.error('Error al compartir');
     }
   };
 
@@ -432,9 +450,14 @@ export function ReadingDetail({ readingId }: ReadingDetailProps) {
           </Button>
 
           <div className="flex flex-col gap-2 sm:flex-row">
-            <Button variant="outline" onClick={handleShare} disabled={isSharing}>
-              <Share2 className="mr-2 h-4 w-4" />
-              {isSharing ? 'Compartiendo...' : 'Compartir'}
+            {/* Dropdown for share options */}
+            <Button
+              variant="outline"
+              onClick={handleShareText}
+              disabled={isLoadingShareText || !shareTextData?.text}
+            >
+              <FileText className="mr-2 h-4 w-4" />
+              Compartir
             </Button>
 
             <Button onClick={handleNewReading}>

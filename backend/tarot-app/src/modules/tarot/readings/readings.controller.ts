@@ -22,6 +22,7 @@ import {
   ApiBody,
   ApiQuery,
 } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 
 import { JwtAuthGuard } from '../../auth/infrastructure/guards/jwt-auth.guard';
 import { RequiresPremiumForCustomQuestionGuard } from './guards/requires-premium-for-custom-question.guard';
@@ -34,16 +35,21 @@ import {
 } from '../../usage-limits';
 import { AIQuotaGuard } from '../../ai-usage/infrastructure/guards/ai-quota.guard';
 import { ReadingsOrchestratorService } from './application/services/readings-orchestrator.service';
+import { ShareTextGeneratorService } from './application/services/share-text-generator.service';
 import { CreateReadingDto } from './dto/create-reading.dto';
 import { QueryReadingsDto } from './dto/query-readings.dto';
 import { PaginatedReadingsResponseDto } from './dto/paginated-readings-response.dto';
+import { GenerateShareTextResponseDto } from './dto/generate-share-text-response.dto';
 import { ReadingsCacheInterceptor } from './interceptors/readings-cache.interceptor';
 import { User } from '../../users/entities/user.entity';
 
 @ApiTags('Lecturas de Tarot')
 @Controller('readings')
 export class ReadingsController {
-  constructor(private readonly orchestrator: ReadingsOrchestratorService) {}
+  constructor(
+    private readonly orchestrator: ReadingsOrchestratorService,
+    private readonly shareTextGenerator: ShareTextGeneratorService,
+  ) {}
 
   @UseGuards(
     JwtAuthGuard,
@@ -346,5 +352,61 @@ export class ReadingsController {
   ) {
     const userId = req.user.userId;
     return this.orchestrator.unshareReading(id, userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
+  @Get(':id/share-text')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: 'Obtener texto formateado para compartir una lectura',
+    description:
+      'Genera texto formateado con emojis para compartir la lectura en redes sociales. El contenido varía según el plan del usuario (free o premium).',
+  })
+  @ApiParam({ name: 'id', description: 'ID de la lectura' })
+  @ApiResponse({
+    status: 200,
+    description: 'Texto de compartir generado exitosamente',
+    type: GenerateShareTextResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tienes permiso para acceder a esta lectura',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Lectura no encontrada',
+  })
+  @ApiResponse({
+    status: 429,
+    description: 'Límite de rate limiting alcanzado (10 requests/minuto)',
+  })
+  async getReadingShareText(
+    @Request() req: { user: { userId: number; plan?: string } },
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<GenerateShareTextResponseDto> {
+    const userId = req.user.userId;
+
+    // Obtener la lectura y verificar ownership
+    const reading = await this.orchestrator.findOne(id, userId);
+
+    // Incrementar el contador de veces compartidas
+    await this.orchestrator.incrementShareCount(id);
+
+    // Determinar el plan del usuario (desde el request o desde la lectura)
+    const userPlan = (req.user.plan || 'free') as
+      | 'anonymous'
+      | 'free'
+      | 'premium';
+
+    // Generar texto de compartir
+    const text = this.shareTextGenerator.generateShareText(
+      reading,
+      userPlan,
+      'tarot',
+    );
+
+    return { text };
   }
 }

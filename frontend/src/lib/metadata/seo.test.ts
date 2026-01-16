@@ -216,5 +216,100 @@ describe('SEO Metadata Configuration', () => {
         follow: true,
       });
     });
+
+    // New tests for improved OpenGraph meta tags
+    it('should include Twitter Card metadata', () => {
+      const metadata = generateSharedReadingMetadata({
+        question: '¿Qué me depara el futuro?',
+        categoryName: 'Vida y Propósito',
+      });
+
+      expect(metadata.twitter).toBeDefined();
+      // Type assertion needed because Next.js Metadata types don't expose nested properties
+      const twitter = metadata.twitter as {
+        card?: string;
+        title?: string;
+        description?: string;
+        site?: string;
+        creator?: string;
+      };
+      expect(twitter.card).toBe('summary_large_image');
+      expect(twitter.title).toContain('¿Qué me depara el futuro?');
+      expect(twitter.description).toContain('Vida y Propósito');
+      expect(twitter.site).toBe('@auguriatarot');
+      expect(twitter.creator).toBe('@auguriatarot');
+    });
+
+    it('should include OpenGraph image with dimensions', () => {
+      const metadata = generateSharedReadingMetadata({
+        question: 'Test question',
+      });
+
+      expect(metadata.openGraph?.images).toBeDefined();
+      const images = Array.isArray(metadata.openGraph?.images)
+        ? metadata.openGraph.images
+        : [metadata.openGraph?.images];
+
+      const firstImage = images[0] as { url: string; width: number; height: number; alt: string };
+      expect(firstImage).toMatchObject({
+        url: expect.stringContaining('/og-image.png'),
+        width: 1200,
+        height: 630,
+        alt: expect.stringContaining('Test question'),
+      });
+    });
+
+    it('should include article metadata for OpenGraph', () => {
+      const metadata = generateSharedReadingMetadata({
+        question: 'Test question',
+        categoryName: 'Amor',
+      });
+
+      // Type assertion needed because Next.js Metadata types don't expose nested properties
+      const openGraph = metadata.openGraph as {
+        type?: string;
+        publishedTime?: string;
+        authors?: string[];
+      };
+      expect(openGraph.type).toBe('article');
+      expect(openGraph).toHaveProperty('publishedTime');
+      expect(openGraph).toHaveProperty('authors');
+    });
+
+    it('should include locale alternatives for international sharing', () => {
+      const metadata = generateSharedReadingMetadata({
+        question: 'Test question',
+      });
+
+      // Type assertion needed because Next.js Metadata types don't expose nested properties
+      const openGraph = metadata.openGraph as { locale?: string };
+      expect(openGraph.locale).toBe('es_ES');
+      expect(metadata.alternates?.languages).toBeDefined();
+      expect(metadata.alternates?.languages?.['es']).toBeDefined();
+    });
+
+    it('should generate proper image alt text based on reading content', () => {
+      const metadata = generateSharedReadingMetadata({
+        question: '¿Encontraré el amor?',
+        categoryName: 'Amor y Relaciones',
+      });
+
+      const images = Array.isArray(metadata.openGraph?.images)
+        ? metadata.openGraph.images
+        : [metadata.openGraph?.images];
+
+      const firstImage = images[0] as { alt?: string };
+      expect(firstImage).toHaveProperty('alt');
+      expect(firstImage.alt).toContain('¿Encontraré el amor?');
+      expect(firstImage.alt).toContain('Amor y Relaciones');
+    });
+
+    it('should include site verification tags', () => {
+      const metadata = generateSharedReadingMetadata({
+        question: 'Test question',
+      });
+
+      expect(metadata.verification).toBeDefined();
+    });
   });
 });

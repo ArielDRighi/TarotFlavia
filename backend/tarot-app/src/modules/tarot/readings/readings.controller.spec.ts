@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ReadingsController } from './readings.controller';
 import { ReadingsOrchestratorService } from './application/services/readings-orchestrator.service';
+import { ShareTextGeneratorService } from './application/services/share-text-generator.service';
 import { CreateReadingDto } from './dto/create-reading.dto';
 import { QueryReadingsDto, SortBy, SortOrder } from './dto/query-readings.dto';
 import { JwtAuthGuard } from '../../auth/infrastructure/guards/jwt-auth.guard';
@@ -33,6 +34,11 @@ describe('ReadingsController', () => {
     restore: jest.fn(),
     shareReading: jest.fn(),
     unshareReading: jest.fn(),
+    incrementShareCount: jest.fn(),
+  };
+
+  const mockShareTextGenerator = {
+    generateShareText: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -42,6 +48,10 @@ describe('ReadingsController', () => {
         {
           provide: ReadingsOrchestratorService,
           useValue: mockOrchestrator,
+        },
+        {
+          provide: ShareTextGeneratorService,
+          useValue: mockShareTextGenerator,
         },
       ],
     })
@@ -402,6 +412,92 @@ describe('ReadingsController', () => {
       expect(result).toEqual(unsharedReading);
       expect(result.sharedToken).toBeNull();
       expect(result.isPublic).toBe(false);
+    });
+  });
+
+  describe('getReadingShareText', () => {
+    it('should generate share text and increment share count', async () => {
+      const readingWithShareCount = {
+        ...mockReading,
+        shareCount: 0,
+      };
+
+      mockOrchestrator.findOne.mockResolvedValue(readingWithShareCount);
+      mockOrchestrator.incrementShareCount = jest.fn().mockResolvedValue({
+        ...readingWithShareCount,
+        shareCount: 1,
+      });
+      mockShareTextGenerator.generateShareText.mockReturnValue(
+        'Compartir mi lectura de tarot ✨',
+      );
+
+      const req = { user: { userId: 1, plan: 'free' } };
+      const result = await controller.getReadingShareText(req, 1);
+
+      expect(orchestrator.findOne).toHaveBeenCalledWith(1, 1);
+      expect(orchestrator.incrementShareCount).toHaveBeenCalledWith(1);
+      expect(mockShareTextGenerator.generateShareText).toHaveBeenCalledWith(
+        readingWithShareCount,
+        'free',
+        'tarot',
+      );
+      expect(result).toEqual({ text: 'Compartir mi lectura de tarot ✨' });
+    });
+
+    it('should handle premium users correctly', async () => {
+      const readingWithShareCount = {
+        ...mockReading,
+        shareCount: 5,
+      };
+
+      mockOrchestrator.findOne.mockResolvedValue(readingWithShareCount);
+      mockOrchestrator.incrementShareCount = jest.fn().mockResolvedValue({
+        ...readingWithShareCount,
+        shareCount: 6,
+      });
+      mockShareTextGenerator.generateShareText.mockReturnValue(
+        'Mi lectura premium de tarot 🔮',
+      );
+
+      const req = { user: { userId: 1, plan: 'premium' } };
+      const result = await controller.getReadingShareText(req, 1);
+
+      expect(orchestrator.findOne).toHaveBeenCalledWith(1, 1);
+      expect(orchestrator.incrementShareCount).toHaveBeenCalledWith(1);
+      expect(mockShareTextGenerator.generateShareText).toHaveBeenCalledWith(
+        readingWithShareCount,
+        'premium',
+        'tarot',
+      );
+      expect(result).toEqual({ text: 'Mi lectura premium de tarot 🔮' });
+    });
+
+    it('should default to free plan when plan not specified', async () => {
+      const readingWithShareCount = {
+        ...mockReading,
+        shareCount: 2,
+      };
+
+      mockOrchestrator.findOne.mockResolvedValue(readingWithShareCount);
+      mockOrchestrator.incrementShareCount = jest.fn().mockResolvedValue({
+        ...readingWithShareCount,
+        shareCount: 3,
+      });
+      mockShareTextGenerator.generateShareText.mockReturnValue(
+        'Compartir lectura ✨',
+      );
+
+      const req = { user: { userId: 1 } };
+      const result = await controller.getReadingShareText(req, 1);
+
+      expect(orchestrator.findOne).toHaveBeenCalledWith(1, 1);
+      expect(orchestrator.incrementShareCount).toHaveBeenCalledWith(1);
+      expect(mockShareTextGenerator.generateShareText).toHaveBeenCalledWith(
+        readingWithShareCount,
+        'free',
+        'tarot',
+      );
+      expect(result).toEqual({ text: 'Compartir lectura ✨' });
     });
   });
 });

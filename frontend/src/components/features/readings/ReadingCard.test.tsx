@@ -240,4 +240,90 @@ describe('ReadingCard', () => {
       expect(thumbnail).toHaveAttribute('src', '/images/cards/the-fool.jpg');
     });
   });
+
+  describe('Share Button - TASK-SHARE-009', () => {
+    it('should render share button', () => {
+      const mockOnShare = vi.fn();
+      const reading = createTestReading();
+
+      render(<ReadingCard reading={reading} onView={mockOnView} onShare={mockOnShare} />);
+
+      const shareButton = screen.getByRole('button', { name: /compartir/i });
+      expect(shareButton).toBeInTheDocument();
+    });
+
+    it('should call onShare with reading id when share button is clicked', async () => {
+      const user = userEvent.setup();
+      const mockOnShare = vi.fn();
+      const reading = createTestReading({ id: 42 });
+
+      render(<ReadingCard reading={reading} onView={mockOnView} onShare={mockOnShare} />);
+
+      await user.click(screen.getByRole('button', { name: /compartir/i }));
+
+      expect(mockOnShare).toHaveBeenCalledTimes(1);
+      expect(mockOnShare).toHaveBeenCalledWith(42);
+    });
+
+    it('should not navigate to detail when share button is clicked', async () => {
+      const user = userEvent.setup();
+      const mockOnShare = vi.fn();
+      const reading = createTestReading();
+
+      render(<ReadingCard reading={reading} onView={mockOnView} onShare={mockOnShare} />);
+
+      const shareButton = screen.getByRole('button', { name: /compartir/i });
+
+      await user.click(shareButton);
+
+      // onView should NOT be called when clicking share
+      expect(mockOnView).not.toHaveBeenCalled();
+      // onShare should be called
+      expect(mockOnShare).toHaveBeenCalled();
+    });
+
+    it('should stop event propagation to prevent card click', async () => {
+      const user = userEvent.setup();
+      const mockOnShare = vi.fn();
+      const reading = createTestReading();
+
+      render(<ReadingCard reading={reading} onView={mockOnView} onShare={mockOnShare} />);
+
+      const shareButton = screen.getByRole('button', { name: /compartir/i });
+
+      await user.click(shareButton);
+
+      // Only share callback should be called
+      expect(mockOnShare).toHaveBeenCalledTimes(1);
+      expect(mockOnView).not.toHaveBeenCalled();
+    });
+
+    it('should be keyboard accessible', async () => {
+      const user = userEvent.setup();
+      const mockOnShare = vi.fn();
+      const reading = createTestReading();
+
+      render(<ReadingCard reading={reading} onView={mockOnView} onShare={mockOnShare} />);
+
+      // Tab to view button first
+      await user.tab();
+      expect(screen.getByRole('button', { name: /ver/i })).toHaveFocus();
+
+      // Tab to share button
+      await user.tab();
+      expect(screen.getByRole('button', { name: /compartir/i })).toHaveFocus();
+    });
+
+    it('should have Share2 icon from lucide-react', () => {
+      const mockOnShare = vi.fn();
+      const reading = createTestReading();
+
+      render(<ReadingCard reading={reading} onView={mockOnView} onShare={mockOnShare} />);
+
+      const shareButton = screen.getByRole('button', { name: /compartir/i });
+      // Check that button contains SVG (icon)
+      const svg = shareButton.querySelector('svg');
+      expect(svg).toBeInTheDocument();
+    });
+  });
 });

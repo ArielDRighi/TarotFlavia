@@ -2,12 +2,13 @@
 
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Copy, History, Sparkles } from 'lucide-react';
+import { History, Sparkles } from 'lucide-react';
 import { ROUTES } from '@/lib/constants/routes';
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TarotCard } from '@/components/features/readings/TarotCard';
+import { ShareButton } from '@/components/features/shared/ShareButton';
 import { AnonymousLimitReached } from './AnonymousLimitReached';
 import { DailyCardLimitReached } from './DailyCardLimitReached';
 import {
@@ -15,9 +16,9 @@ import {
   useDailyReading,
   useDailyReadingPublic,
 } from '@/hooks/api/useDailyReading';
+import { useDailyShareText } from '@/hooks/api/useShareText';
 import { useUserCapabilities, useInvalidateCapabilities } from '@/hooks/api/useUserCapabilities';
 import { useAuth } from '@/hooks/useAuth';
-import { toast } from '@/hooks/utils/useToast';
 import { cn } from '@/lib/utils';
 import { getSessionFingerprint } from '@/lib/utils/fingerprint';
 import type { DailyReading, ReadingCard } from '@/types';
@@ -76,6 +77,9 @@ export function DailyCardExperience() {
   // Fetch user capabilities - SINGLE SOURCE OF TRUTH for limits
   const { data: capabilities, isLoading: isLoadingCapabilities } = useUserCapabilities();
   const invalidateCapabilities = useInvalidateCapabilities();
+
+  // Fetch share text from backend (with automatic fallback if error)
+  const { data: shareTextData } = useDailyShareText();
 
   // Extract boolean flags from capabilities
   const canCreateDailyReading = capabilities?.canCreateDailyReading ?? false;
@@ -175,20 +179,23 @@ export function DailyCardExperience() {
   ]);
 
   /**
-   * Handle share button - copy interpretation to clipboard
+   * Generate fallback share text when backend is unavailable
+   * TASK-SHARE-007: Maintain local fallback for offline scenarios
    */
-  const handleShare = useCallback(async () => {
-    if (!currentReading) return;
+  const generateFallbackShareText = useCallback((): string => {
+    if (!currentReading) return '';
 
-    const shareText = `🌟 Mi Carta del Día: ${currentReading.card.name}${currentReading.isReversed ? ' (Invertida)' : ''}\n\n${currentReading.interpretation}\n\n✨ Descubre tu carta en Auguria`;
+    const cardName = `${currentReading.card.name}${currentReading.isReversed ? ' (Invertida)' : ''}`;
+    const interpretation = currentReading.interpretation || currentReading.cardMeaning || '';
 
-    try {
-      await navigator.clipboard.writeText(shareText);
-      toast.success('Mensaje copiado al portapapeles');
-    } catch {
-      toast.error('No se pudo copiar el mensaje');
-    }
+    return `🌟 Mi Carta del Día: ${cardName}\n\n${interpretation}\n\n✨ Descubre tu carta en Auguria`;
   }, [currentReading]);
+
+  /**
+   * Get share text - prioritize backend, fallback to local
+   * TASK-SHARE-007: ShareButton integration with backend text + local fallback
+   */
+  const shareText = shareTextData?.text || generateFallbackShareText();
 
   /**
    * Handle history navigation
@@ -355,22 +362,24 @@ export function DailyCardExperience() {
             </div>
           )}
 
-          {/* Action Buttons (only for authenticated users with interpretation) */}
-          {isAuthenticated && currentReading?.interpretation && (
+          {/* Share Button - available for all users with a reading */}
+          {currentReading && (
             <div className="flex flex-wrap justify-center gap-3">
-              <Button variant="outline" onClick={handleShare} aria-label="Compartir mensaje">
-                <Copy className="h-4 w-4" />
+              <ShareButton text={shareText} title="Mi Carta del Día en Auguria" variant="outline">
                 Compartir mensaje
-              </Button>
+              </ShareButton>
 
-              <Button
-                variant="outline"
-                onClick={handleViewHistory}
-                aria-label="Ver historial de cartas"
-              >
-                <History className="h-4 w-4" />
-                Ver historial
-              </Button>
+              {/* History button - only for authenticated users */}
+              {isAuthenticated && (
+                <Button
+                  variant="outline"
+                  onClick={handleViewHistory}
+                  aria-label="Ver historial de cartas"
+                >
+                  <History className="h-4 w-4" />
+                  Ver historial
+                </Button>
+              )}
             </div>
           )}
         </div>

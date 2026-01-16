@@ -272,6 +272,15 @@ export class TypeOrmReadingRepository implements IReadingRepository {
     await this.readingRepo.increment({ id }, 'viewCount', 1);
   }
 
+  async incrementShareCount(id: number): Promise<TarotReading> {
+    await this.readingRepo.increment({ id }, 'shareCount', 1);
+    const reading = await this.readingRepo.findOne({ where: { id } });
+    if (!reading) {
+      throw new Error(`Reading with id ${id} not found`);
+    }
+    return reading;
+  }
+
   async archiveOldReadings(
     userPlan: UserPlan,
     retentionDays: number,

@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Image from 'next/image';
-import { Eye, Layers } from 'lucide-react';
+import { Eye, Layers, Share2 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { formatDateShort } from '@/lib/utils/date';
@@ -21,6 +21,8 @@ export interface ReadingCardProps {
   cards?: ReadingCardType[];
   /** Callback when view button is clicked */
   onView: (id: number) => void;
+  /** Callback when share button is clicked (TASK-SHARE-009) */
+  onShare?: (id: number) => void;
   /** Additional CSS classes */
   className?: string;
 }
@@ -37,7 +39,7 @@ export interface ReadingCardProps {
  * Layout (single-row compact):
  * - Thumbnail (40x56px): Card image or placeholder icon
  * - Content: Question (1-line) + meta row (date + spread badge)
- * - Actions: View and delete buttons (32x32px)
+ * - Actions: View and share buttons (32x32px)
  *
  * Features:
  * - Compact card height (~62px) for efficient list viewing
@@ -45,16 +47,18 @@ export interface ReadingCardProps {
  * - Date and spread badge grouped on same line
  * - Smaller action buttons for cleaner appearance
  * - Subtle hover shadow (no scale) for peaceful feel
+ * - Share button (TASK-SHARE-009) with propagation prevention
  *
  * @example
  * ```tsx
  * <ReadingCard
  *   reading={reading}
  *   onView={(id) => router.push(`/lecturas/${id}`)}
+ *   onShare={(id) => handleShare(id)}
  * />
  * ```
  */
-export function ReadingCard({ reading, cards, onView, className }: ReadingCardProps) {
+export function ReadingCard({ reading, cards, onView, onShare, className }: ReadingCardProps) {
   // Prefer cardPreviews from reading (TASK-UI-002), fallback to cards prop
   const cardPreview = reading.cardPreviews?.[0] || cards?.[0];
   const hasCardThumbnail = cardPreview?.imageUrl;
@@ -69,6 +73,18 @@ export function ReadingCard({ reading, cards, onView, className }: ReadingCardPr
   const handleViewClick = React.useCallback(() => {
     onView(reading.id);
   }, [onView, reading.id]);
+
+  const handleShareClick = React.useCallback(
+    (e: React.MouseEvent) => {
+      // Prevent event propagation to avoid triggering parent click handlers
+      e.stopPropagation();
+
+      if (onShare) {
+        onShare(reading.id);
+      }
+    },
+    [onShare, reading.id]
+  );
 
   return (
     <>
@@ -123,7 +139,7 @@ export function ReadingCard({ reading, cards, onView, className }: ReadingCardPr
           </div>
         </div>
 
-        {/* Actions - View only */}
+        {/* Actions - View and Share */}
         <div className="flex shrink-0 items-center gap-1">
           <Button
             variant="ghost"
@@ -134,6 +150,18 @@ export function ReadingCard({ reading, cards, onView, className }: ReadingCardPr
           >
             <Eye className="h-4 w-4" />
           </Button>
+
+          {onShare && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={handleShareClick}
+              aria-label="Compartir lectura"
+            >
+              <Share2 className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </Card>
     </>

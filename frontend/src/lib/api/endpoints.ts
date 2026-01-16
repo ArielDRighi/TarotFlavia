@@ -39,6 +39,7 @@ export const API_ENDPOINTS = {
     RESTORE: (id: number) => `/readings/${id}/restore`,
     REGENERATE: (id: number) => `/readings/${id}/regenerate`,
     SHARE: (id: number) => `/readings/${id}/share`,
+    SHARE_TEXT: (id: number) => `/readings/${id}/share-text`,
   },
 
   // Shared Readings (Public - No authentication required)
@@ -53,6 +54,7 @@ export const API_ENDPOINTS = {
     PUBLIC: '/public/daily-reading', // POST - Anonymous users with fingerprint
     HISTORY: '/daily-reading/history',
     REGENERATE: '/daily-reading/regenerate',
+    SHARE_TEXT: '/daily-reading/share-text',
   },
 
   // Users

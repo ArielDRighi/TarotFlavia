@@ -223,18 +223,57 @@ export function generateSharedReadingMetadata(reading: {
     ? `Lectura de tarot sobre ${reading.categoryName}. Descubre la interpretación completa.`
     : 'Descubre esta lectura de tarot compartida y su interpretación completa.';
 
+  // Generate descriptive alt text for image
+  const imageAlt = reading.categoryName
+    ? `Lectura de Tarot: ${reading.question} - ${reading.categoryName} en Auguria`
+    : `Lectura de Tarot: ${reading.question} en Auguria`;
+
+  // Current date for article published time
+  const publishedTime = new Date().toISOString();
+
   return {
     title,
     description,
     openGraph: {
       title: `${title} | ${SITE_NAME}`,
       description,
-      images: [DEFAULT_OG_IMAGE],
+      images: [
+        {
+          url: DEFAULT_OG_IMAGE,
+          width: 1200,
+          height: 630,
+          alt: imageAlt,
+        },
+      ],
       type: 'article',
+      locale: 'es_ES',
+      siteName: SITE_NAME,
+      publishedTime,
+      authors: [SITE_NAME],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${title} | ${SITE_NAME}`,
+      description,
+      images: [DEFAULT_OG_IMAGE],
+      site: '@auguriatarot',
+      creator: '@auguriatarot',
     },
     robots: {
       index: true,
       follow: true,
+    },
+    alternates: {
+      languages: {
+        es: '',
+        'es-ES': '',
+        'es-MX': '',
+        'es-AR': '',
+      },
+    },
+    verification: {
+      google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+      yandex: process.env.NEXT_PUBLIC_YANDEX_VERIFICATION,
     },
   };
 }

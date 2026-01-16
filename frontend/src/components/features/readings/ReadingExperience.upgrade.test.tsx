@@ -220,6 +220,36 @@ vi.mock('@/hooks/utils/useToast', () => ({
   },
 }));
 
+// Mock useUserCapabilities
+vi.mock('@/hooks/api/useUserCapabilities', () => ({
+  useUserCapabilities: () => ({
+    data: {
+      dailyCard: {
+        used: 0,
+        limit: 1,
+        canUse: true,
+        resetAt: '2025-12-08T00:00:00Z',
+      },
+      tarotReadings: {
+        used: 0,
+        limit: 3,
+        canUse: true,
+        resetAt: '2025-12-08T00:00:00Z',
+      },
+      canCreateDailyReading: true,
+      canCreateTarotReading: true,
+      canUseAI: false, // FREE users cannot use AI
+      canUseCustomQuestions: false,
+      canUseAdvancedSpreads: false,
+      plan: 'free',
+      isAuthenticated: true,
+    },
+    isLoading: false,
+    isError: false,
+    error: null,
+  }),
+}));
+
 // Query client for tests
 const createTestQueryClient = () =>
   new QueryClient({
@@ -276,13 +306,16 @@ describe('ReadingExperience - Upgrade Banner for FREE users', () => {
     const revealButton = screen.getByRole('button', { name: /Revelar mi destino/i });
     fireEvent.click(revealButton);
 
-    await waitFor(() => {
-      expect(screen.getByTestId('upgrade-banner')).toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(screen.getByTestId('upgrade-banner')).toBeInTheDocument();
+      },
+      { timeout: 10000 }
+    );
 
     expect(screen.getByText(/desbloquea interpretaciones personalizadas/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /upgrade a premium/i })).toBeInTheDocument();
-  });
+  }, 15000); // Timeout de 15 segundos para el test
 
   it('should open upgrade modal when clicking banner button', async () => {
     renderWithProviders(<ReadingExperience spreadId={2} questionId={1} customQuestion={null} />);

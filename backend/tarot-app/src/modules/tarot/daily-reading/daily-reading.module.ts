@@ -14,6 +14,7 @@ import { AIUsageModule } from '../../ai-usage/ai-usage.module';
 import { UsageLimitsModule } from '../../usage-limits/usage-limits.module';
 import { UsersModule } from '../../users/users.module';
 import { PlanConfigModule } from '../../plan-config/plan-config.module';
+import { ShareTextGeneratorService } from '../readings/application/services/share-text-generator.service';
 
 @Module({
   imports: [
@@ -25,7 +26,11 @@ import { PlanConfigModule } from '../../plan-config/plan-config.module';
     PlanConfigModule,
   ],
   controllers: [DailyReadingController, DailyReadingPublicController],
-  providers: [DailyReadingService, DailyReadingCleanupService],
+  providers: [
+    DailyReadingService,
+    DailyReadingCleanupService,
+    ShareTextGeneratorService,
+  ],
   exports: [DailyReadingService, TypeOrmModule],
 })
 export class DailyReadingModule {}

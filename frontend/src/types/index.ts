@@ -45,6 +45,7 @@ export type {
   PaginatedReadings,
   PaginationMeta,
   ShareReadingResponse,
+  ShareTextResponse,
   SharedReading,
   CardPosition,
   DeckInfo,

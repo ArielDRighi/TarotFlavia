@@ -7,6 +7,8 @@ import { Search, Layers, ChevronDown, Grid3x3, List, Sun } from 'lucide-react';
 import { startOfWeek, startOfMonth, isAfter, isSameDay } from 'date-fns';
 
 import { useMyReadings } from '@/hooks/api/useReadings';
+import { getShareText } from '@/lib/api/readings-api';
+import { shouldUseNativeShare } from '@/lib/utils/device';
 import { ReadingCard } from '@/components/features/readings/ReadingCard';
 import { SkeletonCard } from '@/components/ui/skeleton-card';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -18,6 +20,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { toast } from '@/hooks/utils/useToast';
 import type { Reading } from '@/types';
 
 // Constants
@@ -139,6 +142,36 @@ export function ReadingsHistory() {
   const handleViewReading = (id: number) => {
     router.push(`/historial/${id}`);
   };
+
+  // Handle share reading (TASK-SHARE-009)
+  const handleShareReading = React.useCallback(async (readingId: number) => {
+    try {
+      // Fetch share text from backend using API function
+      const data = await getShareText(readingId);
+      const shareText = data.text;
+
+      // Solo usar Web Share API en móvil, en PC copiar al portapapeles
+      if (shouldUseNativeShare()) {
+        await navigator.share({
+          text: shareText,
+          title: 'Mi Lectura de Tarot en Auguria',
+        });
+        toast.success('¡Compartido!');
+      } else {
+        // PC/Desktop: Copiar al portapapeles directamente
+        await navigator.clipboard.writeText(shareText);
+        toast.success('Texto copiado al portapapeles');
+      }
+    } catch (error) {
+      // Don't show error if user cancelled share
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        return;
+      }
+
+      console.error('Error sharing reading:', error);
+      toast.error('Error al compartir');
+    }
+  }, []);
 
   // Handle pagination
   const handlePreviousPage = () => {
@@ -333,7 +366,12 @@ export function ReadingsHistory() {
       {!isReadingsLoading && !isError && hasFilteredReadings && (
         <div data-testid="readings-list" className={listClasses}>
           {filteredReadings.map((reading) => (
-            <ReadingCard key={reading.id} reading={reading} onView={handleViewReading} />
+            <ReadingCard
+              key={reading.id}
+              reading={reading}
+              onView={handleViewReading}
+              onShare={handleShareReading}
+            />
           ))}
         </div>
       )}

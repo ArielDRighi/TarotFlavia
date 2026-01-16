@@ -4,6 +4,7 @@ import {
   DailyReadingPublicController,
 } from './daily-reading.controller';
 import { DailyReadingService } from './daily-reading.service';
+import { ShareTextGeneratorService } from '../readings/application/services/share-text-generator.service';
 import { IncrementUsageInterceptor } from '../../usage-limits/interceptors/increment-usage.interceptor';
 import { UsageLimitsService } from '../../usage-limits/usage-limits.service';
 import { DailyReading } from './entities/daily-reading.entity';
@@ -58,6 +59,10 @@ describe('DailyReadingController - IncrementUsageInterceptor Integration', () =>
       checkLimit: jest.fn(),
     };
 
+    const mockShareTextGeneratorService = {
+      generateShareText: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [DailyReadingController],
       providers: [
@@ -68,6 +73,10 @@ describe('DailyReadingController - IncrementUsageInterceptor Integration', () =>
         {
           provide: UsageLimitsService,
           useValue: mockUsageLimitsService,
+        },
+        {
+          provide: ShareTextGeneratorService,
+          useValue: mockShareTextGeneratorService,
         },
         IncrementUsageInterceptor,
         Reflector,

@@ -152,6 +152,25 @@ export class DailyReadingService {
   }
 
   /**
+   * Obtiene la carta del día por fingerprint
+   * @param fingerprint - Fingerprint del usuario anónimo
+   * @param date - Fecha en formato YYYY-MM-DD
+   */
+  async findOneByFingerprint(
+    fingerprint: string,
+    date: string,
+  ): Promise<DailyReading | null> {
+    return this.dailyReadingRepository
+      .createQueryBuilder('daily_reading')
+      .where('daily_reading.anonymous_fingerprint = :fingerprint', {
+        fingerprint,
+      })
+      .andWhere('daily_reading.reading_date = :date', { date })
+      .leftJoinAndSelect('daily_reading.card', 'card')
+      .getOne();
+  }
+
+  /**
    * Obtiene la carta del día de hoy para acceso público (sin autenticación)
    * Retorna la primera carta del día generada hoy (carta oficial del día)
    * No incluye interpretación IA (solo info de DB)
