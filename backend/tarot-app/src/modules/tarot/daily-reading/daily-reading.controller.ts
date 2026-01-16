@@ -283,7 +283,7 @@ export class DailyReadingController {
     @Request() req: { user?: { userId: number; plan?: string } },
     @Query('fingerprint') fingerprint?: string,
   ): Promise<GenerateShareTextResponseDto> {
-    let dailyReading;
+    let dailyReading: DailyReadingResponseDto | null;
     let userPlan: 'anonymous' | 'free' | 'premium' = 'anonymous';
 
     // Determinar si es usuario autenticado o anónimo
