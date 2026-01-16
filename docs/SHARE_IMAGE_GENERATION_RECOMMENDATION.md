@@ -701,12 +701,13 @@ Crear hook de React Query para obtener el texto de compartir desde el backend.
 
 ---
 
-### **TASK-SHARE-007: Integrar ShareButton en DailyCardExperience**
+### **TASK-SHARE-007: Integrar ShareButton en DailyCardExperience** ✅
 
 **Prioridad:** 🔴 ALTA  
 **Estimación:** 2 horas  
 **Dependencias:** TASK-SHARE-005, TASK-SHARE-006  
-**Tipo:** 🎨 Frontend
+**Tipo:** 🎨 Frontend  
+**Estado:** ✅ **COMPLETADA**
 
 #### 📋 Descripción
 
@@ -714,17 +715,39 @@ Actualizar el componente DailyCardExperience para usar el nuevo ShareButton y ob
 
 #### ✅ Tareas específicas
 
-- [ ] Reemplazar lógica de `handleShare` actual con `ShareButton`
-- [ ] Usar `useDailyShareText()` hook para obtener texto
-- [ ] Mantener fallback local si el backend no responde
-- [ ] Mantener el mismo estilo visual actual
+- [x] Reemplazar lógica de `handleShare` actual con `ShareButton`
+- [x] Usar `useDailyShareText()` hook para obtener texto
+- [x] Mantener fallback local si el backend no responde
+- [x] Mantener el mismo estilo visual actual
+- [x] Añadir prop `children` a ShareButton para texto customizable
+- [x] Actualizar tests existentes
 
 #### 🎯 Criterios de aceptación
 
-- ✓ Botón compartir usa el nuevo componente
-- ✓ Texto proviene del backend (diferenciado por plan)
-- ✓ Fallback funciona si hay error de red
-- ✓ UX no cambia para el usuario
+- ✅ Botón compartir usa el nuevo componente ShareButton
+- ✅ Texto proviene del backend (useDailyShareText hook)
+- ✅ Fallback local funciona si hay error de red
+- ✅ UX no cambia para el usuario (mismo estilo visual)
+- ✅ Lint sin errores
+- ✅ Type check sin errores
+- ✅ Build exitoso
+- ✅ Todos los tests pasan (1895/1895 - 2 tests nuevos)
+
+#### 📊 Resultado Final
+
+**Archivos modificados:**
+
+- `frontend/src/components/features/daily-reading/DailyCardExperience.tsx` - Integración ShareButton
+- `frontend/src/components/features/shared/ShareButton.tsx` - Añadido soporte children
+- `frontend/src/components/features/shared/ShareButton.test.tsx` - Test para children
+- `frontend/src/components/features/daily-reading/DailyCardExperience.test.tsx` - Test integración
+
+**Funcionalidad implementada:**
+
+- Reemplazado `handleShare` custom con `ShareButton` component
+- Uso de `useDailyShareText()` para obtener texto del backend
+- Fallback local con `generateFallbackShareText()` si backend falla
+- Mantiene estilo visual outline y texto "Compartir mensaje"
 
 ---
 

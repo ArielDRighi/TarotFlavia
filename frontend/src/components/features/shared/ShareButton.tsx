@@ -19,6 +19,8 @@ export interface ShareButtonProps {
   variant?: 'default' | 'outline' | 'ghost' | 'destructive' | 'secondary' | 'link';
   /** Button size */
   size?: 'default' | 'sm' | 'lg' | 'icon' | 'icon-sm' | 'icon-lg';
+  /** Button children (label) */
+  children?: React.ReactNode;
   /** Callback when share succeeds */
   onSuccess?: () => void;
   /** Callback when share fails */
@@ -54,6 +56,7 @@ export function ShareButton({
   url,
   variant = 'outline',
   size = 'default',
+  children,
   onSuccess,
   onError,
 }: ShareButtonProps) {
@@ -104,10 +107,10 @@ export function ShareButton({
       size={size}
       onClick={handleShare}
       disabled={isSharing}
-      aria-label="Compartir"
+      aria-label={typeof children === 'string' ? children : 'Compartir'}
     >
       <Share2 className="h-4 w-4" />
-      Compartir
+      {children || 'Compartir'}
     </Button>
   );
 }

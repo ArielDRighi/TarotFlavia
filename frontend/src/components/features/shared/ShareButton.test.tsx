@@ -45,6 +45,12 @@ describe('ShareButton', () => {
       expect(screen.getByRole('button', { name: /compartir/i })).toBeInTheDocument();
     });
 
+    it('should render with custom children text', () => {
+      render(<ShareButton text="Test content">Compartir mensaje</ShareButton>);
+
+      expect(screen.getByRole('button', { name: /compartir mensaje/i })).toBeInTheDocument();
+    });
+
     it('should render with custom variant', () => {
       render(<ShareButton text="Test" variant="outline" />);
 
