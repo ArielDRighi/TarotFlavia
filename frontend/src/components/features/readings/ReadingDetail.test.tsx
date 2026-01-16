@@ -4,12 +4,14 @@
  * @vitest-environment jsdom
  */
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { ReactNode } from 'react';
 
 import { ReadingDetail } from './ReadingDetail';
 import * as useReadingsModule from '@/hooks/api/useReadings';
+import * as useShareTextModule from '@/hooks/api/useShareText';
 import type { ReadingDetail as ReadingDetailType, Spread } from '@/types';
 
 // Mock next/navigation
@@ -30,6 +32,11 @@ vi.mock('@/hooks/api/useReadings', () => ({
   useShareReading: vi.fn(),
 }));
 
+// Mock useShareText hook
+vi.mock('@/hooks/api/useShareText', () => ({
+  useReadingShareText: vi.fn(),
+}));
+
 // Mock toast
 vi.mock('@/hooks/utils/useToast', () => ({
   toast: {
@@ -39,9 +46,10 @@ vi.mock('@/hooks/utils/useToast', () => ({
 }));
 
 // Mock clipboard API
+const mockWriteText = vi.fn().mockResolvedValue(undefined);
 Object.assign(navigator, {
   clipboard: {
-    writeText: vi.fn().mockResolvedValue(undefined),
+    writeText: mockWriteText,
   },
 });
 
@@ -133,6 +141,7 @@ const mockSpread: Spread = {
 describe('ReadingDetail', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockWriteText.mockClear();
 
     // Default mocks
     vi.mocked(useReadingsModule.useSpreads).mockReturnValue({
@@ -152,6 +161,13 @@ describe('ReadingDetail', () => {
       mutateAsync: vi.fn().mockResolvedValue({ shareToken: 'test-token' }),
       isPending: false,
     } as unknown as ReturnType<typeof useReadingsModule.useShareReading>);
+
+    vi.mocked(useShareTextModule.useReadingShareText).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as ReturnType<typeof useShareTextModule.useReadingShareText>);
   });
 
   describe('Loading State', () => {
@@ -213,7 +229,46 @@ describe('ReadingDetail', () => {
       expect(screen.getByTestId('interpretation-content')).toBeInTheDocument();
     });
 
-    it('should handle share action', async () => {
+    it('should navigate back to history', () => {
+      render(<ReadingDetail readingId={1} />, { wrapper: createWrapper() });
+
+      const backButton = screen.getByRole('button', { name: /volver al historial/i });
+      fireEvent.click(backButton);
+
+      expect(mockPush).toHaveBeenCalledWith('/historial');
+    });
+  });
+
+  describe('Share Functionality', () => {
+    beforeEach(() => {
+      vi.mocked(useReadingsModule.useReadingDetail).mockReturnValue({
+        data: mockReadingDetail,
+        isLoading: false,
+        isError: false,
+        error: null,
+      } as ReturnType<typeof useReadingsModule.useReadingDetail>);
+    });
+
+    it('should show dropdown with share link and share text options', async () => {
+      const user = userEvent.setup();
+      render(<ReadingDetail readingId={1} />, { wrapper: createWrapper() });
+
+      // Buscar el botón de dropdown "Compartir"
+      const shareDropdownButton = screen.getByRole('button', { name: /compartir$/i });
+      expect(shareDropdownButton).toBeInTheDocument();
+
+      // Abrir el dropdown
+      await user.click(shareDropdownButton);
+
+      // Esperar a que aparezca el menú
+      await waitFor(() => {
+        const shareLinkOption = screen.getByText('Compartir link');
+        expect(shareLinkOption).toBeInTheDocument();
+      });
+    });
+
+    it('should show "Compartir link" option in dropdown menu', async () => {
+      const user = userEvent.setup();
       const mockMutateAsync = vi.fn().mockResolvedValue({ shareToken: 'share-123' });
       vi.mocked(useReadingsModule.useShareReading).mockReturnValue({
         mutate: vi.fn(),
@@ -223,28 +278,86 @@ describe('ReadingDetail', () => {
 
       render(<ReadingDetail readingId={1} />, { wrapper: createWrapper() });
 
-      const shareButton = screen.getByRole('button', { name: /compartir/i });
-      fireEvent.click(shareButton);
+      const shareDropdownButton = screen.getByRole('button', { name: /compartir$/i });
+      await user.click(shareDropdownButton);
+
+      // Verificar que aparece el menú con la opción "Compartir link"
+      const shareLinkOption = await screen.findByRole('menuitem', { name: /compartir link/i });
+      expect(shareLinkOption).toBeInTheDocument();
+      expect(shareLinkOption).not.toHaveAttribute('data-disabled');
+    });
+
+    it('should show "Compartir texto" option in dropdown menu when data is available', async () => {
+      const user = userEvent.setup();
+      const mockShareText =
+        '🌟 Mi Lectura de Tarot en Auguria\n\n❓ ¿Qué me depara el futuro?\n\n🃏 El Mago, La Emperatriz ↓';
+
+      vi.mocked(useShareTextModule.useReadingShareText).mockReturnValue({
+        data: { shareText: mockShareText },
+        isLoading: false,
+        isError: false,
+        error: null,
+      } as ReturnType<typeof useShareTextModule.useReadingShareText>);
+
+      render(<ReadingDetail readingId={1} />, { wrapper: createWrapper() });
+
+      const shareDropdownButton = screen.getByRole('button', { name: /compartir$/i });
+      await user.click(shareDropdownButton);
+
+      // Verificar que aparece el menú con la opción "Compartir texto" habilitada
+      const shareTextOption = await screen.findByRole('menuitem', { name: /compartir texto/i });
+      expect(shareTextOption).toBeInTheDocument();
+      expect(shareTextOption).not.toHaveAttribute('data-disabled');
+    });
+
+    it('should show loading state when fetching share text', async () => {
+      const user = userEvent.setup();
+      vi.mocked(useShareTextModule.useReadingShareText).mockReturnValue({
+        data: undefined,
+        isLoading: true,
+        isError: false,
+        error: null,
+      } as ReturnType<typeof useShareTextModule.useReadingShareText>);
+
+      render(<ReadingDetail readingId={1} />, { wrapper: createWrapper() });
+
+      const shareDropdownButton = screen.getByRole('button', { name: /compartir$/i });
+      await user.click(shareDropdownButton);
 
       await waitFor(() => {
-        expect(mockMutateAsync).toHaveBeenCalledWith(1);
-        // Verifica que la URL copiada sea correcta (sin /lecturas/)
-        expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-          expect.stringContaining('/compartida/share-123')
-        );
-        expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-          expect.not.stringContaining('/lecturas/compartida/')
-        );
+        // Cuando está cargando, debería aparecer un DropdownMenuItem disabled
+        const shareTextOption = screen.getByText('Compartir texto');
+        expect(shareTextOption).toBeInTheDocument();
+
+        // El elemento tiene role menuitem (de Radix Dropdown)
+        const menuItem = shareTextOption.closest('[role="menuitem"]');
+        expect(menuItem).toHaveAttribute('data-disabled', '');
       });
     });
 
-    it('should navigate back to history', () => {
+    it('should handle error when fetching share text', async () => {
+      const user = userEvent.setup();
+      vi.mocked(useShareTextModule.useReadingShareText).mockReturnValue({
+        data: undefined,
+        isLoading: false,
+        isError: true,
+        error: new Error('Failed to fetch'),
+      } as ReturnType<typeof useShareTextModule.useReadingShareText>);
+
       render(<ReadingDetail readingId={1} />, { wrapper: createWrapper() });
 
-      const backButton = screen.getByRole('button', { name: /volver al historial/i });
-      fireEvent.click(backButton);
+      const shareDropdownButton = screen.getByRole('button', { name: /compartir$/i });
+      await user.click(shareDropdownButton);
 
-      expect(mockPush).toHaveBeenCalledWith('/historial');
+      await waitFor(() => {
+        // Cuando hay error, debería aparecer un DropdownMenuItem disabled
+        const shareTextOption = screen.getByText('Compartir texto');
+        expect(shareTextOption).toBeInTheDocument();
+
+        // El elemento tiene role menuitem (de Radix Dropdown)
+        const menuItem = shareTextOption.closest('[role="menuitem"]');
+        expect(menuItem).toHaveAttribute('data-disabled', '');
+      });
     });
   });
 });

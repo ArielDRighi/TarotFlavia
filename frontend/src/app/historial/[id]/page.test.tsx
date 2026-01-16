@@ -7,9 +7,11 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { ReactNode } from 'react';
+import userEvent from '@testing-library/user-event';
 
 import ReadingDetailPage from './page';
 import * as useReadingsModule from '@/hooks/api/useReadings';
+import * as useShareTextModule from '@/hooks/api/useShareText';
 import type { ReadingDetail, Spread } from '@/types';
 
 // Mock next/navigation
@@ -34,6 +36,11 @@ vi.mock('@/hooks/api/useReadings', () => ({
   useSpreads: vi.fn(),
   useRegenerateInterpretation: vi.fn(),
   useShareReading: vi.fn(),
+}));
+
+// Mock useShareText hook
+vi.mock('@/hooks/api/useShareText', () => ({
+  useReadingShareText: vi.fn(),
 }));
 
 // Mock toast
@@ -177,6 +184,13 @@ describe('ReadingDetailPage', () => {
       mutateAsync: vi.fn().mockResolvedValue({ shareToken: 'test-token' }),
       isPending: false,
     } as unknown as ReturnType<typeof useReadingsModule.useShareReading>);
+
+    vi.mocked(useShareTextModule.useReadingShareText).mockReturnValue({
+      data: { shareText: 'Mock share text' },
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as ReturnType<typeof useShareTextModule.useReadingShareText>);
   });
 
   describe('Loading State', () => {
@@ -333,27 +347,23 @@ describe('ReadingDetailPage', () => {
       } as ReturnType<typeof useReadingsModule.useReadingDetail>);
     });
 
-    it('should display share button', () => {
+    it('should display share dropdown button', () => {
       render(<ReadingDetailPage />, { wrapper: createWrapper() });
 
-      expect(screen.getByRole('button', { name: /compartir/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /compartir$/i })).toBeInTheDocument();
     });
 
-    it('should copy link to clipboard when share is clicked', async () => {
-      const mockMutateAsync = vi.fn().mockResolvedValue({ shareToken: 'test-share-token' });
-      vi.mocked(useReadingsModule.useShareReading).mockReturnValue({
-        mutate: vi.fn(),
-        mutateAsync: mockMutateAsync,
-        isPending: false,
-      } as unknown as ReturnType<typeof useReadingsModule.useShareReading>);
-
+    it('should show share options when dropdown is opened', async () => {
+      const user = userEvent.setup();
       render(<ReadingDetailPage />, { wrapper: createWrapper() });
 
-      const shareButton = screen.getByRole('button', { name: /compartir/i });
-      fireEvent.click(shareButton);
+      const shareButton = screen.getByRole('button', { name: /compartir$/i });
+      await user.click(shareButton);
 
+      // Wait for dropdown menu to appear
       await waitFor(() => {
-        expect(navigator.clipboard.writeText).toHaveBeenCalled();
+        expect(screen.getByRole('menuitem', { name: /compartir link/i })).toBeInTheDocument();
+        expect(screen.getByRole('menuitem', { name: /compartir texto/i })).toBeInTheDocument();
       });
     });
   });

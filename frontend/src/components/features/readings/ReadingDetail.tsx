@@ -4,16 +4,23 @@ import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { ArrowLeft, Share2, Plus, ChevronRight, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Share2, Plus, ChevronRight, RotateCcw, Link, FileText } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
 import { useReadingDetail, useSpreads, useShareReading } from '@/hooks/api/useReadings';
+import { useReadingShareText } from '@/hooks/api/useShareText';
 import { toast } from '@/hooks/utils/useToast';
 import { TarotCard } from '@/components/features/readings/TarotCard';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import type { Interpretation } from '@/types/reading.types';
 
@@ -273,6 +280,7 @@ export function ReadingDetail({ readingId }: ReadingDetailProps) {
   // Data fetching
   const { data: reading, isLoading: isReadingLoading, isError } = useReadingDetail(readingId);
   const { data: spreads } = useSpreads();
+  const { data: shareTextData, isLoading: isLoadingShareText } = useReadingShareText(readingId);
 
   // Mutations
   const { mutateAsync: shareReadingAsync, isPending: isSharing } = useShareReading();
@@ -285,7 +293,7 @@ export function ReadingDetail({ readingId }: ReadingDetailProps) {
     router.push('/historial');
   };
 
-  const handleShare = async () => {
+  const handleShareLink = async () => {
     if (!reading) return;
 
     try {
@@ -295,6 +303,31 @@ export function ReadingDetail({ readingId }: ReadingDetailProps) {
       toast.success('Link copiado al portapapeles');
     } catch {
       toast.error('Error al compartir la lectura');
+    }
+  };
+
+  const handleShareText = async () => {
+    if (!shareTextData?.shareText) return;
+
+    try {
+      // Check if Web Share API is available (typically mobile)
+      if (navigator.share) {
+        await navigator.share({
+          text: shareTextData.shareText,
+        });
+        toast.success('¡Compartido!');
+      } else {
+        // Fallback: Copy to clipboard (typically desktop)
+        await navigator.clipboard.writeText(shareTextData.shareText);
+        toast.success('Texto copiado');
+      }
+    } catch (error) {
+      // Don't show error if user cancelled share (AbortError)
+      if (error instanceof DOMException && (error as DOMException).name === 'AbortError') {
+        // User cancelled - do nothing
+        return;
+      }
+      toast.error('Error al compartir');
     }
   };
 
@@ -432,10 +465,28 @@ export function ReadingDetail({ readingId }: ReadingDetailProps) {
           </Button>
 
           <div className="flex flex-col gap-2 sm:flex-row">
-            <Button variant="outline" onClick={handleShare} disabled={isSharing}>
-              <Share2 className="mr-2 h-4 w-4" />
-              {isSharing ? 'Compartiendo...' : 'Compartir'}
-            </Button>
+            {/* Dropdown for share options */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" disabled={isSharing}>
+                  <Share2 className="mr-2 h-4 w-4" />
+                  Compartir
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onSelect={handleShareLink} disabled={isSharing}>
+                  <Link className="mr-2 h-4 w-4" />
+                  Compartir link
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={handleShareText}
+                  disabled={isLoadingShareText || !shareTextData?.shareText}
+                >
+                  <FileText className="mr-2 h-4 w-4" />
+                  Compartir texto
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             <Button onClick={handleNewReading}>
               <Plus className="mr-2 h-4 w-4" />
