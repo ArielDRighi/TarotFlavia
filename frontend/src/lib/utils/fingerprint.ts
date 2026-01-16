@@ -3,22 +3,26 @@
  *
  * Generates and manages unique fingerprints for anonymous users
  * to track daily card access without authentication.
+ *
+ * IMPORTANT: Uses localStorage (not sessionStorage) to ensure the same fingerprint
+ * is shared across all browser tabs/windows. This prevents anonymous users from
+ * bypassing daily limits by opening multiple tabs.
  */
 
 const STORAGE_KEY = 'daily-card-fingerprint';
 
 /**
- * Internal: Generate a stable browser fingerprint + session timestamp
- * This creates a unique identifier per browser session that persists for the session.
+ * Internal: Generate a stable browser fingerprint + timestamp
+ * This creates a unique identifier per browser that persists across tabs/windows.
  * Uses stable browser characteristics (User Agent) combined with a timestamp that's
- * generated only once per session (via getSessionFingerprint).
+ * generated only once per browser (via getSessionFingerprint).
  *
  * NOTE: This function is internal. Use getSessionFingerprint() instead, which ensures
- * the same fingerprint is used throughout the session by caching in sessionStorage.
+ * the same fingerprint is used throughout ALL browser tabs by caching in localStorage.
  *
  * Uses Web Crypto API for SHA-256 hashing when available, falls back to simple hash.
  *
- * @param timestampSeed - Timestamp to mix into fingerprint (for per-session uniqueness)
+ * @param timestampSeed - Timestamp to mix into fingerprint (for per-browser uniqueness)
  * @returns {Promise<string>} A unique hexadecimal fingerprint string
  */
 async function generateFingerprintWithSeed(timestampSeed: number): Promise<string> {
@@ -55,29 +59,32 @@ async function generateFingerprintWithSeed(timestampSeed: number): Promise<strin
 
 /**
  * Get session fingerprint from storage or generate new one
- * Ensures the same fingerprint is used throughout the session.
+ * Ensures the same fingerprint is used across ALL browser tabs/windows.
  *
  * This is the PUBLIC API - always use this function instead of calling
  * generateFingerprintWithSeed directly.
+ *
+ * CRITICAL: Uses localStorage (not sessionStorage) to share fingerprint across
+ * all tabs/windows, preventing anonymous users from bypassing daily limits.
  *
  * @returns {Promise<string>} The session fingerprint
  */
 export async function getSessionFingerprint(): Promise<string> {
   try {
-    // Try to get existing fingerprint from sessionStorage
-    const stored = sessionStorage.getItem(STORAGE_KEY);
+    // Try to get existing fingerprint from localStorage (shared across tabs)
+    const stored = localStorage.getItem(STORAGE_KEY);
 
     if (stored) {
       return stored;
     }
 
-    // Generate new fingerprint with current timestamp (only once per session)
+    // Generate new fingerprint with current timestamp (only once per browser)
     const newFingerprint = await generateFingerprintWithSeed(Date.now());
-    sessionStorage.setItem(STORAGE_KEY, newFingerprint);
+    localStorage.setItem(STORAGE_KEY, newFingerprint);
 
     return newFingerprint;
   } catch {
-    // If sessionStorage fails (private mode, etc.), generate without storing
+    // If localStorage fails (private mode, etc.), generate without storing
     // This means each call will generate a different fingerprint in private mode
     return generateFingerprintWithSeed(Date.now());
   }
