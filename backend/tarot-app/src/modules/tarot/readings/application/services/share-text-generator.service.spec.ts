@@ -263,7 +263,7 @@ describe('ShareTextGeneratorService', () => {
       expect(result).toContain('━━━━━━━━━━━━━━━━━━');
     });
 
-    it('should truncate long interpretations to ~200 characters', () => {
+    it('should include full interpretations up to 5000 characters', () => {
       const longInterpretation = 'A'.repeat(300);
       const mockReading: Partial<DailyReading> = {
         card: { id: 1, name: 'Test', meaningUpright: 'Test' } as any,
@@ -278,8 +278,9 @@ describe('ShareTextGeneratorService', () => {
       );
 
       const interpretationPart = result.match(/"([^"]+)"/)?.[1] || '';
-      expect(interpretationPart.length).toBeLessThanOrEqual(210);
-      expect(result).toContain('...');
+      // Now we allow up to 5000 characters, so 300 should be included fully
+      expect(interpretationPart.length).toBe(300);
+      expect(result).toContain(longInterpretation);
     });
   });
 });
