@@ -17,6 +17,7 @@ export interface IReadingRepository {
   hardDelete(olderthanDays: number): Promise<number>;
   findByShareToken(token: string): Promise<TarotReading | null>;
   incrementViewCount(id: number): Promise<void>;
+  incrementShareCount(id: number): Promise<TarotReading>;
   /**
    * Archiva (soft-delete) lecturas que exceden el periodo de retencion
    * @param userPlan Plan del usuario

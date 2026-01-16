@@ -391,6 +391,9 @@ export class ReadingsController {
     // Obtener la lectura y verificar ownership
     const reading = await this.orchestrator.findOne(id, userId);
 
+    // Incrementar el contador de veces compartidas
+    await this.orchestrator.incrementShareCount(id);
+
     // Determinar el plan del usuario (desde el request o desde la lectura)
     const userPlan = (req.user.plan || 'free') as
       | 'anonymous'

@@ -59,6 +59,7 @@ describe('ReadingsController', () => {
     sharedToken: null,
     isPublic: false,
     viewCount: 0,
+    shareCount: 0,
   } as TarotReading;
 
   const mockOrchestrator = {

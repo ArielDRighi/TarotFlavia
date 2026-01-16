@@ -209,6 +209,13 @@ export class TarotReading {
   @Column({ default: 0 })
   viewCount: number;
 
+  @ApiProperty({
+    example: 0,
+    description: 'Número de veces que se compartió la lectura',
+  })
+  @Column({ default: 0 })
+  shareCount: number;
+
   @DeleteDateColumn()
   deletedAt?: Date;
 }

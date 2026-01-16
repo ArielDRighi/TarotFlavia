@@ -160,6 +160,14 @@ export class ReadingsOrchestratorService {
     return reading;
   }
 
+  /**
+   * Incrementa el contador de veces que se compartió una lectura.
+   * Este método se invoca cuando el usuario obtiene el texto para compartir.
+   */
+  async incrementShareCount(id: number): Promise<TarotReading> {
+    return this.readingRepo.incrementShareCount(id);
+  }
+
   // ==================== Retention Policy Methods ====================
 
   /**
