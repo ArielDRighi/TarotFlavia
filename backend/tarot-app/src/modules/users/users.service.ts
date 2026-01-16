@@ -54,7 +54,7 @@ export class UsersService {
       email: normalizedEmail,
       password: hashedPassword,
       name,
-      ...(birthDate && { birthDate }),
+      ...(birthDate ? { birthDate: birthDate as unknown as Date } : {}),
     });
 
     try {
