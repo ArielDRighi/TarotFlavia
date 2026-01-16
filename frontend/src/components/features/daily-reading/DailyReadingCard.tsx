@@ -61,6 +61,10 @@ export function DailyReadingCard({ reading, className }: DailyReadingCardProps) 
       // For historical readings, fetch share text from backend using reading ID
       // Note: Backend doesn't have endpoint for historical daily readings by ID yet,
       // so we generate the text locally using the data we have
+      //
+      // NOTE: This duplicates formatting from backend ShareTextGeneratorService intentionally.
+      // Historical daily readings should NOT make backend API calls - this is a lightweight
+      // local fallback. If format changes, update both places or extract to shared constant.
       const cardName = `${reading.cardName}${reading.isReversed ? ' (Invertida)' : ''}`;
       const content = reading.interpretationSummary;
 

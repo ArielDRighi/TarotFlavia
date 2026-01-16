@@ -15,6 +15,9 @@ export function isMobileDevice(): boolean {
   const isSmallScreen = window.innerWidth <= 768;
 
   // Also check user agent for mobile keywords
+  // NOTE: This regex is intentionally limited to well-known mobile devices.
+  // While it may not detect new/emerging devices, it's sufficient for our use case
+  // (showing Web Share API only on proven mobile platforms with useful share targets).
   const mobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
   const isMobileUA = mobileRegex.test(navigator.userAgent);
 

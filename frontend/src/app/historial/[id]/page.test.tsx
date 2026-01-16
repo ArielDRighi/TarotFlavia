@@ -3,11 +3,10 @@
  *
  * @vitest-environment jsdom
  */
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { ReactNode } from 'react';
-import userEvent from '@testing-library/user-event';
 
 import ReadingDetailPage from './page';
 import * as useReadingsModule from '@/hooks/api/useReadings';

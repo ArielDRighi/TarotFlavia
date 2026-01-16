@@ -3,8 +3,7 @@
  *
  * @vitest-environment jsdom
  */
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { ReactNode } from 'react';
@@ -276,7 +275,6 @@ describe('ReadingDetail', () => {
     });
 
     it('should show "Compartir texto" option in dropdown menu when data is available', async () => {
-      const user = userEvent.setup();
       const mockShareText =
         '🌟 Mi Lectura de Tarot en Auguria\n\n❓ ¿Qué me depara el futuro?\n\n🃏 El Mago, La Emperatriz ↓';
 

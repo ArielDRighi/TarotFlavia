@@ -91,7 +91,8 @@ export class ShareTextGeneratorService {
     const cardsStr = cardPositions
       .map((cp) => {
         const card = cards.find((c) => c.id === cp.cardId);
-        return cp.isReversed ? `${card?.name} ↓` : card?.name;
+        const cardName = card?.name ?? 'Carta desconocida';
+        return cp.isReversed ? `${cardName} ↓` : cardName;
       })
       .join(', ');
 
