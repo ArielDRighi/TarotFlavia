@@ -294,12 +294,12 @@ describe('DailyCardExperience - Anonymous User Flow', () => {
       expect(screen.queryByRole('button', { name: /regenerar/i })).not.toBeInTheDocument();
     });
 
-    it('should NOT show share button for anonymous users', async () => {
+    it('should show share button for anonymous users when they have a reading', async () => {
       const user = userEvent.setup();
       const mockCard = createMockTarotCard();
       const mockReading = createMockDailyReading({
         card: mockCard,
-        interpretation: null,
+        interpretation: 'Test interpretation for sharing',
       });
 
       const mockMutate = vi.fn((fingerprint, { onSuccess }) => {
@@ -324,8 +324,8 @@ describe('DailyCardExperience - Anonymous User Flow', () => {
         { timeout: 1000 }
       );
 
-      // Share button should NOT be visible for anonymous users (no interpretation)
-      expect(screen.queryByRole('button', { name: /compartir/i })).not.toBeInTheDocument();
+      // Share button SHOULD be visible for anonymous users (available for all users with a reading)
+      expect(screen.getByRole('button', { name: /compartir mensaje/i })).toBeInTheDocument();
     });
   });
 

@@ -7,6 +7,11 @@ import { ShareButton } from './ShareButton';
 const mockWriteText = vi.fn();
 const mockShare = vi.fn();
 
+// Mock device utilities
+vi.mock('@/lib/utils/device', () => ({
+  shouldUseNativeShare: vi.fn(() => false), // Default to desktop behavior
+}));
+
 // Mock toast
 vi.mock('@/hooks/utils/useToast', () => ({
   toast: {
@@ -100,7 +105,7 @@ describe('ShareButton', () => {
       await user.click(button);
 
       await waitFor(() => {
-        expect(toast.success).toHaveBeenCalledWith('Texto copiado');
+        expect(toast.success).toHaveBeenCalledWith('Texto copiado al portapapeles');
       });
     });
 
@@ -150,13 +155,17 @@ describe('ShareButton', () => {
   });
 
   describe('Mobile behavior (Web Share API)', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       // Setup Web Share API
       Object.defineProperty(navigator, 'share', {
         value: mockShare,
         writable: true,
         configurable: true,
       });
+
+      // Mock shouldUseNativeShare to return true (mobile)
+      const { shouldUseNativeShare } = await import('@/lib/utils/device');
+      vi.mocked(shouldUseNativeShare).mockReturnValue(true);
     });
 
     it('should use Web Share API when available', async () => {
