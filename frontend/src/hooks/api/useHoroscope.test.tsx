@@ -127,37 +127,38 @@ describe('horoscope hooks', () => {
       expect(horoscopeApi.getTodayHoroscope).toHaveBeenCalledWith(ZodiacSign.ARIES);
     });
 
-    it('should be disabled when sign is null', () => {
-      const { result } = renderHook(() => useTodayHoroscope(null), { wrapper });
+    it('should handle errors when API fails', async () => {
+      const mockError = new Error('API Error');
+      vi.mocked(horoscopeApi.getTodayHoroscope).mockRejectedValueOnce(mockError);
 
-      // Query should not be loading if disabled
-      expect(result.current.isLoading).toBe(false);
-      expect(result.current.fetchStatus).toBe('idle');
-      expect(horoscopeApi.getTodayHoroscope).not.toHaveBeenCalled();
-    });
-
-    it('should enable when sign is provided', async () => {
-      vi.mocked(horoscopeApi.getTodayHoroscope).mockResolvedValueOnce(mockHoroscope);
-
-      const { result, rerender } = renderHook(
-        ({ sign }) => useTodayHoroscope(sign),
-        {
-          wrapper,
-          initialProps: { sign: null as ZodiacSign | null },
-        }
-      );
-
-      // Initially disabled
-      expect(result.current.fetchStatus).toBe('idle');
-
-      // Enable by providing a sign
-      rerender({ sign: ZodiacSign.ARIES });
+      const { result } = renderHook(() => useTodayHoroscope(ZodiacSign.TAURUS), { wrapper });
 
       await waitFor(() => {
-        expect(result.current.isSuccess).toBe(true);
+        expect(result.current.isError).toBe(true);
       });
 
-      expect(result.current.data).toEqual(mockHoroscope);
+      expect(result.current.error).toEqual(mockError);
+    });
+
+    it('should fetch different signs independently', async () => {
+      const ariesHoroscope = { ...mockHoroscope, zodiacSign: ZodiacSign.ARIES };
+      const taurusHoroscope = { ...mockHoroscope, id: 2, zodiacSign: ZodiacSign.TAURUS };
+
+      vi.mocked(horoscopeApi.getTodayHoroscope)
+        .mockResolvedValueOnce(ariesHoroscope)
+        .mockResolvedValueOnce(taurusHoroscope);
+
+      const { result: ariesResult } = renderHook(() => useTodayHoroscope(ZodiacSign.ARIES), { wrapper });
+      const { result: taurusResult } = renderHook(() => useTodayHoroscope(ZodiacSign.TAURUS), { wrapper });
+
+      await waitFor(() => {
+        expect(ariesResult.current.isSuccess).toBe(true);
+        expect(taurusResult.current.isSuccess).toBe(true);
+      });
+
+      expect(ariesResult.current.data?.zodiacSign).toBe(ZodiacSign.ARIES);
+      expect(taurusResult.current.data?.zodiacSign).toBe(ZodiacSign.TAURUS);
+      expect(horoscopeApi.getTodayHoroscope).toHaveBeenCalledTimes(2);
     });
   });
 

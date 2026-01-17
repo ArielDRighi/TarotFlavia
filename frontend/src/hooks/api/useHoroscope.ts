@@ -51,11 +51,14 @@ export function useTodayAllHoroscopes() {
 /**
  * Hook para obtener el horóscopo de un signo específico para hoy
  *
- * @param sign - Signo zodiacal (puede ser null para deshabilitar la query)
+ * @param sign - Signo zodiacal (requerido, no nullable)
  *
  * @example
  * ```tsx
- * function HoroscopeDetail({ sign }: { sign: ZodiacSign }) {
+ * function HoroscopeDetail({ sign }: { sign: ZodiacSign | null }) {
+ *   // El componente maneja el caso null antes de llamar al hook
+ *   if (!sign) return <SelectSign />;
+ *
  *   const { data, isLoading, error } = useTodayHoroscope(sign);
  *
  *   if (isLoading) return <Spinner />;
@@ -65,11 +68,10 @@ export function useTodayAllHoroscopes() {
  * }
  * ```
  */
-export function useTodayHoroscope(sign: ZodiacSign | null) {
+export function useTodayHoroscope(sign: ZodiacSign) {
   return useQuery({
-    queryKey: horoscopeQueryKeys.todaySign(sign!),
-    queryFn: () => getTodayHoroscope(sign!),
-    enabled: !!sign, // Solo ejecutar si hay un signo
+    queryKey: horoscopeQueryKeys.todaySign(sign),
+    queryFn: () => getTodayHoroscope(sign),
     staleTime: 1000 * 60 * 60, // 1 hora
   });
 }
