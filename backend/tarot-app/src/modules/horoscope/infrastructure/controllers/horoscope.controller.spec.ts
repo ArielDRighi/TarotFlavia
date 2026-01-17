@@ -138,9 +138,9 @@ describe('HoroscopeController', () => {
       horoscopeService.getTodayUTC.mockReturnValue(mockDate);
       horoscopeService.findBySignAndDate.mockResolvedValue(null);
 
-      await expect(
-        controller.getTodayBySign(ZodiacSign.ARIES),
-      ).rejects.toThrow(NotFoundException);
+      await expect(controller.getTodayBySign(ZodiacSign.ARIES)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should increment view count asynchronously', async () => {

@@ -166,9 +166,7 @@ describe('HoroscopeGenerationService', () => {
 
       // Mock findExistingHoroscope (usa createQueryBuilder)
       const queryBuilder = repository.createQueryBuilder();
-      queryBuilder.getOne = jest
-        .fn()
-        .mockResolvedValue(mockDailyHoroscope);
+      queryBuilder.getOne = jest.fn().mockResolvedValue(mockDailyHoroscope);
 
       const result = await service.generateForSign(sign, date);
 
@@ -333,9 +331,7 @@ describe('HoroscopeGenerationService', () => {
 
       // Mock createQueryBuilder para findBySignAndDate
       const queryBuilder = repository.createQueryBuilder();
-      queryBuilder.getOne = jest
-        .fn()
-        .mockResolvedValue(mockDailyHoroscope);
+      queryBuilder.getOne = jest.fn().mockResolvedValue(mockDailyHoroscope);
 
       const result = await service.findBySignAndDate(sign, date);
 
