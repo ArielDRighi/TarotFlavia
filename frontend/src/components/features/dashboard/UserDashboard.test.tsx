@@ -5,14 +5,17 @@ import * as useAuthModule from '@/hooks/useAuth';
 import * as useUserPlanFeaturesModule from '@/hooks/utils/useUserPlanFeatures';
 import * as useUserModule from '@/hooks/api/useUser';
 import * as useUserCapabilitiesModule from '@/hooks/api/useUserCapabilities';
-import type { AuthUser, UserProfile, UserCapabilities } from '@/types';
+import * as useHoroscopeModule from '@/hooks/api/useHoroscope';
+import type { AuthUser, UserProfile, UserCapabilities, DailyHoroscope } from '@/types';
 import type { UseQueryResult } from '@tanstack/react-query';
+import { ZodiacSign } from '@/types/horoscope.types';
 
 // Mocks
 vi.mock('@/hooks/useAuth');
 vi.mock('@/hooks/utils/useUserPlanFeatures');
 vi.mock('@/hooks/api/useUser');
 vi.mock('@/hooks/api/useUserCapabilities');
+vi.mock('@/hooks/api/useHoroscope');
 
 // Helper to create AuthUser mock without limits fields
 function createMockAuthUser(overrides?: Partial<AuthUser>): AuthUser {
@@ -30,6 +33,14 @@ function createMockAuthUser(overrides?: Partial<AuthUser>): AuthUser {
 describe('UserDashboard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // Default mock for useMySignHoroscope (can be overridden per test)
+    vi.spyOn(useHoroscopeModule, 'useMySignHoroscope').mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    } as unknown as UseQueryResult<DailyHoroscope, Error>);
   });
 
   it('should render WelcomeHeader', () => {
@@ -385,5 +396,141 @@ describe('UserDashboard', () => {
     await waitFor(() => {
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
+  });
+
+  // TASK-110: Tests for HoroscopeWidget integration
+  it('should render HoroscopeWidget in the dashboard', () => {
+    const mockUser = createMockAuthUser({ name: 'Test User', plan: 'free', birthDate: '1990-05-15' });
+
+    vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
+      user: mockUser,
+      isAuthenticated: true,
+      isLoading: false,
+      login: vi.fn(),
+      register: vi.fn(),
+      logout: vi.fn(),
+      checkAuth: vi.fn(),
+    });
+
+    vi.spyOn(useUserPlanFeaturesModule, 'useUserPlanFeatures').mockReturnValue({
+      plan: 'free',
+      planLabel: 'GRATUITO',
+      canUseAI: false,
+      canUseCategories: false,
+      canUseCustomQuestions: false,
+      canShare: true,
+      isPremium: false,
+      isFree: true,
+      isAnonymous: false,
+    });
+
+    // Mock useMySignHoroscope
+    vi.spyOn(useHoroscopeModule, 'useMySignHoroscope').mockReturnValue({
+      data: {
+        id: 1,
+        zodiacSign: ZodiacSign.TAURUS,
+        horoscopeDate: '2026-01-17',
+        generalContent: 'Hoy es un buen día para ti.',
+        areas: {
+          love: { content: 'Amor positivo', score: 8 },
+          wellness: { content: 'Bienestar alto', score: 7 },
+          money: { content: 'Finanzas estables', score: 6 },
+        },
+        luckyNumber: 7,
+        luckyColor: 'Verde',
+        luckyTime: 'Mañana',
+      },
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    } as unknown as UseQueryResult<DailyHoroscope, Error>);
+
+    render(<UserDashboard />);
+
+    // Should render HoroscopeWidget (test will FAIL initially - TDD RED phase)
+    expect(screen.getByTestId('horoscope-widget')).toBeInTheDocument();
+  });
+
+  it('should render HoroscopeWidget for premium users', () => {
+    const mockUser = createMockAuthUser({ name: 'Premium User', plan: 'premium', birthDate: '1985-12-25' });
+
+    vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
+      user: mockUser,
+      isAuthenticated: true,
+      isLoading: false,
+      login: vi.fn(),
+      register: vi.fn(),
+      logout: vi.fn(),
+      checkAuth: vi.fn(),
+    });
+
+    vi.spyOn(useUserPlanFeaturesModule, 'useUserPlanFeatures').mockReturnValue({
+      plan: 'premium',
+      planLabel: 'PREMIUM',
+      canUseAI: true,
+      canUseCategories: true,
+      canUseCustomQuestions: true,
+      canShare: true,
+      isPremium: true,
+      isFree: false,
+      isAnonymous: false,
+    });
+
+    vi.spyOn(useUserModule, 'useProfile').mockReturnValue({
+      data: {
+        id: 1,
+        email: 'premium@test.com',
+        name: 'Premium User',
+        roles: ['consumer'],
+        plan: 'premium',
+        lastLogin: null,
+      },
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    } as unknown as UseQueryResult<UserProfile>);
+
+    vi.spyOn(useUserCapabilitiesModule, 'useUserCapabilities').mockReturnValue({
+      data: {
+        dailyCard: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+        tarotReadings: { used: 1, limit: 3, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+        canCreateDailyReading: true,
+        canCreateTarotReading: true,
+        canUseAI: true,
+        canUseCustomQuestions: true,
+        canUseAdvancedSpreads: true,
+        plan: 'premium',
+        isAuthenticated: true,
+      },
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    } as unknown as UseQueryResult<UserCapabilities>);
+
+    // Mock useMySignHoroscope
+    vi.spyOn(useHoroscopeModule, 'useMySignHoroscope').mockReturnValue({
+      data: {
+        id: 2,
+        zodiacSign: ZodiacSign.CAPRICORN,
+        horoscopeDate: '2026-01-17',
+        generalContent: 'Día de crecimiento para ti.',
+        areas: {
+          love: { content: 'Amor estable', score: 7 },
+          wellness: { content: 'Energía positiva', score: 9 },
+          money: { content: 'Oportunidades financieras', score: 8 },
+        },
+        luckyNumber: 3,
+        luckyColor: 'Azul',
+        luckyTime: 'Tarde',
+      },
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    } as unknown as UseQueryResult<DailyHoroscope, Error>);
+
+    render(<UserDashboard />);
+
+    // Should render HoroscopeWidget even for premium users
+    expect(screen.getByTestId('horoscope-widget')).toBeInTheDocument();
   });
 });
