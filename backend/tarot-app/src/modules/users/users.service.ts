@@ -32,7 +32,7 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<UserWithoutPassword> {
-    const { email, password, name } = createUserDto;
+    const { email, password, name, birthDate } = createUserDto;
 
     // Normalize email to lowercase - BUG ENCONTRADO POR TEST
     const normalizedEmail = email.toLowerCase();
@@ -54,6 +54,7 @@ export class UsersService {
       email: normalizedEmail,
       password: hashedPassword,
       name,
+      ...(birthDate ? { birthDate } : {}),
     });
 
     try {

@@ -52,6 +52,13 @@ export class UserProfileResponseDto {
   profilePicture: string | null;
 
   @ApiProperty({
+    description: 'Fecha de nacimiento del usuario (formato: YYYY-MM-DD)',
+    example: '1990-05-15',
+    nullable: true,
+  })
+  birthDate: string | null;
+
+  @ApiProperty({
     description: 'Plan actual del usuario',
     enum: ['anonymous', 'free', 'premium'],
     example: 'free',

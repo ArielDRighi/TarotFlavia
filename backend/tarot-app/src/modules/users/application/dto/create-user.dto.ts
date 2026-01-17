@@ -4,6 +4,8 @@ import {
   IsString,
   MinLength,
   MaxLength,
+  IsOptional,
+  IsDateString,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import {
@@ -40,4 +42,16 @@ export class CreateUserDto {
   @MaxLength(128, { message: 'Password must not exceed 128 characters' })
   @Trim()
   password: string;
+
+  @ApiProperty({
+    example: '1990-05-15',
+    description: 'Fecha de nacimiento (formato: YYYY-MM-DD)',
+    required: false,
+  })
+  @IsOptional()
+  @IsDateString(
+    {},
+    { message: 'La fecha debe tener formato válido (YYYY-MM-DD)' },
+  )
+  birthDate?: string;
 }

@@ -4,6 +4,7 @@ import {
   IsOptional,
   MinLength,
   IsDate,
+  IsDateString,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
@@ -55,4 +56,16 @@ export class UpdateUserDto {
   @Type(() => Date)
   @IsOptional()
   lastLogin?: Date;
+
+  @ApiProperty({
+    example: '1990-05-15',
+    description: 'Fecha de nacimiento (formato: YYYY-MM-DD)',
+    required: false,
+  })
+  @IsOptional()
+  @IsDateString(
+    {},
+    { message: 'La fecha debe tener formato válido (YYYY-MM-DD)' },
+  )
+  birthDate?: string;
 }

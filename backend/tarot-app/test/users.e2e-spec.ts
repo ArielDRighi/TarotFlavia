@@ -800,4 +800,105 @@ describe('Users (e2e)', () => {
       expect(directCapabilities).toEqual(profileCapabilities);
     });
   });
+
+  describe('BirthDate Field', () => {
+    it('should register user without birthDate', async () => {
+      const registerData = {
+        email: `no-birthdate-${Date.now()}@test.com`,
+        name: 'User Without BirthDate',
+        password: 'Test123456!',
+      };
+
+      const response = await request(app.getHttpServer())
+        .post('/api/v1/auth/register')
+        .send(registerData)
+        .expect(201);
+
+      expect(response.body).toHaveProperty('access_token');
+      expect(response.body.user).toHaveProperty('email', registerData.email);
+      expect(response.body.user).not.toHaveProperty('password');
+    });
+
+    it('should register user with valid birthDate', async () => {
+      const birthDate = '1990-05-15';
+      const registerData = {
+        email: `with-birthdate-${Date.now()}@test.com`,
+        name: 'User With BirthDate',
+        password: 'Test123456!',
+        birthDate,
+      };
+
+      const response = await request(app.getHttpServer())
+        .post('/api/v1/auth/register')
+        .send(registerData)
+        .expect(201);
+
+      expect(response.body).toHaveProperty('access_token');
+      expect(response.body.user).toHaveProperty('email', registerData.email);
+
+      // Obtener el profile del usuario para verificar birthDate
+      const profileResponse = await request(app.getHttpServer())
+        .get('/api/v1/users/profile')
+        .set('Authorization', `Bearer ${response.body.access_token}`)
+        .expect(200);
+
+      const profile = profileResponse.body as UserProfile & {
+        birthDate?: string;
+      };
+      expect(profile.birthDate).toBe(birthDate);
+    });
+
+    it('should reject invalid birthDate format', async () => {
+      const registerData = {
+        email: `invalid-birthdate-${Date.now()}@test.com`,
+        name: 'User Invalid BirthDate',
+        password: 'Test123456!',
+        birthDate: '15/05/1990', // Formato incorrecto
+      };
+
+      const response = await request(app.getHttpServer())
+        .post('/api/v1/auth/register')
+        .send(registerData)
+        .expect(400);
+
+      expect(response.body).toHaveProperty('message');
+      expect(Array.isArray(response.body.message)).toBe(true);
+      expect(
+        response.body.message.some((msg: string) => msg.includes('fecha')),
+      ).toBe(true);
+    });
+
+    it('should update user birthDate through profile update', async () => {
+      const birthDate = '1985-12-25';
+      const response = await request(app.getHttpServer())
+        .patch('/api/v1/users/profile')
+        .set('Authorization', `Bearer ${freeUserToken}`)
+        .send({ birthDate })
+        .expect(200);
+
+      const profile = response.body as UserProfile & { birthDate?: string };
+      expect(profile.birthDate).toBe(birthDate);
+    });
+
+    it('should allow clearing birthDate by setting to null', async () => {
+      // Primero establecer una fecha
+      await request(app.getHttpServer())
+        .patch('/api/v1/users/profile')
+        .set('Authorization', `Bearer ${premiumUserToken}`)
+        .send({ birthDate: '1995-03-10' })
+        .expect(200);
+
+      // Luego limpiar la fecha
+      const response = await request(app.getHttpServer())
+        .patch('/api/v1/users/profile')
+        .set('Authorization', `Bearer ${premiumUserToken}`)
+        .send({ birthDate: null })
+        .expect(200);
+
+      const profile = response.body as UserProfile & {
+        birthDate?: string | null;
+      };
+      expect(profile.birthDate).toBeNull();
+    });
+  });
 });
