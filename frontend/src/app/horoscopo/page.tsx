@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { ZodiacSignSelector, HoroscopeSkeleton } from '@/components/features/horoscope';
 import { useTodayAllHoroscopes } from '@/hooks/api/useHoroscope';
 import { useAuthStore } from '@/stores/authStore';
@@ -29,9 +30,9 @@ export default function HoroscopoPage() {
       {!isAuthenticated && (
         <div className="bg-muted/50 rounded-lg p-4 mb-8 text-center">
           <p className="text-sm text-muted-foreground">
-            <a href="/registro" className="text-primary hover:underline">
+            <Link href={ROUTES.REGISTER} className="text-primary hover:underline">
               Regístrate
-            </a>{' '}
+            </Link>{' '}
             para ver tu horóscopo automáticamente
           </p>
         </div>
@@ -40,9 +41,9 @@ export default function HoroscopoPage() {
       {isAuthenticated && !userSign && (
         <div className="bg-accent/20 rounded-lg p-4 mb-8 text-center">
           <p className="text-sm">
-            <a href="/perfil" className="text-primary hover:underline">
+            <Link href={ROUTES.PERFIL} className="text-primary hover:underline">
               Configura tu fecha de nacimiento
-            </a>
+            </Link>
           </p>
         </div>
       )}

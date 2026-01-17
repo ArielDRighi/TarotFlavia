@@ -5,6 +5,7 @@ import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/stores/authStore';
 import { UserMenu } from './UserMenu';
+import { ROUTES } from '@/lib/constants/routes';
 
 /**
  * Header component
@@ -40,13 +41,13 @@ export function Header() {
         {/* Desktop navigation */}
         <div className="hidden items-center gap-6 md:flex">
           <Link
-            href="/carta-del-dia"
+            href={ROUTES.CARTA_DEL_DIA}
             className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
           >
             Carta del Día
           </Link>
           <Link
-            href="/horoscopo"
+            href={ROUTES.HOROSCOPO}
             className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
           >
             Horóscopo
