@@ -37,8 +37,37 @@ export class DailyHoroscope {
   /**
    * Fecha del horóscopo (solo fecha, sin hora)
    * Tipo DATE en PostgreSQL para optimizar almacenamiento y consultas
+   *
+   * IMPORTANTE: Usar transformer para evitar problemas de timezone.
+   * PostgreSQL DATE no guarda timezone, pero TypeORM convierte Date objects
+   * aplicando el timezone del servidor, lo que puede causar desfases de días.
+   *
+   * El transformer convierte:
+   * - Al guardar: Date → string 'YYYY-MM-DD' (usando UTC)
+   * - Al leer: string/Date → Date object normalizado a UTC medianoche
    */
-  @Column({ name: 'horoscope_date', type: 'date' })
+  @Column({
+    name: 'horoscope_date',
+    type: 'date',
+    transformer: {
+      to: (value: Date | string | null): string | null => {
+        if (!value) return null;
+        if (typeof value === 'string') return value;
+        // Usar UTC para evitar desfase de días por timezone
+        const year = value.getUTCFullYear();
+        const month = String(value.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(value.getUTCDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      },
+      from: (value: string | Date | null): Date | null => {
+        if (!value) return null;
+        if (value instanceof Date) return value;
+        // Parsear como UTC para consistencia
+        const [year, month, day] = value.split('-').map(Number);
+        return new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+      },
+    },
+  })
   horoscopeDate: Date;
 
   /**

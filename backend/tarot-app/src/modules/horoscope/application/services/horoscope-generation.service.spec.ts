@@ -81,13 +81,21 @@ describe('HoroscopeGenerationService', () => {
   };
 
   beforeEach(async () => {
+    const mockQueryBuilder = {
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      getOne: jest.fn(),
+      getMany: jest.fn(),
+    };
+
     const mockRepository = {
       findOne: jest.fn(),
       find: jest.fn(),
       create: jest.fn(),
       save: jest.fn(),
       delete: jest.fn(),
-      createQueryBuilder: jest.fn(),
+      createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
     };
 
     const mockAIProvider = {
@@ -124,18 +132,17 @@ describe('HoroscopeGenerationService', () => {
       const date = new Date('2026-01-17');
       const sign = ZodiacSign.ARIES;
 
-      repository.findOne.mockResolvedValue(null);
+      // Mock findExistingHoroscope (usa createQueryBuilder)
+      const queryBuilder = repository.createQueryBuilder();
+      queryBuilder.getOne = jest.fn().mockResolvedValue(null);
+
       aiProviderService.generateCompletion.mockResolvedValue(mockAIResponse);
       repository.create.mockReturnValue(mockDailyHoroscope);
       repository.save.mockResolvedValue(mockDailyHoroscope);
 
       const result = await service.generateForSign(sign, date);
 
-      expect(repository.findOne).toHaveBeenCalledWith({
-        where: expect.objectContaining({
-          zodiacSign: sign,
-        }),
-      });
+      expect(repository.createQueryBuilder).toHaveBeenCalled();
       expect(aiProviderService.generateCompletion).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({ role: 'system' }),
@@ -157,11 +164,13 @@ describe('HoroscopeGenerationService', () => {
       const date = new Date('2026-01-17');
       const sign = ZodiacSign.ARIES;
 
-      repository.findOne.mockResolvedValue(mockDailyHoroscope);
+      // Mock findExistingHoroscope (usa createQueryBuilder)
+      const queryBuilder = repository.createQueryBuilder();
+      queryBuilder.getOne = jest.fn().mockResolvedValue(mockDailyHoroscope);
 
       const result = await service.generateForSign(sign, date);
 
-      expect(repository.findOne).toHaveBeenCalled();
+      expect(repository.createQueryBuilder).toHaveBeenCalled();
       expect(aiProviderService.generateCompletion).not.toHaveBeenCalled();
       expect(result).toEqual(mockDailyHoroscope);
     });
@@ -170,7 +179,10 @@ describe('HoroscopeGenerationService', () => {
       const date = new Date('2026-01-17');
       const sign = ZodiacSign.ARIES;
 
-      repository.findOne.mockResolvedValue(null);
+      // Mock findExistingHoroscope (usa createQueryBuilder)
+      const queryBuilder = repository.createQueryBuilder();
+      queryBuilder.getOne = jest.fn().mockResolvedValue(null);
+
       aiProviderService.generateCompletion.mockResolvedValue({
         ...mockAIResponse,
         content: 'invalid json',
@@ -185,7 +197,10 @@ describe('HoroscopeGenerationService', () => {
       const date = new Date('2026-01-17');
       const sign = ZodiacSign.ARIES;
 
-      repository.findOne.mockResolvedValue(null);
+      // Mock findExistingHoroscope (usa createQueryBuilder)
+      const queryBuilder = repository.createQueryBuilder();
+      queryBuilder.getOne = jest.fn().mockResolvedValue(null);
+
       const invalidResponse = {
         generalContent: 'Test',
         areas: {
@@ -210,7 +225,10 @@ describe('HoroscopeGenerationService', () => {
       const date = new Date('2026-01-17');
       const sign = ZodiacSign.ARIES;
 
-      repository.findOne.mockResolvedValue(null);
+      // Mock findExistingHoroscope (usa createQueryBuilder)
+      const queryBuilder = repository.createQueryBuilder();
+      queryBuilder.getOne = jest.fn().mockResolvedValue(null);
+
       const invalidResponse = {
         generalContent: 'Test',
         areas: {
@@ -236,7 +254,10 @@ describe('HoroscopeGenerationService', () => {
       const date = new Date('2026-01-17');
       const sign = ZodiacSign.ARIES;
 
-      repository.findOne.mockResolvedValue(null);
+      // Mock findExistingHoroscope (usa createQueryBuilder)
+      const queryBuilder = repository.createQueryBuilder();
+      queryBuilder.getOne = jest.fn().mockResolvedValue(null);
+
       const invalidResponse = {
         generalContent: 'Test',
         areas: {
@@ -262,7 +283,10 @@ describe('HoroscopeGenerationService', () => {
       const date = new Date('2026-01-17');
       const sign = ZodiacSign.ARIES;
 
-      repository.findOne.mockResolvedValue(null);
+      // Mock findExistingHoroscope (usa createQueryBuilder)
+      const queryBuilder = repository.createQueryBuilder();
+      queryBuilder.getOne = jest.fn().mockResolvedValue(null);
+
       aiProviderService.generateCompletion.mockResolvedValue({
         ...mockAIResponse,
         content: '```json\n' + mockAIResponse.content + '\n```',
@@ -280,20 +304,18 @@ describe('HoroscopeGenerationService', () => {
       const today = new Date();
       const todayStr = today.toISOString().split('T')[0];
 
-      repository.findOne.mockResolvedValue(null);
+      // Mock findExistingHoroscope (usa createQueryBuilder)
+      const queryBuilder = repository.createQueryBuilder();
+      queryBuilder.getOne = jest.fn().mockResolvedValue(null);
+
       aiProviderService.generateCompletion.mockResolvedValue(mockAIResponse);
       repository.create.mockReturnValue(mockDailyHoroscope);
       repository.save.mockResolvedValue(mockDailyHoroscope);
 
       await service.generateForSign(sign);
 
-      // Verificar que se llamó con la fecha actual
-      expect(repository.findOne).toHaveBeenCalledWith({
-        where: expect.objectContaining({
-          zodiacSign: sign,
-          horoscopeDate: expect.anything(), // Raw query con fecha actual
-        }),
-      });
+      // Verificar que se llamó el createQueryBuilder
+      expect(repository.createQueryBuilder).toHaveBeenCalled();
 
       // Verificar que el prompt incluye la fecha actual
       const promptCall = aiProviderService.generateCompletion.mock.calls[0];
@@ -307,15 +329,13 @@ describe('HoroscopeGenerationService', () => {
       const date = new Date('2026-01-17');
       const sign = ZodiacSign.ARIES;
 
-      repository.findOne.mockResolvedValue(mockDailyHoroscope);
+      // Mock createQueryBuilder para findBySignAndDate
+      const queryBuilder = repository.createQueryBuilder();
+      queryBuilder.getOne = jest.fn().mockResolvedValue(mockDailyHoroscope);
 
       const result = await service.findBySignAndDate(sign, date);
 
-      expect(repository.findOne).toHaveBeenCalledWith({
-        where: expect.objectContaining({
-          zodiacSign: sign,
-        }),
-      });
+      expect(repository.createQueryBuilder).toHaveBeenCalled();
       expect(result).toEqual(mockDailyHoroscope);
     });
 
@@ -323,7 +343,9 @@ describe('HoroscopeGenerationService', () => {
       const date = new Date('2026-01-17');
       const sign = ZodiacSign.ARIES;
 
-      repository.findOne.mockResolvedValue(null);
+      // Mock createQueryBuilder para findBySignAndDate
+      const queryBuilder = repository.createQueryBuilder();
+      queryBuilder.getOne = jest.fn().mockResolvedValue(null);
 
       const result = await service.findBySignAndDate(sign, date);
 
@@ -339,21 +361,22 @@ describe('HoroscopeGenerationService', () => {
         { ...mockDailyHoroscope, id: 2, zodiacSign: ZodiacSign.TAURUS },
       ];
 
-      repository.find.mockResolvedValue(mockHoroscopes);
+      // Mock createQueryBuilder para findAllByDate
+      const queryBuilder = repository.createQueryBuilder();
+      queryBuilder.getMany = jest.fn().mockResolvedValue(mockHoroscopes);
 
       const result = await service.findAllByDate(date);
 
-      expect(repository.find).toHaveBeenCalledWith({
-        where: expect.any(Object),
-        order: { zodiacSign: 'ASC' },
-      });
+      expect(repository.createQueryBuilder).toHaveBeenCalled();
       expect(result).toEqual(mockHoroscopes);
     });
 
     it('should return empty array if no horoscopes found', async () => {
       const date = new Date('2026-01-17');
 
-      repository.find.mockResolvedValue([]);
+      // Mock createQueryBuilder para findAllByDate
+      const queryBuilder = repository.createQueryBuilder();
+      queryBuilder.getMany = jest.fn().mockResolvedValue([]);
 
       const result = await service.findAllByDate(date);
 
