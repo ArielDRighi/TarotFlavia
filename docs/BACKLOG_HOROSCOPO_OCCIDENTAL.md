@@ -2301,12 +2301,17 @@ frontend/src/components/features/horoscope/
 
 ---
 
-### TASK-109: Crear página de Horóscopo y agregar al Header
+### ✅ TASK-109: Crear página de Horóscopo y agregar al Header [COMPLETADA]
 
 **Módulo:** `frontend/src/app/horoscopo/`  
 **Prioridad:** 🟡 MEDIA  
 **Estimación:** 1 día  
-**Dependencias:** TASK-108
+**Dependencias:** TASK-108  
+**Estado:** ✅ COMPLETADA  
+**Fecha:** 17/01/2026  
+**Commit:** `196caea` - feat(horoscope): TASK-109 - Crear página de Horóscopo y agregar link al Header  
+**PR:** #254  
+**Rama:** `feature/TASK-109-horoscope-page-header`
 
 ---
 
@@ -2316,25 +2321,60 @@ Crear la página principal de horóscopo con selector de signos y vista detallad
 
 ---
 
-#### 🏗️ Contexto Técnico
+#### 🏗️ Implementación Realizada
 
-**Archivos a crear:**
+**Archivos creados:**
 
-- `frontend/src/app/horoscopo/page.tsx`
-- `frontend/src/app/horoscopo/[sign]/page.tsx`
+- ✅ `frontend/src/app/horoscopo/page.tsx` - Página principal con selector de signos
+- ✅ `frontend/src/app/horoscopo/page.test.tsx` - 7 tests
+- ✅ `frontend/src/app/horoscopo/[sign]/page.tsx` - Página de detalle por signo
+- ✅ `frontend/src/app/horoscopo/[sign]/page.test.tsx` - 8 tests
 
-**Archivos a modificar:**
+**Archivos modificados:**
 
-- `frontend/src/components/layout/Header.tsx`
-- `frontend/src/lib/constants/routes.ts`
+- ✅ `frontend/src/lib/constants/routes.ts` - Rutas HOROSCOPO y HOROSCOPO_SIGN
+- ✅ `frontend/src/components/layout/Header.tsx` - Links "Carta del Día" y "Horóscopo" (navegación pública)
+- ✅ `frontend/src/components/layout/Header.test.tsx` - 2 tests agregados (22 tests totales)
+- ✅ `frontend/src/types/auth.types.ts` - Campo birthDate agregado (opcional)
+- ✅ `frontend/src/components/features/horoscope/HoroscopeSkeleton.tsx` - data-testid attributes
+- ✅ `frontend/src/test/factories/authUser.factory.ts` - birthDate: null default
+- ✅ `frontend/src/test/factories/dailyReading.factory.ts` - birthDate: null default
+- ✅ `frontend/src/app/admin/layout.test.tsx` - Mock users updated
+
+**Características implementadas:**
+
+- ✅ Página `/horoscopo` con grid de 12 signos zodiacales
+- ✅ Página `/horoscopo/[sign]` con detalle completo del horóscopo
+- ✅ Detección automática del signo del usuario (si tiene birthDate)
+- ✅ Navegación en Header visible para todos los usuarios (público)
+- ✅ Estados: loading, error, no-data, success
+- ✅ Responsive design (mobile-first)
+- ✅ Mensajes para usuarios no autenticados y sin birthDate
+- ✅ Validación de signos inválidos con página de error
+- ✅ Selector horizontal de signos en página de detalle
+
+**Tests:**
+
+- ✅ 37 tests totales (100% passing)
+- ✅ 7 tests página principal (horoscopo/page.test.tsx)
+- ✅ 8 tests página de detalle (horoscopo/[sign]/page.test.tsx)
+- ✅ 22 tests Header component (incluye 2 nuevos para navegación pública)
+- ✅ Coverage > 80%
+
+**Validaciones:**
+
+- ✅ Lint: 0 errores, 0 warnings
+- ✅ Type-check: 0 errores TypeScript
+- ✅ Build: Exitoso (routes `/horoscopo` y `/horoscopo/[sign]` confirmados)
+- ✅ Tests: 37/37 pasando
 
 ---
 
-#### ✅ Tareas Específicas
+#### ✅ Tareas Completadas
 
 ##### Frontend
 
-- [ ] Agregar rutas en `routes.ts`:
+- [x] Agregar rutas en `routes.ts`:
 
   ```typescript
   export const ROUTES = {
@@ -2344,7 +2384,7 @@ Crear la página principal de horóscopo con selector de signos y vista detallad
   } as const;
   ```
 
-- [ ] Crear `app/horoscopo/page.tsx`:
+- [x] Crear `app/horoscopo/page.tsx`:
 
   ```tsx
   "use client";
@@ -2406,7 +2446,7 @@ Crear la página principal de horóscopo con selector de signos y vista detallad
   }
   ```
 
-- [ ] Crear `app/horoscopo/[sign]/page.tsx`:
+- [x] Crear `app/horoscopo/[sign]/page.tsx`:
 
   ```tsx
   "use client";
@@ -2470,7 +2510,7 @@ Crear la página principal de horóscopo con selector de signos y vista detallad
   }
   ```
 
-- [ ] Actualizar `Header.tsx` - agregar link:
+- [x] Actualizar `Header.tsx` - agregar link:
   ```tsx
   const navigationItems = [
     { href: "/carta-del-dia", label: "Carta del Día" },
@@ -2481,20 +2521,41 @@ Crear la página principal de horóscopo con selector de signos y vista detallad
 
 ##### Testing
 
-- [ ] Test: Página muestra 12 signos
-- [ ] Test: Click navega a página de signo
-- [ ] Test: Página de signo muestra detalle
-- [ ] Test: Signo inválido muestra error
+- [x] Test: Página muestra 12 signos (validado en tests)
+- [x] Test: Click navega a página de signo
+- [x] Test: Página de signo muestra detalle
+- [x] Test: Signo inválido muestra error
+- [x] Test: Loading states (skeleton variants)
+- [x] Test: Mensajes para usuarios sin auth/birthDate
+- [x] Test: Navegación en Header (links públicos)
+- [x] Test: User sign detection from birthDate
 
 ---
 
-#### 🎯 Criterios de Aceptación
+#### 🎯 Criterios de Aceptación (Todos Cumplidos)
 
-- [ ] /horoscopo muestra selector de signos
-- [ ] /horoscopo/[sign] muestra detalle
-- [ ] Navegación entre signos funciona
-- [ ] Link visible en header
-- [ ] Responsive en móvil y desktop
+- [x] /horoscopo muestra selector de signos
+- [x] /horoscopo/[sign] muestra detalle
+- [x] Navegación entre signos funciona
+- [x] Link visible en header (navegación pública)
+- [x] Responsive en móvil y desktop
+- [x] Tests pasan con >80% coverage (37/37 tests passing)
+- [x] Lint y build sin errores
+
+---
+
+#### 📎 Notas Técnicas
+
+> **IMPLEMENTACIÓN:**
+>
+> - ✅ Campo `birthDate` agregado a AuthUser como opcional/nullable
+> - ✅ Detección automática de signo usando `getZodiacSignFromDate()`
+> - ✅ Navegación en Header cambió a público (visible para todos los usuarios)
+> - ✅ Mensajes contextuales para usuarios anónimos y sin birthDate
+> - ✅ Componentes reutilizados de TASK-108 (ZodiacSignSelector, HoroscopeDetail, etc.)
+> - ✅ Hooks de TASK-107 (useTodayHoroscope, useTodayAllHoroscopes)
+> - ✅ Validación de signos inválidos con página de error graceful
+
 
 # Dashboard Widget y Esquema de Datos
 
@@ -2671,7 +2732,7 @@ Semana 3:
 
 - [x] TASK-107: Types y hooks ✅ (17/01/2026)
 - [x] TASK-108: Componentes UI ✅ (17/01/2026)
-- [ ] TASK-109: Páginas
+- [x] TASK-109: Páginas ✅ (17/01/2026) - PR #254
 - [ ] TASK-110: Widget dashboard
 
 ### Infraestructura
