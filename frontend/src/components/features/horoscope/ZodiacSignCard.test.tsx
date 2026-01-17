@@ -169,13 +169,12 @@ describe('ZodiacSignCard', () => {
       expect(mockOnClick).not.toHaveBeenCalled();
     });
 
-    it('should be keyboard accessible', async () => {
+    it('should be keyboard accessible with Enter key', async () => {
       const user = userEvent.setup();
       const signInfo = createTestSignInfo();
 
       render(<ZodiacSignCard signInfo={signInfo} onClick={mockOnClick} />);
 
-      // Tab to card (cards should be clickable but in this case just the card itself is clickable)
       const card = screen.getByTestId(`zodiac-card-${signInfo.sign}`);
       
       // Simulate clicking via Enter key
@@ -183,6 +182,23 @@ describe('ZodiacSignCard', () => {
       await user.keyboard('{Enter}');
 
       expect(mockOnClick).toHaveBeenCalledTimes(1);
+      expect(mockOnClick).toHaveBeenCalledWith(signInfo.sign);
+    });
+
+    it('should be keyboard accessible with Space key', async () => {
+      const user = userEvent.setup();
+      const signInfo = createTestSignInfo();
+
+      render(<ZodiacSignCard signInfo={signInfo} onClick={mockOnClick} />);
+
+      const card = screen.getByTestId(`zodiac-card-${signInfo.sign}`);
+      
+      // Simulate clicking via Space key
+      card.focus();
+      await user.keyboard(' ');
+
+      expect(mockOnClick).toHaveBeenCalledTimes(1);
+      expect(mockOnClick).toHaveBeenCalledWith(signInfo.sign);
     });
   });
 
