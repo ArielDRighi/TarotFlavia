@@ -31,7 +31,7 @@ export interface HoroscopeSkeletonProps {
 export function HoroscopeSkeleton({ variant = 'grid' }: HoroscopeSkeletonProps) {
   if (variant === 'detail') {
     return (
-      <div className="space-y-6">
+      <div data-testid="horoscope-skeleton-detail" className="space-y-6">
         <div className="text-center">
           <Skeleton className="mx-auto h-16 w-16 rounded-full" />
           <Skeleton className="mx-auto mt-2 h-8 w-32" />
@@ -48,7 +48,7 @@ export function HoroscopeSkeleton({ variant = 'grid' }: HoroscopeSkeletonProps) 
 
   // Grid skeleton (12 cards)
   return (
-    <div className="grid grid-cols-3 gap-4 md:grid-cols-4 lg:grid-cols-6">
+    <div data-testid="horoscope-skeleton-grid" className="grid grid-cols-3 gap-4 md:grid-cols-4 lg:grid-cols-6">
       {Array.from({ length: 12 }).map((_, i) => (
         <Card key={i} className="p-4">
           <Skeleton className="mx-auto h-12 w-12 rounded-full" />

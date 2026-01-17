@@ -39,6 +39,18 @@ export function Header() {
 
         {/* Desktop navigation */}
         <div className="hidden items-center gap-6 md:flex">
+          <Link
+            href="/carta-del-dia"
+            className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
+          >
+            Carta del Día
+          </Link>
+          <Link
+            href="/horoscopo"
+            className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
+          >
+            Horóscopo
+          </Link>
           {user && (
             <>
               <Link

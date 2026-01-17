@@ -97,6 +97,7 @@ export function createMockUser(overrides: Partial<AuthUser> = {}): AuthUser {
     roles: ['user'],
     plan: 'FREE',
     profilePicture: null,
+    birthDate: null,
     ...overrides,
   };
 }

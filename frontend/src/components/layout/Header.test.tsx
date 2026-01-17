@@ -187,4 +187,32 @@ describe('Header', () => {
       expect(screen.getByRole('navigation')).toBeInTheDocument();
     });
   });
+
+  describe('Public Navigation Links', () => {
+    it('should display Carta del Día link for all users', () => {
+      mockUseAuthStore.mockReturnValue({
+        user: null,
+        isAuthenticated: false,
+      });
+
+      render(<Header />);
+
+      const cartaLink = screen.getByRole('link', { name: /carta del día/i });
+      expect(cartaLink).toBeInTheDocument();
+      expect(cartaLink).toHaveAttribute('href', '/carta-del-dia');
+    });
+
+    it('should display Horóscopo link for all users', () => {
+      mockUseAuthStore.mockReturnValue({
+        user: null,
+        isAuthenticated: false,
+      });
+
+      render(<Header />);
+
+      const horoscopoLink = screen.getByRole('link', { name: /horóscopo/i });
+      expect(horoscopoLink).toBeInTheDocument();
+      expect(horoscopoLink).toHaveAttribute('href', '/horoscopo');
+    });
+  });
 });
