@@ -366,12 +366,32 @@ describe('ReadingCard', () => {
 
 **Action:** Automatically apply **FULL workflow** from `docs/WORKFLOW_FRONTEND.md`
 
+#### Backend PR Feedback
+```
+"Tengo feedback del PR de backend TASK-XXX"
+"Feedback del PR backend"
+"PR feedback backend: [comentarios]"
+```
+
+**Action:** Automatically apply **FULL workflow** from `docs/WORKFLOW_PR_FEEDBACK_BACKEND.md`
+
+#### Frontend PR Feedback
+```
+"Tengo feedback del PR de frontend TASK-XXX"
+"Feedback del PR frontend"
+"PR feedback frontend: [comentarios]"
+```
+
+**Action:** Automatically apply **FULL workflow** from `docs/WORKFLOW_PR_FEEDBACK_FRONTEND.md`
+
 ### Workflow Documents
 
 | Workflow | Path | When to Use |
 |----------|------|-------------|
 | **Backend TDD** | `docs/WORKFLOW_BACKEND.md` | All NestJS backend tasks |
 | **Frontend TDD** | `docs/WORKFLOW_FRONTEND.md` | All Next.js frontend tasks |
+| **Backend PR Feedback** | `docs/WORKFLOW_PR_FEEDBACK_BACKEND.md` | When receiving PR reviews for backend |
+| **Frontend PR Feedback** | `docs/WORKFLOW_PR_FEEDBACK_FRONTEND.md` | When receiving PR reviews for frontend |
 
 **CRITICAL:** These workflows are **NOT suggestions** - they are **mandatory processes** that must be followed for every task. The user should never need to repeat the full workflow instructions.
 
