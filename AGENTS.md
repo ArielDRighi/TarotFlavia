@@ -342,13 +342,69 @@ describe('ReadingCard', () => {
 
 ---
 
+## 🤖 Automated Workflows
+
+### Trigger Recognition
+
+**AI Agents MUST automatically apply these workflows when the user says:**
+
+#### Backend Tasks
+```
+"Iniciar TASK-XXX del backend"
+"Empezar tarea backend TASK-XXX"
+"Start backend task TASK-XXX"
+```
+
+**Action:** Automatically apply **FULL workflow** from `docs/WORKFLOW_BACKEND.md`
+
+#### Frontend Tasks
+```
+"Iniciar TASK-XXX del frontend"
+"Empezar tarea frontend TASK-XXX"
+"Start frontend task TASK-XXX"
+```
+
+**Action:** Automatically apply **FULL workflow** from `docs/WORKFLOW_FRONTEND.md`
+
+#### Backend PR Feedback
+```
+"Tengo feedback del PR de backend TASK-XXX"
+"Feedback del PR backend"
+"PR feedback backend: [comentarios]"
+```
+
+**Action:** Automatically apply **FULL workflow** from `docs/WORKFLOW_PR_FEEDBACK_BACKEND.md`
+
+#### Frontend PR Feedback
+```
+"Tengo feedback del PR de frontend TASK-XXX"
+"Feedback del PR frontend"
+"PR feedback frontend: [comentarios]"
+```
+
+**Action:** Automatically apply **FULL workflow** from `docs/WORKFLOW_PR_FEEDBACK_FRONTEND.md`
+
+### Workflow Documents
+
+| Workflow | Path | When to Use |
+|----------|------|-------------|
+| **Backend TDD** | `docs/WORKFLOW_BACKEND.md` | All NestJS backend tasks |
+| **Frontend TDD** | `docs/WORKFLOW_FRONTEND.md` | All Next.js frontend tasks |
+| **Backend PR Feedback** | `docs/WORKFLOW_PR_FEEDBACK_BACKEND.md` | When receiving PR reviews for backend |
+| **Frontend PR Feedback** | `docs/WORKFLOW_PR_FEEDBACK_FRONTEND.md` | When receiving PR reviews for frontend |
+
+**CRITICAL:** These workflows are **NOT suggestions** - they are **mandatory processes** that must be followed for every task. The user should never need to repeat the full workflow instructions.
+
+---
+
 ## 🔍 When in Doubt
 
 1. Check existing code patterns in similar modules
 2. Consult `.github/copilot-instructions.md` for API contracts
 3. Review `backend/tarot-app/docs/ARCHITECTURE.md` for backend patterns
 4. Review `frontend/docs/AI_DEVELOPMENT_GUIDE.md` for frontend patterns
-5. Run tests before committing: `npm run test:cov` (backend), `npm run test:run` (frontend)
+5. Review `docs/WORKFLOW_BACKEND.md` or `docs/WORKFLOW_FRONTEND.md` for complete workflows
+6. Run tests before committing: `npm run test:cov` (backend), `npm run test:run` (frontend)
 
 ---
 

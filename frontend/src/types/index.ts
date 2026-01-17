@@ -105,3 +105,12 @@ export type {
   SetFavoriteTarotistaDto,
   SetFavoriteTarotistaResponse,
 } from './subscription.types';
+
+// Horoscope Types
+export type {
+  DailyHoroscope,
+  HoroscopeArea,
+  HoroscopeAreas,
+  ZodiacSignInfo,
+} from './horoscope.types';
+export { ZodiacSign } from './horoscope.types';
