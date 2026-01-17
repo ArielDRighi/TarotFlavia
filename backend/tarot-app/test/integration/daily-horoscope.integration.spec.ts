@@ -12,7 +12,7 @@ import { INestApplication } from '@nestjs/common';
 import { AppModule } from '../../src/app.module';
 import { DataSource, Repository } from 'typeorm';
 import { DailyHoroscope } from '../../src/modules/horoscope/entities/daily-horoscope.entity';
-import { ZodiacSign } from '../../src/modules/horoscope/entities/zodiac-sign.enum';
+import { ZodiacSign } from '../../src/common/utils/zodiac.utils';
 
 // Increase timeout for integration tests
 jest.setTimeout(30000);

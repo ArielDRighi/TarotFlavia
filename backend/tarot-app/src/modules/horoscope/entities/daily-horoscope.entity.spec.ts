@@ -1,5 +1,5 @@
 import { DailyHoroscope } from './daily-horoscope.entity';
-import { ZodiacSign } from './zodiac-sign.enum';
+import { ZodiacSign } from '../../../common/utils/zodiac.utils';
 
 describe('DailyHoroscope Entity', () => {
   describe('Entity Creation', () => {

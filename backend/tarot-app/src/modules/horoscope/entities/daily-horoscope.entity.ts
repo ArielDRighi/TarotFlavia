@@ -6,7 +6,7 @@ import {
   UpdateDateColumn,
   Index,
 } from 'typeorm';
-import { ZodiacSign } from './zodiac-sign.enum';
+import { ZodiacSign } from '../../../common/utils/zodiac.utils';
 
 /**
  * Entidad para almacenar horóscopos diarios generados por IA
