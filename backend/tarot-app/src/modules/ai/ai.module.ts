@@ -11,6 +11,7 @@ import { PromptBuilderService } from './application/services/prompt-builder.serv
 import { GroqProvider } from './infrastructure/providers/groq.provider';
 import { DeepSeekProvider } from './infrastructure/providers/deepseek.provider';
 import { OpenAIProvider } from './infrastructure/providers/openai.provider';
+import { GeminiProvider } from './infrastructure/providers/gemini.provider';
 
 // External dependencies for PromptBuilderService
 import { TarotistaConfig } from '../tarotistas/entities/tarotista-config.entity';
@@ -39,6 +40,7 @@ import { AIUsageModule } from '../ai-usage/ai-usage.module';
     GroqProvider,
     DeepSeekProvider,
     OpenAIProvider,
+    GeminiProvider,
   ],
   exports: [AIProviderService, PromptBuilderService],
 })
