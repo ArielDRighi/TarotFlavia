@@ -1346,12 +1346,70 @@ src/modules/horoscope/application/services/
 
 ---
 
-### TASK-107: Crear tipos TypeScript y API client para Horóscopo
+### ✅ TASK-107: Crear tipos TypeScript y API client para Horóscopo [COMPLETADA]
 
 **Módulo:** `frontend/src/`  
 **Prioridad:** 🟡 MEDIA  
 **Estimación:** 0.5 días  
-**Dependencias:** TASK-105 (endpoints backend)
+**Dependencias:** TASK-105 (endpoints backend)  
+**Estado:** ✅ COMPLETADA  
+**Fecha:** 17/01/2026  
+**Commit:** `735c246` - feat(horoscope): add TypeScript types and API client  
+**Rama:** `feature/TASK-107-horoscope-types-api`
+
+---
+
+#### 📊 Resumen de Implementación
+
+**Archivos creados:**
+
+- ✅ `frontend/src/types/horoscope.types.ts` - Enum ZodiacSign + interfaces
+- ✅ `frontend/src/types/horoscope.types.test.ts` - 5 tests
+- ✅ `frontend/src/lib/api/horoscope-api.ts` - 5 funciones API
+- ✅ `frontend/src/lib/api/horoscope-api.test.ts` - 7 tests
+- ✅ `frontend/src/lib/utils/zodiac.ts` - Utilidades zodiacales con fix UTC
+- ✅ `frontend/src/lib/utils/zodiac.test.ts` - 19 tests (incluye Capricornio)
+- ✅ `frontend/src/hooks/api/useHoroscope.ts` - 3 hooks React Query
+- ✅ `frontend/src/hooks/api/useHoroscope.test.tsx` - 9 tests
+
+**Archivos modificados:**
+
+- ✅ `frontend/src/lib/api/endpoints.ts` - Agregado objeto HOROSCOPE
+- ✅ `frontend/src/types/index.ts` - Exports centralizados
+
+**Características implementadas:**
+
+- ✅ Enum `ZodiacSign` con 12 signos del zodiaco
+- ✅ Interfaces: `HoroscopeArea`, `HoroscopeAreas`, `DailyHoroscope`, `ZodiacSignInfo`
+- ✅ 5 funciones API: getTodayAllHoroscopes, getTodayHoroscope, getMySignHoroscope, getHoroscopeByDate, getHoroscopeByDateAndSign
+- ✅ ZODIAC_SIGNS_INFO con datos completos de 12 signos (nombre, símbolo, elemento, fechas)
+- ✅ ZODIAC_RANGES con rangos de fechas por signo
+- ✅ getZodiacSignFromDate() usando UTC para evitar problemas de timezone
+- ✅ Manejo especial de Capricornio (cruza el año: Dec 22 - Jan 19)
+- ✅ Hooks React Query con staleTime de 1 hora
+- ✅ useMySignHoroscope con retry: false (falla legítimamente sin birthDate)
+
+**Tests:**
+
+- ✅ 40 tests totales (100% passing)
+- ✅ 5 tests de tipos
+- ✅ 19 tests de utilidades zodiacales (incluye caso especial de Capricornio)
+- ✅ 7 tests de funciones API
+- ✅ 9 tests de hooks React Query
+- ✅ Coverage > 80%
+
+**Fix crítico aplicado:**
+
+- ✅ Cambio de `getMonth()/getDate()` a `getUTCMonth()/getUTCDate()` en `zodiac.ts`
+- ✅ Soluciona problemas de timezone en cálculo de signos zodiacales
+
+**Calidad:**
+
+- ✅ Lint: 0 errores, 0 warnings
+- ✅ Type-check: 0 errores de tipos
+- ✅ Build: Exitoso
+- ✅ Tests: 40/40 pasando
+- ✅ Coverage: >80%
 
 ---
 
@@ -1381,7 +1439,50 @@ Crear los tipos TypeScript, endpoints y funciones de API para horóscopo.
 
 ##### Frontend
 
-- [ ] Crear `horoscope.types.ts`:
+- [x] Crear `horoscope.types.ts` con enum ZodiacSign e interfaces
+- [x] Agregar endpoints en `endpoints.ts` (HOROSCOPE object)
+- [x] Crear `horoscope-api.ts` con 5 funciones API
+- [x] Crear `lib/utils/zodiac.ts` con utilidades zodiacales
+- [x] Crear `hooks/api/useHoroscope.ts` con 3 hooks React Query
+- [x] Exportar tipos desde `types/index.ts`
+
+##### Testing
+
+- [x] Tests de tipos (5 tests)
+- [x] Tests de utilidades zodiacales (19 tests, incluye Capricornio)
+- [x] Tests de funciones API (7 tests)
+- [x] Tests de hooks React Query (9 tests)
+- [x] Coverage >80% (alcanzado en todos los archivos nuevos)
+
+---
+
+#### 🎯 Criterios de Aceptación
+
+- [x] Tipos TypeScript completos y documentados
+- [x] Funciones API implementadas con manejo de errores
+- [x] Utilidades zodiacales funcionan correctamente (incluye caso especial Capricornio)
+- [x] Hooks React Query con configuración adecuada (staleTime, retry)
+- [x] Tests pasan con >80% coverage (40/40 tests passing)
+- [x] Exports centralizados en index.ts
+- [x] Lint y build sin errores
+
+---
+
+#### 📎 Notas Técnicas
+
+> **IMPORTANTE:**
+>
+> - ✅ StaleTime de 1 hora apropiado (horóscopo no cambia durante el día)
+> - ✅ retry: false en useMySignHoroscope (falla legítimamente sin birthDate)
+> - ✅ Capricornio requiere lógica especial (cruza año nuevo: Dec 22 - Jan 19)
+> - ✅ Usar UTC methods para evitar timezone issues (`getUTCMonth()`, `getUTCDate()`)
+> - ✅ Backend ya implementado y funcional (TASK-105 completada)
+
+---
+
+# Frontend: Componentes UI
+
+---
 
   ```typescript
   export enum ZodiacSign {
