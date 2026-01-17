@@ -2614,8 +2614,8 @@ Semana 3:
 
 ### Frontend
 
-- [ ] TASK-107: Types y hooks
-- [ ] TASK-108: Componentes UI
+- [x] TASK-107: Types y hooks ✅ (17/01/2026)
+- [x] TASK-108: Componentes UI ✅ (17/01/2026)
 - [ ] TASK-109: Páginas
 - [ ] TASK-110: Widget dashboard
 
