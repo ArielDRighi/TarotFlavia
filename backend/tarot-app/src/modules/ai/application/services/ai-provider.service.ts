@@ -26,7 +26,7 @@ import { retryWithBackoff } from '../../infrastructure/errors/retry.utils';
 /**
  * AI Provider Service
  * Orchestrates multiple AI providers with automatic fallback
- * Priority: Groq (free) → DeepSeek (cheap) → Gemini (free tier) → OpenAI (fallback)
+ * Priority: Groq (free) → Gemini (free tier) → DeepSeek (cheap) → OpenAI (fallback)
  */
 @Injectable()
 export class AIProviderService {
@@ -51,8 +51,8 @@ export class AIProviderService {
     // Initialize providers in priority order
     this.providers = [
       this.groqProvider, // Primary: Free and fast
-      this.deepseekProvider, // Secondary: Low cost
-      this.geminiProvider, // Tertiary: Free tier (15 RPM)
+      this.geminiProvider, // Secondary: Free tier (15 RPM)
+      this.deepseekProvider, // Tertiary: Low cost
       this.openaiProvider, // Quaternary: Fallback
     ];
 
