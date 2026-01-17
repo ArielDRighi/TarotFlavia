@@ -12,6 +12,7 @@ export interface AuthUser {
   roles: string[];
   plan: string;
   profilePicture: string | null;
+  birthDate?: string | null;
 }
 
 /**

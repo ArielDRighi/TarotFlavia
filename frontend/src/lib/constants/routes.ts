@@ -10,6 +10,8 @@ export const ROUTES = {
   LOGIN: '/login',
   REGISTER: '/registro',
   CARTA_DEL_DIA: '/carta-del-dia',
+  HOROSCOPO: '/horoscopo',
+  HOROSCOPO_SIGN: (sign: string) => `/horoscopo/${sign}`,
 
   // Dashboard (authenticated)
   DASHBOARD: '/dashboard',
