@@ -75,7 +75,7 @@ const config = {
       ? ['query', 'error', 'warn']
       : false, // Habilitado en desarrollo para detectar N+1 queries. Para E2E: set E2E_ENABLE_LOGGING=true para habilitar logs durante pruebas E2E
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-  migrations: [__dirname + '/../migrations/*{.ts,.js}'],
+  migrations: [__dirname + '/../database/migrations/*{.ts,.js}'],
   migrationsTableName: 'migrations',
   migrationsRun: isE2ETesting ? false : true, // No ejecutar migraciones automáticamente en E2E (ya se ejecutan en globalSetup)
   ssl: false,
