@@ -2569,7 +2569,7 @@ Crear la página principal de horóscopo con selector de signos y vista detallad
 **Dependencias:** TASK-108, TASK-109  
 **Estado:** ✅ COMPLETADA  
 **Fecha:** 17/01/2026  
-**Commit:** (pendiente - será agregado)  
+**Commit:** `aecb6a8` - feat(horoscope): TASK-110 - Agregar HoroscopeWidget al Dashboard  
 **Rama:** `feature/TASK-110-horoscope-dashboard-widget`
 
 ---
