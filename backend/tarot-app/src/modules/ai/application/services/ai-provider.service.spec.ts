@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { AIProviderService } from './ai-provider.service';
 import { GroqProvider } from '../../infrastructure/providers/groq.provider';
 import { DeepSeekProvider } from '../../infrastructure/providers/deepseek.provider';
+import { GeminiProvider } from '../../infrastructure/providers/gemini.provider';
 import { OpenAIProvider } from '../../infrastructure/providers/openai.provider';
 import { AIUsageService } from '../../../ai-usage/ai-usage.service';
 import { AIQuotaService } from '../../../ai-usage/ai-quota.service';
@@ -17,6 +18,7 @@ describe('AIProviderService', () => {
   let service: AIProviderService;
   let groqProvider: jest.Mocked<GroqProvider>;
   let deepseekProvider: jest.Mocked<DeepSeekProvider>;
+  let geminiProvider: jest.Mocked<GeminiProvider>;
   let openaiProvider: jest.Mocked<OpenAIProvider>;
   let aiUsageService: jest.Mocked<AIUsageService>;
   let aiQuotaService: jest.Mocked<AIQuotaService>;
@@ -61,6 +63,14 @@ describe('AIProviderService', () => {
     deepseekProvider =
       deepseekProviderMock as unknown as jest.Mocked<DeepSeekProvider>;
 
+    const geminiProviderMock = {
+      generateCompletion: jest.fn(),
+      getProviderType: jest.fn().mockReturnValue(AIProviderType.GEMINI),
+      isAvailable: jest.fn().mockResolvedValue(true),
+    };
+    geminiProvider =
+      geminiProviderMock as unknown as jest.Mocked<GeminiProvider>;
+
     const openaiProviderMock = {
       generateCompletion: jest.fn(),
       getProviderType: jest.fn().mockReturnValue(AIProviderType.OPENAI),
@@ -99,6 +109,10 @@ describe('AIProviderService', () => {
         {
           provide: DeepSeekProvider,
           useValue: deepseekProvider,
+        },
+        {
+          provide: GeminiProvider,
+          useValue: geminiProvider,
         },
         {
           provide: OpenAIProvider,
@@ -193,6 +207,7 @@ describe('AIProviderService', () => {
 
       groqProvider.generateCompletion.mockRejectedValue(error);
       deepseekProvider.generateCompletion.mockRejectedValue(error);
+      geminiProvider.generateCompletion.mockRejectedValue(error);
       openaiProvider.generateCompletion.mockRejectedValue(error);
 
       await expect(
@@ -201,6 +216,7 @@ describe('AIProviderService', () => {
 
       expect(groqProvider.generateCompletion).toHaveBeenCalled();
       expect(deepseekProvider.generateCompletion).toHaveBeenCalled();
+      expect(geminiProvider.generateCompletion).toHaveBeenCalled();
       expect(openaiProvider.generateCompletion).toHaveBeenCalled();
     });
 
@@ -209,14 +225,15 @@ describe('AIProviderService', () => {
 
       groqProvider.generateCompletion.mockRejectedValue(error);
       deepseekProvider.generateCompletion.mockRejectedValue(error);
+      geminiProvider.generateCompletion.mockRejectedValue(error);
       openaiProvider.generateCompletion.mockRejectedValue(error);
 
       await expect(
         service.generateCompletion(mockMessages, 1, 1),
       ).rejects.toThrow();
 
-      // Should log 3 failed attempts
-      expect(aiUsageService.createLog).toHaveBeenCalledTimes(3);
+      // Should log 4 failed attempts (Groq, DeepSeek, Gemini, OpenAI)
+      expect(aiUsageService.createLog).toHaveBeenCalledTimes(4);
       expect(aiUsageService.createLog).toHaveBeenCalledWith(
         expect.objectContaining({
           status: 'error',
@@ -337,6 +354,7 @@ describe('AIProviderService', () => {
     it('should return status of all providers', async () => {
       groqProvider.isAvailable.mockResolvedValue(true);
       deepseekProvider.isAvailable.mockResolvedValue(false);
+      geminiProvider.isAvailable.mockResolvedValue(true);
       openaiProvider.isAvailable.mockResolvedValue(true);
 
       const statuses = await service.getProvidersStatus();
@@ -344,6 +362,7 @@ describe('AIProviderService', () => {
       expect(statuses).toEqual([
         { provider: AIProviderType.GROQ, available: true },
         { provider: AIProviderType.DEEPSEEK, available: false },
+        { provider: AIProviderType.GEMINI, available: true },
         { provider: AIProviderType.OPENAI, available: true },
       ]);
     });
@@ -353,6 +372,7 @@ describe('AIProviderService', () => {
 
       expect(groqProvider.isAvailable).toHaveBeenCalled();
       expect(deepseekProvider.isAvailable).toHaveBeenCalled();
+      expect(geminiProvider.isAvailable).toHaveBeenCalled();
       expect(openaiProvider.isAvailable).toHaveBeenCalled();
     });
   });
@@ -375,19 +395,20 @@ describe('AIProviderService', () => {
       expect(primary).toBe(AIProviderType.DEEPSEEK);
     });
 
-    it('should return OpenAI when Groq and DeepSeek unavailable', async () => {
+    it('should return Gemini when Groq and DeepSeek unavailable', async () => {
       groqProvider.isAvailable.mockResolvedValue(false);
       deepseekProvider.isAvailable.mockResolvedValue(false);
-      openaiProvider.isAvailable.mockResolvedValue(true);
+      geminiProvider.isAvailable.mockResolvedValue(true);
 
       const primary = await service.getPrimaryProvider();
 
-      expect(primary).toBe(AIProviderType.OPENAI);
+      expect(primary).toBe(AIProviderType.GEMINI);
     });
 
     it('should return null when all providers unavailable', async () => {
       groqProvider.isAvailable.mockResolvedValue(false);
       deepseekProvider.isAvailable.mockResolvedValue(false);
+      geminiProvider.isAvailable.mockResolvedValue(false);
       openaiProvider.isAvailable.mockResolvedValue(false);
 
       const primary = await service.getPrimaryProvider();
@@ -400,11 +421,12 @@ describe('AIProviderService', () => {
     it('should return stats for all circuit breakers', () => {
       const stats = service.getCircuitBreakerStats();
 
-      expect(stats).toHaveLength(3);
+      expect(stats).toHaveLength(4);
       expect(stats.map((s) => s.provider)).toEqual(
         expect.arrayContaining([
           AIProviderType.GROQ,
           AIProviderType.DEEPSEEK,
+          AIProviderType.GEMINI,
           AIProviderType.OPENAI,
         ]),
       );

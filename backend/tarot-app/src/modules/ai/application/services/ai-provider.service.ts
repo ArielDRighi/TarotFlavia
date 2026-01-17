@@ -10,6 +10,7 @@ import {
 import { GroqProvider } from '../../infrastructure/providers/groq.provider';
 import { DeepSeekProvider } from '../../infrastructure/providers/deepseek.provider';
 import { OpenAIProvider } from '../../infrastructure/providers/openai.provider';
+import { GeminiProvider } from '../../infrastructure/providers/gemini.provider';
 import { AIUsageService } from '../../../ai-usage/ai-usage.service';
 import { AIQuotaService } from '../../../ai-usage/ai-quota.service';
 import {
@@ -25,7 +26,7 @@ import { retryWithBackoff } from '../../infrastructure/errors/retry.utils';
 /**
  * AI Provider Service
  * Orchestrates multiple AI providers with automatic fallback
- * Priority: Groq (free) → DeepSeek (cheap) → OpenAI (fallback)
+ * Priority: Groq (free) → DeepSeek (cheap) → Gemini (free tier) → OpenAI (fallback)
  */
 @Injectable()
 export class AIProviderService {
@@ -42,6 +43,7 @@ export class AIProviderService {
     private readonly configService: ConfigService,
     private readonly groqProvider: GroqProvider,
     private readonly deepseekProvider: DeepSeekProvider,
+    private readonly geminiProvider: GeminiProvider,
     private readonly openaiProvider: OpenAIProvider,
     private readonly aiUsageService: AIUsageService,
     private readonly aiQuotaService: AIQuotaService,
@@ -50,7 +52,8 @@ export class AIProviderService {
     this.providers = [
       this.groqProvider, // Primary: Free and fast
       this.deepseekProvider, // Secondary: Low cost
-      this.openaiProvider, // Tertiary: Fallback
+      this.geminiProvider, // Tertiary: Free tier (15 RPM)
+      this.openaiProvider, // Quaternary: Fallback
     ];
 
     // Initialize circuit breakers for each provider
@@ -74,6 +77,14 @@ export class AIProviderService {
       AIProviderType.OPENAI,
       new CircuitBreaker(
         AIProviderType.OPENAI,
+        this.CIRCUIT_BREAKER_FAILURE_THRESHOLD,
+        this.CIRCUIT_BREAKER_TIMEOUT_MS,
+      ),
+    );
+    this.circuitBreakers.set(
+      AIProviderType.GEMINI,
+      new CircuitBreaker(
+        AIProviderType.GEMINI,
         this.CIRCUIT_BREAKER_FAILURE_THRESHOLD,
         this.CIRCUIT_BREAKER_TIMEOUT_MS,
       ),

@@ -7,6 +7,7 @@ export enum AIProviderType {
   GROQ = 'groq',
   DEEPSEEK = 'deepseek',
   OPENAI = 'openai',
+  GEMINI = 'gemini',
 }
 
 export interface AIProviderConfig {
