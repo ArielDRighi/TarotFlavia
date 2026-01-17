@@ -441,12 +441,15 @@ Agregar Google Gemini 1.5 Flash como provider de IA para usar como fallback cuan
 
 ---
 
-### TASK-103: Crear entidad DailyHoroscope y migración
+### ✅ TASK-103: Crear entidad DailyHoroscope y migración [COMPLETADA]
 
 **Módulo:** `src/modules/horoscope/`  
 **Prioridad:** 🔴 ALTA  
 **Estimación:** 0.5 días  
-**Dependencias:** TASK-101 (para el enum ZodiacSign)
+**Estado:** ✅ COMPLETADA  
+**Fecha:** 17/01/2026  
+**Commit:** `04340d5` - feat(horoscope): TASK-103 - Crear entidad DailyHoroscope y migración  
+**Rama:** `feature/TASK-103-crear-entidad-daily-horoscope`
 
 ---
 
@@ -456,38 +459,74 @@ Crear la entidad `DailyHoroscope` para almacenar los horóscopos diarios generad
 
 ---
 
-#### 🏗️ Contexto Técnico
+#### 🏗️ Implementación Realizada
 
-**Archivos a crear:**
+**Archivos creados:**
 
-- `src/modules/horoscope/entities/daily-horoscope.entity.ts`
-- `src/database/migrations/XXXX-CreateDailyHoroscopes.ts`
+- ✅ `src/modules/horoscope/entities/zodiac-sign.enum.ts` - Enum con los 12 signos del zodiaco
+- ✅ `src/modules/horoscope/entities/daily-horoscope.entity.ts` - Entidad con índices y JSONB
+- ✅ `src/database/migrations/1770900000000-CreateDailyHoroscopes.ts` - Migración con enum y tabla
+- ✅ `src/modules/horoscope/entities/daily-horoscope.entity.spec.ts` - 12 tests unitarios
+- ✅ `test/integration/daily-horoscope.integration.spec.ts` - 9 tests de integración
 
-**Ubicación del módulo:**
+**Configuración:**
+
+- ✅ `test/integration.config.ts` - Agregadas rutas de migraciones
+- ✅ `test/setup-integration-db.ts` - Variable INTEGRATION_TESTING
+
+**Estructura del módulo:**
 
 ```
 src/modules/horoscope/
-├── horoscope.module.ts
-├── entities/
-│   └── daily-horoscope.entity.ts
-├── application/
-│   ├── dto/
-│   ├── services/
-│   └── prompts/
-└── infrastructure/
-    ├── controllers/
-    └── repositories/
+└── entities/
+    ├── zodiac-sign.enum.ts          ✅
+    ├── daily-horoscope.entity.ts    ✅
+    └── daily-horoscope.entity.spec.ts ✅
 ```
 
 ---
 
-#### ✅ Tareas Específicas
+#### ✅ Tareas Completadas
 
 ##### Backend
 
-- [ ] Crear estructura de carpetas del módulo horoscope
+- [x] Crear estructura de carpetas del módulo horoscope
+- [x] Crear enum ZodiacSign con 12 signos
+- [x] Crear entidad `DailyHoroscope` con:
+  - Índice único en (zodiacSign, horoscopeDate)
+  - Índice en horoscopeDate
+  - JSONB para áreas (amor, bienestar, dinero)
+  - Campos opcionales (luckyNumber, luckyColor, luckyTime)
+  - Metadatos de IA (provider, model, tokens, tiempo)
+  - Contador de visualizaciones
+  - Mapeo explícito de columnas camelCase → snake_case
+- [x] Crear migración 1770900000000-CreateDailyHoroscopes
+- [x] Ejecutar migración en BD principal y de integración
 
-- [ ] Crear entidad `DailyHoroscope`:
+##### Testing
+
+- [x] 12 tests unitarios: creación, JSONB, fechas, metadata, lucky elements
+- [x] 9 tests de integración: persistencia, índice único, consultas por fecha
+- [x] Configurar IntegrationDataSource con migraciones
+- [x] Variable INTEGRATION_TESTING para tests
+
+---
+
+#### 🎯 Criterios de Aceptación (Todos Cumplidos)
+
+- [x] Migración ejecutada sin errores
+- [x] Índice único funciona correctamente (validado en tests de integración)
+- [x] JSONB permite consultas y actualizaciones (validado con 21 tests)
+- [x] Tests: ✅ 21/21 pasando (12 unitarios + 9 integración)
+
+---
+
+#### 📎 Notas Técnicas
+
+- El índice único (zodiacSign, horoscopeDate) previene duplicados eficientemente
+- JSONB permite almacenar estructuras flexibles con consultas eficientes
+- Mapeo explícito de nombres de columnas evita problemas con camelCase/snake_case
+- Tests de integración validan la funcionalidad completa con BD real
 
   ```typescript
   @Entity("daily_horoscopes")
@@ -527,55 +566,7 @@ src/modules/horoscope/
 
     @Column({ type: "varchar", length: 100, nullable: true })
     aiModel: string | null;
-
-    @Column({ type: "int", default: 0 })
-    tokensUsed: number;
-
-    @Column({ type: "int", default: 0 })
-    generationTimeMs: number;
-
-    @Column({ type: "int", default: 0 })
-    viewCount: number;
-
-    @CreateDateColumn()
-    createdAt: Date;
-
-    @UpdateDateColumn()
-    updatedAt: Date;
-  }
   ```
-
-- [ ] Crear migración que incluya:
-  - Enum `zodiac_sign_enum` en PostgreSQL
-  - Tabla `daily_horoscopes`
-  - Índice único en (zodiacSign, horoscopeDate)
-  - Índice en horoscopeDate
-
-- [ ] Ejecutar migración
-
-##### Testing
-
-- [ ] Test: Entidad se crea correctamente
-- [ ] Test: Índice único previene duplicados
-- [ ] Test: JSONB de áreas se guarda y recupera correctamente
-
----
-
-#### 🎯 Criterios de Aceptación
-
-- [ ] Migración se ejecuta sin errores
-- [ ] Índice único funciona correctamente
-- [ ] JSONB permite consultas y actualizaciones
-
----
-
-#### 📎 Notas para el Agente IA
-
-> **IMPORTANTE:**
->
-> - El índice único (zodiacSign, horoscopeDate) es CRÍTICO
-> - `horoscopeDate` es tipo DATE (sin hora)
-> - Scores de áreas son 1-10
 
 ---
 
