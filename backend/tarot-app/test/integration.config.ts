@@ -25,7 +25,7 @@ export const integrationDataSourceOptions: TypeOrmModuleOptions &
   synchronize: false, // Usar migraciones, NO auto-sync
   dropSchema: false, // NO eliminar schema entre tests
   logging: false, // Desactivar logging SQL en tests
-  migrations: [],
+  migrations: [join(__dirname, '../src/database/migrations/*{.ts,.js}')],
 };
 
 export const IntegrationDataSource = new DataSource(

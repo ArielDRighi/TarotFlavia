@@ -7,6 +7,9 @@ import { IntegrationDataSource } from './integration.config';
 export default async function globalSetup() {
   console.log('\n🚀 [Global Setup Integration] Iniciando configuración...');
 
+  // Establecer variable de entorno para que AppModule use la BD de integración
+  process.env.INTEGRATION_TESTING = 'true';
+
   try {
     // Inicializar conexión
     console.log('[Global Setup Integration] Conectando a base de datos...');
