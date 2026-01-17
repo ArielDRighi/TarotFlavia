@@ -132,26 +132,6 @@ export class HoroscopeGenerationService {
   }
 
   /**
-   * Verifica si ya existe un horóscopo para un signo y fecha
-   *
-   * @param sign - Signo zodiacal
-   * @param date - Fecha del horóscopo
-   * @returns Horóscopo encontrado o null
-   * @private
-   */
-  private async findExistingHoroscope(
-    sign: ZodiacSign,
-    date: Date,
-  ): Promise<DailyHoroscope | null> {
-    const dateStr = this.formatDateForQuery(date);
-    return this.horoscopeRepository
-      .createQueryBuilder('h')
-      .where('h.zodiacSign = :sign', { sign })
-      .andWhere(`h.horoscope_date::TEXT = :date`, { date: dateStr })
-      .getOne();
-  }
-
-  /**
    * Busca un horóscopo por signo y fecha
    *
    * @param sign - Signo zodiacal

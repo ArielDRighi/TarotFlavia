@@ -263,6 +263,10 @@ describe('HoroscopeController', () => {
         ZodiacSign.ARIES,
         new Date(dateStr),
       );
+      // Verificar que se incrementa el contador de vistas
+      expect(horoscopeService.incrementViewCount).toHaveBeenCalledWith(
+        mockHoroscope.id,
+      );
       expect(result.zodiacSign).toBe(ZodiacSign.ARIES);
     });
 

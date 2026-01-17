@@ -233,16 +233,28 @@ export class HoroscopeController {
       throw new NotFoundException(`Horóscopo no disponible`);
     }
 
+    // Incrementar viewCount de forma asíncrona (fire-and-forget)
+    this.horoscopeService.incrementViewCount(horoscope.id).catch(() => {
+      // Ignorar errores silenciosamente
+    });
+
     return this.toResponseDto(horoscope);
   }
 
   /**
    * Helper: Parsear string de fecha a Date
+   * Valida formato YYYY-MM-DD estricto antes de parsear
    */
   private parseDate(dateStr: string): Date {
+    // Validar formato YYYY-MM-DD con regex
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(dateStr)) {
+      throw new BadRequestException('Formato inválido. Usar YYYY-MM-DD');
+    }
+
     const date = new Date(dateStr);
     if (isNaN(date.getTime())) {
-      throw new BadRequestException('Formato inválido. Usar YYYY-MM-DD');
+      throw new BadRequestException('Fecha inválida');
     }
     return date;
   }
