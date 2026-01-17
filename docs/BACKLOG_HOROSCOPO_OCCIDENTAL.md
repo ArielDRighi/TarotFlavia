@@ -434,7 +434,7 @@ Agregar Google Gemini 1.5 Flash como provider de IA para usar como fallback cuan
 
 **Coverage:** 97.14% (Statements), 87.03% (Branches), 100% (Functions)  
 **Tests:** 20 tests pasados  
-**Prioridad:** Groq → DeepSeek → Gemini → OpenAI  
+**Prioridad:** Groq → Gemini → DeepSeek → OpenAI  
 **Límites Free Tier:** 15 RPM, 1M TPM, 1500 RPD
 
 # Backend: Entidad, Servicio y Módulo
