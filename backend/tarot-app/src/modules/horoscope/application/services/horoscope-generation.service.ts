@@ -4,7 +4,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Raw, LessThan } from 'typeorm';
+import { Repository, LessThan } from 'typeorm';
 import { DailyHoroscope } from '../../entities/daily-horoscope.entity';
 import { AIProviderService } from '../../../ai/application/services/ai-provider.service';
 import { AIMessage } from '../../../ai/domain/interfaces/ai-provider.interface';
@@ -39,6 +39,15 @@ export class HoroscopeGenerationService {
     private readonly horoscopeRepository: Repository<DailyHoroscope>,
     private readonly aiProviderService: AIProviderService,
   ) {}
+
+  /**
+   * Obtiene la fecha de hoy normalizada a UTC (medianoche)
+   * Este método asegura que "hoy" sea consistente entre todas las operaciones
+   * @returns Fecha de hoy a las 00:00:00 UTC
+   */
+  getTodayUTC(): Date {
+    return this.normalizeDateToUTC(new Date());
+  }
 
   /**
    * Genera un horóscopo para un signo específico en una fecha
@@ -94,9 +103,12 @@ export class HoroscopeGenerationService {
     const horoscopeData = this.parseAIResponse(aiResponse.content);
 
     // 6. Crear y guardar el horóscopo
+    // Normalizar la fecha a medianoche UTC para consistencia
+    const normalizedDate = this.normalizeDateToUTC(date);
+
     const horoscope = this.horoscopeRepository.create({
       zodiacSign: sign,
-      horoscopeDate: date,
+      horoscopeDate: normalizedDate,
       generalContent: horoscopeData.generalContent,
       areas: horoscopeData.areas,
       luckyNumber: horoscopeData.luckyNumber,
@@ -120,6 +132,26 @@ export class HoroscopeGenerationService {
   }
 
   /**
+   * Verifica si ya existe un horóscopo para un signo y fecha
+   *
+   * @param sign - Signo zodiacal
+   * @param date - Fecha del horóscopo
+   * @returns Horóscopo encontrado o null
+   * @private
+   */
+  private async findExistingHoroscope(
+    sign: ZodiacSign,
+    date: Date,
+  ): Promise<DailyHoroscope | null> {
+    const dateStr = this.formatDateForQuery(date);
+    return this.horoscopeRepository
+      .createQueryBuilder('h')
+      .where('h.zodiacSign = :sign', { sign })
+      .andWhere(`h.horoscope_date::TEXT = :date`, { date: dateStr })
+      .getOne();
+  }
+
+  /**
    * Busca un horóscopo por signo y fecha
    *
    * @param sign - Signo zodiacal
@@ -131,12 +163,18 @@ export class HoroscopeGenerationService {
     date: Date,
   ): Promise<DailyHoroscope | null> {
     const dateStr = this.formatDateForQuery(date);
-    return this.horoscopeRepository.findOne({
-      where: {
-        zodiacSign: sign,
-        horoscopeDate: Raw((alias) => `${alias} = :date`, { date: dateStr }),
-      },
-    });
+    this.logger.debug(
+      `Buscando horóscopo: ${sign}, fecha: ${dateStr}, date original: ${date.toISOString()}`,
+    );
+
+    const result = await this.horoscopeRepository
+      .createQueryBuilder('h')
+      .where('h.zodiacSign = :sign', { sign })
+      .andWhere(`h.horoscope_date::TEXT = :date`, { date: dateStr })
+      .getOne();
+
+    this.logger.debug(`Resultado: ${result ? 'encontrado' : 'no encontrado'}`);
+    return result;
   }
 
   /**
@@ -147,12 +185,18 @@ export class HoroscopeGenerationService {
    */
   async findAllByDate(date: Date): Promise<DailyHoroscope[]> {
     const dateStr = this.formatDateForQuery(date);
-    return this.horoscopeRepository.find({
-      where: {
-        horoscopeDate: Raw((alias) => `${alias} = :date`, { date: dateStr }),
-      },
-      order: { zodiacSign: 'ASC' },
-    });
+    this.logger.debug(
+      `Buscando todos los horóscopos para fecha: ${dateStr}, date original: ${date.toISOString()}`,
+    );
+
+    const results = await this.horoscopeRepository
+      .createQueryBuilder('h')
+      .where(`h.horoscope_date::TEXT = :date`, { date: dateStr })
+      .orderBy('h.zodiacSign', 'ASC')
+      .getMany();
+
+    this.logger.debug(`Encontrados: ${results.length} horóscopos`);
+    return results;
   }
 
   /**
@@ -267,11 +311,29 @@ export class HoroscopeGenerationService {
 
   /**
    * Formatea una fecha para queries de base de datos
+   * Usa componentes UTC para consistencia con cómo se almacenan las fechas
    * @param date - Fecha a formatear
    * @returns String en formato YYYY-MM-DD
    * @private
    */
   private formatDateForQuery(date: Date): string {
-    return date.toISOString().split('T')[0];
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  /**
+   * Normaliza una fecha a medianoche UTC para almacenarla en la BD
+   * Esto asegura que todas las fechas se guarden de forma consistente
+   * @param date - Fecha a normalizar
+   * @returns Nueva fecha a medianoche UTC
+   * @private
+   */
+  private normalizeDateToUTC(date: Date): Date {
+    const year = date.getUTCFullYear();
+    const month = date.getUTCMonth();
+    const day = date.getUTCDate();
+    return new Date(Date.UTC(year, month, day, 0, 0, 0, 0));
   }
 }

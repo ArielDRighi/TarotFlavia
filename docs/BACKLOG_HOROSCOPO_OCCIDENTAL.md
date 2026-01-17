@@ -665,12 +665,16 @@ src/modules/horoscope/
 
 ---
 
-### TASK-105: Crear endpoints de Horóscopo
+### ✅ TASK-105: Crear endpoints de Horóscopo [COMPLETADA]
 
 **Módulo:** `src/modules/horoscope/`  
 **Prioridad:** 🔴 ALTA  
 **Estimación:** 1.5 días  
-**Dependencias:** TASK-102, TASK-103
+**Dependencias:** TASK-102, TASK-103  
+**Estado:** ✅ COMPLETADA  
+**Fecha:** 17/01/2026  
+**Commit:** feat(horoscope): TASK-105 - Crear endpoints REST con 5 rutas  
+**Rama:** feature/TASK-105-crear-endpoints-horoscopo
 
 ---
 
@@ -2515,7 +2519,7 @@ Semana 3:
 - [x] TASK-102: Gemini Provider ✅ (17/01/2026)
 - [ ] TASK-103: Entidad DailyHoroscope
 - [ ] TASK-104: Servicio generación
-- [ ] TASK-105: Endpoints
+- [x] TASK-105: Endpoints ✅ (17/01/2026)
 - [ ] TASK-106: Cron job
 
 ### Frontend
