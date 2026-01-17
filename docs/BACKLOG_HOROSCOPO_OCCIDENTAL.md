@@ -1066,12 +1066,16 @@ Implementar endpoints REST para consultar horóscopos diarios.
 
 ---
 
-### TASK-106: Crear Cron Job de generación diaria
+### ✅ TASK-106: Crear Cron Job de generación diaria [COMPLETADA]
 
 **Módulo:** `src/modules/horoscope/application/services/`  
 **Prioridad:** 🔴 ALTA  
 **Estimación:** 1 día  
-**Dependencias:** TASK-104
+**Dependencias:** TASK-104  
+**Estado:** ✅ COMPLETADA  
+**Fecha:** 17/01/2026  
+**Commit:** (será agregado al hacer commit)  
+**Rama:** feature/TASK-106-horoscope-daily-cron
 
 ---
 
@@ -1081,27 +1085,83 @@ Implementar el cron job que genera horóscopos diarios de forma **SECUENCIAL** c
 
 ---
 
-#### 🏗️ Contexto Técnico
+#### 🏗️ Implementación Realizada
 
-**Archivos a crear:**
+**Archivos creados:**
 
-- `src/modules/horoscope/application/services/horoscope-cron.service.ts`
-- `src/modules/horoscope/application/services/horoscope-cron.service.spec.ts`
+```
+src/modules/horoscope/application/services/
+├── horoscope-cron.service.ts           ✅
+├── horoscope-cron.service.spec.ts      ✅
+└── horoscope-cron.config.ts            ✅
+```
 
-**Configuración crítica:**
+**Archivos modificados:**
 
-- Horario: 06:00 UTC
-- Ejecución: SECUENCIAL (no paralela)
-- Delay entre signos: 6 segundos
-- Objetivo: Nunca superar 15 RPM de Gemini
+- ✅ `src/modules/horoscope/horoscope.module.ts` - Registro de HoroscopeCronService
+
+**Características implementadas:**
+
+- ✅ Cron job secuencial (06:00 UTC diario)
+- ✅ Delay de 6 segundos entre signos (respeta 15 RPM de Gemini)
+- ✅ Generación resiliente (continúa si un signo falla)
+- ✅ Logs detallados con resumen de resultados
+- ✅ Cron job de limpieza semanal (>30 días)
+- ✅ Método generateNow() para testing manual
+- ✅ Constantes configurables (delay, retención, schedules)
 
 ---
 
-#### ✅ Tareas Específicas
+#### ✅ Tareas Completadas
 
 ##### Backend
 
-- [ ] Crear `HoroscopeCronService`:
+- [x] Crear `HoroscopeCronService` con generación secuencial
+- [x] Implementar delay de 6 segundos entre signos
+- [x] Cron job diario (@Cron '0 0 6 * * *')
+- [x] Cron job de limpieza semanal
+- [x] Método generateNow() para ejecución manual
+- [x] Registrar servicio en HoroscopeModule
+- [x] Crear archivo de constantes configurables
+
+##### Testing
+
+- [x] Test: Genera 12 horóscopos en orden secuencial
+- [x] Test: Continúa si un signo falla
+- [x] Test: Delay se ejecuta entre cada signo (11 veces)
+- [x] Test: Logs de resumen (exitosos/fallidos)
+- [x] Test: generateNow() funciona
+- [x] Test: Limpieza elimina horóscopos >30 días
+- [x] Test: Manejo de errores en limpieza
+- [x] Test: Constantes configuradas correctamente
+
+**Resultado:** ✅ 10/10 tests pasando (100%)
+
+---
+
+#### 🎯 Criterios de Aceptación (Todos Cumplidos)
+
+- [x] Cron job se registra correctamente (06:00 UTC)
+- [x] Generación es SECUENCIAL (no paralela)
+- [x] Delay de 6 segundos funciona (11 delays entre 12 signos)
+- [x] Si falla un signo, continúa con el siguiente
+- [x] Logs detallados con resumen final
+- [x] Limpieza semanal funciona
+- [x] Tests unitarios: ✅ 10/10 pasando
+- [x] Lint y build sin errores
+- [x] Validación de arquitectura pasa
+
+---
+
+#### 📎 Notas Técnicas
+
+- Delay de 6 segundos permite máximo 10 requests/minuto (bien dentro de 15 RPM de Gemini)
+- Total de ejecución: ~72 segundos para los 12 signos
+- Delay mockeado en tests para ejecución rápida
+- Constantes exportadas desde archivo de configuración separado
+- Limpieza semanal usa cron expression '0 0 0 * * 0' (domingos medianoche UTC)
+
+---
 
   ```typescript
   @Injectable()
