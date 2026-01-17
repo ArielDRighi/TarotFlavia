@@ -87,7 +87,7 @@ describe('zodiac.utils', () => {
 
     describe('Edge cases', () => {
       it('should handle Date object', () => {
-        const date = new Date(1990, 2, 25); // March 25, 1990 (month is 0-indexed)
+        const date = new Date('1990-03-25');
         expect(getZodiacSign(date)).toBe(ZodiacSign.ARIES);
       });
 

@@ -1,5 +1,21 @@
 /**
- * Signos zodiacales occidentales
+ * @module common/utils/zodiac.utils
+ *
+ * Utilidades relacionadas con los signos zodiacales occidentales.
+ *
+ * Este módulo define:
+ * - El enum {@link ZodiacSign}, que estandariza los identificadores internos
+ *   de los signos zodiacales.
+ * - La interfaz {@link ZodiacSignInfo}, que describe la información básica
+ *   de cada signo (nombres, símbolo, elemento, cualidad y planeta regente).
+ * - El mapa interno de metadatos de todos los signos, usado para
+ *   enriquecer lecturas de tarot y perfiles de usuario con contexto
+ *   astrológico coherente.
+ *
+ * Uso típico:
+ * - Persistir el signo de un usuario utilizando el enum {@link ZodiacSign}.
+ * - Obtener metadatos de un signo (por ejemplo, elemento o planeta regente)
+ *   a partir de su valor en {@link ZodiacSign}.
  */
 export enum ZodiacSign {
   ARIES = 'aries',
@@ -144,9 +160,11 @@ const ZODIAC_SIGNS_INFO: Record<ZodiacSign, ZodiacSignInfo> = {
 };
 
 /**
- * Parsea una fecha de manera segura, sin conversión de timezone
- * @param input - Date object o string YYYY-MM-DD
- * @returns Array [month (1-12), day (1-31)]
+ * Parsea una fecha de manera segura, sin conversión de timezone.
+ *
+ * @param {Date | string} input - Objeto Date o string de fecha en formato YYYY-MM-DD (o ISO con parte de fecha).
+ * @returns {[number, number]} Tupla [month (1-12), day (1-31)] correspondiente a la fecha proporcionada.
+ * @throws {Error} Si la fecha es inválida o no se puede parsear.
  */
 function parseDate(input: Date | string): [number, number] {
   let dateStr: string;
@@ -166,6 +184,22 @@ function parseDate(input: Date | string): [number, number] {
   const parts = dateStr.split('T')[0].split('-');
   const month = parseInt(parts[1], 10);
   const day = parseInt(parts[2], 10);
+
+  // Validate parsed values
+  if (
+    isNaN(month) ||
+    isNaN(day) ||
+    month < 1 ||
+    month > 12 ||
+    day < 1 ||
+    day > 31
+  ) {
+    const inputStr = typeof input === 'string' ? input : input.toISOString();
+    throw new Error(
+      `Invalid date format or values. Expected YYYY-MM-DD or Date object, got: ${inputStr}`,
+    );
+  }
+
   return [month, day];
 }
 
@@ -247,8 +281,12 @@ export function getZodiacSign(birthDate: Date | string): ZodiacSign {
     return ZodiacSign.SAGITTARIUS;
   }
 
-  // Fallback (should never reach here with correct ranges)
-  return ZodiacSign.CAPRICORN;
+  // This point should be unreachable if all date ranges are correct and the date is valid.
+  // Throw an error instead of returning an arbitrary sign to surface potential logic bugs.
+  throw new Error(
+    `Unable to determine zodiac sign for provided date (month=${month}, day=${day}). ` +
+      'This indicates a logic error in getZodiacSign or invalid input.',
+  );
 }
 
 /**
