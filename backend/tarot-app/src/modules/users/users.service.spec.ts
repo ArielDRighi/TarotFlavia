@@ -654,7 +654,7 @@ describe('UsersService', () => {
         email: createUserDto.email,
         name: createUserDto.name,
         password: createUserDto.password,
-        birthDate: new Date(birthDateString),
+        birthDate: birthDateString,
         roles: [UserRole.CONSUMER],
         plan: UserPlan.FREE,
       } as User;
@@ -665,8 +665,8 @@ describe('UsersService', () => {
 
       const result = await service.create(createUserDto);
 
-      // La fecha se convierte a Date en la base de datos
-      expect(result.birthDate).toEqual(new Date(birthDateString));
+      // birthDate is stored as string (YYYY-MM-DD)
+      expect(result.birthDate).toEqual(birthDateString);
     });
 
     it('should update user birthDate', async () => {

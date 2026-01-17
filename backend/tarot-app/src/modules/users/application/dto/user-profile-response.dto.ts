@@ -56,7 +56,7 @@ export class UserProfileResponseDto {
     example: '1990-05-15',
     nullable: true,
   })
-  birthDate: Date | null;
+  birthDate: string | null;
 
   @ApiProperty({
     description: 'Plan actual del usuario',

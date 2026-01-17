@@ -66,8 +66,24 @@ export class User {
     description: 'Fecha de nacimiento del usuario (formato: YYYY-MM-DD)',
     nullable: true,
   })
-  @Column({ type: 'date', nullable: true })
-  birthDate: Date | null;
+  @Column({
+    type: 'date',
+    nullable: true,
+    transformer: {
+      // Keep date as string to avoid timezone issues
+      to: (value: string | null) => value,
+      from: (value: Date | string | null) => {
+        if (!value) return null;
+        if (value instanceof Date) {
+          // Convert Date to YYYY-MM-DD string
+          return value.toISOString().split('T')[0];
+        }
+        // Already a string, return as is
+        return value;
+      },
+    },
+  })
+  birthDate: string | null;
 
   @ApiProperty({
     example: false,
