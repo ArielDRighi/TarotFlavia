@@ -18,7 +18,7 @@ export interface HoroscopeAIResponse {
       score: number;
     };
   };
-  luckyNumber: number;
-  luckyColor: string;
-  luckyTime: string;
+  luckyNumber?: number;
+  luckyColor?: string;
+  luckyTime?: string;
 }

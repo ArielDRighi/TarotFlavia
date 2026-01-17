@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ZodiacSign } from '../../entities/zodiac-sign.enum';
+import { ZodiacSign } from '../../../../common/utils/zodiac.utils';
 
 /**
  * DTO para representar un área específica del horóscopo

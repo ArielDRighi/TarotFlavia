@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { InternalServerErrorException } from '@nestjs/common';
 import { HoroscopeGenerationService } from './horoscope-generation.service';
 import { DailyHoroscope } from '../../entities/daily-horoscope.entity';
-import { ZodiacSign } from '../../entities/zodiac-sign.enum';
+import { ZodiacSign } from '../../../../common/utils/zodiac.utils';
 import { AIProviderService } from '../../../ai/application/services/ai-provider.service';
 import {
   AIProviderType,
@@ -181,6 +181,83 @@ describe('HoroscopeGenerationService', () => {
       );
     });
 
+    it('should throw error if AI response is missing required area', async () => {
+      const date = new Date('2026-01-17');
+      const sign = ZodiacSign.ARIES;
+
+      repository.findOne.mockResolvedValue(null);
+      const invalidResponse = {
+        generalContent: 'Test',
+        areas: {
+          love: { content: 'Test', score: 5 },
+          // Missing wellness and money
+        },
+        luckyNumber: 7,
+        luckyColor: 'Blue',
+        luckyTime: 'Morning',
+      };
+      aiProviderService.generateCompletion.mockResolvedValue({
+        ...mockAIResponse,
+        content: JSON.stringify(invalidResponse),
+      });
+
+      await expect(service.generateForSign(sign, date)).rejects.toThrow(
+        InternalServerErrorException,
+      );
+    });
+
+    it('should throw error if AI response has invalid score type', async () => {
+      const date = new Date('2026-01-17');
+      const sign = ZodiacSign.ARIES;
+
+      repository.findOne.mockResolvedValue(null);
+      const invalidResponse = {
+        generalContent: 'Test',
+        areas: {
+          love: { content: 'Test', score: 'invalid' }, // score debe ser number
+          wellness: { content: 'Test', score: 5 },
+          money: { content: 'Test', score: 5 },
+        },
+        luckyNumber: 7,
+        luckyColor: 'Blue',
+        luckyTime: 'Morning',
+      };
+      aiProviderService.generateCompletion.mockResolvedValue({
+        ...mockAIResponse,
+        content: JSON.stringify(invalidResponse),
+      });
+
+      await expect(service.generateForSign(sign, date)).rejects.toThrow(
+        InternalServerErrorException,
+      );
+    });
+
+    it('should throw error if AI response has score out of range', async () => {
+      const date = new Date('2026-01-17');
+      const sign = ZodiacSign.ARIES;
+
+      repository.findOne.mockResolvedValue(null);
+      const invalidResponse = {
+        generalContent: 'Test',
+        areas: {
+          love: { content: 'Test', score: 15 }, // score debe ser 1-10
+          wellness: { content: 'Test', score: 5 },
+          money: { content: 'Test', score: 5 },
+        },
+        luckyNumber: 7,
+        luckyColor: 'Blue',
+        luckyTime: 'Morning',
+      };
+      aiProviderService.generateCompletion.mockResolvedValue({
+        ...mockAIResponse,
+        content: JSON.stringify(invalidResponse),
+      });
+
+      await expect(service.generateForSign(sign, date)).rejects.toThrow(
+        InternalServerErrorException,
+      );
+    });
+
     it('should strip markdown code blocks from AI response', async () => {
       const date = new Date('2026-01-17');
       const sign = ZodiacSign.ARIES;
@@ -200,6 +277,8 @@ describe('HoroscopeGenerationService', () => {
 
     it('should use current date if no date provided', async () => {
       const sign = ZodiacSign.ARIES;
+      const today = new Date();
+      const todayStr = today.toISOString().split('T')[0];
 
       repository.findOne.mockResolvedValue(null);
       aiProviderService.generateCompletion.mockResolvedValue(mockAIResponse);
@@ -208,8 +287,18 @@ describe('HoroscopeGenerationService', () => {
 
       await service.generateForSign(sign);
 
-      expect(repository.findOne).toHaveBeenCalled();
-      expect(aiProviderService.generateCompletion).toHaveBeenCalled();
+      // Verificar que se llamó con la fecha actual
+      expect(repository.findOne).toHaveBeenCalledWith({
+        where: expect.objectContaining({
+          zodiacSign: sign,
+          horoscopeDate: expect.anything(), // Raw query con fecha actual
+        }),
+      });
+
+      // Verificar que el prompt incluye la fecha actual
+      const promptCall = aiProviderService.generateCompletion.mock.calls[0];
+      const userPrompt = promptCall[0][1].content;
+      expect(userPrompt).toContain(todayStr);
     });
   });
 

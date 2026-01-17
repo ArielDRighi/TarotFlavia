@@ -98,5 +98,5 @@ RECORDATORIOS IMPORTANTES:
 3. Incluye consejos prácticos en cada área
 4. Las puntuaciones (score) deben reflejar la intensidad de la energía en cada área
 
-Responde ÚNICAMENTE con el JSON válido, sin markdown, sin texto adicional antes o después.
+CRÍTICO: Responde ÚNICAMENTE con JSON crudo válido. NO uses markdown ni bloques de código (por ejemplo, NO uses \`\`\`json). NO añadas explicaciones ni texto adicional antes o después del JSON.
 `;

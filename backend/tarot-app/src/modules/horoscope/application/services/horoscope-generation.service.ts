@@ -6,10 +6,12 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Raw, LessThan } from 'typeorm';
 import { DailyHoroscope } from '../../entities/daily-horoscope.entity';
-import { ZodiacSign } from '../../entities/zodiac-sign.enum';
 import { AIProviderService } from '../../../ai/application/services/ai-provider.service';
 import { AIMessage } from '../../../ai/domain/interfaces/ai-provider.interface';
-import { getZodiacSignInfo } from '../../../../common/utils/zodiac.utils';
+import {
+  getZodiacSignInfo,
+  ZodiacSign,
+} from '../../../../common/utils/zodiac.utils';
 import {
   HOROSCOPE_SYSTEM_PROMPT,
   HOROSCOPE_USER_PROMPT,
@@ -57,14 +59,14 @@ export class HoroscopeGenerationService {
     const existing = await this.findBySignAndDate(sign, date);
     if (existing) {
       this.logger.log(
-        `Horóscopo ya existe para ${sign} en ${date.toISOString().split('T')[0]}`,
+        `Horóscopo ya existe para ${sign} en ${this.formatDateForQuery(date)}`,
       );
       return existing;
     }
 
     // 2. Obtener info del signo
     const signInfo = getZodiacSignInfo(sign);
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = this.formatDateForQuery(date);
 
     this.logger.log(
       `Generando horóscopo para ${signInfo.nameEs} (${sign}) - ${dateStr}`,
@@ -128,7 +130,7 @@ export class HoroscopeGenerationService {
     sign: ZodiacSign,
     date: Date,
   ): Promise<DailyHoroscope | null> {
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = this.formatDateForQuery(date);
     return this.horoscopeRepository.findOne({
       where: {
         zodiacSign: sign,
@@ -144,7 +146,7 @@ export class HoroscopeGenerationService {
    * @returns Array de horóscopos ordenados por signo
    */
   async findAllByDate(date: Date): Promise<DailyHoroscope[]> {
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = this.formatDateForQuery(date);
     return this.horoscopeRepository.find({
       where: {
         horoscopeDate: Raw((alias) => `${alias} = :date`, { date: dateStr }),
@@ -157,7 +159,7 @@ export class HoroscopeGenerationService {
    * Incrementa el contador de visualizaciones de un horóscopo
    *
    * Operación atómica usando query builder para evitar race conditions.
-   * Fire-and-forget: no espera confirmación para no bloquear el request.
+   * Nota: Esta operación es awaited para asegurar su ejecución.
    *
    * @param id - ID del horóscopo
    */
@@ -256,7 +258,20 @@ export class HoroscopeGenerationService {
 
     const areaObj = area as Record<string, unknown>;
     return (
-      typeof areaObj.content === 'string' && typeof areaObj.score === 'number'
+      typeof areaObj.content === 'string' &&
+      typeof areaObj.score === 'number' &&
+      areaObj.score >= 1 &&
+      areaObj.score <= 10
     );
+  }
+
+  /**
+   * Formatea una fecha para queries de base de datos
+   * @param date - Fecha a formatear
+   * @returns String en formato YYYY-MM-DD
+   * @private
+   */
+  private formatDateForQuery(date: Date): string {
+    return date.toISOString().split('T')[0];
   }
 }
