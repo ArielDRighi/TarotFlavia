@@ -317,7 +317,7 @@ Crear la entidad para almacenar horóscopos chinos anuales.
 
 ##### Backend
 
-- [ ] Crear entidad `ChineseHoroscope`:
+- [x] Crear entidad `ChineseHoroscope`:
 
   ```typescript
   @Entity("chinese_horoscopes")
@@ -382,7 +382,7 @@ Crear la entidad para almacenar horóscopos chinos anuales.
   }
   ```
 
-- [ ] Crear migración:
+- [x] Crear migración:
 
   ```sql
   CREATE TYPE chinese_zodiac_animal_enum AS ENUM (
@@ -413,21 +413,21 @@ Crear la entidad para almacenar horóscopos chinos anuales.
   CREATE INDEX idx_chinese_year ON chinese_horoscopes(year);
   ```
 
-- [ ] Ejecutar migración
+- [x] Ejecutar migración
 
 ##### Testing
 
-- [ ] Test: Entidad se crea correctamente
-- [ ] Test: Índice único previene duplicados
-- [ ] Test: JSONB se guarda y recupera
+- [x] Test: Entidad se crea correctamente
+- [x] Test: Índice único previene duplicados
+- [x] Test: JSONB se guarda y recupera
 
 ---
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] Migración ejecuta sin errores
-- [ ] Índice único (animal, year) funciona
-- [ ] JSONB permite queries complejas
+- [x] Migración ejecuta sin errores
+- [x] Índice único (animal, year) funciona
+- [x] JSONB permite queries complejas
 
 ---
 
@@ -473,7 +473,7 @@ Crear el servicio para generar horóscopos chinos anuales usando IA.
 
 ##### Backend
 
-- [ ] Crear `chinese-horoscope.prompts.ts`:
+- [x] Crear `chinese-horoscope.prompts.ts`:
 
   ```typescript
   export const CHINESE_HOROSCOPE_SYSTEM_PROMPT = `
@@ -538,7 +538,7 @@ Crear el servicio para generar horóscopos chinos anuales usando IA.
   `;
   ```
 
-- [ ] Crear `ChineseHoroscopeService`:
+- [x] Crear `ChineseHoroscopeService`:
 
   ````typescript
   @Injectable()
@@ -723,7 +723,7 @@ Crear el servicio para generar horóscopos chinos anuales usando IA.
   }
   ````
 
-- [ ] Actualizar `horoscope.module.ts`:
+- [x] Actualizar `horoscope.module.ts`:
   ```typescript
   @Module({
     imports: [TypeOrmModule.forFeature([DailyHoroscope, ChineseHoroscope]), AIModule],
@@ -739,20 +739,20 @@ Crear el servicio para generar horóscopos chinos anuales usando IA.
 
 ##### Testing
 
-- [ ] Test: Genera horóscopo correctamente
-- [ ] Test: No genera duplicados
-- [ ] Test: generateAllForYear genera 12 horóscopos
-- [ ] Test: findForUser calcula animal correcto
-- [ ] Test: Parsea JSON de IA correctamente
+- [x] Test: Genera horóscopo correctamente
+- [x] Test: No genera duplicados
+- [x] Test: generateAllForYear genera 12 horóscopos
+- [x] Test: findForUser calcula animal correcto
+- [x] Test: Parsea JSON de IA correctamente
 
 ---
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] Servicio genera horóscopos anuales
-- [ ] Incluye compatibilidad entre animales
-- [ ] Método para generar todos los animales
-- [ ] Tests >80% coverage
+- [x] Servicio genera horóscopos anuales
+- [x] Incluye compatibilidad entre animales
+- [x] Método para generar todos los animales
+- [x] Tests >80% coverage
 
 ---
 
