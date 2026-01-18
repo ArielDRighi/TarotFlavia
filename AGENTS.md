@@ -97,6 +97,7 @@ npm run lint:fix            # Autofix code style
 npm run type-check          # TypeScript validation
 npm run test:run            # Run all tests
 npm run build               # Build para producción
+node scripts/validate-architecture.js  # Validar arquitectura
 ```
 
 **SI OLVIDAS `format` o cualquier paso:**
@@ -127,16 +128,31 @@ npm run build               # Build para producción
 
 **Al inicio de CADA tarea, crear TODO list con:**
 
+**Para tareas de BACKEND:**
 ```
 1. Implementar [feature/test]
 2. Ejecutar npm run format
 3. Ejecutar npm run lint
 4. Ejecutar npm run test:cov
 5. Ejecutar npm run build
-6. [Si existe] Ejecutar npm run validate-architecture
+6. Ejecutar npm run validate-architecture (si existe)
 7. Actualizar backlog (marcar tarea completada)
 8. Crear commit
 9. Push y crear PR apuntando a develop
+```
+
+**Para tareas de FRONTEND:**
+```
+1. Implementar [feature/test]
+2. Ejecutar npm run format
+3. Ejecutar npm run lint:fix
+4. Ejecutar npm run type-check
+5. Ejecutar npm run test:run
+6. Ejecutar npm run build
+7. Ejecutar node scripts/validate-architecture.js
+8. Actualizar backlog (marcar tarea completada)
+9. Crear commit
+10. Push y crear PR apuntando a develop
 ```
 
 **Marcar cada ítem INMEDIATAMENTE después de completarlo.**
