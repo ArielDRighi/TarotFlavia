@@ -8,6 +8,7 @@ import { DidYouKnowSection } from './DidYouKnowSection';
 import { StatsSection } from './StatsSection';
 import UpgradeBanner from '@/components/features/readings/UpgradeBanner';
 import UpgradeModal from '@/components/features/readings/UpgradeModal';
+import { HoroscopeWidget } from '@/components/features/horoscope';
 
 /**
  * User Dashboard component for authenticated users
@@ -16,6 +17,7 @@ import UpgradeModal from '@/components/features/readings/UpgradeModal';
  * - Welcome header with name and plan badge
  * - Quick action cards (Nueva Lectura, Historial, Carta del Día)
  * - Did You Know section with tarot facts
+ * - Horoscope widget (All authenticated users)
  * - Stats section (Premium only)
  * - Upgrade banner (Free users only)
  *
@@ -59,6 +61,9 @@ export function UserDashboard() {
 
           {/* Right column (1/3 width) */}
           <div className="space-y-8">
+            {/* Horoscope Widget - For all users */}
+            <HoroscopeWidget />
+
             {/* Stats Section - Only for Premium users */}
             {isPremium && <StatsSection />}
           </div>
