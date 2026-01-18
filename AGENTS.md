@@ -1,7 +1,48 @@
 # AGENTS.md - Auguria Codebase Guide for AI Agents
 
 > 🤖 **Purpose:** Essential reference for AI coding agents working in this monorepo.
-> 📅 **Last Updated:** January 17, 2026
+> 📅 **Last Updated:** January 18, 2026
+
+---
+
+## 🚨 CRITICAL RULES FOR AI AGENTS
+
+### Rule 1: NEVER Develop Beyond Requested Task
+**IMPORTANTE:** Solo desarrolla la tarea específica que el usuario solicita. **NUNCA** asumas que debes continuar con la siguiente tarea, incluso si:
+- El usuario dice "continue"
+- Terminas una tarea y ves la siguiente en el backlog
+- Las tareas están relacionadas o son dependencias
+
+**Siempre pregunta explícitamente** antes de empezar una nueva tarea.
+
+❌ **INCORRECTO:**
+```
+Usuario: "Desarrolla TASK-111"
+Agente: [Completa TASK-111]
+Agente: [Automáticamente empieza TASK-112 sin preguntar]
+```
+
+✅ **CORRECTO:**
+```
+Usuario: "Desarrolla TASK-111"
+Agente: [Completa TASK-111]
+Agente: "TASK-111 completada. ¿Quieres que continúe con TASK-112?"
+```
+
+### Rule 2: PRs ALWAYS Target `develop` Branch
+**CRÍTICO:** Todos los Pull Requests deben apuntar al branch `develop`, **NUNCA** a `main`.
+
+```bash
+# ✅ CORRECTO
+gh pr create --base develop --title "..." --body "..."
+
+# ❌ INCORRECTO
+gh pr create --base main --title "..." --body "..."
+```
+
+**Razón:** El proyecto usa Git Flow:
+- `develop`: Branch de integración para desarrollo
+- `main`: Solo para releases de producción
 
 ---
 
