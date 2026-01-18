@@ -210,9 +210,24 @@ describe('Header', () => {
 
       render(<Header />);
 
-      const horoscopoLink = screen.getByRole('link', { name: /horóscopo/i });
+      const horoscopoLink = screen.getByRole('link', { name: /^Horóscopo$/i });
       expect(horoscopoLink).toBeInTheDocument();
       expect(horoscopoLink).toHaveAttribute('href', '/horoscopo');
+    });
+
+    it('should display Horóscopo Chino link for all users', () => {
+      mockUseAuthStore.mockReturnValue({
+        user: null,
+        isAuthenticated: false,
+      });
+
+      render(<Header />);
+
+      const horoscopoChino = screen.getByRole('link', {
+        name: /horóscopo chino/i,
+      });
+      expect(horoscopoChino).toBeInTheDocument();
+      expect(horoscopoChino).toHaveAttribute('href', '/horoscopo-chino');
     });
   });
 });
