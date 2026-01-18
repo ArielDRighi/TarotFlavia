@@ -5,7 +5,33 @@ import { z } from 'zod';
 import { CONFIG } from '@/lib/constants/config';
 
 /**
- * Schema for updating user profile (name and/or email)
+ * Helper to validate birthDate string
+ * - Checks YYYY-MM-DD format
+ * - Validates the date is real (not 2025-02-30)
+ * - Validates the date is not in the future
+ */
+const birthDateSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato inválido (YYYY-MM-DD)')
+  .refine(
+    (val) => {
+      const date = new Date(val);
+      // Check if date is valid (not NaN and matches input)
+      return !isNaN(date.getTime()) && date.toISOString().startsWith(val);
+    },
+    { message: 'Fecha inválida' }
+  )
+  .refine(
+    (val) => {
+      const date = new Date(val);
+      return date <= new Date();
+    },
+    { message: 'La fecha no puede ser futura' }
+  )
+  .or(z.literal(''));
+
+/**
+ * Schema for updating user profile (name, email, birthDate)
  * All fields are optional
  */
 export const updateProfileSchema = z.object({
@@ -15,6 +41,7 @@ export const updateProfileSchema = z.object({
     .max(CONFIG.USERNAME_MAX_LENGTH, `Máximo ${CONFIG.USERNAME_MAX_LENGTH} caracteres`)
     .optional(),
   email: z.string().email('Email inválido').optional(),
+  birthDate: birthDateSchema.nullable().optional(),
 });
 
 export type UpdateProfileFormData = z.infer<typeof updateProfileSchema>;

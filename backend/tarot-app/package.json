@@ -16,7 +16,7 @@
     "type-check": "tsc --noEmit",
     "test": "jest --no-watchman --all",
     "test:watch": "jest --watch --no-watchman",
-    "test:cov": "jest --coverage --no-watchman --all",
+    "test:cov": "jest --coverage --no-watchman --all --maxWorkers=50%",
     "test:cov:html": "jest --coverage --no-watchman --all && open coverage/index.html",
     "test:cov:summary": "jest --coverage --no-watchman --all --coverageReporters=text-summary",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand --no-watchman --all",

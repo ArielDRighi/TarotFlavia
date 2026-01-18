@@ -38,6 +38,7 @@ export function RegisterForm() {
       email: '',
       password: '',
       confirmPassword: '',
+      birthDate: '',
     },
   });
 
@@ -48,6 +49,7 @@ export function RegisterForm() {
         name: data.name,
         email: data.email,
         password: data.password,
+        birthDate: data.birthDate || undefined,
       });
 
       toast.success('Cuenta creada exitosamente');
@@ -123,6 +125,28 @@ export function RegisterForm() {
                 aria-invalid={errors.email ? 'true' : 'false'}
               />
               {errors.email && <p className="text-destructive text-sm">{errors.email.message}</p>}
+            </div>
+
+            {/* Birth Date Field (optional) */}
+            <div className="space-y-2">
+              <label htmlFor="birthDate" className="text-sm font-medium">
+                Fecha de Nacimiento{' '}
+                <span className="text-muted-foreground font-normal">(opcional)</span>
+              </label>
+              <Input
+                id="birthDate"
+                type="date"
+                disabled={isSubmitting}
+                className="focus:border-primary bg-gray-50"
+                {...register('birthDate')}
+                aria-invalid={errors.birthDate ? 'true' : 'false'}
+              />
+              {errors.birthDate && (
+                <p className="text-destructive text-sm">{errors.birthDate.message}</p>
+              )}
+              <p className="text-muted-foreground text-xs">
+                Para personalizar tu horóscopo según tu signo zodiacal
+              </p>
             </div>
 
             {/* Password Field */}

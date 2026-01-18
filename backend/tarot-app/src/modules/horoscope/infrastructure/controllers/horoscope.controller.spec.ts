@@ -1,7 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException, BadRequestException } from '@nestjs/common';
+import { NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { HoroscopeController } from './horoscope.controller';
 import { HoroscopeGenerationService } from '../../application/services/horoscope-generation.service';
+import { HoroscopeCronService } from '../../application/services/horoscope-cron.service';
 import { UsersService } from '../../../users/users.service';
 import { ZodiacSign } from '../../../../common/utils/zodiac.utils';
 import { DailyHoroscope } from '../../entities/daily-horoscope.entity';
@@ -9,6 +10,7 @@ import { DailyHoroscope } from '../../entities/daily-horoscope.entity';
 describe('HoroscopeController', () => {
   let controller: HoroscopeController;
   let horoscopeService: jest.Mocked<HoroscopeGenerationService>;
+  let horoscopeCronService: jest.Mocked<HoroscopeCronService>;
   let usersService: jest.Mocked<UsersService>;
 
   const mockDate = new Date('2026-01-17T00:00:00.000Z');
@@ -61,6 +63,12 @@ describe('HoroscopeController', () => {
       generateForSign: jest.fn(),
     };
 
+    const mockCronService = {
+      generateNow: jest.fn(),
+      generateDailyHoroscopes: jest.fn(),
+      cleanupOldHoroscopes: jest.fn(),
+    };
+
     const mockUsersService = {
       findById: jest.fn(),
     };
@@ -73,6 +81,10 @@ describe('HoroscopeController', () => {
           useValue: mockHoroscopeService,
         },
         {
+          provide: HoroscopeCronService,
+          useValue: mockCronService,
+        },
+        {
           provide: UsersService,
           useValue: mockUsersService,
         },
@@ -81,6 +93,7 @@ describe('HoroscopeController', () => {
 
     controller = module.get<HoroscopeController>(HoroscopeController);
     horoscopeService = module.get(HoroscopeGenerationService);
+    horoscopeCronService = module.get(HoroscopeCronService);
     usersService = module.get(UsersService);
   });
 
@@ -306,6 +319,42 @@ describe('HoroscopeController', () => {
         luckyColor: 'Rojo',
         luckyTime: 'Mañana',
       });
+    });
+  });
+
+  describe('generateManually', () => {
+    it('should trigger horoscope generation and return message', () => {
+      horoscopeCronService.generateNow.mockResolvedValue(undefined);
+
+      const result = controller.generateManually();
+
+      expect(result.message).toContain('Generación de horóscopos iniciada');
+      expect(horoscopeCronService.generateNow).toHaveBeenCalled();
+    });
+
+    it('should handle generateNow errors silently (fire-and-forget)', async () => {
+      const loggerErrorSpy = jest
+        .spyOn(Logger.prototype, 'error')
+        .mockImplementation();
+
+      horoscopeCronService.generateNow.mockRejectedValue(
+        new Error('Generation failed'),
+      );
+
+      // No debe lanzar error porque es fire-and-forget
+      const result = controller.generateManually();
+
+      expect(result.message).toContain('Generación de horóscopos iniciada');
+
+      // Esperar a que el Promise rejected se procese y el .catch() se ejecute
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(loggerErrorSpy).toHaveBeenCalledWith(
+        'Error en generación manual:',
+        expect.any(Error),
+      );
+
+      loggerErrorSpy.mockRestore();
     });
   });
 });
