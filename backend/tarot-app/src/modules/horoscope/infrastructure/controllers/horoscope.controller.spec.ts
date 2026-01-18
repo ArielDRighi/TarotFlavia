@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException, BadRequestException } from '@nestjs/common';
+import { NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { HoroscopeController } from './horoscope.controller';
 import { HoroscopeGenerationService } from '../../application/services/horoscope-generation.service';
 import { HoroscopeCronService } from '../../application/services/horoscope-cron.service';
@@ -332,7 +332,11 @@ describe('HoroscopeController', () => {
       expect(horoscopeCronService.generateNow).toHaveBeenCalled();
     });
 
-    it('should handle generateNow errors silently (fire-and-forget)', () => {
+    it('should handle generateNow errors silently (fire-and-forget)', async () => {
+      const loggerErrorSpy = jest
+        .spyOn(Logger.prototype, 'error')
+        .mockImplementation();
+
       horoscopeCronService.generateNow.mockRejectedValue(
         new Error('Generation failed'),
       );
@@ -341,6 +345,16 @@ describe('HoroscopeController', () => {
       const result = controller.generateManually();
 
       expect(result.message).toContain('Generación de horóscopos iniciada');
+
+      // Esperar a que el Promise rejected se procese y el .catch() se ejecute
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(loggerErrorSpy).toHaveBeenCalledWith(
+        'Error en generación manual:',
+        expect.any(Error),
+      );
+
+      loggerErrorSpy.mockRestore();
     });
   });
 });

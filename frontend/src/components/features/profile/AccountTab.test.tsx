@@ -89,6 +89,26 @@ describe('AccountTab', () => {
       expect(screen.getByText('El email no puede ser modificado')).toBeInTheDocument();
     });
 
+    it('should render birthDate input field', () => {
+      render(<AccountTab profile={mockProfile} />, { wrapper: createWrapper() });
+
+      expect(screen.getByLabelText(/fecha de nacimiento/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/tu signo zodiacal se calculará automáticamente/i)
+      ).toBeInTheDocument();
+    });
+
+    it('should display existing birthDate when profile has one', () => {
+      const profileWithBirthDate = {
+        ...mockProfile,
+        birthDate: '1990-05-15',
+      };
+      render(<AccountTab profile={profileWithBirthDate} />, { wrapper: createWrapper() });
+
+      const birthDateInput = screen.getByLabelText(/fecha de nacimiento/i) as HTMLInputElement;
+      expect(birthDateInput.value).toBe('1990-05-15');
+    });
+
     it('should submit profile form with valid data', async () => {
       const user = userEvent.setup();
       render(<AccountTab profile={mockProfile} />, { wrapper: createWrapper() });
@@ -136,6 +156,28 @@ describe('AccountTab', () => {
 
       await waitFor(() => {
         expect(screen.getByText(/mínimo 3 caracteres/i)).toBeInTheDocument();
+      });
+    });
+
+    it('should submit profile form with birthDate when provided', async () => {
+      const user = userEvent.setup();
+      render(<AccountTab profile={mockProfile} />, { wrapper: createWrapper() });
+
+      const nameInput = screen.getByLabelText(/^nombre$/i);
+      const birthDateInput = screen.getByLabelText(/fecha de nacimiento/i);
+
+      await user.clear(nameInput);
+      await user.type(nameInput, 'Updated Name');
+      await user.type(birthDateInput, '1990-05-15');
+
+      const submitButton = screen.getAllByRole('button', { name: /guardar cambios/i })[0];
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(mockUpdateProfile).toHaveBeenCalledWith(
+          { name: 'Updated Name', email: 'test@example.com', birthDate: '1990-05-15' },
+          expect.any(Object)
+        );
       });
     });
   });

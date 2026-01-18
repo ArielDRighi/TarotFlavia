@@ -7,6 +7,7 @@ import {
   NotFoundException,
   BadRequestException,
   ParseEnumPipe,
+  Logger,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -43,6 +44,8 @@ import { UsersService } from '../../../users/users.service';
 @ApiTags('Horoscope')
 @Controller('horoscope')
 export class HoroscopeController {
+  private readonly logger = new Logger(HoroscopeController.name);
+
   constructor(
     private readonly horoscopeService: HoroscopeGenerationService,
     private readonly horoscopeCronService: HoroscopeCronService,
@@ -71,7 +74,7 @@ export class HoroscopeController {
   generateManually(): { message: string } {
     // Fire-and-forget: inicia la generación en background
     this.horoscopeCronService.generateNow().catch((error) => {
-      console.error('Error en generación manual:', error);
+      this.logger.error('Error en generación manual:', error);
     });
     return {
       message:

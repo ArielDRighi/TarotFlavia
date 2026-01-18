@@ -96,6 +96,13 @@ describe('RegisterForm', () => {
       expect(loginLink).toBeInTheDocument();
       expect(loginLink.closest('a')).toHaveAttribute('href', '/login');
     });
+
+    it('should render optional birthDate input field', () => {
+      render(<RegisterForm />);
+
+      expect(screen.getByLabelText(/fecha de nacimiento/i)).toBeInTheDocument();
+      expect(screen.getByText(/\(opcional\)/i)).toBeInTheDocument();
+    });
   });
 
   describe('Form Validation', () => {
@@ -167,6 +174,32 @@ describe('RegisterForm', () => {
         expect(screen.getByText(/las contraseñas no coinciden/i)).toBeInTheDocument();
       });
     });
+
+    it('should not show error for empty birthDate (optional field)', async () => {
+      mockRegister.mockResolvedValueOnce(undefined);
+      mockLogin.mockResolvedValueOnce(undefined);
+      const user = userEvent.setup();
+      render(<RegisterForm />);
+
+      const nameInput = screen.getByLabelText(/nombre/i);
+      const emailInput = screen.getByLabelText(/email/i);
+      const passwordInput = screen.getByLabelText(/^contraseña$/i);
+      const confirmPasswordInput = screen.getByLabelText(/confirmar contraseña/i);
+
+      await user.type(nameInput, 'Test User');
+      await user.type(emailInput, 'test@test.com');
+      await user.type(passwordInput, 'password123');
+      await user.type(confirmPasswordInput, 'password123');
+
+      const submitButton = screen.getByRole('button', { name: /crear cuenta/i });
+      await user.click(submitButton);
+
+      // Should not show birthDate error since it's optional
+      await waitFor(() => {
+        expect(mockRegister).toHaveBeenCalled();
+      });
+      expect(screen.queryByText(/fecha inválida/i)).not.toBeInTheDocument();
+    });
   });
 
   describe('Form Submission', () => {
@@ -193,6 +226,36 @@ describe('RegisterForm', () => {
           name: 'Test User',
           email: 'test@test.com',
           password: 'password123',
+        });
+      });
+    });
+
+    it('should include birthDate in register call when provided', async () => {
+      mockRegister.mockResolvedValueOnce(undefined);
+      mockLogin.mockResolvedValueOnce(undefined);
+      const user = userEvent.setup();
+      render(<RegisterForm />);
+
+      const nameInput = screen.getByLabelText(/nombre/i);
+      const emailInput = screen.getByLabelText(/email/i);
+      const passwordInput = screen.getByLabelText(/^contraseña$/i);
+      const confirmPasswordInput = screen.getByLabelText(/confirmar contraseña/i);
+      const birthDateInput = screen.getByLabelText(/fecha de nacimiento/i);
+      const submitButton = screen.getByRole('button', { name: /crear cuenta/i });
+
+      await user.type(nameInput, 'Test User');
+      await user.type(emailInput, 'test@test.com');
+      await user.type(passwordInput, 'password123');
+      await user.type(confirmPasswordInput, 'password123');
+      await user.type(birthDateInput, '1990-05-15');
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(mockRegister).toHaveBeenCalledWith({
+          name: 'Test User',
+          email: 'test@test.com',
+          password: 'password123',
+          birthDate: '1990-05-15',
         });
       });
     });
