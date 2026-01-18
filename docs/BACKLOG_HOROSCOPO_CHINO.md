@@ -294,7 +294,8 @@ Crear funciones utilitarias para calcular el animal del zodiaco chino basado en 
 **Módulo:** `src/modules/horoscope/`  
 **Prioridad:** 🔴 ALTA  
 **Estimación:** 0.5 días  
-**Dependencias:** TASK-111
+**Dependencias:** TASK-111  
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -449,7 +450,8 @@ Crear la entidad para almacenar horóscopos chinos anuales.
 **Módulo:** `src/modules/horoscope/application/services/`  
 **Prioridad:** 🔴 ALTA  
 **Estimación:** 1 día  
-**Dependencias:** TASK-112, TASK-102 (Gemini Provider)
+**Dependencias:** TASK-112, TASK-102 (Gemini Provider)  
+**Estado:** ✅ COMPLETADA
 
 ---
 
