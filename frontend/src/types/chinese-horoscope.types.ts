@@ -19,6 +19,8 @@ export enum ChineseZodiacAnimal {
   PIG = 'pig',
 }
 
+export type ChineseZodiacElement = 'Agua' | 'Tierra' | 'Madera' | 'Fuego' | 'Metal';
+
 export interface ChineseHoroscopeArea {
   content: string;
   rating: number;
@@ -56,7 +58,7 @@ export interface ChineseZodiacInfo {
   nameEs: string;
   nameEn: string;
   emoji: string;
-  element: string;
+  element: ChineseZodiacElement;
   characteristics: string[];
 }
 

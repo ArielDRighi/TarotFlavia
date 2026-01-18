@@ -121,6 +121,7 @@ export type {
   ChineseHoroscopeArea,
   ChineseHoroscopeLucky,
   ChineseZodiacInfo,
+  ChineseZodiacElement,
   CalculateAnimalResponse,
 } from './chinese-horoscope.types';
 export { ChineseZodiacAnimal } from './chinese-horoscope.types';

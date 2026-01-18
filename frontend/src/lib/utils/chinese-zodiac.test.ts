@@ -5,7 +5,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   getChineseZodiacInfo,
-  getCurrentChineseYear,
+  getCurrentYear,
   getAllChineseZodiacAnimals,
   getAllChineseZodiacInfo,
   CHINESE_ZODIAC_INFO,
@@ -91,9 +91,9 @@ describe('chinese zodiac utilities', () => {
     });
   });
 
-  describe('getCurrentChineseYear', () => {
+  describe('getCurrentYear', () => {
     it('should return current year as number', () => {
-      const year = getCurrentChineseYear();
+      const year = getCurrentYear();
       expect(typeof year).toBe('number');
       expect(year).toBeGreaterThan(2020);
       expect(year).toBeLessThan(2100);
@@ -101,8 +101,8 @@ describe('chinese zodiac utilities', () => {
 
     it('should match current JavaScript year', () => {
       const currentYear = new Date().getFullYear();
-      const chineseYear = getCurrentChineseYear();
-      expect(chineseYear).toBe(currentYear);
+      const year = getCurrentYear();
+      expect(year).toBe(currentYear);
     });
   });
 

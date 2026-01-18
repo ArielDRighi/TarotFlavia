@@ -114,9 +114,10 @@ export function getChineseZodiacInfo(animal: ChineseZodiacAnimal): ChineseZodiac
 }
 
 /**
- * Obtiene el año chino actual
+ * Obtiene el año actual (gregoriano)
+ * Útil para consultar horóscopos chinos que usan años gregorianos en el backend
  */
-export function getCurrentChineseYear(): number {
+export function getCurrentYear(): number {
   return new Date().getFullYear();
 }
 
