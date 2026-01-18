@@ -1884,7 +1884,8 @@ frontend/src/components/features/chinese-horoscope/
 **Módulo:** `frontend/src/app/horoscopo-chino/`  
 **Prioridad:** 🟡 MEDIA  
 **Estimación:** 0.5 días  
-**Dependencias:** TASK-116
+**Dependencias:** TASK-116  
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -1912,7 +1913,7 @@ Crear páginas para el horóscopo chino.
 
 ##### Frontend
 
-- [ ] Agregar rutas:
+- [x] Agregar rutas:
 
   ```typescript
   export const ROUTES = {
@@ -1922,7 +1923,7 @@ Crear páginas para el horóscopo chino.
   } as const;
   ```
 
-- [ ] Crear `app/horoscopo-chino/page.tsx`:
+- [x] Crear `app/horoscopo-chino/page.tsx`:
 
   ```tsx
   "use client";
@@ -1965,7 +1966,7 @@ Crear páginas para el horóscopo chino.
   }
   ```
 
-- [ ] Crear `app/horoscopo-chino/[animal]/page.tsx`:
+- [x] Crear `app/horoscopo-chino/[animal]/page.tsx`:
 
   ```tsx
   "use client";
@@ -2025,22 +2026,22 @@ Crear páginas para el horóscopo chino.
   }
   ```
 
-- [ ] Actualizar Header con link
+- [x] Actualizar Header con link
 
 ##### Testing
 
-- [ ] Test: Página muestra 12 animales
-- [ ] Test: Calculador funciona
-- [ ] Test: Página de animal muestra detalle
+- [x] Test: Página muestra 12 animales
+- [x] Test: Calculador funciona
+- [x] Test: Página de animal muestra detalle
 
 ---
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] /horoscopo-chino muestra selector
-- [ ] /horoscopo-chino/[animal] muestra detalle
-- [ ] Calculador funciona para anónimos
-- [ ] Link en header
+- [x] /horoscopo-chino muestra selector
+- [x] /horoscopo-chino/[animal] muestra detalle
+- [x] Calculador funciona para anónimos
+- [x] Link en header
 
 ---
 

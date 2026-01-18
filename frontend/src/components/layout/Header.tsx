@@ -52,6 +52,12 @@ export function Header() {
           >
             Horóscopo
           </Link>
+          <Link
+            href={ROUTES.HOROSCOPO_CHINO}
+            className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
+          >
+            Horóscopo Chino
+          </Link>
           {user && (
             <>
               <Link

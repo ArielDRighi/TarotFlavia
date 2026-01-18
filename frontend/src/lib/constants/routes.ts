@@ -12,6 +12,8 @@ export const ROUTES = {
   CARTA_DEL_DIA: '/carta-del-dia',
   HOROSCOPO: '/horoscopo',
   HOROSCOPO_SIGN: (sign: string) => `/horoscopo/${sign}`,
+  HOROSCOPO_CHINO: '/horoscopo-chino',
+  HOROSCOPO_CHINO_ANIMAL: (animal: string) => `/horoscopo-chino/${animal}`,
 
   // Dashboard (authenticated)
   DASHBOARD: '/dashboard',
