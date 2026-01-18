@@ -74,6 +74,85 @@ gh pr create --base main --title "..." --body "..."
 
 **IMPORTANTE:** Herramientas de IA (como Copilot) pueden revisar archivos incorrectos o confundirse con el contexto. Siempre verificar primero.
 
+### Rule 4: MANDATORY Quality Gates & Task Tracking
+**CRÍTICO:** NUNCA olvides estos pasos en CADA tarea. Usa TODO list para tracking.
+
+#### A) Ciclo de Calidad Completo (OBLIGATORIO)
+
+Ejecutar EN ORDEN después de implementación:
+
+```bash
+# Backend
+cd backend/tarot-app
+npm run format              # ⚠️ CRÍTICO: NO OLVIDAR
+npm run lint                # Autofix code style
+npm run test:cov            # Coverage ≥ 80%
+npm run build               # Compilación exitosa
+npm run validate-architecture  # Si existe el script
+
+# Frontend  
+cd frontend
+npm run format              # ⚠️ CRÍTICO: NO OLVIDAR
+npm run lint:fix            # Autofix code style
+npm run type-check          # TypeScript validation
+npm run test:run            # Run all tests
+npm run build               # Build para producción
+```
+
+**SI OLVIDAS `format` o cualquier paso:**
+- El código tendrá formato inconsistente
+- Los PRs fallarán en CI/CD
+- Se perderá tiempo en ciclos de feedback
+
+#### B) Actualización de Backlog (OBLIGATORIO)
+
+**ANTES de crear el commit final:**
+
+1. **Marcar TODAS las tareas como completadas**:
+   ```markdown
+   **Estado:** ✅ COMPLETADA
+   
+   - [x] Tarea 1
+   - [x] Tarea 2
+   ```
+
+2. **Verificar checkboxes**:
+   - ✅ Todos los criterios de aceptación
+   - ✅ Todas las subtareas técnicas
+   - ✅ Todos los tests
+
+3. **NO incluir en commit si el backlog no está actualizado**
+
+#### C) Uso de TODO List (OBLIGATORIO)
+
+**Al inicio de CADA tarea, crear TODO list con:**
+
+```
+1. Implementar [feature/test]
+2. Ejecutar npm run format
+3. Ejecutar npm run lint
+4. Ejecutar npm run test:cov
+5. Ejecutar npm run build
+6. [Si existe] Ejecutar npm run validate-architecture
+7. Actualizar backlog (marcar tarea completada)
+8. Crear commit
+9. Push y crear PR apuntando a develop
+```
+
+**Marcar cada ítem INMEDIATAMENTE después de completarlo.**
+
+**❌ NUNCA:**
+- Omitir `format` porque "el linter lo arreglará"
+- Olvidar marcar tareas en el backlog
+- Crear commit sin actualizar documentación
+- Asumir que un paso "no es importante"
+
+**✅ SIEMPRE:**
+- Seguir el orden exacto de los pasos
+- Usar TODO list para tracking
+- Verificar que TODOS los pasos estén ✅ antes del commit
+- Actualizar backlog ANTES del commit final
+
 ---
 
 ## 📂 Repository Structure
