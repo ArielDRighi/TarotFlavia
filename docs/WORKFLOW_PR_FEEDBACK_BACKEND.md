@@ -2,7 +2,37 @@
 
 > 📋 **Propósito:** Proceso para analizar y aplicar feedback de PRs en backend.
 > 🤖 **Uso:** Aplicar automáticamente cuando se recibe feedback de PR de backend.
-> 📅 **Last Updated:** January 17, 2026
+> 📅 **Last Updated:** January 18, 2026
+
+---
+
+## 🚨 REGLA CRÍTICA: SIEMPRE VALIDAR ANTES DE APLICAR
+
+**NUNCA aplicar feedback automáticamente. SIEMPRE seguir este proceso:**
+
+1. ✅ **VALIDAR** qué archivos menciona el feedback
+2. ✅ **VERIFICAR** si esos archivos están realmente en el PR
+3. ✅ **CATEGORIZAR** el feedback (válido/inválido/dudoso)
+4. ✅ **INFORMAR** al usuario el análisis completo
+5. ✅ **ESPERAR confirmación** antes de aplicar
+
+### Formato de Reporte Obligatorio:
+
+```markdown
+📋 ANÁLISIS DE FEEDBACK DEL PR
+
+✅ FEEDBACK VÁLIDO (X items):
+1. [Descripción] → [Acción propuesta]
+2. [Descripción] → [Acción propuesta]
+
+❌ FEEDBACK INVÁLIDO (Y items):
+1. [Descripción] → Razón: [archivo no está en PR / ya fue aplicado / etc]
+
+⚠️ FEEDBACK DUDOSO (Z items):
+1. [Descripción] → Requiere decisión del usuario
+
+¿Procedo a aplicar los X items válidos?
+```
 
 ---
 
@@ -28,6 +58,25 @@ Feedback Recibido: [Pega aquí el feedback completo del revisor]
 ---
 
 ## 🔍 Proceso de Análisis (Senior Developer Mindset)
+
+### Fase 0: Validación de Feedback (OBLIGATORIO)
+
+**Antes de analizar el contenido, verificar:**
+
+1. **Listar archivos mencionados en el feedback:**
+   ```bash
+   # Extraer nombres de archivos del feedback
+   ```
+
+2. **Verificar qué archivos están realmente en el PR:**
+   ```bash
+   gh pr diff [PR_NUMBER] --name-only
+   ```
+
+3. **Comparar y categorizar:**
+   - ✅ Archivo en feedback Y en PR → Feedback potencialmente válido
+   - ❌ Archivo en feedback pero NO en PR → Feedback inválido/confundido
+   - ⚠️ Feedback genérico sin archivo específico → Requiere análisis
 
 ### Fase 1: Lectura Obligatoria de Contexto
 

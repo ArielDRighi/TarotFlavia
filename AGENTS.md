@@ -44,6 +44,36 @@ gh pr create --base main --title "..." --body "..."
 - `develop`: Branch de integración para desarrollo
 - `main`: Solo para releases de producción
 
+### Rule 3: ALWAYS Validate PR Feedback Before Applying
+**CRÍTICO:** Cuando recibas feedback de un PR, **NUNCA** apliques cambios automáticamente.
+
+**Proceso obligatorio:**
+
+1. **VALIDAR** qué archivos menciona el feedback
+2. **VERIFICAR** si esos archivos están realmente en el PR (`gh pr diff [PR_NUMBER] --name-only`)
+3. **CATEGORIZAR** el feedback:
+   - ✅ Válido: Archivo en feedback Y en PR
+   - ❌ Inválido: Archivo en feedback pero NO en PR
+   - ⚠️ Dudoso: Requiere análisis adicional
+4. **INFORMAR** al usuario con formato:
+   ```
+   📋 ANÁLISIS DE FEEDBACK DEL PR
+   
+   ✅ FEEDBACK VÁLIDO (X items):
+   1. [Descripción] → [Acción propuesta]
+   
+   ❌ FEEDBACK INVÁLIDO (Y items):
+   1. [Descripción] → Razón: [archivo no está en PR]
+   
+   ⚠️ FEEDBACK DUDOSO (Z items):
+   1. [Descripción] → Requiere decisión
+   
+   ¿Procedo a aplicar los X items válidos?
+   ```
+5. **ESPERAR** confirmación del usuario antes de aplicar
+
+**IMPORTANTE:** Herramientas de IA (como Copilot) pueden revisar archivos incorrectos o confundirse con el contexto. Siempre verificar primero.
+
 ---
 
 ## 📂 Repository Structure
