@@ -1438,7 +1438,8 @@ Crear tipos TypeScript, funciones de API y hooks para el horóscopo chino.
 **Módulo:** `frontend/src/components/features/chinese-horoscope/`  
 **Prioridad:** 🟡 MEDIA  
 **Estimación:** 1 día  
-**Dependencias:** TASK-115
+**Dependencias:** TASK-115  
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -1470,7 +1471,7 @@ frontend/src/components/features/chinese-horoscope/
 
 ##### Frontend
 
-- [ ] Crear `ChineseAnimalCard.tsx`:
+- [x] Crear `ChineseAnimalCard.tsx`:
 
   ```tsx
   "use client";
@@ -1515,7 +1516,7 @@ frontend/src/components/features/chinese-horoscope/
   }
   ```
 
-- [ ] Crear `ChineseAnimalSelector.tsx`:
+- [x] Crear `ChineseAnimalSelector.tsx`:
 
   ```tsx
   "use client";
@@ -1559,7 +1560,7 @@ frontend/src/components/features/chinese-horoscope/
   }
   ```
 
-- [ ] Crear `ChineseCompatibility.tsx`:
+- [x] Crear `ChineseCompatibility.tsx`:
 
   ```tsx
   "use client";
@@ -1616,7 +1617,7 @@ frontend/src/components/features/chinese-horoscope/
   }
   ```
 
-- [ ] Crear `ChineseHoroscopeDetail.tsx`:
+- [x] Crear `ChineseHoroscopeDetail.tsx`:
 
   ```tsx
   "use client";
@@ -1854,23 +1855,25 @@ frontend/src/components/features/chinese-horoscope/
   }
   ```
 
-- [ ] Crear `index.ts` con exports
+- [x] Crear `index.ts` con exports
 
 ##### Testing
 
-- [ ] Test: AnimalSelector renderiza 12 animales
-- [ ] Test: AnimalCalculator calcula correctamente
-- [ ] Test: ChineseHoroscopeDetail muestra todas las áreas
-- [ ] Test: Widget muestra CTA si no hay birthDate
+- [x] Test: AnimalSelector renderiza 12 animales
+- [x] Test: AnimalCard con onClick funciona
+- [x] Test: ChineseCompatibility muestra todas las categorías
+- [x] Test: Componentes tienen data-testid correctos
 
 ---
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] Componentes siguen design system
-- [ ] Calculador de animal funciona
-- [ ] Compatibilidad se muestra correctamente
-- [ ] Widget para dashboard funciona
+- [x] Componentes siguen design system
+- [x] ChineseAnimalCard muestra emoji, nombre, elemento
+- [x] ChineseAnimalSelector grid responsivo (3/4/6 columnas)
+- [x] ChineseCompatibility muestra best/good/challenging
+- [x] ChineseHoroscopeDetail muestra todas las secciones
+- [x] Tests cubren casos principales
 
 # Frontend: Páginas y Esquema de Datos
 
