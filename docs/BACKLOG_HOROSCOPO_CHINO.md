@@ -296,7 +296,7 @@ Crear funciones utilitarias para calcular el animal del zodiaco chino basado en 
 **Estimación:** 0.5 días  
 **Dependencias:** TASK-111  
 **Estado:** ✅ COMPLETADO (18/01/2026)  
-**PR:** #258 (pendiente)
+**PR:** #258 - https://github.com/ArielDRighi/TarotFlavia/pull/258
 
 ---
 
