@@ -154,9 +154,7 @@ export class ChineseHoroscopeController {
     const targetYear = year || new Date().getFullYear();
 
     // Validar rango de año
-    if (targetYear < 2020 || targetYear > 2050) {
-      throw new BadRequestException('El año debe estar entre 2020 y 2050');
-    }
+    this.validateYear(targetYear);
 
     // Buscar horóscopo del usuario
     const birthDate = new Date(user.birthDate);
@@ -203,9 +201,7 @@ export class ChineseHoroscopeController {
     @Param('year', ParseIntPipe) year: number,
   ): Promise<ChineseHoroscopeResponseDto[]> {
     // Validar rango de año
-    if (year < 2020 || year > 2050) {
-      throw new BadRequestException('El año debe estar entre 2020 y 2050');
-    }
+    this.validateYear(year);
 
     const horoscopes = await this.chineseService.findAllByYear(year);
     return horoscopes.map((h) => this.toResponseDto(h));
@@ -246,9 +242,7 @@ export class ChineseHoroscopeController {
     animal: ChineseZodiacAnimal,
   ): Promise<ChineseHoroscopeResponseDto> {
     // Validar rango de año
-    if (year < 2020 || year > 2050) {
-      throw new BadRequestException('El año debe estar entre 2020 y 2050');
-    }
+    this.validateYear(year);
 
     const horoscope = await this.chineseService.findByAnimalAndYear(
       animal,
@@ -302,9 +296,7 @@ export class ChineseHoroscopeController {
     details: string;
   } {
     // Validar rango de año
-    if (year < 2020 || year > 2050) {
-      throw new BadRequestException('El año debe estar entre 2020 y 2050');
-    }
+    this.validateYear(year);
 
     // Fire-and-forget: inicia la generación en background
     this.chineseService
@@ -322,6 +314,15 @@ export class ChineseHoroscopeController {
       message: `Generación de horóscopos chinos para ${year} iniciada`,
       details: 'Proceso en background (~1-2 minutos para 12 animales).',
     };
+  }
+
+  /**
+   * Helper: Validar rango de año permitido (2020-2050)
+   */
+  private validateYear(year: number): void {
+    if (year < 2020 || year > 2050) {
+      throw new BadRequestException('El año debe estar entre 2020 y 2050');
+    }
   }
 
   /**

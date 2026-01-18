@@ -47,7 +47,7 @@ describe('ChineseHoroscopeController', () => {
     id: 1,
     email: 'test@example.com',
     name: 'Test User',
-    birthDate: new Date('1988-03-15'), // Dragón
+    birthDate: '1988-03-15', // Dragón
     plan: { name: 'free' },
   };
 
@@ -195,7 +195,7 @@ describe('ChineseHoroscopeController', () => {
       expect(result.animal).toBe(ChineseZodiacAnimal.DRAGON);
       expect(usersService.findById).toHaveBeenCalledWith(1);
       expect(chineseService.findForUser).toHaveBeenCalledWith(
-        mockUser.birthDate,
+        expect.any(Date),
         new Date().getFullYear(),
       );
     });
@@ -209,7 +209,7 @@ describe('ChineseHoroscopeController', () => {
       await controller.getMyAnimalHoroscope(currentUser, year);
 
       expect(chineseService.findForUser).toHaveBeenCalledWith(
-        mockUser.birthDate,
+        expect.any(Date),
         year,
       );
     });
@@ -251,6 +251,26 @@ describe('ChineseHoroscopeController', () => {
       await controller.getMyAnimalHoroscope(currentUser);
 
       expect(chineseService.incrementViewCount).toHaveBeenCalledWith(1);
+    });
+
+    it('should throw BadRequestException when year is below 2020', async () => {
+      const currentUser = { userId: 1 };
+      const invalidYear = 2019;
+      usersService.findById.mockResolvedValue(mockUser as any);
+
+      await expect(
+        controller.getMyAnimalHoroscope(currentUser, invalidYear),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw BadRequestException when year is above 2050', async () => {
+      const currentUser = { userId: 1 };
+      const invalidYear = 2051;
+      usersService.findById.mockResolvedValue(mockUser as any);
+
+      await expect(
+        controller.getMyAnimalHoroscope(currentUser, invalidYear),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
