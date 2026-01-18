@@ -114,3 +114,13 @@ export type {
   ZodiacSignInfo,
 } from './horoscope.types';
 export { ZodiacSign } from './horoscope.types';
+
+// Chinese Horoscope Types
+export type {
+  ChineseHoroscope,
+  ChineseHoroscopeArea,
+  ChineseHoroscopeLucky,
+  ChineseZodiacInfo,
+  CalculateAnimalResponse,
+} from './chinese-horoscope.types';
+export { ChineseZodiacAnimal } from './chinese-horoscope.types';

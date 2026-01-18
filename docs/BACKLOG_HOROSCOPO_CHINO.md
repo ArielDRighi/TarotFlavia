@@ -1084,7 +1084,8 @@ Implementar endpoints REST para consultar horóscopos chinos.
 **Módulo:** `frontend/src/`  
 **Prioridad:** 🟡 MEDIA  
 **Estimación:** 0.5 días  
-**Dependencias:** TASK-114
+**Dependencias:** TASK-114  
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -1114,7 +1115,7 @@ Crear tipos TypeScript, funciones de API y hooks para el horóscopo chino.
 
 ##### Frontend
 
-- [ ] Crear `chinese-horoscope.types.ts`:
+- [x] Crear `chinese-horoscope.types.ts`:
 
   ```typescript
   export enum ChineseZodiacAnimal {
@@ -1400,23 +1401,23 @@ Crear tipos TypeScript, funciones de API y hooks para el horóscopo chino.
   }
   ```
 
-- [ ] Exportar desde `types/index.ts`
+- [x] Exportar desde `types/index.ts`
 
 ##### Testing
 
-- [ ] Test: Tipos se exportan correctamente
-- [ ] Test: API functions funcionan
-- [ ] Test: CHINESE_ZODIAC_INFO tiene 12 animales
-- [ ] Test: Hooks con staleTime correcto
+- [x] Test: Tipos se exportan correctamente
+- [x] Test: API functions funcionan
+- [x] Test: CHINESE_ZODIAC_INFO tiene 12 animales
+- [x] Test: Hooks con staleTime correcto
 
 ---
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] Tipos completos para horóscopo chino
-- [ ] API functions cubren todos los endpoints
-- [ ] Info de 12 animales disponible
-- [ ] staleTime de 24h (es anual)
+- [x] Tipos completos para horóscopo chino
+- [x] API functions cubren todos los endpoints
+- [x] Info de 12 animales disponible
+- [x] staleTime de 24h (es anual)
 
 ---
 
