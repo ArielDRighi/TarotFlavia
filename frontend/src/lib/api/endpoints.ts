@@ -101,6 +101,14 @@ export const API_ENDPOINTS = {
     BY_DATE_SIGN: (date: string, sign: string) => `/horoscope/${date}/${sign}`,
   },
 
+  // Chinese Horoscope (Horóscopo Chino - Anual)
+  CHINESE_HOROSCOPE: {
+    CALCULATE: '/chinese-horoscope/calculate',
+    MY_ANIMAL: '/chinese-horoscope/my-animal',
+    BY_YEAR: (year: number) => `/chinese-horoscope/${year}`,
+    BY_YEAR_ANIMAL: (year: number, animal: string) => `/chinese-horoscope/${year}/${animal}`,
+  },
+
   // Admin Dashboard
   ADMIN: {
     DASHBOARD_STATS: '/admin/dashboard/stats',
