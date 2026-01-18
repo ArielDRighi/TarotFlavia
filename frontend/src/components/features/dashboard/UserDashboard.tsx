@@ -17,6 +17,7 @@ import { HoroscopeWidget } from '@/components/features/horoscope';
  * - Welcome header with name and plan badge
  * - Quick action cards (Nueva Lectura, Historial, Carta del Día)
  * - Did You Know section with tarot facts
+ * - Horoscope widget (All authenticated users)
  * - Stats section (Premium only)
  * - Upgrade banner (Free users only)
  *

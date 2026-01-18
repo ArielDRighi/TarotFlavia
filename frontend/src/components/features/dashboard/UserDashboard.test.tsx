@@ -447,7 +447,7 @@ describe('UserDashboard', () => {
 
     render(<UserDashboard />);
 
-    // Should render HoroscopeWidget (test will FAIL initially - TDD RED phase)
+    // Should render HoroscopeWidget
     expect(screen.getByTestId('horoscope-widget')).toBeInTheDocument();
   });
 
