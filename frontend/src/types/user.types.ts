@@ -25,6 +25,7 @@ export interface User {
   roles: UserRole[];
   plan: UserPlan;
   profilePicture?: string;
+  birthDate?: string | null;
   lastLogin: string | null;
   createdAt: string;
   updatedAt: string;
@@ -60,6 +61,7 @@ export interface UpdateProfileDto {
   email?: string;
   password?: string;
   profilePicture?: string;
+  birthDate?: string | null;
 }
 
 /**

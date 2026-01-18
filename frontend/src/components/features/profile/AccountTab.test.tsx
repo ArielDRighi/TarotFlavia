@@ -102,7 +102,7 @@ describe('AccountTab', () => {
 
       await waitFor(() => {
         expect(mockUpdateProfile).toHaveBeenCalledWith(
-          { name: 'Updated Name', email: 'test@example.com' },
+          { name: 'Updated Name', email: 'test@example.com', birthDate: null },
           expect.any(Object)
         );
       });

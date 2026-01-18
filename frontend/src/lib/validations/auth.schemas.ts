@@ -28,6 +28,11 @@ export const registerSchema = z
       .string()
       .min(CONFIG.PASSWORD_MIN_LENGTH, `Mínimo ${CONFIG.PASSWORD_MIN_LENGTH} caracteres`),
     confirmPassword: z.string(),
+    birthDate: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato inválido (YYYY-MM-DD)')
+      .optional()
+      .or(z.literal('')),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: 'Las contraseñas no coinciden',

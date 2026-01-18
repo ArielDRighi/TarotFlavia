@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Post,
   Param,
   UseGuards,
   NotFoundException,
@@ -15,6 +16,7 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { HoroscopeGenerationService } from '../../application/services/horoscope-generation.service';
+import { HoroscopeCronService } from '../../application/services/horoscope-cron.service';
 import { HoroscopeResponseDto } from '../../application/dto/horoscope-response.dto';
 import { DailyHoroscope } from '../../entities/daily-horoscope.entity';
 import {
@@ -22,6 +24,7 @@ import {
   getZodiacSign,
 } from '../../../../common/utils/zodiac.utils';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
+import { AdminGuard } from '../../../auth/infrastructure/guards/admin.guard';
 import { CurrentUser } from '../../../../common/decorators/current-user.decorator';
 import { UsersService } from '../../../users/users.service';
 
@@ -42,8 +45,39 @@ import { UsersService } from '../../../users/users.service';
 export class HoroscopeController {
   constructor(
     private readonly horoscopeService: HoroscopeGenerationService,
+    private readonly horoscopeCronService: HoroscopeCronService,
     private readonly usersService: UsersService,
   ) {}
+
+  /**
+   * Generar horóscopos manualmente (Admin only)
+   */
+  @Post('generate')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Generar horóscopos manualmente (Admin)' })
+  @ApiResponse({
+    status: 201,
+    description: 'Generación de horóscopos iniciada',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No autorizado (requiere rol admin)',
+  })
+  generateManually(): { message: string } {
+    // Fire-and-forget: inicia la generación en background
+    this.horoscopeCronService.generateNow().catch((error) => {
+      console.error('Error en generación manual:', error);
+    });
+    return {
+      message:
+        'Generación de horóscopos iniciada. Proceso en background (~72 segundos).',
+    };
+  }
 
   /**
    * Obtener todos los horóscopos de hoy

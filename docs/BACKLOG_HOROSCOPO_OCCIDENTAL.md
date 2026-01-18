@@ -1118,7 +1118,7 @@ src/modules/horoscope/application/services/
 
 - [x] Crear `HoroscopeCronService` con generación secuencial
 - [x] Implementar delay de 6 segundos entre signos
-- [x] Cron job diario (@Cron '0 0 6 * * *')
+- [x] Cron job diario (@Cron '0 0 6 \* \* \*')
 - [x] Cron job de limpieza semanal
 - [x] Método generateNow() para ejecución manual
 - [x] Registrar servicio en HoroscopeModule
@@ -1159,139 +1159,139 @@ src/modules/horoscope/application/services/
 - Total de ejecución: ~72 segundos para los 12 signos
 - Delay mockeado en tests para ejecución rápida
 - Constantes exportadas desde archivo de configuración separado
-- Limpieza semanal usa cron expression '0 0 0 * * 0' (domingos medianoche UTC)
+- Limpieza semanal usa cron expression '0 0 0 \* \* 0' (domingos medianoche UTC)
 
 ---
 
-  ```typescript
-  @Injectable()
-  export class HoroscopeCronService {
-    private readonly logger = new Logger(HoroscopeCronService.name);
-    private readonly DELAY_BETWEEN_SIGNS_MS = 6000;
+```typescript
+@Injectable()
+export class HoroscopeCronService {
+  private readonly logger = new Logger(HoroscopeCronService.name);
+  private readonly DELAY_BETWEEN_SIGNS_MS = 6000;
 
-    private readonly ZODIAC_ORDER: ZodiacSign[] = [
-      ZodiacSign.ARIES,
-      ZodiacSign.TAURUS,
-      ZodiacSign.GEMINI,
-      ZodiacSign.CANCER,
-      ZodiacSign.LEO,
-      ZodiacSign.VIRGO,
-      ZodiacSign.LIBRA,
-      ZodiacSign.SCORPIO,
-      ZodiacSign.SAGITTARIUS,
-      ZodiacSign.CAPRICORN,
-      ZodiacSign.AQUARIUS,
-      ZodiacSign.PISCES,
-    ];
+  private readonly ZODIAC_ORDER: ZodiacSign[] = [
+    ZodiacSign.ARIES,
+    ZodiacSign.TAURUS,
+    ZodiacSign.GEMINI,
+    ZodiacSign.CANCER,
+    ZodiacSign.LEO,
+    ZodiacSign.VIRGO,
+    ZodiacSign.LIBRA,
+    ZodiacSign.SCORPIO,
+    ZodiacSign.SAGITTARIUS,
+    ZodiacSign.CAPRICORN,
+    ZodiacSign.AQUARIUS,
+    ZodiacSign.PISCES,
+  ];
 
-    constructor(private readonly horoscopeService: HoroscopeGenerationService) {}
+  constructor(private readonly horoscopeService: HoroscopeGenerationService) {}
 
-    /**
-     * Genera horóscopos diarios - 06:00 UTC
-     *
-     * LÓGICA SECUENCIAL:
-     * - Un signo a la vez
-     * - 6 segundos entre generaciones
-     * - Total: ~72 segundos para 12 signos
-     */
-    @Cron("0 0 6 * * *", {
-      name: "daily-horoscope-generation",
-      timeZone: "UTC",
-    })
-    async generateDailyHoroscopes(): Promise<void> {
+  /**
+   * Genera horóscopos diarios - 06:00 UTC
+   *
+   * LÓGICA SECUENCIAL:
+   * - Un signo a la vez
+   * - 6 segundos entre generaciones
+   * - Total: ~72 segundos para 12 signos
+   */
+  @Cron("0 0 6 * * *", {
+    name: "daily-horoscope-generation",
+    timeZone: "UTC",
+  })
+  async generateDailyHoroscopes(): Promise<void> {
+    const startTime = Date.now();
+    const today = new Date();
+    const dateStr = today.toISOString().split("T")[0];
+
+    this.logger.log(`=== INICIO: Horóscopos para ${dateStr} ===`);
+
+    const results: GenerationResult[] = [];
+
+    for (let i = 0; i < this.ZODIAC_ORDER.length; i++) {
+      const sign = this.ZODIAC_ORDER[i];
+
+      if (i > 0) {
+        this.logger.debug(`Esperando ${this.DELAY_BETWEEN_SIGNS_MS}ms...`);
+        await this.delay(this.DELAY_BETWEEN_SIGNS_MS);
+      }
+
+      const result = await this.generateSingleHoroscope(sign, today, i + 1);
+      results.push(result);
+    }
+
+    const successful = results.filter((r) => r.success).length;
+    const failed = results.filter((r) => !r.success).length;
+    const totalTime = Date.now() - startTime;
+
+    this.logger.log(`=== FIN: ${successful}/12 exitosos ===`);
+    this.logger.log(`Tiempo total: ${(totalTime / 1000).toFixed(1)}s`);
+
+    results.filter((r) => !r.success).forEach((r) => this.logger.error(`FALLO ${r.sign}: ${r.error}`));
+
+    if (failed > 0) {
+      this.logger.warn(`⚠️ ${failed} horóscopos fallaron`);
+    }
+  }
+
+  private async generateSingleHoroscope(sign: ZodiacSign, date: Date, index: number): Promise<GenerationResult> {
+    const signName = getZodiacSignInfo(sign).nameEs;
+
+    try {
+      this.logger.log(`[${index}/12] Generando ${signName}...`);
+
       const startTime = Date.now();
-      const today = new Date();
-      const dateStr = today.toISOString().split("T")[0];
+      const horoscope = await this.horoscopeService.generateForSign(sign, date);
+      const duration = Date.now() - startTime;
 
-      this.logger.log(`=== INICIO: Horóscopos para ${dateStr} ===`);
+      this.logger.log(`[${index}/12] ✓ ${signName} (${duration}ms, ${horoscope.aiProvider})`);
 
-      const results: GenerationResult[] = [];
-
-      for (let i = 0; i < this.ZODIAC_ORDER.length; i++) {
-        const sign = this.ZODIAC_ORDER[i];
-
-        if (i > 0) {
-          this.logger.debug(`Esperando ${this.DELAY_BETWEEN_SIGNS_MS}ms...`);
-          await this.delay(this.DELAY_BETWEEN_SIGNS_MS);
-        }
-
-        const result = await this.generateSingleHoroscope(sign, today, i + 1);
-        results.push(result);
-      }
-
-      const successful = results.filter((r) => r.success).length;
-      const failed = results.filter((r) => !r.success).length;
-      const totalTime = Date.now() - startTime;
-
-      this.logger.log(`=== FIN: ${successful}/12 exitosos ===`);
-      this.logger.log(`Tiempo total: ${(totalTime / 1000).toFixed(1)}s`);
-
-      results.filter((r) => !r.success).forEach((r) => this.logger.error(`FALLO ${r.sign}: ${r.error}`));
-
-      if (failed > 0) {
-        this.logger.warn(`⚠️ ${failed} horóscopos fallaron`);
-      }
-    }
-
-    private async generateSingleHoroscope(sign: ZodiacSign, date: Date, index: number): Promise<GenerationResult> {
-      const signName = getZodiacSignInfo(sign).nameEs;
-
-      try {
-        this.logger.log(`[${index}/12] Generando ${signName}...`);
-
-        const startTime = Date.now();
-        const horoscope = await this.horoscopeService.generateForSign(sign, date);
-        const duration = Date.now() - startTime;
-
-        this.logger.log(`[${index}/12] ✓ ${signName} (${duration}ms, ${horoscope.aiProvider})`);
-
-        return { sign, success: true, duration, provider: horoscope.aiProvider };
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        this.logger.error(`[${index}/12] ✗ ${signName}: ${errorMessage}`);
-        return { sign, success: false, error: errorMessage };
-      }
-    }
-
-    /**
-     * Limpia horóscopos >30 días - Semanal
-     */
-    @Cron(CronExpression.EVERY_WEEK, {
-      name: "horoscope-cleanup",
-      timeZone: "UTC",
-    })
-    async cleanupOldHoroscopes(): Promise<void> {
-      this.logger.log("Limpiando horóscopos antiguos...");
-
-      try {
-        const deletedCount = await this.horoscopeService.cleanupOldHoroscopes(30);
-        this.logger.log(`Eliminados: ${deletedCount}`);
-      } catch (error) {
-        this.logger.error("Error en limpieza:", error);
-      }
-    }
-
-    /**
-     * Método manual para testing
-     */
-    async generateNow(): Promise<void> {
-      this.logger.warn("Generación manual iniciada...");
-      await this.generateDailyHoroscopes();
-    }
-
-    private delay(ms: number): Promise<void> {
-      return new Promise((resolve) => setTimeout(resolve, ms));
+      return { sign, success: true, duration, provider: horoscope.aiProvider };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.error(`[${index}/12] ✗ ${signName}: ${errorMessage}`);
+      return { sign, success: false, error: errorMessage };
     }
   }
 
-  interface GenerationResult {
-    sign: ZodiacSign;
-    success: boolean;
-    duration?: number;
-    provider?: string;
-    error?: string;
+  /**
+   * Limpia horóscopos >30 días - Semanal
+   */
+  @Cron(CronExpression.EVERY_WEEK, {
+    name: "horoscope-cleanup",
+    timeZone: "UTC",
+  })
+  async cleanupOldHoroscopes(): Promise<void> {
+    this.logger.log("Limpiando horóscopos antiguos...");
+
+    try {
+      const deletedCount = await this.horoscopeService.cleanupOldHoroscopes(30);
+      this.logger.log(`Eliminados: ${deletedCount}`);
+    } catch (error) {
+      this.logger.error("Error en limpieza:", error);
+    }
   }
-  ```
+
+  /**
+   * Método manual para testing
+   */
+  async generateNow(): Promise<void> {
+    this.logger.warn("Generación manual iniciada...");
+    await this.generateDailyHoroscopes();
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+}
+
+interface GenerationResult {
+  sign: ZodiacSign;
+  success: boolean;
+  duration?: number;
+  provider?: string;
+  error?: string;
+}
+```
 
 - [ ] Registrar servicio en módulo:
 
@@ -1484,52 +1484,52 @@ Crear los tipos TypeScript, endpoints y funciones de API para horóscopo.
 
 ---
 
-  ```typescript
-  export enum ZodiacSign {
-    ARIES = "aries",
-    TAURUS = "taurus",
-    GEMINI = "gemini",
-    CANCER = "cancer",
-    LEO = "leo",
-    VIRGO = "virgo",
-    LIBRA = "libra",
-    SCORPIO = "scorpio",
-    SAGITTARIUS = "sagittarius",
-    CAPRICORN = "capricorn",
-    AQUARIUS = "aquarius",
-    PISCES = "pisces",
-  }
+```typescript
+export enum ZodiacSign {
+  ARIES = "aries",
+  TAURUS = "taurus",
+  GEMINI = "gemini",
+  CANCER = "cancer",
+  LEO = "leo",
+  VIRGO = "virgo",
+  LIBRA = "libra",
+  SCORPIO = "scorpio",
+  SAGITTARIUS = "sagittarius",
+  CAPRICORN = "capricorn",
+  AQUARIUS = "aquarius",
+  PISCES = "pisces",
+}
 
-  export interface HoroscopeArea {
-    content: string;
-    score: number;
-  }
+export interface HoroscopeArea {
+  content: string;
+  score: number;
+}
 
-  export interface HoroscopeAreas {
-    love: HoroscopeArea;
-    wellness: HoroscopeArea; // Bienestar: energía, descanso, estrés, meditación, autocuidado
-    money: HoroscopeArea;
-  }
+export interface HoroscopeAreas {
+  love: HoroscopeArea;
+  wellness: HoroscopeArea; // Bienestar: energía, descanso, estrés, meditación, autocuidado
+  money: HoroscopeArea;
+}
 
-  export interface DailyHoroscope {
-    id: number;
-    zodiacSign: ZodiacSign;
-    horoscopeDate: string;
-    generalContent: string;
-    areas: HoroscopeAreas;
-    luckyNumber: number | null;
-    luckyColor: string | null;
-    luckyTime: string | null;
-  }
+export interface DailyHoroscope {
+  id: number;
+  zodiacSign: ZodiacSign;
+  horoscopeDate: string;
+  generalContent: string;
+  areas: HoroscopeAreas;
+  luckyNumber: number | null;
+  luckyColor: string | null;
+  luckyTime: string | null;
+}
 
-  export interface ZodiacSignInfo {
-    sign: ZodiacSign;
-    nameEs: string;
-    nameEn: string;
-    symbol: string;
-    element: "fire" | "earth" | "air" | "water";
-  }
-  ```
+export interface ZodiacSignInfo {
+  sign: ZodiacSign;
+  nameEs: string;
+  nameEn: string;
+  symbol: string;
+  element: "fire" | "earth" | "air" | "water";
+}
+```
 
 - [ ] Agregar endpoints en `endpoints.ts`:
 
@@ -2301,17 +2301,12 @@ frontend/src/components/features/horoscope/
 
 ---
 
-### ✅ TASK-109: Crear página de Horóscopo y agregar al Header [COMPLETADA]
+### TASK-109: Crear página de Horóscopo y agregar al Header
 
 **Módulo:** `frontend/src/app/horoscopo/`  
 **Prioridad:** 🟡 MEDIA  
 **Estimación:** 1 día  
-**Dependencias:** TASK-108  
-**Estado:** ✅ COMPLETADA  
-**Fecha:** 17/01/2026  
-**Commit:** `196caea` - feat(horoscope): TASK-109 - Crear página de Horóscopo y agregar link al Header  
-**PR:** #254  
-**Rama:** `feature/TASK-109-horoscope-page-header`
+**Dependencias:** TASK-108
 
 ---
 
@@ -2321,60 +2316,25 @@ Crear la página principal de horóscopo con selector de signos y vista detallad
 
 ---
 
-#### 🏗️ Implementación Realizada
+#### 🏗️ Contexto Técnico
 
-**Archivos creados:**
+**Archivos a crear:**
 
-- ✅ `frontend/src/app/horoscopo/page.tsx` - Página principal con selector de signos
-- ✅ `frontend/src/app/horoscopo/page.test.tsx` - 7 tests
-- ✅ `frontend/src/app/horoscopo/[sign]/page.tsx` - Página de detalle por signo
-- ✅ `frontend/src/app/horoscopo/[sign]/page.test.tsx` - 8 tests
+- `frontend/src/app/horoscopo/page.tsx`
+- `frontend/src/app/horoscopo/[sign]/page.tsx`
 
-**Archivos modificados:**
+**Archivos a modificar:**
 
-- ✅ `frontend/src/lib/constants/routes.ts` - Rutas HOROSCOPO y HOROSCOPO_SIGN
-- ✅ `frontend/src/components/layout/Header.tsx` - Links "Carta del Día" y "Horóscopo" (navegación pública)
-- ✅ `frontend/src/components/layout/Header.test.tsx` - 2 tests agregados (22 tests totales)
-- ✅ `frontend/src/types/auth.types.ts` - Campo birthDate agregado (opcional)
-- ✅ `frontend/src/components/features/horoscope/HoroscopeSkeleton.tsx` - data-testid attributes
-- ✅ `frontend/src/test/factories/authUser.factory.ts` - birthDate: null default
-- ✅ `frontend/src/test/factories/dailyReading.factory.ts` - birthDate: null default
-- ✅ `frontend/src/app/admin/layout.test.tsx` - Mock users updated
-
-**Características implementadas:**
-
-- ✅ Página `/horoscopo` con grid de 12 signos zodiacales
-- ✅ Página `/horoscopo/[sign]` con detalle completo del horóscopo
-- ✅ Detección automática del signo del usuario (si tiene birthDate)
-- ✅ Navegación en Header visible para todos los usuarios (público)
-- ✅ Estados: loading, error, no-data, success
-- ✅ Responsive design (mobile-first)
-- ✅ Mensajes para usuarios no autenticados y sin birthDate
-- ✅ Validación de signos inválidos con página de error
-- ✅ Selector horizontal de signos en página de detalle
-
-**Tests:**
-
-- ✅ 37 tests totales (100% passing)
-- ✅ 7 tests página principal (horoscopo/page.test.tsx)
-- ✅ 8 tests página de detalle (horoscopo/[sign]/page.test.tsx)
-- ✅ 22 tests Header component (incluye 2 nuevos para navegación pública)
-- ✅ Coverage > 80%
-
-**Validaciones:**
-
-- ✅ Lint: 0 errores, 0 warnings
-- ✅ Type-check: 0 errores TypeScript
-- ✅ Build: Exitoso (routes `/horoscopo` y `/horoscopo/[sign]` confirmados)
-- ✅ Tests: 37/37 pasando
+- `frontend/src/components/layout/Header.tsx`
+- `frontend/src/lib/constants/routes.ts`
 
 ---
 
-#### ✅ Tareas Completadas
+#### ✅ Tareas Específicas
 
 ##### Frontend
 
-- [x] Agregar rutas en `routes.ts`:
+- [ ] Agregar rutas en `routes.ts`:
 
   ```typescript
   export const ROUTES = {
@@ -2384,7 +2344,7 @@ Crear la página principal de horóscopo con selector de signos y vista detallad
   } as const;
   ```
 
-- [x] Crear `app/horoscopo/page.tsx`:
+- [ ] Crear `app/horoscopo/page.tsx`:
 
   ```tsx
   "use client";
@@ -2446,7 +2406,7 @@ Crear la página principal de horóscopo con selector de signos y vista detallad
   }
   ```
 
-- [x] Crear `app/horoscopo/[sign]/page.tsx`:
+- [ ] Crear `app/horoscopo/[sign]/page.tsx`:
 
   ```tsx
   "use client";
@@ -2510,7 +2470,7 @@ Crear la página principal de horóscopo con selector de signos y vista detallad
   }
   ```
 
-- [x] Actualizar `Header.tsx` - agregar link:
+- [ ] Actualizar `Header.tsx` - agregar link:
   ```tsx
   const navigationItems = [
     { href: "/carta-del-dia", label: "Carta del Día" },
@@ -2521,56 +2481,31 @@ Crear la página principal de horóscopo con selector de signos y vista detallad
 
 ##### Testing
 
-- [x] Test: Página muestra 12 signos (validado en tests)
-- [x] Test: Click navega a página de signo
-- [x] Test: Página de signo muestra detalle
-- [x] Test: Signo inválido muestra error
-- [x] Test: Loading states (skeleton variants)
-- [x] Test: Mensajes para usuarios sin auth/birthDate
-- [x] Test: Navegación en Header (links públicos)
-- [x] Test: User sign detection from birthDate
+- [ ] Test: Página muestra 12 signos
+- [ ] Test: Click navega a página de signo
+- [ ] Test: Página de signo muestra detalle
+- [ ] Test: Signo inválido muestra error
 
 ---
 
-#### 🎯 Criterios de Aceptación (Todos Cumplidos)
+#### 🎯 Criterios de Aceptación
 
-- [x] /horoscopo muestra selector de signos
-- [x] /horoscopo/[sign] muestra detalle
-- [x] Navegación entre signos funciona
-- [x] Link visible en header (navegación pública)
-- [x] Responsive en móvil y desktop
-- [x] Tests pasan con >80% coverage (37/37 tests passing)
-- [x] Lint y build sin errores
-
----
-
-#### 📎 Notas Técnicas
-
-> **IMPLEMENTACIÓN:**
->
-> - ✅ Campo `birthDate` agregado a AuthUser como opcional/nullable
-> - ✅ Detección automática de signo usando `getZodiacSignFromDate()`
-> - ✅ Navegación en Header cambió a público (visible para todos los usuarios)
-> - ✅ Mensajes contextuales para usuarios anónimos y sin birthDate
-> - ✅ Componentes reutilizados de TASK-108 (ZodiacSignSelector, HoroscopeDetail, etc.)
-> - ✅ Hooks de TASK-107 (useTodayHoroscope, useTodayAllHoroscopes)
-> - ✅ Validación de signos inválidos con página de error graceful
-
+- [ ] /horoscopo muestra selector de signos
+- [ ] /horoscopo/[sign] muestra detalle
+- [ ] Navegación entre signos funciona
+- [ ] Link visible en header
+- [ ] Responsive en móvil y desktop
 
 # Dashboard Widget y Esquema de Datos
 
 ---
 
-### ✅ TASK-110: Agregar widget de Horóscopo al Dashboard [COMPLETADA]
+### TASK-110: Agregar widget de Horóscopo al Dashboard
 
 **Módulo:** `frontend/src/components/features/dashboard/`  
 **Prioridad:** 🟢 BAJA  
 **Estimación:** 0.5 días  
-**Dependencias:** TASK-108, TASK-109  
-**Estado:** ✅ COMPLETADA  
-**Fecha:** 17/01/2026  
-**Commit:** `aecb6a8` - feat(horoscope): TASK-110 - Agregar HoroscopeWidget al Dashboard  
-**Rama:** `feature/TASK-110-horoscope-dashboard-widget`
+**Dependencias:** TASK-108, TASK-109
 
 ---
 
@@ -2580,101 +2515,41 @@ Integrar el widget de horóscopo en el dashboard del usuario autenticado.
 
 ---
 
-#### 🏗️ Implementación Realizada
-
-**Archivos modificados:**
-
-- ✅ `frontend/src/components/features/dashboard/UserDashboard.tsx` - Integración del HoroscopeWidget
-- ✅ `frontend/src/components/features/dashboard/UserDashboard.test.tsx` - 2 tests nuevos agregados
-
-**Características implementadas:**
-
-- ✅ HoroscopeWidget integrado en la columna derecha del dashboard (1/3 ancho)
-- ✅ Widget visible para TODOS los usuarios autenticados (Free y Premium)
-- ✅ Widget posicionado arriba de StatsSection (que es solo Premium)
-- ✅ Manejo de estados del widget (implementado en TASK-108):
-  - Usuario sin birthDate → CTA "Configura tu fecha de nacimiento" → link a `/perfil`
-  - Loading → Skeleton
-  - Error/No data → "No disponible en este momento"
-  - Success → Muestra signo, resumen truncado, y scores de Amor/Bienestar/Dinero
-
-**Tests:**
-
-- ✅ 11/11 tests pasando en UserDashboard.test.tsx
-- ✅ Test: "should render HoroscopeWidget in the dashboard" (Free user con birthDate)
-- ✅ Test: "should render HoroscopeWidget for premium users" (Premium user con birthDate)
-- ✅ Mock de useMySignHoroscope agregado en beforeEach para prevenir errores undefined
-
-**Validaciones:**
-
-- ✅ Lint: 0 errores, 0 warnings
-- ✅ Type-check: 0 errores TypeScript
-- ✅ Build: Exitoso
-- ✅ Tests: 11/11 pasando en UserDashboard.test.tsx (700+ tests totales en suite completo)
-
----
-
-#### ✅ Tareas Completadas
+#### ✅ Tareas Específicas
 
 ##### Frontend
 
-- [x] Importar `HoroscopeWidget` en `UserDashboard.tsx`:
+- [ ] Importar `HoroscopeWidget` en `UserDashboard.tsx`:
 
   ```tsx
   import { HoroscopeWidget } from "@/components/features/horoscope";
 
-  // Integrado en el layout del dashboard (columna derecha):
-  <div className="grid gap-8 lg:grid-cols-3">
-    {/* Left column (2/3 width) */}
-    <div className="space-y-8 lg:col-span-2">
-      <DidYouKnowSection />
-      {!isPremium && <UpgradeBanner onUpgradeClick={handleUpgradeClick} />}
-    </div>
-
-    {/* Right column (1/3 width) */}
-    <div className="space-y-8">
-      <HoroscopeWidget /> {/* ✅ NUEVO */}
-      {isPremium && <StatsSection />}
-    </div>
+  // En el layout del dashboard:
+  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <DailyCardWidget />
+    <HoroscopeWidget />
+    {/* Otros widgets */}
   </div>;
   ```
 
-- [x] Verificar que el widget maneje:
-  - ✅ Usuario sin birthDate → CTA "Configura tu fecha de nacimiento" → link a `/perfil`
-  - ✅ Horóscopo no disponible → "No disponible en este momento"
-  - ✅ Loading → Skeleton
-  - ✅ Success → Muestra signo, resumen truncado (line-clamp-3), scores
+- [ ] Verificar que el widget maneje:
+  - Usuario sin birthDate → CTA para configurar
+  - Horóscopo no disponible → mensaje de error
+  - Loading → skeleton
 
 ##### Testing
 
-- [x] Test: Dashboard muestra widget (verificado con data-testid="horoscope-widget")
-- [x] Test: Widget muestra signo correcto (2 tests: Free y Premium users)
-- [x] Test: CTA funciona si no hay birthDate (implementado en HoroscopeWidget en TASK-108)
-- [x] Mock de useMySignHoroscope agregado en beforeEach para prevenir errores
+- [ ] Test: Dashboard muestra widget
+- [ ] Test: Widget muestra signo correcto
+- [ ] Test: CTA funciona si no hay birthDate
 
 ---
 
-#### 🎯 Criterios de Aceptación (Todos Cumplidos)
+#### 🎯 Criterios de Aceptación
 
-- [x] Widget visible en dashboard (columna derecha, arriba de StatsSection)
-- [x] Muestra signo y resumen (implementado en HoroscopeWidget)
-- [x] CTA funciona para configurar birthDate (link a `/perfil`)
-- [x] Tests pasan (11/11 en UserDashboard.test.tsx)
-- [x] Lint, type-check, build sin errores
-- [x] Widget visible para todos los usuarios autenticados (Free y Premium)
-
----
-
-#### 📎 Notas Técnicas
-
-> **IMPLEMENTACIÓN:**
->
-> - ✅ El HoroscopeWidget ya fue creado en TASK-108 con todos los estados manejados
-> - ✅ Widget usa `useMySignHoroscope` con retry: false (falla legítimamente sin birthDate)
-> - ✅ Widget tiene `data-testid="horoscope-widget"` para testing
-> - ✅ Layout de dashboard usa grid lg:grid-cols-3 (2/3 left, 1/3 right)
-> - ✅ Widget posicionado estratégicamente: visible para todos, no compite con StatsSection (Premium-only)
-> - ✅ Mock de useMySignHoroscope en beforeEach previene errores undefined en tests
+- [ ] Widget visible en dashboard
+- [ ] Muestra signo y resumen
+- [ ] CTA funciona para configurar birthDate
 
 ---
 
@@ -2796,7 +2671,7 @@ Semana 3:
 
 - [x] TASK-107: Types y hooks ✅ (17/01/2026)
 - [x] TASK-108: Componentes UI ✅ (17/01/2026)
-- [x] TASK-109: Páginas ✅ (17/01/2026) - PR #254
+- [ ] TASK-109: Páginas
 - [ ] TASK-110: Widget dashboard
 
 ### Infraestructura

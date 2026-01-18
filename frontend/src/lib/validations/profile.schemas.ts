@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { CONFIG } from '@/lib/constants/config';
 
 /**
- * Schema for updating user profile (name and/or email)
+ * Schema for updating user profile (name, email, birthDate)
  * All fields are optional
  */
 export const updateProfileSchema = z.object({
@@ -15,6 +15,12 @@ export const updateProfileSchema = z.object({
     .max(CONFIG.USERNAME_MAX_LENGTH, `Máximo ${CONFIG.USERNAME_MAX_LENGTH} caracteres`)
     .optional(),
   email: z.string().email('Email inválido').optional(),
+  birthDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato inválido (YYYY-MM-DD)')
+    .nullable()
+    .optional()
+    .or(z.literal('')),
 });
 
 export type UpdateProfileFormData = z.infer<typeof updateProfileSchema>;

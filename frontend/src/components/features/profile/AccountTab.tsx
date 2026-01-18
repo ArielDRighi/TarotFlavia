@@ -35,6 +35,7 @@ export function AccountTab({ profile }: AccountTabProps) {
     defaultValues: {
       name: profile.name,
       email: profile.email,
+      birthDate: profile.birthDate || '',
     },
   });
 
@@ -49,9 +50,14 @@ export function AccountTab({ profile }: AccountTabProps) {
   });
 
   const onProfileSubmit = (data: UpdateProfileFormData) => {
-    updateProfile(data, {
+    // Send birthDate as null if empty string, or as the value if provided
+    const payload = {
+      ...data,
+      birthDate: data.birthDate || null,
+    };
+    updateProfile(payload, {
       onSuccess: () => {
-        profileForm.reset({ name: data.name, email: data.email });
+        profileForm.reset({ name: data.name, email: data.email, birthDate: data.birthDate || '' });
       },
     });
   };
@@ -111,6 +117,28 @@ export function AccountTab({ profile }: AccountTabProps) {
                 className="bg-muted cursor-not-allowed"
               />
               <p className="text-muted-foreground text-xs">El email no puede ser modificado</p>
+            </div>
+
+            {/* Birth Date Field */}
+            <div className="space-y-2">
+              <label htmlFor="birthDate" className="text-sm font-medium">
+                Fecha de Nacimiento
+              </label>
+              <Input
+                id="birthDate"
+                type="date"
+                {...profileForm.register('birthDate')}
+                disabled={isUpdatingProfile}
+                aria-invalid={profileForm.formState.errors.birthDate ? 'true' : 'false'}
+              />
+              {profileForm.formState.errors.birthDate && (
+                <p className="text-destructive text-sm">
+                  {profileForm.formState.errors.birthDate.message}
+                </p>
+              )}
+              <p className="text-muted-foreground text-xs">
+                Tu signo zodiacal se calculará automáticamente para personalizar tu horóscopo
+              </p>
             </div>
 
             {/* Submit Button */}
