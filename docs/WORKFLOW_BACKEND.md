@@ -153,7 +153,11 @@
     ```bash
     git push -u origin feature/TASK-XXX-descripcion
     
+    # IMPORTANTE: PR SIEMPRE apunta a develop (NUNCA a main)
+    gh pr create --base develop --title "..." --body "..."
+    
     # Crear PR con:
+    # - Base: develop (CRÍTICO)
     # - Título descriptivo
     # - Resumen de cambios (bullet points)
     # - Referencia a la tarea (TASK-XXX)

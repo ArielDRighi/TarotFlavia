@@ -226,7 +226,7 @@ Crear funciones utilitarias para calcular el animal del zodiaco chino basado en 
 
 ##### Backend
 
-- [ ] Crear enum `ChineseZodiacAnimal`:
+- [x] Crear enum `ChineseZodiacAnimal`:
 
   ```typescript
   export enum ChineseZodiacAnimal {
@@ -245,134 +245,36 @@ Crear funciones utilitarias para calcular el animal del zodiaco chino basado en 
   }
   ```
 
-- [ ] Crear constante con fechas del Año Nuevo Chino:
+- [x] Crear constante con fechas del Año Nuevo Chino (1950-2050)
 
-  ```typescript
-  // Fechas del Año Nuevo Chino (1970-2035)
-  const CHINESE_NEW_YEAR_DATES: Record<number, string> = {
-    1970: "1970-02-06",
-    1980: "1980-02-16",
-    1984: "1984-02-02",
-    1985: "1985-02-20",
-    1986: "1986-02-09",
-    1987: "1987-01-29",
-    1988: "1988-02-17",
-    1989: "1989-02-06",
-    1990: "1990-01-27",
-    // ... completar hasta 2035
-    2024: "2024-02-10",
-    2025: "2025-01-29",
-    2026: "2026-02-17",
-    2027: "2027-02-06",
-    2028: "2028-01-26",
-    2029: "2029-02-13",
-    2030: "2030-02-03",
-  };
-  ```
+- [x] Crear función principal `getChineseZodiacAnimal`
 
-- [ ] Crear función principal `getChineseZodiacAnimal`:
+- [x] Crear función `getChineseZodiacInfo`
 
-  ```typescript
-  /**
-   * Calcula el animal del zodiaco chino basado en fecha de nacimiento
-   * Considera la fecha del Año Nuevo Chino para determinar el año correcto
-   */
-  export function getChineseZodiacAnimal(birthDate: Date): ChineseZodiacAnimal {
-    const year = birthDate.getFullYear();
-    const chineseNewYear = CHINESE_NEW_YEAR_DATES[year];
+- [x] Crear constante con información completa de todos los animales
 
-    // Si nació antes del Año Nuevo Chino, pertenece al año anterior
-    let chineseYear = year;
-    if (chineseNewYear && birthDate < new Date(chineseNewYear)) {
-      chineseYear = year - 1;
-    }
+- [x] Crear función `getChineseYear`
 
-    // Ciclo de 12 años comenzando en 1900 (Rata)
-    const animals = Object.values(ChineseZodiacAnimal);
-    const index = (chineseYear - 1900) % 12;
-
-    return animals[index >= 0 ? index : index + 12];
-  }
-  ```
-
-- [ ] Crear función `getChineseZodiacInfo`:
-
-  ```typescript
-  export interface ChineseZodiacInfo {
-    animal: ChineseZodiacAnimal;
-    nameEs: string;
-    nameEn: string;
-    emoji: string;
-    element: "wood" | "fire" | "earth" | "metal" | "water";
-    yinYang: "yin" | "yang";
-    compatibleWith: ChineseZodiacAnimal[];
-    incompatibleWith: ChineseZodiacAnimal[];
-    characteristics: string[];
-  }
-
-  export function getChineseZodiacInfo(animal: ChineseZodiacAnimal): ChineseZodiacInfo {
-    return CHINESE_ZODIAC_INFO[animal];
-  }
-  ```
-
-- [ ] Crear constante con información completa:
-
-  ```typescript
-  const CHINESE_ZODIAC_INFO: Record<ChineseZodiacAnimal, ChineseZodiacInfo> = {
-    [ChineseZodiacAnimal.RAT]: {
-      animal: ChineseZodiacAnimal.RAT,
-      nameEs: "Rata",
-      nameEn: "Rat",
-      emoji: "🐀",
-      element: "water",
-      yinYang: "yang",
-      compatibleWith: [ChineseZodiacAnimal.DRAGON, ChineseZodiacAnimal.MONKEY, ChineseZodiacAnimal.OX],
-      incompatibleWith: [ChineseZodiacAnimal.HORSE, ChineseZodiacAnimal.GOAT],
-      characteristics: ["Inteligente", "Adaptable", "Ingenioso"],
-    },
-    // ... resto de animales
-  };
-  ```
-
-- [ ] Crear función `getChineseYear`:
-
-  ```typescript
-  /**
-   * Obtiene información del año chino actual o especificado
-   */
-  export function getChineseYearInfo(year: number = new Date().getFullYear()): {
-    animal: ChineseZodiacAnimal;
-    element: string;
-    newYearDate: string;
-  } {
-    const newYearDate = CHINESE_NEW_YEAR_DATES[year];
-    const animal = getAnimalForYear(year);
-    const element = getElementForYear(year);
-
-    return { animal, element, newYearDate };
-  }
-  ```
-
-- [ ] Exportar desde `src/common/utils/index.ts`
+- [x] Exportar desde `src/common/utils/index.ts`
 
 ##### Testing
 
-- [ ] Test: Persona nacida en 1988-03-15 → Dragón
-- [ ] Test: Persona nacida en 1988-01-15 (antes del CNY) → Conejo
-- [ ] Test: Persona nacida en 2000-02-05 (exacto CNY) → Dragón
-- [ ] Test: Ciclo completo de 12 animales
-- [ ] Test: getChineseZodiacInfo retorna datos correctos
-- [ ] Test: Compatibilidades correctas
+- [x] Test: Persona nacida en 1988-03-15 → Dragón
+- [x] Test: Persona nacida en 1988-01-15 (antes del CNY) → Conejo
+- [x] Test: Persona nacida en 2000-02-05 (exacto CNY) → Dragón
+- [x] Test: Ciclo completo de 12 animales
+- [x] Test: getChineseZodiacInfo retorna datos correctos
+- [x] Test: Compatibilidades correctas
 
 ---
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] Calcula animal correctamente considerando CNY
-- [ ] Maneja fechas antes del Año Nuevo Chino
-- [ ] Información de compatibilidad disponible
-- [ ] Tests cubren edge cases
-- [ ] Coverage >90%
+- [x] Calcula animal correctamente considerando CNY
+- [x] Maneja fechas antes del Año Nuevo Chino
+- [x] Información de compatibilidad disponible
+- [x] Tests cubren edge cases
+- [x] Coverage >90% (100% alcanzado)
 
 ---
 

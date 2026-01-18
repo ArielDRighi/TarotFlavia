@@ -1,7 +1,78 @@
 # AGENTS.md - Auguria Codebase Guide for AI Agents
 
 > 🤖 **Purpose:** Essential reference for AI coding agents working in this monorepo.
-> 📅 **Last Updated:** January 17, 2026
+> 📅 **Last Updated:** January 18, 2026
+
+---
+
+## 🚨 CRITICAL RULES FOR AI AGENTS
+
+### Rule 1: NEVER Develop Beyond Requested Task
+**IMPORTANTE:** Solo desarrolla la tarea específica que el usuario solicita. **NUNCA** asumas que debes continuar con la siguiente tarea, incluso si:
+- El usuario dice "continue"
+- Terminas una tarea y ves la siguiente en el backlog
+- Las tareas están relacionadas o son dependencias
+
+**Siempre pregunta explícitamente** antes de empezar una nueva tarea.
+
+❌ **INCORRECTO:**
+```
+Usuario: "Desarrolla TASK-111"
+Agente: [Completa TASK-111]
+Agente: [Automáticamente empieza TASK-112 sin preguntar]
+```
+
+✅ **CORRECTO:**
+```
+Usuario: "Desarrolla TASK-111"
+Agente: [Completa TASK-111]
+Agente: "TASK-111 completada. ¿Quieres que continúe con TASK-112?"
+```
+
+### Rule 2: PRs ALWAYS Target `develop` Branch
+**CRÍTICO:** Todos los Pull Requests deben apuntar al branch `develop`, **NUNCA** a `main`.
+
+```bash
+# ✅ CORRECTO
+gh pr create --base develop --title "..." --body "..."
+
+# ❌ INCORRECTO
+gh pr create --base main --title "..." --body "..."
+```
+
+**Razón:** El proyecto usa Git Flow:
+- `develop`: Branch de integración para desarrollo
+- `main`: Solo para releases de producción
+
+### Rule 3: ALWAYS Validate PR Feedback Before Applying
+**CRÍTICO:** Cuando recibas feedback de un PR, **NUNCA** apliques cambios automáticamente.
+
+**Proceso obligatorio:**
+
+1. **VALIDAR** qué archivos menciona el feedback
+2. **VERIFICAR** si esos archivos están realmente en el PR (`gh pr diff [PR_NUMBER] --name-only`)
+3. **CATEGORIZAR** el feedback:
+   - ✅ Válido: Archivo en feedback Y en PR
+   - ❌ Inválido: Archivo en feedback pero NO en PR
+   - ⚠️ Dudoso: Requiere análisis adicional
+4. **INFORMAR** al usuario con formato:
+   ```
+   📋 ANÁLISIS DE FEEDBACK DEL PR
+   
+   ✅ FEEDBACK VÁLIDO (X items):
+   1. [Descripción] → [Acción propuesta]
+   
+   ❌ FEEDBACK INVÁLIDO (Y items):
+   1. [Descripción] → Razón: [archivo no está en PR]
+   
+   ⚠️ FEEDBACK DUDOSO (Z items):
+   1. [Descripción] → Requiere decisión
+   
+   ¿Procedo a aplicar los X items válidos?
+   ```
+5. **ESPERAR** confirmación del usuario antes de aplicar
+
+**IMPORTANTE:** Herramientas de IA (como Copilot) pueden revisar archivos incorrectos o confundirse con el contexto. Siempre verificar primero.
 
 ---
 
