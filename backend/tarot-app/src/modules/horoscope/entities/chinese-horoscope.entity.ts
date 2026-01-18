@@ -21,7 +21,7 @@ import { ChineseZodiacAnimal } from '../../../common/utils/chinese-zodiac.utils'
  * - Generación anual (un registro por animal por año)
  * - Incluye elementos de suerte tradicionales (números, colores, direcciones)
  * - Sistema de compatibilidad entre animales (best, good, challenging)
- * - Predicciones por áreas con ratings (1-10)
+ * - Predicciones por áreas con scores (1-10)
  *
  * Índices:
  * - idx_chinese_animal_year: Único en (animal, year) - previene duplicados
@@ -37,7 +37,7 @@ export class ChineseHoroscope {
   /**
    * Animal del zodiaco chino
    */
-  @Column({ type: 'enum', enum: ChineseZodiacAnimal })
+  @Column({ name: 'zodiac_animal', type: 'enum', enum: ChineseZodiacAnimal })
   animal: ChineseZodiacAnimal;
 
   /**
@@ -55,26 +55,29 @@ export class ChineseHoroscope {
   generalOverview: string;
 
   /**
-   * Áreas específicas del horóscopo con contenido y rating
+   * Áreas específicas del horóscopo con contenido y score
    * Almacenado como JSONB para permitir consultas flexibles
    *
    * IMPORTANTE: El horóscopo chino incluye 'career' y 'finance' como áreas separadas,
    * a diferencia del horóscopo occidental que solo incluye 'money'.
    *
+   * Nota: La validación del rango de score (1-10) se realiza en la capa de servicio
+   * durante la generación del horóscopo, no a nivel de entidad.
+   *
    * Estructura:
    * {
-   *   love: { content: string, rating: 1-10 },
-   *   career: { content: string, rating: 1-10 },
-   *   wellness: { content: string, rating: 1-10 },
-   *   finance: { content: string, rating: 1-10 }
+   *   love: { content: string, score: 1-10 },
+   *   career: { content: string, score: 1-10 },
+   *   wellness: { content: string, score: 1-10 },
+   *   finance: { content: string, score: 1-10 }
    * }
    */
   @Column({ type: 'jsonb' })
   areas: {
-    love: { content: string; rating: number };
-    career: { content: string; rating: number };
-    wellness: { content: string; rating: number };
-    finance: { content: string; rating: number };
+    love: { content: string; score: number };
+    career: { content: string; score: number };
+    wellness: { content: string; score: number };
+    finance: { content: string; score: number };
   };
 
   /**
@@ -146,6 +149,13 @@ export class ChineseHoroscope {
    */
   @Column({ name: 'tokens_used', type: 'int', default: 0 })
   tokensUsed: number;
+
+  /**
+   * Tiempo de generación en milisegundos
+   * Para métricas de performance y optimización de IA
+   */
+  @Column({ name: 'generation_time_ms', type: 'int', default: 0 })
+  generationTimeMs: number;
 
   /**
    * Contador de visualizaciones del horóscopo

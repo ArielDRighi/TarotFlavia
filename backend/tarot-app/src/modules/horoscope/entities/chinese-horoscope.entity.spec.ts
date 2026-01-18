@@ -22,6 +22,7 @@ describe('ChineseHoroscope Entity', () => {
       expect(horoscope).toHaveProperty('aiProvider');
       expect(horoscope).toHaveProperty('aiModel');
       expect(horoscope).toHaveProperty('tokensUsed');
+      expect(horoscope).toHaveProperty('generationTimeMs');
       expect(horoscope).toHaveProperty('viewCount');
       expect(horoscope).toHaveProperty('createdAt');
       expect(horoscope).toHaveProperty('updatedAt');
@@ -37,19 +38,19 @@ describe('ChineseHoroscope Entity', () => {
       horoscope.areas = {
         love: {
           content: 'El amor florecerá en primavera...',
-          rating: 8,
+          score: 8,
         },
         career: {
           content: 'Oportunidades profesionales abundantes...',
-          rating: 9,
+          score: 9,
         },
         wellness: {
           content: 'Energía vital alta durante todo el año...',
-          rating: 7,
+          score: 7,
         },
         finance: {
           content: 'Inversiones prometedoras en el segundo semestre...',
-          rating: 8,
+          score: 8,
         },
       };
       horoscope.luckyElements = {
@@ -73,10 +74,10 @@ describe('ChineseHoroscope Entity', () => {
       expect(horoscope.animal).toBe(ChineseZodiacAnimal.DRAGON);
       expect(horoscope.year).toBe(2026);
       expect(horoscope.generalOverview).toContain('grandes oportunidades');
-      expect(horoscope.areas.love.rating).toBe(8);
-      expect(horoscope.areas.career.rating).toBe(9);
-      expect(horoscope.areas.wellness.rating).toBe(7);
-      expect(horoscope.areas.finance.rating).toBe(8);
+      expect(horoscope.areas.love.score).toBe(8);
+      expect(horoscope.areas.career.score).toBe(9);
+      expect(horoscope.areas.wellness.score).toBe(7);
+      expect(horoscope.areas.finance.score).toBe(8);
       expect(horoscope.luckyElements.numbers).toEqual([3, 7, 9]);
       expect(horoscope.luckyElements.colors).toEqual(['Rojo', 'Dorado']);
       expect(horoscope.luckyElements.directions).toEqual(['Sur', 'Este']);
@@ -116,10 +117,10 @@ describe('ChineseHoroscope Entity', () => {
       const horoscope = new ChineseHoroscope();
 
       const validAreas = {
-        love: { content: 'Contenido de amor', rating: 8 },
-        career: { content: 'Contenido de carrera', rating: 9 },
-        wellness: { content: 'Contenido de bienestar', rating: 7 },
-        finance: { content: 'Contenido de finanzas', rating: 8 },
+        love: { content: 'Contenido de amor', score: 8 },
+        career: { content: 'Contenido de carrera', score: 9 },
+        wellness: { content: 'Contenido de bienestar', score: 7 },
+        finance: { content: 'Contenido de finanzas', score: 8 },
       };
 
       horoscope.areas = validAreas;
@@ -130,9 +131,9 @@ describe('ChineseHoroscope Entity', () => {
       expect(horoscope.areas).toHaveProperty('finance');
 
       expect(horoscope.areas.love).toHaveProperty('content');
-      expect(horoscope.areas.love).toHaveProperty('rating');
+      expect(horoscope.areas.love).toHaveProperty('score');
       expect(typeof horoscope.areas.love.content).toBe('string');
-      expect(typeof horoscope.areas.love.rating).toBe('number');
+      expect(typeof horoscope.areas.love.score).toBe('number');
     });
 
     it('debe tener la estructura correcta para luckyElements', () => {
@@ -221,6 +222,14 @@ describe('ChineseHoroscope Entity', () => {
 
       expect(typeof horoscope.tokensUsed).toBe('number');
       expect(horoscope.tokensUsed).toBeGreaterThanOrEqual(0);
+    });
+
+    it('debe aceptar generationTimeMs como número', () => {
+      const horoscope = new ChineseHoroscope();
+      horoscope.generationTimeMs = 3500;
+
+      expect(typeof horoscope.generationTimeMs).toBe('number');
+      expect(horoscope.generationTimeMs).toBeGreaterThanOrEqual(0);
     });
 
     it('debe aceptar viewCount como número', () => {
