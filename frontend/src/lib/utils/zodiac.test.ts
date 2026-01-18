@@ -69,7 +69,7 @@ describe('zodiac utilities', () => {
       expect(getZodiacSignFromDate(new Date('1990-12-22'))).toBe(ZodiacSign.CAPRICORN);
       expect(getZodiacSignFromDate(new Date('1990-12-25'))).toBe(ZodiacSign.CAPRICORN);
       expect(getZodiacSignFromDate(new Date('1990-12-31'))).toBe(ZodiacSign.CAPRICORN);
-      
+
       // Enero
       expect(getZodiacSignFromDate(new Date('1991-01-01'))).toBe(ZodiacSign.CAPRICORN);
       expect(getZodiacSignFromDate(new Date('1991-01-10'))).toBe(ZodiacSign.CAPRICORN);
@@ -156,7 +156,7 @@ describe('zodiac utilities', () => {
 
     it('should have correct elements distribution', () => {
       const elements = Object.values(ZODIAC_SIGNS_INFO).map((info) => info.element);
-      
+
       // Contar elementos (cada elemento tiene 3 signos)
       const fireCount = elements.filter((el) => el === 'fire').length;
       const earthCount = elements.filter((el) => el === 'earth').length;

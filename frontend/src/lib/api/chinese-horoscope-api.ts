@@ -17,9 +17,12 @@ import type {
  * @param birthDate Fecha de nacimiento en formato YYYY-MM-DD
  */
 export async function calculateAnimal(birthDate: string): Promise<CalculateAnimalResponse> {
-  const response = await apiClient.get<CalculateAnimalResponse>(API_ENDPOINTS.CHINESE_HOROSCOPE.CALCULATE, {
-    params: { birthDate },
-  });
+  const response = await apiClient.get<CalculateAnimalResponse>(
+    API_ENDPOINTS.CHINESE_HOROSCOPE.CALCULATE,
+    {
+      params: { birthDate },
+    }
+  );
   return response.data;
 }
 
@@ -28,9 +31,12 @@ export async function calculateAnimal(birthDate: string): Promise<CalculateAnima
  * @param year Año del horóscopo (opcional, default: año actual)
  */
 export async function getMyAnimalHoroscope(year?: number): Promise<ChineseHoroscope> {
-  const response = await apiClient.get<ChineseHoroscope>(API_ENDPOINTS.CHINESE_HOROSCOPE.MY_ANIMAL, {
-    params: year ? { year } : undefined,
-  });
+  const response = await apiClient.get<ChineseHoroscope>(
+    API_ENDPOINTS.CHINESE_HOROSCOPE.MY_ANIMAL,
+    {
+      params: year ? { year } : undefined,
+    }
+  );
   return response.data;
 }
 
@@ -39,7 +45,9 @@ export async function getMyAnimalHoroscope(year?: number): Promise<ChineseHorosc
  * @param year Año del horóscopo
  */
 export async function getChineseHoroscopesByYear(year: number): Promise<ChineseHoroscope[]> {
-  const response = await apiClient.get<ChineseHoroscope[]>(API_ENDPOINTS.CHINESE_HOROSCOPE.BY_YEAR(year));
+  const response = await apiClient.get<ChineseHoroscope[]>(
+    API_ENDPOINTS.CHINESE_HOROSCOPE.BY_YEAR(year)
+  );
   return response.data;
 }
 
@@ -48,7 +56,12 @@ export async function getChineseHoroscopesByYear(year: number): Promise<ChineseH
  * @param year Año del horóscopo
  * @param animal Animal del zodiaco chino
  */
-export async function getChineseHoroscope(year: number, animal: ChineseZodiacAnimal): Promise<ChineseHoroscope> {
-  const response = await apiClient.get<ChineseHoroscope>(API_ENDPOINTS.CHINESE_HOROSCOPE.BY_YEAR_ANIMAL(year, animal));
+export async function getChineseHoroscope(
+  year: number,
+  animal: ChineseZodiacAnimal
+): Promise<ChineseHoroscope> {
+  const response = await apiClient.get<ChineseHoroscope>(
+    API_ENDPOINTS.CHINESE_HOROSCOPE.BY_YEAR_ANIMAL(year, animal)
+  );
   return response.data;
 }

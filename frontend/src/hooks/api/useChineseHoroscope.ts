@@ -19,7 +19,8 @@ export const chineseHoroscopeKeys = {
   all: ['chinese-horoscope'] as const,
   myAnimal: (year?: number) => [...chineseHoroscopeKeys.all, 'my', year] as const,
   byYear: (year: number) => [...chineseHoroscopeKeys.all, year] as const,
-  byAnimal: (year: number, animal: ChineseZodiacAnimal) => [...chineseHoroscopeKeys.all, year, animal] as const,
+  byAnimal: (year: number, animal: ChineseZodiacAnimal) =>
+    [...chineseHoroscopeKeys.all, year, animal] as const,
   calculate: (birthDate: string) => [...chineseHoroscopeKeys.all, 'calculate', birthDate] as const,
 } as const;
 

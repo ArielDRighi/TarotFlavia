@@ -400,7 +400,11 @@ describe('UserDashboard', () => {
 
   // TASK-110: Tests for HoroscopeWidget integration
   it('should render HoroscopeWidget in the dashboard', () => {
-    const mockUser = createMockAuthUser({ name: 'Test User', plan: 'free', birthDate: '1990-05-15' });
+    const mockUser = createMockAuthUser({
+      name: 'Test User',
+      plan: 'free',
+      birthDate: '1990-05-15',
+    });
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       user: mockUser,
@@ -452,7 +456,11 @@ describe('UserDashboard', () => {
   });
 
   it('should render HoroscopeWidget for premium users', () => {
-    const mockUser = createMockAuthUser({ name: 'Premium User', plan: 'premium', birthDate: '1985-12-25' });
+    const mockUser = createMockAuthUser({
+      name: 'Premium User',
+      plan: 'premium',
+      birthDate: '1985-12-25',
+    });
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       user: mockUser,
