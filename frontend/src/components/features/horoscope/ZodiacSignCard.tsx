@@ -76,8 +76,8 @@ export function ZodiacSignCard({
       data-testid={`zodiac-card-${signInfo.sign}`}
       className={cn(
         'cursor-pointer p-4 text-center transition-all',
-        'hover:shadow-md hover:scale-105',
-        isSelected && 'ring-2 ring-primary',
+        'hover:scale-105 hover:shadow-md',
+        isSelected && 'ring-primary ring-2',
         isUserSign && 'border-accent border-2',
         className
       )}
@@ -90,7 +90,7 @@ export function ZodiacSignCard({
         {signInfo.symbol}
       </span>
       <p className="mt-2 font-serif text-lg">{signInfo.nameEs}</p>
-      {isUserSign && <span className="text-xs text-muted-foreground">Tu signo</span>}
+      {isUserSign && <span className="text-muted-foreground text-xs">Tu signo</span>}
     </Card>
   );
 }

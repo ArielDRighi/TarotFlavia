@@ -60,7 +60,9 @@ describe('horoscope API functions', () => {
 
       const result = await getTodayHoroscope(ZodiacSign.ARIES);
 
-      expect(apiClient.get).toHaveBeenCalledWith(API_ENDPOINTS.HOROSCOPE.TODAY_SIGN(ZodiacSign.ARIES));
+      expect(apiClient.get).toHaveBeenCalledWith(
+        API_ENDPOINTS.HOROSCOPE.TODAY_SIGN(ZodiacSign.ARIES)
+      );
       expect(result).toEqual(mockHoroscope);
       expect(result.zodiacSign).toBe(ZodiacSign.ARIES);
     });
@@ -71,7 +73,9 @@ describe('horoscope API functions', () => {
 
       const result = await getTodayHoroscope(ZodiacSign.LEO);
 
-      expect(apiClient.get).toHaveBeenCalledWith(API_ENDPOINTS.HOROSCOPE.TODAY_SIGN(ZodiacSign.LEO));
+      expect(apiClient.get).toHaveBeenCalledWith(
+        API_ENDPOINTS.HOROSCOPE.TODAY_SIGN(ZodiacSign.LEO)
+      );
       expect(result.zodiacSign).toBe(ZodiacSign.LEO);
     });
   });

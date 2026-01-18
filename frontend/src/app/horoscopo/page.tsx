@@ -21,15 +21,15 @@ export default function HoroscopoPage() {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="text-center mb-8">
-        <h1 className="font-serif text-4xl mb-2">Horóscopo Diario</h1>
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8 text-center">
+        <h1 className="mb-2 font-serif text-4xl">Horóscopo Diario</h1>
         <p className="text-muted-foreground">Selecciona tu signo para ver las predicciones</p>
       </div>
 
       {!isAuthenticated && (
-        <div className="bg-muted/50 rounded-lg p-4 mb-8 text-center">
-          <p className="text-sm text-muted-foreground">
+        <div className="bg-muted/50 mb-8 rounded-lg p-4 text-center">
+          <p className="text-muted-foreground text-sm">
             <Link href={ROUTES.REGISTER} className="text-primary hover:underline">
               Regístrate
             </Link>{' '}
@@ -39,7 +39,7 @@ export default function HoroscopoPage() {
       )}
 
       {isAuthenticated && !userSign && (
-        <div className="bg-accent/20 rounded-lg p-4 mb-8 text-center">
+        <div className="bg-accent/20 mb-8 rounded-lg p-4 text-center">
           <p className="text-sm">
             <Link href={ROUTES.PERFIL} className="text-primary hover:underline">
               Configura tu fecha de nacimiento

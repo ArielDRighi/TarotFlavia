@@ -33,11 +33,11 @@ describe('chinese zodiac utilities', () => {
 
     it('should have correct elements distribution', () => {
       const elements = Object.values(CHINESE_ZODIAC_INFO).map((info) => info.element);
-      
+
       // Verificar que hay elementos variados
       const uniqueElements = new Set(elements);
       expect(uniqueElements.size).toBeGreaterThan(1);
-      
+
       // Verificar elementos tradicionales chinos
       const validElements = ['Agua', 'Tierra', 'Madera', 'Fuego', 'Metal'];
       elements.forEach((element) => {
@@ -115,13 +115,13 @@ describe('chinese zodiac utilities', () => {
     it('should return all ChineseZodiacAnimal enum values', () => {
       const animals = getAllChineseZodiacAnimals();
       const enumValues = Object.values(ChineseZodiacAnimal);
-      
+
       expect(animals).toEqual(enumValues);
     });
 
     it('should contain all expected animals', () => {
       const animals = getAllChineseZodiacAnimals();
-      
+
       expect(animals).toContain(ChineseZodiacAnimal.RAT);
       expect(animals).toContain(ChineseZodiacAnimal.OX);
       expect(animals).toContain(ChineseZodiacAnimal.TIGER);
@@ -145,7 +145,7 @@ describe('chinese zodiac utilities', () => {
 
     it('should return complete info for each animal', () => {
       const infos = getAllChineseZodiacInfo();
-      
+
       infos.forEach((info) => {
         expect(info.animal).toBeDefined();
         expect(info.nameEs).toBeTruthy();
@@ -159,7 +159,7 @@ describe('chinese zodiac utilities', () => {
     it('should match CHINESE_ZODIAC_INFO values', () => {
       const infos = getAllChineseZodiacInfo();
       const expectedInfos = Object.values(CHINESE_ZODIAC_INFO);
-      
+
       expect(infos).toEqual(expectedInfos);
     });
   });

@@ -24,8 +24,8 @@ export default function HoroscopeSignPage() {
 
   if (!ZODIAC_SIGNS_INFO[sign]) {
     return (
-      <div className="container mx-auto py-8 px-4 text-center">
-        <h1 className="text-2xl mb-4">Signo no válido</h1>
+      <div className="container mx-auto px-4 py-8 text-center">
+        <h1 className="mb-4 text-2xl">Signo no válido</h1>
         <Button onClick={() => router.push(ROUTES.HOROSCOPO)}>Ver todos los signos</Button>
       </div>
     );
@@ -34,7 +34,7 @@ export default function HoroscopeSignPage() {
   const userSign = user?.birthDate ? getZodiacSignFromDate(new Date(user.birthDate)) : null;
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto px-4 py-8">
       <Button
         variant="ghost"
         size="sm"
@@ -57,7 +57,7 @@ export default function HoroscopeSignPage() {
       {isLoading ? (
         <HoroscopeSkeleton variant="detail" />
       ) : error ? (
-        <div className="text-center py-8">
+        <div className="py-8 text-center">
           <p className="text-muted-foreground">Horóscopo no disponible</p>
         </div>
       ) : data ? (

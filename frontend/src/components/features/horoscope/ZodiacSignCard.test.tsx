@@ -176,7 +176,7 @@ describe('ZodiacSignCard', () => {
       render(<ZodiacSignCard signInfo={signInfo} onClick={mockOnClick} />);
 
       const card = screen.getByTestId(`zodiac-card-${signInfo.sign}`);
-      
+
       // Simulate clicking via Enter key
       card.focus();
       await user.keyboard('{Enter}');
@@ -192,7 +192,7 @@ describe('ZodiacSignCard', () => {
       render(<ZodiacSignCard signInfo={signInfo} onClick={mockOnClick} />);
 
       const card = screen.getByTestId(`zodiac-card-${signInfo.sign}`);
-      
+
       // Simulate clicking via Space key
       card.focus();
       await user.keyboard(' ');
@@ -216,11 +216,7 @@ describe('ZodiacSignCard', () => {
       const signInfo = createTestSignInfo();
 
       render(
-        <ZodiacSignCard
-          signInfo={signInfo}
-          onClick={mockOnClick}
-          className="custom-padding"
-        />
+        <ZodiacSignCard signInfo={signInfo} onClick={mockOnClick} className="custom-padding" />
       );
 
       const card = screen.getByTestId(`zodiac-card-${signInfo.sign}`);

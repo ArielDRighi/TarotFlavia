@@ -104,7 +104,7 @@ describe('horoscope hooks', () => {
 
     it('should have 1 hour staleTime', () => {
       renderHook(() => useTodayAllHoroscopes(), { wrapper });
-      
+
       // Query options should include staleTime
       const queryState = queryClient.getQueryState(horoscopeQueryKeys.todayAll());
       expect(queryState).toBeDefined();
@@ -148,8 +148,12 @@ describe('horoscope hooks', () => {
         .mockResolvedValueOnce(ariesHoroscope)
         .mockResolvedValueOnce(taurusHoroscope);
 
-      const { result: ariesResult } = renderHook(() => useTodayHoroscope(ZodiacSign.ARIES), { wrapper });
-      const { result: taurusResult } = renderHook(() => useTodayHoroscope(ZodiacSign.TAURUS), { wrapper });
+      const { result: ariesResult } = renderHook(() => useTodayHoroscope(ZodiacSign.ARIES), {
+        wrapper,
+      });
+      const { result: taurusResult } = renderHook(() => useTodayHoroscope(ZodiacSign.TAURUS), {
+        wrapper,
+      });
 
       await waitFor(() => {
         expect(ariesResult.current.isSuccess).toBe(true);
