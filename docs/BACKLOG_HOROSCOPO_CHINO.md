@@ -776,7 +776,8 @@ Crear el servicio para generar horóscopos chinos anuales usando IA.
 **Módulo:** `src/modules/horoscope/infrastructure/controllers/`  
 **Prioridad:** 🔴 ALTA  
 **Estimación:** 1 día  
-**Dependencias:** TASK-113
+**Dependencias:** TASK-113  
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -809,7 +810,7 @@ Implementar endpoints REST para consultar horóscopos chinos.
 
 ##### Backend
 
-- [ ] Crear DTOs:
+- [x] Crear DTOs:
 
   ```typescript
   // chinese-horoscope-response.dto.ts
@@ -1040,28 +1041,28 @@ Implementar endpoints REST para consultar horóscopos chinos.
   }
   ```
 
-- [ ] Agregar controller al módulo
+- [x] Agregar controller al módulo
 
-- [ ] Documentar con Swagger
+- [x] Documentar con Swagger
 
 ##### Testing
 
-- [ ] Test e2e: GET /chinese-horoscope/calculate funciona
-- [ ] Test e2e: GET /chinese-horoscope/2026 retorna array
-- [ ] Test e2e: GET /chinese-horoscope/2026/dragon retorna horóscopo
-- [ ] Test e2e: GET /chinese-horoscope/my-animal requiere auth
-- [ ] Test e2e: POST admin/generate requiere admin
-- [ ] Test e2e: 404 cuando no existe
+- [x] Test e2e: GET /chinese-horoscope/calculate funciona
+- [x] Test e2e: GET /chinese-horoscope/2026 retorna array
+- [x] Test e2e: GET /chinese-horoscope/2026/dragon retorna horóscopo
+- [x] Test e2e: GET /chinese-horoscope/my-animal requiere auth
+- [x] Test e2e: POST admin/generate requiere admin
+- [x] Test e2e: 404 cuando no existe
 
 ---
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] Todos los endpoints funcionan
-- [ ] Calculador de animal funciona
-- [ ] Endpoint /my-animal usa birthDate del usuario
-- [ ] Endpoint de generación solo para admins
-- [ ] Documentación Swagger completa
+- [x] Todos los endpoints funcionan
+- [x] Calculador de animal funciona
+- [x] Endpoint /my-animal usa birthDate del usuario
+- [x] Endpoint de generación solo para admins
+- [x] Documentación Swagger completa
 
 ---
 

@@ -84,20 +84,20 @@ Ejecutar EN ORDEN después de implementación:
 ```bash
 # Backend
 cd backend/tarot-app
-npm run format              # ⚠️ CRÍTICO: NO OLVIDAR
-npm run lint                # Autofix code style
-npm run test:cov            # Coverage ≥ 80%
-npm run build               # Compilación exitosa
-npm run validate-architecture  # Si existe el script
+npm run format                          # ⚠️ CRÍTICO: NO OLVIDAR
+npm run lint                            # Autofix code style
+npm run test:cov                        # Coverage ≥ 80%
+npm run build                           # Compilación exitosa
+node scripts/validate-architecture.js   # ⚠️ CRÍTICO: Validar arquitectura (ubicación: backend/tarot-app/scripts/validate-architecture.js)
 
 # Frontend  
 cd frontend
-npm run format              # ⚠️ CRÍTICO: NO OLVIDAR
-npm run lint:fix            # Autofix code style
-npm run type-check          # TypeScript validation
-npm run test:run            # Run all tests
-npm run build               # Build para producción
-node scripts/validate-architecture.js  # Validar arquitectura
+npm run format                          # ⚠️ CRÍTICO: NO OLVIDAR
+npm run lint:fix                        # Autofix code style
+npm run type-check                      # TypeScript validation
+npm run test:run                        # Run all tests
+npm run build                           # Build para producción
+node scripts/validate-architecture.js   # ⚠️ CRÍTICO: Validar arquitectura (ubicación: frontend/scripts/validate-architecture.js)
 ```
 
 **SI OLVIDAS `format` o cualquier paso:**
@@ -135,7 +135,7 @@ node scripts/validate-architecture.js  # Validar arquitectura
 3. Ejecutar npm run lint
 4. Ejecutar npm run test:cov
 5. Ejecutar npm run build
-6. Ejecutar npm run validate-architecture (si existe)
+6. Ejecutar node scripts/validate-architecture.js
 7. Actualizar backlog (marcar tarea completada)
 8. Crear commit
 9. Push y crear PR apuntando a develop

@@ -8,6 +8,7 @@ import { HoroscopeGenerationService } from './application/services/horoscope-gen
 import { HoroscopeCronService } from './application/services/horoscope-cron.service';
 import { ChineseHoroscopeService } from './application/services/chinese-horoscope.service';
 import { HoroscopeController } from './infrastructure/controllers/horoscope.controller';
+import { ChineseHoroscopeController } from './infrastructure/controllers/chinese-horoscope.controller';
 
 /**
  * Módulo de Horóscopo
@@ -35,7 +36,7 @@ import { HoroscopeController } from './infrastructure/controllers/horoscope.cont
     HoroscopeCronService,
     ChineseHoroscopeService, // Nuevo: Servicio de horóscopo chino
   ],
-  controllers: [HoroscopeController],
+  controllers: [HoroscopeController, ChineseHoroscopeController],
   exports: [HoroscopeGenerationService, ChineseHoroscopeService],
 })
 export class HoroscopeModule {}
