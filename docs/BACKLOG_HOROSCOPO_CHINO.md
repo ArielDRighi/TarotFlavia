@@ -289,12 +289,14 @@ Crear funciones utilitarias para calcular el animal del zodiaco chino basado en 
 
 ---
 
-### TASK-112: Crear entidad ChineseHoroscope y migración
+### TASK-112: Crear entidad ChineseHoroscope y migración ✅
 
 **Módulo:** `src/modules/horoscope/`  
 **Prioridad:** 🔴 ALTA  
 **Estimación:** 0.5 días  
-**Dependencias:** TASK-111
+**Dependencias:** TASK-111  
+**Estado:** ✅ COMPLETADO (18/01/2026)  
+**PR:** #258 (pendiente)
 
 ---
 
