@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DailyHoroscope } from './entities/daily-horoscope.entity';
+import { ChineseHoroscope } from './entities/chinese-horoscope.entity';
 import { AIModule } from '../ai/ai.module';
 import { UsersModule } from '../users/users.module';
 import { HoroscopeGenerationService } from './application/services/horoscope-generation.service';
@@ -23,7 +24,7 @@ import { HoroscopeController } from './infrastructure/controllers/horoscope.cont
  */
 @Module({
   imports: [
-    TypeOrmModule.forFeature([DailyHoroscope]),
+    TypeOrmModule.forFeature([DailyHoroscope, ChineseHoroscope]),
     AIModule, // Proporciona AIProviderService con fallback automático
     UsersModule, // Para acceder a UsersService en el controller
   ],
