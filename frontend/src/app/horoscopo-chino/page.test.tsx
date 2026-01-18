@@ -18,14 +18,9 @@ vi.mock('next/navigation', () => ({
 
 // Mock hooks
 const mockUseChineseHoroscopesByYear = vi.fn();
-const mockUseAuthStore = vi.fn();
 
 vi.mock('@/hooks/api/useChineseHoroscope', () => ({
   useChineseHoroscopesByYear: () => mockUseChineseHoroscopesByYear(),
-}));
-
-vi.mock('@/stores/authStore', () => ({
-  useAuthStore: () => mockUseAuthStore(),
 }));
 
 // Test wrapper
@@ -52,10 +47,6 @@ describe('HoroscopoChinoPage', () => {
   });
 
   it('should render page title', () => {
-    mockUseAuthStore.mockReturnValue({
-      user: null,
-      isAuthenticated: false,
-    });
     mockUseChineseHoroscopesByYear.mockReturnValue({
       isLoading: false,
       data: [],
@@ -71,10 +62,6 @@ describe('HoroscopoChinoPage', () => {
   });
 
   it('should render animal selector when not loading', () => {
-    mockUseAuthStore.mockReturnValue({
-      user: null,
-      isAuthenticated: false,
-    });
     mockUseChineseHoroscopesByYear.mockReturnValue({
       isLoading: false,
       data: [],
@@ -87,10 +74,6 @@ describe('HoroscopoChinoPage', () => {
 
   it('should navigate to animal page when clicking on an animal card', async () => {
     const user = userEvent.setup();
-    mockUseAuthStore.mockReturnValue({
-      user: null,
-      isAuthenticated: false,
-    });
     mockUseChineseHoroscopesByYear.mockReturnValue({
       isLoading: false,
       data: [],
