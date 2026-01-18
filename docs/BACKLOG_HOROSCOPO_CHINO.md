@@ -46,7 +46,7 @@ Feature: Consultar horóscopo chino como usuario anónimo
     Given estoy en la página de horóscopo chino
     When hago clic en la tarjeta del "Dragón"
     Then veo el horóscopo anual completo del Dragón para 2026
-    And veo secciones: Amor, Carrera, Salud, Finanzas
+    And veo secciones: Amor, Carrera, Bienestar, Finanzas
     And veo compatibilidades con otros animales
     And veo elementos de suerte (colores, números, direcciones)
 
@@ -438,7 +438,7 @@ Crear la entidad para almacenar horóscopos chinos anuales.
     areas: {
       love: { content: string; rating: number };
       career: { content: string; rating: number };
-      health: { content: string; rating: number };
+      wellness: { content: string; rating: number };
       finance: { content: string; rating: number };
     };
 
@@ -587,13 +587,20 @@ Crear el servicio para generar horóscopos chinos anuales usando IA.
   4. Menciona meses favorables y desafiantes
   5. Incluye elementos de suerte tradicionales
   
+  IMPORTANTE SOBRE BIENESTAR (wellness):
+  - NO hagas diagnósticos físicos ni menciones enfermedades
+  - Enfócate en: niveles de energía, descanso, manejo del estrés,
+    meditación, autocuidado, equilibrio emocional y vitalidad
+  - Usa términos como: "energía vital", "armonía interior",
+    "momento de pausa", "autocuidado", "equilibrio"
+  
   FORMATO DE RESPUESTA (JSON estricto):
   {
     "generalOverview": "Resumen general del año (3-4 oraciones)",
     "areas": {
       "love": { "content": "Predicción amor (3-4 oraciones)", "rating": 8 },
       "career": { "content": "Predicción carrera (3-4 oraciones)", "rating": 7 },
-      "health": { "content": "Predicción salud (3-4 oraciones)", "rating": 9 },
+      "wellness": { "content": "Predicción bienestar: energía, descanso, autocuidado (3-4 oraciones)", "rating": 9 },
       "finance": { "content": "Predicción finanzas (3-4 oraciones)", "rating": 6 }
     },
     "luckyElements": {
@@ -801,7 +808,7 @@ Crear el servicio para generar horóscopos chinos anuales usando IA.
     areas: {
       love: { content: string; rating: number };
       career: { content: string; rating: number };
-      health: { content: string; rating: number };
+      wellness: { content: string; rating: number };
       finance: { content: string; rating: number };
     };
     luckyElements: {
@@ -941,7 +948,7 @@ Implementar endpoints REST para consultar horóscopos chinos.
     areas: {
       love: ChineseHoroscopeAreaDto;
       career: ChineseHoroscopeAreaDto;
-      health: ChineseHoroscopeAreaDto;
+      wellness: ChineseHoroscopeAreaDto;
       finance: ChineseHoroscopeAreaDto;
     };
 
@@ -1240,7 +1247,7 @@ Crear tipos TypeScript, funciones de API y hooks para el horóscopo chino.
     areas: {
       love: ChineseHoroscopeArea;
       career: ChineseHoroscopeArea;
-      health: ChineseHoroscopeArea;
+      wellness: ChineseHoroscopeArea;
       finance: ChineseHoroscopeArea;
     };
     luckyElements: ChineseHoroscopeLucky;
@@ -1721,7 +1728,7 @@ frontend/src/components/features/chinese-horoscope/
   const AREA_LABELS = {
     love: { label: "Amor", icon: "❤️" },
     career: { label: "Carrera", icon: "💼" },
-    health: { label: "Salud", icon: "💪" },
+    wellness: { label: "Bienestar", icon: "✨" },
     finance: { label: "Finanzas", icon: "💰" },
   };
 
