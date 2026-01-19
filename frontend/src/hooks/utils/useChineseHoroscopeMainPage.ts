@@ -33,7 +33,7 @@ interface UseChineseHoroscopeMainPageResult {
   /** Get animal emoji */
   getAnimalEmoji: (animal: ChineseZodiacAnimal) => string;
   /** Handle animal selection from selector */
-  handleAnimalSelect: (animal: ChineseZodiacAnimal) => void;
+  handleAnimalSelect: (animal: ChineseZodiacAnimal, element?: string) => void;
   /** Handle year confirmation from modal */
   handleYearConfirm: (year: number) => void;
   /** Handle modal open state change */
@@ -81,7 +81,13 @@ export function useChineseHoroscopeMainPage(): UseChineseHoroscopeMainPageResult
 
   // Handlers
   const handleAnimalSelect = useCallback(
-    (animal: ChineseZodiacAnimal) => {
+    (animal: ChineseZodiacAnimal, element?: string) => {
+      // If element is provided (from AnimalCalculator), navigate with element
+      if (element) {
+        router.push(`${ROUTES.HOROSCOPO_CHINO_ANIMAL(animal)}?element=${element}`);
+        return;
+      }
+
       // If user clicks their own animal, navigate directly
       if (userAnimal && animal === userAnimal) {
         router.push(ROUTES.HOROSCOPO_CHINO_ANIMAL(animal));

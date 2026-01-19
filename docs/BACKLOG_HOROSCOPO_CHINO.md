@@ -3191,7 +3191,7 @@ Modificar la página de detalle para mostrar horóscopo específico animal/eleme
 **Prioridad:** 🟢 BAJA  
 **Estimación:** 0.5 días  
 **Dependencias:** TASK-128  
-**Estado:** 📋 PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 #### Descripción
 
@@ -3199,17 +3199,17 @@ Conectar el AnimalCalculator con navegación directa al horóscopo completo del 
 
 #### Tareas Específicas
 
-- [ ] Agregar botón "Ver tu horóscopo completo" al resultado del calculador
-- [ ] Navegar a `/horoscopo-chino/[animal]?element=[element]`
-- [ ] Pasar elemento calculado como query param
-- [ ] Para usuario anónimo: persistir fecha en sessionStorage
-- [ ] Tests de integración
+- [x] Agregar botón "Ver tu horóscopo completo" al resultado del calculador
+- [x] Navegar a `/horoscopo-chino/[animal]?element=[element]`
+- [x] Pasar elemento calculado como query param
+- [x] Para usuario anónimo: persistir fecha en sessionStorage
+- [x] Tests de integración
 
 #### Criterios de Aceptación
 
-- [ ] Calculador conecta con página de horóscopo
-- [ ] Elemento se pasa correctamente
-- [ ] Navegación fluida
+- [x] Calculador conecta con página de horóscopo
+- [x] Elemento se pasa correctamente
+- [x] Navegación fluida
 
 ---
 

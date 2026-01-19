@@ -16,7 +16,7 @@ import type { ChineseZodiacAnimal } from '@/types/chinese-horoscope.types';
  */
 export interface AnimalCalculatorProps {
   /** Callback when animal is calculated and user wants to view horoscope */
-  onAnimalFound?: (animal: ChineseZodiacAnimal) => void;
+  onAnimalFound?: (animal: ChineseZodiacAnimal, element: string) => void;
   /** Additional CSS classes */
   className?: string;
 }
@@ -35,7 +35,7 @@ export interface AnimalCalculatorProps {
  *
  * @example
  * ```tsx
- * <AnimalCalculator onAnimalFound={(animal) => router.push(`/horoscopo-chino/${animal}`)} />
+ * <AnimalCalculator onAnimalFound={(animal, element) => router.push(`/horoscopo-chino/${animal}?element=${element}`)} />
  * ```
  */
 export function AnimalCalculator({ onAnimalFound, className }: AnimalCalculatorProps) {
@@ -53,6 +53,16 @@ export function AnimalCalculator({ onAnimalFound, className }: AnimalCalculatorP
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleCalculate();
+    }
+  };
+
+  const handleViewHoroscope = () => {
+    if (data) {
+      // Persistir birthDate en sessionStorage para usuarios anónimos
+      sessionStorage.setItem('anonymousBirthDate', birthDate);
+
+      // Llamar callback con animal y elemento
+      onAnimalFound?.(data.animal, data.birthElement);
     }
   };
 
@@ -113,10 +123,10 @@ export function AnimalCalculator({ onAnimalFound, className }: AnimalCalculatorP
           {onAnimalFound && (
             <Button
               className="mt-4"
-              onClick={() => onAnimalFound(data.animal)}
+              onClick={handleViewHoroscope}
               data-testid="animal-calculator-view-button"
             >
-              Ver mi horóscopo
+              Ver tu horóscopo completo
             </Button>
           )}
         </div>

@@ -248,7 +248,7 @@ describe('AnimalCalculator', () => {
   });
 
   describe('Callback', () => {
-    it('should show "Ver mi horóscopo" button when onAnimalFound is provided', () => {
+    it('should show "Ver tu horóscopo completo" button when onAnimalFound is provided', () => {
       mockUseCalculateAnimal.mockReturnValue({
         data: createMockCalculateResponse(),
         isLoading: false,
@@ -258,10 +258,10 @@ describe('AnimalCalculator', () => {
       render(<AnimalCalculator onAnimalFound={mockOnAnimalFound} />);
 
       expect(screen.getByTestId('animal-calculator-view-button')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Ver mi horóscopo' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Ver tu horóscopo completo' })).toBeInTheDocument();
     });
 
-    it('should NOT show "Ver mi horóscopo" button when onAnimalFound is not provided', () => {
+    it('should NOT show "Ver tu horóscopo completo" button when onAnimalFound is not provided', () => {
       mockUseCalculateAnimal.mockReturnValue({
         data: createMockCalculateResponse(),
         isLoading: false,
@@ -273,10 +273,13 @@ describe('AnimalCalculator', () => {
       expect(screen.queryByTestId('animal-calculator-view-button')).not.toBeInTheDocument();
     });
 
-    it('should call onAnimalFound with animal when button is clicked', async () => {
+    it('should call onAnimalFound with animal and element when button is clicked', async () => {
       const user = userEvent.setup();
       mockUseCalculateAnimal.mockReturnValue({
-        data: createMockCalculateResponse({ animal: ChineseZodiacAnimal.RAT }),
+        data: createMockCalculateResponse({
+          animal: ChineseZodiacAnimal.RAT,
+          birthElement: 'metal',
+        }),
         isLoading: false,
         error: null,
       });
@@ -287,7 +290,31 @@ describe('AnimalCalculator', () => {
       await user.click(button);
 
       expect(mockOnAnimalFound).toHaveBeenCalledTimes(1);
-      expect(mockOnAnimalFound).toHaveBeenCalledWith(ChineseZodiacAnimal.RAT);
+      expect(mockOnAnimalFound).toHaveBeenCalledWith(ChineseZodiacAnimal.RAT, 'metal');
+    });
+
+    it('should persist birthDate in sessionStorage when viewing horoscope', async () => {
+      const user = userEvent.setup();
+      const mockSetItem = vi.spyOn(Storage.prototype, 'setItem');
+
+      mockUseCalculateAnimal.mockReturnValue({
+        data: createMockCalculateResponse(),
+        isLoading: false,
+        error: null,
+      });
+
+      render(<AnimalCalculator onAnimalFound={mockOnAnimalFound} />);
+
+      // Set birth date
+      const input = screen.getByTestId('animal-calculator-input');
+      await user.type(input, '1988-03-15');
+      await user.click(screen.getByTestId('animal-calculator-button'));
+
+      // Click view button
+      const viewButton = screen.getByTestId('animal-calculator-view-button');
+      await user.click(viewButton);
+
+      expect(mockSetItem).toHaveBeenCalledWith('anonymousBirthDate', '1988-03-15');
     });
   });
 
