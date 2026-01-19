@@ -138,6 +138,42 @@ describe('ChineseHoroscopeCronService', () => {
         expect.any(String),
       );
     });
+
+    it('should handle errors from findAllByYear gracefully', async () => {
+      // Arrange
+      const errorSpy = jest.spyOn(service['logger'], 'error');
+      mockChineseService.findAllByYear.mockRejectedValue(
+        new Error('Database connection error'),
+      );
+
+      // Act
+      await service.generateNextYearHoroscopes();
+
+      // Assert
+      expect(errorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Error en generación automática'),
+        expect.stringContaining('Database connection error'),
+      );
+      expect(chineseService.generateAllForYear).not.toHaveBeenCalled();
+    });
+
+    it('should handle non-Error objects in catch block', async () => {
+      // Arrange
+      const errorSpy = jest.spyOn(service['logger'], 'error');
+      mockChineseService.findAllByYear.mockResolvedValue([]);
+      mockChineseService.generateAllForYear.mockRejectedValue(
+        'String error without Error object',
+      );
+
+      // Act
+      await service.generateNextYearHoroscopes();
+
+      // Assert
+      expect(errorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Error en generación automática'),
+        '', // Empty stack for non-Error objects
+      );
+    });
   });
 
   describe('generateManually', () => {
