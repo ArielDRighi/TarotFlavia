@@ -366,6 +366,21 @@ describe('AnimalCalculator', () => {
 
       expect(screen.getByTestId('full-zodiac-type')).toHaveTextContent('Eres Dragón');
     });
+
+    it('should not display element section when birthElementEs is not available', () => {
+      mockUseCalculateAnimal.mockReturnValue({
+        data: {
+          ...createMockCalculateResponse(),
+          birthElementEs: '',
+        },
+        isLoading: false,
+        error: null,
+      });
+
+      render(<AnimalCalculator />);
+
+      expect(screen.queryByTestId('birth-element')).not.toBeInTheDocument();
+    });
   });
 
   describe('Accessibility', () => {

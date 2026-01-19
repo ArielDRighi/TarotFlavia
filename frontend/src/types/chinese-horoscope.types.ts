@@ -21,6 +21,11 @@ export enum ChineseZodiacAnimal {
 
 export type ChineseZodiacElement = 'Agua' | 'Tierra' | 'Madera' | 'Fuego' | 'Metal';
 
+/**
+ * Chinese element codes (Wu Xing) - lowercase for API compatibility
+ */
+export type ChineseElementCode = 'metal' | 'water' | 'wood' | 'fire' | 'earth';
+
 export interface ChineseHoroscopeArea {
   content: string;
   rating: number;
@@ -66,8 +71,8 @@ export interface CalculateAnimalResponse {
   animal: ChineseZodiacAnimal;
   animalInfo: ChineseZodiacInfo;
   chineseYear: number;
-  birthElement: string;
+  birthElement: ChineseElementCode;
   birthElementEs: string;
-  fixedElement: string;
+  fixedElement: ChineseElementCode;
   fullZodiacType: string;
 }

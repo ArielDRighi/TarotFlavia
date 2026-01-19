@@ -22,7 +22,20 @@ function getElementIcon(element: string): string {
     fire: '🔴',
     earth: '🟤',
   };
-  return icons[element.toLowerCase()] || '';
+
+  const key = element.toLowerCase();
+  const icon = icons[key];
+
+  if (icon) {
+    return icon;
+  }
+
+  if (process.env.NODE_ENV === 'development') {
+    console.warn(`Unknown Chinese element in getElementIcon: "${element}"`);
+  }
+
+  // Fallback icon for unrecognized elements
+  return '⭕';
 }
 
 /**
