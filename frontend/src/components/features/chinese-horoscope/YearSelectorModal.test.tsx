@@ -6,7 +6,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { YearSelectorModal } from './YearSelectorModal';
-import { ChineseZodiacAnimal } from '@/types/chinese-horoscope.types';
 
 describe('YearSelectorModal', () => {
   const mockOnConfirm = vi.fn();
@@ -14,7 +13,6 @@ describe('YearSelectorModal', () => {
 
   const defaultProps = {
     open: true,
-    animal: ChineseZodiacAnimal.DRAGON,
     animalNameEs: 'Dragón',
     onConfirm: mockOnConfirm,
     onOpenChange: mockOnOpenChange,

@@ -45,10 +45,13 @@ export default function HoroscopoChinoPage() {
     setIsModalOpen(true);
   };
 
-  const handleYearConfirm = () => {
+  const handleYearConfirm = (year: number) => {
     if (selectedAnimalForModal) {
-      // TODO: Calculate element from year and navigate to specific horoscope
-      // For now, navigate to animal page
+      // TODO (TASK-128): Calculate element from year and navigate to specific horoscope
+      // Example: const element = calculateElementFromYear(year);
+      // router.push(ROUTES.HOROSCOPO_CHINO_ANIMAL_ELEMENT(selectedAnimalForModal, element));
+      // For now, navigate to animal page only
+      console.log('Year selected:', year); // Will be used in TASK-128
       router.push(ROUTES.HOROSCOPO_CHINO_ANIMAL(selectedAnimalForModal));
     }
   };
