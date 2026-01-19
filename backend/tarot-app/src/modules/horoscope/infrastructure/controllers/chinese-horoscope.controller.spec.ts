@@ -58,6 +58,7 @@ describe('ChineseHoroscopeController', () => {
   beforeEach(async () => {
     const mockChineseService = {
       findByAnimalAndYear: jest.fn(),
+      findByAnimalElementAndYear: jest.fn(),
       findAllByYear: jest.fn(),
       findForUser: jest.fn(),
       generateAllForYear: jest.fn(),
@@ -225,6 +226,112 @@ describe('ChineseHoroscopeController', () => {
       await expect(controller.getByYearAndAnimal(year, animal)).rejects.toThrow(
         NotFoundException,
       );
+    });
+  });
+
+  describe('getByAnimalAndElement', () => {
+    it('should return horoscope for specific year, animal and element', async () => {
+      const year = 2026;
+      const animal = ChineseZodiacAnimal.DRAGON;
+      const element = 'earth' as ChineseElement;
+      chineseService.findByAnimalElementAndYear.mockResolvedValue(
+        mockChineseHoroscope,
+      );
+
+      const result = await controller.getByAnimalAndElement(
+        year,
+        animal,
+        element,
+      );
+
+      expect(result).toBeDefined();
+      expect(result.animal).toBe(ChineseZodiacAnimal.DRAGON);
+      expect(result.year).toBe(2026);
+      expect(chineseService.findByAnimalElementAndYear).toHaveBeenCalledWith(
+        animal,
+        element,
+        year,
+      );
+      expect(chineseService.incrementViewCount).toHaveBeenCalledWith(1);
+    });
+
+    it('should throw NotFoundException when horoscope does not exist', async () => {
+      const year = 2026;
+      const animal = ChineseZodiacAnimal.DRAGON;
+      const element = 'earth' as ChineseElement;
+      chineseService.findByAnimalElementAndYear.mockResolvedValue(null);
+
+      await expect(
+        controller.getByAnimalAndElement(year, animal, element),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should validate year range (too low)', async () => {
+      const year = 2019;
+      const animal = ChineseZodiacAnimal.DRAGON;
+      const element = 'earth' as ChineseElement;
+
+      await expect(
+        controller.getByAnimalAndElement(year, animal, element),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should validate year range (too high)', async () => {
+      const year = 2051;
+      const animal = ChineseZodiacAnimal.DRAGON;
+      const element = 'earth' as ChineseElement;
+
+      await expect(
+        controller.getByAnimalAndElement(year, animal, element),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw BadRequestException for invalid element', async () => {
+      const year = 2026;
+      const animal = ChineseZodiacAnimal.DRAGON;
+      const element = 'invalid-element';
+
+      await expect(
+        controller.getByAnimalAndElement(year, animal, element),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should handle different element types correctly', async () => {
+      const year = 2026;
+      const animal = ChineseZodiacAnimal.RAT;
+      const element = 'metal' as ChineseElement;
+      const mockRatMetal: ChineseHoroscope = {
+        ...mockChineseHoroscope,
+        animal: ChineseZodiacAnimal.RAT,
+        element: 'metal',
+      };
+      chineseService.findByAnimalElementAndYear.mockResolvedValue(mockRatMetal);
+
+      const result = await controller.getByAnimalAndElement(
+        year,
+        animal,
+        element,
+      );
+
+      expect(result.animal).toBe(ChineseZodiacAnimal.RAT);
+      expect(chineseService.findByAnimalElementAndYear).toHaveBeenCalledWith(
+        animal,
+        element,
+        year,
+      );
+    });
+
+    it('should increment view count when horoscope is found', async () => {
+      const year = 2026;
+      const animal = ChineseZodiacAnimal.TIGER;
+      const element = 'wood' as ChineseElement;
+      chineseService.findByAnimalElementAndYear.mockResolvedValue(
+        mockChineseHoroscope,
+      );
+
+      await controller.getByAnimalAndElement(year, animal, element);
+
+      expect(chineseService.incrementViewCount).toHaveBeenCalledWith(1);
     });
   });
 
