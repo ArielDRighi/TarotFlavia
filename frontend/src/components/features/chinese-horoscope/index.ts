@@ -25,6 +25,3 @@ export { ChineseHoroscopeWidget } from './ChineseHoroscopeWidget';
 
 export { YearSelectorModal } from './YearSelectorModal';
 export type { YearSelectorModalProps } from './YearSelectorModal';
-
-export { YearInputBanner } from './YearInputBanner';
-export type { YearInputBannerProps } from './YearInputBanner';

@@ -80,7 +80,7 @@ export function YearSelectorModal({
     if (prevOpen.current && !open) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setYear('');
-       
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setError('');
     }
     prevOpen.current = open;
