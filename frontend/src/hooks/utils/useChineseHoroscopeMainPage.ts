@@ -84,7 +84,8 @@ export function useChineseHoroscopeMainPage(): UseChineseHoroscopeMainPageResult
     (animal: ChineseZodiacAnimal, element?: string) => {
       // If element is provided (from AnimalCalculator), navigate with element
       if (element) {
-        router.push(`${ROUTES.HOROSCOPO_CHINO_ANIMAL(animal)}?element=${element}`);
+        const params = new URLSearchParams({ element });
+        router.push(`${ROUTES.HOROSCOPO_CHINO_ANIMAL(animal)}?${params.toString()}`);
         return;
       }
 

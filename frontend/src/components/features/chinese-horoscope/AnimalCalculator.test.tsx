@@ -315,6 +315,7 @@ describe('AnimalCalculator', () => {
       await user.click(viewButton);
 
       expect(mockSetItem).toHaveBeenCalledWith('anonymousBirthDate', '1988-03-15');
+      mockSetItem.mockRestore();
     });
   });
 
