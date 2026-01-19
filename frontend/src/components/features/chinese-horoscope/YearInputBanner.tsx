@@ -10,6 +10,7 @@ import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils/cn';
 
 export interface YearInputBannerProps {
   onYearSubmit: (year: number) => void | Promise<void>;
@@ -50,7 +51,7 @@ export function YearInputBanner({ onYearSubmit, animalName, className }: YearInp
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && year) {
       handleSubmit();
     }
@@ -64,7 +65,7 @@ export function YearInputBanner({ onYearSubmit, animalName, className }: YearInp
   };
 
   return (
-    <Card data-testid="year-input-banner" className={`p-6 ${className || ''}`}>
+    <Card data-testid="year-input-banner" className={cn('p-6', className)}>
       <div className="mb-4">
         <h3 className="font-serif text-lg">
           {animalName
@@ -83,7 +84,7 @@ export function YearInputBanner({ onYearSubmit, animalName, className }: YearInp
           pattern="[0-9]*"
           value={year}
           onChange={handleChange}
-          onKeyPress={handleKeyPress}
+          onKeyDown={handleKeyDown}
           placeholder="Ej: 1988"
           aria-label="Año de nacimiento"
           className="max-w-[200px]"

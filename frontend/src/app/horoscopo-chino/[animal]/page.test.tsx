@@ -23,11 +23,13 @@ vi.mock('next/navigation', () => ({
 }));
 
 // Mock auth store
+const mockAuthStore = {
+  user: null as { birthDate?: string } | null,
+  isAuthenticated: false,
+};
+
 vi.mock('@/stores/authStore', () => ({
-  useAuthStore: () => ({
-    user: null,
-    isAuthenticated: false,
-  }),
+  useAuthStore: () => mockAuthStore,
 }));
 
 // Mock hooks
@@ -64,6 +66,8 @@ describe('ChineseHoroscopeAnimalPage', () => {
     mockPush.mockClear();
     mockSearchParams.get.mockReturnValue(null);
     mockParams.animal = 'dragon';
+    mockAuthStore.user = null;
+    mockAuthStore.isAuthenticated = false;
     mockUseCalculateAnimal.mockReturnValue({
       data: null,
       isLoading: false,
@@ -101,7 +105,9 @@ describe('ChineseHoroscopeAnimalPage', () => {
 
     renderWithProviders(<ChineseHoroscopeAnimalPage />);
 
-    expect(screen.getByText(/Ingresa el año de nacimiento para ver el horóscopo personalizado/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Ingresa el año de nacimiento para ver el horóscopo personalizado/i)
+    ).toBeInTheDocument();
   });
 
   it('should render loading state when fetching horoscope', () => {
@@ -224,5 +230,66 @@ describe('ChineseHoroscopeAnimalPage', () => {
     await user.click(backButton);
 
     expect(mockPush).toHaveBeenCalledWith('/horoscopo-chino');
+  });
+
+  it('should show horoscope directly when viewing own animal (isMyAnimal === true)', () => {
+    mockParams.animal = 'dragon';
+    mockAuthStore.user = { birthDate: '1988-03-15' };
+    mockAuthStore.isAuthenticated = true;
+
+    // User's calculated animal matches the current animal
+    mockUseCalculateAnimal.mockReturnValue({
+      data: {
+        animal: ChineseZodiacAnimal.DRAGON,
+        birthElement: 'earth' as ChineseElementCode,
+      },
+      isLoading: false,
+    });
+
+    mockUseMyAnimalHoroscope.mockReturnValue({
+      isLoading: false,
+      data: {
+        id: 1,
+        animal: ChineseZodiacAnimal.DRAGON,
+        birthElement: 'earth' as ChineseElementCode,
+        year: 2026,
+        generalOverview: 'Tu año como Dragón de Tierra',
+        areas: {
+          love: { content: 'Love content', rating: 8 },
+          career: { content: 'Career content', rating: 7 },
+          wellness: { content: 'Wellness content', rating: 9 },
+          finance: { content: 'Finance content', rating: 6 },
+        },
+        luckyElements: {
+          numbers: [3, 7, 9],
+          colors: ['Rojo', 'Dorado'],
+          directions: ['Sur', 'Este'],
+          months: [3, 6, 9],
+        },
+        compatibility: {
+          best: [ChineseZodiacAnimal.RAT],
+          good: [ChineseZodiacAnimal.MONKEY],
+          challenging: [ChineseZodiacAnimal.DOG],
+        },
+        monthlyHighlights: 'Test highlights',
+      },
+      error: null,
+    });
+
+    mockUseChineseHoroscopeByElement.mockReturnValue({
+      isLoading: false,
+      data: null,
+      error: null,
+    });
+
+    renderWithProviders(<ChineseHoroscopeAnimalPage />);
+
+    // Should NOT show YearInputBanner
+    expect(
+      screen.queryByText(/Ingresa el año de nacimiento para ver el horóscopo personalizado/i)
+    ).not.toBeInTheDocument();
+
+    // Should show the horoscope directly
+    expect(screen.getByText('Tu año como Dragón de Tierra')).toBeInTheDocument();
   });
 });

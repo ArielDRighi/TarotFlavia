@@ -131,4 +131,57 @@ describe('YearInputBanner', () => {
 
     expect(screen.getByTestId('year-input-banner')).toBeInTheDocument();
   });
+
+  it('muestra error cuando onYearSubmit falla', async () => {
+    const user = userEvent.setup();
+    const onYearSubmit = vi.fn().mockRejectedValue(new Error('API Error'));
+    render(<YearInputBanner onYearSubmit={onYearSubmit} />);
+
+    const input = screen.getByLabelText(/año de nacimiento/i);
+    const button = screen.getByRole('button', { name: /calcular/i });
+
+    await user.type(input, '1988');
+    await user.click(button);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Error al calcular. Inténtalo de nuevo./i)).toBeInTheDocument();
+    });
+  });
+
+  it('valida upper bound del año (> 2100)', async () => {
+    const user = userEvent.setup();
+    const onYearSubmit = vi.fn();
+    render(<YearInputBanner onYearSubmit={onYearSubmit} />);
+
+    const input = screen.getByLabelText(/año de nacimiento/i);
+    const button = screen.getByRole('button', { name: /calcular/i });
+
+    // Año fuera de rango superior
+    await user.type(input, '2200');
+    await user.click(button);
+
+    await waitFor(() => {
+      expect(screen.getByText(/año debe estar entre/i)).toBeInTheDocument();
+    });
+
+    expect(onYearSubmit).not.toHaveBeenCalled();
+  });
+
+  it('muestra error cuando se ingresa texto no numérico', async () => {
+    const user = userEvent.setup();
+    const onYearSubmit = vi.fn();
+    render(<YearInputBanner onYearSubmit={onYearSubmit} />);
+
+    const input = screen.getByLabelText(/año de nacimiento/i);
+    const button = screen.getByRole('button', { name: /calcular/i });
+
+    await user.type(input, 'abc');
+    await user.click(button);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Por favor ingresa un año válido/i)).toBeInTheDocument();
+    });
+
+    expect(onYearSubmit).not.toHaveBeenCalled();
+  });
 });

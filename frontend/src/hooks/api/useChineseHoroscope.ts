@@ -43,13 +43,15 @@ export function useCalculateAnimal(birthDate: string | null) {
 /**
  * Hook para obtener el horóscopo chino del usuario autenticado
  * @param year Año del horóscopo (opcional)
+ * @param options Opciones del hook (enabled para habilitar/deshabilitar la query)
  */
-export function useMyAnimalHoroscope(year?: number) {
+export function useMyAnimalHoroscope(year?: number, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: chineseHoroscopeKeys.myAnimal(year),
     queryFn: () => getMyAnimalHoroscope(year),
     staleTime: 1000 * 60 * 60 * 24, // 24 horas (es anual)
     retry: false,
+    enabled: options?.enabled ?? true,
   });
 }
 

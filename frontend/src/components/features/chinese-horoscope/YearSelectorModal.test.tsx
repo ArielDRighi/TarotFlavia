@@ -123,18 +123,28 @@ describe('YearSelectorModal', () => {
   });
 
   it('should reset input when modal is reopened', async () => {
-    const { rerender } = render(<YearSelectorModal {...defaultProps} open={false} />);
+    const user = userEvent.setup();
+    const mockOnOpenChange = vi.fn();
+    const { rerender } = render(
+      <YearSelectorModal {...defaultProps} open={true} onOpenChange={mockOnOpenChange} />
+    );
 
-    // Open and enter year
-    rerender(<YearSelectorModal {...defaultProps} open={true} />);
+    // Enter year
     const input = screen.getByLabelText(/Año de nacimiento/i);
-    await userEvent.setup().type(input, '1988');
+    await user.type(input, '1988');
+    expect(input).toHaveValue(1988);
 
-    // Close modal
-    rerender(<YearSelectorModal {...defaultProps} open={false} />);
+    // Close modal by clicking cancel button (this triggers reset via handleOpenChange)
+    await user.click(screen.getByRole('button', { name: /Cancelar/i }));
 
-    // Reopen modal - input should be empty
-    rerender(<YearSelectorModal {...defaultProps} open={true} />);
+    // Verify onOpenChange was called with false
+    expect(mockOnOpenChange).toHaveBeenCalledWith(false);
+
+    // Rerender with closed then open again - the internal state was reset by handleOpenChange
+    rerender(<YearSelectorModal {...defaultProps} open={false} onOpenChange={mockOnOpenChange} />);
+    rerender(<YearSelectorModal {...defaultProps} open={true} onOpenChange={mockOnOpenChange} />);
+
+    // Input should be empty after reset
     const newInput = screen.getByLabelText(/Año de nacimiento/i);
     expect(newInput).toHaveValue(null);
   });
