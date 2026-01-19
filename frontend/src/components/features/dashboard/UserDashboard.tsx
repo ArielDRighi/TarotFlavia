@@ -9,6 +9,7 @@ import { StatsSection } from './StatsSection';
 import UpgradeBanner from '@/components/features/readings/UpgradeBanner';
 import UpgradeModal from '@/components/features/readings/UpgradeModal';
 import { HoroscopeWidget } from '@/components/features/horoscope';
+import { ChineseHoroscopeWidget } from '@/components/features/chinese-horoscope';
 
 /**
  * User Dashboard component for authenticated users
@@ -61,8 +62,11 @@ export function UserDashboard() {
 
           {/* Right column (1/3 width) */}
           <div className="space-y-8">
-            {/* Horoscope Widget - For all users */}
+            {/* Horoscope Widget (Western) - For all users */}
             <HoroscopeWidget />
+
+            {/* Chinese Horoscope Widget - For all users */}
+            <ChineseHoroscopeWidget />
 
             {/* Stats Section - Only for Premium users */}
             {isPremium && <StatsSection />}

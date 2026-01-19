@@ -37,7 +37,7 @@ export class ChineseHoroscope {
   /**
    * Animal del zodiaco chino
    */
-  @Column({ name: 'zodiac_animal', type: 'enum', enum: ChineseZodiacAnimal })
+  @Column({ type: 'enum', enum: ChineseZodiacAnimal })
   animal: ChineseZodiacAnimal;
 
   /**

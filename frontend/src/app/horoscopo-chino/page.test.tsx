@@ -18,9 +18,17 @@ vi.mock('next/navigation', () => ({
 
 // Mock hooks
 const mockUseChineseHoroscopesByYear = vi.fn();
+const mockUseCalculateAnimal = vi.fn();
 
 vi.mock('@/hooks/api/useChineseHoroscope', () => ({
   useChineseHoroscopesByYear: () => mockUseChineseHoroscopesByYear(),
+  useCalculateAnimal: () => mockUseCalculateAnimal(),
+}));
+
+// Mock useAuth hook - default: authenticated user
+const mockUseAuth = vi.fn();
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => mockUseAuth(),
 }));
 
 // Test wrapper
@@ -44,6 +52,17 @@ describe('HoroscopoChinoPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockPush.mockClear();
+    // Default mock for useCalculateAnimal
+    mockUseCalculateAnimal.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: null,
+    });
+    // Default: authenticated user
+    mockUseAuth.mockReturnValue({
+      isAuthenticated: true,
+      user: { id: 1 },
+    });
   });
 
   it('should render page title', () => {
@@ -85,5 +104,37 @@ describe('HoroscopoChinoPage', () => {
     await user.click(dragonCard);
 
     expect(mockPush).toHaveBeenCalledWith('/horoscopo-chino/dragon');
+  });
+
+  describe('Anonymous users (HU-HCH-001)', () => {
+    beforeEach(() => {
+      // Set up as anonymous user
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: false,
+        user: null,
+      });
+    });
+
+    it('should render AnimalCalculator for anonymous users', () => {
+      mockUseChineseHoroscopesByYear.mockReturnValue({
+        isLoading: false,
+        data: [],
+      });
+
+      renderWithProviders(<HoroscopoChinoPage />);
+
+      expect(screen.getByTestId('animal-calculator')).toBeInTheDocument();
+    });
+
+    it('should show animal calculator title for anonymous users', () => {
+      mockUseChineseHoroscopesByYear.mockReturnValue({
+        isLoading: false,
+        data: [],
+      });
+
+      renderWithProviders(<HoroscopoChinoPage />);
+
+      expect(screen.getByRole('heading', { name: /descubre tu animal/i })).toBeInTheDocument();
+    });
   });
 });

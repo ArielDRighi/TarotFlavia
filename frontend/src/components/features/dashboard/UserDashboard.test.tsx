@@ -6,7 +6,14 @@ import * as useUserPlanFeaturesModule from '@/hooks/utils/useUserPlanFeatures';
 import * as useUserModule from '@/hooks/api/useUser';
 import * as useUserCapabilitiesModule from '@/hooks/api/useUserCapabilities';
 import * as useHoroscopeModule from '@/hooks/api/useHoroscope';
-import type { AuthUser, UserProfile, UserCapabilities, DailyHoroscope } from '@/types';
+import * as useChineseHoroscopeModule from '@/hooks/api/useChineseHoroscope';
+import type {
+  AuthUser,
+  UserProfile,
+  UserCapabilities,
+  DailyHoroscope,
+  ChineseHoroscope,
+} from '@/types';
 import type { UseQueryResult } from '@tanstack/react-query';
 import { ZodiacSign } from '@/types/horoscope.types';
 
@@ -16,6 +23,7 @@ vi.mock('@/hooks/utils/useUserPlanFeatures');
 vi.mock('@/hooks/api/useUser');
 vi.mock('@/hooks/api/useUserCapabilities');
 vi.mock('@/hooks/api/useHoroscope');
+vi.mock('@/hooks/api/useChineseHoroscope');
 
 // Helper to create AuthUser mock without limits fields
 function createMockAuthUser(overrides?: Partial<AuthUser>): AuthUser {
@@ -41,6 +49,14 @@ describe('UserDashboard', () => {
       error: null,
       refetch: vi.fn(),
     } as unknown as UseQueryResult<DailyHoroscope, Error>);
+
+    // Default mock for useMyAnimalHoroscope (Chinese horoscope widget)
+    vi.spyOn(useChineseHoroscopeModule, 'useMyAnimalHoroscope').mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    } as unknown as UseQueryResult<ChineseHoroscope, Error>);
   });
 
   it('should render WelcomeHeader', () => {
