@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ChineseZodiacAnimal } from '../../../../common/utils/chinese-zodiac.utils';
 
 /**
@@ -125,4 +125,24 @@ export class ChineseHoroscopeResponseDto {
     nullable: true,
   })
   monthlyHighlights: string | null;
+
+  // Campos Wu Xing (solo disponibles en endpoint /my-animal)
+  @ApiPropertyOptional({
+    description:
+      'Elemento del año de nacimiento (Wu Xing) - solo en /my-animal',
+    example: 'earth',
+  })
+  birthElement?: string;
+
+  @ApiPropertyOptional({
+    description: 'Nombre del elemento en español',
+    example: 'Tierra',
+  })
+  birthElementEs?: string;
+
+  @ApiPropertyOptional({
+    description: 'Identidad zodiacal completa',
+    example: 'Dragón de Tierra',
+  })
+  fullZodiacType?: string;
 }

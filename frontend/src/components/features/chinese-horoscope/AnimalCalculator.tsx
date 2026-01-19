@@ -8,35 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCalculateAnimal } from '@/hooks/api/useChineseHoroscope';
-import { CHINESE_ZODIAC_INFO } from '@/lib/utils/chinese-zodiac';
+import { CHINESE_ZODIAC_INFO, getElementIcon } from '@/lib/utils/chinese-zodiac';
 import type { ChineseZodiacAnimal } from '@/types/chinese-horoscope.types';
-
-/**
- * Get icon for Chinese element (Wu Xing)
- */
-function getElementIcon(element: string): string {
-  const icons: Record<string, string> = {
-    metal: '⚪',
-    water: '🔵',
-    wood: '🟢',
-    fire: '🔴',
-    earth: '🟤',
-  };
-
-  const key = element.toLowerCase();
-  const icon = icons[key];
-
-  if (icon) {
-    return icon;
-  }
-
-  if (process.env.NODE_ENV === 'development') {
-    console.warn(`Unknown Chinese element in getElementIcon: "${element}"`);
-  }
-
-  // Fallback icon for unrecognized elements
-  return '⭕';
-}
 
 /**
  * Props for AnimalCalculator component

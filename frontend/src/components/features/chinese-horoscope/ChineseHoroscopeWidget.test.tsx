@@ -57,6 +57,10 @@ function createMockHoroscope(overrides?: Partial<ChineseHoroscope>): ChineseHoro
       challenging: [ChineseZodiacAnimal.DOG],
     },
     monthlyHighlights: 'Marzo y septiembre serán meses clave.',
+    // Wu Xing fields
+    birthElement: 'earth',
+    birthElementEs: 'Tierra',
+    fullZodiacType: 'Dragón de Tierra',
     ...overrides,
   };
 }
@@ -194,7 +198,90 @@ describe('ChineseHoroscopeWidget', () => {
 
       render(<ChineseHoroscopeWidget />);
 
+      // With Wu Xing, shows fullZodiacType instead of just nameEs
+      expect(screen.getByText('Dragón de Tierra')).toBeInTheDocument();
+    });
+
+    it('should display fullZodiacType when available', () => {
+      mockUseMyAnimalHoroscope.mockReturnValue({
+        data: createMockHoroscope({
+          fullZodiacType: 'Dragón de Metal',
+          birthElement: 'metal',
+          birthElementEs: 'Metal',
+        }),
+        isLoading: false,
+        error: null,
+      });
+
+      render(<ChineseHoroscopeWidget />);
+
+      expect(screen.getByText('Dragón de Metal')).toBeInTheDocument();
+    });
+
+    it('should fallback to nameEs when fullZodiacType is not available', () => {
+      mockUseMyAnimalHoroscope.mockReturnValue({
+        data: createMockHoroscope({
+          fullZodiacType: undefined,
+          birthElement: undefined,
+          birthElementEs: undefined,
+        }),
+        isLoading: false,
+        error: null,
+      });
+
+      render(<ChineseHoroscopeWidget />);
+
       expect(screen.getByText('Dragón')).toBeInTheDocument();
+    });
+
+    it('should display birth element with icon', () => {
+      mockUseMyAnimalHoroscope.mockReturnValue({
+        data: createMockHoroscope({
+          birthElement: 'earth',
+          birthElementEs: 'Tierra',
+        }),
+        isLoading: false,
+        error: null,
+      });
+
+      render(<ChineseHoroscopeWidget />);
+
+      const elementDisplay = screen.getByTestId('chinese-horoscope-widget-element');
+      expect(elementDisplay).toHaveTextContent('🟤');
+      expect(elementDisplay).toHaveTextContent('Tierra');
+    });
+
+    it('should display metal element with correct icon', () => {
+      mockUseMyAnimalHoroscope.mockReturnValue({
+        data: createMockHoroscope({
+          birthElement: 'metal',
+          birthElementEs: 'Metal',
+          fullZodiacType: 'Dragón de Metal',
+        }),
+        isLoading: false,
+        error: null,
+      });
+
+      render(<ChineseHoroscopeWidget />);
+
+      const elementDisplay = screen.getByTestId('chinese-horoscope-widget-element');
+      expect(elementDisplay).toHaveTextContent('⚪');
+      expect(elementDisplay).toHaveTextContent('Metal');
+    });
+
+    it('should not display element when birthElementEs is not available', () => {
+      mockUseMyAnimalHoroscope.mockReturnValue({
+        data: createMockHoroscope({
+          birthElement: undefined,
+          birthElementEs: undefined,
+        }),
+        isLoading: false,
+        error: null,
+      });
+
+      render(<ChineseHoroscopeWidget />);
+
+      expect(screen.queryByTestId('chinese-horoscope-widget-element')).not.toBeInTheDocument();
     });
 
     it('should display current year label', () => {
@@ -270,7 +357,12 @@ describe('ChineseHoroscopeWidget', () => {
   describe('Different Animals', () => {
     it('should display correct info for Rat', () => {
       mockUseMyAnimalHoroscope.mockReturnValue({
-        data: createMockHoroscope({ animal: ChineseZodiacAnimal.RAT }),
+        data: createMockHoroscope({
+          animal: ChineseZodiacAnimal.RAT,
+          fullZodiacType: 'Rata de Agua',
+          birthElement: 'water',
+          birthElementEs: 'Agua',
+        }),
         isLoading: false,
         error: null,
       });
@@ -278,12 +370,17 @@ describe('ChineseHoroscopeWidget', () => {
       render(<ChineseHoroscopeWidget />);
 
       expect(screen.getByText('🐀')).toBeInTheDocument();
-      expect(screen.getByText('Rata')).toBeInTheDocument();
+      expect(screen.getByText('Rata de Agua')).toBeInTheDocument();
     });
 
     it('should display correct info for Snake', () => {
       mockUseMyAnimalHoroscope.mockReturnValue({
-        data: createMockHoroscope({ animal: ChineseZodiacAnimal.SNAKE }),
+        data: createMockHoroscope({
+          animal: ChineseZodiacAnimal.SNAKE,
+          fullZodiacType: 'Serpiente de Fuego',
+          birthElement: 'fire',
+          birthElementEs: 'Fuego',
+        }),
         isLoading: false,
         error: null,
       });
@@ -291,7 +388,7 @@ describe('ChineseHoroscopeWidget', () => {
       render(<ChineseHoroscopeWidget />);
 
       expect(screen.getByText('🐍')).toBeInTheDocument();
-      expect(screen.getByText('Serpiente')).toBeInTheDocument();
+      expect(screen.getByText('Serpiente de Fuego')).toBeInTheDocument();
     });
 
     it('should link to correct animal page', () => {
@@ -318,7 +415,7 @@ describe('ChineseHoroscopeWidget', () => {
 
       render(<ChineseHoroscopeWidget />);
 
-      expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Dragón');
+      expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Dragón de Tierra');
     });
 
     it('should have accessible link with clear text', () => {

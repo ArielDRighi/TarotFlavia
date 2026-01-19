@@ -8,7 +8,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMyAnimalHoroscope } from '@/hooks/api/useChineseHoroscope';
-import { CHINESE_ZODIAC_INFO, getCurrentYear } from '@/lib/utils/chinese-zodiac';
+import { CHINESE_ZODIAC_INFO, getCurrentYear, getElementIcon } from '@/lib/utils/chinese-zodiac';
 
 /**
  * ChineseHoroscopeWidget Component
@@ -67,6 +67,7 @@ export function ChineseHoroscopeWidget() {
   }
 
   const animalInfo = CHINESE_ZODIAC_INFO[horoscope.animal];
+  const displayName = horoscope.fullZodiacType || animalInfo.nameEs;
 
   return (
     <Card data-testid="chinese-horoscope-widget" className="p-6">
@@ -74,8 +75,15 @@ export function ChineseHoroscopeWidget() {
         <div className="flex items-center gap-2">
           <span className="text-3xl">{animalInfo.emoji}</span>
           <div>
-            <h2 className="font-serif text-xl">{animalInfo.nameEs}</h2>
-            <p className="text-muted-foreground text-xs">Horóscopo Chino {currentYear}</p>
+            <h2 className="font-serif text-xl">{displayName}</h2>
+            <div className="flex items-center gap-2">
+              <p className="text-muted-foreground text-xs">Horóscopo Chino {currentYear}</p>
+              {horoscope.birthElementEs && (
+                <span className="text-xs" data-testid="chinese-horoscope-widget-element">
+                  {getElementIcon(horoscope.birthElement || '')} {horoscope.birthElementEs}
+                </span>
+              )}
+            </div>
           </div>
         </div>
         <Button asChild variant="ghost" size="sm">

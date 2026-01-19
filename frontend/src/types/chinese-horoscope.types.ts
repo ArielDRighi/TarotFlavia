@@ -56,6 +56,10 @@ export interface ChineseHoroscope {
     challenging: ChineseZodiacAnimal[];
   };
   monthlyHighlights: string | null;
+  // Campos Wu Xing (solo disponibles en endpoint /my-animal)
+  birthElement?: ChineseElementCode;
+  birthElementEs?: string;
+  fullZodiacType?: string;
 }
 
 export interface ChineseZodiacInfo {
