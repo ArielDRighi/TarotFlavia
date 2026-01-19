@@ -12,6 +12,33 @@ import { CHINESE_ZODIAC_INFO } from '@/lib/utils/chinese-zodiac';
 import type { ChineseZodiacAnimal } from '@/types/chinese-horoscope.types';
 
 /**
+ * Get icon for Chinese element (Wu Xing)
+ */
+function getElementIcon(element: string): string {
+  const icons: Record<string, string> = {
+    metal: '⚪',
+    water: '🔵',
+    wood: '🟢',
+    fire: '🔴',
+    earth: '🟤',
+  };
+
+  const key = element.toLowerCase();
+  const icon = icons[key];
+
+  if (icon) {
+    return icon;
+  }
+
+  if (process.env.NODE_ENV === 'development') {
+    console.warn(`Unknown Chinese element in getElementIcon: "${element}"`);
+  }
+
+  // Fallback icon for unrecognized elements
+  return '⭕';
+}
+
+/**
  * Props for AnimalCalculator component
  */
 export interface AnimalCalculatorProps {
@@ -91,9 +118,15 @@ export function AnimalCalculator({ onAnimalFound, className }: AnimalCalculatorP
       {data && (
         <div className="bg-muted rounded-lg p-4 text-center" data-testid="animal-calculator-result">
           <span className="text-5xl">{CHINESE_ZODIAC_INFO[data.animal].emoji}</span>
-          <p className="mt-2 font-serif text-xl">Eres {data.animalInfo.nameEs}</p>
+          <p className="mt-2 font-serif text-xl" data-testid="full-zodiac-type">
+            Eres {data.fullZodiacType || data.animalInfo.nameEs}
+          </p>
           <p className="text-muted-foreground text-sm">Año chino: {data.chineseYear}</p>
-          {/* TODO: Mostrar birthElement cuando TASK-119-121 estén implementadas */}
+          {data.birthElementEs && (
+            <p className="text-muted-foreground mt-1 text-sm" data-testid="birth-element">
+              Elemento: {getElementIcon(data.birthElement)} {data.birthElementEs}
+            </p>
+          )}
           <div className="mt-2 flex flex-wrap justify-center gap-1">
             {data.animalInfo.characteristics.map((char) => (
               <span
