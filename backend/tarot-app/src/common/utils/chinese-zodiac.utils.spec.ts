@@ -3,6 +3,11 @@ import {
   getChineseZodiacInfo,
   getChineseYearInfo,
   ChineseZodiacAnimal,
+  getElementForYear,
+  getElementByBirthDate,
+  getFullZodiacType,
+  CHINESE_ELEMENTS_MAP_ES,
+  type ChineseElement,
 } from './chinese-zodiac.utils';
 
 describe('chinese-zodiac.utils', () => {
@@ -323,6 +328,121 @@ describe('chinese-zodiac.utils', () => {
 
       expect(yearInfo1.animal).toBe(yearInfo2.animal);
       expect(yearInfo1.element).toBe(yearInfo2.element);
+    });
+  });
+
+  describe('getElementForYear', () => {
+    it('should return "earth" for 1988 (digit 8)', () => {
+      expect(getElementForYear(1988)).toBe('earth');
+    });
+
+    it('should return "earth" for 1989 (digit 9)', () => {
+      expect(getElementForYear(1989)).toBe('earth');
+    });
+
+    it('should return "wood" for 2024 (digit 4)', () => {
+      expect(getElementForYear(2024)).toBe('wood');
+    });
+
+    it('should return "metal" for 2000 (digit 0)', () => {
+      expect(getElementForYear(2000)).toBe('metal');
+    });
+
+    it('should return "fire" for 1987 (digit 7)', () => {
+      expect(getElementForYear(1987)).toBe('fire');
+    });
+
+    it('should cycle through all 5 elements', () => {
+      const elements: ChineseElement[] = [];
+      for (let year = 1900; year < 1910; year++) {
+        elements.push(getElementForYear(year));
+      }
+      expect(elements).toContain('metal');
+      expect(elements).toContain('water');
+      expect(elements).toContain('wood');
+      expect(elements).toContain('fire');
+      expect(elements).toContain('earth');
+    });
+  });
+
+  describe('getElementByBirthDate', () => {
+    it('should return "earth" for birth date 1988-03-15 (after CNY)', () => {
+      const date = new Date('1988-03-15');
+      expect(getElementByBirthDate(date)).toBe('earth');
+    });
+
+    it('should return "fire" for birth date 1988-01-15 (before CNY, year 1987)', () => {
+      // Chinese New Year 1988 was on 1988-02-17
+      // So 1988-01-15 belongs to Chinese year 1987
+      // 1987 (digit 7) → fire
+      const date = new Date('1988-01-15');
+      expect(getElementByBirthDate(date)).toBe('fire');
+    });
+
+    it('should return "earth" for birth date 1989-03-15', () => {
+      const date = new Date('1989-03-15');
+      expect(getElementByBirthDate(date)).toBe('earth');
+    });
+
+    it('should return "wood" for birth date 2024-03-15', () => {
+      const date = new Date('2024-03-15');
+      expect(getElementByBirthDate(date)).toBe('wood');
+    });
+
+    it('should return "metal" for birth date 2000-03-15', () => {
+      const date = new Date('2000-03-15');
+      expect(getElementByBirthDate(date)).toBe('metal');
+    });
+  });
+
+  describe('getFullZodiacType', () => {
+    it('should return "Dragón de Tierra" for Dragon + Earth', () => {
+      expect(getFullZodiacType(ChineseZodiacAnimal.DRAGON, 'earth')).toBe(
+        'Dragón de Tierra',
+      );
+    });
+
+    it('should return "Conejo de Fuego" for Rabbit + Fire', () => {
+      expect(getFullZodiacType(ChineseZodiacAnimal.RABBIT, 'fire')).toBe(
+        'Conejo de Fuego',
+      );
+    });
+
+    it('should return "Rata de Agua" for Rat + Water', () => {
+      expect(getFullZodiacType(ChineseZodiacAnimal.RAT, 'water')).toBe(
+        'Rata de Agua',
+      );
+    });
+
+    it('should return "Tigre de Madera" for Tiger + Wood', () => {
+      expect(getFullZodiacType(ChineseZodiacAnimal.TIGER, 'wood')).toBe(
+        'Tigre de Madera',
+      );
+    });
+
+    it('should return "Mono de Metal" for Monkey + Metal', () => {
+      expect(getFullZodiacType(ChineseZodiacAnimal.MONKEY, 'metal')).toBe(
+        'Mono de Metal',
+      );
+    });
+
+    it('should work with all 12 animals and 5 elements', () => {
+      const animals = Object.values(ChineseZodiacAnimal);
+      const elements: ChineseElement[] = [
+        'metal',
+        'water',
+        'wood',
+        'fire',
+        'earth',
+      ];
+
+      animals.forEach((animal) => {
+        elements.forEach((element) => {
+          const result = getFullZodiacType(animal, element);
+          expect(result).toContain(CHINESE_ELEMENTS_MAP_ES[element]);
+          expect(result).toContain('de');
+        });
+      });
     });
   });
 });

@@ -17,6 +17,22 @@
  * - Obtener información del año chino actual o de un año específico.
  */
 
+/**
+ * Tipo que representa los 5 elementos del zodiaco chino
+ */
+export type ChineseElement = 'metal' | 'water' | 'wood' | 'fire' | 'earth';
+
+/**
+ * Mapa de elementos en español
+ */
+export const CHINESE_ELEMENTS_MAP_ES: Record<ChineseElement, string> = {
+  metal: 'Metal',
+  water: 'Agua',
+  wood: 'Madera',
+  fire: 'Fuego',
+  earth: 'Tierra',
+};
+
 export enum ChineseZodiacAnimal {
   RAT = 'rat',
   OX = 'ox',
@@ -414,10 +430,8 @@ function getAnimalForYear(year: number): ChineseZodiacAnimal {
  * @param year - Año gregoriano
  * @returns Elemento del año
  */
-function getElementForYear(
-  year: number,
-): 'wood' | 'fire' | 'earth' | 'metal' | 'water' {
-  const elements: Array<'wood' | 'fire' | 'earth' | 'metal' | 'water'> = [
+export function getElementForYear(year: number): ChineseElement {
+  const elements: ChineseElement[] = [
     'metal',
     'metal',
     'water',
@@ -436,6 +450,53 @@ function getElementForYear(
 }
 
 /**
+ * Obtiene el elemento del año de nacimiento (considera CNY)
+ * @param birthDate - Fecha de nacimiento
+ * @returns Elemento del año chino correspondiente
+ *
+ * @example
+ * ```typescript
+ * getElementByBirthDate(new Date('1988-03-15')); // 'earth'
+ * getElementByBirthDate(new Date('1988-01-15')); // 'fire' (año chino 1987)
+ * ```
+ */
+export function getElementByBirthDate(birthDate: Date): ChineseElement {
+  const year = birthDate.getFullYear();
+  const chineseNewYear = CHINESE_NEW_YEAR_DATES[year];
+
+  // Si nació antes del Año Nuevo Chino, pertenece al año anterior
+  let chineseYear = year;
+  if (chineseNewYear) {
+    const cnyDate = new Date(chineseNewYear);
+    if (birthDate < cnyDate) {
+      chineseYear = year - 1;
+    }
+  }
+
+  return getElementForYear(chineseYear);
+}
+
+/**
+ * Genera la identidad completa (ej. "Dragón de Tierra")
+ * @param animal - Animal del zodiaco
+ * @param element - Elemento del año
+ * @returns Nombre completo en español
+ *
+ * @example
+ * ```typescript
+ * getFullZodiacType(ChineseZodiacAnimal.DRAGON, 'earth'); // "Dragón de Tierra"
+ * getFullZodiacType(ChineseZodiacAnimal.RABBIT, 'fire'); // "Conejo de Fuego"
+ * ```
+ */
+export function getFullZodiacType(
+  animal: ChineseZodiacAnimal,
+  element: ChineseElement,
+): string {
+  const info = getChineseZodiacInfo(animal);
+  return `${info.nameEs} de ${CHINESE_ELEMENTS_MAP_ES[element]}`;
+}
+
+/**
  * Obtiene información del año chino actual o especificado
  *
  * @param year - Año gregoriano (por defecto el año actual)
@@ -451,7 +512,7 @@ function getElementForYear(
  */
 export function getChineseYearInfo(year: number = new Date().getFullYear()): {
   animal: ChineseZodiacAnimal;
-  element: 'wood' | 'fire' | 'earth' | 'metal' | 'water';
+  element: ChineseElement;
   newYearDate: string;
 } {
   const newYearDate = CHINESE_NEW_YEAR_DATES[year] || `${year}-02-01`; // Fallback aproximado
