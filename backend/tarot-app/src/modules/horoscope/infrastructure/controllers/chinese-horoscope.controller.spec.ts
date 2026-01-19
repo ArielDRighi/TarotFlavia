@@ -102,6 +102,11 @@ describe('ChineseHoroscopeController', () => {
       expect(result.animalInfo.nameEn).toBe('Dragon');
       expect(result.animalInfo.emoji).toBe('🐉');
       expect(result.chineseYear).toBe(1988);
+      // Nuevos campos Wu Xing
+      expect(result.birthElement).toBe('earth');
+      expect(result.birthElementEs).toBe('Tierra');
+      expect(result.fixedElement).toBe('earth');
+      expect(result.fullZodiacType).toBe('Dragón de Tierra');
     });
 
     it('should calculate correct animal for birth before Chinese New Year', () => {

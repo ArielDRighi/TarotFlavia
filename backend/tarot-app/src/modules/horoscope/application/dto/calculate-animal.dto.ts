@@ -1,6 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDateString } from 'class-validator';
-import { ChineseZodiacAnimal } from '../../../../common/utils/chinese-zodiac.utils';
+import {
+  ChineseZodiacAnimal,
+  ChineseElement,
+} from '../../../../common/utils/chinese-zodiac.utils';
 
 /**
  * DTO para calcular el animal del zodiaco chino
@@ -53,7 +56,7 @@ export class CalculateAnimalResponseDto {
     description: 'Elemento del año de nacimiento (Wu Xing)',
     example: 'earth',
   })
-  birthElement: string;
+  birthElement: ChineseElement;
 
   @ApiProperty({
     description: 'Nombre del elemento en español',
@@ -65,7 +68,7 @@ export class CalculateAnimalResponseDto {
     description: 'Elemento fijo/natural del animal',
     example: 'earth',
   })
-  fixedElement: string;
+  fixedElement: ChineseElement;
 
   @ApiProperty({
     description: 'Identidad zodiacal completa',
