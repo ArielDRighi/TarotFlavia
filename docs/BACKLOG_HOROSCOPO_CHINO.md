@@ -2532,17 +2532,172 @@ Actualizar los tipos TypeScript y componentes del frontend para mostrar el eleme
 
 **Fecha:** 19 de enero, 2026  
 **Archivos modificados:**
+
 - `frontend/src/types/chinese-horoscope.types.ts` - Agregados campos: birthElement, birthElementEs, fixedElement, fullZodiacType
 - `frontend/src/components/features/chinese-horoscope/AnimalCalculator.tsx` - Helper getElementIcon(), muestra fullZodiacType y elemento con ícono
 - `frontend/src/components/features/chinese-horoscope/AnimalCalculator.test.tsx` - 26/26 tests actualizados y pasando
 
 **Decisiones técnicas:**
+
 1. ChineseHoroscopeWidget NO modificado - endpoint `/my-animal` no incluye campos de elemento
 2. Iconos de elementos: emojis circulares de colores (⚪🔵🟢🔴🟤)
 3. Fallback strategy: `data.fullZodiacType || data.animalInfo.nameEs`
 4. Validaciones pasadas: format, lint, type-check, tests (1202/1202), build
 
 **Coverage:** 100% en nuevos campos
+
+---
+
+### TASK-123: Agregar Wu Xing a endpoint /my-animal
+
+**Módulo:** `backend + frontend`  
+**Prioridad:** 🔴 ALTA (Bug Fix)  
+**Estimación:** 0.5 días (4 horas)  
+**Dependencias:** TASK-119, TASK-122  
+**Estado:** ✅ COMPLETADA
+
+---
+
+#### 📋 Descripción
+
+El endpoint `GET /chinese-horoscope/my-animal` para usuarios autenticados NO incluye los campos Wu Xing (birthElement, fullZodiacType), mientras que `POST /calculate-animal` para usuarios anónimos SÍ los incluye.
+
+**Problema detectado:** El widget del dashboard y la página de horóscopo chino para usuarios logueados muestra solo el animal base (ej. "Dragón") en lugar del tipo completo (ej. "Dragón de Tierra").
+
+---
+
+#### 🏗️ Contexto Técnico
+
+**Endpoints afectados:**
+
+| Endpoint                 | Usuarios     | Estado Wu Xing              |
+| ------------------------ | ------------ | --------------------------- |
+| `POST /calculate-animal` | Anónimos     | ✅ Incluye campos           |
+| `GET /my-animal`         | Autenticados | ✅ **Ahora incluye campos** |
+
+**Archivos modificados:**
+
+**Backend:**
+
+- `src/modules/horoscope/application/dto/chinese-horoscope-response.dto.ts` - Agregados campos opcionales
+- `src/modules/horoscope/infrastructure/controllers/chinese-horoscope.controller.ts` - Calcula y retorna campos
+- `src/modules/horoscope/infrastructure/controllers/chinese-horoscope.controller.spec.ts` - 26 tests (3 nuevos)
+
+**Frontend:**
+
+- `src/types/chinese-horoscope.types.ts` - Agregados campos a ChineseHoroscope interface
+- `src/components/features/chinese-horoscope/ChineseHoroscopeWidget.tsx` - Muestra fullZodiacType y elemento
+- `src/components/features/chinese-horoscope/ChineseHoroscopeWidget.test.tsx` - 25 tests (6 nuevos)
+
+---
+
+#### ✅ Tareas Específicas
+
+##### Backend
+
+- [x] Agregar campos opcionales a `ChineseHoroscopeResponseDto`:
+
+  ```typescript
+  @ApiPropertyOptional({
+    description: 'Elemento del año de nacimiento (Wu Xing) - solo en /my-animal',
+    example: 'earth',
+  })
+  birthElement?: string;
+
+  @ApiPropertyOptional({
+    description: 'Nombre del elemento en español',
+    example: 'Tierra',
+  })
+  birthElementEs?: string;
+
+  @ApiPropertyOptional({
+    description: 'Identidad zodiacal completa',
+    example: 'Dragón de Tierra',
+  })
+  fullZodiacType?: string;
+  ```
+
+- [x] Modificar `getMyAnimalHoroscope` para calcular y agregar campos Wu Xing:
+
+  ```typescript
+  // Después de obtener horoscope...
+  const birthElement = getElementByBirthDate(birthDate);
+  const fullZodiacType = getFullZodiacType(horoscope.animal, birthElement);
+
+  return {
+    ...this.toResponseDto(horoscope),
+    birthElement,
+    birthElementEs: CHINESE_ELEMENTS_MAP_ES[birthElement],
+    fullZodiacType,
+  };
+  ```
+
+##### Testing Backend
+
+- [x] Test: /my-animal retorna birthElement correcto
+- [x] Test: /my-animal retorna fullZodiacType correcto
+- [x] Test: CNY edge case (usuario nacido antes de CNY)
+
+##### Frontend
+
+- [x] Actualizar tipo `ChineseHoroscope` con campos opcionales
+- [x] Agregar helper `getElementIcon()` a ChineseHoroscopeWidget
+- [x] Mostrar fullZodiacType en lugar de solo nameEs (con fallback)
+- [x] Mostrar elemento con ícono debajo del título
+
+##### Testing Frontend
+
+- [x] Test: Widget muestra fullZodiacType cuando está disponible
+- [x] Test: Widget hace fallback a nameEs cuando fullZodiacType no está disponible
+- [x] Test: Widget muestra elemento con ícono metal (⚪)
+- [x] Test: Widget muestra elemento con ícono fire (🔴)
+- [x] Test: Widget muestra elemento con ícono earth (🟤)
+- [x] Test: No muestra elemento cuando birthElementEs no está disponible
+
+---
+
+#### 🎯 Criterios de Aceptación
+
+- [x] Endpoint /my-animal retorna birthElement, birthElementEs, fullZodiacType
+- [x] Widget del dashboard muestra "Dragón de Tierra" en lugar de solo "Dragón"
+- [x] Widget muestra elemento con ícono de color
+- [x] Backward compatible (campos opcionales)
+- [x] Tests cubren nuevos campos
+- [x] Coverage >80%
+
+---
+
+#### 📊 Resultados
+
+**Backend:**
+
+- Tests: 26/26 pasando (3 nuevos tests para Wu Xing en /my-animal)
+- Format: ✅ Sin cambios
+- Lint: ✅ Limpio
+- Build: ✅ Exitoso
+- Architecture Validation: ✅ Pasada
+
+**Frontend:**
+
+- Tests: 25/25 pasando (6 nuevos tests para Wu Xing)
+- Format: ✅ Sin cambios
+- Lint: ✅ Limpio
+- Type-check: ✅ Sin errores
+- Build: ✅ Exitoso
+- Architecture Validation: ✅ Pasada
+
+**Coverage:** 100% en nuevos campos y funcionalidad
+
+---
+
+#### 📎 Notas para el Agente IA
+
+> **IMPORTANTE:**
+>
+> - Reutilizar funciones existentes: `getElementByBirthDate`, `getFullZodiacType`, `CHINESE_ELEMENTS_MAP_ES`
+> - Reutilizar `getElementIcon()` del AnimalCalculator (moverlo a utils o copiar)
+> - Los campos son OPCIONALES en el DTO porque otros endpoints que usan el mismo DTO no los tienen
+> - Solo el endpoint `/my-animal` tendrá estos campos (porque tiene acceso al birthDate del usuario)
 
 ---
 
@@ -2626,9 +2781,279 @@ Día 7-8 (HU-HCH-005 - Elemento Wu Xing):
 ├── TASK-120: Actualizar DTO (0.25d)
 ├── TASK-121: Actualizar controller (0.5d)
 └── TASK-122: Actualizar frontend (0.5d)
+
+Día 8 (Bug Fix):
+└── TASK-123: Agregar Wu Xing a /my-animal (0.5d)
+
+Día 9-13 (HU-HCH-006 - Horóscopos por Animal/Elemento):
+├── TASK-124: Modificar schema DB para 60 horóscopos (0.5d)
+├── TASK-125: Actualizar generador AI para 60 variantes (1d)
+├── TASK-126: Crear endpoint /chinese-horoscope/:animal/:element (0.5d)
+├── TASK-127: Actualizar página /horoscopo-chino con selector (1d)
+├── TASK-128: Actualizar página /horoscopo-chino/[animal] (1d)
+└── TASK-129: Integrar calculador con navegación (0.5d)
 ```
 
-**Total:** 4-5 días (MVP), 5.5 días (con automatización), 7 días (con Wu Xing)
+**Total:** 4-5 días (MVP), 5.5 días (con automatización), 7 días (con Wu Xing), 11.5 días (con Horóscopos Animal/Elemento)
+
+---
+
+## HU-HCH-006: Horóscopos Personalizados por Animal/Elemento
+
+**Prioridad:** 🟡 MEDIA  
+**Estimación Total:** 4.5 días  
+**Estado:** 📋 PENDIENTE
+
+---
+
+### 📋 Descripción
+
+Implementar horóscopos anuales completos para las 60 combinaciones de animal/elemento del zodiaco chino (12 animales × 5 elementos Wu Xing), siguiendo el enfoque profesional de la astrología china (BaZi).
+
+**Principio Base:**
+> "No existe un Dragón genérico. Existen 5 Dragones diferentes, y cada uno tiene un destino distinto."
+
+---
+
+### 🎯 Objetivos
+
+1. Generar 60 horóscopos anuales (no 12)
+2. Siempre requerir fecha/año de nacimiento para consultas
+3. Mostrar horóscopo personalizado animal/elemento
+4. Eliminar concepto de "elemento base" en horóscopos
+
+---
+
+### 📐 Flujo UX Profesional
+
+```
+/horoscopo-chino
+├── Usuario logueado con birthDate → Muestra SU card destacada + 11 animales
+├── Usuario sin birthDate → "Ingresa tu fecha para descubrir tu signo"
+└── Quiero ver otro animal → "¿Para quién consultas? Ingresa el año de nacimiento"
+
+/horoscopo-chino/[animal]
+├── Es MI animal → Muestra MI horóscopo (animal + MI elemento)
+└── Es OTRO animal → Pide año: "¿En qué año nació esta persona?"
+                      → Muestra horóscopo de ese animal + elemento calculado
+```
+
+---
+
+### ✅ Tareas
+
+---
+
+### TASK-124: Modificar schema DB para 60 horóscopos
+
+**Módulo:** `backend`  
+**Prioridad:** 🔴 ALTA  
+**Estimación:** 0.5 días  
+**Dependencias:** Ninguna  
+**Estado:** 📋 PENDIENTE
+
+#### Descripción
+Modificar la entidad `ChineseHoroscope` para soportar la combinación animal + elemento como clave única en lugar de solo animal.
+
+#### Tareas Específicas
+
+- [ ] Agregar campo `element` (ChineseElement enum) a entidad ChineseHoroscope
+- [ ] Cambiar constraint unique de `(animal, year)` a `(animal, element, year)`
+- [ ] Crear migración para nuevo schema
+- [ ] Actualizar repository con métodos `findByAnimalElementAndYear`
+- [ ] Tests para nueva estructura
+
+#### Criterios de Aceptación
+- [ ] Entidad soporta 60 registros por año (12 × 5)
+- [ ] Migración ejecuta sin errores
+- [ ] Tests cubren nuevos métodos
+
+---
+
+### TASK-125: Actualizar generador AI para 60 variantes
+
+**Módulo:** `backend`  
+**Prioridad:** 🔴 ALTA  
+**Estimación:** 1 día  
+**Dependencias:** TASK-124  
+**Estado:** 📋 PENDIENTE
+
+#### Descripción
+Modificar el servicio de generación para crear horóscopos personalizados para cada combinación animal/elemento.
+
+#### Tareas Específicas
+
+- [ ] Actualizar prompt de IA para incluir elemento del usuario
+- [ ] Modificar `generateAllHoroscopes` para generar 60 variantes
+- [ ] Agregar batch processing con delays (evitar rate limits)
+- [ ] Incluir interacción elemento nacimiento vs elemento del año en prompt
+- [ ] Actualizar admin command para regeneración masiva
+- [ ] Tests para generación de múltiples elementos
+
+#### Prompt Context Adicional
+```
+El usuario es un {animal} de {elemento}.
+El año {año} es un año de {elemento_año}.
+Considera la interacción entre {elemento} y {elemento_año}:
+- Ciclo productivo: Madera→Fuego→Tierra→Metal→Agua→Madera
+- Ciclo destructivo: Madera→Tierra→Agua→Fuego→Metal→Madera
+```
+
+#### Criterios de Aceptación
+- [ ] Se generan 60 horóscopos por año
+- [ ] Cada horóscopo menciona la interacción de elementos
+- [ ] Rate limiting respetado (60 calls con delays)
+
+---
+
+### TASK-126: Crear endpoint /chinese-horoscope/:animal/:element
+
+**Módulo:** `backend`  
+**Prioridad:** 🔴 ALTA  
+**Estimación:** 0.5 días  
+**Dependencias:** TASK-124  
+**Estado:** 📋 PENDIENTE
+
+#### Descripción
+Crear nuevo endpoint para obtener horóscopo por animal y elemento específico.
+
+#### Tareas Específicas
+
+- [ ] Crear endpoint `GET /chinese-horoscope/:animal/:element`
+- [ ] Validar animal y element con enums
+- [ ] Retornar 404 si no existe para ese año
+- [ ] Mantener backward compatibility con endpoint actual (deprecar gradualmente)
+- [ ] Documentar en Swagger
+- [ ] Tests de integración
+
+#### API Contract
+```typescript
+GET /chinese-horoscope/dragon/earth?year=2026
+
+Response:
+{
+  id: 42,
+  animal: "dragon",
+  element: "earth",
+  animalEs: "Dragón",
+  elementEs: "Tierra",
+  fullZodiacType: "Dragón de Tierra",
+  year: 2026,
+  generalOverview: "...",
+  areas: {...}
+}
+```
+
+#### Criterios de Aceptación
+- [ ] Endpoint retorna horóscopo específico
+- [ ] Validación de parámetros correcta
+- [ ] Swagger documentado
+- [ ] Tests cubren casos válidos e inválidos
+
+---
+
+### TASK-127: Actualizar página /horoscopo-chino con selector
+
+**Módulo:** `frontend`  
+**Prioridad:** 🟡 MEDIA  
+**Estimación:** 1 día  
+**Dependencias:** TASK-126  
+**Estado:** 📋 PENDIENTE
+
+#### Descripción
+Rediseñar la página principal de horóscopo chino para que siempre solicite fecha/año antes de mostrar un horóscopo.
+
+#### Tareas Específicas
+
+- [ ] Usuario logueado con birthDate: destacar SU card animal/elemento
+- [ ] Usuario sin birthDate: mostrar calculador prominente
+- [ ] Click en otro animal: abrir modal/form para ingresar año
+- [ ] Actualizar ChineseAnimalSelector con indicador visual del animal propio
+- [ ] Agregar YearSelectorModal component
+- [ ] Tests para todos los flujos
+
+#### Mockup UX
+```
+┌─────────────────────────────────────────────┐
+│  🐴 Tu Horóscopo: Caballo de Tierra 2026    │ ← Destacado
+│  [Ver mi horóscopo completo]                │
+├─────────────────────────────────────────────┤
+│  Explora otros signos                       │
+│  🐀 🐂 🐅 🐇 🐉 🐍 🐴 🐑 🐒 🐓 🐕 🐖      │
+│  ↑ Click abre modal: "¿Año de nacimiento?"  │
+└─────────────────────────────────────────────┘
+```
+
+#### Criterios de Aceptación
+- [ ] Usuario ve su animal/elemento destacado
+- [ ] Modal de año funciona correctamente
+- [ ] Navegación fluida entre animales
+- [ ] Tests cubren flujos principales
+
+---
+
+### TASK-128: Actualizar página /horoscopo-chino/[animal]
+
+**Módulo:** `frontend`  
+**Prioridad:** 🟡 MEDIA  
+**Estimación:** 1 día  
+**Dependencias:** TASK-126, TASK-127  
+**Estado:** 📋 PENDIENTE
+
+#### Descripción
+Modificar la página de detalle para mostrar horóscopo específico animal/elemento, solicitando año si no es el animal del usuario.
+
+#### Tareas Específicas
+
+- [ ] Si es MI animal: mostrar horóscopo de MI elemento directamente
+- [ ] Si es OTRO animal: mostrar selector de año antes del contenido
+- [ ] Crear componente YearInputBanner para pedir año
+- [ ] Actualizar URL a `/horoscopo-chino/[animal]?element=[element]` o `/horoscopo-chino/[animal]/[element]`
+- [ ] Mantener persistencia del año seleccionado (sessionStorage)
+- [ ] Tests para ambos flujos
+
+#### Flujo
+```
+/horoscopo-chino/dragon (no es mi animal)
+├── Banner: "¿En qué año nació la persona?"
+├── Input: [1988] → Calcular → "Dragón de Tierra"
+└── Muestra horóscopo de Dragón de Tierra 2026
+
+/horoscopo-chino/horse (es mi animal, soy Caballo de Tierra)
+└── Muestra horóscopo de Caballo de Tierra 2026 directamente
+```
+
+#### Criterios de Aceptación
+- [ ] Mi animal muestra mi horóscopo directo
+- [ ] Otro animal pide año primero
+- [ ] Navegación funcional
+- [ ] Tests cubren casos
+
+---
+
+### TASK-129: Integrar calculador con navegación a horóscopo
+
+**Módulo:** `frontend`  
+**Prioridad:** 🟢 BAJA  
+**Estimación:** 0.5 días  
+**Dependencias:** TASK-128  
+**Estado:** 📋 PENDIENTE
+
+#### Descripción
+Conectar el AnimalCalculator con navegación directa al horóscopo completo del animal/elemento calculado.
+
+#### Tareas Específicas
+
+- [ ] Agregar botón "Ver tu horóscopo completo" al resultado del calculador
+- [ ] Navegar a `/horoscopo-chino/[animal]?element=[element]`
+- [ ] Pasar elemento calculado como query param
+- [ ] Para usuario anónimo: persistir fecha en sessionStorage
+- [ ] Tests de integración
+
+#### Criterios de Aceptación
+- [ ] Calculador conecta con página de horóscopo
+- [ ] Elemento se pasa correctamente
+- [ ] Navegación fluida
 
 ---
 
@@ -2644,6 +3069,10 @@ Día 7-8 (HU-HCH-005 - Elemento Wu Xing):
 - [x] TASK-119: Exportar getElementByYear y helpers (HU-HCH-005)
 - [x] TASK-120: Actualizar DTO CalculateAnimalResponseDto (HU-HCH-005)
 - [x] TASK-121: Actualizar controller con elemento (HU-HCH-005)
+- [x] TASK-123: Agregar Wu Xing a /my-animal (Bug Fix)
+- [ ] TASK-124: Modificar schema DB para 60 horóscopos (HU-HCH-006)
+- [ ] TASK-125: Actualizar generador AI para 60 variantes (HU-HCH-006)
+- [ ] TASK-126: Crear endpoint /:animal/:element (HU-HCH-006)
 
 ### Frontend
 
@@ -2651,6 +3080,9 @@ Día 7-8 (HU-HCH-005 - Elemento Wu Xing):
 - [x] TASK-116: Componentes UI
 - [x] TASK-117: Páginas
 - [x] TASK-122: Mostrar elemento en UI (HU-HCH-005)
+- [ ] TASK-127: Actualizar página /horoscopo-chino (HU-HCH-006)
+- [ ] TASK-128: Actualizar página /horoscopo-chino/[animal] (HU-HCH-006)
+- [ ] TASK-129: Integrar calculador con navegación (HU-HCH-006)
 
 ### Infraestructura
 

@@ -184,7 +184,16 @@ export class ChineseHoroscopeController {
       // Ignorar errores silenciosamente
     });
 
-    return this.toResponseDto(horoscope);
+    // Calcular campos Wu Xing basados en la fecha de nacimiento del usuario
+    const birthElement = getElementByBirthDate(birthDate);
+    const fullZodiacType = getFullZodiacType(horoscope.animal, birthElement);
+
+    return {
+      ...this.toResponseDto(horoscope),
+      birthElement,
+      birthElementEs: CHINESE_ELEMENTS_MAP_ES[birthElement],
+      fullZodiacType,
+    };
   }
 
   /**

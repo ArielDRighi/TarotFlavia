@@ -313,6 +313,53 @@ describe('ChineseHoroscopeController', () => {
         controller.getMyAnimalHoroscope(currentUser, invalidYear),
       ).rejects.toThrow(BadRequestException);
     });
+
+    it('should include Wu Xing fields in response', async () => {
+      const currentUser = { userId: 1 };
+      usersService.findById.mockResolvedValue(mockUser as any);
+      chineseService.findForUser.mockResolvedValue(mockChineseHoroscope);
+
+      const result = await controller.getMyAnimalHoroscope(currentUser);
+
+      // mockUser.birthDate = '1988-03-15' → Dragón de Tierra (dígito 8)
+      expect(result.birthElement).toBe('earth');
+      expect(result.birthElementEs).toBe('Tierra');
+      expect(result.fullZodiacType).toBe('Dragón de Tierra');
+    });
+
+    it('should calculate correct Wu Xing for user born before CNY', async () => {
+      const currentUser = { userId: 1 };
+      // Usuario nacido 15 Ene 1988, antes del CNY (17 Feb) → año chino 1987, Conejo de Fuego
+      const userBeforeCNY = { ...mockUser, birthDate: '1988-01-15' };
+      // Mock horóscopo de Conejo para este usuario
+      const rabbitHoroscope = {
+        ...mockChineseHoroscope,
+        animal: ChineseZodiacAnimal.RABBIT,
+      };
+      usersService.findById.mockResolvedValue(userBeforeCNY as any);
+      chineseService.findForUser.mockResolvedValue(rabbitHoroscope);
+
+      const result = await controller.getMyAnimalHoroscope(currentUser);
+
+      // Año chino 1987 (dígito 7) → Fuego
+      expect(result.birthElement).toBe('fire');
+      expect(result.birthElementEs).toBe('Fuego');
+      expect(result.fullZodiacType).toBe('Conejo de Fuego');
+    });
+
+    it('should calculate correct Wu Xing for year ending in 0 (Metal)', async () => {
+      const currentUser = { userId: 1 };
+      // Usuario nacido en 2000 → Dragón de Metal
+      const userYear2000 = { ...mockUser, birthDate: '2000-03-15' };
+      usersService.findById.mockResolvedValue(userYear2000 as any);
+      chineseService.findForUser.mockResolvedValue(mockChineseHoroscope);
+
+      const result = await controller.getMyAnimalHoroscope(currentUser);
+
+      expect(result.birthElement).toBe('metal');
+      expect(result.birthElementEs).toBe('Metal');
+      expect(result.fullZodiacType).toBe('Dragón de Metal');
+    });
   });
 
   describe('generateForYear', () => {
