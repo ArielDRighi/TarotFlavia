@@ -116,6 +116,10 @@ describe('ChineseHoroscopeController', () => {
 
       expect(result.animal).toBe(ChineseZodiacAnimal.RABBIT);
       expect(result.chineseYear).toBe(1988); // Still 1988 as the year
+      // Verificar que el elemento también se ajusta al año chino correcto (1987)
+      expect(result.birthElement).toBe('fire'); // 1987 termina en 7 → Fuego
+      expect(result.birthElementEs).toBe('Fuego');
+      expect(result.fullZodiacType).toBe('Conejo de Fuego');
     });
 
     it('should throw BadRequestException for invalid date format', () => {
@@ -124,6 +128,38 @@ describe('ChineseHoroscopeController', () => {
       expect(() => controller.calculateAnimal(dto)).toThrow(
         BadRequestException,
       );
+    });
+
+    it('should calculate correct element for year ending in 0 (Metal)', () => {
+      const dto = { birthDate: '2000-03-15' }; // Después del CNY 2000 (5 de febrero)
+
+      const result = controller.calculateAnimal(dto);
+
+      expect(result.animal).toBe(ChineseZodiacAnimal.DRAGON);
+      expect(result.birthElement).toBe('metal'); // 2000 termina en 0 → Metal
+      expect(result.birthElementEs).toBe('Metal');
+      expect(result.fullZodiacType).toBe('Dragón de Metal');
+    });
+
+    it('should calculate correct element for year ending in 4 (Madera)', () => {
+      const dto = { birthDate: '2024-03-15' }; // Después del CNY 2024 (10 de febrero)
+
+      const result = controller.calculateAnimal(dto);
+
+      expect(result.animal).toBe(ChineseZodiacAnimal.DRAGON);
+      expect(result.birthElement).toBe('wood'); // 2024 termina en 4 → Madera
+      expect(result.birthElementEs).toBe('Madera');
+      expect(result.fullZodiacType).toBe('Dragón de Madera');
+    });
+
+    it('should include fixedElement from animal info', () => {
+      const dto = { birthDate: '2000-03-15' }; // Dragón de Metal
+
+      const result = controller.calculateAnimal(dto);
+
+      expect(result.fixedElement).toBe('earth'); // Dragón tiene elemento fijo Tierra
+      expect(result.birthElement).toBe('metal'); // Pero el año 2000 es Metal
+      // Esto demuestra la diferencia entre elemento fijo del animal vs elemento del año
     });
   });
 
