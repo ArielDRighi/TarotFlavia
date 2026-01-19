@@ -85,12 +85,12 @@ export class ChineseHoroscopeResponseDto {
 
   @ApiProperty({
     description: 'Predicciones por área de vida',
-    type: () => ({
-      love: ChineseHoroscopeAreaDto,
-      career: ChineseHoroscopeAreaDto,
-      wellness: ChineseHoroscopeAreaDto,
-      finance: ChineseHoroscopeAreaDto,
-    }),
+    example: {
+      love: { content: 'El amor florecerá...', score: 8 },
+      career: { content: 'Oportunidades laborales...', score: 7 },
+      wellness: { content: 'Energía vital elevada...', score: 9 },
+      finance: { content: 'Estabilidad financiera...', score: 6 },
+    },
   })
   areas: {
     love: ChineseHoroscopeAreaDto;
