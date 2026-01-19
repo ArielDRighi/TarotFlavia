@@ -93,7 +93,7 @@ export function AnimalCalculator({ onAnimalFound, className }: AnimalCalculatorP
           <span className="text-5xl">{CHINESE_ZODIAC_INFO[data.animal].emoji}</span>
           <p className="mt-2 font-serif text-xl">Eres {data.animalInfo.nameEs}</p>
           <p className="text-muted-foreground text-sm">Año chino: {data.chineseYear}</p>
-          <p className="text-muted-foreground mt-1 text-xs">Elemento: {data.animalInfo.element}</p>
+          {/* TODO: Mostrar birthElement cuando TASK-119-121 estén implementadas */}
           <div className="mt-2 flex flex-wrap justify-center gap-1">
             {data.animalInfo.characteristics.map((char) => (
               <span
