@@ -3036,7 +3036,7 @@ if (i > 0) {
 **Prioridad:** 🔴 ALTA  
 **Estimación:** 0.5 días  
 **Dependencias:** TASK-124  
-**Estado:** 📋 PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 #### Descripción
 
@@ -3044,17 +3044,17 @@ Crear nuevo endpoint para obtener horóscopo por animal y elemento específico.
 
 #### Tareas Específicas
 
-- [ ] Crear endpoint `GET /chinese-horoscope/:animal/:element`
-- [ ] Validar animal y element con enums
-- [ ] Retornar 404 si no existe para ese año
-- [ ] Mantener backward compatibility con endpoint actual (deprecar gradualmente)
-- [ ] Documentar en Swagger
-- [ ] Tests de integración
+- [x] Crear endpoint `GET /chinese-horoscope/:year/:animal/:element`
+- [x] Validar animal y element con enums
+- [x] Retornar 404 si no existe para ese año
+- [x] Mantener backward compatibility con endpoint actual (deprecar gradualmente)
+- [x] Documentar en Swagger
+- [x] Tests de integración
 
 #### API Contract
 
 ```typescript
-GET /chinese-horoscope/dragon/earth?year=2026
+GET /chinese-horoscope/2026/dragon/earth
 
 Response:
 {
@@ -3072,10 +3072,10 @@ Response:
 
 #### Criterios de Aceptación
 
-- [ ] Endpoint retorna horóscopo específico
-- [ ] Validación de parámetros correcta
-- [ ] Swagger documentado
-- [ ] Tests cubren casos válidos e inválidos
+- [x] Endpoint retorna horóscopo específico
+- [x] Validación de parámetros correcta
+- [x] Swagger documentado
+- [x] Tests cubren casos válidos e inválidos
 
 ---
 
