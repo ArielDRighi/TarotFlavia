@@ -1,26 +1,44 @@
+/**
+ * Chinese Horoscope Animal Detail Page
+ *
+ * Página de detalle para un animal del zodiaco chino específico
+ * - Si es MI animal (usuario autenticado): muestra horóscopo directamente
+ * - Si es OTRO animal: solicita año para calcular elemento
+ *
+ * All business logic is encapsulated in useAnimalHoroscopePage hook.
+ */
+
 'use client';
 
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   ChineseHoroscopeDetail,
   ChineseAnimalSelector,
+  YearInputBanner,
 } from '@/components/features/chinese-horoscope';
-import { useChineseHoroscope } from '@/hooks/api/useChineseHoroscope';
-import { CHINESE_ZODIAC_INFO } from '@/lib/utils/chinese-zodiac';
+import { useAnimalHoroscopePage } from '@/hooks/utils/useAnimalHoroscopePage';
 import { ROUTES } from '@/lib/constants/routes';
-import { ChineseZodiacAnimal } from '@/types/chinese-horoscope.types';
 
 export default function ChineseHoroscopeAnimalPage() {
-  const params = useParams();
   const router = useRouter();
-  const currentYear = new Date().getFullYear();
+  const {
+    animal,
+    isValidAnimal,
+    animalInfo,
+    userAnimal,
+    isMyAnimal,
+    element,
+    horoscopeData,
+    isLoading,
+    error,
+    currentYear,
+    handleYearSubmit,
+  } = useAnimalHoroscopePage();
 
-  const animal = params.animal as ChineseZodiacAnimal;
-  const { data, isLoading, error } = useChineseHoroscope(currentYear, animal);
-
-  if (!CHINESE_ZODIAC_INFO[animal]) {
+  // Invalid animal - show error
+  if (!isValidAnimal || !animalInfo) {
     return (
       <div className="container mx-auto px-4 py-8 text-center">
         <h1 className="mb-4 text-2xl">Animal no válido</h1>
@@ -44,20 +62,33 @@ export default function ChineseHoroscopeAnimalPage() {
       <div className="mb-8 overflow-x-auto pb-2">
         <ChineseAnimalSelector
           selectedAnimal={animal}
-          onSelect={(a) => router.push(ROUTES.HOROSCOPO_CHINO_ANIMAL(a))}
+          userAnimal={userAnimal}
+          onSelect={(a) => {
+            router.push(ROUTES.HOROSCOPO_CHINO_ANIMAL(a));
+          }}
           className="!grid-cols-6 lg:!grid-cols-12"
         />
       </div>
 
-      {isLoading ? (
-        <div className="py-8 text-center">Cargando...</div>
-      ) : error ? (
-        <div className="py-8 text-center">
-          <p className="text-muted-foreground">Horóscopo no disponible para {currentYear}</p>
-        </div>
-      ) : data ? (
-        <ChineseHoroscopeDetail horoscope={data} />
-      ) : null}
+      {/* If NOT my animal and NO element, show YearInputBanner */}
+      {!isMyAnimal && !element && (
+        <YearInputBanner onYearSubmit={handleYearSubmit} animalName={animalInfo.nameEs} />
+      )}
+
+      {/* Show horoscope when available */}
+      {element && (
+        <>
+          {isLoading ? (
+            <div className="py-8 text-center">Cargando horóscopo...</div>
+          ) : error ? (
+            <div className="py-8 text-center">
+              <p className="text-muted-foreground">Horóscopo no disponible para {currentYear}</p>
+            </div>
+          ) : horoscopeData ? (
+            <ChineseHoroscopeDetail horoscope={horoscopeData} />
+          ) : null}
+        </>
+      )}
     </div>
   );
 }

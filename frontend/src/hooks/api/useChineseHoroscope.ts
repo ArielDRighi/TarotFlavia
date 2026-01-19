@@ -12,8 +12,9 @@ import {
   getMyAnimalHoroscope,
   getChineseHoroscopesByYear,
   getChineseHoroscope,
+  getChineseHoroscopeByElement,
 } from '@/lib/api/chinese-horoscope-api';
-import type { ChineseZodiacAnimal } from '@/types/chinese-horoscope.types';
+import type { ChineseZodiacAnimal, ChineseElementCode } from '@/types/chinese-horoscope.types';
 
 export const chineseHoroscopeKeys = {
   all: ['chinese-horoscope'] as const,
@@ -21,6 +22,8 @@ export const chineseHoroscopeKeys = {
   byYear: (year: number) => [...chineseHoroscopeKeys.all, year] as const,
   byAnimal: (year: number, animal: ChineseZodiacAnimal) =>
     [...chineseHoroscopeKeys.all, year, animal] as const,
+  byAnimalElement: (year: number, animal: ChineseZodiacAnimal, element: ChineseElementCode) =>
+    [...chineseHoroscopeKeys.all, year, animal, element] as const,
   calculate: (birthDate: string) => [...chineseHoroscopeKeys.all, 'calculate', birthDate] as const,
 } as const;
 
@@ -40,13 +43,15 @@ export function useCalculateAnimal(birthDate: string | null) {
 /**
  * Hook para obtener el horóscopo chino del usuario autenticado
  * @param year Año del horóscopo (opcional)
+ * @param options Opciones del hook (enabled para habilitar/deshabilitar la query)
  */
-export function useMyAnimalHoroscope(year?: number) {
+export function useMyAnimalHoroscope(year?: number, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: chineseHoroscopeKeys.myAnimal(year),
     queryFn: () => getMyAnimalHoroscope(year),
     staleTime: 1000 * 60 * 60 * 24, // 24 horas (es anual)
     retry: false,
+    enabled: options?.enabled ?? true,
   });
 }
 
@@ -72,6 +77,25 @@ export function useChineseHoroscope(year: number, animal: ChineseZodiacAnimal | 
     queryKey: chineseHoroscopeKeys.byAnimal(year, animal!),
     queryFn: () => getChineseHoroscope(year, animal!),
     enabled: !!animal,
+    staleTime: 1000 * 60 * 60 * 24, // 24 horas
+  });
+}
+
+/**
+ * Hook para obtener un horóscopo chino por animal y elemento
+ * @param year Año del horóscopo
+ * @param animal Animal del zodiaco
+ * @param element Elemento Wu Xing
+ */
+export function useChineseHoroscopeByElement(
+  year: number,
+  animal: ChineseZodiacAnimal | null,
+  element: ChineseElementCode | null
+) {
+  return useQuery({
+    queryKey: chineseHoroscopeKeys.byAnimalElement(year, animal!, element!),
+    queryFn: () => getChineseHoroscopeByElement(year, animal!, element!),
+    enabled: !!animal && !!element,
     staleTime: 1000 * 60 * 60 * 24, // 24 horas
   });
 }

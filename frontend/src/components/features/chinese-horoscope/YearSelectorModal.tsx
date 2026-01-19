@@ -7,7 +7,7 @@
 
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -69,22 +69,18 @@ export function YearSelectorModal({
   const currentYear = new Date().getFullYear();
   const MIN_YEAR = 1900;
 
-  // Reset input when modal closes using effect
-  // Justification for eslint-disable: The Dialog component doesn't provide
-  // a clean onClose callback, only onOpenChange which fires on both open and close.
-  // We need to detect the close transition to reset form state. This is a controlled
-  // cleanup operation, not a cascading update.
-  const prevOpen = useRef(open);
-  useEffect(() => {
-    // Only reset when modal transitions from open to closed
-    if (prevOpen.current && !open) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setYear('');
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setError('');
-    }
-    prevOpen.current = open;
-  }, [open]);
+  // Wrap onOpenChange to reset form when modal closes
+  const handleOpenChange = useCallback(
+    (newOpen: boolean) => {
+      if (!newOpen) {
+        // Reset form state when closing
+        setYear('');
+        setError('');
+      }
+      onOpenChange(newOpen);
+    },
+    [onOpenChange]
+  );
 
   const validateYear = (yearValue: string): boolean => {
     if (!yearValue) {
@@ -118,18 +114,18 @@ export function YearSelectorModal({
     if (validateYear(year)) {
       const yearNum = parseInt(year, 10);
       onConfirm(yearNum);
-      onOpenChange(false);
+      handleOpenChange(false);
     }
   };
 
   const handleCancel = () => {
-    onOpenChange(false);
+    handleOpenChange(false);
   };
 
   const isYearValid = year !== '' && !error;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent data-testid="year-selector-modal">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
