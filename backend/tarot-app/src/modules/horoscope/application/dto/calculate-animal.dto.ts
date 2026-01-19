@@ -48,4 +48,28 @@ export class CalculateAnimalResponseDto {
     example: 1988,
   })
   chineseYear: number;
+
+  @ApiProperty({
+    description: 'Elemento del año de nacimiento (Wu Xing)',
+    example: 'earth',
+  })
+  birthElement: string;
+
+  @ApiProperty({
+    description: 'Nombre del elemento en español',
+    example: 'Tierra',
+  })
+  birthElementEs: string;
+
+  @ApiProperty({
+    description: 'Elemento fijo/natural del animal',
+    example: 'earth',
+  })
+  fixedElement: string;
+
+  @ApiProperty({
+    description: 'Identidad zodiacal completa',
+    example: 'Dragón de Tierra',
+  })
+  fullZodiacType: string;
 }
