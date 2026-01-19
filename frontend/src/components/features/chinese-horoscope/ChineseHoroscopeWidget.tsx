@@ -8,27 +8,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMyAnimalHoroscope } from '@/hooks/api/useChineseHoroscope';
-import { CHINESE_ZODIAC_INFO, getCurrentYear } from '@/lib/utils/chinese-zodiac';
-
-/**
- * Helper function to get element icon based on Wu Xing element code
- */
-function getElementIcon(element: string): string {
-  switch (element) {
-    case 'metal':
-      return '⚪';
-    case 'water':
-      return '🔵';
-    case 'wood':
-      return '🟢';
-    case 'fire':
-      return '🔴';
-    case 'earth':
-      return '🟤';
-    default:
-      return '⭐';
-  }
-}
+import { CHINESE_ZODIAC_INFO, getCurrentYear, getElementIcon } from '@/lib/utils/chinese-zodiac';
 
 /**
  * ChineseHoroscopeWidget Component

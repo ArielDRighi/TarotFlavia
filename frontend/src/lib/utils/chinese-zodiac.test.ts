@@ -8,6 +8,7 @@ import {
   getCurrentYear,
   getAllChineseZodiacAnimals,
   getAllChineseZodiacInfo,
+  getElementIcon,
   CHINESE_ZODIAC_INFO,
 } from '@/lib/utils/chinese-zodiac';
 import { ChineseZodiacAnimal } from '@/types/chinese-horoscope.types';
@@ -188,6 +189,39 @@ describe('chinese zodiac utilities', () => {
         expect(info.characteristics.length).toBeGreaterThan(0);
         expect(info.characteristics.length).toBeLessThanOrEqual(5);
       });
+    });
+  });
+
+  describe('getElementIcon', () => {
+    it('should return correct icon for metal', () => {
+      expect(getElementIcon('metal')).toBe('⚪');
+    });
+
+    it('should return correct icon for water', () => {
+      expect(getElementIcon('water')).toBe('🔵');
+    });
+
+    it('should return correct icon for wood', () => {
+      expect(getElementIcon('wood')).toBe('🟢');
+    });
+
+    it('should return correct icon for fire', () => {
+      expect(getElementIcon('fire')).toBe('🔴');
+    });
+
+    it('should return correct icon for earth', () => {
+      expect(getElementIcon('earth')).toBe('🟤');
+    });
+
+    it('should be case insensitive', () => {
+      expect(getElementIcon('METAL')).toBe('⚪');
+      expect(getElementIcon('Water')).toBe('🔵');
+      expect(getElementIcon('EARTH')).toBe('🟤');
+    });
+
+    it('should return fallback icon for unknown element', () => {
+      expect(getElementIcon('unknown')).toBe('⭕');
+      expect(getElementIcon('')).toBe('⭕');
     });
   });
 });

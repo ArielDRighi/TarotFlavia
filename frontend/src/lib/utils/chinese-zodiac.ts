@@ -134,3 +134,34 @@ export function getAllChineseZodiacAnimals(): ChineseZodiacAnimal[] {
 export function getAllChineseZodiacInfo(): ChineseZodiacInfo[] {
   return Object.values(CHINESE_ZODIAC_INFO);
 }
+
+/**
+ * Elemento icons para Wu Xing (5 elementos chinos)
+ */
+const ELEMENT_ICONS: Record<string, string> = {
+  metal: '⚪',
+  water: '🔵',
+  wood: '🟢',
+  fire: '🔴',
+  earth: '🟤',
+};
+
+/**
+ * Obtiene el ícono emoji para un elemento Wu Xing
+ * @param element - Código del elemento (metal, water, wood, fire, earth)
+ * @returns Emoji del elemento o fallback ⭕ si no se reconoce
+ */
+export function getElementIcon(element: string): string {
+  const key = element.toLowerCase();
+  const icon = ELEMENT_ICONS[key];
+
+  if (icon) {
+    return icon;
+  }
+
+  if (process.env.NODE_ENV === 'development') {
+    console.warn(`Unknown Chinese element in getElementIcon: "${element}"`);
+  }
+
+  return '⭕';
+}

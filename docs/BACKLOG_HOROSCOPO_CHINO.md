@@ -2811,6 +2811,7 @@ Día 9-13 (HU-HCH-006 - Horóscopos por Animal/Elemento):
 Implementar horóscopos anuales completos para las 60 combinaciones de animal/elemento del zodiaco chino (12 animales × 5 elementos Wu Xing), siguiendo el enfoque profesional de la astrología china (BaZi).
 
 **Principio Base:**
+
 > "No existe un Dragón genérico. Existen 5 Dragones diferentes, y cada uno tiene un destino distinto."
 
 ---
@@ -2853,6 +2854,7 @@ Implementar horóscopos anuales completos para las 60 combinaciones de animal/el
 **Estado:** 📋 PENDIENTE
 
 #### Descripción
+
 Modificar la entidad `ChineseHoroscope` para soportar la combinación animal + elemento como clave única en lugar de solo animal.
 
 #### Tareas Específicas
@@ -2864,6 +2866,7 @@ Modificar la entidad `ChineseHoroscope` para soportar la combinación animal + e
 - [ ] Tests para nueva estructura
 
 #### Criterios de Aceptación
+
 - [ ] Entidad soporta 60 registros por año (12 × 5)
 - [ ] Migración ejecuta sin errores
 - [ ] Tests cubren nuevos métodos
@@ -2879,6 +2882,7 @@ Modificar la entidad `ChineseHoroscope` para soportar la combinación animal + e
 **Estado:** 📋 PENDIENTE
 
 #### Descripción
+
 Modificar el servicio de generación para crear horóscopos personalizados para cada combinación animal/elemento.
 
 #### Tareas Específicas
@@ -2891,6 +2895,7 @@ Modificar el servicio de generación para crear horóscopos personalizados para 
 - [ ] Tests para generación de múltiples elementos
 
 #### Prompt Context Adicional
+
 ```
 El usuario es un {animal} de {elemento}.
 El año {año} es un año de {elemento_año}.
@@ -2900,6 +2905,7 @@ Considera la interacción entre {elemento} y {elemento_año}:
 ```
 
 #### Criterios de Aceptación
+
 - [ ] Se generan 60 horóscopos por año
 - [ ] Cada horóscopo menciona la interacción de elementos
 - [ ] Rate limiting respetado (60 calls con delays)
@@ -2915,6 +2921,7 @@ Considera la interacción entre {elemento} y {elemento_año}:
 **Estado:** 📋 PENDIENTE
 
 #### Descripción
+
 Crear nuevo endpoint para obtener horóscopo por animal y elemento específico.
 
 #### Tareas Específicas
@@ -2927,6 +2934,7 @@ Crear nuevo endpoint para obtener horóscopo por animal y elemento específico.
 - [ ] Tests de integración
 
 #### API Contract
+
 ```typescript
 GET /chinese-horoscope/dragon/earth?year=2026
 
@@ -2945,6 +2953,7 @@ Response:
 ```
 
 #### Criterios de Aceptación
+
 - [ ] Endpoint retorna horóscopo específico
 - [ ] Validación de parámetros correcta
 - [ ] Swagger documentado
@@ -2961,6 +2970,7 @@ Response:
 **Estado:** 📋 PENDIENTE
 
 #### Descripción
+
 Rediseñar la página principal de horóscopo chino para que siempre solicite fecha/año antes de mostrar un horóscopo.
 
 #### Tareas Específicas
@@ -2973,6 +2983,7 @@ Rediseñar la página principal de horóscopo chino para que siempre solicite fe
 - [ ] Tests para todos los flujos
 
 #### Mockup UX
+
 ```
 ┌─────────────────────────────────────────────┐
 │  🐴 Tu Horóscopo: Caballo de Tierra 2026    │ ← Destacado
@@ -2985,6 +2996,7 @@ Rediseñar la página principal de horóscopo chino para que siempre solicite fe
 ```
 
 #### Criterios de Aceptación
+
 - [ ] Usuario ve su animal/elemento destacado
 - [ ] Modal de año funciona correctamente
 - [ ] Navegación fluida entre animales
@@ -3001,6 +3013,7 @@ Rediseñar la página principal de horóscopo chino para que siempre solicite fe
 **Estado:** 📋 PENDIENTE
 
 #### Descripción
+
 Modificar la página de detalle para mostrar horóscopo específico animal/elemento, solicitando año si no es el animal del usuario.
 
 #### Tareas Específicas
@@ -3013,6 +3026,7 @@ Modificar la página de detalle para mostrar horóscopo específico animal/eleme
 - [ ] Tests para ambos flujos
 
 #### Flujo
+
 ```
 /horoscopo-chino/dragon (no es mi animal)
 ├── Banner: "¿En qué año nació la persona?"
@@ -3024,6 +3038,7 @@ Modificar la página de detalle para mostrar horóscopo específico animal/eleme
 ```
 
 #### Criterios de Aceptación
+
 - [ ] Mi animal muestra mi horóscopo directo
 - [ ] Otro animal pide año primero
 - [ ] Navegación funcional
@@ -3040,6 +3055,7 @@ Modificar la página de detalle para mostrar horóscopo específico animal/eleme
 **Estado:** 📋 PENDIENTE
 
 #### Descripción
+
 Conectar el AnimalCalculator con navegación directa al horóscopo completo del animal/elemento calculado.
 
 #### Tareas Específicas
@@ -3051,6 +3067,7 @@ Conectar el AnimalCalculator con navegación directa al horóscopo completo del 
 - [ ] Tests de integración
 
 #### Criterios de Aceptación
+
 - [ ] Calculador conecta con página de horóscopo
 - [ ] Elemento se pasa correctamente
 - [ ] Navegación fluida
