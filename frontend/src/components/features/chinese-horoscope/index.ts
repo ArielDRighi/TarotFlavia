@@ -22,3 +22,6 @@ export type { ChineseHoroscopeDetailProps } from './ChineseHoroscopeDetail';
 export { ChineseHoroscopeSkeleton } from './ChineseHoroscopeSkeleton';
 
 export { ChineseHoroscopeWidget } from './ChineseHoroscopeWidget';
+
+export { YearSelectorModal } from './YearSelectorModal';
+export type { YearSelectorModalProps } from './YearSelectorModal';

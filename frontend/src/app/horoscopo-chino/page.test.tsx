@@ -19,10 +19,12 @@ vi.mock('next/navigation', () => ({
 // Mock hooks
 const mockUseChineseHoroscopesByYear = vi.fn();
 const mockUseCalculateAnimal = vi.fn();
+const mockUseMyAnimalHoroscope = vi.fn();
 
 vi.mock('@/hooks/api/useChineseHoroscope', () => ({
   useChineseHoroscopesByYear: () => mockUseChineseHoroscopesByYear(),
   useCalculateAnimal: () => mockUseCalculateAnimal(),
+  useMyAnimalHoroscope: () => mockUseMyAnimalHoroscope(),
 }));
 
 // Mock useAuth hook - default: authenticated user
@@ -54,6 +56,12 @@ describe('HoroscopoChinoPage', () => {
     mockPush.mockClear();
     // Default mock for useCalculateAnimal
     mockUseCalculateAnimal.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: null,
+    });
+    // Default mock for useMyAnimalHoroscope
+    mockUseMyAnimalHoroscope.mockReturnValue({
       data: undefined,
       isLoading: false,
       error: null,
@@ -91,7 +99,7 @@ describe('HoroscopoChinoPage', () => {
     expect(screen.getByTestId('chinese-animal-selector')).toBeInTheDocument();
   });
 
-  it('should navigate to animal page when clicking on an animal card', async () => {
+  it('should open year selector modal when clicking on an animal card', async () => {
     const user = userEvent.setup();
     mockUseChineseHoroscopesByYear.mockReturnValue({
       isLoading: false,
@@ -103,7 +111,8 @@ describe('HoroscopoChinoPage', () => {
     const dragonCard = screen.getByTestId('chinese-animal-dragon');
     await user.click(dragonCard);
 
-    expect(mockPush).toHaveBeenCalledWith('/horoscopo-chino/dragon');
+    // Should open modal instead of navigating directly
+    expect(screen.getByTestId('year-selector-modal')).toBeInTheDocument();
   });
 
   describe('Anonymous users (HU-HCH-001)', () => {
