@@ -2315,7 +2315,7 @@ La función `getElementForYear` ya existe pero es privada. Necesitamos:
 **Prioridad:** 🔴 ALTA  
 **Estimación:** 0.25 días (2 horas)  
 **Dependencias:** TASK-119  
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -2337,7 +2337,7 @@ Actualizar el DTO de respuesta del cálculo de animal para incluir los nuevos ca
 
 ##### Backend
 
-- [ ] Agregar nuevos campos al DTO:
+- [x] Agregar nuevos campos al DTO:
 
   ```typescript
   export class CalculateAnimalResponseDto {
@@ -2373,9 +2373,9 @@ Actualizar el DTO de respuesta del cálculo de animal para incluir los nuevos ca
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] Nuevos campos agregados al DTO
-- [ ] Decoradores Swagger correctos
-- [ ] Ejemplos reflejan datos reales
+- [x] Nuevos campos agregados al DTO
+- [x] Decoradores Swagger correctos
+- [x] Ejemplos reflejan datos reales
 
 ---
 

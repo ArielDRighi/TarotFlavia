@@ -34,6 +34,9 @@ import {
   ChineseZodiacAnimal,
   getChineseZodiacAnimal,
   getChineseZodiacInfo,
+  getElementByBirthDate,
+  getFullZodiacType,
+  CHINESE_ELEMENTS_MAP_ES,
 } from '../../../../common/utils/chinese-zodiac.utils';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
 import { AdminGuard } from '../../../auth/infrastructure/guards/admin.guard';
@@ -94,11 +97,17 @@ export class ChineseHoroscopeController {
 
     const animal = getChineseZodiacAnimal(birthDate);
     const animalInfo = getChineseZodiacInfo(animal);
+    const birthElement = getElementByBirthDate(birthDate);
+    const fullZodiacType = getFullZodiacType(animal, birthElement);
 
     return {
       animal,
       animalInfo,
       chineseYear: birthDate.getFullYear(),
+      birthElement,
+      birthElementEs: CHINESE_ELEMENTS_MAP_ES[birthElement],
+      fixedElement: animalInfo.element,
+      fullZodiacType,
     };
   }
 
