@@ -18,11 +18,12 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
  * - Los registros existentes (12 horóscopos) recibirán element='earth' por defecto
  * - Después de ejecutar esta migración, se debe regenerar los 60 horóscopos
  */
-export class AddElementToChineseHoroscopes1737276000000 implements MigrationInterface {
-  name = 'AddElementToChineseHoroscopes1737276000000';
+export class AddElementToChineseHoroscopes1771000000002 implements MigrationInterface {
+  name = 'AddElementToChineseHoroscopes1771000000002';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     // 1. Crear enum para chinese_element
+    // NOTA: Los valores deben coincidir con CHINESE_ELEMENTS en chinese-zodiac.utils.ts
     await queryRunner.query(`
       CREATE TYPE "chinese_element_enum" AS ENUM(
         'metal', 'water', 'wood', 'fire', 'earth'

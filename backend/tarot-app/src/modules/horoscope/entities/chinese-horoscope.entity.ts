@@ -9,6 +9,7 @@ import {
 import {
   ChineseZodiacAnimal,
   ChineseElement,
+  CHINESE_ELEMENTS,
 } from '../../../common/utils/chinese-zodiac.utils';
 
 /**
@@ -57,8 +58,10 @@ export class ChineseHoroscope {
    *
    * Los 5 elementos son: Metal, Agua, Madera, Fuego, Tierra
    * Ejemplo: "Dragón de Tierra" (dragon + earth), "Rata de Metal" (rat + metal)
+   *
+   * Usa la constante CHINESE_ELEMENTS para mantener sincronización con el tipo ChineseElement
    */
-  @Column({ type: 'enum', enum: ['metal', 'water', 'wood', 'fire', 'earth'] })
+  @Column({ type: 'enum', enum: CHINESE_ELEMENTS })
   element: ChineseElement;
 
   /**
