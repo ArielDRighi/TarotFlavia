@@ -286,6 +286,16 @@ describe('ChineseHoroscopeController', () => {
       ).rejects.toThrow(BadRequestException);
     });
 
+    it('should throw BadRequestException for invalid element', async () => {
+      const year = 2026;
+      const animal = ChineseZodiacAnimal.DRAGON;
+      const element = 'invalid-element';
+
+      await expect(
+        controller.getByAnimalAndElement(year, animal, element),
+      ).rejects.toThrow(BadRequestException);
+    });
+
     it('should handle different element types correctly', async () => {
       const year = 2026;
       const animal = ChineseZodiacAnimal.RAT;
