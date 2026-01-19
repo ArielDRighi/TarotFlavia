@@ -393,6 +393,30 @@ describe('chinese-zodiac.utils', () => {
       const date = new Date('2000-03-15');
       expect(getElementByBirthDate(date)).toBe('metal');
     });
+
+    it('should handle years outside CNY dates range (before 1950)', () => {
+      // 1940 → (1940 - 1900) % 10 = 40 % 10 = 0 → metal
+      const date = new Date('1940-03-15');
+      expect(getElementByBirthDate(date)).toBe('metal');
+    });
+
+    it('should handle years outside CNY dates range (after 2050)', () => {
+      // 2060 → (2060 - 1900) % 10 = 160 % 10 = 0 → metal
+      const date = new Date('2060-03-15');
+      expect(getElementByBirthDate(date)).toBe('metal');
+    });
+
+    it('should handle very early dates (1900s)', () => {
+      // 1905 → (1905 - 1900) % 10 = 5 % 10 = 5 → wood
+      const date = new Date('1905-06-15');
+      expect(getElementByBirthDate(date)).toBe('wood');
+    });
+
+    it('should handle far future dates (2100s)', () => {
+      // 2100 → (2100 - 1900) % 10 = 200 % 10 = 0 → metal
+      const date = new Date('2100-06-15');
+      expect(getElementByBirthDate(date)).toBe('metal');
+    });
   });
 
   describe('getFullZodiacType', () => {
