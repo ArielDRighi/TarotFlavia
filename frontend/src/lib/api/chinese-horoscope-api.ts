@@ -9,6 +9,7 @@ import { API_ENDPOINTS } from './endpoints';
 import type {
   ChineseHoroscope,
   ChineseZodiacAnimal,
+  ChineseElementCode,
   CalculateAnimalResponse,
 } from '@/types/chinese-horoscope.types';
 
@@ -62,6 +63,23 @@ export async function getChineseHoroscope(
 ): Promise<ChineseHoroscope> {
   const response = await apiClient.get<ChineseHoroscope>(
     API_ENDPOINTS.CHINESE_HOROSCOPE.BY_YEAR_ANIMAL(year, animal)
+  );
+  return response.data;
+}
+
+/**
+ * Obtiene un horóscopo chino específico por año, animal y elemento
+ * @param year Año del horóscopo
+ * @param animal Animal del zodiaco chino
+ * @param element Elemento Wu Xing (metal, water, wood, fire, earth)
+ */
+export async function getChineseHoroscopeByElement(
+  year: number,
+  animal: ChineseZodiacAnimal,
+  element: ChineseElementCode
+): Promise<ChineseHoroscope> {
+  const response = await apiClient.get<ChineseHoroscope>(
+    API_ENDPOINTS.CHINESE_HOROSCOPE.BY_YEAR_ANIMAL_ELEMENT(year, animal, element)
   );
   return response.data;
 }
