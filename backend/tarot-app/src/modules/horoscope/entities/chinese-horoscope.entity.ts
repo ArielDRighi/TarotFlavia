@@ -6,30 +6,41 @@ import {
   UpdateDateColumn,
   Index,
 } from 'typeorm';
-import { ChineseZodiacAnimal } from '../../../common/utils/chinese-zodiac.utils';
+import {
+  ChineseZodiacAnimal,
+  ChineseElement,
+} from '../../../common/utils/chinese-zodiac.utils';
 
 /**
  * Entidad para almacenar horóscopos chinos anuales generados por IA
  *
+ * TASK-124: Modificada para soportar 60 horóscopos por año (12 animales × 5 elementos)
+ * El horóscopo chino profesional considera el elemento del año de nacimiento (Wu Xing),
+ * no existe un "Dragón genérico", sino 5 tipos de Dragón según el elemento.
+ *
  * El horóscopo chino es anual (no diario como el occidental). Cada año se genera
- * un horóscopo completo para cada uno de los 12 animales del zodiaco chino.
+ * un horóscopo completo para cada combinación de animal + elemento del zodiaco chino.
  *
  * A diferencia del horóscopo occidental que incluye amor, bienestar y dinero,
  * el horóscopo chino incluye: amor, carrera, bienestar y finanzas.
  *
  * Características únicas:
- * - Generación anual (un registro por animal por año)
+ * - Generación anual (60 registros por año: 12 animales × 5 elementos)
  * - Incluye elementos de suerte tradicionales (números, colores, direcciones)
  * - Sistema de compatibilidad entre animales (best, good, challenging)
  * - Predicciones por áreas con scores (1-10)
  *
  * Índices:
- * - idx_chinese_animal_year: Único en (animal, year) - previene duplicados
+ * - idx_chinese_animal_element_year: Único en (animal, element, year) - previene duplicados
  * - idx_chinese_year: Permite búsquedas rápidas por año
+ * - idx_chinese_element: Permite búsquedas por elemento
  */
 @Entity('chinese_horoscopes')
-@Index('idx_chinese_animal_year', ['animal', 'year'], { unique: true })
+@Index('idx_chinese_animal_element_year', ['animal', 'element', 'year'], {
+  unique: true,
+})
 @Index('idx_chinese_year', ['year'])
+@Index('idx_chinese_element', ['element'])
 export class ChineseHoroscope {
   @PrimaryGeneratedColumn()
   id: number;
@@ -39,6 +50,16 @@ export class ChineseHoroscope {
    */
   @Column({ type: 'enum', enum: ChineseZodiacAnimal })
   animal: ChineseZodiacAnimal;
+
+  /**
+   * Elemento Wu Xing del año de nacimiento
+   * TASK-124: Agregado para soportar 60 combinaciones (12 animales × 5 elementos)
+   *
+   * Los 5 elementos son: Metal, Agua, Madera, Fuego, Tierra
+   * Ejemplo: "Dragón de Tierra" (dragon + earth), "Rata de Metal" (rat + metal)
+   */
+  @Column({ type: 'enum', enum: ['metal', 'water', 'wood', 'fire', 'earth'] })
+  element: ChineseElement;
 
   /**
    * Año gregoriano del horóscopo (2026, 2027, etc.)

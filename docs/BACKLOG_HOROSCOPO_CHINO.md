@@ -2856,7 +2856,7 @@ Implementar horóscopos anuales completos para las 60 combinaciones de animal/el
 **Prioridad:** 🔴 ALTA  
 **Estimación:** 0.5 días  
 **Dependencias:** Ninguna  
-**Estado:** 📋 PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 #### Descripción
 
@@ -2864,17 +2864,17 @@ Modificar la entidad `ChineseHoroscope` para soportar la combinación animal + e
 
 #### Tareas Específicas
 
-- [ ] Agregar campo `element` (ChineseElement enum) a entidad ChineseHoroscope
-- [ ] Cambiar constraint unique de `(animal, year)` a `(animal, element, year)`
-- [ ] Crear migración para nuevo schema
-- [ ] Actualizar repository con métodos `findByAnimalElementAndYear`
-- [ ] Tests para nueva estructura
+- [x] Agregar campo `element` (ChineseElement enum) a entidad ChineseHoroscope
+- [x] Cambiar constraint unique de `(animal, year)` a `(animal, element, year)`
+- [x] Crear migración para nuevo schema
+- [x] Actualizar repository con métodos `findByAnimalElementAndYear`
+- [x] Tests para nueva estructura
 
 #### Criterios de Aceptación
 
-- [ ] Entidad soporta 60 registros por año (12 × 5)
-- [ ] Migración ejecuta sin errores
-- [ ] Tests cubren nuevos métodos
+- [x] Entidad soporta 60 registros por año (12 × 5)
+- [x] Migración ejecuta sin errores
+- [x] Tests cubren nuevos métodos
 
 ---
 
@@ -3179,7 +3179,7 @@ Actualizar `API_DOCUMENTATION.md` con los nuevos endpoints y eliminar referencia
 - [x] TASK-120: Actualizar DTO CalculateAnimalResponseDto (HU-HCH-005)
 - [x] TASK-121: Actualizar controller con elemento (HU-HCH-005)
 - [x] TASK-123: Agregar Wu Xing a /my-animal (Bug Fix)
-- [ ] TASK-124: Modificar schema DB para 60 horóscopos (HU-HCH-006)
+- [x] TASK-124: Modificar schema DB para 60 horóscopos (HU-HCH-006)
 - [ ] TASK-125: Actualizar generador AI para 60 variantes (HU-HCH-006)
 - [ ] TASK-126: Crear endpoint /:animal/:element (HU-HCH-006)
 - [ ] TASK-130: Eliminar endpoint GET /:animal obsoleto (HU-HCH-006 Cleanup)

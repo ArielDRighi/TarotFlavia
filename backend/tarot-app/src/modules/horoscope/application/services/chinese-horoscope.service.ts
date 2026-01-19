@@ -10,9 +10,11 @@ import { AIProviderService } from '../../../ai/application/services/ai-provider.
 import { AIMessage } from '../../../ai/domain/interfaces/ai-provider.interface';
 import {
   ChineseZodiacAnimal,
+  ChineseElement,
   getChineseZodiacAnimal,
   getChineseZodiacInfo,
   getChineseYearInfo,
+  getElementByBirthDate,
 } from '../../../../common/utils/chinese-zodiac.utils';
 import {
   CHINESE_HOROSCOPE_SYSTEM_PROMPT,
@@ -42,9 +44,11 @@ interface ChineseHoroscopeAIResponse {
 
 /**
  * Resultado de generación de un animal específico
+ * TASK-124: Actualizado para incluir elemento
  */
 interface GenerationResult {
   animal: ChineseZodiacAnimal;
+  element: ChineseElement;
   success: boolean;
   id?: number;
   error?: string;
@@ -76,24 +80,32 @@ export class ChineseHoroscopeService {
   ) {}
 
   /**
-   * Genera un horóscopo chino para un animal y año específicos
+   * TASK-124: Genera un horóscopo chino para un animal, elemento y año específicos
    *
-   * Si ya existe un horóscopo para ese animal y año, lo retorna sin generar uno nuevo.
-   * Usa el AIProviderService con fallback automático (Groq → Gemini → DeepSeek → OpenAI).
+   * Este método soporta la generación de 60 horóscopos por año (12 animales × 5 elementos).
+   * Si ya existe un horóscopo para esa combinación, lo retorna sin generar uno nuevo.
    *
    * @param animal - Animal del zodiaco chino
+   * @param element - Elemento Wu Xing (metal, water, wood, fire, earth)
    * @param year - Año gregoriano del horóscopo (ej: 2026)
    * @returns Horóscopo generado o existente
    * @throws InternalServerErrorException si no se puede parsear la respuesta de la IA
    */
-  async generateForAnimal(
+  async generateForAnimalAndElement(
     animal: ChineseZodiacAnimal,
+    element: ChineseElement,
     year: number,
   ): Promise<ChineseHoroscope> {
     // 1. Verificar si ya existe
-    const existing = await this.findByAnimalAndYear(animal, year);
+    const existing = await this.findByAnimalElementAndYear(
+      animal,
+      element,
+      year,
+    );
     if (existing) {
-      this.logger.log(`Horóscopo chino ya existe: ${animal} ${year}`);
+      this.logger.log(
+        `Horóscopo chino ya existe: ${animal} ${element} ${year}`,
+      );
       return existing;
     }
 
@@ -102,7 +114,7 @@ export class ChineseHoroscopeService {
     const yearInfo = getChineseYearInfo(year);
 
     this.logger.log(
-      `Generando horóscopo chino para ${animalInfo.nameEs} (${animal}) - Año ${year}`,
+      `Generando horóscopo chino para ${animalInfo.nameEs} de ${element} (${animal}/${element}) - Año ${year}`,
     );
 
     // 3. Construir mensajes para la IA
@@ -140,9 +152,10 @@ export class ChineseHoroscopeService {
       challenging: animalInfo.incompatibleWith,
     };
 
-    // 7. Crear y guardar el horóscopo
+    // 7. Crear y guardar el horóscopo con elemento
     const horoscope = this.repository.create({
       animal,
+      element,
       year,
       generalOverview: data.generalOverview,
       areas: {
@@ -175,7 +188,7 @@ export class ChineseHoroscopeService {
     const saved = await this.repository.save(horoscope);
 
     this.logger.log(
-      `Horóscopo chino generado: ${animalInfo.nameEs} ${year} | ` +
+      `Horóscopo chino generado: ${animalInfo.nameEs} de ${element} ${year} | ` +
         `Provider: ${aiResponse.provider} | Tokens: ${aiResponse.tokensUsed.total} | ` +
         `Tiempo: ${saved.generationTimeMs}ms`,
     );
@@ -184,7 +197,29 @@ export class ChineseHoroscopeService {
   }
 
   /**
-   * Genera horóscopos chinos para todos los 12 animales de un año específico
+   * Genera un horóscopo chino para un animal y año específicos
+   *
+   * @deprecated Use generateForAnimalAndElement instead (TASK-124)
+   * Este método se mantiene por compatibilidad pero generará con elemento 'earth' por defecto
+   *
+   * Si ya existe un horóscopo para ese animal y año, lo retorna sin generar uno nuevo.
+   * Usa el AIProviderService con fallback automático (Groq → Gemini → DeepSeek → OpenAI).
+   *
+   * @param animal - Animal del zodiaco chino
+   * @param year - Año gregoriano del horóscopo (ej: 2026)
+   * @returns Horóscopo generado o existente
+   * @throws InternalServerErrorException si no se puede parsear la respuesta de la IA
+   */
+  async generateForAnimal(
+    animal: ChineseZodiacAnimal,
+    year: number,
+  ): Promise<ChineseHoroscope> {
+    // Por defecto usamos 'earth' para mantener compatibilidad
+    return this.generateForAnimalAndElement(animal, 'earth', year);
+  }
+
+  /**
+   * TASK-124: Genera horóscopos chinos para todos los 60 combinaciones (12 animales × 5 elementos)
    *
    * Genera secuencialmente con un delay de 5 segundos entre cada llamada
    * para evitar rate limits de los proveedores de IA.
@@ -198,31 +233,60 @@ export class ChineseHoroscopeService {
     results: GenerationResult[];
   }> {
     const animals = Object.values(ChineseZodiacAnimal);
+    const elements: ChineseElement[] = [
+      'metal',
+      'water',
+      'wood',
+      'fire',
+      'earth',
+    ];
     const results: GenerationResult[] = [];
 
-    this.logger.log(`Iniciando generación de 12 horóscopos para año ${year}`);
+    this.logger.log(
+      `Iniciando generación de 60 horóscopos (12 animales × 5 elementos) para año ${year}`,
+    );
 
     // Generar secuencialmente con delay para evitar rate limits
-    for (let i = 0; i < animals.length; i++) {
-      const animal = animals[i];
+    let counter = 0;
+    for (const animal of animals) {
+      for (const element of elements) {
+        counter++;
+        // Delay de 5s entre cada generación (excepto la primera)
+        if (counter > 1) {
+          await this.delay(5000);
+        }
 
-      // Delay de 5s entre cada generación (excepto la primera)
-      if (i > 0) {
-        await this.delay(5000);
-      }
-
-      try {
-        this.logger.log(`[${i + 1}/12] Generando ${animal}...`);
-        const horoscope = await this.generateForAnimal(animal, year);
-        results.push({ animal, success: true, id: horoscope.id });
-        this.logger.log(
-          `[${i + 1}/12] ✓ ${animal} completado (ID: ${horoscope.id})`,
-        );
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : String(error);
-        this.logger.error(`[${i + 1}/12] ✗ Falló ${animal}: ${errorMessage}`);
-        results.push({ animal, success: false, error: errorMessage });
+        try {
+          this.logger.log(
+            `[${counter}/60] Generando ${animal} de ${element}...`,
+          );
+          const horoscope = await this.generateForAnimalAndElement(
+            animal,
+            element,
+            year,
+          );
+          results.push({
+            animal,
+            element,
+            success: true,
+            id: horoscope.id,
+          });
+          this.logger.log(
+            `[${counter}/60] ✓ ${animal}/${element} completado (ID: ${horoscope.id})`,
+          );
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : String(error);
+          this.logger.error(
+            `[${counter}/60] ✗ Falló ${animal}/${element}: ${errorMessage}`,
+          );
+          results.push({
+            animal,
+            element,
+            success: false,
+            error: errorMessage,
+          });
+        }
       }
     }
 
@@ -240,7 +304,28 @@ export class ChineseHoroscopeService {
   }
 
   /**
+   * TASK-124: Busca un horóscopo por animal, elemento y año
+   *
+   * @param animal - Animal del zodiaco chino
+   * @param element - Elemento Wu Xing
+   * @param year - Año gregoriano
+   * @returns Horóscopo encontrado o null
+   */
+  async findByAnimalElementAndYear(
+    animal: ChineseZodiacAnimal,
+    element: ChineseElement,
+    year: number,
+  ): Promise<ChineseHoroscope | null> {
+    return this.repository.findOne({
+      where: { animal, element, year },
+    });
+  }
+
+  /**
    * Busca un horóscopo por animal y año
+   *
+   * @deprecated Use findByAnimalElementAndYear instead (TASK-124)
+   * Este método busca con elemento 'earth' por defecto para mantener compatibilidad
    *
    * @param animal - Animal del zodiaco chino
    * @param year - Año gregoriano
@@ -250,9 +335,8 @@ export class ChineseHoroscopeService {
     animal: ChineseZodiacAnimal,
     year: number,
   ): Promise<ChineseHoroscope | null> {
-    return this.repository.findOne({
-      where: { animal, year },
-    });
+    // Por defecto busca con 'earth' para mantener compatibilidad
+    return this.findByAnimalElementAndYear(animal, 'earth', year);
   }
 
   /**
@@ -269,21 +353,22 @@ export class ChineseHoroscopeService {
   }
 
   /**
-   * Obtiene el horóscopo para un usuario basado en su fecha de nacimiento
+   * TASK-124: Obtiene el horóscopo para un usuario basado en su fecha de nacimiento
    *
-   * Calcula el animal del zodiaco chino del usuario considerando el
-   * Año Nuevo Chino y busca su horóscopo para el año especificado.
+   * Calcula el animal del zodiaco chino Y el elemento Wu Xing del usuario considerando el
+   * Año Nuevo Chino y busca su horóscopo personalizado para el año especificado.
    *
    * @param birthDate - Fecha de nacimiento del usuario
    * @param year - Año gregoriano del horóscopo (default: año actual)
-   * @returns Horóscopo del animal del usuario o null si no existe
+   * @returns Horóscopo del animal/elemento del usuario o null si no existe
    */
   async findForUser(
     birthDate: Date,
     year: number = new Date().getFullYear(),
   ): Promise<ChineseHoroscope | null> {
     const animal = getChineseZodiacAnimal(birthDate);
-    return this.findByAnimalAndYear(animal, year);
+    const element = getElementByBirthDate(birthDate);
+    return this.findByAnimalElementAndYear(animal, element, year);
   }
 
   /**
