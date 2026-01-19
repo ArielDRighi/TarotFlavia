@@ -5,9 +5,9 @@
 **Fecha de creación:** 16 de enero de 2026  
 **Módulo:** Horóscopo Chino (Anual)  
 **Prioridad Global:** 🟡 MEDIA  
-**Estimación Total:** 4-5 días (MVP), 5.5 días (con automatización)  
+**Estimación Total:** 4-5 días (MVP), 5.5 días (con automatización), +1.5 días (HU-HCH-005)  
 **Estado MVP:** ✅ COMPLETADO (TASK-111 a TASK-117)  
-**Pendiente:** TASK-118 (Cron job anual - Opcional)
+**Pendiente:** TASK-118 (Cron job anual - Opcional), TASK-119 a TASK-122 (Elemento Wu Xing)
 
 ---
 
@@ -163,6 +163,67 @@ Feature: Ver compatibilidad entre animales
     And muestra porcentaje de compatibilidad
     And muestra áreas fuertes y débiles de la relación
 ```
+
+---
+
+### HU-HCH-005: Cálculo del Elemento Anual (Wu Xing)
+
+**Módulo:** `src/common/utils` & `src/modules/horoscope`  
+**Prioridad:** 🔴 ALTA (Esencial para identidad del usuario)  
+**Dependencias:** Extiende TASK-111 y TASK-114  
+**Estado:** ⏳ PENDIENTE
+
+```gherkin
+Feature: Identificación del Elemento Anual (Wu Xing)
+  Como usuario (anónimo o registrado)
+  Quiero conocer mi elemento específico según mi año de nacimiento (ej. "Dragón de Tierra")
+  Para distinguir mi personalidad astrológica más allá del animal general
+
+  Background:
+    Given el sistema utiliza los 5 elementos chinos: Metal, Agua, Madera, Fuego, Tierra
+    And el elemento se determina por el último dígito del año chino
+
+  Scenario: Calcular elemento basado en el año
+    Given mi fecha de nacimiento es "1988-03-15" (Año Chino 1988)
+    And el último dígito del año es 8
+    When el sistema calcula mi signo completo
+    Then determina que mi elemento anual es "Tierra"
+    And mi identidad completa es "Dragón de Tierra"
+
+  Scenario: Distinción entre elemento fijo y variable
+    Given soy un "Dragón" (Elemento fijo: Tierra)
+    But nací en "2000" (Año del Metal - dígitos 0,0)
+    When consulto mi perfil
+    Then veo que soy un "Dragón de Metal"
+    And el sistema usa "Metal" para personalizar predicciones
+
+  Scenario: Fecha antes del Año Nuevo Chino
+    Given mi fecha de nacimiento es "1988-01-15"
+    And el Año Nuevo Chino de 1988 fue el 17 de febrero
+    When el sistema calcula mi elemento
+    Then determina que pertenezco al año chino 1987
+    And mi elemento es "Fuego" (1987 termina en 7)
+    And mi identidad completa es "Conejo de Fuego"
+
+  Scenario: Ver elemento en respuesta del cálculo
+    Given calculo mi animal con fecha "1988-03-15"
+    When recibo la respuesta del API
+    Then incluye campo "birthElement": "Tierra"
+    And incluye campo "fixedElement": "Tierra" (elemento natural del Dragón)
+    And incluye campo "fullZodiacType": "Dragón de Tierra"
+```
+
+#### Regla de Negocio: Cálculo del Elemento por Dígito
+
+| Último dígito | Elemento |
+| ------------- | -------- |
+| 0, 1          | Metal    |
+| 2, 3          | Agua     |
+| 4, 5          | Madera   |
+| 6, 7          | Fuego    |
+| 8, 9          | Tierra   |
+
+**Nota importante:** El cálculo debe usar el `chineseYear` (ajustado por el Año Nuevo Chino), NO el año gregoriano directo.
 
 ---
 
@@ -2076,6 +2137,7 @@ Implementar un cron job que genere automáticamente los horóscopos chinos del p
 - `src/modules/horoscope/horoscope.module.ts` (agregar provider)
 
 **Funcionalidad:**
+
 - Ejecutar automáticamente el 15 de diciembre a las 00:00 UTC
 - Generar los 12 horóscopos chinos para el año siguiente
 - No regenerar si ya existen
@@ -2120,6 +2182,350 @@ Implementar un cron job que genere automáticamente los horóscopos chinos del p
 > - Reutiliza el método `generateAllForYear()` de ChineseHoroscopeService
 > - El sistema de notificaciones al admin se implementará en el futuro
 > - Usar mismo patrón que HoroscopeCronService (horóscopos occidentales)
+
+---
+
+# Backend: Elemento Anual (Wu Xing) - HU-HCH-005
+
+---
+
+### TASK-119: Exportar y mejorar función getElementByYear
+
+**Módulo:** `src/common/utils/`  
+**Prioridad:** 🔴 ALTA  
+**Estimación:** 0.25 días (2 horas)  
+**Dependencias:** TASK-111  
+**Estado:** ⏳ PENDIENTE
+
+---
+
+#### 📋 Descripción
+
+La función `getElementForYear` ya existe pero es privada. Necesitamos:
+
+1. Exportarla públicamente
+2. Agregar tipo `ChineseElement`
+3. Crear función helper para obtener elemento por fecha de nacimiento (considera CNY)
+4. Agregar función para generar `fullZodiacType` (ej. "Dragón de Tierra")
+
+---
+
+#### 🏗️ Contexto Técnico
+
+**Archivos a modificar:**
+
+- `src/common/utils/chinese-zodiac.utils.ts`
+- `src/common/utils/chinese-zodiac.utils.spec.ts`
+
+---
+
+#### ✅ Tareas Específicas
+
+##### Backend
+
+- [ ] Agregar tipo exportado `ChineseElement`:
+
+  ```typescript
+  export type ChineseElement = "metal" | "water" | "wood" | "fire" | "earth";
+
+  export const CHINESE_ELEMENTS_MAP_ES: Record<ChineseElement, string> = {
+    metal: "Metal",
+    water: "Agua",
+    wood: "Madera",
+    fire: "Fuego",
+    earth: "Tierra",
+  };
+  ```
+
+- [ ] Exportar función existente `getElementForYear`:
+
+  ```typescript
+  export function getElementForYear(year: number): ChineseElement {
+    // Lógica existente (ya implementada)
+  }
+  ```
+
+- [ ] Crear función `getElementByBirthDate`:
+
+  ```typescript
+  /**
+   * Obtiene el elemento del año de nacimiento (considera CNY)
+   * @param birthDate - Fecha de nacimiento
+   * @returns Elemento del año chino correspondiente
+   */
+  export function getElementByBirthDate(birthDate: Date): ChineseElement {
+    // Usar misma lógica que getChineseZodiacAnimal para obtener chineseYear
+    // Luego aplicar getElementForYear(chineseYear)
+  }
+  ```
+
+- [ ] Crear función `getFullZodiacType`:
+
+  ```typescript
+  /**
+   * Genera la identidad completa (ej. "Dragón de Tierra")
+   * @param animal - Animal del zodiaco
+   * @param element - Elemento del año
+   * @returns Nombre completo en español
+   */
+  export function getFullZodiacType(animal: ChineseZodiacAnimal, element: ChineseElement): string {
+    const info = getChineseZodiacInfo(animal);
+    return `${info.nameEs} de ${CHINESE_ELEMENTS_MAP_ES[element]}`;
+  }
+  ```
+
+##### Testing
+
+- [ ] Test: 1988 (dígito 8) → "earth" (Tierra)
+- [ ] Test: 1989 (dígito 9) → "earth" (Tierra)
+- [ ] Test: 2024 (dígito 4) → "wood" (Madera)
+- [ ] Test: 2000 (dígito 0) → "metal" (Metal)
+- [ ] Test: Fecha borde 15 Ene 1988 → año chino 1987 → "fire" (Fuego)
+- [ ] Test: `getFullZodiacType(DRAGON, 'earth')` → "Dragón de Tierra"
+- [ ] Test: `getFullZodiacType(RABBIT, 'fire')` → "Conejo de Fuego"
+
+---
+
+#### 🎯 Criterios de Aceptación
+
+- [ ] Tipo `ChineseElement` exportado
+- [ ] Función `getElementForYear` exportada
+- [ ] Función `getElementByBirthDate` creada y exportada
+- [ ] Función `getFullZodiacType` creada y exportada
+- [ ] Tests cubren edge case de CNY
+- [ ] Coverage >90%
+
+---
+
+#### 📎 Notas para el Agente IA
+
+> **IMPORTANTE:**
+>
+> - La función `getElementForYear` YA EXISTE en el archivo (líneas 417-434)
+> - Solo necesita ser exportada (actualmente es función privada)
+> - El cálculo es: `(year - 1900) % 10` aplicado a array de elementos
+> - Para `getElementByBirthDate` reutilizar lógica de CNY de `getChineseZodiacAnimal`
+> - El **caso crítico** es 15 Ene 1988: CNY fue 17 Feb → año chino 1987 → dígito 7 → Fuego
+
+---
+
+### TASK-120: Actualizar DTO CalculateAnimalResponseDto
+
+**Módulo:** `src/modules/horoscope/application/dto/`  
+**Prioridad:** 🔴 ALTA  
+**Estimación:** 0.25 días (2 horas)  
+**Dependencias:** TASK-119  
+**Estado:** ⏳ PENDIENTE
+
+---
+
+#### 📋 Descripción
+
+Actualizar el DTO de respuesta del cálculo de animal para incluir los nuevos campos de elemento.
+
+---
+
+#### 🏗️ Contexto Técnico
+
+**Archivos a modificar:**
+
+- `src/modules/horoscope/application/dto/calculate-animal.dto.ts`
+
+---
+
+#### ✅ Tareas Específicas
+
+##### Backend
+
+- [ ] Agregar nuevos campos al DTO:
+
+  ```typescript
+  export class CalculateAnimalResponseDto {
+    // ... campos existentes (animal, animalInfo, chineseYear)
+
+    @ApiProperty({
+      description: "Elemento del año de nacimiento (Wu Xing)",
+      example: "earth",
+    })
+    birthElement: string;
+
+    @ApiProperty({
+      description: "Nombre del elemento en español",
+      example: "Tierra",
+    })
+    birthElementEs: string;
+
+    @ApiProperty({
+      description: "Elemento fijo/natural del animal",
+      example: "earth",
+    })
+    fixedElement: string;
+
+    @ApiProperty({
+      description: "Identidad zodiacal completa",
+      example: "Dragón de Tierra",
+    })
+    fullZodiacType: string;
+  }
+  ```
+
+---
+
+#### 🎯 Criterios de Aceptación
+
+- [ ] Nuevos campos agregados al DTO
+- [ ] Decoradores Swagger correctos
+- [ ] Ejemplos reflejan datos reales
+
+---
+
+### TASK-121: Actualizar controller para incluir elemento
+
+**Módulo:** `src/modules/horoscope/infrastructure/controllers/`  
+**Prioridad:** 🔴 ALTA  
+**Estimación:** 0.5 días (4 horas)  
+**Dependencias:** TASK-119, TASK-120  
+**Estado:** ⏳ PENDIENTE
+
+---
+
+#### 📋 Descripción
+
+Actualizar los endpoints `calculateAnimal` y `getMyAnimalHoroscope` para que retornen la información completa del elemento.
+
+---
+
+#### 🏗️ Contexto Técnico
+
+**Archivos a modificar:**
+
+- `src/modules/horoscope/infrastructure/controllers/chinese-horoscope.controller.ts`
+- `src/modules/horoscope/infrastructure/controllers/chinese-horoscope.controller.spec.ts`
+
+---
+
+#### ✅ Tareas Específicas
+
+##### Backend
+
+- [ ] Actualizar endpoint `POST /chinese-horoscope/calculate-animal`:
+
+  ```typescript
+  @Post('calculate-animal')
+  async calculateAnimal(@Body() dto: CalculateAnimalDto): Promise<CalculateAnimalResponseDto> {
+    const birthDate = new Date(dto.birthDate);
+    const animal = getChineseZodiacAnimal(birthDate);
+    const animalInfo = getChineseZodiacInfo(animal);
+    const chineseYear = getChineseYear(birthDate);
+
+    // NUEVOS campos
+    const birthElement = getElementByBirthDate(birthDate);
+    const fullZodiacType = getFullZodiacType(animal, birthElement);
+
+    return {
+      animal,
+      animalInfo: { /* ... */ },
+      chineseYear,
+      birthElement,
+      birthElementEs: CHINESE_ELEMENTS_MAP_ES[birthElement],
+      fixedElement: animalInfo.element,
+      fullZodiacType,
+    };
+  }
+  ```
+
+- [ ] Actualizar endpoint `GET /chinese-horoscope/my-animal` (si aplica)
+
+##### Testing
+
+- [ ] Test: calculateAnimal retorna birthElement correcto
+- [ ] Test: calculateAnimal retorna fullZodiacType correcto
+- [ ] Test: Fecha borde CNY retorna elemento correcto
+- [ ] Test: Swagger documenta nuevos campos
+
+---
+
+#### 🎯 Criterios de Aceptación
+
+- [ ] Endpoint calculateAnimal retorna nuevos campos
+- [ ] Swagger documentation actualizada
+- [ ] Tests cubren nuevos campos
+- [ ] Backward compatible (campos adicionales, no breaking changes)
+
+---
+
+### TASK-122: Actualizar frontend para mostrar elemento
+
+**Módulo:** `frontend/src/`  
+**Prioridad:** 🟡 MEDIA  
+**Estimación:** 0.5 días (4 horas)  
+**Dependencias:** TASK-121  
+**Estado:** ⏳ PENDIENTE
+
+---
+
+#### 📋 Descripción
+
+Actualizar los tipos TypeScript y componentes del frontend para mostrar el elemento del usuario.
+
+---
+
+#### 🏗️ Contexto Técnico
+
+**Archivos a modificar:**
+
+- `src/types/chinese-horoscope.types.ts`
+- `src/components/features/chinese-horoscope/AnimalCalculator.tsx`
+- `src/components/features/chinese-horoscope/ChineseHoroscopeWidget.tsx`
+
+---
+
+#### ✅ Tareas Específicas
+
+##### Frontend
+
+- [ ] Actualizar tipos en `chinese-horoscope.types.ts`:
+
+  ```typescript
+  export interface CalculateAnimalResponse {
+    // ... campos existentes
+    birthElement: string;
+    birthElementEs: string;
+    fixedElement: string;
+    fullZodiacType: string;
+  }
+  ```
+
+- [ ] Actualizar `AnimalCalculator.tsx` para mostrar:
+  - Nombre completo (ej. "Dragón de Tierra")
+  - Elemento del año con ícono/color
+
+- [ ] Actualizar `ChineseHoroscopeWidget.tsx` para mostrar:
+  - fullZodiacType en lugar de solo animal name
+
+##### Testing
+
+- [ ] Test: AnimalCalculator muestra fullZodiacType
+- [ ] Test: ChineseHoroscopeWidget muestra elemento
+
+---
+
+#### 🎯 Criterios de Aceptación
+
+- [ ] Tipos actualizados reflejan nueva API
+- [ ] UI muestra "Dragón de Tierra" en lugar de solo "Dragón"
+- [ ] Elemento tiene color/ícono distintivo
+- [ ] Tests actualizados
+
+---
+
+#### 📎 Notas para el Agente IA
+
+> **IMPORTANTE:**
+>
+> - Usar colores para elementos: 🔴 Fuego, 🟤 Tierra, ⚪ Metal, 🔵 Agua, 🟢 Madera
+> - El fullZodiacType debe ser prominente en la UI
+> - Mantener backward compatibility (si API no retorna campos, fallback graceful)
 
 ---
 
@@ -2177,6 +2583,7 @@ CREATE INDEX idx_chinese_year ON chinese_horoscopes(year);
 | Cálculo incorrecto del animal | Media | Alto    | Tests exhaustivos con CNY  |
 | Horóscopo no generado         | Baja  | Medio   | Admin puede generar manual |
 | Usuario nació antes de CNY    | Alta  | Medio   | Lógica de cálculo correcta |
+| Elemento incorrecto por CNY   | Alta  | Medio   | Tests edge case CNY        |
 
 ### Orden de Implementación
 
@@ -2196,9 +2603,15 @@ Día 4-5:
 
 Día 6 (Opcional - Automatización):
 └── TASK-118: Cron job anual (0.5d)
+
+Día 7-8 (HU-HCH-005 - Elemento Wu Xing):
+├── TASK-119: Exportar getElementByYear (0.25d)
+├── TASK-120: Actualizar DTO (0.25d)
+├── TASK-121: Actualizar controller (0.5d)
+└── TASK-122: Actualizar frontend (0.5d)
 ```
 
-**Total:** 4-5 días (MVP), 5.5 días (con automatización)
+**Total:** 4-5 días (MVP), 5.5 días (con automatización), 7 días (con Wu Xing)
 
 ---
 
@@ -2211,12 +2624,16 @@ Día 6 (Opcional - Automatización):
 - [x] TASK-113: Servicio de generación
 - [x] TASK-114: Endpoints
 - [x] TASK-118: Cron job anual (Opcional - Automatización)
+- [ ] TASK-119: Exportar getElementByYear y helpers (HU-HCH-005)
+- [ ] TASK-120: Actualizar DTO CalculateAnimalResponseDto (HU-HCH-005)
+- [ ] TASK-121: Actualizar controller con elemento (HU-HCH-005)
 
 ### Frontend
 
 - [x] TASK-115: Types y hooks
 - [x] TASK-116: Componentes UI
 - [x] TASK-117: Páginas
+- [ ] TASK-122: Mostrar elemento en UI (HU-HCH-005)
 
 ### Infraestructura
 
