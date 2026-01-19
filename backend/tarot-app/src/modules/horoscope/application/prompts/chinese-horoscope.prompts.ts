@@ -89,9 +89,11 @@ IMPORTANTE:
 /**
  * User prompt para generación de horóscopo chino anual
  *
- * Proporciona contexto específico del animal y año para la generación
+ * TASK-125: Actualizado para incluir elemento del usuario (birthElement)
+ * Proporciona contexto específico del animal, elemento de nacimiento y año para la generación
  *
  * @param animal - Identificador del animal (ej: 'dragon')
+ * @param element - Elemento del año de nacimiento del usuario (ej: 'earth')
  * @param year - Año gregoriano del horóscopo (ej: 2026)
  * @param animalInfo - Información completa del animal del zodiaco chino
  * @param yearInfo - Información del año chino (animal regente y elemento)
@@ -99,16 +101,22 @@ IMPORTANTE:
  */
 export const CHINESE_HOROSCOPE_USER_PROMPT = (
   animal: string,
+  element: string,
   year: number,
   animalInfo: ChineseZodiacInfo,
   yearInfo: { animal: string; element: string },
 ): string => `
-Genera el horóscopo chino anual para ${animalInfo.nameEs} (${animal}) para el año ${year}.
+Genera el horóscopo chino anual para ${animalInfo.nameEs} de ${element} (${animal}/${element}) para el año ${year}.
 
-INFORMACIÓN DEL ANIMAL:
+INFORMACIÓN DEL USUARIO:
+- Animal del zodiaco: ${animalInfo.nameEs} (${animal})
+- Elemento de nacimiento: ${element}
+- Signo completo: ${animalInfo.nameEs} de ${element}
+
+INFORMACIÓN DEL ANIMAL BASE:
 - Nombre español: ${animalInfo.nameEs}
 - Nombre inglés: ${animalInfo.nameEn}
-- Elemento natural: ${animalInfo.element}
+- Elemento natural del animal: ${animalInfo.element}
 - Yin/Yang: ${animalInfo.yinYang}
 - Características: ${animalInfo.characteristics.join(', ')}
 - Compatibilidades: ${animalInfo.compatibleWith.join(', ')}
@@ -118,13 +126,27 @@ INFORMACIÓN DEL AÑO ${year}:
 - Animal regente: ${yearInfo.animal}
 - Elemento del año: ${yearInfo.element}
 
-CONTEXTO IMPORTANTE:
-Analiza cómo el elemento del año (${yearInfo.element}) interactúa con el 
-elemento natural del animal (${animalInfo.element}). Considera si hay armonía 
-o tensión entre estos elementos según la teoría de los cinco elementos.
+INTERACCIÓN DE ELEMENTOS (Wu Xing):
+El horóscopo debe considerar TRES elementos:
+1. Elemento de nacimiento del usuario: ${element}
+2. Elemento natural del animal: ${animalInfo.element}
+3. Elemento del año: ${yearInfo.element}
 
-Genera predicciones específicas y prácticas para cada una de las cuatro áreas:
-amor, carrera, bienestar y finanzas.
+Ciclo productivo (apoyo): Madera→Fuego→Tierra→Metal→Agua→Madera
+Ciclo destructivo (tensión): Madera→Tierra→Agua→Fuego→Metal→Madera
+
+CONTEXTO CRÍTICO:
+Analiza cómo el elemento de nacimiento del usuario (${element}) interactúa con 
+el elemento del año (${yearInfo.element}). Esta interacción es ÚNICA para cada 
+persona y determina si el año será de apoyo, tensión o equilibrio.
+
+Por ejemplo:
+- Si ${element} alimenta a ${yearInfo.element} en el ciclo productivo: año favorable
+- Si ${element} controla a ${yearInfo.element} en el ciclo destructivo: año desafiante
+- Si son el mismo elemento: año de resonancia (puede ser intenso)
+
+Genera predicciones personalizadas que reflejen esta dinámica elemental específica
+para cada una de las cuatro áreas: amor, carrera, bienestar y finanzas.
 
 CRÍTICO: Responde ÚNICAMENTE con JSON crudo válido. NO uses markdown ni bloques de código. NO añadas explicaciones ni texto adicional antes o después del JSON.
 `;
