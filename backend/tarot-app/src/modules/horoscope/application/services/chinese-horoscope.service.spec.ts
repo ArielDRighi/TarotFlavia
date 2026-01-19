@@ -300,7 +300,7 @@ describe('ChineseHoroscopeService', () => {
       expect(failedResult?.error).toContain('Error de IA');
     });
 
-    it('debe incluir delay de 5s entre cada generación', async () => {
+    it('debe incluir delay de 10s entre cada generación (TASK-125)', async () => {
       // Arrange
       repository.findOne.mockResolvedValue(null);
       aiProviderService.generateCompletion.mockResolvedValue(mockAIResponse);
@@ -317,7 +317,7 @@ describe('ChineseHoroscopeService', () => {
       // Assert
       // Debe haber 59 delays (no hay delay antes de la primera combinación)
       expect(delaySpy).toHaveBeenCalledTimes(59);
-      expect(delaySpy).toHaveBeenCalledWith(5000);
+      expect(delaySpy).toHaveBeenCalledWith(10000); // TASK-125: 10s delay
     });
   });
 

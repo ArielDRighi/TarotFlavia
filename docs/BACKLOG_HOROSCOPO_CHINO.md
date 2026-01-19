@@ -2884,7 +2884,7 @@ Modificar la entidad `ChineseHoroscope` para soportar la combinación animal + e
 **Prioridad:** 🔴 ALTA  
 **Estimación:** 1.5 días  
 **Dependencias:** TASK-124  
-**Estado:** 📋 PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 #### Descripción
 
@@ -2936,8 +2936,8 @@ if (i > 0) {
 
 ##### Servicio de Generación
 
-- [ ] Crear nuevo método `generateForAnimalElement(animal, element, year)`
-- [ ] Modificar `generateAllForYear` para iterar 60 combinaciones:
+- [x] Crear nuevo método `generateForAnimalElement(animal, element, year)`
+- [x] Modificar `generateAllForYear` para iterar 60 combinaciones:
   ```typescript
   async generateAllForYear(year: number) {
     const animals = Object.values(ChineseZodiacAnimal);
@@ -2964,13 +2964,13 @@ if (i > 0) {
     };
   }
   ```
-- [ ] Actualizar delay de 5s a 10s para mayor seguridad con rate limits
-- [ ] Agregar logging de progreso mejorado (`[X/60]`)
-- [ ] Agregar tiempo total estimado al resumen final
+- [x] Actualizar delay de 5s a 10s para mayor seguridad con rate limits
+- [x] Agregar logging de progreso mejorado (`[X/60]`)
+- [x] Agregar tiempo total estimado al resumen final
 
 ##### Prompt de IA
 
-- [ ] Actualizar `CHINESE_HOROSCOPE_USER_PROMPT` para incluir elemento del usuario:
+- [x] Actualizar `CHINESE_HOROSCOPE_USER_PROMPT` para incluir elemento del usuario:
 
   ```typescript
   export const CHINESE_HOROSCOPE_USER_PROMPT = (
@@ -3002,31 +3002,31 @@ if (i > 0) {
 
 ##### Admin Command
 
-- [ ] Actualizar comando admin para generar 60 horóscopos
-- [ ] Agregar opción para generar solo un animal específico (12 elementos)
-- [ ] Agregar opción para generar solo un elemento específico (12 animales)
-- [ ] Mostrar barra de progreso o logs incrementales
+- [x] Actualizar comando admin para generar 60 horóscopos
+- [x] Agregar opción para generar solo un animal específico (12 elementos)
+- [x] Agregar opción para generar solo un elemento específico (12 animales)
+- [x] Mostrar barra de progreso o logs incrementales
 
 ##### Tests
 
-- [ ] Test: `generateForAnimalElement` genera horóscopo correcto
-- [ ] Test: `generateAllForYear` genera 60 horóscopos
-- [ ] Test: Delay de 10s se respeta entre generaciones
-- [ ] Test: Prompt incluye información de elemento
-- [ ] Test: Resumen final muestra estadísticas correctas
+- [x] Test: `generateForAnimalElement` genera horóscopo correcto
+- [x] Test: `generateAllForYear` genera 60 horóscopos
+- [x] Test: Delay de 10s se respeta entre generaciones
+- [x] Test: Prompt incluye información de elemento
+- [x] Test: Resumen final muestra estadísticas correctas
 
 ---
 
 #### Criterios de Aceptación
 
-- [ ] Se generan exactamente 60 horóscopos por año (12 × 5)
-- [ ] Cada horóscopo es único para la combinación animal/elemento
-- [ ] Prompt menciona la interacción Wu Xing entre elementos
-- [ ] Rate limiting respetado (delay 10s = 6 RPM)
-- [ ] Tiempo total de generación: 10-15 minutos (aceptable para tarea anual)
-- [ ] Logging muestra progreso `[1/60]...[60/60]`
-- [ ] Fallback a otros proveedores funciona si uno falla
-- [ ] Tests cubren nuevos métodos
+- [x] Se generan exactamente 60 horóscopos por año (12 × 5)
+- [x] Cada horóscopo es único para la combinación animal/elemento
+- [x] Prompt menciona la interacción Wu Xing entre elementos
+- [x] Rate limiting respetado (delay 10s = 6 RPM)
+- [x] Tiempo total de generación: 10-15 minutos (aceptable para tarea anual)
+- [x] Logging muestra progreso `[1/60]...[60/60]`
+- [x] Fallback a otros proveedores funciona si uno falla
+- [x] Tests cubren nuevos métodos
 
 ---
 

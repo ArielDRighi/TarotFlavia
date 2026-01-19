@@ -118,14 +118,21 @@ export class ChineseHoroscopeService {
     );
 
     // 3. Construir mensajes para la IA
+    // TASK-125: Incluir elemento del usuario en el prompt
     const messages: AIMessage[] = [
       { role: 'system', content: CHINESE_HOROSCOPE_SYSTEM_PROMPT },
       {
         role: 'user',
-        content: CHINESE_HOROSCOPE_USER_PROMPT(animal, year, animalInfo, {
-          animal: yearInfo.animal,
-          element: yearInfo.element,
-        }),
+        content: CHINESE_HOROSCOPE_USER_PROMPT(
+          animal,
+          element, // TASK-125: Elemento del usuario
+          year,
+          animalInfo,
+          {
+            animal: yearInfo.animal,
+            element: yearInfo.element,
+          },
+        ),
       },
     ];
 
@@ -219,10 +226,12 @@ export class ChineseHoroscopeService {
   }
 
   /**
-   * TASK-124: Genera horóscopos chinos para todos los 60 combinaciones (12 animales × 5 elementos)
+   * TASK-125: Genera horóscopos chinos para todos los 60 combinaciones (12 animales × 5 elementos)
    *
-   * Genera secuencialmente con un delay de 5 segundos entre cada llamada
-   * para evitar rate limits de los proveedores de IA.
+   * Genera secuencialmente con un delay de 10 segundos entre cada llamada
+   * para evitar rate limits de los proveedores de IA (6 RPM).
+   *
+   * Tiempo estimado: ~10 minutos para 60 horóscopos.
    *
    * @param year - Año gregoriano para generar horóscopos
    * @returns Resumen de generación (exitosos, fallidos, detalles)
@@ -251,9 +260,10 @@ export class ChineseHoroscopeService {
     for (const animal of animals) {
       for (const element of elements) {
         counter++;
-        // Delay de 5s entre cada generación (excepto la primera)
+        // TASK-125: Delay de 10s entre cada generación (excepto la primera)
+        // 10s = 6 RPM (requests per minute), seguro para proveedores gratuitos
         if (counter > 1) {
-          await this.delay(5000);
+          await this.delay(10000);
         }
 
         try {
