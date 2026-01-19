@@ -1,16 +1,14 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddGenerationTimeMsToChineseHoroscopes1771000000001
-  implements MigrationInterface
-{
+export class AddGenerationTimeMsToChineseHoroscopes1771000000001 implements MigrationInterface {
   name = 'AddGenerationTimeMsToChineseHoroscopes1771000000001';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Check if column exists first
-    const columnExists = await queryRunner.query(`
+    const columnExists = (await queryRunner.query(`
       SELECT column_name FROM information_schema.columns
       WHERE table_name = 'chinese_horoscopes' AND column_name = 'generation_time_ms'
-    `);
+    `)) as { column_name: string }[];
 
     if (columnExists.length === 0) {
       await queryRunner.query(`
