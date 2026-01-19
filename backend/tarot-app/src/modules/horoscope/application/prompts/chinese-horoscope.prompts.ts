@@ -1,4 +1,7 @@
-import { ChineseZodiacInfo } from '../../../../common/utils/chinese-zodiac.utils';
+import {
+  ChineseZodiacInfo,
+  CHINESE_ELEMENTS_MAP_ES,
+} from '../../../../common/utils/chinese-zodiac.utils';
 
 /**
  * System prompt para generación de horóscopos chinos anuales
@@ -106,12 +109,12 @@ export const CHINESE_HOROSCOPE_USER_PROMPT = (
   animalInfo: ChineseZodiacInfo,
   yearInfo: { animal: string; element: string },
 ): string => `
-Genera el horóscopo chino anual para ${animalInfo.nameEs} de ${element} (${animal}/${element}) para el año ${year}.
+Genera el horóscopo chino anual para ${animalInfo.nameEs} de ${CHINESE_ELEMENTS_MAP_ES[element]} (${animal}/${element}) para el año ${year}.
 
 INFORMACIÓN DEL USUARIO:
 - Animal del zodiaco: ${animalInfo.nameEs} (${animal})
-- Elemento de nacimiento: ${element}
-- Signo completo: ${animalInfo.nameEs} de ${element}
+- Elemento de nacimiento: ${CHINESE_ELEMENTS_MAP_ES[element]}
+- Signo completo: ${animalInfo.nameEs} de ${CHINESE_ELEMENTS_MAP_ES[element]}
 
 INFORMACIÓN DEL ANIMAL BASE:
 - Nombre español: ${animalInfo.nameEs}
@@ -128,21 +131,21 @@ INFORMACIÓN DEL AÑO ${year}:
 
 INTERACCIÓN DE ELEMENTOS (Wu Xing):
 El horóscopo debe considerar TRES elementos:
-1. Elemento de nacimiento del usuario: ${element}
+1. Elemento de nacimiento del usuario: ${CHINESE_ELEMENTS_MAP_ES[element]}
 2. Elemento natural del animal: ${animalInfo.element}
-3. Elemento del año: ${yearInfo.element}
+3. Elemento del año: ${CHINESE_ELEMENTS_MAP_ES[yearInfo.element]}
 
 Ciclo productivo (apoyo): Madera→Fuego→Tierra→Metal→Agua→Madera
-Ciclo destructivo (tensión): Madera→Tierra→Agua→Fuego→Metal→Madera
+Ciclo destructivo (tensión): Madera→Tierra, Tierra→Agua, Agua→Fuego, Fuego→Metal, Metal→Madera
 
 CONTEXTO CRÍTICO:
-Analiza cómo el elemento de nacimiento del usuario (${element}) interactúa con 
-el elemento del año (${yearInfo.element}). Esta interacción es ÚNICA para cada 
+Analiza cómo el elemento de nacimiento del usuario (${CHINESE_ELEMENTS_MAP_ES[element]}) interactúa con 
+el elemento del año (${CHINESE_ELEMENTS_MAP_ES[yearInfo.element]}). Esta interacción es ÚNICA para cada 
 persona y determina si el año será de apoyo, tensión o equilibrio.
 
 Por ejemplo:
-- Si ${element} alimenta a ${yearInfo.element} en el ciclo productivo: año favorable
-- Si ${element} controla a ${yearInfo.element} en el ciclo destructivo: año desafiante
+- Si ${CHINESE_ELEMENTS_MAP_ES[element]} alimenta a ${CHINESE_ELEMENTS_MAP_ES[yearInfo.element]} en el ciclo productivo: año favorable
+- Si ${CHINESE_ELEMENTS_MAP_ES[element]} controla a ${CHINESE_ELEMENTS_MAP_ES[yearInfo.element]} en el ciclo destructivo: año desafiante
 - Si son el mismo elemento: año de resonancia (puede ser intenso)
 
 Genera predicciones personalizadas que reflejen esta dinámica elemental específica
