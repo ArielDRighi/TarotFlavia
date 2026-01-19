@@ -7,6 +7,7 @@ import { UsersModule } from '../users/users.module';
 import { HoroscopeGenerationService } from './application/services/horoscope-generation.service';
 import { HoroscopeCronService } from './application/services/horoscope-cron.service';
 import { ChineseHoroscopeService } from './application/services/chinese-horoscope.service';
+import { ChineseHoroscopeCronService } from './application/services/chinese-horoscope-cron.service';
 import { HoroscopeController } from './infrastructure/controllers/horoscope.controller';
 import { ChineseHoroscopeController } from './infrastructure/controllers/chinese-horoscope.controller';
 
@@ -18,7 +19,7 @@ import { ChineseHoroscopeController } from './infrastructure/controllers/chinese
  * - Generar horóscopos chinos anuales usando IA
  * - Consultar horóscopos por signo/animal y fecha/año
  * - Gestionar el ciclo de vida de los horóscopos
- * - Cron jobs automáticos para generación diaria y limpieza
+ * - Cron jobs automáticos para generación diaria, anual y limpieza
  *
  * Dependencias:
  * - AIModule: Para generación con modelos de IA (Groq, Gemini, DeepSeek, OpenAI)
@@ -34,7 +35,8 @@ import { ChineseHoroscopeController } from './infrastructure/controllers/chinese
   providers: [
     HoroscopeGenerationService,
     HoroscopeCronService,
-    ChineseHoroscopeService, // Nuevo: Servicio de horóscopo chino
+    ChineseHoroscopeService, // Servicio de horóscopo chino
+    ChineseHoroscopeCronService, // Cron job anual para horóscopos chinos
   ],
   controllers: [HoroscopeController, ChineseHoroscopeController],
   exports: [HoroscopeGenerationService, ChineseHoroscopeService],

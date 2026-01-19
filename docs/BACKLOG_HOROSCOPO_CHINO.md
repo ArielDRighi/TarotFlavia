@@ -2057,7 +2057,7 @@ Crear páginas para el horóscopo chino.
 **Prioridad:** 🟡 MEDIA  
 **Estimación:** 0.5 días  
 **Dependencias:** TASK-113  
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -2087,238 +2087,27 @@ Implementar un cron job que genere automáticamente los horóscopos chinos del p
 
 ##### Backend
 
-- [ ] Crear `chinese-horoscope-cron.service.ts`:
-
-  ```typescript
-  import { Injectable, Logger } from '@nestjs/common';
-  import { Cron } from '@nestjs/schedule';
-  import { ChineseHoroscopeService } from './chinese-horoscope.service';
-
-  /**
-   * Servicio de cron job para generación automática de horóscopos chinos
-   * 
-   * Responsabilidades:
-   * - Generar horóscopos chinos del próximo año el 15 de diciembre
-   * - Verificar que no existan antes de generar
-   * - Notificar al admin sobre el resultado
-   */
-  @Injectable()
-  export class ChineseHoroscopeCronService {
-    private readonly logger = new Logger(ChineseHoroscopeCronService.name);
-
-    constructor(
-      private readonly chineseHoroscopeService: ChineseHoroscopeService,
-    ) {}
-
-    /**
-     * Genera horóscopos chinos para el próximo año
-     * Ejecuta el 15 de diciembre a las 00:00 UTC
-     * 
-     * Cron expression: "0 0 0 15 12 *"
-     * - 0 segundos
-     * - 0 minutos
-     * - 0 hora (00:00)
-     * - 15 día del mes
-     * - 12 mes (diciembre)
-     * - * cualquier día de la semana
-     */
-    @Cron('0 0 0 15 12 *', {
-      name: 'annual-chinese-horoscope-generation',
-      timeZone: 'UTC',
-    })
-    async generateNextYearHoroscopes(): Promise<void> {
-      const currentYear = new Date().getFullYear();
-      const nextYear = currentYear + 1;
-
-      this.logger.log(`=== INICIO: Generación automática de horóscopos chinos ${nextYear} ===`);
-
-      try {
-        // Verificar si ya existen horóscopos para el próximo año
-        const existing = await this.chineseHoroscopeService.findAllByYear(nextYear);
-        
-        if (existing.length > 0) {
-          this.logger.warn(`Los horóscopos de ${nextYear} ya existen (${existing.length}/12). No se generan duplicados.`);
-          return;
-        }
-
-        // Generar los 12 horóscopos
-        const result = await this.chineseHoroscopeService.generateAllForYear(nextYear);
-
-        this.logger.log(
-          `=== FIN: ${result.successful}/12 horóscopos generados exitosamente ===`
-        );
-
-        // TODO: Enviar notificación al admin (implementar cuando exista sistema de notificaciones)
-        // await this.notificationService.notifyAdmin({
-        //   subject: `Horóscopos Chinos ${nextYear} Generados`,
-        //   message: `Se generaron ${result.successful} de 12 horóscopos exitosamente.`,
-        // });
-
-      } catch (error) {
-        this.logger.error(`Error en generación automática: ${error.message}`, error.stack);
-        // TODO: Notificar al admin del error
-      }
-    }
-
-    /**
-     * Método manual para testing
-     * Útil para probar la generación sin esperar al 15 de diciembre
-     */
-    async generateManually(year?: number): Promise<void> {
-      const targetYear = year || new Date().getFullYear() + 1;
-      this.logger.warn(`Generación manual iniciada para ${targetYear}...`);
-      
-      const result = await this.chineseHoroscopeService.generateAllForYear(targetYear);
-      
-      this.logger.log(
-        `Generación manual completada: ${result.successful}/12 exitosos, ${result.failed}/12 fallidos`
-      );
-    }
-  }
-  ```
-
-- [ ] Crear tests `chinese-horoscope-cron.service.spec.ts`:
-
-  ```typescript
-  import { Test, TestingModule } from '@nestjs/testing';
-  import { ChineseHoroscopeCronService } from './chinese-horoscope-cron.service';
-  import { ChineseHoroscopeService } from './chinese-horoscope.service';
-
-  describe('ChineseHoroscopeCronService', () => {
-    let service: ChineseHoroscopeCronService;
-    let chineseService: ChineseHoroscopeService;
-
-    const mockChineseService = {
-      findAllByYear: jest.fn(),
-      generateAllForYear: jest.fn(),
-    };
-
-    beforeEach(async () => {
-      const module: TestingModule = await Test.createTestingModule({
-        providers: [
-          ChineseHoroscopeCronService,
-          {
-            provide: ChineseHoroscopeService,
-            useValue: mockChineseService,
-          },
-        ],
-      }).compile();
-
-      service = module.get<ChineseHoroscopeCronService>(ChineseHoroscopeCronService);
-      chineseService = module.get<ChineseHoroscopeService>(ChineseHoroscopeService);
-
-      jest.clearAllMocks();
-    });
-
-    it('should be defined', () => {
-      expect(service).toBeDefined();
-    });
-
-    describe('generateNextYearHoroscopes', () => {
-      it('should generate horoscopes for next year if none exist', async () => {
-        mockChineseService.findAllByYear.mockResolvedValue([]);
-        mockChineseService.generateAllForYear.mockResolvedValue({
-          successful: 12,
-          failed: 0,
-          results: [],
-        });
-
-        await service.generateNextYearHoroscopes();
-
-        const nextYear = new Date().getFullYear() + 1;
-        expect(chineseService.findAllByYear).toHaveBeenCalledWith(nextYear);
-        expect(chineseService.generateAllForYear).toHaveBeenCalledWith(nextYear);
-      });
-
-      it('should not generate if horoscopes already exist', async () => {
-        mockChineseService.findAllByYear.mockResolvedValue([
-          { id: 1, animal: 'rat', year: 2027 },
-        ]);
-
-        await service.generateNextYearHoroscopes();
-
-        expect(chineseService.generateAllForYear).not.toHaveBeenCalled();
-      });
-
-      it('should handle generation errors gracefully', async () => {
-        mockChineseService.findAllByYear.mockResolvedValue([]);
-        mockChineseService.generateAllForYear.mockRejectedValue(
-          new Error('AI service unavailable')
-        );
-
-        await expect(service.generateNextYearHoroscopes()).resolves.not.toThrow();
-      });
-    });
-
-    describe('generateManually', () => {
-      it('should generate horoscopes for specified year', async () => {
-        mockChineseService.generateAllForYear.mockResolvedValue({
-          successful: 12,
-          failed: 0,
-          results: [],
-        });
-
-        await service.generateManually(2028);
-
-        expect(chineseService.generateAllForYear).toHaveBeenCalledWith(2028);
-      });
-
-      it('should default to next year if no year specified', async () => {
-        mockChineseService.generateAllForYear.mockResolvedValue({
-          successful: 12,
-          failed: 0,
-          results: [],
-        });
-
-        await service.generateManually();
-
-        const nextYear = new Date().getFullYear() + 1;
-        expect(chineseService.generateAllForYear).toHaveBeenCalledWith(nextYear);
-      });
-    });
-  });
-  ```
-
-- [ ] Actualizar `horoscope.module.ts`:
-
-  ```typescript
-  import { ChineseHoroscopeCronService } from './application/services/chinese-horoscope-cron.service';
-
-  @Module({
-    imports: [
-      TypeOrmModule.forFeature([DailyHoroscope, ChineseHoroscope]),
-      AIModule,
-      UsersModule,
-    ],
-    providers: [
-      HoroscopeGenerationService,
-      HoroscopeCronService,
-      ChineseHoroscopeService,
-      ChineseHoroscopeCronService, // 🆕 Cron para horóscopos chinos
-    ],
-    controllers: [HoroscopeController, ChineseHoroscopeController],
-    exports: [HoroscopeGenerationService, ChineseHoroscopeService],
-  })
-  export class HoroscopeModule {}
-  ```
+- [x] Crear `chinese-horoscope-cron.service.ts`:
+- [x] Crear tests `chinese-horoscope-cron.service.spec.ts`
+- [x] Actualizar `horoscope.module.ts`
 
 ##### Testing
 
-- [ ] Test: Genera horóscopos automáticamente el 15 de diciembre
-- [ ] Test: No regenera si ya existen horóscopos
-- [ ] Test: Maneja errores correctamente
-- [ ] Test: Método manual funciona correctamente
+- [x] Test: Genera horóscopos automáticamente el 15 de diciembre
+- [x] Test: No regenera si ya existen horóscopos
+- [x] Test: Maneja errores correctamente
+- [x] Test: Método manual funciona correctamente
 
 ---
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] Cron job se ejecuta el 15 de diciembre a las 00:00 UTC
-- [ ] Genera automáticamente los 12 horóscopos del año siguiente
-- [ ] No genera duplicados si ya existen
-- [ ] Registra logs de inicio, progreso y finalización
-- [ ] Método manual disponible para testing
-- [ ] Tests >80% coverage
+- [x] Cron job se ejecuta el 15 de diciembre a las 00:00 UTC
+- [x] Genera automáticamente los 12 horóscopos del año siguiente
+- [x] No genera duplicados si ya existen
+- [x] Registra logs de inicio, progreso y finalización
+- [x] Método manual disponible para testing
+- [x] Tests >80% coverage
 
 ---
 
@@ -2421,7 +2210,7 @@ Día 6 (Opcional - Automatización):
 - [x] TASK-112: Entidad ChineseHoroscope
 - [x] TASK-113: Servicio de generación
 - [x] TASK-114: Endpoints
-- [ ] TASK-118: Cron job anual (Opcional - Automatización)
+- [x] TASK-118: Cron job anual (Opcional - Automatización)
 
 ### Frontend
 
@@ -2434,7 +2223,7 @@ Día 6 (Opcional - Automatización):
 - [x] Migración ejecutada
 - [x] Fechas CNY cargadas (1950-2050)
 - [x] Tests >80% coverage
-- [ ] Cron job anual configurado
+- [x] Cron job anual configurado
 
 ---
 
