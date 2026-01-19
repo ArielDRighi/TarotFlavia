@@ -1,13 +1,15 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { ChineseAnimalSelector } from '@/components/features/chinese-horoscope';
+import { ChineseAnimalSelector, AnimalCalculator } from '@/components/features/chinese-horoscope';
 import { useChineseHoroscopesByYear } from '@/hooks/api/useChineseHoroscope';
+import { useAuth } from '@/hooks/useAuth';
 import { ROUTES } from '@/lib/constants/routes';
 import type { ChineseZodiacAnimal } from '@/types/chinese-horoscope.types';
 
 export default function HoroscopoChinoPage() {
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
   const currentYear = new Date().getFullYear();
   useChineseHoroscopesByYear(currentYear);
 
@@ -21,6 +23,13 @@ export default function HoroscopoChinoPage() {
         <h1 className="mb-2 font-serif text-4xl">Horóscopo Chino {currentYear}</h1>
         <p className="text-muted-foreground">Descubre las predicciones anuales según tu animal</p>
       </div>
+
+      {/* Calculador para usuarios no autenticados */}
+      {!isAuthenticated && (
+        <div className="mx-auto mb-8 max-w-md">
+          <AnimalCalculator onAnimalFound={handleAnimalSelect} />
+        </div>
+      )}
 
       {/* Selector de animales */}
       <ChineseAnimalSelector onSelect={handleAnimalSelect} />

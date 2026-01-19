@@ -4,6 +4,9 @@
  * Barrel export for all Chinese horoscope-related components
  */
 
+export { AnimalCalculator } from './AnimalCalculator';
+export type { AnimalCalculatorProps } from './AnimalCalculator';
+
 export { ChineseAnimalCard } from './ChineseAnimalCard';
 export type { ChineseAnimalCardProps } from './ChineseAnimalCard';
 
@@ -17,3 +20,5 @@ export { ChineseHoroscopeDetail } from './ChineseHoroscopeDetail';
 export type { ChineseHoroscopeDetailProps } from './ChineseHoroscopeDetail';
 
 export { ChineseHoroscopeSkeleton } from './ChineseHoroscopeSkeleton';
+
+export { ChineseHoroscopeWidget } from './ChineseHoroscopeWidget';
