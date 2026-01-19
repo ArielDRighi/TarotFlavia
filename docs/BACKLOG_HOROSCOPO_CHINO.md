@@ -2882,38 +2882,151 @@ Modificar la entidad `ChineseHoroscope` para soportar la combinación animal + e
 
 **Módulo:** `backend`  
 **Prioridad:** 🔴 ALTA  
-**Estimación:** 1 día  
+**Estimación:** 1.5 días  
 **Dependencias:** TASK-124  
 **Estado:** 📋 PENDIENTE
 
 #### Descripción
 
-Modificar el servicio de generación para crear horóscopos personalizados para cada combinación animal/elemento.
+Modificar el servicio de generación para crear horóscopos personalizados para cada combinación animal/elemento (12 animales × 5 elementos = 60 horóscopos por año).
+
+**Nota:** La generación se ejecuta **1 vez al año** (cron job automático o comando admin manual), por lo que un tiempo de 10-15 minutos es completamente aceptable.
+
+---
+
+#### 🔧 Análisis Técnico de Rate Limits
+
+**Proveedores configurados (con fallback automático):**
+
+| Proveedor | Modelo           | Rate Limit (Free) | Orden               |
+| --------- | ---------------- | ----------------- | ------------------- |
+| Groq      | llama-3.1-70b    | ~30 RPM, 6K TPM   | 1º (principal)      |
+| Gemini    | gemini-1.5-flash | 15 RPM, 1M TPM    | 2º (fallback)       |
+| DeepSeek  | deepseek-chat    | ~60 RPM           | 3º                  |
+| OpenAI    | gpt-4            | Por pago          | 4º (último recurso) |
+
+**Cálculo de tiempo:**
+
+- Cada horóscopo: ~1,500 tokens
+- Delay seguro: 10 segundos entre requests (6 RPM)
+- 60 horóscopos × 10s = **10 minutos** de generación
+- Con overhead y reintentos: **~15 minutos máximo**
+
+**Código actual (12 horóscopos):**
+
+```typescript
+// Delay de 5s entre cada generación
+if (i > 0) {
+  await this.delay(5000);
+}
+```
+
+**Cambio requerido (60 horóscopos):**
+
+```typescript
+// Delay de 10s para respetar rate limits con 60 requests
+if (i > 0) {
+  await this.delay(10000);
+}
+```
+
+---
 
 #### Tareas Específicas
 
-- [ ] Actualizar prompt de IA para incluir elemento del usuario
-- [ ] Modificar `generateAllHoroscopes` para generar 60 variantes
-- [ ] Agregar batch processing con delays (evitar rate limits)
-- [ ] Incluir interacción elemento nacimiento vs elemento del año en prompt
-- [ ] Actualizar admin command para regeneración masiva
-- [ ] Tests para generación de múltiples elementos
+##### Servicio de Generación
 
-#### Prompt Context Adicional
+- [ ] Crear nuevo método `generateForAnimalElement(animal, element, year)`
+- [ ] Modificar `generateAllForYear` para iterar 60 combinaciones:
+  ```typescript
+  async generateAllForYear(year: number) {
+    const animals = Object.values(ChineseZodiacAnimal);
+    const elements = Object.values(ChineseElement);
+    const results: GenerationResult[] = [];
+    let index = 0;
 
-```
-El usuario es un {animal} de {elemento}.
-El año {año} es un año de {elemento_año}.
-Considera la interacción entre {elemento} y {elemento_año}:
-- Ciclo productivo: Madera→Fuego→Tierra→Metal→Agua→Madera
-- Ciclo destructivo: Madera→Tierra→Agua→Fuego→Metal→Madera
-```
+    for (const animal of animals) {
+      for (const element of elements) {
+        index++;
+        if (index > 1) await this.delay(10000); // 10s entre requests
+
+        this.logger.log(`[${index}/60] Generando ${animal} de ${element}...`);
+        const result = await this.generateForAnimalElement(animal, element, year);
+        results.push(result);
+      }
+    }
+
+    return {
+      successful: results.filter(r => r.success).length,
+      failed: results.filter(r => !r.success).length,
+      totalTime: `~${Math.ceil(index * 10 / 60)} minutos`,
+      results
+    };
+  }
+  ```
+- [ ] Actualizar delay de 5s a 10s para mayor seguridad con rate limits
+- [ ] Agregar logging de progreso mejorado (`[X/60]`)
+- [ ] Agregar tiempo total estimado al resumen final
+
+##### Prompt de IA
+
+- [ ] Actualizar `CHINESE_HOROSCOPE_USER_PROMPT` para incluir elemento del usuario:
+
+  ```typescript
+  export const CHINESE_HOROSCOPE_USER_PROMPT = (
+    animal: ChineseZodiacAnimal,
+    birthElement: ChineseElement, // NUEVO
+    year: number,
+    animalInfo: ZodiacInfo,
+    yearInfo: YearInfo,
+  ) => `
+  Genera el horóscopo anual para: ${animalInfo.nameEs} de ${birthElement}
+  
+  CONTEXTO IMPORTANTE:
+  - Animal del zodiaco: ${animal} (${animalInfo.nameEs})
+  - Elemento de nacimiento: ${birthElement}
+  - Año: ${year}
+  - Animal del año: ${yearInfo.animal}
+  - Elemento del año: ${yearInfo.element}
+  
+  INTERACCIÓN DE ELEMENTOS (Wu Xing):
+  - Ciclo productivo: Madera→Fuego→Tierra→Metal→Agua→Madera
+  - Ciclo destructivo: Madera→Tierra→Agua→Fuego→Metal→Madera
+  - Relación ${birthElement} con ${yearInfo.element}: [calcular si es productivo, destructivo o neutro]
+  
+  El horóscopo debe reflejar cómo la interacción entre el elemento de nacimiento
+  y el elemento del año afecta las predicciones del usuario.
+  ...
+  `;
+  ```
+
+##### Admin Command
+
+- [ ] Actualizar comando admin para generar 60 horóscopos
+- [ ] Agregar opción para generar solo un animal específico (12 elementos)
+- [ ] Agregar opción para generar solo un elemento específico (12 animales)
+- [ ] Mostrar barra de progreso o logs incrementales
+
+##### Tests
+
+- [ ] Test: `generateForAnimalElement` genera horóscopo correcto
+- [ ] Test: `generateAllForYear` genera 60 horóscopos
+- [ ] Test: Delay de 10s se respeta entre generaciones
+- [ ] Test: Prompt incluye información de elemento
+- [ ] Test: Resumen final muestra estadísticas correctas
+
+---
 
 #### Criterios de Aceptación
 
-- [ ] Se generan 60 horóscopos por año
-- [ ] Cada horóscopo menciona la interacción de elementos
-- [ ] Rate limiting respetado (60 calls con delays)
+- [ ] Se generan exactamente 60 horóscopos por año (12 × 5)
+- [ ] Cada horóscopo es único para la combinación animal/elemento
+- [ ] Prompt menciona la interacción Wu Xing entre elementos
+- [ ] Rate limiting respetado (delay 10s = 6 RPM)
+- [ ] Tiempo total de generación: 10-15 minutos (aceptable para tarea anual)
+- [ ] Logging muestra progreso `[1/60]...[60/60]`
+- [ ] Fallback a otros proveedores funciona si uno falla
+- [ ] Tests cubren nuevos métodos
 
 ---
 
