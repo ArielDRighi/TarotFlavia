@@ -3085,7 +3085,7 @@ Response:
 **Prioridad:** 🟡 MEDIA  
 **Estimación:** 1 día  
 **Dependencias:** TASK-126  
-**Estado:** 📋 PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 #### Descripción
 
@@ -3093,12 +3093,12 @@ Rediseñar la página principal de horóscopo chino para que siempre solicite fe
 
 #### Tareas Específicas
 
-- [ ] Usuario logueado con birthDate: destacar SU card animal/elemento
-- [ ] Usuario sin birthDate: mostrar calculador prominente
-- [ ] Click en otro animal: abrir modal/form para ingresar año
-- [ ] Actualizar ChineseAnimalSelector con indicador visual del animal propio
-- [ ] Agregar YearSelectorModal component
-- [ ] Tests para todos los flujos
+- [x] Usuario logueado con birthDate: destacar SU card animal/elemento
+- [x] Usuario sin birthDate: mostrar calculador prominente
+- [x] Click en otro animal: abrir modal/form para ingresar año
+- [x] Actualizar ChineseAnimalSelector con indicador visual del animal propio
+- [x] Agregar YearSelectorModal component
+- [x] Tests para todos los flujos
 
 #### Mockup UX
 
@@ -3115,10 +3115,10 @@ Rediseñar la página principal de horóscopo chino para que siempre solicite fe
 
 #### Criterios de Aceptación
 
-- [ ] Usuario ve su animal/elemento destacado
-- [ ] Modal de año funciona correctamente
-- [ ] Navegación fluida entre animales
-- [ ] Tests cubren flujos principales
+- [x] Usuario ve su animal/elemento destacado
+- [x] Modal de año funciona correctamente
+- [x] Navegación fluida entre animales
+- [x] Tests cubren flujos principales
 
 ---
 
@@ -3304,7 +3304,7 @@ Actualizar `API_DOCUMENTATION.md` con los nuevos endpoints y eliminar referencia
 - [x] TASK-116: Componentes UI
 - [x] TASK-117: Páginas
 - [x] TASK-122: Mostrar elemento en UI (HU-HCH-005)
-- [ ] TASK-127: Actualizar página /horoscopo-chino (HU-HCH-006)
+- [x] TASK-127: Actualizar página /horoscopo-chino (HU-HCH-006)
 - [ ] TASK-128: Actualizar página /horoscopo-chino/[animal] (HU-HCH-006)
 - [ ] TASK-129: Integrar calculador con navegación (HU-HCH-006)
 
