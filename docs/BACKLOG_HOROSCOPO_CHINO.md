@@ -2385,7 +2385,7 @@ Actualizar el DTO de respuesta del cálculo de animal para incluir los nuevos ca
 **Prioridad:** 🔴 ALTA  
 **Estimación:** 0.5 días (4 horas)  
 **Dependencias:** TASK-119, TASK-120  
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -2408,7 +2408,7 @@ Actualizar los endpoints `calculateAnimal` y `getMyAnimalHoroscope` para que ret
 
 ##### Backend
 
-- [ ] Actualizar endpoint `POST /chinese-horoscope/calculate-animal`:
+- [x] Actualizar endpoint `POST /chinese-horoscope/calculate-animal`:
 
   ```typescript
   @Post('calculate-animal')
@@ -2434,23 +2434,23 @@ Actualizar los endpoints `calculateAnimal` y `getMyAnimalHoroscope` para que ret
   }
   ```
 
-- [ ] Actualizar endpoint `GET /chinese-horoscope/my-animal` (si aplica)
+- [x] Actualizar endpoint `GET /chinese-horoscope/my-animal` (si aplica)
 
 ##### Testing
 
-- [ ] Test: calculateAnimal retorna birthElement correcto
-- [ ] Test: calculateAnimal retorna fullZodiacType correcto
-- [ ] Test: Fecha borde CNY retorna elemento correcto
-- [ ] Test: Swagger documenta nuevos campos
+- [x] Test: calculateAnimal retorna birthElement correcto
+- [x] Test: calculateAnimal retorna fullZodiacType correcto
+- [x] Test: Fecha borde CNY retorna elemento correcto
+- [x] Test: Swagger documenta nuevos campos
 
 ---
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] Endpoint calculateAnimal retorna nuevos campos
-- [ ] Swagger documentation actualizada
-- [ ] Tests cubren nuevos campos
-- [ ] Backward compatible (campos adicionales, no breaking changes)
+- [x] Endpoint calculateAnimal retorna nuevos campos
+- [x] Swagger documentation actualizada
+- [x] Tests cubren nuevos campos
+- [x] Backward compatible (campos adicionales, no breaking changes)
 
 ---
 
@@ -2624,9 +2624,9 @@ Día 7-8 (HU-HCH-005 - Elemento Wu Xing):
 - [x] TASK-113: Servicio de generación
 - [x] TASK-114: Endpoints
 - [x] TASK-118: Cron job anual (Opcional - Automatización)
-- [ ] TASK-119: Exportar getElementByYear y helpers (HU-HCH-005)
-- [ ] TASK-120: Actualizar DTO CalculateAnimalResponseDto (HU-HCH-005)
-- [ ] TASK-121: Actualizar controller con elemento (HU-HCH-005)
+- [x] TASK-119: Exportar getElementByYear y helpers (HU-HCH-005)
+- [x] TASK-120: Actualizar DTO CalculateAnimalResponseDto (HU-HCH-005)
+- [x] TASK-121: Actualizar controller con elemento (HU-HCH-005)
 
 ### Frontend
 
