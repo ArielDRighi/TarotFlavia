@@ -3,7 +3,10 @@ import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { ChineseHoroscopeController } from './chinese-horoscope.controller';
 import { ChineseHoroscopeService } from '../../application/services/chinese-horoscope.service';
 import { UsersService } from '../../../users/users.service';
-import { ChineseZodiacAnimal } from '../../../../common/utils/chinese-zodiac.utils';
+import {
+  ChineseZodiacAnimal,
+  ChineseElement,
+} from '../../../../common/utils/chinese-zodiac.utils';
 import { ChineseHoroscope } from '../../entities/chinese-horoscope.entity';
 
 describe('ChineseHoroscopeController', () => {
@@ -14,8 +17,9 @@ describe('ChineseHoroscopeController', () => {
   const mockChineseHoroscope: ChineseHoroscope = {
     id: 1,
     animal: ChineseZodiacAnimal.DRAGON,
+    element: 'earth' as ChineseElement,
     year: 2026,
-    generalOverview: 'Un año de transformación para el Dragón.',
+    generalOverview: 'Un año de transformación para el Dragón de Tierra.',
     areas: {
       love: { content: 'El amor florecerá este año.', score: 8 },
       career: { content: 'Oportunidades profesionales abundan.', score: 9 },

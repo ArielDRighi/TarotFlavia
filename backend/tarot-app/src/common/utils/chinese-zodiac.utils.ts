@@ -18,9 +18,21 @@
  */
 
 /**
+ * Array constante de los 5 elementos del zodiaco chino (Wu Xing)
+ * Usado para definir enums en TypeORM y mantener sincronización con el tipo ChineseElement
+ */
+export const CHINESE_ELEMENTS = [
+  'metal',
+  'water',
+  'wood',
+  'fire',
+  'earth',
+] as const;
+
+/**
  * Tipo que representa los 5 elementos del zodiaco chino
  */
-export type ChineseElement = 'metal' | 'water' | 'wood' | 'fire' | 'earth';
+export type ChineseElement = (typeof CHINESE_ELEMENTS)[number];
 
 /**
  * Mapa de elementos en español
