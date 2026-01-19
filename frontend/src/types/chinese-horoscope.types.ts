@@ -66,4 +66,8 @@ export interface CalculateAnimalResponse {
   animal: ChineseZodiacAnimal;
   animalInfo: ChineseZodiacInfo;
   chineseYear: number;
+  birthElement: string;
+  birthElementEs: string;
+  fixedElement: string;
+  fullZodiacType: string;
 }

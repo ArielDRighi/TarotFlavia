@@ -27,6 +27,10 @@ function createMockCalculateResponse(
       characteristics: ['Confiado', 'Inteligente', 'Entusiasta'],
     },
     chineseYear: 1988,
+    birthElement: 'earth',
+    birthElementEs: 'Tierra',
+    fixedElement: 'earth',
+    fullZodiacType: 'Dragón de Tierra',
     ...overrides,
   };
 }
@@ -191,7 +195,7 @@ describe('AnimalCalculator', () => {
       expect(screen.getByText('🐉')).toBeInTheDocument();
     });
 
-    it('should display animal name in Spanish', () => {
+    it('should display full zodiac type (animal + element)', () => {
       mockUseCalculateAnimal.mockReturnValue({
         data: createMockCalculateResponse(),
         isLoading: false,
@@ -200,7 +204,7 @@ describe('AnimalCalculator', () => {
 
       render(<AnimalCalculator />);
 
-      expect(screen.getByText('Eres Dragón')).toBeInTheDocument();
+      expect(screen.getByTestId('full-zodiac-type')).toHaveTextContent('Eres Dragón de Tierra');
     });
 
     it('should display Chinese year', () => {
@@ -215,8 +219,7 @@ describe('AnimalCalculator', () => {
       expect(screen.getByText('Año chino: 1988')).toBeInTheDocument();
     });
 
-    // TODO: Re-enable when TASK-119-121 implement birthElement
-    it.skip('should display element (pending Wu Xing implementation)', () => {
+    it('should display birth element with icon', () => {
       mockUseCalculateAnimal.mockReturnValue({
         data: createMockCalculateResponse(),
         isLoading: false,
@@ -225,8 +228,8 @@ describe('AnimalCalculator', () => {
 
       render(<AnimalCalculator />);
 
-      // Will use data.birthElementEs when available
-      expect(screen.getByText('Elemento: Tierra')).toBeInTheDocument();
+      const elementText = screen.getByTestId('birth-element');
+      expect(elementText).toHaveTextContent('Elemento: 🟤 Tierra');
     });
 
     it('should display characteristics', () => {
@@ -289,7 +292,7 @@ describe('AnimalCalculator', () => {
   });
 
   describe('Different Animals', () => {
-    it('should display correct info for Rat', () => {
+    it('should display correct info for Rat with Metal element', () => {
       mockUseCalculateAnimal.mockReturnValue({
         data: createMockCalculateResponse({
           animal: ChineseZodiacAnimal.RAT,
@@ -302,6 +305,10 @@ describe('AnimalCalculator', () => {
             characteristics: ['Inteligente', 'Adaptable'],
           },
           chineseYear: 2020,
+          birthElement: 'metal',
+          birthElementEs: 'Metal',
+          fixedElement: 'water',
+          fullZodiacType: 'Rata de Metal',
         }),
         isLoading: false,
         error: null,
@@ -310,12 +317,12 @@ describe('AnimalCalculator', () => {
       render(<AnimalCalculator />);
 
       expect(screen.getByText('🐀')).toBeInTheDocument();
-      expect(screen.getByText('Eres Rata')).toBeInTheDocument();
+      expect(screen.getByTestId('full-zodiac-type')).toHaveTextContent('Eres Rata de Metal');
       expect(screen.getByText('Año chino: 2020')).toBeInTheDocument();
-      // TODO: Add element assertion when Wu Xing feature is implemented (TASK-119-121)
+      expect(screen.getByTestId('birth-element')).toHaveTextContent('Elemento: ⚪ Metal');
     });
 
-    it('should display correct info for Snake', () => {
+    it('should display correct info for Snake with Fire element', () => {
       mockUseCalculateAnimal.mockReturnValue({
         data: createMockCalculateResponse({
           animal: ChineseZodiacAnimal.SNAKE,
@@ -328,6 +335,10 @@ describe('AnimalCalculator', () => {
             characteristics: ['Enigmático', 'Sabio'],
           },
           chineseYear: 2025,
+          birthElement: 'wood',
+          birthElementEs: 'Madera',
+          fixedElement: 'fire',
+          fullZodiacType: 'Serpiente de Madera',
         }),
         isLoading: false,
         error: null,
@@ -336,8 +347,24 @@ describe('AnimalCalculator', () => {
       render(<AnimalCalculator />);
 
       expect(screen.getByText('🐍')).toBeInTheDocument();
-      expect(screen.getByText('Eres Serpiente')).toBeInTheDocument();
+      expect(screen.getByTestId('full-zodiac-type')).toHaveTextContent('Eres Serpiente de Madera');
       expect(screen.getByText('Año chino: 2025')).toBeInTheDocument();
+      expect(screen.getByTestId('birth-element')).toHaveTextContent('Elemento: 🟢 Madera');
+    });
+
+    it('should fallback to animal name when fullZodiacType is not available', () => {
+      mockUseCalculateAnimal.mockReturnValue({
+        data: {
+          ...createMockCalculateResponse(),
+          fullZodiacType: '',
+        },
+        isLoading: false,
+        error: null,
+      });
+
+      render(<AnimalCalculator />);
+
+      expect(screen.getByTestId('full-zodiac-type')).toHaveTextContent('Eres Dragón');
     });
   });
 
