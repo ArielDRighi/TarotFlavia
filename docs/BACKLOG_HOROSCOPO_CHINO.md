@@ -2792,16 +2792,21 @@ Día 9-13 (HU-HCH-006 - Horóscopos por Animal/Elemento):
 ├── TASK-127: Actualizar página /horoscopo-chino con selector (1d)
 ├── TASK-128: Actualizar página /horoscopo-chino/[animal] (1d)
 └── TASK-129: Integrar calculador con navegación (0.5d)
+
+Día 14 (HU-HCH-006 - Cleanup):
+├── TASK-130: Eliminar endpoint GET /:animal obsoleto (0.25d)
+├── TASK-131: Migración de datos a 60 horóscopos (0.5d)
+└── TASK-132: Actualizar documentación de API (0.25d)
 ```
 
-**Total:** 4-5 días (MVP), 5.5 días (con automatización), 7 días (con Wu Xing), 11.5 días (con Horóscopos Animal/Elemento)
+**Total:** 4-5 días (MVP), 5.5 días (con automatización), 7 días (con Wu Xing), 12.5 días (con Horóscopos Animal/Elemento + Cleanup)
 
 ---
 
 ## HU-HCH-006: Horóscopos Personalizados por Animal/Elemento
 
 **Prioridad:** 🟡 MEDIA  
-**Estimación Total:** 4.5 días  
+**Estimación Total:** 5.5 días (incluye cleanup)  
 **Estado:** 📋 PENDIENTE
 
 ---
@@ -3074,6 +3079,93 @@ Conectar el AnimalCalculator con navegación directa al horóscopo completo del 
 
 ---
 
+### TASK-130: Eliminar endpoint GET /:animal obsoleto
+
+**Módulo:** `backend`  
+**Prioridad:** 🟡 MEDIA  
+**Estimación:** 0.25 días  
+**Dependencias:** TASK-126, TASK-128  
+**Estado:** 📋 PENDIENTE
+
+#### Descripción
+
+Eliminar el endpoint `GET /chinese-horoscope/:animal` que ya no tiene sentido sin el elemento. Este endpoint retornaba el horóscopo genérico del animal, pero con el nuevo sistema profesional siempre se requiere el elemento.
+
+#### Tareas Específicas
+
+- [ ] Verificar que no hay referencias al endpoint en el frontend
+- [ ] Eliminar método `getHoroscopeByAnimal` del controller
+- [ ] Eliminar tests asociados al endpoint obsoleto
+- [ ] Actualizar Swagger/OpenAPI (remover endpoint)
+- [ ] Verificar que `/my-animal` y `/:animal/:element` funcionan correctamente
+
+#### Criterios de Aceptación
+
+- [ ] Endpoint `GET /:animal` retorna 404 o no existe
+- [ ] No hay código muerto en el controller
+- [ ] Tests actualizados sin referencias al endpoint eliminado
+
+---
+
+### TASK-131: Migración de datos a 60 horóscopos
+
+**Módulo:** `backend`  
+**Prioridad:** 🟡 MEDIA  
+**Estimación:** 0.5 días  
+**Dependencias:** TASK-124, TASK-125  
+**Estado:** 📋 PENDIENTE
+
+#### Descripción
+
+Crear migración para eliminar los 12 horóscopos genéricos actuales y reemplazarlos con los 60 horóscopos por animal/elemento. Incluye backup de datos actuales.
+
+#### Tareas Específicas
+
+- [ ] Crear script de backup de horóscopos actuales (por si se necesita rollback)
+- [ ] Crear migración que:
+  - Elimina registros actuales (12 por año)
+  - Ejecuta generación de 60 nuevos horóscopos
+- [ ] Agregar seed para ambiente de desarrollo
+- [ ] Documentar proceso de rollback
+- [ ] Test de migración en ambiente de staging
+
+#### Criterios de Aceptación
+
+- [ ] Base de datos tiene exactamente 60 horóscopos por año
+- [ ] Cada combinación animal/elemento tiene su registro
+- [ ] Backup disponible para rollback
+- [ ] Migración es idempotente
+
+---
+
+### TASK-132: Actualizar documentación de API
+
+**Módulo:** `docs`  
+**Prioridad:** 🟢 BAJA  
+**Estimación:** 0.25 días  
+**Dependencias:** TASK-126, TASK-130  
+**Estado:** 📋 PENDIENTE
+
+#### Descripción
+
+Actualizar `API_DOCUMENTATION.md` con los nuevos endpoints y eliminar referencias al endpoint obsoleto.
+
+#### Tareas Específicas
+
+- [ ] Documentar `GET /chinese-horoscope/:animal/:element`
+- [ ] Eliminar documentación de `GET /chinese-horoscope/:animal`
+- [ ] Actualizar ejemplos de request/response
+- [ ] Agregar sección sobre Wu Xing y cálculo de elementos
+- [ ] Actualizar diagramas de flujo si existen
+
+#### Criterios de Aceptación
+
+- [ ] Documentación refleja estado actual de la API
+- [ ] No hay referencias a endpoints obsoletos
+- [ ] Ejemplos son correctos y ejecutables
+
+---
+
 ## CHECKLIST DE COMPLETITUD
 
 ### Backend
@@ -3090,6 +3182,8 @@ Conectar el AnimalCalculator con navegación directa al horóscopo completo del 
 - [ ] TASK-124: Modificar schema DB para 60 horóscopos (HU-HCH-006)
 - [ ] TASK-125: Actualizar generador AI para 60 variantes (HU-HCH-006)
 - [ ] TASK-126: Crear endpoint /:animal/:element (HU-HCH-006)
+- [ ] TASK-130: Eliminar endpoint GET /:animal obsoleto (HU-HCH-006 Cleanup)
+- [ ] TASK-131: Migración de datos a 60 horóscopos (HU-HCH-006 Cleanup)
 
 ### Frontend
 
@@ -3100,6 +3194,10 @@ Conectar el AnimalCalculator con navegación directa al horóscopo completo del 
 - [ ] TASK-127: Actualizar página /horoscopo-chino (HU-HCH-006)
 - [ ] TASK-128: Actualizar página /horoscopo-chino/[animal] (HU-HCH-006)
 - [ ] TASK-129: Integrar calculador con navegación (HU-HCH-006)
+
+### Documentación
+
+- [ ] TASK-132: Actualizar documentación de API (HU-HCH-006 Cleanup)
 
 ### Infraestructura
 
