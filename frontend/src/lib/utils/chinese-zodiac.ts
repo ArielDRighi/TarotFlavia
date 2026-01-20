@@ -147,6 +147,44 @@ const ELEMENT_ICONS: Record<string, string> = {
 };
 
 /**
+ * Chinese element type codes
+ */
+export type ChineseElementCode = 'metal' | 'water' | 'wood' | 'fire' | 'earth';
+
+/**
+ * Obtiene el elemento para un año específico (gregoriano)
+ * Los 5 elementos rotan cada 2 años: Metal, Water, Wood, Fire, Earth
+ *
+ * @param year - Año gregoriano
+ * @returns Código del elemento (metal, water, wood, fire, earth)
+ *
+ * @example
+ * ```typescript
+ * getElementForYear(1988); // 'earth'
+ * getElementForYear(2000); // 'metal'
+ * getElementForYear(2026); // 'fire'
+ * ```
+ */
+export function getElementForYear(year: number): ChineseElementCode {
+  const elements: ChineseElementCode[] = [
+    'metal',
+    'metal',
+    'water',
+    'water',
+    'wood',
+    'wood',
+    'fire',
+    'fire',
+    'earth',
+    'earth',
+  ];
+
+  // Comenzando desde 1900 (Metal)
+  const index = (year - 1900) % 10;
+  return elements[index >= 0 ? index : index + 10];
+}
+
+/**
  * Obtiene el ícono emoji para un elemento Wu Xing
  * @param element - Código del elemento (metal, water, wood, fire, earth)
  * @returns Emoji del elemento o fallback ⭕ si no se reconoce
