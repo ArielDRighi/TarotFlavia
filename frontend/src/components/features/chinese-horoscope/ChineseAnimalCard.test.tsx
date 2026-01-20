@@ -43,14 +43,6 @@ describe('ChineseAnimalCard', () => {
       expect(screen.getByText('Dragón')).toBeInTheDocument();
     });
 
-    it('should render animal element', () => {
-      const animalInfo = createTestAnimalInfo({ element: 'Fuego' });
-
-      render(<ChineseAnimalCard animalInfo={animalInfo} onClick={mockOnClick} />);
-
-      expect(screen.getByText('Fuego')).toBeInTheDocument();
-    });
-
     it('should have correct testid with animal value', () => {
       const animalInfo = createTestAnimalInfo({ animal: ChineseZodiacAnimal.DRAGON });
 

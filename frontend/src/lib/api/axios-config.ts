@@ -133,11 +133,17 @@ apiClient.interceptors.response.use(
     // Check originalRequest exists to handle network errors without config
     const isAuthEndpoint = originalRequest?.url?.includes('/auth/');
 
+    // Also skip if no access_token was ever set (user never authenticated)
+    // This prevents redirect to login for anonymous users hitting protected endpoints
+    const hasAccessToken =
+      typeof window !== 'undefined' && localStorage.getItem('access_token') !== null;
+
     if (
       error.response?.status === 401 &&
       originalRequest &&
       !originalRequest._retry &&
-      !isAuthEndpoint
+      !isAuthEndpoint &&
+      hasAccessToken
     ) {
       if (isRefreshing) {
         // If already refreshing, queue this request to retry after refresh completes

@@ -343,10 +343,16 @@ describe('axios-config', () => {
         config: { url: '/test', _retry: false, headers: {} },
       } as unknown as AxiosError;
 
-      // No refresh token available
-      localStorageMock.getItem.mockReturnValue(null);
+      // No access token available (user never authenticated)
+      localStorageMock.getItem.mockImplementation((key) => {
+        if (key === 'access_token') return null;
+        if (key === 'refresh_token') return 'refresh-token';
+        return null;
+      });
 
-      await expect(errorHandler(mockError)).rejects.toThrow('No refresh token available');
+      // Should NOT attempt refresh and should reject with original error
+      await expect(errorHandler(mockError)).rejects.toEqual(mockError);
+      expect(mockPost).not.toHaveBeenCalled();
     });
 
     it('should clear tokens and redirect to /login on refresh failure', async () => {

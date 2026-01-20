@@ -28,7 +28,7 @@ export type ChineseElementCode = 'metal' | 'water' | 'wood' | 'fire' | 'earth';
 
 export interface ChineseHoroscopeArea {
   content: string;
-  rating: number;
+  score: number;
 }
 
 export interface ChineseHoroscopeLucky {

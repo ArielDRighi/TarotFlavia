@@ -30,19 +30,19 @@ function createMockHoroscope(overrides?: Partial<ChineseHoroscope>): ChineseHoro
     areas: {
       love: {
         content: 'El amor florecerá en primavera.',
-        rating: 8,
+        score: 8,
       },
       career: {
         content: 'Excelente año para avances profesionales.',
-        rating: 9,
+        score: 9,
       },
       wellness: {
         content: 'Mantén el equilibrio entre trabajo y descanso.',
-        rating: 7,
+        score: 7,
       },
       finance: {
         content: 'Las inversiones serán favorables.',
-        rating: 8,
+        score: 8,
       },
     },
     luckyElements: {
@@ -340,7 +340,7 @@ describe('ChineseHoroscopeWidget', () => {
       expect(screen.getByText('💰')).toBeInTheDocument();
     });
 
-    it('should render link to full horoscope page', () => {
+    it('should render link to full horoscope page with element', () => {
       mockUseMyAnimalHoroscope.mockReturnValue({
         data: createMockHoroscope(),
         isLoading: false,
@@ -350,7 +350,7 @@ describe('ChineseHoroscopeWidget', () => {
       render(<ChineseHoroscopeWidget />);
 
       const link = screen.getByRole('link', { name: /ver más/i });
-      expect(link).toHaveAttribute('href', '/horoscopo-chino/dragon');
+      expect(link).toHaveAttribute('href', '/horoscopo-chino/dragon?element=earth');
     });
   });
 
@@ -391,7 +391,7 @@ describe('ChineseHoroscopeWidget', () => {
       expect(screen.getByText('Serpiente de Fuego')).toBeInTheDocument();
     });
 
-    it('should link to correct animal page', () => {
+    it('should link to correct animal page with element', () => {
       mockUseMyAnimalHoroscope.mockReturnValue({
         data: createMockHoroscope({ animal: ChineseZodiacAnimal.TIGER }),
         isLoading: false,
@@ -401,7 +401,8 @@ describe('ChineseHoroscopeWidget', () => {
       render(<ChineseHoroscopeWidget />);
 
       const link = screen.getByRole('link', { name: /ver más/i });
-      expect(link).toHaveAttribute('href', '/horoscopo-chino/tiger');
+      // Default birthElement from createMockHoroscope is 'earth'
+      expect(link).toHaveAttribute('href', '/horoscopo-chino/tiger?element=earth');
     });
   });
 

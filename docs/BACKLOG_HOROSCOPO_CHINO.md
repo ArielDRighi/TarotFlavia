@@ -2938,6 +2938,7 @@ if (i > 0) {
 
 - [x] Crear nuevo método `generateForAnimalElement(animal, element, year)`
 - [x] Modificar `generateAllForYear` para iterar 60 combinaciones:
+
   ```typescript
   async generateAllForYear(year: number) {
     const animals = Object.values(ChineseZodiacAnimal);
@@ -2964,6 +2965,7 @@ if (i > 0) {
     };
   }
   ```
+
 - [x] Actualizar delay de 5s a 10s para mayor seguridad con rate limits
 - [x] Agregar logging de progreso mejorado (`[X/60]`)
 - [x] Agregar tiempo total estimado al resumen final
@@ -3164,20 +3166,25 @@ Modificar la página de detalle para mostrar horóscopo específico animal/eleme
 #### Implementación Final
 
 **Componentes creados:**
+
 - `YearInputBanner.tsx` - Banner para solicitar año de nacimiento
 - `YearInputBanner.test.tsx` - Tests completos (10 tests)
 
 **Endpoints agregados:**
+
 - `API_ENDPOINTS.CHINESE_HOROSCOPE.BY_YEAR_ANIMAL_ELEMENT` - Endpoint parametrizado
 
 **Hooks creados:**
+
 - `useChineseHoroscopeByElement()` - Fetch de horóscopo por animal + elemento
 
 **Página actualizada:**
+
 - `/horoscopo-chino/[animal]/page.tsx` - Lógica completa para detectar si es MI animal vs OTRO animal
 - `/horoscopo-chino/[animal]/page.test.tsx` - Tests actualizados (7 tests)
 
 **Decisiones técnicas:**
+
 - Se decidió NO usar sessionStorage para simplificar UX (cada animal empieza sin año)
 - URL pattern: `/horoscopo-chino/[animal]?element=wood`
 - Se usa `useCalculateAnimal` para calcular elemento desde año ingresado
@@ -3309,6 +3316,201 @@ Actualizar `API_DOCUMENTATION.md` con los nuevos endpoints y eliminar referencia
 - [ ] Documentación refleja estado actual de la API
 - [ ] No hay referencias a endpoints obsoletos
 - [ ] Ejemplos son correctos y ejecutables
+
+---
+
+## 🛠️ BUGFIXES Y MEJORAS - RAMA feature/chinese-horoscope-fixes
+
+**Fecha:** 19 de enero, 2026  
+**Commits:** `edee238`, `e65e73f`  
+**Estado:** ✅ COMPLETADA  
+**PR:** Pendiente → `develop`
+
+---
+
+### 🐛 Bugs Corregidos
+
+#### BUG #1: Usuarios Anónimos Redirigidos a /login
+
+**Problema:**  
+Usuarios no autenticados que accedían a `/horoscopo-chino` eran redirigidos a `/login` automáticamente, impidiendo el acceso público a la funcionalidad.
+
+**Root Cause:**  
+El hook `useMyAnimalHoroscope` se ejecutaba sin condicional `enabled: isAuthenticated`, causando un request 401 que activaba el interceptor de refresh de tokens en usuarios sin sesión.
+
+**Solución:**
+
+- Agregar `enabled: isAuthenticated` a `useMyAnimalHoroscope` en `useChineseHoroscopeMainPage.ts`
+- Agregar check `hasAccessToken` en `axios-config.ts` antes de intentar refresh de tokens
+
+**Archivos modificados:**
+
+- `frontend/src/hooks/utils/useChineseHoroscopeMainPage.ts`
+- `frontend/src/lib/api/axios-config.ts`
+
+**Commit:** `edee238`
+
+---
+
+#### BUG #2: Modal de Año No Calculaba Elemento
+
+**Problema:**  
+Al ingresar el año de nacimiento en el modal, la navegación ocurría sin el parámetro `?element=`, causando que se mostrara el prompt nuevamente en la página de detalle.
+
+**Root Cause:**  
+La función `handleYearConfirm` en `useChineseHoroscopeMainPage.ts` tenía un TODO y solo logueaba el año sin calcular el elemento ni navegar correctamente.
+
+**Solución:**
+
+- Implementar función `getElementForYear(year)` en `chinese-zodiac.ts`
+- Actualizar `handleYearConfirm` para calcular elemento antes de navegar
+- Navegar a `/horoscopo-chino/[animal]?element=[calculatedElement]`
+
+**Archivos modificados:**
+
+- `frontend/src/hooks/utils/useChineseHoroscopeMainPage.ts`
+- `frontend/src/lib/utils/chinese-zodiac.ts`
+
+**Tests:** 187/187 pasando en chinese-horoscope suite
+
+**Commit:** `edee238`
+
+---
+
+#### BUG #3: Link del Widget Sin Parámetro element
+
+**Problema:**  
+El botón "Ver más" del widget del dashboard navegaba a `/horoscopo-chino/[animal]` sin incluir el parámetro `?element=`, causando re-prompts innecesarios.
+
+**Solución:**
+
+- Actualizar link del widget para incluir `?element=${horoscope.birthElement}`
+- Agregar test para verificar presencia del parámetro en URL
+
+**Archivos modificados:**
+
+- `frontend/src/components/features/chinese-horoscope/ChineseHoroscopeWidget.tsx`
+- `frontend/src/components/features/chinese-horoscope/ChineseHoroscopeWidget.test.tsx`
+
+**Tests:** 25/25 pasando en ChineseHoroscopeWidget
+
+**Commit:** `e65e73f`
+
+---
+
+#### BUG #4: Elementos Base Confusos en Selector
+
+**Problema:**  
+Cada card de animal en el selector mostraba un elemento fijo (ej. "Agua", "Tierra") que confundía a los usuarios, ya que el elemento depende del año de nacimiento, no del animal.
+
+**Análisis:**  
+Los elementos base ("fijos") de cada animal son información profesional de astrología china (BaZi) que no deben mostrarse a usuarios finales. Causan confusión porque el usuario espera ver su elemento calculado.
+
+**Solución:**
+
+- Eliminar línea de elemento de `ChineseAnimalCard.tsx`
+- Ahora cada card muestra solo emoji + nombre del animal
+- Tests actualizados para verificar ausencia de elemento base
+
+**Archivos modificados:**
+
+- `frontend/src/components/features/chinese-horoscope/ChineseAnimalCard.tsx`
+- `frontend/src/components/features/chinese-horoscope/ChineseAnimalCard.test.tsx`
+
+**Tests:** 187/187 pasando
+
+**Commit:** `e65e73f` (parte 1)
+
+---
+
+#### BUG #5: Ratings No Se Mostraban (rating vs score)
+
+**Problema:**  
+Las áreas de horóscopo mostraban "/10" sin números en widget y detalle. El elemento rating aparecía como "undefined/10".
+
+**Root Cause:**  
+Mismatch entre backend y frontend:
+
+- **Backend** usa campo `score` en `ChineseHoroscopeArea`
+- **Frontend** esperaba campo `rating`
+
+**Solución:**
+
+- Cambiar todas las referencias de `rating` a `score` en tipos TypeScript
+- Actualizar componentes: `ChineseHoroscopeWidget.tsx`, `ChineseHoroscopeDetail.tsx`
+- Actualizar todos los tests para usar `score`
+
+**Archivos modificados:**
+
+- `frontend/src/types/chinese-horoscope.types.ts`
+- `frontend/src/components/features/chinese-horoscope/ChineseHoroscopeWidget.tsx`
+- `frontend/src/components/features/chinese-horoscope/ChineseHoroscopeDetail.tsx`
+- Tests: `ChineseHoroscopeWidget.test.tsx`, `ChineseHoroscopeDetail.test.tsx`
+
+**Tests:** 25/25 pasando en widget, 36/36 en detail
+
+**Commit:** `e65e73f` (parte 2)
+
+---
+
+#### BUG #6: Elemento No Aparecía en Título de Detalle
+
+**Problema:**  
+La página de detalle mostraba "Serpiente" en lugar de "Serpiente de Fuego", perdiendo información crítica del elemento del usuario.
+
+**Solución:**
+
+- Agregar función `getElementNameEs(element)` en `chinese-zodiac.ts`
+- Agregar prop `element` a componente `ChineseHoroscopeDetail`
+- Actualizar título para mostrar nombre completo: `{animalInfo.nameEs} de {getElementNameEs(element)}`
+- Lógica de fallback: `fullZodiacType` (API) > nombre calculado > solo animal
+
+**Archivos modificados:**
+
+- `frontend/src/lib/utils/chinese-zodiac.ts` - Agregado `ELEMENT_NAMES_ES` y función helper
+- `frontend/src/components/features/chinese-horoscope/ChineseHoroscopeDetail.tsx` - Prop y lógica de display
+- `frontend/src/app/horoscopo-chino/[animal]/page.tsx` - Pasar prop `element` desde query params
+
+**Tests:** 36/36 pasando en ChineseHoroscopeDetail
+
+**Commit:** `e65e73f` (parte 3)
+
+---
+
+### ✅ Verificación de Calidad
+
+**Backend:**
+
+- Tests: ✅ Todos pasando
+- Format: ✅ Sin cambios necesarios
+- Lint: ✅ Sin errores
+- Build: ✅ Exitoso
+- Architecture Validation: ✅ Pasada
+
+**Frontend:**
+
+- Tests: ✅ 187/187 (chinese-horoscope), 36/36 (ChineseHoroscopeDetail), 25/25 (ChineseHoroscopeWidget)
+- Format: ✅ Sin cambios necesarios
+- Lint: ✅ Sin errores
+- Type-check: ✅ Sin errores
+- Build: ✅ Exitoso
+- Architecture Validation: ✅ Pasada
+
+---
+
+### 📊 Resumen de Impacto
+
+| Área       | Archivos Modificados | Tests Agregados/Actualizados | Bugs Corregidos |
+| ---------- | -------------------- | ---------------------------- | --------------- |
+| Hooks      | 1                    | 187                          | 2               |
+| API Config | 1                    | -                            | 1               |
+| Utils      | 1                    | -                            | 2               |
+| Components | 3                    | 61                           | 3               |
+| Pages      | 1                    | -                            | 1               |
+| Types      | 1                    | -                            | 1               |
+| **TOTAL**  | **8**                | **248**                      | **6**           |
+
+**Tiempo invertido:** ~4 horas de bugfixing + testing
 
 ---
 

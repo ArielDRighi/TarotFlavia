@@ -9,6 +9,7 @@ import {
   getAllChineseZodiacAnimals,
   getAllChineseZodiacInfo,
   getElementIcon,
+  getElementForYear,
   CHINESE_ZODIAC_INFO,
 } from '@/lib/utils/chinese-zodiac';
 import { ChineseZodiacAnimal } from '@/types/chinese-horoscope.types';
@@ -222,6 +223,84 @@ describe('chinese zodiac utilities', () => {
     it('should return fallback icon for unknown element', () => {
       expect(getElementIcon('unknown')).toBe('⭕');
       expect(getElementIcon('')).toBe('⭕');
+    });
+  });
+
+  describe('getElementForYear', () => {
+    it('should return correct element for JSDoc examples', () => {
+      // Examples from JSDoc comments
+      expect(getElementForYear(1988)).toBe('earth');
+      expect(getElementForYear(2000)).toBe('metal');
+      expect(getElementForYear(2026)).toBe('fire');
+    });
+
+    it('should return all five elements correctly in rotation', () => {
+      // Test all 5 elements appear in a 10-year cycle
+      expect(getElementForYear(1900)).toBe('metal'); // Metal Yang
+      expect(getElementForYear(1901)).toBe('metal'); // Metal Yin
+      expect(getElementForYear(1902)).toBe('water'); // Water Yang
+      expect(getElementForYear(1903)).toBe('water'); // Water Yin
+      expect(getElementForYear(1904)).toBe('wood'); // Wood Yang
+      expect(getElementForYear(1905)).toBe('wood'); // Wood Yin
+      expect(getElementForYear(1906)).toBe('fire'); // Fire Yang
+      expect(getElementForYear(1907)).toBe('fire'); // Fire Yin
+      expect(getElementForYear(1908)).toBe('earth'); // Earth Yang
+      expect(getElementForYear(1909)).toBe('earth'); // Earth Yin
+    });
+
+    it('should repeat element cycle every 10 years', () => {
+      // Test that the cycle repeats
+      expect(getElementForYear(1910)).toBe('metal'); // Same as 1900
+      expect(getElementForYear(1920)).toBe('metal'); // Same as 1900, 1910
+      expect(getElementForYear(2000)).toBe('metal'); // Same as 1900, 1910, etc.
+    });
+
+    it('should handle recent years correctly', () => {
+      expect(getElementForYear(2020)).toBe('metal');
+      expect(getElementForYear(2021)).toBe('metal');
+      expect(getElementForYear(2022)).toBe('water');
+      expect(getElementForYear(2023)).toBe('water');
+      expect(getElementForYear(2024)).toBe('wood');
+      expect(getElementForYear(2025)).toBe('wood');
+      expect(getElementForYear(2026)).toBe('fire');
+      expect(getElementForYear(2027)).toBe('fire');
+      expect(getElementForYear(2028)).toBe('earth');
+      expect(getElementForYear(2029)).toBe('earth');
+    });
+
+    it('should handle years before 1900', () => {
+      // Test years before the base year (1900)
+      expect(getElementForYear(1890)).toBe('metal'); // 1900 - 10
+      expect(getElementForYear(1898)).toBe('earth'); // Should calculate correctly
+      expect(getElementForYear(1800)).toBe('metal'); // Much earlier year
+    });
+
+    it('should handle edge case years', () => {
+      // Test boundary conditions
+      expect(getElementForYear(1900)).toBe('metal'); // Base year
+      expect(getElementForYear(1899)).toBe('earth'); // Year before base
+      expect(getElementForYear(2100)).toBe('metal'); // Future year
+    });
+
+    it('should return only valid element codes', () => {
+      const validElements = ['metal', 'water', 'wood', 'fire', 'earth'];
+
+      // Test a range of years
+      for (let year = 1900; year <= 2030; year++) {
+        const element = getElementForYear(year);
+        expect(validElements).toContain(element);
+      }
+    });
+
+    it('should maintain yin-yang pairing in element rotation', () => {
+      // Each element appears twice consecutively (Yang then Yin)
+      for (let baseYear = 1900; baseYear <= 2020; baseYear += 10) {
+        expect(getElementForYear(baseYear)).toBe(getElementForYear(baseYear + 1)); // metal/metal
+        expect(getElementForYear(baseYear + 2)).toBe(getElementForYear(baseYear + 3)); // water/water
+        expect(getElementForYear(baseYear + 4)).toBe(getElementForYear(baseYear + 5)); // wood/wood
+        expect(getElementForYear(baseYear + 6)).toBe(getElementForYear(baseYear + 7)); // fire/fire
+        expect(getElementForYear(baseYear + 8)).toBe(getElementForYear(baseYear + 9)); // earth/earth
+      }
     });
   });
 });

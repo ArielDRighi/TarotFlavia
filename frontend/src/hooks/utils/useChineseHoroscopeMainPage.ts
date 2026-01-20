@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation';
 import { useMyAnimalHoroscope, useChineseHoroscopesByYear } from '@/hooks/api/useChineseHoroscope';
 import { useAuth } from '@/hooks/useAuth';
 import { ROUTES } from '@/lib/constants/routes';
-import { CHINESE_ZODIAC_INFO } from '@/lib/utils/chinese-zodiac';
+import { CHINESE_ZODIAC_INFO, getElementForYear } from '@/lib/utils/chinese-zodiac';
 import type { ChineseZodiacAnimal, ChineseHoroscope } from '@/types/chinese-horoscope.types';
 
 interface UseChineseHoroscopeMainPageResult {
@@ -65,7 +65,8 @@ export function useChineseHoroscopeMainPage(): UseChineseHoroscopeMainPageResult
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Fetch user's horoscope if authenticated and has birthDate
-  const { data: myHoroscope } = useMyAnimalHoroscope(currentYear);
+  // Must use enabled: isAuthenticated to prevent 401 errors for anonymous users
+  const { data: myHoroscope } = useMyAnimalHoroscope(currentYear, { enabled: isAuthenticated });
   useChineseHoroscopesByYear(currentYear);
 
   const userAnimal = myHoroscope?.animal || null;
@@ -105,9 +106,12 @@ export function useChineseHoroscopeMainPage(): UseChineseHoroscopeMainPageResult
   const handleYearConfirm = useCallback(
     (year: number) => {
       if (selectedAnimalForModal) {
-        // TODO (TASK-128): Calculate element from year and navigate to specific horoscope
-        console.log('Year selected:', year); // Will be used in TASK-128
-        router.push(ROUTES.HOROSCOPO_CHINO_ANIMAL(selectedAnimalForModal));
+        // Calculate element from year and navigate with element query param
+        const element = getElementForYear(year);
+        const params = new URLSearchParams({ element });
+        router.push(
+          `${ROUTES.HOROSCOPO_CHINO_ANIMAL(selectedAnimalForModal)}?${params.toString()}`
+        );
       }
     },
     [selectedAnimalForModal, router]

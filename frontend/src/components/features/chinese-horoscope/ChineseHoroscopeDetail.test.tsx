@@ -21,19 +21,19 @@ function createMockHoroscope(overrides?: Partial<ChineseHoroscope>): ChineseHoro
     areas: {
       love: {
         content: 'El amor florecerá en primavera.',
-        rating: 8,
+        score: 8,
       },
       career: {
         content: 'Excelente año para avances profesionales.',
-        rating: 9,
+        score: 9,
       },
       wellness: {
         content: 'Mantén el equilibrio entre trabajo y descanso.',
-        rating: 7,
+        score: 7,
       },
       finance: {
         content: 'Las inversiones serán favorables.',
-        rating: 8,
+        score: 8,
       },
     },
     luckyElements: {
@@ -69,11 +69,33 @@ describe('ChineseHoroscopeDetail', () => {
       expect(screen.getByText('🐉')).toBeInTheDocument();
     });
 
-    it('should display animal name in Spanish', () => {
+    it('should display animal name in Spanish when no element provided', () => {
       const horoscope = createMockHoroscope();
       render(<ChineseHoroscopeDetail horoscope={horoscope} />);
 
       expect(screen.getByText('Dragón')).toBeInTheDocument();
+    });
+
+    it('should display animal name with element when element prop is provided', () => {
+      const horoscope = createMockHoroscope();
+      render(<ChineseHoroscopeDetail horoscope={horoscope} element="earth" />);
+
+      expect(screen.getByText('Dragón de Tierra')).toBeInTheDocument();
+    });
+
+    it('should display animal name with fire element', () => {
+      const horoscope = createMockHoroscope();
+      render(<ChineseHoroscopeDetail horoscope={horoscope} element="fire" />);
+
+      expect(screen.getByText('Dragón de Fuego')).toBeInTheDocument();
+    });
+
+    it('should prefer fullZodiacType from horoscope over calculated name', () => {
+      const horoscope = createMockHoroscope({ fullZodiacType: 'Dragón de Metal' });
+      render(<ChineseHoroscopeDetail horoscope={horoscope} element="earth" />);
+
+      // Should use fullZodiacType, not "Dragón de Tierra"
+      expect(screen.getByText('Dragón de Metal')).toBeInTheDocument();
     });
 
     it('should display year badge', () => {
@@ -124,7 +146,7 @@ describe('ChineseHoroscopeDetail', () => {
       expect(screen.getByText('💰')).toBeInTheDocument();
     });
 
-    it('should display area ratings', () => {
+    it('should display area scores', () => {
       const horoscope = createMockHoroscope();
       render(<ChineseHoroscopeDetail horoscope={horoscope} />);
 
@@ -339,13 +361,13 @@ describe('ChineseHoroscopeDetail', () => {
       expect(screen.getByText(longText)).toBeInTheDocument();
     });
 
-    it('should handle rating of 10', () => {
+    it('should handle score of 10', () => {
       const horoscope = createMockHoroscope({
         areas: {
-          love: { content: 'Perfecto', rating: 10 },
-          career: { content: 'Bien', rating: 5 },
-          wellness: { content: 'Bien', rating: 5 },
-          finance: { content: 'Bien', rating: 5 },
+          love: { content: 'Perfecto', score: 10 },
+          career: { content: 'Bien', score: 5 },
+          wellness: { content: 'Bien', score: 5 },
+          finance: { content: 'Bien', score: 5 },
         },
       });
       render(<ChineseHoroscopeDetail horoscope={horoscope} />);
@@ -353,13 +375,13 @@ describe('ChineseHoroscopeDetail', () => {
       expect(screen.getByText('10/10')).toBeInTheDocument();
     });
 
-    it('should handle rating of 1', () => {
+    it('should handle score of 1', () => {
       const horoscope = createMockHoroscope({
         areas: {
-          love: { content: 'Desafiante', rating: 1 },
-          career: { content: 'Bien', rating: 5 },
-          wellness: { content: 'Bien', rating: 5 },
-          finance: { content: 'Bien', rating: 5 },
+          love: { content: 'Desafiante', score: 1 },
+          career: { content: 'Bien', score: 5 },
+          wellness: { content: 'Bien', score: 5 },
+          finance: { content: 'Bien', score: 5 },
         },
       });
       render(<ChineseHoroscopeDetail horoscope={horoscope} />);

@@ -133,7 +133,7 @@ describe('useChineseHoroscopeMainPage', () => {
     });
 
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith('/horoscopo-chino/dragon');
+      expect(mockPush).toHaveBeenCalledWith('/horoscopo-chino/dragon?element=earth');
     });
   });
 
