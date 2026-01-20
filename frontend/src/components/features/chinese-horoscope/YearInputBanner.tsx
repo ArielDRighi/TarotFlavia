@@ -1,7 +1,9 @@
 /**
- * YearInputBanner Component
+ * BirthDateInputBanner Component
  *
- * Banner que solicita el año de nacimiento para calcular el elemento del zodiaco chino
+ * Banner que solicita la fecha de nacimiento completa para calcular
+ * correctamente el animal y elemento del zodiaco chino.
+ * Requiere día, mes y año porque el año nuevo chino varía cada año.
  */
 
 'use client';
@@ -13,37 +15,43 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils/cn';
 
 export interface YearInputBannerProps {
-  onYearSubmit: (year: number) => void | Promise<void>;
+  onBirthDateSubmit: (birthDate: string) => void | Promise<void>;
   animalName?: string;
   className?: string;
 }
 
-const MIN_YEAR = 1900;
-const MAX_YEAR = 2100;
-
-export function YearInputBanner({ onYearSubmit, animalName, className }: YearInputBannerProps) {
-  const [year, setYear] = useState('');
+export function YearInputBanner({
+  onBirthDateSubmit,
+  animalName,
+  className,
+}: YearInputBannerProps) {
+  const [birthDate, setBirthDate] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  const today = new Date().toISOString().split('T')[0];
+  const minDate = '1900-01-01';
 
   const handleSubmit = async () => {
     setError('');
 
-    const yearNum = parseInt(year, 10);
-
-    if (isNaN(yearNum)) {
-      setError('Por favor ingresa un año válido');
+    if (!birthDate) {
+      setError('Por favor ingresa una fecha válida');
       return;
     }
 
-    if (yearNum < MIN_YEAR || yearNum > MAX_YEAR) {
-      setError(`El año debe estar entre ${MIN_YEAR} y ${MAX_YEAR}`);
+    const date = new Date(birthDate);
+    const minDateObj = new Date(minDate);
+    const todayObj = new Date(today);
+
+    if (isNaN(date.getTime()) || date < minDateObj || date > todayObj) {
+      setError('La fecha debe ser entre 1900 y hoy');
       return;
     }
 
     try {
       setIsLoading(true);
-      await onYearSubmit(yearNum);
+      await onBirthDateSubmit(birthDate);
     } catch {
       setError('Error al calcular. Inténtalo de nuevo.');
     } finally {
@@ -52,13 +60,13 @@ export function YearInputBanner({ onYearSubmit, animalName, className }: YearInp
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && year) {
+    if (e.key === 'Enter' && birthDate) {
       handleSubmit();
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setYear(e.target.value);
+    setBirthDate(e.target.value);
     if (error) {
       setError('');
     }
@@ -69,27 +77,26 @@ export function YearInputBanner({ onYearSubmit, animalName, className }: YearInp
       <div className="mb-4">
         <h3 className="font-serif text-lg">
           {animalName
-            ? `¿En qué año nació la persona del ${animalName}?`
-            : '¿En qué año nació esta persona?'}
+            ? `¿Cuándo nació la persona del ${animalName}?`
+            : '¿Cuándo nació esta persona?'}
         </h3>
         <p className="text-muted-foreground mt-1 text-sm">
-          Ingresa el año de nacimiento para ver el horóscopo personalizado
+          Ingresa la fecha de nacimiento para ver el horóscopo personalizado
         </p>
       </div>
 
       <div className="flex gap-2">
         <Input
-          type="text"
-          inputMode="numeric"
-          pattern="[0-9]*"
-          value={year}
+          type="date"
+          min={minDate}
+          max={today}
+          value={birthDate}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
-          placeholder="Ej: 1988"
-          aria-label="Año de nacimiento"
+          aria-label="Fecha de nacimiento"
           className="max-w-[200px]"
         />
-        <Button onClick={handleSubmit} disabled={!year || isLoading}>
+        <Button onClick={handleSubmit} disabled={!birthDate || isLoading}>
           {isLoading ? 'Calculando...' : 'Calcular'}
         </Button>
       </div>

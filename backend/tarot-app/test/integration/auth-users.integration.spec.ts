@@ -197,8 +197,10 @@ describe('Auth + Users Integration Tests', () => {
       id: number;
       email: string;
       name: string;
-      isAdmin: boolean;
+      roles: string[];
       plan: string;
+      profilePicture: string | null;
+      birthDate: string | null;
     };
 
     beforeEach(async () => {
@@ -301,8 +303,10 @@ describe('Auth + Users Integration Tests', () => {
       id: number;
       email: string;
       name: string;
-      isAdmin: boolean;
+      roles: string[];
       plan: string;
+      profilePicture: string | null;
+      birthDate: string | null;
     };
     let refreshToken: string;
 
@@ -380,8 +384,10 @@ describe('Auth + Users Integration Tests', () => {
       id: number;
       email: string;
       name: string;
-      isAdmin: boolean;
+      roles: string[];
       plan: string;
+      profilePicture: string | null;
+      birthDate: string | null;
     };
 
     beforeEach(async () => {
@@ -524,8 +530,10 @@ describe('Auth + Users Integration Tests', () => {
       id: number;
       email: string;
       name: string;
-      isAdmin: boolean;
+      roles: string[];
       plan: string;
+      profilePicture: string | null;
+      birthDate: string | null;
     };
     let refreshToken: string;
 

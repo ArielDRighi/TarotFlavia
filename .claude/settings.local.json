@@ -28,7 +28,9 @@
       "mcp__playwright__browser_evaluate",
       "mcp__playwright__browser_press_key",
       "Bash(git push:*)",
-      "Bash(gh pr create:*)"
+      "Bash(gh pr create:*)",
+      "mcp__playwright__browser_type",
+      "Bash(npm run lint:fix:*)"
     ]
   }
 }

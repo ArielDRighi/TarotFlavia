@@ -34,7 +34,7 @@ export default function ChineseHoroscopeAnimalPage() {
     isLoading,
     error,
     currentYear,
-    handleYearSubmit,
+    handleBirthDateSubmit,
   } = useAnimalHoroscopePage();
 
   // Invalid animal - show error
@@ -70,9 +70,9 @@ export default function ChineseHoroscopeAnimalPage() {
         />
       </div>
 
-      {/* If NOT my animal and NO element, show YearInputBanner */}
+      {/* If NOT my animal and NO element, show birth date input banner */}
       {!isMyAnimal && !element && (
-        <YearInputBanner onYearSubmit={handleYearSubmit} animalName={animalInfo.nameEs} />
+        <YearInputBanner onBirthDateSubmit={handleBirthDateSubmit} animalName={animalInfo.nameEs} />
       )}
 
       {/* Show horoscope when available */}

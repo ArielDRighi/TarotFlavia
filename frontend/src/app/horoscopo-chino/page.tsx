@@ -23,7 +23,7 @@ export default function HoroscopoChinoPage() {
     selectedAnimalForModal,
     isModalOpen,
     handleAnimalSelect,
-    handleYearConfirm,
+    handleBirthDateConfirm,
     handleModalOpenChange,
     navigateToMyHoroscope,
   } = useChineseHoroscopeMainPage();
@@ -98,7 +98,7 @@ export default function HoroscopoChinoPage() {
       {/* Selector de animales */}
       <ChineseAnimalSelector userAnimal={userAnimal} onSelect={handleAnimalSelect} />
 
-      {/* Year Selector Modal */}
+      {/* Birth Date Selector Modal */}
       <YearSelectorModal
         open={isModalOpen}
         animalNameEs={
@@ -107,7 +107,7 @@ export default function HoroscopoChinoPage() {
         animalEmoji={
           selectedAnimalForModal ? CHINESE_ZODIAC_INFO[selectedAnimalForModal].emoji : undefined
         }
-        onConfirm={handleYearConfirm}
+        onConfirm={handleBirthDateConfirm}
         onOpenChange={handleModalOpenChange}
       />
     </div>

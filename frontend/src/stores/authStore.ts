@@ -60,6 +60,13 @@ export const useAuthStore = create<AuthStore>()(
             localStorage.setItem('refresh_token', refresh_token);
           }
 
+          // Clear React Query cache to prevent stale anonymous session data
+          // from being shown after login (e.g., horoscope data)
+          if (typeof window !== 'undefined') {
+            const queryClient = getGlobalQueryClient();
+            queryClient.clear();
+          }
+
           // Update store state
           get().setUser(user);
 
