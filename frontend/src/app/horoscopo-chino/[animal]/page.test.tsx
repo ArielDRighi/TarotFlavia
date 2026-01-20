@@ -106,7 +106,7 @@ describe('ChineseHoroscopeAnimalPage', () => {
     renderWithProviders(<ChineseHoroscopeAnimalPage />);
 
     expect(
-      screen.getByText(/Ingresa el año de nacimiento para ver el horóscopo personalizado/i)
+      screen.getByText(/Ingresa la fecha de nacimiento para ver el horóscopo personalizado/i)
     ).toBeInTheDocument();
   });
 

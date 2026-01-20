@@ -81,8 +81,10 @@ export class LoginUseCase {
       id: number;
       email: string;
       name: string;
-      isAdmin: boolean;
+      roles: string[];
       plan: string;
+      profilePicture: string | null;
+      birthDate: string | null;
     };
     access_token: string;
     refresh_token: string;
@@ -152,8 +154,10 @@ export class LoginUseCase {
         id: user.id,
         email: user.email,
         name: user.name,
-        isAdmin: user.isAdmin,
+        roles: user.roles,
         plan: user.plan,
+        profilePicture: user.profilePicture,
+        birthDate: user.birthDate,
       },
       access_token: this.jwtService.sign(payload),
       refresh_token: refreshToken,

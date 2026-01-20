@@ -114,10 +114,10 @@ describe('useAnimalHoroscopePage', () => {
     });
   });
 
-  it('should provide handleYearSubmit callback', () => {
+  it('should provide handleBirthDateSubmit callback', () => {
     const { result } = renderHook(() => useAnimalHoroscopePage(), { wrapper });
 
-    expect(typeof result.current.handleYearSubmit).toBe('function');
+    expect(typeof result.current.handleBirthDateSubmit).toBe('function');
   });
 
   it('should return loading state', () => {

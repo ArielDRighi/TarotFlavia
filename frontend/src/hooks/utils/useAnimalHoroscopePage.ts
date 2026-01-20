@@ -43,8 +43,8 @@ interface UseAnimalHoroscopePageResult {
   error: Error | null;
   /** Current year for horoscope */
   currentYear: number;
-  /** Handle year submission for element calculation */
-  handleYearSubmit: (year: number) => void;
+  /** Handle birth date submission for element calculation (format: YYYY-MM-DD) */
+  handleBirthDateSubmit: (birthDate: string) => void;
 }
 
 /**
@@ -67,10 +67,10 @@ export function useAnimalHoroscopePage(): UseAnimalHoroscopePageResult {
 
   const animal = params.animal as ChineseZodiacAnimal;
 
-  // State for selected year (to calculate element)
-  const [selectedYear, setSelectedYear] = useState<number | null>(null);
+  // State for selected birth date (to calculate element via API)
+  const [selectedBirthDate, setSelectedBirthDate] = useState<string | null>(null);
 
-  // Get element from query param or calculate from year
+  // Get element from query param or calculate from birth date
   const elementFromQuery = searchParams.get('element') as ChineseElementCode | null;
 
   // Calculate user's animal if authenticated
@@ -85,13 +85,8 @@ export function useAnimalHoroscopePage(): UseAnimalHoroscopePageResult {
     return userAnimalData.animal === animal;
   }, [isAuthenticated, userAnimalData, animal]);
 
-  // Calculate element when year is selected
-  const calculationBirthDate = useMemo(() => {
-    if (!selectedYear) return null;
-    return `${selectedYear}-01-01`;
-  }, [selectedYear]);
-
-  const { data: calculatedAnimalData } = useCalculateAnimal(calculationBirthDate);
+  // Calculate element from selected birth date via API
+  const { data: calculatedAnimalData } = useCalculateAnimal(selectedBirthDate);
 
   // Determine which element to use
   const element = useMemo<ChineseElementCode | null>(() => {
@@ -130,9 +125,9 @@ export function useAnimalHoroscopePage(): UseAnimalHoroscopePageResult {
     }
   }, [element, elementFromQuery, animal]);
 
-  // Handler for year selection
-  const handleYearSubmit = useCallback((year: number) => {
-    setSelectedYear(year);
+  // Handler for birth date selection
+  const handleBirthDateSubmit = useCallback((birthDate: string) => {
+    setSelectedBirthDate(birthDate);
   }, []);
 
   // Validate animal
@@ -150,6 +145,6 @@ export function useAnimalHoroscopePage(): UseAnimalHoroscopePageResult {
     isLoading,
     error,
     currentYear,
-    handleYearSubmit,
+    handleBirthDateSubmit,
   };
 }

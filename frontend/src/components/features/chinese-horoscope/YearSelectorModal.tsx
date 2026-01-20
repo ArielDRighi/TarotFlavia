@@ -1,8 +1,10 @@
 /**
- * YearSelectorModal Component
+ * BirthDateSelectorModal Component
  *
- * Modal para solicitar el año de nacimiento cuando el usuario
+ * Modal para solicitar la fecha de nacimiento completa cuando el usuario
  * quiere ver el horóscopo de otro animal que no es el suyo.
+ * Requiere día, mes y año para calcular correctamente el animal y elemento
+ * considerando que el año nuevo chino varía cada año.
  */
 
 'use client';
@@ -27,23 +29,27 @@ export interface YearSelectorModalProps {
   animalNameEs: string;
   /** Animal emoji (optional) */
   animalEmoji?: string;
-  /** Callback when year is confirmed */
-  onConfirm: (year: number) => void;
+  /** Callback when birth date is confirmed (format: YYYY-MM-DD) */
+  onConfirm: (birthDate: string) => void;
   /** Callback when modal open state changes */
   onOpenChange: (open: boolean) => void;
 }
 
 /**
- * YearSelectorModal Component
+ * BirthDateSelectorModal Component
  *
- * Displays a modal dialog to request the birth year when a user
+ * Displays a modal dialog to request the full birth date when a user
  * wants to view the horoscope for an animal other than their own.
  *
  * Features:
- * - Input field for birth year
- * - Validation for year range (1900 - current year)
+ * - Date input for full birth date (day, month, year)
+ * - Validation for date range (1900 - current date)
  * - Confirm/Cancel buttons
  * - Resets input when modal is reopened
+ *
+ * Note: Full birth date is required because the Chinese New Year
+ * varies each year (can be between January and February), so
+ * someone born in January might belong to the previous Chinese year.
  *
  * @example
  * ```tsx
@@ -51,7 +57,7 @@ export interface YearSelectorModalProps {
  *   open={isOpen}
  *   animalNameEs="Dragón"
  *   animalEmoji="🐉"
- *   onConfirm={(year) => handleYearConfirm(year)}
+ *   onConfirm={(birthDate) => handleBirthDateConfirm(birthDate)}
  *   onOpenChange={setIsOpen}
  * />
  * ```
@@ -63,18 +69,18 @@ export function YearSelectorModal({
   onConfirm,
   onOpenChange,
 }: YearSelectorModalProps) {
-  const [year, setYear] = useState<string>('');
+  const [birthDate, setBirthDate] = useState<string>('');
   const [error, setError] = useState<string>('');
 
-  const currentYear = new Date().getFullYear();
-  const MIN_YEAR = 1900;
+  const today = new Date().toISOString().split('T')[0];
+  const minDate = '1900-01-01';
 
   // Wrap onOpenChange to reset form when modal closes
   const handleOpenChange = useCallback(
     (newOpen: boolean) => {
       if (!newOpen) {
         // Reset form state when closing
-        setYear('');
+        setBirthDate('');
         setError('');
       }
       onOpenChange(newOpen);
@@ -82,21 +88,23 @@ export function YearSelectorModal({
     [onOpenChange]
   );
 
-  const validateYear = (yearValue: string): boolean => {
-    if (!yearValue) {
+  const validateDate = (dateValue: string): boolean => {
+    if (!dateValue) {
       setError('');
       return false;
     }
 
-    const yearNum = parseInt(yearValue, 10);
+    const date = new Date(dateValue);
+    const minDateObj = new Date(minDate);
+    const todayObj = new Date(today);
 
-    if (isNaN(yearNum)) {
-      setError('Año inválido');
+    if (isNaN(date.getTime())) {
+      setError('Fecha inválida');
       return false;
     }
 
-    if (yearNum < MIN_YEAR || yearNum > currentYear) {
-      setError(`El año debe ser entre ${MIN_YEAR} y ${currentYear}`);
+    if (date < minDateObj || date > todayObj) {
+      setError('La fecha debe ser entre 1900 y hoy');
       return false;
     }
 
@@ -104,16 +112,15 @@ export function YearSelectorModal({
     return true;
   };
 
-  const handleYearChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setYear(value);
-    validateYear(value);
+    setBirthDate(value);
+    validateDate(value);
   };
 
   const handleConfirm = () => {
-    if (validateYear(year)) {
-      const yearNum = parseInt(year, 10);
-      onConfirm(yearNum);
+    if (validateDate(birthDate)) {
+      onConfirm(birthDate);
       handleOpenChange(false);
     }
   };
@@ -122,7 +129,7 @@ export function YearSelectorModal({
     handleOpenChange(false);
   };
 
-  const isYearValid = year !== '' && !error;
+  const isDateValid = birthDate !== '' && !error;
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -130,30 +137,30 @@ export function YearSelectorModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {animalEmoji && <span className="text-2xl">{animalEmoji}</span>}
-            <span>¿En qué año nació esta persona?</span>
+            <span>¿Cuándo nació esta persona?</span>
           </DialogTitle>
           <DialogDescription>
-            Para ver el horóscopo personalizado de {animalNameEs}, necesitamos saber el año de
-            nacimiento para calcular el elemento correcto.
+            Para ver el horóscopo personalizado de {animalNameEs}, necesitamos la fecha de
+            nacimiento completa para calcular correctamente el animal y elemento (el año nuevo chino
+            varía cada año).
           </DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="birth-year">Año de nacimiento</Label>
+            <Label htmlFor="birth-date">Fecha de nacimiento</Label>
             <Input
-              id="birth-year"
-              type="number"
-              min={MIN_YEAR}
-              max={currentYear}
-              placeholder="Ej: 1988"
-              value={year}
-              onChange={handleYearChange}
+              id="birth-date"
+              type="date"
+              min={minDate}
+              max={today}
+              value={birthDate}
+              onChange={handleDateChange}
               aria-invalid={!!error}
-              aria-describedby={error ? 'year-error' : undefined}
+              aria-describedby={error ? 'date-error' : undefined}
             />
             {error && (
-              <p id="year-error" className="text-destructive text-sm">
+              <p id="date-error" className="text-destructive text-sm">
                 {error}
               </p>
             )}
@@ -164,7 +171,7 @@ export function YearSelectorModal({
           <Button variant="outline" onClick={handleCancel}>
             Cancelar
           </Button>
-          <Button onClick={handleConfirm} disabled={!isYearValid}>
+          <Button onClick={handleConfirm} disabled={!isDateValid}>
             Confirmar
           </Button>
         </DialogFooter>

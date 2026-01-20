@@ -1,7 +1,8 @@
 /**
- * YearInputBanner Tests
+ * BirthDateInputBanner (YearInputBanner) Tests
  *
- * Tests para el banner que solicita año de nacimiento
+ * Tests para el banner que solicita fecha de nacimiento completa
+ * para calcular correctamente el animal y elemento del zodiaco chino.
  */
 
 import { describe, it, expect, vi } from 'vitest';
@@ -9,62 +10,62 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { YearInputBanner } from './YearInputBanner';
 
-describe('YearInputBanner', () => {
+describe('YearInputBanner (BirthDateInputBanner)', () => {
   it('renderiza correctamente el banner', () => {
-    render(<YearInputBanner onYearSubmit={vi.fn()} />);
+    render(<YearInputBanner onBirthDateSubmit={vi.fn()} />);
 
-    expect(screen.getByText(/¿En qué año nació/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/año de nacimiento/i)).toBeInTheDocument();
+    expect(screen.getByText(/¿Cuándo nació/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/fecha de nacimiento/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /calcular/i })).toBeInTheDocument();
   });
 
-  it('permite ingresar un año', async () => {
+  it('permite ingresar una fecha', async () => {
     const user = userEvent.setup();
-    render(<YearInputBanner onYearSubmit={vi.fn()} />);
+    render(<YearInputBanner onBirthDateSubmit={vi.fn()} />);
 
-    const input = screen.getByLabelText(/año de nacimiento/i);
-    await user.type(input, '1988');
+    const input = screen.getByLabelText(/fecha de nacimiento/i);
+    await user.type(input, '1988-06-15');
 
-    expect(input).toHaveValue('1988');
+    expect(input).toHaveValue('1988-06-15');
   });
 
-  it('llama a onYearSubmit con el año correcto al hacer submit', async () => {
+  it('llama a onBirthDateSubmit con la fecha correcta al hacer submit', async () => {
     const user = userEvent.setup();
-    const onYearSubmit = vi.fn();
-    render(<YearInputBanner onYearSubmit={onYearSubmit} />);
+    const onBirthDateSubmit = vi.fn();
+    render(<YearInputBanner onBirthDateSubmit={onBirthDateSubmit} />);
 
-    const input = screen.getByLabelText(/año de nacimiento/i);
+    const input = screen.getByLabelText(/fecha de nacimiento/i);
     const button = screen.getByRole('button', { name: /calcular/i });
 
-    await user.type(input, '1988');
+    await user.type(input, '1988-06-15');
     await user.click(button);
 
     await waitFor(() => {
-      expect(onYearSubmit).toHaveBeenCalledWith(1988);
+      expect(onBirthDateSubmit).toHaveBeenCalledWith('1988-06-15');
     });
   });
 
-  it('valida que el año esté en rango válido (1900-2100)', async () => {
+  it('valida que la fecha esté en rango válido (1900 a hoy)', async () => {
     const user = userEvent.setup();
-    const onYearSubmit = vi.fn();
-    render(<YearInputBanner onYearSubmit={onYearSubmit} />);
+    const onBirthDateSubmit = vi.fn();
+    render(<YearInputBanner onBirthDateSubmit={onBirthDateSubmit} />);
 
-    const input = screen.getByLabelText(/año de nacimiento/i);
+    const input = screen.getByLabelText(/fecha de nacimiento/i);
     const button = screen.getByRole('button', { name: /calcular/i });
 
-    // Año fuera de rango
-    await user.type(input, '1800');
+    // Fecha fuera de rango (antes de 1900)
+    await user.type(input, '1899-01-01');
     await user.click(button);
 
     await waitFor(() => {
-      expect(screen.getByText(/año debe estar entre/i)).toBeInTheDocument();
+      expect(screen.getByText(/fecha debe ser entre 1900 y hoy/i)).toBeInTheDocument();
     });
 
-    expect(onYearSubmit).not.toHaveBeenCalled();
+    expect(onBirthDateSubmit).not.toHaveBeenCalled();
   });
 
-  it('deshabilita el botón cuando no hay año', () => {
-    render(<YearInputBanner onYearSubmit={vi.fn()} />);
+  it('deshabilita el botón cuando no hay fecha', () => {
+    render(<YearInputBanner onBirthDateSubmit={vi.fn()} />);
 
     const button = screen.getByRole('button', { name: /calcular/i });
     expect(button).toBeDisabled();
@@ -72,75 +73,75 @@ describe('YearInputBanner', () => {
 
   it('muestra loading state durante cálculo', async () => {
     const user = userEvent.setup();
-    const onYearSubmit = vi.fn(
+    const onBirthDateSubmit = vi.fn(
       (): Promise<void> => new Promise((resolve) => setTimeout(resolve, 100))
     );
-    render(<YearInputBanner onYearSubmit={onYearSubmit} />);
+    render(<YearInputBanner onBirthDateSubmit={onBirthDateSubmit} />);
 
-    const input = screen.getByLabelText(/año de nacimiento/i);
+    const input = screen.getByLabelText(/fecha de nacimiento/i);
     const button = screen.getByRole('button', { name: /calcular/i });
 
-    await user.type(input, '1988');
+    await user.type(input, '1988-06-15');
     await user.click(button);
 
     expect(screen.getByText(/calculando/i)).toBeInTheDocument();
   });
 
   it('permite pasar un animalName para personalizar el mensaje', () => {
-    render(<YearInputBanner onYearSubmit={vi.fn()} animalName="Dragón" />);
+    render(<YearInputBanner onBirthDateSubmit={vi.fn()} animalName="Dragón" />);
 
-    expect(screen.getByText(/¿En qué año nació.*Dragón/i)).toBeInTheDocument();
+    expect(screen.getByText(/¿Cuándo nació.*Dragón/i)).toBeInTheDocument();
   });
 
   it('limpia el mensaje de error cuando el usuario vuelve a escribir', async () => {
     const user = userEvent.setup();
-    render(<YearInputBanner onYearSubmit={vi.fn()} />);
+    render(<YearInputBanner onBirthDateSubmit={vi.fn()} />);
 
-    const input = screen.getByLabelText(/año de nacimiento/i);
+    const input = screen.getByLabelText(/fecha de nacimiento/i);
     const button = screen.getByRole('button', { name: /calcular/i });
 
-    // Trigger error
-    await user.type(input, '1800');
+    // Trigger error (fecha antes de 1900)
+    await user.type(input, '1899-01-01');
     await user.click(button);
-    expect(screen.getByText(/año debe estar entre/i)).toBeInTheDocument();
+    expect(screen.getByText(/fecha debe ser entre 1900 y hoy/i)).toBeInTheDocument();
 
     // Clear input and type again
     await user.clear(input);
-    await user.type(input, '1988');
+    await user.type(input, '1988-06-15');
 
-    expect(screen.queryByText(/año debe estar entre/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/fecha debe ser entre 1900 y hoy/i)).not.toBeInTheDocument();
   });
 
   it('permite enviar con Enter key', async () => {
     const user = userEvent.setup();
-    const onYearSubmit = vi.fn();
-    render(<YearInputBanner onYearSubmit={onYearSubmit} />);
+    const onBirthDateSubmit = vi.fn();
+    render(<YearInputBanner onBirthDateSubmit={onBirthDateSubmit} />);
 
-    const input = screen.getByLabelText(/año de nacimiento/i);
+    const input = screen.getByLabelText(/fecha de nacimiento/i);
 
-    await user.type(input, '1988');
+    await user.type(input, '1988-06-15');
     await user.keyboard('{Enter}');
 
     await waitFor(() => {
-      expect(onYearSubmit).toHaveBeenCalledWith(1988);
+      expect(onBirthDateSubmit).toHaveBeenCalledWith('1988-06-15');
     });
   });
 
   it('tiene data-testid correcto', () => {
-    render(<YearInputBanner onYearSubmit={vi.fn()} />);
+    render(<YearInputBanner onBirthDateSubmit={vi.fn()} />);
 
     expect(screen.getByTestId('year-input-banner')).toBeInTheDocument();
   });
 
-  it('muestra error cuando onYearSubmit falla', async () => {
+  it('muestra error cuando onBirthDateSubmit falla', async () => {
     const user = userEvent.setup();
-    const onYearSubmit = vi.fn().mockRejectedValue(new Error('API Error'));
-    render(<YearInputBanner onYearSubmit={onYearSubmit} />);
+    const onBirthDateSubmit = vi.fn().mockRejectedValue(new Error('API Error'));
+    render(<YearInputBanner onBirthDateSubmit={onBirthDateSubmit} />);
 
-    const input = screen.getByLabelText(/año de nacimiento/i);
+    const input = screen.getByLabelText(/fecha de nacimiento/i);
     const button = screen.getByRole('button', { name: /calcular/i });
 
-    await user.type(input, '1988');
+    await user.type(input, '1988-06-15');
     await user.click(button);
 
     await waitFor(() => {
@@ -148,40 +149,10 @@ describe('YearInputBanner', () => {
     });
   });
 
-  it('valida upper bound del año (> 2100)', async () => {
-    const user = userEvent.setup();
-    const onYearSubmit = vi.fn();
-    render(<YearInputBanner onYearSubmit={onYearSubmit} />);
+  it('muestra el input con tipo date', () => {
+    render(<YearInputBanner onBirthDateSubmit={vi.fn()} />);
 
-    const input = screen.getByLabelText(/año de nacimiento/i);
-    const button = screen.getByRole('button', { name: /calcular/i });
-
-    // Año fuera de rango superior
-    await user.type(input, '2200');
-    await user.click(button);
-
-    await waitFor(() => {
-      expect(screen.getByText(/año debe estar entre/i)).toBeInTheDocument();
-    });
-
-    expect(onYearSubmit).not.toHaveBeenCalled();
-  });
-
-  it('muestra error cuando se ingresa texto no numérico', async () => {
-    const user = userEvent.setup();
-    const onYearSubmit = vi.fn();
-    render(<YearInputBanner onYearSubmit={onYearSubmit} />);
-
-    const input = screen.getByLabelText(/año de nacimiento/i);
-    const button = screen.getByRole('button', { name: /calcular/i });
-
-    await user.type(input, 'abc');
-    await user.click(button);
-
-    await waitFor(() => {
-      expect(screen.getByText(/Por favor ingresa un año válido/i)).toBeInTheDocument();
-    });
-
-    expect(onYearSubmit).not.toHaveBeenCalled();
+    const input = screen.getByLabelText(/fecha de nacimiento/i);
+    expect(input).toHaveAttribute('type', 'date');
   });
 });
