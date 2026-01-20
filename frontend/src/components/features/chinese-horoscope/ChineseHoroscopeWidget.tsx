@@ -87,7 +87,9 @@ export function ChineseHoroscopeWidget() {
           </div>
         </div>
         <Button asChild variant="ghost" size="sm">
-          <Link href={`/horoscopo-chino/${horoscope.animal}`}>
+          <Link
+            href={`/horoscopo-chino/${horoscope.animal}${horoscope.birthElement ? `?element=${horoscope.birthElement}` : ''}`}
+          >
             Ver más
             <ArrowRight className="ml-1 h-4 w-4" />
           </Link>
