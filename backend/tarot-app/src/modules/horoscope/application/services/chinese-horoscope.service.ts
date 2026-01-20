@@ -204,28 +204,6 @@ export class ChineseHoroscopeService {
   }
 
   /**
-   * Genera un horóscopo chino para un animal y año específicos
-   *
-   * @deprecated Use generateForAnimalAndElement instead (TASK-124)
-   * Este método se mantiene por compatibilidad pero generará con elemento 'earth' por defecto
-   *
-   * Si ya existe un horóscopo para ese animal y año, lo retorna sin generar uno nuevo.
-   * Usa el AIProviderService con fallback automático (Groq → Gemini → DeepSeek → OpenAI).
-   *
-   * @param animal - Animal del zodiaco chino
-   * @param year - Año gregoriano del horóscopo (ej: 2026)
-   * @returns Horóscopo generado o existente
-   * @throws InternalServerErrorException si no se puede parsear la respuesta de la IA
-   */
-  async generateForAnimal(
-    animal: ChineseZodiacAnimal,
-    year: number,
-  ): Promise<ChineseHoroscope> {
-    // Por defecto usamos 'earth' para mantener compatibilidad
-    return this.generateForAnimalAndElement(animal, 'earth', year);
-  }
-
-  /**
    * TASK-125: Genera horóscopos chinos para todos los 60 combinaciones (12 animales × 5 elementos)
    *
    * Genera secuencialmente con un delay de 10 segundos entre cada llamada
@@ -329,24 +307,6 @@ export class ChineseHoroscopeService {
     return this.repository.findOne({
       where: { animal, element, year },
     });
-  }
-
-  /**
-   * Busca un horóscopo por animal y año
-   *
-   * @deprecated Use findByAnimalElementAndYear instead (TASK-124)
-   * Este método busca con elemento 'earth' por defecto para mantener compatibilidad
-   *
-   * @param animal - Animal del zodiaco chino
-   * @param year - Año gregoriano
-   * @returns Horóscopo encontrado o null
-   */
-  async findByAnimalAndYear(
-    animal: ChineseZodiacAnimal,
-    year: number,
-  ): Promise<ChineseHoroscope | null> {
-    // Por defecto busca con 'earth' para mantener compatibilidad
-    return this.findByAnimalElementAndYear(animal, 'earth', year);
   }
 
   /**

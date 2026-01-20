@@ -53,21 +53,6 @@ export async function getChineseHoroscopesByYear(year: number): Promise<ChineseH
 }
 
 /**
- * Obtiene un horóscopo chino específico por año y animal
- * @param year Año del horóscopo
- * @param animal Animal del zodiaco chino
- */
-export async function getChineseHoroscope(
-  year: number,
-  animal: ChineseZodiacAnimal
-): Promise<ChineseHoroscope> {
-  const response = await apiClient.get<ChineseHoroscope>(
-    API_ENDPOINTS.CHINESE_HOROSCOPE.BY_YEAR_ANIMAL(year, animal)
-  );
-  return response.data;
-}
-
-/**
  * Obtiene un horóscopo chino específico por año, animal y elemento
  * @param year Año del horóscopo
  * @param animal Animal del zodiaco chino

@@ -106,7 +106,6 @@ export const API_ENDPOINTS = {
     CALCULATE: '/chinese-horoscope/calculate',
     MY_ANIMAL: '/chinese-horoscope/my-animal',
     BY_YEAR: (year: number) => `/chinese-horoscope/${year}`,
-    BY_YEAR_ANIMAL: (year: number, animal: string) => `/chinese-horoscope/${year}/${animal}`,
     BY_YEAR_ANIMAL_ELEMENT: (year: number, animal: string, element: string) =>
       `/chinese-horoscope/${year}/${animal}/${element}`,
   },
