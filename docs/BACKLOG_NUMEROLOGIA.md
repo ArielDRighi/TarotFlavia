@@ -5,13 +5,17 @@
 **Fecha de creación:** 17 de enero de 2026  
 **Módulo:** Numerología  
 **Prioridad Global:** 🟡 MEDIA (Alto valor, baja complejidad)  
-**Estimación Total:** 3-4 días
+**Estimación Total:** 6.5 días
 
 ---
 
 ## OVERVIEW DEL MÓDULO
 
-La Numerología calcula números significativos basados en la fecha de nacimiento y nombre del usuario. Es un módulo de **baja complejidad** porque los cálculos son algorítmicos (no requieren IA).
+La Numerología calcula números significativos basados en la fecha de nacimiento y nombre del usuario. Es un módulo de **baja complejidad** porque los cálculos son algorítmicos (no requieren IA para la funcionalidad básica).
+
+### Funcionalidad Premium con IA
+
+Los usuarios **PREMIUM** pueden obtener una **interpretación personalizada generada por IA** que analiza la combinación única de todos sus números. Esta interpretación se genera **una única vez** y se persiste en la base de datos para el usuario.
 
 ### Números a calcular:
 
@@ -398,6 +402,26 @@ Crear funciones puras para calcular todos los números numerológicos. Estos cá
   }
   ```
 
+- [ ] Crear función `calculateDayNumber`:
+
+  ```typescript
+  /**
+   * Calcula el Número del Día Universal
+   * Suma todos los dígitos de una fecha específica
+   * @param date - Fecha a calcular (default: hoy)
+   * @returns Número del día (1-9)
+   */
+  export function calculateDayNumber(date: Date = new Date()): number {
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+
+    const sum = reduceToSingleDigit(year, false) + reduceToSingleDigit(month, false) + reduceToSingleDigit(day, false);
+
+    return reduceToSingleDigit(sum, false); // No maestros en día universal
+  }
+  ```
+
 - [ ] Crear función principal `calculateAllNumbers`:
 
   ```typescript
@@ -446,6 +470,7 @@ Crear funciones puras para calcular todos los números numerológicos. Estos cá
 - [ ] Test: calculateLifePath("1990-03-25") = correcto
 - [ ] Test: calculateExpressionNumber("Juan") = correcto
 - [ ] Test: calculateSoulUrge("AEIOU") = 6 (1+5+9+6+3)
+- [ ] Test: calculateDayNumber devuelve 1-9
 - [ ] Test: Nombres con acentos funcionan
 - [ ] Test: Números maestros se preservan
 
@@ -863,16 +888,395 @@ src/modules/numerology/
 - [ ] DTOs documentados con Swagger
 - [ ] Tests unitarios pasan
 
+# Backend: Entidad y Servicio de Interpretación IA (PREMIUM)
+
+---
+
+### TASK-202b: Crear entidad y servicio de interpretación IA para usuarios Premium
+
+**Módulo:** `src/modules/numerology/`
+**Prioridad:** 🔴 ALTA
+**Estimación:** 1 día
+**Dependencias:** TASK-202
+
+---
+
+#### 📋 Descripción
+
+Crear la entidad para persistir la interpretación IA del usuario premium. La interpretación se genera **una única vez** por usuario y se almacena permanentemente. Si el usuario ya tiene una interpretación, se retorna la existente.
+
+---
+
+#### 🏗️ Contexto Técnico
+
+**Archivos a crear:**
+
+```
+src/modules/numerology/
+├── entities/
+│   └── numerology-interpretation.entity.ts
+├── prompts/
+│   └── numerology-interpretation.prompt.ts
+├── guards/
+│   └── requires-premium-for-numerology-ai.guard.ts
+└── dto/
+    └── numerology-interpretation-response.dto.ts
+```
+
+---
+
+#### ✅ Tareas Específicas
+
+##### Backend
+
+- [ ] Crear entidad `NumerologyInterpretation`:
+
+  ```typescript
+  // src/modules/numerology/entities/numerology-interpretation.entity.ts
+  import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn, Index } from "typeorm";
+  import { User } from "@/modules/users/entities/user.entity";
+
+  @Entity("numerology_interpretations")
+  @Index("idx_numerology_interpretation_user", ["userId"], { unique: true })
+  export class NumerologyInterpretation {
+    @PrimaryGeneratedColumn()
+    id: number;
+
+    @Column({ name: "user_id" })
+    userId: number;
+
+    @ManyToOne(() => User, { onDelete: "CASCADE" })
+    @JoinColumn({ name: "user_id" })
+    user: User;
+
+    // === NÚMEROS CALCULADOS (snapshot al momento de generar) ===
+    @Column({ name: "life_path", type: "smallint" })
+    lifePath: number;
+
+    @Column({ name: "birthday_number", type: "smallint" })
+    birthdayNumber: number;
+
+    @Column({ name: "expression_number", type: "smallint", nullable: true })
+    expressionNumber: number | null;
+
+    @Column({ name: "soul_urge", type: "smallint", nullable: true })
+    soulUrge: number | null;
+
+    @Column({ name: "personality", type: "smallint", nullable: true })
+    personality: number | null;
+
+    @Column({ name: "birth_date", type: "date" })
+    birthDate: Date;
+
+    @Column({ name: "full_name", type: "varchar", length: 100, nullable: true })
+    fullName: string | null;
+
+    // === INTERPRETACIÓN GENERADA ===
+    @Column({ type: "text" })
+    interpretation: string;
+
+    // === METADATA DE IA ===
+    @Column({ name: "ai_provider", type: "varchar", length: 50 })
+    aiProvider: string;
+
+    @Column({ name: "ai_model", type: "varchar", length: 100 })
+    aiModel: string;
+
+    @Column({ name: "tokens_used", type: "int", default: 0 })
+    tokensUsed: number;
+
+    @Column({ name: "generation_time_ms", type: "int", default: 0 })
+    generationTimeMs: number;
+
+    @CreateDateColumn({ name: "generated_at" })
+    generatedAt: Date;
+  }
+  ```
+
+- [ ] Crear migración para la tabla:
+
+  ```typescript
+  // src/database/migrations/XXXXXX-CreateNumerologyInterpretation.ts
+  export class CreateNumerologyInterpretation implements MigrationInterface {
+    public async up(queryRunner: QueryRunner): Promise<void> {
+      await queryRunner.createTable(
+        new Table({
+          name: "numerology_interpretations",
+          columns: [
+            { name: "id", type: "int", isPrimary: true, isGenerated: true, generationStrategy: "increment" },
+            { name: "user_id", type: "int", isUnique: true },
+            { name: "life_path", type: "smallint" },
+            { name: "birthday_number", type: "smallint" },
+            { name: "expression_number", type: "smallint", isNullable: true },
+            { name: "soul_urge", type: "smallint", isNullable: true },
+            { name: "personality", type: "smallint", isNullable: true },
+            { name: "birth_date", type: "date" },
+            { name: "full_name", type: "varchar", length: "100", isNullable: true },
+            { name: "interpretation", type: "text" },
+            { name: "ai_provider", type: "varchar", length: "50" },
+            { name: "ai_model", type: "varchar", length: "100" },
+            { name: "tokens_used", type: "int", default: 0 },
+            { name: "generation_time_ms", type: "int", default: 0 },
+            { name: "generated_at", type: "timestamp", default: "CURRENT_TIMESTAMP" },
+          ],
+          foreignKeys: [
+            {
+              columnNames: ["user_id"],
+              referencedTableName: "user",
+              referencedColumnNames: ["id"],
+              onDelete: "CASCADE",
+            },
+          ],
+        }),
+      );
+    }
+
+    public async down(queryRunner: QueryRunner): Promise<void> {
+      await queryRunner.dropTable("numerology_interpretations");
+    }
+  }
+  ```
+
+- [ ] Crear prompt de interpretación IA:
+
+  ```typescript
+  // src/modules/numerology/prompts/numerology-interpretation.prompt.ts
+
+  export const NUMEROLOGY_SYSTEM_PROMPT = `Eres un numerólogo experto con décadas de experiencia en interpretación de perfiles numerológicos.
+  Tu tarea es crear una interpretación personalizada y profunda basada en la combinación única de números del consultante.
+  ```
+
+REGLAS:
+
+- Escribe en español, con un tono cálido pero profesional
+- Relaciona los diferentes números entre sí, mostrando cómo se complementan o desafían
+- Sé específico y evita generalidades vagas
+- Incluye consejos prácticos basados en los números
+- La interpretación debe ser de 400-600 palabras
+- Usa formato markdown con encabezados para organizar la respuesta
+- NO inventes números ni datos que no se te proporcionaron`;
+
+  export function buildNumerologyUserPrompt(data: {
+  lifePath: number;
+  birthdayNumber: number;
+  expressionNumber: number | null;
+  soulUrge: number | null;
+  personality: number | null;
+  personalYear: number;
+  fullName: string | null;
+  }): string {
+  const hasNameNumbers = data.expressionNumber !== null;
+
+  return `Genera una interpretación numerológica personalizada para el siguiente perfil:
+
+## NÚMEROS DEL CONSULTANTE
+
+### Desde la fecha de nacimiento:
+
+- **Camino de Vida:** ${data.lifePath} ${isMasterNumber(data.lifePath) ? '(Número Maestro)' : ''}
+- **Número del Día:** ${data.birthdayNumber}
+- **Año Personal ${new Date().getFullYear()}:** ${data.personalYear}
+
+${hasNameNumbers ? `### Desde el nombre (${data.fullName}):
+
+- **Expresión/Destino:** ${data.expressionNumber} ${isMasterNumber(data.expressionNumber!) ? '(Número Maestro)' : ''}
+- **Número del Alma:** ${data.soulUrge}
+- **Personalidad:** ${data.personality}` : '### Sin números de nombre disponibles'}
+
+## ESTRUCTURA DE LA RESPUESTA
+
+Organiza tu interpretación así:
+
+### 🌟 Tu Esencia Numerológica
+
+(Resumen de quién eres según tus números principales)
+
+### 🛤️ Tu Camino de Vida (${data.lifePath})
+
+(Propósito, lecciones de vida, dirección)
+
+${hasNameNumbers ? `### 💫 Tu Potencial y Deseos Internos
+(Cómo se relacionan Expresión, Alma y Personalidad)` : ''}
+
+### 📅 Tu Ciclo Actual (Año Personal ${data.personalYear})
+
+(Qué energías predominan este año, qué cultivar)
+
+### 💡 Consejos Prácticos
+
+(3-4 recomendaciones específicas basadas en tus números)`;
+}
+
+function isMasterNumber(num: number): boolean {
+return [11, 22, 33].includes(num);
+}
+
+````
+
+- [ ] Agregar métodos al servicio:
+
+```typescript
+// Agregar a NumerologyService
+
+@Injectable()
+export class NumerologyService {
+  constructor(
+    @InjectRepository(NumerologyInterpretation)
+    private readonly interpretationRepo: Repository<NumerologyInterpretation>,
+    private readonly aiProviderService: AIProviderService,
+  ) {}
+
+  /**
+   * Obtiene interpretación existente del usuario
+   */
+  async getExistingInterpretation(userId: number): Promise<NumerologyInterpretation | null> {
+    return this.interpretationRepo.findOne({ where: { userId } });
+  }
+
+  /**
+   * Genera y guarda interpretación IA (solo si no existe)
+   */
+  async generateAndSaveInterpretation(user: User): Promise<NumerologyInterpretation> {
+    // Verificar que no exista
+    const existing = await this.getExistingInterpretation(user.id);
+    if (existing) {
+      return existing;
+    }
+
+    // Calcular números
+    const birthDate = new Date(user.birthDate);
+    const numbers = calculateAllNumbers(birthDate, user.name);
+
+    // Generar con IA
+    const startTime = Date.now();
+    const prompt = buildNumerologyUserPrompt({
+      lifePath: numbers.lifePath,
+      birthdayNumber: numbers.birthday,
+      expressionNumber: numbers.expression,
+      soulUrge: numbers.soulUrge,
+      personality: numbers.personality,
+      personalYear: numbers.personalYear,
+      fullName: user.name,
+    });
+
+    const aiResponse = await this.aiProviderService.generateCompletion(
+      [
+        { role: 'system', content: NUMEROLOGY_SYSTEM_PROMPT },
+        { role: 'user', content: prompt },
+      ],
+      { temperature: 0.7, maxTokens: 1500 },
+    );
+
+    const generationTimeMs = Date.now() - startTime;
+
+    // Crear y guardar entidad
+    const interpretation = this.interpretationRepo.create({
+      userId: user.id,
+      lifePath: numbers.lifePath,
+      birthdayNumber: numbers.birthday,
+      expressionNumber: numbers.expression,
+      soulUrge: numbers.soulUrge,
+      personality: numbers.personality,
+      birthDate: birthDate,
+      fullName: user.name,
+      interpretation: aiResponse.content,
+      aiProvider: aiResponse.provider,
+      aiModel: aiResponse.model,
+      tokensUsed: aiResponse.totalTokens || 0,
+      generationTimeMs,
+    });
+
+    return this.interpretationRepo.save(interpretation);
+  }
+}
+````
+
+- [ ] Crear DTO de respuesta:
+
+  ```typescript
+  // src/modules/numerology/dto/numerology-interpretation-response.dto.ts
+  import { ApiProperty } from "@nestjs/swagger";
+
+  export class NumerologyInterpretationResponseDto {
+    @ApiProperty({ example: 1 })
+    id: number;
+
+    @ApiProperty({ example: 123 })
+    userId: number;
+
+    @ApiProperty()
+    interpretation: string;
+
+    @ApiProperty({ example: 7 })
+    lifePath: number;
+
+    @ApiProperty({ example: 5, nullable: true })
+    expression: number | null;
+
+    @ApiProperty({ example: 3, nullable: true })
+    soulUrge: number | null;
+
+    @ApiProperty({ example: 2, nullable: true })
+    personality: number | null;
+
+    @ApiProperty({ example: 25 })
+    birthday: number;
+
+    @ApiProperty()
+    generatedAt: string;
+
+    @ApiProperty({ example: "groq" })
+    aiProvider: string;
+
+    @ApiProperty({ example: "llama-3.1-70b-versatile" })
+    aiModel: string;
+  }
+  ```
+
+- [ ] Registrar entidad en el módulo
+
+##### Testing
+
+- [ ] Test: generateAndSaveInterpretation crea nueva interpretación
+- [ ] Test: generateAndSaveInterpretation retorna existente si ya existe
+- [ ] Test: getExistingInterpretation retorna null si no existe
+- [ ] Test: La interpretación se guarda con todos los campos correctos
+- [ ] Test: La entidad tiene constraint UNIQUE en userId
+
+---
+
+#### 🎯 Criterios de Aceptación
+
+- [ ] Entidad creada con migración
+- [ ] Solo se genera una interpretación por usuario
+- [ ] Se almacena metadata de IA (provider, model, tokens)
+- [ ] El prompt genera interpretaciones coherentes
+- [ ] Tests cubren el flujo completo
+
+---
+
+#### 📎 Notas para el Agente IA
+
+> **IMPORTANTE:**
+>
+> - La interpretación se genera UNA SOLA VEZ por usuario
+> - Si el usuario ya tiene interpretación, se retorna la existente (no se regenera)
+> - El constraint UNIQUE en userId previene duplicados a nivel de DB
+> - Se guarda un "snapshot" de los números al momento de generar
+> - El costo de IA se trackea en `AIUsageLog` automáticamente por el `AIProviderService`
+
+---
+
 # Backend: Endpoints
 
 ---
 
-### TASK-123: Crear endpoints de Numerología
+### TASK-203: Crear endpoints de Numerología
 
-**Módulo:** `src/modules/numerology/infrastructure/controllers/`  
-**Prioridad:** 🔴 ALTA  
-**Estimación:** 0.5 días  
-**Dependencias:** TASK-122
+**Módulo:** `src/modules/numerology/infrastructure/controllers/`
+**Prioridad:** 🔴 ALTA
+**Estimación:** 0.5 días
+**Dependencias:** TASK-202
 
 ---
 
@@ -951,24 +1355,27 @@ Implementar endpoints REST para calcular numerología y consultar significados.
     /**
      * POST /numerology/my-profile/interpret
      * Genera interpretación IA (solo PREMIUM)
+     * Usa el mismo patrón de guards que readings
      */
     @Post("my-profile/interpret")
-    @UseGuards(JwtAuthGuard, PlanGuard)
-    @RequiredPlan(UserPlan.PREMIUM)
+    @UseGuards(JwtAuthGuard, RequiresPremiumForNumerologyAIGuard, AIQuotaGuard)
     @ApiBearerAuth()
     @ApiOperation({ summary: "Generar interpretación IA (PREMIUM)" })
-    @ApiResponse({ status: 200, type: NumerologyProfileDto })
+    @ApiResponse({ status: 200, type: NumerologyInterpretationResponseDto })
     @ApiResponse({ status: 403, description: "Requiere plan PREMIUM" })
-    async interpretMyProfile(@CurrentUser() user: User): Promise<NumerologyProfileDto> {
+    @ApiResponse({ status: 409, description: "Ya existe una interpretación" })
+    async interpretMyProfile(@CurrentUser() user: User): Promise<NumerologyInterpretationResponseDto> {
       if (!user.birthDate) {
         throw new BadRequestException("Configura tu fecha de nacimiento");
       }
 
-      return this.numerologyService.calculateProfile(
-        user.birthDate,
-        user.name,
-        true, // Con interpretación IA
-      );
+      // Verifica si ya existe interpretación (se genera una sola vez)
+      const existing = await this.numerologyService.getExistingInterpretation(user.id);
+      if (existing) {
+        return existing;
+      }
+
+      return this.numerologyService.generateAndSaveInterpretation(user);
     }
 
     /**
@@ -1041,34 +1448,41 @@ Implementar endpoints REST para calcular numerología y consultar significados.
   }
   ```
 
-- [ ] Crear guard `PlanGuard` si no existe:
+- [ ] Crear guard `RequiresPremiumForNumerologyAIGuard` (siguiendo patrón existente):
 
   ```typescript
-  @Injectable()
-  export class PlanGuard implements CanActivate {
-    constructor(private reflector: Reflector) {}
+  // src/modules/numerology/guards/requires-premium-for-numerology-ai.guard.ts
+  import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from "@nestjs/common";
+  import { UserPlan } from "@/modules/users/entities/user.entity";
 
-    canActivate(context: ExecutionContext): boolean {
-      const requiredPlan = this.reflector.get<UserPlan>("requiredPlan", context.getHandler());
-
-      if (!requiredPlan) return true;
-
-      const request = context.switchToHttp().getRequest();
-      const user = request.user;
-
-      if (!user) return false;
-
-      // PREMIUM puede acceder a todo
-      if (user.plan === UserPlan.PREMIUM) return true;
-
-      // Verificar plan específico
-      return user.plan === requiredPlan;
-    }
+  interface RequestWithUser extends Request {
+    user: { userId: number; plan: UserPlan };
   }
 
-  // Decorador
-  export const RequiredPlan = (plan: UserPlan) => SetMetadata("requiredPlan", plan);
+  @Injectable()
+  export class RequiresPremiumForNumerologyAIGuard implements CanActivate {
+    canActivate(context: ExecutionContext): boolean {
+      const request = context.switchToHttp().getRequest<RequestWithUser>();
+      const user = request.user;
+
+      if (!user) {
+        throw new ForbiddenException("Usuario no autenticado");
+      }
+
+      // Solo usuarios PREMIUM pueden generar interpretación IA
+      if (user.plan !== UserPlan.PREMIUM) {
+        throw new ForbiddenException(
+          "Las interpretaciones numerológicas con IA están disponibles solo para usuarios Premium. " +
+            "Actualiza tu plan para desbloquear esta funcionalidad.",
+        );
+      }
+
+      return true;
+    }
+  }
   ```
+
+  > **Nota:** Este guard sigue el mismo patrón que `RequiresPremiumForAIGuard` en el módulo de readings.
 
 - [ ] Agregar controller al módulo
 
@@ -1111,12 +1525,12 @@ Implementar endpoints REST para calcular numerología y consultar significados.
 
 ---
 
-### TASK-124: Crear tipos TypeScript y API client para Numerología
+### TASK-204: Crear tipos TypeScript y API client para Numerología
 
-**Módulo:** `frontend/src/`  
-**Prioridad:** 🟡 MEDIA  
-**Estimación:** 0.5 días  
-**Dependencias:** TASK-123
+**Módulo:** `frontend/src/`
+**Prioridad:** 🟡 MEDIA
+**Estimación:** 0.5 días
+**Dependencias:** TASK-203
 
 ---
 
@@ -1146,43 +1560,67 @@ Crear los tipos TypeScript, endpoints y funciones de API para numerología.
 
 ##### Frontend
 
-- [ ] Crear `numerology.types.ts`:
+- [ ] Crear `numerology.types.ts` (alineado con DTOs del backend):
 
   ```typescript
-  export interface NumerologyNumber {
+  /**
+   * Coincide con NumberDetailDto del backend
+   */
+  export interface NumberDetailDto {
     value: number;
     name: string;
-    keywords: string;
+    keywords: string[];
     description: string;
-    meaning: string;
-    isMasterNumber: boolean;
+    isMaster: boolean;
   }
 
-  export interface NumerologyProfile {
-    lifePathNumber: NumerologyNumber;
-    destinyNumber: NumerologyNumber | null;
-    personalYearNumber: NumerologyNumber;
-    dayNumber: NumerologyNumber;
-    calculatedAt: string;
-    aiInterpretation: string | null;
+  /**
+   * Coincide con NumerologyResponseDto del backend
+   */
+  export interface NumerologyResponseDto {
+    lifePath: NumberDetailDto;
+    birthday: NumberDetailDto;
+    expression: NumberDetailDto | null;
+    soulUrge: NumberDetailDto | null;
+    personality: NumberDetailDto | null;
+    personalYear: number;
+    personalMonth: number;
+    birthDate: string;
+    fullName: string | null;
   }
 
-  export interface NumerologyMeaning {
+  /**
+   * Respuesta de interpretación IA (PREMIUM)
+   * Coincide con NumerologyInterpretationResponseDto del backend
+   */
+  export interface NumerologyInterpretationResponseDto {
     id: number;
+    userId: number;
+    interpretation: string;
+    lifePath: number;
+    expression: number | null;
+    soulUrge: number | null;
+    personality: number | null;
+    birthday: number;
+    generatedAt: string;
+    aiProvider: string;
+    aiModel: string;
+  }
+
+  /**
+   * Significado de un número
+   */
+  export interface NumerologyMeaning {
     number: number;
     name: string;
-    keywords: string;
+    keywords: string[];
     description: string;
-    strengths: string;
-    challenges: string;
-    lifePathMeaning: string;
-    destinyMeaning: string;
-    personalYearMeaning: string;
-    compatibility: {
-      bestWith: number[];
-      challenging: number[];
-    };
-    isMasterNumber: boolean;
+    strengths: string[];
+    challenges: string[];
+    careers: string[];
+    lifePurpose?: string;
+    lessonsToLearn?: string[];
+    isMaster: boolean;
   }
 
   export interface DayNumberResponse {
@@ -1194,6 +1632,19 @@ Crear los tipos TypeScript, endpoints y funciones de API para numerología.
   export interface CalculateNumerologyRequest {
     birthDate: string;
     fullName?: string;
+  }
+
+  /**
+   * Compatibilidad entre números
+   */
+  export type CompatibilityLevel = "high" | "medium" | "low";
+
+  export interface Compatibility {
+    numbers: [number, number];
+    level: CompatibilityLevel;
+    description: string;
+    strengths: string[];
+    challenges: string[];
   }
   ```
 
@@ -1220,7 +1671,8 @@ Crear los tipos TypeScript, endpoints y funciones de API para numerología.
   import { apiClient } from "./axios-config";
   import { API_ENDPOINTS } from "./endpoints";
   import type {
-    NumerologyProfile,
+    NumerologyResponseDto,
+    NumerologyInterpretationResponseDto,
     NumerologyMeaning,
     DayNumberResponse,
     CalculateNumerologyRequest,
@@ -1229,24 +1681,24 @@ Crear los tipos TypeScript, endpoints y funciones de API para numerología.
   /**
    * Calcula perfil numerológico (público)
    */
-  export async function calculateNumerology(data: CalculateNumerologyRequest): Promise<NumerologyProfile> {
-    const response = await apiClient.post<NumerologyProfile>(API_ENDPOINTS.NUMEROLOGY.CALCULATE, data);
+  export async function calculateNumerology(data: CalculateNumerologyRequest): Promise<NumerologyResponseDto> {
+    const response = await apiClient.post<NumerologyResponseDto>(API_ENDPOINTS.NUMEROLOGY.CALCULATE, data);
     return response.data;
   }
 
   /**
    * Obtiene mi perfil numerológico (requiere auth)
    */
-  export async function getMyNumerologyProfile(): Promise<NumerologyProfile> {
-    const response = await apiClient.get<NumerologyProfile>(API_ENDPOINTS.NUMEROLOGY.MY_PROFILE);
+  export async function getMyNumerologyProfile(): Promise<NumerologyResponseDto> {
+    const response = await apiClient.get<NumerologyResponseDto>(API_ENDPOINTS.NUMEROLOGY.MY_PROFILE);
     return response.data;
   }
 
   /**
    * Genera interpretación IA (PREMIUM)
    */
-  export async function generateNumerologyInterpretation(): Promise<NumerologyProfile> {
-    const response = await apiClient.post<NumerologyProfile>(API_ENDPOINTS.NUMEROLOGY.INTERPRET);
+  export async function generateNumerologyInterpretation(): Promise<NumerologyInterpretationResponseDto> {
+    const response = await apiClient.post<NumerologyInterpretationResponseDto>(API_ENDPOINTS.NUMEROLOGY.INTERPRET);
     return response.data;
   }
 
@@ -1470,12 +1922,12 @@ Crear los tipos TypeScript, endpoints y funciones de API para numerología.
 
 ---
 
-### TASK-125: Crear componentes UI de Numerología
+### TASK-205: Crear componentes UI de Numerología
 
-**Módulo:** `frontend/src/components/features/numerology/`  
-**Prioridad:** 🟡 MEDIA  
-**Estimación:** 1 día  
-**Dependencias:** TASK-124
+**Módulo:** `frontend/src/components/features/numerology/`
+**Prioridad:** 🟡 MEDIA
+**Estimación:** 1 día
+**Dependencias:** TASK-204
 
 ---
 
@@ -1492,6 +1944,7 @@ Crear los componentes de UI para numerología: calculadora, tarjetas de números
 ```
 frontend/src/components/features/numerology/
 ├── index.ts
+├── NumerologyIntro.tsx        # Introducción explicativa
 ├── NumerologyCalculator.tsx
 ├── NumberCard.tsx
 ├── NumberGallery.tsx
@@ -1507,6 +1960,60 @@ frontend/src/components/features/numerology/
 
 ##### Frontend
 
+- [ ] Crear `NumerologyIntro.tsx`:
+
+  ```tsx
+  "use client";
+
+  import { Card } from "@/components/ui/card";
+  import { cn } from "@/lib/utils";
+
+  interface NumerologyIntroProps {
+    className?: string;
+  }
+
+  export function NumerologyIntro({ className }: NumerologyIntroProps) {
+    return (
+      <Card
+        className={cn(
+          "p-6 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-950/20 dark:to-indigo-950/20",
+          className,
+        )}
+      >
+        <h2 className="font-serif text-xl mb-3">¿Qué es la Numerología?</h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          La numerología es un sistema ancestral que estudia la relación entre los números y los eventos de la vida. A
+          través de tu fecha de nacimiento y nombre, podemos descubrir aspectos profundos de tu personalidad, propósito
+          de vida y ciclos personales.
+        </p>
+
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <h3 className="font-medium mb-1">📅 Desde tu fecha</h3>
+            <ul className="text-muted-foreground space-y-1">
+              <li>• Camino de Vida</li>
+              <li>• Número del Día</li>
+              <li>• Año Personal</li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="font-medium mb-1">✨ Desde tu nombre</h3>
+            <ul className="text-muted-foreground space-y-1">
+              <li>• Número de Expresión</li>
+              <li>• Número del Alma</li>
+              <li>• Personalidad</li>
+            </ul>
+          </div>
+        </div>
+
+        <p className="text-xs text-muted-foreground mt-4 italic">
+          Los números maestros (11, 22, 33) tienen un significado especial y no se reducen.
+        </p>
+      </Card>
+    );
+  }
+  ```
+
 - [ ] Crear `NumberCard.tsx`:
 
   ```tsx
@@ -1516,21 +2023,24 @@ frontend/src/components/features/numerology/
   import { Badge } from "@/components/ui/badge";
   import { cn } from "@/lib/utils";
   import { NUMEROLOGY_NUMBERS_INFO } from "@/lib/utils/numerology";
-  import type { NumerologyNumber } from "@/types/numerology.types";
+  import type { NumberDetailDto } from "@/types/numerology.types";
 
   interface NumberCardProps {
-    number: NumerologyNumber;
-    context?: "lifePath" | "destiny" | "personalYear" | "day";
+    number: NumberDetailDto;
+    context?: "lifePath" | "expression" | "soulUrge" | "personality" | "birthday" | "personalYear" | "personalMonth";
     variant?: "compact" | "full";
     onClick?: () => void;
     className?: string;
   }
 
-  const CONTEXT_LABELS = {
-    lifePath: "Número de Vida",
-    destiny: "Número de Destino",
+  const CONTEXT_LABELS: Record<string, string> = {
+    lifePath: "Camino de Vida",
+    expression: "Expresión/Destino",
+    soulUrge: "Número del Alma",
+    personality: "Personalidad",
+    birthday: "Número del Día",
     personalYear: "Año Personal",
-    day: "Número del Día",
+    personalMonth: "Mes Personal",
   };
 
   export function NumberCard({ number, context, variant = "compact", onClick, className }: NumberCardProps) {
@@ -1547,7 +2057,7 @@ frontend/src/components/features/numerology/
           <div className="flex-1">
             {context && <p className="text-xs text-muted-foreground">{CONTEXT_LABELS[context]}</p>}
             <p className="font-serif text-lg">{number.name}</p>
-            {number.isMasterNumber && (
+            {number.isMaster && (
               <Badge variant="secondary" className="mt-1">
                 Número Maestro ✨
               </Badge>
@@ -1558,8 +2068,8 @@ frontend/src/components/features/numerology/
 
         {variant === "full" && (
           <>
-            <p className="mt-3 text-sm text-muted-foreground">{number.keywords}</p>
-            <p className="mt-2 text-sm">{number.meaning}</p>
+            <p className="mt-3 text-sm text-muted-foreground">{number.keywords.join(", ")}</p>
+            <p className="mt-2 text-sm">{number.description}</p>
           </>
         )}
       </Card>
@@ -1634,10 +2144,10 @@ frontend/src/components/features/numerology/
   import { NumberCard } from "./NumberCard";
   import { useCalculateNumerology } from "@/hooks/api/useNumerology";
   import { calculateLifePathNumber } from "@/lib/utils/numerology";
-  import type { NumerologyProfile } from "@/types/numerology.types";
+  import type { NumerologyResponseDto } from "@/types/numerology.types";
 
   interface NumerologyCalculatorProps {
-    onCalculated?: (profile: NumerologyProfile) => void;
+    onCalculated?: (profile: NumerologyResponseDto) => void;
     showNameField?: boolean;
   }
 
@@ -1720,8 +2230,8 @@ frontend/src/components/features/numerology/
 
         {data && (
           <div className="mt-6 space-y-3">
-            <NumberCard number={data.lifePathNumber} context="lifePath" variant="full" />
-            {data.destinyNumber && <NumberCard number={data.destinyNumber} context="destiny" />}
+            <NumberCard number={data.lifePath} context="lifePath" variant="full" />
+            {data.expression && <NumberCard number={data.expression} context="expression" />}
           </div>
         )}
       </Card>
@@ -1739,10 +2249,11 @@ frontend/src/components/features/numerology/
   import { Separator } from "@/components/ui/separator";
   import { NumberCard } from "./NumberCard";
   import { Sparkles } from "lucide-react";
-  import type { NumerologyProfile as ProfileType } from "@/types/numerology.types";
+  import type { NumerologyResponseDto, NumerologyInterpretationResponseDto } from "@/types/numerology.types";
 
   interface NumerologyProfileProps {
-    profile: ProfileType;
+    profile: NumerologyResponseDto;
+    interpretation?: NumerologyInterpretationResponseDto | null;
     onRequestInterpretation?: () => void;
     isGeneratingInterpretation?: boolean;
     canGenerateInterpretation?: boolean;
@@ -1750,6 +2261,7 @@ frontend/src/components/features/numerology/
 
   export function NumerologyProfile({
     profile,
+    interpretation,
     onRequestInterpretation,
     isGeneratingInterpretation = false,
     canGenerateInterpretation = false,
@@ -1758,21 +2270,42 @@ frontend/src/components/features/numerology/
       <div className="space-y-6">
         <div className="text-center">
           <h1 className="font-serif text-3xl">Tu Perfil Numerológico</h1>
-          <p className="text-muted-foreground mt-2">
-            Calculado el {new Date(profile.calculatedAt).toLocaleDateString()}
-          </p>
+          <p className="text-muted-foreground mt-2">Fecha de nacimiento: {profile.birthDate}</p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
-          <NumberCard number={profile.lifePathNumber} context="lifePath" variant="full" />
-          {profile.destinyNumber && <NumberCard number={profile.destinyNumber} context="destiny" variant="full" />}
-          <NumberCard number={profile.personalYearNumber} context="personalYear" variant="full" />
-          <NumberCard number={profile.dayNumber} context="day" />
+          <NumberCard number={profile.lifePath} context="lifePath" variant="full" />
+          {profile.expression && <NumberCard number={profile.expression} context="expression" variant="full" />}
+          {profile.soulUrge && <NumberCard number={profile.soulUrge} context="soulUrge" variant="full" />}
+          {profile.personality && <NumberCard number={profile.personality} context="personality" variant="full" />}
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <NumberCard
+            number={{
+              value: profile.personalYear,
+              name: `Año Personal ${new Date().getFullYear()}`,
+              keywords: [],
+              description: "",
+              isMaster: false,
+            }}
+            context="personalYear"
+          />
+          <NumberCard
+            number={{
+              value: profile.personalMonth,
+              name: "Mes Personal",
+              keywords: [],
+              description: "",
+              isMaster: false,
+            }}
+            context="personalMonth"
+          />
         </div>
 
         <Separator />
 
-        {profile.aiInterpretation ? (
+        {interpretation ? (
           <Card
             className="p-6 bg-gradient-to-br from-purple-50 to-indigo-50 
                           dark:from-purple-950/20 dark:to-indigo-950/20"
@@ -1781,7 +2314,10 @@ frontend/src/components/features/numerology/
               <Sparkles className="h-5 w-5 text-purple-500" />
               <h3 className="font-serif text-lg">Interpretación Personalizada</h3>
             </div>
-            <p className="text-sm leading-relaxed whitespace-pre-line">{profile.aiInterpretation}</p>
+            <p className="text-sm leading-relaxed whitespace-pre-line">{interpretation.interpretation}</p>
+            <p className="text-xs text-muted-foreground mt-4">
+              Generado el {new Date(interpretation.generatedAt).toLocaleDateString()}
+            </p>
           </Card>
         ) : canGenerateInterpretation ? (
           <Card className="p-6 text-center">
@@ -1858,7 +2394,7 @@ frontend/src/components/features/numerology/
       );
     }
 
-    const lifePathInfo = NUMEROLOGY_NUMBERS_INFO[profile.lifePathNumber.value];
+    const lifePathInfo = NUMEROLOGY_NUMBERS_INFO[profile.lifePath.value];
 
     return (
       <Card data-testid="numerology-widget" className="p-6">
@@ -1875,11 +2411,11 @@ frontend/src/components/features/numerology/
         <div className="flex items-center gap-4">
           <div className="text-center">
             <p className="text-xs text-muted-foreground">Vida</p>
-            <p className={`text-3xl font-bold ${lifePathInfo?.color}`}>{profile.lifePathNumber.value}</p>
+            <p className={`text-3xl font-bold ${lifePathInfo?.color}`}>{profile.lifePath.value}</p>
           </div>
           <div className="flex-1">
-            <p className="font-medium">{profile.lifePathNumber.name}</p>
-            <p className="text-xs text-muted-foreground line-clamp-2">{profile.lifePathNumber.keywords}</p>
+            <p className="font-medium">{profile.lifePath.name}</p>
+            <p className="text-xs text-muted-foreground line-clamp-2">{profile.lifePath.keywords.join(", ")}</p>
           </div>
         </div>
 
@@ -1921,12 +2457,12 @@ frontend/src/components/features/numerology/
 
 ---
 
-### TASK-209: Crear páginas de Numerología
+### TASK-206: Crear páginas de Numerología
 
-**Módulo:** `frontend/src/app/numerologia/`  
-**Prioridad:** 🟡 MEDIA  
-**Estimación:** 1 día  
-**Dependencias:** TASK-208
+**Módulo:** `frontend/src/app/numerologia/`
+**Prioridad:** 🟡 MEDIA
+**Estimación:** 1 día
+**Dependencias:** TASK-205
 
 ---
 
@@ -2067,13 +2603,14 @@ Crear la página principal de numerología con calculadora y vista de resultados
   import { useRouter } from "next/navigation";
   import { ArrowLeft, RefreshCw } from "lucide-react";
   import { Button } from "@/components/ui/button";
-  import { LifePathCard, NumerologyNumberCard, PersonalCycleCard } from "@/components/features/numerology";
+  import { Card } from "@/components/ui/card";
+  import { NumberCard } from "@/components/features/numerology";
   import { ROUTES } from "@/lib/constants/routes";
-  import type { NumerologyResponse } from "@/types/numerology.types";
+  import type { NumerologyResponseDto } from "@/types/numerology.types";
 
   export default function ResultadoPage() {
     const router = useRouter();
-    const [result, setResult] = useState<NumerologyResponse | null>(null);
+    const [result, setResult] = useState<NumerologyResponseDto | null>(null);
 
     useEffect(() => {
       const stored = sessionStorage.getItem("numerologyResult");
@@ -2114,37 +2651,31 @@ Crear la página principal de numerología con calculadora y vista de resultados
             </p>
           </div>
 
-          {/* Número principal */}
-          <LifePathCard data={result.lifePath} className="mb-8" />
+          {/* Número principal: Camino de Vida */}
+          <NumberCard number={result.lifePath} context="lifePath" variant="full" className="mb-8" />
 
           {/* Grid de números */}
           <h2 className="font-serif text-xl mb-4">Tus Números</h2>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-8">
-            <NumerologyNumberCard title="Número del Día" data={result.birthday} description="Tu talento natural" />
-            {result.expression && (
-              <NumerologyNumberCard title="Expresión" data={result.expression} description="Tu potencial" />
-            )}
-            {result.soulUrge && (
-              <NumerologyNumberCard title="Alma" data={result.soulUrge} description="Tus deseos internos" />
-            )}
-            {result.personality && (
-              <NumerologyNumberCard title="Personalidad" data={result.personality} description="Cómo te ven" />
-            )}
+            <NumberCard number={result.birthday} context="birthday" />
+            {result.expression && <NumberCard number={result.expression} context="expression" />}
+            {result.soulUrge && <NumberCard number={result.soulUrge} context="soulUrge" />}
+            {result.personality && <NumberCard number={result.personality} context="personality" />}
           </div>
 
           {/* Ciclos personales */}
           <h2 className="font-serif text-xl mb-4">Tus Ciclos Actuales</h2>
           <div className="grid gap-4 md:grid-cols-2 mb-8">
-            <PersonalCycleCard
-              title="Año Personal"
-              number={result.personalYear}
-              period={new Date().getFullYear().toString()}
-            />
-            <PersonalCycleCard
-              title="Mes Personal"
-              number={result.personalMonth}
-              period={new Date().toLocaleDateString("es", { month: "long" })}
-            />
+            <Card className="p-4 text-center">
+              <p className="text-xs text-muted-foreground">Año Personal {new Date().getFullYear()}</p>
+              <p className="text-4xl font-bold text-primary mt-2">{result.personalYear}</p>
+            </Card>
+            <Card className="p-4 text-center">
+              <p className="text-xs text-muted-foreground">
+                Mes Personal ({new Date().toLocaleDateString("es", { month: "long" })})
+              </p>
+              <p className="text-4xl font-bold text-primary mt-2">{result.personalMonth}</p>
+            </Card>
           </div>
 
           {/* CTA */}
@@ -2190,12 +2721,12 @@ Crear la página principal de numerología con calculadora y vista de resultados
 
 ---
 
-### TASK-210: Agregar widget al Dashboard
+### TASK-207: Agregar widget al Dashboard
 
-**Módulo:** `frontend/src/components/features/dashboard/`  
-**Prioridad:** 🟢 BAJA  
-**Estimación:** 0.5 días  
-**Dependencias:** TASK-209
+**Módulo:** `frontend/src/components/features/dashboard/`
+**Prioridad:** 🟢 BAJA
+**Estimación:** 0.5 días
+**Dependencias:** TASK-206
 
 ---
 
@@ -2278,18 +2809,19 @@ interface NumberInterpretation {
 
 ## RESUMEN DE TAREAS
 
-| Tarea    | Descripción               | Estimación |
-| -------- | ------------------------- | ---------- |
-| TASK-200 | Utils de cálculo          | 1 día      |
-| TASK-201 | Datos de interpretaciones | 0.5 días   |
-| TASK-202 | Módulo y servicio         | 0.5 días   |
-| TASK-203 | Endpoints                 | 0.5 días   |
-| TASK-207 | Frontend types y hooks    | 0.5 días   |
-| TASK-208 | Componentes UI            | 1 día      |
-| TASK-209 | Páginas                   | 1 día      |
-| TASK-210 | Widget dashboard          | 0.5 días   |
+| Tarea     | Descripción                         | Estimación |
+| --------- | ----------------------------------- | ---------- |
+| TASK-200  | Utils de cálculo (backend)          | 1 día      |
+| TASK-201  | Datos de interpretaciones (backend) | 0.5 días   |
+| TASK-202  | Módulo y servicio (backend)         | 0.5 días   |
+| TASK-202b | Entidad e IA Premium (backend)      | 1 día      |
+| TASK-203  | Endpoints (backend)                 | 0.5 días   |
+| TASK-204  | Types, API y hooks (frontend)       | 0.5 días   |
+| TASK-205  | Componentes UI (frontend)           | 1 día      |
+| TASK-206  | Páginas (frontend)                  | 1 día      |
+| TASK-207  | Widget dashboard (frontend)         | 0.5 días   |
 
-**Total:** 5.5 días
+**Total:** 6.5 días
 
 ---
 
@@ -2300,14 +2832,15 @@ interface NumberInterpretation {
 - [ ] TASK-200: Utilidades de cálculo
 - [ ] TASK-201: Datos de interpretaciones
 - [ ] TASK-202: Módulo y servicio
+- [ ] TASK-202b: Entidad e interpretación IA Premium
 - [ ] TASK-203: Endpoints
 
 ### Frontend
 
-- [ ] TASK-207: Types y hooks
-- [ ] TASK-208: Componentes UI
-- [ ] TASK-209: Páginas
-- [ ] TASK-210: Widget dashboard
+- [ ] TASK-204: Types, API y hooks
+- [ ] TASK-205: Componentes UI
+- [ ] TASK-206: Páginas
+- [ ] TASK-207: Widget dashboard
 
 ### Validación
 
