@@ -90,6 +90,7 @@ export function useChineseHoroscopeMainPage(): UseChineseHoroscopeMainPageResult
       Promise.resolve().then(() => {
         setModalBirthDate(null);
         setSelectedAnimalForModal(null);
+        setIsModalOpen(false);
       });
     }
   }, [calculatedAnimalData, selectedAnimalForModal, modalBirthDate, router]);
