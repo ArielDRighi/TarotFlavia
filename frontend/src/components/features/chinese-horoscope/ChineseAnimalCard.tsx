@@ -88,7 +88,6 @@ export function ChineseAnimalCard({
     >
       <span className="text-4xl">{animalInfo.emoji}</span>
       <p className="mt-2 font-serif text-lg">{animalInfo.nameEs}</p>
-      <p className="text-muted-foreground text-xs">{animalInfo.element}</p>
       {isUserAnimal && <span className="text-xs font-medium text-red-500">Tu animal</span>}
     </Card>
   );

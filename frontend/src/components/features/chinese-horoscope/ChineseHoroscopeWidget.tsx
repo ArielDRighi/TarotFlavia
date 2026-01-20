@@ -101,19 +101,19 @@ export function ChineseHoroscopeWidget() {
       <div className="mt-4 flex gap-4 text-xs">
         <span className="flex items-center gap-1">
           <span className="text-rose-500">❤️</span>
-          {horoscope.areas.love.rating}/10
+          {horoscope.areas.love.score}/10
         </span>
         <span className="flex items-center gap-1">
           <span className="text-blue-500">💼</span>
-          {horoscope.areas.career.rating}/10
+          {horoscope.areas.career.score}/10
         </span>
         <span className="flex items-center gap-1">
           <span className="text-emerald-500">✨</span>
-          {horoscope.areas.wellness.rating}/10
+          {horoscope.areas.wellness.score}/10
         </span>
         <span className="flex items-center gap-1">
           <span className="text-amber-500">💰</span>
-          {horoscope.areas.finance.rating}/10
+          {horoscope.areas.finance.score}/10
         </span>
       </div>
     </Card>

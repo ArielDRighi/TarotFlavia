@@ -85,7 +85,7 @@ export default function ChineseHoroscopeAnimalPage() {
               <p className="text-muted-foreground">Horóscopo no disponible para {currentYear}</p>
             </div>
           ) : horoscopeData ? (
-            <ChineseHoroscopeDetail horoscope={horoscopeData} />
+            <ChineseHoroscopeDetail horoscope={horoscopeData} element={element} />
           ) : null}
         </>
       )}

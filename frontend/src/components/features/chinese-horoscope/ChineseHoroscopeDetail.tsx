@@ -3,8 +3,8 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ChineseCompatibility } from './ChineseCompatibility';
-import { CHINESE_ZODIAC_INFO } from '@/lib/utils/chinese-zodiac';
-import type { ChineseHoroscope } from '@/types/chinese-horoscope.types';
+import { CHINESE_ZODIAC_INFO, getElementNameEs } from '@/lib/utils/chinese-zodiac';
+import type { ChineseHoroscope, ChineseElementCode } from '@/types/chinese-horoscope.types';
 
 /**
  * ChineseHoroscopeDetail Component Props
@@ -12,6 +12,8 @@ import type { ChineseHoroscope } from '@/types/chinese-horoscope.types';
 export interface ChineseHoroscopeDetailProps {
   /** Chinese horoscope data */
   horoscope: ChineseHoroscope;
+  /** Element code (optional - used to display full zodiac name like 'Dragón de Tierra') */
+  element?: ChineseElementCode | null;
 }
 
 const AREA_LABELS = {
@@ -32,15 +34,20 @@ const AREA_LABELS = {
  * <ChineseHoroscopeDetail horoscope={dragonHoroscope2026} />
  * ```
  */
-export function ChineseHoroscopeDetail({ horoscope }: ChineseHoroscopeDetailProps) {
+export function ChineseHoroscopeDetail({ horoscope, element }: ChineseHoroscopeDetailProps) {
   const animalInfo = CHINESE_ZODIAC_INFO[horoscope.animal];
+
+  // Determine display name: fullZodiacType from API > calculated from element > just animal name
+  const displayName =
+    horoscope.fullZodiacType ||
+    (element ? `${animalInfo.nameEs} de ${getElementNameEs(element)}` : animalInfo.nameEs);
 
   return (
     <div className="space-y-6" data-testid="chinese-horoscope-detail">
       {/* Header */}
       <div className="text-center">
         <span className="text-6xl">{animalInfo.emoji}</span>
-        <h1 className="mt-2 font-serif text-3xl">{animalInfo.nameEs}</h1>
+        <h1 className="mt-2 font-serif text-3xl">{displayName}</h1>
         <Badge variant="secondary" className="mt-2">
           Horóscopo {horoscope.year}
         </Badge>
@@ -61,7 +68,7 @@ export function ChineseHoroscopeDetail({ horoscope }: ChineseHoroscopeDetailProp
                 <span>{config.icon}</span>
                 <h3 className="font-medium">{config.label}</h3>
                 <Badge variant="outline" className="ml-auto">
-                  {area.rating}/10
+                  {area.score}/10
                 </Badge>
               </div>
               <p className="text-muted-foreground text-sm">{area.content}</p>

@@ -152,6 +152,32 @@ const ELEMENT_ICONS: Record<string, string> = {
 export type ChineseElementCode = 'metal' | 'water' | 'wood' | 'fire' | 'earth';
 
 /**
+ * Mapping de códigos de elementos a nombres en español
+ */
+const ELEMENT_NAMES_ES: Record<ChineseElementCode, string> = {
+  metal: 'Metal',
+  water: 'Agua',
+  wood: 'Madera',
+  fire: 'Fuego',
+  earth: 'Tierra',
+};
+
+/**
+ * Obtiene el nombre en español de un elemento Wu Xing
+ * @param element - Código del elemento (metal, water, wood, fire, earth)
+ * @returns Nombre del elemento en español
+ *
+ * @example
+ * ```typescript
+ * getElementNameEs('earth'); // 'Tierra'
+ * getElementNameEs('fire'); // 'Fuego'
+ * ```
+ */
+export function getElementNameEs(element: ChineseElementCode): string {
+  return ELEMENT_NAMES_ES[element] || element;
+}
+
+/**
  * Obtiene el elemento para un año específico (gregoriano)
  * Los 5 elementos rotan cada 2 años: Metal, Water, Wood, Fire, Earth
  *

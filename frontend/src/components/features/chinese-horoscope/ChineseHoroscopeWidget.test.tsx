@@ -30,19 +30,19 @@ function createMockHoroscope(overrides?: Partial<ChineseHoroscope>): ChineseHoro
     areas: {
       love: {
         content: 'El amor florecerá en primavera.',
-        rating: 8,
+        score: 8,
       },
       career: {
         content: 'Excelente año para avances profesionales.',
-        rating: 9,
+        score: 9,
       },
       wellness: {
         content: 'Mantén el equilibrio entre trabajo y descanso.',
-        rating: 7,
+        score: 7,
       },
       finance: {
         content: 'Las inversiones serán favorables.',
-        rating: 8,
+        score: 8,
       },
     },
     luckyElements: {
