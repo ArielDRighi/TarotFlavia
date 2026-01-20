@@ -62,7 +62,8 @@
     "pretest:e2e": "echo 'E2E tests use global setup/teardown - no pre-reset needed'",
     "test:e2e:fresh": "npm run db:e2e:reset && npm run test:e2e",
     "test:integration:fresh": "npm run db:integration:reset && npm run test:integration",
-    "validate:schema": "npm run build && tsc scripts/validate-schema-consistency.ts --outDir dist/scripts --module commonjs --esModuleInterop && node dist/scripts/validate-schema-consistency.js"
+    "validate:schema": "npm run build && tsc scripts/validate-schema-consistency.ts --outDir dist/scripts --module commonjs --esModuleInterop && node dist/scripts/validate-schema-consistency.js",
+    "backup:chinese-horoscopes": "ts-node -r tsconfig-paths/register scripts/backup-chinese-horoscopes.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

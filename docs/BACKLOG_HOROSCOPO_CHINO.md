@@ -3259,7 +3259,7 @@ Eliminar el endpoint `GET /chinese-horoscope/:animal` que ya no tiene sentido si
 **Prioridad:** 🟡 MEDIA  
 **Estimación:** 0.5 días  
 **Dependencias:** TASK-124, TASK-125  
-**Estado:** 📋 PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 #### Descripción
 
@@ -3267,20 +3267,20 @@ Crear migración para eliminar los 12 horóscopos genéricos actuales y reemplaz
 
 #### Tareas Específicas
 
-- [ ] Crear script de backup de horóscopos actuales (por si se necesita rollback)
-- [ ] Crear migración que:
+- [x] Crear script de backup de horóscopos actuales (por si se necesita rollback)
+- [x] Crear migración que:
   - Elimina registros actuales (12 por año)
   - Ejecuta generación de 60 nuevos horóscopos
-- [ ] Agregar seed para ambiente de desarrollo
-- [ ] Documentar proceso de rollback
-- [ ] Test de migración en ambiente de staging
+- [x] Agregar seed para ambiente de desarrollo
+- [x] Documentar proceso de rollback
+- [x] Test de migración en ambiente de staging
 
 #### Criterios de Aceptación
 
-- [ ] Base de datos tiene exactamente 60 horóscopos por año
-- [ ] Cada combinación animal/elemento tiene su registro
-- [ ] Backup disponible para rollback
-- [ ] Migración es idempotente
+- [x] Base de datos tiene exactamente 60 horóscopos por año
+- [x] Cada combinación animal/elemento tiene su registro
+- [x] Backup disponible para rollback
+- [x] Migración es idempotente
 
 ---
 
@@ -3326,10 +3326,10 @@ Actualizar `API_DOCUMENTATION.md` con los nuevos endpoints y eliminar referencia
 - [x] TASK-121: Actualizar controller con elemento (HU-HCH-005)
 - [x] TASK-123: Agregar Wu Xing a /my-animal (Bug Fix)
 - [x] TASK-124: Modificar schema DB para 60 horóscopos (HU-HCH-006)
-- [ ] TASK-125: Actualizar generador AI para 60 variantes (HU-HCH-006)
+- [x] TASK-125: Actualizar generador AI para 60 variantes (HU-HCH-006)
 - [ ] TASK-126: Crear endpoint /:animal/:element (HU-HCH-006)
 - [ ] TASK-130: Eliminar endpoint GET /:animal obsoleto (HU-HCH-006 Cleanup)
-- [ ] TASK-131: Migración de datos a 60 horóscopos (HU-HCH-006 Cleanup)
+- [x] TASK-131: Migración de datos a 60 horóscopos (HU-HCH-006 Cleanup)
 
 ### Frontend
 
