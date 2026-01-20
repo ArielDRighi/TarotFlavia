@@ -103,11 +103,7 @@ psql -h localhost -U postgres -d tarot_dev
 # (Convertir JSON a INSERT statements)
 ```
 
-**O usar script de restauración:**
-```bash
-ts-node -r tsconfig-paths/register scripts/restore-chinese-horoscopes.ts \
-  backups/chinese-horoscopes-backup-{timestamp}.json
-```
+> **Nota:** Actualmente la restauración debe hacerse de forma manual usando el backup JSON.
 
 ---
 
@@ -176,7 +172,7 @@ npm run backup:chinese-horoscopes
 npm run migration:run
 
 # 3. Generar vía API con monitoreo
-curl -X POST https://api.auguria.com/chinese-horoscope/admin/generate/2025 \
+curl -X POST "$API_BASE_URL/chinese-horoscopes/admin/generate/2025" \
   -H "Authorization: Bearer $ADMIN_TOKEN" \
   -H "Content-Type: application/json"
 

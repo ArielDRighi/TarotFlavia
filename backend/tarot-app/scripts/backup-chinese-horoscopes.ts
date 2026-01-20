@@ -15,7 +15,7 @@
  */
 
 import { DataSource } from 'typeorm';
-import { readFileSync, writeFileSync, mkdirSync } from 'fs';
+import { writeFileSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import * as dotenv from 'dotenv';
 
@@ -75,11 +75,7 @@ async function backupChineseHoroscopes() {
 
     // Crear directorio de backups si no existe
     const backupsDir = join(__dirname, '../backups');
-    try {
-      mkdirSync(backupsDir, { recursive: true });
-    } catch (error) {
-      // Directorio ya existe
-    }
+    mkdirSync(backupsDir, { recursive: true });
 
     // Generar nombre de archivo con timestamp
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
@@ -105,7 +101,7 @@ async function backupChineseHoroscopes() {
 
     // Mostrar resumen por año
     const yearSummary = horoscopes.reduce(
-      (acc: any, h: any) => {
+      (acc: Record<number, number>, h: any) => {
         acc[h.year] = (acc[h.year] || 0) + 1;
         return acc;
       },
