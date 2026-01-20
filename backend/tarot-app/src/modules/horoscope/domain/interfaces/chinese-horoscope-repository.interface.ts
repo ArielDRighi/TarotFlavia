@@ -1,5 +1,4 @@
 import { ChineseHoroscope } from '../../entities/chinese-horoscope.entity';
-import { ChineseZodiacAnimal } from '../../../../common/utils/chinese-zodiac.utils';
 
 /**
  * Repository interface for ChineseHoroscope entity.
@@ -9,17 +8,6 @@ import { ChineseZodiacAnimal } from '../../../../common/utils/chinese-zodiac.uti
  * when the repository layer is added to the infrastructure layer.
  */
 export interface IChineseHoroscopeRepository {
-  /**
-   * Finds a horoscope by animal and year.
-   * @param animal - The Chinese zodiac animal
-   * @param year - The year (e.g., 2026)
-   * @returns The horoscope if found, null otherwise
-   */
-  findByAnimalAndYear(
-    animal: ChineseZodiacAnimal,
-    year: number,
-  ): Promise<ChineseHoroscope | null>;
-
   /**
    * Finds all horoscopes for a specific year.
    * @param year - The year (e.g., 2026)

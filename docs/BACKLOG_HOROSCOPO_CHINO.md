@@ -3219,25 +3219,37 @@ Conectar el AnimalCalculator con navegación directa al horóscopo completo del 
 **Prioridad:** 🟡 MEDIA  
 **Estimación:** 0.25 días  
 **Dependencias:** TASK-126, TASK-128  
-**Estado:** 📋 PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 #### Descripción
 
 Eliminar el endpoint `GET /chinese-horoscope/:animal` que ya no tiene sentido sin el elemento. Este endpoint retornaba el horóscopo genérico del animal, pero con el nuevo sistema profesional siempre se requiere el elemento.
 
+**IMPORTANTE:** Se realizó limpieza completa de código obsoleto en TODA la aplicación (backend + frontend + capa de servicio), no solo el endpoint del controller. Esto incluye:
+
+- **Backend:** Eliminado endpoint del controller + métodos de servicio (`findByAnimalAndYear`, `generateForAnimal`) + tests + interface del repository
+- **Frontend:** Eliminado endpoint definition + función API + hook de React Query + query key
+
 #### Tareas Específicas
 
-- [ ] Verificar que no hay referencias al endpoint en el frontend
-- [ ] Eliminar método `getHoroscopeByAnimal` del controller
-- [ ] Eliminar tests asociados al endpoint obsoleto
-- [ ] Actualizar Swagger/OpenAPI (remover endpoint)
-- [ ] Verificar que `/my-animal` y `/:animal/:element` funcionan correctamente
+- [x] Verificar que no hay referencias al endpoint en el frontend
+- [x] Eliminar método `getHoroscopeByAnimal` del controller
+- [x] Eliminar tests asociados al endpoint obsoleto
+- [x] Actualizar Swagger/OpenAPI (remover endpoint)
+- [x] Verificar que `/my-animal` y `/:animal/:element` funcionan correctamente
+- [x] **CLEANUP COMPLETO:** Eliminar métodos de servicio deprecados (`findByAnimalAndYear`, `generateForAnimal`)
+- [x] **CLEANUP COMPLETO:** Eliminar función API del frontend (`getChineseHoroscope`)
+- [x] **CLEANUP COMPLETO:** Eliminar hook de React Query (`useChineseHoroscope`)
+- [x] **CLEANUP COMPLETO:** Eliminar endpoint definition del frontend (`BY_YEAR_ANIMAL`)
 
 #### Criterios de Aceptación
 
-- [ ] Endpoint `GET /:animal` retorna 404 o no existe
-- [ ] No hay código muerto en el controller
-- [ ] Tests actualizados sin referencias al endpoint eliminado
+- [x] Endpoint `GET /:animal` retorna 404 o no existe
+- [x] No hay código muerto en el controller
+- [x] Tests actualizados sin referencias al endpoint eliminado
+- [x] **NO hay código muerto en capa de servicio** (backend)
+- [x] **NO hay código muerto en API/hooks** (frontend)
+- [x] **Todas las validaciones pasan** (format, lint, tests, build, architecture)
 
 ---
 

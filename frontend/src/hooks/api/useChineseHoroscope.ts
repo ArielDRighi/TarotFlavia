@@ -11,7 +11,6 @@ import {
   calculateAnimal,
   getMyAnimalHoroscope,
   getChineseHoroscopesByYear,
-  getChineseHoroscope,
   getChineseHoroscopeByElement,
 } from '@/lib/api/chinese-horoscope-api';
 import type { ChineseZodiacAnimal, ChineseElementCode } from '@/types/chinese-horoscope.types';
@@ -20,8 +19,6 @@ export const chineseHoroscopeKeys = {
   all: ['chinese-horoscope'] as const,
   myAnimal: (year?: number) => [...chineseHoroscopeKeys.all, 'my', year] as const,
   byYear: (year: number) => [...chineseHoroscopeKeys.all, year] as const,
-  byAnimal: (year: number, animal: ChineseZodiacAnimal) =>
-    [...chineseHoroscopeKeys.all, year, animal] as const,
   byAnimalElement: (year: number, animal: ChineseZodiacAnimal, element: ChineseElementCode) =>
     [...chineseHoroscopeKeys.all, year, animal, element] as const,
   calculate: (birthDate: string) => [...chineseHoroscopeKeys.all, 'calculate', birthDate] as const,
@@ -63,20 +60,6 @@ export function useChineseHoroscopesByYear(year: number) {
   return useQuery({
     queryKey: chineseHoroscopeKeys.byYear(year),
     queryFn: () => getChineseHoroscopesByYear(year),
-    staleTime: 1000 * 60 * 60 * 24, // 24 horas
-  });
-}
-
-/**
- * Hook para obtener un horóscopo chino específico
- * @param year Año del horóscopo
- * @param animal Animal del zodiaco
- */
-export function useChineseHoroscope(year: number, animal: ChineseZodiacAnimal | null) {
-  return useQuery({
-    queryKey: chineseHoroscopeKeys.byAnimal(year, animal!),
-    queryFn: () => getChineseHoroscope(year, animal!),
-    enabled: !!animal,
     staleTime: 1000 * 60 * 60 * 24, // 24 horas
   });
 }

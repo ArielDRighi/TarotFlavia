@@ -51,7 +51,7 @@ import { UsersService } from '../../../users/users.service';
  * Endpoints públicos:
  * - GET /chinese-horoscope/calculate?birthDate=YYYY-MM-DD - Calcular animal chino
  * - GET /chinese-horoscope/:year - Todos los horóscopos de un año
- * - GET /chinese-horoscope/:year/:animal - Horóscopo específico
+ * - GET /chinese-horoscope/:year/:animal/:element - Horóscopo específico por animal y elemento
  *
  * Endpoints autenticados:
  * - GET /chinese-horoscope/my-animal?year=2026 - Horóscopo del usuario (requiere birthDate)
@@ -290,63 +290,6 @@ export class ChineseHoroscopeController {
     if (!horoscope) {
       throw new NotFoundException(
         `Horóscopo chino de ${animal} de ${element} para ${year} no disponible`,
-      );
-    }
-
-    // Incrementar viewCount de forma asíncrona (fire-and-forget)
-    this.chineseService.incrementViewCount(horoscope.id).catch(() => {
-      // Ignorar errores silenciosamente
-    });
-
-    return this.toResponseDto(horoscope);
-  }
-
-  /**
-   * Obtener horóscopo chino específico por año y animal
-   * @deprecated Use getByAnimalAndElement instead (TASK-126)
-   */
-  @Get(':year/:animal')
-  @ApiOperation({ summary: 'Obtener horóscopo chino específico' })
-  @ApiParam({
-    name: 'year',
-    example: 2026,
-    description: 'Año a consultar (2020-2050)',
-  })
-  @ApiParam({
-    name: 'animal',
-    enum: ChineseZodiacAnimal,
-    description: 'Animal zodiacal chino',
-    example: 'dragon',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Horóscopo específico',
-    type: ChineseHoroscopeResponseDto,
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Horóscopo no disponible',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Año o animal inválido',
-  })
-  async getByYearAndAnimal(
-    @Param('year', ParseIntPipe) year: number,
-    @Param('animal', new ParseEnumPipe(ChineseZodiacAnimal))
-    animal: ChineseZodiacAnimal,
-  ): Promise<ChineseHoroscopeResponseDto> {
-    // Validar rango de año
-    this.validateYear(year);
-
-    const horoscope = await this.chineseService.findByAnimalAndYear(
-      animal,
-      year,
-    );
-
-    if (!horoscope) {
-      throw new NotFoundException(
-        `Horóscopo chino de ${animal} para ${year} no disponible`,
       );
     }
 

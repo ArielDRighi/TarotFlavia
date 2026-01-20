@@ -57,7 +57,6 @@ describe('ChineseHoroscopeController', () => {
 
   beforeEach(async () => {
     const mockChineseService = {
-      findByAnimalAndYear: jest.fn(),
       findByAnimalElementAndYear: jest.fn(),
       findAllByYear: jest.fn(),
       findForUser: jest.fn(),
@@ -194,37 +193,6 @@ describe('ChineseHoroscopeController', () => {
 
       await expect(controller.getAllByYear(invalidYear)).rejects.toThrow(
         BadRequestException,
-      );
-    });
-  });
-
-  describe('getByYearAndAnimal', () => {
-    it('should return horoscope for specific year and animal', async () => {
-      const year = 2026;
-      const animal = ChineseZodiacAnimal.DRAGON;
-      chineseService.findByAnimalAndYear.mockResolvedValue(
-        mockChineseHoroscope,
-      );
-
-      const result = await controller.getByYearAndAnimal(year, animal);
-
-      expect(result).toBeDefined();
-      expect(result.animal).toBe(ChineseZodiacAnimal.DRAGON);
-      expect(result.year).toBe(2026);
-      expect(chineseService.findByAnimalAndYear).toHaveBeenCalledWith(
-        animal,
-        year,
-      );
-      expect(chineseService.incrementViewCount).toHaveBeenCalledWith(1);
-    });
-
-    it('should throw NotFoundException when horoscope does not exist', async () => {
-      const year = 2026;
-      const animal = ChineseZodiacAnimal.DRAGON;
-      chineseService.findByAnimalAndYear.mockResolvedValue(null);
-
-      await expect(controller.getByYearAndAnimal(year, animal)).rejects.toThrow(
-        NotFoundException,
       );
     });
   });
@@ -511,11 +479,16 @@ describe('ChineseHoroscopeController', () => {
     it('should correctly transform entity to DTO', async () => {
       const year = 2026;
       const animal = ChineseZodiacAnimal.DRAGON;
-      chineseService.findByAnimalAndYear.mockResolvedValue(
+      const element = 'earth' as ChineseElement;
+      chineseService.findByAnimalElementAndYear.mockResolvedValue(
         mockChineseHoroscope,
       );
 
-      const result = await controller.getByYearAndAnimal(year, animal);
+      const result = await controller.getByAnimalAndElement(
+        year,
+        animal,
+        element,
+      );
 
       // Verify DTO structure
       expect(result).toEqual({
