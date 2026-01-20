@@ -3219,7 +3219,7 @@ Conectar el AnimalCalculator con navegación directa al horóscopo completo del 
 **Prioridad:** 🟡 MEDIA  
 **Estimación:** 0.25 días  
 **Dependencias:** TASK-126, TASK-128  
-**Estado:** 📋 PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 #### Descripción
 
@@ -3227,17 +3227,17 @@ Eliminar el endpoint `GET /chinese-horoscope/:animal` que ya no tiene sentido si
 
 #### Tareas Específicas
 
-- [ ] Verificar que no hay referencias al endpoint en el frontend
-- [ ] Eliminar método `getHoroscopeByAnimal` del controller
-- [ ] Eliminar tests asociados al endpoint obsoleto
-- [ ] Actualizar Swagger/OpenAPI (remover endpoint)
-- [ ] Verificar que `/my-animal` y `/:animal/:element` funcionan correctamente
+- [x] Verificar que no hay referencias al endpoint en el frontend
+- [x] Eliminar método `getHoroscopeByAnimal` del controller
+- [x] Eliminar tests asociados al endpoint obsoleto
+- [x] Actualizar Swagger/OpenAPI (remover endpoint)
+- [x] Verificar que `/my-animal` y `/:animal/:element` funcionan correctamente
 
 #### Criterios de Aceptación
 
-- [ ] Endpoint `GET /:animal` retorna 404 o no existe
-- [ ] No hay código muerto en el controller
-- [ ] Tests actualizados sin referencias al endpoint eliminado
+- [x] Endpoint `GET /:animal` retorna 404 o no existe
+- [x] No hay código muerto en el controller
+- [x] Tests actualizados sin referencias al endpoint eliminado
 
 ---
 
