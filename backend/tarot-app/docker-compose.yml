@@ -138,10 +138,8 @@ services:
 # Named volumes with clear Tarot identification
 volumes:
   tarot-postgres-data:
-    name: tarot-postgres-data
-    labels:
-      com.tarot.description: "PostgreSQL data volume for Tarot"
-      com.tarot.project: "tarot"
+    name: tarotflavia-postgres-data
+    external: true
 
   tarot-pgadmin-data:
     name: tarot-pgadmin-data
