@@ -34,7 +34,11 @@ const LETTER_VALUES: Record<string, number> = {
 };
 
 const VOWELS = ['A', 'E', 'I', 'O', 'U'];
-const MASTER_NUMBERS = [11, 22, 33];
+
+/**
+ * Master numbers in numerology that should not be reduced
+ */
+export const MASTER_NUMBERS = [11, 22, 33];
 
 /**
  * Reduce un número a un solo dígito, preservando números maestros

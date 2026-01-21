@@ -706,7 +706,7 @@ src/modules/numerology/
 
 ##### Backend
 
-- [ ] Crear `calculate-numerology.dto.ts`:
+- [x] Crear `calculate-numerology.dto.ts`:
 
   ```typescript
   import { ApiProperty } from "@nestjs/swagger";
@@ -732,7 +732,7 @@ src/modules/numerology/
   }
   ```
 
-- [ ] Crear `numerology-response.dto.ts`:
+- [x] Crear `numerology-response.dto.ts`:
 
   ```typescript
   import { ApiProperty } from "@nestjs/swagger";
@@ -784,7 +784,7 @@ src/modules/numerology/
   }
   ```
 
-- [ ] Crear `numerology.service.ts`:
+- [x] Crear `numerology.service.ts`:
 
   ```typescript
   import { Injectable } from "@nestjs/common";
@@ -857,7 +857,7 @@ src/modules/numerology/
   }
   ```
 
-- [ ] Crear `numerology.module.ts`:
+- [x] Crear `numerology.module.ts`:
 
   ```typescript
   import { Module } from "@nestjs/common";
@@ -876,19 +876,19 @@ src/modules/numerology/
 
 ##### Testing
 
-- [ ] Test: Service calcula números correctamente
-- [ ] Test: Interpretaciones se incluyen
-- [ ] Test: Números sin nombre retornan null en expression/soul/personality
-- [ ] Test: getCompatibility funciona
+- [x] Test: Service calcula números correctamente
+- [x] Test: Interpretaciones se incluyen
+- [x] Test: Números sin nombre retornan null en expression/soul/personality
+- [x] Test: getCompatibility funciona
 
 ---
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] Servicio calcula todos los números
-- [ ] Interpretaciones se adjuntan
-- [ ] DTOs documentados con Swagger
-- [ ] Tests unitarios pasan
+- [x] Servicio calcula todos los números
+- [x] Interpretaciones se adjuntan
+- [x] DTOs documentados con Swagger
+- [x] Tests unitarios pasan
 
 # Backend: Entidad y Servicio de Interpretación IA (PREMIUM)
 
@@ -2831,9 +2831,9 @@ interface NumberInterpretation {
 
 ### Backend
 
-- [ ] TASK-200: Utilidades de cálculo
-- [ ] TASK-201: Datos de interpretaciones
-- [ ] TASK-202: Módulo y servicio
+- [x] TASK-200: Utilidades de cálculo
+- [x] TASK-201: Datos de interpretaciones
+- [x] TASK-202: Módulo y servicio
 - [ ] TASK-202b: Entidad e interpretación IA Premium
 - [ ] TASK-203: Endpoints
 
