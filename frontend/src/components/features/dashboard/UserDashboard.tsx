@@ -10,6 +10,7 @@ import UpgradeBanner from '@/components/features/readings/UpgradeBanner';
 import UpgradeModal from '@/components/features/readings/UpgradeModal';
 import { HoroscopeWidget } from '@/components/features/horoscope';
 import { ChineseHoroscopeWidget } from '@/components/features/chinese-horoscope';
+import { NumerologyWidget } from '@/components/features/numerology';
 
 /**
  * User Dashboard component for authenticated users
@@ -19,6 +20,8 @@ import { ChineseHoroscopeWidget } from '@/components/features/chinese-horoscope'
  * - Quick action cards (Nueva Lectura, Historial, Carta del Día)
  * - Did You Know section with tarot facts
  * - Horoscope widget (All authenticated users)
+ * - Chinese Horoscope widget (All authenticated users)
+ * - Numerology widget (All authenticated users)
  * - Stats section (Premium only)
  * - Upgrade banner (Free users only)
  *
@@ -67,6 +70,9 @@ export function UserDashboard() {
 
             {/* Chinese Horoscope Widget - For all users */}
             <ChineseHoroscopeWidget />
+
+            {/* Numerology Widget - For all users */}
+            <NumerologyWidget />
 
             {/* Stats Section - Only for Premium users */}
             {isPremium && <StatsSection />}
