@@ -125,3 +125,15 @@ export type {
   CalculateAnimalResponse,
 } from './chinese-horoscope.types';
 export { ChineseZodiacAnimal } from './chinese-horoscope.types';
+
+// Numerology Types
+export type {
+  NumberDetailDto,
+  NumerologyResponseDto,
+  NumerologyInterpretationResponseDto,
+  NumerologyMeaning,
+  DayNumberResponse,
+  CalculateNumerologyRequest,
+  CompatibilityLevel,
+  Compatibility,
+} from './numerology.types';

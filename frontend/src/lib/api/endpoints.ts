@@ -110,6 +110,16 @@ export const API_ENDPOINTS = {
       `/chinese-horoscope/${year}/${animal}/${element}`,
   },
 
+  // Numerology (Numerología)
+  NUMEROLOGY: {
+    CALCULATE: '/numerology/calculate',
+    MY_PROFILE: '/numerology/my-profile',
+    INTERPRET: '/numerology/my-profile/interpret',
+    MEANINGS: '/numerology/meanings',
+    MEANING_BY_NUMBER: (num: number) => `/numerology/meanings/${num}`,
+    DAY_NUMBER: '/numerology/day-number',
+  },
+
   // Admin Dashboard
   ADMIN: {
     DASHBOARD_STATS: '/admin/dashboard/stats',
