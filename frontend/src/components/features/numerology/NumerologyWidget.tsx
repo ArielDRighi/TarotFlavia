@@ -124,7 +124,7 @@ export function NumerologyWidget() {
 
         {/* Link to full profile */}
         <Button asChild variant="outline" className="w-full" size="sm">
-          <Link href="/numerologia/mi-perfil">Ver perfil completo</Link>
+          <Link href="/numerologia/resultado">Ver informe completo</Link>
         </Button>
       </CardContent>
     </Card>

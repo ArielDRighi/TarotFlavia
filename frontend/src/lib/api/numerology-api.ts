@@ -6,6 +6,7 @@
 
 import { apiClient } from './axios-config';
 import { API_ENDPOINTS } from './endpoints';
+import { AxiosError } from 'axios';
 import type {
   NumerologyResponseDto,
   NumerologyInterpretationResponseDto,
@@ -33,6 +34,30 @@ export async function calculateNumerology(
 export async function getMyNumerologyProfile(): Promise<NumerologyResponseDto> {
   const response = await apiClient.get<NumerologyResponseDto>(API_ENDPOINTS.NUMEROLOGY.MY_PROFILE);
   return response.data;
+}
+
+/**
+ * Obtiene interpretación IA del perfil numerológico del usuario (PREMIUM).
+ *
+ * El endpoint del backend puede devolver una interpretación existente o generar una nueva
+ * según la lógica del servidor. En este wrapper, si la respuesta es 401 (no autenticado)
+ * o 403 (usuario no premium), se retorna `null` en lugar de propagar el error.
+ */
+export async function getMyNumerologyInterpretation(): Promise<NumerologyInterpretationResponseDto | null> {
+  try {
+    const response = await apiClient.post<NumerologyInterpretationResponseDto>(
+      API_ENDPOINTS.NUMEROLOGY.INTERPRET
+    );
+    return response.data;
+  } catch (error) {
+    // Si es 403 (no premium) o 401 (no autenticado), retornar null
+    if (error instanceof AxiosError) {
+      if (error.response?.status === 403 || error.response?.status === 401) {
+        return null;
+      }
+    }
+    throw error;
+  }
 }
 
 /**

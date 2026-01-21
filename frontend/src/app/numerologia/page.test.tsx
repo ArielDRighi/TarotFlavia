@@ -3,8 +3,8 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import NumerologiaPage from './page';
 import { useAuthStore } from '@/stores/authStore';
-import { useCalculateNumerology } from '@/hooks/api/useNumerology';
-import type { UseMutationResult } from '@tanstack/react-query';
+import { useCalculateNumerology, useMyNumerologyProfile } from '@/hooks/api/useNumerology';
+import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 import type { AuthStore } from '@/types';
 import type { CalculateNumerologyRequest, NumerologyResponseDto } from '@/types/numerology.types';
 
@@ -38,6 +38,12 @@ describe('NumerologiaPage', () => {
       CalculateNumerologyRequest,
       unknown
     >);
+
+    vi.mocked(useMyNumerologyProfile).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: null,
+    } as unknown as UseQueryResult<NumerologyResponseDto, Error>);
   });
 
   describe('Rendering', () => {
@@ -59,7 +65,7 @@ describe('NumerologiaPage', () => {
 
       expect(screen.getByLabelText(/fecha de nacimiento/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/nombre completo/i)).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /calcular mis números/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /calcular números/i })).toBeInTheDocument();
     });
 
     it('should show registration CTA for anonymous users', () => {
@@ -82,7 +88,7 @@ describe('NumerologiaPage', () => {
   });
 
   describe('Form pre-fill for authenticated users', () => {
-    it('should pre-fill birth date if user has one', () => {
+    it('should NOT pre-fill birth date (calculator is for third parties)', () => {
       vi.mocked(useAuthStore).mockReturnValue({
         user: { id: 1, name: 'Test User', birthDate: '1990-01-01T00:00:00.000Z' },
         isAuthenticated: true,
@@ -91,10 +97,10 @@ describe('NumerologiaPage', () => {
       render(<NumerologiaPage />);
 
       const dateInput = screen.getByLabelText(/fecha de nacimiento/i) as HTMLInputElement;
-      expect(dateInput.value).toBe('1990-01-01');
+      expect(dateInput.value).toBe('');
     });
 
-    it('should pre-fill full name if user has one', () => {
+    it('should NOT pre-fill full name (calculator is for third parties)', () => {
       vi.mocked(useAuthStore).mockReturnValue({
         user: { id: 1, name: 'Juan Pérez', birthDate: '1990-01-01' },
         isAuthenticated: true,
@@ -103,7 +109,7 @@ describe('NumerologiaPage', () => {
       render(<NumerologiaPage />);
 
       const nameInput = screen.getByLabelText(/nombre completo/i) as HTMLInputElement;
-      expect(nameInput.value).toBe('Juan Pérez');
+      expect(nameInput.value).toBe('');
     });
   });
 
@@ -111,7 +117,7 @@ describe('NumerologiaPage', () => {
     it('should disable button when birth date is empty', () => {
       render(<NumerologiaPage />);
 
-      const button = screen.getByRole('button', { name: /calcular mis números/i });
+      const button = screen.getByRole('button', { name: /calcular números/i });
       expect(button).toBeDisabled();
     });
 
@@ -122,7 +128,7 @@ describe('NumerologiaPage', () => {
       const dateInput = screen.getByLabelText(/fecha de nacimiento/i);
       await user.type(dateInput, '1990-01-15');
 
-      const button = screen.getByRole('button', { name: /calcular mis números/i });
+      const button = screen.getByRole('button', { name: /calcular números/i });
       expect(button).not.toBeDisabled();
     });
 
@@ -152,7 +158,7 @@ describe('NumerologiaPage', () => {
       const dateInput = screen.getByLabelText(/fecha de nacimiento/i);
       await user.type(dateInput, '1990-01-15');
 
-      const button = screen.getByRole('button', { name: /calcular mis números/i });
+      const button = screen.getByRole('button', { name: /calcular números/i });
       await user.click(button);
 
       expect(mockMutate).toHaveBeenCalledWith(
@@ -171,7 +177,7 @@ describe('NumerologiaPage', () => {
       await user.type(dateInput, '1990-01-15');
       await user.type(nameInput, 'Juan Pérez');
 
-      const button = screen.getByRole('button', { name: /calcular mis números/i });
+      const button = screen.getByRole('button', { name: /calcular números/i });
       await user.click(button);
 
       expect(mockMutate).toHaveBeenCalledWith(
@@ -227,7 +233,7 @@ describe('NumerologiaPage', () => {
       const dateInput = screen.getByLabelText(/fecha de nacimiento/i);
       await user.type(dateInput, '1990-01-15');
 
-      const button = screen.getByRole('button', { name: /calcular mis números/i });
+      const button = screen.getByRole('button', { name: /calcular números/i });
       await user.click(button);
 
       await waitFor(() => {

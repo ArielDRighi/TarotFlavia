@@ -10,6 +10,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   calculateNumerology,
   getMyNumerologyProfile,
+  getMyNumerologyInterpretation,
   generateNumerologyInterpretation,
   getAllNumerologyMeanings,
   getNumerologyMeaning,
@@ -20,6 +21,7 @@ import type { CalculateNumerologyRequest } from '@/types/numerology.types';
 export const numerologyQueryKeys = {
   all: ['numerology'] as const,
   myProfile: () => [...numerologyQueryKeys.all, 'my-profile'] as const,
+  myInterpretation: () => [...numerologyQueryKeys.all, 'my-interpretation'] as const,
   meanings: () => [...numerologyQueryKeys.all, 'meanings'] as const,
   meaning: (num: number) => [...numerologyQueryKeys.all, 'meaning', num] as const,
   dayNumber: () => [...numerologyQueryKeys.all, 'day-number'] as const,
@@ -27,12 +29,27 @@ export const numerologyQueryKeys = {
 
 /**
  * Hook para obtener mi perfil numerológico
+ * @param options - Opciones adicionales de React Query (ej: enabled)
  */
-export function useMyNumerologyProfile() {
+export function useMyNumerologyProfile(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: numerologyQueryKeys.myProfile(),
     queryFn: getMyNumerologyProfile,
     staleTime: 1000 * 60 * 60, // 1 hora
+    retry: false,
+    ...options,
+  });
+}
+
+/**
+ * Hook para obtener mi interpretación IA existente (PREMIUM)
+ * Retorna null si no existe o si el usuario no es PREMIUM
+ */
+export function useMyNumerologyInterpretation() {
+  return useQuery({
+    queryKey: numerologyQueryKeys.myInterpretation(),
+    queryFn: getMyNumerologyInterpretation,
+    staleTime: Infinity, // La interpretación nunca cambia una vez generada
     retry: false,
   });
 }
@@ -55,7 +72,10 @@ export function useGenerateInterpretation() {
   return useMutation({
     mutationFn: generateNumerologyInterpretation,
     onSuccess: () => {
-      // Invalidar el perfil para forzar un refetch con los datos correctos
+      // Invalidar tanto el perfil como la interpretación
+      queryClient.invalidateQueries({
+        queryKey: numerologyQueryKeys.myInterpretation(),
+      });
       queryClient.invalidateQueries({
         queryKey: numerologyQueryKeys.myProfile(),
       });

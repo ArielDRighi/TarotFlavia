@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
 import { NumerologyProfile } from './NumerologyProfile';
 import type { NumerologyResponseDto } from '@/types/numerology.types';
@@ -29,92 +29,56 @@ describe('NumerologyProfile', () => {
     expect(screen.getByText(/1990-03-25/i)).toBeInTheDocument();
   });
 
+  it('should display full name when provided', () => {
+    render(<NumerologyProfile profile={mockProfile} />);
+
+    expect(screen.getByText(/Juan Pérez/i)).toBeInTheDocument();
+  });
+
+  it('should not display full name when not provided', () => {
+    const profileWithoutName = { ...mockProfile, fullName: null };
+    render(<NumerologyProfile profile={profileWithoutName} />);
+
+    expect(screen.queryByText(/Nombre:/i)).not.toBeInTheDocument();
+  });
+
   it('should render life path card', () => {
     render(<NumerologyProfile profile={mockProfile} />);
 
     expect(screen.getByTestId('number-card-7')).toBeInTheDocument();
   });
 
-  it('should show premium interpretation CTA when canGenerateInterpretation is true and no interpretation', () => {
-    render(<NumerologyProfile profile={mockProfile} canGenerateInterpretation={true} />);
+  it('should render all core numbers', () => {
+    render(<NumerologyProfile profile={mockProfile} />);
 
-    expect(screen.getByText(/interpretación con IA/i)).toBeInTheDocument();
-    expect(screen.getByText(/generar interpretación/i)).toBeInTheDocument();
+    expect(screen.getByText('Números Principales')).toBeInTheDocument();
+    expect(screen.getByTestId('number-card-5')).toBeInTheDocument(); // Expression
+    expect(screen.getByTestId('number-card-3')).toBeInTheDocument(); // Soul Urge
+    expect(screen.getByTestId('number-card-2')).toBeInTheDocument(); // Personality
+    expect(screen.getByTestId('number-card-25')).toBeInTheDocument(); // Birthday
   });
 
-  it('should show upgrade message when canGenerateInterpretation is false', () => {
-    render(<NumerologyProfile profile={mockProfile} canGenerateInterpretation={false} />);
+  it('should display personal year', () => {
+    render(<NumerologyProfile profile={mockProfile} />);
 
-    expect(screen.getByText('PREMIUM')).toBeInTheDocument();
-    expect(screen.getByText(/interpretaciones personalizadas con IA/i)).toBeInTheDocument();
+    expect(screen.getByText('Año Personal')).toBeInTheDocument();
+    expect(screen.getByText('8')).toBeInTheDocument();
   });
 
-  it('should call onRequestInterpretation when button is clicked', () => {
-    const onRequestInterpretation = vi.fn();
+  it('should display personal month', () => {
+    render(<NumerologyProfile profile={mockProfile} />);
 
-    render(
-      <NumerologyProfile
-        profile={mockProfile}
-        canGenerateInterpretation={true}
-        onRequestInterpretation={onRequestInterpretation}
-      />
+    expect(screen.getByText('Mes Personal')).toBeInTheDocument();
+    // Use getAllByText since "5" appears in both expression number and personal month
+    const fives = screen.getAllByText('5');
+    expect(fives.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('should apply custom className when provided', () => {
+    const { container } = render(
+      <NumerologyProfile profile={mockProfile} className="custom-class" />
     );
 
-    const button = screen.getByText(/generar interpretación/i);
-    button.click();
-
-    expect(onRequestInterpretation).toHaveBeenCalledTimes(1);
-  });
-
-  it('should disable button when isGeneratingInterpretation is true', () => {
-    render(
-      <NumerologyProfile
-        profile={mockProfile}
-        canGenerateInterpretation={true}
-        isGeneratingInterpretation={true}
-      />
-    );
-
-    expect(screen.getByText(/generando.../i)).toBeDisabled();
-  });
-
-  it('should display interpretation when provided', () => {
-    const interpretation = {
-      id: 1,
-      userId: 1,
-      interpretation: 'Tu perfil numerológico muestra...',
-      lifePath: 7,
-      expressionNumber: 5,
-      soulUrge: 3,
-      personality: 2,
-      birthdayNumber: 25,
-      generatedAt: '2026-01-21T00:00:00Z',
-      aiProvider: 'groq',
-      aiModel: 'llama-3.1-70b-versatile',
-    };
-
-    render(<NumerologyProfile profile={mockProfile} interpretation={interpretation} />);
-
-    expect(screen.getByText(/tu perfil numerológico muestra.../i)).toBeInTheDocument();
-  });
-
-  it('should show generation date for interpretation', () => {
-    const interpretation = {
-      id: 1,
-      userId: 1,
-      interpretation: 'Interpretación...',
-      lifePath: 7,
-      expressionNumber: null,
-      soulUrge: null,
-      personality: null,
-      birthdayNumber: 25,
-      generatedAt: '2026-01-21T00:00:00Z',
-      aiProvider: 'groq',
-      aiModel: 'llama-3.1-70b-versatile',
-    };
-
-    render(<NumerologyProfile profile={mockProfile} interpretation={interpretation} />);
-
-    expect(screen.getByText(/generada el/i)).toBeInTheDocument();
+    expect(container.querySelector('.custom-class')).toBeInTheDocument();
   });
 });

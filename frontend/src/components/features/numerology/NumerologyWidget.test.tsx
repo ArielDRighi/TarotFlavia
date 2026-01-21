@@ -322,8 +322,8 @@ describe('NumerologyWidget', () => {
 
       render(<NumerologyWidget />);
 
-      const link = screen.getByRole('link', { name: /ver perfil completo/i });
-      expect(link).toHaveAttribute('href', '/numerologia/mi-perfil');
+      const link = screen.getByRole('link', { name: /ver informe completo/i });
+      expect(link).toHaveAttribute('href', '/numerologia/resultado');
     });
 
     it('should display master number badge for life path 11', () => {
@@ -431,7 +431,7 @@ describe('NumerologyWidget', () => {
 
       render(<NumerologyWidget />);
 
-      expect(screen.getByRole('link', { name: /ver perfil completo/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /ver informe completo/i })).toBeInTheDocument();
     });
   });
 });
