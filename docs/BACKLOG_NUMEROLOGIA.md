@@ -2876,7 +2876,7 @@ interface NumberInterpretation {
 - [x] TASK-201: Datos de interpretaciones
 - [x] TASK-202: Módulo y servicio
 - [x] TASK-202b: Entidad e interpretación IA Premium
-- [ ] TASK-203: Endpoints
+- [x] TASK-203: Endpoints
 
 ### Frontend
 
