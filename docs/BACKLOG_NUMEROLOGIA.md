@@ -1570,6 +1570,7 @@ Implementar endpoints REST para calcular numerología y consultar significados.
 **Prioridad:** 🟡 MEDIA
 **Estimación:** 0.5 días
 **Dependencias:** TASK-203
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -1599,7 +1600,7 @@ Crear los tipos TypeScript, endpoints y funciones de API para numerología.
 
 ##### Frontend
 
-- [ ] Crear `numerology.types.ts` (alineado con DTOs del backend):
+- [x] Crear `numerology.types.ts` (alineado con DTOs del backend):
 
   ```typescript
   /**
@@ -1687,7 +1688,7 @@ Crear los tipos TypeScript, endpoints y funciones de API para numerología.
   }
   ```
 
-- [ ] Agregar endpoints en `endpoints.ts`:
+- [x] Agregar endpoints en `endpoints.ts`:
 
   ```typescript
   export const API_ENDPOINTS = {
@@ -1704,7 +1705,7 @@ Crear los tipos TypeScript, endpoints y funciones de API para numerología.
   } as const;
   ```
 
-- [ ] Crear `numerology-api.ts`:
+- [x] Crear `numerology-api.ts`:
 
   ```typescript
   import { apiClient } from "./axios-config";
@@ -1766,7 +1767,7 @@ Crear los tipos TypeScript, endpoints y funciones de API para numerología.
   }
   ```
 
-- [ ] Crear `lib/utils/numerology.ts` (cálculos cliente):
+- [x] Crear `lib/utils/numerology.ts` (cálculos cliente):
 
   ```typescript
   /**
@@ -1833,7 +1834,7 @@ Crear los tipos TypeScript, endpoints y funciones de API para numerología.
   };
   ```
 
-- [ ] Crear `useNumerology.ts`:
+- [x] Crear `useNumerology.ts`:
 
   ```typescript
   "use client";
@@ -1928,23 +1929,23 @@ Crear los tipos TypeScript, endpoints y funciones de API para numerología.
   }
   ```
 
-- [ ] Exportar desde `types/index.ts`
+- [x] Exportar desde `types/index.ts`
 
 ##### Testing
 
-- [ ] Test: Tipos se exportan correctamente
-- [ ] Test: calculateLifePathNumber funciona en cliente
-- [ ] Test: Hooks retornan datos esperados
-- [ ] Test: useMutation actualiza cache
+- [x] Test: Tipos se exportan correctamente
+- [x] Test: calculateLifePathNumber funciona en cliente
+- [x] Test: Hooks retornan datos esperados
+- [x] Test: useMutation actualiza cache
 
 ---
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] Tipos completos
-- [ ] API functions cubren todos los endpoints
-- [ ] Cálculo cliente para preview rápido
-- [ ] Hooks con staleTime apropiado
+- [x] Tipos completos
+- [x] API functions cubren todos los endpoints
+- [x] Cálculo cliente para preview rápido
+- [x] Hooks con staleTime apropiado
 
 ---
 
