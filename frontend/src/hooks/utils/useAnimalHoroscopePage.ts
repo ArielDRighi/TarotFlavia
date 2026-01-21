@@ -3,10 +3,13 @@
  *
  * Encapsulates all business logic for the Chinese Horoscope Animal Detail Page.
  * This keeps the page component clean (only UI) following the architecture pattern.
+ *
+ * TASK-135: Simplified version - removed YearInputBanner logic.
+ * Now shows ElementSelectorModal when element is missing.
  */
 
-import { useState, useMemo, useEffect, useCallback } from 'react';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useMemo } from 'react';
+import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import {
   useChineseHoroscopeByElement,
   useMyAnimalHoroscope,
@@ -33,7 +36,7 @@ interface UseAnimalHoroscopePageResult {
   userAnimal: ChineseZodiacAnimal | undefined;
   /** Whether viewing own animal */
   isMyAnimal: boolean;
-  /** Current element (calculated or from query) */
+  /** Current element (from query or user's element) */
   element: ChineseElementCode | null;
   /** Horoscope data */
   horoscopeData: ChineseHoroscope | undefined;
@@ -43,34 +46,32 @@ interface UseAnimalHoroscopePageResult {
   error: Error | null;
   /** Current year for horoscope */
   currentYear: number;
-  /** Handle birth date submission for element calculation (format: YYYY-MM-DD) */
-  handleBirthDateSubmit: (birthDate: string) => void;
+  /** Whether to show the element selector modal */
+  showElementModal: boolean;
+  /** Handler when user selects an element from modal */
+  handleElementSelect: (element: ChineseElementCode) => void;
 }
 
 /**
  * Custom hook that encapsulates all logic for the Chinese Horoscope Animal page.
  *
- * Manages:
- * - URL parameter extraction
- * - User authentication state
- * - Element calculation from year
- * - Horoscope data fetching
- * - URL synchronization
+ * TASK-135: Simplified version that:
+ * - Removes birth date calculation logic (use calculator on main page instead)
+ * - Shows ElementSelectorModal when element is missing
+ * - Cleaner UX without confusing flows
  *
  * @returns All state and handlers needed by the page component
  */
 export function useAnimalHoroscopePage(): UseAnimalHoroscopePageResult {
   const params = useParams();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const { user, isAuthenticated } = useAuthStore();
   const currentYear = new Date().getFullYear();
 
   const animal = params.animal as ChineseZodiacAnimal;
 
-  // State for selected birth date (to calculate element via API)
-  const [selectedBirthDate, setSelectedBirthDate] = useState<string | null>(null);
-
-  // Get element from query param or calculate from birth date
+  // Get element from query param only
   const elementFromQuery = searchParams.get('element') as ChineseElementCode | null;
 
   // Calculate user's animal if authenticated
@@ -85,16 +86,20 @@ export function useAnimalHoroscopePage(): UseAnimalHoroscopePageResult {
     return userAnimalData.animal === animal;
   }, [isAuthenticated, userAnimalData, animal]);
 
-  // Calculate element from selected birth date via API
-  const { data: calculatedAnimalData } = useCalculateAnimal(selectedBirthDate);
-
-  // Determine which element to use
+  // Determine which element to use:
+  // 1. Element from query param (user selected or from navigation)
+  // 2. User's own element if viewing own animal
+  // 3. Otherwise null (show element selector)
   const element = useMemo<ChineseElementCode | null>(() => {
     if (elementFromQuery) return elementFromQuery;
     if (isMyAnimal && userAnimalData) return userAnimalData.birthElement;
-    if (calculatedAnimalData) return calculatedAnimalData.birthElement;
     return null;
-  }, [elementFromQuery, isMyAnimal, userAnimalData, calculatedAnimalData]);
+  }, [elementFromQuery, isMyAnimal, userAnimalData]);
+
+  // Show element selector modal when:
+  // - Not viewing own animal AND
+  // - No element in query params
+  const showElementModal = !isMyAnimal && !element;
 
   // Queries for horoscope data
   // Only fetch my horoscope when viewing own animal (optimization)
@@ -117,18 +122,11 @@ export function useAnimalHoroscopePage(): UseAnimalHoroscopePageResult {
   const isLoading = isMyAnimal ? isLoadingMy : isLoadingElement;
   const error = (isMyAnimal ? errorMy : errorElement) as Error | null;
 
-  // Update URL with element when calculated
-  useEffect(() => {
-    if (element && !elementFromQuery) {
-      const newUrl = `${ROUTES.HOROSCOPO_CHINO_ANIMAL(animal)}?element=${element}`;
-      window.history.replaceState(null, '', newUrl);
-    }
-  }, [element, elementFromQuery, animal]);
-
-  // Handler for birth date selection
-  const handleBirthDateSubmit = useCallback((birthDate: string) => {
-    setSelectedBirthDate(birthDate);
-  }, []);
+  // Handler when user selects an element from modal
+  const handleElementSelect = (selectedElement: ChineseElementCode) => {
+    // Navigate to same page with element query param
+    router.push(`${ROUTES.HOROSCOPO_CHINO_ANIMAL(animal)}?element=${selectedElement}`);
+  };
 
   // Validate animal
   const isValidAnimal = !!CHINESE_ZODIAC_INFO[animal];
@@ -145,6 +143,7 @@ export function useAnimalHoroscopePage(): UseAnimalHoroscopePageResult {
     isLoading,
     error,
     currentYear,
-    handleBirthDateSubmit,
+    showElementModal,
+    handleElementSelect,
   };
 }

@@ -23,6 +23,9 @@ export { ChineseHoroscopeSkeleton } from './ChineseHoroscopeSkeleton';
 
 export { ChineseHoroscopeWidget } from './ChineseHoroscopeWidget';
 
+export { ElementSelectorModal } from './ElementSelectorModal';
+export type { ElementSelectorModalProps } from './ElementSelectorModal';
+
 export { YearSelectorModal } from './YearSelectorModal';
 export type { YearSelectorModalProps } from './YearSelectorModal';
 
