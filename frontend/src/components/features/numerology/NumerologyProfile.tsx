@@ -53,6 +53,13 @@ export function NumerologyProfile({ profile, className }: Props) {
         - Implement abuse prevention (cooldown, limits, etc.)
         - Update AI prompt to separate permanent vs annual interpretations
         - Uncomment and test
+        
+        IMPORTANT: When re-enabling, remember to:
+        - Add: import ReactMarkdown from 'react-markdown';
+        - Add: import { Button } from '@/components/ui/button';
+        - Add: import { Alert, AlertDescription } from '@/components/ui/alert';
+        - Add: import { Sparkles } from 'lucide-react';
+        - Update Props interface with interpretation, canGenerateInterpretation, etc.
       */}
       {/* Personalized Interpretation Section - DISABLED */}
       {/* <div className="mb-6">

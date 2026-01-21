@@ -28,7 +28,9 @@ export default function NumerologiaPage() {
   const router = useRouter();
   const { user, isAuthenticated } = useAuthStore();
   const { mutate, isPending } = useCalculateNumerology();
-  const { data: myProfile, isLoading: isLoadingProfile } = useMyNumerologyProfile();
+  const { data: myProfile, isLoading: isLoadingProfile } = useMyNumerologyProfile({
+    enabled: isAuthenticated,
+  });
 
   const [birthDate, setBirthDate] = useState('');
   const [fullName, setFullName] = useState('');

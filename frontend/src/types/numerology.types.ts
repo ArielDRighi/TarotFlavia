@@ -33,6 +33,10 @@ export interface NumerologyResponseDto {
 
 /**
  * Perfil extendido con interpretación (para UI)
+ *
+ * NOTA: Tipo reservado para uso futuro cuando se reactive la feature
+ * de interpretación personalizada con IA. Actualmente no se utiliza
+ * ya que la feature está pausada temporalmente.
  */
 export interface NumerologyProfileWithInterpretation extends NumerologyResponseDto {
   interpretation?: NumerologyInterpretationResponseDto | null;

@@ -29,13 +29,15 @@ export const numerologyQueryKeys = {
 
 /**
  * Hook para obtener mi perfil numerológico
+ * @param options - Opciones adicionales de React Query (ej: enabled)
  */
-export function useMyNumerologyProfile() {
+export function useMyNumerologyProfile(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: numerologyQueryKeys.myProfile(),
     queryFn: getMyNumerologyProfile,
     staleTime: 1000 * 60 * 60, // 1 hora
     retry: false,
+    ...options,
   });
 }
 
