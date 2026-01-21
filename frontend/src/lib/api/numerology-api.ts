@@ -36,6 +36,25 @@ export async function getMyNumerologyProfile(): Promise<NumerologyResponseDto> {
 }
 
 /**
+ * Obtiene interpretación IA existente (PREMIUM)
+ * Este endpoint es idempotente: si ya existe la retorna, si no la genera
+ */
+export async function getMyNumerologyInterpretation(): Promise<NumerologyInterpretationResponseDto | null> {
+  try {
+    const response = await apiClient.post<NumerologyInterpretationResponseDto>(
+      API_ENDPOINTS.NUMEROLOGY.INTERPRET
+    );
+    return response.data;
+  } catch (error: any) {
+    // Si es 403 (no premium) o 401 (no autenticado), retornar null
+    if (error.response?.status === 403 || error.response?.status === 401) {
+      return null;
+    }
+    throw error;
+  }
+}
+
+/**
  * Genera interpretación IA (PREMIUM)
  */
 export async function generateNumerologyInterpretation(): Promise<NumerologyInterpretationResponseDto> {

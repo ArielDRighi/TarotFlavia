@@ -323,7 +323,7 @@ describe('NumerologyWidget', () => {
       render(<NumerologyWidget />);
 
       const link = screen.getByRole('link', { name: /ver perfil completo/i });
-      expect(link).toHaveAttribute('href', '/numerologia/mi-perfil');
+      expect(link).toHaveAttribute('href', '/numerologia/resultado');
     });
 
     it('should display master number badge for life path 11', () => {

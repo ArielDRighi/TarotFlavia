@@ -32,6 +32,13 @@ export interface NumerologyResponseDto {
 }
 
 /**
+ * Perfil extendido con interpretación (para UI)
+ */
+export interface NumerologyProfileWithInterpretation extends NumerologyResponseDto {
+  interpretation?: NumerologyInterpretationResponseDto | null;
+}
+
+/**
  * Respuesta de interpretación IA (PREMIUM)
  * Coincide con NumerologyInterpretationResponseDto del backend
  */
