@@ -322,7 +322,7 @@ describe('NumerologyWidget', () => {
 
       render(<NumerologyWidget />);
 
-      const link = screen.getByRole('link', { name: /ver perfil completo/i });
+      const link = screen.getByRole('link', { name: /ver informe completo/i });
       expect(link).toHaveAttribute('href', '/numerologia/resultado');
     });
 
@@ -431,7 +431,7 @@ describe('NumerologyWidget', () => {
 
       render(<NumerologyWidget />);
 
-      expect(screen.getByRole('link', { name: /ver perfil completo/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /ver informe completo/i })).toBeInTheDocument();
     });
   });
 });

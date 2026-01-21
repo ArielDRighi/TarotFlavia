@@ -10,6 +10,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/utils/useToast';
 import { useAuthStore } from '@/stores/authStore';
 import { getProfile, updateProfile, updatePassword, deleteAccount } from '@/lib/api/user-api';
+import { numerologyQueryKeys } from '@/hooks/api/useNumerology';
 import type { UpdateProfileDto, UpdatePasswordDto } from '@/types';
 
 // ============================================================================
@@ -42,7 +43,7 @@ export function useProfile() {
 
 /**
  * Hook to update current user profile
- * On success: invalidates profile query and shows toast
+ * On success: invalidates profile query and numerology queries, shows toast
  */
 export function useUpdateProfile() {
   const queryClient = useQueryClient();
@@ -51,6 +52,9 @@ export function useUpdateProfile() {
     mutationFn: (data: UpdateProfileDto) => updateProfile(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: userQueryKeys.profile });
+      // Invalidar numerología ya que depende de birthDate y name del usuario
+      queryClient.invalidateQueries({ queryKey: numerologyQueryKeys.myProfile() });
+      queryClient.invalidateQueries({ queryKey: numerologyQueryKeys.myInterpretation() });
       toast.success('Perfil actualizado exitosamente');
     },
     onError: (error: Error) => {
