@@ -99,7 +99,7 @@ describe('HoroscopoChinoPage', () => {
     expect(screen.getByTestId('chinese-animal-selector')).toBeInTheDocument();
   });
 
-  it('should open year selector modal when clicking on an animal card', async () => {
+  it('should open element selector modal when clicking on an animal card', async () => {
     const user = userEvent.setup();
     mockUseChineseHoroscopesByYear.mockReturnValue({
       isLoading: false,
@@ -112,38 +112,72 @@ describe('HoroscopoChinoPage', () => {
     await user.click(dragonCard);
 
     // Should open modal instead of navigating directly
-    expect(screen.getByTestId('year-selector-modal')).toBeInTheDocument();
+    expect(screen.getByTestId('element-selector-modal')).toBeInTheDocument();
   });
 
-  describe('Anonymous users (HU-HCH-001)', () => {
-    beforeEach(() => {
-      // Set up as anonymous user
-      mockUseAuth.mockReturnValue({
-        isAuthenticated: false,
-        user: null,
+  describe('AnimalCalculator visibility', () => {
+    describe('Anonymous users (HU-HCH-001)', () => {
+      beforeEach(() => {
+        // Set up as anonymous user
+        mockUseAuth.mockReturnValue({
+          isAuthenticated: false,
+          user: null,
+        });
+      });
+
+      it('should render AnimalCalculator for anonymous users', () => {
+        mockUseChineseHoroscopesByYear.mockReturnValue({
+          isLoading: false,
+          data: [],
+        });
+
+        renderWithProviders(<HoroscopoChinoPage />);
+
+        expect(screen.getByTestId('animal-calculator')).toBeInTheDocument();
+      });
+
+      it('should show animal calculator title for anonymous users', () => {
+        mockUseChineseHoroscopesByYear.mockReturnValue({
+          isLoading: false,
+          data: [],
+        });
+
+        renderWithProviders(<HoroscopoChinoPage />);
+
+        expect(screen.getByRole('heading', { name: /descubre tu animal/i })).toBeInTheDocument();
       });
     });
 
-    it('should render AnimalCalculator for anonymous users', () => {
-      mockUseChineseHoroscopesByYear.mockReturnValue({
-        isLoading: false,
-        data: [],
+    describe('Authenticated users', () => {
+      beforeEach(() => {
+        // Set up as authenticated user (default in main beforeEach)
+        mockUseAuth.mockReturnValue({
+          isAuthenticated: true,
+          user: { id: 1, name: 'Test User' },
+        });
       });
 
-      renderWithProviders(<HoroscopoChinoPage />);
+      it('should render AnimalCalculator for authenticated users', () => {
+        mockUseChineseHoroscopesByYear.mockReturnValue({
+          isLoading: false,
+          data: [],
+        });
 
-      expect(screen.getByTestId('animal-calculator')).toBeInTheDocument();
-    });
+        renderWithProviders(<HoroscopoChinoPage />);
 
-    it('should show animal calculator title for anonymous users', () => {
-      mockUseChineseHoroscopesByYear.mockReturnValue({
-        isLoading: false,
-        data: [],
+        expect(screen.getByTestId('animal-calculator')).toBeInTheDocument();
       });
 
-      renderWithProviders(<HoroscopoChinoPage />);
+      it('should show animal calculator title for authenticated users', () => {
+        mockUseChineseHoroscopesByYear.mockReturnValue({
+          isLoading: false,
+          data: [],
+        });
 
-      expect(screen.getByRole('heading', { name: /descubre tu animal/i })).toBeInTheDocument();
+        renderWithProviders(<HoroscopoChinoPage />);
+
+        expect(screen.getByRole('heading', { name: /descubre tu animal/i })).toBeInTheDocument();
+      });
     });
   });
 });

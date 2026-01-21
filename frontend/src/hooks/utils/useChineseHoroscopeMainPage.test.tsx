@@ -122,13 +122,13 @@ describe('useChineseHoroscopeMainPage', () => {
     });
   });
 
-  it('should provide handleBirthDateConfirm callback', () => {
+  it('should provide handleElementSelect callback', () => {
     const { result } = renderHook(() => useChineseHoroscopeMainPage(), { wrapper });
 
-    expect(typeof result.current.handleBirthDateConfirm).toBe('function');
+    expect(typeof result.current.handleElementSelect).toBe('function');
   });
 
-  it('should set birth date when handleBirthDateConfirm is called', async () => {
+  it('should navigate to animal+element when handleElementSelect is called', async () => {
     const { result } = renderHook(() => useChineseHoroscopeMainPage(), { wrapper });
 
     // Select animal first
@@ -138,15 +138,19 @@ describe('useChineseHoroscopeMainPage', () => {
 
     await waitFor(() => {
       expect(result.current.isModalOpen).toBe(true);
+      expect(result.current.selectedAnimalForModal).toBe(ChineseZodiacAnimal.DRAGON);
     });
 
-    // Confirm birth date - navigation will happen via useEffect when API returns data
+    // Select element - should navigate to animal+element
     act(() => {
-      result.current.handleBirthDateConfirm('1988-06-15');
+      result.current.handleElementSelect('fire');
     });
 
-    // The function should be callable without error
-    expect(result.current.handleBirthDateConfirm).toBeDefined();
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith('/horoscopo-chino/dragon?element=fire');
+      expect(result.current.isModalOpen).toBe(false);
+      expect(result.current.selectedAnimalForModal).toBeNull();
+    });
   });
 
   it('should return utility functions for animal info', () => {
@@ -154,5 +158,48 @@ describe('useChineseHoroscopeMainPage', () => {
 
     expect(result.current.getAnimalNameEs(ChineseZodiacAnimal.DRAGON)).toBe('Dragón');
     expect(result.current.getAnimalEmoji(ChineseZodiacAnimal.DRAGON)).toBe('🐉');
+  });
+
+  it('should navigate directly when animal is selected with element param', async () => {
+    const { result } = renderHook(() => useChineseHoroscopeMainPage(), { wrapper });
+
+    // Simulate selection from AnimalCalculator with element
+    act(() => {
+      result.current.handleAnimalSelect(ChineseZodiacAnimal.HORSE, 'earth');
+    });
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith('/horoscopo-chino/horse?element=earth');
+      expect(result.current.isModalOpen).toBe(false);
+    });
+  });
+
+  it('should not open modal when selecting user own animal (authenticated)', async () => {
+    const { useAuth } = await import('@/hooks/useAuth');
+    const { useMyAnimalHoroscope } = await import('@/hooks/api/useChineseHoroscope');
+
+    vi.mocked(useAuth).mockReturnValue({
+      user: { birthDate: '1988-06-15' } as unknown as ReturnType<typeof useAuth>['user'],
+      isAuthenticated: true,
+    } as unknown as ReturnType<typeof useAuth>);
+
+    vi.mocked(useMyAnimalHoroscope).mockReturnValue({
+      data: { animal: ChineseZodiacAnimal.DRAGON } as unknown as ReturnType<
+        typeof useMyAnimalHoroscope
+      >['data'],
+      isLoading: false,
+      error: null,
+    } as unknown as ReturnType<typeof useMyAnimalHoroscope>);
+
+    const { result } = renderHook(() => useChineseHoroscopeMainPage(), { wrapper });
+
+    act(() => {
+      result.current.handleAnimalSelect(ChineseZodiacAnimal.DRAGON);
+    });
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith('/horoscopo-chino/dragon');
+      expect(result.current.isModalOpen).toBe(false);
+    });
   });
 });
