@@ -1,5 +1,6 @@
 'use client';
 
+import ReactMarkdown from 'react-markdown';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -62,10 +63,10 @@ export function NumerologyProfile({
             </CardHeader>
             <CardContent>
               <div
-                className="prose prose-sm max-w-none text-gray-700"
+                className="prose prose-slate max-w-none text-gray-700"
                 data-testid="interpretation-content"
               >
-                {interpretation.interpretation}
+                <ReactMarkdown>{interpretation.interpretation}</ReactMarkdown>
               </div>
               <div className="mt-4 text-xs text-gray-500">
                 Generada el{' '}
@@ -105,8 +106,8 @@ export function NumerologyProfile({
           <Alert>
             <AlertDescription>
               <p className="text-sm text-gray-700">
-                Mejora a <strong>PREMIUM</strong> para obtener una interpretación profunda y personalizada
-                de tu perfil numerológico completo.
+                Mejora a <strong>PREMIUM</strong> para obtener una interpretación profunda y
+                personalizada de tu perfil numerológico completo.
               </p>
             </AlertDescription>
           </Alert>

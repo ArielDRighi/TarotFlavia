@@ -4,6 +4,13 @@ import { describe, it, expect, vi } from 'vitest';
 import { NumerologyProfile } from './NumerologyProfile';
 import type { NumerologyResponseDto } from '@/types/numerology.types';
 
+// Mock react-markdown
+vi.mock('react-markdown', () => ({
+  default: function MockReactMarkdown({ children }: { children: string }) {
+    return <div data-testid="markdown-content">{children}</div>;
+  },
+}));
+
 const mockProfile: NumerologyResponseDto = {
   lifePath: { value: 7, name: 'El Buscador', keywords: [], description: '', isMaster: false },
   birthday: { value: 25, name: 'Número 25', keywords: [], description: '', isMaster: false },
