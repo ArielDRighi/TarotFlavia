@@ -149,6 +149,7 @@ describe('useChineseHoroscopeMainPage', () => {
     await waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith('/horoscopo-chino/dragon?element=fire');
       expect(result.current.isModalOpen).toBe(false);
+      expect(result.current.selectedAnimalForModal).toBeNull();
     });
   });
 
@@ -183,7 +184,9 @@ describe('useChineseHoroscopeMainPage', () => {
     } as unknown as ReturnType<typeof useAuth>);
 
     vi.mocked(useMyAnimalHoroscope).mockReturnValue({
-      data: { animal: ChineseZodiacAnimal.DRAGON } as unknown as ReturnType<typeof useMyAnimalHoroscope>['data'],
+      data: { animal: ChineseZodiacAnimal.DRAGON } as unknown as ReturnType<
+        typeof useMyAnimalHoroscope
+      >['data'],
       isLoading: false,
       error: null,
     } as unknown as ReturnType<typeof useMyAnimalHoroscope>);
