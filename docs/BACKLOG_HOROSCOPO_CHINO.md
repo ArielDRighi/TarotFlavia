@@ -3514,6 +3514,242 @@ La página de detalle mostraba "Serpiente" en lugar de "Serpiente de Fuego", per
 
 ---
 
+#### BUG #7: Animal Calculado Ignorado al Introducir Fecha de Nacimiento
+
+**Problema:**  
+Cuando un usuario selecciona manualmente un animal (ej. "Mono") y luego introduce su fecha de nacimiento en el modal actual (`YearSelectorModal`), el sistema calcula correctamente el animal, pero si el usuario realmente corresponde a otro animal (ej. Caballo), el comportamiento puede ser confuso.
+
+**Ejemplo concreto:**
+
+- Usuario clickea en "Mono" → abre modal que pide fecha de nacimiento
+- Introduce fecha 01/05/1966
+- Sistema calcula: Caballo de Fuego (CNY 1966 = 21 Enero, Mayo es después → año 1966 → Caballo)
+- Sistema navega a `/horoscopo-chino/caballo?element=fire` (correcto)
+- PERO el usuario clickeó "Mono" esperando ver un Mono
+
+**Análisis del Flujo Actual:**
+El modal `YearSelectorModal` pide la fecha de nacimiento para calcular el animal+elemento real del usuario. Esto funciona correctamente, pero la UX es confusa porque:
+
+1. El usuario clickea un animal específico (ej. Mono) para "explorarlo"
+2. El sistema le pide su fecha de nacimiento
+3. Si su fecha corresponde a otro animal, es llevado a ese otro animal
+4. Esto frustra al usuario que quería explorar el Mono específicamente
+
+**Solución Propuesta (Mejora UX):**
+Cambiar el modal para que en lugar de pedir fecha de nacimiento, muestre los **5 elementos Wu Xing** para que el usuario elija cuál quiere consultar:
+
+1. **Reemplazar `YearSelectorModal` con `ElementSelectorModal`:**
+   - Al clickear un animal, mostrar modal con los 5 elementos
+   - Cada elemento muestra años de ejemplo del ciclo de 60 años
+   - El usuario elige el elemento que quiere consultar
+
+2. **Mantener `AnimalCalculator` visible:**
+   - Ya existe en la página principal para usuarios no autenticados
+   - Permite cálculo exacto por fecha de nacimiento
+   - Esto es para quienes quieren saber "cuál es MI animal y elemento"
+
+**Beneficios:**
+
+- **Exploración**: Usuario puede ver cualquier combinación animal+elemento
+- **Precisión**: El calculador sigue disponible para cálculo exacto por fecha
+- **Sin confusión**: No hay desconexión entre lo que el usuario clickea y lo que ve
+- **UX clara**: Dos caminos distintos - "explorar" vs "calcular mi signo"
+
+**Bug adicional detectado:**  
+Actualmente el `AnimalCalculator` solo se muestra para usuarios NO autenticados (`!isAuthenticated` en línea 85 de `page.tsx`). Esto es incorrecto porque:
+
+- Un usuario registrado puede querer calcular el signo de un amigo/familiar
+- El calculador debe estar **siempre visible** para TODOS los usuarios (anónimos, free, premium)
+- Debe corregirse en TASK-134
+
+**Tareas relacionadas:** TASK-133, TASK-134, TASK-135
+
+---
+
+### TASK-133: Crear ElementSelectorModal (reemplaza YearSelectorModal)
+
+**Módulo:** Frontend - Chinese Horoscope  
+**Prioridad:** 🔴 Alta  
+**Estimación:** 3-4 horas  
+**Dependencias:** Ninguna
+
+#### Descripción
+
+Crear un nuevo modal `ElementSelectorModal` que reemplace al actual `YearSelectorModal`. En lugar de pedir fecha de nacimiento, este modal presenta los 5 elementos Wu Xing para que el usuario elija cuál quiere consultar del animal seleccionado.
+
+#### Contexto Técnico
+
+- **Reemplaza:** `YearSelectorModal.tsx` (modal actual que pide fecha de nacimiento)
+- **Motivo del cambio:** El modal actual pide fecha y puede navegar a un animal diferente al clickeado, causando confusión
+- **Nuevo comportamiento:** Muestra 5 opciones de elementos, usuario elige uno → navega a ese animal+elemento
+- Usa componentes shadcn/ui (Dialog, Button)
+- Incluye años de ejemplo para cada elemento del animal seleccionado
+
+#### Diseño del Modal
+
+```
+┌─────────────────────────────────────────┐
+│           🐒 Mono                       │
+│   Selecciona tu elemento Wu Xing        │
+├─────────────────────────────────────────┤
+│                                         │
+│  🔘 Metal  (1920, 1980, 2040)          │
+│  🔘 Agua   (1932, 1992, 2052)          │
+│  🔘 Madera (1944, 2004, 2064)          │
+│  🔘 Fuego  (1956, 2016, 2076)          │
+│  🔘 Tierra (1968, 2028, 2088)          │
+│                                         │
+│  ────────────────────────────────────   │
+│  💡 ¿No sabes tu elemento?              │
+│  Usa el calculador en la página         │
+│  principal con tu fecha de nacimiento   │
+│                                         │
+│         [ Cancelar ]                    │
+└─────────────────────────────────────────┘
+```
+
+#### Cálculo de Años de Ejemplo
+
+Para cada animal, los años con cada elemento siguen un ciclo de 60 años:
+
+- Cada animal aparece cada 12 años
+- Cada elemento aparece cada 10 años
+- La combinación animal+elemento aparece cada 60 años
+
+```typescript
+// Ejemplo: Mono (año base 1920 = Metal)
+// Metal: 1920, 1980, 2040
+// Agua:  1932, 1992, 2052
+// Madera: 1944, 2004, 2064
+// Fuego: 1956, 2016, 2076
+// Tierra: 1968, 2028, 2088
+```
+
+#### Tareas Específicas
+
+- [ ] Crear componente `ElementSelectorModal.tsx`
+- [ ] Definir props: `animal`, `isOpen`, `onClose`, `onSelectElement`
+- [ ] Crear helper para calcular años de ejemplo por animal+elemento
+- [ ] Implementar navegación a `/horoscopo-chino/[animal]?element=[element]` al seleccionar
+- [ ] Agregar nota sobre el calculador para cálculo exacto
+- [ ] Agregar tests unitarios con >80% coverage
+- [ ] Documentar componente
+- [ ] Deprecar/eliminar `YearSelectorModal.tsx` y sus tests
+
+#### Criterios de Aceptación
+
+- [ ] Modal muestra los 5 elementos Wu Xing con iconos/colores
+- [ ] Cada elemento muestra 3 años de ejemplo del ciclo de 60 años
+- [ ] Click en elemento navega a página del animal con elemento en query param
+- [ ] Tests unitarios pasando (>80% coverage)
+- [ ] Accesibilidad: navegable por teclado, aria-labels
+- [ ] `YearSelectorModal` eliminado o marcado como deprecated
+
+---
+
+### TASK-134: Integrar ElementSelectorModal en Página Principal
+
+**Módulo:** Frontend - Chinese Horoscope  
+**Prioridad:** 🔴 Alta  
+**Estimación:** 2-3 horas  
+**Dependencias:** TASK-133
+
+#### Descripción
+
+Modificar la página `/horoscopo-chino` para usar el nuevo `ElementSelectorModal` en lugar del actual `YearSelectorModal`.
+
+#### Contexto Técnico
+
+- **Archivo principal:** `src/app/horoscopo-chino/page.tsx`
+- **Hook a modificar:** `useChineseHoroscopeMainPage`
+- **Cambio clave:** Reemplazar import y uso de `YearSelectorModal` por `ElementSelectorModal`
+
+#### Flujo Actual vs Nuevo
+
+| Paso | Flujo Actual                                     | Flujo Nuevo                                   |
+| ---- | ------------------------------------------------ | --------------------------------------------- |
+| 1    | Click en animal                                  | Click en animal                               |
+| 2    | Modal pide fecha de nacimiento                   | Modal muestra 5 elementos                     |
+| 3    | Calcula animal+elemento de la fecha              | Usuario elige elemento                        |
+| 4    | Navega al animal calculado (puede ser diferente) | Navega al animal clickeado + elemento elegido |
+
+#### Tareas Específicas
+
+- [ ] Reemplazar import de `YearSelectorModal` por `ElementSelectorModal` en page.tsx
+- [ ] Actualizar `useChineseHoroscopeMainPage`:
+  - [ ] Cambiar `handleBirthDateConfirm` por `handleElementSelect`
+  - [ ] Simplificar lógica (ya no hay cálculo, solo navegación)
+- [ ] Pasar props correctas al nuevo modal (`animal`, `onSelectElement`)
+- [ ] **CORREGIR:** Hacer `AnimalCalculator` visible para TODOS los usuarios:
+  - [ ] Eliminar condición `{!isAuthenticated && ...}` (línea 85-87)
+  - [ ] Mostrar calculador siempre, independiente del estado de autenticación
+  - [ ] Permite calcular signo para amigos/familiares
+- [ ] Actualizar tests de la página
+- [ ] Actualizar tests del hook
+
+#### Criterios de Aceptación
+
+- [ ] Click en animal abre modal de selección de elementos
+- [ ] Seleccionar elemento navega a `/horoscopo-chino/[animal]?element=[element]`
+- [ ] El animal en la URL es el mismo que el usuario clickeó
+- [ ] `AnimalCalculator` visible para TODOS los usuarios (anónimos, free, premium)
+- [ ] Tests pasando (>80% coverage)
+
+---
+
+### TASK-135: Simplificar Página de Detalle (eliminar YearInputBanner)
+
+**Módulo:** Frontend - Chinese Horoscope  
+**Prioridad:** 🟡 Media  
+**Estimación:** 2 horas  
+**Dependencias:** TASK-133, TASK-134
+
+#### Descripción
+
+Simplificar la página `/horoscopo-chino/[animal]` eliminando el `YearInputBanner` que pide fecha de nacimiento, ya que esta funcionalidad ahora está centralizada en el `AnimalCalculator` de la página principal.
+
+#### Contexto Técnico
+
+- **Archivo:** `src/app/horoscopo-chino/[animal]/page.tsx`
+- **Hook:** `useAnimalHoroscopePage.ts`
+- El elemento ahora viene como query param `?element=fire`
+- Si no hay elemento, mostrar selector de elementos o mensaje informativo
+
+#### Problema del Flujo Actual en Página de Detalle
+
+1. Usuario llega a `/horoscopo-chino/mono?element=fire` → ✅ OK, muestra Mono de Fuego
+2. Usuario llega a `/horoscopo-chino/mono` (sin elemento) → ❓ Muestra banner pidiendo fecha
+3. Si ingresa fecha y resulta ser Caballo → ❌ Confusión (estaba en página del Mono)
+
+#### Nuevo Flujo Propuesto
+
+1. Usuario llega con `?element=X` → Mostrar horóscopo del animal + elemento
+2. Usuario llega sin elemento → Mostrar `ElementSelectorModal` o mensaje:
+   > "Selecciona tu elemento para ver el horóscopo completo"
+   > con botones para cada elemento y link "¿No sabes tu elemento? → Calculadora"
+
+#### Tareas Específicas
+
+- [ ] Eliminar o simplificar `YearInputBanner` de la página de detalle
+- [ ] Modificar `useAnimalHoroscopePage`:
+  - [ ] Eliminar lógica de `selectedBirthDate` y cálculo de animal
+  - [ ] Simplificar a: leer `element` de query params
+- [ ] Si no hay `element` en query:
+  - [ ] Opción A: Mostrar `ElementSelectorModal` automáticamente
+  - [ ] Opción B: Mostrar mensaje con botones de elementos
+- [ ] Agregar link "¿No es tu elemento? Calcula tu signo exacto" → página principal
+- [ ] Actualizar tests de página y hook
+
+#### Criterios de Aceptación
+
+- [ ] Página de detalle NO pide fecha de nacimiento
+- [ ] Si falta elemento, muestra selector o mensaje claro
+- [ ] Link visible para ir a calculadora en página principal
+- [ ] No hay confusión entre animal seleccionado y animal calculado
+- [ ] Tests pasando (>80% coverage)
+
+---
+
 ## CHECKLIST DE COMPLETITUD
 
 ### Backend
@@ -3542,6 +3778,9 @@ La página de detalle mostraba "Serpiente" en lugar de "Serpiente de Fuego", per
 - [x] TASK-127: Actualizar página /horoscopo-chino (HU-HCH-006)
 - [ ] TASK-128: Actualizar página /horoscopo-chino/[animal] (HU-HCH-006)
 - [ ] TASK-129: Integrar calculador con navegación (HU-HCH-006)
+- [ ] TASK-133: Crear ElementSelectorModal (BUG #7 - Mejora UX)
+- [ ] TASK-134: Integrar ElementSelectorModal en página principal (BUG #7)
+- [ ] TASK-135: Actualizar página de detalle para UX consistente (BUG #7)
 
 ### Documentación
 
