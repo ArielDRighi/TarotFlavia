@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import {
   calculateAllNumbers,
   MASTER_NUMBERS,
@@ -13,9 +15,21 @@ import {
   NumerologyResponseDto,
   NumberDetailDto,
 } from './dto/numerology-response.dto';
+import { NumerologyInterpretation } from './entities/numerology-interpretation.entity';
+import { AIProviderService } from '../ai/application/services/ai-provider.service';
+import {
+  NUMEROLOGY_SYSTEM_PROMPT,
+  buildNumerologyUserPrompt,
+} from './prompts/numerology-interpretation.prompt';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class NumerologyService {
+  constructor(
+    @InjectRepository(NumerologyInterpretation)
+    private readonly interpretationRepo: Repository<NumerologyInterpretation>,
+    private readonly aiProviderService: AIProviderService,
+  ) {}
   /**
    * Calcula todos los números e incluye interpretaciones
    */
@@ -80,5 +94,80 @@ export class NumerologyService {
       description: interpretation.description,
       isMaster: interpretation.isMaster,
     };
+  }
+
+  /**
+   * Obtiene interpretación IA existente del usuario
+   */
+  async getExistingInterpretation(
+    userId: number,
+  ): Promise<NumerologyInterpretation | null> {
+    return this.interpretationRepo.findOne({ where: { userId } });
+  }
+
+  /**
+   * Genera y guarda interpretación IA (solo si no existe)
+   * Si el usuario ya tiene una interpretación, retorna la existente
+   */
+  async generateAndSaveInterpretation(
+    user: User,
+  ): Promise<NumerologyInterpretation> {
+    // Verificar que no exista
+    const existing = await this.getExistingInterpretation(user.id);
+    if (existing) {
+      return existing;
+    }
+
+    // Verificar que el usuario tenga fecha de nacimiento
+    if (!user.birthDate) {
+      throw new Error('El usuario no tiene fecha de nacimiento configurada');
+    }
+
+    // Calcular números
+    const birthDate = new Date(user.birthDate);
+    const numbers = calculateAllNumbers(birthDate, user.name);
+
+    // Generar con IA
+    const startTime = Date.now();
+    const prompt = buildNumerologyUserPrompt({
+      lifePath: numbers.lifePath,
+      birthdayNumber: numbers.birthday,
+      expressionNumber: numbers.expression,
+      soulUrge: numbers.soulUrge,
+      personality: numbers.personality,
+      personalYear: numbers.personalYear,
+      fullName: user.name,
+    });
+
+    const aiResponse = await this.aiProviderService.generateCompletion(
+      [
+        { role: 'system', content: NUMEROLOGY_SYSTEM_PROMPT },
+        { role: 'user', content: prompt },
+      ],
+      user.id,
+      null,
+      { temperature: 0.7, maxTokens: 1500 },
+    );
+
+    const generationTimeMs = Date.now() - startTime;
+
+    // Crear y guardar entidad
+    const interpretation = this.interpretationRepo.create({
+      userId: user.id,
+      lifePath: numbers.lifePath,
+      birthdayNumber: numbers.birthday,
+      expressionNumber: numbers.expression,
+      soulUrge: numbers.soulUrge,
+      personality: numbers.personality,
+      birthDate: birthDate,
+      fullName: user.name,
+      interpretation: aiResponse.content,
+      aiProvider: aiResponse.provider,
+      aiModel: aiResponse.model,
+      tokensUsed: aiResponse.tokensUsed.total || 0,
+      generationTimeMs,
+    });
+
+    return this.interpretationRepo.save(interpretation);
   }
 }
