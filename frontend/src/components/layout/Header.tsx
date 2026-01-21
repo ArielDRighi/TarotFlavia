@@ -58,6 +58,12 @@ export function Header() {
           >
             Horóscopo Chino
           </Link>
+          <Link
+            href={ROUTES.NUMEROLOGIA}
+            className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
+          >
+            Numerología
+          </Link>
           {user && (
             <>
               <Link
