@@ -229,3 +229,68 @@ export function getElementIcon(element: string): string {
 
   return '⭕';
 }
+
+/**
+ * Base years for each Chinese zodiac animal in the 60-year cycle
+ * These are the first occurrences with the 'metal' element in the 20th century
+ */
+const ANIMAL_BASE_YEARS: Record<ChineseZodiacAnimal, number> = {
+  [ChineseZodiacAnimal.RAT]: 1924,
+  [ChineseZodiacAnimal.OX]: 1925,
+  [ChineseZodiacAnimal.TIGER]: 1926,
+  [ChineseZodiacAnimal.RABBIT]: 1927,
+  [ChineseZodiacAnimal.DRAGON]: 1940, // Skips to next metal cycle
+  [ChineseZodiacAnimal.SNAKE]: 1941,
+  [ChineseZodiacAnimal.HORSE]: 1942,
+  [ChineseZodiacAnimal.GOAT]: 1943,
+  [ChineseZodiacAnimal.MONKEY]: 1920,
+  [ChineseZodiacAnimal.ROOSTER]: 1921,
+  [ChineseZodiacAnimal.DOG]: 1922,
+  [ChineseZodiacAnimal.PIG]: 1923,
+};
+
+/**
+ * Element offsets within the 60-year cycle
+ * Each element repeats every 10 years, but the specific year offset depends on the element
+ */
+const ELEMENT_YEAR_OFFSETS: Record<ChineseElementCode, number> = {
+  metal: 0, // Base year
+  water: 12, // +12 years from base
+  wood: 24, // +24 years from base
+  fire: 36, // +36 years from base
+  earth: 48, // +48 years from base
+};
+
+/**
+ * Gets 3 example years for a specific animal+element combination
+ * spanning across the 60-year cycles (past, present, future)
+ *
+ * @param animal - Chinese zodiac animal
+ * @param element - Wu Xing element code
+ * @returns Array of 3 years in ascending order
+ *
+ * @example
+ * ```typescript
+ * getExampleYearsForAnimalElement(ChineseZodiacAnimal.MONKEY, 'metal');
+ * // [1920, 1980, 2040]
+ *
+ * getExampleYearsForAnimalElement(ChineseZodiacAnimal.DRAGON, 'earth');
+ * // [1988, 2048, 2108]
+ * ```
+ */
+export function getExampleYearsForAnimalElement(
+  animal: ChineseZodiacAnimal,
+  element: ChineseElementCode
+): [number, number, number] {
+  const baseYear = ANIMAL_BASE_YEARS[animal];
+  const elementOffset = ELEMENT_YEAR_OFFSETS[element];
+
+  // Calculate the first occurrence of this animal+element combination
+  const firstYear = baseYear + elementOffset;
+
+  // Each animal+element combination repeats every 60 years
+  const secondYear = firstYear + 60;
+  const thirdYear = firstYear + 120;
+
+  return [firstYear, secondYear, thirdYear];
+}
