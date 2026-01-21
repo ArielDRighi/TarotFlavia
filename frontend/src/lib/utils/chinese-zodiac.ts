@@ -275,7 +275,7 @@ const ELEMENT_YEAR_OFFSETS: Record<ChineseElementCode, number> = {
  * // [1920, 1980, 2040]
  *
  * getExampleYearsForAnimalElement(ChineseZodiacAnimal.DRAGON, 'earth');
- * // [1928, 1988, 2048]
+ * // [1988, 2048, 2108]
  * ```
  */
 export function getExampleYearsForAnimalElement(

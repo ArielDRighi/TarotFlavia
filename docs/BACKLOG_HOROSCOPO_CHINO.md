@@ -3631,20 +3631,20 @@ Para cada animal, los años con cada elemento siguen un ciclo de 60 años:
 - [x] Crear componente `ElementSelectorModal.tsx`
 - [x] Definir props: `animal`, `isOpen`, `onClose`, `onSelectElement`
 - [x] Crear helper para calcular años de ejemplo por animal+elemento
-- [x] Implementar navegación a `/horoscopo-chino/[animal]?element=[element]` al seleccionar
+- [ ] Implementar navegación a `/horoscopo-chino/[animal]?element=[element]` al seleccionar (se implementará en TASK-134 - integración con routing)
 - [x] Agregar nota sobre el calculador para cálculo exacto
 - [x] Agregar tests unitarios con >80% coverage
 - [x] Documentar componente
-- [x] Deprecar/eliminar `YearSelectorModal.tsx` y sus tests
+- [ ] Deprecar/eliminar `YearSelectorModal.tsx` y sus tests (pendiente de TASK-134)
 
 #### Criterios de Aceptación
 
 - [x] Modal muestra los 5 elementos Wu Xing con iconos/colores
 - [x] Cada elemento muestra 3 años de ejemplo del ciclo de 60 años
-- [x] Click en elemento navega a página del animal con elemento en query param
+- [ ] Click en elemento navega a página del animal con elemento en query param (pendiente de TASK-134 - integración)
 - [x] Tests unitarios pasando (>80% coverage - 17/17 tests passed)
 - [x] Accesibilidad: navegable por teclado, aria-labels
-- [x] `YearSelectorModal` eliminado o marcado como deprecated
+- [ ] `YearSelectorModal` eliminado o marcado como deprecated (pendiente de TASK-134)
 
 ---
 

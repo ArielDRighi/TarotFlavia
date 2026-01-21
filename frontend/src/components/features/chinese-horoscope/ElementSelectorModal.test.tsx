@@ -172,7 +172,7 @@ describe('ElementSelectorModal', () => {
   });
 
   describe('Different Animals', () => {
-    it('should calculate correct years for Dragon (base year 1928)', () => {
+    it('should calculate correct years for Dragon (base year 1940)', () => {
       render(
         <ElementSelectorModal
           {...defaultProps}
@@ -182,8 +182,7 @@ describe('ElementSelectorModal', () => {
         />
       );
 
-      // Dragon base year for Metal is 1940 (Mono 1920 + 8 years)
-      // Actually: Dragon = 1928 (Metal) → 1940 (Metal) → 2000 (Metal)
+      // Dragon Metal years from this base: 1940 (Metal) → 2000 (Metal)
       expect(screen.getByText(/1940/)).toBeInTheDocument();
       expect(screen.getByText(/2000/)).toBeInTheDocument();
     });
