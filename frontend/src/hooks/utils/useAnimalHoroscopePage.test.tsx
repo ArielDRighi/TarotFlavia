@@ -114,10 +114,23 @@ describe('useAnimalHoroscopePage', () => {
     });
   });
 
-  it('should provide handleBirthDateSubmit callback', () => {
+  it('should provide showElementModal flag when element is missing', () => {
     const { result } = renderHook(() => useAnimalHoroscopePage(), { wrapper });
 
-    expect(typeof result.current.handleBirthDateSubmit).toBe('function');
+    // No element in query and not my animal -> should show modal
+    expect(result.current.showElementModal).toBe(true);
+  });
+
+  it('should not show element modal when element is provided in query', async () => {
+    vi.mocked(useSearchParams).mockReturnValue({
+      get: vi.fn((key: string) => (key === 'element' ? 'fire' : null)),
+    } as unknown as ReturnType<typeof useSearchParams>);
+
+    const { result } = renderHook(() => useAnimalHoroscopePage(), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.showElementModal).toBe(false);
+    });
   });
 
   it('should return loading state', () => {

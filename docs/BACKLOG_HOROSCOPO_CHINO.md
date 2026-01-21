@@ -3700,6 +3700,7 @@ Modificar la página `/horoscopo-chino` para usar el nuevo `ElementSelectorModal
 
 ### TASK-135: Simplificar Página de Detalle (eliminar YearInputBanner)
 
+**Estado:** ✅ COMPLETADA  
 **Módulo:** Frontend - Chinese Horoscope  
 **Prioridad:** 🟡 Media  
 **Estimación:** 2 horas  
@@ -3731,23 +3732,23 @@ Simplificar la página `/horoscopo-chino/[animal]` eliminando el `YearInputBanne
 
 #### Tareas Específicas
 
-- [ ] Eliminar o simplificar `YearInputBanner` de la página de detalle
-- [ ] Modificar `useAnimalHoroscopePage`:
-  - [ ] Eliminar lógica de `selectedBirthDate` y cálculo de animal
-  - [ ] Simplificar a: leer `element` de query params
-- [ ] Si no hay `element` en query:
-  - [ ] Opción A: Mostrar `ElementSelectorModal` automáticamente
-  - [ ] Opción B: Mostrar mensaje con botones de elementos
-- [ ] Agregar link "¿No es tu elemento? Calcula tu signo exacto" → página principal
-- [ ] Actualizar tests de página y hook
+- [x] Eliminar o simplificar `YearInputBanner` de la página de detalle
+- [x] Modificar `useAnimalHoroscopePage`:
+  - [x] Eliminar lógica de `selectedBirthDate` y cálculo de animal
+  - [x] Simplificar a: leer `element` de query params
+- [x] Si no hay `element` en query:
+  - [x] Opción A: Mostrar `ElementSelectorModal` automáticamente
+  - [x] Opción B: Mostrar mensaje con botones de elementos
+- [x] Agregar link "¿No es tu elemento? Calcula tu signo exacto" → página principal
+- [x] Actualizar tests de página y hook
 
 #### Criterios de Aceptación
 
-- [ ] Página de detalle NO pide fecha de nacimiento
-- [ ] Si falta elemento, muestra selector o mensaje claro
-- [ ] Link visible para ir a calculadora en página principal
-- [ ] No hay confusión entre animal seleccionado y animal calculado
-- [ ] Tests pasando (>80% coverage)
+- [x] Página de detalle NO pide fecha de nacimiento
+- [x] Si falta elemento, muestra selector o mensaje claro
+- [x] Link visible para ir a calculadora en página principal
+- [x] No hay confusión entre animal seleccionado y animal calculado
+- [x] Tests pasando (>80% coverage)
 
 ---
 
@@ -3781,7 +3782,7 @@ Simplificar la página `/horoscopo-chino/[animal]` eliminando el `YearInputBanne
 - [ ] TASK-129: Integrar calculador con navegación (HU-HCH-006)
 - [x] TASK-133: Crear ElementSelectorModal (BUG #7 - Mejora UX) ✅ COMPLETADA
 - [ ] TASK-134: Integrar ElementSelectorModal en página principal (BUG #7)
-- [ ] TASK-135: Actualizar página de detalle para UX consistente (BUG #7)
+- [x] TASK-135: Actualizar página de detalle para UX consistente (BUG #7) ✅ COMPLETADA
 
 ### Documentación
 

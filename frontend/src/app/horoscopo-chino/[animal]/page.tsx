@@ -3,20 +3,23 @@
  *
  * Página de detalle para un animal del zodiaco chino específico
  * - Si es MI animal (usuario autenticado): muestra horóscopo directamente
- * - Si es OTRO animal: solicita año para calcular elemento
+ * - Si NO hay elemento: muestra ElementSelectorModal para elegir
  *
- * All business logic is encapsulated in useAnimalHoroscopePage hook.
+ * TASK-135: Simplified version - removed YearInputBanner (confusing UX)
+ * Now uses ElementSelectorModal + link to calculator for exact calculations.
  */
 
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Calculator } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   ChineseHoroscopeDetail,
   ChineseAnimalSelector,
-  YearInputBanner,
+  ElementSelectorModal,
 } from '@/components/features/chinese-horoscope';
 import { useAnimalHoroscopePage } from '@/hooks/utils/useAnimalHoroscopePage';
 import { ROUTES } from '@/lib/constants/routes';
@@ -28,14 +31,29 @@ export default function ChineseHoroscopeAnimalPage() {
     isValidAnimal,
     animalInfo,
     userAnimal,
-    isMyAnimal,
     element,
     horoscopeData,
     isLoading,
     error,
     currentYear,
-    handleBirthDateSubmit,
+    showElementModal,
+    handleElementSelect,
   } = useAnimalHoroscopePage();
+
+  // Track if user manually dismissed the modal
+  // Use animal as key to reset state when animal changes
+  const [userDismissedModal, setUserDismissedModal] = useState<Record<string, boolean>>({});
+
+  // Show modal only if:
+  // 1. showElementModal is true (no element and not user's animal)
+  // 2. User hasn't dismissed it yet for this animal
+  const shouldShowModal = showElementModal && !userDismissedModal[animal];
+
+  const handleModalClose = (open: boolean) => {
+    if (!open) {
+      setUserDismissedModal((prev) => ({ ...prev, [animal]: true }));
+    }
+  };
 
   // Invalid animal - show error
   if (!isValidAnimal || !animalInfo) {
@@ -70,12 +88,35 @@ export default function ChineseHoroscopeAnimalPage() {
         />
       </div>
 
-      {/* If NOT my animal and NO element, show birth date input banner */}
-      {!isMyAnimal && !element && (
-        <YearInputBanner onBirthDateSubmit={handleBirthDateSubmit} animalName={animalInfo.nameEs} />
+      {/* Show element selector modal when element is missing */}
+      <ElementSelectorModal
+        open={shouldShowModal}
+        animal={animal}
+        animalNameEs={animalInfo.nameEs}
+        animalEmoji={animalInfo.emoji}
+        onSelectElement={handleElementSelect}
+        onOpenChange={handleModalClose}
+      />
+
+      {/* Show info message with calculator link when user dismissed modal */}
+      {!element && userDismissedModal[animal] && (
+        <Alert className="mb-6">
+          <Calculator className="h-4 w-4" />
+          <AlertDescription className="flex items-center justify-between">
+            <span>Selecciona tu elemento para ver el horóscopo completo</span>
+            <Button
+              variant="link"
+              size="sm"
+              onClick={() => router.push(ROUTES.HOROSCOPO_CHINO)}
+              className="ml-2"
+            >
+              ¿No sabes tu elemento? Usa el calculador
+            </Button>
+          </AlertDescription>
+        </Alert>
       )}
 
-      {/* Show horoscope when available */}
+      {/* Show horoscope when element is available */}
       {element && (
         <>
           {isLoading ? (

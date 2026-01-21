@@ -91,7 +91,7 @@ describe('ChineseHoroscopeAnimalPage', () => {
     expect(screen.getByTestId('chinese-animal-selector')).toBeInTheDocument();
   });
 
-  it('should show YearInputBanner when not user animal and no element', () => {
+  it('should show ElementSelectorModal when not user animal and no element', () => {
     mockUseMyAnimalHoroscope.mockReturnValue({
       isLoading: false,
       data: null,
@@ -105,9 +105,9 @@ describe('ChineseHoroscopeAnimalPage', () => {
 
     renderWithProviders(<ChineseHoroscopeAnimalPage />);
 
-    expect(
-      screen.getByText(/Ingresa la fecha de nacimiento para ver el horóscopo personalizado/i)
-    ).toBeInTheDocument();
+    // Should show the element selector modal
+    expect(screen.getByTestId('element-selector-modal')).toBeInTheDocument();
+    expect(screen.getByText(/Selecciona tu elemento/i)).toBeInTheDocument();
   });
 
   it('should render loading state when fetching horoscope', () => {
@@ -212,6 +212,7 @@ describe('ChineseHoroscopeAnimalPage', () => {
   it('should navigate back when clicking back button', async () => {
     const user = userEvent.setup();
     mockParams.animal = 'dragon';
+    mockSearchParams.get.mockReturnValue('wood'); // Add element so modal doesn't show
 
     mockUseMyAnimalHoroscope.mockReturnValue({
       isLoading: false,
@@ -220,12 +221,37 @@ describe('ChineseHoroscopeAnimalPage', () => {
     });
     mockUseChineseHoroscopeByElement.mockReturnValue({
       isLoading: false,
-      data: null,
+      data: {
+        id: 1,
+        animal: ChineseZodiacAnimal.DRAGON,
+        birthElement: 'wood' as ChineseElementCode,
+        year: 2026,
+        generalOverview: 'Test overview',
+        areas: {
+          love: { content: 'Love content', rating: 8 },
+          career: { content: 'Career content', rating: 7 },
+          wellness: { content: 'Wellness content', rating: 9 },
+          finance: { content: 'Finance content', rating: 6 },
+        },
+        luckyElements: {
+          numbers: [3, 7, 9],
+          colors: ['Rojo', 'Dorado'],
+          directions: ['Sur', 'Este'],
+          months: [3, 6, 9],
+        },
+        compatibility: {
+          best: [ChineseZodiacAnimal.RAT],
+          good: [ChineseZodiacAnimal.MONKEY],
+          challenging: [ChineseZodiacAnimal.DOG],
+        },
+        monthlyHighlights: 'Test highlights',
+      },
       error: null,
     });
 
     renderWithProviders(<ChineseHoroscopeAnimalPage />);
 
+    // Look for "Todos los animales" button
     const backButton = screen.getByRole('button', { name: /Todos los animales/i });
     await user.click(backButton);
 
