@@ -50,14 +50,14 @@ export function NumerologyProfile({
         <NumberCard number={profile.lifePath} context="lifePath" variant="full" />
       </div>
 
-      {/* AI Interpretation Section */}
+      {/* Personalized Interpretation Section */}
       <div className="mb-6">
         {hasInterpretation ? (
           <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-purple-900">
                 <Sparkles className="h-5 w-5" />
-                Interpretación Personalizada con IA
+                Interpretación Personalizada
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -84,7 +84,7 @@ export function NumerologyProfile({
               <div className="flex items-center justify-between">
                 <div>
                   <p className="mb-1 font-semibold text-purple-900">
-                    Interpretación con IA (PREMIUM)
+                    Interpretación Personalizada (PREMIUM)
                   </p>
                   <p className="text-sm text-gray-700">
                     Obtén un análisis profundo y personalizado de tu perfil numerológico
@@ -105,8 +105,8 @@ export function NumerologyProfile({
           <Alert>
             <AlertDescription>
               <p className="text-sm text-gray-700">
-                Mejora a <strong>PREMIUM</strong> para obtener interpretaciones personalizadas con
-                IA de tu perfil numerológico.
+                Mejora a <strong>PREMIUM</strong> para obtener una interpretación profunda y personalizada
+                de tu perfil numerológico completo.
               </p>
             </AlertDescription>
           </Alert>

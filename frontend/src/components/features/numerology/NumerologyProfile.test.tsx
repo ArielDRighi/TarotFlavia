@@ -38,7 +38,7 @@ describe('NumerologyProfile', () => {
   it('should show premium interpretation CTA when canGenerateInterpretation is true and no interpretation', () => {
     render(<NumerologyProfile profile={mockProfile} canGenerateInterpretation={true} />);
 
-    expect(screen.getByText(/interpretación con IA/i)).toBeInTheDocument();
+    expect(screen.getByText(/interpretación personalizada/i)).toBeInTheDocument();
     expect(screen.getByText(/generar interpretación/i)).toBeInTheDocument();
   });
 
@@ -46,7 +46,7 @@ describe('NumerologyProfile', () => {
     render(<NumerologyProfile profile={mockProfile} canGenerateInterpretation={false} />);
 
     expect(screen.getByText('PREMIUM')).toBeInTheDocument();
-    expect(screen.getByText(/interpretaciones personalizadas con IA/i)).toBeInTheDocument();
+    expect(screen.getByText(/interpretación profunda y personalizada/i)).toBeInTheDocument();
   });
 
   it('should call onRequestInterpretation when button is clicked', () => {

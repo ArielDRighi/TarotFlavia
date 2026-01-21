@@ -112,22 +112,35 @@ export default function NumerologiaPage() {
                 <Skeleton className="h-64 w-full" />
               </Card>
             ) : myProfile ? (
-              <NumerologyProfile
-                profile={myProfile}
-                interpretation={myInterpretation}
-                canGenerateInterpretation={isPremium}
-                isGeneratingInterpretation={isGeneratingInterpretation}
-                onRequestInterpretation={handleGenerateInterpretation}
-              />
+              <>
+                <NumerologyProfile
+                  profile={myProfile}
+                  interpretation={myInterpretation}
+                  canGenerateInterpretation={isPremium}
+                  isGeneratingInterpretation={isGeneratingInterpretation}
+                  onRequestInterpretation={handleGenerateInterpretation}
+                />
+                
+                {/* Tip para actualizar nombre */}
+                <Alert className="mt-4 border-blue-200 bg-blue-50">
+                  <AlertDescription className="text-sm text-blue-900">
+                    💡 <strong>Consejo:</strong> Si cambiaste tu nombre o quieres usar tu nombre completo para un análisis más preciso,{' '}
+                    <Link href={ROUTES.PERFIL} className="font-semibold underline hover:text-blue-700">
+                      actualízalo en tu perfil
+                    </Link>
+                    .
+                  </AlertDescription>
+                </Alert>
+              </>
             ) : null}
           </div>
         )}
 
         {/* Calculator Section - Always visible */}
         <Card className="p-6">
-          <h2 className="mb-2 font-serif text-xl">Calcula Números para Otra Persona</h2>
+          <h2 className="mb-2 font-serif text-xl">Calculadora de Numerología</h2>
           <p className="mb-4 text-sm text-muted-foreground">
-            Consulta la numerología de amigos o familiares
+            Calcula números numerológicos para cualquier fecha y nombre
           </p>
 
           <div className="space-y-4">
