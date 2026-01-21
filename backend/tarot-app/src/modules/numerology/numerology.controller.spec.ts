@@ -198,7 +198,6 @@ describe('NumerologyController', () => {
     it('should generate new interpretation for premium user', async () => {
       const currentUser = { userId: 123, plan: UserPlan.PREMIUM };
       usersService.findById.mockResolvedValue(mockUser as any);
-      numerologyService.getExistingInterpretation.mockResolvedValue(null);
       numerologyService.generateAndSaveInterpretation.mockResolvedValue(
         mockInterpretation as any,
       );
@@ -206,30 +205,25 @@ describe('NumerologyController', () => {
       const result = await controller.interpretMyProfile(currentUser);
 
       expect(result).toEqual(expectedInterpretationDto);
-      expect(numerologyService.getExistingInterpretation).toHaveBeenCalledWith(
-        123,
-      );
       expect(
         numerologyService.generateAndSaveInterpretation,
-      ).toHaveBeenCalled();
+      ).toHaveBeenCalledWith(mockUser);
     });
 
-    it('should return existing interpretation if already exists', async () => {
+    it('should return existing interpretation if already exists (handled by service)', async () => {
       const currentUser = { userId: 123, plan: UserPlan.PREMIUM };
       usersService.findById.mockResolvedValue(mockUser as any);
-      numerologyService.getExistingInterpretation.mockResolvedValue(
+      // Service returns existing interpretation idempotently
+      numerologyService.generateAndSaveInterpretation.mockResolvedValue(
         mockInterpretation as any,
       );
 
       const result = await controller.interpretMyProfile(currentUser);
 
       expect(result).toEqual(expectedInterpretationDto);
-      expect(numerologyService.getExistingInterpretation).toHaveBeenCalledWith(
-        123,
-      );
       expect(
         numerologyService.generateAndSaveInterpretation,
-      ).not.toHaveBeenCalled();
+      ).toHaveBeenCalledWith(mockUser);
     });
 
     it('should throw BadRequestException if user has no birthDate', async () => {
@@ -318,6 +312,16 @@ describe('NumerologyController', () => {
   });
 
   describe('getDayNumber', () => {
+    beforeEach(() => {
+      // Fijar fecha para tests determinísticos
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date('2026-01-18T12:00:00Z'));
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
     it('should return day number for today', () => {
       const today = new Date();
       const dayNum = calculateDayNumber(today);
@@ -328,7 +332,7 @@ describe('NumerologyController', () => {
 
       const result = controller.getDayNumber();
 
-      expect(result).toHaveProperty('date');
+      expect(result).toHaveProperty('date', '2026-01-18');
       expect(result).toHaveProperty('dayNumber', dayNum);
       expect(result).toHaveProperty('meaning');
       expect(result.dayNumber).toBeGreaterThanOrEqual(1);

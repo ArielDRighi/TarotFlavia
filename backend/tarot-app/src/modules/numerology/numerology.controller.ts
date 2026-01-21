@@ -8,6 +8,8 @@ import {
   ParseIntPipe,
   BadRequestException,
   NotFoundException,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -26,7 +28,7 @@ import { AIQuotaGuard } from '../ai-usage/infrastructure/guards/ai-quota.guard';
 import { RequiresPremiumForNumerologyAIGuard } from './guards/requires-premium-for-numerology-ai.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { calculateDayNumber } from '../../common/utils/numerology.utils';
-import { NumberInterpretation } from './data/interpretations.data';
+import { LifePathInterpretation } from './data/interpretations.data';
 import { NumerologyInterpretation } from './entities/numerology-interpretation.entity';
 
 /**
@@ -55,6 +57,7 @@ export class NumerologyController {
    * Calcula perfil básico (para anónimos y widget)
    */
   @Post('calculate')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Calcular perfil numerológico básico' })
   @ApiResponse({ status: 200, type: NumerologyResponseDto })
   @ApiResponse({ status: 400, description: 'Datos inválidos' })
@@ -105,11 +108,13 @@ export class NumerologyController {
    * Usa el mismo patrón de guards que readings
    */
   @Post('my-profile/interpret')
+  @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard, RequiresPremiumForNumerologyAIGuard, AIQuotaGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Generar interpretación IA (PREMIUM)' })
   @ApiResponse({ status: 200, type: NumerologyInterpretationResponseDto })
   @ApiResponse({ status: 400, description: 'Sin fecha de nacimiento' })
+  @ApiResponse({ status: 401, description: 'No autenticado' })
   @ApiResponse({ status: 403, description: 'Requiere plan PREMIUM' })
   @ApiResponse({ status: 404, description: 'Usuario no encontrado' })
   async interpretMyProfile(
@@ -128,15 +133,7 @@ export class NumerologyController {
       );
     }
 
-    // Verifica si ya existe interpretación (se genera una sola vez)
-    const existing = await this.numerologyService.getExistingInterpretation(
-      user.id,
-    );
-    if (existing) {
-      return this.toInterpretationDto(existing);
-    }
-
-    // Genera nueva interpretación
+    // Genera o recupera interpretación de forma idempotente desde el servicio
     const interpretation =
       await this.numerologyService.generateAndSaveInterpretation(user);
     return this.toInterpretationDto(interpretation);
@@ -170,9 +167,9 @@ export class NumerologyController {
   @Get('meanings')
   @ApiOperation({ summary: 'Obtener todos los significados' })
   @ApiResponse({ status: 200, description: 'Lista de significados' })
-  getAllMeanings(): NumberInterpretation[] {
+  getAllMeanings(): LifePathInterpretation[] {
     const validNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 22, 33];
-    const meanings: NumberInterpretation[] = [];
+    const meanings: LifePathInterpretation[] = [];
 
     for (const num of validNumbers) {
       const meaning = this.numerologyService.getInterpretation(num);
@@ -200,7 +197,7 @@ export class NumerologyController {
   @ApiResponse({ status: 404, description: 'Significado no encontrado' })
   getMeaning(
     @Param('number', ParseIntPipe) number: number,
-  ): NumberInterpretation {
+  ): LifePathInterpretation {
     // Validar que sea un número válido
     const validNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 22, 33];
     if (!validNumbers.includes(number)) {
@@ -240,7 +237,7 @@ export class NumerologyController {
   getDayNumber(): {
     date: string;
     dayNumber: number;
-    meaning: NumberInterpretation | null;
+    meaning: LifePathInterpretation | null;
   } {
     const today = new Date();
     const dayNumber = calculateDayNumber(today);
