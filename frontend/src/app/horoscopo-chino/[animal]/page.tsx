@@ -40,11 +40,20 @@ export default function ChineseHoroscopeAnimalPage() {
     handleElementSelect,
   } = useAnimalHoroscopePage();
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // Track if user manually dismissed the modal
+  // Use animal as key to reset state when animal changes
+  const [userDismissedModal, setUserDismissedModal] = useState<Record<string, boolean>>({});
 
-  // Auto-open modal when element is missing
-  // (Controlled by showElementModal flag from hook)
-  const shouldShowModal = showElementModal && !isModalOpen;
+  // Show modal only if:
+  // 1. showElementModal is true (no element and not user's animal)
+  // 2. User hasn't dismissed it yet for this animal
+  const shouldShowModal = showElementModal && !userDismissedModal[animal];
+
+  const handleModalClose = (open: boolean) => {
+    if (!open) {
+      setUserDismissedModal((prev) => ({ ...prev, [animal]: true }));
+    }
+  };
 
   // Invalid animal - show error
   if (!isValidAnimal || !animalInfo) {
@@ -86,11 +95,11 @@ export default function ChineseHoroscopeAnimalPage() {
         animalNameEs={animalInfo.nameEs}
         animalEmoji={animalInfo.emoji}
         onSelectElement={handleElementSelect}
-        onOpenChange={setIsModalOpen}
+        onOpenChange={handleModalClose}
       />
 
-      {/* Show info message with calculator link when no element selected */}
-      {!element && !showElementModal && (
+      {/* Show info message with calculator link when user dismissed modal */}
+      {!element && userDismissedModal[animal] && (
         <Alert className="mb-6">
           <Calculator className="h-4 w-4" />
           <AlertDescription className="flex items-center justify-between">
