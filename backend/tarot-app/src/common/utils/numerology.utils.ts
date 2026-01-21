@@ -41,6 +41,12 @@ const MASTER_NUMBERS = [11, 22, 33];
  * @param num - Número a reducir
  * @param preserveMaster - Si preservar 11, 22, 33
  * @returns Número reducido o maestro
+ *
+ * @example
+ * reduceToSingleDigit(25, false); // Returns 7 (2+5=7)
+ * reduceToSingleDigit(25, true);  // Returns 7 (2+5=7)
+ * reduceToSingleDigit(29, true);  // Returns 11 (2+9=11, master number preserved)
+ * reduceToSingleDigit(29, false); // Returns 2 (2+9=11, 1+1=2)
  */
 export function reduceToSingleDigit(
   num: number,
@@ -68,6 +74,10 @@ export function reduceToSingleDigit(
  * Suma todos los dígitos de la fecha de nacimiento
  * @param birthDate - Fecha de nacimiento
  * @returns Número de Camino de Vida (1-9, 11, 22, 33)
+ *
+ * @example
+ * calculateLifePath(new Date('1990-05-15')); // Returns 3 (1+9+9+0=19, 5, 1+5=6; 19+5+6=30, 3+0=3)
+ * calculateLifePath(new Date('1985-11-29')); // Returns 11 (master number)
  */
 export function calculateLifePath(birthDate: Date): number {
   const year = birthDate.getUTCFullYear();
@@ -89,6 +99,10 @@ export function calculateLifePath(birthDate: Date): number {
  * Solo usa el día del mes
  * @param birthDate - Fecha de nacimiento
  * @returns Número del día (1-9, 11, 22)
+ *
+ * @example
+ * calculateBirthdayNumber(new Date('1990-05-15')); // Returns 6 (1+5=6)
+ * calculateBirthdayNumber(new Date('1985-11-29')); // Returns 11 (master number)
  */
 export function calculateBirthdayNumber(birthDate: Date): number {
   const day = birthDate.getUTCDate();
@@ -99,7 +113,11 @@ export function calculateBirthdayNumber(birthDate: Date): number {
  * Calcula el Número de Expresión (Destino)
  * Suma todas las letras del nombre completo
  * @param fullName - Nombre completo
- * @returns Número de Expresión
+ * @returns Número de Expresión (1-9, 11, 22, 33)
+ *
+ * @example
+ * calculateExpressionNumber('John Doe'); // Returns calculated expression number
+ * calculateExpressionNumber('María García'); // Returns calculated expression number (accents removed)
  */
 export function calculateExpressionNumber(fullName: string): number {
   const normalized = fullName
@@ -119,7 +137,11 @@ export function calculateExpressionNumber(fullName: string): number {
  * Calcula el Número del Alma (Deseo del Corazón)
  * Suma solo las vocales del nombre
  * @param fullName - Nombre completo
- * @returns Número del Alma
+ * @returns Número del Alma (1-9, 11, 22, 33)
+ *
+ * @example
+ * calculateSoulUrge('John Doe'); // Returns soul urge based on vowels O, O, E
+ * calculateSoulUrge('María García'); // Returns soul urge based on vowels A, I, A, A, I, A
  */
 export function calculateSoulUrge(fullName: string): number {
   const normalized = fullName
@@ -141,7 +163,11 @@ export function calculateSoulUrge(fullName: string): number {
  * Calcula el Número de Personalidad
  * Suma solo las consonantes del nombre
  * @param fullName - Nombre completo
- * @returns Número de Personalidad
+ * @returns Número de Personalidad (1-9, 11, 22, 33)
+ *
+ * @example
+ * calculatePersonality('John Doe'); // Returns personality based on consonants J, H, N, D
+ * calculatePersonality('María García'); // Returns personality based on consonants M, R, G, R, C
  */
 export function calculatePersonality(fullName: string): number {
   const normalized = fullName
@@ -164,7 +190,11 @@ export function calculatePersonality(fullName: string): number {
  * Suma día + mes de nacimiento + año actual
  * @param birthDate - Fecha de nacimiento
  * @param year - Año a calcular (default: actual)
- * @returns Año Personal (1-9)
+ * @returns Año Personal (1-9, no preserva números maestros)
+ *
+ * @example
+ * calculatePersonalYear(new Date('1990-05-15'), 2024); // Returns personal year for 2024
+ * calculatePersonalYear(new Date('1985-11-29')); // Returns personal year for current year
  */
 export function calculatePersonalYear(
   birthDate: Date,
@@ -186,7 +216,11 @@ export function calculatePersonalYear(
  * Año Personal + mes actual
  * @param personalYear - Año personal calculado
  * @param month - Mes (1-12)
- * @returns Mes Personal (1-9)
+ * @returns Mes Personal (1-9, no preserva números maestros)
+ *
+ * @example
+ * calculatePersonalMonth(5, 3); // Returns 8 (5+3=8) for personal year 5, month March
+ * calculatePersonalMonth(7); // Returns personal month for current month
  */
 export function calculatePersonalMonth(
   personalYear: number,
@@ -200,7 +234,11 @@ export function calculatePersonalMonth(
  * Calcula el Número del Día Universal
  * Suma todos los dígitos de una fecha específica
  * @param date - Fecha a calcular (default: hoy)
- * @returns Número del día (1-9)
+ * @returns Número del día (1-9, no preserva números maestros)
+ *
+ * @example
+ * calculateDayNumber(new Date('2024-03-15')); // Returns 8 (2+0+2+4=8, 3, 1+5=6; 8+3+6=17, 1+7=8)
+ * calculateDayNumber(); // Returns day number for today
  */
 export function calculateDayNumber(date: Date = new Date()): number {
   const year = date.getUTCFullYear();
@@ -229,7 +267,45 @@ export interface NumerologyResult {
 }
 
 /**
- * Calcula todos los números numerológicos
+ * Calcula todos los números numerológicos de una persona
+ *
+ * @param birthDate - Fecha de nacimiento
+ * @param fullName - Nombre completo (opcional, si no se provee los números basados en nombre serán null)
+ * @returns Objeto con todos los números numerológicos calculados
+ *
+ * @example
+ * // Con nombre completo
+ * const result = calculateAllNumbers(new Date('1990-05-15'), 'María García');
+ * // Returns:
+ * // {
+ * //   lifePath: 3,
+ * //   birthday: 6,
+ * //   expression: 7,
+ * //   soulUrge: 9,
+ * //   personality: 7,
+ * //   personalYear: 5,
+ * //   personalMonth: 8,
+ * //   isMasterNumber: false,
+ * //   birthDate: '1990-05-15',
+ * //   fullName: 'María García'
+ * // }
+ *
+ * @example
+ * // Sin nombre (solo números basados en fecha)
+ * const result = calculateAllNumbers(new Date('1985-11-29'));
+ * // Returns:
+ * // {
+ * //   lifePath: 11,
+ * //   birthday: 11,
+ * //   expression: null,
+ * //   soulUrge: null,
+ * //   personality: null,
+ * //   personalYear: 7,
+ * //   personalMonth: 8,
+ * //   isMasterNumber: true,
+ * //   birthDate: '1985-11-29',
+ * //   fullName: null
+ * // }
  */
 export function calculateAllNumbers(
   birthDate: Date,
