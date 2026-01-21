@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { calculateAllNumbers } from '../../common/utils/numerology.utils';
+import {
+  calculateAllNumbers,
+  MASTER_NUMBERS,
+} from '../../common/utils/numerology.utils';
 import {
   LIFE_PATH_INTERPRETATIONS,
   NumberInterpretation,
@@ -66,7 +69,7 @@ export class NumerologyService {
         name: `Número ${number}`,
         keywords: [],
         description: '',
-        isMaster: [11, 22, 33].includes(number),
+        isMaster: MASTER_NUMBERS.includes(number),
       };
     }
 
