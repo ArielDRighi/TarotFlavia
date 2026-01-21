@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -120,7 +120,9 @@ export class NumerologyService {
 
     // Verificar que el usuario tenga fecha de nacimiento
     if (!user.birthDate) {
-      throw new Error('El usuario no tiene fecha de nacimiento configurada');
+      throw new BadRequestException(
+        'El usuario no tiene fecha de nacimiento configurada',
+      );
     }
 
     // Calcular números

@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { BadRequestException } from '@nestjs/common';
 import { NumerologyService } from './numerology.service';
 import { CalculateNumerologyDto } from './dto/calculate-numerology.dto';
 import { NumerologyInterpretation } from './entities/numerology-interpretation.entity';
@@ -417,6 +418,27 @@ describe('NumerologyService', () => {
         where: { userId: 123 },
       });
       // NO debe llamar a generateCompletion ni save
+      expect(mockAIProviderService.generateCompletion).not.toHaveBeenCalled();
+      expect(mockInterpretationRepo.save).not.toHaveBeenCalled();
+    });
+
+    it('should throw BadRequestException when user has no birthDate', async () => {
+      const userWithoutBirthDate = {
+        ...mockUser,
+        birthDate: null,
+      } as unknown as User;
+
+      mockInterpretationRepo.findOne.mockResolvedValue(null);
+
+      await expect(
+        service.generateAndSaveInterpretation(userWithoutBirthDate),
+      ).rejects.toThrow(BadRequestException);
+
+      await expect(
+        service.generateAndSaveInterpretation(userWithoutBirthDate),
+      ).rejects.toThrow('El usuario no tiene fecha de nacimiento configurada');
+
+      // NO debe llamar a AI ni guardar
       expect(mockAIProviderService.generateCompletion).not.toHaveBeenCalled();
       expect(mockInterpretationRepo.save).not.toHaveBeenCalled();
     });
