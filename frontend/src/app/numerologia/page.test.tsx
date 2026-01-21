@@ -32,7 +32,12 @@ describe('NumerologiaPage', () => {
     vi.mocked(useCalculateNumerology).mockReturnValue({
       mutate: mockMutate,
       isPending: false,
-    } as unknown as UseMutationResult<NumerologyResponseDto, Error, CalculateNumerologyRequest, unknown>);
+    } as unknown as UseMutationResult<
+      NumerologyResponseDto,
+      Error,
+      CalculateNumerologyRequest,
+      unknown
+    >);
   });
 
   describe('Rendering', () => {
@@ -125,7 +130,12 @@ describe('NumerologiaPage', () => {
       vi.mocked(useCalculateNumerology).mockReturnValue({
         mutate: mockMutate,
         isPending: true,
-      } as unknown as UseMutationResult<NumerologyResponseDto, Error, CalculateNumerologyRequest, unknown>);
+      } as unknown as UseMutationResult<
+        NumerologyResponseDto,
+        Error,
+        CalculateNumerologyRequest,
+        unknown
+      >);
 
       render(<NumerologiaPage />);
 
@@ -145,7 +155,10 @@ describe('NumerologiaPage', () => {
       const button = screen.getByRole('button', { name: /calcular mis números/i });
       await user.click(button);
 
-      expect(mockMutate).toHaveBeenCalledWith({ birthDate: '1990-01-15', fullName: undefined }, expect.any(Object));
+      expect(mockMutate).toHaveBeenCalledWith(
+        { birthDate: '1990-01-15', fullName: undefined },
+        expect.any(Object)
+      );
     });
 
     it('should call mutate with birth date and full name when both provided', async () => {
@@ -163,7 +176,7 @@ describe('NumerologiaPage', () => {
 
       expect(mockMutate).toHaveBeenCalledWith(
         { birthDate: '1990-01-15', fullName: 'Juan Pérez' },
-        expect.any(Object),
+        expect.any(Object)
       );
     });
 
@@ -190,12 +203,17 @@ describe('NumerologiaPage', () => {
       vi.mocked(useCalculateNumerology).mockReturnValue({
         mutate: (
           data: CalculateNumerologyRequest,
-          options: { onSuccess: (result: NumerologyResponseDto) => void },
+          options: { onSuccess: (result: NumerologyResponseDto) => void }
         ) => {
           options.onSuccess(mockResult);
         },
         isPending: false,
-      } as unknown as UseMutationResult<NumerologyResponseDto, Error, CalculateNumerologyRequest, unknown>);
+      } as unknown as UseMutationResult<
+        NumerologyResponseDto,
+        Error,
+        CalculateNumerologyRequest,
+        unknown
+      >);
 
       vi.doMock('next/navigation', () => ({
         useRouter: () => ({

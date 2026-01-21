@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { ArrowLeft, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -94,7 +95,7 @@ export default function ResultadoPage() {
         <div className="text-center">
           <p className="text-muted-foreground mb-4 text-sm">¿Quieres profundizar más?</p>
           <Button asChild>
-            <a href="/ritual">Consulta el Tarot</a>
+            <Link href={ROUTES.LECTURAS_NEW}>Consulta el Tarot</Link>
           </Button>
         </div>
       </div>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -89,9 +90,9 @@ export default function NumerologiaPage() {
 
           {!isAuthenticated && (
             <p className="text-muted-foreground mt-4 text-center text-sm">
-              <a href="/registro" className="text-primary hover:underline">
+              <Link href={ROUTES.REGISTER} className="text-primary hover:underline">
                 Regístrate
-              </a>{' '}
+              </Link>{' '}
               para guardar tus resultados
             </p>
           )}

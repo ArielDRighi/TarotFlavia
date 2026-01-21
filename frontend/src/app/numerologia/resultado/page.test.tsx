@@ -112,7 +112,9 @@ describe('ResultadoPage', () => {
     it('should render personal year and month', () => {
       render(<ResultadoPage />);
 
-      expect(screen.getByText(new RegExp(`Año Personal ${new Date().getFullYear()}`))).toBeInTheDocument();
+      expect(
+        screen.getByText(new RegExp(`Año Personal ${new Date().getFullYear()}`))
+      ).toBeInTheDocument();
       // Use getAllByText since the number might appear in multiple cards
       const personalYearCards = screen.getAllByText('5');
       expect(personalYearCards.length).toBeGreaterThan(0);
@@ -198,7 +200,7 @@ describe('ResultadoPage', () => {
       render(<ResultadoPage />);
 
       const link = screen.getByRole('link', { name: /consulta el tarot/i });
-      expect(link).toHaveAttribute('href', '/ritual');
+      expect(link).toHaveAttribute('href', '/lecturas/nueva');
     });
   });
 
