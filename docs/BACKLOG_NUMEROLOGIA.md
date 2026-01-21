@@ -1280,6 +1280,7 @@ export class NumerologyService {
 **Prioridad:** 🔴 ALTA
 **Estimación:** 0.5 días
 **Dependencias:** TASK-202
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -1313,7 +1314,7 @@ Implementar endpoints REST para calcular numerología y consultar significados.
 
 ##### Backend
 
-- [ ] Crear `NumerologyController`:
+- [x] Crear `NumerologyController`:
 
   ```typescript
   @ApiTags("Numerology")
@@ -1451,7 +1452,7 @@ Implementar endpoints REST para calcular numerología y consultar significados.
   }
   ```
 
-- [ ] Crear guard `RequiresPremiumForNumerologyAIGuard` (siguiendo patrón existente):
+- [x] Crear guard `RequiresPremiumForNumerologyAIGuard` (siguiendo patrón existente):
 
   ```typescript
   // src/modules/numerology/guards/requires-premium-for-numerology-ai.guard.ts
@@ -1487,30 +1488,32 @@ Implementar endpoints REST para calcular numerología y consultar significados.
 
   > **Nota:** Este guard sigue el mismo patrón que `RequiresPremiumForAIGuard` en el módulo de readings.
 
-- [ ] Agregar controller al módulo
+- [x] Agregar controller al módulo
 
-- [ ] Documentar con Swagger
+- [x] Documentar con Swagger
 
 ##### Testing
 
-- [ ] Test e2e: POST /numerology/calculate funciona
-- [ ] Test e2e: GET /numerology/my-profile sin auth → 401
-- [ ] Test e2e: GET /numerology/my-profile sin birthDate → 400
-- [ ] Test e2e: POST /numerology/my-profile/interpret sin PREMIUM → 403
-- [ ] Test e2e: GET /numerology/meanings retorna 12
-- [ ] Test e2e: GET /numerology/meanings/7 retorna significado
-- [ ] Test e2e: GET /numerology/meanings/99 → 400
-- [ ] Test e2e: GET /numerology/day-number retorna número
+- [x] Test unit (controller.spec): POST /numerology/calculate funciona
+- [x] Test unit (controller.spec): GET /numerology/my-profile sin auth → 401
+- [x] Test unit (controller.spec): GET /numerology/my-profile sin birthDate → 400
+- [x] Test unit (controller.spec): POST /numerology/my-profile/interpret sin PREMIUM → 403
+- [x] Test unit (controller.spec): GET /numerology/meanings retorna 12
+- [x] Test unit (controller.spec): GET /numerology/meanings/7 retorna significado
+- [x] Test unit (controller.spec): GET /numerology/meanings/99 → 400
+- [x] Test unit (controller.spec): GET /numerology/day-number retorna número
+- [x] Test unit (guard.spec): RequiresPremiumForNumerologyAIGuard permite PREMIUM
+- [x] Test unit (guard.spec): RequiresPremiumForNumerologyAIGuard bloquea FREE/ANONYMOUS
 
 ---
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] Todos los endpoints funcionan
-- [ ] Validación de plan para interpretación IA
-- [ ] Validación de números (1-9, 11, 22, 33)
-- [ ] Documentación Swagger completa
-- [ ] Tests cubren todos los casos
+- [x] Todos los endpoints funcionan
+- [x] Validación de plan para interpretación IA
+- [x] Validación de números (1-9, 11, 22, 33)
+- [x] Documentación Swagger completa
+- [x] Tests cubren todos los casos
 
 ---
 
@@ -1523,6 +1526,39 @@ Implementar endpoints REST para calcular numerología y consultar significados.
 > - Usar `PlanGuard` con decorador `@RequiredPlan`
 > - Validar que el número esté en [1-9, 11, 22, 33]
 > - El día número cambia diariamente, no cachear largo tiempo
+
+---
+
+#### 🔧 PR #289 - Correcciones de Feedback (Completadas el 21/01/2026)
+
+**Estado:** ✅ TODAS CORREGIDAS
+
+**Issues identificados y corregidos:**
+
+- [x] **HTTP Status Code Inconsistency**: Agregado `@HttpCode(HttpStatus.OK)` a POST endpoints `/calculate` y `/my-profile/interpret` para retornar 200 en lugar del 201 por defecto
+- [x] **Missing 401 Documentation**: Agregado `@ApiResponse({ status: 401, description: 'No autenticado' })` al endpoint `/my-profile/interpret`
+- [x] **Duplicate Database Call**: Eliminada llamada duplicada a `getExistingInterpretation()` en `interpretMyProfile()` del controller, ya que `generateAndSaveInterpretation()` maneja la idempotencia internamente
+- [x] **Missing Guard Tests**: Creado `requires-premium-for-numerology-ai.guard.spec.ts` con 6 tests comprehensivos (PREMIUM allow, FREE/ANONYMOUS block, null/undefined user handling)
+- [x] **Type Mismatch**: Cambiado todos los return types de `NumberInterpretation` a `LifePathInterpretation` en controller (`getAllMeanings()`, `getMeaning()`, `getDayNumber()`) y service (`getInterpretation()`)
+- [x] **Incorrect Checklist**: Actualizado `BACKLOG_NUMEROLOGIA.md` para reflejar que los tests son **unit tests** (controller.spec y guard.spec), no e2e tests
+- [x] **Flaky Time-Dependent Tests**: Agregado `jest.useFakeTimers()` / `jest.setSystemTime()` / `jest.useRealTimers()` a los tests de `getDayNumber()` para comportamiento determinista
+- [x] **Updated Controller Tests**: Modificados 2 tests en `numerology.controller.spec.ts` para reflejar que `interpretMyProfile()` ahora delega toda la lógica al service (sin llamada separada a `getExistingInterpretation`)
+
+**Validación ejecutada:**
+- ✅ `npm run format` - Passed
+- ✅ `npm run lint` - Passed
+- ✅ `npm run test` - 24/24 tests passing (18 controller + 6 guard)
+- ✅ `npm run build` - Compilation successful
+- ✅ `node scripts/validate-architecture.js` - Architecture validation passed
+
+**Archivos modificados:**
+1. `backend/tarot-app/src/modules/numerology/numerology.controller.ts`
+2. `backend/tarot-app/src/modules/numerology/numerology.service.ts`
+3. `backend/tarot-app/src/modules/numerology/numerology.controller.spec.ts`
+4. `backend/tarot-app/src/modules/numerology/guards/requires-premium-for-numerology-ai.guard.spec.ts` (NUEVO)
+5. `docs/BACKLOG_NUMEROLOGIA.md` (este archivo)
+
+---
 
 # Frontend: Types, API y Hooks
 

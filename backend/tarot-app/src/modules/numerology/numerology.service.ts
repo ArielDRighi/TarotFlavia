@@ -7,7 +7,7 @@ import {
 } from '../../common/utils/numerology.utils';
 import {
   LIFE_PATH_INTERPRETATIONS,
-  NumberInterpretation,
+  LifePathInterpretation,
 } from './data/interpretations.data';
 import { getCompatibility, Compatibility } from './data/compatibility.data';
 import { CalculateNumerologyDto } from './dto/calculate-numerology.dto';
@@ -60,7 +60,7 @@ export class NumerologyService {
   /**
    * Obtiene interpretación detallada de un número
    */
-  getInterpretation(number: number): NumberInterpretation | null {
+  getInterpretation(number: number): LifePathInterpretation | null {
     return LIFE_PATH_INTERPRETATIONS[number] || null;
   }
 
