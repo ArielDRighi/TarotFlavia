@@ -2769,6 +2769,7 @@ Crear la página principal de numerología con calculadora y vista de resultados
 **Prioridad:** 🟢 BAJA
 **Estimación:** 0.5 días
 **Dependencias:** TASK-206
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -2780,7 +2781,7 @@ Widget de numerología en el dashboard del usuario autenticado.
 
 #### ✅ Tareas Específicas
 
-- [ ] Agregar `NumerologyWidget` en `UserDashboard.tsx`:
+- [x] Agregar `NumerologyWidget` en `UserDashboard.tsx`:
 
   ```tsx
   import { NumerologyWidget } from "@/components/features/numerology";
@@ -2797,9 +2798,9 @@ Widget de numerología en el dashboard del usuario autenticado.
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] Widget visible en dashboard
-- [ ] Muestra Camino de Vida
-- [ ] CTA si no hay birthDate
+- [x] Widget visible en dashboard
+- [x] Muestra Camino de Vida
+- [x] CTA si no hay birthDate
 
 ---
 
@@ -2882,7 +2883,7 @@ interface NumberInterpretation {
 - [x] TASK-204: Types, API y hooks
 - [x] TASK-205: Componentes UI
 - [x] TASK-206: Páginas
-- [ ] TASK-207: Widget dashboard
+- [x] TASK-207: Widget dashboard
 
 ### Validación
 
