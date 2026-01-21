@@ -10,12 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { NumerologyIntro, NumerologyProfile } from '@/components/features/numerology';
 import { useAuthStore } from '@/stores/authStore';
-import {
-  useCalculateNumerology,
-  useMyNumerologyProfile,
-  useMyNumerologyInterpretation,
-  useGenerateInterpretation,
-} from '@/hooks/api/useNumerology';
+import { useCalculateNumerology, useMyNumerologyProfile } from '@/hooks/api/useNumerology';
 import { ROUTES } from '@/lib/constants/routes';
 import { AlertCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -34,10 +29,6 @@ export default function NumerologiaPage() {
   const { user, isAuthenticated } = useAuthStore();
   const { mutate, isPending } = useCalculateNumerology();
   const { data: myProfile, isLoading: isLoadingProfile } = useMyNumerologyProfile();
-  const { data: myInterpretation, isLoading: isLoadingInterpretation } =
-    useMyNumerologyInterpretation();
-  const { mutate: generateInterpretation, isPending: isGeneratingInterpretation } =
-    useGenerateInterpretation();
 
   const [birthDate, setBirthDate] = useState('');
   const [fullName, setFullName] = useState('');
@@ -56,17 +47,10 @@ export default function NumerologiaPage() {
     );
   };
 
-  const handleGenerateInterpretation = () => {
-    generateInterpretation();
-  };
-
   // Check if user has incomplete profile
   const hasIncompleteName = isAuthenticated && (!user?.name || user.name.split(' ').length < 2);
   const hasIncompleteBirthDate = isAuthenticated && !user?.birthDate;
   const hasIncompleteProfile = hasIncompleteName || hasIncompleteBirthDate;
-
-  // Check if user is premium
-  const isPremium = user?.plan === 'premium';
 
   return (
     <div className="container mx-auto px-4 py-8" data-testid="numerologia-page">
@@ -89,7 +73,8 @@ export default function NumerologiaPage() {
                     Completa tu perfil para ver tu informe numerológico
                   </p>
                   <p className="mt-1 text-sm text-amber-800">
-                    {hasIncompleteName && 'Tu nombre completo es necesario para calcular todos los números. '}
+                    {hasIncompleteName &&
+                      'Tu nombre completo es necesario para calcular todos los números. '}
                     {hasIncompleteBirthDate && 'Tu fecha de nacimiento es necesaria. '}
                   </p>
                 </div>
@@ -104,7 +89,7 @@ export default function NumerologiaPage() {
         {/* User's Numerology Profile */}
         {isAuthenticated && !hasIncompleteProfile && (
           <div className="mb-8">
-            {isLoadingProfile || isLoadingInterpretation ? (
+            {isLoadingProfile ? (
               <Card className="p-6">
                 <Skeleton className="mb-4 h-8 w-64" />
                 <Skeleton className="mb-2 h-4 w-48" />
@@ -113,19 +98,17 @@ export default function NumerologiaPage() {
               </Card>
             ) : myProfile ? (
               <>
-                <NumerologyProfile
-                  profile={myProfile}
-                  interpretation={myInterpretation}
-                  canGenerateInterpretation={isPremium}
-                  isGeneratingInterpretation={isGeneratingInterpretation}
-                  onRequestInterpretation={handleGenerateInterpretation}
-                />
-                
+                <NumerologyProfile profile={myProfile} />
+
                 {/* Tip para actualizar nombre */}
                 <Alert className="mt-4 border-blue-200 bg-blue-50">
                   <AlertDescription className="text-sm text-blue-900">
-                    💡 <strong>Consejo:</strong> Si cambiaste tu nombre o quieres usar tu nombre completo para un análisis más preciso,{' '}
-                    <Link href={ROUTES.PERFIL} className="font-semibold underline hover:text-blue-700">
+                    💡 <strong>Consejo:</strong> Si cambiaste tu nombre o quieres usar tu nombre
+                    completo para un análisis más preciso,{' '}
+                    <Link
+                      href={ROUTES.PERFIL}
+                      className="font-semibold underline hover:text-blue-700"
+                    >
                       actualízalo en tu perfil
                     </Link>
                     .
@@ -139,7 +122,7 @@ export default function NumerologiaPage() {
         {/* Calculator Section - Always visible */}
         <Card className="p-6">
           <h2 className="mb-2 font-serif text-xl">Calculadora de Numerología</h2>
-          <p className="mb-4 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mb-4 text-sm">
             Calcula números numerológicos para cualquier fecha y nombre
           </p>
 

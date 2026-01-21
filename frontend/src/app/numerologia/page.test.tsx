@@ -3,19 +3,10 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import NumerologiaPage from './page';
 import { useAuthStore } from '@/stores/authStore';
-import {
-  useCalculateNumerology,
-  useMyNumerologyProfile,
-  useMyNumerologyInterpretation,
-  useGenerateInterpretation,
-} from '@/hooks/api/useNumerology';
+import { useCalculateNumerology, useMyNumerologyProfile } from '@/hooks/api/useNumerology';
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 import type { AuthStore } from '@/types';
-import type {
-  CalculateNumerologyRequest,
-  NumerologyResponseDto,
-  NumerologyInterpretationResponseDto,
-} from '@/types/numerology.types';
+import type { CalculateNumerologyRequest, NumerologyResponseDto } from '@/types/numerology.types';
 
 // Mock modules
 vi.mock('@/stores/authStore');
@@ -28,7 +19,6 @@ vi.mock('next/navigation', () => ({
 
 describe('NumerologiaPage', () => {
   const mockMutate = vi.fn();
-  const mockGenerateInterpretation = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -54,17 +44,6 @@ describe('NumerologiaPage', () => {
       isLoading: false,
       error: null,
     } as unknown as UseQueryResult<NumerologyResponseDto, Error>);
-
-    vi.mocked(useMyNumerologyInterpretation).mockReturnValue({
-      data: undefined,
-      isLoading: false,
-      error: null,
-    } as unknown as UseQueryResult<NumerologyInterpretationResponseDto | null, Error>);
-
-    vi.mocked(useGenerateInterpretation).mockReturnValue({
-      mutate: mockGenerateInterpretation,
-      isPending: false,
-    } as unknown as UseMutationResult<NumerologyInterpretationResponseDto, Error, void, unknown>);
   });
 
   describe('Rendering', () => {

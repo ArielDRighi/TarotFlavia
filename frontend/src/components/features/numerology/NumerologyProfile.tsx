@@ -1,35 +1,15 @@
 'use client';
 
-import ReactMarkdown from 'react-markdown';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Sparkles } from 'lucide-react';
 import { NumberCard } from './NumberCard';
-import type {
-  NumerologyResponseDto,
-  NumerologyInterpretationResponseDto,
-} from '@/types/numerology.types';
+import type { NumerologyResponseDto } from '@/types/numerology.types';
 
 interface Props {
   profile: NumerologyResponseDto;
-  interpretation?: NumerologyInterpretationResponseDto | null;
-  canGenerateInterpretation?: boolean;
-  isGeneratingInterpretation?: boolean;
-  onRequestInterpretation?: () => void;
   className?: string;
 }
 
-export function NumerologyProfile({
-  profile,
-  interpretation,
-  canGenerateInterpretation = false,
-  isGeneratingInterpretation = false,
-  onRequestInterpretation,
-  className,
-}: Props) {
-  const hasInterpretation = !!interpretation;
-
+export function NumerologyProfile({ profile, className }: Props) {
   return (
     <div className={className} data-testid="numerology-profile">
       {/* Header */}
@@ -51,8 +31,31 @@ export function NumerologyProfile({
         <NumberCard number={profile.lifePath} context="lifePath" variant="full" />
       </div>
 
-      {/* Personalized Interpretation Section */}
-      <div className="mb-6">
+      {/* 
+        TODO: FEATURE PAUSED - Personalized AI Interpretation
+        
+        REASON: Need to define strategy for annual regeneration and prevent abuse
+        
+        ISSUES TO RESOLVE:
+        1. Annual regeneration: When to regenerate (Jan 1st cron vs lazy on-demand)?
+        2. Profile changes: How to prevent abuse when user changes name/birthdate?
+        3. Cost optimization: Regenerate for ALL premium users or only active ones?
+        4. Year-specific content: Interpretation includes "Año Personal 2026" which becomes stale
+        
+        INFRASTRUCTURE READY:
+        - Backend: POST /numerology/my-profile/interpret (working)
+        - Frontend: useMyNumerologyInterpretation hook (working)
+        - Database: numerology_interpretations table (working)
+        - UI: Components ready (commented out below)
+        
+        NEXT STEPS:
+        - Define regeneration strategy
+        - Implement abuse prevention (cooldown, limits, etc.)
+        - Update AI prompt to separate permanent vs annual interpretations
+        - Uncomment and test
+      */}
+      {/* Personalized Interpretation Section - DISABLED */}
+      {/* <div className="mb-6">
         {hasInterpretation ? (
           <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50">
             <CardHeader>
@@ -112,7 +115,7 @@ export function NumerologyProfile({
             </AlertDescription>
           </Alert>
         )}
-      </div>
+      </div> */}
 
       {/* Core Numbers Grid */}
       <div className="mb-6">
