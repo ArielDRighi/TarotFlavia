@@ -996,7 +996,7 @@ src/modules/numerology/
   }
   ```
 
-- [ ] Crear migración para la tabla:
+- [x] Crear migración para la tabla:
 
   ```typescript
   // src/database/migrations/XXXXXX-CreateNumerologyInterpretation.ts
@@ -1040,7 +1040,7 @@ src/modules/numerology/
   }
   ```
 
-- [ ] Crear prompt de interpretación IA:
+- [x] Crear prompt de interpretación IA:
 
   ```typescript
   // src/modules/numerology/prompts/numerology-interpretation.prompt.ts
