@@ -31,6 +31,7 @@ import { SecurityModule } from './modules/security/security.module';
 import { SchedulingModule } from './modules/scheduling/scheduling.module';
 import { PlanConfigModule } from './modules/plan-config/plan-config.module';
 import { HoroscopeModule } from './modules/horoscope/horoscope.module';
+import { NumerologyModule } from './modules/numerology/numerology.module';
 import { CustomThrottlerGuard } from './common/guards/custom-throttler.guard';
 import { ThrottlerExceptionFilter } from './common/filters/throttler-exception.filter';
 import { RateLimitingModule } from './common/rate-limiting/rate-limiting.module';
@@ -88,6 +89,7 @@ import { validate } from './config/env-validator';
     SchedulingModule,
     PlanConfigModule,
     HoroscopeModule,
+    NumerologyModule,
     InterpretationCacheModule,
     AIModule,
     CardsModule,
