@@ -5,7 +5,7 @@ import { Settings } from 'lucide-react';
 import {
   ChineseAnimalSelector,
   AnimalCalculator,
-  YearSelectorModal,
+  ElementSelectorModal,
 } from '@/components/features/chinese-horoscope';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,7 +23,7 @@ export default function HoroscopoChinoPage() {
     selectedAnimalForModal,
     isModalOpen,
     handleAnimalSelect,
-    handleBirthDateConfirm,
+    handleElementSelect,
     handleModalOpenChange,
     navigateToMyHoroscope,
   } = useChineseHoroscopeMainPage();
@@ -81,12 +81,10 @@ export default function HoroscopoChinoPage() {
         </div>
       )}
 
-      {/* Calculador para usuarios no autenticados */}
-      {!isAuthenticated && (
-        <div className="mx-auto mb-8 max-w-md">
-          <AnimalCalculator onAnimalFound={handleAnimalSelect} />
-        </div>
-      )}
+      {/* Calculador para todos los usuarios (permite calcular signo para amigos/familiares) */}
+      <div className="mx-auto mb-8 max-w-md">
+        <AnimalCalculator onAnimalFound={handleAnimalSelect} />
+      </div>
 
       {/* Section title */}
       <div className="mb-4">
@@ -98,18 +96,17 @@ export default function HoroscopoChinoPage() {
       {/* Selector de animales */}
       <ChineseAnimalSelector userAnimal={userAnimal} onSelect={handleAnimalSelect} />
 
-      {/* Birth Date Selector Modal */}
-      <YearSelectorModal
-        open={isModalOpen}
-        animalNameEs={
-          selectedAnimalForModal ? CHINESE_ZODIAC_INFO[selectedAnimalForModal].nameEs : ''
-        }
-        animalEmoji={
-          selectedAnimalForModal ? CHINESE_ZODIAC_INFO[selectedAnimalForModal].emoji : undefined
-        }
-        onConfirm={handleBirthDateConfirm}
-        onOpenChange={handleModalOpenChange}
-      />
+      {/* Element Selector Modal */}
+      {selectedAnimalForModal && (
+        <ElementSelectorModal
+          open={isModalOpen}
+          animal={selectedAnimalForModal}
+          animalNameEs={CHINESE_ZODIAC_INFO[selectedAnimalForModal].nameEs}
+          animalEmoji={CHINESE_ZODIAC_INFO[selectedAnimalForModal].emoji}
+          onSelectElement={handleElementSelect}
+          onOpenChange={handleModalOpenChange}
+        />
+      )}
     </div>
   );
 }

@@ -3650,6 +3650,7 @@ Para cada animal, los años con cada elemento siguen un ciclo de 60 años:
 
 ### TASK-134: Integrar ElementSelectorModal en Página Principal
 
+**Estado:** ✅ COMPLETADA  
 **Módulo:** Frontend - Chinese Horoscope  
 **Prioridad:** 🔴 Alta  
 **Estimación:** 2-3 horas  
@@ -3676,25 +3677,25 @@ Modificar la página `/horoscopo-chino` para usar el nuevo `ElementSelectorModal
 
 #### Tareas Específicas
 
-- [ ] Reemplazar import de `YearSelectorModal` por `ElementSelectorModal` en page.tsx
-- [ ] Actualizar `useChineseHoroscopeMainPage`:
-  - [ ] Cambiar `handleBirthDateConfirm` por `handleElementSelect`
-  - [ ] Simplificar lógica (ya no hay cálculo, solo navegación)
-- [ ] Pasar props correctas al nuevo modal (`animal`, `onSelectElement`)
-- [ ] **CORREGIR:** Hacer `AnimalCalculator` visible para TODOS los usuarios:
-  - [ ] Eliminar condición `{!isAuthenticated && ...}` (línea 85-87)
-  - [ ] Mostrar calculador siempre, independiente del estado de autenticación
-  - [ ] Permite calcular signo para amigos/familiares
-- [ ] Actualizar tests de la página
-- [ ] Actualizar tests del hook
+- [x] Reemplazar import de `YearSelectorModal` por `ElementSelectorModal` en page.tsx
+- [x] Actualizar `useChineseHoroscopeMainPage`:
+  - [x] Cambiar `handleBirthDateConfirm` por `handleElementSelect`
+  - [x] Simplificar lógica (ya no hay cálculo, solo navegación)
+- [x] Pasar props correctas al nuevo modal (`animal`, `onSelectElement`)
+- [x] **CORREGIR:** Hacer `AnimalCalculator` visible para TODOS los usuarios:
+  - [x] Eliminar condición `{!isAuthenticated && ...}` (línea 85-87)
+  - [x] Mostrar calculador siempre, independiente del estado de autenticación
+  - [x] Permite calcular signo para amigos/familiares
+- [x] Actualizar tests de la página
+- [x] Actualizar tests del hook
 
 #### Criterios de Aceptación
 
-- [ ] Click en animal abre modal de selección de elementos
-- [ ] Seleccionar elemento navega a `/horoscopo-chino/[animal]?element=[element]`
-- [ ] El animal en la URL es el mismo que el usuario clickeó
-- [ ] `AnimalCalculator` visible para TODOS los usuarios (anónimos, free, premium)
-- [ ] Tests pasando (>80% coverage)
+- [x] Click en animal abre modal de selección de elementos
+- [x] Seleccionar elemento navega a `/horoscopo-chino/[animal]?element=[element]`
+- [x] El animal en la URL es el mismo que el usuario clickeó
+- [x] `AnimalCalculator` visible para TODOS los usuarios (anónimos, free, premium)
+- [x] Tests pasando (>80% coverage)
 
 ---
 

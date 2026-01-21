@@ -99,7 +99,7 @@ describe('HoroscopoChinoPage', () => {
     expect(screen.getByTestId('chinese-animal-selector')).toBeInTheDocument();
   });
 
-  it('should open year selector modal when clicking on an animal card', async () => {
+  it('should open element selector modal when clicking on an animal card', async () => {
     const user = userEvent.setup();
     mockUseChineseHoroscopesByYear.mockReturnValue({
       isLoading: false,
@@ -112,7 +112,7 @@ describe('HoroscopoChinoPage', () => {
     await user.click(dragonCard);
 
     // Should open modal instead of navigating directly
-    expect(screen.getByTestId('year-selector-modal')).toBeInTheDocument();
+    expect(screen.getByTestId('element-selector-modal')).toBeInTheDocument();
   });
 
   describe('Anonymous users (HU-HCH-001)', () => {
