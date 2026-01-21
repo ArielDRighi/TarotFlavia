@@ -54,9 +54,11 @@ export function useGenerateInterpretation() {
 
   return useMutation({
     mutationFn: generateNumerologyInterpretation,
-    onSuccess: (data) => {
-      // Actualizar cache del perfil
-      queryClient.setQueryData(numerologyQueryKeys.myProfile(), data);
+    onSuccess: () => {
+      // Invalidar el perfil para forzar un refetch con los datos correctos
+      queryClient.invalidateQueries({
+        queryKey: numerologyQueryKeys.myProfile(),
+      });
     },
   });
 }

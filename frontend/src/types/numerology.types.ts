@@ -40,10 +40,10 @@ export interface NumerologyInterpretationResponseDto {
   userId: number;
   interpretation: string;
   lifePath: number;
-  expression: number | null;
+  expressionNumber: number | null;
   soulUrge: number | null;
   personality: number | null;
-  birthday: number;
+  birthdayNumber: number;
   generatedAt: string;
   aiProvider: string;
   aiModel: string;
