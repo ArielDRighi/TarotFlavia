@@ -27,24 +27,38 @@ export function NumerologyIntro({ className }: Props) {
             <h3 className="flex items-center gap-2 text-lg font-semibold text-purple-800">
               📅 Desde tu Fecha de Nacimiento
             </h3>
-            <ul className="space-y-1 text-sm text-gray-600">
+            <ul className="space-y-2 text-sm text-gray-600">
               <li className="flex items-start gap-2">
                 <span className="text-purple-600">•</span>
                 <span>
-                  <strong className="text-gray-700">Camino de Vida:</strong> Tu misión principal en
-                  esta vida
+                  <strong className="text-gray-700">Camino de Vida:</strong> El número más
+                  importante. Revela tu propósito de vida, las lecciones que debes aprender y el
+                  camino que seguirás para alcanzar tu máximo potencial.
                 </span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-purple-600">•</span>
                 <span>
-                  <strong className="text-gray-700">Número del Día:</strong> Influencias diarias
+                  <strong className="text-gray-700">Número de Cumpleaños:</strong> Derivado del día
+                  en que naciste, revela talentos específicos y habilidades naturales que puedes
+                  desarrollar a lo largo de tu vida.
                 </span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-purple-600">•</span>
                 <span>
-                  <strong className="text-gray-700">Año Personal:</strong> Ciclos anuales de energía
+                  <strong className="text-gray-700">Año Personal:</strong> Un ciclo de 9 años que
+                  indica las oportunidades y desafíos del año actual. Cada número (1-9) trae
+                  diferentes energías: inicios, relaciones, creatividad, trabajo, cambios, hogar,
+                  introspección, poder o culminación.
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-purple-600">•</span>
+                <span>
+                  <strong className="text-gray-700">Mes Personal:</strong> Combina tu Año Personal
+                  con el mes actual, refinando las energías anuales para darte orientación más
+                  específica sobre las influencias y oportunidades de cada mes.
                 </span>
               </li>
             </ul>
@@ -54,24 +68,29 @@ export function NumerologyIntro({ className }: Props) {
             <h3 className="flex items-center gap-2 text-lg font-semibold text-indigo-800">
               ✍️ Desde tu Nombre Completo
             </h3>
-            <ul className="space-y-1 text-sm text-gray-600">
+            <ul className="space-y-2 text-sm text-gray-600">
               <li className="flex items-start gap-2">
                 <span className="text-indigo-600">•</span>
                 <span>
-                  <strong className="text-gray-700">Número de Expresión:</strong> Tus talentos
-                  naturales
+                  <strong className="text-gray-700">Número de Expresión:</strong> Calculado con
+                  todas las letras de tu nombre. Representa tus talentos innatos, habilidades y el
+                  potencial que puedes desarrollar en esta vida.
                 </span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-indigo-600">•</span>
                 <span>
-                  <strong className="text-gray-700">Número del Alma:</strong> Tus deseos profundos
+                  <strong className="text-gray-700">Número del Alma:</strong> Derivado solo de las
+                  vocales de tu nombre. Revela tus deseos más profundos, lo que realmente te motiva
+                  y lo que tu corazón anhela.
                 </span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-indigo-600">•</span>
                 <span>
-                  <strong className="text-gray-700">Personalidad:</strong> Cómo te ven los demás
+                  <strong className="text-gray-700">Personalidad:</strong> Calculado con las
+                  consonantes. Muestra la imagen que proyectas al mundo y cómo te perciben los demás
+                  en un primer encuentro.
                 </span>
               </li>
             </ul>

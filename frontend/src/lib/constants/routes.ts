@@ -15,7 +15,6 @@ export const ROUTES = {
   HOROSCOPO_CHINO: '/horoscopo-chino',
   HOROSCOPO_CHINO_ANIMAL: (animal: string) => `/horoscopo-chino/${animal}`,
   NUMEROLOGIA: '/numerologia',
-  NUMEROLOGIA_RESULTADO: '/numerologia/resultado',
 
   // Dashboard (authenticated)
   DASHBOARD: '/dashboard',

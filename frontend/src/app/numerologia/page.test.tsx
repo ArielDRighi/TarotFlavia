@@ -186,9 +186,8 @@ describe('NumerologiaPage', () => {
       );
     });
 
-    it('should navigate to result page on success', async () => {
-      const mockRouterPush = vi.fn();
-      const mockResult = {
+    it('should display result inline on success', async () => {
+      const mockResult: NumerologyResponseDto = {
         lifePath: { value: 7, name: 'El Buscador', keywords: [], description: '', isMaster: false },
         birthday: {
           value: 6,
@@ -208,7 +207,7 @@ describe('NumerologiaPage', () => {
 
       vi.mocked(useCalculateNumerology).mockReturnValue({
         mutate: (
-          data: CalculateNumerologyRequest,
+          _data: CalculateNumerologyRequest,
           options: { onSuccess: (result: NumerologyResponseDto) => void }
         ) => {
           options.onSuccess(mockResult);
@@ -221,12 +220,6 @@ describe('NumerologiaPage', () => {
         unknown
       >);
 
-      vi.doMock('next/navigation', () => ({
-        useRouter: () => ({
-          push: mockRouterPush,
-        }),
-      }));
-
       const user = userEvent.setup();
       render(<NumerologiaPage />);
 
@@ -237,7 +230,7 @@ describe('NumerologiaPage', () => {
       await user.click(button);
 
       await waitFor(() => {
-        expect(sessionStorage.getItem('numerologyResult')).toBe(JSON.stringify(mockResult));
+        expect(screen.getByTestId('calculated-result')).toBeInTheDocument();
       });
     });
   });
