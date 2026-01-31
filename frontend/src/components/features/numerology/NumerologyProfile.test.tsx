@@ -61,14 +61,16 @@ describe('NumerologyProfile', () => {
   it('should display personal year', () => {
     render(<NumerologyProfile profile={mockProfile} />);
 
-    expect(screen.getByText('Año Personal')).toBeInTheDocument();
+    // Title includes the current year, e.g., "Año Personal 2026" - may match multiple times
+    expect(screen.getAllByText(/año personal/i).length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText('8')).toBeInTheDocument();
   });
 
   it('should display personal month', () => {
     render(<NumerologyProfile profile={mockProfile} />);
 
-    expect(screen.getByText('Mes Personal')).toBeInTheDocument();
+    // Title includes month name, e.g., "Mes Personal (enero)"
+    expect(screen.getByText(/mes personal/i)).toBeInTheDocument();
     // Use getAllByText since "5" appears in both expression number and personal month
     const fives = screen.getAllByText('5');
     expect(fives.length).toBeGreaterThanOrEqual(1);

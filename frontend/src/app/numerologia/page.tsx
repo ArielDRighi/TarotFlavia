@@ -1,7 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,8 +11,9 @@ import { NumerologyIntro, NumerologyProfile } from '@/components/features/numero
 import { useAuthStore } from '@/stores/authStore';
 import { useCalculateNumerology, useMyNumerologyProfile } from '@/hooks/api/useNumerology';
 import { ROUTES } from '@/lib/constants/routes';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, RotateCcw } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import type { NumerologyResponseDto } from '@/types/numerology.types';
 
 /**
  * Numerología Page
@@ -23,9 +23,9 @@ import { Skeleton } from '@/components/ui/skeleton';
  * - Si el usuario está autenticado y tiene perfil completo, muestra su informe
  * - Si faltan datos (nombre o fecha), muestra alerta para completar perfil
  * - Siempre muestra calculadora para consultas de terceros
+ * - Los resultados de la calculadora se muestran inline (sin navegar a otra página)
  */
 export default function NumerologiaPage() {
-  const router = useRouter();
   const { user, isAuthenticated } = useAuthStore();
   const { mutate, isPending } = useCalculateNumerology();
   const { data: myProfile, isLoading: isLoadingProfile } = useMyNumerologyProfile({
@@ -34,6 +34,9 @@ export default function NumerologiaPage() {
 
   const [birthDate, setBirthDate] = useState('');
   const [fullName, setFullName] = useState('');
+  const [calculatedResult, setCalculatedResult] = useState<NumerologyResponseDto | null>(null);
+
+  const resultRef = useRef<HTMLDivElement>(null);
 
   const handleCalculate = () => {
     if (!birthDate) return;
@@ -42,11 +45,22 @@ export default function NumerologiaPage() {
       { birthDate, fullName: fullName || undefined },
       {
         onSuccess: (data) => {
-          sessionStorage.setItem('numerologyResult', JSON.stringify(data));
-          router.push(ROUTES.NUMEROLOGIA_RESULTADO);
+          setCalculatedResult(data);
+          // Scroll to result after a brief delay to allow render
+          setTimeout(() => {
+            if (resultRef.current && typeof resultRef.current.scrollIntoView === 'function') {
+              resultRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }, 100);
         },
       }
     );
+  };
+
+  const handleReset = () => {
+    setCalculatedResult(null);
+    setBirthDate('');
+    setFullName('');
   };
 
   // Check if user has incomplete profile
@@ -128,42 +142,54 @@ export default function NumerologiaPage() {
             Calcula números numerológicos para cualquier fecha y nombre
           </p>
 
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="birthDate">Fecha de Nacimiento *</Label>
-              <Input
-                id="birthDate"
-                type="date"
-                value={birthDate}
-                onChange={(e) => setBirthDate(e.target.value)}
-                required
-                data-testid="birth-date-input"
-              />
+          {!calculatedResult ? (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="birthDate">Fecha de Nacimiento *</Label>
+                <Input
+                  id="birthDate"
+                  type="date"
+                  value={birthDate}
+                  onChange={(e) => setBirthDate(e.target.value)}
+                  required
+                  data-testid="birth-date-input"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="fullName">Nombre Completo (opcional)</Label>
+                <Input
+                  id="fullName"
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Para números de expresión y alma"
+                  data-testid="full-name-input"
+                />
+              </div>
+
+              <Button
+                onClick={handleCalculate}
+                disabled={!birthDate || isPending}
+                className="w-full"
+                data-testid="calculate-button"
+              >
+                {isPending ? 'Calculando...' : 'Calcular Números'}
+              </Button>
             </div>
-
-            <div>
-              <Label htmlFor="fullName">Nombre Completo (opcional)</Label>
-              <Input
-                id="fullName"
-                type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="Para números de expresión y alma"
-                data-testid="full-name-input"
-              />
+          ) : (
+            <div className="text-center">
+              <p className="text-muted-foreground mb-2 text-sm">
+                Resultado calculado para otra fecha/nombre
+              </p>
+              <Button onClick={handleReset} variant="outline" size="sm">
+                <RotateCcw className="mr-2 h-4 w-4" />
+                Nueva consulta
+              </Button>
             </div>
+          )}
 
-            <Button
-              onClick={handleCalculate}
-              disabled={!birthDate || isPending}
-              className="w-full"
-              data-testid="calculate-button"
-            >
-              {isPending ? 'Calculando...' : 'Calcular Números'}
-            </Button>
-          </div>
-
-          {!isAuthenticated && (
+          {!isAuthenticated && !calculatedResult && (
             <p className="text-muted-foreground mt-4 text-center text-sm">
               <Link href={ROUTES.REGISTER} className="text-primary hover:underline">
                 Regístrate
@@ -172,6 +198,20 @@ export default function NumerologiaPage() {
             </p>
           )}
         </Card>
+
+        {/* Calculated Result - Inline */}
+        {calculatedResult && (
+          <div ref={resultRef} className="mt-8" data-testid="calculated-result">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="font-serif text-2xl">Resultado del Cálculo</h2>
+              <Button onClick={handleReset} variant="ghost" size="sm">
+                <RotateCcw className="mr-2 h-4 w-4" />
+                Nueva consulta
+              </Button>
+            </div>
+            <NumerologyProfile profile={calculatedResult} />
+          </div>
+        )}
       </div>
     </div>
   );

@@ -23,8 +23,10 @@ describe('NumerologyIntro', () => {
 
     expect(screen.getByText(/desde tu fecha/i)).toBeInTheDocument();
     expect(screen.getByText(/camino de vida/i)).toBeInTheDocument();
-    expect(screen.getByText(/número del día/i)).toBeInTheDocument();
-    expect(screen.getByText(/año personal/i)).toBeInTheDocument();
+    expect(screen.getByText(/número de cumpleaños/i)).toBeInTheDocument();
+    // Use getAllByText since "Año Personal" appears in multiple places (Año Personal and Mes Personal descriptions)
+    expect(screen.getAllByText(/año personal/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText(/^Mes Personal:/i)).toBeInTheDocument();
   });
 
   it('should show numbers from name section', () => {

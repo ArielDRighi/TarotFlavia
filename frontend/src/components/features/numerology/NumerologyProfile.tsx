@@ -2,6 +2,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { NumberCard } from './NumberCard';
+import { NUMEROLOGY_NUMBERS_INFO, getPersonalYearMeaning } from '@/lib/utils/numerology';
+import { cn } from '@/lib/utils';
 import type { NumerologyResponseDto } from '@/types/numerology.types';
 
 interface Props {
@@ -145,22 +147,58 @@ export function NumerologyProfile({ profile, className }: Props) {
       <div>
         <h2 className="mb-3 text-xl font-semibold text-gray-800">Ciclos Actuales</h2>
         <div className="grid gap-4 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Año Personal</CardTitle>
+          <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-base text-purple-900">
+                <span className="text-2xl">
+                  {NUMEROLOGY_NUMBERS_INFO[profile.personalYear]?.emoji || '📅'}
+                </span>
+                Año Personal {new Date().getFullYear()}
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold text-purple-600">{profile.personalYear}</div>
-              <p className="mt-2 text-sm text-gray-600">Ciclo anual de energía y oportunidades</p>
+              <div
+                className={cn(
+                  'text-4xl font-bold',
+                  NUMEROLOGY_NUMBERS_INFO[profile.personalYear]?.color || 'text-purple-600'
+                )}
+              >
+                {profile.personalYear}
+              </div>
+              <div className="mt-1 text-sm font-semibold text-gray-700">
+                {getPersonalYearMeaning(profile.personalYear)?.name}
+              </div>
+              <p className="mt-2 text-sm leading-relaxed text-gray-600">
+                {getPersonalYearMeaning(profile.personalYear)?.description}
+              </p>
             </CardContent>
           </Card>
           <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Mes Personal</CardTitle>
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <span className="text-2xl">
+                  {NUMEROLOGY_NUMBERS_INFO[profile.personalMonth]?.emoji || '📅'}
+                </span>
+                Mes Personal ({new Date().toLocaleDateString('es', { month: 'long' })})
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold text-indigo-600">{profile.personalMonth}</div>
-              <p className="mt-2 text-sm text-gray-600">Influencias del mes actual</p>
+              <div
+                className={cn(
+                  'text-4xl font-bold',
+                  NUMEROLOGY_NUMBERS_INFO[profile.personalMonth]?.color || 'text-indigo-600'
+                )}
+              >
+                {profile.personalMonth}
+              </div>
+              <div className="mt-1 text-sm font-semibold text-gray-700">
+                {NUMEROLOGY_NUMBERS_INFO[profile.personalMonth]?.name}
+              </div>
+              <p className="mt-2 text-sm leading-relaxed text-gray-600">
+                Este mes combina la energía de tu Año Personal {profile.personalYear} con las
+                cualidades del número {profile.personalMonth}. Las influencias mensuales te ayudan a
+                navegar las oportunidades del año de manera más específica.
+              </p>
             </CardContent>
           </Card>
         </div>
