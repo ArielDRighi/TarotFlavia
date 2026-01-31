@@ -8,6 +8,7 @@ import { Settings } from 'lucide-react';
 import { useMyNumerologyProfile, useDayNumber } from '@/hooks/api/useNumerology';
 import { NUMEROLOGY_NUMBERS_INFO } from '@/lib/utils/numerology';
 import { cn } from '@/lib/utils';
+import { ROUTES } from '@/lib/constants/routes';
 
 export function NumerologyWidget() {
   const { data: profile, isLoading: isLoadingProfile } = useMyNumerologyProfile();
@@ -42,7 +43,7 @@ export function NumerologyWidget() {
             Configura tu fecha de nacimiento para ver tu perfil numerológico
           </p>
           <Button asChild size="sm">
-            <Link href="/perfil">
+            <Link href={ROUTES.PERFIL}>
               <Settings className="mr-2 h-4 w-4" />
               Configurar
             </Link>
@@ -124,7 +125,7 @@ export function NumerologyWidget() {
 
         {/* Link to full profile */}
         <Button asChild variant="outline" className="w-full" size="sm">
-          <Link href="/numerologia">Ver informe completo</Link>
+          <Link href={ROUTES.NUMEROLOGIA}>Ver informe completo</Link>
         </Button>
       </CardContent>
     </Card>
