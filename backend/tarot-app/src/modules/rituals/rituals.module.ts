@@ -9,7 +9,9 @@ import {
 import { LunarPhaseService } from './application/services/lunar-phase.service';
 import { RitualsService } from './application/services/rituals.service';
 import { RitualHistoryService } from './application/services/ritual-history.service';
+import { RitualsAdminService } from './application/services/rituals-admin.service';
 import { RitualsController } from './infrastructure/controllers/rituals.controller';
+import { RitualsAdminController } from './infrastructure/controllers/rituals-admin.controller';
 
 /**
  * Módulo de Rituales
@@ -24,8 +26,18 @@ import { RitualsController } from './infrastructure/controllers/rituals.controll
       UserRitualHistory,
     ]),
   ],
-  controllers: [RitualsController],
-  providers: [LunarPhaseService, RitualsService, RitualHistoryService],
-  exports: [LunarPhaseService, RitualsService, RitualHistoryService],
+  controllers: [RitualsController, RitualsAdminController],
+  providers: [
+    LunarPhaseService,
+    RitualsService,
+    RitualHistoryService,
+    RitualsAdminService,
+  ],
+  exports: [
+    LunarPhaseService,
+    RitualsService,
+    RitualHistoryService,
+    RitualsAdminService,
+  ],
 })
 export class RitualsModule {}

@@ -6,3 +6,13 @@ export {
   RitualMaterialDto,
   RitualStepDto,
 } from './ritual-response.dto';
+export {
+  CreateRitualDto,
+  CreateRitualStepDto,
+  CreateRitualMaterialDto,
+} from './create-ritual.dto';
+export {
+  UpdateRitualDto,
+  UpdateRitualStepDto,
+  UpdateRitualMaterialDto,
+} from './update-ritual.dto';
