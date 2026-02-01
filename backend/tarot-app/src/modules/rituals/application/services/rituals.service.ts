@@ -143,9 +143,9 @@ export class RitualsService {
       .addSelect('COUNT(*)', 'count')
       .where('ritual.isActive = :isActive', { isActive: true })
       .groupBy('ritual.category')
-      .getRawMany();
+      .getRawMany<{ category: string; count: string }>();
 
-    return results.map((result) => ({
+    return results.map((result: { category: string; count: string }) => ({
       category: result.category,
       count: parseInt(result.count, 10),
     }));
