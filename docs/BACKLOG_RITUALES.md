@@ -3196,6 +3196,7 @@ Crear endpoints de administración para gestionar rituales, pasos y materiales d
 
 ### TASK-405: Crear tipos TypeScript para Rituales
 
+**Estado:** ✅ COMPLETADA
 **Módulo:** `frontend/src/types/`
 **Prioridad:** 🟡 MEDIA
 **Estimación:** 0.5 días
@@ -3228,7 +3229,7 @@ Crear los tipos TypeScript, funciones de API y hooks para el módulo de rituales
 
 ##### Frontend
 
-- [ ] Crear `ritual.types.ts`:
+- [x] Crear `ritual.types.ts`:
 
   ```typescript
   // Enums
@@ -3408,7 +3409,7 @@ Crear los tipos TypeScript, funciones de API y hooks para el módulo de rituales
   };
   ```
 
-- [ ] Agregar endpoints en `endpoints.ts`:
+- [x] Agregar endpoints en `endpoints.ts`:
 
   ```typescript
   export const API_ENDPOINTS = {
@@ -3427,7 +3428,7 @@ Crear los tipos TypeScript, funciones de API y hooks para el módulo de rituales
   } as const;
   ```
 
-- [ ] Crear `rituals-api.ts`:
+- [x] Crear `rituals-api.ts`:
 
   ```typescript
   import { apiClient } from "./axios-config";
@@ -3497,7 +3498,7 @@ Crear los tipos TypeScript, funciones de API y hooks para el módulo de rituales
   }
   ```
 
-- [ ] Crear `useRituals.ts`:
+- [x] Crear `useRituals.ts`:
 
   ```typescript
   "use client";
@@ -3597,25 +3598,25 @@ Crear los tipos TypeScript, funciones de API y hooks para el módulo de rituales
   }
   ```
 
-- [ ] Exportar desde `types/index.ts`
+- [x] Exportar desde `types/index.ts`
 
 ##### Testing
 
-- [ ] Test: Tipos se exportan correctamente
-- [ ] Test: API functions hacen llamadas correctas
-- [ ] Test: Hooks retornan datos esperados
-- [ ] Test: useLunarInfo refetch cada hora
-- [ ] Test: useCompleteRitual invalida queries
+- [x] Test: Tipos se exportan correctamente
+- [x] Test: API functions hacen llamadas correctas
+- [x] Test: Hooks retornan datos esperados
+- [x] Test: useLunarInfo refetch cada hora
+- [x] Test: useCompleteRitual invalida queries
 
 ---
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] Tipos completos para todas las entidades
-- [ ] API functions cubren todos los endpoints
-- [ ] Hooks con staleTime apropiado
-- [ ] Info de categorías y fases para UI
-- [ ] Helpers de UI con iconos y colores
+- [x] Tipos completos para todas las entidades
+- [x] API functions cubren todos los endpoints
+- [x] Hooks con staleTime apropiado
+- [x] Info de categorías y fases para UI
+- [x] Helpers de UI con iconos y colores
 
 # Frontend: Componentes de Lista y Navegación
 

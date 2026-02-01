@@ -120,6 +120,18 @@ export const API_ENDPOINTS = {
     DAY_NUMBER: '/numerology/day-number',
   },
 
+  // Rituals (Rituales)
+  RITUALS: {
+    LIST: '/rituals',
+    FEATURED: '/rituals/featured',
+    CATEGORIES: '/rituals/categories',
+    LUNAR_INFO: '/rituals/lunar-info',
+    DETAIL: (slug: string) => `/rituals/${slug}`,
+    COMPLETE: (id: number) => `/rituals/${id}/complete`,
+    HISTORY: '/rituals/history',
+    STATS: '/rituals/history/stats',
+  },
+
   // Admin Dashboard
   ADMIN: {
     DASHBOARD_STATS: '/admin/dashboard/stats',
