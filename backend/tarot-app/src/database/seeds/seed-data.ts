@@ -20,6 +20,7 @@ import { seedFlaviaUser } from './flavia-user.seeder';
 import { seedFlaviaTarotista } from './flavia-tarotista.seeder';
 import { seedFlaviaIAConfig } from './flavia-ia-config.seeder';
 import { seedPlans } from './plans.seeder';
+import { seedRituals } from './rituals.seeder';
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppModule);
@@ -98,6 +99,9 @@ async function bootstrap() {
 
     // Seed Test Users (for development and E2E testing)
     await seedUsers(userRepository);
+
+    // Seed Rituals (spiritual practices with steps and materials)
+    await seedRituals(dataSource);
 
     console.log('\n✨ ¡Datos iniciales cargados con éxito!');
   } catch (error) {
