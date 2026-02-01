@@ -1256,7 +1256,7 @@ Crear el archivo de datos con rituales iniciales y el comando para poblar la bas
 - [x] Contenido en español de calidad
 - [x] Validación de contenido implementada (título, descripción, propósito, pasos, materiales)
 - [x] Seeder idempotente (puede ejecutarse múltiples veces sin duplicar)
-- [x] Tests con cobertura ≥80% (alcanzado: 86.36%)
+- [x] Tests con cobertura ≥80% sobre el código incluido en Jest (nota: los seeds en src/database/seeds/** están excluidos del reporte de coverage actual)
 
 # Backend: Módulo y Servicios
 

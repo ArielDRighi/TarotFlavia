@@ -28,6 +28,7 @@ import { seedFlaviaUser } from '../src/database/seeds/flavia-user.seeder';
 import { seedFlaviaTarotista } from '../src/database/seeds/flavia-tarotista.seeder';
 import { seedFlaviaIAConfig } from '../src/database/seeds/flavia-ia-config.seeder';
 import { seedPlans } from '../src/database/seeds/plans.seeder';
+import { seedRituals } from '../src/database/seeds/rituals.seeder';
 
 interface SeederStep {
   name: string;
@@ -158,6 +159,13 @@ async function bootstrap() {
         dependencies: [],
         execute: async () => {
           await seedUsers(userRepository);
+        },
+      },
+      {
+        name: 'Rituals',
+        dependencies: [],
+        execute: async () => {
+          await seedRituals(dataSource);
         },
       },
     ];

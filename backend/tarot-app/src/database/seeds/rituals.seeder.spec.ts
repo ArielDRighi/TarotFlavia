@@ -3,7 +3,7 @@ import { Ritual } from '../../modules/rituals/entities/ritual.entity';
 import { RitualStep } from '../../modules/rituals/entities/ritual-step.entity';
 import { RitualMaterial } from '../../modules/rituals/entities/ritual-material.entity';
 import { seedRituals } from './rituals.seeder';
-import { RITUALS_SEED_DATA } from './data/rituals-seed.data';
+import { RITUALS_SEED_DATA } from './data/rituals.data';
 import { RitualCategory } from '../../modules/rituals/domain/enums';
 
 describe('RitualsSeeder', () => {
@@ -21,6 +21,7 @@ describe('RitualsSeeder', () => {
   let mockMaterialCreate: jest.Mock;
   let mockMaterialSave: jest.Mock;
   let mockMaterialCount: jest.Mock;
+  let mockTransaction: jest.Mock;
 
   beforeEach(() => {
     // Initialize mocks
@@ -34,6 +35,7 @@ describe('RitualsSeeder', () => {
     mockMaterialCreate = jest.fn();
     mockMaterialSave = jest.fn();
     mockMaterialCount = jest.fn();
+    mockTransaction = jest.fn();
 
     // Mock repositories
     ritualRepository = {
@@ -55,16 +57,35 @@ describe('RitualsSeeder', () => {
       count: mockMaterialCount,
     } as unknown as Repository<RitualMaterial>;
 
-    // Mock DataSource
+    // Mock DataSource with transaction support
     dataSource = {
       getRepository: jest.fn((entity) => {
         if (entity === Ritual) return ritualRepository;
         if (entity === RitualStep) return stepRepository;
         if (entity === RitualMaterial) return materialRepository;
 
-        return {} as Repository<any>;
+        // Never should reach here in tests, return empty repository
+        return {} as Repository<never>;
       }),
+      transaction: mockTransaction,
     } as unknown as DataSource;
+
+    // Mock transaction to execute callback immediately
+    mockTransaction.mockImplementation(
+      <T>(callback: (manager: unknown) => Promise<T>): Promise<T> => {
+        const manager = {
+          getRepository: jest.fn((entity) => {
+            if (entity === Ritual) return ritualRepository;
+            if (entity === RitualStep) return stepRepository;
+            if (entity === RitualMaterial) return materialRepository;
+
+            // Never should reach here in tests, return empty repository
+            return {} as Repository<never>;
+          }),
+        };
+        return callback(manager);
+      },
+    );
   });
 
   afterEach(() => {
@@ -95,10 +116,22 @@ describe('RitualsSeeder', () => {
     });
 
     it('debe insertar rituales si la tabla está vacía', async () => {
-      // Arrange
-      mockRitualCount.mockResolvedValueOnce(0).mockResolvedValueOnce(4);
-      mockMaterialCount.mockResolvedValue(15);
-      mockStepCount.mockResolvedValue(30);
+      // Arrange - Usar valores calculados desde RITUALS_SEED_DATA
+      const expectedRitualCount = RITUALS_SEED_DATA.length;
+      const expectedMaterialCount = RITUALS_SEED_DATA.reduce(
+        (acc, ritual) => acc + (ritual.materials?.length ?? 0),
+        0,
+      );
+      const expectedStepCount = RITUALS_SEED_DATA.reduce(
+        (acc, ritual) => acc + (ritual.steps?.length ?? 0),
+        0,
+      );
+
+      mockRitualCount
+        .mockResolvedValueOnce(0)
+        .mockResolvedValueOnce(expectedRitualCount);
+      mockMaterialCount.mockResolvedValue(expectedMaterialCount);
+      mockStepCount.mockResolvedValue(expectedStepCount);
 
       mockRitualCreate.mockImplementation((data) => data as Ritual);
       mockRitualSave.mockImplementation((ritual) =>
@@ -141,9 +174,21 @@ describe('RitualsSeeder', () => {
   describe('Validación de contenido', () => {
     it('debe crear rituales con todos los campos requeridos', async () => {
       // Arrange
-      mockRitualCount.mockResolvedValueOnce(0).mockResolvedValueOnce(4);
-      mockMaterialCount.mockResolvedValue(15);
-      mockStepCount.mockResolvedValue(30);
+      const expectedRitualCount = RITUALS_SEED_DATA.length;
+      const expectedMaterialCount = RITUALS_SEED_DATA.reduce(
+        (acc, ritual) => acc + (ritual.materials?.length ?? 0),
+        0,
+      );
+      const expectedStepCount = RITUALS_SEED_DATA.reduce(
+        (acc, ritual) => acc + (ritual.steps?.length ?? 0),
+        0,
+      );
+
+      mockRitualCount
+        .mockResolvedValueOnce(0)
+        .mockResolvedValueOnce(expectedRitualCount);
+      mockMaterialCount.mockResolvedValue(expectedMaterialCount);
+      mockStepCount.mockResolvedValue(expectedStepCount);
 
       const savedRituals: Partial<Ritual>[] = [];
       mockRitualCreate.mockImplementation((data) => data as Ritual);
@@ -190,9 +235,21 @@ describe('RitualsSeeder', () => {
 
     it('debe crear materiales para cada ritual', async () => {
       // Arrange
-      mockRitualCount.mockResolvedValueOnce(0).mockResolvedValueOnce(4);
-      mockMaterialCount.mockResolvedValue(15);
-      mockStepCount.mockResolvedValue(30);
+      const expectedRitualCount = RITUALS_SEED_DATA.length;
+      const expectedMaterialCount = RITUALS_SEED_DATA.reduce(
+        (acc, ritual) => acc + (ritual.materials?.length ?? 0),
+        0,
+      );
+      const expectedStepCount = RITUALS_SEED_DATA.reduce(
+        (acc, ritual) => acc + (ritual.steps?.length ?? 0),
+        0,
+      );
+
+      mockRitualCount
+        .mockResolvedValueOnce(0)
+        .mockResolvedValueOnce(expectedRitualCount);
+      mockMaterialCount.mockResolvedValue(expectedMaterialCount);
+      mockStepCount.mockResolvedValue(expectedStepCount);
 
       mockRitualCreate.mockImplementation((data) => data as Ritual);
       mockRitualSave.mockImplementation((ritual) =>
@@ -240,9 +297,21 @@ describe('RitualsSeeder', () => {
 
     it('debe crear pasos para cada ritual en orden secuencial', async () => {
       // Arrange
-      mockRitualCount.mockResolvedValueOnce(0).mockResolvedValueOnce(4);
-      mockMaterialCount.mockResolvedValue(15);
-      mockStepCount.mockResolvedValue(30);
+      const expectedRitualCount = RITUALS_SEED_DATA.length;
+      const expectedMaterialCount = RITUALS_SEED_DATA.reduce(
+        (acc, ritual) => acc + (ritual.materials?.length ?? 0),
+        0,
+      );
+      const expectedStepCount = RITUALS_SEED_DATA.reduce(
+        (acc, ritual) => acc + (ritual.steps?.length ?? 0),
+        0,
+      );
+
+      mockRitualCount
+        .mockResolvedValueOnce(0)
+        .mockResolvedValueOnce(expectedRitualCount);
+      mockMaterialCount.mockResolvedValue(expectedMaterialCount);
+      mockStepCount.mockResolvedValue(expectedStepCount);
 
       mockRitualCreate.mockImplementation((data) => data as Ritual);
       mockRitualSave.mockImplementation((ritual) =>
@@ -289,7 +358,9 @@ describe('RitualsSeeder', () => {
 
       // Verificar que los pasos estén numerados secuencialmente por ritual
       RITUALS_SEED_DATA.forEach((ritualData) => {
-        const stepNumbers = ritualData.steps.map((s) => s.stepNumber).sort();
+        const stepNumbers = ritualData.steps
+          .map((s) => s.stepNumber)
+          .sort((a, b) => a - b);
         stepNumbers.forEach((num, idx) => {
           expect(num).toBe(idx + 1);
         });
@@ -358,17 +429,20 @@ describe('RitualsSeeder', () => {
       mockRitualCount.mockResolvedValueOnce(0);
       mockRitualCreate.mockImplementation((data) => data as Ritual);
 
-      // Reemplazar temporalmente los datos
+      // Reemplazar temporalmente los datos con try/finally para evitar contaminación
       const originalData = [...RITUALS_SEED_DATA];
-      RITUALS_SEED_DATA.length = 0;
-      RITUALS_SEED_DATA.push(invalidRitual);
 
-      // Act & Assert
-      await expect(seedRituals(dataSource)).rejects.toThrow();
+      try {
+        RITUALS_SEED_DATA.length = 0;
+        RITUALS_SEED_DATA.push(invalidRitual);
 
-      // Restaurar datos originales
-      RITUALS_SEED_DATA.length = 0;
-      RITUALS_SEED_DATA.push(...originalData);
+        // Act & Assert
+        await expect(seedRituals(dataSource)).rejects.toThrow();
+      } finally {
+        // Restaurar datos originales siempre, incluso si el test falla
+        RITUALS_SEED_DATA.length = 0;
+        RITUALS_SEED_DATA.push(...originalData);
+      }
     });
   });
 });

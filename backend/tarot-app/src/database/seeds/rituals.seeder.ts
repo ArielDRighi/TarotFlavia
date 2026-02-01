@@ -2,7 +2,7 @@ import { DataSource } from 'typeorm';
 import { Ritual } from '../../modules/rituals/entities/ritual.entity';
 import { RitualStep } from '../../modules/rituals/entities/ritual-step.entity';
 import { RitualMaterial } from '../../modules/rituals/entities/ritual-material.entity';
-import { RITUALS_SEED_DATA } from './data/rituals-seed.data';
+import { RITUALS_SEED_DATA } from './data/rituals.data';
 
 /**
  * Seed Rituals - Rituales Espirituales Completos
@@ -13,7 +13,12 @@ import { RITUALS_SEED_DATA } from './data/rituals-seed.data';
  * - Rituales completos con pasos detallados y materiales necesarios
  * - Validación de calidad de contenido
  * - Incluye rituales lunares, limpieza energética y tarot
+ * - Transaccional: Cada ritual se crea atómicamente
  */
+
+// Tipos derivados del seed data para type-safety
+type RitualSeedData = (typeof RITUALS_SEED_DATA)[number];
+
 export async function seedRituals(dataSource: DataSource): Promise<void> {
   console.log('🌙 Iniciando seed de rituales...');
 
@@ -39,39 +44,55 @@ export async function seedRituals(dataSource: DataSource): Promise<void> {
     // Validar contenido del ritual
     validateRitualContent(ritualData);
 
-    // Crear ritual
-    const ritual = ritualRepository.create({
-      ...ritualFields,
-      isActive: true,
-      isFeatured: ritualData.isFeatured || false,
-      completionCount: 0,
-      viewCount: 0,
+    // Usar transacción para crear ritual, materiales y pasos atómicamente
+    await dataSource.transaction(async (manager) => {
+      const ritualRepo = manager.getRepository(Ritual);
+      const materialRepo = manager.getRepository(RitualMaterial);
+      const stepRepo = manager.getRepository(RitualStep);
+
+      // Crear ritual
+      const ritual = ritualRepo.create({
+        ...ritualFields,
+        isActive: true,
+        isFeatured: ritualData.isFeatured || false,
+        completionCount: 0,
+        viewCount: 0,
+      });
+
+      const savedRitual = await ritualRepo.save(ritual);
+
+      // Crear materiales
+      for (const materialData of materials) {
+        const quantity = materialData.quantity ?? 1;
+
+        // Validar quantity explícitamente
+        if (quantity < 1) {
+          throw new Error(
+            `Cantidad inválida (${quantity}) para material "${materialData.name}" en el ritual "${savedRitual.title}". Debe ser >= 1.`,
+          );
+        }
+
+        const material = materialRepo.create({
+          ...materialData,
+          ritualId: savedRitual.id,
+          quantity,
+        });
+        await materialRepo.save(material);
+      }
+
+      // Crear pasos
+      for (const stepData of steps) {
+        const step = stepRepo.create({
+          ...stepData,
+          ritualId: savedRitual.id,
+        });
+        await stepRepo.save(step);
+      }
+
+      console.log(
+        `  ✓ ${ritual.title} (${materials.length} materiales, ${steps.length} pasos)`,
+      );
     });
-
-    const savedRitual = await ritualRepository.save(ritual);
-
-    // Crear materiales
-    for (const materialData of materials) {
-      const material = materialRepository.create({
-        ...materialData,
-        ritualId: savedRitual.id,
-        quantity: materialData.quantity || 1,
-      });
-      await materialRepository.save(material);
-    }
-
-    // Crear pasos
-    for (const stepData of steps) {
-      const step = stepRepository.create({
-        ...stepData,
-        ritualId: savedRitual.id,
-      });
-      await stepRepository.save(step);
-    }
-
-    console.log(
-      `  ✓ ${ritual.title} (${materials.length} materiales, ${steps.length} pasos)`,
-    );
   }
 
   // Estadísticas finales
@@ -101,28 +122,7 @@ export async function seedRituals(dataSource: DataSource): Promise<void> {
  * Valida que un ritual tenga contenido completo y de calidad
  * Lanza error si falta información crítica
  */
-interface StepWithNumber {
-  stepNumber: number;
-}
-
-interface StepWithContent {
-  title?: string;
-  description?: string;
-}
-
-interface MaterialData {
-  name: string;
-  type: string;
-}
-
-function validateRitualContent(ritualData: {
-  title: string;
-  description: string;
-  purpose: string;
-  materials: MaterialData[];
-  steps: unknown[];
-  slug: string;
-}): void {
+function validateRitualContent(ritualData: RitualSeedData): void {
   const errors: string[] = [];
 
   // Validar campos requeridos
@@ -154,9 +154,11 @@ function validateRitualContent(ritualData: {
     errors.push('No hay pasos definidos');
   } else {
     // Validar que los pasos estén numerados secuencialmente
+    // CORRECCIÓN: Usar sort numérico (a - b) en lugar de sort lexicográfico
     const stepNumbers = ritualData.steps
-      .map((s) => (s as StepWithNumber).stepNumber)
-      .sort();
+      .map((s) => s.stepNumber)
+      .sort((a, b) => a - b);
+
     for (let i = 0; i < stepNumbers.length; i++) {
       if (stepNumbers[i] !== i + 1) {
         errors.push(
@@ -168,14 +170,12 @@ function validateRitualContent(ritualData: {
 
     // Validar que cada paso tenga título y descripción
     ritualData.steps.forEach((step, index) => {
-      const typedStep = step as StepWithContent;
-
-      if (!typedStep.title || typedStep.title.trim().length < 3) {
+      if (!step.title || step.title.trim().length < 3) {
         errors.push(
           `Paso ${index + 1}: título faltante o muy corto (mín 3 chars)`,
         );
       }
-      if (!typedStep.description || typedStep.description.trim().length < 20) {
+      if (!step.description || step.description.trim().length < 20) {
         errors.push(
           `Paso ${index + 1}: descripción faltante o muy corta (mín 20 chars)`,
         );
