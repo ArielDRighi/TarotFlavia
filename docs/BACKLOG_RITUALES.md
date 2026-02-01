@@ -595,6 +595,7 @@ src/modules/rituals/
 
 ### TASK-401: Crear migraciones de Rituales
 
+**Estado:** ✅ COMPLETADA  
 **Módulo:** `src/database/migrations/`  
 **Prioridad:** 🔴 ALTA  
 **Estimación:** 0.5 días  
@@ -612,7 +613,7 @@ Crear las migraciones para las tablas de rituales.
 
 ##### Backend
 
-- [ ] Crear migración principal:
+- [x] Crear migración principal:
 
   ```typescript
   // XXXX-CreateRitualsTables.ts
