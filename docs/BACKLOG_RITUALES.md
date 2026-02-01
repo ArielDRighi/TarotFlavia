@@ -1258,6 +1258,29 @@ Crear el archivo de datos con rituales iniciales y el comando para poblar la bas
 - [x] Seeder idempotente (puede ejecutarse múltiples veces sin duplicar)
 - [x] Tests con cobertura ≥80% sobre el código incluido en Jest (nota: los seeds en src/database/seeds/** están excluidos del reporte de coverage actual)
 
+---
+
+#### 📝 Notas de Implementación
+
+**PR #298 - Feedback de Copilot aplicado:**
+- ✅ Renombrado `rituals-seed.data.ts` → `rituals.data.ts` por consistencia
+- ✅ Fix de sort numérico en validación de pasos (soporte para 10+ pasos)
+- ✅ Eliminación de todos los tipos `any` usando inferencia de tipos desde seed data
+- ✅ Uso de `Repository<never>` para casos inalcanzables en mocks (en vez de `any`)
+- ✅ Tipado correcto de transaction callback con genéricos
+- ✅ Uso de nullish coalescing (`??`) y validación explícita de quantity >= 1
+- ✅ Creación de rituales envuelta en transacción para atomicidad
+- ✅ Tests robustos usando valores calculados desde RITUALS_SEED_DATA
+- ✅ Protección de mutación de datos de test con try/finally
+- ✅ Integración del seeder en seed-data.ts y db-seed-all.ts
+- ✅ **CERO usos de `any`** - 100% type-safe
+- ✅ **CERO usos de `eslint-disable`** - código limpio
+
+**Quality Gates:** ✅ TODOS PASANDO (format, lint, test:cov, build, architecture)  
+**CI Pipeline:** ✅ TODOS LOS CHECKS VERDES
+
+---
+
 # Backend: Módulo y Servicios
 
 ---
