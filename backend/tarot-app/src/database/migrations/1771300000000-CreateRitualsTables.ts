@@ -19,7 +19,7 @@ export class CreateRitualsTables1771300000000 implements MigrationInterface {
     // ====================================
 
     await queryRunner.query(`
-      CREATE TYPE ritual_category_enum AS ENUM (
+      CREATE TYPE "ritual_category_enum" AS ENUM (
         'tarot',
         'lunar',
         'cleansing',
@@ -32,7 +32,7 @@ export class CreateRitualsTables1771300000000 implements MigrationInterface {
     `);
 
     await queryRunner.query(`
-      CREATE TYPE ritual_difficulty_enum AS ENUM (
+      CREATE TYPE "ritual_difficulty_enum" AS ENUM (
         'beginner',
         'intermediate',
         'advanced'
@@ -40,7 +40,7 @@ export class CreateRitualsTables1771300000000 implements MigrationInterface {
     `);
 
     await queryRunner.query(`
-      CREATE TYPE lunar_phase_enum AS ENUM (
+      CREATE TYPE "lunar_phase_enum" AS ENUM (
         'new_moon',
         'waxing_crescent',
         'first_quarter',
@@ -53,7 +53,7 @@ export class CreateRitualsTables1771300000000 implements MigrationInterface {
     `);
 
     await queryRunner.query(`
-      CREATE TYPE material_type_enum AS ENUM (
+      CREATE TYPE "material_type_enum" AS ENUM (
         'required',
         'optional',
         'alternative'
@@ -70,10 +70,10 @@ export class CreateRitualsTables1771300000000 implements MigrationInterface {
         "slug" VARCHAR(100) UNIQUE NOT NULL,
         "title" VARCHAR(150) NOT NULL,
         "description" TEXT NOT NULL,
-        "category" ritual_category_enum NOT NULL,
-        "difficulty" ritual_difficulty_enum NOT NULL,
+        "category" "ritual_category_enum" NOT NULL,
+        "difficulty" "ritual_difficulty_enum" NOT NULL,
         "duration_minutes" SMALLINT NOT NULL,
-        "best_lunar_phase" lunar_phase_enum,
+        "best_lunar_phase" "lunar_phase_enum",
         "best_lunar_phases" JSONB,
         "best_time_of_day" VARCHAR(255),
         "purpose" TEXT,
@@ -93,9 +93,6 @@ export class CreateRitualsTables1771300000000 implements MigrationInterface {
     `);
 
     // Índices para la tabla rituals
-    await queryRunner.query(
-      `CREATE UNIQUE INDEX "idx_ritual_slug" ON "rituals"("slug");`,
-    );
     await queryRunner.query(
       `CREATE INDEX "idx_ritual_category" ON "rituals"("category");`,
     );
@@ -150,7 +147,7 @@ export class CreateRitualsTables1771300000000 implements MigrationInterface {
         "ritual_id" INTEGER NOT NULL,
         "name" VARCHAR(100) NOT NULL,
         "description" TEXT,
-        "type" material_type_enum DEFAULT 'required',
+        "type" "material_type_enum" DEFAULT 'required',
         "alternative" VARCHAR(100),
         "quantity" SMALLINT DEFAULT 1,
         "unit" VARCHAR(50),
@@ -177,7 +174,7 @@ export class CreateRitualsTables1771300000000 implements MigrationInterface {
         "user_id" INTEGER NOT NULL,
         "ritual_id" INTEGER NOT NULL,
         "completed_at" TIMESTAMPTZ NOT NULL,
-        "lunar_phase" lunar_phase_enum,
+        "lunar_phase" "lunar_phase_enum",
         "lunar_sign" VARCHAR(50),
         "notes" TEXT,
         "rating" SMALLINT CHECK ("rating" >= 1 AND "rating" <= 5),
@@ -209,6 +206,18 @@ export class CreateRitualsTables1771300000000 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    // Eliminar índices explícitamente
+    await queryRunner.query(`DROP INDEX IF EXISTS "idx_history_date";`);
+    await queryRunner.query(`DROP INDEX IF EXISTS "idx_history_ritual";`);
+    await queryRunner.query(`DROP INDEX IF EXISTS "idx_history_user";`);
+    await queryRunner.query(`DROP INDEX IF EXISTS "idx_material_ritual";`);
+    await queryRunner.query(`DROP INDEX IF EXISTS "idx_step_order";`);
+    await queryRunner.query(`DROP INDEX IF EXISTS "idx_step_ritual";`);
+    await queryRunner.query(`DROP INDEX IF EXISTS "idx_ritual_featured";`);
+    await queryRunner.query(`DROP INDEX IF EXISTS "idx_ritual_lunar_phase";`);
+    await queryRunner.query(`DROP INDEX IF EXISTS "idx_ritual_difficulty";`);
+    await queryRunner.query(`DROP INDEX IF EXISTS "idx_ritual_category";`);
+
     // Eliminar tablas en orden inverso (por dependencias)
     await queryRunner.query(`DROP TABLE IF EXISTS "user_ritual_history";`);
     await queryRunner.query(`DROP TABLE IF EXISTS "ritual_materials";`);
@@ -216,9 +225,9 @@ export class CreateRitualsTables1771300000000 implements MigrationInterface {
     await queryRunner.query(`DROP TABLE IF EXISTS "rituals";`);
 
     // Eliminar enums
-    await queryRunner.query(`DROP TYPE IF EXISTS material_type_enum;`);
-    await queryRunner.query(`DROP TYPE IF EXISTS lunar_phase_enum;`);
-    await queryRunner.query(`DROP TYPE IF EXISTS ritual_difficulty_enum;`);
-    await queryRunner.query(`DROP TYPE IF EXISTS ritual_category_enum;`);
+    await queryRunner.query(`DROP TYPE IF EXISTS "material_type_enum";`);
+    await queryRunner.query(`DROP TYPE IF EXISTS "lunar_phase_enum";`);
+    await queryRunner.query(`DROP TYPE IF EXISTS "ritual_difficulty_enum";`);
+    await queryRunner.query(`DROP TYPE IF EXISTS "ritual_category_enum";`);
   }
 }
