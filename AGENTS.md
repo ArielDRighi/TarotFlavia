@@ -1,7 +1,33 @@
 # AGENTS.md - Auguria Codebase Guide for AI Agents
 
 > 🤖 **Purpose:** Essential reference for AI coding agents working in this monorepo.
-> 📅 **Last Updated:** January 18, 2026
+> 📅 **Last Updated:** February 1, 2026
+
+---
+
+## ⚠️⚠️⚠️ MANDATORY FIRST STEP FOR EVERY TASK ⚠️⚠️⚠️
+
+**BEFORE DOING ANYTHING ELSE, YOU MUST:**
+
+1. **IDENTIFY** the task type from the user's request:
+   - Backend task? → Contains "backend", "TASK-XXX del backend", "API", "NestJS", etc.
+   - Frontend task? → Contains "frontend", "TASK-XXX del frontend", "UI", "Next.js", etc.
+   - PR feedback? → Contains "feedback del PR", "PR review", etc.
+
+2. **IMMEDIATELY READ** the corresponding workflow file:
+   - Backend task → `docs/WORKFLOW_BACKEND.md`
+   - Frontend task → `docs/WORKFLOW_FRONTEND.md`
+   - Backend PR feedback → `docs/WORKFLOW_PR_FEEDBACK_BACKEND.md`
+   - Frontend PR feedback → `docs/WORKFLOW_PR_FEEDBACK_FRONTEND.md`
+
+3. **FOLLOW THAT WORKFLOW EXACTLY** - Do not skip ahead, do not improvise
+
+**❌ NEVER START CODING WITHOUT READING THE WORKFLOW FIRST ❌**
+
+**Examples of what triggers workflow reading:**
+- "inicia la TASK-403 del backend" → READ `docs/WORKFLOW_BACKEND.md` NOW
+- "empezar TASK-405 frontend" → READ `docs/WORKFLOW_FRONTEND.md` NOW
+- "tengo feedback del PR backend" → READ `docs/WORKFLOW_PR_FEEDBACK_BACKEND.md` NOW
 
 ---
 
@@ -510,56 +536,117 @@ describe('ReadingCard', () => {
 
 ## 🤖 Automated Workflows
 
-### Trigger Recognition
+### 🔴 WORKFLOW READING IS MANDATORY - NOT OPTIONAL 🔴
 
-**AI Agents MUST automatically apply these workflows when the user says:**
+**EVERY TIME** you receive a task, you MUST:
+
+1. **STOP** before doing anything
+2. **READ** the appropriate workflow file in full
+3. **FOLLOW** every step in that workflow
+4. **DO NOT** skip ahead or improvise
+
+### Trigger Recognition & Required Actions
+
+**AI Agents MUST automatically READ and FOLLOW these workflows:**
 
 #### Backend Tasks
+**Trigger phrases:**
 ```
 "Iniciar TASK-XXX del backend"
+"inicia la TASK-XXX"
 "Empezar tarea backend TASK-XXX"
 "Start backend task TASK-XXX"
+"Desarrolla TASK-XXX del backend"
+"crear [módulo/servicio/controller] del backend"
 ```
 
-**Action:** Automatically apply **FULL workflow** from `docs/WORKFLOW_BACKEND.md`
+**REQUIRED ACTION (DO THIS FIRST):**
+```
+1. Read file: docs/WORKFLOW_BACKEND.md
+2. Follow every step in that workflow
+3. Do not proceed without reading it
+```
 
 #### Frontend Tasks
+**Trigger phrases:**
 ```
 "Iniciar TASK-XXX del frontend"
+"inicia la TASK-XXX del front"
 "Empezar tarea frontend TASK-XXX"
 "Start frontend task TASK-XXX"
+"Desarrolla TASK-XXX del frontend"
+"crear [componente/página/hook] del frontend"
 ```
 
-**Action:** Automatically apply **FULL workflow** from `docs/WORKFLOW_FRONTEND.md`
+**REQUIRED ACTION (DO THIS FIRST):**
+```
+1. Read file: docs/WORKFLOW_FRONTEND.md
+2. Follow every step in that workflow
+3. Do not proceed without reading it
+```
 
 #### Backend PR Feedback
+**Trigger phrases:**
 ```
 "Tengo feedback del PR de backend TASK-XXX"
 "Feedback del PR backend"
 "PR feedback backend: [comentarios]"
+"Review del PR de backend"
 ```
 
-**Action:** Automatically apply **FULL workflow** from `docs/WORKFLOW_PR_FEEDBACK_BACKEND.md`
+**REQUIRED ACTION (DO THIS FIRST):**
+```
+1. Read file: docs/WORKFLOW_PR_FEEDBACK_BACKEND.md
+2. Follow the validation process exactly
+3. Do not apply changes without validation
+```
 
 #### Frontend PR Feedback
+**Trigger phrases:**
 ```
 "Tengo feedback del PR de frontend TASK-XXX"
 "Feedback del PR frontend"
 "PR feedback frontend: [comentarios]"
+"Review del PR de frontend"
 ```
 
-**Action:** Automatically apply **FULL workflow** from `docs/WORKFLOW_PR_FEEDBACK_FRONTEND.md`
+**REQUIRED ACTION (DO THIS FIRST):**
+```
+1. Read file: docs/WORKFLOW_PR_FEEDBACK_FRONTEND.md
+2. Follow the validation process exactly
+3. Do not apply changes without validation
+```
 
 ### Workflow Documents
 
-| Workflow | Path | When to Use |
-|----------|------|-------------|
-| **Backend TDD** | `docs/WORKFLOW_BACKEND.md` | All NestJS backend tasks |
-| **Frontend TDD** | `docs/WORKFLOW_FRONTEND.md` | All Next.js frontend tasks |
-| **Backend PR Feedback** | `docs/WORKFLOW_PR_FEEDBACK_BACKEND.md` | When receiving PR reviews for backend |
-| **Frontend PR Feedback** | `docs/WORKFLOW_PR_FEEDBACK_FRONTEND.md` | When receiving PR reviews for frontend |
+| Workflow | Path | When to Use | First Action |
+|----------|------|-------------|--------------|
+| **Backend TDD** | `docs/WORKFLOW_BACKEND.md` | All NestJS backend tasks | **READ THIS FILE FIRST** |
+| **Frontend TDD** | `docs/WORKFLOW_FRONTEND.md` | All Next.js frontend tasks | **READ THIS FILE FIRST** |
+| **Backend PR Feedback** | `docs/WORKFLOW_PR_FEEDBACK_BACKEND.md` | When receiving PR reviews for backend | **READ THIS FILE FIRST** |
+| **Frontend PR Feedback** | `docs/WORKFLOW_PR_FEEDBACK_FRONTEND.md` | When receiving PR reviews for frontend | **READ THIS FILE FIRST** |
+
+### ❌ WHAT NOT TO DO
+
+**NEVER:**
+- Start coding without reading the workflow
+- Create a TODO list without following the workflow format
+- Jump to implementation without reading context
+- Assume you know what to do based on the task name
+- Skip the workflow because "you've done similar tasks before"
+
+### ✅ WHAT TO DO
+
+**ALWAYS:**
+1. Identify task type from user's request
+2. Read the corresponding workflow file COMPLETELY
+3. Follow the workflow steps IN ORDER
+4. Use the workflow's TODO list format
+5. Complete all quality gates mentioned in the workflow
 
 **CRITICAL:** These workflows are **NOT suggestions** - they are **mandatory processes** that must be followed for every task. The user should never need to repeat the full workflow instructions.
+
+**IF YOU FIND YOURSELF CODING WITHOUT HAVING READ THE WORKFLOW, YOU ARE DOING IT WRONG. STOP AND READ IT.**
 
 ---
 
