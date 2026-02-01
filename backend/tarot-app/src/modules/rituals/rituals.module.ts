@@ -6,6 +6,9 @@ import {
   RitualMaterial,
   UserRitualHistory,
 } from './entities';
+import { LunarPhaseService } from './application/services/lunar-phase.service';
+import { RitualsService } from './application/services/rituals.service';
+import { RitualHistoryService } from './application/services/ritual-history.service';
 
 /**
  * Módulo de Rituales
@@ -21,7 +24,7 @@ import {
     ]),
   ],
   controllers: [],
-  providers: [],
-  exports: [],
+  providers: [LunarPhaseService, RitualsService, RitualHistoryService],
+  exports: [LunarPhaseService, RitualsService, RitualHistoryService],
 })
 export class RitualsModule {}
