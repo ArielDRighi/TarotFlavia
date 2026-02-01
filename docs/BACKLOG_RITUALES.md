@@ -241,6 +241,7 @@ Feature: Mostrar rituales relevantes según fase lunar
 
 ### TASK-400: Crear entidades de Rituales
 
+**Estado:** ✅ COMPLETADA  
 **Módulo:** `src/modules/rituals/`  
 **Prioridad:** 🔴 ALTA  
 **Estimación:** 1.5 días  
@@ -283,7 +284,7 @@ src/modules/rituals/
 
 ##### Backend
 
-- [ ] Crear `ritual.enums.ts`:
+- [x] Crear `ritual.enums.ts`:
 
   ```typescript
   export enum RitualCategory {
@@ -321,7 +322,7 @@ src/modules/rituals/
   }
   ```
 
-- [ ] Crear `ritual.entity.ts`:
+- [x] Crear `ritual.entity.ts`:
 
   ```typescript
   import {
@@ -433,7 +434,7 @@ src/modules/rituals/
   }
   ```
 
-- [ ] Crear `ritual-step.entity.ts`:
+- [x] Crear `ritual-step.entity.ts`:
 
   ```typescript
   import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, Index } from "typeorm";
@@ -477,7 +478,7 @@ src/modules/rituals/
   }
   ```
 
-- [ ] Crear `ritual-material.entity.ts`:
+- [x] Crear `ritual-material.entity.ts`:
 
   ```typescript
   import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, Index } from "typeorm";
@@ -519,7 +520,7 @@ src/modules/rituals/
   }
   ```
 
-- [ ] Crear `user-ritual-history.entity.ts`:
+- [x] Crear `user-ritual-history.entity.ts`:
 
   ```typescript
   import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, Index } from "typeorm";
@@ -574,19 +575,19 @@ src/modules/rituals/
 
 ##### Testing
 
-- [ ] Test: Entidades se crean correctamente
-- [ ] Test: Relaciones OneToMany funcionan
-- [ ] Test: Cascade delete funciona
-- [ ] Test: Enums validan correctamente
+- [x] Test: Entidades se crean correctamente
+- [x] Test: Relaciones OneToMany funcionan
+- [x] Test: Cascade delete funciona
+- [x] Test: Enums validan correctamente
 
 ---
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] 4 entidades creadas y relacionadas
-- [ ] Enums cubren todas las categorías
-- [ ] Índices para consultas frecuentes
-- [ ] Historial vincula usuario, ritual y fecha
+- [x] 4 entidades creadas y relacionadas
+- [x] Enums cubren todas las categorías
+- [x] Índices para consultas frecuentes
+- [x] Historial vincula usuario, ritual y fecha
 
 # Backend: Migraciones y Seeder
 
