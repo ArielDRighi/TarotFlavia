@@ -195,39 +195,32 @@ export const LUNAR_PHASE_INFO: Record<
   {
     name: string;
     icon: string;
-    emoji: string;
   }
 > = {
-  [LunarPhase.NEW_MOON]: { name: 'Luna Nueva', icon: '🌑', emoji: '🌑' },
+  [LunarPhase.NEW_MOON]: { name: 'Luna Nueva', icon: '🌑' },
   [LunarPhase.WAXING_CRESCENT]: {
     name: 'Luna Creciente',
     icon: '🌒',
-    emoji: '🌒',
   },
   [LunarPhase.FIRST_QUARTER]: {
     name: 'Cuarto Creciente',
     icon: '🌓',
-    emoji: '🌓',
   },
   [LunarPhase.WAXING_GIBBOUS]: {
     name: 'Gibosa Creciente',
     icon: '🌔',
-    emoji: '🌔',
   },
-  [LunarPhase.FULL_MOON]: { name: 'Luna Llena', icon: '🌕', emoji: '🌕' },
+  [LunarPhase.FULL_MOON]: { name: 'Luna Llena', icon: '🌕' },
   [LunarPhase.WANING_GIBBOUS]: {
     name: 'Gibosa Menguante',
     icon: '🌖',
-    emoji: '🌖',
   },
   [LunarPhase.LAST_QUARTER]: {
     name: 'Cuarto Menguante',
     icon: '🌗',
-    emoji: '🌗',
   },
   [LunarPhase.WANING_CRESCENT]: {
     name: 'Luna Menguante',
     icon: '🌘',
-    emoji: '🌘',
   },
 };

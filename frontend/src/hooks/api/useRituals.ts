@@ -126,7 +126,7 @@ export function useRitual(slug: string) {
 
 /**
  * Hook para marcar un ritual como completado
- * Invalida automáticamente el historial y estadísticas
+ * Invalida automáticamente el detalle, historial y estadísticas
  *
  * @returns Mutation para completar ritual
  *
@@ -149,7 +149,8 @@ export function useCompleteRitual() {
     mutationFn: ({ ritualId, data }: { ritualId: number; data: CompleteRitualRequest }) =>
       completeRitual(ritualId, data),
     onSuccess: () => {
-      // Invalidar historial y stats al completar un ritual
+      // Invalidar detalle (completionCount puede cambiar), historial y stats
+      queryClient.invalidateQueries({ queryKey: [...ritualKeys.all, 'detail'] });
       queryClient.invalidateQueries({ queryKey: ritualKeys.history() });
       queryClient.invalidateQueries({ queryKey: ritualKeys.stats() });
     },

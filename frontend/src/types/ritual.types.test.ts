@@ -413,7 +413,6 @@ describe('ritual types', () => {
         expect(LUNAR_PHASE_INFO[phase]).toBeDefined();
         expect(LUNAR_PHASE_INFO[phase].name).toBeDefined();
         expect(LUNAR_PHASE_INFO[phase].icon).toBeDefined();
-        expect(LUNAR_PHASE_INFO[phase].emoji).toBeDefined();
       });
     });
 

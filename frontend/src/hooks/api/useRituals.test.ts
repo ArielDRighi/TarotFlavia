@@ -10,8 +10,10 @@ import {
   useRitualCategories,
   useLunarInfo,
   useRitual,
+  useCompleteRitual,
   useRitualHistory,
   useRitualStats,
+  ritualKeys,
 } from './useRituals';
 import * as ritualsApi from '@/lib/api/rituals-api';
 import {
@@ -349,5 +351,172 @@ describe('useRitualStats', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(result.current.data?.favoriteCategory).toBeNull();
+  });
+});
+
+describe('useCompleteRitual', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should call completeRitual API with correct parameters', async () => {
+    const mockResponse = {
+      message: 'Ritual completado exitosamente',
+      historyId: 123,
+      lunarPhase: 'full_moon',
+      lunarSign: 'Aries',
+    };
+    vi.mocked(ritualsApi.completeRitual).mockResolvedValue(mockResponse);
+
+    const wrapper = createWrapper();
+    const { result } = renderHook(() => useCompleteRitual(), { wrapper });
+
+    const ritualId = 1;
+    const data = {
+      notes: 'Muy tranquilizador',
+      rating: 5,
+      durationMinutes: 35,
+    };
+
+    result.current.mutate({ ritualId, data });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(ritualsApi.completeRitual).toHaveBeenCalledWith(ritualId, data);
+    expect(ritualsApi.completeRitual).toHaveBeenCalledTimes(1);
+  });
+
+  it('should invalidate all required queries on success', async () => {
+    const mockResponse = {
+      message: 'Ritual completado exitosamente',
+      historyId: 123,
+      lunarPhase: 'full_moon',
+      lunarSign: 'Aries',
+    };
+    vi.mocked(ritualsApi.completeRitual).mockResolvedValue(mockResponse);
+
+    const queryClient = createTestQueryClient();
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
+
+    const wrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(QueryClientProvider, { client: queryClient }, children);
+
+    const { result } = renderHook(() => useCompleteRitual(), { wrapper });
+
+    result.current.mutate({ ritualId: 1, data: {} });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    // Should invalidate all three query types
+    expect(invalidateSpy).toHaveBeenCalledTimes(3);
+  });
+
+  it('should invalidate history query on success', async () => {
+    const mockResponse = {
+      message: 'Ritual completado exitosamente',
+      historyId: 123,
+      lunarPhase: 'full_moon',
+      lunarSign: 'Aries',
+    };
+    vi.mocked(ritualsApi.completeRitual).mockResolvedValue(mockResponse);
+
+    const queryClient = createTestQueryClient();
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
+
+    const wrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(QueryClientProvider, { client: queryClient }, children);
+
+    const { result } = renderHook(() => useCompleteRitual(), { wrapper });
+
+    result.current.mutate({ ritualId: 1, data: {} });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    // Should invalidate history queries
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ritualKeys.history() });
+  });
+
+  it('should invalidate stats query on success', async () => {
+    const mockResponse = {
+      message: 'Ritual completado exitosamente',
+      historyId: 123,
+      lunarPhase: 'full_moon',
+      lunarSign: 'Aries',
+    };
+    vi.mocked(ritualsApi.completeRitual).mockResolvedValue(mockResponse);
+
+    const queryClient = createTestQueryClient();
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
+
+    const wrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(QueryClientProvider, { client: queryClient }, children);
+
+    const { result } = renderHook(() => useCompleteRitual(), { wrapper });
+
+    result.current.mutate({ ritualId: 1, data: {} });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    // Should invalidate stats queries
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ritualKeys.stats() });
+  });
+
+  it('should invalidate detail queries on success', async () => {
+    const mockResponse = {
+      message: 'Ritual completado exitosamente',
+      historyId: 123,
+      lunarPhase: 'full_moon',
+      lunarSign: 'Aries',
+    };
+    vi.mocked(ritualsApi.completeRitual).mockResolvedValue(mockResponse);
+
+    const queryClient = createTestQueryClient();
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
+
+    const wrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(QueryClientProvider, { client: queryClient }, children);
+
+    const { result } = renderHook(() => useCompleteRitual(), { wrapper });
+
+    result.current.mutate({ ritualId: 1, data: {} });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    // Should invalidate all detail queries (to update completionCount)
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: [...ritualKeys.all, 'detail'] });
+  });
+
+  it('should handle errors correctly', async () => {
+    const error = new Error('Error al completar ritual');
+    vi.mocked(ritualsApi.completeRitual).mockRejectedValue(error);
+
+    const wrapper = createWrapper();
+    const { result } = renderHook(() => useCompleteRitual(), { wrapper });
+
+    result.current.mutate({ ritualId: 1, data: {} });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+
+    expect(result.current.error).toEqual(error);
+  });
+
+  it('should handle mutation with minimal data', async () => {
+    const mockResponse = {
+      message: 'Ritual completado exitosamente',
+      historyId: 456,
+      lunarPhase: 'new_moon',
+      lunarSign: 'Tauro',
+    };
+    vi.mocked(ritualsApi.completeRitual).mockResolvedValue(mockResponse);
+
+    const wrapper = createWrapper();
+    const { result } = renderHook(() => useCompleteRitual(), { wrapper });
+
+    // Completar sin notas, rating o duración
+    result.current.mutate({ ritualId: 42, data: {} });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(ritualsApi.completeRitual).toHaveBeenCalledWith(42, {});
   });
 });
