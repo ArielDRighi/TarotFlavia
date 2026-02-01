@@ -51,7 +51,11 @@ export class LunarPhaseService {
   calculatePhase(date: Date): LunarPhase {
     const daysSince =
       (date.getTime() - this.KNOWN_NEW_MOON.getTime()) / (1000 * 60 * 60 * 24);
-    const lunarAge = daysSince % this.SYNODIC_MONTH;
+    // Normalizar módulo para manejar fechas antes de la referencia
+    let lunarAge = daysSince % this.SYNODIC_MONTH;
+    if (lunarAge < 0) {
+      lunarAge += this.SYNODIC_MONTH;
+    }
 
     // Dividir el ciclo en 8 fases
     const phaseIndex = Math.floor((lunarAge / this.SYNODIC_MONTH) * 8) % 8;

@@ -136,14 +136,19 @@ export class RitualsService {
   /**
    * Obtiene las categorías disponibles con conteo
    */
-  async getCategories(): Promise<{ category: string; count: string }[]> {
-    return this.ritualRepository
+  async getCategories(): Promise<{ category: string; count: number }[]> {
+    const results = await this.ritualRepository
       .createQueryBuilder('ritual')
       .select('ritual.category', 'category')
       .addSelect('COUNT(*)', 'count')
       .where('ritual.isActive = :isActive', { isActive: true })
       .groupBy('ritual.category')
       .getRawMany();
+
+    return results.map((result) => ({
+      category: result.category,
+      count: parseInt(result.count, 10),
+    }));
   }
 
   /**
@@ -203,7 +208,16 @@ export class RitualsService {
       audioUrl: ritual.audioUrl,
       materials:
         ritual.materials
-          ?.sort((a) => (a.type === MaterialType.REQUIRED ? -1 : 1))
+          ?.sort((a, b) => {
+            const aRequired = a.type === MaterialType.REQUIRED;
+            const bRequired = b.type === MaterialType.REQUIRED;
+
+            if (aRequired === bRequired) {
+              return 0;
+            }
+
+            return aRequired ? -1 : 1;
+          })
           .map((m) => ({
             id: m.id,
             name: m.name,

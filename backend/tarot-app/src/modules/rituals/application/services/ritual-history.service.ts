@@ -42,6 +42,14 @@ export class RitualHistoryService {
     ritualId: number,
     dto: CompleteRitualDto,
   ): Promise<UserRitualHistory> {
+    // Verificar si ya se completó hoy
+    const alreadyCompleted = await this.hasCompletedToday(userId, ritualId);
+    if (alreadyCompleted) {
+      throw new Error(
+        'Este ritual ya fue completado hoy. Solo se permite un registro por día.',
+      );
+    }
+
     const lunarInfo = this.lunarPhaseService.getCurrentPhase();
 
     const history = this.historyRepository.create({
@@ -158,19 +166,27 @@ export class RitualHistoryService {
     const currentDate = new Date();
     currentDate.setHours(0, 0, 0, 0);
 
-    // Agrupar por fecha
+    // Helper para convertir Date a string local YYYY-MM-DD
+    const toLocalDateString = (date: Date): string => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
+    // Agrupar por fecha local
     const dateSet = new Set<string>();
     history.forEach((h) => {
       const date = new Date(h.completedAt);
       date.setHours(0, 0, 0, 0);
-      dateSet.add(date.toISOString().split('T')[0]);
+      dateSet.add(toLocalDateString(date));
     });
 
     // Contar días consecutivos hacia atrás
     for (let i = 0; i < 30; i++) {
       const checkDate = new Date(currentDate);
       checkDate.setDate(checkDate.getDate() - i);
-      const dateStr = checkDate.toISOString().split('T')[0];
+      const dateStr = toLocalDateString(checkDate);
 
       if (dateSet.has(dateStr)) {
         streak++;
