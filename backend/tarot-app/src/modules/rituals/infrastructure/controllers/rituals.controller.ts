@@ -136,12 +136,41 @@ export class RitualsController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Obtener mi historial de rituales' })
   @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiResponse({
+    status: 200,
+    description: 'Historial de rituales del usuario',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          id: { type: 'number' },
+          ritual: {
+            type: 'object',
+            properties: {
+              id: { type: 'number' },
+              slug: { type: 'string' },
+              title: { type: 'string' },
+              category: { type: 'string' },
+            },
+          },
+          completedAt: { type: 'string', format: 'date-time' },
+          lunarPhase: { type: 'string' },
+          lunarSign: { type: 'string' },
+          notes: { type: 'string', nullable: true },
+          rating: { type: 'number', nullable: true },
+          durationMinutes: { type: 'number', nullable: true },
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 401, description: 'No autenticado' })
   async getHistory(
-    @CurrentUser() user: { id: number },
+    @CurrentUser() user: { userId: number },
     @Query('limit') limit?: number,
   ) {
     const history = await this.historyService.getUserHistory(
-      user.id,
+      user.userId,
       limit || 20,
     );
 
@@ -170,8 +199,22 @@ export class RitualsController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Obtener mis estadísticas de rituales' })
-  async getStats(@CurrentUser() user: { id: number }) {
-    return this.historyService.getUserStats(user.id);
+  @ApiResponse({
+    status: 200,
+    description: 'Estadísticas de rituales del usuario',
+    schema: {
+      type: 'object',
+      properties: {
+        totalCompleted: { type: 'number' },
+        favoriteCategory: { type: 'string', nullable: true },
+        currentStreak: { type: 'number' },
+        thisMonthCount: { type: 'number' },
+      },
+    },
+  })
+  @ApiResponse({ status: 401, description: 'No autenticado' })
+  async getStats(@CurrentUser() user: { userId: number }) {
+    return this.historyService.getUserStats(user.userId);
   }
 
   /**
@@ -200,14 +243,25 @@ export class RitualsController {
   @ApiResponse({
     status: 201,
     description: 'Ritual registrado como completado',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string' },
+        historyId: { type: 'number' },
+        lunarPhase: { type: 'string' },
+        lunarSign: { type: 'string' },
+      },
+    },
   })
+  @ApiResponse({ status: 401, description: 'No autenticado' })
+  @ApiResponse({ status: 404, description: 'Ritual no encontrado' })
   async completeRitual(
-    @CurrentUser() user: { id: number },
+    @CurrentUser() user: { userId: number },
     @Param('id', ParseIntPipe) ritualId: number,
     @Body() dto: CompleteRitualDto,
   ) {
     const history = await this.historyService.completeRitual(
-      user.id,
+      user.userId,
       ritualId,
       dto,
     );

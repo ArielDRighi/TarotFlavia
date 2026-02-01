@@ -2,7 +2,7 @@ import { DataSource } from 'typeorm';
 import { Ritual } from '../../modules/rituals/entities/ritual.entity';
 import { RitualStep } from '../../modules/rituals/entities/ritual-step.entity';
 import { RitualMaterial } from '../../modules/rituals/entities/ritual-material.entity';
-import { RITUALS_SEED_DATA } from '../seeds/data/rituals.data';
+import { RITUALS_SEED_DATA } from './data/rituals.data';
 
 /**
  * Seed Rituals - Rituales Espirituales Completos

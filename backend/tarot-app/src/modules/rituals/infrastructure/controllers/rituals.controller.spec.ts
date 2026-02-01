@@ -74,7 +74,7 @@ describe('RitualsController', () => {
   };
 
   const mockUser = {
-    id: 1,
+    userId: 1,
     email: 'user@test.com',
     username: 'testuser',
   };
