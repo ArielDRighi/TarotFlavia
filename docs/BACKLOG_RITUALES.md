@@ -1287,6 +1287,7 @@ Crear el archivo de datos con rituales iniciales y el comando para poblar la bas
 
 ### TASK-403: Crear módulo y servicios de Rituales
 
+**Estado:** ✅ COMPLETADA  
 **Módulo:** `src/modules/rituals/`  
 **Prioridad:** 🔴 ALTA  
 **Estimación:** 1.5 días  
@@ -1316,7 +1317,7 @@ Crear el módulo NestJS con servicios para consultar rituales, gestionar histori
 
 ##### Backend
 
-- [ ] Crear DTOs:
+- [x] Crear DTOs:
 
   ```typescript
   // ritual-filters.dto.ts
@@ -1491,7 +1492,7 @@ Crear el módulo NestJS con servicios para consultar rituales, gestionar histori
   }
   ```
 
-- [ ] Crear `lunar-phase.service.ts`:
+- [x] Crear `lunar-phase.service.ts`:
 
   ```typescript
   import { Injectable } from "@nestjs/common";
@@ -1632,7 +1633,7 @@ Crear el módulo NestJS con servicios para consultar rituales, gestionar histori
   }
   ```
 
-- [ ] Crear `rituals.service.ts`:
+- [x] Crear `rituals.service.ts`:
 
   ```typescript
   import { Injectable, NotFoundException } from "@nestjs/common";
@@ -1841,7 +1842,7 @@ Crear el módulo NestJS con servicios para consultar rituales, gestionar histori
   }
   ```
 
-- [ ] Crear `ritual-history.service.ts`:
+- [x] Crear `ritual-history.service.ts`:
 
   ```typescript
   import { Injectable } from "@nestjs/common";
@@ -2011,26 +2012,43 @@ Crear el módulo NestJS con servicios para consultar rituales, gestionar histori
   }
   ```
 
-- [ ] Crear `rituals.module.ts`
+- [x] Crear `rituals.module.ts`
 
 ##### Testing
 
-- [ ] Test: findAll retorna rituales
-- [ ] Test: Filtros funcionan
-- [ ] Test: getFeatured retorna por fase lunar
-- [ ] Test: Fase lunar se calcula correctamente
-- [ ] Test: Historial se registra
-- [ ] Test: Estadísticas calculan correctamente
+- [x] Test: findAll retorna rituales
+- [x] Test: Filtros funcionan
+- [x] Test: getFeatured retorna por fase lunar
+- [x] Test: Fase lunar se calcula correctamente
+- [x] Test: Historial se registra
+- [x] Test: Estadísticas calculan correctamente
 
 ---
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] Servicio consulta rituales con filtros
-- [ ] Fase lunar se calcula automáticamente
-- [ ] Rituales destacados según fase actual
-- [ ] Historial registra completados
-- [ ] Estadísticas de usuario funcionan
+- [x] Servicio consulta rituales con filtros
+- [x] Fase lunar se calcula automáticamente
+- [x] Rituales destacados según fase actual
+- [x] Historial registra completados
+- [x] Estadísticas de usuario funcionan
+
+---
+
+#### 📝 Notas de Implementación
+
+**Implementación completada:**
+- ✅ LunarPhaseService: Cálculo de fase lunar actual con algoritmo basado en ciclo lunar de 29.5 días
+- ✅ RitualsService: Query de rituales con filtros (categoría, dificultad, fase lunar, búsqueda), rituales destacados, categorías con conteo
+- ✅ RitualHistoryService: Registro de completados con info lunar, historial, estadísticas (total, categoría favorita, racha, este mes)
+- ✅ DTOs completos: RitualFiltersDto, CompleteRitualDto, RitualSummaryDto, RitualDetailDto
+- ✅ Tests unitarios: 42 tests passing (15 LunarPhase + 15 Rituals + 12 History)
+- ✅ Coverage > 80% en todos los servicios
+- ✅ TDD approach: tests escritos primero, luego implementación
+
+**Quality Gates:** ✅ TODOS PASANDO (lint, test:cov, build, validate-architecture)
+
+**Branch:** `feature/TASK-403-rituales-servicios`
 
 # Backend: Endpoints
 
@@ -5223,10 +5241,10 @@ const lunarInfo = lunarPhaseService.getCurrentPhase();
 
 ### Backend
 
-- [ ] TASK-400: Entidades creadas
-- [ ] TASK-401: Migraciones ejecutan
-- [ ] TASK-402: Seeder con 10+ rituales
-- [ ] TASK-403: Servicios funcionan
+- [x] TASK-400: Entidades creadas
+- [x] TASK-401: Migraciones ejecutan
+- [x] TASK-402: Seeder con 10+ rituales
+- [x] TASK-403: Servicios funcionan
 - [ ] TASK-404: Endpoints probados
 
 ### Frontend
