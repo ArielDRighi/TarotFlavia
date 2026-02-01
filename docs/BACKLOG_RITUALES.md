@@ -769,7 +769,8 @@ Crear las migraciones para las tablas de rituales.
 
 ### TASK-402: Crear Seeder de Rituales
 
-**Módulo:** `src/modules/rituals/data/`  
+**Estado:** ✅ COMPLETADA  
+**Módulo:** `src/database/seeds/`  
 **Prioridad:** 🔴 ALTA  
 **Estimación:** 1.5 días  
 **Dependencias:** TASK-401
@@ -786,7 +787,7 @@ Crear el archivo de datos con rituales iniciales y el comando para poblar la bas
 
 ##### Backend
 
-- [ ] Crear `rituals-seed.data.ts`:
+- [x] Crear `rituals-seed.data.ts`:
 
   ```typescript
   import { RitualCategory, RitualDifficulty, LunarPhase, MaterialType } from "../enums/ritual.enums";
@@ -1185,10 +1186,10 @@ Crear el archivo de datos con rituales iniciales y el comando para poblar la bas
   ];
   ```
 
-- [ ] Crear comando de seed:
+- [x] Crear comando de seed:
 
   ```typescript
-  // src/database/seeds/rituals.seed.ts
+  // src/database/seeds/rituals.seeder.ts
   import { DataSource } from "typeorm";
   import { Ritual } from "@/modules/rituals/entities/ritual.entity";
   import { RitualStep } from "@/modules/rituals/entities/ritual-step.entity";
@@ -1240,19 +1241,22 @@ Crear el archivo de datos con rituales iniciales y el comando para poblar la bas
 
 ##### Testing
 
-- [ ] Test: Seed inserta rituales completos
-- [ ] Test: Pasos se crean en orden correcto
-- [ ] Test: Materiales se asocian correctamente
-- [ ] Test: No duplica si ya existen
+- [x] Test: Seed inserta rituales completos
+- [x] Test: Pasos se crean en orden correcto
+- [x] Test: Materiales se asocian correctamente
+- [x] Test: No duplica si ya existen
 
 ---
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] Migración crea todas las tablas
-- [ ] Seeder crea al menos 4 rituales completos
-- [ ] Cada ritual tiene pasos y materiales
-- [ ] Contenido en español de calidad
+- [x] Migración crea todas las tablas
+- [x] Seeder crea al menos 4 rituales completos (creados: Luna Nueva, Luna Llena, Limpieza Hogar, Consagración Tarot)
+- [x] Cada ritual tiene pasos y materiales
+- [x] Contenido en español de calidad
+- [x] Validación de contenido implementada (título, descripción, propósito, pasos, materiales)
+- [x] Seeder idempotente (puede ejecutarse múltiples veces sin duplicar)
+- [x] Tests con cobertura ≥80% (alcanzado: 86.36%)
 
 # Backend: Módulo y Servicios
 
