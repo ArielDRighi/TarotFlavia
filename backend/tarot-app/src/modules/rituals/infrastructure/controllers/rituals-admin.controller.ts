@@ -17,7 +17,6 @@ import {
   ApiResponse,
   ApiBearerAuth,
   ApiParam,
-  ApiBody,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../../common/guards/roles.guard';
@@ -31,6 +30,7 @@ import {
   UpdateRitualStepDto,
   CreateRitualMaterialDto,
   UpdateRitualMaterialDto,
+  DuplicateRitualDto,
 } from '../../application/dto';
 
 @ApiTags('Admin - Rituals')
@@ -103,15 +103,14 @@ export class RitualsAdminController {
   @Post(':id/duplicate')
   @ApiOperation({ summary: 'Duplicar ritual' })
   @ApiParam({ name: 'id', type: Number })
-  @ApiBody({ schema: { properties: { newSlug: { type: 'string' } } } })
   @ApiResponse({ status: 201, description: 'Ritual duplicado exitosamente' })
   @ApiResponse({ status: 404, description: 'Ritual no encontrado' })
   @ApiResponse({ status: 409, description: 'Ya existe un ritual con ese slug' })
   async duplicate(
     @Param('id', ParseIntPipe) id: number,
-    @Body('newSlug') newSlug: string,
+    @Body() dto: DuplicateRitualDto,
   ) {
-    return this.adminService.duplicate(id, newSlug);
+    return this.adminService.duplicate(id, dto.newSlug);
   }
 
   // ==================

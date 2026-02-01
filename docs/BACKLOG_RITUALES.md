@@ -3108,15 +3108,15 @@ Crear endpoints de administración para gestionar rituales, pasos y materiales d
 
 ##### Testing
 
-- [x] Test e2e: POST /admin/rituals crea ritual completo
-- [x] Test e2e: POST con slug duplicado retorna 409
-- [x] Test e2e: PATCH /admin/rituals/:id actualiza campos
-- [x] Test e2e: DELETE /admin/rituals/:id hace soft delete
-- [x] Test e2e: POST /admin/rituals/:id/steps agrega paso
-- [x] Test e2e: POST /admin/rituals/:id/materials agrega material
-- [x] Test e2e: POST /admin/rituals/:id/duplicate crea copia
-- [x] Test e2e: Endpoints requieren rol ADMIN
-- [x] Test e2e: Usuario sin rol ADMIN recibe 403
+- [ ] Test e2e: POST /admin/rituals crea ritual completo
+- [ ] Test e2e: POST con slug duplicado retorna 409
+- [ ] Test e2e: PATCH /admin/rituals/:id actualiza campos
+- [ ] Test e2e: DELETE /admin/rituals/:id hace soft delete
+- [ ] Test e2e: POST /admin/rituals/:id/steps agrega paso
+- [ ] Test e2e: POST /admin/rituals/:id/materials agrega material
+- [ ] Test e2e: POST /admin/rituals/:id/duplicate crea copia
+- [ ] Test e2e: Endpoints requieren rol ADMIN
+- [ ] Test e2e: Usuario sin rol ADMIN recibe 403
 
 ---
 

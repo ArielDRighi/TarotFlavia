@@ -16,3 +16,4 @@ export {
   UpdateRitualStepDto,
   UpdateRitualMaterialDto,
 } from './update-ritual.dto';
+export { DuplicateRitualDto } from './duplicate-ritual.dto';
