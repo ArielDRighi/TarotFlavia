@@ -1,4 +1,4 @@
-import { DataSource } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Ritual } from '../../modules/rituals/entities/ritual.entity';
 import { RitualStep } from '../../modules/rituals/entities/ritual-step.entity';
 import { RitualMaterial } from '../../modules/rituals/entities/ritual-material.entity';
@@ -8,40 +8,63 @@ import { RitualCategory } from '../../modules/rituals/domain/enums';
 
 describe('RitualsSeeder', () => {
   let dataSource: DataSource;
-  let ritualRepository: any;
-  let stepRepository: any;
-  let materialRepository: any;
+  let ritualRepository: Repository<Ritual>;
+  let stepRepository: Repository<RitualStep>;
+  let materialRepository: Repository<RitualMaterial>;
+  let mockRitualCount: jest.Mock;
+  let mockRitualCreate: jest.Mock;
+  let mockRitualSave: jest.Mock;
+  let mockRitualQueryBuilder: jest.Mock;
+  let mockStepCreate: jest.Mock;
+  let mockStepSave: jest.Mock;
+  let mockStepCount: jest.Mock;
+  let mockMaterialCreate: jest.Mock;
+  let mockMaterialSave: jest.Mock;
+  let mockMaterialCount: jest.Mock;
 
   beforeEach(() => {
+    // Initialize mocks
+    mockRitualCount = jest.fn();
+    mockRitualCreate = jest.fn();
+    mockRitualSave = jest.fn();
+    mockRitualQueryBuilder = jest.fn();
+    mockStepCreate = jest.fn();
+    mockStepSave = jest.fn();
+    mockStepCount = jest.fn();
+    mockMaterialCreate = jest.fn();
+    mockMaterialSave = jest.fn();
+    mockMaterialCount = jest.fn();
+
     // Mock repositories
     ritualRepository = {
-      count: jest.fn(),
-      create: jest.fn(),
-      save: jest.fn(),
-      createQueryBuilder: jest.fn(),
-    };
+      count: mockRitualCount,
+      create: mockRitualCreate,
+      save: mockRitualSave,
+      createQueryBuilder: mockRitualQueryBuilder,
+    } as unknown as Repository<Ritual>;
 
     stepRepository = {
-      create: jest.fn(),
-      save: jest.fn(),
-      count: jest.fn(),
-    };
+      create: mockStepCreate,
+      save: mockStepSave,
+      count: mockStepCount,
+    } as unknown as Repository<RitualStep>;
 
     materialRepository = {
-      create: jest.fn(),
-      save: jest.fn(),
-      count: jest.fn(),
-    };
+      create: mockMaterialCreate,
+      save: mockMaterialSave,
+      count: mockMaterialCount,
+    } as unknown as Repository<RitualMaterial>;
 
     // Mock DataSource
     dataSource = {
-      getRepository: jest.fn((entity): any => {
+      getRepository: jest.fn((entity) => {
         if (entity === Ritual) return ritualRepository;
         if (entity === RitualStep) return stepRepository;
         if (entity === RitualMaterial) return materialRepository;
-        return {} as any;
+
+        return {} as Repository<any>;
       }),
-    } as any;
+    } as unknown as DataSource;
   });
 
   afterEach(() => {
@@ -51,7 +74,7 @@ describe('RitualsSeeder', () => {
   describe('Idempotencia', () => {
     it('debe saltar el seed si ya existen rituales', async () => {
       // Arrange
-      ritualRepository.count.mockResolvedValue(5);
+      mockRitualCount.mockResolvedValue(5);
 
       // Spy on console.log
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
@@ -60,10 +83,10 @@ describe('RitualsSeeder', () => {
       await seedRituals(dataSource);
 
       // Assert
-      expect(ritualRepository.count).toHaveBeenCalledTimes(1);
-      expect(ritualRepository.save).not.toHaveBeenCalled();
-      expect(stepRepository.save).not.toHaveBeenCalled();
-      expect(materialRepository.save).not.toHaveBeenCalled();
+      expect(mockRitualCount).toHaveBeenCalledTimes(1);
+      expect(mockRitualSave).not.toHaveBeenCalled();
+      expect(mockStepSave).not.toHaveBeenCalled();
+      expect(mockMaterialSave).not.toHaveBeenCalled();
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringContaining('Rituales ya poblados'),
       );
@@ -73,27 +96,23 @@ describe('RitualsSeeder', () => {
 
     it('debe insertar rituales si la tabla está vacía', async () => {
       // Arrange
-      ritualRepository.count.mockResolvedValueOnce(0).mockResolvedValueOnce(4);
-      materialRepository.count.mockResolvedValue(15);
-      stepRepository.count.mockResolvedValue(30);
+      mockRitualCount.mockResolvedValueOnce(0).mockResolvedValueOnce(4);
+      mockMaterialCount.mockResolvedValue(15);
+      mockStepCount.mockResolvedValue(30);
 
-      ritualRepository.create.mockImplementation((data: any) => data as Ritual);
-      ritualRepository.save.mockImplementation((ritual: any) =>
+      mockRitualCreate.mockImplementation((data) => data as Ritual);
+      mockRitualSave.mockImplementation((ritual) =>
         Promise.resolve({
           ...ritual,
           id: Math.floor(Math.random() * 1000),
         } as Ritual),
       );
 
-      stepRepository.create.mockImplementation(
-        (data: any) => data as RitualStep,
-      );
-      stepRepository.save.mockResolvedValue({} as RitualStep);
+      mockStepCreate.mockImplementation((data) => data as RitualStep);
+      mockStepSave.mockResolvedValue({} as RitualStep);
 
-      materialRepository.create.mockImplementation(
-        (data: any) => data as RitualMaterial,
-      );
-      materialRepository.save.mockResolvedValue({});
+      mockMaterialCreate.mockImplementation((data) => data as RitualMaterial);
+      mockMaterialSave.mockResolvedValue({} as RitualMaterial);
 
       // Mock para el query builder (estadísticas)
       const queryBuilder = {
@@ -106,45 +125,39 @@ describe('RitualsSeeder', () => {
           { category: 'tarot', count: '1' },
         ]),
       };
-      ritualRepository.createQueryBuilder.mockReturnValue(queryBuilder);
+      mockRitualQueryBuilder.mockReturnValue(queryBuilder);
 
       // Act
       await seedRituals(dataSource);
 
       // Assert
-      expect(ritualRepository.count).toHaveBeenCalled();
-      expect(ritualRepository.save).toHaveBeenCalledTimes(
-        RITUALS_SEED_DATA.length,
-      );
-      expect(stepRepository.save).toHaveBeenCalled();
-      expect(materialRepository.save).toHaveBeenCalled();
+      expect(mockRitualCount).toHaveBeenCalled();
+      expect(mockRitualSave).toHaveBeenCalledTimes(RITUALS_SEED_DATA.length);
+      expect(mockStepSave).toHaveBeenCalled();
+      expect(mockMaterialSave).toHaveBeenCalled();
     });
   });
 
   describe('Validación de contenido', () => {
     it('debe crear rituales con todos los campos requeridos', async () => {
       // Arrange
-      ritualRepository.count.mockResolvedValueOnce(0).mockResolvedValueOnce(4);
-      materialRepository.count.mockResolvedValue(15);
-      stepRepository.count.mockResolvedValue(30);
+      mockRitualCount.mockResolvedValueOnce(0).mockResolvedValueOnce(4);
+      mockMaterialCount.mockResolvedValue(15);
+      mockStepCount.mockResolvedValue(30);
 
-      const savedRituals: any[] = [];
-      ritualRepository.create.mockImplementation((data: any) => data as Ritual);
-      ritualRepository.save.mockImplementation((ritual: any) => {
+      const savedRituals: Partial<Ritual>[] = [];
+      mockRitualCreate.mockImplementation((data) => data as Ritual);
+      mockRitualSave.mockImplementation((ritual) => {
         const saved = { ...ritual, id: savedRituals.length + 1 };
         savedRituals.push(saved);
         return Promise.resolve(saved as Ritual);
       });
 
-      stepRepository.create.mockImplementation(
-        (data: any) => data as RitualStep,
-      );
-      stepRepository.save.mockResolvedValue({} as RitualStep);
+      mockStepCreate.mockImplementation((data) => data as RitualStep);
+      mockStepSave.mockResolvedValue({} as RitualStep);
 
-      materialRepository.create.mockImplementation(
-        (data: any) => data as RitualMaterial,
-      );
-      materialRepository.save.mockResolvedValue({});
+      mockMaterialCreate.mockImplementation((data) => data as RitualMaterial);
+      mockMaterialSave.mockResolvedValue({} as RitualMaterial);
 
       const queryBuilder = {
         select: jest.fn().mockReturnThis(),
@@ -152,7 +165,7 @@ describe('RitualsSeeder', () => {
         groupBy: jest.fn().mockReturnThis(),
         getRawMany: jest.fn().mockResolvedValue([]),
       };
-      ritualRepository.createQueryBuilder.mockReturnValue(queryBuilder);
+      mockRitualQueryBuilder.mockReturnValue(queryBuilder);
 
       // Act
       await seedRituals(dataSource);
@@ -160,7 +173,7 @@ describe('RitualsSeeder', () => {
       // Assert
       expect(savedRituals.length).toBe(RITUALS_SEED_DATA.length);
 
-      savedRituals.forEach((ritual: any) => {
+      savedRituals.forEach((ritual) => {
         expect(ritual.slug).toBeDefined();
         expect(ritual.title).toBeDefined();
         expect(ritual.description).toBeDefined();
@@ -177,31 +190,27 @@ describe('RitualsSeeder', () => {
 
     it('debe crear materiales para cada ritual', async () => {
       // Arrange
-      ritualRepository.count.mockResolvedValueOnce(0).mockResolvedValueOnce(4);
-      materialRepository.count.mockResolvedValue(15);
-      stepRepository.count.mockResolvedValue(30);
+      mockRitualCount.mockResolvedValueOnce(0).mockResolvedValueOnce(4);
+      mockMaterialCount.mockResolvedValue(15);
+      mockStepCount.mockResolvedValue(30);
 
-      ritualRepository.create.mockImplementation((data: any) => data as Ritual);
-      ritualRepository.save.mockImplementation((ritual: any) =>
+      mockRitualCreate.mockImplementation((data) => data as Ritual);
+      mockRitualSave.mockImplementation((ritual) =>
         Promise.resolve({
           ...ritual,
           id: 1,
         } as Ritual),
       );
 
-      const savedMaterials: any[] = [];
-      materialRepository.create.mockImplementation(
-        (data: any) => data as RitualMaterial,
-      );
-      materialRepository.save.mockImplementation((material: any) => {
+      const savedMaterials: Partial<RitualMaterial>[] = [];
+      mockMaterialCreate.mockImplementation((data) => data as RitualMaterial);
+      mockMaterialSave.mockImplementation((material) => {
         savedMaterials.push(material);
         return Promise.resolve(material as RitualMaterial);
       });
 
-      stepRepository.create.mockImplementation(
-        (data: any) => data as RitualStep,
-      );
-      stepRepository.save.mockResolvedValue({} as RitualStep);
+      mockStepCreate.mockImplementation((data) => data as RitualStep);
+      mockStepSave.mockResolvedValue({} as RitualStep);
 
       const queryBuilder = {
         select: jest.fn().mockReturnThis(),
@@ -209,7 +218,7 @@ describe('RitualsSeeder', () => {
         groupBy: jest.fn().mockReturnThis(),
         getRawMany: jest.fn().mockResolvedValue([]),
       };
-      ritualRepository.createQueryBuilder.mockReturnValue(queryBuilder);
+      mockRitualQueryBuilder.mockReturnValue(queryBuilder);
 
       // Act
       await seedRituals(dataSource);
@@ -221,7 +230,7 @@ describe('RitualsSeeder', () => {
       );
       expect(savedMaterials.length).toBe(totalExpectedMaterials);
 
-      savedMaterials.forEach((material: any) => {
+      savedMaterials.forEach((material) => {
         expect(material.ritualId).toBeDefined();
         expect(material.name).toBeDefined();
         expect(material.type).toBeDefined();
@@ -231,31 +240,27 @@ describe('RitualsSeeder', () => {
 
     it('debe crear pasos para cada ritual en orden secuencial', async () => {
       // Arrange
-      ritualRepository.count.mockResolvedValueOnce(0).mockResolvedValueOnce(4);
-      materialRepository.count.mockResolvedValue(15);
-      stepRepository.count.mockResolvedValue(30);
+      mockRitualCount.mockResolvedValueOnce(0).mockResolvedValueOnce(4);
+      mockMaterialCount.mockResolvedValue(15);
+      mockStepCount.mockResolvedValue(30);
 
-      ritualRepository.create.mockImplementation((data: any) => data as Ritual);
-      ritualRepository.save.mockImplementation((ritual: any) =>
+      mockRitualCreate.mockImplementation((data) => data as Ritual);
+      mockRitualSave.mockImplementation((ritual) =>
         Promise.resolve({
           ...ritual,
           id: 1,
         } as Ritual),
       );
 
-      const savedSteps: any[] = [];
-      stepRepository.create.mockImplementation(
-        (data: any) => data as RitualStep,
-      );
-      stepRepository.save.mockImplementation((step: any) => {
+      const savedSteps: Partial<RitualStep>[] = [];
+      mockStepCreate.mockImplementation((data) => data as RitualStep);
+      mockStepSave.mockImplementation((step) => {
         savedSteps.push(step);
         return Promise.resolve(step as RitualStep);
       });
 
-      materialRepository.create.mockImplementation(
-        (data: any) => data as RitualMaterial,
-      );
-      materialRepository.save.mockResolvedValue({} as RitualMaterial);
+      mockMaterialCreate.mockImplementation((data) => data as RitualMaterial);
+      mockMaterialSave.mockResolvedValue({} as RitualMaterial);
 
       const queryBuilder = {
         select: jest.fn().mockReturnThis(),
@@ -263,7 +268,7 @@ describe('RitualsSeeder', () => {
         groupBy: jest.fn().mockReturnThis(),
         getRawMany: jest.fn().mockResolvedValue([]),
       };
-      ritualRepository.createQueryBuilder.mockReturnValue(queryBuilder);
+      mockRitualQueryBuilder.mockReturnValue(queryBuilder);
 
       // Act
       await seedRituals(dataSource);
@@ -275,7 +280,7 @@ describe('RitualsSeeder', () => {
       );
       expect(savedSteps.length).toBe(totalExpectedSteps);
 
-      savedSteps.forEach((step: any) => {
+      savedSteps.forEach((step) => {
         expect(step.ritualId).toBeDefined();
         expect(step.stepNumber).toBeGreaterThanOrEqual(1);
         expect(step.title).toBeDefined();
@@ -350,13 +355,13 @@ describe('RitualsSeeder', () => {
         title: 'abc', // Muy corto
       };
 
-      ritualRepository.count.mockResolvedValueOnce(0);
-      ritualRepository.create.mockImplementation((data: any) => data as Ritual);
+      mockRitualCount.mockResolvedValueOnce(0);
+      mockRitualCreate.mockImplementation((data) => data as Ritual);
 
       // Reemplazar temporalmente los datos
       const originalData = [...RITUALS_SEED_DATA];
       RITUALS_SEED_DATA.length = 0;
-      RITUALS_SEED_DATA.push(invalidRitual as any);
+      RITUALS_SEED_DATA.push(invalidRitual);
 
       // Act & Assert
       await expect(seedRituals(dataSource)).rejects.toThrow();

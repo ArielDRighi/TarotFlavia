@@ -101,12 +101,26 @@ export async function seedRituals(dataSource: DataSource): Promise<void> {
  * Valida que un ritual tenga contenido completo y de calidad
  * Lanza error si falta información crítica
  */
+interface StepWithNumber {
+  stepNumber: number;
+}
+
+interface StepWithContent {
+  title?: string;
+  description?: string;
+}
+
+interface MaterialData {
+  name: string;
+  type: string;
+}
+
 function validateRitualContent(ritualData: {
   title: string;
   description: string;
   purpose: string;
-  materials: any[];
-  steps: any[];
+  materials: MaterialData[];
+  steps: unknown[];
   slug: string;
 }): void {
   const errors: string[] = [];
@@ -140,11 +154,8 @@ function validateRitualContent(ritualData: {
     errors.push('No hay pasos definidos');
   } else {
     // Validar que los pasos estén numerados secuencialmente
-    interface StepWithNumber {
-      stepNumber: number;
-    }
     const stepNumbers = ritualData.steps
-      .map((s: any) => (s as StepWithNumber).stepNumber)
+      .map((s) => (s as StepWithNumber).stepNumber)
       .sort();
     for (let i = 0; i < stepNumbers.length; i++) {
       if (stepNumbers[i] !== i + 1) {
@@ -156,11 +167,7 @@ function validateRitualContent(ritualData: {
     }
 
     // Validar que cada paso tenga título y descripción
-    interface StepWithContent {
-      title?: string;
-      description?: string;
-    }
-    ritualData.steps.forEach((step: any, index) => {
+    ritualData.steps.forEach((step, index) => {
       const typedStep = step as StepWithContent;
 
       if (!typedStep.title || typedStep.title.trim().length < 3) {
