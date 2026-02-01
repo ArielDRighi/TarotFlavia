@@ -46,6 +46,7 @@ export class Ritual {
   @Column({ name: 'duration_minutes', type: 'smallint' })
   durationMinutes: number;
 
+  // Fase lunar principal recomendada para realizar el ritual
   @Column({
     name: 'best_lunar_phase',
     type: 'enum',
@@ -54,6 +55,7 @@ export class Ritual {
   })
   bestLunarPhase: LunarPhase | null;
 
+  // Todas las fases lunares válidas (si el ritual funciona bien en múltiples fases)
   @Column({ name: 'best_lunar_phases', type: 'jsonb', nullable: true })
   bestLunarPhases: LunarPhase[] | null;
 
@@ -110,13 +112,11 @@ export class Ritual {
   // Relaciones
   @OneToMany(() => RitualStep, (step) => step.ritual, {
     cascade: true,
-    eager: true,
   })
   steps: RitualStep[];
 
   @OneToMany(() => RitualMaterial, (material) => material.ritual, {
     cascade: true,
-    eager: true,
   })
   materials: RitualMaterial[];
 
