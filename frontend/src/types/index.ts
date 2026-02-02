@@ -159,3 +159,12 @@ export {
   DIFFICULTY_INFO,
   LUNAR_PHASE_INFO,
 } from './ritual.types';
+
+// Sacred Calendar Types
+export type { SacredEvent, SacredCalendarFilters } from './sacred-calendar.types';
+export {
+  SacredEventType,
+  ImportanceLevel,
+  EVENT_TYPE_INFO,
+  IMPORTANCE_INFO,
+} from './sacred-calendar.types';

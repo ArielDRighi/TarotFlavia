@@ -132,6 +132,14 @@ export const API_ENDPOINTS = {
     STATS: '/rituals/history/stats',
   },
 
+  // Sacred Calendar (Calendario Sagrado)
+  SACRED_CALENDAR: {
+    UPCOMING: '/sacred-calendar/upcoming',
+    TODAY: '/sacred-calendar/today',
+    BY_DATE_RANGE: '/sacred-calendar/range',
+    BY_ID: (id: number) => `/sacred-calendar/${id}`,
+  },
+
   // Admin Dashboard
   ADMIN: {
     DASHBOARD_STATS: '/admin/dashboard/stats',
