@@ -8,7 +8,6 @@ import type { RitualSummary } from '@/types/ritual.types';
 // Mock Next.js components
 vi.mock('next/image', () => ({
   default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => {
-     
     return <img {...props} alt={props.alt || ''} />;
   },
 }));

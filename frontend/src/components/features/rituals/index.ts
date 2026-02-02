@@ -1,3 +1,14 @@
+/**
+ * Rituals Feature Components
+ *
+ * This module exports all components related to the Rituals feature:
+ * - RitualCard: Display ritual summary card
+ * - RitualGrid: Responsive grid layout for ritual cards
+ * - RitualCategorySelector: Horizontal category filter
+ * - RitualDifficultyFilter: Difficulty level dropdown
+ * - RitualsSkeleton: Loading skeleton states
+ */
+
 export { RitualCard } from './RitualCard';
 export { RitualGrid } from './RitualGrid';
 export { RitualCategorySelector } from './RitualCategorySelector';

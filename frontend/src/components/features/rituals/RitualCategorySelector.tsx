@@ -13,7 +13,7 @@ export interface RitualCategorySelectorProps {
   /** Callback when a category is selected */
   onSelect: (category: RitualCategory | undefined) => void;
   /** Optional category counts to display */
-  categories?: { category: string; count: number }[];
+  categories?: { category: RitualCategory; count: number }[];
   /** Additional CSS classes */
   className?: string;
 }
