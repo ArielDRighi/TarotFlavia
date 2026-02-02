@@ -6187,7 +6187,7 @@ Crear widget para el dashboard que muestre eventos sagrados próximos con recome
 
 ##### Frontend
 
-- [ ] Crear tipos TypeScript:
+- [x] Crear tipos TypeScript:
 
   ```typescript
   // frontend/src/types/sacred-calendar.types.ts
@@ -6205,7 +6205,7 @@ Crear widget para el dashboard que muestre eventos sagrados próximos con recome
   }
   ```
 
-- [ ] Crear hook `useSacredCalendar`:
+- [x] Crear hook `useSacredCalendar`:
 
   ```typescript
   export function useUpcomingEvents(days?: number) {
@@ -6225,7 +6225,7 @@ Crear widget para el dashboard que muestre eventos sagrados próximos con recome
   }
   ```
 
-- [ ] Crear `SacredEventsWidget.tsx`:
+- [x] Crear `SacredEventsWidget.tsx`:
 
   ```tsx
   "use client";
@@ -6332,14 +6332,14 @@ Crear widget para el dashboard que muestre eventos sagrados próximos con recome
   }
   ```
 
-- [ ] Agregar widget a `UserDashboard.tsx`
+- [x] Agregar widget a `UserDashboard.tsx`
 
 ##### Testing
 
-- [ ] Test: Widget muestra eventos de hoy destacados
-- [ ] Test: Muestra próximos eventos
-- [ ] Test: Upsell aparece para usuarios Free
-- [ ] Test: Link "Ver todo" solo para Premium
+- [x] Test: Widget muestra eventos de hoy destacados
+- [x] Test: Muestra próximos eventos
+- [x] Test: Upsell aparece para usuarios Free
+- [x] Test: Link "Ver todo" solo para Premium
 
 ---
 
