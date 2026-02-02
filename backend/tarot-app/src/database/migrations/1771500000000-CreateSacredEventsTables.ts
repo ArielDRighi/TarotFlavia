@@ -94,6 +94,10 @@ export class CreateSacredEventsTables1771500000000 implements MigrationInterface
     await queryRunner.query(
       `CREATE INDEX "idx_sacred_event_hemisphere" ON "sacred_events"("hemisphere");`,
     );
+    // Índice único para slug (identificador estable, como en ritual.entity.ts)
+    await queryRunner.query(
+      `CREATE UNIQUE INDEX "idx_sacred_event_slug" ON "sacred_events"("slug");`,
+    );
 
     // ====================================
     // 3. TABLA: user_sacred_event_notifications
@@ -122,8 +126,9 @@ export class CreateSacredEventsTables1771500000000 implements MigrationInterface
     `);
 
     // Índices para la tabla user_sacred_event_notifications
+    // UNIQUE constraint para prevenir duplicados por condiciones de carrera
     await queryRunner.query(
-      `CREATE INDEX "idx_user_event" ON "user_sacred_event_notifications"("user_id", "event_id");`,
+      `CREATE UNIQUE INDEX "idx_user_event" ON "user_sacred_event_notifications"("user_id", "event_id");`,
     );
   }
 
@@ -134,12 +139,13 @@ export class CreateSacredEventsTables1771500000000 implements MigrationInterface
     );
     await queryRunner.query(`DROP TABLE IF EXISTS "sacred_events";`);
 
-    // Eliminar enums
+    // Eliminar enums específicos de esta funcionalidad
+    // Nota: NO eliminamos hemisphere_enum porque es compartido con la tabla user
+    // (creado en 1771400000000-AddUserLocationFields.ts)
     await queryRunner.query(
       `DROP TYPE IF EXISTS "sacred_event_importance_enum";`,
     );
     await queryRunner.query(`DROP TYPE IF EXISTS "sabbat_enum";`);
     await queryRunner.query(`DROP TYPE IF EXISTS "sacred_event_type_enum";`);
-    await queryRunner.query(`DROP TYPE IF EXISTS "hemisphere_enum";`);
   }
 }

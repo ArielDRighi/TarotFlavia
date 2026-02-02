@@ -15,7 +15,7 @@ import { SacredEvent } from './sacred-event.entity';
  * Evita notificar el mismo evento múltiples veces
  */
 @Entity('user_sacred_event_notifications')
-@Index('idx_user_event', ['userId', 'eventId'])
+@Index('idx_user_event', ['userId', 'eventId'], { unique: true })
 export class UserSacredEventNotification {
   @PrimaryGeneratedColumn()
   id: number;

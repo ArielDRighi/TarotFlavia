@@ -30,8 +30,8 @@ export class SacredEvent {
   @Column({ type: 'varchar', length: 100 })
   name: string; // "Luna Llena en Leo", "Samhain"
 
-  @Column({ type: 'varchar', length: 100 })
-  slug: string;
+  @Column({ type: 'varchar', length: 100, unique: true })
+  slug: string; // Identificador único para búsquedas (ej: "samhain-2025-north")
 
   @Column({ type: 'text' })
   description: string;
