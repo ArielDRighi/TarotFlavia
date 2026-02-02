@@ -5513,8 +5513,9 @@ Agregar campos de ubicación geográfica al usuario para determinar el hemisferi
 
 ---
 
-### TASK-400b: Crear entidades del Calendario Sagrado
+### ✅ TASK-400b: Crear entidades del Calendario Sagrado
 
+**Estado:** ✅ COMPLETADA
 **Módulo:** `src/modules/rituals/`
 **Prioridad:** 🔴 ALTA
 **Estimación:** 1.5 días
