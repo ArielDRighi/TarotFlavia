@@ -7039,4 +7039,185 @@ Total General: ~21 días (4-5 semanas)
 
 ---
 
+# TAREAS PENDIENTES - DETECTADAS EN REVISIÓN
+
+## Fecha de revisión: 2 de febrero de 2026
+
+Durante la revisión de calidad del módulo de Rituales se detectaron los siguientes problemas que requieren resolución:
+
+---
+
+### TASK-409: Ejecutar migración de tablas de Rituales
+
+**Estado:** 🔴 PENDIENTE
+**Módulo:** `src/database/migrations/`
+**Prioridad:** 🔴 CRÍTICA
+**Estimación:** 5 minutos
+**Dependencias:** Ninguna
+
+#### 📋 Descripción
+
+La migración `1771300000000-CreateRitualsTables.ts` fue creada pero nunca ejecutada. Las tablas de rituales no existen en la base de datos.
+
+#### ✅ Tareas Específicas
+
+- [ ] Ejecutar el comando de migración:
+  ```bash
+  cd backend/tarot-app
+  npm run migration:run
+  ```
+- [ ] Verificar que las tablas fueron creadas:
+  - `rituals`
+  - `ritual_steps`
+  - `ritual_materials`
+  - `user_ritual_history`
+- [ ] Verificar que los enums fueron creados:
+  - `ritual_category_enum`
+  - `ritual_difficulty_enum`
+  - `lunar_phase_enum`
+  - `material_type_enum`
+
+---
+
+### TASK-410: Ejecutar seeder de Rituales
+
+**Estado:** 🔴 PENDIENTE
+**Módulo:** `src/database/seeds/`
+**Prioridad:** 🔴 CRÍTICA
+**Estimación:** 5 minutos
+**Dependencias:** TASK-409
+
+#### 📋 Descripción
+
+El seeder de rituales fue creado pero nunca ejecutado. La base de datos no contiene rituales de ejemplo.
+
+#### ✅ Tareas Específicas
+
+- [ ] Ejecutar el comando de seed:
+  ```bash
+  cd backend/tarot-app
+  npm run seed:rituals
+  ```
+  O si no existe ese script:
+  ```bash
+  npx ts-node src/database/seeds/seed-data.ts
+  ```
+- [ ] Verificar que se insertaron los 4 rituales iniciales:
+  - Ritual de Luna Nueva
+  - Ritual de Luna Llena
+  - Limpieza Energética del Hogar
+  - Consagración de Mazo de Tarot
+- [ ] Verificar la respuesta de `GET /api/v1/rituals` no esté vacía
+
+---
+
+### TASK-411: Agregar link a Rituales en el Header
+
+**Estado:** 🔴 PENDIENTE
+**Módulo:** `frontend/src/components/layout/Header.tsx`
+**Prioridad:** 🔴 ALTA
+**Estimación:** 15 minutos
+**Dependencias:** Ninguna
+
+#### 📋 Descripción
+
+La página de rituales (`/rituales`) existe y funciona, pero no hay ningún enlace en la navegación del Header para acceder a ella. Los usuarios no pueden descubrir ni acceder al módulo de rituales.
+
+#### ✅ Tareas Específicas
+
+- [ ] Modificar `Header.tsx` para agregar link a Rituales:
+  ```tsx
+  <Link
+    href={ROUTES.RITUALES}
+    className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
+  >
+    Rituales
+  </Link>
+  ```
+- [ ] Agregar el link en la navegación pública (visible para todos los usuarios)
+- [ ] Posicionarlo después de "Numerología" y antes de "Nueva Lectura"
+- [ ] Verificar que `ROUTES.RITUALES` esté definido en `routes.ts`
+- [ ] Actualizar el menú móvil cuando se implemente (TODO existente)
+
+---
+
+### TASK-412: Agregar DialogDescription en RitualCompletedModal
+
+**Estado:** 🟡 PENDIENTE
+**Módulo:** `frontend/src/components/features/rituals/RitualCompletedModal.tsx`
+**Prioridad:** 🟡 MEDIA
+**Estimación:** 10 minutos
+**Dependencias:** Ninguna
+
+#### 📋 Descripción
+
+Durante los tests se detectó una advertencia de accesibilidad:
+```
+Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+```
+
+El modal no tiene un `DialogDescription` que describa su propósito para lectores de pantalla.
+
+#### ✅ Tareas Específicas
+
+- [ ] Agregar `DialogDescription` al modal:
+  ```tsx
+  import { DialogDescription } from '@/components/ui/dialog';
+
+  <DialogDescription>
+    Registra tu experiencia con este ritual. Puedes agregar notas y una calificación opcional.
+  </DialogDescription>
+  ```
+- [ ] Alternativamente, usar `aria-describedby={undefined}` si no se desea texto visible
+- [ ] Ejecutar tests para verificar que el warning desaparece
+
+---
+
+### TASK-413: Corregir atributos booleanos en Image components
+
+**Estado:** 🟢 PENDIENTE
+**Módulo:** `frontend/src/components/features/rituals/`
+**Prioridad:** 🟢 BAJA
+**Estimación:** 15 minutos
+**Dependencias:** Ninguna
+
+#### 📋 Descripción
+
+Durante los tests se detectaron warnings en componentes que usan `next/image`:
+```
+Received `true` for a non-boolean attribute `fill`.
+Received `true` for a non-boolean attribute `priority`.
+```
+
+Esto ocurre en `RitualCard.tsx` y `RitualHeader.tsx`.
+
+#### ✅ Tareas Específicas
+
+- [ ] En los componentes afectados, cambiar:
+  ```tsx
+  // De:
+  <Image fill={true} priority={true} ... />
+
+  // A:
+  <Image fill priority ... />
+  ```
+- [ ] O manejar explícitamente en tests con mock de next/image
+- [ ] Ejecutar tests para verificar que los warnings desaparecen
+
+---
+
+## RESUMEN DE TAREAS PENDIENTES
+
+| Task | Descripción | Estimación | Prioridad |
+|------|-------------|------------|-----------|
+| TASK-409 | Ejecutar migración de Rituales | 5 min | 🔴 CRÍTICA |
+| TASK-410 | Ejecutar seeder de Rituales | 5 min | 🔴 CRÍTICA |
+| TASK-411 | Agregar link a Rituales en Header | 15 min | 🔴 ALTA |
+| TASK-412 | Agregar DialogDescription en modal | 10 min | 🟡 MEDIA |
+| TASK-413 | Corregir atributos booleanos en Image | 15 min | 🟢 BAJA |
+
+**Total estimado: 50 minutos**
+
+---
+
 **Fin del Módulo Rituales**
