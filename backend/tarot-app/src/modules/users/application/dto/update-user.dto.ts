@@ -5,9 +5,15 @@ import {
   MinLength,
   IsDate,
   IsDateString,
+  IsEnum,
+  Length,
+  IsNumber,
+  Min,
+  Max,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
+import { Hemisphere } from '../../enums/hemisphere.enum';
 
 export class UpdateUserDto {
   @ApiProperty({
@@ -68,4 +74,46 @@ export class UpdateUserDto {
     { message: 'La fecha debe tener formato válido (YYYY-MM-DD)' },
   )
   birthDate?: string;
+
+  @ApiProperty({
+    example: 'America/Argentina/Buenos_Aires',
+    description: 'Zona horaria del usuario (formato IANA)',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  timezone?: string;
+
+  @ApiProperty({
+    example: 'AR',
+    description: 'Código de país ISO 3166-1 alpha-2 (2 caracteres)',
+    required: false,
+  })
+  @IsString()
+  @Length(2, 2, {
+    message: 'El código de país debe tener exactamente 2 caracteres',
+  })
+  @IsOptional()
+  countryCode?: string;
+
+  @ApiProperty({
+    example: Hemisphere.SOUTH,
+    description: 'Hemisferio geográfico del usuario',
+    enum: Hemisphere,
+    required: false,
+  })
+  @IsEnum(Hemisphere, { message: "El hemisferio debe ser 'north' o 'south'" })
+  @IsOptional()
+  hemisphere?: Hemisphere;
+
+  @ApiProperty({
+    example: -34.6037,
+    description: 'Latitud del usuario (rango: -90 a 90)',
+    required: false,
+  })
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
+  @IsOptional()
+  latitude?: number;
 }

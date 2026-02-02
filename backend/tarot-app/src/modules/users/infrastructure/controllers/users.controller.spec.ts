@@ -7,13 +7,16 @@ import {
 import { UsersController } from './users.controller';
 import { UsersOrchestratorService } from '../../application/services/users-orchestrator.service';
 import { UserCapabilitiesService } from '../../application/services/user-capabilities.service';
+import { LocationService } from '../../application/services/location.service';
 import { UsageLimitsService } from '../../../usage-limits/usage-limits.service';
 import { PlanConfigService } from '../../../plan-config/plan-config.service';
 import { UserRole } from '../../../../common/enums/user-role.enum';
 import { UpdateUserDto } from '../../application/dto/update-user.dto';
 import { UpdatePasswordDto } from '../../application/dto/update-password.dto';
 import { UpdateUserPlanDto } from '../../application/dto/update-user-plan.dto';
+import { UpdateUserLocationDto } from '../../application/dto/update-user-location.dto';
 import { User, UserPlan } from '../../entities/user.entity';
+import { Hemisphere } from '../../enums/hemisphere.enum';
 
 describe('UsersController', () => {
   let controller: UsersController;
@@ -59,6 +62,11 @@ describe('UsersController', () => {
     getCapabilities: jest.fn(),
   };
 
+  const mockLocationService = {
+    getHemisphereByCountry: jest.fn(),
+    getHemisphereByLatitude: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UsersController],
@@ -70,6 +78,10 @@ describe('UsersController', () => {
         {
           provide: UserCapabilitiesService,
           useValue: mockUserCapabilitiesService,
+        },
+        {
+          provide: LocationService,
+          useValue: mockLocationService,
         },
         {
           provide: UsageLimitsService,
@@ -475,6 +487,194 @@ describe('UsersController', () => {
         BadRequestException,
       );
       expect(service.removeRole).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('updateLocation', () => {
+    it('should auto-detect hemisphere from countryCode when hemisphere not provided', async () => {
+      const updateLocationDto: UpdateUserLocationDto = {
+        timezone: 'America/Argentina/Buenos_Aires',
+        countryCode: 'AR',
+      };
+
+      const updatedUser: Partial<User> = {
+        ...mockUser,
+        timezone: 'America/Argentina/Buenos_Aires',
+        countryCode: 'AR',
+        hemisphere: Hemisphere.SOUTH,
+      };
+
+      mockLocationService.getHemisphereByCountry.mockReturnValue(
+        Hemisphere.SOUTH,
+      );
+      mockUsersService.update.mockResolvedValue(updatedUser);
+
+      const req = { user: { userId: 1 } };
+      const result = await controller.updateLocation(req, updateLocationDto);
+
+      expect(mockLocationService.getHemisphereByCountry).toHaveBeenCalledWith(
+        'AR',
+      );
+      expect(service.update).toHaveBeenCalledWith(1, {
+        ...updateLocationDto,
+        hemisphere: Hemisphere.SOUTH,
+      });
+      expect(result.message).toBe('Ubicación actualizada exitosamente');
+      expect(result.location.timezone).toBe('America/Argentina/Buenos_Aires');
+      expect(result.location.countryCode).toBe('AR');
+      expect(result.location.hemisphere).toBe(Hemisphere.SOUTH);
+    });
+
+    it('should auto-detect hemisphere from latitude when countryCode not provided', async () => {
+      const updateLocationDto: UpdateUserLocationDto = {
+        latitude: -34.603722,
+      } as any; // Using 'as any' because latitude doesn't exist yet (Item 3)
+
+      const updatedUser: Partial<User> = {
+        ...mockUser,
+        latitude: -34.603722,
+        hemisphere: Hemisphere.SOUTH,
+      };
+
+      mockLocationService.getHemisphereByLatitude.mockReturnValue(
+        Hemisphere.SOUTH,
+      );
+      mockUsersService.update.mockResolvedValue(updatedUser);
+
+      const req = { user: { userId: 1 } };
+      const result = await controller.updateLocation(req, updateLocationDto);
+
+      expect(mockLocationService.getHemisphereByLatitude).toHaveBeenCalledWith(
+        -34.603722,
+      );
+      expect(service.update).toHaveBeenCalledWith(1, {
+        ...updateLocationDto,
+        hemisphere: Hemisphere.SOUTH,
+      });
+      expect(result.message).toBe('Ubicación actualizada exitosamente');
+      expect(result.location.hemisphere).toBe(Hemisphere.SOUTH);
+    });
+
+    it('should prefer countryCode over latitude for hemisphere detection', async () => {
+      const updateLocationDto: UpdateUserLocationDto = {
+        countryCode: 'US',
+        latitude: -34.603722, // Southern latitude, but US is northern
+      } as any; // Using 'as any' because latitude doesn't exist yet (Item 3)
+
+      const updatedUser: Partial<User> = {
+        ...mockUser,
+        countryCode: 'US',
+        hemisphere: Hemisphere.NORTH,
+      };
+
+      mockLocationService.getHemisphereByCountry.mockReturnValue(
+        Hemisphere.NORTH,
+      );
+      mockUsersService.update.mockResolvedValue(updatedUser);
+
+      const req = { user: { userId: 1 } };
+      const result = await controller.updateLocation(req, updateLocationDto);
+
+      expect(mockLocationService.getHemisphereByCountry).toHaveBeenCalledWith(
+        'US',
+      );
+      expect(
+        mockLocationService.getHemisphereByLatitude,
+      ).not.toHaveBeenCalled();
+      expect(service.update).toHaveBeenCalledWith(1, {
+        ...updateLocationDto,
+        hemisphere: Hemisphere.NORTH,
+      });
+      expect(result.location.hemisphere).toBe(Hemisphere.NORTH);
+    });
+
+    it('should allow manual override when both countryCode and hemisphere provided', async () => {
+      const updateLocationDto: UpdateUserLocationDto = {
+        countryCode: 'US',
+        hemisphere: Hemisphere.SOUTH, // Manual override
+      };
+
+      const updatedUser: Partial<User> = {
+        ...mockUser,
+        countryCode: 'US',
+        hemisphere: Hemisphere.SOUTH,
+      };
+
+      mockUsersService.update.mockResolvedValue(updatedUser);
+
+      const req = { user: { userId: 1 } };
+      const result = await controller.updateLocation(req, updateLocationDto);
+
+      expect(mockLocationService.getHemisphereByCountry).not.toHaveBeenCalled();
+      expect(
+        mockLocationService.getHemisphereByLatitude,
+      ).not.toHaveBeenCalled();
+      expect(service.update).toHaveBeenCalledWith(1, updateLocationDto);
+      expect(result.location.hemisphere).toBe(Hemisphere.SOUTH);
+    });
+
+    it('should update location successfully with all fields', async () => {
+      const updateLocationDto: UpdateUserLocationDto = {
+        timezone: 'America/Argentina/Buenos_Aires',
+        countryCode: 'AR',
+        latitude: -34.603722,
+      } as any; // Using 'as any' because latitude doesn't exist yet (Item 3)
+
+      const updatedUser: Partial<User> = {
+        ...mockUser,
+        timezone: 'America/Argentina/Buenos_Aires',
+        countryCode: 'AR',
+        latitude: -34.603722,
+        hemisphere: Hemisphere.SOUTH,
+      };
+
+      mockLocationService.getHemisphereByCountry.mockReturnValue(
+        Hemisphere.SOUTH,
+      );
+      mockUsersService.update.mockResolvedValue(updatedUser);
+
+      const req = { user: { userId: 1 } };
+      const result = await controller.updateLocation(req, updateLocationDto);
+
+      expect(service.update).toHaveBeenCalledWith(1, {
+        ...updateLocationDto,
+        hemisphere: Hemisphere.SOUTH,
+      });
+      expect(result.message).toBe('Ubicación actualizada exitosamente');
+      expect(result.location.timezone).toBe('America/Argentina/Buenos_Aires');
+      expect(result.location.countryCode).toBe('AR');
+      expect(result.location.hemisphere).toBe(Hemisphere.SOUTH);
+    });
+
+    it('should return updated location in response', async () => {
+      const updateLocationDto: UpdateUserLocationDto = {
+        timezone: 'Europe/London',
+        countryCode: 'GB',
+      };
+
+      const updatedUser: Partial<User> = {
+        ...mockUser,
+        timezone: 'Europe/London',
+        countryCode: 'GB',
+        hemisphere: Hemisphere.NORTH,
+      };
+
+      mockLocationService.getHemisphereByCountry.mockReturnValue(
+        Hemisphere.NORTH,
+      );
+      mockUsersService.update.mockResolvedValue(updatedUser);
+
+      const req = { user: { userId: 1 } };
+      const result = await controller.updateLocation(req, updateLocationDto);
+
+      expect(result).toEqual({
+        message: 'Ubicación actualizada exitosamente',
+        location: expect.objectContaining({
+          timezone: 'Europe/London',
+          countryCode: 'GB',
+          hemisphere: Hemisphere.NORTH,
+        }),
+      });
     });
   });
 });
