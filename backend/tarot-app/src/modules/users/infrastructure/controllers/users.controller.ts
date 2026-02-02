@@ -16,9 +16,11 @@ import {
 } from '@nestjs/common';
 import { UsersOrchestratorService } from '../../application/services/users-orchestrator.service';
 import { UserCapabilitiesService } from '../../application/services/user-capabilities.service';
+import { LocationService } from '../../application/services/location.service';
 import { UpdateUserDto } from '../../application/dto/update-user.dto';
 import { UpdatePasswordDto } from '../../application/dto/update-password.dto';
 import { UpdateUserPlanDto } from '../../application/dto/update-user-plan.dto';
+import { UpdateUserLocationDto } from '../../application/dto/update-user-location.dto';
 import { UserCapabilitiesDto } from '../../application/dto/user-capabilities.dto';
 import { UserProfileResponseDto } from '../../application/dto/user-profile-response.dto';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
@@ -47,6 +49,7 @@ export class UsersController {
   constructor(
     private readonly usersService: UsersOrchestratorService,
     private readonly userCapabilitiesService: UserCapabilitiesService,
+    private readonly locationService: LocationService,
     private readonly usageLimitsService: UsageLimitsService,
     private readonly planConfigService: PlanConfigService,
   ) {}
@@ -190,6 +193,49 @@ export class UsersController {
   ) {
     const userId = req.user.userId;
     return this.usersService.update(userId, updateUserDto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('location')
+  @ApiOperation({
+    summary: 'Actualizar ubicación geográfica del usuario',
+    description:
+      'Actualiza la zona horaria, país y hemisferio del usuario. El hemisferio se detecta automáticamente si se proporciona el código de país, pero puede ser sobrescrito manualmente.',
+  })
+  @ApiBody({ type: UpdateUserLocationDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Ubicación actualizada exitosamente',
+  })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({ status: 404, description: 'Usuario no encontrado' })
+  async updateLocation(
+    @Request() req: { user: { userId: number } },
+    @Body() updateLocationDto: UpdateUserLocationDto,
+  ) {
+    const userId = req.user.userId;
+
+    // Si se proporciona countryCode pero no hemisphere, detectarlo automáticamente
+    if (updateLocationDto.countryCode && !updateLocationDto.hemisphere) {
+      updateLocationDto.hemisphere =
+        this.locationService.getHemisphereByCountry(
+          updateLocationDto.countryCode,
+        );
+    }
+
+    const updatedUser = await this.usersService.update(
+      userId,
+      updateLocationDto,
+    );
+
+    return {
+      message: 'Ubicación actualizada exitosamente',
+      location: {
+        timezone: updatedUser.timezone,
+        countryCode: updatedUser.countryCode,
+        hemisphere: updatedUser.hemisphere,
+      },
+    };
   }
 
   @UseGuards(JwtAuthGuard)

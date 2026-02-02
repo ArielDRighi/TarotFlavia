@@ -16,6 +16,7 @@ import { UsersController } from './infrastructure/controllers/users.controller';
 // Application
 import { UsersOrchestratorService } from './application/services/users-orchestrator.service';
 import { UserCapabilitiesService } from './application/services/user-capabilities.service';
+import { LocationService } from './application/services/location.service';
 import { CreateUserUseCase } from './application/use-cases/create-user.use-case';
 import { UpdateUserUseCase } from './application/use-cases/update-user.use-case';
 import { UpdatePasswordUseCase } from './application/use-cases/update-password.use-case';
@@ -56,6 +57,7 @@ import { UsersService } from './users.service';
 
     // Services
     UserCapabilitiesService,
+    LocationService,
 
     // Use cases
     CreateUserUseCase,

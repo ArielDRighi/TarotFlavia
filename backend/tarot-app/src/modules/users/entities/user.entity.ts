@@ -9,6 +9,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { TarotReading } from '../../tarot/readings/entities/tarot-reading.entity';
 import { UserRole } from '../../../common/enums/user-role.enum';
+import { Hemisphere } from '../enums/hemisphere.enum';
 
 // Re-export UserRole for backward compatibility
 export { UserRole };
@@ -220,6 +221,45 @@ export class User {
   })
   @Column({ type: 'timestamp', nullable: true })
   lastLogin: Date | null;
+
+  // Geolocation fields
+  @ApiProperty({
+    example: 'America/Argentina/Buenos_Aires',
+    description: 'Zona horaria del usuario (formato IANA)',
+    nullable: true,
+  })
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  timezone: string | null;
+
+  @ApiProperty({
+    example: 'AR',
+    description: 'Código ISO de país del usuario (ISO 3166-1 alpha-2)',
+    nullable: true,
+  })
+  @Column({ type: 'varchar', length: 2, nullable: true })
+  countryCode: string | null;
+
+  @ApiProperty({
+    example: 'south',
+    description: 'Hemisferio geográfico del usuario',
+    enum: Hemisphere,
+    nullable: true,
+  })
+  @Column({
+    type: 'enum',
+    enum: Hemisphere,
+    nullable: true,
+  })
+  hemisphere: Hemisphere | null;
+
+  @ApiProperty({
+    example: -34.603722,
+    description:
+      'Latitud del usuario (para detección automática de hemisferio)',
+    nullable: true,
+  })
+  @Column({ type: 'decimal', precision: 10, scale: 6, nullable: true })
+  latitude: number | null;
 
   @ApiProperty({
     example: null,
