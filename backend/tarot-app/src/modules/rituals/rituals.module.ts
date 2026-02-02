@@ -5,17 +5,20 @@ import {
   RitualStep,
   RitualMaterial,
   UserRitualHistory,
+  SacredEvent,
 } from './entities';
 import { LunarPhaseService } from './application/services/lunar-phase.service';
 import { RitualsService } from './application/services/rituals.service';
 import { RitualHistoryService } from './application/services/ritual-history.service';
 import { RitualsAdminService } from './application/services/rituals-admin.service';
+import { SacredCalendarService } from './application/services/sacred-calendar.service';
+import { SacredCalendarCronService } from './application/cron/sacred-calendar-cron.service';
 import { RitualsController } from './infrastructure/controllers/rituals.controller';
 import { RitualsAdminController } from './infrastructure/controllers/rituals-admin.controller';
 
 /**
  * Módulo de Rituales
- * Gestiona rituales espirituales, pasos, materiales e historial de usuarios
+ * Gestiona rituales espirituales, pasos, materiales, historial de usuarios y calendario sagrado
  */
 @Module({
   imports: [
@@ -24,6 +27,7 @@ import { RitualsAdminController } from './infrastructure/controllers/rituals-adm
       RitualStep,
       RitualMaterial,
       UserRitualHistory,
+      SacredEvent,
     ]),
   ],
   controllers: [RitualsController, RitualsAdminController],
@@ -32,12 +36,16 @@ import { RitualsAdminController } from './infrastructure/controllers/rituals-adm
     RitualsService,
     RitualHistoryService,
     RitualsAdminService,
+    SacredCalendarService,
+    SacredCalendarCronService,
   ],
   exports: [
     LunarPhaseService,
     RitualsService,
     RitualHistoryService,
     RitualsAdminService,
+    SacredCalendarService,
+    SacredCalendarCronService,
   ],
 })
 export class RitualsModule {}

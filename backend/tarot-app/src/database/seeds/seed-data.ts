@@ -21,6 +21,10 @@ import { seedFlaviaTarotista } from './flavia-tarotista.seeder';
 import { seedFlaviaIAConfig } from './flavia-ia-config.seeder';
 import { seedPlans } from './plans.seeder';
 import { seedRituals } from './rituals.seeder';
+import { seedSacredCalendar } from './sacred-calendar.seeder';
+import { SacredCalendarService } from '../../modules/rituals/application/services/sacred-calendar.service';
+import { LunarPhaseService } from '../../modules/rituals/application/services/lunar-phase.service';
+import { SacredEvent } from '../../modules/rituals/entities/sacred-event.entity';
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppModule);
@@ -45,6 +49,16 @@ async function bootstrap() {
     getRepositoryToken(TarotistaConfig),
   );
   const planRepository = app.get<Repository<Plan>>(getRepositoryToken(Plan));
+
+  // Services for seeders
+  const sacredEventRepository = app.get<Repository<SacredEvent>>(
+    getRepositoryToken(SacredEvent),
+  );
+  const lunarPhaseService = app.get(LunarPhaseService);
+  const sacredCalendarService = new SacredCalendarService(
+    sacredEventRepository,
+    lunarPhaseService,
+  );
 
   try {
     console.log('🌱 Starting database seeding process...\n');
@@ -102,6 +116,9 @@ async function bootstrap() {
 
     // Seed Rituals (spiritual practices with steps and materials)
     await seedRituals(dataSource);
+
+    // Seed Sacred Calendar Events (Sabbats, lunar phases, portals)
+    await seedSacredCalendar(dataSource, sacredCalendarService);
 
     console.log('\n✨ ¡Datos iniciales cargados con éxito!');
   } catch (error) {
