@@ -35,4 +35,9 @@ export const ROUTES = {
   ADMIN: '/admin',
   ADMIN_USERS: '/admin/users',
   ADMIN_STATS: '/admin/stats',
+
+  // Rituals
+  RITUALES: '/rituales',
+  RITUAL_DETAIL: (slug: string) => `/rituales/${slug}`,
+  RITUALES_HISTORIAL: '/rituales/historial',
 } as const;

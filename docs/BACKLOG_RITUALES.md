@@ -4408,12 +4408,13 @@ frontend/src/components/features/rituals/
 
 ---
 
-### TASK-408: Crear páginas de Rituales
+### ✅ TASK-408: Crear páginas de Rituales
 
 **Módulo:** `frontend/src/app/rituales/`  
 **Prioridad:** 🟡 MEDIA  
 **Estimación:** 1 día  
-**Dependencias:** TASK-406, TASK-407
+**Dependencias:** TASK-406, TASK-407  
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -4442,7 +4443,7 @@ Crear las páginas principales: catálogo, detalle de ritual e historial.
 
 ##### Frontend
 
-- [ ] Agregar rutas en `routes.ts`:
+- [x] Agregar rutas en `routes.ts`:
 
   ```typescript
   export const ROUTES = {
@@ -4453,7 +4454,7 @@ Crear las páginas principales: catálogo, detalle de ritual e historial.
   } as const;
   ```
 
-- [ ] Crear `app/rituales/page.tsx`:
+- [x] Crear `app/rituales/page.tsx`:
 
   ```tsx
   "use client";
@@ -4554,7 +4555,7 @@ Crear las páginas principales: catálogo, detalle de ritual e historial.
   }
   ```
 
-- [ ] Crear `app/rituales/[slug]/page.tsx`:
+- [x] Crear `app/rituales/[slug]/page.tsx`:
 
   ```tsx
   "use client";
@@ -4813,7 +4814,7 @@ Crear las páginas principales: catálogo, detalle de ritual e historial.
 
   ```
 
-- [ ] Crear componente `RitualTips.tsx`:
+- [x] Crear componente `RitualTips.tsx`:
 
   ```tsx
   "use client";
@@ -4844,7 +4845,7 @@ Crear las páginas principales: catálogo, detalle de ritual e historial.
   }
   ```
 
-- [ ] Crear `app/rituales/historial/page.tsx`:
+- [x] Crear `app/rituales/historial/page.tsx`:
 
   ```tsx
   "use client";
