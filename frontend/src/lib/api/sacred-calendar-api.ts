@@ -1,12 +1,13 @@
 import { apiClient } from './axios-config';
 import { API_ENDPOINTS } from './endpoints';
-import type { SacredEvent, SacredCalendarFilters } from '@/types/sacred-calendar.types';
+import type { SacredEvent } from '@/types';
 
 /**
  * Obtener eventos sagrados próximos
- * @param days - Número de días hacia adelante (por defecto 7)
+ * @param days - Número de días hacia adelante (default: 30)
+ * @returns Lista de eventos próximos (limitado a 3 para usuarios free)
  */
-export async function getUpcomingEvents(days: number = 7): Promise<SacredEvent[]> {
+export async function getUpcomingEvents(days: number = 30): Promise<SacredEvent[]> {
   const response = await apiClient.get<SacredEvent[]>(
     `${API_ENDPOINTS.SACRED_CALENDAR.UPCOMING}?days=${days}`
   );
@@ -22,34 +23,14 @@ export async function getTodayEvents(): Promise<SacredEvent[]> {
 }
 
 /**
- * Obtener eventos sagrados por rango de fechas
- * @param startDate - Fecha de inicio (ISO 8601)
- * @param endDate - Fecha de fin (ISO 8601)
- * @param filters - Filtros adicionales opcionales
+ * Obtener eventos sagrados de un mes específico (Premium only)
+ * @param year - Año
+ * @param month - Mes (1-12)
+ * @returns Lista de eventos del mes
  */
-export async function getEventsByDateRange(
-  startDate: string,
-  endDate: string,
-  filters?: Omit<SacredCalendarFilters, 'startDate' | 'endDate'>
-): Promise<SacredEvent[]> {
-  const params = new URLSearchParams();
-  params.append('startDate', startDate);
-  params.append('endDate', endDate);
-
-  if (filters?.eventType) params.append('eventType', filters.eventType);
-  if (filters?.importance) params.append('importance', filters.importance);
-
+export async function getMonthEvents(year: number, month: number): Promise<SacredEvent[]> {
   const response = await apiClient.get<SacredEvent[]>(
-    `${API_ENDPOINTS.SACRED_CALENDAR.BY_DATE_RANGE}?${params.toString()}`
+    API_ENDPOINTS.SACRED_CALENDAR.MONTH(year, month)
   );
-  return response.data;
-}
-
-/**
- * Obtener evento sagrado por ID
- * @param id - ID del evento
- */
-export async function getEventById(id: number): Promise<SacredEvent> {
-  const response = await apiClient.get<SacredEvent>(API_ENDPOINTS.SACRED_CALENDAR.BY_ID(id));
   return response.data;
 }

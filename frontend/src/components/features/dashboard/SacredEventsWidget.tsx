@@ -8,11 +8,10 @@ import { useTodayEvents, useUpcomingEvents } from '@/hooks/api/useSacredCalendar
 import { useAuthStore } from '@/stores/authStore';
 import Link from 'next/link';
 import { SacredEventType, ImportanceLevel, IMPORTANCE_INFO, type SacredEvent } from '@/types';
+import { parseDateString } from '@/lib/utils/date';
+import { differenceInCalendarDays } from 'date-fns';
 
-const EVENT_ICONS: Record<
-  SacredEventType,
-  React.ComponentType<{ className?: string }>
-> = {
+const EVENT_ICONS: Record<SacredEventType, React.ComponentType<{ className?: string }>> = {
   [SacredEventType.SABBAT]: Sun,
   [SacredEventType.LUNAR_PHASE]: Moon,
   [SacredEventType.PORTAL]: Sparkles,
@@ -22,9 +21,8 @@ const EVENT_ICONS: Record<
 
 const calculateDaysUntil = (eventDate: string): number => {
   const now = new Date();
-  const event = new Date(eventDate);
-  const diffTime = event.getTime() - now.getTime();
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const event = parseDateString(eventDate);
+  return differenceInCalendarDays(event, now);
 };
 
 const getDaysUntilLabel = (days: number): string => {
@@ -93,13 +91,13 @@ export function SacredEventsWidget() {
     data: upcomingEventsData,
     isLoading: upcomingLoading,
     error: upcomingError,
-  } = useUpcomingEvents(7);
+  } = useUpcomingEvents(30);
 
   const isLoading = todayLoading || upcomingLoading;
   const hasError = todayError || upcomingError;
 
-  // Limitar a máximo 3 eventos próximos
-  const upcomingEvents = upcomingEventsData?.slice(0, 3) || [];
+  // Backend already limits to 3 events for free users, so no need to manually slice
+  const upcomingEvents = upcomingEventsData || [];
 
   const hasTodayEvents = todayEvents && todayEvents.length > 0;
   const hasUpcomingEvents = upcomingEvents.length > 0;
@@ -115,7 +113,7 @@ export function SacredEventsWidget() {
         </div>
         {isPremium && (
           <Link
-            href="/rituales/calendario"
+            href="/rituales"
             className="flex items-center gap-1 text-sm font-medium text-purple-600 hover:text-purple-700"
           >
             Ver todo
@@ -198,15 +196,16 @@ export function SacredEventsWidget() {
                 Accede a todos los eventos sagrados del año y planifica tus rituales con
                 anticipación.
               </p>
-              <Link href="/premium">
-                <Button
-                  size="sm"
-                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                >
+              <Button
+                asChild
+                size="sm"
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+              >
+                <Link href="/premium">
                   Mejorar a Premium
                   <ChevronRight className="ml-1 h-4 w-4" />
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           </div>
         </div>

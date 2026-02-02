@@ -1,11 +1,12 @@
 import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { SacredEventsWidget } from './SacredEventsWidget';
 import * as useSacredCalendarHook from '@/hooks/api/useSacredCalendar';
 import * as authStore from '@/stores/authStore';
 import type { SacredEvent } from '@/types';
 import { SacredEventType, ImportanceLevel } from '@/types';
+import { RitualCategory } from '@/types/ritual.types';
 
 // Mock Next.js Link
 vi.mock('next/link', () => ({
@@ -19,11 +20,16 @@ const createMockEvent = (overrides: Partial<SacredEvent> = {}): SacredEvent => (
   name: 'Luna Llena',
   slug: 'luna-llena',
   eventType: SacredEventType.LUNAR_PHASE,
-  eventDate: new Date('2024-01-15T00:00:00Z').toISOString(),
+  eventDate: '2025-01-15',
+  eventTime: '14:30',
   importance: ImportanceLevel.HIGH,
   description: 'Fase lunar completa',
   energyDescription: 'Energía de culminación y manifestación',
-  suggestedRitualCategories: [],
+  suggestedRitualCategories: [RitualCategory.LUNAR],
+  suggestedRitualIds: null,
+  lunarPhase: 'full_moon',
+  sabbat: null,
+  hemisphere: 'south',
   ...overrides,
 });
 
@@ -31,6 +37,10 @@ describe('SacredEventsWidget', () => {
   let queryClient: QueryClient;
 
   beforeEach(() => {
+    // Use fake timers for consistent date testing
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2025-01-10T12:00:00Z'));
+
     queryClient = new QueryClient({
       defaultOptions: {
         queries: { retry: false },
@@ -62,6 +72,10 @@ describe('SacredEventsWidget', () => {
     } as any);
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   const renderComponent = () => {
     return render(
       <QueryClientProvider client={queryClient}>
@@ -89,7 +103,7 @@ describe('SacredEventsWidget', () => {
         id: 1,
         name: 'Sabbat de Imbolc',
         eventType: SacredEventType.SABBAT,
-        eventDate: new Date().toISOString(),
+        eventDate: '2025-01-10',
         importance: ImportanceLevel.HIGH,
       });
 
@@ -108,7 +122,7 @@ describe('SacredEventsWidget', () => {
 
     it('should show "Hoy" label for today events', () => {
       const todayEvent = createMockEvent({
-        eventDate: new Date().toISOString(),
+        eventDate: '2025-01-10',
       });
 
       vi.spyOn(useSacredCalendarHook, 'useTodayEvents').mockReturnValue({
@@ -128,7 +142,7 @@ describe('SacredEventsWidget', () => {
         id: 1,
         name: 'Luna Nueva',
         importance: ImportanceLevel.HIGH,
-        eventDate: new Date().toISOString(),
+        eventDate: '2025-01-10',
       });
 
       vi.spyOn(useSacredCalendarHook, 'useTodayEvents').mockReturnValue({
@@ -159,30 +173,23 @@ describe('SacredEventsWidget', () => {
   });
 
   describe('Eventos próximos', () => {
-    it('should display upcoming events (max 3)', () => {
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-
+    it('should display upcoming events returned by backend (backend limits to 3 for free users)', () => {
+      // Backend already returns max 3 events for free users
       const upcomingEvents = [
         createMockEvent({
           id: 1,
           name: 'Evento 1',
-          eventDate: tomorrow.toISOString(),
+          eventDate: '2025-01-11',
         }),
         createMockEvent({
           id: 2,
           name: 'Evento 2',
-          eventDate: new Date(tomorrow.getTime() + 24 * 60 * 60 * 1000).toISOString(),
+          eventDate: '2025-01-12',
         }),
         createMockEvent({
           id: 3,
           name: 'Evento 3',
-          eventDate: new Date(tomorrow.getTime() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-        }),
-        createMockEvent({
-          id: 4,
-          name: 'Evento 4',
-          eventDate: new Date(tomorrow.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+          eventDate: '2025-01-13',
         }),
       ];
 
@@ -198,18 +205,14 @@ describe('SacredEventsWidget', () => {
       expect(screen.getByText('Evento 1')).toBeInTheDocument();
       expect(screen.getByText('Evento 2')).toBeInTheDocument();
       expect(screen.getByText('Evento 3')).toBeInTheDocument();
-      expect(screen.queryByText('Evento 4')).not.toBeInTheDocument();
     });
 
     it('should calculate and display "daysUntil" correctly', () => {
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      tomorrow.setHours(0, 0, 0, 0);
-
+      // System time is 2025-01-10, so 2025-01-11 is tomorrow
       const upcomingEvent = createMockEvent({
         id: 1,
         name: 'Evento Mañana',
-        eventDate: tomorrow.toISOString(),
+        eventDate: '2025-01-11',
       });
 
       vi.spyOn(useSacredCalendarHook, 'useUpcomingEvents').mockReturnValue({
@@ -225,27 +228,21 @@ describe('SacredEventsWidget', () => {
     });
 
     it('should show "Hoy", "Mañana", "En X días" appropriately', () => {
-      const today = new Date();
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const threeDays = new Date();
-      threeDays.setDate(threeDays.getDate() + 3);
-
       const upcomingEvents = [
         createMockEvent({
           id: 1,
           name: 'Evento Hoy',
-          eventDate: today.toISOString(),
+          eventDate: '2025-01-10', // Today
         }),
         createMockEvent({
           id: 2,
           name: 'Evento Mañana',
-          eventDate: tomorrow.toISOString(),
+          eventDate: '2025-01-11', // Tomorrow
         }),
         createMockEvent({
           id: 3,
           name: 'Evento en 3 días',
-          eventDate: threeDays.toISOString(),
+          eventDate: '2025-01-13', // 3 days from now
         }),
       ];
 
@@ -264,14 +261,11 @@ describe('SacredEventsWidget', () => {
     });
 
     it('should display "Ver rituales" button for each event', () => {
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-
       const upcomingEvent = createMockEvent({
         id: 1,
         name: 'Luna Llena',
         eventType: SacredEventType.LUNAR_PHASE,
-        eventDate: tomorrow.toISOString(),
+        eventDate: '2025-01-11',
       });
 
       vi.spyOn(useSacredCalendarHook, 'useUpcomingEvents').mockReturnValue({
@@ -299,7 +293,7 @@ describe('SacredEventsWidget', () => {
 
       expect(screen.getByText('Ver todo')).toBeInTheDocument();
       const link = screen.getByText('Ver todo').closest('a');
-      expect(link).toHaveAttribute('href', '/rituales/calendario');
+      expect(link).toHaveAttribute('href', '/rituales');
     });
 
     it('should hide "Ver todo" link for free users', () => {
@@ -383,7 +377,7 @@ describe('SacredEventsWidget', () => {
   });
 
   describe('Links & Navigation', () => {
-    it('should link to /rituales/calendario for "Ver todo"', () => {
+    it('should link to /rituales for "Ver todo"', () => {
       vi.spyOn(authStore, 'useAuthStore').mockReturnValue({
         user: { id: 1, email: 'premium@test.com', plan: 'premium' },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -392,18 +386,15 @@ describe('SacredEventsWidget', () => {
       renderComponent();
 
       const link = screen.getByText('Ver todo').closest('a');
-      expect(link).toHaveAttribute('href', '/rituales/calendario');
+      expect(link).toHaveAttribute('href', '/rituales');
     });
 
-    it('should link to /rituales?lunar={phase} for "Ver rituales"', () => {
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-
+    it('should link to /rituales?event={eventType} for "Ver rituales"', () => {
       const upcomingEvent = createMockEvent({
         id: 1,
         name: 'Luna Llena',
         eventType: SacredEventType.LUNAR_PHASE,
-        eventDate: tomorrow.toISOString(),
+        eventDate: '2025-01-11',
       });
 
       vi.spyOn(useSacredCalendarHook, 'useUpcomingEvents').mockReturnValue({

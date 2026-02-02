@@ -7,8 +7,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   useUpcomingEvents,
   useTodayEvents,
-  useEventsByDateRange,
-  useSacredEvent,
+  useMonthEvents,
   sacredCalendarKeys,
 } from './useSacredCalendar';
 import * as sacredCalendarApi from '@/lib/api/sacred-calendar-api';
@@ -48,11 +47,15 @@ describe('useUpcomingEvents', () => {
     slug: 'luna-nueva-capricornio-2026',
     description: 'Primera luna nueva del año',
     eventType: SacredEventType.LUNAR_PHASE,
-    eventDate: '2026-01-17T18:00:00Z',
+    eventDate: '2026-01-17',
+    eventTime: '18:00',
     importance: ImportanceLevel.HIGH,
     energyDescription: 'Energía de nuevos comienzos',
     suggestedRitualCategories: [RitualCategory.LUNAR],
+    suggestedRitualIds: null,
     lunarPhase: 'new_moon',
+    sabbat: null,
+    hemisphere: 'south',
   };
 
   it('should fetch upcoming events with default days', async () => {
@@ -68,7 +71,7 @@ describe('useUpcomingEvents', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(result.current.data).toEqual(mockData);
-    expect(sacredCalendarApi.getUpcomingEvents).toHaveBeenCalledWith(7);
+    expect(sacredCalendarApi.getUpcomingEvents).toHaveBeenCalledWith(undefined);
   });
 
   it('should fetch upcoming events with custom days', async () => {
@@ -111,11 +114,15 @@ describe('useTodayEvents', () => {
       slug: 'luna-nueva-2026',
       description: 'Evento de hoy',
       eventType: SacredEventType.LUNAR_PHASE,
-      eventDate: new Date().toISOString(),
+      eventDate: '2026-01-17',
+      eventTime: '12:00',
       importance: ImportanceLevel.HIGH,
       energyDescription: 'Energía especial',
       suggestedRitualCategories: [RitualCategory.LUNAR, RitualCategory.MEDITATION],
+      suggestedRitualIds: null,
       lunarPhase: 'new_moon',
+      sabbat: null,
+      hemisphere: 'south',
     };
 
     const mockData = [mockEvent];
@@ -157,13 +164,10 @@ describe('useTodayEvents', () => {
   });
 });
 
-describe('useEventsByDateRange', () => {
+describe('useMonthEvents', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
-
-  const startDate = '2026-01-01T00:00:00Z';
-  const endDate = '2026-01-31T23:59:59Z';
 
   const mockEvent: SacredEvent = {
     id: 2,
@@ -171,126 +175,47 @@ describe('useEventsByDateRange', () => {
     slug: 'imbolc-2026',
     description: 'Sabbat de purificación',
     eventType: SacredEventType.SABBAT,
-    eventDate: '2026-02-02T00:00:00Z',
+    eventDate: '2026-02-02',
+    eventTime: '00:00',
     importance: ImportanceLevel.HIGH,
     energyDescription: 'Energía de limpieza',
     suggestedRitualCategories: [RitualCategory.CLEANSING],
+    suggestedRitualIds: null,
     lunarPhase: null,
+    sabbat: 'imbolc',
+    hemisphere: 'south',
   };
 
-  it('should fetch events by date range', async () => {
+  it('should fetch events for a specific month', async () => {
     const mockData = [mockEvent];
-    vi.mocked(sacredCalendarApi.getEventsByDateRange).mockResolvedValue(mockData);
+    vi.mocked(sacredCalendarApi.getMonthEvents).mockResolvedValue(mockData);
 
-    const { result } = renderHook(() => useEventsByDateRange(startDate, endDate), {
+    const { result } = renderHook(() => useMonthEvents(2026, 2), {
       wrapper: createWrapper(),
     });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(result.current.data).toEqual(mockData);
-    expect(sacredCalendarApi.getEventsByDateRange).toHaveBeenCalledWith(
-      startDate,
-      endDate,
-      undefined
-    );
+    expect(sacredCalendarApi.getMonthEvents).toHaveBeenCalledWith(2026, 2);
   });
 
-  it('should fetch events with filters', async () => {
-    const mockData = [mockEvent];
-    vi.mocked(sacredCalendarApi.getEventsByDateRange).mockResolvedValue(mockData);
+  it('should not fetch when year or month are invalid', () => {
+    vi.mocked(sacredCalendarApi.getMonthEvents).mockResolvedValue([]);
 
-    const filters = {
-      eventType: SacredEventType.SABBAT,
-      importance: ImportanceLevel.HIGH,
-    };
-
-    const { result } = renderHook(() => useEventsByDateRange(startDate, endDate, filters), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-    expect(result.current.data).toEqual(mockData);
-    expect(sacredCalendarApi.getEventsByDateRange).toHaveBeenCalledWith(
-      startDate,
-      endDate,
-      filters
-    );
-  });
-
-  it('should not fetch when dates are not provided', () => {
-    vi.mocked(sacredCalendarApi.getEventsByDateRange).mockResolvedValue([]);
-
-    const { result } = renderHook(() => useEventsByDateRange('', ''), {
+    const { result } = renderHook(() => useMonthEvents(0, 0), {
       wrapper: createWrapper(),
     });
 
     expect(result.current.status).toBe('pending');
-    expect(sacredCalendarApi.getEventsByDateRange).not.toHaveBeenCalled();
+    expect(sacredCalendarApi.getMonthEvents).not.toHaveBeenCalled();
   });
 
   it('should handle errors', async () => {
-    const error = new Error('Error al obtener eventos por rango');
-    vi.mocked(sacredCalendarApi.getEventsByDateRange).mockRejectedValue(error);
+    const error = new Error('Error al obtener eventos del mes');
+    vi.mocked(sacredCalendarApi.getMonthEvents).mockRejectedValue(error);
 
-    const { result } = renderHook(() => useEventsByDateRange(startDate, endDate), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => expect(result.current.isError).toBe(true));
-
-    expect(result.current.error).toEqual(error);
-  });
-});
-
-describe('useSacredEvent', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  const mockEvent: SacredEvent = {
-    id: 1,
-    name: 'Luna Nueva',
-    slug: 'luna-nueva-2026',
-    description: 'Evento detallado',
-    eventType: SacredEventType.LUNAR_PHASE,
-    eventDate: '2026-01-17T18:00:00Z',
-    importance: ImportanceLevel.HIGH,
-    energyDescription: 'Energía detallada',
-    suggestedRitualCategories: [RitualCategory.LUNAR, RitualCategory.MEDITATION],
-    lunarPhase: 'new_moon',
-  };
-
-  it('should fetch event by ID', async () => {
-    vi.mocked(sacredCalendarApi.getEventById).mockResolvedValue(mockEvent);
-
-    const { result } = renderHook(() => useSacredEvent(1), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-    expect(result.current.data).toEqual(mockEvent);
-    expect(sacredCalendarApi.getEventById).toHaveBeenCalledWith(1);
-  });
-
-  it('should not fetch when ID is invalid', () => {
-    vi.mocked(sacredCalendarApi.getEventById).mockResolvedValue(mockEvent);
-
-    const { result } = renderHook(() => useSacredEvent(0), {
-      wrapper: createWrapper(),
-    });
-
-    expect(result.current.status).toBe('pending');
-    expect(sacredCalendarApi.getEventById).not.toHaveBeenCalled();
-  });
-
-  it('should handle errors', async () => {
-    const error = new Error('Evento no encontrado');
-    vi.mocked(sacredCalendarApi.getEventById).mockRejectedValue(error);
-
-    const { result } = renderHook(() => useSacredEvent(999), {
+    const { result } = renderHook(() => useMonthEvents(2026, 2), {
       wrapper: createWrapper(),
     });
 
@@ -303,15 +228,8 @@ describe('useSacredEvent', () => {
 describe('sacredCalendarKeys', () => {
   it('should generate correct query keys', () => {
     expect(sacredCalendarKeys.all).toEqual(['sacred-calendar']);
-    expect(sacredCalendarKeys.upcoming(7)).toEqual(['sacred-calendar', 'upcoming', 7]);
+    expect(sacredCalendarKeys.upcoming(30)).toEqual(['sacred-calendar', 'upcoming', 30]);
     expect(sacredCalendarKeys.today()).toEqual(['sacred-calendar', 'today']);
-    expect(sacredCalendarKeys.byDateRange('2026-01-01T00:00:00Z', '2026-01-31T23:59:59Z')).toEqual([
-      'sacred-calendar',
-      'range',
-      '2026-01-01T00:00:00Z',
-      '2026-01-31T23:59:59Z',
-      undefined,
-    ]);
-    expect(sacredCalendarKeys.detail(1)).toEqual(['sacred-calendar', 'detail', 1]);
+    expect(sacredCalendarKeys.month(2026, 2)).toEqual(['sacred-calendar', 'month', 2026, 2]);
   });
 });

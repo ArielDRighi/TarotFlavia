@@ -134,10 +134,9 @@ export const API_ENDPOINTS = {
 
   // Sacred Calendar (Calendario Sagrado)
   SACRED_CALENDAR: {
-    UPCOMING: '/sacred-calendar/upcoming',
-    TODAY: '/sacred-calendar/today',
-    BY_DATE_RANGE: '/sacred-calendar/range',
-    BY_ID: (id: number) => `/sacred-calendar/${id}`,
+    UPCOMING: '/rituals/calendar/upcoming',
+    TODAY: '/rituals/calendar/today',
+    MONTH: (year: number, month: number) => `/rituals/calendar/month/${year}/${month}`,
   },
 
   // Admin Dashboard

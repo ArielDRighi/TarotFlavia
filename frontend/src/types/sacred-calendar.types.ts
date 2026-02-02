@@ -22,12 +22,16 @@ export interface SacredEvent {
   slug: string;
   description: string;
   eventType: SacredEventType;
-  eventDate: string; // ISO 8601 date string
+  sabbat?: string | null; // Sabbat type (if applicable)
+  lunarPhase?: string | null; // Lunar phase (if applicable)
+  eventDate: string; // Fecha sólo (YYYY-MM-DD) enviada por el backend
+  eventTime?: string | null; // Hora asociada al evento (por ejemplo, "18:30"), puede ser null
+  hemisphere?: string | null; // Hemisferio (north/south)
   importance: ImportanceLevel;
   energyDescription: string;
-  suggestedRitualCategories: RitualCategory[];
+  suggestedRitualCategories?: RitualCategory[] | null;
+  suggestedRitualIds?: number[] | null;
   daysUntil?: number; // Calculado en frontend
-  lunarPhase?: string | null; // Solo para eventos lunares
 }
 
 export interface SacredCalendarFilters {
