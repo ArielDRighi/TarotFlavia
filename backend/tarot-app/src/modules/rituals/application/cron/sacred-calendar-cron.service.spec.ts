@@ -4,7 +4,6 @@ import { SacredCalendarService } from '../services/sacred-calendar.service';
 
 describe('SacredCalendarCronService', () => {
   let service: SacredCalendarCronService;
-  let calendarService: SacredCalendarService;
 
   const mockCalendarService = {
     generateYearEvents: jest.fn(),
@@ -22,7 +21,6 @@ describe('SacredCalendarCronService', () => {
     }).compile();
 
     service = module.get<SacredCalendarCronService>(SacredCalendarCronService);
-    calendarService = module.get<SacredCalendarService>(SacredCalendarService);
 
     // Reset mocks
     jest.clearAllMocks();
