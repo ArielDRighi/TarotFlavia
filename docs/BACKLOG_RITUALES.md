@@ -3624,6 +3624,7 @@ Crear los tipos TypeScript, funciones de API y hooks para el módulo de rituales
 
 ### TASK-406: Crear componentes de listado de rituales
 
+**Estado:** ✅ COMPLETADA  
 **Módulo:** `frontend/src/components/features/rituals/`  
 **Prioridad:** 🟡 MEDIA  
 **Estimación:** 1 día  
