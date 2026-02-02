@@ -5673,12 +5673,13 @@ Crear las entidades para almacenar eventos del calendario sagrado: Sabbats (Rued
 
 ---
 
-### TASK-400c: Servicio de Calendario Sagrado y Seeder
+### TASK-400c: Servicio de Calendario Sagrado y Seeder ✅ COMPLETADA
 
 **Módulo:** `src/modules/rituals/`
 **Prioridad:** 🔴 ALTA
 **Estimación:** 2 días
 **Dependencias:** TASK-400b, TASK-403 (LunarPhaseService)
+**Estado:** ✅ COMPLETADA el 02/02/2026
 
 ---
 
