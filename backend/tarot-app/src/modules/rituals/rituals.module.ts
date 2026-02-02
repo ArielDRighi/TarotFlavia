@@ -45,6 +45,7 @@ import { RitualsAdminController } from './infrastructure/controllers/rituals-adm
     RitualHistoryService,
     RitualsAdminService,
     SacredCalendarService,
+    SacredCalendarCronService,
   ],
 })
 export class RitualsModule {}

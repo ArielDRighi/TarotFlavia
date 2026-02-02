@@ -120,7 +120,7 @@ describe('SacredCalendarService', () => {
         2026,
         Hemisphere.NORTH,
       );
-      expect(result).toEqual(new Date('2026-10-31'));
+      expect(result).toEqual(new Date(2026, 9, 31)); // October 31
     });
 
     it('should return correct date for Samhain in Southern Hemisphere', () => {
@@ -129,17 +129,17 @@ describe('SacredCalendarService', () => {
         2026,
         Hemisphere.SOUTH,
       );
-      expect(result).toEqual(new Date('2026-04-30'));
+      expect(result).toEqual(new Date(2026, 3, 30)); // April 30
     });
 
     it('should return correct date for Yule in Northern Hemisphere', () => {
       const result = service.getSabbatDate(Sabbat.YULE, 2026, Hemisphere.NORTH);
-      expect(result).toEqual(new Date('2026-12-21'));
+      expect(result).toEqual(new Date(2026, 11, 21)); // December 21
     });
 
     it('should return correct date for Yule in Southern Hemisphere', () => {
       const result = service.getSabbatDate(Sabbat.YULE, 2026, Hemisphere.SOUTH);
-      expect(result).toEqual(new Date('2026-06-21'));
+      expect(result).toEqual(new Date(2026, 5, 21)); // June 21
     });
 
     it('should handle all sabbats correctly', () => {
@@ -229,7 +229,7 @@ describe('SacredCalendarService', () => {
 
   describe('generatePortalEvents', () => {
     it('should generate 12 portal events', async () => {
-      mockEventRepo.findOne.mockResolvedValue(null);
+      mockEventRepo.find.mockResolvedValue([]); // No existing portals
       mockEventRepo.save.mockImplementation((event: SacredEvent) =>
         Promise.resolve(event),
       );
@@ -243,7 +243,7 @@ describe('SacredCalendarService', () => {
     });
 
     it('should include special portals with high importance', async () => {
-      mockEventRepo.findOne.mockResolvedValue(null);
+      mockEventRepo.find.mockResolvedValue([]); // No existing portals
       mockEventRepo.save.mockImplementation((event: SacredEvent) =>
         Promise.resolve(event),
       );

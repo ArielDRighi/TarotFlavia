@@ -67,4 +67,28 @@ describe('SacredCalendarCronService', () => {
       expect(errorSpy).toHaveBeenCalled();
     });
   });
+
+  describe('generateEventsForYear', () => {
+    it('should generate events for specific year', async () => {
+      mockCalendarService.generateYearEvents.mockResolvedValue(64);
+
+      const result = await service.generateEventsForYear(2027);
+
+      expect(mockCalendarService.generateYearEvents).toHaveBeenCalledWith(2027);
+      expect(result).toBe(64);
+    });
+
+    it('should log when generating events manually', async () => {
+      const logSpy = jest.spyOn(service['logger'], 'log');
+      mockCalendarService.generateYearEvents.mockResolvedValue(64);
+
+      await service.generateEventsForYear(2027);
+
+      expect(logSpy).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Generando eventos manualmente para el año 2027',
+        ),
+      );
+    });
+  });
 });

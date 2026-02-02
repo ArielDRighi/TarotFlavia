@@ -18,6 +18,11 @@ export class SacredCalendarCronService {
   /**
    * Genera eventos del próximo año automáticamente
    * Ejecuta el 1 de diciembre a las 00:00 UTC
+   *
+   * NOTA: El timing del 1 de diciembre es intencional:
+   * - El seeder inicial genera eventos para año actual + próximo año
+   * - Este cron solo mantiene el calendario adelantado cada diciembre
+   * - Si se despliega tarde en el año, el seeder ya cubrió el año actual
    */
   @Cron('0 0 1 12 *', {
     name: 'generate-next-year-events',
