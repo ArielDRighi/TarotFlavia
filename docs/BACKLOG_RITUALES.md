@@ -4019,12 +4019,13 @@ frontend/src/components/features/rituals/
 
 ---
 
-### TASK-407: Crear componentes de detalle del ritual
+### ✅ TASK-407: Crear componentes de detalle del ritual
 
 **Módulo:** `frontend/src/components/features/rituals/`  
 **Prioridad:** 🟡 MEDIA  
 **Estimación:** 1 día  
-**Dependencias:** TASK-406
+**Dependencias:** TASK-406  
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -4053,7 +4054,7 @@ frontend/src/components/features/rituals/
 
 ##### Frontend
 
-- [ ] Crear `RitualHeader.tsx`:
+- [x] Crear `RitualHeader.tsx`:
 
   ```tsx
   "use client";
@@ -4121,7 +4122,7 @@ frontend/src/components/features/rituals/
   }
   ```
 
-- [ ] Crear `RitualMaterials.tsx`:
+- [x] Crear `RitualMaterials.tsx`:
 
   ```tsx
   "use client";
@@ -4194,7 +4195,7 @@ frontend/src/components/features/rituals/
   }
   ```
 
-- [ ] Crear `RitualStepsList.tsx`:
+- [x] Crear `RitualStepsList.tsx`:
 
   ```tsx
   "use client";
@@ -4266,7 +4267,7 @@ frontend/src/components/features/rituals/
   }
   ```
 
-- [ ] Crear `RitualTips.tsx`:
+- [x] Crear `RitualTips.tsx`:
 
   ```tsx
   "use client";
@@ -4297,7 +4298,7 @@ frontend/src/components/features/rituals/
   }
   ```
 
-- [ ] Crear `RitualCompletedModal.tsx`:
+- [x] Crear `RitualCompletedModal.tsx`:
 
   ```tsx
   "use client";
@@ -4397,11 +4398,11 @@ frontend/src/components/features/rituals/
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] Detalle muestra toda la info del ritual
-- [ ] Materiales categorizados correctamente
-- [ ] Pasos con línea de tiempo visual
-- [ ] Mantras y visualizaciones destacados
-- [ ] Modal permite notas y rating opcionales
+- [x] Detalle muestra toda la info del ritual
+- [x] Materiales categorizados correctamente
+- [x] Pasos con línea de tiempo visual
+- [x] Mantras y visualizaciones destacados
+- [x] Modal permite notas y rating opcionales
 
 # Frontend: Páginas
 
