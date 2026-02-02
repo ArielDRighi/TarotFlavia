@@ -8,19 +8,24 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
  * - Tabla: sacred_events (eventos del calendario sagrado)
  * - Tabla: user_sacred_event_notifications (tracking de notificaciones)
  */
-export class CreateSacredEventsTables1771400000000 implements MigrationInterface {
-  name = 'CreateSacredEventsTables1771400000000';
+export class CreateSacredEventsTables1771500000000 implements MigrationInterface {
+  name = 'CreateSacredEventsTables1771500000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     // ====================================
     // 1. CREAR ENUMS
     // ====================================
 
+    // Crear enum hemisphere si no existe (puede haber sido creado por AddUserLocationFields)
     await queryRunner.query(`
-      CREATE TYPE "hemisphere_enum" AS ENUM (
-        'north',
-        'south'
-      );
+      DO $$ BEGIN
+        CREATE TYPE "hemisphere_enum" AS ENUM (
+          'north',
+          'south'
+        );
+      EXCEPTION
+        WHEN duplicate_object THEN null;
+      END $$;
     `);
 
     await queryRunner.query(`
@@ -106,7 +111,7 @@ export class CreateSacredEventsTables1771400000000 implements MigrationInterface
         
         CONSTRAINT "fk_user_notification"
           FOREIGN KEY ("user_id")
-          REFERENCES "users"("id")
+          REFERENCES "user"("id")
           ON DELETE CASCADE,
           
         CONSTRAINT "fk_event_notification"
