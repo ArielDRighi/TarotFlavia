@@ -68,7 +68,7 @@ export class SacredCalendarController {
     @CurrentUser()
     user?: { userId: number; plan?: UserPlan; hemisphere?: Hemisphere },
   ): Promise<SacredEventDto[]> {
-    const hemisphere = user?.hemisphere || Hemisphere.SOUTH; // Default Argentina
+    const hemisphere = user?.hemisphere || Hemisphere.SOUTH; // Default: Southern Hemisphere
     const daysToFetch = days || 30;
 
     const events = await this.calendarService.getUpcomingEvents(
@@ -98,7 +98,7 @@ export class SacredCalendarController {
   async getTodayEvents(
     @CurrentUser() user?: { hemisphere?: Hemisphere },
   ): Promise<SacredEventDto[]> {
-    const hemisphere = user?.hemisphere || Hemisphere.SOUTH;
+    const hemisphere = user?.hemisphere || Hemisphere.SOUTH; // Default: Southern Hemisphere
     const events = await this.calendarService.getTodayEvents(hemisphere);
     return events.map((e) => this.toDto(e));
   }
@@ -138,7 +138,7 @@ export class SacredCalendarController {
       );
     }
 
-    const hemisphere = user.hemisphere || Hemisphere.SOUTH;
+    const hemisphere = user.hemisphere || Hemisphere.SOUTH; // Default: Southern Hemisphere
     const events = await this.calendarService.getMonthEvents(
       year,
       month,
