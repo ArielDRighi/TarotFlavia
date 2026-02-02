@@ -60,7 +60,7 @@ export class AddUserLocationFields1771400000000 implements MigrationInterface {
 
     // Crear índice para consultas por país
     await queryRunner.query(`
-      CREATE INDEX idx_user_country ON "user"("countryCode");
+      CREATE INDEX IF NOT EXISTS idx_user_country ON "user"("countryCode");
     `);
   }
 

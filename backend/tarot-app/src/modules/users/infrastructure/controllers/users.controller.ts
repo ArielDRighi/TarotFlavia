@@ -23,6 +23,7 @@ import { UpdateUserPlanDto } from '../../application/dto/update-user-plan.dto';
 import { UpdateUserLocationDto } from '../../application/dto/update-user-location.dto';
 import { UserCapabilitiesDto } from '../../application/dto/user-capabilities.dto';
 import { UserProfileResponseDto } from '../../application/dto/user-profile-response.dto';
+import { Hemisphere } from '../../enums/hemisphere.enum';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../../../auth/infrastructure/guards/optional-jwt-auth.guard';
 import { AdminGuard } from '../../../auth/infrastructure/guards/admin.guard';
@@ -215,12 +216,30 @@ export class UsersController {
   ) {
     const userId = req.user.userId;
 
-    // Si se proporciona countryCode pero no hemisphere, detectarlo automáticamente
-    if (updateLocationDto.countryCode && !updateLocationDto.hemisphere) {
-      updateLocationDto.hemisphere =
-        this.locationService.getHemisphereByCountry(
+    // Si no se proporciona hemisphere, intentar detectarlo automáticamente
+    if (!updateLocationDto.hemisphere) {
+      let detectedHemisphere: Hemisphere | undefined;
+
+      // Primero intentar con el countryCode, si está disponible
+      if (updateLocationDto.countryCode) {
+        detectedHemisphere = this.locationService.getHemisphereByCountry(
           updateLocationDto.countryCode,
         );
+      }
+
+      // Si no se pudo determinar por countryCode, intentar con la latitud
+      if (
+        !detectedHemisphere &&
+        typeof updateLocationDto.latitude === 'number'
+      ) {
+        detectedHemisphere = this.locationService.getHemisphereByLatitude(
+          updateLocationDto.latitude,
+        );
+      }
+
+      if (detectedHemisphere) {
+        updateLocationDto.hemisphere = detectedHemisphere;
+      }
     }
 
     const updatedUser = await this.usersService.update(

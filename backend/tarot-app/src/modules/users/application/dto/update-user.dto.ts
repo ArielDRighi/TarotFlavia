@@ -102,7 +102,7 @@ export class UpdateUserDto {
     enum: Hemisphere,
     required: false,
   })
-  @IsEnum(Hemisphere, { message: 'El hemisferio debe ser NORTH o SOUTH' })
+  @IsEnum(Hemisphere, { message: "El hemisferio debe ser 'north' o 'south'" })
   @IsOptional()
   hemisphere?: Hemisphere;
 

@@ -248,6 +248,7 @@ export class User {
   @Column({
     type: 'enum',
     enum: Hemisphere,
+    enumName: 'hemisphere_enum',
     nullable: true,
   })
   hemisphere: Hemisphere | null;
@@ -258,7 +259,17 @@ export class User {
       'Latitud del usuario (para detección automática de hemisferio)',
     nullable: true,
   })
-  @Column({ type: 'decimal', precision: 10, scale: 6, nullable: true })
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 6,
+    nullable: true,
+    transformer: {
+      to: (value: number | null) => value,
+      from: (value: string | null): number | null =>
+        value === null ? null : parseFloat(value),
+    },
+  })
   latitude: number | null;
 
   @ApiProperty({

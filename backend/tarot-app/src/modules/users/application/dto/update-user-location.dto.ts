@@ -1,5 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString, IsEnum, Length } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsEnum,
+  IsNumber,
+  Length,
+  Min,
+  Max,
+} from 'class-validator';
 import { Hemisphere } from '../../enums/hemisphere.enum';
 
 /**
@@ -41,4 +49,18 @@ export class UpdateUserLocationDto {
     message: 'El hemisferio debe ser "north" o "south"',
   })
   hemisphere?: Hemisphere;
+
+  @ApiProperty({
+    description:
+      'Latitud del usuario (para detección automática de hemisferio)',
+    example: -34.603722,
+    required: false,
+    minimum: -90,
+    maximum: 90,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
+  latitude?: number;
 }

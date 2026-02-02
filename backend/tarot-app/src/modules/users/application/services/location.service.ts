@@ -8,7 +8,7 @@ import { Hemisphere } from '../../enums/hemisphere.enum';
 @Injectable()
 export class LocationService {
   // Países del hemisferio sur (principales)
-  private readonly southernCountries = [
+  private readonly southernCountries = new Set<string>([
     // Sudamérica
     'AR', // Argentina
     'CL', // Chile
@@ -40,7 +40,7 @@ export class LocationService {
     // Otras islas del hemisferio sur
     'RE', // Reunión
     'MU', // Mauricio
-  ];
+  ]);
 
   /**
    * Determina el hemisferio basándose en el código de país
@@ -48,7 +48,7 @@ export class LocationService {
    * @returns Hemisphere.SOUTH si el país está en el hemisferio sur, Hemisphere.NORTH de lo contrario
    */
   getHemisphereByCountry(countryCode: string): Hemisphere {
-    return this.southernCountries.includes(countryCode.toUpperCase())
+    return this.southernCountries.has(countryCode.toUpperCase())
       ? Hemisphere.SOUTH
       : Hemisphere.NORTH;
   }
