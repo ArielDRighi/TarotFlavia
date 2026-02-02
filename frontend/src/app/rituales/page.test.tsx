@@ -147,6 +147,7 @@ describe('RitualesPage', () => {
   });
 
   it('filters by category', async () => {
+    const user = userEvent.setup();
     const mockUseRituals = vi.fn().mockReturnValue({
       data: [mockRituals[1]],
       isLoading: false,
@@ -156,17 +157,42 @@ describe('RitualesPage', () => {
 
     render(<RitualesPage />);
 
-    // Click on Limpieza category (it should be in the category selector)
-    // This would need the actual category button to be found
-    // For now, we verify the hook is called initially
+    // Initially called with empty filters
     expect(mockUseRituals).toHaveBeenCalledWith({});
+
+    // Click on Limpieza category button
+    const limpiezaButton = screen.getByRole('button', { name: /✨.*limpieza/i });
+    await user.click(limpiezaButton);
+
+    // Should call useRituals with the category filter
+    await waitFor(() => {
+      expect(mockUseRituals).toHaveBeenCalledWith(
+        expect.objectContaining({
+          category: RitualCategory.CLEANSING,
+        })
+      );
+    });
   });
 
   it('filters by difficulty', () => {
+    const mockUseRituals = vi.fn().mockReturnValue({
+      data: mockRituals,
+      isLoading: false,
+    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (useRituals as any).mockImplementation(mockUseRituals);
+
     render(<RitualesPage />);
 
-    // Verify difficulty filter is present
-    expect(screen.getByText('Todos los Rituales')).toBeInTheDocument();
+    // Verify difficulty filter component is rendered
+    const difficultyFilter = screen.getByRole('combobox');
+    expect(difficultyFilter).toBeInTheDocument();
+
+    // Verify default state shows "Todas las dificultades"
+    expect(screen.getByText('Todas las dificultades')).toBeInTheDocument();
+
+    // Initially called with empty filters
+    expect(mockUseRituals).toHaveBeenCalledWith({});
   });
 
   it('searches rituals', async () => {
@@ -206,15 +232,15 @@ describe('RitualesPage', () => {
     // Initially featured section should be visible
     expect(screen.getByText('Destacados para esta fase lunar')).toBeInTheDocument();
 
-    // Type in search (this would apply a filter)
+    // Type in search (this will apply a filter and should hide featured section)
     const searchInput = screen.getByPlaceholderText('Buscar ritual...');
     await user.type(searchInput, 'test');
 
     // Wait for debounce
     await waitFor(
       () => {
-        // Featured section should still be visible (need to click category to hide it)
-        expect(screen.queryByText('Destacados para esta fase lunar')).toBeInTheDocument();
+        // Featured section should be hidden when a search filter is applied
+        expect(screen.queryByText('Destacados para esta fase lunar')).not.toBeInTheDocument();
       },
       { timeout: 500 }
     );

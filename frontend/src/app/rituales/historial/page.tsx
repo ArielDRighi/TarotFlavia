@@ -7,12 +7,15 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRitualHistory, useRitualStats } from '@/hooks/api/useRituals';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { ROUTES } from '@/lib/constants/routes';
 import { CATEGORY_INFO, LUNAR_PHASE_INFO } from '@/types/ritual.types';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export default function RitualHistorialPage() {
+  useRequireAuth();
+
   const { data: history, isLoading: loadingHistory } = useRitualHistory(50);
   const { data: stats, isLoading: loadingStats } = useRitualStats();
 
