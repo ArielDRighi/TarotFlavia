@@ -3659,7 +3659,7 @@ frontend/src/components/features/rituals/
 
 ##### Frontend
 
-- [ ] Crear `RitualCard.tsx`:
+- [x] Crear `RitualCard.tsx`:
 
   ```tsx
   "use client";
@@ -3739,7 +3739,7 @@ frontend/src/components/features/rituals/
   }
   ```
 
-- [ ] Crear `RitualGrid.tsx`:
+- [x] Crear `RitualGrid.tsx`:
 
   ```tsx
   "use client";
@@ -3780,7 +3780,7 @@ frontend/src/components/features/rituals/
   }
   ```
 
-- [ ] Crear `RitualCategorySelector.tsx`:
+- [x] Crear `RitualCategorySelector.tsx`:
 
   ```tsx
   "use client";
@@ -3840,7 +3840,7 @@ frontend/src/components/features/rituals/
   }
   ```
 
-- [ ] Crear `RitualDifficultyFilter.tsx`:
+- [x] Crear `RitualDifficultyFilter.tsx`:
 
   ```tsx
   "use client";
@@ -3935,7 +3935,7 @@ frontend/src/components/features/rituals/
   }
   ```
 
-- [ ] Crear `RitualsSkeleton.tsx`:
+- [x] Crear `RitualsSkeleton.tsx`:
 
   ```tsx
   "use client";
@@ -3985,7 +3985,7 @@ frontend/src/components/features/rituals/
   }
   ```
 
-- [ ] Crear `index.ts`:
+- [x] Crear `index.ts`:
   ```typescript
   export { RitualCard } from "./RitualCard";
   export { RitualGrid } from "./RitualGrid";
@@ -3998,21 +3998,21 @@ frontend/src/components/features/rituals/
 
 ##### Testing
 
-- [ ] Test: RitualCard renderiza información
-- [ ] Test: RitualGrid muestra lista
-- [ ] Test: CategorySelector filtra
-- [ ] Test: LunarPhaseBanner muestra fase actual
-- [ ] Test: Skeletons se muestran durante carga
+- [x] Test: RitualCard renderiza información
+- [x] Test: RitualGrid muestra lista
+- [x] Test: CategorySelector filtra
+- [ ] Test: LunarPhaseBanner muestra fase actual (SKIPPED - component not created)
+- [x] Test: Skeletons se muestran durante carga
 
 ---
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] Cards muestran toda la info relevante
-- [ ] Grid es responsive
-- [ ] Categorías son scrolleables en móvil
-- [ ] Banner lunar muestra fase actual
-- [ ] Loading states con skeletons
+- [x] Cards muestran toda la info relevante
+- [x] Grid es responsive
+- [x] Categorías son scrolleables en móvil
+- [ ] Banner lunar muestra fase actual (SKIPPED - component not created)
+- [x] Loading states con skeletons
 
 # Frontend: Componentes de Detalle
 
