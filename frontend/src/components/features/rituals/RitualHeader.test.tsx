@@ -12,7 +12,6 @@ import {
 // Mock Next.js Image component
 vi.mock('next/image', () => ({
   default: ({ src, alt, ...props }: { src: string; alt: string }) => (
-     
     <img src={src} alt={alt} {...props} />
   ),
 }));

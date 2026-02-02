@@ -5,10 +5,36 @@ import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import type { RitualStep } from '@/types/ritual.types';
 
+/**
+ * RitualStepsList Component Props
+ */
 export interface RitualStepsListProps {
+  /** Ordered list of ritual steps */
   steps: RitualStep[];
+  /** Additional CSS classes */
   className?: string;
 }
+
+/**
+ * RitualStepsList Component
+ *
+ * Displays the sequential steps of a ritual with a visual timeline
+ * and optional mantras/visualizations.
+ *
+ * Features:
+ * - Numbered steps with visual timeline connector
+ * - Duration display for each step (seconds/minutes)
+ * - Step title and description
+ * - Optional mantra text with quote styling
+ * - Optional visualization guidance with purple highlight
+ * - Responsive layout
+ * - Accessible with proper semantic HTML
+ *
+ * @example
+ * ```tsx
+ * <RitualStepsList steps={ritual.steps} />
+ * ```
+ */
 
 function formatDuration(seconds: number): string {
   if (seconds < 60) return `${seconds}s`;

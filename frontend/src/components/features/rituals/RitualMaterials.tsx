@@ -5,13 +5,39 @@ import { Card } from '@/components/ui/card';
 import { MaterialType } from '@/types/ritual.types';
 import type { RitualMaterial } from '@/types/ritual.types';
 
+/**
+ * RitualMaterials Component Props
+ */
 export interface RitualMaterialsProps {
+  /** List of materials needed for the ritual */
   materials: RitualMaterial[];
 }
 
+/**
+ * RitualMaterials Component
+ *
+ * Displays a categorized list of materials needed for a ritual,
+ * separated into required and optional sections.
+ *
+ * Features:
+ * - Required materials with green checkmark icon
+ * - Optional/alternative materials with circle icon
+ * - Quantity and unit display for required materials
+ * - Material descriptions when available
+ * - Alternative suggestions for optional materials
+ * - Responsive card layout
+ *
+ * @example
+ * ```tsx
+ * <RitualMaterials materials={ritual.materials} />
+ * ```
+ */
 export function RitualMaterials({ materials }: RitualMaterialsProps) {
   const required = materials.filter((m) => m.type === MaterialType.REQUIRED);
-  const optional = materials.filter((m) => m.type !== MaterialType.REQUIRED);
+  // Optional includes both OPTIONAL and ALTERNATIVE types
+  const optional = materials.filter(
+    (m) => m.type === MaterialType.OPTIONAL || m.type === MaterialType.ALTERNATIVE
+  );
 
   return (
     <Card className="p-6" data-testid="ritual-materials">
@@ -26,7 +52,7 @@ export function RitualMaterials({ materials }: RitualMaterialsProps) {
                 <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500" />
                 <div>
                   <span className="font-medium">{material.name}</span>
-                  {material.quantity > 1 && (
+                  {(material.quantity > 1 || (material.quantity === 1 && material.unit)) && (
                     <span className="text-muted-foreground">
                       {' '}
                       × {material.quantity}

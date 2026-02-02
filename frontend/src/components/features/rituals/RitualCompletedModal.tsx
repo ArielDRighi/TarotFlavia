@@ -1,21 +1,57 @@
 'use client';
 
 import { useState } from 'react';
-import { Sparkles, Star } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Star, Sparkles } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import type { RitualDetail } from '@/types/ritual.types';
 
+/**
+ * RitualCompletedModal Component Props
+ */
 export interface RitualCompletedModalProps {
+  /** Ritual detail information */
   ritual: RitualDetail;
+  /** Whether the modal is open */
   isOpen: boolean;
+  /** Callback when modal is closed */
   onClose: () => void;
+  /** Callback when ritual is marked as completed */
   onComplete: (notes?: string, rating?: number) => void;
 }
 
+/**
+ * RitualCompletedModal Component
+ *
+ * Modal dialog for marking a ritual as completed, allowing users
+ * to add an optional rating and personal notes.
+ *
+ * Features:
+ * - 5-star rating system (optional)
+ * - Personal notes textarea (optional)
+ * - Ritual title in description
+ * - Cancel and save actions
+ * - Form state reset after completion
+ * - Accessible with proper ARIA labels
+ *
+ * @example
+ * ```tsx
+ * <RitualCompletedModal
+ *   ritual={ritual}
+ *   isOpen={isOpen}
+ *   onClose={() => setIsOpen(false)}
+ *   onComplete={(notes, rating) => handleComplete(notes, rating)}
+ * />
+ * ```
+ */
 export function RitualCompletedModal({
   ritual,
   isOpen,
@@ -58,6 +94,7 @@ export function RitualCompletedModal({
                   onClick={() => setRating(value)}
                   className="p-1 transition-colors"
                   type="button"
+                  aria-label={`Calificar ${value} de 5 estrellas`}
                 >
                   <Star
                     className={cn(

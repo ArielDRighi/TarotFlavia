@@ -6,10 +6,34 @@ import { Badge } from '@/components/ui/badge';
 import { CATEGORY_INFO, DIFFICULTY_INFO, LUNAR_PHASE_INFO } from '@/types/ritual.types';
 import type { RitualDetail } from '@/types/ritual.types';
 
+/**
+ * RitualHeader Component Props
+ */
 export interface RitualHeaderProps {
+  /** Ritual detail information */
   ritual: RitualDetail;
 }
 
+/**
+ * RitualHeader Component
+ *
+ * Displays a hero header for a ritual with background image,
+ * category/difficulty badges, title, and metadata.
+ *
+ * Features:
+ * - Full-width background image with gradient overlay
+ * - Category badge with icon and color coding
+ * - Difficulty indicator with color coding
+ * - Optional lunar phase badge (best time to perform)
+ * - Duration, steps count, and completion count
+ * - Responsive sizing (mobile/desktop)
+ * - Next.js Image optimization with priority loading
+ *
+ * @example
+ * ```tsx
+ * <RitualHeader ritual={ritualDetail} />
+ * ```
+ */
 export function RitualHeader({ ritual }: RitualHeaderProps) {
   const categoryInfo = CATEGORY_INFO[ritual.category];
   const difficultyInfo = DIFFICULTY_INFO[ritual.difficulty];
