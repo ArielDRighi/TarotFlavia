@@ -17,3 +17,4 @@ export {
   UpdateRitualMaterialDto,
 } from './update-ritual.dto';
 export { DuplicateRitualDto } from './duplicate-ritual.dto';
+export { SacredEventDto } from './sacred-event-response.dto';
