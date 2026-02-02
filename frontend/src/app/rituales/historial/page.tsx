@@ -147,7 +147,9 @@ export default function RitualHistorialPage() {
                       </div>
 
                       {entry.notes && (
-                        <p className="text-muted-foreground mt-2 text-sm italic">&ldquo;{entry.notes}&rdquo;</p>
+                        <p className="text-muted-foreground mt-2 text-sm italic">
+                          &ldquo;{entry.notes}&rdquo;
+                        </p>
                       )}
                     </div>
                   </div>

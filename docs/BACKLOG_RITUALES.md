@@ -6167,12 +6167,13 @@ Crear endpoints REST para consultar eventos del calendario sagrado.
 
 ---
 
-### TASK-400e: Widget de Eventos Próximos en Dashboard (Premium)
+### ✅ TASK-400e: Widget de Eventos Próximos en Dashboard (Premium) [COMPLETADA]
 
 **Módulo:** `frontend/src/components/features/dashboard/`
 **Prioridad:** 🟡 MEDIA
 **Estimación:** 1 día
 **Dependencias:** TASK-400d, TASK-405
+**Completada:** 2024-02-02
 
 ---
 
