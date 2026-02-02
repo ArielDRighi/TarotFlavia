@@ -5533,7 +5533,7 @@ Crear las entidades para almacenar eventos del calendario sagrado: Sabbats (Rued
 
 ##### Backend
 
-- [ ] Crear enums de eventos sagrados:
+- [x] Crear enums de eventos sagrados:
 
   ```typescript
   // src/modules/rituals/enums/sacred-events.enums.ts
@@ -5564,7 +5564,7 @@ Crear las entidades para almacenar eventos del calendario sagrado: Sabbats (Rued
   }
   ```
 
-- [ ] Crear entidad `SacredEvent`:
+- [x] Crear entidad `SacredEvent`:
 
   ```typescript
   // src/modules/rituals/entities/sacred-event.entity.ts
@@ -5622,7 +5622,7 @@ Crear las entidades para almacenar eventos del calendario sagrado: Sabbats (Rued
   }
   ```
 
-- [ ] Crear entidad `UserSacredEventNotification`:
+- [x] Crear entidad `UserSacredEventNotification`:
 
   ```typescript
   // Para trackear qué eventos ya se notificaron a cada usuario
@@ -5693,7 +5693,7 @@ Crear el servicio que genera y gestiona eventos del calendario sagrado, incluyen
 
 ##### Backend
 
-- [ ] Crear `SacredCalendarService`:
+- [x] Crear `SacredCalendarService`:
 
   ```typescript
   // src/modules/rituals/application/services/sacred-calendar.service.ts
@@ -5943,7 +5943,7 @@ Crear el servicio que genera y gestiona eventos del calendario sagrado, incluyen
   }
   ```
 
-- [ ] Crear datos de Sabbats con descripciones completas:
+- [x] Crear datos de Sabbats con descripciones completas:
 
   ```typescript
   // src/modules/rituals/data/sabbats.data.ts
@@ -6004,7 +6004,7 @@ Crear el servicio que genera y gestiona eventos del calendario sagrado, incluyen
   };
   ```
 
-- [ ] Crear Cron Job para generación automática:
+- [x] Crear Cron Job para generación automática:
 
   ```typescript
   // src/modules/rituals/application/cron/sacred-calendar-cron.service.ts
@@ -6034,19 +6034,19 @@ Crear el servicio que genera y gestiona eventos del calendario sagrado, incluyen
 
 ##### Testing
 
-- [ ] Test: getUpcomingEvents filtra por hemisferio
-- [ ] Test: getSabbatDate retorna fechas correctas para cada hemisferio
-- [ ] Test: generateYearEvents crea todos los eventos esperados
-- [ ] Test: Portales numéricos se generan correctamente
+- [x] Test: getUpcomingEvents filtra por hemisferio
+- [x] Test: getSabbatDate retorna fechas correctas para cada hemisferio
+- [x] Test: generateYearEvents crea todos los eventos esperados
+- [x] Test: Portales numéricos se generan correctamente
 
 ---
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] Sistema calcula fechas de Sabbats correctamente para ambos hemisferios
-- [ ] Eventos lunares se generan automáticamente
-- [ ] Portales numéricos y eventos mensuales incluidos
-- [ ] Cron job genera eventos del próximo año
+- [x] Sistema calcula fechas de Sabbats correctamente para ambos hemisferios
+- [x] Eventos lunares se generan automáticamente
+- [x] Portales numéricos y eventos mensuales incluidos
+- [x] Cron job genera eventos del próximo año
 
 ---
 
