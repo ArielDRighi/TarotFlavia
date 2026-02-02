@@ -5660,12 +5660,16 @@ Crear las entidades para almacenar eventos del calendario sagrado: Sabbats (Rued
   }
   ```
 
-- [ ] Crear migración `CreateSacredEventsTables`
+- [x] Crear migración `CreateSacredEventsTables`
+- [x] **Ejecutar migración**: `npm run migration:run` 
+- [x] **Verificar tablas creadas**: sacred_events, user_sacred_event_notifications
+- [x] **Verificar enums creados**: sacred_event_type_enum, sabbat_enum, sacred_event_importance_enum
 
 ##### Testing
 
-- [ ] Test: Entidades se crean correctamente
-- [ ] Test: Índices funcionan para queries por fecha
+- [x] Test: Entidades se crean correctamente
+- [x] Test: Índices funcionan para queries por fecha
+- [x] **Migración ejecutada exitosamente en desarrollo**
 
 ---
 
@@ -7077,9 +7081,9 @@ Durante la revisión de calidad del módulo de Rituales se detectaron los siguie
 
 ---
 
-### TASK-409: Ejecutar migración de tablas de Rituales
+### ✅ TASK-409: Ejecutar migración de tablas de Rituales
 
-**Estado:** 🔴 PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Módulo:** `src/database/migrations/`
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 5 minutos
@@ -7089,23 +7093,32 @@ Durante la revisión de calidad del módulo de Rituales se detectaron los siguie
 
 La migración `1771300000000-CreateRitualsTables.ts` fue creada pero nunca ejecutada. Las tablas de rituales no existen en la base de datos.
 
+**ACTUALIZACIÓN**: ✅ Ejecutada el 2025 junto con:
+- `1771400000000-AddUserLocationFields.ts` (TASK-400a)
+- `1771500000000-CreateSacredEventsTables.ts` (TASK-400b)
+
 #### ✅ Tareas Específicas
 
-- [ ] Ejecutar el comando de migración:
+- [x] Ejecutar el comando de migración:
   ```bash
   cd backend/tarot-app
   npm run migration:run
   ```
-- [ ] Verificar que las tablas fueron creadas:
-  - `rituals`
-  - `ritual_steps`
-  - `ritual_materials`
-  - `user_ritual_history`
-- [ ] Verificar que los enums fueron creados:
-  - `ritual_category_enum`
-  - `ritual_difficulty_enum`
-  - `lunar_phase_enum`
-  - `material_type_enum`
+- [x] Verificar que las tablas fueron creadas:
+  - `rituals` ✅
+  - `ritual_steps` ✅
+  - `ritual_materials` ✅
+  - `user_ritual_history` ✅
+- [x] Verificar que los enums fueron creados:
+  - `ritual_category_enum` ✅
+  - `ritual_difficulty_enum` ✅
+  - `lunar_phase_enum` ✅
+  - `material_type_enum` ✅
+
+**Adicionales ejecutadas:**
+- `timezone`, `countryCode`, `hemisphere`, `latitude` en tabla `user` ✅
+- `sacred_events` y `user_sacred_event_notifications` ✅
+- Enums: `hemisphere_enum`, `sacred_event_type_enum`, `sabbat_enum`, `sacred_event_importance_enum` ✅
 
 ---
 
@@ -7238,16 +7251,159 @@ Esto ocurre en `RitualCard.tsx` y `RitualHeader.tsx`.
 
 ## RESUMEN DE TAREAS PENDIENTES
 
-| Task | Descripción | Estimación | Prioridad |
-|------|-------------|------------|-----------|
-| TASK-409 | Ejecutar migración de Rituales | 5 min | 🔴 CRÍTICA |
-| TASK-410 | Ejecutar seeder de Rituales | 5 min | 🔴 CRÍTICA |
-| TASK-411 | Agregar link a Rituales en Header | 15 min | 🔴 ALTA |
-| TASK-412 | Agregar DialogDescription en modal | 10 min | 🟡 MEDIA |
-| TASK-413 | Corregir atributos booleanos en Image | 15 min | 🟢 BAJA |
+| Task | Descripción | Estimación | Prioridad | Estado |
+|------|-------------|------------|-----------|--------|
+| TASK-409 | Ejecutar migración de Rituales | 5 min | 🔴 CRÍTICA | ✅ COMPLETADA |
+| TASK-410 | Ejecutar seeder de Rituales | 5 min | 🔴 CRÍTICA | 🔴 PENDIENTE |
+| TASK-411 | Agregar link a Rituales en Header | 15 min | 🔴 ALTA | 🔴 PENDIENTE |
+| TASK-412 | Agregar DialogDescription en modal | 10 min | 🟡 MEDIA | 🔴 PENDIENTE |
+| TASK-413 | Corregir atributos booleanos en Image | 15 min | 🟢 BAJA | 🔴 PENDIENTE |
 
-**Total estimado: 50 minutos**
+**Total estimado restante: 45 minutos**
+
+---
+
+## 📚 LECCIONES APRENDIDAS Y MEJORAS AL WORKFLOW
+
+### 🔴 Problema Crítico Identificado: Migraciones No Ejecutadas
+
+**Fecha:** Febrero 2025  
+**Reportado por:** Developer durante TASK-400b
+
+#### 🐛 Problema
+
+Las tareas del backlog **NO incluían pasos para ejecutar migraciones ni seeders**, causando:
+
+1. **Tests de integración fallando** por columnas faltantes en BD
+2. **CI/CD bloqueado** al intentar mergear PRs
+3. **Acumulación de migraciones sin ejecutar** (3 migraciones pendientes encontradas)
+4. **Conflictos de timestamps** en migraciones
+
+**Migraciones afectadas:**
+- `1771300000000-CreateRitualsTables.ts` (TASK-400)
+- `1771400000000-AddUserLocationFields.ts` (TASK-400a)  
+- `1771400000000-CreateSacredEventsTables.ts` (TASK-400b) ❌ Timestamp duplicado
+
+#### ✅ Solución Aplicada
+
+1. **Corregir timestamp duplicado**: Renombrar a `1771500000000-CreateSacredEventsTables.ts`
+2. **Ejecutar todas las migraciones pendientes**: `npm run migration:run`
+3. **Verificar creación de tablas y enums**
+4. **Actualizar backlog** con pasos de ejecución
+
+#### 📋 Mejoras al Workflow Backend
+
+**NUEVO: Agregar a TODAS las tareas que crean migraciones:**
+
+```markdown
+##### Database Migration
+
+- [ ] Crear migración `XXXX-NombreMigracion.ts`
+- [ ] **Ejecutar migración localmente:**
+  ```bash
+  cd backend/tarot-app
+  npm run migration:run
+  ```
+- [ ] **Verificar migración ejecutada:**
+  ```bash
+  npm run migration:show
+  # Debe aparecer la nueva migración como ejecutada
+  ```
+- [ ] **Verificar tablas/columnas creadas** (usar DBeaver o CLI)
+- [ ] **Agregar al quality gate**: Tests de integración deben pasar
+
+##### Database Seeding (si aplica)
+
+- [ ] Crear seeder `seed-XXXXX.ts`
+- [ ] **Ejecutar seeder:**
+  ```bash
+  npm run seed:XXXXX
+  # o
+  ts-node src/database/seeds/seed-data.ts
+  ```
+- [ ] **Verificar datos insertados** con query o endpoint
+```
+
+#### 🎯 Quality Gates Actualizados
+
+**Agregar verificación de migración:**
+
+```bash
+# Después de: npm run build
+# Antes de: crear commit
+
+# Nuevo paso:
+npm run migration:show
+# Verificar que la nueva migración aparece como ejecutada [X]
+```
+
+#### ⚠️ Prevención de Conflictos de Timestamps
+
+**Regla:** Al crear nueva migración, verificar timestamps existentes:
+
+```bash
+ls backend/tarot-app/src/database/migrations/ | grep "^177" | tail -3
+
+# Usar timestamp SIGUIENTE al último encontrado
+# Si último es 1771400000000 -> usar 1771500000000
+```
+
+#### 📝 Template Actualizado para Tareas de Backend
+
+```markdown
+### TASK-XXX: Título de la Tarea
+
+**Estado:** 🔴 PENDIENTE  
+**Módulo:** `src/modules/XXX/`  
+**Prioridad:** 🔴 ALTA  
+**Estimación:** X días  
+**Dependencias:** TASK-YYY  
+
+---
+
+#### ✅ Tareas Específicas
+
+##### Entities & Migrations
+
+- [ ] Crear enums necesarios
+- [ ] Crear entidades
+- [ ] Crear migración con timestamp único
+- [ ] **EJECUTAR migración**: `npm run migration:run`
+- [ ] **VERIFICAR** tablas creadas en BD
+- [ ] Crear tests de entidades
+
+##### Services & Logic
+
+- [ ] Implementar servicios
+- [ ] Crear DTOs
+- [ ] Tests unitarios de servicios
+
+##### Database (CRÍTICO)
+
+- [ ] **Ejecutar migración localmente**
+- [ ] **Verificar con**: `npm run migration:show`
+- [ ] Crear seeder (si aplica)
+- [ ] Ejecutar seeder (si aplica)
+- [ ] Verificar datos de ejemplo
+
+##### Quality Gates
+
+- [ ] Format: `npm run format`
+- [ ] Lint: `npm run lint`
+- [ ] Tests: `npm run test:cov` (coverage ≥80%)
+- [ ] Build: `npm run build`
+- [ ] Architecture: `node scripts/validate-architecture.js`
+- [ ] **Migration: Verificar ejecutada con `npm run migration:show`**
+- [ ] **Integration tests: Deben pasar (verificar BD actualizada)**
+
+##### Git
+
+- [ ] Actualizar backlog (marcar completada)
+- [ ] Crear commit descriptivo
+- [ ] Push y crear PR a `develop`
+```
 
 ---
 
 **Fin del Módulo Rituales**
+
