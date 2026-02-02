@@ -107,6 +107,43 @@ export class SacredCalendarService {
   }
 
   /**
+   * Obtiene eventos de un mes específico (Premium feature)
+   * @param year Año
+   * @param month Mes (1-12)
+   * @param hemisphere Hemisferio del usuario
+   * @returns Eventos del mes ordenados por fecha e importancia
+   */
+  async getMonthEvents(
+    year: number,
+    month: number,
+    hemisphere: Hemisphere,
+  ): Promise<SacredEvent[]> {
+    // Validar mes
+    if (month < 1 || month > 12) {
+      throw new Error('Month must be between 1 and 12');
+    }
+
+    // Calcular primer y último día del mes
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0); // Día 0 del mes siguiente = último día del mes actual
+
+    return this.eventRepo
+      .createQueryBuilder('event')
+      .where('event.eventDate BETWEEN :startDate AND :endDate', {
+        startDate: this.toDateString(startDate),
+        endDate: this.toDateString(endDate),
+      })
+      .andWhere(
+        '(event.hemisphere IS NULL OR event.hemisphere = :hemisphere)',
+        { hemisphere },
+      )
+      .andWhere('event.isActive = true')
+      .orderBy('event.eventDate', 'ASC')
+      .addOrderBy('event.importance', 'DESC')
+      .getMany();
+  }
+
+  /**
    * Calcula fecha de un Sabbat para un año y hemisferio
    * Las fechas del hemisferio sur están desplazadas 6 meses
    * @param sabbat Sabbat a calcular

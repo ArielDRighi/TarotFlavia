@@ -15,6 +15,7 @@ import { SacredCalendarService } from './application/services/sacred-calendar.se
 import { SacredCalendarCronService } from './application/cron/sacred-calendar-cron.service';
 import { RitualsController } from './infrastructure/controllers/rituals.controller';
 import { RitualsAdminController } from './infrastructure/controllers/rituals-admin.controller';
+import { SacredCalendarController } from './infrastructure/controllers/sacred-calendar.controller';
 
 /**
  * Módulo de Rituales
@@ -30,7 +31,11 @@ import { RitualsAdminController } from './infrastructure/controllers/rituals-adm
       SacredEvent,
     ]),
   ],
-  controllers: [RitualsController, RitualsAdminController],
+  controllers: [
+    RitualsController,
+    RitualsAdminController,
+    SacredCalendarController,
+  ],
   providers: [
     LunarPhaseService,
     RitualsService,

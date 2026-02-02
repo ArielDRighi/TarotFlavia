@@ -6050,12 +6050,14 @@ Crear el servicio que genera y gestiona eventos del calendario sagrado, incluyen
 
 ---
 
-### TASK-400d: Endpoints del Calendario Sagrado
+### TASK-400d: Endpoints del Calendario Sagrado ✅ COMPLETADA
 
 **Módulo:** `src/modules/rituals/infrastructure/controllers/`
 **Prioridad:** 🟡 MEDIA
 **Estimación:** 0.5 días
 **Dependencias:** TASK-400c
+**Estado:** ✅ COMPLETADA
+**Fecha:** 2025-01-21
 
 ---
 
@@ -6069,7 +6071,7 @@ Crear endpoints REST para consultar eventos del calendario sagrado.
 
 ##### Backend
 
-- [ ] Crear `SacredCalendarController`:
+- [x] Crear `SacredCalendarController`:
 
   ```typescript
   @ApiTags('Sacred Calendar')
@@ -6138,13 +6140,30 @@ Crear endpoints REST para consultar eventos del calendario sagrado.
   }
   ```
 
-- [ ] Crear DTOs de respuesta
+- [x] Crear DTOs de respuesta
 
 ##### Testing
 
-- [ ] Test: /upcoming retorna eventos filtrados por hemisferio
-- [ ] Test: Usuarios free solo ven 3 eventos
-- [ ] Test: Usuarios premium ven todos los eventos
+- [x] Test: /upcoming retorna eventos filtrados por hemisferio
+- [x] Test: Usuarios free solo ven 3 eventos
+- [x] Test: Usuarios premium ven todos los eventos
+
+#### 📂 Archivos Creados/Modificados
+
+- ✅ `backend/tarot-app/src/modules/rituals/infrastructure/controllers/sacred-calendar.controller.ts` (NUEVO)
+- ✅ `backend/tarot-app/src/modules/rituals/infrastructure/controllers/sacred-calendar.controller.spec.ts` (NUEVO)
+- ✅ `backend/tarot-app/src/modules/rituals/application/dto/sacred-event-response.dto.ts` (NUEVO)
+- ✅ `backend/tarot-app/src/modules/rituals/application/dto/index.ts` (actualizado export)
+- ✅ `backend/tarot-app/src/modules/rituals/application/services/sacred-calendar.service.ts` (agregado método `getMonthEvents`)
+- ✅ `backend/tarot-app/src/modules/rituals/rituals.module.ts` (registrado controller)
+
+#### ✅ Quality Gates Pasados
+
+- ✅ Format (`npm run format`)
+- ✅ Lint (`npm run lint`)
+- ✅ Tests unitarios (14/14 pasando)
+- ✅ Build (`npm run build`)
+- ✅ Validación de arquitectura (`node scripts/validate-architecture.js`)
 
 ---
 
@@ -7020,17 +7039,17 @@ Actualizar los componentes de upsell existentes para incluir los beneficios de r
 
 ## RESUMEN DE TAREAS PREMIUM
 
-| Tarea | Descripción | Estimación | Prioridad |
-|-------|-------------|------------|-----------|
-| TASK-400a | Campos de geolocalización en User | 1 día | 🔴 ALTA |
-| TASK-400b | Entidades del Calendario Sagrado | 1.5 días | 🔴 ALTA |
-| TASK-400c | Servicio de Calendario y Seeder | 2 días | 🔴 ALTA |
-| TASK-400d | Endpoints del Calendario Sagrado | 0.5 días | 🟡 MEDIA |
-| TASK-400e | Widget de Eventos en Dashboard | 1 día | 🟡 MEDIA |
-| TASK-400f | Análisis de Patrones de Lecturas | 2 días | 🔴 ALTA |
-| TASK-400g | Widget de Recomendaciones | 1 día | 🟡 MEDIA |
-| TASK-400h | Sistema de Notificaciones In-App | 2 días | 🟡 MEDIA |
-| TASK-400i | Beneficios en Upsells existentes | 0.5 días | 🟢 BAJA |
+| Tarea | Descripción | Estimación | Prioridad | Estado |
+|-------|-------------|------------|-----------|--------|
+| TASK-400a | Campos de geolocalización en User | 1 día | 🔴 ALTA | ⏳ Pendiente |
+| TASK-400b | Entidades del Calendario Sagrado | 1.5 días | 🔴 ALTA | ⏳ Pendiente |
+| TASK-400c | Servicio de Calendario y Seeder | 2 días | 🔴 ALTA | ⏳ Pendiente |
+| TASK-400d | Endpoints del Calendario Sagrado | 0.5 días | 🟡 MEDIA | ✅ COMPLETADA |
+| TASK-400e | Widget de Eventos en Dashboard | 1 día | 🟡 MEDIA | ⏳ Pendiente |
+| TASK-400f | Análisis de Patrones de Lecturas | 2 días | 🔴 ALTA | ⏳ Pendiente |
+| TASK-400g | Widget de Recomendaciones | 1 día | 🟡 MEDIA | ⏳ Pendiente |
+| TASK-400h | Sistema de Notificaciones In-App | 2 días | 🟡 MEDIA | ⏳ Pendiente |
+| TASK-400i | Beneficios en Upsells existentes | 0.5 días | 🟢 BAJA | ⏳ Pendiente |
 
 **Total Features Premium: 11.5 días**
 
