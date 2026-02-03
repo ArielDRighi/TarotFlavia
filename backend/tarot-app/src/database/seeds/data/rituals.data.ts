@@ -83,7 +83,6 @@ export const RITUALS_SEED_DATA: RitualSeedData[] = [
       'Revisa tus intenciones anteriores antes de crear nuevas',
     ],
     imageUrl: '/images/rituals/luna-nueva.jpg',
-    thumbnailUrl: '/images/rituals/thumbs/luna-nueva.jpg',
     isFeatured: true,
     materials: [
       {
@@ -191,7 +190,6 @@ export const RITUALS_SEED_DATA: RitualSeedData[] = [
       'Es buen momento para terminar proyectos',
     ],
     imageUrl: '/images/rituals/luna-llena.jpg',
-    thumbnailUrl: '/images/rituals/thumbs/luna-llena.jpg',
     isFeatured: true,
     materials: [
       {
@@ -310,7 +308,6 @@ export const RITUALS_SEED_DATA: RitualSeedData[] = [
       'Los espejos acumulan mucha energía, limpia su superficie mientras humeas',
     ],
     imageUrl: '/images/rituals/limpieza-hogar.jpg',
-    thumbnailUrl: '/images/rituals/thumbs/limpieza-hogar.jpg',
     materials: [
       {
         name: 'Salvia blanca o palo santo',
@@ -431,7 +428,6 @@ export const RITUALS_SEED_DATA: RitualSeedData[] = [
       'Algunos tarotistas tienen mazos para uso personal y otros para clientes',
     ],
     imageUrl: '/images/rituals/consagracion-tarot.jpg',
-    thumbnailUrl: '/images/rituals/thumbs/consagracion-tarot.jpg',
     materials: [
       {
         name: 'Mazo de tarot nuevo',
