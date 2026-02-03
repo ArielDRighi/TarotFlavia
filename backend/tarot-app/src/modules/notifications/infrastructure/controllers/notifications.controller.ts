@@ -55,8 +55,17 @@ export class NotificationsController {
     @CurrentUser() user: User,
     @Query('unreadOnly', new ParseBoolPipe({ optional: true }))
     unreadOnly = false,
-  ) {
-    return this.notificationsService.getUserNotifications(user.id, unreadOnly);
+  ): Promise<NotificationDto[]> {
+    const notifications = await this.notificationsService.getUserNotifications(
+      user.id,
+      unreadOnly,
+    );
+
+    // Map entities to DTOs, explicitly excluding internal fields like userId/user
+    return notifications.map(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      ({ userId, user: userRelation, ...rest }) => rest as NotificationDto,
+    );
   }
 
   /**
@@ -84,6 +93,10 @@ export class NotificationsController {
   @ApiOperation({ summary: 'Marcar notificación como leída' })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({ status: 204, description: 'Notificación marcada como leída' })
+  @ApiResponse({
+    status: 404,
+    description: 'Notificación no encontrada o no pertenece al usuario',
+  })
   async markAsRead(
     @CurrentUser() user: User,
     @Param('id', ParseIntPipe) id: number,

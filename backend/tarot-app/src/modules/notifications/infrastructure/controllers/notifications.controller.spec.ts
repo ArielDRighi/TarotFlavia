@@ -59,6 +59,20 @@ describe('NotificationsController', () => {
         },
       ];
 
+      const expectedResponse = [
+        {
+          id: 1,
+          type: NotificationType.SACRED_EVENT,
+          title: 'Luna Nueva',
+          message: 'Test',
+          data: null,
+          actionUrl: null,
+          read: false,
+          readAt: null,
+          createdAt: mockNotifications[0].createdAt,
+        },
+      ];
+
       mockNotificationsService.getUserNotifications.mockResolvedValue(
         mockNotifications,
       );
@@ -66,7 +80,7 @@ describe('NotificationsController', () => {
       const result = await controller.getNotifications(mockUser as User);
 
       expect(service.getUserNotifications).toHaveBeenCalledWith(1, false);
-      expect(result).toEqual(mockNotifications);
+      expect(result).toEqual(expectedResponse);
     });
 
     it('should return only unread notifications when unreadOnly is true', async () => {
@@ -85,6 +99,20 @@ describe('NotificationsController', () => {
         },
       ];
 
+      const expectedResponse = [
+        {
+          id: 1,
+          type: NotificationType.SACRED_EVENT,
+          title: 'Luna Nueva',
+          message: 'Test',
+          data: null,
+          actionUrl: null,
+          read: false,
+          readAt: null,
+          createdAt: mockNotifications[0].createdAt,
+        },
+      ];
+
       mockNotificationsService.getUserNotifications.mockResolvedValue(
         mockNotifications,
       );
@@ -92,7 +120,7 @@ describe('NotificationsController', () => {
       const result = await controller.getNotifications(mockUser as User, true);
 
       expect(service.getUserNotifications).toHaveBeenCalledWith(1, true);
-      expect(result).toEqual(mockNotifications);
+      expect(result).toEqual(expectedResponse);
     });
   });
 

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOptionsWhere } from 'typeorm';
 import {
@@ -60,10 +60,16 @@ export class NotificationsService {
    * Marcar notificación como leída
    */
   async markAsRead(userId: number, notificationId: number): Promise<void> {
-    await this.notificationRepo.update(
+    const result = await this.notificationRepo.update(
       { id: notificationId, userId },
       { read: true, readAt: new Date() },
     );
+
+    if (result.affected === 0) {
+      throw new NotFoundException(
+        `Notification with id ${notificationId} not found or does not belong to user`,
+      );
+    }
   }
 
   /**

@@ -21,9 +21,8 @@ export enum NotificationType {
  * Almacena alertas sobre eventos del calendario sagrado, rituales recomendados, etc.
  */
 @Entity('user_notifications')
-@Index('idx_notification_user', ['userId'])
+@Index('idx_notification_user_created', ['userId', 'createdAt'])
 @Index('idx_notification_read', ['userId', 'read'])
-@Index('idx_notification_created', ['createdAt'])
 export class UserNotification {
   @PrimaryGeneratedColumn()
   id: number;

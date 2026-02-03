@@ -44,9 +44,9 @@ export class CreateUserNotificationsTable1771600000000 implements MigrationInter
         "message" TEXT NOT NULL,
         "data" JSONB,
         "action_url" VARCHAR(255),
-        "read" BOOLEAN DEFAULT false,
+        "read" BOOLEAN NOT NULL DEFAULT false,
         "read_at" TIMESTAMPTZ,
-        "created_at" TIMESTAMPTZ DEFAULT NOW(),
+        "created_at" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         
         CONSTRAINT "fk_notification_user"
           FOREIGN KEY ("user_id")
@@ -59,27 +59,24 @@ export class CreateUserNotificationsTable1771600000000 implements MigrationInter
     // 3. CREAR ÍNDICES
     // ====================================
 
-    // Índice para obtener notificaciones de un usuario
+    // Índice compuesto para listar notificaciones de un usuario ordenadas por fecha
+    // Optimiza la query principal: WHERE user_id = ? ORDER BY created_at DESC LIMIT 20
     await queryRunner.query(
-      `CREATE INDEX "idx_notification_user" ON "user_notifications"("user_id");`,
+      `CREATE INDEX "idx_notification_user_created_at_desc" ON "user_notifications"("user_id", "created_at" DESC);`,
     );
 
     // Índice compuesto para filtrar por usuario y estado de lectura
     await queryRunner.query(
       `CREATE INDEX "idx_notification_read" ON "user_notifications"("user_id", "read");`,
     );
-
-    // Índice para ordenar por fecha de creación
-    await queryRunner.query(
-      `CREATE INDEX "idx_notification_created" ON "user_notifications"("created_at");`,
-    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     // Eliminar índices explícitamente
-    await queryRunner.query(`DROP INDEX IF EXISTS "idx_notification_created";`);
     await queryRunner.query(`DROP INDEX IF EXISTS "idx_notification_read";`);
-    await queryRunner.query(`DROP INDEX IF EXISTS "idx_notification_user";`);
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "idx_notification_user_created_at_desc";`,
+    );
 
     // Eliminar tabla
     await queryRunner.query(`DROP TABLE IF EXISTS "user_notifications";`);

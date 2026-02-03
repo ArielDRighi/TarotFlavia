@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { NotFoundException } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import {
   UserNotification,
@@ -200,6 +201,31 @@ describe('NotificationsService', () => {
       expect(mockRepository.update).toHaveBeenCalledWith(
         { id: notificationId, userId },
         { read: true, readAt: expect.any(Date) },
+      );
+    });
+
+    it('should throw NotFoundException when notification does not exist', async () => {
+      const userId = 1;
+      const notificationId = 999;
+
+      mockRepository.update.mockResolvedValue({ affected: 0 });
+
+      await expect(service.markAsRead(userId, notificationId)).rejects.toThrow(
+        NotFoundException,
+      );
+      await expect(service.markAsRead(userId, notificationId)).rejects.toThrow(
+        'Notification with id 999 not found or does not belong to user',
+      );
+    });
+
+    it('should throw NotFoundException when notification belongs to another user', async () => {
+      const userId = 1;
+      const notificationId = 10;
+
+      mockRepository.update.mockResolvedValue({ affected: 0 });
+
+      await expect(service.markAsRead(userId, notificationId)).rejects.toThrow(
+        NotFoundException,
       );
     });
   });
