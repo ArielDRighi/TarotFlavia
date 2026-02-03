@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getRitualRecommendations } from '@/lib/api/rituals-api';
 import { useAuthStore } from '@/stores/authStore';
+import { ritualKeys } from './useRituals';
 
 /**
  * Hook para obtener recomendaciones personalizadas de rituales
@@ -26,7 +27,7 @@ export function useRitualRecommendations() {
   const isPremium = user?.plan === 'premium';
 
   return useQuery({
-    queryKey: ['rituals', 'recommendations'],
+    queryKey: ritualKeys.recommendations(),
     queryFn: getRitualRecommendations,
     enabled: isPremium,
     staleTime: 1000 * 60 * 60 * 24, // 24 horas (no cambia frecuentemente)

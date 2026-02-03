@@ -55,7 +55,7 @@ function PersonalizedRitualsSkeleton() {
 export function PersonalizedRitualsWidget() {
   const { user } = useAuthStore();
   const isPremium = user?.plan === 'premium';
-  const { data, isLoading } = useRitualRecommendations();
+  const { data, isLoading, isError } = useRitualRecommendations();
 
   // Free user: Show upsell
   if (!isPremium) {
@@ -84,6 +84,21 @@ export function PersonalizedRitualsWidget() {
     return <PersonalizedRitualsSkeleton />;
   }
 
+  // Error state
+  if (isError) {
+    return (
+      <Card className="p-6" data-testid="personalized-rituals-widget">
+        <div className="mb-4 flex items-center gap-3">
+          <Sparkles className="h-6 w-6 text-purple-500" />
+          <h2 className="font-serif text-xl">Rituales para Ti</h2>
+        </div>
+        <p className="text-sm text-red-600">
+          Error al cargar recomendaciones. Inténtalo de nuevo más tarde.
+        </p>
+      </Card>
+    );
+  }
+
   // No recommendations available
   if (!data?.hasRecommendations) {
     return (
@@ -109,12 +124,12 @@ export function PersonalizedRitualsWidget() {
       </div>
 
       <div className="space-y-4">
-        {data.recommendations.slice(0, 2).map((rec, idx) => {
+        {data.recommendations.slice(0, 2).map((rec) => {
           const Icon = PATTERN_ICONS[rec.pattern] || Sparkles;
 
           return (
             <div
-              key={idx}
+              key={rec.pattern}
               className="rounded-lg bg-gradient-to-r from-purple-500/10 to-transparent p-4"
             >
               <div className="flex items-start gap-3">

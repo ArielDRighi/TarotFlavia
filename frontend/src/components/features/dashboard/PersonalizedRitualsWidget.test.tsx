@@ -211,15 +211,19 @@ describe('PersonalizedRitualsWidget', () => {
   });
 
   describe('Error handling', () => {
-    it('should handle errors gracefully (show empty state or fallback)', () => {
+    it('should display error message when API call fails', () => {
       mockAuthStore('premium');
       mockRecommendationsHook(undefined, false, true, new Error('Network error'));
 
       render(<PersonalizedRitualsWidget />, { wrapper });
 
-      // Component should handle error gracefully (show empty state or error message)
-      // Since the spec doesn't explicitly show error UI, it might just not render anything or show empty
+      // Should display error message
+      expect(screen.getByText(/error al cargar recomendaciones/i)).toBeInTheDocument();
+      expect(screen.getByText(/inténtalo de nuevo más tarde/i)).toBeInTheDocument();
+      
+      // Should NOT show recommendations or empty state
       expect(screen.queryByText('Recomendado para Ti')).not.toBeInTheDocument();
+      expect(screen.queryByText(/realiza algunas lecturas más/i)).not.toBeInTheDocument();
     });
   });
 
