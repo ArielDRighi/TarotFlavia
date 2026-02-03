@@ -7116,7 +7116,7 @@ Actualizar los componentes de upsell existentes para incluir los beneficios de r
 
 ##### Frontend
 
-- [ ] Actualizar `DailyCardLimitReached.tsx`:
+- [x] Actualizar `DailyCardLimitReached.tsx`:
 
   ```tsx
   // Agregar en la lista de beneficios premium:
@@ -7130,7 +7130,7 @@ Actualizar los componentes de upsell existentes para incluir los beneficios de r
   </li>
   ```
 
-- [ ] Actualizar `AnonymousLimitReached.tsx`:
+- [x] Actualizar `AnonymousLimitReached.tsx`:
 
   ```tsx
   // En "Con una cuenta gratuita podrás:"
@@ -7138,7 +7138,7 @@ Actualizar los componentes de upsell existentes para incluir los beneficios de r
   <li>✓ Ver eventos del calendario sagrado (limitado)</li>
   ```
 
-- [ ] Crear constante centralizada de beneficios premium:
+- [x] Crear constante centralizada de beneficios premium:
 
   ```typescript
   // frontend/src/lib/constants/premium-benefits.ts
@@ -7163,8 +7163,8 @@ Actualizar los componentes de upsell existentes para incluir los beneficios de r
 
 ##### Testing
 
-- [ ] Test: Beneficios de rituales aparecen en upsells
-- [ ] Test: Constante exporta beneficios correctamente
+- [x] Test: Beneficios de rituales aparecen en upsells
+- [x] Test: Constante exporta beneficios correctamente
 
 ---
 
@@ -7180,7 +7180,7 @@ Actualizar los componentes de upsell existentes para incluir los beneficios de r
 | TASK-400f | Análisis de Patrones de Lecturas  | 2 días     | 🔴 ALTA   | ✅ COMPLETADA |
 | TASK-400g | Widget de Recomendaciones         | 1 día      | 🟡 MEDIA  | ✅ COMPLETADA |
 | TASK-400h | Sistema de Notificaciones In-App  | 2 días     | 🟡 MEDIA  | ✅ COMPLETADA |
-| TASK-400i | Beneficios en Upsells existentes  | 0.5 días   | 🟢 BAJA   | ⏳ Pendiente  |
+| TASK-400i | Beneficios en Upsells existentes  | 0.5 días   | 🟢 BAJA   | ✅ COMPLETADA |
 
 **Total Features Premium: 11.5 días**
 

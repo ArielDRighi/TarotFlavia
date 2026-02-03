@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Calendar, History, Sparkles, Crown } from 'lucide-react';
+import { Calendar, History, Sparkles, Crown, CalendarHeart } from 'lucide-react';
 
 import { useUserCapabilities } from '@/hooks/api/useUserCapabilities';
 import { Button } from '@/components/ui/button';
@@ -139,6 +139,18 @@ export function DailyCardLimitReached() {
                   <Sparkles className="text-primary mt-0.5 h-4 w-4 shrink-0" />
                   <span>
                     <strong>Preguntas personalizadas</strong> para lecturas más precisas
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CalendarHeart className="mt-0.5 h-4 w-4 shrink-0 text-purple-500" />
+                  <span>
+                    <strong>Calendario sagrado completo</strong> con notificaciones
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+                  <span>
+                    <strong>Rituales recomendados</strong> según tus lecturas
                   </span>
                 </li>
               </ul>
