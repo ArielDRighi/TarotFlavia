@@ -64,6 +64,12 @@ export function Header() {
           >
             Numerología
           </Link>
+          <Link
+            href={ROUTES.RITUALES}
+            className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
+          >
+            Rituales
+          </Link>
           {user && (
             <>
               <Link

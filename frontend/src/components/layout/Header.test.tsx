@@ -229,5 +229,31 @@ describe('Header', () => {
       expect(horoscopoChino).toBeInTheDocument();
       expect(horoscopoChino).toHaveAttribute('href', '/horoscopo-chino');
     });
+
+    it('should display Numerología link for all users', () => {
+      mockUseAuthStore.mockReturnValue({
+        user: null,
+        isAuthenticated: false,
+      });
+
+      render(<Header />);
+
+      const numerologiaLink = screen.getByRole('link', { name: /numerología/i });
+      expect(numerologiaLink).toBeInTheDocument();
+      expect(numerologiaLink).toHaveAttribute('href', '/numerologia');
+    });
+
+    it('should display Rituales link for all users', () => {
+      mockUseAuthStore.mockReturnValue({
+        user: null,
+        isAuthenticated: false,
+      });
+
+      render(<Header />);
+
+      const ritualesLink = screen.getByRole('link', { name: /rituales/i });
+      expect(ritualesLink).toBeInTheDocument();
+      expect(ritualesLink).toHaveAttribute('href', '/rituales');
+    });
   });
 });

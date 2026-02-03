@@ -7323,7 +7323,7 @@ El seeder de rituales fue creado pero nunca ejecutado. La base de datos no conti
 
 ### TASK-411: Agregar link a Rituales en el Header
 
-**Estado:** 🔴 PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Módulo:** `frontend/src/components/layout/Header.tsx`
 **Prioridad:** 🔴 ALTA
 **Estimación:** 15 minutos
@@ -7335,16 +7335,16 @@ La página de rituales (`/rituales`) existe y funciona, pero no hay ningún enla
 
 #### ✅ Tareas Específicas
 
-- [ ] Modificar `Header.tsx` para agregar link a Rituales:
+- [x] Modificar `Header.tsx` para agregar link a Rituales:
   ```tsx
   <Link href={ROUTES.RITUALES} className="text-text-primary hover:text-primary text-sm font-medium transition-colors">
     Rituales
   </Link>
   ```
-- [ ] Agregar el link en la navegación pública (visible para todos los usuarios)
-- [ ] Posicionarlo después de "Numerología" y antes de "Nueva Lectura"
-- [ ] Verificar que `ROUTES.RITUALES` esté definido en `routes.ts`
-- [ ] Actualizar el menú móvil cuando se implemente (TODO existente)
+- [x] Agregar el link en la navegación pública (visible para todos los usuarios)
+- [x] Posicionarlo después de "Numerología" y antes de "Nueva Lectura"
+- [x] Verificar que `ROUTES.RITUALES` esté definido en `routes.ts`
+- [x] Actualizar el menú móvil cuando se implemente (TODO existente)
 
 ---
 
