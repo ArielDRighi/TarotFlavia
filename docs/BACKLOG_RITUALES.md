@@ -7277,7 +7277,7 @@ La migración `1771300000000-CreateRitualsTables.ts` fue creada pero nunca ejecu
 
 ### TASK-410: Ejecutar seeder de Rituales
 
-**Estado:** 🔴 PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Módulo:** `src/database/seeds/`
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 5 minutos
@@ -7289,7 +7289,7 @@ El seeder de rituales fue creado pero nunca ejecutado. La base de datos no conti
 
 #### ✅ Tareas Específicas
 
-- [ ] Ejecutar el comando de seed:
+- [x] Ejecutar el comando de seed:
   ```bash
   cd backend/tarot-app
   npm run seed:rituals
@@ -7298,12 +7298,26 @@ El seeder de rituales fue creado pero nunca ejecutado. La base de datos no conti
   ```bash
   npx ts-node src/database/seeds/seed-data.ts
   ```
-- [ ] Verificar que se insertaron los 4 rituales iniciales:
+- [x] Verificar que se insertaron los 4 rituales iniciales:
   - Ritual de Luna Nueva
   - Ritual de Luna Llena
   - Limpieza Energética del Hogar
   - Consagración de Mazo de Tarot
-- [ ] Verificar la respuesta de `GET /api/v1/rituals` no esté vacía
+- [x] Verificar la respuesta de `GET /api/v1/rituals` no esté vacía
+
+#### 📝 Notas de Implementación
+
+**Ejecución exitosa:**
+- ✅ Ejecutado `npm run seed` desde `backend/tarot-app/`
+- ✅ El seeder `seedRituals()` ya estaba integrado en `seed-data.ts` (línea 118)
+- ✅ 4 rituales insertados correctamente en la base de datos:
+  1. Ritual de Luna Nueva (ID: 1, slug: ritual-luna-nueva)
+  2. Ritual de Luna Llena (ID: 2, slug: ritual-luna-llena)
+  3. Limpieza Energética del Hogar (ID: 3, slug: limpieza-energetica-hogar)
+  4. Consagración de Mazo de Tarot (ID: 4, slug: consagracion-mazo-tarot)
+- ✅ Endpoint `GET /api/v1/rituals` respondiendo correctamente con datos
+- ✅ Cada ritual incluye materiales y pasos completos
+- ✅ URLs de imágenes configuradas en `/images/rituals/thumbs/`
 
 ---
 
@@ -7923,13 +7937,13 @@ import { NotificationBell } from "@/components/features/notifications";
 | Task     | Descripción                           | Estimación | Prioridad  | Estado        |
 | -------- | ------------------------------------- | ---------- | ---------- | ------------- |
 | TASK-409 | Ejecutar migración de Rituales        | 5 min      | 🔴 CRÍTICA | ✅ COMPLETADA |
-| TASK-410 | Ejecutar seeder de Rituales           | 5 min      | 🔴 CRÍTICA | 🔴 PENDIENTE  |
+| TASK-410 | Ejecutar seeder de Rituales           | 5 min      | 🔴 CRÍTICA | ✅ COMPLETADA |
 | TASK-411 | Agregar link a Rituales en Header     | 15 min     | 🔴 ALTA    | 🔴 PENDIENTE  |
 | TASK-412 | Agregar DialogDescription en modal    | 10 min     | 🟡 MEDIA   | 🔴 PENDIENTE  |
 | TASK-413 | Corregir atributos booleanos en Image | 15 min     | 🟢 BAJA    | 🔴 PENDIENTE  |
 | TASK-414 | Frontend de Notificaciones In-App     | 1 día      | 🟡 MEDIA   | 🔴 PENDIENTE  |
 
-**Total estimado restante: ~1 día y 45 minutos**
+**Total estimado restante: ~1 día y 40 minutos**
 
 ---
 
