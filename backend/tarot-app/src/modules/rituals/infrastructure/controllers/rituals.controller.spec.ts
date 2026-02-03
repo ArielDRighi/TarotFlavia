@@ -4,6 +4,7 @@ import { RitualsController } from './rituals.controller';
 import { RitualsService } from '../../application/services/rituals.service';
 import { RitualHistoryService } from '../../application/services/ritual-history.service';
 import { LunarPhaseService } from '../../application/services/lunar-phase.service';
+import { ReadingPatternAnalyzerService } from '../../application/services/reading-pattern-analyzer.service';
 import {
   RitualCategory,
   RitualDifficulty,
@@ -116,6 +117,10 @@ describe('RitualsController', () => {
       getCurrentPhase: jest.fn(),
     };
 
+    const mockPatternAnalyzer = {
+      analyzeUserPatterns: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [RitualsController],
       providers: [
@@ -130,6 +135,10 @@ describe('RitualsController', () => {
         {
           provide: LunarPhaseService,
           useValue: mockLunarPhaseService,
+        },
+        {
+          provide: ReadingPatternAnalyzerService,
+          useValue: mockPatternAnalyzer,
         },
       ],
     }).compile();

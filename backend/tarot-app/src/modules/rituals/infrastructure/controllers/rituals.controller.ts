@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   HttpCode,
   HttpStatus,
+  ForbiddenException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -26,12 +27,15 @@ import {
   LunarPhaseService,
   LunarInfo,
 } from '../../application/services/lunar-phase.service';
+import { ReadingPatternAnalyzerService } from '../../application/services/reading-pattern-analyzer.service';
 import { RitualFiltersDto } from '../../application/dto/ritual-filters.dto';
 import {
   RitualSummaryDto,
   RitualDetailDto,
 } from '../../application/dto/ritual-response.dto';
 import { CompleteRitualDto } from '../../application/dto/complete-ritual.dto';
+import { RitualRecommendationsResponseDto } from '../../application/dto/pattern-analysis.dto';
+import { UserPlan } from '../../../users/entities/user.entity';
 
 /**
  * Controlador de endpoints REST para rituales
@@ -47,6 +51,7 @@ import { CompleteRitualDto } from '../../application/dto/complete-ritual.dto';
  * - POST /rituals/:id/complete - Marcar ritual como completado
  * - GET /rituals/history - Historial del usuario
  * - GET /rituals/history/stats - Estadísticas del usuario
+ * - GET /rituals/recommendations - Recomendaciones personalizadas (Premium)
  */
 @ApiTags('Rituals')
 @Controller('rituals')
@@ -55,6 +60,7 @@ export class RitualsController {
     private readonly ritualsService: RitualsService,
     private readonly historyService: RitualHistoryService,
     private readonly lunarPhaseService: LunarPhaseService,
+    private readonly patternAnalyzer: ReadingPatternAnalyzerService,
   ) {}
 
   /**
@@ -215,6 +221,55 @@ export class RitualsController {
   @ApiResponse({ status: 401, description: 'No autenticado' })
   async getStats(@CurrentUser() user: { userId: number }) {
     return this.historyService.getUserStats(user.userId);
+  }
+
+  /**
+   * GET /rituals/recommendations
+   * Obtener recomendaciones personalizadas basadas en patrones de lecturas (Premium)
+   */
+  @Get('recommendations')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Obtener recomendaciones personalizadas (Premium)',
+    description:
+      'Analiza el historial de lecturas de tarot del usuario para detectar patrones emocionales y recomendar rituales apropiados. Requiere plan Premium.',
+  })
+  @ApiResponse({
+    status: 200,
+    type: RitualRecommendationsResponseDto,
+    description:
+      'Recomendaciones personalizadas basadas en análisis de patrones',
+  })
+  @ApiResponse({ status: 401, description: 'No autenticado' })
+  @ApiResponse({
+    status: 403,
+    description: 'Plan Premium requerido',
+  })
+  async getPersonalizedRecommendations(
+    @CurrentUser() user: { userId: number; plan: UserPlan },
+  ): Promise<RitualRecommendationsResponseDto> {
+    // Verificar plan Premium
+    if (user.plan !== UserPlan.PREMIUM) {
+      throw new ForbiddenException(
+        'Las recomendaciones personalizadas están disponibles solo para usuarios Premium',
+      );
+    }
+
+    // Analizar patrones de lecturas del usuario
+    const analysis = await this.patternAnalyzer.analyzeUserPatterns(
+      user.userId,
+      5,
+    );
+
+    // Retornar recomendaciones
+    return {
+      hasRecommendations:
+        analysis.hasEnoughData && analysis.recommendations.length > 0,
+      recommendations: analysis.recommendations,
+      nextAnalysisIn: '7 días',
+      analysis,
+    };
   }
 
   /**
