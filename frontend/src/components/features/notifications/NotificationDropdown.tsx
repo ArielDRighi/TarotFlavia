@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useNotifications, useMarkAsRead, useMarkAllAsRead } from '@/hooks/api/useNotifications';
 import { NotificationItem } from './NotificationItem';
 import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
 import type { Notification } from '@/types';
 
 export function NotificationDropdown() {
@@ -29,7 +30,11 @@ export function NotificationDropdown() {
   };
 
   if (isLoading) {
-    return <div className="p-4 text-center text-sm text-gray-500">Cargando notificaciones...</div>;
+    return (
+      <div className="p-4">
+        <Spinner size="sm" text="Cargando notificaciones..." />
+      </div>
+    );
   }
 
   if (isError) {
