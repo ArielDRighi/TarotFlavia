@@ -10,3 +10,4 @@ export { NumberGallery } from './NumberGallery';
 export { NumerologyCalculator } from './NumerologyCalculator';
 export { NumerologyProfile } from './NumerologyProfile';
 export { NumerologyWidget } from './NumerologyWidget';
+export { NumerologyPage } from './NumerologyPage';

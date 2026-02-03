@@ -8,16 +8,20 @@ import * as useUserCapabilitiesModule from '@/hooks/api/useUserCapabilities';
 import * as useHoroscopeModule from '@/hooks/api/useHoroscope';
 import * as useChineseHoroscopeModule from '@/hooks/api/useChineseHoroscope';
 import * as useNumerologyModule from '@/hooks/api/useNumerology';
+import * as useSacredCalendarModule from '@/hooks/api/useSacredCalendar';
+import * as useRitualRecommendationsModule from '@/hooks/api/useRitualRecommendations';
 import type {
   AuthUser,
   UserProfile,
   UserCapabilities,
   DailyHoroscope,
   ChineseHoroscope,
+  SacredEvent,
 } from '@/types';
 import type { UseQueryResult } from '@tanstack/react-query';
 import { ZodiacSign } from '@/types/horoscope.types';
 import type { NumerologyResponseDto, DayNumberResponse } from '@/types/numerology.types';
+import type { RitualRecommendationsResponse } from '@/types/ritual.types';
 
 // Mocks
 vi.mock('@/hooks/useAuth');
@@ -27,6 +31,8 @@ vi.mock('@/hooks/api/useUserCapabilities');
 vi.mock('@/hooks/api/useHoroscope');
 vi.mock('@/hooks/api/useChineseHoroscope');
 vi.mock('@/hooks/api/useNumerology');
+vi.mock('@/hooks/api/useSacredCalendar');
+vi.mock('@/hooks/api/useRitualRecommendations');
 
 // Helper to create AuthUser mock without limits fields
 function createMockAuthUser(overrides?: Partial<AuthUser>): AuthUser {
@@ -76,6 +82,30 @@ describe('UserDashboard', () => {
       error: null,
       refetch: vi.fn(),
     } as unknown as UseQueryResult<DayNumberResponse, Error>);
+
+    // Default mock for useTodayEvents (SacredEventsWidget)
+    vi.spyOn(useSacredCalendarModule, 'useTodayEvents').mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    } as unknown as UseQueryResult<SacredEvent[], Error>);
+
+    // Default mock for useUpcomingEvents (SacredEventsWidget)
+    vi.spyOn(useSacredCalendarModule, 'useUpcomingEvents').mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    } as unknown as UseQueryResult<SacredEvent[], Error>);
+
+    // Default mock for useRitualRecommendations (PersonalizedRitualsWidget)
+    vi.spyOn(useRitualRecommendationsModule, 'useRitualRecommendations').mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    } as unknown as UseQueryResult<RitualRecommendationsResponse, Error>);
   });
 
   it('should render WelcomeHeader', () => {

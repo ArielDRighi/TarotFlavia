@@ -1,10 +1,11 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Calendar, History, Sparkles, Crown } from 'lucide-react';
+import { Calendar, History, Sparkles, Crown, CalendarHeart, Bell, Wand2 } from 'lucide-react';
 
 import { useUserCapabilities } from '@/hooks/api/useUserCapabilities';
 import { Button } from '@/components/ui/button';
+import { PREMIUM_BENEFITS } from '@/lib/constants';
 import {
   Card,
   CardContent,
@@ -136,9 +137,44 @@ export function DailyCardLimitReached() {
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <Sparkles className="text-primary mt-0.5 h-4 w-4 shrink-0" />
+                  <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
                   <span>
                     <strong>Preguntas personalizadas</strong> para lecturas más precisas
+                  </span>
+                </li>
+                {PREMIUM_BENEFITS.rituals.map((benefit, index) => {
+                  const iconMap = {
+                    CalendarHeart,
+                    Bell,
+                    Wand2,
+                    History,
+                  } as const;
+                  const IconComponent = iconMap[benefit.icon as keyof typeof iconMap];
+                  const colorClass =
+                    benefit.icon === 'CalendarHeart'
+                      ? 'text-purple-500'
+                      : benefit.icon === 'Wand2'
+                        ? 'text-amber-500'
+                        : 'text-primary';
+                  return (
+                    <li key={index} className="flex items-start gap-2">
+                      <IconComponent className={`mt-0.5 h-4 w-4 shrink-0 ${colorClass}`} />
+                      <span>
+                        <strong>{benefit.text}</strong>
+                      </span>
+                    </li>
+                  );
+                })}
+                <li className="flex items-start gap-2">
+                  <CalendarHeart className="mt-0.5 h-4 w-4 shrink-0 text-purple-500" />
+                  <span>
+                    <strong>Calendario sagrado completo</strong> con notificaciones
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+                  <span>
+                    <strong>Rituales recomendados</strong> según tus lecturas
                   </span>
                 </li>
               </ul>

@@ -62,6 +62,12 @@ export function AnonymousLimitReached() {
             <li className="flex items-center gap-2">
               <span className="text-primary">✓</span> Historial de tus lecturas
             </li>
+            <li className="flex items-center gap-2">
+              <span className="text-primary">✓</span> Explorar el catálogo de rituales
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="text-primary">✓</span> Ver eventos del calendario sagrado (limitado)
+            </li>
           </ul>
         </div>
       </CardContent>
