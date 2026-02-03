@@ -5,6 +5,7 @@ import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/stores/authStore';
 import { UserMenu } from './UserMenu';
+import { NotificationBell } from '@/components/features/notifications';
 import { ROUTES } from '@/lib/constants/routes';
 
 /**
@@ -99,8 +100,9 @@ export function Header() {
           )}
         </div>
 
-        {/* User menu - always visible on right */}
-        <div className="flex items-center">
+        {/* User menu and notifications - always visible on right */}
+        <div className="flex items-center gap-2">
+          {user && <NotificationBell />}
           <UserMenu />
         </div>
       </nav>

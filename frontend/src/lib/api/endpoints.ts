@@ -140,6 +140,15 @@ export const API_ENDPOINTS = {
     MONTH: (year: number, month: number) => `/rituals/calendar/month/${year}/${month}`,
   },
 
+  // Notifications (Notificaciones In-App)
+  NOTIFICATIONS: {
+    BASE: '/notifications',
+    BY_ID: (id: number) => `/notifications/${id}`,
+    COUNT: '/notifications/count',
+    MARK_READ: (id: number) => `/notifications/${id}/read`,
+    MARK_ALL_READ: '/notifications/read-all',
+  },
+
   // Admin Dashboard
   ADMIN: {
     DASHBOARD_STATS: '/admin/dashboard/stats',
