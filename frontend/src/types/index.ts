@@ -171,3 +171,7 @@ export {
   EVENT_TYPE_INFO,
   IMPORTANCE_INFO,
 } from './sacred-calendar.types';
+
+// Notification Types
+export type { Notification, UnreadCountResponse, NotificationFilters } from './notification.types';
+export { NotificationType, NOTIFICATION_TYPE_INFO } from './notification.types';

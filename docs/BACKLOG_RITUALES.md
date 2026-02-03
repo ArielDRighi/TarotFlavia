@@ -7421,7 +7421,7 @@ Esto ocurre en `RitualCard.tsx` y `RitualHeader.tsx`.
 
 ### TASK-414: Frontend de Notificaciones In-App
 
-**Estado:** 🔴 PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Módulo:** `frontend/src/`
 **Prioridad:** 🟡 MEDIA
 **Estimación:** 1 día
@@ -7446,7 +7446,7 @@ Implementar la interfaz de usuario para el sistema de notificaciones in-app. Inc
 
 ##### 1. Tipos TypeScript (`types/notification.types.ts`)
 
-- [ ] Crear archivo de tipos:
+- [x] Crear archivo de tipos:
 
 ```typescript
 // frontend/src/types/notification.types.ts
@@ -7484,7 +7484,7 @@ export interface UnreadCountResponse {
 }
 ```
 
-- [ ] Exportar tipos en `types/index.ts`:
+- [x] Exportar tipos en `types/index.ts`:
 
 ```typescript
 // Notification Types
@@ -7494,7 +7494,7 @@ export { NotificationType } from "./notification.types";
 
 ##### 2. Endpoints Centralizados (`lib/api/endpoints.ts`)
 
-- [ ] Agregar endpoints de notificaciones:
+- [x] Agregar endpoints de notificaciones:
 
 ```typescript
 // En API_ENDPOINTS, agregar:
@@ -7508,7 +7508,7 @@ NOTIFICATIONS: {
 
 ##### 3. API Functions (`lib/api/notifications-api.ts`)
 
-- [ ] Crear funciones de API:
+- [x] Crear funciones de API:
 
 ```typescript
 // frontend/src/lib/api/notifications-api.ts
@@ -7551,11 +7551,11 @@ export async function markAllAsRead(): Promise<void> {
 }
 ```
 
-- [ ] Crear tests (`lib/api/notifications-api.test.ts`)
+- [x] Crear tests (`lib/api/notifications-api.test.ts`)
 
 ##### 4. React Query Hook (`hooks/api/useNotifications.ts`)
 
-- [ ] Crear hook con queries y mutations:
+- [x] Crear hook con queries y mutations:
 
 ```typescript
 // frontend/src/hooks/api/useNotifications.ts
@@ -7627,11 +7627,11 @@ export function useMarkAllAsRead() {
 }
 ```
 
-- [ ] Crear tests (`hooks/api/useNotifications.test.ts`)
+- [x] Crear tests (`hooks/api/useNotifications.test.ts`)
 
 ##### 5. Componente NotificationBell (`components/features/notifications/`)
 
-- [ ] Crear estructura de carpeta:
+- [x] Crear estructura de carpeta:
 
 ```
 components/features/notifications/
@@ -7644,7 +7644,7 @@ components/features/notifications/
 └── index.ts
 ```
 
-- [ ] Crear `NotificationItem.tsx`:
+- [x] Crear `NotificationItem.tsx`:
 
 ```tsx
 "use client";
@@ -7713,7 +7713,7 @@ export function NotificationItem({ notification, onMarkRead, onClick }: Notifica
 }
 ```
 
-- [ ] Crear `NotificationDropdown.tsx`:
+- [x] Crear `NotificationDropdown.tsx`:
 
 ```tsx
 "use client";
@@ -7800,7 +7800,7 @@ export function NotificationDropdown() {
 }
 ```
 
-- [ ] Crear `NotificationBell.tsx`:
+- [x] Crear `NotificationBell.tsx`:
 
 ```tsx
 "use client";
@@ -7847,7 +7847,7 @@ export function NotificationBell() {
 }
 ```
 
-- [ ] Crear `index.ts`:
+- [x] Crear `index.ts`:
 
 ```typescript
 export { NotificationBell } from "./NotificationBell";
@@ -7855,17 +7855,17 @@ export { NotificationDropdown } from "./NotificationDropdown";
 export { NotificationItem } from "./NotificationItem";
 ```
 
-- [ ] Crear tests para cada componente
+- [x] Crear tests para cada componente
 
 ##### 6. Integración en Header (`components/layout/Header.tsx`)
 
-- [ ] Importar `NotificationBell`:
+- [x] Importar `NotificationBell`:
 
 ```tsx
 import { NotificationBell } from "@/components/features/notifications";
 ```
 
-- [ ] Agregar el componente al header (solo para usuarios autenticados):
+- [x] Agregar el componente al header (solo para usuarios autenticados):
 
 ```tsx
 {
@@ -7879,46 +7879,46 @@ import { NotificationBell } from "@/components/features/notifications";
 
 ##### Testing
 
-- [ ] Tests unitarios para `notification.types.ts`
-- [ ] Tests para `notifications-api.ts` (mock axios)
-- [ ] Tests para `useNotifications.ts` (mock React Query)
-- [ ] Tests para `NotificationItem.tsx`
-- [ ] Tests para `NotificationDropdown.tsx`
-- [ ] Tests para `NotificationBell.tsx`
-- [ ] Tests de integración para Header con NotificationBell
+- [x] Tests unitarios para `notification.types.ts`
+- [x] Tests para `notifications-api.ts` (mock axios)
+- [x] Tests para `useNotifications.ts` (mock React Query)
+- [x] Tests para `NotificationItem.tsx`
+- [x] Tests para `NotificationDropdown.tsx`
+- [x] Tests para `NotificationBell.tsx`
+- [x] Tests de integración para Header con NotificationBell
 
 ##### Quality Gates
 
-- [ ] Format: `npm run format`
-- [ ] Lint: `npm run lint:fix`
-- [ ] Type-check: `npm run type-check`
-- [ ] Tests: `npm run test:run`
-- [ ] Coverage: `npm run test:coverage` (≥ 80%)
-- [ ] Build: `npm run build`
-- [ ] Architecture: `node scripts/validate-architecture.js`
+- [x] Format: `npm run format`
+- [x] Lint: `npm run lint:fix`
+- [x] Type-check: `npm run type-check`
+- [x] Tests: `npm run test:run`
+- [x] Coverage: `npm run test:coverage` (≥ 80%)
+- [x] Build: `npm run build`
+- [x] Architecture: `node scripts/validate-architecture.js`
 
 ##### Git
 
-- [ ] Actualizar backlog (marcar completada)
-- [ ] Crear commit: `feat(notifications): add in-app notifications UI components`
-- [ ] Push y crear PR a `develop`
+- [x] Actualizar backlog (marcar completada)
+- [x] Crear commit: `feat(notifications): add in-app notifications UI components`
+- [x] Push y crear PR a `develop`
 
 ---
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] El icono de campana aparece en el header para usuarios autenticados
-- [ ] El badge muestra el conteo de notificaciones no leídas (máx 99+)
-- [ ] Al hacer clic se despliega el dropdown con las notificaciones
-- [ ] Las notificaciones no leídas tienen indicador visual (fondo/punto)
-- [ ] Se puede marcar una notificación como leída al hacer clic
-- [ ] Se pueden marcar todas como leídas con un botón
-- [ ] Al hacer clic en una notificación con `actionUrl`, navega a esa URL
-- [ ] Estado vacío muestra mensaje apropiado
-- [ ] Estado de carga muestra spinner
-- [ ] Texto en español para todo el UI
-- [ ] Tests con coverage ≥ 80%
-- [ ] Build exitoso sin errores de TypeScript
+- [x] El icono de campana aparece en el header para usuarios autenticados
+- [x] El badge muestra el conteo de notificaciones no leídas (máx 99+)
+- [x] Al hacer clic se despliega el dropdown con las notificaciones
+- [x] Las notificaciones no leídas tienen indicador visual (fondo/punto)
+- [x] Se puede marcar una notificación como leída al hacer clic
+- [x] Se pueden marcar todas como leídas con un botón
+- [x] Al hacer clic en una notificación con `actionUrl`, navega a esa URL
+- [x] Estado vacío muestra mensaje apropiado
+- [x] Estado de carga muestra spinner
+- [x] Texto en español para todo el UI
+- [x] Tests con coverage ≥ 80%
+- [x] Build exitoso sin errores de TypeScript
 
 ---
 
@@ -7941,7 +7941,7 @@ import { NotificationBell } from "@/components/features/notifications";
 | TASK-411 | Agregar link a Rituales en Header     | 15 min     | 🔴 ALTA    | 🔴 PENDIENTE  |
 | TASK-412 | Agregar DialogDescription en modal    | 10 min     | 🟡 MEDIA   | 🔴 PENDIENTE  |
 | TASK-413 | Corregir atributos booleanos en Image | 15 min     | 🟢 BAJA    | 🔴 PENDIENTE  |
-| TASK-414 | Frontend de Notificaciones In-App     | 1 día      | 🟡 MEDIA   | 🔴 PENDIENTE  |
+| TASK-414 | Frontend de Notificaciones In-App     | 1 día      | 🟡 MEDIA   | ✅ COMPLETADA |
 
 **Total estimado restante: ~1 día y 40 minutos**
 

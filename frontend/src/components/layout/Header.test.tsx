@@ -16,6 +16,26 @@ vi.mock('@/stores/authStore', () => ({
   useAuthStore: () => mockUseAuthStore(),
 }));
 
+// Mock notification hooks
+vi.mock('@/hooks/api/useNotifications', () => ({
+  useUnreadCount: vi.fn(() => ({
+    data: { count: 0 },
+    isLoading: false,
+    error: null,
+  })),
+  useNotifications: vi.fn(() => ({
+    data: [],
+    isLoading: false,
+    error: null,
+  })),
+  useMarkAsRead: vi.fn(() => ({
+    mutate: vi.fn(),
+  })),
+  useMarkAllAsRead: vi.fn(() => ({
+    mutate: vi.fn(),
+  })),
+}));
+
 describe('Header', () => {
   beforeEach(() => {
     vi.clearAllMocks();
