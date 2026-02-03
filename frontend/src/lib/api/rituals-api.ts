@@ -8,6 +8,7 @@ import type {
   RitualHistoryEntry,
   UserRitualStats,
   CompleteRitualRequest,
+  RitualRecommendationsResponse,
 } from '@/types/ritual.types';
 
 /**
@@ -94,5 +95,16 @@ export async function getRitualHistory(limit?: number): Promise<RitualHistoryEnt
  */
 export async function getRitualStats(): Promise<UserRitualStats> {
   const response = await apiClient.get<UserRitualStats>(API_ENDPOINTS.RITUALS.STATS);
+  return response.data;
+}
+
+/**
+ * Obtener recomendaciones personalizadas de rituales (Premium)
+ * Requiere autenticación y plan Premium
+ */
+export async function getRitualRecommendations(): Promise<RitualRecommendationsResponse> {
+  const response = await apiClient.get<RitualRecommendationsResponse>(
+    API_ENDPOINTS.RITUALS.RECOMMENDATIONS
+  );
   return response.data;
 }

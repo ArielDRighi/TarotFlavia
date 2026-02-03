@@ -12,6 +12,7 @@ import { HoroscopeWidget } from '@/components/features/horoscope';
 import { ChineseHoroscopeWidget } from '@/components/features/chinese-horoscope';
 import { NumerologyWidget } from '@/components/features/numerology';
 import { SacredEventsWidget } from './SacredEventsWidget';
+import { PersonalizedRitualsWidget } from './PersonalizedRitualsWidget';
 
 /**
  * User Dashboard component for authenticated users
@@ -24,6 +25,7 @@ import { SacredEventsWidget } from './SacredEventsWidget';
  * - Chinese Horoscope widget (All authenticated users)
  * - Numerology widget (All authenticated users)
  * - Sacred Events widget (All authenticated users)
+ * - Personalized Rituals widget (All users, Premium features)
  * - Stats section (Premium only)
  * - Upgrade banner (Free users only)
  *
@@ -78,6 +80,9 @@ export function UserDashboard() {
 
             {/* Sacred Events Widget - For all users */}
             <SacredEventsWidget />
+
+            {/* Personalized Rituals Widget - For all users (Premium features) */}
+            <PersonalizedRitualsWidget />
 
             {/* Stats Section - Only for Premium users */}
             {isPremium && <StatsSection />}

@@ -130,6 +130,7 @@ export const API_ENDPOINTS = {
     COMPLETE: (id: number) => `/rituals/${id}/complete`,
     HISTORY: '/rituals/history',
     STATS: '/rituals/history/stats',
+    RECOMMENDATIONS: '/rituals/recommendations',
   },
 
   // Sacred Calendar (Calendario Sagrado)
