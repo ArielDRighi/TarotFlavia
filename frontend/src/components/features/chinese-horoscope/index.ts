@@ -31,3 +31,5 @@ export type { YearSelectorModalProps } from './YearSelectorModal';
 
 export { YearInputBanner } from './YearInputBanner';
 export type { YearInputBannerProps } from './YearInputBanner';
+
+export { AnimalHoroscopePage } from './AnimalHoroscopePage';

@@ -15,6 +15,11 @@ import type { ReactNode } from 'react';
 vi.mock('next/navigation', () => ({
   useParams: vi.fn(),
   useSearchParams: vi.fn(),
+  useRouter: vi.fn(() => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    back: vi.fn(),
+  })),
 }));
 
 // Mock auth store

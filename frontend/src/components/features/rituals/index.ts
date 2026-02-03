@@ -20,6 +20,7 @@ export { RitualGrid } from './RitualGrid';
 export { RitualCategorySelector } from './RitualCategorySelector';
 export { RitualDifficultyFilter } from './RitualDifficultyFilter';
 export { RitualsSkeleton } from './RitualsSkeleton';
+export { RitualsPage } from './RitualsPage';
 
 // Detail components
 export { RitualHeader } from './RitualHeader';
@@ -27,6 +28,7 @@ export { RitualMaterials } from './RitualMaterials';
 export { RitualStepsList } from './RitualStepsList';
 export { RitualTips } from './RitualTips';
 export { RitualCompletedModal } from './RitualCompletedModal';
+export { RitualDetailPage } from './RitualDetailPage';
 
 // Type exports
 export type { RitualCardProps } from './RitualCard';
