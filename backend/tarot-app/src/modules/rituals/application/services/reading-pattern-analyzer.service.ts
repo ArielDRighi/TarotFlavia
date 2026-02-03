@@ -21,8 +21,6 @@ export class ReadingPatternAnalyzerService {
   constructor(
     @InjectRepository(TarotReading)
     private readonly readingRepo: Repository<TarotReading>,
-    @InjectRepository(ReadingCategory)
-    private readonly categoryRepo: Repository<ReadingCategory>,
   ) {}
 
   /**
@@ -50,9 +48,6 @@ export class ReadingPatternAnalyzerService {
       };
     }
 
-    // Analizar categorías más frecuentes
-    const categoryFrequency = this.analyzeCategoryFrequency(readings);
-
     // Analizar cartas y detectar patrones emocionales
     const cardPatterns = this.analyzeCardPatterns(readings);
 
@@ -61,7 +56,6 @@ export class ReadingPatternAnalyzerService {
 
     // Combinar patrones detectados
     const detectedPatterns = this.combinePatterns(
-      categoryFrequency,
       cardPatterns,
       obsessionDetected,
       readings,
@@ -99,12 +93,14 @@ export class ReadingPatternAnalyzerService {
    */
   private analyzeCardPatterns(readings: TarotReading[]): EmotionalPattern[] {
     const patterns: EmotionalPattern[] = [];
-    const allCardIds = readings.flatMap((r) => r.cards?.map((c) => c.id) || []);
+    const allCardNumbers = readings.flatMap(
+      (r) => r.cards?.map((c) => c.number) || [],
+    );
 
     for (const [pattern, config] of Object.entries(PATTERN_CARDS)) {
       // Contar cuántas veces aparecen cartas del patrón (permite repeticiones)
-      const matchCount = allCardIds.filter((id) =>
-        config.majorArcana.includes(id),
+      const matchCount = allCardNumbers.filter((cardNumber) =>
+        config.majorArcana.includes(cardNumber),
       ).length;
 
       // Si 2+ apariciones de cartas del patrón, lo detectamos
@@ -135,7 +131,6 @@ export class ReadingPatternAnalyzerService {
    * Combina los resultados de diferentes análisis en patrones detectados
    */
   private combinePatterns(
-    categoryFrequency: Map<string, number>,
     cardPatterns: EmotionalPattern[],
     obsessionDetected: boolean,
     readings: TarotReading[],
@@ -177,10 +172,12 @@ export class ReadingPatternAnalyzerService {
     readings: TarotReading[],
     pattern: EmotionalPattern,
   ): number {
-    const patternCardIds = PATTERN_CARDS[pattern].majorArcana;
+    const patternCardNumbers = PATTERN_CARDS[pattern].majorArcana;
     return readings.filter((reading) => {
-      const readingCardIds = reading.cards?.map((c) => c.id) || [];
-      return patternCardIds.some((id) => readingCardIds.includes(id));
+      const readingCardNumbers = reading.cards?.map((c) => c.number) || [];
+      return patternCardNumbers.some((cardNumber) =>
+        readingCardNumbers.includes(cardNumber),
+      );
     }).length;
   }
 
@@ -191,12 +188,12 @@ export class ReadingPatternAnalyzerService {
     readings: TarotReading[],
     pattern: EmotionalPattern,
   ): string[] {
-    const patternCardIds = PATTERN_CARDS[pattern].majorArcana;
+    const patternCardNumbers = PATTERN_CARDS[pattern].majorArcana;
     const cardNames = new Set<string>();
 
     for (const reading of readings) {
       for (const card of reading.cards || []) {
-        if (patternCardIds.includes(card.id)) {
+        if (patternCardNumbers.includes(card.number)) {
           cardNames.add(card.name);
         }
       }
@@ -220,7 +217,12 @@ export class ReadingPatternAnalyzerService {
         pattern: pattern.type,
         message: this.getPatternMessage(pattern.type),
         suggestedCategories: ritualCategories,
-        priority: pattern.confidence > 0.7 ? 'high' : 'medium',
+        priority:
+          pattern.confidence > 0.7
+            ? 'high'
+            : pattern.confidence > 0.4
+              ? 'medium'
+              : 'low',
       });
     }
 

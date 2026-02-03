@@ -53,7 +53,7 @@ describe('ReadingPatternAnalyzerService', () => {
       readingRepo.find.mockResolvedValue([
         {
           id: 1,
-          cards: [{ id: 16, name: 'La Torre', imageUrl: '' }],
+          cards: [{ id: 101, number: 16, name: 'La Torre', imageUrl: '' }],
           category: { id: 1, slug: 'amor', name: 'Amor' },
           createdAt: new Date(),
         } as unknown as TarotReading,
@@ -74,18 +74,15 @@ describe('ReadingPatternAnalyzerService', () => {
         {
           id: 1,
           cards: [
-            { id: 16, name: 'La Torre', imageUrl: '' },
-            { id: 18, name: 'La Luna', imageUrl: '' },
+            { id: 101, number: 16, name: 'La Torre', imageUrl: '' },
+            { id: 102, number: 18, name: 'La Luna', imageUrl: '' },
           ],
           category: { id: 1, slug: 'amor', name: 'Amor' },
           createdAt: new Date(),
         } as unknown as TarotReading,
         {
           id: 2,
-          cards: [
-            { id: 5, name: 'El Hierofante', imageUrl: '' },
-            { id: 16, name: 'La Torre', imageUrl: '' },
-          ],
+          cards: [{ id: 104, number: 18, name: 'La Luna', imageUrl: '' }],
           category: { id: 1, slug: 'amor', name: 'Amor' },
           createdAt: new Date(),
         } as unknown as TarotReading,
@@ -111,13 +108,13 @@ describe('ReadingPatternAnalyzerService', () => {
       readingRepo.find.mockResolvedValue([
         {
           id: 1,
-          cards: [{ id: 12, name: 'El Colgado', imageUrl: '' }],
+          cards: [{ id: 105, number: 12, name: 'El Colgado', imageUrl: '' }],
           category: { id: 2, slug: 'trabajo', name: 'Trabajo' },
           createdAt: new Date(),
         } as unknown as TarotReading,
         {
           id: 2,
-          cards: [{ id: 12, name: 'El Colgado', imageUrl: '' }],
+          cards: [{ id: 105, number: 12, name: 'El Colgado', imageUrl: '' }],
           category: { id: 2, slug: 'trabajo', name: 'Trabajo' },
           createdAt: new Date(),
         } as unknown as TarotReading,
@@ -143,15 +140,22 @@ describe('ReadingPatternAnalyzerService', () => {
         {
           id: 1,
           cards: [
-            { id: 19, name: 'El Sol', imageUrl: '' },
-            { id: 21, name: 'El Mundo', imageUrl: '' },
+            { id: 106, number: 19, name: 'El Sol', imageUrl: '' },
+            { id: 107, number: 21, name: 'El Mundo', imageUrl: '' },
           ],
           category: { id: 2, slug: 'trabajo', name: 'Trabajo' },
           createdAt: new Date(),
         } as unknown as TarotReading,
         {
           id: 2,
-          cards: [{ id: 10, name: 'La Rueda de la Fortuna', imageUrl: '' }],
+          cards: [
+            {
+              id: 108,
+              number: 10,
+              name: 'La Rueda de la Fortuna',
+              imageUrl: '',
+            },
+          ],
           category: { id: 3, slug: 'dinero', name: 'Dinero' },
           createdAt: new Date(),
         } as unknown as TarotReading,
@@ -182,19 +186,19 @@ describe('ReadingPatternAnalyzerService', () => {
       readingRepo.find.mockResolvedValue([
         {
           id: 1,
-          cards: [{ id: 1, name: 'El Mago', imageUrl: '' }],
+          cards: [{ id: 109, number: 1, name: 'El Mago', imageUrl: '' }],
           category,
           createdAt: new Date('2026-02-01T10:00:00Z'),
         } as unknown as TarotReading,
         {
           id: 2,
-          cards: [{ id: 2, name: 'La Sacerdotisa', imageUrl: '' }],
+          cards: [{ id: 110, number: 2, name: 'La Sacerdotisa', imageUrl: '' }],
           category,
           createdAt: new Date('2026-02-01T09:00:00Z'),
         } as unknown as TarotReading,
         {
           id: 3,
-          cards: [{ id: 3, name: 'La Emperatriz', imageUrl: '' }],
+          cards: [{ id: 111, number: 3, name: 'La Emperatriz', imageUrl: '' }],
           category,
           createdAt: new Date('2026-02-01T08:00:00Z'),
         } as unknown as TarotReading,
@@ -220,15 +224,15 @@ describe('ReadingPatternAnalyzerService', () => {
         {
           id: 1,
           cards: [
-            { id: 16, name: 'La Torre', imageUrl: '' },
-            { id: 18, name: 'La Luna', imageUrl: '' },
+            { id: 112, number: 16, name: 'La Torre', imageUrl: '' },
+            { id: 113, number: 18, name: 'La Luna', imageUrl: '' },
           ],
           category: { id: 1, slug: 'amor', name: 'Amor' },
           createdAt: new Date(),
         } as unknown as TarotReading,
         {
           id: 2,
-          cards: [{ id: 16, name: 'La Torre', imageUrl: '' }],
+          cards: [{ id: 115, number: 16, name: 'La Torre', imageUrl: '' }],
           category: { id: 1, slug: 'amor', name: 'Amor' },
           createdAt: new Date(),
         } as unknown as TarotReading,
@@ -252,13 +256,13 @@ describe('ReadingPatternAnalyzerService', () => {
       readingRepo.find.mockResolvedValue([
         {
           id: 1,
-          cards: [{ id: 1, name: 'El Mago', imageUrl: '' }],
+          cards: [{ id: 109, number: 1, name: 'El Mago', imageUrl: '' }],
           category: { id: 1, slug: 'amor', name: 'Amor' },
           createdAt: new Date(),
         } as unknown as TarotReading,
         {
           id: 2,
-          cards: [{ id: 2, name: 'La Sacerdotisa', imageUrl: '' }],
+          cards: [{ id: 110, number: 2, name: 'La Sacerdotisa', imageUrl: '' }],
           category: { id: 1, slug: 'amor', name: 'Amor' },
           createdAt: new Date(),
         } as unknown as TarotReading,
@@ -301,8 +305,8 @@ describe('ReadingPatternAnalyzerService', () => {
         {
           id: 1,
           cards: [
-            { id: 16, name: 'La Torre', imageUrl: '' },
-            { id: 18, name: 'La Luna', imageUrl: '' },
+            { id: 116, number: 16, name: 'La Torre', imageUrl: '' },
+            { id: 117, number: 18, name: 'La Luna', imageUrl: '' },
           ],
           category: { id: 1, slug: 'amor', name: 'Amor' },
           createdAt: new Date(),
@@ -310,8 +314,8 @@ describe('ReadingPatternAnalyzerService', () => {
         {
           id: 2,
           cards: [
-            { id: 16, name: 'La Torre', imageUrl: '' },
-            { id: 18, name: 'La Luna', imageUrl: '' },
+            { id: 118, number: 16, name: 'La Torre', imageUrl: '' },
+            { id: 119, number: 18, name: 'La Luna', imageUrl: '' },
           ],
           category: { id: 1, slug: 'amor', name: 'Amor' },
           createdAt: new Date(),
@@ -319,8 +323,8 @@ describe('ReadingPatternAnalyzerService', () => {
         {
           id: 3,
           cards: [
-            { id: 16, name: 'La Torre', imageUrl: '' },
-            { id: 18, name: 'La Luna', imageUrl: '' },
+            { id: 120, number: 16, name: 'La Torre', imageUrl: '' },
+            { id: 121, number: 18, name: 'La Luna', imageUrl: '' },
           ],
           category: { id: 1, slug: 'amor', name: 'Amor' },
           createdAt: new Date(),

@@ -14,11 +14,10 @@ export enum EmotionalPattern {
 }
 
 /**
- * Configuración de patrones: IDs de arcanos mayores y palabras clave de menores
+ * Configuración de patrones: IDs de arcanos mayores
  */
 export interface PatternCardConfig {
   majorArcana: number[]; // IDs de arcanos mayores asociados
-  minorKeywords: string[]; // Palabras clave para buscar en nombres de arcanos menores
 }
 
 /**
@@ -28,36 +27,24 @@ export interface PatternCardConfig {
 export const PATTERN_CARDS: Record<EmotionalPattern, PatternCardConfig> = {
   [EmotionalPattern.HEARTBREAK]: {
     majorArcana: [16, 18], // La Torre (16), La Luna (18)
-    minorKeywords: ['tres de espadas', 'cinco de copas', 'diez de espadas'],
   },
   [EmotionalPattern.MATERIAL_BLOCK]: {
     majorArcana: [12], // El Colgado (12)
-    minorKeywords: ['cinco de oros', 'cuatro de espadas', 'siete de bastos'],
   },
   [EmotionalPattern.SUCCESS_EXPANSION]: {
     majorArcana: [19, 21, 10], // El Sol (19), El Mundo (21), La Rueda (10)
-    minorKeywords: [
-      'as de oros',
-      'nueve de copas',
-      'diez de oros',
-      'diez de copas',
-    ],
   },
   [EmotionalPattern.OBSESSION]: {
     majorArcana: [15, 8], // El Diablo (15), La Fuerza (8)
-    minorKeywords: ['siete de copas', 'nueve de espadas'],
   },
   [EmotionalPattern.SEEKING_CLARITY]: {
     majorArcana: [2, 9], // La Sacerdotisa (2), El Ermitaño (9)
-    minorKeywords: ['as de espadas', 'ocho de espadas'],
   },
   [EmotionalPattern.HEALING_NEEDED]: {
     majorArcana: [6, 14], // Los Enamorados (6), Templanza (14)
-    minorKeywords: ['cuatro de copas', 'tres de copas'],
   },
   [EmotionalPattern.PROTECTION_NEEDED]: {
     majorArcana: [16, 5], // La Torre (16), El Hierofante (5)
-    minorKeywords: ['siete de espadas', 'cinco de bastos'],
   },
 };
 

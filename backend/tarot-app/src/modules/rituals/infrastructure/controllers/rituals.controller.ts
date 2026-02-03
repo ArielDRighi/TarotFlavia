@@ -51,6 +51,7 @@ import { UserPlan } from '../../../users/entities/user.entity';
  * - POST /rituals/:id/complete - Marcar ritual como completado
  * - GET /rituals/history - Historial del usuario
  * - GET /rituals/history/stats - Estadísticas del usuario
+ * - GET /rituals/recommendations - Recomendaciones personalizadas (Premium)
  */
 @ApiTags('Rituals')
 @Controller('rituals')

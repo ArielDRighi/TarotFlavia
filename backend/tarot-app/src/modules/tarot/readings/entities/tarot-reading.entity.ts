@@ -22,6 +22,7 @@ interface IUser {
 interface ITarotCard {
   id: number;
   name: string;
+  number: number;
   imageUrl: string;
 }
 
