@@ -10,14 +10,14 @@
  */
 
 export interface PremiumBenefit {
-  icon: string;
-  text: string;
+  readonly icon: string;
+  readonly text: string;
 }
 
 export interface PremiumBenefits {
-  readings: PremiumBenefit[];
-  rituals: PremiumBenefit[];
-  general: PremiumBenefit[];
+  readonly readings: readonly PremiumBenefit[];
+  readonly rituals: readonly PremiumBenefit[];
+  readonly general: readonly PremiumBenefit[];
 }
 
 export const PREMIUM_BENEFITS: PremiumBenefits = {
@@ -45,7 +45,7 @@ export const PREMIUM_BENEFITS: PremiumBenefits = {
       text: 'Notificaciones de eventos cósmicos',
     },
     {
-      icon: 'Sparkles',
+      icon: 'Wand2',
       text: 'Rituales recomendados según tus lecturas',
     },
     {
@@ -55,7 +55,7 @@ export const PREMIUM_BENEFITS: PremiumBenefits = {
   ],
   general: [
     {
-      icon: 'History',
+      icon: 'CalendarClock',
       text: 'Historial de 365 días',
     },
     {
