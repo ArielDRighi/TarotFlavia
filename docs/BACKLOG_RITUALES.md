@@ -6913,7 +6913,7 @@ Crear sistema de notificaciones in-app para alertar a usuarios Premium sobre eve
 
 ##### Backend
 
-- [ ] Crear módulo de notificaciones:
+- [x] Crear módulo de notificaciones:
 
   ```
   src/modules/notifications/
@@ -6930,7 +6930,7 @@ Crear sistema de notificaciones in-app para alertar a usuarios Premium sobre eve
           └── notifications.controller.ts
   ```
 
-- [ ] Crear entidad `UserNotification`:
+- [x] Crear entidad `UserNotification`:
 
   ```typescript
   @Entity('user_notifications')
@@ -6973,7 +6973,7 @@ Crear sistema de notificaciones in-app para alertar a usuarios Premium sobre eve
   }
   ```
 
-- [ ] Crear `NotificationsService`:
+- [x] Crear `NotificationsService`:
 
   ```typescript
   @Injectable()
@@ -7036,7 +7036,7 @@ Crear sistema de notificaciones in-app para alertar a usuarios Premium sobre eve
   }
   ```
 
-- [ ] Crear endpoints de notificaciones:
+- [x] Crear endpoints de notificaciones:
 
   ```typescript
   @ApiTags('Notifications')
@@ -7064,7 +7064,7 @@ Crear sistema de notificaciones in-app para alertar a usuarios Premium sobre eve
   }
   ```
 
-- [ ] Crear Cron Job para notificaciones de eventos:
+- [x] Crear Cron Job para notificaciones de eventos:
 
   ```typescript
   @Injectable()
@@ -7119,10 +7119,10 @@ Crear sistema de notificaciones in-app para alertar a usuarios Premium sobre eve
 
 ##### Testing
 
-- [ ] Test: Notificaciones se crean correctamente
-- [ ] Test: markAsRead actualiza estado
-- [ ] Test: Cron envía notificaciones a usuarios premium
-- [ ] Test: Usuarios free no reciben notificaciones de eventos
+- [x] Test: Notificaciones se crean correctamente
+- [x] Test: markAsRead actualiza estado
+- [x] Test: Cron envía notificaciones a usuarios premium
+- [x] Test: Usuarios free no reciben notificaciones de eventos
 
 ---
 
