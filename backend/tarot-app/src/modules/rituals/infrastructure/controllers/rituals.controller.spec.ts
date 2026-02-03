@@ -17,7 +17,6 @@ describe('RitualsController', () => {
   let ritualsService: jest.Mocked<RitualsService>;
   let historyService: jest.Mocked<RitualHistoryService>;
   let lunarPhaseService: jest.Mocked<LunarPhaseService>;
-  let patternAnalyzer: jest.Mocked<ReadingPatternAnalyzerService>;
 
   const mockRitualSummary = {
     id: 1,
@@ -148,7 +147,6 @@ describe('RitualsController', () => {
     ritualsService = module.get(RitualsService);
     historyService = module.get(RitualHistoryService);
     lunarPhaseService = module.get(LunarPhaseService);
-    patternAnalyzer = module.get(ReadingPatternAnalyzerService);
   });
 
   afterEach(() => {
