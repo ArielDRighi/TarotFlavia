@@ -26,6 +26,7 @@ export const ritualKeys = {
   detail: (slug: string) => [...ritualKeys.all, 'detail', slug] as const,
   history: (limit?: number) => [...ritualKeys.all, 'history', limit] as const,
   stats: () => [...ritualKeys.all, 'stats'] as const,
+  recommendations: () => [...ritualKeys.all, 'recommendations'] as const,
 };
 
 /**

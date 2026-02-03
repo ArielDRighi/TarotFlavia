@@ -125,6 +125,25 @@ export interface CompleteRitualRequest {
   durationMinutes?: number;
 }
 
+// Ritual Recommendations (Premium feature)
+export type RecommendationPattern =
+  | 'heartbreak'
+  | 'material_block'
+  | 'success'
+  | 'obsession'
+  | 'protection';
+
+export interface RitualRecommendation {
+  pattern: RecommendationPattern;
+  message: string;
+  suggestedCategories: string[];
+}
+
+export interface RitualRecommendationsResponse {
+  hasRecommendations: boolean;
+  recommendations: RitualRecommendation[];
+}
+
 // Helpers de UI
 export const CATEGORY_INFO: Record<
   RitualCategory,

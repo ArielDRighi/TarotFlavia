@@ -149,6 +149,9 @@ export type {
   UserRitualStats,
   RitualFilters,
   CompleteRitualRequest,
+  RitualRecommendation,
+  RitualRecommendationsResponse,
+  RecommendationPattern,
 } from './ritual.types';
 export {
   RitualCategory,
