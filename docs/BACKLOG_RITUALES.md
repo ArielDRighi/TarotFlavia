@@ -7959,12 +7959,15 @@ import { NotificationBell } from "@/components/features/notifications";
 | -------- | ------------------------------------- | ---------- | ---------- | ------------- |
 | TASK-409 | Ejecutar migración de Rituales        | 5 min      | 🔴 CRÍTICA | ✅ COMPLETADA |
 | TASK-410 | Ejecutar seeder de Rituales           | 5 min      | 🔴 CRÍTICA | ✅ COMPLETADA |
-| TASK-411 | Agregar link a Rituales en Header     | 15 min     | 🔴 ALTA    | 🔴 PENDIENTE  |
-| TASK-412 | Agregar DialogDescription en modal    | 10 min     | 🟡 MEDIA   | 🔴 PENDIENTE  |
-| TASK-413 | Corregir atributos booleanos en Image | 15 min     | 🟢 BAJA    | 🔴 PENDIENTE  |
+| TASK-411 | Agregar link a Rituales en Header     | 15 min     | 🔴 ALTA    | ✅ COMPLETADA |
+| TASK-412 | Agregar DialogDescription en modal    | 10 min     | 🟡 MEDIA   | ✅ COMPLETADA |
+| TASK-413 | Corregir atributos booleanos en Image | 15 min     | 🟢 BAJA    | ✅ COMPLETADA |
 | TASK-414 | Frontend de Notificaciones In-App     | 1 día      | 🟡 MEDIA   | ✅ COMPLETADA |
+| TASK-415 | Corregir thumbnails de rituales (404) | 30 min     | 🟡 MEDIA   | 🔴 PENDIENTE  |
+| TASK-416 | Corregir endpoints calendario sagrado | 1 hora     | 🔴 ALTA    | 🔴 PENDIENTE  |
+| TASK-417 | Crear páginas legales faltantes       | 2 horas    | 🟢 BAJA    | 🔴 PENDIENTE  |
 
-**Total estimado restante: ~1 día y 40 minutos**
+**Total estimado restante: ~3.5 horas**
 
 ---
 
@@ -8111,6 +8114,147 @@ ls backend/tarot-app/src/database/migrations/ | grep "^177" | tail -3
 - [ ] Crear commit descriptivo
 - [ ] Push y crear PR a `develop`
 ```
+
+---
+
+## 🔍 AUDITORÍA DEL MÓDULO RITUALES
+
+**Fecha:** 3 de febrero de 2026
+**Realizada por:** Claude Code (Opus 4.5)
+**Herramientas:** Playwright MCP, análisis de código
+
+### Resumen de Auditoría
+
+| Área | Estado | Observaciones |
+|------|--------|---------------|
+| Frontend | ✅ EXCELENTE | Sin violaciones arquitectónicas |
+| Backend | ✅ FUNCIONAL | Oportunidad de refactorización según ADRs |
+| HU-RIT-001 | ✅ VERIFICADA | Catálogo funciona para todos los usuarios |
+| HU-RIT-002 | ✅ VERIFICADA | Detalle de ritual completo |
+| HU-RIT-003 | ✅ VERIFICADA | Completar ritual con calificación y notas |
+| HU-RIT-004 | ✅ VERIFICADA | Historial con estadísticas |
+| HU-RIT-005 | ✅ VERIFICADA | Destacados según fase lunar |
+
+### Problemas Detectados
+
+1. **Imágenes 404** - Thumbnails de rituales no encontrados
+2. **Endpoints calendario 404** - `/rituals/calendar/today` y `/upcoming`
+3. **Páginas legales 404** - `/terminos`, `/privacidad`, `/contacto`
+
+### Notas sobre Arquitectura Backend
+
+Según **ADR-002** el módulo Rituals (39 archivos, ~4000 líneas) cumple criterios para arquitectura por capas completa. Actualmente usa TypeORM directamente en servicios. Esto es una oportunidad de mejora futura según **ADR-003** (Repository Pattern), pero no bloquea la funcionalidad actual.
+
+---
+
+## TAREAS DE CORRECCIÓN (Post-Auditoría)
+
+### TASK-415: Corregir thumbnails de rituales (404)
+
+**Estado:** 🔴 PENDIENTE
+**Módulo:** `backend/` + assets
+**Prioridad:** 🟡 MEDIA
+**Estimación:** 30 minutos
+**Dependencias:** Ninguna
+
+#### 📋 Descripción
+
+Durante la auditoría con Playwright se detectaron errores 404 para las imágenes de thumbnails de rituales:
+
+```
+/images/rituals/thumbs/luna-nueva.jpg - 404
+/images/rituals/thumbs/luna-llena.jpg - 404
+/images/rituals/thumbs/limpieza-hogar.jpg - 404
+/images/rituals/thumbs/consagracion-tarot.jpg - 404
+```
+
+#### ✅ Tareas Específicas
+
+- [ ] Verificar que las imágenes existan en `frontend/public/images/rituals/thumbs/`
+- [ ] Si no existen, crear imágenes placeholder o descargar assets apropiados
+- [ ] Verificar que los URLs en el seeder coincidan con los archivos reales
+- [ ] Alternativamente, configurar imágenes desde CDN externo
+- [ ] Probar que las imágenes cargan correctamente en la UI
+
+---
+
+### TASK-416: Corregir endpoints de calendario sagrado (404)
+
+**Estado:** 🔴 PENDIENTE
+**Módulo:** `backend/tarot-app/src/modules/rituals/`
+**Prioridad:** 🔴 ALTA
+**Estimación:** 1 hora
+**Dependencias:** Ninguna
+
+#### 📋 Descripción
+
+Los endpoints del calendario sagrado devuelven 404:
+
+```
+GET /api/v1/rituals/calendar/today - 404
+GET /api/v1/rituals/calendar/upcoming?days=30 - 404
+```
+
+Esto causa que la sección "Calendario Sagrado" en el dashboard muestre "Cargando eventos..." permanentemente para usuarios Premium.
+
+#### ✅ Tareas Específicas
+
+- [ ] Verificar que `SacredCalendarController` esté registrado en `rituals.module.ts`
+- [ ] Verificar las rutas definidas en el controlador
+- [ ] Verificar que el módulo esté importado en `app.module.ts`
+- [ ] Ejecutar `npm run start:dev` y probar endpoints manualmente:
+  ```bash
+  curl http://localhost:3000/api/v1/rituals/calendar/today
+  curl http://localhost:3000/api/v1/rituals/calendar/upcoming?days=30
+  ```
+- [ ] Si los endpoints existen pero la ruta es diferente, actualizar frontend
+- [ ] Verificar que haya datos de eventos sagrados en la BD (seeder)
+
+#### 📝 Archivos a revisar
+
+- `backend/tarot-app/src/modules/rituals/infrastructure/controllers/sacred-calendar.controller.ts`
+- `backend/tarot-app/src/modules/rituals/rituals.module.ts`
+- `frontend/src/lib/api/endpoints.ts` - Verificar rutas del calendario
+
+---
+
+### TASK-417: Crear páginas legales faltantes
+
+**Estado:** 🔴 PENDIENTE
+**Módulo:** `frontend/src/app/`
+**Prioridad:** 🟢 BAJA
+**Estimación:** 2 horas
+**Dependencias:** Ninguna
+
+#### 📋 Descripción
+
+Las páginas legales del footer devuelven 404:
+
+- `/terminos` - Términos y condiciones
+- `/privacidad` - Política de privacidad
+- `/contacto` - Página de contacto
+
+#### ✅ Tareas Específicas
+
+- [ ] Crear `frontend/src/app/terminos/page.tsx` con contenido placeholder
+- [ ] Crear `frontend/src/app/privacidad/page.tsx` con contenido placeholder
+- [ ] Crear `frontend/src/app/contacto/page.tsx` con formulario básico
+- [ ] Usar layout consistente con el resto de la aplicación
+- [ ] Contenido legal puede ser placeholder inicial (TODO para legal)
+
+---
+
+## 📊 MÉTRICAS DE LA AUDITORÍA
+
+| Métrica | Valor |
+|---------|-------|
+| Archivos frontend analizados | 22 componentes + 9 tests |
+| Archivos backend analizados | 39 archivos |
+| HUs verificadas con Playwright | 5 de 5 (100%) |
+| Usuarios testeados | 3 (Anónimo, Free, Premium) |
+| Bugs críticos encontrados | 0 |
+| Bugs medios encontrados | 2 (imágenes, calendario) |
+| Bugs bajos encontrados | 1 (páginas legales) |
 
 ---
 
