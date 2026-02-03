@@ -6625,6 +6625,7 @@ Crear el servicio que analiza el historial de lecturas del usuario para detectar
 **Prioridad:** 🟡 MEDIA
 **Estimación:** 1 día
 **Dependencias:** TASK-400f
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -6638,14 +6639,14 @@ Crear widget para el dashboard que muestre recomendaciones de rituales basadas e
 
 ##### Frontend
 
-- [ ] Crear hook `useRitualRecommendations`:
+- [x] Crear hook `useRitualRecommendations`:
 
   ```typescript
   export function useRitualRecommendations() {
     const { user } = useAuthStore();
 
     return useQuery({
-      queryKey: ['rituals', 'recommendations'],
+      queryKey: ritualKeys.recommendations(), // ✅ Centralizado
       queryFn: getRitualRecommendations,
       enabled: user?.plan === 'premium',
       staleTime: 1000 * 60 * 60 * 24, // 24 horas (no cambia frecuentemente)
@@ -6653,7 +6654,7 @@ Crear widget para el dashboard que muestre recomendaciones de rituales basadas e
   }
   ```
 
-- [ ] Crear `PersonalizedRitualsWidget.tsx`:
+- [x] Crear `PersonalizedRitualsWidget.tsx`:
 
   ```tsx
   "use client";
@@ -6676,7 +6677,7 @@ Crear widget para el dashboard que muestre recomendaciones de rituales basadas e
   export function PersonalizedRitualsWidget() {
     const { user } = useAuthStore();
     const isPremium = user?.plan === 'premium';
-    const { data, isLoading } = useRitualRecommendations();
+    const { data, isLoading, isError } = useRitualRecommendations(); // ✅ Con error handling
 
     // Solo mostrar para Premium
     if (!isPremium) {
@@ -6699,6 +6700,21 @@ Crear widget para el dashboard que muestre recomendaciones de rituales basadas e
 
     if (isLoading) {
       return <PersonalizedRitualsSkeleton />;
+    }
+
+    // ✅ Error handling explícito
+    if (isError) {
+      return (
+        <Card className="p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <Sparkles className="h-6 w-6 text-purple-500" />
+            <h2 className="font-serif text-xl">Rituales para Ti</h2>
+          </div>
+          <p className="text-sm text-red-600">
+            Error al cargar recomendaciones. Inténtalo de nuevo más tarde.
+          </p>
+        </Card>
+      );
     }
 
     if (!data?.hasRecommendations) {
@@ -6724,12 +6740,12 @@ Crear widget para el dashboard que muestre recomendaciones de rituales basadas e
         </div>
 
         <div className="space-y-4">
-          {data.recommendations.slice(0, 2).map((rec, idx) => {
+          {data.recommendations.slice(0, 2).map((rec) => { // ✅ key={rec.pattern}
             const Icon = PATTERN_ICONS[rec.pattern] || Sparkles;
 
             return (
               <div
-                key={idx}
+                key={rec.pattern}
                 className="p-4 bg-gradient-to-r from-purple-500/10 to-transparent rounded-lg"
               >
                 <div className="flex items-start gap-3">
@@ -6763,14 +6779,22 @@ Crear widget para el dashboard que muestre recomendaciones de rituales basadas e
   }
   ```
 
-- [ ] Agregar widget a `UserDashboard.tsx` (solo para Premium)
+- [x] Agregar widget a `UserDashboard.tsx` (solo para Premium)
 
 ##### Testing
 
-- [ ] Test: Widget muestra upsell para usuarios Free
-- [ ] Test: Muestra mensaje si no hay suficientes datos
-- [ ] Test: Renderiza recomendaciones correctamente
-- [ ] Test: Links a categorías funcionan
+- [x] Test: Widget muestra upsell para usuarios Free
+- [x] Test: Muestra mensaje si no hay suficientes datos
+- [x] Test: Renderiza recomendaciones correctamente
+- [x] Test: Links a categorías funcionan
+- [x] Test: Manejo de errores con mensaje apropiado
+
+##### Mejoras del PR Feedback
+
+- [x] Manejo explícito de estado de error
+- [x] Query key centralizada en `ritualKeys`
+- [x] React key usando `rec.pattern` en lugar de índice
+- [x] Tests actualizados para verificar UI de error
 
 ---
 
