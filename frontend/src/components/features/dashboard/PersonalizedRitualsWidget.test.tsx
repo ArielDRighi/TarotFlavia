@@ -220,7 +220,7 @@ describe('PersonalizedRitualsWidget', () => {
       // Should display error message
       expect(screen.getByText(/error al cargar recomendaciones/i)).toBeInTheDocument();
       expect(screen.getByText(/inténtalo de nuevo más tarde/i)).toBeInTheDocument();
-      
+
       // Should NOT show recommendations or empty state
       expect(screen.queryByText('Recomendado para Ti')).not.toBeInTheDocument();
       expect(screen.queryByText(/realiza algunas lecturas más/i)).not.toBeInTheDocument();
