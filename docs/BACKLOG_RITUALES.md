@@ -1256,13 +1256,14 @@ Crear el archivo de datos con rituales iniciales y el comando para poblar la bas
 - [x] Contenido en español de calidad
 - [x] Validación de contenido implementada (título, descripción, propósito, pasos, materiales)
 - [x] Seeder idempotente (puede ejecutarse múltiples veces sin duplicar)
-- [x] Tests con cobertura ≥80% sobre el código incluido en Jest (nota: los seeds en src/database/seeds/** están excluidos del reporte de coverage actual)
+- [x] Tests con cobertura ≥80% sobre el código incluido en Jest (nota: los seeds en src/database/seeds/\*\* están excluidos del reporte de coverage actual)
 
 ---
 
 #### 📝 Notas de Implementación
 
 **PR #298 - Feedback de Copilot aplicado:**
+
 - ✅ Renombrado `rituals-seed.data.ts` → `rituals.data.ts` por consistencia
 - ✅ Fix de sort numérico en validación de pasos (soporte para 10+ pasos)
 - ✅ Eliminación de todos los tipos `any` usando inferencia de tipos desde seed data
@@ -2038,6 +2039,7 @@ Crear el módulo NestJS con servicios para consultar rituales, gestionar histori
 #### 📝 Notas de Implementación
 
 **Implementación completada:**
+
 - ✅ LunarPhaseService: Cálculo de fase lunar actual con algoritmo basado en ciclo lunar de 29.5 días
 - ✅ RitualsService: Query de rituales con filtros (categoría, dificultad, fase lunar, búsqueda), rituales destacados, categorías con conteo
 - ✅ RitualHistoryService: Registro de completados con info lunar, historial, estadísticas (total, categoría favorita, racha, este mes)
@@ -2334,6 +2336,7 @@ Implementar endpoints REST para consultar rituales, gestionar historial y obtene
 #### 📝 Notas de Implementación
 
 **Implementación completada:**
+
 - ✅ CreateRitualDto y UpdateRitualDto: DTOs completos con validación robusta (nested DTOs para materials y steps)
 - ✅ RitualsAdminService: CRUD completo con transacciones, gestión de pasos/materiales, toggle active, duplicate
 - ✅ RitualsAdminController: 13 endpoints REST con guards @Roles(UserRole.ADMIN) y documentación Swagger completa
@@ -2354,6 +2357,7 @@ Implementar endpoints REST para consultar rituales, gestionar historial y obtene
 #### 📝 Notas de Implementación
 
 **Implementación completada:**
+
 - ✅ RitualsController: 8 endpoints REST implementados (5 públicos, 3 protegidos con JWT)
 - ✅ Endpoints públicos: GET /rituals, /rituals/featured, /rituals/categories, /rituals/lunar-info, /rituals/:slug
 - ✅ Endpoints protegidos: POST /rituals/:id/complete, GET /rituals/history, GET /rituals/history/stats
@@ -2411,22 +2415,22 @@ Crear endpoints de administración para gestionar rituales, pasos y materiales d
 
 **Endpoints:**
 
-| Método | Ruta | Descripción | Auth |
-|--------|------|-------------|------|
-| POST | `/admin/rituals` | Crear ritual completo | Admin |
-| GET | `/admin/rituals` | Listar todos (incluye inactivos) | Admin |
-| GET | `/admin/rituals/:id` | Obtener ritual por ID | Admin |
-| PATCH | `/admin/rituals/:id` | Actualizar ritual | Admin |
-| DELETE | `/admin/rituals/:id` | Soft delete | Admin |
-| PATCH | `/admin/rituals/:id/toggle-active` | Activar/desactivar | Admin |
-| POST | `/admin/rituals/:id/steps` | Agregar paso | Admin |
-| PATCH | `/admin/rituals/:id/steps/:stepId` | Actualizar paso | Admin |
-| DELETE | `/admin/rituals/:id/steps/:stepId` | Eliminar paso | Admin |
-| POST | `/admin/rituals/:id/materials` | Agregar material | Admin |
-| PATCH | `/admin/rituals/:id/materials/:materialId` | Actualizar material | Admin |
-| DELETE | `/admin/rituals/:id/materials/:materialId` | Eliminar material | Admin |
-| POST | `/admin/rituals/:id/duplicate` | Duplicar ritual | Admin |
-| PATCH | `/admin/rituals/reorder` | Reordenar rituales | Admin |
+| Método | Ruta                                       | Descripción                      | Auth  |
+| ------ | ------------------------------------------ | -------------------------------- | ----- |
+| POST   | `/admin/rituals`                           | Crear ritual completo            | Admin |
+| GET    | `/admin/rituals`                           | Listar todos (incluye inactivos) | Admin |
+| GET    | `/admin/rituals/:id`                       | Obtener ritual por ID            | Admin |
+| PATCH  | `/admin/rituals/:id`                       | Actualizar ritual                | Admin |
+| DELETE | `/admin/rituals/:id`                       | Soft delete                      | Admin |
+| PATCH  | `/admin/rituals/:id/toggle-active`         | Activar/desactivar               | Admin |
+| POST   | `/admin/rituals/:id/steps`                 | Agregar paso                     | Admin |
+| PATCH  | `/admin/rituals/:id/steps/:stepId`         | Actualizar paso                  | Admin |
+| DELETE | `/admin/rituals/:id/steps/:stepId`         | Eliminar paso                    | Admin |
+| POST   | `/admin/rituals/:id/materials`             | Agregar material                 | Admin |
+| PATCH  | `/admin/rituals/:id/materials/:materialId` | Actualizar material              | Admin |
+| DELETE | `/admin/rituals/:id/materials/:materialId` | Eliminar material                | Admin |
+| POST   | `/admin/rituals/:id/duplicate`             | Duplicar ritual                  | Admin |
+| PATCH  | `/admin/rituals/reorder`                   | Reordenar rituales               | Admin |
 
 ---
 
@@ -2438,7 +2442,7 @@ Crear endpoints de administración para gestionar rituales, pasos y materiales d
 
   ```typescript
   // src/modules/rituals/application/dto/create-ritual.dto.ts
-  import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+  import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
   import {
     IsString,
     IsEnum,
@@ -2451,17 +2455,17 @@ Crear endpoints de administración para gestionar rituales, pasos y materiales d
     Max,
     Length,
     Matches,
-  } from 'class-validator';
-  import { Type } from 'class-transformer';
-  import { RitualCategory, RitualDifficulty, LunarPhase, MaterialType } from '../enums/ritual.enums';
+  } from "class-validator";
+  import { Type } from "class-transformer";
+  import { RitualCategory, RitualDifficulty, LunarPhase, MaterialType } from "../enums/ritual.enums";
 
   export class CreateRitualMaterialDto {
-    @ApiProperty({ example: 'Vela blanca' })
+    @ApiProperty({ example: "Vela blanca" })
     @IsString()
     @Length(1, 100)
     name: string;
 
-    @ApiPropertyOptional({ example: 'Preferiblemente de cera natural' })
+    @ApiPropertyOptional({ example: "Preferiblemente de cera natural" })
     @IsOptional()
     @IsString()
     description?: string;
@@ -2470,7 +2474,7 @@ Crear endpoints de administración para gestionar rituales, pasos y materiales d
     @IsEnum(MaterialType)
     type: MaterialType;
 
-    @ApiPropertyOptional({ example: 'Vela plateada' })
+    @ApiPropertyOptional({ example: "Vela plateada" })
     @IsOptional()
     @IsString()
     @Length(1, 100)
@@ -2482,7 +2486,7 @@ Crear endpoints de administración para gestionar rituales, pasos y materiales d
     @Min(1)
     quantity?: number;
 
-    @ApiPropertyOptional({ example: 'unidad' })
+    @ApiPropertyOptional({ example: "unidad" })
     @IsOptional()
     @IsString()
     @Length(1, 50)
@@ -2495,52 +2499,52 @@ Crear endpoints de administración para gestionar rituales, pasos y materiales d
     @Min(1)
     stepNumber: number;
 
-    @ApiProperty({ example: 'Preparar el espacio' })
+    @ApiProperty({ example: "Preparar el espacio" })
     @IsString()
     @Length(1, 150)
     title: string;
 
-    @ApiProperty({ example: 'Limpia y ordena tu espacio sagrado...' })
+    @ApiProperty({ example: "Limpia y ordena tu espacio sagrado..." })
     @IsString()
     description: string;
 
-    @ApiPropertyOptional({ example: 180, description: 'Duración en segundos' })
+    @ApiPropertyOptional({ example: 180, description: "Duración en segundos" })
     @IsOptional()
     @IsInt()
     @Min(0)
     durationSeconds?: number;
 
-    @ApiPropertyOptional({ example: '/images/rituals/steps/step1.jpg' })
+    @ApiPropertyOptional({ example: "/images/rituals/steps/step1.jpg" })
     @IsOptional()
     @IsString()
     imageUrl?: string;
 
-    @ApiPropertyOptional({ example: 'Que la luz guíe mi camino...' })
+    @ApiPropertyOptional({ example: "Que la luz guíe mi camino..." })
     @IsOptional()
     @IsString()
     mantra?: string;
 
-    @ApiPropertyOptional({ example: 'Imagina una luz dorada...' })
+    @ApiPropertyOptional({ example: "Imagina una luz dorada..." })
     @IsOptional()
     @IsString()
     visualization?: string;
   }
 
   export class CreateRitualDto {
-    @ApiProperty({ example: 'ritual-luna-nueva' })
+    @ApiProperty({ example: "ritual-luna-nueva" })
     @IsString()
     @Length(3, 100)
     @Matches(/^[a-z0-9-]+$/, {
-      message: 'El slug solo puede contener letras minúsculas, números y guiones',
+      message: "El slug solo puede contener letras minúsculas, números y guiones",
     })
     slug: string;
 
-    @ApiProperty({ example: 'Ritual de Luna Nueva' })
+    @ApiProperty({ example: "Ritual de Luna Nueva" })
     @IsString()
     @Length(3, 150)
     title: string;
 
-    @ApiProperty({ example: 'Ceremonia para establecer intenciones...' })
+    @ApiProperty({ example: "Ceremonia para establecer intenciones..." })
     @IsString()
     description: string;
 
@@ -2552,7 +2556,7 @@ Crear endpoints de administración para gestionar rituales, pasos y materiales d
     @IsEnum(RitualDifficulty)
     difficulty: RitualDifficulty;
 
-    @ApiProperty({ example: 30, description: 'Duración total en minutos' })
+    @ApiProperty({ example: 30, description: "Duración total en minutos" })
     @IsInt()
     @Min(5)
     @Max(180)
@@ -2569,43 +2573,43 @@ Crear endpoints de administración para gestionar rituales, pasos y materiales d
     @IsEnum(LunarPhase, { each: true })
     bestLunarPhases?: LunarPhase[];
 
-    @ApiPropertyOptional({ example: 'Noche, idealmente con luna visible' })
+    @ApiPropertyOptional({ example: "Noche, idealmente con luna visible" })
     @IsOptional()
     @IsString()
     @Length(1, 255)
     bestTimeOfDay?: string;
 
-    @ApiPropertyOptional({ example: 'La luna nueva representa el inicio...' })
+    @ApiPropertyOptional({ example: "La luna nueva representa el inicio..." })
     @IsOptional()
     @IsString()
     purpose?: string;
 
-    @ApiPropertyOptional({ example: 'Busca un espacio tranquilo...' })
+    @ApiPropertyOptional({ example: "Busca un espacio tranquilo..." })
     @IsOptional()
     @IsString()
     preparation?: string;
 
-    @ApiPropertyOptional({ example: 'Agradece a la luna y guarda tus intenciones...' })
+    @ApiPropertyOptional({ example: "Agradece a la luna y guarda tus intenciones..." })
     @IsOptional()
     @IsString()
     closing?: string;
 
-    @ApiPropertyOptional({ type: [String], example: ['Escribe en presente', 'Sé específico'] })
+    @ApiPropertyOptional({ type: [String], example: ["Escribe en presente", "Sé específico"] })
     @IsOptional()
     @IsArray()
     @IsString({ each: true })
     tips?: string[];
 
-    @ApiProperty({ example: '/images/rituals/luna-nueva.jpg' })
+    @ApiProperty({ example: "/images/rituals/luna-nueva.jpg" })
     @IsString()
     imageUrl: string;
 
-    @ApiPropertyOptional({ example: '/images/rituals/thumbnails/luna-nueva.jpg' })
+    @ApiPropertyOptional({ example: "/images/rituals/thumbnails/luna-nueva.jpg" })
     @IsOptional()
     @IsString()
     thumbnailUrl?: string;
 
-    @ApiPropertyOptional({ example: '/audio/rituals/luna-nueva.mp3' })
+    @ApiPropertyOptional({ example: "/audio/rituals/luna-nueva.mp3" })
     @IsOptional()
     @IsString()
     audioUrl?: string;
@@ -2638,13 +2642,11 @@ Crear endpoints de administración para gestionar rituales, pasos y materiales d
 
   ```typescript
   // src/modules/rituals/application/dto/update-ritual.dto.ts
-  import { PartialType, OmitType } from '@nestjs/swagger';
-  import { CreateRitualDto } from './create-ritual.dto';
+  import { PartialType, OmitType } from "@nestjs/swagger";
+  import { CreateRitualDto } from "./create-ritual.dto";
 
   // Permite actualizar cualquier campo excepto slug (que es identificador único)
-  export class UpdateRitualDto extends PartialType(
-    OmitType(CreateRitualDto, ['slug'] as const),
-  ) {}
+  export class UpdateRitualDto extends PartialType(OmitType(CreateRitualDto, ["slug"] as const)) {}
 
   export class UpdateRitualStepDto extends PartialType(CreateRitualStepDto) {}
 
@@ -2655,13 +2657,13 @@ Crear endpoints de administración para gestionar rituales, pasos y materiales d
 
   ```typescript
   // src/modules/rituals/application/services/rituals-admin.service.ts
-  import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
-  import { InjectRepository } from '@nestjs/typeorm';
-  import { Repository, DataSource } from 'typeorm';
-  import { Ritual } from '../../entities/ritual.entity';
-  import { RitualStep } from '../../entities/ritual-step.entity';
-  import { RitualMaterial } from '../../entities/ritual-material.entity';
-  import { CreateRitualDto, UpdateRitualDto } from '../dto';
+  import { Injectable, NotFoundException, ConflictException } from "@nestjs/common";
+  import { InjectRepository } from "@nestjs/typeorm";
+  import { Repository, DataSource } from "typeorm";
+  import { Ritual } from "../../entities/ritual.entity";
+  import { RitualStep } from "../../entities/ritual-step.entity";
+  import { RitualMaterial } from "../../entities/ritual-material.entity";
+  import { CreateRitualDto, UpdateRitualDto } from "../dto";
 
   @Injectable()
   export class RitualsAdminService {
@@ -2732,8 +2734,8 @@ Crear endpoints de administración para gestionar rituales, pasos y materiales d
      */
     async findAll(): Promise<Ritual[]> {
       return this.ritualRepo.find({
-        relations: ['materials', 'steps'],
-        order: { createdAt: 'DESC' },
+        relations: ["materials", "steps"],
+        order: { createdAt: "DESC" },
       });
     }
 
@@ -2743,7 +2745,7 @@ Crear endpoints de administración para gestionar rituales, pasos y materiales d
     async findById(id: number): Promise<Ritual> {
       const ritual = await this.ritualRepo.findOne({
         where: { id },
-        relations: ['materials', 'steps'],
+        relations: ["materials", "steps"],
       });
 
       if (!ritual) {
@@ -2830,7 +2832,7 @@ Crear endpoints de administración para gestionar rituales, pasos y materiales d
         title: `${original.title} (copia)`,
         isActive: false, // Inactivo por defecto
         isFeatured: false,
-        materials: original.materials.map(m => ({
+        materials: original.materials.map((m) => ({
           name: m.name,
           description: m.description,
           type: m.type,
@@ -2838,7 +2840,7 @@ Crear endpoints de administración para gestionar rituales, pasos y materiales d
           quantity: m.quantity,
           unit: m.unit,
         })),
-        steps: original.steps.map(s => ({
+        steps: original.steps.map((s) => ({
           stepNumber: s.stepNumber,
           title: s.title,
           description: s.description,
@@ -2866,11 +2868,7 @@ Crear endpoints de administración para gestionar rituales, pasos y materiales d
       return this.stepRepo.save(step);
     }
 
-    async updateStep(
-      ritualId: number,
-      stepId: number,
-      dto: UpdateRitualStepDto,
-    ): Promise<RitualStep> {
+    async updateStep(ritualId: number, stepId: number, dto: UpdateRitualStepDto): Promise<RitualStep> {
       const step = await this.stepRepo.findOne({
         where: { id: stepId, ritualId },
       });
@@ -2904,11 +2902,7 @@ Crear endpoints de administración para gestionar rituales, pasos y materiales d
       return this.materialRepo.save(material);
     }
 
-    async updateMaterial(
-      ritualId: number,
-      materialId: number,
-      dto: UpdateRitualMaterialDto,
-    ): Promise<RitualMaterial> {
+    async updateMaterial(ritualId: number, materialId: number, dto: UpdateRitualMaterialDto): Promise<RitualMaterial> {
       const material = await this.materialRepo.findOne({
         where: { id: materialId, ritualId },
       });
@@ -2946,19 +2940,13 @@ Crear endpoints de administración para gestionar rituales, pasos y materiales d
     UseGuards,
     HttpCode,
     HttpStatus,
-  } from '@nestjs/common';
-  import {
-    ApiTags,
-    ApiOperation,
-    ApiResponse,
-    ApiBearerAuth,
-    ApiParam,
-  } from '@nestjs/swagger';
-  import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
-  import { RolesGuard } from '@/common/guards/roles.guard';
-  import { Roles } from '@/common/decorators/roles.decorator';
-  import { UserRole } from '@/modules/users/enums/user-role.enum';
-  import { RitualsAdminService } from '../../application/services/rituals-admin.service';
+  } from "@nestjs/common";
+  import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from "@nestjs/swagger";
+  import { JwtAuthGuard } from "@/common/guards/jwt-auth.guard";
+  import { RolesGuard } from "@/common/guards/roles.guard";
+  import { Roles } from "@/common/decorators/roles.decorator";
+  import { UserRole } from "@/modules/users/enums/user-role.enum";
+  import { RitualsAdminService } from "../../application/services/rituals-admin.service";
   import {
     CreateRitualDto,
     UpdateRitualDto,
@@ -2966,10 +2954,10 @@ Crear endpoints de administración para gestionar rituales, pasos y materiales d
     UpdateRitualStepDto,
     CreateRitualMaterialDto,
     UpdateRitualMaterialDto,
-  } from '../../application/dto';
+  } from "../../application/dto";
 
-  @ApiTags('Admin - Rituals')
-  @Controller('admin/rituals')
+  @ApiTags("Admin - Rituals")
+  @Controller("admin/rituals")
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiBearerAuth()
@@ -2981,58 +2969,52 @@ Crear endpoints de administración para gestionar rituales, pasos y materiales d
     // ==================
 
     @Post()
-    @ApiOperation({ summary: 'Crear nuevo ritual' })
-    @ApiResponse({ status: 201, description: 'Ritual creado exitosamente' })
-    @ApiResponse({ status: 409, description: 'Ya existe un ritual con ese slug' })
+    @ApiOperation({ summary: "Crear nuevo ritual" })
+    @ApiResponse({ status: 201, description: "Ritual creado exitosamente" })
+    @ApiResponse({ status: 409, description: "Ya existe un ritual con ese slug" })
     async create(@Body() dto: CreateRitualDto) {
       return this.adminService.create(dto);
     }
 
     @Get()
-    @ApiOperation({ summary: 'Listar todos los rituales (incluye inactivos)' })
+    @ApiOperation({ summary: "Listar todos los rituales (incluye inactivos)" })
     async findAll() {
       return this.adminService.findAll();
     }
 
-    @Get(':id')
-    @ApiOperation({ summary: 'Obtener ritual por ID' })
-    @ApiParam({ name: 'id', type: Number })
-    async findById(@Param('id', ParseIntPipe) id: number) {
+    @Get(":id")
+    @ApiOperation({ summary: "Obtener ritual por ID" })
+    @ApiParam({ name: "id", type: Number })
+    async findById(@Param("id", ParseIntPipe) id: number) {
       return this.adminService.findById(id);
     }
 
-    @Patch(':id')
-    @ApiOperation({ summary: 'Actualizar ritual' })
-    @ApiParam({ name: 'id', type: Number })
-    async update(
-      @Param('id', ParseIntPipe) id: number,
-      @Body() dto: UpdateRitualDto,
-    ) {
+    @Patch(":id")
+    @ApiOperation({ summary: "Actualizar ritual" })
+    @ApiParam({ name: "id", type: Number })
+    async update(@Param("id", ParseIntPipe) id: number, @Body() dto: UpdateRitualDto) {
       return this.adminService.update(id, dto);
     }
 
-    @Delete(':id')
+    @Delete(":id")
     @HttpCode(HttpStatus.NO_CONTENT)
-    @ApiOperation({ summary: 'Eliminar ritual (soft delete)' })
-    @ApiParam({ name: 'id', type: Number })
-    async delete(@Param('id', ParseIntPipe) id: number) {
+    @ApiOperation({ summary: "Eliminar ritual (soft delete)" })
+    @ApiParam({ name: "id", type: Number })
+    async delete(@Param("id", ParseIntPipe) id: number) {
       await this.adminService.softDelete(id);
     }
 
-    @Patch(':id/toggle-active')
-    @ApiOperation({ summary: 'Activar/desactivar ritual' })
-    @ApiParam({ name: 'id', type: Number })
-    async toggleActive(@Param('id', ParseIntPipe) id: number) {
+    @Patch(":id/toggle-active")
+    @ApiOperation({ summary: "Activar/desactivar ritual" })
+    @ApiParam({ name: "id", type: Number })
+    async toggleActive(@Param("id", ParseIntPipe) id: number) {
       return this.adminService.toggleActive(id);
     }
 
-    @Post(':id/duplicate')
-    @ApiOperation({ summary: 'Duplicar ritual' })
-    @ApiParam({ name: 'id', type: Number })
-    async duplicate(
-      @Param('id', ParseIntPipe) id: number,
-      @Body('newSlug') newSlug: string,
-    ) {
+    @Post(":id/duplicate")
+    @ApiOperation({ summary: "Duplicar ritual" })
+    @ApiParam({ name: "id", type: Number })
+    async duplicate(@Param("id", ParseIntPipe) id: number, @Body("newSlug") newSlug: string) {
       return this.adminService.duplicate(id, newSlug);
     }
 
@@ -3040,32 +3022,26 @@ Crear endpoints de administración para gestionar rituales, pasos y materiales d
     // GESTIÓN DE PASOS
     // ==================
 
-    @Post(':id/steps')
-    @ApiOperation({ summary: 'Agregar paso a ritual' })
-    async addStep(
-      @Param('id', ParseIntPipe) ritualId: number,
-      @Body() dto: CreateRitualStepDto,
-    ) {
+    @Post(":id/steps")
+    @ApiOperation({ summary: "Agregar paso a ritual" })
+    async addStep(@Param("id", ParseIntPipe) ritualId: number, @Body() dto: CreateRitualStepDto) {
       return this.adminService.addStep(ritualId, dto);
     }
 
-    @Patch(':id/steps/:stepId')
-    @ApiOperation({ summary: 'Actualizar paso' })
+    @Patch(":id/steps/:stepId")
+    @ApiOperation({ summary: "Actualizar paso" })
     async updateStep(
-      @Param('id', ParseIntPipe) ritualId: number,
-      @Param('stepId', ParseIntPipe) stepId: number,
+      @Param("id", ParseIntPipe) ritualId: number,
+      @Param("stepId", ParseIntPipe) stepId: number,
       @Body() dto: UpdateRitualStepDto,
     ) {
       return this.adminService.updateStep(ritualId, stepId, dto);
     }
 
-    @Delete(':id/steps/:stepId')
+    @Delete(":id/steps/:stepId")
     @HttpCode(HttpStatus.NO_CONTENT)
-    @ApiOperation({ summary: 'Eliminar paso' })
-    async deleteStep(
-      @Param('id', ParseIntPipe) ritualId: number,
-      @Param('stepId', ParseIntPipe) stepId: number,
-    ) {
+    @ApiOperation({ summary: "Eliminar paso" })
+    async deleteStep(@Param("id", ParseIntPipe) ritualId: number, @Param("stepId", ParseIntPipe) stepId: number) {
       await this.adminService.deleteStep(ritualId, stepId);
     }
 
@@ -3073,31 +3049,28 @@ Crear endpoints de administración para gestionar rituales, pasos y materiales d
     // GESTIÓN DE MATERIALES
     // ==================
 
-    @Post(':id/materials')
-    @ApiOperation({ summary: 'Agregar material a ritual' })
-    async addMaterial(
-      @Param('id', ParseIntPipe) ritualId: number,
-      @Body() dto: CreateRitualMaterialDto,
-    ) {
+    @Post(":id/materials")
+    @ApiOperation({ summary: "Agregar material a ritual" })
+    async addMaterial(@Param("id", ParseIntPipe) ritualId: number, @Body() dto: CreateRitualMaterialDto) {
       return this.adminService.addMaterial(ritualId, dto);
     }
 
-    @Patch(':id/materials/:materialId')
-    @ApiOperation({ summary: 'Actualizar material' })
+    @Patch(":id/materials/:materialId")
+    @ApiOperation({ summary: "Actualizar material" })
     async updateMaterial(
-      @Param('id', ParseIntPipe) ritualId: number,
-      @Param('materialId', ParseIntPipe) materialId: number,
+      @Param("id", ParseIntPipe) ritualId: number,
+      @Param("materialId", ParseIntPipe) materialId: number,
       @Body() dto: UpdateRitualMaterialDto,
     ) {
       return this.adminService.updateMaterial(ritualId, materialId, dto);
     }
 
-    @Delete(':id/materials/:materialId')
+    @Delete(":id/materials/:materialId")
     @HttpCode(HttpStatus.NO_CONTENT)
-    @ApiOperation({ summary: 'Eliminar material' })
+    @ApiOperation({ summary: "Eliminar material" })
     async deleteMaterial(
-      @Param('id', ParseIntPipe) ritualId: number,
-      @Param('materialId', ParseIntPipe) materialId: number,
+      @Param("id", ParseIntPipe) ritualId: number,
+      @Param("materialId", ParseIntPipe) materialId: number,
     ) {
       await this.adminService.deleteMaterial(ritualId, materialId);
     }
@@ -3147,10 +3120,7 @@ Crear endpoints de administración para gestionar rituales, pasos y materiales d
   "purpose": "La luna nueva representa el inicio de un nuevo ciclo...",
   "preparation": "Busca un espacio tranquilo donde no serás interrumpido.",
   "closing": "Agradece a la luna y guarda tu lista de intenciones.",
-  "tips": [
-    "Escribe tus intenciones en presente",
-    "No establezcas más de 3-5 intenciones"
-  ],
+  "tips": ["Escribe tus intenciones en presente", "No establezcas más de 3-5 intenciones"],
   "imageUrl": "/images/rituals/luna-nueva.jpg",
   "isActive": true,
   "isFeatured": true,
@@ -5209,18 +5179,18 @@ public/images/rituals/
 
 ## RESUMEN DE TAREAS
 
-| Tarea    | Descripción            | Estimación |
-| -------- | ---------------------- | ---------- |
-| TASK-400 | Entidades y Enums      | 1.5 días   |
-| TASK-401 | Migraciones            | 0.5 días   |
-| TASK-402 | Seeder de rituales     | 1.5 días   |
-| TASK-403 | Módulo y Servicios     | 1.5 días   |
-| TASK-404 | Endpoints públicos     | 1 día      |
+| Tarea     | Descripción            | Estimación |
+| --------- | ---------------------- | ---------- |
+| TASK-400  | Entidades y Enums      | 1.5 días   |
+| TASK-401  | Migraciones            | 0.5 días   |
+| TASK-402  | Seeder de rituales     | 1.5 días   |
+| TASK-403  | Módulo y Servicios     | 1.5 días   |
+| TASK-404  | Endpoints públicos     | 1 día      |
 | TASK-404a | CRUD Admin de Rituales | 1.5 días   |
-| TASK-405 | Frontend Types y Hooks | 0.5 días   |
-| TASK-406 | Componentes de Lista   | 1 día      |
-| TASK-407 | Componentes de Detalle | 1 día      |
-| TASK-408 | Páginas                | 1 día      |
+| TASK-405  | Frontend Types y Hooks | 0.5 días   |
+| TASK-406  | Componentes de Lista   | 1 día      |
+| TASK-407  | Componentes de Detalle | 1 día      |
+| TASK-408  | Páginas                | 1 día      |
 
 **Total:** 11 días
 
@@ -5357,13 +5327,13 @@ Las siguientes tareas implementan las funcionalidades exclusivas para usuarios P
 
 ### Evaluación de Viabilidad Técnica
 
-| Componente | Estado Actual | Viabilidad | Esfuerzo |
-|------------|---------------|------------|----------|
-| Geolocalización/Hemisferio | No existe | Media | 2-3 días |
-| Análisis de Lecturas | 90% implementado | Alta | 1-2 días |
-| Notificaciones In-App | No existe (solo email) | Media | 3-4 días |
-| Dashboard Widgets | 100% implementado | Excelente | 0.5 días |
-| Calendario de Eventos | Parcial (crons) | Media-Alta | 3-4 días |
+| Componente                 | Estado Actual          | Viabilidad | Esfuerzo |
+| -------------------------- | ---------------------- | ---------- | -------- |
+| Geolocalización/Hemisferio | No existe              | Media      | 2-3 días |
+| Análisis de Lecturas       | 90% implementado       | Alta       | 1-2 días |
+| Notificaciones In-App      | No existe (solo email) | Media      | 3-4 días |
+| Dashboard Widgets          | 100% implementado      | Excelente  | 0.5 días |
+| Calendario de Eventos      | Parcial (crons)        | Media-Alta | 3-4 días |
 
 **Total estimado para features premium: 10-14 días adicionales**
 
@@ -5394,8 +5364,8 @@ Agregar campos de ubicación geográfica al usuario para determinar el hemisferi
   ```typescript
   // src/modules/users/enums/hemisphere.enum.ts
   export enum Hemisphere {
-    NORTH = 'north',
-    SOUTH = 'south',
+    NORTH = "north",
+    SOUTH = "south",
   }
   ```
 
@@ -5448,15 +5418,25 @@ Agregar campos de ubicación geográfica al usuario para determinar el hemisferi
   export class LocationService {
     // Países del hemisferio sur (principales)
     private readonly southernCountries = [
-      'AR', 'CL', 'UY', 'PY', 'BR', 'BO', 'PE', 'EC', // Sudamérica
-      'AU', 'NZ', // Oceanía
-      'ZA', 'NA', 'BW', 'ZW', 'MZ', // África Sur
+      "AR",
+      "CL",
+      "UY",
+      "PY",
+      "BR",
+      "BO",
+      "PE",
+      "EC", // Sudamérica
+      "AU",
+      "NZ", // Oceanía
+      "ZA",
+      "NA",
+      "BW",
+      "ZW",
+      "MZ", // África Sur
     ];
 
     getHemisphereByCountry(countryCode: string): Hemisphere {
-      return this.southernCountries.includes(countryCode.toUpperCase())
-        ? Hemisphere.SOUTH
-        : Hemisphere.NORTH;
+      return this.southernCountries.includes(countryCode.toUpperCase()) ? Hemisphere.SOUTH : Hemisphere.NORTH;
     }
 
     getHemisphereByLatitude(latitude: number): Hemisphere {
@@ -5495,6 +5475,7 @@ Agregar campos de ubicación geográfica al usuario para determinar el hemisferi
 #### 📝 Notas de Implementación
 
 **Implementación completada:**
+
 - ✅ Enum `Hemisphere` creado en `src/modules/users/enums/hemisphere.enum.ts`
 - ✅ 4 campos agregados a `user.entity.ts`: timezone, countryCode, hemisphere, latitude
 - ✅ Migración `1771400000000-AddUserLocationFields.ts` con enum PostgreSQL y columnas
@@ -5539,28 +5520,28 @@ Crear las entidades para almacenar eventos del calendario sagrado: Sabbats (Rued
   // src/modules/rituals/enums/sacred-events.enums.ts
 
   export enum SacredEventType {
-    SABBAT = 'sabbat',           // Solsticios/Equinoccios (Rueda del Año)
-    LUNAR_PHASE = 'lunar_phase', // Fases lunares
-    PORTAL = 'portal',           // Portales numéricos (11/11, 08/08)
-    CULTURAL = 'cultural',       // Día de Muertos, San Valentín, etc.
-    ECLIPSE = 'eclipse',         // Eclipses solares/lunares
+    SABBAT = "sabbat", // Solsticios/Equinoccios (Rueda del Año)
+    LUNAR_PHASE = "lunar_phase", // Fases lunares
+    PORTAL = "portal", // Portales numéricos (11/11, 08/08)
+    CULTURAL = "cultural", // Día de Muertos, San Valentín, etc.
+    ECLIPSE = "eclipse", // Eclipses solares/lunares
   }
 
   export enum Sabbat {
-    SAMHAIN = 'samhain',         // Muerte y Ancestros
-    YULE = 'yule',               // Solsticio Invierno
-    IMBOLC = 'imbolc',           // Purificación
-    OSTARA = 'ostara',           // Equinoccio Primavera
-    BELTANE = 'beltane',         // Pasión y Unión
-    LITHA = 'litha',             // Solsticio Verano
-    LAMMAS = 'lammas',           // Cosecha y Gratitud
-    MABON = 'mabon',             // Equinoccio Otoño
+    SAMHAIN = "samhain", // Muerte y Ancestros
+    YULE = "yule", // Solsticio Invierno
+    IMBOLC = "imbolc", // Purificación
+    OSTARA = "ostara", // Equinoccio Primavera
+    BELTANE = "beltane", // Pasión y Unión
+    LITHA = "litha", // Solsticio Verano
+    LAMMAS = "lammas", // Cosecha y Gratitud
+    MABON = "mabon", // Equinoccio Otoño
   }
 
   export enum SacredEventImportance {
-    HIGH = 'high',       // Luna Llena, Sabbats mayores
-    MEDIUM = 'medium',   // Cuartos lunares, portales
-    LOW = 'low',         // Eventos menores
+    HIGH = "high", // Luna Llena, Sabbats mayores
+    MEDIUM = "medium", // Cuartos lunares, portales
+    LOW = "low", // Eventos menores
   }
   ```
 
@@ -5568,53 +5549,53 @@ Crear las entidades para almacenar eventos del calendario sagrado: Sabbats (Rued
 
   ```typescript
   // src/modules/rituals/entities/sacred-event.entity.ts
-  @Entity('sacred_events')
-  @Index('idx_sacred_event_date', ['eventDate'])
-  @Index('idx_sacred_event_type', ['eventType'])
+  @Entity("sacred_events")
+  @Index("idx_sacred_event_date", ["eventDate"])
+  @Index("idx_sacred_event_type", ["eventType"])
   export class SacredEvent {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({ type: 'varchar', length: 100 })
+    @Column({ type: "varchar", length: 100 })
     name: string; // "Luna Llena en Leo", "Samhain"
 
-    @Column({ type: 'varchar', length: 100 })
+    @Column({ type: "varchar", length: 100 })
     slug: string;
 
-    @Column({ type: 'text' })
+    @Column({ type: "text" })
     description: string;
 
-    @Column({ type: 'enum', enum: SacredEventType })
+    @Column({ type: "enum", enum: SacredEventType })
     eventType: SacredEventType;
 
-    @Column({ type: 'enum', enum: Sabbat, nullable: true })
+    @Column({ type: "enum", enum: Sabbat, nullable: true })
     sabbat: Sabbat | null; // Solo para tipo SABBAT
 
-    @Column({ type: 'enum', enum: LunarPhase, nullable: true })
+    @Column({ type: "enum", enum: LunarPhase, nullable: true })
     lunarPhase: LunarPhase | null; // Solo para tipo LUNAR_PHASE
 
-    @Column({ type: 'date' })
+    @Column({ type: "date" })
     eventDate: Date;
 
-    @Column({ type: 'time', nullable: true })
+    @Column({ type: "time", nullable: true })
     eventTime: string | null; // Hora exacta (opcional)
 
-    @Column({ type: 'enum', enum: Hemisphere, nullable: true })
+    @Column({ type: "enum", enum: Hemisphere, nullable: true })
     hemisphere: Hemisphere | null; // null = global (lunas)
 
-    @Column({ type: 'enum', enum: SacredEventImportance })
+    @Column({ type: "enum", enum: SacredEventImportance })
     importance: SacredEventImportance;
 
-    @Column({ type: 'text' })
+    @Column({ type: "text" })
     energyDescription: string; // "Ideal para nuevos comienzos..."
 
-    @Column({ type: 'jsonb', nullable: true })
+    @Column({ type: "jsonb", nullable: true })
     suggestedRitualCategories: RitualCategory[] | null;
 
-    @Column({ type: 'jsonb', nullable: true })
+    @Column({ type: "jsonb", nullable: true })
     suggestedRitualIds: number[] | null; // Rituales específicos recomendados
 
-    @Column({ type: 'boolean', default: true })
+    @Column({ type: "boolean", default: true })
     isActive: boolean;
 
     @CreateDateColumn()
@@ -5626,8 +5607,8 @@ Crear las entidades para almacenar eventos del calendario sagrado: Sabbats (Rued
 
   ```typescript
   // Para trackear qué eventos ya se notificaron a cada usuario
-  @Entity('user_sacred_event_notifications')
-  @Index('idx_user_event', ['userId', 'eventId'])
+  @Entity("user_sacred_event_notifications")
+  @Index("idx_user_event", ["userId", "eventId"])
   export class UserSacredEventNotification {
     @PrimaryGeneratedColumn()
     id: number;
@@ -5638,30 +5619,30 @@ Crear las entidades para almacenar eventos del calendario sagrado: Sabbats (Rued
     @Column()
     eventId: number;
 
-    @Column({ type: 'boolean', default: false })
+    @Column({ type: "boolean", default: false })
     notified24h: boolean; // Notificado 24h antes
 
-    @Column({ type: 'boolean', default: false })
+    @Column({ type: "boolean", default: false })
     notifiedOnDay: boolean; // Notificado el día del evento
 
-    @Column({ type: 'boolean', default: false })
+    @Column({ type: "boolean", default: false })
     dismissed: boolean; // Usuario descartó
 
     @CreateDateColumn()
     createdAt: Date;
 
-    @ManyToOne(() => User, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'userId' })
+    @ManyToOne(() => User, { onDelete: "CASCADE" })
+    @JoinColumn({ name: "userId" })
     user: User;
 
-    @ManyToOne(() => SacredEvent, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'eventId' })
+    @ManyToOne(() => SacredEvent, { onDelete: "CASCADE" })
+    @JoinColumn({ name: "eventId" })
     event: SacredEvent;
   }
   ```
 
 - [x] Crear migración `CreateSacredEventsTables`
-- [x] **Ejecutar migración**: `npm run migration:run` 
+- [x] **Ejecutar migración**: `npm run migration:run`
 - [x] **Verificar tablas creadas**: sacred_events, user_sacred_event_notifications
 - [x] **Verificar enums creados**: sacred_event_type_enum, sabbat_enum, sacred_event_importance_enum
 
@@ -5708,27 +5689,21 @@ Crear el servicio que genera y gestiona eventos del calendario sagrado, incluyen
     /**
      * Obtiene eventos próximos para un usuario (según su hemisferio)
      */
-    async getUpcomingEvents(
-      hemisphere: Hemisphere,
-      days: number = 30,
-    ): Promise<SacredEvent[]> {
+    async getUpcomingEvents(hemisphere: Hemisphere, days: number = 30): Promise<SacredEvent[]> {
       const today = new Date();
       const endDate = new Date(today);
       endDate.setDate(endDate.getDate() + days);
 
       return this.eventRepo
-        .createQueryBuilder('event')
-        .where('event.eventDate BETWEEN :today AND :endDate', {
-          today: today.toISOString().split('T')[0],
-          endDate: endDate.toISOString().split('T')[0],
+        .createQueryBuilder("event")
+        .where("event.eventDate BETWEEN :today AND :endDate", {
+          today: today.toISOString().split("T")[0],
+          endDate: endDate.toISOString().split("T")[0],
         })
-        .andWhere(
-          '(event.hemisphere IS NULL OR event.hemisphere = :hemisphere)',
-          { hemisphere },
-        )
-        .andWhere('event.isActive = true')
-        .orderBy('event.eventDate', 'ASC')
-        .addOrderBy('event.importance', 'DESC')
+        .andWhere("(event.hemisphere IS NULL OR event.hemisphere = :hemisphere)", { hemisphere })
+        .andWhere("event.isActive = true")
+        .orderBy("event.eventDate", "ASC")
+        .addOrderBy("event.importance", "DESC")
         .getMany();
     }
 
@@ -5736,14 +5711,14 @@ Crear el servicio que genera y gestiona eventos del calendario sagrado, incluyen
      * Obtiene eventos destacados del día (para widget del home)
      */
     async getTodayEvents(hemisphere: Hemisphere): Promise<SacredEvent[]> {
-      const today = new Date().toISOString().split('T')[0];
+      const today = new Date().toISOString().split("T")[0];
 
       return this.eventRepo.find({
         where: [
           { eventDate: today, hemisphere: IsNull() },
           { eventDate: today, hemisphere },
         ],
-        order: { importance: 'DESC' },
+        order: { importance: "DESC" },
       });
     }
 
@@ -5753,19 +5728,17 @@ Crear el servicio que genera y gestiona eventos del calendario sagrado, incluyen
     getSabbatDate(sabbat: Sabbat, year: number, hemisphere: Hemisphere): Date {
       // Las fechas del hemisferio sur son 6 meses desplazadas
       const sabbatDates: Record<Sabbat, { north: string; south: string }> = {
-        [Sabbat.SAMHAIN]: { north: '10-31', south: '04-30' },
-        [Sabbat.YULE]: { north: '12-21', south: '06-21' },
-        [Sabbat.IMBOLC]: { north: '02-01', south: '08-01' },
-        [Sabbat.OSTARA]: { north: '03-21', south: '09-21' },
-        [Sabbat.BELTANE]: { north: '05-01', south: '10-31' },
-        [Sabbat.LITHA]: { north: '06-21', south: '12-21' },
-        [Sabbat.LAMMAS]: { north: '08-01', south: '02-01' },
-        [Sabbat.MABON]: { north: '09-21', south: '03-21' },
+        [Sabbat.SAMHAIN]: { north: "10-31", south: "04-30" },
+        [Sabbat.YULE]: { north: "12-21", south: "06-21" },
+        [Sabbat.IMBOLC]: { north: "02-01", south: "08-01" },
+        [Sabbat.OSTARA]: { north: "03-21", south: "09-21" },
+        [Sabbat.BELTANE]: { north: "05-01", south: "10-31" },
+        [Sabbat.LITHA]: { north: "06-21", south: "12-21" },
+        [Sabbat.LAMMAS]: { north: "08-01", south: "02-01" },
+        [Sabbat.MABON]: { north: "09-21", south: "03-21" },
       };
 
-      const dateStr = hemisphere === Hemisphere.SOUTH
-        ? sabbatDates[sabbat].south
-        : sabbatDates[sabbat].north;
+      const dateStr = hemisphere === Hemisphere.SOUTH ? sabbatDates[sabbat].south : sabbatDates[sabbat].north;
 
       return new Date(`${year}-${dateStr}`);
     }
@@ -5813,10 +5786,7 @@ Crear el servicio que genera y gestiona eventos del calendario sagrado, incluyen
       // Calcular fechas de lunas llenas y nuevas para el año
       for (let month = 0; month < 12; month++) {
         // Luna Nueva
-        const newMoonDate = this.lunarService.getNextPhaseDate(
-          new Date(year, month, 1),
-          LunarPhase.NEW_MOON,
-        );
+        const newMoonDate = this.lunarService.getNextPhaseDate(new Date(year, month, 1), LunarPhase.NEW_MOON);
         if (newMoonDate.getFullYear() === year) {
           events.push({
             name: `Luna Nueva de ${this.getMonthName(newMoonDate.getMonth())}`,
@@ -5825,16 +5795,13 @@ Crear el servicio que genera y gestiona eventos del calendario sagrado, incluyen
             eventDate: newMoonDate,
             hemisphere: null, // Global
             importance: SacredEventImportance.HIGH,
-            energyDescription: 'Ideal para nuevos comienzos, sembrar intenciones y planificar.',
+            energyDescription: "Ideal para nuevos comienzos, sembrar intenciones y planificar.",
             suggestedRitualCategories: [RitualCategory.LUNAR, RitualCategory.ABUNDANCE],
           });
         }
 
         // Luna Llena
-        const fullMoonDate = this.lunarService.getNextPhaseDate(
-          new Date(year, month, 1),
-          LunarPhase.FULL_MOON,
-        );
+        const fullMoonDate = this.lunarService.getNextPhaseDate(new Date(year, month, 1), LunarPhase.FULL_MOON);
         if (fullMoonDate.getFullYear() === year) {
           events.push({
             name: `Luna Llena de ${this.getMonthName(fullMoonDate.getMonth())}`,
@@ -5843,7 +5810,7 @@ Crear el servicio que genera y gestiona eventos del calendario sagrado, incluyen
             eventDate: fullMoonDate,
             hemisphere: null,
             importance: SacredEventImportance.HIGH,
-            energyDescription: 'Momento de culminación, liberación y carga energética.',
+            energyDescription: "Momento de culminación, liberación y carga energética.",
             suggestedRitualCategories: [RitualCategory.LUNAR, RitualCategory.CLEANSING],
           });
         }
@@ -5869,18 +5836,28 @@ Crear el servicio que genera y gestiona eventos del calendario sagrado, incluyen
 
     private async generatePortalEvents(year: number): Promise<number> {
       const portals = [
-        { date: `${year}-01-01`, name: 'Portal 1/1', desc: 'Nuevos comienzos del año' },
-        { date: `${year}-02-02`, name: 'Portal 2/2', desc: 'Equilibrio y dualidad' },
-        { date: `${year}-03-03`, name: 'Portal 3/3', desc: 'Creatividad y expresión' },
-        { date: `${year}-04-04`, name: 'Portal 4/4', desc: 'Estabilidad y fundamentos' },
-        { date: `${year}-05-05`, name: 'Portal 5/5', desc: 'Cambio y libertad' },
-        { date: `${year}-06-06`, name: 'Portal 6/6', desc: 'Amor y armonía' },
-        { date: `${year}-07-07`, name: 'Portal 7/7', desc: 'Espiritualidad y sabiduría' },
-        { date: `${year}-08-08`, name: 'Portal del León 8/8', desc: 'Lion\'s Gate - Abundancia y poder personal', importance: SacredEventImportance.HIGH },
-        { date: `${year}-09-09`, name: 'Portal 9/9', desc: 'Culminación y servicio' },
-        { date: `${year}-10-10`, name: 'Portal 10/10', desc: 'Manifestación completa' },
-        { date: `${year}-11-11`, name: 'Portal 11/11', desc: 'Despertar espiritual - Portal de manifestación', importance: SacredEventImportance.HIGH },
-        { date: `${year}-12-12`, name: 'Portal 12/12', desc: 'Cierre de ciclos' },
+        { date: `${year}-01-01`, name: "Portal 1/1", desc: "Nuevos comienzos del año" },
+        { date: `${year}-02-02`, name: "Portal 2/2", desc: "Equilibrio y dualidad" },
+        { date: `${year}-03-03`, name: "Portal 3/3", desc: "Creatividad y expresión" },
+        { date: `${year}-04-04`, name: "Portal 4/4", desc: "Estabilidad y fundamentos" },
+        { date: `${year}-05-05`, name: "Portal 5/5", desc: "Cambio y libertad" },
+        { date: `${year}-06-06`, name: "Portal 6/6", desc: "Amor y armonía" },
+        { date: `${year}-07-07`, name: "Portal 7/7", desc: "Espiritualidad y sabiduría" },
+        {
+          date: `${year}-08-08`,
+          name: "Portal del León 8/8",
+          desc: "Lion's Gate - Abundancia y poder personal",
+          importance: SacredEventImportance.HIGH,
+        },
+        { date: `${year}-09-09`, name: "Portal 9/9", desc: "Culminación y servicio" },
+        { date: `${year}-10-10`, name: "Portal 10/10", desc: "Manifestación completa" },
+        {
+          date: `${year}-11-11`,
+          name: "Portal 11/11",
+          desc: "Despertar espiritual - Portal de manifestación",
+          importance: SacredEventImportance.HIGH,
+        },
+        { date: `${year}-12-12`, name: "Portal 12/12", desc: "Cierre de ciclos" },
       ];
 
       let created = 0;
@@ -5889,17 +5866,19 @@ Crear el servicio que genera y gestiona eventos del calendario sagrado, incluyen
           where: { eventDate: portal.date, eventType: SacredEventType.PORTAL },
         });
         if (!existing) {
-          await this.eventRepo.save(this.eventRepo.create({
-            name: portal.name,
-            slug: portal.name.toLowerCase().replace(/[^a-z0-9]/g, '-'),
-            description: portal.desc,
-            eventType: SacredEventType.PORTAL,
-            eventDate: new Date(portal.date),
-            hemisphere: null,
-            importance: portal.importance || SacredEventImportance.MEDIUM,
-            energyDescription: portal.desc,
-            suggestedRitualCategories: [RitualCategory.ABUNDANCE, RitualCategory.MEDITATION],
-          }));
+          await this.eventRepo.save(
+            this.eventRepo.create({
+              name: portal.name,
+              slug: portal.name.toLowerCase().replace(/[^a-z0-9]/g, "-"),
+              description: portal.desc,
+              eventType: SacredEventType.PORTAL,
+              eventDate: new Date(portal.date),
+              hemisphere: null,
+              importance: portal.importance || SacredEventImportance.MEDIUM,
+              energyDescription: portal.desc,
+              suggestedRitualCategories: [RitualCategory.ABUNDANCE, RitualCategory.MEDITATION],
+            }),
+          );
           created++;
         }
       }
@@ -5913,22 +5892,24 @@ Crear el servicio que genera y gestiona eventos del calendario sagrado, incluyen
         const existing = await this.eventRepo.findOne({
           where: {
             eventType: SacredEventType.CULTURAL,
-            eventDate: date.toISOString().split('T')[0],
-            name: Like('%Canela%'),
+            eventDate: date.toISOString().split("T")[0],
+            name: Like("%Canela%"),
           },
         });
         if (!existing) {
-          await this.eventRepo.save(this.eventRepo.create({
-            name: `Ritual de la Canela - ${this.getMonthName(month)}`,
-            slug: `ritual-canela-${this.getMonthName(month).toLowerCase()}-${year}`,
-            description: 'Sopla canela en tu puerta para atraer abundancia este mes.',
-            eventType: SacredEventType.CULTURAL,
-            eventDate: date,
-            hemisphere: null,
-            importance: SacredEventImportance.MEDIUM,
-            energyDescription: 'El primer día del mes es ideal para rituales de prosperidad.',
-            suggestedRitualCategories: [RitualCategory.ABUNDANCE],
-          }));
+          await this.eventRepo.save(
+            this.eventRepo.create({
+              name: `Ritual de la Canela - ${this.getMonthName(month)}`,
+              slug: `ritual-canela-${this.getMonthName(month).toLowerCase()}-${year}`,
+              description: "Sopla canela en tu puerta para atraer abundancia este mes.",
+              eventType: SacredEventType.CULTURAL,
+              eventDate: date,
+              hemisphere: null,
+              importance: SacredEventImportance.MEDIUM,
+              energyDescription: "El primer día del mes es ideal para rituales de prosperidad.",
+              suggestedRitualCategories: [RitualCategory.ABUNDANCE],
+            }),
+          );
           created++;
         }
       }
@@ -5936,8 +5917,20 @@ Crear el servicio que genera y gestiona eventos del calendario sagrado, incluyen
     }
 
     private getMonthName(month: number): string {
-      const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-                      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+      const months = [
+        "Enero",
+        "Febrero",
+        "Marzo",
+        "Abril",
+        "Mayo",
+        "Junio",
+        "Julio",
+        "Agosto",
+        "Septiembre",
+        "Octubre",
+        "Noviembre",
+        "Diciembre",
+      ];
       return months[month];
     }
   }
@@ -5947,58 +5940,61 @@ Crear el servicio que genera y gestiona eventos del calendario sagrado, incluyen
 
   ```typescript
   // src/modules/rituals/data/sabbats.data.ts
-  export const SABBAT_INFO: Record<Sabbat, {
-    name: string;
-    energy: string;
-    description: string;
-    suggestedCategories: RitualCategory[];
-  }> = {
+  export const SABBAT_INFO: Record<
+    Sabbat,
+    {
+      name: string;
+      energy: string;
+      description: string;
+      suggestedCategories: RitualCategory[];
+    }
+  > = {
     [Sabbat.SAMHAIN]: {
-      name: 'Samhain',
-      energy: 'Muerte y Ancestros',
-      description: 'El velo entre mundos se adelgaza. Honra a tus ancestros y cierra ciclos.',
+      name: "Samhain",
+      energy: "Muerte y Ancestros",
+      description: "El velo entre mundos se adelgaza. Honra a tus ancestros y cierra ciclos.",
       suggestedCategories: [RitualCategory.MEDITATION, RitualCategory.CLEANSING],
     },
     [Sabbat.YULE]: {
-      name: 'Yule - Solsticio de Invierno',
-      energy: 'Renacimiento',
-      description: 'La noche más larga. El sol renace. Momento de esperanza y luz interior.',
+      name: "Yule - Solsticio de Invierno",
+      energy: "Renacimiento",
+      description: "La noche más larga. El sol renace. Momento de esperanza y luz interior.",
       suggestedCategories: [RitualCategory.MEDITATION, RitualCategory.HEALING],
     },
     [Sabbat.IMBOLC]: {
-      name: 'Imbolc',
-      energy: 'Purificación',
-      description: 'Primeras señales de vida. Limpieza del hogar e inicio de proyectos.',
+      name: "Imbolc",
+      energy: "Purificación",
+      description: "Primeras señales de vida. Limpieza del hogar e inicio de proyectos.",
       suggestedCategories: [RitualCategory.CLEANSING, RitualCategory.PROTECTION],
     },
     [Sabbat.OSTARA]: {
-      name: 'Ostara - Equinoccio de Primavera',
-      energy: 'Equilibrio y Fertilidad',
-      description: 'Día y noche en equilibrio. Nuevos comienzos y florecimiento.',
+      name: "Ostara - Equinoccio de Primavera",
+      energy: "Equilibrio y Fertilidad",
+      description: "Día y noche en equilibrio. Nuevos comienzos y florecimiento.",
       suggestedCategories: [RitualCategory.ABUNDANCE, RitualCategory.LOVE],
     },
     [Sabbat.BELTANE]: {
-      name: 'Beltane',
-      energy: 'Pasión y Unión',
-      description: 'Fiesta del fuego y el amor. Fertilidad máxima.',
+      name: "Beltane",
+      energy: "Pasión y Unión",
+      description: "Fiesta del fuego y el amor. Fertilidad máxima.",
       suggestedCategories: [RitualCategory.LOVE, RitualCategory.ABUNDANCE],
     },
     [Sabbat.LITHA]: {
-      name: 'Litha - Solsticio de Verano',
-      energy: 'Poder y Éxito',
-      description: 'El día más largo. Abundancia y fuerza solar máxima.',
+      name: "Litha - Solsticio de Verano",
+      energy: "Poder y Éxito",
+      description: "El día más largo. Abundancia y fuerza solar máxima.",
       suggestedCategories: [RitualCategory.ABUNDANCE, RitualCategory.PROTECTION],
     },
     [Sabbat.LAMMAS]: {
-      name: 'Lammas (Lughnasadh)',
-      energy: 'Cosecha y Gratitud',
-      description: 'Primera cosecha. Agradecer lo recibido.',
+      name: "Lammas (Lughnasadh)",
+      energy: "Cosecha y Gratitud",
+      description: "Primera cosecha. Agradecer lo recibido.",
       suggestedCategories: [RitualCategory.ABUNDANCE, RitualCategory.MEDITATION],
     },
     [Sabbat.MABON]: {
-      name: 'Mabon - Equinoccio de Otoño',
-      energy: 'Soltar y Balance',
-      description: 'Segunda cosecha. Prepararse para la oscuridad, reflexión.',
+      name: "Mabon - Equinoccio de Otoño",
+      energy: "Soltar y Balance",
+      description: "Segunda cosecha. Prepararse para la oscuridad, reflexión.",
       suggestedCategories: [RitualCategory.CLEANSING, RitualCategory.MEDITATION],
     },
   };
@@ -6015,7 +6011,7 @@ Crear el servicio que genera y gestiona eventos del calendario sagrado, incluyen
     constructor(private readonly calendarService: SacredCalendarService) {}
 
     // Ejecutar el 1 de diciembre a las 00:00 UTC
-    @Cron('0 0 1 12 *')
+    @Cron("0 0 1 12 *")
     async generateNextYearEvents() {
       const nextYear = new Date().getFullYear() + 1;
       this.logger.log(`Generando eventos del calendario sagrado para ${nextYear}`);
@@ -6025,7 +6021,7 @@ Crear el servicio que genera y gestiona eventos del calendario sagrado, incluyen
     }
 
     // Ejecutar diariamente para verificar lunas (más precisión)
-    @Cron('0 0 * * *')
+    @Cron("0 0 * * *")
     async checkDailyLunarPhase() {
       // Verificar si hoy es luna nueva o llena y crear notificaciones
     }
@@ -6074,8 +6070,8 @@ Crear endpoints REST para consultar eventos del calendario sagrado.
 - [x] Crear `SacredCalendarController`:
 
   ```typescript
-  @ApiTags('Sacred Calendar')
-  @Controller('rituals/calendar')
+  @ApiTags("Sacred Calendar")
+  @Controller("rituals/calendar")
   export class SacredCalendarController {
     constructor(
       private readonly calendarService: SacredCalendarService,
@@ -6087,13 +6083,10 @@ Crear endpoints REST para consultar eventos del calendario sagrado.
      * Obtener eventos próximos (30 días)
      * Premium: muestra todos | Free/Anon: muestra solo los 3 más importantes
      */
-    @Get('upcoming')
-    @ApiOperation({ summary: 'Obtener eventos sagrados próximos' })
-    @ApiQuery({ name: 'days', required: false, type: Number })
-    async getUpcomingEvents(
-      @Query('days') days?: number,
-      @CurrentUser() user?: User,
-    ): Promise<SacredEventDto[]> {
+    @Get("upcoming")
+    @ApiOperation({ summary: "Obtener eventos sagrados próximos" })
+    @ApiQuery({ name: "days", required: false, type: Number })
+    async getUpcomingEvents(@Query("days") days?: number, @CurrentUser() user?: User): Promise<SacredEventDto[]> {
       const hemisphere = user?.hemisphere || Hemisphere.SOUTH; // Default Argentina
       const events = await this.calendarService.getUpcomingEvents(hemisphere, days || 30);
 
@@ -6109,8 +6102,8 @@ Crear endpoints REST para consultar eventos del calendario sagrado.
      * GET /rituals/calendar/today
      * Obtener eventos del día actual
      */
-    @Get('today')
-    @ApiOperation({ summary: 'Obtener eventos sagrados de hoy' })
+    @Get("today")
+    @ApiOperation({ summary: "Obtener eventos sagrados de hoy" })
     async getTodayEvents(@CurrentUser() user?: User): Promise<SacredEventDto[]> {
       const hemisphere = user?.hemisphere || Hemisphere.SOUTH;
       const events = await this.calendarService.getTodayEvents(hemisphere);
@@ -6121,17 +6114,17 @@ Crear endpoints REST para consultar eventos del calendario sagrado.
      * GET /rituals/calendar/month/:year/:month
      * Obtener eventos de un mes específico (Premium only)
      */
-    @Get('month/:year/:month')
+    @Get("month/:year/:month")
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
-    @ApiOperation({ summary: 'Obtener eventos de un mes (Premium)' })
+    @ApiOperation({ summary: "Obtener eventos de un mes (Premium)" })
     async getMonthEvents(
-      @Param('year', ParseIntPipe) year: number,
-      @Param('month', ParseIntPipe) month: number,
+      @Param("year", ParseIntPipe) year: number,
+      @Param("month", ParseIntPipe) month: number,
       @CurrentUser() user: User,
     ): Promise<SacredEventDto[]> {
       if (user.plan !== UserPlan.PREMIUM) {
-        throw new ForbiddenException('El calendario completo está disponible solo para usuarios Premium');
+        throw new ForbiddenException("El calendario completo está disponible solo para usuarios Premium");
       }
 
       const hemisphere = user.hemisphere || Hemisphere.SOUTH;
@@ -6196,9 +6189,9 @@ Crear widget para el dashboard que muestre eventos sagrados próximos con recome
     name: string;
     slug: string;
     description: string;
-    eventType: 'sabbat' | 'lunar_phase' | 'portal' | 'cultural' | 'eclipse';
+    eventType: "sabbat" | "lunar_phase" | "portal" | "cultural" | "eclipse";
     eventDate: string;
-    importance: 'high' | 'medium' | 'low';
+    importance: "high" | "medium" | "low";
     energyDescription: string;
     suggestedRitualCategories: RitualCategory[];
     daysUntil: number; // Calculado en frontend
@@ -6210,7 +6203,7 @@ Crear widget para el dashboard que muestre eventos sagrados próximos con recome
   ```typescript
   export function useUpcomingEvents(days?: number) {
     return useQuery({
-      queryKey: ['sacred-calendar', 'upcoming', days],
+      queryKey: ["sacred-calendar", "upcoming", days],
       queryFn: () => getUpcomingEvents(days),
       staleTime: 1000 * 60 * 60, // 1 hora
     });
@@ -6218,7 +6211,7 @@ Crear widget para el dashboard que muestre eventos sagrados próximos con recome
 
   export function useTodayEvents() {
     return useQuery({
-      queryKey: ['sacred-calendar', 'today'],
+      queryKey: ["sacred-calendar", "today"],
       queryFn: getTodayEvents,
       staleTime: 1000 * 60 * 30, // 30 min
     });
@@ -6248,7 +6241,7 @@ Crear widget para el dashboard que muestre eventos sagrados próximos con recome
 
   export function SacredEventsWidget() {
     const { user } = useAuthStore();
-    const isPremium = user?.plan === 'premium';
+    const isPremium = user?.plan === "premium";
 
     const { data: todayEvents } = useTodayEvents();
     const { data: upcomingEvents } = useUpcomingEvents(7);
@@ -6280,7 +6273,7 @@ Crear widget para el dashboard que muestre eventos sagrados próximos con recome
                   <Icon className="h-5 w-5" />
                   <span className="font-medium">{event.name}</span>
                   <Badge variant="secondary" className="ml-auto">
-                    {event.importance === 'high' ? 'Alta energía' : 'Propicio'}
+                    {event.importance === "high" ? "Alta energía" : "Propicio"}
                   </Badge>
                 </div>
               );
@@ -6293,9 +6286,7 @@ Crear widget para el dashboard que muestre eventos sagrados próximos con recome
           <p className="text-sm text-muted-foreground">Próximos 7 días</p>
           {upcomingEvents?.slice(0, 3).map((event) => {
             const Icon = EVENT_ICONS[event.eventType];
-            const daysUntil = Math.ceil(
-              (new Date(event.eventDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-            );
+            const daysUntil = Math.ceil((new Date(event.eventDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
 
             return (
               <div key={event.id} className="flex items-center gap-3 p-2 hover:bg-muted/50 rounded">
@@ -6303,10 +6294,10 @@ Crear widget para el dashboard que muestre eventos sagrados próximos con recome
                 <div className="flex-1">
                   <p className="text-sm font-medium">{event.name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {daysUntil === 0 ? 'Hoy' : daysUntil === 1 ? 'Mañana' : `En ${daysUntil} días`}
+                    {daysUntil === 0 ? "Hoy" : daysUntil === 1 ? "Mañana" : `En ${daysUntil} días`}
                   </p>
                 </div>
-                <Link href={`/rituales?lunar=${event.lunarPhase || ''}`}>
+                <Link href={`/rituales?lunar=${event.lunarPhase || ""}`}>
                   <Button variant="ghost" size="sm">
                     Ver rituales
                   </Button>
@@ -6368,31 +6359,34 @@ Crear el servicio que analiza el historial de lecturas del usuario para detectar
   ```typescript
   // src/modules/rituals/enums/reading-patterns.enums.ts
   export enum EmotionalPattern {
-    HEARTBREAK = 'heartbreak',           // Corazón roto / Conflicto emocional
-    MATERIAL_BLOCK = 'material_block',   // Bloqueo material / Estancamiento
-    SUCCESS_EXPANSION = 'success',       // Éxito y expansión
-    OBSESSION = 'obsession',             // Obsesión / Repetición
-    SEEKING_CLARITY = 'clarity',         // Búsqueda de claridad
-    HEALING_NEEDED = 'healing',          // Necesita sanación
-    PROTECTION_NEEDED = 'protection',    // Necesita protección
+    HEARTBREAK = "heartbreak", // Corazón roto / Conflicto emocional
+    MATERIAL_BLOCK = "material_block", // Bloqueo material / Estancamiento
+    SUCCESS_EXPANSION = "success", // Éxito y expansión
+    OBSESSION = "obsession", // Obsesión / Repetición
+    SEEKING_CLARITY = "clarity", // Búsqueda de claridad
+    HEALING_NEEDED = "healing", // Necesita sanación
+    PROTECTION_NEEDED = "protection", // Necesita protección
   }
 
   // Cartas asociadas a cada patrón
-  export const PATTERN_CARDS: Record<EmotionalPattern, {
-    majorArcana: number[];
-    minorKeywords: string[];
-  }> = {
+  export const PATTERN_CARDS: Record<
+    EmotionalPattern,
+    {
+      majorArcana: number[];
+      minorKeywords: string[];
+    }
+  > = {
     [EmotionalPattern.HEARTBREAK]: {
       majorArcana: [16, 18], // La Torre, La Luna
-      minorKeywords: ['espadas_3', 'copas_5', 'espadas_10'],
+      minorKeywords: ["espadas_3", "copas_5", "espadas_10"],
     },
     [EmotionalPattern.MATERIAL_BLOCK]: {
       majorArcana: [12], // El Colgado
-      minorKeywords: ['oros_5', 'espadas_4', 'bastos_7'],
+      minorKeywords: ["oros_5", "espadas_4", "bastos_7"],
     },
     [EmotionalPattern.SUCCESS_EXPANSION]: {
       majorArcana: [19, 21, 10], // El Sol, El Mundo, Rueda de la Fortuna
-      minorKeywords: ['oros_as', 'copas_9', 'oros_10', 'copas_10'],
+      minorKeywords: ["oros_as", "copas_9", "oros_10", "copas_10"],
     },
     // ... más patrones
   };
@@ -6414,15 +6408,12 @@ Crear el servicio que analiza el historial de lecturas del usuario para detectar
     /**
      * Analiza las últimas N lecturas del usuario y detecta patrones
      */
-    async analyzeUserPatterns(
-      userId: number,
-      readingsCount: number = 5,
-    ): Promise<PatternAnalysisResult> {
+    async analyzeUserPatterns(userId: number, readingsCount: number = 5): Promise<PatternAnalysisResult> {
       // Obtener últimas lecturas con cartas y categorías
       const readings = await this.readingRepo.find({
         where: { user: { id: userId } },
-        relations: ['cards', 'category'],
-        order: { createdAt: 'DESC' },
+        relations: ["cards", "category"],
+        order: { createdAt: "DESC" },
         take: readingsCount,
       });
 
@@ -6440,11 +6431,7 @@ Crear el servicio que analiza el historial de lecturas del usuario para detectar
       const obsessionDetected = this.detectObsession(readings);
 
       // Combinar patrones detectados
-      const detectedPatterns = this.combinePatterns(
-        categoryFrequency,
-        cardPatterns,
-        obsessionDetected,
-      );
+      const detectedPatterns = this.combinePatterns(categoryFrequency, cardPatterns, obsessionDetected);
 
       return {
         hasEnoughData: true,
@@ -6458,7 +6445,7 @@ Crear el servicio que analiza el historial de lecturas del usuario para detectar
     private analyzeCategoryFrequency(readings: TarotReading[]): Map<string, number> {
       const frequency = new Map<string, number>();
       for (const reading of readings) {
-        const cat = reading.category?.slug || 'general';
+        const cat = reading.category?.slug || "general";
         frequency.set(cat, (frequency.get(cat) || 0) + 1);
       }
       return frequency;
@@ -6466,10 +6453,10 @@ Crear el servicio que analiza el historial de lecturas del usuario para detectar
 
     private analyzeCardPatterns(readings: TarotReading[]): EmotionalPattern[] {
       const patterns: EmotionalPattern[] = [];
-      const allCardIds = readings.flatMap(r => r.cards?.map(c => c.id) || []);
+      const allCardIds = readings.flatMap((r) => r.cards?.map((c) => c.id) || []);
 
       for (const [pattern, config] of Object.entries(PATTERN_CARDS)) {
-        const matchCount = config.majorArcana.filter(id => allCardIds.includes(id)).length;
+        const matchCount = config.majorArcana.filter((id) => allCardIds.includes(id)).length;
         // Si 2+ cartas del patrón aparecen, lo detectamos
         if (matchCount >= 2) {
           patterns.push(pattern as EmotionalPattern);
@@ -6483,17 +6470,15 @@ Crear el servicio que analiza el historial de lecturas del usuario para detectar
       if (readings.length < 3) return false;
 
       // Detectar si las últimas 3 lecturas son de la misma categoría
-      const recentCategories = readings.slice(0, 3).map(r => r.category?.slug);
-      const allSame = recentCategories.every(c => c === recentCategories[0]);
+      const recentCategories = readings.slice(0, 3).map((r) => r.category?.slug);
+      const allSame = recentCategories.every((c) => c === recentCategories[0]);
 
       // O si la pregunta es muy similar (usando distancia de Levenshtein simplificada)
       // Para MVP: solo verificar categoría repetida
       return allSame;
     }
 
-    private async generateRecommendations(
-      patterns: DetectedPattern[],
-    ): Promise<RitualRecommendation[]> {
+    private async generateRecommendations(patterns: DetectedPattern[]): Promise<RitualRecommendation[]> {
       const recommendations: RitualRecommendation[] = [];
 
       for (const pattern of patterns) {
@@ -6503,7 +6488,7 @@ Crear el servicio que analiza el historial de lecturas del usuario para detectar
           pattern: pattern.type,
           message: this.getPatternMessage(pattern.type),
           suggestedCategories: ritualCategories,
-          priority: pattern.confidence > 0.7 ? 'high' : 'medium',
+          priority: pattern.confidence > 0.7 ? "high" : "medium",
         });
       }
 
@@ -6513,19 +6498,18 @@ Crear el servicio que analiza el historial de lecturas del usuario para detectar
     private getPatternMessage(pattern: EmotionalPattern): string {
       const messages: Record<EmotionalPattern, string> = {
         [EmotionalPattern.HEARTBREAK]:
-          'Las cartas han mostrado turbulencia emocional. Un baño de limpieza con romero podría ayudarte a restaurar tu equilibrio.',
+          "Las cartas han mostrado turbulencia emocional. Un baño de limpieza con romero podría ayudarte a restaurar tu equilibrio.",
         [EmotionalPattern.MATERIAL_BLOCK]:
-          'Si sientes que tus proyectos están estancados, aprovecha la próxima Luna Creciente para un ritual de Abrecaminos.',
+          "Si sientes que tus proyectos están estancados, aprovecha la próxima Luna Creciente para un ritual de Abrecaminos.",
         [EmotionalPattern.SUCCESS_EXPANSION]:
-          'Tu energía está vibrando alto. Es el momento perfecto para un ritual de Gratitud para multiplicar lo que llega.',
+          "Tu energía está vibrando alto. Es el momento perfecto para un ritual de Gratitud para multiplicar lo que llega.",
         [EmotionalPattern.OBSESSION]:
-          'A veces la respuesta llega en el silencio. Te sugerimos un ritual de meditación para calmar la mente.',
+          "A veces la respuesta llega en el silencio. Te sugerimos un ritual de meditación para calmar la mente.",
         [EmotionalPattern.SEEKING_CLARITY]:
-          'Cuando buscamos claridad, un ritual de conexión con La Sacerdotisa puede iluminar el camino.',
-        [EmotionalPattern.HEALING_NEEDED]:
-          'Tu energía pide sanación. Considera un ritual de limpieza y autocuidado.',
+          "Cuando buscamos claridad, un ritual de conexión con La Sacerdotisa puede iluminar el camino.",
+        [EmotionalPattern.HEALING_NEEDED]: "Tu energía pide sanación. Considera un ritual de limpieza y autocuidado.",
         [EmotionalPattern.PROTECTION_NEEDED]:
-          'Las cartas sugieren que es momento de fortalecer tus defensas energéticas.',
+          "Las cartas sugieren que es momento de fortalecer tus defensas energéticas.",
       };
       return messages[pattern];
     }
@@ -6595,6 +6579,7 @@ Crear el servicio que analiza el historial de lecturas del usuario para detectar
 #### 📝 Notas de Implementación
 
 **PR #314 - Feature completa:**
+
 - ✅ Entidades y enums de patrones creados
 - ✅ `ReadingPatternAnalyzerService` con lógica de análisis
 - ✅ Endpoint `GET /rituals/recommendations` (Premium only)
@@ -6602,6 +6587,7 @@ Crear el servicio que analiza el historial de lecturas del usuario para detectar
 - ✅ Integración con módulo de rituales
 
 **PR #314 - Feedback de Copilot aplicado (commit 26fe1b1):**
+
 - ✅ **FIX CRÍTICO**: Corregido bug `card.id` vs `card.number` en 3 métodos del servicio
 - ✅ Agregado campo `number` a interfaz `ITarotCard` en `tarot-reading.entity.ts`
 - ✅ Actualizado todos los mocks de tests con campo `number` realista
@@ -6648,7 +6634,7 @@ Crear widget para el dashboard que muestre recomendaciones de rituales basadas e
     return useQuery({
       queryKey: ritualKeys.recommendations(), // ✅ Centralizado
       queryFn: getRitualRecommendations,
-      enabled: user?.plan === 'premium',
+      enabled: user?.plan === "premium",
       staleTime: 1000 * 60 * 60 * 24, // 24 horas (no cambia frecuentemente)
     });
   }
@@ -6676,7 +6662,7 @@ Crear widget para el dashboard que muestre recomendaciones de rituales basadas e
 
   export function PersonalizedRitualsWidget() {
     const { user } = useAuthStore();
-    const isPremium = user?.plan === 'premium';
+    const isPremium = user?.plan === "premium";
     const { data, isLoading, isError } = useRitualRecommendations(); // ✅ Con error handling
 
     // Solo mostrar para Premium
@@ -6688,8 +6674,8 @@ Crear widget para el dashboard que muestre recomendaciones de rituales basadas e
             <h2 className="font-serif text-xl">Rituales Recomendados para Ti</h2>
           </div>
           <p className="text-sm text-muted-foreground mb-4">
-            Con Premium, analizamos tus lecturas para sugerirte rituales personalizados
-            según tu momento energético actual.
+            Con Premium, analizamos tus lecturas para sugerirte rituales personalizados según tu momento energético
+            actual.
           </p>
           <Button asChild>
             <Link href="/premium">Desbloquear recomendaciones</Link>
@@ -6710,9 +6696,7 @@ Crear widget para el dashboard que muestre recomendaciones de rituales basadas e
             <Sparkles className="h-6 w-6 text-purple-500" />
             <h2 className="font-serif text-xl">Rituales para Ti</h2>
           </div>
-          <p className="text-sm text-red-600">
-            Error al cargar recomendaciones. Inténtalo de nuevo más tarde.
-          </p>
+          <p className="text-sm text-red-600">Error al cargar recomendaciones. Inténtalo de nuevo más tarde.</p>
         </Card>
       );
     }
@@ -6725,8 +6709,7 @@ Crear widget para el dashboard que muestre recomendaciones de rituales basadas e
             <h2 className="font-serif text-xl">Rituales para Ti</h2>
           </div>
           <p className="text-sm text-muted-foreground">
-            Realiza algunas lecturas más para que podamos analizar tu energía
-            y recomendarte rituales personalizados.
+            Realiza algunas lecturas más para que podamos analizar tu energía y recomendarte rituales personalizados.
           </p>
         </Card>
       );
@@ -6740,28 +6723,21 @@ Crear widget para el dashboard que muestre recomendaciones de rituales basadas e
         </div>
 
         <div className="space-y-4">
-          {data.recommendations.slice(0, 2).map((rec) => { // ✅ key={rec.pattern}
+          {data.recommendations.slice(0, 2).map((rec) => {
+            // ✅ key={rec.pattern}
             const Icon = PATTERN_ICONS[rec.pattern] || Sparkles;
 
             return (
-              <div
-                key={rec.pattern}
-                className="p-4 bg-gradient-to-r from-purple-500/10 to-transparent rounded-lg"
-              >
+              <div key={rec.pattern} className="p-4 bg-gradient-to-r from-purple-500/10 to-transparent rounded-lg">
                 <div className="flex items-start gap-3">
                   <div className="p-2 bg-purple-500/20 rounded-full">
                     <Icon className="h-5 w-5 text-purple-600" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm text-muted-foreground mb-2">
-                      {rec.message}
-                    </p>
+                    <p className="text-sm text-muted-foreground mb-2">{rec.message}</p>
                     <div className="flex flex-wrap gap-2">
                       {rec.suggestedCategories.map((cat) => (
-                        <Link
-                          key={cat}
-                          href={`/rituales?category=${cat}`}
-                        >
+                        <Link key={cat} href={`/rituales?category=${cat}`}>
                           <Button variant="outline" size="sm">
                             Ver rituales de {cat}
                           </Button>
@@ -6821,16 +6797,19 @@ Crear sistema de notificaciones in-app para alertar a usuarios Premium sobre eve
 **Backend:**
 
 ✅ **Entidad UserNotification** (`src/modules/notifications/entities/user-notification.entity.ts`)
+
 - Campos: id, userId, type (enum), title, message, data (jsonb), actionUrl, read, readAt, createdAt
 - Índices: `idx_notification_user`, `idx_notification_read`, `idx_notification_created`
 - Relación ManyToOne con User (onDelete: CASCADE)
 - Enum NotificationType: SACRED_EVENT, SACRED_EVENT_REMINDER, RITUAL_REMINDER, PATTERN_INSIGHT
 
 ✅ **DTOs** (`src/modules/notifications/application/dto/notification.dto.ts`)
+
 - `NotificationDto`: DTO completo con decoradores Swagger
 - `UnreadCountDto`: DTO para conteo de no leídas
 
 ✅ **NotificationsService** (`src/modules/notifications/application/services/notifications.service.ts`)
+
 - `createNotification()`: Crear notificación
 - `getUserNotifications()`: Obtener notificaciones (con filtro unreadOnly)
 - `markAsRead()`: Marcar como leída
@@ -6839,6 +6818,7 @@ Crear sistema de notificaciones in-app para alertar a usuarios Premium sobre eve
 - Tests unitarios: 100% coverage
 
 ✅ **NotificationsController** (`src/modules/notifications/infrastructure/controllers/notifications.controller.ts`)
+
 - `GET /notifications?unreadOnly=boolean`: Obtener notificaciones
 - `GET /notifications/count`: Conteo de no leídas
 - `PATCH /notifications/:id/read`: Marcar como leída
@@ -6848,6 +6828,7 @@ Crear sistema de notificaciones in-app para alertar a usuarios Premium sobre eve
 - Tests unitarios: 100% coverage
 
 ✅ **SacredEventNotificationCronService** (`src/modules/notifications/application/services/sacred-event-notification-cron.service.ts`)
+
 - Cron job: Ejecuta diariamente a las 9:00 AM UTC
 - Lógica:
   1. Obtiene usuarios premium activos
@@ -6859,12 +6840,14 @@ Crear sistema de notificaciones in-app para alertar a usuarios Premium sobre eve
 - Tests unitarios: 100% coverage (con stubs para CalendarService)
 
 ✅ **Migración** (`src/database/migrations/1771600000000-CreateUserNotificationsTable.ts`)
+
 - Enum `notification_type_enum`
 - Tabla `user_notifications` con todos los campos
 - Índices: `idx_notification_user`, `idx_notification_read`, `idx_notification_created`
 - FK a users con ON DELETE CASCADE
 
 ✅ **Módulo** (`src/modules/notifications/notifications.module.ts`)
+
 - Registrado en AppModule
 - Exports: NotificationsService
 
@@ -6933,9 +6916,9 @@ Crear sistema de notificaciones in-app para alertar a usuarios Premium sobre eve
 - [x] Crear entidad `UserNotification`:
 
   ```typescript
-  @Entity('user_notifications')
-  @Index('idx_notification_user', ['userId'])
-  @Index('idx_notification_read', ['userId', 'read'])
+  @Entity("user_notifications")
+  @Index("idx_notification_user", ["userId"])
+  @Index("idx_notification_read", ["userId", "read"])
   export class UserNotification {
     @PrimaryGeneratedColumn()
     id: number;
@@ -6943,32 +6926,32 @@ Crear sistema de notificaciones in-app para alertar a usuarios Premium sobre eve
     @Column()
     userId: number;
 
-    @Column({ type: 'varchar', length: 50 })
+    @Column({ type: "varchar", length: 50 })
     type: string; // 'sacred_event', 'ritual_reminder', 'pattern_insight'
 
-    @Column({ type: 'varchar', length: 150 })
+    @Column({ type: "varchar", length: 150 })
     title: string;
 
-    @Column({ type: 'text' })
+    @Column({ type: "text" })
     message: string;
 
-    @Column({ type: 'jsonb', nullable: true })
+    @Column({ type: "jsonb", nullable: true })
     data: Record<string, any> | null; // { eventId, ritualId, etc. }
 
-    @Column({ type: 'varchar', length: 255, nullable: true })
+    @Column({ type: "varchar", length: 255, nullable: true })
     actionUrl: string | null; // Link a la acción
 
-    @Column({ type: 'boolean', default: false })
+    @Column({ type: "boolean", default: false })
     read: boolean;
 
-    @Column({ type: 'timestamptz', nullable: true })
+    @Column({ type: "timestamptz", nullable: true })
     readAt: Date | null;
 
     @CreateDateColumn()
     createdAt: Date;
 
-    @ManyToOne(() => User, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'userId' })
+    @ManyToOne(() => User, { onDelete: "CASCADE" })
+    @JoinColumn({ name: "userId" })
     user: User;
   }
   ```
@@ -6998,10 +6981,7 @@ Crear sistema de notificaciones in-app para alertar a usuarios Premium sobre eve
       );
     }
 
-    async getUserNotifications(
-      userId: number,
-      unreadOnly: boolean = false,
-    ): Promise<UserNotification[]> {
+    async getUserNotifications(userId: number, unreadOnly: boolean = false): Promise<UserNotification[]> {
       const where: FindOptionsWhere<UserNotification> = { userId };
       if (unreadOnly) {
         where.read = false;
@@ -7009,23 +6989,17 @@ Crear sistema de notificaciones in-app para alertar a usuarios Premium sobre eve
 
       return this.notificationRepo.find({
         where,
-        order: { createdAt: 'DESC' },
+        order: { createdAt: "DESC" },
         take: 20,
       });
     }
 
     async markAsRead(userId: number, notificationId: number): Promise<void> {
-      await this.notificationRepo.update(
-        { id: notificationId, userId },
-        { read: true, readAt: new Date() },
-      );
+      await this.notificationRepo.update({ id: notificationId, userId }, { read: true, readAt: new Date() });
     }
 
     async markAllAsRead(userId: number): Promise<void> {
-      await this.notificationRepo.update(
-        { userId, read: false },
-        { read: true, readAt: new Date() },
-      );
+      await this.notificationRepo.update({ userId, read: false }, { read: true, readAt: new Date() });
     }
 
     async getUnreadCount(userId: number): Promise<number> {
@@ -7070,7 +7044,7 @@ Crear sistema de notificaciones in-app para alertar a usuarios Premium sobre eve
   @Injectable()
   export class SacredEventNotificationCronService {
     // Ejecutar a las 9:00 AM todos los días
-    @Cron('0 9 * * *')
+    @Cron("0 9 * * *")
     async sendDailyEventNotifications() {
       // 1. Obtener usuarios premium
       const premiumUsers = await this.userRepo.find({
@@ -7085,24 +7059,24 @@ Crear sistema de notificaciones in-app para alertar a usuarios Premium sobre eve
         for (const event of todayEvents) {
           await this.notificationService.createNotification(
             user.id,
-            'sacred_event',
+            "sacred_event",
             `Hoy: ${event.name}`,
             event.energyDescription,
             { eventId: event.id },
-            `/rituales?lunar=${event.lunarPhase || ''}`,
+            `/rituales?lunar=${event.lunarPhase || ""}`,
           );
         }
 
         // 3. Verificar eventos de mañana (pre-aviso)
         const tomorrowEvents = await this.calendarService.getTomorrowEvents(hemisphere);
-        for (const event of tomorrowEvents.filter(e => e.importance === 'high')) {
+        for (const event of tomorrowEvents.filter((e) => e.importance === "high")) {
           await this.notificationService.createNotification(
             user.id,
-            'sacred_event_reminder',
+            "sacred_event_reminder",
             `Mañana: ${event.name}`,
             `Prepárate para ${event.name}. ${event.energyDescription}`,
             { eventId: event.id },
-            `/rituales?lunar=${event.lunarPhase || ''}`,
+            `/rituales?lunar=${event.lunarPhase || ""}`,
           );
         }
       }
@@ -7112,10 +7086,7 @@ Crear sistema de notificaciones in-app para alertar a usuarios Premium sobre eve
 
 ##### Frontend
 
-- [ ] Crear hook `useNotifications`
-- [ ] Crear componente `NotificationBell` para header
-- [ ] Crear dropdown de notificaciones
-- [ ] Actualizar layout para incluir NotificationBell
+> ⚠️ **NOTA:** El desarrollo de frontend para notificaciones se movió a **TASK-414** con instrucciones detalladas.
 
 ##### Testing
 
@@ -7173,19 +7144,19 @@ Actualizar los componentes de upsell existentes para incluir los beneficios de r
   // frontend/src/lib/constants/premium-benefits.ts
   export const PREMIUM_BENEFITS = {
     readings: [
-      { icon: 'Layers', text: 'Todas las tiradas (1, 3, 5 cartas y Cruz Céltica)' },
-      { icon: 'Sparkles', text: '3 lecturas completas por día' },
-      { icon: 'MessageSquare', text: 'Preguntas personalizadas' },
+      { icon: "Layers", text: "Todas las tiradas (1, 3, 5 cartas y Cruz Céltica)" },
+      { icon: "Sparkles", text: "3 lecturas completas por día" },
+      { icon: "MessageSquare", text: "Preguntas personalizadas" },
     ],
     rituals: [
-      { icon: 'CalendarHeart', text: 'Calendario sagrado completo' },
-      { icon: 'Bell', text: 'Notificaciones de eventos cósmicos' },
-      { icon: 'Sparkles', text: 'Rituales recomendados según tus lecturas' },
-      { icon: 'History', text: 'Historial ilimitado de rituales' },
+      { icon: "CalendarHeart", text: "Calendario sagrado completo" },
+      { icon: "Bell", text: "Notificaciones de eventos cósmicos" },
+      { icon: "Sparkles", text: "Rituales recomendados según tus lecturas" },
+      { icon: "History", text: "Historial ilimitado de rituales" },
     ],
     general: [
-      { icon: 'History', text: 'Historial de 365 días' },
-      { icon: 'Brain', text: 'Interpretaciones con IA avanzada' },
+      { icon: "History", text: "Historial de 365 días" },
+      { icon: "Brain", text: "Interpretaciones con IA avanzada" },
     ],
   };
   ```
@@ -7199,17 +7170,17 @@ Actualizar los componentes de upsell existentes para incluir los beneficios de r
 
 ## RESUMEN DE TAREAS PREMIUM
 
-| Tarea | Descripción | Estimación | Prioridad | Estado |
-|-------|-------------|------------|-----------|--------|
-| TASK-400a | Campos de geolocalización en User | 1 día | 🔴 ALTA | ⏳ Pendiente |
-| TASK-400b | Entidades del Calendario Sagrado | 1.5 días | 🔴 ALTA | ⏳ Pendiente |
-| TASK-400c | Servicio de Calendario y Seeder | 2 días | 🔴 ALTA | ⏳ Pendiente |
-| TASK-400d | Endpoints del Calendario Sagrado | 0.5 días | 🟡 MEDIA | ✅ COMPLETADA |
-| TASK-400e | Widget de Eventos en Dashboard | 1 día | 🟡 MEDIA | ⏳ Pendiente |
-| TASK-400f | Análisis de Patrones de Lecturas | 2 días | 🔴 ALTA | ✅ COMPLETADA |
-| TASK-400g | Widget de Recomendaciones | 1 día | 🟡 MEDIA | ✅ COMPLETADA |
-| TASK-400h | Sistema de Notificaciones In-App | 2 días | 🟡 MEDIA | ✅ COMPLETADA |
-| TASK-400i | Beneficios en Upsells existentes | 0.5 días | 🟢 BAJA | ⏳ Pendiente |
+| Tarea     | Descripción                       | Estimación | Prioridad | Estado        |
+| --------- | --------------------------------- | ---------- | --------- | ------------- |
+| TASK-400a | Campos de geolocalización en User | 1 día      | 🔴 ALTA   | ⏳ Pendiente  |
+| TASK-400b | Entidades del Calendario Sagrado  | 1.5 días   | 🔴 ALTA   | ⏳ Pendiente  |
+| TASK-400c | Servicio de Calendario y Seeder   | 2 días     | 🔴 ALTA   | ⏳ Pendiente  |
+| TASK-400d | Endpoints del Calendario Sagrado  | 0.5 días   | 🟡 MEDIA  | ✅ COMPLETADA |
+| TASK-400e | Widget de Eventos en Dashboard    | 1 día      | 🟡 MEDIA  | ⏳ Pendiente  |
+| TASK-400f | Análisis de Patrones de Lecturas  | 2 días     | 🔴 ALTA   | ✅ COMPLETADA |
+| TASK-400g | Widget de Recomendaciones         | 1 día      | 🟡 MEDIA  | ✅ COMPLETADA |
+| TASK-400h | Sistema de Notificaciones In-App  | 2 días     | 🟡 MEDIA  | ✅ COMPLETADA |
+| TASK-400i | Beneficios en Upsells existentes  | 0.5 días   | 🟢 BAJA   | ⏳ Pendiente  |
 
 **Total Features Premium: 11.5 días**
 
@@ -7274,6 +7245,7 @@ Durante la revisión de calidad del módulo de Rituales se detectaron los siguie
 La migración `1771300000000-CreateRitualsTables.ts` fue creada pero nunca ejecutada. Las tablas de rituales no existen en la base de datos.
 
 **ACTUALIZACIÓN**: ✅ Ejecutada el 2025 junto con:
+
 - `1771400000000-AddUserLocationFields.ts` (TASK-400a)
 - `1771500000000-CreateSacredEventsTables.ts` (TASK-400b)
 
@@ -7296,6 +7268,7 @@ La migración `1771300000000-CreateRitualsTables.ts` fue creada pero nunca ejecu
   - `material_type_enum` ✅
 
 **Adicionales ejecutadas:**
+
 - `timezone`, `countryCode`, `hemisphere`, `latitude` en tabla `user` ✅
 - `sacred_events` y `user_sacred_event_notifications` ✅
 - Enums: `hemisphere_enum`, `sacred_event_type_enum`, `sabbat_enum`, `sacred_event_importance_enum` ✅
@@ -7350,10 +7323,7 @@ La página de rituales (`/rituales`) existe y funciona, pero no hay ningún enla
 
 - [ ] Modificar `Header.tsx` para agregar link a Rituales:
   ```tsx
-  <Link
-    href={ROUTES.RITUALES}
-    className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
-  >
+  <Link href={ROUTES.RITUALES} className="text-text-primary hover:text-primary text-sm font-medium transition-colors">
     Rituales
   </Link>
   ```
@@ -7375,6 +7345,7 @@ La página de rituales (`/rituales`) existe y funciona, pero no hay ningún enla
 #### 📋 Descripción
 
 Durante los tests se detectó una advertencia de accesibilidad:
+
 ```
 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
 ```
@@ -7384,13 +7355,15 @@ El modal no tiene un `DialogDescription` que describa su propósito para lectore
 #### ✅ Tareas Específicas
 
 - [ ] Agregar `DialogDescription` al modal:
+
   ```tsx
-  import { DialogDescription } from '@/components/ui/dialog';
+  import { DialogDescription } from "@/components/ui/dialog";
 
   <DialogDescription>
     Registra tu experiencia con este ritual. Puedes agregar notas y una calificación opcional.
-  </DialogDescription>
+  </DialogDescription>;
   ```
+
 - [ ] Alternativamente, usar `aria-describedby={undefined}` si no se desea texto visible
 - [ ] Ejecutar tests para verificar que el warning desaparece
 
@@ -7407,6 +7380,7 @@ El modal no tiene un `DialogDescription` que describa su propósito para lectore
 #### 📋 Descripción
 
 Durante los tests se detectaron warnings en componentes que usan `next/image`:
+
 ```
 Received `true` for a non-boolean attribute `fill`.
 Received `true` for a non-boolean attribute `priority`.
@@ -7417,6 +7391,7 @@ Esto ocurre en `RitualCard.tsx` y `RitualHeader.tsx`.
 #### ✅ Tareas Específicas
 
 - [ ] En los componentes afectados, cambiar:
+
   ```tsx
   // De:
   <Image fill={true} priority={true} ... />
@@ -7424,22 +7399,537 @@ Esto ocurre en `RitualCard.tsx` y `RitualHeader.tsx`.
   // A:
   <Image fill priority ... />
   ```
+
 - [ ] O manejar explícitamente en tests con mock de next/image
 - [ ] Ejecutar tests para verificar que los warnings desaparecen
 
 ---
 
+### TASK-414: Frontend de Notificaciones In-App
+
+**Estado:** 🔴 PENDIENTE
+**Módulo:** `frontend/src/`
+**Prioridad:** 🟡 MEDIA
+**Estimación:** 1 día
+**Dependencias:** TASK-400h (backend completado)
+
+---
+
+#### 📋 Descripción
+
+Implementar la interfaz de usuario para el sistema de notificaciones in-app. Incluye un icono de campana en el header con contador de notificaciones no leídas, un dropdown para ver las notificaciones, y la capacidad de marcarlas como leídas.
+
+**Prerrequisito:** El backend de notificaciones ya está implementado (TASK-400h) con los siguientes endpoints:
+
+- `GET /notifications` - Lista notificaciones (con filtro `unreadOnly`)
+- `GET /notifications/count` - Conteo de no leídas
+- `PATCH /notifications/:id/read` - Marcar como leída
+- `PATCH /notifications/read-all` - Marcar todas como leídas
+
+---
+
+#### ✅ Tareas Específicas
+
+##### 1. Tipos TypeScript (`types/notification.types.ts`)
+
+- [ ] Crear archivo de tipos:
+
+```typescript
+// frontend/src/types/notification.types.ts
+
+/**
+ * Tipos de notificación del sistema
+ */
+export enum NotificationType {
+  SACRED_EVENT = "sacred_event",
+  SACRED_EVENT_REMINDER = "sacred_event_reminder",
+  RITUAL_REMINDER = "ritual_reminder",
+  PATTERN_INSIGHT = "pattern_insight",
+}
+
+/**
+ * Notificación del usuario
+ */
+export interface Notification {
+  id: number; // IDs siempre numéricos
+  type: NotificationType;
+  title: string;
+  message: string;
+  data: Record<string, any> | null; // Datos adicionales (eventId, etc.)
+  actionUrl: string | null; // URL de acción (ej: /rituales?lunar=new_moon)
+  read: boolean;
+  readAt: Date | null;
+  createdAt: Date;
+}
+
+/**
+ * Respuesta del conteo de no leídas
+ */
+export interface UnreadCountResponse {
+  count: number;
+}
+```
+
+- [ ] Exportar tipos en `types/index.ts`:
+
+```typescript
+// Notification Types
+export type { Notification, UnreadCountResponse } from "./notification.types";
+export { NotificationType } from "./notification.types";
+```
+
+##### 2. Endpoints Centralizados (`lib/api/endpoints.ts`)
+
+- [ ] Agregar endpoints de notificaciones:
+
+```typescript
+// En API_ENDPOINTS, agregar:
+NOTIFICATIONS: {
+  LIST: '/notifications',
+  COUNT: '/notifications/count',
+  MARK_READ: (id: number) => `/notifications/${id}/read`,
+  MARK_ALL_READ: '/notifications/read-all',
+},
+```
+
+##### 3. API Functions (`lib/api/notifications-api.ts`)
+
+- [ ] Crear funciones de API:
+
+```typescript
+// frontend/src/lib/api/notifications-api.ts
+import { apiClient } from "./apiClient";
+import { API_ENDPOINTS } from "./endpoints";
+import type { Notification, UnreadCountResponse } from "@/types";
+
+/**
+ * Obtiene las notificaciones del usuario
+ * @param unreadOnly - Si es true, solo retorna no leídas
+ */
+export async function getNotifications(unreadOnly = false): Promise<Notification[]> {
+  const response = await apiClient.get<Notification[]>(API_ENDPOINTS.NOTIFICATIONS.LIST, {
+    params: { unreadOnly },
+  });
+  return response.data;
+}
+
+/**
+ * Obtiene el conteo de notificaciones no leídas
+ */
+export async function getUnreadCount(): Promise<UnreadCountResponse> {
+  const response = await apiClient.get<UnreadCountResponse>(API_ENDPOINTS.NOTIFICATIONS.COUNT);
+  return response.data;
+}
+
+/**
+ * Marca una notificación como leída
+ * @param id - ID de la notificación
+ */
+export async function markAsRead(id: number): Promise<void> {
+  await apiClient.patch(API_ENDPOINTS.NOTIFICATIONS.MARK_READ(id));
+}
+
+/**
+ * Marca todas las notificaciones como leídas
+ */
+export async function markAllAsRead(): Promise<void> {
+  await apiClient.patch(API_ENDPOINTS.NOTIFICATIONS.MARK_ALL_READ);
+}
+```
+
+- [ ] Crear tests (`lib/api/notifications-api.test.ts`)
+
+##### 4. React Query Hook (`hooks/api/useNotifications.ts`)
+
+- [ ] Crear hook con queries y mutations:
+
+```typescript
+// frontend/src/hooks/api/useNotifications.ts
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getNotifications, getUnreadCount, markAsRead, markAllAsRead } from "@/lib/api/notifications-api";
+
+/**
+ * Query keys para notificaciones
+ */
+export const notificationKeys = {
+  all: ["notifications"] as const,
+  list: (unreadOnly?: boolean) => [...notificationKeys.all, "list", unreadOnly] as const,
+  count: () => [...notificationKeys.all, "count"] as const,
+};
+
+/**
+ * Hook para obtener notificaciones del usuario
+ * @param unreadOnly - Si es true, solo retorna no leídas
+ */
+export function useNotifications(unreadOnly = false) {
+  return useQuery({
+    queryKey: notificationKeys.list(unreadOnly),
+    queryFn: () => getNotifications(unreadOnly),
+    staleTime: 1000 * 60, // 1 minuto
+  });
+}
+
+/**
+ * Hook para obtener conteo de notificaciones no leídas
+ * Útil para mostrar el badge en el icono de campana
+ */
+export function useUnreadCount() {
+  return useQuery({
+    queryKey: notificationKeys.count(),
+    queryFn: getUnreadCount,
+    staleTime: 1000 * 30, // 30 segundos (más frecuente para actualizar badge)
+    refetchInterval: 1000 * 60 * 5, // Refetch cada 5 minutos
+  });
+}
+
+/**
+ * Hook para marcar una notificación como leída
+ */
+export function useMarkAsRead() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: markAsRead,
+    onSuccess: () => {
+      // Invalidar queries para refrescar datos
+      queryClient.invalidateQueries({ queryKey: notificationKeys.all });
+    },
+  });
+}
+
+/**
+ * Hook para marcar todas las notificaciones como leídas
+ */
+export function useMarkAllAsRead() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: markAllAsRead,
+    onSuccess: () => {
+      // Invalidar queries para refrescar datos
+      queryClient.invalidateQueries({ queryKey: notificationKeys.all });
+    },
+  });
+}
+```
+
+- [ ] Crear tests (`hooks/api/useNotifications.test.ts`)
+
+##### 5. Componente NotificationBell (`components/features/notifications/`)
+
+- [ ] Crear estructura de carpeta:
+
+```
+components/features/notifications/
+├── NotificationBell.tsx
+├── NotificationBell.test.tsx
+├── NotificationDropdown.tsx
+├── NotificationDropdown.test.tsx
+├── NotificationItem.tsx
+├── NotificationItem.test.tsx
+└── index.ts
+```
+
+- [ ] Crear `NotificationItem.tsx`:
+
+```tsx
+"use client";
+
+import { Bell, Calendar, Sparkles, Brain, CalendarClock } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { es } from "date-fns/locale";
+import { cn } from "@/lib/utils";
+import type { Notification } from "@/types";
+import { NotificationType } from "@/types";
+
+interface NotificationItemProps {
+  notification: Notification;
+  onMarkRead?: (id: number) => void;
+  onClick?: (notification: Notification) => void;
+}
+
+const TYPE_ICONS: Record<NotificationType, typeof Bell> = {
+  [NotificationType.SACRED_EVENT]: Calendar,
+  [NotificationType.SACRED_EVENT_REMINDER]: CalendarClock,
+  [NotificationType.RITUAL_REMINDER]: Sparkles,
+  [NotificationType.PATTERN_INSIGHT]: Brain,
+};
+
+export function NotificationItem({ notification, onMarkRead, onClick }: NotificationItemProps) {
+  const Icon = TYPE_ICONS[notification.type] || Bell;
+
+  const handleClick = () => {
+    if (!notification.read && onMarkRead) {
+      onMarkRead(notification.id);
+    }
+    onClick?.(notification);
+  };
+
+  return (
+    <button
+      data-testid={`notification-item-${notification.id}`}
+      onClick={handleClick}
+      className={cn(
+        "w-full text-left p-3 flex gap-3 hover:bg-surface-secondary transition-colors",
+        !notification.read && "bg-primary/5",
+      )}
+    >
+      <div className="flex-shrink-0">
+        <Icon className={cn("h-5 w-5", !notification.read ? "text-primary" : "text-text-secondary")} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className={cn("text-sm", !notification.read ? "font-medium text-text-primary" : "text-text-secondary")}>
+          {notification.title}
+        </p>
+        <p className="text-xs text-text-muted mt-0.5 line-clamp-2">{notification.message}</p>
+        <p className="text-xs text-text-muted mt-1">
+          {formatDistanceToNow(new Date(notification.createdAt), {
+            addSuffix: true,
+            locale: es,
+          })}
+        </p>
+      </div>
+      {!notification.read && (
+        <div className="flex-shrink-0">
+          <span className="h-2 w-2 rounded-full bg-primary block" />
+        </div>
+      )}
+    </button>
+  );
+}
+```
+
+- [ ] Crear `NotificationDropdown.tsx`:
+
+```tsx
+"use client";
+
+import { useRouter } from "next/navigation";
+import { Bell, CheckCheck, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { NotificationItem } from "./NotificationItem";
+import { useNotifications, useMarkAsRead, useMarkAllAsRead } from "@/hooks/api/useNotifications";
+import type { Notification } from "@/types";
+
+export function NotificationDropdown() {
+  const router = useRouter();
+  const { data: notifications, isLoading } = useNotifications();
+  const markAsRead = useMarkAsRead();
+  const markAllAsRead = useMarkAllAsRead();
+
+  const handleMarkRead = (id: number) => {
+    markAsRead.mutate(id);
+  };
+
+  const handleMarkAllRead = () => {
+    markAllAsRead.mutate();
+  };
+
+  const handleNotificationClick = (notification: Notification) => {
+    if (notification.actionUrl) {
+      router.push(notification.actionUrl);
+    }
+  };
+
+  const hasUnread = notifications?.some((n) => !n.read);
+
+  return (
+    <DropdownMenuContent align="end" className="w-80" data-testid="notification-dropdown">
+      <DropdownMenuLabel className="flex items-center justify-between">
+        <span>Notificaciones</span>
+        {hasUnread && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-auto py-1 px-2 text-xs"
+            onClick={handleMarkAllRead}
+            disabled={markAllAsRead.isPending}
+          >
+            {markAllAsRead.isPending ? (
+              <Loader2 className="h-3 w-3 animate-spin" />
+            ) : (
+              <>
+                <CheckCheck className="h-3 w-3 mr-1" />
+                Marcar todo leído
+              </>
+            )}
+          </Button>
+        )}
+      </DropdownMenuLabel>
+      <DropdownMenuSeparator />
+
+      {isLoading ? (
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin text-text-muted" />
+        </div>
+      ) : notifications?.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-8 text-center">
+          <Bell className="h-8 w-8 text-text-muted mb-2" />
+          <p className="text-sm text-text-muted">No tienes notificaciones</p>
+        </div>
+      ) : (
+        <ScrollArea className="h-[300px]">
+          {notifications?.map((notification) => (
+            <NotificationItem
+              key={notification.id}
+              notification={notification}
+              onMarkRead={handleMarkRead}
+              onClick={handleNotificationClick}
+            />
+          ))}
+        </ScrollArea>
+      )}
+    </DropdownMenuContent>
+  );
+}
+```
+
+- [ ] Crear `NotificationBell.tsx`:
+
+```tsx
+"use client";
+
+import { Bell } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { NotificationDropdown } from "./NotificationDropdown";
+import { useUnreadCount } from "@/hooks/api/useNotifications";
+import { cn } from "@/lib/utils";
+
+export function NotificationBell() {
+  const { data: unreadData } = useUnreadCount();
+  const count = unreadData?.count ?? 0;
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative"
+          aria-label={`Notificaciones${count > 0 ? `, ${count} sin leer` : ""}`}
+          data-testid="notification-bell"
+        >
+          <Bell className="h-5 w-5" />
+          {count > 0 && (
+            <span
+              data-testid="notification-badge"
+              className={cn(
+                "absolute -top-1 -right-1 flex items-center justify-center",
+                "min-w-[18px] h-[18px] rounded-full bg-destructive text-destructive-foreground",
+                "text-xs font-medium px-1",
+              )}
+            >
+              {count > 99 ? "99+" : count}
+            </span>
+          )}
+        </Button>
+      </DropdownMenuTrigger>
+      <NotificationDropdown />
+    </DropdownMenu>
+  );
+}
+```
+
+- [ ] Crear `index.ts`:
+
+```typescript
+export { NotificationBell } from "./NotificationBell";
+export { NotificationDropdown } from "./NotificationDropdown";
+export { NotificationItem } from "./NotificationItem";
+```
+
+- [ ] Crear tests para cada componente
+
+##### 6. Integración en Header (`components/layout/Header.tsx`)
+
+- [ ] Importar `NotificationBell`:
+
+```tsx
+import { NotificationBell } from "@/components/features/notifications";
+```
+
+- [ ] Agregar el componente al header (solo para usuarios autenticados):
+
+```tsx
+{
+  /* User actions - right side */
+}
+<div className="flex items-center gap-2">
+  {user && <NotificationBell />}
+  {user ? <UserMenu /> : <AuthButtons />}
+</div>;
+```
+
+##### Testing
+
+- [ ] Tests unitarios para `notification.types.ts`
+- [ ] Tests para `notifications-api.ts` (mock axios)
+- [ ] Tests para `useNotifications.ts` (mock React Query)
+- [ ] Tests para `NotificationItem.tsx`
+- [ ] Tests para `NotificationDropdown.tsx`
+- [ ] Tests para `NotificationBell.tsx`
+- [ ] Tests de integración para Header con NotificationBell
+
+##### Quality Gates
+
+- [ ] Format: `npm run format`
+- [ ] Lint: `npm run lint:fix`
+- [ ] Type-check: `npm run type-check`
+- [ ] Tests: `npm run test:run`
+- [ ] Coverage: `npm run test:coverage` (≥ 80%)
+- [ ] Build: `npm run build`
+- [ ] Architecture: `node scripts/validate-architecture.js`
+
+##### Git
+
+- [ ] Actualizar backlog (marcar completada)
+- [ ] Crear commit: `feat(notifications): add in-app notifications UI components`
+- [ ] Push y crear PR a `develop`
+
+---
+
+#### 🎯 Criterios de Aceptación
+
+- [ ] El icono de campana aparece en el header para usuarios autenticados
+- [ ] El badge muestra el conteo de notificaciones no leídas (máx 99+)
+- [ ] Al hacer clic se despliega el dropdown con las notificaciones
+- [ ] Las notificaciones no leídas tienen indicador visual (fondo/punto)
+- [ ] Se puede marcar una notificación como leída al hacer clic
+- [ ] Se pueden marcar todas como leídas con un botón
+- [ ] Al hacer clic en una notificación con `actionUrl`, navega a esa URL
+- [ ] Estado vacío muestra mensaje apropiado
+- [ ] Estado de carga muestra spinner
+- [ ] Texto en español para todo el UI
+- [ ] Tests con coverage ≥ 80%
+- [ ] Build exitoso sin errores de TypeScript
+
+---
+
+#### 📝 Notas Técnicas
+
+- **Polling automático:** El hook `useUnreadCount` hace refetch cada 5 minutos para mantener el badge actualizado
+- **Optimistic updates:** Considerar implementar para mejor UX en marcar como leído
+- **WebSocket (futuro):** La arquitectura permite agregar push notifications real-time
+- **Accesibilidad:** Usar `aria-label` apropiados para el icono y badge
+- **Mobile:** El dropdown funciona tanto en desktop como móvil
+
+---
+
 ## RESUMEN DE TAREAS PENDIENTES
 
-| Task | Descripción | Estimación | Prioridad | Estado |
-|------|-------------|------------|-----------|--------|
-| TASK-409 | Ejecutar migración de Rituales | 5 min | 🔴 CRÍTICA | ✅ COMPLETADA |
-| TASK-410 | Ejecutar seeder de Rituales | 5 min | 🔴 CRÍTICA | 🔴 PENDIENTE |
-| TASK-411 | Agregar link a Rituales en Header | 15 min | 🔴 ALTA | 🔴 PENDIENTE |
-| TASK-412 | Agregar DialogDescription en modal | 10 min | 🟡 MEDIA | 🔴 PENDIENTE |
-| TASK-413 | Corregir atributos booleanos en Image | 15 min | 🟢 BAJA | 🔴 PENDIENTE |
+| Task     | Descripción                           | Estimación | Prioridad  | Estado        |
+| -------- | ------------------------------------- | ---------- | ---------- | ------------- |
+| TASK-409 | Ejecutar migración de Rituales        | 5 min      | 🔴 CRÍTICA | ✅ COMPLETADA |
+| TASK-410 | Ejecutar seeder de Rituales           | 5 min      | 🔴 CRÍTICA | 🔴 PENDIENTE  |
+| TASK-411 | Agregar link a Rituales en Header     | 15 min     | 🔴 ALTA    | 🔴 PENDIENTE  |
+| TASK-412 | Agregar DialogDescription en modal    | 10 min     | 🟡 MEDIA   | 🔴 PENDIENTE  |
+| TASK-413 | Corregir atributos booleanos en Image | 15 min     | 🟢 BAJA    | 🔴 PENDIENTE  |
+| TASK-414 | Frontend de Notificaciones In-App     | 1 día      | 🟡 MEDIA   | 🔴 PENDIENTE  |
 
-**Total estimado restante: 45 minutos**
+**Total estimado restante: ~1 día y 45 minutos**
 
 ---
 
@@ -7460,8 +7950,9 @@ Las tareas del backlog **NO incluían pasos para ejecutar migraciones ni seeders
 4. **Conflictos de timestamps** en migraciones
 
 **Migraciones afectadas:**
+
 - `1771300000000-CreateRitualsTables.ts` (TASK-400)
-- `1771400000000-AddUserLocationFields.ts` (TASK-400a)  
+- `1771400000000-AddUserLocationFields.ts` (TASK-400a)
 - `1771400000000-CreateSacredEventsTables.ts` (TASK-400b) ❌ Timestamp duplicado
 
 #### ✅ Solución Aplicada
@@ -7475,7 +7966,7 @@ Las tareas del backlog **NO incluían pasos para ejecutar migraciones ni seeders
 
 **NUEVO: Agregar a TODAS las tareas que crean migraciones:**
 
-```markdown
+````markdown
 ##### Database Migration
 
 - [ ] Crear migración `XXXX-NombreMigracion.ts`
@@ -7484,6 +7975,8 @@ Las tareas del backlog **NO incluían pasos para ejecutar migraciones ni seeders
   cd backend/tarot-app
   npm run migration:run
   ```
+````
+
 - [ ] **Verificar migración ejecutada:**
   ```bash
   npm run migration:show
@@ -7502,7 +7995,8 @@ Las tareas del backlog **NO incluían pasos para ejecutar migraciones ni seeders
   ts-node src/database/seeds/seed-data.ts
   ```
 - [ ] **Verificar datos insertados** con query o endpoint
-```
+
+````
 
 #### 🎯 Quality Gates Actualizados
 
@@ -7515,7 +8009,7 @@ Las tareas del backlog **NO incluían pasos para ejecutar migraciones ni seeders
 # Nuevo paso:
 npm run migration:show
 # Verificar que la nueva migración aparece como ejecutada [X]
-```
+````
 
 #### ⚠️ Prevención de Conflictos de Timestamps
 
@@ -7537,7 +8031,7 @@ ls backend/tarot-app/src/database/migrations/ | grep "^177" | tail -3
 **Módulo:** `src/modules/XXX/`  
 **Prioridad:** 🔴 ALTA  
 **Estimación:** X días  
-**Dependencias:** TASK-YYY  
+**Dependencias:** TASK-YYY
 
 ---
 
@@ -7586,4 +8080,3 @@ ls backend/tarot-app/src/database/migrations/ | grep "^177" | tail -3
 ---
 
 **Fin del Módulo Rituales**
-
