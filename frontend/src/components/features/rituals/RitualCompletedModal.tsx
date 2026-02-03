@@ -2,7 +2,13 @@
 
 import { useState } from 'react';
 import { Star, Sparkles } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -69,6 +75,10 @@ export function RitualCompletedModal({
           <div className="text-center">
             <Sparkles className="mx-auto mb-2 h-12 w-12 text-yellow-500" />
             <DialogTitle className="font-serif text-2xl">Marcar como Completado</DialogTitle>
+            <DialogDescription>
+              Registra tu experiencia con este ritual. Puedes agregar notas y una calificación
+              opcional.
+            </DialogDescription>
           </div>
         </DialogHeader>
 

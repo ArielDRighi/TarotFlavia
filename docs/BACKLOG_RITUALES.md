@@ -7350,7 +7350,7 @@ La página de rituales (`/rituales`) existe y funciona, pero no hay ningún enla
 
 ### TASK-412: Agregar DialogDescription en RitualCompletedModal
 
-**Estado:** 🟡 PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Módulo:** `frontend/src/components/features/rituals/RitualCompletedModal.tsx`
 **Prioridad:** 🟡 MEDIA
 **Estimación:** 10 minutos
@@ -7368,7 +7368,7 @@ El modal no tiene un `DialogDescription` que describa su propósito para lectore
 
 #### ✅ Tareas Específicas
 
-- [ ] Agregar `DialogDescription` al modal:
+- [x] Agregar `DialogDescription` al modal:
 
   ```tsx
   import { DialogDescription } from "@/components/ui/dialog";
@@ -7378,8 +7378,8 @@ El modal no tiene un `DialogDescription` que describa su propósito para lectore
   </DialogDescription>;
   ```
 
-- [ ] Alternativamente, usar `aria-describedby={undefined}` si no se desea texto visible
-- [ ] Ejecutar tests para verificar que el warning desaparece
+- [x] Alternativamente, usar `aria-describedby={undefined}` si no se desea texto visible
+- [x] Ejecutar tests para verificar que el warning desaparece
 
 ---
 
