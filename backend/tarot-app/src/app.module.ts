@@ -33,6 +33,7 @@ import { PlanConfigModule } from './modules/plan-config/plan-config.module';
 import { HoroscopeModule } from './modules/horoscope/horoscope.module';
 import { NumerologyModule } from './modules/numerology/numerology.module';
 import { RitualsModule } from './modules/rituals/rituals.module';
+import { PendulumModule } from './modules/pendulum/pendulum.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { CustomThrottlerGuard } from './common/guards/custom-throttler.guard';
 import { ThrottlerExceptionFilter } from './common/filters/throttler-exception.filter';
@@ -93,6 +94,7 @@ import { validate } from './config/env-validator';
     HoroscopeModule,
     NumerologyModule,
     RitualsModule,
+    PendulumModule,
     NotificationsModule,
     InterpretationCacheModule,
     AIModule,
