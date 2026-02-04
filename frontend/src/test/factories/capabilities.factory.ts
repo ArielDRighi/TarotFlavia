@@ -5,7 +5,7 @@
  * These match the backend UserCapabilitiesDto structure.
  */
 
-import type { UserCapabilities, FeatureLimit } from '@/types';
+import type { UserCapabilities, FeatureLimit, PendulumFeatureLimit } from '@/types';
 
 /**
  * Create a mock FeatureLimit with default values
@@ -25,6 +25,22 @@ export function createMockFeatureLimit(overrides: Partial<FeatureLimit> = {}): F
 }
 
 /**
+ * Create a mock PendulumFeatureLimit with default values
+ */
+export function createMockPendulumFeatureLimit(
+  overrides: Partial<PendulumFeatureLimit> = {}
+): PendulumFeatureLimit {
+  return {
+    used: 0,
+    limit: 1,
+    canUse: true,
+    resetAt: null,
+    period: 'lifetime',
+    ...overrides,
+  };
+}
+
+/**
  * Create mock UserCapabilities for anonymous user
  */
 export function createMockAnonymousCapabilities(
@@ -33,6 +49,7 @@ export function createMockAnonymousCapabilities(
   return {
     dailyCard: createMockFeatureLimit({ used: 0, limit: 1, canUse: true }),
     tarotReadings: createMockFeatureLimit({ used: 0, limit: 0, canUse: false }),
+    pendulum: createMockPendulumFeatureLimit({ used: 0, limit: 1, canUse: true, period: 'lifetime' }),
     canCreateDailyReading: true,
     canCreateTarotReading: false,
     canUseAI: false,
@@ -53,6 +70,7 @@ export function createMockFreeCapabilities(
   return {
     dailyCard: createMockFeatureLimit({ used: 0, limit: 1, canUse: true }),
     tarotReadings: createMockFeatureLimit({ used: 0, limit: 1, canUse: true }),
+    pendulum: createMockPendulumFeatureLimit({ used: 0, limit: 3, canUse: true, period: 'daily' }),
     canCreateDailyReading: true,
     canCreateTarotReading: true,
     canUseAI: false,
@@ -73,6 +91,7 @@ export function createMockPremiumCapabilities(
   return {
     dailyCard: createMockFeatureLimit({ used: 0, limit: 1, canUse: true }),
     tarotReadings: createMockFeatureLimit({ used: 0, limit: 3, canUse: true }),
+    pendulum: createMockPendulumFeatureLimit({ used: 0, limit: 10, canUse: true, period: 'daily' }),
     canCreateDailyReading: true,
     canCreateTarotReading: true,
     canUseAI: true,

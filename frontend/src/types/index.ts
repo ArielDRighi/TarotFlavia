@@ -28,7 +28,7 @@ export type {
 } from './user.types';
 
 // Capabilities Types
-export type { FeatureLimit, UserCapabilities } from './capabilities.types';
+export type { FeatureLimit, PendulumFeatureLimit, UserCapabilities } from './capabilities.types';
 
 // Reading Types
 export type {
