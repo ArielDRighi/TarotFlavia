@@ -111,6 +111,8 @@ describe('PendulumController', () => {
         { question: undefined },
         undefined,
       );
+      // Verificar que el DTO original no fue mutado
+      expect(dto.question).toBe('Mi pregunta');
     });
 
     it('should throw BadRequestException for blocked content', async () => {
@@ -186,6 +188,43 @@ describe('PendulumController', () => {
         1,
         10,
         PendulumResponse.YES,
+      );
+    });
+
+    it('should throw BadRequestException when limit is less than 1', async () => {
+      const premiumUser = { id: 1, plan: UserPlan.PREMIUM } as User;
+
+      await expect(controller.getHistory(premiumUser, 0)).rejects.toThrow(
+        BadRequestException,
+      );
+      expect(historyService.getUserHistory).not.toHaveBeenCalled();
+    });
+
+    it('should throw BadRequestException when limit is greater than 100', async () => {
+      const premiumUser = { id: 1, plan: UserPlan.PREMIUM } as User;
+
+      await expect(controller.getHistory(premiumUser, 101)).rejects.toThrow(
+        BadRequestException,
+      );
+      expect(historyService.getUserHistory).not.toHaveBeenCalled();
+    });
+
+    it('should accept valid limit values (1-100)', async () => {
+      const premiumUser = { id: 1, plan: UserPlan.PREMIUM } as User;
+      historyService.getUserHistory.mockResolvedValue([]);
+
+      await controller.getHistory(premiumUser, 1);
+      expect(historyService.getUserHistory).toHaveBeenCalledWith(
+        1,
+        1,
+        undefined,
+      );
+
+      await controller.getHistory(premiumUser, 100);
+      expect(historyService.getUserHistory).toHaveBeenCalledWith(
+        1,
+        100,
+        undefined,
       );
     });
   });

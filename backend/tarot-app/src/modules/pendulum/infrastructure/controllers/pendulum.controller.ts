@@ -9,15 +9,19 @@ import {
   UseGuards,
   UseInterceptors,
   ParseIntPipe,
+  ParseEnumPipe,
+  DefaultValuePipe,
   HttpCode,
   HttpStatus,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../../../auth/infrastructure/guards/optional-jwt-auth.guard';
@@ -86,15 +90,21 @@ export class PendulumController {
     @Body() dto: PendulumQueryDto,
     @CurrentUser() user?: User,
   ): Promise<PendulumQueryResponseDto> {
-    // Solo Premium puede escribir preguntas
-    if (dto.question && (!user || user.plan !== UserPlan.PREMIUM)) {
-      dto.question = undefined;
-    }
+    // Crear nuevo objeto sin mutar el DTO de entrada
+    const questionToSave =
+      dto.question && user?.plan === UserPlan.PREMIUM
+        ? dto.question
+        : undefined;
+
+    const dtoToUse: PendulumQueryDto = {
+      ...dto,
+      question: questionToSave,
+    };
 
     // Solo guardar historial para Premium
     const userId = user?.plan === UserPlan.PREMIUM ? user.id : undefined;
 
-    return this.pendulumService.query(dto, userId);
+    return this.pendulumService.query(dtoToUse, userId);
   }
 
   /**
@@ -104,10 +114,28 @@ export class PendulumController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Obtener mi historial de consultas (Premium)' })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Número máximo de consultas a retornar (1-100)',
+    example: 10,
+  })
+  @ApiQuery({
+    name: 'response',
+    required: false,
+    enum: PendulumResponse,
+    description: 'Filtrar por tipo de respuesta',
+    example: PendulumResponse.YES,
+  })
   @ApiResponse({
     status: 200,
     description: 'Lista de consultas',
     type: [PendulumHistoryItemDto],
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Parámetros de query inválidos',
   })
   @ApiResponse({
     status: 403,
@@ -115,14 +143,28 @@ export class PendulumController {
   })
   async getHistory(
     @CurrentUser() user: User,
-    @Query('limit') limit?: number,
-    @Query('response') response?: PendulumResponse,
+    @Query(
+      'limit',
+      new DefaultValuePipe(10),
+      new ParseIntPipe({ optional: true }),
+    )
+    limit?: number,
+    @Query('response', new ParseEnumPipe(PendulumResponse, { optional: true }))
+    response?: PendulumResponse,
   ): Promise<PendulumHistoryItemDto[]> {
     if (user.plan !== UserPlan.PREMIUM) {
       throw new ForbiddenException(
         'El historial solo está disponible para usuarios Premium',
       );
     }
+
+    // Validar rango de limit
+    if (limit !== undefined && (limit < 1 || limit > 100)) {
+      throw new BadRequestException(
+        'El parámetro "limit" debe estar entre 1 y 100',
+      );
+    }
+
     const history = await this.historyService.getUserHistory(
       user.id,
       limit,
