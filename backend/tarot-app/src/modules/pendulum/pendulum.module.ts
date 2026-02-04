@@ -5,6 +5,7 @@ import { PendulumInterpretation } from './entities/pendulum-interpretation.entit
 import { RitualsModule } from '../rituals/rituals.module';
 import { UsageLimitsModule } from '../usage-limits/usage-limits.module';
 import { UsersModule } from '../users/users.module';
+import { PlanConfigModule } from '../plan-config/plan-config.module';
 import { PendulumService } from './application/services/pendulum.service';
 import { PendulumHistoryService } from './application/services/pendulum-history.service';
 import { PendulumInterpretationService } from './application/services/pendulum-interpretation.service';
@@ -25,6 +26,7 @@ import { PendulumController } from './infrastructure/controllers/pendulum.contro
  * - RitualsModule: Para obtener fase lunar actual (LunarPhaseService)
  * - UsageLimitsModule: Para guards e interceptors de límites de uso
  * - UsersModule: Para validación de usuarios (usado por CheckUsageLimitGuard)
+ * - PlanConfigModule: Para configuración de planes (usado por CheckUsageLimitGuard)
  * - TypeORM: Para persistencia de consultas e interpretaciones
  */
 @Module({
@@ -32,6 +34,7 @@ import { PendulumController } from './infrastructure/controllers/pendulum.contro
     TypeOrmModule.forFeature([PendulumQuery, PendulumInterpretation]),
     RitualsModule, // Proporciona LunarPhaseService
     UsageLimitsModule, // Proporciona CheckUsageLimitGuard e IncrementUsageInterceptor
+    PlanConfigModule, // Proporciona PlanConfigService (necesario para CheckUsageLimitGuard)
     forwardRef(() => UsersModule), // Proporciona UsersService (necesario para CheckUsageLimitGuard)
   ],
   controllers: [PendulumController],
