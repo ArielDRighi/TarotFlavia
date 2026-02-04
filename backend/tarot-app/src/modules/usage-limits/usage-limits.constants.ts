@@ -15,18 +15,21 @@ export const USAGE_LIMITS: Record<UserPlan, Record<UsageFeature, number>> = {
     [UsageFeature.TAROT_READING]: 1, // 1 tirada diaria
     [UsageFeature.INTERPRETATION_REGENERATION]: 0, // Sin regeneración
     [UsageFeature.ORACLE_QUERY]: 0, // Sin consultas al oráculo
+    [UsageFeature.PENDULUM_QUERY]: 1, // 1 consulta de por vida
   },
   [UserPlan.FREE]: {
     [UsageFeature.DAILY_CARD]: 1, // 1 carta del día
     [UsageFeature.TAROT_READING]: 2, // Carta del día + 1 tirada de 3 cartas
     [UsageFeature.INTERPRETATION_REGENERATION]: 0, // Sin regeneración
     [UsageFeature.ORACLE_QUERY]: 5, // 5 consultas al oráculo/día
+    [UsageFeature.PENDULUM_QUERY]: 3, // 3 consultas al péndulo/mes
   },
   [UserPlan.PREMIUM]: {
     [UsageFeature.DAILY_CARD]: 1, // 1 carta del día
     [UsageFeature.TAROT_READING]: 3, // 3 tiradas/día
     [UsageFeature.INTERPRETATION_REGENERATION]: -1, // Regeneración ilimitada
     [UsageFeature.ORACLE_QUERY]: -1, // Consultas ilimitadas
+    [UsageFeature.PENDULUM_QUERY]: 1, // 1 consulta al péndulo/día
   },
 } as const;
 
