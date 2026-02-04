@@ -149,6 +149,13 @@ export const API_ENDPOINTS = {
     MARK_ALL_READ: '/notifications/read-all',
   },
 
+  // Pendulum (Péndulo Digital)
+  PENDULUM: {
+    QUERY: '/pendulum/query',
+    HISTORY: '/pendulum/history',
+    STATS: '/pendulum/history/stats',
+  },
+
   // Admin Dashboard
   ADMIN: {
     DASHBOARD_STATS: '/admin/dashboard/stats',

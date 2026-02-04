@@ -1284,6 +1284,8 @@ export class PendulumModule {}
 
 ### TASK-505: Crear tipos TypeScript y API
 
+**Estado:** ✅ COMPLETADA
+
 **Módulo:** `frontend/src/types/` y `frontend/src/lib/api/`
 **Prioridad:** ALTA
 **Estimación:** 0.25 días
@@ -1398,6 +1400,40 @@ PENDULUM: {
   STATS: '/pendulum/history/stats',
 },
 ```
+
+#### Resultados
+
+✅ **Archivos creados:**
+- `frontend/src/types/pendulum.types.ts` - Tipos TypeScript completos con interfaces, tipos literales y helpers de configuración
+- `frontend/src/lib/api/pendulum-api.ts` - Funciones de API para consultas, historial, estadísticas y eliminación
+
+✅ **Archivos modificados:**
+- `frontend/src/lib/api/endpoints.ts` - Agregados endpoints del péndulo (QUERY, HISTORY, STATS)
+- `frontend/src/types/index.ts` - Exportados tipos y configuraciones del péndulo
+
+✅ **Tipos implementados:**
+- `PendulumResponse`, `PendulumMovement`, `PendulumPeriod` - Tipos literales
+- `PendulumQueryRequest`, `PendulumQueryResponse` - Request/Response de consulta
+- `PendulumHistoryItem`, `PendulumStats`, `PendulumCapabilities` - Datos históricos y capacidades
+- `PENDULUM_RESPONSE_CONFIG`, `PENDULUM_MOVEMENT_CONFIG` - Helpers con colores y etiquetas
+
+✅ **Validaciones:**
+- Format sin cambios
+- Lint sin errores
+- Type-check sin errores
+- Build exitoso
+- Validador de arquitectura OK
+
+✅ **Tests agregados (PR #332 - Feedback):**
+- `frontend/src/lib/api/pendulum-api.test.ts` - 13 tests passing
+  - `queryPendulum()` - Tests para consultas con/sin pregunta, diferentes respuestas y movimientos
+  - `getPendulumHistory()` - Tests para historial completo, filtrado por límite y tipo de respuesta
+  - `getPendulumStats()` - Tests para estadísticas y distribución de respuestas
+  - `deletePendulumQuery()` - Tests para eliminación de consultas por ID
+- Coverage completo de todas las funciones de API
+- Patrón consistente con otros tests de API del proyecto
+
+**Fecha de completación:** 4 de febrero de 2026
 
 ---
 
