@@ -51,15 +51,22 @@ export function RitualCard({ ritual, className }: RitualCardProps) {
         data-testid={`ritual-card-${ritual.slug}`}
         className={cn('group overflow-hidden transition-all hover:shadow-lg', className)}
       >
-        {/* Imagen */}
+        {/* Imagen con fallback para URLs inválidas */}
         <div className="bg-muted relative aspect-video">
           <Image
-            src={ritual.imageUrl}
+            src={ritual.imageUrl || '/ritual-placeholder.svg'}
             alt={ritual.title}
             fill
             className="object-cover transition-transform group-hover:scale-105"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             unoptimized
+            onError={(e) => {
+              // Fallback a placeholder si la imagen falla al cargar
+              // Solo se ejecuta una vez para evitar loops infinitos
+              if (e.currentTarget.src !== '/ritual-placeholder.svg') {
+                e.currentTarget.src = '/ritual-placeholder.svg';
+              }
+            }}
           />
           {/* Badge de categoría */}
           <Badge className={cn('bg-background/90 absolute top-2 left-2', categoryInfo.color)}>
