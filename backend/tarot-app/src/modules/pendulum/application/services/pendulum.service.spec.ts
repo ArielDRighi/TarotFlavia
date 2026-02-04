@@ -253,27 +253,42 @@ describe('PendulumService', () => {
       expect(createCall.question).toBeNull();
     });
 
-    it('should respect probability distribution (smoke test)', async () => {
-      const results = { yes: 0, no: 0, maybe: 0 };
+    it('should respect probability distribution (deterministic test)', () => {
+      // Mock Math.random con valores que cubran todos los rangos
+      const randomValues = [
+        0.2, // YES (< 0.4)
+        0.5, // NO (0.4 <= x < 0.8)
+        0.85, // MAYBE (>= 0.8)
+        0.1, // YES
+        0.6, // NO
+        0.9, // MAYBE
+      ];
+      let callIndex = 0;
+      jest.spyOn(Math, 'random').mockImplementation(() => {
+        const value = randomValues[callIndex % randomValues.length];
+        callIndex++;
+        return value;
+      });
 
-      // Run 100 queries
-      for (let i = 0; i < 100; i++) {
-        const result = await service.query({}, 1);
-        if (result.response === PendulumResponse.YES) results.yes++;
-        else if (result.response === PendulumResponse.NO) results.no++;
-        else results.maybe++;
-      }
+      // Generar respuestas con valores deterministas
+      const responses = [
+        service['generateResponse'](), // 0.2 → YES
+        service['generateResponse'](), // 0.5 → NO
+        service['generateResponse'](), // 0.85 → MAYBE
+        service['generateResponse'](), // 0.1 → YES
+        service['generateResponse'](), // 0.6 → NO
+        service['generateResponse'](), // 0.9 → MAYBE
+      ];
 
-      // Verificar que hay variedad (no todos iguales)
-      expect(results.yes).toBeGreaterThan(0);
-      expect(results.no).toBeGreaterThan(0);
-      expect(results.maybe).toBeGreaterThan(0);
+      // Verificar que cada rango genera la respuesta correcta
+      expect(responses[0]).toBe(PendulumResponse.YES);
+      expect(responses[1]).toBe(PendulumResponse.NO);
+      expect(responses[2]).toBe(PendulumResponse.MAYBE);
+      expect(responses[3]).toBe(PendulumResponse.YES);
+      expect(responses[4]).toBe(PendulumResponse.NO);
+      expect(responses[5]).toBe(PendulumResponse.MAYBE);
 
-      // Verificar distribución aproximada (40%, 40%, 20%)
-      // Con 100 samples, YES y NO deberían estar cerca de 40, MAYBE cerca de 20
-      expect(results.yes).toBeGreaterThan(25);
-      expect(results.no).toBeGreaterThan(25);
-      expect(results.maybe).toBeLessThan(40);
+      jest.spyOn(Math, 'random').mockRestore();
     });
   });
 });

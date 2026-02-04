@@ -16,7 +16,7 @@ describe('PendulumHistoryService', () => {
       question: '¿Debo aceptar este trabajo?',
       response: PendulumResponse.YES,
       interpretation: 'El universo afirma tu camino.',
-      lunarPhase: 'Luna Llena',
+      lunarPhase: 'full_moon',
       createdAt: new Date('2026-02-01'),
     },
     {
@@ -25,7 +25,7 @@ describe('PendulumHistoryService', () => {
       question: null,
       response: PendulumResponse.NO,
       interpretation: 'El universo sugiere pausa.',
-      lunarPhase: 'Luna Nueva',
+      lunarPhase: 'new_moon',
       createdAt: new Date('2026-02-02'),
     },
     {
@@ -34,7 +34,7 @@ describe('PendulumHistoryService', () => {
       question: '¿Es el momento?',
       response: PendulumResponse.MAYBE,
       interpretation: 'Las energías están en equilibrio.',
-      lunarPhase: 'Cuarto Creciente',
+      lunarPhase: 'first_quarter',
       createdAt: new Date('2026-02-03'),
     },
     {
@@ -43,12 +43,15 @@ describe('PendulumHistoryService', () => {
       question: 'Otro usuario',
       response: PendulumResponse.YES,
       interpretation: 'Test',
-      lunarPhase: 'Luna Llena',
+      lunarPhase: 'full_moon',
       createdAt: new Date('2026-02-03'),
     },
   ];
 
-  const createMockQueryBuilder = (results: any[] = []) => {
+  // Helper para crear mock del QueryBuilder con tipado seguro
+  const createMockQueryBuilder = (
+    results: Partial<PendulumQuery>[] | unknown[] = [],
+  ) => {
     const mockQueryBuilder = {
       where: jest.fn().mockReturnThis(),
       andWhere: jest.fn().mockReturnThis(),
@@ -60,7 +63,8 @@ describe('PendulumHistoryService', () => {
       getMany: jest.fn().mockResolvedValue(results),
       getRawMany: jest.fn().mockResolvedValue(results),
     };
-    return mockQueryBuilder as any as SelectQueryBuilder<PendulumQuery>;
+    // Cast necesario para compatibilidad con SelectQueryBuilder
+    return mockQueryBuilder as unknown as SelectQueryBuilder<PendulumQuery>;
   };
 
   beforeEach(async () => {

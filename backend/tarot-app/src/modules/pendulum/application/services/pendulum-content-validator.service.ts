@@ -55,7 +55,6 @@ export class PendulumContentValidatorService {
     'crypto',
     'apuesta',
     'apostar',
-    'apostar',
     'lotería',
     'loteria',
     'casino',
