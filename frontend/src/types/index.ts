@@ -175,3 +175,16 @@ export {
 // Notification Types
 export type { Notification, UnreadCountResponse, NotificationFilters } from './notification.types';
 export { NotificationType, NOTIFICATION_TYPE_INFO } from './notification.types';
+
+// Pendulum Types
+export type {
+  PendulumResponse,
+  PendulumMovement,
+  PendulumPeriod,
+  PendulumQueryRequest,
+  PendulumQueryResponse,
+  PendulumHistoryItem,
+  PendulumStats,
+  PendulumCapabilities,
+} from './pendulum.types';
+export { PENDULUM_RESPONSE_CONFIG, PENDULUM_MOVEMENT_CONFIG } from './pendulum.types';
