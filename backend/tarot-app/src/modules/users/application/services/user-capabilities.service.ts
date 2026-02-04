@@ -97,9 +97,11 @@ export class UserCapabilitiesService {
     const pendulumConfig = await this.planConfigService.getPendulumLimit(
       user.plan,
     );
-    const pendulumUsage = await this.usageLimitsService.getUsage(
+    // Obtener uso del péndulo según el período configurado (daily/monthly/lifetime)
+    const pendulumUsage = await this.usageLimitsService.getUsageByPeriod(
       userId,
       UsageFeature.PENDULUM_QUERY,
+      pendulumConfig.period,
     );
 
     // Calcular resetAt del péndulo según el período
@@ -107,11 +109,12 @@ export class UserCapabilitiesService {
     if (pendulumConfig.period === 'daily') {
       pendulumResetAt = resetAt; // Usa el mismo resetAt (próxima medianoche UTC)
     } else if (pendulumConfig.period === 'monthly') {
-      // Calcular primer día del próximo mes
-      const nextMonth = new Date();
-      nextMonth.setUTCMonth(nextMonth.getUTCMonth() + 1);
-      nextMonth.setUTCDate(1);
-      nextMonth.setUTCHours(0, 0, 0, 0);
+      // Calcular primer día del próximo mes (00:00:00.000 UTC) de forma segura
+      // Usar Date.UTC() evita bugs de normalización en fechas de fin de mes
+      const now = new Date();
+      const nextMonth = new Date(
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0, 0),
+      );
       pendulumResetAt = nextMonth.toISOString();
     }
     // Si es 'lifetime', pendulumResetAt se queda en null
@@ -139,7 +142,8 @@ export class UserCapabilitiesService {
       pendulum: {
         used: pendulumUsage,
         limit: pendulumConfig.limit,
-        canUse: pendulumUsage < pendulumConfig.limit,
+        canUse:
+          pendulumConfig.limit === -1 || pendulumUsage < pendulumConfig.limit,
         resetAt: pendulumResetAt,
         period: pendulumConfig.period,
       },

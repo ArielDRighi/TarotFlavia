@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsBoolean,
   IsEnum,
+  IsIn,
   IsISO8601,
   IsInt,
   IsNotEmpty,
@@ -104,6 +105,7 @@ export class PendulumLimitDto {
     example: 'monthly',
     enum: ['daily', 'monthly', 'lifetime'],
   })
+  @IsIn(['daily', 'monthly', 'lifetime'])
   @IsNotEmpty()
   period: 'daily' | 'monthly' | 'lifetime';
 }

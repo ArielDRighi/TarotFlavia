@@ -69,6 +69,7 @@ describe('UserCapabilitiesService', () => {
           provide: UsageLimitsService,
           useValue: {
             getUsage: jest.fn().mockResolvedValue(0),
+            getUsageByPeriod: jest.fn().mockResolvedValue(0),
           },
         },
         {
