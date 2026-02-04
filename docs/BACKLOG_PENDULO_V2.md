@@ -736,6 +736,8 @@ pendulum: {
 
 ### TASK-503: Crear servicios del Péndulo
 
+**Estado:** ✅ COMPLETADA
+
 **Módulo:** `src/modules/pendulum/application/services/`
 **Prioridad:** ALTA
 **Estimación:** 0.5 días
@@ -1042,11 +1044,42 @@ export class PendulumHistoryService {
 
 #### Testing
 
-- [ ] Test: `generateResponse` respeta probabilidades
-- [ ] Test: `validateQuestion` detecta términos prohibidos
-- [ ] Test: Interpretación se obtiene correctamente
-- [ ] Test: Historial filtra por usuario y respuesta
-- [ ] Test: Stats calculan correctamente
+- [x] Test: `generateResponse` respeta probabilidades
+- [x] Test: `validateQuestion` detecta términos prohibidos
+- [x] Test: Interpretación se obtiene correctamente
+- [x] Test: Historial filtra por usuario y respuesta
+- [x] Test: Stats calculan correctamente
+
+#### Resultados
+
+✅ **Archivos creados:**
+- `backend/tarot-app/src/modules/pendulum/application/services/pendulum.service.ts`
+- `backend/tarot-app/src/modules/pendulum/application/services/pendulum.service.spec.ts`
+- `backend/tarot-app/src/modules/pendulum/application/services/pendulum-interpretation.service.ts`
+- `backend/tarot-app/src/modules/pendulum/application/services/pendulum-interpretation.service.spec.ts`
+- `backend/tarot-app/src/modules/pendulum/application/services/pendulum-content-validator.service.ts`
+- `backend/tarot-app/src/modules/pendulum/application/services/pendulum-content-validator.service.spec.ts`
+- `backend/tarot-app/src/modules/pendulum/application/services/pendulum-history.service.ts`
+- `backend/tarot-app/src/modules/pendulum/application/services/pendulum-history.service.spec.ts`
+
+✅ **Servicios implementados:**
+1. **PendulumInterpretationService:** Obtiene interpretaciones aleatorias desde la base de datos según tipo de respuesta (yes/no/maybe)
+2. **PendulumContentValidatorService:** Valida preguntas escritas y bloquea contenido sensible (salud, legal, financiero, violencia)
+3. **PendulumService:** Servicio principal que genera respuestas aleatorias (40% YES, 40% NO, 20% MAYBE), valida contenido, guarda historial e integra fase lunar
+4. **PendulumHistoryService:** Gestiona el historial de consultas del usuario (obtener, filtrar, eliminar, estadísticas) - solo Premium
+
+✅ **Tests:**
+- 78 tests pasando en total (10 + 34 + 18 + 16)
+- Coverage 100% en los 4 servicios
+- Tests incluyen: generación aleatoria, validación de contenido, obtención de interpretaciones, gestión de historial, cálculo de estadísticas
+
+✅ **Validaciones:**
+- Lint sin errores
+- Build exitoso
+- Validador de arquitectura OK (módulo pendulum: 8 archivos, 667 líneas - estructura plana permitida)
+- Formato Prettier aplicado
+
+**Fecha de completación:** 4 de febrero de 2026
 
 ---
 
