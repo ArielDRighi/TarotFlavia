@@ -1424,6 +1424,15 @@ PENDULUM: {
 - Build exitoso
 - Validador de arquitectura OK
 
+✅ **Tests agregados (PR #332 - Feedback):**
+- `frontend/src/lib/api/pendulum-api.test.ts` - 13 tests passing
+  - `queryPendulum()` - Tests para consultas con/sin pregunta, diferentes respuestas y movimientos
+  - `getPendulumHistory()` - Tests para historial completo, filtrado por límite y tipo de respuesta
+  - `getPendulumStats()` - Tests para estadísticas y distribución de respuestas
+  - `deletePendulumQuery()` - Tests para eliminación de consultas por ID
+- Coverage completo de todas las funciones de API
+- Patrón consistente con otros tests de API del proyecto
+
 **Fecha de completación:** 4 de febrero de 2026
 
 ---
