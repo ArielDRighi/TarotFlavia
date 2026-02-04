@@ -1,6 +1,7 @@
 import { validate } from 'class-validator';
 import {
   FeatureLimitDto,
+  PendulumLimitDto,
   UserCapabilitiesDto,
   UserPlanType,
 } from './user-capabilities.dto';
@@ -105,9 +106,17 @@ describe('UserCapabilitiesDto', () => {
       tarotReadings.canUse = true;
       tarotReadings.resetAt = '2026-01-09T00:00:00.000Z';
 
+      const pendulum = new PendulumLimitDto();
+      pendulum.used = 0;
+      pendulum.limit = 3;
+      pendulum.canUse = true;
+      pendulum.resetAt = '2026-02-01T00:00:00.000Z';
+      pendulum.period = 'monthly';
+
       const dto = new UserCapabilitiesDto();
       dto.dailyCard = dailyCard;
       dto.tarotReadings = tarotReadings;
+      dto.pendulum = pendulum;
       dto.canCreateDailyReading = true;
       dto.canCreateTarotReading = true;
       dto.canUseAI = false;
@@ -133,9 +142,17 @@ describe('UserCapabilitiesDto', () => {
       tarotReadings.canUse = true;
       tarotReadings.resetAt = '2026-01-09T00:00:00.000Z';
 
+      const pendulum = new PendulumLimitDto();
+      pendulum.used = 0;
+      pendulum.limit = 1;
+      pendulum.canUse = true;
+      pendulum.resetAt = '2026-01-10T00:00:00.000Z';
+      pendulum.period = 'daily';
+
       const dto = new UserCapabilitiesDto();
       dto.dailyCard = dailyCard;
       dto.tarotReadings = tarotReadings;
+      dto.pendulum = pendulum;
       dto.canCreateDailyReading = false;
       dto.canCreateTarotReading = true;
       dto.canUseAI = true;
@@ -161,9 +178,17 @@ describe('UserCapabilitiesDto', () => {
       tarotReadings.canUse = false;
       tarotReadings.resetAt = '2026-01-09T00:00:00.000Z';
 
+      const pendulum = new PendulumLimitDto();
+      pendulum.used = 0;
+      pendulum.limit = 1;
+      pendulum.canUse = true;
+      pendulum.resetAt = null;
+      pendulum.period = 'lifetime';
+
       const dto = new UserCapabilitiesDto();
       dto.dailyCard = dailyCard;
       dto.tarotReadings = tarotReadings;
+      dto.pendulum = pendulum;
       dto.canCreateDailyReading = true;
       dto.canCreateTarotReading = false;
       dto.canUseAI = false;

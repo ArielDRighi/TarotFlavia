@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { UserCapabilitiesService } from './user-capabilities.service';
 import { UsersService } from '../../users.service';
 import { UsageLimitsService } from '../../../usage-limits/usage-limits.service';
+import { AnonymousTrackingService } from '../../../usage-limits/services/anonymous-tracking.service';
 import { PlanConfigService } from '../../../plan-config/plan-config.service';
 import { DailyReading } from '../../../tarot/daily-reading/entities/daily-reading.entity';
 import { TarotReading } from '../../../tarot/readings/entities/tarot-reading.entity';
@@ -14,6 +15,7 @@ describe('UserCapabilitiesService', () => {
   let service: UserCapabilitiesService;
   let usersService: jest.Mocked<UsersService>;
   let usageLimitsService: jest.Mocked<UsageLimitsService>;
+  let _anonymousTrackingService: jest.Mocked<AnonymousTrackingService>;
   let planConfigService: jest.Mocked<PlanConfigService>;
   let dailyReadingRepository: jest.Mocked<Repository<DailyReading>>;
   let tarotReadingRepository: jest.Mocked<Repository<TarotReading>>;
@@ -66,13 +68,24 @@ describe('UserCapabilitiesService', () => {
         {
           provide: UsageLimitsService,
           useValue: {
-            getUsage: jest.fn(),
+            getUsage: jest.fn().mockResolvedValue(0),
+            getUsageByPeriod: jest.fn().mockResolvedValue(0),
+          },
+        },
+        {
+          provide: AnonymousTrackingService,
+          useValue: {
+            canAccessLifetime: jest.fn().mockResolvedValue(true),
           },
         },
         {
           provide: PlanConfigService,
           useValue: {
             findByPlanType: jest.fn(),
+            getPendulumLimit: jest.fn().mockResolvedValue({
+              limit: 1,
+              period: 'lifetime' as const,
+            }),
           },
         },
         {
@@ -95,6 +108,7 @@ describe('UserCapabilitiesService', () => {
     service = module.get<UserCapabilitiesService>(UserCapabilitiesService);
     usersService = module.get(UsersService);
     usageLimitsService = module.get(UsageLimitsService);
+    _anonymousTrackingService = module.get(AnonymousTrackingService);
     planConfigService = module.get(PlanConfigService);
     dailyReadingRepository = module.get(getRepositoryToken(DailyReading));
     tarotReadingRepository = module.get(getRepositoryToken(TarotReading));
@@ -130,6 +144,13 @@ describe('UserCapabilitiesService', () => {
           canUseAdvancedSpreads: false,
           plan: UserPlanType.ANONYMOUS,
           isAuthenticated: false,
+          pendulum: {
+            used: 0,
+            limit: 1,
+            canUse: true,
+            resetAt: null,
+            period: 'lifetime',
+          },
         });
 
         // Verify resetAt is a valid ISO date
@@ -187,6 +208,10 @@ describe('UserCapabilitiesService', () => {
         planConfigService.findByPlanType.mockResolvedValue(
           mockPlanConfig as any,
         );
+        planConfigService.getPendulumLimit.mockResolvedValue({
+          limit: 3,
+          period: 'monthly',
+        });
         // No daily reading found (hasn't used daily card)
         // BUG-CAP-001: Now uses createQueryBuilder
         mockQueryBuilder.getOne.mockResolvedValue(null);
@@ -215,6 +240,13 @@ describe('UserCapabilitiesService', () => {
           canUseAdvancedSpreads: false,
           plan: UserPlanType.FREE,
           isAuthenticated: true,
+          pendulum: {
+            used: 0,
+            limit: 3,
+            canUse: true,
+            resetAt: expect.any(String),
+            period: 'monthly',
+          },
         });
 
         expect(usersService.findById).toHaveBeenCalledWith(1);
@@ -324,6 +356,10 @@ describe('UserCapabilitiesService', () => {
         planConfigService.findByPlanType.mockResolvedValue(
           premiumPlanConfig as any,
         );
+        planConfigService.getPendulumLimit.mockResolvedValue({
+          limit: 1,
+          period: 'daily',
+        });
         // Premium user has used daily card multiple times (but unlimited)
         // BUG-CAP-001: Now uses createQueryBuilder
         mockQueryBuilder.getOne.mockResolvedValue({
@@ -355,6 +391,13 @@ describe('UserCapabilitiesService', () => {
           canUseAdvancedSpreads: true,
           plan: UserPlanType.PREMIUM,
           isAuthenticated: true,
+          pendulum: {
+            used: 0,
+            limit: 1,
+            canUse: true,
+            resetAt: expect.any(String),
+            period: 'daily',
+          },
         });
       });
 

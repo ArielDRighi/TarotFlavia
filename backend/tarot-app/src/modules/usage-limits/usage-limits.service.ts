@@ -88,6 +88,44 @@ export class UsageLimitsService {
     return usageRecord?.count || 0;
   }
 
+  /**
+   * Gets usage for a specific period (daily, monthly, or lifetime)
+   */
+  async getUsageByPeriod(
+    userId: number,
+    feature: UsageFeature,
+    period: 'daily' | 'monthly' | 'lifetime',
+  ): Promise<number> {
+    if (period === 'daily') {
+      // Para período diario, usar el método existente
+      return this.getUsage(userId, feature);
+    }
+
+    let startDate: string;
+    if (period === 'monthly') {
+      // Calcular primer día del mes actual
+      const now = new Date();
+      const firstDayOfMonth = new Date(
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0),
+      );
+      startDate = firstDayOfMonth.toISOString().split('T')[0];
+    } else {
+      // lifetime: desde el inicio de los tiempos
+      startDate = '1970-01-01';
+    }
+
+    // Sumar todos los registros desde la fecha de inicio
+    const result = await this.usageLimitRepository
+      .createQueryBuilder('usage')
+      .select('SUM(usage.count)', 'total')
+      .where('usage.userId = :userId', { userId })
+      .andWhere('usage.feature = :feature', { feature })
+      .andWhere('usage.date >= :startDate', { startDate })
+      .getRawOne<{ total: string }>();
+
+    return parseInt(result?.total || '0', 10);
+  }
+
   async incrementUsage(
     userId: number,
     feature: UsageFeature,

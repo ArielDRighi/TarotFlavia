@@ -105,6 +105,20 @@ export class Plan {
   allowAdvancedSpreads: boolean;
 
   @ApiProperty({
+    example: 1,
+    description: 'Límite diario de consultas al Péndulo (-1 para ilimitado)',
+  })
+  @Column({ type: 'int', default: 1, name: 'pendulum_daily_limit' })
+  pendulumDailyLimit: number;
+
+  @ApiProperty({
+    example: 3,
+    description: 'Límite mensual de consultas al Péndulo (-1 para ilimitado)',
+  })
+  @Column({ type: 'int', default: 3, name: 'pendulum_monthly_limit' })
+  pendulumMonthlyLimit: number;
+
+  @ApiProperty({
     example: true,
     description: 'Indica si el plan está activo',
   })

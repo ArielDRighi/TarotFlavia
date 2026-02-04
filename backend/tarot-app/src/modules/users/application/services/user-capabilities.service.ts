@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThanOrEqual, IsNull } from 'typeorm';
 import { UsersService } from '../../users.service';
 import { UsageLimitsService } from '../../../usage-limits/usage-limits.service';
+import { AnonymousTrackingService } from '../../../usage-limits/services/anonymous-tracking.service';
 import { PlanConfigService } from '../../../plan-config/plan-config.service';
 import { DailyReading } from '../../../tarot/daily-reading/entities/daily-reading.entity';
 import { TarotReading } from '../../../tarot/readings/entities/tarot-reading.entity';
@@ -15,12 +16,14 @@ import {
   getTodayUTCDateString,
   getStartOfTodayUTC,
 } from '../../../../common/utils/date.utils';
+import { UsageFeature } from '../../../usage-limits/entities/usage-limit.entity';
 
 @Injectable()
 export class UserCapabilitiesService {
   constructor(
     private readonly usersService: UsersService,
     private readonly usageLimitsService: UsageLimitsService,
+    private readonly anonymousTrackingService: AnonymousTrackingService,
     private readonly planConfigService: PlanConfigService,
     @InjectRepository(DailyReading)
     private readonly dailyReadingRepository: Repository<DailyReading>,
@@ -90,6 +93,32 @@ export class UserCapabilitiesService {
 
     const resetAt = this.getNextMidnightUTC();
 
+    // Obtener límites del péndulo según el plan del usuario
+    const pendulumConfig = await this.planConfigService.getPendulumLimit(
+      user.plan,
+    );
+    // Obtener uso del péndulo según el período configurado (daily/monthly/lifetime)
+    const pendulumUsage = await this.usageLimitsService.getUsageByPeriod(
+      userId,
+      UsageFeature.PENDULUM_QUERY,
+      pendulumConfig.period,
+    );
+
+    // Calcular resetAt del péndulo según el período
+    let pendulumResetAt: string | null = null;
+    if (pendulumConfig.period === 'daily') {
+      pendulumResetAt = resetAt; // Usa el mismo resetAt (próxima medianoche UTC)
+    } else if (pendulumConfig.period === 'monthly') {
+      // Calcular primer día del próximo mes (00:00:00.000 UTC) de forma segura
+      // Usar Date.UTC() evita bugs de normalización en fechas de fin de mes
+      const now = new Date();
+      const nextMonth = new Date(
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0, 0),
+      );
+      pendulumResetAt = nextMonth.toISOString();
+    }
+    // Si es 'lifetime', pendulumResetAt se queda en null
+
     return {
       dailyCard: {
         used: dailyCardUsage,
@@ -110,6 +139,14 @@ export class UserCapabilitiesService {
       canUseAdvancedSpreads: user.plan === UserPlan.PREMIUM,
       plan: this.mapUserPlanToType(user.plan),
       isAuthenticated: true,
+      pendulum: {
+        used: pendulumUsage,
+        limit: pendulumConfig.limit,
+        canUse:
+          pendulumConfig.limit === -1 || pendulumUsage < pendulumConfig.limit,
+        resetAt: pendulumResetAt,
+        period: pendulumConfig.period,
+      },
     };
   }
 
@@ -132,6 +169,8 @@ export class UserCapabilitiesService {
     // Check actual usage for anonymous user via fingerprint
     let dailyCardUsed = 0;
     let canCreateDailyReading = true;
+    let pendulumUsed = 0;
+    let canUsePendulum = true;
 
     // Solo verificar si tenemos fingerprint válido
     if (fingerprint && fingerprint.length > 0) {
@@ -150,6 +189,17 @@ export class UserCapabilitiesService {
       if (existingReading) {
         dailyCardUsed = 1;
         canCreateDailyReading = false;
+      }
+
+      // Verificar si ya usó su consulta lifetime del péndulo
+      const canAccessPendulum =
+        await this.anonymousTrackingService.canAccessLifetime(
+          fingerprint,
+          UsageFeature.PENDULUM_QUERY,
+        );
+      if (!canAccessPendulum) {
+        pendulumUsed = 1;
+        canUsePendulum = false;
       }
     }
 
@@ -173,6 +223,13 @@ export class UserCapabilitiesService {
       canUseAdvancedSpreads: false,
       plan: UserPlanType.ANONYMOUS,
       isAuthenticated: false,
+      pendulum: {
+        used: pendulumUsed,
+        limit: 1,
+        canUse: canUsePendulum,
+        resetAt: null,
+        period: 'lifetime',
+      },
     };
   }
 

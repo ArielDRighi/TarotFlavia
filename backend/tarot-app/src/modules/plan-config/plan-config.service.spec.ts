@@ -442,4 +442,121 @@ describe('PlanConfigService', () => {
       expect(mockPlan.hasFeature).toHaveBeenCalledWith('allowSharing');
     });
   });
+
+  describe('getPendulumLimit', () => {
+    it('should return lifetime limit for anonymous plan', async () => {
+      const mockPlan = {
+        id: 1,
+        planType: UserPlan.ANONYMOUS,
+        name: 'Plan Anónimo',
+        description: 'Plan anónimo',
+        price: 0,
+        readingsLimit: 0,
+        pendulumDailyLimit: 0,
+        pendulumMonthlyLimit: 0,
+        aiQuotaMonthly: 0,
+        allowCustomQuestions: false,
+        allowSharing: false,
+        allowAdvancedSpreads: false,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as Plan;
+
+      mockRepository.findOne.mockResolvedValue(mockPlan);
+
+      const result = await service.getPendulumLimit(UserPlan.ANONYMOUS);
+
+      expect(result).toEqual({
+        limit: 1,
+        period: 'lifetime',
+      });
+    });
+
+    it('should return monthly limit for free plan', async () => {
+      const mockPlan = {
+        id: 2,
+        planType: UserPlan.FREE,
+        name: 'Plan Gratuito',
+        description: 'Plan básico',
+        price: 0,
+        readingsLimit: 10,
+        pendulumDailyLimit: 0,
+        pendulumMonthlyLimit: 3,
+        aiQuotaMonthly: 100,
+        allowCustomQuestions: false,
+        allowSharing: false,
+        allowAdvancedSpreads: false,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as Plan;
+
+      mockRepository.findOne.mockResolvedValue(mockPlan);
+
+      const result = await service.getPendulumLimit(UserPlan.FREE);
+
+      expect(result).toEqual({
+        limit: 3,
+        period: 'monthly',
+      });
+    });
+
+    it('should return daily limit for premium plan', async () => {
+      const mockPlan = {
+        id: 3,
+        planType: UserPlan.PREMIUM,
+        name: 'Plan Premium',
+        description: 'Plan premium',
+        price: 9.99,
+        readingsLimit: -1,
+        pendulumDailyLimit: 1,
+        pendulumMonthlyLimit: 0,
+        aiQuotaMonthly: -1,
+        allowCustomQuestions: true,
+        allowSharing: true,
+        allowAdvancedSpreads: true,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as Plan;
+
+      mockRepository.findOne.mockResolvedValue(mockPlan);
+
+      const result = await service.getPendulumLimit(UserPlan.PREMIUM);
+
+      expect(result).toEqual({
+        limit: 1,
+        period: 'daily',
+      });
+    });
+
+    it('should use default values if plan does not have pendulum limits', async () => {
+      const mockPlan = {
+        id: 2,
+        planType: UserPlan.FREE,
+        name: 'Plan Gratuito',
+        description: 'Plan básico',
+        price: 0,
+        readingsLimit: 10,
+        // No pendulumDailyLimit or pendulumMonthlyLimit
+        aiQuotaMonthly: 100,
+        allowCustomQuestions: false,
+        allowSharing: false,
+        allowAdvancedSpreads: false,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as Plan;
+
+      mockRepository.findOne.mockResolvedValue(mockPlan);
+
+      const result = await service.getPendulumLimit(UserPlan.FREE);
+
+      expect(result).toEqual({
+        limit: 3, // default for free
+        period: 'monthly',
+      });
+    });
+  });
 });

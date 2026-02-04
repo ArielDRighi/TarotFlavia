@@ -178,4 +178,50 @@ describe('Plan Entity', () => {
       expect(plan.updatedAt).toBeInstanceOf(Date);
     });
   });
+
+  describe('pendulum limits', () => {
+    it('should have pendulumDailyLimit field with default value', () => {
+      const plan = new Plan();
+      plan.pendulumDailyLimit = 1;
+
+      expect(plan.pendulumDailyLimit).toBe(1);
+    });
+
+    it('should have pendulumMonthlyLimit field with default value', () => {
+      const plan = new Plan();
+      plan.pendulumMonthlyLimit = 3;
+
+      expect(plan.pendulumMonthlyLimit).toBe(3);
+    });
+
+    it('should allow setting pendulum limits for FREE plan', () => {
+      const plan = new Plan();
+      plan.planType = UserPlan.FREE;
+      plan.pendulumDailyLimit = 0;
+      plan.pendulumMonthlyLimit = 3;
+
+      expect(plan.pendulumDailyLimit).toBe(0);
+      expect(plan.pendulumMonthlyLimit).toBe(3);
+    });
+
+    it('should allow setting pendulum limits for PREMIUM plan', () => {
+      const plan = new Plan();
+      plan.planType = UserPlan.PREMIUM;
+      plan.pendulumDailyLimit = 1;
+      plan.pendulumMonthlyLimit = 0;
+
+      expect(plan.pendulumDailyLimit).toBe(1);
+      expect(plan.pendulumMonthlyLimit).toBe(0);
+    });
+
+    it('should allow setting pendulum limits for ANONYMOUS plan', () => {
+      const plan = new Plan();
+      plan.planType = UserPlan.ANONYMOUS;
+      plan.pendulumDailyLimit = 0;
+      plan.pendulumMonthlyLimit = 0;
+
+      expect(plan.pendulumDailyLimit).toBe(0);
+      expect(plan.pendulumMonthlyLimit).toBe(0);
+    });
+  });
 });

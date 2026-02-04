@@ -149,4 +149,34 @@ export class PlanConfigService {
     const plan = await this.findByPlanType(planType);
     return plan.hasFeature(feature);
   }
+
+  /**
+   * Obtiene el límite de consultas al Péndulo para un tipo de plan
+   * @param planType - Tipo de plan
+   * @returns Objeto con límite y período (lifetime, monthly, daily)
+   */
+  async getPendulumLimit(
+    planType: UserPlan,
+  ): Promise<{ limit: number; period: 'daily' | 'monthly' | 'lifetime' }> {
+    // Anonymous users have 1 lifetime query
+    if (planType === UserPlan.ANONYMOUS) {
+      return { limit: 1, period: 'lifetime' };
+    }
+
+    // Free users have monthly limit
+    if (planType === UserPlan.FREE) {
+      const plan = await this.findByPlanType(planType);
+      return {
+        limit: plan.pendulumMonthlyLimit ?? 3,
+        period: 'monthly',
+      };
+    }
+
+    // Premium users have daily limit
+    const plan = await this.findByPlanType(planType);
+    return {
+      limit: plan.pendulumDailyLimit ?? 1,
+      period: 'daily',
+    };
+  }
 }

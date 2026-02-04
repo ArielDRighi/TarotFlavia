@@ -11,6 +11,7 @@ describe('AnonymousTrackingService', () => {
     findOne: jest.fn(),
     create: jest.fn(),
     save: jest.fn(),
+    count: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -218,6 +219,106 @@ describe('AnonymousTrackingService', () => {
         feature: UsageFeature.TAROT_READING,
       });
       expect(mockAnonymousUsageRepository.save).toHaveBeenCalled();
+    });
+  });
+
+  describe('canAccessLifetime', () => {
+    it('should return true when user has never used the feature', async () => {
+      const fingerprint = service.generateFingerprint('192.168.1.1', 'Chrome');
+      mockAnonymousUsageRepository.findOne.mockResolvedValue(null);
+
+      const result = await service.canAccessLifetime(
+        fingerprint,
+        UsageFeature.PENDULUM_QUERY,
+      );
+
+      expect(result).toBe(true);
+      expect(mockAnonymousUsageRepository.findOne).toHaveBeenCalledWith({
+        where: {
+          fingerprint,
+          feature: UsageFeature.PENDULUM_QUERY,
+        },
+      });
+    });
+
+    it('should return false when user has already used the feature', async () => {
+      const fingerprint = service.generateFingerprint('192.168.1.1', 'Chrome');
+      mockAnonymousUsageRepository.findOne.mockResolvedValue({
+        id: 1,
+        fingerprint,
+        ip: '192.168.1.1',
+        date: '1970-01-01',
+        feature: UsageFeature.PENDULUM_QUERY,
+      });
+
+      const result = await service.canAccessLifetime(
+        fingerprint,
+        UsageFeature.PENDULUM_QUERY,
+      );
+
+      expect(result).toBe(false);
+    });
+
+    it('should work with different features', async () => {
+      const fingerprint = service.generateFingerprint('192.168.1.1', 'Chrome');
+      mockAnonymousUsageRepository.findOne.mockResolvedValue(null);
+
+      const result = await service.canAccessLifetime(
+        fingerprint,
+        UsageFeature.ORACLE_QUERY,
+      );
+
+      expect(result).toBe(true);
+    });
+  });
+
+  describe('recordLifetimeUsage', () => {
+    it('should record lifetime usage with fixed date 1970-01-01', async () => {
+      const fingerprint = service.generateFingerprint('192.168.1.1', 'Chrome');
+      const ip = '192.168.1.1';
+      const feature = UsageFeature.PENDULUM_QUERY;
+
+      const mockUsage = {
+        id: 1,
+        fingerprint,
+        ip,
+        date: '1970-01-01',
+        feature,
+      };
+
+      mockAnonymousUsageRepository.create.mockReturnValue(mockUsage);
+      mockAnonymousUsageRepository.save.mockResolvedValue(mockUsage);
+
+      await service.recordLifetimeUsage(fingerprint, ip, feature);
+
+      expect(mockAnonymousUsageRepository.create).toHaveBeenCalledWith({
+        fingerprint,
+        ip,
+        feature,
+        date: '1970-01-01',
+      });
+      expect(mockAnonymousUsageRepository.save).toHaveBeenCalledWith(mockUsage);
+    });
+
+    it('should work with different IPs and fingerprints', async () => {
+      const fingerprint = service.generateFingerprint('10.0.0.1', 'Firefox');
+      const ip = '10.0.0.1';
+      const feature = UsageFeature.PENDULUM_QUERY;
+
+      const mockUsage = {
+        id: 2,
+        fingerprint,
+        ip,
+        date: '1970-01-01',
+        feature,
+      };
+
+      mockAnonymousUsageRepository.create.mockReturnValue(mockUsage);
+      mockAnonymousUsageRepository.save.mockResolvedValue(mockUsage);
+
+      await service.recordLifetimeUsage(fingerprint, ip, feature);
+
+      expect(mockAnonymousUsageRepository.save).toHaveBeenCalledWith(mockUsage);
     });
   });
 });
