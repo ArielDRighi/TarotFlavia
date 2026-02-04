@@ -439,6 +439,8 @@ export class PendulumQuery {
 
 ### TASK-501: Crear migración y seeder
 
+**Estado:** ✅ COMPLETADA
+
 **Módulo:** `src/database/migrations/` y `src/database/seeders/`
 **Prioridad:** ALTA
 **Estimación:** 0.5 días
@@ -550,9 +552,27 @@ const interpretations = [
 
 #### Testing
 
-- [ ] Test: Migración crea tablas correctamente
-- [ ] Test: Seeder inserta 30 interpretaciones
-- [ ] Test: Foreign key funciona correctamente
+- [x] Test: Migración crea tablas correctamente
+- [x] Test: Seeder inserta 30 interpretaciones
+- [x] Test: Foreign key funciona correctamente
+
+#### Resultados
+
+✅ **Archivos creados:**
+- `backend/tarot-app/src/database/migrations/1771700000000-CreatePendulumTables.ts`
+- `backend/tarot-app/src/database/seeds/pendulum-interpretations.seeder.ts`
+
+✅ **Cambios realizados:**
+- Actualizado `scripts/db-seed-all.ts` para incluir el seeder del péndulo
+- Migración ejecutada exitosamente
+- Seeder integrado al proceso de seeding completo
+
+✅ **Validaciones:**
+- Lint sin errores
+- Build exitoso
+- Migración aplicada correctamente
+
+**Fecha de completación:** 4 de febrero de 2026
 
 ---
 
