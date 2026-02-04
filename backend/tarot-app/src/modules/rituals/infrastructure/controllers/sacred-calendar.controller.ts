@@ -172,9 +172,21 @@ export class SacredCalendarController {
 
   /**
    * Convierte una fecha a string en formato YYYY-MM-DD
+   * Maneja tanto objetos Date como strings que ya vienen en formato de fecha
    * @private
    */
-  private toDateString(date: Date): string {
+  private toDateString(date: Date | string): string {
+    // Si ya es un string, verificar si está en formato YYYY-MM-DD
+    if (typeof date === 'string') {
+      // Si viene como "YYYY-MM-DD", retornarlo directamente
+      if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        return date;
+      }
+      // Si viene en otro formato, convertirlo a Date primero
+      date = new Date(date);
+    }
+
+    // Procesar como objeto Date
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');

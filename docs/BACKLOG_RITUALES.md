@@ -8193,7 +8193,7 @@ Se eliminaron las referencias a `thumbnailUrl` del seeder (`backend/tarot-app/sr
 
 ### TASK-416: Corregir endpoints de calendario sagrado (404)
 
-**Estado:** 🔴 PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Módulo:** `backend/tarot-app/src/modules/rituals/`
 **Prioridad:** 🔴 ALTA
 **Estimación:** 1 hora
@@ -8201,27 +8201,34 @@ Se eliminaron las referencias a `thumbnailUrl` del seeder (`backend/tarot-app/sr
 
 #### 📋 Descripción
 
-Los endpoints del calendario sagrado devuelven 404:
+Los endpoints del calendario sagrado devolvían error 500 (no 404 como se documentó inicialmente):
 
 ```
-GET /api/v1/rituals/calendar/today - 404
-GET /api/v1/rituals/calendar/upcoming?days=30 - 404
+GET /api/v1/rituals/calendar/today - 500
+GET /api/v1/rituals/calendar/upcoming?days=30 - 500
 ```
 
-Esto causa que la sección "Calendario Sagrado" en el dashboard muestre "Cargando eventos..." permanentemente para usuarios Premium.
+Esto causaba que la sección "Calendario Sagrado" en el dashboard mostrara "Cargando eventos..." permanentemente para usuarios Premium.
+
+**Causa raíz:** TypeORM devuelve columnas PostgreSQL tipo `DATE` como strings, no como objetos `Date` de JavaScript. El método `toDateString()` del controller intentaba llamar `.getFullYear()` en un string, causando `TypeError: date.getFullYear is not a function`.
+
+**Solución:** Actualizar `toDateString()` en `SacredCalendarController` para manejar tanto strings como objetos Date, verificando el tipo antes de procesarlo.
 
 #### ✅ Tareas Específicas
 
-- [ ] Verificar que `SacredCalendarController` esté registrado en `rituals.module.ts`
-- [ ] Verificar las rutas definidas en el controlador
-- [ ] Verificar que el módulo esté importado en `app.module.ts`
-- [ ] Ejecutar `npm run start:dev` y probar endpoints manualmente:
+- [x] Verificar que `SacredCalendarController` esté registrado en `rituals.module.ts`
+- [x] Verificar las rutas definidas en el controlador
+- [x] Verificar que el módulo esté importado en `app.module.ts`
+- [x] Ejecutar `npm run start:dev` y probar endpoints manualmente:
   ```bash
   curl http://localhost:3000/api/v1/rituals/calendar/today
   curl http://localhost:3000/api/v1/rituals/calendar/upcoming?days=30
   ```
-- [ ] Si los endpoints existen pero la ruta es diferente, actualizar frontend
-- [ ] Verificar que haya datos de eventos sagrados en la BD (seeder)
+- [x] Verificar que haya datos de eventos sagrados en la BD (seeder) - 104 eventos encontrados
+- [x] Identificar causa raíz del error 500
+- [x] Corregir método `toDateString()` para manejar strings y Date objects
+- [x] Probar endpoints después del fix - Ambos devuelven 200 con JSON válido
+- [x] Tests del módulo de rituales (218 tests) - Todos pasan ✅
 
 #### 📝 Archivos a revisar
 
