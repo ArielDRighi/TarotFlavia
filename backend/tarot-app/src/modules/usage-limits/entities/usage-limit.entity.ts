@@ -14,6 +14,7 @@ export enum UsageFeature {
   TAROT_READING = 'tarot_reading',
   ORACLE_QUERY = 'oracle_query',
   INTERPRETATION_REGENERATION = 'interpretation_regeneration',
+  PENDULUM_QUERY = 'pendulum_query',
 }
 
 @Entity('usage_limit')

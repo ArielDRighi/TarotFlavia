@@ -340,6 +340,8 @@ Feature: Mostrar disclaimer legal antes de cada consulta
 
 ### TASK-500: Crear entidades del Péndulo
 
+**Estado:** ✅ COMPLETADA
+
 **Módulo:** `src/modules/pendulum/entities/`
 **Prioridad:** ALTA
 **Estimación:** 0.5 días
@@ -427,9 +429,11 @@ export class PendulumQuery {
 
 #### Testing
 
-- [ ] Test: Entidades se crean correctamente
-- [ ] Test: Relaciones funcionan
-- [ ] Test: Enums tienen valores correctos
+- [x] Test: Entidades se crean correctamente
+- [x] Test: Relaciones funcionan
+- [x] Test: Enums tienen valores correctos
+
+**Resultado:** ✅ 30 tests pasando, 100% coverage del módulo péndulo
 
 ---
 
