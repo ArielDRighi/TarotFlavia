@@ -8245,12 +8245,12 @@ Esto causaba que la sección "Calendario Sagrado" en el dashboard mostrara "Carg
 
 ### TASK-418: Fix profesional para imágenes de rituales (Backend + Frontend)
 
-**Estado:** ✅ COMPLETADA (05/02/2026)
+**Estado:** ✅ COMPLETADA (04/02/2026)
 **Módulo:** `backend/tarot-app` + `frontend`
 **Prioridad:** 🟡 MEDIA
 **Estimación:** 3-4 horas (Real: 3 horas)
 **Dependencias:** Ninguna
-**PR:** #[pendiente]
+**PR:** #324 (Merged to develop)
 
 #### 📝 Resumen de Implementación
 
@@ -8271,9 +8271,12 @@ Esto causaba que la sección "Calendario Sagrado" en el dashboard mostrara "Carg
    - ❌ Removido `fixImageUrl()`
    - ❌ Removido `transformRitualSummary()`
    - ❌ Removido `transformRitualDetail()`
-2. Componentes ahora usan URLs directamente del backend
-3. Placeholder SVG mantenido en `public/ritual-placeholder.svg`
-4. Quality gates pasados: format ✅, lint ✅, type-check ✅, build ✅
+2. Agregado manejo defensivo de imágenes en componentes:
+   - `RitualCard.tsx`: Fallback `||` + handler `onError` con prevención de loops
+   - `RitualHeader.tsx`: Mismo patrón defensivo
+3. Tests agregados para escenarios de fallback (null, undefined, empty string, onError)
+4. Placeholder SVG mantenido en `public/ritual-placeholder.svg`
+5. Quality gates pasados: format ✅, lint ✅, type-check ✅, build ✅, tests ✅
 
 **Resultado:** Sistema limpio sin hacks, backend controla la integridad de datos
 
@@ -8309,7 +8312,7 @@ Esto causaba que la sección "Calendario Sagrado" en el dashboard mostrara "Carg
 
 - [x] Eliminar funciones `fixImageUrl`, `transformRitualSummary`, `transformRitualDetail`
 - [x] Image components manejan fallback con `onError` (sin loops)
-- [x] Tests para componentes con imágenes faltantes
+- [x] Tests para componentes con imágenes faltantes (null, undefined, empty, onError)
 - [x] Coverage ≥ 80%
 
 **Integración:**
@@ -8425,9 +8428,18 @@ Esto causaba que la sección "Calendario Sagrado" en el dashboard mostrara "Carg
 
 #### 📚 Documentación
 
-- [ ] Agregar comentarios explicando sistema de fallback de imágenes
-- [ ] Actualizar README con instrucciones para agregar imágenes reales
-- [ ] Documentar estructura esperada: `public/images/rituals/[slug].jpg`
+- [x] Agregar comentarios explicando sistema de fallback de imágenes
+- [x] Actualizar README con instrucciones para agregar imágenes reales
+- [x] Documentar estructura esperada: `public/images/rituals/[slug].jpg`
+
+**Notas de Implementación:**
+
+- ✅ Migration renombrada a timestamp `1771300000001` para ejecutar después de CreateRitualsTables
+- ✅ Backend entity test agregado verificando default value
+- ✅ Frontend: 5 tests nuevos en RitualCard (null, undefined, empty, onError)
+- ✅ Frontend: 3 tests nuevos en RitualHeader (null, undefined, empty)
+- ✅ Patrón defensivo: `src={ritual.imageUrl || '/placeholder'}` + `onError` con guard
+- ✅ Documentación actualizada en BACKLOG_RITUALES.md
 
 #### ⚠️ Notas Importantes
 
