@@ -43,7 +43,14 @@ export function RitualHeader({ ritual }: RitualHeaderProps) {
     <div className="relative" data-testid="ritual-header">
       {/* Imagen de fondo */}
       <div className="relative h-64 overflow-hidden rounded-lg md:h-80">
-        <Image src={ritual.imageUrl} alt={ritual.title} fill className="object-cover" priority />
+        <Image
+          src={ritual.imageUrl}
+          alt={ritual.title}
+          fill
+          className="object-cover"
+          priority
+          unoptimized
+        />
         <div className="from-background via-background/50 absolute inset-0 bg-gradient-to-t to-transparent" />
       </div>
 

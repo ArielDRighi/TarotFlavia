@@ -59,6 +59,7 @@ export function RitualCard({ ritual, className }: RitualCardProps) {
             fill
             className="object-cover transition-transform group-hover:scale-105"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            unoptimized
           />
           {/* Badge de categoría */}
           <Badge className={cn('bg-background/90 absolute top-2 left-2', categoryInfo.color)}>

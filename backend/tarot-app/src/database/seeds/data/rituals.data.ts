@@ -82,7 +82,7 @@ export const RITUALS_SEED_DATA: RitualSeedData[] = [
       'No establezcas más de 3-5 intenciones principales',
       'Revisa tus intenciones anteriores antes de crear nuevas',
     ],
-    imageUrl: '/images/rituals/luna-nueva.jpg',
+    imageUrl: '/ritual-placeholder.svg',
     isFeatured: true,
     materials: [
       {
@@ -189,7 +189,7 @@ export const RITUALS_SEED_DATA: RitualSeedData[] = [
       'Evita tomar decisiones importantes bajo luna llena, las emociones están intensificadas',
       'Es buen momento para terminar proyectos',
     ],
-    imageUrl: '/images/rituals/luna-llena.jpg',
+    imageUrl: '/ritual-placeholder.svg',
     isFeatured: true,
     materials: [
       {
@@ -307,7 +307,7 @@ export const RITUALS_SEED_DATA: RitualSeedData[] = [
       'Presta especial atención a esquinas y detrás de puertas',
       'Los espejos acumulan mucha energía, limpia su superficie mientras humeas',
     ],
-    imageUrl: '/images/rituals/limpieza-hogar.jpg',
+    imageUrl: '/ritual-placeholder.svg',
     materials: [
       {
         name: 'Salvia blanca o palo santo',
@@ -427,7 +427,7 @@ export const RITUALS_SEED_DATA: RitualSeedData[] = [
       'Puedes repetir este ritual si sientes que el mazo necesita reconexión',
       'Algunos tarotistas tienen mazos para uso personal y otros para clientes',
     ],
-    imageUrl: '/images/rituals/consagracion-tarot.jpg',
+    imageUrl: '/ritual-placeholder.svg',
     materials: [
       {
         name: 'Mazo de tarot nuevo',
