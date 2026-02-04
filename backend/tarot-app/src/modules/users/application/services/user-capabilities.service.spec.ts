@@ -15,7 +15,7 @@ describe('UserCapabilitiesService', () => {
   let service: UserCapabilitiesService;
   let usersService: jest.Mocked<UsersService>;
   let usageLimitsService: jest.Mocked<UsageLimitsService>;
-  let anonymousTrackingService: jest.Mocked<AnonymousTrackingService>;
+  let _anonymousTrackingService: jest.Mocked<AnonymousTrackingService>;
   let planConfigService: jest.Mocked<PlanConfigService>;
   let dailyReadingRepository: jest.Mocked<Repository<DailyReading>>;
   let tarotReadingRepository: jest.Mocked<Repository<TarotReading>>;
@@ -107,7 +107,7 @@ describe('UserCapabilitiesService', () => {
     service = module.get<UserCapabilitiesService>(UserCapabilitiesService);
     usersService = module.get(UsersService);
     usageLimitsService = module.get(UsageLimitsService);
-    anonymousTrackingService = module.get(AnonymousTrackingService);
+    _anonymousTrackingService = module.get(AnonymousTrackingService);
     planConfigService = module.get(PlanConfigService);
     dailyReadingRepository = module.get(getRepositoryToken(DailyReading));
     tarotReadingRepository = module.get(getRepositoryToken(TarotReading));

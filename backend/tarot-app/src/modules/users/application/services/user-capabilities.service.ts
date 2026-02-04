@@ -16,6 +16,7 @@ import {
   getTodayUTCDateString,
   getStartOfTodayUTC,
 } from '../../../../common/utils/date.utils';
+import { UsageFeature } from '../../../usage-limits/entities/usage-limit.entity';
 
 @Injectable()
 export class UserCapabilitiesService {
@@ -98,7 +99,7 @@ export class UserCapabilitiesService {
     );
     const pendulumUsage = await this.usageLimitsService.getUsage(
       userId,
-      'pendulum_query' as any,
+      UsageFeature.PENDULUM_QUERY,
     );
 
     // Calcular resetAt del péndulo según el período
@@ -190,7 +191,7 @@ export class UserCapabilitiesService {
       const canAccessPendulum =
         await this.anonymousTrackingService.canAccessLifetime(
           fingerprint,
-          'pendulum_query' as any,
+          UsageFeature.PENDULUM_QUERY,
         );
       if (!canAccessPendulum) {
         pendulumUsed = 1;
