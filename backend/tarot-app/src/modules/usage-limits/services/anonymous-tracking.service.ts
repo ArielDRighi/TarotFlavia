@@ -114,4 +114,48 @@ export class AnonymousTrackingService {
 
     return await this.anonymousUsageRepository.save(anonymousUsage);
   }
+
+  /**
+   * Checks if an anonymous user can access a feature with lifetime limit (no date restriction)
+   * Used for features like PENDULUM_QUERY for anonymous users (1 total, not daily)
+   * @param fingerprint - User fingerprint (SHA-256 hash)
+   * @param feature - The feature to check
+   * @returns true if user has never used the feature, false otherwise
+   */
+  async canAccessLifetime(
+    fingerprint: string,
+    feature: UsageFeature,
+  ): Promise<boolean> {
+    // Check if fingerprint has ever accessed this feature (no date filter)
+    const existingUsage = await this.anonymousUsageRepository.findOne({
+      where: {
+        fingerprint,
+        feature,
+      },
+    });
+
+    return !existingUsage; // Can access if no existing usage found
+  }
+
+  /**
+   * Records lifetime usage for an anonymous user (uses fixed date 1970-01-01)
+   * @param fingerprint - User fingerprint (SHA-256 hash)
+   * @param ip - IP address
+   * @param feature - The feature being used
+   * @returns The created AnonymousUsage record
+   */
+  async recordLifetimeUsage(
+    fingerprint: string,
+    ip: string,
+    feature: UsageFeature,
+  ): Promise<AnonymousUsage> {
+    const usage = this.anonymousUsageRepository.create({
+      fingerprint,
+      ip,
+      feature,
+      date: '1970-01-01', // Fixed date for lifetime tracking
+    });
+
+    return await this.anonymousUsageRepository.save(usage);
+  }
 }

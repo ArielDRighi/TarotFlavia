@@ -5,6 +5,7 @@ import {
   IsISO8601,
   IsInt,
   IsNotEmpty,
+  IsOptional,
   Min,
   ValidateNested,
 } from 'class-validator';
@@ -52,6 +53,59 @@ export class FeatureLimitDto {
   @IsISO8601()
   @IsNotEmpty()
   resetAt: string;
+}
+
+/**
+ * DTO para límites del Péndulo con soporte de períodos lifetime/monthly/daily
+ */
+export class PendulumLimitDto {
+  @ApiProperty({
+    description:
+      'Cantidad de veces que se ha usado el péndulo en el período actual',
+    example: 1,
+    minimum: 0,
+  })
+  @IsInt()
+  @Min(0)
+  @IsNotEmpty()
+  used: number;
+
+  @ApiProperty({
+    description: 'Límite máximo de uso en el período',
+    example: 3,
+    minimum: 0,
+  })
+  @IsInt()
+  @Min(0)
+  @IsNotEmpty()
+  limit: number;
+
+  @ApiProperty({
+    description:
+      'Indica si el usuario puede usar el péndulo (true si used < limit)',
+    example: true,
+  })
+  @IsBoolean()
+  @IsNotEmpty()
+  canUse: boolean;
+
+  @ApiProperty({
+    description:
+      'Fecha y hora ISO 8601 cuando se resetean los límites (null para lifetime)',
+    example: '2026-02-01T00:00:00.000Z',
+    nullable: true,
+  })
+  @IsOptional()
+  @IsISO8601()
+  resetAt: string | null;
+
+  @ApiProperty({
+    description: 'Período del límite',
+    example: 'monthly',
+    enum: ['daily', 'monthly', 'lifetime'],
+  })
+  @IsNotEmpty()
+  period: 'daily' | 'monthly' | 'lifetime';
 }
 
 /**
@@ -147,4 +201,13 @@ export class UserCapabilitiesDto {
   @IsBoolean()
   @IsNotEmpty()
   isAuthenticated: boolean;
+
+  @ApiProperty({
+    description: 'Límites de uso del Péndulo Digital',
+    type: PendulumLimitDto,
+  })
+  @ValidateNested()
+  @Type(() => PendulumLimitDto)
+  @IsNotEmpty()
+  pendulum: PendulumLimitDto;
 }

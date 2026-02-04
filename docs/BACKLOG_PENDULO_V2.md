@@ -578,6 +578,8 @@ const interpretations = [
 
 ### TASK-502: Extender sistema de límites existente
 
+**Estado:** ✅ COMPLETADA
+
 **Módulo:** `src/modules/usage-limits/` y `src/modules/plan-config/`
 **Prioridad:** ALTA
 **Estimación:** 0.5 días
@@ -724,11 +726,11 @@ pendulum: {
 
 #### Testing
 
-- [ ] Test: `canAccessLifetime` retorna true si nunca usó
-- [ ] Test: `canAccessLifetime` retorna false después de usar
-- [ ] Test: Límite mensual funciona correctamente
-- [ ] Test: Límite diario funciona para premium
-- [ ] Test: `UserCapabilitiesDto` incluye campos de péndulo
+- [x] Test: `canAccessLifetime` retorna true si nunca usó
+- [x] Test: `canAccessLifetime` retorna false después de usar
+- [x] Test: Límite mensual funciona correctamente
+- [x] Test: Límite diario funciona para premium
+- [x] Test: `UserCapabilitiesDto` incluye campos de péndulo
 
 ---
 
