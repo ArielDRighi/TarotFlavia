@@ -8151,7 +8151,7 @@ Según **ADR-002** el módulo Rituals (39 archivos, ~4000 líneas) cumple criter
 
 ### TASK-415: Corregir thumbnails de rituales (404)
 
-**Estado:** 🔴 PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Módulo:** `backend/` + assets
 **Prioridad:** 🟡 MEDIA
 **Estimación:** 30 minutos
@@ -8170,11 +8170,24 @@ Durante la auditoría con Playwright se detectaron errores 404 para las imágene
 
 #### ✅ Tareas Específicas
 
-- [ ] Verificar que las imágenes existan en `frontend/public/images/rituals/thumbs/`
-- [ ] Si no existen, crear imágenes placeholder o descargar assets apropiados
-- [ ] Verificar que los URLs en el seeder coincidan con los archivos reales
-- [ ] Alternativamente, configurar imágenes desde CDN externo
-- [ ] Probar que las imágenes cargan correctamente en la UI
+- [x] Verificar que las imágenes thumbnail existan en `frontend/public/images/rituals/thumbs/`
+- [ ] Evaluar creación de imágenes placeholder o descarga de assets para thumbnails *(DESCARTADO: se eliminan referencias a `thumbnailUrl` y se usa `imageUrl` como fallback)*
+- [x] Verificar y actualizar el seeder para que no referencie thumbnails inexistentes (`thumbnailUrl`)
+- [ ] Evaluar configuración de imágenes de thumbnails desde CDN externo *(DESCARTADO para esta iteración)*
+- [x] Probar que las imágenes principales (`imageUrl`) cargan correctamente en la UI tras la eliminación de `thumbnailUrl`
+
+#### 🎯 Solución Implementada
+
+Se eliminaron las referencias a `thumbnailUrl` del seeder (`backend/tarot-app/src/database/seeds/data/rituals.data.ts`) ya que:
+
+1. Las imágenes thumbnail NO existen en `frontend/public/images/rituals/thumbs/`
+2. El servicio `RitualsService` ya define un fallback: `imageUrl: ritual.thumbnailUrl || ritual.imageUrl`
+3. De este modo, el sistema usa `imageUrl` como fallback cuando no hay `thumbnailUrl`
+
+**Archivos modificados:**
+- `backend/tarot-app/src/database/seeds/data/rituals.data.ts`: Eliminadas 4 líneas de `thumbnailUrl`
+
+**PR:** `feature/TASK-415-fix-thumbnails-rituales` → `develop`
 
 ---
 
