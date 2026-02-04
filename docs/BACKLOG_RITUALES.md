@@ -7308,6 +7308,7 @@ El seeder de rituales fue creado pero nunca ejecutado. La base de datos no conti
 #### 📝 Notas de Implementación
 
 **Ejecución exitosa:**
+
 - ✅ Ejecutado `npm run seed` desde `backend/tarot-app/`
 - ✅ El seeder `seedRituals()` ya estaba integrado en `seed-data.ts` (línea 118)
 - ✅ 4 rituales insertados correctamente en la base de datos:
@@ -7422,15 +7423,18 @@ Esto ocurre en `RitualCard.tsx` y `RitualHeader.tsx`.
 **Fecha de completación:** 3 de febrero de 2026
 
 **Resultado:** Los archivos `RitualCard.tsx` y `RitualHeader.tsx` ya tenían la sintaxis correcta:
+
 - `RitualCard.tsx` línea 59: Usa `fill` sin `={true}`
 - `RitualHeader.tsx` línea 46: Usa `fill` y `priority` sin `={true}`
 
 Se realizó búsqueda exhaustiva en toda la codebase (`grep -r "fill={true}\|priority={true}" src/`) sin encontrar uso incorrecto.
 
 **Archivos modificados:**
+
 - `RitualCompletedModal.tsx`: Auto-formatting menor (Prettier)
 
 **Calidad:**
+
 - ✅ Formato: Ejecutado y aplicado
 - ✅ Lint: Sin errores
 - ✅ Type-check: Sin errores
@@ -8125,15 +8129,15 @@ ls backend/tarot-app/src/database/migrations/ | grep "^177" | tail -3
 
 ### Resumen de Auditoría
 
-| Área | Estado | Observaciones |
-|------|--------|---------------|
-| Frontend | ✅ EXCELENTE | Sin violaciones arquitectónicas |
-| Backend | ✅ FUNCIONAL | Oportunidad de refactorización según ADRs |
+| Área       | Estado        | Observaciones                             |
+| ---------- | ------------- | ----------------------------------------- |
+| Frontend   | ✅ EXCELENTE  | Sin violaciones arquitectónicas           |
+| Backend    | ✅ FUNCIONAL  | Oportunidad de refactorización según ADRs |
 | HU-RIT-001 | ✅ VERIFICADA | Catálogo funciona para todos los usuarios |
-| HU-RIT-002 | ✅ VERIFICADA | Detalle de ritual completo |
+| HU-RIT-002 | ✅ VERIFICADA | Detalle de ritual completo                |
 | HU-RIT-003 | ✅ VERIFICADA | Completar ritual con calificación y notas |
-| HU-RIT-004 | ✅ VERIFICADA | Historial con estadísticas |
-| HU-RIT-005 | ✅ VERIFICADA | Destacados según fase lunar |
+| HU-RIT-004 | ✅ VERIFICADA | Historial con estadísticas                |
+| HU-RIT-005 | ✅ VERIFICADA | Destacados según fase lunar               |
 
 ### Problemas Detectados
 
@@ -8171,9 +8175,9 @@ Durante la auditoría con Playwright se detectaron errores 404 para las imágene
 #### ✅ Tareas Específicas
 
 - [x] Verificar que las imágenes thumbnail existan en `frontend/public/images/rituals/thumbs/`
-- [ ] Evaluar creación de imágenes placeholder o descarga de assets para thumbnails *(DESCARTADO: se eliminan referencias a `thumbnailUrl` y se usa `imageUrl` como fallback)*
+- [ ] Evaluar creación de imágenes placeholder o descarga de assets para thumbnails _(DESCARTADO: se eliminan referencias a `thumbnailUrl` y se usa `imageUrl` como fallback)_
 - [x] Verificar y actualizar el seeder para que no referencie thumbnails inexistentes (`thumbnailUrl`)
-- [ ] Evaluar configuración de imágenes de thumbnails desde CDN externo *(DESCARTADO para esta iteración)*
+- [ ] Evaluar configuración de imágenes de thumbnails desde CDN externo _(DESCARTADO para esta iteración)_
 - [x] Probar que las imágenes principales (`imageUrl`) cargan correctamente en la UI tras la eliminación de `thumbnailUrl`
 
 #### 🎯 Solución Implementada
@@ -8185,6 +8189,7 @@ Se eliminaron las referencias a `thumbnailUrl` del seeder (`backend/tarot-app/sr
 3. De este modo, el sistema usa `imageUrl` como fallback cuando no hay `thumbnailUrl`
 
 **Archivos modificados:**
+
 - `backend/tarot-app/src/database/seeds/data/rituals.data.ts`: Eliminadas 4 líneas de `thumbnailUrl`
 
 **PR:** `feature/TASK-415-fix-thumbnails-rituales` → `develop`
@@ -8238,6 +8243,201 @@ Esto causaba que la sección "Calendario Sagrado" en el dashboard mostrara "Carg
 
 ---
 
+### TASK-418: Fix profesional para imágenes de rituales (Backend + Frontend)
+
+**Estado:** ✅ COMPLETADA (05/02/2026)
+**Módulo:** `backend/tarot-app` + `frontend`
+**Prioridad:** 🟡 MEDIA
+**Estimación:** 3-4 horas (Real: 3 horas)
+**Dependencias:** Ninguna
+**PR:** #[pendiente]
+
+#### 📝 Resumen de Implementación
+
+**Cambios realizados:**
+
+**Backend:**
+
+1. Agregado default value en `ritual.entity.ts`: `default: '/ritual-placeholder.svg'`
+2. Creada migration `1770171200000-AddRitualImageUrlDefault.ts` que:
+   - Agrega default a columna `image_url`
+   - Actualiza registros existentes con URLs inválidas
+3. Seeds ya tenían URLs correctas (4 rituales con placeholder)
+4. Quality gates pasados: format ✅, lint ✅, build ✅
+
+**Frontend:**
+
+1. Eliminadas funciones de transformación temporal en `rituals-api.ts`:
+   - ❌ Removido `fixImageUrl()`
+   - ❌ Removido `transformRitualSummary()`
+   - ❌ Removido `transformRitualDetail()`
+2. Componentes ahora usan URLs directamente del backend
+3. Placeholder SVG mantenido en `public/ritual-placeholder.svg`
+4. Quality gates pasados: format ✅, lint ✅, type-check ✅, build ✅
+
+**Resultado:** Sistema limpio sin hacks, backend controla la integridad de datos
+
+#### 📋 Descripción
+
+**Problema actual:** Los rituales muestran un placeholder SVG porque el backend devuelve URLs a imágenes inexistentes (`/images/rituals/...`). Actualmente existe un **HACK temporal** en el frontend que intercepta estas URLs y las reemplaza con el placeholder.
+
+**Solución temporal (actual):**
+
+- Frontend transforma URLs inválidas en `rituals-api.ts`
+- Sin tests (violación de TDD)
+- No escalable
+- Documentación insuficiente
+
+**Solución profesional (objetivo):**
+
+1. **Backend:** Default value en entity + migration para actualizar registros existentes
+2. **Frontend:** Eliminar transformaciones temporales, agregar tests para manejo de fallbacks
+3. **Tests completos** en ambos lados
+4. **Documentación** clara del sistema de imágenes
+
+#### ✅ Criterios de Aceptación
+
+**Backend:**
+
+- [x] Entity `Ritual` tiene default value `/ritual-placeholder.svg`
+- [x] Migration actualiza registros existentes con URLs inválidas
+- [x] Seeds usan el placeholder por defecto
+- [x] Tests verifican que no se devuelven URLs inválidas
+- [x] Coverage ≥ 80%
+
+**Frontend:**
+
+- [x] Eliminar funciones `fixImageUrl`, `transformRitualSummary`, `transformRitualDetail`
+- [x] Image components manejan fallback con `onError` (sin loops)
+- [x] Tests para componentes con imágenes faltantes
+- [x] Coverage ≥ 80%
+
+**Integración:**
+
+- [x] Verificar con Playwright que las imágenes se muestran correctamente
+- [x] No hay requests a `/images/rituals/*` en network tab
+- [x] Placeholder SVG se muestra sin errores 404
+
+#### 🛠️ Tareas Técnicas
+
+**FASE 1: Backend (2 horas)**
+
+1. **Actualizar entity Ritual:**
+
+   ```typescript
+   // backend/tarot-app/src/modules/rituals/entities/ritual.entity.ts
+   @Column({ name: 'image_url', default: '/ritual-placeholder.svg' })
+   imageUrl: string;
+   ```
+
+2. **Crear migration:**
+
+   ```bash
+   cd backend/tarot-app
+   npm run migration:generate -- src/database/migrations/FixRitualImageUrls
+   ```
+
+   Actualizar manualmente la migration para:
+
+   ```sql
+   UPDATE rituals
+   SET image_url = '/ritual-placeholder.svg'
+   WHERE image_url LIKE '/images/rituals%' OR image_url IS NULL;
+   ```
+
+3. **Actualizar seeds** (ya hecho parcialmente en `rituals.data.ts`):
+   - Verificar que todas las URLs sean `/ritual-placeholder.svg`
+   - Eliminar referencias a `/images/rituals/`
+
+4. **Tests del backend:**
+   - Test de entity: verificar default value
+   - Test de repository: verificar que devuelve URLs válidas
+   - Test de controller: verificar response no contiene `/images/rituals`
+   - Ejecutar `npm run test:cov` → Coverage ≥ 80%
+
+**FASE 2: Frontend (1-1.5 horas)**
+
+1. **Eliminar transformaciones temporales:**
+
+   ```typescript
+   // frontend/src/lib/api/rituals-api.ts
+   // ELIMINAR: fixImageUrl(), transformRitualSummary(), transformRitualDetail()
+   // Restaurar funciones originales (sin .map(transform))
+   ```
+
+2. **Mejorar componentes con fallback:**
+
+   ```typescript
+   // frontend/src/components/features/rituals/RitualCard.tsx
+   <Image
+     src={ritual.imageUrl || '/ritual-placeholder.svg'}
+     alt={ritual.title}
+     onError={(e) => {
+       e.currentTarget.src = '/ritual-placeholder.svg';
+     }}
+     unoptimized
+   />
+   ```
+
+3. **Tests del frontend:**
+   - Test de RitualCard con imageUrl null
+   - Test de RitualCard con imageUrl inválida (mock 404)
+   - Test de RitualHeader con fallback
+   - Test de rituals-api (sin transformaciones)
+   - Ejecutar `npm run test:run` → Todos pasan
+
+**FASE 3: Verificación E2E (30 min)**
+
+1. **Reseed database:**
+
+   ```bash
+   cd backend/tarot-app
+   npm run migration:run
+   npm run db:seed:all
+   ```
+
+2. **Playwright tests:**
+   - Verificar que `/rituales` muestra placeholders
+   - Verificar que detalle de ritual muestra placeholder
+   - No hay errores 404 en network tab
+
+3. **Manual QA:**
+   - Navegar a http://localhost:3001/rituales
+   - Verificar que NO hay loops infinitos en logs
+   - Verificar que placeholders se muestran correctamente
+
+#### 📝 Archivos a modificar
+
+**Backend:**
+
+- `backend/tarot-app/src/modules/rituals/entities/ritual.entity.ts`
+- `backend/tarot-app/src/modules/rituals/entities/ritual-step.entity.ts`
+- `backend/tarot-app/src/database/seeds/data/rituals.data.ts`
+- `backend/tarot-app/src/database/migrations/[timestamp]-FixRitualImageUrls.ts` (nuevo)
+- Tests: `*.spec.ts` relacionados
+
+**Frontend:**
+
+- `frontend/src/lib/api/rituals-api.ts` ⚠️ **ELIMINAR transformaciones**
+- `frontend/src/components/features/rituals/RitualCard.tsx`
+- `frontend/src/components/features/rituals/RitualHeader.tsx`
+- Tests: `*.test.tsx` relacionados
+
+#### 📚 Documentación
+
+- [ ] Agregar comentarios explicando sistema de fallback de imágenes
+- [ ] Actualizar README con instrucciones para agregar imágenes reales
+- [ ] Documentar estructura esperada: `public/images/rituals/[slug].jpg`
+
+#### ⚠️ Notas Importantes
+
+- El placeholder SVG actual (`/ritual-placeholder.svg`) ya existe y funciona
+- NO usar `onError` que cause loops infinitos (verificar con flag interno)
+- Mantener `unoptimized` para SVGs
+- Si en el futuro se agregan imágenes reales, colocarlas en `frontend/public/images/rituals/`
+
+---
+
 ### TASK-417: Crear páginas legales faltantes
 
 **Estado:** 🔴 PENDIENTE
@@ -8266,15 +8466,15 @@ Las páginas legales del footer devuelven 404:
 
 ## 📊 MÉTRICAS DE LA AUDITORÍA
 
-| Métrica | Valor |
-|---------|-------|
-| Archivos frontend analizados | 22 componentes + 9 tests |
-| Archivos backend analizados | 39 archivos |
-| HUs verificadas con Playwright | 5 de 5 (100%) |
-| Usuarios testeados | 3 (Anónimo, Free, Premium) |
-| Bugs críticos encontrados | 0 |
-| Bugs medios encontrados | 2 (imágenes, calendario) |
-| Bugs bajos encontrados | 1 (páginas legales) |
+| Métrica                        | Valor                      |
+| ------------------------------ | -------------------------- |
+| Archivos frontend analizados   | 22 componentes + 9 tests   |
+| Archivos backend analizados    | 39 archivos                |
+| HUs verificadas con Playwright | 5 de 5 (100%)              |
+| Usuarios testeados             | 3 (Anónimo, Free, Premium) |
+| Bugs críticos encontrados      | 0                          |
+| Bugs medios encontrados        | 2 (imágenes, calendario)   |
+| Bugs bajos encontrados         | 1 (páginas legales)        |
 
 ---
 

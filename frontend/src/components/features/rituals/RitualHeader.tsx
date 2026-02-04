@@ -41,9 +41,23 @@ export function RitualHeader({ ritual }: RitualHeaderProps) {
 
   return (
     <div className="relative" data-testid="ritual-header">
-      {/* Imagen de fondo */}
+      {/* Imagen de fondo con fallback para URLs inválidas */}
       <div className="relative h-64 overflow-hidden rounded-lg md:h-80">
-        <Image src={ritual.imageUrl} alt={ritual.title} fill className="object-cover" priority />
+        <Image
+          src={ritual.imageUrl || '/ritual-placeholder.svg'}
+          alt={ritual.title}
+          fill
+          className="object-cover"
+          priority
+          unoptimized
+          onError={(e) => {
+            // Fallback a placeholder si la imagen falla al cargar
+            // Solo se ejecuta una vez para evitar loops infinitos
+            if (e.currentTarget.src !== '/ritual-placeholder.svg') {
+              e.currentTarget.src = '/ritual-placeholder.svg';
+            }
+          }}
+        />
         <div className="from-background via-background/50 absolute inset-0 bg-gradient-to-t to-transparent" />
       </div>
 

@@ -130,4 +130,30 @@ describe('RitualHeader', () => {
 
     expect(screen.getByTestId('ritual-header')).toBeInTheDocument();
   });
+
+  describe('Image fallback handling', () => {
+    it('should use placeholder when imageUrl is null', () => {
+      const ritualWithNullImage = { ...mockRitual, imageUrl: null as unknown as string };
+      render(<RitualHeader ritual={ritualWithNullImage} />);
+
+      const image = screen.getByAltText(mockRitual.title);
+      expect(image).toHaveAttribute('src', '/ritual-placeholder.svg');
+    });
+
+    it('should use placeholder when imageUrl is undefined', () => {
+      const ritualWithUndefinedImage = { ...mockRitual, imageUrl: undefined as unknown as string };
+      render(<RitualHeader ritual={ritualWithUndefinedImage} />);
+
+      const image = screen.getByAltText(mockRitual.title);
+      expect(image).toHaveAttribute('src', '/ritual-placeholder.svg');
+    });
+
+    it('should use placeholder when imageUrl is empty string', () => {
+      const ritualWithEmptyImage = { ...mockRitual, imageUrl: '' };
+      render(<RitualHeader ritual={ritualWithEmptyImage} />);
+
+      const image = screen.getByAltText(mockRitual.title);
+      expect(image).toHaveAttribute('src', '/ritual-placeholder.svg');
+    });
+  });
 });

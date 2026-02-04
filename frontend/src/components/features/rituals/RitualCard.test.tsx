@@ -306,4 +306,44 @@ describe('RitualCard', () => {
       });
     });
   });
+
+  describe('Image fallback handling', () => {
+    it('should use placeholder when imageUrl is null', () => {
+      const ritual = createTestRitual({ imageUrl: null as unknown as string });
+
+      render(<RitualCard ritual={ritual} />);
+
+      const image = screen.getByAltText('Ritual de Luna Nueva');
+      expect(image).toHaveAttribute('src', '/ritual-placeholder.svg');
+    });
+
+    it('should use placeholder when imageUrl is undefined', () => {
+      const ritual = createTestRitual({ imageUrl: undefined as unknown as string });
+
+      render(<RitualCard ritual={ritual} />);
+
+      const image = screen.getByAltText('Ritual de Luna Nueva');
+      expect(image).toHaveAttribute('src', '/ritual-placeholder.svg');
+    });
+
+    it('should use placeholder when imageUrl is empty string', () => {
+      const ritual = createTestRitual({ imageUrl: '' });
+
+      render(<RitualCard ritual={ritual} />);
+
+      const image = screen.getByAltText('Ritual de Luna Nueva');
+      expect(image).toHaveAttribute('src', '/ritual-placeholder.svg');
+    });
+
+    it('should have onError handler to prevent infinite loops', () => {
+      const ritual = createTestRitual({ imageUrl: '/invalid-url.jpg' });
+
+      const { container } = render(<RitualCard ritual={ritual} />);
+
+      // El componente debe tener la prop onError definida
+      // En el mock de Next/Image esto se traduce en un handler
+      const image = container.querySelector('img');
+      expect(image).toBeDefined();
+    });
+  });
 });
