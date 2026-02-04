@@ -8452,7 +8452,7 @@ Esto causaba que la sección "Calendario Sagrado" en el dashboard mostrara "Carg
 
 ### TASK-417: Crear páginas legales faltantes
 
-**Estado:** 🔴 PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Módulo:** `frontend/src/app/`
 **Prioridad:** 🟢 BAJA
 **Estimación:** 2 horas
@@ -8468,11 +8468,11 @@ Las páginas legales del footer devuelven 404:
 
 #### ✅ Tareas Específicas
 
-- [ ] Crear `frontend/src/app/terminos/page.tsx` con contenido placeholder
-- [ ] Crear `frontend/src/app/privacidad/page.tsx` con contenido placeholder
-- [ ] Crear `frontend/src/app/contacto/page.tsx` con formulario básico
-- [ ] Usar layout consistente con el resto de la aplicación
-- [ ] Contenido legal puede ser placeholder inicial (TODO para legal)
+- [x] Crear `frontend/src/app/terminos/page.tsx` con contenido placeholder
+- [x] Crear `frontend/src/app/privacidad/page.tsx` con contenido placeholder
+- [x] Crear `frontend/src/app/contacto/page.tsx` con formulario básico
+- [x] Usar layout consistente con el resto de la aplicación
+- [x] Contenido legal puede ser placeholder inicial (TODO para legal)
 
 ---
 
