@@ -81,7 +81,12 @@ export class Ritual {
   tips: string[] | null;
 
   // Media
-  @Column({ name: 'image_url', type: 'varchar', length: 255 })
+  @Column({
+    name: 'image_url',
+    type: 'varchar',
+    length: 255,
+    default: '/ritual-placeholder.svg',
+  })
   imageUrl: string;
 
   @Column({

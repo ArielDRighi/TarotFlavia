@@ -12,41 +12,6 @@ import type {
 } from '@/types/ritual.types';
 
 /**
- * Helper to fix image URLs from backend
- * Backend returns paths like /images/rituals/... that don't exist
- */
-function fixImageUrl(url: string | null | undefined): string {
-  if (!url) return '/ritual-placeholder.svg';
-  // Replace any /images/rituals path with placeholder
-  if (url.includes('/images/rituals')) return '/ritual-placeholder.svg';
-  return url;
-}
-
-/**
- * Transform ritual summary to fix image URLs
- */
-function transformRitualSummary(ritual: RitualSummary): RitualSummary {
-  return {
-    ...ritual,
-    imageUrl: fixImageUrl(ritual.imageUrl),
-  };
-}
-
-/**
- * Transform ritual detail to fix image URLs
- */
-function transformRitualDetail(ritual: RitualDetail): RitualDetail {
-  return {
-    ...ritual,
-    imageUrl: fixImageUrl(ritual.imageUrl),
-    steps: ritual.steps.map((step) => ({
-      ...step,
-      imageUrl: step.imageUrl ? fixImageUrl(step.imageUrl) : null,
-    })),
-  };
-}
-
-/**
  * Obtener lista de rituales con filtros opcionales
  */
 export async function getRituals(filters?: RitualFilters): Promise<RitualSummary[]> {
@@ -62,7 +27,7 @@ export async function getRituals(filters?: RitualFilters): Promise<RitualSummary
     : API_ENDPOINTS.RITUALS.LIST;
 
   const response = await apiClient.get<RitualSummary[]>(url);
-  return response.data.map(transformRitualSummary);
+  return response.data;
 }
 
 /**
@@ -70,7 +35,7 @@ export async function getRituals(filters?: RitualFilters): Promise<RitualSummary
  */
 export async function getFeaturedRituals(): Promise<RitualSummary[]> {
   const response = await apiClient.get<RitualSummary[]>(API_ENDPOINTS.RITUALS.FEATURED);
-  return response.data.map(transformRitualSummary);
+  return response.data;
 }
 
 /**
@@ -96,7 +61,7 @@ export async function getLunarInfo(): Promise<LunarInfo> {
  */
 export async function getRitualBySlug(slug: string): Promise<RitualDetail> {
   const response = await apiClient.get<RitualDetail>(API_ENDPOINTS.RITUALS.DETAIL(slug));
-  return transformRitualDetail(response.data);
+  return response.data;
 }
 
 /**
