@@ -33,7 +33,7 @@ export function PendulumLimitBanner() {
 
   // Límite alcanzado
   return (
-    <Alert className="mb-4 border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-200">
+    <Alert className="mb-4 border-amber-200 bg-amber-50 text-amber-900">
       <Clock className="h-4 w-4" />
       <AlertDescription className="flex items-center justify-between">
         <span>
