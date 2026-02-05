@@ -45,7 +45,7 @@ export function PendulumLimitBanner() {
         </span>
         {period !== 'daily' && (
           <Button size="sm" variant="outline" asChild>
-            <Link href="/premium">
+            <Link href={period === 'lifetime' ? '/registro' : '/perfil'}>
               <Sparkles className="mr-1 h-3 w-3" />
               {period === 'lifetime' ? 'Registrarse' : 'Upgrade'}
             </Link>
