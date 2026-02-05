@@ -6,7 +6,14 @@ import { Info } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 import {
   Pendulum,
   PendulumDisclaimer,
@@ -124,13 +131,21 @@ export function PendulumConsultation() {
           <div className="mb-4 flex justify-end">
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" data-testid="info-button">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  data-testid="info-button"
+                  aria-label="Información sobre cómo usar el péndulo"
+                >
                   <Info className="h-4 w-4" />
                 </Button>
               </SheetTrigger>
               <SheetContent>
                 <SheetHeader>
                   <SheetTitle>Cómo usar el péndulo</SheetTitle>
+                  <SheetDescription>
+                    Aprende cómo interpretar los movimientos del péndulo digital
+                  </SheetDescription>
                 </SheetHeader>
                 <div className="text-muted-foreground mt-4 space-y-4 text-sm">
                   <p>
@@ -141,13 +156,13 @@ export function PendulumConsultation() {
                     <h4 className="text-foreground mb-1 font-medium">Movimientos:</h4>
                     <ul className="list-disc space-y-1 pl-4">
                       <li>
-                        <strong>Vertical:</strong> Sí
+                        <strong className="text-green-500">Vertical:</strong> Sí
                       </li>
                       <li>
-                        <strong>Horizontal:</strong> No
+                        <strong className="text-red-500">Horizontal:</strong> No
                       </li>
                       <li>
-                        <strong>Circular:</strong> Quizás
+                        <strong className="text-amber-500">Circular:</strong> Quizás
                       </li>
                     </ul>
                   </div>
