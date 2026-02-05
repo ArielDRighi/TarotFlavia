@@ -2165,12 +2165,18 @@ export default function PenduloPage() {
 
 ### TASK-509: Crear animaciones CSS
 
-**Módulo:** `frontend/src/styles/`
+**Estado:** ✅ COMPLETADA
+
+**Módulo:** `frontend/src/app/globals.css`
 **Prioridad:** MEDIA
 **Estimación:** 0.25 días
 **Dependencias:** TASK-507
 
-#### Agregar a `tailwind.config.js` o CSS global
+#### Descripción
+
+Agregar animaciones CSS para el péndulo digital al archivo de estilos globales.
+
+#### Animaciones implementadas
 
 ```css
 @keyframes pendulum-idle {
@@ -2224,6 +2230,28 @@ export default function PenduloPage() {
   animation: pendulum-circular 2s linear infinite;
 }
 ```
+
+#### Resultados
+
+✅ **Archivo modificado:**
+- `frontend/src/app/globals.css` - Agregadas 5 keyframes y 5 clases de animación
+
+✅ **Animaciones implementadas:**
+- `animate-pendulum-idle` - Balanceo suave en reposo (±3deg, 3s)
+- `animate-pendulum-search` - Movimiento errático buscando respuesta (±15deg, 0.5s)
+- `animate-pendulum-vertical` - Respuesta SÍ (adelante-atrás, 1s)
+- `animate-pendulum-horizontal` - Respuesta NO (izquierda-derecha, 1s)
+- `animate-pendulum-circular` - Respuesta QUIZÁS (circular, 2s)
+
+✅ **Validaciones:**
+- Format sin cambios
+- Lint sin errores
+- Type-check sin errores
+- Tests: 2952/2952 pasando
+- Build exitoso
+- Validador de arquitectura OK
+
+**Fecha de completación:** 4 de febrero de 2026
 
 ---
 

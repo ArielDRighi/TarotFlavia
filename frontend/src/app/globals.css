@@ -235,3 +235,99 @@ body {
 .grid-cols-13 {
   grid-template-columns: repeat(13, minmax(0, 1fr));
 }
+
+/* ===========================================
+   Pendulum Animations - Digital Pendulum Feature
+   =========================================== */
+
+/* Idle: Gentle sway at rest */
+@keyframes pendulum-idle {
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+/* Search: Erratic movement while finding answer */
+@keyframes pendulum-search {
+  0% {
+    transform: rotate(-15deg);
+  }
+  25% {
+    transform: rotate(15deg);
+  }
+  50% {
+    transform: rotate(-10deg);
+  }
+  75% {
+    transform: rotate(10deg);
+  }
+  100% {
+    transform: rotate(-15deg);
+  }
+}
+
+/* Vertical: YES response - forward/backward movement */
+@keyframes pendulum-vertical {
+  0%,
+  100% {
+    transform: rotate(0deg) translateY(0);
+  }
+  50% {
+    transform: rotate(0deg) translateY(20px);
+  }
+}
+
+/* Horizontal: NO response - left/right swing */
+@keyframes pendulum-horizontal {
+  0%,
+  100% {
+    transform: rotate(-25deg);
+  }
+  50% {
+    transform: rotate(25deg);
+  }
+}
+
+/* Circular: MAYBE response - conical motion (3D effect) */
+@keyframes pendulum-circular {
+  0% {
+    transform: rotateZ(15deg) rotateX(0deg);
+  }
+  25% {
+    transform: rotateZ(0deg) rotateX(15deg);
+  }
+  50% {
+    transform: rotateZ(-15deg) rotateX(0deg);
+  }
+  75% {
+    transform: rotateZ(0deg) rotateX(-15deg);
+  }
+  100% {
+    transform: rotateZ(15deg) rotateX(0deg);
+  }
+}
+
+/* Animation classes */
+.animate-pendulum-idle {
+  animation: pendulum-idle 3s ease-in-out infinite;
+}
+
+.animate-pendulum-search {
+  animation: pendulum-search 0.5s ease-in-out infinite;
+}
+
+.animate-pendulum-vertical {
+  animation: pendulum-vertical 1s ease-in-out infinite;
+}
+
+.animate-pendulum-horizontal {
+  animation: pendulum-horizontal 1s ease-in-out infinite;
+}
+
+.animate-pendulum-circular {
+  animation: pendulum-circular 2s linear infinite;
+}
