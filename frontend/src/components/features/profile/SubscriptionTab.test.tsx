@@ -39,7 +39,13 @@ const createMockCapabilities = (
   data: {
     dailyCard: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
     tarotReadings: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
-    pendulum: { used: 0, limit: 3, canUse: true, resetAt: '2026-01-09T00:00:00Z', period: 'monthly' },
+    pendulum: {
+      used: 0,
+      limit: 3,
+      canUse: true,
+      resetAt: '2026-01-09T00:00:00Z',
+      period: 'monthly',
+    },
     canCreateDailyReading: true,
     canCreateTarotReading: true,
     canUseAI: false,

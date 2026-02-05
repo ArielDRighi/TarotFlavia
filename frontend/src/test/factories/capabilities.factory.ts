@@ -49,7 +49,12 @@ export function createMockAnonymousCapabilities(
   return {
     dailyCard: createMockFeatureLimit({ used: 0, limit: 1, canUse: true }),
     tarotReadings: createMockFeatureLimit({ used: 0, limit: 0, canUse: false }),
-    pendulum: createMockPendulumFeatureLimit({ used: 0, limit: 1, canUse: true, period: 'lifetime' }),
+    pendulum: createMockPendulumFeatureLimit({
+      used: 0,
+      limit: 1,
+      canUse: true,
+      period: 'lifetime',
+    }),
     canCreateDailyReading: true,
     canCreateTarotReading: false,
     canUseAI: false,
@@ -70,7 +75,12 @@ export function createMockFreeCapabilities(
   return {
     dailyCard: createMockFeatureLimit({ used: 0, limit: 1, canUse: true }),
     tarotReadings: createMockFeatureLimit({ used: 0, limit: 1, canUse: true }),
-    pendulum: createMockPendulumFeatureLimit({ used: 0, limit: 3, canUse: true, period: 'monthly' }),
+    pendulum: createMockPendulumFeatureLimit({
+      used: 0,
+      limit: 3,
+      canUse: true,
+      period: 'monthly',
+    }),
     canCreateDailyReading: true,
     canCreateTarotReading: true,
     canUseAI: false,
