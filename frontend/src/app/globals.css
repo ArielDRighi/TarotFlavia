@@ -292,22 +292,22 @@ body {
   }
 }
 
-/* Circular: MAYBE response - circular motion */
+/* Circular: MAYBE response - conical motion (3D effect) */
 @keyframes pendulum-circular {
   0% {
-    transform: rotate(0deg) translateX(10px);
+    transform: rotateZ(15deg) rotateX(0deg);
   }
   25% {
-    transform: rotate(90deg) translateX(10px);
+    transform: rotateZ(0deg) rotateX(15deg);
   }
   50% {
-    transform: rotate(180deg) translateX(10px);
+    transform: rotateZ(-15deg) rotateX(0deg);
   }
   75% {
-    transform: rotate(270deg) translateX(10px);
+    transform: rotateZ(0deg) rotateX(-15deg);
   }
   100% {
-    transform: rotate(360deg) translateX(10px);
+    transform: rotateZ(15deg) rotateX(0deg);
   }
 }
 
