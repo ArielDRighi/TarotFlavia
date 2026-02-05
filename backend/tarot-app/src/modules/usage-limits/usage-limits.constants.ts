@@ -29,7 +29,7 @@ export const USAGE_LIMITS: Record<UserPlan, Record<UsageFeature, number>> = {
     [UsageFeature.TAROT_READING]: 3, // 3 tiradas/día
     [UsageFeature.INTERPRETATION_REGENERATION]: -1, // Regeneración ilimitada
     [UsageFeature.ORACLE_QUERY]: -1, // Consultas ilimitadas
-    [UsageFeature.PENDULUM_QUERY]: 1, // 1 consulta al péndulo/día
+    [UsageFeature.PENDULUM_QUERY]: 3, // 3 consultas al péndulo/día
   },
 } as const;
 

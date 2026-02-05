@@ -473,7 +473,7 @@ describe('PlanConfigService', () => {
       });
     });
 
-    it('should return monthly limit for free plan', async () => {
+    it('should return daily limit for free plan', async () => {
       const mockPlan = {
         id: 2,
         planType: UserPlan.FREE,
@@ -481,8 +481,8 @@ describe('PlanConfigService', () => {
         description: 'Plan básico',
         price: 0,
         readingsLimit: 10,
-        pendulumDailyLimit: 0,
-        pendulumMonthlyLimit: 3,
+        pendulumDailyLimit: 1,
+        pendulumMonthlyLimit: 0,
         aiQuotaMonthly: 100,
         allowCustomQuestions: false,
         allowSharing: false,
@@ -497,8 +497,8 @@ describe('PlanConfigService', () => {
       const result = await service.getPendulumLimit(UserPlan.FREE);
 
       expect(result).toEqual({
-        limit: 3,
-        period: 'monthly',
+        limit: 1,
+        period: 'daily',
       });
     });
 
@@ -510,7 +510,7 @@ describe('PlanConfigService', () => {
         description: 'Plan premium',
         price: 9.99,
         readingsLimit: -1,
-        pendulumDailyLimit: 1,
+        pendulumDailyLimit: 3,
         pendulumMonthlyLimit: 0,
         aiQuotaMonthly: -1,
         allowCustomQuestions: true,
@@ -526,7 +526,7 @@ describe('PlanConfigService', () => {
       const result = await service.getPendulumLimit(UserPlan.PREMIUM);
 
       expect(result).toEqual({
-        limit: 1,
+        limit: 3,
         period: 'daily',
       });
     });
@@ -539,7 +539,7 @@ describe('PlanConfigService', () => {
         description: 'Plan básico',
         price: 0,
         readingsLimit: 10,
-        // No pendulumDailyLimit or pendulumMonthlyLimit
+        // No pendulumDailyLimit - should use default 1
         aiQuotaMonthly: 100,
         allowCustomQuestions: false,
         allowSharing: false,
@@ -554,9 +554,53 @@ describe('PlanConfigService', () => {
       const result = await service.getPendulumLimit(UserPlan.FREE);
 
       expect(result).toEqual({
-        limit: 3, // default for free
-        period: 'monthly',
+        limit: 1, // default for all authenticated users
+        period: 'daily',
       });
+    });
+  });
+
+  describe('getPendulumDailyLimit', () => {
+    it('should return pendulumDailyLimit for FREE plan', async () => {
+      const mockPlan = {
+        id: 1,
+        planType: UserPlan.FREE,
+        pendulumDailyLimit: 1,
+      } as Plan;
+
+      mockRepository.findOne.mockResolvedValue(mockPlan);
+
+      const result = await service.getPendulumDailyLimit(UserPlan.FREE);
+
+      expect(result).toBe(1);
+      expect(mockRepository.findOne).toHaveBeenCalledWith({
+        where: { planType: UserPlan.FREE },
+      });
+    });
+
+    it('should return pendulumDailyLimit for PREMIUM plan', async () => {
+      const mockPlan = {
+        id: 2,
+        planType: UserPlan.PREMIUM,
+        pendulumDailyLimit: 3,
+      } as Plan;
+
+      mockRepository.findOne.mockResolvedValue(mockPlan);
+
+      const result = await service.getPendulumDailyLimit(UserPlan.PREMIUM);
+
+      expect(result).toBe(3);
+      expect(mockRepository.findOne).toHaveBeenCalledWith({
+        where: { planType: UserPlan.PREMIUM },
+      });
+    });
+
+    it('should throw NotFoundException when plan not found', async () => {
+      mockRepository.findOne.mockResolvedValue(null);
+
+      await expect(
+        service.getPendulumDailyLimit(UserPlan.PREMIUM),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 });

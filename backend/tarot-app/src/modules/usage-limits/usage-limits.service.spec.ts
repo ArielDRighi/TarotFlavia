@@ -28,6 +28,7 @@ describe('UsageLimitsService', () => {
   const mockPlanConfigService = {
     getDailyCardLimit: jest.fn(),
     getTarotReadingsLimit: jest.fn(),
+    getPendulumDailyLimit: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -727,6 +728,150 @@ describe('UsageLimitsService', () => {
         today.setUTCHours(0, 0, 0, 0);
         const expectedDateString = today.toISOString().split('T')[0];
         expect(insertValues.date).toBe(expectedDateString);
+      });
+    });
+  });
+
+  describe('PENDULUM_QUERY limits (TASK-514)', () => {
+    describe('checkLimit for PENDULUM_QUERY', () => {
+      it('should use planConfigService.getPendulumDailyLimit for FREE user', async () => {
+        const freeUser: Partial<User> = {
+          id: 1,
+          plan: UserPlan.FREE,
+        };
+
+        mockUsersService.findById.mockResolvedValue(freeUser);
+        mockPlanConfigService.getPendulumDailyLimit.mockResolvedValue(1); // FREE: 1/day from DB
+        mockUsageLimitRepository.findOne.mockResolvedValue({ count: 0 });
+
+        const result = await service.checkLimit(1, UsageFeature.PENDULUM_QUERY);
+
+        expect(result).toBe(true);
+        expect(
+          mockPlanConfigService.getPendulumDailyLimit,
+        ).toHaveBeenCalledWith(UserPlan.FREE);
+      });
+
+      it('should use planConfigService.getPendulumDailyLimit for PREMIUM user', async () => {
+        const premiumUser: Partial<User> = {
+          id: 2,
+          plan: UserPlan.PREMIUM,
+          subscriptionStatus: SubscriptionStatus.ACTIVE,
+        };
+
+        mockUsersService.findById.mockResolvedValue(premiumUser);
+        mockPlanConfigService.getPendulumDailyLimit.mockResolvedValue(3); // PREMIUM: 3/day from DB
+        mockUsageLimitRepository.findOne.mockResolvedValue({ count: 1 });
+
+        const result = await service.checkLimit(2, UsageFeature.PENDULUM_QUERY);
+
+        expect(result).toBe(true); // 1 < 3
+        expect(
+          mockPlanConfigService.getPendulumDailyLimit,
+        ).toHaveBeenCalledWith(UserPlan.PREMIUM);
+      });
+
+      it('should return false when FREE user exceeds daily pendulum limit', async () => {
+        const freeUser: Partial<User> = {
+          id: 1,
+          plan: UserPlan.FREE,
+        };
+
+        mockUsersService.findById.mockResolvedValue(freeUser);
+        mockPlanConfigService.getPendulumDailyLimit.mockResolvedValue(1);
+        mockUsageLimitRepository.findOne.mockResolvedValue({ count: 1 }); // At limit
+
+        const result = await service.checkLimit(1, UsageFeature.PENDULUM_QUERY);
+
+        expect(result).toBe(false);
+      });
+
+      it('should return false when PREMIUM user exceeds daily pendulum limit', async () => {
+        const premiumUser: Partial<User> = {
+          id: 2,
+          plan: UserPlan.PREMIUM,
+          subscriptionStatus: SubscriptionStatus.ACTIVE,
+        };
+
+        mockUsersService.findById.mockResolvedValue(premiumUser);
+        mockPlanConfigService.getPendulumDailyLimit.mockResolvedValue(3);
+        mockUsageLimitRepository.findOne.mockResolvedValue({ count: 3 }); // At limit
+
+        const result = await service.checkLimit(2, UsageFeature.PENDULUM_QUERY);
+
+        expect(result).toBe(false);
+      });
+
+      it('should return true when no usage record exists for pendulum query', async () => {
+        const freeUser: Partial<User> = {
+          id: 1,
+          plan: UserPlan.FREE,
+        };
+
+        mockUsersService.findById.mockResolvedValue(freeUser);
+        mockPlanConfigService.getPendulumDailyLimit.mockResolvedValue(1);
+        mockUsageLimitRepository.findOne.mockResolvedValue(null);
+
+        const result = await service.checkLimit(1, UsageFeature.PENDULUM_QUERY);
+
+        expect(result).toBe(true);
+      });
+    });
+
+    describe('getRemainingUsage for PENDULUM_QUERY', () => {
+      it('should return correct remaining pendulum queries for FREE user', async () => {
+        const freeUser: Partial<User> = {
+          id: 1,
+          plan: UserPlan.FREE,
+        };
+
+        mockUsersService.findById.mockResolvedValue(freeUser);
+        mockPlanConfigService.getPendulumDailyLimit.mockResolvedValue(1);
+        mockUsageLimitRepository.findOne.mockResolvedValue({ count: 0 });
+
+        const result = await service.getRemainingUsage(
+          1,
+          UsageFeature.PENDULUM_QUERY,
+        );
+
+        expect(result).toBe(1); // 1 - 0 = 1
+      });
+
+      it('should return correct remaining pendulum queries for PREMIUM user', async () => {
+        const premiumUser: Partial<User> = {
+          id: 2,
+          plan: UserPlan.PREMIUM,
+          subscriptionStatus: SubscriptionStatus.ACTIVE,
+        };
+
+        mockUsersService.findById.mockResolvedValue(premiumUser);
+        mockPlanConfigService.getPendulumDailyLimit.mockResolvedValue(3);
+        mockUsageLimitRepository.findOne.mockResolvedValue({ count: 1 });
+
+        const result = await service.getRemainingUsage(
+          2,
+          UsageFeature.PENDULUM_QUERY,
+        );
+
+        expect(result).toBe(2); // 3 - 1 = 2
+      });
+
+      it('should return 0 when pendulum limit is exhausted', async () => {
+        const freeUser: Partial<User> = {
+          id: 1,
+          plan: UserPlan.FREE,
+        };
+
+        mockUsersService.findById.mockResolvedValue(freeUser);
+        mockPlanConfigService.getPendulumDailyLimit.mockResolvedValue(1);
+        mockUsageLimitRepository.findOne.mockResolvedValue({ count: 1 });
+
+        const result = await service.getRemainingUsage(
+          1,
+          UsageFeature.PENDULUM_QUERY,
+        );
+
+        expect(result).toBe(0);
       });
     });
   });
