@@ -40,11 +40,14 @@ export function PendulumBlockedContent({ open, category, onClose }: PendulumBloc
   const message = CATEGORY_MESSAGES[category] || CATEGORY_MESSAGES.default;
 
   return (
-    <AlertDialog open={open} onOpenChange={(isOpen) => {
-      if (!isOpen) {
-        onClose();
-      }
-    }}>
+    <AlertDialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) {
+          onClose();
+        }
+      }}
+    >
       <AlertDialogContent>
         <AlertDialogHeader>
           <div className="flex items-center gap-2">
@@ -52,7 +55,7 @@ export function PendulumBlockedContent({ open, category, onClose }: PendulumBloc
             <AlertDialogTitle>{message.title}</AlertDialogTitle>
           </div>
           <AlertDialogDescription asChild>
-            <div className="space-y-3 text-sm text-muted-foreground">
+            <div className="text-muted-foreground space-y-3 text-sm">
               <p>Tu pregunta toca temas sensibles que no podemos abordar a través del péndulo.</p>
               <p className="font-medium">{message.recommendation}</p>
               <p>

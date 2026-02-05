@@ -20,7 +20,9 @@ export function PendulumResponseDisplay({ response, className }: PendulumRespons
       <div className={cn('font-serif text-5xl', config.color)}>{response.responseText}</div>
 
       {/* Interpretación */}
-      <p className="text-muted-foreground text-lg italic">&ldquo;{response.interpretation}&rdquo;</p>
+      <p className="text-muted-foreground text-lg italic">
+        &ldquo;{response.interpretation}&rdquo;
+      </p>
 
       {/* Fase lunar */}
       <div className="text-muted-foreground flex items-center justify-center gap-2 text-sm">

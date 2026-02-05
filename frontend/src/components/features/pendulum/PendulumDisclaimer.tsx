@@ -24,11 +24,14 @@ interface PendulumDisclaimerProps {
  */
 export function PendulumDisclaimer({ open, onAccept, onCancel }: PendulumDisclaimerProps) {
   return (
-    <AlertDialog open={open} onOpenChange={(isOpen) => {
-      if (!isOpen) {
-        onCancel();
-      }
-    }}>
+    <AlertDialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) {
+          onCancel();
+        }
+      }}
+    >
       <AlertDialogContent className="sm:max-w-md">
         <AlertDialogHeader>
           <div className="flex items-center gap-2">
@@ -36,7 +39,7 @@ export function PendulumDisclaimer({ open, onAccept, onCancel }: PendulumDisclai
             <AlertDialogTitle>Aviso Importante</AlertDialogTitle>
           </div>
           <AlertDialogDescription asChild>
-            <div className="space-y-3 pt-2 text-left text-sm text-muted-foreground">
+            <div className="text-muted-foreground space-y-3 pt-2 text-left text-sm">
               <p>
                 El Péndulo Digital es una herramienta de <strong>entretenimiento</strong> basada en
                 tradiciones espirituales ancestrales.
@@ -46,16 +49,12 @@ export function PendulumDisclaimer({ open, onAccept, onCancel }: PendulumDisclai
                 <li>Las respuestas son generadas aleatoriamente</li>
                 <li>No debe usarse para tomar decisiones importantes</li>
               </ul>
-              <p>
-                Al continuar, confirmas que entiendes que esto es solo para entretenimiento.
-              </p>
+              <p>Al continuar, confirmas que entiendes que esto es solo para entretenimiento.</p>
             </div>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="flex-col gap-2 sm:flex-row">
-          <AlertDialogCancel className="w-full sm:w-auto">
-            Cancelar
-          </AlertDialogCancel>
+          <AlertDialogCancel className="w-full sm:w-auto">Cancelar</AlertDialogCancel>
           <AlertDialogAction onClick={onAccept} className="w-full sm:w-auto">
             Entiendo y Acepto
           </AlertDialogAction>
