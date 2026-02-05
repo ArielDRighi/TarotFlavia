@@ -70,7 +70,7 @@ export function createMockFreeCapabilities(
   return {
     dailyCard: createMockFeatureLimit({ used: 0, limit: 1, canUse: true }),
     tarotReadings: createMockFeatureLimit({ used: 0, limit: 1, canUse: true }),
-    pendulum: createMockPendulumFeatureLimit({ used: 0, limit: 3, canUse: true, period: 'daily' }),
+    pendulum: createMockPendulumFeatureLimit({ used: 0, limit: 3, canUse: true, period: 'monthly' }),
     canCreateDailyReading: true,
     canCreateTarotReading: true,
     canUseAI: false,

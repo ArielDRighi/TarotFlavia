@@ -15,7 +15,7 @@ import {
 } from '@/lib/api/pendulum-api';
 import type { PendulumQueryRequest, PendulumResponse } from '@/types/pendulum.types';
 import type { PendulumFeatureLimit } from '@/types/capabilities.types';
-import { useUserCapabilities } from './useUserCapabilities';
+import { useUserCapabilities, capabilitiesQueryKeys } from './useUserCapabilities';
 
 // ============================================================================
 // Query Keys (for consistency and type safety)
@@ -47,7 +47,7 @@ export function usePendulumQuery() {
     mutationFn: (request: PendulumQueryRequest) => queryPendulum(request),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: pendulumKeys.all });
-      queryClient.invalidateQueries({ queryKey: ['user', 'capabilities'] });
+      queryClient.invalidateQueries({ queryKey: capabilitiesQueryKeys.capabilities });
     },
   });
 }

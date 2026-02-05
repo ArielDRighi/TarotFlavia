@@ -8,7 +8,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { type ReactNode } from 'react';
+import React, { type ReactNode } from 'react';
 import * as pendulumApi from '@/lib/api/pendulum-api';
 import {
   usePendulumQuery,
@@ -54,11 +54,9 @@ function createWrapper() {
     },
   });
 
-  function Wrapper({ children }: { children: ReactNode }) {
-    return QueryClientProvider({ client: queryClient, children });
-  }
-
-  return Wrapper;
+  return function Wrapper({ children }: { children: ReactNode }) {
+    return React.createElement(QueryClientProvider, { client: queryClient }, children);
+  };
 }
 
 describe('usePendulum hooks', () => {
