@@ -150,6 +150,9 @@ vi.mock('@/components/ui/sheet', () => ({
   SheetTitle: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="sheet-title">{children}</div>
   ),
+  SheetDescription: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="sheet-description">{children}</div>
+  ),
 }));
 
 // Test wrapper with QueryClient
