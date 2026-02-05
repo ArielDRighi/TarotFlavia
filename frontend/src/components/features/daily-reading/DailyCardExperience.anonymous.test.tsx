@@ -340,7 +340,7 @@ describe('DailyCardExperience - Anonymous User Flow', () => {
 
     it('should call authenticated endpoint for authenticated users', () => {
       mockUseAuth.mockReturnValue({
-        user: { id: 1, email: 'test@example.com', plan: 'FREE' },
+        user: { id: 1, email: 'test@example.com', plan: 'free' },
         isAuthenticated: true,
         isLoading: false,
       });
@@ -371,7 +371,7 @@ describe('DailyCardExperience - Anonymous User Flow', () => {
       });
 
       mockUseAuth.mockReturnValue({
-        user: { id: 1, email: 'test@example.com', plan: 'FREE' },
+        user: { id: 1, email: 'test@example.com', plan: 'free' },
         isAuthenticated: true,
         isLoading: false,
       });
