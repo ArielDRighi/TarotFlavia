@@ -123,4 +123,34 @@ describe('PendulumLimitBanner', () => {
 
     expect(screen.queryByRole('link', { name: /upgrade|registrarse/i })).not.toBeInTheDocument();
   });
+
+  it('should link to /registro for lifetime users when limit reached', () => {
+    vi.mocked(usePendulumCapabilities).mockReturnValue({
+      used: 1,
+      limit: 1,
+      canUse: false,
+      resetAt: null,
+      period: 'lifetime',
+    });
+
+    render(<PendulumLimitBanner />);
+
+    const link = screen.getByRole('link', { name: /registrarse/i });
+    expect(link).toHaveAttribute('href', '/registro');
+  });
+
+  it('should link to /perfil for monthly users when limit reached', () => {
+    vi.mocked(usePendulumCapabilities).mockReturnValue({
+      used: 3,
+      limit: 3,
+      canUse: false,
+      resetAt: '2026-03-01T00:00:00.000Z',
+      period: 'monthly',
+    });
+
+    render(<PendulumLimitBanner />);
+
+    const link = screen.getByRole('link', { name: /upgrade/i });
+    expect(link).toHaveAttribute('href', '/perfil');
+  });
 });

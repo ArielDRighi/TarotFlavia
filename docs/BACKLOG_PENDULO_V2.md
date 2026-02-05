@@ -3198,16 +3198,28 @@ WHERE "planType" = 'premium';
 ---
 
 #### TASK-512: Fix CTA de Upgrade/Registrarse
+**Estado:** ✅ COMPLETADA (5 de febrero de 2026)
 **Prioridad:** 🟠 ALTA
 **Estimación:** 0.1 días
-**Archivos:** `frontend/src/components/features/pendulum/PendulumLimitBanner.tsx`
+**Archivos:** `frontend/src/components/features/pendulum/PendulumLimitBanner.tsx`, `frontend/src/components/features/pendulum/PendulumLimitBanner.test.tsx`
 
-**Cambio requerido:**
+**Cambio implementado:**
 ```tsx
 <Link href={period === 'lifetime' ? '/registro' : '/perfil'}>
 ```
 
-**Resuelve:** Problema #3
+**Tests agregados:**
+- ✅ Test: "should link to /registro for lifetime users when limit reached"
+- ✅ Test: "should link to /perfil for monthly users when limit reached"
+
+**Validaciones:**
+- ✅ 10/10 tests passing en PendulumLimitBanner.test.tsx
+- ✅ npm run format, lint:fix, type-check, test:run, build, validate-architecture
+- ✅ Total: 2954 tests passing en frontend
+
+**Resuelve:** Problema #3 (CTA apuntaba a /premium que no existe)
+
+**PR:** #[número pendiente]
 
 ---
 
