@@ -43,6 +43,10 @@ export class UsageLimitsService {
       return this.planConfigService.getTarotReadingsLimit(user.plan);
     }
 
+    if (feature === UsageFeature.PENDULUM_QUERY) {
+      return this.planConfigService.getPendulumDailyLimit(user.plan);
+    }
+
     // For other features (ORACLE_QUERY, INTERPRETATION_REGENERATION), fall back to constants
     const limit = USAGE_LIMITS[user.plan]?.[feature];
     if (limit === undefined) {

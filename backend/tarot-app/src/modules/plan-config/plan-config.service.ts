@@ -165,11 +165,21 @@ export class PlanConfigService {
 
     // Free and Premium users have daily limit
     // FREE: 1/day (no question input, no history)
-    // PREMIUM: 1/day (with question input and history)
+    // PREMIUM: 3/day (with question input and history)
     const plan = await this.findByPlanType(planType);
     return {
       limit: plan.pendulumDailyLimit ?? 1,
       period: 'daily',
     };
+  }
+
+  /**
+   * Obtiene el límite diario de consultas al Péndulo para un tipo de plan
+   * @param planType - Tipo de plan
+   * @returns Límite diario de consultas al péndulo
+   */
+  async getPendulumDailyLimit(planType: UserPlan): Promise<number> {
+    const plan = await this.findByPlanType(planType);
+    return plan.pendulumDailyLimit;
   }
 }
