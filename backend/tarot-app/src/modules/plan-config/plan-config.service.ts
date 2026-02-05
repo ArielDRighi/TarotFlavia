@@ -163,16 +163,9 @@ export class PlanConfigService {
       return { limit: 1, period: 'lifetime' };
     }
 
-    // Free users have monthly limit
-    if (planType === UserPlan.FREE) {
-      const plan = await this.findByPlanType(planType);
-      return {
-        limit: plan.pendulumMonthlyLimit ?? 3,
-        period: 'monthly',
-      };
-    }
-
-    // Premium users have daily limit
+    // Free and Premium users have daily limit
+    // FREE: 1/day (no question input, no history)
+    // PREMIUM: 1/day (with question input and history)
     const plan = await this.findByPlanType(planType);
     return {
       limit: plan.pendulumDailyLimit ?? 1,

@@ -6,8 +6,8 @@ import { UsageFeature } from './entities/usage-limit.entity';
  * Estructura: USAGE_LIMITS[plan][feature] = límite
  * -1 significa ilimitado
  *
- * NOTA: Para TAROT_READING, la fuente de verdad es la base de datos (tabla plans).
- * Estos valores son fallback para otras características que aún no están en DB.
+ * NOTA: Para TAROT_READING y PENDULUM_QUERY, la fuente de verdad es la base de datos (tabla plans).
+ * Estos valores son fallback para características que aún no están en DB.
  */
 export const USAGE_LIMITS: Record<UserPlan, Record<UsageFeature, number>> = {
   [UserPlan.ANONYMOUS]: {
@@ -22,7 +22,7 @@ export const USAGE_LIMITS: Record<UserPlan, Record<UsageFeature, number>> = {
     [UsageFeature.TAROT_READING]: 2, // Carta del día + 1 tirada de 3 cartas
     [UsageFeature.INTERPRETATION_REGENERATION]: 0, // Sin regeneración
     [UsageFeature.ORACLE_QUERY]: 5, // 5 consultas al oráculo/día
-    [UsageFeature.PENDULUM_QUERY]: 3, // 3 consultas al péndulo/mes
+    [UsageFeature.PENDULUM_QUERY]: 1, // 1 consulta al péndulo/día (CAMBIO: antes era 3/mes)
   },
   [UserPlan.PREMIUM]: {
     [UsageFeature.DAILY_CARD]: 1, // 1 carta del día

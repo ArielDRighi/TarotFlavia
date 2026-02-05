@@ -20,7 +20,7 @@ El Péndulo Digital es una herramienta interactiva que simula la experiencia de 
 | Respuestas Sí/No/Quizás | Tres posibles direcciones de movimiento |
 | Diseño único | Cristal de cuarzo (hardcodeado) |
 | Interpretaciones predefinidas | Frases místicas desde base de datos |
-| Límites por plan | Anónimo: 1 total, Free: 3/mes, Premium: 1/día |
+| Límites por plan | Anónimo: 1 total, Free: 1/día, Premium: 1/día |
 | Historial | Solo para usuarios Premium |
 | Disclaimer obligatorio | Aceptación requerida ANTES DE CADA consulta |
 
@@ -39,7 +39,7 @@ El Péndulo Digital es una herramienta interactiva que simula la experiencia de 
 | Input de texto (pregunta escrita) | ❌ | ❌ | ✅ |
 | Historial de consultas | ❌ | ❌ | ✅ |
 | Interpretación incluida | ✅ | ✅ | ✅ |
-| Límite | 1 total | 3/mes | 1/día |
+| Límite | 1 total | 1/día | 1/día |
 
 ---
 
@@ -138,10 +138,10 @@ Feature: Consultar el péndulo digital
 
   Scenario: Límite alcanzado (free)
     Given soy usuario free
-    And ya usé mis 3 consultas del mes
+    And ya usé mi consulta del día
     When intento consultar el péndulo
-    Then veo mensaje "Has alcanzado el límite mensual"
-    And veo cuándo se resetea (día 1 del próximo mes)
+    Then veo mensaje "Has alcanzado el límite diario"
+    And veo cuándo se resetea (medianoche UTC)
     And veo CTA para upgrade a Premium
 ```
 
@@ -3267,6 +3267,259 @@ WHERE "planType" = 'premium';
 - El Sheet es accesible para usuarios anónimos, free y premium por igual
 
 **Fecha de completación:** 5 de febrero de 2026
+
+---
+
+#### TASK-514: Fix límites de péndulo para usuarios autenticados (usar BD en lugar de constantes)
+**Estado:** 🚧 PENDIENTE
+**Prioridad:** 🔴 CRÍTICA
+**Estimación:** 0.3 días
+**Tipo:** 🐛 BUGFIX
+**Detectado:** 5 de febrero de 2026 durante testing E2E de TASK-511
+**Archivos afectados:**
+- `backend/tarot-app/src/modules/usage-limits/usage-limits.service.ts`
+- `backend/tarot-app/src/modules/plan-config/plan-config.service.ts` (si falta método)
+- `backend/tarot-app/src/modules/usage-limits/usage-limits.service.spec.ts`
+
+#### 📋 Descripción del Problema
+
+**Síntoma:** Usuarios autenticados (FREE y PREMIUM) no pueden hacer consultas al péndulo, reciben 403 Forbidden en su **primera consulta del día**.
+
+**Causa raíz:** El método `UsageLimitsService.getLimit()` NO consulta la base de datos para obtener `pendulumDailyLimit` cuando el feature es `PENDULUM_QUERY`. En su lugar, usa constantes hardcodeadas en `usage-limits.constants.ts`.
+
+**Ubicación exacta del bug:** `backend/tarot-app/src/modules/usage-limits/usage-limits.service.ts:29-54`
+
+```typescript
+// ❌ CÓDIGO ACTUAL (INCORRECTO):
+private async getLimit(userId: number, feature: UsageFeature): Promise<number> {
+  const user = await this.usersService.findById(userId);
+  if (!user) throw new NotFoundException(`User with ID ${userId} not found`);
+
+  if (feature === UsageFeature.DAILY_CARD) {
+    return this.planConfigService.getDailyCardLimit(user.plan);
+  }
+
+  if (feature === UsageFeature.TAROT_READING) {
+    return this.planConfigService.getTarotReadingsLimit(user.plan);
+  }
+
+  // ❌ PENDULUM_QUERY cae aquí y usa constantes hardcodeadas, NO la BD
+  const limit = USAGE_LIMITS[user.plan]?.[feature];
+  if (limit === undefined) {
+    throw new BadRequestException(`Invalid feature '${feature}' for plan '${user.plan}'`);
+  }
+  return limit;
+}
+```
+
+**Impacto:**
+- ⚠️ Severidad: **CRÍTICA** - Funcionalidad completamente rota para usuarios autenticados
+- ⚠️ Alcance: **Todos los usuarios autenticados** (FREE, PREMIUM, ADMIN)
+- ⚠️ Urgencia: **ALTA** - Debe resolverse antes de mergear módulo Péndulo
+- ⚠️ Relación con TASK-511: Bug preexistente, NO introducido por TASK-511
+
+#### 🧪 Evidencia del Bug (Pruebas Realizadas)
+
+| Usuario | Plan | Resultado Esperado | Resultado Real | Estado |
+|---------|------|-------------------|----------------|--------|
+| `free@test.com` (ID: 2) | FREE | 200 OK (1 consulta/día) | 403 Forbidden | ❌ FALLA |
+| `premium@test.com` (ID: 3) | PREMIUM | 200 OK (1 consulta/día) | 403 Forbidden | ❌ FALLA |
+| `admin@test.com` (ID: 4) | PREMIUM | 200 OK (1 consulta/día) | 403 Forbidden | ❌ FALLA |
+
+**Comando de reproducción:**
+```bash
+# 1. Login
+TOKEN=$(curl -s -X POST http://localhost:3000/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"premium@test.com","password":"Test123456!"}' \
+  | jq -r '.access_token')
+
+# 2. Consultar péndulo (primera consulta del día)
+curl -X POST http://localhost:3000/api/v1/pendulum/query \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"question":"¿Es este un bug?"}'
+
+# Resultado: 403 Forbidden (esperado: 200 OK)
+```
+
+#### ✅ Solución Propuesta
+
+**Cambios requeridos:**
+
+**1. Modificar `UsageLimitsService.getLimit()` para consultar BD:**
+
+```typescript
+// ✅ CÓDIGO CORREGIDO:
+private async getLimit(userId: number, feature: UsageFeature): Promise<number> {
+  const user = await this.usersService.findById(userId);
+  if (!user) throw new NotFoundException(`User with ID ${userId} not found`);
+
+  if (feature === UsageFeature.DAILY_CARD) {
+    return this.planConfigService.getDailyCardLimit(user.plan);
+  }
+
+  if (feature === UsageFeature.TAROT_READING) {
+    return this.planConfigService.getTarotReadingsLimit(user.plan);
+  }
+
+  // ✅ NUEVO: Consultar BD para PENDULUM_QUERY
+  if (feature === UsageFeature.PENDULUM_QUERY) {
+    return this.planConfigService.getPendulumDailyLimit(user.plan);
+  }
+
+  // Para otras features (ORACLE_QUERY, INTERPRETATION_REGENERATION), usar constantes
+  const limit = USAGE_LIMITS[user.plan]?.[feature];
+  if (limit === undefined) {
+    throw new BadRequestException(`Invalid feature '${feature}' for plan '${user.plan}'`);
+  }
+  return limit;
+}
+```
+
+**2. Agregar método `getPendulumDailyLimit()` en `PlanConfigService` (si no existe):**
+
+```typescript
+async getPendulumDailyLimit(plan: UserPlan): Promise<number> {
+  const planConfig = await this.findByPlanType(plan);
+  if (!planConfig) {
+    throw new NotFoundException('Plan configuration not found');
+  }
+  return planConfig.pendulumDailyLimit;
+}
+```
+
+**Nota:** Verificar si este método ya existe. Si existe, solo se requiere el cambio #1.
+
+**3. Actualizar tests en `usage-limits.service.spec.ts`:**
+
+Agregar tests que verifiquen:
+- ✅ `PENDULUM_QUERY` usa `planConfigService.getPendulumDailyLimit()`, NO constantes
+- ✅ Diferentes planes retornan límites correctos desde BD
+- ✅ Mock del `planConfigService` debe simular respuesta de BD
+
+#### 🎯 Cambio de Diseño Confirmado (5 de febrero de 2026)
+
+**DECISIÓN:** Los límites del péndulo para usuarios FREE cambian de **3/mes a 1/día**, igual que Premium pero sin las funcionalidades premium.
+
+**Resumen de límites por plan:**
+
+| Plan | Límite | Pregunta escrita | Historial |
+|------|--------|------------------|-----------|
+| Anónimo | 1 total (lifetime) | ❌ No | ❌ No |
+| FREE | **1 por día** (CAMBIO: antes era 3/mes) | ❌ No | ❌ No |
+| PREMIUM | 1 por día | ✅ Sí | ✅ Sí |
+
+**Razón del cambio:**
+- Simplifica la implementación (todos usan límites diarios)
+- Consistencia con otros features del sistema
+- FREE mantiene diferenciación: sin pregunta escrita ni historial
+
+**Archivos a actualizar con este cambio:**
+
+1. **Backend:**
+   - `usage-limits.constants.ts` - Cambiar `3` a `1` y comentario a "1 consulta al péndulo/día"
+   - Migración/seeder de BD (si es necesario) - Asegurar `pendulum_daily_limit = 1` para FREE
+
+2. **Frontend:**
+   - `usePendulumCapabilities.tsx` (línea 673) - Cambiar lógica de period='monthly' a period='daily'
+
+3. **Documentación:**
+   - Este backlog - Actualizar todas las referencias de "3/mes" a "1/día" para FREE
+   - Overview del módulo (líneas 23, 42)
+   - HU-PEN-002 (línea 141)
+   - Notas de testing (líneas 2520, 2558, 2787)
+
+#### ✅ Criterios de Aceptación
+
+**Funcionales:**
+- [ ] Usuario FREE puede hacer consultas dentro de su límite diario (configurado en BD)
+- [ ] Usuario PREMIUM puede hacer consultas dentro de su límite diario (configurado en BD)
+- [ ] Usuario ADMIN (plan Premium) puede hacer consultas dentro de su límite diario
+- [ ] El límite se obtiene de la tabla `plans` campo `pendulum_daily_limit`, NO de constantes
+- [ ] Cuando se actualiza el límite en la BD, el cambio se refleja inmediatamente en la API
+
+**Técnicos:**
+- [ ] `UsageLimitsService.getLimit()` llama a `planConfigService.getPendulumDailyLimit()` para `PENDULUM_QUERY`
+- [ ] Tests unitarios verifican que se usa el servicio de planes, NO las constantes
+- [ ] Tests mockean correctamente el `PlanConfigService`
+- [ ] Coverage de tests ≥ 80% en archivos modificados
+
+**Validaciones:**
+- [ ] `npm run format` sin cambios
+- [ ] `npm run lint` sin errores
+- [ ] `npm run test:cov` ≥ 80% coverage
+- [ ] `npm run build` exitoso
+- [ ] `node scripts/validate-architecture.js` pasa
+- [ ] Testing manual con los 3 usuarios de test (FREE, PREMIUM, ADMIN) exitoso
+
+#### 📝 Subtareas Técnicas
+
+**Backend:**
+1. [ ] Leer código de `PlanConfigService` para verificar si `getPendulumDailyLimit()` ya existe
+2. [ ] Si no existe, implementar método `getPendulumDailyLimit()` en `PlanConfigService`
+3. [ ] Modificar `UsageLimitsService.getLimit()` para agregar case de `PENDULUM_QUERY`
+4. [ ] ✅ **CAMBIO DE DISEÑO APLICADO:** Actualizar `usage-limits.constants.ts` - Cambiar FREE de `3` a `1` y comentario a "1 consulta al péndulo/día"
+5. [ ] ✅ **CAMBIO DE DISEÑO APLICADO:** Actualizar `PlanConfigService.getPendulumLimit()` líneas 166-180 - Cambiar FREE de monthly a daily
+6. [ ] Actualizar tests de `UsageLimitsService` para validar nuevo comportamiento
+7. [ ] Actualizar tests de `PlanConfigService` para reflejar cambio de período FREE
+8. [ ] Agregar tests para `getPendulumDailyLimit()` (si es método nuevo)
+9. [ ] Ejecutar ciclo de calidad: `format → lint → test:cov → build → validate-architecture`
+
+**Frontend:**
+10. [ ] ✅ **NO REQUIERE CAMBIOS:** El frontend ya muestra correctamente según el período que retorna el backend
+11. [ ] Ejecutar ciclo de calidad frontend: `format → lint:fix → type-check → test:run → build → validate-architecture`
+
+**Base de Datos:**
+12. [ ] Verificar que plan FREE en tabla `plans` tiene `pendulum_daily_limit = 1` (no 3)
+13. [ ] Si es necesario, crear script de migración de datos o ejecutar UPDATE manual
+
+**Testing Manual:**
+14. [ ] Limpiar registros de `usage_limit` para usuarios 2, 3, 4 (solo feature=pendulum_query, fecha=hoy)
+15. [ ] Test usuario FREE: Primera consulta → 200 OK, Segunda → 403 (límite = 1)
+16. [ ] Test usuario PREMIUM: Primera consulta → 200 OK, Segunda → 403 (límite = 1)
+17. [ ] Test usuario ADMIN: Primera consulta → 200 OK, Segunda → 403 (límite = 1)
+18. [ ] Verificar que mensaje de error es correcto (diario, no "lifetime")
+19. [ ] Verificar que banner de límites muestra "1 consulta por día" para FREE (no "este mes")
+
+**Documentación:**
+20. [ ] ✅ **APLICADO:** Actualizar overview del módulo en este backlog (líneas 23, 42) - "FREE: 1/día"
+21. [ ] ✅ **APLICADO:** Actualizar HU-PEN-002 (línea 141) - Cambiar "3 consultas del mes" a "consulta del día"
+22. [ ] ✅ **APLICADO:** Actualizar notas de testing con nuevos límites
+23. [ ] Marcar TASK-514 como completada en este backlog
+
+#### 🔗 Relación con Otras Tareas
+
+- **TASK-511:** Este bug fue detectado durante testing E2E de TASK-511, pero es **independiente** y preexistente
+- **TASK-502:** Esta tarea implementó originalmente los límites del péndulo. El bug es por incompletitud de esa tarea
+- **TASK-503, TASK-504:** Estos servicios y endpoints funcionan correctamente, el problema es solo en `UsageLimitsService`
+
+**Bloqueo:** Este bug debe resolverse ANTES de:
+- Mergear el módulo Péndulo a `develop`
+- Marcar las TASK-500 a TASK-513 como completadas definitivamente
+- Realizar testing E2E completo del flujo del péndulo
+
+#### 🎯 Notas de Implementación
+
+**¿Por qué este bug no se detectó antes?**
+- Los tests unitarios existentes mockean el servicio y no validan la integración real con BD
+- El testing E2E del péndulo se enfocó primero en usuarios anónimos
+- Los tests de límites autenticados solo se ejecutaron en la segunda revisión de TASK-511
+
+**Prevención futura:**
+- Agregar tests de integración que validen el flujo completo con BD real
+- Implementar endpoint admin para resetear límites durante testing
+- Agregar más logging en guards y servicios para facilitar debugging
+
+#### 🚀 Estimación de Esfuerzo
+
+- **Implementación:** 1-2 horas
+- **Testing:** 1 hora
+- **Documentación:** 30 min
+- **Total:** 0.3 días
+
+**Fecha de creación:** 5 de febrero de 2026  
+**Fecha estimada de completación:** 5-6 de febrero de 2026
 
 ---
 
