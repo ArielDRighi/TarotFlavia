@@ -2,9 +2,11 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { isAxiosError } from 'axios';
+import { Info } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import {
   Pendulum,
   PendulumDisclaimer,
@@ -118,6 +120,42 @@ export function PendulumConsultation() {
 
         {/* Área del péndulo */}
         <Card className="mb-6 p-6">
+          {/* Botón de información */}
+          <div className="mb-4 flex justify-end">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" data-testid="info-button">
+                  <Info className="h-4 w-4" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent>
+                <SheetHeader>
+                  <SheetTitle>Cómo usar el péndulo</SheetTitle>
+                </SheetHeader>
+                <div className="text-muted-foreground mt-4 space-y-4 text-sm">
+                  <p>
+                    El péndulo es una herramienta de adivinación que responde preguntas de sí o no
+                    mediante el movimiento.
+                  </p>
+                  <div>
+                    <h4 className="text-foreground mb-1 font-medium">Movimientos:</h4>
+                    <ul className="list-disc space-y-1 pl-4">
+                      <li>
+                        <strong>Vertical:</strong> Sí
+                      </li>
+                      <li>
+                        <strong>Horizontal:</strong> No
+                      </li>
+                      <li>
+                        <strong>Circular:</strong> Quizás
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+
           {/* Péndulo animado */}
           <Pendulum movement={movement} isGlowing={!!response} />
 
