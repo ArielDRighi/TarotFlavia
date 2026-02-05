@@ -7,7 +7,7 @@ import {
   PendulumResponse,
   PendulumMovement,
 } from '../../domain/enums/pendulum.enums';
-import { User, UserPlan } from '../../../users/entities/user.entity';
+import { UserPlan } from '../../../users/entities/user.entity';
 import { OptionalJwtAuthGuard } from '../../../auth/infrastructure/guards/optional-jwt-auth.guard';
 import { CheckUsageLimitGuard } from '../../../usage-limits/guards/check-usage-limit.guard';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
@@ -79,7 +79,7 @@ describe('PendulumController', () => {
     });
 
     it('should allow free user to query pendulum without saving history', async () => {
-      const freeUser = { id: 1, plan: UserPlan.FREE } as User;
+      const freeUser = { userId: 1, plan: UserPlan.FREE };
       pendulumService.query.mockResolvedValue(mockResponse);
 
       const result = await controller.query({}, freeUser);
@@ -89,7 +89,10 @@ describe('PendulumController', () => {
     });
 
     it('should allow premium user to query with question', async () => {
-      const premiumUser = { id: 1, plan: UserPlan.PREMIUM } as User;
+      const premiumUser = {
+        userId: 1,
+        plan: UserPlan.PREMIUM,
+      };
       const dto = { question: '¿Debo aceptar este trabajo?' };
       const responseWithId = { ...mockResponse, queryId: 123 };
       pendulumService.query.mockResolvedValue(responseWithId);
@@ -101,7 +104,7 @@ describe('PendulumController', () => {
     });
 
     it('should strip question from non-premium users', async () => {
-      const freeUser = { id: 1, plan: UserPlan.FREE } as User;
+      const freeUser = { userId: 1, plan: UserPlan.FREE };
       const dto = { question: 'Mi pregunta' };
       pendulumService.query.mockResolvedValue(mockResponse);
 
@@ -116,7 +119,10 @@ describe('PendulumController', () => {
     });
 
     it('should throw BadRequestException for blocked content', async () => {
-      const premiumUser = { id: 1, plan: UserPlan.PREMIUM } as User;
+      const premiumUser = {
+        userId: 1,
+        plan: UserPlan.PREMIUM,
+      };
       const dto = { question: '¿Tengo cáncer?' };
       pendulumService.query.mockRejectedValue(
         new BadRequestException({
@@ -135,7 +141,10 @@ describe('PendulumController', () => {
 
   describe('getHistory', () => {
     it('should return history for premium users', async () => {
-      const premiumUser = { id: 1, plan: UserPlan.PREMIUM } as User;
+      const premiumUser = {
+        userId: 1,
+        plan: UserPlan.PREMIUM,
+      };
       const testDate = new Date('2026-02-04T21:28:41.999Z');
       const mockHistory = [
         {
@@ -170,7 +179,7 @@ describe('PendulumController', () => {
     });
 
     it('should throw ForbiddenException for non-premium users', async () => {
-      const freeUser = { id: 1, plan: UserPlan.FREE } as User;
+      const freeUser = { userId: 1, plan: UserPlan.FREE };
 
       await expect(controller.getHistory(freeUser)).rejects.toThrow(
         ForbiddenException,
@@ -179,7 +188,10 @@ describe('PendulumController', () => {
     });
 
     it('should filter history by response type', async () => {
-      const premiumUser = { id: 1, plan: UserPlan.PREMIUM } as User;
+      const premiumUser = {
+        userId: 1,
+        plan: UserPlan.PREMIUM,
+      };
       historyService.getUserHistory.mockResolvedValue([]);
 
       await controller.getHistory(premiumUser, 10, PendulumResponse.YES);
@@ -192,7 +204,10 @@ describe('PendulumController', () => {
     });
 
     it('should throw BadRequestException when limit is less than 1', async () => {
-      const premiumUser = { id: 1, plan: UserPlan.PREMIUM } as User;
+      const premiumUser = {
+        userId: 1,
+        plan: UserPlan.PREMIUM,
+      };
 
       await expect(controller.getHistory(premiumUser, 0)).rejects.toThrow(
         BadRequestException,
@@ -201,7 +216,10 @@ describe('PendulumController', () => {
     });
 
     it('should throw BadRequestException when limit is greater than 100', async () => {
-      const premiumUser = { id: 1, plan: UserPlan.PREMIUM } as User;
+      const premiumUser = {
+        userId: 1,
+        plan: UserPlan.PREMIUM,
+      };
 
       await expect(controller.getHistory(premiumUser, 101)).rejects.toThrow(
         BadRequestException,
@@ -210,7 +228,10 @@ describe('PendulumController', () => {
     });
 
     it('should accept valid limit values (1-100)', async () => {
-      const premiumUser = { id: 1, plan: UserPlan.PREMIUM } as User;
+      const premiumUser = {
+        userId: 1,
+        plan: UserPlan.PREMIUM,
+      };
       historyService.getUserHistory.mockResolvedValue([]);
 
       await controller.getHistory(premiumUser, 1);
@@ -231,7 +252,10 @@ describe('PendulumController', () => {
 
   describe('getStats', () => {
     it('should return stats for premium users', async () => {
-      const premiumUser = { id: 1, plan: UserPlan.PREMIUM } as User;
+      const premiumUser = {
+        userId: 1,
+        plan: UserPlan.PREMIUM,
+      };
       const mockStats = {
         total: 10,
         yesCount: 4,
@@ -247,7 +271,7 @@ describe('PendulumController', () => {
     });
 
     it('should throw ForbiddenException for non-premium users', async () => {
-      const freeUser = { id: 1, plan: UserPlan.FREE } as User;
+      const freeUser = { userId: 1, plan: UserPlan.FREE };
 
       await expect(controller.getStats(freeUser)).rejects.toThrow(
         ForbiddenException,
@@ -258,7 +282,10 @@ describe('PendulumController', () => {
 
   describe('deleteQuery', () => {
     it('should delete query for premium users', async () => {
-      const premiumUser = { id: 1, plan: UserPlan.PREMIUM } as User;
+      const premiumUser = {
+        userId: 1,
+        plan: UserPlan.PREMIUM,
+      };
       historyService.deleteQuery.mockResolvedValue(true);
 
       await controller.deleteQuery(premiumUser, 123);
@@ -267,7 +294,7 @@ describe('PendulumController', () => {
     });
 
     it('should throw ForbiddenException for non-premium users', async () => {
-      const freeUser = { id: 1, plan: UserPlan.FREE } as User;
+      const freeUser = { userId: 1, plan: UserPlan.FREE };
 
       await expect(controller.deleteQuery(freeUser, 123)).rejects.toThrow(
         ForbiddenException,

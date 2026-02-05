@@ -3022,30 +3022,37 @@ Misma que #1 - cambiar `user.id` a `user.userId` en el controller.
 
 ### 🎯 TAREAS DE CORRECCIÓN REQUERIDAS
 
-#### TASK-510: Fix userId en PendulumController
+#### TASK-510: Fix userId en PendulumController ✅
+**Estado:** ✅ COMPLETADA (2026-02-05)
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 0.25 días
 **Archivos:** `backend/tarot-app/src/modules/pendulum/infrastructure/controllers/pendulum.controller.ts`
 
-**Cambios requeridos:**
+**Cambios aplicados:**
 ```typescript
-// Línea ~105 - query endpoint
+// Línea 105 - query endpoint
 const userId = user?.plan === UserPlan.PREMIUM ? user.userId : undefined;
 
-// Línea ~155 - getHistory endpoint
-if (user.plan !== UserPlan.PREMIUM) {
-
-// Línea ~174 - getHistory call
+// Línea 169 - getHistory call
 const history = await this.historyService.getUserHistory(user.userId, limit, response);
 
-// Línea ~200 - getStats endpoint
+// Línea 205 - getStats endpoint
 return this.historyService.getUserStats(user.userId);
 
-// Línea ~229 - deleteQuery endpoint
+// Línea 233 - deleteQuery endpoint
 await this.historyService.deleteQuery(user.userId, queryId);
 ```
 
-**Resuelve:** Problemas #1 y #5
+**Cambios adicionales:**
+- Actualizado tipo de parámetro `user` de `User` a `{ userId: number; plan: UserPlan }` en todos los métodos
+- Actualizado todos los mocks en `pendulum.controller.spec.ts` para usar estructura JWT correcta
+- Removido import innecesario de `User` entity
+
+**Tests:** ✅ 15/15 pasando
+**Build:** ✅ Exitoso
+**Validación arquitectura:** ✅ Pasando
+
+**Resuelve:** Problemas #1 (Historial Premium) y #5 (Validación contenido bloqueado)
 
 ---
 
