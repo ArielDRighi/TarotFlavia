@@ -629,6 +629,44 @@ describe('PenduloPage', () => {
     });
   });
 
+  describe('Info Sheet', () => {
+    it('should render info button', () => {
+      renderWithProviders(<PenduloPage />);
+
+      expect(screen.getByTestId('sheet-trigger')).toBeInTheDocument();
+    });
+
+    it('should display sheet with info content', () => {
+      renderWithProviders(<PenduloPage />);
+
+      // Sheet content should be rendered (mocked in test)
+      expect(screen.getByTestId('sheet-content')).toBeInTheDocument();
+    });
+
+    it('should show "Cómo usar el péndulo" title in sheet', () => {
+      renderWithProviders(<PenduloPage />);
+
+      expect(screen.getByText('Cómo usar el péndulo')).toBeInTheDocument();
+    });
+
+    it('should display movement explanations', () => {
+      renderWithProviders(<PenduloPage />);
+
+      expect(screen.getByText(/Vertical:/)).toBeInTheDocument();
+      expect(screen.getByText(/Sí/)).toBeInTheDocument();
+      expect(screen.getByText(/Horizontal:/)).toBeInTheDocument();
+      expect(screen.getByText(/No/)).toBeInTheDocument();
+      expect(screen.getByText(/Circular:/)).toBeInTheDocument();
+      expect(screen.getByText(/Quizás/)).toBeInTheDocument();
+    });
+
+    it('should display pendulum description', () => {
+      renderWithProviders(<PenduloPage />);
+
+      expect(screen.getByText(/El péndulo es una herramienta de adivinación/i)).toBeInTheDocument();
+    });
+  });
+
   describe('Premium Question Submission', () => {
     it('should send question to API for premium users', async () => {
       const user = userEvent.setup();

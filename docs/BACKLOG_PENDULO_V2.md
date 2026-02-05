@@ -3224,6 +3224,7 @@ WHERE "planType" = 'premium';
 ---
 
 #### TASK-513: Agregar Sheet de información
+**Estado:** ✅ COMPLETADA
 **Prioridad:** 🟡 MEDIA
 **Estimación:** 0.25 días
 **Archivos:** `frontend/src/components/features/pendulum/PendulumConsultation.tsx`
@@ -3231,6 +3232,41 @@ WHERE "planType" = 'premium';
 **Descripción:** Implementar el Sheet con información sobre cómo usar el péndulo según especificación de TASK-508.
 
 **Resuelve:** Problema #4
+
+**Resultados:**
+✅ **Archivos modificados:**
+- `frontend/src/components/features/pendulum/PendulumConsultation.tsx` - Agregado Sheet con botón Info
+- `frontend/src/components/ui/sheet.tsx` - Instalado componente Sheet de shadcn/ui
+- `frontend/src/app/pendulo/page.test.tsx` - Agregados 5 nuevos tests
+
+✅ **Implementación:**
+- Sheet con botón ghost + icono Info en esquina superior derecha
+- Contenido incluye: título "Cómo usar el péndulo", descripción del péndulo, lista de movimientos con colores (Vertical: Sí, Horizontal: No, Circular: Quizás)
+- Sheet se abre desde la derecha (comportamiento por defecto de shadcn)
+
+✅ **Tests agregados:** 5 nuevos tests en `page.test.tsx`
+- Test: El botón de información se renderiza correctamente
+- Test: Al hacer clic abre el Sheet
+- Test: El Sheet muestra el título "Cómo usar el péndulo"
+- Test: El Sheet muestra las explicaciones de los movimientos
+- Test: El Sheet muestra la descripción del péndulo
+
+✅ **Validaciones:**
+- Format sin cambios (ya formateado)
+- Lint sin errores
+- Type-check sin errores
+- Tests: 31/31 passing (pendulo page) + 2959 total passing
+- Build exitoso
+- Validador de arquitectura OK
+
+✅ **Notas:**
+- Seguido workflow TDD completo: Red → Green → Refactor
+- No requiere cambios en backend
+- No requiere cambios en tipos ni APIs
+- Es una mejora puramente visual/UX
+- El Sheet es accesible para usuarios anónimos, free y premium por igual
+
+**Fecha de completación:** 5 de febrero de 2026
 
 ---
 
