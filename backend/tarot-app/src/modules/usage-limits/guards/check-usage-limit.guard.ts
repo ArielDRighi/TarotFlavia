@@ -82,7 +82,7 @@ export class CheckUsageLimitGuard implements CanActivate {
 
     // Anonymous user flow
     if (allowAnonymous) {
-      return this.checkAnonymousUserLimit(request);
+      return this.checkAnonymousUserLimit(request, feature);
     }
 
     throw new ForbiddenException('Usuario no autenticado');
@@ -222,8 +222,18 @@ export class CheckUsageLimitGuard implements CanActivate {
 
   /**
    * Checks usage limits for anonymous users.
+   * Supports both daily limits (default) and lifetime limits (for PENDULUM_QUERY).
    */
-  private async checkAnonymousUserLimit(request: Request): Promise<boolean> {
+  private async checkAnonymousUserLimit(
+    request: Request,
+    feature: UsageFeature,
+  ): Promise<boolean> {
+    // PENDULUM_QUERY has a special lifetime limit (1 total, not daily)
+    if (feature === UsageFeature.PENDULUM_QUERY) {
+      return this.checkPendulumLifetimeLimit(request);
+    }
+
+    // Default: daily limit (for DAILY_CARD, TAROT_READING, etc.)
     const canAccess = await this.anonymousTrackingService.canAccess(request);
 
     if (!canAccess) {
@@ -233,6 +243,36 @@ export class CheckUsageLimitGuard implements CanActivate {
     }
 
     await this.anonymousTrackingService.recordUsage(request);
+    return true;
+  }
+
+  /**
+   * Checks lifetime limit for anonymous pendulum queries (1 total, forever).
+   */
+  private async checkPendulumLifetimeLimit(request: Request): Promise<boolean> {
+    const ip = request.ip || '';
+    const userAgent = request.headers['user-agent'] || '';
+    const fingerprint = this.anonymousTrackingService.generateFingerprint(
+      ip,
+      userAgent,
+    );
+
+    const canAccess = await this.anonymousTrackingService.canAccessLifetime(
+      fingerprint,
+      UsageFeature.PENDULUM_QUERY,
+    );
+
+    if (!canAccess) {
+      throw new ForbiddenException(
+        'Ya has usado tu consulta gratuita del Péndulo. Regístrate para obtener más consultas.',
+      );
+    }
+
+    await this.anonymousTrackingService.recordLifetimeUsage(
+      fingerprint,
+      ip,
+      UsageFeature.PENDULUM_QUERY,
+    );
     return true;
   }
 }

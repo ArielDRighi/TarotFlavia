@@ -3057,18 +3057,37 @@ await this.historyService.deleteQuery(user.userId, queryId);
 ---
 
 #### TASK-511: Fix límite lifetime para anónimos
+
+**Estado:** ✅ COMPLETADA
+
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 0.5 días
 **Archivos:**
 - `backend/tarot-app/src/modules/usage-limits/guards/check-usage-limit.guard.ts`
+- `backend/tarot-app/src/modules/usage-limits/guards/check-usage-limit.guard.spec.ts`
 - `backend/tarot-app/src/modules/usage-limits/services/anonymous-tracking.service.ts`
 
-**Cambios requeridos:**
-1. Modificar `checkAnonymousUserLimit()` para recibir feature como parámetro
-2. Agregar case específico para `PENDULUM_QUERY` que use `canAccessLifetime()`
-3. Registrar uso con `recordLifetimeUsage()` después de consulta exitosa
+**Cambios realizados:**
+1. ✅ Modificado `checkAnonymousUserLimit()` para recibir `feature` como parámetro
+2. ✅ Agregado método `checkPendulumLifetimeLimit()` específico para `PENDULUM_QUERY`
+3. ✅ Implementado uso de `canAccessLifetime()` y `recordLifetimeUsage()` para límite de 1 consulta total
+4. ✅ Agregados 4 tests específicos para validar el comportamiento de límite lifetime
+5. ✅ Mensaje de error personalizado: "Ya has usado tu consulta gratuita del Péndulo. Regístrate para obtener más consultas."
+
+**Tests:**
+- 21/21 tests pasando en `check-usage-limit.guard.spec.ts`
+- 84/84 tests pasando en todo el módulo `usage-limits`
+- Coverage 100% en las líneas modificadas
+
+**Validaciones:**
+- ✅ Format sin errores
+- ✅ Lint sin errores
+- ✅ Build exitoso
+- ✅ Validador de arquitectura OK
 
 **Resuelve:** Problema #2
+
+**Fecha de completación:** 5 de febrero de 2026
 
 ---
 

@@ -23,6 +23,9 @@ describe('CheckUsageLimitGuard', () => {
   let anonymousTrackingService: {
     canAccess: jest.Mock;
     recordUsage: jest.Mock;
+    canAccessLifetime: jest.Mock;
+    recordLifetimeUsage: jest.Mock;
+    generateFingerprint: jest.Mock;
   };
   let usersService: {
     findById: jest.Mock;
@@ -63,6 +66,9 @@ describe('CheckUsageLimitGuard', () => {
     const mockGetRemainingUsage = jest.fn();
     const mockCanAccess = jest.fn();
     const mockRecordUsage = jest.fn();
+    const mockCanAccessLifetime = jest.fn();
+    const mockRecordLifetimeUsage = jest.fn();
+    const mockGenerateFingerprint = jest.fn();
     const mockGetAllAndOverride = jest.fn();
     const mockFindById = jest.fn();
     const mockFindByPlanType = jest.fn();
@@ -105,6 +111,9 @@ describe('CheckUsageLimitGuard', () => {
           useValue: {
             canAccess: mockCanAccess,
             recordUsage: mockRecordUsage,
+            canAccessLifetime: mockCanAccessLifetime,
+            recordLifetimeUsage: mockRecordLifetimeUsage,
+            generateFingerprint: mockGenerateFingerprint,
           },
         },
         {
@@ -321,6 +330,146 @@ describe('CheckUsageLimitGuard', () => {
         expect(anonymousTrackingService.canAccess).toHaveBeenCalled();
         expect(anonymousTrackingService.recordUsage).toHaveBeenCalled();
         expect(usageLimitsService.checkLimit).not.toHaveBeenCalled();
+      });
+
+      describe('PENDULUM_QUERY lifetime limit', () => {
+        it('should allow anonymous user FIRST pendulum query (lifetime limit)', async () => {
+          const context = mockExecutionContext(
+            undefined,
+            '192.168.1.1',
+            'Mozilla/5.0',
+          );
+          reflector.getAllAndOverride
+            .mockReturnValueOnce(UsageFeature.PENDULUM_QUERY)
+            .mockReturnValueOnce(true); // allowAnonymous = true
+
+          // Mock canAccessLifetime para simular que nunca ha usado el péndulo
+          const mockCanAccessLifetime = jest.fn().mockResolvedValue(true);
+          const mockRecordLifetimeUsage = jest.fn().mockResolvedValue({
+            id: 1,
+            fingerprint: 'test-fingerprint',
+            ip: '192.168.1.1',
+            date: '1970-01-01',
+            feature: UsageFeature.PENDULUM_QUERY,
+          });
+          anonymousTrackingService.canAccessLifetime = mockCanAccessLifetime;
+          anonymousTrackingService.recordLifetimeUsage =
+            mockRecordLifetimeUsage;
+
+          const result = await guard.canActivate(context);
+
+          expect(result).toBe(true);
+          expect(mockCanAccessLifetime).toHaveBeenCalled();
+          expect(mockRecordLifetimeUsage).toHaveBeenCalled();
+          // No debe llamar a canAccess (que es para límites diarios)
+          expect(anonymousTrackingService.canAccess).not.toHaveBeenCalled();
+        });
+
+        it('should block anonymous user SECOND pendulum query (lifetime limit reached)', async () => {
+          const context = mockExecutionContext(
+            undefined,
+            '192.168.1.1',
+            'Mozilla/5.0',
+          );
+          reflector.getAllAndOverride
+            .mockReturnValueOnce(UsageFeature.PENDULUM_QUERY)
+            .mockReturnValueOnce(true);
+
+          // Mock canAccessLifetime para simular que YA usó el péndulo antes
+          const mockCanAccessLifetime = jest.fn().mockResolvedValue(false);
+          anonymousTrackingService.canAccessLifetime = mockCanAccessLifetime;
+
+          await expect(guard.canActivate(context)).rejects.toThrow(
+            ForbiddenException,
+          );
+
+          // Create second context for second assertion
+          const context2 = mockExecutionContext(
+            undefined,
+            '192.168.1.1',
+            'Mozilla/5.0',
+          );
+          reflector.getAllAndOverride
+            .mockReturnValueOnce(UsageFeature.PENDULUM_QUERY)
+            .mockReturnValueOnce(true);
+
+          await expect(guard.canActivate(context2)).rejects.toThrow(
+            'Ya has usado tu consulta gratuita del Péndulo. Regístrate para obtener más consultas.',
+          );
+
+          expect(mockCanAccessLifetime).toHaveBeenCalled();
+        });
+
+        it('should use fingerprint correctly for pendulum lifetime tracking', async () => {
+          const ip = '192.168.1.100';
+          const userAgent = 'Mozilla/5.0 Chrome';
+          const context = mockExecutionContext(undefined, ip, userAgent);
+
+          reflector.getAllAndOverride
+            .mockReturnValueOnce(UsageFeature.PENDULUM_QUERY)
+            .mockReturnValueOnce(true);
+
+          const mockGenerateFingerprint = jest
+            .fn()
+            .mockReturnValue('fingerprint-hash-123');
+          const mockCanAccessLifetime = jest.fn().mockResolvedValue(true);
+          const mockRecordLifetimeUsage = jest.fn().mockResolvedValue({});
+
+          anonymousTrackingService.generateFingerprint =
+            mockGenerateFingerprint;
+          anonymousTrackingService.canAccessLifetime = mockCanAccessLifetime;
+          anonymousTrackingService.recordLifetimeUsage =
+            mockRecordLifetimeUsage;
+
+          await guard.canActivate(context);
+
+          expect(mockGenerateFingerprint).toHaveBeenCalledWith(ip, userAgent);
+          expect(mockCanAccessLifetime).toHaveBeenCalledWith(
+            'fingerprint-hash-123',
+            UsageFeature.PENDULUM_QUERY,
+          );
+          expect(mockRecordLifetimeUsage).toHaveBeenCalledWith(
+            'fingerprint-hash-123',
+            ip,
+            UsageFeature.PENDULUM_QUERY,
+          );
+        });
+
+        it('should use lifetime tracking for PENDULUM but daily tracking for TAROT_READING', async () => {
+          // Test 1: PENDULUM_QUERY usa lifetime
+          const pendulumContext = mockExecutionContext(undefined);
+          reflector.getAllAndOverride
+            .mockReturnValueOnce(UsageFeature.PENDULUM_QUERY)
+            .mockReturnValueOnce(true);
+
+          const mockCanAccessLifetime = jest.fn().mockResolvedValue(true);
+          const mockRecordLifetimeUsage = jest.fn().mockResolvedValue({});
+          anonymousTrackingService.canAccessLifetime = mockCanAccessLifetime;
+          anonymousTrackingService.recordLifetimeUsage =
+            mockRecordLifetimeUsage;
+
+          await guard.canActivate(pendulumContext);
+
+          expect(mockCanAccessLifetime).toHaveBeenCalled();
+          expect(mockRecordLifetimeUsage).toHaveBeenCalled();
+          expect(anonymousTrackingService.canAccess).not.toHaveBeenCalled();
+
+          // Test 2: TAROT_READING sigue usando daily tracking
+          jest.clearAllMocks();
+          const tarotContext = mockExecutionContext(undefined);
+          reflector.getAllAndOverride
+            .mockReturnValueOnce(UsageFeature.TAROT_READING)
+            .mockReturnValueOnce(true);
+
+          anonymousTrackingService.canAccess.mockResolvedValue(true);
+          anonymousTrackingService.recordUsage.mockResolvedValue({});
+
+          await guard.canActivate(tarotContext);
+
+          expect(anonymousTrackingService.canAccess).toHaveBeenCalled();
+          expect(anonymousTrackingService.recordUsage).toHaveBeenCalled();
+          expect(mockCanAccessLifetime).not.toHaveBeenCalled();
+        });
       });
 
       it('should block anonymous access when limit is reached', async () => {
