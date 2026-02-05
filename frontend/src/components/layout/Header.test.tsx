@@ -275,5 +275,18 @@ describe('Header', () => {
       expect(ritualesLink).toBeInTheDocument();
       expect(ritualesLink).toHaveAttribute('href', '/rituales');
     });
+
+    it('should display Péndulo link for all users', () => {
+      mockUseAuthStore.mockReturnValue({
+        user: null,
+        isAuthenticated: false,
+      });
+
+      render(<Header />);
+
+      const penduloLink = screen.getByRole('link', { name: /péndulo/i });
+      expect(penduloLink).toBeInTheDocument();
+      expect(penduloLink).toHaveAttribute('href', '/pendulo');
+    });
   });
 });

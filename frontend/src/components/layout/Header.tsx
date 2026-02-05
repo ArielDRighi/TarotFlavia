@@ -71,6 +71,12 @@ export function Header() {
           >
             Rituales
           </Link>
+          <Link
+            href={ROUTES.PENDULO}
+            className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
+          >
+            Péndulo
+          </Link>
           {user && (
             <>
               <Link
