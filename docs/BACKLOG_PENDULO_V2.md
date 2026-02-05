@@ -1548,6 +1548,8 @@ export function usePendulumCapabilities() {
 
 ### TASK-507: Crear componentes del Péndulo
 
+**Estado:** ✅ COMPLETADA
+
 **Módulo:** `frontend/src/components/features/pendulum/`
 **Prioridad:** ALTA
 **Estimación:** 1 día
@@ -1865,6 +1867,53 @@ export { PendulumLimitBanner } from './PendulumLimitBanner';
 export { PendulumResponseDisplay } from './PendulumResponse';
 export { PendulumBlockedContent } from './PendulumBlockedContent';
 ```
+
+#### Testing
+
+- [x] Test: Pendulum renderiza correctamente con diferentes movements (idle, searching, vertical, horizontal, circular)
+- [x] Test: Pendulum muestra efecto glowing cuando isGlowing=true
+- [x] Test: PendulumDisclaimer se abre y cierra correctamente
+- [x] Test: PendulumDisclaimer muestra texto de entretenimiento y disclaimer points
+- [x] Test: PendulumDisclaimer llama onAccept y onCancel según botón clickeado
+- [x] Test: PendulumLimitBanner muestra consultas restantes (lifetime, monthly, daily)
+- [x] Test: PendulumLimitBanner muestra mensaje de límite alcanzado con CTA correcto
+- [x] Test: PendulumResponse muestra respuesta, interpretación y fase lunar
+- [x] Test: PendulumResponse aplica color correcto según tipo de respuesta
+- [x] Test: PendulumBlockedContent muestra mensajes por categoría (health, legal, financial)
+- [x] Test: PendulumBlockedContent llama onClose cuando se cierra
+- [x] Todos los 39 tests passing ✅
+
+#### Resultados
+
+✅ **Archivos creados:**
+- `frontend/src/components/features/pendulum/Pendulum.tsx`
+- `frontend/src/components/features/pendulum/Pendulum.test.tsx`
+- `frontend/src/components/features/pendulum/PendulumDisclaimer.tsx`
+- `frontend/src/components/features/pendulum/PendulumDisclaimer.test.tsx`
+- `frontend/src/components/features/pendulum/PendulumLimitBanner.tsx`
+- `frontend/src/components/features/pendulum/PendulumLimitBanner.test.tsx`
+- `frontend/src/components/features/pendulum/PendulumResponse.tsx`
+- `frontend/src/components/features/pendulum/PendulumResponse.test.tsx`
+- `frontend/src/components/features/pendulum/PendulumBlockedContent.tsx`
+- `frontend/src/components/features/pendulum/PendulumBlockedContent.test.tsx`
+- `frontend/src/components/features/pendulum/index.ts`
+
+✅ **Validaciones:**
+- Lint sin errores (npm run lint:fix)
+- Format aplicado (npm run format)
+- Type-check exitoso (npm run type-check)
+- Build exitoso (npm run build)
+- Validador de arquitectura OK (node scripts/validate-architecture.js)
+- Tests: 39/39 passing ✅
+
+✅ **Cobertura de tests:**
+- Pendulum.test.tsx: 9 tests
+- PendulumDisclaimer.test.tsx: 7 tests
+- PendulumLimitBanner.test.tsx: 8 tests  
+- PendulumResponse.test.tsx: 7 tests
+- PendulumBlockedContent.test.tsx: 8 tests
+
+**Fecha de completación:** 4 de febrero de 2026
 
 ---
 
