@@ -538,6 +538,7 @@ describe('PenduloPage', () => {
         user: createMockUser({ plan: 'premium' }),
       });
       mockMutateAsync.mockRejectedValue({
+        isAxiosError: true,
         response: {
           data: {
             code: 'BLOCKED_CONTENT',
@@ -568,6 +569,7 @@ describe('PenduloPage', () => {
         user: createMockUser({ plan: 'premium' }),
       });
       mockMutateAsync.mockRejectedValue({
+        isAxiosError: true,
         response: {
           data: {
             code: 'BLOCKED_CONTENT',

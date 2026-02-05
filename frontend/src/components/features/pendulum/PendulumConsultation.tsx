@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { isAxiosError } from 'axios';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,8 +31,18 @@ export function PendulumConsultation() {
     category: '',
   });
 
+  // Ref para rastrear si el componente está montado (prevenir memory leaks)
+  const isMountedRef = useRef(true);
+
   const isPremium = user?.plan === 'premium';
   const canUse = capabilities?.canUse ?? true;
+
+  // Cleanup: marcar componente como desmontado
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   // Cuando el usuario hace clic en "Consultar", mostramos el disclaimer
   const handleConsultClick = () => {
@@ -58,33 +69,23 @@ export function PendulumConsultation() {
     try {
       const result = await queryPendulum({ question: isPremium ? question : undefined });
 
-      // Mostrar animación de respuesta
+      // Mostrar animación de respuesta con cleanup para prevenir memory leaks
       setTimeout(() => {
+        if (!isMountedRef.current) return;
         setMovement(result.movement);
         setTimeout(() => {
+          if (!isMountedRef.current) return;
           setResponse(result);
         }, 2000);
       }, 3000);
     } catch (error: unknown) {
       setMovement('idle');
 
-      if (
-        error &&
-        typeof error === 'object' &&
-        'response' in error &&
-        error.response &&
-        typeof error.response === 'object' &&
-        'data' in error.response &&
-        error.response.data &&
-        typeof error.response.data === 'object' &&
-        'code' in error.response.data &&
-        error.response.data.code === 'BLOCKED_CONTENT' &&
-        'category' in error.response.data
-      ) {
-        const data = error.response.data as { code: string; category: string };
+      // Simplificado con isAxiosError (consistente con otros archivos del proyecto)
+      if (isAxiosError(error) && error.response?.data?.code === 'BLOCKED_CONTENT') {
         setBlockedContent({
           open: true,
-          category: data.category,
+          category: error.response.data.category,
         });
       }
     }
