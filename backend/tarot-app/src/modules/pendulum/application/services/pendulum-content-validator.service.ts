@@ -92,6 +92,7 @@ export class PendulumContentValidatorService {
     // Verificar cada término bloqueado
     for (const term of this.blockedTerms) {
       const normalizedTerm = term
+        .toLowerCase()
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '');
 

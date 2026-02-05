@@ -31,7 +31,7 @@ import { CheckUsageLimit } from '../../../usage-limits/decorators/check-usage-li
 import { AllowAnonymous } from '../../../usage-limits/decorators/allow-anonymous.decorator';
 import { UsageFeature } from '../../../usage-limits/entities/usage-limit.entity';
 import { CurrentUser } from '../../../../common/decorators/current-user.decorator';
-import { User, UserPlan } from '../../../users/entities/user.entity';
+import { UserPlan } from '../../../users/entities/user.entity';
 import { PendulumService } from '../../application/services/pendulum.service';
 import { PendulumHistoryService } from '../../application/services/pendulum-history.service';
 import { PendulumQueryDto } from '../../application/dto/pendulum-query.dto';
@@ -88,7 +88,7 @@ export class PendulumController {
   })
   async query(
     @Body() dto: PendulumQueryDto,
-    @CurrentUser() user?: User,
+    @CurrentUser() user?: { userId: number; plan: UserPlan },
   ): Promise<PendulumQueryResponseDto> {
     // Crear nuevo objeto sin mutar el DTO de entrada
     const questionToSave =
@@ -102,7 +102,7 @@ export class PendulumController {
     };
 
     // Solo guardar historial para Premium
-    const userId = user?.plan === UserPlan.PREMIUM ? user.id : undefined;
+    const userId = user?.plan === UserPlan.PREMIUM ? user.userId : undefined;
 
     return this.pendulumService.query(dtoToUse, userId);
   }
@@ -142,7 +142,7 @@ export class PendulumController {
     description: 'Historial solo disponible para usuarios Premium',
   })
   async getHistory(
-    @CurrentUser() user: User,
+    @CurrentUser() user: { userId: number; plan: UserPlan },
     @Query(
       'limit',
       new DefaultValuePipe(10),
@@ -166,7 +166,7 @@ export class PendulumController {
     }
 
     const history = await this.historyService.getUserHistory(
-      user.id,
+      user.userId,
       limit,
       response,
     );
@@ -196,13 +196,15 @@ export class PendulumController {
     status: 403,
     description: 'Estadísticas solo disponibles para usuarios Premium',
   })
-  async getStats(@CurrentUser() user: User): Promise<PendulumStatsDto> {
+  async getStats(
+    @CurrentUser() user: { userId: number; plan: UserPlan },
+  ): Promise<PendulumStatsDto> {
     if (user.plan !== UserPlan.PREMIUM) {
       throw new ForbiddenException(
         'Las estadísticas solo están disponibles para usuarios Premium',
       );
     }
-    return this.historyService.getUserStats(user.id);
+    return this.historyService.getUserStats(user.userId);
   }
 
   /**
@@ -222,7 +224,7 @@ export class PendulumController {
     description: 'Historial solo disponible para usuarios Premium',
   })
   async deleteQuery(
-    @CurrentUser() user: User,
+    @CurrentUser() user: { userId: number; plan: UserPlan },
     @Param('id', ParseIntPipe) queryId: number,
   ): Promise<void> {
     if (user.plan !== UserPlan.PREMIUM) {
@@ -230,6 +232,6 @@ export class PendulumController {
         'El historial solo está disponible para usuarios Premium',
       );
     }
-    await this.historyService.deleteQuery(user.id, queryId);
+    await this.historyService.deleteQuery(user.userId, queryId);
   }
 }
