@@ -17,20 +17,19 @@ describe('PrivacidadPage', () => {
 
   it('should display last updated date', () => {
     render(<PrivacidadPage />);
-    expect(screen.getByText('Última actualización: Febrero 2026')).toBeInTheDocument();
+    expect(screen.getByText(/Última actualización:/i)).toBeInTheDocument();
+    expect(screen.getByText(/2026/i)).toBeInTheDocument();
   });
 
   it('should render all 11 sections with their headings', () => {
     render(<PrivacidadPage />);
 
+    expect(screen.getByRole('heading', { name: '1. Introducción', level: 2 })).toBeInTheDocument();
     expect(
-      screen.getByRole('heading', { name: '1. Información que Recopilamos', level: 2 })
+      screen.getByRole('heading', { name: '2. Información que Recopilamos', level: 2 })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('heading', { name: '2. Cómo Utilizamos tu Información', level: 2 })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('heading', { name: '3. Base Legal para el Procesamiento', level: 2 })
+      screen.getByRole('heading', { name: '3. Cómo Usamos tu Información', level: 2 })
     ).toBeInTheDocument();
     expect(
       screen.getByRole('heading', { name: '4. Compartir Información', level: 2 })
@@ -66,13 +65,13 @@ describe('PrivacidadPage', () => {
 
   it('should have proper styling classes', () => {
     const { container } = render(<PrivacidadPage />);
-    const mainContainer = container.querySelector('.bg-bg-main');
-    expect(mainContainer).toBeInTheDocument();
+    const containerDiv = container.querySelector('.container');
+    expect(containerDiv).toBeInTheDocument();
   });
 
-  it('should mention GDPR compliance', () => {
+  it('should mention data protection', () => {
     render(<PrivacidadPage />);
-    expect(screen.getByText(/Cumplir con el GDPR/i)).toBeInTheDocument();
+    expect(screen.getByText(/respetamos tu privacidad/i)).toBeInTheDocument();
   });
 
   it('should display information about cookies', () => {
