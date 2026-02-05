@@ -3057,18 +3057,143 @@ await this.historyService.deleteQuery(user.userId, queryId);
 ---
 
 #### TASK-511: Fix límite lifetime para anónimos
+
+**Estado:** ✅ COMPLETADA
+
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 0.5 días
 **Archivos:**
 - `backend/tarot-app/src/modules/usage-limits/guards/check-usage-limit.guard.ts`
+- `backend/tarot-app/src/modules/usage-limits/guards/check-usage-limit.guard.spec.ts`
 - `backend/tarot-app/src/modules/usage-limits/services/anonymous-tracking.service.ts`
 
-**Cambios requeridos:**
-1. Modificar `checkAnonymousUserLimit()` para recibir feature como parámetro
-2. Agregar case específico para `PENDULUM_QUERY` que use `canAccessLifetime()`
-3. Registrar uso con `recordLifetimeUsage()` después de consulta exitosa
+**Cambios realizados:**
+1. ✅ Modificado `checkAnonymousUserLimit()` para recibir `feature` como parámetro
+2. ✅ Agregado método `checkPendulumLifetimeLimit()` específico para `PENDULUM_QUERY`
+3. ✅ Implementado uso de `canAccessLifetime()` y `recordLifetimeUsage()` para límite de 1 consulta total
+4. ✅ Agregados 4 tests específicos para validar el comportamiento de límite lifetime
+5. ✅ Mensaje de error personalizado: "Ya has usado tu consulta gratuita del Péndulo. Regístrate para obtener más consultas."
+
+**Tests:**
+- 21/21 tests pasando en `check-usage-limit.guard.spec.ts`
+- 84/84 tests pasando en todo el módulo `usage-limits`
+- Coverage 100% en las líneas modificadas
+
+**Validaciones:**
+- ✅ Format sin errores
+- ✅ Lint sin errores
+- ✅ Build exitoso
+- ✅ Validador de arquitectura OK
 
 **Resuelve:** Problema #2
+
+**Fecha de completación:** 5 de febrero de 2026
+
+---
+
+#### 🔍 Hallazgo Adicional Durante Testing E2E de TASK-511
+
+**Fecha del hallazgo:** 5 de febrero de 2026  
+**Detectado por:** Testing manual con cURL  
+**Estado:** 🚨 REQUIERE INVESTIGACIÓN
+
+Durante el testing E2E del fix de TASK-511, se realizaron pruebas con distintos tipos de usuarios para validar que el límite lifetime de anónimos funcionara correctamente. En ese proceso, se descubrió un **problema adicional con usuarios PREMIUM**.
+
+##### Contexto del Testing
+
+Se ejecutaron las siguientes pruebas en localhost:3000:
+
+1. ✅ **Usuario anónimo (fingerprint nuevo) - Primera consulta:** 200 OK - PASA
+2. ✅ **Usuario anónimo (mismo fingerprint) - Segunda consulta:** 403 Forbidden - PASA (mensaje correcto)
+3. ✅ **Usuario FREE autenticado (ID: 2):** 200 OK - PASA
+4. ❌ **Usuario PREMIUM autenticado (ID: 3):** 403 Forbidden - **INESPERADO**
+
+##### Descripción del Problema
+
+**Usuario afectado:**
+- Email: `premium@test.com`
+- UserID: `3`
+- Plan: `PREMIUM`
+- Límite esperado: 1 consulta por día
+
+**Comportamiento observado:**
+
+```bash
+# Request:
+curl -X POST http://localhost:3000/api/v1/pendulum/query \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
+  -d '{}'
+
+# Response:
+{
+  "message": "Has alcanzado tu límite diario para esta función. Tu límite se restablecerá mañana.",
+  "error": "Forbidden",
+  "statusCode": 403
+}
+```
+
+**Comportamiento esperado:**
+- Primera consulta del día debería retornar 200 OK con respuesta del péndulo
+- Solo la segunda consulta en el mismo día debería recibir 403
+
+##### Posibles Causas
+
+1. **Consultas previas en la BD:** El usuario Premium ya pudo haber hecho una consulta hoy y alcanzó su límite de 1/día
+2. **Problema en la lógica del guard:** El `CheckUsageLimitGuard` puede estar validando incorrectamente el límite diario para `PENDULUM_QUERY`
+3. **Problema de configuración del plan:** El campo `pendulumDailyLimit` en la tabla `plans` podría no estar configurado correctamente
+4. **Bug preexistente:** El problema puede haber existido ANTES del fix de TASK-511 y no estar relacionado con los cambios realizados
+
+##### Análisis Preliminar
+
+**Archivos relevantes a revisar:**
+- `backend/tarot-app/src/modules/usage-limits/guards/check-usage-limit.guard.ts` (línea 105-117: `checkAuthenticatedUserLimit()`)
+- `backend/tarot-app/src/modules/plan-config/entities/plan.entity.ts` (campo `pendulumDailyLimit`)
+- Tabla `usage_limit` en PostgreSQL (verificar registros para userId=3 y feature=PENDULUM_QUERY)
+
+**Queries de verificación recomendadas:**
+
+```sql
+-- Verificar consultas previas del usuario Premium hoy
+SELECT * FROM pendulum_queries 
+WHERE "userId" = 3 
+AND "createdAt" >= CURRENT_DATE;
+
+-- Verificar registros de límites de uso hoy
+SELECT * FROM usage_limit 
+WHERE "userId" = 3 
+AND feature = 'pendulum_query' 
+AND date >= CURRENT_DATE;
+
+-- Verificar configuración del plan PREMIUM
+SELECT "planType", "pendulumDailyLimit" 
+FROM plans 
+WHERE "planType" = 'premium';
+```
+
+##### Impacto
+
+- ⚠️ **Severidad:** MEDIA (si es un problema preexistente) o ALTA (si fue introducido por el fix de TASK-511)
+- ⚠️ **Alcance:** Solo usuarios PREMIUM
+- ⚠️ **Urgencia:** ALTA - Requiere investigación inmediata para determinar si está relacionado con el fix de TASK-511
+
+##### Acciones Requeridas
+
+**CRÍTICO:** Antes de mergear el PR #340 (TASK-511), se debe:
+
+1. **Verificar datos en BD** usando las queries de verificación de arriba
+2. **Determinar causa raíz:**
+   - Si el usuario ya hizo una consulta hoy → Problema es solo de testing (resetear datos)
+   - Si el plan no está configurado → Corregir configuración del plan
+   - Si la lógica del guard está mal → Crear TASK-514 para fix separado
+3. **Aislar el problema:** Confirmar que NO fue introducido por los cambios de TASK-511
+4. **Documentar hallazgo:** Si es un bug separado, crear un nuevo issue/task
+
+##### Estado Actual
+
+**Decisión pendiente:** ¿Es este problema relacionado con TASK-511 o es un issue preexistente y separado?
+
+**Bloqueo para PR #340:** Requiere validación adicional antes de aprobar el merge.
 
 ---
 
