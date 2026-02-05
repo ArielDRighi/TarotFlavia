@@ -231,7 +231,7 @@ describe('DailyCardExperience', () => {
     it('should show limit message for PREMIUM user when daily card limit reached', () => {
       // PREMIUM also has 1 daily card limit
       mockUseAuth.mockReturnValue({
-        user: createMockUser({ plan: 'PREMIUM' }),
+        user: createMockUser({ plan: 'premium' }),
         isAuthenticated: true,
         isLoading: false,
       });
@@ -358,7 +358,7 @@ describe('DailyCardExperience', () => {
   describe('Revealed State - with personalized interpretation (PREMIUM)', () => {
     it('should render revealed state when daily reading exists with personalized interpretation', () => {
       mockUseAuth.mockReturnValue({
-        user: createMockUser({ plan: 'PREMIUM' }),
+        user: createMockUser({ plan: 'premium' }),
         isAuthenticated: true,
         isLoading: false,
       });
@@ -376,7 +376,7 @@ describe('DailyCardExperience', () => {
 
     it('should display card name with secondary color - PREMIUM user', () => {
       mockUseAuth.mockReturnValue({
-        user: createMockUser({ plan: 'PREMIUM' }),
+        user: createMockUser({ plan: 'premium' }),
         isAuthenticated: true,
         isLoading: false,
       });
@@ -409,7 +409,7 @@ describe('DailyCardExperience', () => {
       });
 
       mockUseAuth.mockReturnValue({
-        user: createMockUser({ plan: 'FREE' }),
+        user: createMockUser({ plan: 'free' }),
         isAuthenticated: true,
         isLoading: false,
       });
@@ -499,7 +499,7 @@ describe('DailyCardExperience', () => {
       });
 
       mockUseAuth.mockReturnValue({
-        user: createMockUser({ plan: 'FREE' }),
+        user: createMockUser({ plan: 'free' }),
         isAuthenticated: true,
         isLoading: false,
       });

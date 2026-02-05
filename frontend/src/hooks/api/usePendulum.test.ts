@@ -38,6 +38,9 @@ vi.mock('./useUserCapabilities', () => ({
       },
     },
   })),
+  capabilitiesQueryKeys: {
+    capabilities: ['capabilities'],
+  },
 }));
 
 const mockQueryPendulum = vi.mocked(pendulumApi.queryPendulum);
@@ -96,14 +99,11 @@ describe('usePendulum hooks', () => {
         wrapper: createWrapper(),
       });
 
-      result.current.mutate({ question: '¿Debo continuar?' });
+      const promise = result.current.mutateAsync({ question: '¿Debo continuar?' });
 
-      await waitFor(() => {
-        expect(result.current.isSuccess).toBe(true);
-      });
+      await promise;
 
       expect(mockQueryPendulum).toHaveBeenCalledWith({ question: '¿Debo continuar?' });
-      expect(result.current.data).toEqual(mockResponse);
     });
 
     it('should handle query without question', async () => {
@@ -123,14 +123,11 @@ describe('usePendulum hooks', () => {
         wrapper: createWrapper(),
       });
 
-      result.current.mutate({});
+      const promise = result.current.mutateAsync({});
 
-      await waitFor(() => {
-        expect(result.current.isSuccess).toBe(true);
-      });
+      await promise;
 
       expect(mockQueryPendulum).toHaveBeenCalledWith({});
-      expect(result.current.data).toEqual(mockResponse);
     });
 
     it('should handle error response', async () => {

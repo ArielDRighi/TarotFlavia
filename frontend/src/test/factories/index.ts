@@ -21,6 +21,7 @@ export {
 
 export {
   createMockFeatureLimit,
+  createMockPendulumFeatureLimit,
   createMockAnonymousCapabilities,
   createMockFreeCapabilities,
   createMockPremiumCapabilities,
