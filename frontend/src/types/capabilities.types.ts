@@ -22,6 +22,23 @@ export interface FeatureLimit {
 }
 
 /**
+ * Pendulum feature limit information
+ * Extends FeatureLimit with period-specific information for pendulum queries
+ */
+export interface PendulumFeatureLimit {
+  /** Number of times the feature has been used in the current period */
+  used: number;
+  /** Maximum number of times the feature can be used */
+  limit: number;
+  /** Whether the user can still use this feature (used < limit) */
+  canUse: boolean;
+  /** ISO date string when the limit resets, or null for lifetime limits */
+  resetAt: string | null;
+  /** Period type: 'daily' (premium), 'monthly' (free), 'lifetime' (anonymous) */
+  period: 'daily' | 'monthly' | 'lifetime';
+}
+
+/**
  * User capabilities response from backend
  * Single source of truth for what a user can do in the app
  */
@@ -30,6 +47,8 @@ export interface UserCapabilities {
   dailyCard: FeatureLimit;
   /** Tarot readings limits and usage */
   tarotReadings: FeatureLimit;
+  /** Pendulum queries limits and usage */
+  pendulum: PendulumFeatureLimit;
 
   /** Convenient boolean: can create daily reading (dailyCard.canUse) */
   canCreateDailyReading: boolean;

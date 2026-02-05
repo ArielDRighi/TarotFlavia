@@ -1,7 +1,7 @@
 # BACKLOG AUGURIA 2.0 - PÉNDULO DIGITAL V2
 
 **Fecha de creación:** 18 de enero de 2026
-**Última actualización:** 18 de enero de 2026
+**Última actualización:** 4 de febrero de 2026
 **Módulo:** Péndulo Digital
 **Prioridad Global:** MEDIA
 **Estimación Total:** 4-5 días
@@ -1439,6 +1439,8 @@ PENDULUM: {
 
 ### TASK-506: Crear hooks del Péndulo
 
+**Estado:** ✅ COMPLETADA
+
 **Módulo:** `frontend/src/hooks/api/`
 **Prioridad:** ALTA
 **Estimación:** 0.25 días
@@ -1508,6 +1510,39 @@ export function usePendulumCapabilities() {
   return capabilities?.pendulum ?? null;
 }
 ```
+
+#### Resultados
+
+✅ **Archivos creados:**
+- `frontend/src/hooks/api/usePendulum.ts` - Hooks de TanStack Query para el péndulo
+- `frontend/src/hooks/api/usePendulum.test.ts` - Tests completos (12 tests passing)
+
+✅ **Archivos modificados:**
+- `frontend/src/types/capabilities.types.ts` - Agregado `PendulumFeatureLimit` interface y campo `pendulum` en `UserCapabilities`
+- `frontend/src/types/index.ts` - Exportado `PendulumFeatureLimit`
+- `frontend/src/test/factories/capabilities.factory.ts` - Agregados mocks para péndulo en todos los factories
+
+✅ **Hooks implementados:**
+- `usePendulumQuery()` - Mutation para consultar el péndulo con invalidación de capabilities
+- `usePendulumHistory()` - Query para historial con filtros opcionales (límite y tipo de respuesta)
+- `usePendulumStats()` - Query para estadísticas del usuario
+- `useDeletePendulumQuery()` - Mutation para eliminar consulta del historial
+- `usePendulumCapabilities()` - Helper para obtener capacidades del péndulo desde UserCapabilities
+- `pendulumKeys` - Query keys centralizados
+
+✅ **Tests:**
+- 12 tests pasando (100% coverage)
+- Tests incluyen: query keys correctos, mutations con invalidaciones, queries con filtros, manejo de capabilities
+
+✅ **Validaciones:**
+- Format sin cambios
+- Lint sin errores
+- Type-check sin errores ✅ (arreglados 8 errores en factories/mocks)
+- Build exitoso
+- Test suite completo: 1263 tests passing
+- Validador de arquitectura OK
+
+**Fecha de completación:** 4 de febrero de 2026
 
 ---
 
