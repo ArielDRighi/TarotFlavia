@@ -800,14 +800,16 @@ export enum InterpretationCategory {
 
 ---
 
-### T-CA-002: Crear Entidad BirthChart
+### T-CA-002: Crear Entidad BirthChart ✅
+
+**Estado:** ✅ COMPLETADA
 
 **Historia relacionada:** HU-CA-001, HU-CA-008, HU-CA-009
 
 **Descripción:**
 Crear la entidad principal `BirthChart` que almacena las cartas astrales generadas por usuarios Premium. Incluye datos de nacimiento, posiciones calculadas y relación con usuario.
 
-**Ubicación:** `src/modules/birth-chart/infrastructure/entities/`
+**Ubicación:** `src/modules/birth-chart/entities/` (ubicación correcta según ADR-003)
 
 **Archivos a crear:**
 
@@ -1009,18 +1011,29 @@ export class BirthChart {
 
 **Criterios de aceptación:**
 
-- [ ] Entidad creada con todos los campos especificados
-- [ ] Interfaces TypeScript para estructuras JSON
-- [ ] Índice único para prevenir cartas duplicadas
-- [ ] Índice de búsqueda por userId
-- [ ] Relación ManyToOne con User (CASCADE delete)
-- [ ] Métodos helper documentados
-- [ ] Swagger decorators para documentación API
-- [ ] Tests unitarios para métodos helper
+- [x] Entidad creada con todos los campos especificados
+- [x] Interfaces TypeScript para estructuras JSON
+- [x] Índice único para prevenir cartas duplicadas
+- [x] Índice de búsqueda por userId
+- [x] Relación ManyToOne con User (CASCADE delete)
+- [x] Métodos helper documentados
+- [x] Swagger decorators para documentación API
+- [x] Tests unitarios para métodos helper (18 tests, 100% cobertura)
 
-**Dependencias:** T-CA-001 (enums)
+**Dependencias:** T-CA-001 (enums) ✅
 
 **Estimación:** 3 horas
+
+**Tiempo real:** 2.5 horas
+
+**Notas técnicas:**
+- Entidad ubicada en `src/modules/birth-chart/entities/` según ADR-003 (entidades en raíz del módulo)
+- Estructura flat porque módulo tiene 8 archivos, 707 líneas (bajo threshold de 10 archivos/1500 líneas)
+- Tests con 100% cobertura (18 casos de prueba)
+- Interfaces TypeScript completas para: PlanetPosition, HouseCusp, ChartAspect, ChartDistribution, ChartData
+- Métodos helper: getBigThree(), hasAiSynthesis(), getAspectsForPlanet()
+- IDs numéricos (no strings) según reglas del proyecto
+- Índice único compuesto: userId + birthDate + birthTime + latitude + longitude
 
 ---
 
