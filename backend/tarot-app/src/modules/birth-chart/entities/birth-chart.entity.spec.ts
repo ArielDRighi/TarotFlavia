@@ -278,6 +278,10 @@ describe('BirthChart Entity', () => {
       expect(birthChart).toHaveProperty('ascendantSign');
     });
 
+    it('should have user relation property', () => {
+      expect(birthChart).toHaveProperty('user');
+    });
+
     it('should have chartData with correct structure', () => {
       expect(birthChart.chartData).toHaveProperty('planets');
       expect(birthChart.chartData).toHaveProperty('houses');

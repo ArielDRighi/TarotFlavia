@@ -129,14 +129,32 @@ export class BirthChart {
     example: -34.6037,
     description: 'Latitud del lugar de nacimiento',
   })
-  @Column({ type: 'decimal', precision: 10, scale: 6 })
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 6,
+    transformer: {
+      to: (value: number | null | undefined) => value,
+      from: (value: string | null | undefined): number | null | undefined =>
+        value !== null && value !== undefined ? parseFloat(value) : value,
+    },
+  })
   latitude: number;
 
   @ApiProperty({
     example: -58.3816,
     description: 'Longitud del lugar de nacimiento',
   })
-  @Column({ type: 'decimal', precision: 10, scale: 6 })
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 6,
+    transformer: {
+      to: (value: number | null | undefined) => value,
+      from: (value: string | null | undefined): number | null | undefined =>
+        value !== null && value !== undefined ? parseFloat(value) : value,
+    },
+  })
   longitude: number;
 
   @ApiProperty({
