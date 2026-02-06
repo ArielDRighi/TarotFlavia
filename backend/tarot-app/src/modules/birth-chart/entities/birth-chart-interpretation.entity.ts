@@ -170,7 +170,7 @@ export class BirthChartInterpretation {
    * ```typescript
    * // Planeta en signo
    * generateKey(InterpretationCategory.PLANET_IN_SIGN, Planet.SUN, ZodiacSign.ARIES)
-   * // => "planet_in_sign:sun:aries::"
+   * // => "planet_in_sign:sun:aries:::"
    *
    * // Aspecto
    * generateKey(InterpretationCategory.ASPECT, Planet.MARS, null, null, AspectType.TRINE, Planet.JUPITER)
@@ -235,6 +235,12 @@ export class BirthChartInterpretation {
             error: 'planet_in_sign requires planet and sign',
           };
         }
+        if (house || aspectType || planet2) {
+          return {
+            valid: false,
+            error: 'planet_in_sign only needs planet and sign',
+          };
+        }
         break;
 
       case InterpretationCategory.PLANET_IN_HOUSE:
@@ -244,6 +250,12 @@ export class BirthChartInterpretation {
             error: 'planet_in_house requires planet and house',
           };
         }
+        if (sign || aspectType || planet2) {
+          return {
+            valid: false,
+            error: 'planet_in_house only needs planet and house',
+          };
+        }
         break;
 
       case InterpretationCategory.ASPECT:
@@ -251,6 +263,12 @@ export class BirthChartInterpretation {
           return {
             valid: false,
             error: 'aspect requires planet, planet2, and aspectType',
+          };
+        }
+        if (sign || house) {
+          return {
+            valid: false,
+            error: 'aspect only needs planet, planet2, and aspectType',
           };
         }
         break;
@@ -263,6 +281,9 @@ export class BirthChartInterpretation {
           return { valid: false, error: 'ascendant only needs sign' };
         }
         break;
+
+      default:
+        return { valid: false, error: 'unknown category' };
     }
 
     return { valid: true };

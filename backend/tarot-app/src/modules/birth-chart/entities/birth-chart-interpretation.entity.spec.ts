@@ -128,6 +128,17 @@ describe('BirthChartInterpretation Entity', () => {
         expect(result.valid).toBe(false);
         expect(result.error).toBe('planet_in_sign requires planet and sign');
       });
+
+      it('should reject planet_in_sign with extra fields (house)', () => {
+        const result = BirthChartInterpretation.validateCombination(
+          InterpretationCategory.PLANET_IN_SIGN,
+          Planet.MARS,
+          ZodiacSign.ARIES,
+          5, // house (extra)
+        );
+        expect(result.valid).toBe(false);
+        expect(result.error).toBe('planet_in_sign only needs planet and sign');
+      });
     });
 
     describe('PLANET_IN_HOUSE validations', () => {
@@ -160,6 +171,19 @@ describe('BirthChartInterpretation Entity', () => {
         );
         expect(result.valid).toBe(false);
         expect(result.error).toBe('planet_in_house requires planet and house');
+      });
+
+      it('should reject planet_in_house with extra fields (sign)', () => {
+        const result = BirthChartInterpretation.validateCombination(
+          InterpretationCategory.PLANET_IN_HOUSE,
+          Planet.SATURN,
+          ZodiacSign.CAPRICORN, // sign (extra)
+          10,
+        );
+        expect(result.valid).toBe(false);
+        expect(result.error).toBe(
+          'planet_in_house only needs planet and house',
+        );
       });
     });
 
@@ -209,15 +233,30 @@ describe('BirthChartInterpretation Entity', () => {
       it('should reject aspect without aspectType', () => {
         const result = BirthChartInterpretation.validateCombination(
           InterpretationCategory.ASPECT,
-          Planet.MARS,
+          Planet.SUN,
           null,
           null,
           null,
-          Planet.JUPITER,
+          Planet.MOON,
         );
         expect(result.valid).toBe(false);
         expect(result.error).toBe(
           'aspect requires planet, planet2, and aspectType',
+        );
+      });
+
+      it('should reject aspect with extra fields (sign)', () => {
+        const result = BirthChartInterpretation.validateCombination(
+          InterpretationCategory.ASPECT,
+          Planet.SUN,
+          ZodiacSign.LEO, // sign (extra)
+          null,
+          AspectType.CONJUNCTION,
+          Planet.MOON,
+        );
+        expect(result.valid).toBe(false);
+        expect(result.error).toBe(
+          'aspect only needs planet, planet2, and aspectType',
         );
       });
     });
@@ -249,6 +288,16 @@ describe('BirthChartInterpretation Entity', () => {
         );
         expect(result.valid).toBe(false);
         expect(result.error).toBe('ascendant only needs sign');
+      });
+    });
+
+    describe('Unknown category handling', () => {
+      it('should reject unknown category', () => {
+        const result = BirthChartInterpretation.validateCombination(
+          'invalid_category' as any,
+        );
+        expect(result.valid).toBe(false);
+        expect(result.error).toBe('unknown category');
       });
     });
   });
