@@ -1,23 +1,10 @@
 /**
- * Enum de signos zodiacales
- *
- * Representa los 12 signos del zodíaco en orden astronómico
- * (comenzando con Aries en el equinoccio de primavera).
+ * Re-exportar enum de signos zodiacales desde common/utils
+ * para evitar duplicación y mantener compatibilidad de tipos
  */
-export enum ZodiacSign {
-  ARIES = 'aries',
-  TAURUS = 'taurus',
-  GEMINI = 'gemini',
-  CANCER = 'cancer',
-  LEO = 'leo',
-  VIRGO = 'virgo',
-  LIBRA = 'libra',
-  SCORPIO = 'scorpio',
-  SAGITTARIUS = 'sagittarius',
-  CAPRICORN = 'capricorn',
-  AQUARIUS = 'aquarius',
-  PISCES = 'pisces',
-}
+import { ZodiacSign } from '../../../../common/utils/zodiac.utils';
+
+export { ZodiacSign };
 
 /**
  * Metadata de signos zodiacales
