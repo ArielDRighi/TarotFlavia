@@ -26,7 +26,7 @@ export enum AspectType {
  * - orb: Orbe permitido (desviación aceptable en grados)
  * - nature: Naturaleza del aspecto (armonioso, desafiante, neutral)
  */
-export const AspectMetadata: Record<
+export const AspectTypeMetadata: Record<
   AspectType,
   {
     name: string;

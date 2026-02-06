@@ -1,4 +1,4 @@
-import { AspectType, AspectMetadata } from './aspect-type.enum';
+import { AspectType, AspectTypeMetadata } from './aspect-type.enum';
 
 describe('AspectType Enum', () => {
   describe('Enum Values', () => {
@@ -26,13 +26,13 @@ describe('AspectType Enum', () => {
   describe('Aspect Metadata', () => {
     it('should have metadata for all aspects', () => {
       Object.values(AspectType).forEach((aspect) => {
-        expect(AspectMetadata[aspect]).toBeDefined();
+        expect(AspectTypeMetadata[aspect]).toBeDefined();
       });
     });
 
     it('should have complete metadata structure', () => {
       Object.values(AspectType).forEach((aspect) => {
-        const metadata = AspectMetadata[aspect];
+        const metadata = AspectTypeMetadata[aspect];
         expect(metadata).toHaveProperty('name');
         expect(metadata).toHaveProperty('symbol');
         expect(metadata).toHaveProperty('angle');
@@ -47,32 +47,34 @@ describe('AspectType Enum', () => {
     });
 
     it('should have names in Spanish', () => {
-      expect(AspectMetadata[AspectType.CONJUNCTION].name).toBe('Conjunción');
-      expect(AspectMetadata[AspectType.OPPOSITION].name).toBe('Oposición');
-      expect(AspectMetadata[AspectType.SQUARE].name).toBe('Cuadratura');
-      expect(AspectMetadata[AspectType.TRINE].name).toBe('Trígono');
-      expect(AspectMetadata[AspectType.SEXTILE].name).toBe('Sextil');
+      expect(AspectTypeMetadata[AspectType.CONJUNCTION].name).toBe(
+        'Conjunción',
+      );
+      expect(AspectTypeMetadata[AspectType.OPPOSITION].name).toBe('Oposición');
+      expect(AspectTypeMetadata[AspectType.SQUARE].name).toBe('Cuadratura');
+      expect(AspectTypeMetadata[AspectType.TRINE].name).toBe('Trígono');
+      expect(AspectTypeMetadata[AspectType.SEXTILE].name).toBe('Sextil');
     });
 
     it('should have valid nature values', () => {
       const validNatures = ['harmonious', 'challenging', 'neutral'];
       Object.values(AspectType).forEach((aspect) => {
-        const metadata = AspectMetadata[aspect];
+        const metadata = AspectTypeMetadata[aspect];
         expect(validNatures).toContain(metadata.nature);
       });
     });
 
     it('should have correct angles', () => {
-      expect(AspectMetadata[AspectType.CONJUNCTION].angle).toBe(0);
-      expect(AspectMetadata[AspectType.OPPOSITION].angle).toBe(180);
-      expect(AspectMetadata[AspectType.SQUARE].angle).toBe(90);
-      expect(AspectMetadata[AspectType.TRINE].angle).toBe(120);
-      expect(AspectMetadata[AspectType.SEXTILE].angle).toBe(60);
+      expect(AspectTypeMetadata[AspectType.CONJUNCTION].angle).toBe(0);
+      expect(AspectTypeMetadata[AspectType.OPPOSITION].angle).toBe(180);
+      expect(AspectTypeMetadata[AspectType.SQUARE].angle).toBe(90);
+      expect(AspectTypeMetadata[AspectType.TRINE].angle).toBe(120);
+      expect(AspectTypeMetadata[AspectType.SEXTILE].angle).toBe(60);
     });
 
     it('should have positive orb values', () => {
       Object.values(AspectType).forEach((aspect) => {
-        const metadata = AspectMetadata[aspect];
+        const metadata = AspectTypeMetadata[aspect];
         expect(metadata.orb).toBeGreaterThan(0);
         expect(metadata.orb).toBeLessThanOrEqual(10);
       });
@@ -80,7 +82,7 @@ describe('AspectType Enum', () => {
 
     it('should have non-empty symbols', () => {
       Object.values(AspectType).forEach((aspect) => {
-        const metadata = AspectMetadata[aspect];
+        const metadata = AspectTypeMetadata[aspect];
         expect(metadata.symbol.length).toBeGreaterThan(0);
       });
     });

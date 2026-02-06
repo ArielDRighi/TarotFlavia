@@ -3,17 +3,14 @@ import { House, HouseMetadata } from './house.enum';
 describe('House Enum', () => {
   describe('Enum Values', () => {
     it('should have 12 houses', () => {
-      const houses = Object.values(House).filter((v) => typeof v === 'number');
+      const houses = Object.values(House);
       expect(houses).toHaveLength(12);
     });
 
-    it('should have numeric values from 1 to 12', () => {
-      const numericValues = Object.values(House).filter(
-        (v) => typeof v === 'number',
-      ) as number[];
-      numericValues.forEach((house) => {
-        expect(house).toBeGreaterThanOrEqual(1);
-        expect(house).toBeLessThanOrEqual(12);
+    it('should have string values in lowercase', () => {
+      Object.values(House).forEach((house) => {
+        expect(typeof house).toBe('string');
+        expect(house).toBe(house.toLowerCase());
       });
     });
 
@@ -35,19 +32,13 @@ describe('House Enum', () => {
 
   describe('House Metadata', () => {
     it('should have metadata for all houses', () => {
-      const numericValues = Object.values(House).filter(
-        (v) => typeof v === 'number',
-      ) as House[];
-      numericValues.forEach((house) => {
+      Object.values(House).forEach((house) => {
         expect(HouseMetadata[house]).toBeDefined();
       });
     });
 
     it('should have complete metadata structure', () => {
-      const numericValues = Object.values(House).filter(
-        (v) => typeof v === 'number',
-      ) as House[];
-      numericValues.forEach((house) => {
+      Object.values(House).forEach((house) => {
         const metadata = HouseMetadata[house];
         expect(metadata).toHaveProperty('name');
         expect(metadata).toHaveProperty('theme');
@@ -74,20 +65,14 @@ describe('House Enum', () => {
     });
 
     it('should have non-empty themes', () => {
-      const numericValues = Object.values(House).filter(
-        (v) => typeof v === 'number',
-      ) as House[];
-      numericValues.forEach((house) => {
+      Object.values(House).forEach((house) => {
         const metadata = HouseMetadata[house];
         expect(metadata.theme.length).toBeGreaterThan(0);
       });
     });
 
     it('should have at least 2 keywords per house', () => {
-      const numericValues = Object.values(House).filter(
-        (v) => typeof v === 'number',
-      ) as House[];
-      numericValues.forEach((house) => {
+      Object.values(House).forEach((house) => {
         const metadata = HouseMetadata[house];
         expect(metadata.keywords.length).toBeGreaterThanOrEqual(2);
       });
@@ -96,18 +81,18 @@ describe('House Enum', () => {
 
   describe('Specific House Values', () => {
     it('should have correct enum values', () => {
-      expect(House.FIRST).toBe(1);
-      expect(House.SECOND).toBe(2);
-      expect(House.THIRD).toBe(3);
-      expect(House.FOURTH).toBe(4);
-      expect(House.FIFTH).toBe(5);
-      expect(House.SIXTH).toBe(6);
-      expect(House.SEVENTH).toBe(7);
-      expect(House.EIGHTH).toBe(8);
-      expect(House.NINTH).toBe(9);
-      expect(House.TENTH).toBe(10);
-      expect(House.ELEVENTH).toBe(11);
-      expect(House.TWELFTH).toBe(12);
+      expect(House.FIRST).toBe('first');
+      expect(House.SECOND).toBe('second');
+      expect(House.THIRD).toBe('third');
+      expect(House.FOURTH).toBe('fourth');
+      expect(House.FIFTH).toBe('fifth');
+      expect(House.SIXTH).toBe('sixth');
+      expect(House.SEVENTH).toBe('seventh');
+      expect(House.EIGHTH).toBe('eighth');
+      expect(House.NINTH).toBe('ninth');
+      expect(House.TENTH).toBe('tenth');
+      expect(House.ELEVENTH).toBe('eleventh');
+      expect(House.TWELFTH).toBe('twelfth');
     });
   });
 });

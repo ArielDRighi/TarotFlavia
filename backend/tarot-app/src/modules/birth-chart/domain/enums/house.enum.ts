@@ -3,18 +3,18 @@
  * Representa las áreas de experiencia de vida en una carta natal
  */
 export enum House {
-  FIRST = 1,
-  SECOND = 2,
-  THIRD = 3,
-  FOURTH = 4,
-  FIFTH = 5,
-  SIXTH = 6,
-  SEVENTH = 7,
-  EIGHTH = 8,
-  NINTH = 9,
-  TENTH = 10,
-  ELEVENTH = 11,
-  TWELFTH = 12,
+  FIRST = 'first',
+  SECOND = 'second',
+  THIRD = 'third',
+  FOURTH = 'fourth',
+  FIFTH = 'fifth',
+  SIXTH = 'sixth',
+  SEVENTH = 'seventh',
+  EIGHTH = 'eighth',
+  NINTH = 'ninth',
+  TENTH = 'tenth',
+  ELEVENTH = 'eleventh',
+  TWELFTH = 'twelfth',
 }
 
 /**
