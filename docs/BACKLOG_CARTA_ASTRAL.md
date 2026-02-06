@@ -577,7 +577,9 @@ Esta parte cubre la creación de entidades, enums, migraciones y configuración 
 
 ## DETALLE DE TAREAS
 
-### T-CA-001: Crear Enums Astrológicos
+### T-CA-001: Crear Enums Astrológicos ✅
+
+**Estado:** ✅ COMPLETADA
 
 **Historia relacionada:** HU-CA-001, HU-CA-003, HU-CA-004, HU-CA-005
 
@@ -786,11 +788,11 @@ export enum InterpretationCategory {
 
 **Criterios de aceptación:**
 
-- [ ] Todos los enums creados con valores string lowercase
-- [ ] Metadata de cada enum con información para UI
-- [ ] Archivo index.ts exportando todos los enums
-- [ ] Tests unitarios para validar metadata
-- [ ] Documentación JSDoc en cada enum
+- [x] Todos los enums creados con valores string lowercase
+- [x] Metadata de cada enum con información para UI
+- [x] Archivo index.ts exportando todos los enums
+- [x] Tests unitarios para validar metadata
+- [x] Documentación JSDoc en cada enum
 
 **Dependencias:** Ninguna
 
