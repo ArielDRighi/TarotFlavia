@@ -1037,14 +1037,16 @@ export class BirthChart {
 
 ---
 
-### T-CA-003: Crear Entidad BirthChartInterpretation
+### T-CA-003: Crear Entidad BirthChartInterpretation ✅
+
+**Estado:** ✅ COMPLETADA
 
 **Historia relacionada:** HU-CA-004, HU-CA-005
 
 **Descripción:**
 Crear la entidad `BirthChartInterpretation` que almacena los ~490 textos estáticos de interpretación astrológica. Estos textos son el contenido base para las lecturas de carta astral.
 
-**Ubicación:** `src/modules/birth-chart/infrastructure/entities/`
+**Ubicación:** `src/modules/birth-chart/entities/` (ubicación correcta según ADR-003)
 
 **Archivos a crear:**
 
@@ -1263,17 +1265,38 @@ export class BirthChartInterpretation {
 
 **Criterios de aceptación:**
 
-- [ ] Entidad creada con todos los campos nullable apropiados
-- [ ] Constraint UNIQUE para prevenir duplicados
-- [ ] Índices optimizados para búsquedas comunes
-- [ ] Método estático generateKey para búsquedas
-- [ ] Método estático validateCombination para validar datos
-- [ ] Swagger decorators completos
-- [ ] Tests unitarios para métodos estáticos
+- [x] Entidad creada con todos los campos nullable apropiados
+- [x] Constraint UNIQUE para prevenir duplicados
+- [x] Índices optimizados para búsquedas comunes
+- [x] Método estático generateKey para búsquedas
+- [x] Método estático validateCombination para validar datos
+- [x] Swagger decorators completos
+- [x] Tests unitarios para métodos estáticos (24 tests, 100% cobertura)
 
-**Dependencias:** T-CA-001 (enums)
+**Dependencias:** T-CA-001 (enums) ✅
 
 **Estimación:** 3 horas
+
+**Tiempo real:** 2.5 horas
+
+**Notas técnicas:**
+- Entidad ubicada en `src/modules/birth-chart/entities/` según ADR-003 (entidades en raíz del módulo)
+- Estructura flat porque módulo tiene 9 archivos, 984 líneas (bajo threshold de 10 archivos/1500 líneas)
+- Tests con 100% cobertura (24 casos de prueba):
+  - 6 tests para generateKey()
+  - 18 tests para validateCombination() (validación por categoría)
+- Constraint UNIQUE NULLS NOT DISTINCT para combinación (category, planet, sign, house, aspectType, planet2)
+- Índices optimizados: category, (planet, sign), (planet, house), (planet, planet2, aspectType)
+- Métodos estáticos helper: generateKey(), validateCombination()
+- ~490 interpretaciones esperadas:
+  - PLANET_INTRO: 10 textos
+  - ASCENDANT: 12 textos  
+  - PLANET_IN_SIGN: 120 textos (10 × 12)
+  - PLANET_IN_HOUSE: 120 textos (10 × 12)
+  - ASPECT: ~225 textos (~45 pares × 5 tipos)
+- IDs numéricos (no strings) según reglas del proyecto
+- Todos los campos con decoradores Swagger completos
+- Validación de combinaciones por categoría implementada y testeada
 
 ---
 
