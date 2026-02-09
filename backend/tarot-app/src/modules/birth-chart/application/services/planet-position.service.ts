@@ -85,7 +85,7 @@ export class PlanetPositionService {
    * Convierte nombre de planeta (string) a enum Planet
    *
    * @param name - Nombre del planeta (ej: "sun", "moon")
-   * @returns Valor del enum Planet
+   * @returns Valor del enum Planet, o el nombre original si no se encuentra (con warning)
    */
   private mapToPlanetEnum(name: string): string {
     const mapping: Record<string, Planet> = {
@@ -101,7 +101,16 @@ export class PlanetPositionService {
       pluto: Planet.PLUTO,
     };
 
-    return mapping[name.toLowerCase()] || name;
+    const normalized = name.toLowerCase();
+    const planetEnum = mapping[normalized];
+
+    if (!planetEnum) {
+      this.logger.warn(
+        `Unknown planet name received: "${name}". Falling back to original name.`,
+      );
+    }
+
+    return planetEnum || name;
   }
 
   /**
@@ -134,12 +143,29 @@ export class PlanetPositionService {
    * @param longitude - Longitud eclíptica del planeta
    * @param cusps - Array de 12 cúspides (longitudes de inicio de cada casa)
    * @returns Número de casa (1-12)
+   * @throws Error if cusps array is invalid (wrong length or non-finite values)
    *
    * @example
    * // Con cúspides cada 30°:
    * calculateHouse(45, [0, 30, 60, ...]) // 2 (entre cúspides 1 y 2)
    */
   calculateHouse(longitude: number, cusps: number[]): number {
+    // Validar que el array de cúspides tenga exactamente 12 elementos
+    if (cusps.length !== 12) {
+      const error = `Invalid cusps array: must contain exactly 12 house cusps, received ${cusps.length}`;
+      this.logger.error(error);
+      throw new Error(error);
+    }
+
+    // Validar que todos los valores sean números finitos
+    const hasInvalidValues = cusps.some((cusp) => !Number.isFinite(cusp));
+    if (hasInvalidValues) {
+      const error =
+        'Invalid cusps array: all cusps must be finite numbers (found NaN, undefined, or Infinity)';
+      this.logger.error(error, { cusps });
+      throw new Error(error);
+    }
+
     // Normalizar longitud
     const normalizedLong = ((longitude % 360) + 360) % 360;
 
@@ -215,8 +241,19 @@ export class PlanetPositionService {
    * // "15° 30' Leo ℞"
    */
   formatPosition(position: PlanetPosition): string {
-    const degrees = Math.floor(position.signDegree);
-    const minutes = Math.round((position.signDegree - degrees) * 60);
+    let degrees = Math.floor(position.signDegree);
+    let minutes = Math.round((position.signDegree - degrees) * 60);
+
+    // Normalizar minutos: si redondeo produce 60', incrementar grados y resetear minutos
+    if (minutes === 60) {
+      degrees += 1;
+      minutes = 0;
+    }
+
+    // Si grados llega a 30, significa que estamos en el límite del signo
+    // En este caso, el formateo es válido (30° 0' del signo actual)
+    // La conversión a otro signo es responsabilidad de longitudeToSign
+
     const signName =
       ZodiacSignMetadata[position.sign as ZodiacSign]?.name || position.sign;
     const retrograde = position.isRetrograde ? ' ℞' : '';

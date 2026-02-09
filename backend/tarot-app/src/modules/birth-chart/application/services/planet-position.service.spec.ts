@@ -390,4 +390,126 @@ describe('PlanetPositionService', () => {
       expect(result.degree).toBe(15);
     });
   });
+
+  describe('validation and error handling', () => {
+    describe('calculateHouse validation', () => {
+      it('should throw error when cusps array has wrong length', () => {
+        const invalidCusps = [0, 30, 60]; // Only 3 cusps instead of 12
+        expect(() => service.calculateHouse(45, invalidCusps)).toThrow(
+          'Invalid cusps array: must contain exactly 12 house cusps',
+        );
+      });
+
+      it('should throw error when cusps array is empty', () => {
+        expect(() => service.calculateHouse(45, [])).toThrow(
+          'Invalid cusps array: must contain exactly 12 house cusps',
+        );
+      });
+
+      it('should throw error when cusps contain NaN values', () => {
+        const invalidCusps = [
+          0,
+          30,
+          NaN,
+          90,
+          120,
+          150,
+          180,
+          210,
+          240,
+          270,
+          300,
+          330,
+        ];
+        expect(() => service.calculateHouse(45, invalidCusps)).toThrow(
+          'Invalid cusps array: all cusps must be finite numbers',
+        );
+      });
+
+      it('should throw error when cusps contain undefined values', () => {
+        const invalidCusps = [
+          0,
+          30,
+          undefined as any,
+          90,
+          120,
+          150,
+          180,
+          210,
+          240,
+          270,
+          300,
+          330,
+        ];
+        expect(() => service.calculateHouse(45, invalidCusps)).toThrow(
+          'Invalid cusps array: all cusps must be finite numbers',
+        );
+      });
+
+      it('should throw error when cusps contain Infinity', () => {
+        const invalidCusps = [
+          0,
+          30,
+          Infinity,
+          90,
+          120,
+          150,
+          180,
+          210,
+          240,
+          270,
+          300,
+          330,
+        ];
+        expect(() => service.calculateHouse(45, invalidCusps)).toThrow(
+          'Invalid cusps array: all cusps must be finite numbers',
+        );
+      });
+    });
+
+    describe('formatPosition edge cases', () => {
+      it('should handle signDegree close to 30° (59.99 minutes)', () => {
+        const position: PlanetPosition = {
+          planet: Planet.SUN,
+          longitude: 149.9999, // Very close to 150° (Virgo 0°)
+          sign: ZodiacSign.LEO,
+          signDegree: 29.9999,
+          house: 5,
+          isRetrograde: false,
+        };
+
+        const result = service.formatPosition(position);
+        // 29.9999° = 29° + 0.9999 * 60 minutes ≈ 29° 60' → should normalize to 30° 0'
+        expect(result).toBe("30° 0' Leo");
+      });
+
+      it('should handle signDegree with high precision decimals', () => {
+        const position: PlanetPosition = {
+          planet: Planet.MOON,
+          longitude: 45.983333,
+          sign: ZodiacSign.TAURUS,
+          signDegree: 15.983333, // 15° 59' (59.0 minutes exactly)
+          house: 2,
+          isRetrograde: false,
+        };
+
+        const result = service.formatPosition(position);
+        expect(result).toBe("15° 59' Tauro");
+      });
+
+      it('should handle signDegree at exact boundary', () => {
+        const position: PlanetPosition = {
+          planet: Planet.VENUS,
+          longitude: 90,
+          sign: ZodiacSign.CANCER,
+          signDegree: 0,
+          house: 4,
+          isRetrograde: false,
+        };
+
+        const result = service.formatPosition(position);
+        expect(result).toBe("0° 0' Cáncer");
+      });
+    });
+  });
 });
