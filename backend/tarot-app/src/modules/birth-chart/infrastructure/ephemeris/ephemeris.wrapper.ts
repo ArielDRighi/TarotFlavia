@@ -69,7 +69,10 @@ export class EphemerisWrapper implements OnModuleInit {
       throw new Error('Swiss Ephemeris not initialized');
     }
 
-    this.logger.debug(`Calculating ephemeris for: ${JSON.stringify(input)}`);
+    const { year, month, day } = input;
+    this.logger.debug(
+      `Calculating ephemeris for date ${year}-${month}-${day} using house system ${this.houseSystem}`,
+    );
 
     try {
       const julianDay = this.calculateJulianDay(
@@ -215,8 +218,9 @@ export class EphemerisWrapper implements OnModuleInit {
   }
 
   /**
-   * Validates that the year is valid for calculations
-   * Swiss Ephemeris supports: -13000 to +16800 approx.
+   * Validates that the year is within the application's supported range.
+   * Restricted to 1800-2400 for practical astrological use cases.
+   * (Swiss Ephemeris itself supports ~-13000 to ~+16800)
    */
   validateDate(year: number): boolean {
     return year >= 1800 && year <= 2400;

@@ -1,26 +1,33 @@
 import { registerAs } from '@nestjs/config';
 
-export default registerAs('ephemeris', () => ({
-  // House system: Placidus (most common)
-  houseSystem: process.env.EPHEMERIS_HOUSE_SYSTEM || 'placidus',
+export default registerAs('ephemeris', () => {
+  const DEFAULT_PRECISION = 1;
+  const rawPrecision = process.env.EPHEMERIS_PRECISION;
+  const parsedPrecision = rawPrecision
+    ? Number(rawPrecision)
+    : DEFAULT_PRECISION;
 
-  // Zodiac: Tropical (western) vs Sidereal (vedic)
-  zodiacType: process.env.EPHEMERIS_ZODIAC_TYPE || 'tropical',
+  return {
+    // House system: Placidus (most common)
+    houseSystem: process.env.EPHEMERIS_HOUSE_SYSTEM || 'placidus',
 
-  // Planets to calculate
-  planets: [
-    'sun',
-    'moon',
-    'mercury',
-    'venus',
-    'mars',
-    'jupiter',
-    'saturn',
-    'uranus',
-    'neptune',
-    'pluto',
-  ],
+    // Planets to calculate
+    planets: [
+      'sun',
+      'moon',
+      'mercury',
+      'venus',
+      'mars',
+      'jupiter',
+      'saturn',
+      'uranus',
+      'neptune',
+      'pluto',
+    ],
 
-  // Calculation precision (arc minutes)
-  precision: parseInt(process.env.EPHEMERIS_PRECISION || '1', 10),
-}));
+    // Calculation precision (arc minutes)
+    precision: Number.isFinite(parsedPrecision)
+      ? parsedPrecision
+      : DEFAULT_PRECISION,
+  };
+});

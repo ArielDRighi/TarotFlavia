@@ -14,13 +14,11 @@ describe('ephemerisConfig', () => {
 
   it('should return default values when no env vars are set', () => {
     delete process.env.EPHEMERIS_HOUSE_SYSTEM;
-    delete process.env.EPHEMERIS_ZODIAC_TYPE;
     delete process.env.EPHEMERIS_PRECISION;
 
     const config = ephemerisConfig();
 
     expect(config.houseSystem).toBe('placidus');
-    expect(config.zodiacType).toBe('tropical');
     expect(config.precision).toBe(1);
   });
 
@@ -35,13 +33,19 @@ describe('ephemerisConfig', () => {
 
   it('should use environment variables when set', () => {
     process.env.EPHEMERIS_HOUSE_SYSTEM = 'koch';
-    process.env.EPHEMERIS_ZODIAC_TYPE = 'sidereal';
     process.env.EPHEMERIS_PRECISION = '2';
 
     const config = ephemerisConfig();
 
     expect(config.houseSystem).toBe('koch');
-    expect(config.zodiacType).toBe('sidereal');
     expect(config.precision).toBe(2);
+  });
+
+  it('should fallback to default precision when EPHEMERIS_PRECISION is not a number', () => {
+    process.env.EPHEMERIS_PRECISION = 'invalid';
+
+    const config = ephemerisConfig();
+
+    expect(config.precision).toBe(1);
   });
 });
