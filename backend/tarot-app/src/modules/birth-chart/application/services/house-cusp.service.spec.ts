@@ -370,6 +370,23 @@ describe('HouseCuspService', () => {
       expect(result).toContain('0°');
       expect(result).toContain("0'");
     });
+
+    it('should normalize 60 minutes to next degree', () => {
+      // signDegree cercano al siguiente grado que redondea a 60'
+      const cusp: HouseCusp = {
+        house: 7,
+        longitude: 195.99,
+        sign: ZodiacSign.LIBRA,
+        signDegree: 12.999, // 12° 59.94' → redondea a 13° 0'
+      };
+
+      const result = service.formatCusp(cusp);
+
+      expect(result).toContain('Casa 7');
+      expect(result).toContain('13°');
+      expect(result).toContain("0'");
+      expect(result).not.toContain("60'"); // NO debe aparecer 60'
+    });
   });
 
   describe('groupByElement', () => {

@@ -29,7 +29,38 @@ export class HouseCuspService {
    */
   calculateCusps(rawCusps: RawHouseCusps): HouseCusp[] {
     this.logger.debug('Calculating house cusps');
-    return rawCusps.cusps.map((longitude, index) => {
+
+    const cusps = rawCusps?.cusps;
+
+    if (!Array.isArray(cusps)) {
+      this.logger.error(
+        'Invalid house cusps data from ephemeris wrapper: "cusps" is not an array',
+        { cusps },
+      );
+      throw new Error('Invalid house cusps data from ephemeris wrapper');
+    }
+
+    if (cusps.length !== 12) {
+      this.logger.error(
+        `Invalid house cusps data from ephemeris wrapper: expected 12 cusps, received ${cusps.length}`,
+        { cusps },
+      );
+      throw new Error('Invalid house cusps data from ephemeris wrapper');
+    }
+
+    const hasOnlyFiniteNumbers = cusps.every(
+      (value) => typeof value === 'number' && Number.isFinite(value),
+    );
+
+    if (!hasOnlyFiniteNumbers) {
+      this.logger.error(
+        'Invalid house cusps data from ephemeris wrapper: all cusps must be finite numbers',
+        { cusps },
+      );
+      throw new Error('Invalid house cusps data from ephemeris wrapper');
+    }
+
+    return cusps.map((longitude, index) => {
       const houseNumber = index + 1;
       const { sign, degree } = this.positionService.longitudeToSign(longitude);
 
@@ -63,7 +94,15 @@ export class HouseCuspService {
     const rulers: Record<number, ZodiacSign> = {};
 
     for (const cusp of cusps) {
-      rulers[cusp.house] = cusp.sign as ZodiacSign;
+      const sign = cusp.sign;
+      // Validar que el sign sea un ZodiacSign válido
+      if (!Object.values(ZodiacSign).includes(sign as ZodiacSign)) {
+        this.logger.error(
+          `Invalid ZodiacSign in cusp: ${sign} for house ${cusp.house}`,
+        );
+        throw new Error(`Invalid ZodiacSign: ${sign}`);
+      }
+      rulers[cusp.house] = sign as ZodiacSign;
     }
 
     return rulers;
@@ -84,10 +123,10 @@ export class HouseCuspService {
   }
 
   /**
-   * Detecta signos duplicados (mismo signo en dos cúspides consecutivas)
+   * Detecta signos duplicados (mismo signo presente en múltiples cúspides de casa)
    *
    * @param cusps - Array de cúspides calculadas
-   * @returns Array de objetos con signo y las casas donde aparece
+   * @returns Array de objetos con signo y las casas donde aparece más de una vez
    */
   findDuplicatedSigns(cusps: HouseCusp[]): Array<{
     sign: ZodiacSign;
@@ -117,11 +156,25 @@ export class HouseCuspService {
    * @returns Mapa de número de casa a tamaño en grados
    */
   calculateHouseSizes(cusps: HouseCusp[]): Record<number, number> {
+    if (cusps.length !== 12) {
+      this.logger.error(
+        `Invalid cusps array: expected 12 elements, received ${cusps.length}`,
+      );
+      throw new Error('calculateHouseSizes requires exactly 12 cusps');
+    }
+
     const sizes: Record<number, number> = {};
 
     for (let i = 0; i < 12; i++) {
       const current = cusps[i].longitude;
       const next = cusps[(i + 1) % 12].longitude;
+
+      if (!Number.isFinite(current) || !Number.isFinite(next)) {
+        this.logger.error(
+          `Invalid longitude values at index ${i}: current=${current}, next=${next}`,
+        );
+        throw new Error('All cusps must have finite longitude values');
+      }
 
       // Manejar cruce de 0°/360°
       let size = next - current;
@@ -174,8 +227,13 @@ export class HouseCuspService {
    * @returns String formateado (ej: "Casa 1: 15° 30' aries")
    */
   formatCusp(cusp: HouseCusp): string {
-    const degrees = Math.floor(cusp.signDegree);
-    const minutes = Math.round((cusp.signDegree - degrees) * 60);
+    let degrees = Math.floor(cusp.signDegree);
+    let minutes = Math.round((cusp.signDegree - degrees) * 60);
+
+    if (minutes === 60) {
+      degrees += 1;
+      minutes = 0;
+    }
 
     return `Casa ${cusp.house}: ${degrees}° ${minutes}' ${cusp.sign}`;
   }
@@ -186,8 +244,10 @@ export class HouseCuspService {
    * @param cusps - Array de cúspides calculadas
    * @returns Mapa de elemento a números de casas
    */
-  groupByElement(cusps: HouseCusp[]): Record<string, number[]> {
-    const groups: Record<string, number[]> = {
+  groupByElement(
+    cusps: HouseCusp[],
+  ): Record<'fire' | 'earth' | 'air' | 'water', number[]> {
+    const groups: Record<'fire' | 'earth' | 'air' | 'water', number[]> = {
       fire: [],
       earth: [],
       air: [],
@@ -234,7 +294,11 @@ export class HouseCuspService {
     if (airSigns.includes(sign)) return 'air';
     if (waterSigns.includes(sign)) return 'water';
 
-    return 'fire'; // fallback
+    // Si llegamos aquí, el signo no corresponde a ningún elemento conocido.
+    this.logger.error(
+      `Unknown ZodiacSign received in getSignElement: ${sign as unknown as string}`,
+    );
+    throw new Error(`Unknown ZodiacSign: ${sign}`);
   }
 
   /**
@@ -260,6 +324,16 @@ export class HouseCuspService {
       12: House.TWELFTH,
     };
 
-    return mapping[houseNumber] || House.FIRST;
+    const house = mapping[houseNumber];
+    if (!house) {
+      this.logger.error(
+        `Invalid house number: ${houseNumber}. Expected a value between 1 and 12.`,
+      );
+      throw new Error(
+        `Invalid house number: ${houseNumber}. House must be between 1 and 12.`,
+      );
+    }
+
+    return house;
   }
 }
