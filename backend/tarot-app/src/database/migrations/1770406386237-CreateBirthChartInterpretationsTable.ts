@@ -9,7 +9,8 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
  * - Enum: interpretation_category_enum (5 categorías)
  * - Tabla: birth_chart_interpretations (textos de interpretación)
  *
- * Nota: zodiac_sign_enum no se crea porque se reutiliza el existente en common/utils
+ * Nota: zodiac_sign_enum se reutiliza si ya existe (definido a nivel global) y,
+ * en caso contrario, esta migración lo crea de forma condicional.
  */
 export class CreateBirthChartInterpretationsTable1770406386237 implements MigrationInterface {
   name = 'CreateBirthChartInterpretationsTable1770406386237';
@@ -100,7 +101,7 @@ export class CreateBirthChartInterpretationsTable1770406386237 implements Migrat
         "planet2" "planet_enum",
         "content" TEXT NOT NULL,
         "summary" VARCHAR(255),
-        "isActive" BOOLEAN DEFAULT true,
+        "isActive" BOOLEAN NOT NULL DEFAULT true,
         "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
         "updatedAt" TIMESTAMP NOT NULL DEFAULT now()
       );
