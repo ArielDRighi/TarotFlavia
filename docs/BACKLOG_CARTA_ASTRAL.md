@@ -1794,6 +1794,8 @@ Esta parte cubre la implementación del servicio core que realiza los cálculos 
 
 ### T-CA-006: Configurar Librería de Efemérides
 
+**Estado:** ✅ COMPLETADA
+
 **Historia relacionada:** HU-CA-001
 
 **Descripción:**
@@ -2122,20 +2124,20 @@ export class EphemerisWrapper implements OnModuleInit {
 
 **Criterios de aceptación:**
 
-- [ ] Librería `sweph` instalada y configurada
-- [ ] Wrapper TypeScript con tipado completo
-- [ ] Inicialización en `onModuleInit`
-- [ ] Cálculo de Julian Day correcto
-- [ ] Cálculo de 10 planetas funcionando
-- [ ] Cálculo de 12 casas (sistema Placidus por defecto)
-- [ ] Soporte para múltiples sistemas de casas (configurable)
-- [ ] Ascendente y Medio Cielo extraídos
-- [ ] Velocidad planetaria para detección de retrogradación
-- [ ] Validación de coordenadas y fechas
-- [ ] Manejo de errores robusto con fallbacks
-- [ ] Método `close()` para limpieza de recursos
-- [ ] Tests unitarios con fechas conocidas
-- [ ] Documentación de precisión y limitaciones
+- [x] Librería `sweph` instalada y configurada
+- [x] Wrapper TypeScript con tipado completo
+- [x] Inicialización en `onModuleInit`
+- [x] Cálculo de Julian Day correcto
+- [x] Cálculo de 10 planetas funcionando
+- [x] Cálculo de 12 casas (sistema Placidus por defecto)
+- [x] Soporte para múltiples sistemas de casas (configurable)
+- [x] Ascendente y Medio Cielo extraídos
+- [x] Velocidad planetaria para detección de retrogradación
+- [x] Validación de coordenadas y fechas
+- [x] Manejo de errores robusto con fallbacks
+- [x] Método `close()` para limpieza de recursos
+- [x] Tests unitarios con fechas conocidas
+- [x] Documentación de precisión y limitaciones
 
 **Dependencias:** Ninguna
 
@@ -3129,7 +3131,7 @@ export class ChartCalculationService {
 
 ## CHECKLIST DE PARTE 7C
 
-- [ ] T-CA-006: Librería de efemérides configurada
+- [x] T-CA-006: Librería de efemérides configurada
 - [ ] T-CA-007: Servicio de posiciones planetarias funcionando
 - [ ] T-CA-008: Servicio de cúspides de casas funcionando
 - [ ] T-CA-009: Servicio de cálculo de aspectos funcionando
