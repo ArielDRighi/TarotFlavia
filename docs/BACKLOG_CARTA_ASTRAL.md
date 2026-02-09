@@ -2578,21 +2578,46 @@ export class HouseCuspService {
 }
 ```
 
+**Estado:** ✅ COMPLETADA
+
 **Criterios de aceptación:**
 
-- [ ] Transformación de 12 cúspides
-- [ ] Cálculo correcto de signo en cada cúspide
-- [ ] Detección de signos interceptados
-- [ ] Detección de signos duplicados
-- [ ] Cálculo de tamaño de casas
-- [ ] Agrupación por elemento
-- [ ] Formateo para display
-- [ ] Tests unitarios completos
-- [ ] Tests con cartas de latitudes extremas
+- [x] Transformación de 12 cúspides
+- [x] Cálculo correcto de signo en cada cúspide
+- [x] Detección de signos interceptados
+- [x] Detección de signos duplicados
+- [x] Cálculo de tamaño de casas
+- [x] Agrupación por elemento
+- [x] Formateo para display
+- [x] Tests unitarios completos (20 tests, 98.63% statements, 81.25% branches)
+- [x] Tests con cartas de latitudes extremas
 
-**Dependencias:** T-CA-007
+**Dependencias:** T-CA-007 ✅
 
 **Estimación:** 3 horas
+
+**Tiempo real:** 2 horas
+
+**Notas técnicas:**
+- Servicio implementado con TDD (Red-Green-Refactor)
+- 20 tests unitarios con cobertura: 98.63% statements, 81.25% branches, 100% functions
+- Métodos implementados:
+  - `calculateCusps()`: Transforma 12 cúspides raw en enriquecidas
+  - `getCusp()`: Obtiene cúspide de casa específica
+  - `getHouseRulers()`: Mapa de casas a signos regentes
+  - `findInterceptedSigns()`: Detecta signos interceptados
+  - `findDuplicatedSigns()`: Detecta signos duplicados en cúspides
+  - `calculateHouseSizes()`: Tamaño en grados de cada casa
+  - `getHouseInfo()`: Información completa (cusp, theme, keywords, size)
+  - `formatCusp()`: Formateo para display (ej: "Casa 1: 15° 30' aries")
+  - `groupByElement()`: Agrupa casas por elemento (fire, earth, air, water)
+- Inyecta `PlanetPositionService` para reutilizar `longitudeToSign()`
+- Manejo robusto de 360° wrapping para casa 12
+- Tests incluyen casos de latitudes extremas y casas desiguales
+- Quality gates: ✅ format, ✅ lint, ✅ test:cov, ✅ build, ✅ validate-architecture
+- Ubicación: `src/modules/birth-chart/application/services/house-cusp.service.ts`
+- Test: `src/modules/birth-chart/application/services/house-cusp.service.spec.ts`
+- Exportado en `index.ts` para importación centralizada
 
 ---
 
