@@ -4,3 +4,4 @@
  */
 
 export * from './planet-position.service';
+export * from './house-cusp.service';
