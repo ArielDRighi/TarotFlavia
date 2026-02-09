@@ -24,7 +24,7 @@ describe('Birth Chart Interpretations Seeder', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('Basic Seeding', () => {

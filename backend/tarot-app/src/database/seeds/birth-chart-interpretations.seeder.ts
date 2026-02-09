@@ -33,12 +33,11 @@ export async function seedBirthChartInterpretations(
     BirthChartInterpretation,
   );
 
-  // Check if interpretations already exist (idempotency)
+  // Check if already seeded (idempotency)
   const existingCount = await interpretationRepository.count();
-
   if (existingCount > 0) {
     console.log(
-      `✅ Birth Chart interpretations already seeded (found ${existingCount} interpretation(s)). Skipping...`,
+      `✅ Birth Chart interpretations already seeded (${existingCount} found). Skipping...`,
     );
     return;
   }
@@ -46,12 +45,49 @@ export async function seedBirthChartInterpretations(
   // Collect all interpretations
   const interpretations: Partial<BirthChartInterpretation>[] = [];
 
+  // Define stable constant arrays for iteration (avoid enum pitfalls)
+  const PLANETS: Planet[] = [
+    Planet.SUN,
+    Planet.MOON,
+    Planet.MERCURY,
+    Planet.VENUS,
+    Planet.MARS,
+    Planet.JUPITER,
+    Planet.SATURN,
+    Planet.URANUS,
+    Planet.NEPTUNE,
+    Planet.PLUTO,
+  ];
+
+  const ZODIAC_SIGNS: ZodiacSign[] = [
+    ZodiacSign.ARIES,
+    ZodiacSign.TAURUS,
+    ZodiacSign.GEMINI,
+    ZodiacSign.CANCER,
+    ZodiacSign.LEO,
+    ZodiacSign.VIRGO,
+    ZodiacSign.LIBRA,
+    ZodiacSign.SCORPIO,
+    ZodiacSign.SAGITTARIUS,
+    ZodiacSign.CAPRICORN,
+    ZodiacSign.AQUARIUS,
+    ZodiacSign.PISCES,
+  ];
+
+  const ASPECT_TYPES: AspectType[] = [
+    AspectType.CONJUNCTION,
+    AspectType.OPPOSITION,
+    AspectType.SQUARE,
+    AspectType.TRINE,
+    AspectType.SEXTILE,
+  ];
+
   // ==============================================================================
   // 1. PLANET INTROS (10)
   // ==============================================================================
   console.log('📝 Generating Planet Intros (10)...');
 
-  const planetIntros = Object.values(Planet).map((planet) => ({
+  const planetIntros = PLANETS.map((planet) => ({
     category: InterpretationCategory.PLANET_INTRO,
     planet,
     sign: null,
@@ -70,7 +106,7 @@ export async function seedBirthChartInterpretations(
   // ==============================================================================
   console.log('📝 Generating Ascendants (12)...');
 
-  const ascendants = Object.values(ZodiacSign).map((sign) => ({
+  const ascendants = ZODIAC_SIGNS.map((sign) => ({
     category: InterpretationCategory.ASCENDANT,
     planet: null,
     sign,
@@ -90,8 +126,8 @@ export async function seedBirthChartInterpretations(
   console.log('📝 Generating Planets in Signs (120)...');
 
   const planetsInSigns: Partial<BirthChartInterpretation>[] = [];
-  Object.values(Planet).forEach((planet) => {
-    Object.values(ZodiacSign).forEach((sign) => {
+  PLANETS.forEach((planet) => {
+    ZODIAC_SIGNS.forEach((sign) => {
       planetsInSigns.push({
         category: InterpretationCategory.PLANET_IN_SIGN,
         planet,
@@ -114,7 +150,7 @@ export async function seedBirthChartInterpretations(
   console.log('📝 Generating Planets in Houses (120)...');
 
   const planetsInHouses: Partial<BirthChartInterpretation>[] = [];
-  Object.values(Planet).forEach((planet) => {
+  PLANETS.forEach((planet) => {
     for (let house = 1; house <= 12; house++) {
       planetsInHouses.push({
         category: InterpretationCategory.PLANET_IN_HOUSE,
@@ -138,21 +174,21 @@ export async function seedBirthChartInterpretations(
   console.log('📝 Generating Sample Aspects (20 placeholders)...');
 
   const aspects: Partial<BirthChartInterpretation>[] = [];
-  const planets = Object.values(Planet);
-  const aspectTypes = Object.values(AspectType);
+  const otherPlanets = PLANETS.filter((planet) => planet !== Planet.SUN);
 
   // Generate some sample aspects (not all combinations yet)
   // Sun aspects with other planets
-  for (let i = 1; i < Math.min(5, planets.length); i++) {
-    aspectTypes.forEach((aspectType) => {
+  for (let i = 0; i < Math.min(4, otherPlanets.length); i++) {
+    const planet2 = otherPlanets[i];
+    ASPECT_TYPES.forEach((aspectType) => {
       aspects.push({
         category: InterpretationCategory.ASPECT,
-        planet: planets[0], // Sun
-        planet2: planets[i],
+        planet: Planet.SUN,
+        planet2,
         aspectType,
         sign: null,
         house: null,
-        content: getAspectText(planets[0], planets[i], aspectType),
+        content: getAspectText(Planet.SUN, planet2, aspectType),
         summary: null,
         isActive: true,
       });
@@ -172,7 +208,7 @@ export async function seedBirthChartInterpretations(
     interpretationRepository.create(data),
   );
 
-  await interpretationRepository.save(interpretationEntities);
+  await interpretationRepository.save(interpretationEntities, { chunk: 50 });
 
   console.log(
     `✅ Successfully seeded ${interpretations.length} birth chart interpretations`,
@@ -251,12 +287,12 @@ function getAscendantText(sign: ZodiacSign): string {
 
 function getPlanetInSignText(planet: Planet, sign: ZodiacSign): string {
   // Placeholder: Generate a generic text combining planet and sign
-  return `${getPlanetName(planet)} en ${getSignName(sign)} crea una combinación única de energías. Esta posición influye en cómo se manifiesta ${getPlanetName(planet)} en tu vida, teñido por las cualidades de ${getSignName(sign)}. Es una mezcla de ${getPlanetKeyword(planet)} con ${getSignKeyword(sign)}.`;
+  return `[PLACEHOLDER] ${getPlanetName(planet)} en ${getSignName(sign)} crea una combinación única de energías. Esta posición influye en cómo se manifiesta ${getPlanetName(planet)} en tu vida, teñido por las cualidades de ${getSignName(sign)}. Es una mezcla de ${getPlanetKeyword(planet)} con ${getSignKeyword(sign)}.`;
 }
 
 function getPlanetInHouseText(planet: Planet, house: number): string {
   // Placeholder: Generate a generic text combining planet and house
-  return `${getPlanetName(planet)} en Casa ${house} indica que las energías de ${getPlanetName(planet)} se expresan principalmente en el área de vida relacionada con la Casa ${house}. Esta posición muestra dónde y cómo se manifiesta ${getPlanetKeyword(planet)} en tu experiencia cotidiana.`;
+  return `[PLACEHOLDER] ${getPlanetName(planet)} en Casa ${house} indica que las energías de ${getPlanetName(planet)} se expresan principalmente en el área de vida relacionada con la Casa ${house}. Esta posición muestra dónde y cómo se manifiesta ${getPlanetKeyword(planet)} en tu experiencia cotidiana.`;
 }
 
 function getAspectText(
@@ -265,7 +301,7 @@ function getAspectText(
   aspectType: AspectType,
 ): string {
   // Placeholder: Generate a generic text for aspects
-  return `${getPlanetName(planet1)} en ${getAspectName(aspectType)} con ${getPlanetName(planet2)} crea una dinámica ${getAspectQuality(aspectType)} entre estas dos energías planetarias. Esta configuración influye en cómo interactúan ${getPlanetKeyword(planet1)} y ${getPlanetKeyword(planet2)} en tu carta natal.`;
+  return `[PLACEHOLDER] ${getPlanetName(planet1)} en ${getAspectName(aspectType)} con ${getPlanetName(planet2)} crea una dinámica ${getAspectQuality(aspectType)} entre estas dos energías planetarias. Esta configuración influye en cómo interactúan ${getPlanetKeyword(planet1)} y ${getPlanetKeyword(planet2)} en tu carta natal.`;
 }
 
 // ==============================================================================
