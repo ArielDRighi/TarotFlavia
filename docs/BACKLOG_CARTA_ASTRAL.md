@@ -1300,7 +1300,9 @@ export class BirthChartInterpretation {
 
 ---
 
-### T-CA-004: Crear Migración de Tablas Principales
+### T-CA-004: Crear Migración de Tablas Principales ✅
+
+**Estado:** ✅ COMPLETADA
 
 **Historia relacionada:** Todas
 
@@ -1632,18 +1634,30 @@ export class CreateBirthChartTables1707220000000 implements MigrationInterface {
 
 **Criterios de aceptación:**
 
-- [ ] Migración ejecuta sin errores en ambiente de desarrollo
-- [ ] Rollback (down) funciona correctamente
-- [ ] Todos los enums creados en PostgreSQL
-- [ ] Ambas tablas creadas con columnas correctas
-- [ ] Índices creados según especificación
-- [ ] Foreign key con CASCADE delete funcionando
-- [ ] Constraint UNIQUE NULLS NOT DISTINCT funcionando
-- [ ] Documentación de la migración en código
+- [x] Migración ejecuta sin errores en ambiente de desarrollo
+- [x] Rollback (down) funciona correctamente
+- [x] Todos los enums creados en PostgreSQL
+- [x] Ambas tablas creadas con columnas correctas
+- [x] Índices creados según especificación
+- [x] Foreign key con CASCADE delete funcionando
+- [x] Constraint UNIQUE NULLS NOT DISTINCT funcionando
+- [x] Documentación de la migración en código
 
-**Dependencias:** T-CA-001, T-CA-002, T-CA-003
+**Dependencias:** T-CA-001 ✅, T-CA-002 ✅, T-CA-003 ✅
 
 **Estimación:** 2 horas
+
+**Tiempo real:** 2 horas
+
+**Notas técnicas:**
+- Migración creada manualmente: `1770406386237-CreateBirthChartInterpretationsTable.ts`
+- Se verifica existencia de `zodiac_sign_enum` antes de crear (puede existir en common/utils)
+- Enums creados: `planet_enum`, `aspect_type_enum`, `interpretation_category_enum`, `zodiac_sign_enum`
+- Tabla `birth_chart_interpretations` con todos los campos especificados
+- Constraint UNIQUE NULLS NOT DISTINCT para (category, planet, sign, house, aspectType, planet2)
+- 4 índices optimizados para búsquedas comunes
+- Validación de formato: ✅ prettier, ✅ eslint, ✅ build
+- Nota: `birth_charts` ya tenía migración existente (1770406386236-CreateBirthChartsTable.ts)
 
 ---
 
