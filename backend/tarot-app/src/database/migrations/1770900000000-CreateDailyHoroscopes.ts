@@ -4,13 +4,22 @@ export class CreateDailyHoroscopes1770900000000 implements MigrationInterface {
   name = 'CreateDailyHoroscopes1770900000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // Crear enum para zodiac_sign
-    await queryRunner.query(`
-      CREATE TYPE "zodiac_sign_enum" AS ENUM(
-        'aries', 'taurus', 'gemini', 'cancer', 'leo', 'virgo',
-        'libra', 'scorpio', 'sagittarius', 'capricorn', 'aquarius', 'pisces'
-      )
-    `);
+    // Crear enum para zodiac_sign (solo si no existe)
+    const zodiacEnumExists = (await queryRunner.query(`
+      SELECT EXISTS (
+        SELECT 1 FROM pg_type 
+        WHERE typname = 'zodiac_sign_enum'
+      );
+    `)) as Array<{ exists: boolean }>;
+
+    if (!zodiacEnumExists[0].exists) {
+      await queryRunner.query(`
+        CREATE TYPE "zodiac_sign_enum" AS ENUM(
+          'aries', 'taurus', 'gemini', 'cancer', 'leo', 'virgo',
+          'libra', 'scorpio', 'sagittarius', 'capricorn', 'aquarius', 'pisces'
+        )
+      `);
+    }
 
     // Crear tabla daily_horoscopes
     await queryRunner.query(`
@@ -56,7 +65,7 @@ export class CreateDailyHoroscopes1770900000000 implements MigrationInterface {
     // Eliminar tabla
     await queryRunner.query(`DROP TABLE "daily_horoscopes"`);
 
-    // Eliminar enum
-    await queryRunner.query(`DROP TYPE "zodiac_sign_enum"`);
+    // Nota: zodiac_sign_enum NO se elimina porque puede estar siendo usado por otras tablas
+    // (ej: birth_chart_interpretations)
   }
 }
