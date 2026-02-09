@@ -2348,21 +2348,29 @@ export class PlanetPositionService {
 }
 ```
 
+**Estado:** ✅ COMPLETADA
+
 **Criterios de aceptación:**
 
-- [ ] Transformación de todas las posiciones raw
-- [ ] Cálculo correcto de signo desde longitud
-- [ ] Cálculo correcto de casa para cada planeta
-- [ ] Detección de retrogradación
-- [ ] Cálculo de Ascendente y MC
-- [ ] Formateo para display humano
-- [ ] Extracción de Big Three
-- [ ] Tests unitarios con casos conocidos
-- [ ] Tests de edge cases (cruce de 0°/360°)
+- [x] Transformación de todas las posiciones raw
+- [x] Cálculo correcto de signo desde longitud
+- [x] Cálculo correcto de casa para cada planeta
+- [x] Detección de retrogradación
+- [x] Cálculo de Ascendente y MC
+- [x] Formateo para display humano
+- [x] Extracción de Big Three
+- [x] Tests unitarios con casos conocidos
+- [x] Tests de edge cases (cruce de 0°/360°)
 
 **Dependencias:** T-CA-006
 
 **Estimación:** 4 horas
+
+**Notas de implementación:**
+- Implementado con TDD (35 tests unitarios)
+- Coverage: 97.82% statements, 85% branches, 100% functions
+- Validación de arquitectura limpia exitosa
+- Manejo robusto de edge cases (360° wrapping, casas interceptadas)
 
 ---
 

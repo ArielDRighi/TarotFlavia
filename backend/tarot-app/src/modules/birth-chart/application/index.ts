@@ -1,1 +1,6 @@
-// Application layer - services and use cases will be added in future tasks
+/**
+ * Barrel export for birth-chart application layer
+ * Centraliza las exportaciones de servicios, use cases y DTOs
+ */
+
+export * from './services';
