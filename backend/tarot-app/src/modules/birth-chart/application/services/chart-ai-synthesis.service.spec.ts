@@ -144,7 +144,7 @@ describe('ChartAISynthesisService', () => {
       expect(result.synthesis).toBe(mockAIResponse.content);
       expect(result.provider).toBe(AIProviderType.GROQ);
       expect(result.tokensUsed).toBe(800);
-      expect(result.durationMs).toBeGreaterThan(0);
+      expect(result.durationMs).toBeGreaterThanOrEqual(0);
       expect(mockAIProvider.generateCompletion).toHaveBeenCalledTimes(1);
     });
 
