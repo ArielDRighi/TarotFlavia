@@ -3594,6 +3594,8 @@ export class BirthChartInterpretationRepository implements IBirthChartInterpreta
 
 ### T-CA-012: Crear Servicio de Interpretación de Carta
 
+**Estado:** ✅ COMPLETADA
+
 **Historia relacionada:** HU-CA-004, HU-CA-005
 
 **Descripción:**
@@ -3955,16 +3957,16 @@ export class ChartInterpretationService {
 
 **Criterios de aceptación:**
 
-- [ ] Generación de Big Three para todos los planes
-- [ ] Generación de informe completo para Free/Premium
-- [ ] Ensamblaje de interpretaciones por planeta
-- [ ] Ensamblaje de interpretaciones de aspectos
-- [ ] Cálculo de porcentajes de distribución
-- [ ] Resumen de balance de aspectos
-- [ ] Interpretaciones por defecto si faltan en DB
-- [ ] Optimización con consultas batch
-- [ ] Tests unitarios completos
-- [ ] Tests de integración
+- [x] Generación de Big Three para todos los planes
+- [x] Generación de informe completo para Free/Premium
+- [x] Ensamblaje de interpretaciones por planeta
+- [x] Ensamblaje de interpretaciones de aspectos
+- [x] Cálculo de porcentajes de distribución
+- [x] Resumen de balance de aspectos
+- [x] Interpretaciones por defecto si faltan en DB
+- [x] Optimización con consultas batch
+- [x] Tests unitarios completos (93.65% coverage)
+- [x] Tests de integración
 
 **Dependencias:** T-CA-011
 
