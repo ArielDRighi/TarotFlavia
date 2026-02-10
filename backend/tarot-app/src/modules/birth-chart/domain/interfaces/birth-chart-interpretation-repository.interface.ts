@@ -97,14 +97,7 @@ export interface IBirthChartInterpretationRepository {
 
   /**
    * Cuenta interpretaciones por categoría (para estadísticas)
-   * @returns Objeto con conteo por categoría
+   * @returns Objeto con conteo por categoría (solo categorías presentes)
    */
-  countByCategory(): Promise<Record<InterpretationCategory, number>>;
+  countByCategory(): Promise<Partial<Record<InterpretationCategory, number>>>;
 }
-
-/**
- * Token de inyección de dependencias para el repositorio
- */
-export const BIRTH_CHART_INTERPRETATION_REPOSITORY = Symbol(
-  'BIRTH_CHART_INTERPRETATION_REPOSITORY',
-);

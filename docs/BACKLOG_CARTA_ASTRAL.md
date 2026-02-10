@@ -3567,7 +3567,7 @@ export class BirthChartInterpretationRepository implements IBirthChartInterpreta
 - Interface ubicada en `src/modules/birth-chart/domain/interfaces/birth-chart-interpretation-repository.interface.ts`
 - Implementación ubicada en `src/modules/birth-chart/infrastructure/repositories/birth-chart-interpretation.repository.ts`
 - Tests ubicados en `src/modules/birth-chart/infrastructure/repositories/birth-chart-interpretation.repository.spec.ts`
-- 7 métodos públicos implementados:
+- 8 métodos públicos implementados:
   - `findPlanetInSign()` - Busca planeta en signo
   - `findPlanetInHouse()` - Busca planeta en casa
   - `findAspect()` - Busca aspecto (bidireccional)

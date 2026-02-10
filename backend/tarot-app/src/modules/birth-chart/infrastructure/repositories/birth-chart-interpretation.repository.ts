@@ -186,13 +186,14 @@ export class BirthChartInterpretationRepository implements IBirthChartInterpreta
     const aspectPromises = params.aspects.map((a) =>
       this.findAspect(a.planet1, a.planet2, a.aspectType).then((interp) => {
         if (interp) {
+          // Usar planetas del request para mantener consistencia de key
           const key = BirthChartInterpretation.generateKey(
             InterpretationCategory.ASPECT,
-            interp.planet,
+            a.planet1,
             null,
             null,
-            interp.aspectType,
-            interp.planet2,
+            a.aspectType,
+            a.planet2,
           );
           results.set(key, interp);
         }
@@ -229,7 +230,9 @@ export class BirthChartInterpretationRepository implements IBirthChartInterpreta
   /**
    * Cuenta interpretaciones por categoría (para estadísticas)
    */
-  async countByCategory(): Promise<Record<InterpretationCategory, number>> {
+  async countByCategory(): Promise<
+    Partial<Record<InterpretationCategory, number>>
+  > {
     const counts = await this.repo
       .createQueryBuilder('interp')
       .select('interp.category', 'category')
@@ -238,7 +241,7 @@ export class BirthChartInterpretationRepository implements IBirthChartInterpreta
       .groupBy('interp.category')
       .getRawMany<{ category: InterpretationCategory; count: string }>();
 
-    const result = {} as Record<InterpretationCategory, number>;
+    const result = {} as Partial<Record<InterpretationCategory, number>>;
     for (const row of counts) {
       result[row.category] = parseInt(row.count, 10);
     }

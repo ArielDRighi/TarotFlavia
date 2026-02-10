@@ -411,6 +411,161 @@ describe('BirthChartInterpretationRepository', () => {
       expect(result).toBeInstanceOf(Map);
       expect(result.size).toBe(0);
     });
+
+    it('should generate correct keys for all interpretation types', async () => {
+      const planets = [
+        {
+          planet: Planet.SUN,
+          sign: ZodiacSign.ARIES,
+          house: 1,
+        },
+      ];
+
+      const aspects = [
+        {
+          planet1: Planet.SUN,
+          planet2: Planet.MOON,
+          aspectType: AspectType.CONJUNCTION,
+        },
+      ];
+
+      // Mock diferentes tipos de interpretaciones
+      const mockPlanetInSign = {
+        ...mockInterpretation,
+        category: InterpretationCategory.PLANET_IN_SIGN,
+        planet: Planet.SUN,
+        sign: ZodiacSign.ARIES,
+      };
+
+      const mockPlanetInHouse = {
+        ...mockInterpretation,
+        category: InterpretationCategory.PLANET_IN_HOUSE,
+        planet: Planet.SUN,
+        house: 1,
+      };
+
+      const mockAscendant = {
+        ...mockInterpretation,
+        category: InterpretationCategory.ASCENDANT,
+        sign: ZodiacSign.VIRGO,
+      };
+
+      const mockAspect = {
+        ...mockInterpretation,
+        category: InterpretationCategory.ASPECT,
+        planet: Planet.SUN,
+        planet2: Planet.MOON,
+        aspectType: AspectType.CONJUNCTION,
+      };
+
+      // Setup mocks para retornar las interpretaciones correctas
+      mockRepo.find.mockResolvedValue([mockInterpretation]); // PLANET_INTRO
+      mockRepo.findOne.mockImplementation((options: any) => {
+        if (options.where.category === InterpretationCategory.PLANET_IN_SIGN) {
+          return Promise.resolve(mockPlanetInSign);
+        }
+        if (options.where.category === InterpretationCategory.PLANET_IN_HOUSE) {
+          return Promise.resolve(mockPlanetInHouse);
+        }
+        if (options.where.category === InterpretationCategory.ASCENDANT) {
+          return Promise.resolve(mockAscendant);
+        }
+        // Para aspectos (bidireccional)
+        if (Array.isArray(options.where)) {
+          return Promise.resolve(mockAspect);
+        }
+        return Promise.resolve(null);
+      });
+
+      const result = await repository.findAllForChart({
+        planets,
+        aspects,
+        ascendantSign: ZodiacSign.VIRGO,
+      });
+
+      // Verificar que las keys se generan correctamente
+      const expectedPlanetInSignKey = BirthChartInterpretation.generateKey(
+        InterpretationCategory.PLANET_IN_SIGN,
+        Planet.SUN,
+        ZodiacSign.ARIES,
+      );
+      const expectedPlanetInHouseKey = BirthChartInterpretation.generateKey(
+        InterpretationCategory.PLANET_IN_HOUSE,
+        Planet.SUN,
+        null,
+        1,
+      );
+      const expectedAscendantKey = BirthChartInterpretation.generateKey(
+        InterpretationCategory.ASCENDANT,
+        null,
+        ZodiacSign.VIRGO,
+      );
+      const expectedAspectKey = BirthChartInterpretation.generateKey(
+        InterpretationCategory.ASPECT,
+        Planet.SUN,
+        null,
+        null,
+        AspectType.CONJUNCTION,
+        Planet.MOON,
+      );
+
+      expect(result.has(expectedPlanetInSignKey)).toBe(true);
+      expect(result.has(expectedPlanetInHouseKey)).toBe(true);
+      expect(result.has(expectedAscendantKey)).toBe(true);
+      expect(result.has(expectedAspectKey)).toBe(true);
+
+      // Verificar que las interpretaciones son las correctas
+      expect(result.get(expectedPlanetInSignKey)).toEqual(mockPlanetInSign);
+      expect(result.get(expectedPlanetInHouseKey)).toEqual(mockPlanetInHouse);
+      expect(result.get(expectedAscendantKey)).toEqual(mockAscendant);
+      expect(result.get(expectedAspectKey)).toEqual(mockAspect);
+    });
+
+    it('should use request params for aspect keys even when found in reverse order', async () => {
+      const aspects = [
+        {
+          planet1: Planet.SUN,
+          planet2: Planet.MOON,
+          aspectType: AspectType.CONJUNCTION,
+        },
+      ];
+
+      // Mock de aspecto almacenado en orden inverso (Luna-Sol)
+      const mockAspectReverse = {
+        ...mockInterpretation,
+        category: InterpretationCategory.ASPECT,
+        planet: Planet.MOON, // Orden inverso en DB
+        planet2: Planet.SUN,
+        aspectType: AspectType.CONJUNCTION,
+      };
+
+      mockRepo.find.mockResolvedValue([]);
+      mockRepo.findOne.mockImplementation((options: any) => {
+        if (Array.isArray(options.where)) {
+          return Promise.resolve(mockAspectReverse);
+        }
+        return Promise.resolve(null);
+      });
+
+      const result = await repository.findAllForChart({
+        planets: [],
+        aspects,
+        ascendantSign: ZodiacSign.VIRGO,
+      });
+
+      // La key debe usar el orden del request (Sol-Luna), no el de DB (Luna-Sol)
+      const expectedKey = BirthChartInterpretation.generateKey(
+        InterpretationCategory.ASPECT,
+        Planet.SUN, // Del request
+        null,
+        null,
+        AspectType.CONJUNCTION,
+        Planet.MOON, // Del request
+      );
+
+      expect(result.has(expectedKey)).toBe(true);
+      expect(result.get(expectedKey)).toEqual(mockAspectReverse);
+    });
   });
 
   describe('countByCategory', () => {
