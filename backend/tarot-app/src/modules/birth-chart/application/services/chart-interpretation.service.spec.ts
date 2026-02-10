@@ -1,6 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ChartInterpretationService } from './chart-interpretation.service';
-import { IBirthChartInterpretationRepository } from '../../domain/interfaces/birth-chart-interpretation-repository.interface';
+import {
+  IBirthChartInterpretationRepository,
+  BIRTH_CHART_INTERPRETATION_REPOSITORY,
+} from '../../domain/interfaces';
 import { BirthChartInterpretation } from '../../entities/birth-chart-interpretation.entity';
 import {
   Planet,
@@ -199,7 +202,7 @@ describe('ChartInterpretationService', () => {
       providers: [
         ChartInterpretationService,
         {
-          provide: 'BIRTH_CHART_INTERPRETATION_REPOSITORY',
+          provide: BIRTH_CHART_INTERPRETATION_REPOSITORY,
           useValue: mockInterpretationRepo,
         },
       ],
@@ -466,6 +469,54 @@ describe('ChartInterpretationService', () => {
       );
       expect(mercuryInterpretation!.intro).toBeUndefined();
       expect(mercuryInterpretation!.inSign).toBeUndefined();
+    });
+
+    it('should filter out aspects with non-Planet enum values (e.g., ascendant)', async () => {
+      // Arrange
+      const chartWithAscendantAspect: ChartData = {
+        ...mockChartData,
+        aspects: [
+          {
+            planet1: Planet.SUN,
+            planet2: Planet.MOON,
+            aspectType: AspectType.CONJUNCTION,
+            angle: 29.8,
+            orb: 0.2,
+            isApplying: true,
+          },
+          {
+            planet1: 'ascendant' as Planet, // No es un Planet enum válido
+            planet2: Planet.SUN,
+            aspectType: AspectType.SEXTILE,
+            angle: 60.0,
+            orb: 1.5,
+            isApplying: false,
+          },
+        ] as ChartAspect[],
+      };
+      mockInterpretationRepo.findAllForChart.mockResolvedValue(
+        new Map<string, BirthChartInterpretation>(),
+      );
+      mockInterpretationRepo.findBigThree.mockResolvedValue({
+        sun: mockSunInAriesInterpretation,
+        moon: mockMoonInTaurusInterpretation,
+        ascendant: mockAscendantLeoInterpretation,
+      });
+
+      // Act
+      const result = await service.generateFullInterpretation(
+        chartWithAscendantAspect,
+      );
+
+      // Assert
+      expect(result.aspectSummary.total).toBe(1); // Solo el aspecto válido Sun-Moon
+      const sunInterpretation = result.planets.find(
+        (p) => p.planet === Planet.SUN,
+      );
+      expect(sunInterpretation).toBeDefined();
+      expect(sunInterpretation!.aspects).toHaveLength(1); // Solo un aspecto válido
+      expect(sunInterpretation!.aspects![0].planet1).toBe(Planet.SUN);
+      expect(sunInterpretation!.aspects![0].planet2).toBe(Planet.MOON);
     });
   });
 

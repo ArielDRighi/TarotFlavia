@@ -14,7 +14,10 @@ import {
   AspectTypeMetadata,
   InterpretationCategory,
 } from '../../domain/enums';
-import { IBirthChartInterpretationRepository } from '../../domain/interfaces/birth-chart-interpretation-repository.interface';
+import {
+  IBirthChartInterpretationRepository,
+  BIRTH_CHART_INTERPRETATION_REPOSITORY,
+} from '../../domain/interfaces';
 
 /**
  * Interpretación de un planeta individual
@@ -105,7 +108,7 @@ export class ChartInterpretationService {
   private readonly logger = new Logger(ChartInterpretationService.name);
 
   constructor(
-    @Inject('BIRTH_CHART_INTERPRETATION_REPOSITORY')
+    @Inject(BIRTH_CHART_INTERPRETATION_REPOSITORY)
     private readonly interpretationRepo: IBirthChartInterpretationRepository,
   ) {}
 
@@ -171,11 +174,25 @@ export class ChartInterpretationService {
       house: p.house,
     }));
 
-    const aspects = chartData.aspects.map((a) => ({
-      planet1: a.planet1 as Planet,
-      planet2: a.planet2 as Planet,
-      aspectType: a.aspectType as AspectType,
-    }));
+    const aspects = chartData.aspects
+      // Solo incluimos aspectos donde ambos puntos son planetas válidos del enum Planet
+      .filter(
+        (a) =>
+          Object.values(Planet).includes(a.planet1 as Planet) &&
+          Object.values(Planet).includes(a.planet2 as Planet),
+      )
+      .map((a) => ({
+        planet1: a.planet1 as Planet,
+        planet2: a.planet2 as Planet,
+        aspectType: a.aspectType as AspectType,
+      }));
+
+    // Crear una copia filtrada de chartData.aspects para usar en métodos que necesitan ChartAspect completo
+    const filteredAspects = chartData.aspects.filter(
+      (a) =>
+        Object.values(Planet).includes(a.planet1 as Planet) &&
+        Object.values(Planet).includes(a.planet2 as Planet),
+    );
 
     const ascendantSign = chartData.ascendant.sign as ZodiacSign;
 
@@ -186,32 +203,70 @@ export class ChartInterpretationService {
       ascendantSign,
     });
 
-    // 3. Generar Big Three
-    const sunSign = chartData.planets.find(
+    // 3. Generar Big Three reutilizando las interpretaciones ya cargadas
+    const sunPosition = chartData.planets.find(
       (p) => (p.planet as Planet) === Planet.SUN,
-    )?.sign as ZodiacSign;
-    const moonSign = chartData.planets.find(
+    );
+    const moonPosition = chartData.planets.find(
       (p) => (p.planet as Planet) === Planet.MOON,
-    )?.sign as ZodiacSign;
-    const bigThree = await this.generateBigThreeInterpretation(
+    );
+    const sunSign = (sunPosition?.sign ?? ZodiacSign.ARIES) as ZodiacSign;
+    const moonSign = (moonPosition?.sign ?? ZodiacSign.ARIES) as ZodiacSign;
+
+    // Buscar interpretaciones del Big Three en el map (ya fueron cargadas en batch)
+    const sunKey = BirthChartInterpretation.generateKey(
+      InterpretationCategory.PLANET_IN_SIGN,
+      Planet.SUN,
       sunSign,
+    );
+    const moonKey = BirthChartInterpretation.generateKey(
+      InterpretationCategory.PLANET_IN_SIGN,
+      Planet.MOON,
       moonSign,
+    );
+    const ascendantKey = BirthChartInterpretation.generateKey(
+      InterpretationCategory.ASCENDANT,
+      null,
       ascendantSign,
     );
 
-    // 4. Generar interpretaciones de planetas
+    const bigThree: BigThreeInterpretation = {
+      sun: {
+        sign: sunSign,
+        signName: ZodiacSignMetadata[sunSign]?.name || sunSign,
+        interpretation:
+          interpretationsMap.get(sunKey)?.content ||
+          this.getDefaultInterpretation('sun', sunSign),
+      },
+      moon: {
+        sign: moonSign,
+        signName: ZodiacSignMetadata[moonSign]?.name || moonSign,
+        interpretation:
+          interpretationsMap.get(moonKey)?.content ||
+          this.getDefaultInterpretation('moon', moonSign),
+      },
+      ascendant: {
+        sign: ascendantSign,
+        signName: ZodiacSignMetadata[ascendantSign]?.name || ascendantSign,
+        interpretation:
+          interpretationsMap.get(ascendantKey)?.content ||
+          this.getDefaultInterpretation('ascendant', ascendantSign),
+      },
+    };
+
+    // 4. Generar interpretaciones de planetas (usar aspectos filtrados)
     const planetInterpretations = this.buildPlanetInterpretations(
       chartData.planets,
-      chartData.aspects,
+      filteredAspects,
       interpretationsMap,
     );
 
     // 5. Calcular distribución con porcentajes
     const distribution = this.buildDistributionSummary(chartData.distribution);
 
-    // 6. Generar resumen de aspectos
+    // 6. Generar resumen de aspectos (usar aspectos filtrados)
     const aspectSummary = this.buildAspectSummary(
-      chartData.aspects,
+      filteredAspects,
       interpretationsMap,
     );
 
@@ -311,7 +366,10 @@ export class ChartInterpretationService {
     elements: { name: string; count: number; percentage: number }[];
     modalities: { name: string; count: number; percentage: number }[];
   } {
-    const totalPlanets = 11; // 10 planetas + Ascendente
+    const totalPlanets = Object.values(distribution.elements).reduce(
+      (sum, count) => sum + count,
+      0,
+    );
 
     const elements = [
       { name: 'Fuego', count: distribution.elements.fire },
