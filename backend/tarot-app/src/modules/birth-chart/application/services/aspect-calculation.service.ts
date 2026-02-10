@@ -119,7 +119,11 @@ export class AspectCalculationService {
 
       if (orb <= aspectConfig.orb) {
         // Determinar si el aspecto es aplicativo o separativo
-        const isApplying = this.isAspectApplying(planet1, planet2, angle);
+        const isApplying = this.isAspectApplying(
+          planet1,
+          planet2,
+          aspectConfig.angle,
+        );
 
         return {
           planet1: planet1.planet,
@@ -137,14 +141,17 @@ export class AspectCalculationService {
 
   /**
    * Calcula el ángulo entre dos longitudes eclípticas
-   * Siempre retorna el ángulo menor (0-180°)
    *
    * @param long1 - Longitud eclíptica del primer planeta (0-360°)
    * @param long2 - Longitud eclíptica del segundo planeta (0-360°)
    * @returns Ángulo entre las dos posiciones (0-180°)
    */
   private calculateAngle(long1: number, long2: number): number {
-    let diff = Math.abs(long1 - long2);
+    // Normalizar longitudes al rango [0, 360) para evitar valores negativos
+    const norm1 = ((long1 % 360) + 360) % 360;
+    const norm2 = ((long2 % 360) + 360) % 360;
+
+    let diff = Math.abs(norm1 - norm2);
 
     // Siempre usar el ángulo menor (máximo 180°)
     if (diff > 180) {
@@ -174,25 +181,32 @@ export class AspectCalculationService {
    *
    * @param planet1 - Primera posición planetaria
    * @param planet2 - Segunda posición planetaria
-   * @param currentAngle - Ángulo actual entre los planetas
+   * @param aspectAngle - Ángulo exacto del aspecto detectado
    * @returns true si el aspecto es aplicativo, false si es separativo
    */
   private isAspectApplying(
     planet1: PlanetPosition,
     planet2: PlanetPosition,
-    currentAngle: number,
+    aspectAngle: number,
   ): boolean {
-    // Implementación simplificada: basada en la posición relativa
-    // En una implementación real, se usaría longitudeSpeed de las efemérides
+    // Implementación mejorada: compara orbes en vez de ángulos raw
+    // Simula movimiento futuro para determinar si el aspecto se acerca o aleja
+
+    const currentAngle = this.calculateAngle(
+      planet1.longitude,
+      planet2.longitude,
+    );
+    const currentOrb = this.calculateOrb(currentAngle, aspectAngle);
 
     // Simular movimiento futuro (aproximación simple)
     const futureAngle = this.calculateAngle(
-      planet1.longitude + 1, // 1 grado de movimiento
+      planet1.longitude + 1, // 1 grado de movimiento (planeta más rápido)
       planet2.longitude + 0.5, // Planeta más lento
     );
+    const futureOrb = this.calculateOrb(futureAngle, aspectAngle);
 
-    // Si el ángulo futuro es menor que el actual, está aplicándose
-    return futureAngle < currentAngle;
+    // Si el orbe futuro es menor, el aspecto está aplicándose (acercándose)
+    return futureOrb < currentOrb;
   }
 
   /**
@@ -292,6 +306,19 @@ export class AspectCalculationService {
     aspects: ChartAspect[],
     planets: string[],
   ): Record<string, Record<string, ChartAspect | null>> {
+    // Crear lookup map para O(1) access
+    // Key: "planet1|planet2" (normalizado alfabéticamente)
+    const aspectMap = new Map<string, ChartAspect>();
+
+    for (const aspect of aspects) {
+      const key =
+        aspect.planet1 < aspect.planet2
+          ? `${aspect.planet1}|${aspect.planet2}`
+          : `${aspect.planet2}|${aspect.planet1}`;
+      aspectMap.set(key, aspect);
+    }
+
+    // Construir matriz usando el lookup map
     const matrix: Record<string, Record<string, ChartAspect | null>> = {};
 
     for (const p1 of planets) {
@@ -303,14 +330,9 @@ export class AspectCalculationService {
           continue;
         }
 
-        // Buscar aspecto entre p1 y p2 (en cualquier dirección)
-        const aspect = aspects.find(
-          (a) =>
-            (a.planet1 === p1 && a.planet2 === p2) ||
-            (a.planet1 === p2 && a.planet2 === p1),
-        );
-
-        matrix[p1][p2] = aspect || null;
+        // Buscar en el map (O(1))
+        const key = p1 < p2 ? `${p1}|${p2}` : `${p2}|${p1}`;
+        matrix[p1][p2] = aspectMap.get(key) || null;
       }
     }
 

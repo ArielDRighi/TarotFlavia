@@ -609,4 +609,168 @@ describe('AspectCalculationService', () => {
       expect(conjunction?.angle).toBe(0);
     });
   });
+
+  describe('isApplying Field', () => {
+    it('should calculate isApplying field for conjunction', () => {
+      const planets: PlanetPosition[] = [
+        {
+          planet: 'sun',
+          longitude: 0,
+          sign: 'aries',
+          signDegree: 0,
+          house: 1,
+          isRetrograde: false,
+        },
+        {
+          planet: 'moon',
+          longitude: 5, // Conjunción con orbe 5°
+          sign: 'aries',
+          signDegree: 5,
+          house: 1,
+          isRetrograde: false,
+        },
+      ];
+
+      const aspects = service.calculateAspects(planets);
+      const conjunction = aspects.find(
+        (a) => a.aspectType === (AspectType.CONJUNCTION as string),
+      );
+
+      expect(conjunction).toBeDefined();
+      expect(conjunction?.isApplying).toBeDefined();
+      expect(typeof conjunction?.isApplying).toBe('boolean');
+    });
+
+    it('should calculate isApplying field for opposition', () => {
+      const planets: PlanetPosition[] = [
+        {
+          planet: 'sun',
+          longitude: 0,
+          sign: 'aries',
+          signDegree: 0,
+          house: 1,
+          isRetrograde: false,
+        },
+        {
+          planet: 'venus',
+          longitude: 180, // Oposición exacta
+          sign: 'libra',
+          signDegree: 0,
+          house: 7,
+          isRetrograde: false,
+        },
+      ];
+
+      const aspects = service.calculateAspects(planets);
+      const opposition = aspects.find(
+        (a) => a.aspectType === (AspectType.OPPOSITION as string),
+      );
+
+      expect(opposition).toBeDefined();
+      expect(opposition?.isApplying).toBeDefined();
+      expect(typeof opposition?.isApplying).toBe('boolean');
+    });
+
+    it('should calculate isApplying field for trine', () => {
+      const planets: PlanetPosition[] = [
+        {
+          planet: 'sun',
+          longitude: 0,
+          sign: 'aries',
+          signDegree: 0,
+          house: 1,
+          isRetrograde: false,
+        },
+        {
+          planet: 'jupiter',
+          longitude: 120, // Trígono exacto
+          sign: 'leo',
+          signDegree: 0,
+          house: 5,
+          isRetrograde: false,
+        },
+      ];
+
+      const aspects = service.calculateAspects(planets);
+      const trine = aspects.find(
+        (a) => a.aspectType === (AspectType.TRINE as string),
+      );
+
+      expect(trine).toBeDefined();
+      expect(trine?.isApplying).toBeDefined();
+      expect(typeof trine?.isApplying).toBe('boolean');
+    });
+
+    it('should calculate isApplying field for square', () => {
+      const planets: PlanetPosition[] = [
+        {
+          planet: 'sun',
+          longitude: 0,
+          sign: 'aries',
+          signDegree: 0,
+          house: 1,
+          isRetrograde: false,
+        },
+        {
+          planet: 'mars',
+          longitude: 90, // Cuadratura exacta
+          sign: 'cancer',
+          signDegree: 0,
+          house: 4,
+          isRetrograde: false,
+        },
+      ];
+
+      const aspects = service.calculateAspects(planets);
+      const square = aspects.find(
+        (a) => a.aspectType === (AspectType.SQUARE as string),
+      );
+
+      expect(square).toBeDefined();
+      expect(square?.isApplying).toBeDefined();
+      expect(typeof square?.isApplying).toBe('boolean');
+    });
+
+    it('should calculate isApplying field for sextile', () => {
+      const planets: PlanetPosition[] = [
+        {
+          planet: 'sun',
+          longitude: 0,
+          sign: 'aries',
+          signDegree: 0,
+          house: 1,
+          isRetrograde: false,
+        },
+        {
+          planet: 'venus',
+          longitude: 60, // Sextil exacto
+          sign: 'gemini',
+          signDegree: 0,
+          house: 3,
+          isRetrograde: false,
+        },
+      ];
+
+      const aspects = service.calculateAspects(planets);
+      const sextile = aspects.find(
+        (a) => a.aspectType === (AspectType.SEXTILE as string),
+      );
+
+      expect(sextile).toBeDefined();
+      expect(sextile?.isApplying).toBeDefined();
+      expect(typeof sextile?.isApplying).toBe('boolean');
+    });
+
+    it('should verify all calculated aspects have isApplying field', () => {
+      const aspects = service.calculateAspects(mockPlanets);
+
+      // Todos los aspectos deben tener el campo isApplying
+      for (const aspect of aspects) {
+        expect(aspect.isApplying).toBeDefined();
+        expect(typeof aspect.isApplying).toBe('boolean');
+      }
+
+      expect(aspects.length).toBeGreaterThan(0);
+    });
+  });
 });
