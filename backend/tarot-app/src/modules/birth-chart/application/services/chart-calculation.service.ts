@@ -138,9 +138,9 @@ export class ChartCalculationService {
     const timeParts = birthTime.split(':').map(Number);
 
     return {
-      year: birthDate.getFullYear(),
-      month: birthDate.getMonth() + 1, // JavaScript usa 0-11
-      day: birthDate.getDate(),
+      year: birthDate.getUTCFullYear(),
+      month: birthDate.getUTCMonth() + 1, // JavaScript usa 0-11
+      day: birthDate.getUTCDate(),
       hour: timeParts[0] || 0,
       minute: timeParts[1] || 0,
     };

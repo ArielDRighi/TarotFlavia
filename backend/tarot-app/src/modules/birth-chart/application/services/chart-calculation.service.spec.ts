@@ -193,7 +193,7 @@ describe('ChartCalculationService', () => {
       expect(mockEphemeris.calculate).toHaveBeenCalledWith({
         year: 1990,
         month: 5,
-        day: 14,
+        day: 15,
         hour: 14,
         minute: 30,
         latitude: -34.6037,
