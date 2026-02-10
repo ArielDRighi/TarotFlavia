@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
 import { ChartCacheService } from './chart-cache.service';
 import { ChartData } from '../../entities/birth-chart.entity';
 import { FullChartInterpretation } from './chart-interpretation.service';
@@ -8,7 +7,6 @@ import { ZodiacSign } from '../../domain/enums';
 
 describe('ChartCacheService', () => {
   let service: ChartCacheService;
-  let _cacheManager: Cache;
 
   const mockCacheManager = {
     get: jest.fn(),
@@ -30,7 +28,6 @@ describe('ChartCacheService', () => {
     }).compile();
 
     service = module.get<ChartCacheService>(ChartCacheService);
-    _cacheManager = module.get<Cache>(CACHE_MANAGER);
   });
 
   it('should be defined', () => {
@@ -156,7 +153,7 @@ describe('ChartCacheService', () => {
       const cacheKey = 'test-key';
       const cachedData = {
         chartData: { planets: [] } as unknown as ChartData,
-        calculatedAt: new Date(),
+        calculatedAt: new Date().toISOString(),
         cacheKey,
       };
 
@@ -236,7 +233,7 @@ describe('ChartCacheService', () => {
       const chartCacheKey = 'test-chart-key';
       const cachedSynthesis = {
         synthesis: 'Test synthesis',
-        generatedAt: new Date(),
+        generatedAt: new Date().toISOString(),
         provider: 'openai',
         model: 'gpt-4',
       };

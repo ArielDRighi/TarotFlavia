@@ -7,13 +7,13 @@ import { FullChartInterpretation } from './chart-interpretation.service';
 
 export interface CachedChartData {
   chartData: ChartData;
-  calculatedAt: Date;
+  calculatedAt: string; // ISO string for Redis compatibility
   cacheKey: string;
 }
 
 export interface CachedSynthesis {
   synthesis: string;
-  generatedAt: Date;
+  generatedAt: string; // ISO string for Redis compatibility
   provider: string;
   model: string;
 }
@@ -67,11 +67,15 @@ export class ChartCacheService {
    *
    * Usa SHA-256 para crear una clave determinística basada en:
    * - Fecha de nacimiento
-   * - Hora de nacimiento
-   * - Coordenadas geográficas
+   * - Hora de nacimiento (normalizada a HH:mm:ss)
+   * - Coordenadas geográficas (redondeadas a 6 decimales)
+   *
+   * Normalización aplicada para mejorar hit-rate:
+   * - birthTime: Siempre HH:mm:ss (añade :00 si falta)
+   * - coords: 6 decimales (coincide con DB scale: 6)
    *
    * @param birthDate Fecha de nacimiento
-   * @param birthTime Hora de nacimiento (HH:mm:ss)
+   * @param birthTime Hora de nacimiento (HH:mm o HH:mm:ss)
    * @param latitude Latitud del lugar de nacimiento
    * @param longitude Longitud del lugar de nacimiento
    * @returns Hash SHA-256 de 64 caracteres hex
@@ -82,7 +86,18 @@ export class ChartCacheService {
     latitude: number,
     longitude: number,
   ): string {
-    const dataString = `chart:${birthDate.toISOString()}:${birthTime}:${latitude}:${longitude}`;
+    // Normalizar birthTime a HH:mm:ss
+    const normalizedTime = birthTime.includes(':')
+      ? birthTime.split(':').length === 2
+        ? `${birthTime}:00`
+        : birthTime
+      : birthTime;
+
+    // Redondear coordenadas a 6 decimales (coincide con DB)
+    const normalizedLat = parseFloat(latitude.toFixed(6));
+    const normalizedLng = parseFloat(longitude.toFixed(6));
+
+    const dataString = `chart:${birthDate.toISOString()}:${normalizedTime}:${normalizedLat}:${normalizedLng}`;
     return createHash('sha256').update(dataString).digest('hex');
   }
 
@@ -144,7 +159,7 @@ export class ChartCacheService {
     try {
       const cached: CachedChartData = {
         chartData,
-        calculatedAt: new Date(),
+        calculatedAt: new Date().toISOString(),
         cacheKey,
       };
 
@@ -202,7 +217,7 @@ export class ChartCacheService {
       const key = this.generateSynthesisCacheKey(chartCacheKey);
       const cached: CachedSynthesis = {
         synthesis,
-        generatedAt: new Date(),
+        generatedAt: new Date().toISOString(),
         provider,
         model,
       };
