@@ -6,3 +6,4 @@
 export * from './planet-position.service';
 export * from './house-cusp.service';
 export * from './aspect-calculation.service';
+export * from './chart-calculation.service';

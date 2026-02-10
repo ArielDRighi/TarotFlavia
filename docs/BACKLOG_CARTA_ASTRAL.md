@@ -3153,33 +3153,37 @@ export class ChartCalculationService {
 }
 ```
 
+**Estado:** ✅ COMPLETADA
+
 **Criterios de aceptación:**
 
-- [ ] Orquestación completa del cálculo de carta
-- [ ] Parseo correcto de fecha y hora
-- [ ] Validación de inputs antes de calcular
-- [ ] Cálculo de distribución de elementos/modalidades
-- [ ] Ensamblaje correcto de ChartData
-- [ ] Extracción de Big Three
-- [ ] Logging de tiempo de cálculo
-- [ ] Validación de datos calculados
-- [ ] Manejo de errores robusto
-- [ ] Tests de integración completos
-- [ ] Tests con cartas de ejemplo verificadas
+- [x] Orquestación completa del cálculo de carta
+- [x] Parseo correcto de fecha y hora
+- [x] Validación de inputs antes de calcular
+- [x] Cálculo de distribución de elementos/modalidades
+- [x] Ensamblaje correcto de ChartData
+- [x] Extracción de Big Three
+- [x] Logging de tiempo de cálculo
+- [x] Validación de datos calculados
+- [x] Manejo de errores robusto
+- [x] Tests de integración completos (27 tests passing)
+- [x] Tests con cartas de ejemplo verificadas
 
 **Dependencias:** T-CA-006, T-CA-007, T-CA-008, T-CA-009
 
 **Estimación:** 4 horas
+
+**Tiempo real:** ~4 horas
 
 ---
 
 ## CHECKLIST DE PARTE 7C
 
 - [x] T-CA-006: Librería de efemérides configurada
-- [ ] T-CA-007: Servicio de posiciones planetarias funcionando
-- [ ] T-CA-008: Servicio de cúspides de casas funcionando
-- [ ] T-CA-009: Servicio de cálculo de aspectos funcionando
-- [ ] T-CA-010: Servicio orquestador integrando todo
+- [x] T-CA-007: Servicio de posiciones planetarias funcionando
+- [x] T-CA-008: Servicio de cúspides de casas funcionando
+- [x] T-CA-009: Servicio de cálculo de aspectos funcionando
+- [x] T-CA-010: Servicio orquestador integrando todo
 
 ---
 
