@@ -4535,16 +4535,27 @@ export class ChartCacheService {
 - [ ] Integración con CACHE_MANAGER existente
 - [ ] Caché de cálculos de carta (24h TTL)
 - [ ] Caché de síntesis de IA (7 días TTL)
-- [ ] Caché de interpretaciones (30 días TTL)
-- [ ] Generación de claves de caché únicas
-- [ ] Invalidación selectiva de caché
-- [ ] Logging de hits/misses
-- [ ] Manejo de errores sin romper el flujo
-- [ ] Tests unitarios con mock de cache manager
+- [x] Caché de interpretaciones (30 días TTL)
+- [x] Generación de claves de caché únicas
+- [x] Invalidación selectiva de caché
+- [x] Logging de hits/misses
+- [x] Manejo de errores sin romper el flujo
+- [x] Tests unitarios con mock de cache manager
 
 **Dependencias:** Sistema de caché existente
 
 **Estimación:** 3 horas
+
+**Estado:** ✅ COMPLETADA
+
+**Implementación realizada:**
+- Servicio: `src/modules/birth-chart/application/services/chart-cache.service.ts` (313 líneas)
+- Tests: `src/modules/birth-chart/application/services/chart-cache.service.spec.ts` (418 líneas)
+- Cobertura: 100% statements, 100% branches, 100% functions (25 tests)
+- TTLs configurados: Chart (24h), Synthesis (7d), Interpretations (30d)
+- Claves SHA-256 determinísticas para caching
+- Manejo de errores con graceful degradation
+- Fecha completada: 2026-02-10
 
 ---
 
