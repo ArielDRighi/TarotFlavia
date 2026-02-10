@@ -10,3 +10,4 @@ export * from './chart-calculation.service';
 export * from './chart-interpretation.service';
 export * from './chart-ai-synthesis.service';
 export * from './chart-cache.service';
+export * from './chart-pdf.service';

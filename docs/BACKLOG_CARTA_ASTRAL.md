@@ -5047,19 +5047,21 @@ Cada persona es única y tiene libre albedrío para tomar sus propias decisiones
 }
 ```
 
+**Estado:** ✅ COMPLETADA
+
 **Criterios de aceptación:**
 
-- [ ] Generación de PDF con PDFKit
-- [ ] Portada con datos de nacimiento y Big Three
-- [ ] Página de posiciones planetarias con tabla
-- [ ] Página de distribución de elementos/modalidades
-- [ ] Páginas individuales por planeta (Free/Premium)
-- [ ] Página de síntesis IA (solo Premium)
-- [ ] Página de disclaimer legal
-- [ ] Estilos consistentes con branding Auguria
-- [ ] Nombre de archivo sanitizado
-- [ ] Tests unitarios de generación
-- [ ] Tests de integración con datos reales
+- [x] Generación de PDF con PDFKit
+- [x] Portada con datos de nacimiento y Big Three
+- [x] Página de posiciones planetarias con tabla
+- [x] Página de distribución de elementos/modalidades
+- [x] Páginas individuales por planeta (Free/Premium)
+- [x] Página de síntesis IA (solo Premium)
+- [x] Página de disclaimer legal
+- [x] Estilos consistentes con branding Auguria
+- [x] Nombre de archivo sanitizado
+- [x] Tests unitarios de generación
+- [x] Tests de integración con datos reales
 
 **Dependencias:** T-CA-012, T-CA-013
 
@@ -5073,7 +5075,7 @@ Cada persona es única y tiene libre albedrío para tomar sus propias decisiones
 - [ ] T-CA-012: Servicio de interpretación de carta funcionando
 - [ ] T-CA-013: Servicio de síntesis con IA integrado
 - [ ] T-CA-014: Sistema de caché integrado
-- [ ] T-CA-015: Generación de PDF funcionando
+- [x] T-CA-015: Generación de PDF funcionando ✅
 
 ---
 
