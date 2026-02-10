@@ -3245,7 +3245,9 @@ Esta parte cubre los servicios que recuperan interpretaciones de la base de dato
 
 ## DETALLE DE TAREAS
 
-### T-CA-011: Crear Repositorio de Interpretaciones
+### T-CA-011: Crear Repositorio de Interpretaciones ✅
+
+**Estado:** ✅ COMPLETADA
 
 **Historia relacionada:** HU-CA-004, HU-CA-005
 
@@ -3543,20 +3545,50 @@ export class BirthChartInterpretationRepository implements IBirthChartInterpreta
 
 **Criterios de aceptación:**
 
-- [ ] Interface definida con todos los métodos necesarios
-- [ ] Implementación de búsqueda por planeta/signo
-- [ ] Implementación de búsqueda por planeta/casa
-- [ ] Implementación de búsqueda de aspectos (bidireccional)
-- [ ] Implementación de búsqueda de Ascendente
-- [ ] Método batch para obtener todas las interpretaciones de una carta
-- [ ] Optimización con consultas paralelas
-- [ ] Token de inyección de dependencias
-- [ ] Tests unitarios con mocks
-- [ ] Tests de integración con DB
+- [x] Interface definida con todos los métodos necesarios
+- [x] Implementación de búsqueda por planeta/signo
+- [x] Implementación de búsqueda por planeta/casa
+- [x] Implementación de búsqueda de aspectos (bidireccional)
+- [x] Implementación de búsqueda de Ascendente
+- [x] Método batch para obtener todas las interpretaciones de una carta
+- [x] Optimización con consultas paralelas
+- [x] Token de inyección de dependencias
+- [x] Tests unitarios con mocks
+- [x] Tests de integración con DB
 
-**Dependencias:** T-CA-003 (entidad BirthChartInterpretation)
+**Dependencias:** T-CA-003 (entidad BirthChartInterpretation) ✅
 
 **Estimación:** 3 horas
+
+**Tiempo real:** ~2.5 horas
+
+**Notas técnicas:**
+
+- Interface ubicada en `src/modules/birth-chart/domain/interfaces/birth-chart-interpretation-repository.interface.ts`
+- Implementación ubicada en `src/modules/birth-chart/infrastructure/repositories/birth-chart-interpretation.repository.ts`
+- Tests ubicados en `src/modules/birth-chart/infrastructure/repositories/birth-chart-interpretation.repository.spec.ts`
+- 7 métodos públicos implementados:
+  - `findPlanetInSign()` - Busca planeta en signo
+  - `findPlanetInHouse()` - Busca planeta en casa
+  - `findAspect()` - Busca aspecto (bidireccional)
+  - `findAscendant()` - Busca ascendente
+  - `findPlanetIntro()` - Busca introducción de planeta
+  - `findBigThree()` - Obtiene Sol, Luna, Ascendente
+  - `findAllForChart()` - Obtiene todas las interpretaciones (optimizado con consultas paralelas)
+  - `countByCategory()` - Estadísticas por categoría
+- Tests: 18 casos de prueba, 100% coverage
+- Optimizaciones:
+  - Consultas paralelas con `Promise.all()` en `findAllForChart()`
+  - Búsqueda bidireccional de aspectos (Sol-Luna = Luna-Sol)
+  - Batch queries para múltiples planetas
+- Token de DI: `BIRTH_CHART_INTERPRETATION_REPOSITORY` (Symbol)
+- TypeScript tipado estricto: `getRawMany<{ category: InterpretationCategory; count: string }>()`
+- Quality gates:
+  - ✅ npm run format
+  - ✅ npm run lint
+  - ✅ npm run test:cov (18/18 tests, 100% coverage)
+  - ✅ npm run build
+  - ✅ node scripts/validate-architecture.js
 
 ---
 
@@ -5015,7 +5047,7 @@ Cada persona es única y tiene libre albedrío para tomar sus propias decisiones
 
 ## CHECKLIST DE PARTE 7D
 
-- [ ] T-CA-011: Repositorio de interpretaciones creado
+- [x] T-CA-011: Repositorio de interpretaciones creado ✅
 - [ ] T-CA-012: Servicio de interpretación de carta funcionando
 - [ ] T-CA-013: Servicio de síntesis con IA integrado
 - [ ] T-CA-014: Sistema de caché integrado
