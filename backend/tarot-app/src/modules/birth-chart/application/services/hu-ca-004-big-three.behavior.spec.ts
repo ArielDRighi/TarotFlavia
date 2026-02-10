@@ -29,7 +29,10 @@ import { ChartData } from '../../entities/birth-chart.entity';
 /**
  * Helper: crea un mock del repositorio con interpretaciones del Big Three
  */
+let idCounter = 1;
+
 function createMockRepo(): jest.Mocked<IBirthChartInterpretationRepository> {
+  idCounter = 1;
   const createInterpretation = (
     category: InterpretationCategory,
     content: string,
@@ -37,7 +40,7 @@ function createMockRepo(): jest.Mocked<IBirthChartInterpretationRepository> {
     sign?: ZodiacSign | null,
   ): BirthChartInterpretation => {
     const interp = new BirthChartInterpretation();
-    interp.id = Math.floor(Math.random() * 1000);
+    interp.id = idCounter++;
     interp.category = category;
     interp.planet = planet || null;
     interp.sign = sign || null;
@@ -205,8 +208,8 @@ function createFullChartData(): ChartData {
         planet1: Planet.JUPITER,
         planet2: Planet.SATURN,
         aspectType: AspectType.SEXTILE,
-        angle: 40,
-        orb: 20,
+        angle: 60,
+        orb: 5,
         isApplying: false,
       },
     ],
@@ -490,6 +493,34 @@ describe('HU-CA-005: Ver Informe Completo Estático (Comportamiento)', () => {
         expect(planet.house).toBeGreaterThanOrEqual(1);
         expect(planet.house).toBeLessThanOrEqual(12);
       }
+    });
+
+    it('dado planetas con interpretación en DB, entonces su campo inSign tiene contenido real', async () => {
+      const chartData = createFullChartData();
+      const result = await service.generateFullInterpretation(chartData);
+
+      // Sol y Luna tienen interpretaciones en el mock del repositorio
+      const sun = result.planets.find((p) => p.planet === Planet.SUN);
+      const moon = result.planets.find((p) => p.planet === Planet.MOON);
+
+      expect(sun).toBeDefined();
+      expect(sun!.inSign).toBeTruthy();
+      expect(sun!.inSign!.length).toBeGreaterThan(10);
+
+      expect(moon).toBeDefined();
+      expect(moon!.inSign).toBeTruthy();
+      expect(moon!.inSign!.length).toBeGreaterThan(10);
+    });
+
+    it('dado planetas sin interpretación en DB, entonces sus campos de texto son undefined (fallback queda en capa superior)', async () => {
+      const chartData = createFullChartData();
+      const result = await service.generateFullInterpretation(chartData);
+
+      // Marte no tiene interpretación en el mock
+      const mars = result.planets.find((p) => p.planet === Planet.MARS);
+      expect(mars).toBeDefined();
+      // Los campos opcionales quedan undefined cuando no hay datos en DB
+      expect(mars!.inSign).toBeUndefined();
     });
   });
 

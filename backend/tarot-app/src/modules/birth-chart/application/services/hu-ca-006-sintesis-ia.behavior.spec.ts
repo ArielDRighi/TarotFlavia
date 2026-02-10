@@ -122,8 +122,8 @@ function createTestInput(): AISynthesisInput {
         planet1: Planet.SUN,
         planet2: Planet.MOON,
         aspectType: AspectType.TRINE,
-        angle: 155,
-        orb: 25,
+        angle: 120,
+        orb: 3,
         isApplying: false,
       },
     ],
@@ -255,6 +255,32 @@ En síntesis, tu carta natal habla de una persona que combina intelecto brillant
       expect(result.model).toBeTruthy();
       expect(result.tokensUsed).toBeGreaterThanOrEqual(0);
       expect(result.durationMs).toBeGreaterThanOrEqual(0);
+    });
+  });
+
+  // =========================================================================
+  // Contrato de acceso: la síntesis requiere userId (usuario autenticado)
+  // =========================================================================
+  describe('Contrato de acceso: requiere userId', () => {
+    it('dado que el servicio recibe userId, entonces lo pasa al proveedor de IA', async () => {
+      const input = createTestInput();
+      await service.generateSynthesis(input, 42);
+
+      const callArgs = mockAiProvider.generateCompletion.mock.calls[0];
+      // El segundo argumento es userId
+      expect(callArgs[1]).toBe(42);
+    });
+
+    it('dado que no se proporciona userId (null), entonces el servicio igualmente genera síntesis', async () => {
+      const input = createTestInput();
+      const result = await service.generateSynthesis(
+        input,
+        null as unknown as number,
+      );
+
+      // El servicio no rechaza, la validación de plan ocurre en capas superiores
+      expect(result).toBeDefined();
+      expect(result.synthesis).toBeTruthy();
     });
   });
 

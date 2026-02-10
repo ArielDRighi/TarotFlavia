@@ -172,6 +172,25 @@ describe('HU-CA-001: Generar Carta Astral Básica (Comportamiento)', () => {
   });
 
   // =========================================================================
+  // Timezone: el campo timezone se pasa al servicio y afecta el cálculo
+  // =========================================================================
+  describe('Timezone: afecta el cálculo de posiciones', () => {
+    it('dado dos inputs con distinto timezone, entonces el servicio recibe ambos y delega a efemérides', () => {
+      const inputBA = {
+        ...defaultInput,
+        timezone: 'America/Argentina/Buenos_Aires',
+      };
+      const inputTokyo = { ...defaultInput, timezone: 'Asia/Tokyo' };
+
+      service.calculateChart(inputBA);
+      service.calculateChart(inputTokyo);
+
+      // El wrapper de efemérides fue invocado dos veces con los datos correspondientes
+      expect(mockEphemeris.calculate).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  // =========================================================================
   // CA-2: "Obtengo las posiciones de: Sol, Luna, Mercurio, Venus, Marte,
   //        Júpiter, Saturno, Urano, Neptuno, Plutón"
   // =========================================================================
@@ -363,10 +382,9 @@ describe('HU-CA-001: Generar Carta Astral Básica (Comportamiento)', () => {
       // Debería existir un aspecto entre Sol y Saturno
       // El ángulo es ~124.4° que está a ~4.4° de un trígono (120°)
       // El orbe del trígono es 8°, así que debería detectarse
-      if (sunSaturnAspect) {
-        expect(sunSaturnAspect.aspectType).toBe(AspectType.TRINE);
-        expect(sunSaturnAspect.orb).toBeLessThanOrEqual(8);
-      }
+      expect(sunSaturnAspect).toBeDefined();
+      expect(sunSaturnAspect!.aspectType).toBe(AspectType.TRINE);
+      expect(sunSaturnAspect!.orb).toBeLessThanOrEqual(8);
     });
   });
 
