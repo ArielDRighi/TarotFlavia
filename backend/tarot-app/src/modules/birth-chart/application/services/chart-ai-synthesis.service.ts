@@ -56,6 +56,9 @@ export class ChartAISynthesisService {
 
   /**
    * Genera síntesis personalizada con IA
+   *
+   * Incluye validación automática del resultado y fallback si la IA falla
+   * o genera contenido inválido.
    */
   async generateSynthesis(
     input: AISynthesisInput,
@@ -82,8 +85,28 @@ export class ChartAISynthesisService {
 
       const durationMs = Date.now() - startTime;
 
+      // 3. Validar la síntesis generada
+      const validation = this.validateSynthesis(response.content);
+
+      if (!validation.valid) {
+        this.logger.warn(
+          `AI synthesis validation failed: ${validation.issues.join(', ')}. Using fallback.`,
+        );
+
+        // Usar fallback si la validación falla
+        const fallbackSynthesis = this.generateFallbackSynthesis(input);
+
+        return {
+          synthesis: fallbackSynthesis,
+          tokensUsed: 0,
+          provider: 'fallback',
+          model: 'rule-based',
+          durationMs,
+        };
+      }
+
       this.logger.log(
-        `AI synthesis generated in ${durationMs}ms using ${response.provider}`,
+        `AI synthesis generated in ${durationMs}ms using ${response.provider} (${response.model}), tokens: ${response.tokensUsed.total}`,
       );
 
       return {
@@ -97,7 +120,36 @@ export class ChartAISynthesisService {
       this.logger.error('Error generating AI synthesis:', error);
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
-      throw new Error(`AI synthesis generation failed: ${errorMessage}`);
+
+      // Intentar síntesis de fallback si la IA falla
+      try {
+        const fallbackSynthesis = this.generateFallbackSynthesis(input);
+        const durationMs = Date.now() - startTime;
+
+        this.logger.warn(
+          `Using fallback synthesis due to AI error: ${errorMessage}`,
+        );
+
+        return {
+          synthesis: fallbackSynthesis,
+          tokensUsed: 0,
+          provider: 'fallback',
+          model: 'rule-based',
+          durationMs,
+        };
+      } catch (fallbackError) {
+        this.logger.error(
+          'Fallback synthesis generation also failed:',
+          fallbackError,
+        );
+        const fallbackErrorMessage =
+          fallbackError instanceof Error
+            ? fallbackError.message
+            : 'Unknown fallback error';
+        throw new Error(
+          `AI synthesis generation failed: ${errorMessage}. Fallback synthesis also failed: ${fallbackErrorMessage}`,
+        );
+      }
     }
   }
 
@@ -199,11 +251,16 @@ MODALIDADES:
 - Fijo: ${chartData.distribution.modalities.fixed} planetas
 - Mutable: ${chartData.distribution.modalities.mutable} planetas`;
 
+    // Formatear fecha de forma determinista (ISO format)
+    const birthDateFormatted = birthDate
+      ? birthDate.toISOString().split('T')[0]
+      : undefined;
+
     // Construir prompt completo
     return `Genera una síntesis personalizada para la siguiente carta natal:
 
 ${userName ? `NOMBRE: ${userName}` : ''}
-${birthDate ? `FECHA DE NACIMIENTO: ${birthDate.toLocaleDateString('es-ES')}` : ''}
+${birthDateFormatted ? `FECHA DE NACIMIENTO: ${birthDateFormatted}` : ''}
 
 === BIG THREE ===
 ${bigThree}
@@ -262,9 +319,12 @@ Genera la síntesis ahora:`;
   }
 
   /**
-   * Genera síntesis de fallback si la IA falla
+   * Genera síntesis de fallback si la IA falla o valida mal
+   *
+   * Esta síntesis es determinística y no depende de proveedores externos.
    */
-  generateFallbackSynthesis(interpretation: FullChartInterpretation): string {
+  generateFallbackSynthesis(input: AISynthesisInput): string {
+    const { interpretation } = input;
     const { bigThree, distribution, aspectSummary } = interpretation;
 
     const dominantElement = this.findDominant(distribution.elements);

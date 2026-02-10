@@ -11,7 +11,9 @@ import { AIProviderType } from '../../../ai/domain/interfaces/ai-provider.interf
 
 describe('ChartAISynthesisService', () => {
   let service: ChartAISynthesisService;
-  let mockAIProvider: jest.Mocked<AIProviderService>;
+  let mockAIProvider: jest.Mocked<
+    Pick<AIProviderService, 'generateCompletion'>
+  >;
 
   // Mock data
   const mockPlanetPosition: PlanetPosition = {
@@ -92,10 +94,10 @@ describe('ChartAISynthesisService', () => {
   };
 
   beforeEach(async () => {
-    // Mock AIProviderService
+    // Mock AIProviderService con tipado correcto
     mockAIProvider = {
       generateCompletion: jest.fn(),
-    } as any;
+    } as jest.Mocked<Pick<AIProviderService, 'generateCompletion'>>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -120,7 +122,11 @@ describe('ChartAISynthesisService', () => {
     it('should generate AI synthesis successfully', async () => {
       // Arrange
       const mockAIResponse = {
-        content: 'Tu carta natal muestra una combinación única...',
+        content: `Tu carta natal revela una configuración única donde el Sol en Leo ilumina tu esencia vital con calidez y creatividad. Esta energía solar se entrelaza con la profundidad emocional de tu Luna en Escorpio, creando un contraste fascinante entre tu expresión externa radiante y tu mundo interno intenso y transformador.
+
+El Ascendente en Aries añade una cualidad pionera y directa a tu personalidad, impulsándote a iniciar nuevos caminos con valentía. La combinación de estos tres elementos crea una personalidad magnética que no pasa desapercibida, con una capacidad innata para liderar y transformar.
+
+Los aspectos en tu carta sugieren una tensión creativa que te impulsa constantemente hacia el crecimiento personal. Esta dinámica entre tus diferentes energías planetarias te hace alguien capaz de profundas transformaciones, siempre en búsqueda de tu máxima expresión auténtica.`,
         provider: AIProviderType.GROQ,
         model: 'llama-3.1-70b',
         tokensUsed: { prompt: 500, completion: 300, total: 800 },
@@ -220,7 +226,7 @@ describe('ChartAISynthesisService', () => {
       expect(userPrompt).toContain('Aries');
     });
 
-    it('should throw error when AI service fails', async () => {
+    it('should use fallback when AI service fails', async () => {
       // Arrange
       mockAIProvider.generateCompletion.mockRejectedValue(
         new Error('AI service unavailable'),
@@ -231,16 +237,79 @@ describe('ChartAISynthesisService', () => {
         interpretation: mockInterpretation,
       };
 
-      // Act & Assert
-      await expect(service.generateSynthesis(input)).rejects.toThrow(
-        'AI synthesis generation failed',
-      );
+      // Act
+      const result = await service.generateSynthesis(input);
+
+      // Assert
+      expect(result).toBeDefined();
+      expect(result.synthesis).toContain('Tu carta natal revela');
+      expect(result.provider).toBe('fallback');
+      expect(result.model).toBe('rule-based');
+      expect(result.tokensUsed).toBe(0);
+      expect(result.durationMs).toBeGreaterThanOrEqual(0);
+    });
+
+    it('should use fallback when AI returns invalid synthesis (too short)', async () => {
+      // Arrange
+      const mockAIResponse = {
+        content: 'Muy corto',
+        provider: AIProviderType.GROQ,
+        model: 'llama-3.1-70b',
+        tokensUsed: { prompt: 500, completion: 10, total: 510 },
+        durationMs: 800,
+      };
+
+      mockAIProvider.generateCompletion.mockResolvedValue(mockAIResponse);
+
+      const input = {
+        chartData: mockChartData,
+        interpretation: mockInterpretation,
+      };
+
+      // Act
+      const result = await service.generateSynthesis(input);
+
+      // Assert
+      expect(result.synthesis).not.toBe(mockAIResponse.content);
+      expect(result.synthesis).toContain('Tu carta natal revela');
+      expect(result.provider).toBe('fallback');
+      expect(result.model).toBe('rule-based');
+      expect(result.tokensUsed).toBe(0);
+    });
+
+    it('should use fallback when AI returns synthesis with placeholders', async () => {
+      // Arrange
+      const mockAIResponse = {
+        content: `Tu carta natal muestra [aspectos significativos] que revelan tu personalidad. El Sol en [signo] y la Luna en [signo] crean una combinación única. Tu Ascendente en [signo] añade otra dimensión a tu ser. Esta configuración sugiere que tienes [características] muy marcadas en tu personalidad. Los planetas en tu carta indican [tendencias] que moldean tu camino de vida. En general, tu carta astral revela una personalidad compleja con múltiples facetas que se entrelazan de manera armoniosa para crear tu esencia única y especial en este mundo lleno de posibilidades infinitas.`,
+        provider: AIProviderType.GROQ,
+        model: 'llama-3.1-70b',
+        tokensUsed: { prompt: 500, completion: 200, total: 700 },
+        durationMs: 1000,
+      };
+
+      mockAIProvider.generateCompletion.mockResolvedValue(mockAIResponse);
+
+      const input = {
+        chartData: mockChartData,
+        interpretation: mockInterpretation,
+      };
+
+      // Act
+      const result = await service.generateSynthesis(input);
+
+      // Assert
+      expect(result.synthesis).not.toBe(mockAIResponse.content);
+      expect(result.synthesis).toContain('Tu carta natal revela');
+      expect(result.provider).toBe('fallback');
+      expect(result.model).toBe('rule-based');
     });
 
     it('should use correct configuration for AI call', async () => {
       // Arrange
+      const validSynthesis = `Tu carta natal revela patrones astrológicos significativos. El Sol en Leo ilumina tu esencia con calidez y creatividad, mientras que la Luna en Escorpio profundiza tu mundo emocional con intensidad transformadora. El Ascendente en Aries aporta dinamismo y coraje a tu forma de enfrentar el mundo. Esta configuración planetaria única sugiere una personalidad magnética con gran potencial de liderazgo y transformación personal constante a lo largo de tu vida.`;
+
       const mockAIResponse = {
-        content: 'Síntesis',
+        content: validSynthesis,
         provider: AIProviderType.GROQ,
         model: 'llama-3.1-70b',
         tokensUsed: { prompt: 500, completion: 300, total: 800 },
@@ -337,8 +406,14 @@ describe('ChartAISynthesisService', () => {
 
   describe('generateFallbackSynthesis', () => {
     it('should generate fallback synthesis', () => {
+      // Arrange
+      const input = {
+        chartData: mockChartData,
+        interpretation: mockInterpretation,
+      };
+
       // Act
-      const result = service.generateFallbackSynthesis(mockInterpretation);
+      const result = service.generateFallbackSynthesis(input);
 
       // Assert
       expect(result).toBeDefined();
@@ -349,16 +424,28 @@ describe('ChartAISynthesisService', () => {
     });
 
     it('should include distribution information', () => {
+      // Arrange
+      const input = {
+        chartData: mockChartData,
+        interpretation: mockInterpretation,
+      };
+
       // Act
-      const result = service.generateFallbackSynthesis(mockInterpretation);
+      const result = service.generateFallbackSynthesis(input);
 
       // Assert
       expect(result).toContain('Aire'); // Elemento dominante
     });
 
     it('should include aspect balance', () => {
+      // Arrange
+      const input = {
+        chartData: mockChartData,
+        interpretation: mockInterpretation,
+      };
+
       // Act
-      const result = service.generateFallbackSynthesis(mockInterpretation);
+      const result = service.generateFallbackSynthesis(input);
 
       // Assert
       expect(result).toContain('6'); // Aspectos armónicos
@@ -366,8 +453,14 @@ describe('ChartAISynthesisService', () => {
     });
 
     it('should be in Spanish', () => {
+      // Arrange
+      const input = {
+        chartData: mockChartData,
+        interpretation: mockInterpretation,
+      };
+
       // Act
-      const result = service.generateFallbackSynthesis(mockInterpretation);
+      const result = service.generateFallbackSynthesis(input);
 
       // Assert
       expect(result).toMatch(/\bel\b/);
@@ -379,8 +472,10 @@ describe('ChartAISynthesisService', () => {
   describe('edge cases', () => {
     it('should handle synthesis without userName', async () => {
       // Arrange
+      const validSynthesis = `Tu configuración astral muestra una personalidad compleja y multifacética. El Sol en Leo te dota de una presencia magnética y creativa que naturalmente atrae la atención de los demás. Esta energía solar se combina con la profundidad emocional de tu Luna en Escorpio, creando un contraste fascinante entre tu expresión externa y tu mundo interno. El Ascendente en Aries añade determinación y coraje a tu forma de enfrentar la vida, impulsándote a ser pionero en tus iniciativas. Esta combinación de fuego y agua en tu carta crea una dinámica única de pasión y transformación constante.`;
+
       const mockAIResponse = {
-        content: 'Síntesis sin nombre',
+        content: validSynthesis,
         provider: AIProviderType.GROQ,
         model: 'llama-3.1-70b',
         tokensUsed: { prompt: 500, completion: 300, total: 800 },
@@ -399,12 +494,15 @@ describe('ChartAISynthesisService', () => {
 
       // Assert
       expect(result.synthesis).toBe(mockAIResponse.content);
+      expect(result.provider).toBe(AIProviderType.GROQ);
     });
 
     it('should handle synthesis without birthDate', async () => {
       // Arrange
+      const validSynthesis = `Tu carta natal revela una combinación poderosa de energías que te hacen único. Con el Sol en Leo, posees una naturaleza cálida y generosa que busca brillar y crear. La Luna en Escorpio te otorga una profundidad emocional excepcional y una capacidad para transformarte a través de tus experiencias más intensas. Tu Ascendente en Aries te impulsa a la acción directa y valiente, dotándote de iniciativa y coraje. Esta mezcla de signos de fuego y agua en tu configuración crea una personalidad apasionada y magnética que no deja indiferente a nadie.`;
+
       const mockAIResponse = {
-        content: 'Síntesis sin fecha',
+        content: validSynthesis,
         provider: AIProviderType.GROQ,
         model: 'llama-3.1-70b',
         tokensUsed: { prompt: 500, completion: 300, total: 800 },
@@ -424,6 +522,7 @@ describe('ChartAISynthesisService', () => {
 
       // Assert
       expect(result.synthesis).toBe(mockAIResponse.content);
+      expect(result.provider).toBe(AIProviderType.GROQ);
     });
 
     it('should handle chart with no aspects', () => {
@@ -437,8 +536,13 @@ describe('ChartAISynthesisService', () => {
         },
       };
 
+      const input = {
+        chartData: mockChartData,
+        interpretation: interpretationNoAspects,
+      };
+
       // Act
-      const result = service.generateFallbackSynthesis(interpretationNoAspects);
+      const result = service.generateFallbackSynthesis(input);
 
       // Assert
       expect(result).toBeDefined();
