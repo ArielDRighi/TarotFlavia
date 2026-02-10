@@ -5309,18 +5309,20 @@ export * from "./generate-chart.dto";
 export * from "./geocode-place.dto";
 ```
 
+**Estado:** ✅ COMPLETADA
+
 **Criterios de aceptación:**
 
-- [ ] DTO GenerateChartDto con todas las validaciones
-- [ ] DTO CreateBirthChartDto extendiendo GenerateChartDto
-- [ ] DTO GeocodePlaceDto para búsqueda de lugares
-- [ ] Validación de formato de fecha (ISO)
-- [ ] Validación de formato de hora (HH:mm)
-- [ ] Validación de rangos de latitud/longitud
-- [ ] Sanitización de inputs de texto
-- [ ] Decoradores Swagger completos
-- [ ] Mensajes de error en español
-- [ ] Tests unitarios de validación
+- [x] DTO GenerateChartDto con todas las validaciones
+- [x] DTO CreateBirthChartDto extendiendo GenerateChartDto
+- [x] DTO GeocodePlaceDto para búsqueda de lugares
+- [x] Validación de formato de fecha (ISO)
+- [x] Validación de formato de hora (HH:mm)
+- [x] Validación de rangos de latitud/longitud
+- [x] Sanitización de inputs de texto
+- [x] Decoradores Swagger completos
+- [x] Mensajes de error en español
+- [x] Tests unitarios de validación
 
 **Dependencias:** Ninguna
 
