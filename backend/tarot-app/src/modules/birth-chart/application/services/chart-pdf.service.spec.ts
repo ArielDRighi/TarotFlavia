@@ -371,6 +371,180 @@ describe('ChartPdfService', () => {
       // El nombre debe estar sanitizado pero reconocible
       expect(result.filename.toLowerCase()).toContain('jose');
     });
+
+    it('should handle username with only special characters', async () => {
+      const input = {
+        chartData: mockChartData,
+        interpretation: mockInterpretation,
+        userName: '####@@@@!!!!',
+        birthDate: new Date('1990-05-15'),
+        birthTime: '14:30:00',
+        birthPlace: 'Buenos Aires, Argentina',
+        generatedAt: new Date(),
+        isPremium: false,
+      };
+
+      const result = await service.generatePDF(input);
+
+      expect(result).toBeDefined();
+      expect(result.filename).toMatch(/\.pdf$/);
+      // Debe usar el fallback "usuario" cuando la sanitización resulta en string vacío
+      expect(result.filename.toLowerCase()).toContain('usuario');
+      expect(result.filename).not.toContain('--'); // No debe tener dobles guiones
+    });
+
+    it('should throw error when userName is null', async () => {
+      const invalidInput = {
+        chartData: mockChartData,
+        interpretation: mockInterpretation,
+        userName: null as any,
+        birthDate: new Date('1990-05-15'),
+        birthTime: '14:30:00',
+        birthPlace: 'Buenos Aires, Argentina',
+        generatedAt: new Date(),
+        isPremium: false,
+      };
+
+      await expect(service.generatePDF(invalidInput)).rejects.toThrow(
+        'userName is required for PDF generation',
+      );
+    });
+
+    it('should throw error when userName is empty string', async () => {
+      const invalidInput = {
+        chartData: mockChartData,
+        interpretation: mockInterpretation,
+        userName: '   ',
+        birthDate: new Date('1990-05-15'),
+        birthTime: '14:30:00',
+        birthPlace: 'Buenos Aires, Argentina',
+        generatedAt: new Date(),
+        isPremium: false,
+      };
+
+      await expect(service.generatePDF(invalidInput)).rejects.toThrow(
+        'userName is required for PDF generation',
+      );
+    });
+
+    it('should throw error when birthDate is null', async () => {
+      const invalidInput = {
+        chartData: mockChartData,
+        interpretation: mockInterpretation,
+        userName: 'Test User',
+        birthDate: null as any,
+        birthTime: '14:30:00',
+        birthPlace: 'Buenos Aires, Argentina',
+        generatedAt: new Date(),
+        isPremium: false,
+      };
+
+      await expect(service.generatePDF(invalidInput)).rejects.toThrow(
+        'birthDate is required for PDF generation',
+      );
+    });
+
+    it('should throw error when birthTime is null', async () => {
+      const invalidInput = {
+        chartData: mockChartData,
+        interpretation: mockInterpretation,
+        userName: 'Test User',
+        birthDate: new Date('1990-05-15'),
+        birthTime: null as any,
+        birthPlace: 'Buenos Aires, Argentina',
+        generatedAt: new Date(),
+        isPremium: false,
+      };
+
+      await expect(service.generatePDF(invalidInput)).rejects.toThrow(
+        'birthTime is required for PDF generation',
+      );
+    });
+
+    it('should throw error when birthPlace is null', async () => {
+      const invalidInput = {
+        chartData: mockChartData,
+        interpretation: mockInterpretation,
+        userName: 'Test User',
+        birthDate: new Date('1990-05-15'),
+        birthTime: '14:30:00',
+        birthPlace: null as any,
+        generatedAt: new Date(),
+        isPremium: false,
+      };
+
+      await expect(service.generatePDF(invalidInput)).rejects.toThrow(
+        'birthPlace is required for PDF generation',
+      );
+    });
+
+    it('should throw error when generatedAt is null', async () => {
+      const invalidInput = {
+        chartData: mockChartData,
+        interpretation: mockInterpretation,
+        userName: 'Test User',
+        birthDate: new Date('1990-05-15'),
+        birthTime: '14:30:00',
+        birthPlace: 'Buenos Aires, Argentina',
+        generatedAt: null as any,
+        isPremium: false,
+      };
+
+      await expect(service.generatePDF(invalidInput)).rejects.toThrow(
+        'generatedAt is required for PDF generation',
+      );
+    });
+
+    it('should throw error when interpretation is null', async () => {
+      const invalidInput = {
+        chartData: mockChartData,
+        interpretation: null as any,
+        userName: 'Test User',
+        birthDate: new Date('1990-05-15'),
+        birthTime: '14:30:00',
+        birthPlace: 'Buenos Aires, Argentina',
+        generatedAt: new Date(),
+        isPremium: false,
+      };
+
+      await expect(service.generatePDF(invalidInput)).rejects.toThrow(
+        'interpretation is required for PDF generation',
+      );
+    });
+
+    it('should throw error when interpretation.bigThree is missing', async () => {
+      const invalidInput = {
+        chartData: mockChartData,
+        interpretation: { planets: [] } as any,
+        userName: 'Test User',
+        birthDate: new Date('1990-05-15'),
+        birthTime: '14:30:00',
+        birthPlace: 'Buenos Aires, Argentina',
+        generatedAt: new Date(),
+        isPremium: false,
+      };
+
+      await expect(service.generatePDF(invalidInput)).rejects.toThrow(
+        'interpretation.bigThree is required for PDF generation',
+      );
+    });
+
+    it('should throw error when interpretation.planets is not an array', async () => {
+      const invalidInput = {
+        chartData: mockChartData,
+        interpretation: { bigThree: mockBigThree, planets: null } as any,
+        userName: 'Test User',
+        birthDate: new Date('1990-05-15'),
+        birthTime: '14:30:00',
+        birthPlace: 'Buenos Aires, Argentina',
+        generatedAt: new Date(),
+        isPremium: false,
+      };
+
+      await expect(service.generatePDF(invalidInput)).rejects.toThrow(
+        'interpretation.planets is required and must be an array for PDF generation',
+      );
+    });
   });
 
   // ============================================================================

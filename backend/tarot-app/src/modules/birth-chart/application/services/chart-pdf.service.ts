@@ -85,11 +85,63 @@ export class ChartPdfService {
    * Genera el PDF completo de la carta astral
    */
   async generatePDF(input: PDFGenerationInput): Promise<PDFGenerationResult> {
-    this.logger.log(`Generating PDF for ${input.userName}`);
+    const {
+      userName,
+      birthDate,
+      birthTime,
+      birthPlace,
+      generatedAt,
+      interpretation,
+      chartData,
+    } = input;
 
-    if (!input.chartData) {
+    // Validación de campos requeridos para evitar errores en tiempo de ejecución
+    if (
+      !userName ||
+      typeof userName !== 'string' ||
+      userName.trim().length === 0
+    ) {
+      throw new Error('userName is required for PDF generation');
+    }
+
+    if (birthDate == null) {
+      throw new Error('birthDate is required for PDF generation');
+    }
+
+    if (birthTime == null) {
+      throw new Error('birthTime is required for PDF generation');
+    }
+
+    if (
+      !birthPlace ||
+      (typeof birthPlace === 'string' && birthPlace.trim().length === 0)
+    ) {
+      throw new Error('birthPlace is required for PDF generation');
+    }
+
+    if (generatedAt == null) {
+      throw new Error('generatedAt is required for PDF generation');
+    }
+
+    if (!interpretation) {
+      throw new Error('interpretation is required for PDF generation');
+    }
+
+    if (!interpretation.bigThree) {
+      throw new Error('interpretation.bigThree is required for PDF generation');
+    }
+
+    if (!interpretation.planets || !Array.isArray(interpretation.planets)) {
+      throw new Error(
+        'interpretation.planets is required and must be an array for PDF generation',
+      );
+    }
+
+    if (!chartData) {
       throw new Error('chartData is required for PDF generation');
     }
+
+    this.logger.log(`Generating PDF for ${userName}`);
 
     return new Promise((resolve, reject) => {
       try {
@@ -97,7 +149,7 @@ export class ChartPdfService {
           size: 'A4',
           margins: { top: 50, bottom: 50, left: 50, right: 50 },
           info: {
-            Title: `Carta Astral - ${input.userName}`,
+            Title: `Carta Astral - ${userName}`,
             Author: 'Auguria',
             Subject: 'Carta Astral Natal',
             Creator: 'Auguria - Plataforma de Servicios Místicos',
@@ -110,7 +162,7 @@ export class ChartPdfService {
         doc.on('data', (chunk: Buffer) => chunks.push(chunk));
         doc.on('end', () => {
           const buffer = Buffer.concat(chunks);
-          const filename = this.generateFilename(input.userName);
+          const filename = this.generateFilename(userName);
 
           resolve({
             buffer,
@@ -180,8 +232,11 @@ export class ChartPdfService {
       .replace(/[^a-z0-9]+/g, '-') // Reemplazar espacios y caracteres especiales
       .replace(/^-+|-+$/g, ''); // Eliminar guiones al inicio/final
 
+    // Fallback en caso de que el nombre sanitizado quede vacío (por ejemplo, solo caracteres especiales)
+    const safeName = sanitizedName || 'usuario';
+
     const timestamp = Date.now();
-    return `carta-astral-${sanitizedName}-${timestamp}.pdf`;
+    return `carta-astral-${safeName}-${timestamp}.pdf`;
   }
 
   /**
