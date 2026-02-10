@@ -2623,6 +2623,8 @@ export class HouseCuspService {
 
 ### T-CA-009: Crear Servicio de Cálculo de Aspectos
 
+**Estado:** ✅ COMPLETADA
+
 **Historia relacionada:** HU-CA-001, HU-CA-003, HU-CA-005
 
 **Descripción:**
@@ -2875,19 +2877,28 @@ export class AspectCalculationService {
 
 **Criterios de aceptación:**
 
-- [ ] Detección de 5 aspectos mayores
-- [ ] Cálculo correcto de ángulos y orbes
-- [ ] Determinación de aspecto aplicativo vs separativo
-- [ ] Filtrado por planeta y por tipo
-- [ ] Balance de aspectos armónicos/desafiantes
-- [ ] Generación de matriz de aspectos
-- [ ] Formateo para display
-- [ ] Tests unitarios con aspectos conocidos
-- [ ] Tests de edge cases (0°/360°)
+- [x] Detección de 5 aspectos mayores
+- [x] Cálculo correcto de ángulos y orbes
+- [x] Determinación de aspecto aplicativo vs separativo
+- [x] Filtrado por planeta y por tipo
+- [x] Balance de aspectos armónicos/desafiantes
+- [x] Generación de matriz de aspectos
+- [x] Formateo para display
+- [x] Tests unitarios con aspectos conocidos
+- [x] Tests de edge cases (0°/360°)
 
 **Dependencias:** T-CA-007
 
 **Estimación:** 3 horas
+
+**Notas de completación:**
+- 30 tests implementados, todos pasando
+- Coverage: 100% statements, 95.65% branch, 100% functions, 100% lines
+- Quality gates: ✅ format, ✅ lint, ✅ test:cov, ✅ build, ✅ validate-architecture
+- Ubicación implementada: `src/modules/birth-chart/application/services/aspect-calculation.service.ts`
+- Tests: `src/modules/birth-chart/application/services/aspect-calculation.service.spec.ts`
+- Exportado en `index.ts` para importación centralizada
+- Branch: `feature/T-CA-009-servicio-calculo-aspectos`
 
 ---
 
