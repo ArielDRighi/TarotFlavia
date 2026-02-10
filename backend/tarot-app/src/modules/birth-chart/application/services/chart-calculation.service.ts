@@ -103,6 +103,14 @@ export class ChartCalculationService {
         aiSynthesis: undefined, // Se agrega después por AI
       };
 
+      // 11. Validar completitud de la carta
+      const validation = this.validateChartData(chartData);
+      if (!validation.valid) {
+        throw new Error(
+          `Chart data validation failed: ${validation.errors.join(', ')}`,
+        );
+      }
+
       const calculationTimeMs = Date.now() - startTime;
 
       this.logger.log(`Chart calculated in ${calculationTimeMs}ms`);
@@ -135,14 +143,41 @@ export class ChartCalculationService {
     hour: number;
     minute: number;
   } {
-    const timeParts = birthTime.split(':').map(Number);
+    // Validar formato de birthTime
+    const timeRegex = /^(\d{1,2}):(\d{2})(?::(\d{2}))?$/;
+    const match = birthTime.match(timeRegex);
+
+    if (!match) {
+      throw new Error(
+        `Invalid birthTime format: "${birthTime}". Expected format: "HH:mm" or "HH:mm:ss"`,
+      );
+    }
+
+    const hour = Number(match[1]);
+    const minute = Number(match[2]);
+
+    // Validar rangos
+    if (hour < 0 || hour > 23) {
+      throw new Error(`Invalid hour: ${hour}. Hour must be between 0 and 23.`);
+    }
+
+    if (minute < 0 || minute > 59) {
+      throw new Error(
+        `Invalid minute: ${minute}. Minute must be between 0 and 59.`,
+      );
+    }
+
+    // Validar que birthDate sea válido
+    if (isNaN(birthDate.getTime())) {
+      throw new Error('Invalid birthDate: Date object is invalid (NaN).');
+    }
 
     return {
       year: birthDate.getUTCFullYear(),
       month: birthDate.getUTCMonth() + 1, // JavaScript usa 0-11
       day: birthDate.getUTCDate(),
-      hour: timeParts[0] || 0,
-      minute: timeParts[1] || 0,
+      hour,
+      minute,
     };
   }
 

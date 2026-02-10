@@ -4,7 +4,7 @@ import { EphemerisWrapper } from '../../infrastructure/ephemeris/ephemeris.wrapp
 import { PlanetPositionService } from './planet-position.service';
 import { HouseCuspService } from './house-cusp.service';
 import { AspectCalculationService } from './aspect-calculation.service';
-import { ZodiacSign, Planet } from '../../domain/enums';
+import { ZodiacSign, Planet, AspectType } from '../../domain/enums';
 import { ChartData, PlanetPosition } from '../../entities/birth-chart.entity';
 
 describe('ChartCalculationService', () => {
@@ -110,11 +110,100 @@ describe('ChartCalculationService', () => {
         house: 8,
         isRetrograde: false,
       },
+      {
+        planet: Planet.MERCURY,
+        longitude: 60.0,
+        sign: ZodiacSign.GEMINI,
+        signDegree: 0.0,
+        house: 3,
+        isRetrograde: false,
+      },
+      {
+        planet: Planet.VENUS,
+        longitude: 90.0,
+        sign: ZodiacSign.CANCER,
+        signDegree: 0.0,
+        house: 4,
+        isRetrograde: false,
+      },
+      {
+        planet: Planet.MARS,
+        longitude: 120.0,
+        sign: ZodiacSign.LEO,
+        signDegree: 0.0,
+        house: 5,
+        isRetrograde: false,
+      },
+      {
+        planet: Planet.JUPITER,
+        longitude: 150.0,
+        sign: ZodiacSign.VIRGO,
+        signDegree: 0.0,
+        house: 6,
+        isRetrograde: false,
+      },
+      {
+        planet: Planet.SATURN,
+        longitude: 180.0,
+        sign: ZodiacSign.LIBRA,
+        signDegree: 0.0,
+        house: 7,
+        isRetrograde: false,
+      },
+      {
+        planet: Planet.URANUS,
+        longitude: 210.0,
+        sign: ZodiacSign.SCORPIO,
+        signDegree: 0.0,
+        house: 8,
+        isRetrograde: false,
+      },
+      {
+        planet: Planet.NEPTUNE,
+        longitude: 240.0,
+        sign: ZodiacSign.SAGITTARIUS,
+        signDegree: 0.0,
+        house: 9,
+        isRetrograde: false,
+      },
+      {
+        planet: Planet.PLUTO,
+        longitude: 270.0,
+        sign: ZodiacSign.CAPRICORN,
+        signDegree: 0.0,
+        house: 10,
+        isRetrograde: false,
+      },
     ];
 
     const mockHouseCusps = [
       { house: 1, longitude: 15, sign: ZodiacSign.ARIES, signDegree: 15 },
       { house: 2, longitude: 45, sign: ZodiacSign.TAURUS, signDegree: 15 },
+      { house: 3, longitude: 75, sign: ZodiacSign.GEMINI, signDegree: 15 },
+      { house: 4, longitude: 105, sign: ZodiacSign.CANCER, signDegree: 15 },
+      { house: 5, longitude: 135, sign: ZodiacSign.LEO, signDegree: 15 },
+      { house: 6, longitude: 165, sign: ZodiacSign.VIRGO, signDegree: 15 },
+      { house: 7, longitude: 195, sign: ZodiacSign.LIBRA, signDegree: 15 },
+      { house: 8, longitude: 225, sign: ZodiacSign.SCORPIO, signDegree: 15 },
+      {
+        house: 9,
+        longitude: 255,
+        sign: ZodiacSign.SAGITTARIUS,
+        signDegree: 15,
+      },
+      {
+        house: 10,
+        longitude: 285,
+        sign: ZodiacSign.CAPRICORN,
+        signDegree: 15,
+      },
+      {
+        house: 11,
+        longitude: 315,
+        sign: ZodiacSign.AQUARIUS,
+        signDegree: 15,
+      },
+      { house: 12, longitude: 345, sign: ZodiacSign.PISCES, signDegree: 15 },
     ];
 
     const mockAscendant: PlanetPosition = {
@@ -139,7 +228,7 @@ describe('ChartCalculationService', () => {
       {
         planet1: Planet.SUN,
         planet2: Planet.MOON,
-        aspectType: 'trine' as any,
+        aspectType: AspectType.TRINE,
         angle: 120,
         orb: 0.8,
         isApplying: true,
