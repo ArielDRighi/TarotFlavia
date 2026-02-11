@@ -502,7 +502,7 @@ mockQueryBuilder as unknown as SelectQueryBuilder<RefreshToken>;
 mockResult as unknown as UpdateResult;
 
 // Test de tipos inválidos
-null as unknown as number  // Para probar manejo de null
+null as unknown as number; // Para probar manejo de null
 ```
 
 **Resultados de validación:**
@@ -520,22 +520,63 @@ null as unknown as number  // Para probar manejo de null
 
 ## 📋 FASE 3: TESTS NO CRÍTICOS
 
-### TASK-ANY-013: Tarot Module Tests
+### TASK-ANY-013: Tarot Module Tests ✅
 
+**Estado:** ✅ COMPLETADA  
 **Prioridad:** 🟡 MEDIA  
-**Usos de `any`:** 30  
-**Archivos afectados:**
+**Usos de `any`:** 27 → 0  
+**Archivos modificados:**
 
-- `src/modules/tarot/daily-reading/daily-reading-cleanup.service.spec.ts` (11 usos)
-- `src/modules/tarot/readings/application/services/share-text-generator.service.spec.ts` (7 usos)
-- Otros archivos de readings (12 usos)
+- ✅ `src/modules/tarot/readings/application/services/daily-reading-cleanup.service.spec.ts` (11 → 0)
+- ✅ `src/modules/tarot/readings/application/services/share-text-generator.service.spec.ts` (7 → 0)
+- ✅ `src/modules/tarot/readings/infrastructure/repositories/typeorm-reading.repository.spec.ts` (2 → 0)
+- ✅ `src/modules/tarot/readings/application/use-cases/restore-reading.use-case.spec.ts` (2 → 0)
+- ✅ `src/modules/tarot/readings/application/use-cases/get-reading.use-case.spec.ts` (2 → 0)
+- ✅ `src/modules/tarot/readings/application/use-cases/delete-reading.use-case.spec.ts` (2 → 0)
+- ✅ `src/modules/tarot/readings/application/use-cases/create-reading.use-case.spec.ts` (1 → 0)
 
-**Validación:**
+**Cambios implementados:**
+
+1. **daily-reading-cleanup.service.spec.ts**: Agregado `SelectQueryBuilder` import, cambiado `mockQueryBuilder as any` (10 instancias) a `as unknown as SelectQueryBuilder<DailyReading>`, cambiado `callArgs as any` a `as Record<string, unknown>`
+2. **share-text-generator.service.spec.ts**: Agregado `TarotCard` entity import, reemplazado todos los card mocks `} as any,` (7 instancias) a `} as unknown as TarotCard,`
+3. **typeorm-reading.repository.spec.ts**: Agregado `UpdateResult` a imports de typeorm, cambiado restore results `{ affected: N } as any` a `as unknown as UpdateResult`
+4. **restore-reading.use-case.spec.ts**: Cambiado `null as any` a `null as unknown as number` para tests de validación (readingId y userId)
+5. **get-reading.use-case.spec.ts**: Cambiado `null as any` a `null as unknown as number` para tests de validación (readingId y userId)
+6. **delete-reading.use-case.spec.ts**: Cambiado `null as any` a `null as unknown as number` para tests de validación (readingId y userId)
+7. **create-reading.use-case.spec.ts**: Cambiado `null as any` a `null as unknown as User` para test de validación de usuario nulo
+
+**Patrones aplicados:**
+
+```typescript
+// TypeORM QueryBuilder typing
+import { SelectQueryBuilder } from "typeorm";
+mockQueryBuilder as unknown as SelectQueryBuilder<DailyReading>;
+
+// Entity mocks con doble aserción
+import { TarotCard } from "../../../cards/entities/tarot-card.entity";
+{ id: 1, name: "El Sol", ... } as unknown as TarotCard;
+
+// TypeORM result types
+import { UpdateResult } from "typeorm";
+{ affected: 1 } as unknown as UpdateResult;
+
+// Test de tipos inválidos
+null as unknown as number; // Para probar validación de IDs
+null as unknown as User; // Para probar validación de usuario
+
+// Record para acceso a propiedades de mocks
+dailyReadingRepo.delete.mock.calls[0][0] as Record<string, unknown>;
+```
+
+**Resultados de validación:**
 
 ```bash
-cd backend/tarot-app
-npm run lint
-npm run test src/modules/tarot/
+✅ npm run format - OK
+✅ npm run lint - 149 errores any en otros módulos (esperado)
+✅ npm run test src/modules/tarot/ - 29 suites, 595 tests passed
+✅ npm run test:cov - 80.86% coverage (250 suites, 3484 tests)
+✅ npm run build - Compilación exitosa
+✅ node scripts/validate-architecture.js - Validación OK
 ```
 
 ---
@@ -642,12 +683,12 @@ npm run test:e2e
 | ------------ | --------- | ------------- | ----------- | ------------------------- |
 | **Fase 1**   | 8 tareas  | 32 → 0        | 9.0%        | ✅ COMPLETADA             |
 | **Fase 2**   | 4 tareas  | 165 → 0       | 46.5%       | ✅ COMPLETADA             |
-| **Fase 3**   | 4 tareas  | 131 usos      | 36.9%       | ⏳ PENDIENTE              |
+| **Fase 3**   | 4 tareas  | 131 → 104     | 36.9%       | 🔄 EN PROGRESO (1/4)      |
 | **Fase 4**   | 1 tarea   | 19 usos       | 5.4%        | ⏳ PENDIENTE              |
 | **RESTANTE** |           | 5 usos        | 1.3%        | ⏳ PENDIENTE              |
-| **TOTAL**    | 17 tareas | 355 → 152     | 100%        | **203 any eliminados** ✅ |
+| **TOTAL**    | 17 tareas | 355 → 125     | 100%        | **230 any eliminados** ✅ |
 
-**Progreso general:** 203 / 355 = **57.2% completado** 🎉
+**Progreso general:** 230 / 355 = **64.8% completado** 🎉
 
 **Fase 2 - Detalle:**
 
@@ -655,6 +696,13 @@ npm run test:e2e
 - ✅ TASK-ANY-010: Birth Chart Module Tests (57 → 0)
 - ✅ TASK-ANY-011: Database Seeders Tests (33 → 0)
 - ✅ TASK-ANY-012: Auth Module Tests (29 → 0) **¡100% eliminado!**
+
+**Fase 3 - Detalle:**
+
+- ✅ TASK-ANY-013: Tarot Module Tests (27 → 0) **¡100% eliminado!**
+- ⏳ TASK-ANY-014: Horoscope, Numerology & Health Tests (39 usos)
+- ⏳ TASK-ANY-015: Rituals, Tarotistas & Admin Tests (43 usos)
+- ⏳ TASK-ANY-016: Usage Limits & Subscriptions Tests (22 usos)
 
 **Nota:** El restante (5 usos) son archivos AI usages y similares que se asignarán en refactoring posterior.
 
