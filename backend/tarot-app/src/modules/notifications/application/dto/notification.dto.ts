@@ -24,7 +24,7 @@ export class NotificationDto {
     example: { eventId: 5, lunarPhase: 'new_moon' },
     nullable: true,
   })
-  data: Record<string, any> | null;
+  data: Record<string, unknown> | null;
 
   @ApiPropertyOptional({
     example: '/rituales?lunar=new_moon',
