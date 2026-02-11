@@ -6,6 +6,7 @@ import {
   ApplicationStatus,
 } from '../../entities/tarotista-application.entity';
 import { GetPublicTarotistasFilterDto } from '../../application/dto';
+import { FindOptionsWhere } from 'typeorm';
 
 /**
  * Interface for Tarotista repository operations
@@ -68,7 +69,7 @@ export interface ITarotistaRepository {
   ): Promise<TarotistaApplication>;
 
   // Utility
-  count(where?: any): Promise<number>;
+  count(where?: FindOptionsWhere<Tarotista>): Promise<number>;
 }
 
 export interface TarotistaFindOptions {

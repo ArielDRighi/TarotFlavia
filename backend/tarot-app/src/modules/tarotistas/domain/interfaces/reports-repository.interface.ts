@@ -1,6 +1,16 @@
 import { ExportReportDto } from '../../application/dto/report-export.dto';
 
 /**
+ * Type for CSV export data rows
+ */
+export type CSVDataRow = Record<string, string | number | boolean | null>;
+
+/**
+ * Type for PDF template data
+ */
+export type PDFTemplateData = Record<string, unknown>;
+
+/**
  * Interface for Reports repository operations
  * Handles report generation and export
  */
@@ -27,8 +37,8 @@ export interface IReportsRepository {
   ): Promise<PlatformReport>;
 
   // Export
-  exportToCSV(data: any[], columns: string[]): Promise<string>;
-  exportToPDF(data: any, template: string): Promise<Buffer>;
+  exportToCSV(data: CSVDataRow[], columns: string[]): Promise<string>;
+  exportToPDF(data: PDFTemplateData, template: string): Promise<Buffer>;
 }
 
 export interface ReportOptions {

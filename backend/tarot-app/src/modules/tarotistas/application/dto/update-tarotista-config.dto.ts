@@ -66,5 +66,5 @@ export class UpdateTarotistaConfigDto {
   })
   @IsOptional()
   @IsObject()
-  styleConfig?: Record<string, any>;
+  styleConfig?: Record<string, unknown>;
 }
