@@ -3,13 +3,13 @@ import { ReadingCategory } from '../../modules/categories/entities/reading-categ
 import { seedReadingCategories } from './reading-categories.seeder';
 
 describe('ReadingCategoriesSeeder', () => {
-  let mockCategoryRepository: jest.Mocked<Repository<ReadingCategory>>;
+  let mockCategoryRepository: Record<string, jest.Mock>;
 
   beforeEach(() => {
     mockCategoryRepository = {
       count: jest.fn(),
       save: jest.fn(),
-    } as unknown as jest.Mocked<Repository<ReadingCategory>>;
+    };
   });
 
   describe('seedReadingCategories', () => {
@@ -33,7 +33,7 @@ describe('ReadingCategoriesSeeder', () => {
       );
 
       // Act
-      await seedReadingCategories(mockCategoryRepository);
+      await seedReadingCategories(mockCategoryRepository as unknown as Repository<ReadingCategory>);
 
       // Assert
       expect(mockCategoryRepository.count).toHaveBeenCalledTimes(1);
@@ -53,7 +53,7 @@ describe('ReadingCategoriesSeeder', () => {
       mockCategoryRepository.count.mockResolvedValue(6);
 
       // Act
-      await seedReadingCategories(mockCategoryRepository);
+      await seedReadingCategories(mockCategoryRepository as unknown as Repository<ReadingCategory>);
 
       // Assert
       expect(mockCategoryRepository.count).toHaveBeenCalledTimes(1);
@@ -63,10 +63,12 @@ describe('ReadingCategoriesSeeder', () => {
     it('should seed all categories with required icon, color, description, and order', async () => {
       // Arrange
       mockCategoryRepository.count.mockResolvedValue(0);
-      mockCategoryRepository.save.mockResolvedValue([] as any);
+      mockCategoryRepository.save.mockResolvedValue(
+        [],
+      );
 
       // Act
-      await seedReadingCategories(mockCategoryRepository);
+      await seedReadingCategories(mockCategoryRepository as unknown as Repository<ReadingCategory>);
 
       // Assert
       const savedData = mockCategoryRepository.save.mock
@@ -87,10 +89,12 @@ describe('ReadingCategoriesSeeder', () => {
     it('should seed all categories with isActive set to true', async () => {
       // Arrange
       mockCategoryRepository.count.mockResolvedValue(0);
-      mockCategoryRepository.save.mockResolvedValue([] as any);
+      mockCategoryRepository.save.mockResolvedValue(
+        [],
+      );
 
       // Act
-      await seedReadingCategories(mockCategoryRepository);
+      await seedReadingCategories(mockCategoryRepository as unknown as Repository<ReadingCategory>);
 
       // Assert
       const savedData = mockCategoryRepository.save.mock
@@ -103,10 +107,12 @@ describe('ReadingCategoriesSeeder', () => {
     it('should seed Amor y Relaciones category with correct data', async () => {
       // Arrange
       mockCategoryRepository.count.mockResolvedValue(0);
-      mockCategoryRepository.save.mockResolvedValue([] as any);
+      mockCategoryRepository.save.mockResolvedValue(
+        [],
+      );
 
       // Act
-      await seedReadingCategories(mockCategoryRepository);
+      await seedReadingCategories(mockCategoryRepository as unknown as Repository<ReadingCategory>);
 
       // Assert
       const savedData = mockCategoryRepository.save.mock
@@ -123,10 +129,12 @@ describe('ReadingCategoriesSeeder', () => {
     it('should seed Carrera y Trabajo category with correct data', async () => {
       // Arrange
       mockCategoryRepository.count.mockResolvedValue(0);
-      mockCategoryRepository.save.mockResolvedValue([] as any);
+      mockCategoryRepository.save.mockResolvedValue(
+        [],
+      );
 
       // Act
-      await seedReadingCategories(mockCategoryRepository);
+      await seedReadingCategories(mockCategoryRepository as unknown as Repository<ReadingCategory>);
 
       // Assert
       const savedData = mockCategoryRepository.save.mock
@@ -145,10 +153,12 @@ describe('ReadingCategoriesSeeder', () => {
     it('should seed Dinero y Finanzas category with correct data', async () => {
       // Arrange
       mockCategoryRepository.count.mockResolvedValue(0);
-      mockCategoryRepository.save.mockResolvedValue([] as any);
+      mockCategoryRepository.save.mockResolvedValue(
+        [],
+      );
 
       // Act
-      await seedReadingCategories(mockCategoryRepository);
+      await seedReadingCategories(mockCategoryRepository as unknown as Repository<ReadingCategory>);
 
       // Assert
       const savedData = mockCategoryRepository.save.mock
@@ -167,10 +177,12 @@ describe('ReadingCategoriesSeeder', () => {
     it('should seed Salud y Bienestar category with correct data', async () => {
       // Arrange
       mockCategoryRepository.count.mockResolvedValue(0);
-      mockCategoryRepository.save.mockResolvedValue([] as any);
+      mockCategoryRepository.save.mockResolvedValue(
+        [],
+      );
 
       // Act
-      await seedReadingCategories(mockCategoryRepository);
+      await seedReadingCategories(mockCategoryRepository as unknown as Repository<ReadingCategory>);
 
       // Assert
       const savedData = mockCategoryRepository.save.mock
@@ -187,10 +199,12 @@ describe('ReadingCategoriesSeeder', () => {
     it('should seed Crecimiento Espiritual category with correct data', async () => {
       // Arrange
       mockCategoryRepository.count.mockResolvedValue(0);
-      mockCategoryRepository.save.mockResolvedValue([] as any);
+      mockCategoryRepository.save.mockResolvedValue(
+        [],
+      );
 
       // Act
-      await seedReadingCategories(mockCategoryRepository);
+      await seedReadingCategories(mockCategoryRepository as unknown as Repository<ReadingCategory>);
 
       // Assert
       const savedData = mockCategoryRepository.save.mock
@@ -209,10 +223,12 @@ describe('ReadingCategoriesSeeder', () => {
     it('should seed Consulta General category with correct data', async () => {
       // Arrange
       mockCategoryRepository.count.mockResolvedValue(0);
-      mockCategoryRepository.save.mockResolvedValue([] as any);
+      mockCategoryRepository.save.mockResolvedValue(
+        [],
+      );
 
       // Act
-      await seedReadingCategories(mockCategoryRepository);
+      await seedReadingCategories(mockCategoryRepository as unknown as Repository<ReadingCategory>);
 
       // Assert
       const savedData = mockCategoryRepository.save.mock
@@ -231,10 +247,12 @@ describe('ReadingCategoriesSeeder', () => {
     it('should have unique order values for each category', async () => {
       // Arrange
       mockCategoryRepository.count.mockResolvedValue(0);
-      mockCategoryRepository.save.mockResolvedValue([] as any);
+      mockCategoryRepository.save.mockResolvedValue(
+        [],
+      );
 
       // Act
-      await seedReadingCategories(mockCategoryRepository);
+      await seedReadingCategories(mockCategoryRepository as unknown as Repository<ReadingCategory>);
 
       // Assert
       const savedData = mockCategoryRepository.save.mock
@@ -247,10 +265,12 @@ describe('ReadingCategoriesSeeder', () => {
     it('should have unique slug values for each category', async () => {
       // Arrange
       mockCategoryRepository.count.mockResolvedValue(0);
-      mockCategoryRepository.save.mockResolvedValue([] as any);
+      mockCategoryRepository.save.mockResolvedValue(
+        [],
+      );
 
       // Act
-      await seedReadingCategories(mockCategoryRepository);
+      await seedReadingCategories(mockCategoryRepository as unknown as Repository<ReadingCategory>);
 
       // Assert
       const savedData = mockCategoryRepository.save.mock
@@ -264,10 +284,12 @@ describe('ReadingCategoriesSeeder', () => {
       // Arrange
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
       mockCategoryRepository.count.mockResolvedValue(0);
-      mockCategoryRepository.save.mockResolvedValue([] as any);
+      mockCategoryRepository.save.mockResolvedValue(
+        [],
+      );
 
       // Act
-      await seedReadingCategories(mockCategoryRepository);
+      await seedReadingCategories(mockCategoryRepository as unknown as Repository<ReadingCategory>);
 
       // Assert
       expect(consoleSpy).toHaveBeenCalledWith(
