@@ -1,13 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { SelectQueryBuilder } from 'typeorm';
 import { TypeOrmUserRepository } from './typeorm-user.repository';
 import { User, UserRole, UserPlan } from '../../entities/user.entity';
 import { UserQueryDto } from '../../application/dto/user-query.dto';
 
 describe('TypeOrmUserRepository', () => {
   let repository: TypeOrmUserRepository;
-  let mockUserRepository: jest.Mocked<Repository<User>>;
+  let mockUserRepository: Record<string, jest.Mock>;
 
   beforeEach(async () => {
     const mockQueryBuilder = {
@@ -24,8 +24,11 @@ describe('TypeOrmUserRepository', () => {
       findOne: jest.fn(),
       find: jest.fn(),
       delete: jest.fn(),
-      createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
-    } as any;
+      createQueryBuilder: jest.fn(),
+    };
+    mockUserRepository.createQueryBuilder.mockReturnValue(
+      mockQueryBuilder as unknown as SelectQueryBuilder<User>,
+    );
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -133,7 +136,15 @@ describe('TypeOrmUserRepository', () => {
   });
 
   describe('findWithFilters', () => {
-    let mockQueryBuilder: any;
+    type MockQueryBuilder = {
+      andWhere: jest.Mock;
+      orderBy: jest.Mock;
+      skip: jest.Mock;
+      take: jest.Mock;
+      getManyAndCount: jest.Mock;
+    };
+
+    let mockQueryBuilder: MockQueryBuilder;
 
     beforeEach(() => {
       mockQueryBuilder = {
@@ -143,7 +154,9 @@ describe('TypeOrmUserRepository', () => {
         take: jest.fn().mockReturnThis(),
         getManyAndCount: jest.fn(),
       };
-      mockUserRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder);
+      mockUserRepository.createQueryBuilder.mockReturnValue(
+        mockQueryBuilder as unknown as SelectQueryBuilder<User>,
+      );
     });
 
     it('should return paginated users with default values', async () => {

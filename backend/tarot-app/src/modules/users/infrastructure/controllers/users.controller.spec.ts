@@ -528,7 +528,7 @@ describe('UsersController', () => {
     it('should auto-detect hemisphere from latitude when countryCode not provided', async () => {
       const updateLocationDto: UpdateUserLocationDto = {
         latitude: -34.603722,
-      } as any; // Using 'as any' because latitude doesn't exist yet (Item 3)
+      } as unknown as UpdateUserLocationDto; // latitude doesn't exist in DTO but used in test
 
       const updatedUser: Partial<User> = {
         ...mockUser,
@@ -559,7 +559,7 @@ describe('UsersController', () => {
       const updateLocationDto: UpdateUserLocationDto = {
         countryCode: 'US',
         latitude: -34.603722, // Southern latitude, but US is northern
-      } as any; // Using 'as any' because latitude doesn't exist yet (Item 3)
+      } as unknown as UpdateUserLocationDto; // latitude doesn't exist in DTO but used in test
 
       const updatedUser: Partial<User> = {
         ...mockUser,
@@ -618,7 +618,7 @@ describe('UsersController', () => {
         timezone: 'America/Argentina/Buenos_Aires',
         countryCode: 'AR',
         latitude: -34.603722,
-      } as any; // Using 'as any' because latitude doesn't exist yet (Item 3)
+      } as unknown as UpdateUserLocationDto; // latitude doesn't exist in DTO but used in test
 
       const updatedUser: Partial<User> = {
         ...mockUser,

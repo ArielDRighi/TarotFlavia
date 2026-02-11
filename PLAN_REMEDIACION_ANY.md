@@ -312,39 +312,40 @@ npm run build
 
 ## 📋 FASE 2: TESTS CRÍTICOS
 
-### TASK-ANY-009: Users Module Tests
+### TASK-ANY-009: Users Module Tests ✅
 
+**Estado:** ✅ COMPLETADA  
 **Prioridad:** 🟠 ALTA  
-**Usos de `any`:** 47  
-**Archivos afectados:**
+**Usos de `any`:** 47 → 0  
+**Archivos modificados:**
 
-- `src/modules/users/application/services/user-capabilities.service.spec.ts` (22 usos)
-- `src/modules/users/application/services/users-orchestrator.service.spec.ts` (7 usos)
-- `src/modules/users/application/dto/update-user-plan.dto.spec.ts` (4 usos)
-- `src/modules/users/application/dto/user-capabilities.dto.spec.ts` (6 usos)
-- `src/modules/users/application/use-cases/create-user.use-case.spec.ts` (2 usos)
-- `src/modules/users/infrastructure/controllers/users.controller.spec.ts` (3 usos)
-- `src/modules/users/infrastructure/repositories/typeorm-user.repository.spec.ts` (2 usos)
-- `src/modules/users/users.service.spec.ts` (1 uso)
+- ✅ `src/modules/users/application/services/user-capabilities.service.spec.ts` (22 usos → 0)
+- ✅ `src/modules/users/application/services/users-orchestrator.service.spec.ts` (7 usos → 0)
+- ✅ `src/modules/users/application/dto/update-user-plan.dto.spec.ts` (4 usos → 0)
+- ✅ `src/modules/users/application/dto/user-capabilities.dto.spec.ts` (6 usos → 0)
+- ✅ `src/modules/users/application/use-cases/create-user.use-case.spec.ts` (2 usos → 0)
+- ✅ `src/modules/users/infrastructure/controllers/users.controller.spec.ts` (3 usos → 0)
+- ✅ `src/modules/users/infrastructure/repositories/typeorm-user.repository.spec.ts` (2 usos → 0)
+- ✅ `src/modules/users/users.service.spec.ts` (1 uso → 0)
 
-**Estrategia:**
+**Cambios implementados:**
 
-```typescript
-// Usar Partial<Type>, jest.Mocked<Type>
-const mockUser: Partial<User> = { id: 1, email: "test@test.com" };
-const mockRepo: jest.Mocked<IUserRepository> = {
-  findById: jest.fn(),
-  save: jest.fn(),
-  // ... resto de métodos
-};
-```
+1. **DTOs de validación**: `Object.assign(dto, { property })` en lugar de `(dto as any).property`
+2. **Mocks de repositorios**: `Record<string, jest.Mock>` en lugar de `jest.Mocked<Partial<Interface>>`
+3. **Type casts seguros**: `as unknown as Type` para incompatibilidades de Partial
+4. **Imports corregidos**: Agregado UserRole, User, Plan entities
+5. **Propiedades de Plan**: Eliminadas propiedades inexistentes del mock
+6. **Roles tipados**: `[UserRole.CONSUMER]` en lugar de `['user']`
 
-**Validación:**
+**Resultados de validación:**
 
 ```bash
-cd backend/tarot-app
-npm run lint
-npm run test src/modules/users/
+✅ npm run format - OK (sin cambios)
+✅ npm run lint - OK (módulo users clean)
+✅ npm run test src/modules/users/ - 17/17 suites, 237 tests passed
+✅ npm run test:cov - 80.86% coverage (3484 tests)
+✅ npm run build - Compilación exitosa
+✅ node scripts/validate-architecture.js - Validación OK
 ```
 
 ---

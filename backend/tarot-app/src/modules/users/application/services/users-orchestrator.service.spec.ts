@@ -11,11 +11,13 @@ import {
   USER_REPOSITORY,
   TAROTISTA_REPOSITORY,
 } from '../../domain/interfaces/repository.tokens';
+import { User } from '../../entities/user.entity';
+import { Tarotista } from '../../../tarotistas/entities/tarotista.entity';
 
 describe('UsersOrchestratorService', () => {
   let service: UsersOrchestratorService;
-  let mockUserRepository: any;
-  let mockTarotistaRepository: any;
+  let mockUserRepository: Record<string, jest.Mock>;
+  let mockTarotistaRepository: Record<string, jest.Mock>;
 
   beforeEach(async () => {
     mockUserRepository = {
@@ -88,7 +90,7 @@ describe('UsersOrchestratorService', () => {
 
   describe('findAll', () => {
     it('should call repository findAll method', async () => {
-      const mockUsers: any = [{ id: 1, email: 'test@test.com' }];
+      const mockUsers: Partial<User>[] = [{ id: 1, email: 'test@test.com' }];
       mockUserRepository.findAll.mockResolvedValue(mockUsers);
 
       const result = await service.findAll();
@@ -100,7 +102,7 @@ describe('UsersOrchestratorService', () => {
 
   describe('findById', () => {
     it('should call repository findById method', async () => {
-      const mockUser: any = { id: 1, email: 'test@test.com' };
+      const mockUser: Partial<User> = { id: 1, email: 'test@test.com' };
       mockUserRepository.findById.mockResolvedValue(mockUser);
 
       const result = await service.findById(1);
@@ -112,7 +114,7 @@ describe('UsersOrchestratorService', () => {
 
   describe('findByEmail', () => {
     it('should call repository findByEmail method', async () => {
-      const mockUser: any = { id: 1, email: 'test@test.com' };
+      const mockUser: Partial<User> = { id: 1, email: 'test@test.com' };
       mockUserRepository.findByEmail.mockResolvedValue(mockUser);
 
       const result = await service.findByEmail('test@test.com');
@@ -126,7 +128,7 @@ describe('UsersOrchestratorService', () => {
 
   describe('remove', () => {
     it('should call repository delete method', async () => {
-      const mockDeleteResult: any = { affected: 1 };
+      const mockDeleteResult: { affected: number } = { affected: 1 };
       mockUserRepository.delete.mockResolvedValue(mockDeleteResult);
 
       const result = await service.remove(1);
@@ -138,7 +140,7 @@ describe('UsersOrchestratorService', () => {
 
   describe('getTarotistaByUserId', () => {
     it('should call tarotista repository findByUserId method', async () => {
-      const mockTarotista: any = { id: 1, userId: 1 };
+      const mockTarotista: Partial<Tarotista> = { id: 1, userId: 1 };
       mockTarotistaRepository.findByUserId.mockResolvedValue(mockTarotista);
 
       const result = await service.getTarotistaByUserId(1);
