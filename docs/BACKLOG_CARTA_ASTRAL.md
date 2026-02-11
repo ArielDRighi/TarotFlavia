@@ -5653,17 +5653,19 @@ export class GeocodeSearchResponseDto {
 }
 ```
 
+**Estado:** ✅ COMPLETADA
+
 **Criterios de aceptación:**
 
-- [ ] DTOs para respuesta básica (Anónimos)
-- [ ] DTOs para respuesta completa (Free)
-- [ ] DTOs para respuesta Premium (con síntesis IA)
-- [ ] DTOs para historial de cartas
-- [ ] DTOs para geocoding
-- [ ] Herencia correcta entre niveles de respuesta
-- [ ] Decoradores Swagger completos con ejemplos
-- [ ] Documentación clara de qué incluye cada nivel
-- [ ] Tests unitarios de serialización
+- [x] DTOs para respuesta básica (Anónimos)
+- [x] DTOs para respuesta completa (Free)
+- [x] DTOs para respuesta Premium (con síntesis IA)
+- [x] DTOs para historial de cartas
+- [x] DTOs para geocoding
+- [x] Herencia correcta entre niveles de respuesta
+- [x] Decoradores Swagger completos con ejemplos
+- [x] Documentación clara de qué incluye cada nivel
+- [x] Tests unitarios de serialización
 
 **Dependencias:** T-CA-016
 
