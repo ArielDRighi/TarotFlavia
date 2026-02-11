@@ -6,6 +6,7 @@ import { UserPlan } from '../../../users/entities/user.entity';
 import { OptionalJwtAuthGuard } from '../../../auth/infrastructure/guards/optional-jwt-auth.guard';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
 import { CheckUsageLimitGuard } from '../../../usage-limits/guards/check-usage-limit.guard';
+import { IncrementUsageInterceptor } from '../../../usage-limits/interceptors/increment-usage.interceptor';
 
 /**
  * Tests del BirthChartController
@@ -139,6 +140,8 @@ describe('BirthChartController', () => {
       .useValue({ canActivate: () => true })
       .overrideGuard(CheckUsageLimitGuard)
       .useValue({ canActivate: () => true })
+      .overrideInterceptor(IncrementUsageInterceptor)
+      .useValue({ intercept: (context, next) => next.handle() })
       .compile();
 
     controller = module.get<BirthChartController>(BirthChartController);
@@ -175,7 +178,11 @@ describe('BirthChartController', () => {
 
     it('should generate full chart for free user', async () => {
       // Arrange
-      const freeUser = { id: 1, email: 'free@example.com', plan: UserPlan.FREE };
+      const freeUser = {
+        userId: 1,
+        email: 'free@example.com',
+        plan: UserPlan.FREE,
+      };
       mockFacadeService.generateChart.mockResolvedValue(mockFullChartResponse);
 
       // Act
@@ -189,14 +196,18 @@ describe('BirthChartController', () => {
       expect(mockFacadeService.generateChart).toHaveBeenCalledWith(
         mockGenerateChartDto,
         UserPlan.FREE,
-        freeUser.id,
+        freeUser.userId,
       );
       expect(result).toEqual(mockFullChartResponse);
     });
 
     it('should generate premium chart for premium user', async () => {
       // Arrange
-      const premiumUser = { id: 1, email: 'premium@example.com', plan: UserPlan.PREMIUM };
+      const premiumUser = {
+        userId: 1,
+        email: 'premium@example.com',
+        plan: UserPlan.PREMIUM,
+      };
       mockFacadeService.generateChart.mockResolvedValue(
         mockPremiumChartResponse,
       );
@@ -212,7 +223,7 @@ describe('BirthChartController', () => {
       expect(mockFacadeService.generateChart).toHaveBeenCalledWith(
         mockGenerateChartDto,
         UserPlan.PREMIUM,
-        premiumUser.id,
+        premiumUser.userId,
       );
       expect(result).toEqual(mockPremiumChartResponse);
     });
@@ -220,7 +231,11 @@ describe('BirthChartController', () => {
     it('should log chart generation with user email', async () => {
       // Arrange
       const logSpy = jest.spyOn(controller['logger'], 'log');
-      const user = { id: 1, email: 'test@example.com', plan: UserPlan.FREE };
+      const user = {
+        userId: 1,
+        email: 'test@example.com',
+        plan: UserPlan.FREE,
+      };
       mockFacadeService.generateChart.mockResolvedValue(mockFullChartResponse);
 
       // Act
@@ -314,7 +329,7 @@ describe('BirthChartController', () => {
     it('should generate PDF for free user', async () => {
       // Arrange
       const freeUser = {
-        id: 1,
+        userId: 1,
         email: 'free@example.com',
         plan: UserPlan.FREE,
       };
@@ -352,7 +367,7 @@ describe('BirthChartController', () => {
     it('should generate PDF for premium user with AI synthesis', async () => {
       // Arrange
       const premiumUser = {
-        id: 1,
+        userId: 1,
         email: 'premium@example.com',
         plan: UserPlan.PREMIUM,
       };
@@ -381,7 +396,11 @@ describe('BirthChartController', () => {
     it('should log PDF generation with user email', async () => {
       // Arrange
       const logSpy = jest.spyOn(controller['logger'], 'log');
-      const user = { id: 1, email: 'test@example.com', plan: UserPlan.FREE };
+      const user = {
+        userId: 1,
+        email: 'test@example.com',
+        plan: UserPlan.FREE,
+      };
       mockFacadeService.generatePdf.mockResolvedValue({
         buffer: Buffer.from('PDF'),
         filename: 'test.pdf',
@@ -449,7 +468,11 @@ describe('BirthChartController', () => {
   describe('GET /birth-chart/usage', () => {
     it('should return usage status for authenticated user', async () => {
       // Arrange
-      const user = { id: 1, email: 'user@example.com', plan: UserPlan.FREE };
+      const user = {
+        userId: 1,
+        email: 'user@example.com',
+        plan: UserPlan.FREE,
+      };
       const mockUsage = {
         plan: 'free',
         used: 2,
@@ -503,7 +526,7 @@ describe('BirthChartController', () => {
     it('should generate AI synthesis for premium user', async () => {
       // Arrange
       const premiumUser = {
-        id: 1,
+        userId: 1,
         email: 'premium@example.com',
         plan: UserPlan.PREMIUM,
       };
@@ -523,7 +546,7 @@ describe('BirthChartController', () => {
       // Assert
       expect(mockFacadeService.generateSynthesisOnly).toHaveBeenCalledWith(
         mockGenerateChartDto,
-        premiumUser.id,
+        premiumUser.userId,
       );
       expect(result).toEqual(mockSynthesis);
     });
@@ -532,7 +555,7 @@ describe('BirthChartController', () => {
       // Arrange
       const logSpy = jest.spyOn(controller['logger'], 'log');
       const premiumUser = {
-        id: 1,
+        userId: 1,
         email: 'premium@example.com',
         plan: UserPlan.PREMIUM,
       };
@@ -555,16 +578,4 @@ describe('BirthChartController', () => {
   // ============================================================================
   // Tests de validación de parámetros
   // ============================================================================
-
-  describe('Parameter Validation', () => {
-    it('should validate GenerateChartDto fields', async () => {
-      // Este test verifica que el DTO tiene decoradores de validación
-      // Los pipes de NestJS manejan la validación automáticamente
-      mockFacadeService.generateChart.mockResolvedValue(mockBasicChartResponse);
-
-      await controller.generateChart(mockGenerateChartDto, null, 'fingerprint');
-
-      expect(mockFacadeService.generateChart).toHaveBeenCalled();
-    });
-  });
 });

@@ -6,9 +6,11 @@ import {
   Query,
   Res,
   UseGuards,
+  UseInterceptors,
   HttpStatus,
   Logger,
   Inject,
+  ForbiddenException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -22,6 +24,7 @@ import { Throttle } from '@nestjs/throttler';
 import { OptionalJwtAuthGuard } from '../../../auth/infrastructure/guards/optional-jwt-auth.guard';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
 import { CheckUsageLimitGuard } from '../../../usage-limits/guards/check-usage-limit.guard';
+import { IncrementUsageInterceptor } from '../../../usage-limits/interceptors/increment-usage.interceptor';
 import { CheckUsageLimit } from '../../../usage-limits/decorators/check-usage-limit.decorator';
 import { AllowAnonymous } from '../../../usage-limits/decorators/allow-anonymous.decorator';
 import { UsageFeature } from '../../../usage-limits/entities/usage-limit.entity';
@@ -38,7 +41,7 @@ import { GeocodeSearchResponseDto } from '../../application/dto/geocode-response
  * Usuario parcial para CurrentUser decorator
  */
 interface UserFromToken {
-  id: number;
+  userId: number;
   email: string;
   plan: UserPlan;
 }
@@ -110,6 +113,7 @@ export class BirthChartController {
    */
   @Post('generate')
   @UseGuards(OptionalJwtAuthGuard, CheckUsageLimitGuard)
+  @UseInterceptors(IncrementUsageInterceptor)
   @CheckUsageLimit(UsageFeature.BIRTH_CHART)
   @AllowAnonymous()
   @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 requests/minuto
@@ -124,15 +128,21 @@ export class BirthChartController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Carta generada exitosamente',
-    type: PremiumChartResponseDto,
+    description: 'Carta generada (formato depende del plan del usuario)',
+    schema: {
+      oneOf: [
+        { $ref: '#/components/schemas/BasicChartResponseDto' },
+        { $ref: '#/components/schemas/FullChartResponseDto' },
+        { $ref: '#/components/schemas/PremiumChartResponseDto' },
+      ],
+    },
   })
   @ApiResponse({ status: 400, description: 'Datos de entrada inválidos' })
   @ApiResponse({ status: 429, description: 'Límite de uso alcanzado' })
   async generateChart(
     @Body() dto: GenerateChartDto,
     @CurrentUser() user: UserFromToken | null,
-    fingerprint?: string,
+    @Query('fingerprint') fingerprint?: string,
   ): Promise<
     BasicChartResponseDto | FullChartResponseDto | PremiumChartResponseDto
   > {
@@ -147,7 +157,7 @@ export class BirthChartController {
     const result = await this.birthChartFacade.generateChart(
       dto,
       plan,
-      user?.id ?? null,
+      user?.userId ?? null,
     );
 
     return result;
@@ -159,6 +169,7 @@ export class BirthChartController {
    */
   @Post('generate/anonymous')
   @UseGuards(CheckUsageLimitGuard)
+  @UseInterceptors(IncrementUsageInterceptor)
   @CheckUsageLimit(UsageFeature.BIRTH_CHART)
   @AllowAnonymous()
   @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 requests/minuto
@@ -171,7 +182,7 @@ export class BirthChartController {
   @ApiResponse({ status: 429, description: 'Ya utilizaste tu carta gratuita' })
   generateChartAnonymous(
     @Body() dto: GenerateChartDto,
-    fingerprint: string,
+    @Query('fingerprint') fingerprint: string,
   ): Promise<BasicChartResponseDto> {
     this.logger.log(
       `Generating anonymous chart for fingerprint: ${fingerprint}`,
@@ -196,6 +207,7 @@ export class BirthChartController {
    */
   @Post('pdf')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(IncrementUsageInterceptor)
   @ApiBearerAuth()
   @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 PDFs/minuto
   @ApiOperation({
@@ -287,9 +299,9 @@ export class BirthChartController {
   })
   getUsage(
     @CurrentUser() user: UserFromToken | null,
-    fingerprint: string,
+    @Query('fingerprint') fingerprint?: string,
   ): Promise<unknown> {
-    return this.birthChartFacade.getUsageStatus(user, fingerprint);
+    return this.birthChartFacade.getUsageStatus(user, fingerprint ?? '');
   }
 
   // ===========================================================================
@@ -303,6 +315,7 @@ export class BirthChartController {
    */
   @Post('synthesis')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(IncrementUsageInterceptor)
   @ApiBearerAuth()
   @Throttle({ default: { limit: 3, ttl: 60000 } }) // 3 síntesis/minuto
   @ApiOperation({
@@ -325,8 +338,15 @@ export class BirthChartController {
     @Body() dto: GenerateChartDto,
     @CurrentUser() user: UserFromToken,
   ): Promise<unknown> {
+    // Validar que el usuario sea Premium
+    if (user.plan !== UserPlan.PREMIUM) {
+      throw new ForbiddenException(
+        'La síntesis IA solo está disponible para usuarios Premium',
+      );
+    }
+
     this.logger.log(`Generating AI synthesis for user ${user.email}`);
 
-    return this.birthChartFacade.generateSynthesisOnly(dto, user.id);
+    return this.birthChartFacade.generateSynthesisOnly(dto, user.userId);
   }
 }
