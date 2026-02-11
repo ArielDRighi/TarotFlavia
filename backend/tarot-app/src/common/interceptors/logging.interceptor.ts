@@ -12,7 +12,9 @@ import { CorrelationIdService } from '../logger/correlation-id.service';
 
 interface RequestUser {
   id: number;
-  [key: string]: any;
+  email?: string;
+  role?: string;
+  [key: string]: string | number | boolean | undefined;
 }
 
 @Injectable()
