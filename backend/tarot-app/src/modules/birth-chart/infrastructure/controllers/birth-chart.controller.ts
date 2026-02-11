@@ -22,7 +22,6 @@ import { Throttle } from '@nestjs/throttler';
 import { OptionalJwtAuthGuard } from '../../../auth/infrastructure/guards/optional-jwt-auth.guard';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
 import { CheckUsageLimitGuard } from '../../../usage-limits/guards/check-usage-limit.guard';
-import { IncrementUsageInterceptor } from '../../../usage-limits/interceptors/increment-usage.interceptor';
 import { CheckUsageLimit } from '../../../usage-limits/decorators/check-usage-limit.decorator';
 import { AllowAnonymous } from '../../../usage-limits/decorators/allow-anonymous.decorator';
 import { UsageFeature } from '../../../usage-limits/entities/usage-limit.entity';
@@ -34,6 +33,46 @@ import { FullChartResponseDto } from '../../application/dto/chart-response.dto';
 import { PremiumChartResponseDto } from '../../application/dto/chart-response.dto';
 import { GeocodePlaceDto } from '../../application/dto/geocode-place.dto';
 import { GeocodeSearchResponseDto } from '../../application/dto/geocode-response.dto';
+
+/**
+ * Usuario parcial para CurrentUser decorator
+ */
+interface UserFromToken {
+  id: number;
+  email: string;
+  plan: UserPlan;
+}
+
+/**
+ * Servicios inyectados (interfaces temporales hasta implementación real)
+ */
+interface IBirthChartFacadeService {
+  generateChart(
+    dto: GenerateChartDto,
+    plan: UserPlan,
+    userId: number | null,
+    fingerprint?: string,
+  ): Promise<
+    BasicChartResponseDto | FullChartResponseDto | PremiumChartResponseDto
+  >;
+  generatePdf(
+    dto: GenerateChartDto,
+    user: UserFromToken,
+    isPremium: boolean,
+  ): Promise<{ buffer: Buffer; filename: string }>;
+  getUsageStatus(
+    user: UserFromToken | null,
+    fingerprint: string,
+  ): Promise<unknown>;
+  generateSynthesisOnly(
+    dto: GenerateChartDto,
+    userId: number,
+  ): Promise<unknown>;
+}
+
+interface IGeocodeService {
+  searchPlaces(query: string): Promise<GeocodeSearchResponseDto>;
+}
 
 /**
  * Controlador REST para Carta Astral
@@ -55,9 +94,9 @@ export class BirthChartController {
 
   constructor(
     @Inject('BirthChartFacadeService')
-    private readonly birthChartFacade: any,
+    private readonly birthChartFacade: IBirthChartFacadeService,
     @Inject('GeocodeService')
-    private readonly geocodeService: any,
+    private readonly geocodeService: IGeocodeService,
   ) {}
 
   // ===========================================================================
@@ -92,23 +131,23 @@ export class BirthChartController {
   @ApiResponse({ status: 429, description: 'Límite de uso alcanzado' })
   async generateChart(
     @Body() dto: GenerateChartDto,
-    @CurrentUser() user: any | null,
+    @CurrentUser() user: UserFromToken | null,
     fingerprint?: string,
   ): Promise<
     BasicChartResponseDto | FullChartResponseDto | PremiumChartResponseDto
   > {
     this.logger.log(
-      `Generating chart for ${user?.email || 'anonymous'} (${fingerprint})`,
+      `Generating chart for ${user?.email ?? 'anonymous'} (${fingerprint ?? 'no-fingerprint'})`,
     );
 
     // Determinar plan del usuario
-    const plan = user?.plan || UserPlan.ANONYMOUS;
+    const plan = user?.plan ?? UserPlan.ANONYMOUS;
 
     // Generar carta según plan
     const result = await this.birthChartFacade.generateChart(
       dto,
       plan,
-      user?.id || null,
+      user?.id ?? null,
     );
 
     return result;
@@ -130,7 +169,7 @@ export class BirthChartController {
   })
   @ApiResponse({ status: 200, type: BasicChartResponseDto })
   @ApiResponse({ status: 429, description: 'Ya utilizaste tu carta gratuita' })
-  async generateChartAnonymous(
+  generateChartAnonymous(
     @Body() dto: GenerateChartDto,
     fingerprint: string,
   ): Promise<BasicChartResponseDto> {
@@ -143,7 +182,7 @@ export class BirthChartController {
       UserPlan.ANONYMOUS,
       null,
       fingerprint,
-    );
+    ) as Promise<BasicChartResponseDto>;
   }
 
   // ===========================================================================
@@ -175,7 +214,7 @@ export class BirthChartController {
   @ApiResponse({ status: 401, description: 'No autenticado' })
   async downloadPdf(
     @Body() dto: GenerateChartDto,
-    @CurrentUser() user: any,
+    @CurrentUser() user: UserFromToken,
     @Res() res: Response,
   ): Promise<void> {
     this.logger.log(`Generating PDF for user ${user.email}`);
@@ -213,7 +252,7 @@ export class BirthChartController {
   })
   @ApiQuery({ name: 'query', example: 'Buenos Aires' })
   @ApiResponse({ status: 200, type: GeocodeSearchResponseDto })
-  async searchPlace(
+  searchPlace(
     @Query() dto: GeocodePlaceDto,
   ): Promise<GeocodeSearchResponseDto> {
     return this.geocodeService.searchPlaces(dto.query);
@@ -246,7 +285,10 @@ export class BirthChartController {
       },
     },
   })
-  async getUsage(@CurrentUser() user: any | null, fingerprint: string) {
+  getUsage(
+    @CurrentUser() user: UserFromToken | null,
+    fingerprint: string,
+  ): Promise<unknown> {
     return this.birthChartFacade.getUsageStatus(user, fingerprint);
   }
 
@@ -281,8 +323,8 @@ export class BirthChartController {
   @ApiResponse({ status: 403, description: 'Requiere plan Premium' })
   async generateSynthesis(
     @Body() dto: GenerateChartDto,
-    @CurrentUser() user: any,
-  ) {
+    @CurrentUser() user: UserFromToken,
+  ): Promise<unknown> {
     this.logger.log(`Generating AI synthesis for user ${user.email}`);
 
     return this.birthChartFacade.generateSynthesisOnly(dto, user.id);
