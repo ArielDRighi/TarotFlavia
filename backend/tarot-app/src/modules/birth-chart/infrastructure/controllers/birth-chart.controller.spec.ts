@@ -141,7 +141,10 @@ describe('BirthChartController', () => {
       .overrideGuard(CheckUsageLimitGuard)
       .useValue({ canActivate: () => true })
       .overrideInterceptor(IncrementUsageInterceptor)
-      .useValue({ intercept: (context, next) => next.handle() })
+      .useValue({
+        intercept: (_context: unknown, next: { handle: () => unknown }) =>
+          next.handle(),
+      })
       .compile();
 
     controller = module.get<BirthChartController>(BirthChartController);
