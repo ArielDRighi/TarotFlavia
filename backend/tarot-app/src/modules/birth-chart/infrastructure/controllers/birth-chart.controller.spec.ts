@@ -175,7 +175,7 @@ describe('BirthChartController', () => {
 
     it('should generate full chart for free user', async () => {
       // Arrange
-      const freeUser = { id: 1, plan: UserPlan.FREE };
+      const freeUser = { id: 1, email: 'free@example.com', plan: UserPlan.FREE };
       mockFacadeService.generateChart.mockResolvedValue(mockFullChartResponse);
 
       // Act
@@ -196,7 +196,7 @@ describe('BirthChartController', () => {
 
     it('should generate premium chart for premium user', async () => {
       // Arrange
-      const premiumUser = { id: 1, plan: UserPlan.PREMIUM };
+      const premiumUser = { id: 1, email: 'premium@example.com', plan: UserPlan.PREMIUM };
       mockFacadeService.generateChart.mockResolvedValue(
         mockPremiumChartResponse,
       );
@@ -449,7 +449,7 @@ describe('BirthChartController', () => {
   describe('GET /birth-chart/usage', () => {
     it('should return usage status for authenticated user', async () => {
       // Arrange
-      const user = { id: 1, plan: UserPlan.FREE };
+      const user = { id: 1, email: 'user@example.com', plan: UserPlan.FREE };
       const mockUsage = {
         plan: 'free',
         used: 2,
@@ -491,7 +491,7 @@ describe('BirthChartController', () => {
         null,
         'fingerprint-456',
       );
-      expect(result.canGenerate).toBe(false);
+      expect((result as any).canGenerate).toBe(false);
     });
   });
 
