@@ -72,7 +72,7 @@ describe('GenerateChartDto', () => {
         birthPlace: 'North Pole',
         latitude: 90,
         longitude: 0,
-        timezone: 'UTC',
+        timezone: 'Arctic/Longyearbyen',
       });
 
       const errors = await validate(dto);
@@ -279,6 +279,23 @@ describe('GenerateChartDto', () => {
       expect(errors.length).toBeGreaterThan(0);
       expect(errors[0].property).toBe('birthDate');
     });
+
+    it('should fail when birthDate includes time (ISO datetime)', async () => {
+      const dto = plainToInstance(GenerateChartDto, {
+        name: 'Test User',
+        birthDate: '1990-05-15T14:30:00Z',
+        birthTime: '14:30',
+        birthPlace: 'Madrid, Spain',
+        latitude: 40.4168,
+        longitude: -3.7038,
+        timezone: 'Europe/Madrid',
+      });
+
+      const errors = await validate(dto);
+      expect(errors.length).toBeGreaterThan(0);
+      expect(errors[0].property).toBe('birthDate');
+      expect(errors[0].constraints?.matches).toBeDefined();
+    });
   });
 
   describe('birthTime validation', () => {
@@ -409,7 +426,7 @@ describe('GenerateChartDto', () => {
         birthPlace: 'Test Place',
         latitude: -90.1,
         longitude: 0,
-        timezone: 'UTC',
+        timezone: 'America/New_York',
       });
 
       const errors = await validate(dto);
@@ -426,7 +443,7 @@ describe('GenerateChartDto', () => {
         birthPlace: 'Test Place',
         latitude: 90.1,
         longitude: 0,
-        timezone: 'UTC',
+        timezone: 'America/New_York',
       });
 
       const errors = await validate(dto);
@@ -443,7 +460,7 @@ describe('GenerateChartDto', () => {
         birthPlace: 'Test Place',
         latitude: 'invalid' as any,
         longitude: 0,
-        timezone: 'UTC',
+        timezone: 'America/New_York',
       });
 
       const errors = await validate(dto);
@@ -459,7 +476,7 @@ describe('GenerateChartDto', () => {
         birthTime: '14:30',
         birthPlace: 'Test Place',
         longitude: 0,
-        timezone: 'UTC',
+        timezone: 'America/New_York',
       });
 
       const errors = await validate(dto);
@@ -478,7 +495,7 @@ describe('GenerateChartDto', () => {
         birthPlace: 'Test Place',
         latitude: 0,
         longitude: -180.1,
-        timezone: 'UTC',
+        timezone: 'America/New_York',
       });
 
       const errors = await validate(dto);
@@ -495,7 +512,7 @@ describe('GenerateChartDto', () => {
         birthPlace: 'Test Place',
         latitude: 0,
         longitude: 180.1,
-        timezone: 'UTC',
+        timezone: 'America/New_York',
       });
 
       const errors = await validate(dto);
@@ -512,7 +529,7 @@ describe('GenerateChartDto', () => {
         birthPlace: 'Test Place',
         latitude: 0,
         longitude: 'invalid' as any,
-        timezone: 'UTC',
+        timezone: 'America/New_York',
       });
 
       const errors = await validate(dto);
@@ -528,7 +545,7 @@ describe('GenerateChartDto', () => {
         birthTime: '14:30',
         birthPlace: 'Test Place',
         latitude: 0,
-        timezone: 'UTC',
+        timezone: 'America/New_York',
       });
 
       const errors = await validate(dto);
@@ -587,6 +604,53 @@ describe('GenerateChartDto', () => {
       expect(errors.length).toBeGreaterThan(0);
       const tzError = errors.find((e) => e.property === 'timezone');
       expect(tzError).toBeDefined();
+    });
+
+    it('should fail when timezone is not in IANA format', async () => {
+      const dto = plainToInstance(GenerateChartDto, {
+        name: 'Test User',
+        birthDate: '1990-05-15',
+        birthTime: '14:30',
+        birthPlace: 'Test Place',
+        latitude: 0,
+        longitude: 0,
+        timezone: 'UTC',
+      });
+
+      const errors = await validate(dto);
+      expect(errors.length).toBeGreaterThan(0);
+      expect(errors[0].property).toBe('timezone');
+      expect(errors[0].constraints?.matches).toBeDefined();
+    });
+
+    it('should accept valid IANA timezone with region/city format', async () => {
+      const dto = plainToInstance(GenerateChartDto, {
+        name: 'Test User',
+        birthDate: '1990-05-15',
+        birthTime: '14:30',
+        birthPlace: 'Test Place',
+        latitude: 0,
+        longitude: 0,
+        timezone: 'America/New_York',
+      });
+
+      const errors = await validate(dto);
+      expect(errors).toHaveLength(0);
+    });
+
+    it('should accept valid IANA timezone with region/country/city format', async () => {
+      const dto = plainToInstance(GenerateChartDto, {
+        name: 'Test User',
+        birthDate: '1990-05-15',
+        birthTime: '14:30',
+        birthPlace: 'Test Place',
+        latitude: 0,
+        longitude: 0,
+        timezone: 'America/Argentina/Buenos_Aires',
+      });
+
+      const errors = await validate(dto);
+      expect(errors).toHaveLength(0);
     });
   });
 });

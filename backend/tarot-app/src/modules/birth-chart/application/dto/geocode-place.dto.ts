@@ -10,10 +10,14 @@ export class GeocodePlaceDto {
     example: 'Buenos Aires, Argentina',
     description: 'Texto de búsqueda del lugar',
   })
-  @IsString()
+  @IsString({
+    message: 'El texto de búsqueda debe ser una cadena de caracteres',
+  })
   @IsNotEmpty({ message: 'El texto de búsqueda es requerido' })
   @MinLength(3, { message: 'Ingrese al menos 3 caracteres' })
-  @MaxLength(255)
+  @MaxLength(255, {
+    message: 'El texto de búsqueda no puede superar los 255 caracteres',
+  })
   @SanitizeHtml()
   query: string;
 }
