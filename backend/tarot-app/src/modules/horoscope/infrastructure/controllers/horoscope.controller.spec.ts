@@ -6,6 +6,7 @@ import { HoroscopeCronService } from '../../application/services/horoscope-cron.
 import { UsersService } from '../../../users/users.service';
 import { ZodiacSign } from '../../../../common/utils/zodiac.utils';
 import { DailyHoroscope } from '../../entities/daily-horoscope.entity';
+import { User } from '../../../users/entities/user.entity';
 
 describe('HoroscopeController', () => {
   let controller: HoroscopeController;
@@ -183,7 +184,7 @@ describe('HoroscopeController', () => {
 
   describe('getMySignHoroscope', () => {
     it('should return horoscope for authenticated user', async () => {
-      usersService.findById.mockResolvedValue(mockUser as any);
+      usersService.findById.mockResolvedValue(mockUser as unknown as User);
       horoscopeService.getTodayUTC.mockReturnValue(mockDate);
       horoscopeService.findBySignAndDate.mockResolvedValue(mockHoroscope);
       horoscopeService.incrementViewCount.mockResolvedValue(undefined);
@@ -208,7 +209,9 @@ describe('HoroscopeController', () => {
 
     it('should throw BadRequestException when user has no birth date', async () => {
       const userWithoutBirthDate = { ...mockUser, birthDate: null };
-      usersService.findById.mockResolvedValue(userWithoutBirthDate as any);
+      usersService.findById.mockResolvedValue(
+        userWithoutBirthDate as unknown as User,
+      );
 
       await expect(
         controller.getMySignHoroscope({ userId: 1 }),
@@ -216,7 +219,7 @@ describe('HoroscopeController', () => {
     });
 
     it('should throw NotFoundException when horoscope not available', async () => {
-      usersService.findById.mockResolvedValue(mockUser as any);
+      usersService.findById.mockResolvedValue(mockUser as unknown as User);
       horoscopeService.getTodayUTC.mockReturnValue(mockDate);
       horoscopeService.findBySignAndDate.mockResolvedValue(null);
 

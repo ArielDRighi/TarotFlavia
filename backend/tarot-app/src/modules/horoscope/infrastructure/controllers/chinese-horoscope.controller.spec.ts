@@ -8,6 +8,7 @@ import {
   ChineseElement,
 } from '../../../../common/utils/chinese-zodiac.utils';
 import { ChineseHoroscope } from '../../entities/chinese-horoscope.entity';
+import { User } from '../../../users/entities/user.entity';
 
 describe('ChineseHoroscopeController', () => {
   let controller: ChineseHoroscopeController;
@@ -306,7 +307,7 @@ describe('ChineseHoroscopeController', () => {
   describe('getMyAnimalHoroscope', () => {
     it('should return horoscope for authenticated user', async () => {
       const currentUser = { userId: 1 };
-      usersService.findById.mockResolvedValue(mockUser as any);
+      usersService.findById.mockResolvedValue(mockUser as unknown as User);
       chineseService.findForUser.mockResolvedValue(mockChineseHoroscope);
 
       const result = await controller.getMyAnimalHoroscope(currentUser);
@@ -323,7 +324,7 @@ describe('ChineseHoroscopeController', () => {
     it('should use specified year when provided', async () => {
       const currentUser = { userId: 1 };
       const year = 2027;
-      usersService.findById.mockResolvedValue(mockUser as any);
+      usersService.findById.mockResolvedValue(mockUser as unknown as User);
       chineseService.findForUser.mockResolvedValue(mockChineseHoroscope);
 
       await controller.getMyAnimalHoroscope(currentUser, year);
@@ -346,7 +347,9 @@ describe('ChineseHoroscopeController', () => {
     it('should throw BadRequestException when user has no birthDate', async () => {
       const currentUser = { userId: 1 };
       const userWithoutBirthDate = { ...mockUser, birthDate: null };
-      usersService.findById.mockResolvedValue(userWithoutBirthDate as any);
+      usersService.findById.mockResolvedValue(
+        userWithoutBirthDate as unknown as User,
+      );
 
       await expect(
         controller.getMyAnimalHoroscope(currentUser),
@@ -355,7 +358,7 @@ describe('ChineseHoroscopeController', () => {
 
     it('should throw NotFoundException when horoscope not available', async () => {
       const currentUser = { userId: 1 };
-      usersService.findById.mockResolvedValue(mockUser as any);
+      usersService.findById.mockResolvedValue(mockUser as unknown as User);
       chineseService.findForUser.mockResolvedValue(null);
 
       await expect(
@@ -365,7 +368,7 @@ describe('ChineseHoroscopeController', () => {
 
     it('should increment view count', async () => {
       const currentUser = { userId: 1 };
-      usersService.findById.mockResolvedValue(mockUser as any);
+      usersService.findById.mockResolvedValue(mockUser as unknown as User);
       chineseService.findForUser.mockResolvedValue(mockChineseHoroscope);
 
       await controller.getMyAnimalHoroscope(currentUser);
@@ -376,7 +379,7 @@ describe('ChineseHoroscopeController', () => {
     it('should throw BadRequestException when year is below 2020', async () => {
       const currentUser = { userId: 1 };
       const invalidYear = 2019;
-      usersService.findById.mockResolvedValue(mockUser as any);
+      usersService.findById.mockResolvedValue(mockUser as unknown as User);
 
       await expect(
         controller.getMyAnimalHoroscope(currentUser, invalidYear),
@@ -386,7 +389,7 @@ describe('ChineseHoroscopeController', () => {
     it('should throw BadRequestException when year is above 2050', async () => {
       const currentUser = { userId: 1 };
       const invalidYear = 2051;
-      usersService.findById.mockResolvedValue(mockUser as any);
+      usersService.findById.mockResolvedValue(mockUser as unknown as User);
 
       await expect(
         controller.getMyAnimalHoroscope(currentUser, invalidYear),
@@ -395,7 +398,7 @@ describe('ChineseHoroscopeController', () => {
 
     it('should include Wu Xing fields in response', async () => {
       const currentUser = { userId: 1 };
-      usersService.findById.mockResolvedValue(mockUser as any);
+      usersService.findById.mockResolvedValue(mockUser as unknown as User);
       chineseService.findForUser.mockResolvedValue(mockChineseHoroscope);
 
       const result = await controller.getMyAnimalHoroscope(currentUser);
@@ -415,7 +418,7 @@ describe('ChineseHoroscopeController', () => {
         ...mockChineseHoroscope,
         animal: ChineseZodiacAnimal.RABBIT,
       };
-      usersService.findById.mockResolvedValue(userBeforeCNY as any);
+      usersService.findById.mockResolvedValue(userBeforeCNY as unknown as User);
       chineseService.findForUser.mockResolvedValue(rabbitHoroscope);
 
       const result = await controller.getMyAnimalHoroscope(currentUser);
@@ -430,7 +433,7 @@ describe('ChineseHoroscopeController', () => {
       const currentUser = { userId: 1 };
       // Usuario nacido en 2000 → Dragón de Metal
       const userYear2000 = { ...mockUser, birthDate: '2000-03-15' };
-      usersService.findById.mockResolvedValue(userYear2000 as any);
+      usersService.findById.mockResolvedValue(userYear2000 as unknown as User);
       chineseService.findForUser.mockResolvedValue(mockChineseHoroscope);
 
       const result = await controller.getMyAnimalHoroscope(currentUser);
@@ -449,7 +452,11 @@ describe('ChineseHoroscopeController', () => {
         failed: 0,
         results: [],
       };
-      chineseService.generateAllForYear.mockResolvedValue(mockResult as any);
+      chineseService.generateAllForYear.mockResolvedValue(
+        mockResult as unknown as Awaited<
+          ReturnType<typeof chineseService.generateAllForYear>
+        >,
+      );
 
       const result = controller.generateForYear(year);
 

@@ -3,7 +3,8 @@ import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { NumerologyController } from './numerology.controller';
 import { NumerologyService } from './numerology.service';
 import { UsersService } from '../users/users.service';
-import { UserPlan } from '../users/entities/user.entity';
+import { User, UserPlan } from '../users/entities/user.entity';
+import { NumerologyInterpretation } from './entities/numerology-interpretation.entity';
 import { calculateDayNumber } from '../../common/utils/numerology.utils';
 import { JwtAuthGuard } from '../auth/infrastructure/guards/jwt-auth.guard';
 import { AIQuotaGuard } from '../ai-usage/infrastructure/guards/ai-quota.guard';
@@ -159,7 +160,7 @@ describe('NumerologyController', () => {
   describe('getMyProfile', () => {
     it('should return profile for authenticated user with birthDate', async () => {
       const currentUser = { userId: 123, plan: UserPlan.FREE };
-      usersService.findById.mockResolvedValue(mockUser as any);
+      usersService.findById.mockResolvedValue(mockUser as unknown as User);
       numerologyService.calculate.mockReturnValue(mockNumerologyProfile);
 
       const result = await controller.getMyProfile(currentUser);
@@ -183,7 +184,9 @@ describe('NumerologyController', () => {
     it('should throw BadRequestException if user has no birthDate', async () => {
       const currentUser = { userId: 123, plan: UserPlan.FREE };
       const userWithoutBirthDate = { ...mockUser, birthDate: null };
-      usersService.findById.mockResolvedValue(userWithoutBirthDate as any);
+      usersService.findById.mockResolvedValue(
+        userWithoutBirthDate as unknown as User,
+      );
 
       await expect(controller.getMyProfile(currentUser)).rejects.toThrow(
         BadRequestException,
@@ -197,9 +200,9 @@ describe('NumerologyController', () => {
   describe('interpretMyProfile', () => {
     it('should generate new interpretation for premium user', async () => {
       const currentUser = { userId: 123, plan: UserPlan.PREMIUM };
-      usersService.findById.mockResolvedValue(mockUser as any);
+      usersService.findById.mockResolvedValue(mockUser as unknown as User);
       numerologyService.generateAndSaveInterpretation.mockResolvedValue(
-        mockInterpretation as any,
+        mockInterpretation as unknown as NumerologyInterpretation,
       );
 
       const result = await controller.interpretMyProfile(currentUser);
@@ -212,10 +215,10 @@ describe('NumerologyController', () => {
 
     it('should return existing interpretation if already exists (handled by service)', async () => {
       const currentUser = { userId: 123, plan: UserPlan.PREMIUM };
-      usersService.findById.mockResolvedValue(mockUser as any);
+      usersService.findById.mockResolvedValue(mockUser as unknown as User);
       // Service returns existing interpretation idempotently
       numerologyService.generateAndSaveInterpretation.mockResolvedValue(
-        mockInterpretation as any,
+        mockInterpretation as unknown as NumerologyInterpretation,
       );
 
       const result = await controller.interpretMyProfile(currentUser);
@@ -229,7 +232,9 @@ describe('NumerologyController', () => {
     it('should throw BadRequestException if user has no birthDate', async () => {
       const currentUser = { userId: 123, plan: UserPlan.PREMIUM };
       const userWithoutBirthDate = { ...mockUser, birthDate: null };
-      usersService.findById.mockResolvedValue(userWithoutBirthDate as any);
+      usersService.findById.mockResolvedValue(
+        userWithoutBirthDate as unknown as User,
+      );
 
       await expect(controller.interpretMyProfile(currentUser)).rejects.toThrow(
         BadRequestException,
