@@ -5,11 +5,12 @@ import {
   PASSWORD_RESET_REPOSITORY,
   REFRESH_TOKEN_REPOSITORY,
 } from '../../domain/interfaces/repository.tokens';
+import { UserWithoutPassword } from '../../../users/entities/user.entity';
 
 describe('ResetPasswordUseCase', () => {
   let useCase: ResetPasswordUseCase;
-  let passwordResetRepository: any;
-  let refreshTokenRepository: any;
+  let passwordResetRepository: Record<string, jest.Mock>;
+  let refreshTokenRepository: Record<string, jest.Mock>;
   let usersService: jest.Mocked<UsersService>;
 
   const mockResetToken = {
@@ -93,7 +94,7 @@ describe('ResetPasswordUseCase', () => {
 
       usersService.update.mockImplementation(() => {
         callOrder.push('update');
-        return Promise.resolve({} as any);
+        return Promise.resolve({} as unknown as UserWithoutPassword);
       });
       refreshTokenRepository.revokeAllUserTokens.mockImplementation(() => {
         callOrder.push('revoke');

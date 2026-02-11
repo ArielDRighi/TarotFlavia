@@ -4,7 +4,7 @@ import { PASSWORD_RESET_REPOSITORY } from '../../domain/interfaces/repository.to
 
 describe('ForgotPasswordUseCase', () => {
   let useCase: ForgotPasswordUseCase;
-  let passwordResetRepository: any;
+  let passwordResetRepository: Record<string, jest.Mock>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({

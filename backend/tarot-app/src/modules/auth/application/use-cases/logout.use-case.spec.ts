@@ -5,7 +5,7 @@ import { REFRESH_TOKEN_REPOSITORY } from '../../domain/interfaces/repository.tok
 
 describe('LogoutUseCase', () => {
   let useCase: LogoutUseCase;
-  let refreshTokenRepository: any;
+  let refreshTokenRepository: Record<string, jest.Mock>;
 
   const mockTokenEntity = {
     id: 1,
@@ -76,15 +76,15 @@ describe('LogoutUseCase', () => {
     });
 
     it('should throw UnauthorizedException when userId is not provided', async () => {
-      await expect(useCase.executeAll(null as any)).rejects.toThrow(
-        UnauthorizedException,
-      );
+      await expect(
+        useCase.executeAll(null as unknown as number),
+      ).rejects.toThrow(UnauthorizedException);
     });
 
     it('should throw UnauthorizedException with correct message', async () => {
-      await expect(useCase.executeAll(undefined as any)).rejects.toThrow(
-        'User not authenticated',
-      );
+      await expect(
+        useCase.executeAll(undefined as unknown as number),
+      ).rejects.toThrow('User not authenticated');
     });
   });
 });

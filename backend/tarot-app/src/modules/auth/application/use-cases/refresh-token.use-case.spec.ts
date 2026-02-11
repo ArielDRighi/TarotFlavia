@@ -8,7 +8,7 @@ import { UsersService } from '../../../users/users.service';
 describe('RefreshTokenUseCase', () => {
   let useCase: RefreshTokenUseCase;
   let jwtService: jest.Mocked<JwtService>;
-  let refreshTokenRepository: any;
+  let refreshTokenRepository: Record<string, jest.Mock>;
   let _usersService: jest.Mocked<UsersService>;
 
   const mockUser = {

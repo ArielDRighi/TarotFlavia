@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder, UpdateResult } from 'typeorm';
 import { TypeOrmRefreshTokenRepository } from './typeorm-refresh-token.repository';
 import { RefreshToken } from '../../entities/refresh-token.entity';
 import { User } from '../../../users/entities/user.entity';
@@ -26,7 +26,7 @@ describe('TypeOrmRefreshTokenRepository', () => {
       find: jest.fn(),
       update: jest.fn(),
       createQueryBuilder: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<Repository<RefreshToken>>;
 
     mockConfigService = {
       get: jest.fn((key: string) => {
@@ -34,7 +34,7 @@ describe('TypeOrmRefreshTokenRepository', () => {
         if (key === 'REFRESH_TOKEN_RETENTION_DAYS') return 30;
         return null;
       }),
-    } as any;
+    } as unknown as jest.Mocked<ConfigService>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -110,7 +110,7 @@ describe('TypeOrmRefreshTokenRepository', () => {
       await repository.createRefreshToken(mockUser);
 
       const createCall = mockRefreshTokenRepository.create.mock
-        .calls[0][0] as any;
+        .calls[0][0] as Record<string, unknown>;
       const expiresAt = createCall.expiresAt as Date;
       const now = Date.now();
       const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
@@ -140,9 +140,11 @@ describe('TypeOrmRefreshTokenRepository', () => {
       expect(result).toBe(mockRefreshToken);
       expect(mockRefreshTokenRepository.findOne).toHaveBeenCalled();
       const callArg = mockRefreshTokenRepository.findOne.mock
-        .calls[0][0] as any;
+        .calls[0][0] as Record<string, unknown>;
       expect(callArg.where).toBeDefined();
-      expect(callArg.where.tokenHash).toBeDefined();
+      expect(
+        (callArg.where as Record<string, unknown>).tokenHash,
+      ).toBeDefined();
     });
 
     it('should return null if token not found', async () => {
@@ -208,7 +210,7 @@ describe('TypeOrmRefreshTokenRepository', () => {
     it('should revoke a token by ID', async () => {
       mockRefreshTokenRepository.update.mockResolvedValue({
         affected: 1,
-      } as any);
+      } as unknown as UpdateResult);
 
       await repository.revokeToken('token-id');
 
@@ -223,7 +225,7 @@ describe('TypeOrmRefreshTokenRepository', () => {
     it('should revoke all active tokens for a user', async () => {
       mockRefreshTokenRepository.update.mockResolvedValue({
         affected: 3,
-      } as any);
+      } as unknown as UpdateResult);
 
       await repository.revokeAllUserTokens(1);
 
@@ -247,7 +249,7 @@ describe('TypeOrmRefreshTokenRepository', () => {
       };
 
       mockRefreshTokenRepository.createQueryBuilder.mockReturnValue(
-        mockQueryBuilder as any,
+        mockQueryBuilder as unknown as SelectQueryBuilder<RefreshToken>,
       );
 
       const result = await repository.deleteExpiredTokens();
@@ -270,7 +272,7 @@ describe('TypeOrmRefreshTokenRepository', () => {
       };
 
       mockRefreshTokenRepository.createQueryBuilder.mockReturnValue(
-        mockQueryBuilder as any,
+        mockQueryBuilder as unknown as SelectQueryBuilder<RefreshToken>,
       );
 
       const result = await repository.deleteExpiredTokens();
@@ -290,7 +292,7 @@ describe('TypeOrmRefreshTokenRepository', () => {
       };
 
       mockRefreshTokenRepository.createQueryBuilder.mockReturnValue(
-        mockQueryBuilder as any,
+        mockQueryBuilder as unknown as SelectQueryBuilder<RefreshToken>,
       );
 
       const result = await repository.deleteExpiredTokens();

@@ -5,12 +5,13 @@ import { RegisterUseCase } from './register.use-case';
 import { UsersService } from '../../../users/users.service';
 import { REFRESH_TOKEN_REPOSITORY } from '../../domain/interfaces/repository.tokens';
 import { CreateUserDto } from '../../../users/application/dto/create-user.dto';
+import { User } from '../../../users/entities/user.entity';
 
 describe('RegisterUseCase', () => {
   let useCase: RegisterUseCase;
   let usersService: jest.Mocked<UsersService>;
   let jwtService: jest.Mocked<JwtService>;
-  let refreshTokenRepository: any;
+  let refreshTokenRepository: Record<string, jest.Mock>;
 
   const mockUser = {
     id: 1,
@@ -20,7 +21,7 @@ describe('RegisterUseCase', () => {
     isAdmin: false,
     plan: 'free',
     roles: ['user'],
-  } as any;
+  } as unknown as User;
 
   const createUserDto: CreateUserDto = {
     email: 'newuser@example.com',
@@ -82,7 +83,7 @@ describe('RegisterUseCase', () => {
     });
 
     it('should throw UnauthorizedException when user creation fails', async () => {
-      usersService.create.mockResolvedValue({ id: 1 } as any);
+      usersService.create.mockResolvedValue({ id: 1 } as unknown as User);
       usersService.findById.mockResolvedValue(null);
 
       await expect(

@@ -73,9 +73,7 @@ describe('TarotCards Seeder', () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
         .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) =>
-          Promise.resolve(cards as any),
-        );
+        .mockImplementation((cards) => Promise.resolve(cards as any));
 
       await seedTarotCards(cardRepository, deckRepository);
 
@@ -88,9 +86,7 @@ describe('TarotCards Seeder', () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
         .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) =>
-          Promise.resolve(cards as any),
-        );
+        .mockImplementation((cards) => Promise.resolve(cards as any));
 
       await seedTarotCards(cardRepository, deckRepository);
 
@@ -105,9 +101,7 @@ describe('TarotCards Seeder', () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
         .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) =>
-          Promise.resolve(cards as any),
-        );
+        .mockImplementation((cards) => Promise.resolve(cards as any));
 
       await seedTarotCards(cardRepository, deckRepository);
 
@@ -120,9 +114,7 @@ describe('TarotCards Seeder', () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
         .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) =>
-          Promise.resolve(cards as any),
-        );
+        .mockImplementation((cards) => Promise.resolve(cards as any));
 
       await seedTarotCards(cardRepository, deckRepository);
 
@@ -135,9 +127,7 @@ describe('TarotCards Seeder', () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
         .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) =>
-          Promise.resolve(cards as any),
-        );
+        .mockImplementation((cards) => Promise.resolve(cards as any));
 
       await seedTarotCards(cardRepository, deckRepository);
 
@@ -150,9 +140,7 @@ describe('TarotCards Seeder', () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
         .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) =>
-          Promise.resolve(cards as any),
-        );
+        .mockImplementation((cards) => Promise.resolve(cards as any));
 
       await seedTarotCards(cardRepository, deckRepository);
 
@@ -167,9 +155,7 @@ describe('TarotCards Seeder', () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
         .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) =>
-          Promise.resolve(cards as any),
-        );
+        .mockImplementation((cards) => Promise.resolve(cards as any));
 
       await seedTarotCards(cardRepository, deckRepository);
 
@@ -193,9 +179,7 @@ describe('TarotCards Seeder', () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
         .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) =>
-          Promise.resolve(cards as any),
-        );
+        .mockImplementation((cards) => Promise.resolve(cards as any));
 
       await seedTarotCards(cardRepository, deckRepository);
 
@@ -227,9 +211,7 @@ describe('TarotCards Seeder', () => {
 
       const saveSpy = jest
         .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) =>
-          Promise.resolve(cards as any),
-        );
+        .mockImplementation((cards) => Promise.resolve(cards as any));
 
       // First call - should seed
       await seedTarotCards(cardRepository, deckRepository);
@@ -255,9 +237,7 @@ describe('TarotCards Seeder', () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
         .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) =>
-          Promise.resolve(cards as any),
-        );
+        .mockImplementation((cards) => Promise.resolve(cards as any));
 
       await seedTarotCards(cardRepository, deckRepository);
 
@@ -273,9 +253,7 @@ describe('TarotCards Seeder', () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
         .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) =>
-          Promise.resolve(cards as any),
-        );
+        .mockImplementation((cards) => Promise.resolve(cards as any));
 
       await seedTarotCards(cardRepository, deckRepository);
 
@@ -299,9 +277,7 @@ describe('TarotCards Seeder', () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
         .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) =>
-          Promise.resolve(cards as any),
-        );
+        .mockImplementation((cards) => Promise.resolve(cards as any));
 
       await seedTarotCards(cardRepository, deckRepository);
 
@@ -323,9 +299,7 @@ describe('TarotCards Seeder', () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
         .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) =>
-          Promise.resolve(cards as any),
-        );
+        .mockImplementation((cards) => Promise.resolve(cards as any));
 
       await seedTarotCards(cardRepository, deckRepository);
 
@@ -349,9 +323,7 @@ describe('TarotCards Seeder', () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
         .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) =>
-          Promise.resolve(cards as any),
-        );
+        .mockImplementation((cards) => Promise.resolve(cards as any));
 
       await seedTarotCards(cardRepository, deckRepository);
 
@@ -368,9 +340,7 @@ describe('TarotCards Seeder', () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
         .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) =>
-          Promise.resolve(cards as any),
-        );
+        .mockImplementation((cards) => Promise.resolve(cards as any));
 
       await seedTarotCards(cardRepository, deckRepository);
 
@@ -387,9 +357,7 @@ describe('TarotCards Seeder', () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
         .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) =>
-          Promise.resolve(cards as any),
-        );
+        .mockImplementation((cards) => Promise.resolve(cards as any));
 
       await seedTarotCards(cardRepository, deckRepository);
 
@@ -406,9 +374,7 @@ describe('TarotCards Seeder', () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
         .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) =>
-          Promise.resolve(cards as any),
-        );
+        .mockImplementation((cards) => Promise.resolve(cards as any));
 
       await seedTarotCards(cardRepository, deckRepository);
 
@@ -428,9 +394,7 @@ describe('TarotCards Seeder', () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
         .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) =>
-          Promise.resolve(cards as any),
-        );
+        .mockImplementation((cards) => Promise.resolve(cards as any));
 
       await seedTarotCards(cardRepository, deckRepository);
 
@@ -447,9 +411,7 @@ describe('TarotCards Seeder', () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
         .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) =>
-          Promise.resolve(cards as any),
-        );
+        .mockImplementation((cards) => Promise.resolve(cards as any));
 
       await seedTarotCards(cardRepository, deckRepository);
 

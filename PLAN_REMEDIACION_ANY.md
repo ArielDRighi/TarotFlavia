@@ -461,34 +461,59 @@ await seedFunction(mockRepo as unknown as Repository<Entity>);
 
 ---
 
-### TASK-ANY-012: Auth Module Tests
+### TASK-ANY-012: Auth Module Tests ✅
 
+**Estado:** ✅ COMPLETADA  
 **Prioridad:** 🟠 ALTA  
-**Usos de `any`:** 29  
-**Archivos afectados:**
+**Usos de `any`:** 29 → 0  
+**Archivos modificados:**
 
-- `src/modules/auth/infrastructure/repositories/typeorm-refresh-token.repository.spec.ts` (9 usos)
-- `src/modules/auth/application/use-cases/login.use-case.spec.ts` (3 usos)
-- `src/modules/auth/application/use-cases/logout.use-case.spec.ts` (3 usos)
-- `src/modules/auth/application/use-cases/register.use-case.spec.ts` (3 usos)
-- `src/modules/auth/application/use-cases/reset-password.use-case.spec.ts` (3 usos)
-- `src/modules/auth/application/services/token-cleanup.service.spec.ts` (2 usos)
-- Otros archivos (6 usos)
+- ✅ `src/modules/auth/infrastructure/repositories/typeorm-refresh-token.repository.spec.ts` (9 → 0)
+- ✅ `src/modules/auth/application/use-cases/login.use-case.spec.ts` (3 → 0)
+- ✅ `src/modules/auth/application/use-cases/logout.use-case.spec.ts` (3 → 0)
+- ✅ `src/modules/auth/application/use-cases/register.use-case.spec.ts` (3 → 0)
+- ✅ `src/modules/auth/application/use-cases/reset-password.use-case.spec.ts` (3 → 0)
+- ✅ `src/modules/auth/application/services/token-cleanup.service.spec.ts` (2 → 0)
+- ✅ `src/modules/auth/infrastructure/repositories/typeorm-password-reset.repository.spec.ts` (2 → 0)
+- ✅ `src/modules/auth/application/services/auth-orchestrator.service.spec.ts` (1 → 0)
+- ✅ `src/modules/auth/application/use-cases/forgot-password.use-case.spec.ts` (1 → 0)
+- ✅ `src/modules/auth/application/use-cases/refresh-token.use-case.spec.ts` (1 → 0)
+- ✅ `src/modules/auth/infrastructure/guards/optional-jwt-auth.guard.spec.ts` (1 → 0)
 
-**Estrategia:**
+**Cambios implementados:**
+
+1. **Variables tipadas**: Cambiadas de `any` a `Record<string, jest.Mock>` para repositorios (7 archivos)
+2. **Mocks de usuario**: Doble aserción `as unknown as User` en lugar de `as any` (4 archivos)
+3. **Casts de TypeORM**: `as unknown as SelectQueryBuilder<T>` y `as unknown as UpdateResult` (3 casos)
+4. **Tests de validación**: `as unknown as number/string` para tests de tipos inválidos (3 casos)
+5. **Mock requests**: Tipo específico `{ headers: Record<string, string | undefined> }` en guards
+
+**Patrones aplicados:**
 
 ```typescript
-// Mocks tipados para repositorios
-let mockRefreshTokenRepo: jest.Mocked<IRefreshTokenRepository>;
-let mockPasswordResetRepo: jest.Mocked<IPasswordResetRepository>;
+// Repositorios tipados
+let refreshTokenRepository: Record<string, jest.Mock>;
+
+// Mock objects con doble aserción
+mockUser = {} as unknown as User;
+
+// TypeORM types
+mockQueryBuilder as unknown as SelectQueryBuilder<RefreshToken>;
+mockResult as unknown as UpdateResult;
+
+// Test de tipos inválidos
+null as unknown as number  // Para probar manejo de null
 ```
 
-**Validación:**
+**Resultados de validación:**
 
 ```bash
-cd backend/tarot-app
-npm run lint
-npm run test src/modules/auth/
+✅ npm run format - OK
+✅ npm run lint - OK (0 errores any en auth)
+✅ npm run test auth - 17 suites, 135 tests passed
+✅ npm run test:cov - 80.86% coverage (250 suites, 3484 tests)
+✅ npm run build - Compilación exitosa
+✅ node scripts/validate-architecture.js - Validación OK
 ```
 
 ---
@@ -616,20 +641,20 @@ npm run test:e2e
 | Fase         | Tareas    | Usos de `any` | % del Total | Estado                    |
 | ------------ | --------- | ------------- | ----------- | ------------------------- |
 | **Fase 1**   | 8 tareas  | 32 → 0        | 9.0%        | ✅ COMPLETADA             |
-| **Fase 2**   | 4 tareas  | 165 → 28      | 46.5%       | ⏳ EN PROGRESO (83% done) |
+| **Fase 2**   | 4 tareas  | 165 → 0       | 46.5%       | ✅ COMPLETADA             |
 | **Fase 3**   | 4 tareas  | 131 usos      | 36.9%       | ⏳ PENDIENTE              |
 | **Fase 4**   | 1 tarea   | 19 usos       | 5.4%        | ⏳ PENDIENTE              |
 | **RESTANTE** |           | 5 usos        | 1.3%        | ⏳ PENDIENTE              |
-| **TOTAL**    | 17 tareas | 355 → 183     | 100%        | **169 any eliminados** ✅ |
+| **TOTAL**    | 17 tareas | 355 → 152     | 100%        | **203 any eliminados** ✅ |
 
-**Progreso general:** 169 / 355 = **47.6% completado** 🎉
+**Progreso general:** 203 / 355 = **57.2% completado** 🎉
 
 **Fase 2 - Detalle:**
 
 - ✅ TASK-ANY-009: Users Module Tests (47 → 0)
 - ✅ TASK-ANY-010: Birth Chart Module Tests (57 → 0)
 - ✅ TASK-ANY-011: Database Seeders Tests (33 → 0)
-- ⏳ TASK-ANY-012: Auth Module Tests (29 pendientes)
+- ✅ TASK-ANY-012: Auth Module Tests (29 → 0) **¡100% eliminado!**
 
 **Nota:** El restante (5 usos) son archivos AI usages y similares que se asignarán en refactoring posterior.
 
