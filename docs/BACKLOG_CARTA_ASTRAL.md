@@ -5126,7 +5126,7 @@ Esta parte cubre la creación de DTOs de request/response, controladores REST y 
 | -------- | ------------------------------------------- | ------- | --------- | ---------- |
 | T-CA-016 | Crear DTOs de request ✅                    | Backend | Must      | 2h         |
 | T-CA-017 | Crear DTOs de response                      | Backend | Must      | 2h         |
-| T-CA-018 | Crear controlador principal de carta astral | Backend | Must      | 4h         |
+| T-CA-018 | Crear controlador principal de carta astral ✅ | Backend | Must      | 4h         |
 | T-CA-019 | Crear controlador de historial (Premium)    | Backend | Must      | 3h         |
 | T-CA-020 | Crear módulo BirthChart completo            | Backend | Must      | 2h         |
 
@@ -5673,6 +5673,8 @@ export class GeocodeSearchResponseDto {
 
 ### T-CA-018: Crear Controlador Principal de Carta Astral
 
+**Estado:** ✅ COMPLETADA
+
 **Historia relacionada:** HU-CA-001, HU-CA-004, HU-CA-005, HU-CA-006, HU-CA-007, HU-CA-010, HU-CA-012
 
 **Descripción:**
@@ -5934,20 +5936,20 @@ export class BirthChartController {
 
 **Criterios de aceptación:**
 
-- [ ] Endpoint POST /generate con diferenciación por plan
-- [ ] Endpoint POST /generate/anonymous para anónimos
-- [ ] Endpoint POST /pdf para descarga
-- [ ] Endpoint GET /geocode para búsqueda de lugares
-- [ ] Endpoint GET /usage para consultar límites
-- [ ] Endpoint POST /synthesis para síntesis IA (Premium)
-- [ ] Guards de autenticación opcionales y requeridos
-- [ ] Guard de límites de uso integrado
-- [ ] Guard de Premium para endpoints exclusivos
-- [ ] Throttling por endpoint
-- [ ] Documentación Swagger completa
-- [ ] Logging de operaciones
-- [ ] Manejo de errores consistente
-- [ ] Tests de integración
+- [x] Endpoint POST /generate con diferenciación por plan
+- [x] Endpoint POST /generate/anonymous para anónimos
+- [x] Endpoint POST /pdf para descarga
+- [x] Endpoint GET /geocode para búsqueda de lugares
+- [x] Endpoint GET /usage para consultar límites
+- [x] Endpoint POST /synthesis para síntesis IA (Premium)
+- [x] Guards de autenticación opcionales y requeridos
+- [x] Guard de límites de uso integrado
+- [x] Guard de Premium para endpoints exclusivos
+- [x] Throttling por endpoint
+- [x] Documentación Swagger completa
+- [x] Logging de operaciones
+- [x] Manejo de errores consistente
+- [x] Tests de integración
 
 **Dependencias:** T-CA-016, T-CA-017, Sistema de límites existente
 
