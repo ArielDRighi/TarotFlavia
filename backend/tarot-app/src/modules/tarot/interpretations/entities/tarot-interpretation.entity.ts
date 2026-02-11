@@ -43,7 +43,7 @@ export class TarotInterpretation {
     model: string;
     temperature: number;
     maxTokens: number;
-    [key: string]: any;
+    [key: string]: string | number | boolean;
   };
 
   @ApiProperty({

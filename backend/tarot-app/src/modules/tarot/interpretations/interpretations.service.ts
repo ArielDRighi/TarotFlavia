@@ -340,13 +340,13 @@ export class InterpretationsService {
   private async saveInterpretation(
     content: string,
     modelUsed: string,
-    aiConfig: any,
+    aiConfig: Record<string, unknown>,
   ) {
     try {
       const interpretation = this.interpretationRepository.create({
         content,
         modelUsed,
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
         aiConfig,
       });
       await this.interpretationRepository.save(interpretation);
@@ -360,14 +360,14 @@ export class InterpretationsService {
     readingId: number,
     interpretation: string,
     modelUsed: string,
-    aiConfig: any,
+    aiConfig: Record<string, unknown>,
   ) {
     try {
       const tarotInterpretation = this.interpretationRepository.create({
         reading: { id: readingId } as Pick<TarotReading, 'id'>,
         content: interpretation,
         modelUsed,
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
         aiConfig,
       });
       return await this.interpretationRepository.save(tarotInterpretation);
