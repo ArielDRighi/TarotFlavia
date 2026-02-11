@@ -42,11 +42,11 @@ describe('AdminUsersController', () => {
     findAll: jest.fn(),
   };
 
-  const mockRequest: any = {
+  const mockRequest = {
     user: { userId: 999, roles: [UserRole.ADMIN] },
     ip: '127.0.0.1',
     headers: { 'user-agent': 'test-agent' },
-  };
+  } as Parameters<typeof controller.banUser>[2];
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({

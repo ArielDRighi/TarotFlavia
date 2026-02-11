@@ -141,7 +141,7 @@ describe('AdminDashboardController', () => {
 
   describe('getStats', () => {
     it('should return comprehensive dashboard statistics', async () => {
-      const result = await (controller.getStats as any)();
+      const result = await controller.getStats();
       expect(result).toEqual(mockStatsResponse);
       expect(service.getStats).toHaveBeenCalledTimes(1);
     });
@@ -149,7 +149,7 @@ describe('AdminDashboardController', () => {
 
   describe('getCharts', () => {
     it('should return chart data for last 30 days', async () => {
-      const result = await (controller.getCharts as any)();
+      const result = await controller.getCharts();
       expect(result).toEqual(mockChartsResponse);
       expect(service.getCharts).toHaveBeenCalledTimes(1);
     });

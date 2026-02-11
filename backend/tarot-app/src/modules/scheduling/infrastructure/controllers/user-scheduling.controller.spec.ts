@@ -42,7 +42,7 @@ describe('UserSchedulingController', () => {
       userId: 1,
       email: 'test@example.com',
     },
-  } as any;
+  } as Parameters<typeof controller.bookSession>[0];
 
   beforeEach(async () => {
     const mockSessionService = {

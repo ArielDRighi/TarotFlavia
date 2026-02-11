@@ -589,6 +589,7 @@ dailyReadingRepo.delete.mock.calls[0][0] as Record<string, unknown>;
 **Archivos afectados:**
 
 **Horoscope Module (25 → 0):**
+
 - `infrastructure/controllers/chinese-horoscope.controller.spec.ts` (11 → 0)
 - `application/services/chinese-horoscope.service.spec.ts` (8 → 0)
 - `infrastructure/controllers/horoscope.controller.spec.ts` (3 → 0)
@@ -596,14 +597,17 @@ dailyReadingRepo.delete.mock.calls[0][0] as Record<string, unknown>;
 - `application/services/horoscope-generation.service.spec.ts` (1 → 0)
 
 **Numerology Module (7 → 0):**
+
 - `numerology.controller.spec.ts` (7 → 0)
 
 **Health Module (7 → 0):**
+
 - `ai-health.service.spec.ts` (7 → 0)
 
 **Implementación:**
 
 **1. Chinese Horoscope Controller (11 → 0):**
+
 ```typescript
 import { User } from '../../../users/entities/user.entity';
 
@@ -615,48 +619,50 @@ const mockResult = {...} as unknown as Awaited<ReturnType<typeof chineseService.
 ```
 
 **2. Chinese Horoscope Service (8 → 0):**
+
 ```typescript
-import { SelectQueryBuilder } from 'typeorm';
+import { SelectQueryBuilder } from "typeorm";
 
 // ✅ Private method spying (4 instances)
-jest.spyOn(service as unknown as Record<string, jest.Mock>, 'delay')
-  .mockResolvedValue(undefined);
+jest.spyOn(service as unknown as Record<string, jest.Mock>, "delay").mockResolvedValue(undefined);
 
 // ✅ Private method call (2 instances)
 (service as unknown as Record<string, (arg: string) => unknown>).parseAIResponse(text);
 
 // ✅ QueryBuilder typing
-repository.createQueryBuilder.mockReturnValue(
-  mockQueryBuilder as unknown as SelectQueryBuilder<ChineseHoroscope>
-);
+repository.createQueryBuilder.mockReturnValue(mockQueryBuilder as unknown as SelectQueryBuilder<ChineseHoroscope>);
 ```
 
 **3. Horoscope Controller (3 → 0):**
+
 ```typescript
-import { User } from '../../../users/entities/user.entity';
+import { User } from "../../../users/entities/user.entity";
 
 // ✅ User mocks (3 instances)
 usersService.findById.mockResolvedValue(mockUser as unknown as User);
 ```
 
 **4. Horoscope Cron Service (2 → 0):**
+
 ```typescript
 // ✅ Private method spying (2 instances)
-jest.spyOn(service as unknown as Record<string, jest.Mock>, 'delay');
+jest.spyOn(service as unknown as Record<string, jest.Mock>, "delay");
 ```
 
 **5. Horoscope Generation Service (1 → 0):**
+
 ```typescript
-import { SelectQueryBuilder } from 'typeorm';
+import { SelectQueryBuilder } from "typeorm";
 
 // ✅ QueryBuilder typing
-mockQueryBuilder as unknown as SelectQueryBuilder<DailyHoroscope>
+mockQueryBuilder as unknown as SelectQueryBuilder<DailyHoroscope>;
 ```
 
 **6. Numerology Controller (7 → 0):**
+
 ```typescript
-import { User } from '../../users/entities/user.entity';
-import { NumerologyInterpretation } from './entities/numerology-interpretation.entity';
+import { User } from "../../users/entities/user.entity";
+import { NumerologyInterpretation } from "./entities/numerology-interpretation.entity";
 
 // ✅ User mocks (6 instances)
 usersService.findById.mockResolvedValue(mockUser as unknown as User);
@@ -666,15 +672,17 @@ repository.findOne.mockResolvedValue(mockInterpretation as unknown as Numerology
 ```
 
 **7. AI Health Service (7 → 0):**
+
 ```typescript
 // ✅ Private method spying (4 instances)
-jest.spyOn(service as unknown as Record<string, jest.Mock>, 'testGroqConnection');
+jest.spyOn(service as unknown as Record<string, jest.Mock>, "testGroqConnection");
 
 // ✅ Private constant access (3 instances)
 const timeout = (service as unknown as Record<string, number>).GROQ_TIMEOUT;
 ```
 
 **Técnicas aplicadas:**
+
 - ✅ User entity mocking con double assertion: `as unknown as User` (20 instancias)
 - ✅ SelectQueryBuilder typing para TypeORM (2 instancias)
 - ✅ Private method spying con `Record<string, jest.Mock>` (10 instancias)
@@ -705,28 +713,190 @@ node scripts/validate-architecture.js # ✅ PASSED
 
 ---
 
-### TASK-ANY-015: Rituals, Tarotistas & Admin Tests
+### TASK-ANY-015: Rituals, Tarotistas & Admin Tests ✅
 
+**Estado:** ✅ COMPLETADA  
 **Prioridad:** 🟡 MEDIA  
-**Usos de `any`:** 43  
+**Usos de `any`:** 44 → 0 (100% eliminado)  
 **Archivos afectados:**
 
-- `src/modules/rituals/` (17 usos)
-- `src/modules/tarotistas/` (14 tests usos)
-- `src/modules/admin/` (9 usos)
-- `src/modules/pendulum/` (1 uso)
-- `src/modules/plan-config/` (1 uso)
-- `src/modules/scheduling/` (2 usos)
+**Rituals Module (17 → 0):**
+
+- `application/services/sacred-calendar.service.spec.ts` (8 → 0)
+- `application/services/rituals-admin.service.spec.ts` (7 → 0)
+- `application/services/rituals.service.spec.ts` (1 → 0)
+- `application/services/ritual-history.service.spec.ts` (1 → 0)
+
+**Tarotistas Module (14 → 0):**
+
+- `services/revenue-calculation.service.spec.ts` (8 → 0)
+- `application/services/tarotistas-orchestrator.service.spec.ts` (4 → 0)
+- `infrastructure/controllers/tarotistas-admin.controller.spec.ts` (2 → 0)
+
+**Admin Module (9 → 0):**
+
+- `admin-dashboard.service.spec.ts` (6 → 0)
+- `admin-dashboard.controller.spec.ts` (2 → 0)
+- `admin-users.controller.spec.ts` (1 → 0)
+
+**Pendulum Module (1 → 0):**
+
+- `infrastructure/controllers/pendulum.controller.spec.ts` (1 → 0)
+
+**Plan-Config Module (1 → 0):**
+
+- `entities/plan.entity.spec.ts` (1 → 0)
+
+**Scheduling Module (2 → 0):**
+
+- `infrastructure/repositories/typeorm-exception.repository.spec.ts` (1 → 0)
+- `infrastructure/controllers/user-scheduling.controller.spec.ts` (1 → 0)
+
+**Implementación:**
+
+**1. Revenue Calculation Service (8 → 0):**
+
+```typescript
+// ✅ Entity mocking con doble aserción
+mockRevenueMetric as unknown as TarotistaRevenueMetrics;
+```
+
+**2. Sacred Calendar Service (8 → 0):**
+
+```typescript
+// ✅ Remover type annotation de callback
+(event) => event as SacredEvent; // Sin : any
+
+// ✅ Type cast en filter callback
+(call: unknown[]) => (call[0] as { hemisphere?: string }).hemisphere === Hemisphere.NORTH;
+```
+
+**3. Rituals Admin Service (7 → 0):**
+
+```typescript
+import { DeleteResult, QueryRunner } from 'typeorm';
+
+// ✅ QueryRunner mock
+queryRunner = {...} as unknown as jest.Mocked<QueryRunner>;
+
+// ✅ DeleteResult typing
+{ affected: 1 } as unknown as DeleteResult
+```
+
+**4. Admin Dashboard Service (6 → 0):**
+
+```typescript
+// ✅ Remover casts innecesarios de await expressions
+const result = await service.getCharts(); // Sin as any
+```
+
+**5. Tarotistas Orchestrator (4 → 0):**
+
+```typescript
+// ✅ Usar Parameters para DTO parciales
+const dto = { userId: 1, nombrePublico: "Test" } as Parameters<typeof mockCreateUseCase.execute>[0];
+const filterDto = {} as Record<string, unknown>;
+```
+
+**6. Tarotistas Admin Controller (2 → 0):**
+
+```typescript
+// ✅ Remover cast de bulkDto
+await controller.bulkImportMeanings(1, bulkDto);  // Sin as any
+
+// ✅ Entity mock
+tarotista: {} as unknown as Tarotista
+```
+
+**7. Admin Dashboard Controller (2 → 0):**
+
+```typescript
+// ✅ Remover casts de métodos
+await controller.getStats(); // Sin (controller.getStats as any)()
+```
+
+**8. Admin Users Controller (1 → 0):**
+
+```typescript
+// ✅ Request mock con Parameters
+const mockRequest = {...} as Parameters<typeof controller.banUser>[2];
+```
+
+**9. Pendulum Controller (1 → 0):**
+
+```typescript
+// ✅ Return type inference
+const mockHistory = [...] as Awaited<ReturnType<typeof historyService.getUserHistory>>;
+```
+
+**10. Rituals Service (1 → 0):**
+
+```typescript
+// ✅ QueryBuilder con Record
+const createQueryBuilder: Record<string, jest.Mock> = {...};
+```
+
+**11. Ritual History Service (1 → 0):**
+
+```typescript
+// ✅ QueryBuilder con Record
+const createQueryBuilder: Record<string, jest.Mock> = {...};
+```
+
+**12. Scheduling Exception Repository (1 → 0):**
+
+```typescript
+// ✅ Entity mock
+const mockException: TarotistException = {...} as unknown as TarotistException;
+```
+
+**13. User Scheduling Controller (1 → 0):**
+
+```typescript
+// ✅ Request mock con Parameters
+const mockRequest = {...} as Parameters<typeof controller.bookSession>[0];
+```
+
+**14. Plan Entity (1 → 0):**
+
+```typescript
+// ✅ Test de tipo inválido
+"invalidFeature" as never; // Para test de throw
+```
+
+**Técnicas aplicadas:**
+
+- ✅ Entity mocking con double assertion (7 instancias)
+- ✅ Parameters<typeof T> para tipos de función (4 instancias)
+- ✅ Return type inference: Awaited<ReturnType<typeof T>> (2 instancias)
+- ✅ Record<string, jest.Mock> para QueryBuilder mocks (3 instancias)
+- ✅ Record<string, unknown> para objetos genéricos (2 instancias)
+- ✅ TypeORM types: QueryRunner, DeleteResult (8 instancias)
+- ✅ Remover casts innecesarios (8 instancias)
+- ✅ Type casting en callbacks de filter (2 instancias)
+- ✅ as never para tests de tipos inválidos (1 instancia)
 
 **Validación:**
 
 ```bash
 cd backend/tarot-app
-npm run lint
-npm run test src/modules/rituals/
-npm run test src/modules/tarotistas/
-npm run test src/modules/admin/
+npm run format                       # ✅ PASSED - No changes needed
+npm run lint                         # ✅ PASSED - 66 any in test/ (TASK-017)
+npm run test src/modules/rituals/    # ✅ PASSED - Part of 62 suites
+npm run test src/modules/tarotistas/ # ✅ PASSED - Part of 62 suites
+npm run test src/modules/admin/      # ✅ PASSED - Part of 62 suites
+npm run test (modules)               # ✅ 62 suites, 707 tests passed
+npm run test:cov                     # ✅ 80.86% coverage (250 suites, 3484 tests)
+npm run build                        # ✅ PASSED
+node scripts/validate-architecture.js # ✅ PASSED
 ```
+
+**Resultado:**
+✅ **44 eliminaciones exitosas** (100%)  
+✅ **Todos los tests pasando** (62 suites, 707 tests en módulos afectados)  
+✅ **Coverage mantenido** (80.86%)  
+✅ **Build exitoso**  
+✅ **Arquitectura validada**
 
 ---
 
@@ -785,12 +955,12 @@ npm run test:e2e
 | ------------ | --------- | ------------- | ----------- | ------------------------- |
 | **Fase 1**   | 8 tareas  | 32 → 0        | 9.0%        | ✅ COMPLETADA             |
 | **Fase 2**   | 4 tareas  | 165 → 0       | 46.5%       | ✅ COMPLETADA             |
-| **Fase 3**   | 4 tareas  | 131 → 65      | 36.9%       | 🔄 EN PROGRESO (2/4)      |
+| **Fase 3**   | 4 tareas  | 131 → 22      | 36.9%       | 🔄 EN PROGRESO (3/4)      |
 | **Fase 4**   | 1 tarea   | 19 usos       | 5.4%        | ⏳ PENDIENTE              |
 | **RESTANTE** |           | 5 usos        | 1.3%        | ⏳ PENDIENTE              |
-| **TOTAL**    | 17 tareas | 355 → 86      | 100%        | **269 any eliminados** ✅ |
+| **TOTAL**    | 17 tareas | 355 → 42      | 100%        | **313 any eliminados** ✅ |
 
-**Progreso general:** 269 / 355 = **75.8% completado** 🎉
+**Progreso general:** 313 / 355 = **88.2% completado** 🎉
 
 **Fase 2 - Detalle:**
 
@@ -803,7 +973,7 @@ npm run test:e2e
 
 - ✅ TASK-ANY-013: Tarot Module Tests (27 → 0) **¡100% eliminado!**
 - ✅ TASK-ANY-014: Horoscope, Numerology & Health Tests (39 → 0) **¡100% eliminado!**
-- ⏳ TASK-ANY-015: Rituals, Tarotistas & Admin Tests (43 usos)
+- ✅ TASK-ANY-015: Rituals, Tarotistas & Admin Tests (44 → 0) **¡100% eliminado!**
 - ⏳ TASK-ANY-016: Usage Limits & Subscriptions Tests (22 usos)
 
 **Nota:** El restante (5 usos) son archivos AI usages y similares que se asignarán en refactoring posterior.

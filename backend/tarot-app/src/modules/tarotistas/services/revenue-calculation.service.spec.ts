@@ -209,10 +209,14 @@ describe('RevenueCalculationService', () => {
 
       jest
         .spyOn(revenueMetricsRepository, 'create')
-        .mockReturnValue(mockRevenueMetric as any);
+        .mockReturnValue(
+          mockRevenueMetric as unknown as TarotistaRevenueMetrics,
+        );
       jest
         .spyOn(revenueMetricsRepository, 'save')
-        .mockResolvedValue(mockRevenueMetric as any);
+        .mockResolvedValue(
+          mockRevenueMetric as unknown as TarotistaRevenueMetrics,
+        );
 
       const result = await service.recordRevenue(dto);
 
@@ -273,10 +277,14 @@ describe('RevenueCalculationService', () => {
 
       jest
         .spyOn(revenueMetricsRepository, 'create')
-        .mockReturnValue(mockRevenueMetric as any);
+        .mockReturnValue(
+          mockRevenueMetric as unknown as TarotistaRevenueMetrics,
+        );
       jest
         .spyOn(revenueMetricsRepository, 'save')
-        .mockResolvedValue(mockRevenueMetric as any);
+        .mockResolvedValue(
+          mockRevenueMetric as unknown as TarotistaRevenueMetrics,
+        );
 
       const result = await service.recordRevenue(dto);
 
@@ -325,10 +333,14 @@ describe('RevenueCalculationService', () => {
 
       jest
         .spyOn(revenueMetricsRepository, 'create')
-        .mockReturnValue(mockRevenueMetric as any);
+        .mockReturnValue(
+          mockRevenueMetric as unknown as TarotistaRevenueMetrics,
+        );
       jest
         .spyOn(revenueMetricsRepository, 'save')
-        .mockResolvedValue(mockRevenueMetric as any);
+        .mockResolvedValue(
+          mockRevenueMetric as unknown as TarotistaRevenueMetrics,
+        );
 
       const result = await service.recordRevenue(dto);
 
@@ -374,10 +386,14 @@ describe('RevenueCalculationService', () => {
 
       jest
         .spyOn(revenueMetricsRepository, 'create')
-        .mockReturnValue(mockRevenueMetric as any);
+        .mockReturnValue(
+          mockRevenueMetric as unknown as TarotistaRevenueMetrics,
+        );
       jest
         .spyOn(revenueMetricsRepository, 'save')
-        .mockResolvedValue(mockRevenueMetric as any);
+        .mockResolvedValue(
+          mockRevenueMetric as unknown as TarotistaRevenueMetrics,
+        );
 
       const result = await service.calculateRevenueForReading(
         readingId,

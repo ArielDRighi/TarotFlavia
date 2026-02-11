@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository, DataSource, QueryRunner } from 'typeorm';
+import { Repository, DataSource, QueryRunner, DeleteResult } from 'typeorm';
 import { NotFoundException, ConflictException } from '@nestjs/common';
 import { RitualsAdminService } from './rituals-admin.service';
 import { Ritual } from '../../entities/ritual.entity';
@@ -75,7 +75,7 @@ describe('RitualsAdminService', () => {
       manager: {
         save: jest.fn(),
       },
-    } as any;
+    } as unknown as jest.Mocked<QueryRunner>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -241,7 +241,9 @@ describe('RitualsAdminService', () => {
 
       ritualRepository.findOne.mockResolvedValue(mockRitual as Ritual);
       ritualRepository.save.mockResolvedValue(mockRitual as Ritual);
-      materialRepository.delete.mockResolvedValue({ affected: 1 } as any);
+      materialRepository.delete.mockResolvedValue({
+        affected: 1,
+      } as unknown as DeleteResult);
       materialRepository.create.mockReturnValue({} as RitualMaterial);
       materialRepository.save.mockResolvedValue({} as RitualMaterial);
 
@@ -264,7 +266,9 @@ describe('RitualsAdminService', () => {
 
       ritualRepository.findOne.mockResolvedValue(mockRitual as Ritual);
       ritualRepository.save.mockResolvedValue(mockRitual as Ritual);
-      stepRepository.delete.mockResolvedValue({ affected: 1 } as any);
+      stepRepository.delete.mockResolvedValue({
+        affected: 1,
+      } as unknown as DeleteResult);
       stepRepository.create.mockReturnValue({} as RitualStep);
       stepRepository.save.mockResolvedValue({} as RitualStep);
 
@@ -449,7 +453,9 @@ describe('RitualsAdminService', () => {
 
   describe('deleteStep', () => {
     it('should delete a step', async () => {
-      stepRepository.delete.mockResolvedValue({ affected: 1 } as any);
+      stepRepository.delete.mockResolvedValue({
+        affected: 1,
+      } as unknown as DeleteResult);
 
       await service.deleteStep(1, 1);
 
@@ -460,7 +466,9 @@ describe('RitualsAdminService', () => {
     });
 
     it('should throw NotFoundException if step not found', async () => {
-      stepRepository.delete.mockResolvedValue({ affected: 0 } as any);
+      stepRepository.delete.mockResolvedValue({
+        affected: 0,
+      } as unknown as DeleteResult);
 
       await expect(service.deleteStep(1, 999)).rejects.toThrow(
         NotFoundException,
@@ -530,7 +538,9 @@ describe('RitualsAdminService', () => {
 
   describe('deleteMaterial', () => {
     it('should delete a material', async () => {
-      materialRepository.delete.mockResolvedValue({ affected: 1 } as any);
+      materialRepository.delete.mockResolvedValue({
+        affected: 1,
+      } as unknown as DeleteResult);
 
       await service.deleteMaterial(1, 1);
 
@@ -541,7 +551,9 @@ describe('RitualsAdminService', () => {
     });
 
     it('should throw NotFoundException if material not found', async () => {
-      materialRepository.delete.mockResolvedValue({ affected: 0 } as any);
+      materialRepository.delete.mockResolvedValue({
+        affected: 0,
+      } as unknown as DeleteResult);
 
       await expect(service.deleteMaterial(1, 999)).rejects.toThrow(
         NotFoundException,

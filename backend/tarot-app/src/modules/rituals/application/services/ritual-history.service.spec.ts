@@ -39,7 +39,7 @@ describe('RitualHistoryService', () => {
     durationMinutes: 30,
   };
 
-  const createQueryBuilder: any = {
+  const createQueryBuilder: Record<string, jest.Mock> = {
     innerJoin: jest.fn().mockReturnThis(),
     select: jest.fn().mockReturnThis(),
     addSelect: jest.fn().mockReturnThis(),
@@ -61,7 +61,7 @@ describe('RitualHistoryService', () => {
             save: jest.fn(),
             find: jest.fn(),
             count: jest.fn(),
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+
             createQueryBuilder: jest.fn(() => createQueryBuilder),
           },
         },
