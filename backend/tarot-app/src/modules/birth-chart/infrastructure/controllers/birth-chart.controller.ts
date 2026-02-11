@@ -6,7 +6,6 @@ import {
   Query,
   Res,
   UseGuards,
-  HttpStatus,
   Logger,
 } from '@nestjs/common';
 import {
@@ -78,8 +77,8 @@ export class BirthChartController {
   })
   @ApiResponse({ status: 400, description: 'Datos de entrada inválidos' })
   @ApiResponse({ status: 429, description: 'Límite de uso alcanzado' })
-  async generateChart(
-    @Body() dto: GenerateChartDto,
+  generateChart(
+    @Body() _dto: GenerateChartDto,
     @CurrentUser() user: User | null,
     // Note: Fingerprint decorator will be added when the fingerprinting system is implemented
     // For now, we use a placeholder parameter to maintain the API contract
@@ -89,10 +88,8 @@ export class BirthChartController {
   > {
     this.logger.log(`Generating chart for ${user?.email || 'anonymous'}`);
 
-    // Determinar plan del usuario
-    const plan = user?.plan || 'anonymous';
-
     // TODO: Implement facade service call when T-CA-019+ are completed
+    // const plan = user?.plan || 'anonymous';
     // return this.birthChartFacade.generateChart(dto, plan, user?.id);
 
     // Placeholder response for testing
@@ -112,8 +109,8 @@ export class BirthChartController {
   })
   @ApiResponse({ status: 200, type: BasicChartResponseDto })
   @ApiResponse({ status: 429, description: 'Ya utilizaste tu carta gratuita' })
-  async generateChartAnonymous(
-    @Body() dto: GenerateChartDto,
+  generateChartAnonymous(
+    @Body() _dto: GenerateChartDto,
     // @Fingerprint() fingerprint: string,
   ): Promise<BasicChartResponseDto> {
     this.logger.log(`Generating anonymous chart`);
@@ -151,16 +148,15 @@ export class BirthChartController {
     content: { 'application/pdf': {} },
   })
   @ApiResponse({ status: 401, description: 'No autenticado' })
-  async downloadPdf(
-    @Body() dto: GenerateChartDto,
+  downloadPdf(
+    @Body() _dto: GenerateChartDto,
     @CurrentUser() user: User,
-    @Res() res: Response,
+    @Res() _res: Response,
   ): Promise<void> {
     this.logger.log(`Generating PDF for user ${user.email}`);
 
-    const isPremium = user.plan === 'premium';
-
     // TODO: Implement PDF generation service
+    // const isPremium = user.plan === 'premium';
     // const pdfResult = await this.birthChartFacade.generatePdf(dto, user, isPremium);
 
     // res.setHeader('Content-Type', 'application/pdf');
@@ -189,8 +185,8 @@ export class BirthChartController {
   })
   @ApiQuery({ name: 'query', example: 'Buenos Aires' })
   @ApiResponse({ status: 200, type: GeocodeSearchResponseDto })
-  async searchPlace(
-    @Query() dto: GeocodePlaceDto,
+  searchPlace(
+    @Query() _dto: GeocodePlaceDto,
   ): Promise<GeocodeSearchResponseDto> {
     // TODO: Implement geocoding service
     // return this.geocodeService.searchPlaces(dto.query);
@@ -225,8 +221,8 @@ export class BirthChartController {
       },
     },
   })
-  async getUsage(
-    @CurrentUser() user: User | null,
+  getUsage(
+    @CurrentUser() _user: User | null,
     // @Fingerprint() fingerprint: string,
   ) {
     // TODO: Implement usage tracking service
@@ -265,10 +261,7 @@ export class BirthChartController {
     },
   })
   @ApiResponse({ status: 403, description: 'Requiere plan Premium' })
-  async generateSynthesis(
-    @Body() dto: GenerateChartDto,
-    @CurrentUser() user: User,
-  ) {
+  generateSynthesis(@Body() _dto: GenerateChartDto, @CurrentUser() user: User) {
     this.logger.log(`Generating AI synthesis for user ${user.email}`);
 
     // TODO: Implement AI synthesis service
