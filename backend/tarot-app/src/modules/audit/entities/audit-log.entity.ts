@@ -12,9 +12,9 @@ import { AuditAction } from '../enums/audit-action.enum';
 
 /**
  * Type for audit log values (JSONB fields)
- * Allows common primitive types and nested objects
+ * Using unknown for nested structures to avoid circular references
  */
-export type AuditValue = Record<string, string | number | boolean | null | Date | AuditValue | AuditValue[]>;
+export type AuditValue = Record<string, unknown>;
 
 @Entity('audit_logs')
 @Index(['userId', 'createdAt'])

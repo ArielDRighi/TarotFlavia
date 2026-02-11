@@ -12,11 +12,17 @@ export interface LoggerConfig {
 
 export type LogMetadata = Record<
   string,
-  string | number | boolean | null | undefined
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | Record<string, unknown>
+  | Array<unknown>
 >;
 export type LogObject = Record<
   string,
-  string | number | boolean | null | undefined | LogMetadata
+  string | number | boolean | null | undefined | Record<string, unknown>
 >;
 
 @Injectable()
