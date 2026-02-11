@@ -171,10 +171,11 @@ export class InterpretationCacheService {
    */
   async clearAllCaches(): Promise<void> {
     // Limpiar caché in-memory si es posible
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    if (typeof (this.cacheManager as any).reset === 'function') {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-      await (this.cacheManager as any).reset();
+    const cacheManagerWithReset = this.cacheManager as {
+      reset?: () => Promise<void>;
+    };
+    if (typeof cacheManagerWithReset.reset === 'function') {
+      await cacheManagerWithReset.reset();
     }
     // Si no hay reset(), el caché in-memory expirará naturalmente (TTL 1 hora)
 

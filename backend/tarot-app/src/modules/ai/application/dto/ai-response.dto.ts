@@ -18,5 +18,5 @@ export class AIResponseDto {
   };
 
   @ApiProperty({ required: false })
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
