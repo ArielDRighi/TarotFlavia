@@ -16,6 +16,7 @@ export const USAGE_LIMITS: Record<UserPlan, Record<UsageFeature, number>> = {
     [UsageFeature.INTERPRETATION_REGENERATION]: 0, // Sin regeneración
     [UsageFeature.ORACLE_QUERY]: 0, // Sin consultas al oráculo
     [UsageFeature.PENDULUM_QUERY]: 1, // 1 consulta de por vida
+    [UsageFeature.BIRTH_CHART]: 1, // 1 carta astral lifetime
   },
   [UserPlan.FREE]: {
     [UsageFeature.DAILY_CARD]: 1, // 1 carta del día
@@ -23,6 +24,7 @@ export const USAGE_LIMITS: Record<UserPlan, Record<UsageFeature, number>> = {
     [UsageFeature.INTERPRETATION_REGENERATION]: 0, // Sin regeneración
     [UsageFeature.ORACLE_QUERY]: 5, // 5 consultas al oráculo/día
     [UsageFeature.PENDULUM_QUERY]: 1, // 1 consulta al péndulo/día (CAMBIO: antes era 3/mes)
+    [UsageFeature.BIRTH_CHART]: 3, // 3 cartas astrales/mes
   },
   [UserPlan.PREMIUM]: {
     [UsageFeature.DAILY_CARD]: 1, // 1 carta del día
@@ -30,6 +32,7 @@ export const USAGE_LIMITS: Record<UserPlan, Record<UsageFeature, number>> = {
     [UsageFeature.INTERPRETATION_REGENERATION]: -1, // Regeneración ilimitada
     [UsageFeature.ORACLE_QUERY]: -1, // Consultas ilimitadas
     [UsageFeature.PENDULUM_QUERY]: 3, // 3 consultas al péndulo/día
+    [UsageFeature.BIRTH_CHART]: 5, // 5 cartas astrales/mes
   },
 } as const;
 

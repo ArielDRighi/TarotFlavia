@@ -15,6 +15,7 @@ export enum UsageFeature {
   ORACLE_QUERY = 'oracle_query',
   INTERPRETATION_REGENERATION = 'interpretation_regeneration',
   PENDULUM_QUERY = 'pendulum_query',
+  BIRTH_CHART = 'birth_chart',
 }
 
 @Entity('usage_limit')
