@@ -312,7 +312,7 @@ describe('SavedChartSummaryDto', () => {
 describe('ChartHistoryResponseDto', () => {
   it('should create a valid paginated response', () => {
     const dto = plainToInstance(ChartHistoryResponseDto, {
-      charts: [
+      data: [
         {
           id: 1,
           name: 'Mi carta natal',
@@ -323,30 +323,40 @@ describe('ChartHistoryResponseDto', () => {
           createdAt: '2026-02-06T12:00:00Z',
         },
       ],
-      total: 5,
-      page: 1,
-      limit: 10,
-      totalPages: 1,
+      meta: {
+        page: 1,
+        limit: 10,
+        totalItems: 5,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
     });
 
     expect(dto).toBeDefined();
-    expect(dto.charts).toHaveLength(1);
-    expect(dto.total).toBe(5);
-    expect(dto.page).toBe(1);
-    expect(dto.limit).toBe(10);
-    expect(dto.totalPages).toBe(1);
+    expect(dto.data).toHaveLength(1);
+    expect(dto.meta.totalItems).toBe(5);
+    expect(dto.meta.page).toBe(1);
+    expect(dto.meta.limit).toBe(10);
+    expect(dto.meta.totalPages).toBe(1);
+    expect(dto.meta.hasNextPage).toBe(false);
+    expect(dto.meta.hasPreviousPage).toBe(false);
   });
 
   it('should handle empty chart list', () => {
     const dto = plainToInstance(ChartHistoryResponseDto, {
-      charts: [],
-      total: 0,
-      page: 1,
-      limit: 10,
-      totalPages: 0,
+      data: [],
+      meta: {
+        page: 1,
+        limit: 10,
+        totalItems: 0,
+        totalPages: 0,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
     });
 
-    expect(dto.charts).toHaveLength(0);
-    expect(dto.total).toBe(0);
+    expect(dto.data).toHaveLength(0);
+    expect(dto.meta.totalItems).toBe(0);
   });
 });

@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { PaginationMeta } from '../../../tarot/readings/dto/paginated-readings-response.dto';
 
 /**
  * DTO para la posición de un planeta en la carta
@@ -365,24 +366,18 @@ export class SavedChartSummaryDto {
 
 /**
  * DTO para respuesta de historial de cartas
- * Incluye paginación para listados grandes
+ * Incluye paginación consistente con PaginationMeta
  */
 export class ChartHistoryResponseDto {
   @ApiProperty({
     type: [SavedChartSummaryDto],
     description: 'Lista de cartas guardadas',
   })
-  charts: SavedChartSummaryDto[];
+  data: SavedChartSummaryDto[];
 
-  @ApiProperty({ example: 5, description: 'Total de cartas guardadas' })
-  total: number;
-
-  @ApiProperty({ example: 1, description: 'Página actual' })
-  page: number;
-
-  @ApiProperty({ example: 10, description: 'Límite de resultados por página' })
-  limit: number;
-
-  @ApiProperty({ example: 1, description: 'Total de páginas' })
-  totalPages: number;
+  @ApiProperty({
+    type: PaginationMeta,
+    description: 'Metadata de paginación',
+  })
+  meta: PaginationMeta;
 }
