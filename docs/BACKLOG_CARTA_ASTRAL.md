@@ -5124,7 +5124,7 @@ Esta parte cubre la creación de DTOs de request/response, controladores REST y 
 
 | Tarea    | Título                                      | Tipo    | Prioridad | Estimación |
 | -------- | ------------------------------------------- | ------- | --------- | ---------- |
-| T-CA-016 | Crear DTOs de request                       | Backend | Must      | 2h         |
+| T-CA-016 | Crear DTOs de request ✅                    | Backend | Must      | 2h         |
 | T-CA-017 | Crear DTOs de response                      | Backend | Must      | 2h         |
 | T-CA-018 | Crear controlador principal de carta astral | Backend | Must      | 4h         |
 | T-CA-019 | Crear controlador de historial (Premium)    | Backend | Must      | 3h         |
@@ -5137,6 +5137,8 @@ Esta parte cubre la creación de DTOs de request/response, controladores REST y 
 ## DETALLE DE TAREAS
 
 ### T-CA-016: Crear DTOs de Request
+
+**Estado:** ✅ COMPLETADA
 
 **Historia relacionada:** HU-CA-001, HU-CA-012
 
@@ -5311,16 +5313,16 @@ export * from "./geocode-place.dto";
 
 **Criterios de aceptación:**
 
-- [ ] DTO GenerateChartDto con todas las validaciones
-- [ ] DTO CreateBirthChartDto extendiendo GenerateChartDto
-- [ ] DTO GeocodePlaceDto para búsqueda de lugares
-- [ ] Validación de formato de fecha (ISO)
-- [ ] Validación de formato de hora (HH:mm)
-- [ ] Validación de rangos de latitud/longitud
-- [ ] Sanitización de inputs de texto
-- [ ] Decoradores Swagger completos
-- [ ] Mensajes de error en español
-- [ ] Tests unitarios de validación
+- [x] DTO GenerateChartDto con todas las validaciones
+- [x] DTO CreateBirthChartDto extendiendo GenerateChartDto
+- [x] DTO GeocodePlaceDto para búsqueda de lugares
+- [x] Validación de formato de fecha (ISO)
+- [x] Validación de formato de hora (HH:mm)
+- [x] Validación de rangos de latitud/longitud
+- [x] Sanitización de inputs de texto
+- [x] Decoradores Swagger completos
+- [x] Mensajes de error en español
+- [x] Tests unitarios de validación (73 tests, 100% cobertura)
 
 **Dependencias:** Ninguna
 
@@ -6935,7 +6937,7 @@ export class BirthChartHistoryService {
 
 ## CHECKLIST DE PARTE 7E
 
-- [ ] T-CA-016: DTOs de request creados con validaciones
+- [x] T-CA-016: DTOs de request creados con validaciones ✅
 - [ ] T-CA-017: DTOs de response creados con documentación
 - [ ] T-CA-018: Controlador principal funcionando
 - [ ] T-CA-019: Controlador de historial funcionando
