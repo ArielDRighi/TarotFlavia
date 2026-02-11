@@ -23,8 +23,8 @@ import { IncrementUsageInterceptor } from '../../../usage-limits/interceptors/in
  */
 describe('BirthChartController', () => {
   let controller: BirthChartController;
-  let mockFacadeService: any;
-  let mockGeocodeService: any;
+  let mockFacadeService: Record<string, jest.Mock>;
+  let mockGeocodeService: Record<string, jest.Mock>;
 
   const mockGenerateChartDto = {
     name: 'María García',
@@ -517,7 +517,7 @@ describe('BirthChartController', () => {
         null,
         'fingerprint-456',
       );
-      expect((result as any).canGenerate).toBe(false);
+      expect((result as Record<string, unknown>).canGenerate).toBe(false);
     });
   });
 

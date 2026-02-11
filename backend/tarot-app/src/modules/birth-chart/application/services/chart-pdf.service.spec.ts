@@ -66,7 +66,7 @@ describe('ChartPdfService', () => {
       signDegree: 0,
       house: 1,
       isRetrograde: false,
-    } as any,
+    } as unknown as PlanetPosition,
     midheaven: {
       planet: 'midheaven',
       longitude: 210,
@@ -74,7 +74,7 @@ describe('ChartPdfService', () => {
       signDegree: 0,
       house: 10,
       isRetrograde: false,
-    } as any,
+    } as unknown as PlanetPosition,
     distribution: {
       elements: { fire: 2, earth: 0, air: 0, water: 1 },
       modalities: { cardinal: 0, fixed: 2, mutable: 1 },
@@ -320,7 +320,7 @@ describe('ChartPdfService', () => {
   describe('Manejo de errores', () => {
     it('should handle errors gracefully during PDF generation', async () => {
       const invalidInput = {
-        chartData: null as any, // Datos inválidos
+        chartData: null as unknown as ChartData, // Datos inválidos
         interpretation: mockInterpretation,
         userName: 'Test User',
         birthDate: new Date('1990-05-15'),
@@ -397,7 +397,7 @@ describe('ChartPdfService', () => {
       const invalidInput = {
         chartData: mockChartData,
         interpretation: mockInterpretation,
-        userName: null as any,
+        userName: null as unknown as string,
         birthDate: new Date('1990-05-15'),
         birthTime: '14:30:00',
         birthPlace: 'Buenos Aires, Argentina',
@@ -432,7 +432,7 @@ describe('ChartPdfService', () => {
         chartData: mockChartData,
         interpretation: mockInterpretation,
         userName: 'Test User',
-        birthDate: null as any,
+        birthDate: null as unknown as Date,
         birthTime: '14:30:00',
         birthPlace: 'Buenos Aires, Argentina',
         generatedAt: new Date(),
@@ -450,7 +450,7 @@ describe('ChartPdfService', () => {
         interpretation: mockInterpretation,
         userName: 'Test User',
         birthDate: new Date('1990-05-15'),
-        birthTime: null as any,
+        birthTime: null as unknown as string,
         birthPlace: 'Buenos Aires, Argentina',
         generatedAt: new Date(),
         isPremium: false,
@@ -468,7 +468,7 @@ describe('ChartPdfService', () => {
         userName: 'Test User',
         birthDate: new Date('1990-05-15'),
         birthTime: '14:30:00',
-        birthPlace: null as any,
+        birthPlace: null as unknown as string,
         generatedAt: new Date(),
         isPremium: false,
       };
@@ -486,7 +486,7 @@ describe('ChartPdfService', () => {
         birthDate: new Date('1990-05-15'),
         birthTime: '14:30:00',
         birthPlace: 'Buenos Aires, Argentina',
-        generatedAt: null as any,
+        generatedAt: null as unknown as Date,
         isPremium: false,
       };
 
@@ -498,7 +498,7 @@ describe('ChartPdfService', () => {
     it('should throw error when interpretation is null', async () => {
       const invalidInput = {
         chartData: mockChartData,
-        interpretation: null as any,
+        interpretation: null as unknown as FullChartInterpretation,
         userName: 'Test User',
         birthDate: new Date('1990-05-15'),
         birthTime: '14:30:00',
@@ -515,7 +515,7 @@ describe('ChartPdfService', () => {
     it('should throw error when interpretation.bigThree is missing', async () => {
       const invalidInput = {
         chartData: mockChartData,
-        interpretation: { planets: [] } as any,
+        interpretation: { planets: [] } as unknown as FullChartInterpretation,
         userName: 'Test User',
         birthDate: new Date('1990-05-15'),
         birthTime: '14:30:00',
@@ -532,7 +532,10 @@ describe('ChartPdfService', () => {
     it('should throw error when interpretation.planets is not an array', async () => {
       const invalidInput = {
         chartData: mockChartData,
-        interpretation: { bigThree: mockBigThree, planets: null } as any,
+        interpretation: {
+          bigThree: mockBigThree,
+          planets: null,
+        } as unknown as FullChartInterpretation,
         userName: 'Test User',
         birthDate: new Date('1990-05-15'),
         birthTime: '14:30:00',

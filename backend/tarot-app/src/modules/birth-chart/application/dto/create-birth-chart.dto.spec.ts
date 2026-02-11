@@ -101,7 +101,7 @@ describe('CreateBirthChartDto', () => {
         latitude: -34.6037,
         longitude: -58.3816,
         timezone: 'America/Argentina/Buenos_Aires',
-        chartName: 12345 as any,
+        chartName: 12345 as unknown as string,
       });
 
       const errors = await validate(dto);

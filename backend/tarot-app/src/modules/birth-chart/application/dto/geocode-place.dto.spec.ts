@@ -96,7 +96,7 @@ describe('GeocodePlaceDto', () => {
 
     it('should fail when query is not a string', async () => {
       const dto = plainToInstance(GeocodePlaceDto, {
-        query: 12345 as any,
+        query: 12345 as unknown as string,
       });
 
       const errors = await validate(dto);

@@ -147,8 +147,8 @@ describe('GenerateChartDto', () => {
         birthDate: '1990-05-15',
         birthTime: '14:30',
         birthPlace: 'Madrid, Spain',
-        latitude: '-34.6037' as any,
-        longitude: '-58.3816' as any,
+        latitude: '-34.6037' as unknown as number,
+        longitude: '-58.3816' as unknown as string,
         timezone: 'Europe/Madrid',
       });
 
@@ -214,7 +214,7 @@ describe('GenerateChartDto', () => {
 
     it('should fail when name is not a string', async () => {
       const dto = plainToInstance(GenerateChartDto, {
-        name: 12345 as any,
+        name: 12345 as unknown as string,
         birthDate: '1990-05-15',
         birthTime: '14:30',
         birthPlace: 'Madrid, Spain',
@@ -458,7 +458,7 @@ describe('GenerateChartDto', () => {
         birthDate: '1990-05-15',
         birthTime: '14:30',
         birthPlace: 'Test Place',
-        latitude: 'invalid' as any,
+        latitude: 'invalid' as unknown as string,
         longitude: 0,
         timezone: 'America/New_York',
       });
@@ -528,7 +528,7 @@ describe('GenerateChartDto', () => {
         birthTime: '14:30',
         birthPlace: 'Test Place',
         latitude: 0,
-        longitude: 'invalid' as any,
+        longitude: 'invalid' as unknown as string,
         timezone: 'America/New_York',
       });
 

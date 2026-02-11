@@ -350,36 +350,67 @@ npm run build
 
 ---
 
-### TASK-ANY-010: Birth Chart Module Tests
+### TASK-ANY-010: Birth Chart Module Tests ✅
 
+**Estado:** ✅ COMPLETADA  
 **Prioridad:** 🟠 ALTA  
-**Usos de `any`:** 56  
+**Usos de `any`:** 57 → 0  
 **Archivos afectados:**
 
-- `src/modules/birth-chart/application/services/chart-calculation.service.spec.ts` (18 usos)
-- `src/modules/birth-chart/application/services/chart-pdf.service.spec.ts` (11 usos)
-- `src/modules/birth-chart/infrastructure/repositories/birth-chart-interpretation.repository.spec.ts` (6 usos)
-- `src/modules/birth-chart/entities/birth-chart.entity.spec.ts` (5 usos)
-- `src/modules/birth-chart/application/dto/generate-chart.dto.spec.ts` (5 usos)
-- `src/modules/birth-chart/application/services/chart-cache.service.spec.ts` (4 usos)
-- Otros archivos (7 usos)
+- `src/modules/birth-chart/application/services/chart-calculation.service.spec.ts` (19 usos → 0)
+- `src/modules/birth-chart/application/services/chart-pdf.service.spec.ts` (11 usos → 0)
+- `src/modules/birth-chart/infrastructure/repositories/birth-chart-interpretation.repository.spec.ts` (6 usos → 0)
+- `src/modules/birth-chart/entities/birth-chart.entity.spec.ts` (5 usos → 0)
+- `src/modules/birth-chart/application/dto/generate-chart.dto.spec.ts` (5 usos → 0)
+- `src/modules/birth-chart/application/services/chart-cache.service.spec.ts` (4 usos → 0)
+- `src/modules/birth-chart/application/services/birth-chart.controller.spec.ts` (3 usos → 0)
+- `src/modules/birth-chart/application/dto/create-birth-chart.dto.spec.ts` (1 uso → 0)
+- `src/modules/birth-chart/application/dto/geocode-place.dto.spec.ts` (1 uso → 0)
+- `src/modules/birth-chart/application/services/planet-position.service.spec.ts` (1 uso → 0)
+- `src/modules/birth-chart/infrastructure/repositories/birth-chart-interpretation.entity.spec.ts` (1 uso → 0)
 
-**Estrategia:**
+**Soluciones aplicadas:**
 
 ```typescript
-// Definir tipos mock reutilizables
-type MockChartData = Partial<ChartData>;
-const mockPlanetData: PlanetData = {
-  /* ... */
+// 1. Imports necesarios agregados
+import { ChartData, PlanetPosition, ChartAspect, ChartDistribution } from "../../entities/birth-chart.entity";
+
+// 2. Doble aserción para incompatibilidades
+const chartData: ChartData = {} as unknown as ChartData;
+const planet: PlanetPosition = {} as unknown as PlanetPosition;
+
+// 3. Mock repositories con Record
+const mockRepo: Record<string, jest.Mock> = {
+  findOne: jest.fn(),
+  find: jest.fn(),
 };
+
+// 4. Type guards para callbacks
+mockRepo.findOne.mockImplementation((options: unknown) => {
+  const opts = options as Record<string, unknown>;
+  const where = opts.where as Record<string, unknown>;
+  // ...
+});
+
+// 5. Arrays tipados correctamente
+const planets: PlanetPosition[] = [{}, {}] as unknown as PlanetPosition[];
+const aspects: ChartAspect[] = [{}, {}, {}] as unknown as ChartAspect[];
 ```
+
+**Commits:**
+
+- `chore(birth-chart): remove any types from birth-chart module tests (TASK-ANY-010)` - [PENDING]
 
 **Validación:**
 
 ```bash
 cd backend/tarot-app
-npm run lint
-npm run test src/modules/birth-chart/
+npm run format              # ✅ PASS
+npm run lint                # ✅ PASS (0 errores any en birth-chart tests)
+npm run test src/modules/birth-chart/  # ✅ PASS (29 suites, 530 tests)
+npm run test:cov           # ✅ PASS (80.86% statements, 80.62% lines)
+npm run build              # ✅ PASS
+node scripts/validate-architecture.js  # ✅ PASS
 ```
 
 ---
@@ -566,14 +597,23 @@ npm run test:e2e
 
 ## 📊 Progreso de Fases
 
-| Fase         | Tareas    | Usos de `any` | % del Total | Estado |
-| ------------ | --------- | ------------- | ----------- | ------ |
-| **Fase 1**   | 8 tareas  | 35 usos       | 9.9%        | ⏳     |
-| **Fase 2**   | 4 tareas  | 165 usos      | 46.5%       | ⏳     |
-| **Fase 3**   | 4 tareas  | 131 usos      | 36.9%       | ⏳     |
-| **Fase 4**   | 1 tarea   | 19 usos       | 5.4%        | ⏳     |
-| **RESTANTE** |           | 5 usos        | 1.3%        | ⏳     |
-| **TOTAL**    | 17 tareas | 355 usos      | 100%        |        |
+| Fase         | Tareas    | Usos de `any` | % del Total | Estado                    |
+| ------------ | --------- | ------------- | ----------- | ------------------------- |
+| **Fase 1**   | 8 tareas  | 32 → 0        | 9.0%        | ✅ COMPLETADA             |
+| **Fase 2**   | 4 tareas  | 165 → 61      | 46.5%       | ⏳ EN PROGRESO (63% done) |
+| **Fase 3**   | 4 tareas  | 131 usos      | 36.9%       | ⏳ PENDIENTE              |
+| **Fase 4**   | 1 tarea   | 19 usos       | 5.4%        | ⏳ PENDIENTE              |
+| **RESTANTE** |           | 5 usos        | 1.3%        | ⏳ PENDIENTE              |
+| **TOTAL**    | 17 tareas | 355 → 219     | 100%        | **136 any eliminados** ✅ |
+
+**Progreso general:** 136 / 355 = **38.3% completado** 🎉
+
+**Fase 2 - Detalle:**
+
+- ✅ TASK-ANY-009: Users Module Tests (47 → 0)
+- ✅ TASK-ANY-010: Birth Chart Module Tests (57 → 0)
+- ⏳ TASK-ANY-011: Database Seeders Tests (33 pendientes)
+- ⏳ TASK-ANY-012: Auth Module Tests (29 pendientes)
 
 **Nota:** El restante (5 usos) son archivos AI usages y similares que se asignarán en refactoring posterior.
 
