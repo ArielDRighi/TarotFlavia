@@ -13,6 +13,11 @@ interface ITarotReading {
   id: number;
 }
 
+/**
+ * Type for AI configuration stored in JSONB
+ */
+export type AIConfig = Record<string, unknown>;
+
 @Entity()
 export class TarotInterpretation {
   @ApiProperty({ example: 1, description: 'ID único de la interpretación' })
@@ -39,12 +44,7 @@ export class TarotInterpretation {
     description: 'Configuración utilizada para la generación',
   })
   @Column('jsonb')
-  aiConfig: {
-    model: string;
-    temperature: number;
-    maxTokens: number;
-    [key: string]: string | number | boolean;
-  };
+  aiConfig: AIConfig;
 
   @ApiProperty({
     example: 'gpt-4',
