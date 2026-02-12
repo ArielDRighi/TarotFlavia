@@ -232,24 +232,28 @@
 #### Criterios de Aceptación:
 
 1. **Dado** que soy usuario Premium  
-   **Cuando** genero mi carta  
-   **Entonces** veo una sección adicional "Síntesis Personalizada"
+   **Cuando** veo el resultado de mi carta  
+   **Entonces** veo una acción explícita "Generar síntesis IA" (no automática)
 
-2. **Dado** que la IA procesa mi carta  
-   **Cuando** veo la síntesis  
-   **Entonces** el texto conecta elementos de mi carta entre sí (ej: "Tu Sol en Géminis combinado con Luna en Escorpio sugiere...")
+2. **Dado** que ejecuto la acción de síntesis IA  
+   **Cuando** la IA procesa mi carta  
+   **Entonces** veo una sección "Síntesis Personalizada" que conecta elementos de mi carta entre sí (ej: "Tu Sol en Géminis combinado con Luna en Escorpio sugiere...")
 
 3. **Dado** que recibo la síntesis  
    **Cuando** la leo  
    **Entonces** es un texto único de 3-5 párrafos que no podría aplicar a otra persona
 
-4. **Dado** que soy usuario Free o Anónimo  
-   **Cuando** veo la carta  
-   **Entonces** NO veo la síntesis IA, pero veo un CTA "Actualiza a Premium para síntesis personalizada"
+4. **Dado** que soy usuario Premium  
+   **Cuando** veo el módulo de síntesis  
+   **Entonces** se muestra un indicador de usos restantes del día (máximo 2 por día UTC)
 
-5. **Dado** que genero mi carta como Premium  
-   **Cuando** la guardo  
-   **Entonces** la síntesis IA se guarda junto con la carta para futuras consultas
+5. **Dado** que soy usuario Free o Anónimo  
+    **Cuando** veo la carta  
+   **Entonces** NO puedo generar síntesis IA y veo CTA "Actualiza a Premium para síntesis personalizada"
+
+6. **Dado** que genero una síntesis IA como Premium  
+   **Cuando** la guardo o consulto la carta en historial  
+    **Entonces** la síntesis IA se guarda junto con la carta para futuras consultas
 
 #### Notas Técnicas:
 
@@ -257,6 +261,7 @@
 - El prompt incluye los datos de la carta + las interpretaciones base
 - Cachear resultado para no regenerar si se consulta de nuevo
 - Implementar manejo de errores si la IA falla
+- El límite de síntesis IA Premium es fijo en esta etapa: **2 por día (UTC)**
 
 #### Estimación: 5 puntos
 
@@ -383,7 +388,7 @@
 ### HU-CA-010: Controlar Límites de Uso
 
 **Como** sistema  
-**Quiero** controlar cuántas cartas puede generar cada tipo de usuario  
+**Quiero** controlar límites solo donde aplica (anónimos y síntesis IA Premium)  
 **Para** gestionar recursos y diferenciar planes
 
 #### Criterios de Aceptación:
@@ -393,31 +398,35 @@
    **Entonces** el sistema verifica si ya usé mi única carta lifetime
 
 2. **Dado** que soy usuario Free  
-   **Cuando** intento generar una carta  
-   **Entonces** el sistema verifica si tengo disponibles de mis 3 mensuales
+    **Cuando** intento generar una carta  
+   **Entonces** puedo generarla sin límite
 
 3. **Dado** que soy usuario Premium  
-   **Cuando** intento generar una carta  
-   **Entonces** el sistema verifica si tengo disponibles de mis 5 mensuales
+    **Cuando** intento generar una carta  
+   **Entonces** puedo generarla sin límite
 
-4. **Dado** que no tengo cartas disponibles  
-   **Cuando** intento generar  
-   **Entonces** veo mensaje explicativo y CTA apropiado según mi plan
+4. **Dado** que soy usuario Premium  
+   **Cuando** intento generar síntesis IA desde el resultado  
+   **Entonces** el sistema verifica el límite de 2 por día (UTC)
 
-5. **Dado** que es día 1 del mes  
+5. **Dado** que no tengo usos de síntesis IA disponibles en el día  
+   **Cuando** intento generar síntesis IA  
+   **Entonces** veo mensaje explicativo con próximo reinicio diario
+
+6. **Dado** que cambia el día en UTC  
    **Cuando** el sistema procesa  
-   **Entonces** resetea los contadores mensuales de Free y Premium
+   **Entonces** reinicia el contador diario de síntesis IA Premium
 
 #### Límites Definidos:
 
-- **Anónimo:** 1 lifetime total
-- **Free:** 3 por mes
-- **Premium:** 5 por mes
+- **Anónimo:** 1 generación lifetime total
+- **Free:** generación ilimitada + síntesis IA deshabilitada
+- **Premium:** generación ilimitada + **2 síntesis IA por día (UTC)**
 
 #### Notas Técnicas:
 
 - **IMPORTANTE:** Analizar y reutilizar el sistema de límites existente (tarot, péndulo, etc.)
-- El sistema existente maneja límites DIARIOS; adaptar para soportar límites MENSUALES
+- Reutilizar límites diarios existentes para síntesis IA Premium
 - Centralizar la lógica de límites si no está centralizada
 - Integrar carta astral al sistema existente en lugar de crear lógica nueva
 - Para anónimos: reutilizar tracking existente (cookies/fingerprint)
@@ -435,28 +444,28 @@
 #### Criterios de Aceptación:
 
 1. **Dado** que soy administrador  
-   **Cuando** accedo al panel de configuración  
-   **Entonces** veo los límites actuales de carta astral por plan
+    **Cuando** accedo al panel de configuración  
+   **Entonces** veo la configuración de límites aplicables para carta astral
 
-2. **Dado** que quiero cambiar el límite Free  
+2. **Dado** que quiero cambiar el límite de síntesis IA Premium diario  
    **Cuando** modifico el valor y guardo  
    **Entonces** el nuevo límite aplica inmediatamente
 
-3. **Dado** que quiero cambiar el límite Premium  
+3. **Dado** que quiero cambiar el límite de generación anónima  
    **Cuando** modifico el valor y guardo  
    **Entonces** el nuevo límite aplica inmediatamente
 
 4. **Dado** que cambio un límite  
-   **Cuando** los usuarios generan cartas  
-   **Entonces** respetan el nuevo límite
+   **Cuando** los usuarios generan síntesis IA o flujo anónimo  
+    **Entonces** respetan el nuevo límite
 
 5. **Dado** que configuro límites  
    **Cuando** veo el histórico  
-   **Entonces** puedo ver cuándo se cambió cada límite (auditoría)
+   **Entonces** puedo ver cuándo se cambió cada valor (auditoría)
 
 #### Notas Técnicas:
 
-- El límite de anónimos (1 lifetime) NO es configurable
+- Free debe permanecer sin límite de generación y sin opción de síntesis IA
 - Reutilizar panel de admin existente para límites
 - Cachear valores para no consultar DB en cada request
 
@@ -525,17 +534,17 @@
 
 ## MATRIZ DE FUNCIONALIDADES POR PLAN
 
-| Funcionalidad                            | Anónimo         | Free       | Premium    |
-| ---------------------------------------- | --------------- | ---------- | ---------- |
-| Generar carta                            | ✅ (1 lifetime) | ✅ (3/mes) | ✅ (5/mes) |
-| Ver gráfico SVG                          | ✅              | ✅         | ✅         |
-| Ver tablas (posiciones, casas, aspectos) | ✅              | ✅         | ✅         |
-| Interpretación Big Three                 | ✅              | ✅         | ✅         |
-| Informe completo estático                | ❌              | ✅         | ✅         |
-| Síntesis IA personalizada                | ❌              | ❌         | ✅         |
-| Descargar PDF                            | ❌              | ✅         | ✅         |
-| Guardar en historial                     | ❌              | ❌         | ✅         |
-| Ver historial                            | ❌              | ❌         | ✅         |
+| Funcionalidad                            | Anónimo         | Free             | Premium                   |
+| ---------------------------------------- | --------------- | ---------------- | ------------------------- |
+| Generar carta                            | ✅ (1 lifetime) | ✅ (ilimitado)   | ✅ (ilimitado)            |
+| Ver gráfico SVG                          | ✅              | ✅               | ✅                        |
+| Ver tablas (posiciones, casas, aspectos) | ✅              | ✅               | ✅                        |
+| Interpretación Big Three                 | ✅              | ✅               | ✅                        |
+| Informe completo estático                | ❌              | ✅               | ✅                        |
+| Síntesis IA personalizada                | ❌              | ❌ (CTA Premium) | ✅ (2/día, acción manual) |
+| Descargar PDF                            | ❌              | ✅               | ✅                        |
+| Guardar en historial                     | ❌              | ❌               | ✅                        |
+| Ver historial                            | ❌              | ❌               | ✅                        |
 
 ---
 
@@ -5527,14 +5536,14 @@ export class FullChartResponseDto extends BasicChartResponseDto {
 
 /**
  * Respuesta Premium de carta
- * Incluye todo lo completo + síntesis IA + guardado
+ * Incluye todo lo completo + guardado (síntesis IA opcional)
  */
 export class PremiumChartResponseDto extends FullChartResponseDto {
   @ApiPropertyOptional({ example: 1, description: "ID de la carta guardada" })
   savedChartId?: number;
 
-  @ApiProperty({ description: "Síntesis personalizada generada por IA" })
-  aiSynthesis: {
+  @ApiPropertyOptional({ description: "Síntesis personalizada generada por IA (si fue solicitada)" })
+  aiSynthesis?: {
     content: string;
     generatedAt: string;
     provider: string;
@@ -5755,11 +5764,10 @@ export class BirthChartController {
   /**
    * POST /birth-chart/generate
    * Genera una carta astral sin guardarla
-   * Disponible para: Anónimos (1 lifetime), Free (3/mes), Premium (5/mes)
+   * Disponible para: Anónimos (1 lifetime), Free (ilimitado), Premium (ilimitado)
    */
   @Post("generate")
-  @UseGuards(OptionalJwtAuthGuard, CheckUsageLimitGuard)
-  @UsageType("BIRTH_CHART")
+  @UseGuards(OptionalJwtAuthGuard)
   @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 requests/minuto
   @ApiOperation({
     summary: "Generar carta astral",
@@ -5767,8 +5775,8 @@ export class BirthChartController {
     
 **Por plan:**
 - **Anónimo:** Recibe gráfico + tablas + Big Three interpretado. Límite: 1 lifetime.
-- **Free:** Recibe informe completo con todas las interpretaciones. Límite: 3/mes.
-- **Premium:** Recibe informe completo + síntesis IA personalizada. Límite: 5/mes.`,
+- **Free:** Recibe informe completo con todas las interpretaciones. Generación ilimitada.
+- **Premium:** Recibe informe completo; síntesis IA bajo acción explícita (2/día).`,
   })
   @ApiResponse({
     status: 200,
@@ -5880,29 +5888,32 @@ export class BirthChartController {
   // ===========================================================================
 
   /**
-   * GET /birth-chart/usage
-   * Obtiene el estado de uso de cartas astrales del usuario
+   * GET /birth-chart/usage-status
+   * Obtiene el estado de uso de cartas astrales del usuario SIN consumir uso
    */
-  @Get("usage")
+  @Get("usage-status")
   @UseGuards(OptionalJwtAuthGuard)
   @ApiOperation({
-    summary: "Consultar límites de uso",
-    description: "Retorna cuántas cartas ha generado y cuántas le quedan.",
+    summary: "Consultar estado de uso",
+    description: "Retorna el estado de límites de uso sin consumir usos. Estructura diferenciada por plan.",
   })
   @ApiResponse({
     status: 200,
     schema: {
       example: {
-        plan: "free",
-        used: 2,
-        limit: 3,
-        remaining: 1,
-        resetsAt: "2026-03-01T00:00:00Z",
-        canGenerate: true,
+        plan: "premium",
+        synthesis: {
+          used: 1,
+          limit: 2,
+          remaining: 1,
+          resetsAt: "2026-03-01T00:00:00Z", // Medianoche UTC (00:00 UTC+0) cada día
+          canUse: true,
+        },
+        generatedAt: "2026-02-28T10:30:00Z",
       },
     },
   })
-  async getUsage(@CurrentUser() user: User | null, @Fingerprint() fingerprint: string) {
+  async getUsageStatus(@CurrentUser() user: User | null, @Fingerprint() fingerprint: string) {
     return this.birthChartFacade.getUsageStatus(user, fingerprint);
   }
 
@@ -6564,7 +6575,7 @@ export class BirthChartFacadeService {
   }
 
   /**
-   * Construye respuesta para Premium (todo + síntesis IA + guardar)
+   * Construye respuesta para Premium (guardado + síntesis IA bajo demanda)
    */
   private async buildPremiumResponse(
     chartData: ChartData,
@@ -6573,29 +6584,12 @@ export class BirthChartFacadeService {
   ): Promise<PremiumChartResponseDto> {
     const freeResponse = await this.buildFreeResponse(chartData, dto);
 
-    // Generar síntesis IA
-    const fullInterpretation = await this.interpretationService.generateFullInterpretation(chartData);
-    const synthesis = await this.aiSynthesisService.generateSynthesis(
-      {
-        chartData,
-        interpretation: fullInterpretation,
-        userName: dto.name,
-        birthDate: new Date(dto.birthDate),
-      },
-      userId,
-    );
-
     // Guardar en DB
-    const savedChart = await this.saveChart(userId, dto, chartData, synthesis.synthesis);
+    const savedChart = await this.saveChart(userId, dto, chartData);
 
     return {
       ...freeResponse,
       savedChartId: savedChart.id,
-      aiSynthesis: {
-        content: synthesis.synthesis,
-        generatedAt: new Date().toISOString(),
-        provider: synthesis.provider,
-      },
       canAccessHistory: true,
     };
   }
@@ -6653,16 +6647,9 @@ export class BirthChartFacadeService {
 
     let aiSynthesis: string | undefined;
     if (includeSynthesis) {
-      const synthesis = await this.aiSynthesisService.generateSynthesis(
-        {
-          chartData,
-          interpretation,
-          userName: dto.name,
-          birthDate,
-        },
-        user.id,
-      );
-      aiSynthesis = synthesis.synthesis;
+      // En este flujo no se genera IA automáticamente.
+      // Solo incluir síntesis si ya existe (ej. carta guardada con síntesis previa).
+      aiSynthesis = undefined;
     }
 
     const pdfInput: PDFGenerationInput = {
@@ -6689,8 +6676,8 @@ export class BirthChartFacadeService {
 
     const limits = {
       [UserPlan.ANONYMOUS]: { limit: 1, period: "lifetime" },
-      [UserPlan.FREE]: { limit: 3, period: "month" },
-      [UserPlan.PREMIUM]: { limit: 5, period: "month" },
+      [UserPlan.FREE]: { limit: Number.POSITIVE_INFINITY, period: "none" },
+      [UserPlan.PREMIUM]: { limit: Number.POSITIVE_INFINITY, period: "none" },
     };
 
     return {
@@ -6998,21 +6985,21 @@ export class BirthChartHistoryService {
 
 ## ENDPOINTS RESULTANTES
 
-| Método | Endpoint                             | Plan         | Descripción                      |
-| ------ | ------------------------------------ | ------------ | -------------------------------- |
-| POST   | /birth-chart/generate                | Todos        | Genera carta astral              |
-| POST   | /birth-chart/generate/anonymous      | Anónimo      | Genera carta para no registrados |
-| POST   | /birth-chart/pdf                     | Free/Premium | Descarga PDF                     |
-| GET    | /birth-chart/geocode                 | Público      | Busca lugares                    |
-| GET    | /birth-chart/usage                   | Todos        | Consulta límites                 |
-| POST   | /birth-chart/synthesis               | Premium      | Genera síntesis IA               |
-| GET    | /birth-chart/history                 | Premium      | Lista cartas guardadas           |
-| GET    | /birth-chart/history/:id             | Premium      | Obtiene carta guardada           |
-| POST   | /birth-chart/history                 | Premium      | Guarda carta manualmente         |
-| POST   | /birth-chart/history/:id/name        | Premium      | Renombra carta                   |
-| DELETE | /birth-chart/history/:id             | Premium      | Elimina carta                    |
-| POST   | /birth-chart/history/check-duplicate | Premium      | Verifica duplicado               |
-| GET    | /birth-chart/history/:id/pdf         | Premium      | PDF de carta guardada            |
+| Método | Endpoint                             | Plan         | Descripción                       |
+| ------ | ------------------------------------ | ------------ | --------------------------------- |
+| POST   | /birth-chart/generate                | Todos        | Genera carta astral               |
+| POST   | /birth-chart/generate/anonymous      | Anónimo      | Genera carta para no registrados  |
+| POST   | /birth-chart/pdf                     | Free/Premium | Descarga PDF                      |
+| GET    | /birth-chart/geocode/search          | Público      | Busca lugares                     |
+| GET    | /birth-chart/usage-status            | Todos        | Consulta estado de uso            |
+| POST   | /birth-chart/:id/synthesis           | Premium      | Genera síntesis IA (límite 2/día) |
+| GET    | /birth-chart/history                 | Premium      | Lista cartas guardadas            |
+| GET    | /birth-chart/history/:id             | Premium      | Obtiene carta guardada            |
+| POST   | /birth-chart/history                 | Premium      | Guarda carta manualmente          |
+| POST   | /birth-chart/history/:id/name        | Premium      | Renombra carta                    |
+| DELETE | /birth-chart/history/:id             | Premium      | Elimina carta                     |
+| POST   | /birth-chart/history/check-duplicate | Premium      | Verifica duplicado                |
+| GET    | /birth-chart/history/:id/pdf         | Premium      | PDF de carta guardada             |
 
 ---
 
@@ -7055,8 +7042,6 @@ Esta parte cubre la integración con el sistema de límites de uso existente (ad
 ## DETALLE DE TAREAS
 
 ### T-CA-021: Analizar Sistema de Límites Existente
-
-**Estado:** ✅ COMPLETADA
 
 **Historia relacionada:** HU-CA-010
 
@@ -7142,30 +7127,16 @@ Según docs/USAGE_LIMITS_SYSTEM.md:
 
 **Criterios de aceptación:**
 
-- [x] Documento de análisis completo
-- [x] Estructura actual documentada
-- [x] Puntos de extensión identificados
-- [x] Recomendación de implementación clara
-- [x] Riesgos y consideraciones documentados
-- [x] Estimación refinada para T-CA-022
+- [ ] Documento de análisis completo
+- [ ] Estructura actual documentada
+- [ ] Puntos de extensión identificados
+- [ ] Recomendación de implementación clara
+- [ ] Riesgos y consideraciones documentados
+- [ ] Estimación refinada para T-CA-022
 
 **Dependencias:** Ninguna
 
 **Estimación:** 2 horas
-
-**Tiempo real:** ~2 horas
-
-**Documento generado:**
-
-- `docs/ANALISIS_T-CA-021_SISTEMA_LIMITES.md`
-
-**Resumen de hallazgos:**
-
-- El módulo actual combina límites diarios por fecha UTC, lectura mensual parcial (`getUsageByPeriod`) y tracking anónimo por fingerprint.
-- `BIRTH_CHART` está configurado con intención mensual/lifetime, pero el guard no aplica período mensual de forma genérica aún.
-- Se identificó inconsistencia en tracking anónimo genérico (`recordUsage` persiste `TAROT_READING` fijo).
-- Recomendación para T-CA-022: extender el modelo actual con `UsagePeriod` + mapeo por feature (sin crear tablas nuevas en primera iteración).
-- Estimación refinada para T-CA-022: 6-8 horas.
 
 ---
 
@@ -8746,7 +8717,7 @@ export class SystemConfig {
 
 ## CHECKLIST DE PARTE 7F
 
-- [x] T-CA-021: Análisis del sistema de límites completado
+- [ ] T-CA-021: Análisis del sistema de límites completado
 - [ ] T-CA-022: Sistema extendido para límites mensuales
 - [ ] T-CA-023: Límites de carta astral integrados
 - [ ] T-CA-024: Servicio de geocodificación funcionando
@@ -17386,11 +17357,11 @@ Ver [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) para problemas comunes.
     │
 3.  └── BirthChartFacadeService
     │
-4.              ├── ChartCacheService.get() (verificar caché)
+4.             ├── ChartCacheService.get() (verificar caché)
               │       │
               │       └── Si existe → retornar cacheado
               │
-5.              ├── ChartCalculationService.calculateChart()
+5.             ├── ChartCalculationService.calculateChart()
               │       │
               │       ├── EphemerisWrapper.calculatePlanetPositions()
               │       ├── EphemerisWrapper.calculateHouses()
@@ -17398,17 +17369,17 @@ Ver [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) para problemas comunes.
               │       ├── HouseCuspService.transform()
               │       └── AspectCalculationService.calculate()
               │
-6.              ├── ChartInterpretationService.generateInterpretation()
+6.             ├── ChartInterpretationService.generateInterpretation()
               │       │
               │       └── BirthChartInterpretationRepository.findAllForChart()
               │
-7.              ├── ChartAISynthesisService.generateSynthesis() (Premium)
+7.             ├── ChartAISynthesisService.generateSynthesis() (Premium)
               │       │
               │       └── AIProviderService.generateCompletion()
               │
-8.              ├── BirthChartRepository.save() (Premium)
+8.             ├── BirthChartRepository.save() (Premium)
               │
-9.              ├── ChartCacheService.set()
+9.             ├── ChartCacheService.set()
               │
 10.           └── Return response según plan
 
@@ -17621,7 +17592,6 @@ Obtiene estado de uso del usuario.
 
 [... más endpoints documentados ...]
 
-````
 
 ```markdown
 <!-- docs/modules/birth-chart/TROUBLESHOOTING.md -->
