@@ -908,11 +908,13 @@ node scripts/validate-architecture.js # ✅ PASSED
 **Archivos afectados:**
 
 **Usage Limits Module (13 → 0):**
+
 - `services/anonymous-tracking.service.spec.ts` (6 → 0)
 - `guards/check-usage-limit.guard.spec.ts` (1 → 0)
 - `services/usage-limits-reset.service.spec.ts` (6 → 0)
 
 **Subscriptions Module (6 → 0):**
+
 - `subscriptions.service.spec.ts` (4 → 0)
 - `subscriptions.controller.spec.ts` (2 → 0)
 
@@ -921,6 +923,7 @@ node scripts/validate-architecture.js # ✅ PASSED
 **Implementación:**
 
 **1. Anonymous Tracking Service (6 → 0):**
+
 ```typescript
 // ✅ Request mocks con Parameters inference
 await service.canAccess(mockRequest as Parameters<typeof service.canAccess>[0]);
@@ -932,22 +935,24 @@ await service.recordUsage(requestWithoutIP as Parameters<typeof service.recordUs
 ```
 
 **2. Check Usage Limit Guard (1 → 0):**
+
 ```typescript
-import { AnonymousUsage } from '../entities/anonymous-usage.entity';
+import { AnonymousUsage } from "../entities/anonymous-usage.entity";
 
 // ✅ Entity mock
 anonymousTrackingService.recordUsage.mockResolvedValue({
   id: 1,
-  fingerprint: 'test-fingerprint',
-  ip: '192.168.1.1',
-  date: '2025-01-02',
+  fingerprint: "test-fingerprint",
+  ip: "192.168.1.1",
+  date: "2025-01-02",
   feature: UsageFeature.TAROT_READING,
 } as unknown as AnonymousUsage);
 ```
 
 **3. Usage Limits Reset Service (6 → 0):**
+
 ```typescript
-import { Repository, DeleteResult } from 'typeorm';
+import { Repository, DeleteResult } from "typeorm";
 
 // ✅ DeleteResult typing (5 instances)
 const mockDeleteResult = { affected: 5 };
@@ -958,6 +963,7 @@ const callArgs = repository.delete.mock.calls[0][0] as Record<string, unknown>;
 ```
 
 **4. Subscriptions Service (4 → 0):**
+
 ```typescript
 // ✅ UserTarotistaSubscription entity mocks
 const newSubscription = {...};
@@ -974,18 +980,20 @@ subscriptionRepo.save.mockResolvedValue({
 ```
 
 **5. Subscriptions Controller (2 → 0):**
+
 ```typescript
 import {
   SubscriptionType,
   SubscriptionStatus,
   UserTarotistaSubscription,
-} from '../tarotistas/entities/user-tarotista-subscription.entity';
+} from "../tarotistas/entities/user-tarotista-subscription.entity";
 
 // ✅ Entity mock (2 instances)
 service.setFavoriteTarotista.mockResolvedValue(mockSubscription as unknown as UserTarotistaSubscription);
 ```
 
 **Técnicas aplicadas:**
+
 - ✅ Parameters<typeof method>[N] para Request mocks (6 instancias)
 - ✅ Entity mocking: AnonymousUsage, UserTarotistaSubscription (8 instancias)
 - ✅ TypeORM DeleteResult typing (5 instancias)
@@ -1016,28 +1024,82 @@ node scripts/validate-architecture.js # ✅ PASSED
 
 ### TASK-ANY-017: E2E & Integration Tests
 
+**Estado:** ✅ COMPLETADA  
 **Prioridad:** 🟢 BAJA  
-**Usos de `any`:** 19  
+**Usos de `any`:** 19 → 0 (100% eliminado)  
 **Archivos afectados:**
 
-- `test/integration/` (9 usos)
-- `test/*.e2e-spec.ts` (10 usos)
+**Integration tests (9 → 0):**
+- `test/integration/admin.integration.spec.ts` (2 → 0)
+- `test/integration/cache-ai.integration.spec.ts` (2 → 0)
+- `test/integration/categories-questions.integration.spec.ts` (3 → 0)
+- `test/integration/plan-config.integration.spec.ts` (2 → 0)
+- `test/integration/usage-limits.integration.spec.ts` (2 → 0)
 
-**Estrategia:**
+**E2E tests (10 → 0):**
+- `test/ai-health.e2e-spec.ts` (1 → 0)
+- `test/auth-integration.e2e-spec.ts` (1 → 0)
+- `test/database-infrastructure.e2e-spec.ts` (1 → 0)
+- `test/health.e2e-spec.ts` (1 → 0)
+- `test/migration-validation.e2e-spec.ts` (3 → 0)
+- `test/revenue-sharing-metrics.e2e-spec.ts` (1 → 0)
+
+**Implementación:**
 
 ```typescript
-// E2E tests pueden usar interfaces más simples
-type TestRequest = Partial<Request>;
-type TestResponse = Partial<Response>;
+// ✅ Repositorios TypeORM tipados
+let userRepository: Repository<User>;
+
+// ✅ Callbacks tipados (find/map)
+(row: { table_name: string }) => row.table_name
+(cb: { provider: string }) => cb.provider === 'groq'
+
+// ✅ E2E http server tipado
+import type { Server } from 'http';
+let httpServer: Server;
+
+// ✅ Audits: usar enum en vez de strings
+action: AuditAction.PLAN_CHANGED
+
+// ✅ Tests de valores inválidos
+'invalidFeature' as never
+
+// ✅ Strict null checks: guards en findOne()
+if (!entity) throw new Error('...');
 ```
 
 **Validación:**
 
 ```bash
 cd backend/tarot-app
+
+npm run format
 npm run lint
-npm run test:e2e
+
+# ⚠️ E2E deben ejecutarse de a uno (correr suite completa en paralelo falla)
+npm run test:e2e -- test/ai-health.e2e-spec.ts
+npm run test:e2e -- test/auth-integration.e2e-spec.ts
+npm run test:e2e -- test/database-infrastructure.e2e-spec.ts
+npm run test:e2e -- test/health.e2e-spec.ts
+npm run test:e2e -- test/migration-validation.e2e-spec.ts
+npm run test:e2e -- test/revenue-sharing-metrics.e2e-spec.ts
+
+# Integration (de a uno)
+npm run test:integration -- test/integration/admin.integration.spec.ts
+npm run test:integration -- test/integration/cache-ai.integration.spec.ts
+npm run test:integration -- test/integration/categories-questions.integration.spec.ts
+npm run test:integration -- test/integration/plan-config.integration.spec.ts
+npm run test:integration -- test/integration/usage-limits.integration.spec.ts
+
+npm run test:cov
+npm run build
+node scripts/validate-architecture.js
 ```
+
+**Resultado:**
+✅ **19 eliminaciones exitosas** (100%)  
+✅ **E2E + Integration pasando** (ejecución individual)  
+✅ **Lint + Coverage + Build + Arquitectura OK**
 
 ---
 
@@ -1048,11 +1110,11 @@ npm run test:e2e
 | **Fase 1**   | 8 tareas  | 32 → 0        | 9.0%        | ✅ COMPLETADA             |
 | **Fase 2**   | 4 tareas  | 165 → 0       | 46.5%       | ✅ COMPLETADA             |
 | **Fase 3**   | 4 tareas  | 131 → 0       | 36.9%       | ✅ COMPLETADA             |
-| **Fase 4**   | 1 tarea   | 19 usos       | 5.4%        | ⏳ PENDIENTE              |
-| **RESTANTE** |           | 5 usos        | 1.3%        | ⏳ PENDIENTE              |
-| **TOTAL**    | 17 tareas | 355 → 23      | 100%        | **332 any eliminados** ✅ |
+| **Fase 4**   | 1 tarea   | 19 → 0        | 5.4%        | ✅ COMPLETADA             |
+| **RESTANTE** |           | 0 usos        | 0.0%        | ✅ COMPLETADA             |
+| **TOTAL**    | 17 tareas | 355 → 0       | 100%        | **355 any eliminados** ✅ |
 
-**Progreso general:** 332 / 355 = **93.5% completado** 🎉
+**Progreso general:** 355 / 355 = **100% completado** 🎉
 
 **Fase 2 - Detalle:**
 
@@ -1068,7 +1130,9 @@ npm run test:e2e
 - ✅ TASK-ANY-015: Rituals, Tarotistas & Admin Tests (44 → 0) **¡100% eliminado!**
 - ✅ TASK-ANY-016: Usage Limits & Subscriptions Tests (19 → 0) **¡100% eliminado!**
 
-**Nota:** El restante (5 usos) son archivos AI usages y similares que se asignarán en refactoring posterior.
+**Fase 4 - Detalle:**
+
+- ✅ TASK-ANY-017: E2E & Integration Tests (19 → 0) **¡100% eliminado!**
 
 ---
 

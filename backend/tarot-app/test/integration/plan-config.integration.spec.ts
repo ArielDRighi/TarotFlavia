@@ -174,7 +174,7 @@ describe('Plan Configuration Integration Tests', () => {
   describe('Error Handling', () => {
     it('should throw NotFoundException for non-existent plan', async () => {
       await expect(
-        planService.findByPlanType('nonexistent' as any),
+        planService.findByPlanType('nonexistent' as unknown as UserPlan),
       ).rejects.toThrow();
     });
 
@@ -198,7 +198,7 @@ describe('Plan Configuration Integration Tests', () => {
     it('should throw error for invalid feature name', async () => {
       const plan = await planService.findByPlanType(UserPlan.FREE);
 
-      expect(() => plan.hasFeature('invalidFeature' as any)).toThrow();
+      expect(() => plan.hasFeature('invalidFeature' as never)).toThrow();
     });
   });
 });

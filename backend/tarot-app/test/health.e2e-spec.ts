@@ -1,11 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
+import type { Server } from 'http';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 
 describe('Health (E2E)', () => {
   let app: INestApplication;
-  let httpServer: any;
+  let httpServer: Server;
 
   // Increase timeout for health checks (AI providers can be slow in CI)
   jest.setTimeout(30000);

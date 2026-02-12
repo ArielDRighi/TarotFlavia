@@ -156,8 +156,9 @@ describe('Database Infrastructure (E2E)', () => {
         AND table_name NOT LIKE 'information_schema.%'
       `);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      const tableNames = result.map((r: any) => r.table_name);
+      const tableNames = (result as Array<{ table_name: string }>).map(
+        (row) => row.table_name,
+      );
 
       // Core tables
       expect(tableNames).toContain('user');

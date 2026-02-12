@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository, SelectQueryBuilder } from 'typeorm';
+import { SelectQueryBuilder } from 'typeorm';
 import { BirthChartInterpretationRepository } from './birth-chart-interpretation.repository';
 import { BirthChartInterpretation } from '../../entities/birth-chart-interpretation.entity';
 import {

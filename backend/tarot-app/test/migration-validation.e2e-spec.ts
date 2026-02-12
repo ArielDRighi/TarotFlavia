@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { DataSource, QueryRunner } from 'typeorm';
 import { e2eConnectionSource } from '../src/config/typeorm-e2e.config';
 import { InitialSchema1761655973524 } from '../src/database/migrations/1761655973524-InitialSchema';
@@ -52,7 +51,9 @@ describe('Migration Validation', () => {
         AND table_type = 'BASE TABLE'
       `);
 
-      const tableNames = result.map((r: any) => r.table_name);
+      const tableNames = (result as Array<{ table_name: string }>).map(
+        (row) => row.table_name,
+      );
 
       expect(tableNames).toContain('user');
       expect(tableNames).toContain('tarot_card');
@@ -69,7 +70,9 @@ describe('Migration Validation', () => {
 
       expect(columns.length).toBeGreaterThan(0);
 
-      const columnNames = columns.map((c: any) => c.column_name);
+      const columnNames = (columns as Array<{ column_name: string }>).map(
+        (column) => column.column_name,
+      );
 
       expect(columnNames).toContain('id');
       expect(columnNames).toContain('email');
@@ -103,7 +106,9 @@ describe('Migration Validation', () => {
 
       expect(constraints.length).toBeGreaterThan(0);
 
-      const fkColumns = constraints.map((c: any) => c.column_name);
+      const fkColumns = (constraints as Array<{ column_name: string }>).map(
+        (constraint) => constraint.column_name,
+      );
 
       expect(fkColumns).toContain('userId');
       expect(fkColumns).toContain('deckId');
