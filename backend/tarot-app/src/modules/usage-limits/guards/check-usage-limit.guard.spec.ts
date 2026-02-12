@@ -1,4 +1,8 @@
-import { ExecutionContext, ForbiddenException } from '@nestjs/common';
+import {
+  ExecutionContext,
+  ForbiddenException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -9,7 +13,6 @@ import { UsageFeature } from '../entities/usage-limit.entity';
 import { AnonymousUsage } from '../entities/anonymous-usage.entity';
 import { DailyReading } from '../../tarot/daily-reading/entities/daily-reading.entity';
 import { TarotReading } from '../../tarot/readings/entities/tarot-reading.entity';
-import { BirthChart } from '../../birth-chart/entities/birth-chart.entity';
 import { UsersService } from '../../users/users.service';
 import { PlanConfigService } from '../../plan-config/plan-config.service';
 import { USAGE_LIMIT_FEATURE_KEY } from '../decorators/check-usage-limit.decorator';
@@ -21,6 +24,7 @@ describe('CheckUsageLimitGuard', () => {
   let usageLimitsService: {
     checkLimit: jest.Mock;
     getRemainingUsage: jest.Mock;
+    getUsageByPeriod: jest.Mock;
   };
   let anonymousTrackingService: {
     canAccess: jest.Mock;
@@ -66,6 +70,7 @@ describe('CheckUsageLimitGuard', () => {
   beforeEach(async () => {
     const mockCheckLimit = jest.fn();
     const mockGetRemainingUsage = jest.fn();
+    const mockGetUsageByPeriod = jest.fn();
     const mockCanAccess = jest.fn();
     const mockRecordUsage = jest.fn();
     const mockCanAccessLifetime = jest.fn();
@@ -89,6 +94,7 @@ describe('CheckUsageLimitGuard', () => {
       tarotReadingsLimit: 1,
     });
     mockCountTarotReading.mockResolvedValue(0);
+    mockGetUsageByPeriod.mockResolvedValue(0);
 
     // Setup createQueryBuilder mock chain for tarot readings
     const mockQueryBuilder = {
@@ -106,6 +112,7 @@ describe('CheckUsageLimitGuard', () => {
           useValue: {
             checkLimit: mockCheckLimit,
             getRemainingUsage: mockGetRemainingUsage,
+            getUsageByPeriod: mockGetUsageByPeriod,
           },
         },
         {
@@ -149,12 +156,6 @@ describe('CheckUsageLimitGuard', () => {
             count: mockCountTarotReading,
             find: jest.fn(),
             createQueryBuilder: mockCreateQueryBuilder,
-          },
-        },
-        {
-          provide: getRepositoryToken(BirthChart),
-          useValue: {
-            createQueryBuilder: jest.fn(),
           },
         },
       ],
@@ -606,10 +607,6 @@ describe('CheckUsageLimitGuard', () => {
               provide: getRepositoryToken(TarotReading),
               useValue: { createQueryBuilder: jest.fn() },
             },
-            {
-              provide: getRepositoryToken(BirthChart),
-              useValue: { createQueryBuilder: jest.fn() },
-            },
           ],
         }).compile();
 
@@ -697,10 +694,6 @@ describe('CheckUsageLimitGuard', () => {
               provide: getRepositoryToken(TarotReading),
               useValue: { createQueryBuilder: jest.fn() },
             },
-            {
-              provide: getRepositoryToken(BirthChart),
-              useValue: { createQueryBuilder: jest.fn() },
-            },
           ],
         }).compile();
 
@@ -778,10 +771,6 @@ describe('CheckUsageLimitGuard', () => {
                   .fn()
                   .mockReturnValue(mockTarotQueryBuilder),
               },
-            },
-            {
-              provide: getRepositoryToken(BirthChart),
-              useValue: { createQueryBuilder: jest.fn() },
             },
           ],
         }).compile();
@@ -865,10 +854,6 @@ describe('CheckUsageLimitGuard', () => {
                   .mockReturnValue(mockTarotQueryBuilder),
               },
             },
-            {
-              provide: getRepositoryToken(BirthChart),
-              useValue: { createQueryBuilder: jest.fn() },
-            },
           ],
         }).compile();
 
@@ -945,10 +930,6 @@ describe('CheckUsageLimitGuard', () => {
               provide: getRepositoryToken(TarotReading),
               useValue: { createQueryBuilder: jest.fn() },
             },
-            {
-              provide: getRepositoryToken(BirthChart),
-              useValue: { createQueryBuilder: jest.fn() },
-            },
           ],
         }).compile();
 
@@ -1010,10 +991,6 @@ describe('CheckUsageLimitGuard', () => {
                   .mockReturnValue(mockTarotQueryBuilder),
               },
             },
-            {
-              provide: getRepositoryToken(BirthChart),
-              useValue: { createQueryBuilder: jest.fn() },
-            },
           ],
         }).compile();
 
@@ -1030,19 +1007,11 @@ describe('CheckUsageLimitGuard', () => {
       describe('authenticated users - monthly limits', () => {
         it('FREE: should allow birth chart generation when under monthly limit (0/3)', async () => {
           const userId = 1;
-          const startOfMonth = new Date('2025-02-01T00:00:00.000Z');
 
-          // Mock getStartOfMonthUTC to return first day of current month
-          jest
-            .spyOn(dateUtils, 'getStartOfMonthUTC')
-            .mockReturnValue(startOfMonth);
-
-          const mockBirthChartRepository = {
-            createQueryBuilder: jest.fn().mockReturnValue({
-              where: jest.fn().mockReturnThis(),
-              andWhere: jest.fn().mockReturnThis(),
-              getCount: jest.fn().mockResolvedValue(0), // 0 charts this month
-            }),
+          const mockUsageLimitsService = {
+            checkLimit: jest.fn(),
+            getRemainingUsage: jest.fn(),
+            getUsageByPeriod: jest.fn().mockResolvedValue(0), // 0 charts this month
           };
 
           const module: TestingModule = await Test.createTestingModule({
@@ -1050,10 +1019,7 @@ describe('CheckUsageLimitGuard', () => {
               CheckUsageLimitGuard,
               {
                 provide: UsageLimitsService,
-                useValue: {
-                  checkLimit: jest.fn(),
-                  getRemainingUsage: jest.fn(),
-                },
+                useValue: mockUsageLimitsService,
               },
               {
                 provide: AnonymousTrackingService,
@@ -1074,7 +1040,12 @@ describe('CheckUsageLimitGuard', () => {
               {
                 provide: Reflector,
                 useValue: {
-                  getAllAndOverride: jest.fn().mockReturnValueOnce(UsageFeature.BIRTH_CHART).mockReturnValueOnce(false).mockReturnValueOnce(UsageFeature.BIRTH_CHART).mockReturnValueOnce(false), // allowAnonymous = false
+                  getAllAndOverride: jest
+                    .fn()
+                    .mockReturnValueOnce(UsageFeature.BIRTH_CHART)
+                    .mockReturnValueOnce(false)
+                    .mockReturnValueOnce(UsageFeature.BIRTH_CHART)
+                    .mockReturnValueOnce(false), // allowAnonymous = false
                 },
               },
               {
@@ -1084,10 +1055,6 @@ describe('CheckUsageLimitGuard', () => {
               {
                 provide: getRepositoryToken(TarotReading),
                 useValue: { createQueryBuilder: jest.fn() },
-              },
-              {
-                provide: getRepositoryToken(BirthChart),
-                useValue: mockBirthChartRepository,
               },
             ],
           }).compile();
@@ -1099,27 +1066,18 @@ describe('CheckUsageLimitGuard', () => {
           const result = await testGuard.canActivate(context);
 
           expect(result).toBe(true);
-          expect(
-            mockBirthChartRepository.createQueryBuilder,
-          ).toHaveBeenCalled();
+          expect(mockUsageLimitsService.getUsageByPeriod).toHaveBeenCalledWith(
+            userId,
+            UsageFeature.BIRTH_CHART,
+            'monthly',
+          );
           jest.restoreAllMocks();
         });
 
         it('FREE: should block birth chart generation when monthly limit reached (3/3)', async () => {
           const userId = 1;
-          const startOfMonth = new Date('2025-02-01T00:00:00.000Z');
 
-          jest
-            .spyOn(dateUtils, 'getStartOfMonthUTC')
-            .mockReturnValue(startOfMonth);
-
-          const mockBirthChartRepository = {
-            createQueryBuilder: jest.fn().mockReturnValue({
-              where: jest.fn().mockReturnThis(),
-              andWhere: jest.fn().mockReturnThis(),
-              getCount: jest.fn().mockResolvedValue(3), // Already at limit
-            }),
-          };
+          const mockGetUsageByPeriod = jest.fn().mockResolvedValue(3);
 
           const module: TestingModule = await Test.createTestingModule({
             providers: [
@@ -1129,6 +1087,7 @@ describe('CheckUsageLimitGuard', () => {
                 useValue: {
                   checkLimit: jest.fn(),
                   getRemainingUsage: jest.fn(),
+                  getUsageByPeriod: mockGetUsageByPeriod,
                 },
               },
               {
@@ -1150,7 +1109,12 @@ describe('CheckUsageLimitGuard', () => {
               {
                 provide: Reflector,
                 useValue: {
-                  getAllAndOverride: jest.fn().mockReturnValueOnce(UsageFeature.BIRTH_CHART).mockReturnValueOnce(false).mockReturnValueOnce(UsageFeature.BIRTH_CHART).mockReturnValueOnce(false),
+                  getAllAndOverride: jest
+                    .fn()
+                    .mockReturnValueOnce(UsageFeature.BIRTH_CHART)
+                    .mockReturnValueOnce(false)
+                    .mockReturnValueOnce(UsageFeature.BIRTH_CHART)
+                    .mockReturnValueOnce(false),
                 },
               },
               {
@@ -1160,10 +1124,6 @@ describe('CheckUsageLimitGuard', () => {
               {
                 provide: getRepositoryToken(TarotReading),
                 useValue: { createQueryBuilder: jest.fn() },
-              },
-              {
-                provide: getRepositoryToken(BirthChart),
-                useValue: mockBirthChartRepository,
               },
             ],
           }).compile();
@@ -1180,24 +1140,19 @@ describe('CheckUsageLimitGuard', () => {
             'Has alcanzado tu límite mensual de cartas astrales (3 por mes para plan free). Tu cuota se restablecerá el próximo mes. Actualiza a Premium para generar más cartas astrales.',
           );
 
+          expect(mockGetUsageByPeriod).toHaveBeenCalledWith(
+            userId,
+            UsageFeature.BIRTH_CHART,
+            'monthly',
+          );
+
           jest.restoreAllMocks();
         });
 
         it('PREMIUM: should allow birth chart generation when under monthly limit (4/5)', async () => {
           const userId = 2;
-          const startOfMonth = new Date('2025-02-01T00:00:00.000Z');
 
-          jest
-            .spyOn(dateUtils, 'getStartOfMonthUTC')
-            .mockReturnValue(startOfMonth);
-
-          const mockBirthChartRepository = {
-            createQueryBuilder: jest.fn().mockReturnValue({
-              where: jest.fn().mockReturnThis(),
-              andWhere: jest.fn().mockReturnThis(),
-              getCount: jest.fn().mockResolvedValue(4), // 4 charts this month
-            }),
-          };
+          const mockGetUsageByPeriod = jest.fn().mockResolvedValue(4);
 
           const module: TestingModule = await Test.createTestingModule({
             providers: [
@@ -1207,6 +1162,7 @@ describe('CheckUsageLimitGuard', () => {
                 useValue: {
                   checkLimit: jest.fn(),
                   getRemainingUsage: jest.fn(),
+                  getUsageByPeriod: mockGetUsageByPeriod,
                 },
               },
               {
@@ -1228,7 +1184,12 @@ describe('CheckUsageLimitGuard', () => {
               {
                 provide: Reflector,
                 useValue: {
-                  getAllAndOverride: jest.fn().mockReturnValueOnce(UsageFeature.BIRTH_CHART).mockReturnValueOnce(false).mockReturnValueOnce(UsageFeature.BIRTH_CHART).mockReturnValueOnce(false),
+                  getAllAndOverride: jest
+                    .fn()
+                    .mockReturnValueOnce(UsageFeature.BIRTH_CHART)
+                    .mockReturnValueOnce(false)
+                    .mockReturnValueOnce(UsageFeature.BIRTH_CHART)
+                    .mockReturnValueOnce(false),
                 },
               },
               {
@@ -1238,10 +1199,6 @@ describe('CheckUsageLimitGuard', () => {
               {
                 provide: getRepositoryToken(TarotReading),
                 useValue: { createQueryBuilder: jest.fn() },
-              },
-              {
-                provide: getRepositoryToken(BirthChart),
-                useValue: mockBirthChartRepository,
               },
             ],
           }).compile();
@@ -1253,24 +1210,18 @@ describe('CheckUsageLimitGuard', () => {
           const result = await testGuard.canActivate(context);
 
           expect(result).toBe(true);
+          expect(mockGetUsageByPeriod).toHaveBeenCalledWith(
+            userId,
+            UsageFeature.BIRTH_CHART,
+            'monthly',
+          );
           jest.restoreAllMocks();
         });
 
         it('PREMIUM: should block birth chart generation when monthly limit reached (5/5)', async () => {
           const userId = 2;
-          const startOfMonth = new Date('2025-02-01T00:00:00.000Z');
 
-          jest
-            .spyOn(dateUtils, 'getStartOfMonthUTC')
-            .mockReturnValue(startOfMonth);
-
-          const mockBirthChartRepository = {
-            createQueryBuilder: jest.fn().mockReturnValue({
-              where: jest.fn().mockReturnThis(),
-              andWhere: jest.fn().mockReturnThis(),
-              getCount: jest.fn().mockResolvedValue(5), // At limit
-            }),
-          };
+          const mockGetUsageByPeriod = jest.fn().mockResolvedValue(5);
 
           const module: TestingModule = await Test.createTestingModule({
             providers: [
@@ -1280,6 +1231,7 @@ describe('CheckUsageLimitGuard', () => {
                 useValue: {
                   checkLimit: jest.fn(),
                   getRemainingUsage: jest.fn(),
+                  getUsageByPeriod: mockGetUsageByPeriod,
                 },
               },
               {
@@ -1301,7 +1253,12 @@ describe('CheckUsageLimitGuard', () => {
               {
                 provide: Reflector,
                 useValue: {
-                  getAllAndOverride: jest.fn().mockReturnValueOnce(UsageFeature.BIRTH_CHART).mockReturnValueOnce(false).mockReturnValueOnce(UsageFeature.BIRTH_CHART).mockReturnValueOnce(false),
+                  getAllAndOverride: jest
+                    .fn()
+                    .mockReturnValueOnce(UsageFeature.BIRTH_CHART)
+                    .mockReturnValueOnce(false)
+                    .mockReturnValueOnce(UsageFeature.BIRTH_CHART)
+                    .mockReturnValueOnce(false),
                 },
               },
               {
@@ -1311,10 +1268,6 @@ describe('CheckUsageLimitGuard', () => {
               {
                 provide: getRepositoryToken(TarotReading),
                 useValue: { createQueryBuilder: jest.fn() },
-              },
-              {
-                provide: getRepositoryToken(BirthChart),
-                useValue: mockBirthChartRepository,
               },
             ],
           }).compile();
@@ -1331,28 +1284,23 @@ describe('CheckUsageLimitGuard', () => {
             'Has alcanzado tu límite mensual de cartas astrales (5 por mes para plan premium). Tu cuota se restablecerá el próximo mes.',
           );
 
+          expect(mockGetUsageByPeriod).toHaveBeenCalledWith(
+            userId,
+            UsageFeature.BIRTH_CHART,
+            'monthly',
+          );
+
           jest.restoreAllMocks();
         });
 
         it('should reset monthly limit on new month', async () => {
           const userId = 1;
-          // Previous month: February
-          const februaryStart = new Date('2025-02-01T00:00:00.000Z');
-          // Current month: March
-          const marchStart = new Date('2025-03-01T00:00:00.000Z');
 
-          // First call in February - user hits limit
-          jest
-            .spyOn(dateUtils, 'getStartOfMonthUTC')
-            .mockReturnValue(februaryStart);
-
-          const mockBirthChartRepository = {
-            createQueryBuilder: jest.fn().mockReturnValue({
-              where: jest.fn().mockReturnThis(),
-              andWhere: jest.fn().mockReturnThis(),
-              getCount: jest.fn().mockResolvedValue(3), // Hit limit in Feb
-            }),
-          };
+          // Mock usage service to return limit reached in February
+          const mockGetUsageByPeriod = jest
+            .fn()
+            .mockResolvedValueOnce(3) // February: at limit
+            .mockResolvedValueOnce(0); // March: reset to 0
 
           const module: TestingModule = await Test.createTestingModule({
             providers: [
@@ -1362,6 +1310,7 @@ describe('CheckUsageLimitGuard', () => {
                 useValue: {
                   checkLimit: jest.fn(),
                   getRemainingUsage: jest.fn(),
+                  getUsageByPeriod: mockGetUsageByPeriod,
                 },
               },
               {
@@ -1394,10 +1343,6 @@ describe('CheckUsageLimitGuard', () => {
                 provide: getRepositoryToken(TarotReading),
                 useValue: { createQueryBuilder: jest.fn() },
               },
-              {
-                provide: getRepositoryToken(BirthChart),
-                useValue: mockBirthChartRepository,
-              },
             ],
           }).compile();
 
@@ -1415,19 +1360,7 @@ describe('CheckUsageLimitGuard', () => {
             ForbiddenException,
           );
 
-          // March attempt - should allow (new month, count resets)
-          jest
-            .spyOn(dateUtils, 'getStartOfMonthUTC')
-            .mockReturnValue(marchStart);
-
-          mockBirthChartRepository.createQueryBuilder = jest
-            .fn()
-            .mockReturnValue({
-              where: jest.fn().mockReturnThis(),
-              andWhere: jest.fn().mockReturnThis(),
-              getCount: jest.fn().mockResolvedValue(0), // No charts in March yet
-            });
-
+          // March attempt - should allow (new month, usage resets)
           (reflector.getAllAndOverride as jest.Mock)
             .mockReturnValueOnce(UsageFeature.BIRTH_CHART)
             .mockReturnValueOnce(false);
@@ -1436,6 +1369,12 @@ describe('CheckUsageLimitGuard', () => {
           const result = await testGuard.canActivate(contextMar);
 
           expect(result).toBe(true);
+          expect(mockGetUsageByPeriod).toHaveBeenCalledTimes(2);
+          expect(mockGetUsageByPeriod).toHaveBeenCalledWith(
+            userId,
+            UsageFeature.BIRTH_CHART,
+            'monthly',
+          );
           jest.restoreAllMocks();
         });
       });
@@ -1504,10 +1443,6 @@ describe('CheckUsageLimitGuard', () => {
                 provide: getRepositoryToken(TarotReading),
                 useValue: { createQueryBuilder: jest.fn() },
               },
-            {
-              provide: getRepositoryToken(BirthChart),
-              useValue: { createQueryBuilder: jest.fn() },
-            },
             ],
           }).compile();
 
@@ -1592,10 +1527,6 @@ describe('CheckUsageLimitGuard', () => {
                 provide: getRepositoryToken(TarotReading),
                 useValue: { createQueryBuilder: jest.fn() },
               },
-            {
-              provide: getRepositoryToken(BirthChart),
-              useValue: { createQueryBuilder: jest.fn() },
-            },
             ],
           }).compile();
 
@@ -1621,9 +1552,6 @@ describe('CheckUsageLimitGuard', () => {
       describe('error handling', () => {
         it('should handle user not found error', async () => {
           const userId = 999;
-          const mockBirthChartRepository = {
-            createQueryBuilder: jest.fn(),
-          };
 
           const module: TestingModule = await Test.createTestingModule({
             providers: [
@@ -1652,7 +1580,12 @@ describe('CheckUsageLimitGuard', () => {
               {
                 provide: Reflector,
                 useValue: {
-                  getAllAndOverride: jest.fn().mockReturnValueOnce(UsageFeature.BIRTH_CHART).mockReturnValueOnce(false).mockReturnValueOnce(UsageFeature.BIRTH_CHART).mockReturnValueOnce(false),
+                  getAllAndOverride: jest
+                    .fn()
+                    .mockReturnValueOnce(UsageFeature.BIRTH_CHART)
+                    .mockReturnValueOnce(false)
+                    .mockReturnValueOnce(UsageFeature.BIRTH_CHART)
+                    .mockReturnValueOnce(false),
                 },
               },
               {
@@ -1663,10 +1596,6 @@ describe('CheckUsageLimitGuard', () => {
                 provide: getRepositoryToken(TarotReading),
                 useValue: { createQueryBuilder: jest.fn() },
               },
-              {
-                provide: getRepositoryToken(BirthChart),
-                useValue: mockBirthChartRepository,
-              },
             ],
           }).compile();
 
@@ -1676,7 +1605,10 @@ describe('CheckUsageLimitGuard', () => {
           const context = mockExecutionContext(userId);
 
           await expect(testGuard.canActivate(context)).rejects.toThrow(
-            'Usuario no encontrado',
+            UnauthorizedException,
+          );
+          await expect(testGuard.canActivate(context)).rejects.toThrow(
+            'Token inválido o expirado',
           );
 
           jest.restoreAllMocks();

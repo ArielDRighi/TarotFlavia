@@ -15,7 +15,6 @@ import { AnonymousTrackingService } from '../services/anonymous-tracking.service
 import { UsageFeature } from '../entities/usage-limit.entity';
 import { DailyReading } from '../../tarot/daily-reading/entities/daily-reading.entity';
 import { TarotReading } from '../../tarot/readings/entities/tarot-reading.entity';
-import { BirthChart } from '../../birth-chart/entities/birth-chart.entity';
 import { UsersService } from '../../users/users.service';
 import { PlanConfigService } from '../../plan-config/plan-config.service';
 import { UserPlan } from '../../users/entities/user.entity';
@@ -25,7 +24,6 @@ import { USAGE_LIMITS } from '../usage-limits.constants';
 import {
   getTodayUTCDateString,
   getStartOfTodayUTC,
-  getStartOfMonthUTC,
 } from '../../../common/utils/date.utils';
 
 /** Standard error message for daily limit reached */
@@ -38,7 +36,7 @@ const DAILY_LIMIT_ERROR_MESSAGE =
  * This guard supports four types of limit checking:
  * 1. DAILY_CARD: Checks daily_readings table (1 per day, uses DATE column)
  * 2. TAROT_READING: Checks tarot_reading table (variable limit by plan, uses TIMESTAMP)
- * 3. BIRTH_CHART: Checks birth_charts table (monthly for Free/Premium, lifetime for Anonymous)
+ * 3. BIRTH_CHART: Uses centralized usage_limits table (monthly for Free/Premium, lifetime for Anonymous)
  * 4. Other features: Uses usage_limits table
  *
  * All date comparisons use UTC to ensure consistent 24-hour reset cycles.
@@ -57,8 +55,6 @@ export class CheckUsageLimitGuard implements CanActivate {
     private readonly dailyReadingRepository: Repository<DailyReading>,
     @InjectRepository(TarotReading)
     private readonly tarotReadingRepository: Repository<TarotReading>,
-    @InjectRepository(BirthChart)
-    private readonly birthChartRepository: Repository<BirthChart>,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -215,7 +211,7 @@ export class CheckUsageLimitGuard implements CanActivate {
    * - FREE: 3 per month
    * - PREMIUM: 5 per month
    *
-   * Uses TIMESTAMP comparison with start of month UTC for accurate counting.
+   * Uses centralized usage tracking from usage_limits table for accurate counting.
    */
   private async checkBirthChartLimit(userId: number): Promise<boolean> {
     this.logger.debug(`Checking BIRTH_CHART for userId=${userId}`);
@@ -224,7 +220,7 @@ export class CheckUsageLimitGuard implements CanActivate {
     const user = await this.usersService.findById(userId);
     if (!user) {
       this.logger.warn(`User not found for userId=${userId}`);
-      throw new ForbiddenException('Usuario no encontrado');
+      throw new UnauthorizedException('Token inválido o expirado');
     }
 
     const plan = user.plan;
@@ -232,14 +228,12 @@ export class CheckUsageLimitGuard implements CanActivate {
 
     this.logger.debug(`User plan: ${plan}, limit: ${limit}`);
 
-    // Count this month's birth charts
-    const startOfMonth = getStartOfMonthUTC();
-
-    const chartsCount = await this.birthChartRepository
-      .createQueryBuilder('birth_chart')
-      .where('birth_chart.userId = :userId', { userId })
-      .andWhere('birth_chart.createdAt >= :startOfMonth', { startOfMonth })
-      .getCount();
+    // Get this month's usage from centralized usage tracking
+    const chartsCount = await this.usageLimitsService.getUsageByPeriod(
+      userId,
+      UsageFeature.BIRTH_CHART,
+      'monthly',
+    );
 
     this.logger.debug(`BIRTH_CHART count this month: ${chartsCount}/${limit}`);
 
@@ -312,6 +306,9 @@ export class CheckUsageLimitGuard implements CanActivate {
   /**
    * Checks lifetime limit for anonymous users (1 total, forever).
    * Used for PENDULUM_QUERY and BIRTH_CHART features.
+   *
+   * Prioritizes fingerprint from request (query/body) if provided,
+   * otherwise generates from IP + User-Agent as fallback.
    */
   private async checkLifetimeLimit(
     request: Request,
@@ -319,10 +316,21 @@ export class CheckUsageLimitGuard implements CanActivate {
   ): Promise<boolean> {
     const ip = request.ip || '';
     const userAgent = request.headers['user-agent'] || '';
-    const fingerprint = this.anonymousTrackingService.generateFingerprint(
-      ip,
-      userAgent,
-    );
+
+    // Prioritize fingerprint from request (query or body) if provided
+    const requestQuery = request.query as Record<string, unknown>;
+    const requestBody = request.body as Record<string, unknown>;
+    const providedFingerprint =
+      (typeof requestQuery?.fingerprint === 'string'
+        ? requestQuery.fingerprint
+        : undefined) ||
+      (typeof requestBody?.fingerprint === 'string'
+        ? requestBody.fingerprint
+        : undefined);
+
+    const fingerprint =
+      providedFingerprint ||
+      this.anonymousTrackingService.generateFingerprint(ip, userAgent);
 
     const canAccess = await this.anonymousTrackingService.canAccessLifetime(
       fingerprint,
