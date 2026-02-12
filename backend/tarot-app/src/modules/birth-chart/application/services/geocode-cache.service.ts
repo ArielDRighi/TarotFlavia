@@ -67,28 +67,31 @@ export class GeocodeCacheService {
   }
 
   /**
-   * Obtiene detalles de un lugar específico desde caché
+   * Obtiene detalles de un lugar específico desde caché (reverse geocoding)
    */
-  async getPlace(placeId: string): Promise<GeocodedPlaceDto | null> {
-    const key = `geocode:place:${placeId}`;
+  async getPlaceDetails(coordKey: string): Promise<GeocodedPlaceDto | null> {
+    const key = `geocode:place:${coordKey}`;
     const cached = await this.cacheManager.get<GeocodedPlaceDto>(key);
 
     if (cached) {
-      this.logger.debug(`Cache hit for place: ${placeId}`);
+      this.logger.debug(`Cache hit for place details: ${coordKey}`);
       return cached;
     }
 
-    this.logger.debug(`Cache miss for place: ${placeId}`);
+    this.logger.debug(`Cache miss for place details: ${coordKey}`);
     return null;
   }
 
   /**
-   * Guarda detalles de un lugar en caché
+   * Guarda detalles de un lugar en caché (reverse geocoding)
    */
-  async setPlace(placeId: string, place: GeocodedPlaceDto): Promise<void> {
-    const key = `geocode:place:${placeId}`;
+  async setPlaceDetails(
+    coordKey: string,
+    place: GeocodedPlaceDto,
+  ): Promise<void> {
+    const key = `geocode:place:${coordKey}`;
     await this.cacheManager.set(key, place, this.PLACE_DETAILS_TTL);
-    this.logger.debug(`Cached place details: ${placeId}`);
+    this.logger.debug(`Cached place details: ${coordKey}`);
   }
 
   /**

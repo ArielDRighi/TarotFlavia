@@ -31,7 +31,7 @@ import {
   HouseCuspService,
   PlanetPositionService,
 } from './application/services';
-import { GeocodeCacheService } from './infrastructure/cache/geocode-cache.service';
+import { GeocodeCacheService } from './application/services/geocode-cache.service';
 import { BirthChartInterpretationsSeeder } from './infrastructure/seeders/birth-chart-interpretations.seeder';
 
 @Module({

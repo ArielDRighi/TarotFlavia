@@ -87,34 +87,36 @@ describe('GeocodeCacheService', () => {
     });
   });
 
-  describe('getPlace', () => {
+  describe('getPlaceDetails', () => {
     it('should return cached place details if exists', async () => {
-      const placeId = 'test-place-id';
+      const coordKey = '-34.6037,-58.3816';
       cacheManager.get.mockResolvedValue(mockPlace);
 
-      const result = await service.getPlace(placeId);
+      const result = await service.getPlaceDetails(coordKey);
 
       expect(result).toEqual(mockPlace);
       expect(cacheManager.get).toHaveBeenCalledWith(
-        'geocode:place:test-place-id',
+        'geocode:place:-34.6037,-58.3816',
       );
     });
 
     it('should return null if cache miss', async () => {
       cacheManager.get.mockResolvedValue(undefined);
 
-      const result = await service.getPlace('non-existent');
+      const result = await service.getPlaceDetails('0.0000,0.0000');
 
       expect(result).toBeNull();
     });
   });
 
-  describe('setPlace', () => {
+  describe('setPlaceDetails', () => {
     it('should store place details with correct TTL', async () => {
-      await service.setPlace(mockPlace.placeId, mockPlace);
+      const coordKey = '-34.6037,-58.3816';
+
+      await service.setPlaceDetails(coordKey, mockPlace);
 
       expect(cacheManager.set).toHaveBeenCalledWith(
-        'geocode:place:test-place-id',
+        'geocode:place:-34.6037,-58.3816',
         mockPlace,
         30 * 24 * 60 * 60 * 1000, // 30 días en ms
       );

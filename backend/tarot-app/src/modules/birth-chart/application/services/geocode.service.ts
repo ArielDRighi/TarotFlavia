@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
-import { GeocodeCacheService } from '../../infrastructure/cache/geocode-cache.service';
+import { GeocodeCacheService } from './geocode-cache.service';
 import {
   GeocodeSearchResponseDto,
   GeocodedPlaceDto,
@@ -66,7 +66,21 @@ export class GeocodeService {
   private readonly TIMEZONEDB_URL =
     'http://api.timezonedb.com/v2.1/get-time-zone';
 
-  // Rate limiting: Nominatim requiere max 1 request/segundo
+  /**
+   * Rate limiting Nominatim: máximo 1 request/segundo.
+   *
+   * IMPORTANTE (MVP / single-instance):
+   * - Este rate limit es solo en memoria y por proceso (un singleton de NestJS).
+   *   Si se ejecutan múltiples instancias del backend (horizontal scaling),
+   *   cada una mantiene su propio estado y el tráfico agregado puede exceder
+   *   el límite global de Nominatim (1 req/seg).
+   * - La actualización de este timestamp no es atómica: múltiples requests
+   *   concurrentes en la misma instancia podrían acercarse demasiado entre sí.
+   *
+   * Antes de escalar a múltiples instancias, reemplazar este mecanismo por
+   * un rate limiter distribuido (por ejemplo, usando Redis o similar) o una
+   * librería de rate limiting que soporte locks distribuidos.
+   */
   private lastNominatimRequest = 0;
   private readonly NOMINATIM_RATE_LIMIT_MS = 1100; // 1.1 segundos
 
@@ -141,8 +155,14 @@ export class GeocodeService {
 
       return responseDto;
     } catch (error) {
-      this.logger.error('Error searching places:', error);
-      throw new Error('No se pudo buscar el lugar. Intente de nuevo.');
+      const err = error as Error;
+      this.logger.error(
+        `Error searching places for query "${query}": ${err.message}`,
+        err.stack,
+      );
+      throw new Error('No se pudo buscar el lugar. Intente de nuevo.', {
+        cause: err,
+      });
     }
   }
 
@@ -150,7 +170,8 @@ export class GeocodeService {
    * Obtiene la zona horaria para unas coordenadas
    */
   async getTimezone(latitude: number, longitude: number): Promise<string> {
-    const coordKey = `${latitude.toFixed(2)},${longitude.toFixed(2)}`;
+    // Usamos 4 decimales (~11m) para evitar colisiones cerca de fronteras de zona horaria
+    const coordKey = `${latitude.toFixed(4)},${longitude.toFixed(4)}`;
 
     // Verificar caché
     const cached = await this.cacheService.getTimezone(coordKey);
@@ -188,10 +209,80 @@ export class GeocodeService {
 
       throw new Error(response.data.message || 'Unknown error');
     } catch (error) {
-      this.logger.error('Error getting timezone:', error);
+      const err = error as Error;
+      this.logger.error(
+        `Error getting timezone for coordinates (${latitude}, ${longitude}): ${err.message}`,
+        err.stack,
+      );
       const fallbackTimezone = this.estimateTimezoneByLongitude(longitude);
       await this.cacheService.setTimezone(coordKey, fallbackTimezone);
       return fallbackTimezone;
+    }
+  }
+
+  /**
+   * Obtiene detalles de un lugar específico por coordenadas (reverse geocoding)
+   */
+  async getPlaceDetails(
+    latitude: number,
+    longitude: number,
+  ): Promise<GeocodedPlaceDto | null> {
+    // Usamos 4 decimales (~11m) para precisión en el cache key
+    const coordKey = `${latitude.toFixed(4)},${longitude.toFixed(4)}`;
+
+    // Verificar caché
+    const cached = await this.cacheService.getPlaceDetails(coordKey);
+    if (cached) {
+      this.logger.debug('Returning cached place details');
+      return cached;
+    }
+
+    // Rate limiting
+    await this.waitForRateLimit();
+
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get<NominatimResult>(
+          'https://nominatim.openstreetmap.org/reverse',
+          {
+            params: {
+              lat: latitude,
+              lon: longitude,
+              format: 'json',
+              addressdetails: 1,
+              'accept-language': 'es',
+            },
+            headers: {
+              'User-Agent': 'Auguria/1.0 (contact@auguria.com)',
+            },
+          },
+        ),
+      );
+
+      const result = response.data;
+      const timezone = await this.getTimezone(latitude, longitude);
+
+      const place: GeocodedPlaceDto = {
+        placeId: `osm_${result.osm_type}_${result.osm_id}`,
+        displayName: result.display_name,
+        city: this.extractCity(result.address),
+        country: result.address?.country || '',
+        latitude,
+        longitude,
+        timezone,
+      };
+
+      // Guardar en caché
+      await this.cacheService.setPlaceDetails(coordKey, place);
+
+      return place;
+    } catch (error) {
+      const err = error as Error;
+      this.logger.error(
+        `Error getting place details for coordinates (${latitude}, ${longitude}): ${err.message}`,
+        err.stack,
+      );
+      return null;
     }
   }
 
