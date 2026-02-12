@@ -3,7 +3,6 @@ import {
   ConflictException,
   Controller,
   Delete,
-  ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
@@ -116,7 +115,6 @@ export class BirthChartHistoryController {
     @Query('page', new ParseIntPipe({ optional: true })) page: number = 1,
     @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 10,
   ): Promise<ChartHistoryResponseDto> {
-    this.ensurePremium(user);
     this.logger.log(`Fetching chart history for user ${user.userId}`);
 
     return this.historyService.getUserCharts(user.userId, page, limit);
@@ -134,7 +132,6 @@ export class BirthChartHistoryController {
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() user: UserFromToken,
   ): Promise<PremiumChartResponseDto> {
-    this.ensurePremium(user);
     this.logger.log(`Fetching chart ${id} for user ${user.userId}`);
 
     const chart = await this.historyService.getChartById(id, user.userId);
@@ -159,7 +156,6 @@ export class BirthChartHistoryController {
     @Body() dto: CreateBirthChartDto,
     @CurrentUser() user: UserFromToken,
   ): Promise<SavedChartSummaryDto> {
-    this.ensurePremium(user);
     this.logger.log(`Saving chart for user ${user.userId}`);
 
     const exists = await this.historyService.checkDuplicate(
@@ -196,7 +192,6 @@ export class BirthChartHistoryController {
     @Body('name') name: string,
     @CurrentUser() user: UserFromToken,
   ): Promise<{ id: number; name: string }> {
-    this.ensurePremium(user);
     this.logger.log(`Renaming chart ${id} for user ${user.userId}`);
 
     const updated = await this.historyService.renameChart(
@@ -225,7 +220,6 @@ export class BirthChartHistoryController {
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() user: UserFromToken,
   ): Promise<void> {
-    this.ensurePremium(user);
     this.logger.log(`Deleting chart ${id} for user ${user.userId}`);
 
     const deleted = await this.historyService.deleteChart(id, user.userId);
@@ -255,8 +249,6 @@ export class BirthChartHistoryController {
     @Body() dto: CreateBirthChartDto,
     @CurrentUser() user: UserFromToken,
   ): Promise<{ exists: boolean; existingChart: DuplicateChartSummary | null }> {
-    this.ensurePremium(user);
-
     const existing = await this.historyService.findDuplicate(
       user.userId,
       dto.birthDate,
@@ -285,7 +277,6 @@ export class BirthChartHistoryController {
     @CurrentUser() user: UserFromToken,
     @Res() res: Response,
   ): Promise<void> {
-    this.ensurePremium(user);
     this.logger.log(`Downloading PDF for saved chart ${id}`);
 
     const pdfResult = await this.historyService.generatePdfFromSaved(
@@ -303,13 +294,5 @@ export class BirthChartHistoryController {
       `attachment; filename="${pdfResult.filename}"`,
     );
     res.send(pdfResult.buffer);
-  }
-
-  private ensurePremium(user: UserFromToken): void {
-    if (user.plan !== UserPlan.PREMIUM) {
-      throw new ForbiddenException(
-        'El historial de cartas está disponible solo para usuarios Premium',
-      );
-    }
   }
 }

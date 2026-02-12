@@ -1,8 +1,4 @@
-import {
-  ConflictException,
-  ForbiddenException,
-  NotFoundException,
-} from '@nestjs/common';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Response } from 'express';
 import { CreateBirthChartDto } from '../../application/dto/generate-chart.dto';
@@ -17,12 +13,6 @@ describe('BirthChartHistoryController', () => {
     userId: 10,
     email: 'premium@test.com',
     plan: UserPlan.PREMIUM,
-  };
-
-  const freeUser = {
-    userId: 11,
-    email: 'free@test.com',
-    plan: UserPlan.FREE,
   };
 
   const createDto: CreateBirthChartDto = {
@@ -102,22 +92,12 @@ describe('BirthChartHistoryController', () => {
         meta: { page: 1, limit: 10, totalItems: 0, totalPages: 0 },
       });
 
-      await controller.getHistory(
-        premiumUser,
-        undefined as unknown as number,
-        undefined as unknown as number,
-      );
+      await controller.getHistory(premiumUser);
 
       expect(mockHistoryService.getUserCharts).toHaveBeenCalledWith(
         premiumUser.userId,
         1,
         10,
-      );
-    });
-
-    it('should reject non-premium user', () => {
-      expect(() => controller.getHistory(freeUser, 1, 10)).toThrow(
-        ForbiddenException,
       );
     });
   });

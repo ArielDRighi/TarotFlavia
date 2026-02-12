@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   Injectable,
 } from '@nestjs/common';
+import type { Request } from 'express';
 import { UserPlan } from '../../../users/entities/user.entity';
 
 interface RequestWithUser extends Request {
