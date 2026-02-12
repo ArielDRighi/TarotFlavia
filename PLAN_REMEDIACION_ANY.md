@@ -900,23 +900,115 @@ node scripts/validate-architecture.js # ✅ PASSED
 
 ---
 
-### TASK-ANY-016: Usage Limits & Subscriptions Tests
+### TASK-ANY-016: Usage Limits & Subscriptions Tests ✅
 
+**Estado:** ✅ COMPLETADA  
 **Prioridad:** 🟡 MEDIA  
-**Usos de `any`:** 19  
+**Usos de `any`:** 19 → 0 (100% eliminado)  
 **Archivos afectados:**
 
-- `src/modules/usage-limits/` (13 usos)
-- `src/modules/subscriptions/` (6 usos)
+**Usage Limits Module (13 → 0):**
+- `services/anonymous-tracking.service.spec.ts` (6 → 0)
+- `guards/check-usage-limit.guard.spec.ts` (1 → 0)
+- `services/usage-limits-reset.service.spec.ts` (6 → 0)
+
+**Subscriptions Module (6 → 0):**
+- `subscriptions.service.spec.ts` (4 → 0)
+- `subscriptions.controller.spec.ts` (2 → 0)
+
+**Nota:** Los archivos `increment-usage.interceptor.spec.ts` (2 usos) y `usage-limits.service.spec.ts` (1 uso) solo contenían Jest matchers (`expect.any()`) que no requieren cambios.
+
+**Implementación:**
+
+**1. Anonymous Tracking Service (6 → 0):**
+```typescript
+// ✅ Request mocks con Parameters inference
+await service.canAccess(mockRequest as Parameters<typeof service.canAccess>[0]);
+await service.canAccess(requestWithoutUA as Parameters<typeof service.canAccess>[0]);
+
+await service.recordUsage(mockRequest as Parameters<typeof service.recordUsage>[0]);
+await service.recordUsage(requestWithoutUA as Parameters<typeof service.recordUsage>[0]);
+await service.recordUsage(requestWithoutIP as Parameters<typeof service.recordUsage>[0]);
+```
+
+**2. Check Usage Limit Guard (1 → 0):**
+```typescript
+import { AnonymousUsage } from '../entities/anonymous-usage.entity';
+
+// ✅ Entity mock
+anonymousTrackingService.recordUsage.mockResolvedValue({
+  id: 1,
+  fingerprint: 'test-fingerprint',
+  ip: '192.168.1.1',
+  date: '2025-01-02',
+  feature: UsageFeature.TAROT_READING,
+} as unknown as AnonymousUsage);
+```
+
+**3. Usage Limits Reset Service (6 → 0):**
+```typescript
+import { Repository, DeleteResult } from 'typeorm';
+
+// ✅ DeleteResult typing (5 instances)
+const mockDeleteResult = { affected: 5 };
+repository.delete.mockResolvedValue(mockDeleteResult as unknown as DeleteResult);
+
+// ✅ Record para acceso a propiedades
+const callArgs = repository.delete.mock.calls[0][0] as Record<string, unknown>;
+```
+
+**4. Subscriptions Service (4 → 0):**
+```typescript
+// ✅ UserTarotistaSubscription entity mocks
+const newSubscription = {...};
+subscriptionRepo.create.mockReturnValue(newSubscription as unknown as UserTarotistaSubscription);
+subscriptionRepo.save.mockResolvedValue(newSubscription as unknown as UserTarotistaSubscription);
+
+// ✅ Object mocks con entity type
+subscriptionRepo.save.mockResolvedValue({
+  ...currentSubscription,
+  tarotistaId: newTarotistaId,
+  canChangeAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+  changeCount: 2,
+} as unknown as UserTarotistaSubscription);
+```
+
+**5. Subscriptions Controller (2 → 0):**
+```typescript
+import {
+  SubscriptionType,
+  SubscriptionStatus,
+  UserTarotistaSubscription,
+} from '../tarotistas/entities/user-tarotista-subscription.entity';
+
+// ✅ Entity mock (2 instances)
+service.setFavoriteTarotista.mockResolvedValue(mockSubscription as unknown as UserTarotistaSubscription);
+```
+
+**Técnicas aplicadas:**
+- ✅ Parameters<typeof method>[N] para Request mocks (6 instancias)
+- ✅ Entity mocking: AnonymousUsage, UserTarotistaSubscription (8 instancias)
+- ✅ TypeORM DeleteResult typing (5 instancias)
+- ✅ Record<string, unknown> para acceso a propiedades (1 instancia)
 
 **Validación:**
 
 ```bash
 cd backend/tarot-app
-npm run lint
-npm run test src/modules/usage-limits/
-npm run test src/modules/subscriptions/
+npm run format                       # ✅ PASSED - No changes needed
+npm run lint                         # ✅ PASSED - 0 errors in affected modules
+npm run test src/modules/usage-limits/ src/modules/subscriptions/  # ✅ 7 suites, 117 tests passed
+npm run test:cov                     # ✅ 80.86% coverage (250 suites, 3484 tests)
+npm run build                        # ✅ PASSED
+node scripts/validate-architecture.js # ✅ PASSED
 ```
+
+**Resultado:**
+✅ **19 eliminaciones exitosas** (100%)  
+✅ **Todos los tests pasando** (7 suites, 117 tests en módulos afectados)  
+✅ **Coverage mantenido** (80.86%)  
+✅ **Build exitoso**  
+✅ **Arquitectura validada**
 
 ---
 
@@ -955,12 +1047,12 @@ npm run test:e2e
 | ------------ | --------- | ------------- | ----------- | ------------------------- |
 | **Fase 1**   | 8 tareas  | 32 → 0        | 9.0%        | ✅ COMPLETADA             |
 | **Fase 2**   | 4 tareas  | 165 → 0       | 46.5%       | ✅ COMPLETADA             |
-| **Fase 3**   | 4 tareas  | 131 → 22      | 36.9%       | 🔄 EN PROGRESO (3/4)      |
+| **Fase 3**   | 4 tareas  | 131 → 0       | 36.9%       | ✅ COMPLETADA             |
 | **Fase 4**   | 1 tarea   | 19 usos       | 5.4%        | ⏳ PENDIENTE              |
 | **RESTANTE** |           | 5 usos        | 1.3%        | ⏳ PENDIENTE              |
-| **TOTAL**    | 17 tareas | 355 → 42      | 100%        | **313 any eliminados** ✅ |
+| **TOTAL**    | 17 tareas | 355 → 23      | 100%        | **332 any eliminados** ✅ |
 
-**Progreso general:** 313 / 355 = **88.2% completado** 🎉
+**Progreso general:** 332 / 355 = **93.5% completado** 🎉
 
 **Fase 2 - Detalle:**
 
@@ -974,7 +1066,7 @@ npm run test:e2e
 - ✅ TASK-ANY-013: Tarot Module Tests (27 → 0) **¡100% eliminado!**
 - ✅ TASK-ANY-014: Horoscope, Numerology & Health Tests (39 → 0) **¡100% eliminado!**
 - ✅ TASK-ANY-015: Rituals, Tarotistas & Admin Tests (44 → 0) **¡100% eliminado!**
-- ⏳ TASK-ANY-016: Usage Limits & Subscriptions Tests (22 usos)
+- ✅ TASK-ANY-016: Usage Limits & Subscriptions Tests (19 → 0) **¡100% eliminado!**
 
 **Nota:** El restante (5 usos) son archivos AI usages y similares que se asignarán en refactoring posterior.
 

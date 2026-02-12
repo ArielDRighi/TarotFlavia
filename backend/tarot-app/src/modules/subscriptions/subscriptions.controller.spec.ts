@@ -9,6 +9,7 @@ import {
 import {
   SubscriptionType,
   SubscriptionStatus,
+  UserTarotistaSubscription,
 } from '../tarotistas/entities/user-tarotista-subscription.entity';
 
 describe('SubscriptionsController', () => {
@@ -52,7 +53,9 @@ describe('SubscriptionsController', () => {
 
       jest
         .spyOn(service, 'setFavoriteTarotista')
-        .mockResolvedValue(mockSubscription as any);
+        .mockResolvedValue(
+          mockSubscription as unknown as UserTarotistaSubscription,
+        );
 
       const result = await controller.setFavoriteTarotista(req, {
         tarotistaId,
@@ -150,7 +153,9 @@ describe('SubscriptionsController', () => {
 
       jest
         .spyOn(service, 'enableAllAccessMode')
-        .mockResolvedValue(mockSubscription as any);
+        .mockResolvedValue(
+          mockSubscription as unknown as UserTarotistaSubscription,
+        );
 
       const result = await controller.enableAllAccess(req);
 

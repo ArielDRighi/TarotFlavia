@@ -93,10 +93,14 @@ describe('SubscriptionsService', () => {
 
       jest
         .spyOn(subscriptionRepo, 'create')
-        .mockReturnValue(newSubscription as any);
+        .mockReturnValue(
+          newSubscription as unknown as UserTarotistaSubscription,
+        );
       jest
         .spyOn(subscriptionRepo, 'save')
-        .mockResolvedValue(newSubscription as any);
+        .mockResolvedValue(
+          newSubscription as unknown as UserTarotistaSubscription,
+        );
 
       const result = await service.setFavoriteTarotista(userId, tarotistaId);
 
@@ -175,7 +179,7 @@ describe('SubscriptionsService', () => {
         tarotistaId: newTarotistaId,
         canChangeAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         changeCount: 2,
-      } as any);
+      } as unknown as UserTarotistaSubscription);
 
       const result = await service.setFavoriteTarotista(userId, newTarotistaId);
 
@@ -216,7 +220,7 @@ describe('SubscriptionsService', () => {
         ...currentSubscription,
         tarotistaId: newTarotistaId,
         changeCount: 6,
-      } as any);
+      } as unknown as UserTarotistaSubscription);
 
       const result = await service.setFavoriteTarotista(userId, newTarotistaId);
 
