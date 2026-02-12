@@ -61,7 +61,7 @@ describe('LoggerService', () => {
       service.log('Test message', 'TestContext');
 
       expect(spy).toHaveBeenCalled();
-      const call = spy.mock.calls[0][0] as Record<string, any>;
+      const call = spy.mock.calls[0][0] as Record<string, unknown>;
       expect(call.message).toBe('Test message');
       spy.mockRestore();
     });
@@ -71,7 +71,7 @@ describe('LoggerService', () => {
       service.log('Test message', 'MyContext');
 
       expect(spy).toHaveBeenCalled();
-      const call = spy.mock.calls[0][0] as Record<string, any>;
+      const call = spy.mock.calls[0][0] as Record<string, unknown>;
       expect(call).toMatchObject({
         context: 'MyContext',
       });
@@ -87,7 +87,7 @@ describe('LoggerService', () => {
       });
 
       expect(spy).toHaveBeenCalled();
-      const call = spy.mock.calls[0][0] as Record<string, any>;
+      const call = spy.mock.calls[0][0] as Record<string, unknown>;
       expect(call).toMatchObject({
         correlationId: testId,
       });
@@ -101,7 +101,7 @@ describe('LoggerService', () => {
       service.log('Test with metadata', 'TestContext', metadata);
 
       expect(spy).toHaveBeenCalled();
-      const call = spy.mock.calls[0][0] as Record<string, any>;
+      const call = spy.mock.calls[0][0] as Record<string, unknown>;
       expect(call).toMatchObject(metadata);
       spy.mockRestore();
     });
@@ -123,7 +123,7 @@ describe('LoggerService', () => {
       service.error('Error occurred', error.stack, 'TestContext');
 
       expect(spy).toHaveBeenCalled();
-      const call = spy.mock.calls[0][0] as Record<string, any>;
+      const call = spy.mock.calls[0][0] as Record<string, unknown>;
       expect(call).toMatchObject({
         stack: error.stack,
       });

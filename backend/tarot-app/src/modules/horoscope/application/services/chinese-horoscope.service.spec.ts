@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { InternalServerErrorException } from '@nestjs/common';
 import { ChineseHoroscopeService } from './chinese-horoscope.service';
@@ -149,7 +149,9 @@ describe('ChineseHoroscopeService', () => {
       repository.save.mockResolvedValue(mockHoroscope as ChineseHoroscope);
 
       // Mock delay para evitar esperas reales en tests
-      jest.spyOn(service as any, 'delay').mockResolvedValue(undefined);
+      jest
+        .spyOn(service as unknown as Record<string, jest.Mock>, 'delay')
+        .mockResolvedValue(undefined);
 
       // Act
       const result = await service.generateAllForYear(2026);
@@ -177,7 +179,9 @@ describe('ChineseHoroscopeService', () => {
       repository.save.mockResolvedValue(mockHoroscope as ChineseHoroscope);
 
       // Mock delay
-      jest.spyOn(service as any, 'delay').mockResolvedValue(undefined);
+      jest
+        .spyOn(service as unknown as Record<string, jest.Mock>, 'delay')
+        .mockResolvedValue(undefined);
 
       // Act
       const result = await service.generateAllForYear(2026);
@@ -200,7 +204,7 @@ describe('ChineseHoroscopeService', () => {
       repository.save.mockResolvedValue(mockHoroscope as ChineseHoroscope);
 
       const delaySpy = jest
-        .spyOn(service as any, 'delay')
+        .spyOn(service as unknown as Record<string, jest.Mock>, 'delay')
         .mockResolvedValue(undefined);
 
       // Act
@@ -317,7 +321,9 @@ describe('ChineseHoroscopeService', () => {
         where: jest.fn().mockReturnThis(),
         execute: jest.fn().mockResolvedValue({}),
       };
-      repository.createQueryBuilder.mockReturnValue(mockQueryBuilder as any);
+      repository.createQueryBuilder.mockReturnValue(
+        mockQueryBuilder as unknown as SelectQueryBuilder<ChineseHoroscope>,
+      );
 
       // Act
       await service.incrementViewCount(1);
@@ -338,7 +344,9 @@ describe('ChineseHoroscopeService', () => {
   describe('parseAIResponse (private)', () => {
     it('debe parsear correctamente JSON válido', () => {
       // Act
-      const result = (service as any).parseAIResponse(mockAIResponse.content);
+      const result = (
+        service as unknown as Record<string, (arg: string) => unknown>
+      ).parseAIResponse(mockAIResponse.content);
 
       // Assert
       expect(result).toHaveProperty('generalOverview');
@@ -352,7 +360,9 @@ describe('ChineseHoroscopeService', () => {
         '```json\n' + mockAIResponse.content + '\n```';
 
       // Act
-      const result = (service as any).parseAIResponse(contentWithMarkdown);
+      const result = (
+        service as unknown as Record<string, (arg: string) => unknown>
+      ).parseAIResponse(contentWithMarkdown);
 
       // Assert
       expect(result).toHaveProperty('generalOverview');
@@ -365,7 +375,9 @@ describe('ChineseHoroscopeService', () => {
 
       // Act & Assert
       expect(() => {
-        (service as any).parseAIResponse(invalidJSON);
+        (
+          service as unknown as Record<string, (arg: string) => unknown>
+        ).parseAIResponse(invalidJSON);
       }).toThrow(InternalServerErrorException);
     });
   });
@@ -405,7 +417,9 @@ describe('ChineseHoroscopeService', () => {
       repository.save.mockResolvedValue(mockHoroscope as ChineseHoroscope);
 
       // Mock delay
-      jest.spyOn(service as any, 'delay').mockResolvedValue(undefined);
+      jest
+        .spyOn(service as unknown as Record<string, jest.Mock>, 'delay')
+        .mockResolvedValue(undefined);
 
       // Act
       const result = await service.generateAllForYear(2026);

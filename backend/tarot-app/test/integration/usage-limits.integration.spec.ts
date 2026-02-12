@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import * as request from 'supertest';
 import { AppModule } from '../../src/app.module';
 
@@ -46,8 +46,8 @@ describe('UsageLimits + Readings Integration Tests', () => {
   let testSpread: TarotSpread;
 
   // Repositories
-  let userRepository: any;
-  let usageLimitRepository: any;
+  let userRepository: Repository<User>;
+  let usageLimitRepository: Repository<UsageLimit>;
 
   const testUserData = {
     password: 'TestPass123!',
@@ -400,13 +400,14 @@ describe('UsageLimits + Readings Integration Tests', () => {
 
       // ASSERT
       const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      today.setUTCHours(0, 0, 0, 0);
+      const dateString = today.toISOString().split('T')[0];
 
       const usageRecord = await usageLimitRepository.findOne({
         where: {
           userId: testUser.id,
           feature: UsageFeature.TAROT_READING,
-          date: today,
+          date: dateString,
         },
       });
 
@@ -440,13 +441,14 @@ describe('UsageLimits + Readings Integration Tests', () => {
 
       // ASSERT
       const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      today.setUTCHours(0, 0, 0, 0);
+      const dateString = today.toISOString().split('T')[0];
 
       const usageRecord = await usageLimitRepository.findOne({
         where: {
           userId: testUser.id,
           feature: UsageFeature.TAROT_READING,
-          date: today,
+          date: dateString,
         },
       });
 

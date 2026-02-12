@@ -7,6 +7,7 @@ import { LogoutUseCase } from '../use-cases/logout.use-case';
 import { ForgotPasswordUseCase } from '../use-cases/forgot-password.use-case';
 import { ResetPasswordUseCase } from '../use-cases/reset-password.use-case';
 import { CreateUserDto } from '../../../users/application/dto/create-user.dto';
+import { User } from '../../../users/entities/user.entity';
 
 describe('AuthOrchestratorService', () => {
   let service: AuthOrchestratorService;
@@ -89,7 +90,7 @@ describe('AuthOrchestratorService', () => {
   describe('validateUser', () => {
     it('should delegate to LoginUseCase.validateUser', async () => {
       const mockUser = { id: 1, email: 'test@example.com' };
-      loginUseCase.validateUser.mockResolvedValue(mockUser as any);
+      loginUseCase.validateUser.mockResolvedValue(mockUser as unknown as User);
 
       const result = await service.validateUser(
         'test@example.com',

@@ -46,9 +46,11 @@ describe('Revenue Sharing and Metrics (e2e)', () => {
       .get('/api/v1/tarotistas')
       .expect(200);
 
-    const flavia = tarotistasResponse.body.data.find(
-      (t: any) => t.nombrePublico === 'Flavia',
-    );
+    const tarotistas = tarotistasResponse.body.data as Array<{
+      id: number;
+      nombrePublico: string;
+    }>;
+    const flavia = tarotistas.find((t) => t.nombrePublico === 'Flavia');
     if (!flavia) {
       throw new Error('Flavia tarotista not found in public tarotistas list');
     }

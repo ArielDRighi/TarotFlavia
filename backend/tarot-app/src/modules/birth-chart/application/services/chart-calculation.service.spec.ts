@@ -5,7 +5,12 @@ import { PlanetPositionService } from './planet-position.service';
 import { HouseCuspService } from './house-cusp.service';
 import { AspectCalculationService } from './aspect-calculation.service';
 import { ZodiacSign, Planet, AspectType } from '../../domain/enums';
-import { ChartData, PlanetPosition } from '../../entities/birth-chart.entity';
+import {
+  ChartData,
+  PlanetPosition,
+  ChartDistribution,
+  ChartAspect,
+} from '../../entities/birth-chart.entity';
 
 describe('ChartCalculationService', () => {
   let service: ChartCalculationService;
@@ -447,11 +452,11 @@ describe('ChartCalculationService', () => {
     it('should generate a summary of the chart', () => {
       const mockResult = {
         chartData: {
-          planets: [{}, {}] as any,
-          houses: [] as any,
-          aspects: [{}, {}, {}] as any,
-          ascendant: {} as any,
-          midheaven: {} as any,
+          planets: [{}, {}] as unknown as PlanetPosition[],
+          houses: [],
+          aspects: [{}, {}, {}] as unknown as ChartAspect[],
+          ascendant: {} as unknown as PlanetPosition,
+          midheaven: {} as unknown as PlanetPosition,
           distribution: {
             elements: { fire: 3, earth: 2, air: 4, water: 2 },
             modalities: { cardinal: 4, fixed: 3, mutable: 4 },
@@ -480,12 +485,12 @@ describe('ChartCalculationService', () => {
 
   describe('validateChartData', () => {
     it('should validate chart with correct data', () => {
-      const mockChartData: ChartData = {
+      const mockChartData: Partial<ChartData> = {
         planets: new Array(10).fill({}),
         houses: new Array(12).fill({}),
         aspects: [],
-        ascendant: {} as any,
-        midheaven: {} as any,
+        ascendant: {} as unknown as PlanetPosition,
+        midheaven: {} as unknown as PlanetPosition,
         distribution: {
           elements: { fire: 0, earth: 0, air: 0, water: 0 },
           modalities: { cardinal: 0, fixed: 0, mutable: 0 },
@@ -493,19 +498,21 @@ describe('ChartCalculationService', () => {
         },
       };
 
-      const result = service.validateChartData(mockChartData);
+      const result = service.validateChartData(
+        mockChartData as unknown as ChartData,
+      );
 
       expect(result.valid).toBe(true);
       expect(result.errors).toHaveLength(0);
     });
 
     it('should detect invalid number of planets', () => {
-      const mockChartData: ChartData = {
+      const mockChartData: Partial<ChartData> = {
         planets: new Array(5).fill({}),
         houses: new Array(12).fill({}),
         aspects: [],
-        ascendant: {} as any,
-        midheaven: {} as any,
+        ascendant: {} as unknown as PlanetPosition,
+        midheaven: {} as unknown as PlanetPosition,
         distribution: {
           elements: { fire: 0, earth: 0, air: 0, water: 0 },
           modalities: { cardinal: 0, fixed: 0, mutable: 0 },
@@ -513,19 +520,21 @@ describe('ChartCalculationService', () => {
         },
       };
 
-      const result = service.validateChartData(mockChartData);
+      const result = service.validateChartData(
+        mockChartData as unknown as ChartData,
+      );
 
       expect(result.valid).toBe(false);
       expect(result.errors).toContain('Expected 10 planets, got 5');
     });
 
     it('should detect invalid number of houses', () => {
-      const mockChartData: ChartData = {
+      const mockChartData: Partial<ChartData> = {
         planets: new Array(10).fill({}),
         houses: new Array(6).fill({}),
         aspects: [],
-        ascendant: {} as any,
-        midheaven: {} as any,
+        ascendant: {} as unknown as PlanetPosition,
+        midheaven: {} as unknown as PlanetPosition,
         distribution: {
           elements: { fire: 0, earth: 0, air: 0, water: 0 },
           modalities: { cardinal: 0, fixed: 0, mutable: 0 },
@@ -533,19 +542,21 @@ describe('ChartCalculationService', () => {
         },
       };
 
-      const result = service.validateChartData(mockChartData);
+      const result = service.validateChartData(
+        mockChartData as unknown as ChartData,
+      );
 
       expect(result.valid).toBe(false);
       expect(result.errors).toContain('Expected 12 houses, got 6');
     });
 
     it('should detect missing ascendant', () => {
-      const mockChartData: ChartData = {
+      const mockChartData: Partial<ChartData> = {
         planets: new Array(10).fill({}),
         houses: new Array(12).fill({}),
         aspects: [],
-        ascendant: null as any,
-        midheaven: {} as any,
+        ascendant: null as unknown as PlanetPosition,
+        midheaven: {} as unknown as PlanetPosition,
         distribution: {
           elements: { fire: 0, earth: 0, air: 0, water: 0 },
           modalities: { cardinal: 0, fixed: 0, mutable: 0 },
@@ -553,39 +564,45 @@ describe('ChartCalculationService', () => {
         },
       };
 
-      const result = service.validateChartData(mockChartData);
+      const result = service.validateChartData(
+        mockChartData as unknown as ChartData,
+      );
 
       expect(result.valid).toBe(false);
       expect(result.errors).toContain('Missing ascendant');
     });
 
     it('should detect missing distribution', () => {
-      const mockChartData: ChartData = {
+      const mockChartData: Partial<ChartData> = {
         planets: new Array(10).fill({}),
         houses: new Array(12).fill({}),
         aspects: [],
-        ascendant: {} as any,
-        midheaven: {} as any,
-        distribution: null as any,
+        ascendant: {} as unknown as PlanetPosition,
+        midheaven: {} as unknown as PlanetPosition,
+        distribution: null as unknown as ChartDistribution,
       };
 
-      const result = service.validateChartData(mockChartData);
+      const result = service.validateChartData(
+        mockChartData as unknown as ChartData,
+      );
 
       expect(result.valid).toBe(false);
       expect(result.errors).toContain('Missing distribution data');
     });
 
     it('should detect multiple errors', () => {
-      const mockChartData: ChartData = {
+      const mockChartData: Partial<ChartData> = {
         planets: [],
         houses: [],
         aspects: [],
-        ascendant: null as any,
-        midheaven: null as any,
-        distribution: null as any,
+        ascendant: null as unknown as PlanetPosition,
+        midheaven: null as unknown as PlanetPosition,
+        distribution: null as unknown as ChartDistribution,
       };
 
-      const result = service.validateChartData(mockChartData);
+      const result = service.validateChartData(
+        mockChartData as unknown as ChartData,
+      );
 
       expect(result.valid).toBe(false);
       expect(result.errors.length).toBeGreaterThan(1);

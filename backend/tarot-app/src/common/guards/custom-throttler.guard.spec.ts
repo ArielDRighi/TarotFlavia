@@ -181,7 +181,7 @@ describe('CustomThrottlerGuard', () => {
 
         // Mock parent's canActivate to throw ThrottlerException
         jest
-          .spyOn(guard as any, 'canActivate')
+          .spyOn(guard as unknown as { canActivate: jest.Mock }, 'canActivate')
           .mockRejectedValueOnce(new ThrottlerException());
 
         const context = createMockContext('192.168.1.50');

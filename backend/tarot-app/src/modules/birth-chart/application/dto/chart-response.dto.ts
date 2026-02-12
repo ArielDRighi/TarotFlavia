@@ -162,9 +162,9 @@ export class BasicChartResponseDto {
       'Datos para renderizar el gráfico de la carta astral (formato SVG)',
   })
   chartSvgData: {
-    planets: any[];
-    houses: any[];
-    aspects: any[];
+    planets: Record<string, unknown>[];
+    houses: Record<string, unknown>[];
+    aspects: Record<string, unknown>[];
   };
 
   @ApiProperty({

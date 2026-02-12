@@ -14,5 +14,5 @@ export class AIRequestDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsObject()
-  parameters?: Record<string, any>;
+  parameters?: Record<string, unknown>;
 }

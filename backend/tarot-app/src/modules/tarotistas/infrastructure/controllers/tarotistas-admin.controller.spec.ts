@@ -366,7 +366,7 @@ describe('TarotistasAdminController', () => {
         expectedResult,
       );
 
-      const result = await controller.bulkImportMeanings(1, bulkDto as any);
+      const result = await controller.bulkImportMeanings(1, bulkDto);
 
       expect(orchestrator.bulkImportCustomMeanings).toHaveBeenCalledWith(
         1,
@@ -424,7 +424,7 @@ describe('TarotistasAdminController', () => {
 
       mockOrchestrator.approveApplication.mockResolvedValue({
         application,
-        tarotista: {} as any,
+        tarotista: {} as unknown as Tarotista,
       });
 
       const result = await controller.approveApplication(1, req, approveDto);

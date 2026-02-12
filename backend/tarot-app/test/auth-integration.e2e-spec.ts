@@ -9,8 +9,8 @@ interface AuthResponse {
     id: number;
     email: string;
     name: string;
-    isAdmin: boolean;
     plan: string;
+    roles?: string[];
   };
   access_token: string;
   refresh_token: string;
@@ -78,7 +78,6 @@ describe('Auth Integration Tests (E2E)', () => {
       expect(response.body.user).toBeDefined();
       expect(response.body.user.email).toBe(testUserData.email);
       expect(response.body.user.name).toBe(testUserData.name);
-      expect(response.body.user.isAdmin).toBe(false);
       expect(response.body.user.plan).toBe('free');
     });
 
@@ -298,9 +297,11 @@ describe('Auth Integration Tests (E2E)', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
-      const testUser = usersResponse.body.find(
-        (u: any) => u.email === testUserData.email,
-      );
+      const users = usersResponse.body as Array<{ id: number; email: string }>;
+      const testUser = users.find((u) => u.email === testUserData.email);
+      if (!testUser) {
+        throw new Error('Usuario de prueba no encontrado');
+      }
 
       await request(app.getHttpServer())
         .post(`/api/v1/users/${testUser.id}/ban`)

@@ -20,11 +20,11 @@ describe('TypeOrmPasswordResetRepository', () => {
       create: jest.fn(),
       save: jest.fn(),
       createQueryBuilder: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<Repository<PasswordResetToken>>;
 
     mockUsersService = {
       findByEmail: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<UsersService>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

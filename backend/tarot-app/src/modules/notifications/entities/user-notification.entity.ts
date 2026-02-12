@@ -43,7 +43,7 @@ export class UserNotification {
   message: string;
 
   @Column({ type: 'jsonb', nullable: true })
-  data: Record<string, any> | null;
+  data: Record<string, unknown> | null;
 
   @Column({ name: 'action_url', type: 'varchar', length: 255, nullable: true })
   actionUrl: string | null;

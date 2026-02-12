@@ -116,7 +116,7 @@ describe('AI Health (e2e)', () => {
           expect(res.body.circuitBreakers.length).toBeGreaterThan(0);
 
           const groqBreaker = res.body.circuitBreakers.find(
-            (cb: any) => cb.provider === 'groq',
+            (cb: { provider: string }) => cb.provider === 'groq',
           );
           expect(groqBreaker).toBeDefined();
           expect(groqBreaker.state).toBe('CLOSED');

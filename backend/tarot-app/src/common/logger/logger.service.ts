@@ -10,6 +10,21 @@ export interface LoggerConfig {
   maxSize?: string;
 }
 
+export type LogMetadata = Record<
+  string,
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | Record<string, unknown>
+  | Array<unknown>
+>;
+export type LogObject = Record<
+  string,
+  string | number | boolean | null | undefined | Record<string, unknown>
+>;
+
 @Injectable()
 export class LoggerService implements NestLoggerService {
   public readonly logger: winston.Logger;
@@ -100,8 +115,8 @@ export class LoggerService implements NestLoggerService {
   private buildLogObject(
     message: string,
     context?: string,
-    metadata?: Record<string, any>,
-  ): Record<string, any> {
+    metadata?: LogMetadata,
+  ): LogObject {
     const correlationId = this.correlationIdService.getCorrelationId();
 
     return {
@@ -116,7 +131,7 @@ export class LoggerService implements NestLoggerService {
   /**
    * Log an info level message
    */
-  log(message: string, context?: string, metadata?: Record<string, any>): void {
+  log(message: string, context?: string, metadata?: LogMetadata): void {
     this.logger.info(this.buildLogObject(message, context, metadata));
   }
 
@@ -127,7 +142,7 @@ export class LoggerService implements NestLoggerService {
     message: string,
     trace?: string,
     context?: string,
-    metadata?: Record<string, any>,
+    metadata?: LogMetadata,
   ): void {
     this.logger.error(
       this.buildLogObject(message, context, {
@@ -140,44 +155,28 @@ export class LoggerService implements NestLoggerService {
   /**
    * Log a warning level message
    */
-  warn(
-    message: string,
-    context?: string,
-    metadata?: Record<string, any>,
-  ): void {
+  warn(message: string, context?: string, metadata?: LogMetadata): void {
     this.logger.warn(this.buildLogObject(message, context, metadata));
   }
 
   /**
    * Log a debug level message
    */
-  debug(
-    message: string,
-    context?: string,
-    metadata?: Record<string, any>,
-  ): void {
+  debug(message: string, context?: string, metadata?: LogMetadata): void {
     this.logger.debug(this.buildLogObject(message, context, metadata));
   }
 
   /**
    * Log a verbose level message
    */
-  verbose(
-    message: string,
-    context?: string,
-    metadata?: Record<string, any>,
-  ): void {
+  verbose(message: string, context?: string, metadata?: LogMetadata): void {
     this.logger.verbose(this.buildLogObject(message, context, metadata));
   }
 
   /**
    * Log an HTTP request (custom level)
    */
-  http(
-    message: string,
-    context?: string,
-    metadata?: Record<string, any>,
-  ): void {
+  http(message: string, context?: string, metadata?: LogMetadata): void {
     this.logger.http(this.buildLogObject(message, context, metadata));
   }
 }

@@ -70,7 +70,7 @@ describe('FeatureLimitDto', () => {
       dto.used = 0;
       dto.limit = 3;
       dto.canUse = true;
-      (dto as any).resetAt = 'invalid-date';
+      Object.assign(dto, { resetAt: 'invalid-date' });
 
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
@@ -81,7 +81,7 @@ describe('FeatureLimitDto', () => {
       const dto = new FeatureLimitDto();
       dto.used = 0;
       dto.limit = 3;
-      (dto as any).canUse = 'true';
+      Object.assign(dto, { canUse: 'true' });
       dto.resetAt = '2026-01-09T00:00:00.000Z';
 
       const errors = await validate(dto);
@@ -222,7 +222,7 @@ describe('UserCapabilitiesDto', () => {
       dto.canUseAI = false;
       dto.canUseCustomQuestions = false;
       dto.canUseAdvancedSpreads = false;
-      (dto as any).plan = 'invalid-plan';
+      Object.assign(dto, { plan: 'invalid-plan' });
       dto.isAuthenticated = true;
 
       const errors = await validate(dto);
@@ -252,7 +252,7 @@ describe('UserCapabilitiesDto', () => {
       dto.canUseCustomQuestions = false;
       dto.canUseAdvancedSpreads = false;
       dto.plan = UserPlanType.FREE;
-      (dto as any).isAuthenticated = 'true';
+      Object.assign(dto, { isAuthenticated: 'true' });
 
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
@@ -267,7 +267,7 @@ describe('UserCapabilitiesDto', () => {
       tarotReadings.resetAt = '2026-01-09T00:00:00.000Z';
 
       const dto = new UserCapabilitiesDto();
-      (dto as any).dailyCard = { invalid: 'data' };
+      Object.assign(dto, { dailyCard: { invalid: 'data' } });
       dto.tarotReadings = tarotReadings;
       dto.canCreateDailyReading = true;
       dto.canCreateTarotReading = true;
@@ -297,7 +297,7 @@ describe('UserCapabilitiesDto', () => {
       const dto = new UserCapabilitiesDto();
       dto.dailyCard = dailyCard;
       dto.tarotReadings = tarotReadings;
-      (dto as any).canCreateDailyReading = 'true';
+      Object.assign(dto, { canCreateDailyReading: 'true' });
       dto.canCreateTarotReading = true;
       dto.canUseAI = false;
       dto.canUseCustomQuestions = false;

@@ -430,7 +430,7 @@ describe('PlanetPositionService', () => {
         const invalidCusps = [
           0,
           30,
-          undefined as any,
+          undefined as unknown as number,
           90,
           120,
           150,

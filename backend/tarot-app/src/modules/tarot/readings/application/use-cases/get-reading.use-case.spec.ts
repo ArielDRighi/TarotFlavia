@@ -163,9 +163,9 @@ describe('GetReadingUseCase', () => {
     it('should handle null readingId', async () => {
       readingRepo.findById.mockResolvedValue(null);
 
-      await expect(useCase.execute(null as any, 100, false)).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        useCase.execute(null as unknown as number, 100, false),
+      ).rejects.toThrow(NotFoundException);
       expect(readingRepo.findById).toHaveBeenCalledWith(null, [
         'deck',
         'cards',
@@ -177,7 +177,7 @@ describe('GetReadingUseCase', () => {
       readingRepo.findById.mockResolvedValue(mockReading);
       validator.validateReadingOwnership.mockResolvedValue(mockReading);
 
-      await useCase.execute(1, null as any, false);
+      await useCase.execute(1, null as unknown as number, false);
 
       expect(validator.validateReadingOwnership).toHaveBeenCalledWith(1, null);
     });

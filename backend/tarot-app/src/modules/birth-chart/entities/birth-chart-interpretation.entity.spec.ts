@@ -294,7 +294,7 @@ describe('BirthChartInterpretation Entity', () => {
     describe('Unknown category handling', () => {
       it('should reject unknown category', () => {
         const result = BirthChartInterpretation.validateCombination(
-          'invalid_category' as any,
+          'invalid_category' as unknown as InterpretationCategory,
         );
         expect(result.valid).toBe(false);
         expect(result.error).toBe('unknown category');

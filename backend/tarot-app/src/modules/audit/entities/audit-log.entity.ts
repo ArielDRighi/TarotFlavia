@@ -10,6 +10,12 @@ import {
 import { User } from '../../users/entities/user.entity';
 import { AuditAction } from '../enums/audit-action.enum';
 
+/**
+ * Type for audit log values (JSONB fields)
+ * Using unknown for nested structures to avoid circular references
+ */
+export type AuditValue = Record<string, unknown>;
+
 @Entity('audit_logs')
 @Index(['userId', 'createdAt'])
 @Index(['action', 'createdAt'])
@@ -46,10 +52,10 @@ export class AuditLog {
   entityId: string;
 
   @Column({ name: 'old_value', type: 'jsonb', nullable: true })
-  oldValue: Record<string, any> | null;
+  oldValue: AuditValue | null;
 
   @Column({ name: 'new_value', type: 'jsonb' })
-  newValue: Record<string, any>;
+  newValue: AuditValue;
 
   @Column({ name: 'ip_address', type: 'varchar', length: 45, nullable: true })
   ipAddress: string | null;

@@ -4,6 +4,7 @@ import { CheckUserQuotaUseCase } from './check-user-quota.use-case';
 import { IUserRepository } from '../../domain/interfaces/user-repository.interface';
 import { USER_REPOSITORY } from '../../domain/interfaces/repository.tokens';
 import { UserPlan } from '../../../users/entities/user.entity';
+import { User } from '../../../users/entities/user.entity';
 
 describe('CheckUserQuotaUseCase', () => {
   let useCase: CheckUserQuotaUseCase;
@@ -43,7 +44,7 @@ describe('CheckUserQuotaUseCase', () => {
         email: 'test@example.com',
         plan: UserPlan.PREMIUM,
         aiRequestsUsedMonth: 1000,
-      } as any;
+      } as unknown as User;
 
       userRepo.findById.mockResolvedValue(user);
 
@@ -59,7 +60,7 @@ describe('CheckUserQuotaUseCase', () => {
         email: 'test@example.com',
         plan: UserPlan.FREE,
         aiRequestsUsedMonth: 50,
-      } as any;
+      } as unknown as User;
 
       userRepo.findById.mockResolvedValue(user);
 
@@ -74,7 +75,7 @@ describe('CheckUserQuotaUseCase', () => {
         email: 'test@example.com',
         plan: UserPlan.FREE,
         aiRequestsUsedMonth: 100,
-      } as any;
+      } as unknown as User;
 
       userRepo.findById.mockResolvedValue(user);
 
@@ -103,7 +104,7 @@ describe('CheckUserQuotaUseCase', () => {
         email: 'test@example.com',
         plan: UserPlan.PREMIUM,
         aiRequestsUsedMonth: 500,
-      } as any;
+      } as unknown as User;
 
       userRepo.findById.mockResolvedValue(user);
 
@@ -120,7 +121,7 @@ describe('CheckUserQuotaUseCase', () => {
         email: 'test@example.com',
         plan: UserPlan.FREE,
         aiRequestsUsedMonth: 30,
-      } as any;
+      } as unknown as User;
 
       userRepo.findById.mockResolvedValue(user);
 

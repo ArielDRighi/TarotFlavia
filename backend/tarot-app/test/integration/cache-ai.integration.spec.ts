@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { AppModule } from '../../src/app.module';
 
 // Services
@@ -36,8 +36,8 @@ describe('Cache + AI Integration Tests', () => {
   let _authToken: string;
 
   // Repositories
-  let userRepository: any;
-  let _cacheRepository: any;
+  let userRepository: Repository<User>;
+  let _cacheRepository: Repository<CachedInterpretation>;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({

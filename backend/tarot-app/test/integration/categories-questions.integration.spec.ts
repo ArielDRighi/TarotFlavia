@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import * as request from 'supertest';
 import { AppModule } from '../../src/app.module';
 
@@ -30,9 +30,9 @@ describe('Categories + Questions Integration Tests', () => {
   let testQuestion: PredefinedQuestion;
 
   // Repositories
-  let userRepository: any;
-  let categoryRepository: any;
-  let questionRepository: any;
+  let userRepository: Repository<User>;
+  let categoryRepository: Repository<ReadingCategory>;
+  let questionRepository: Repository<PredefinedQuestion>;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -135,6 +135,9 @@ describe('Categories + Questions Integration Tests', () => {
       });
 
       expect(question).toBeDefined();
+      if (!question) {
+        throw new Error('Pregunta no encontrada');
+      }
       expect(question.categoryId).toBe(testCategory.id);
     });
 
@@ -147,6 +150,9 @@ describe('Categories + Questions Integration Tests', () => {
 
       // ASSERT
       expect(question).toBeDefined();
+      if (!question) {
+        throw new Error('Pregunta no encontrada');
+      }
       expect(question.category).toBeDefined();
       expect(question.category.id).toBe(testCategory.id);
       expect(question.category.name).toBe(testCategory.name);
@@ -290,6 +296,9 @@ describe('Categories + Questions Integration Tests', () => {
         where: { id: response.body.id },
       });
       expect(savedCategory).toBeDefined();
+      if (!savedCategory) {
+        throw new Error('Categoría guardada no encontrada');
+      }
       expect(savedCategory.name).toBe(createDto.name);
 
       // Cleanup
@@ -318,6 +327,9 @@ describe('Categories + Questions Integration Tests', () => {
       const updatedCategory = await categoryRepository.findOne({
         where: { id: testCategory.id },
       });
+      if (!updatedCategory) {
+        throw new Error('Categoría actualizada no encontrada');
+      }
       expect(updatedCategory.name).toBe(updateDto.name);
     });
 
@@ -338,6 +350,9 @@ describe('Categories + Questions Integration Tests', () => {
       const toggledCategory = await categoryRepository.findOne({
         where: { id: testCategory.id },
       });
+      if (!toggledCategory) {
+        throw new Error('Categoría no encontrada');
+      }
       expect(toggledCategory.isActive).toBe(!initialStatus);
     });
   });
@@ -365,7 +380,9 @@ describe('Categories + Questions Integration Tests', () => {
       // La categoría puede estar soft-deleted o completamente eliminada
       // Ambos comportamientos son válidos
       if (deletedCategory) {
-        expect(deletedCategory.deletedAt).not.toBeNull();
+        const deletedAt = (deletedCategory as unknown as { deletedAt: unknown })
+          .deletedAt;
+        expect(deletedAt).not.toBeNull();
       }
 
       // Question puede o no existir dependiendo de la implementación de cascade
@@ -430,6 +447,9 @@ describe('Categories + Questions Integration Tests', () => {
       const updatedQuestion = await questionRepository.findOne({
         where: { id: testQuestion.id },
       });
+      if (!updatedQuestion) {
+        throw new Error('Pregunta actualizada no encontrada');
+      }
       expect(updatedQuestion.usageCount).toBe(initialCount + 1);
     });
   });
@@ -487,6 +507,9 @@ describe('Categories + Questions Integration Tests', () => {
       const foundUser = await userRepository.findOne({
         where: { id: regularUser.id },
       });
+      if (!foundUser) {
+        throw new Error('Usuario regular no encontrado');
+      }
       const regularLogin = await authService.login(
         foundUser.id,
         foundUser.email,
@@ -538,6 +561,9 @@ describe('Categories + Questions Integration Tests', () => {
       const foundUser = await userRepository.findOne({
         where: { id: regularUser.id },
       });
+      if (!foundUser) {
+        throw new Error('Usuario regular no encontrado');
+      }
       const regularLogin = await authService.login(
         foundUser.id,
         foundUser.email,

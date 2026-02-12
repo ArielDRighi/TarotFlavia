@@ -7,8 +7,8 @@ import {
 
 describe('TokenCleanupService', () => {
   let service: TokenCleanupService;
-  let refreshTokenRepository: any;
-  let passwordResetRepository: any;
+  let refreshTokenRepository: Record<string, jest.Mock>;
+  let passwordResetRepository: Record<string, jest.Mock>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({

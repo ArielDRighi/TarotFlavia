@@ -790,9 +790,9 @@ describe('CreateReadingUseCase', () => {
     });
 
     it('should handle null user', async () => {
-      await expect(useCase.execute(null as any, mockDto)).rejects.toThrow(
-        'Invalid user: user object or user.id is missing',
-      );
+      await expect(
+        useCase.execute(null as unknown as User, mockDto),
+      ).rejects.toThrow('Invalid user: user object or user.id is missing');
     });
 
     it('should handle undefined customQuestion and no predefinedQuestionId', async () => {

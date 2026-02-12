@@ -43,7 +43,7 @@ describe('RitualsService', () => {
     steps: [],
   };
 
-  const createQueryBuilder: any = {
+  const createQueryBuilder: Record<string, jest.Mock> = {
     leftJoinAndSelect: jest.fn().mockReturnThis(),
     where: jest.fn().mockReturnThis(),
     andWhere: jest.fn().mockReturnThis(),
@@ -68,7 +68,7 @@ describe('RitualsService', () => {
           provide: getRepositoryToken(Ritual),
           useValue: {
             findOne: jest.fn(),
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+
             createQueryBuilder: jest.fn(() => createQueryBuilder),
           },
         },

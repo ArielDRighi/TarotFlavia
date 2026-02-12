@@ -14,12 +14,12 @@ describe('SacredCalendarSeeder', () => {
       count: jest.fn(),
       save: jest.fn(),
       createQueryBuilder: jest.fn(),
-    } as any;
+    } as unknown as Repository<SacredEvent>;
 
     // Mock SacredCalendarService
     sacredCalendarService = {
       generateYearEvents: jest.fn(),
-    } as any;
+    } as unknown as SacredCalendarService;
 
     // Mock DataSource
     dataSource = {
@@ -30,7 +30,7 @@ describe('SacredCalendarSeeder', () => {
         };
         return callback(transactionManager) as Promise<void>;
       }),
-    } as any;
+    } as unknown as DataSource;
   });
 
   afterEach(() => {

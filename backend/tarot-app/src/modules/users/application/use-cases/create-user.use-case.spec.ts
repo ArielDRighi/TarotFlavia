@@ -6,13 +6,14 @@ import {
 import { CreateUserUseCase } from './create-user.use-case';
 import { USER_REPOSITORY } from '../../domain/interfaces/repository.tokens';
 import { CreateUserDto } from '../dto/create-user.dto';
+import { User } from '../../entities/user.entity';
 import * as bcrypt from 'bcryptjs';
 
 jest.mock('bcryptjs');
 
 describe('CreateUserUseCase', () => {
   let useCase: CreateUserUseCase;
-  let mockUserRepository: any;
+  let mockUserRepository: Record<string, jest.Mock>;
 
   beforeEach(async () => {
     mockUserRepository = {
@@ -45,7 +46,7 @@ describe('CreateUserUseCase', () => {
     };
 
     it('should create a user successfully', async () => {
-      const mockUserWithoutPassword: any = {
+      const mockUserWithoutPassword: Partial<User> = {
         id: 1,
         email: 'test@test.com',
         name: 'Test User',

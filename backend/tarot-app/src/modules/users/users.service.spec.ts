@@ -3,6 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User, UserRole, UserPlan } from './entities/user.entity';
+import { UserQueryDto } from './application/dto/user-query.dto';
 import { REFRESH_TOKEN_REPOSITORY } from '../auth/domain/interfaces/repository.tokens';
 import { Tarotista } from '../tarotistas/entities/tarotista.entity';
 
@@ -547,7 +548,8 @@ describe('UsersService', () => {
 
       // Malicious sortBy value
       await service.findAllWithFilters({
-        sortBy: 'email; DROP TABLE users--' as any,
+        sortBy:
+          'email; DROP TABLE users--' as unknown as UserQueryDto['sortBy'],
       });
 
       // Should use default 'createdAt' column, NOT the malicious value

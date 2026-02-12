@@ -217,7 +217,7 @@ describe('RestoreReadingUseCase', () => {
       readingRepo.restore.mockResolvedValue(undefined);
       readingRepo.findById.mockResolvedValue(mockRestoredReading);
 
-      await useCase.execute(null as any, 100);
+      await useCase.execute(null as unknown as number, 100);
 
       expect(validator.validateReadingOwnership).toHaveBeenCalledWith(
         null,
@@ -233,7 +233,7 @@ describe('RestoreReadingUseCase', () => {
       readingRepo.restore.mockResolvedValue(undefined);
       readingRepo.findById.mockResolvedValue(mockRestoredReading);
 
-      await useCase.execute(1, null as any);
+      await useCase.execute(1, null as unknown as number);
 
       expect(validator.validateReadingOwnership).toHaveBeenCalledWith(
         1,

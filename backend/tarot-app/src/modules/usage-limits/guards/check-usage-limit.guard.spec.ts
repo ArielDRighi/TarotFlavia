@@ -6,6 +6,7 @@ import { CheckUsageLimitGuard } from './check-usage-limit.guard';
 import { UsageLimitsService } from '../usage-limits.service';
 import { AnonymousTrackingService } from '../services/anonymous-tracking.service';
 import { UsageFeature } from '../entities/usage-limit.entity';
+import { AnonymousUsage } from '../entities/anonymous-usage.entity';
 import { DailyReading } from '../../tarot/daily-reading/entities/daily-reading.entity';
 import { TarotReading } from '../../tarot/readings/entities/tarot-reading.entity';
 import { UsersService } from '../../users/users.service';
@@ -322,7 +323,7 @@ describe('CheckUsageLimitGuard', () => {
           ip: '192.168.1.1',
           date: '2025-01-02',
           feature: UsageFeature.TAROT_READING,
-        } as any);
+        } as unknown as AnonymousUsage);
 
         const result = await guard.canActivate(context);
 

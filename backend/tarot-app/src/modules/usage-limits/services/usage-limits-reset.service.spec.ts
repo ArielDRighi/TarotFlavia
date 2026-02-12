@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DeleteResult } from 'typeorm';
 import { UsageLimitsResetService } from './usage-limits-reset.service';
 import { UsageLimit } from '../entities/usage-limit.entity';
 import { Logger } from '@nestjs/common';
@@ -43,14 +43,19 @@ describe('UsageLimitsResetService', () => {
     it('should delete records older than 7 days', async () => {
       // Arrange
       const mockDeleteResult = { affected: 5 };
-      repository.delete.mockResolvedValue(mockDeleteResult as any);
+      repository.delete.mockResolvedValue(
+        mockDeleteResult as unknown as DeleteResult,
+      );
 
       // Act
       await service.handleDailyReset();
 
       // Assert
       expect(repository.delete).toHaveBeenCalledTimes(1);
-      const callArgs = repository.delete.mock.calls[0][0] as any;
+      const callArgs = repository.delete.mock.calls[0][0] as Record<
+        string,
+        unknown
+      >;
       expect(callArgs).toHaveProperty('date');
       expect(callArgs.date).toBeDefined();
     });
@@ -58,7 +63,9 @@ describe('UsageLimitsResetService', () => {
     it('should log the number of deleted records', async () => {
       // Arrange
       const mockDeleteResult = { affected: 3 };
-      repository.delete.mockResolvedValue(mockDeleteResult as any);
+      repository.delete.mockResolvedValue(
+        mockDeleteResult as unknown as DeleteResult,
+      );
 
       // Act
       await service.handleDailyReset();
@@ -75,7 +82,9 @@ describe('UsageLimitsResetService', () => {
     it('should handle zero deleted records', async () => {
       // Arrange
       const mockDeleteResult = { affected: 0 };
-      repository.delete.mockResolvedValue(mockDeleteResult as any);
+      repository.delete.mockResolvedValue(
+        mockDeleteResult as unknown as DeleteResult,
+      );
 
       // Act
       await service.handleDailyReset();
@@ -89,7 +98,9 @@ describe('UsageLimitsResetService', () => {
     it('should handle undefined affected count', async () => {
       // Arrange
       const mockDeleteResult = { affected: undefined };
-      repository.delete.mockResolvedValue(mockDeleteResult as any);
+      repository.delete.mockResolvedValue(
+        mockDeleteResult as unknown as DeleteResult,
+      );
 
       // Act
       await service.handleDailyReset();
@@ -119,7 +130,9 @@ describe('UsageLimitsResetService', () => {
     it('should use correct date calculation for 7 days retention', async () => {
       // Arrange
       const mockDeleteResult = { affected: 2 };
-      repository.delete.mockResolvedValue(mockDeleteResult as any);
+      repository.delete.mockResolvedValue(
+        mockDeleteResult as unknown as DeleteResult,
+      );
 
       const now = new Date('2025-12-27T00:00:00Z');
       jest.useFakeTimers().setSystemTime(now);

@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { SelectQueryBuilder } from 'typeorm';
 import { BirthChartInterpretationRepository } from './birth-chart-interpretation.repository';
 import { BirthChartInterpretation } from '../../entities/birth-chart-interpretation.entity';
 import {
@@ -12,7 +12,7 @@ import {
 
 describe('BirthChartInterpretationRepository', () => {
   let repository: BirthChartInterpretationRepository;
-  let mockRepo: jest.Mocked<Repository<BirthChartInterpretation>>;
+  let mockRepo: Record<string, jest.Mock>;
 
   // Mock data
   const mockInterpretation: BirthChartInterpretation = {
@@ -31,7 +31,7 @@ describe('BirthChartInterpretationRepository', () => {
     getBigThree: jest.fn(),
     hasAiSynthesis: jest.fn(),
     getAspectsForPlanet: jest.fn(),
-  } as any;
+  } as unknown as BirthChartInterpretation;
 
   beforeEach(async () => {
     // Create mock repository
@@ -45,7 +45,7 @@ describe('BirthChartInterpretationRepository', () => {
         groupBy: jest.fn().mockReturnThis(),
         getRawMany: jest.fn(),
       })),
-    } as any;
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -460,18 +460,20 @@ describe('BirthChartInterpretationRepository', () => {
 
       // Setup mocks para retornar las interpretaciones correctas
       mockRepo.find.mockResolvedValue([mockInterpretation]); // PLANET_INTRO
-      mockRepo.findOne.mockImplementation((options: any) => {
-        if (options.where.category === InterpretationCategory.PLANET_IN_SIGN) {
+      mockRepo.findOne.mockImplementation((options: unknown) => {
+        const opts = options as Record<string, unknown>;
+        const where = opts.where as Record<string, unknown>;
+        if (where.category === InterpretationCategory.PLANET_IN_SIGN) {
           return Promise.resolve(mockPlanetInSign);
         }
-        if (options.where.category === InterpretationCategory.PLANET_IN_HOUSE) {
+        if (where.category === InterpretationCategory.PLANET_IN_HOUSE) {
           return Promise.resolve(mockPlanetInHouse);
         }
-        if (options.where.category === InterpretationCategory.ASCENDANT) {
+        if (where.category === InterpretationCategory.ASCENDANT) {
           return Promise.resolve(mockAscendant);
         }
         // Para aspectos (bidireccional)
-        if (Array.isArray(options.where)) {
+        if (Array.isArray(where)) {
           return Promise.resolve(mockAspect);
         }
         return Promise.resolve(null);
@@ -540,8 +542,9 @@ describe('BirthChartInterpretationRepository', () => {
       };
 
       mockRepo.find.mockResolvedValue([]);
-      mockRepo.findOne.mockImplementation((options: any) => {
-        if (Array.isArray(options.where)) {
+      mockRepo.findOne.mockImplementation((options: unknown) => {
+        const opts = options as Record<string, unknown>;
+        if (Array.isArray(opts.where)) {
           return Promise.resolve(mockAspectReverse);
         }
         return Promise.resolve(null);
@@ -586,7 +589,9 @@ describe('BirthChartInterpretationRepository', () => {
         getRawMany: jest.fn().mockResolvedValue(mockCounts),
       };
 
-      mockRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder as any);
+      mockRepo.createQueryBuilder.mockReturnValue(
+        mockQueryBuilder as unknown as SelectQueryBuilder<BirthChartInterpretation>,
+      );
 
       const result = await repository.countByCategory();
 
@@ -609,7 +614,9 @@ describe('BirthChartInterpretationRepository', () => {
         getRawMany: jest.fn().mockResolvedValue([]),
       };
 
-      mockRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder as any);
+      mockRepo.createQueryBuilder.mockReturnValue(
+        mockQueryBuilder as unknown as SelectQueryBuilder<BirthChartInterpretation>,
+      );
 
       const result = await repository.countByCategory();
 

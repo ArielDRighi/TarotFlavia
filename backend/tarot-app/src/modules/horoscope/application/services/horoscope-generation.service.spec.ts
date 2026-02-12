@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { InternalServerErrorException } from '@nestjs/common';
 import { HoroscopeGenerationService } from './horoscope-generation.service';
 import { DailyHoroscope } from '../../entities/daily-horoscope.entity';
@@ -394,7 +394,9 @@ describe('HoroscopeGenerationService', () => {
         execute: jest.fn().mockResolvedValue({ affected: 1 }),
       };
 
-      repository.createQueryBuilder.mockReturnValue(mockQueryBuilder as any);
+      repository.createQueryBuilder.mockReturnValue(
+        mockQueryBuilder as unknown as SelectQueryBuilder<DailyHoroscope>,
+      );
 
       await service.incrementViewCount(id);
 

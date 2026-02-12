@@ -9,7 +9,9 @@ import { PlanConfigService } from '../../../plan-config/plan-config.service';
 import { DailyReading } from '../../../tarot/daily-reading/entities/daily-reading.entity';
 import { TarotReading } from '../../../tarot/readings/entities/tarot-reading.entity';
 import { UserPlanType } from '../dto/user-capabilities.dto';
-import { UserPlan } from '../../entities/user.entity';
+import { User, UserPlan } from '../../entities/user.entity';
+import { Plan } from '../../../plan-config/entities/plan.entity';
+import { UserRole } from '../../../../common/enums/user-role.enum';
 
 describe('UserCapabilitiesService', () => {
   let service: UserCapabilitiesService;
@@ -27,23 +29,21 @@ describe('UserCapabilitiesService', () => {
     getOne: jest.Mock;
   };
 
-  const mockUser = {
+  const mockUser: Partial<User> = {
     id: 1,
     email: 'test@example.com',
     name: 'Test User',
     plan: UserPlan.FREE,
-    role: 'user',
+    roles: [UserRole.CONSUMER],
     createdAt: new Date(),
     updatedAt: new Date(),
   };
 
-  const mockPlanConfig = {
+  const mockPlanConfig: Partial<Plan> = {
     id: 1,
     planType: UserPlan.FREE,
     dailyCardLimit: 1,
     tarotReadingsLimit: 1,
-    oracleQueriesLimit: 0,
-    interpretationRegenerationsLimit: 0,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -204,9 +204,9 @@ describe('UserCapabilitiesService', () => {
 
     describe('FREE User', () => {
       it('should return capabilities for FREE user with no usage', async () => {
-        usersService.findById.mockResolvedValue(mockUser as any);
+        usersService.findById.mockResolvedValue(mockUser as User);
         planConfigService.findByPlanType.mockResolvedValue(
-          mockPlanConfig as any,
+          mockPlanConfig as unknown as Plan,
         );
         planConfigService.getPendulumLimit.mockResolvedValue({
           limit: 3,
@@ -262,9 +262,9 @@ describe('UserCapabilitiesService', () => {
       });
 
       it('should return canUse: false when daily card limit is reached', async () => {
-        usersService.findById.mockResolvedValue(mockUser as any);
+        usersService.findById.mockResolvedValue(mockUser as User);
         planConfigService.findByPlanType.mockResolvedValue(
-          mockPlanConfig as any,
+          mockPlanConfig as unknown as Plan,
         );
         // Daily reading exists (already used today)
         // BUG-CAP-001: Now uses createQueryBuilder
@@ -287,9 +287,9 @@ describe('UserCapabilitiesService', () => {
       });
 
       it('should return canUse: false when tarot reading limit is reached', async () => {
-        usersService.findById.mockResolvedValue(mockUser as any);
+        usersService.findById.mockResolvedValue(mockUser as User);
         planConfigService.findByPlanType.mockResolvedValue(
-          mockPlanConfig as any,
+          mockPlanConfig as unknown as Plan,
         );
         mockQueryBuilder.getOne.mockResolvedValue(null);
         // Tarot reading used once (limit = 1)
@@ -307,9 +307,9 @@ describe('UserCapabilitiesService', () => {
       });
 
       it('should return canUse: false when usage exceeds limit', async () => {
-        usersService.findById.mockResolvedValue(mockUser as any);
+        usersService.findById.mockResolvedValue(mockUser as User);
         planConfigService.findByPlanType.mockResolvedValue(
-          mockPlanConfig as any,
+          mockPlanConfig as unknown as Plan,
         );
         // Edge case: user has TWO daily readings somehow (shouldn't happen but test edge case)
         // Since we query daily_reading directly, we can only get 0 or 1
@@ -345,16 +345,14 @@ describe('UserCapabilitiesService', () => {
         planType: UserPlan.PREMIUM,
         dailyCardLimit: -1, // unlimited
         tarotReadingsLimit: 3,
-        oracleQueriesLimit: -1,
-        interpretationRegenerationsLimit: -1,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
 
       it('should return capabilities for PREMIUM user with unlimited daily card', async () => {
-        usersService.findById.mockResolvedValue(premiumUser as any);
+        usersService.findById.mockResolvedValue(premiumUser as User);
         planConfigService.findByPlanType.mockResolvedValue(
-          premiumPlanConfig as any,
+          premiumPlanConfig as unknown as Plan,
         );
         planConfigService.getPendulumLimit.mockResolvedValue({
           limit: 1,
@@ -402,9 +400,9 @@ describe('UserCapabilitiesService', () => {
       });
 
       it('should handle premium user reaching limited tarot readings', async () => {
-        usersService.findById.mockResolvedValue(premiumUser as any);
+        usersService.findById.mockResolvedValue(premiumUser as User);
         planConfigService.findByPlanType.mockResolvedValue(
-          premiumPlanConfig as any,
+          premiumPlanConfig as unknown as Plan,
         );
         mockQueryBuilder.getOne.mockResolvedValue(null);
         tarotReadingRepository.count.mockResolvedValue(3); // Limit reached
@@ -433,7 +431,7 @@ describe('UserCapabilitiesService', () => {
       });
 
       it('should throw error if plan config not found', async () => {
-        usersService.findById.mockResolvedValue(mockUser as any);
+        usersService.findById.mockResolvedValue(mockUser as User);
         planConfigService.findByPlanType.mockRejectedValue(
           new Error('Plan not found'),
         );
@@ -448,9 +446,9 @@ describe('UserCapabilitiesService', () => {
       it('should allow daily card creation when last reading was yesterday', async () => {
         // This test verifies the fix for BUG-CAP-001:
         // User has a daily reading from YESTERDAY, should be able to create TODAY
-        usersService.findById.mockResolvedValue(mockUser as any);
+        usersService.findById.mockResolvedValue(mockUser as User);
         planConfigService.findByPlanType.mockResolvedValue(
-          mockPlanConfig as any,
+          mockPlanConfig as unknown as Plan,
         );
 
         // Simulate: no reading found for today (yesterday's reading should NOT match)
@@ -469,9 +467,9 @@ describe('UserCapabilitiesService', () => {
       it('should use createQueryBuilder with string date comparison for DATE column', async () => {
         // This test ensures the query uses createQueryBuilder with string comparison
         // The fix uses getTodayUTCDateString() format: 'YYYY-MM-DD'
-        usersService.findById.mockResolvedValue(mockUser as any);
+        usersService.findById.mockResolvedValue(mockUser as User);
         planConfigService.findByPlanType.mockResolvedValue(
-          mockPlanConfig as any,
+          mockPlanConfig as unknown as Plan,
         );
         mockQueryBuilder.getOne.mockResolvedValue(null);
         tarotReadingRepository.count.mockResolvedValue(0);
@@ -495,9 +493,9 @@ describe('UserCapabilitiesService', () => {
       });
 
       it('should block daily card creation when reading exists for today', async () => {
-        usersService.findById.mockResolvedValue(mockUser as any);
+        usersService.findById.mockResolvedValue(mockUser as User);
         planConfigService.findByPlanType.mockResolvedValue(
-          mockPlanConfig as any,
+          mockPlanConfig as unknown as Plan,
         );
 
         // Today's reading exists
@@ -537,9 +535,9 @@ describe('UserCapabilitiesService', () => {
       });
 
       it('should use same resetAt for all features', async () => {
-        usersService.findById.mockResolvedValue(mockUser as any);
+        usersService.findById.mockResolvedValue(mockUser as User);
         planConfigService.findByPlanType.mockResolvedValue(
-          mockPlanConfig as any,
+          mockPlanConfig as unknown as Plan,
         );
         mockQueryBuilder.getOne.mockResolvedValue(null);
         tarotReadingRepository.count.mockResolvedValue(0);

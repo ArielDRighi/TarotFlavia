@@ -6,6 +6,7 @@ import { LoginUseCase } from './login.use-case';
 import { UsersService } from '../../../users/users.service';
 import { SecurityEventService } from '../../../security/security-event.service';
 import { REFRESH_TOKEN_REPOSITORY } from '../../domain/interfaces/repository.tokens';
+import { User } from '../../../users/entities/user.entity';
 
 jest.mock('bcryptjs');
 
@@ -13,7 +14,7 @@ describe('LoginUseCase', () => {
   let useCase: LoginUseCase;
   let usersService: jest.Mocked<UsersService>;
   let _jwtService: jest.Mocked<JwtService>;
-  let _refreshTokenRepository: any;
+  let _refreshTokenRepository: Record<string, jest.Mock>;
   let securityEventService: jest.Mocked<SecurityEventService>;
 
   const mockUser = {
@@ -26,7 +27,7 @@ describe('LoginUseCase', () => {
     roles: ['user'],
     lastLogin: new Date(),
     isBanned: jest.fn().mockReturnValue(false),
-  } as any;
+  } as unknown as User;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -115,7 +116,7 @@ describe('LoginUseCase', () => {
     it('should return null when password is invalid type', async () => {
       const result = await useCase.validateUser(
         'test@example.com',
-        null as any,
+        null as unknown as string,
       );
 
       expect(result).toBeNull();
@@ -170,7 +171,7 @@ describe('LoginUseCase', () => {
         isBanned: jest.fn().mockReturnValue(true),
         banReason: 'Violation of terms',
       };
-      usersService.findById.mockResolvedValue(bannedUser);
+      usersService.findById.mockResolvedValue(bannedUser as unknown as User);
 
       await expect(
         useCase.execute(1, 'test@example.com', '127.0.0.1', 'Mozilla'),

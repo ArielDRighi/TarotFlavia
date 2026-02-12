@@ -35,7 +35,7 @@ describe('UpdateUserPlanDto', () => {
     it('should fail validation with invalid plan', async () => {
       const dto = new UpdateUserPlanDto();
 
-      (dto as any).plan = 'invalid_plan';
+      Object.assign(dto, { plan: 'invalid_plan' });
 
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
@@ -46,7 +46,7 @@ describe('UpdateUserPlanDto', () => {
       const dto = new UpdateUserPlanDto();
       dto.plan = UserPlan.PREMIUM;
 
-      (dto as any).subscriptionStatus = 'invalid_status';
+      Object.assign(dto, { subscriptionStatus: 'invalid_status' });
 
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
@@ -59,7 +59,7 @@ describe('UpdateUserPlanDto', () => {
       const dto = new UpdateUserPlanDto();
       dto.plan = UserPlan.PREMIUM;
 
-      (dto as any).planStartedAt = 'invalid-date';
+      Object.assign(dto, { planStartedAt: 'invalid-date' });
 
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
@@ -70,7 +70,7 @@ describe('UpdateUserPlanDto', () => {
       const dto = new UpdateUserPlanDto();
       dto.plan = UserPlan.PREMIUM;
 
-      (dto as any).stripeCustomerId = 12345;
+      Object.assign(dto, { stripeCustomerId: 12345 });
 
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);

@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { IsNull, Repository } from 'typeorm';
+import { IsNull, Repository, UpdateResult } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
 import { TypeOrmReadingRepository } from './typeorm-reading.repository';
 import { TarotReading } from '../../entities/tarot-reading.entity';
@@ -739,7 +739,9 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
 
   describe('restore', () => {
     it('should restore deleted reading', async () => {
-      mockReadingRepository.restore.mockResolvedValue({ affected: 1 } as any);
+      mockReadingRepository.restore.mockResolvedValue({
+        affected: 1,
+      } as unknown as UpdateResult);
 
       await repository.restore(1);
 
@@ -748,7 +750,9 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
 
     // BUG HUNTING: No validation if reading exists
     it('should not throw even if reading does not exist', async () => {
-      mockReadingRepository.restore.mockResolvedValue({ affected: 0 } as any);
+      mockReadingRepository.restore.mockResolvedValue({
+        affected: 0,
+      } as unknown as UpdateResult);
 
       // Silent failure
       await expect(repository.restore(999)).resolves.not.toThrow();

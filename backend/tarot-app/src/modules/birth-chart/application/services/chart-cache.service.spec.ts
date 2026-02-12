@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ChartCacheService } from './chart-cache.service';
-import { ChartData } from '../../entities/birth-chart.entity';
+import { ChartData, PlanetPosition } from '../../entities/birth-chart.entity';
 import { FullChartInterpretation } from './chart-interpretation.service';
 import { ZodiacSign } from '../../domain/enums';
 
@@ -191,8 +191,8 @@ describe('ChartCacheService', () => {
         planets: [],
         houses: [],
         aspects: [],
-        ascendant: {} as any,
-        midheaven: {} as any,
+        ascendant: {} as unknown as PlanetPosition,
+        midheaven: {} as unknown as PlanetPosition,
         distribution: {
           elements: { fire: 0, earth: 0, air: 0, water: 0 },
           modalities: { cardinal: 0, fixed: 0, mutable: 0 },
@@ -214,7 +214,7 @@ describe('ChartCacheService', () => {
 
     it('should not throw if cache fails', async () => {
       const cacheKey = 'test-key';
-      const chartData: ChartData = {} as any;
+      const chartData: ChartData = {} as unknown as ChartData;
 
       mockCacheManager.set.mockRejectedValue(new Error('Cache error'));
 
@@ -404,7 +404,10 @@ describe('ChartCacheService', () => {
       mockCacheManager.set.mockRejectedValue(new Error('Cache error'));
 
       await expect(
-        service.setInterpretation('test-key', {} as any),
+        service.setInterpretation(
+          'test-key',
+          {} as unknown as FullChartInterpretation,
+        ),
       ).resolves.not.toThrow();
     });
   });

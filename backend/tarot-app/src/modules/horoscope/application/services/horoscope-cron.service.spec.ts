@@ -56,7 +56,9 @@ describe('HoroscopeCronService', () => {
     jest.spyOn(Logger.prototype, 'warn').mockImplementation();
 
     // Mockear el método delay para que los tests sean rápidos
-    jest.spyOn(service as any, 'delay').mockResolvedValue(undefined);
+    jest
+      .spyOn(service as unknown as Record<string, jest.Mock>, 'delay')
+      .mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -143,7 +145,10 @@ describe('HoroscopeCronService', () => {
       );
 
       // Espiar el método delay privado
-      const delaySpy = jest.spyOn(service as any, 'delay');
+      const delaySpy = jest.spyOn(
+        service as unknown as Record<string, jest.Mock>,
+        'delay',
+      );
 
       // Act
       await service.generateDailyHoroscopes();

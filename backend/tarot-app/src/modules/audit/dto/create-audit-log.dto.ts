@@ -7,6 +7,7 @@ import {
   IsString,
 } from 'class-validator';
 import { AuditAction } from '../enums/audit-action.enum';
+import { AuditValue } from '../entities/audit-log.entity';
 
 export class CreateAuditLogDto {
   @ApiPropertyOptional({
@@ -56,14 +57,14 @@ export class CreateAuditLogDto {
     example: { status: 'active' },
   })
   @IsOptional()
-  oldValue?: Record<string, any>;
+  oldValue?: AuditValue;
 
   @ApiProperty({
     description: 'Nuevo estado de la entidad (jsonb)',
     example: { status: 'banned', reason: 'Violation' },
   })
   @IsNotEmpty()
-  newValue: Record<string, any>;
+  newValue: AuditValue;
 
   @ApiPropertyOptional({
     description: 'Dirección IP desde donde se realizó la acción',

@@ -156,8 +156,8 @@ describe('PendulumController', () => {
           lunarPhase: 'full',
           createdAt: testDate,
         },
-      ];
-      historyService.getUserHistory.mockResolvedValue(mockHistory as any);
+      ] as Awaited<ReturnType<typeof historyService.getUserHistory>>;
+      historyService.getUserHistory.mockResolvedValue(mockHistory);
 
       const result = await controller.getHistory(premiumUser, 20);
 

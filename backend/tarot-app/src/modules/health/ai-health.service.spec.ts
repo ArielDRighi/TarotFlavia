@@ -93,7 +93,10 @@ describe('AIHealthService', () => {
 
       // Mock a timeout scenario
       jest
-        .spyOn(service as any, 'testGroqConnection')
+        .spyOn(
+          service as unknown as Record<string, jest.Mock>,
+          'testGroqConnection',
+        )
         .mockRejectedValue(new Error('Request timeout'));
 
       const result = await service.checkGroqHealth();
@@ -109,10 +112,15 @@ describe('AIHealthService', () => {
         return undefined;
       });
 
-      jest.spyOn(service as any, 'testGroqConnection').mockRejectedValue({
-        response: { status: 401 },
-        message: 'Unauthorized',
-      });
+      jest
+        .spyOn(
+          service as unknown as Record<string, jest.Mock>,
+          'testGroqConnection',
+        )
+        .mockRejectedValue({
+          response: { status: 401 },
+          message: 'Unauthorized',
+        });
 
       const result = await service.checkGroqHealth();
 
@@ -127,10 +135,15 @@ describe('AIHealthService', () => {
         return undefined;
       });
 
-      jest.spyOn(service as any, 'testGroqConnection').mockRejectedValue({
-        response: { status: 429 },
-        message: 'Rate limit exceeded',
-      });
+      jest
+        .spyOn(
+          service as unknown as Record<string, jest.Mock>,
+          'testGroqConnection',
+        )
+        .mockRejectedValue({
+          response: { status: 429 },
+          message: 'Rate limit exceeded',
+        });
 
       const result = await service.checkGroqHealth();
 
@@ -145,10 +158,15 @@ describe('AIHealthService', () => {
         return undefined;
       });
 
-      jest.spyOn(service as any, 'testGroqConnection').mockRejectedValue({
-        response: { status: 500 },
-        message: 'Internal server error',
-      });
+      jest
+        .spyOn(
+          service as unknown as Record<string, jest.Mock>,
+          'testGroqConnection',
+        )
+        .mockRejectedValue({
+          response: { status: 500 },
+          message: 'Internal server error',
+        });
 
       const result = await service.checkGroqHealth();
 
@@ -266,17 +284,20 @@ describe('AIHealthService', () => {
 
   describe('Provider timeouts', () => {
     it('should respect Groq timeout of 10s', () => {
-      const timeout = (service as any).GROQ_TIMEOUT as number;
+      const timeout = (service as unknown as Record<string, number>)
+        .GROQ_TIMEOUT;
       expect(timeout).toBe(10000);
     });
 
     it('should respect DeepSeek timeout of 15s', () => {
-      const timeout = (service as any).DEEPSEEK_TIMEOUT as number;
+      const timeout = (service as unknown as Record<string, number>)
+        .DEEPSEEK_TIMEOUT;
       expect(timeout).toBe(15000);
     });
 
     it('should respect OpenAI timeout of 30s', () => {
-      const timeout = (service as any).OPENAI_TIMEOUT as number;
+      const timeout = (service as unknown as Record<string, number>)
+        .OPENAI_TIMEOUT;
       expect(timeout).toBe(30000);
     });
   });

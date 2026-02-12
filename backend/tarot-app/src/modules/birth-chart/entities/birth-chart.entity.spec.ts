@@ -1,4 +1,4 @@
-import { BirthChart } from './birth-chart.entity';
+import { BirthChart, ChartData, ChartAspect } from './birth-chart.entity';
 import { ZodiacSign } from '../domain/enums/zodiac-sign.enum';
 import { Planet } from '../domain/enums/planet.enum';
 import { AspectType } from '../domain/enums/aspect-type.enum';
@@ -159,13 +159,13 @@ describe('BirthChart Entity', () => {
     });
 
     it('should return false when chartData is null', () => {
-      birthChart.chartData = null as any;
+      birthChart.chartData = null as unknown as ChartData;
 
       expect(birthChart.hasAiSynthesis()).toBe(false);
     });
 
     it('should return false when chartData is undefined', () => {
-      birthChart.chartData = undefined as any;
+      birthChart.chartData = undefined as unknown as ChartData;
 
       expect(birthChart.hasAiSynthesis()).toBe(false);
     });
@@ -237,7 +237,7 @@ describe('BirthChart Entity', () => {
     });
 
     it('should return empty array when chartData is null', () => {
-      birthChart.chartData = null as any;
+      birthChart.chartData = null as unknown as ChartData;
 
       const aspects = birthChart.getAspectsForPlanet(Planet.SUN);
 
@@ -245,7 +245,7 @@ describe('BirthChart Entity', () => {
     });
 
     it('should return empty array when chartData.aspects is null', () => {
-      birthChart.chartData.aspects = null as any;
+      birthChart.chartData.aspects = null as unknown as ChartAspect[];
 
       const aspects = birthChart.getAspectsForPlanet(Planet.SUN);
 
@@ -253,7 +253,7 @@ describe('BirthChart Entity', () => {
     });
 
     it('should return empty array when chartData.aspects is undefined', () => {
-      birthChart.chartData.aspects = undefined as any;
+      birthChart.chartData.aspects = undefined as unknown as ChartAspect[];
 
       const aspects = birthChart.getAspectsForPlanet(Planet.SUN);
 

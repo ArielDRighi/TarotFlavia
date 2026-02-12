@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository, DeleteResult } from 'typeorm';
+import { Repository, DeleteResult, SelectQueryBuilder } from 'typeorm';
 import { DailyReadingCleanupService } from './daily-reading-cleanup.service';
 import { DailyReading } from './entities/daily-reading.entity';
 import { UserPlan } from '../../users/entities/user.entity';
@@ -52,7 +52,7 @@ describe('DailyReadingCleanupService', () => {
       };
 
       dailyReadingRepo.createQueryBuilder.mockReturnValue(
-        mockQueryBuilder as any,
+        mockQueryBuilder as unknown as SelectQueryBuilder<DailyReading>,
       );
 
       await service.cleanupOldDailyReadings();
@@ -76,7 +76,7 @@ describe('DailyReadingCleanupService', () => {
       };
 
       dailyReadingRepo.createQueryBuilder.mockReturnValue(
-        mockQueryBuilder as any,
+        mockQueryBuilder as unknown as SelectQueryBuilder<DailyReading>,
       );
 
       await service.cleanupOldDailyReadings();
@@ -88,7 +88,10 @@ describe('DailyReadingCleanupService', () => {
       });
 
       // Verify the delete was called with IsNull and LessThan operators
-      const callArgs = dailyReadingRepo.delete.mock.calls[0][0] as any;
+      const callArgs = dailyReadingRepo.delete.mock.calls[0][0] as Record<
+        string,
+        unknown
+      >;
       expect(callArgs.userId).toBeDefined();
       expect(callArgs.readingDate).toBeDefined();
     });
@@ -107,7 +110,7 @@ describe('DailyReadingCleanupService', () => {
       };
 
       dailyReadingRepo.createQueryBuilder.mockReturnValue(
-        mockQueryBuilder as any,
+        mockQueryBuilder as unknown as SelectQueryBuilder<DailyReading>,
       );
 
       await service.cleanupOldDailyReadings();
@@ -146,7 +149,7 @@ describe('DailyReadingCleanupService', () => {
       };
 
       dailyReadingRepo.createQueryBuilder.mockReturnValue(
-        mockQueryBuilder as any,
+        mockQueryBuilder as unknown as SelectQueryBuilder<DailyReading>,
       );
 
       await service.cleanupOldDailyReadings();
@@ -169,7 +172,7 @@ describe('DailyReadingCleanupService', () => {
       };
 
       dailyReadingRepo.createQueryBuilder.mockReturnValue(
-        mockQueryBuilder as any,
+        mockQueryBuilder as unknown as SelectQueryBuilder<DailyReading>,
       );
 
       await service.cleanupOldDailyReadings();
@@ -203,7 +206,7 @@ describe('DailyReadingCleanupService', () => {
       };
 
       dailyReadingRepo.createQueryBuilder.mockReturnValue(
-        mockQueryBuilder as any,
+        mockQueryBuilder as unknown as SelectQueryBuilder<DailyReading>,
       );
 
       await service.cleanupOldDailyReadings();
@@ -229,7 +232,7 @@ describe('DailyReadingCleanupService', () => {
       };
 
       dailyReadingRepo.createQueryBuilder.mockReturnValue(
-        mockQueryBuilder as any,
+        mockQueryBuilder as unknown as SelectQueryBuilder<DailyReading>,
       );
 
       await service.cleanupOldDailyReadings();
@@ -258,7 +261,7 @@ describe('DailyReadingCleanupService', () => {
       };
 
       dailyReadingRepo.createQueryBuilder.mockReturnValue(
-        mockQueryBuilder as any,
+        mockQueryBuilder as unknown as SelectQueryBuilder<DailyReading>,
       );
 
       await service.cleanupOldDailyReadings();
@@ -292,7 +295,7 @@ describe('DailyReadingCleanupService', () => {
       };
 
       dailyReadingRepo.createQueryBuilder.mockReturnValue(
-        mockQueryBuilder as any,
+        mockQueryBuilder as unknown as SelectQueryBuilder<DailyReading>,
       );
 
       await expect(service.cleanupOldDailyReadings()).resolves.not.toThrow();
@@ -311,7 +314,7 @@ describe('DailyReadingCleanupService', () => {
       };
 
       dailyReadingRepo.createQueryBuilder.mockReturnValue(
-        mockQueryBuilder as any,
+        mockQueryBuilder as unknown as SelectQueryBuilder<DailyReading>,
       );
 
       const errorSpy = jest.spyOn(service['logger'], 'error');

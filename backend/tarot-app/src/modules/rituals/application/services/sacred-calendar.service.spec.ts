@@ -161,9 +161,7 @@ describe('SacredCalendarService', () => {
       mockEventRepo.save.mockImplementation((event: SacredEvent) =>
         Promise.resolve(event),
       );
-      mockEventRepo.create.mockImplementation(
-        (event: any) => event as SacredEvent,
-      );
+      mockEventRepo.create.mockImplementation((event) => event as SacredEvent);
       mockLunarService.calculatePhase.mockReturnValue(LunarPhase.NEW_MOON);
     });
 
@@ -196,10 +194,12 @@ describe('SacredCalendarService', () => {
       // Verificar que se intentaron guardar eventos con ambos hemisferios
       const saveCalls = mockEventRepo.save.mock.calls;
       const northEvents = saveCalls.filter(
-        (call: any[]) => call[0].hemisphere === Hemisphere.NORTH,
+        (call: unknown[]) =>
+          (call[0] as { hemisphere?: string }).hemisphere === Hemisphere.NORTH,
       );
       const southEvents = saveCalls.filter(
-        (call: any[]) => call[0].hemisphere === Hemisphere.SOUTH,
+        (call: unknown[]) =>
+          (call[0] as { hemisphere?: string }).hemisphere === Hemisphere.SOUTH,
       );
 
       expect(northEvents.length).toBeGreaterThan(0);
@@ -213,9 +213,7 @@ describe('SacredCalendarService', () => {
       mockEventRepo.save.mockImplementation((event: SacredEvent) =>
         Promise.resolve(event),
       );
-      mockEventRepo.create.mockImplementation(
-        (event: any) => event as SacredEvent,
-      );
+      mockEventRepo.create.mockImplementation((event) => event as SacredEvent);
 
       mockLunarService.calculatePhase.mockReturnValue(LunarPhase.NEW_MOON);
 
@@ -233,9 +231,7 @@ describe('SacredCalendarService', () => {
       mockEventRepo.save.mockImplementation((event: SacredEvent) =>
         Promise.resolve(event),
       );
-      mockEventRepo.create.mockImplementation(
-        (event: any) => event as SacredEvent,
-      );
+      mockEventRepo.create.mockImplementation((event) => event as SacredEvent);
 
       const count = await service['generatePortalEvents'](2026);
 
@@ -247,9 +243,7 @@ describe('SacredCalendarService', () => {
       mockEventRepo.save.mockImplementation((event: SacredEvent) =>
         Promise.resolve(event),
       );
-      mockEventRepo.create.mockImplementation(
-        (event: any) => event as SacredEvent,
-      );
+      mockEventRepo.create.mockImplementation((event) => event as SacredEvent);
 
       await service['generatePortalEvents'](2026);
 
@@ -272,9 +266,7 @@ describe('SacredCalendarService', () => {
       mockEventRepo.save.mockImplementation((event: SacredEvent) =>
         Promise.resolve(event),
       );
-      mockEventRepo.create.mockImplementation(
-        (event: any) => event as SacredEvent,
-      );
+      mockEventRepo.create.mockImplementation((event) => event as SacredEvent);
 
       const count = await service['generateMonthlyEvents'](2026);
 
@@ -286,9 +278,7 @@ describe('SacredCalendarService', () => {
       mockEventRepo.save.mockImplementation((event: SacredEvent) =>
         Promise.resolve(event),
       );
-      mockEventRepo.create.mockImplementation(
-        (event: any) => event as SacredEvent,
-      );
+      mockEventRepo.create.mockImplementation((event) => event as SacredEvent);
 
       await service['generateMonthlyEvents'](2026);
 

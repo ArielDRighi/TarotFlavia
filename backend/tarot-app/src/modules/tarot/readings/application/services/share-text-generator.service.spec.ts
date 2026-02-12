@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ShareTextGeneratorService } from './share-text-generator.service';
 import { TarotReading } from '../../entities/tarot-reading.entity';
 import { DailyReading } from '../../../daily-reading/entities/daily-reading.entity';
+import { TarotCard } from '../../../cards/entities/tarot-card.entity';
 
 describe('ShareTextGeneratorService', () => {
   let service: ShareTextGeneratorService;
@@ -28,7 +29,7 @@ describe('ShareTextGeneratorService', () => {
           'Éxito, vitalidad, alegría. La carta del Sol representa un periodo de claridad y optimismo. Tus esfuerzos están siendo recompensados y experimentas una sensación de logro y satisfacción.',
         meaningReversed:
           'Desilusión temporal, pérdida de confianza. La energía del Sol está bloqueada momentáneamente.',
-      } as any,
+      } as unknown as TarotCard,
       isReversed: false,
       interpretation:
         'Tu energía está en su punto más alto. Este es el momento perfecto para avanzar en ese proyecto que has estado postergando. La claridad mental que experimentas hoy te permite ver oportunidades que antes pasaban desapercibidas. Aprovecha esta vibración positiva.',
@@ -109,19 +110,19 @@ describe('ShareTextGeneratorService', () => {
           name: 'El Mago',
           meaningUpright: 'Potencial y nuevos comienzos',
           meaningReversed: 'Bloqueos creativos',
-        } as any,
+        } as unknown as TarotCard,
         {
           id: 2,
           name: 'La Luna',
           meaningUpright: 'Intuición y misterio',
           meaningReversed: 'Confusión que se disipa',
-        } as any,
+        } as unknown as TarotCard,
         {
           id: 3,
           name: 'El Sol',
           meaningUpright: 'Éxito y claridad',
           meaningReversed: 'Optimismo forzado',
-        } as any,
+        } as unknown as TarotCard,
       ],
       cardPositions: [
         { cardId: 1, position: 'Pasado', isReversed: false },
@@ -205,7 +206,7 @@ describe('ShareTextGeneratorService', () => {
         id: 1,
         name: 'El Loco',
         meaningUpright: 'Nuevos comienzos',
-      } as any,
+      } as unknown as TarotCard,
       isReversed: false,
     };
 
@@ -250,7 +251,11 @@ describe('ShareTextGeneratorService', () => {
   describe('Text formatting', () => {
     it('should include visual separators', () => {
       const mockReading: Partial<DailyReading> = {
-        card: { id: 1, name: 'Test', meaningUpright: 'Test meaning' } as any,
+        card: {
+          id: 1,
+          name: 'Test',
+          meaningUpright: 'Test meaning',
+        } as unknown as TarotCard,
         isReversed: false,
       };
 
@@ -266,7 +271,11 @@ describe('ShareTextGeneratorService', () => {
     it('should include full interpretations up to 5000 characters', () => {
       const longInterpretation = 'A'.repeat(300);
       const mockReading: Partial<DailyReading> = {
-        card: { id: 1, name: 'Test', meaningUpright: 'Test' } as any,
+        card: {
+          id: 1,
+          name: 'Test',
+          meaningUpright: 'Test',
+        } as unknown as TarotCard,
         isReversed: false,
         interpretation: longInterpretation,
       };

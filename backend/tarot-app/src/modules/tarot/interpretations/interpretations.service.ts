@@ -9,7 +9,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { HttpService } from '@nestjs/axios';
 import { TarotCard } from '../cards/entities/tarot-card.entity';
-import { TarotInterpretation } from './entities/tarot-interpretation.entity';
+import {
+  TarotInterpretation,
+  AIConfig,
+} from './entities/tarot-interpretation.entity';
 import { TarotSpread } from '../spreads/entities/tarot-spread.entity';
 import { TarotReading } from '../readings/entities/tarot-reading.entity';
 import { Tarotista } from '../../tarotistas/entities/tarotista.entity';
@@ -235,7 +238,7 @@ export class InterpretationsService {
         model: response.model,
         tokensUsed: response.tokensUsed,
         duration,
-        spread: spread?.name,
+        spread: spread?.name || 'unknown',
         cardCount: cards.length,
         tarotistaId: finalTarotistaId,
       });
@@ -340,13 +343,13 @@ export class InterpretationsService {
   private async saveInterpretation(
     content: string,
     modelUsed: string,
-    aiConfig: any,
+    aiConfig: AIConfig,
   ) {
     try {
       const interpretation = this.interpretationRepository.create({
         content,
         modelUsed,
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
         aiConfig,
       });
       await this.interpretationRepository.save(interpretation);
@@ -360,14 +363,14 @@ export class InterpretationsService {
     readingId: number,
     interpretation: string,
     modelUsed: string,
-    aiConfig: any,
+    aiConfig: AIConfig,
   ) {
     try {
       const tarotInterpretation = this.interpretationRepository.create({
         reading: { id: readingId } as Pick<TarotReading, 'id'>,
         content: interpretation,
         modelUsed,
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
         aiConfig,
       });
       return await this.interpretationRepository.save(tarotInterpretation);

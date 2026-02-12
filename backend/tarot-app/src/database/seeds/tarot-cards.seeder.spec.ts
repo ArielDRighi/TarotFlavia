@@ -72,25 +72,35 @@ describe('TarotCards Seeder', () => {
     it('should seed exactly 78 tarot cards', async () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
-        .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) => Promise.resolve(cards as any));
+        .spyOn(
+          cardRepository as unknown as {
+            save: (cards: TarotCard[]) => Promise<TarotCard[]>;
+          },
+          'save',
+        )
+        .mockImplementation((cards) => Promise.resolve(cards));
 
       await seedTarotCards(cardRepository, deckRepository);
 
       expect(saveSpy).toHaveBeenCalled();
-      const savedCards = saveSpy.mock.calls[0][0] as TarotCard[];
+      const savedCards = saveSpy.mock.calls[0][0];
       expect(savedCards).toHaveLength(78);
     });
 
     it('should have 22 Arcanos Mayores', async () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
-        .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) => Promise.resolve(cards as any));
+        .spyOn(
+          cardRepository as unknown as {
+            save: (cards: TarotCard[]) => Promise<TarotCard[]>;
+          },
+          'save',
+        )
+        .mockImplementation((cards) => Promise.resolve(cards));
 
       await seedTarotCards(cardRepository, deckRepository);
 
-      const savedCards = saveSpy.mock.calls[0][0] as TarotCard[];
+      const savedCards = saveSpy.mock.calls[0][0];
       const arcanosMayores = savedCards.filter(
         (card) => card.category === 'arcanos_mayores',
       );
@@ -100,12 +110,17 @@ describe('TarotCards Seeder', () => {
     it('should have 14 Bastos cards', async () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
-        .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) => Promise.resolve(cards as any));
+        .spyOn(
+          cardRepository as unknown as {
+            save: (cards: TarotCard[]) => Promise<TarotCard[]>;
+          },
+          'save',
+        )
+        .mockImplementation((cards) => Promise.resolve(cards));
 
       await seedTarotCards(cardRepository, deckRepository);
 
-      const savedCards = saveSpy.mock.calls[0][0] as TarotCard[];
+      const savedCards = saveSpy.mock.calls[0][0];
       const bastos = savedCards.filter((card) => card.category === 'bastos');
       expect(bastos).toHaveLength(14);
     });
@@ -113,12 +128,17 @@ describe('TarotCards Seeder', () => {
     it('should have 14 Copas cards', async () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
-        .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) => Promise.resolve(cards as any));
+        .spyOn(
+          cardRepository as unknown as {
+            save: (cards: TarotCard[]) => Promise<TarotCard[]>;
+          },
+          'save',
+        )
+        .mockImplementation((cards) => Promise.resolve(cards));
 
       await seedTarotCards(cardRepository, deckRepository);
 
-      const savedCards = saveSpy.mock.calls[0][0] as TarotCard[];
+      const savedCards = saveSpy.mock.calls[0][0];
       const copas = savedCards.filter((card) => card.category === 'copas');
       expect(copas).toHaveLength(14);
     });
@@ -126,12 +146,17 @@ describe('TarotCards Seeder', () => {
     it('should have 14 Espadas cards', async () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
-        .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) => Promise.resolve(cards as any));
+        .spyOn(
+          cardRepository as unknown as {
+            save: (cards: TarotCard[]) => Promise<TarotCard[]>;
+          },
+          'save',
+        )
+        .mockImplementation((cards) => Promise.resolve(cards));
 
       await seedTarotCards(cardRepository, deckRepository);
 
-      const savedCards = saveSpy.mock.calls[0][0] as TarotCard[];
+      const savedCards = saveSpy.mock.calls[0][0];
       const espadas = savedCards.filter((card) => card.category === 'espadas');
       expect(espadas).toHaveLength(14);
     });
@@ -139,12 +164,17 @@ describe('TarotCards Seeder', () => {
     it('should have 14 Oros cards', async () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
-        .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) => Promise.resolve(cards as any));
+        .spyOn(
+          cardRepository as unknown as {
+            save: (cards: TarotCard[]) => Promise<TarotCard[]>;
+          },
+          'save',
+        )
+        .mockImplementation((cards) => Promise.resolve(cards));
 
       await seedTarotCards(cardRepository, deckRepository);
 
-      const savedCards = saveSpy.mock.calls[0][0] as TarotCard[];
+      const savedCards = saveSpy.mock.calls[0][0];
       const oros = savedCards.filter((card) => card.category === 'oros');
       expect(oros).toHaveLength(14);
     });
@@ -154,12 +184,17 @@ describe('TarotCards Seeder', () => {
     it('should have all required fields for each card', async () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
-        .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) => Promise.resolve(cards as any));
+        .spyOn(
+          cardRepository as unknown as {
+            save: (cards: TarotCard[]) => Promise<TarotCard[]>;
+          },
+          'save',
+        )
+        .mockImplementation((cards) => Promise.resolve(cards));
 
       await seedTarotCards(cardRepository, deckRepository);
 
-      const savedCards = saveSpy.mock.calls[0][0] as TarotCard[];
+      const savedCards = saveSpy.mock.calls[0][0];
 
       savedCards.forEach((card) => {
         expect(card.name).toBeDefined();
@@ -178,12 +213,17 @@ describe('TarotCards Seeder', () => {
     it('should have unique card names', async () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
-        .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) => Promise.resolve(cards as any));
+        .spyOn(
+          cardRepository as unknown as {
+            save: (cards: TarotCard[]) => Promise<TarotCard[]>;
+          },
+          'save',
+        )
+        .mockImplementation((cards) => Promise.resolve(cards));
 
       await seedTarotCards(cardRepository, deckRepository);
 
-      const savedCards = saveSpy.mock.calls[0][0] as TarotCard[];
+      const savedCards = saveSpy.mock.calls[0][0];
       const names = savedCards.map((card) => card.name);
       const uniqueNames = new Set(names);
 
@@ -194,7 +234,12 @@ describe('TarotCards Seeder', () => {
   describe('Idempotency', () => {
     it('should not seed cards if cards already exist', async () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(78);
-      const saveSpy = jest.spyOn(cardRepository, 'save');
+      const saveSpy = jest.spyOn(
+        cardRepository as unknown as {
+          save: (cards: TarotCard[]) => Promise<TarotCard[]>;
+        },
+        'save',
+      );
 
       await seedTarotCards(cardRepository, deckRepository);
 
@@ -210,8 +255,13 @@ describe('TarotCards Seeder', () => {
       });
 
       const saveSpy = jest
-        .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) => Promise.resolve(cards as any));
+        .spyOn(
+          cardRepository as unknown as {
+            save: (cards: TarotCard[]) => Promise<TarotCard[]>;
+          },
+          'save',
+        )
+        .mockImplementation((cards) => Promise.resolve(cards));
 
       // First call - should seed
       await seedTarotCards(cardRepository, deckRepository);
@@ -236,12 +286,17 @@ describe('TarotCards Seeder', () => {
     it('should associate all cards with the Rider-Waite deck', async () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
-        .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) => Promise.resolve(cards as any));
+        .spyOn(
+          cardRepository as unknown as {
+            save: (cards: TarotCard[]) => Promise<TarotCard[]>;
+          },
+          'save',
+        )
+        .mockImplementation((cards) => Promise.resolve(cards));
 
       await seedTarotCards(cardRepository, deckRepository);
 
-      const savedCards = saveSpy.mock.calls[0][0] as TarotCard[];
+      const savedCards = saveSpy.mock.calls[0][0];
       savedCards.forEach((card) => {
         expect(card.deckId).toBe(mockDeck.id);
       });
@@ -252,12 +307,17 @@ describe('TarotCards Seeder', () => {
     it('should only have valid categories', async () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
-        .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) => Promise.resolve(cards as any));
+        .spyOn(
+          cardRepository as unknown as {
+            save: (cards: TarotCard[]) => Promise<TarotCard[]>;
+          },
+          'save',
+        )
+        .mockImplementation((cards) => Promise.resolve(cards));
 
       await seedTarotCards(cardRepository, deckRepository);
 
-      const savedCards = saveSpy.mock.calls[0][0] as TarotCard[];
+      const savedCards = saveSpy.mock.calls[0][0];
       const validCategories = [
         'arcanos_mayores',
         'bastos',
@@ -276,12 +336,17 @@ describe('TarotCards Seeder', () => {
     it('should have numbers 0-21 for Arcanos Mayores', async () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
-        .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) => Promise.resolve(cards as any));
+        .spyOn(
+          cardRepository as unknown as {
+            save: (cards: TarotCard[]) => Promise<TarotCard[]>;
+          },
+          'save',
+        )
+        .mockImplementation((cards) => Promise.resolve(cards));
 
       await seedTarotCards(cardRepository, deckRepository);
 
-      const savedCards = saveSpy.mock.calls[0][0] as TarotCard[];
+      const savedCards = saveSpy.mock.calls[0][0];
       const arcanosMayores = savedCards.filter(
         (card) => card.category === 'arcanos_mayores',
       );
@@ -298,12 +363,17 @@ describe('TarotCards Seeder', () => {
     it('should have numbers 1-14 for each Minor Arcana suit', async () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
-        .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) => Promise.resolve(cards as any));
+        .spyOn(
+          cardRepository as unknown as {
+            save: (cards: TarotCard[]) => Promise<TarotCard[]>;
+          },
+          'save',
+        )
+        .mockImplementation((cards) => Promise.resolve(cards));
 
       await seedTarotCards(cardRepository, deckRepository);
 
-      const savedCards = saveSpy.mock.calls[0][0] as TarotCard[];
+      const savedCards = saveSpy.mock.calls[0][0];
       const suits = ['bastos', 'copas', 'espadas', 'oros'];
 
       suits.forEach((suit) => {
@@ -322,12 +392,17 @@ describe('TarotCards Seeder', () => {
     it('should have non-empty description for all cards', async () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
-        .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) => Promise.resolve(cards as any));
+        .spyOn(
+          cardRepository as unknown as {
+            save: (cards: TarotCard[]) => Promise<TarotCard[]>;
+          },
+          'save',
+        )
+        .mockImplementation((cards) => Promise.resolve(cards));
 
       await seedTarotCards(cardRepository, deckRepository);
 
-      const savedCards = saveSpy.mock.calls[0][0] as TarotCard[];
+      const savedCards = saveSpy.mock.calls[0][0];
 
       savedCards.forEach((card) => {
         expect(card.description).toBeDefined();
@@ -339,12 +414,17 @@ describe('TarotCards Seeder', () => {
     it('should have non-empty meaningUpright for all cards', async () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
-        .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) => Promise.resolve(cards as any));
+        .spyOn(
+          cardRepository as unknown as {
+            save: (cards: TarotCard[]) => Promise<TarotCard[]>;
+          },
+          'save',
+        )
+        .mockImplementation((cards) => Promise.resolve(cards));
 
       await seedTarotCards(cardRepository, deckRepository);
 
-      const savedCards = saveSpy.mock.calls[0][0] as TarotCard[];
+      const savedCards = saveSpy.mock.calls[0][0];
 
       savedCards.forEach((card) => {
         expect(card.meaningUpright).toBeDefined();
@@ -356,12 +436,17 @@ describe('TarotCards Seeder', () => {
     it('should have non-empty meaningReversed for all cards', async () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
-        .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) => Promise.resolve(cards as any));
+        .spyOn(
+          cardRepository as unknown as {
+            save: (cards: TarotCard[]) => Promise<TarotCard[]>;
+          },
+          'save',
+        )
+        .mockImplementation((cards) => Promise.resolve(cards));
 
       await seedTarotCards(cardRepository, deckRepository);
 
-      const savedCards = saveSpy.mock.calls[0][0] as TarotCard[];
+      const savedCards = saveSpy.mock.calls[0][0];
 
       savedCards.forEach((card) => {
         expect(card.meaningReversed).toBeDefined();
@@ -373,12 +458,17 @@ describe('TarotCards Seeder', () => {
     it('should have at least 3 keywords for all cards', async () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
-        .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) => Promise.resolve(cards as any));
+        .spyOn(
+          cardRepository as unknown as {
+            save: (cards: TarotCard[]) => Promise<TarotCard[]>;
+          },
+          'save',
+        )
+        .mockImplementation((cards) => Promise.resolve(cards));
 
       await seedTarotCards(cardRepository, deckRepository);
 
-      const savedCards = saveSpy.mock.calls[0][0] as TarotCard[];
+      const savedCards = saveSpy.mock.calls[0][0];
 
       savedCards.forEach((card) => {
         expect(card.keywords).toBeDefined();
@@ -393,12 +483,17 @@ describe('TarotCards Seeder', () => {
     it('should have valid imageUrl for all cards', async () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
-        .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) => Promise.resolve(cards as any));
+        .spyOn(
+          cardRepository as unknown as {
+            save: (cards: TarotCard[]) => Promise<TarotCard[]>;
+          },
+          'save',
+        )
+        .mockImplementation((cards) => Promise.resolve(cards));
 
       await seedTarotCards(cardRepository, deckRepository);
 
-      const savedCards = saveSpy.mock.calls[0][0] as TarotCard[];
+      const savedCards = saveSpy.mock.calls[0][0];
 
       savedCards.forEach((card) => {
         expect(card.imageUrl).toBeDefined();
@@ -410,12 +505,17 @@ describe('TarotCards Seeder', () => {
     it('should not contain placeholder text', async () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
-        .spyOn(cardRepository, 'save')
-        .mockImplementation((cards) => Promise.resolve(cards as any));
+        .spyOn(
+          cardRepository as unknown as {
+            save: (cards: TarotCard[]) => Promise<TarotCard[]>;
+          },
+          'save',
+        )
+        .mockImplementation((cards) => Promise.resolve(cards));
 
       await seedTarotCards(cardRepository, deckRepository);
 
-      const savedCards = saveSpy.mock.calls[0][0] as TarotCard[];
+      const savedCards = saveSpy.mock.calls[0][0];
 
       savedCards.forEach((card) => {
         const textToCheck = [

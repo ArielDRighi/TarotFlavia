@@ -108,7 +108,9 @@ describe('TarotistasOrchestratorService', () => {
 
   describe('createTarotista', () => {
     it('should delegate to CreateTarotistaUseCase', async () => {
-      const dto = { userId: 1, nombrePublico: 'Test' } as any;
+      const dto = { userId: 1, nombrePublico: 'Test' } as Parameters<
+        typeof mockCreateUseCase.execute
+      >[0];
       const expected = { id: 1, nombrePublico: 'Test' };
 
       mockCreateUseCase.execute.mockResolvedValue(expected);
@@ -122,7 +124,7 @@ describe('TarotistasOrchestratorService', () => {
 
   describe('getAllTarotistas', () => {
     it('should return paginated tarotistas with correct format', async () => {
-      const filterDto = { page: 1, limit: 10 } as any;
+      const filterDto = { page: 1, limit: 10 };
       const useCaseResult = {
         data: [{ id: 1 }, { id: 2 }],
         total: 25,
@@ -142,7 +144,7 @@ describe('TarotistasOrchestratorService', () => {
     });
 
     it('should use default pagination values', async () => {
-      const filterDto = {} as any;
+      const filterDto = {} as Record<string, unknown>;
       mockListUseCase.execute.mockResolvedValue({ data: [], total: 0 });
 
       await service.getAllTarotistas(filterDto);
@@ -160,7 +162,7 @@ describe('TarotistasOrchestratorService', () => {
 
   describe('approveApplication', () => {
     it('should approve application with correct parameters', async () => {
-      const dto = { adminNotes: 'Approved' } as any;
+      const dto = { adminNotes: 'Approved' };
       const expected = { application: {}, tarotista: {} };
 
       mockApproveUseCase.execute.mockResolvedValue(expected);

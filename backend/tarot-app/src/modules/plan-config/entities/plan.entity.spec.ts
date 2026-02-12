@@ -114,7 +114,7 @@ describe('Plan Entity', () => {
     it('should throw error for invalid feature name', () => {
       const plan = new Plan();
 
-      expect(() => plan.hasFeature('invalidFeature' as any)).toThrow(
+      expect(() => plan.hasFeature('invalidFeature' as never)).toThrow(
         'Invalid feature name: invalidFeature',
       );
     });

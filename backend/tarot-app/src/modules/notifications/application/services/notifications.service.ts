@@ -21,7 +21,7 @@ export class NotificationsService {
     type: NotificationType,
     title: string,
     message: string,
-    data?: Record<string, any>,
+    data?: Record<string, unknown>,
     actionUrl?: string,
   ): Promise<UserNotification> {
     const notification = this.notificationRepo.create({

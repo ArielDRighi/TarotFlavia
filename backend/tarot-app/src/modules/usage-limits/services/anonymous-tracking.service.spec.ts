@@ -92,7 +92,9 @@ describe('AnonymousTrackingService', () => {
     it('should return true when anonymous user has not accessed today', async () => {
       mockAnonymousUsageRepository.findOne.mockResolvedValue(null);
 
-      const result = await service.canAccess(mockRequest as any);
+      const result = await service.canAccess(
+        mockRequest as Parameters<typeof service.canAccess>[0],
+      );
 
       expect(result).toBe(true);
       expect(mockAnonymousUsageRepository.findOne).toHaveBeenCalledWith({
@@ -113,7 +115,9 @@ describe('AnonymousTrackingService', () => {
         feature: UsageFeature.TAROT_READING,
       });
 
-      const result = await service.canAccess(mockRequest as any);
+      const result = await service.canAccess(
+        mockRequest as Parameters<typeof service.canAccess>[0],
+      );
 
       expect(result).toBe(false);
     });
@@ -126,7 +130,9 @@ describe('AnonymousTrackingService', () => {
 
       mockAnonymousUsageRepository.findOne.mockResolvedValue(null);
 
-      const result = await service.canAccess(requestWithoutUA as any);
+      const result = await service.canAccess(
+        requestWithoutUA as Parameters<typeof service.canAccess>[0],
+      );
 
       expect(result).toBe(true);
       expect(mockAnonymousUsageRepository.findOne).toHaveBeenCalled();
@@ -153,7 +159,9 @@ describe('AnonymousTrackingService', () => {
       mockAnonymousUsageRepository.create.mockReturnValue(mockAnonymousUsage);
       mockAnonymousUsageRepository.save.mockResolvedValue(mockAnonymousUsage);
 
-      const result = await service.recordUsage(mockRequest as any);
+      const result = await service.recordUsage(
+        mockRequest as Parameters<typeof service.recordUsage>[0],
+      );
 
       expect(mockAnonymousUsageRepository.create).toHaveBeenCalledWith({
         fingerprint: expect.any(String),
@@ -184,7 +192,9 @@ describe('AnonymousTrackingService', () => {
       mockAnonymousUsageRepository.create.mockReturnValue(mockAnonymousUsage);
       mockAnonymousUsageRepository.save.mockResolvedValue(mockAnonymousUsage);
 
-      await service.recordUsage(requestWithoutUA as any);
+      await service.recordUsage(
+        requestWithoutUA as Parameters<typeof service.recordUsage>[0],
+      );
 
       expect(mockAnonymousUsageRepository.create).toHaveBeenCalled();
       expect(mockAnonymousUsageRepository.save).toHaveBeenCalled();
@@ -209,7 +219,9 @@ describe('AnonymousTrackingService', () => {
       mockAnonymousUsageRepository.create.mockReturnValue(mockAnonymousUsage);
       mockAnonymousUsageRepository.save.mockResolvedValue(mockAnonymousUsage);
 
-      await service.recordUsage(requestWithoutIP as any);
+      await service.recordUsage(
+        requestWithoutIP as Parameters<typeof service.recordUsage>[0],
+      );
 
       // Verify that IP is stored as empty string
       expect(mockAnonymousUsageRepository.create).toHaveBeenCalledWith({

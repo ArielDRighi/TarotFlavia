@@ -21,7 +21,7 @@ describe('TypeOrmExceptionRepository', () => {
     reason: 'Personal',
     createdAt: new Date(),
     updatedAt: new Date(),
-  } as any;
+  } as unknown as TarotistException;
 
   beforeEach(async () => {
     const mockTypeOrmRepository = {

@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import * as request from 'supertest';
 import { AppModule } from '../../src/app.module';
 
@@ -12,6 +12,7 @@ import { AuthOrchestratorService } from '../../src/modules/auth/application/serv
 import { User, UserPlan } from '../../src/modules/users/entities/user.entity';
 import { UserRole } from '../../src/common/enums/user-role.enum';
 import { AuditLog } from '../../src/modules/audit/entities/audit-log.entity';
+import { AuditAction } from '../../src/modules/audit/enums/audit-action.enum';
 
 // Increase timeout for integration tests
 jest.setTimeout(30000);
@@ -28,8 +29,8 @@ describe('Admin Operations Integration Tests', () => {
   let regularUser: User;
 
   // Repositories
-  let userRepository: any;
-  let auditLogRepository: any;
+  let userRepository: Repository<User>;
+  let auditLogRepository: Repository<AuditLog>;
 
   const adminUserData = {
     password: 'AdminPass123!',
@@ -182,18 +183,24 @@ describe('Admin Operations Integration Tests', () => {
       const updatedUser = await userRepository.findOne({
         where: { id: regularUser.id },
       });
+      if (!updatedUser) {
+        throw new Error('Usuario actualizado no encontrado');
+      }
       expect(updatedUser.plan).toBe(UserPlan.PREMIUM);
 
       // Verificar audit log
       const auditLog = await auditLogRepository.findOne({
         where: {
           targetUserId: regularUser.id,
-          action: 'plan_changed',
+          action: AuditAction.PLAN_CHANGED,
         },
         order: { createdAt: 'DESC' },
       });
 
       expect(auditLog).toBeDefined();
+      if (!auditLog) {
+        throw new Error('Audit log no encontrado');
+      }
       expect(auditLog.userId).toBe(adminUser.id);
       expect(auditLog.oldValue).toEqual({ plan: UserPlan.FREE });
       expect(auditLog.newValue).toEqual({ plan: UserPlan.PREMIUM });
@@ -219,6 +226,9 @@ describe('Admin Operations Integration Tests', () => {
       const bannedUser = await userRepository.findOne({
         where: { id: regularUser.id },
       });
+      if (!bannedUser) {
+        throw new Error('Usuario baneado no encontrado');
+      }
       expect(bannedUser.bannedAt).not.toBeNull();
       expect(bannedUser.banReason).toBe(banPayload.reason);
 
@@ -226,12 +236,15 @@ describe('Admin Operations Integration Tests', () => {
       const auditLog = await auditLogRepository.findOne({
         where: {
           targetUserId: regularUser.id,
-          action: 'user_banned',
+          action: AuditAction.USER_BANNED,
         },
         order: { createdAt: 'DESC' },
       });
 
       expect(auditLog).toBeDefined();
+      if (!auditLog) {
+        throw new Error('Audit log no encontrado');
+      }
       expect(auditLog.userId).toBe(adminUser.id);
     });
 
@@ -254,6 +267,9 @@ describe('Admin Operations Integration Tests', () => {
       const unbannedUser = await userRepository.findOne({
         where: { id: regularUser.id },
       });
+      if (!unbannedUser) {
+        throw new Error('Usuario desbaneado no encontrado');
+      }
       expect(unbannedUser.bannedAt).toBeNull();
       expect(unbannedUser.banReason).toBeNull();
     });
@@ -275,19 +291,26 @@ describe('Admin Operations Integration Tests', () => {
       const updatedUser = await userRepository.findOne({
         where: { id: regularUser.id },
       });
+      if (!updatedUser) {
+        throw new Error('Usuario actualizado no encontrado');
+      }
       expect(updatedUser.roles).toContain(UserRole.TAROTIST);
 
       // Verificar audit log
       const auditLog = await auditLogRepository.findOne({
         where: {
           targetUserId: regularUser.id,
-          action: 'role_added',
+          action: AuditAction.ROLE_ADDED,
         },
         order: { createdAt: 'DESC' },
       });
 
       expect(auditLog).toBeDefined();
-      expect(auditLog.newValue.roles).toContain(UserRole.TAROTIST);
+      if (!auditLog) {
+        throw new Error('Audit log no encontrado');
+      }
+      const newRoles = (auditLog.newValue as { roles: string[] }).roles;
+      expect(newRoles).toContain(UserRole.TAROTIST);
     });
 
     it('should promote user to ADMIN role', async () => {
@@ -305,6 +328,9 @@ describe('Admin Operations Integration Tests', () => {
       const updatedUser = await userRepository.findOne({
         where: { id: regularUser.id },
       });
+      if (!updatedUser) {
+        throw new Error('Usuario actualizado no encontrado');
+      }
       expect(updatedUser.roles).toContain(UserRole.ADMIN);
     });
 
@@ -327,6 +353,9 @@ describe('Admin Operations Integration Tests', () => {
       const updatedUser = await userRepository.findOne({
         where: { id: regularUser.id },
       });
+      if (!updatedUser) {
+        throw new Error('Usuario actualizado no encontrado');
+      }
       expect(updatedUser.roles).not.toContain(UserRole.TAROTIST);
     });
   });
@@ -406,9 +435,9 @@ describe('Admin Operations Integration Tests', () => {
       });
 
       const actions = auditLogs.map((log: AuditLog) => log.action);
-      expect(actions).toContain('plan_changed');
-      expect(actions).toContain('role_added');
-      expect(actions).toContain('role_removed');
+      expect(actions).toContain(AuditAction.PLAN_CHANGED);
+      expect(actions).toContain(AuditAction.ROLE_ADDED);
+      expect(actions).toContain(AuditAction.ROLE_REMOVED);
     });
 
     it('should store IP address and user agent in audit log', async () => {
@@ -424,12 +453,15 @@ describe('Admin Operations Integration Tests', () => {
       const auditLog = await auditLogRepository.findOne({
         where: {
           targetUserId: regularUser.id,
-          action: 'plan_changed',
+          action: AuditAction.PLAN_CHANGED,
         },
         order: { createdAt: 'DESC' },
       });
 
       expect(auditLog).toBeDefined();
+      if (!auditLog) {
+        throw new Error('Audit log no encontrado');
+      }
       expect(auditLog.userAgent).toContain('TestAgent');
       expect(auditLog.ipAddress).toBeDefined();
     });

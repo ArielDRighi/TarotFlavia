@@ -19,7 +19,7 @@ describe('OptionalJwtAuthGuard', () => {
 
   describe('canActivate', () => {
     let mockContext: ExecutionContext;
-    let mockRequest: any;
+    let mockRequest: { headers: Record<string, string | undefined> };
 
     beforeEach(() => {
       mockRequest = {
