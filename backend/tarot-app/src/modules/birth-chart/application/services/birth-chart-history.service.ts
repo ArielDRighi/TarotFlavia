@@ -50,13 +50,15 @@ export class BirthChartHistoryService {
       take: safeLimit,
     });
 
+    const totalPages = totalItems === 0 ? 0 : Math.ceil(totalItems / safeLimit);
+
     return {
       data: charts.map((chart) => this.toSavedChartSummary(chart)),
       meta: {
         page: safePage,
         limit: safeLimit,
         totalItems,
-        totalPages: Math.max(1, Math.ceil(totalItems / safeLimit)),
+        totalPages,
         hasNextPage: safePage * safeLimit < totalItems,
         hasPreviousPage: safePage > 1,
       },
@@ -140,7 +142,9 @@ export class BirthChartHistoryService {
       savedChartId: chart.id,
       aiSynthesis: {
         content: chart.chartData.aiSynthesis ?? '',
-        generatedAt: chart.updatedAt.toISOString(),
+        generatedAt: chart.chartData.aiSynthesis
+          ? chart.updatedAt.toISOString()
+          : null,
         provider: chart.chartData.aiSynthesis ? 'cached' : 'none',
       },
       canAccessHistory: true,

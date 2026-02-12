@@ -63,6 +63,29 @@ describe('BirthChartFacadeService', () => {
     },
   };
 
+  const fullInterpretation = {
+    bigThree: {
+      sun: {
+        sign: ZodiacSign.ARIES,
+        signName: 'Aries',
+        interpretation: 'Sol en Aries',
+      },
+      moon: {
+        sign: ZodiacSign.TAURUS,
+        signName: 'Tauro',
+        interpretation: 'Luna en Tauro',
+      },
+      ascendant: {
+        sign: ZodiacSign.ARIES,
+        signName: 'Aries',
+        interpretation: 'Ascendente en Aries',
+      },
+    },
+    planets: [],
+    distribution: { elements: [], modalities: [] },
+    aspectSummary: { total: 0, harmonious: 0, challenging: 0 },
+  };
+
   const chartCalculationServiceMock = {
     calculateChart: jest.fn().mockReturnValue({
       chartData,
@@ -91,28 +114,7 @@ describe('BirthChartFacadeService', () => {
         interpretation: 'Ascendente en Aries',
       },
     }),
-    generateFullInterpretation: jest.fn().mockResolvedValue({
-      bigThree: {
-        sun: {
-          sign: ZodiacSign.ARIES,
-          signName: 'Aries',
-          interpretation: 'Sol en Aries',
-        },
-        moon: {
-          sign: ZodiacSign.TAURUS,
-          signName: 'Tauro',
-          interpretation: 'Luna en Tauro',
-        },
-        ascendant: {
-          sign: ZodiacSign.ARIES,
-          signName: 'Aries',
-          interpretation: 'Ascendente en Aries',
-        },
-      },
-      planets: [],
-      distribution: { elements: [], modalities: [] },
-      aspectSummary: { total: 0, harmonious: 0, challenging: 0 },
-    }),
+    generateFullInterpretation: jest.fn().mockResolvedValue(fullInterpretation),
   };
 
   const cacheServiceMock = {
@@ -126,7 +128,11 @@ describe('BirthChartFacadeService', () => {
   };
 
   const aiSynthesisServiceMock = {
-    generateSynthesis: jest.fn(),
+    generateSynthesis: jest.fn().mockResolvedValue({
+      synthesis: 'síntesis premium',
+      provider: 'groq',
+      model: 'llama-3.1',
+    }),
   };
 
   const pdfServiceMock = {
@@ -142,8 +148,25 @@ describe('BirthChartFacadeService', () => {
   };
 
   const chartRepositoryMock = {
-    create: jest.fn(),
-    save: jest.fn(),
+    create: jest
+      .fn()
+      .mockImplementation((payload: Partial<BirthChart>) => payload),
+    save: jest.fn().mockImplementation((payload: Partial<BirthChart>) =>
+      Promise.resolve({
+        id: 77,
+        ...payload,
+      }),
+    ),
+  };
+
+  const inputDto = {
+    name: 'Test',
+    birthDate: '1990-05-15',
+    birthTime: '14:30',
+    birthPlace: 'Buenos Aires',
+    latitude: -34.6,
+    longitude: -58.3,
+    timezone: 'America/Argentina/Buenos_Aires',
   };
 
   beforeEach(async () => {
@@ -179,15 +202,7 @@ describe('BirthChartFacadeService', () => {
 
   it('should generate anonymous response', async () => {
     const result = await service.generateChart(
-      {
-        name: 'Test',
-        birthDate: '1990-05-15',
-        birthTime: '14:30',
-        birthPlace: 'Buenos Aires',
-        latitude: -34.6,
-        longitude: -58.3,
-        timezone: 'America/Argentina/Buenos_Aires',
-      },
+      inputDto,
       UserPlan.ANONYMOUS,
       null,
       'fingerprint',
@@ -197,6 +212,72 @@ describe('BirthChartFacadeService', () => {
     expect(
       interpretationServiceMock.generateBigThreeInterpretation,
     ).toHaveBeenCalled();
+  });
+
+  it('should generate free response without redundant bigThree generation', async () => {
+    const result = await service.generateChart(inputDto, UserPlan.FREE, 1);
+
+    expect(result.success).toBe(true);
+    expect(
+      interpretationServiceMock.generateFullInterpretation,
+    ).toHaveBeenCalled();
+    expect(
+      interpretationServiceMock.generateBigThreeInterpretation,
+    ).not.toHaveBeenCalled();
+    expect('canDownloadPdf' in result && result.canDownloadPdf).toBe(true);
+  });
+
+  it('should use cached chart calculation when available', async () => {
+    cacheServiceMock.getChartCalculation.mockResolvedValueOnce({ chartData });
+
+    await service.generateChart(
+      inputDto,
+      UserPlan.ANONYMOUS,
+      null,
+      'fingerprint',
+    );
+
+    expect(chartCalculationServiceMock.calculateChart).not.toHaveBeenCalled();
+    expect(cacheServiceMock.setChartCalculation).not.toHaveBeenCalled();
+  });
+
+  it('should use cached synthesis for premium and persist chart', async () => {
+    cacheServiceMock.getInterpretation.mockResolvedValueOnce(
+      fullInterpretation,
+    );
+    cacheServiceMock.getSynthesis.mockResolvedValueOnce({
+      synthesis: 'síntesis cacheada',
+      provider: 'groq',
+      model: 'llama-3.1',
+    });
+
+    const result = await service.generateChart(inputDto, UserPlan.PREMIUM, 5);
+
+    expect(aiSynthesisServiceMock.generateSynthesis).not.toHaveBeenCalled();
+    expect(cacheServiceMock.setSynthesis).not.toHaveBeenCalled();
+    expect(chartRepositoryMock.create).toHaveBeenCalled();
+    expect(chartRepositoryMock.save).toHaveBeenCalled();
+    expect('aiSynthesis' in result && result.aiSynthesis.content).toBe(
+      'síntesis cacheada',
+    );
+  });
+
+  it('should generate and cache synthesis on premium cache miss', async () => {
+    cacheServiceMock.getInterpretation.mockResolvedValueOnce(
+      fullInterpretation,
+    );
+    cacheServiceMock.getSynthesis.mockResolvedValueOnce(null);
+
+    const result = await service.generateChart(inputDto, UserPlan.PREMIUM, 7);
+
+    expect(aiSynthesisServiceMock.generateSynthesis).toHaveBeenCalled();
+    expect(cacheServiceMock.setSynthesis).toHaveBeenCalledWith(
+      'key-123',
+      'síntesis premium',
+      'groq',
+      'llama-3.1',
+    );
+    expect('savedChartId' in result && result.savedChartId).toBe(77);
   });
 
   it('should return usage status for authenticated free user', async () => {

@@ -54,11 +54,11 @@ const GEOCODE_CATALOG: ReadonlyArray<GeocodedPlaceDto> = [
 
 @Injectable()
 export class GeocodeService {
-  searchPlaces(query: string): GeocodeSearchResponseDto {
+  searchPlaces(query: string): Promise<GeocodeSearchResponseDto> {
     const normalizedQuery = query.trim().toLowerCase();
 
     if (!normalizedQuery) {
-      return { results: [], count: 0 };
+      return Promise.resolve({ results: [], count: 0 });
     }
 
     const results = GEOCODE_CATALOG.filter((item) =>
@@ -67,9 +67,9 @@ export class GeocodeService {
         .includes(normalizedQuery),
     );
 
-    return {
+    return Promise.resolve({
       results,
       count: results.length,
-    };
+    });
   }
 }

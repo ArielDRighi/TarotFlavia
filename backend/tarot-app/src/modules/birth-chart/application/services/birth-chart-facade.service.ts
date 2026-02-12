@@ -290,7 +290,7 @@ export class BirthChartFacadeService {
     cacheKey: string,
     calculationTimeMs: number,
   ): Promise<PremiumChartResponseDto> {
-    const freeResponse = await this.buildFreeResponse(
+    const freeResponse = this.buildFreeResponse(
       chartData,
       interpretation,
       calculationTimeMs,
@@ -360,47 +360,18 @@ export class BirthChartFacadeService {
         ascendantSign,
       );
 
-    return {
-      success: true,
-      chartSvgData: {
-        planets: this.formatPlanetsForResponse(chartData.planets).map(
-          (planet) => ({
-            planet: planet.planet,
-            sign: planet.sign,
-            house: planet.house,
-            isRetrograde: planet.isRetrograde,
-          }),
-        ),
-        houses: this.formatHousesForResponse(chartData.houses).map((house) => ({
-          house: house.house,
-          sign: house.sign,
-          signDegree: house.signDegree,
-        })),
-        aspects: this.formatAspectsForResponse(chartData.aspects).map(
-          (aspect) => ({
-            planet1: aspect.planet1,
-            planet2: aspect.planet2,
-            aspectType: aspect.aspectType,
-            orb: aspect.orb,
-          }),
-        ),
-      },
-      planets: this.formatPlanetsForResponse(chartData.planets),
-      houses: this.formatHousesForResponse(chartData.houses),
-      aspects: this.formatAspectsForResponse(chartData.aspects),
-      bigThree,
-      calculationTimeMs,
-    };
+    return this.buildBaseResponse(chartData, calculationTimeMs, bigThree);
   }
 
-  private async buildFreeResponse(
+  private buildFreeResponse(
     chartData: ChartData,
     interpretation: FullChartInterpretation,
     calculationTimeMs: number,
-  ): Promise<FullChartResponseDto> {
-    const base = await this.buildAnonymousResponse(
+  ): FullChartResponseDto {
+    const base = this.buildBaseResponse(
       chartData,
       calculationTimeMs,
+      interpretation.bigThree,
     );
 
     const planetInterpretations = interpretation.planets.map((planet) => ({
@@ -434,6 +405,44 @@ export class BirthChartFacadeService {
         planets: planetInterpretations,
       },
       canDownloadPdf: true,
+    };
+  }
+
+  private buildBaseResponse(
+    chartData: ChartData,
+    calculationTimeMs: number,
+    bigThree: BasicChartResponseDto['bigThree'],
+  ): BasicChartResponseDto {
+    return {
+      success: true,
+      chartSvgData: {
+        planets: this.formatPlanetsForResponse(chartData.planets).map(
+          (planet) => ({
+            planet: planet.planet,
+            sign: planet.sign,
+            house: planet.house,
+            isRetrograde: planet.isRetrograde,
+          }),
+        ),
+        houses: this.formatHousesForResponse(chartData.houses).map((house) => ({
+          house: house.house,
+          sign: house.sign,
+          signDegree: house.signDegree,
+        })),
+        aspects: this.formatAspectsForResponse(chartData.aspects).map(
+          (aspect) => ({
+            planet1: aspect.planet1,
+            planet2: aspect.planet2,
+            aspectType: aspect.aspectType,
+            orb: aspect.orb,
+          }),
+        ),
+      },
+      planets: this.formatPlanetsForResponse(chartData.planets),
+      houses: this.formatHousesForResponse(chartData.houses),
+      aspects: this.formatAspectsForResponse(chartData.aspects),
+      bigThree,
+      calculationTimeMs,
     };
   }
 

@@ -6952,7 +6952,7 @@ export class BirthChartHistoryService {
 - [x] Exportaciones necesarias para otros módulos
 - [x] Integración con AIModule, UsageLimitsModule, CacheModule
 - [x] Seeder registrado como provider
-- [x] Tests de integración del módulo
+- [x] Tests unitarios de los servicios principales
 
 **Dependencias:** Todas las tareas anteriores
 

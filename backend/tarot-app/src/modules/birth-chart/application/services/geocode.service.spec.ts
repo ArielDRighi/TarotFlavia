@@ -7,15 +7,15 @@ describe('GeocodeService', () => {
     service = new GeocodeService();
   });
 
-  it('should return matching places by query', () => {
-    const result = service.searchPlaces('buenos aires');
+  it('should return matching places by query', async () => {
+    const result = await service.searchPlaces('buenos aires');
 
     expect(result.count).toBeGreaterThan(0);
     expect(result.results[0].displayName).toContain('Buenos Aires');
   });
 
-  it('should return empty result for unknown query', () => {
-    const result = service.searchPlaces('ciudad-inexistente-xyz');
+  it('should return empty result for unknown query', async () => {
+    const result = await service.searchPlaces('ciudad-inexistente-xyz');
 
     expect(result).toEqual({ results: [], count: 0 });
   });
