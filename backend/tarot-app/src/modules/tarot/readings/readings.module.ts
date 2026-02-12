@@ -9,6 +9,7 @@ import { TarotReading } from './entities/tarot-reading.entity';
 import { TarotInterpretation } from '../interpretations/entities/tarot-interpretation.entity';
 import { User } from '../../users/entities/user.entity';
 import { DailyReading } from '../daily-reading/entities/daily-reading.entity';
+import { BirthChart } from '../../birth-chart/entities/birth-chart.entity';
 import { RequiresPremiumForCustomQuestionGuard } from './guards/requires-premium-for-custom-question.guard';
 import { ReadingsCacheInterceptor } from './interceptors/readings-cache.interceptor';
 import { InterpretationsModule } from '../interpretations/interpretations.module';
@@ -50,6 +51,7 @@ import { RestoreReadingUseCase } from './application/use-cases/restore-reading.u
       TarotInterpretation,
       User,
       DailyReading,
+      BirthChart,
     ]),
     InterpretationsModule,
     CardsModule,

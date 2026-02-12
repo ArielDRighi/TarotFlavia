@@ -18,6 +18,7 @@ import { UsersService } from '../../src/modules/users/users.service';
 import { PlanConfigService } from '../../src/modules/plan-config/plan-config.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { DailyReading } from '../../src/modules/tarot/daily-reading/entities/daily-reading.entity';
+import { BirthChart } from '../../src/modules/birth-chart/entities/birth-chart.entity';
 
 describe('ReadingsController', () => {
   let controller: ReadingsController;
@@ -162,6 +163,12 @@ describe('ReadingsController', () => {
               andWhere: jest.fn().mockReturnThis(),
               getCount: jest.fn().mockResolvedValue(0),
             }),
+          },
+        },
+        {
+          provide: getRepositoryToken(BirthChart),
+          useValue: {
+            createQueryBuilder: jest.fn(),
           },
         },
       ],

@@ -7825,6 +7825,8 @@ El sistema optó por **NO** crear:
 
 ### T-CA-023: Integrar Límites de Carta Astral
 
+**Estado:** ✅ COMPLETADA
+
 **Historia relacionada:** HU-CA-010
 
 **Descripción:**
@@ -8042,14 +8044,14 @@ async generateChartAnonymous(...) {
 
 **Criterios de aceptación:**
 
-- [ ] Guard valida límites mensuales correctamente
-- [ ] Guard valida límites lifetime para anónimos
-- [ ] Interceptor registra uso después de éxito
-- [ ] Mensajes de error diferenciados por plan
-- [ ] Response incluye detalles del límite alcanzado
-- [ ] Info de uso disponible en request para logging
-- [ ] Tests de integración verificando límites
-- [ ] Tests de edge cases (cambio de mes, etc.)
+- [x] Guard valida límites mensuales correctamente
+- [x] Guard valida límites lifetime para anónimos
+- [x] Interceptor registra uso después de éxito
+- [x] Mensajes de error diferenciados por plan
+- [x] Response incluye detalles del límite alcanzado
+- [x] Info de uso disponible en request para logging
+- [x] Tests de integración verificando límites
+- [x] Tests de edge cases (cambio de mes, etc.)
 
 **Dependencias:** T-CA-022
 
