@@ -7056,6 +7056,8 @@ Esta parte cubre la integración con el sistema de límites de uso existente (ad
 
 ### T-CA-021: Analizar Sistema de Límites Existente
 
+**Estado:** ✅ COMPLETADA
+
 **Historia relacionada:** HU-CA-010
 
 **Descripción:**
@@ -7140,16 +7142,30 @@ Según docs/USAGE_LIMITS_SYSTEM.md:
 
 **Criterios de aceptación:**
 
-- [ ] Documento de análisis completo
-- [ ] Estructura actual documentada
-- [ ] Puntos de extensión identificados
-- [ ] Recomendación de implementación clara
-- [ ] Riesgos y consideraciones documentados
-- [ ] Estimación refinada para T-CA-022
+- [x] Documento de análisis completo
+- [x] Estructura actual documentada
+- [x] Puntos de extensión identificados
+- [x] Recomendación de implementación clara
+- [x] Riesgos y consideraciones documentados
+- [x] Estimación refinada para T-CA-022
 
 **Dependencias:** Ninguna
 
 **Estimación:** 2 horas
+
+**Tiempo real:** ~2 horas
+
+**Documento generado:**
+
+- `docs/ANALISIS_T-CA-021_SISTEMA_LIMITES.md`
+
+**Resumen de hallazgos:**
+
+- El módulo actual combina límites diarios por fecha UTC, lectura mensual parcial (`getUsageByPeriod`) y tracking anónimo por fingerprint.
+- `BIRTH_CHART` está configurado con intención mensual/lifetime, pero el guard no aplica período mensual de forma genérica aún.
+- Se identificó inconsistencia en tracking anónimo genérico (`recordUsage` persiste `TAROT_READING` fijo).
+- Recomendación para T-CA-022: extender el modelo actual con `UsagePeriod` + mapeo por feature (sin crear tablas nuevas en primera iteración).
+- Estimación refinada para T-CA-022: 6-8 horas.
 
 ---
 
@@ -8730,7 +8746,7 @@ export class SystemConfig {
 
 ## CHECKLIST DE PARTE 7F
 
-- [ ] T-CA-021: Análisis del sistema de límites completado
+- [x] T-CA-021: Análisis del sistema de límites completado
 - [ ] T-CA-022: Sistema extendido para límites mensuales
 - [ ] T-CA-023: Límites de carta astral integrados
 - [ ] T-CA-024: Servicio de geocodificación funcionando
