@@ -91,3 +91,22 @@ export function getDateDaysAgoUTCString(days: number): string {
   date.setUTCHours(0, 0, 0, 0);
   return formatDateToUTCString(date);
 }
+
+/**
+ * Returns the start of the current month (00:00:00.000 UTC on day 1) as a Date object.
+ *
+ * Useful for TIMESTAMP column comparisons for monthly limits.
+ *
+ * @returns {Date} Date object set to the first day of the current month at 00:00:00.000 UTC
+ *
+ * @example
+ * const startOfMonth = getStartOfMonthUTC();
+ * // Returns '2025-02-01T00:00:00.000Z' when called in February 2025
+ * // Use with TypeORM: createdAt: MoreThanOrEqual(startOfMonth)
+ */
+export function getStartOfMonthUTC(): Date {
+  const now = new Date();
+  now.setUTCDate(1); // Set to first day of month
+  now.setUTCHours(0, 0, 0, 0);
+  return now;
+}
