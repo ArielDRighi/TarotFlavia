@@ -232,28 +232,24 @@
 #### Criterios de Aceptación:
 
 1. **Dado** que soy usuario Premium  
-   **Cuando** veo el resultado de mi carta  
-   **Entonces** veo una acción explícita "Generar síntesis IA" (no automática)
+   **Cuando** genero mi carta  
+   **Entonces** veo una sección adicional "Síntesis Personalizada"
 
-2. **Dado** que ejecuto la acción de síntesis IA  
-   **Cuando** la IA procesa mi carta  
-   **Entonces** veo una sección "Síntesis Personalizada" que conecta elementos de mi carta entre sí (ej: "Tu Sol en Géminis combinado con Luna en Escorpio sugiere...")
+2. **Dado** que la IA procesa mi carta  
+   **Cuando** veo la síntesis  
+   **Entonces** el texto conecta elementos de mi carta entre sí (ej: "Tu Sol en Géminis combinado con Luna en Escorpio sugiere...")
 
 3. **Dado** que recibo la síntesis  
    **Cuando** la leo  
    **Entonces** es un texto único de 3-5 párrafos que no podría aplicar a otra persona
 
-4. **Dado** que soy usuario Premium  
-   **Cuando** veo el módulo de síntesis  
-   **Entonces** se muestra un indicador de usos restantes del día (máximo 2 por día UTC)
+4. **Dado** que soy usuario Free o Anónimo  
+   **Cuando** veo la carta  
+   **Entonces** NO veo la síntesis IA, pero veo un CTA "Actualiza a Premium para síntesis personalizada"
 
-5. **Dado** que soy usuario Free o Anónimo  
-    **Cuando** veo la carta  
-   **Entonces** NO puedo generar síntesis IA y veo CTA "Actualiza a Premium para síntesis personalizada"
-
-6. **Dado** que genero una síntesis IA como Premium  
-   **Cuando** la guardo o consulto la carta en historial  
-    **Entonces** la síntesis IA se guarda junto con la carta para futuras consultas
+5. **Dado** que genero mi carta como Premium  
+   **Cuando** la guardo  
+   **Entonces** la síntesis IA se guarda junto con la carta para futuras consultas
 
 #### Notas Técnicas:
 
@@ -261,7 +257,6 @@
 - El prompt incluye los datos de la carta + las interpretaciones base
 - Cachear resultado para no regenerar si se consulta de nuevo
 - Implementar manejo de errores si la IA falla
-- El límite de síntesis IA Premium es fijo en esta etapa: **2 por día (UTC)**
 
 #### Estimación: 5 puntos
 
@@ -388,7 +383,7 @@
 ### HU-CA-010: Controlar Límites de Uso
 
 **Como** sistema  
-**Quiero** controlar límites solo donde aplica (anónimos y síntesis IA Premium)  
+**Quiero** controlar cuántas cartas puede generar cada tipo de usuario  
 **Para** gestionar recursos y diferenciar planes
 
 #### Criterios de Aceptación:
@@ -398,35 +393,31 @@
    **Entonces** el sistema verifica si ya usé mi única carta lifetime
 
 2. **Dado** que soy usuario Free  
-    **Cuando** intento generar una carta  
-   **Entonces** puedo generarla sin límite
+   **Cuando** intento generar una carta  
+   **Entonces** el sistema verifica si tengo disponibles de mis 3 mensuales
 
 3. **Dado** que soy usuario Premium  
-    **Cuando** intento generar una carta  
-   **Entonces** puedo generarla sin límite
+   **Cuando** intento generar una carta  
+   **Entonces** el sistema verifica si tengo disponibles de mis 5 mensuales
 
-4. **Dado** que soy usuario Premium  
-   **Cuando** intento generar síntesis IA desde el resultado  
-   **Entonces** el sistema verifica el límite de 2 por día (UTC)
+4. **Dado** que no tengo cartas disponibles  
+   **Cuando** intento generar  
+   **Entonces** veo mensaje explicativo y CTA apropiado según mi plan
 
-5. **Dado** que no tengo usos de síntesis IA disponibles en el día  
-   **Cuando** intento generar síntesis IA  
-   **Entonces** veo mensaje explicativo con próximo reinicio diario
-
-6. **Dado** que cambia el día en UTC  
+5. **Dado** que es día 1 del mes  
    **Cuando** el sistema procesa  
-   **Entonces** reinicia el contador diario de síntesis IA Premium
+   **Entonces** resetea los contadores mensuales de Free y Premium
 
 #### Límites Definidos:
 
-- **Anónimo:** 1 generación lifetime total
-- **Free:** generación ilimitada + síntesis IA deshabilitada
-- **Premium:** generación ilimitada + **2 síntesis IA por día (UTC)**
+- **Anónimo:** 1 lifetime total
+- **Free:** 3 por mes
+- **Premium:** 5 por mes
 
 #### Notas Técnicas:
 
 - **IMPORTANTE:** Analizar y reutilizar el sistema de límites existente (tarot, péndulo, etc.)
-- Reutilizar límites diarios existentes para síntesis IA Premium
+- El sistema existente maneja límites DIARIOS; adaptar para soportar límites MENSUALES
 - Centralizar la lógica de límites si no está centralizada
 - Integrar carta astral al sistema existente en lugar de crear lógica nueva
 - Para anónimos: reutilizar tracking existente (cookies/fingerprint)
@@ -444,28 +435,28 @@
 #### Criterios de Aceptación:
 
 1. **Dado** que soy administrador  
-    **Cuando** accedo al panel de configuración  
-   **Entonces** veo la configuración de límites aplicables para carta astral
+   **Cuando** accedo al panel de configuración  
+   **Entonces** veo los límites actuales de carta astral por plan
 
-2. **Dado** que quiero cambiar el límite de síntesis IA Premium diario  
+2. **Dado** que quiero cambiar el límite Free  
    **Cuando** modifico el valor y guardo  
    **Entonces** el nuevo límite aplica inmediatamente
 
-3. **Dado** que quiero cambiar el límite de generación anónima  
+3. **Dado** que quiero cambiar el límite Premium  
    **Cuando** modifico el valor y guardo  
    **Entonces** el nuevo límite aplica inmediatamente
 
 4. **Dado** que cambio un límite  
-   **Cuando** los usuarios generan síntesis IA o flujo anónimo  
-    **Entonces** respetan el nuevo límite
+   **Cuando** los usuarios generan cartas  
+   **Entonces** respetan el nuevo límite
 
 5. **Dado** que configuro límites  
    **Cuando** veo el histórico  
-   **Entonces** puedo ver cuándo se cambió cada valor (auditoría)
+   **Entonces** puedo ver cuándo se cambió cada límite (auditoría)
 
 #### Notas Técnicas:
 
-- Free debe permanecer sin límite de generación y sin opción de síntesis IA
+- El límite de anónimos (1 lifetime) NO es configurable
 - Reutilizar panel de admin existente para límites
 - Cachear valores para no consultar DB en cada request
 
@@ -534,17 +525,17 @@
 
 ## MATRIZ DE FUNCIONALIDADES POR PLAN
 
-| Funcionalidad                            | Anónimo         | Free             | Premium                   |
-| ---------------------------------------- | --------------- | ---------------- | ------------------------- |
-| Generar carta                            | ✅ (1 lifetime) | ✅ (ilimitado)   | ✅ (ilimitado)            |
-| Ver gráfico SVG                          | ✅              | ✅               | ✅                        |
-| Ver tablas (posiciones, casas, aspectos) | ✅              | ✅               | ✅                        |
-| Interpretación Big Three                 | ✅              | ✅               | ✅                        |
-| Informe completo estático                | ❌              | ✅               | ✅                        |
-| Síntesis IA personalizada                | ❌              | ❌ (CTA Premium) | ✅ (2/día, acción manual) |
-| Descargar PDF                            | ❌              | ✅               | ✅                        |
-| Guardar en historial                     | ❌              | ❌               | ✅                        |
-| Ver historial                            | ❌              | ❌               | ✅                        |
+| Funcionalidad                            | Anónimo         | Free       | Premium    |
+| ---------------------------------------- | --------------- | ---------- | ---------- |
+| Generar carta                            | ✅ (1 lifetime) | ✅ (3/mes) | ✅ (5/mes) |
+| Ver gráfico SVG                          | ✅              | ✅         | ✅         |
+| Ver tablas (posiciones, casas, aspectos) | ✅              | ✅         | ✅         |
+| Interpretación Big Three                 | ✅              | ✅         | ✅         |
+| Informe completo estático                | ❌              | ✅         | ✅         |
+| Síntesis IA personalizada                | ❌              | ❌         | ✅         |
+| Descargar PDF                            | ❌              | ✅         | ✅         |
+| Guardar en historial                     | ❌              | ❌         | ✅         |
+| Ver historial                            | ❌              | ❌         | ✅         |
 
 ---
 
@@ -5536,14 +5527,14 @@ export class FullChartResponseDto extends BasicChartResponseDto {
 
 /**
  * Respuesta Premium de carta
- * Incluye todo lo completo + guardado (síntesis IA opcional)
+ * Incluye todo lo completo + síntesis IA + guardado
  */
 export class PremiumChartResponseDto extends FullChartResponseDto {
   @ApiPropertyOptional({ example: 1, description: "ID de la carta guardada" })
   savedChartId?: number;
 
-  @ApiPropertyOptional({ description: "Síntesis personalizada generada por IA (si fue solicitada)" })
-  aiSynthesis?: {
+  @ApiProperty({ description: "Síntesis personalizada generada por IA" })
+  aiSynthesis: {
     content: string;
     generatedAt: string;
     provider: string;
@@ -5764,10 +5755,11 @@ export class BirthChartController {
   /**
    * POST /birth-chart/generate
    * Genera una carta astral sin guardarla
-   * Disponible para: Anónimos (1 lifetime), Free (ilimitado), Premium (ilimitado)
+   * Disponible para: Anónimos (1 lifetime), Free (3/mes), Premium (5/mes)
    */
   @Post("generate")
-  @UseGuards(OptionalJwtAuthGuard)
+  @UseGuards(OptionalJwtAuthGuard, CheckUsageLimitGuard)
+  @UsageType("BIRTH_CHART")
   @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 requests/minuto
   @ApiOperation({
     summary: "Generar carta astral",
@@ -5775,8 +5767,8 @@ export class BirthChartController {
     
 **Por plan:**
 - **Anónimo:** Recibe gráfico + tablas + Big Three interpretado. Límite: 1 lifetime.
-- **Free:** Recibe informe completo con todas las interpretaciones. Generación ilimitada.
-- **Premium:** Recibe informe completo; síntesis IA bajo acción explícita (2/día).`,
+- **Free:** Recibe informe completo con todas las interpretaciones. Límite: 3/mes.
+- **Premium:** Recibe informe completo + síntesis IA personalizada. Límite: 5/mes.`,
   })
   @ApiResponse({
     status: 200,
@@ -5888,32 +5880,29 @@ export class BirthChartController {
   // ===========================================================================
 
   /**
-   * GET /birth-chart/usage-status
-   * Obtiene el estado de uso de cartas astrales del usuario SIN consumir uso
+   * GET /birth-chart/usage
+   * Obtiene el estado de uso de cartas astrales del usuario
    */
-  @Get("usage-status")
+  @Get("usage")
   @UseGuards(OptionalJwtAuthGuard)
   @ApiOperation({
-    summary: "Consultar estado de uso",
-    description: "Retorna el estado de límites de uso sin consumir usos. Estructura diferenciada por plan.",
+    summary: "Consultar límites de uso",
+    description: "Retorna cuántas cartas ha generado y cuántas le quedan.",
   })
   @ApiResponse({
     status: 200,
     schema: {
       example: {
-        plan: "premium",
-        synthesis: {
-          used: 1,
-          limit: 2,
-          remaining: 1,
-          resetsAt: "2026-03-01T00:00:00Z", // Medianoche UTC (00:00 UTC+0) cada día
-          canUse: true,
-        },
-        generatedAt: "2026-02-28T10:30:00Z",
+        plan: "free",
+        used: 2,
+        limit: 3,
+        remaining: 1,
+        resetsAt: "2026-03-01T00:00:00Z",
+        canGenerate: true,
       },
     },
   })
-  async getUsageStatus(@CurrentUser() user: User | null, @Fingerprint() fingerprint: string) {
+  async getUsage(@CurrentUser() user: User | null, @Fingerprint() fingerprint: string) {
     return this.birthChartFacade.getUsageStatus(user, fingerprint);
   }
 
@@ -6575,7 +6564,7 @@ export class BirthChartFacadeService {
   }
 
   /**
-   * Construye respuesta para Premium (guardado + síntesis IA bajo demanda)
+   * Construye respuesta para Premium (todo + síntesis IA + guardar)
    */
   private async buildPremiumResponse(
     chartData: ChartData,
@@ -6584,12 +6573,29 @@ export class BirthChartFacadeService {
   ): Promise<PremiumChartResponseDto> {
     const freeResponse = await this.buildFreeResponse(chartData, dto);
 
+    // Generar síntesis IA
+    const fullInterpretation = await this.interpretationService.generateFullInterpretation(chartData);
+    const synthesis = await this.aiSynthesisService.generateSynthesis(
+      {
+        chartData,
+        interpretation: fullInterpretation,
+        userName: dto.name,
+        birthDate: new Date(dto.birthDate),
+      },
+      userId,
+    );
+
     // Guardar en DB
-    const savedChart = await this.saveChart(userId, dto, chartData);
+    const savedChart = await this.saveChart(userId, dto, chartData, synthesis.synthesis);
 
     return {
       ...freeResponse,
       savedChartId: savedChart.id,
+      aiSynthesis: {
+        content: synthesis.synthesis,
+        generatedAt: new Date().toISOString(),
+        provider: synthesis.provider,
+      },
       canAccessHistory: true,
     };
   }
@@ -6647,9 +6653,16 @@ export class BirthChartFacadeService {
 
     let aiSynthesis: string | undefined;
     if (includeSynthesis) {
-      // En este flujo no se genera IA automáticamente.
-      // Solo incluir síntesis si ya existe (ej. carta guardada con síntesis previa).
-      aiSynthesis = undefined;
+      const synthesis = await this.aiSynthesisService.generateSynthesis(
+        {
+          chartData,
+          interpretation,
+          userName: dto.name,
+          birthDate,
+        },
+        user.id,
+      );
+      aiSynthesis = synthesis.synthesis;
     }
 
     const pdfInput: PDFGenerationInput = {
@@ -6676,8 +6689,8 @@ export class BirthChartFacadeService {
 
     const limits = {
       [UserPlan.ANONYMOUS]: { limit: 1, period: "lifetime" },
-      [UserPlan.FREE]: { limit: Number.POSITIVE_INFINITY, period: "none" },
-      [UserPlan.PREMIUM]: { limit: Number.POSITIVE_INFINITY, period: "none" },
+      [UserPlan.FREE]: { limit: 3, period: "month" },
+      [UserPlan.PREMIUM]: { limit: 5, period: "month" },
     };
 
     return {
@@ -6985,21 +6998,21 @@ export class BirthChartHistoryService {
 
 ## ENDPOINTS RESULTANTES
 
-| Método | Endpoint                             | Plan         | Descripción                       |
-| ------ | ------------------------------------ | ------------ | --------------------------------- |
-| POST   | /birth-chart/generate                | Todos        | Genera carta astral               |
-| POST   | /birth-chart/generate/anonymous      | Anónimo      | Genera carta para no registrados  |
-| POST   | /birth-chart/pdf                     | Free/Premium | Descarga PDF                      |
-| GET    | /birth-chart/geocode/search          | Público      | Busca lugares                     |
-| GET    | /birth-chart/usage-status            | Todos        | Consulta estado de uso            |
-| POST   | /birth-chart/:id/synthesis           | Premium      | Genera síntesis IA (límite 2/día) |
-| GET    | /birth-chart/history                 | Premium      | Lista cartas guardadas            |
-| GET    | /birth-chart/history/:id             | Premium      | Obtiene carta guardada            |
-| POST   | /birth-chart/history                 | Premium      | Guarda carta manualmente          |
-| POST   | /birth-chart/history/:id/name        | Premium      | Renombra carta                    |
-| DELETE | /birth-chart/history/:id             | Premium      | Elimina carta                     |
-| POST   | /birth-chart/history/check-duplicate | Premium      | Verifica duplicado                |
-| GET    | /birth-chart/history/:id/pdf         | Premium      | PDF de carta guardada             |
+| Método | Endpoint                             | Plan         | Descripción                      |
+| ------ | ------------------------------------ | ------------ | -------------------------------- |
+| POST   | /birth-chart/generate                | Todos        | Genera carta astral              |
+| POST   | /birth-chart/generate/anonymous      | Anónimo      | Genera carta para no registrados |
+| POST   | /birth-chart/pdf                     | Free/Premium | Descarga PDF                     |
+| GET    | /birth-chart/geocode                 | Público      | Busca lugares                    |
+| GET    | /birth-chart/usage                   | Todos        | Consulta límites                 |
+| POST   | /birth-chart/synthesis               | Premium      | Genera síntesis IA               |
+| GET    | /birth-chart/history                 | Premium      | Lista cartas guardadas           |
+| GET    | /birth-chart/history/:id             | Premium      | Obtiene carta guardada           |
+| POST   | /birth-chart/history                 | Premium      | Guarda carta manualmente         |
+| POST   | /birth-chart/history/:id/name        | Premium      | Renombra carta                   |
+| DELETE | /birth-chart/history/:id             | Premium      | Elimina carta                    |
+| POST   | /birth-chart/history/check-duplicate | Premium      | Verifica duplicado               |
+| GET    | /birth-chart/history/:id/pdf         | Premium      | PDF de carta guardada            |
 
 ---
 
@@ -7025,13 +7038,13 @@ export class BirthChartHistoryService {
 
 ## RESUMEN DE PARTE 7F
 
-Esta parte cubre la integración con el sistema de límites de uso existente (por período y feature) y la implementación del servicio de geocodificación para lugares de nacimiento.
+Esta parte cubre la integración con el sistema de límites de uso existente (adaptándolo para límites mensuales) y la implementación del servicio de geocodificación para lugares de nacimiento.
 
 | Tarea    | Título                                         | Tipo    | Prioridad | Estimación |
 | -------- | ---------------------------------------------- | ------- | --------- | ---------- |
 | T-CA-021 | Analizar sistema de límites existente          | Backend | Must      | 2h         |
-| T-CA-022 | Configurar períodos de límite por feature      | Backend | Must      | 4h         |
-| T-CA-023 | Integrar límites de carta astral y síntesis IA | Backend | Must      | 3h         |
+| T-CA-022 | Extender sistema para límites mensuales        | Backend | Must      | 4h         |
+| T-CA-023 | Integrar límites de carta astral               | Backend | Must      | 3h         |
 | T-CA-024 | Crear servicio de geocodificación              | Backend | Must      | 4h         |
 | T-CA-025 | Crear panel admin para límites de carta astral | Backend | Should    | 3h         |
 
@@ -7048,7 +7061,7 @@ Esta parte cubre la integración con el sistema de límites de uso existente (po
 **Historia relacionada:** HU-CA-010
 
 **Descripción:**
-Analizar el sistema de límites de uso actual (`UsageLimitsModule`) para entender su arquitectura y planificar la extensión por períodos (daily/lifetime) según el feature de carta astral.
+Analizar el sistema de límites de uso actual (`UsageLimitsModule`) para entender su arquitectura y planificar la extensión para soportar límites mensuales además de los diarios existentes.
 
 **Ubicación de análisis:** `src/modules/usage-limits/`
 
@@ -7061,10 +7074,9 @@ Analizar el sistema de límites de uso actual (`UsageLimitsModule`) para entende
    - ¿Dónde se configuran los límites por plan?
 
 2. **Identificar puntos de extensión:**
-
-- ¿Se puede agregar/usar períodos por feature sin romper lo existente?
-- ¿Es necesario crear nuevas entidades o se pueden reutilizar?
-- ¿El guard actual puede manejar diferentes períodos?
+   - ¿Se puede agregar un nuevo período (mensual) sin romper lo existente?
+   - ¿Es necesario crear nuevas entidades o se pueden reutilizar?
+   - ¿El guard actual puede manejar diferentes períodos?
 
 3. **Documentar hallazgos:**
 
@@ -7107,17 +7119,17 @@ Según docs/USAGE_LIMITS_SYSTEM.md:
 - Se resetean automáticamente mediante consultas que filtran por fecha actual
 - Ejemplo: `WHERE reading_date = TODAY`
 
-## Cambios Necesarios para Límites por Feature
+## Cambios Necesarios para Límites Mensuales
 
 ### Opción A: Extender UsageType con período
 
-- Agregar/usar campo `period: 'daily' | 'lifetime'`
-- Modificar consultas para filtrar por día UTC cuando aplique
+- Agregar campo `period: 'daily' | 'monthly' | 'lifetime'`
+- Modificar consultas para filtrar por mes actual
 
-### Opción B: Reutilizar tracking diario + lifetime
+### Opción B: Crear entidad separada para uso mensual
 
-- Reusar tabla/consulta diaria existente
-- Mantener tracking anónimo lifetime por fingerprint
+- Nueva tabla `monthly_usage`
+- Mantener sistema diario intacto
 
 ### Opción C: Usar JSONB para tracking flexible
 
@@ -7149,63 +7161,41 @@ Según docs/USAGE_LIMITS_SYSTEM.md:
 
 **Resumen de hallazgos:**
 
-- El módulo actual combina límites diarios por fecha UTC y tracking anónimo por fingerprint.
-- Se requiere separar tipos por feature: síntesis IA Premium (daily) y generación anónima (lifetime).
+- El módulo actual combina límites diarios por fecha UTC, lectura mensual parcial (`getUsageByPeriod`) y tracking anónimo por fingerprint.
+- `BIRTH_CHART` está configurado con intención mensual/lifetime, pero el guard no aplica período mensual de forma genérica aún.
 - Se identificó inconsistencia en tracking anónimo genérico (`recordUsage` persiste `TAROT_READING` fijo).
 - Recomendación para T-CA-022: extender el modelo actual con `UsagePeriod` + mapeo por feature (sin crear tablas nuevas en primera iteración).
 - Estimación refinada para T-CA-022: 6-8 horas.
 
 ---
 
-### T-CA-022: Crear Infraestructura de Límites de Uso Flexible
+### T-CA-022: Extender Sistema para Límites Mensuales
 
 **Historia relacionada:** HU-CA-010
 
 **Descripción:**
-Crear la infraestructura profesional para el sistema de límites de uso, permitiendo configuración dinámica desde base de datos sin hardcoding. Esto incluye enums, entidades, migrations y servicios de configuración.
+Extender el sistema de límites existente para soportar límites mensuales, manteniendo compatibilidad con los límites diarios actuales.
 
 **Ubicación:** `src/modules/usage-limits/`
 
-**Objetivo:** Estructura que permite:
-
-- Límites configurables sin código hardcodeado
-- Cambios en BD sin reiniciar servidor
-- Auditoría de cambios
-- Soporte para múltiples períodos (daily, lifetime)
-- Escalable a nuevos tipos de uso
-
-**Criterios de aceptación:**
-
-- [ ] Enums UsageType y UsagePeriod creados con valores string
-- [ ] Interfaces IUsageLimitConfig e IUsageLimitStatus definidas
-- [ ] Entidad UsageLimitConfig creada con relación a UserPlan
-- [ ] Migration para crear tabla usage_limit_configs
-- [ ] UsageLimitConfigRepository implementado con caché
-- [ ] Servicio de configuración dinámica sin hardcoding
-- [ ] Soporte para auditoria de cambios en BD
-- [ ] Tests unitarios con cobertura ≥80%
-
----
-
-### T-CA-022a: Crear Enums y Contratos de Límites
-
-**Descripción:**
-Definir enums y interfaces que sirven como contratos para todo el sistema de límites.
-
-**Ubicación:** `backend/tarot-app/src/modules/usage-limits/`
-
-**Archivos a crear:**
+**Archivos a modificar/crear:**
 
 ```
 src/modules/usage-limits/
 ├── domain/
-│   ├── enums/
-│   │   ├── usage-type.enum.ts
-│   │   ├── usage-period.enum.ts
-│   │   └── index.ts
-│   └── interfaces/
-│       ├── usage-limit-config.interface.ts
-│       └── usage-status.interface.ts
+│   └── enums/
+│       ├── usage-type.enum.ts          # Agregar BIRTH_CHART
+│       └── usage-period.enum.ts        # 🆕 Crear
+├── application/
+│   └── services/
+│       └── usage-limits.service.ts     # Extender
+├── infrastructure/
+│   ├── entities/
+│   │   └── monthly-usage.entity.ts     # 🆕 Crear (si es necesario)
+│   └── guards/
+│       └── check-usage-limit.guard.ts  # Extender
+└── constants/
+    └── usage-limits.constants.ts       # Agregar límites de carta astral
 ```
 
 **Implementación:**
@@ -7214,156 +7204,76 @@ src/modules/usage-limits/
 // usage-period.enum.ts
 export enum UsagePeriod {
   DAILY = "daily",
+  MONTHLY = "monthly",
   LIFETIME = "lifetime",
 }
-
-export const UsagePeriodLabels: Record<UsagePeriod, string> = {
-  [UsagePeriod.DAILY]: "Medianoche UTC (00:00 UTC+0) cada día",
-  [UsagePeriod.LIFETIME]: "Único (Lifetime)",
-};
 ```
 
 ```typescript
-// usage-type.enum.ts
+// usage-type.enum.ts (extender)
 export enum UsageType {
-  // Existentes (tarot readings)
+  // Existentes (diarios)
   DAILY_CARD = "daily_card",
   TAROT_READING = "tarot_reading",
 
-  // Carta astral - Premium síntesis IA
-  BIRTH_CHART_SYNTHESIS = "birth_chart_synthesis",
+  // Nuevos (mensuales)
+  BIRTH_CHART = "birth_chart",
 
-  // Carta astral - Anónimos
+  // Anónimos (lifetime)
   BIRTH_CHART_ANONYMOUS = "birth_chart_anonymous",
 }
 
-export const UsageTypeLabels: Record<UsageType, string> = {
-  [UsageType.DAILY_CARD]: "Carta del Día",
-  [UsageType.TAROT_READING]: "Lectura de Tarot",
-  [UsageType.BIRTH_CHART_SYNTHESIS]: "Síntesis IA de Carta Astral",
-  [UsageType.BIRTH_CHART_ANONYMOUS]: "Generación Carta Astral (Anónimo)",
+// Configuración de período por tipo
+export const UsageTypePeriod: Record<UsageType, UsagePeriod> = {
+  [UsageType.DAILY_CARD]: UsagePeriod.DAILY,
+  [UsageType.TAROT_READING]: UsagePeriod.DAILY,
+  [UsageType.BIRTH_CHART]: UsagePeriod.MONTHLY,
+  [UsageType.BIRTH_CHART_ANONYMOUS]: UsagePeriod.LIFETIME,
 };
 ```
 
 ```typescript
-// usage-limit-config.interface.ts
-import { UserPlan } from "../../../users/enums/user-plan.enum";
-import { UsageType } from "../enums/usage-type.enum";
-import { UsagePeriod } from "../enums/usage-period.enum";
+// usage-limits.constants.ts (extender)
+import { UserPlan } from "../../users/enums/user-plan.enum";
+import { UsageType } from "../domain/enums/usage-type.enum";
 
-export interface IUsageLimitConfig {
-  usageType: UsageType;
-  period: UsagePeriod;
-  limits: Record<UserPlan, number>;
-}
+export const USAGE_LIMITS: Record<UsageType, Record<UserPlan, number>> = {
+  // Límites existentes (diarios)
+  [UsageType.DAILY_CARD]: {
+    [UserPlan.ANONYMOUS]: 1,
+    [UserPlan.FREE]: 1,
+    [UserPlan.PREMIUM]: 3,
+  },
+  [UsageType.TAROT_READING]: {
+    [UserPlan.ANONYMOUS]: 1,
+    [UserPlan.FREE]: 3,
+    [UserPlan.PREMIUM]: 10,
+  },
 
-export interface IUsageLimitStatus {
-  usageType: UsageType;
-  period: UsagePeriod;
-  plan: UserPlan;
-  used: number;
-  limit: number;
-  remaining: number;
-  resetsAt: Date | null;
-  canUse: boolean;
-}
-```
-
-**Criterios de aceptación:**
-
-- [ ] Enums UsageType y UsagePeriod sin valores hardcodeados
-- [ ] Labels centralizados para UI
-- [ ] Interfaces de contrato documentadas
-- [ ] Exportación correcta en index.ts
-- [ ] Sin referencias a constantes hardcodeadas
-
-**Dependencias:** Ninguna
-**Estimación:** 1 hora
-
----
-
-### T-CA-022b: Crear Entidades y Migraciones de Límites
-
-**Descripción:**
-Crear entidades de BD para almacenar configuración de límites, tracking diario y anónimo lifetime, con capacidad de ser modificadas sin código.
-
-**Ubicación:** `backend/tarot-app/src/modules/usage-limits/`
-
-**Archivos a crear/modificar:**
-
-```
-src/modules/usage-limits/
-├── infrastructure/
-│   ├── entities/
-│   │   ├── usage-limit-config.entity.ts      # Configuración editable
-│   │   ├── daily-usage.entity.ts             # Tracking diario
-│   │   └── anonymous-lifetime-usage.entity.ts # Tracking anónimo
-│   └── database/migrations/
-│       └── [timestamp]-create-usage-tracking.ts
-```
-
-**Implementación:**
-
-```typescript
-// usage-limit-config.entity.ts
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, Index, Unique } from "typeorm";
-import { UsageType } from "../../domain/enums/usage-type.enum";
-import { UsagePeriod } from "../../domain/enums/usage-period.enum";
-
-@Entity("usage_limit_configs")
-@Unique("uq_usage_limit_config", ["usageType", "period"])
-@Index("idx_usage_type", ["usageType"])
-export class UsageLimitConfig {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column({
-    type: "enum",
-    enum: UsageType,
-  })
-  usageType: UsageType;
-
-  @Column({
-    type: "enum",
-    enum: UsagePeriod,
-  })
-  period: UsagePeriod;
-
-  /**
-   * JSON con límites por plan: { "anonymous": 1, "free": 0, "premium": 2 }
-   * Permite cambios sin redeployer
-   */
-  @Column({ type: "jsonb" })
-  limits: Record<string, number>;
-
-  @Column({ type: "text", nullable: true })
-  description: string | null;
-
-  @Column({ type: "varchar", length: 100, nullable: true })
-  lastModifiedBy: string | null;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
-
-  @Version()
-  version: number;
-}
+  // Nuevos límites de carta astral (mensuales/lifetime)
+  [UsageType.BIRTH_CHART]: {
+    [UserPlan.ANONYMOUS]: 0, // No aplica, usa BIRTH_CHART_ANONYMOUS
+    [UserPlan.FREE]: 3, // 3 por mes
+    [UserPlan.PREMIUM]: 5, // 5 por mes
+  },
+  [UsageType.BIRTH_CHART_ANONYMOUS]: {
+    [UserPlan.ANONYMOUS]: 1, // 1 lifetime
+    [UserPlan.FREE]: 0, // No aplica
+    [UserPlan.PREMIUM]: 0, // No aplica
+  },
+};
 ```
 
 ```typescript
-// daily-usage.entity.ts
+// monthly-usage.entity.ts (nueva entidad para tracking mensual)
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, Index, Unique } from "typeorm";
 import { UsageType } from "../../domain/enums/usage-type.enum";
 
-@Entity("daily_usages")
-@Unique("uq_daily_usage", ["userId", "usageType", "usageDate"])
-@Index("idx_daily_usage_user", ["userId"])
-@Index("idx_daily_usage_date", ["usageDate"])
-@Index("idx_daily_usage_type", ["usageType"])
-export class DailyUsage {
+@Entity("monthly_usage")
+@Unique("uq_monthly_usage", ["userId", "usageType", "usageYear", "usageMonth"])
+@Index("idx_monthly_usage_user", ["userId"])
+@Index("idx_monthly_usage_period", ["usageYear", "usageMonth"])
+export class MonthlyUsage {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -7376,8 +7286,11 @@ export class DailyUsage {
   })
   usageType: UsageType;
 
-  @Column({ type: "date" })
-  usageDate: string; // YYYY-MM-DD (UTC)
+  @Column({ type: "smallint" })
+  usageYear: number;
+
+  @Column({ type: "smallint" })
+  usageMonth: number; // 1-12
 
   @Column({ type: "int", default: 0 })
   usageCount: number;
@@ -7391,23 +7304,18 @@ export class DailyUsage {
 ```
 
 ```typescript
-// anonymous-lifetime-usage.entity.ts
+// anonymous-lifetime-usage.entity.ts (para tracking de anónimos lifetime)
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, Index, Unique } from "typeorm";
 import { UsageType } from "../../domain/enums/usage-type.enum";
 
-@Entity("anonymous_lifetime_usages")
+@Entity("anonymous_lifetime_usage")
 @Unique("uq_anonymous_lifetime", ["fingerprint", "usageType"])
 @Index("idx_anonymous_fingerprint", ["fingerprint"])
-@Index("idx_anonymous_type", ["usageType"])
 export class AnonymousLifetimeUsage {
   @PrimaryGeneratedColumn()
   id: number;
 
-  /**
-   * Device fingerprint del usuario anónimo
-   * Generado en frontend, enviado en header x-fingerprint
-   */
-  @Column({ type: "varchar", length: 128 })
+  @Column({ type: "varchar", length: 64 })
   fingerprint: string;
 
   @Column({
@@ -7424,118 +7332,265 @@ export class AnonymousLifetimeUsage {
 
   @Column({ type: "timestamp", nullable: true })
   lastUsedAt: Date | null;
-
-  /**
-   * Metadatos opcionales para debugging
-   * { userAgent, ipAddress, country, etc. }
-   */
-  @Column({ type: "jsonb", nullable: true })
-  metadata: Record<string, any> | null;
 }
 ```
 
-**Migración:**
+```typescript
+// usage-limits.service.ts (extender con métodos para mensual y lifetime)
+import { Injectable, Logger } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { MonthlyUsage } from "../infrastructure/entities/monthly-usage.entity";
+import { AnonymousLifetimeUsage } from "../infrastructure/entities/anonymous-lifetime-usage.entity";
+import { UsageType, UsageTypePeriod, UsagePeriod } from "../domain/enums";
+import { USAGE_LIMITS } from "../constants/usage-limits.constants";
+import { UserPlan } from "../../users/enums/user-plan.enum";
+
+@Injectable()
+export class UsageLimitsService {
+  private readonly logger = new Logger(UsageLimitsService.name);
+
+  constructor(
+    @InjectRepository(MonthlyUsage)
+    private readonly monthlyUsageRepo: Repository<MonthlyUsage>,
+    @InjectRepository(AnonymousLifetimeUsage)
+    private readonly anonymousUsageRepo: Repository<AnonymousLifetimeUsage>,
+    // ... otros repositorios existentes
+  ) {}
+
+  /**
+   * Verifica si el usuario puede realizar la acción
+   */
+  async checkLimit(
+    usageType: UsageType,
+    userId: number | null,
+    plan: UserPlan,
+    fingerprint?: string,
+  ): Promise<{ allowed: boolean; current: number; limit: number; remaining: number }> {
+    const period = UsageTypePeriod[usageType];
+    const limit = USAGE_LIMITS[usageType][plan];
+
+    let current: number;
+
+    switch (period) {
+      case UsagePeriod.DAILY:
+        current = await this.getDailyUsage(usageType, userId);
+        break;
+      case UsagePeriod.MONTHLY:
+        current = await this.getMonthlyUsage(usageType, userId!);
+        break;
+      case UsagePeriod.LIFETIME:
+        current = await this.getLifetimeUsage(usageType, fingerprint!);
+        break;
+      default:
+        current = 0;
+    }
+
+    const remaining = Math.max(0, limit - current);
+    const allowed = current < limit;
+
+    return { allowed, current, limit, remaining };
+  }
+
+  /**
+   * Obtiene uso mensual de un usuario
+   */
+  async getMonthlyUsage(usageType: UsageType, userId: number): Promise<number> {
+    const now = new Date();
+    const year = now.getUTCFullYear();
+    const month = now.getUTCMonth() + 1;
+
+    const record = await this.monthlyUsageRepo.findOne({
+      where: {
+        userId,
+        usageType,
+        usageYear: year,
+        usageMonth: month,
+      },
+    });
+
+    return record?.usageCount || 0;
+  }
+
+  /**
+   * Obtiene uso lifetime de un anónimo
+   */
+  async getLifetimeUsage(usageType: UsageType, fingerprint: string): Promise<number> {
+    const record = await this.anonymousUsageRepo.findOne({
+      where: {
+        fingerprint,
+        usageType,
+      },
+    });
+
+    return record?.usageCount || 0;
+  }
+
+  /**
+   * Incrementa el uso mensual
+   */
+  async incrementMonthlyUsage(usageType: UsageType, userId: number): Promise<void> {
+    const now = new Date();
+    const year = now.getUTCFullYear();
+    const month = now.getUTCMonth() + 1;
+
+    // Upsert: crear si no existe, incrementar si existe
+    await this.monthlyUsageRepo
+      .createQueryBuilder()
+      .insert()
+      .into(MonthlyUsage)
+      .values({
+        userId,
+        usageType,
+        usageYear: year,
+        usageMonth: month,
+        usageCount: 1,
+        lastUsedAt: now,
+      })
+      .orUpdate(["usageCount", "lastUsedAt"], ["userId", "usageType", "usageYear", "usageMonth"])
+      .setParameter("usageCount", () => '"usageCount" + 1')
+      .execute();
+
+    // Alternativa más simple si el upsert da problemas:
+    /*
+    let record = await this.monthlyUsageRepo.findOne({
+      where: { userId, usageType, usageYear: year, usageMonth: month },
+    });
+
+    if (record) {
+      record.usageCount++;
+      record.lastUsedAt = now;
+      await this.monthlyUsageRepo.save(record);
+    } else {
+      record = this.monthlyUsageRepo.create({
+        userId,
+        usageType,
+        usageYear: year,
+        usageMonth: month,
+        usageCount: 1,
+        lastUsedAt: now,
+      });
+      await this.monthlyUsageRepo.save(record);
+    }
+    */
+  }
+
+  /**
+   * Incrementa el uso lifetime de anónimo
+   */
+  async incrementLifetimeUsage(usageType: UsageType, fingerprint: string): Promise<void> {
+    const now = new Date();
+
+    let record = await this.anonymousUsageRepo.findOne({
+      where: { fingerprint, usageType },
+    });
+
+    if (record) {
+      record.usageCount++;
+      record.lastUsedAt = now;
+      await this.anonymousUsageRepo.save(record);
+    } else {
+      record = this.anonymousUsageRepo.create({
+        fingerprint,
+        usageType,
+        usageCount: 1,
+        lastUsedAt: now,
+      });
+      await this.anonymousUsageRepo.save(record);
+    }
+  }
+
+  /**
+   * Obtiene información de uso para mostrar al usuario
+   */
+  async getUsageInfo(
+    usageType: UsageType,
+    userId: number | null,
+    plan: UserPlan,
+    fingerprint?: string,
+  ): Promise<{
+    plan: UserPlan;
+    usageType: UsageType;
+    period: UsagePeriod;
+    used: number;
+    limit: number;
+    remaining: number;
+    resetsAt: Date | null;
+    canUse: boolean;
+  }> {
+    const checkResult = await this.checkLimit(usageType, userId, plan, fingerprint);
+    const period = UsageTypePeriod[usageType];
+
+    // Calcular fecha de reset
+    let resetsAt: Date | null = null;
+    if (period === UsagePeriod.DAILY) {
+      resetsAt = this.getNextDayUTC();
+    } else if (period === UsagePeriod.MONTHLY) {
+      resetsAt = this.getFirstDayNextMonthUTC();
+    }
+    // Lifetime no tiene reset
+
+    return {
+      plan,
+      usageType,
+      period,
+      used: checkResult.current,
+      limit: checkResult.limit,
+      remaining: checkResult.remaining,
+      resetsAt,
+      canUse: checkResult.allowed,
+    };
+  }
+
+  /**
+   * Helper: próximo día UTC
+   */
+  private getNextDayUTC(): Date {
+    const tomorrow = new Date();
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+    tomorrow.setUTCHours(0, 0, 0, 0);
+    return tomorrow;
+  }
+
+  /**
+   * Helper: primer día del próximo mes UTC
+   */
+  private getFirstDayNextMonthUTC(): Date {
+    const now = new Date();
+    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0, 0));
+  }
+}
+```
+
+**Migración para nuevas tablas:**
 
 ```typescript
-// src/database/migrations/[timestamp]-create-usage-tracking.ts
+// XXXXXXXXXX-CreateMonthlyUsageTables.ts
 import { MigrationInterface, QueryRunner, Table, TableIndex, TableUnique } from "typeorm";
 
-export class CreateUsageTracking1708000000000 implements MigrationInterface {
-  name = "CreateUsageTracking1708000000000";
+export class CreateMonthlyUsageTables1707220000001 implements MigrationInterface {
+  name = "CreateMonthlyUsageTables1707220000001";
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // Crear tipo enum si no existe
-    await queryRunner
-      .query(
-        `
-      CREATE TYPE usage_type_enum AS ENUM (
-        'daily_card',
-        'tarot_reading',
-        'birth_chart_synthesis',
-        'birth_chart_anonymous'
-      );
-    `,
-      )
-      .catch(() => null); // Ignorar si existe
+    // Agregar BIRTH_CHART al enum usage_type si existe
+    // O crear el enum si no existe
+    await queryRunner.query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'usage_type_enum') THEN
+          CREATE TYPE usage_type_enum AS ENUM ('daily_card', 'tarot_reading', 'birth_chart', 'birth_chart_anonymous');
+        ELSE
+          ALTER TYPE usage_type_enum ADD VALUE IF NOT EXISTS 'birth_chart';
+          ALTER TYPE usage_type_enum ADD VALUE IF NOT EXISTS 'birth_chart_anonymous';
+        END IF;
+      END
+      $$;
+    `);
 
-    await queryRunner
-      .query(
-        `
-      CREATE TYPE usage_period_enum AS ENUM ('daily', 'lifetime');
-    `,
-      )
-      .catch(() => null);
-
-    // Tabla: usage_limit_configs
+    // Tabla monthly_usage
     await queryRunner.createTable(
       new Table({
-        name: "usage_limit_configs",
-        columns: [
-          {
-            name: "id",
-            type: "integer",
-            isPrimary: true,
-            isGenerated: true,
-            generationStrategy: "increment",
-          },
-          {
-            name: "usageType",
-            type: "usage_type_enum",
-          },
-          {
-            name: "period",
-            type: "usage_period_enum",
-          },
-          {
-            name: "limits",
-            type: "jsonb",
-            default: "'{}'",
-          },
-          {
-            name: "description",
-            type: "text",
-            isNullable: true,
-          },
-          {
-            name: "lastModifiedBy",
-            type: "varchar",
-            length: 100,
-            isNullable: true,
-          },
-          {
-            name: "createdAt",
-            type: "timestamp",
-            default: "now()",
-          },
-          {
-            name: "updatedAt",
-            type: "timestamp",
-            default: "now()",
-          },
-          {
-            name: "version",
-            type: "integer",
-            default: 0,
-          },
-        ],
-      }),
-      true,
-    );
-
-    // Índices y constraints
-    await queryRunner.createIndex(
-      "usage_limit_configs",
-      new TableIndex({
-        name: "uq_usage_limit_config",
-        columnNames: ["usageType", "period"],
-        isUnique: true,
-      }),
-    );
-
-    // Tabla: daily_usages
-    await queryRunner.createTable(
-      new Table({
-        name: "daily_usages",
+        name: "monthly_usage",
         columns: [
           {
             name: "id",
@@ -7553,8 +7608,12 @@ export class CreateUsageTracking1708000000000 implements MigrationInterface {
             type: "usage_type_enum",
           },
           {
-            name: "usageDate",
-            type: "date",
+            name: "usageYear",
+            type: "smallint",
+          },
+          {
+            name: "usageMonth",
+            type: "smallint",
           },
           {
             name: "usageCount",
@@ -7576,35 +7635,32 @@ export class CreateUsageTracking1708000000000 implements MigrationInterface {
       true,
     );
 
-    // Índices para daily_usages
+    // Índices y constraints para monthly_usage
     await queryRunner.createIndex(
-      "daily_usages",
+      "monthly_usage",
       new TableIndex({
-        name: "idx_daily_usage_user",
+        name: "idx_monthly_usage_user",
         columnNames: ["userId"],
       }),
     );
 
     await queryRunner.createIndex(
-      "daily_usages",
+      "monthly_usage",
       new TableIndex({
-        name: "idx_daily_usage_date",
-        columnNames: ["usageDate"],
+        name: "idx_monthly_usage_period",
+        columnNames: ["usageYear", "usageMonth"],
       }),
     );
 
-    await queryRunner.createIndex(
-      "daily_usages",
-      new TableIndex({
-        name: "idx_daily_usage_type",
-        columnNames: ["usageType"],
-      }),
-    );
+    await queryRunner.query(`
+      ALTER TABLE monthly_usage
+      ADD CONSTRAINT uq_monthly_usage UNIQUE ("userId", "usageType", "usageYear", "usageMonth");
+    `);
 
-    // Tabla: anonymous_lifetime_usages
+    // Tabla anonymous_lifetime_usage
     await queryRunner.createTable(
       new Table({
-        name: "anonymous_lifetime_usages",
+        name: "anonymous_lifetime_usage",
         columns: [
           {
             name: "id",
@@ -7616,7 +7672,7 @@ export class CreateUsageTracking1708000000000 implements MigrationInterface {
           {
             name: "fingerprint",
             type: "varchar",
-            length: 128,
+            length: "64",
           },
           {
             name: "usageType",
@@ -7637,680 +7693,86 @@ export class CreateUsageTracking1708000000000 implements MigrationInterface {
             type: "timestamp",
             isNullable: true,
           },
-          {
-            name: "metadata",
-            type: "jsonb",
-            isNullable: true,
-          },
         ],
       }),
       true,
     );
 
-    // Índices para anonymous_lifetime_usages
     await queryRunner.createIndex(
-      "anonymous_lifetime_usages",
+      "anonymous_lifetime_usage",
       new TableIndex({
         name: "idx_anonymous_fingerprint",
         columnNames: ["fingerprint"],
       }),
     );
 
-    await queryRunner.createIndex(
-      "anonymous_lifetime_usages",
-      new TableIndex({
-        name: "idx_anonymous_type",
-        columnNames: ["usageType"],
-      }),
-    );
+    await queryRunner.query(`
+      ALTER TABLE anonymous_lifetime_usage
+      ADD CONSTRAINT uq_anonymous_lifetime UNIQUE ("fingerprint", "usageType");
+    `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable("anonymous_lifetime_usages");
-    await queryRunner.dropTable("daily_usages");
-    await queryRunner.dropTable("usage_limit_configs");
+    await queryRunner.dropTable("anonymous_lifetime_usage");
+    await queryRunner.dropTable("monthly_usage");
+    // No eliminamos los valores del enum para evitar problemas
   }
 }
 ```
 
 **Criterios de aceptación:**
 
-- [ ] Entidad UsageLimitConfig con límites en JSONB
-- [ ] Entidad DailyUsage con índices de rendimiento
-- [ ] Entidad AnonymousLifetimeUsage con metadata
-- [ ] Migración TypeORM con constraints correctos
-- [ ] Índices compound para búsquedas rápidas
-- [ ] Unique constraints para evitar duplicados
-- [ ] Versionado en UsageLimitConfig para cambios
+- [ ] Enum `UsagePeriod` creado
+- [ ] Enum `UsageType` extendido con BIRTH_CHART
+- [ ] Entidad `MonthlyUsage` creada
+- [ ] Entidad `AnonymousLifetimeUsage` creada
+- [ ] Migración ejecutada correctamente
+- [ ] Servicio extendido con métodos para mensual/lifetime
+- [ ] Método `checkLimit` unificado para todos los períodos
+- [ ] Método `incrementUsage` para cada período
+- [ ] Método `getUsageInfo` para consulta de estado
+- [ ] Tests unitarios para nueva lógica
+- [ ] Tests de integración con DB
+- [ ] Compatibilidad con límites diarios existentes verificada
 
-**Dependencias:** T-CA-022a
-**Estimación:** 2 horas
+**Dependencias:** T-CA-021
 
----
-
-### T-CA-022c: Crear Servicios de Límites Dinámicos
-
-**Descripción:**
-Implementar servicios profesionales que consultan configuración desde BD en lugar de constantes hardcodeadas. Permite cambios en runtime sin redeployer.
-
-**Ubicación:** `backend/tarot-app/src/modules/usage-limits/`
-
-**Archivos a crear:**
-
-```
-src/modules/usage-limits/
-├── application/
-│   ├── services/
-│   │   ├── usage-limit-config.service.ts  # Gestión de configuración
-│   │   ├── usage-tracking.service.ts      # Tracking de uso
-│   │   └── usage-limits.service.ts        # Orquestación
-│   └── repositories/
-│       └── usage-limit-config.repository.ts
-└── infrastructure/
-    └── cache/
-        └── limit-config.cache.ts          # Caché de configuración
-```
-
-**Implementación:**
-
-```typescript
-// usage-limit-config.repository.ts
-import { Injectable } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
-import { UsageLimitConfig } from "../entities/usage-limit-config.entity";
-import { UsageType } from "../../domain/enums/usage-type.enum";
-import { UsagePeriod } from "../../domain/enums/usage-period.enum";
-import { UserPlan } from "../../../users/enums/user-plan.enum";
-
-@Injectable()
-export class UsageLimitConfigRepository {
-  constructor(
-    @InjectRepository(UsageLimitConfig)
-    private readonly repo: Repository<UsageLimitConfig>,
-  ) {}
-
-  async findByUsageType(usageType: UsageType, period: UsagePeriod): Promise<UsageLimitConfig | null> {
-    return this.repo.findOne({
-      where: { usageType, period },
-    });
-  }
-
-  async findAllConfigs(): Promise<UsageLimitConfig[]> {
-    return this.repo.find();
-  }
-
-  async getLimit(usageType: UsageType, period: UsagePeriod, plan: UserPlan): Promise<number> {
-    const config = await this.findByUsageType(usageType, period);
-    return config?.limits[plan] ?? 0;
-  }
-
-  async updateConfig(
-    usageType: UsageType,
-    period: UsagePeriod,
-    limits: Record<UserPlan, number>,
-    modifiedBy: string,
-  ): Promise<UsageLimitConfig> {
-    let config = await this.findByUsageType(usageType, period);
-
-    if (!config) {
-      config = this.repo.create({
-        usageType,
-        period,
-        limits,
-        lastModifiedBy: modifiedBy,
-      });
-    } else {
-      config.limits = limits;
-      config.lastModifiedBy = modifiedBy;
-    }
-
-    return this.repo.save(config);
-  }
-
-  async seedDefaultLimits(): Promise<void> {
-    const existing = await this.findAllConfigs();
-    if (existing.length > 0) return;
-
-    const defaults: Partial<UsageLimitConfig>[] = [
-      // Tarot readings (diarios)
-      {
-        usageType: UsageType.DAILY_CARD,
-        period: UsagePeriod.DAILY,
-        limits: { [UserPlan.ANONYMOUS]: 1, [UserPlan.FREE]: 1, [UserPlan.PREMIUM]: 3 },
-      },
-      {
-        usageType: UsageType.TAROT_READING,
-        period: UsagePeriod.DAILY,
-        limits: { [UserPlan.ANONYMOUS]: 1, [UserPlan.FREE]: 3, [UserPlan.PREMIUM]: 10 },
-      },
-      // Carta astral - Síntesis IA (diaria, solo premium)
-      {
-        usageType: UsageType.BIRTH_CHART_SYNTHESIS,
-        period: UsagePeriod.DAILY,
-        limits: { [UserPlan.ANONYMOUS]: 0, [UserPlan.FREE]: 0, [UserPlan.PREMIUM]: 2 },
-      },
-      // Carta astral - Anónimo (lifetime)
-      {
-        usageType: UsageType.BIRTH_CHART_ANONYMOUS,
-        period: UsagePeriod.LIFETIME,
-        limits: { [UserPlan.ANONYMOUS]: 1, [UserPlan.FREE]: 0, [UserPlan.PREMIUM]: 0 },
-      },
-    ];
-
-    for (const config of defaults) {
-      await this.repo.save(
-        this.repo.create({
-          ...config,
-          lastModifiedBy: "system",
-        }),
-      );
-    }
-  }
-}
-```
-
-```typescript
-// usage-tracking.service.ts
-import { Injectable, Logger } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
-import { DailyUsage } from "../entities/daily-usage.entity";
-import { AnonymousLifetimeUsage } from "../entities/anonymous-lifetime-usage.entity";
-import { UsageType } from "../../domain/enums/usage-type.enum";
-
-@Injectable()
-export class UsageTrackingService {
-  private readonly logger = new Logger(UsageTrackingService.name);
-
-  constructor(
-    @InjectRepository(DailyUsage)
-    private readonly dailyUsageRepo: Repository<DailyUsage>,
-    @InjectRepository(AnonymousLifetimeUsage)
-    private readonly anonLifetimeRepo: Repository<AnonymousLifetimeUsage>,
-  ) {}
-
-  /**
-   * Obtiene uso diario actual (UTC)
-   */
-  async getDailyUsage(userId: number, usageType: UsageType): Promise<number> {
-    const today = this.getTodayUTC();
-    const record = await this.dailyUsageRepo.findOne({
-      where: { userId, usageType, usageDate: today },
-    });
-    return record?.usageCount ?? 0;
-  }
-
-  /**
-   * Obtiene uso lifetime de usuario anónimo
-   */
-  async getAnonLifetimeUsage(fingerprint: string, usageType: UsageType): Promise<number> {
-    const record = await this.anonLifetimeRepo.findOne({
-      where: { fingerprint, usageType },
-    });
-    return record?.usageCount ?? 0;
-  }
-
-  /**
-   * Incrementa uso diario (con upsert)
-   */
-  async incrementDailyUsage(userId: number, usageType: UsageType): Promise<void> {
-    const today = this.getTodayUTC();
-    const now = new Date();
-
-    const existing = await this.dailyUsageRepo.findOne({
-      where: { userId, usageType, usageDate: today },
-    });
-
-    if (existing) {
-      existing.usageCount++;
-      existing.lastUsedAt = now;
-      await this.dailyUsageRepo.save(existing);
-    } else {
-      const newRecord = this.dailyUsageRepo.create({
-        userId,
-        usageType,
-        usageDate: today,
-        usageCount: 1,
-        lastUsedAt: now,
-      });
-      await this.dailyUsageRepo.save(newRecord);
-    }
-
-    this.logger.debug(`Incremented daily usage: user=${userId}, type=${usageType}`);
-  }
-
-  /**
-   * Incrementa uso lifetime de anónimo
-   */
-  async incrementAnonLifetimeUsage(
-    fingerprint: string,
-    usageType: UsageType,
-    metadata?: Record<string, any>,
-  ): Promise<void> {
-    const now = new Date();
-
-    const existing = await this.anonLifetimeRepo.findOne({
-      where: { fingerprint, usageType },
-    });
-
-    if (existing) {
-      existing.usageCount++;
-      existing.lastUsedAt = now;
-      if (metadata) {
-        existing.metadata = { ...existing.metadata, ...metadata };
-      }
-      await this.anonLifetimeRepo.save(existing);
-    } else {
-      const newRecord = this.anonLifetimeRepo.create({
-        fingerprint,
-        usageType,
-        usageCount: 1,
-        lastUsedAt: now,
-        metadata,
-      });
-      await this.anonLifetimeRepo.save(newRecord);
-    }
-
-    this.logger.debug(`Incremented anon lifetime usage: fingerprint=${fingerprint}, type=${usageType}`);
-  }
-
-  /**
-   * Helper: obtener hoy en UTC (YYYY-MM-DD)
-   */
-  private getTodayUTC(): string {
-    return new Date().toISOString().split("T")[0];
-  }
-
-  /**
-   * Helper: próximo reset en UTC
-   */
-  getNextResetUTC(): Date {
-    const tomorrow = new Date();
-    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
-    tomorrow.setUTCHours(0, 0, 0, 0);
-    return tomorrow;
-  }
-}
-```
-
-```typescript
-// usage-limits.service.ts - Orquestador principal
-import { Injectable, Logger } from "@nestjs/common";
-import { UsageType } from "../../domain/enums/usage-type.enum";
-import { UsagePeriod } from "../../domain/enums/usage-period.enum";
-import { UserPlan } from "../../../users/enums/user-plan.enum";
-import { IUsageLimitStatus } from "../../domain/interfaces/usage-limit-config.interface";
-import { UsageLimitConfigRepository } from "../repositories/usage-limit-config.repository";
-import { UsageTrackingService } from "./usage-tracking.service";
-import { LimitConfigCache } from "../cache/limit-config.cache";
-
-@Injectable()
-export class UsageLimitsService {
-  private readonly logger = new Logger(UsageLimitsService.name);
-
-  constructor(
-    private readonly configRepo: UsageLimitConfigRepository,
-    private readonly trackingService: UsageTrackingService,
-    private readonly cacheService: LimitConfigCache,
-  ) {}
-
-  /**
-   * Verifica si un usuario/anónimo puede realizar la acción
-   */
-  async checkLimit(
-    usageType: UsageType,
-    plan: UserPlan,
-    userId?: number,
-    fingerprint?: string,
-  ): Promise<IUsageLimitStatus> {
-    // Obtener período del tipo de uso
-    const period = this.getUsagePeriod(usageType);
-
-    // Obtener límite configurado desde cache/BD
-    const limit = await this.getConfiguredLimit(usageType, period, plan);
-
-    // Si límite es 0, no puede usar
-    if (limit === 0) {
-      return {
-        usageType,
-        period,
-        plan,
-        used: 0,
-        limit: 0,
-        remaining: 0,
-        resetsAt: null,
-        canUse: false,
-      };
-    }
-
-    // Obtener uso actual
-    let used = 0;
-    if (period === UsagePeriod.DAILY && userId) {
-      used = await this.trackingService.getDailyUsage(userId, usageType);
-    } else if (period === UsagePeriod.LIFETIME && fingerprint) {
-      used = await this.trackingService.getAnonLifetimeUsage(fingerprint, usageType);
-    }
-
-    const remaining = Math.max(0, limit - used);
-    const canUse = used < limit;
-    const resetsAt = period === UsagePeriod.DAILY ? this.trackingService.getNextResetUTC() : null;
-
-    return {
-      usageType,
-      period,
-      plan,
-      used,
-      limit,
-      remaining,
-      resetsAt,
-      canUse,
-    };
-  }
-
-  /**
-   * Registra uso después de operación exitosa
-   */
-  async recordUsage(
-    usageType: UsageType,
-    plan: UserPlan,
-    userId?: number,
-    fingerprint?: string,
-    metadata?: Record<string, any>,
-  ): Promise<void> {
-    const period = this.getUsagePeriod(usageType);
-
-    try {
-      if (period === UsagePeriod.DAILY && userId) {
-        await this.trackingService.incrementDailyUsage(userId, usageType);
-      } else if (period === UsagePeriod.LIFETIME && fingerprint) {
-        await this.trackingService.incrementAnonLifetimeUsage(fingerprint, usageType, metadata);
-      }
-    } catch (error) {
-      this.logger.error(`Failed to record usage: ${error.message}`);
-      // No lanzar error - el usuario ya realizó la acción
-    }
-  }
-
-  /**
-   * Obtiene límite configurado desde BD (con caché)
-   */
-  private async getConfiguredLimit(usageType: UsageType, period: UsagePeriod, plan: UserPlan): Promise<number> {
-    const cacheKey = `${usageType}:${period}`;
-    const config = await this.cacheService.getConfig(cacheKey);
-
-    if (config) {
-      return config.limits[plan] ?? 0;
-    }
-
-    const dbConfig = await this.configRepo.findByUsageType(usageType, period);
-    if (dbConfig) {
-      await this.cacheService.setConfig(cacheKey, dbConfig);
-      return dbConfig.limits[plan] ?? 0;
-    }
-
-    return 0;
-  }
-
-  /**
-   * Determina período basado en tipo de uso
-   */
-  private getUsagePeriod(usageType: UsageType): UsagePeriod {
-    switch (usageType) {
-      case UsageType.BIRTH_CHART_ANONYMOUS:
-        return UsagePeriod.LIFETIME;
-      case UsageType.BIRTH_CHART_SYNTHESIS:
-      case UsageType.DAILY_CARD:
-      case UsageType.TAROT_READING:
-        return UsagePeriod.DAILY;
-      default:
-        return UsagePeriod.DAILY;
-    }
-  }
-
-  /**
-   * Invalida cache de configuración (usado por panel admin)
-   */
-  async invalidateLimitCache(): Promise<void> {
-    await this.cacheService.clear();
-    this.logger.log("Usage limit cache invalidated");
-  }
-}
-```
-
-```typescript
-// limit-config.cache.ts
-import { Injectable, Inject } from "@nestjs/common";
-import { CACHE_MANAGER } from "@nestjs/cache-manager";
-import { Cache } from "cache-manager";
-import { UsageLimitConfig } from "../../entities/usage-limit-config.entity";
-
-@Injectable()
-export class LimitConfigCache {
-  private readonly TTL_SECONDS = 5 * 60; // 5 minutos
-
-  constructor(
-    @Inject(CACHE_MANAGER)
-    private readonly cacheManager: Cache,
-  ) {}
-
-  async getConfig(key: string): Promise<UsageLimitConfig | null> {
-    return this.cacheManager.get<UsageLimitConfig>(key);
-  }
-
-  async setConfig(key: string, config: UsageLimitConfig): Promise<void> {
-    await this.cacheManager.set(key, config, this.TTL_SECONDS * 1000);
-  }
-
-  async clear(): Promise<void> {
-    await this.cacheManager.reset();
-  }
-}
-```
-
-**Criterios de aceptación:**
-
-- [ ] UsageLimitConfigRepository recupera configuración de BD
-- [ ] UsageTrackingService registra uso sin hardcoding
-- [ ] UsageLimitsService orquesta todo sin constantes
-- [ ] Caché invalida cuando admin cambia configuración
-- [ ] Métodos getDailyUsage y getAnonLifetimeUsage funcionan
-- [ ] recordUsage registra sin fallar si falla caché
-- [ ] Tests unitarios de todos los servicios
-- [ ] Tests de integración con BD
-
-**Dependencias:** T-CA-022b
-**Estimación:** 3 horas
+**Estimación:** 4 horas
 
 ---
 
-### T-CA-022d: Integrar Servicios en Módulo y Seedear Configuración
+### T-CA-023: Integrar Límites de Carta Astral
+
+**Historia relacionada:** HU-CA-010
 
 **Descripción:**
-Integrar todos los servicios en el módulo UsageLimits, registrar entidades en TypeORM, y crear seeder para valores por defecto.
+Integrar el sistema de límites extendido con el módulo de carta astral, asegurando que el guard valide y registre el uso correctamente.
 
-**Ubicación:** `backend/tarot-app/src/modules/usage-limits/`
+**Ubicación:** `src/modules/usage-limits/` y `src/modules/birth-chart/`
 
 **Archivos a modificar:**
 
 ```
 src/modules/usage-limits/
-├── usage-limits.module.ts          # Actualizar providers e imports
-└── infrastructure/seeders/
-    └── usage-limits.seeder.ts      # Seeder de configuración default
-```
+├── infrastructure/
+│   └── guards/
+│       └── check-usage-limit.guard.ts   # Extender
+└── usage-limits.module.ts               # Actualizar exports
 
-**Implementación:**
-
-```typescript
-// usage-limits.module.ts (actualizar)
-import { Module } from "@nestjs/common";
-import { TypeOrmModule } from "@nestjs/typeorm";
-import { CacheModule } from "@nestjs/cache-manager";
-
-// Entities
-import { UsageLimitConfig } from "./infrastructure/entities/usage-limit-config.entity";
-import { DailyUsage } from "./infrastructure/entities/daily-usage.entity";
-import { AnonymousLifetimeUsage } from "./infrastructure/entities/anonymous-lifetime-usage.entity";
-
-// Services
-import { UsageLimitConfigRepository } from "./application/repositories/usage-limit-config.repository";
-import { UsageTrackingService } from "./application/services/usage-tracking.service";
-import { UsageLimitsService } from "./application/services/usage-limits.service";
-import { LimitConfigCache } from "./infrastructure/cache/limit-config.cache";
-
-// Guards & Interceptors
-import { CheckUsageLimitGuard } from "./infrastructure/guards/check-usage-limit.guard";
-
-// Seeders
-import { UsageLimitsSeeder } from "./infrastructure/seeders/usage-limits.seeder";
-
-@Module({
-  imports: [
-    TypeOrmModule.forFeature([UsageLimitConfig, DailyUsage, AnonymousLifetimeUsage]),
-    CacheModule.register(), // Para LimitConfigCache
-  ],
-  providers: [
-    // Repositories
-    UsageLimitConfigRepository,
-
-    // Services
-    UsageTrackingService,
-    UsageLimitsService,
-    LimitConfigCache,
-
-    // Guards
-    CheckUsageLimitGuard,
-
-    // Seeders
-    UsageLimitsSeeder,
-  ],
-  exports: [UsageLimitsService, CheckUsageLimitGuard, UsageLimitConfigRepository],
-})
-export class UsageLimitsModule {}
-```
-
-```typescript
-// usage-limits.seeder.ts
-import { Injectable, Logger } from "@nestjs/common";
-import { UsageLimitConfigRepository } from "../../application/repositories/usage-limit-config.repository";
-
-@Injectable()
-export class UsageLimitsSeeder {
-  private readonly logger = new Logger(UsageLimitsSeeder.name);
-
-  constructor(private readonly configRepo: UsageLimitConfigRepository) {}
-
-  async seed(): Promise<void> {
-    this.logger.log("Seeding default usage limit configs...");
-    await this.configRepo.seedDefaultLimits();
-    this.logger.log("Usage limit configs seeded successfully");
-  }
-}
-```
-
-**Criterios de aceptación:**
-
-- [ ] Módulo importa entidades correctamente
-- [ ] Providers registrados en orden correcto
-- [ ] Exports permiten usar desde otros módulos
-- [ ] Seeder crea configuración por defecto
-- [ ] No hay hardcoding en módulo
-- [ ] Caché integrado
-
-**Dependencias:** T-CA-022c
-**Estimación:** 1 hora
-
----
-
-## Resumen de T-CA-022 Refactorizado
-
-**Descripción General:**
-Crear infraestructura profesional de límites de uso sin hardcoding, permitiendo cambios en runtime desde BD.
-
-**Estructura:**
-
-- **022a:** Enums y contratos (1h)
-- **022b:** Entidades y migraciones (2h)
-- **022c:** Servicios dinámicos (3h)
-- **022d:** Integración y seeders (1h)
-
-**Total T-CA-022:** 7 horas
-
-**Dependencias:** T-CA-021 (completada)
-
-**Criterios de aceptación globales:**
-
-- [ ] Sin constantes hardcodeadas
-- [ ] Límites recuperados de BD con caché
-- [ ] Tracking de uso en tablas separadas
-- [ ] Período (daily/lifetime) determinado automáticamente
-- [ ] Caché se invalida cuando admin cambia config
-- [ ] Seeder crea valores por defecto
-- [ ] Tests unitarios e integración
-- [ ] Soporte para múltiples tipos de uso
-
----
-
-### T-CA-023: Integrar Límites con Carta Astral y API de Síntesis
-
-**Historia relacionada:** HU-CA-010
-
-**Dependencias:** T-CA-022 (infraestructura de límites)
-
-**Descripción:**
-Integrar el sistema de límites (T-CA-022) con el módulo de carta astral, creando guards e interceptors para validar y registrar uso. Incluye endpoint explícito para consultar estado de límites sin hacer consumir uso.
-
-**Ubicación:** `backend/tarot-app/src/modules/usage-limits/` y `backend/tarot-app/src/modules/birth-chart/`
-
-**Objetivo:**
-
-- Guard valida límites ANTES de ejecutar generación/síntesis
-- Interceptor registra uso SOLO si respuesta es exitosa
-- Endpoint separado para consultar estado sin consumir uso
-- Mensajes de error claros diferenciados por plan y tipo
-
-**Criterios de aceptación:**
-
-- [ ] Guard @CanUseLimits valida límites correctamente
-- [ ] Guard rechaza requests cuando límite está agotado
-- [ ] Interceptor registra uso solo en respuestas exitosas (2xx)
-- [ ] Endpoint GET /limits-status retorna estado sin consumir uso
-- [ ] Mensajes de error diferenciados por plan (Free, Premium)
-- [ ] Caché de configuración se invalida en cambios de BD
-- [ ] Todos los endpoints de síntesis y generación protegidos
-- [ ] Tests de integración para guards e interceptors
-- [ ] Cobertura de tests ≥80%
-
----
-
-### T-CA-023a: Crear Guard de Validación de Límites
-
-**Dependencias:** T-CA-022 (enums, interfaces, services de límites)
-
-**Descripción:**
-Crear guard profesional que valida límites antes de ejecutar endpoints, con caché de configuración y mensajes dinámicos.
-
-**Ubicación:** `backend/tarot-app/src/modules/usage-limits/`
-
-**Archivo:**
-
-```
-src/modules/usage-limits/
+src/modules/birth-chart/
 └── infrastructure/
-    └── guards/
-        └── check-usage-limit.guard.ts
+    └── controllers/
+        └── birth-chart.controller.ts    # Ya tiene @UsageType
 ```
 
 **Implementación:**
 
 ```typescript
-// check-usage-limit.guard.ts
+// check-usage-limit.guard.ts (extender)
 import { Injectable, CanActivate, ExecutionContext, HttpException, HttpStatus, Logger } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { UsageLimitsService } from "../../application/services/usage-limits.service";
-import { UsageType } from "../../domain/enums/usage-type.enum";
-import { UsagePeriod } from "../../domain/enums/usage-period.enum";
+import { UsageType, UsageTypePeriod, UsagePeriod } from "../../domain/enums";
 import { USAGE_TYPE_KEY } from "../../decorators/usage-type.decorator";
 import { UserPlan } from "../../../users/enums/user-plan.enum";
 
@@ -8324,125 +7786,118 @@ export class CheckUsageLimitGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    // Obtener tipo de uso desde decorador
+    // Obtener el tipo de uso del decorador
     const usageType = this.reflector.get<UsageType>(USAGE_TYPE_KEY, context.getHandler());
 
-    // Si no hay @UsageType(), no validar límite (endpoint público sin límite)
     if (!usageType) {
+      // Si no hay decorador, permitir
       return true;
     }
 
     const request = context.switchToHttp().getRequest();
     const user = request.user;
     const fingerprint = request.fingerprint || request.headers["x-fingerprint"];
+
+    // Determinar plan
     const plan = user?.plan || UserPlan.ANONYMOUS;
     const userId = user?.id || null;
 
     // Verificar límite
-    const status = await this.usageLimitsService.checkLimit(usageType, plan, userId, fingerprint);
+    const { allowed, current, limit, remaining } = await this.usageLimitsService.checkLimit(
+      usageType,
+      userId,
+      plan,
+      fingerprint,
+    );
 
-    // Guardar en request para later use (logging, response headers)
-    request.usageInfo = status;
+    if (!allowed) {
+      const period = UsageTypePeriod[usageType];
+      const periodText = this.getPeriodText(period);
 
-    // Si no puede usar, lanzar error con detalles
-    if (!status.canUse) {
-      this.logger.warn(
-        `Usage limit exceeded for ${user?.email || fingerprint}: ${usageType} (${status.used}/${status.limit})`,
-      );
+      this.logger.warn(`Usage limit reached for ${user?.email || fingerprint}: ${usageType} (${current}/${limit})`);
 
       throw new HttpException(
         {
           statusCode: HttpStatus.TOO_MANY_REQUESTS,
-          error: "Límite de uso excedido",
-          message: this.generateErrorMessage(usageType, plan, status),
+          error: "Usage Limit Exceeded",
+          message: this.getLimitMessage(usageType, plan, period),
           details: {
             usageType,
-            period: status.period,
-            used: status.used,
-            limit: status.limit,
+            period: periodText,
+            used: current,
+            limit,
             remaining: 0,
-            resetsAt: status.resetsAt?.toISOString() || null,
           },
         },
         HttpStatus.TOO_MANY_REQUESTS,
       );
     }
 
+    // Guardar info en request para uso posterior
+    request.usageInfo = {
+      usageType,
+      current,
+      limit,
+      remaining,
+      plan,
+    };
+
     return true;
   }
 
   /**
-   * Genera mensaje de error contextualizado
+   * Genera mensaje de error según tipo y plan
    */
-  private generateErrorMessage(usageType: UsageType, plan: UserPlan, status: any): string {
-    switch (usageType) {
-      case UsageType.BIRTH_CHART_ANONYMOUS:
-        return "Ya generaste tu carta astral gratuita. Regístrate para obtener acceso ilimitado.";
+  private getLimitMessage(usageType: UsageType, plan: UserPlan, period: UsagePeriod): string {
+    if (usageType === UsageType.BIRTH_CHART_ANONYMOUS) {
+      return "Ya utilizaste tu carta astral gratuita. Regístrate para obtener más.";
+    }
 
-      case UsageType.BIRTH_CHART_SYNTHESIS:
-        if (plan === UserPlan.FREE) {
-          return "La síntesis IA está disponible solo para usuarios Premium. Mejora tu plan para acceder.";
-        }
-        return `Has alcanzado tu límite diario de síntesis IA. Se restablece a las 00:00 UTC.`;
+    if (usageType === UsageType.BIRTH_CHART) {
+      if (plan === UserPlan.FREE) {
+        return "Has alcanzado el límite de 3 cartas astrales este mes. Actualiza a Premium para obtener 5 cartas mensuales.";
+      }
+      if (plan === UserPlan.PREMIUM) {
+        return "Has alcanzado el límite de 5 cartas astrales este mes. El límite se reinicia el primer día del próximo mes.";
+      }
+    }
 
+    // Mensaje genérico para otros tipos
+    const periodText = period === UsagePeriod.DAILY ? "hoy" : "este mes";
+    return `Has alcanzado el límite de uso para ${periodText}.`;
+  }
+
+  /**
+   * Convierte período a texto
+   */
+  private getPeriodText(period: UsagePeriod): string {
+    switch (period) {
+      case UsagePeriod.DAILY:
+        return "diario";
+      case UsagePeriod.MONTHLY:
+        return "mensual";
+      case UsagePeriod.LIFETIME:
+        return "único";
       default:
-        const periodLabel = status.period === UsagePeriod.DAILY ? "hoy" : "en este período";
-        return `Has alcanzado tu límite de uso ${periodLabel}. Intenta más tarde.`;
+        return period;
     }
   }
 }
 ```
 
-**Criterios de aceptación:**
-
-- [ ] Guard valida límite antes de ejecutar handler
-- [ ] Si límite = 0, rechaza con 429
-- [ ] Si usado >= límite, rechaza con 429
-- [ ] Mensajes diferenciados por tipo de uso y plan
-- [ ] Información de límites guardada en request
-- [ ] Sin hardcoding de mensajes
-- [ ] Tests unitarios
-
-**Dependencias:** T-CA-022d
-**Estimación:** 2 horas
-
----
-
-### T-CA-023b: Crear Interceptor para Registrar Uso
-
-**Dependencias:** T-CA-022 (servicios de límites), T-CA-023a (guard debe ejecutarse antes)
-
-**Descripción:**
-Interceptor que registra uso SOLO después de respuesta exitosa. Permite regenerar si falló el registro sin consumir segundo uso.
-
-**Ubicación:** `backend/tarot-app/src/modules/usage-limits/`
-
-**Archivo:**
-
-```
-src/modules/usage-limits/
-└── infrastructure/
-    └── interceptors/
-        └── register-usage.interceptor.ts
-```
-
-**Implementación:**
-
 ```typescript
-// register-usage.interceptor.ts
-import { Injectable, NestInterceptor, ExecutionContext, CallHandler, Logger } from "@nestjs/common";
+// Decorador para registrar uso después de éxito
+// register-usage.interceptor.ts (nuevo)
+import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from "@nestjs/common";
 import { Observable } from "rxjs";
 import { tap } from "rxjs/operators";
 import { Reflector } from "@nestjs/core";
 import { UsageLimitsService } from "../../application/services/usage-limits.service";
-import { UsageType } from "../../domain/enums/usage-type.enum";
+import { UsageType, UsageTypePeriod, UsagePeriod } from "../../domain/enums";
 import { USAGE_TYPE_KEY } from "../../decorators/usage-type.decorator";
-import { UserPlan } from "../../../users/enums/user-plan.enum";
 
 @Injectable()
 export class RegisterUsageInterceptor implements NestInterceptor {
-  private readonly logger = new Logger(RegisterUsageInterceptor.name);
-
   constructor(
     private readonly reflector: Reflector,
     private readonly usageLimitsService: UsageLimitsService,
@@ -8451,7 +7906,6 @@ export class RegisterUsageInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const usageType = this.reflector.get<UsageType>(USAGE_TYPE_KEY, context.getHandler());
 
-    // Si no hay @UsageType, no registrar
     if (!usageType) {
       return next.handle();
     }
@@ -8459,324 +7913,65 @@ export class RegisterUsageInterceptor implements NestInterceptor {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
     const fingerprint = request.fingerprint || request.headers["x-fingerprint"];
-    const plan = user?.plan || UserPlan.ANONYMOUS;
-    const userId = user?.id || null;
-
-    // Capturar metadata opcional
-    const metadata = {
-      ipAddress: request.ip,
-      userAgent: request.headers["user-agent"],
-      timestamp: new Date().toISOString(),
-    };
+    const period = UsageTypePeriod[usageType];
 
     return next.handle().pipe(
-      tap(
-        async () => {
-          // Respuesta exitosa - registrar uso
-          try {
-            await this.usageLimitsService.recordUsage(usageType, plan, userId, fingerprint, metadata);
-            this.logger.debug(`Usage recorded: ${usageType} for user=${userId || fingerprint}`);
-          } catch (error) {
-            // Log pero NO fallar - el usuario ya recibió el resultado
-            this.logger.error(`Failed to record usage: ${error.message}`);
+      tap(async () => {
+        // Registrar uso solo después de respuesta exitosa
+        try {
+          if (period === UsagePeriod.LIFETIME) {
+            await this.usageLimitsService.incrementLifetimeUsage(usageType, fingerprint);
+          } else if (period === UsagePeriod.MONTHLY) {
+            await this.usageLimitsService.incrementMonthlyUsage(usageType, user.id);
+          } else {
+            await this.usageLimitsService.incrementDailyUsage(usageType, user?.id, fingerprint);
           }
-        },
-        (error) => {
-          // Si hubo error en el handler, no registrar uso
-          this.logger.debug(`Handler failed, usage NOT recorded: ${usageType}`);
-        },
-      ),
+        } catch (error) {
+          // Log pero no fallar - el usuario ya recibió su carta
+          console.error("Failed to register usage:", error);
+        }
+      }),
     );
   }
 }
 ```
 
-**Criterios de aceptación:**
-
-- [ ] Registra uso solo si respuesta es 2xx
-- [ ] No falla si registro de uso falla
-- [ ] Captura metadata (IP, User-Agent)
-- [ ] Logs de debug para troubleshooting
-- [ ] Tests con casos exitosos y con error
-
-**Dependencias:** T-CA-023a
-**Estimación:** 1.5 horas
-
----
-
-### T-CA-023c: Crear Endpoint de Consulta de Estado de Uso
-
-**Dependencias:** T-CA-022 (servicios de límites)
-
-**Descripción:**
-Endpoint `GET /birth-chart/usage-status` que retorna estado de límites SIN consumir uso. Necesario para mostrar widget de usos restantes en frontend.
-
-**Ubicación:** `backend/tarot-app/src/modules/birth-chart/`
-
-**Archivo:**
-
-```
-src/modules/birth-chart/
-└── infrastructure/
-    └── controllers/
-        └── birth-chart-usage.controller.ts
-```
-
-**Implementación:**
-
 ```typescript
-// birth-chart-usage.controller.ts
-import { Controller, Get, Headers, UseGuards, Request } from "@nestjs/common";
-import { ApiTags, ApiOperation, ApiResponse, ApiHeader, ApiBearerAuth } from "@nestjs/swagger";
-import { UsageLimitsService } from "../../../usage-limits/application/services/usage-limits.service";
-import { UsageType } from "../../../usage-limits/domain/enums/usage-type.enum";
-import { OptionalJwtAuthGuard } from "../../../auth/guards/optional-jwt-auth.guard";
-import { UserPlan } from "../../../users/enums/user-plan.enum";
+// Actualizar birth-chart.controller.ts para usar interceptor
+import { UseInterceptors } from '@nestjs/common';
+import { RegisterUsageInterceptor } from '../../../usage-limits/infrastructure/interceptors/register-usage.interceptor';
 
-export class UsageStatusResponseDto {
-  @ApiProperty({ enum: UserPlan })
-  plan: UserPlan;
-
-  @ApiProperty({
-    description: "Información de síntesis IA (solo aplicable si es premium)",
-    nullable: true,
-  })
-  synthesis?: {
-    used: number;
-    limit: number;
-    remaining: number;
-    resetsAt: string | null;
-    canUse: boolean;
-  };
-
-  @ApiProperty({
-    description: "Información de generación anónima lifetime (si es anónimo)",
-    nullable: true,
-  })
-  anonGeneration?: {
-    used: number;
-    limit: number;
-    remaining: number;
-    canUse: boolean;
-  };
-
-  @ApiProperty()
-  generatedAt: string;
+@Post('generate')
+@UseGuards(OptionalJwtAuthGuard, CheckUsageLimitGuard)
+@UseInterceptors(RegisterUsageInterceptor)  // 🆕 Agregar
+@UsageType('BIRTH_CHART')
+async generateChart(...) {
+  // ...
 }
 
-@ApiTags("Birth Chart - Usage")
-@Controller("birth-chart")
-@UseGuards(OptionalJwtAuthGuard)
-export class BirthChartUsageController {
-  constructor(private readonly usageLimitsService: UsageLimitsService) {}
-
-  /**
-   * GET /birth-chart/usage-status
-   * Retorna estado de límites de uso SIN consumir uso
-   */
-  @Get("usage-status")
-  @ApiOperation({
-    summary: "Obtener estado de límites de uso",
-    description: `Retorna el estado de límites de uso para la carta astral.
-
-    **Usuarios anónimos:** Muestra si tiene uso disponible lifetime
-    **Usuarios premium:** Muestra síntesis IA restante hoy
-    **Usuarios free:** No tiene límites en generación
-
-    Este endpoint NO consume uso.`,
-  })
-  @ApiHeader({
-    name: "x-fingerprint",
-    required: false,
-    description: "Device fingerprint para usuarios anónimos",
-  })
-  @ApiBearerAuth()
-  @ApiResponse({ status: 200, type: UsageStatusResponseDto })
-  async getUsageStatus(
-    @Request() req,
-    @Headers("x-fingerprint") fingerprint?: string,
-  ): Promise<UsageStatusResponseDto> {
-    const user = req.user;
-    const plan = user?.plan || UserPlan.ANONYMOUS;
-    const userId = user?.id || null;
-    const deviceFingerprint = fingerprint || req.fingerprint;
-
-    const response: UsageStatusResponseDto = {
-      plan,
-      generatedAt: new Date().toISOString(),
-    };
-
-    // Síntesis IA - solo Premium
-    if (plan === UserPlan.PREMIUM) {
-      const synthesisStatus = await this.usageLimitsService.checkLimit(
-        UsageType.BIRTH_CHART_SYNTHESIS,
-        plan,
-        userId,
-        deviceFingerprint,
-      );
-
-      response.synthesis = {
-        used: synthesisStatus.used,
-        limit: synthesisStatus.limit,
-        remaining: synthesisStatus.remaining,
-        resetsAt: synthesisStatus.resetsAt?.toISOString() || null,
-        canUse: synthesisStatus.canUse,
-      };
-    }
-
-    // Generación anónima lifetime - solo anónimos
-    if (plan === UserPlan.ANONYMOUS) {
-      const anonStatus = await this.usageLimitsService.checkLimit(
-        UsageType.BIRTH_CHART_ANONYMOUS,
-        plan,
-        undefined,
-        deviceFingerprint,
-      );
-
-      response.anonGeneration = {
-        used: anonStatus.used,
-        limit: anonStatus.limit,
-        remaining: anonStatus.remaining,
-        canUse: anonStatus.canUse,
-      };
-    }
-
-    return response;
-  }
+@Post('generate/anonymous')
+@UseGuards(CheckUsageLimitGuard)
+@UseInterceptors(RegisterUsageInterceptor)  // 🆕 Agregar
+@UsageType('BIRTH_CHART_ANONYMOUS')
+async generateChartAnonymous(...) {
+  // ...
 }
 ```
 
 **Criterios de aceptación:**
 
-- [ ] Endpoint GET retorna estado sin consumir uso
-- [ ] Diferencia datos según plan (ANONYMOUS, FREE, PREMIUM)
-- [ ] Síntesis IA solo si PREMIUM
-- [ ] Generación anónimo solo si ANONYMOUS
-- [ ] Incluye resetsAt para UI
-- [ ] Sin @UsageType (no valida límite)
-- [ ] Sin @RegisterUsageInterceptor (no registra)
-- [ ] Tests sin consumir uso
-
-**Dependencias:** T-CA-023a
-**Estimación:** 1.5 horas
-
----
-
-### T-CA-023d: Integrar en Controladores de Carta Astral
-
-**Dependencias:** T-CA-023a (guard), T-CA-023b (interceptor), T-CA-023c (endpoint de estado)
-
-**Descripción:**
-Actualizar controladores para usar guards e interceptors en endpoints correctos.
-
-**Ubicación:** `backend/tarot-app/src/modules/birth-chart/`
-
-**Archivos a modificar:**
-
-```
-src/modules/birth-chart/infrastructure/controllers/
-├── birth-chart.controller.ts
-└── birth-chart-history.controller.ts
-```
-
-**Implementación (cambios en birth-chart.controller.ts):**
-
-```typescript
-import { UseGuards, UseInterceptors } from "@nestjs/common";
-import { CheckUsageLimitGuard } from "../../../usage-limits/infrastructure/guards/check-usage-limit.guard";
-import { RegisterUsageInterceptor } from "../../../usage-limits/infrastructure/interceptors/register-usage.interceptor";
-import { UsageType } from "../../../usage-limits/domain/enums/usage-type.enum";
-
-export class BirthChartController {
-  constructor(private readonly facade: BirthChartFacadeService) {}
-
-  /**
-   * POST /birth-chart/generate
-   * Genera carta astral - SIN LÍMITE para usuarios autenticados
-   * Usuarios anónimos no pueden usar este endpoint
-   */
-  @Post("generate")
-  @UseGuards(JwtAuthGuard) // Solo autenticados
-  async generateChart(@Body() dto: GenerateChartDto, @Request() req): Promise<any> {
-    const user = req.user;
-    return this.facade.generateChart(dto, user.plan, user.id);
-  }
-
-  /**
-   * POST /birth-chart/generate/anonymous
-   * Genera carta astral para anónimos - LIMITA A 1 LIFETIME
-   */
-  @Post("generate/anonymous")
-  @UseGuards(CheckUsageLimitGuard) // Valida límite antes
-  @UseInterceptors(RegisterUsageInterceptor) // Registra uso después
-  @UsageType(UsageType.BIRTH_CHART_ANONYMOUS)
-  async generateChartAnonymous(@Body() dto: GenerateChartDto, @Request() req): Promise<any> {
-    const fingerprint = req.fingerprint || req.headers["x-fingerprint"];
-    return this.facade.generateChart(dto, UserPlan.ANONYMOUS, null, fingerprint);
-  }
-
-  /**
-   * POST /birth-chart/synthesis
-   * Genera síntesis IA de carta guardada - LIMITA A 2/DÍA UTC
-   * Solo Premium
-   */
-  @Post(":id/synthesis")
-  @UseGuards(JwtAuthGuard, PremiumGuard) // Solo Premium
-  @UseGuards(CheckUsageLimitGuard) // Valida límite diario
-  @UseInterceptors(RegisterUsageInterceptor) // Registra uso
-  @UsageType(UsageType.BIRTH_CHART_SYNTHESIS)
-  async generateSynthesis(@Param("id") chartId: number, @Request() req): Promise<any> {
-    const user = req.user;
-    return this.facade.generateSynthesisForChart(chartId, user.id);
-  }
-
-  /**
-   * GET /birth-chart/usage-status
-   * Consulta estado de límites - SIN CONSUMIR USO
-   * Ver BirthChartUsageController
-   */
-}
-```
-
-**Criterios de aceptación:**
-
-- [ ] POST /birth-chart/generate - sin límite (solo autenticados)
-- [ ] POST /birth-chart/generate/anonymous - 1 lifetime
-- [ ] POST /birth-chart/:id/synthesis - 2 por día (premium)
-- [ ] Guards aplicados en orden correcto
+- [ ] Guard valida límites mensuales correctamente
+- [ ] Guard valida límites lifetime para anónimos
 - [ ] Interceptor registra uso después de éxito
-- [ ] Decoradores @UsageType presentes
-- [ ] Tests de integración
+- [ ] Mensajes de error diferenciados por plan
+- [ ] Response incluye detalles del límite alcanzado
+- [ ] Info de uso disponible en request para logging
+- [ ] Tests de integración verificando límites
+- [ ] Tests de edge cases (cambio de mes, etc.)
 
-**Dependencias:** T-CA-023a, T-CA-023b, T-CA-023c
-**Estimación:** 1.5 horas
+**Dependencias:** T-CA-022
 
----
-
-## Resumen de T-CA-023 Refactorizado
-
-**Descripción General:**
-Integración profesional de límites con carta astral, incluyendo guard, interceptor y endpoint de estado.
-
-**Estructura:**
-
-- **023a:** Guard de validación (2h)
-- **023b:** Interceptor de registro (1.5h)
-- **023c:** Endpoint de estado sin consumo (1.5h)
-- **023d:** Integración en controladores (1.5h)
-
-**Total T-CA-023:** 6.5 horas
-
-**Dependencias:** T-CA-022d (completada)
-
-**Criterios de aceptación globales:**
-
-- [ ] Guard valida límite ANTES de ejecutar
-- [ ] Interceptor registra uso SOLO si exitoso
-- [ ] Endpoint status retorna estado sin consumo
-- [ ] Mensajes de error claros y dinámicos
-- [ ] Tres endpoints claros: generate (auth), generate/anonymous (1 lifetime), synthesis (2/día)
-- [ ] Tests E2E de flujos completos
+**Estimación:** 3 horas
 
 ---
 
@@ -9157,625 +8352,405 @@ TIMEZONEDB_API_KEY=your_api_key_here
 
 **Estimación:** 4 horas
 
-**Nota:** GeocodeService ya está implementado en T-CA-020 como parte del módulo BirthChart. Esta tarea asume que ya está integrado. Si falta integración de endpoint, ver T-CA-024a.
-
 ---
 
-### T-CA-024a: Crear Endpoint Público de Búsqueda de Lugares (Geocoding)
-
-**Descripción:**
-Si aún no existe, crear endpoint público para búsqueda de lugares por nombre, retornando coordenadas y timezone.
-
-**Ubicación:** `backend/tarot-app/src/modules/birth-chart/`
-
-**Archivo:**
-
-```
-src/modules/birth-chart/
-└── infrastructure/
-    └── controllers/
-        └── geocode.controller.ts
-```
-
-**Implementación:**
-
-```typescript
-import { Controller, Get, Query, HttpException, HttpStatus } from "@nestjs/common";
-import { ApiTags, ApiOperation, ApiQuery, ApiResponse } from "@nestjs/swagger";
-import { GeocodeService } from "../../application/services/geocode.service";
-
-@ApiTags("Birth Chart - Geocoding")
-@Controller("birth-chart/geocode")
-export class GeocodeController {
-  constructor(private readonly geocodeService: GeocodeService) {}
-
-  /**
-   * GET /birth-chart/geocode/search?query=Buenos Aires
-   * Busca lugares por nombre
-   */
-  @Get("search")
-  @ApiOperation({
-    summary: "Buscar lugares por nombre",
-    description: "Retorna lista de lugares coincidentes con coordenadas y timezone",
-  })
-  @ApiQuery({
-    name: "query",
-    required: true,
-    description: "Nombre del lugar a buscar",
-    example: "Buenos Aires",
-  })
-  @ApiResponse({
-    status: 200,
-    schema: {
-      example: {
-        results: [
-          {
-            placeId: "osm_R_62422",
-            displayName: "Buenos Aires, Argentina",
-            city: "Buenos Aires",
-            country: "Argentina",
-            latitude: -34.6037,
-            longitude: -58.3816,
-            timezone: "America/Argentina/Buenos_Aires",
-          },
-        ],
-        count: 1,
-      },
-    },
-  })
-  async searchPlaces(@Query("query") query: string) {
-    if (!query || query.trim().length < 2) {
-      throw new HttpException("Query debe tener mínimo 2 caracteres", HttpStatus.BAD_REQUEST);
-    }
-
-    return this.geocodeService.searchPlaces(query);
-  }
-}
-```
-
-**Criterios de aceptación:**
-
-- [ ] GET /birth-chart/geocode/search?query=X funciona
-- [ ] Retorna lista de lugares con coordenadas y timezone
-- [ ] Validación de query (mínimo 2 caracteres)
-- [ ] Manejo de errores de API
-- [ ] Tests
-
-**Dependencias:** GeocodeService (T-CA-020)
-**Estimación:** 0.5 horas
-
----
-
-### T-CA-025: Crear Panel Admin para Gestionar Límites de Uso
+### T-CA-025: Crear Panel Admin para Límites de Carta Astral
 
 **Historia relacionada:** HU-CA-011
 
 **Descripción:**
-Crear panel administrativo para gestionar límites de uso en tiempo real, sin redeployer. Usa UsageLimitConfigRepository para cambios persistentes y caché para respuestas rápidas. Incluye auditoría de cambios.
+Extender el panel de administración existente para permitir configurar los límites de uso de cartas astrales por plan (Free y Premium).
 
-**Ubicación:** `backend/tarot-app/src/modules/admin/`
+**Ubicación:** `src/modules/admin/`
 
-**Objetivo:**
-
-- Admin puede cambiar límites en la BD
-- Cambios se aplican inmediatamente (caché se invalida)
-- Auditoría completa de quién cambió qué y cuándo
-- API REST documentada con Swagger
-
-**Criterios de aceptación:**
-
-- [ ] Admin puede visualizar todos los límites actuales por plan
-- [ ] Admin puede actualizar límites sin redeployer
-- [ ] Cambios en BD se reflejan inmediatamente en caché
-- [ ] Auditoría registra quién, qué, cuándo en cada cambio
-- [ ] Endpoint POST /admin/usage-limits actualiza configuración
-- [ ] Endpoint GET /admin/usage-limits retorna todas las configs
-- [ ] Endpoint GET /admin/audit-log retorna histórico de cambios
-- [ ] Swagger documentation completa para endpoints admin
-- [ ] Validación de datos de entrada en DTOs
-- [ ] Tests de integración para CRUD de límites
-
----
-
-### T-CA-025a: Crear DTOs y Validaciones
-
-**Descripción:**
-Definir DTOs para peticiones y respuestas del panel admin, con validaciones y límites de rango.
-
-**Ubicación:** `backend/tarot-app/src/modules/admin/`
-
-**Archivo:**
+**Archivos a crear/modificar:**
 
 ```
 src/modules/admin/
+├── application/
+│   └── services/
+│       └── admin-limits.service.ts      # Extender
+├── infrastructure/
+│   └── controllers/
+│       └── admin-limits.controller.ts   # Extender
 └── application/
     └── dto/
-        ├── update-usage-limit.dto.ts
-        └── usage-limit-response.dto.ts
+        └── update-limits.dto.ts         # Extender
 ```
 
 **Implementación:**
 
 ```typescript
-// update-usage-limit.dto.ts
-import { ApiProperty } from "@nestjs/swagger";
-import { IsEnum, IsInt, Min, Max, IsNotEmpty } from "class-validator";
-import { UsageType } from "../../../usage-limits/domain/enums/usage-type.enum";
-import { UserPlan } from "../../../users/enums/user-plan.enum";
+// update-limits.dto.ts (extender)
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { IsInt, Min, Max, IsOptional, IsEnum } from "class-validator";
+import { UsageType } from "../../../usage-limits/domain/enums";
 
-export class UpdateUsageLimitDto {
+export class UpdateBirthChartLimitsDto {
   @ApiProperty({
-    enum: UsageType,
-    description: "Tipo de uso a limitar",
-  })
-  @IsEnum(UsageType)
-  @IsNotEmpty()
-  usageType: UsageType;
-
-  @ApiProperty({
-    enum: UserPlan,
-    description: "Plan de usuario",
-  })
-  @IsEnum(UserPlan)
-  @IsNotEmpty()
-  plan: UserPlan;
-
-  @ApiProperty({
-    example: 2,
-    description: "Nuevo límite (0 = deshabilitado)",
-    minimum: 0,
-    maximum: 100,
+    example: 3,
+    description: "Límite mensual para usuarios Free",
   })
   @IsInt()
   @Min(0)
   @Max(100)
-  @IsNotEmpty()
-  newLimit: number;
+  freeLimit: number;
+
+  @ApiProperty({
+    example: 5,
+    description: "Límite mensual para usuarios Premium",
+  })
+  @IsInt()
+  @Min(0)
+  @Max(100)
+  premiumLimit: number;
 }
 
-export class UsageLimitDetailDto {
-  @ApiProperty({ enum: UsageType })
-  usageType: UsageType;
+export class UsageLimitConfigDto {
+  @ApiProperty({ example: "birth_chart" })
+  usageType: string;
 
-  @ApiProperty({ enum: UserPlan })
-  plan: UserPlan;
+  @ApiProperty({ example: "monthly" })
+  period: string;
 
-  @ApiProperty()
-  limit: number;
+  @ApiProperty({
+    example: { anonymous: 0, free: 3, premium: 5 },
+  })
+  limits: Record<string, number>;
 
-  @ApiProperty()
-  currentUsage?: number;
+  @ApiProperty({ example: "2026-02-06T12:00:00Z" })
+  updatedAt: string;
 
-  @ApiProperty()
-  percentage?: number;
-}
-
-export class UsageLimitConfigResponseDto {
-  @ApiProperty({ isArray: true, type: UsageLimitDetailDto })
-  configs: UsageLimitDetailDto[];
-
-  @ApiProperty()
-  totalConfigs: number;
-
-  @ApiProperty()
-  retrievedAt: string;
-}
-
-export class UpdatedLimitResponseDto {
-  @ApiProperty()
-  success: boolean;
-
-  @ApiProperty()
-  message: string;
-
-  @ApiProperty()
-  previousLimit: number;
-
-  @ApiProperty()
-  newLimit: number;
-
-  @ApiProperty()
-  appliedAt: string;
-
-  @ApiProperty()
-  appliedBy: string;
+  @ApiPropertyOptional({ example: "admin@auguria.com" })
+  updatedBy?: string;
 }
 ```
-
-**Criterios de aceptación:**
-
-- [ ] DTO con validaciones de rango (0-100)
-- [ ] Enums para UsageType y UserPlan
-- [ ] Response DTOs con información clara
-- [ ] Documentación con ejemplos
-- [ ] Sin hardcoding de valores
-
-**Dependencias:** Ninguna
-**Estimación:** 1 hora
-
----
-
-### T-CA-025b: Crear Servicio Admin de Límites
-
-**Descripción:**
-Servicio que gestiona cambios de límites, invalida caché y registra auditoría.
-
-**Ubicación:** `backend/tarot-app/src/modules/admin/`
-
-**Archivo:**
-
-```
-src/modules/admin/
-└── application/
-    └── services/
-        └── admin-usage-limits.service.ts
-```
-
-**Implementación:**
 
 ```typescript
-// admin-usage-limits.service.ts
-import { Injectable, Logger, BadRequestException } from "@nestjs/common";
-import { UsageLimitConfigRepository } from "../../../usage-limits/application/repositories/usage-limit-config.repository";
-import { LimitConfigCache } from "../../../usage-limits/infrastructure/cache/limit-config.cache";
-import { AuditLogService } from "./audit-log.service"; // Asumiendo que existe
-import { UsageType } from "../../../usage-limits/domain/enums/usage-type.enum";
-import { UsagePeriod } from "../../../usage-limits/domain/enums/usage-period.enum";
+// admin-limits.service.ts (extender)
+import { Injectable, Logger } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { SystemConfig } from "../entities/system-config.entity"; // Si existe
+import { UpdateBirthChartLimitsDto, UsageLimitConfigDto } from "../dto";
+import { AuditLogService } from "./audit-log.service";
+import { USAGE_LIMITS } from "../../../usage-limits/constants/usage-limits.constants";
+import { UsageType } from "../../../usage-limits/domain/enums";
 import { UserPlan } from "../../../users/enums/user-plan.enum";
-import { UpdateUsageLimitDto, UsageLimitConfigResponseDto, UpdatedLimitResponseDto } from "../dto";
 
 @Injectable()
-export class AdminUsageLimitsService {
-  private readonly logger = new Logger(AdminUsageLimitsService.name);
+export class AdminLimitsService {
+  private readonly logger = new Logger(AdminLimitsService.name);
+
+  // Caché en memoria de límites configurables
+  private limitsOverrides: Map<UsageType, Record<UserPlan, number>> = new Map();
 
   constructor(
-    private readonly configRepo: UsageLimitConfigRepository,
-    private readonly cacheService: LimitConfigCache,
+    @InjectRepository(SystemConfig)
+    private readonly configRepo: Repository<SystemConfig>,
     private readonly auditLog: AuditLogService,
-  ) {}
-
-  /**
-   * Obtiene todas las configuraciones de límites actuales
-   */
-  async getAllLimits(): Promise<UsageLimitConfigResponseDto> {
-    const configs = await this.configRepo.findAllConfigs();
-
-    const configDetails = configs.map((config) => ({
-      usageType: config.usageType,
-      period: config.period,
-      limits: config.limits,
-      lastModifiedBy: config.lastModifiedBy,
-      updatedAt: config.updatedAt,
-    }));
-
-    return {
-      configs: configDetails,
-      totalConfigs: configDetails.length,
-      retrievedAt: new Date().toISOString(),
-    };
+  ) {
+    this.loadLimitsFromDB();
   }
 
   /**
-   * Actualiza un límite específico
+   * Carga límites personalizados desde DB al iniciar
    */
-  async updateLimit(dto: UpdateUsageLimitDto, adminId: number, adminEmail: string): Promise<UpdatedLimitResponseDto> {
-    // Determinar período basado en tipo de uso
-    const period = this.getUsagePeriod(dto.usageType);
+  private async loadLimitsFromDB(): Promise<void> {
+    try {
+      const configs = await this.configRepo.find({
+        where: { category: "usage_limits" },
+      });
 
-    // Obtener configuración actual
-    let config = await this.configRepo.findByUsageType(dto.usageType, period);
+      for (const config of configs) {
+        const usageType = config.key as UsageType;
+        const limits = JSON.parse(config.value);
+        this.limitsOverrides.set(usageType, limits);
+      }
 
-    if (!config) {
-      throw new BadRequestException(`No existe configuración para ${dto.usageType} con período ${period}`);
+      this.logger.log(`Loaded ${this.limitsOverrides.size} custom limit configs`);
+    } catch (error) {
+      this.logger.error("Failed to load limits from DB:", error);
+    }
+  }
+
+  /**
+   * Obtiene límite actual para un tipo y plan
+   */
+  getLimit(usageType: UsageType, plan: UserPlan): number {
+    // Primero verificar overrides
+    const override = this.limitsOverrides.get(usageType);
+    if (override && override[plan] !== undefined) {
+      return override[plan];
     }
 
-    const previousLimit = config.limits[dto.plan] ?? 0;
+    // Fallback a constantes
+    return USAGE_LIMITS[usageType]?.[plan] ?? 0;
+  }
 
-    // Actualizar límite
-    config.limits = {
-      ...config.limits,
-      [dto.plan]: dto.newLimit,
-    };
+  /**
+   * Obtiene configuración actual de límites de carta astral
+   */
+  async getBirthChartLimits(): Promise<UsageLimitConfigDto> {
+    const usageType = UsageType.BIRTH_CHART;
 
-    const updated = await this.configRepo.updateConfig(config.usageType, config.period, config.limits, adminEmail);
-
-    // Invalidar caché
-    await this.cacheService.clear();
-    this.logger.log(`Cache invalidated after limit update: ${dto.usageType}/${dto.plan}`);
-
-    // Registrar en auditoría
-    await this.auditLog.log({
-      action: "UPDATE_USAGE_LIMIT",
-      entityType: "UsageLimitConfig",
-      entityId: updated.id.toString(),
-      userId: adminId,
-      metadata: {
-        usageType: dto.usageType,
-        plan: dto.plan,
-        period,
-        previousLimit,
-        newLimit: dto.newLimit,
+    return {
+      usageType,
+      period: "monthly",
+      limits: {
+        anonymous: 0, // No configurable
+        free: this.getLimit(usageType, UserPlan.FREE),
+        premium: this.getLimit(usageType, UserPlan.PREMIUM),
       },
-      description: `Límite de ${dto.usageType} para ${dto.plan} actualizado de ${previousLimit} a ${dto.newLimit}`,
-    });
-
-    this.logger.log(
-      `Usage limit updated: ${dto.usageType}/${dto.plan} from ${previousLimit} to ${dto.newLimit} by ${adminEmail}`,
-    );
-
-    return {
-      success: true,
-      message: `Límite actualizado exitosamente`,
-      previousLimit,
-      newLimit: dto.newLimit,
-      appliedAt: new Date().toISOString(),
-      appliedBy: adminEmail,
+      updatedAt: await this.getLastUpdateTime(usageType),
+      updatedBy: await this.getLastUpdatedBy(usageType),
     };
   }
 
   /**
-   * Obtiene historial de cambios
+   * Actualiza límites de carta astral
    */
-  async getLimitsHistory(usageType?: UsageType): Promise<any[]> {
-    return this.auditLog.getHistory({
-      action: "UPDATE_USAGE_LIMIT",
-      entityType: "UsageLimitConfig",
-      metadata: usageType ? { usageType } : undefined,
-    });
-  }
+  async updateBirthChartLimits(
+    dto: UpdateBirthChartLimitsDto,
+    adminUserId: number,
+    adminEmail: string,
+  ): Promise<UsageLimitConfigDto> {
+    const usageType = UsageType.BIRTH_CHART;
 
-  /**
-   * Restaura límites a valores por defecto
-   */
-  async resetToDefaults(adminId: number, adminEmail: string): Promise<void> {
-    await this.configRepo.seedDefaultLimits();
-    await this.cacheService.clear();
+    const newLimits: Record<UserPlan, number> = {
+      [UserPlan.ANONYMOUS]: 0, // Siempre 0 (usa BIRTH_CHART_ANONYMOUS)
+      [UserPlan.FREE]: dto.freeLimit,
+      [UserPlan.PREMIUM]: dto.premiumLimit,
+    };
 
-    await this.auditLog.log({
-      action: "RESET_USAGE_LIMITS",
-      entityType: "UsageLimitConfig",
-      entityId: "all",
-      userId: adminId,
-      description: "Todos los límites restaurados a valores por defecto",
+    // Guardar en DB
+    const configKey = usageType;
+    let config = await this.configRepo.findOne({
+      where: { category: "usage_limits", key: configKey },
     });
 
-    this.logger.log(`All limits reset to defaults by ${adminEmail}`);
-  }
+    const previousValue = config?.value;
 
-  /**
-   * Determina período basado en tipo de uso
-   */
-  private getUsagePeriod(usageType: UsageType): UsagePeriod {
-    switch (usageType) {
-      case UsageType.BIRTH_CHART_ANONYMOUS:
-        return UsagePeriod.LIFETIME;
-      default:
-        return UsagePeriod.DAILY;
+    if (config) {
+      config.value = JSON.stringify(newLimits);
+      config.updatedBy = adminEmail;
+    } else {
+      config = this.configRepo.create({
+        category: "usage_limits",
+        key: configKey,
+        value: JSON.stringify(newLimits),
+        updatedBy: adminEmail,
+      });
     }
+
+    await this.configRepo.save(config);
+
+    // Actualizar caché en memoria
+    this.limitsOverrides.set(usageType, newLimits);
+
+    // Registrar en audit log
+    await this.auditLog.log({
+      action: "UPDATE_USAGE_LIMITS",
+      entityType: "SystemConfig",
+      entityId: config.id.toString(),
+      userId: adminUserId,
+      previousValue,
+      newValue: JSON.stringify(newLimits),
+      metadata: {
+        usageType,
+        freeLimit: dto.freeLimit,
+        premiumLimit: dto.premiumLimit,
+      },
+    });
+
+    this.logger.log(`Birth chart limits updated by ${adminEmail}: Free=${dto.freeLimit}, Premium=${dto.premiumLimit}`);
+
+    return this.getBirthChartLimits();
+  }
+
+  /**
+   * Obtiene historial de cambios de límites
+   */
+  async getLimitsHistory(usageType: UsageType): Promise<any[]> {
+    return this.auditLog.getHistory({
+      action: "UPDATE_USAGE_LIMITS",
+      entityType: "SystemConfig",
+      metadata: { usageType },
+    });
+  }
+
+  /**
+   * Helper: última fecha de actualización
+   */
+  private async getLastUpdateTime(usageType: UsageType): Promise<string> {
+    const config = await this.configRepo.findOne({
+      where: { category: "usage_limits", key: usageType },
+    });
+    return config?.updatedAt?.toISOString() || new Date().toISOString();
+  }
+
+  /**
+   * Helper: último admin que actualizó
+   */
+  private async getLastUpdatedBy(usageType: UsageType): Promise<string | undefined> {
+    const config = await this.configRepo.findOne({
+      where: { category: "usage_limits", key: usageType },
+    });
+    return config?.updatedBy;
   }
 }
 ```
 
-**Criterios de aceptación:**
-
-- [ ] Obtiene todos los límites
-- [ ] Actualiza límite y registra cambio
-- [ ] Invalida caché después de cambio
-- [ ] Registra en auditoría quién cambió qué
-- [ ] Historial de cambios disponible
-- [ ] Reset a valores por defecto
-- [ ] Tests unitarios
-
-**Dependencias:** T-CA-025a, UsageLimitConfigRepository (T-CA-022d)
-**Estimación:** 2 horas
-
----
-
-### T-CA-025c: Crear Controlador Admin
-
-**Descripción:**
-Endpoints REST protegidos con AdminGuard para gestionar límites.
-
-**Ubicación:** `backend/tarot-app/src/modules/admin/`
-
-**Archivo:**
-
-```
-src/modules/admin/
-└── infrastructure/
-    └── controllers/
-        └── usage-limits.controller.ts
-```
-
-**Implementación:**
-
 ```typescript
-// usage-limits.controller.ts
-import { Controller, Get, Put, Post, Body, UseGuards, Param, Logger, Query } from "@nestjs/common";
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from "@nestjs/swagger";
+// admin-limits.controller.ts (extender)
+import { Controller, Get, Put, Body, UseGuards, Logger } from "@nestjs/common";
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../../../auth/guards/jwt-auth.guard";
 import { AdminGuard } from "../../../auth/guards/admin.guard";
 import { CurrentUser } from "../../../auth/decorators/current-user.decorator";
+import { AdminLimitsService } from "../../application/services/admin-limits.service";
+import { UpdateBirthChartLimitsDto, UsageLimitConfigDto } from "../../application/dto";
 import { User } from "../../../users/entities/user.entity";
-import { AdminUsageLimitsService } from "../../application/services/admin-usage-limits.service";
-import { UpdateUsageLimitDto, UsageLimitConfigResponseDto, UpdatedLimitResponseDto } from "../../application/dto";
 
-@ApiTags("Admin - Usage Limits Management")
-@Controller("admin/usage-limits")
+@ApiTags("Admin - Usage Limits")
+@Controller("admin/limits")
 @UseGuards(JwtAuthGuard, AdminGuard)
 @ApiBearerAuth()
-export class UsageLimitsAdminController {
-  private readonly logger = new Logger(UsageLimitsAdminController.name);
+export class AdminLimitsController {
+  private readonly logger = new Logger(AdminLimitsController.name);
 
-  constructor(private readonly limitsService: AdminUsageLimitsService) {}
+  constructor(private readonly limitsService: AdminLimitsService) {}
 
   /**
-   * GET /admin/usage-limits
-   * Obtiene todos los límites configurados
+   * GET /admin/limits/birth-chart
+   * Obtiene configuración actual de límites de carta astral
    */
-  @Get()
+  @Get("birth-chart")
   @ApiOperation({
-    summary: "Obtener todos los límites",
-    description: "Retorna configuración actual de todos los límites de uso",
+    summary: "Obtener límites de carta astral",
+    description: "Obtiene la configuración actual de límites mensuales de carta astral por plan.",
   })
-  @ApiResponse({ status: 200, type: UsageLimitConfigResponseDto })
-  async getAllLimits(): Promise<UsageLimitConfigResponseDto> {
-    return this.limitsService.getAllLimits();
+  @ApiResponse({ status: 200, type: UsageLimitConfigDto })
+  async getBirthChartLimits(): Promise<UsageLimitConfigDto> {
+    return this.limitsService.getBirthChartLimits();
   }
 
   /**
-   * PUT /admin/usage-limits
-   * Actualiza un límite específico
+   * PUT /admin/limits/birth-chart
+   * Actualiza límites de carta astral
    */
-  @Put()
+  @Put("birth-chart")
   @ApiOperation({
-    summary: "Actualizar un límite",
-    description: "Cambia el límite de un tipo de uso para un plan específico",
+    summary: "Actualizar límites de carta astral",
+    description: `Actualiza los límites mensuales de generación de cartas astrales.
+    
+**Nota:** El límite de usuarios anónimos (1 lifetime) no es configurable.`,
   })
-  @ApiResponse({ status: 200, type: UpdatedLimitResponseDto })
-  async updateLimit(@Body() dto: UpdateUsageLimitDto, @CurrentUser() admin: User): Promise<UpdatedLimitResponseDto> {
-    this.logger.log(`Admin ${admin.email} updating usage limit: ${JSON.stringify(dto)}`);
-    return this.limitsService.updateLimit(dto, admin.id, admin.email);
+  @ApiResponse({ status: 200, type: UsageLimitConfigDto })
+  async updateBirthChartLimits(
+    @Body() dto: UpdateBirthChartLimitsDto,
+    @CurrentUser() admin: User,
+  ): Promise<UsageLimitConfigDto> {
+    this.logger.log(
+      `Admin ${admin.email} updating birth chart limits: Free=${dto.freeLimit}, Premium=${dto.premiumLimit}`,
+    );
+
+    return this.limitsService.updateBirthChartLimits(dto, admin.id, admin.email);
   }
 
   /**
-   * GET /admin/usage-limits/history
-   * Obtiene historial de cambios
+   * GET /admin/limits/birth-chart/history
+   * Historial de cambios de límites
    */
-  @Get("history")
+  @Get("birth-chart/history")
   @ApiOperation({
-    summary: "Obtener historial de cambios",
-    description: "Retorna auditoría de cambios en los límites",
+    summary: "Historial de cambios de límites",
+    description: "Obtiene el historial de cambios en la configuración de límites.",
   })
-  async getLimitsHistory(@Query("usageType") usageType?: string): Promise<any[]> {
-    return this.limitsService.getLimitsHistory(usageType as any);
+  @ApiResponse({
+    status: 200,
+    schema: {
+      example: [
+        {
+          id: 1,
+          action: "UPDATE_USAGE_LIMITS",
+          previousValue: '{"free":3,"premium":5}',
+          newValue: '{"free":5,"premium":10}',
+          userId: 1,
+          userEmail: "admin@auguria.com",
+          createdAt: "2026-02-06T12:00:00Z",
+        },
+      ],
+    },
+  })
+  async getLimitsHistory() {
+    return this.limitsService.getLimitsHistory(UsageType.BIRTH_CHART);
   }
+}
+```
 
-  /**
-   * POST /admin/usage-limits/reset
-   * Restaura límites a valores por defecto
-   */
-  @Post("reset")
-  @ApiOperation({
-    summary: "Restaurar valores por defecto",
-    description: "Restablece todos los límites a sus valores predeterminados",
-  })
-  async resetDefaults(@CurrentUser() admin: User): Promise<{ success: boolean; message: string }> {
-    this.logger.warn(`Admin ${admin.email} resetting all usage limits to defaults`);
-    await this.limitsService.resetToDefaults(admin.id, admin.email);
-    return {
-      success: true,
-      message: "Límites restaurados a valores por defecto",
-    };
-  }
+**Entidad SystemConfig (si no existe):**
+
+```typescript
+// system-config.entity.ts
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, Index, Unique } from "typeorm";
+
+@Entity("system_config")
+@Unique("uq_system_config", ["category", "key"])
+@Index("idx_system_config_category", ["category"])
+export class SystemConfig {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ type: "varchar", length: 50 })
+  category: string;
+
+  @Column({ type: "varchar", length: 100 })
+  key: string;
+
+  @Column({ type: "text" })
+  value: string;
+
+  @Column({ type: "varchar", length: 255, nullable: true })
+  description: string | null;
+
+  @Column({ type: "varchar", length: 100, nullable: true })
+  updatedBy: string | null;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }
 ```
 
 **Criterios de aceptación:**
 
-- [ ] GET /admin/usage-limits retorna todas las configuraciones
-- [ ] PUT /admin/usage-limits actualiza un límite
-- [ ] GET /admin/usage-limits/history retorna cambios
-- [ ] POST /admin/usage-limits/reset restaura defaults
-- [ ] Todos protegidos con AdminGuard
-- [ ] Logging de cambios
+- [ ] Endpoint GET para obtener límites actuales
+- [ ] Endpoint PUT para actualizar límites
+- [ ] Endpoint GET para historial de cambios
+- [ ] Límite de anónimos (1 lifetime) NO configurable
+- [ ] Cambios aplicados inmediatamente (caché en memoria)
+- [ ] Persistencia en DB para sobrevivir reinicios
+- [ ] Auditoría de cambios
+- [ ] Protegido con AdminGuard
+- [ ] Documentación Swagger completa
 - [ ] Tests de integración
 
-**Dependencias:** T-CA-025b
-**Estimación:** 1.5 horas
+**Dependencias:** T-CA-022, T-CA-023
+
+**Estimación:** 3 horas
 
 ---
 
-## Resumen de T-CA-025 Refactorizado
+## CHECKLIST DE PARTE 7F
 
-**Descripción General:**
-Panel administrativo profesional para gestionar límites en tiempo real, sin hardcoding.
-
-**Estructura:**
-
-- **025a:** DTOs y validaciones (1h)
-- **025b:** Servicio de admin (2h)
-- **025c:** Controlador y endpoints (1.5h)
-
-**Total T-CA-025:** 4.5 horas
-
-**Dependencias:** T-CA-022d, AuditLogService (existente)
-
-**Criterios de aceptación globales:**
-
-- [ ] Sin hardcoding de límites
-- [ ] Cambios persistentes en BD
-- [ ] Caché se invalida automáticamente
-- [ ] Auditoría completa
-- [ ] DTOs con validaciones
-- [ ] Endpoints protegidos con AdminGuard
-- [ ] Swagger documentado
-- [ ] Tests de integración
-
----
-
-## CHECKLIST DE PARTE 7F - SISTEMA DE LÍMITES Y GEOCODING PROFESIONAL
-
-**NOTA:** Todas las tareas desde T-CA-022 incluyen subtareas con nomenclatura de letras (022a, 022b, etc.)
-
-- [x] **T-CA-021:** Análisis completado ✅
-  - Documento: `docs/ANALISIS_T-CA-021_SISTEMA_LIMITES.md`
-
-- [ ] **T-CA-022:** Infraestructura de límites flexible (7h total)
-  - [ ] T-CA-022a: Enums sin hardcoding (1h)
-  - [ ] T-CA-022b: Entidades y migraciones (2h)
-  - [ ] T-CA-022c: Servicios dinámicos (3h)
-  - [ ] T-CA-022d: Integración en módulo (1h)
-
-- [ ] **T-CA-023:** Integración con Carta Astral (6.5h total)
-  - [ ] T-CA-023a: Guard de validación (2h)
-  - [ ] T-CA-023b: Interceptor de registro (1.5h)
-  - [ ] T-CA-023c: Endpoint de status (1.5h)
-  - [ ] T-CA-023d: Integración en controladores (1.5h)
-
-- [ ] **T-CA-024:** Geocodificación (4.5h total)
-  - [x] GeocodeService (ya en T-CA-020)
-  - [ ] T-CA-024a: Endpoint público de búsqueda (0.5h)
-
-- [ ] **T-CA-025:** Panel Admin de Límites (4.5h total)
-  - [ ] T-CA-025a: DTOs y validaciones (1h)
-  - [ ] T-CA-025b: Servicio admin (2h)
-  - [ ] T-CA-025c: Controlador y endpoints (1.5h)
-
-**TOTAL ESTIMADO PARTE 7F:** 23 horas (sin T-CA-020)
-
----
-
-## PRINCIPIOS DE DESARROLLO APLICADOS
-
-✅ **Sin Hardcoding:**
-
-- Límites en BD (`UsageLimitConfig`)
-- Configurables sin redeployer
-- Caché para rendimiento
-
-✅ **Best Practices NestJS:**
-
-- Separación en capas (domain, application, infrastructure)
-- Inyección de dependencias
-- Guards y Interceptors
-- DTOs con validaciones
-- Logging estructurado
-
-✅ **Profesionalismo:**
-
-- Migraciones TypeORM con índices
-- Auditoría de cambios
-- Manejo de errores robusto
-- Tests unitarios e integración
-- Documentación Swagger completa
-
-✅ **Escalabilidad:**
-
-- Repositorio patrón
-- Caché configurable
-- Soporte para múltiples tipos de uso
-- Estructura extensible para nuevos tipos
+- [x] T-CA-021: Análisis del sistema de límites completado
+- [ ] T-CA-022: Sistema extendido para límites mensuales
+- [ ] T-CA-023: Límites de carta astral integrados
+- [ ] T-CA-024: Servicio de geocodificación funcionando
+- [ ] T-CA-025: Panel admin para límites configurado
 
 ---
 
@@ -9807,7 +8782,7 @@ Usuario solicita generar carta
 │   RegisterUsageInterceptor  │
 │                             │
 │  Solo si respuesta exitosa: │
-│  - incrementDailyUsage()    │
+│  - incrementMonthlyUsage()  │
 │  - o incrementLifetimeUsage │
 └─────────────────────────────┘
            │
@@ -9857,33 +8832,12 @@ Esta parte cubre la creación de los componentes base de React y el formulario d
 
 ## DETALLE DE TAREAS
 
-## PARTE 7G: TAREAS FRONTEND - ACTUALIZADAS PARA SINCRONIZAR CON BACKEND
-
-### ⚠️ **CAMBIOS CRÍTICOS EN BACKEND**
-
-Las siguientes tareas han sido **ACTUALIZADAS** para reflejar cambios en los endpoints de backend:
-
-1. **Endpoint de Estado:** `/birth-chart/usage` → **`/birth-chart/usage-status`** ✅
-2. **Búsqueda de Lugares:** `/birth-chart/geocode?query=X` → **`/birth-chart/geocode/search?query=X`** ✅
-3. **Síntesis IA:** Endpoint separado **`POST /birth-chart/:id/synthesis`** (no incluido en generación) ✅
-4. **Estructura de Response:** `UsageStatus` → **`UsageStatusResponse`** (discriminada por plan) ✅
-
-### 📋 **SUBTAREAS CRÍTICAS AGREGADAS**
-
-- **T-CA-026a:** Actualizar tipos TypeScript para nueva estructura
-- **T-CA-027a:** Actualizar URLs de endpoints en hooks
-- **T-CA-029a:** Separar flujos autenticado vs anónimo
-- **T-CA-038a:** Validar que usuario es Premium para síntesis
-- **T-CA-044a:** Mostrar widget diferenciado por plan
-
----
-
 ### T-CA-026: Crear Tipos TypeScript del Módulo
 
 **Historia relacionada:** Todas
 
 **Descripción:**
-Definir todos los tipos e interfaces TypeScript necesarios para el módulo de carta astral en el frontend, alineados con los DTOs del backend (ACTUALIZADO).
+Definir todos los tipos e interfaces TypeScript necesarios para el módulo de carta astral en el frontend, alineados con los DTOs del backend.
 
 **Ubicación:** `src/features/birth-chart/types/`
 
@@ -10150,39 +9104,16 @@ export function isPremiumChartResponse(response: ChartResponse): response is Pre
 }
 
 /**
- * Estado de uso de límites - ESTRUCTURA DISCRIMINADA POR PLAN
- *
- * ANONYMOUS: Solo tiene anonGeneration (1 lifetime)
- * FREE: Sin límites (no hay synthesisi)
- * PREMIUM: Solo tiene synthesis (2/día UTC)
+ * Estado de uso
  */
-export interface UsageStatusResponse {
+export interface UsageStatus {
   plan: "anonymous" | "free" | "premium";
-
-  // Solo PREMIUM
-  synthesis?: {
-    used: number;
-    limit: number;
-    remaining: number;
-    resetsAt: string | null;
-    canUse: boolean;
-  };
-
-  // Solo ANONYMOUS
-  anonGeneration?: {
-    used: number;
-    limit: number;
-    remaining: number;
-    canUse: boolean;
-  };
-
-  generatedAt: string;
+  used: number;
+  limit: number;
+  remaining: number;
+  resetsAt: string | null;
+  canGenerate: boolean;
 }
-
-/**
- * @deprecated Usar UsageStatusResponse en su lugar
- */
-export interface UsageStatus extends UsageStatusResponse {}
 
 /**
  * Respuesta de historial
@@ -10347,7 +9278,6 @@ src/features/birth-chart/
     ├── useChartHistory.ts
     ├── useGeocodeSearch.ts
     ├── useUsageStatus.ts
-    ├── useSynthesis.ts
     └── useDownloadPdf.ts
 ```
 
@@ -10538,162 +9468,58 @@ export function useGeocodeSearch(options: UseGeocodeSearchOptions) {
 // useUsageStatus.ts
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { UsageStatusResponse } from "../types";
+import { UsageStatus } from "../types";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 /**
- * Hook para obtener estado de uso SIN consumir uso
- * Retorna estructura diferente según plan:
- * - ANONYMOUS: { anonGeneration: { used, limit, remaining, canUse } }
- * - PREMIUM: { synthesis: { used, limit, remaining, resetsAt, canUse } }
- * - FREE: { plan: 'free' } (sin límites)
+ * Hook para obtener estado de uso de cartas astrales
  */
 export function useUsageStatus() {
-  return useQuery<UsageStatusResponse>({
-    queryKey: ["birth-chart", "usage-status"],
+  const { isAuthenticated } = useAuth();
+
+  return useQuery<UsageStatus>({
+    queryKey: ["birth-chart", "usage"],
     queryFn: async () => {
-      const response = await api.get<UsageStatusResponse>("/birth-chart/usage-status");
+      const response = await api.get<UsageStatus>("/birth-chart/usage");
       return response.data;
     },
-    staleTime: 30 * 1000, // 30 segundos (estado debe estar actualizado)
+    staleTime: 60 * 1000, // 1 minuto
     refetchOnWindowFocus: true,
-    refetchOnReconnect: true,
   });
 }
 
 /**
- * Hook helper para verificar si usuario anónimo puede generar carta
+ * Hook helper para verificar si puede generar
  */
-export function useCanGenerateAnonymousChart() {
+export function useCanGenerateChart(): {
+  canGenerate: boolean;
+  remaining: number;
+  isLoading: boolean;
+  message?: string;
+} {
   const { data, isLoading } = useUsageStatus();
 
   if (isLoading || !data) {
-    return {
-      canGenerate: false,
-      remaining: 0,
-      isLoading: true,
-      message: undefined,
-    };
+    return { canGenerate: false, remaining: 0, isLoading };
   }
 
-  // Solo aplicable a usuarios anónimos
-  if (data.plan !== "anonymous") {
-    return {
-      canGenerate: true,
-      remaining: -1, // No aplica
-      isLoading: false,
-      message: undefined,
-    };
-  }
-
-  const canGenerate = data.anonGeneration?.canUse ?? false;
-  const remaining = data.anonGeneration?.remaining ?? 0;
-
-  return {
-    canGenerate,
-    remaining,
-    isLoading: false,
-    message: !canGenerate
-      ? "Ya utilizaste tu carta astral gratuita. Regístrate para obtener acceso ilimitado."
-      : undefined,
-  };
-}
-
-/**
- * Hook helper para verificar si usuario premium puede generar síntesis IA
- */
-export function useCanGenerateSynthesis() {
-  const { data, isLoading } = useUsageStatus();
-
-  if (isLoading || !data) {
-    return {
-      canGenerate: false,
-      remaining: 0,
-      limit: 0,
-      resetsAt: null,
-      isLoading: true,
-      message: undefined,
-    };
-  }
-
-  // Solo para premium
-  if (data.plan !== "premium") {
-    return {
-      canGenerate: false,
-      remaining: 0,
-      limit: 0,
-      resetsAt: null,
-      isLoading: false,
-      message: "La síntesis IA está disponible solo para usuarios Premium",
-    };
-  }
-
-  const synthesis = data.synthesis;
-  if (!synthesis) {
-    return {
-      canGenerate: false,
-      remaining: 0,
-      limit: 0,
-      resetsAt: null,
-      isLoading: false,
-      message: "No disponible",
-    };
+  let message: string | undefined;
+  if (!data.canGenerate) {
+    if (data.plan === "anonymous") {
+      message = "Ya utilizaste tu carta gratuita. Regístrate para obtener más.";
+    } else if (data.plan === "free") {
+      message = `Has alcanzado el límite de ${data.limit} cartas este mes.`;
+    } else {
+      message = `Has alcanzado el límite de ${data.limit} cartas este mes.`;
+    }
   }
 
   return {
-    canGenerate: synthesis.canUse,
-    remaining: synthesis.remaining,
-    limit: synthesis.limit,
-    resetsAt: synthesis.resetsAt,
+    canGenerate: data.canGenerate,
+    remaining: data.remaining,
     isLoading: false,
-    message: synthesis.canUse
-      ? undefined
-      : `Has alcanzado tu límite diario de síntesis IA (${synthesis.used}/${synthesis.limit})`,
+    message,
   };
-}
-```
-
-```typescript
-// useSynthesis.ts (ACTUALIZADO)
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "@/lib/api";
-
-interface GenerateSynthesisRequest {
-  chartId: number; // Requerido: ID de carta guardada
-}
-
-interface GenerateSynthesisResponse {
-  content: string;
-  generatedAt: string;
-  provider: string;
-}
-
-/**
- * Hook para generar síntesis IA de una carta guardada
- * SOLO para usuarios Premium con límite de 2 por día UTC
- */
-export function useGenerateSynthesis() {
-  const queryClient = useQueryClient();
-
-  return useMutation<GenerateSynthesisResponse, Error, GenerateSynthesisRequest>({
-    mutationFn: async ({ chartId }) => {
-      // POST /birth-chart/:id/synthesis (con límite diario)
-      const response = await api.post<GenerateSynthesisResponse>(`/birth-chart/${chartId}/synthesis`, {});
-      return response.data;
-    },
-    onSuccess: () => {
-      // Invalidar caché de estado de uso (síntesis gastó un uso)
-      queryClient.invalidateQueries({ queryKey: ["birth-chart", "usage-status"] });
-
-      // Invalidar carta guardada (incluye síntesis)
-      queryClient.invalidateQueries({ queryKey: ["birth-chart", "history"] });
-    },
-    onError: (error: any) => {
-      // Error 429: límite alcanzado
-      if (error.response?.status === 429) {
-        queryClient.invalidateQueries({ queryKey: ["birth-chart", "usage-status"] });
-      }
-    },
-  });
 }
 ```
 
@@ -10759,7 +9585,6 @@ export * from "./useGenerateChart";
 export * from "./useChartHistory";
 export * from "./useGeocodeSearch";
 export * from "./useUsageStatus";
-export * from "./useSynthesis";
 export * from "./useDownloadPdf";
 ```
 
@@ -10772,7 +9597,6 @@ export * from "./useDownloadPdf";
 - [ ] Hooks useRenameChart y useDeleteChart con invalidación de cache
 - [ ] Hook useGeocodeSearch con debounce
 - [ ] Hook useUsageStatus con refetch automático
-- [ ] Hook useGenerateSynthesis para endpoint explícito
 - [ ] Hook useDownloadPdf con trigger de descarga
 - [ ] Invalidación de cache correcta tras mutaciones
 - [ ] Tiempos de stale/gc apropiados para cada query
@@ -11375,124 +10199,6 @@ export { birthDataSchema, type BirthDataFormValues } from "./BirthDataForm.schem
 
 ---
 
-### T-CA-029a: Separar Flujos Autenticado vs Anónimo en BirthDataForm
-
-**Historia relacionada:** HU-CA-001, HU-CA-012
-
-**Descripción:**
-Actualizar el componente `BirthDataForm` para manejar dos flujos diferentes según el estado de autenticación del usuario. El formulario debe usar dos endpoints diferentes:
-
-- **Flujo Anónimo:** `POST /birth-chart/generate/anonymous` - Límite: 1 lifetime
-- **Flujo Autenticado:** `POST /birth-chart/generate` - Sin límites (unlimited para free y premium)
-
-**Ubicación:** `frontend/src/features/birth-chart/components/BirthDataForm/`
-
-Esta subtarea se ejecuta después de T-CA-029 (formulario base) y requiere integración con hooks de autenticación y límites.
-
-**Cambios en BirthDataForm:**
-
-```tsx
-// BirthDataForm.tsx - Modificaciones
-
-import { useAuth } from "@/hooks/useAuth";
-import { useGenerateChart, useGenerateChartAnonymous } from "../../hooks";
-import { useCanGenerateAnonymousChart } from "../../hooks/useUsageStatus";
-
-interface BirthDataFormProps {
-  onSubmit: (data: BirthDataFormValues) => void;
-  isLoading?: boolean;
-  disabled?: boolean;
-  showUsageWarning?: boolean;
-  usageMessage?: string;
-  defaultValues?: Partial<BirthDataFormValues>;
-  onSuccess?: (data: ChartResponse) => void; // AGREGADO
-}
-
-export function BirthDataForm({
-  onSubmit,
-  isLoading = false,
-  disabled = false,
-  showUsageWarning = false,
-  usageMessage,
-  defaultValues,
-  onSuccess, // AGREGADO
-}: BirthDataFormProps) {
-  const { user } = useAuth();
-  const { canGenerate: canGenerateAnon, message: anonMessage } = useCanGenerateAnonymousChart();
-
-  const generateChartMutation = useGenerateChart();
-  const generateChartAnonMutation = useGenerateChartAnonymous();
-
-  const handleFormSubmit = async (data: BirthDataFormValues) => {
-    // Si usuario está autenticado, usar endpoint autenticado
-    if (user) {
-      generateChartMutation.mutate(data, {
-        onSuccess: (response) => {
-          onSuccess?.(response);
-          onSubmit(data);
-        },
-      });
-    } else {
-      // Usuario anónimo - verificar si puede generar
-      if (!canGenerateAnon) {
-        // Mostrar error o mensaje de límite alcanzado
-        return;
-      }
-
-      generateChartAnonMutation.mutate(data, {
-        onSuccess: (response) => {
-          onSuccess?.(response);
-          onSubmit(data);
-        },
-      });
-    }
-  };
-
-  const isLoading = generateChartMutation.isPending || generateChartAnonMutation.isPending;
-  const isDisabled = disabled || isLoading || (user === null && !canGenerateAnon);
-
-  // Mostrar alerta si usuario anónimo no puede generar
-  const showAnonWarning = user === null && !canGenerateAnon;
-
-  return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
-        {/* Alerta si usuario anónimo alcanzó límite */}
-        {showAnonWarning && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              {anonMessage || "Ya utilizaste tu carta astral gratuita. Regístrate para obtener acceso ilimitado."}
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {/* Resto del formulario sin cambios */}
-        {/* ... */}
-      </form>
-    </Form>
-  );
-}
-```
-
-**Criterios de aceptación:**
-
-- [ ] Detectar si usuario está autenticado
-- [ ] Usar `useGenerateChart` para usuarios autenticados
-- [ ] Usar `useGenerateChartAnonymous` para usuarios anónimos
-- [ ] Validar límite de usuario anónimo ANTES de permitir submit
-- [ ] Mostrar alerta si usuario anónimo ya utilizó su carta gratuita
-- [ ] Manejar estados de loading para ambos endpoints
-- [ ] Invalidar cache de uso después de generación exitosa
-- [ ] Callback `onSuccess` para redireccionar a resultado
-- [ ] Tests para ambos flujos (autenticado y anónimo)
-
-**Dependencias:** T-CA-029, T-CA-027 (hooks)
-
-**Estimación:** 2 horas
-
----
-
 ### T-CA-030: Crear Página Principal de Carta Astral
 
 **Historia relacionada:** HU-CA-001
@@ -11586,12 +10292,7 @@ import Link from "next/link";
 export default function BirthChartPage() {
   const router = useRouter();
   const { isAuthenticated, user } = useAuth();
-  const {
-    canGenerateAnonymous,
-    remaining,
-    isLoading: usageLoading,
-    message: usageMessage,
-  } = useCanGenerateAnonymousChart();
+  const { canGenerate, remaining, isLoading: usageLoading, message: usageMessage } = useCanGenerateChart();
   const { setChartResult, setFormData } = useBirthChartStore();
 
   // Usar el hook apropiado según autenticación
@@ -11669,11 +10370,13 @@ export default function BirthChartPage() {
             <Sparkles className="w-3 h-3 mr-1" />1 carta gratis
           </Badge>
         )}
-        {isAuthenticated && user?.plan === "free" && <Badge variant="secondary">Generación ilimitada</Badge>}
+        {isAuthenticated && user?.plan === "free" && (
+          <Badge variant="secondary">Quedan {remaining} cartas este mes</Badge>
+        )}
         {isAuthenticated && user?.plan === "premium" && (
           <Badge variant="default" className="bg-amber-500">
             <Crown className="w-3 h-3 mr-1" />
-            Premium • Generación ilimitada
+            Premium • {remaining} cartas restantes
           </Badge>
         )}
       </div>
@@ -11694,15 +10397,13 @@ export default function BirthChartPage() {
           <CardDescription>Ingresa tu información para calcular tu carta astral natal</CardDescription>
         </CardHeader>
         <CardContent>
-          {isAuthenticated || canGenerateAnonymous || usageLoading ? (
+          {canGenerate || usageLoading ? (
             <BirthDataForm
               onSubmit={handleSubmit}
               isLoading={isSubmitting}
-              disabled={!isAuthenticated && !canGenerateAnonymous && !usageLoading}
-              showUsageWarning={!isAuthenticated && remaining === 1}
-              usageMessage={
-                !isAuthenticated && remaining === 1 ? "Esta es tu última carta anónima disponible." : undefined
-              }
+              disabled={!canGenerate && !usageLoading}
+              showUsageWarning={remaining === 1}
+              usageMessage={remaining === 1 ? "Esta es tu última carta disponible del período." : undefined}
             />
           ) : (
             <div className="text-center py-8 space-y-4">
@@ -11718,7 +10419,16 @@ export default function BirthChartPage() {
                 </div>
               )}
 
-              {isAuthenticated && user?.plan === "free" && null}
+              {isAuthenticated && user?.plan === "free" && (
+                <div className="space-y-2">
+                  <p className="text-sm">
+                    Actualiza a Premium para obtener 5 cartas mensuales y síntesis personalizada con IA.
+                  </p>
+                  <Button asChild>
+                    <Link href="/premium">Ver planes Premium</Link>
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </CardContent>
@@ -11743,7 +10453,7 @@ export default function BirthChartPage() {
               )}
               {user?.plan === "premium" && (
                 <>
-                  <li>✓ Síntesis personalizada con IA (2/día, acción manual)</li>
+                  <li>✓ Síntesis personalizada con IA</li>
                   <li>✓ Historial de cartas</li>
                 </>
               )}
@@ -11803,11 +10513,11 @@ export const useBirthChartStore = create<BirthChartState>((set) => ({
 - [ ] Layout con metadata SEO
 - [ ] Skeleton de loading
 - [ ] Header con ícono y descripción
-- [ ] Badges mostrando plan y estado (ilimitado para Free/Premium)
+- [ ] Badges mostrando plan y límites
 - [ ] Formulario integrado
 - [ ] Manejo de errores visual
 - [ ] Redirección a resultado tras éxito
-- [ ] Vista de límite alcanzado para anónimo con CTA
+- [ ] Vista de límite alcanzado con CTAs
 - [ ] Cards informativas de qué incluye
 - [ ] Store Zustand para persistir datos entre páginas
 - [ ] Responsive design
@@ -11820,14 +10530,6 @@ export const useBirthChartStore = create<BirthChartState>((set) => ({
 ---
 
 ## CHECKLIST DE PARTE 7G
-
-### SUBTAREAS CRÍTICAS (Primeramente)
-
-- [ ] T-CA-029a: Separar flujos autenticado vs anónimo
-- [ ] T-CA-038a: Validar plan Premium y mostrar upsell
-- [ ] T-CA-044a: Mostrar widget diferenciado por plan
-
-### TAREAS BASE
 
 - [ ] T-CA-026: Tipos TypeScript definidos
 - [ ] T-CA-027: Hooks de API creados
@@ -14087,7 +12789,7 @@ export { PlanetInterpretation } from "./PlanetInterpretation";
 **Historia relacionada:** HU-CA-006
 
 **Descripción:**
-Crear el componente de síntesis IA exclusivo para usuarios Premium con flujo explícito: estado inicial con botón "Generar síntesis IA", indicador de usos restantes del día y render de resultado una vez generado.
+Crear el componente que muestra la síntesis personalizada generada por IA, exclusivo para usuarios Premium, con formato rico y destacado visual.
 
 **Ubicación:** `src/features/birth-chart/components/`
 
@@ -14119,22 +12821,18 @@ import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 
 interface AISynthesisProps {
-  data?: AISynthesisType | null;
-  onGenerate?: () => void;
+  data: AISynthesisType;
   onRegenerate?: () => void;
-  isGenerating?: boolean;
+  isRegenerating?: boolean;
   showMetadata?: boolean;
-  usage?: { remaining: number; limit: number; resetsAt?: string };
   className?: string;
 }
 
 export function AISynthesis({
   data,
-  onGenerate,
   onRegenerate,
-  isGenerating = false,
+  isRegenerating = false,
   showMetadata = true,
-  usage,
   className,
 }: AISynthesisProps) {
   const [copied, setCopied] = useState(false);
@@ -14152,7 +12850,7 @@ export function AISynthesis({
   };
 
   // Formatear fecha
-  const formattedDate = data?.generatedAt
+  const formattedDate = data.generatedAt
     ? formatDistanceToNow(new Date(data.generatedAt), {
         addSuffix: true,
         locale: es,
@@ -14160,29 +12858,7 @@ export function AISynthesis({
     : null;
 
   // Dividir contenido en párrafos para mejor legibilidad
-  const paragraphs = data?.content?.split("\n\n").filter((p) => p.trim()) ?? [];
-
-  if (!data) {
-    return (
-      <Card className={cn("relative overflow-hidden border-2 border-amber-500/30", className)}>
-        <CardContent className="py-10 text-center space-y-3">
-          <h3 className="font-semibold">Síntesis Personalizada</h3>
-          <p className="text-sm text-muted-foreground">
-            Genera una síntesis única de tu carta astral con IA bajo demanda.
-          </p>
-          {usage && (
-            <p className="text-xs text-muted-foreground">
-              Te quedan {usage.remaining} de {usage.limit} síntesis hoy.
-            </p>
-          )}
-          <Button onClick={onGenerate} disabled={isGenerating || !usage || usage.remaining <= 0}>
-            <Sparkles className="h-4 w-4 mr-2" />
-            Generar síntesis IA
-          </Button>
-        </CardContent>
-      </Card>
-    );
-  }
+  const paragraphs = data.content.split("\n\n").filter((p) => p.trim());
 
   return (
     <Card
@@ -14261,7 +12937,7 @@ export function AISynthesis({
         <CardContent className="relative pt-0">
           {/* Contenido de la síntesis */}
           <div className="prose prose-sm dark:prose-invert max-w-none">
-            {isGenerating ? (
+            {isRegenerating ? (
               <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                 <Sparkles className="h-8 w-8 animate-pulse mb-4 text-amber-500" />
                 <p>Generando nueva síntesis...</p>
@@ -14279,7 +12955,7 @@ export function AISynthesis({
           </div>
 
           {/* Metadata */}
-          {showMetadata && !isGenerating && (
+          {showMetadata && !isRegenerating && (
             <div className="mt-6 pt-4 border-t border-border/50 flex flex-wrap gap-4 text-xs text-muted-foreground">
               {formattedDate && (
                 <div className="flex items-center gap-1">
@@ -14339,10 +13015,8 @@ export { AISynthesis, AISynthesisPlaceholder } from "./AISynthesis";
 - [ ] Badge "Premium" visible
 - [ ] Contenido formateado en párrafos
 - [ ] Botón para copiar al portapapeles
-- [ ] Estado inicial con botón "Generar síntesis IA"
-- [ ] Indicador de usos restantes (Premium: 2/día)
 - [ ] Botón para regenerar (opcional)
-- [ ] Estado de carga mientras genera/regenera
+- [ ] Estado de carga mientras regenera
 - [ ] Metadata de generación (fecha, modelo)
 - [ ] Colapsable
 - [ ] Placeholder para usuarios Free (upsell)
@@ -14355,184 +13029,12 @@ export { AISynthesis, AISynthesisPlaceholder } from "./AISynthesis";
 
 ---
 
-### T-CA-038a: Validar Plan Premium y Mostrar Upsell
-
-**Historia relacionada:** HU-CA-006
-
-**Descripción:**
-Actualizar el componente `AISynthesis` para validar que el usuario tiene plan Premium ANTES de permitir generar síntesis IA. Si el usuario no es Premium, mostrar un componente de "upsell" invitándolo a actualizar su plan.
-
-Esta subtarea garantiza que solo usuarios Premium puedan acceder a la síntesis IA (2/día) y maneja la experiencia del usuario Free/Anonymous que intenta acceder.
-
-**Ubicación:** `frontend/src/features/birth-chart/components/AISynthesis/`
-
-**Cambios en AISynthesis:**
-
-```tsx
-// AISynthesis.tsx - Modificaciones para validar Premium
-
-import { useAuth } from "@/hooks/useAuth";
-import { useCanGenerateSynthesis } from "../../hooks/useUsageStatus";
-import { UpgradePrompt } from "@/components/UpgradePrompt"; // Componente reutilizable
-
-interface AISynthesisProps {
-  data?: AISynthesisType | null;
-  chartId?: number;
-  onGenerate?: () => void;
-  onRegenerate?: () => void;
-  isGenerating?: boolean;
-  showMetadata?: boolean;
-  usage?: { remaining: number; limit: number; resetsAt?: string };
-  className?: string;
-}
-
-export function AISynthesis({
-  data,
-  chartId,
-  onGenerate,
-  onRegenerate,
-  isGenerating = false,
-  showMetadata = true,
-  usage,
-  className,
-}: AISynthesisProps) {
-  const { user } = useAuth();
-  const { canGenerate, message, isLoading } = useCanGenerateSynthesis();
-
-  // Usuario no autenticado o plan Free
-  if (!user || user.plan !== "premium") {
-    return (
-      <UpgradePrompt
-        title="Síntesis IA Personalizada"
-        description="Obtén un análisis único de tu carta astral potenciado por inteligencia artificial."
-        feature="Síntesis IA"
-        plan="Premium"
-        cta="Actualizar a Premium"
-        subtitle="2 síntesis por día"
-      />
-    );
-  }
-
-  // Usuario Premium pero sin síntesis disponibles hoy
-  if (!canGenerate && !isLoading) {
-    return (
-      <Card className={cn("relative overflow-hidden border-2 border-amber-500/30", className)}>
-        <CardContent className="py-10 text-center space-y-3">
-          <AlertCircle className="h-8 w-8 mx-auto text-amber-500" />
-          <h3 className="font-semibold">Límite Diario Alcanzado</h3>
-          <p className="text-sm text-muted-foreground">{message}</p>
-          {usage?.resetsAt && (
-            <p className="text-xs text-muted-foreground">
-              Se reinicia {formatDistanceToNow(new Date(usage.resetsAt), { addSuffix: true, locale: es })}
-            </p>
-          )}
-        </CardContent>
-      </Card>
-    );
-  }
-
-  // Resto del componente original (mostrar datos o botón para generar)
-  // ...
-}
-```
-
-**Componente UpgradePrompt** (crear en `src/components/UpgradePrompt/`):
-
-```tsx
-// UpgradePrompt.tsx
-import { Crown, Sparkles } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
-
-interface UpgradeProm ptProps {
-  title: string;
-  description: string;
-  feature: string;
-  plan: string;
-  cta: string;
-  subtitle?: string;
-  className?: string;
-}
-
-export function UpgradePrompt({
-  title,
-  description,
-  feature,
-  plan,
-  cta,
-  subtitle,
-  className,
-}: UpgradePromptProps) {
-  return (
-    <Card
-      className={cn(
-        "relative overflow-hidden border-2 border-amber-500/30",
-        "bg-gradient-to-br from-amber-500/5 via-transparent to-purple-500/5",
-        className
-      )}
-    >
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute -right-20 -top-20 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl" />
-        <div className="absolute -left-20 -bottom-20 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl" />
-      </div>
-
-      <CardContent className="py-10 text-center space-y-4 relative">
-        <div className="p-3 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 w-fit mx-auto">
-          <Sparkles className="h-6 w-6 text-white" />
-        </div>
-
-        <div>
-          <h3 className="font-semibold text-lg mb-1">{title}</h3>
-          <p className="text-sm text-muted-foreground mb-2">{description}</p>
-          {subtitle && (
-            <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0">
-              <Crown className="h-3 w-3 mr-1" />
-              {subtitle}
-            </Badge>
-          )}
-        </div>
-
-        <Link href="/upgrade" className="block">
-          <Button className="w-full">
-            <Crown className="h-4 w-4 mr-2" />
-            {cta}
-          </Button>
-        </Link>
-
-        <p className="text-xs text-muted-foreground">
-          Solo disponible en plan {plan}
-        </p>
-      </CardContent>
-    </Card>
-  );
-}
-```
-
-**Criterios de aceptación:**
-
-- [ ] Validar que usuario es Premium ANTES de renderizar síntesis
-- [ ] Mostrar componente `UpgradePrompt` si usuario no es Premium
-- [ ] Mostrar mensaje de límite alcanzado si Premium pero sin usos restantes
-- [ ] Mostrar fecha de reset del límite diario
-- [ ] Crear componente reutilizable `UpgradePrompt`
-- [ ] Link a página de upgrade funcional
-- [ ] Responsive design
-- [ ] Tests para ambos flujos (Premium y no-Premium)
-
-**Dependencias:** T-CA-038, T-CA-027 (useCanGenerateSynthesis)
-
-**Estimación:** 2 horas
-
----
-
 ### T-CA-039: Crear Página de Resultado de Carta Astral
 
 **Historia relacionada:** HU-CA-001, HU-CA-002, HU-CA-003, HU-CA-004, HU-CA-005, HU-CA-006
 
 **Descripción:**
-Crear la página principal de resultado que muestra la carta astral completa con gráfico, tablas, Big Three, interpretaciones y síntesis IA explícita para Premium.
+Crear la página principal de resultado que muestra la carta astral completa con gráfico, tablas, Big Three, interpretaciones y síntesis (según plan).
 
 **Ubicación:** `src/app/(main)/carta-astral/resultado/`
 
@@ -14755,16 +13257,10 @@ export default function ChartResultPage() {
           </p>
         </div>
 
-        {/* Síntesis IA (Premium - arriba de todo, acción explícita) */}
-        {isPremium && (
+        {/* Síntesis IA (Premium - arriba de todo) */}
+        {isPremium && chartResult.aiSynthesis && (
           <div className="mb-8">
-            <AISynthesis
-              data={chartResult.aiSynthesis ?? null}
-              onGenerate={handleGenerateSynthesis}
-              onRegenerate={handleGenerateSynthesis}
-              isGenerating={isGeneratingSynthesis}
-              usage={synthesisUsage}
-            />
+            <AISynthesis data={chartResult.aiSynthesis} />
           </div>
         )}
 
@@ -14926,8 +13422,7 @@ export default function ChartResultPage() {
 
 - [ ] Header sticky con acciones (compartir, PDF, nueva carta)
 - [ ] Título con datos del nativo
-- [ ] Síntesis IA con acción explícita (Premium)
-- [ ] Indicador de usos de síntesis restantes (2/día)
+- [ ] Síntesis IA destacada arriba (Premium)
 - [ ] Grid con gráfico y Big Three
 - [ ] Tabs para posiciones, aspectos y distribución
 - [ ] Sección de interpretaciones expandible (Free/Premium)
@@ -16431,7 +14926,7 @@ export { ErrorState } from "./ErrorState";
 **Historia relacionada:** HU-CA-010
 
 **Descripción:**
-Crear un componente visual que muestre el estado de uso del límite de síntesis IA (Premium 2/día), con barra de progreso y CTA de upgrade para usuarios Free.
+Crear un componente visual que muestre el estado de uso del límite de cartas astrales, con barra de progreso y llamadas a la acción según el plan.
 
 **Ubicación:** `src/features/birth-chart/components/`
 
@@ -16479,7 +14974,7 @@ export function UsageLimitBanner({
 }: UsageLimitBannerProps) {
   const percentage = Math.round((usage.used / usage.limit) * 100);
   const isLow = usage.remaining <= 1;
-  const isExhausted = usage.remaining <= 0;
+  const isExhausted = !usage.canGenerate;
 
   // Texto de reset
   const resetText = usage.resetsAt
@@ -16506,12 +15001,12 @@ export function UsageLimitBanner({
             >
               <Sparkles className="h-3 w-3" />
               <span>
-                IA: {usage.remaining}/{usage.limit}
+                {usage.remaining}/{usage.limit}
               </span>
             </div>
           </TooltipTrigger>
           <TooltipContent>
-            <p>{isExhausted ? "Sin síntesis IA disponibles hoy" : `${usage.remaining} síntesis IA restantes`}</p>
+            <p>{isExhausted ? "Sin cartas disponibles" : `${usage.remaining} cartas restantes`}</p>
             {resetText && <p className="text-xs text-muted-foreground">Se reinicia {resetText}</p>}
           </TooltipContent>
         </Tooltip>
@@ -16532,7 +15027,7 @@ export function UsageLimitBanner({
         )}
       >
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium">Síntesis IA disponibles</span>
+          <span className="text-sm font-medium">Cartas disponibles</span>
           <Badge variant={isExhausted ? "destructive" : isLow ? "warning" : "secondary"}>
             {usage.remaining}/{usage.limit}
           </Badge>
@@ -16596,11 +15091,7 @@ export function UsageLimitBanner({
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
             <h4 className="font-semibold">
-              {isExhausted
-                ? "Límite de síntesis alcanzado"
-                : isLow
-                  ? "¡Última síntesis disponible!"
-                  : "Uso de síntesis IA"}
+              {isExhausted ? "Límite alcanzado" : isLow ? "¡Última carta disponible!" : "Uso de cartas astrales"}
             </h4>
             <Badge variant="outline" className="capitalize">
               {usage.plan}
@@ -16624,17 +15115,17 @@ export function UsageLimitBanner({
           <p className="text-sm text-muted-foreground">
             {isExhausted ? (
               <>
-                Has utilizado todas tus síntesis IA del día.
+                Has utilizado todas tus cartas este período.
                 {resetText && ` Se reinicia ${resetText}.`}
               </>
             ) : isLow ? (
               <>
-                Te queda solo {usage.remaining} síntesis IA hoy.
-                {usage.plan === "free" && " Actualiza a Premium para desbloquear esta función."}
+                Te queda solo {usage.remaining} carta.
+                {usage.plan === "free" && " Actualiza a Premium para obtener más."}
               </>
             ) : (
               <>
-                Te quedan {usage.remaining} síntesis IA de {usage.limit} hoy.
+                Te quedan {usage.remaining} cartas de {usage.limit}.
                 {resetText && ` El límite se reinicia ${resetText}.`}
               </>
             )}
@@ -16678,10 +15169,10 @@ export { UsageLimitBanner } from "./UsageLimitBanner";
 
 **Criterios de aceptación:**
 
-- [ ] Muestra uso actual de síntesis IA vs límite diario
+- [ ] Muestra uso actual vs límite
 - [ ] Barra de progreso visual
 - [ ] Colores diferenciados (normal, bajo, agotado)
-- [ ] Fecha de reinicio diario en UTC
+- [ ] Fecha de reinicio del límite
 - [ ] CTA para upgrade cuando aplique
 - [ ] Variante inline para headers
 - [ ] Variante compact para sidebars
@@ -16691,211 +15182,6 @@ export { UsageLimitBanner } from "./UsageLimitBanner";
 - [ ] Tests de componente
 
 **Dependencias:** T-CA-026
-
-**Estimación:** 2 horas
-
----
-
-### T-CA-044a: Mostrar Widget Diferenciado por Plan
-
-**Historia relacionada:** HU-CA-010
-
-**Descripción:**
-Actualizar el componente `UsageLimitBanner` para mostrar información diferente según el plan del usuario. El componente debe adaptarse a mostrar:
-
-- **ANONYMOUS:** Estado de uso de generación (1 lifetime)
-- **FREE:** Sin widget (usuarios free tienen acceso ilimitado)
-- **PREMIUM:** Estado de síntesis IA (2/día UTC)
-
-Esta subtarea garantiza que solo se muestre información relevante según el plan y evita confundir al usuario mostrando límites que no aplican.
-
-**Ubicación:** `frontend/src/features/birth-chart/components/UsageLimitBanner/`
-
-**Cambios en UsageLimitBanner:**
-
-```tsx
-// UsageLimitBanner.tsx - Modificaciones para discriminar por plan
-
-import { useUsageStatus } from "../../hooks/useUsageStatus";
-import { useAuth } from "@/hooks/useAuth";
-
-interface UsageLimitBannerProps {
-  variant?: "inline" | "compact" | "full";
-  dismissible?: boolean;
-  className?: string;
-}
-
-export function UsageLimitBanner({ variant = "full", dismissible = true, className }: UsageLimitBannerProps) {
-  const { user } = useAuth();
-  const { data: usageStatus, isLoading } = useUsageStatus();
-  const [isDismissed, setIsDismissed] = useState(false);
-
-  // No mostrar si está descartado
-  if (isDismissed || isLoading || !usageStatus) {
-    return null;
-  }
-
-  // ANONYMOUS: Mostrar uso de generación (1 lifetime)
-  if (usageStatus.plan === "anonymous" && usageStatus.anonGeneration) {
-    const { used, limit, canUse } = usageStatus.anonGeneration;
-
-    return (
-      <BannerContent
-        title="Carta Astral Gratuita"
-        description="Tienes 1 generación gratuita de por vida como usuario anónimo"
-        used={used}
-        limit={limit}
-        canUse={canUse}
-        type="generation"
-        variant={variant}
-        dismissible={dismissible}
-        onDismiss={() => setIsDismissed(true)}
-        className={className}
-      />
-    );
-  }
-
-  // FREE: No mostrar widget (sin límites)
-  if (usageStatus.plan === "free") {
-    return null;
-  }
-
-  // PREMIUM: Mostrar síntesis IA (2/día UTC)
-  if (usageStatus.plan === "premium" && usageStatus.synthesis) {
-    const { used, limit, remaining, canUse, resetsAt } = usageStatus.synthesis;
-
-    // No mostrar si tiene usos disponibles y no está bajo límite
-    if (canUse && remaining > 0) {
-      return null; // Opcional: mostrar siempre o solo cuando está bajo
-    }
-
-    return (
-      <BannerContent
-        title="Síntesis IA Premium"
-        description={`Has usado ${used} de ${limit} síntesis hoy`}
-        used={used}
-        limit={limit}
-        canUse={canUse}
-        remaining={remaining}
-        resetsAt={resetsAt}
-        type="synthesis"
-        variant={variant}
-        dismissible={dismissible}
-        onDismiss={() => setIsDismissed(true)}
-        className={className}
-      />
-    );
-  }
-
-  return null;
-}
-
-// Componente auxiliar para el contenido del banner
-function BannerContent({
-  title,
-  description,
-  used,
-  limit,
-  canUse,
-  remaining,
-  resetsAt,
-  type,
-  variant,
-  dismissible,
-  onDismiss,
-  className,
-}: {
-  title: string;
-  description: string;
-  used: number;
-  limit: number;
-  canUse: boolean;
-  remaining?: number;
-  resetsAt?: string | null;
-  type: "generation" | "synthesis";
-  variant: "inline" | "compact" | "full";
-  dismissible?: boolean;
-  onDismiss?: () => void;
-  className?: string;
-}) {
-  const isExhausted = !canUse;
-  const isLow = remaining !== undefined && remaining <= 1;
-
-  return (
-    <Alert variant={isExhausted ? "destructive" : "warning"} className={className}>
-      <AlertTriangle
-        className={cn("h-4 w-4", {
-          "text-destructive": isExhausted,
-          "text-amber-600": !isExhausted,
-        })}
-      />
-      <AlertTitle>{title}</AlertTitle>
-      <AlertDescription>
-        <div className="space-y-2">
-          <p>{description}</p>
-
-          {variant !== "inline" && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span>Uso:</span>
-                <span className="font-medium">
-                  {used}/{limit}
-                </span>
-              </div>
-
-              <Progress
-                value={(used / limit) * 100}
-                className={cn({
-                  "[&>div]:bg-red-500": isExhausted,
-                  "[&>div]:bg-amber-500": isLow && !isExhausted,
-                  "[&>div]:bg-green-500": !isLow && !isExhausted,
-                })}
-              />
-
-              {resetsAt && (
-                <p className="text-xs text-muted-foreground">
-                  Se reinicia{" "}
-                  {formatDistanceToNow(new Date(resetsAt), {
-                    addSuffix: true,
-                    locale: es,
-                  })}
-                </p>
-              )}
-            </div>
-          )}
-
-          {isExhausted && type === "synthesis" && (
-            <Button variant="outline" size="sm" className="w-full mt-2" asChild>
-              <Link href="/upgrade">Actualizar Plan</Link>
-            </Button>
-          )}
-        </div>
-      </AlertDescription>
-
-      {dismissible && (
-        <button onClick={onDismiss} className="ml-auto -mr-1 -mt-1">
-          <X className="h-4 w-4" />
-        </button>
-      )}
-    </Alert>
-  );
-}
-```
-
-**Criterios de aceptación:**
-
-- [ ] Mostrar widget solo para ANONYMOUS y PREMIUM
-- [ ] Ocultar widget para FREE users (sin límites)
-- [ ] Mostrar "Carta Astral Gratuita" para ANONYMOUS con 1/1 uso
-- [ ] Mostrar "Síntesis IA Premium" para PREMIUM con uso actual vs límite
-- [ ] Colores diferenciados según estado (exhausto, bajo, disponible)
-- [ ] Mostrar fecha de reset para PREMIUM en UTC
-- [ ] Opción de dismiss/cerrar el banner
-- [ ] No mostrar banner si usuario Premium tiene usos disponibles (opcional)
-- [ ] Responsive para todas las variantes (inline, compact, full)
-- [ ] Tests para los tres planes
-
-**Dependencias:** T-CA-044, T-CA-027 (useUsageStatus)
 
 **Estimación:** 2 horas
 
@@ -18313,7 +16599,7 @@ describe("BirthChartController (Integration)", () => {
       expect(response.body.aiSynthesis).toBeUndefined();
     });
 
-    it("should generate chart for premium user without automatic synthesis", async () => {
+    it("should generate chart for premium user (premium response)", async () => {
       const response = await request(app.getHttpServer())
         .post("/birth-chart/generate")
         .set("Authorization", `Bearer ${premiumToken}`)
@@ -18321,7 +16607,8 @@ describe("BirthChartController (Integration)", () => {
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.aiSynthesis).toBeUndefined();
+      expect(response.body.aiSynthesis).toBeDefined();
+      expect(response.body.aiSynthesis.content).toBeTruthy();
       expect(response.body.savedChartId).toBeDefined();
       expect(response.body.canAccessHistory).toBe(true);
     });
@@ -18413,22 +16700,23 @@ describe("BirthChartController (Integration)", () => {
     });
   });
 
-  describe("GET /birth-chart/usage-status", () => {
+  describe("GET /birth-chart/usage", () => {
     it("should return usage status for authenticated user", async () => {
       const response = await request(app.getHttpServer())
-        .get("/birth-chart/usage-status")
+        .get("/birth-chart/usage")
         .set("Authorization", `Bearer ${freeToken}`)
         .expect(200);
 
       expect(response.body.plan).toBe("free");
-      expect(response.body.generatedAt).toBeDefined();
-      // Free users no tienen synthesis
-      expect(response.body.synthesis).toBeUndefined();
+      expect(response.body.limit).toBe(3);
+      expect(response.body.used).toBeDefined();
+      expect(response.body.remaining).toBeDefined();
+      expect(response.body.canGenerate).toBeDefined();
     });
 
     it("should return anonymous status without auth", async () => {
       const response = await request(app.getHttpServer())
-        .get("/birth-chart/usage-status")
+        .get("/birth-chart/usage")
         .set("x-fingerprint", "test-fingerprint")
         .expect(200);
 
@@ -18455,28 +16743,6 @@ describe("BirthChartController (Integration)", () => {
 
       expect(response.body.synthesis).toBeDefined();
       expect(response.body.generatedAt).toBeDefined();
-    });
-
-    it("should enforce premium synthesis daily limit", async () => {
-      await request(app.getHttpServer())
-        .post("/birth-chart/synthesis")
-        .set("Authorization", `Bearer ${premiumToken}`)
-        .send(TEST_BIRTH_DATA)
-        .expect(200);
-
-      await request(app.getHttpServer())
-        .post("/birth-chart/synthesis")
-        .set("Authorization", `Bearer ${premiumToken}`)
-        .send(TEST_BIRTH_DATA)
-        .expect(200);
-
-      const response = await request(app.getHttpServer())
-        .post("/birth-chart/synthesis")
-        .set("Authorization", `Bearer ${premiumToken}`)
-        .send(TEST_BIRTH_DATA)
-        .expect(429);
-
-      expect(response.body.message).toContain("2 síntesis IA por día");
     });
   });
 });
@@ -18623,8 +16889,7 @@ describe("BirthChartHistoryController (Integration)", () => {
 
 - [ ] Tests de endpoints de generación de carta
 - [ ] Tests de diferenciación por plan (anónimo, free, premium)
-- [ ] Tests de síntesis IA explícita para Premium
-- [ ] Tests de límite diario de síntesis IA (2/día)
+- [ ] Tests de límites de uso
 - [ ] Tests de endpoints de historial (CRUD)
 - [ ] Tests de geocoding
 - [ ] Tests de generación de PDF
@@ -18850,7 +17115,7 @@ test.describe("Birth Chart - Premium User", () => {
     await expect(page.getByText(/premium/i)).toBeVisible();
   });
 
-  test("should generate chart and trigger AI synthesis explicitly", async ({ page }) => {
+  test("should generate chart with AI synthesis", async ({ page }) => {
     await page.getByLabel(/nombre/i).fill(TEST_BIRTH_DATA.name);
     await page.getByLabel(/hora/i).fill(TEST_BIRTH_DATA.birthTime);
     await page.getByLabel(/lugar/i).fill("Buenos Aires");
@@ -18859,16 +17124,9 @@ test.describe("Birth Chart - Premium User", () => {
 
     await expect(page).toHaveURL(/\/carta-astral\/resultado/);
 
-    // Verificar estado inicial de síntesis IA
-    await expect(page.getByRole("button", { name: /generar síntesis ia/i })).toBeVisible();
-
-    // Ejecutar síntesis explícitamente
-    await page.getByRole("button", { name: /generar síntesis ia/i }).click();
+    // Verificar síntesis IA
     await expect(page.getByText(/síntesis personalizada/i)).toBeVisible();
-  });
-
-  test("should show synthesis daily usage indicator", async ({ page }) => {
-    await expect(page.getByText(/síntesis ia restantes/i)).toBeVisible();
+    await expect(page.getByText(/premium/i)).toBeVisible();
   });
 
   test("should download PDF", async ({ page }) => {
@@ -18972,8 +17230,6 @@ test.describe("Birth Chart - History (Premium)", () => {
 - [ ] Tests del flujo completo para usuario anónimo
 - [ ] Tests del flujo completo para usuario free
 - [ ] Tests del flujo completo para usuario premium
-- [ ] Tests de síntesis IA bajo acción explícita
-- [ ] Tests de indicador de usos restantes de síntesis IA
 - [ ] Tests de autocompletado de lugares
 - [ ] Tests de visualización del gráfico
 - [ ] Tests de tabs en página de resultado
@@ -19020,7 +17276,7 @@ docs/modules/birth-chart/
 
 El módulo de Carta Astral permite a los usuarios generar su carta natal astrológica
 basada en sus datos de nacimiento. Incluye cálculos astronómicos precisos,
-interpretaciones personalizadas y síntesis con IA bajo acción explícita.
+interpretaciones personalizadas y síntesis con IA.
 
 ## Características
 
@@ -19034,14 +17290,14 @@ interpretaciones personalizadas y síntesis con IA bajo acción explícita.
 
 ## Planes y Límites
 
-| Feature                    | Anónimo    | Free      | Premium            |
-| -------------------------- | ---------- | --------- | ------------------ |
-| Generación de carta        | 1 lifetime | Ilimitado | Ilimitado          |
-| Big Three interpretado     | ✅         | ✅        | ✅                 |
-| Interpretaciones completas | ❌         | ✅        | ✅                 |
-| Descarga PDF               | ❌         | ✅        | ✅                 |
-| Síntesis IA                | ❌         | ❌ (CTA)  | ✅ (2/día, manual) |
-| Historial                  | ❌         | ❌        | ✅                 |
+| Feature                    | Anónimo    | Free  | Premium |
+| -------------------------- | ---------- | ----- | ------- |
+| Generación de carta        | 1 lifetime | 3/mes | 5/mes   |
+| Big Three interpretado     | ✅         | ✅    | ✅      |
+| Interpretaciones completas | ❌         | ✅    | ✅      |
+| Descarga PDF               | ❌         | ✅    | ✅      |
+| Síntesis IA                | ❌         | ❌    | ✅      |
+| Historial                  | ❌         | ❌    | ✅      |
 
 ## Inicio Rápido
 
@@ -19075,13 +17331,13 @@ npm run dev
 
 ## Endpoints Principales
 
-| Método | Endpoint                    | Descripción         |
-| ------ | --------------------------- | ------------------- |
-| POST   | /birth-chart/generate       | Genera carta astral |
-| POST   | /birth-chart/pdf            | Descarga PDF        |
-| GET    | /birth-chart/geocode/search | Busca lugares       |
-| GET    | /birth-chart/usage-status   | Estado de uso       |
-| GET    | /birth-chart/history        | Historial (Premium) |
+| Método | Endpoint              | Descripción         |
+| ------ | --------------------- | ------------------- |
+| POST   | /birth-chart/generate | Genera carta astral |
+| POST   | /birth-chart/pdf      | Descarga PDF        |
+| GET    | /birth-chart/geocode  | Busca lugares       |
+| GET    | /birth-chart/usage    | Estado de uso       |
+| GET    | /birth-chart/history  | Historial (Premium) |
 
 Ver [API.md](./API.md) para documentación completa.
 
@@ -19130,11 +17386,11 @@ Ver [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) para problemas comunes.
     │
 3.  └── BirthChartFacadeService
     │
-4.                 ├── ChartCacheService.get() (verificar caché)
+4.              ├── ChartCacheService.get() (verificar caché)
               │       │
               │       └── Si existe → retornar cacheado
               │
-5.                 ├── ChartCalculationService.calculateChart()
+5.              ├── ChartCalculationService.calculateChart()
               │       │
               │       ├── EphemerisWrapper.calculatePlanetPositions()
               │       ├── EphemerisWrapper.calculateHouses()
@@ -19142,17 +17398,17 @@ Ver [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) para problemas comunes.
               │       ├── HouseCuspService.transform()
               │       └── AspectCalculationService.calculate()
               │
-6.                 ├── ChartInterpretationService.generateInterpretation()
+6.              ├── ChartInterpretationService.generateInterpretation()
               │       │
               │       └── BirthChartInterpretationRepository.findAllForChart()
               │
-7.                 ├── ChartAISynthesisService.generateSynthesis() (Premium, acción explícita)
+7.              ├── ChartAISynthesisService.generateSynthesis() (Premium)
               │       │
               │       └── AIProviderService.generateCompletion()
               │
-8.                 ├── BirthChartRepository.save() (Premium)
+8.              ├── BirthChartRepository.save() (Premium)
               │
-9.                 ├── ChartCacheService.set()
+9.              ├── ChartCacheService.set()
               │
 10.           └── Return response según plan
 
@@ -19293,6 +17549,11 @@ Genera una carta astral.
 
   // Solo Premium:
   "savedChartId": 123,
+  "aiSynthesis": {
+    "content": "Tu carta revela...",
+    "generatedAt": "2026-02-06T12:00:00Z",
+    "provider": "groq"
+  },
   "canAccessHistory": true
 }
 ```
@@ -19303,12 +17564,12 @@ Genera una carta astral.
 {
   "statusCode": 429,
   "error": "Usage Limit Exceeded",
-  "message": "Has alcanzado el límite de 2 síntesis IA por día.",
+  "message": "Has alcanzado el límite de 3 cartas astrales este mes.",
   "details": {
-    "usageType": "birth_chart_synthesis",
-    "period": "daily",
-    "used": 2,
-    "limit": 2,
+    "usageType": "birth_chart",
+    "period": "monthly",
+    "used": 3,
+    "limit": 3,
     "remaining": 0
   }
 }
@@ -19349,12 +17610,11 @@ Obtiene estado de uso del usuario.
 
 ```json
 {
-  "plan": "premium",
-  "usageType": "birth_chart_synthesis",
-  "used": 1,
-  "limit": 2,
+  "plan": "free",
+  "used": 2,
+  "limit": 3,
   "remaining": 1,
-  "resetsAt": "2026-02-07T00:00:00Z",
+  "resetsAt": "2026-03-01T00:00:00Z",
   "canGenerate": true
 }
 ```
@@ -19410,7 +17670,7 @@ Obtiene estado de uso del usuario.
 
 **Solución:**
 - Los límites se calculan en UTC
-- El reset diario de síntesis IA ocurre a las 00:00 UTC
+- El reset mensual ocurre el día 1 a las 00:00 UTC
 
 ## Logs Relevantes
 
@@ -19438,7 +17698,6 @@ grep "calculationTimeMs" logs/birth-chart.log | awk '$NF > 1000'
 - [ ] README con overview del módulo
 - [ ] Documentación de arquitectura con diagramas
 - [ ] Documentación completa de API (todos los endpoints)
-- [ ] Documentación de síntesis IA explícita y su límite diario
 - [ ] Guía de deployment
 - [ ] Guía de troubleshooting
 - [ ] Swagger/OpenAPI actualizado
@@ -19502,9 +17761,8 @@ Esta es la última parte del backlog técnico. El siguiente paso sería:
 - **Puntos de historia:** 55 puntos
 
 ### Tareas Técnicas
-- **Total:** 50 tareas + 3 subtareas críticas desglosadas (029a, 038a, 044a)
-- **Estimación total CORRECTA:** 207.5 horas (~5.2 semanas a tiempo completo para 1 dev FT)
-  - **⚠️ Corrección:** Estimación anterior (156h) era incompleta porque no sumaba subtareas desglosadas con letras. Se recalculó sumando todas las tareas y subtareas del backlog.
+- **Total:** 50 tareas
+- **Estimación total:** 156 horas (~4 semanas a tiempo completo)
 
 ---
 
@@ -19531,26 +17789,25 @@ Esta es la última parte del backlog técnico. El siguiente paso sería:
 ```
 
 Backend (PARTE 7B-7F)
-├── Entidades y DB .......... 14h (6.7%)
-├── Cálculos Astronómicos ... 17h (8.2%)
-├── Interpretación/Caché .... 19h (9.2%)
-├── Controladores/DTOs ...... 13h (6.3%)
-└── Límites/Geocoding ....... 22.5h (10.9%) [incluye 22a-d, 23a-d, 24a, 25a-c desglosadas]
-SUBTOTAL BACKEND: 85.5h (41.2%)
+├── Entidades y DB .......... 14h (9%)
+├── Cálculos Astronómicos ... 17h (11%)
+├── Interpretación/Caché .... 19h (12%)
+├── Controladores/DTOs ...... 13h (8%)
+└── Límites/Geocoding ....... 16h (10%)
+SUBTOTAL BACKEND: 79h (51%)
 
 Frontend (PARTE 7G-7J)
-├── Formulario/Base ......... 18h (8.7%) [incluye T-CA-029a]
-├── Gráfico SVG ............. 15h (7.2%)
-├── Páginas Resultado ....... 20h (9.6%) [incluye T-CA-038a]
-└── Historial/Final ......... 16h (7.7%) [incluye T-CA-044a]
-SUBTOTAL FRONTEND: 69h (33.3%)
+├── Formulario/Base ......... 16h (10%)
+├── Gráfico SVG ............. 15h (10%)
+├── Páginas Resultado ....... 16h (10%)
+└── Historial/Final ......... 12h (8%)
+SUBTOTAL FRONTEND: 59h (38%)
 
 Testing/Docs (PARTE 7K)
-├── Tests + Documentación ... 18h (8.7%)
-└── Análisis + Auditoría .... 15.5h (7.5%) [T-CA-021 análisis profundo]
-SUBTOTAL TESTING: 53.5h (25.8%)
+└── Tests + Documentación ... 18h (11%)
+SUBTOTAL TESTING: 18h (11%)
 
-TOTAL: 207.5h (100%)
+TOTAL: 156h (100%)
 
 ```
 
@@ -19598,8 +17855,8 @@ TOTAL: 207.5h (100%)
 | ID | Tarea | Horas |
 |----|-------|-------|
 | T-CA-021 | Analizar sistema de límites | 2h |
-| T-CA-022 | Configurar períodos por feature | 4h |
-| T-CA-023 | Integrar límites de carta astral + síntesis IA | 3h |
+| T-CA-022 | Extender para límites mensuales | 4h |
+| T-CA-023 | Integrar límites de carta astral | 3h |
 | T-CA-024 | Servicio de geocodificación | 4h |
 | T-CA-025 | Panel admin para límites | 3h |
 
@@ -19757,8 +18014,8 @@ T-CA-046 → T-CA-047 → T-CA-048 → T-CA-049 → T-CA-050
 
 ### Funcionales
 - [ ] Usuario anónimo puede generar 1 carta lifetime
-- [ ] Usuario free puede generar cartas ilimitadas con interpretaciones
-- [ ] Usuario premium puede generar cartas ilimitadas y usar síntesis IA explícita (2/día)
+- [ ] Usuario free puede generar 3 cartas/mes con interpretaciones
+- [ ] Usuario premium puede generar 5 cartas/mes con IA y historial
 - [ ] Gráfico de carta renderiza correctamente
 - [ ] PDF se genera y descarga correctamente
 - [ ] Geocoding autocompleta lugares correctamente
@@ -19783,7 +18040,7 @@ T-CA-046 → T-CA-047 → T-CA-048 → T-CA-049 → T-CA-050
 
 2. **Librería de gráficos:** Usar `@astrodraw/astrochart` por ser TypeScript nativo y generar SVGs sin dependencias.
 
-3. **Sistema de límites:** Extender el existente por feature (daily/lifetime), sin crear sistema paralelo.
+3. **Sistema de límites:** Extender el existente con períodos mensuales y lifetime, sin crear sistema paralelo.
 
 4. **Caché agresivo:** Cálculos astronómicos son determinísticos, cachear por 24h mínimo.
 
