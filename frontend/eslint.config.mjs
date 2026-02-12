@@ -13,6 +13,12 @@ const eslintConfig = defineConfig([
     'build/**',
     'next-env.d.ts',
   ]),
+  // Enforce no explicit `any` in frontend code.
+  {
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'error',
+    },
+  },
   // Allow <img> in test files for mocking next/image
   {
     files: ['**/*.test.tsx', '**/*.test.ts'],
