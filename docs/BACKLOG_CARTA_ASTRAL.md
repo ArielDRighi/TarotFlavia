@@ -7043,6 +7043,8 @@ Esta parte cubre la integración con el sistema de límites de uso existente (ad
 
 ### T-CA-021: Analizar Sistema de Límites Existente
 
+**Estado:** ✅ COMPLETADA
+
 **Historia relacionada:** HU-CA-010
 
 **Descripción:**
@@ -7127,16 +7129,23 @@ Según docs/USAGE_LIMITS_SYSTEM.md:
 
 **Criterios de aceptación:**
 
-- [ ] Documento de análisis completo
-- [ ] Estructura actual documentada
-- [ ] Puntos de extensión identificados
-- [ ] Recomendación de implementación clara
-- [ ] Riesgos y consideraciones documentados
-- [ ] Estimación refinada para T-CA-022
+- [x] Documento de análisis completo
+- [x] Estructura actual documentada
+- [x] Puntos de extensión identificados
+- [x] Recomendación de implementación clara
+- [x] Riesgos y consideraciones documentados
+- [x] Estimación refinada para T-CA-022
 
 **Dependencias:** Ninguna
 
 **Estimación:** 2 horas
+
+**Resultado del análisis:**
+- ✅ **Hallazgo principal:** El sistema YA soporta límites mensuales mediante `getUsageByPeriod(userId, feature, 'monthly')`
+- ✅ `UsageFeature.BIRTH_CHART` ya existe y está configurado
+- ✅ Límites definidos: FREE: 3/mes, PREMIUM: 5/mes, ANONYMOUS: 1 lifetime
+- ⚠️ **Ajuste necesario:** `USAGE_RETENTION_DAYS = 7` debe aumentarse a 35 para límites mensuales
+- 📄 **Documento completo:** `docs/ANALISIS_T-CA-021_SISTEMA_LIMITES.md`
 
 ---
 
