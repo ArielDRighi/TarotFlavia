@@ -320,7 +320,7 @@ export class PremiumChartResponseDto extends FullChartResponseDto {
   })
   aiSynthesis: {
     content: string;
-    generatedAt: string;
+    generatedAt: string | null;
     provider: string;
   };
 

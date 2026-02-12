@@ -11,3 +11,6 @@ export * from './chart-interpretation.service';
 export * from './chart-ai-synthesis.service';
 export * from './chart-cache.service';
 export * from './chart-pdf.service';
+export * from './birth-chart-facade.service';
+export * from './birth-chart-history.service';
+export * from './geocode.service';
