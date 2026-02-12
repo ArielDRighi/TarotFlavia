@@ -8418,19 +8418,21 @@ export class GeocodeCacheService {
 TIMEZONEDB_API_KEY=your_api_key_here
 ```
 
+**Estado:** ✅ COMPLETADA
+
 **Criterios de aceptación:**
 
-- [ ] Búsqueda de lugares con Nominatim funcionando
-- [ ] Obtención de timezone con TimeZoneDB
-- [ ] Fallback de timezone por longitud
-- [ ] Rate limiting para Nominatim (1 req/seg)
-- [ ] Caché de resultados de búsqueda (7 días)
-- [ ] Caché de detalles de lugar (30 días)
-- [ ] Caché de timezone (1 año)
-- [ ] Reverse geocoding funcionando
-- [ ] Manejo de errores robusto
-- [ ] Tests unitarios con mocks de APIs
-- [ ] Tests de integración
+- [x] Búsqueda de lugares con Nominatim funcionando
+- [x] Obtención de timezone con TimeZoneDB
+- [x] Fallback de timezone por longitud
+- [x] Rate limiting para Nominatim (1 req/seg)
+- [x] Caché de resultados de búsqueda (7 días)
+- [x] Caché de detalles de lugar (30 días)
+- [x] Caché de timezone (1 año)
+- [x] Reverse geocoding funcionando
+- [x] Manejo de errores robusto
+- [x] Tests unitarios con mocks de APIs
+- [x] Tests de integración
 
 **Dependencias:** Ninguna
 
