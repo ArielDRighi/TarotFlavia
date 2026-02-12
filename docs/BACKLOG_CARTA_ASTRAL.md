@@ -1027,6 +1027,7 @@ export class BirthChart {
 **Tiempo real:** 2.5 horas
 
 **Notas técnicas:**
+
 - Entidad ubicada en `src/modules/birth-chart/entities/` según ADR-003 (entidades en raíz del módulo)
 - Estructura flat porque módulo tiene 8 archivos, 707 líneas (bajo threshold de 10 archivos/1500 líneas)
 - Tests con 100% cobertura (18 casos de prueba)
@@ -1280,6 +1281,7 @@ export class BirthChartInterpretation {
 **Tiempo real:** 2.5 horas
 
 **Notas técnicas:**
+
 - Entidad ubicada en `src/modules/birth-chart/entities/` según ADR-003 (entidades en raíz del módulo)
 - Estructura flat porque módulo tiene 9 archivos, 984 líneas (bajo threshold de 10 archivos/1500 líneas)
 - Tests con 100% cobertura (24 casos de prueba):
@@ -1290,7 +1292,7 @@ export class BirthChartInterpretation {
 - Métodos estáticos helper: generateKey(), validateCombination()
 - ~490 interpretaciones esperadas:
   - PLANET_INTRO: 10 textos
-  - ASCENDANT: 12 textos  
+  - ASCENDANT: 12 textos
   - PLANET_IN_SIGN: 120 textos (10 × 12)
   - PLANET_IN_HOUSE: 120 textos (10 × 12)
   - ASPECT: ~225 textos (~45 pares × 5 tipos)
@@ -1650,6 +1652,7 @@ export class CreateBirthChartTables1707220000000 implements MigrationInterface {
 **Tiempo real:** 2 horas
 
 **Notas técnicas:**
+
 - Migración creada manualmente: `1770406386237-CreateBirthChartInterpretationsTable.ts`
 - Se verifica existencia de `zodiac_sign_enum` antes de crear (puede existir en common/utils)
 - Enums creados: `planet_enum`, `aspect_type_enum`, `interpretation_category_enum`, `zodiac_sign_enum`
@@ -2367,6 +2370,7 @@ export class PlanetPositionService {
 **Estimación:** 4 horas
 
 **Notas de implementación:**
+
 - Implementado con TDD (35 tests unitarios)
 - Coverage: 97.82% statements, 85% branches, 100% functions
 - Validación de arquitectura limpia exitosa
@@ -2599,6 +2603,7 @@ export class HouseCuspService {
 **Tiempo real:** 2 horas
 
 **Notas técnicas:**
+
 - Servicio implementado con TDD (Red-Green-Refactor)
 - 20 tests unitarios con cobertura: 98.63% statements, 81.25% branches, 100% functions
 - Métodos implementados:
@@ -2892,6 +2897,7 @@ export class AspectCalculationService {
 **Estimación:** 3 horas
 
 **Notas de completación:**
+
 - 30 tests implementados, todos pasando
 - Coverage: 100% statements, 95.65% branch, 100% functions, 100% lines
 - Quality gates: ✅ format, ✅ lint, ✅ test:cov, ✅ build, ✅ validate-architecture
@@ -4292,6 +4298,7 @@ Esta combinación única de energías te hace una persona singular, con talentos
 **Tiempo real:** 4 horas
 
 **Implementación:**
+
 - Archivo: `src/modules/birth-chart/application/services/chart-ai-synthesis.service.ts` (352 líneas)
 - Tests: `src/modules/birth-chart/application/services/chart-ai-synthesis.service.spec.ts` (415 líneas)
 - Coverage: 91.93% statements, 65.71% branches, 86.66% functions
@@ -4549,6 +4556,7 @@ export class ChartCacheService {
 **Estado:** ✅ COMPLETADA
 
 **Implementación realizada:**
+
 - Servicio: `src/modules/birth-chart/application/services/chart-cache.service.ts` (313 líneas)
 - Tests: `src/modules/birth-chart/application/services/chart-cache.service.spec.ts` (418 líneas)
 - Cobertura: 100% statements, 100% branches, 100% functions (25 tests)
@@ -5122,13 +5130,13 @@ T-CA-013 (AI Synthesis)   T-CA-014 (Cache Service)
 
 Esta parte cubre la creación de DTOs de request/response, controladores REST y la integración de todos los servicios en endpoints funcionales.
 
-| Tarea    | Título                                      | Tipo    | Prioridad | Estimación |
-| -------- | ------------------------------------------- | ------- | --------- | ---------- |
-| T-CA-016 | Crear DTOs de request ✅                    | Backend | Must      | 2h         |
-| T-CA-017 | Crear DTOs de response                      | Backend | Must      | 2h         |
+| Tarea    | Título                                         | Tipo    | Prioridad | Estimación |
+| -------- | ---------------------------------------------- | ------- | --------- | ---------- |
+| T-CA-016 | Crear DTOs de request ✅                       | Backend | Must      | 2h         |
+| T-CA-017 | Crear DTOs de response                         | Backend | Must      | 2h         |
 | T-CA-018 | Crear controlador principal de carta astral ✅ | Backend | Must      | 4h         |
-| T-CA-019 | Crear controlador de historial (Premium)    | Backend | Must      | 3h         |
-| T-CA-020 | Crear módulo BirthChart completo            | Backend | Must      | 2h         |
+| T-CA-019 | Crear controlador de historial (Premium)       | Backend | Must      | 3h         |
+| T-CA-020 | Crear módulo BirthChart completo               | Backend | Must      | 2h         |
 
 **Total estimado:** 13 horas
 
@@ -5959,6 +5967,8 @@ export class BirthChartController {
 
 ### T-CA-019: Crear Controlador de Historial (Premium)
 
+**Estado:** ✅ COMPLETADA
+
 **Historia relacionada:** HU-CA-008, HU-CA-009
 
 **Descripción:**
@@ -6259,22 +6269,33 @@ Este endpoint es útil para guardar manualmente una carta que se generó antes.`
 
 **Criterios de aceptación:**
 
-- [ ] GET /history con paginación
-- [ ] GET /history/:id para detalle de carta
-- [ ] POST /history para guardar manualmente
-- [ ] POST /history/:id/name para renombrar
-- [ ] DELETE /history/:id para eliminar
-- [ ] POST /history/check-duplicate para verificar
-- [ ] GET /history/:id/pdf para descargar PDF
-- [ ] Todos los endpoints protegidos con PremiumGuard
-- [ ] Validación de propiedad (user.id)
-- [ ] Documentación Swagger completa
-- [ ] Manejo de errores 404, 409
-- [ ] Tests de integración
+- [x] GET /history con paginación
+- [x] GET /history/:id para detalle de carta
+- [x] POST /history para guardar manualmente
+- [x] POST /history/:id/name para renombrar
+- [x] DELETE /history/:id para eliminar
+- [x] POST /history/check-duplicate para verificar
+- [x] GET /history/:id/pdf para descargar PDF
+- [x] Todos los endpoints protegidos con PremiumGuard
+- [x] Validación de propiedad (user.id)
+- [x] Documentación Swagger completa
+- [x] Manejo de errores 404, 409
+- [x] Tests de integración
 
 **Dependencias:** T-CA-018
 
 **Estimación:** 3 horas
+
+**Notas técnicas (completado 2026-02-12):**
+
+- Controlador implementado: `src/modules/birth-chart/infrastructure/controllers/birth-chart-history.controller.ts`
+- Export agregado en `src/modules/birth-chart/infrastructure/controllers/index.ts`
+- Guard premium creado: `src/modules/auth/infrastructure/guards/premium.guard.ts`
+- Tests unitarios agregados:
+  - `src/modules/birth-chart/infrastructure/controllers/birth-chart-history.controller.spec.ts` (15 tests)
+  - `src/modules/auth/infrastructure/guards/premium.guard.spec.ts` (4 tests)
+- Test de integración agregado:
+  - `test/integration/birth-chart-history.controller.integration.spec.ts` (6 tests)
 
 ---
 
@@ -6942,7 +6963,7 @@ export class BirthChartHistoryService {
 - [x] T-CA-016: DTOs de request creados con validaciones ✅
 - [ ] T-CA-017: DTOs de response creados con documentación
 - [ ] T-CA-018: Controlador principal funcionando
-- [ ] T-CA-019: Controlador de historial funcionando
+- [x] T-CA-019: Controlador de historial funcionando ✅
 - [ ] T-CA-020: Módulo completo e integrado
 
 ---
