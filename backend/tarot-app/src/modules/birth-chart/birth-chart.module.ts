@@ -5,6 +5,10 @@ import { HttpModule } from '@nestjs/axios';
 import { AIModule } from '../ai/ai.module';
 import { CacheModule } from '../cache/cache.module';
 import { UsageLimitsModule } from '../usage-limits/usage-limits.module';
+import { UsersModule } from '../users/users.module';
+import { PlanConfigModule } from '../plan-config/plan-config.module';
+import { DailyReading } from '../tarot/daily-reading/entities/daily-reading.entity';
+import { TarotReading } from '../tarot/readings/entities/tarot-reading.entity';
 import { BirthChart } from './entities/birth-chart.entity';
 import { BirthChartInterpretation } from './entities/birth-chart-interpretation.entity';
 import {
@@ -31,12 +35,19 @@ import { BirthChartInterpretationsSeeder } from './infrastructure/seeders/birth-
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([BirthChart, BirthChartInterpretation]),
+    TypeOrmModule.forFeature([
+      BirthChart,
+      BirthChartInterpretation,
+      DailyReading,
+      TarotReading,
+    ]),
     ConfigModule.forFeature(ephemerisConfig),
     HttpModule,
     forwardRef(() => AIModule),
     CacheModule,
     UsageLimitsModule,
+    PlanConfigModule,
+    forwardRef(() => UsersModule),
   ],
   controllers: [BirthChartController, BirthChartHistoryController],
   providers: [
