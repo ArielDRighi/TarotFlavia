@@ -4,6 +4,7 @@ import { PendulumQuery } from './entities/pendulum-query.entity';
 import { PendulumInterpretation } from './entities/pendulum-interpretation.entity';
 import { DailyReading } from '../tarot/daily-reading/entities/daily-reading.entity';
 import { TarotReading } from '../tarot/readings/entities/tarot-reading.entity';
+import { BirthChart } from '../birth-chart/entities/birth-chart.entity';
 import { RitualsModule } from '../rituals/rituals.module';
 import { UsageLimitsModule } from '../usage-limits/usage-limits.module';
 import { UsersModule } from '../users/users.module';
@@ -39,6 +40,7 @@ import { PendulumController } from './infrastructure/controllers/pendulum.contro
       PendulumInterpretation,
       DailyReading, // Requerido por CheckUsageLimitGuard
       TarotReading, // Requerido por CheckUsageLimitGuard
+      BirthChart, // Requerido por CheckUsageLimitGuard
     ]),
     RitualsModule, // Proporciona LunarPhaseService
     UsageLimitsModule, // Proporciona CheckUsageLimitGuard e IncrementUsageInterceptor

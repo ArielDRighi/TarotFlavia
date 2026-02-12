@@ -9,6 +9,7 @@ import { DailyReadingCleanupService } from './daily-reading-cleanup.service';
 import { DailyReading } from './entities/daily-reading.entity';
 import { TarotCard } from '../cards/entities/tarot-card.entity';
 import { TarotReading } from '../readings/entities/tarot-reading.entity';
+import { BirthChart } from '../../birth-chart/entities/birth-chart.entity';
 import { InterpretationsModule } from '../interpretations/interpretations.module';
 import { AIUsageModule } from '../../ai-usage/ai-usage.module';
 import { UsageLimitsModule } from '../../usage-limits/usage-limits.module';
@@ -18,7 +19,12 @@ import { ShareTextGeneratorService } from '../readings/application/services/shar
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([DailyReading, TarotCard, TarotReading]),
+    TypeOrmModule.forFeature([
+      DailyReading,
+      TarotCard,
+      TarotReading,
+      BirthChart,
+    ]),
     InterpretationsModule,
     AIUsageModule,
     UsageLimitsModule,
