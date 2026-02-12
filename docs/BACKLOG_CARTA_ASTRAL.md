@@ -204,9 +204,9 @@
    **Cuando** veo las interpretaciones  
    **Entonces** veo la interpretación de cada aspecto significativo
 
-4. **Dado** que veo una interpretación de planeta  
-   **Cuando** la expando  
-   **Entonces** veo: Introducción del planeta + Planeta en Signo + Planeta en Casa + Aspectos
+4. **Dado** que veo una interpretación de planeta
+   **Cuando** la expando
+   **Entonces** veo: Introducción del planeta + Planeta en Signo + Planeta en casa + Aspectos
 
 5. **Dado** que veo la distribución de mi carta  
    **Cuando** analizo los porcentajes  
