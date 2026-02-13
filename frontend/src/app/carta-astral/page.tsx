@@ -12,6 +12,9 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Star, Sparkles, Crown, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
+import axios from 'axios';
+
+import { RateLimitError } from '@/lib/api/axios-config';
 
 import { BirthDataForm } from '@/components/features/birth-chart/BirthDataForm/BirthDataForm';
 import type { BirthDataFormValues } from '@/components/features/birth-chart/BirthDataForm/BirthDataForm.schema';
@@ -57,17 +60,29 @@ export default function BirthChartPage() {
   }
 
   function handleError(err: unknown) {
-    // Type guard para verificar si es un error con statusCode y message
-    if (err && typeof err === 'object' && 'statusCode' in err && 'message' in err) {
-      const errorWithStatus = err as { statusCode: number; message?: string };
-      if (errorWithStatus.statusCode === 429) {
-        setError(errorWithStatus.message || 'Has alcanzado el límite de uso.');
+    // Detectar RateLimitError
+    if (err instanceof RateLimitError) {
+      setError(err.message || 'Has alcanzado el límite de uso.');
+      return;
+    }
+
+    // Detectar AxiosError
+    if (axios.isAxiosError(err)) {
+      const status = err.response?.status;
+      const message = err.response?.data?.message;
+
+      if (status === 429) {
+        setError(message || 'Has alcanzado el límite de uso.');
+      } else if (message) {
+        setError(message);
       } else {
         setError('Error al generar la carta astral. Por favor intenta de nuevo.');
       }
-    } else {
-      setError('Error al generar la carta astral. Por favor intenta de nuevo.');
+      return;
     }
+
+    // Error genérico
+    setError('Error al generar la carta astral. Por favor intenta de nuevo.');
   }
 
   // Usar el hook apropiado según autenticación
@@ -130,7 +145,7 @@ export default function BirthChartPage() {
         {isAuthenticated && user?.plan === 'premium' && (
           <Badge variant="default" className="bg-amber-500">
             <Crown className="mr-1 h-3 w-3" />
-            Premium • {remaining} cartas restantes
+            Premium • Cartas ilimitadas
           </Badge>
         )}
       </div>
@@ -157,7 +172,7 @@ export default function BirthChartPage() {
             <BirthDataForm
               onSubmit={handleSubmit}
               isLoading={isSubmitting}
-              disabled={!canGenerate && !usageLoading}
+              disabled={!canGenerate || usageLoading}
               showUsageWarning={remaining === 1}
               usageMessage={
                 remaining === 1 ? 'Esta es tu última carta disponible del período.' : undefined
@@ -180,7 +195,7 @@ export default function BirthChartPage() {
               {isAuthenticated && user?.plan === 'free' && (
                 <div className="space-y-2">
                   <p className="text-sm">
-                    Actualiza a Premium para obtener 5 cartas mensuales y síntesis personalizada con
+                    Actualiza a Premium para obtener cartas ilimitadas y síntesis personalizada con
                     IA.
                   </p>
                   <Button asChild>

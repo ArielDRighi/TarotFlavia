@@ -3,7 +3,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import BirthChartPage from './page';
 import { useAuthStore } from '@/stores/authStore';
 import {
@@ -11,23 +12,29 @@ import {
   useGenerateChartAnonymous,
   useCanGenerateChart,
 } from '@/hooks/api/useBirthChart';
+import { useBirthChartStore } from '@/stores/birthChartStore';
 import type { UseMutationResult } from '@tanstack/react-query';
 import type { AuthStore } from '@/types';
-import type { ChartResponse, GenerateChartRequest } from '@/types/birth-chart-api.types';
+import type {
+  ChartResponse,
+  GenerateChartRequest,
+  PremiumChartResponse,
+} from '@/types/birth-chart-api.types';
+import { ZodiacSign } from '@/types/birth-chart.enums';
+import { RateLimitError } from '@/lib/api/axios-config';
+import axios from 'axios';
 
 // Mock modules
+const mockSetFormData = vi.fn();
+const mockSetChartResult = vi.fn();
+const mockRouterPush = vi.fn();
+
 vi.mock('@/stores/authStore');
 vi.mock('@/hooks/api/useBirthChart');
-vi.mock('@/stores/birthChartStore', () => ({
-  useBirthChartStore: () => ({
-    setFormData: vi.fn(),
-    setChartResult: vi.fn(),
-    reset: vi.fn(),
-  }),
-}));
+vi.mock('@/stores/birthChartStore');
 vi.mock('next/navigation', () => ({
   useRouter: () => ({
-    push: vi.fn(),
+    push: mockRouterPush,
   }),
 }));
 vi.mock('@/hooks/useAuth', () => ({
@@ -64,6 +71,15 @@ describe('BirthChartPage', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // Mock birthChartStore
+    vi.mocked(useBirthChartStore).mockReturnValue({
+      setFormData: mockSetFormData,
+      setChartResult: mockSetChartResult,
+      reset: vi.fn(),
+      formData: null,
+      chartResult: null,
+    });
 
     // Default mocks for anonymous user
     vi.mocked(useAuthStore).mockReturnValue({
@@ -148,7 +164,7 @@ describe('BirthChartPage', () => {
       vi.mocked(useCanGenerateChart).mockReturnValue({
         canGenerate: true,
         remaining: 3,
-        limit: 5,
+        limit: 3,
         isLoading: false,
         message: undefined,
       });
@@ -184,10 +200,10 @@ describe('BirthChartPage', () => {
       });
     });
 
-    it('should show Premium badge with remaining charts', () => {
+    it('should show Premium badge with unlimited charts', () => {
       render(<BirthChartPage />);
 
-      expect(screen.getByText(/premium.*5 cartas restantes/i)).toBeInTheDocument();
+      expect(screen.getByText(/premium.*cartas ilimitadas/i)).toBeInTheDocument();
     });
 
     it('should not show anonymous or free badges for Premium users', () => {
@@ -241,15 +257,15 @@ describe('BirthChartPage', () => {
       vi.mocked(useCanGenerateChart).mockReturnValue({
         canGenerate: false,
         remaining: 0,
-        limit: 5,
+        limit: 3,
         isLoading: false,
-        message: 'Has alcanzado el límite de 5 cartas este mes.',
+        message: 'Has alcanzado el límite de 3 cartas este mes.',
       });
 
       render(<BirthChartPage />);
 
       expect(
-        screen.getByText(/actualiza a premium para obtener 5 cartas mensuales/i)
+        screen.getByText(/actualiza a premium para obtener cartas ilimitadas/i)
       ).toBeInTheDocument();
       expect(screen.getByRole('link', { name: /ver planes premium/i })).toBeInTheDocument();
     });
@@ -319,6 +335,204 @@ describe('BirthChartPage', () => {
 
       const submitButton = screen.getByTestId('submit-button');
       expect(submitButton).toBeDisabled();
+    });
+
+    it('should disable form while usage is loading', () => {
+      vi.mocked(useCanGenerateChart).mockReturnValue({
+        canGenerate: true,
+        remaining: 1,
+        limit: 1,
+        isLoading: true,
+        message: undefined,
+      });
+
+      render(<BirthChartPage />);
+
+      const submitButton = screen.getByTestId('submit-button');
+      expect(submitButton).toBeDisabled();
+    });
+  });
+
+  describe('Success and Error Handling', () => {
+    const mockChartResponse: ChartResponse = {
+      success: true,
+      chartSvgData: { planets: [], houses: [], aspects: [] },
+      planets: [],
+      houses: [],
+      aspects: [],
+      bigThree: {
+        sun: { sign: ZodiacSign.ARIES, signName: 'Aries', interpretation: 'Test' },
+        moon: { sign: ZodiacSign.TAURUS, signName: 'Taurus', interpretation: 'Test' },
+        ascendant: { sign: ZodiacSign.GEMINI, signName: 'Gemini', interpretation: 'Test' },
+      },
+      calculationTimeMs: 100,
+    };
+
+    const mockPremiumResponse: PremiumChartResponse = {
+      ...mockChartResponse,
+      distribution: {
+        elements: [],
+        modalities: [],
+      },
+      interpretations: { planets: [] },
+      canDownloadPdf: true,
+      savedChartId: 123,
+      aiSynthesis: {
+        content: 'Test synthesis',
+        generatedAt: new Date().toISOString(),
+        provider: 'test-ai',
+      },
+      canAccessHistory: true,
+    };
+
+    it('should call setChartResult and navigate on successful generation (anonymous)', async () => {
+      const user = userEvent.setup();
+
+      // Mock del hook anónimo para capturar callbacks y simular éxito
+      let capturedOnSuccess: ((data: ChartResponse) => void) | undefined;
+      vi.mocked(useGenerateChartAnonymous).mockImplementation((options?: any) => {
+        capturedOnSuccess = options?.onSuccess;
+        return {
+          mutate: vi.fn(() => {
+            if (capturedOnSuccess) capturedOnSuccess(mockChartResponse);
+          }),
+          isPending: false,
+        } as any;
+      });
+
+      render(<BirthChartPage />);
+
+      const submitButton = screen.getByTestId('submit-button');
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(mockSetChartResult).toHaveBeenCalledWith(mockChartResponse);
+        expect(mockRouterPush).toHaveBeenCalledWith('/carta-astral/resultado');
+      });
+    });
+
+    it('should navigate to result with ID for Premium users with savedChartId', async () => {
+      const user = userEvent.setup();
+
+      vi.mocked(useAuthStore).mockReturnValue({
+        user: { id: 1, name: 'Test', plan: 'premium' },
+        isAuthenticated: true,
+      } as AuthStore);
+
+      // Mock del hook autenticado para capturar callbacks y simular éxito
+      let capturedOnSuccess: ((data: ChartResponse) => void) | undefined;
+      vi.mocked(useGenerateChart).mockImplementation((options?: any) => {
+        capturedOnSuccess = options?.onSuccess;
+        return {
+          mutate: vi.fn(() => {
+            if (capturedOnSuccess) capturedOnSuccess(mockPremiumResponse);
+          }),
+          isPending: false,
+        } as any;
+      });
+
+      render(<BirthChartPage />);
+
+      const submitButton = screen.getByTestId('submit-button');
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(mockSetChartResult).toHaveBeenCalledWith(mockPremiumResponse);
+        expect(mockRouterPush).toHaveBeenCalledWith('/carta-astral/resultado/123');
+      });
+    });
+
+    it('should show error Alert when RateLimitError occurs', async () => {
+      const user = userEvent.setup();
+      const rateLimitError = new RateLimitError('Has alcanzado el límite de uso.');
+
+      // Mock del hook anónimo para capturar callbacks y simular error
+      let capturedOnError: ((err: Error) => void) | undefined;
+      vi.mocked(useGenerateChartAnonymous).mockImplementation((options?: any) => {
+        capturedOnError = options?.onError;
+        return {
+          mutate: vi.fn(() => {
+            if (capturedOnError) capturedOnError(rateLimitError);
+          }),
+          isPending: false,
+        } as any;
+      });
+
+      render(<BirthChartPage />);
+
+      const submitButton = screen.getByTestId('submit-button');
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(screen.getByText('Error')).toBeInTheDocument();
+        expect(screen.getByText('Has alcanzado el límite de uso.')).toBeInTheDocument();
+      });
+    });
+
+    it('should show error Alert when AxiosError with 429 occurs', async () => {
+      const user = userEvent.setup();
+      const axiosError = {
+        isAxiosError: true,
+        response: {
+          status: 429,
+          data: { message: 'Límite excedido' },
+        },
+      };
+
+      vi.spyOn(axios, 'isAxiosError').mockReturnValue(true);
+
+      // Mock del hook anónimo para capturar callbacks y simular error
+      let capturedOnError: ((err: any) => void) | undefined;
+      vi.mocked(useGenerateChartAnonymous).mockImplementation((options?: any) => {
+        capturedOnError = options?.onError;
+        return {
+          mutate: vi.fn(() => {
+            if (capturedOnError) capturedOnError(axiosError);
+          }),
+          isPending: false,
+        } as any;
+      });
+
+      render(<BirthChartPage />);
+
+      const submitButton = screen.getByTestId('submit-button');
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(screen.getByText('Error')).toBeInTheDocument();
+        expect(screen.getByText('Límite excedido')).toBeInTheDocument();
+      });
+    });
+
+    it('should show generic error message for unknown errors', async () => {
+      const user = userEvent.setup();
+      const genericError = new Error('Network error');
+
+      vi.spyOn(axios, 'isAxiosError').mockReturnValue(false);
+
+      // Mock del hook anónimo para capturar callbacks y simular error
+      let capturedOnError: ((err: Error) => void) | undefined;
+      vi.mocked(useGenerateChartAnonymous).mockImplementation((options?: any) => {
+        capturedOnError = options?.onError;
+        return {
+          mutate: vi.fn(() => {
+            if (capturedOnError) capturedOnError(genericError);
+          }),
+          isPending: false,
+        } as any;
+      });
+
+      render(<BirthChartPage />);
+
+      const submitButton = screen.getByTestId('submit-button');
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(screen.getByText('Error')).toBeInTheDocument();
+        expect(
+          screen.getByText('Error al generar la carta astral. Por favor intenta de nuevo.')
+        ).toBeInTheDocument();
+      });
     });
   });
 });

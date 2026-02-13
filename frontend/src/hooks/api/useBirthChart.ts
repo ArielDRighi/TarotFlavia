@@ -60,6 +60,8 @@ export function useGenerateChart(options?: GenerateChartOptions) {
  * Solo retorna datos astronómicos básicos, sin interpretación
  */
 export function useGenerateChartAnonymous(options?: GenerateChartOptions) {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (data: GenerateChartRequest) => {
       const response = await apiClient.post<ChartResponse>(
@@ -68,7 +70,11 @@ export function useGenerateChartAnonymous(options?: GenerateChartOptions) {
       );
       return response.data;
     },
-    onSuccess: options?.onSuccess,
+    onSuccess: (data) => {
+      // Invalidar usage al generar carta anónima
+      queryClient.invalidateQueries({ queryKey: birthChartQueryKeys.usage() });
+      options?.onSuccess?.(data);
+    },
     onError: options?.onError,
   });
 }
