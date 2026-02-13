@@ -1,7 +1,7 @@
 # AGENTS.md - Auguria Codebase Guide for AI Agents
 
 > 🤖 **Purpose:** Essential reference for AI coding agents working in this monorepo.
-> 📅 **Last Updated:** February 1, 2026
+> 📅 **Last Updated:** February 13, 2026
 
 ---
 
@@ -28,6 +28,123 @@
 - "inicia la TASK-403 del backend" → READ `docs/WORKFLOW_BACKEND.md` NOW
 - "empezar TASK-405 frontend" → READ `docs/WORKFLOW_FRONTEND.md` NOW
 - "tengo feedback del PR backend" → READ `docs/WORKFLOW_PR_FEEDBACK_BACKEND.md` NOW
+
+---
+
+## 🔥🔥🔥 ABSOLUTE PROHIBITIONS - ZERO TOLERANCE 🔥🔥🔥
+
+### ⛔ RULE 0: NEVER USE `any` TYPE OR `eslint-disable` ⛔
+
+**ESTO ES ABSOLUTAMENTE PROHIBIDO EN TODO EL CÓDIGO - INCLUYENDO TESTS**
+
+#### ❌ PROHIBIDO EN TODO EL CÓDIGO (PRODUCCIÓN Y TESTS):
+
+```typescript
+// ❌ PROHIBIDO - Tipo any
+const data: any = response;
+function process(item: any) { }
+const items: any[] = [];
+
+// ❌ PROHIBIDO - ESLint disable
+// eslint-disable-next-line
+// eslint-disable
+/* eslint-disable */
+
+// ❌ PROHIBIDO - TSLint/TypeScript ignore
+// @ts-ignore
+// @ts-nocheck
+```
+
+#### ✅ SOLUCIONES OBLIGATORIAS:
+
+```typescript
+// ✅ CORRECTO - Definir tipos específicos
+interface ResponseData {
+  id: number;
+  name: string;
+}
+const data: ResponseData = response;
+
+// ✅ CORRECTO - Usar unknown y type guards
+const data: unknown = response;
+if (isResponseData(data)) {
+  // Type guard valida el tipo
+}
+
+// ✅ CORRECTO - Tipos genéricos
+function process<T extends BaseType>(item: T): T {
+  return item;
+}
+
+// ✅ CORRECTO - Utility types
+type PartialUser = Partial<User>;
+type ReadonlyConfig = Readonly<Config>;
+
+// ✅ CORRECTO EN TESTS - Mock types específicos
+const mockRepository = {
+  findOne: jest.fn().mockResolvedValue({ id: 1, name: 'Test' }),
+  save: jest.fn(),
+} as jest.Mocked<Repository<Entity>>;
+
+// ✅ CORRECTO EN TESTS - Tipos de mocks
+const mockService: jest.Mocked<MyService> = {
+  method: jest.fn().mockResolvedValue(expectedValue),
+};
+```
+
+#### 🚨 CONSECUENCIAS DE VIOLACIÓN:
+
+Si escribes `any` o `eslint-disable` EN CUALQUIER LUGAR (producción o tests):
+
+1. **DETENER** inmediatamente
+2. **REESCRIBIR** con tipos apropiados
+3. **NUNCA** commit código con `any` o `eslint-disable`
+
+#### 💡 ALTERNATIVAS PARA CASOS COMPLEJOS:
+
+```typescript
+// Caso: Response de API desconocida
+// ❌ PROHIBIDO
+const data: any = await fetch(url);
+
+// ✅ CORRECTO
+const data: unknown = await fetch(url);
+const parsed = ResponseSchema.parse(data); // Zod validation
+// O usar type guard
+if (isValidResponse(data)) {
+  // TypeScript sabe el tipo aquí
+}
+
+// Caso: Mocks en tests
+// ❌ PROHIBIDO
+const mockRepo: any = { findOne: jest.fn() };
+
+// ✅ CORRECTO
+const mockRepo: jest.Mocked<Partial<Repository<User>>> = {
+  findOne: jest.fn().mockResolvedValue(mockUser),
+};
+
+// Caso: Tipos parciales complejos
+// ❌ PROHIBIDO
+const config: any = { prop1: 'value' };
+
+// ✅ CORRECTO
+type TestConfig = Pick<FullConfig, 'prop1' | 'prop2'>;
+const config: TestConfig = { prop1: 'value' };
+```
+
+#### 📋 CHECKLIST ANTES DE CADA COMMIT:
+
+```bash
+# Buscar violaciones (debe retornar 0 resultados)
+grep -r "any" src/           # ❌ NO debe haber resultados
+grep -r "eslint-disable" .   # ❌ NO debe haber resultados
+grep -r "@ts-ignore" .       # ❌ NO debe haber resultados
+
+# Si encuentras resultados: REESCRIBE antes de continuar
+```
+
+**ESTA REGLA NO TIENE EXCEPCIONES. NI SIQUIERA EN TESTS.**
 
 ---
 
@@ -524,9 +641,9 @@ describe('ReadingCard', () => {
 
 ## ⚠️ Common Pitfalls to Avoid
 
-1. **Don't inject repositories in controllers** → Use orchestrators
-2. **Don't hardcode endpoints** → Use `API_ENDPOINTS` constant
-3. **Don't use `any` type** → Use proper TypeScript types
+1. **🔥 ZERO TOLERANCE: Don't use `any` type or `eslint-disable`** → Ver RULE 0 arriba
+2. **Don't inject repositories in controllers** → Use orchestrators
+3. **Don't hardcode endpoints** → Use `API_ENDPOINTS` constant
 4. **Don't forget `'use client'`** → Required for Next.js client components
 5. **Don't skip tests** → TDD is enforced (coverage ≥ 80%)
 6. **Don't modify API contracts** → IDs are numeric, pagination format is fixed
