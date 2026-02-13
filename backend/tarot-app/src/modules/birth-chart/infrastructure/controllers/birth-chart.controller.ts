@@ -10,7 +10,6 @@ import {
   HttpStatus,
   Logger,
   Inject,
-  ForbiddenException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -23,6 +22,7 @@ import { Response } from 'express';
 import { Throttle } from '@nestjs/throttler';
 import { OptionalJwtAuthGuard } from '../../../auth/infrastructure/guards/optional-jwt-auth.guard';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
+import { PremiumGuard } from '../../../auth/infrastructure/guards/premium.guard';
 import { CheckUsageLimitGuard } from '../../../usage-limits/guards/check-usage-limit.guard';
 import { IncrementUsageInterceptor } from '../../../usage-limits/interceptors/increment-usage.interceptor';
 import { CheckUsageLimit } from '../../../usage-limits/decorators/check-usage-limit.decorator';
@@ -314,7 +314,7 @@ export class BirthChartController {
    * Útil si la síntesis falló inicialmente o se quiere regenerar
    */
   @Post('synthesis')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PremiumGuard)
   @UseInterceptors(IncrementUsageInterceptor)
   @ApiBearerAuth()
   @Throttle({ default: { limit: 3, ttl: 60000 } }) // 3 síntesis/minuto
@@ -338,13 +338,6 @@ export class BirthChartController {
     @Body() dto: GenerateChartDto,
     @CurrentUser() user: UserFromToken,
   ): Promise<unknown> {
-    // Validar que el usuario sea Premium
-    if (user.plan !== UserPlan.PREMIUM) {
-      throw new ForbiddenException(
-        'La síntesis IA solo está disponible para usuarios Premium',
-      );
-    }
-
     this.logger.log(`Generating AI synthesis for user ${user.email}`);
 
     return this.birthChartFacade.generateSynthesisOnly(dto, user.userId);

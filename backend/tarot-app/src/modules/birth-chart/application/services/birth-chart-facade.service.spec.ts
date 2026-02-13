@@ -295,4 +295,125 @@ describe('BirthChartFacadeService', () => {
     expect(result.used).toBe(2);
     expect(result.remaining).toBe(1);
   });
+
+  it('should return usage status for authenticated premium user', async () => {
+    const result = await service.getUsageStatus(
+      { userId: 2, email: 'premium@example.com', plan: UserPlan.PREMIUM },
+      'fingerprint',
+    );
+
+    expect(usageLimitsServiceMock.getUsageByPeriod).toHaveBeenCalledWith(
+      2,
+      UsageFeature.BIRTH_CHART,
+      'monthly',
+    );
+    expect(result.limit).toBe(5);
+    expect(result.used).toBe(2);
+    expect(result.remaining).toBe(3);
+  });
+
+  it('should return usage status for anonymous user with available access', async () => {
+    const result = await service.getUsageStatus(null, 'fingerprint-abc');
+
+    expect(anonymousTrackingServiceMock.canAccessLifetime).toHaveBeenCalledWith(
+      'fingerprint-abc',
+      UsageFeature.BIRTH_CHART,
+    );
+    expect(result.plan).toBe(UserPlan.ANONYMOUS);
+    expect(result.used).toBe(0);
+    expect(result.limit).toBe(1);
+    expect(result.remaining).toBe(1);
+    expect(result.canGenerate).toBe(true);
+  });
+
+  it('should return usage status for anonymous user without available access', async () => {
+    anonymousTrackingServiceMock.canAccessLifetime.mockResolvedValueOnce(false);
+
+    const result = await service.getUsageStatus(null, 'fingerprint-used');
+
+    expect(result.plan).toBe(UserPlan.ANONYMOUS);
+    expect(result.used).toBe(1);
+    expect(result.limit).toBe(1);
+    expect(result.remaining).toBe(0);
+    expect(result.canGenerate).toBe(false);
+  });
+
+  it('should generate PDF for free user', async () => {
+    pdfServiceMock.generatePDF.mockResolvedValueOnce({
+      buffer: Buffer.from('pdf-content'),
+      filename: 'carta-test.pdf',
+    });
+
+    const result = await service.generatePdf(
+      inputDto,
+      { userId: 1, email: 'test@example.com', plan: UserPlan.FREE },
+      false,
+    );
+
+    expect(chartCalculationServiceMock.calculateChart).toHaveBeenCalled();
+    expect(
+      interpretationServiceMock.generateFullInterpretation,
+    ).toHaveBeenCalled();
+    expect(aiSynthesisServiceMock.generateSynthesis).not.toHaveBeenCalled();
+    expect(pdfServiceMock.generatePDF).toHaveBeenCalledWith(
+      expect.objectContaining({
+        chartData,
+        interpretation: fullInterpretation,
+        aiSynthesis: undefined,
+        isPremium: false,
+      }),
+    );
+    expect(result.buffer).toBeInstanceOf(Buffer);
+    expect(result.filename).toBe('carta-test.pdf');
+  });
+
+  it('should generate PDF with AI synthesis for premium user', async () => {
+    pdfServiceMock.generatePDF.mockResolvedValueOnce({
+      buffer: Buffer.from('pdf-premium-content'),
+      filename: 'carta-premium.pdf',
+    });
+
+    const result = await service.generatePdf(
+      inputDto,
+      { userId: 2, email: 'premium@example.com', plan: UserPlan.PREMIUM },
+      true,
+    );
+
+    expect(aiSynthesisServiceMock.generateSynthesis).toHaveBeenCalledWith(
+      expect.objectContaining({
+        chartData,
+        interpretation: fullInterpretation,
+        userName: 'Test',
+      }),
+      2,
+    );
+    expect(pdfServiceMock.generatePDF).toHaveBeenCalledWith(
+      expect.objectContaining({
+        aiSynthesis: 'síntesis premium',
+        isPremium: true,
+      }),
+    );
+    expect(result.buffer).toBeInstanceOf(Buffer);
+    expect(result.filename).toBe('carta-premium.pdf');
+  });
+
+  it('should generate synthesis only for premium user', async () => {
+    const result = await service.generateSynthesisOnly(inputDto, 3);
+
+    expect(chartCalculationServiceMock.calculateChart).toHaveBeenCalled();
+    expect(
+      interpretationServiceMock.generateFullInterpretation,
+    ).toHaveBeenCalled();
+    expect(aiSynthesisServiceMock.generateSynthesis).toHaveBeenCalledWith(
+      expect.objectContaining({
+        chartData,
+        interpretation: fullInterpretation,
+        userName: 'Test',
+      }),
+      3,
+    );
+    expect(result.synthesis).toBe('síntesis premium');
+    expect(result.provider).toBe('groq');
+    expect(result.generatedAt).toBeDefined();
+  });
 });
