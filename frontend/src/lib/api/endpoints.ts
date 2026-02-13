@@ -156,6 +156,19 @@ export const API_ENDPOINTS = {
     STATS: '/pendulum/history/stats',
   },
 
+  // Birth Chart (Carta Astral)
+  BIRTH_CHART: {
+    GENERATE: '/birth-chart/generate',
+    GENERATE_ANONYMOUS: '/birth-chart/generate/anonymous',
+    USAGE: '/birth-chart/usage',
+    HISTORY: '/birth-chart/history',
+    BY_ID: (id: number) => `/birth-chart/history/${id}`,
+    RENAME: (id: number) => `/birth-chart/history/${id}/name`,
+    PDF: '/birth-chart/pdf',
+    PDF_BY_ID: (id: number) => `/birth-chart/history/${id}/pdf`,
+    GEOCODE: '/birth-chart/geocode',
+  },
+
   // Admin Dashboard
   ADMIN: {
     DASHBOARD_STATS: '/admin/dashboard/stats',

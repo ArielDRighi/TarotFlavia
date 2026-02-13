@@ -9683,19 +9683,21 @@ export * from "./useUsageStatus";
 export * from "./useDownloadPdf";
 ```
 
+**Estado:** ✅ COMPLETADA
+
 **Criterios de aceptación:**
 
-- [ ] Hook useGenerateChart con manejo de éxito/error
-- [ ] Hook useGenerateChartAnonymous para no autenticados
-- [ ] Hook useChartHistory con paginación
-- [ ] Hook useSavedChart para detalle
-- [ ] Hooks useRenameChart y useDeleteChart con invalidación de cache
-- [ ] Hook useGeocodeSearch con debounce
-- [ ] Hook useUsageStatus con refetch automático
-- [ ] Hook useDownloadPdf con trigger de descarga
-- [ ] Invalidación de cache correcta tras mutaciones
-- [ ] Tiempos de stale/gc apropiados para cada query
-- [ ] Tests unitarios
+- [x] Hook useGenerateChart con manejo de éxito/error
+- [x] Hook useGenerateChartAnonymous para no autenticados
+- [x] Hook useChartHistory con paginación
+- [x] Hook useSavedChart para detalle
+- [x] Hooks useRenameChart y useDeleteChart con invalidación de cache
+- [x] Hook useGeocodeSearch con debounce
+- [x] Hook useUsageStatus con refetch automático
+- [x] Hook useDownloadPdf con trigger de descarga
+- [x] Invalidación de cache correcta tras mutaciones
+- [x] Tiempos de stale/gc apropiados para cada query
+- [x] Tests unitarios
 
 **Dependencias:** T-CA-026
 
