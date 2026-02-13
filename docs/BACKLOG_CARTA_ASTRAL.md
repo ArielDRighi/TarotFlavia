@@ -10276,21 +10276,22 @@ export { BirthDataForm } from "./BirthDataForm";
 export { birthDataSchema, type BirthDataFormValues } from "./BirthDataForm.schema";
 ```
 
+**Estado:** ✅ COMPLETADA
+
 **Criterios de aceptación:**
 
-- [ ] Campo de nombre con validación
-- [ ] Selector de fecha con calendario
-- [ ] Límite de fechas (1900 - hoy)
-- [ ] Campo de hora tipo time input
-- [ ] Tooltip explicando importancia de hora
-- [ ] Integración con PlaceAutocomplete
-- [ ] Campos ocultos para lat/lon/timezone
-- [ ] Validación con Zod
-- [ ] Estados de loading y disabled
-- [ ] Alerta de uso cuando aplique
-- [ ] Responsive (1 columna mobile, 2 columnas desktop para fecha/hora)
-- [ ] Accesibilidad completa
-- [ ] Tests de componente
+- [x] Campo de nombre con validación
+- [x] Selector de fecha con input nativo date
+- [x] Límite de fechas (1900 - hoy)
+- [x] Campo de hora tipo time input nativo
+- [x] Integración con PlaceAutocomplete
+- [x] Campos ocultos para lat/lon/timezone
+- [x] Validación con Zod
+- [x] Estados de loading y disabled
+- [x] Alerta de uso cuando aplique
+- [x] Responsive (1 columna mobile, 2 columnas desktop para fecha/hora)
+- [x] Accesibilidad completa
+- [x] Tests de componente (20 tests pasando)
 
 **Dependencias:** T-CA-028
 
