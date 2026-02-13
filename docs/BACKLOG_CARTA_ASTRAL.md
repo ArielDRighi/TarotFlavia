@@ -5142,10 +5142,10 @@ Esta parte cubre la creación de DTOs de request/response, controladores REST y 
 | Tarea    | Título                                         | Tipo    | Prioridad | Estimación |
 | -------- | ---------------------------------------------- | ------- | --------- | ---------- |
 | T-CA-016 | Crear DTOs de request ✅                       | Backend | Must      | 2h         |
-| T-CA-017 | Crear DTOs de response                         | Backend | Must      | 2h         |
+| T-CA-017 | Crear DTOs de response ✅                      | Backend | Must      | 2h         |
 | T-CA-018 | Crear controlador principal de carta astral ✅ | Backend | Must      | 4h         |
-| T-CA-019 | Crear controlador de historial (Premium)       | Backend | Must      | 3h         |
-| T-CA-020 | Crear módulo BirthChart completo               | Backend | Must      | 2h         |
+| T-CA-019 | Crear controlador de historial (Premium) ✅    | Backend | Must      | 3h         |
+| T-CA-020 | Crear módulo BirthChart completo ✅            | Backend | Must      | 2h         |
 
 **Total estimado:** 13 horas
 
@@ -5348,6 +5348,8 @@ export * from "./geocode-place.dto";
 ---
 
 ### T-CA-017: Crear DTOs de Response
+
+**Estado:** ✅ COMPLETADA
 
 **Historia relacionada:** HU-CA-001, HU-CA-004, HU-CA-005, HU-CA-006
 
@@ -5680,7 +5682,7 @@ export class GeocodeSearchResponseDto {
 - [x] Herencia correcta entre niveles de respuesta
 - [x] Decoradores Swagger completos con ejemplos
 - [x] Documentación clara de qué incluye cada nivel
-- [x] Tests unitarios de serialización (24/28 tests passing)
+- [x] Tests unitarios de serialización (24 passed, 4 skipped, 28 total) ✅
 
 **Dependencias:** T-CA-016
 
@@ -6976,8 +6978,8 @@ export class BirthChartHistoryService {
 ## CHECKLIST DE PARTE 7E
 
 - [x] T-CA-016: DTOs de request creados con validaciones ✅
-- [ ] T-CA-017: DTOs de response creados con documentación
-- [ ] T-CA-018: Controlador principal funcionando
+- [x] T-CA-017: DTOs de response creados con documentación ✅
+- [x] T-CA-018: Controlador principal funcionando ✅
 - [x] T-CA-019: Controlador de historial funcionando ✅
 - [x] T-CA-020: Módulo completo e integrado ✅
 
@@ -7031,12 +7033,12 @@ Esta parte cubre la integración con el sistema de límites de uso existente (ad
 | -------- | ---------------------------------------------- | ------- | --------- | ---------- | ------ |
 | T-CA-021 | Analizar sistema de límites existente          | Backend | Must      | 2h         | ✅     |
 | T-CA-022 | Extender sistema para límites mensuales        | Backend | Must      | 4h         | ✅     |
-| T-CA-023 | Integrar límites de carta astral               | Backend | Must      | 3h         |        |
-| T-CA-024 | Crear servicio de geocodificación              | Backend | Must      | 4h         |        |
-| T-CA-025 | Crear panel admin para límites de carta astral | Backend | Should    | 3h         |        |
+| T-CA-023 | Integrar límites de carta astral               | Backend | Must      | 3h         | ✅     |
+| T-CA-024 | Crear servicio de geocodificación              | Backend | Must      | 4h         | ✅     |
+| T-CA-025 | Crear panel admin para límites de carta astral | Backend | Should    | 3h         | ✅     |
 
-**Total estimado:** 16 horas  
-**Completado:** 6 horas (37.5%)
+**Total estimado:** 16 horas
+**Completado:** 16 horas (100%) ✅
 
 ---
 
@@ -8837,10 +8839,10 @@ export class SystemConfig {
 
 ## CHECKLIST DE PARTE 7F
 
-- [ ] T-CA-021: Análisis del sistema de límites completado
+- [x] T-CA-021: Análisis del sistema de límites completado ✅
 - [x] T-CA-022: Sistema extendido para límites mensuales ✅
-- [ ] T-CA-023: Límites de carta astral integrados
-- [ ] T-CA-024: Servicio de geocodificación funcionando
+- [x] T-CA-023: Límites de carta astral integrados ✅
+- [x] T-CA-024: Servicio de geocodificación funcionando ✅
 - [x] T-CA-025: Panel admin para límites configurado ✅
 
 ---
