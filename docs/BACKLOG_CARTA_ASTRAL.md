@@ -9939,21 +9939,23 @@ export function PlaceAutocomplete({
 export { PlaceAutocomplete } from "./PlaceAutocomplete";
 ```
 
+**Estado:** ✅ COMPLETADA
+
 **Criterios de aceptación:**
 
-- [ ] Input con ícono de búsqueda
-- [ ] Popover con resultados mientras escribe
-- [ ] Debounce de 300ms en búsqueda
-- [ ] Mínimo 3 caracteres para buscar
-- [ ] Indicador de carga durante búsqueda
-- [ ] Mensaje cuando no hay resultados
-- [ ] Selección de lugar actualiza el input
-- [ ] Botón para limpiar selección
-- [ ] Muestra coordenadas y timezone del lugar seleccionado
-- [ ] Soporte para error y required
-- [ ] Accesibilidad (aria labels, keyboard navigation)
-- [ ] Responsive design
-- [ ] Tests de componente
+- [x] Input con ícono de búsqueda
+- [x] Popover con resultados mientras escribe
+- [x] Debounce de 300ms en búsqueda
+- [x] Mínimo 3 caracteres para buscar
+- [x] Indicador de carga durante búsqueda
+- [x] Mensaje cuando no hay resultados
+- [x] Selección de lugar actualiza el input
+- [x] Botón para limpiar selección
+- [x] Muestra coordenadas y timezone del lugar seleccionado
+- [x] Soporte para error y required
+- [x] Accesibilidad (aria labels, keyboard navigation)
+- [x] Responsive design
+- [x] Tests de componente
 
 **Dependencias:** T-CA-027
 
