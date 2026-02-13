@@ -59,8 +59,8 @@ describe('BirthDataForm', () => {
       // Campo nombre (buscar por placeholder ya que FormControl wrapper evita getByLabelText)
       expect(screen.getByPlaceholderText(/maría garcía/i)).toBeInTheDocument();
 
-      // Campo fecha
-      expect(screen.getByText(/fecha de nacimiento/i)).toBeInTheDocument();
+      // Campo fecha (buscar el label específicamente)
+      expect(screen.getByLabelText(/fecha de nacimiento/i)).toBeInTheDocument();
       const dateInput = document.querySelector('input[name="birthDate"]');
       expect(dateInput).toHaveAttribute('type', 'date');
 
@@ -167,6 +167,54 @@ describe('BirthDataForm', () => {
         expect(latInput?.value).toBe('-34.6037');
         expect(lonInput?.value).toBe('-58.3816');
         expect(tzInput?.value).toBe('America/Argentina/Buenos_Aires');
+      });
+    });
+  });
+
+  describe('Submit del formulario', () => {
+    it('debe llamar a onSubmit con datos válidos completos', async () => {
+      const user = userEvent.setup();
+      render(<BirthDataForm onSubmit={mockOnSubmit} />);
+
+      // Llenar todos los campos requeridos
+      const nameInput = screen.getByPlaceholderText(/maría garcía/i);
+      await user.type(nameInput, 'Juan Pérez');
+
+      const dateInput = document.querySelector('input[name="birthDate"]') as HTMLInputElement;
+      await user.type(dateInput, '1990-05-15');
+
+      const timeInput = document.querySelector('input[name="birthTime"]') as HTMLInputElement;
+      await user.type(timeInput, '14:30');
+
+      const placeInput = screen.getByTestId('place-autocomplete');
+      await user.type(placeInput, 'Buenos Aires');
+
+      // Esperar a que se actualicen los campos ocultos
+      await waitFor(() => {
+        const latInput = document.querySelector('input[name="latitude"]') as HTMLInputElement;
+        expect(latInput?.value).toBe('-34.6037');
+      });
+
+      // Submit el formulario
+      const submitButton = screen.getByRole('button', { name: /generar mi carta astral/i });
+      await user.click(submitButton);
+
+      // Verificar que onSubmit fue llamado con los datos correctos
+      await waitFor(() => {
+        expect(mockOnSubmit).toHaveBeenCalledTimes(1);
+        // React Hook Form pasa (data, event) - verificar solo el primer argumento
+        const firstCallFirstArg = mockOnSubmit.mock.calls[0][0];
+        expect(firstCallFirstArg).toEqual(
+          expect.objectContaining({
+            name: 'Juan Pérez',
+            birthDate: '1990-05-15',
+            birthTime: '14:30',
+            birthPlace: 'Buenos Aires',
+            latitude: -34.6037,
+            longitude: -58.3816,
+            timezone: 'America/Argentina/Buenos_Aires',
+          })
+        );
       });
     });
   });

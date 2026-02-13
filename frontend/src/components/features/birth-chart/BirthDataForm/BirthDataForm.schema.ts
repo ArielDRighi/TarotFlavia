@@ -13,6 +13,14 @@ export const birthDataSchema = z.object({
   birthDate: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha inválido')
+    .refine(
+      (val) => {
+        const date = new Date(val);
+        // Check if date is valid (not NaN and matches input)
+        return !isNaN(date.getTime()) && date.toISOString().startsWith(val);
+      },
+      { message: 'Fecha inválida' }
+    )
     .refine((date) => {
       const parsed = new Date(date);
       const now = new Date();

@@ -75,15 +75,22 @@ export function BirthDataForm({
   };
 
   // Obtener lugar actual del form para el autocomplete
-  const currentPlace: GeocodedPlace | null = form.watch('birthPlace')
+  const [birthPlace, latitude, longitude, timezone] = form.watch([
+    'birthPlace',
+    'latitude',
+    'longitude',
+    'timezone',
+  ]);
+
+  const currentPlace: GeocodedPlace | null = birthPlace
     ? {
         placeId: '',
-        displayName: form.watch('birthPlace'),
+        displayName: birthPlace,
         city: '',
         country: '',
-        latitude: form.watch('latitude'),
-        longitude: form.watch('longitude'),
-        timezone: form.watch('timezone'),
+        latitude,
+        longitude,
+        timezone,
       }
     : null;
 
@@ -144,7 +151,9 @@ export function BirthDataForm({
                     disabled={disabled}
                   />
                 </FormControl>
-                <FormDescription>Formato: DD/MM/AAAA</FormDescription>
+                <FormDescription>
+                  Selecciona tu fecha de nacimiento usando el selector de fecha.
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
