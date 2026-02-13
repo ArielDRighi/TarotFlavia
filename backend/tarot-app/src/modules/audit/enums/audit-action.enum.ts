@@ -11,4 +11,5 @@ export enum AuditAction {
   SPREAD_MODIFIED = 'spread_modified',
   CONFIG_CHANGED = 'config_changed',
   USER_DELETED = 'user_deleted',
+  UPDATE_USAGE_LIMITS = 'update_usage_limits',
 }
