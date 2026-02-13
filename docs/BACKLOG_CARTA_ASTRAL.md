@@ -7142,6 +7142,7 @@ Según docs/USAGE_LIMITS_SYSTEM.md:
 **Estimación:** 2 horas
 
 **Resultado del análisis:**
+
 - ✅ **Hallazgo principal:** El sistema YA soporta límites mensuales mediante `getUsageByPeriod(userId, feature, 'monthly')`
 - ✅ `UsageFeature.BIRTH_CHART` ya existe y está configurado
 - ✅ Límites definidos: FREE: 3/mes, PREMIUM: 5/mes, ANONYMOUS: 1 lifetime
@@ -7798,24 +7799,26 @@ const monthlyUsage = await this.usageLimitsService.getUsageByPeriod(
 
 **Archivos clave de referencia:**
 
-| Archivo | Líneas clave | Funcionalidad |
-|---------|--------------|---------------|
-| `usage-limit.entity.ts` | 18 | Define `UsageFeature.BIRTH_CHART` |
-| `usage-limits.constants.ts` | 32-37 | Límites por plan (1/3/5) |
-| `usage-limits.service.ts` | 98-131 | `getUsageByPeriod('monthly')` |
-| `anonymous-tracking.service.ts` | 119-160 | Lifetime tracking (`canAccessLifetime`, `recordLifetimeUsage`) |
-| `check-usage-limit.guard.ts` | 252-277 | Lógica de validación lifetime |
-| `birth-chart.controller.ts` | 117, 173 | Decoradores aplicados (`@CheckUsageLimit`, `@AllowAnonymous`) |
-| `birth-chart-facade.service.ts` | 211-230 | Uso real de límites mensuales |
+| Archivo                         | Líneas clave | Funcionalidad                                                  |
+| ------------------------------- | ------------ | -------------------------------------------------------------- |
+| `usage-limit.entity.ts`         | 18           | Define `UsageFeature.BIRTH_CHART`                              |
+| `usage-limits.constants.ts`     | 32-37        | Límites por plan (1/3/5)                                       |
+| `usage-limits.service.ts`       | 98-131       | `getUsageByPeriod('monthly')`                                  |
+| `anonymous-tracking.service.ts` | 119-160      | Lifetime tracking (`canAccessLifetime`, `recordLifetimeUsage`) |
+| `check-usage-limit.guard.ts`    | 252-277      | Lógica de validación lifetime                                  |
+| `birth-chart.controller.ts`     | 117, 173     | Decoradores aplicados (`@CheckUsageLimit`, `@AllowAnonymous`)  |
+| `birth-chart-facade.service.ts` | 211-230      | Uso real de límites mensuales                                  |
 
 **Decisión de diseño:**
 
 El sistema optó por **NO** crear:
+
 - Enum `UsagePeriod` → Usa tipos literales `'daily' | 'monthly' | 'lifetime'`
 - Entidad `MonthlyUsage` → Usa agregación sobre `usage_limit` existente
 - Entidad `AnonymousLifetimeUsage` → Usa `anonymous_usage` con fecha fija '1970-01-01'
 
 **Razones:**
+
 1. ✅ Menos complejidad (no crear tablas innecesarias)
 2. ✅ Mejor performance (menos joins, menos índices)
 3. ✅ Más mantenible (un solo sistema de tracking)
@@ -17474,11 +17477,11 @@ Ver [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) para problemas comunes.
     │
 3.  └── BirthChartFacadeService
     │
-4.              ├── ChartCacheService.get() (verificar caché)
+4.               ├── ChartCacheService.get() (verificar caché)
               │       │
               │       └── Si existe → retornar cacheado
               │
-5.              ├── ChartCalculationService.calculateChart()
+5.               ├── ChartCalculationService.calculateChart()
               │       │
               │       ├── EphemerisWrapper.calculatePlanetPositions()
               │       ├── EphemerisWrapper.calculateHouses()
@@ -17486,17 +17489,17 @@ Ver [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) para problemas comunes.
               │       ├── HouseCuspService.transform()
               │       └── AspectCalculationService.calculate()
               │
-6.              ├── ChartInterpretationService.generateInterpretation()
+6.               ├── ChartInterpretationService.generateInterpretation()
               │       │
               │       └── BirthChartInterpretationRepository.findAllForChart()
               │
-7.              ├── ChartAISynthesisService.generateSynthesis() (Premium)
+7.               ├── ChartAISynthesisService.generateSynthesis() (Premium)
               │       │
               │       └── AIProviderService.generateCompletion()
               │
-8.              ├── BirthChartRepository.save() (Premium)
+8.               ├── BirthChartRepository.save() (Premium)
               │
-9.              ├── ChartCacheService.set()
+9.               ├── ChartCacheService.set()
               │
 10.           └── Return response según plan
 
