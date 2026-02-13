@@ -8927,6 +8927,8 @@ Esta parte cubre la creación de los componentes base de React y el formulario d
 
 ### T-CA-026: Crear Tipos TypeScript del Módulo
 
+**Estado:** ✅ COMPLETADA
+
 **Historia relacionada:** Todas
 
 **Descripción:**
@@ -9336,15 +9338,15 @@ export * from "./enums";
 
 **Criterios de aceptación:**
 
-- [ ] Tipos de posiciones planetarias definidos
-- [ ] Tipos de casas y aspectos definidos
-- [ ] Tipos de interpretaciones definidos
-- [ ] Tipos de geocoding definidos
-- [ ] Tipos de request/response de API definidos
-- [ ] Type guards para diferenciar respuestas
-- [ ] Enums con metadata (nombres, símbolos)
-- [ ] Exportación centralizada en index.ts
-- [ ] Alineación con DTOs del backend
+- [x] Tipos de posiciones planetarias definidos
+- [x] Tipos de casas y aspectos definidos
+- [x] Tipos de interpretaciones definidos
+- [x] Tipos de geocoding definidos
+- [x] Tipos de request/response de API definidos
+- [x] Type guards para diferenciar respuestas
+- [x] Enums con metadata (nombres, símbolos)
+- [x] Exportación centralizada en index.ts
+- [x] Alineación con DTOs del backend
 
 **Dependencias:** Ninguna
 
