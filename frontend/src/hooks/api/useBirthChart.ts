@@ -59,7 +59,9 @@ export function useGenerateChart(options?: GenerateChartOptions) {
  * Hook para generar carta astral (usuarios anónimos)
  * Solo retorna datos astronómicos básicos, sin interpretación
  */
-export function useGenerateChartAnonymous() {
+export function useGenerateChartAnonymous(options?: GenerateChartOptions) {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (data: GenerateChartRequest) => {
       const response = await apiClient.post<ChartResponse>(
@@ -68,6 +70,12 @@ export function useGenerateChartAnonymous() {
       );
       return response.data;
     },
+    onSuccess: (data) => {
+      // Invalidar usage al generar carta anónima
+      queryClient.invalidateQueries({ queryKey: birthChartQueryKeys.usage() });
+      options?.onSuccess?.(data);
+    },
+    onError: options?.onError,
   });
 }
 

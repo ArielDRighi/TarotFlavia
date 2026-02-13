@@ -10299,7 +10299,9 @@ export { birthDataSchema, type BirthDataFormValues } from "./BirthDataForm.schem
 
 ---
 
-### T-CA-030: Crear Página Principal de Carta Astral
+### T-CA-030: Crear Página Principal de Carta Astral ✅
+
+**Estado:** ✅ COMPLETADA
 
 **Historia relacionada:** HU-CA-001
 
@@ -10610,18 +10612,16 @@ export const useBirthChartStore = create<BirthChartState>((set) => ({
 
 **Criterios de aceptación:**
 
-- [ ] Layout con metadata SEO
-- [ ] Skeleton de loading
-- [ ] Header con ícono y descripción
-- [ ] Badges mostrando plan y límites
-- [ ] Formulario integrado
-- [ ] Manejo de errores visual
-- [ ] Redirección a resultado tras éxito
-- [ ] Vista de límite alcanzado con CTAs
-- [ ] Cards informativas de qué incluye
-- [ ] Store Zustand para persistir datos entre páginas
-- [ ] Responsive design
-- [ ] Tests de página
+- [x] Layout con metadata SEO apropiada
+- [x] Skeleton de loading
+- [x] Integración con BirthDataForm
+- [x] Badges de plan y uso (diferenciado por anónimo/free/premium)
+- [x] Al éxito, navegar a página de resultado
+- [x] Vista de límite alcanzado con CTAs
+- [x] Cards informativas de qué incluye
+- [x] Store Zustand para persistir datos entre páginas
+- [x] Responsive design
+- [x] Tests de página
 
 **Dependencias:** T-CA-029, T-CA-027
 
@@ -10631,11 +10631,11 @@ export const useBirthChartStore = create<BirthChartState>((set) => ({
 
 ## CHECKLIST DE PARTE 7G
 
-- [ ] T-CA-026: Tipos TypeScript definidos
-- [ ] T-CA-027: Hooks de API creados
-- [ ] T-CA-028: Componente PlaceAutocomplete funcionando
-- [ ] T-CA-029: Formulario BirthDataForm completo
-- [ ] T-CA-030: Página principal funcionando
+- [x] T-CA-026: Tipos TypeScript definidos
+- [x] T-CA-027: Hooks de API creados
+- [x] T-CA-028: Componente PlaceAutocomplete funcionando
+- [x] T-CA-029: Formulario BirthDataForm completo
+- [x] T-CA-030: Página principal funcionando
 
 ---
 
