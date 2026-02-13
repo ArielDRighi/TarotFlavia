@@ -188,3 +188,50 @@ export type {
   PendulumCapabilities,
 } from './pendulum.types';
 export { PENDULUM_RESPONSE_CONFIG, PENDULUM_MOVEMENT_CONFIG } from './pendulum.types';
+
+// Birth Chart Types - Enums
+export type { House } from './birth-chart.enums';
+export {
+  ZodiacSign as BirthChartZodiacSign,
+  Planet,
+  AspectType,
+  ZODIAC_SIGNS,
+  PLANETS,
+  ASPECTS,
+} from './birth-chart.enums';
+
+// Birth Chart Types - Chart
+export type {
+  PlanetPosition,
+  HouseCusp,
+  ChartAspect,
+  ChartDistribution,
+  ChartSvgData,
+  BirthData,
+  SavedChart,
+} from './birth-chart.types';
+
+// Birth Chart Types - Interpretations
+export type {
+  BigThreeInterpretation,
+  AspectInterpretation,
+  PlanetInterpretation,
+  FullInterpretation,
+  AISynthesis,
+} from './birth-chart-interpretation.types';
+
+// Birth Chart Types - Geocode
+export type { GeocodedPlace, GeocodeSearchResponse } from './birth-chart-geocode.types';
+
+// Birth Chart Types - API
+export type {
+  GenerateChartRequest,
+  BasicChartResponse,
+  FullChartResponse,
+  PremiumChartResponse,
+  ChartResponse,
+  UsageStatus,
+  ChartHistoryResponse,
+  ApiError as BirthChartApiError,
+} from './birth-chart-api.types';
+export { isFullChartResponse, isPremiumChartResponse } from './birth-chart-api.types';
