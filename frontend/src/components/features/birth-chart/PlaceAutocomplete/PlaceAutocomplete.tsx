@@ -6,7 +6,7 @@
 
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { MapPin, Loader2, Search, X } from 'lucide-react';
 import { useGeocodeSearch } from '@/hooks/api/useGeocodeSearch';
 import type { GeocodedPlace } from '@/types/birth-chart-geocode.types';
@@ -44,32 +44,24 @@ export function PlaceAutocomplete({
   id = 'birth-place',
 }: PlaceAutocompleteProps) {
   const [open, setOpen] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-  
-  // Mantener una referencia del último value.placeId para detectar cambios reales
-  const lastPlaceIdRef = useRef<string | null>(value?.placeId ?? null);
-  
-  // Estado local del input - se inicializa con value.displayName si existe
-  const [inputValue, setInputValue] = useState(value?.displayName || '');
 
-  // Sincronizar inputValue solo cuando value.placeId cambia (nuevo lugar seleccionado)
-  // Esto evita el setState sincrónico en effect que causa el warning
-  if (value?.placeId !== lastPlaceIdRef.current) {
-    lastPlaceIdRef.current = value?.placeId ?? null;
-    const newDisplayName = value?.displayName || '';
-    if (inputValue !== newDisplayName) {
-      setInputValue(newDisplayName);
-    }
-  }
+  // Estado SOLO para cuando el usuario está escribiendo (búsqueda)
+  const [searchQuery, setSearchQuery] = useState('');
 
-  // Búsqueda con debounce
-  const { data, isLoading, isFetching } = useGeocodeSearch(inputValue);
+  // El valor mostrado en el input se deriva del estado actual:
+  // - Si hay searchQuery (usuario escribiendo) → mostrar searchQuery
+  // - Si hay value seleccionado → mostrar value.displayName
+  // - Si no hay nada → mostrar vacío
+  const inputDisplayValue = searchQuery || value?.displayName || '';
+
+  // Búsqueda con debounce - usa searchQuery, no el valor mostrado
+  const { data, isLoading, isFetching } = useGeocodeSearch(searchQuery);
 
   // Manejar selección de lugar
   const handleSelect = useCallback(
     (place: GeocodedPlace) => {
       onChange(place);
-      setInputValue(place.displayName);
+      setSearchQuery(''); // Limpiar búsqueda, el input mostrará value.displayName
       setOpen(false);
     },
     [onChange]
@@ -78,14 +70,13 @@ export function PlaceAutocomplete({
   // Limpiar selección
   const handleClear = useCallback(() => {
     onChange(null);
-    setInputValue('');
-    inputRef.current?.focus();
+    setSearchQuery('');
   }, [onChange]);
 
   // Manejar cambio en input
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
-    setInputValue(newValue);
+    setSearchQuery(newValue);
 
     // Si borramos todo o cambiamos el texto, limpiar selección
     if (value && newValue !== value.displayName) {
@@ -132,7 +123,9 @@ export function PlaceAutocomplete({
           >
             <MapPin className="text-muted-foreground mr-2 h-4 w-4" />
             <div className="flex flex-col">
-              <span className="font-medium">{place.city || place.displayName.split(',')[0]}</span>
+              <span className="font-medium">
+                {place.city || place.displayName.split(',')[0]?.trim() || place.displayName}
+              </span>
               <span className="text-muted-foreground text-xs">
                 {place.country}
                 {place.timezone && ` • ${place.timezone}`}
@@ -158,12 +151,11 @@ export function PlaceAutocomplete({
           <div className="relative">
             <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
             <Input
-              ref={inputRef}
               id={id}
               type="text"
-              value={inputValue}
+              value={inputDisplayValue}
               onChange={handleInputChange}
-              onFocus={() => inputValue.length >= 3 && setOpen(true)}
+              onFocus={() => searchQuery.length >= 3 && setOpen(true)}
               placeholder={placeholder}
               disabled={disabled}
               className={cn(

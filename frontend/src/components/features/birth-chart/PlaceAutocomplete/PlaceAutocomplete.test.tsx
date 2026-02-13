@@ -289,7 +289,7 @@ describe('PlaceAutocomplete', () => {
         })
       );
 
-      render(<PlaceAutocomplete value={null} onChange={mockOnChange} />, {
+      const { rerender } = render(<PlaceAutocomplete value={null} onChange={mockOnChange} />, {
         wrapper: createWrapper(),
       });
 
@@ -303,6 +303,9 @@ describe('PlaceAutocomplete', () => {
 
       const buenosAiresOption = screen.getByText('Buenos Aires');
       await user.click(buenosAiresOption);
+
+      // Simular que el padre actualiza el prop value (componente controlado)
+      rerender(<PlaceAutocomplete value={mockPlace} onChange={mockOnChange} />);
 
       await waitFor(() => {
         expect(input.value).toBe('Buenos Aires, Argentina');
