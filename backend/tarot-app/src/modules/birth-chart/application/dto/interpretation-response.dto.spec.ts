@@ -63,13 +63,6 @@ describe('InterpretationDto', () => {
     expect(dto.house).toBeUndefined();
   });
 
-  // Skip: Jest doesn't execute TypeScript decorators at runtime
-  it.skip('should have proper API documentation', () => {
-    const dto = new InterpretationDto();
-    const metadata = Reflect.getMetadata('swagger/apiModelProperties', dto);
-    expect(metadata).toBeDefined();
-  });
-
   it('should handle content in Spanish', () => {
     const dto = plainToInstance(InterpretationDto, {
       category: 'planet_in_sign',

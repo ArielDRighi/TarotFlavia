@@ -32,13 +32,6 @@ describe('PlanetPositionDto', () => {
     expect(dto.house).toBe(5);
     expect(dto.isRetrograde).toBe(false);
   });
-
-  // Skip: Jest doesn't execute TypeScript decorators at runtime
-  it.skip('should have proper API documentation', () => {
-    const dto = new PlanetPositionDto();
-    const metadata = Reflect.getMetadata('swagger/apiModelProperties', dto);
-    expect(metadata).toBeDefined();
-  });
 });
 
 describe('HouseCuspDto', () => {

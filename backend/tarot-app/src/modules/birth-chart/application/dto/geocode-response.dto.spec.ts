@@ -40,13 +40,6 @@ describe('GeocodedPlaceDto', () => {
     expect(dto.latitude).toBe(0);
     expect(dto.longitude).toBe(0);
   });
-
-  // Skip: Jest doesn't execute TypeScript decorators at runtime
-  it.skip('should have proper API documentation', () => {
-    const dto = new GeocodedPlaceDto();
-    const metadata = Reflect.getMetadata('swagger/apiModelProperties', dto);
-    expect(metadata).toBeDefined();
-  });
 });
 
 describe('GeocodeSearchResponseDto', () => {
@@ -139,12 +132,5 @@ describe('GeocodeSearchResponseDto', () => {
     });
 
     expect(dto.count).toBe(dto.results.length);
-  });
-
-  // Skip: Jest doesn't execute TypeScript decorators at runtime
-  it.skip('should have proper API documentation', () => {
-    const dto = new GeocodeSearchResponseDto();
-    const metadata = Reflect.getMetadata('swagger/apiModelProperties', dto);
-    expect(metadata).toBeDefined();
   });
 });
