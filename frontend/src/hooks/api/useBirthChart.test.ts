@@ -316,7 +316,8 @@ describe('useBirthChart Hooks', () => {
   });
 
   describe('useRenameChart', () => {
-    it('should rename a chart successfully', async () => {
+    it('should rename a chart successfully and return id + name', async () => {
+      // Backend retorna { id: number; name: string } según birth-chart-history.controller.ts:207
       const mockResponse = { id: 1, name: 'Nuevo Nombre' };
 
       mockPost.mockResolvedValue({ data: mockResponse });
@@ -332,6 +333,8 @@ describe('useBirthChart Hooks', () => {
       });
 
       expect(result.current.data).toEqual(mockResponse);
+      expect(result.current.data?.id).toBe(1);
+      expect(result.current.data?.name).toBe('Nuevo Nombre');
       expect(mockPost).toHaveBeenCalledWith('/birth-chart/history/1/name', {
         name: 'Nuevo Nombre',
       });
@@ -339,8 +342,9 @@ describe('useBirthChart Hooks', () => {
   });
 
   describe('useDeleteChart', () => {
-    it('should delete a chart successfully', async () => {
-      mockDelete.mockResolvedValue({});
+    it('should delete a chart successfully and return void (HTTP 204)', async () => {
+      // Backend retorna 204 NO_CONTENT (void) según birth-chart-history.controller.ts:210
+      mockDelete.mockResolvedValue({ data: undefined });
 
       const { result } = renderHook(() => useDeleteChart(), {
         wrapper: createWrapper(),
@@ -352,6 +356,7 @@ describe('useBirthChart Hooks', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
+      expect(result.current.data).toBeUndefined();
       expect(mockDelete).toHaveBeenCalledWith('/birth-chart/history/1');
     });
   });
@@ -405,6 +410,7 @@ describe('useBirthChart Hooks', () => {
 
       expect(result.current.remaining).toBe(95);
       expect(result.current.limit).toBe(100);
+      expect(result.current.message).toBeUndefined();
     });
 
     it('should return canGenerate false with message for anonymous', async () => {
@@ -430,6 +436,9 @@ describe('useBirthChart Hooks', () => {
       expect(result.current.canGenerate).toBe(false);
       expect(result.current.remaining).toBe(0);
       expect(result.current.limit).toBe(1);
+      expect(result.current.message).toBe(
+        'Ya utilizaste tu carta gratuita. Regístrate para obtener más.'
+      );
     });
 
     it('should return canGenerate false with message for free', async () => {
@@ -455,6 +464,33 @@ describe('useBirthChart Hooks', () => {
       expect(result.current.canGenerate).toBe(false);
       expect(result.current.remaining).toBe(0);
       expect(result.current.limit).toBe(10);
+      expect(result.current.message).toBe('Has alcanzado el límite de 10 cartas este mes.');
+    });
+
+    it('should return canGenerate false with message for premium limit reached', async () => {
+      const mockResponse: UsageStatus = {
+        plan: 'premium',
+        used: 100,
+        limit: 100,
+        remaining: 0,
+        resetsAt: '2026-03-01T00:00:00Z',
+        canGenerate: false,
+      };
+
+      mockGet.mockResolvedValue({ data: mockResponse });
+
+      const { result } = renderHook(() => useCanGenerateChart(), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.canGenerate).toBe(false);
+      expect(result.current.remaining).toBe(0);
+      expect(result.current.limit).toBe(100);
+      expect(result.current.message).toBe('Has alcanzado el límite de 100 cartas este mes.');
     });
   });
 });

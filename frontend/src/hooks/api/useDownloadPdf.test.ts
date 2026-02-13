@@ -65,7 +65,7 @@ describe('useDownloadPdf', () => {
     vi.clearAllMocks();
   });
 
-  it('should download PDF with custom filename', async () => {
+  it('should download PDF with custom filename and return void', async () => {
     const mockBlob = new Blob(['PDF content'], { type: 'application/pdf' });
     mockPost.mockResolvedValue({ data: mockBlob });
 
@@ -89,9 +89,11 @@ describe('useDownloadPdf', () => {
     });
 
     await waitFor(() => {
-      expect(mockPost).toHaveBeenCalled();
+      expect(result.current.isSuccess).toBe(true);
     });
 
+    // El backend retorna Blob directamente, mutation debería retornar void
+    expect(result.current.data).toBeUndefined();
     expect(mockPost).toHaveBeenCalledWith('/birth-chart/pdf', mockChartData, {
       responseType: 'blob',
     });
@@ -161,7 +163,7 @@ describe('useDownloadSavedChartPdf', () => {
     vi.clearAllMocks();
   });
 
-  it('should download saved chart PDF by ID', async () => {
+  it('should download saved chart PDF by ID and return void', async () => {
     const mockBlob = new Blob(['PDF content'], { type: 'application/pdf' });
     mockGet.mockResolvedValue({ data: mockBlob });
 
@@ -175,9 +177,11 @@ describe('useDownloadSavedChartPdf', () => {
     });
 
     await waitFor(() => {
-      expect(mockGet).toHaveBeenCalled();
+      expect(result.current.isSuccess).toBe(true);
     });
 
+    // El backend retorna Blob directamente, mutation debería retornar void
+    expect(result.current.data).toBeUndefined();
     expect(mockGet).toHaveBeenCalledWith('/birth-chart/history/42/pdf', {
       responseType: 'blob',
     });

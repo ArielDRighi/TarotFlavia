@@ -114,7 +114,8 @@ export function useRenameChart() {
 
   return useMutation({
     mutationFn: async ({ id, name }: { id: number; name: string }) => {
-      const response = await apiClient.post<{ success: boolean; name: string }>(
+      // Backend retorna { id: number; name: string } según birth-chart-history.controller.ts:207
+      const response = await apiClient.post<{ id: number; name: string }>(
         API_ENDPOINTS.BIRTH_CHART.RENAME(id),
         { name }
       );
@@ -138,10 +139,8 @@ export function useDeleteChart() {
 
   return useMutation({
     mutationFn: async (id: number) => {
-      const response = await apiClient.delete<{ success: boolean }>(
-        API_ENDPOINTS.BIRTH_CHART.BY_ID(id)
-      );
-      return response.data;
+      // Backend retorna 204 NO_CONTENT (void) según birth-chart-history.controller.ts:210
+      await apiClient.delete(API_ENDPOINTS.BIRTH_CHART.BY_ID(id));
     },
     onSuccess: () => {
       // Invalidar historial y usage al eliminar
@@ -167,15 +166,26 @@ export function useUsageStatus() {
 
 /**
  * Hook helper para verificar si el usuario puede generar una carta
- * Combina datos de usage y plan del usuario
+ * Combina datos de usage y plan del usuario, incluyendo mensajes en español
  */
 export function useCanGenerateChart() {
   const { data: usage, isLoading } = useUsageStatus();
+
+  // Generar mensaje en español según el estado
+  let message: string | undefined;
+  if (usage && usage.remaining === 0) {
+    if (usage.plan === 'anonymous') {
+      message = 'Ya utilizaste tu carta gratuita. Regístrate para obtener más.';
+    } else {
+      message = `Has alcanzado el límite de ${usage.limit} cartas este mes.`;
+    }
+  }
 
   return {
     canGenerate: usage ? usage.remaining > 0 : false,
     remaining: usage?.remaining ?? 0,
     limit: usage?.limit ?? 0,
     isLoading,
+    message,
   };
 }

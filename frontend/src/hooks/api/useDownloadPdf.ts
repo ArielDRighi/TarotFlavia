@@ -36,7 +36,7 @@ interface DownloadPdfParams {
  */
 export function useDownloadPdf() {
   return useMutation({
-    mutationFn: async ({ chartData, filename }: DownloadPdfParams) => {
+    mutationFn: async ({ chartData, filename }: DownloadPdfParams): Promise<void> => {
       const response = await apiClient.post<Blob>(API_ENDPOINTS.BIRTH_CHART.PDF, chartData, {
         responseType: 'blob',
       });
@@ -44,7 +44,7 @@ export function useDownloadPdf() {
       const finalFilename = filename || `carta-astral-${chartData.name || 'anon'}.pdf`;
       downloadBlob(response.data, finalFilename);
 
-      return { success: true };
+      // Backend retorna Blob directamente, no estructura JSON
     },
   });
 }
@@ -59,7 +59,7 @@ interface DownloadSavedChartParams {
  */
 export function useDownloadSavedChartPdf() {
   return useMutation({
-    mutationFn: async ({ chartId, filename }: DownloadSavedChartParams) => {
+    mutationFn: async ({ chartId, filename }: DownloadSavedChartParams): Promise<void> => {
       const response = await apiClient.get<Blob>(API_ENDPOINTS.BIRTH_CHART.PDF_BY_ID(chartId), {
         responseType: 'blob',
       });
@@ -67,7 +67,7 @@ export function useDownloadSavedChartPdf() {
       const finalFilename = filename || `carta-astral-${chartId}.pdf`;
       downloadBlob(response.data, finalFilename);
 
-      return { success: true };
+      // Backend retorna Blob directamente, no estructura JSON
     },
   });
 }
