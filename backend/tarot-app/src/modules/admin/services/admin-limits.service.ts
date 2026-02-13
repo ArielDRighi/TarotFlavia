@@ -6,7 +6,10 @@ import {
   UpdateBirthChartLimitsDto,
   UsageLimitConfigDto,
 } from '../dto/usage-limits.dto';
-import { AuditLogService } from '../../audit/audit-log.service';
+import {
+  AuditLogService,
+  AuditLogListResponse,
+} from '../../audit/audit-log.service';
 import { AuditAction } from '../../audit/enums/audit-action.enum';
 import { USAGE_LIMITS } from '../../usage-limits/usage-limits.constants';
 import { UsageFeature } from '../../usage-limits/entities/usage-limit.entity';
@@ -167,13 +170,13 @@ export class AdminLimitsService implements OnModuleInit {
   /**
    * Obtiene el historial de cambios de límites desde el audit log
    */
-  async getLimitsHistory(): Promise<unknown[]> {
+  async getLimitsHistory(): Promise<AuditLogListResponse> {
     const result = await this.auditLog.findAll({
       action: AuditAction.UPDATE_USAGE_LIMITS,
       entityType: 'SystemConfig',
     });
 
-    return result.logs;
+    return result;
   }
 
   /**

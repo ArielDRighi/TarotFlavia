@@ -13,7 +13,10 @@ import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { UserRole } from '../../../common/enums/user-role.enum';
 import { AdminLimitsService } from '../services/admin-limits.service';
-import { UpdateBirthChartLimitsDto } from '../dto/usage-limits.dto';
+import {
+  UpdateBirthChartLimitsDto,
+  UsageLimitConfigDto,
+} from '../dto/usage-limits.dto';
 import {
   ApiTags,
   ApiOperation,
@@ -39,14 +42,7 @@ export class AdminLimitsController {
   @ApiResponse({
     status: 200,
     description: 'Límites actuales por plan',
-    schema: {
-      type: 'object',
-      properties: {
-        anonymous: { type: 'number', example: 1 },
-        free: { type: 'number', example: 3 },
-        premium: { type: 'number', example: 5 },
-      },
-    },
+    type: UsageLimitConfigDto,
   })
   @ApiResponse({ status: 401, description: 'No autorizado' })
   @ApiResponse({
@@ -75,12 +71,7 @@ export class AdminLimitsController {
           example: 'Límites actualizados exitosamente',
         },
         limits: {
-          type: 'object',
-          properties: {
-            anonymous: { type: 'number', example: 1 },
-            free: { type: 'number', example: 5 },
-            premium: { type: 'number', example: 10 },
-          },
+          $ref: '#/components/schemas/UsageLimitConfigDto',
         },
       },
     },
@@ -122,23 +113,39 @@ export class AdminLimitsController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Historial de cambios',
+    description: 'Historial de cambios con paginación',
     schema: {
-      type: 'array',
-      items: {
-        type: 'object',
-        properties: {
-          id: { type: 'number', example: 1 },
-          action: { type: 'string', example: 'UPDATE_USAGE_LIMITS' },
-          performedBy: { type: 'number', example: 1 },
-          performedAt: { type: 'string', example: '2026-02-12T10:00:00Z' },
-          oldValue: {
+      type: 'object',
+      properties: {
+        logs: {
+          type: 'array',
+          items: {
             type: 'object',
-            example: { free: 3, premium: 5 },
+            properties: {
+              id: { type: 'number', example: 1 },
+              action: { type: 'string', example: 'UPDATE_USAGE_LIMITS' },
+              entityType: { type: 'string', example: 'SystemConfig' },
+              entityId: { type: 'string', example: '1' },
+              userId: { type: 'number', example: 1 },
+              oldValue: {
+                type: 'object',
+                example: { free: 3, premium: 5 },
+              },
+              newValue: {
+                type: 'object',
+                example: { free: 5, premium: 10 },
+              },
+              createdAt: { type: 'string', example: '2026-02-12T10:00:00Z' },
+            },
           },
-          newValue: {
-            type: 'object',
-            example: { free: 5, premium: 10 },
+        },
+        meta: {
+          type: 'object',
+          properties: {
+            currentPage: { type: 'number', example: 1 },
+            itemsPerPage: { type: 'number', example: 20 },
+            totalItems: { type: 'number', example: 1 },
+            totalPages: { type: 'number', example: 1 },
           },
         },
       },

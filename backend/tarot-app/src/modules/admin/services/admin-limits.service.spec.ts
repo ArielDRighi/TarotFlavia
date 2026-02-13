@@ -364,7 +364,7 @@ describe('AdminLimitsService', () => {
         },
       ];
 
-      auditLogService.findAll.mockResolvedValue({
+      const mockResponse = {
         logs: mockHistory as unknown as never[],
         meta: {
           currentPage: 1,
@@ -372,7 +372,9 @@ describe('AdminLimitsService', () => {
           totalItems: 1,
           totalPages: 1,
         },
-      });
+      };
+
+      auditLogService.findAll.mockResolvedValue(mockResponse);
 
       const result = await service.getLimitsHistory();
 
@@ -380,11 +382,11 @@ describe('AdminLimitsService', () => {
         action: AuditAction.UPDATE_USAGE_LIMITS,
         entityType: 'SystemConfig',
       });
-      expect(result).toEqual(mockHistory);
+      expect(result).toEqual(mockResponse);
     });
 
-    it('should return empty array when no history exists', async () => {
-      auditLogService.findAll.mockResolvedValue({
+    it('should return empty logs array when no history exists', async () => {
+      const mockResponse = {
         logs: [],
         meta: {
           currentPage: 1,
@@ -392,11 +394,13 @@ describe('AdminLimitsService', () => {
           totalItems: 0,
           totalPages: 0,
         },
-      });
+      };
+
+      auditLogService.findAll.mockResolvedValue(mockResponse);
 
       const result = await service.getLimitsHistory();
 
-      expect(result).toEqual([]);
+      expect(result).toEqual(mockResponse);
     });
   });
 });
