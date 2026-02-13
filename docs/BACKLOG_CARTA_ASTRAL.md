@@ -8442,6 +8442,8 @@ TIMEZONEDB_API_KEY=your_api_key_here
 
 ### T-CA-025: Crear Panel Admin para Límites de Carta Astral
 
+**Estado:** ✅ COMPLETADA
+
 **Historia relacionada:** HU-CA-011
 
 **Descripción:**
@@ -8813,16 +8815,16 @@ export class SystemConfig {
 
 **Criterios de aceptación:**
 
-- [ ] Endpoint GET para obtener límites actuales
-- [ ] Endpoint PUT para actualizar límites
-- [ ] Endpoint GET para historial de cambios
-- [ ] Límite de anónimos (1 lifetime) NO configurable
-- [ ] Cambios aplicados inmediatamente (caché en memoria)
-- [ ] Persistencia en DB para sobrevivir reinicios
-- [ ] Auditoría de cambios
-- [ ] Protegido con AdminGuard
-- [ ] Documentación Swagger completa
-- [ ] Tests de integración
+- [x] Endpoint GET para obtener límites actuales
+- [x] Endpoint PUT para actualizar límites
+- [x] Endpoint GET para historial de cambios
+- [x] Límite de anónimos (1 lifetime) NO configurable
+- [x] Cambios aplicados inmediatamente (caché en memoria)
+- [x] Persistencia en DB para sobrevivir reinicios
+- [x] Auditoría de cambios
+- [x] Protegido con AdminGuard
+- [x] Documentación Swagger completa
+- [x] Tests de integración
 
 **Dependencias:** T-CA-022, T-CA-023
 
@@ -8836,7 +8838,7 @@ export class SystemConfig {
 - [x] T-CA-022: Sistema extendido para límites mensuales ✅
 - [ ] T-CA-023: Límites de carta astral integrados
 - [ ] T-CA-024: Servicio de geocodificación funcionando
-- [ ] T-CA-025: Panel admin para límites configurado
+- [x] T-CA-025: Panel admin para límites configurado ✅
 
 ---
 
