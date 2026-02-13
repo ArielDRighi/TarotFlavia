@@ -1,75 +1,336 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
+import { firstValueFrom } from 'rxjs';
+import { GeocodeCacheService } from './geocode-cache.service';
 import {
   GeocodeSearchResponseDto,
   GeocodedPlaceDto,
 } from '../dto/geocode-response.dto';
 
-const GEOCODE_CATALOG: ReadonlyArray<GeocodedPlaceDto> = [
-  {
-    placeId: 'ar-buenos-aires',
-    displayName: 'Buenos Aires, Argentina',
-    city: 'Buenos Aires',
-    country: 'Argentina',
-    latitude: -34.6037,
-    longitude: -58.3816,
-    timezone: 'America/Argentina/Buenos_Aires',
-  },
-  {
-    placeId: 'es-madrid',
-    displayName: 'Madrid, España',
-    city: 'Madrid',
-    country: 'España',
-    latitude: 40.4168,
-    longitude: -3.7038,
-    timezone: 'Europe/Madrid',
-  },
-  {
-    placeId: 'mx-ciudad-de-mexico',
-    displayName: 'Ciudad de México, México',
-    city: 'Ciudad de México',
-    country: 'México',
-    latitude: 19.4326,
-    longitude: -99.1332,
-    timezone: 'America/Mexico_City',
-  },
-  {
-    placeId: 'co-bogota',
-    displayName: 'Bogotá, Colombia',
-    city: 'Bogotá',
-    country: 'Colombia',
-    latitude: 4.711,
-    longitude: -74.0721,
-    timezone: 'America/Bogota',
-  },
-  {
-    placeId: 'cl-santiago',
-    displayName: 'Santiago, Chile',
-    city: 'Santiago',
-    country: 'Chile',
-    latitude: -33.4489,
-    longitude: -70.6693,
-    timezone: 'America/Santiago',
-  },
-];
+interface NominatimResult {
+  place_id: number;
+  licence: string;
+  osm_type: string;
+  osm_id: number;
+  boundingbox: string[];
+  lat: string;
+  lon: string;
+  display_name: string;
+  class: string;
+  type: string;
+  importance: number;
+  address?: {
+    city?: string;
+    town?: string;
+    village?: string;
+    municipality?: string;
+    state?: string;
+    country?: string;
+    country_code?: string;
+  };
+}
 
+interface TimezoneDBResult {
+  status: string;
+  message?: string;
+  zoneName?: string;
+  abbreviation?: string;
+  gmtOffset?: number;
+}
+
+/**
+ * Servicio de Geocodificación
+ *
+ * Convierte nombres de lugares en coordenadas geográficas (latitud, longitud)
+ * y obtiene la zona horaria correspondiente, necesario para calcular cartas astrales precisas.
+ *
+ * Características:
+ * - Busca lugares usando Nominatim (OpenStreetMap) - Gratis, sin API key
+ * - Obtiene timezone usando TimeZoneDB (opcional, con fallback por longitud)
+ * - Rate limiting: Nominatim requiere máximo 1 request/segundo
+ * - Caché robusto: búsquedas 7 días, lugares 30 días, timezones 1 año
+ *
+ * @example
+ * // Buscar lugares
+ * const results = await service.searchPlaces('Buenos Aires');
+ * // Obtener timezone
+ * const tz = await service.getTimezone(-34.6037, -58.3816);
+ */
 @Injectable()
 export class GeocodeService {
-  searchPlaces(query: string): Promise<GeocodeSearchResponseDto> {
-    const normalizedQuery = query.trim().toLowerCase();
+  private readonly logger = new Logger(GeocodeService.name);
 
-    if (!normalizedQuery) {
-      return Promise.resolve({ results: [], count: 0 });
+  // URLs de APIs
+  private readonly NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
+  private readonly TIMEZONEDB_URL =
+    'http://api.timezonedb.com/v2.1/get-time-zone';
+
+  /**
+   * Rate limiting Nominatim: máximo 1 request/segundo.
+   *
+   * IMPORTANTE (MVP / single-instance):
+   * - Este rate limit es solo en memoria y por proceso (un singleton de NestJS).
+   *   Si se ejecutan múltiples instancias del backend (horizontal scaling),
+   *   cada una mantiene su propio estado y el tráfico agregado puede exceder
+   *   el límite global de Nominatim (1 req/seg).
+   * - La actualización de este timestamp no es atómica: múltiples requests
+   *   concurrentes en la misma instancia podrían acercarse demasiado entre sí.
+   *
+   * Antes de escalar a múltiples instancias, reemplazar este mecanismo por
+   * un rate limiter distribuido (por ejemplo, usando Redis o similar) o una
+   * librería de rate limiting que soporte locks distribuidos.
+   */
+  private lastNominatimRequest = 0;
+  private readonly NOMINATIM_RATE_LIMIT_MS = 1100; // 1.1 segundos
+
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly configService: ConfigService,
+    private readonly cacheService: GeocodeCacheService,
+  ) {}
+
+  /**
+   * Busca lugares por texto
+   */
+  async searchPlaces(query: string): Promise<GeocodeSearchResponseDto> {
+    this.logger.debug(`Searching places for: ${query}`);
+
+    // Verificar caché
+    const cached = await this.cacheService.getSearchResults(query);
+    if (cached) {
+      this.logger.debug('Returning cached search results');
+      return {
+        results: cached,
+        count: cached.length,
+      };
     }
 
-    const results = GEOCODE_CATALOG.filter((item) =>
-      `${item.displayName} ${item.city} ${item.country}`
-        .toLowerCase()
-        .includes(normalizedQuery),
-    );
+    // Rate limiting
+    await this.waitForRateLimit();
 
-    return Promise.resolve({
-      results,
-      count: results.length,
-    });
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get<NominatimResult[]>(this.NOMINATIM_URL, {
+          params: {
+            q: query,
+            format: 'json',
+            addressdetails: 1,
+            limit: 5,
+            'accept-language': 'es',
+          },
+          headers: {
+            'User-Agent': 'Auguria/1.0 (contact@auguria.com)', // Requerido por Nominatim
+          },
+        }),
+      );
+
+      const results: GeocodedPlaceDto[] = await Promise.all(
+        response.data.map(async (result) => {
+          const latitude = parseFloat(result.lat);
+          const longitude = parseFloat(result.lon);
+
+          // Obtener timezone
+          const timezone = await this.getTimezone(latitude, longitude);
+
+          return {
+            placeId: `osm_${result.osm_type}_${result.osm_id}`,
+            displayName: result.display_name,
+            city: this.extractCity(result.address),
+            country: result.address?.country || '',
+            latitude,
+            longitude,
+            timezone,
+          };
+        }),
+      );
+
+      const responseDto: GeocodeSearchResponseDto = {
+        results,
+        count: results.length,
+      };
+
+      // Guardar en caché
+      await this.cacheService.setSearchResults(query, results);
+
+      return responseDto;
+    } catch (error) {
+      const err = error as Error;
+      this.logger.error(
+        `Error searching places for query "${query}": ${err.message}`,
+        err.stack,
+      );
+      throw new Error('No se pudo buscar el lugar. Intente de nuevo.', {
+        cause: err,
+      });
+    }
+  }
+
+  /**
+   * Obtiene la zona horaria para unas coordenadas
+   */
+  async getTimezone(latitude: number, longitude: number): Promise<string> {
+    // Usamos 4 decimales (~11m) para evitar colisiones cerca de fronteras de zona horaria
+    const coordKey = `${latitude.toFixed(4)},${longitude.toFixed(4)}`;
+
+    // Verificar caché
+    const cached = await this.cacheService.getTimezone(coordKey);
+    if (cached) {
+      return cached;
+    }
+
+    const apiKey = this.configService.get<string>('TIMEZONEDB_API_KEY');
+
+    if (!apiKey) {
+      // Fallback: estimar timezone por longitud (muy impreciso pero funcional)
+      this.logger.warn('No TIMEZONEDB_API_KEY configured, using fallback');
+      const timezone = this.estimateTimezoneByLongitude(longitude);
+      await this.cacheService.setTimezone(coordKey, timezone);
+      return timezone;
+    }
+
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get<TimezoneDBResult>(this.TIMEZONEDB_URL, {
+          params: {
+            key: apiKey,
+            format: 'json',
+            by: 'position',
+            lat: latitude,
+            lng: longitude,
+          },
+        }),
+      );
+
+      if (response.data.status === 'OK' && response.data.zoneName) {
+        await this.cacheService.setTimezone(coordKey, response.data.zoneName);
+        return response.data.zoneName;
+      }
+
+      throw new Error(response.data.message || 'Unknown error');
+    } catch (error) {
+      const err = error as Error;
+      this.logger.error(
+        `Error getting timezone for coordinates (${latitude}, ${longitude}): ${err.message}`,
+        err.stack,
+      );
+      const fallbackTimezone = this.estimateTimezoneByLongitude(longitude);
+      await this.cacheService.setTimezone(coordKey, fallbackTimezone);
+      return fallbackTimezone;
+    }
+  }
+
+  /**
+   * Obtiene detalles de un lugar específico por coordenadas (reverse geocoding)
+   */
+  async getPlaceDetails(
+    latitude: number,
+    longitude: number,
+  ): Promise<GeocodedPlaceDto | null> {
+    // Usamos 4 decimales (~11m) para precisión en el cache key
+    const coordKey = `${latitude.toFixed(4)},${longitude.toFixed(4)}`;
+
+    // Verificar caché
+    const cached = await this.cacheService.getPlaceDetails(coordKey);
+    if (cached) {
+      this.logger.debug('Returning cached place details');
+      return cached;
+    }
+
+    // Rate limiting
+    await this.waitForRateLimit();
+
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get<NominatimResult>(
+          'https://nominatim.openstreetmap.org/reverse',
+          {
+            params: {
+              lat: latitude,
+              lon: longitude,
+              format: 'json',
+              addressdetails: 1,
+              'accept-language': 'es',
+            },
+            headers: {
+              'User-Agent': 'Auguria/1.0 (contact@auguria.com)',
+            },
+          },
+        ),
+      );
+
+      const result = response.data;
+      const timezone = await this.getTimezone(latitude, longitude);
+
+      const place: GeocodedPlaceDto = {
+        placeId: `osm_${result.osm_type}_${result.osm_id}`,
+        displayName: result.display_name,
+        city: this.extractCity(result.address),
+        country: result.address?.country || '',
+        latitude,
+        longitude,
+        timezone,
+      };
+
+      // Guardar en caché
+      await this.cacheService.setPlaceDetails(coordKey, place);
+
+      return place;
+    } catch (error) {
+      const err = error as Error;
+      this.logger.error(
+        `Error getting place details for coordinates (${latitude}, ${longitude}): ${err.message}`,
+        err.stack,
+      );
+      return null;
+    }
+  }
+
+  /**
+   * Extrae la ciudad del objeto address
+   */
+  private extractCity(address?: NominatimResult['address']): string {
+    if (!address) return '';
+    return (
+      address.city ||
+      address.town ||
+      address.village ||
+      address.municipality ||
+      ''
+    );
+  }
+
+  /**
+   * Estima timezone por longitud (fallback muy básico)
+   *
+   * Cada 15 grados de longitud = 1 hora de diferencia con UTC
+   * Nota: Este es un fallback muy impreciso. Úsalo solo cuando TimeZoneDB no esté disponible.
+   */
+  private estimateTimezoneByLongitude(longitude: number): string {
+    // Cada 15 grados de longitud = 1 hora de diferencia con UTC
+    const offsetHours = Math.round(longitude / 15);
+
+    if (offsetHours === 0) return 'UTC';
+    if (offsetHours > 0) return `Etc/GMT-${offsetHours}`;
+    return `Etc/GMT+${Math.abs(offsetHours)}`;
+  }
+
+  /**
+   * Rate limiting para Nominatim
+   *
+   * Nominatim policy requires max 1 request per second
+   * https://operations.osmfoundation.org/policies/nominatim/
+   */
+  private async waitForRateLimit(): Promise<void> {
+    const now = Date.now();
+    const timeSinceLastRequest = now - this.lastNominatimRequest;
+
+    if (timeSinceLastRequest < this.NOMINATIM_RATE_LIMIT_MS) {
+      const waitTime = this.NOMINATIM_RATE_LIMIT_MS - timeSinceLastRequest;
+      this.logger.debug(`Rate limiting: waiting ${waitTime}ms`);
+      await new Promise((resolve) => setTimeout(resolve, waitTime));
+    }
+
+    this.lastNominatimRequest = Date.now();
   }
 }
