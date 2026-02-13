@@ -32,9 +32,11 @@ export interface BigThreeInterpretation {
  * Interpretación de un aspecto planetario
  */
 export interface AspectInterpretation {
-  aspectName: string;
   withPlanet: string;
-  interpretation?: string;
+  withPlanetName: string;
+  aspectType: string;
+  aspectName: string;
+  interpretation: string;
 }
 
 /**
@@ -61,6 +63,6 @@ export interface FullInterpretation {
  */
 export interface AISynthesis {
   content: string;
-  generatedAt: string;
+  generatedAt: string | null;
   provider: string;
 }

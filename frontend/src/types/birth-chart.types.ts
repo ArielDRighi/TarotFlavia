@@ -64,11 +64,16 @@ export interface ChartDistribution {
 
 /**
  * Datos para renderizar el gráfico SVG de la carta
+ *
+ * Nota: El backend (`BasicChartResponseDto`) define `chartSvgData` como
+ * `Record<string, unknown>[]` para los tres arrays, por lo que no se
+ * garantiza que coincida con las estructuras de `PlanetPosition`,
+ * `HouseCusp` o `ChartAspect`. Aquí reflejamos ese contrato genérico.
  */
 export interface ChartSvgData {
-  planets: PlanetPosition[];
-  houses: HouseCusp[];
-  aspects: ChartAspect[];
+  planets: Record<string, unknown>[];
+  houses: Record<string, unknown>[];
+  aspects: Record<string, unknown>[];
 }
 
 /**

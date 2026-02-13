@@ -95,14 +95,19 @@ export interface UsageStatus {
 }
 
 /**
- * Respuesta de historial de cartas (solo Premium)
+ * Respuesta de historial de cartas
+ * Estructura de paginación estándar del backend
  */
 export interface ChartHistoryResponse {
-  charts: SavedChart[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
+  data: SavedChart[];
+  meta: {
+    page: number;
+    limit: number;
+    totalItems: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
 }
 
 /**
