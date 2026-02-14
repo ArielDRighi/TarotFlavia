@@ -11360,6 +11360,8 @@ export { useChartWheel } from "./ChartWheel.hooks";
 
 ### T-CA-033: Crear Componente de Tabla de Posiciones Planetarias
 
+**Estado:** ✅ COMPLETADA
+
 **Historia relacionada:** HU-CA-003
 
 **Descripción:**
@@ -11586,18 +11588,18 @@ export { PlanetPositionsTable } from "./PlanetPositionsTable";
 
 **Criterios de aceptación:**
 
-- [ ] Muestra todos los planetas con símbolo y nombre
-- [ ] Muestra signo con símbolo y color por elemento
-- [ ] Muestra posición exacta (grados y minutos)
-- [ ] Muestra casa donde se ubica
-- [ ] Indicador visual de retrogradación
-- [ ] Incluye Ascendente y MC si están disponibles
-- [ ] Tooltips con información adicional
-- [ ] Soporte para modo compacto (mobile)
-- [ ] Highlight de planeta seleccionado
-- [ ] Callback onClick para interactividad
-- [ ] Responsive design
-- [ ] Tests de componente
+- [x] Muestra todos los planetas con símbolo y nombre
+- [x] Muestra signo con símbolo y color por elemento
+- [x] Muestra posición exacta (grados y minutos)
+- [x] Muestra casa donde se ubica
+- [x] Indicador visual de retrogradación
+- [x] Incluye Ascendente y MC si están disponibles
+- [x] Tooltips con información adicional
+- [x] Soporte para modo compacto (mobile)
+- [x] Highlight de planeta seleccionado
+- [x] Callback onClick para interactividad
+- [x] Responsive design
+- [x] Tests de componente
 
 **Dependencias:** T-CA-026
 

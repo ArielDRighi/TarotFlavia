@@ -391,14 +391,19 @@ describe('BirthChartPage', () => {
       // Mock del hook anónimo para capturar callbacks y simular éxito
       let capturedOnSuccess: ((data: ChartResponse) => void) | undefined;
       vi.mocked(useGenerateChartAnonymous).mockImplementation(
-        (options?: { onSuccess?: (data: ChartResponse) => void; onError?: (err: Error) => void }) => {
+        (options?: {
+          onSuccess?: (data: ChartResponse) => void;
+          onError?: (err: Error) => void;
+        }) => {
           capturedOnSuccess = options?.onSuccess;
           return {
             mutate: vi.fn(() => {
               if (capturedOnSuccess) capturedOnSuccess(mockChartResponse);
             }),
             isPending: false,
-          } as Partial<UseMutationResult<ChartResponse, Error, GenerateChartRequest>> as UseMutationResult<ChartResponse, Error, GenerateChartRequest>;
+          } as Partial<
+            UseMutationResult<ChartResponse, Error, GenerateChartRequest>
+          > as UseMutationResult<ChartResponse, Error, GenerateChartRequest>;
         }
       );
 
@@ -424,14 +429,19 @@ describe('BirthChartPage', () => {
       // Mock del hook autenticado para capturar callbacks y simular éxito
       let capturedOnSuccess: ((data: ChartResponse) => void) | undefined;
       vi.mocked(useGenerateChart).mockImplementation(
-        (options?: { onSuccess?: (data: ChartResponse) => void; onError?: (err: Error) => void }) => {
+        (options?: {
+          onSuccess?: (data: ChartResponse) => void;
+          onError?: (err: Error) => void;
+        }) => {
           capturedOnSuccess = options?.onSuccess;
           return {
             mutate: vi.fn(() => {
               if (capturedOnSuccess) capturedOnSuccess(mockPremiumResponse);
             }),
             isPending: false,
-          } as Partial<UseMutationResult<PremiumChartResponse, Error, GenerateChartRequest>> as UseMutationResult<PremiumChartResponse, Error, GenerateChartRequest>;
+          } as Partial<
+            UseMutationResult<PremiumChartResponse, Error, GenerateChartRequest>
+          > as UseMutationResult<PremiumChartResponse, Error, GenerateChartRequest>;
         }
       );
 
@@ -453,14 +463,19 @@ describe('BirthChartPage', () => {
       // Mock del hook anónimo para capturar callbacks y simular error
       let capturedOnError: ((err: Error) => void) | undefined;
       vi.mocked(useGenerateChartAnonymous).mockImplementation(
-        (options?: { onSuccess?: (data: ChartResponse) => void; onError?: (err: Error) => void }) => {
+        (options?: {
+          onSuccess?: (data: ChartResponse) => void;
+          onError?: (err: Error) => void;
+        }) => {
           capturedOnError = options?.onError;
           return {
             mutate: vi.fn(() => {
               if (capturedOnError) capturedOnError(rateLimitError);
             }),
             isPending: false,
-          } as Partial<UseMutationResult<ChartResponse, Error, GenerateChartRequest>> as UseMutationResult<ChartResponse, Error, GenerateChartRequest>;
+          } as Partial<
+            UseMutationResult<ChartResponse, Error, GenerateChartRequest>
+          > as UseMutationResult<ChartResponse, Error, GenerateChartRequest>;
         }
       );
 
@@ -492,14 +507,19 @@ describe('BirthChartPage', () => {
       // Mock del hook anónimo para capturar callbacks y simular error
       let capturedOnError: ((err: Error) => void) | undefined;
       vi.mocked(useGenerateChartAnonymous).mockImplementation(
-        (options?: { onSuccess?: (data: ChartResponse) => void; onError?: (err: Error) => void }) => {
+        (options?: {
+          onSuccess?: (data: ChartResponse) => void;
+          onError?: (err: Error) => void;
+        }) => {
           capturedOnError = options?.onError;
           return {
             mutate: vi.fn(() => {
               if (capturedOnError) capturedOnError(axiosError as Error);
             }),
             isPending: false,
-          } as Partial<UseMutationResult<ChartResponse, Error, GenerateChartRequest>> as UseMutationResult<ChartResponse, Error, GenerateChartRequest>;
+          } as Partial<
+            UseMutationResult<ChartResponse, Error, GenerateChartRequest>
+          > as UseMutationResult<ChartResponse, Error, GenerateChartRequest>;
         }
       );
 
@@ -523,14 +543,19 @@ describe('BirthChartPage', () => {
       // Mock del hook anónimo para capturar callbacks y simular error
       let capturedOnError: ((err: Error) => void) | undefined;
       vi.mocked(useGenerateChartAnonymous).mockImplementation(
-        (options?: { onSuccess?: (data: ChartResponse) => void; onError?: (err: Error) => void }) => {
+        (options?: {
+          onSuccess?: (data: ChartResponse) => void;
+          onError?: (err: Error) => void;
+        }) => {
           capturedOnError = options?.onError;
           return {
             mutate: vi.fn(() => {
               if (capturedOnError) capturedOnError(genericError);
             }),
             isPending: false,
-          } as Partial<UseMutationResult<ChartResponse, Error, GenerateChartRequest>> as UseMutationResult<ChartResponse, Error, GenerateChartRequest>;
+          } as Partial<
+            UseMutationResult<ChartResponse, Error, GenerateChartRequest>
+          > as UseMutationResult<ChartResponse, Error, GenerateChartRequest>;
         }
       );
 
