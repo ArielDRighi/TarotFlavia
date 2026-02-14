@@ -12340,13 +12340,13 @@ src/features/birth-chart/
 
 Esta parte cubre las páginas de resultado de la carta astral, incluyendo la visualización del Big Three, las interpretaciones completas y la síntesis de IA.
 
-| Tarea    | Título                                        | Tipo     | Prioridad | Estimación |
-| -------- | --------------------------------------------- | -------- | --------- | ---------- |
-| T-CA-036 | Crear componente Big Three                    | Frontend | Must      | 3h         |
-| T-CA-037 | Crear componente de interpretación de planeta | Frontend | Must      | 3h         |
-| T-CA-038 | Crear componente de síntesis IA               | Frontend | Must      | 2h         |
-| T-CA-039 | Crear página de resultado de carta astral     | Frontend | Must      | 5h         |
-| T-CA-040 | Crear página de carta guardada (Premium)      | Frontend | Must      | 3h         |
+| Tarea    | Título                                        | Tipo     | Prioridad | Estimación | Estado          |
+| -------- | --------------------------------------------- | -------- | --------- | ---------- | --------------- |
+| T-CA-036 | Crear componente Big Three                    | Frontend | Must      | 3h         | ✅ COMPLETADA   |
+| T-CA-037 | Crear componente de interpretación de planeta | Frontend | Must      | 3h         |                 |
+| T-CA-038 | Crear componente de síntesis IA               | Frontend | Must      | 2h         |                 |
+| T-CA-039 | Crear página de resultado de carta astral     | Frontend | Must      | 5h         |                 |
+| T-CA-040 | Crear página de carta guardada (Premium)      | Frontend | Must      | 3h         |                 |
 
 **Total estimado:** 16 horas
 
@@ -12625,20 +12625,22 @@ export { BigThree } from "./BigThree";
 
 **Criterios de aceptación:**
 
-- [ ] Muestra Sol, Luna y Ascendente con íconos distintivos
-- [ ] Muestra signo con símbolo zodiacal
-- [ ] Incluye interpretación para cada uno
-- [ ] Variante "hero" para destacado en página de resultado
-- [ ] Variante "compact" para resúmenes
-- [ ] Variante "default" colapsable
-- [ ] Colores diferenciados para cada elemento
-- [ ] Tooltips informativos
-- [ ] Responsive design
-- [ ] Tests de componente
+- [x] Muestra Sol, Luna y Ascendente con íconos distintivos
+- [x] Muestra signo con símbolo zodiacal
+- [x] Incluye interpretación para cada uno
+- [x] Variante "hero" para destacado en página de resultado
+- [x] Variante "compact" para resúmenes
+- [x] Variante "default" colapsable
+- [x] Colores diferenciados para cada elemento
+- [x] Tooltips informativos
+- [x] Responsive design
+- [x] Tests de componente
 
 **Dependencias:** T-CA-026
 
 **Estimación:** 3 horas
+
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -13957,7 +13959,7 @@ export default function SavedChartPage() {
 
 ## CHECKLIST DE PARTE 7I
 
-- [ ] T-CA-036: Componente BigThree funcionando
+- [x] T-CA-036: Componente BigThree funcionando
 - [ ] T-CA-037: Componente PlanetInterpretation funcionando
 - [ ] T-CA-038: Componente AISynthesis funcionando
 - [ ] T-CA-039: Página de resultado completa
