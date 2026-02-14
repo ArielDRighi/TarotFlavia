@@ -462,7 +462,7 @@ describe('AspectsTable', () => {
     });
 
     it('should show message when filtered aspects are empty', () => {
-      render(<AspectsTable aspects={mockAspects} filterByPlanet="invalid" />);
+      render(<AspectsTable aspects={mockAspects} filterByPlanet={Planet.PLUTO} />);
 
       // After filtering, if no matches, should show empty message
       const table = screen.getByTestId('aspects-table');

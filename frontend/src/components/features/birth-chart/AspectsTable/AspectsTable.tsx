@@ -39,12 +39,41 @@ interface AspectsTableProps {
   aspects: ChartAspect[];
   showCard?: boolean;
   maxItems?: number;
-  filterByPlanet?: string;
+  filterByPlanet?: Planet;
   showFilters?: boolean;
   onAspectClick?: (aspect: ChartAspect) => void;
 }
 
-type FilterType = 'all' | 'harmonious' | 'challenging';
+type FilterType = 'all' | 'harmonious' | 'challenging' | 'neutral';
+
+// Helper functions (pure, outside component for performance)
+const getAspectInfo = (aspect: ChartAspect) => {
+  const metadata = ASPECTS[aspect.aspectType as AspectType];
+  return {
+    name: metadata?.name || aspect.aspectType,
+    symbol: metadata?.symbol || '?',
+    nature: metadata?.nature || 'neutral',
+  };
+};
+
+const getAspectColor = (nature: string) => {
+  switch (nature) {
+    case 'harmonious':
+      return 'text-green-500 bg-green-500/10';
+    case 'challenging':
+      return 'text-red-500 bg-red-500/10';
+    default:
+      return 'text-purple-500 bg-purple-500/10';
+  }
+};
+
+const getPlanetInfo = (planetKey: string) => {
+  const metadata = PLANETS[planetKey as Planet];
+  return {
+    name: metadata?.name || planetKey,
+    symbol: metadata?.symbol || planetKey.charAt(0).toUpperCase(),
+  };
+};
 
 export function AspectsTable({
   aspects,
@@ -55,7 +84,10 @@ export function AspectsTable({
   onAspectClick,
 }: AspectsTableProps) {
   const [typeFilter, setTypeFilter] = useState<FilterType>('all');
-  const [planetFilter, setPlanetFilter] = useState<string>(filterByPlanet || 'all');
+  const [planetFilter, setPlanetFilter] = useState<string>('all');
+
+  // Use prop directly if provided, otherwise use state
+  const effectivePlanetFilter = filterByPlanet || planetFilter;
 
   // Lista de planetas únicos en los aspectos
   const uniquePlanets = useMemo(() => {
@@ -80,9 +112,9 @@ export function AspectsTable({
     }
 
     // Filtrar por planeta
-    if (planetFilter !== 'all') {
+    if (effectivePlanetFilter !== 'all') {
       filtered = filtered.filter(
-        (aspect) => aspect.planet1 === planetFilter || aspect.planet2 === planetFilter
+        (aspect) => aspect.planet1 === effectivePlanetFilter || aspect.planet2 === effectivePlanetFilter
       );
     }
 
@@ -95,41 +127,10 @@ export function AspectsTable({
     }
 
     return filtered;
-  }, [aspects, typeFilter, planetFilter, maxItems]);
-
-  // Obtener metadata del aspecto
-  const getAspectInfo = (aspect: ChartAspect) => {
-    const metadata = ASPECTS[aspect.aspectType as AspectType];
-    return {
-      name: metadata?.name || aspect.aspectType,
-      symbol: metadata?.symbol || '?',
-      nature: metadata?.nature || 'neutral',
-    };
-  };
-
-  // Obtener color según naturaleza del aspecto
-  const getAspectColor = (nature: string) => {
-    switch (nature) {
-      case 'harmonious':
-        return 'text-green-500 bg-green-500/10';
-      case 'challenging':
-        return 'text-red-500 bg-red-500/10';
-      default:
-        return 'text-purple-500 bg-purple-500/10';
-    }
-  };
-
-  // Obtener info del planeta
-  const getPlanetInfo = (planetKey: string) => {
-    const metadata = PLANETS[planetKey as Planet];
-    return {
-      name: metadata?.name || planetKey,
-      symbol: metadata?.symbol || planetKey.charAt(0).toUpperCase(),
-    };
-  };
+  }, [aspects, typeFilter, effectivePlanetFilter, maxItems]);
 
   const TableContent = (
-    <>
+    <TooltipProvider>
       {/* Filtros */}
       {showFilters && (
         <div className="mb-4 flex flex-wrap gap-2 p-4 sm:p-0">
@@ -142,10 +143,11 @@ export function AspectsTable({
               <SelectItem value="all">Todos</SelectItem>
               <SelectItem value="harmonious">Armónicos</SelectItem>
               <SelectItem value="challenging">Desafiantes</SelectItem>
+              <SelectItem value="neutral">Neutros</SelectItem>
             </SelectContent>
           </Select>
 
-          <Select value={planetFilter} onValueChange={setPlanetFilter}>
+          <Select value={effectivePlanetFilter} onValueChange={setPlanetFilter}>
             <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="Planeta" />
             </SelectTrigger>
@@ -209,12 +211,16 @@ export function AspectsTable({
 
                   {/* Planeta 1 */}
                   <TableCell className="text-center">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger className="text-lg">{planet1Info.symbol}</TooltipTrigger>
-                        <TooltipContent>{planet1Info.name}</TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger
+                        type="button"
+                        aria-label={`Planeta ${planet1Info.name}`}
+                        className="text-lg"
+                      >
+                        {planet1Info.symbol}
+                      </TooltipTrigger>
+                      <TooltipContent>{planet1Info.name}</TooltipContent>
+                    </Tooltip>
                   </TableCell>
 
                   {/* Tipo (solo desktop) */}
@@ -239,42 +245,46 @@ export function AspectsTable({
 
                   {/* Planeta 2 */}
                   <TableCell className="text-center">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger className="text-lg">{planet2Info.symbol}</TooltipTrigger>
-                        <TooltipContent>{planet2Info.name}</TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger
+                        type="button"
+                        aria-label={`Planeta ${planet2Info.name}`}
+                        className="text-lg"
+                      >
+                        {planet2Info.symbol}
+                      </TooltipTrigger>
+                      <TooltipContent>{planet2Info.name}</TooltipContent>
+                    </Tooltip>
                   </TableCell>
 
                   {/* Orbe */}
                   <TableCell className="text-right">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger
-                          className={cn(
-                            'font-mono text-sm',
-                            aspect.orb <= 2 && 'font-medium text-green-500',
-                            aspect.orb > 5 && 'text-muted-foreground'
-                          )}
-                        >
-                          {aspect.orb.toFixed(1)}°
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Orbe: {aspect.orb.toFixed(2)}°</p>
-                          <p className="text-muted-foreground text-xs">
-                            {aspect.orb <= 2
-                              ? 'Aspecto muy exacto'
-                              : aspect.orb <= 5
-                                ? 'Aspecto moderado'
-                                : 'Aspecto amplio'}
-                          </p>
-                          <p className="mt-1 text-xs">
-                            {aspect.isApplying ? '↗ Aplicativo' : '↘ Separativo'}
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger
+                        type="button"
+                        aria-label={`Orbe ${aspect.orb.toFixed(1)} grados`}
+                        className={cn(
+                          'font-mono text-sm',
+                          aspect.orb <= 2 && 'font-medium text-green-500',
+                          aspect.orb > 5 && 'text-muted-foreground'
+                        )}
+                      >
+                        {aspect.orb.toFixed(1)}°
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Orbe: {aspect.orb.toFixed(2)}°</p>
+                        <p className="text-muted-foreground text-xs">
+                          {aspect.orb <= 2
+                            ? 'Aspecto muy exacto'
+                            : aspect.orb <= 5
+                              ? 'Aspecto moderado'
+                              : 'Aspecto amplio'}
+                        </p>
+                        <p className="mt-1 text-xs">
+                          {aspect.isApplying ? '↗ Aplicativo' : '↘ Separativo'}
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               );
@@ -298,7 +308,7 @@ export function AspectsTable({
           <span>Neutro (fusión)</span>
         </div>
       </div>
-    </>
+    </TooltipProvider>
   );
 
   if (!showCard) {
@@ -306,13 +316,13 @@ export function AspectsTable({
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-lg">
-          Aspectos Planetarios
-          <TooltipProvider>
+    <TooltipProvider>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            Aspectos Planetarios
             <Tooltip>
-              <TooltipTrigger>
+              <TooltipTrigger type="button" aria-label="Información sobre aspectos planetarios">
                 <Info className="text-muted-foreground h-4 w-4" />
               </TooltipTrigger>
               <TooltipContent className="max-w-xs">
@@ -323,11 +333,11 @@ export function AspectsTable({
                 </p>
               </TooltipContent>
             </Tooltip>
-          </TooltipProvider>
-        </CardTitle>
-        <CardDescription>{aspects.length} aspectos encontrados entre planetas</CardDescription>
-      </CardHeader>
-      <CardContent className="p-0 sm:p-6 sm:pt-0">{TableContent}</CardContent>
-    </Card>
+          </CardTitle>
+          <CardDescription>{aspects.length} aspectos encontrados entre planetas</CardDescription>
+        </CardHeader>
+        <CardContent className="p-0 sm:p-6 sm:pt-0">{TableContent}</CardContent>
+      </Card>
+    </TooltipProvider>
   );
 }
