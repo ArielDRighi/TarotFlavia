@@ -12220,15 +12220,15 @@ export { ElementDistribution } from "./ElementDistribution";
 
 **Criterios de aceptación:**
 
-- [ ] Muestra los 4 elementos con íconos y colores
-- [ ] Barras de progreso proporcionales
-- [ ] Indica elemento dominante
-- [ ] Muestra las 3 modalidades (opcional)
-- [ ] Tooltips con descripción de cada elemento
-- [ ] Resumen textual de predominancia
-- [ ] Soporte para modo compacto
-- [ ] Responsive design
-- [ ] Tests de componente
+- [x] Muestra los 4 elementos con íconos y colores
+- [x] Barras de progreso proporcionales
+- [x] Indica elemento dominante
+- [x] Muestra las 3 modalidades (opcional)
+- [x] Tooltips con descripción de cada elemento
+- [x] Resumen textual de predominancia
+- [x] Soporte para modo compacto
+- [x] Responsive design
+- [x] Tests de componente
 
 **Dependencias:** T-CA-026
 
@@ -12242,7 +12242,7 @@ export { ElementDistribution } from "./ElementDistribution";
 - [ ] T-CA-032: Componente ChartWheel funcionando
 - [ ] T-CA-033: Componente PlanetPositionsTable funcionando
 - [x] T-CA-034: Componente AspectsTable funcionando
-- [ ] T-CA-035: Componente ElementDistribution funcionando
+- [x] T-CA-035: Componente ElementDistribution funcionando
 
 ---
 

@@ -114,7 +114,8 @@ export function AspectsTable({
     // Filtrar por planeta
     if (effectivePlanetFilter !== 'all') {
       filtered = filtered.filter(
-        (aspect) => aspect.planet1 === effectivePlanetFilter || aspect.planet2 === effectivePlanetFilter
+        (aspect) =>
+          aspect.planet1 === effectivePlanetFilter || aspect.planet2 === effectivePlanetFilter
       );
     }
 
