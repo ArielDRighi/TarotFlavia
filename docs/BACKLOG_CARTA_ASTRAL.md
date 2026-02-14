@@ -11938,19 +11938,21 @@ export function AspectsTable({
 export { AspectsTable } from "./AspectsTable";
 ```
 
+**Estado:** ✅ COMPLETADA
+
 **Criterios de aceptación:**
 
-- [ ] Muestra todos los aspectos con símbolos
-- [ ] Colores diferenciados por naturaleza (armónico/desafiante)
-- [ ] Muestra orbe con indicador visual de exactitud
-- [ ] Filtro por tipo de aspecto
-- [ ] Filtro por planeta
-- [ ] Ordenamiento por orbe
-- [ ] Tooltips informativos
-- [ ] Leyenda explicativa
-- [ ] Soporte para limitar cantidad mostrada
-- [ ] Responsive design
-- [ ] Tests de componente
+- [x] Muestra todos los aspectos con símbolos
+- [x] Colores diferenciados por naturaleza (armónico/desafiante)
+- [x] Muestra orbe con indicador visual de exactitud
+- [x] Filtro por tipo de aspecto
+- [x] Filtro por planeta
+- [x] Ordenamiento por orbe
+- [x] Tooltips informativos
+- [x] Leyenda explicativa
+- [x] Soporte para limitar cantidad mostrada
+- [x] Responsive design
+- [x] Tests de componente
 
 **Dependencias:** T-CA-026
 
@@ -12239,7 +12241,7 @@ export { ElementDistribution } from "./ElementDistribution";
 - [ ] T-CA-031: Librería astrochart configurada
 - [ ] T-CA-032: Componente ChartWheel funcionando
 - [ ] T-CA-033: Componente PlanetPositionsTable funcionando
-- [ ] T-CA-034: Componente AspectsTable funcionando
+- [x] T-CA-034: Componente AspectsTable funcionando
 - [ ] T-CA-035: Componente ElementDistribution funcionando
 
 ---
