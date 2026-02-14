@@ -68,9 +68,10 @@ describe('ChartWheel', () => {
   const mockUseChartWheel = {
     containerId: 'astrochart-test',
     containerRef: { current: null },
-    calculatedSize: 500,
     isRendered: true,
     error: null,
+    selectedPlanet: null,
+    setSelectedPlanet: vi.fn(),
     exportSvg: vi.fn().mockReturnValue('<svg></svg>'),
   };
 
@@ -185,16 +186,6 @@ describe('ChartWheel', () => {
       );
     });
 
-    it('debe pasar responsive al hook cuando se especifica', () => {
-      render(<ChartWheel data={mockChartData} responsive={true} />);
-
-      expect(useChartWheel).toHaveBeenCalledWith(
-        expect.objectContaining({
-          responsive: true,
-        })
-      );
-    });
-
     it('debe llamar a exportSvg cuando se hace click en descargar', async () => {
       render(<ChartWheel data={mockChartData} showControls={true} />);
 
@@ -222,19 +213,14 @@ describe('ChartWheel', () => {
       });
     });
 
-    it('debe renderizar el contenedor con el tamaño calculado', () => {
-      const customCalculatedSize = 700;
-      (useChartWheel as Mock).mockReturnValue({
-        ...mockUseChartWheel,
-        calculatedSize: customCalculatedSize,
-      });
-
-      render(<ChartWheel data={mockChartData} />);
+    it('debe renderizar el contenedor con el tamaño especificado', () => {
+      const customSize = 700;
+      render(<ChartWheel data={mockChartData} size={customSize} />);
 
       const container = screen.getByRole('img');
       expect(container).toHaveStyle({
-        width: `${customCalculatedSize}px`,
-        height: `${customCalculatedSize}px`,
+        width: `${customSize}px`,
+        height: `${customSize}px`,
       });
     });
   });

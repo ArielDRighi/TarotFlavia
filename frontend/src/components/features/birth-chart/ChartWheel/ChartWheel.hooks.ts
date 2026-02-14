@@ -21,17 +21,15 @@ export interface UseChartWheelParams {
   size?: number;
   showAspects?: boolean;
   darkMode?: boolean;
-  /** Si es true, el tamaño se calcula automáticamente basado en el contenedor padre */
-  responsive?: boolean;
 }
 
 export interface UseChartWheelReturn {
   isRendered: boolean;
   error: string | null;
+  selectedPlanet: string | null;
+  setSelectedPlanet: (planet: string | null) => void;
   exportSvg: () => string;
   containerId: string;
-  containerRef: React.RefObject<HTMLDivElement | null>;
-  calculatedSize: number;
 }
 
 /**
@@ -55,75 +53,12 @@ export function useChartWheel({
   size = 600,
   showAspects = true,
   darkMode = false,
-  responsive = false,
 }: UseChartWheelParams): UseChartWheelReturn {
   const [isRendered, setIsRendered] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [calculatedSize, setCalculatedSize] = useState<number>(size);
+  const [selectedPlanet, setSelectedPlanet] = useState<string | null>(null);
   const chartRef = useRef<AstroChart | null>(null);
   const containerIdRef = useRef<string>(generateChartContainerId());
-  const rafIdRef = useRef<number | null>(null);
-  const isMountedRef = useRef<boolean>(true);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // ResizeObserver para calcular tamaño responsive
-  useEffect(() => {
-    if (!responsive || !containerRef.current) {
-      setCalculatedSize(size);
-      return;
-    }
-
-    const observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const { width, height } = entry.contentRect;
-        // Usar el menor de ancho/alto para mantener el gráfico cuadrado
-        const newSize = Math.min(width, height, size);
-        setCalculatedSize(newSize);
-      }
-    });
-
-    observer.observe(containerRef.current);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [responsive, size]);
-
-  // Validar estructura de datos
-  const validateData = useCallback((dataToValidate: ChartSvgData): boolean => {
-    if (!Array.isArray(dataToValidate.planets) || dataToValidate.planets.length === 0) {
-      return false;
-    }
-
-    // Validar que cada planeta tenga las propiedades necesarias
-    for (const planet of dataToValidate.planets) {
-      const p = planet as unknown as Record<string, unknown>;
-      if (
-        typeof p.planet !== 'string' ||
-        typeof p.sign !== 'string' ||
-        typeof p.signDegree !== 'number' ||
-        typeof p.house !== 'number'
-      ) {
-        return false;
-      }
-    }
-
-    // Validar casas si existen
-    if (dataToValidate.houses && Array.isArray(dataToValidate.houses)) {
-      for (const house of dataToValidate.houses) {
-        const h = house as unknown as Record<string, unknown>;
-        if (
-          typeof h.house !== 'number' ||
-          typeof h.sign !== 'string' ||
-          typeof h.signDegree !== 'number'
-        ) {
-          return false;
-        }
-      }
-    }
-
-    return true;
-  }, []);
 
   // Renderizar gráfico
   const renderChart = useCallback(() => {
@@ -132,10 +67,8 @@ export function useChartWheel({
       setIsRendered(false);
 
       // Validar datos
-      if (!validateData(data)) {
-        throw new Error(
-          'Datos de carta astral no válidos. Verifica que planets contenga planet, sign, signDegree y house.'
-        );
+      if (!data.planets || data.planets.length === 0) {
+        throw new Error('Datos de planetas no válidos');
       }
 
       // Limpiar gráfico anterior
@@ -147,21 +80,10 @@ export function useChartWheel({
         chartRef.current = null;
       }
 
-      // Cancelar requestAnimationFrame anterior si existe
-      if (rafIdRef.current !== null) {
-        cancelAnimationFrame(rafIdRef.current);
-        rafIdRef.current = null;
-      }
-
       // Esperar siguiente frame para asegurar que el DOM esté listo
-      rafIdRef.current = requestAnimationFrame(() => {
-        // Guard: no procesar si el componente fue desmontado
-        if (!isMountedRef.current) {
-          return;
-        }
-
+      requestAnimationFrame(() => {
         try {
-          // Convertir datos (ahora validados)
+          // Convertir datos
           const planets = convertPlanetsToAstroChart(data.planets as PlanetPosition[]);
           const cusps = convertHousesToAstroChart(data.houses as HouseCusp[]);
 
@@ -179,8 +101,8 @@ export function useChartWheel({
           // Usamos unknown temporalmente y luego type assertion a nuestra interfaz
           const chart = new Chart(
             containerIdRef.current,
-            calculatedSize,
-            calculatedSize,
+            size,
+            size,
             settings as unknown as Partial<Record<string, unknown>>
           ) as unknown as AstroChart;
 
@@ -195,17 +117,11 @@ export function useChartWheel({
           chart.radix(chartData);
 
           chartRef.current = chart;
-
-          // Guard: solo actualizar estado si el componente sigue montado
-          if (isMountedRef.current) {
-            setIsRendered(true);
-          }
+          setIsRendered(true);
         } catch (err) {
           const errorMessage = err instanceof Error ? err.message : 'Error al renderizar gráfico';
-          if (isMountedRef.current) {
-            setError(errorMessage);
-            setIsRendered(false);
-          }
+          setError(errorMessage);
+          setIsRendered(false);
         }
       });
     } catch (err) {
@@ -213,7 +129,7 @@ export function useChartWheel({
       setError(errorMessage);
       setIsRendered(false);
     }
-  }, [data, calculatedSize, showAspects, darkMode, validateData]);
+  }, [data, size, showAspects, darkMode]);
 
   // Exportar SVG
   const exportSvg = useCallback((): string => {
@@ -233,7 +149,6 @@ export function useChartWheel({
 
   // Renderizar gráfico cuando cambien las dependencias
   useEffect(() => {
-    isMountedRef.current = true;
     renderChart();
 
     // Copiar el ID actual para usar en cleanup
@@ -241,15 +156,6 @@ export function useChartWheel({
 
     // Cleanup al desmontar
     return () => {
-      isMountedRef.current = false;
-
-      // Cancelar requestAnimationFrame pendiente
-      if (rafIdRef.current !== null) {
-        cancelAnimationFrame(rafIdRef.current);
-        rafIdRef.current = null;
-      }
-
-      // Limpiar gráfico
       if (chartRef.current) {
         const container = document.getElementById(currentContainerId);
         if (container) {
@@ -263,9 +169,9 @@ export function useChartWheel({
   return {
     isRendered,
     error,
+    selectedPlanet,
+    setSelectedPlanet,
     exportSvg,
     containerId: containerIdRef.current,
-    containerRef,
-    calculatedSize,
   };
 }
