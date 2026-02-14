@@ -1,0 +1,1 @@
+export { AspectsTable } from './AspectsTable';
