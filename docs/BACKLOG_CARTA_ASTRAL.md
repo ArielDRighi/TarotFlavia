@@ -10988,18 +10988,34 @@ export * from "./astrochart.utils";
 
 **Criterios de aceptación:**
 
-- [ ] Librería instalada correctamente
-- [ ] Configuración de colores Auguria definida
-- [ ] Configuración para modo oscuro
-- [ ] Configuración para PDF
-- [ ] Funciones de conversión de datos
-- [ ] Mapeo correcto de planetas y signos
-- [ ] Documentación de la configuración
-- [ ] Tests unitarios de funciones de conversión
+- [x] Librería instalada correctamente
+- [x] Configuración de colores Auguria definida
+- [x] Configuración para modo oscuro
+- [x] Configuración para PDF
+- [x] Funciones de conversión de datos
+- [x] Mapeo correcto de planetas y signos
+- [x] Documentación de la configuración
+- [x] Tests unitarios de funciones de conversión
 
 **Dependencias:** T-CA-026
 
 **Estimación:** 2 horas
+
+**Estado:** ✅ COMPLETADA (13/02/2026)
+
+**Archivos creados:**
+- `frontend/src/components/features/birth-chart/lib/astrochart.config.ts` - Configuración de colores Auguria y 3 settings (default dark, light, PDF)
+- `frontend/src/components/features/birth-chart/lib/astrochart.utils.ts` - Funciones de conversión de datos backend → astrochart
+- `frontend/src/components/features/birth-chart/lib/astrochart.utils.test.ts` - 18 tests unitarios (100% passed)
+- `frontend/src/components/features/birth-chart/lib/index.ts` - Exports centralizados
+
+**Quality Gates:**
+- ✅ npm run format (Prettier)
+- ✅ npm run lint:fix (ESLint)
+- ✅ npm run type-check (TypeScript)
+- ✅ npm run test:run (18/18 tests passed)
+- ✅ npm run build (Build exitoso)
+- ✅ node scripts/validate-architecture.js (Arquitectura validada)
 
 ---
 
