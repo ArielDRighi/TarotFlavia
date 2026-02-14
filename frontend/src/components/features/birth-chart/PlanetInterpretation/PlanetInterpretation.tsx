@@ -96,11 +96,16 @@ export function PlanetInterpretation({
             <Accordion type="single" collapsible className="w-full">
               {aspects.map((aspect, index) => {
                 const aspectMetadata = ASPECTS[aspect.aspectType as keyof typeof ASPECTS];
+                if (!aspectMetadata) {
+                  // Skip rendering if metadata for this aspect type is not defined
+                  return null;
+                }
                 const badgeText = getNatureBadgeText(aspectMetadata.nature);
                 const badgeVariant = getNatureBadgeVariant(aspectMetadata.nature);
+                const aspectId = `aspect-${aspect.aspectType}-${aspect.withPlanetName}-${index}`;
 
                 return (
-                  <AccordionItem key={index} value={`aspect-${index}`}>
+                  <AccordionItem key={aspectId} value={aspectId}>
                     <AccordionTrigger className="text-sm hover:no-underline">
                       <div className="flex items-center gap-2">
                         <span>{aspectMetadata.symbol}</span>
