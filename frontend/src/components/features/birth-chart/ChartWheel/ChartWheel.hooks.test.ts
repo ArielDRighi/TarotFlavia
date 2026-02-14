@@ -10,11 +10,15 @@ import { Planet, ZodiacSign, AspectType } from '@/types/birth-chart.enums';
 
 // Mock de astrodraw/astrochart
 vi.mock('@astrodraw/astrochart', () => {
-  const MockChart = vi.fn(function (this: any) {
+  interface MockChartInstance {
+    radix: ReturnType<typeof vi.fn>;
+  }
+
+  const MockChart = vi.fn(function (this: MockChartInstance) {
     this.radix = vi.fn();
     return this;
   });
-  
+
   return {
     Chart: MockChart,
   };

@@ -151,9 +151,9 @@ describe('BigThree', () => {
     });
   });
 
-  describe('Prop expanded', () => {
-    it('debe expandir todos los items cuando expanded=true', () => {
-      render(<BigThree data={mockData} expanded={true} />);
+  describe('Prop defaultExpanded', () => {
+    it('debe expandir todos los items cuando defaultExpanded=true', () => {
+      render(<BigThree data={mockData} defaultExpanded={true} />);
       expect(screen.getByText(/personalidad carismática/i)).toBeInTheDocument();
       expect(screen.getByText(/emociones intensas/i)).toBeInTheDocument();
       expect(screen.getByText(/imagen de persona organizada/i)).toBeInTheDocument();
@@ -196,10 +196,11 @@ describe('BigThree', () => {
 
   describe('Iconos', () => {
     it('debe mostrar ícono de Sol para el elemento Sun', () => {
-      render(<BigThree data={mockData} variant="hero" />);
-      // Verificar que hay elementos con la clase del ícono del sol
       const { container } = render(<BigThree data={mockData} variant="hero" />);
-      expect(container.innerHTML).toContain('sun');
+      // Verificar que hay un SVG dentro del primer item (Sol)
+      const sunSection = container.querySelector('.grid > div:first-child');
+      const svgIcon = sunSection?.querySelector('svg');
+      expect(svgIcon).toBeInTheDocument();
     });
   });
 

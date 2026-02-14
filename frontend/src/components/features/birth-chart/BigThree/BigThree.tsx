@@ -57,7 +57,7 @@ const BIG_THREE_CONFIG = {
 // Types
 interface BigThreeProps {
   data: BigThreeInterpretation;
-  expanded?: boolean;
+  defaultExpanded?: boolean;
   showInterpretations?: boolean;
   variant?: 'default' | 'compact' | 'hero';
   className?: string;
@@ -66,15 +66,15 @@ interface BigThreeProps {
 // Main Component
 export function BigThree({
   data,
-  expanded = false,
+  defaultExpanded = false,
   showInterpretations = true,
   variant = 'default',
   className,
 }: BigThreeProps) {
   const [openItems, setOpenItems] = useState<Record<string, boolean>>({
-    sun: expanded,
-    moon: expanded,
-    ascendant: expanded,
+    sun: defaultExpanded,
+    moon: defaultExpanded,
+    ascendant: defaultExpanded,
   });
 
   const toggleItem = (key: string) => {
@@ -143,11 +143,14 @@ export function BigThree({
         <TooltipProvider key={key}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className={cn('flex items-center gap-2 rounded-lg p-2', config.bgColor)}>
+              <button
+                type="button"
+                className={cn('flex items-center gap-2 rounded-lg p-2', config.bgColor)}
+              >
                 <Icon className={cn('h-4 w-4', config.color)} />
                 <span className="text-lg">{signMetadata?.symbol}</span>
                 <span className="text-sm font-medium">{itemData.signName}</span>
-              </div>
+              </button>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="max-w-xs">
               <p className="font-medium">
