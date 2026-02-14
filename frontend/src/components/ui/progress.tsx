@@ -14,25 +14,31 @@ interface ProgressProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const Progress = React.forwardRef<HTMLDivElement, ProgressProps>(
-  ({ className, value, indicatorClassName, ...props }, ref) => (
-    <div
-      ref={ref}
-      role="progressbar"
-      aria-valuemin={0}
-      aria-valuemax={100}
-      aria-valuenow={value}
-      className={cn('bg-secondary relative h-4 w-full overflow-hidden rounded-full', className)}
-      {...props}
-    >
+  ({ className, value, indicatorClassName, ...props }, ref) => {
+    const clampedValue = Math.min(100, Math.max(0, value));
+
+    return (
       <div
-        className={cn(
-          'bg-primary h-full transition-all duration-300 ease-in-out',
-          indicatorClassName
-        )}
-        style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
-      />
-    </div>
-  )
+        ref={ref}
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={clampedValue}
+        data-slot="progress"
+        className={cn('bg-secondary relative h-4 w-full overflow-hidden rounded-full', className)}
+        {...props}
+      >
+        <div
+          data-slot="progress-indicator"
+          className={cn(
+            'bg-primary h-full transition-all duration-300 ease-in-out',
+            indicatorClassName
+          )}
+          style={{ width: `${clampedValue}%` }}
+        />
+      </div>
+    );
+  }
 );
 Progress.displayName = 'Progress';
 
