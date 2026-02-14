@@ -38,7 +38,7 @@ describe('astrochart.utils', () => {
         },
       ];
 
-      const result = convertPlanetsToAstroChart(planets, 0);
+      const result = convertPlanetsToAstroChart(planets);
 
       expect(result).toHaveLength(2);
       expect(result[0]).toEqual({
@@ -66,7 +66,7 @@ describe('astrochart.utils', () => {
         },
       ];
 
-      const result = convertPlanetsToAstroChart(planets, 0);
+      const result = convertPlanetsToAstroChart(planets);
 
       expect(result[0].retrograde).toBe(true);
     });
@@ -84,7 +84,7 @@ describe('astrochart.utils', () => {
         },
       ];
 
-      const result = convertPlanetsToAstroChart(planets, 0);
+      const result = convertPlanetsToAstroChart(planets);
 
       // Pisces is index 11, so: 11 * 30 + 29.99 = 359.99
       expect(result[0].position).toBeCloseTo(359.99);
@@ -304,7 +304,7 @@ describe('astrochart.utils', () => {
         },
       ];
 
-      const result = convertPlanetsToAstroChart(planets, 0);
+      const result = convertPlanetsToAstroChart(planets);
 
       // Debe usar fallback a Aries (index 0): 0 * 30 + 15.5 = 15.5
       expect(result[0].position).toBe(15.5);
@@ -376,7 +376,7 @@ describe('astrochart.utils', () => {
         },
       ];
 
-      const result = convertPlanetsToAstroChart(planets, 0);
+      const result = convertPlanetsToAstroChart(planets);
 
       // Primero: fallback a Aries (0 * 30 + 10 = 10)
       expect(result[0].position).toBe(10);

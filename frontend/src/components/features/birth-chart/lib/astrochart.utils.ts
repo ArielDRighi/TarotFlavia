@@ -55,7 +55,6 @@ export interface AstroChartPoint {
  * Convierte nuestras posiciones planetarias al formato de astrochart
  *
  * @param planets - Array de posiciones planetarias del backend
- * @param ascendantLongitude - Longitud del Ascendente (para referencia, no usado en conversión)
  * @returns Array de puntos en formato astrochart
  *
  * @example
@@ -63,13 +62,12 @@ export interface AstroChartPoint {
  * const planets = [
  *   { planet: Planet.SUN, sign: ZodiacSign.ARIES, signDegree: 15.5, ... }
  * ];
- * const points = convertPlanetsToAstroChart(planets, 0);
+ * const points = convertPlanetsToAstroChart(planets);
  * // [{ name: 'Sun', position: 15.5, retrograde: false }]
  * ```
  */
 export function convertPlanetsToAstroChart(
   planets: PlanetPosition[],
-  _ascendantLongitude: number
 ): AstroChartPoint[] {
   return planets.map((planet) => {
     // Calcular longitud absoluta desde signo + grado

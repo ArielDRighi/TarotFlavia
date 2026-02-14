@@ -11337,22 +11337,24 @@ export { useChartWheel } from "./ChartWheel.hooks";
 
 **Criterios de aceptación:**
 
-- [ ] Renderiza gráfico circular con planetas y casas
-- [ ] Muestra aspectos como líneas entre planetas
-- [ ] Soporte para modo claro y oscuro
-- [ ] Responsive (ajusta tamaño al contenedor)
-- [ ] Leyenda interactiva de planetas
-- [ ] Tooltip con detalles al hover
-- [ ] Botón para exportar SVG
-- [ ] Skeleton mientras carga
-- [ ] Manejo de errores visual
-- [ ] Accesibilidad (aria labels)
-- [ ] Callback onPlanetClick para interactividad
-- [ ] Tests de componente
+- [x] Renderiza gráfico circular con planetas y casas
+- [x] Muestra aspectos como líneas entre planetas
+- [x] Soporte para modo claro y oscuro
+- [x] Responsive (ajusta tamaño al contenedor)
+- [x] Leyenda interactiva de planetas
+- [x] Tooltip con detalles al hover
+- [x] Botón para exportar SVG
+- [x] Skeleton mientras carga
+- [x] Manejo de errores visual
+- [x] Accesibilidad (aria labels)
+- [x] Callback onPlanetClick para interactividad
+- [x] Tests de componente
 
 **Dependencias:** T-CA-031
 
 **Estimación:** 5 horas
+
+**Estado:** ✅ COMPLETADA
 
 ---
 
