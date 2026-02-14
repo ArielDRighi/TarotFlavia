@@ -390,15 +390,17 @@ describe('BirthChartPage', () => {
 
       // Mock del hook anónimo para capturar callbacks y simular éxito
       let capturedOnSuccess: ((data: ChartResponse) => void) | undefined;
-      vi.mocked(useGenerateChartAnonymous).mockImplementation((options?: any) => {
-        capturedOnSuccess = options?.onSuccess;
-        return {
-          mutate: vi.fn(() => {
-            if (capturedOnSuccess) capturedOnSuccess(mockChartResponse);
-          }),
-          isPending: false,
-        } as any;
-      });
+      vi.mocked(useGenerateChartAnonymous).mockImplementation(
+        (options?: { onSuccess?: (data: ChartResponse) => void; onError?: (err: Error) => void }) => {
+          capturedOnSuccess = options?.onSuccess;
+          return {
+            mutate: vi.fn(() => {
+              if (capturedOnSuccess) capturedOnSuccess(mockChartResponse);
+            }),
+            isPending: false,
+          } as Partial<UseMutationResult<ChartResponse, Error, GenerateChartRequest>> as UseMutationResult<ChartResponse, Error, GenerateChartRequest>;
+        }
+      );
 
       render(<BirthChartPage />);
 
@@ -421,15 +423,17 @@ describe('BirthChartPage', () => {
 
       // Mock del hook autenticado para capturar callbacks y simular éxito
       let capturedOnSuccess: ((data: ChartResponse) => void) | undefined;
-      vi.mocked(useGenerateChart).mockImplementation((options?: any) => {
-        capturedOnSuccess = options?.onSuccess;
-        return {
-          mutate: vi.fn(() => {
-            if (capturedOnSuccess) capturedOnSuccess(mockPremiumResponse);
-          }),
-          isPending: false,
-        } as any;
-      });
+      vi.mocked(useGenerateChart).mockImplementation(
+        (options?: { onSuccess?: (data: ChartResponse) => void; onError?: (err: Error) => void }) => {
+          capturedOnSuccess = options?.onSuccess;
+          return {
+            mutate: vi.fn(() => {
+              if (capturedOnSuccess) capturedOnSuccess(mockPremiumResponse);
+            }),
+            isPending: false,
+          } as Partial<UseMutationResult<PremiumChartResponse, Error, GenerateChartRequest>> as UseMutationResult<PremiumChartResponse, Error, GenerateChartRequest>;
+        }
+      );
 
       render(<BirthChartPage />);
 
@@ -448,15 +452,17 @@ describe('BirthChartPage', () => {
 
       // Mock del hook anónimo para capturar callbacks y simular error
       let capturedOnError: ((err: Error) => void) | undefined;
-      vi.mocked(useGenerateChartAnonymous).mockImplementation((options?: any) => {
-        capturedOnError = options?.onError;
-        return {
-          mutate: vi.fn(() => {
-            if (capturedOnError) capturedOnError(rateLimitError);
-          }),
-          isPending: false,
-        } as any;
-      });
+      vi.mocked(useGenerateChartAnonymous).mockImplementation(
+        (options?: { onSuccess?: (data: ChartResponse) => void; onError?: (err: Error) => void }) => {
+          capturedOnError = options?.onError;
+          return {
+            mutate: vi.fn(() => {
+              if (capturedOnError) capturedOnError(rateLimitError);
+            }),
+            isPending: false,
+          } as Partial<UseMutationResult<ChartResponse, Error, GenerateChartRequest>> as UseMutationResult<ChartResponse, Error, GenerateChartRequest>;
+        }
+      );
 
       render(<BirthChartPage />);
 
@@ -472,26 +478,30 @@ describe('BirthChartPage', () => {
     it('should show error Alert when AxiosError with 429 occurs', async () => {
       const user = userEvent.setup();
       const axiosError = {
+        name: 'AxiosError',
+        message: 'Request failed with status code 429',
         isAxiosError: true,
         response: {
           status: 429,
           data: { message: 'Límite excedido' },
         },
-      };
+      } as Error;
 
       vi.spyOn(axios, 'isAxiosError').mockReturnValue(true);
 
       // Mock del hook anónimo para capturar callbacks y simular error
-      let capturedOnError: ((err: any) => void) | undefined;
-      vi.mocked(useGenerateChartAnonymous).mockImplementation((options?: any) => {
-        capturedOnError = options?.onError;
-        return {
-          mutate: vi.fn(() => {
-            if (capturedOnError) capturedOnError(axiosError);
-          }),
-          isPending: false,
-        } as any;
-      });
+      let capturedOnError: ((err: Error) => void) | undefined;
+      vi.mocked(useGenerateChartAnonymous).mockImplementation(
+        (options?: { onSuccess?: (data: ChartResponse) => void; onError?: (err: Error) => void }) => {
+          capturedOnError = options?.onError;
+          return {
+            mutate: vi.fn(() => {
+              if (capturedOnError) capturedOnError(axiosError as Error);
+            }),
+            isPending: false,
+          } as Partial<UseMutationResult<ChartResponse, Error, GenerateChartRequest>> as UseMutationResult<ChartResponse, Error, GenerateChartRequest>;
+        }
+      );
 
       render(<BirthChartPage />);
 
@@ -512,15 +522,17 @@ describe('BirthChartPage', () => {
 
       // Mock del hook anónimo para capturar callbacks y simular error
       let capturedOnError: ((err: Error) => void) | undefined;
-      vi.mocked(useGenerateChartAnonymous).mockImplementation((options?: any) => {
-        capturedOnError = options?.onError;
-        return {
-          mutate: vi.fn(() => {
-            if (capturedOnError) capturedOnError(genericError);
-          }),
-          isPending: false,
-        } as any;
-      });
+      vi.mocked(useGenerateChartAnonymous).mockImplementation(
+        (options?: { onSuccess?: (data: ChartResponse) => void; onError?: (err: Error) => void }) => {
+          capturedOnError = options?.onError;
+          return {
+            mutate: vi.fn(() => {
+              if (capturedOnError) capturedOnError(genericError);
+            }),
+            isPending: false,
+          } as Partial<UseMutationResult<ChartResponse, Error, GenerateChartRequest>> as UseMutationResult<ChartResponse, Error, GenerateChartRequest>;
+        }
+      );
 
       render(<BirthChartPage />);
 
