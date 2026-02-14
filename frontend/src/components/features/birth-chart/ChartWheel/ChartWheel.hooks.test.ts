@@ -75,9 +75,7 @@ describe('useChartWheel', () => {
         aspects: [],
       };
 
-      const { result } = renderHook(() =>
-        useChartWheel({ data: invalidData })
-      );
+      const { result } = renderHook(() => useChartWheel({ data: invalidData }));
 
       await waitFor(() => {
         expect(result.current.error).toBeTruthy();
@@ -91,15 +89,13 @@ describe('useChartWheel', () => {
           {
             planet: Planet.SUN,
             // Falta sign, signDegree, house
-          } as unknown as typeof mockChartData.planets[0],
+          } as unknown as (typeof mockChartData.planets)[0],
         ],
         houses: mockChartData.houses,
         aspects: [],
       };
 
-      const { result } = renderHook(() =>
-        useChartWheel({ data: invalidData })
-      );
+      const { result } = renderHook(() => useChartWheel({ data: invalidData }));
 
       await waitFor(() => {
         expect(result.current.error).toContain('no válidos');
@@ -114,14 +110,12 @@ describe('useChartWheel', () => {
           {
             house: 1,
             // Falta sign, signDegree
-          } as unknown as typeof mockChartData.houses[0],
+          } as unknown as (typeof mockChartData.houses)[0],
         ],
         aspects: [],
       };
 
-      const { result } = renderHook(() =>
-        useChartWheel({ data: invalidData })
-      );
+      const { result } = renderHook(() => useChartWheel({ data: invalidData }));
 
       await waitFor(() => {
         expect(result.current.error).toContain('no válidos');
@@ -130,9 +124,7 @@ describe('useChartWheel', () => {
     });
 
     it('debe renderizar correctamente con datos válidos', async () => {
-      const { result } = renderHook(() =>
-        useChartWheel({ data: mockChartData })
-      );
+      const { result } = renderHook(() => useChartWheel({ data: mockChartData }));
 
       await waitFor(() => {
         expect(result.current.error).toBeNull();
@@ -143,14 +135,9 @@ describe('useChartWheel', () => {
 
   describe('🔴 Cleanup y Memory Leaks', () => {
     it('debe cancelar requestAnimationFrame al desmontar', async () => {
-      const cancelAnimationFrameSpy = vi.spyOn(
-        window,
-        'cancelAnimationFrame'
-      );
+      const cancelAnimationFrameSpy = vi.spyOn(window, 'cancelAnimationFrame');
 
-      const { unmount } = renderHook(() =>
-        useChartWheel({ data: mockChartData })
-      );
+      const { unmount } = renderHook(() => useChartWheel({ data: mockChartData }));
 
       unmount();
 
@@ -166,9 +153,7 @@ describe('useChartWheel', () => {
 
       document.getElementById = vi.fn().mockReturnValue(mockContainer);
 
-      const { unmount } = renderHook(() =>
-        useChartWheel({ data: mockChartData })
-      );
+      const { unmount } = renderHook(() => useChartWheel({ data: mockChartData }));
 
       unmount();
 
@@ -176,9 +161,7 @@ describe('useChartWheel', () => {
     });
 
     it('no debe actualizar estado después de desmontar', async () => {
-      const { result, unmount } = renderHook(() =>
-        useChartWheel({ data: mockChartData })
-      );
+      const { result, unmount } = renderHook(() => useChartWheel({ data: mockChartData }));
 
       const initialError = result.current.error;
       unmount();
@@ -202,9 +185,7 @@ describe('useChartWheel', () => {
     });
 
     it('debe tener containerRef disponible para ResizeObserver', () => {
-      const { result } = renderHook(() =>
-        useChartWheel({ data: mockChartData, responsive: true })
-      );
+      const { result } = renderHook(() => useChartWheel({ data: mockChartData, responsive: true }));
 
       expect(result.current.containerRef).toBeDefined();
       expect(result.current.containerRef.current).toBeDefined();
@@ -215,9 +196,7 @@ describe('useChartWheel', () => {
     it('debe retornar string vacío cuando no hay contenedor', () => {
       document.getElementById = vi.fn().mockReturnValue(null);
 
-      const { result } = renderHook(() =>
-        useChartWheel({ data: mockChartData })
-      );
+      const { result } = renderHook(() => useChartWheel({ data: mockChartData }));
 
       const svg = result.current.exportSvg();
       expect(svg).toBe('');
@@ -228,9 +207,7 @@ describe('useChartWheel', () => {
         querySelector: vi.fn().mockReturnValue(null),
       });
 
-      const { result } = renderHook(() =>
-        useChartWheel({ data: mockChartData })
-      );
+      const { result } = renderHook(() => useChartWheel({ data: mockChartData }));
 
       const svg = result.current.exportSvg();
       expect(svg).toBe('');
@@ -245,9 +222,7 @@ describe('useChartWheel', () => {
         querySelector: vi.fn().mockReturnValue(mockSvg),
       });
 
-      const { result } = renderHook(() =>
-        useChartWheel({ data: mockChartData })
-      );
+      const { result } = renderHook(() => useChartWheel({ data: mockChartData }));
 
       const svg = result.current.exportSvg();
       expect(svg).toContain('<svg');
@@ -258,12 +233,8 @@ describe('useChartWheel', () => {
 
   describe('🔴 Hook Return Values', () => {
     it('debe retornar un containerId único', () => {
-      const { result: result1 } = renderHook(() =>
-        useChartWheel({ data: mockChartData })
-      );
-      const { result: result2 } = renderHook(() =>
-        useChartWheel({ data: mockChartData })
-      );
+      const { result: result1 } = renderHook(() => useChartWheel({ data: mockChartData }));
+      const { result: result2 } = renderHook(() => useChartWheel({ data: mockChartData }));
 
       expect(result1.current.containerId).toBeTruthy();
       expect(result2.current.containerId).toBeTruthy();
@@ -271,17 +242,13 @@ describe('useChartWheel', () => {
     });
 
     it('debe tener containerRef definido', () => {
-      const { result } = renderHook(() =>
-        useChartWheel({ data: mockChartData })
-      );
+      const { result } = renderHook(() => useChartWheel({ data: mockChartData }));
 
       expect(result.current.containerRef).toBeDefined();
     });
 
     it('debe tener exportSvg function', () => {
-      const { result } = renderHook(() =>
-        useChartWheel({ data: mockChartData })
-      );
+      const { result } = renderHook(() => useChartWheel({ data: mockChartData }));
 
       expect(typeof result.current.exportSvg).toBe('function');
     });
