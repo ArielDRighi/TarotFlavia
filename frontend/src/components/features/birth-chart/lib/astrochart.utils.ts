@@ -75,7 +75,9 @@ export function convertPlanetsToAstroChart(
     // Calcular longitud absoluta desde signo + grado
     // Cada signo ocupa 30° (12 signos * 30° = 360°)
     const signIndex = ZODIAC_SIGN_ORDER.indexOf(planet.sign);
-    const absoluteLongitude = signIndex * 30 + planet.signDegree;
+    // Fallback defensivo: si el signo no se encuentra, usar Aries (0) para evitar longitudes negativas
+    const safeSignIndex = signIndex === -1 ? 0 : signIndex;
+    const absoluteLongitude = safeSignIndex * 30 + planet.signDegree;
 
     return {
       name: PLANET_NAME_MAP[planet.planet] || planet.planet,
@@ -104,7 +106,9 @@ export function convertPlanetsToAstroChart(
 export function convertHousesToAstroChart(houses: HouseCusp[]): number[] {
   return houses.map((house) => {
     const signIndex = ZODIAC_SIGN_ORDER.indexOf(house.sign);
-    return signIndex * 30 + house.signDegree;
+    // Fallback defensivo: si el signo no se encuentra, usar Aries (0) para evitar longitudes negativas
+    const safeSignIndex = signIndex === -1 ? 0 : signIndex;
+    return safeSignIndex * 30 + house.signDegree;
   });
 }
 
@@ -131,6 +135,10 @@ export function getAscendantLongitude(houses: HouseCusp[]): number {
   if (!house1) return 0;
 
   const signIndex = ZODIAC_SIGN_ORDER.indexOf(house1.sign);
+  if (signIndex === -1) {
+    // Datos corruptos o signo desconocido: devolvemos 0 para evitar longitudes negativas
+    return 0;
+  }
   return signIndex * 30 + house1.signDegree;
 }
 

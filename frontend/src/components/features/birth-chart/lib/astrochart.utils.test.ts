@@ -289,4 +289,101 @@ describe('astrochart.utils', () => {
       });
     });
   });
+
+  describe('Edge Cases: Datos Corruptos', () => {
+    it('should handle unknown zodiac sign in convertPlanetsToAstroChart', () => {
+      const planets: PlanetPosition[] = [
+        {
+          planet: Planet.SUN,
+          sign: 'INVALID_SIGN' as ZodiacSign, // Signo corrupto/desconocido
+          signName: 'Invalid Sign',
+          signDegree: 15.5,
+          formattedPosition: "15°30' Invalid Sign",
+          house: 1,
+          isRetrograde: false,
+        },
+      ];
+
+      const result = convertPlanetsToAstroChart(planets, 0);
+
+      // Debe usar fallback a Aries (index 0): 0 * 30 + 15.5 = 15.5
+      expect(result[0].position).toBe(15.5);
+      expect(result[0].name).toBe('Sun');
+    });
+
+    it('should handle unknown zodiac sign in convertHousesToAstroChart', () => {
+      const houses: HouseCusp[] = [
+        {
+          house: 1,
+          sign: 'CORRUPTED_SIGN' as ZodiacSign, // Signo corrupto
+          signName: 'Corrupted Sign',
+          signDegree: 12.5,
+          formattedPosition: "12°30' Corrupted Sign",
+        },
+      ];
+
+      const result = convertHousesToAstroChart(houses);
+
+      // Debe usar fallback a Aries (index 0): 0 * 30 + 12.5 = 12.5
+      expect(result[0]).toBe(12.5);
+    });
+
+    it('should handle unknown zodiac sign in getAscendantLongitude', () => {
+      const houses: HouseCusp[] = [
+        {
+          house: 1,
+          sign: 'UNKNOWN' as ZodiacSign, // Signo desconocido
+          signName: 'Unknown',
+          signDegree: 20.0,
+          formattedPosition: "20°00' Unknown",
+        },
+      ];
+
+      const result = getAscendantLongitude(houses);
+
+      // Debe devolver 0 para evitar longitudes negativas
+      expect(result).toBe(0);
+    });
+
+    it('should handle multiple corrupted signs in convertPlanetsToAstroChart', () => {
+      const planets: PlanetPosition[] = [
+        {
+          planet: Planet.SUN,
+          sign: 'INVALID_1' as ZodiacSign,
+          signName: 'Invalid 1',
+          signDegree: 10,
+          formattedPosition: "10°00' Invalid 1",
+          house: 1,
+          isRetrograde: false,
+        },
+        {
+          planet: Planet.MOON,
+          sign: ZodiacSign.TAURUS, // Válido
+          signName: 'Taurus',
+          signDegree: 20,
+          formattedPosition: "20°00' Taurus",
+          house: 2,
+          isRetrograde: false,
+        },
+        {
+          planet: Planet.MERCURY,
+          sign: 'INVALID_2' as ZodiacSign,
+          signName: 'Invalid 2',
+          signDegree: 5,
+          formattedPosition: "5°00' Invalid 2",
+          house: 3,
+          isRetrograde: false,
+        },
+      ];
+
+      const result = convertPlanetsToAstroChart(planets, 0);
+
+      // Primero: fallback a Aries (0 * 30 + 10 = 10)
+      expect(result[0].position).toBe(10);
+      // Segundo: Taurus válido (1 * 30 + 20 = 50)
+      expect(result[1].position).toBe(50);
+      // Tercero: fallback a Aries (0 * 30 + 5 = 5)
+      expect(result[2].position).toBe(5);
+    });
+  });
 });
