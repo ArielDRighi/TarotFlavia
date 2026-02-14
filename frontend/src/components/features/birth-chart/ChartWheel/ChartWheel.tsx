@@ -14,7 +14,7 @@ export interface ChartWheelProps {
   data: ChartSvgData;
 
   /**
-   * Tamaño del gráfico en píxeles
+   * Tamaño máximo del gráfico en píxeles (si responsive=true, se ajustará al contenedor)
    * @default 600
    */
   size?: number;
@@ -32,15 +32,10 @@ export interface ChartWheelProps {
   showControls?: boolean;
 
   /**
-   * Habilitar interactividad (click en planetas, etc.)
+   * Si es true, el tamaño se ajusta automáticamente al contenedor padre
    * @default false
    */
-  interactive?: boolean;
-
-  /**
-   * Callback cuando se hace click en un planeta
-   */
-  onPlanetClick?: (planet: string) => void;
+  responsive?: boolean;
 
   /**
    * Callback cuando se exporta el SVG
@@ -66,7 +61,6 @@ export interface ChartWheelProps {
  *   size={600}
  *   showAspects={true}
  *   showControls={true}
- *   onPlanetClick={(planet) => console.log(planet)}
  * />
  * ```
  */
@@ -75,21 +69,22 @@ export function ChartWheel({
   size = 600,
   showAspects = true,
   showControls = true,
-  interactive = false,
-  onPlanetClick,
+  responsive = false,
   onExport,
   className,
 }: ChartWheelProps) {
   const { resolvedTheme } = useTheme();
   const darkMode = resolvedTheme === 'dark';
 
-  const { containerId, isRendered, error, selectedPlanet, setSelectedPlanet, exportSvg } =
-    useChartWheel({
+  const { containerId, isRendered, error, exportSvg, containerRef, calculatedSize } = useChartWheel(
+    {
       data,
       size,
       showAspects,
       darkMode,
-    });
+      responsive,
+    }
+  );
 
   // Handler para exportar SVG
   const handleExport = () => {
@@ -105,18 +100,16 @@ export function ChartWheel({
       const link = document.createElement('a');
       link.href = url;
       link.download = `carta-astral-${Date.now()}.svg`;
+
+      // Append al DOM, click y remove para asegurar descarga en todos los navegadores
+      document.body.appendChild(link);
       link.click();
-      URL.revokeObjectURL(url);
-    }
-  };
+      link.remove();
 
-  // Handler para click en planetas (si es interactivo)
-  const handlePlanetClick = (planet: string) => {
-    if (!interactive) return;
-
-    setSelectedPlanet(planet);
-    if (onPlanetClick) {
-      onPlanetClick(planet);
+      // Revocar el objeto URL en un microtask para evitar interrumpir la descarga
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 0);
     }
   };
 
@@ -144,12 +137,15 @@ export function ChartWheel({
       )}
 
       {/* Contenedor del gráfico */}
-      <div className={cn('relative flex items-center justify-center', className)}>
+      <div
+        ref={containerRef}
+        className={cn('relative flex items-center justify-center', className)}
+      >
         {/* Skeleton loader */}
         {!isRendered && !error && (
           <div
             className="bg-muted animate-pulse rounded-full"
-            style={{ width: size, height: size }}
+            style={{ width: calculatedSize, height: calculatedSize }}
             data-testid="chart-skeleton"
           />
         )}
@@ -158,7 +154,7 @@ export function ChartWheel({
         {error && (
           <div
             className="border-destructive/50 bg-destructive/10 text-destructive flex items-center justify-center rounded-lg border p-8"
-            style={{ width: size, height: size }}
+            style={{ width: calculatedSize, height: calculatedSize }}
             data-testid="chart-error"
           >
             <div className="text-center">
@@ -173,24 +169,14 @@ export function ChartWheel({
           id={containerId}
           role="img"
           aria-label="Gráfico de carta astral"
-          style={{ width: size, height: size }}
+          style={{ width: calculatedSize, height: calculatedSize }}
           className={cn(
             'transition-opacity duration-300',
-            isRendered && !error ? 'opacity-100' : 'opacity-0',
-            interactive && 'cursor-pointer'
+            isRendered && !error ? 'opacity-100' : 'opacity-0'
           )}
-          onClick={() => interactive && selectedPlanet && handlePlanetClick(selectedPlanet)}
           data-testid="chart-container"
         />
       </div>
-
-      {/* Información del planeta seleccionado (si es interactivo) */}
-      {interactive && selectedPlanet && (
-        <div className="bg-card rounded-lg border p-4 text-sm" data-testid="selected-planet-info">
-          <p className="font-semibold">Planeta seleccionado:</p>
-          <p className="text-muted-foreground">{selectedPlanet}</p>
-        </div>
-      )}
     </div>
   );
 }

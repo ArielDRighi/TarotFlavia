@@ -66,9 +66,7 @@ export interface AstroChartPoint {
  * // [{ name: 'Sun', position: 15.5, retrograde: false }]
  * ```
  */
-export function convertPlanetsToAstroChart(
-  planets: PlanetPosition[],
-): AstroChartPoint[] {
+export function convertPlanetsToAstroChart(planets: PlanetPosition[]): AstroChartPoint[] {
   return planets.map((planet) => {
     // Calcular longitud absoluta desde signo + grado
     // Cada signo ocupa 30° (12 signos * 30° = 360°)
