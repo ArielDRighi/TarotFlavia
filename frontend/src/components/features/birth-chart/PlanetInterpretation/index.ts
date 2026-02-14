@@ -1,0 +1,1 @@
+export { PlanetInterpretation } from './PlanetInterpretation';
