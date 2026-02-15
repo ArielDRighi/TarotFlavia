@@ -15066,6 +15066,8 @@ export { ErrorState } from "./ErrorState";
 
 ### T-CA-044: Crear Componente de Límite de Uso
 
+**Estado:** ✅ COMPLETADA
+
 **Historia relacionada:** HU-CA-010
 
 **Descripción:**
@@ -15312,17 +15314,17 @@ export { UsageLimitBanner } from "./UsageLimitBanner";
 
 **Criterios de aceptación:**
 
-- [ ] Muestra uso actual vs límite
-- [ ] Barra de progreso visual
-- [ ] Colores diferenciados (normal, bajo, agotado)
-- [ ] Fecha de reinicio del límite
-- [ ] CTA para upgrade cuando aplique
-- [ ] Variante inline para headers
-- [ ] Variante compact para sidebars
-- [ ] Variante full para banners
-- [ ] Opción de cerrar/dismiss
-- [ ] Responsive design
-- [ ] Tests de componente
+- [x] Muestra uso actual vs límite
+- [x] Barra de progreso visual
+- [x] Colores diferenciados (normal, bajo, agotado)
+- [x] Fecha de reinicio del límite
+- [x] CTA para upgrade cuando aplique
+- [x] Variante inline para headers
+- [x] Variante compact para sidebars
+- [x] Variante full para banners
+- [x] Opción de cerrar/dismiss
+- [x] Responsive design
+- [x] Tests de componente
 
 **Dependencias:** T-CA-026
 
