@@ -13546,23 +13546,25 @@ export default function ChartResultPage() {
 
 **Criterios de aceptación:**
 
-- [ ] Header sticky con acciones (compartir, PDF, nueva carta)
-- [ ] Título con datos del nativo
-- [ ] Síntesis IA destacada arriba (Premium)
-- [ ] Grid con gráfico y Big Three
-- [ ] Tabs para posiciones, aspectos y distribución
-- [ ] Sección de interpretaciones expandible (Free/Premium)
-- [ ] Upsells contextuales según plan
-- [ ] Descarga de PDF funcionando
-- [ ] Web Share API para compartir
-- [ ] Navegación a historial (Premium)
-- [ ] Responsive design
-- [ ] Skeleton de loading
-- [ ] Tests de página
+- [x] Header sticky con acciones (compartir, PDF, nueva carta)
+- [x] Título con datos del nativo
+- [x] Síntesis IA destacada arriba (Premium)
+- [x] Grid con gráfico y Big Three
+- [x] Tabs para posiciones, aspectos y distribución
+- [x] Sección de interpretaciones expandible (Free/Premium)
+- [x] Upsells contextuales según plan
+- [x] Descarga de PDF funcionando
+- [x] Web Share API para compartir
+- [x] Navegación a historial (Premium)
+- [x] Responsive design
+- [x] Skeleton de loading
+- [x] Tests de página
 
 **Dependencias:** T-CA-032 a T-CA-038
 
 **Estimación:** 5 horas
+
+**Estado:** ✅ COMPLETADA
 
 ---
 

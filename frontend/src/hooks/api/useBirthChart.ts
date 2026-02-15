@@ -197,3 +197,30 @@ export function useCanGenerateChart() {
     message,
   };
 }
+
+/**
+ * Hook para descargar carta astral en PDF
+ * Solo disponible para usuarios autenticados (Free y Premium)
+ */
+export function useDownloadPdf() {
+  return useMutation({
+    mutationFn: async (data: GenerateChartRequest) => {
+      const response = await apiClient.post(API_ENDPOINTS.BIRTH_CHART.PDF, data, {
+        responseType: 'blob',
+      });
+
+      // Crear URL temporal para el blob y descargar
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `carta-astral-${data.name.replace(/\s+/g, '-').toLowerCase()}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      return response.data;
+    },
+  });
+}
