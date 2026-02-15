@@ -169,7 +169,7 @@ describe('HistorialPage', () => {
     it('debe renderizar la página de historial', () => {
       render(<HistorialPage />);
 
-      expect(screen.getByTestId('historial-page')).toBeInTheDocument();
+      expect(screen.getByTestId('chart-history-page')).toBeInTheDocument();
     });
 
     it('debe mostrar el título de la página', () => {
