@@ -14723,22 +14723,24 @@ export default function ChartHistoryPage() {
 }
 ```
 
+**Estado:** ✅ COMPLETADA
+
 **Criterios de aceptación:**
 
-- [ ] Grid de cartas guardadas con cards
-- [ ] Alternancia vista grid/lista
-- [ ] Búsqueda por nombre
-- [ ] Ordenamiento (recientes, antiguas, nombre)
-- [ ] Paginación funcional
-- [ ] Dialog de renombrar
-- [ ] Dialog de confirmar eliminación
-- [ ] Descarga de PDF desde la lista
-- [ ] Estado vacío cuando no hay cartas
-- [ ] Estado de búsqueda sin resultados
-- [ ] Verificación de plan Premium
-- [ ] Loading state con skeletons
-- [ ] Responsive design
-- [ ] Tests de página
+- [x] Grid de cartas guardadas con cards
+- [x] Alternancia vista grid/lista
+- [x] Búsqueda por nombre
+- [x] Ordenamiento (recientes, antiguas, nombre)
+- [x] Paginación funcional
+- [x] Dialog de renombrar
+- [x] Dialog de confirmar eliminación
+- [x] Descarga de PDF desde la lista
+- [x] Estado vacío cuando no hay cartas
+- [x] Estado de búsqueda sin resultados
+- [x] Verificación de plan Premium
+- [x] Loading state con skeletons
+- [x] Responsive design
+- [x] Tests de página
 
 **Dependencias:** T-CA-041, T-CA-027
 
