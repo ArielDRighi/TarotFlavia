@@ -470,10 +470,7 @@ export function ChartHistoryPage() {
             >
               Cancelar
             </Button>
-            <Button
-              onClick={handleRename}
-              disabled={isRenaming || !newName.trim() || !!nameError}
-            >
+            <Button onClick={handleRename} disabled={isRenaming || !newName.trim() || !!nameError}>
               {isRenaming ? 'Guardando...' : 'Guardar'}
             </Button>
           </DialogFooter>

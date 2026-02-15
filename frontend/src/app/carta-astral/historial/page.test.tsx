@@ -134,7 +134,12 @@ describe('HistorialPage', () => {
       status: 'idle',
       mutateAsync: vi.fn(),
       reset: vi.fn(),
-    } as unknown as UseMutationResult<{ id: number; name: string }, Error, { id: number; name: string }, unknown>);
+    } as unknown as UseMutationResult<
+      { id: number; name: string },
+      Error,
+      { id: number; name: string },
+      unknown
+    >);
 
     vi.mocked(useDownloadSavedChartPdf).mockReturnValue({
       mutate: vi.fn(),

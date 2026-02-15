@@ -14750,6 +14750,8 @@ export default function ChartHistoryPage() {
 
 ### T-CA-043: Crear Componentes de Estados Vacíos y Error
 
+**Estado:** ✅ COMPLETADA
+
 **Historia relacionada:** Todas
 
 **Descripción:**
@@ -15045,16 +15047,16 @@ export { ErrorState } from "./ErrorState";
 
 **Criterios de aceptación:**
 
-- [ ] EmptyState con múltiples tipos predefinidos
-- [ ] Íconos y colores diferenciados por tipo
-- [ ] Acciones primaria y secundaria opcionales
-- [ ] Variante inline compacta
-- [ ] ErrorState con 3 variantes (page, card, inline)
-- [ ] Botón de reintentar con estado de carga
-- [ ] Links opcionales (home, back)
-- [ ] Diseño consistente con el sistema
-- [ ] Responsive design
-- [ ] Tests de componentes
+- [x] EmptyState con múltiples tipos predefinidos
+- [x] Íconos y colores diferenciados por tipo
+- [x] Acciones primaria y secundaria opcionales
+- [x] Variante inline compacta
+- [x] ErrorState con 3 variantes (page, card, inline)
+- [x] Botón de reintentar con estado de carga
+- [x] Links opcionales (home, back)
+- [x] Diseño consistente con el sistema
+- [x] Responsive design
+- [x] Tests de componentes
 
 **Dependencias:** Ninguna
 
