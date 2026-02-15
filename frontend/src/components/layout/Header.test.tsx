@@ -288,5 +288,18 @@ describe('Header', () => {
       expect(penduloLink).toBeInTheDocument();
       expect(penduloLink).toHaveAttribute('href', '/pendulo');
     });
+
+    it('should display Carta Astral link for all users', () => {
+      mockUseAuthStore.mockReturnValue({
+        user: null,
+        isAuthenticated: false,
+      });
+
+      render(<Header />);
+
+      const cartaAstralLink = screen.getByRole('link', { name: /carta astral/i });
+      expect(cartaAstralLink).toBeInTheDocument();
+      expect(cartaAstralLink).toHaveAttribute('href', '/carta-astral');
+    });
   });
 });

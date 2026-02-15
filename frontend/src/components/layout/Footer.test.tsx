@@ -17,7 +17,65 @@ describe('Footer', () => {
     });
   });
 
-  describe('Links', () => {
+  describe('Service Links', () => {
+    it('should render "Carta del Día" service link', () => {
+      render(<Footer />);
+
+      const link = screen.getByRole('link', { name: /^carta del día$/i });
+      expect(link).toBeInTheDocument();
+      expect(link).toHaveAttribute('href', '/carta-del-dia');
+    });
+
+    it('should render "Horóscopo" service link', () => {
+      render(<Footer />);
+
+      const link = screen.getByRole('link', { name: /^horóscopo$/i });
+      expect(link).toBeInTheDocument();
+      expect(link).toHaveAttribute('href', '/horoscopo');
+    });
+
+    it('should render "Horóscopo Chino" service link', () => {
+      render(<Footer />);
+
+      const link = screen.getByRole('link', { name: /horóscopo chino/i });
+      expect(link).toBeInTheDocument();
+      expect(link).toHaveAttribute('href', '/horoscopo-chino');
+    });
+
+    it('should render "Numerología" service link', () => {
+      render(<Footer />);
+
+      const link = screen.getByRole('link', { name: /numerología/i });
+      expect(link).toBeInTheDocument();
+      expect(link).toHaveAttribute('href', '/numerologia');
+    });
+
+    it('should render "Rituales" service link', () => {
+      render(<Footer />);
+
+      const link = screen.getByRole('link', { name: /rituales/i });
+      expect(link).toBeInTheDocument();
+      expect(link).toHaveAttribute('href', '/rituales');
+    });
+
+    it('should render "Péndulo" service link', () => {
+      render(<Footer />);
+
+      const link = screen.getByRole('link', { name: /péndulo/i });
+      expect(link).toBeInTheDocument();
+      expect(link).toHaveAttribute('href', '/pendulo');
+    });
+
+    it('should render "Carta Astral" service link', () => {
+      render(<Footer />);
+
+      const link = screen.getByRole('link', { name: /carta astral/i });
+      expect(link).toBeInTheDocument();
+      expect(link).toHaveAttribute('href', '/carta-astral');
+    });
+  });
+
+  describe('Legal Links', () => {
     it('should render "Términos" link', () => {
       render(<Footer />);
 

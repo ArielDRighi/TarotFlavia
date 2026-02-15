@@ -4,6 +4,7 @@ import { PlanComparison } from './PlanComparison';
 import { HowItWorks } from './HowItWorks';
 import { PremiumBenefitsSection } from './PremiumBenefitsSection';
 import { WhatIsTarotSection } from './WhatIsTarotSection';
+import { BirthChartPromo } from '@/components/features/birth-chart/PromoSection';
 
 /**
  * LandingPage Component
@@ -13,16 +14,18 @@ import { WhatIsTarotSection } from './WhatIsTarotSection';
  *
  * Structure:
  * 1. HeroSection - Main headline with Auguria branding + CTAs
- * 2. TryWithoutRegisterSection - Quick daily card CTA
- * 3. PlanComparison - Anonymous vs Free vs Premium comparison
- * 4. HowItWorks - 3-step process explanation
- * 5. PremiumBenefitsSection - Premium features highlight
- * 6. WhatIsTarotSection - Educational content
+ * 2. BirthChartPromo - Promotional section for Birth Chart feature
+ * 3. TryWithoutRegisterSection - Quick daily card CTA
+ * 4. PlanComparison - Anonymous vs Free vs Premium comparison
+ * 5. HowItWorks - 3-step process explanation
+ * 6. PremiumBenefitsSection - Premium features highlight
+ * 7. WhatIsTarotSection - Educational content
  */
 export function LandingPage() {
   return (
     <main className="min-h-screen">
       <HeroSection />
+      <BirthChartPromo variant="hero" />
       <TryWithoutRegisterSection />
       <PlanComparison />
       <HowItWorks />
