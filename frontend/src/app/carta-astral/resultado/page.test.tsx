@@ -25,7 +25,7 @@ import type {
 } from '@/types/birth-chart-api.types';
 import { ZodiacSign, Planet } from '@/types/birth-chart.enums';
 import type { AuthUser } from '@/types/auth.types';
-import { useDownloadPdf } from '@/hooks/api/useBirthChart';
+import { useDownloadPdf } from '@/hooks/api/useDownloadPdf';
 
 // Mock modules
 const mockRouterPush = vi.fn();
@@ -41,7 +41,7 @@ vi.mock('@/stores/birthChartStore');
 vi.mock('@/hooks/useAuth');
 
 // Mock useDownloadPdf hook
-vi.mock('@/hooks/api/useBirthChart', () => ({
+vi.mock('@/hooks/api/useDownloadPdf', () => ({
   useDownloadPdf: vi.fn(() => ({
     mutate: vi.fn(),
     isPending: false,
@@ -341,7 +341,7 @@ describe('BirthChartResultPage', () => {
       vi.mocked(useDownloadPdf).mockReturnValueOnce({
         mutate: mockMutate,
         isPending: false,
-      } as any);
+      } as unknown as ReturnType<typeof useDownloadPdf>);
 
       const user = userEvent.setup();
       render(<BirthChartResultPage />);
@@ -350,13 +350,15 @@ describe('BirthChartResultPage', () => {
       await user.click(downloadButton);
 
       expect(mockMutate).toHaveBeenCalledWith({
-        name: mockFormData.name,
-        birthDate: mockFormData.birthDate,
-        birthTime: mockFormData.birthTime,
-        birthPlace: mockFormData.birthPlace,
-        latitude: mockFormData.latitude,
-        longitude: mockFormData.longitude,
-        timezone: mockFormData.timezone,
+        chartData: {
+          name: mockFormData.name,
+          birthDate: mockFormData.birthDate,
+          birthTime: mockFormData.birthTime,
+          birthPlace: mockFormData.birthPlace,
+          latitude: mockFormData.latitude,
+          longitude: mockFormData.longitude,
+          timezone: mockFormData.timezone,
+        },
       });
     });
   });
@@ -426,7 +428,7 @@ describe('BirthChartResultPage', () => {
       render(<BirthChartResultPage />);
 
       // Buscar en el elemento p que contiene la metadata
-      const metadataText = screen.getByText(/14 de mayo de 1990/i).closest('p');
+      const metadataText = screen.getByText(/15 de mayo de 1990/i).closest('p');
       expect(metadataText).toBeInTheDocument();
       expect(metadataText).toHaveTextContent(/14:30/);
       expect(metadataText).toHaveTextContent(/buenos aires, argentina/i);
@@ -593,7 +595,9 @@ describe('BirthChartResultPage', () => {
       const distributionTab = screen.getByRole('tab', { name: /distribución/i });
       await user.click(distributionTab);
 
-      expect(screen.getAllByRole('link', { name: /crear cuenta gratis/i }).length).toBeGreaterThan(0);
+      expect(screen.getAllByRole('link', { name: /crear cuenta gratis/i }).length).toBeGreaterThan(
+        0
+      );
     });
   });
 
@@ -864,7 +868,7 @@ describe('BirthChartResultPage', () => {
       vi.mocked(useDownloadPdf).mockReturnValueOnce({
         mutate: mockDownloadPdfMutate,
         isPending: true,
-      } as any);
+      } as unknown as ReturnType<typeof useDownloadPdf>);
 
       render(<BirthChartResultPage />);
 

@@ -24,7 +24,7 @@ import Link from 'next/link';
 
 // Store y hooks
 import { useBirthChartStore } from '@/stores/birthChartStore';
-import { useDownloadPdf } from '@/hooks/api/useBirthChart';
+import { useDownloadPdf } from '@/hooks/api/useDownloadPdf';
 
 // Tipos
 import { isFullChartResponse, isPremiumChartResponse } from '@/types/birth-chart-api.types';
@@ -53,10 +53,6 @@ export default function ChartResultPage() {
   const downloadPdf = useDownloadPdf();
 
   const [showAllPlanets, setShowAllPlanets] = useState(false);
-  // Verificar si Web Share API está disponible (calculado una sola vez)
-  const [canShare] = useState(() => {
-    return typeof window !== 'undefined' && typeof window.navigator?.share === 'function';
-  });
 
   // Redirigir si no hay resultado
   useEffect(() => {
@@ -64,6 +60,11 @@ export default function ChartResultPage() {
       router.replace('/carta-astral');
     }
   }, [chartResult, router]);
+
+  // Verificar si Web Share API está disponible (estado derivado - SSR safe)
+  const canShare =
+    typeof window !== 'undefined' &&
+    typeof window.navigator?.share === 'function';
 
   if (!chartResult || !formData) {
     return null;
@@ -77,13 +78,15 @@ export default function ChartResultPage() {
   const handleDownloadPdf = () => {
     if (!formData) return;
     downloadPdf.mutate({
-      name: formData.name,
-      birthDate: formData.birthDate,
-      birthTime: formData.birthTime,
-      birthPlace: formData.birthPlace,
-      latitude: formData.latitude,
-      longitude: formData.longitude,
-      timezone: formData.timezone,
+      chartData: {
+        name: formData.name,
+        birthDate: formData.birthDate,
+        birthTime: formData.birthTime,
+        birthPlace: formData.birthPlace,
+        latitude: formData.latitude,
+        longitude: formData.longitude,
+        timezone: formData.timezone,
+      },
     });
   };
 
@@ -155,11 +158,15 @@ export default function ChartResultPage() {
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold tracking-tight">Carta Astral de {formData.name}</h1>
           <p className="text-muted-foreground mt-1">
-            {new Date(formData.birthDate).toLocaleDateString('es-AR', {
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric',
-            })}{' '}
+            {(() => {
+              const [year, month, day] = formData.birthDate.split('-').map(Number);
+              const localBirthDate = new Date(year, month - 1, day);
+              return localBirthDate.toLocaleDateString('es-AR', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+              });
+            })()}{' '}
             • {formData.birthTime} • {formData.birthPlace}
           </p>
         </div>
@@ -317,7 +324,7 @@ export default function ChartResultPage() {
 
           {isPremium && (
             <Button variant="outline" asChild>
-              <Link href="/carta-astral/historial">Ver mi historial</Link>
+              <Link href="/historial">Ver mi historial</Link>
             </Button>
           )}
 
