@@ -311,6 +311,20 @@ export class PremiumChartResponseDto extends FullChartResponseDto {
   savedChartId?: number;
 
   @ApiProperty({
+    example: 'Mi carta natal',
+    description: 'Nombre de la carta guardada',
+    required: false,
+  })
+  name?: string;
+
+  @ApiProperty({
+    example: '2026-02-10T12:00:00Z',
+    description: 'Fecha de creación de la carta guardada',
+    required: false,
+  })
+  createdAt?: string;
+
+  @ApiProperty({
     example: {
       content: 'Síntesis personalizada generada por IA...',
       generatedAt: '2026-02-10T12:00:00Z',
