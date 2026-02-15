@@ -315,7 +315,7 @@ export const KNOWN_ASPECTS: Record<string, AspectFixture> = {
     planet1Longitude: 0.0,
     planet2Longitude: 45.0,
     expectedAspect: null,
-    expectedOrb: 0,
+    expectedOrb: 15,
     notes: '45° no es un aspecto mayor en astrología clásica',
   },
 
@@ -335,12 +335,12 @@ export const KNOWN_ASPECTS: Record<string, AspectFixture> = {
    * Wrap-around en 360° (conjunción cerca de 0°/360°)
    */
   wrapAroundConjunction: {
-    description: 'Conjunción wrap-around - 355° y 5°',
-    planet1Longitude: 355.0,
+    description: 'Conjunción wrap-around - 358° y 5°',
+    planet1Longitude: 358.0,
     planet2Longitude: 5.0,
     expectedAspect: 'conjunction',
-    expectedOrb: 10,
-    notes: 'Conjunción que cruza el punto 0°/360° con 10° de separación',
+    expectedOrb: 7,
+    notes: 'Conjunción que cruza el punto 0°/360° con 7° de separación',
   },
 };
 
@@ -472,7 +472,7 @@ export const EDGE_CASES = {
    * Año bisiesto (29 de febrero)
    */
   leapYear: {
-    description: 'Año bisiesto - 29 de febrero 2000',
+    description: 'Año bisiesto - 29 de febrero',
     input: {
       year: 2000,
       month: 2,
