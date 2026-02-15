@@ -1,16 +1,21 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { UsageLimitBanner } from './UsageLimitBanner';
 import type { UsageStatus } from '@/types/birth-chart-api.types';
 
 describe('UsageLimitBanner', () => {
+  // Mock date determinista: 2026-02-15 12:00:00 UTC
+  const MOCK_NOW = new Date('2026-02-15T12:00:00.000Z');
+  // Reset date: 2 semanas en el futuro
+  const MOCK_RESET_DATE = '2026-03-01T00:00:00.000Z';
+
   const mockUsage: UsageStatus = {
     plan: 'free',
     used: 2,
     limit: 10,
     remaining: 8,
-    resetsAt: '2026-03-01T00:00:00.000Z',
+    resetsAt: MOCK_RESET_DATE,
     canGenerate: true,
   };
 
@@ -50,11 +55,20 @@ describe('UsageLimitBanner', () => {
   });
 
   describe('Variant: compact', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(MOCK_NOW);
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
     it('should render compact variant with progress bar', () => {
       render(<UsageLimitBanner usage={mockUsage} variant="compact" />);
 
-      expect(screen.getByText('Cartas disponibles')).toBeInTheDocument();
-      expect(screen.getByText('8/10')).toBeInTheDocument();
+      expect(screen.getByText('Uso de cartas')).toBeInTheDocument();
+      expect(screen.getByText('2/10')).toBeInTheDocument();
     });
 
     it('should show reset time in compact variant', () => {
@@ -73,7 +87,7 @@ describe('UsageLimitBanner', () => {
 
       render(<UsageLimitBanner usage={exhaustedUsage} variant="compact" />);
 
-      expect(screen.getByText('0/10')).toBeInTheDocument();
+      expect(screen.getByText('10/10')).toBeInTheDocument();
     });
   });
 
@@ -181,6 +195,9 @@ describe('UsageLimitBanner', () => {
       render(<UsageLimitBanner usage={usageAt50} />);
 
       // Progress bar should be at 50%
+      const progressbar = screen.getByRole('progressbar');
+      expect(progressbar).toHaveAttribute('aria-valuenow', '50');
+      // Label still shows the fraction 5/10
       expect(screen.getByText('5/10')).toBeInTheDocument();
     });
   });
@@ -189,9 +206,8 @@ describe('UsageLimitBanner', () => {
     it('should render dismiss button when showDismiss is true', () => {
       render(<UsageLimitBanner usage={mockUsage} showDismiss={true} onDismiss={() => {}} />);
 
-      // Button has aria-label=""
-      const dismissButtons = screen.queryAllByRole('button');
-      expect(dismissButtons.length).toBeGreaterThan(0);
+      // Button has aria-label="Cerrar banner"
+      expect(screen.getByRole('button', { name: /cerrar banner/i })).toBeInTheDocument();
     });
 
     it('should call onDismiss when dismiss button is clicked', async () => {
@@ -200,7 +216,7 @@ describe('UsageLimitBanner', () => {
 
       render(<UsageLimitBanner usage={mockUsage} showDismiss={true} onDismiss={onDismiss} />);
 
-      const dismissButton = screen.getByRole('button', { name: '' });
+      const dismissButton = screen.getByRole('button', { name: /cerrar banner/i });
       await user.click(dismissButton);
 
       expect(onDismiss).toHaveBeenCalledTimes(1);
@@ -209,12 +225,21 @@ describe('UsageLimitBanner', () => {
     it('should NOT render dismiss button when showDismiss is false', () => {
       render(<UsageLimitBanner usage={mockUsage} showDismiss={false} />);
 
-      // No button with empty name (X button)
-      expect(screen.queryByRole('button', { name: '' })).not.toBeInTheDocument();
+      // No dismiss button
+      expect(screen.queryByRole('button', { name: /cerrar banner/i })).not.toBeInTheDocument();
     });
   });
 
   describe('Reset time display', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(MOCK_NOW);
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
     it('should show reset time when resetsAt is provided', () => {
       render(<UsageLimitBanner usage={mockUsage} />);
 

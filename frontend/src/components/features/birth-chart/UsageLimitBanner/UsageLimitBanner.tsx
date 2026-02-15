@@ -82,9 +82,9 @@ export function UsageLimitBanner({
         )}
       >
         <div className="mb-2 flex items-center justify-between">
-          <span className="text-sm font-medium">Cartas disponibles</span>
+          <span className="text-sm font-medium">Uso de cartas</span>
           <Badge variant={isExhausted ? 'destructive' : 'secondary'}>
-            {usage.remaining}/{usage.limit}
+            {usage.used}/{usage.limit}
           </Badge>
         </div>
         <Progress
@@ -119,9 +119,10 @@ export function UsageLimitBanner({
       {/* Botón cerrar */}
       {showDismiss && onDismiss && (
         <button
+          type="button"
           onClick={onDismiss}
           className="text-muted-foreground hover:text-foreground absolute top-2 right-2"
-          aria-label=""
+          aria-label="Cerrar banner"
         >
           <X className="h-4 w-4" />
         </button>
