@@ -101,9 +101,9 @@ export function EmptyState({
       </p>
 
       {/* Acciones */}
-      {(actionLabel || actionHref || onAction || secondaryActionLabel) && (
+      {(actionHref || onAction || (secondaryActionLabel && secondaryActionHref)) && (
         <div data-testid="empty-state-actions" className="flex flex-col gap-3 sm:flex-row">
-          {(actionLabel || actionHref || onAction) && (
+          {(actionHref || onAction) && (
             <Button
               onClick={onAction}
               asChild={!!actionHref}

@@ -64,6 +64,8 @@ export function ErrorState({
   if (variant === 'card') {
     return (
       <div
+        role="alert"
+        aria-live="polite"
         data-testid="error-state-container"
         className={cn(
           'border-destructive/50 bg-destructive/5 rounded-lg border p-6 text-center',
@@ -94,6 +96,8 @@ export function ErrorState({
   // Variante page (grande, página completa)
   return (
     <div
+      role="alert"
+      aria-live="polite"
       data-testid="error-state-container"
       className={cn(
         'flex min-h-[50vh] flex-col items-center justify-center px-4 py-16 text-center',

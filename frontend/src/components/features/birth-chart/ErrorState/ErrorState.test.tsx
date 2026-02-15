@@ -219,14 +219,15 @@ describe('ErrorState', () => {
 
     it('should call window.history.back when back button is clicked', async () => {
       const user = userEvent.setup();
-      const mockBack = vi.fn();
-      window.history.back = mockBack;
+      const backSpy = vi.spyOn(window.history, 'back');
 
       render(<ErrorState message="Error" showBackLink={true} />);
 
       await user.click(screen.getByRole('button', { name: /Volver/i }));
 
-      expect(mockBack).toHaveBeenCalledTimes(1);
+      expect(backSpy).toHaveBeenCalledTimes(1);
+
+      backSpy.mockRestore();
     });
   });
 
