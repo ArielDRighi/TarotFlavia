@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Sparkles,
   Crown,
@@ -38,13 +38,30 @@ export function AISynthesis({
 }: AISynthesisProps) {
   const [copied, setCopied] = useState(false);
   const [isExpanded, setIsExpanded] = useState(true);
+  const copyTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup del timeout cuando el componente se desmonta
+  useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Copiar al portapapeles
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(data.content);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+
+      // Limpiar timeout anterior si existe
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
+
+      // Guardar referencia al nuevo timeout
+      copyTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
     } catch (error) {
       console.error('Error copying to clipboard:', error);
     }
@@ -101,6 +118,7 @@ export function AISynthesis({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8"
@@ -123,6 +141,7 @@ export function AISynthesis({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
+                      type="button"
                       variant="ghost"
                       size="icon"
                       className="h-8 w-8"
@@ -139,11 +158,14 @@ export function AISynthesis({
             )}
 
             <Button
+              type="button"
               variant="ghost"
               size="icon"
               className="h-8 w-8"
               onClick={() => setIsExpanded(!isExpanded)}
               aria-label={isExpanded ? 'Colapsar' : 'Expandir'}
+              aria-expanded={isExpanded}
+              aria-controls="synthesis-content"
             >
               {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
             </Button>
@@ -152,7 +174,7 @@ export function AISynthesis({
       </CardHeader>
 
       {isExpanded && (
-        <CardContent className="relative pt-0">
+        <CardContent id="synthesis-content" className="relative pt-0">
           {/* Contenido de la síntesis */}
           <div className="prose prose-sm dark:prose-invert max-w-none">
             {isRegenerating ? (
@@ -222,7 +244,10 @@ export function AISynthesisPlaceholder({ className }: { className?: string }) {
             Obtén un análisis único generado por inteligencia artificial que conecta todos los
             elementos de tu carta y revela patrones ocultos.
           </p>
-          <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
+          <Button
+            type="button"
+            className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+          >
             <Crown className="mr-2 h-4 w-4" />
             Desbloquear con Premium
           </Button>

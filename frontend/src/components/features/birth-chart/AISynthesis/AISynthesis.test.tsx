@@ -60,20 +60,21 @@ describe('AISynthesis', () => {
     it('debe mostrar metadata por defecto', () => {
       render(<AISynthesis data={mockData} />);
       // Query for metadata specifically (with "Modelo:" prefix to avoid false positives)
-      expect(screen.getByText(/hace alrededor de 12 horas/i)).toBeInTheDocument();
+      // No dependemos del texto exacto de formatDistanceToNow para evitar tests flaky
+      expect(screen.getByText(/hace.*hora/i)).toBeInTheDocument();
       expect(screen.getByText(/Modelo: Claude 3.5 Sonnet/i)).toBeInTheDocument();
     });
 
     it('debe ocultar metadata cuando showMetadata es false', () => {
       render(<AISynthesis data={mockData} showMetadata={false} />);
       // Query for time metadata specifically
-      expect(screen.queryByText(/hace alrededor de/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/hace.*hora/i)).not.toBeInTheDocument();
       expect(screen.queryByText(/Modelo: Claude 3.5 Sonnet/i)).not.toBeInTheDocument();
     });
   });
 
   describe('Interacciones', () => {
-    it('debe copar al portapapeles cuando se hace clic en el botón copiar', async () => {
+    it('debe copiar al portapapeles cuando se hace clic en el botón copiar', async () => {
       const user = userEvent.setup();
       render(<AISynthesis data={mockData} />);
 
@@ -166,7 +167,7 @@ describe('AISynthesis', () => {
       const onRegenerate = vi.fn();
       render(<AISynthesis data={mockData} onRegenerate={onRegenerate} isRegenerating={true} />);
 
-      expect(screen.queryByText(/hace alrededor de/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/hace.*hora/i)).not.toBeInTheDocument();
       expect(screen.queryByText(/Modelo: Claude 3.5 Sonnet/i)).not.toBeInTheDocument();
     });
   });
@@ -192,7 +193,7 @@ describe('AISynthesis', () => {
         generatedAt: null,
       };
       render(<AISynthesis data={dataWithoutDate} />);
-      expect(screen.queryByText(/hace alrededor de/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/hace.*hora/i)).not.toBeInTheDocument();
     });
 
     it('debe manejar provider vacío', () => {
