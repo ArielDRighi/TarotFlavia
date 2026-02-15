@@ -1,99 +1,392 @@
 /**
- * Placeholder: Página de Resultado de Carta Astral por ID (Premium)
+ * Página de Carta Astral Guardada (Premium)
  *
- * Página temporal para mostrar carta astral guardada (usuarios Premium).
- * TODO (T-CA-031): Implementar visualización completa con SVG e interpretaciones.
+ * Muestra una carta guardada del historial con acciones:
+ * - Renombrar
+ * - Descargar PDF
+ * - Eliminar
  */
 
 'use client';
 
-import { useParams, useRouter } from 'next/navigation';
-import { Loader2, Star, AlertCircle } from 'lucide-react';
+import { useState } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import {
+  ArrowLeft,
+  Download,
+  Pencil,
+  Trash2,
+  MoreVertical,
+  Check,
+  X,
+  RefreshCw,
+  Crown,
+  Star,
+  Sparkles,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
+import Link from 'next/link';
 
-import { useSavedChart } from '@/hooks/api/useBirthChart';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+// Hooks
+import { useSavedChart, useRenameChart, useDeleteChart } from '@/hooks/api/useBirthChart';
+import { useDownloadSavedChartPdf } from '@/hooks/api/useDownloadPdf';
+
+// Componentes de carta astral
+import { ChartWheel } from '@/components/features/birth-chart/ChartWheel/ChartWheel';
+import { BigThree } from '@/components/features/birth-chart/BigThree/BigThree';
+import { PlanetPositionsTable } from '@/components/features/birth-chart/PlanetPositionsTable/PlanetPositionsTable';
+import { AspectsTable } from '@/components/features/birth-chart/AspectsTable/AspectsTable';
+import { ElementDistribution } from '@/components/features/birth-chart/ElementDistribution/ElementDistribution';
+import { PlanetInterpretation } from '@/components/features/birth-chart/PlanetInterpretation/PlanetInterpretation';
+import { AISynthesis } from '@/components/features/birth-chart/AISynthesis/AISynthesis';
+
+// UI Components
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Skeleton } from '@/components/ui/skeleton';
 
-export default function SavedBirthChartResultPage() {
+// API endpoints
+import { API_ENDPOINTS } from '@/lib/api/endpoints';
+
+export default function SavedChartPage() {
   const router = useRouter();
   const params = useParams();
-  const chartId = typeof params.id === 'string' ? parseInt(params.id, 10) : 0;
+  const chartId = Number(params.id);
 
-  const { data: chart, isLoading, error } = useSavedChart(chartId, chartId > 0);
+  // Estados locales
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showAllPlanets, setShowAllPlanets] = useState(false);
 
+  // Queries y mutations
+  const { data: chart, isLoading, error } = useSavedChart(chartId);
+  const renameChart = useRenameChart();
+  const deleteChart = useDeleteChart();
+  const downloadPdf = useDownloadSavedChartPdf();
+
+  // Iniciar edición de nombre
+  const handleStartEdit = () => {
+    if (!chart) return;
+    setEditName(chart.name || '');
+    setIsEditing(true);
+  };
+
+  // Guardar nombre editado
+  const handleSaveEdit = () => {
+    if (!editName.trim()) return;
+
+    renameChart.mutate(
+      { id: chartId, name: editName.trim() },
+      {
+        onSuccess: () => setIsEditing(false),
+      }
+    );
+  };
+
+  // Cancelar edición
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditName('');
+  };
+
+  // Eliminar carta
+  const handleDelete = () => {
+    deleteChart.mutate(chartId, {
+      onSuccess: () => {
+        router.push('/carta-astral/historial');
+      },
+    });
+  };
+
+  // Descargar PDF
+  const handleDownloadPdf = () => {
+    if (!chart) return;
+    downloadPdf.mutate({
+      chartId,
+      filename: `${chart.name || 'carta-astral'}.pdf`,
+    });
+  };
+
+  // Estado de carga
   if (isLoading) {
     return (
-      <div className="container flex min-h-screen items-center justify-center">
-        <Loader2 className="text-primary h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="container max-w-2xl px-4 py-8">
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>
-            No se pudo cargar la carta astral. Es posible que no exista o no tengas permisos para
-            verla.
-          </AlertDescription>
-        </Alert>
-        <div className="mt-4 flex justify-center">
-          <Button onClick={() => router.push('/carta-astral')} variant="outline">
-            Volver al formulario
-          </Button>
+      <div className="container max-w-6xl py-8">
+        <div className="mb-8 flex items-center justify-between">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-9 w-24" />
         </div>
+        <Skeleton className="h-96 w-full" />
       </div>
     );
   }
 
-  if (!chart) {
-    return null;
+  // Estado de error
+  if (error || !chart) {
+    return (
+      <div className="container max-w-2xl py-16 text-center">
+        <h1 className="mb-4 text-2xl font-bold">Carta no encontrada</h1>
+        <p className="text-muted-foreground mb-6">
+          La carta que buscas no existe o no tienes acceso a ella.
+        </p>
+        <Button asChild>
+          <Link href="/carta-astral/historial">Ir a mi historial</Link>
+        </Button>
+      </div>
+    );
   }
 
   return (
-    <div className="container max-w-4xl px-4 py-8">
+    <div className="from-background to-muted/20 min-h-screen bg-gradient-to-b">
       {/* Header */}
-      <div className="mb-8 text-center">
-        <div className="bg-primary/10 mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full">
-          <Star className="text-primary h-8 w-8" />
-        </div>
-        <h1 className="text-3xl font-bold tracking-tight">Tu Carta Astral</h1>
-        <p className="text-muted-foreground mt-2">Carta guardada #{chartId}</p>
-      </div>
+      <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 border-b backdrop-blur">
+        <div className="container flex h-14 items-center justify-between">
+          {/* Breadcrumb - Volver al historial */}
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/carta-astral/historial">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Mi historial
+            </Link>
+          </Button>
 
-      {/* Placeholder Content */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Página en Construcción</CardTitle>
-          <CardDescription>
-            Esta es una página placeholder. La visualización completa de la carta astral guardada
-            con todas las interpretaciones se implementará en la tarea T-CA-031.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="bg-muted rounded-lg p-4">
-            <p className="text-sm font-medium">Carta cargada correctamente:</p>
-            <ul className="text-muted-foreground mt-2 space-y-1 text-sm">
-              <li>✓ ID de carta: {chartId}</li>
-              <li>✓ Planetas: {chart.planets?.length || 0}</li>
-              <li>✓ Casas: {chart.houses?.length || 0}</li>
-              <li>✓ Aspectos: {chart.aspects?.length || 0}</li>
-              {chart.aiSynthesis && <li>✓ Síntesis con IA disponible</li>}
-            </ul>
-          </div>
+          <div className="flex items-center gap-2">
+            {/* Badge Premium */}
+            <Badge className="bg-gradient-to-r from-amber-500 to-orange-500">
+              <Crown className="mr-1 h-3 w-3" />
+              Guardada
+            </Badge>
 
-          <div className="flex justify-center gap-4">
-            <Button onClick={() => router.push('/carta-astral')} variant="outline">
-              Nueva carta
+            {/* Botón descargar PDF */}
+            <Button size="sm" onClick={handleDownloadPdf} disabled={downloadPdf.isPending}>
+              {downloadPdf.isPending ? (
+                <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="mr-2 h-4 w-4" />
+              )}
+              PDF
             </Button>
-            <Button onClick={() => router.push('/historial')}>Ver historial</Button>
+
+            {/* Menú de acciones */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" data-testid="menu-button">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleStartEdit}>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Renombrar
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => setShowDeleteDialog(true)}
+                  className="text-destructive"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Eliminar
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </header>
+
+      <main className="container max-w-6xl px-4 py-8">
+        {/* Título editable */}
+        <div className="mb-8 text-center">
+          {isEditing ? (
+            <div className="mx-auto flex max-w-md items-center justify-center gap-2">
+              <Input
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                className="text-center text-xl font-bold"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleSaveEdit();
+                  if (e.key === 'Escape') handleCancelEdit();
+                }}
+              />
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={handleSaveEdit}
+                disabled={renameChart.isPending}
+                data-testid="save-edit-button"
+              >
+                {renameChart.isPending ? (
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Check className="h-4 w-4 text-green-500" />
+                )}
+              </Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={handleCancelEdit}
+                data-testid="cancel-edit-button"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ) : (
+            <h1 className="text-3xl font-bold tracking-tight">{chart.name || 'Carta Astral'}</h1>
+          )}
+          <p className="text-muted-foreground mt-1">
+            Guardada el{' '}
+            {new Date(chart.createdAt).toLocaleDateString('es-AR', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+            })}
+          </p>
+        </div>
+
+        {/* Síntesis IA (Premium) */}
+        {chart.aiSynthesis && (
+          <div className="mb-8">
+            <AISynthesis data={chart.aiSynthesis} />
+          </div>
+        )}
+
+        {/* Grid principal: Gráfico + Big Three */}
+        <div className="mb-8 grid gap-6 lg:grid-cols-2">
+          {/* Gráfico de la carta */}
+          <Card data-testid="chart-wheel-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Star className="text-primary h-5 w-5" />
+                Carta Natal
+              </CardTitle>
+              <CardDescription>Posición de los planetas</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ChartWheel
+                data={chart.chartSvgData}
+                size={400}
+                showAspects={true}
+                interactive={true}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Big Three */}
+          <BigThree data={chart.bigThree} variant="hero" showInterpretations={true} />
+        </div>
+
+        {/* Tabs: Posiciones / Aspectos / Distribución */}
+        <Tabs defaultValue="positions" className="mb-8">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="positions">Posiciones</TabsTrigger>
+            <TabsTrigger value="aspects">Aspectos</TabsTrigger>
+            <TabsTrigger value="distribution">Distribución</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="positions" className="mt-4">
+            <PlanetPositionsTable planets={chart.planets} showCard={true} />
+          </TabsContent>
+
+          <TabsContent value="aspects" className="mt-4">
+            <AspectsTable aspects={chart.aspects} showCard={true} />
+          </TabsContent>
+
+          <TabsContent value="distribution" className="mt-4">
+            <ElementDistribution distribution={chart.distribution} showCard={true} />
+          </TabsContent>
+        </Tabs>
+
+        {/* Interpretaciones */}
+        {chart.interpretations && (
+          <section className="mb-8">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="flex items-center gap-2 text-2xl font-bold">
+                <Sparkles className="text-primary h-6 w-6" />
+                Interpretaciones
+              </h2>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowAllPlanets(!showAllPlanets)}
+              >
+                {showAllPlanets ? 'Mostrar menos' : 'Mostrar todos'}
+                {showAllPlanets ? (
+                  <ChevronUp className="ml-1 h-4 w-4" />
+                ) : (
+                  <ChevronDown className="ml-1 h-4 w-4" />
+                )}
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              {chart.interpretations.planets
+                .slice(0, showAllPlanets ? undefined : 3)
+                .map((planetInterp) => {
+                  return (
+                    <PlanetInterpretation
+                      key={planetInterp.planet}
+                      interpretation={planetInterp}
+                      showAspects={true}
+                    />
+                  );
+                })}
+            </div>
+
+            {!showAllPlanets && chart.interpretations.planets.length > 3 && (
+              <p className="text-muted-foreground mt-4 text-center text-sm">
+                Mostrando 3 de {chart.interpretations.planets.length} planetas
+              </p>
+            )}
+          </section>
+        )}
+      </main>
+
+      {/* Dialog de confirmación para eliminar */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar esta carta?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. La carta será eliminada permanentemente de tu
+              historial.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteChart.isPending ? (
+                <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="mr-2 h-4 w-4" />
+              )}
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

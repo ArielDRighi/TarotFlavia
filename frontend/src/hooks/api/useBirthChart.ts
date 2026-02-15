@@ -13,6 +13,7 @@ import type {
   ChartResponse,
   GenerateChartRequest,
   PremiumChartResponse,
+  SavedChartResponse,
   UsageStatus,
   ChartHistoryResponse,
 } from '@/types/birth-chart-api.types';
@@ -104,9 +105,7 @@ export function useSavedChart(id: number, enabled = true) {
   return useQuery({
     queryKey: birthChartQueryKeys.chart(id),
     queryFn: async () => {
-      const response = await apiClient.get<PremiumChartResponse>(
-        API_ENDPOINTS.BIRTH_CHART.BY_ID(id)
-      );
+      const response = await apiClient.get<SavedChartResponse>(API_ENDPOINTS.BIRTH_CHART.BY_ID(id));
       return response.data;
     },
     enabled,
