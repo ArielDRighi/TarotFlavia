@@ -15731,6 +15731,8 @@ Esta parte cubre las tareas de testing (unitario, integración, e2e), documentac
 
 ### T-CA-046: Tests Unitarios de Servicios de Cálculo
 
+**Estado:** ✅ COMPLETADA
+
 **Historia relacionada:** HU-CA-002, HU-CA-003
 
 **Descripción:**
@@ -16209,15 +16211,15 @@ describe("AspectCalculationService", () => {
 
 **Criterios de aceptación:**
 
-- [ ] Tests para EphemerisWrapper (Julian Day, planetas, casas)
-- [ ] Tests para PlanetPositionService (conversión de longitud a signo)
-- [ ] Tests para HouseCuspService (cúspides, signos interceptados)
-- [ ] Tests para AspectCalculationService (todos los aspectos mayores)
-- [ ] Tests para ChartCalculationService (orquestación)
-- [ ] Fixtures con datos de prueba conocidos
-- [ ] Cobertura mínima del 80%
-- [ ] Tests de edge cases (latitudes extremas, fechas históricas)
-- [ ] Tests de manejo de errores
+- [x] Tests para EphemerisWrapper (Julian Day, planetas, casas)
+- [x] Tests para PlanetPositionService (conversión de longitud a signo)
+- [x] Tests para HouseCuspService (cúspides, signos interceptados)
+- [x] Tests para AspectCalculationService (todos los aspectos mayores)
+- [x] Tests para ChartCalculationService (orquestación)
+- [x] Fixtures con datos de prueba conocidos
+- [x] Cobertura mínima del 80%
+- [x] Tests de edge cases (latitudes extremas, fechas históricas)
+- [x] Tests de manejo de errores
 
 **Dependencias:** T-CA-006 a T-CA-010
 
@@ -17864,7 +17866,7 @@ grep "calculationTimeMs" logs/birth-chart.log | awk '$NF > 1000'
 
 ## CHECKLIST DE PARTE 7K
 
-- [ ] T-CA-046: Tests unitarios de cálculos creados
+- [x] T-CA-046: Tests unitarios de cálculos creados
 - [ ] T-CA-047: Tests unitarios de interpretación creados
 - [ ] T-CA-048: Tests de integración de API creados
 - [ ] T-CA-049: Tests E2E creados
