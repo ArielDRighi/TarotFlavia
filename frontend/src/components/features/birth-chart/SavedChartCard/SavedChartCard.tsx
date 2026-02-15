@@ -1,0 +1,380 @@
+'use client';
+
+// 1. React & Next.js
+import { useCallback } from 'react';
+import Link from 'next/link';
+
+// 2. Icons
+import {
+  Calendar,
+  Clock,
+  Sun,
+  Moon,
+  Sunrise,
+  Eye,
+  Download,
+  Pencil,
+  Trash2,
+  MoreVertical,
+} from 'lucide-react';
+
+// 3. Third-party
+import { formatDistanceToNow, format } from 'date-fns';
+import { es } from 'date-fns/locale';
+
+// 4. Custom hooks
+// N/A
+
+// 5. Components (ui → features)
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { Skeleton } from '@/components/ui/skeleton';
+
+// 6. Utils & types
+import { cn } from '@/lib/utils';
+import type { SavedChart } from '@/types/birth-chart.types';
+import { ZODIAC_SIGNS, ZodiacSign } from '@/types/birth-chart.enums';
+
+/**
+ * Mapeo de elementos a clases de gradiente Tailwind
+ */
+const ELEMENT_GRADIENTS = {
+  fire: 'from-red-500 to-orange-500',
+  earth: 'from-green-600 to-emerald-600',
+  air: 'from-blue-400 to-cyan-400',
+  water: 'from-blue-600 to-indigo-600',
+} as const;
+
+/**
+ * Props del componente SavedChartCard
+ */
+interface SavedChartCardProps {
+  /** Carta guardada a mostrar */
+  chart: SavedChart;
+  /** Callback cuando se hace clic en "Ver carta" */
+  onView: (chart: SavedChart) => void;
+  /** Callback cuando se hace clic en "Descargar PDF" */
+  onDownload: (chart: SavedChart) => void;
+  /** Callback cuando se hace clic en "Renombrar" */
+  onRename: (chart: SavedChart) => void;
+  /** Callback cuando se hace clic en "Eliminar" */
+  onDelete: (chart: SavedChart) => void;
+}
+
+/**
+ * Obtiene el gradiente CSS según el elemento del signo solar
+ */
+function getElementGradient(sunSign: string): string {
+  const zodiacKey = sunSign as ZodiacSign;
+  const element = ZODIAC_SIGNS[zodiacKey]?.element || 'air';
+  return ELEMENT_GRADIENTS[element];
+}
+
+/**
+ * Componente de tarjeta para carta astral guardada
+ *
+ * Muestra información resumida de una carta astral guardada:
+ * - Nombre y fecha de nacimiento
+ * - Big Three (Sol, Luna, Ascendente) con símbolos zodiacales
+ * - Gradiente de fondo según elemento del Sol
+ * - Menú de acciones (ver, descargar, renombrar, eliminar)
+ * - Indicador de tiempo desde creación
+ * - Link a vista detallada
+ */
+export function SavedChartCard({
+  chart,
+  onView,
+  onDownload,
+  onRename,
+  onDelete,
+}: SavedChartCardProps) {
+  // Obtener metadata de signos
+  const sunSignData = ZODIAC_SIGNS[chart.sunSign as ZodiacSign];
+  const moonSignData = ZODIAC_SIGNS[chart.moonSign as ZodiacSign];
+  const ascendantSignData = ZODIAC_SIGNS[chart.ascendantSign as ZodiacSign];
+
+  // Formatear fechas
+  const birthDateObj = new Date(chart.birthDate);
+  const formattedBirthDate = format(birthDateObj, "d 'de' MMMM 'de' yyyy", {
+    locale: es,
+  });
+  const timeAgo = formatDistanceToNow(new Date(chart.createdAt), {
+    addSuffix: true,
+    locale: es,
+  });
+
+  // Gradiente según elemento del sol
+  const gradientClasses = getElementGradient(chart.sunSign);
+
+  // Handlers
+  const handleView = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      onView(chart);
+    },
+    [chart, onView],
+  );
+
+  const handleDownload = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      onDownload(chart);
+    },
+    [chart, onDownload],
+  );
+
+  const handleRename = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      onRename(chart);
+    },
+    [chart, onRename],
+  );
+
+  const handleDelete = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      onDelete(chart);
+    },
+    [chart, onDelete],
+  );
+
+  const handleMenuOpen = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
+  return (
+    <Link href={`/carta-astral/resultado/${chart.id}`} passHref legacyBehavior>
+      <a className="block">
+        <Card
+          data-testid="saved-chart-card"
+          data-chart-id={chart.id}
+          className={cn(
+            'group relative overflow-hidden transition-all duration-300',
+            'hover:shadow-lg hover:scale-[1.02] hover:-translate-y-1',
+            'cursor-pointer',
+          )}
+        >
+          {/* Gradiente de fondo según elemento */}
+          <div
+            className={cn(
+              'absolute inset-0 bg-gradient-to-br opacity-10',
+              'group-hover:opacity-20 transition-opacity duration-300',
+              gradientClasses,
+            )}
+          />
+
+          {/* Contenido de la tarjeta */}
+          <div className="relative z-10">
+            <CardHeader className="pb-3">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <CardTitle className="text-lg font-semibold truncate">
+                    {chart.name}
+                  </CardTitle>
+                  <CardDescription className="flex items-center gap-1.5 mt-1">
+                    <Calendar className="h-3.5 w-3.5" />
+                    <span className="text-sm">{formattedBirthDate}</span>
+                  </CardDescription>
+                </div>
+
+                {/* Menú de acciones */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild onClick={handleMenuOpen}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 shrink-0"
+                      aria-label="Más opciones"
+                    >
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleView}>
+                      <Eye className="h-4 w-4 mr-2" />
+                      Ver carta
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleDownload}>
+                      <Download className="h-4 w-4 mr-2" />
+                      Descargar PDF
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleRename}>
+                      <Pencil className="h-4 w-4 mr-2" />
+                      Renombrar
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={handleDelete}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Eliminar
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </CardHeader>
+
+            <CardContent className="pb-3">
+              {/* Big Three */}
+              <div className="flex items-center justify-around gap-4">
+                {/* Sol */}
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div
+                        className="flex flex-col items-center gap-1"
+                        aria-label={`Sol en ${sunSignData.name}`}
+                      >
+                        <Sun className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-2xl" role="img" aria-hidden="true">
+                          {sunSignData.symbol}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {sunSignData.name}
+                        </span>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Sol en {sunSignData.name}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+
+                {/* Luna */}
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div
+                        className="flex flex-col items-center gap-1"
+                        aria-label={`Luna en ${moonSignData.name}`}
+                      >
+                        <Moon className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-2xl" role="img" aria-hidden="true">
+                          {moonSignData.symbol}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {moonSignData.name}
+                        </span>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Luna en {moonSignData.name}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+
+                {/* Ascendente */}
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div
+                        className="flex flex-col items-center gap-1"
+                        aria-label={`Ascendente en ${ascendantSignData.name}`}
+                      >
+                        <Sunrise className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-2xl" role="img" aria-hidden="true">
+                          {ascendantSignData.symbol}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {ascendantSignData.name}
+                        </span>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Ascendente en {ascendantSignData.name}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            </CardContent>
+
+            <CardFooter className="pt-3 border-t">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Clock className="h-3.5 w-3.5" />
+                <span>{timeAgo}</span>
+              </div>
+            </CardFooter>
+          </div>
+        </Card>
+      </a>
+    </Link>
+  );
+}
+
+/**
+ * Componente skeleton para loading state
+ */
+export function SavedChartCardSkeleton() {
+  return (
+    <Card
+      data-testid="saved-chart-card-skeleton"
+      className="animate-pulse overflow-hidden"
+    >
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-5 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+          </div>
+          <Skeleton className="h-8 w-8 rounded-md" />
+        </div>
+      </CardHeader>
+
+      <CardContent className="pb-3">
+        <div className="flex items-center justify-around gap-4">
+          {/* Sol */}
+          <div className="flex flex-col items-center gap-1">
+            <Skeleton className="h-4 w-4 rounded-full" />
+            <Skeleton className="h-8 w-8 rounded-full" />
+            <Skeleton className="h-3 w-12" />
+          </div>
+
+          {/* Luna */}
+          <div className="flex flex-col items-center gap-1">
+            <Skeleton className="h-4 w-4 rounded-full" />
+            <Skeleton className="h-8 w-8 rounded-full" />
+            <Skeleton className="h-3 w-12" />
+          </div>
+
+          {/* Ascendente */}
+          <div className="flex flex-col items-center gap-1">
+            <Skeleton className="h-4 w-4 rounded-full" />
+            <Skeleton className="h-8 w-8 rounded-full" />
+            <Skeleton className="h-3 w-12" />
+          </div>
+        </div>
+      </CardContent>
+
+      <CardFooter className="pt-3 border-t">
+        <Skeleton className="h-3 w-24" />
+      </CardFooter>
+    </Card>
+  );
+}

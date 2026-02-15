@@ -14269,22 +14269,31 @@ export function SavedChartCardSkeleton() {
 export { SavedChartCard, SavedChartCardSkeleton } from "./SavedChartCard";
 ```
 
+**Estado:** ✅ COMPLETADA
+
 **Criterios de aceptación:**
 
-- [ ] Muestra nombre y fecha de nacimiento
-- [ ] Visual del Big Three con símbolos
-- [ ] Gradiente de fondo según elemento del Sol
-- [ ] Menú de acciones (ver, PDF, renombrar, eliminar)
-- [ ] Indica tiempo desde creación
-- [ ] Link a vista detallada
-- [ ] Hover effects
-- [ ] Skeleton para loading
-- [ ] Responsive design
-- [ ] Tests de componente
+- [x] Muestra nombre y fecha de nacimiento
+- [x] Visual del Big Three con símbolos
+- [x] Gradiente de fondo según elemento del Sol
+- [x] Menú de acciones (ver, PDF, renombrar, eliminar)
+- [x] Indica tiempo desde creación
+- [x] Link a vista detallada
+- [x] Hover effects
+- [x] Skeleton para loading
+- [x] Responsive design
+- [x] Tests de componente
 
 **Dependencias:** T-CA-026
 
 **Estimación:** 2 horas
+
+**Notas de implementación:**
+- Componente implementado siguiendo workflow TDD (Red → Green → Refactor)
+- 31 tests comprehensivos (todos pasando)
+- Ubicación final: `frontend/src/components/features/birth-chart/SavedChartCard/`
+- Quality gates completados: lint, type-check, tests, build, arquitectura
+- Sin uso de `any` types o `eslint-disable`
 
 ---
 
