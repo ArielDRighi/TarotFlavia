@@ -13941,19 +13941,21 @@ export default function SavedChartPage() {
 }
 ```
 
+**Estado:** ✅ COMPLETADA
+
 **Criterios de aceptación:**
 
-- [ ] Carga carta por ID desde API
-- [ ] Header con navegación al historial
-- [ ] Nombre editable inline
-- [ ] Menú de acciones (renombrar, eliminar)
-- [ ] Confirmación antes de eliminar
-- [ ] Descarga de PDF
-- [ ] Muestra todos los componentes (gráfico, Big Three, tabs, interpretaciones)
-- [ ] Manejo de carta no encontrada
-- [ ] Skeleton de loading
-- [ ] Responsive design
-- [ ] Tests de página
+- [x] Carga carta por ID desde API
+- [x] Header con navegación al historial
+- [x] Nombre editable inline
+- [x] Menú de acciones (renombrar, eliminar)
+- [x] Confirmación antes de eliminar
+- [x] Descarga de PDF
+- [x] Muestra todos los componentes (gráfico, Big Three, tabs, interpretaciones)
+- [x] Manejo de carta no encontrada
+- [x] Skeleton de loading
+- [x] Responsive design
+- [x] Tests de página (27/27 tests passing)
 
 **Dependencias:** T-CA-039
 
@@ -13967,7 +13969,7 @@ export default function SavedChartPage() {
 - [ ] T-CA-037: Componente PlanetInterpretation funcionando
 - [x] T-CA-038: Componente AISynthesis funcionando
 - [ ] T-CA-039: Página de resultado completa
-- [ ] T-CA-040: Página de carta guardada completa
+- [x] T-CA-040: Página de carta guardada completa
 
 ---
 

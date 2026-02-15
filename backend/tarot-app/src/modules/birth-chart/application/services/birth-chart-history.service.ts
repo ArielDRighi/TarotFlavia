@@ -140,6 +140,8 @@ export class BirthChartHistoryService {
       },
       canDownloadPdf: true,
       savedChartId: chart.id,
+      name: chart.name,
+      createdAt: chart.createdAt.toISOString(),
       aiSynthesis: {
         content: chart.chartData.aiSynthesis ?? '',
         generatedAt: chart.chartData.aiSynthesis

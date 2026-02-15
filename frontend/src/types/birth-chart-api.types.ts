@@ -64,6 +64,15 @@ export interface PremiumChartResponse extends FullChartResponse {
 }
 
 /**
+ * Respuesta Premium extendida con metadatos de carta guardada
+ * Usada cuando se obtiene una carta guardada por ID del historial
+ */
+export interface SavedChartResponse extends PremiumChartResponse {
+  name: string;
+  createdAt: string;
+}
+
+/**
  * Unión de tipos de respuesta
  */
 export type ChartResponse = BasicChartResponse | FullChartResponse | PremiumChartResponse;

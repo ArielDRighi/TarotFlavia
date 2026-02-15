@@ -62,9 +62,7 @@ export default function ChartResultPage() {
   }, [chartResult, router]);
 
   // Verificar si Web Share API está disponible (estado derivado - SSR safe)
-  const canShare =
-    typeof window !== 'undefined' &&
-    typeof window.navigator?.share === 'function';
+  const canShare = typeof window !== 'undefined' && typeof window.navigator?.share === 'function';
 
   if (!chartResult || !formData) {
     return null;
