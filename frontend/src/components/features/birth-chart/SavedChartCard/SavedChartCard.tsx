@@ -169,161 +169,159 @@ export function SavedChartCard({
   }, []);
 
   return (
-    <Link href={`/carta-astral/resultado/${chart.id}`} passHref legacyBehavior>
-      <a className="block">
-        <Card
-          data-testid="saved-chart-card"
-          data-chart-id={chart.id}
+    <Link href={`/carta-astral/resultado/${chart.id}`}>
+      <Card
+        data-testid="saved-chart-card"
+        data-chart-id={chart.id}
+        className={cn(
+          'group relative overflow-hidden transition-all duration-300',
+          'hover:shadow-lg hover:scale-[1.02] hover:-translate-y-1',
+          'cursor-pointer',
+        )}
+      >
+        {/* Gradiente de fondo según elemento */}
+        <div
           className={cn(
-            'group relative overflow-hidden transition-all duration-300',
-            'hover:shadow-lg hover:scale-[1.02] hover:-translate-y-1',
-            'cursor-pointer',
+            'absolute inset-0 bg-gradient-to-br opacity-10',
+            'group-hover:opacity-20 transition-opacity duration-300',
+            gradientClasses,
           )}
-        >
-          {/* Gradiente de fondo según elemento */}
-          <div
-            className={cn(
-              'absolute inset-0 bg-gradient-to-br opacity-10',
-              'group-hover:opacity-20 transition-opacity duration-300',
-              gradientClasses,
-            )}
-          />
+        />
 
-          {/* Contenido de la tarjeta */}
-          <div className="relative z-10">
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex-1 min-w-0">
-                  <CardTitle className="text-lg font-semibold truncate">
-                    {chart.name}
-                  </CardTitle>
-                  <CardDescription className="flex items-center gap-1.5 mt-1">
-                    <Calendar className="h-3.5 w-3.5" />
-                    <span className="text-sm">{formattedBirthDate}</span>
-                  </CardDescription>
-                </div>
+        {/* Contenido de la tarjeta */}
+        <div className="relative z-10">
+          <CardHeader className="pb-3">
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex-1 min-w-0">
+                <CardTitle className="text-lg font-semibold truncate">
+                  {chart.name}
+                </CardTitle>
+                <CardDescription className="flex items-center gap-1.5 mt-1">
+                  <Calendar className="h-3.5 w-3.5" />
+                  <span className="text-sm">{formattedBirthDate}</span>
+                </CardDescription>
+              </div>
 
-                {/* Menú de acciones */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild onClick={handleMenuOpen}>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 shrink-0"
-                      aria-label="Más opciones"
+              {/* Menú de acciones */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild onClick={handleMenuOpen}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 shrink-0"
+                    aria-label="Más opciones"
+                  >
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={handleView}>
+                    <Eye className="h-4 w-4 mr-2" />
+                    Ver carta
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleDownload}>
+                    <Download className="h-4 w-4 mr-2" />
+                    Descargar PDF
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleRename}>
+                    <Pencil className="h-4 w-4 mr-2" />
+                    Renombrar
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={handleDelete}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Eliminar
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </CardHeader>
+
+          <CardContent className="pb-3">
+            {/* Big Three */}
+            <div className="flex items-center justify-around gap-4">
+              {/* Sol */}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div
+                      className="flex flex-col items-center gap-1"
+                      aria-label={`Sol en ${sunSignData.name}`}
                     >
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={handleView}>
-                      <Eye className="h-4 w-4 mr-2" />
-                      Ver carta
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleDownload}>
-                      <Download className="h-4 w-4 mr-2" />
-                      Descargar PDF
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleRename}>
-                      <Pencil className="h-4 w-4 mr-2" />
-                      Renombrar
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={handleDelete}
-                      className="text-destructive focus:text-destructive"
+                      <Sun className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-2xl" role="img" aria-hidden="true">
+                        {sunSignData.symbol}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {sunSignData.name}
+                      </span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Sol en {sunSignData.name}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
+              {/* Luna */}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div
+                      className="flex flex-col items-center gap-1"
+                      aria-label={`Luna en ${moonSignData.name}`}
                     >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Eliminar
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </CardHeader>
+                      <Moon className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-2xl" role="img" aria-hidden="true">
+                        {moonSignData.symbol}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {moonSignData.name}
+                      </span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Luna en {moonSignData.name}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
 
-            <CardContent className="pb-3">
-              {/* Big Three */}
-              <div className="flex items-center justify-around gap-4">
-                {/* Sol */}
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div
-                        className="flex flex-col items-center gap-1"
-                        aria-label={`Sol en ${sunSignData.name}`}
-                      >
-                        <Sun className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-2xl" role="img" aria-hidden="true">
-                          {sunSignData.symbol}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {sunSignData.name}
-                        </span>
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Sol en {sunSignData.name}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+              {/* Ascendente */}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div
+                      className="flex flex-col items-center gap-1"
+                      aria-label={`Ascendente en ${ascendantSignData.name}`}
+                    >
+                      <Sunrise className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-2xl" role="img" aria-hidden="true">
+                        {ascendantSignData.symbol}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {ascendantSignData.name}
+                      </span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Ascendente en {ascendantSignData.name}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+          </CardContent>
 
-                {/* Luna */}
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div
-                        className="flex flex-col items-center gap-1"
-                        aria-label={`Luna en ${moonSignData.name}`}
-                      >
-                        <Moon className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-2xl" role="img" aria-hidden="true">
-                          {moonSignData.symbol}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {moonSignData.name}
-                        </span>
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Luna en {moonSignData.name}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-
-                {/* Ascendente */}
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div
-                        className="flex flex-col items-center gap-1"
-                        aria-label={`Ascendente en ${ascendantSignData.name}`}
-                      >
-                        <Sunrise className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-2xl" role="img" aria-hidden="true">
-                          {ascendantSignData.symbol}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {ascendantSignData.name}
-                        </span>
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Ascendente en {ascendantSignData.name}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-            </CardContent>
-
-            <CardFooter className="pt-3 border-t">
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Clock className="h-3.5 w-3.5" />
-                <span>{timeAgo}</span>
-              </div>
-            </CardFooter>
-          </div>
-        </Card>
-      </a>
+          <CardFooter className="pt-3 border-t">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Clock className="h-3.5 w-3.5" />
+              <span>{timeAgo}</span>
+            </div>
+          </CardFooter>
+        </div>
+      </Card>
     </Link>
   );
 }

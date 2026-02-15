@@ -20,17 +20,10 @@ vi.mock('next/link', () => ({
   default: ({
     children,
     href,
-    ...props
   }: {
     children: React.ReactNode;
     href: string;
-    passHref?: boolean;
-    legacyBehavior?: boolean;
-  }) => (
-    <a href={href} {...props}>
-      {children}
-    </a>
-  ),
+  }) => <a href={href}>{children}</a>,
 }));
 
 describe('SavedChartCard', () => {
