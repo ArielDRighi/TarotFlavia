@@ -66,13 +66,11 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 
-// API endpoints
-import { API_ENDPOINTS } from '@/lib/api/endpoints';
-
 export default function SavedChartPage() {
   const router = useRouter();
   const params = useParams();
   const chartId = Number(params.id);
+  const isValidId = Number.isFinite(chartId) && chartId > 0;
 
   // Estados locales
   const [isEditing, setIsEditing] = useState(false);
@@ -81,7 +79,7 @@ export default function SavedChartPage() {
   const [showAllPlanets, setShowAllPlanets] = useState(false);
 
   // Queries y mutations
-  const { data: chart, isLoading, error } = useSavedChart(chartId);
+  const { data: chart, isLoading, error } = useSavedChart(chartId, isValidId);
   const renameChart = useRenameChart();
   const deleteChart = useDeleteChart();
   const downloadPdf = useDownloadSavedChartPdf();
@@ -128,6 +126,19 @@ export default function SavedChartPage() {
       filename: `${chart.name || 'carta-astral'}.pdf`,
     });
   };
+
+  // Validar ID antes de cargar
+  if (!isValidId) {
+    return (
+      <div className="container max-w-2xl py-16 text-center">
+        <h1 className="mb-4 text-2xl font-bold">ID de carta inválido</h1>
+        <p className="text-muted-foreground mb-6">El identificador de la carta no es válido.</p>
+        <Button asChild>
+          <Link href="/carta-astral/historial">Ir a mi historial</Link>
+        </Button>
+      </div>
+    );
+  }
 
   // Estado de carga
   if (isLoading) {
@@ -177,20 +188,32 @@ export default function SavedChartPage() {
               Guardada
             </Badge>
 
-            {/* Botón descargar PDF */}
-            <Button size="sm" onClick={handleDownloadPdf} disabled={downloadPdf.isPending}>
-              {downloadPdf.isPending ? (
-                <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Download className="mr-2 h-4 w-4" />
-              )}
-              PDF
-            </Button>
+            {/* Botón descargar PDF (solo si el backend lo permite) */}
+            {chart.canDownloadPdf && (
+              <Button
+                size="sm"
+                onClick={handleDownloadPdf}
+                disabled={downloadPdf.isPending || !chart.canDownloadPdf}
+              >
+                {downloadPdf.isPending ? (
+                  <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Download className="mr-2 h-4 w-4" />
+                )}
+                PDF
+              </Button>
+            )}
 
             {/* Menú de acciones */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" data-testid="menu-button">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  data-testid="menu-button"
+                  aria-label="Abrir menú de acciones"
+                  title="Abrir menú de acciones"
+                >
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>

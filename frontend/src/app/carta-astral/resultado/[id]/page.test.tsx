@@ -445,7 +445,7 @@ describe('SavedChartPage', () => {
       });
     });
 
-    it('should call rename mutation when save is clicked', async () => {
+    it('should open rename input when rename menu option is clicked', async () => {
       const user = userEvent.setup();
       const mockMutate = vi.fn();
 
@@ -592,7 +592,7 @@ describe('SavedChartPage', () => {
 
       render(<SavedChartPage />, { wrapper: createWrapper() });
 
-      const menuButton = screen.getByRole('button', { name: '' });
+      const menuButton = screen.getByTestId('menu-button');
       await user.click(menuButton);
 
       const deleteOption = screen.getByRole('menuitem', { name: /eliminar/i });
@@ -631,7 +631,7 @@ describe('SavedChartPage', () => {
 
       render(<SavedChartPage />, { wrapper: createWrapper() });
 
-      const menuButton = screen.getByRole('button', { name: '' });
+      const menuButton = screen.getByTestId('menu-button');
       await user.click(menuButton);
 
       const deleteOption = screen.getByRole('menuitem', { name: /eliminar/i });
@@ -672,7 +672,7 @@ describe('SavedChartPage', () => {
 
       render(<SavedChartPage />, { wrapper: createWrapper() });
 
-      const menuButton = screen.getByRole('button', { name: '' });
+      const menuButton = screen.getByTestId('menu-button');
       await user.click(menuButton);
 
       const deleteOption = screen.getByRole('menuitem', { name: /eliminar/i });
