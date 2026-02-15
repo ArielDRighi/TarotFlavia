@@ -1,0 +1,1 @@
+export { BirthChartPromo } from './BirthChartPromo';

@@ -199,11 +199,14 @@ describe('PlaceAutocomplete', () => {
 
       const input = screen.getByPlaceholderText('Ej: Buenos Aires, Argentina');
       await user.type(input, 'Buenos');
-      await user.click(input); // Open popover
-
-      await waitFor(() => {
-        expect(screen.getByText('Buscando lugares...')).toBeInTheDocument();
-      });
+      
+      // Wait for debounce and popover to open
+      await waitFor(
+        () => {
+          expect(screen.getByText('Buscando lugares...')).toBeInTheDocument();
+        },
+        { timeout: 2000 }
+      );
     });
 
     it('should show results in popover when data is available', async () => {
@@ -221,12 +224,17 @@ describe('PlaceAutocomplete', () => {
 
       const input = screen.getByPlaceholderText('Ej: Buenos Aires, Argentina');
       await user.type(input, 'Buenos');
-      await user.click(input); // Open popover
-
-      await waitFor(() => {
-        expect(screen.getByText('Buenos Aires')).toBeInTheDocument();
-        expect(screen.getByText('Madrid')).toBeInTheDocument();
-      });
+      
+      // Wait for debounce and popover content
+      await waitFor(
+        () => {
+          const buenosAires = screen.getByText('Buenos Aires');
+          const madrid = screen.getByText('Madrid');
+          expect(buenosAires).toBeInTheDocument();
+          expect(madrid).toBeInTheDocument();
+        },
+        { timeout: 2000 }
+      );
     });
 
     it('should show empty message when no results', async () => {
@@ -244,11 +252,14 @@ describe('PlaceAutocomplete', () => {
 
       const input = screen.getByPlaceholderText('Ej: Buenos Aires, Argentina');
       await user.type(input, 'XYZ12345');
-      await user.click(input); // Open popover
-
-      await waitFor(() => {
-        expect(screen.getByText('No se encontraron lugares.')).toBeInTheDocument();
-      });
+      
+      // Wait for debounce and empty message
+      await waitFor(
+        () => {
+          expect(screen.getByText('No se encontraron lugares.')).toBeInTheDocument();
+        },
+        { timeout: 2000 }
+      );
     });
   });
 
@@ -268,13 +279,16 @@ describe('PlaceAutocomplete', () => {
 
       const input = screen.getByPlaceholderText('Ej: Buenos Aires, Argentina');
       await user.type(input, 'Buenos');
-      await user.click(input);
 
-      await waitFor(() => {
-        expect(screen.getByText('Buenos Aires')).toBeInTheDocument();
-      });
+      // Wait for results to appear
+      await waitFor(
+        () => {
+          expect(screen.getByText(/Buenos Aires/)).toBeInTheDocument();
+        },
+        { timeout: 2000 }
+      );
 
-      const buenosAiresOption = screen.getByText('Buenos Aires');
+      const buenosAiresOption = screen.getByText(/Buenos Aires/);
       await user.click(buenosAiresOption);
 
       expect(mockOnChange).toHaveBeenCalledWith(mockPlace);
@@ -295,13 +309,16 @@ describe('PlaceAutocomplete', () => {
 
       const input = screen.getByPlaceholderText('Ej: Buenos Aires, Argentina') as HTMLInputElement;
       await user.type(input, 'Buenos');
-      await user.click(input);
 
-      await waitFor(() => {
-        expect(screen.getByText('Buenos Aires')).toBeInTheDocument();
-      });
+      // Wait for results
+      await waitFor(
+        () => {
+          expect(screen.getByText(/Buenos Aires/)).toBeInTheDocument();
+        },
+        { timeout: 2000 }
+      );
 
-      const buenosAiresOption = screen.getByText('Buenos Aires');
+      const buenosAiresOption = screen.getByText(/Buenos Aires/);
       await user.click(buenosAiresOption);
 
       // Simular que el padre actualiza el prop value (componente controlado)

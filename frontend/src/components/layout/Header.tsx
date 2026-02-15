@@ -77,6 +77,12 @@ export function Header() {
           >
             Péndulo
           </Link>
+          <Link
+            href={ROUTES.CARTA_ASTRAL}
+            className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
+          >
+            Carta Astral
+          </Link>
           {user && (
             <>
               <Link

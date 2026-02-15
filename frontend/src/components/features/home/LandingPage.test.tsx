@@ -67,4 +67,21 @@ describe('LandingPage', () => {
     // Premium CTA
     expect(screen.getByRole('link', { name: /actualizar a premium/i })).toBeInTheDocument();
   });
+
+  it('should render BirthChartPromo section', () => {
+    render(<LandingPage />);
+
+    // Verificar que existe el componente promocional de Carta Astral (variante hero)
+    expect(screen.getByTestId('birth-chart-promo-hero')).toBeInTheDocument();
+  });
+
+  it('should render BirthChartPromo with correct content', () => {
+    render(<LandingPage />);
+
+    // Verificar contenido específico del promo
+    expect(
+      screen.getByRole('heading', { name: /carta astral personalizada/i })
+    ).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /generar mi carta astral/i })).toBeInTheDocument();
+  });
 });

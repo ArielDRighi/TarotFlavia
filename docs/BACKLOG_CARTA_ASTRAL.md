@@ -15334,6 +15334,8 @@ export { UsageLimitBanner } from "./UsageLimitBanner";
 
 ### T-CA-045: Integrar Módulo en Navegación y Landing
 
+**Estado:** ✅ COMPLETADA
+
 **Historia relacionada:** Todas
 
 **Descripción:**
@@ -15586,16 +15588,16 @@ export { BirthChartPromo } from "./BirthChartPromo";
 
 **Criterios de aceptación:**
 
-- [ ] Link en navegación principal
-- [ ] Link en navegación móvil
-- [ ] Link en footer
-- [ ] Sección promocional en landing (variante hero)
-- [ ] Card promocional para otras páginas
-- [ ] Badge "Nuevo" temporal
-- [ ] Diseño visual atractivo
-- [ ] CTAs claros
-- [ ] Responsive en todas las variantes
-- [ ] Tests de integración
+- [x] Link en navegación principal
+- [x] Link en navegación móvil (N/A - no hay MobileNav implementado en el proyecto)
+- [x] Link en footer
+- [x] Sección promocional en landing (variante hero)
+- [x] Card promocional para otras páginas
+- [x] Badge "Nuevo" temporal
+- [x] Diseño visual atractivo
+- [x] CTAs claros
+- [x] Responsive en todas las variantes
+- [x] Tests de integración
 
 **Dependencias:** Ninguna (pero requiere estructura de layout existente)
 
@@ -15609,7 +15611,7 @@ export { BirthChartPromo } from "./BirthChartPromo";
 - [ ] T-CA-042: Página de historial completa
 - [ ] T-CA-043: Componentes EmptyState y ErrorState creados
 - [ ] T-CA-044: Componente UsageLimitBanner funcionando
-- [ ] T-CA-045: Módulo integrado en navegación y landing
+- [x] T-CA-045: Módulo integrado en navegación y landing
 
 ---
 

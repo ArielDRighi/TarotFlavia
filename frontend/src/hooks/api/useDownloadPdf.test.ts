@@ -46,6 +46,13 @@ global.URL.revokeObjectURL = mockRevokeObjectURL;
 const mockClick = vi.fn();
 const mockRemove = vi.fn();
 const originalCreateElement = document.createElement.bind(document);
+const originalAppendChild = document.body.appendChild.bind(document.body);
+
+vi.spyOn(document.body, 'appendChild').mockImplementation((node) => {
+  // Simular appendChild pero no hacerlo realmente para no afectar el DOM de tests
+  return node as Node;
+});
+
 vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
   if (tagName === 'a') {
     const mockAnchor = {
@@ -63,6 +70,8 @@ vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
 describe('useDownloadPdf', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockClick.mockClear();
+    mockRemove.mockClear();
   });
 
   it('should download PDF with custom filename and return void', async () => {
