@@ -17,13 +17,9 @@ vi.mock('date-fns', async () => {
 
 // Mock de next/link
 vi.mock('next/link', () => ({
-  default: ({
-    children,
-    href,
-  }: {
-    children: React.ReactNode;
-    href: string;
-  }) => <a href={href}>{children}</a>,
+  default: ({ children, href }: { children: React.ReactNode; href: string }) => (
+    <a href={href}>{children}</a>
+  ),
 }));
 
 describe('SavedChartCard', () => {
@@ -46,9 +42,7 @@ describe('SavedChartCard', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    const mockFormatDistanceToNow = formatDistanceToNow as unknown as ReturnType<
-      typeof vi.fn
-    >;
+    const mockFormatDistanceToNow = formatDistanceToNow as unknown as ReturnType<typeof vi.fn>;
     mockFormatDistanceToNow.mockReturnValue('hace 2 días');
   });
 
@@ -75,23 +69,17 @@ describe('SavedChartCard', () => {
     it('debe mostrar el ID de la carta', () => {
       render(<SavedChartCard chart={mockChart} {...mockHandlers} />);
 
-      expect(screen.getByTestId('saved-chart-card')).toHaveAttribute(
-        'data-chart-id',
-        '1',
-      );
+      expect(screen.getByTestId('saved-chart-card')).toHaveAttribute('data-chart-id', '1');
     });
 
     it('debe mostrar el tiempo desde creación', () => {
       render(<SavedChartCard chart={mockChart} {...mockHandlers} />);
 
       expect(screen.getByText('hace 2 días')).toBeInTheDocument();
-      expect(formatDistanceToNow).toHaveBeenCalledWith(
-        new Date(mockChart.createdAt),
-        {
-          addSuffix: true,
-          locale: es,
-        },
-      );
+      expect(formatDistanceToNow).toHaveBeenCalledWith(new Date(mockChart.createdAt), {
+        addSuffix: true,
+        locale: es,
+      });
     });
   });
 
@@ -133,9 +121,7 @@ describe('SavedChartCard', () => {
   describe('Gradientes por elemento del Sol', () => {
     it('debe aplicar gradiente fire para signos de fuego (Leo)', () => {
       const fireChart = { ...mockChart, sunSign: 'leo' as const };
-      const { container } = render(
-        <SavedChartCard chart={fireChart} {...mockHandlers} />,
-      );
+      const { container } = render(<SavedChartCard chart={fireChart} {...mockHandlers} />);
 
       // El gradiente está en el div hijo, no en la Card
       const gradientDiv = container.querySelector('.bg-gradient-to-br');
@@ -144,9 +130,7 @@ describe('SavedChartCard', () => {
 
     it('debe aplicar gradiente earth para signos de tierra (Tauro)', () => {
       const earthChart = { ...mockChart, sunSign: 'taurus' as const };
-      const { container } = render(
-        <SavedChartCard chart={earthChart} {...mockHandlers} />,
-      );
+      const { container } = render(<SavedChartCard chart={earthChart} {...mockHandlers} />);
 
       const gradientDiv = container.querySelector('.bg-gradient-to-br');
       expect(gradientDiv?.className).toContain('from-green-600');
@@ -154,9 +138,7 @@ describe('SavedChartCard', () => {
 
     it('debe aplicar gradiente air para signos de aire (Géminis)', () => {
       const airChart = { ...mockChart, sunSign: 'gemini' as const };
-      const { container } = render(
-        <SavedChartCard chart={airChart} {...mockHandlers} />,
-      );
+      const { container } = render(<SavedChartCard chart={airChart} {...mockHandlers} />);
 
       const gradientDiv = container.querySelector('.bg-gradient-to-br');
       expect(gradientDiv?.className).toContain('from-blue-400');
@@ -164,9 +146,7 @@ describe('SavedChartCard', () => {
 
     it('debe aplicar gradiente water para signos de agua (Cáncer)', () => {
       const waterChart = { ...mockChart, sunSign: 'cancer' as const };
-      const { container } = render(
-        <SavedChartCard chart={waterChart} {...mockHandlers} />,
-      );
+      const { container } = render(<SavedChartCard chart={waterChart} {...mockHandlers} />);
 
       const gradientDiv = container.querySelector('.bg-gradient-to-br');
       expect(gradientDiv?.className).toContain('from-blue-600');
@@ -239,7 +219,7 @@ describe('SavedChartCard', () => {
       render(
         <div onClick={onCardClick}>
           <SavedChartCard chart={mockChart} {...mockHandlers} />
-        </div>,
+        </div>
       );
 
       const menuButton = screen.getByLabelText(/más opciones/i);
@@ -255,10 +235,7 @@ describe('SavedChartCard', () => {
       render(<SavedChartCard chart={mockChart} {...mockHandlers} />);
 
       const link = screen.getByRole('link');
-      expect(link).toHaveAttribute(
-        'href',
-        `/carta-astral/resultado/${mockChart.id}`,
-      );
+      expect(link).toHaveAttribute('href', `/carta-astral/resultado/${mockChart.id}`);
     });
 
     it('debe navegar a la vista detallada cuando se hace clic en la tarjeta', () => {
@@ -295,9 +272,7 @@ describe('SavedChartCard', () => {
       render(<SavedChartCard chart={longNameChart} {...mockHandlers} />);
 
       expect(
-        screen.getByText(
-          /Este es un nombre muy largo para una carta astral/,
-        ),
+        screen.getByText(/Este es un nombre muy largo para una carta astral/)
       ).toBeInTheDocument();
     });
 
@@ -313,9 +288,7 @@ describe('SavedChartCard', () => {
     });
 
     it('debe manejar fechas recientes (minutos/horas)', () => {
-      const mockFormatDistanceToNow = formatDistanceToNow as unknown as ReturnType<
-        typeof vi.fn
-      >;
+      const mockFormatDistanceToNow = formatDistanceToNow as unknown as ReturnType<typeof vi.fn>;
       mockFormatDistanceToNow.mockReturnValue('hace 30 minutos');
 
       render(<SavedChartCard chart={mockChart} {...mockHandlers} />);
@@ -324,9 +297,7 @@ describe('SavedChartCard', () => {
     });
 
     it('debe manejar fechas antiguas (meses/años)', () => {
-      const mockFormatDistanceToNow = formatDistanceToNow as unknown as ReturnType<
-        typeof vi.fn
-      >;
+      const mockFormatDistanceToNow = formatDistanceToNow as unknown as ReturnType<typeof vi.fn>;
       mockFormatDistanceToNow.mockReturnValue('hace 3 meses');
 
       render(<SavedChartCard chart={mockChart} {...mockHandlers} />);

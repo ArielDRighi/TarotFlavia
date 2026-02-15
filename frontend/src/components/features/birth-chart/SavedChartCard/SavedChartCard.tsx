@@ -42,12 +42,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Skeleton } from '@/components/ui/skeleton';
 
 // 6. Utils & types
@@ -133,7 +128,7 @@ export function SavedChartCard({
       e.stopPropagation();
       onView(chart);
     },
-    [chart, onView],
+    [chart, onView]
   );
 
   const handleDownload = useCallback(
@@ -142,7 +137,7 @@ export function SavedChartCard({
       e.stopPropagation();
       onDownload(chart);
     },
-    [chart, onDownload],
+    [chart, onDownload]
   );
 
   const handleRename = useCallback(
@@ -151,7 +146,7 @@ export function SavedChartCard({
       e.stopPropagation();
       onRename(chart);
     },
-    [chart, onRename],
+    [chart, onRename]
   );
 
   const handleDelete = useCallback(
@@ -160,7 +155,7 @@ export function SavedChartCard({
       e.stopPropagation();
       onDelete(chart);
     },
-    [chart, onDelete],
+    [chart, onDelete]
   );
 
   const handleMenuOpen = useCallback((e: React.MouseEvent) => {
@@ -175,16 +170,16 @@ export function SavedChartCard({
         data-chart-id={chart.id}
         className={cn(
           'group relative overflow-hidden transition-all duration-300',
-          'hover:shadow-lg hover:scale-[1.02] hover:-translate-y-1',
-          'cursor-pointer',
+          'hover:-translate-y-1 hover:scale-[1.02] hover:shadow-lg',
+          'cursor-pointer'
         )}
       >
         {/* Gradiente de fondo según elemento */}
         <div
           className={cn(
             'absolute inset-0 bg-gradient-to-br opacity-10',
-            'group-hover:opacity-20 transition-opacity duration-300',
-            gradientClasses,
+            'transition-opacity duration-300 group-hover:opacity-20',
+            gradientClasses
           )}
         />
 
@@ -192,11 +187,9 @@ export function SavedChartCard({
         <div className="relative z-10">
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between gap-2">
-              <div className="flex-1 min-w-0">
-                <CardTitle className="text-lg font-semibold truncate">
-                  {chart.name}
-                </CardTitle>
-                <CardDescription className="flex items-center gap-1.5 mt-1">
+              <div className="min-w-0 flex-1">
+                <CardTitle className="truncate text-lg font-semibold">{chart.name}</CardTitle>
+                <CardDescription className="mt-1 flex items-center gap-1.5">
                   <Calendar className="h-3.5 w-3.5" />
                   <span className="text-sm">{formattedBirthDate}</span>
                 </CardDescription>
@@ -216,23 +209,23 @@ export function SavedChartCard({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={handleView}>
-                    <Eye className="h-4 w-4 mr-2" />
+                    <Eye className="mr-2 h-4 w-4" />
                     Ver carta
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleDownload}>
-                    <Download className="h-4 w-4 mr-2" />
+                    <Download className="mr-2 h-4 w-4" />
                     Descargar PDF
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleRename}>
-                    <Pencil className="h-4 w-4 mr-2" />
+                    <Pencil className="mr-2 h-4 w-4" />
                     Renombrar
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={handleDelete}
                     className="text-destructive focus:text-destructive"
                   >
-                    <Trash2 className="h-4 w-4 mr-2" />
+                    <Trash2 className="mr-2 h-4 w-4" />
                     Eliminar
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -251,13 +244,11 @@ export function SavedChartCard({
                       className="flex flex-col items-center gap-1"
                       aria-label={`Sol en ${sunSignData.name}`}
                     >
-                      <Sun className="h-4 w-4 text-muted-foreground" />
+                      <Sun className="text-muted-foreground h-4 w-4" />
                       <span className="text-2xl" role="img" aria-hidden="true">
                         {sunSignData.symbol}
                       </span>
-                      <span className="text-xs text-muted-foreground">
-                        {sunSignData.name}
-                      </span>
+                      <span className="text-muted-foreground text-xs">{sunSignData.name}</span>
                     </div>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -274,13 +265,11 @@ export function SavedChartCard({
                       className="flex flex-col items-center gap-1"
                       aria-label={`Luna en ${moonSignData.name}`}
                     >
-                      <Moon className="h-4 w-4 text-muted-foreground" />
+                      <Moon className="text-muted-foreground h-4 w-4" />
                       <span className="text-2xl" role="img" aria-hidden="true">
                         {moonSignData.symbol}
                       </span>
-                      <span className="text-xs text-muted-foreground">
-                        {moonSignData.name}
-                      </span>
+                      <span className="text-muted-foreground text-xs">{moonSignData.name}</span>
                     </div>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -297,11 +286,11 @@ export function SavedChartCard({
                       className="flex flex-col items-center gap-1"
                       aria-label={`Ascendente en ${ascendantSignData.name}`}
                     >
-                      <Sunrise className="h-4 w-4 text-muted-foreground" />
+                      <Sunrise className="text-muted-foreground h-4 w-4" />
                       <span className="text-2xl" role="img" aria-hidden="true">
                         {ascendantSignData.symbol}
                       </span>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-muted-foreground text-xs">
                         {ascendantSignData.name}
                       </span>
                     </div>
@@ -314,8 +303,8 @@ export function SavedChartCard({
             </div>
           </CardContent>
 
-          <CardFooter className="pt-3 border-t">
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <CardFooter className="border-t pt-3">
+            <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
               <Clock className="h-3.5 w-3.5" />
               <span>{timeAgo}</span>
             </div>
@@ -331,10 +320,7 @@ export function SavedChartCard({
  */
 export function SavedChartCardSkeleton() {
   return (
-    <Card
-      data-testid="saved-chart-card-skeleton"
-      className="animate-pulse overflow-hidden"
-    >
+    <Card data-testid="saved-chart-card-skeleton" className="animate-pulse overflow-hidden">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 space-y-2">
@@ -370,7 +356,7 @@ export function SavedChartCardSkeleton() {
         </div>
       </CardContent>
 
-      <CardFooter className="pt-3 border-t">
+      <CardFooter className="border-t pt-3">
         <Skeleton className="h-3 w-24" />
       </CardFooter>
     </Card>
