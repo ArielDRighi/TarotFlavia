@@ -36,7 +36,7 @@ export function BirthChartPromo({ variant = 'section', className }: BirthChartPr
           <div className="space-y-6">
             <div className="space-y-4">
               <Badge variant="secondary" className="w-fit">
-                <Sparkles className="mr-1 h-3 w-3" />
+                <Sparkles className="mr-1 h-3 w-3" aria-hidden="true" />
                 Nuevo
               </Badge>
 
@@ -53,19 +53,19 @@ export function BirthChartPromo({ variant = 'section', className }: BirthChartPr
             {/* Features list */}
             <ul className="space-y-3">
               <li className="flex items-start gap-3">
-                <Check className="text-primary mt-1 h-5 w-5 flex-shrink-0" />
+                <Check className="text-primary mt-1 h-5 w-5 flex-shrink-0" aria-hidden="true" />
                 <span className="text-gray-700 dark:text-gray-300">
                   Posiciones planetarias exactas al momento de tu nacimiento
                 </span>
               </li>
               <li className="flex items-start gap-3">
-                <Check className="text-primary mt-1 h-5 w-5 flex-shrink-0" />
+                <Check className="text-primary mt-1 h-5 w-5 flex-shrink-0" aria-hidden="true" />
                 <span className="text-gray-700 dark:text-gray-300">
                   Interpretación de aspectos y su influencia en tu vida
                 </span>
               </li>
               <li className="flex items-start gap-3">
-                <Check className="text-primary mt-1 h-5 w-5 flex-shrink-0" />
+                <Check className="text-primary mt-1 h-5 w-5 flex-shrink-0" aria-hidden="true" />
                 <span className="text-gray-700 dark:text-gray-300">
                   Síntesis personalizada con IA para usuarios Premium
                 </span>
@@ -85,15 +85,15 @@ export function BirthChartPromo({ variant = 'section', className }: BirthChartPr
             <div className="relative">
               {/* Icono central grande */}
               <div className="bg-primary/10 mx-auto flex h-32 w-32 items-center justify-center rounded-full">
-                <Star className="text-primary h-16 w-16" />
+                <Star className="text-primary h-16 w-16" aria-hidden="true" />
               </div>
 
               {/* Iconos orbitales decorativos */}
               <div className="absolute top-0 -left-8 animate-pulse">
-                <Sparkles className="text-primary/60 h-8 w-8" />
+                <Sparkles className="text-primary/60 h-8 w-8" aria-hidden="true" />
               </div>
               <div className="absolute -right-8 bottom-0 animate-pulse delay-300">
-                <Sparkles className="text-primary/60 h-8 w-8" />
+                <Sparkles className="text-primary/60 h-8 w-8" aria-hidden="true" />
               </div>
             </div>
           </div>
@@ -112,9 +112,9 @@ export function BirthChartPromo({ variant = 'section', className }: BirthChartPr
         <Card className="from-primary/5 to-primary/10 border-primary/20 bg-gradient-to-br">
           <CardHeader className="text-center">
             <div className="mx-auto mb-4 flex w-fit items-center gap-2">
-              <Star className="text-primary h-6 w-6" />
+              <Star className="text-primary h-6 w-6" aria-hidden="true" />
               <Badge variant="secondary">
-                <Sparkles className="mr-1 h-3 w-3" />
+                <Sparkles className="mr-1 h-3 w-3" aria-hidden="true" />
                 Nuevo
               </Badge>
             </div>
@@ -143,10 +143,10 @@ export function BirthChartPromo({ variant = 'section', className }: BirthChartPr
       <CardHeader>
         <div className="mb-2 flex items-start justify-between">
           <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
-            <Star className="text-primary h-6 w-6" />
+            <Star className="text-primary h-6 w-6" aria-hidden="true" />
           </div>
           <Badge variant="secondary" className="text-xs">
-            <Sparkles className="mr-1 h-3 w-3" />
+            <Sparkles className="mr-1 h-3 w-3" aria-hidden="true" />
             Nuevo
           </Badge>
         </div>

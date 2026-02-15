@@ -199,7 +199,7 @@ describe('PlaceAutocomplete', () => {
 
       const input = screen.getByPlaceholderText('Ej: Buenos Aires, Argentina');
       await user.type(input, 'Buenos');
-      
+
       // Wait for debounce and popover to open
       await waitFor(
         () => {
@@ -224,7 +224,7 @@ describe('PlaceAutocomplete', () => {
 
       const input = screen.getByPlaceholderText('Ej: Buenos Aires, Argentina');
       await user.type(input, 'Buenos');
-      
+
       // Wait for debounce and popover content
       await waitFor(
         () => {
@@ -252,7 +252,7 @@ describe('PlaceAutocomplete', () => {
 
       const input = screen.getByPlaceholderText('Ej: Buenos Aires, Argentina');
       await user.type(input, 'XYZ12345');
-      
+
       // Wait for debounce and empty message
       await waitFor(
         () => {
