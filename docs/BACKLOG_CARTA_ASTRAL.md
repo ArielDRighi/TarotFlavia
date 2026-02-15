@@ -11004,12 +11004,14 @@ export * from "./astrochart.utils";
 **Estado:** ✅ COMPLETADA (13/02/2026)
 
 **Archivos creados:**
+
 - `frontend/src/components/features/birth-chart/lib/astrochart.config.ts` - Configuración de colores Auguria y 3 settings (default dark, light, PDF)
 - `frontend/src/components/features/birth-chart/lib/astrochart.utils.ts` - Funciones de conversión de datos backend → astrochart
 - `frontend/src/components/features/birth-chart/lib/astrochart.utils.test.ts` - 18 tests unitarios (100% passed)
 - `frontend/src/components/features/birth-chart/lib/index.ts` - Exports centralizados
 
 **Quality Gates:**
+
 - ✅ npm run format (Prettier)
 - ✅ npm run lint:fix (ESLint)
 - ✅ npm run type-check (TypeScript)
@@ -12340,13 +12342,13 @@ src/features/birth-chart/
 
 Esta parte cubre las páginas de resultado de la carta astral, incluyendo la visualización del Big Three, las interpretaciones completas y la síntesis de IA.
 
-| Tarea    | Título                                        | Tipo     | Prioridad | Estimación | Estado          |
-| -------- | --------------------------------------------- | -------- | --------- | ---------- | --------------- |
-| T-CA-036 | Crear componente Big Three                    | Frontend | Must      | 3h         | ✅ COMPLETADA   |
-| T-CA-037 | Crear componente de interpretación de planeta | Frontend | Must      | 3h         |                 |
-| T-CA-038 | Crear componente de síntesis IA               | Frontend | Must      | 2h         | ✅ COMPLETADA   |
-| T-CA-039 | Crear página de resultado de carta astral     | Frontend | Must      | 5h         |                 |
-| T-CA-040 | Crear página de carta guardada (Premium)      | Frontend | Must      | 3h         |                 |
+| Tarea    | Título                                        | Tipo     | Prioridad | Estimación | Estado        |
+| -------- | --------------------------------------------- | -------- | --------- | ---------- | ------------- |
+| T-CA-036 | Crear componente Big Three                    | Frontend | Must      | 3h         | ✅ COMPLETADA |
+| T-CA-037 | Crear componente de interpretación de planeta | Frontend | Must      | 3h         |               |
+| T-CA-038 | Crear componente de síntesis IA               | Frontend | Must      | 2h         | ✅ COMPLETADA |
+| T-CA-039 | Crear página de resultado de carta astral     | Frontend | Must      | 5h         |               |
+| T-CA-040 | Crear página de carta guardada (Premium)      | Frontend | Must      | 3h         |               |
 
 **Total estimado:** 16 horas
 
@@ -14289,6 +14291,7 @@ export { SavedChartCard, SavedChartCardSkeleton } from "./SavedChartCard";
 **Estimación:** 2 horas
 
 **Notas de implementación:**
+
 - Componente implementado siguiendo workflow TDD (Red → Green → Refactor)
 - 31 tests comprehensivos (todos pasando)
 - Ubicación final: `frontend/src/components/features/birth-chart/SavedChartCard/`
@@ -17535,11 +17538,11 @@ Ver [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) para problemas comunes.
     │
 3.  └── BirthChartFacadeService
     │
-4.               ├── ChartCacheService.get() (verificar caché)
+4.                ├── ChartCacheService.get() (verificar caché)
               │       │
               │       └── Si existe → retornar cacheado
               │
-5.               ├── ChartCalculationService.calculateChart()
+5.                ├── ChartCalculationService.calculateChart()
               │       │
               │       ├── EphemerisWrapper.calculatePlanetPositions()
               │       ├── EphemerisWrapper.calculateHouses()
@@ -17547,17 +17550,17 @@ Ver [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) para problemas comunes.
               │       ├── HouseCuspService.transform()
               │       └── AspectCalculationService.calculate()
               │
-6.               ├── ChartInterpretationService.generateInterpretation()
+6.                ├── ChartInterpretationService.generateInterpretation()
               │       │
               │       └── BirthChartInterpretationRepository.findAllForChart()
               │
-7.               ├── ChartAISynthesisService.generateSynthesis() (Premium)
+7.                ├── ChartAISynthesisService.generateSynthesis() (Premium)
               │       │
               │       └── AIProviderService.generateCompletion()
               │
-8.               ├── BirthChartRepository.save() (Premium)
+8.                ├── BirthChartRepository.save() (Premium)
               │
-9.               ├── ChartCacheService.set()
+9.                ├── ChartCacheService.set()
               │
 10.           └── Return response según plan
 
@@ -18219,3 +18222,241 @@ T-CA-046 → T-CA-047 → T-CA-048 → T-CA-049 → T-CA-050
 
 **FIN DEL RESUMEN EJECUTIVO**
 ```
+
+# MÓDULO 7: CARTA ASTRAL - TAREA DE CORRECCIÓN
+
+## T-CA-051: Filtrar Aspectos Astronómicamente Imposibles
+
+**Proyecto:** Auguria - Plataforma de Servicios Místicos  
+**Módulo:** Carta Astral  
+**Tipo:** Corrección / Bug Fix  
+**Prioridad:** Must  
+**Estimación:** 2 horas  
+**Fecha:** Febrero 2026
+
+---
+
+## Contexto
+
+Durante la generación de contenido para los seeders, se identificó que algunos aspectos planetarios son **astronómicamente imposibles** debido a las órbitas de Mercurio y Venus (planetas interiores que nunca se alejan lo suficiente del Sol).
+
+El código actual podría calcular/mostrar estos aspectos incorrectamente si los datos de entrada tuvieran errores.
+
+---
+
+## Problema
+
+Los planetas interiores tienen elongación máxima limitada:
+
+- **Mercurio:** máximo ~28° del Sol
+- **Venus:** máximo ~47° del Sol
+
+Esto hace que ciertos aspectos sean físicamente imposibles:
+
+| Par              | Aspectos Imposibles                                              |
+| ---------------- | ---------------------------------------------------------------- |
+| Sol - Mercurio   | Sextil (60°), Cuadratura (90°), Trígono (120°), Oposición (180°) |
+| Sol - Venus      | Cuadratura (90°), Trígono (120°), Oposición (180°)               |
+| Mercurio - Venus | Trígono (120°), Oposición (180°)                                 |
+
+---
+
+## Cambios Requeridos
+
+### 1. Backend: AspectCalculationService
+
+**Archivo:** `src/modules/birth-chart/application/services/aspect-calculation.service.ts`
+
+**Agregar:**
+
+```typescript
+/**
+ * Aspectos astronómicamente imposibles debido a órbitas de planetas interiores
+ */
+private readonly IMPOSSIBLE_ASPECTS: Array<{
+  planet1: string;
+  planet2: string;
+  aspects: string[];
+}> = [
+  {
+    planet1: 'sun',
+    planet2: 'mercury',
+    aspects: ['sextile', 'square', 'trine', 'opposition'],
+  },
+  {
+    planet1: 'sun',
+    planet2: 'venus',
+    aspects: ['square', 'trine', 'opposition'],
+  },
+  {
+    planet1: 'mercury',
+    planet2: 'venus',
+    aspects: ['trine', 'opposition'],
+  },
+];
+
+/**
+ * Verifica si un aspecto es astronómicamente posible
+ */
+private isAspectPossible(
+  planet1: string,
+  planet2: string,
+  aspectType: string,
+): boolean {
+  const entry = this.IMPOSSIBLE_ASPECTS.find(
+    (e) =>
+      (e.planet1 === planet1 && e.planet2 === planet2) ||
+      (e.planet1 === planet2 && e.planet2 === planet1),
+  );
+
+  if (!entry) return true;
+  return !entry.aspects.includes(aspectType);
+}
+```
+
+**Modificar método `calculateAspects()`:**
+
+Agregar validación antes de agregar un aspecto al array de resultados:
+
+```typescript
+// Dentro del loop de cálculo de aspectos
+if (aspectType) {
+  // Validar que el aspecto sea astronómicamente posible
+  if (!this.isAspectPossible(planet1.planet, planet2.planet, aspectType)) {
+    continue; // Saltar aspectos imposibles silenciosamente
+  }
+
+  aspects.push({
+    // ... resto del código
+  });
+}
+```
+
+### 2. Seeders: Excluir interpretaciones de aspectos imposibles
+
+**Archivo:** `src/modules/birth-chart/infrastructure/seeders/birth-chart-interpretations.seeder.ts`
+
+**Agregar validación al procesar datos de aspectos:**
+
+```typescript
+const IMPOSSIBLE_ASPECT_KEYS = [
+  // Sol - Mercurio
+  "aspect:sun:mercury:sextile",
+  "aspect:sun:mercury:square",
+  "aspect:sun:mercury:trine",
+  "aspect:sun:mercury:opposition",
+  "aspect:mercury:sun:sextile",
+  "aspect:mercury:sun:square",
+  "aspect:mercury:sun:trine",
+  "aspect:mercury:sun:opposition",
+  // Sol - Venus
+  "aspect:sun:venus:square",
+  "aspect:sun:venus:trine",
+  "aspect:sun:venus:opposition",
+  "aspect:venus:sun:square",
+  "aspect:venus:sun:trine",
+  "aspect:venus:sun:opposition",
+  // Mercurio - Venus
+  "aspect:mercury:venus:trine",
+  "aspect:mercury:venus:opposition",
+  "aspect:venus:mercury:trine",
+  "aspect:venus:mercury:opposition",
+];
+
+// Al procesar aspectos:
+if (IMPOSSIBLE_ASPECT_KEYS.includes(item.target_key)) {
+  console.warn(`Skipping impossible aspect: ${item.target_key}`);
+  continue;
+}
+```
+
+### 3. Tests: Agregar casos de prueba
+
+**Archivo:** `src/modules/birth-chart/__tests__/unit/aspect-calculation.service.spec.ts`
+
+**Agregar tests:**
+
+```typescript
+describe("impossible aspects validation", () => {
+  it("should not return Sun-Mercury opposition", () => {
+    const planets = [
+      { planet: "sun", longitude: 0 /* ... */ },
+      { planet: "mercury", longitude: 180 /* ... */ }, // Imposible en realidad
+    ];
+
+    const aspects = service.calculateAspects(planets);
+    const sunMercuryOpposition = aspects.find(
+      (a) => a.planet1 === "sun" && a.planet2 === "mercury" && a.aspectType === "opposition",
+    );
+
+    expect(sunMercuryOpposition).toBeUndefined();
+  });
+
+  it("should not return Sun-Venus trine", () => {
+    const planets = [
+      { planet: "sun", longitude: 0 /* ... */ },
+      { planet: "venus", longitude: 120 /* ... */ }, // Imposible en realidad
+    ];
+
+    const aspects = service.calculateAspects(planets);
+    const sunVenusTrine = aspects.find((a) => a.planet1 === "sun" && a.planet2 === "venus" && a.aspectType === "trine");
+
+    expect(sunVenusTrine).toBeUndefined();
+  });
+
+  it("should return valid Sun-Venus conjunction", () => {
+    const planets = [
+      { planet: "sun", longitude: 100 /* ... */ },
+      { planet: "venus", longitude: 102 /* ... */ }, // Válido
+    ];
+
+    const aspects = service.calculateAspects(planets);
+    const conjunction = aspects.find(
+      (a) => a.planet1 === "sun" && a.planet2 === "venus" && a.aspectType === "conjunction",
+    );
+
+    expect(conjunction).toBeDefined();
+  });
+});
+```
+
+---
+
+## Archivos de Seed Data
+
+Los archivos en `docs/seed-data/birth-chart/05-aspects.md` ya deberían **NO incluir** estas interpretaciones (Gemini las excluyó correctamente).
+
+**Verificar que NO existan estas claves en el archivo:**
+
+- `aspect:sun:mercury:opposition`
+- `aspect:sun:mercury:square`
+- `aspect:sun:mercury:trine`
+- `aspect:sun:mercury:sextile`
+- `aspect:sun:venus:opposition`
+- `aspect:sun:venus:trine`
+- `aspect:sun:venus:square`
+- `aspect:mercury:venus:opposition`
+- `aspect:mercury:venus:trine`
+
+---
+
+## Criterios de Aceptación
+
+- [ ] Método `isAspectPossible()` implementado en AspectCalculationService
+- [ ] Aspectos imposibles filtrados en `calculateAspects()`
+- [ ] Seeder valida y salta aspectos imposibles
+- [ ] Tests unitarios para aspectos imposibles
+- [ ] Archivo 05-aspects.md no contiene interpretaciones de aspectos imposibles
+- [ ] No hay regresiones en tests existentes
+
+---
+
+## Notas
+
+- Esta corrección es **preventiva**: los datos reales de sweph nunca deberían generar estos aspectos
+- El filtro silencioso (sin warning) es preferible para no llenar logs en producción
+- Gemini ya excluyó estos aspectos del contenido generado, lo cual es correcto
+
+---
+
+**FIN DE TAREA T-CA-051**
