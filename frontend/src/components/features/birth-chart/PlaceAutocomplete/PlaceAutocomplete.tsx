@@ -12,13 +12,6 @@ import { useGeocodeSearch } from '@/hooks/api/useGeocodeSearch';
 import type { GeocodedPlace } from '@/types/birth-chart-geocode.types';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 
@@ -44,7 +37,6 @@ export function PlaceAutocomplete({
   id = 'birth-place',
 }: PlaceAutocompleteProps) {
   const [open, setOpen] = useState(false);
-  const [selectedPlaceId, setSelectedPlaceId] = useState('');
 
   // Estado SOLO para cuando el usuario está escribiendo (búsqueda)
   const [searchQuery, setSearchQuery] = useState('');
@@ -64,21 +56,8 @@ export function PlaceAutocomplete({
       onChange(place);
       setSearchQuery(''); // Limpiar búsqueda, el input mostrará value.displayName
       setOpen(false);
-      setSelectedPlaceId('');
     },
     [onChange]
-  );
-
-  // Manejar cambio de valor en cmdk
-  const handleValueChange = useCallback(
-    (placeId: string) => {
-      setSelectedPlaceId(placeId);
-      const place = data?.results.find(p => p.placeId === placeId);
-      if (place) {
-        handleSelect(place);
-      }
-    },
-    [data?.results, handleSelect]
   );
 
   // Limpiar selección
@@ -116,37 +95,37 @@ export function PlaceAutocomplete({
 
     if (!data?.results.length) {
       return (
-        <CommandEmpty>
-          No se encontraron lugares.
-          <br />
-          <span className="text-muted-foreground text-xs">
-            Intenta con otro nombre o agrega el país.
-          </span>
-        </CommandEmpty>
+        <div className="text-muted-foreground px-4 py-8 text-center text-sm">
+          <p>No se encontraron lugares.</p>
+          <p className="text-xs mt-1">Intenta con otro nombre o agrega el país.</p>
+        </div>
       );
     }
 
     return (
-      <CommandGroup heading="Lugares encontrados">
-        {data.results.map((place) => (
-          <CommandItem
-            key={place.placeId}
-            value={place.placeId}
-            className="cursor-pointer"
-          >
-            <MapPin className="text-muted-foreground mr-2 h-4 w-4" />
-            <div className="flex flex-col flex-1">
-              <span className="font-medium">
-                {place.city || place.displayName.split(',')[0]?.trim() || place.displayName}
-              </span>
-              <span className="text-muted-foreground text-xs">
-                {place.country}
-                {place.timezone && ` • ${place.timezone}`}
-              </span>
-            </div>
-          </CommandItem>
-        ))}
-      </CommandGroup>
+      <div className="max-h-64 overflow-y-auto">
+        <div className="px-2 py-1">
+          <p className="text-xs font-medium text-muted-foreground px-2 py-1.5">Lugares encontrados</p>
+          {data.results.map((place) => (
+            <button
+              key={place.placeId}
+              onClick={() => handleSelect(place)}
+              className="w-full text-left px-2 py-2 rounded-sm hover:bg-accent hover:text-accent-foreground transition-colors flex items-center gap-2 cursor-pointer"
+            >
+              <MapPin className="text-muted-foreground h-4 w-4 flex-shrink-0" />
+              <div className="flex flex-col flex-1 min-w-0">
+                <span className="font-medium text-sm">
+                  {place.city || place.displayName.split(',')[0]?.trim() || place.displayName}
+                </span>
+                <span className="text-muted-foreground text-xs">
+                  {place.country}
+                  {place.timezone && ` • ${place.timezone}`}
+                </span>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
     );
   };
 
@@ -195,15 +174,8 @@ export function PlaceAutocomplete({
         <PopoverContent
           className="w-[var(--radix-popover-trigger-width)] p-0"
           align="start"
-          onOpenAutoFocus={(e) => e.preventDefault()}
         >
-          <Command
-            shouldFilter={false}
-            value={selectedPlaceId}
-            onValueChange={handleValueChange}
-          >
-            <CommandList>{renderResults()}</CommandList>
-          </Command>
+          {renderResults()}
         </PopoverContent>
       </Popover>
 
