@@ -58,6 +58,40 @@ export class AspectCalculationService {
   ];
 
   /**
+   * Aspectos astronómicamente imposibles debido a órbitas de planetas interiores
+   *
+   * Mercurio y Venus son planetas interiores que nunca se alejan lo suficiente del Sol:
+   * - Mercurio: elongación máxima ~28° del Sol
+   * - Venus: elongación máxima ~47° del Sol
+   *
+   * Esto hace que ciertos aspectos sean físicamente imposibles entre:
+   * - Sol-Mercurio: sextil (60°), cuadratura (90°), trígono (120°), oposición (180°)
+   * - Sol-Venus: cuadratura (90°), trígono (120°), oposición (180°)
+   * - Mercurio-Venus: trígono (120°), oposición (180°)
+   */
+  private readonly IMPOSSIBLE_ASPECTS: Array<{
+    planet1: string;
+    planet2: string;
+    aspects: string[];
+  }> = [
+    {
+      planet1: 'sun',
+      planet2: 'mercury',
+      aspects: ['sextile', 'square', 'trine', 'opposition'],
+    },
+    {
+      planet1: 'sun',
+      planet2: 'venus',
+      aspects: ['square', 'trine', 'opposition'],
+    },
+    {
+      planet1: 'mercury',
+      planet2: 'venus',
+      aspects: ['trine', 'opposition'],
+    },
+  ];
+
+  /**
    * Calcula todos los aspectos entre planetas
    *
    * @param planets - Array de posiciones planetarias
@@ -118,6 +152,17 @@ export class AspectCalculationService {
       const orb = this.calculateOrb(angle, aspectConfig.angle);
 
       if (orb <= aspectConfig.orb) {
+        // Validar que el aspecto sea astronómicamente posible
+        if (
+          !this.isAspectPossible(
+            planet1.planet,
+            planet2.planet,
+            aspectConfig.type,
+          )
+        ) {
+          continue; // Saltar aspectos imposibles silenciosamente
+        }
+
         // Determinar si el aspecto es aplicativo o separativo
         const isApplying = this.isAspectApplying(
           planet1,
@@ -207,6 +252,32 @@ export class AspectCalculationService {
 
     // Si el orbe futuro es menor, el aspecto está aplicándose (acercándose)
     return futureOrb < currentOrb;
+  }
+
+  /**
+   * Verifica si un aspecto es astronómicamente posible
+   *
+   * Filtra aspectos imposibles entre planetas interiores (Mercurio, Venus) y el Sol
+   * debido a las limitaciones de elongación máxima de estos planetas.
+   *
+   * @param planet1 - Nombre del primer planeta
+   * @param planet2 - Nombre del segundo planeta
+   * @param aspectType - Tipo de aspecto a verificar
+   * @returns true si el aspecto es astronómicamente posible, false si es imposible
+   */
+  private isAspectPossible(
+    planet1: string,
+    planet2: string,
+    aspectType: string,
+  ): boolean {
+    const entry = this.IMPOSSIBLE_ASPECTS.find(
+      (e) =>
+        (e.planet1 === planet1 && e.planet2 === planet2) ||
+        (e.planet1 === planet2 && e.planet2 === planet1),
+    );
+
+    if (!entry) return true;
+    return !entry.aspects.includes(aspectType);
   }
 
   /**
