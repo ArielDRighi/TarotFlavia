@@ -44,6 +44,7 @@ export function PlaceAutocomplete({
   id = 'birth-place',
 }: PlaceAutocompleteProps) {
   const [open, setOpen] = useState(false);
+  const [selectedPlaceId, setSelectedPlaceId] = useState('');
 
   // Estado SOLO para cuando el usuario está escribiendo (búsqueda)
   const [searchQuery, setSearchQuery] = useState('');
@@ -63,8 +64,21 @@ export function PlaceAutocomplete({
       onChange(place);
       setSearchQuery(''); // Limpiar búsqueda, el input mostrará value.displayName
       setOpen(false);
+      setSelectedPlaceId('');
     },
     [onChange]
+  );
+
+  // Manejar cambio de valor en cmdk
+  const handleValueChange = useCallback(
+    (placeId: string) => {
+      setSelectedPlaceId(placeId);
+      const place = data?.results.find(p => p.placeId === placeId);
+      if (place) {
+        handleSelect(place);
+      }
+    },
+    [data?.results, handleSelect]
   );
 
   // Limpiar selección
@@ -118,8 +132,6 @@ export function PlaceAutocomplete({
           <CommandItem
             key={place.placeId}
             value={place.placeId}
-            onSelect={() => handleSelect(place)}
-            onMouseDown={(e) => handleSelect(place)}
             className="cursor-pointer"
           >
             <MapPin className="text-muted-foreground mr-2 h-4 w-4" />
@@ -185,7 +197,11 @@ export function PlaceAutocomplete({
           align="start"
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
-          <Command shouldFilter={false}>
+          <Command
+            shouldFilter={false}
+            value={selectedPlaceId}
+            onValueChange={handleValueChange}
+          >
             <CommandList>{renderResults()}</CommandList>
           </Command>
         </PopoverContent>
