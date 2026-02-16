@@ -119,17 +119,31 @@ export function PlaceAutocomplete({
             key={place.placeId}
             value={place.placeId}
             onSelect={() => handleSelect(place)}
-            className="cursor-pointer"
+            className="cursor-pointer p-0"
           >
-            <MapPin className="text-muted-foreground mr-2 h-4 w-4" />
-            <div className="flex flex-col">
-              <span className="font-medium">
-                {place.city || place.displayName.split(',')[0]?.trim() || place.displayName}
-              </span>
-              <span className="text-muted-foreground text-xs">
-                {place.country}
-                {place.timezone && ` • ${place.timezone}`}
-              </span>
+            <div
+              onPointerDown={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                handleSelect(place)
+              }}
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                handleSelect(place)
+              }}
+              className="flex items-center gap-2 flex-1 w-full px-2 py-1.5"
+            >
+              <MapPin className="text-muted-foreground h-4 w-4 flex-shrink-0" />
+              <div className="flex flex-col flex-1 min-w-0">
+                <span className="font-medium truncate">
+                  {place.city || place.displayName.split(',')[0]?.trim() || place.displayName}
+                </span>
+                <span className="text-muted-foreground text-xs truncate">
+                  {place.country}
+                  {place.timezone && ` • ${place.timezone}`}
+                </span>
+              </div>
             </div>
           </CommandItem>
         ))}
