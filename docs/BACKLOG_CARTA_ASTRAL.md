@@ -17873,7 +17873,7 @@ grep "calculationTimeMs" logs/birth-chart.log | awk '$NF > 1000'
 
 - [x] T-CA-046: Tests unitarios de cálculos creados
 - [ ] T-CA-047: Tests unitarios de interpretación creados
-- [ ] T-CA-048: Tests de integración de API creados
+- [x] T-CA-048: Tests de integración de API creados
 - [ ] T-CA-049: Tests E2E creados
 - [ ] T-CA-050: Documentación técnica completa
 
