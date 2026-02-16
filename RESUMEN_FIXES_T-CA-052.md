@@ -72,6 +72,25 @@ canGenerate: usage ? usage.remaining > 0 : true,
 
 ---
 
+### Fix 4: Layout Centrado (ESTÉTICO)
+**Archivos:**
+- `frontend/src/app/carta-astral/page.tsx` (línea 123)
+- `frontend/src/app/carta-astral/loading.tsx` (línea 5)
+
+**Cambio:** Agregar `mx-auto` al contenedor principal
+
+```typescript
+// ANTES:
+<div className="container max-w-2xl px-4 py-8">
+
+// DESPUÉS:
+<div className="container mx-auto max-w-2xl px-4 py-8">
+```
+
+**Impacto:** El contenido ahora está centrado en la pantalla, consistente con otros features del sitio. Antes estaba alineado a la izquierda.
+
+---
+
 ## 🧪 Validaciones Ejecutadas
 
 ### Backend
@@ -91,6 +110,8 @@ canGenerate: usage ? usage.remaining > 0 : true,
 ## 📝 Commits Realizados
 
 ```
+5a9e3e81 fix(carta-astral): centrar layout de página - agregar mx-auto
+bbcf922c docs(carta-astral): agregar resumen final de fixes T-CA-052
 a088a413 fix(carta-astral): arreglar lint error en migración
 aae0ceec test(carta-astral): actualizar test useCanGenerateChart para nuevo comportamiento
 4ea945da fix(carta-astral): fixear bloqueo del formulario T-CA-052
