@@ -89,6 +89,9 @@ export class BirthChartHistoryService {
           (planet) => ({
             planet: planet.planet,
             sign: planet.sign,
+            signName: planet.signName,
+            signDegree: planet.signDegree,
+            formattedPosition: planet.formattedPosition,
             house: planet.house,
             isRetrograde: planet.isRetrograde,
           }),
@@ -97,15 +100,22 @@ export class BirthChartHistoryService {
           (house) => ({
             house: house.house,
             sign: house.sign,
+            signName: house.signName,
             signDegree: house.signDegree,
+            formattedPosition: house.formattedPosition,
           }),
         ),
         aspects: this.formatAspectsForResponse(chart.chartData.aspects).map(
           (aspect) => ({
             planet1: aspect.planet1,
+            planet1Name: aspect.planet1Name,
             planet2: aspect.planet2,
+            planet2Name: aspect.planet2Name,
             aspectType: aspect.aspectType,
+            aspectName: aspect.aspectName,
+            aspectSymbol: aspect.aspectSymbol,
             orb: aspect.orb,
+            isApplying: aspect.isApplying,
           }),
         ),
       },

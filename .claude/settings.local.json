@@ -3,7 +3,17 @@
     "allow": [
       "Bash(npx jest:*)",
       "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InByZW1pdW1AdGVzdC5jb20iLCJzdWIiOjMsImlzQWRtaW4iOmZhbHNlLCJyb2xlcyI6WyJjb25zdW1lciJdLCJwbGFuIjoicHJlbWl1bSIsImlhdCI6MTc3MTI0MzM3NiwiZXhwIjoxNzcxMjQ0Mjc2fQ.fal_Lou2jpZy0p-Kd5taZZdZQtW4F5bE_P5G28h6yUQ\")",
-      "Bash(__NEW_LINE_df9d3d623e0397a8__ curl -s http://localhost:3000/api/v1/birth-chart/usage -H \"Authorization: Bearer $TOKEN\")"
+      "Bash(__NEW_LINE_df9d3d623e0397a8__ curl -s http://localhost:3000/api/v1/birth-chart/usage -H \"Authorization: Bearer $TOKEN\")",
+      "mcp__playwright__browser_run_code",
+      "Bash(git restore:*)",
+      "Bash(pkill:*)",
+      "Bash(netstat:*)",
+      "Bash(lsof:*)",
+      "Bash(taskkill:*)",
+      "Bash(kill:*)",
+      "Bash(cmd /c \"taskkill /PID 54000 /F\")",
+      "Bash(powershell -Command:*)",
+      "Bash(grep:*)"
     ]
   }
 }
