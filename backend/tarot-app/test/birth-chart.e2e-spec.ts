@@ -8,6 +8,7 @@ import {
   cleanupBirthCharts,
   cleanupTestUsers,
   generateTestFingerprint,
+  cleanupUsageTracking,
 } from './birth-chart-test-utils';
 import { User } from '../src/modules/users/entities/user.entity';
 import { UserPlan } from '../src/modules/users/entities/user.entity';
@@ -53,6 +54,10 @@ describe('BirthChartController (E2E)', () => {
     // Limpiar cartas después de cada test
     await cleanupBirthCharts(app, freeUser.id);
     await cleanupBirthCharts(app, premiumUser.id);
+
+    // Limpiar usage tracking para tests deterministas
+    await cleanupUsageTracking(app, freeUser.id);
+    await cleanupUsageTracking(app, premiumUser.id);
   });
 
   // ============================================================================
@@ -72,7 +77,7 @@ describe('BirthChartController (E2E)', () => {
         .post('/api/v1/birth-chart/generate')
         .set('Authorization', `Bearer ${freeToken}`)
         .send(TEST_BIRTH_DATA)
-        .expect(201);
+        .expect(200);
 
       expect(response.body).toBeDefined();
       expect(response.body.success).toBe(true);
@@ -107,7 +112,7 @@ describe('BirthChartController (E2E)', () => {
         .post('/api/v1/birth-chart/generate')
         .set('Authorization', `Bearer ${premiumToken}`)
         .send(TEST_BIRTH_DATA)
-        .expect(201);
+        .expect(200);
 
       expect(response.body).toBeDefined();
       expect(response.body.success).toBe(true);
@@ -249,9 +254,9 @@ describe('BirthChartController (E2E)', () => {
 
       const response = await request(app.getHttpServer())
         .post('/api/v1/birth-chart/generate/anonymous')
-        .set('x-fingerprint', fingerprint)
+        .query({ fingerprint })
         .send(TEST_BIRTH_DATA)
-        .expect(201);
+        .expect(200);
 
       expect(response.body.success).toBe(true);
 
@@ -274,10 +279,10 @@ describe('BirthChartController (E2E)', () => {
       expect(response.body.canAccessHistory).toBe(false);
     });
 
-    it('should require x-fingerprint header', async () => {
+    it('should require fingerprint query parameter', async () => {
       await request(app.getHttpServer())
         .post('/api/v1/birth-chart/generate/anonymous')
-        // Sin header x-fingerprint
+        // Sin query fingerprint
         .send(TEST_BIRTH_DATA)
         .expect(400);
     });
@@ -288,14 +293,14 @@ describe('BirthChartController (E2E)', () => {
       // Primera solicitud - debería funcionar
       await request(app.getHttpServer())
         .post('/api/v1/birth-chart/generate/anonymous')
-        .set('x-fingerprint', fingerprint)
+        .query({ fingerprint })
         .send(TEST_BIRTH_DATA)
-        .expect(201);
+        .expect(200);
 
       // Segunda solicitud - debería fallar (límite lifetime = 1)
       const response = await request(app.getHttpServer())
         .post('/api/v1/birth-chart/generate/anonymous')
-        .set('x-fingerprint', fingerprint)
+        .query({ fingerprint })
         .send(TEST_BIRTH_DATA)
         .expect(429);
 
@@ -445,7 +450,7 @@ describe('BirthChartController (E2E)', () => {
 
       const response = await request(app.getHttpServer())
         .get('/api/v1/birth-chart/usage')
-        .set('x-fingerprint', fingerprint)
+        .query({ fingerprint })
         .expect(200);
 
       expect(response.body.plan).toBe('anonymous');
@@ -487,7 +492,7 @@ describe('BirthChartController (E2E)', () => {
         .post('/api/v1/birth-chart/synthesis')
         .set('Authorization', `Bearer ${premiumToken}`)
         .send(TEST_BIRTH_DATA)
-        .expect(201);
+        .expect(200);
 
       expect(response.body).toBeDefined();
       expect(response.body.synthesis).toBeDefined();
@@ -515,7 +520,7 @@ describe('BirthChartController (E2E)', () => {
         .post('/api/v1/birth-chart/synthesis')
         .set('Authorization', `Bearer ${premiumToken}`)
         .send(TEST_BIRTH_DATA)
-        .expect(201);
+        .expect(200);
 
       // Segunda síntesis
       await request(app.getHttpServer())
@@ -526,7 +531,7 @@ describe('BirthChartController (E2E)', () => {
           name: 'Test User 2',
           birthDate: '1995-08-20',
         })
-        .expect(201);
+        .expect(200);
 
       // Tercera síntesis - debería fallar (límite = 2 por día)
       const response = await request(app.getHttpServer())

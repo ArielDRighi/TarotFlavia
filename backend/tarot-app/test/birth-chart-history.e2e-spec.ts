@@ -254,7 +254,7 @@ describe('BirthChartHistoryController (E2E)', () => {
         })
         .expect(200);
 
-      expect(response.body.isDuplicate).toBe(true);
+      expect(response.body.exists).toBe(true);
       expect(response.body.existingChart).toBeDefined();
       expect(response.body.existingChart.id).toBe(savedChartId);
       expect(response.body.existingChart.name).toBeDefined();
@@ -272,7 +272,7 @@ describe('BirthChartHistoryController (E2E)', () => {
         })
         .expect(200);
 
-      expect(response.body.isDuplicate).toBe(false);
+      expect(response.body.exists).toBe(false);
       expect(response.body.existingChart).toBeNull();
     });
   });
@@ -355,17 +355,17 @@ describe('BirthChartHistoryController (E2E)', () => {
   // PATCH /api/v1/birth-chart/history/:id/rename
   // ============================================================================
 
-  describe('PATCH /api/v1/birth-chart/history/:id/rename', () => {
+  describe('POST /api/v1/birth-chart/history/:id/name', () => {
     it('should require authentication', async () => {
       await request(app.getHttpServer())
-        .patch(`/api/v1/birth-chart/history/${savedChartId}/rename`)
+        .post(`/api/v1/birth-chart/history/${savedChartId}/name`)
         .send({ name: 'New Name' })
         .expect(401);
     });
 
     it('should reject free user', async () => {
       await request(app.getHttpServer())
-        .patch(`/api/v1/birth-chart/history/${savedChartId}/rename`)
+        .post(`/api/v1/birth-chart/history/${savedChartId}/name`)
         .set('Authorization', `Bearer ${freeToken}`)
         .send({ name: 'New Name' })
         .expect(403);
@@ -375,13 +375,13 @@ describe('BirthChartHistoryController (E2E)', () => {
       const newName = 'Renamed Chart';
 
       const response = await request(app.getHttpServer())
-        .patch(`/api/v1/birth-chart/history/${savedChartId}/rename`)
+        .post(`/api/v1/birth-chart/history/${savedChartId}/name`)
         .set('Authorization', `Bearer ${premiumToken}`)
         .send({ name: newName })
         .expect(200);
 
-      expect(response.body.success).toBe(true);
-      expect(response.body.message).toBeDefined();
+      expect(response.body.id).toBe(savedChartId);
+      expect(response.body.name).toBe(newName);
 
       // Verificar que el nombre cambió
       const checkResponse = await request(app.getHttpServer())
@@ -394,7 +394,7 @@ describe('BirthChartHistoryController (E2E)', () => {
 
     it('should return 404 for non-existent chart', async () => {
       await request(app.getHttpServer())
-        .patch('/api/v1/birth-chart/history/999999/rename')
+        .post('/api/v1/birth-chart/history/999999/name')
         .set('Authorization', `Bearer ${premiumToken}`)
         .send({ name: 'New Name' })
         .expect(404);
@@ -404,7 +404,7 @@ describe('BirthChartHistoryController (E2E)', () => {
       const tooLongName = 'A'.repeat(101); // Más de 100 caracteres
 
       await request(app.getHttpServer())
-        .patch(`/api/v1/birth-chart/history/${savedChartId}/rename`)
+        .post(`/api/v1/birth-chart/history/${savedChartId}/name`)
         .set('Authorization', `Bearer ${premiumToken}`)
         .send({ name: tooLongName })
         .expect(400);
@@ -430,13 +430,10 @@ describe('BirthChartHistoryController (E2E)', () => {
     });
 
     it('should delete chart for premium user', async () => {
-      const response = await request(app.getHttpServer())
+      await request(app.getHttpServer())
         .delete(`/api/v1/birth-chart/history/${savedChartId}`)
         .set('Authorization', `Bearer ${premiumToken}`)
-        .expect(200);
-
-      expect(response.body.success).toBe(true);
-      expect(response.body.message).toBeDefined();
+        .expect(204);
 
       // Verificar que la carta ya no existe
       await request(app.getHttpServer())
@@ -478,26 +475,26 @@ describe('BirthChartHistoryController (E2E)', () => {
   });
 
   // ============================================================================
-  // POST /api/v1/birth-chart/history/:id/pdf (Generate PDF from Saved Chart)
+  // GET /api/v1/birth-chart/history/:id/pdf (Generate PDF from Saved Chart)
   // ============================================================================
 
-  describe('POST /api/v1/birth-chart/history/:id/pdf', () => {
+  describe('GET /api/v1/birth-chart/history/:id/pdf', () => {
     it('should require authentication', async () => {
       await request(app.getHttpServer())
-        .post(`/api/v1/birth-chart/history/${savedChartId}/pdf`)
+        .get(`/api/v1/birth-chart/history/${savedChartId}/pdf`)
         .expect(401);
     });
 
     it('should reject free user', async () => {
       await request(app.getHttpServer())
-        .post(`/api/v1/birth-chart/history/${savedChartId}/pdf`)
+        .get(`/api/v1/birth-chart/history/${savedChartId}/pdf`)
         .set('Authorization', `Bearer ${freeToken}`)
         .expect(403);
     });
 
     it('should generate PDF from saved chart for premium user', async () => {
       const response = await request(app.getHttpServer())
-        .post(`/api/v1/birth-chart/history/${savedChartId}/pdf`)
+        .get(`/api/v1/birth-chart/history/${savedChartId}/pdf`)
         .set('Authorization', `Bearer ${premiumToken}`)
         .expect(200);
 
@@ -513,7 +510,7 @@ describe('BirthChartHistoryController (E2E)', () => {
 
     it('should return 404 for non-existent chart', async () => {
       await request(app.getHttpServer())
-        .post('/api/v1/birth-chart/history/999999/pdf')
+        .get('/api/v1/birth-chart/history/999999/pdf')
         .set('Authorization', `Bearer ${premiumToken}`)
         .expect(404);
     });
@@ -527,7 +524,7 @@ describe('BirthChartHistoryController (E2E)', () => {
 
       // Intentar generar PDF de la carta del primer usuario
       await request(app.getHttpServer())
-        .post(`/api/v1/birth-chart/history/${savedChartId}/pdf`)
+        .get(`/api/v1/birth-chart/history/${savedChartId}/pdf`)
         .set('Authorization', `Bearer ${otherToken}`)
         .expect(404);
 

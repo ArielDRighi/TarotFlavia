@@ -158,7 +158,11 @@ export async function cleanupBirthCharts(
       userId,
     ]);
   } else {
-    await dataSource.query("DELETE FROM birth_charts WHERE name LIKE '%Test%'");
+    // Limpiar solo cartas de usuarios de test (más seguro que LIKE '%Test%')
+    await dataSource.query(
+      'DELETE FROM birth_charts USING "user" WHERE birth_charts."userId" = "user".id AND "user".email LIKE $1',
+      ['test-%'],
+    );
   }
 }
 
@@ -174,12 +178,45 @@ export async function cleanupTestUsers(
   if (email) {
     await dataSource.query('DELETE FROM "user" WHERE email = $1', [email]);
   } else {
-    await dataSource.query('DELETE FROM "user" WHERE email LIKE \'test-%\'');
+    await dataSource.query('DELETE FROM "user" WHERE email LIKE $1', [
+      'test-%',
+    ]);
+  }
+}
+
+/**
+ * Limpia registros de usage tracking (para tests deterministas)
+ */
+export async function cleanupUsageTracking(
+  app: INestApplication,
+  userId?: number,
+  fingerprint?: string,
+): Promise<void> {
+  const dataSource = app.get(DataSource);
+
+  if (userId) {
+    await dataSource.query(
+      'DELETE FROM usage_tracking WHERE "userId" = $1 AND feature = $2',
+      [userId, 'BIRTH_CHART'],
+    );
+  } else if (fingerprint) {
+    await dataSource.query(
+      'DELETE FROM usage_tracking WHERE fingerprint = $1 AND feature = $2',
+      [fingerprint, 'BIRTH_CHART'],
+    );
+  } else {
+    // Limpiar todos los registros de test users
+    await dataSource.query(
+      'DELETE FROM usage_tracking USING "user" WHERE usage_tracking."userId" = "user".id AND "user".email LIKE $1 AND feature = $2',
+      ['test-%', 'BIRTH_CHART'],
+    );
   }
 }
 
 /**
  * Crea una carta astral de test en la base de datos
+ * NOTA: chartData usa una estructura mínima válida para testing.
+ * Si la interface ChartData evoluciona, actualizar aquí.
  */
 export async function createTestBirthChart(
   app: INestApplication,
