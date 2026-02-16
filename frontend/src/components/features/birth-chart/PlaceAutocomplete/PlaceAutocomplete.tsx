@@ -76,9 +76,13 @@ export function PlaceAutocomplete({
       onChange(null);
     }
 
-    // Abrir popover si hay suficientes caracteres
+    // Abrir/cerrar popover basado en cantidad de caracteres
     if (newValue.length >= 3) {
+      // Solo abrir si no está ya abierto (para evitar perder el foco)
       setOpen(true);
+    } else if (newValue.length < 3) {
+      // Cerrar si hay menos de 3 caracteres
+      setOpen(false);
     }
   };
 
@@ -174,6 +178,7 @@ export function PlaceAutocomplete({
         <PopoverContent
           className="w-[var(--radix-popover-trigger-width)] p-0"
           align="start"
+          onOpenAutoFocus={(e) => e.preventDefault()}
         >
           {renderResults()}
         </PopoverContent>
