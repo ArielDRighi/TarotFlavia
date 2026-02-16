@@ -16600,15 +16600,17 @@ describe("ChartCacheService", () => {
 });
 ```
 
+**Estado:** ✅ COMPLETADA
+
 **Criterios de aceptación:**
 
-- [ ] Tests para ChartInterpretationService (Big Three, interpretación completa)
-- [ ] Tests para ChartAISynthesisService (generación, fallback, validación)
-- [ ] Tests para ChartCacheService (get, set, invalidate, keys)
-- [ ] Tests para ChartPdfService (generación, estructura, contenido)
-- [ ] Mocks adecuados para dependencias externas
-- [ ] Tests de casos de error
-- [ ] Cobertura mínima del 80%
+- [x] Tests para ChartInterpretationService (Big Three, interpretación completa)
+- [x] Tests para ChartAISynthesisService (generación, fallback, validación)
+- [x] Tests para ChartCacheService (get, set, invalidate, keys)
+- [x] Tests para ChartPdfService (generación, estructura, contenido)
+- [x] Mocks adecuados para dependencias externas
+- [x] Tests de casos de error
+- [x] Cobertura mínima del 80%
 
 **Dependencias:** T-CA-011 a T-CA-015
 
