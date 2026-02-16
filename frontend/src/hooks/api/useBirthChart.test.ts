@@ -404,11 +404,13 @@ describe('useBirthChart Hooks', () => {
         wrapper: createWrapper(),
       });
 
+      // Esperar a que la query se complete y remaining tenga el valor correcto
+      // (antes canGenerate era el indicador, ahora con el fix puede ser true incluso antes de cargar)
       await waitFor(() => {
-        expect(result.current.canGenerate).toBe(true);
+        expect(result.current.remaining).toBe(95);
       });
 
-      expect(result.current.remaining).toBe(95);
+      expect(result.current.canGenerate).toBe(true);
       expect(result.current.limit).toBe(100);
       expect(result.current.message).toBeUndefined();
     });
