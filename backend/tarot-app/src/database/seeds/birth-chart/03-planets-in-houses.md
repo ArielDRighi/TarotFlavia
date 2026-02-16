@@ -179,12 +179,7 @@
 "planet": "mercury",
 "house": 12,
 "content": "Con Mercurio en la Casa 12, tu pensamiento es intuitivo, visual y a veces secreto. Procesas la información a través de sueños o sensaciones más que por lógica lineal. Puedes ser reservado al hablar de tus ideas personales. Tienes talento para entender símbolos, poesía y lenguajes no verbales. A veces te cuesta explicarte claramente, pero captas lo sutil. Tu mente necesita silencio para ordenarse. Ejemplo práctico: llevar un diario de sueños, escribir poesía en soledad o entender instintivamente lo que alguien siente sin que lo diga."
-}
-]
-}
-
-{
-"planet_in_house": [
+},
 {
 "planet": "venus",
 "house": 1,
@@ -364,12 +359,7 @@
 "planet": "jupiter",
 "house": 12,
 "content": "Con Júpiter en la Casa 12, tienes un 'ángel de la guarda' invisible que te protege en los peores momentos. Tu suerte es espiritual y oculta. Disfrutas de la soledad y la meditación; tu mundo interior es rico y expansivo. Eres compasivo y ayudas a otros de forma anónima. Tienes una gran intuición y conexión con lo divino. El desafío es el escapismo o sentirte desconectado de la realidad material. Tu don es la fe inquebrantable en lo invisible y la capacidad de sanación espiritual. Ejemplo práctico: salvarte milagrosamente de accidentes, encontrar paz en retiros espirituales o trabajar ayudando a marginados."
-}
-]
-}
-
-{
-"planet_in_house": [
+},
 {
 "planet": "saturn",
 "house": 1,

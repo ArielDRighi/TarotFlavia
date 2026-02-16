@@ -22,6 +22,7 @@ import { seedFlaviaIAConfig } from './flavia-ia-config.seeder';
 import { seedPlans } from './plans.seeder';
 import { seedRituals } from './rituals.seeder';
 import { seedSacredCalendar } from './sacred-calendar.seeder';
+import { seedBirthChartInterpretations } from './birth-chart-interpretations.seeder';
 import { SacredCalendarService } from '../../modules/rituals/application/services/sacred-calendar.service';
 import { LunarPhaseService } from '../../modules/rituals/application/services/lunar-phase.service';
 import { SacredEvent } from '../../modules/rituals/entities/sacred-event.entity';
@@ -119,6 +120,9 @@ async function bootstrap() {
 
     // Seed Sacred Calendar Events (Sabbats, lunar phases, portals)
     await seedSacredCalendar(dataSource, sacredCalendarService);
+
+    // Seed Birth Chart Interpretations (natal chart texts)
+    await seedBirthChartInterpretations(dataSource);
 
     console.log('\n✨ ¡Datos iniciales cargados con éxito!');
   } catch (error) {
