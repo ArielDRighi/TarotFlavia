@@ -213,6 +213,7 @@ export async function seedBirthChartInterpretations(
 
   // Definir aspectos astronómicamente imposibles (T-CA-051)
   // Estos aspectos no pueden ocurrir debido a las limitaciones de elongación
+  // Optimizado: cada par de planetas se almacena una sola vez
   const IMPOSSIBLE_ASPECTS: Array<{
     planet1: string;
     planet2: string;
@@ -224,21 +225,12 @@ export async function seedBirthChartInterpretations(
       planet2: 'mercury',
       aspects: ['sextile', 'square', 'trine', 'opposition'],
     },
-    {
-      planet1: 'mercury',
-      planet2: 'sun',
-      aspects: ['sextile', 'square', 'trine', 'opposition'],
-    },
     // Sol-Venus (elongación máxima ~47°)
+    // Incluye sextile (60°) porque excede la elongación máxima
     {
       planet1: 'sun',
       planet2: 'venus',
-      aspects: ['square', 'trine', 'opposition'],
-    },
-    {
-      planet1: 'venus',
-      planet2: 'sun',
-      aspects: ['square', 'trine', 'opposition'],
+      aspects: ['sextile', 'square', 'trine', 'opposition'],
     },
     // Mercurio-Venus
     {
@@ -246,14 +238,10 @@ export async function seedBirthChartInterpretations(
       planet2: 'venus',
       aspects: ['trine', 'opposition'],
     },
-    {
-      planet1: 'venus',
-      planet2: 'mercury',
-      aspects: ['trine', 'opposition'],
-    },
   ];
 
   // Helper: Verificar si un aspecto es astronómicamente imposible
+  // Compara en ambos sentidos (simétrica) para evitar duplicar datos
   function isAspectImpossible(
     planet1: string,
     planet2: string,
@@ -261,8 +249,8 @@ export async function seedBirthChartInterpretations(
   ): boolean {
     return IMPOSSIBLE_ASPECTS.some(
       (impossible) =>
-        impossible.planet1 === planet1 &&
-        impossible.planet2 === planet2 &&
+        ((impossible.planet1 === planet1 && impossible.planet2 === planet2) ||
+          (impossible.planet1 === planet2 && impossible.planet2 === planet1)) &&
         impossible.aspects.includes(aspectType),
     );
   }

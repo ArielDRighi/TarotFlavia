@@ -36,7 +36,6 @@ aspectsData.aspects.forEach((aspect, index) => {
         planet1,
         planet2,
         aspect: aspectType,
-        line: `Line ~${index * 6 + 3}` // Estimación de línea
       });
     }
   });

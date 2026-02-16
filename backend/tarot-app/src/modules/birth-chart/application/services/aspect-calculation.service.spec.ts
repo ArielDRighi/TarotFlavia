@@ -742,7 +742,7 @@ describe('AspectCalculationService', () => {
           isRetrograde: false,
         },
         {
-          planet: 'venus',
+          planet: 'mars', // Usamos Marte (sin restricciones de elongación)
           longitude: 60, // Sextil exacto
           sign: 'gemini',
           signDegree: 0,
@@ -1023,6 +1023,37 @@ describe('AspectCalculationService', () => {
       expect(sunVenusSquare).toBeUndefined();
     });
 
+    it('should not return Sun-Venus sextile (astronomically impossible)', () => {
+      const planets: PlanetPosition[] = [
+        {
+          planet: 'sun',
+          longitude: 0,
+          sign: 'aries',
+          signDegree: 0,
+          house: 1,
+          isRetrograde: false,
+        },
+        {
+          planet: 'venus',
+          longitude: 60, // Imposible (Venus solo llega a ~47° del Sol)
+          sign: 'gemini',
+          signDegree: 0,
+          house: 3,
+          isRetrograde: false,
+        },
+      ];
+
+      const aspects = service.calculateAspects(planets);
+      const sunVenusSextile = aspects.find(
+        (a) =>
+          ((a.planet1 === 'sun' && a.planet2 === 'venus') ||
+            (a.planet1 === 'venus' && a.planet2 === 'sun')) &&
+          a.aspectType === (AspectType.SEXTILE as string),
+      );
+
+      expect(sunVenusSextile).toBeUndefined();
+    });
+
     it('should return valid Sun-Venus conjunction (astronomically possible)', () => {
       const planets: PlanetPosition[] = [
         {
@@ -1054,9 +1085,9 @@ describe('AspectCalculationService', () => {
       expect(conjunction).toBeDefined();
     });
 
-    it('should return valid Sun-Venus sextile (astronomically possible)', () => {
-      // Venus puede estar hasta ~47° del Sol, por lo que un sextil (60°) es astronómicamente posible
-      // aunque no común. Para este test usamos Marte para un sextil claro.
+    it('should return valid Sun-Mars sextile', () => {
+      // Para este test usamos un sextil claro entre el Sol y Marte (60° de separación),
+      // sin restricciones de elongación como las que tendría Venus.
       const planets: PlanetPosition[] = [
         {
           planet: 'sun',

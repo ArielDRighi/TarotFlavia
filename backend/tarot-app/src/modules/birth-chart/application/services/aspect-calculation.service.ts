@@ -66,7 +66,7 @@ export class AspectCalculationService {
    *
    * Esto hace que ciertos aspectos sean físicamente imposibles entre:
    * - Sol-Mercurio: sextil (60°), cuadratura (90°), trígono (120°), oposición (180°)
-   * - Sol-Venus: cuadratura (90°), trígono (120°), oposición (180°)
+   * - Sol-Venus: sextil (60°), cuadratura (90°), trígono (120°), oposición (180°)
    * - Mercurio-Venus: trígono (120°), oposición (180°)
    */
   private readonly IMPOSSIBLE_ASPECTS: Array<{
@@ -82,7 +82,7 @@ export class AspectCalculationService {
     {
       planet1: 'sun',
       planet2: 'venus',
-      aspects: ['square', 'trine', 'opposition'],
+      aspects: ['sextile', 'square', 'trine', 'opposition'],
     },
     {
       planet1: 'mercury',
