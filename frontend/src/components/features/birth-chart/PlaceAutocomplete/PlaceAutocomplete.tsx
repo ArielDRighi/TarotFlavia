@@ -119,6 +119,7 @@ export function PlaceAutocomplete({
             key={place.placeId}
             value={place.placeId}
             onSelect={() => handleSelect(place)}
+            onMouseDown={(e) => handleSelect(place)}
             className="cursor-pointer"
           >
             <MapPin className="text-muted-foreground mr-2 h-4 w-4" />
