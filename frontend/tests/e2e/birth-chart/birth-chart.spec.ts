@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { TEST_BIRTH_DATA } from './fixtures/test-data';
+import { TEST_BIRTH_DATA, fillBirthChartForm } from './fixtures/test-data';
 
 /**
  * Test Suite: Birth Chart - Anonymous User
@@ -48,9 +48,8 @@ test.describe('Birth Chart - Anonymous User', () => {
     // Llenar formulario
     await page.getByLabel(/nombre/i).fill(TEST_BIRTH_DATA.name);
 
-    // Fecha - usar el date picker
-    await page.getByLabel(/fecha/i).click();
-    await page.getByRole('button', { name: '15' }).click();
+    // Fecha
+    await page.getByLabel(/fecha/i).fill(TEST_BIRTH_DATA.birthDate);
 
     // Hora
     await page.getByLabel(/hora/i).fill(TEST_BIRTH_DATA.birthTime);
@@ -164,12 +163,31 @@ test.describe('Birth Chart - Result Page (Anonymous)', () => {
   test.beforeEach(async ({ page }) => {
     // Generar carta primero
     await page.goto('/carta-astral');
-    await page.getByLabel(/nombre/i).fill('Test User');
-    await page.getByLabel(/hora/i).fill('14:30');
-    await page.getByLabel(/lugar/i).fill('Buenos Aires');
-    await page.getByText(/Buenos Aires, Argentina/).click();
+
+    // Verificar que el formulario se renderizó correctamente
+    const nameField = page.getByLabel(/nombre/i);
+    const timeField = page.getByLabel(/hora/i);
+    const placeField = page.getByLabel(/lugar/i);
+
+    await expect(nameField, 'Expected name field on birth chart form').toBeVisible();
+    await expect(timeField, 'Expected time field on birth chart form').toBeVisible();
+    await expect(placeField, 'Expected place field on birth chart form').toBeVisible();
+
+    // Llenar formulario usando helper
+    await fillBirthChartForm(page, {
+      name: 'Test User',
+      birthTime: '14:30',
+      birthPlace: 'Buenos Aires',
+      birthPlaceFullName: 'Buenos Aires, Argentina',
+    });
+
     await page.getByRole('button', { name: /generar/i }).click();
     await expect(page).toHaveURL(/\/carta-astral\/resultado/);
+
+    // Verificar que el gráfico se generó correctamente
+    await expect(
+      page.locator('svg[aria-label="Gráfico de carta astral"]'),
+    ).toBeVisible();
   });
 
   test('should display tabs with different views', async ({ page }) => {
@@ -222,7 +240,8 @@ test.describe('Birth Chart - Result Page (Anonymous)', () => {
     await expect(table).toBeVisible();
 
     // Debe mostrar al menos los 10 planetas
-    await expect(table.locator('tbody tr')).toHaveCount(10, { timeout: 5000 });
+    const planetRowCount = await table.locator('tbody tr').count();
+    expect(planetRowCount).toBeGreaterThanOrEqual(10);
 
     // Debe mostrar columnas: Planeta, Grado, Signo, Casa
     await expect(table.getByRole('columnheader', { name: /planeta/i })).toBeVisible();

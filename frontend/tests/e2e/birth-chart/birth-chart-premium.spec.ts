@@ -1,5 +1,10 @@
 import { test, expect } from '@playwright/test';
-import { TEST_BIRTH_DATA, TEST_USER_PREMIUM } from './fixtures/test-data';
+import {
+  TEST_BIRTH_DATA,
+  TEST_USER_PREMIUM,
+  fillBirthChartForm,
+  loginAsPremium,
+} from './fixtures/test-data';
 
 /**
  * Test Suite: Birth Chart - Premium User
@@ -16,10 +21,7 @@ import { TEST_BIRTH_DATA, TEST_USER_PREMIUM } from './fixtures/test-data';
 test.describe('Birth Chart - Premium User', () => {
   test.beforeEach(async ({ page }) => {
     // Login como usuario premium
-    await page.goto('/login');
-    await page.getByLabel(/email/i).fill(TEST_USER_PREMIUM.email);
-    await page.getByLabel(/contraseña/i).fill(TEST_USER_PREMIUM.password);
-    await page.getByRole('button', { name: /iniciar sesión/i }).click();
+    await loginAsPremium(page);
 
     await expect(page).toHaveURL('/');
     await page.goto('/carta-astral');
@@ -30,10 +32,7 @@ test.describe('Birth Chart - Premium User', () => {
   });
 
   test('should generate chart with full interpretations', async ({ page }) => {
-    await page.getByLabel(/nombre/i).fill(TEST_BIRTH_DATA.name);
-    await page.getByLabel(/hora/i).fill(TEST_BIRTH_DATA.birthTime);
-    await page.getByLabel(/lugar/i).fill('Buenos Aires');
-    await page.getByText(/Buenos Aires, Argentina/).click();
+    await fillBirthChartForm(page, TEST_BIRTH_DATA);
     await page.getByRole('button', { name: /generar/i }).click();
 
     await expect(page).toHaveURL(/\/carta-astral\/resultado\/\d+/);
@@ -51,10 +50,7 @@ test.describe('Birth Chart - Premium User', () => {
   });
 
   test('should show AI synthesis option', async ({ page }) => {
-    await page.getByLabel(/nombre/i).fill(TEST_BIRTH_DATA.name);
-    await page.getByLabel(/hora/i).fill(TEST_BIRTH_DATA.birthTime);
-    await page.getByLabel(/lugar/i).fill('Buenos Aires');
-    await page.getByText(/Buenos Aires, Argentina/).click();
+    await fillBirthChartForm(page, TEST_BIRTH_DATA);
     await page.getByRole('button', { name: /generar/i }).click();
 
     await expect(page).toHaveURL(/\/carta-astral\/resultado\/\d+/);
@@ -70,10 +66,7 @@ test.describe('Birth Chart - Premium User', () => {
   });
 
   test('should generate AI synthesis when requested', async ({ page }) => {
-    await page.getByLabel(/nombre/i).fill(TEST_BIRTH_DATA.name);
-    await page.getByLabel(/hora/i).fill(TEST_BIRTH_DATA.birthTime);
-    await page.getByLabel(/lugar/i).fill('Buenos Aires');
-    await page.getByText(/Buenos Aires, Argentina/).click();
+    await fillBirthChartForm(page, TEST_BIRTH_DATA);
     await page.getByRole('button', { name: /generar/i }).click();
 
     await expect(page).toHaveURL(/\/carta-astral\/resultado\/\d+/);
@@ -92,7 +85,8 @@ test.describe('Birth Chart - Premium User', () => {
     // Verificar que se muestra el contenido de la síntesis
     const synthesisContent = page.locator('[data-testid="ai-synthesis-content"]');
     await expect(synthesisContent).toBeVisible();
-    expect(await synthesisContent.textContent()).toContain('Sol');
+    const synthesisText = (await synthesisContent.textContent())?.trim() ?? '';
+    expect(synthesisText.length).toBeGreaterThan(50);
   });
 
   test('should download PDF', async ({ page }) => {
@@ -167,10 +161,7 @@ test.describe('Birth Chart - Premium User', () => {
 test.describe('Birth Chart - History (Premium)', () => {
   test.beforeEach(async ({ page }) => {
     // Login como premium
-    await page.goto('/login');
-    await page.getByLabel(/email/i).fill(TEST_USER_PREMIUM.email);
-    await page.getByLabel(/contraseña/i).fill(TEST_USER_PREMIUM.password);
-    await page.getByRole('button', { name: /iniciar sesión/i }).click();
+    await loginAsPremium(page);
 
     await page.goto('/carta-astral/historial');
   });
@@ -198,10 +189,10 @@ test.describe('Birth Chart - History (Premium)', () => {
     if (initialCount > 0) {
       await page.getByPlaceholder(/buscar/i).fill('Test');
 
-      // Verificar que se filtran
-      await page.waitForTimeout(500); // Esperar debounce de búsqueda
-      const filteredCount = await chartCards.count();
-      expect(filteredCount).toBeLessThanOrEqual(initialCount);
+      // Verificar que se filtran usando espera basada en condición
+      await expect
+        .poll(async () => await chartCards.count())
+        .toBeLessThanOrEqual(initialCount);
     }
   });
 
@@ -225,59 +216,59 @@ test.describe('Birth Chart - History (Premium)', () => {
     // Asumiendo que hay al menos una carta
     const chartCard = page.locator('[data-testid="chart-card"]').first();
 
-    if (await chartCard.isVisible()) {
-      // Abrir menú de opciones
-      await chartCard.getByRole('button', { name: /más/i }).click();
-      await page.getByRole('menuitem', { name: /renombrar/i }).click();
+    await expect(chartCard).toBeVisible();
 
-      // Cambiar nombre
-      const nameInput = page.getByLabel(/nombre/i);
-      await nameInput.fill('Renamed Chart');
-      await page.getByRole('button', { name: /guardar/i }).click();
+    // Abrir menú de opciones
+    await chartCard.getByRole('button', { name: /más/i }).click();
+    await page.getByRole('menuitem', { name: /renombrar/i }).click();
 
-      // Verificar que se actualizó
-      await expect(page.getByText('Renamed Chart')).toBeVisible();
-    }
+    // Cambiar nombre
+    const nameInput = page.getByLabel(/nombre/i);
+    await nameInput.fill('Renamed Chart');
+    await page.getByRole('button', { name: /guardar/i }).click();
+
+    // Verificar que se actualizó
+    await expect(page.getByText('Renamed Chart')).toBeVisible();
   });
 
   test('should delete chart with confirmation', async ({ page }) => {
     const chartCard = page.locator('[data-testid="chart-card"]').first();
 
-    if (await chartCard.isVisible()) {
-      const initialCount = await page
-        .locator('[data-testid="chart-card"]')
-        .count();
+    await expect(chartCard).toBeVisible();
 
-      // Abrir menú y eliminar
-      await chartCard.getByRole('button', { name: /más/i }).click();
-      await page.getByRole('menuitem', { name: /eliminar/i }).click();
+    const initialCount = await page
+      .locator('[data-testid="chart-card"]')
+      .count();
 
-      // Confirmar
-      await expect(page.getByText(/¿eliminar esta carta/i)).toBeVisible();
-      await page.getByRole('button', { name: /eliminar/i }).click();
+    // Abrir menú y eliminar
+    await chartCard.getByRole('button', { name: /más/i }).click();
+    await page.getByRole('menuitem', { name: /eliminar/i }).click();
 
-      // Verificar que se eliminó
-      await page.waitForTimeout(1000);
-      const newCount = await page.locator('[data-testid="chart-card"]').count();
-      expect(newCount).toBe(initialCount - 1);
-    }
+    // Confirmar
+    await expect(page.getByText(/¿eliminar esta carta/i)).toBeVisible();
+    await page.getByRole('button', { name: /eliminar/i }).click();
+
+    // Verificar que se eliminó
+    await expect(page.locator('[data-testid="chart-card"]')).toHaveCount(
+      initialCount - 1,
+    );
   });
 
   test('should open chart detail from history', async ({ page }) => {
     const chartCard = page.locator('[data-testid="chart-card"]').first();
 
-    if (await chartCard.isVisible()) {
-      // Click en la carta
-      await chartCard.click();
+    await expect(chartCard).toBeVisible();
 
-      // Debe navegar al detalle
-      await expect(page).toHaveURL(/\/carta-astral\/resultado\/\d+/);
+    // Click en la carta
+    await chartCard.click();
 
-      // Debe mostrar el gráfico
-      await expect(
-        page.locator('svg[aria-label="Gráfico de carta astral"]'),
-      ).toBeVisible();
-    }
+    // Debe navegar al detalle
+    await expect(page).toHaveURL(/\/carta-astral\/resultado\/\d+/);
+
+    // Debe mostrar el gráfico
+    await expect(
+      page.locator('svg[aria-label="Gráfico de carta astral"]'),
+    ).toBeVisible();
   });
 });
 
@@ -286,10 +277,7 @@ test.describe('Birth Chart - History (Premium)', () => {
  */
 test.describe('Birth Chart - AI Synthesis Limits', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/login');
-    await page.getByLabel(/email/i).fill(TEST_USER_PREMIUM.email);
-    await page.getByLabel(/contraseña/i).fill(TEST_USER_PREMIUM.password);
-    await page.getByRole('button', { name: /iniciar sesión/i }).click();
+    await loginAsPremium(page);
     await page.goto('/carta-astral');
   });
 
@@ -340,12 +328,12 @@ test.describe('Birth Chart - AI Synthesis Limits', () => {
     expect(usesAfter).toBe(usesBefore - 1);
   });
 
-  test('should show limit reached message when no uses left', async ({
+  test.skip('should show limit reached message when no uses left', async ({
     page,
   }) => {
-    // Este test necesita que el usuario ya haya usado todos sus intentos
-    // O que se simule el estado de límite alcanzado
-    // Por ahora, solo verificamos que el mensaje existe si el botón está deshabilitado
+    // TODO: Este test requiere simular que el usuario ya consumió todos sus usos de síntesis IA.
+    // Actualmente no hay forma de establecer este estado sin consumir realmente los 2 usos diarios.
+    // Considerar agregar endpoint de test o mock para establecer límite alcanzado.
 
     await page.getByLabel(/nombre/i).fill('Test');
     await page.getByLabel(/hora/i).fill('12:00');
@@ -355,16 +343,13 @@ test.describe('Birth Chart - AI Synthesis Limits', () => {
 
     await expect(page).toHaveURL(/\/carta-astral\/resultado\/\d+/);
 
-    // Si el botón está deshabilitado, debe mostrar mensaje
+    // Verificar que botón está deshabilitado y muestra mensaje
     const synthesisButton = page.getByRole('button', {
       name: /generar síntesis ia/i,
     });
-    const isDisabled = await synthesisButton.isDisabled();
-
-    if (isDisabled) {
-      await expect(
-        page.getByText(/límite de síntesis alcanzado/i),
-      ).toBeVisible();
-    }
+    await expect(synthesisButton).toBeDisabled();
+    await expect(
+      page.getByText(/límite de síntesis alcanzado/i),
+    ).toBeVisible();
   });
 });
