@@ -208,26 +208,46 @@ export class BirthChartFacadeService {
       };
     }
 
-    const monthlyUsage = await this.usageLimitsService.getUsageByPeriod(
-      user.userId,
-      UsageFeature.BIRTH_CHART,
-      'monthly',
-    );
-
     const planLimit =
       user.plan === UserPlan.PREMIUM ? 5 : user.plan === UserPlan.FREE ? 3 : 1;
 
-    const remaining = Math.max(0, planLimit - monthlyUsage);
-    const resetsAt = this.getNextMonthStartIso();
+    try {
+      const monthlyUsage = await this.usageLimitsService.getUsageByPeriod(
+        user.userId,
+        UsageFeature.BIRTH_CHART,
+        'monthly',
+      );
 
-    return {
-      plan: user.plan,
-      used: monthlyUsage,
-      limit: planLimit,
-      remaining,
-      resetsAt,
-      canGenerate: remaining > 0,
-    };
+      const remaining = Math.max(0, planLimit - monthlyUsage);
+      const resetsAt = this.getNextMonthStartIso();
+
+      return {
+        plan: user.plan,
+        used: monthlyUsage,
+        limit: planLimit,
+        remaining,
+        resetsAt,
+        canGenerate: remaining > 0,
+      };
+    } catch (error) {
+      // Fallback en caso de error al obtener uso (ej: enum value no existe en DB)
+      // Retornar como si el usuario tiene el límite completo disponible
+      // El backend rechazará la generación si realmente excede el límite en el interceptor
+      this.logger.error(
+        `Error getting usage for user ${user.userId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+
+      const resetsAt = this.getNextMonthStartIso();
+
+      return {
+        plan: user.plan,
+        used: 0,
+        limit: planLimit,
+        remaining: planLimit,
+        resetsAt,
+        canGenerate: true,
+      };
+    }
   }
 
   async generateSynthesisOnly(
