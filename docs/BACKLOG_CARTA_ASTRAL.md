@@ -18293,6 +18293,7 @@ T-CA-046 → T-CA-047 → T-CA-048 → T-CA-049 → T-CA-050
 
 ## T-CA-051: Filtrar Aspectos Astronómicamente Imposibles
 
+**Estado:** ✅ COMPLETADA  
 **Proyecto:** Auguria - Plataforma de Servicios Místicos  
 **Módulo:** Carta Astral  
 **Tipo:** Corrección / Bug Fix  
@@ -18508,12 +18509,12 @@ Los archivos en `docs/seed-data/birth-chart/05-aspects.md` ya deberían **NO inc
 
 ## Criterios de Aceptación
 
-- [ ] Método `isAspectPossible()` implementado en AspectCalculationService
-- [ ] Aspectos imposibles filtrados en `calculateAspects()`
-- [ ] Seeder valida y salta aspectos imposibles
-- [ ] Tests unitarios para aspectos imposibles
-- [ ] Archivo 05-aspects.md no contiene interpretaciones de aspectos imposibles
-- [ ] No hay regresiones en tests existentes
+- [x] Método `isAspectPossible()` implementado en AspectCalculationService
+- [x] Aspectos imposibles filtrados en `calculateAspects()`
+- [x] Seeder valida y salta aspectos imposibles
+- [x] Tests unitarios para aspectos imposibles (14 tests nuevos)
+- [x] Archivo 05-aspects.md no contiene interpretaciones de aspectos imposibles
+- [x] No hay regresiones en tests existentes (50/50 tests pasando)
 
 ---
 

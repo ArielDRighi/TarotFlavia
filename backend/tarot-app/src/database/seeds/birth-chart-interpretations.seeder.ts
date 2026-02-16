@@ -210,20 +210,82 @@ export async function seedBirthChartInterpretations(
   console.log('📝 Loading Aspects from 05-aspects.md...');
 
   const aspectsData = readSeedFile<AspectsData>('05-aspects.md');
-  const aspects = aspectsData.aspects.map((item) => ({
-    category: InterpretationCategory.ASPECT,
-    planet: item.planet1 as Planet,
-    planet2: item.planet2 as Planet,
-    aspectType: item.aspect as AspectType,
-    sign: null,
-    house: null,
-    content: item.content,
-    summary: null,
-    isActive: true,
+
+  // Definir aspectos astronómicamente imposibles (T-CA-051)
+  // Estos aspectos no pueden ocurrir debido a las limitaciones de elongación
+  // Optimizado: cada par de planetas se almacena una sola vez
+  const IMPOSSIBLE_ASPECTS: Array<{
+    planet1: string;
+    planet2: string;
+    aspects: string[];
+  }> = [
+    // Sol-Mercurio (elongación máxima ~28°)
+    {
+      planet1: 'sun',
+      planet2: 'mercury',
+      aspects: ['sextile', 'square', 'trine', 'opposition'],
+    },
+    // Sol-Venus (elongación máxima ~47°)
+    // Incluye sextile (60°) porque excede la elongación máxima
+    {
+      planet1: 'sun',
+      planet2: 'venus',
+      aspects: ['sextile', 'square', 'trine', 'opposition'],
+    },
+    // Mercurio-Venus
+    {
+      planet1: 'mercury',
+      planet2: 'venus',
+      aspects: ['trine', 'opposition'],
+    },
+  ];
+
+  // Helper: Verificar si un aspecto es astronómicamente imposible
+  // Compara en ambos sentidos (simétrica) para evitar duplicar datos
+  function isAspectImpossible(
+    planet1: string,
+    planet2: string,
+    aspectType: string,
+  ): boolean {
+    return IMPOSSIBLE_ASPECTS.some(
+      (impossible) =>
+        ((impossible.planet1 === planet1 && impossible.planet2 === planet2) ||
+          (impossible.planet1 === planet2 && impossible.planet2 === planet1)) &&
+        impossible.aspects.includes(aspectType),
+    );
+  }
+
+  // Filtrar aspectos imposibles y mapear a entidades
+  const allAspects = aspectsData.aspects.map((item) => ({
+    item,
+    entity: {
+      category: InterpretationCategory.ASPECT,
+      planet: item.planet1 as Planet,
+      planet2: item.planet2 as Planet,
+      aspectType: item.aspect as AspectType,
+      sign: null,
+      house: null,
+      content: item.content,
+      summary: null,
+      isActive: true,
+    },
   }));
+
+  // Separar aspectos válidos de imposibles
+  const validAspects = allAspects.filter(
+    ({ item }) => !isAspectImpossible(item.planet1, item.planet2, item.aspect),
+  );
+  const filteredCount = allAspects.length - validAspects.length;
+
+  const aspects = validAspects.map(({ entity }) => entity);
 
   interpretations.push(...aspects);
   console.log(`   ✓ Loaded ${aspects.length} aspects`);
+  if (filteredCount > 0) {
+    console.log(
+      `   ⚠️  Filtered ${filteredCount} astronomically impossible aspects`,
+    );
+  }
 
   // ==============================================================================
   // INSERT ALL INTERPRETATIONS

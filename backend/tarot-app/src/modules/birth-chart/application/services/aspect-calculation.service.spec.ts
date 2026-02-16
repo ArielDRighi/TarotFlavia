@@ -26,18 +26,18 @@ describe('AspectCalculationService', () => {
     },
     {
       planet: 'mercury',
-      longitude: 120, // 0° Leo (Trígono con Sol)
-      sign: 'leo',
-      signDegree: 0,
-      house: 5,
+      longitude: 6, // 6° Aries (Conjunción con Sol - orbe 6°, dentro del límite de 8°)
+      sign: 'aries',
+      signDegree: 6,
+      house: 1,
       isRetrograde: false,
     },
     {
       planet: 'venus',
-      longitude: 180, // 0° Libra (Oposición con Sol)
-      sign: 'libra',
-      signDegree: 0,
-      house: 7,
+      longitude: 8, // 8° Aries (Conjunción con Sol - orbe 8°, justo en el límite)
+      sign: 'aries',
+      signDegree: 8,
+      house: 1,
       isRetrograde: false,
     },
     {
@@ -108,36 +108,6 @@ describe('AspectCalculationService', () => {
       expect(square?.orb).toBeCloseTo(0, 1);
     });
 
-    it('should detect trine (Sun-Mercury 120°)', () => {
-      const aspects = service.calculateAspects(mockPlanets);
-
-      const trine = aspects.find(
-        (a) =>
-          ((a.planet1 === 'sun' && a.planet2 === 'mercury') ||
-            (a.planet1 === 'mercury' && a.planet2 === 'sun')) &&
-          a.aspectType === (AspectType.TRINE as string),
-      );
-
-      expect(trine).toBeDefined();
-      expect(trine?.angle).toBeCloseTo(120, 1);
-      expect(trine?.orb).toBeCloseTo(0, 1);
-    });
-
-    it('should detect opposition (Sun-Venus 180°)', () => {
-      const aspects = service.calculateAspects(mockPlanets);
-
-      const opposition = aspects.find(
-        (a) =>
-          ((a.planet1 === 'sun' && a.planet2 === 'venus') ||
-            (a.planet1 === 'venus' && a.planet2 === 'sun')) &&
-          a.aspectType === (AspectType.OPPOSITION as string),
-      );
-
-      expect(opposition).toBeDefined();
-      expect(opposition?.angle).toBeCloseTo(180, 1);
-      expect(opposition?.orb).toBeCloseTo(0, 1);
-    });
-
     it('should detect sextile (Sun-Mars 60°)', () => {
       const aspects = service.calculateAspects(mockPlanets);
 
@@ -151,6 +121,36 @@ describe('AspectCalculationService', () => {
       expect(sextile).toBeDefined();
       expect(sextile?.angle).toBeCloseTo(60, 1);
       expect(sextile?.orb).toBeCloseTo(0, 1);
+    });
+
+    it('should detect conjunction (Sun-Mercury ~6°)', () => {
+      const aspects = service.calculateAspects(mockPlanets);
+
+      const conjunction = aspects.find(
+        (a) =>
+          ((a.planet1 === 'sun' && a.planet2 === 'mercury') ||
+            (a.planet1 === 'mercury' && a.planet2 === 'sun')) &&
+          a.aspectType === (AspectType.CONJUNCTION as string),
+      );
+
+      expect(conjunction).toBeDefined();
+      expect(conjunction?.angle).toBeCloseTo(6, 1);
+      expect(conjunction?.orb).toBeCloseTo(6, 1);
+    });
+
+    it('should detect conjunction (Sun-Venus ~8°)', () => {
+      const aspects = service.calculateAspects(mockPlanets);
+
+      const conjunction = aspects.find(
+        (a) =>
+          ((a.planet1 === 'sun' && a.planet2 === 'venus') ||
+            (a.planet1 === 'venus' && a.planet2 === 'sun')) &&
+          a.aspectType === (AspectType.CONJUNCTION as string),
+      );
+
+      expect(conjunction).toBeDefined();
+      expect(conjunction?.angle).toBeCloseTo(8, 1);
+      expect(conjunction?.orb).toBeCloseTo(8, 1);
     });
 
     it('should sort aspects by strength (smaller orb first)', () => {
@@ -644,7 +644,7 @@ describe('AspectCalculationService', () => {
     it('should calculate isApplying field for opposition', () => {
       const planets: PlanetPosition[] = [
         {
-          planet: 'sun',
+          planet: 'mars',
           longitude: 0,
           sign: 'aries',
           signDegree: 0,
@@ -652,8 +652,8 @@ describe('AspectCalculationService', () => {
           isRetrograde: false,
         },
         {
-          planet: 'venus',
-          longitude: 180, // Oposición exacta
+          planet: 'jupiter',
+          longitude: 180, // Oposición exacta (válida entre planetas exteriores)
           sign: 'libra',
           signDegree: 0,
           house: 7,
@@ -742,7 +742,7 @@ describe('AspectCalculationService', () => {
           isRetrograde: false,
         },
         {
-          planet: 'venus',
+          planet: 'mars', // Usamos Marte (sin restricciones de elongación)
           longitude: 60, // Sextil exacto
           sign: 'gemini',
           signDegree: 0,
@@ -771,6 +771,472 @@ describe('AspectCalculationService', () => {
       }
 
       expect(aspects.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('Impossible Aspects Validation', () => {
+    it('should not return Sun-Mercury opposition (astronomically impossible)', () => {
+      const planets: PlanetPosition[] = [
+        {
+          planet: 'sun',
+          longitude: 0,
+          sign: 'aries',
+          signDegree: 0,
+          house: 1,
+          isRetrograde: false,
+        },
+        {
+          planet: 'mercury',
+          longitude: 180, // Imposible en realidad (elongación máxima ~28°)
+          sign: 'libra',
+          signDegree: 0,
+          house: 7,
+          isRetrograde: false,
+        },
+      ];
+
+      const aspects = service.calculateAspects(planets);
+      const sunMercuryOpposition = aspects.find(
+        (a) =>
+          ((a.planet1 === 'sun' && a.planet2 === 'mercury') ||
+            (a.planet1 === 'mercury' && a.planet2 === 'sun')) &&
+          a.aspectType === (AspectType.OPPOSITION as string),
+      );
+
+      expect(sunMercuryOpposition).toBeUndefined();
+    });
+
+    it('should not return Sun-Mercury square (astronomically impossible)', () => {
+      const planets: PlanetPosition[] = [
+        {
+          planet: 'sun',
+          longitude: 0,
+          sign: 'aries',
+          signDegree: 0,
+          house: 1,
+          isRetrograde: false,
+        },
+        {
+          planet: 'mercury',
+          longitude: 90, // Imposible en realidad
+          sign: 'cancer',
+          signDegree: 0,
+          house: 4,
+          isRetrograde: false,
+        },
+      ];
+
+      const aspects = service.calculateAspects(planets);
+      const sunMercurySquare = aspects.find(
+        (a) =>
+          ((a.planet1 === 'sun' && a.planet2 === 'mercury') ||
+            (a.planet1 === 'mercury' && a.planet2 === 'sun')) &&
+          a.aspectType === (AspectType.SQUARE as string),
+      );
+
+      expect(sunMercurySquare).toBeUndefined();
+    });
+
+    it('should not return Sun-Mercury trine (astronomically impossible)', () => {
+      const planets: PlanetPosition[] = [
+        {
+          planet: 'sun',
+          longitude: 0,
+          sign: 'aries',
+          signDegree: 0,
+          house: 1,
+          isRetrograde: false,
+        },
+        {
+          planet: 'mercury',
+          longitude: 120, // Imposible en realidad
+          sign: 'leo',
+          signDegree: 0,
+          house: 5,
+          isRetrograde: false,
+        },
+      ];
+
+      const aspects = service.calculateAspects(planets);
+      const sunMercuryTrine = aspects.find(
+        (a) =>
+          ((a.planet1 === 'sun' && a.planet2 === 'mercury') ||
+            (a.planet1 === 'mercury' && a.planet2 === 'sun')) &&
+          a.aspectType === (AspectType.TRINE as string),
+      );
+
+      expect(sunMercuryTrine).toBeUndefined();
+    });
+
+    it('should not return Sun-Mercury sextile (astronomically impossible)', () => {
+      const planets: PlanetPosition[] = [
+        {
+          planet: 'sun',
+          longitude: 0,
+          sign: 'aries',
+          signDegree: 0,
+          house: 1,
+          isRetrograde: false,
+        },
+        {
+          planet: 'mercury',
+          longitude: 60, // Imposible en realidad
+          sign: 'gemini',
+          signDegree: 0,
+          house: 3,
+          isRetrograde: false,
+        },
+      ];
+
+      const aspects = service.calculateAspects(planets);
+      const sunMercurySextile = aspects.find(
+        (a) =>
+          ((a.planet1 === 'sun' && a.planet2 === 'mercury') ||
+            (a.planet1 === 'mercury' && a.planet2 === 'sun')) &&
+          a.aspectType === (AspectType.SEXTILE as string),
+      );
+
+      expect(sunMercurySextile).toBeUndefined();
+    });
+
+    it('should return valid Sun-Mercury conjunction (astronomically possible)', () => {
+      const planets: PlanetPosition[] = [
+        {
+          planet: 'sun',
+          longitude: 100,
+          sign: 'cancer',
+          signDegree: 10,
+          house: 4,
+          isRetrograde: false,
+        },
+        {
+          planet: 'mercury',
+          longitude: 102, // Válido (dentro de elongación máxima)
+          sign: 'cancer',
+          signDegree: 12,
+          house: 4,
+          isRetrograde: false,
+        },
+      ];
+
+      const aspects = service.calculateAspects(planets);
+      const conjunction = aspects.find(
+        (a) =>
+          ((a.planet1 === 'sun' && a.planet2 === 'mercury') ||
+            (a.planet1 === 'mercury' && a.planet2 === 'sun')) &&
+          a.aspectType === (AspectType.CONJUNCTION as string),
+      );
+
+      expect(conjunction).toBeDefined();
+    });
+
+    it('should not return Sun-Venus opposition (astronomically impossible)', () => {
+      const planets: PlanetPosition[] = [
+        {
+          planet: 'sun',
+          longitude: 0,
+          sign: 'aries',
+          signDegree: 0,
+          house: 1,
+          isRetrograde: false,
+        },
+        {
+          planet: 'venus',
+          longitude: 180, // Imposible (elongación máxima ~47°)
+          sign: 'libra',
+          signDegree: 0,
+          house: 7,
+          isRetrograde: false,
+        },
+      ];
+
+      const aspects = service.calculateAspects(planets);
+      const sunVenusOpposition = aspects.find(
+        (a) =>
+          ((a.planet1 === 'sun' && a.planet2 === 'venus') ||
+            (a.planet1 === 'venus' && a.planet2 === 'sun')) &&
+          a.aspectType === (AspectType.OPPOSITION as string),
+      );
+
+      expect(sunVenusOpposition).toBeUndefined();
+    });
+
+    it('should not return Sun-Venus trine (astronomically impossible)', () => {
+      const planets: PlanetPosition[] = [
+        {
+          planet: 'sun',
+          longitude: 0,
+          sign: 'aries',
+          signDegree: 0,
+          house: 1,
+          isRetrograde: false,
+        },
+        {
+          planet: 'venus',
+          longitude: 120, // Imposible
+          sign: 'leo',
+          signDegree: 0,
+          house: 5,
+          isRetrograde: false,
+        },
+      ];
+
+      const aspects = service.calculateAspects(planets);
+      const sunVenusTrine = aspects.find(
+        (a) =>
+          ((a.planet1 === 'sun' && a.planet2 === 'venus') ||
+            (a.planet1 === 'venus' && a.planet2 === 'sun')) &&
+          a.aspectType === (AspectType.TRINE as string),
+      );
+
+      expect(sunVenusTrine).toBeUndefined();
+    });
+
+    it('should not return Sun-Venus square (astronomically impossible)', () => {
+      const planets: PlanetPosition[] = [
+        {
+          planet: 'sun',
+          longitude: 0,
+          sign: 'aries',
+          signDegree: 0,
+          house: 1,
+          isRetrograde: false,
+        },
+        {
+          planet: 'venus',
+          longitude: 90, // Imposible
+          sign: 'cancer',
+          signDegree: 0,
+          house: 4,
+          isRetrograde: false,
+        },
+      ];
+
+      const aspects = service.calculateAspects(planets);
+      const sunVenusSquare = aspects.find(
+        (a) =>
+          ((a.planet1 === 'sun' && a.planet2 === 'venus') ||
+            (a.planet1 === 'venus' && a.planet2 === 'sun')) &&
+          a.aspectType === (AspectType.SQUARE as string),
+      );
+
+      expect(sunVenusSquare).toBeUndefined();
+    });
+
+    it('should not return Sun-Venus sextile (astronomically impossible)', () => {
+      const planets: PlanetPosition[] = [
+        {
+          planet: 'sun',
+          longitude: 0,
+          sign: 'aries',
+          signDegree: 0,
+          house: 1,
+          isRetrograde: false,
+        },
+        {
+          planet: 'venus',
+          longitude: 60, // Imposible (Venus solo llega a ~47° del Sol)
+          sign: 'gemini',
+          signDegree: 0,
+          house: 3,
+          isRetrograde: false,
+        },
+      ];
+
+      const aspects = service.calculateAspects(planets);
+      const sunVenusSextile = aspects.find(
+        (a) =>
+          ((a.planet1 === 'sun' && a.planet2 === 'venus') ||
+            (a.planet1 === 'venus' && a.planet2 === 'sun')) &&
+          a.aspectType === (AspectType.SEXTILE as string),
+      );
+
+      expect(sunVenusSextile).toBeUndefined();
+    });
+
+    it('should return valid Sun-Venus conjunction (astronomically possible)', () => {
+      const planets: PlanetPosition[] = [
+        {
+          planet: 'sun',
+          longitude: 100,
+          sign: 'cancer',
+          signDegree: 10,
+          house: 4,
+          isRetrograde: false,
+        },
+        {
+          planet: 'venus',
+          longitude: 103, // Válido
+          sign: 'cancer',
+          signDegree: 13,
+          house: 4,
+          isRetrograde: false,
+        },
+      ];
+
+      const aspects = service.calculateAspects(planets);
+      const conjunction = aspects.find(
+        (a) =>
+          ((a.planet1 === 'sun' && a.planet2 === 'venus') ||
+            (a.planet1 === 'venus' && a.planet2 === 'sun')) &&
+          a.aspectType === (AspectType.CONJUNCTION as string),
+      );
+
+      expect(conjunction).toBeDefined();
+    });
+
+    it('should return valid Sun-Mars sextile', () => {
+      // Para este test usamos un sextil claro entre el Sol y Marte (60° de separación),
+      // sin restricciones de elongación como las que tendría Venus.
+      const planets: PlanetPosition[] = [
+        {
+          planet: 'sun',
+          longitude: 0,
+          sign: 'aries',
+          signDegree: 0,
+          house: 1,
+          isRetrograde: false,
+        },
+        {
+          planet: 'mars',
+          longitude: 60,
+          sign: 'gemini',
+          signDegree: 0,
+          house: 3,
+          isRetrograde: false,
+        },
+      ];
+
+      const aspects = service.calculateAspects(planets);
+      const sextile = aspects.find(
+        (a) =>
+          ((a.planet1 === 'sun' && a.planet2 === 'mars') ||
+            (a.planet1 === 'mars' && a.planet2 === 'sun')) &&
+          a.aspectType === (AspectType.SEXTILE as string),
+      );
+
+      expect(sextile).toBeDefined();
+    });
+
+    it('should not return Mercury-Venus opposition (astronomically impossible)', () => {
+      const planets: PlanetPosition[] = [
+        {
+          planet: 'mercury',
+          longitude: 0,
+          sign: 'aries',
+          signDegree: 0,
+          house: 1,
+          isRetrograde: false,
+        },
+        {
+          planet: 'venus',
+          longitude: 180, // Imposible
+          sign: 'libra',
+          signDegree: 0,
+          house: 7,
+          isRetrograde: false,
+        },
+      ];
+
+      const aspects = service.calculateAspects(planets);
+      const mercuryVenusOpposition = aspects.find(
+        (a) =>
+          ((a.planet1 === 'mercury' && a.planet2 === 'venus') ||
+            (a.planet1 === 'venus' && a.planet2 === 'mercury')) &&
+          a.aspectType === (AspectType.OPPOSITION as string),
+      );
+
+      expect(mercuryVenusOpposition).toBeUndefined();
+    });
+
+    it('should not return Mercury-Venus trine (astronomically impossible)', () => {
+      const planets: PlanetPosition[] = [
+        {
+          planet: 'mercury',
+          longitude: 0,
+          sign: 'aries',
+          signDegree: 0,
+          house: 1,
+          isRetrograde: false,
+        },
+        {
+          planet: 'venus',
+          longitude: 120, // Imposible
+          sign: 'leo',
+          signDegree: 0,
+          house: 5,
+          isRetrograde: false,
+        },
+      ];
+
+      const aspects = service.calculateAspects(planets);
+      const mercuryVenusTrine = aspects.find(
+        (a) =>
+          ((a.planet1 === 'mercury' && a.planet2 === 'venus') ||
+            (a.planet1 === 'venus' && a.planet2 === 'mercury')) &&
+          a.aspectType === (AspectType.TRINE as string),
+      );
+
+      expect(mercuryVenusTrine).toBeUndefined();
+    });
+
+    it('should return valid Mercury-Venus conjunction (astronomically possible)', () => {
+      const planets: PlanetPosition[] = [
+        {
+          planet: 'mercury',
+          longitude: 100,
+          sign: 'cancer',
+          signDegree: 10,
+          house: 4,
+          isRetrograde: false,
+        },
+        {
+          planet: 'venus',
+          longitude: 102, // Válido
+          sign: 'cancer',
+          signDegree: 12,
+          house: 4,
+          isRetrograde: false,
+        },
+      ];
+
+      const aspects = service.calculateAspects(planets);
+      const conjunction = aspects.find(
+        (a) =>
+          ((a.planet1 === 'mercury' && a.planet2 === 'venus') ||
+            (a.planet1 === 'venus' && a.planet2 === 'mercury')) &&
+          a.aspectType === (AspectType.CONJUNCTION as string),
+      );
+
+      expect(conjunction).toBeDefined();
+    });
+
+    it('should allow all aspects for outer planets (not affected by impossible aspects)', () => {
+      const planets: PlanetPosition[] = [
+        {
+          planet: 'mars',
+          longitude: 0,
+          sign: 'aries',
+          signDegree: 0,
+          house: 1,
+          isRetrograde: false,
+        },
+        {
+          planet: 'jupiter',
+          longitude: 180, // Oposición válida entre planetas exteriores
+          sign: 'libra',
+          signDegree: 0,
+          house: 7,
+          isRetrograde: false,
+        },
+      ];
+
+      const aspects = service.calculateAspects(planets);
+      const opposition = aspects.find(
+        (a) => a.aspectType === (AspectType.OPPOSITION as string),
+      );
+
+      expect(opposition).toBeDefined();
     });
   });
 });
