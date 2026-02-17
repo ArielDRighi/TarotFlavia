@@ -23,8 +23,6 @@ import {
   Crown,
   Star,
   Sparkles,
-  ChevronDown,
-  ChevronUp,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -76,8 +74,6 @@ export default function SavedChartPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState('');
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [showAllPlanets, setShowAllPlanets] = useState(false);
-
   // Queries y mutations
   const { data: chart, isLoading, error } = useSavedChart(chartId, isValidId);
   const renameChart = useRenameChart();
@@ -343,44 +339,22 @@ export default function SavedChartPage() {
         {/* Interpretaciones */}
         {chart.interpretations && (
           <section className="mb-8">
-            <div className="mb-4 flex items-center justify-between">
+            <div className="mb-4">
               <h2 className="flex items-center gap-2 text-2xl font-bold">
                 <Sparkles className="text-primary h-6 w-6" />
                 Interpretaciones
               </h2>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowAllPlanets(!showAllPlanets)}
-              >
-                {showAllPlanets ? 'Mostrar menos' : 'Mostrar todos'}
-                {showAllPlanets ? (
-                  <ChevronUp className="ml-1 h-4 w-4" />
-                ) : (
-                  <ChevronDown className="ml-1 h-4 w-4" />
-                )}
-              </Button>
             </div>
 
             <div className="space-y-4">
-              {chart.interpretations.planets
-                .slice(0, showAllPlanets ? undefined : 3)
-                .map((planetInterp) => {
-                  return (
-                    <PlanetInterpretation
-                      key={planetInterp.planet}
-                      interpretation={planetInterp}
-                      showAspects={true}
-                    />
-                  );
-                })}
+              {chart.interpretations.planets.map((planetInterp) => (
+                <PlanetInterpretation
+                  key={planetInterp.planet}
+                  interpretation={planetInterp}
+                  showAspects={true}
+                />
+              ))}
             </div>
-
-            {!showAllPlanets && chart.interpretations.planets.length > 3 && (
-              <p className="text-muted-foreground mt-4 text-center text-sm">
-                Mostrando 3 de {chart.interpretations.planets.length} planetas
-              </p>
-            )}
           </section>
         )}
       </main>

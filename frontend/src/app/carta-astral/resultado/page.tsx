@@ -7,7 +7,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Download,
@@ -16,8 +16,6 @@ import {
   Star,
   Sparkles,
   Crown,
-  ChevronDown,
-  ChevronUp,
   RefreshCw,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -51,8 +49,6 @@ export default function ChartResultPage() {
   const router = useRouter();
   const { chartResult, formData, reset } = useBirthChartStore();
   const downloadPdf = useDownloadPdf();
-
-  const [showAllPlanets, setShowAllPlanets] = useState(false);
 
   // Redirigir si no hay resultado
   useEffect(() => {
@@ -246,44 +242,22 @@ export default function ChartResultPage() {
         {/* Interpretaciones completas (Free y Premium) */}
         {isFull && chartResult.interpretations && (
           <section className="mb-8">
-            <div className="mb-4 flex items-center justify-between">
+            <div className="mb-4">
               <h2 className="flex items-center gap-2 text-2xl font-bold">
                 <Sparkles className="text-primary h-6 w-6" />
                 Interpretaciones
               </h2>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowAllPlanets(!showAllPlanets)}
-              >
-                {showAllPlanets ? 'Mostrar menos' : 'Mostrar todos'}
-                {showAllPlanets ? (
-                  <ChevronUp className="ml-1 h-4 w-4" />
-                ) : (
-                  <ChevronDown className="ml-1 h-4 w-4" />
-                )}
-              </Button>
             </div>
 
             <div className="space-y-4">
-              {chartResult.interpretations.planets
-                .slice(0, showAllPlanets ? undefined : 3)
-                .map((planetInterp) => {
-                  return (
-                    <PlanetInterpretation
-                      key={planetInterp.planet}
-                      interpretation={planetInterp}
-                      showAspects={true}
-                    />
-                  );
-                })}
+              {chartResult.interpretations.planets.map((planetInterp) => (
+                <PlanetInterpretation
+                  key={planetInterp.planet}
+                  interpretation={planetInterp}
+                  showAspects={true}
+                />
+              ))}
             </div>
-
-            {!showAllPlanets && chartResult.interpretations.planets.length > 3 && (
-              <p className="text-muted-foreground mt-4 text-center text-sm">
-                Mostrando 3 de {chartResult.interpretations.planets.length} planetas
-              </p>
-            )}
           </section>
         )}
 
