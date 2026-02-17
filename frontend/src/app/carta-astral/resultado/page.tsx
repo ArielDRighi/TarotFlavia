@@ -151,7 +151,7 @@ export default function ChartResultPage() {
         </div>
       </header>
 
-      <main className="container max-w-6xl px-4 py-8">
+      <main className="container mx-auto max-w-6xl px-4 py-8">
         {/* Título */}
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold tracking-tight">Carta Astral de {formData.name}</h1>
@@ -176,10 +176,9 @@ export default function ChartResultPage() {
           </div>
         )}
 
-        {/* Grid principal: Gráfico + Big Three */}
-        <div className="mb-8 grid gap-6 lg:grid-cols-2">
-          {/* Gráfico de la carta */}
-          <Card>
+        {/* Gráfico de la carta */}
+        <div className="mb-8">
+          <Card className="mx-auto max-w-2xl">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Star className="text-primary h-5 w-5" />
@@ -199,8 +198,10 @@ export default function ChartResultPage() {
               />
             </CardContent>
           </Card>
+        </div>
 
-          {/* Big Three */}
+        {/* Big Three */}
+        <div className="mb-8">
           <BigThree data={chartResult.bigThree} variant="hero" showInterpretations={true} />
         </div>
 

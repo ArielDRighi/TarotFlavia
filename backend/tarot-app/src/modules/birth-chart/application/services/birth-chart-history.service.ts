@@ -286,7 +286,7 @@ export class BirthChartHistoryService {
       interpretation,
       aiSynthesis: chart.chartData.aiSynthesis,
       userName: chart.name,
-      birthDate: chart.birthDate,
+      birthDate: new Date(chart.birthDate),
       birthTime: chart.birthTime,
       birthPlace: chart.birthPlace,
       generatedAt: new Date(),

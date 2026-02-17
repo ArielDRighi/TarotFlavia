@@ -143,7 +143,7 @@ export default function SavedChartPage() {
   // Estado de carga
   if (isLoading) {
     return (
-      <div className="container max-w-6xl py-8">
+      <div className="container mx-auto max-w-6xl py-8">
         <div className="mb-8 flex items-center justify-between">
           <Skeleton className="h-8 w-48" />
           <Skeleton className="h-9 w-24" />
@@ -236,7 +236,7 @@ export default function SavedChartPage() {
         </div>
       </header>
 
-      <main className="container max-w-6xl px-4 py-8">
+      <main className="container mx-auto max-w-6xl px-4 py-8">
         {/* Título editable */}
         <div className="mb-8 text-center">
           {isEditing ? (
@@ -293,10 +293,9 @@ export default function SavedChartPage() {
           </div>
         )}
 
-        {/* Grid principal: Gráfico + Big Three */}
-        <div className="mb-8 grid gap-6 lg:grid-cols-2">
-          {/* Gráfico de la carta */}
-          <Card data-testid="chart-wheel-card">
+        {/* Gráfico de la carta */}
+        <div className="mb-8">
+          <Card className="mx-auto max-w-2xl" data-testid="chart-wheel-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Star className="text-primary h-5 w-5" />
@@ -313,8 +312,10 @@ export default function SavedChartPage() {
               />
             </CardContent>
           </Card>
+        </div>
 
-          {/* Big Three */}
+        {/* Big Three */}
+        <div className="mb-8">
           <BigThree data={chart.bigThree} variant="hero" showInterpretations={true} />
         </div>
 

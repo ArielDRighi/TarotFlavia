@@ -173,9 +173,11 @@ export default function BirthChartPage() {
               onSubmit={handleSubmit}
               isLoading={isSubmitting}
               disabled={!canGenerate || usageLoading}
-              showUsageWarning={remaining === 1}
+              showUsageWarning={remaining === 1 && user?.plan !== 'premium'}
               usageMessage={
-                remaining === 1 ? 'Esta es tu última carta disponible del período.' : undefined
+                remaining === 1 && user?.plan !== 'premium'
+                  ? 'Esta es tu última carta disponible del período.'
+                  : undefined
               }
             />
           ) : (

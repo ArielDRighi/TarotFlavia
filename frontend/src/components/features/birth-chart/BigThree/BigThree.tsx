@@ -100,7 +100,7 @@ export function BigThree({
         <div
           key={key}
           className={cn(
-            'relative overflow-hidden rounded-xl border-2 p-6',
+            'relative min-w-0 overflow-hidden rounded-xl border-2 p-6',
             config.borderColor,
             config.bgColor
           )}
@@ -118,9 +118,9 @@ export function BigThree({
               </div>
               <div>
                 <p className="text-muted-foreground text-sm">{config.label}</p>
-                <h3 className="flex items-center gap-2 text-2xl font-bold">
+                <h3 className="flex items-center gap-2 text-2xl font-bold break-words">
                   <span className="text-3xl">{signMetadata?.symbol}</span>
-                  {itemData.signName}
+                  <span className="min-w-0">{itemData.signName}</span>
                 </h3>
                 <p className="text-muted-foreground mt-1 text-sm">{config.title}</p>
               </div>
