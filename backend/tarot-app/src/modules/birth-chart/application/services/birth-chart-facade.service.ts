@@ -483,11 +483,39 @@ export class BirthChartFacadeService {
     chartData: ChartData,
     aiSynthesis?: string,
   ): Promise<BirthChart> {
+    const birthDate = new Date(dto.birthDate);
+    const birthTime = this.normalizeBirthTime(dto.birthTime);
+
+    // Check for existing chart with same parameters (upsert to avoid duplicate key error)
+    const existing = await this.chartRepo.findOne({
+      where: {
+        userId,
+        birthDate,
+        birthTime,
+        latitude: dto.latitude,
+        longitude: dto.longitude,
+      },
+    });
+
+    if (existing) {
+      this.logger.debug(
+        `Updating existing birth chart id=${existing.id} for userId=${userId}`,
+      );
+      existing.name = dto.name;
+      existing.birthPlace = dto.birthPlace;
+      existing.timezone = dto.timezone;
+      existing.chartData = { ...chartData, aiSynthesis };
+      existing.sunSign = this.findPlanetSign(chartData, Planet.SUN);
+      existing.moonSign = this.findPlanetSign(chartData, Planet.MOON);
+      existing.ascendantSign = chartData.ascendant.sign as ZodiacSign;
+      return this.chartRepo.save(existing);
+    }
+
     const chart = this.chartRepo.create({
       userId,
       name: dto.name,
-      birthDate: new Date(dto.birthDate),
-      birthTime: this.normalizeBirthTime(dto.birthTime),
+      birthDate,
+      birthTime,
       birthPlace: dto.birthPlace,
       latitude: dto.latitude,
       longitude: dto.longitude,

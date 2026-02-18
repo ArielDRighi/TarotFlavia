@@ -157,6 +157,7 @@ describe('BirthChartFacadeService', () => {
         ...payload,
       }),
     ),
+    findOne: jest.fn().mockResolvedValue(null),
   };
 
   const inputDto = {
