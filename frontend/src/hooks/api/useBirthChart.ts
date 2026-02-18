@@ -192,7 +192,7 @@ export function useCanGenerateChart() {
     // Si no hay datos de usage (query en progreso o error), permitir intentar generar.
     // El backend rechazará si realmente se excede el límite via CheckUsageLimitGuard.
     // Esto previene bloquear el formulario si el endpoint de usage falla.
-    canGenerate: usage ? usage.remaining > 0 : true,
+    canGenerate: usage ? usage.canGenerate : true,
     remaining: usage?.remaining ?? 0,
     limit: usage?.limit ?? 0,
     isLoading,
