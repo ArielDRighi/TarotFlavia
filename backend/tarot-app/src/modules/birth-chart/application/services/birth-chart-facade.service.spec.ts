@@ -307,9 +307,11 @@ describe('BirthChartFacadeService', () => {
       UsageFeature.BIRTH_CHART,
       'monthly',
     );
-    expect(result.limit).toBe(5);
+    expect(result.limit).toBe(-1);
     expect(result.used).toBe(2);
-    expect(result.remaining).toBe(3);
+    expect(result.remaining).toBe(-1);
+    expect(result.canGenerate).toBe(true);
+    expect(result.resetsAt).toBeNull();
   });
 
   it('should return usage status for anonymous user with available access', async () => {

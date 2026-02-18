@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { UsageLimitsService } from '../../../usage-limits/usage-limits.service';
 import { AnonymousTrackingService } from '../../../usage-limits/services/anonymous-tracking.service';
 import { UsageFeature } from '../../../usage-limits/entities/usage-limit.entity';
+import { USAGE_LIMITS } from '../../../usage-limits/usage-limits.constants';
 import { UserPlan } from '../../../users/entities/user.entity';
 import { BirthChart, ChartData } from '../../entities/birth-chart.entity';
 import {
@@ -208,8 +209,8 @@ export class BirthChartFacadeService {
       };
     }
 
-    const planLimit =
-      user.plan === UserPlan.PREMIUM ? 5 : user.plan === UserPlan.FREE ? 3 : 1;
+    const planLimit = USAGE_LIMITS[user.plan]?.[UsageFeature.BIRTH_CHART] ?? 1;
+    const isUnlimited = planLimit === -1;
 
     try {
       const monthlyUsage = await this.usageLimitsService.getUsageByPeriod(
@@ -218,8 +219,10 @@ export class BirthChartFacadeService {
         'monthly',
       );
 
-      const remaining = Math.max(0, planLimit - monthlyUsage);
-      const resetsAt = this.getNextMonthStartIso();
+      const remaining = isUnlimited
+        ? -1
+        : Math.max(0, planLimit - monthlyUsage);
+      const resetsAt = isUnlimited ? null : this.getNextMonthStartIso();
 
       return {
         plan: user.plan,
@@ -227,7 +230,7 @@ export class BirthChartFacadeService {
         limit: planLimit,
         remaining,
         resetsAt,
-        canGenerate: remaining > 0,
+        canGenerate: isUnlimited || remaining > 0,
       };
     } catch (error) {
       // Fallback en caso de error al obtener uso (ej: enum value no existe en DB)
@@ -237,14 +240,12 @@ export class BirthChartFacadeService {
         `Error getting usage for user ${user.userId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
 
-      const resetsAt = this.getNextMonthStartIso();
-
       return {
         plan: user.plan,
         used: 0,
         limit: planLimit,
-        remaining: planLimit,
-        resetsAt,
+        remaining: isUnlimited ? -1 : planLimit,
+        resetsAt: isUnlimited ? null : this.getNextMonthStartIso(),
         canGenerate: true,
       };
     }
