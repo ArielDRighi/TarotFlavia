@@ -228,6 +228,12 @@ export class CheckUsageLimitGuard implements CanActivate {
 
     this.logger.debug(`User plan: ${plan}, limit: ${limit}`);
 
+    // Unlimited access (limit === -1)
+    if (limit === -1) {
+      this.logger.debug('UNLIMITED ACCESS - ALLOWING');
+      return true;
+    }
+
     // Get this month's usage from centralized usage tracking
     const chartsCount = await this.usageLimitsService.getUsageByPeriod(
       userId,

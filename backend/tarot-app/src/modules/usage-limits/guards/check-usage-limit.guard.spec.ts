@@ -1149,10 +1149,10 @@ describe('CheckUsageLimitGuard', () => {
           jest.restoreAllMocks();
         });
 
-        it('PREMIUM: should allow birth chart generation when under monthly limit (4/5)', async () => {
+        it('PREMIUM: should allow birth chart generation with unlimited limit (-1)', async () => {
           const userId = 2;
 
-          const mockGetUsageByPeriod = jest.fn().mockResolvedValue(4);
+          const mockGetUsageByPeriod = jest.fn().mockResolvedValue(100); // Even if 100 charts generated
 
           const module: TestingModule = await Test.createTestingModule({
             providers: [
@@ -1210,18 +1210,15 @@ describe('CheckUsageLimitGuard', () => {
           const result = await testGuard.canActivate(context);
 
           expect(result).toBe(true);
-          expect(mockGetUsageByPeriod).toHaveBeenCalledWith(
-            userId,
-            UsageFeature.BIRTH_CHART,
-            'monthly',
-          );
+          // For unlimited (-1), getUsageByPeriod should NOT be called because we check limit first
+          expect(mockGetUsageByPeriod).not.toHaveBeenCalled();
           jest.restoreAllMocks();
         });
 
-        it('PREMIUM: should block birth chart generation when monthly limit reached (5/5)', async () => {
+        it('PREMIUM: should allow birth chart generation even when many charts exist (unlimited plan)', async () => {
           const userId = 2;
 
-          const mockGetUsageByPeriod = jest.fn().mockResolvedValue(5);
+          const mockGetUsageByPeriod = jest.fn().mockResolvedValue(1000); // Many charts generated
 
           const module: TestingModule = await Test.createTestingModule({
             providers: [
@@ -1277,18 +1274,11 @@ describe('CheckUsageLimitGuard', () => {
 
           const context = mockExecutionContext(userId);
 
-          await expect(testGuard.canActivate(context)).rejects.toThrow(
-            ForbiddenException,
-          );
-          await expect(testGuard.canActivate(context)).rejects.toThrow(
-            'Has alcanzado tu límite mensual de cartas astrales (5 por mes para plan premium). Tu cuota se restablecerá el próximo mes.',
-          );
+          const result = await testGuard.canActivate(context);
 
-          expect(mockGetUsageByPeriod).toHaveBeenCalledWith(
-            userId,
-            UsageFeature.BIRTH_CHART,
-            'monthly',
-          );
+          expect(result).toBe(true);
+          // For unlimited (-1), getUsageByPeriod should NOT be called
+          expect(mockGetUsageByPeriod).not.toHaveBeenCalled();
 
           jest.restoreAllMocks();
         });
