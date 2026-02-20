@@ -761,17 +761,18 @@ export class ChartPdfService {
     const cellSize = 38;
     const headerSize = 30;
     const gridX = MARGIN + headerSize;
-    const gridY = y;
+    const gridY = y + 20;
 
     for (let col = 0; col < n; col++) {
       const meta = PlanetMetadata[planetOrder[col]];
       doc
-        .fontSize(11)
+        .fontSize(10)
         .font('MainFont')
         .fillColor(COLORS.accentViolet)
-        .text(meta?.symbol || '', gridX + col * cellSize + 2, gridY - 18, {
+        .text(meta?.symbol || '', gridX + col * cellSize + 2, gridY - 16, {
           width: cellSize - 4,
           align: 'center',
+          lineBreak: false,
         });
     }
 
@@ -846,9 +847,8 @@ export class ChartPdfService {
       }
     }
 
-    y = gridY + n * cellSize + 15;
+    y = gridY + n * cellSize + 20;
 
-    doc.fontSize(8).font('MainFont').fillColor(COLORS.textSecondary);
     const legendItems = [
       {
         symbol: '\u260C',
@@ -875,15 +875,17 @@ export class ChartPdfService {
 
     let lx = MARGIN;
     for (const item of legendItems) {
-      doc.fillColor(item.color).text(item.symbol, lx, y, { continued: true });
       doc
+        .fontSize(10)
+        .font('MainFont')
+        .fillColor(item.color)
+        .text(item.symbol, lx, y, { lineBreak: false });
+      doc
+        .fontSize(8)
+        .font('MainFont')
         .fillColor(COLORS.textSecondary)
-        .text(` ${item.name}`, { continued: false });
-      lx += 90;
-      if (lx > doc.page.width - MARGIN - 80) {
-        lx = MARGIN;
-        y += 14;
-      }
+        .text(item.name, lx + 14, y + 1, { lineBreak: false });
+      lx += 95;
     }
 
     y += 25;
