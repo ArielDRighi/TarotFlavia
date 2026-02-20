@@ -240,8 +240,8 @@ describe('ChartPdfService', () => {
 
       const result = await service.generatePDF(input);
 
-      // El PDF debe tener al menos 3 páginas: Portada + Big Three + Planetas
-      expect(result.pageCount).toBeGreaterThanOrEqual(3);
+      // Portada + Posiciones + Aspectario + Big Three (3) + Planetas + Disclaimer = 8+
+      expect(result.pageCount).toBeGreaterThanOrEqual(8);
     });
 
     it('should not include AI synthesis section for Free users', async () => {
@@ -569,8 +569,8 @@ describe('ChartPdfService', () => {
 
       const result = await service.generatePDF(input);
 
-      // Mínimo: Portada + Big Three + Planetas + Disclaimer
-      expect(result.pageCount).toBeGreaterThanOrEqual(4);
+      // Mínimo: Portada + Posiciones + Aspectario + Big Three (3) + Planetas + Disclaimer
+      expect(result.pageCount).toBeGreaterThanOrEqual(8);
     });
 
     it('should include disclaimer page at the end', async () => {
@@ -717,6 +717,134 @@ describe('ChartPdfService', () => {
 
       expect(result).toBeDefined();
       expect(result.buffer).toBeInstanceOf(Buffer);
+    });
+
+    it('should handle empty houses array', async () => {
+      const input = {
+        chartData: { ...mockChartData, houses: [] },
+        interpretation: mockInterpretation,
+        userName: 'Test User',
+        birthDate: new Date('1990-05-15'),
+        birthTime: '14:30:00',
+        birthPlace: 'Buenos Aires, Argentina',
+        generatedAt: new Date(),
+        isPremium: false,
+      };
+
+      const result = await service.generatePDF(input);
+
+      expect(result).toBeDefined();
+      expect(result.buffer).toBeInstanceOf(Buffer);
+    });
+
+    it('should handle zero polarity values', async () => {
+      const input = {
+        chartData: {
+          ...mockChartData,
+          distribution: {
+            ...mockChartData.distribution,
+            polarity: { masculine: 0, feminine: 0 },
+          },
+        },
+        interpretation: mockInterpretation,
+        userName: 'Test User',
+        birthDate: new Date('1990-05-15'),
+        birthTime: '14:30:00',
+        birthPlace: 'Buenos Aires, Argentina',
+        generatedAt: new Date(),
+        isPremium: false,
+      };
+
+      const result = await service.generatePDF(input);
+
+      expect(result).toBeDefined();
+      expect(result.buffer).toBeInstanceOf(Buffer);
+    });
+
+    it('should generate aspect grid page even with many aspects', async () => {
+      const manyAspects = [
+        {
+          planet1: Planet.SUN,
+          planet2: Planet.MOON,
+          aspectType: AspectType.TRINE,
+          angle: 120,
+          orb: 0.2,
+          isApplying: true,
+        },
+        {
+          planet1: Planet.MERCURY,
+          planet2: Planet.VENUS,
+          aspectType: AspectType.CONJUNCTION,
+          angle: 0,
+          orb: 1.5,
+          isApplying: false,
+        },
+        {
+          planet1: Planet.MARS,
+          planet2: Planet.SATURN,
+          aspectType: AspectType.SQUARE,
+          angle: 90,
+          orb: 2.0,
+          isApplying: true,
+        },
+      ];
+
+      const input = {
+        chartData: { ...mockChartData, aspects: manyAspects },
+        interpretation: {
+          ...mockInterpretation,
+          aspectSummary: {
+            total: 3,
+            harmonious: 1,
+            challenging: 1,
+            strongest: {
+              planet1: 'sun',
+              planet2: 'moon',
+              aspectType: AspectType.TRINE,
+              aspectName: 'Trígono',
+              aspectSymbol: '△',
+              orb: 0.2,
+            },
+          },
+        },
+        userName: 'Test User',
+        birthDate: new Date('1990-05-15'),
+        birthTime: '14:30:00',
+        birthPlace: 'Buenos Aires, Argentina',
+        generatedAt: new Date(),
+        isPremium: false,
+      };
+
+      const result = await service.generatePDF(input);
+
+      expect(result).toBeDefined();
+      expect(result.buffer).toBeInstanceOf(Buffer);
+      // Aspect grid page is always generated
+      expect(result.pageCount).toBeGreaterThanOrEqual(8);
+    });
+
+    it('should include premium synthesis page increasing page count', async () => {
+      const freeInput = {
+        chartData: mockChartData,
+        interpretation: mockInterpretation,
+        userName: 'Test User',
+        birthDate: new Date('1990-05-15'),
+        birthTime: '14:30:00',
+        birthPlace: 'Buenos Aires, Argentina',
+        generatedAt: new Date(),
+        isPremium: false,
+      };
+
+      const premiumInput = {
+        ...freeInput,
+        isPremium: true,
+        aiSynthesis: 'Síntesis IA para premium.',
+      };
+
+      const freeResult = await service.generatePDF(freeInput);
+      const premiumResult = await service.generatePDF(premiumInput);
+
+      expect(premiumResult.pageCount).toBe(freeResult.pageCount + 1);
     });
   });
 });
