@@ -518,7 +518,7 @@ export class ChartPdfService {
         `Generado por Auguria el ${generatedAt.toLocaleDateString('es-ES')}`,
         MARGIN,
         h - 60,
-        { align: 'center' },
+        { align: 'center', lineBreak: false },
       );
   }
 
