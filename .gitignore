@@ -161,3 +161,14 @@ docker/postgres/data/
 docker-compose.override.yml
 
 .playwright-mcp/
+
+# =============================================================================
+# Artefactos de debugging — no commitear sesiones de análisis temporales
+# =============================================================================
+BUGS_*.md
+PLAN_TESTING_*.md
+RESUMEN_*.md
+TASK-*-REMEDIATION.md
+INDICE_TESTING*.txt
+*bug-report.png
+*bug-report.jpg
