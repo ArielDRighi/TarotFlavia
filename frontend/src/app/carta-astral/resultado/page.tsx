@@ -9,15 +9,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  Download,
-  Share2,
-  ArrowLeft,
-  Star,
-  Sparkles,
-  Crown,
-  RefreshCw,
-} from 'lucide-react';
+import { Download, Share2, ArrowLeft, Star, Sparkles, Crown, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 
 // Store y hooks

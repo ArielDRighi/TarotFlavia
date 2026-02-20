@@ -660,38 +660,21 @@ describe('BirthChartResultPage', () => {
       expect(screen.getByText('Interpretaciones')).toBeInTheDocument();
     });
 
-    it('should render first 3 planet interpretations by default', () => {
+    it('should render all planet interpretations without pagination', () => {
       render(<BirthChartResultPage />);
 
+      // Todos los planetas visibles directamente, sin necesidad de expandir
       expect(screen.getByTestId('planet-interpretation-sun')).toBeInTheDocument();
       expect(screen.getByTestId('planet-interpretation-moon')).toBeInTheDocument();
       expect(screen.getByTestId('planet-interpretation-mercury')).toBeInTheDocument();
-    });
-
-    it('should show "Mostrar todos" button when there are more than 3 planets', () => {
-      render(<BirthChartResultPage />);
-
-      expect(screen.getByRole('button', { name: /mostrar todos/i })).toBeInTheDocument();
-    });
-
-    it('should show all planet interpretations when "Mostrar todos" is clicked', async () => {
-      const user = userEvent.setup();
-      render(<BirthChartResultPage />);
-
-      const showAllButton = screen.getByRole('button', { name: /mostrar todos/i });
-      await user.click(showAllButton);
-
       expect(screen.getByTestId('planet-interpretation-venus')).toBeInTheDocument();
     });
 
-    it('should change button text to "Mostrar menos" when expanded', async () => {
-      const user = userEvent.setup();
+    it('should NOT show "Mostrar todos" toggle button', () => {
       render(<BirthChartResultPage />);
 
-      const showAllButton = screen.getByRole('button', { name: /mostrar todos/i });
-      await user.click(showAllButton);
-
-      expect(screen.getByRole('button', { name: /mostrar menos/i })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /mostrar todos/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /mostrar menos/i })).not.toBeInTheDocument();
     });
   });
 
