@@ -486,50 +486,32 @@ export class BirthChartFacadeService {
     const birthDate = new Date(dto.birthDate);
     const birthTime = this.normalizeBirthTime(dto.birthTime);
 
-    // Check for existing chart with same parameters (upsert to avoid duplicate key error)
-    const existing = await this.chartRepo.findOne({
-      where: {
+    // Upsert atómico basado en el unique index (idx_birth_chart_user_birth).
+    // Evita race condition del patrón findOne+save: dos requests concurrentes
+    // con los mismos datos de nacimiento van a converger en un solo registro.
+    // Nota: se usa el id devuelto por upsert para el findOneOrFail ya que las
+    // coordenadas con precisión >6 decimales se redondean al almacenar en
+    // DECIMAL(10,6), lo que hace que la búsqueda por lat/lon exact falle.
+    const result = await this.chartRepo.upsert(
+      {
         userId,
+        name: dto.name,
         birthDate,
         birthTime,
+        birthPlace: dto.birthPlace,
         latitude: dto.latitude,
         longitude: dto.longitude,
+        timezone: dto.timezone,
+        chartData: { ...chartData, aiSynthesis },
+        sunSign: this.findPlanetSign(chartData, Planet.SUN),
+        moonSign: this.findPlanetSign(chartData, Planet.MOON),
+        ascendantSign: chartData.ascendant.sign as ZodiacSign,
       },
-    });
+      ['userId', 'birthDate', 'birthTime', 'latitude', 'longitude'],
+    );
 
-    if (existing) {
-      this.logger.debug(
-        `Updating existing birth chart id=${existing.id} for userId=${userId}`,
-      );
-      existing.name = dto.name;
-      existing.birthPlace = dto.birthPlace;
-      existing.timezone = dto.timezone;
-      existing.chartData = { ...chartData, aiSynthesis };
-      existing.sunSign = this.findPlanetSign(chartData, Planet.SUN);
-      existing.moonSign = this.findPlanetSign(chartData, Planet.MOON);
-      existing.ascendantSign = chartData.ascendant.sign as ZodiacSign;
-      return this.chartRepo.save(existing);
-    }
-
-    const chart = this.chartRepo.create({
-      userId,
-      name: dto.name,
-      birthDate,
-      birthTime,
-      birthPlace: dto.birthPlace,
-      latitude: dto.latitude,
-      longitude: dto.longitude,
-      timezone: dto.timezone,
-      chartData: {
-        ...chartData,
-        aiSynthesis,
-      },
-      sunSign: this.findPlanetSign(chartData, Planet.SUN),
-      moonSign: this.findPlanetSign(chartData, Planet.MOON),
-      ascendantSign: chartData.ascendant.sign,
-    });
-
-    return this.chartRepo.save(chart);
+    const savedId = result.identifiers[0]?.id as number;
+    return this.chartRepo.findOneOrFail({ where: { id: savedId } });
   }
 
   private findPlanetSign(chartData: ChartData, planet: Planet): ZodiacSign {
