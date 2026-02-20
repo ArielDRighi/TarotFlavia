@@ -1,7 +1,8 @@
 /**
  * Tests para PlaceAutocomplete Component
  *
- * Tests para el componente de autocompletado de lugares con geocoding
+ * Tests para el componente de autocompletado de lugares con geocoding.
+ * Cubre: rendering, búsqueda, selección con mouse, navegación por teclado y ARIA.
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -82,7 +83,6 @@ describe('PlaceAutocomplete', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    // Default mock - idle state
     mockUseGeocodeSearch.mockReturnValue(createMockQueryResult());
   });
 
@@ -134,7 +134,6 @@ describe('PlaceAutocomplete', () => {
         wrapper: createWrapper(),
       });
 
-      // Verificar que existe un ícono de búsqueda (Search icon)
       const searchIcon = container.querySelector('svg');
       expect(searchIcon).toBeInTheDocument();
     });
@@ -159,7 +158,6 @@ describe('PlaceAutocomplete', () => {
       const input = screen.getByPlaceholderText('Ej: Buenos Aires, Argentina');
       await user.type(input, 'AB');
 
-      // El hook no debería ser llamado para búsquedas cortas
       expect(mockUseGeocodeSearch).toHaveBeenCalled();
     });
 
@@ -179,7 +177,6 @@ describe('PlaceAutocomplete', () => {
       const input = screen.getByPlaceholderText('Ej: Buenos Aires, Argentina');
       await user.type(input, 'Buenos');
 
-      // El hook debería ser llamado con el query
       expect(mockUseGeocodeSearch).toHaveBeenCalled();
     });
 
@@ -200,7 +197,6 @@ describe('PlaceAutocomplete', () => {
       const input = screen.getByPlaceholderText('Ej: Buenos Aires, Argentina');
       await user.type(input, 'Buenos');
 
-      // Wait for debounce and popover to open
       await waitFor(
         () => {
           expect(screen.getByText('Buscando lugares...')).toBeInTheDocument();
@@ -225,13 +221,10 @@ describe('PlaceAutocomplete', () => {
       const input = screen.getByPlaceholderText('Ej: Buenos Aires, Argentina');
       await user.type(input, 'Buenos');
 
-      // Wait for debounce and popover content
       await waitFor(
         () => {
-          const buenosAires = screen.getByText('Buenos Aires');
-          const madrid = screen.getByText('Madrid');
-          expect(buenosAires).toBeInTheDocument();
-          expect(madrid).toBeInTheDocument();
+          expect(screen.getByText('Buenos Aires')).toBeInTheDocument();
+          expect(screen.getByText('Madrid')).toBeInTheDocument();
         },
         { timeout: 2000 }
       );
@@ -253,7 +246,6 @@ describe('PlaceAutocomplete', () => {
       const input = screen.getByPlaceholderText('Ej: Buenos Aires, Argentina');
       await user.type(input, 'XYZ12345');
 
-      // Wait for debounce and empty message
       await waitFor(
         () => {
           expect(screen.getByText('No se encontraron lugares.')).toBeInTheDocument();
@@ -280,7 +272,6 @@ describe('PlaceAutocomplete', () => {
       const input = screen.getByPlaceholderText('Ej: Buenos Aires, Argentina');
       await user.type(input, 'Buenos');
 
-      // Wait for results to appear
       await waitFor(
         () => {
           expect(screen.getByText(/Buenos Aires/)).toBeInTheDocument();
@@ -310,7 +301,6 @@ describe('PlaceAutocomplete', () => {
       const input = screen.getByPlaceholderText('Ej: Buenos Aires, Argentina') as HTMLInputElement;
       await user.type(input, 'Buenos');
 
-      // Wait for results
       await waitFor(
         () => {
           expect(screen.getByText(/Buenos Aires/)).toBeInTheDocument();
@@ -321,7 +311,6 @@ describe('PlaceAutocomplete', () => {
       const buenosAiresOption = screen.getByText(/Buenos Aires/);
       await user.click(buenosAiresOption);
 
-      // Simular que el padre actualiza el prop value (componente controlado)
       rerender(<PlaceAutocomplete value={mockPlace} onChange={mockOnChange} />);
 
       await waitFor(() => {
@@ -348,6 +337,169 @@ describe('PlaceAutocomplete', () => {
       await user.click(clearButton);
 
       expect(mockOnChange).toHaveBeenCalledWith(null);
+    });
+  });
+
+  describe('Keyboard navigation', () => {
+    it('should navigate to first option with ArrowDown', async () => {
+      const user = userEvent.setup();
+      mockUseGeocodeSearch.mockReturnValue(
+        createMockQueryResult({
+          data: { results: mockPlaces, count: 2 },
+          isSuccess: true,
+        })
+      );
+
+      render(<PlaceAutocomplete value={null} onChange={mockOnChange} />, {
+        wrapper: createWrapper(),
+      });
+
+      const input = screen.getByPlaceholderText('Ej: Buenos Aires, Argentina');
+      await user.type(input, 'Buenos');
+
+      await waitFor(
+        () => {
+          expect(screen.getByText('Buenos Aires')).toBeInTheDocument();
+        },
+        { timeout: 2000 }
+      );
+
+      await user.keyboard('{ArrowDown}');
+
+      // El primer ítem debe tener aria-selected=true
+      const options = screen.getAllByRole('option');
+      expect(options[0]).toHaveAttribute('aria-selected', 'true');
+    });
+
+    it('should navigate between options with ArrowDown/ArrowUp', async () => {
+      const user = userEvent.setup();
+      mockUseGeocodeSearch.mockReturnValue(
+        createMockQueryResult({
+          data: { results: mockPlaces, count: 2 },
+          isSuccess: true,
+        })
+      );
+
+      render(<PlaceAutocomplete value={null} onChange={mockOnChange} />, {
+        wrapper: createWrapper(),
+      });
+
+      const input = screen.getByPlaceholderText('Ej: Buenos Aires, Argentina');
+      await user.type(input, 'Buenos');
+
+      await waitFor(
+        () => {
+          expect(screen.getByText('Buenos Aires')).toBeInTheDocument();
+        },
+        { timeout: 2000 }
+      );
+
+      // ArrowDown → primer ítem activo
+      await user.keyboard('{ArrowDown}');
+      const options = screen.getAllByRole('option');
+      expect(options[0]).toHaveAttribute('aria-selected', 'true');
+      expect(options[1]).toHaveAttribute('aria-selected', 'false');
+
+      // ArrowDown → segundo ítem activo
+      await user.keyboard('{ArrowDown}');
+      expect(options[0]).toHaveAttribute('aria-selected', 'false');
+      expect(options[1]).toHaveAttribute('aria-selected', 'true');
+
+      // ArrowUp → vuelve al primer ítem
+      await user.keyboard('{ArrowUp}');
+      expect(options[0]).toHaveAttribute('aria-selected', 'true');
+      expect(options[1]).toHaveAttribute('aria-selected', 'false');
+    });
+
+    it('should select option with Enter key', async () => {
+      const user = userEvent.setup();
+      mockUseGeocodeSearch.mockReturnValue(
+        createMockQueryResult({
+          data: { results: mockPlaces, count: 2 },
+          isSuccess: true,
+        })
+      );
+
+      render(<PlaceAutocomplete value={null} onChange={mockOnChange} />, {
+        wrapper: createWrapper(),
+      });
+
+      const input = screen.getByPlaceholderText('Ej: Buenos Aires, Argentina');
+      await user.type(input, 'Buenos');
+
+      await waitFor(
+        () => {
+          expect(screen.getByText('Buenos Aires')).toBeInTheDocument();
+        },
+        { timeout: 2000 }
+      );
+
+      // Navegar al primer ítem y seleccionar con Enter
+      await user.keyboard('{ArrowDown}');
+      await user.keyboard('{Enter}');
+
+      expect(mockOnChange).toHaveBeenCalledWith(mockPlace);
+    });
+
+    it('should close popover with Escape key', async () => {
+      const user = userEvent.setup();
+      mockUseGeocodeSearch.mockReturnValue(
+        createMockQueryResult({
+          data: { results: mockPlaces, count: 2 },
+          isSuccess: true,
+        })
+      );
+
+      render(<PlaceAutocomplete value={null} onChange={mockOnChange} />, {
+        wrapper: createWrapper(),
+      });
+
+      const input = screen.getByPlaceholderText('Ej: Buenos Aires, Argentina');
+      await user.type(input, 'Buenos');
+
+      await waitFor(
+        () => {
+          expect(screen.getByText('Buenos Aires')).toBeInTheDocument();
+        },
+        { timeout: 2000 }
+      );
+
+      await user.keyboard('{Escape}');
+
+      await waitFor(() => {
+        expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+      });
+    });
+
+    it('should update aria-activedescendant when navigating', async () => {
+      const user = userEvent.setup();
+      mockUseGeocodeSearch.mockReturnValue(
+        createMockQueryResult({
+          data: { results: mockPlaces, count: 2 },
+          isSuccess: true,
+        })
+      );
+
+      render(<PlaceAutocomplete value={null} onChange={mockOnChange} id="birth-place" />, {
+        wrapper: createWrapper(),
+      });
+
+      const input = screen.getByPlaceholderText('Ej: Buenos Aires, Argentina');
+      await user.type(input, 'Buenos');
+
+      await waitFor(
+        () => {
+          expect(screen.getByText('Buenos Aires')).toBeInTheDocument();
+        },
+        { timeout: 2000 }
+      );
+
+      // Sin navegación: aria-activedescendant no debe estar presente
+      expect(input).not.toHaveAttribute('aria-activedescendant');
+
+      // Después de ArrowDown: debe apuntar al primer ítem
+      await user.keyboard('{ArrowDown}');
+      expect(input).toHaveAttribute('aria-activedescendant', 'birth-place-option-0');
     });
   });
 
@@ -403,19 +555,46 @@ describe('PlaceAutocomplete', () => {
       const input = screen.getByPlaceholderText('Ej: Buenos Aires, Argentina');
       expect(input).toHaveAttribute('aria-invalid', 'true');
     });
+
+    it('should mark error message as alert role', () => {
+      render(<PlaceAutocomplete value={null} onChange={mockOnChange} error="Campo requerido" />, {
+        wrapper: createWrapper(),
+      });
+
+      const errorEl = screen.getByRole('alert');
+      expect(errorEl).toHaveTextContent('Campo requerido');
+    });
   });
 
-  describe('Accessibility', () => {
-    it('should have proper aria labels', () => {
-      render(<PlaceAutocomplete value={null} onChange={mockOnChange} id="birth-place" />, {
+  describe('Accessibility (ARIA)', () => {
+    it('should have role=combobox on input', () => {
+      render(<PlaceAutocomplete value={null} onChange={mockOnChange} />, {
         wrapper: createWrapper(),
       });
 
       const input = screen.getByPlaceholderText('Ej: Buenos Aires, Argentina');
-      expect(input).toHaveAttribute('id', 'birth-place');
+      expect(input).toHaveAttribute('role', 'combobox');
     });
 
-    it('should associate error message with input via aria-describedby', () => {
+    it('should have aria-expanded=false when popover is closed', () => {
+      render(<PlaceAutocomplete value={null} onChange={mockOnChange} />, {
+        wrapper: createWrapper(),
+      });
+
+      const input = screen.getByPlaceholderText('Ej: Buenos Aires, Argentina');
+      expect(input).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('should have aria-haspopup=listbox on input', () => {
+      render(<PlaceAutocomplete value={null} onChange={mockOnChange} />, {
+        wrapper: createWrapper(),
+      });
+
+      const input = screen.getByPlaceholderText('Ej: Buenos Aires, Argentina');
+      expect(input).toHaveAttribute('aria-haspopup', 'listbox');
+    });
+
+    it('should have proper id and aria-describedby for error', () => {
       render(
         <PlaceAutocomplete
           value={null}
@@ -427,7 +606,57 @@ describe('PlaceAutocomplete', () => {
       );
 
       const input = screen.getByPlaceholderText('Ej: Buenos Aires, Argentina');
+      expect(input).toHaveAttribute('id', 'birth-place');
       expect(input).toHaveAttribute('aria-describedby', 'birth-place-error');
+    });
+
+    it('should render listbox with role=listbox when results are shown', async () => {
+      const user = userEvent.setup();
+      mockUseGeocodeSearch.mockReturnValue(
+        createMockQueryResult({
+          data: { results: mockPlaces, count: 2 },
+          isSuccess: true,
+        })
+      );
+
+      render(<PlaceAutocomplete value={null} onChange={mockOnChange} />, {
+        wrapper: createWrapper(),
+      });
+
+      const input = screen.getByPlaceholderText('Ej: Buenos Aires, Argentina');
+      await user.type(input, 'Buenos');
+
+      await waitFor(
+        () => {
+          expect(screen.getByRole('listbox')).toBeInTheDocument();
+        },
+        { timeout: 2000 }
+      );
+    });
+
+    it('should render options with role=option', async () => {
+      const user = userEvent.setup();
+      mockUseGeocodeSearch.mockReturnValue(
+        createMockQueryResult({
+          data: { results: mockPlaces, count: 2 },
+          isSuccess: true,
+        })
+      );
+
+      render(<PlaceAutocomplete value={null} onChange={mockOnChange} />, {
+        wrapper: createWrapper(),
+      });
+
+      const input = screen.getByPlaceholderText('Ej: Buenos Aires, Argentina');
+      await user.type(input, 'Buenos');
+
+      await waitFor(
+        () => {
+          const options = screen.getAllByRole('option');
+          expect(options).toHaveLength(2);
+        },
+        { timeout: 2000 }
+      );
     });
 
     it('should have clear button with proper aria-label', () => {

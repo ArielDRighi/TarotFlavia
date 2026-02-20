@@ -147,16 +147,21 @@ describe('BirthChartFacadeService', () => {
     canAccessLifetime: jest.fn().mockResolvedValue(true),
   };
 
+  const savedChart: Partial<BirthChart> = { id: 77 };
+
   const chartRepositoryMock = {
     create: jest
       .fn()
       .mockImplementation((payload: Partial<BirthChart>) => payload),
-    save: jest.fn().mockImplementation((payload: Partial<BirthChart>) =>
-      Promise.resolve({
-        id: 77,
-        ...payload,
-      }),
-    ),
+    save: jest
+      .fn()
+      .mockImplementation((payload: Partial<BirthChart>) =>
+        Promise.resolve({ id: 77, ...payload }),
+      ),
+    // upsert: operación atómica INSERT ... ON CONFLICT DO UPDATE
+    upsert: jest.fn().mockResolvedValue({ identifiers: [{ id: 77 }] }),
+    // findOneOrFail: recupera el chart persistido después del upsert
+    findOneOrFail: jest.fn().mockResolvedValue(savedChart),
   };
 
   const inputDto = {
@@ -255,8 +260,8 @@ describe('BirthChartFacadeService', () => {
 
     expect(aiSynthesisServiceMock.generateSynthesis).not.toHaveBeenCalled();
     expect(cacheServiceMock.setSynthesis).not.toHaveBeenCalled();
-    expect(chartRepositoryMock.create).toHaveBeenCalled();
-    expect(chartRepositoryMock.save).toHaveBeenCalled();
+    expect(chartRepositoryMock.upsert).toHaveBeenCalled();
+    expect(chartRepositoryMock.findOneOrFail).toHaveBeenCalled();
     expect('aiSynthesis' in result && result.aiSynthesis.content).toBe(
       'síntesis cacheada',
     );
@@ -278,6 +283,30 @@ describe('BirthChartFacadeService', () => {
       'llama-3.1',
     );
     expect('savedChartId' in result && result.savedChartId).toBe(77);
+  });
+
+  it('should use atomic upsert with conflict columns matching unique index', async () => {
+    cacheServiceMock.getInterpretation.mockResolvedValueOnce(
+      fullInterpretation,
+    );
+    cacheServiceMock.getSynthesis.mockResolvedValueOnce(null);
+
+    await service.generateChart(inputDto, UserPlan.PREMIUM, 5);
+
+    // Verificar que upsert fue llamado con las columnas del unique index
+    expect(chartRepositoryMock.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: 5,
+        name: inputDto.name,
+        birthPlace: inputDto.birthPlace,
+      }),
+      ['userId', 'birthDate', 'birthTime', 'latitude', 'longitude'],
+    );
+    // Verificar que findOneOrFail recupera el registro por id devuelto por upsert
+    // (no por lat/lon, ya que DECIMAL(10,6) puede redondear coordenadas de alta precisión)
+    expect(chartRepositoryMock.findOneOrFail).toHaveBeenCalledWith({
+      where: { id: 77 },
+    });
   });
 
   it('should return usage status for authenticated free user', async () => {
@@ -307,9 +336,11 @@ describe('BirthChartFacadeService', () => {
       UsageFeature.BIRTH_CHART,
       'monthly',
     );
-    expect(result.limit).toBe(5);
+    expect(result.limit).toBe(-1);
     expect(result.used).toBe(2);
-    expect(result.remaining).toBe(3);
+    expect(result.remaining).toBe(-1);
+    expect(result.canGenerate).toBe(true);
+    expect(result.resetsAt).toBeNull();
   });
 
   it('should return usage status for anonymous user with available access', async () => {

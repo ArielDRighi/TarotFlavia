@@ -40,16 +40,9 @@ describe('astrochart.utils', () => {
 
       const result = convertPlanetsToAstroChart(planets);
 
-      expect(result).toHaveLength(2);
-      expect(result[0]).toEqual({
-        name: 'Sun',
-        position: 15.5, // Aries (index 0) * 30 + 15.5
-        retrograde: false,
-      });
-      expect(result[1]).toEqual({
-        name: 'Moon',
-        position: 53.75, // Taurus (index 1) * 30 + 23.75
-        retrograde: false,
+      expect(result).toEqual({
+        Sun: [15.5], // Aries (index 0) * 30 + 15.5
+        Moon: [53.75], // Taurus (index 1) * 30 + 23.75
       });
     });
 
@@ -68,7 +61,9 @@ describe('astrochart.utils', () => {
 
       const result = convertPlanetsToAstroChart(planets);
 
-      expect(result[0].retrograde).toBe(true);
+      // Astrochart doesn't use retrograde flag in planets object
+      // It only stores [longitude]
+      expect(result.Mercury).toEqual([70.0]); // Gemini (index 2) * 30 + 10.0 = 70
     });
 
     it('should calculate absolute longitude correctly for different signs', () => {
@@ -87,7 +82,7 @@ describe('astrochart.utils', () => {
       const result = convertPlanetsToAstroChart(planets);
 
       // Pisces is index 11, so: 11 * 30 + 29.99 = 359.99
-      expect(result[0].position).toBeCloseTo(359.99);
+      expect(result.Venus[0]).toBeCloseTo(359.99);
     });
   });
 
@@ -307,8 +302,7 @@ describe('astrochart.utils', () => {
       const result = convertPlanetsToAstroChart(planets);
 
       // Debe usar fallback a Aries (index 0): 0 * 30 + 15.5 = 15.5
-      expect(result[0].position).toBe(15.5);
-      expect(result[0].name).toBe('Sun');
+      expect(result.Sun).toEqual([15.5]);
     });
 
     it('should handle unknown zodiac sign in convertHousesToAstroChart', () => {
@@ -379,11 +373,11 @@ describe('astrochart.utils', () => {
       const result = convertPlanetsToAstroChart(planets);
 
       // Primero: fallback a Aries (0 * 30 + 10 = 10)
-      expect(result[0].position).toBe(10);
+      expect(result.Sun).toEqual([10]);
       // Segundo: Taurus válido (1 * 30 + 20 = 50)
-      expect(result[1].position).toBe(50);
+      expect(result.Moon).toEqual([50]);
       // Tercero: fallback a Aries (0 * 30 + 5 = 5)
-      expect(result[2].position).toBe(5);
+      expect(result.Mercury).toEqual([5]);
     });
   });
 });

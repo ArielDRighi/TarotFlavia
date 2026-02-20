@@ -1,7 +1,20 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx jest:*)"
+      "Bash(npx jest:*)",
+      "mcp__playwright__browser_run_code",
+      "Bash(git restore:*)",
+      "Bash(pkill:*)",
+      "Bash(netstat:*)",
+      "Bash(lsof:*)",
+      "Bash(taskkill:*)",
+      "Bash(kill:*)",
+      "Bash(powershell -Command:*)",
+      "Bash(grep:*)",
+      "Bash(npx eslint:*)",
+      "Bash(git stash pop:*)",
+      "Bash(git show:*)",
+      "Bash(tasklist:*)"
     ]
   }
 }

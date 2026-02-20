@@ -32,7 +32,7 @@ export const USAGE_LIMITS: Record<UserPlan, Record<UsageFeature, number>> = {
     [UsageFeature.INTERPRETATION_REGENERATION]: -1, // Regeneración ilimitada
     [UsageFeature.ORACLE_QUERY]: -1, // Consultas ilimitadas
     [UsageFeature.PENDULUM_QUERY]: 3, // 3 consultas al péndulo/día
-    [UsageFeature.BIRTH_CHART]: 5, // 5 cartas astrales/mes
+    [UsageFeature.BIRTH_CHART]: -1, // Cartas astrales ilimitadas
   },
 } as const;
 

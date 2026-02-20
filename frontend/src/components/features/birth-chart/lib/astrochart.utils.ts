@@ -43,31 +43,35 @@ const ZODIAC_SIGN_ORDER = [
 ];
 
 /**
- * Interfaz para punto planetario en formato astrochart
+ * Tipo para planeta en formato astrochart (objeto con nombres como claves)
+ * Ejemplo: { "Sun": [281], "Moon": [268, 0.5] }
+ * Donde el array es [longitud] o [longitud, declination]
  */
-export interface AstroChartPoint {
-  name: string;
-  position: number;
-  retrograde: boolean;
-}
+export type AstroChartPlanets = Record<string, number[]>;
 
 /**
  * Convierte nuestras posiciones planetarias al formato de astrochart
  *
+ * Astrochart requiere un objeto donde:
+ * - Las claves son nombres de planetas (ej: "Sun", "Moon")
+ * - Los valores son arrays [longitud] o [longitud, declination]
+ *
  * @param planets - Array de posiciones planetarias del backend
- * @returns Array de puntos en formato astrochart
+ * @returns Objeto con planetas en formato astrochart
  *
  * @example
  * ```typescript
  * const planets = [
- *   { planet: Planet.SUN, sign: ZodiacSign.ARIES, signDegree: 15.5, ... }
+ *   { planet: Planet.SUN, sign: ZodiacSign.ARIES, signDegree: 15.5, isRetrograde: false }
  * ];
- * const points = convertPlanetsToAstroChart(planets);
- * // [{ name: 'Sun', position: 15.5, retrograde: false }]
+ * const chartPlanets = convertPlanetsToAstroChart(planets);
+ * // { "Sun": [15.5] }
  * ```
  */
-export function convertPlanetsToAstroChart(planets: PlanetPosition[]): AstroChartPoint[] {
-  return planets.map((planet) => {
+export function convertPlanetsToAstroChart(planets: PlanetPosition[]): AstroChartPlanets {
+  const result: AstroChartPlanets = {};
+
+  planets.forEach((planet) => {
     // Calcular longitud absoluta desde signo + grado
     // Cada signo ocupa 30° (12 signos * 30° = 360°)
     const signIndex = ZODIAC_SIGN_ORDER.indexOf(planet.sign);
@@ -75,12 +79,13 @@ export function convertPlanetsToAstroChart(planets: PlanetPosition[]): AstroChar
     const safeSignIndex = signIndex === -1 ? 0 : signIndex;
     const absoluteLongitude = safeSignIndex * 30 + planet.signDegree;
 
-    return {
-      name: PLANET_NAME_MAP[planet.planet] || planet.planet,
-      position: absoluteLongitude,
-      retrograde: planet.isRetrograde,
-    };
+    const planetName = PLANET_NAME_MAP[planet.planet] || planet.planet;
+    // Astrochart espera array [longitud] o [longitud, declination]
+    // Por ahora usamos solo longitud
+    result[planetName] = [absoluteLongitude];
   });
+
+  return result;
 }
 
 /**

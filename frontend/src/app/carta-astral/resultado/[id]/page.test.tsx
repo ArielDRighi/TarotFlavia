@@ -378,32 +378,18 @@ describe('SavedChartPage', () => {
       expect(screen.getByText(/el sol representa tu esencia/i)).toBeInTheDocument();
     });
 
-    it('should show only first 3 planet interpretations by default', () => {
+    it('should show all planet interpretations without pagination', () => {
       render(<SavedChartPage />, { wrapper: createWrapper() });
 
+      // Todos los planetas visibles directamente, sin necesidad de expandir
       expect(screen.getByText(/el sol representa tu esencia/i)).toBeInTheDocument();
       expect(screen.getByText(/la luna representa tus emociones/i)).toBeInTheDocument();
       expect(screen.getByText(/mercurio representa tu comunicación/i)).toBeInTheDocument();
+      expect(screen.getByText(/venus representa el amor/i)).toBeInTheDocument();
 
-      // Venus should NOT be visible (4th planet)
-      expect(screen.queryByText(/venus representa el amor/i)).not.toBeInTheDocument();
-
-      expect(screen.getByText(/mostrando 3 de 4 planetas/i)).toBeInTheDocument();
-    });
-
-    it('should show all planet interpretations when "Mostrar todos" is clicked', async () => {
-      const user = userEvent.setup();
-      render(<SavedChartPage />, { wrapper: createWrapper() });
-
-      const showAllButton = screen.getByRole('button', { name: /mostrar todos/i });
-      await user.click(showAllButton);
-
-      await waitFor(() => {
-        expect(screen.getByText(/venus representa el amor/i)).toBeInTheDocument();
-      });
-
-      expect(screen.queryByText(/mostrando 3 de 4 planetas/i)).not.toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /mostrar menos/i })).toBeInTheDocument();
+      // Sin texto de paginación ni botones de toggle
+      expect(screen.queryByText(/mostrando 3 de/i)).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /mostrar todos/i })).not.toBeInTheDocument();
     });
   });
 

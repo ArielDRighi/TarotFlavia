@@ -134,20 +134,29 @@ describe('AdminLimitsService', () => {
   });
 
   describe('getBirthChartLimits', () => {
-    it('should return current birth chart limits', async () => {
-      configRepository.findOne.mockResolvedValue({
+    it('should return current birth chart limits driven by DB override', async () => {
+      // Para que el servicio use valores de DB debe cargar limitsOverrides via onModuleInit
+      const dbConfig: SystemConfig = {
         id: 1,
         category: 'usage_limits',
         key: UsageFeature.BIRTH_CHART,
         value: JSON.stringify({
+          [UserPlan.ANONYMOUS]: 1,
           [UserPlan.FREE]: 3,
-          [UserPlan.PREMIUM]: 5,
+          [UserPlan.PREMIUM]: 5, // Override DB: 5 (distinto del constant -1)
         }),
         description: null,
         updatedBy: 'admin@auguria.com',
         createdAt: new Date('2026-02-06T12:00:00Z'),
         updatedAt: new Date('2026-02-06T12:00:00Z'),
-      } as SystemConfig);
+      } as SystemConfig;
+
+      // Poblar la caché en memoria simulando carga desde DB
+      configRepository.find.mockResolvedValue([dbConfig]);
+      await service.onModuleInit();
+
+      // Mockear findOne para las llamadas de metadata (updatedAt, updatedBy)
+      configRepository.findOne.mockResolvedValue(dbConfig);
 
       const result = await service.getBirthChartLimits();
 
@@ -157,7 +166,7 @@ describe('AdminLimitsService', () => {
         limits: {
           anonymous: 1,
           free: 3,
-          premium: 5,
+          premium: 5, // El override de DB prevalece sobre el constant (-1)
         },
         updatedAt: expect.any(String),
         updatedBy: 'admin@auguria.com',
@@ -170,7 +179,7 @@ describe('AdminLimitsService', () => {
       const result = await service.getBirthChartLimits();
 
       expect(result.limits.free).toBe(3); // Default from constants
-      expect(result.limits.premium).toBe(5); // Default from constants
+      expect(result.limits.premium).toBe(-1); // Default from constants: premium tiene acceso ilimitado
     });
   });
 

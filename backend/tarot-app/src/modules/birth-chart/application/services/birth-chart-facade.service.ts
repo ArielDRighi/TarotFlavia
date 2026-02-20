@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { UsageLimitsService } from '../../../usage-limits/usage-limits.service';
 import { AnonymousTrackingService } from '../../../usage-limits/services/anonymous-tracking.service';
 import { UsageFeature } from '../../../usage-limits/entities/usage-limit.entity';
+import { USAGE_LIMITS } from '../../../usage-limits/usage-limits.constants';
 import { UserPlan } from '../../../users/entities/user.entity';
 import { BirthChart, ChartData } from '../../entities/birth-chart.entity';
 import {
@@ -208,26 +209,46 @@ export class BirthChartFacadeService {
       };
     }
 
-    const monthlyUsage = await this.usageLimitsService.getUsageByPeriod(
-      user.userId,
-      UsageFeature.BIRTH_CHART,
-      'monthly',
-    );
+    const planLimit = USAGE_LIMITS[user.plan]?.[UsageFeature.BIRTH_CHART] ?? 1;
+    const isUnlimited = planLimit === -1;
 
-    const planLimit =
-      user.plan === UserPlan.PREMIUM ? 5 : user.plan === UserPlan.FREE ? 3 : 1;
+    try {
+      const monthlyUsage = await this.usageLimitsService.getUsageByPeriod(
+        user.userId,
+        UsageFeature.BIRTH_CHART,
+        'monthly',
+      );
 
-    const remaining = Math.max(0, planLimit - monthlyUsage);
-    const resetsAt = this.getNextMonthStartIso();
+      const remaining = isUnlimited
+        ? -1
+        : Math.max(0, planLimit - monthlyUsage);
+      const resetsAt = isUnlimited ? null : this.getNextMonthStartIso();
 
-    return {
-      plan: user.plan,
-      used: monthlyUsage,
-      limit: planLimit,
-      remaining,
-      resetsAt,
-      canGenerate: remaining > 0,
-    };
+      return {
+        plan: user.plan,
+        used: monthlyUsage,
+        limit: planLimit,
+        remaining,
+        resetsAt,
+        canGenerate: isUnlimited || remaining > 0,
+      };
+    } catch (error) {
+      // Fallback en caso de error al obtener uso (ej: enum value no existe en DB)
+      // Retornar como si el usuario tiene el límite completo disponible
+      // El backend rechazará la generación si realmente excede el límite en el interceptor
+      this.logger.error(
+        `Error getting usage for user ${user.userId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+
+      return {
+        plan: user.plan,
+        used: 0,
+        limit: planLimit,
+        remaining: isUnlimited ? -1 : planLimit,
+        resetsAt: isUnlimited ? null : this.getNextMonthStartIso(),
+        canGenerate: true,
+      };
+    }
   }
 
   async generateSynthesisOnly(
@@ -420,6 +441,9 @@ export class BirthChartFacadeService {
           (planet) => ({
             planet: planet.planet,
             sign: planet.sign,
+            signName: planet.signName,
+            signDegree: planet.signDegree,
+            formattedPosition: planet.formattedPosition,
             house: planet.house,
             isRetrograde: planet.isRetrograde,
           }),
@@ -427,14 +451,21 @@ export class BirthChartFacadeService {
         houses: this.formatHousesForResponse(chartData.houses).map((house) => ({
           house: house.house,
           sign: house.sign,
+          signName: house.signName,
           signDegree: house.signDegree,
+          formattedPosition: house.formattedPosition,
         })),
         aspects: this.formatAspectsForResponse(chartData.aspects).map(
           (aspect) => ({
             planet1: aspect.planet1,
+            planet1Name: aspect.planet1Name,
             planet2: aspect.planet2,
+            planet2Name: aspect.planet2Name,
             aspectType: aspect.aspectType,
+            aspectName: aspect.aspectName,
+            aspectSymbol: aspect.aspectSymbol,
             orb: aspect.orb,
+            isApplying: aspect.isApplying,
           }),
         ),
       },
@@ -452,25 +483,35 @@ export class BirthChartFacadeService {
     chartData: ChartData,
     aiSynthesis?: string,
   ): Promise<BirthChart> {
-    const chart = this.chartRepo.create({
-      userId,
-      name: dto.name,
-      birthDate: new Date(dto.birthDate),
-      birthTime: this.normalizeBirthTime(dto.birthTime),
-      birthPlace: dto.birthPlace,
-      latitude: dto.latitude,
-      longitude: dto.longitude,
-      timezone: dto.timezone,
-      chartData: {
-        ...chartData,
-        aiSynthesis,
-      },
-      sunSign: this.findPlanetSign(chartData, Planet.SUN),
-      moonSign: this.findPlanetSign(chartData, Planet.MOON),
-      ascendantSign: chartData.ascendant.sign,
-    });
+    const birthDate = new Date(dto.birthDate);
+    const birthTime = this.normalizeBirthTime(dto.birthTime);
 
-    return this.chartRepo.save(chart);
+    // Upsert atómico basado en el unique index (idx_birth_chart_user_birth).
+    // Evita race condition del patrón findOne+save: dos requests concurrentes
+    // con los mismos datos de nacimiento van a converger en un solo registro.
+    // Nota: se usa el id devuelto por upsert para el findOneOrFail ya que las
+    // coordenadas con precisión >6 decimales se redondean al almacenar en
+    // DECIMAL(10,6), lo que hace que la búsqueda por lat/lon exact falle.
+    const result = await this.chartRepo.upsert(
+      {
+        userId,
+        name: dto.name,
+        birthDate,
+        birthTime,
+        birthPlace: dto.birthPlace,
+        latitude: dto.latitude,
+        longitude: dto.longitude,
+        timezone: dto.timezone,
+        chartData: { ...chartData, aiSynthesis },
+        sunSign: this.findPlanetSign(chartData, Planet.SUN),
+        moonSign: this.findPlanetSign(chartData, Planet.MOON),
+        ascendantSign: chartData.ascendant.sign as ZodiacSign,
+      },
+      ['userId', 'birthDate', 'birthTime', 'latitude', 'longitude'],
+    );
+
+    const savedId = result.identifiers[0]?.id as number;
+    return this.chartRepo.findOneOrFail({ where: { id: savedId } });
   }
 
   private findPlanetSign(chartData: ChartData, planet: Planet): ZodiacSign {

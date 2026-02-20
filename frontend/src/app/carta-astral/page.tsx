@@ -120,7 +120,7 @@ export default function BirthChartPage() {
   const isSubmitting = generateChart.isPending || generateChartAnonymous.isPending;
 
   return (
-    <div className="container max-w-2xl px-4 py-8">
+    <div className="container mx-auto max-w-2xl px-4 py-8">
       {/* Header */}
       <div className="mb-8 text-center">
         <div className="bg-primary/10 mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full">
@@ -173,9 +173,11 @@ export default function BirthChartPage() {
               onSubmit={handleSubmit}
               isLoading={isSubmitting}
               disabled={!canGenerate || usageLoading}
-              showUsageWarning={remaining === 1}
+              showUsageWarning={remaining === 1 && user?.plan !== 'premium'}
               usageMessage={
-                remaining === 1 ? 'Esta es tu última carta disponible del período.' : undefined
+                remaining === 1 && user?.plan !== 'premium'
+                  ? 'Esta es tu última carta disponible del período.'
+                  : undefined
               }
             />
           ) : (

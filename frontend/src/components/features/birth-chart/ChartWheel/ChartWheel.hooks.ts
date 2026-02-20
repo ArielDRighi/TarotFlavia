@@ -11,7 +11,7 @@ import {
   convertHousesToAstroChart,
   prepareAspectsForChart,
   generateChartContainerId,
-  type AstroChartPoint,
+  type AstroChartPlanets,
   type AstroChartAspect,
 } from '../lib/astrochart.utils';
 import { getChartSettings, type AstrochartSettings } from '../lib/astrochart.config';
@@ -34,9 +34,10 @@ export interface UseChartWheelReturn {
 
 /**
  * Estructura de datos para radix del chart
+ * Formato esperado por astrochart.Chart.radix()
  */
 interface RadixData {
-  planets: AstroChartPoint[];
+  planets: AstroChartPlanets;
   cusps: number[];
   aspects?: AstroChartAspect[];
 }

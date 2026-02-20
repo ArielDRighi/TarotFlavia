@@ -2,7 +2,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export default function BirthChartLoading() {
   return (
-    <div className="container max-w-2xl py-8">
+    <div className="container mx-auto max-w-2xl py-8">
       <div className="space-y-6">
         {/* Header skeleton */}
         <div className="space-y-2 text-center">
