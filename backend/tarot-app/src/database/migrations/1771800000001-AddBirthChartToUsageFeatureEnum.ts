@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddBirthChartToUsageFeatureEnum1771800000000 implements MigrationInterface {
-  name = 'AddBirthChartToUsageFeatureEnum1771800000000';
+export class AddBirthChartToUsageFeatureEnum1771800000001 implements MigrationInterface {
+  name = 'AddBirthChartToUsageFeatureEnum1771800000001';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Agregar 'birth_chart' al enum usage_feature_enum si no existe
