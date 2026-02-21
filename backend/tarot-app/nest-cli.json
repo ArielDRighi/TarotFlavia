@@ -7,7 +7,7 @@
     "assets": [
       {
         "include": "modules/birth-chart/assets/fonts/*.ttf",
-        "outDir": "dist"
+        "outDir": "dist/src"
       }
     ]
   }
