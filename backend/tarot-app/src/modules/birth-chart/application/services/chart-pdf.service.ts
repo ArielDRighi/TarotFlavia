@@ -449,8 +449,21 @@ export class ChartPdfService {
     const w = doc.page.width;
     const h = doc.page.height;
 
-    doc.rect(0, 0, w, h * 0.55).fill(COLORS.coverBg);
-    doc.rect(0, h * 0.55, w, h * 0.45).fill(COLORS.coverBgLower);
+    // Single dark background with subtle gradient at bottom
+    doc.rect(0, 0, w, h).fill(COLORS.coverBg);
+    const gradientBands = 20;
+    const gradientStart = h * 0.7;
+    const bandHeight = (h - gradientStart) / gradientBands;
+    for (let i = 0; i < gradientBands; i++) {
+      const t = i / gradientBands;
+      const r = Math.round(0x1a + (0x2d - 0x1a) * t);
+      const g = Math.round(0x0b + (0x1b - 0x0b) * t);
+      const b = Math.round(0x2e + (0x4e - 0x2e) * t);
+      const color = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+      doc
+        .rect(0, gradientStart + i * bandHeight, w, bandHeight + 1)
+        .fill(color);
+    }
 
     this.renderDiamondDecoration(doc, w / 2, 140, 80, COLORS.goldLine);
 
