@@ -240,8 +240,8 @@ describe('ChartPdfService', () => {
 
       const result = await service.generatePDF(input);
 
-      // Portada + Posiciones + Aspectario + Big Three (3) + Planetas + Disclaimer = 8+
-      expect(result.pageCount).toBeGreaterThanOrEqual(8);
+      // Portada + Posiciones + Aspectario + BigThree(flow) + Planetas(flow) + Disclaimer
+      expect(result.pageCount).toBeGreaterThanOrEqual(5);
     });
 
     it('should not include AI synthesis section for Free users', async () => {
@@ -569,8 +569,8 @@ describe('ChartPdfService', () => {
 
       const result = await service.generatePDF(input);
 
-      // Mínimo: Portada + Posiciones + Aspectario + Big Three (3) + Planetas + Disclaimer
-      expect(result.pageCount).toBeGreaterThanOrEqual(8);
+      // Mínimo: Portada + Posiciones + Aspectario + BigThree(flow) + Planetas(flow) + Disclaimer
+      expect(result.pageCount).toBeGreaterThanOrEqual(5);
     });
 
     it('should include disclaimer page at the end', async () => {
@@ -820,7 +820,7 @@ describe('ChartPdfService', () => {
       expect(result).toBeDefined();
       expect(result.buffer).toBeInstanceOf(Buffer);
       // Aspect grid page is always generated
-      expect(result.pageCount).toBeGreaterThanOrEqual(8);
+      expect(result.pageCount).toBeGreaterThanOrEqual(5);
     });
 
     it('should include premium synthesis page increasing page count', async () => {

@@ -151,7 +151,7 @@ export class ChartPdfService {
         pageCount += this.addInteriorPage(doc, pageCount + 1);
         this.renderAspectGridPage(doc, input);
 
-        // === PAGES: BIG THREE (3 pages) ===
+        // === PAGES: BIG THREE (flowing layout) ===
         const bigThreeEntries: {
           title: string;
           sign: string;
@@ -174,15 +174,38 @@ export class ChartPdfService {
           },
         ];
 
+        pageCount += this.addInteriorPage(doc, pageCount + 1);
+        let flowY = this.renderSectionTitle(
+          doc,
+          'INTERPRETACIONES: BIG THREE',
+          MARGIN + 5,
+        );
+
         for (const entry of bigThreeEntries) {
-          pageCount += this.addInteriorPage(doc, pageCount + 1);
-          this.renderBigThreeEntry(doc, entry.title, entry.sign, entry.text);
+          const result = this.renderBigThreeEntry(
+            doc,
+            entry.title,
+            entry.sign,
+            entry.text,
+            flowY,
+            pageCount,
+          );
+          flowY = result.y;
+          pageCount += result.addedPages;
         }
 
-        // === PAGES: PLANETS ===
+        // === PAGES: PLANETS (flowing layout) ===
+        pageCount += this.addInteriorPage(doc, pageCount + 1);
+        flowY = this.renderSectionTitle(
+          doc,
+          'INTERPRETACIONES: PLANETAS',
+          MARGIN + 5,
+        );
+
         for (const planet of input.interpretation.planets) {
-          pageCount += this.addInteriorPage(doc, pageCount + 1);
-          pageCount += this.renderPlanetPage(doc, planet, pageCount);
+          const result = this.renderPlanetPage(doc, planet, flowY, pageCount);
+          flowY = result.y;
+          pageCount += result.addedPages;
         }
 
         // === PAGE: AI SYNTHESIS (Premium) ===
@@ -938,80 +961,114 @@ export class ChartPdfService {
     }
   }
 
-  // ── Big Three Pages ────────────────────────────────────────
+  // ── Big Three Entries (flowing) ─────────────────────────────
 
   private renderBigThreeEntry(
     doc: typeof PDFDocument,
     title: string,
     signName: string,
     interpretation: string,
-  ): void {
-    const boxH = 65;
-    this.renderContentBox(doc, MARGIN, MARGIN + 5, CONTENT_WIDTH, boxH, {
-      accentColor: COLORS.accentViolet,
+    startY: number,
+    pageCount: number,
+  ): { y: number; addedPages: number } {
+    let addedPages = 0;
+    const boxH = 50;
+
+    // Estimate total height: box + text
+    doc.fontSize(11);
+    const textHeight = doc.heightOfString(interpretation, {
+      width: CONTENT_WIDTH,
     });
+    const totalNeeded = boxH + 15 + textHeight + 25;
 
-    doc
-      .fontSize(22)
-      .font('MainFont-Bold')
-      .fillColor(COLORS.textPrimary)
-      .text(title, MARGIN + 16, MARGIN + 15);
+    const check = this.checkPageBreak(
+      doc,
+      startY,
+      Math.min(totalNeeded, 200),
+      pageCount + addedPages,
+    );
+    let y = check.y;
+    addedPages += check.addedPages;
 
-    doc
-      .fontSize(15)
-      .font('MainFont')
-      .fillColor(COLORS.accentViolet)
-      .text(`en ${signName}`, MARGIN + 16, MARGIN + 42);
-
-    const textY = MARGIN + boxH + 25;
-    doc
-      .fontSize(12)
-      .font('MainFont')
-      .fillColor(COLORS.textPrimary)
-      .text(interpretation, MARGIN, textY, {
-        width: CONTENT_WIDTH,
-        align: 'justify',
-        lineGap: 4,
-      });
-  }
-
-  // ── Planet Pages ───────────────────────────────────────────
-
-  private renderPlanetPage(
-    doc: typeof PDFDocument,
-    planet: PlanetInterpretation,
-    currentPageCount: number,
-  ): number {
-    let extraPages = 0;
-    let y = MARGIN + 5;
-
-    const retroLabel = planet.isRetrograde ? ' (\u211E Retr\u00F3grado)' : '';
-    const boxH = 65;
     this.renderContentBox(doc, MARGIN, y, CONTENT_WIDTH, boxH, {
       accentColor: COLORS.accentViolet,
     });
 
     doc
-      .fontSize(20)
+      .fontSize(18)
+      .font('MainFont-Bold')
+      .fillColor(COLORS.textPrimary)
+      .text(title, MARGIN + 16, y + 10);
+
+    doc
+      .fontSize(12)
+      .font('MainFont')
+      .fillColor(COLORS.accentViolet)
+      .text(`en ${signName}`, MARGIN + 16, y + 32);
+
+    y += boxH + 12;
+
+    doc
+      .fontSize(11)
+      .font('MainFont')
+      .fillColor(COLORS.textPrimary)
+      .text(interpretation, MARGIN, y, {
+        width: CONTENT_WIDTH,
+        align: 'justify',
+        lineGap: 3,
+      });
+
+    y = doc.y + 20;
+    return { y, addedPages };
+  }
+
+  // ── Planet Entries (flowing) ──────────────────────────────
+
+  private renderPlanetPage(
+    doc: typeof PDFDocument,
+    planet: PlanetInterpretation,
+    startY: number,
+    pageCount: number,
+  ): { y: number; addedPages: number } {
+    let addedPages = 0;
+    const boxH = 50;
+
+    // Check if we need a page break for the header box
+    const check0 = this.checkPageBreak(
+      doc,
+      startY,
+      boxH + 60,
+      pageCount + addedPages,
+    );
+    let y = check0.y;
+    addedPages += check0.addedPages;
+
+    const retroLabel = planet.isRetrograde ? ' (\u211E Retr\u00F3grado)' : '';
+    this.renderContentBox(doc, MARGIN, y, CONTENT_WIDTH, boxH, {
+      accentColor: COLORS.accentViolet,
+    });
+
+    doc
+      .fontSize(16)
       .font('MainFont-Bold')
       .fillColor(COLORS.textPrimary)
       .text(
         `${planet.planetSymbol} ${planet.planetName.toUpperCase()}`,
         MARGIN + 16,
-        y + 12,
+        y + 8,
       );
 
     doc
-      .fontSize(13)
+      .fontSize(11)
       .font('MainFont')
       .fillColor(COLORS.accentViolet)
       .text(
         `en ${planet.signName} - Casa ${planet.house}${retroLabel}`,
         MARGIN + 16,
-        y + 38,
+        y + 30,
       );
 
-    y += boxH + 20;
+    y += boxH + 12;
 
     if (planet.intro) {
       doc.fontSize(11);
@@ -1019,6 +1076,15 @@ export class ChartPdfService {
         width: CONTENT_WIDTH - 30,
       });
       const blockH = introHeight + 20;
+
+      const checkIntro = this.checkPageBreak(
+        doc,
+        y,
+        blockH,
+        pageCount + addedPages,
+      );
+      y = checkIntro.y;
+      addedPages += checkIntro.addedPages;
 
       this.renderContentBox(doc, MARGIN, y, CONTENT_WIDTH, blockH, {
         accentColor: COLORS.goldLine,
@@ -1035,18 +1101,13 @@ export class ChartPdfService {
           lineGap: 3,
         });
 
-      y += blockH + 15;
+      y += blockH + 12;
     }
 
     if (planet.inSign) {
-      const check = this.checkPageBreak(
-        doc,
-        y,
-        100,
-        currentPageCount + extraPages,
-      );
+      const check = this.checkPageBreak(doc, y, 80, pageCount + addedPages);
       y = check.y;
-      extraPages += check.addedPages;
+      addedPages += check.addedPages;
 
       y = this.renderSectionTitle(doc, `En ${planet.signName}`, y);
 
@@ -1060,18 +1121,13 @@ export class ChartPdfService {
           lineGap: 3,
         });
 
-      y = doc.y + 20;
+      y = doc.y + 15;
     }
 
     if (planet.inHouse) {
-      const check = this.checkPageBreak(
-        doc,
-        y,
-        100,
-        currentPageCount + extraPages,
-      );
+      const check = this.checkPageBreak(doc, y, 80, pageCount + addedPages);
       y = check.y;
-      extraPages += check.addedPages;
+      addedPages += check.addedPages;
 
       y = this.renderSectionTitle(doc, `En Casa ${planet.house}`, y);
 
@@ -1085,30 +1141,20 @@ export class ChartPdfService {
           lineGap: 3,
         });
 
-      y = doc.y + 20;
+      y = doc.y + 15;
     }
 
     if (planet.aspects && planet.aspects.length > 0) {
-      const check = this.checkPageBreak(
-        doc,
-        y,
-        60,
-        currentPageCount + extraPages,
-      );
+      const check = this.checkPageBreak(doc, y, 50, pageCount + addedPages);
       y = check.y;
-      extraPages += check.addedPages;
+      addedPages += check.addedPages;
 
       y = this.renderSectionTitle(doc, 'Aspectos', y);
 
       for (const aspect of planet.aspects) {
-        const check2 = this.checkPageBreak(
-          doc,
-          y,
-          80,
-          currentPageCount + extraPages,
-        );
+        const check2 = this.checkPageBreak(doc, y, 60, pageCount + addedPages);
         y = check2.y;
-        extraPages += check2.addedPages;
+        addedPages += check2.addedPages;
 
         const nature =
           AspectTypeMetadata[aspect.aspectType]?.nature || 'neutral';
@@ -1144,12 +1190,13 @@ export class ChartPdfService {
               lineGap: 2,
             });
 
-          y = doc.y + 12;
+          y = doc.y + 10;
         }
       }
     }
 
-    return extraPages;
+    y += 10;
+    return { y, addedPages };
   }
 
   // ── Synthesis Page ─────────────────────────────────────────
