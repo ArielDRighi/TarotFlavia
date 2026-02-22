@@ -493,6 +493,7 @@ export class ChartPdfService {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
+      timeZone: 'UTC',
     });
 
     doc

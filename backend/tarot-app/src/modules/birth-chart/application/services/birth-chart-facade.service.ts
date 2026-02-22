@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { parseBirthDate } from '../../domain/utils/date-utils';
 import { UsageLimitsService } from '../../../usage-limits/usage-limits.service';
 import { AnonymousTrackingService } from '../../../usage-limits/services/anonymous-tracking.service';
 import { UsageFeature } from '../../../usage-limits/entities/usage-limit.entity';
@@ -70,7 +71,7 @@ export class BirthChartFacadeService {
       `Generating birth chart for plan ${plan}${fingerprint ? ' with fingerprint' : ''}`,
     );
 
-    const birthDate = new Date(dto.birthDate);
+    const birthDate = parseBirthDate(dto.birthDate);
     const cacheKey = this.cacheService.generateChartCacheKey(
       birthDate,
       dto.birthTime,
@@ -137,7 +138,7 @@ export class BirthChartFacadeService {
     this.logger.log(`Generating birth chart PDF for user ${user.userId}`);
 
     const input: ChartCalculationInput = {
-      birthDate: new Date(dto.birthDate),
+      birthDate: parseBirthDate(dto.birthDate),
       birthTime: dto.birthTime,
       latitude: dto.latitude,
       longitude: dto.longitude,
@@ -155,7 +156,7 @@ export class BirthChartFacadeService {
           chartData,
           interpretation,
           userName: dto.name,
-          birthDate: new Date(dto.birthDate),
+          birthDate: parseBirthDate(dto.birthDate),
         },
         user.userId,
       );
@@ -167,7 +168,7 @@ export class BirthChartFacadeService {
       interpretation,
       aiSynthesis,
       userName: dto.name,
-      birthDate: new Date(dto.birthDate),
+      birthDate: parseBirthDate(dto.birthDate),
       birthTime: dto.birthTime,
       birthPlace: dto.birthPlace,
       generatedAt: new Date(),
@@ -258,7 +259,7 @@ export class BirthChartFacadeService {
     this.logger.log(`Generating synthesis only for user ${userId}`);
 
     const input: ChartCalculationInput = {
-      birthDate: new Date(dto.birthDate),
+      birthDate: parseBirthDate(dto.birthDate),
       birthTime: dto.birthTime,
       latitude: dto.latitude,
       longitude: dto.longitude,
@@ -274,7 +275,7 @@ export class BirthChartFacadeService {
         chartData,
         interpretation,
         userName: dto.name,
-        birthDate: new Date(dto.birthDate),
+        birthDate: parseBirthDate(dto.birthDate),
       },
       userId,
     );
@@ -330,7 +331,7 @@ export class BirthChartFacadeService {
             chartData,
             interpretation,
             userName: dto.name,
-            birthDate: new Date(dto.birthDate),
+            birthDate: parseBirthDate(dto.birthDate),
           },
           userId ?? undefined,
         );
@@ -483,7 +484,7 @@ export class BirthChartFacadeService {
     chartData: ChartData,
     aiSynthesis?: string,
   ): Promise<BirthChart> {
-    const birthDate = new Date(dto.birthDate);
+    const birthDate = parseBirthDate(dto.birthDate);
     const birthTime = this.normalizeBirthTime(dto.birthTime);
 
     // Upsert atómico basado en el unique index (idx_birth_chart_user_birth).
