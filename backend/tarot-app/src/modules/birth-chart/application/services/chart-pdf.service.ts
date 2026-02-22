@@ -86,6 +86,10 @@ const FONTS_DIR = path.join(__dirname, '../../assets/fonts');
 const FONT_REGULAR = path.join(FONTS_DIR, 'DejaVuSans.ttf');
 const FONT_BOLD = path.join(FONTS_DIR, 'DejaVuSans-Bold.ttf');
 
+// ── PDFKit instance type (InstanceType is the correct annotation for instances
+//    created via `new PDFDocument(...)` — `typeof PDFDocument` is the constructor) ──
+type PDFDocInstance = InstanceType<typeof PDFDocument>;
+
 // ────────────────────────────────────────────────────────────────
 
 /**
@@ -127,28 +131,33 @@ export class ChartPdfService {
         doc.registerFont('MainFont-Bold', FONT_BOLD);
 
         const chunks: Buffer[] = [];
-        let pageCount = 0;
+        let currentPageNum = 1; // Cover page = 1, no header
+
+        // Automatically number every page added after the cover
+        doc.on('pageAdded', () => {
+          currentPageNum++;
+          this.renderPageHeader(doc, currentPageNum);
+        });
 
         doc.on('data', (chunk: Buffer) => chunks.push(chunk));
         doc.on('end', () => {
           resolve({
             buffer: Buffer.concat(chunks),
             filename: this.generateFilename(input.userName),
-            pageCount,
+            pageCount: currentPageNum,
           });
         });
         doc.on('error', reject);
 
         // === PAGE 1: COVER ===
-        pageCount++;
         this.renderCoverPage(doc, input);
 
         // === PAGE 2: POSITIONS & DISTRIBUTION ===
-        pageCount += this.addInteriorPage(doc, pageCount + 1);
+        this.addInteriorPage(doc);
         this.renderPositionsPage(doc, input);
 
         // === PAGE 3: ASPECT GRID ===
-        pageCount += this.addInteriorPage(doc, pageCount + 1);
+        this.addInteriorPage(doc);
         this.renderAspectGridPage(doc, input);
 
         // === PAGES: BIG THREE (flowing layout) ===
@@ -174,7 +183,7 @@ export class ChartPdfService {
           },
         ];
 
-        pageCount += this.addInteriorPage(doc, pageCount + 1);
+        this.addInteriorPage(doc);
         let flowY = this.renderSectionTitle(
           doc,
           'INTERPRETACIONES: BIG THREE',
@@ -182,20 +191,17 @@ export class ChartPdfService {
         );
 
         for (const entry of bigThreeEntries) {
-          const result = this.renderBigThreeEntry(
+          flowY = this.renderBigThreeEntry(
             doc,
             entry.title,
             entry.sign,
             entry.text,
             flowY,
-            pageCount,
           );
-          flowY = result.y;
-          pageCount += result.addedPages;
         }
 
         // === PAGES: PLANETS (flowing layout) ===
-        pageCount += this.addInteriorPage(doc, pageCount + 1);
+        this.addInteriorPage(doc);
         flowY = this.renderSectionTitle(
           doc,
           'INTERPRETACIONES: PLANETAS',
@@ -203,19 +209,17 @@ export class ChartPdfService {
         );
 
         for (const planet of input.interpretation.planets) {
-          const result = this.renderPlanetPage(doc, planet, flowY, pageCount);
-          flowY = result.y;
-          pageCount += result.addedPages;
+          flowY = this.renderPlanetPage(doc, planet, flowY);
         }
 
         // === PAGE: AI SYNTHESIS (Premium) ===
         if (input.isPremium && input.aiSynthesis) {
-          pageCount += this.addInteriorPage(doc, pageCount + 1);
-          this.renderSynthesisPage(doc, input.aiSynthesis);
+          this.addInteriorPage(doc);
+          this.renderSynthesisPage(doc, input.aiSynthesis, MARGIN + 5);
         }
 
         // === PAGE: DISCLAIMER ===
-        pageCount += this.addInteriorPage(doc, pageCount + 1);
+        this.addInteriorPage(doc);
         this.renderDisclaimerPage(doc);
 
         doc.end();
@@ -288,13 +292,11 @@ export class ChartPdfService {
     return `carta-astral-${safeName}-${Date.now()}.pdf`;
   }
 
-  private addInteriorPage(doc: typeof PDFDocument, pageNumber: number): number {
-    doc.addPage();
-    this.renderPageHeader(doc, pageNumber);
-    return 1;
+  private addInteriorPage(doc: PDFDocInstance): void {
+    doc.addPage(); // pageAdded event fires and renders the header automatically
   }
 
-  private renderPageHeader(doc: typeof PDFDocument, pageNumber: number): void {
+  private renderPageHeader(doc: PDFDocInstance, pageNumber: number): void {
     const w = doc.page.width;
     doc
       .moveTo(MARGIN, 35)
@@ -313,7 +315,7 @@ export class ChartPdfService {
   }
 
   private renderSectionTitle(
-    doc: typeof PDFDocument,
+    doc: PDFDocInstance,
     title: string,
     y: number,
   ): number {
@@ -339,7 +341,7 @@ export class ChartPdfService {
   }
 
   private renderContentBox(
-    doc: typeof PDFDocument,
+    doc: PDFDocInstance,
     x: number,
     y: number,
     width: number,
@@ -359,7 +361,7 @@ export class ChartPdfService {
   }
 
   private renderBar(
-    doc: typeof PDFDocument,
+    doc: PDFDocInstance,
     x: number,
     y: number,
     maxWidth: number,
@@ -397,21 +399,19 @@ export class ChartPdfService {
   }
 
   private checkPageBreak(
-    doc: typeof PDFDocument,
+    doc: PDFDocInstance,
     currentY: number,
     requiredSpace: number,
-    pageCount: number,
-  ): { y: number; addedPages: number } {
+  ): number {
     if (currentY + requiredSpace > doc.page.height - MARGIN) {
-      doc.addPage();
-      this.renderPageHeader(doc, pageCount + 1);
-      return { y: MARGIN + 10, addedPages: 1 };
+      doc.addPage(); // pageAdded event fires and renders the header automatically
+      return MARGIN + 10;
     }
-    return { y: currentY, addedPages: 0 };
+    return currentY;
   }
 
   private renderDiamondDecoration(
-    doc: typeof PDFDocument,
+    doc: PDFDocInstance,
     cx: number,
     y: number,
     lineLen: number,
@@ -441,7 +441,7 @@ export class ChartPdfService {
   // ── Page 1: Cover ──────────────────────────────────────────
 
   private renderCoverPage(
-    doc: typeof PDFDocument,
+    doc: PDFDocInstance,
     input: PDFGenerationInput,
   ): void {
     const { userName, birthDate, birthTime, birthPlace, generatedAt } = input;
@@ -558,10 +558,198 @@ export class ChartPdfService {
       );
   }
 
+  // ── Chart Wheel (cover element) ────────────────────────────
+
+  private renderChartWheel(
+    doc: PDFDocInstance,
+    cx: number,
+    cy: number,
+    radius: number,
+    chartData: ChartData,
+  ): void {
+    const houses = chartData.houses || [];
+    const planets = chartData.planets || [];
+    if (houses.length === 0) return;
+
+    const outerR = radius;
+    const ringInnerR = radius * 0.78;
+    const planetR = radius * 0.63;
+    const houseR = radius * 0.5;
+    const centerR = radius * 0.06;
+    const ascLon = houses[0].longitude;
+
+    const toRad = (lon: number): number =>
+      ((180 + lon - ascLon) * Math.PI) / 180;
+    const xAt = (a: number, r: number) => cx + r * Math.cos(a);
+    const yAt = (a: number, r: number) => cy - r * Math.sin(a);
+    const fmt = (n: number) => n.toFixed(2);
+
+    const RING: Record<string, string> = {
+      fire: '#F59E0B',
+      earth: '#22C55E',
+      air: '#38BDF8',
+      water: '#0891B2',
+    };
+
+    const SIGNS: ZodiacSign[] = [
+      ZodiacSign.ARIES,
+      ZodiacSign.TAURUS,
+      ZodiacSign.GEMINI,
+      ZodiacSign.CANCER,
+      ZodiacSign.LEO,
+      ZodiacSign.VIRGO,
+      ZodiacSign.LIBRA,
+      ZodiacSign.SCORPIO,
+      ZodiacSign.SAGITTARIUS,
+      ZodiacSign.CAPRICORN,
+      ZodiacSign.AQUARIUS,
+      ZodiacSign.PISCES,
+    ];
+
+    // Subtle golden glow behind the wheel
+    doc.save();
+    doc.opacity(0.15);
+    doc.circle(cx, cy, outerR + 6).fill(COLORS.goldLine);
+    doc.restore();
+
+    // White backdrop
+    doc.circle(cx, cy, outerR + 1).fill('#FFFFFF');
+
+    // ── Zodiac ring segments ──
+    for (let i = 0; i < 12; i++) {
+      const meta = ZodiacSignMetadata[SIGNS[i]];
+      if (!meta) continue;
+      const color = RING[meta.element] || '#9CA3AF';
+      const a1 = toRad(i * 30);
+      const a2 = toRad(i * 30 + 30);
+
+      const ox1 = fmt(xAt(a1, outerR)),
+        oy1 = fmt(yAt(a1, outerR));
+      const ox2 = fmt(xAt(a2, outerR)),
+        oy2 = fmt(yAt(a2, outerR));
+      const ix2 = fmt(xAt(a2, ringInnerR)),
+        iy2 = fmt(yAt(a2, ringInnerR));
+      const ix1 = fmt(xAt(a1, ringInnerR)),
+        iy1 = fmt(yAt(a1, ringInnerR));
+
+      doc
+        .path(
+          `M ${ox1} ${oy1} A ${fmt(outerR)} ${fmt(outerR)} 0 0 0 ${ox2} ${oy2} ` +
+            `L ${ix2} ${iy2} A ${fmt(ringInnerR)} ${fmt(ringInnerR)} 0 0 1 ${ix1} ${iy1} Z`,
+        )
+        .fill(color);
+
+      // Zodiac symbol at segment midpoint
+      const mid = toRad(i * 30 + 15);
+      const sR = (outerR + ringInnerR) / 2;
+      doc
+        .fontSize(Math.max(7, radius * 0.12))
+        .font('MainFont-Bold')
+        .fillColor('#FFFFFF')
+        .text(meta.symbol, xAt(mid, sR) - 6, yAt(mid, sR) - 5, {
+          width: 12,
+          align: 'center',
+          lineBreak: false,
+        });
+    }
+
+    // Segment divider lines
+    for (let i = 0; i < 12; i++) {
+      const a = toRad(i * 30);
+      doc
+        .moveTo(xAt(a, ringInnerR), yAt(a, ringInnerR))
+        .lineTo(xAt(a, outerR), yAt(a, outerR))
+        .lineWidth(0.5)
+        .stroke('#FFFFFF');
+    }
+
+    // Inner white fill (cleans up ring inner edge)
+    doc.circle(cx, cy, ringInnerR).fill('#FFFFFF');
+
+    // House boundary circle
+    doc.circle(cx, cy, houseR).lineWidth(0.4).stroke(COLORS.lineMedium);
+
+    // House cusp lines
+    for (let i = 0; i < houses.length; i++) {
+      const a = toRad(houses[i].longitude);
+      const isAngular = i === 0 || i === 3 || i === 6 || i === 9;
+      doc
+        .moveTo(xAt(a, centerR), yAt(a, centerR))
+        .lineTo(xAt(a, ringInnerR), yAt(a, ringInnerR))
+        .lineWidth(isAngular ? 1 : 0.3)
+        .stroke(isAngular ? COLORS.textPrimary : COLORS.lineLight);
+    }
+
+    // House numbers
+    doc
+      .fontSize(Math.max(6, radius * 0.09))
+      .font('MainFont')
+      .fillColor(COLORS.textSecondary);
+    for (let i = 0; i < houses.length; i++) {
+      const next = houses[(i + 1) % houses.length];
+      if (!next) continue;
+      const cur = houses[i].longitude;
+      const nxt = next.longitude;
+      let mid = (cur + nxt) / 2;
+      if (nxt < cur) mid = ((cur + nxt + 360) / 2) % 360;
+      const a = toRad(mid);
+      const nR = houseR * 0.55;
+      doc.text(String(i + 1), xAt(a, nR) - 6, yAt(a, nR) - 4, {
+        width: 12,
+        align: 'center',
+        lineBreak: false,
+      });
+    }
+
+    // Planet symbols
+    doc
+      .fontSize(Math.max(7, radius * 0.11))
+      .font('MainFont-Bold')
+      .fillColor(COLORS.textPrimary);
+    for (const p of planets) {
+      const meta = PlanetMetadata[p.planet as Planet];
+      if (!meta) continue;
+      const a = toRad(p.longitude);
+      doc.text(meta.symbol, xAt(a, planetR) - 6, yAt(a, planetR) - 5, {
+        width: 12,
+        align: 'center',
+        lineBreak: false,
+      });
+    }
+
+    // Center dot
+    doc.circle(cx, cy, centerR).fill('#FFFFFF');
+    doc.circle(cx, cy, centerR).lineWidth(0.3).stroke(COLORS.lineMedium);
+
+    // Cardinal point labels (outside ring, on dark cover background)
+    const lblR = outerR + 14;
+    const cardinals: { text: string; lon: number }[] = [
+      { text: 'As', lon: ascLon },
+      { text: 'Ds', lon: (ascLon + 180) % 360 },
+    ];
+    if (houses.length >= 10)
+      cardinals.push({ text: 'Mc', lon: houses[9].longitude });
+    if (houses.length >= 4)
+      cardinals.push({ text: 'Ic', lon: houses[3].longitude });
+
+    doc
+      .fontSize(Math.max(7, radius * 0.11))
+      .font('MainFont-Bold')
+      .fillColor(COLORS.textOnDark);
+    for (const c of cardinals) {
+      const a = toRad(c.lon);
+      doc.text(c.text, xAt(a, lblR) - 8, yAt(a, lblR) - 5, {
+        width: 16,
+        align: 'center',
+        lineBreak: false,
+      });
+    }
+  }
+
   // ── Page 2: Positions & Distribution ───────────────────────
 
   private renderPositionsPage(
-    doc: typeof PDFDocument,
+    doc: PDFDocInstance,
     input: PDFGenerationInput,
   ): void {
     let y = this.renderSectionTitle(doc, 'POSICIONES PLANETARIAS', MARGIN + 5);
@@ -685,6 +873,7 @@ export class ChartPdfService {
     }
 
     y += 15;
+    const distStartY = y; // anchor for right-column wheel
     y = this.renderSectionTitle(doc, 'DISTRIBUCI\u00D3N', y);
 
     doc
@@ -770,12 +959,28 @@ export class ChartPdfService {
         );
       }
     }
+
+    // Chart wheel in the right half of the distribution section
+    const pageBottom = doc.page.height - MARGIN;
+    const availableHeight = pageBottom - distStartY;
+    const wheelRadius = Math.min(100, Math.floor(availableHeight / 2) - 15);
+    const wheelCX = MARGIN + Math.round((CONTENT_WIDTH * 3) / 4);
+    const wheelCY = Math.round(distStartY + availableHeight / 2);
+    if (wheelRadius > 30) {
+      this.renderChartWheel(
+        doc,
+        wheelCX,
+        wheelCY,
+        wheelRadius,
+        input.chartData,
+      );
+    }
   }
 
   // ── Page 3: Aspect Grid ────────────────────────────────────
 
   private renderAspectGridPage(
-    doc: typeof PDFDocument,
+    doc: PDFDocInstance,
     input: PDFGenerationInput,
   ): void {
     let y = this.renderSectionTitle(doc, 'ASPECTARIO', MARGIN + 5);
@@ -977,14 +1182,12 @@ export class ChartPdfService {
   // ── Big Three Entries (flowing) ─────────────────────────────
 
   private renderBigThreeEntry(
-    doc: typeof PDFDocument,
+    doc: PDFDocInstance,
     title: string,
     signName: string,
     interpretation: string,
     startY: number,
-    pageCount: number,
-  ): { y: number; addedPages: number } {
-    let addedPages = 0;
+  ): number {
     const boxH = 50;
 
     // Estimate total height: box + text
@@ -994,14 +1197,7 @@ export class ChartPdfService {
     });
     const totalNeeded = boxH + 15 + textHeight + 25;
 
-    const check = this.checkPageBreak(
-      doc,
-      startY,
-      Math.min(totalNeeded, 200),
-      pageCount + addedPages,
-    );
-    let y = check.y;
-    addedPages += check.addedPages;
+    let y = this.checkPageBreak(doc, startY, Math.min(totalNeeded, 200));
 
     this.renderContentBox(doc, MARGIN, y, CONTENT_WIDTH, boxH, {
       accentColor: COLORS.accentViolet,
@@ -1031,30 +1227,20 @@ export class ChartPdfService {
         lineGap: 3,
       });
 
-    y = doc.y + 20;
-    return { y, addedPages };
+    return doc.y + 20;
   }
 
   // ── Planet Entries (flowing) ──────────────────────────────
 
   private renderPlanetPage(
-    doc: typeof PDFDocument,
+    doc: PDFDocInstance,
     planet: PlanetInterpretation,
     startY: number,
-    pageCount: number,
-  ): { y: number; addedPages: number } {
-    let addedPages = 0;
+  ): number {
     const boxH = 50;
 
     // Check if we need a page break for the header box
-    const check0 = this.checkPageBreak(
-      doc,
-      startY,
-      boxH + 60,
-      pageCount + addedPages,
-    );
-    let y = check0.y;
-    addedPages += check0.addedPages;
+    let y = this.checkPageBreak(doc, startY, boxH + 60);
 
     const retroLabel = planet.isRetrograde ? ' (\u211E Retr\u00F3grado)' : '';
     this.renderContentBox(doc, MARGIN, y, CONTENT_WIDTH, boxH, {
@@ -1084,20 +1270,14 @@ export class ChartPdfService {
     y += boxH + 12;
 
     if (planet.intro) {
-      doc.fontSize(11);
+      doc.fontSize(11).font('MainFont');
       const introHeight = doc.heightOfString(planet.intro, {
         width: CONTENT_WIDTH - 30,
+        lineGap: 3,
       });
       const blockH = introHeight + 20;
 
-      const checkIntro = this.checkPageBreak(
-        doc,
-        y,
-        blockH,
-        pageCount + addedPages,
-      );
-      y = checkIntro.y;
-      addedPages += checkIntro.addedPages;
+      y = this.checkPageBreak(doc, y, blockH);
 
       this.renderContentBox(doc, MARGIN, y, CONTENT_WIDTH, blockH, {
         accentColor: COLORS.goldLine,
@@ -1118,10 +1298,7 @@ export class ChartPdfService {
     }
 
     if (planet.inSign) {
-      const check = this.checkPageBreak(doc, y, 80, pageCount + addedPages);
-      y = check.y;
-      addedPages += check.addedPages;
-
+      y = this.checkPageBreak(doc, y, 80);
       y = this.renderSectionTitle(doc, `En ${planet.signName}`, y);
 
       doc
@@ -1138,10 +1315,7 @@ export class ChartPdfService {
     }
 
     if (planet.inHouse) {
-      const check = this.checkPageBreak(doc, y, 80, pageCount + addedPages);
-      y = check.y;
-      addedPages += check.addedPages;
-
+      y = this.checkPageBreak(doc, y, 80);
       y = this.renderSectionTitle(doc, `En Casa ${planet.house}`, y);
 
       doc
@@ -1158,16 +1332,11 @@ export class ChartPdfService {
     }
 
     if (planet.aspects && planet.aspects.length > 0) {
-      const check = this.checkPageBreak(doc, y, 50, pageCount + addedPages);
-      y = check.y;
-      addedPages += check.addedPages;
-
+      y = this.checkPageBreak(doc, y, 50);
       y = this.renderSectionTitle(doc, 'Aspectos', y);
 
       for (const aspect of planet.aspects) {
-        const check2 = this.checkPageBreak(doc, y, 60, pageCount + addedPages);
-        y = check2.y;
-        addedPages += check2.addedPages;
+        y = this.checkPageBreak(doc, y, 60);
 
         const nature =
           AspectTypeMetadata[aspect.aspectType]?.nature || 'neutral';
@@ -1208,18 +1377,18 @@ export class ChartPdfService {
       }
     }
 
-    y += 10;
-    return { y, addedPages };
+    return y + 10;
   }
 
   // ── Synthesis Page ─────────────────────────────────────────
 
   private renderSynthesisPage(
-    doc: typeof PDFDocument,
+    doc: PDFDocInstance,
     aiSynthesis: string,
+    startY: number,
   ): void {
     const boxH = 55;
-    this.renderContentBox(doc, MARGIN, MARGIN + 5, CONTENT_WIDTH, boxH, {
+    this.renderContentBox(doc, MARGIN, startY, CONTENT_WIDTH, boxH, {
       accentColor: COLORS.accentViolet,
     });
 
@@ -1227,32 +1396,44 @@ export class ChartPdfService {
       .fontSize(18)
       .font('MainFont-Bold')
       .fillColor(COLORS.textPrimary)
-      .text('\u2726  S\u00CDNTESIS PERSONALIZADA', MARGIN + 16, MARGIN + 14);
+      .text('\u2726  S\u00CDNTESIS PERSONALIZADA', MARGIN + 16, startY + 9);
 
     doc
       .fontSize(9)
       .font('MainFont')
       .fillColor(COLORS.textSecondary)
       .text(
-        'An\u00E1lisis generado por Inteligencia Artificial',
+        'An\u00E1lisis personalizado exclusivo para usuarios Premium',
         MARGIN + 16,
-        MARGIN + 38,
+        startY + 33,
       );
 
-    doc
-      .fontSize(11)
-      .font('MainFont')
-      .fillColor(COLORS.textPrimary)
-      .text(aiSynthesis, MARGIN, MARGIN + boxH + 25, {
+    let y = startY + boxH + 20;
+
+    // Split by paragraph breaks and apply overflow protection for each paragraph
+    const paragraphs = aiSynthesis.split(/\n\n+/).filter(Boolean);
+    for (const para of paragraphs) {
+      const estimatedH = doc.heightOfString(para, {
         width: CONTENT_WIDTH,
-        align: 'justify',
         lineGap: 5,
       });
+      y = this.checkPageBreak(doc, y, estimatedH + 15);
+      doc
+        .fontSize(11)
+        .font('MainFont')
+        .fillColor(COLORS.textPrimary)
+        .text(para, MARGIN, y, {
+          width: CONTENT_WIDTH,
+          align: 'justify',
+          lineGap: 5,
+        });
+      y = doc.y + 12;
+    }
   }
 
   // ── Disclaimer Page ────────────────────────────────────────
 
-  private renderDisclaimerPage(doc: typeof PDFDocument): void {
+  private renderDisclaimerPage(doc: PDFDocInstance): void {
     const w = doc.page.width;
     const cx = w / 2;
     const startY = 250;

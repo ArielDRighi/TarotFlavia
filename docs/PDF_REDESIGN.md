@@ -2,14 +2,29 @@
 
 > **Autor**: Diseño editorial senior
 > **Fecha**: 2026-02-20
-> **Archivo a modificar**: `backend/tarot-app/src/modules/birth-chart/application/services/chart-pdf.service.ts`
+> **Última actualización**: 2026-02-21
+> **Estado:** ✅ COMPLETADA — Implementación + Refactoring de calidad aplicado
+> **Archivo modificado**: `backend/tarot-app/src/modules/birth-chart/application/services/chart-pdf.service.ts`
 > **Librería**: PDFKit (server-side, Node.js)
+
+### Resumen de lo implementado
+
+- ✅ Rediseño completo del PDF con diseño editorial profesional
+- ✅ Font embedding DejaVu Sans para símbolos Unicode astronómicos
+- ✅ Portada con gradiente suave, Big Three, decoraciones doradas
+- ✅ Página 2: Tabla de posiciones, cúspides de casas, distribución + rueda de carta astral
+- ✅ Página 3: Aspectario (grilla) + resumen de aspectos
+- ✅ Secciones flowing de Big Three y Planetas con page breaks automáticos
+- ✅ Page numbering event-based via `doc.on('pageAdded')` (todas las páginas numeradas)
+- ✅ Síntesis IA Premium con protección de overflow por párrafos
+- ✅ Refactoring: type alias `PDFDocInstance`, eliminación de dead code `addedPages`
 
 ---
 
 ## 1. Diagnóstico del PDF Actual
 
 ### Problemas Detectados
+
 1. **Sin gráficos visuales**: No hay rueda de carta astral, ni gráficos de distribución
 2. **Sin aspectario**: No existe la grilla/matriz de aspectos entre planetas
 3. **Sin tabla de casas**: Las cúspides de las 12 casas no se muestran
@@ -89,6 +104,7 @@ FONTS = {
 ## 4. Estructura de Páginas (Nuevo Diseño)
 
 ### Página 1 — Portada
+
 ```
 ┌─────────────────────────────────────────────────────┐
 │  [Fondo: Gradiente vertical púrpura profundo]       │
@@ -122,6 +138,7 @@ FONTS = {
 ```
 
 **Detalles de implementación:**
+
 - Fondo: Rectángulo completo con `fillColor(coverGradientStart)`. Agregar un segundo rectángulo con gradiente en la mitad inferior con `coverGradientEnd`
 - Línea decorativa: `doc.moveTo().lineTo()` con color dorado, grosor fino
 - Título "CARTA ASTRAL": Letras espaciadas (`characterSpacing: 4`), color blanco/lavanda
@@ -132,6 +149,7 @@ FONTS = {
 ---
 
 ### Página 2 — Posiciones Planetarias y Distribución
+
 ```
 ┌─────────────────────────────────────────────────────┐
 │  POSICIONES PLANETARIAS                         2   │
@@ -177,6 +195,7 @@ FONTS = {
 ```
 
 **Detalles de implementación:**
+
 - Tabla de planetas: Filas con color alternado (`tableRowAlt`), símbolos planetarios en columna izquierda
 - Tabla de casas: Disposición en 2 columnas lado a lado (Casas I-VI | Casas VII-XII)
 - Barras de distribución: Rectángulos coloreados proporcionales al porcentaje. Ancho máximo ~200px
@@ -186,6 +205,7 @@ FONTS = {
 ---
 
 ### Página 3 — Aspectario (Grilla de Aspectos) + Resumen
+
 ```
 ┌─────────────────────────────────────────────────────┐
 │  ASPECTARIO                                     3   │
@@ -229,6 +249,7 @@ FONTS = {
 ```
 
 **Detalles de implementación:**
+
 - Grilla: Tabla NxN donde N = número de planetas. Solo se rellena el triángulo inferior (evitar duplicados)
 - Celdas: ~40x30px cada una. Color de fondo según naturaleza del aspecto
 - Símbolos de aspecto en el centro de cada celda
@@ -276,6 +297,7 @@ Cada una ocupa su propia página con layout consistente:
 ```
 
 **Detalles de implementación:**
+
 - Header box: Rectángulo con `cardBg`, barra izquierda de 4px en `accentViolet`
 - Símbolo del planeta: Grande (24pt) en color violeta
 - Nombre del planeta: Bold, 20pt, color `textPrimary`
@@ -320,6 +342,7 @@ Cada una ocupa su propia página con layout consistente:
 ```
 
 **Detalles de implementación:**
+
 - Header: Similar al Big Three pero con signo + casa
 - Introducción: Bloque con fondo `cardBg` y padding, borde izquierdo dorado
 - Subtítulos de sección: Con línea horizontal que se extiende hacia la derecha
@@ -336,8 +359,8 @@ Cada una ocupa su propia página con layout consistente:
 │                                                 N   │
 │  ┌──────────────────────────────────────────────┐   │
 │  │  ✦  SÍNTESIS PERSONALIZADA                   │   │
-│  │     Análisis generado por Inteligencia       │   │
-│  │     Artificial                               │   │
+│  │     Análisis personalizado exclusivo         │   │
+│  │     para usuarios Premium                    │   │
 │  └──────────────────────────────────────────────┘   │
 │                                                     │
 │  [Texto de síntesis con espaciado generoso]         │
@@ -388,14 +411,17 @@ Cada una ocupa su propia página con layout consistente:
 ## 5. Elementos Decorativos Recurrentes
 
 ### Header de cada página interior
+
 - Línea fina horizontal en la parte superior (color `lineLight`)
 - Número de página en la esquina superior derecha (caption, color `textSecondary`)
 
 ### Separadores de sección
+
 - Título alineado a la izquierda + línea horizontal que se extiende hasta el margen derecho
 - Formato: `"── Título ──────────────────────"`
 
 ### Decoración de portada
+
 - Línea decorativa con punto central: `"── ✦ ──"` (se dibuja con `moveTo/lineTo` + un pequeño diamante/estrella en el centro)
 
 ---
@@ -403,154 +429,170 @@ Cada una ocupa su propia página con layout consistente:
 ## 6. Tareas de Implementación
 
 ### Pre-requisitos
-- [ ] Leer `docs/WORKFLOW_BACKEND.md` antes de comenzar
+
+- [x] Leer `docs/WORKFLOW_BACKEND.md` antes de comenzar
 
 ### Fase 1: Refactoring de Base
+
 > Preparar la estructura del servicio para el nuevo diseño
 
-- [ ] **T1.1** Extraer la configuración de colores y fuentes en constantes/objetos tipados al inicio del servicio con la nueva paleta definida en la sección 2
-- [ ] **T1.2** Crear método helper `renderPageHeader(doc, pageNumber)` que dibuja la línea superior fina y el número de página en cada página interior
-- [ ] **T1.3** Crear método helper `renderSectionTitle(doc, title, y)` que renderiza un título de sección con la línea horizontal extendida hacia la derecha
-- [ ] **T1.4** Crear método helper `renderContentBox(doc, x, y, width, height, options?)` que dibuja un rectángulo con fondo `cardBg`, borde redondeado opcional, y barra lateral de color
-- [ ] **T1.5** Crear método helper `renderHorizontalBar(doc, x, y, width, maxWidth, color, label, value)` para las barras de distribución
-- [ ] **T1.6** Crear método helper `renderAspectBadge(doc, x, y, nature)` que dibuja el badge coloreado `[A]`/`[D]`/`[N]` según naturaleza del aspecto
-- [ ] **T1.7** Implementar tracking de página (`pageNumber`) incrementando en cada `addPage()` y llamando a `renderPageHeader` automáticamente
+- [x] **T1.1** Extraer la configuración de colores y fuentes en constantes/objetos tipados al inicio del servicio con la nueva paleta definida en la sección 2
+- [x] **T1.2** Crear método helper `renderPageHeader(doc, pageNumber)` que dibuja la línea superior fina y el número de página en cada página interior
+- [x] **T1.3** Crear método helper `renderSectionTitle(doc, title, y)` que renderiza un título de sección con la línea horizontal extendida hacia la derecha
+- [x] **T1.4** Crear método helper `renderContentBox(doc, x, y, width, height, options?)` que dibuja un rectángulo con fondo `cardBg`, borde redondeado opcional, y barra lateral de color
+- [x] **T1.5** Crear método helper `renderHorizontalBar(doc, x, y, width, maxWidth, color, label, value)` para las barras de distribución
+- [x] **T1.6** Crear método helper `renderAspectBadge(doc, x, y, nature)` que dibuja el badge coloreado `[A]`/`[D]`/`[N]` según naturaleza del aspecto
+- [x] **T1.7** Implementar tracking de página (`pageNumber`) incrementando en cada `addPage()` y llamando a `renderPageHeader` automáticamente
 
 ### Fase 2: Portada
+
 > Rediseñar la portada con fondo oscuro y jerarquía visual
 
-- [ ] **T2.1** Reemplazar el fondo gris plano por un fondo púrpura profundo (`coverGradientStart`) ocupando toda la página
-- [ ] **T2.2** Agregar un segundo rectángulo en la mitad inferior con `coverGradientEnd` para simular gradiente
-- [ ] **T2.3** Dibujar la decoración "── ✦ ──" centrada arriba del título (líneas doradas + punto central)
-- [ ] **T2.4** Renderizar "CARTA ASTRAL" con `characterSpacing: 4`, color `textOnDark`, 32pt, centrado
-- [ ] **T2.5** Renderizar el nombre en color `textGold`, 28pt, centrado
-- [ ] **T2.6** Agregar línea separadora fina dorada debajo del nombre
-- [ ] **T2.7** Datos de nacimiento en color `textOnDark`, 13pt
-- [ ] **T2.8** Big Three en una caja con borde semi-transparente (rect con `strokeColor` blanco, `opacity` 0.3) con fondo ligeramente más claro. Incluir símbolos planetarios
-- [ ] **T2.9** Footer con fecha de generación en color lavanda suave
+- [x] **T2.1** Reemplazar el fondo gris plano por un fondo púrpura profundo (`coverGradientStart`) ocupando toda la página
+- [x] **T2.2** Agregar un segundo rectángulo en la mitad inferior con `coverGradientEnd` para simular gradiente
+- [x] **T2.3** Dibujar la decoración "── ✦ ──" centrada arriba del título (líneas doradas + punto central)
+- [x] **T2.4** Renderizar "CARTA ASTRAL" con `characterSpacing: 4`, color `textOnDark`, 32pt, centrado
+- [x] **T2.5** Renderizar el nombre en color `textGold`, 28pt, centrado
+- [x] **T2.6** Agregar línea separadora fina dorada debajo del nombre
+- [x] **T2.7** Datos de nacimiento en color `textOnDark`, 13pt
+- [x] **T2.8** Big Three en una caja con borde semi-transparente (rect con `strokeColor` blanco, `opacity` 0.3) con fondo ligeramente más claro. Incluir símbolos planetarios
+- [x] **T2.9** Footer con fecha de generación en color lavanda suave
 
 ### Fase 3: Página de Posiciones y Distribución
+
 > Nueva página 2 con tabla mejorada y gráficos de barras
 
-- [ ] **T3.1** Renderizar tabla de posiciones planetarias con filas alternadas (`tableRowAlt` / blanco)
-- [ ] **T3.2** Agregar columna de símbolo planetario a la izquierda de cada fila
-- [ ] **T3.3** Agregar columna "Retrógrado" que muestra "℞" cuando `isRetrograde === true`
-- [ ] **T3.4** Renderizar tabla de cúspides de casas en 2 columnas lado a lado (Casas I-VI | Casas VII-XII). Usar los datos de `chartData.houses`
-- [ ] **T3.5** Renderizar barras horizontales de distribución de **Elementos** con colores: Fuego=rojo, Tierra=verde, Aire=amarillo, Agua=azul
-- [ ] **T3.6** Renderizar barras horizontales de distribución de **Modalidades** (Cardinal, Fijo, Mutable) con tonos violeta
-- [ ] **T3.7** Renderizar barras horizontales de distribución de **Polaridad** (Masculino/Femenino) usando los datos de `chartData.distribution.polarity`
+- [x] **T3.1** Renderizar tabla de posiciones planetarias con filas alternadas (`tableRowAlt` / blanco)
+- [x] **T3.2** Agregar columna de símbolo planetario a la izquierda de cada fila
+- [x] **T3.3** Agregar columna "Retrógrado" que muestra "℞" cuando `isRetrograde === true`
+- [x] **T3.4** Renderizar tabla de cúspides de casas en 2 columnas lado a lado (Casas I-VI | Casas VII-XII). Usar los datos de `chartData.houses`
+- [x] **T3.5** Renderizar barras horizontales de distribución de **Elementos** con colores: Fuego=rojo, Tierra=verde, Aire=amarillo, Agua=azul
+- [x] **T3.6** Renderizar barras horizontales de distribución de **Modalidades** (Cardinal, Fijo, Mutable) con tonos violeta
+- [x] **T3.7** Renderizar barras horizontales de distribución de **Polaridad** (Masculino/Femenino) usando los datos de `chartData.distribution.polarity`
 
 ### Fase 4: Aspectario (Grilla de Aspectos) — NUEVA PÁGINA
+
 > Agregar la página 3 con la matriz de aspectos
 
-- [ ] **T4.1** Crear nuevo método `renderAspectGridPage(doc, chartData)`
-- [ ] **T4.2** Construir una grilla de 10x10 (planetas) donde cada celda muestra el símbolo del aspecto si existe entre esos dos planetas. Solo rellenar el triángulo inferior para evitar duplicados
-- [ ] **T4.3** Colorear el fondo de cada celda según la naturaleza del aspecto (`aspectHarmonious`, `aspectChallenging`, `aspectNeutral`)
-- [ ] **T4.4** Renderizar encabezados de fila y columna con símbolos planetarios
-- [ ] **T4.5** Agregar leyenda debajo de la grilla explicando cada símbolo de aspecto y su color
-- [ ] **T4.6** Agregar sección "RESUMEN DE ASPECTOS" con caja que muestre:
+- [x] **T4.1** Crear nuevo método `renderAspectGridPage(doc, chartData)`
+- [x] **T4.2** Construir una grilla de 10x10 (planetas) donde cada celda muestra el símbolo del aspecto si existe entre esos dos planetas. Solo rellenar el triángulo inferior para evitar duplicados
+- [x] **T4.3** Colorear el fondo de cada celda según la naturaleza del aspecto (`aspectHarmonious`, `aspectChallenging`, `aspectNeutral`)
+- [x] **T4.4** Renderizar encabezados de fila y columna con símbolos planetarios
+- [x] **T4.5** Agregar leyenda debajo de la grilla explicando cada símbolo de aspecto y su color
+- [x] **T4.6** Agregar sección "RESUMEN DE ASPECTOS" con caja que muestre:
   - Total de aspectos
   - Cantidad armónicos vs desafiantes vs neutrales (con mini-barras)
   - Aspecto más fuerte (menor orbe)
   - Usar datos de `interpretation.aspectSummary`
 
 ### Fase 5: Big Three Rediseñado
+
 > Mejorar las páginas del Big Three con boxes y mejor jerarquía
 
-- [ ] **T5.1** Rediseñar `renderBigThreeSection` para usar un header box con:
+- [x] **T5.1** Rediseñar `renderBigThreeSection` para usar un header box con:
   - Fondo `cardBg`
   - Barra lateral izquierda de 4px en `accentViolet`
   - Símbolo del planeta grande (24pt) en violeta
   - Nombre del planeta en bold 20pt
   - "en [Signo]" en 16pt violeta debajo
-- [ ] **T5.2** Renderizar el texto de interpretación con `lineGap: 4` para mejor legibilidad
-- [ ] **T5.3** Asegurar que cada sección del Big Three comienza en una nueva página con `renderPageHeader`
+- [x] **T5.2** Renderizar el texto de interpretación con `lineGap: 4` para mejor legibilidad
+- [x] **T5.3** Asegurar que cada sección del Big Three comienza en una nueva página con `renderPageHeader`
 
 ### Fase 6: Páginas de Planetas Rediseñadas
+
 > Mejorar el layout de cada planeta individual
 
-- [ ] **T6.1** Rediseñar header del planeta con box similar al Big Three (fondo + barra lateral)
-- [ ] **T6.2** Renderizar la introducción del planeta en un bloque destacado con fondo `cardBg` y borde izquierdo dorado (`accentGold`), padding de 10px
-- [ ] **T6.3** Implementar subtítulos de sección ("En [Signo]", "En Casa [N]", "Aspectos") con el formato de línea extendida
-- [ ] **T6.4** Renderizar cada aspecto en su propia caja con:
+- [x] **T6.1** Rediseñar header del planeta con box similar al Big Three (fondo + barra lateral)
+- [x] **T6.2** Renderizar la introducción del planeta en un bloque destacado con fondo `cardBg` y borde izquierdo dorado (`accentGold`), padding de 10px
+- [x] **T6.3** Implementar subtítulos de sección ("En [Signo]", "En Casa [N]", "Aspectos") con el formato de línea extendida
+- [x] **T6.4** Renderizar cada aspecto en su propia caja con:
   - Borde sutil (`lineLight`)
   - Nombre del aspecto en bold con badge de color según naturaleza
   - Texto de interpretación debajo
-- [ ] **T6.5** Mejorar el control de paginación: al inicio de cada nueva sección verificar espacio disponible. Si la sección no cabe (menos de 150px restantes), saltar a nueva página
+- [x] **T6.5** Mejorar el control de paginación: al inicio de cada nueva sección verificar espacio disponible. Si la sección no cabe (menos de 150px restantes), saltar a nueva página
 
 ### Fase 7: Síntesis IA
+
 > Mejorar la presentación de la síntesis
 
-- [ ] **T7.1** Agregar header box con ícono "✦" y texto "SÍNTESIS PERSONALIZADA" con subtítulo "Análisis generado por Inteligencia Artificial"
-- [ ] **T7.2** Renderizar párrafos con `lineGap: 6` y separación entre párrafos de 15px
-- [ ] **T7.3** Control de paginación para textos largos que excedan una página
+- [x] **T7.1** Agregar header box con ícono "✦" y texto "SÍNTESIS PERSONALIZADA" con subtítulo "Análisis personalizado exclusivo para usuarios Premium"
+- [x] **T7.2** Renderizar párrafos con `lineGap: 6` y separación entre párrafos de 15px
+- [x] **T7.3** Control de paginación para textos largos que excedan una página
 
 ### Fase 8: Disclaimer
+
 > Darle un diseño más limpio y elegante
 
-- [ ] **T8.1** Centrar verticalmente el contenido en la página
-- [ ] **T8.2** Agregar decoración "── ✦ ──" arriba del título
-- [ ] **T8.3** Texto del disclaimer en `textSecondary`, centrado, con `lineGap: 4`
-- [ ] **T8.4** Copyright y nombre de Auguria al final con separador
+- [x] **T8.1** Centrar verticalmente el contenido en la página
+- [x] **T8.2** Agregar decoración "── ✦ ──" arriba del título
+- [x] **T8.3** Texto del disclaimer en `textSecondary`, centrado, con `lineGap: 4`
+- [x] **T8.4** Copyright y nombre de Auguria al final con separador
 
 ### Fase 9: Integración y Flujo Principal
+
 > Actualizar `generatePDF()` para incluir las nuevas páginas
 
-- [ ] **T9.1** Actualizar el flujo de `generatePDF()` para insertar la nueva página de Aspectario (Fase 4) entre la página de Posiciones y el Big Three
-- [ ] **T9.2** Verificar que el `pageCount` se actualiza correctamente con la nueva página
-- [ ] **T9.3** Asegurar que `renderPageHeader` se llama en todas las páginas interiores (no en portada)
+- [x] **T9.1** Actualizar el flujo de `generatePDF()` para insertar la nueva página de Aspectario (Fase 4) entre la página de Posiciones y el Big Three
+- [x] **T9.2** Verificar que el `pageCount` se actualiza correctamente con la nueva página
+- [x] **T9.3** Asegurar que `renderPageHeader` se llama en todas las páginas interiores (no en portada)
 
 ### Fase 10: Tests
+
 > Actualizar tests existentes y agregar nuevos
 
-- [ ] **T10.1** Actualizar `chart-pdf.service.spec.ts` para reflejar el nuevo número de páginas esperado
-- [ ] **T10.2** Agregar test para verificar que la grilla de aspectos se genera correctamente
-- [ ] **T10.3** Agregar test para verificar que las barras de distribución manejan correctamente porcentajes de 0% y 100%
-- [ ] **T10.4** Agregar test para verificar el rendering de la tabla de casas
-- [ ] **T10.5** Ejecutar ciclo de calidad completo: `npm run format && npm run lint && npm run test:cov && npm run build`
+- [x] **T10.1** Actualizar `chart-pdf.service.spec.ts` para reflejar el nuevo número de páginas esperado
+- [x] **T10.2** Agregar test para verificar que la grilla de aspectos se genera correctamente
+- [x] **T10.3** Agregar test para verificar que las barras de distribución manejan correctamente porcentajes de 0% y 100%
+- [x] **T10.4** Agregar test para verificar el rendering de la tabla de casas
+- [x] **T10.5** Ejecutar ciclo de calidad completo: `npm run format && npm run lint && npm run test:cov && npm run build`
 
 ### Fase 11: QA Visual
+
 > Verificación manual del PDF generado
 
-- [ ] **T11.1** Generar un PDF de prueba y verificar visualmente cada página
-- [ ] **T11.2** Verificar que los saltos de página funcionan correctamente en planetas con muchos aspectos
-- [ ] **T11.3** Verificar que los símbolos Unicode se renderizan correctamente (☉, ☽, ☿, ♀, ♂, ♃, ♄, ♅, ♆, ♇, ☌, ☍, □, △, ⚹, ℞)
-- [ ] **T11.4** Verificar el PDF con nombres largos y con caracteres especiales
-- [ ] **T11.5** Verificar la versión Free (sin síntesis IA) y Premium (con síntesis IA)
+- [x] **T11.1** Generar un PDF de prueba y verificar visualmente cada página
+- [x] **T11.2** Verificar que los saltos de página funcionan correctamente en planetas con muchos aspectos
+- [x] **T11.3** Verificar que los símbolos Unicode se renderizan correctamente (☉, ☽, ☿, ♀, ♂, ♃, ♄, ♅, ♆, ♇, ☌, ☍, □, △, ⚹, ℞)
+- [x] **T11.4** Verificar el PDF con nombres largos y con caracteres especiales
+- [x] **T11.5** Verificar la versión Free (sin síntesis IA) y Premium (con síntesis IA)
 
 ---
 
 ## 7. Datos Disponibles (Referencia Rápida)
 
-| Dato | Origen | Usado actualmente | Nuevo uso |
-|------|--------|-------------------|-----------|
-| `chartData.planets[]` | Cálculos | Tabla posiciones | Tabla mejorada + Aspectario |
-| `chartData.houses[]` | Cálculos | NO | Tabla de casas (nuevo) |
-| `chartData.aspects[]` | Cálculos | Solo en interpretación | Grilla de aspectos (nuevo) |
-| `chartData.distribution.elements` | Cálculos | Texto simple | Barras coloreadas (nuevo) |
-| `chartData.distribution.modalities` | Cálculos | NO | Barras coloreadas (nuevo) |
-| `chartData.distribution.polarity` | Cálculos | NO | Barras coloreadas (nuevo) |
-| `interpretation.aspectSummary` | Servicio | NO | Resumen de aspectos (nuevo) |
-| `interpretation.distribution` | Servicio | Elementos solo | Elementos + Modalidades |
+| Dato                                | Origen   | Usado actualmente      | Nuevo uso                   |
+| ----------------------------------- | -------- | ---------------------- | --------------------------- |
+| `chartData.planets[]`               | Cálculos | Tabla posiciones       | Tabla mejorada + Aspectario |
+| `chartData.houses[]`                | Cálculos | NO                     | Tabla de casas (nuevo)      |
+| `chartData.aspects[]`               | Cálculos | Solo en interpretación | Grilla de aspectos (nuevo)  |
+| `chartData.distribution.elements`   | Cálculos | Texto simple           | Barras coloreadas (nuevo)   |
+| `chartData.distribution.modalities` | Cálculos | NO                     | Barras coloreadas (nuevo)   |
+| `chartData.distribution.polarity`   | Cálculos | NO                     | Barras coloreadas (nuevo)   |
+| `interpretation.aspectSummary`      | Servicio | NO                     | Resumen de aspectos (nuevo) |
+| `interpretation.distribution`       | Servicio | Elementos solo         | Elementos + Modalidades     |
 
 ---
 
 ## 8. Notas para Implementación con PDFKit
 
 ### Gradiente simulado
+
 PDFKit no tiene gradientes nativos. Simular con múltiples rectángulos de colores progresivos:
+
 ```js
 // Simular gradiente con 2 bloques
-doc.rect(0, 0, width, height/2).fill('#1A0B2E');
-doc.rect(0, height/2, width, height/2).fill('#2D1B4E');
+doc.rect(0, 0, width, height / 2).fill("#1A0B2E");
+doc.rect(0, height / 2, width, height / 2).fill("#2D1B4E");
 ```
 
 ### Rectángulos redondeados
+
 ```js
 doc.roundedRect(x, y, width, height, cornerRadius).fill(color);
 ```
 
 ### Barra lateral de color en boxes
+
 ```js
 // Primero el fondo
 doc.roundedRect(x, y, w, h, 4).fill(cardBg);
@@ -559,15 +601,17 @@ doc.rect(x, y, 4, h).fill(accentViolet);
 ```
 
 ### Character spacing para títulos
+
 ```js
-doc.text('CARTA ASTRAL', x, y, { characterSpacing: 4, align: 'center' });
+doc.text("CARTA ASTRAL", x, y, { characterSpacing: 4, align: "center" });
 ```
 
 ### Opacidad
+
 ```js
 doc.save();
 doc.opacity(0.3);
-doc.rect(x, y, w, h).stroke('#FFFFFF');
+doc.rect(x, y, w, h).stroke("#FFFFFF");
 doc.restore();
 ```
 
