@@ -373,4 +373,213 @@ describe('BirthChartHistoryService', () => {
 
     expect(exists).toBe(true);
   });
+
+  describe('toSavedChartSummary — birthDate type normalization', () => {
+    it('should handle birthDate as Date object in getUserCharts', async () => {
+      const createdAt = new Date('2026-02-12T00:00:00Z');
+      const chart: Partial<BirthChart> = {
+        id: 1,
+        name: 'Mi carta',
+        birthDate: new Date('1990-05-15T00:00:00Z'),
+        sunSign: 'leo',
+        moonSign: 'aries',
+        ascendantSign: 'virgo',
+        createdAt,
+      };
+
+      chartRepositoryMock.findAndCount.mockResolvedValue([[chart], 1]);
+
+      const result = await service.getUserCharts(1, 1, 10);
+
+      expect(result.data[0].birthDate).toBe('1990-05-15');
+      expect(result.data[0].createdAt).toBe('2026-02-12T00:00:00.000Z');
+    });
+
+    it('should handle birthDate as string (PostgreSQL DATE type) in getUserCharts', async () => {
+      const chart: Partial<BirthChart> = {
+        id: 2,
+        name: 'Carta desde DB',
+        birthDate: '1985-11-20' as unknown as Date,
+        sunSign: 'leo',
+        moonSign: 'aries',
+        ascendantSign: 'virgo',
+        createdAt: '2026-01-10T08:00:00.000Z' as unknown as Date,
+      };
+
+      chartRepositoryMock.findAndCount.mockResolvedValue([[chart], 1]);
+
+      const result = await service.getUserCharts(1, 1, 10);
+
+      expect(result.data[0].birthDate).toBe('1985-11-20');
+      expect(result.data[0].createdAt).toBe('2026-01-10T08:00:00.000Z');
+    });
+
+    it('should not throw TypeError when birthDate is string in getUserCharts', async () => {
+      const chart: Partial<BirthChart> = {
+        id: 3,
+        name: 'Carta string date',
+        birthDate: '2000-03-25' as unknown as Date,
+        sunSign: 'aries',
+        moonSign: 'taurus',
+        ascendantSign: 'gemini',
+        createdAt: '2026-02-20T10:00:00.000Z' as unknown as Date,
+      };
+
+      chartRepositoryMock.findAndCount.mockResolvedValue([[chart], 1]);
+
+      await expect(service.getUserCharts(1, 1, 10)).resolves.not.toThrow();
+    });
+  });
+
+  describe('getChartById — date type normalization', () => {
+    it('should handle createdAt and updatedAt as Date objects in getChartById', async () => {
+      const chart: BirthChart = {
+        id: 20,
+        userId: 1,
+        name: 'Carta con Date',
+        birthDate: new Date('1990-05-15T00:00:00Z'),
+        birthTime: '14:30:00',
+        birthPlace: 'Buenos Aires',
+        latitude: -34.6,
+        longitude: -58.3,
+        timezone: 'America/Argentina/Buenos_Aires',
+        chartData: baseChartData,
+        sunSign: 'leo',
+        moonSign: 'aries',
+        ascendantSign: 'virgo',
+        createdAt: new Date('2026-02-10T12:00:00Z'),
+        updatedAt: new Date('2026-02-11T12:00:00Z'),
+        user: {} as never,
+        getBigThree: jest.fn(),
+        hasAiSynthesis: jest.fn(),
+        getAspectsForPlanet: jest.fn(),
+      };
+
+      chartRepositoryMock.findOne.mockResolvedValue(chart);
+      chartInterpretationServiceMock.generateFullInterpretation.mockResolvedValue(
+        {
+          bigThree: {
+            sun: { sign: 'leo', signName: 'Leo', interpretation: 'Sol en Leo' },
+            moon: {
+              sign: 'aries',
+              signName: 'Aries',
+              interpretation: 'Luna en Aries',
+            },
+            ascendant: {
+              sign: 'virgo',
+              signName: 'Virgo',
+              interpretation: 'Ascendente en Virgo',
+            },
+          },
+          planets: [],
+          distribution: { elements: [], modalities: [] },
+          aspectSummary: { total: 0, harmonious: 0, challenging: 0 },
+        },
+      );
+
+      const result = await service.getChartById(20, 1);
+
+      expect(result).not.toBeNull();
+      expect(result?.createdAt).toBe('2026-02-10T12:00:00.000Z');
+    });
+
+    it('should handle createdAt as string (PostgreSQL TIMESTAMP type) in getChartById', async () => {
+      const chart: BirthChart = {
+        id: 21,
+        userId: 1,
+        name: 'Carta con string dates',
+        birthDate: new Date('1990-05-15T00:00:00Z'),
+        birthTime: '14:30:00',
+        birthPlace: 'Buenos Aires',
+        latitude: -34.6,
+        longitude: -58.3,
+        timezone: 'America/Argentina/Buenos_Aires',
+        chartData: baseChartData,
+        sunSign: 'leo',
+        moonSign: 'aries',
+        ascendantSign: 'virgo',
+        createdAt: '2026-02-10T12:00:00.000Z' as unknown as Date,
+        updatedAt: '2026-02-11T12:00:00.000Z' as unknown as Date,
+        user: {} as never,
+        getBigThree: jest.fn(),
+        hasAiSynthesis: jest.fn(),
+        getAspectsForPlanet: jest.fn(),
+      };
+
+      chartRepositoryMock.findOne.mockResolvedValue(chart);
+      chartInterpretationServiceMock.generateFullInterpretation.mockResolvedValue(
+        {
+          bigThree: {
+            sun: { sign: 'leo', signName: 'Leo', interpretation: 'Sol en Leo' },
+            moon: {
+              sign: 'aries',
+              signName: 'Aries',
+              interpretation: 'Luna en Aries',
+            },
+            ascendant: {
+              sign: 'virgo',
+              signName: 'Virgo',
+              interpretation: 'Ascendente en Virgo',
+            },
+          },
+          planets: [],
+          distribution: { elements: [], modalities: [] },
+          aspectSummary: { total: 0, harmonious: 0, challenging: 0 },
+        },
+      );
+
+      const result = await service.getChartById(21, 1);
+
+      expect(result).not.toBeNull();
+      expect(result?.createdAt).toBe('2026-02-10T12:00:00.000Z');
+    });
+
+    it('should not throw TypeError when createdAt/updatedAt are strings in getChartById', async () => {
+      const chart: BirthChart = {
+        id: 22,
+        userId: 1,
+        name: 'Carta strings',
+        birthDate: new Date('1990-05-15T00:00:00Z'),
+        birthTime: '14:30:00',
+        birthPlace: 'Buenos Aires',
+        latitude: -34.6,
+        longitude: -58.3,
+        timezone: 'America/Argentina/Buenos_Aires',
+        chartData: { ...baseChartData, aiSynthesis: 'síntesis' },
+        sunSign: 'leo',
+        moonSign: 'aries',
+        ascendantSign: 'virgo',
+        createdAt: '2026-02-10T12:00:00.000Z' as unknown as Date,
+        updatedAt: '2026-02-11T12:00:00.000Z' as unknown as Date,
+        user: {} as never,
+        getBigThree: jest.fn(),
+        hasAiSynthesis: jest.fn(),
+        getAspectsForPlanet: jest.fn(),
+      };
+
+      chartRepositoryMock.findOne.mockResolvedValue(chart);
+      chartInterpretationServiceMock.generateFullInterpretation.mockResolvedValue(
+        {
+          bigThree: {
+            sun: { sign: 'leo', signName: 'Leo', interpretation: 'Sol en Leo' },
+            moon: {
+              sign: 'aries',
+              signName: 'Aries',
+              interpretation: 'Luna en Aries',
+            },
+            ascendant: {
+              sign: 'virgo',
+              signName: 'Virgo',
+              interpretation: 'Ascendente en Virgo',
+            },
+          },
+          planets: [],
+          distribution: { elements: [], modalities: [] },
+          aspectSummary: { total: 0, harmonious: 0, challenging: 0 },
+        },
+      );
+
+      await expect(service.getChartById(22, 1)).resolves.not.toThrow();
+    });
+  });
 });

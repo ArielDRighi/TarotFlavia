@@ -2,7 +2,7 @@
 
 > **Severidad:** Alta — El historial Premium de Carta Astral no funciona (HTTP 500) + inconsistencias UX generalizadas en acceso al historial
 > **Fecha de detección:** 2026-02-22
-> **Estado:** TASK-FIX-HIST-01 ⏳ Pendiente | TASK-FIX-HIST-02 ⏳ Pendiente | TASK-FIX-HIST-03 ⏳ Pendiente
+> **Estado:** TASK-FIX-HIST-01 ✅ COMPLETADA | TASK-FIX-HIST-02 ⏳ Pendiente | TASK-FIX-HIST-03 ⏳ Pendiente
 
 ---
 
