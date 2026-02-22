@@ -4,9 +4,9 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 export default function SavedChartLoading() {
   return (
     <div className="from-background to-muted/20 min-h-screen bg-gradient-to-b">
-      {/* Header skeleton */}
-      <header className="bg-background/95 sticky top-0 z-50 border-b backdrop-blur">
-        <div className="container flex h-14 items-center justify-between">
+      <main className="container mx-auto max-w-6xl px-4 py-8">
+        {/* Breadcrumb skeleton — dentro del main, sin header sticky extra */}
+        <div className="mb-6 flex items-center justify-between" data-testid="skeleton-nav">
           <Skeleton className="h-9 w-32" data-testid="skeleton-breadcrumb" />
           <div className="flex items-center gap-2">
             <Skeleton className="h-6 w-20" data-testid="skeleton-badge" />
@@ -14,9 +14,6 @@ export default function SavedChartLoading() {
             <Skeleton className="h-9 w-9" data-testid="skeleton-menu-button" />
           </div>
         </div>
-      </header>
-
-      <main className="container max-w-6xl px-4 py-8">
         {/* Title skeleton */}
         <div className="mb-8 text-center">
           <Skeleton className="mx-auto mb-2 h-9 w-64" data-testid="skeleton-title" />

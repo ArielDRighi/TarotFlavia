@@ -874,11 +874,12 @@ describe('BirthChartResultPage', () => {
       expect(stickyHeaders).toBe(0);
     });
 
-    it('should render "Nueva carta" link pointing to /carta-astral', () => {
+    it('should render "Nueva carta" button in navigation area', () => {
       render(<BirthChartResultPage />);
 
-      // El botón de nueva carta puede ser un Link o un Button con onClick
-      // Lo importante es que existe y navega a /carta-astral
+      // Verifica que el botón de nueva carta existe en el área de navegación del main
+      // (La navegación completa — reset + router.push — está cubierta por el test
+      // "should call reset and navigate to /carta-astral when 'Nueva carta' is clicked")
       const newChartButton = screen.getByRole('button', { name: /nueva carta/i });
       expect(newChartButton).toBeInTheDocument();
     });

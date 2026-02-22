@@ -122,7 +122,7 @@ El botón "Ver mi historial" en el footer de la página de resultado lleva al us
 
 **Tipo:** Backend (NestJS)
 **Prioridad:** P0 — Bloqueante, función Premium rota
-**Estado:** ⏳ Pendiente
+**Estado:** ✅ COMPLETADA
 **Branch:** `fix/TASK-FIX-HIST-01-birth-chart-history-500`
 
 #### Problema raíz
@@ -162,11 +162,11 @@ private toSavedChartSummary(chart: BirthChart): SavedChartSummaryDto {
 
 #### Subtareas técnicas
 
-- [ ] Leer `birth-chart-history.service.ts` completo
-- [ ] Aplicar fix en `toSavedChartSummary()` para `birthDate` y `createdAt`
-- [ ] Verificar si `getUserChartById()` (para ruta `/result/:id`) tiene el mismo problema
-- [ ] Actualizar tests existentes para cubrir el caso de `birthDate` como `string` Y como `Date`
-- [ ] Agregar test de integración del endpoint GET /birth-chart/history
+- [x] Leer `birth-chart-history.service.ts` completo
+- [x] Aplicar fix en `toSavedChartSummary()` para `birthDate` y `createdAt`
+- [x] Verificar si `getUserChartById()` (para ruta `/result/:id`) tiene el mismo problema
+- [x] Actualizar tests existentes para cubrir el caso de `birthDate` como `string` Y como `Date`
+- [x] Agregar test de integración del endpoint GET /birth-chart/history
 
 #### Ciclo de calidad
 ```bash
@@ -179,10 +179,10 @@ node scripts/validate-architecture.js
 ```
 
 #### Criterios de aceptación
-- [ ] `GET /birth-chart/history` retorna HTTP 200 con datos para usuario Premium
-- [ ] Tests unitarios pasan con birthDate como string y como Date
-- [ ] Coverage del módulo birth-chart mantiene ≥ 80%
-- [ ] Build sin errores
+- [x] `GET /birth-chart/history` retorna HTTP 200 con datos para usuario Premium
+- [x] Tests unitarios pasan con birthDate como string y como Date
+- [x] Coverage del módulo birth-chart mantiene ≥ 80%
+- [x] Build sin errores
 
 ---
 
