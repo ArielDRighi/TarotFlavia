@@ -147,4 +147,61 @@ describe('QuickActions', () => {
     const icons = document.querySelectorAll('svg');
     expect(icons.length).toBeGreaterThanOrEqual(3);
   });
+
+  describe('Premium user — acceso a Carta Astral Historial', () => {
+    beforeEach(() => {
+      mockUseAuthStore.mockReturnValue({
+        user: {
+          id: 2,
+          email: 'premium@test.com',
+          plan: 'premium',
+        },
+        isAuthenticated: true,
+      });
+    });
+
+    it('should display "Mis Cartas Astrales" card for Premium users', () => {
+      render(<QuickActions />);
+
+      expect(screen.getByText('Mis Cartas Astrales')).toBeInTheDocument();
+    });
+
+    it('should link "Mis Cartas Astrales" to /carta-astral/historial for Premium users', () => {
+      render(<QuickActions />);
+
+      const cartasCard = screen.getByText('Mis Cartas Astrales');
+      expect(cartasCard.closest('a')).toHaveAttribute('href', '/carta-astral/historial');
+    });
+
+    it('should NOT display "Carta del Día" card for Premium users (replaced by Mis Cartas Astrales)', () => {
+      render(<QuickActions />);
+
+      expect(screen.queryByText('Carta del Día')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Free user — NO muestra acceso a Carta Astral Historial', () => {
+    beforeEach(() => {
+      mockUseAuthStore.mockReturnValue({
+        user: {
+          id: 1,
+          email: 'free@test.com',
+          plan: 'free',
+        },
+        isAuthenticated: true,
+      });
+    });
+
+    it('should NOT display "Mis Cartas Astrales" card for Free users', () => {
+      render(<QuickActions />);
+
+      expect(screen.queryByText('Mis Cartas Astrales')).not.toBeInTheDocument();
+    });
+
+    it('should display "Carta del Día" card for Free users', () => {
+      render(<QuickActions />);
+
+      expect(screen.getByText('Carta del Día')).toBeInTheDocument();
+    });
+  });
 });

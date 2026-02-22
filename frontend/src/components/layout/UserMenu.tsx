@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { User, Settings, BookOpen, LogOut } from 'lucide-react';
+import { User, Settings, BookOpen, LogOut, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -72,6 +72,14 @@ export function UserMenu() {
             Mis Lecturas
           </Link>
         </DropdownMenuItem>
+        {user.plan === 'premium' && (
+          <DropdownMenuItem asChild>
+            <Link href="/carta-astral/historial" className="flex items-center">
+              <Star className="mr-2 size-4" />
+              Mis Cartas Astrales
+            </Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem asChild>
           <Link href="/configuracion" className="flex items-center">
             <Settings className="mr-2 size-4" />
