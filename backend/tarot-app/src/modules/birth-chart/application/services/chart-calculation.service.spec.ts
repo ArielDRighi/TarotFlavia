@@ -281,14 +281,16 @@ describe('ChartCalculationService', () => {
       expect(result.calculationTimeMs).toBeGreaterThanOrEqual(0);
     });
 
-    it('should call ephemeris.calculate with correct parameters', () => {
+    it('should call ephemeris.calculate with correct parameters (UTC, not local time)', () => {
+      // mockInput: 1990-05-15 14:30 America/Argentina/Buenos_Aires (UTC-3)
+      // Expected UTC: 14:30 + 3h = 17:30
       service.calculateChart(mockInput);
 
       expect(mockEphemeris.calculate).toHaveBeenCalledWith({
         year: 1990,
         month: 5,
         day: 15,
-        hour: 14,
+        hour: 17,
         minute: 30,
         latitude: -34.6037,
         longitude: -58.3816,
@@ -398,9 +400,10 @@ describe('ChartCalculationService', () => {
       const inputWithSeconds = { ...mockInput, birthTime: '14:30:45' };
       service.calculateChart(inputWithSeconds);
 
+      // 14:30 America/Argentina/Buenos_Aires (UTC-3) → 17:30 UTC
       expect(mockEphemeris.calculate).toHaveBeenCalledWith(
         expect.objectContaining({
-          hour: 14,
+          hour: 17,
           minute: 30,
         }),
       );
@@ -410,9 +413,10 @@ describe('ChartCalculationService', () => {
       const midnightInput = { ...mockInput, birthTime: '00:00' };
       service.calculateChart(midnightInput);
 
+      // 00:00 America/Argentina/Buenos_Aires (UTC-3) → 03:00 UTC
       expect(mockEphemeris.calculate).toHaveBeenCalledWith(
         expect.objectContaining({
-          hour: 0,
+          hour: 3,
           minute: 0,
         }),
       );
@@ -422,9 +426,10 @@ describe('ChartCalculationService', () => {
       const noonInput = { ...mockInput, birthTime: '12:00' };
       service.calculateChart(noonInput);
 
+      // 12:00 America/Argentina/Buenos_Aires (UTC-3) → 15:00 UTC
       expect(mockEphemeris.calculate).toHaveBeenCalledWith(
         expect.objectContaining({
-          hour: 12,
+          hour: 15,
           minute: 0,
         }),
       );
@@ -445,6 +450,30 @@ describe('ChartCalculationService', () => {
 
       expect(result.calculationTimeMs).toBeGreaterThanOrEqual(0);
       expect(result.calculationTimeMs).toBeLessThan(1000); // Should be fast
+    });
+
+    it('REGRESIÓN BUG-TZ: pasa hora UTC (no local) a Swiss Ephemeris para Argentina', () => {
+      const input: import('./chart-calculation.service').ChartCalculationInput =
+        {
+          birthDate: new Date(Date.UTC(2011, 9, 18)),
+          birthTime: '01:07',
+          latitude: -31.4,
+          longitude: -64.183,
+          timezone: 'America/Argentina/Cordoba',
+        };
+
+      service.calculateChart(input);
+
+      // 01:07 America/Argentina/Cordoba (UTC-3) → 04:07 UTC
+      expect(mockEphemeris.calculate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          year: 2011,
+          month: 10,
+          day: 18,
+          hour: 4,
+          minute: 7,
+        }),
+      );
     });
   });
 

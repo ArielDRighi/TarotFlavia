@@ -2,7 +2,7 @@
 
 > **Severidad:** Crítica — Afecta la precisión astronómica de TODAS las cartas astrales
 > **Fecha de detección:** 2026-02-22
-> **Estado:** Pendiente de resolución
+> **Estado:** TASK-FIX-TZ-01 ✅ COMPLETADA | TASK-FIX-TZ-02 ⏳ Pendiente
 
 ---
 
@@ -190,7 +190,7 @@ Luxon:  DateTime.fromObject({y:2011, m:10, d:18, h:1, min:7}, {zone:'America/Arg
 
 ### TASK-FIX-TZ-01 — Implementar conversión timezone local → UTC
 
-**Prioridad:** Crítica | **Esfuerzo:** M–L (2–3h)
+**Prioridad:** Crítica | **Esfuerzo:** M–L (2–3h) | **Estado:** ✅ COMPLETADA
 
 **Descripción:**
 Implementar la corrección completa del bug: instalar la dependencia, crear la utilidad
@@ -382,16 +382,16 @@ node scripts/validate-architecture.js
 ```
 
 **Criterios de aceptación:**
-- [ ] `luxon` aparece en `package.json` bajo `dependencies`
-- [ ] `timezone-utils.spec.ts` existe con todos los casos descritos
-- [ ] `timezone-utils.ts` existe y todos sus tests pasan
-- [ ] `parseDateTime` acepta `timezone` y retorna componentes UTC
-- [ ] Test de regresión del bug pasa (hora enviada a ephemeris = 04:07, no 01:07)
-- [ ] `npm run format` sin cambios residuales
-- [ ] `npm run lint` — 0 errores
-- [ ] `npm run test:cov` — todos los tests pasan, coverage global ≥ 80%
-- [ ] `npm run build` — compilación exitosa
-- [ ] `node scripts/validate-architecture.js` — arquitectura válida
+- [x] `luxon` aparece en `package.json` bajo `dependencies`
+- [x] `timezone-utils.spec.ts` existe con todos los casos descritos
+- [x] `timezone-utils.ts` existe y todos sus tests pasan
+- [x] `parseDateTime` acepta `timezone` y retorna componentes UTC
+- [x] Test de regresión del bug pasa (hora enviada a ephemeris = 04:07, no 01:07)
+- [x] `npm run format` sin cambios residuales
+- [x] `npm run lint` — 0 errores
+- [x] `npm run test:cov` — todos los tests pasan, coverage global ≥ 80%
+- [x] `npm run build` — compilación exitosa
+- [x] `node scripts/validate-architecture.js` — arquitectura válida
 
 ---
 

@@ -9,6 +9,7 @@ import {
   PlanetPosition,
 } from '../../entities/birth-chart.entity';
 import { ZodiacSign, ZodiacSignMetadata } from '../../domain/enums';
+import { localToUtc } from '../../domain/utils/timezone-utils';
 
 export interface ChartCalculationInput {
   birthDate: Date;
@@ -46,10 +47,11 @@ export class ChartCalculationService {
     this.logger.log(`Calculating chart for: ${input.birthDate.toISOString()}`);
 
     try {
-      // 1. Parsear fecha y hora
+      // 1. Parsear fecha y hora (convirtiendo a UTC con el timezone del nacimiento)
       const { year, month, day, hour, minute } = this.parseDateTime(
         input.birthDate,
         input.birthTime,
+        input.timezone,
       );
 
       // 2. Validar inputs
@@ -136,6 +138,7 @@ export class ChartCalculationService {
   private parseDateTime(
     birthDate: Date,
     birthTime: string,
+    timezone: string,
   ): {
     year: number;
     month: number;
@@ -153,17 +156,19 @@ export class ChartCalculationService {
       );
     }
 
-    const hour = Number(match[1]);
-    const minute = Number(match[2]);
+    const localHour = Number(match[1]);
+    const localMinute = Number(match[2]);
 
     // Validar rangos
-    if (hour < 0 || hour > 23) {
-      throw new Error(`Invalid hour: ${hour}. Hour must be between 0 and 23.`);
+    if (localHour < 0 || localHour > 23) {
+      throw new Error(
+        `Invalid hour: ${localHour}. Hour must be between 0 and 23.`,
+      );
     }
 
-    if (minute < 0 || minute > 59) {
+    if (localMinute < 0 || localMinute > 59) {
       throw new Error(
-        `Invalid minute: ${minute}. Minute must be between 0 and 59.`,
+        `Invalid minute: ${localMinute}. Minute must be between 0 and 59.`,
       );
     }
 
@@ -172,13 +177,18 @@ export class ChartCalculationService {
       throw new Error('Invalid birthDate: Date object is invalid (NaN).');
     }
 
-    return {
-      year: birthDate.getUTCFullYear(),
-      month: birthDate.getUTCMonth() + 1, // JavaScript usa 0-11
-      day: birthDate.getUTCDate(),
-      hour,
-      minute,
-    };
+    // Convertir hora local → UTC usando el timezone IANA del nacimiento
+    // Swiss Ephemeris requiere UT (Universal Time) como entrada
+    return localToUtc(
+      {
+        year: birthDate.getUTCFullYear(),
+        month: birthDate.getUTCMonth() + 1, // JavaScript usa 0-11
+        day: birthDate.getUTCDate(),
+        hour: localHour,
+        minute: localMinute,
+      },
+      timezone,
+    );
   }
 
   /**
