@@ -274,6 +274,7 @@ export class ChartPdfService {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
+      timeZone: 'UTC',
     });
 
     doc.text(`Nacimiento: ${birthDateStr}`, 50, 320, { align: 'center' });

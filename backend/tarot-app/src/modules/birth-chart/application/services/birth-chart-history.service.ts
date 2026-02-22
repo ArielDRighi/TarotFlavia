@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { parseBirthDate } from '../../domain/utils/date-utils';
 import { Repository } from 'typeorm';
 import {
   ChartHistoryResponseDto,
@@ -190,7 +191,7 @@ export class BirthChartHistoryService {
     return this.chartRepo.findOne({
       where: {
         userId,
-        birthDate: new Date(birthDate),
+        birthDate: parseBirthDate(birthDate),
         birthTime: this.normalizeBirthTime(birthTime),
         latitude,
         longitude,
@@ -203,7 +204,7 @@ export class BirthChartHistoryService {
     dto: CreateBirthChartDto,
   ): Promise<SavedChartSummaryDto> {
     const input: ChartCalculationInput = {
-      birthDate: new Date(dto.birthDate),
+      birthDate: parseBirthDate(dto.birthDate),
       birthTime: dto.birthTime,
       latitude: dto.latitude,
       longitude: dto.longitude,
@@ -220,7 +221,7 @@ export class BirthChartHistoryService {
             chartData,
           ),
         userName: dto.name,
-        birthDate: new Date(dto.birthDate),
+        birthDate: parseBirthDate(dto.birthDate),
       },
       userId,
     );
@@ -228,7 +229,7 @@ export class BirthChartHistoryService {
     const chart = this.chartRepo.create({
       userId,
       name: dto.chartName ?? dto.name,
-      birthDate: new Date(dto.birthDate),
+      birthDate: parseBirthDate(dto.birthDate),
       birthTime: this.normalizeBirthTime(dto.birthTime),
       birthPlace: dto.birthPlace,
       latitude: dto.latitude,
