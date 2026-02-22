@@ -70,7 +70,7 @@ export class BirthChartFacadeService {
       `Generating birth chart for plan ${plan}${fingerprint ? ' with fingerprint' : ''}`,
     );
 
-    const birthDate = new Date(dto.birthDate);
+    const birthDate = this.parseBirthDate(dto.birthDate);
     const cacheKey = this.cacheService.generateChartCacheKey(
       birthDate,
       dto.birthTime,
@@ -137,7 +137,7 @@ export class BirthChartFacadeService {
     this.logger.log(`Generating birth chart PDF for user ${user.userId}`);
 
     const input: ChartCalculationInput = {
-      birthDate: new Date(dto.birthDate),
+      birthDate: this.parseBirthDate(dto.birthDate),
       birthTime: dto.birthTime,
       latitude: dto.latitude,
       longitude: dto.longitude,
@@ -155,7 +155,7 @@ export class BirthChartFacadeService {
           chartData,
           interpretation,
           userName: dto.name,
-          birthDate: new Date(dto.birthDate),
+          birthDate: this.parseBirthDate(dto.birthDate),
         },
         user.userId,
       );
@@ -167,7 +167,7 @@ export class BirthChartFacadeService {
       interpretation,
       aiSynthesis,
       userName: dto.name,
-      birthDate: new Date(dto.birthDate),
+      birthDate: this.parseBirthDate(dto.birthDate),
       birthTime: dto.birthTime,
       birthPlace: dto.birthPlace,
       generatedAt: new Date(),
@@ -258,7 +258,7 @@ export class BirthChartFacadeService {
     this.logger.log(`Generating synthesis only for user ${userId}`);
 
     const input: ChartCalculationInput = {
-      birthDate: new Date(dto.birthDate),
+      birthDate: this.parseBirthDate(dto.birthDate),
       birthTime: dto.birthTime,
       latitude: dto.latitude,
       longitude: dto.longitude,
@@ -274,7 +274,7 @@ export class BirthChartFacadeService {
         chartData,
         interpretation,
         userName: dto.name,
-        birthDate: new Date(dto.birthDate),
+        birthDate: this.parseBirthDate(dto.birthDate),
       },
       userId,
     );
@@ -330,7 +330,7 @@ export class BirthChartFacadeService {
             chartData,
             interpretation,
             userName: dto.name,
-            birthDate: new Date(dto.birthDate),
+            birthDate: this.parseBirthDate(dto.birthDate),
           },
           userId ?? undefined,
         );
@@ -483,7 +483,7 @@ export class BirthChartFacadeService {
     chartData: ChartData,
     aiSynthesis?: string,
   ): Promise<BirthChart> {
-    const birthDate = new Date(dto.birthDate);
+    const birthDate = this.parseBirthDate(dto.birthDate);
     const birthTime = this.normalizeBirthTime(dto.birthTime);
 
     // Upsert atómico basado en el unique index (idx_birth_chart_user_birth).
@@ -573,6 +573,18 @@ export class BirthChartFacadeService {
     const minutes = Math.round((signDegree - wholeDegrees) * 60);
     const signName = ZodiacSignMetadata[sign as ZodiacSign]?.name ?? sign;
     return `${wholeDegrees}° ${minutes}' ${signName}`;
+  }
+
+  /**
+   * Parses a YYYY-MM-DD date string as a local-midnight Date to avoid
+   * UTC timezone shifts when the pg driver serializes the value for the
+   * PostgreSQL `date` column.  `new Date('YYYY-MM-DD')` creates a UTC
+   * midnight instant which, in negative-offset timezones (e.g. UTC-3),
+   * corresponds to the *previous* calendar day.
+   */
+  private parseBirthDate(dateStr: string): Date {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    return new Date(year, month - 1, day);
   }
 
   private normalizeBirthTime(time: string): string {
