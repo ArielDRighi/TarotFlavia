@@ -152,11 +152,16 @@ export class BirthChartHistoryService {
       canDownloadPdf: true,
       savedChartId: chart.id,
       name: chart.name,
-      createdAt: chart.createdAt.toISOString(),
+      createdAt:
+        typeof chart.createdAt === 'string'
+          ? chart.createdAt
+          : chart.createdAt.toISOString(),
       aiSynthesis: {
         content: chart.chartData.aiSynthesis ?? '',
         generatedAt: chart.chartData.aiSynthesis
-          ? chart.updatedAt.toISOString()
+          ? typeof chart.updatedAt === 'string'
+            ? chart.updatedAt
+            : chart.updatedAt.toISOString()
           : null,
         provider: chart.chartData.aiSynthesis ? 'cached' : 'none',
       },
@@ -301,10 +306,20 @@ export class BirthChartHistoryService {
   }
 
   private toSavedChartSummary(chart: BirthChart): SavedChartSummaryDto {
+    const birthDateStr =
+      typeof chart.birthDate === 'string'
+        ? chart.birthDate
+        : chart.birthDate.toISOString().split('T')[0];
+
+    const createdAtStr =
+      typeof chart.createdAt === 'string'
+        ? chart.createdAt
+        : chart.createdAt.toISOString();
+
     return {
       id: chart.id,
       name: chart.name,
-      birthDate: chart.birthDate.toISOString().split('T')[0],
+      birthDate: birthDateStr,
       sunSign:
         ZodiacSignMetadata[chart.sunSign as ZodiacSign]?.name ?? chart.sunSign,
       moonSign:
@@ -313,7 +328,7 @@ export class BirthChartHistoryService {
       ascendantSign:
         ZodiacSignMetadata[chart.ascendantSign as ZodiacSign]?.name ??
         chart.ascendantSign,
-      createdAt: chart.createdAt.toISOString(),
+      createdAt: createdAtStr,
     };
   }
 
