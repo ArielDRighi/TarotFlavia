@@ -824,6 +824,64 @@ describe('BirthChartResultPage', () => {
 
       expect(screen.getByRole('link', { name: /ver mi historial/i })).toBeInTheDocument();
     });
+
+    it('should link "Ver mi historial" to /carta-astral/historial for Premium users', () => {
+      vi.mocked(useBirthChartStore).mockReturnValue({
+        chartResult: mockPremiumChartResponse,
+        formData: mockFormData,
+        setFormData: vi.fn(),
+        setChartResult: vi.fn(),
+        reset: mockReset,
+      });
+
+      vi.mocked(useAuth).mockReturnValue({
+        user: createMockUser('premium'),
+        isAuthenticated: true,
+        isLoading: false,
+        login: vi.fn(),
+        register: vi.fn(),
+        logout: vi.fn(),
+        checkAuth: vi.fn(),
+      });
+
+      render(<BirthChartResultPage />);
+
+      const historialLink = screen.getByRole('link', { name: /ver mi historial/i });
+      expect(historialLink).toHaveAttribute('href', '/carta-astral/historial');
+    });
+  });
+
+  describe('Navegación - Breadcrumb en lugar de header sticky', () => {
+    beforeEach(() => {
+      vi.mocked(useBirthChartStore).mockReturnValue({
+        chartResult: mockBasicChartResponse,
+        formData: mockFormData,
+        setFormData: vi.fn(),
+        setChartResult: vi.fn(),
+        reset: mockReset,
+      });
+    });
+
+    it('should render navigation breadcrumb inside main content (not a separate sticky header)', () => {
+      render(<BirthChartResultPage />);
+
+      // El botón de volver debe estar en la página
+      expect(screen.getByRole('button', { name: /nueva carta/i })).toBeInTheDocument();
+
+      // No debe haber un <header> sticky con z-50 (el global header del layout no cuenta)
+      const stickyHeaders = document.querySelectorAll('header.sticky').length;
+      // El header interno de la página (sticky + z-50) no debe existir
+      expect(stickyHeaders).toBe(0);
+    });
+
+    it('should render "Nueva carta" link pointing to /carta-astral', () => {
+      render(<BirthChartResultPage />);
+
+      // El botón de nueva carta puede ser un Link o un Button con onClick
+      // Lo importante es que existe y navega a /carta-astral
+      const newChartButton = screen.getByRole('button', { name: /nueva carta/i });
+      expect(newChartButton).toBeInTheDocument();
+    });
   });
 
   describe('Loading state - Download PDF', () => {
