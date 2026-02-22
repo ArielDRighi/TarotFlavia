@@ -2,7 +2,7 @@
 
 > **Severidad:** Alta — El historial Premium de Carta Astral no funciona (HTTP 500) + inconsistencias UX generalizadas en acceso al historial
 > **Fecha de detección:** 2026-02-22
-> **Estado:** TASK-FIX-HIST-01 ✅ COMPLETADA | TASK-FIX-HIST-02 ⏳ Pendiente | TASK-FIX-HIST-03 ⏳ Pendiente
+> **Estado:** TASK-FIX-HIST-01 ✅ COMPLETADA | TASK-FIX-HIST-02 ✅ COMPLETADA | TASK-FIX-HIST-03 ⏳ Pendiente
 
 ---
 
@@ -122,7 +122,7 @@ El botón "Ver mi historial" en el footer de la página de resultado lleva al us
 
 **Tipo:** Backend (NestJS)
 **Prioridad:** P0 — Bloqueante, función Premium rota
-**Estado:** ⏳ Pendiente
+**Estado:** ✅ COMPLETADA
 **Branch:** `fix/TASK-FIX-HIST-01-birth-chart-history-500`
 
 #### Problema raíz
@@ -162,11 +162,11 @@ private toSavedChartSummary(chart: BirthChart): SavedChartSummaryDto {
 
 #### Subtareas técnicas
 
-- [ ] Leer `birth-chart-history.service.ts` completo
-- [ ] Aplicar fix en `toSavedChartSummary()` para `birthDate` y `createdAt`
-- [ ] Verificar si `getUserChartById()` (para ruta `/result/:id`) tiene el mismo problema
-- [ ] Actualizar tests existentes para cubrir el caso de `birthDate` como `string` Y como `Date`
-- [ ] Agregar test de integración del endpoint GET /birth-chart/history
+- [x] Leer `birth-chart-history.service.ts` completo
+- [x] Aplicar fix en `toSavedChartSummary()` para `birthDate` y `createdAt`
+- [x] Verificar si `getUserChartById()` (para ruta `/result/:id`) tiene el mismo problema
+- [x] Actualizar tests existentes para cubrir el caso de `birthDate` como `string` Y como `Date`
+- [x] Agregar test de integración del endpoint GET /birth-chart/history
 
 #### Ciclo de calidad
 ```bash
@@ -179,10 +179,10 @@ node scripts/validate-architecture.js
 ```
 
 #### Criterios de aceptación
-- [ ] `GET /birth-chart/history` retorna HTTP 200 con datos para usuario Premium
-- [ ] Tests unitarios pasan con birthDate como string y como Date
-- [ ] Coverage del módulo birth-chart mantiene ≥ 80%
-- [ ] Build sin errores
+- [x] `GET /birth-chart/history` retorna HTTP 200 con datos para usuario Premium
+- [x] Tests unitarios pasan con birthDate como string y como Date
+- [x] Coverage del módulo birth-chart mantiene ≥ 80%
+- [x] Build sin errores
 
 ---
 
@@ -190,7 +190,7 @@ node scripts/validate-architecture.js
 
 **Tipo:** Frontend (Next.js)
 **Prioridad:** P1 — UX degradada en flujo principal
-**Estado:** ⏳ Pendiente
+**Estado:** ✅ COMPLETADA
 **Branch:** `fix/TASK-FIX-HIST-02-birth-chart-result-navigation`
 
 #### Problema raíz
@@ -237,13 +237,13 @@ Las páginas de resultado de carta astral crean su propio `<header>` sticky inte
 
 #### Subtareas técnicas
 
-- [ ] Leer `resultado/page.tsx` y `resultado/[id]/page.tsx` completos
-- [ ] Eliminar `<header>` sticky interno en ambas páginas
-- [ ] Mover los controles de acción (PDF, compartir, menú) al breadcrumb dentro del `<main>`
-- [ ] Corregir el link "Ver mi historial" en `resultado/page.tsx` → `/carta-astral/historial`
-- [ ] Verificar consistencia visual con `ReadingDetail.tsx` (misma anchura de contenedor, mismos estilos de botón)
-- [ ] Actualizar tests de los componentes si corresponde
-- [ ] Verificar que el breadcrumb sea visible en mobile (responsive)
+- [x] Leer `resultado/page.tsx` y `resultado/[id]/page.tsx` completos
+- [x] Eliminar `<header>` sticky interno en ambas páginas
+- [x] Mover los controles de acción (PDF, compartir, menú) al breadcrumb dentro del `<main>`
+- [x] Corregir el link "Ver mi historial" en `resultado/page.tsx` → `/carta-astral/historial`
+- [x] Verificar consistencia visual con `ReadingDetail.tsx` (misma anchura de contenedor, mismos estilos de botón)
+- [x] Actualizar tests de los componentes si corresponde
+- [x] Verificar que el breadcrumb sea visible en mobile (responsive)
 
 #### Ciclo de calidad
 ```bash
@@ -257,11 +257,11 @@ node scripts/validate-architecture.js
 ```
 
 #### Criterios de aceptación
-- [ ] Las páginas de resultado de carta astral NO crean una segunda barra sticky
-- [ ] El botón de volver usa el mismo patrón visual que `ReadingDetail.tsx`
-- [ ] "Ver mi historial" en `resultado/page.tsx` lleva a `/carta-astral/historial`
-- [ ] La navegación es consistente en mobile y desktop
-- [ ] Build y tests sin errores
+- [x] Las páginas de resultado de carta astral NO crean una segunda barra sticky
+- [x] El botón de volver usa el mismo patrón visual que `ReadingDetail.tsx`
+- [x] "Ver mi historial" en `resultado/page.tsx` lleva a `/carta-astral/historial`
+- [x] La navegación es consistente en mobile y desktop
+- [x] Build y tests sin errores
 
 ---
 

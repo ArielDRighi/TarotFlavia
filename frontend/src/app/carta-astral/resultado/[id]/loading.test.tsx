@@ -9,9 +9,10 @@ import { describe, it, expect } from 'vitest';
 import SavedChartLoading from './loading';
 
 describe('SavedChartLoading', () => {
-  it('should render header skeleton', () => {
+  it('should render navigation skeleton inside main content (not a separate sticky header)', () => {
     render(<SavedChartLoading />);
 
+    expect(screen.getByTestId('skeleton-nav')).toBeInTheDocument();
     expect(screen.getByTestId('skeleton-breadcrumb')).toBeInTheDocument();
     expect(screen.getByTestId('skeleton-badge')).toBeInTheDocument();
     expect(screen.getByTestId('skeleton-pdf-button')).toBeInTheDocument();
@@ -43,16 +44,18 @@ describe('SavedChartLoading', () => {
     expect(screen.getByTestId('skeleton-tabs')).toBeInTheDocument();
   });
 
-  it('should have proper layout structure', () => {
+  it('should have proper layout structure without sticky header', () => {
     render(<SavedChartLoading />);
 
-    // Check for header
-    const header = document.querySelector('header');
-    expect(header).toBeInTheDocument();
+    // No debe haber un <header> sticky — la navegación está dentro del <main>
+    const stickyHeader = document.querySelector('header.sticky');
+    expect(stickyHeader).not.toBeInTheDocument();
 
-    // Check for main content
+    // El área de navegación vive dentro del <main>
     const main = document.querySelector('main');
     expect(main).toBeInTheDocument();
+    const navInMain = main?.querySelector('[data-testid="skeleton-nav"]');
+    expect(navInMain).toBeInTheDocument();
 
     // Check for grid layout
     const grid = document.querySelector('.grid');

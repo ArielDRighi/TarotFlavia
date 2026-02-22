@@ -299,6 +299,21 @@ describe('SavedChartPage', () => {
       expect(screen.getByText(/pdf/i)).toBeInTheDocument();
     });
 
+    it('should render "Mi historial" breadcrumb link pointing to /carta-astral/historial', () => {
+      render(<SavedChartPage />, { wrapper: createWrapper() });
+
+      const historialLink = screen.getByRole('link', { name: /mi historial/i });
+      expect(historialLink).toHaveAttribute('href', '/carta-astral/historial');
+    });
+
+    it('should NOT render a sticky header element inside the page (navigation inside main)', () => {
+      render(<SavedChartPage />, { wrapper: createWrapper() });
+
+      // No debe haber un <header> sticky interno (solo el del layout global)
+      const stickyHeaders = document.querySelectorAll('header.sticky').length;
+      expect(stickyHeaders).toBe(0);
+    });
+
     it('should render chart name and creation date', () => {
       render(<SavedChartPage />, { wrapper: createWrapper() });
 

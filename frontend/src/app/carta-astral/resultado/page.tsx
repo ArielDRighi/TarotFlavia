@@ -99,9 +99,9 @@ export default function ChartResultPage() {
 
   return (
     <div className="from-background to-muted/20 min-h-screen bg-gradient-to-b">
-      {/* Header */}
-      <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 border-b backdrop-blur">
-        <div className="container flex h-14 items-center justify-between">
+      <main className="container mx-auto max-w-6xl px-4 py-8">
+        {/* Breadcrumb de navegación */}
+        <div className="mb-6 flex items-center justify-between">
           <Button variant="ghost" size="sm" onClick={handleNewChart}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Nueva carta
@@ -137,9 +137,7 @@ export default function ChartResultPage() {
             )}
           </div>
         </div>
-      </header>
 
-      <main className="container mx-auto max-w-6xl px-4 py-8">
         {/* Título */}
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold tracking-tight">Carta Astral de {formData.name}</h1>
@@ -289,7 +287,7 @@ export default function ChartResultPage() {
 
           {isPremium && (
             <Button variant="outline" asChild>
-              <Link href="/historial">Ver mi historial</Link>
+              <Link href="/carta-astral/historial">Ver mi historial</Link>
             </Button>
           )}
 
