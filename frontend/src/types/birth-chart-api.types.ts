@@ -70,6 +70,9 @@ export interface PremiumChartResponse extends FullChartResponse {
 export interface SavedChartResponse extends PremiumChartResponse {
   name: string;
   createdAt: string;
+  birthDate?: string; // YYYY-MM-DD
+  birthTime?: string; // HH:mm
+  birthPlace?: string;
 }
 
 /**

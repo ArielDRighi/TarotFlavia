@@ -24,7 +24,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
-import { formatTimestampLocalized } from '@/lib/utils/date';
+import { parseDateString } from '@/lib/utils/date';
 
 // Hooks
 import { useSavedChart, useRenameChart, useDeleteChart } from '@/hooks/api/useBirthChart';
@@ -271,14 +271,18 @@ export function SavedChartPageContent() {
           ) : (
             <h1 className="text-3xl font-bold tracking-tight">{chart.name || 'Carta Astral'}</h1>
           )}
-          <p className="text-muted-foreground mt-1">
-            Guardada el{' '}
-            {formatTimestampLocalized(chart.createdAt, 'es-AR', {
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric',
-            })}
-          </p>
+          {(chart.birthDate ?? chart.birthTime ?? chart.birthPlace) && (
+            <p className="text-muted-foreground mt-1" data-testid="birth-info-subtitle">
+              {chart.birthDate &&
+                parseDateString(chart.birthDate).toLocaleDateString('es-AR', {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric',
+                })}
+              {chart.birthTime && ` • ${chart.birthTime}`}
+              {chart.birthPlace && ` • ${chart.birthPlace}`}
+            </p>
+          )}
         </div>
 
         {/* Síntesis IA (Premium) */}

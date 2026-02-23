@@ -193,6 +193,7 @@ Agregar `birthDate`, `birthTime` y `birthPlace` a la respuesta del endpoint `GET
 **Prioridad:** High
 **Estimación:** 1h
 **Dependencias:** T-CA-051 (backend debe retornar los nuevos campos)
+**Estado:** ✅ COMPLETADA
 
 #### Descripción
 
@@ -207,8 +208,8 @@ Reemplazar el subtítulo "Guardada el [fecha de creación]" en la página de det
 
 #### Subtareas
 
-- [ ] Leer `WORKFLOW_FRONTEND.md` antes de implementar
-- [ ] En `birth-chart-api.types.ts`, actualizar `SavedChartResponse`:
+- [x] Leer `WORKFLOW_FRONTEND.md` antes de implementar
+- [x] En `birth-chart-api.types.ts`, actualizar `SavedChartResponse`:
   ```typescript
   export interface SavedChartResponse extends PremiumChartResponse {
     name: string;
@@ -218,7 +219,7 @@ Reemplazar el subtítulo "Guardada el [fecha de creación]" en la página de det
     birthPlace?: string;
   }
   ```
-- [ ] En `SavedChartPageContent.tsx`, reemplazar el bloque del subtítulo (líneas 274–281):
+- [x] En `SavedChartPageContent.tsx`, reemplazar el bloque del subtítulo (líneas 274–281):
   ```tsx
   // ❌ ELIMINAR
   <p className="text-muted-foreground mt-1">
@@ -244,29 +245,29 @@ Reemplazar el subtítulo "Guardada el [fecha de creación]" en la página de det
     </p>
   )}
   ```
-- [ ] Agregar import de `parseDateString` desde `@/lib/utils/date` si no está presente
-- [ ] Verificar que el import de `formatTimestampLocalized` puede eliminarse si ya no se usa en el componente (o mantenerlo si se usa en otro lugar del archivo)
-- [ ] Actualizar/agregar tests en `SavedChartPageContent.test.tsx` (si existe) para verificar que:
+- [x] Agregar import de `parseDateString` desde `@/lib/utils/date` si no está presente
+- [x] Verificar que el import de `formatTimestampLocalized` puede eliminarse si ya no se usa en el componente (o mantenerlo si se usa en otro lugar del archivo)
+- [x] Actualizar/agregar tests en `SavedChartPageContent.test.tsx` (si existe) para verificar que:
   - Se muestran los datos de nacimiento cuando están disponibles
   - No se muestra la fecha de creación
-- [ ] Ejecutar ciclo de calidad completo:
-  - [ ] `npm run format`
-  - [ ] `npm run lint:fix`
-  - [ ] `npm run type-check`
-  - [ ] `npm run test:run`
-  - [ ] `npm run build`
-  - [ ] `node scripts/validate-architecture.js`
-- [ ] Actualizar backlog (marcar completada)
-- [ ] Commit y PR → `develop`
+- [x] Ejecutar ciclo de calidad completo:
+  - [x] `npm run format`
+  - [x] `npm run lint:fix`
+  - [x] `npm run type-check`
+  - [x] `npm run test:run`
+  - [x] `npm run build`
+  - [x] `node scripts/validate-architecture.js`
+- [x] Actualizar backlog (marcar completada)
+- [x] Commit y PR → `develop`
 
 #### Criterios de aceptación
 
-1. La página `/carta-astral/resultado/[id]` muestra debajo del nombre: `15 de agosto de 1990 • 14:30 • Buenos Aires, Argentina`
-2. El formato visual es consistente con la página de resultado recién generada
-3. Si algún campo no está disponible, se omite gracefully (sin errores)
-4. La fecha de creación ya no aparece en el subtítulo del título
-5. Tests pasan con coverage ≥ 80%
-6. Build y type-check exitosos
+1. ✅ La página `/carta-astral/resultado/[id]` muestra debajo del nombre: `15 de agosto de 1990 • 14:30 • Buenos Aires, Argentina`
+2. ✅ El formato visual es consistente con la página de resultado recién generada
+3. ✅ Si algún campo no está disponible, se omite gracefully (sin errores)
+4. ✅ La fecha de creación ya no aparece en el subtítulo del título
+5. ✅ Tests pasan con coverage ≥ 80%
+6. ✅ Build y type-check exitosos
 
 ---
 
