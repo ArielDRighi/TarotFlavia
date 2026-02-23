@@ -1,17 +1,16 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { formatTimeAgo } from '@/lib/utils/date';
 import { SavedChartCard, SavedChartCardSkeleton } from './SavedChartCard';
 import type { SavedChart } from '@/types/birth-chart.types';
 
-// Mock de date-fns
-vi.mock('date-fns', async () => {
-  const actual = (await vi.importActual('date-fns')) as Record<string, unknown>;
+// Mock de @/lib/utils/date
+vi.mock('@/lib/utils/date', async () => {
+  const actual = (await vi.importActual('@/lib/utils/date')) as Record<string, unknown>;
   return {
     ...actual,
-    formatDistanceToNow: vi.fn(),
+    formatTimeAgo: vi.fn(),
   };
 });
 
@@ -42,8 +41,8 @@ describe('SavedChartCard', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    const mockFormatDistanceToNow = formatDistanceToNow as unknown as ReturnType<typeof vi.fn>;
-    mockFormatDistanceToNow.mockReturnValue('hace 2 días');
+    const mockFormatTimeAgo = formatTimeAgo as unknown as ReturnType<typeof vi.fn>;
+    mockFormatTimeAgo.mockReturnValue('hace 2 días');
   });
 
   describe('Renderizado básico', () => {
@@ -76,10 +75,7 @@ describe('SavedChartCard', () => {
       render(<SavedChartCard chart={mockChart} {...mockHandlers} />);
 
       expect(screen.getByText('hace 2 días')).toBeInTheDocument();
-      expect(formatDistanceToNow).toHaveBeenCalledWith(new Date(mockChart.createdAt), {
-        addSuffix: true,
-        locale: es,
-      });
+      expect(formatTimeAgo).toHaveBeenCalledWith(mockChart.createdAt);
     });
   });
 
@@ -288,8 +284,8 @@ describe('SavedChartCard', () => {
     });
 
     it('debe manejar fechas recientes (minutos/horas)', () => {
-      const mockFormatDistanceToNow = formatDistanceToNow as unknown as ReturnType<typeof vi.fn>;
-      mockFormatDistanceToNow.mockReturnValue('hace 30 minutos');
+      const mockFormatTimeAgo = formatTimeAgo as unknown as ReturnType<typeof vi.fn>;
+      mockFormatTimeAgo.mockReturnValue('hace 30 minutos');
 
       render(<SavedChartCard chart={mockChart} {...mockHandlers} />);
 
@@ -297,8 +293,8 @@ describe('SavedChartCard', () => {
     });
 
     it('debe manejar fechas antiguas (meses/años)', () => {
-      const mockFormatDistanceToNow = formatDistanceToNow as unknown as ReturnType<typeof vi.fn>;
-      mockFormatDistanceToNow.mockReturnValue('hace 3 meses');
+      const mockFormatTimeAgo = formatTimeAgo as unknown as ReturnType<typeof vi.fn>;
+      mockFormatTimeAgo.mockReturnValue('hace 3 meses');
 
       render(<SavedChartCard chart={mockChart} {...mockHandlers} />);
 

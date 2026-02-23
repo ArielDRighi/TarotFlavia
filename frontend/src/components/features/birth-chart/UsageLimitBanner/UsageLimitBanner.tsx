@@ -2,10 +2,9 @@
 
 import Link from 'next/link';
 import { Sparkles, Crown, AlertTriangle, Check, Clock, ArrowRight, X } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
 
 import type { UsageStatus } from '@/types/birth-chart-api.types';
+import { formatTimeAgo } from '@/lib/utils/date';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
@@ -32,12 +31,8 @@ export function UsageLimitBanner({
   const isExhausted = !usage.canGenerate;
 
   // Texto de reset
-  const resetText = usage.resetsAt
-    ? formatDistanceToNow(new Date(usage.resetsAt), {
-        addSuffix: true,
-        locale: es,
-      })
-    : null;
+  // BUGFIX: Use formatTimeAgo to avoid UTC timezone issues (e.g. showing wrong reset time)
+  const resetText = usage.resetsAt ? formatTimeAgo(usage.resetsAt) : null;
 
   // Variante inline (muy compacta, para header)
   if (variant === 'inline') {

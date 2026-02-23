@@ -32,7 +32,7 @@
  * - Use the formatting functions for consistent locale-aware display
  */
 
-import { format } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 /**
@@ -65,6 +65,55 @@ export function parseDateString(dateString: string): Date {
 
   // Full timestamp - parse directly
   return new Date(dateString);
+}
+
+/**
+ * Parses a full timestamp string from the backend, ensuring it is treated as UTC.
+ *
+ * Problem: TypeORM may return TIMESTAMP columns as strings WITHOUT a timezone
+ * indicator (e.g., "2026-02-22T12:30:00.000000"). ECMAScript specifies that
+ * date-time strings without a timezone offset are interpreted as LOCAL time,
+ * causing UTC timestamps to appear shifted (e.g., "in 3 hours" for UTC-3 users).
+ *
+ * Solution: If the string has no timezone indicator, append 'Z' to force UTC parsing.
+ *
+ * @param dateString - Timestamp string from backend (ISO 8601, with or without 'Z')
+ * @returns Parsed Date object anchored to the correct UTC instant
+ *
+ * @example
+ * // Backend returns without 'Z' (TypeORM string passthrough)
+ * parseTimestamp('2026-02-22T12:30:00.000000') // → same as new Date('2026-02-22T12:30:00.000000Z')
+ *
+ * // Backend returns with 'Z' (Date.toISOString())
+ * parseTimestamp('2026-02-22T12:30:00.000Z') // → same as new Date('2026-02-22T12:30:00.000Z')
+ */
+export function parseTimestamp(dateString: string): Date {
+  // Check if the string already has timezone info (ends with Z or ±HH:MM / ±HHMM)
+  const hasTimezone = /Z$|[+-]\d{2}:?\d{2}$/.test(dateString);
+  if (!hasTimezone && dateString.includes('T')) {
+    // No timezone indicator — treat as UTC by appending 'Z'
+    return new Date(`${dateString}Z`);
+  }
+  return new Date(dateString);
+}
+
+/**
+ * Formats a timestamp as a relative time string in Spanish (e.g., "hace 2 horas").
+ *
+ * Uses `parseTimestamp` internally to ensure UTC timestamps from the backend
+ * are handled correctly regardless of whether the 'Z' suffix is present.
+ * This prevents the common "in 3 hours" bug for users in negative UTC offsets.
+ *
+ * @param dateString - Timestamp string from backend (ISO 8601)
+ * @returns Relative time string in Spanish (e.g., "hace 5 minutos", "en 3 horas")
+ *
+ * @example
+ * formatTimeAgo('2026-02-22T09:00:00.000Z')   // → "hace 5 minutos" (if now is 09:05 UTC)
+ * formatTimeAgo('2026-02-22T09:00:00.000000') // → same result (UTC inferred)
+ */
+export function formatTimeAgo(dateString: string): string {
+  const date = parseTimestamp(dateString);
+  return formatDistanceToNow(date, { addSuffix: true, locale: es });
 }
 
 /**

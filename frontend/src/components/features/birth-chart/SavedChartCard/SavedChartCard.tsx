@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 
 // 3. Third-party
-import { formatDistanceToNow, format } from 'date-fns';
+import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 // 4. Custom hooks
@@ -47,6 +47,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 // 6. Utils & types
 import { cn } from '@/lib/utils';
+import { formatTimeAgo } from '@/lib/utils/date';
 import type { SavedChart } from '@/types/birth-chart.types';
 import { ZODIAC_SIGNS, ZodiacSign } from '@/types/birth-chart.enums';
 
@@ -103,23 +104,38 @@ export function SavedChartCard({
   onRename,
   onDelete,
 }: SavedChartCardProps) {
-  // Obtener metadata de signos
-  const sunSignData = ZODIAC_SIGNS[chart.sunSign as ZodiacSign];
-  const moonSignData = ZODIAC_SIGNS[chart.moonSign as ZodiacSign];
-  const ascendantSignData = ZODIAC_SIGNS[chart.ascendantSign as ZodiacSign];
+  // Obtener metadata de signos (normalizar a lowercase por si el backend devuelve nombre capitalizado)
+  const sunSignKey = chart.sunSign.toLowerCase() as ZodiacSign;
+  const moonSignKey = chart.moonSign.toLowerCase() as ZodiacSign;
+  const ascendantSignKey = chart.ascendantSign.toLowerCase() as ZodiacSign;
+
+  const sunSignData = ZODIAC_SIGNS[sunSignKey] ?? {
+    name: chart.sunSign,
+    symbol: '★',
+    element: 'air' as const,
+  };
+  const moonSignData = ZODIAC_SIGNS[moonSignKey] ?? {
+    name: chart.moonSign,
+    symbol: '★',
+    element: 'air' as const,
+  };
+  const ascendantSignData = ZODIAC_SIGNS[ascendantSignKey] ?? {
+    name: chart.ascendantSign,
+    symbol: '★',
+    element: 'air' as const,
+  };
 
   // Formatear fechas
   const birthDateObj = new Date(chart.birthDate);
   const formattedBirthDate = format(birthDateObj, "d 'de' MMMM 'de' yyyy", {
     locale: es,
   });
-  const timeAgo = formatDistanceToNow(new Date(chart.createdAt), {
-    addSuffix: true,
-    locale: es,
-  });
+  // BUGFIX: Use formatTimeAgo instead of formatDistanceToNow to avoid UTC timezone issues
+  // that could show "en 3 horas" for recently created charts (e.g. UTC-3 users).
+  const timeAgo = formatTimeAgo(chart.createdAt);
 
-  // Gradiente según elemento del sol
-  const gradientClasses = getElementGradient(chart.sunSign);
+  // Gradiente según elemento del sol (normalizar key)
+  const gradientClasses = getElementGradient(chart.sunSign.toLowerCase());
 
   // Handlers
   const handleView = useCallback(

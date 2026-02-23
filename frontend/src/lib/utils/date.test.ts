@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import {
   parseDateString,
+  parseTimestamp,
+  formatTimeAgo,
   formatDateFull,
   formatDateFullWithYear,
   formatDateShort,
@@ -156,6 +158,82 @@ describe('date utilities', () => {
         expect(parsed.getMonth()).toBe(month - 1); // JS months are 0-indexed
         expect(parsed.getDate()).toBe(day);
       }
+    });
+  });
+
+  describe('parseTimestamp', () => {
+    it('should parse ISO timestamp with Z suffix as UTC', () => {
+      const date = parseTimestamp('2026-02-22T12:30:00.000Z');
+
+      // UTC time components should be correct
+      expect(date.getUTCFullYear()).toBe(2026);
+      expect(date.getUTCMonth()).toBe(1); // February
+      expect(date.getUTCDate()).toBe(22);
+      expect(date.getUTCHours()).toBe(12);
+      expect(date.getUTCMinutes()).toBe(30);
+    });
+
+    it('should parse ISO timestamp WITHOUT Z suffix as UTC (key fix)', () => {
+      // TypeORM may return TIMESTAMP as string without 'Z'.
+      // Without this fix, JavaScript would treat it as local time,
+      // showing "in 3 hours" for UTC-3 users when it was just created.
+      const withZ = parseTimestamp('2026-02-22T12:30:00.000Z');
+      const withoutZ = parseTimestamp('2026-02-22T12:30:00.000000');
+
+      // Both should represent the same UTC instant
+      expect(withZ.getTime()).toBe(withoutZ.getTime());
+    });
+
+    it('should parse ISO timestamp with numeric timezone offset', () => {
+      const date = parseTimestamp('2026-02-22T09:30:00.000-03:00');
+
+      // 09:30 at UTC-3 = 12:30 UTC
+      expect(date.getUTCHours()).toBe(12);
+      expect(date.getUTCMinutes()).toBe(30);
+    });
+
+    it('should handle fractional seconds without Z', () => {
+      const withZ = parseTimestamp('2026-01-15T08:00:00.123456Z');
+      const withoutZ = parseTimestamp('2026-01-15T08:00:00.123456');
+
+      // Both represent the same UTC instant
+      expect(withZ.getTime()).toBe(withoutZ.getTime());
+    });
+
+    it('should handle timestamps from TypeORM Date.toISOString()', () => {
+      // toISOString() always produces 'Z' suffix — this should parse identically
+      const isoString = '2026-03-10T15:45:00.000Z';
+      const date = parseTimestamp(isoString);
+
+      expect(date.getUTCFullYear()).toBe(2026);
+      expect(date.getUTCMonth()).toBe(2); // March
+      expect(date.getUTCDate()).toBe(10);
+      expect(date.getUTCHours()).toBe(15);
+    });
+  });
+
+  describe('formatTimeAgo', () => {
+    it('should return a string', () => {
+      const result = formatTimeAgo('2026-01-01T00:00:00.000Z');
+
+      expect(typeof result).toBe('string');
+      expect(result.length).toBeGreaterThan(0);
+    });
+
+    it('should return the same result for same UTC time with and without Z', () => {
+      // Core regression test: both strings represent the same UTC instant —
+      // formatTimeAgo must produce identical relative time strings for both.
+      const resultWithZ = formatTimeAgo('2025-06-15T10:00:00.000Z');
+      const resultWithoutZ = formatTimeAgo('2025-06-15T10:00:00.000000');
+
+      expect(resultWithZ).toBe(resultWithoutZ);
+    });
+
+    it('should produce Spanish output', () => {
+      const result = formatTimeAgo('2020-01-01T00:00:00.000Z');
+
+      // Spanish locale uses "hace" for past times
+      expect(result).toMatch(/hace|más de/i);
     });
   });
 });

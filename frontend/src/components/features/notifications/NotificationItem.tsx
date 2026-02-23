@@ -1,8 +1,7 @@
 'use client';
 
-import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { formatTimeAgo } from '@/lib/utils/date';
 import { NOTIFICATION_TYPE_INFO, type Notification } from '@/types';
 
 interface NotificationItemProps {
@@ -46,10 +45,8 @@ export function NotificationItem({ notification, onClick }: NotificationItemProp
             data-testid="notification-time"
             className="flex-shrink-0 text-xs text-gray-500 dark:text-gray-400"
           >
-            {formatDistanceToNow(new Date(notification.createdAt), {
-              addSuffix: true,
-              locale: es,
-            })}
+            {/* BUGFIX: Use formatTimeAgo to avoid UTC timezone issues */}
+            {formatTimeAgo(notification.createdAt)}
           </time>
         </div>
 

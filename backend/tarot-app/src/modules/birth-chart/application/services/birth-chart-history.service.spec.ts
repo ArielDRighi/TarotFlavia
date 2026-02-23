@@ -374,6 +374,31 @@ describe('BirthChartHistoryService', () => {
     expect(exists).toBe(true);
   });
 
+  it('should return chart signs as enum keys (not translated names) in getUserCharts', async () => {
+    const chart: Partial<BirthChart> = {
+      id: 4,
+      name: 'Carta signos',
+      birthDate: '1990-05-15' as unknown as Date,
+      sunSign: 'leo',
+      moonSign: 'aries',
+      ascendantSign: 'virgo',
+      createdAt: '2026-02-20T10:00:00.000Z' as unknown as Date,
+    };
+
+    chartRepositoryMock.findAndCount.mockResolvedValue([[chart], 1]);
+
+    const result = await service.getUserCharts(1, 1, 10);
+
+    // Los signos deben ser claves del enum (lowercase), NO nombres en español
+    expect(result.data[0].sunSign).toBe('leo');
+    expect(result.data[0].moonSign).toBe('aries');
+    expect(result.data[0].ascendantSign).toBe('virgo');
+    // Asegurar que NO son nombres traducidos
+    expect(result.data[0].sunSign).not.toBe('Leo');
+    expect(result.data[0].moonSign).not.toBe('Aries');
+    expect(result.data[0].ascendantSign).not.toBe('Virgo');
+  });
+
   describe('toSavedChartSummary — birthDate type normalization', () => {
     it('should handle birthDate as Date object in getUserCharts', async () => {
       const createdAt = new Date('2026-02-12T00:00:00Z');
