@@ -270,9 +270,10 @@ describe('date utilities', () => {
         minute: '2-digit',
       });
 
-      // Hour info should be present in the output
-      expect(typeof withHour).toBe('string');
-      expect(withHour.length).toBeGreaterThan(0);
+      // Hour info should be present in the output — look for a time pattern (HH:MM)
+      expect(withHour).toMatch(/\d{1,2}:\d{2}/);
+      // Date portion should still be present
+      expect(withHour).toContain('22');
     });
   });
 

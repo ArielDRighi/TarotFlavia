@@ -152,7 +152,7 @@ export function formatTimestampLocalized(
   options?: Intl.DateTimeFormatOptions
 ): string {
   const date = parseTimestamp(dateString);
-  return date.toLocaleDateString(locale, {
+  return date.toLocaleString(locale, {
     year: 'numeric',
     month: 'long',
     day: 'numeric',

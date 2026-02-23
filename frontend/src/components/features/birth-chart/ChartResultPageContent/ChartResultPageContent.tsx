@@ -19,6 +19,7 @@ import { useDownloadPdf } from '@/hooks/api/useDownloadPdf';
 
 // Tipos
 import { isFullChartResponse, isPremiumChartResponse } from '@/types/birth-chart-api.types';
+import { parseDateString } from '@/lib/utils/date';
 
 // Componentes de carta astral
 import { ChartWheel } from '@/components/features/birth-chart/ChartWheel/ChartWheel';
@@ -143,15 +144,11 @@ export function ChartResultPageContent() {
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold tracking-tight">Carta Astral de {formData.name}</h1>
           <p className="text-muted-foreground mt-1">
-            {(() => {
-              const [year, month, day] = formData.birthDate.split('-').map(Number);
-              const localBirthDate = new Date(year, month - 1, day);
-              return localBirthDate.toLocaleDateString('es-AR', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric',
-              });
-            })()}{' '}
+            {parseDateString(formData.birthDate).toLocaleDateString('es-AR', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+            })}{' '}
             • {formData.birthTime} • {formData.birthPlace}
           </p>
         </div>

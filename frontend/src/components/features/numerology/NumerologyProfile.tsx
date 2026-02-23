@@ -61,6 +61,7 @@ export function NumerologyProfile({ profile, className }: Props) {
         - Add: import { Button } from '@/components/ui/button';
         - Add: import { Alert, AlertDescription } from '@/components/ui/alert';
         - Add: import { Sparkles } from 'lucide-react';
+        - Add: import { formatTimestampLocalized } from '@/lib/utils/date';
         - Update Props interface with interpretation, canGenerateInterpretation, etc.
       */}
       {/* Personalized Interpretation Section - DISABLED */}

@@ -315,9 +315,14 @@ export class BirthChartHistoryService {
       id: chart.id,
       name: chart.name,
       birthDate: birthDateStr,
-      sunSign: chart.sunSign,
-      moonSign: chart.moonSign,
-      ascendantSign: chart.ascendantSign,
+      sunSign:
+        ZodiacSignMetadata[chart.sunSign as ZodiacSign]?.name ?? chart.sunSign,
+      moonSign:
+        ZodiacSignMetadata[chart.moonSign as ZodiacSign]?.name ??
+        chart.moonSign,
+      ascendantSign:
+        ZodiacSignMetadata[chart.ascendantSign as ZodiacSign]?.name ??
+        chart.ascendantSign,
       createdAt:
         typeof chart.createdAt === 'string'
           ? chart.createdAt
