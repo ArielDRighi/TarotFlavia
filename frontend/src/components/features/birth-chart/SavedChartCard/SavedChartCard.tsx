@@ -47,7 +47,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 // 6. Utils & types
 import { cn } from '@/lib/utils';
-import { formatTimeAgo } from '@/lib/utils/date';
+import { formatTimeAgo, parseDateString } from '@/lib/utils/date';
 import type { SavedChart } from '@/types/birth-chart.types';
 import { ZODIAC_SIGNS, ZodiacSign } from '@/types/birth-chart.enums';
 
@@ -126,7 +126,9 @@ export function SavedChartCard({
   };
 
   // Formatear fechas
-  const birthDateObj = new Date(chart.birthDate);
+  // BUGFIX: Use parseDateString to avoid UTC timezone shift on DATE-only strings
+  // (e.g. "1979-10-19" parsed by new Date() is UTC midnight → shows Oct 18 in UTC-3)
+  const birthDateObj = parseDateString(chart.birthDate);
   const formattedBirthDate = format(birthDateObj, "d 'de' MMMM 'de' yyyy", {
     locale: es,
   });

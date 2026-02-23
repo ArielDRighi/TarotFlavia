@@ -311,11 +311,6 @@ export class BirthChartHistoryService {
         ? chart.birthDate
         : chart.birthDate.toISOString().split('T')[0];
 
-    const createdAtStr =
-      typeof chart.createdAt === 'string'
-        ? chart.createdAt
-        : chart.createdAt.toISOString();
-
     return {
       id: chart.id,
       name: chart.name,
@@ -323,7 +318,10 @@ export class BirthChartHistoryService {
       sunSign: chart.sunSign,
       moonSign: chart.moonSign,
       ascendantSign: chart.ascendantSign,
-      createdAt: createdAtStr,
+      createdAt:
+        typeof chart.createdAt === 'string'
+          ? chart.createdAt
+          : chart.createdAt.toISOString(),
     };
   }
 

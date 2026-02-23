@@ -3,6 +3,14 @@ import { DataSource, DataSourceOptions } from 'typeorm';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 import * as fs from 'fs';
+import { types } from 'pg';
+
+// BUGFIX: Ensure TIMESTAMP WITHOUT TIME ZONE columns are parsed as UTC.
+// By default, node-postgres parses them as local time (no timezone info),
+// which causes TypeORM Date objects to have incorrect UTC offsets on non-UTC
+// machines (e.g. UTC-3 adds 3 hours: stored 11:48 → returned as 14:48Z).
+// OID 1114 = TIMESTAMP WITHOUT TIME ZONE
+types.setTypeParser(1114, (val: string) => new Date(val + 'Z'));
 
 // Cargar variables de entorno al inicio
 const envPath = path.resolve(process.cwd(), '.env');
