@@ -56,7 +56,7 @@ export const CHART_SETTINGS = {
   SEPTILE_COLOR: AUGURIA_COLORS.minor,
 
   // Símbolos y texto
-  SYMBOL_SCALE: 1.2,
+  SYMBOL_SCALE: 0.8,
   COLOR_ARIES: AUGURIA_COLORS.fire,
   COLOR_TAURUS: AUGURIA_COLORS.earth,
   COLOR_GEMINI: AUGURIA_COLORS.air,
@@ -90,8 +90,8 @@ export const CHART_SETTINGS = {
   POINTS_FONT_COLOR: AUGURIA_COLORS.text,
 
   // Tamaños
-  MARGIN: 50,
-  PADDING: 18,
+  MARGIN: 30,
+  PADDING: 12,
 
   // Aspectos visibles
   ASPECTS: {

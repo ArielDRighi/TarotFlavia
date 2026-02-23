@@ -1,8 +1,6 @@
 'use client';
 
-import { Download } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { Button } from '@/components/ui/button';
 import { useChartWheel } from './ChartWheel.hooks';
 import type { ChartSvgData } from '@/types/birth-chart.types';
 import { cn } from '@/lib/utils';
@@ -26,12 +24,6 @@ export interface ChartWheelProps {
   showAspects?: boolean;
 
   /**
-   * Mostrar controles (descargar, etc.)
-   * @default true
-   */
-  showControls?: boolean;
-
-  /**
    * Habilitar interactividad (click en planetas, etc.)
    * @default false
    */
@@ -41,11 +33,6 @@ export interface ChartWheelProps {
    * Callback cuando se hace click en un planeta
    */
   onPlanetClick?: (planet: string) => void;
-
-  /**
-   * Callback cuando se exporta el SVG
-   */
-  onExport?: (svg: string) => void;
 
   /**
    * Clases CSS adicionales para el contenedor
@@ -65,7 +52,6 @@ export interface ChartWheelProps {
  *   data={chartData}
  *   size={600}
  *   showAspects={true}
- *   showControls={true}
  *   onPlanetClick={(planet) => console.log(planet)}
  * />
  * ```
@@ -74,41 +60,19 @@ export function ChartWheel({
   data,
   size = 600,
   showAspects = true,
-  showControls = true,
   interactive = false,
   onPlanetClick,
-  onExport,
   className,
 }: ChartWheelProps) {
   const { resolvedTheme } = useTheme();
   const darkMode = resolvedTheme === 'dark';
 
-  const { containerId, isRendered, error, selectedPlanet, setSelectedPlanet, exportSvg } =
-    useChartWheel({
-      data,
-      size,
-      showAspects,
-      darkMode,
-    });
-
-  // Handler para exportar SVG
-  const handleExport = () => {
-    const svg = exportSvg();
-    if (svg && onExport) {
-      onExport(svg);
-    }
-
-    // Download file
-    if (svg) {
-      const blob = new Blob([svg], { type: 'image/svg+xml' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `carta-astral-${Date.now()}.svg`;
-      link.click();
-      URL.revokeObjectURL(url);
-    }
-  };
+  const { containerId, isRendered, error, selectedPlanet, setSelectedPlanet } = useChartWheel({
+    data,
+    size,
+    showAspects,
+    darkMode,
+  });
 
   // Handler para click en planetas (si es interactivo)
   const handlePlanetClick = (planet: string) => {
@@ -122,27 +86,6 @@ export function ChartWheel({
 
   return (
     <div className="flex flex-col gap-4" data-testid="chart-wheel-container">
-      {/* Controles superiores */}
-      {showControls && (
-        <div className="flex items-center justify-between">
-          <div className="text-muted-foreground text-sm">
-            {isRendered && 'Gráfico renderizado'}
-            {!isRendered && !error && 'Cargando gráfico...'}
-          </div>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleExport}
-            disabled={!isRendered || !!error}
-            data-testid="export-button"
-          >
-            <Download className="mr-2 h-4 w-4" />
-            Descargar SVG
-          </Button>
-        </div>
-      )}
-
       {/* Contenedor del gráfico */}
       <div className={cn('relative flex items-center justify-center', className)}>
         {/* Skeleton loader */}

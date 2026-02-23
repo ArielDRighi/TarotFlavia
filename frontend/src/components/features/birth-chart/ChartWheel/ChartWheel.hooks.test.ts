@@ -181,45 +181,6 @@ describe('useChartWheel', () => {
     });
   });
 
-  describe('🔴 Export SVG', () => {
-    it('debe retornar string vacío cuando no hay contenedor', () => {
-      document.getElementById = vi.fn().mockReturnValue(null);
-
-      const { result } = renderHook(() => useChartWheel({ data: mockChartData }));
-
-      const svg = result.current.exportSvg();
-      expect(svg).toBe('');
-    });
-
-    it('debe retornar string vacío cuando no hay SVG en contenedor', () => {
-      document.getElementById = vi.fn().mockReturnValue({
-        querySelector: vi.fn().mockReturnValue(null),
-      });
-
-      const { result } = renderHook(() => useChartWheel({ data: mockChartData }));
-
-      const svg = result.current.exportSvg();
-      expect(svg).toBe('');
-    });
-
-    it('debe serializar SVG cuando existe', () => {
-      const mockSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      mockSvg.setAttribute('width', '500');
-      mockSvg.setAttribute('height', '500');
-
-      document.getElementById = vi.fn().mockReturnValue({
-        querySelector: vi.fn().mockReturnValue(mockSvg),
-      });
-
-      const { result } = renderHook(() => useChartWheel({ data: mockChartData }));
-
-      const svg = result.current.exportSvg();
-      expect(svg).toContain('<svg');
-      expect(svg).toContain('width="500"');
-      expect(svg).toContain('height="500"');
-    });
-  });
-
   describe('🔴 Hook Return Values', () => {
     it('debe retornar un containerId único', () => {
       const { result: result1 } = renderHook(() => useChartWheel({ data: mockChartData }));
@@ -228,12 +189,6 @@ describe('useChartWheel', () => {
       expect(result1.current.containerId).toBeTruthy();
       expect(result2.current.containerId).toBeTruthy();
       expect(result1.current.containerId).not.toBe(result2.current.containerId);
-    });
-
-    it('debe tener exportSvg function', () => {
-      const { result } = renderHook(() => useChartWheel({ data: mockChartData }));
-
-      expect(typeof result.current.exportSvg).toBe('function');
     });
   });
 });

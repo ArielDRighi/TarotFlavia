@@ -28,7 +28,6 @@ export interface UseChartWheelReturn {
   error: string | null;
   selectedPlanet: string | null;
   setSelectedPlanet: (planet: string | null) => void;
-  exportSvg: () => string;
   containerId: string;
 }
 
@@ -132,22 +131,6 @@ export function useChartWheel({
     }
   }, [data, size, showAspects, darkMode]);
 
-  // Exportar SVG
-  const exportSvg = useCallback((): string => {
-    const container = document.getElementById(containerIdRef.current);
-    if (!container) {
-      return '';
-    }
-
-    const svgElement = container.querySelector('svg');
-    if (!svgElement) {
-      return '';
-    }
-
-    const serializer = new XMLSerializer();
-    return serializer.serializeToString(svgElement);
-  }, []);
-
   // Renderizar gráfico cuando cambien las dependencias
   useEffect(() => {
     renderChart();
@@ -172,7 +155,6 @@ export function useChartWheel({
     error,
     selectedPlanet,
     setSelectedPlanet,
-    exportSvg,
     containerId: containerIdRef.current,
   };
 }
