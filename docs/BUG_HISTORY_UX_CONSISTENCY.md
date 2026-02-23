@@ -2,7 +2,7 @@
 
 > **Severidad:** Alta — El historial Premium de Carta Astral no funciona (HTTP 500) + inconsistencias UX generalizadas en acceso al historial
 > **Fecha de detección:** 2026-02-22
-> **Estado:** TASK-FIX-HIST-01 ✅ COMPLETADA | TASK-FIX-HIST-02 ✅ COMPLETADA | TASK-FIX-HIST-03 ⏳ Pendiente
+> **Estado:** TASK-FIX-HIST-01 ✅ COMPLETADA | TASK-FIX-HIST-02 ✅ COMPLETADA | TASK-FIX-HIST-03 ✅ COMPLETADA
 
 ---
 
@@ -269,7 +269,7 @@ node scripts/validate-architecture.js
 
 **Tipo:** Frontend (Next.js)
 **Prioridad:** P1 — Función Premium invisible para el usuario
-**Estado:** ⏳ Pendiente
+**Estado:** ✅ COMPLETADA
 **Branch:** `fix/TASK-FIX-HIST-03-unified-history-access`
 
 #### Problema raíz
@@ -341,12 +341,12 @@ Para usuarios Premium, reemplazar o agregar una tarjeta que lleve a "Mis Cartas 
 
 #### Subtareas técnicas
 
-- [ ] Leer `QuickActions.tsx` y `UserMenu.tsx` completos
-- [ ] Actualizar `QuickActions.tsx`: para Premium, mostrar acceso a Carta Astral Historial
-- [ ] Actualizar `UserMenu.tsx`: para Premium, agregar "Mis Cartas Astrales" en el menú
-- [ ] Actualizar tests de `QuickActions` y `UserMenu` para cubrir caso Premium
-- [ ] Verificar que los links nuevos usen `API_ENDPOINTS` si aplica (solo rutas de página, no necesitan endpoints)
-- [ ] Verificar comportamiento en mobile (menú hamburguesa si existe)
+- [x] Leer `QuickActions.tsx` y `UserMenu.tsx` completos
+- [x] Actualizar `QuickActions.tsx`: para Premium, mostrar acceso a Carta Astral Historial
+- [x] Actualizar `UserMenu.tsx`: para Premium, agregar "Mis Cartas Astrales" en el menú
+- [x] Actualizar tests de `QuickActions` y `UserMenu` para cubrir caso Premium
+- [x] Verificar que los links nuevos usen `API_ENDPOINTS` si aplica (solo rutas de página, no necesitan endpoints)
+- [x] Verificar comportamiento en mobile (menú hamburguesa si existe)
 
 #### Ciclo de calidad
 ```bash
@@ -360,11 +360,11 @@ node scripts/validate-architecture.js
 ```
 
 #### Criterios de aceptación
-- [ ] Usuario Premium ve acceso a "Mis Cartas Astrales" en el widget de home
-- [ ] Usuario Premium ve acceso a "Mis Cartas Astrales" en el menú de usuario
-- [ ] Usuario Free NO ve la opción Premium (no genera ruido para ellos)
-- [ ] Tests actualizados cubren ambos estados (Premium / Free)
-- [ ] Build y tests sin errores
+- [x] Usuario Premium ve acceso a "Mis Cartas Astrales" en el widget de home
+- [x] Usuario Premium ve acceso a "Mis Cartas Astrales" en el menú de usuario
+- [x] Usuario Free NO ve la opción Premium (no genera ruido para ellos)
+- [x] Tests actualizados cubren ambos estados (Premium / Free)
+- [x] Build y tests sin errores
 
 ---
 

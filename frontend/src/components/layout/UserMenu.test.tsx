@@ -192,4 +192,89 @@ describe('UserMenu', () => {
       expect(screen.getByText('?')).toBeInTheDocument();
     });
   });
+
+  describe('Premium user — menú diferenciado con Mis Cartas Astrales', () => {
+    const mockPremiumUser = {
+      id: '2',
+      name: 'Ana Premium',
+      email: 'ana@premium.com',
+      plan: 'premium',
+    };
+
+    beforeEach(() => {
+      mockUseAuthStore.mockReturnValue({ user: mockPremiumUser, logout: mockLogout });
+    });
+
+    it('should show "Mis Cartas Astrales" option in dropdown for Premium users', async () => {
+      const user = userEvent.setup();
+      render(<UserMenu />);
+
+      await user.click(screen.getByTestId('user-menu-trigger'));
+
+      await waitFor(() => {
+        expect(screen.getByRole('menuitem', { name: /mis cartas astrales/i })).toBeInTheDocument();
+      });
+    });
+
+    it('should link "Mis Cartas Astrales" to /carta-astral/historial for Premium users', async () => {
+      const user = userEvent.setup();
+      render(<UserMenu />);
+
+      await user.click(screen.getByTestId('user-menu-trigger'));
+
+      await waitFor(() => {
+        const cartasLink = screen.getByRole('menuitem', { name: /mis cartas astrales/i });
+        expect(cartasLink).toHaveAttribute('href', '/carta-astral/historial');
+      });
+    });
+
+    it('should show "Mis Lecturas" option alongside "Mis Cartas Astrales" for Premium users', async () => {
+      const user = userEvent.setup();
+      render(<UserMenu />);
+
+      await user.click(screen.getByTestId('user-menu-trigger'));
+
+      await waitFor(() => {
+        expect(screen.getByRole('menuitem', { name: /mis lecturas/i })).toBeInTheDocument();
+        expect(screen.getByRole('menuitem', { name: /mis cartas astrales/i })).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Free user — NO muestra Mis Cartas Astrales', () => {
+    const mockFreeUser = {
+      id: '3',
+      name: 'Carlos Free',
+      email: 'carlos@free.com',
+      plan: 'free',
+    };
+
+    beforeEach(() => {
+      mockUseAuthStore.mockReturnValue({ user: mockFreeUser, logout: mockLogout });
+    });
+
+    it('should NOT show "Mis Cartas Astrales" option for Free users', async () => {
+      const user = userEvent.setup();
+      render(<UserMenu />);
+
+      await user.click(screen.getByTestId('user-menu-trigger'));
+
+      await waitFor(() => {
+        expect(
+          screen.queryByRole('menuitem', { name: /mis cartas astrales/i })
+        ).not.toBeInTheDocument();
+      });
+    });
+
+    it('should still show "Mis Lecturas" for Free users', async () => {
+      const user = userEvent.setup();
+      render(<UserMenu />);
+
+      await user.click(screen.getByTestId('user-menu-trigger'));
+
+      await waitFor(() => {
+        expect(screen.getByRole('menuitem', { name: /mis lecturas/i })).toBeInTheDocument();
+      });
+    });
+  });
 });

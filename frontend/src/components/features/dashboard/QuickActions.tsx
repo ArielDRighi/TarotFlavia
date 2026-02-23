@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Plus, History, Sparkles } from 'lucide-react';
+import { Plus, History, Sparkles, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/authStore';
 
@@ -107,12 +107,21 @@ export function QuickActions() {
         description="Revisa tus lecturas anteriores"
       />
 
-      <QuickActionCard
-        href="/carta-del-dia"
-        icon={<Sparkles className="h-6 w-6" />}
-        title="Carta del Día"
-        description="Obtén tu carta diaria de inspiración"
-      />
+      {user?.plan === 'premium' ? (
+        <QuickActionCard
+          href="/carta-astral/historial"
+          icon={<Star className="h-6 w-6" />}
+          title="Mis Cartas Astrales"
+          description="Accede a tus cartas guardadas"
+        />
+      ) : (
+        <QuickActionCard
+          href="/carta-del-dia"
+          icon={<Sparkles className="h-6 w-6" />}
+          title="Carta del Día"
+          description="Obtén tu carta diaria de inspiración"
+        />
+      )}
     </div>
   );
 }
