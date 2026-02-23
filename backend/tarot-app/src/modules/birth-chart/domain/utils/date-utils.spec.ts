@@ -1,33 +1,32 @@
-import { parseBirthDate } from './date-utils';
+import { parseBirthDate, formatBirthDate } from './date-utils';
 
 describe('parseBirthDate', () => {
   describe('correct calendar day (timezone-safe)', () => {
     it('should return October 18 for 2011-10-18', () => {
       const date = parseBirthDate('2011-10-18');
-      expect(date.getFullYear()).toBe(2011);
-      expect(date.getMonth()).toBe(9); // 0-indexed
-      expect(date.getDate()).toBe(18);
+      expect(date.getUTCFullYear()).toBe(2011);
+      expect(date.getUTCMonth()).toBe(9); // 0-indexed
+      expect(date.getUTCDate()).toBe(18);
     });
 
     it('should return January 1 for 2000-01-01', () => {
       const date = parseBirthDate('2000-01-01');
-      expect(date.getFullYear()).toBe(2000);
-      expect(date.getMonth()).toBe(0);
-      expect(date.getDate()).toBe(1);
+      expect(date.getUTCFullYear()).toBe(2000);
+      expect(date.getUTCMonth()).toBe(0);
+      expect(date.getUTCDate()).toBe(1);
     });
 
     it('should return December 31 for 1999-12-31', () => {
       const date = parseBirthDate('1999-12-31');
-      expect(date.getFullYear()).toBe(1999);
-      expect(date.getMonth()).toBe(11);
-      expect(date.getDate()).toBe(31);
+      expect(date.getUTCFullYear()).toBe(1999);
+      expect(date.getUTCMonth()).toBe(11);
+      expect(date.getUTCDate()).toBe(31);
     });
 
-    it('should not shift the day compared to new Date(string) behaviour in UTC-3', () => {
-      // new Date('2011-10-18') in UTC-3 would give getDate() === 17 (bug)
-      // parseBirthDate must always give getDate() === 18
+    it('should not shift the day regardless of server timezone', () => {
+      // new Date('2011-10-18') is UTC midnight; getUTCDate() is always 18
       const date = parseBirthDate('2011-10-18');
-      expect(date.getDate()).toBe(18);
+      expect(date.getUTCDate()).toBe(18);
     });
   });
 
@@ -37,9 +36,9 @@ describe('parseBirthDate', () => {
       (input) => {
         const date = parseBirthDate(input);
         const [year, month, day] = input.split('-').map(Number);
-        expect(date.getFullYear()).toBe(year);
-        expect(date.getMonth()).toBe(month - 1);
-        expect(date.getDate()).toBe(day);
+        expect(date.getUTCFullYear()).toBe(year);
+        expect(date.getUTCMonth()).toBe(month - 1);
+        expect(date.getUTCDate()).toBe(day);
       },
     );
   });
@@ -47,9 +46,9 @@ describe('parseBirthDate', () => {
   describe('leap year support', () => {
     it('should parse February 29 on a leap year', () => {
       const date = parseBirthDate('2000-02-29');
-      expect(date.getFullYear()).toBe(2000);
-      expect(date.getMonth()).toBe(1);
-      expect(date.getDate()).toBe(29);
+      expect(date.getUTCFullYear()).toBe(2000);
+      expect(date.getUTCMonth()).toBe(1);
+      expect(date.getUTCDate()).toBe(29);
     });
 
     it('should throw for February 29 on a non-leap year', () => {
@@ -60,7 +59,7 @@ describe('parseBirthDate', () => {
   describe('month boundaries', () => {
     it('should parse the last day of January', () => {
       const date = parseBirthDate('2024-01-31');
-      expect(date.getDate()).toBe(31);
+      expect(date.getUTCDate()).toBe(31);
     });
 
     it('should throw for April 31 (invalid calendar date)', () => {
@@ -90,3 +89,35 @@ describe('parseBirthDate', () => {
     });
   });
 });
+
+describe('formatBirthDate', () => {
+  it('should format a UTC-midnight Date to YYYY-MM-DD without timezone shift', () => {
+    // Simulates a date as returned by parseBirthDate or PostgreSQL date column
+    const date = parseBirthDate('1990-05-15');
+    expect(formatBirthDate(date)).toBe('1990-05-15');
+  });
+
+  it('should format a Date created with new Date(UTC string) correctly', () => {
+    // Simulates how PostgreSQL driver returns date values
+    const date = new Date('1990-05-15T00:00:00Z');
+    expect(formatBirthDate(date)).toBe('1990-05-15');
+  });
+
+  it('should format January 1 correctly (single-digit month and day padded)', () => {
+    const date = parseBirthDate('2000-01-01');
+    expect(formatBirthDate(date)).toBe('2000-01-01');
+  });
+
+  it('should format December 31 correctly', () => {
+    const date = parseBirthDate('1999-12-31');
+    expect(formatBirthDate(date)).toBe('1999-12-31');
+  });
+
+  it('should round-trip with parseBirthDate for multiple dates', () => {
+    const dates = ['2011-10-18', '1978-01-31', '2000-02-29', '1985-11-20'];
+    for (const input of dates) {
+      expect(formatBirthDate(parseBirthDate(input))).toBe(input);
+    }
+  });
+});
+
