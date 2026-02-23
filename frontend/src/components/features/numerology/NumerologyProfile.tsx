@@ -82,7 +82,7 @@ export function NumerologyProfile({ profile, className }: Props) {
               </div>
               <div className="mt-4 text-xs text-gray-500">
                 Generada el{' '}
-                {new Date(interpretation.generatedAt).toLocaleDateString('es-ES', {
+                {formatTimestampLocalized(interpretation.generatedAt, 'es-ES', {
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric',

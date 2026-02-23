@@ -8,6 +8,7 @@
 'use client';
 
 import { useState } from 'react';
+import { parseTimestamp } from '@/lib/utils/date';
 import { useSecurityEvents } from '@/hooks/api/useAdminSecurity';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -204,7 +205,7 @@ export function SecurityEventsTab() {
                   {data.events.map((event) => (
                     <TableRow key={event.id}>
                       <TableCell className="whitespace-nowrap">
-                        {new Date(event.createdAt).toLocaleString()}
+                        {parseTimestamp(event.createdAt).toLocaleString()}
                       </TableCell>
                       <TableCell>{event.eventType.replace(/_/g, ' ')}</TableCell>
                       <TableCell>

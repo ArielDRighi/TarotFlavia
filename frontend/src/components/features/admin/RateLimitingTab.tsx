@@ -8,6 +8,7 @@
 'use client';
 
 import { useRateLimitData } from '@/hooks/api/useAdminSecurity';
+import { parseTimestamp } from '@/lib/utils/date';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -160,9 +161,11 @@ export function RateLimitingTab() {
                         {blocked.reason}
                       </div>
                     </TableCell>
-                    <TableCell>{new Date(blocked.blockedAt).toLocaleString()}</TableCell>
+                    <TableCell>{parseTimestamp(blocked.blockedAt).toLocaleString()}</TableCell>
                     <TableCell>
-                      {blocked.expiresAt ? new Date(blocked.expiresAt).toLocaleString() : 'Nunca'}
+                      {blocked.expiresAt
+                        ? parseTimestamp(blocked.expiresAt).toLocaleString()
+                        : 'Nunca'}
                     </TableCell>
                     <TableCell>
                       <Button

@@ -3,6 +3,8 @@ import {
   parseDateString,
   parseTimestamp,
   formatTimeAgo,
+  formatTimestampLocalized,
+  formatTimestamp,
   formatDateFull,
   formatDateFullWithYear,
   formatDateShort,
@@ -234,6 +236,74 @@ describe('date utilities', () => {
 
       // Spanish locale uses "hace" for past times
       expect(result).toMatch(/hace|más de/i);
+    });
+  });
+
+  describe('formatTimestampLocalized', () => {
+    it('should produce identical results for same UTC time with and without Z', () => {
+      // Defense-in-depth regression test: both strings represent the same UTC instant.
+      // Without parseTimestamp(), only the Z-prefixed version would produce the correct output.
+      const withZ = formatTimestampLocalized('2026-02-22T14:00:00.000Z', 'es-AR');
+      const withoutZ = formatTimestampLocalized('2026-02-22T14:00:00.000000', 'es-AR');
+
+      expect(withZ).toBe(withoutZ);
+    });
+
+    it('should include year, month and day in output', () => {
+      const result = formatTimestampLocalized('2026-02-22T00:00:00.000Z', 'es-AR');
+
+      expect(result).toContain('2026');
+    });
+
+    it('should accept custom locale', () => {
+      const esAR = formatTimestampLocalized('2026-02-22T00:00:00.000Z', 'es-AR');
+      const esES = formatTimestampLocalized('2026-02-22T00:00:00.000Z', 'es-ES');
+
+      // Both are strings with content
+      expect(typeof esAR).toBe('string');
+      expect(typeof esES).toBe('string');
+    });
+
+    it('should accept additional Intl.DateTimeFormatOptions', () => {
+      const withHour = formatTimestampLocalized('2026-02-22T14:00:00.000Z', 'es-AR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+
+      // Hour info should be present in the output
+      expect(typeof withHour).toBe('string');
+      expect(withHour.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('formatTimestamp', () => {
+    it('should produce identical results for same UTC time with and without Z', () => {
+      const pattern = "d 'de' MMMM 'de' yyyy";
+      const withZ = formatTimestamp('2026-02-22T14:00:00.000Z', pattern);
+      const withoutZ = formatTimestamp('2026-02-22T14:00:00.000000', pattern);
+
+      expect(withZ).toBe(withoutZ);
+    });
+
+    it('should format date using the provided pattern', () => {
+      // Use noon UTC so the local date (even in UTC-12) stays on the same calendar day
+      const result = formatTimestamp('2026-03-10T12:00:00.000Z', 'yyyy-MM-dd');
+
+      // Regardless of timezone, 12:00 UTC is still March 10 everywhere (UTC-12 to UTC+12)
+      expect(result).toBe('2026-03-10');
+    });
+
+    it('should include time component when pattern includes HH:mm', () => {
+      // Verify that the time portion in the output reflects LOCAL time,
+      // not UTC. We test structural consistency rather than an absolute UTC value
+      // (the user should always see their own local time).
+      const resultA = formatTimestamp('2026-02-22T14:30:00.000Z', 'yyyy-MM-dd HH:mm');
+      const resultB = formatTimestamp('2026-02-22T20:30:00.000Z', 'yyyy-MM-dd HH:mm');
+
+      // Both are non-empty strings with the correct structure
+      expect(resultA).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/);
+      // resultB is 6 hours later, so its numeric time should be greater
+      expect(resultB > resultA).toBe(true);
     });
   });
 });

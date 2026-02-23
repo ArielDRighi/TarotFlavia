@@ -24,6 +24,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
+import { formatTimestampLocalized } from '@/lib/utils/date';
 
 // Hooks
 import { useSavedChart, useRenameChart, useDeleteChart } from '@/hooks/api/useBirthChart';
@@ -272,7 +273,7 @@ export function SavedChartPageContent() {
           )}
           <p className="text-muted-foreground mt-1">
             Guardada el{' '}
-            {new Date(chart.createdAt).toLocaleDateString('es-AR', {
+            {formatTimestampLocalized(chart.createdAt, 'es-AR', {
               day: 'numeric',
               month: 'long',
               year: 'numeric',
