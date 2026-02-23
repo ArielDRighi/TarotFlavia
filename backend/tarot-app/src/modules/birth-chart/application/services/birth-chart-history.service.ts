@@ -156,6 +156,12 @@ export class BirthChartHistoryService {
         typeof chart.createdAt === 'string'
           ? chart.createdAt
           : chart.createdAt.toISOString(),
+      birthDate:
+        typeof chart.birthDate === 'string'
+          ? chart.birthDate
+          : chart.birthDate.toISOString().split('T')[0],
+      birthTime: chart.birthTime.substring(0, 5),
+      birthPlace: chart.birthPlace,
       aiSynthesis: {
         content: chart.chartData.aiSynthesis ?? '',
         generatedAt: chart.chartData.aiSynthesis
