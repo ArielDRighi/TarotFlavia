@@ -12,6 +12,8 @@
 |----|-------------|------|-----------|--------|
 | FB-CA-001 | Carta guardada muestra fecha de creación en lugar de datos de nacimiento | Bug / UX | High | T-CA-051 (Backend), T-CA-052 (Frontend) |
 | FB-CA-002 | Gráfico SVG web muestra elementos superpuestos + botón "Descargar SVG" a eliminar | Bug / UX | High | T-CA-053 (Frontend) |
+| FB-CA-003 | Geocoding con Nominatim: localidades sin resultados, duplicados, coordenadas no confiables | Bug / Mejora Crítica | Critical | T-CA-054 (Backend) — Photon+Nominatim, T-CA-055 (Frontend) |
+| FB-CA-004 | Falta botón "Nueva carta" en página de carta guardada | UX | Medium | T-CA-056 (Frontend) |
 
 ---
 
@@ -477,3 +479,423 @@ Corregir los valores de configuración de `@astrodraw/astrochart` que causan sup
 - Los valores `SYMBOL_SCALE: 0.8`, `MARGIN: 30`, `PADDING: 12` son un punto de partida. Si tras aplicarlos el gráfico sigue mostrando colisiones o los símbolos se ven demasiado pequeños, ajustar iterativamente dentro del rango `SYMBOL_SCALE: 0.7–1.0`, `MARGIN: 25–40`.
 - La librería `@astrodraw/astrochart` **no tiene collision avoidance nativo** para planetas en conjunción. Cuando dos planetas están en el mismo grado, siempre habrá cierta superposición. El objetivo es minimizarla para casos normales donde los planetas están a varios grados de distancia.
 - El prop `showControls` se pasa como `showControls={true}` explícitamente en `ChartResultPageContent.tsx`. Si se elimina el prop, asegurarse de limpiar esa referencia también.
+
+---
+
+## FB-CA-003: Geocoding — Localidades sin Resultados, Duplicados y Coordenadas No Confiables
+
+**Tipo:** Bug / Mejora Crítica
+**Prioridad:** Critical
+**Impacto:** Alto — coordenadas incorrectas producen cartas astrales erróneas (especialmente el Ascendente)
+
+---
+
+### Descripción del Problema
+
+El sistema de autocompletado de "Lugar de nacimiento" presenta tres problemas graves:
+
+1. **Localidades pequeñas sin resultados** — Lugares como *Campamento Vespucio* o *General Enrique Mosconi* (Salta, Argentina) no aparecen entre las sugerencias.
+2. **Resultados duplicados** — Al escribir "Salta" o "Córdoba", aparecen dos o más opciones visualmente idénticas mezcladas con resultados irrelevantes.
+3. **Coordenadas no confiables** — Para carta astral, coordenadas imprecisas afectan directamente el cálculo del Ascendente y las cúspides de casas. Un error de pocos kilómetros puede cambiar el Ascendente varios minutos de arco.
+
+---
+
+### Análisis Técnico — Fuente actual de datos
+
+#### API usada: Nominatim (OpenStreetMap) — Gratuita, sin API key
+
+**Archivo:** [`geocode.service.ts`](../backend/tarot-app/src/modules/birth-chart/application/services/geocode.service.ts)
+
+```typescript
+// Estado actual — Nominatim sin filtros de calidad
+private readonly NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
+
+// Query sin filtros de tipo de lugar:
+params: {
+  q: query,
+  format: 'json',
+  addressdetails: 1,
+  limit: 5,
+  'accept-language': 'es',
+}
+```
+
+#### Causa de cada problema
+
+**Problema 1 — Localidades pequeñas sin resultados:**
+Nominatim depende de la cobertura de colaboradores de OpenStreetMap. Muchas localidades rurales o semi-urbanas de Argentina (especialmente en el norte) tienen cobertura parcial o nula. *General Enrique Mosconi* y *Campamento Vespucio* son localidades del departamento Gral. San Martín, Salta, con escasa presencia en OSM.
+
+**Problema 2 — Resultados duplicados:**
+Nominatim devuelve múltiples objetos OSM para el mismo topónimo (la ciudad capital, la provincia, el departamento, el municipio, el barrio, etc.). Por ejemplo, para "Salta" retorna:
+- `Salta` (ciudad capital) → type: `city`
+- `Salta` (provincia) → type: `administrative`
+- `Salta` (departamento) → type: `administrative`
+
+La función `extractCity` del servicio solo usa `address.city || address.town || ...`, por lo que todos estos resultados muestran el mismo texto en el dropdown del frontend.
+
+**Problema 3 — Timezone como fallback por longitud:**
+Si no hay `TIMEZONEDB_API_KEY` configurada, el servicio usa `estimateTimezoneByLongitude()` que redondea a horas completas (`Etc/GMT+3`), perdiendo la información de zona horaria IANA real (ej: `America/Argentina/Salta`). Esto afecta el cálculo del tiempo sidéreo y por ende la posición del Ascendente.
+
+---
+
+### Solución Propuesta — Migrar a Photon (Komoot) con Nominatim como fallback
+
+Para una aplicación con alta carga de usuarios free, Google Places API no es sostenible: a partir de ~170 DAU el free tier ($200/mes) ya se supera (~$0.034/búsqueda única, incluyendo Autocomplete + Place Details). La solución óptima para usuarios free es **Photon (Komoot)** como fuente primaria.
+
+#### Comparativa de opciones
+
+| Herramienta | Cobertura AR rural | Duplicados | Costo real | API Key |
+|-------------|-------------------|------------|------------|---------|
+| **Nominatim (actual)** | Baja | Sí (sin filtros) | Gratis | No |
+| **Photon/Komoot (propuesto)** | Media-Alta | Mínimos | **Gratis** | **No** |
+| Google Places API | Excelente | No | ~$0.034/búsqueda única → +$200/mes con >170 DAU | Sí |
+| Mapbox Geocoding | Buena | Ocasionales | 100k req/mes gratis, luego $0.75/1000 | Sí |
+
+**Photon** es un geocoder open-source de Komoot que usa los mismos datos OSM pero con **Elasticsearch**, lo que resulta en búsquedas mucho más precisas, soporte de acentos y mejor cobertura de localidades pequeñas argentinas. Es completamente gratuito, no requiere API key y puede auto-hostearse.
+
+#### Arquitectura propuesta
+
+```
+Frontend (PlaceAutocomplete)
+  → Llama al backend: GET /birth-chart/geocode/search?q=...
+      → Backend (GeocodeService)
+           → Photon API (Komoot)  ← NUEVA implementación primaria (gratis)
+             → OK: retornar resultados de Photon
+             → ERROR: fallback automático a Nominatim
+           → Nominatim (OSM)      ← fallback (ya implementado)
+           → TimeZoneDB API       ← timezone, sin cambios
+           → Cache                ← sin cambios
+```
+
+**La interfaz pública del backend no cambia** — el endpoint y el `GeocodeSearchResponseDto` se mantienen. El cambio es interno al servicio.
+
+---
+
+### Tareas
+
+#### T-CA-054: [Backend] Migrar geocoding a Photon (Komoot) con Nominatim como fallback
+
+**Tipo:** Mejora Crítica
+**Módulo:** Backend — `birth-chart/geocode`
+**Prioridad:** Critical
+**Estimación:** 3h
+**Dependencias:** Ninguna (sin API key requerida)
+
+##### Descripción
+
+Reemplazar Nominatim por **Photon (Komoot)** como fuente primaria de geocoding, manteniendo Nominatim como fallback automático. Photon usa los mismos datos OSM pero con Elasticsearch, ofreciendo búsquedas más precisas, sin duplicados y mejor cobertura de localidades pequeñas argentinas — **completamente gratis y sin API key**. El contrato público (endpoint y DTOs) no cambia.
+
+##### Estrategia Híbrida (Photon primario + Nominatim fallback)
+
+```
+searchPlaces(query):
+  1. Llamar Photon API (Komoot) — siempre, sin condición
+     → OK:    retornar resultados de Photon
+     → ERROR: log.warn("Photon failed, falling back to Nominatim") → Nominatim
+```
+
+**Ventajas:**
+- Costo cero en cualquier volumen de usuarios free
+- Sin API key, sin límites publicados (fair use)
+- Mejor cobertura que Nominatim para localidades pequeñas argentinas
+- Sin duplicados (Photon devuelve un resultado por entidad, no múltiples objetos OSM del mismo topónimo)
+- El contrato del endpoint no cambia para el frontend en ningún caso
+- Auto-hosteable en el futuro si se necesita control total
+
+##### Photon API
+
+```
+GET https://photon.komoot.io/api/
+Params: q=<query>, lang=es, limit=5, osm_tag=place:city, osm_tag=place:town, osm_tag=place:village
+```
+
+Ejemplo de respuesta (GeoJSON FeatureCollection):
+```json
+{
+  "features": [{
+    "geometry": { "coordinates": [-65.4095, -24.7859] },
+    "properties": {
+      "osm_id": 12345,
+      "osm_type": "N",
+      "name": "Salta",
+      "country": "Argentina",
+      "state": "Salta",
+      "type": "city",
+      "extent": [-65.5, -24.9, -65.3, -24.7]
+    }
+  }]
+}
+```
+
+##### Archivos a modificar
+
+| Archivo | Cambio |
+|---------|--------|
+| `backend/tarot-app/src/modules/birth-chart/application/services/geocode.service.ts` | Agregar `searchWithPhoton()`, refactorizar `searchPlaces()` con lógica híbrida |
+
+##### Subtareas
+
+- [ ] Leer `WORKFLOW_BACKEND.md` antes de implementar
+- [ ] Agregar interfaz `PhotonFeature` para tipar la respuesta GeoJSON de Photon:
+  ```typescript
+  interface PhotonFeature {
+    geometry: { coordinates: [number, number] };
+    properties: {
+      osm_id: number;
+      osm_type: string;
+      name: string;
+      country?: string;
+      state?: string;
+      city?: string;
+      type?: string;
+    };
+  }
+  ```
+- [ ] Implementar método privado `searchWithPhoton(query)`:
+  - URL: `https://photon.komoot.io/api/`
+  - Params: `{ q: query, lang: 'es', limit: 5 }`
+  - Headers: `{ 'User-Agent': 'Auguria/1.0 (contact@auguria.com)' }`
+  - Mapear cada feature al `GeocodedPlaceDto` existente:
+    - `placeId`: `photon_${feature.properties.osm_type}_${feature.properties.osm_id}`
+    - `displayName`: construir como `${name}, ${state}, ${country}` (con los campos disponibles)
+    - `city`: `feature.properties.name`
+    - `country`: `feature.properties.country || ''`
+    - `latitude`: `feature.geometry.coordinates[1]`
+    - `longitude`: `feature.geometry.coordinates[0]`
+    - `timezone`: seguir usando `getTimezone()` existente (sin cambio)
+- [ ] Refactorizar `searchPlaces()` con lógica híbrida:
+  ```typescript
+  async searchPlaces(query: string): Promise<GeocodeSearchResponseDto> {
+    const cached = await this.cacheService.getSearchResults(query);
+    if (cached) return { results: cached, count: cached.length };
+
+    try {
+      return await this.searchWithPhoton(query);
+    } catch (error) {
+      this.logger.warn(`Photon geocoding failed, using Nominatim fallback: ${error.message}`);
+      return await this.searchWithNominatim(query);
+    }
+  }
+  ```
+- [ ] Renombrar la lógica actual de Nominatim a método privado `searchWithNominatim(query)` (mantener sin cambios funcionales)
+- [ ] Mantener el caché existente (`GeocodeCacheService`), rate limiting de Nominatim y `NominatimResult` sin cambios
+- [ ] Actualizar tests de `geocode.service.spec.ts`:
+  - Test: Photon OK → retorna resultados de Photon
+  - Test: Photon falla → hace fallback a Nominatim
+  - Test: resultado de Photon mapeado correctamente al `GeocodedPlaceDto`
+- [ ] Ejecutar ciclo de calidad completo
+- [ ] Actualizar backlog y crear PR → `develop`
+
+##### Criterios de aceptación
+
+1. Buscar "Salta" devuelve máximo 1 resultado por ciudad (sin duplicados del tipo city/administrative)
+2. Buscar "Córdoba" diferencia "Córdoba, Córdoba, Argentina" de otras homónimas
+3. El endpoint `GET /birth-chart/geocode/search` sigue funcionando con el mismo contrato
+4. Si Photon falla, el servicio continúa funcionando con Nominatim (sin error 500)
+5. Tests pasan con coverage ≥ 80%
+6. Build exitoso
+
+---
+
+#### T-CA-055: [Frontend] Mejorar display del autocomplete para mostrar resultados diferenciados
+
+**Tipo:** UX Fix
+**Módulo:** Frontend — `birth-chart`
+**Prioridad:** High
+**Estimación:** 1h
+**Dependencias:** T-CA-054 (los nuevos resultados de Photon ya vienen diferenciados por `displayName` completo)
+
+##### Descripción
+
+Ajustar `PlaceAutocomplete.tsx` para aprovechar la estructura mejorada de los resultados de Photon, mostrando subtítulos más informativos en cada opción del dropdown (ej: `"Salta, Salta, Argentina"`) para ayudar al usuario a distinguir entre resultados con nombres similares.
+
+##### Archivos a modificar
+
+| Archivo | Cambio |
+|---------|--------|
+| `frontend/src/components/features/birth-chart/PlaceAutocomplete/PlaceAutocomplete.tsx` | Mejorar display de cada resultado en la lista |
+
+##### Cambio en el dropdown (cada opción)
+
+```tsx
+// ✅ MEJORADO — mostrar nombre completo de la ciudad + país + timezone
+<span className="text-sm font-medium">
+  {place.city || place.displayName.split(',')[0]?.trim()}
+</span>
+<span className="text-muted-foreground text-xs">
+  {place.displayName}  {/* nombre completo: "Salta, Salta, Argentina" */}
+  {place.timezone && ` • ${place.timezone}`}
+</span>
+```
+
+##### Subtareas
+
+- [ ] Leer `WORKFLOW_FRONTEND.md` antes de implementar
+- [ ] En `PlaceAutocomplete.tsx`, en el render de cada `place`, reemplazar la línea del subtítulo:
+  ```tsx
+  // ❌ Actual — solo muestra country y timezone
+  <span className="text-muted-foreground text-xs">
+    {place.country}{place.timezone && ` • ${place.timezone}`}
+  </span>
+  // ✅ Mejorado — muestra displayName completo para diferenciar resultados
+  <span className="text-muted-foreground text-xs">
+    {place.displayName}{place.timezone && ` • ${place.timezone}`}
+  </span>
+  ```
+- [ ] Verificar que `GeocodedPlace` en `birth-chart-geocode.types.ts` incluye `displayName` (ya existe)
+- [ ] Ejecutar ciclo de calidad completo
+- [ ] Actualizar backlog y crear PR → `develop`
+
+##### Criterios de aceptación
+
+1. Al buscar "Salta", cada sugerencia muestra su nombre completo: ej. `"Salta, Salta, Argentina"` vs `"Salta, Buenos Aires, Argentina"` (si existiera), permitiendo distinguirlas
+2. Al buscar "Córdoba", se diferencia "Córdoba, Argentina" de otras homónimas
+3. Tests pasan, build y type-check exitosos
+
+---
+
+### Resumen de Impacto FB-CA-003
+
+| Capa | Archivos afectados | Complejidad |
+|------|--------------------|-------------|
+| Backend Service | `geocode.service.ts` | Media — reemplazar implementación HTTP, mantener contrato |
+| Backend Config | `.env.example` | Mínima — agregar variable |
+| Backend Tests | `geocode.service.spec.ts` | Media — actualizar mocks |
+| Frontend Component | `PlaceAutocomplete.tsx` | Baja — 2-3 líneas de JSX |
+
+**Riesgo:** Muy bajo. El contrato del endpoint no cambia. Photon no requiere API key ni configuración. El fallback a Nominatim garantiza continuidad si Photon no está disponible.
+
+### Notas de Implementación
+
+- Photon no tiene un límite de rate oficialmente publicado, pero sus términos de uso requieren "fair use". Con el caché de 7 días del `GeocodeCacheService`, las llamadas repetidas a la misma query no generan nuevos requests.
+- El `displayName` de Photon debe construirse manualmente concatenando `name + state + country` ya que Photon no devuelve un campo `display_name` listo, a diferencia de Nominatim.
+- Photon no devuelve timezone — se sigue usando `getTimezone()` con TimeZoneDB (o el fallback por longitud), sin cambios.
+- Para localidades muy pequeñas que Photon tampoco encuentre (cobertura OSM insuficiente), el fallback a Nominatim actúa como segunda red de seguridad. Si ninguno encuentra la localidad, el usuario puede ingresar el lugar manualmente con coordenadas (feature futura).
+- Si en el futuro se necesita control total del servicio (por ejemplo, en caso de que Komoot restrinja el acceso), Photon puede auto-hostearse con Docker usando los datos de OpenStreetMap.
+
+---
+
+## FB-CA-004: Falta Botón "Nueva Carta" en Página de Carta Guardada
+
+**Tipo:** UX Fix
+**Prioridad:** Medium
+
+---
+
+### Descripción del Problema
+
+En la página de detalle de carta guardada (`/carta-astral/resultado/[id]`), no existe ningún botón para que el usuario pueda generar una nueva carta astral desde allí.
+
+En contraste, la página de resultado de carta recién generada (`/carta-astral/resultado`) **ya tiene** un botón "← Nueva carta" en el encabezado y un botón "Generar otra carta" en el footer, lo que crea una inconsistencia de UX entre ambas páginas.
+
+---
+
+### Comparación de Comportamiento
+
+| Página | Botón "Nueva carta" | Navegación disponible |
+|--------|--------------------|-----------------------|
+| `/carta-astral/resultado` (resultado fresco) | ✅ "← Nueva carta" (header) + "Generar otra carta" (footer) | Completa |
+| `/carta-astral/resultado/[id]` (carta guardada) | ❌ No existe | Solo "← Mi historial" |
+
+---
+
+### Análisis Técnico
+
+**Archivo:** [`SavedChartPageContent.tsx`](../frontend/src/components/features/birth-chart/SavedChartPageContent/SavedChartPageContent.tsx)
+
+El header actual de la página de carta guardada (líneas 172–233) tiene:
+- Izquierda: `← Mi historial` (Link a `/carta-astral/historial`)
+- Derecha: Badge "Guardada" + Botón "PDF" + Menú `⋮` (Renombrar / Eliminar)
+
+No hay acceso a generar una nueva carta desde esta página. El usuario debe navegar manualmente a `/carta-astral` o usar el menú de navegación superior.
+
+**Referencia — patrón correcto en `ChartResultPageContent.tsx`** (líneas 107–109):
+```tsx
+<Button variant="ghost" size="sm" onClick={handleNewChart}>
+  <ArrowLeft className="mr-2 h-4 w-4" />
+  Nueva carta
+</Button>
+```
+Donde `handleNewChart` hace `reset()` del store y navega a `/carta-astral`.
+
+---
+
+### Tarea
+
+#### T-CA-056: [Frontend] Agregar botón "Nueva carta" en página de carta guardada
+
+**Tipo:** UX Fix
+**Módulo:** Frontend — `birth-chart`
+**Prioridad:** Medium
+**Estimación:** 0.5h
+**Dependencias:** Ninguna
+
+##### Descripción
+
+Agregar un botón "Nueva carta" en `SavedChartPageContent.tsx` para permitir al usuario navegar directamente a generar una nueva carta astral, siendo consistente con la UX de `ChartResultPageContent.tsx`.
+
+##### Archivos a modificar
+
+| Archivo | Cambio |
+|---------|--------|
+| `frontend/src/components/features/birth-chart/SavedChartPageContent/SavedChartPageContent.tsx` | Agregar botón "Nueva carta" en el header |
+
+##### Cambio propuesto
+
+En el encabezado de `SavedChartPageContent.tsx`, reemplazar el botón "← Mi historial" actual por dos botones:
+
+```tsx
+// ✅ Header con ambas opciones de navegación
+<div className="flex items-center gap-2">
+  <Button variant="ghost" size="sm" asChild>
+    <Link href="/carta-astral/historial">
+      <ArrowLeft className="mr-2 h-4 w-4" />
+      Mi historial
+    </Link>
+  </Button>
+  <Button variant="ghost" size="sm" asChild>
+    <Link href="/carta-astral">
+      <Star className="mr-2 h-4 w-4" />
+      Nueva carta
+    </Link>
+  </Button>
+</div>
+```
+
+> Nota: A diferencia de `ChartResultPageContent`, en esta página **no** es necesario hacer `reset()` del store porque la carta guardada no usa el store de `birthChartStore` (obtiene sus datos directo desde el API por ID).
+
+##### Subtareas
+
+- [ ] Leer `WORKFLOW_FRONTEND.md` antes de implementar
+- [ ] En `SavedChartPageContent.tsx`, en el bloque del breadcrumb de navegación (línea ~172):
+  - Reemplazar el único `<Button>` izquierdo por los dos botones descritos arriba
+  - Verificar que `Star` ya está importado de `lucide-react` (lo está, línea 25)
+  - Verificar que `Link` ya está importado de `next/link` (lo está, línea 27)
+- [ ] Actualizar tests en `SavedChartPageContent.test.tsx` si hay tests del header
+- [ ] Ejecutar ciclo de calidad completo:
+  - [ ] `npm run format`
+  - [ ] `npm run lint:fix`
+  - [ ] `npm run type-check`
+  - [ ] `npm run test:run`
+  - [ ] `npm run build`
+  - [ ] `node scripts/validate-architecture.js`
+- [ ] Actualizar backlog y crear PR → `develop`
+
+##### Criterios de aceptación
+
+1. La página `/carta-astral/resultado/[id]` muestra un botón "Nueva carta" en el header
+2. Hacer click en "Nueva carta" navega a `/carta-astral`
+3. "← Mi historial" se mantiene funcional
+4. El layout del header no se rompe en mobile ni desktop
+5. Tests pasan, build y type-check exitosos
+
+---
+
+### Resumen de Impacto FB-CA-004
+
+| Capa | Archivos afectados | Complejidad |
+|------|--------------------|-------------|
+| Frontend Component | `SavedChartPageContent.tsx` | Muy baja — agregar ~8 líneas de JSX |
+| Frontend Tests | `SavedChartPageContent.test.tsx` | Muy baja — verificar nuevo botón |
+
+**Riesgo:** Mínimo. Solo agrega elementos UI sin tocar lógica.
