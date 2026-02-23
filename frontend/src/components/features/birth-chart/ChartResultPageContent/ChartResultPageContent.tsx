@@ -177,7 +177,6 @@ export function ChartResultPageContent() {
                 data={chartResult.chartSvgData}
                 size={400}
                 showAspects={true}
-                showControls={true}
                 interactive={true}
               />
             </CardContent>

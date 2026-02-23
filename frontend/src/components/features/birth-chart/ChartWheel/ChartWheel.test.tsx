@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
 import { ChartWheel } from './ChartWheel';
 import type { ChartSvgData } from '@/types/birth-chart.types';
@@ -72,7 +72,6 @@ describe('ChartWheel', () => {
     error: null,
     selectedPlanet: null,
     setSelectedPlanet: vi.fn(),
-    exportSvg: vi.fn().mockReturnValue('<svg></svg>'),
   };
 
   beforeEach(() => {
@@ -129,17 +128,8 @@ describe('ChartWheel', () => {
       expect(container).not.toHaveClass('opacity-0');
     });
 
-    it('debe mostrar controles cuando showControls es true', () => {
-      render(<ChartWheel data={mockChartData} showControls={true} />);
-
-      const downloadButton = screen.getByRole('button', {
-        name: /descargar/i,
-      });
-      expect(downloadButton).toBeInTheDocument();
-    });
-
-    it('debe ocultar controles cuando showControls es false', () => {
-      render(<ChartWheel data={mockChartData} showControls={false} />);
+    it('no debe mostrar el botón de descarga', () => {
+      render(<ChartWheel data={mockChartData} />);
 
       const downloadButton = screen.queryByRole('button', {
         name: /descargar/i,
@@ -184,33 +174,6 @@ describe('ChartWheel', () => {
           darkMode: true, // porque useTheme devuelve 'dark'
         })
       );
-    });
-
-    it('debe llamar a exportSvg cuando se hace click en descargar', async () => {
-      render(<ChartWheel data={mockChartData} showControls={true} />);
-
-      const downloadButton = screen.getByRole('button', {
-        name: /descargar/i,
-      });
-      downloadButton.click();
-
-      await waitFor(() => {
-        expect(mockUseChartWheel.exportSvg).toHaveBeenCalled();
-      });
-    });
-
-    it('debe llamar al callback onExport si se proporciona', async () => {
-      const onExport = vi.fn();
-      render(<ChartWheel data={mockChartData} showControls={true} onExport={onExport} />);
-
-      const downloadButton = screen.getByRole('button', {
-        name: /descargar/i,
-      });
-      downloadButton.click();
-
-      await waitFor(() => {
-        expect(onExport).toHaveBeenCalledWith('<svg></svg>');
-      });
     });
 
     it('debe renderizar el contenedor con el tamaño especificado', () => {

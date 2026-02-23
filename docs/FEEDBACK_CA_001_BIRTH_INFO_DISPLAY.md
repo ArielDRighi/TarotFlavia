@@ -403,6 +403,7 @@ PADDING: 12,        // Reducido de 18 → mejor distribución de anillos
 **Prioridad:** High
 **Estimación:** 1.5h
 **Dependencias:** Ninguna
+**Estado:** ✅ COMPLETADA
 
 #### Descripción
 
@@ -418,15 +419,15 @@ Corregir los valores de configuración de `@astrodraw/astrochart` que causan sup
 
 #### Subtareas
 
-- [ ] Leer `WORKFLOW_FRONTEND.md` antes de implementar
-- [ ] **En `astrochart.config.ts`**: modificar `CHART_SETTINGS`:
+- [x] Leer `WORKFLOW_FRONTEND.md` antes de implementar
+- [x] **En `astrochart.config.ts`**: modificar `CHART_SETTINGS`:
   ```typescript
   SYMBOL_SCALE: 0.8,  // era 1.2
   MARGIN: 30,         // era 50
   PADDING: 12,        // era 18
   ```
   > Nota: `CHART_SETTINGS_LIGHT` hereda estos valores vía spread, por lo que se corrige automáticamente. `CHART_SETTINGS_PDF` tiene sus propios valores y **no debe tocarse**.
-- [ ] **En `ChartWheel.tsx`**:
+- [x] **En `ChartWheel.tsx`**:
   - Eliminar el `<Button>` "Descargar SVG" (líneas 132–143)
   - Eliminar la función `handleExport` (líneas 95–111)
   - Eliminar el prop `onExport?: (svg: string) => void` de `ChartWheelProps`
@@ -434,21 +435,21 @@ Corregir los valores de configuración de `@astrodraw/astrochart` que causan sup
   - Eliminar `exportSvg` del destructuring del hook `useChartWheel`
   - Eliminar el import `Download` de `lucide-react` (verificar que no se use en otro lugar del archivo)
   - Evaluar si el bloque `showControls` (que quedaría solo con el texto de estado) sigue siendo útil; si no, eliminar el bloque y el prop `showControls`
-- [ ] **En `ChartWheel.hooks.ts`**:
+- [x] **En `ChartWheel.hooks.ts`**:
   - Eliminar `exportSvg` del objeto retornado por `useChartWheel`
   - Eliminar la función `exportSvg` (líneas 136–149)
   - Actualizar la interfaz `UseChartWheelReturn` para remover `exportSvg`
-- [ ] Verificar en `ChartWheel.test.tsx` que los tests que referencian `export-button` o `exportSvg` se actualicen o eliminen
-- [ ] Verificar visualmente (si es posible) que los símbolos del gráfico ya no se superponen con los nuevos valores de configuración
-- [ ] Ejecutar ciclo de calidad completo:
-  - [ ] `npm run format`
-  - [ ] `npm run lint:fix`
-  - [ ] `npm run type-check`
-  - [ ] `npm run test:run`
-  - [ ] `npm run build`
-  - [ ] `node scripts/validate-architecture.js`
-- [ ] Actualizar backlog (marcar completada)
-- [ ] Commit y PR → `develop`
+- [x] Verificar en `ChartWheel.test.tsx` que los tests que referencian `export-button` o `exportSvg` se actualicen o eliminen
+- [x] Verificar visualmente (si es posible) que los símbolos del gráfico ya no se superponen con los nuevos valores de configuración
+- [x] Ejecutar ciclo de calidad completo:
+  - [x] `npm run format`
+  - [x] `npm run lint:fix`
+  - [x] `npm run type-check`
+  - [x] `npm run test:run`
+  - [x] `npm run build`
+  - [x] `node scripts/validate-architecture.js`
+- [x] Actualizar backlog (marcar completada)
+- [x] Commit y PR → `develop`
 
 #### Criterios de aceptación
 
