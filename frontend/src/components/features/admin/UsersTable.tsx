@@ -25,6 +25,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, Ban, Shield, CreditCard } from 'lucide-react';
+import { parseTimestamp } from '@/lib/utils/date';
 import type { AdminUser } from '@/types/admin-users.types';
 import type { UserPlan, UserRole } from '@/types/user.types';
 
@@ -107,7 +108,7 @@ export function UsersTable({ users, onAction }: UsersTableProps) {
                   ))}
                 </div>
               </TableCell>
-              <TableCell>{new Date(user.createdAt).toLocaleDateString('es-ES')}</TableCell>
+              <TableCell>{parseTimestamp(user.createdAt).toLocaleDateString('es-ES')}</TableCell>
               <TableCell className="text-right">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>

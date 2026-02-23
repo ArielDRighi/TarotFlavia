@@ -4,8 +4,7 @@
  * Public component for displaying shared readings (no auth required)
  */
 import * as React from 'react';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { formatTimestamp } from '@/lib/utils/date';
 import ReactMarkdown from 'react-markdown';
 import Link from 'next/link';
 
@@ -99,7 +98,7 @@ export function SharedReadingView({ reading, spreadName }: SharedReadingViewProp
                     {displaySpreadName}
                   </Badge>
                   <span className="text-sm text-gray-600">
-                    {format(new Date(reading.createdAt), "d 'de' MMMM 'de' yyyy", { locale: es })}
+                    {formatTimestamp(reading.createdAt, "d 'de' MMMM 'de' yyyy")}
                   </span>
                 </div>
               </div>

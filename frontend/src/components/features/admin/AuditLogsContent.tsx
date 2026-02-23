@@ -7,6 +7,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { parseTimestamp } from '@/lib/utils/date';
 import { useAuditLogs } from '@/hooks/api/useAuditLogs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -236,7 +237,7 @@ export function AuditLogsContent() {
                             </Button>
                           </TableCell>
                           <TableCell className="whitespace-nowrap">
-                            {new Date(log.createdAt).toLocaleString()}
+                            {parseTimestamp(log.createdAt).toLocaleString()}
                           </TableCell>
                           <TableCell>
                             {log.user ? log.user.name || log.user.email : `ID ${log.userId}`}

@@ -12,9 +12,8 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
 import { AISynthesis as AISynthesisType } from '@/types';
+import { formatTimeAgo } from '@/lib/utils/date';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -68,12 +67,8 @@ export function AISynthesis({
   };
 
   // Formatear fecha
-  const formattedDate = data.generatedAt
-    ? formatDistanceToNow(new Date(data.generatedAt), {
-        addSuffix: true,
-        locale: es,
-      })
-    : null;
+  // BUGFIX: Use formatTimeAgo to avoid UTC timezone issues that show wrong relative time
+  const formattedDate = data.generatedAt ? formatTimeAgo(data.generatedAt) : null;
 
   // Dividir contenido en párrafos para mejor legibilidad
   const paragraphs = data.content.split('\n\n').filter((p) => p.trim());

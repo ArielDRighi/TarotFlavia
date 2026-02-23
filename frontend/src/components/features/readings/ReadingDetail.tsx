@@ -2,8 +2,7 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { formatTimestamp } from '@/lib/utils/date';
 import { ArrowLeft, Plus, ChevronRight, RotateCcw, FileText } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
@@ -341,9 +340,7 @@ export function ReadingDetail({ readingId }: ReadingDetailProps) {
   );
 
   // Format date
-  const formattedDate = format(new Date(reading.createdAt), "d 'de' MMMM 'de' yyyy, HH:mm", {
-    locale: es,
-  });
+  const formattedDate = formatTimestamp(reading.createdAt, "d 'de' MMMM 'de' yyyy, HH:mm");
 
   return (
     <>

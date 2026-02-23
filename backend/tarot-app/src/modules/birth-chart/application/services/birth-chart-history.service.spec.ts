@@ -374,6 +374,31 @@ describe('BirthChartHistoryService', () => {
     expect(exists).toBe(true);
   });
 
+  it('should return chart signs as translated Spanish names in getUserCharts', async () => {
+    const chart: Partial<BirthChart> = {
+      id: 4,
+      name: 'Carta signos',
+      birthDate: '1990-05-15' as unknown as Date,
+      sunSign: 'leo',
+      moonSign: 'aries',
+      ascendantSign: 'virgo',
+      createdAt: '2026-02-20T10:00:00.000Z' as unknown as Date,
+    };
+
+    chartRepositoryMock.findAndCount.mockResolvedValue([[chart], 1]);
+
+    const result = await service.getUserCharts(1, 1, 10);
+
+    // Los signos deben ser nombres en español (de ZodiacSignMetadata), NO claves del enum
+    expect(result.data[0].sunSign).toBe('Leo');
+    expect(result.data[0].moonSign).toBe('Aries');
+    expect(result.data[0].ascendantSign).toBe('Virgo');
+    // Asegurar que NO son claves del enum sin traducir
+    expect(result.data[0].sunSign).not.toBe('leo');
+    expect(result.data[0].moonSign).not.toBe('aries');
+    expect(result.data[0].ascendantSign).not.toBe('virgo');
+  });
+
   describe('toSavedChartSummary — birthDate type normalization', () => {
     it('should handle birthDate as Date object in getUserCharts', async () => {
       const createdAt = new Date('2026-02-12T00:00:00Z');
