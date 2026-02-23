@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { parseBirthDate } from '../../domain/utils/date-utils';
+import { parseBirthDate, formatBirthDate } from '../../domain/utils/date-utils';
 import { Repository } from 'typeorm';
 import {
   ChartHistoryResponseDto,
@@ -156,6 +156,12 @@ export class BirthChartHistoryService {
         typeof chart.createdAt === 'string'
           ? chart.createdAt
           : chart.createdAt.toISOString(),
+      birthDate:
+        typeof chart.birthDate === 'string'
+          ? chart.birthDate
+          : formatBirthDate(chart.birthDate),
+      birthTime: chart.birthTime.substring(0, 5),
+      birthPlace: chart.birthPlace,
       aiSynthesis: {
         content: chart.chartData.aiSynthesis ?? '',
         generatedAt: chart.chartData.aiSynthesis
@@ -309,7 +315,7 @@ export class BirthChartHistoryService {
     const birthDateStr =
       typeof chart.birthDate === 'string'
         ? chart.birthDate
-        : chart.birthDate.toISOString().split('T')[0];
+        : formatBirthDate(chart.birthDate);
 
     return {
       id: chart.id,

@@ -131,6 +131,7 @@ return {
 **Prioridad:** High
 **Estimación:** 1h
 **Dependencias:** Ninguna
+**Estado:** ✅ COMPLETADA
 
 #### Descripción
 
@@ -145,19 +146,19 @@ Agregar `birthDate`, `birthTime` y `birthPlace` a la respuesta del endpoint `GET
 
 #### Subtareas
 
-- [ ] Leer `WORKFLOW_BACKEND.md` antes de implementar
-- [ ] En `PremiumChartResponseDto` agregar:
+- [x] Leer `WORKFLOW_BACKEND.md` antes de implementar
+- [x] En `PremiumChartResponseDto` agregar:
   ```typescript
-  @ApiProperty({ example: '1990-05-15', description: 'Fecha de nacimiento', required: false })
+  @ApiProperty({ example: '1990-05-15', description: 'Fecha de nacimiento (formato YYYY-MM-DD)', required: false })
   birthDate?: string;
 
-  @ApiProperty({ example: '14:30', description: 'Hora de nacimiento (HH:mm)', required: false })
+  @ApiProperty({ example: '14:30', description: 'Hora de nacimiento (formato HH:mm)', required: false })
   birthTime?: string;
 
   @ApiProperty({ example: 'Buenos Aires, Argentina', description: 'Lugar de nacimiento', required: false })
   birthPlace?: string;
   ```
-- [ ] En `getChartById` del servicio, dentro del objeto retornado, agregar el mapeo de los campos desde la entidad `BirthChart`:
+- [x] En `getChartById` del servicio, dentro del objeto retornado, agregar el mapeo de los campos desde la entidad `BirthChart`:
   ```typescript
   birthDate: typeof chart.birthDate === 'string'
     ? chart.birthDate
@@ -165,23 +166,23 @@ Agregar `birthDate`, `birthTime` y `birthPlace` a la respuesta del endpoint `GET
   birthTime: chart.birthTime.substring(0, 5), // HH:mm (sin segundos)
   birthPlace: chart.birthPlace,
   ```
-- [ ] Actualizar el test unitario de `birth-chart-history.service.spec.ts` para verificar que `getChartById` retorna los tres nuevos campos
-- [ ] Actualizar el test de `chart-response.dto.spec.ts` si aplica
-- [ ] Ejecutar ciclo de calidad completo:
-  - [ ] `npm run format`
-  - [ ] `npm run lint`
-  - [ ] `npm run test:cov` (coverage ≥ 80%)
-  - [ ] `npm run build`
-  - [ ] `node scripts/validate-architecture.js`
-- [ ] Actualizar backlog (marcar completada)
-- [ ] Commit y PR → `develop`
+- [x] Actualizar el test unitario de `birth-chart-history.service.spec.ts` para verificar que `getChartById` retorna los tres nuevos campos
+- [x] Actualizar el test de `chart-response.dto.spec.ts` si aplica
+- [x] Ejecutar ciclo de calidad completo:
+  - [x] `npm run format`
+  - [x] `npm run lint`
+  - [x] `npm run test:cov` (coverage ≥ 80%)
+  - [x] `npm run build`
+  - [x] `node scripts/validate-architecture.js`
+- [x] Actualizar backlog (marcar completada)
+- [x] Commit y PR → `develop`
 
 #### Criterios de aceptación
 
-1. `GET /birth-chart/history/:id` retorna `birthDate` (formato `YYYY-MM-DD`), `birthTime` (formato `HH:mm`) y `birthPlace` (string)
-2. Los campos son opcionales para no romper retrocompatibilidad
-3. Tests pasan con coverage ≥ 80%
-4. Build exitoso
+1. ✅ `GET /birth-chart/history/:id` retorna `birthDate` (formato `YYYY-MM-DD`), `birthTime` (formato `HH:mm`) y `birthPlace` (string)
+2. ✅ Los campos son opcionales para no romper retrocompatibilidad
+3. ✅ Tests pasan con coverage ≥ 80% (81.99% statements)
+4. ✅ Build exitoso
 
 ---
 

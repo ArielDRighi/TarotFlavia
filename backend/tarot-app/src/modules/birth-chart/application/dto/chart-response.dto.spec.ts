@@ -279,6 +279,69 @@ describe('PremiumChartResponseDto', () => {
 
     expect(dto.savedChartId).toBeUndefined();
   });
+
+  it('should include optional birthDate, birthTime and birthPlace fields', () => {
+    const dto = plainToInstance(PremiumChartResponseDto, {
+      success: true,
+      chartSvgData: { planets: [], houses: [], aspects: [] },
+      planets: [],
+      houses: [],
+      aspects: [],
+      bigThree: {
+        sun: { sign: 'leo', signName: 'Leo', interpretation: 'Test' },
+        moon: { sign: 'scorpio', signName: 'Escorpio', interpretation: 'Test' },
+        ascendant: { sign: 'virgo', signName: 'Virgo', interpretation: 'Test' },
+      },
+      calculationTimeMs: 125,
+      distribution: { elements: [], modalities: [] },
+      interpretations: { planets: [] },
+      canDownloadPdf: true,
+      savedChartId: 1,
+      name: 'Mi carta natal',
+      birthDate: '1990-05-15',
+      birthTime: '14:30',
+      birthPlace: 'Buenos Aires, Argentina',
+      aiSynthesis: {
+        content: 'Síntesis personalizada...',
+        generatedAt: '2026-02-10T12:00:00Z',
+        provider: 'groq-llama3.1-70b',
+      },
+      canAccessHistory: true,
+    });
+
+    expect(dto.birthDate).toBe('1990-05-15');
+    expect(dto.birthTime).toBe('14:30');
+    expect(dto.birthPlace).toBe('Buenos Aires, Argentina');
+  });
+
+  it('should allow birthDate, birthTime and birthPlace to be undefined (optional)', () => {
+    const dto = plainToInstance(PremiumChartResponseDto, {
+      success: true,
+      chartSvgData: { planets: [], houses: [], aspects: [] },
+      planets: [],
+      houses: [],
+      aspects: [],
+      bigThree: {
+        sun: { sign: 'leo', signName: 'Leo', interpretation: 'Test' },
+        moon: { sign: 'scorpio', signName: 'Escorpio', interpretation: 'Test' },
+        ascendant: { sign: 'virgo', signName: 'Virgo', interpretation: 'Test' },
+      },
+      calculationTimeMs: 125,
+      distribution: { elements: [], modalities: [] },
+      interpretations: { planets: [] },
+      canDownloadPdf: true,
+      aiSynthesis: {
+        content: 'Test',
+        generatedAt: null,
+        provider: 'none',
+      },
+      canAccessHistory: true,
+    });
+
+    expect(dto.birthDate).toBeUndefined();
+    expect(dto.birthTime).toBeUndefined();
+    expect(dto.birthPlace).toBeUndefined();
+  });
 });
 
 describe('SavedChartSummaryDto', () => {

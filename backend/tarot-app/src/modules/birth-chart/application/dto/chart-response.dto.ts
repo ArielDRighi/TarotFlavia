@@ -325,6 +325,27 @@ export class PremiumChartResponseDto extends FullChartResponseDto {
   createdAt?: string;
 
   @ApiProperty({
+    example: '1990-05-15',
+    description: 'Fecha de nacimiento (formato YYYY-MM-DD)',
+    required: false,
+  })
+  birthDate?: string;
+
+  @ApiProperty({
+    example: '14:30',
+    description: 'Hora de nacimiento (formato HH:mm)',
+    required: false,
+  })
+  birthTime?: string;
+
+  @ApiProperty({
+    example: 'Buenos Aires, Argentina',
+    description: 'Lugar de nacimiento',
+    required: false,
+  })
+  birthPlace?: string;
+
+  @ApiProperty({
     example: {
       content: 'Síntesis personalizada generada por IA...',
       generatedAt: '2026-02-10T12:00:00Z',
