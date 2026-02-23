@@ -31,6 +31,23 @@ interface NominatimResult {
   };
 }
 
+interface PhotonFeature {
+  geometry: { coordinates: [number, number] };
+  properties: {
+    osm_id: number;
+    osm_type: string;
+    name: string;
+    country?: string;
+    state?: string;
+    city?: string;
+    type?: string;
+  };
+}
+
+interface PhotonFeatureCollection {
+  features: PhotonFeature[];
+}
+
 interface TimezoneDBResult {
   status: string;
   message?: string;
@@ -46,7 +63,8 @@ interface TimezoneDBResult {
  * y obtiene la zona horaria correspondiente, necesario para calcular cartas astrales precisas.
  *
  * Características:
- * - Busca lugares usando Nominatim (OpenStreetMap) - Gratis, sin API key
+ * - Busca lugares usando Photon (Komoot) como fuente primaria — Gratis, sin API key
+ * - Fallback automático a Nominatim (OpenStreetMap) si Photon falla
  * - Obtiene timezone usando TimeZoneDB (opcional, con fallback por longitud)
  * - Rate limiting: Nominatim requiere máximo 1 request/segundo
  * - Caché robusto: búsquedas 7 días, lugares 30 días, timezones 1 año
@@ -62,6 +80,7 @@ export class GeocodeService {
   private readonly logger = new Logger(GeocodeService.name);
 
   // URLs de APIs
+  private readonly PHOTON_URL = 'https://photon.komoot.io/api/';
   private readonly NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
   private readonly TIMEZONEDB_URL =
     'http://api.timezonedb.com/v2.1/get-time-zone';
@@ -91,7 +110,12 @@ export class GeocodeService {
   ) {}
 
   /**
-   * Busca lugares por texto
+   * Busca lugares por texto.
+   *
+   * Estrategia híbrida:
+   * 1. Verifica caché primero
+   * 2. Intenta Photon (Komoot) — mejor cobertura de localidades pequeñas, sin duplicados
+   * 3. Si Photon falla, hace fallback automático a Nominatim (OSM)
    */
   async searchPlaces(query: string): Promise<GeocodeSearchResponseDto> {
     this.logger.debug(`Searching places for: ${query}`);
@@ -106,6 +130,82 @@ export class GeocodeService {
       };
     }
 
+    try {
+      return await this.searchWithPhoton(query);
+    } catch (photonError) {
+      const photonErr = photonError as Error;
+      this.logger.warn(
+        `Photon geocoding failed, using Nominatim fallback: ${photonErr.message}`,
+      );
+      return await this.searchWithNominatim(query);
+    }
+  }
+
+  /**
+   * Busca lugares usando Photon (Komoot) como fuente primaria.
+   *
+   * Photon utiliza los mismos datos OSM pero con Elasticsearch,
+   * ofreciendo mejor cobertura, sin duplicados y soporte de acentos.
+   * Es completamente gratuito y no requiere API key.
+   *
+   * @see https://photon.komoot.io/
+   */
+  private async searchWithPhoton(
+    query: string,
+  ): Promise<GeocodeSearchResponseDto> {
+    const response = await firstValueFrom(
+      this.httpService.get<PhotonFeatureCollection>(this.PHOTON_URL, {
+        params: {
+          q: query,
+          lang: 'es',
+          limit: 5,
+        },
+        headers: {
+          'User-Agent': 'Auguria/1.0 (contact@auguria.com)',
+        },
+      }),
+    );
+
+    const results: GeocodedPlaceDto[] = await Promise.all(
+      response.data.features.map(async (feature) => {
+        const longitude = feature.geometry.coordinates[0];
+        const latitude = feature.geometry.coordinates[1];
+
+        const timezone = await this.getTimezone(latitude, longitude);
+
+        const displayName = this.buildPhotonDisplayName(feature.properties);
+
+        return {
+          placeId: `photon_${feature.properties.osm_type}_${feature.properties.osm_id}`,
+          displayName,
+          city: feature.properties.name,
+          country: feature.properties.country ?? '',
+          latitude,
+          longitude,
+          timezone,
+        };
+      }),
+    );
+
+    const responseDto: GeocodeSearchResponseDto = {
+      results,
+      count: results.length,
+    };
+
+    await this.cacheService.setSearchResults(query, results);
+
+    return responseDto;
+  }
+
+  /**
+   * Busca lugares usando Nominatim (OpenStreetMap) como fuente de fallback.
+   *
+   * Se invoca automáticamente cuando Photon no está disponible.
+   * Aplica rate limiting (máximo 1 req/seg) según la política de uso de Nominatim.
+   */
+  private async searchWithNominatim(
+    query: string,
+  ): Promise<GeocodeSearchResponseDto> {
     // Rate limiting
     await this.waitForRateLimit();
 
@@ -130,14 +230,13 @@ export class GeocodeService {
           const latitude = parseFloat(result.lat);
           const longitude = parseFloat(result.lon);
 
-          // Obtener timezone
           const timezone = await this.getTimezone(latitude, longitude);
 
           return {
             placeId: `osm_${result.osm_type}_${result.osm_id}`,
             displayName: result.display_name,
             city: this.extractCity(result.address),
-            country: result.address?.country || '',
+            country: result.address?.country ?? '',
             latitude,
             longitude,
             timezone,
@@ -150,7 +249,6 @@ export class GeocodeService {
         count: results.length,
       };
 
-      // Guardar en caché
       await this.cacheService.setSearchResults(query, results);
 
       return responseDto;
@@ -207,7 +305,7 @@ export class GeocodeService {
         return response.data.zoneName;
       }
 
-      throw new Error(response.data.message || 'Unknown error');
+      throw new Error(response.data.message ?? 'Unknown error');
     } catch (error) {
       const err = error as Error;
       this.logger.error(
@@ -266,7 +364,7 @@ export class GeocodeService {
         placeId: `osm_${result.osm_type}_${result.osm_id}`,
         displayName: result.display_name,
         city: this.extractCity(result.address),
-        country: result.address?.country || '',
+        country: result.address?.country ?? '',
         latitude,
         longitude,
         timezone,
@@ -287,15 +385,34 @@ export class GeocodeService {
   }
 
   /**
-   * Extrae la ciudad del objeto address
+   * Construye el displayName a partir de las propiedades de un feature de Photon.
+   *
+   * Photon no devuelve un campo display_name listo, por lo que se construye
+   * manualmente concatenando name + state (si existe) + country (si existe).
+   */
+  private buildPhotonDisplayName(
+    properties: PhotonFeature['properties'],
+  ): string {
+    const parts: string[] = [properties.name];
+    if (properties.state) {
+      parts.push(properties.state);
+    }
+    if (properties.country) {
+      parts.push(properties.country);
+    }
+    return parts.join(', ');
+  }
+
+  /**
+   * Extrae la ciudad del objeto address de Nominatim
    */
   private extractCity(address?: NominatimResult['address']): string {
     if (!address) return '';
     return (
-      address.city ||
-      address.town ||
-      address.village ||
-      address.municipality ||
+      address.city ??
+      address.town ??
+      address.village ??
+      address.municipality ??
       ''
     );
   }

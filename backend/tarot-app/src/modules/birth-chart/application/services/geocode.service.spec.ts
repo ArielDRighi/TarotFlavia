@@ -39,6 +39,22 @@ describe('GeocodeService', () => {
     gmtOffset: -10800,
   };
 
+  const mockPhotonFeatureCollection = {
+    features: [
+      {
+        geometry: { coordinates: [-65.4095, -24.7859] },
+        properties: {
+          osm_id: 98765,
+          osm_type: 'R',
+          name: 'Salta',
+          country: 'Argentina',
+          state: 'Salta',
+          type: 'city',
+        },
+      },
+    ],
+  };
+
   beforeEach(async () => {
     const mockHttpService = {
       get: jest.fn(),
@@ -106,12 +122,122 @@ describe('GeocodeService', () => {
       expect(httpService.get).not.toHaveBeenCalled();
     });
 
-    it('should fetch from Nominatim if cache miss', async () => {
+    it('should fetch from Photon as primary source on cache miss', async () => {
+      cacheService.getSearchResults.mockResolvedValue(null);
+      cacheService.getTimezone.mockResolvedValue('America/Argentina/Salta');
+
+      const mockPhotonResponse: AxiosResponse = {
+        data: mockPhotonFeatureCollection,
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        config: {} as InternalAxiosRequestConfig,
+      };
+
+      httpService.get.mockReturnValue(of(mockPhotonResponse));
+
+      const result = await service.searchPlaces('Salta');
+
+      expect(result.results).toHaveLength(1);
+      expect(result.results[0].city).toBe('Salta');
+      expect(result.results[0].country).toBe('Argentina');
+      expect(result.results[0].latitude).toBe(-24.7859);
+      expect(result.results[0].longitude).toBe(-65.4095);
+      expect(httpService.get).toHaveBeenCalledWith(
+        'https://photon.komoot.io/api/',
+        expect.objectContaining({
+          params: expect.objectContaining({
+            q: 'Salta',
+            lang: 'es',
+            limit: 5,
+          }),
+          headers: expect.objectContaining({
+            'User-Agent': 'Auguria/1.0 (contact@auguria.com)',
+          }),
+        }),
+      );
+      expect(cacheService.setSearchResults).toHaveBeenCalled();
+    });
+
+    it('should map Photon result to GeocodedPlaceDto with correct placeId format', async () => {
+      cacheService.getSearchResults.mockResolvedValue(null);
+      cacheService.getTimezone.mockResolvedValue('America/Argentina/Salta');
+
+      const mockPhotonResponse: AxiosResponse = {
+        data: mockPhotonFeatureCollection,
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        config: {} as InternalAxiosRequestConfig,
+      };
+
+      httpService.get.mockReturnValue(of(mockPhotonResponse));
+
+      const result = await service.searchPlaces('Salta');
+
+      expect(result.results[0].placeId).toBe('photon_R_98765');
+    });
+
+    it('should build displayName as "name, state, country" from Photon response', async () => {
+      cacheService.getSearchResults.mockResolvedValue(null);
+      cacheService.getTimezone.mockResolvedValue('America/Argentina/Salta');
+
+      const mockPhotonResponse: AxiosResponse = {
+        data: mockPhotonFeatureCollection,
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        config: {} as InternalAxiosRequestConfig,
+      };
+
+      httpService.get.mockReturnValue(of(mockPhotonResponse));
+
+      const result = await service.searchPlaces('Salta');
+
+      expect(result.results[0].displayName).toBe('Salta, Salta, Argentina');
+    });
+
+    it('should build displayName without state when state is absent', async () => {
+      cacheService.getSearchResults.mockResolvedValue(null);
+      cacheService.getTimezone.mockResolvedValue('UTC');
+
+      const featureWithoutState = {
+        features: [
+          {
+            geometry: { coordinates: [-58.3816, -34.6037] },
+            properties: {
+              osm_id: 11111,
+              osm_type: 'N',
+              name: 'Buenos Aires',
+              country: 'Argentina',
+              type: 'city',
+            },
+          },
+        ],
+      };
+
+      const mockPhotonResponse: AxiosResponse = {
+        data: featureWithoutState,
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        config: {} as InternalAxiosRequestConfig,
+      };
+
+      httpService.get.mockReturnValue(of(mockPhotonResponse));
+
+      const result = await service.searchPlaces('Buenos Aires');
+
+      expect(result.results[0].displayName).toBe('Buenos Aires, Argentina');
+    });
+
+    it('should fallback to Nominatim when Photon fails', async () => {
       cacheService.getSearchResults.mockResolvedValue(null);
       cacheService.getTimezone.mockResolvedValue(null);
-      configService.get.mockReturnValue(null); // No API key, use fallback
+      configService.get.mockReturnValue(null); // No API key, use longitude fallback
 
-      const mockResponse: AxiosResponse = {
+      // Photon falla en el primer llamado
+      const mockNominatimResponse: AxiosResponse = {
         data: [mockNominatimResult],
         status: 200,
         statusText: 'OK',
@@ -119,44 +245,32 @@ describe('GeocodeService', () => {
         config: {} as InternalAxiosRequestConfig,
       };
 
-      httpService.get.mockReturnValue(of(mockResponse));
+      httpService.get
+        .mockReturnValueOnce(throwError(() => new Error('Photon timeout')))
+        .mockReturnValue(of(mockNominatimResponse));
 
       const result = await service.searchPlaces('Buenos Aires');
 
       expect(result.results).toHaveLength(1);
       expect(result.results[0].city).toBe('Buenos Aires');
       expect(result.results[0].country).toBe('Argentina');
-      expect(result.results[0].latitude).toBe(-34.6037);
-      expect(result.results[0].longitude).toBe(-58.3816);
-      expect(cacheService.setSearchResults).toHaveBeenCalled();
+      // El segundo llamado debe ser a Nominatim
+      expect(httpService.get).toHaveBeenCalledTimes(2);
+      expect(httpService.get).toHaveBeenNthCalledWith(
+        1,
+        'https://photon.komoot.io/api/',
+        expect.anything(),
+      );
+      expect(httpService.get).toHaveBeenNthCalledWith(
+        2,
+        'https://nominatim.openstreetmap.org/search',
+        expect.anything(),
+      );
     });
 
-    it('should respect rate limiting between requests', async () => {
+    it('should throw error when both Photon and Nominatim fail', async () => {
       cacheService.getSearchResults.mockResolvedValue(null);
-      cacheService.getTimezone.mockResolvedValue(null);
-      configService.get.mockReturnValue(null);
 
-      const mockResponse: AxiosResponse = {
-        data: [mockNominatimResult],
-        status: 200,
-        statusText: 'OK',
-        headers: {},
-        config: {} as InternalAxiosRequestConfig,
-      };
-
-      httpService.get.mockReturnValue(of(mockResponse));
-
-      const start = Date.now();
-      await service.searchPlaces('Buenos Aires');
-      await service.searchPlaces('Madrid');
-      const duration = Date.now() - start;
-
-      // Should wait at least 1100ms between requests
-      expect(duration).toBeGreaterThanOrEqual(1000);
-    });
-
-    it('should handle Nominatim API errors gracefully', async () => {
-      cacheService.getSearchResults.mockResolvedValue(null);
       httpService.get.mockReturnValue(
         throwError(() => new Error('Network error')),
       );
@@ -166,37 +280,61 @@ describe('GeocodeService', () => {
       );
     });
 
-    it('should use correct Nominatim parameters', async () => {
+    it('should use osm_tag filters in Photon request for cities', async () => {
       cacheService.getSearchResults.mockResolvedValue(null);
       cacheService.getTimezone.mockResolvedValue('UTC');
 
-      const mockResponse: AxiosResponse = {
-        data: [],
+      const mockPhotonResponse: AxiosResponse = {
+        data: { features: [] },
         status: 200,
         statusText: 'OK',
         headers: {},
         config: {} as InternalAxiosRequestConfig,
       };
 
-      httpService.get.mockReturnValue(of(mockResponse));
+      httpService.get.mockReturnValue(of(mockPhotonResponse));
 
       await service.searchPlaces('Paris');
 
       expect(httpService.get).toHaveBeenCalledWith(
-        'https://nominatim.openstreetmap.org/search',
+        'https://photon.komoot.io/api/',
         expect.objectContaining({
           params: expect.objectContaining({
             q: 'Paris',
-            format: 'json',
-            addressdetails: 1,
+            lang: 'es',
             limit: 5,
-            'accept-language': 'es',
           }),
-          headers: {
-            'User-Agent': 'Auguria/1.0 (contact@auguria.com)',
-          },
         }),
       );
+    });
+
+    it('should respect rate limiting between Nominatim fallback requests', async () => {
+      cacheService.getSearchResults.mockResolvedValue(null);
+      cacheService.getTimezone.mockResolvedValue(null);
+      configService.get.mockReturnValue(null);
+
+      const mockNominatimResponse: AxiosResponse = {
+        data: [mockNominatimResult],
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        config: {} as InternalAxiosRequestConfig,
+      };
+
+      // Photon falla, Nominatim responde
+      httpService.get
+        .mockReturnValueOnce(throwError(() => new Error('Photon down')))
+        .mockReturnValueOnce(of(mockNominatimResponse))
+        .mockReturnValueOnce(throwError(() => new Error('Photon down')))
+        .mockReturnValue(of(mockNominatimResponse));
+
+      const start = Date.now();
+      await service.searchPlaces('Buenos Aires');
+      await service.searchPlaces('Madrid');
+      const duration = Date.now() - start;
+
+      // Should wait at least 1100ms between Nominatim requests
+      expect(duration).toBeGreaterThanOrEqual(1000);
     });
   });
 
@@ -332,12 +470,13 @@ describe('GeocodeService', () => {
     });
   });
 
-  describe('extractCity', () => {
+  describe('extractCity (via searchPlaces with Nominatim fallback)', () => {
     it('should extract city from address', async () => {
       cacheService.getSearchResults.mockResolvedValue(null);
       cacheService.getTimezone.mockResolvedValue('UTC');
 
-      const mockResponse: AxiosResponse = {
+      // Photon falla, Nominatim responde
+      const mockNominatimResponse: AxiosResponse = {
         data: [
           {
             ...mockNominatimResult,
@@ -353,7 +492,9 @@ describe('GeocodeService', () => {
         config: {} as InternalAxiosRequestConfig,
       };
 
-      httpService.get.mockReturnValue(of(mockResponse));
+      httpService.get
+        .mockReturnValueOnce(throwError(() => new Error('Photon unavailable')))
+        .mockReturnValue(of(mockNominatimResponse));
 
       const result = await service.searchPlaces('Buenos Aires');
 
@@ -364,7 +505,7 @@ describe('GeocodeService', () => {
       cacheService.getSearchResults.mockResolvedValue(null);
       cacheService.getTimezone.mockResolvedValue('UTC');
 
-      const mockResponse: AxiosResponse = {
+      const mockNominatimResponse: AxiosResponse = {
         data: [
           {
             ...mockNominatimResult,
@@ -380,7 +521,9 @@ describe('GeocodeService', () => {
         config: {} as InternalAxiosRequestConfig,
       };
 
-      httpService.get.mockReturnValue(of(mockResponse));
+      httpService.get
+        .mockReturnValueOnce(throwError(() => new Error('Photon unavailable')))
+        .mockReturnValue(of(mockNominatimResponse));
 
       const result = await service.searchPlaces('Town');
 
@@ -391,7 +534,7 @@ describe('GeocodeService', () => {
       cacheService.getSearchResults.mockResolvedValue(null);
       cacheService.getTimezone.mockResolvedValue('UTC');
 
-      const mockResponse: AxiosResponse = {
+      const mockNominatimResponse: AxiosResponse = {
         data: [
           {
             ...mockNominatimResult,
@@ -406,7 +549,9 @@ describe('GeocodeService', () => {
         config: {} as InternalAxiosRequestConfig,
       };
 
-      httpService.get.mockReturnValue(of(mockResponse));
+      httpService.get
+        .mockReturnValueOnce(throwError(() => new Error('Photon unavailable')))
+        .mockReturnValue(of(mockNominatimResponse));
 
       const result = await service.searchPlaces('Place');
 
