@@ -648,6 +648,75 @@ describe('ReadingCard', () => {
 5. **Don't skip tests** → TDD is enforced (coverage ≥ 80%)
 6. **Don't modify API contracts** → IDs are numeric, pagination format is fixed
 7. **Don't use English for user-facing text** → Always Spanish
+8. **🔥 Don't change date handling utilities** → See date/timezone rules below
+
+---
+
+## 📅 Date & Timezone Handling — CRITICAL RULES
+
+> **Recurring bug:** Changing date utilities causes birth dates to shift 1 day backward (e.g. Oct 19 → Oct 18). This has broken twice. Read carefully before touching any date code.
+
+### Backend: `parseBirthDate` / `formatBirthDate` (`date-utils.ts`)
+
+**⛔ NEVER change `parseBirthDate` to use `Date.UTC` or `new Date('YYYY-MM-DD')`:**
+
+```typescript
+// ❌ BREAKS STORAGE — TypeORM uses getDate() (local) to write to PostgreSQL
+// In UTC-3: new Date(Date.UTC(1979,9,19)).getDate() === 18 → stores Oct 18!
+const date = new Date(Date.UTC(year, month - 1, day));
+
+// ✅ CORRECT — local midnight: getDate() === 19 in any timezone
+const date = new Date(year, month - 1, day);
+```
+
+**Why:** TypeORM's `preparePersistentValue` for `date` columns calls
+`DateUtils.mixedDateToDateString(value)` which uses LOCAL getters (`getDate()`,
+`getMonth()`, `getFullYear()`). UTC-midnight dates have `getDate() = day - 1`
+in UTC-negative timezones (e.g. UTC-3 Argentina), causing TypeORM to store
+the previous calendar day.
+
+**`formatBirthDate` must use local getters for the same reason:**
+```typescript
+// ✅ CORRECT
+const year = date.getFullYear();
+const day = String(date.getDate()).padStart(2, '0');
+
+// ❌ WRONG for UTC+ timezones (breaks if server ever moves to UTC+)
+const year = date.getUTCFullYear();
+const day = String(date.getUTCDate()).padStart(2, '0');
+```
+
+**postgres-date library note:** For PostgreSQL `date` columns (OID 1082),
+the `postgres-date` library returns LOCAL midnight dates: `new Date(year, month, day)`.
+TypeORM's `prepareHydratedValue` then calls `mixedDateToDateString` → returns a
+plain `YYYY-MM-DD` string. So `chart.birthDate` at runtime is a **string**, not
+a Date — the `typeof chart.birthDate === 'string'` guard in services is always true.
+
+### Frontend: `parseDateString` (`lib/utils/date.ts`)
+
+**⛔ NEVER remove the noon-local-time trick for date-only strings:**
+
+```typescript
+// ✅ CORRECT — noon avoids UTC-midnight shift in any timezone
+const [year, month, day] = dateString.split('-').map(Number);
+return new Date(year, month - 1, day, 12, 0, 0, 0); // noon local
+
+// ❌ WRONG — new Date('YYYY-MM-DD') = UTC midnight → shows previous day in UTC-3
+return new Date(dateString);
+```
+
+**Why:** `new Date('1979-10-19')` per ECMAScript = `1979-10-19T00:00:00.000Z`
+(UTC midnight). In UTC-3, `toLocaleDateString(...)` without `timeZone:'UTC'`
+renders this as Oct 18 (21:00 local time). Noon avoids this for any timezone.
+
+### Quick Reference
+
+| Layer | Function | Approach | Reason |
+|-------|----------|----------|--------|
+| Backend parse | `parseBirthDate(str)` | `new Date(y, m-1, d)` — LOCAL midnight | TypeORM uses local getters for storage |
+| Backend format | `formatBirthDate(date)` | `getFullYear/getMonth/getDate` — local | Consistent with local midnight dates |
+| Frontend display | `parseDateString(str)` | `new Date(y, m-1, d, 12)` — LOCAL noon | Avoids UTC-midnight shift in display |
+| PDF display | `birthDate.toLocaleDateString(...)` | Must include `timeZone: 'UTC'` | `new Date('YYYY-MM-DD')` = UTC midnight |
 
 ---
 

@@ -4,29 +4,29 @@ describe('parseBirthDate', () => {
   describe('correct calendar day (timezone-safe)', () => {
     it('should return October 18 for 2011-10-18', () => {
       const date = parseBirthDate('2011-10-18');
-      expect(date.getUTCFullYear()).toBe(2011);
-      expect(date.getUTCMonth()).toBe(9); // 0-indexed
-      expect(date.getUTCDate()).toBe(18);
+      expect(date.getFullYear()).toBe(2011);
+      expect(date.getMonth()).toBe(9); // 0-indexed
+      expect(date.getDate()).toBe(18);
     });
 
     it('should return January 1 for 2000-01-01', () => {
       const date = parseBirthDate('2000-01-01');
-      expect(date.getUTCFullYear()).toBe(2000);
-      expect(date.getUTCMonth()).toBe(0);
-      expect(date.getUTCDate()).toBe(1);
+      expect(date.getFullYear()).toBe(2000);
+      expect(date.getMonth()).toBe(0);
+      expect(date.getDate()).toBe(1);
     });
 
     it('should return December 31 for 1999-12-31', () => {
       const date = parseBirthDate('1999-12-31');
-      expect(date.getUTCFullYear()).toBe(1999);
-      expect(date.getUTCMonth()).toBe(11);
-      expect(date.getUTCDate()).toBe(31);
+      expect(date.getFullYear()).toBe(1999);
+      expect(date.getMonth()).toBe(11);
+      expect(date.getDate()).toBe(31);
     });
 
     it('should not shift the day regardless of server timezone', () => {
-      // new Date('2011-10-18') is UTC midnight; getUTCDate() is always 18
+      // Uses local midnight: getDate() always returns the typed day
       const date = parseBirthDate('2011-10-18');
-      expect(date.getUTCDate()).toBe(18);
+      expect(date.getDate()).toBe(18);
     });
   });
 
@@ -36,9 +36,9 @@ describe('parseBirthDate', () => {
       (input) => {
         const date = parseBirthDate(input);
         const [year, month, day] = input.split('-').map(Number);
-        expect(date.getUTCFullYear()).toBe(year);
-        expect(date.getUTCMonth()).toBe(month - 1);
-        expect(date.getUTCDate()).toBe(day);
+        expect(date.getFullYear()).toBe(year);
+        expect(date.getMonth()).toBe(month - 1);
+        expect(date.getDate()).toBe(day);
       },
     );
   });
@@ -46,9 +46,9 @@ describe('parseBirthDate', () => {
   describe('leap year support', () => {
     it('should parse February 29 on a leap year', () => {
       const date = parseBirthDate('2000-02-29');
-      expect(date.getUTCFullYear()).toBe(2000);
-      expect(date.getUTCMonth()).toBe(1);
-      expect(date.getUTCDate()).toBe(29);
+      expect(date.getFullYear()).toBe(2000);
+      expect(date.getMonth()).toBe(1);
+      expect(date.getDate()).toBe(29);
     });
 
     it('should throw for February 29 on a non-leap year', () => {
@@ -59,7 +59,7 @@ describe('parseBirthDate', () => {
   describe('month boundaries', () => {
     it('should parse the last day of January', () => {
       const date = parseBirthDate('2024-01-31');
-      expect(date.getUTCDate()).toBe(31);
+      expect(date.getDate()).toBe(31);
     });
 
     it('should throw for April 31 (invalid calendar date)', () => {
@@ -91,15 +91,15 @@ describe('parseBirthDate', () => {
 });
 
 describe('formatBirthDate', () => {
-  it('should format a UTC-midnight Date to YYYY-MM-DD without timezone shift', () => {
-    // Simulates a date as returned by parseBirthDate or PostgreSQL date column
+  it('should format a local-midnight Date to YYYY-MM-DD without timezone shift', () => {
+    // Simulates a date as returned by parseBirthDate or PostgreSQL date column (postgres-date)
     const date = parseBirthDate('1990-05-15');
     expect(formatBirthDate(date)).toBe('1990-05-15');
   });
 
-  it('should format a Date created with new Date(UTC string) correctly', () => {
-    // Simulates how PostgreSQL driver returns date values
-    const date = new Date('1990-05-15T00:00:00Z');
+  it('should format a Date created with new Date(year, month, day) correctly', () => {
+    // Simulates local-midnight date — consistent with TypeORM storage approach
+    const date = new Date(1990, 4, 15); // local midnight May 15
     expect(formatBirthDate(date)).toBe('1990-05-15');
   });
 
@@ -120,4 +120,3 @@ describe('formatBirthDate', () => {
     }
   });
 });
-

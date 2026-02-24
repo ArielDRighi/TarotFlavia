@@ -405,7 +405,7 @@ describe('BirthChartHistoryService', () => {
       const chart: Partial<BirthChart> = {
         id: 1,
         name: 'Mi carta',
-        birthDate: new Date('1990-05-15T00:00:00Z'),
+        birthDate: new Date(1990, 4, 15), // local midnight — matches postgres-date behavior
         sunSign: 'leo',
         moonSign: 'aries',
         ascendantSign: 'virgo',
@@ -462,7 +462,7 @@ describe('BirthChartHistoryService', () => {
         id: 30,
         userId: 1,
         name: 'Carta con Date',
-        birthDate: new Date('1990-05-15T00:00:00Z'),
+        birthDate: new Date(1990, 4, 15), // local midnight — matches postgres-date behavior
         birthTime: '14:30:00',
         birthPlace: 'Buenos Aires, Argentina',
         latitude: -34.6,
