@@ -674,8 +674,8 @@ orbSystem?: 'strict' | 'commercial';
 [x] 19. npm run build (frontend)
 [x] 20. node scripts/validate-architecture.js (frontend)
 [x] 21. Actualizar estado en backlog → ✅ COMPLETADA
-[ ] 22. Crear commit: feat(birth-chart): implementar sistema de orbes dual strict/commercial
-[ ] 23. Push y PR → base: develop
+[x] 22. Crear commit: feat(birth-chart): implementar sistema de orbes dual strict/commercial
+[x] 23. Push y PR → base: develop
 ```
 
 ---

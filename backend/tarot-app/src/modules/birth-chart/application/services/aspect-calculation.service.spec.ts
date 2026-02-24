@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AspectCalculationService } from './aspect-calculation.service';
 import { AspectType } from '../../domain/enums';
-import { OrbSystem } from '../../domain/enums/aspect-type.enum';
 import { PlanetPosition, ChartAspect } from '../../entities/birth-chart.entity';
 
 describe('AspectCalculationService', () => {
@@ -1274,7 +1273,7 @@ describe('AspectCalculationService', () => {
       const aspects = service.calculateAspects(
         [planetWith9DegOrb, planetAt9Deg],
         mockAscendant,
-        'strict' as OrbSystem,
+        'strict',
       );
       const conjunction = aspects.find(
         (a) =>
@@ -1289,7 +1288,7 @@ describe('AspectCalculationService', () => {
       const aspects = service.calculateAspects(
         [planetWith9DegOrb, planetAt9Deg],
         mockAscendant,
-        'commercial' as OrbSystem,
+        'commercial',
       );
       const conjunction = aspects.find(
         (a) =>
@@ -1308,7 +1307,7 @@ describe('AspectCalculationService', () => {
       const commercialAspects = service.calculateAspects(
         [planetWith9DegOrb, planetAt9Deg],
         mockAscendant,
-        'commercial' as OrbSystem,
+        'commercial',
       );
       expect(defaultAspects.length).toBe(commercialAspects.length);
     });
@@ -1335,12 +1334,12 @@ describe('AspectCalculationService', () => {
       const strictAspects = service.calculateAspects(
         [planetBase, planetSextile],
         undefined,
-        'strict' as OrbSystem,
+        'strict',
       );
       const commercialAspects = service.calculateAspects(
         [planetBase, planetSextile],
         undefined,
-        'commercial' as OrbSystem,
+        'commercial',
       );
 
       const strictSextile = strictAspects.find(
