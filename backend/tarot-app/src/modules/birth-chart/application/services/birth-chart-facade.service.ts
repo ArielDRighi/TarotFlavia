@@ -94,6 +94,7 @@ export class BirthChartFacadeService {
         latitude: dto.latitude,
         longitude: dto.longitude,
         timezone: dto.timezone,
+        orbSystem: dto.orbSystem,
       };
 
       const calculationResult = this.calculationService.calculateChart(input);
@@ -143,6 +144,7 @@ export class BirthChartFacadeService {
       latitude: dto.latitude,
       longitude: dto.longitude,
       timezone: dto.timezone,
+      orbSystem: dto.orbSystem,
     };
 
     const { chartData } = this.calculationService.calculateChart(input);
@@ -264,6 +266,7 @@ export class BirthChartFacadeService {
       latitude: dto.latitude,
       longitude: dto.longitude,
       timezone: dto.timezone,
+      orbSystem: dto.orbSystem,
     };
 
     const { chartData } = this.calculationService.calculateChart(input);

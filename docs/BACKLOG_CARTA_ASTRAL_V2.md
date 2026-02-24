@@ -74,7 +74,7 @@ Los siguientes archivos están **bloqueados** para modificación:
 |----|-------|------|-----------|----------|--------|
 | T-CA-057 | Incluir MC en cálculo de distribución | Fix backend | Must | 1h | ✅ COMPLETADA |
 | T-CA-058 | Formato sexagesimal de grados en la UI | Fix frontend + backend | Must | 2h | ✅ COMPLETADA |
-| T-CA-059 | Sistema de orbes dual: strict / commercial | Feature | Should | 4h | ⬜ PENDIENTE |
+| T-CA-059 | Sistema de orbes dual: strict / commercial | Feature | Should | 4h | ✅ COMPLETADA |
 | T-CA-060 | Reducir drift en cúspides de casas | Investigación + Fix | Could | 3h | ⬜ PENDIENTE |
 
 ---
@@ -436,7 +436,7 @@ private formatPosition(signDegree: number, sign: string): string {
 
 ### T-CA-059: Sistema de Orbes Dual (strict / commercial)
 
-**Estado:** ⬜ PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Tipo:** Feature / Mejora
 **Prioridad:** Should
 **Estimación:** 4 horas
@@ -653,27 +653,27 @@ orbSystem?: 'strict' | 'commercial';
 #### TODO List de Implementación
 
 ```
-[ ] 1. Escribir tests en aspect-calculation.service.spec.ts (RED — deben FALLAR)
-[ ] 2. Agregar OrbSystem y ORB_CONFIGS en aspect-type.enum.ts
-[ ] 3. Actualizar calculateAspects() para aceptar orbSystem (GREEN)
-[ ] 4. Actualizar ChartCalculationInput con orbSystem
-[ ] 5. Actualizar llamada a calculateAspects en chart-calculation.service.ts
-[ ] 6. Agregar orbSystem al GenerateChartDto con validación
-[ ] 7. Pasar orbSystem desde birth-chart-facade.service.ts
-[ ] 8. Actualizar tipo de request en frontend (birth-chart-api.types.ts)
-[ ] 9. Ejecutar tests — deben PASAR
-[ ] 10. npm run format (backend)
-[ ] 11. npm run lint (backend)
-[ ] 12. npm run test:cov ≥ 80% (backend)
-[ ] 13. npm run build (backend)
-[ ] 14. node scripts/validate-architecture.js (backend)
-[ ] 15. npm run format (frontend)
-[ ] 16. npm run lint:fix (frontend)
-[ ] 17. npm run type-check (frontend)
-[ ] 18. npm run test:run (frontend)
-[ ] 19. npm run build (frontend)
-[ ] 20. node scripts/validate-architecture.js (frontend)
-[ ] 21. Actualizar estado en backlog → ✅ COMPLETADA
+[x] 1. Escribir tests en aspect-calculation.service.spec.ts (RED — deben FALLAR)
+[x] 2. Agregar OrbSystem y ORB_CONFIGS en aspect-type.enum.ts
+[x] 3. Actualizar calculateAspects() para aceptar orbSystem (GREEN)
+[x] 4. Actualizar ChartCalculationInput con orbSystem
+[x] 5. Actualizar llamada a calculateAspects en chart-calculation.service.ts
+[x] 6. Agregar orbSystem al GenerateChartDto con validación
+[x] 7. Pasar orbSystem desde birth-chart-facade.service.ts
+[x] 8. Actualizar tipo de request en frontend (birth-chart-api.types.ts)
+[x] 9. Ejecutar tests — deben PASAR
+[x] 10. npm run format (backend)
+[x] 11. npm run lint (backend)
+[x] 12. npm run test:cov ≥ 80% (backend)
+[x] 13. npm run build (backend)
+[x] 14. node scripts/validate-architecture.js (backend)
+[x] 15. npm run format (frontend)
+[x] 16. npm run lint:fix (frontend)
+[x] 17. npm run type-check (frontend)
+[x] 18. npm run test:run (frontend)
+[x] 19. npm run build (frontend)
+[x] 20. node scripts/validate-architecture.js (frontend)
+[x] 21. Actualizar estado en backlog → ✅ COMPLETADA
 [ ] 22. Crear commit: feat(birth-chart): implementar sistema de orbes dual strict/commercial
 [ ] 23. Push y PR → base: develop
 ```

@@ -9,9 +9,11 @@ import {
   Max,
   Matches,
   MaxLength,
+  IsIn,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { SanitizeHtml } from '../../../../common/decorators/sanitize.decorator';
+import { OrbSystem } from '../../domain/enums';
 
 /**
  * DTO para generar una carta astral (sin guardar)
@@ -99,6 +101,18 @@ export class GenerateChartDto {
     },
   )
   timezone: string;
+  @ApiPropertyOptional({
+    example: 'commercial',
+    description:
+      "Sistema de orbes para detección de aspectos. 'strict': orbes puristas. 'commercial': orbes amplios (default, paridad con plataformas comerciales).",
+    enum: ['strict', 'commercial'],
+    default: 'commercial',
+  })
+  @IsOptional()
+  @IsIn(['strict', 'commercial'], {
+    message: "El sistema de orbes debe ser 'strict' o 'commercial'",
+  })
+  orbSystem?: OrbSystem;
 }
 
 /**

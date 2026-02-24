@@ -8,7 +8,7 @@ import {
   ChartDistribution,
   PlanetPosition,
 } from '../../entities/birth-chart.entity';
-import { ZodiacSign, ZodiacSignMetadata } from '../../domain/enums';
+import { ZodiacSign, ZodiacSignMetadata, OrbSystem } from '../../domain/enums';
 import { localToUtc } from '../../domain/utils/timezone-utils';
 
 export interface ChartCalculationInput {
@@ -17,6 +17,7 @@ export interface ChartCalculationInput {
   latitude: number;
   longitude: number;
   timezone: string;
+  orbSystem?: OrbSystem;
 }
 
 export interface ChartCalculationResult {
@@ -86,7 +87,11 @@ export class ChartCalculationService {
       );
 
       // 7. Calcular aspectos
-      const aspects = this.aspectService.calculateAspects(planets, ascendant);
+      const aspects = this.aspectService.calculateAspects(
+        planets,
+        ascendant,
+        input.orbSystem,
+      );
 
       // 8. Calcular distribución (elementos, modalidades, polaridad)
       const distribution = this.calculateDistribution(

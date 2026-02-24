@@ -23,7 +23,7 @@ export enum AspectType {
  * - name: Nombre en español
  * - symbol: Símbolo visual del aspecto
  * - angle: Ángulo exacto en grados
- * - orb: Orbe permitido (desviación aceptable en grados)
+ * - orb: Orbe permitido en modo 'strict' (desviación aceptable en grados)
  * - nature: Naturaleza del aspecto (armonioso, desafiante, neutral)
  */
 export const AspectTypeMetadata: Record<
@@ -70,5 +70,35 @@ export const AspectTypeMetadata: Record<
     angle: 60,
     orb: 4,
     nature: 'harmonious',
+  },
+};
+
+/**
+ * Sistema de orbes para detección de aspectos.
+ * - strict: Purista/profesional — filtra aspectos débiles.
+ * - commercial: Amplios — paridad con plataformas comerciales (default).
+ */
+export type OrbSystem = 'strict' | 'commercial';
+
+/**
+ * Matrices de orbes por sistema.
+ *
+ * strict:     Orbes reducidos para uso purista/profesional.
+ * commercial: Orbes amplios para paridad con plataformas como Los Arcanos.
+ */
+export const ORB_CONFIGS: Record<OrbSystem, Record<AspectType, number>> = {
+  strict: {
+    [AspectType.CONJUNCTION]: 8,
+    [AspectType.OPPOSITION]: 8,
+    [AspectType.SQUARE]: 6,
+    [AspectType.TRINE]: 8,
+    [AspectType.SEXTILE]: 4,
+  },
+  commercial: {
+    [AspectType.CONJUNCTION]: 10,
+    [AspectType.OPPOSITION]: 10,
+    [AspectType.SQUARE]: 8,
+    [AspectType.TRINE]: 10,
+    [AspectType.SEXTILE]: 8,
   },
 };
