@@ -73,7 +73,7 @@ Los siguientes archivos están **bloqueados** para modificación:
 | ID | Tarea | Tipo | Prioridad | Esfuerzo | Estado |
 |----|-------|------|-----------|----------|--------|
 | T-CA-057 | Incluir MC en cálculo de distribución | Fix backend | Must | 1h | ✅ COMPLETADA |
-| T-CA-058 | Formato sexagesimal de grados en la UI | Fix frontend + backend | Must | 2h | ⬜ PENDIENTE |
+| T-CA-058 | Formato sexagesimal de grados en la UI | Fix frontend + backend | Must | 2h | ✅ COMPLETADA |
 | T-CA-059 | Sistema de orbes dual: strict / commercial | Feature | Should | 4h | ⬜ PENDIENTE |
 | T-CA-060 | Reducir drift en cúspides de casas | Investigación + Fix | Could | 3h | ⬜ PENDIENTE |
 
@@ -252,7 +252,7 @@ describe('calculateDistribution', () => {
 
 ### T-CA-058: Formato Sexagesimal de Grados en la UI
 
-**Estado:** ⬜ PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Tipo:** Corrección visual
 **Prioridad:** Must
 **Estimación:** 2 horas
@@ -397,30 +397,30 @@ private formatPosition(signDegree: number, sign: string): string {
 
 **Frontend:**
 ```
-[ ] 1. Crear degree.utils.test.ts con todos los casos (RED — deben FALLAR)
-[ ] 2. Crear degree.utils.ts con formatDegreeSexagesimal (GREEN)
-[ ] 3. Ejecutar tests de la utility — deben PASAR
-[ ] 4. Grep para encontrar renders directos de signDegree
-[ ] 5. Corregir cada componente encontrado
-[ ] 6. npm run format
-[ ] 7. npm run lint:fix
-[ ] 8. npm run type-check
-[ ] 9. npm run test:run
-[ ] 10. npm run build
-[ ] 11. node scripts/validate-architecture.js
+[x] 1. Crear degree.utils.test.ts con todos los casos (RED — deben FALLAR)
+[x] 2. Crear degree.utils.ts con formatDegreeSexagesimal (GREEN)
+[x] 3. Ejecutar tests de la utility — deben PASAR
+[x] 4. Grep para encontrar renders directos de signDegree
+[x] 5. Corregir cada componente encontrado
+[x] 6. npm run format
+[x] 7. npm run lint:fix
+[x] 8. npm run type-check
+[x] 9. npm run test:run
+[x] 10. npm run build
+[x] 11. node scripts/validate-architecture.js
 ```
 
 **Backend (edge case):**
 ```
-[ ] 12. Corregir formatPosition en birth-chart-facade.service.ts
-[ ] 13. npm run format
-[ ] 14. npm run lint
-[ ] 15. npm run test:cov (≥ 80%)
-[ ] 16. npm run build
-[ ] 17. node scripts/validate-architecture.js
-[ ] 18. Actualizar estado en backlog → ✅ COMPLETADA
-[ ] 19. Crear commit: fix(birth-chart): formato sexagesimal de grados en UI y facade
-[ ] 20. Push y PR → base: develop
+[x] 12. Corregir formatPosition en birth-chart-facade.service.ts y birth-chart-history.service.ts
+[x] 13. npm run format
+[x] 14. npm run lint
+[x] 15. npm run test:cov (≥ 80%)
+[x] 16. npm run build
+[x] 17. node scripts/validate-architecture.js
+[x] 18. Actualizar estado en backlog → ✅ COMPLETADA
+[x] 19. Crear commit: fix(birth-chart): formato sexagesimal de grados en UI y facade
+[x] 20. Push y PR → base: develop
 ```
 
 ---

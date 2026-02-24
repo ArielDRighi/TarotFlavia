@@ -25,6 +25,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { cn } from '@/lib/utils';
 import { PLANETS, ZODIAC_SIGNS, Planet } from '@/types/birth-chart.enums';
 import type { PlanetPosition } from '@/types/birth-chart.types';
+import { formatDegreeSexagesimal } from '../lib/degree.utils';
 
 interface PlanetPositionsTableProps {
   planets: PlanetPosition[];
@@ -52,15 +53,6 @@ function getElementColor(signName: string): string {
   };
 
   return colors[element] || 'text-foreground';
-}
-
-/**
- * Format position as "23° 30'"
- */
-function formatPosition(signDegree: number): { deg: number; min: number } {
-  const deg = Math.floor(signDegree);
-  const min = Math.floor((signDegree - deg) * 60);
-  return { deg, min };
 }
 
 /**
@@ -164,7 +156,7 @@ export function PlanetPositionsTable({
               ? { name: position.displayName, symbol: position.displaySymbol || '?' }
               : getPlanetInfo(position.planet);
             const signInfo = getSignInfo(position.signName);
-            const { deg, min } = formatPosition(position.signDegree);
+            const formattedDegree = formatDegreeSexagesimal(position.signDegree);
             const isHighlighted = highlightPlanet === position.planet;
 
             return (
@@ -210,9 +202,9 @@ export function PlanetPositionsTable({
                 <TableCell>
                   <div
                     className={cn('font-mono', compact ? 'text-sm' : '')}
-                    title={`${deg} grados, ${min} minutos en ${signInfo.name}`}
+                    title={`${formattedDegree} en ${signInfo.name}`}
                   >
-                    <span>{deg}°</span> <span>{min}&#39;</span>
+                    <span>{formattedDegree}</span>
                   </div>
                 </TableCell>
 
