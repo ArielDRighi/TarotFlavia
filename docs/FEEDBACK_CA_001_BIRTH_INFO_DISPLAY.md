@@ -706,6 +706,7 @@ Ejemplo de respuesta (GeoJSON FeatureCollection):
 **Prioridad:** High
 **Estimación:** 1h
 **Dependencias:** T-CA-054 (los nuevos resultados de Photon ya vienen diferenciados por `displayName` completo)
+**Estado:** ✅ COMPLETADA
 
 ##### Descripción
 
@@ -732,8 +733,8 @@ Ajustar `PlaceAutocomplete.tsx` para aprovechar la estructura mejorada de los re
 
 ##### Subtareas
 
-- [ ] Leer `WORKFLOW_FRONTEND.md` antes de implementar
-- [ ] En `PlaceAutocomplete.tsx`, en el render de cada `place`, reemplazar la línea del subtítulo:
+- [x] Leer `WORKFLOW_FRONTEND.md` antes de implementar
+- [x] En `PlaceAutocomplete.tsx`, en el render de cada `place`, reemplazar la línea del subtítulo:
   ```tsx
   // ❌ Actual — solo muestra country y timezone
   <span className="text-muted-foreground text-xs">
@@ -744,9 +745,9 @@ Ajustar `PlaceAutocomplete.tsx` para aprovechar la estructura mejorada de los re
     {place.displayName}{place.timezone && ` • ${place.timezone}`}
   </span>
   ```
-- [ ] Verificar que `GeocodedPlace` en `birth-chart-geocode.types.ts` incluye `displayName` (ya existe)
-- [ ] Ejecutar ciclo de calidad completo
-- [ ] Actualizar backlog y crear PR → `develop`
+- [x] Verificar que `GeocodedPlace` en `birth-chart-geocode.types.ts` incluye `displayName` (ya existe)
+- [x] Ejecutar ciclo de calidad completo
+- [x] Actualizar backlog y crear PR → `develop`
 
 ##### Criterios de aceptación
 
