@@ -288,6 +288,10 @@ export class ChartCalculationService {
       errors.push('Missing ascendant');
     }
 
+    if (!chartData.midheaven) {
+      errors.push('Missing midheaven');
+    }
+
     if (!chartData.distribution) {
       errors.push('Missing distribution data');
     }

@@ -659,6 +659,28 @@ describe('ChartCalculationService', () => {
       expect(result.errors).toContain('Missing ascendant');
     });
 
+    it('should detect missing midheaven', () => {
+      const mockChartData: Partial<ChartData> = {
+        planets: new Array(10).fill({}),
+        houses: new Array(12).fill({}),
+        aspects: [],
+        ascendant: {} as unknown as PlanetPosition,
+        midheaven: null as unknown as PlanetPosition,
+        distribution: {
+          elements: { fire: 0, earth: 0, air: 0, water: 0 },
+          modalities: { cardinal: 0, fixed: 0, mutable: 0 },
+          polarity: { masculine: 0, feminine: 0 },
+        },
+      };
+
+      const result = service.validateChartData(
+        mockChartData as unknown as ChartData,
+      );
+
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain('Missing midheaven');
+    });
+
     it('should detect missing distribution', () => {
       const mockChartData: Partial<ChartData> = {
         planets: new Array(10).fill({}),
