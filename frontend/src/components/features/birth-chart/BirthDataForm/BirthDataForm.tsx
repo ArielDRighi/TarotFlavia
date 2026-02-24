@@ -16,6 +16,7 @@ import type { GeocodedPlace } from '@/types/birth-chart-geocode.types';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import {
   Form,
   FormControl,
@@ -54,6 +55,7 @@ export function BirthDataForm({
       latitude: 0,
       longitude: 0,
       timezone: '',
+      orbSystem: 'commercial',
       ...defaultValues,
     },
     mode: 'onChange', // Validación en cada cambio
@@ -206,6 +208,56 @@ export function BirthDataForm({
         <input type="hidden" {...form.register('latitude', { valueAsNumber: true })} />
         <input type="hidden" {...form.register('longitude', { valueAsNumber: true })} />
         <input type="hidden" {...form.register('timezone')} />
+
+        {/* Sistema de orbes */}
+        <FormField
+          control={form.control}
+          name="orbSystem"
+          render={({ field }) => (
+            <FormItem className="space-y-3">
+              <div className="flex items-center justify-between rounded-lg border p-3">
+                <div className="space-y-0.5">
+                  <FormLabel className="text-sm">Orbes estrictos</FormLabel>
+                  <FormDescription className="text-xs">
+                    Modo profesional: menos aspectos, mayor precisión
+                  </FormDescription>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={field.value === 'strict'}
+                    onCheckedChange={(checked) =>
+                      field.onChange(checked ? 'strict' : 'commercial')
+                    }
+                    disabled={disabled}
+                  />
+                </FormControl>
+              </div>
+
+              {/* Info box con explicación del modo activo */}
+              <div className="bg-muted/50 rounded-lg p-3 text-sm">
+                {field.value === 'strict' ? (
+                  <>
+                    <p className="font-medium">Modo profesional activado</p>
+                    <p className="text-muted-foreground mt-1">
+                      Se detectan solo los aspectos más fuertes e importantes entre planetas
+                      (ángulos de hasta 4°–8°). Ideal si quieres una lectura más precisa y depurada,
+                      similar a la que haría un astrólogo tradicional.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="font-medium">Modo estándar (recomendado)</p>
+                    <p className="text-muted-foreground mt-1">
+                      Se incluyen todos los aspectos relevantes entre planetas. Obtienes una carta
+                      más completa, con más conexiones y matices para explorar. Ideal para la
+                      mayoría de las personas.
+                    </p>
+                  </>
+                )}
+              </div>
+            </FormItem>
+          )}
+        />
 
         {/* Botón de submit */}
         <Button

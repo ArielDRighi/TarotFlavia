@@ -42,6 +42,8 @@ export const birthDataSchema = z.object({
   longitude: z.number().min(-180, 'Longitud inválida').max(180, 'Longitud inválida'),
 
   timezone: z.string().min(1, 'Zona horaria requerida'),
+
+  orbSystem: z.enum(['strict', 'commercial']),
 });
 
 export type BirthDataFormValues = z.infer<typeof birthDataSchema>;

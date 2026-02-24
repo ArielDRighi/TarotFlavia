@@ -108,6 +108,7 @@ export function BirthChartPageContent() {
       latitude: data.latitude,
       longitude: data.longitude,
       timezone: data.timezone,
+      orbSystem: data.orbSystem,
     };
 
     if (isAuthenticated) {
