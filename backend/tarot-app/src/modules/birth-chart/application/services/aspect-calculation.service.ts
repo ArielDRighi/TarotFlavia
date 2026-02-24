@@ -1,5 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { AspectType, AspectTypeMetadata } from '../../domain/enums';
+import {
+  AspectType,
+  AspectTypeMetadata,
+  OrbSystem,
+  ORB_CONFIGS,
+} from '../../domain/enums';
 import { ChartAspect, PlanetPosition } from '../../entities/birth-chart.entity';
 
 /**
@@ -8,7 +13,6 @@ import { ChartAspect, PlanetPosition } from '../../entities/birth-chart.entity';
 interface AspectConfig {
   type: AspectType;
   angle: number;
-  orb: number;
 }
 
 /**
@@ -26,34 +30,29 @@ export class AspectCalculationService {
   private readonly logger = new Logger(AspectCalculationService.name);
 
   /**
-   * Configuración de aspectos mayores con sus orbes
-   * Los orbes se toman de AspectTypeMetadata
+   * Configuración de aspectos mayores.
+   * Los orbes máximos se determinan en tiempo de ejecución mediante ORB_CONFIGS[orbSystem].
    */
   private readonly ASPECTS: AspectConfig[] = [
     {
       type: AspectType.CONJUNCTION,
       angle: AspectTypeMetadata[AspectType.CONJUNCTION].angle,
-      orb: AspectTypeMetadata[AspectType.CONJUNCTION].orb,
     },
     {
       type: AspectType.OPPOSITION,
       angle: AspectTypeMetadata[AspectType.OPPOSITION].angle,
-      orb: AspectTypeMetadata[AspectType.OPPOSITION].orb,
     },
     {
       type: AspectType.SQUARE,
       angle: AspectTypeMetadata[AspectType.SQUARE].angle,
-      orb: AspectTypeMetadata[AspectType.SQUARE].orb,
     },
     {
       type: AspectType.TRINE,
       angle: AspectTypeMetadata[AspectType.TRINE].angle,
-      orb: AspectTypeMetadata[AspectType.TRINE].orb,
     },
     {
       type: AspectType.SEXTILE,
       angle: AspectTypeMetadata[AspectType.SEXTILE].angle,
-      orb: AspectTypeMetadata[AspectType.SEXTILE].orb,
     },
   ];
 
@@ -96,11 +95,13 @@ export class AspectCalculationService {
    *
    * @param planets - Array de posiciones planetarias
    * @param ascendant - Opcional: Ascendente para incluir en aspectos
+   * @param orbSystem - Sistema de orbes a usar ('strict' | 'commercial'). Default: 'commercial'
    * @returns Array de aspectos detectados, ordenados por fuerza (menor orbe primero)
    */
   calculateAspects(
     planets: PlanetPosition[],
     ascendant?: PlanetPosition,
+    orbSystem: OrbSystem = 'commercial',
   ): ChartAspect[] {
     const aspects: ChartAspect[] = [];
     const allPoints = [...planets];
@@ -120,7 +121,7 @@ export class AspectCalculationService {
         const planet1 = allPoints[i];
         const planet2 = allPoints[j];
 
-        const aspect = this.findAspect(planet1, planet2);
+        const aspect = this.findAspect(planet1, planet2, orbSystem);
         if (aspect) {
           aspects.push(aspect);
         }
@@ -140,18 +141,21 @@ export class AspectCalculationService {
    *
    * @param planet1 - Primera posición planetaria
    * @param planet2 - Segunda posición planetaria
+   * @param orbSystem - Sistema de orbes a usar
    * @returns Aspecto detectado o null si no hay aspecto dentro del orbe
    */
   private findAspect(
     planet1: PlanetPosition,
     planet2: PlanetPosition,
+    orbSystem: OrbSystem,
   ): ChartAspect | null {
     const angle = this.calculateAngle(planet1.longitude, planet2.longitude);
 
     for (const aspectConfig of this.ASPECTS) {
       const orb = this.calculateOrb(angle, aspectConfig.angle);
+      const maxOrb = ORB_CONFIGS[orbSystem][aspectConfig.type];
 
-      if (orb <= aspectConfig.orb) {
+      if (orb <= maxOrb) {
         // Validar que el aspecto sea astronómicamente posible
         if (
           !this.isAspectPossible(

@@ -30,6 +30,7 @@ export interface GenerateChartRequest {
   latitude: number;
   longitude: number;
   timezone: string;
+  orbSystem?: 'strict' | 'commercial';
 }
 
 /**

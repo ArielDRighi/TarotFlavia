@@ -199,7 +199,7 @@ describe('AspectCalculationService', () => {
         },
         {
           planet: 'moon',
-          longitude: 10, // 10° de separación - fuera de orbe de conjunción (8°)
+          longitude: 10, // 10° de separación - fuera de orbe de conjunción en modo strict (8°)
           sign: 'aries',
           signDegree: 10,
           house: 1,
@@ -207,7 +207,7 @@ describe('AspectCalculationService', () => {
         },
       ];
 
-      const aspects = service.calculateAspects(planets);
+      const aspects = service.calculateAspects(planets, undefined, 'strict');
 
       const conjunction = aspects.find(
         (a) => a.aspectType === (AspectType.CONJUNCTION as string),
@@ -1237,6 +1237,122 @@ describe('AspectCalculationService', () => {
       );
 
       expect(opposition).toBeDefined();
+    });
+  });
+
+  describe('orbSystem parameter', () => {
+    // Planeta en 0° y planeta en 9° → conjunción con orbe 9°
+    // visible en 'commercial' (orbe max 10°) pero NO en 'strict' (orbe max 8°)
+    const planetWith9DegOrb: PlanetPosition = {
+      planet: 'sun',
+      sign: 'aries',
+      signDegree: 0,
+      longitude: 0,
+      house: 1,
+      isRetrograde: false,
+    };
+    const planetAt9Deg: PlanetPosition = {
+      planet: 'jupiter',
+      sign: 'aries',
+      signDegree: 9,
+      longitude: 9,
+      house: 1,
+      isRetrograde: false,
+    };
+
+    const mockAscendant: PlanetPosition = {
+      planet: 'ascendant',
+      sign: 'libra',
+      signDegree: 0,
+      longitude: 180,
+      house: 1,
+      isRetrograde: false,
+    };
+
+    it('should NOT detect conjunction with 9° orb in strict mode', () => {
+      const aspects = service.calculateAspects(
+        [planetWith9DegOrb, planetAt9Deg],
+        mockAscendant,
+        'strict',
+      );
+      const conjunction = aspects.find(
+        (a) =>
+          (a.aspectType as AspectType) === AspectType.CONJUNCTION &&
+          ((a.planet1 === 'sun' && a.planet2 === 'jupiter') ||
+            (a.planet1 === 'jupiter' && a.planet2 === 'sun')),
+      );
+      expect(conjunction).toBeUndefined();
+    });
+
+    it('should DETECT conjunction with 9° orb in commercial mode', () => {
+      const aspects = service.calculateAspects(
+        [planetWith9DegOrb, planetAt9Deg],
+        mockAscendant,
+        'commercial',
+      );
+      const conjunction = aspects.find(
+        (a) =>
+          (a.aspectType as AspectType) === AspectType.CONJUNCTION &&
+          ((a.planet1 === 'sun' && a.planet2 === 'jupiter') ||
+            (a.planet1 === 'jupiter' && a.planet2 === 'sun')),
+      );
+      expect(conjunction).toBeDefined();
+    });
+
+    it('should default to commercial when orbSystem is not provided', () => {
+      const defaultAspects = service.calculateAspects(
+        [planetWith9DegOrb, planetAt9Deg],
+        mockAscendant,
+      );
+      const commercialAspects = service.calculateAspects(
+        [planetWith9DegOrb, planetAt9Deg],
+        mockAscendant,
+        'commercial',
+      );
+      expect(defaultAspects.length).toBe(commercialAspects.length);
+    });
+
+    it('should use strict orbs when orbSystem is strict (sextile 5° orb: visible strict=no, commercial=yes)', () => {
+      // Sextil con orbe 5° → strict permite 4°, commercial permite 8°
+      const planetSextile: PlanetPosition = {
+        planet: 'mars',
+        sign: 'gemini',
+        signDegree: 5,
+        longitude: 65, // 60 + 5 = 65° → sextil con orbe 5°
+        house: 3,
+        isRetrograde: false,
+      };
+      const planetBase: PlanetPosition = {
+        planet: 'saturn',
+        sign: 'aries',
+        signDegree: 0,
+        longitude: 0,
+        house: 1,
+        isRetrograde: false,
+      };
+
+      const strictAspects = service.calculateAspects(
+        [planetBase, planetSextile],
+        undefined,
+        'strict',
+      );
+      const commercialAspects = service.calculateAspects(
+        [planetBase, planetSextile],
+        undefined,
+        'commercial',
+      );
+
+      const strictSextile = strictAspects.find(
+        (a) => (a.aspectType as AspectType) === AspectType.SEXTILE,
+      );
+      const commercialSextile = commercialAspects.find(
+        (a) => (a.aspectType as AspectType) === AspectType.SEXTILE,
+      );
+
+      // strict: sextile orb=4°, nuestro orbe es 5° → no detecta
+      expect(strictSextile).toBeUndefined();
+      // commercial: sextile orb=8°, nuestro orbe es 5° → detecta
+      expect(commercialSextile).toBeDefined();
     });
   });
 });

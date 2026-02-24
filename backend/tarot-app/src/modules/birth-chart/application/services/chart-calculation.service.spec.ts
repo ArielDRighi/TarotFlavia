@@ -358,6 +358,7 @@ describe('ChartCalculationService', () => {
       expect(mockAspectService.calculateAspects).toHaveBeenCalledWith(
         mockPlanetPositions,
         mockAscendant,
+        undefined,
       );
     });
 
