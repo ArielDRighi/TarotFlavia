@@ -512,6 +512,64 @@ describe('ChartCalculationService', () => {
     });
   });
 
+  describe('calculateDistribution (T-CA-057: MC incluido)', () => {
+    const makePlanet = (sign: ZodiacSign): PlanetPosition => ({
+      planet: 'sun',
+      sign,
+      signDegree: 15,
+      longitude: 15,
+      house: 1,
+      isRetrograde: false,
+    });
+
+    it('should count 12 points total (10 planets + AC + MC)', () => {
+      const planets = Array(10)
+        .fill(null)
+        .map(() => makePlanet(ZodiacSign.ARIES));
+      const ascendant = makePlanet(ZodiacSign.ARIES);
+      const midheaven = makePlanet(ZodiacSign.ARIES);
+
+      const dist = (
+        service as unknown as {
+          calculateDistribution: (
+            p: PlanetPosition[],
+            a: PlanetPosition,
+            m: PlanetPosition,
+          ) => ChartDistribution;
+        }
+      ).calculateDistribution(planets, ascendant, midheaven);
+
+      const total =
+        dist.elements.fire +
+        dist.elements.earth +
+        dist.elements.air +
+        dist.elements.water;
+      expect(total).toBe(12);
+      expect(dist.elements.fire).toBe(12); // todos en Aries (fuego)
+    });
+
+    it('should count MC polarity in distribution', () => {
+      const planets = Array(10)
+        .fill(null)
+        .map(() => makePlanet(ZodiacSign.TAURUS)); // tierra = femenino
+      const ascendant = makePlanet(ZodiacSign.TAURUS);
+      const midheaven = makePlanet(ZodiacSign.ARIES); // fuego = masculino
+
+      const dist = (
+        service as unknown as {
+          calculateDistribution: (
+            p: PlanetPosition[],
+            a: PlanetPosition,
+            m: PlanetPosition,
+          ) => ChartDistribution;
+        }
+      ).calculateDistribution(planets, ascendant, midheaven);
+
+      expect(dist.polarity.masculine).toBe(1); // solo el MC en Aries
+      expect(dist.polarity.feminine).toBe(11); // 10 planetas + AC en Tauro
+    });
+  });
+
   describe('validateChartData', () => {
     it('should validate chart with correct data', () => {
       const mockChartData: Partial<ChartData> = {

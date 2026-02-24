@@ -89,7 +89,11 @@ export class ChartCalculationService {
       const aspects = this.aspectService.calculateAspects(planets, ascendant);
 
       // 8. Calcular distribución (elementos, modalidades, polaridad)
-      const distribution = this.calculateDistribution(planets, ascendant);
+      const distribution = this.calculateDistribution(
+        planets,
+        ascendant,
+        midheaven,
+      );
 
       // 9. Obtener Big Three
       const bigThree = this.planetService.getBigThree(planets, ascendant);
@@ -214,9 +218,10 @@ export class ChartCalculationService {
   private calculateDistribution(
     planets: PlanetPosition[],
     ascendant: PlanetPosition,
+    midheaven: PlanetPosition,
   ): ChartDistribution {
-    // Incluir Ascendente en el conteo (es significativo)
-    const allPoints = [...planets, ascendant];
+    // Incluir Ascendente y MC en el conteo (12 puntos: 10 planetas + AC + MC)
+    const allPoints = [...planets, ascendant, midheaven];
 
     const elements = { fire: 0, earth: 0, air: 0, water: 0 };
     const modalities = { cardinal: 0, fixed: 0, mutable: 0 };

@@ -435,10 +435,10 @@ describe('HU-CA-001: Generar Carta Astral Básica (Comportamiento)', () => {
       expect(elements.air).toBeGreaterThanOrEqual(0);
       expect(elements.water).toBeGreaterThanOrEqual(0);
 
-      // La suma de elementos debe ser 11 (10 planetas + ascendente)
+      // La suma de elementos debe ser 12 (10 planetas + ascendente + MC)
       const total =
         elements.fire + elements.earth + elements.air + elements.water;
-      expect(total).toBe(11);
+      expect(total).toBe(12);
     });
 
     it('dado un cálculo exitoso, entonces incluye distribución de modalidades', () => {
@@ -450,7 +450,7 @@ describe('HU-CA-001: Generar Carta Astral Básica (Comportamiento)', () => {
       expect(modalities.mutable).toBeGreaterThanOrEqual(0);
 
       const total = modalities.cardinal + modalities.fixed + modalities.mutable;
-      expect(total).toBe(11);
+      expect(total).toBe(12);
     });
 
     it('dado un cálculo exitoso, entonces incluye polaridad (masculino/femenino)', () => {
@@ -461,7 +461,7 @@ describe('HU-CA-001: Generar Carta Astral Básica (Comportamiento)', () => {
       expect(polarity.feminine).toBeGreaterThanOrEqual(0);
 
       const total = polarity.masculine + polarity.feminine;
-      expect(total).toBe(11);
+      expect(total).toBe(12);
     });
   });
 
