@@ -570,10 +570,14 @@ export class BirthChartFacadeService {
   }
 
   private formatPosition(signDegree: number, sign: string): string {
-    const wholeDegrees = Math.floor(signDegree);
-    const minutes = Math.round((signDegree - wholeDegrees) * 60);
+    let degrees = Math.floor(signDegree);
+    let minutes = Math.round((signDegree - degrees) * 60);
+    if (minutes === 60) {
+      degrees += 1;
+      minutes = 0;
+    }
     const signName = ZodiacSignMetadata[sign as ZodiacSign]?.name ?? sign;
-    return `${wholeDegrees}° ${minutes}' ${signName}`;
+    return `${degrees}° ${minutes}' ${signName}`;
   }
 
   private normalizeBirthTime(time: string): string {
