@@ -280,7 +280,7 @@ describe('GeocodeService', () => {
       );
     });
 
-    it('should use osm_tag filters in Photon request for cities', async () => {
+    it('should call Photon with basic search parameters for cities', async () => {
       cacheService.getSearchResults.mockResolvedValue(null);
       cacheService.getTimezone.mockResolvedValue('UTC');
 
