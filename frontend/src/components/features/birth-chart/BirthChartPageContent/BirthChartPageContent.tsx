@@ -8,7 +8,7 @@
  * that app/ pages must not contain business logic (useState, useEffect, hooks).
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Star, Sparkles, Crown, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
@@ -28,10 +28,21 @@ import { useBirthChartStore } from '@/stores/birthChartStore';
 import type { ChartResponse, GenerateChartRequest } from '@/types/birth-chart-api.types';
 import { isPremiumChartResponse } from '@/types/birth-chart-api.types';
 
+import { BirthChartLoading } from '@/components/features/birth-chart/BirthChartLoading';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+
+const LOADING_MESSAGES = [
+  'Trazando el mapa del cielo en tu momento de nacimiento...',
+  'Calculando las posiciones planetarias...',
+  'Interpretando los aspectos entre los astros...',
+  'Alineando las energías de tu carta natal...',
+  'Revelando tu mapa cósmico personal...',
+];
+
+const LOADING_MESSAGE_INTERVAL = 2500;
 
 export function BirthChartPageContent() {
   const router = useRouter();
@@ -45,6 +56,7 @@ export function BirthChartPageContent() {
   const { setChartResult, setFormData } = useBirthChartStore();
 
   const [error, setError] = useState<string | null>(null);
+  const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
 
   function handleSuccess(data: ChartResponse) {
     // Guardar resultado en store
@@ -119,6 +131,25 @@ export function BirthChartPageContent() {
   }
 
   const isSubmitting = generateChart.isPending || generateChartAnonymous.isPending;
+
+  useEffect(() => {
+    if (!isSubmitting) return;
+
+    setLoadingMessageIndex(0);
+    const interval = setInterval(() => {
+      setLoadingMessageIndex((prev) => (prev + 1) % LOADING_MESSAGES.length);
+    }, LOADING_MESSAGE_INTERVAL);
+
+    return () => clearInterval(interval);
+  }, [isSubmitting]);
+
+  if (isSubmitting) {
+    return (
+      <div className="container mx-auto max-w-2xl px-4 py-8">
+        <BirthChartLoading message={LOADING_MESSAGES[loadingMessageIndex]} />
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto max-w-2xl px-4 py-8">
