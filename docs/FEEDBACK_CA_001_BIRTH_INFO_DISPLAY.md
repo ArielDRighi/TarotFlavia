@@ -575,6 +575,8 @@ Frontend (PlaceAutocomplete)
 
 #### T-CA-054: [Backend] Migrar geocoding a Photon (Komoot) con Nominatim como fallback
 
+**Estado:** ✅ COMPLETADA
+
 **Tipo:** Mejora Crítica
 **Módulo:** Backend — `birth-chart/geocode`
 **Prioridad:** Critical
@@ -635,8 +637,8 @@ Ejemplo de respuesta (GeoJSON FeatureCollection):
 
 ##### Subtareas
 
-- [ ] Leer `WORKFLOW_BACKEND.md` antes de implementar
-- [ ] Agregar interfaz `PhotonFeature` para tipar la respuesta GeoJSON de Photon:
+- [x] Leer `WORKFLOW_BACKEND.md` antes de implementar
+- [x] Agregar interfaz `PhotonFeature` para tipar la respuesta GeoJSON de Photon:
   ```typescript
   interface PhotonFeature {
     geometry: { coordinates: [number, number] };
@@ -651,7 +653,7 @@ Ejemplo de respuesta (GeoJSON FeatureCollection):
     };
   }
   ```
-- [ ] Implementar método privado `searchWithPhoton(query)`:
+- [x] Implementar método privado `searchWithPhoton(query)`:
   - URL: `https://photon.komoot.io/api/`
   - Params: `{ q: query, lang: 'es', limit: 5 }`
   - Headers: `{ 'User-Agent': 'Auguria/1.0 (contact@auguria.com)' }`
@@ -663,7 +665,7 @@ Ejemplo de respuesta (GeoJSON FeatureCollection):
     - `latitude`: `feature.geometry.coordinates[1]`
     - `longitude`: `feature.geometry.coordinates[0]`
     - `timezone`: seguir usando `getTimezone()` existente (sin cambio)
-- [ ] Refactorizar `searchPlaces()` con lógica híbrida:
+- [x] Refactorizar `searchPlaces()` con lógica híbrida:
   ```typescript
   async searchPlaces(query: string): Promise<GeocodeSearchResponseDto> {
     const cached = await this.cacheService.getSearchResults(query);
@@ -677,14 +679,14 @@ Ejemplo de respuesta (GeoJSON FeatureCollection):
     }
   }
   ```
-- [ ] Renombrar la lógica actual de Nominatim a método privado `searchWithNominatim(query)` (mantener sin cambios funcionales)
-- [ ] Mantener el caché existente (`GeocodeCacheService`), rate limiting de Nominatim y `NominatimResult` sin cambios
-- [ ] Actualizar tests de `geocode.service.spec.ts`:
+- [x] Renombrar la lógica actual de Nominatim a método privado `searchWithNominatim(query)` (mantener sin cambios funcionales)
+- [x] Mantener el caché existente (`GeocodeCacheService`), rate limiting de Nominatim y `NominatimResult` sin cambios
+- [x] Actualizar tests de `geocode.service.spec.ts`:
   - Test: Photon OK → retorna resultados de Photon
   - Test: Photon falla → hace fallback a Nominatim
   - Test: resultado de Photon mapeado correctamente al `GeocodedPlaceDto`
-- [ ] Ejecutar ciclo de calidad completo
-- [ ] Actualizar backlog y crear PR → `develop`
+- [x] Ejecutar ciclo de calidad completo
+- [x] Actualizar backlog y crear PR → `develop`
 
 ##### Criterios de aceptación
 
