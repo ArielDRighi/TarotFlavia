@@ -230,6 +230,68 @@ describe('PlaceAutocomplete', () => {
       );
     });
 
+    it('should show displayName as subtitle in each result option', async () => {
+      const user = userEvent.setup();
+      mockUseGeocodeSearch.mockReturnValue(
+        createMockQueryResult({
+          data: { results: mockPlaces, count: 2 },
+          isSuccess: true,
+        })
+      );
+
+      render(<PlaceAutocomplete value={null} onChange={mockOnChange} />, {
+        wrapper: createWrapper(),
+      });
+
+      const input = screen.getByPlaceholderText('Ej: Buenos Aires, Argentina');
+      await user.type(input, 'Buenos');
+
+      await waitFor(
+        () => {
+          // El subtítulo de cada opción debe mostrar el displayName completo
+          // para diferenciar resultados similares (ej: "Salta, Salta, Argentina")
+          // El texto puede estar partido entre el displayName y la timezone,
+          // por eso usamos una función matcher que busca contenido exacto del span
+          const subtitles = screen.getAllByRole('option').map((opt) => {
+            const spans = opt.querySelectorAll('span.text-xs');
+            return spans[0]?.textContent ?? '';
+          });
+          expect(subtitles).toContain('Buenos Aires, Argentina • America/Argentina/Buenos_Aires');
+          expect(subtitles).toContain('Madrid, España • Europe/Madrid');
+        },
+        { timeout: 2000 }
+      );
+    });
+
+    it('should show timezone appended to displayName when available', async () => {
+      const user = userEvent.setup();
+      mockUseGeocodeSearch.mockReturnValue(
+        createMockQueryResult({
+          data: { results: [mockPlace], count: 1 },
+          isSuccess: true,
+        })
+      );
+
+      render(<PlaceAutocomplete value={null} onChange={mockOnChange} />, {
+        wrapper: createWrapper(),
+      });
+
+      const input = screen.getByPlaceholderText('Ej: Buenos Aires, Argentina');
+      await user.type(input, 'Buenos');
+
+      await waitFor(
+        () => {
+          // El span de subtítulo debe contener displayName + timezone
+          const options = screen.getAllByRole('option');
+          const subtitleSpan = options[0].querySelector('span.text-xs');
+          expect(subtitleSpan?.textContent).toBe(
+            'Buenos Aires, Argentina • America/Argentina/Buenos_Aires'
+          );
+        },
+        { timeout: 2000 }
+      );
+    });
+
     it('should show empty message when no results', async () => {
       const user = userEvent.setup();
       mockUseGeocodeSearch.mockReturnValue(
@@ -274,13 +336,14 @@ describe('PlaceAutocomplete', () => {
 
       await waitFor(
         () => {
-          expect(screen.getByText(/Buenos Aires/)).toBeInTheDocument();
+          expect(screen.getAllByRole('option').length).toBeGreaterThan(0);
         },
         { timeout: 2000 }
       );
 
-      const buenosAiresOption = screen.getByText(/Buenos Aires/);
-      await user.click(buenosAiresOption);
+      // Hacer click en la primera opción (Buenos Aires)
+      const firstOption = screen.getAllByRole('option')[0];
+      await user.click(firstOption);
 
       expect(mockOnChange).toHaveBeenCalledWith(mockPlace);
     });
@@ -303,13 +366,14 @@ describe('PlaceAutocomplete', () => {
 
       await waitFor(
         () => {
-          expect(screen.getByText(/Buenos Aires/)).toBeInTheDocument();
+          expect(screen.getAllByRole('option').length).toBeGreaterThan(0);
         },
         { timeout: 2000 }
       );
 
-      const buenosAiresOption = screen.getByText(/Buenos Aires/);
-      await user.click(buenosAiresOption);
+      // Hacer click en la primera opción (Buenos Aires)
+      const firstOption = screen.getAllByRole('option')[0];
+      await user.click(firstOption);
 
       rerender(<PlaceAutocomplete value={mockPlace} onChange={mockOnChange} />);
 

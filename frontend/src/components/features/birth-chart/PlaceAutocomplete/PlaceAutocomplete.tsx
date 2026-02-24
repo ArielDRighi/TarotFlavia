@@ -192,7 +192,7 @@ export function PlaceAutocomplete({
                   {place.city || place.displayName.split(',')[0]?.trim() || place.displayName}
                 </span>
                 <span className="text-muted-foreground text-xs">
-                  {place.country}
+                  {place.displayName}
                   {place.timezone && ` • ${place.timezone}`}
                 </span>
               </div>
