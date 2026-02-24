@@ -12,8 +12,18 @@ vi.mock('next/navigation', () => ({
 
 // Mock de next/link
 vi.mock('next/link', () => ({
-  default: ({ children, href }: { children: React.ReactNode; href: string }) => (
-    <a href={href}>{children}</a>
+  default: ({
+    children,
+    href,
+    ...rest
+  }: {
+    children: React.ReactNode;
+    href: string;
+    [key: string]: unknown;
+  }) => (
+    <a href={href} {...rest}>
+      {children}
+    </a>
   ),
 }));
 
@@ -307,6 +317,52 @@ describe('SavedChartPageContent', () => {
       render(<SavedChartPageContent />);
 
       expect(screen.getByText('Carta de Ana')).toBeInTheDocument();
+    });
+  });
+
+  describe('Botón "Nueva carta"', () => {
+    beforeEach(() => {
+      const savedChartReturn: Partial<UseSavedChartReturn> = {
+        data: mockChart,
+        isLoading: false,
+        error: null,
+      };
+      mockUseSavedChart.mockReturnValue(savedChartReturn);
+    });
+
+    it('debe mostrar el botón "Nueva carta" en el header', () => {
+      render(<SavedChartPageContent />);
+
+      expect(screen.getByTestId('nueva-carta-button')).toBeInTheDocument();
+    });
+
+    it('el botón "Nueva carta" debe ser un enlace a /carta-astral', () => {
+      render(<SavedChartPageContent />);
+
+      const nuevaCartaButton = screen.getByTestId('nueva-carta-button');
+      const link = nuevaCartaButton.closest('a');
+      expect(link).toHaveAttribute('href', '/carta-astral');
+    });
+
+    it('el botón "Nueva carta" debe mostrar el texto correcto', () => {
+      render(<SavedChartPageContent />);
+
+      expect(screen.getByTestId('nueva-carta-button')).toHaveTextContent('Nueva carta');
+    });
+
+    it('el botón "Mi historial" debe mantenerse funcional', () => {
+      render(<SavedChartPageContent />);
+
+      const historialLink = screen.getByRole('link', { name: /mi historial/i });
+      expect(historialLink).toBeInTheDocument();
+      expect(historialLink).toHaveAttribute('href', '/carta-astral/historial');
+    });
+
+    it('deben existir ambos botones de navegación en el header al mismo tiempo', () => {
+      render(<SavedChartPageContent />);
+
+      expect(screen.getByTestId('nueva-carta-button')).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /mi historial/i })).toBeInTheDocument();
     });
   });
 });
