@@ -72,7 +72,7 @@ Los siguientes archivos están **bloqueados** para modificación:
 
 | ID | Tarea | Tipo | Prioridad | Esfuerzo | Estado |
 |----|-------|------|-----------|----------|--------|
-| T-CA-057 | Incluir MC en cálculo de distribución | Fix backend | Must | 1h | ⬜ PENDIENTE |
+| T-CA-057 | Incluir MC en cálculo de distribución | Fix backend | Must | 1h | ✅ COMPLETADA |
 | T-CA-058 | Formato sexagesimal de grados en la UI | Fix frontend + backend | Must | 2h | ⬜ PENDIENTE |
 | T-CA-059 | Sistema de orbes dual: strict / commercial | Feature | Should | 4h | ⬜ PENDIENTE |
 | T-CA-060 | Reducir drift en cúspides de casas | Investigación + Fix | Could | 3h | ⬜ PENDIENTE |
@@ -85,7 +85,7 @@ Los siguientes archivos están **bloqueados** para modificación:
 
 ### T-CA-057: Incluir MC en Cálculo de Distribución (Elementos / Modalidades / Polaridades)
 
-**Estado:** ⬜ PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Tipo:** Corrección / Bug Fix
 **Prioridad:** Must
 **Estimación:** 1 hora
@@ -220,17 +220,17 @@ describe('calculateDistribution', () => {
 #### TODO List de Implementación
 
 ```
-[ ] 1. Escribir tests (RED) — deben FALLAR
-[ ] 2. Implementar cambios en chart-calculation.service.ts (GREEN)
-[ ] 3. Verificar que tests PASAN
-[ ] 4. npm run format
-[ ] 5. npm run lint
-[ ] 6. npm run test:cov (≥ 80%)
-[ ] 7. npm run build
-[ ] 8. node scripts/validate-architecture.js
-[ ] 9. Actualizar estado en backlog → ✅ COMPLETADA
-[ ] 10. Crear commit: fix(birth-chart): incluir MC en cálculo de distribución
-[ ] 11. Push y PR → base: develop
+[x] 1. Escribir tests (RED) — deben FALLAR
+[x] 2. Implementar cambios en chart-calculation.service.ts (GREEN)
+[x] 3. Verificar que tests PASAN
+[x] 4. npm run format
+[x] 5. npm run lint
+[x] 6. npm run test:cov (≥ 80%)
+[x] 7. npm run build
+[x] 8. node scripts/validate-architecture.js
+[x] 9. Actualizar estado en backlog → ✅ COMPLETADA
+[x] 10. Crear commit: fix(birth-chart): incluir MC en cálculo de distribución
+[x] 11. Push y PR → base: develop
 ```
 
 ---
@@ -862,7 +862,7 @@ T-CA-057 → T-CA-058 → T-CA-059 → T-CA-060
 
 ## CRITERIOS DE ACEPTACIÓN GLOBALES
 
-- [ ] Distribución total = 12 puntos (10 planetas + AC + MC) en la respuesta de la API
+- [x] Distribución total = 12 puntos (10 planetas + AC + MC) en la respuesta de la API
 - [ ] Todos los grados en la UI muestran formato `X° Y'` (cero decimales visibles)
 - [ ] Request con `orbSystem: 'commercial'` detecta Sol sextil Júpiter y Venus conjunción Urano
 - [ ] Request con `orbSystem: 'strict'` devuelve ~13 aspectos (comportamiento actual)
