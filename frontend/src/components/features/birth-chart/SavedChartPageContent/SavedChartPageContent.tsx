@@ -170,13 +170,21 @@ export function SavedChartPageContent() {
       <main className="container mx-auto max-w-6xl px-4 py-8">
         {/* Breadcrumb de navegación */}
         <div className="mb-6 flex items-center justify-between">
-          {/* Volver al historial */}
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/carta-astral/historial">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Mi historial
-            </Link>
-          </Button>
+          {/* Botones de navegación izquierda */}
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/carta-astral/historial">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Mi historial
+              </Link>
+            </Button>
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/carta-astral" data-testid="nueva-carta-button">
+                <Star className="mr-2 h-4 w-4" />
+                Nueva carta
+              </Link>
+            </Button>
+          </div>
 
           <div className="flex items-center gap-2">
             {/* Badge Premium */}

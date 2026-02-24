@@ -832,6 +832,7 @@ Donde `handleNewChart` hace `reset()` del store y navega a `/carta-astral`.
 **Prioridad:** Medium
 **Estimación:** 0.5h
 **Dependencias:** Ninguna
+**Estado:** ✅ COMPLETADA
 
 ##### Descripción
 
@@ -869,20 +870,20 @@ En el encabezado de `SavedChartPageContent.tsx`, reemplazar el botón "← Mi hi
 
 ##### Subtareas
 
-- [ ] Leer `WORKFLOW_FRONTEND.md` antes de implementar
-- [ ] En `SavedChartPageContent.tsx`, en el bloque del breadcrumb de navegación (línea ~172):
+- [x] Leer `WORKFLOW_FRONTEND.md` antes de implementar
+- [x] En `SavedChartPageContent.tsx`, en el bloque del breadcrumb de navegación (línea ~172):
   - Reemplazar el único `<Button>` izquierdo por los dos botones descritos arriba
   - Verificar que `Star` ya está importado de `lucide-react` (lo está, línea 25)
   - Verificar que `Link` ya está importado de `next/link` (lo está, línea 27)
-- [ ] Actualizar tests en `SavedChartPageContent.test.tsx` si hay tests del header
-- [ ] Ejecutar ciclo de calidad completo:
-  - [ ] `npm run format`
-  - [ ] `npm run lint:fix`
-  - [ ] `npm run type-check`
-  - [ ] `npm run test:run`
-  - [ ] `npm run build`
-  - [ ] `node scripts/validate-architecture.js`
-- [ ] Actualizar backlog y crear PR → `develop`
+- [x] Actualizar tests en `SavedChartPageContent.test.tsx` si hay tests del header
+- [x] Ejecutar ciclo de calidad completo:
+  - [x] `npm run format`
+  - [x] `npm run lint:fix`
+  - [x] `npm run type-check`
+  - [x] `npm run test:run`
+  - [x] `npm run build`
+  - [x] `node scripts/validate-architecture.js`
+- [x] Actualizar backlog y crear PR → `develop`
 
 ##### Criterios de aceptación
 
