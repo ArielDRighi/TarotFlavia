@@ -225,9 +225,7 @@ export function BirthDataForm({
                 <FormControl>
                   <Switch
                     checked={field.value === 'strict'}
-                    onCheckedChange={(checked) =>
-                      field.onChange(checked ? 'strict' : 'commercial')
-                    }
+                    onCheckedChange={(checked) => field.onChange(checked ? 'strict' : 'commercial')}
                     disabled={disabled}
                   />
                 </FormControl>

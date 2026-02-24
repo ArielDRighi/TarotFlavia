@@ -333,6 +333,122 @@ describe('BirthDataForm', () => {
     });
   });
 
+  describe('Sistema de orbes (orbSystem)', () => {
+    it('debe renderizar el switch de orbes estrictos', () => {
+      render(<BirthDataForm onSubmit={mockOnSubmit} />);
+
+      expect(screen.getByText(/orbes estrictos/i)).toBeInTheDocument();
+    });
+
+    it('debe mostrar el modo estándar por defecto', () => {
+      render(<BirthDataForm onSubmit={mockOnSubmit} />);
+
+      expect(screen.getByText(/modo estándar/i)).toBeInTheDocument();
+    });
+
+    it('debe mostrar el switch desactivado por defecto (modo commercial)', () => {
+      const { container } = render(<BirthDataForm onSubmit={mockOnSubmit} />);
+
+      const switchEl = container.querySelector('[role="switch"]') as HTMLElement;
+      expect(switchEl).toBeInTheDocument();
+      expect(switchEl).toHaveAttribute('aria-checked', 'false');
+    });
+
+    it('debe cambiar a modo profesional al activar el switch', async () => {
+      const user = userEvent.setup();
+      const { container } = render(<BirthDataForm onSubmit={mockOnSubmit} />);
+
+      const switchEl = container.querySelector('[role="switch"]') as HTMLElement;
+      await user.click(switchEl);
+
+      await waitFor(() => {
+        expect(screen.getByText(/modo profesional activado/i)).toBeInTheDocument();
+      });
+    });
+
+    it('debe volver al modo estándar al desactivar el switch', async () => {
+      const user = userEvent.setup();
+      const { container } = render(<BirthDataForm onSubmit={mockOnSubmit} />);
+
+      const switchEl = container.querySelector('[role="switch"]') as HTMLElement;
+      await user.click(switchEl);
+      await user.click(switchEl);
+
+      await waitFor(() => {
+        expect(screen.getByText(/modo estándar/i)).toBeInTheDocument();
+      });
+    });
+
+    it('debe incluir orbSystem en el submit con valor commercial por defecto', async () => {
+      const user = userEvent.setup();
+      render(<BirthDataForm onSubmit={mockOnSubmit} />);
+
+      await user.type(screen.getByPlaceholderText(/maría garcía/i), 'Juan Pérez');
+
+      const dateInput = document.querySelector('input[name="birthDate"]') as HTMLInputElement;
+      await user.type(dateInput, '1990-05-15');
+
+      const timeInput = document.querySelector('input[name="birthTime"]') as HTMLInputElement;
+      await user.type(timeInput, '14:30');
+
+      const placeInput = screen.getByTestId('place-autocomplete');
+      await user.type(placeInput, 'Buenos Aires');
+
+      await waitFor(() => {
+        const latInput = document.querySelector('input[name="latitude"]') as HTMLInputElement;
+        expect(latInput?.value).toBe('-34.6037');
+      });
+
+      await user.click(screen.getByRole('button', { name: /generar mi carta astral/i }));
+
+      await waitFor(() => {
+        expect(mockOnSubmit).toHaveBeenCalledTimes(1);
+        const submitted = mockOnSubmit.mock.calls[0][0];
+        expect(submitted.orbSystem).toBe('commercial');
+      });
+    });
+
+    it('debe incluir orbSystem "strict" al submit cuando el switch está activado', async () => {
+      const user = userEvent.setup();
+      const { container } = render(<BirthDataForm onSubmit={mockOnSubmit} />);
+
+      // Activar switch
+      const switchEl = container.querySelector('[role="switch"]') as HTMLElement;
+      await user.click(switchEl);
+
+      await user.type(screen.getByPlaceholderText(/maría garcía/i), 'Juan Pérez');
+
+      const dateInput = document.querySelector('input[name="birthDate"]') as HTMLInputElement;
+      await user.type(dateInput, '1990-05-15');
+
+      const timeInput = document.querySelector('input[name="birthTime"]') as HTMLInputElement;
+      await user.type(timeInput, '14:30');
+
+      const placeInput = screen.getByTestId('place-autocomplete');
+      await user.type(placeInput, 'Buenos Aires');
+
+      await waitFor(() => {
+        const latInput = document.querySelector('input[name="latitude"]') as HTMLInputElement;
+        expect(latInput?.value).toBe('-34.6037');
+      });
+
+      await user.click(screen.getByRole('button', { name: /generar mi carta astral/i }));
+
+      await waitFor(() => {
+        expect(mockOnSubmit).toHaveBeenCalledTimes(1);
+        const submitted = mockOnSubmit.mock.calls[0][0];
+        expect(submitted.orbSystem).toBe('strict');
+      });
+    });
+
+    it('debe deshabilitar el switch cuando disabled es true', () => {
+      const { container } = render(<BirthDataForm onSubmit={mockOnSubmit} disabled={true} />);
+
+      const switchEl = container.querySelector('[role="switch"]') as HTMLElement;
+      expect(switchEl).toBeDisabled();
+    });
+  });
+
   describe('Accesibilidad', () => {
     it('debe tener data-testid en elementos principales', () => {
       const { container } = render(<BirthDataForm onSubmit={mockOnSubmit} />);

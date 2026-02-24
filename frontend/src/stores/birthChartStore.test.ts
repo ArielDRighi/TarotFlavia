@@ -17,6 +17,7 @@ const createMockFormData = (overrides?: Partial<BirthDataFormValues>): BirthData
   latitude: -34.6037,
   longitude: -58.3816,
   timezone: 'America/Argentina/Buenos_Aires',
+  orbSystem: 'commercial',
   ...overrides,
 });
 

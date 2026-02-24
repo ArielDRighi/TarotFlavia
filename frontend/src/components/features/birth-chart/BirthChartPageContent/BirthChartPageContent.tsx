@@ -110,6 +110,7 @@ export function BirthChartPageContent() {
 
   function handleSubmit(data: BirthDataFormValues) {
     setError(null);
+    setLoadingMessageIndex(0);
     setFormData(data);
 
     const request: GenerateChartRequest = {
@@ -135,7 +136,6 @@ export function BirthChartPageContent() {
   useEffect(() => {
     if (!isSubmitting) return;
 
-    setLoadingMessageIndex(0);
     const interval = setInterval(() => {
       setLoadingMessageIndex((prev) => (prev + 1) % LOADING_MESSAGES.length);
     }, LOADING_MESSAGE_INTERVAL);

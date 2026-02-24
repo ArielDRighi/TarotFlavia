@@ -325,7 +325,7 @@ describe('BirthChartPage', () => {
       expect(screen.getByTestId('birth-data-form')).toBeInTheDocument();
     });
 
-    it('should disable form when chart generation is pending', () => {
+    it('should show loading screen when chart generation is pending', () => {
       vi.mocked(useGenerateChart).mockReturnValue({
         mutate: mockMutate,
         isPending: true,
@@ -333,8 +333,9 @@ describe('BirthChartPage', () => {
 
       render(<BirthChartPage />);
 
-      const submitButton = screen.getByTestId('submit-button');
-      expect(submitButton).toBeDisabled();
+      // Loading screen replaces the form while generation is in progress
+      expect(screen.getByTestId('birth-chart-loading')).toBeInTheDocument();
+      expect(screen.queryByTestId('birth-data-form')).not.toBeInTheDocument();
     });
 
     it('should disable form while usage is loading', () => {
