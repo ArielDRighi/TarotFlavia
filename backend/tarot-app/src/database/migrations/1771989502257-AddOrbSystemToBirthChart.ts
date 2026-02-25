@@ -324,7 +324,10 @@ export class AddOrbSystemToBirthChart1771989502257 implements MigrationInterface
       `CREATE TYPE "public"."anonymous_usage_feature_enum" AS ENUM('daily_card', 'tarot_reading', 'oracle_query', 'interpretation_regeneration', 'pendulum_query', 'birth_chart')`,
     );
     await queryRunner.query(
-      `ALTER TABLE "anonymous_usage" ADD "feature" "public"."anonymous_usage_feature_enum" NOT NULL`,
+      `ALTER TABLE "anonymous_usage" ADD "feature" "public"."anonymous_usage_feature_enum" NOT NULL DEFAULT 'daily_card'`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "anonymous_usage" ALTER COLUMN "feature" DROP DEFAULT`,
     );
     await queryRunner.query(
       `ALTER TABLE "tarotistas" ALTER COLUMN "comisión_porcentaje" SET DEFAULT '30'`,
@@ -338,7 +341,6 @@ export class AddOrbSystemToBirthChart1771989502257 implements MigrationInterface
     await queryRunner.query(
       `ALTER TABLE "user_tarotista_subscriptions" ALTER COLUMN "subscription_type" TYPE "public"."user_tarotista_subscriptions_subscription_type_enum" USING "subscription_type"::"text"::"public"."user_tarotista_subscriptions_subscription_type_enum"`,
     );
-    await queryRunner.query(`DROP TYPE "public"."subscription_type_enum_old"`);
     await queryRunner.query(
       `ALTER TYPE "public"."subscription_status_enum" RENAME TO "subscription_status_enum_old"`,
     );
@@ -362,9 +364,6 @@ export class AddOrbSystemToBirthChart1771989502257 implements MigrationInterface
     );
     await queryRunner.query(
       `ALTER TABLE "user_tarotista_subscriptions" ADD "stripe_subscription_id" character varying(255)`,
-    );
-    await queryRunner.query(
-      `ALTER TYPE "public"."subscription_type_enum" RENAME TO "subscription_type_enum_old"`,
     );
     await queryRunner.query(
       `CREATE TYPE "public"."tarotista_revenue_metrics_subscription_type_enum" AS ENUM('favorite', 'premium_individual', 'premium_all_access')`,
@@ -491,7 +490,6 @@ export class AddOrbSystemToBirthChart1771989502257 implements MigrationInterface
     await queryRunner.query(
       `ALTER TABLE "sacred_events" ALTER COLUMN "lunar_phase" TYPE "public"."sacred_events_lunar_phase_enum" USING "lunar_phase"::"text"::"public"."sacred_events_lunar_phase_enum"`,
     );
-    await queryRunner.query(`DROP TYPE "public"."lunar_phase_enum_old"`);
     await queryRunner.query(
       `ALTER TYPE "public"."hemisphere_enum" RENAME TO "hemisphere_enum_old"`,
     );
@@ -501,7 +499,9 @@ export class AddOrbSystemToBirthChart1771989502257 implements MigrationInterface
     await queryRunner.query(
       `ALTER TABLE "sacred_events" ALTER COLUMN "hemisphere" TYPE "public"."sacred_events_hemisphere_enum" USING "hemisphere"::"text"::"public"."sacred_events_hemisphere_enum"`,
     );
-    await queryRunner.query(`DROP TYPE "public"."hemisphere_enum_old"`);
+    await queryRunner.query(
+      `ALTER TYPE "public"."hemisphere_enum_old" RENAME TO "hemisphere_enum"`,
+    );
     await queryRunner.query(
       `ALTER TYPE "public"."sacred_event_importance_enum" RENAME TO "sacred_event_importance_enum_old"`,
     );
@@ -581,15 +581,11 @@ export class AddOrbSystemToBirthChart1771989502257 implements MigrationInterface
     );
     await queryRunner.query(`DROP TYPE "public"."ritual_difficulty_enum_old"`);
     await queryRunner.query(
-      `ALTER TYPE "public"."lunar_phase_enum" RENAME TO "lunar_phase_enum_old"`,
-    );
-    await queryRunner.query(
       `CREATE TYPE "public"."rituals_best_lunar_phase_enum" AS ENUM('new_moon', 'waxing_crescent', 'first_quarter', 'waxing_gibbous', 'full_moon', 'waning_gibbous', 'last_quarter', 'waning_crescent')`,
     );
     await queryRunner.query(
       `ALTER TABLE "rituals" ALTER COLUMN "best_lunar_phase" TYPE "public"."rituals_best_lunar_phase_enum" USING "best_lunar_phase"::"text"::"public"."rituals_best_lunar_phase_enum"`,
     );
-    await queryRunner.query(`DROP TYPE "public"."lunar_phase_enum_old"`);
     await queryRunner.query(
       `ALTER TABLE "rituals" ALTER COLUMN "is_active" SET NOT NULL`,
     );
@@ -609,9 +605,6 @@ export class AddOrbSystemToBirthChart1771989502257 implements MigrationInterface
     await queryRunner.query(`ALTER TABLE "rituals" DROP COLUMN "updated_at"`);
     await queryRunner.query(
       `ALTER TABLE "rituals" ADD "updated_at" TIMESTAMP NOT NULL DEFAULT now()`,
-    );
-    await queryRunner.query(
-      `ALTER TYPE "public"."lunar_phase_enum" RENAME TO "lunar_phase_enum_old"`,
     );
     await queryRunner.query(
       `CREATE TYPE "public"."user_ritual_history_lunar_phase_enum" AS ENUM('new_moon', 'waxing_crescent', 'first_quarter', 'waxing_gibbous', 'full_moon', 'waning_gibbous', 'last_quarter', 'waning_crescent')`,
@@ -650,15 +643,11 @@ export class AddOrbSystemToBirthChart1771989502257 implements MigrationInterface
     await queryRunner.query(
       `ALTER TABLE "pendulum_queries" ALTER COLUMN "response" TYPE "public"."pendulum_queries_response_enum" USING "response"::"text"::"public"."pendulum_queries_response_enum"`,
     );
-    await queryRunner.query(`DROP TYPE "public"."pendulum_response_enum_old"`);
     await queryRunner.query(
       `ALTER TABLE "pendulum_queries" DROP COLUMN "createdAt"`,
     );
     await queryRunner.query(
       `ALTER TABLE "pendulum_queries" ADD "createdAt" TIMESTAMP NOT NULL DEFAULT now()`,
-    );
-    await queryRunner.query(
-      `ALTER TYPE "public"."pendulum_response_enum" RENAME TO "pendulum_response_enum_old"`,
     );
     await queryRunner.query(
       `CREATE TYPE "public"."pendulum_interpretations_responsetype_enum" AS ENUM('yes', 'no', 'maybe')`,
@@ -696,7 +685,6 @@ export class AddOrbSystemToBirthChart1771989502257 implements MigrationInterface
     await queryRunner.query(
       `ALTER TABLE "daily_horoscopes" ALTER COLUMN "zodiac_sign" TYPE "public"."daily_horoscopes_zodiac_sign_enum" USING "zodiac_sign"::"text"::"public"."daily_horoscopes_zodiac_sign_enum"`,
     );
-    await queryRunner.query(`DROP TYPE "public"."zodiac_sign_enum_old"`);
     await queryRunner.query(
       `DROP INDEX "public"."idx_chinese_animal_element_year"`,
     );
@@ -756,10 +744,6 @@ export class AddOrbSystemToBirthChart1771989502257 implements MigrationInterface
     await queryRunner.query(
       `ALTER TABLE "birth_chart_interpretations" ALTER COLUMN "planet" TYPE "public"."birth_chart_interpretations_planet_enum" USING "planet"::"text"::"public"."birth_chart_interpretations_planet_enum"`,
     );
-    await queryRunner.query(`DROP TYPE "public"."planet_enum_old"`);
-    await queryRunner.query(
-      `ALTER TYPE "public"."zodiac_sign_enum" RENAME TO "zodiac_sign_enum_old"`,
-    );
     await queryRunner.query(
       `CREATE TYPE "public"."birth_chart_interpretations_sign_enum" AS ENUM('aries', 'taurus', 'gemini', 'cancer', 'leo', 'virgo', 'libra', 'scorpio', 'sagittarius', 'capricorn', 'aquarius', 'pisces')`,
     );
@@ -777,9 +761,6 @@ export class AddOrbSystemToBirthChart1771989502257 implements MigrationInterface
       `ALTER TABLE "birth_chart_interpretations" ALTER COLUMN "aspectType" TYPE "public"."birth_chart_interpretations_aspecttype_enum" USING "aspectType"::"text"::"public"."birth_chart_interpretations_aspecttype_enum"`,
     );
     await queryRunner.query(`DROP TYPE "public"."aspect_type_enum_old"`);
-    await queryRunner.query(
-      `ALTER TYPE "public"."planet_enum" RENAME TO "planet_enum_old"`,
-    );
     await queryRunner.query(
       `CREATE TYPE "public"."birth_chart_interpretations_planet2_enum" AS ENUM('sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto')`,
     );
@@ -809,7 +790,6 @@ export class AddOrbSystemToBirthChart1771989502257 implements MigrationInterface
     await queryRunner.query(
       `ALTER TABLE "ai_usage_logs" ALTER COLUMN "provider" TYPE "public"."ai_usage_logs_provider_enum" USING "provider"::"text"::"public"."ai_usage_logs_provider_enum"`,
     );
-    await queryRunner.query(`DROP TYPE "public"."ai_provider_enum_old"`);
     await queryRunner.query(
       `ALTER TYPE "public"."ai_usage_status_enum" RENAME TO "ai_usage_status_enum_old"`,
     );
@@ -826,9 +806,6 @@ export class AddOrbSystemToBirthChart1771989502257 implements MigrationInterface
       `ALTER TABLE "ai_usage_logs" ALTER COLUMN "status" SET DEFAULT 'success'`,
     );
     await queryRunner.query(`DROP TYPE "public"."ai_usage_status_enum_old"`);
-    await queryRunner.query(
-      `ALTER TYPE "public"."ai_provider_enum" RENAME TO "ai_provider_enum_old"`,
-    );
     await queryRunner.query(
       `CREATE TYPE "public"."ai_provider_usage_provider_enum" AS ENUM('groq', 'deepseek', 'openai', 'gemini')`,
     );
