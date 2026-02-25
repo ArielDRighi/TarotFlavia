@@ -5,6 +5,7 @@ import { PlanetPositionService } from './planet-position.service';
 import { HouseCuspService } from './house-cusp.service';
 import { AspectCalculationService } from './aspect-calculation.service';
 import { ZodiacSign, Planet, AspectType } from '../../domain/enums';
+import type { OrbSystem } from '../../domain/enums';
 import {
   ChartData,
   PlanetPosition,
@@ -65,7 +66,7 @@ describe('ChartCalculationService', () => {
 
   describe('calculateChart', () => {
     const mockInput = {
-      birthDate: new Date('1990-05-15'),
+      birthDateStr: '1990-05-15',
       birthTime: '14:30',
       latitude: -34.6037,
       longitude: -58.3816,
@@ -456,7 +457,7 @@ describe('ChartCalculationService', () => {
     it('REGRESIÓN BUG-TZ: pasa hora UTC (no local) a Swiss Ephemeris para Argentina', () => {
       const input: import('./chart-calculation.service').ChartCalculationInput =
         {
-          birthDate: new Date(Date.UTC(2011, 9, 18)),
+          birthDateStr: '2011-10-18',
           birthTime: '01:07',
           latitude: -31.4,
           longitude: -64.183,
@@ -474,6 +475,83 @@ describe('ChartCalculationService', () => {
           hour: 4,
           minute: 7,
         }),
+      );
+    });
+
+    it('should throw on invalid birthDateStr format (slashes)', () => {
+      const input: import('./chart-calculation.service').ChartCalculationInput =
+        {
+          birthDateStr: '21/05/1978',
+          birthTime: '05:30',
+          latitude: -34.6037,
+          longitude: -58.3816,
+          timezone: 'America/Argentina/Buenos_Aires',
+        };
+
+      expect(() => service.calculateChart(input)).toThrow(
+        'Invalid birthDateStr format',
+      );
+    });
+
+    it('should throw on invalid birthDateStr — not enough parts', () => {
+      const input: import('./chart-calculation.service').ChartCalculationInput =
+        {
+          birthDateStr: '1978-05',
+          birthTime: '05:30',
+          latitude: -34.6037,
+          longitude: -58.3816,
+          timezone: 'America/Argentina/Buenos_Aires',
+        };
+
+      expect(() => service.calculateChart(input)).toThrow(
+        'Invalid birthDateStr format',
+      );
+    });
+
+    it('REGRESIÓN orbSystem: ephemeris recibe los mismos parámetros con STRICT y COMMERCIAL', () => {
+      // orbSystem NO debe influir en parseDateTime ni en la llamada a ephemeris.calculate
+      const base = {
+        birthDateStr: '1978-05-21',
+        birthTime: '05:30',
+        latitude: -34.6037,
+        longitude: -58.3816,
+        timezone: 'America/Argentina/Buenos_Aires',
+      };
+
+      service.calculateChart({ ...base, orbSystem: 'strict' as OrbSystem });
+      const callStrict = (mockEphemeris.calculate as jest.Mock).mock
+        .calls[0][0];
+
+      (mockEphemeris.calculate as jest.Mock).mockClear();
+
+      service.calculateChart({ ...base, orbSystem: 'commercial' as OrbSystem });
+      const callCommercial = (mockEphemeris.calculate as jest.Mock).mock
+        .calls[0][0];
+
+      expect(callStrict).toEqual(callCommercial);
+    });
+
+    it('REGRESIÓN orbSystem: aspectService recibe el orbSystem correcto para cada modo', () => {
+      const base = {
+        birthDateStr: '1990-05-15',
+        birthTime: '14:30',
+        latitude: -34.6037,
+        longitude: -58.3816,
+        timezone: 'America/Argentina/Buenos_Aires',
+      };
+
+      service.calculateChart({ ...base, orbSystem: 'strict' as OrbSystem });
+      expect(mockAspectService.calculateAspects).toHaveBeenLastCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'strict' as OrbSystem,
+      );
+
+      service.calculateChart({ ...base, orbSystem: 'commercial' as OrbSystem });
+      expect(mockAspectService.calculateAspects).toHaveBeenLastCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'commercial' as OrbSystem,
       );
     });
   });

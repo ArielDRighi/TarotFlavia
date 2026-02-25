@@ -4,6 +4,7 @@ import { Cache } from 'cache-manager';
 import { createHash } from 'crypto';
 import { ChartData } from '../../entities/birth-chart.entity';
 import { FullChartInterpretation } from './chart-interpretation.service';
+import type { OrbSystem } from '../../domain/enums';
 
 export interface CachedChartData {
   chartData: ChartData;
@@ -85,6 +86,7 @@ export class ChartCacheService {
     birthTime: string,
     latitude: number,
     longitude: number,
+    orbSystem?: OrbSystem,
   ): string {
     // Normalizar birthTime a HH:mm:ss
     const normalizedTime = birthTime.includes(':')
@@ -97,7 +99,10 @@ export class ChartCacheService {
     const normalizedLat = parseFloat(latitude.toFixed(6));
     const normalizedLng = parseFloat(longitude.toFixed(6));
 
-    const dataString = `chart:${birthDate.toISOString()}:${normalizedTime}:${normalizedLat}:${normalizedLng}`;
+    // Incluir orbSystem en la clave para evitar colisiones entre modos
+    const orbKey = orbSystem ?? 'default';
+
+    const dataString = `chart:${birthDate.toISOString()}:${normalizedTime}:${normalizedLat}:${normalizedLng}:${orbKey}`;
     return createHash('sha256').update(dataString).digest('hex');
   }
 

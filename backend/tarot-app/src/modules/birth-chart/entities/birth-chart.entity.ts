@@ -88,7 +88,7 @@ export interface ChartData {
 @Index('idx_birth_chart_user', ['userId'])
 @Index(
   'idx_birth_chart_user_birth',
-  ['userId', 'birthDate', 'birthTime', 'latitude', 'longitude'],
+  ['userId', 'birthDate', 'birthTime', 'latitude', 'longitude', 'orbSystem'],
   { unique: true },
 )
 export class BirthChart {
@@ -163,6 +163,13 @@ export class BirthChart {
   })
   @Column({ type: 'varchar', length: 100 })
   timezone: string;
+
+  @ApiProperty({
+    example: 'commercial',
+    description: 'Sistema de orbes usado en el cálculo (strict o commercial)',
+  })
+  @Column({ type: 'varchar', length: 20, default: 'commercial' })
+  orbSystem: string;
 
   @ApiProperty({
     description: 'Datos calculados de la carta (posiciones, aspectos, etc.)',

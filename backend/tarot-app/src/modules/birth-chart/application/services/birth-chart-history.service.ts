@@ -215,7 +215,7 @@ export class BirthChartHistoryService {
     dto: CreateBirthChartDto,
   ): Promise<SavedChartSummaryDto> {
     const input: ChartCalculationInput = {
-      birthDate: parseBirthDate(dto.birthDate),
+      birthDateStr: dto.birthDate,
       birthTime: dto.birthTime,
       latitude: dto.latitude,
       longitude: dto.longitude,

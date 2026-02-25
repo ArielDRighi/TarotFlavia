@@ -4,6 +4,7 @@ import { ChartCacheService } from './chart-cache.service';
 import { ChartData, PlanetPosition } from '../../entities/birth-chart.entity';
 import { FullChartInterpretation } from './chart-interpretation.service';
 import { ZodiacSign } from '../../domain/enums';
+import type { OrbSystem } from '../../domain/enums';
 
 describe('ChartCacheService', () => {
   let service: ChartCacheService;
@@ -122,6 +123,70 @@ describe('ChartCacheService', () => {
       );
 
       expect(key1).not.toBe(key2);
+    });
+
+    it('REGRESIÓN orbSystem: STRICT y COMMERCIAL deben generar claves distintas', () => {
+      const birthDate = new Date(1978, 4, 21); // local midnight — parseBirthDate style
+      const birthTime = '05:30:00';
+      const latitude = -34.6037;
+      const longitude = -58.3816;
+
+      const keyStrict = service.generateChartCacheKey(
+        birthDate,
+        birthTime,
+        latitude,
+        longitude,
+        'strict' as OrbSystem,
+      );
+      const keyCommercial = service.generateChartCacheKey(
+        birthDate,
+        birthTime,
+        latitude,
+        longitude,
+        'commercial' as OrbSystem,
+      );
+
+      expect(keyStrict).not.toBe(keyCommercial);
+    });
+
+    it('REGRESIÓN orbSystem: mismos parámetros + mismo orbSystem → misma clave (determinismo)', () => {
+      const birthDate = new Date(1978, 4, 21);
+      const birthTime = '05:30:00';
+      const latitude = -34.6037;
+      const longitude = -58.3816;
+
+      const key1 = service.generateChartCacheKey(
+        birthDate,
+        birthTime,
+        latitude,
+        longitude,
+        'strict' as OrbSystem,
+      );
+      const key2 = service.generateChartCacheKey(
+        birthDate,
+        birthTime,
+        latitude,
+        longitude,
+        'strict' as OrbSystem,
+      );
+
+      expect(key1).toBe(key2);
+      expect(key1).toHaveLength(64);
+    });
+
+    it('REGRESIÓN orbSystem: undefined orbSystem no lanza error (backward compat)', () => {
+      const birthDate = new Date(1990, 4, 15);
+      const birthTime = '14:30:00';
+
+      expect(() =>
+        service.generateChartCacheKey(
+          birthDate,
+          birthTime,
+          -34.6037,
+          -58.3816,
+          undefined,
+        ),
+      ).not.toThrow();
     });
   });
 

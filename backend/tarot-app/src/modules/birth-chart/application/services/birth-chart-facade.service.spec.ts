@@ -5,6 +5,7 @@ import { BirthChart, ChartData } from '../../entities/birth-chart.entity';
 import { UserPlan } from '../../../users/entities/user.entity';
 import { UsageFeature } from '../../../usage-limits/entities/usage-limit.entity';
 import { ZodiacSign } from '../../domain/enums';
+import type { OrbSystem } from '../../domain/enums';
 import { ChartCalculationService } from './chart-calculation.service';
 import { ChartInterpretationService } from './chart-interpretation.service';
 import { ChartAISynthesisService } from './chart-ai-synthesis.service';
@@ -285,28 +286,62 @@ describe('BirthChartFacadeService', () => {
     expect('savedChartId' in result && result.savedChartId).toBe(77);
   });
 
-  it('should use atomic upsert with conflict columns matching unique index', async () => {
+  it('should use atomic upsert with conflict columns matching unique index (incluye orbSystem)', async () => {
     cacheServiceMock.getInterpretation.mockResolvedValueOnce(
       fullInterpretation,
     );
     cacheServiceMock.getSynthesis.mockResolvedValueOnce(null);
 
-    await service.generateChart(inputDto, UserPlan.PREMIUM, 5);
+    const dtoWithOrb = { ...inputDto, orbSystem: 'strict' as OrbSystem };
+    await service.generateChart(dtoWithOrb, UserPlan.PREMIUM, 5);
 
-    // Verificar que upsert fue llamado con las columnas del unique index
+    // Verificar que upsert incluye orbSystem en las columnas de conflicto
     expect(chartRepositoryMock.upsert).toHaveBeenCalledWith(
       expect.objectContaining({
         userId: 5,
         name: inputDto.name,
         birthPlace: inputDto.birthPlace,
+        orbSystem: 'strict' as OrbSystem,
       }),
-      ['userId', 'birthDate', 'birthTime', 'latitude', 'longitude'],
+      [
+        'userId',
+        'birthDate',
+        'birthTime',
+        'latitude',
+        'longitude',
+        'orbSystem',
+      ],
     );
     // Verificar que findOneOrFail recupera el registro por id devuelto por upsert
-    // (no por lat/lon, ya que DECIMAL(10,6) puede redondear coordenadas de alta precisión)
     expect(chartRepositoryMock.findOneOrFail).toHaveBeenCalledWith({
       where: { id: 77 },
     });
+  });
+
+  it('REGRESIÓN orbSystem: calculateChart recibe birthDateStr como string crudo del DTO', async () => {
+    await service.generateChart(inputDto, UserPlan.FREE, 1);
+
+    expect(chartCalculationServiceMock.calculateChart).toHaveBeenCalledWith(
+      expect.objectContaining({
+        birthDateStr: inputDto.birthDate,
+      }),
+    );
+    // Verificar que birthDate (Date) NO se pasa al cálculo
+    const callArg = chartCalculationServiceMock.calculateChart.mock.calls[0][0];
+    expect(callArg).not.toHaveProperty('birthDate');
+  });
+
+  it('REGRESIÓN orbSystem: generateChartCacheKey recibe orbSystem del DTO', async () => {
+    const dtoWithOrb = { ...inputDto, orbSystem: 'commercial' as OrbSystem };
+    await service.generateChart(dtoWithOrb, UserPlan.FREE, 1);
+
+    expect(cacheServiceMock.generateChartCacheKey).toHaveBeenCalledWith(
+      expect.any(Date),
+      inputDto.birthTime,
+      inputDto.latitude,
+      inputDto.longitude,
+      'commercial' as OrbSystem,
+    );
   });
 
   it('should return usage status for authenticated free user', async () => {
