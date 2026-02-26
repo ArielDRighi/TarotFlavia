@@ -1,38 +1,53 @@
-# BACKLOG AUGURIA 2.0 - ENCICLOPEDIA DEL TAROT
+# BACKLOG AUGURIA 2.0 - ENCICLOPEDIA MÍSTICA
 
 ## Historias de Usuario
 
-**Fecha de creación:** 18 de enero de 2026  
-**Módulo:** Enciclopedia del Tarot  
-**Prioridad Global:** 🟡 MEDIA  
-**Estimación Total:** 6-8 días
+**Fecha de creación:** 18 de enero de 2026
+**Última actualización:** 26 de febrero de 2026
+**Módulo:** Enciclopedia Mística
+**Prioridad Global:** 🟡 MEDIA
+**Estimación Total:** ~18-19 días
 
 ---
 
 ## OVERVIEW DEL MÓDULO
 
-La Enciclopedia del Tarot es una sección educativa que permite a los usuarios explorar y aprender sobre las 78 cartas del Tarot. Incluye los 22 Arcanos Mayores y los 56 Arcanos Menores organizados por palos.
+La Enciclopedia Mística es una sección educativa estática que permite a los usuarios explorar y aprender sobre tarot, astrología y artes místicas. Incluye las 78 cartas del Tarot, 34 artículos de astrología (signos, planetas, casas, elementos) y 6 guías de actividades. Es acceso público, sin lógica de negocio compleja, optimizada para SEO.
 
-### Estructura del Tarot:
+### Estructura del contenido:
 
-| Categoría        | Cantidad | Descripción                            |
-| ---------------- | -------- | -------------------------------------- |
-| Arcanos Mayores  | 22       | El Loco (0) a El Mundo (XXI)           |
-| Bastos (Wands)   | 14       | As al 10 + Paje, Caballero, Reina, Rey |
-| Copas (Cups)     | 14       | As al 10 + Corte                       |
-| Espadas (Swords) | 14       | As al 10 + Corte                       |
-| Oros (Pentacles) | 14       | As al 10 + Corte                       |
-| **Total**        | **78**   |                                        |
+| Categoría                  | Cantidad | Descripción                                        |
+| -------------------------- | -------- | -------------------------------------------------- |
+| Arcanos Mayores            | 22       | El Loco (0) a El Mundo (XXI)                       |
+| Bastos (Wands)             | 14       | As al 10 + Paje, Caballero, Reina, Rey             |
+| Copas (Cups)               | 14       | As al 10 + Corte                                   |
+| Espadas (Swords)           | 14       | As al 10 + Corte                                   |
+| Oros (Pentacles)           | 14       | As al 10 + Corte                                   |
+| Signos Zodiacales          | 12       | Aries a Piscis, características y compatibilidades |
+| Planetas                   | 10       | Sol a Plutón, mitología e influencias              |
+| Casas Astrales             | 12       | Áreas de vida (sistema Placidus)                   |
+| Elementos y Modalidades    | 8        | Fuego/Tierra/Aire/Agua + Cardinal/Fijo/Mutable     |
+| Guía: Numerología          | 15       | Números 1-9 y maestros 11/22/33                    |
+| Guía: Péndulo              | 4        | Historia, tipos, interpretación                    |
+| Guía: Carta Astral         | 5        | Qué es, cómo leerla, aspectos                      |
+| Guía: Rituales             | 6        | Tipos, preparación, fases lunares                  |
+| Guía: Horóscopo Occidental | 3        | Sistema occidental, cómo funciona                  |
+| Guía: Horóscopo Chino      | 5        | 12 animales, Wu Xing, compatibilidad               |
+| **Total**                  | **~173** |                                                    |
 
 ### Funcionalidades principales:
 
-- Navegación por categorías (Mayores/Menores/Palos)
-- Búsqueda de cartas por nombre
-- Vista detallada de cada carta
-- Significados derecha/invertida
+- Navegación por categorías (Tarot / Astrología / Guías)
+- Búsqueda global por nombre o slug (cartas + artículos)
+- Vista detallada de cada carta y artículo
+- Significados derecha/invertida (cartas de tarot)
 - Palabras clave y asociaciones
-- Relación con otras cartas
-- Favoritos (usuarios registrados)
+- Relación entre cartas y artículos de astrología
+- Favoritos de cartas (usuarios registrados)
+- Widget "Info + Ver más" integrado en cada página de módulo
+- Páginas estáticas optimizadas para SEO (`generateMetadata` + `generateStaticParams`)
+- Acceso público total sin restricciones de plan
+- Cross-links entre módulos y artículos relacionados (Carta Astral ↔ signos/planetas, Tarot ↔ arcanos)
 
 ---
 
@@ -212,6 +227,369 @@ Feature: Filtrar y organizar cartas
     When selecciono "Ordenar: Número"
     Then las cartas vuelven al orden numérico
 ```
+
+---
+
+### HU-ENC-005: Explorar la sección de Astrología
+
+```gherkin
+Feature: Explorar la sección de astrología en la enciclopedia
+  Como usuario anónimo
+  Quiero navegar por la sección de astrología de la enciclopedia
+  Para aprender sobre signos, planetas y casas astrales
+
+  Background:
+    Given soy un usuario anónimo en Auguria
+    And la enciclopedia tiene los 34 artículos de astrología cargados
+
+  Scenario: Acceder a la sección de astrología desde la enciclopedia
+    Given estoy en la página principal de la enciclopedia
+    When hago clic en la pestaña "Astrología"
+    Then veo tres subsecciones: "Signos Zodiacales", "Planetas" y "Casas Astrales"
+    And veo una breve descripción de cada subsección
+
+  Scenario: Ver listado de signos zodiacales
+    Given estoy en la sección "Astrología" de la enciclopedia
+    When hago clic en "Signos Zodiacales"
+    Then veo los 12 signos en orden (Aries a Piscis)
+    And cada signo muestra su símbolo, elemento y modalidad
+    And puedo hacer clic en cualquier signo para ver su detalle
+
+  Scenario: Ver detalle de un signo zodiacal
+    When hago clic en "Escorpio"
+    Then veo la página de detalle con:
+      | Campo           | Valor           |
+      | Nombre          | Escorpio        |
+      | Símbolo         | Escorpión       |
+      | Elemento        | Agua            |
+      | Modalidad       | Fijo            |
+      | Planeta regente | Plutón / Marte  |
+      | Fechas          | 23 Oct - 21 Nov |
+    And veo la descripción del carácter y personalidad
+    And veo la sección de compatibilidades
+    And veo los arcanos del tarot asociados a Escorpio
+
+  Scenario: Ver listado de planetas
+    Given estoy en la sección "Astrología"
+    When hago clic en "Planetas"
+    Then veo los 10 planetas (Sol a Plutón)
+    And cada planeta muestra su símbolo astrológico
+    And puedo hacer clic para ver el detalle
+
+  Scenario: Ver detalle de un planeta
+    When hago clic en "Mercurio"
+    Then veo la página de detalle con:
+      | Campo      | Valor                   |
+      | Nombre     | Mercurio                |
+      | Rige       | Géminis y Virgo         |
+      | Mitología  | Mensajero de los dioses |
+    And veo su influencia en la carta astral
+    And veo los arcanos del tarot que se asocian a este planeta
+
+  Scenario: Ver listado de casas astrales
+    Given estoy en la sección "Astrología"
+    When hago clic en "Casas Astrales"
+    Then veo las 12 casas numeradas
+    And cada casa muestra su área de vida principal
+    And puedo hacer clic en cada casa para ver su detalle
+```
+
+---
+
+### HU-ENC-006: Widget "Ver más" en páginas de módulos
+
+```gherkin
+Feature: Ver información de la enciclopedia integrada en las páginas de módulos
+  Como usuario de Auguria
+  Quiero ver un resumen informativo en cada página de módulo
+  Para aprender sobre el tema mientras uso la herramienta
+
+  Background:
+    Given soy un usuario anónimo o registrado en Auguria
+
+  Scenario: Ver widget de enciclopedia en la página de Numerología
+    Given estoy en la página "/numerologia"
+    Then veo un widget de información con el título "¿Qué es la Numerología?"
+    And veo un snippet de 2-3 oraciones explicando la numerología
+    And veo un botón "Ver más en la Enciclopedia"
+    When hago clic en "Ver más en la Enciclopedia"
+    Then navego a "/enciclopedia/guias/numerologia"
+
+  Scenario: Ver widget de enciclopedia en la página del Péndulo
+    Given estoy en la página "/pendulo"
+    Then veo un widget con el título "Sobre el Péndulo"
+    And veo una descripción breve de para qué sirve el péndulo
+    And veo un botón "Ver más en la Enciclopedia"
+    When hago clic en "Ver más"
+    Then navego a "/enciclopedia/guias/pendulo"
+
+  Scenario: Ver widget de enciclopedia en la página de Carta Astral
+    Given estoy en la página "/carta-astral"
+    Then veo un widget con el título "¿Qué es una Carta Astral?"
+    And veo un snippet explicando qué es una carta astral
+    And veo el botón "Ver más en la Enciclopedia"
+    When hago clic en "Ver más"
+    Then navego a "/enciclopedia/guias/carta-astral"
+
+  Scenario: Ver widget de enciclopedia en la página del Horóscopo
+    Given estoy en la página "/horoscopo"
+    Then veo un widget con el título "Sobre el Horóscopo Occidental"
+    And veo un botón "Ver más en la Enciclopedia"
+    When hago clic en "Ver más"
+    Then navego a "/enciclopedia/guias/horoscopo"
+
+  Scenario: Ver widget de enciclopedia en la página del Horóscopo Chino
+    Given estoy en la página "/horoscopo-chino"
+    Then veo un widget con el título "El Zodíaco Chino"
+    And veo un botón "Ver más en la Enciclopedia"
+    When hago clic en "Ver más"
+    Then navego a "/enciclopedia/guias/horoscopo-chino"
+
+  Scenario: Ver widget de enciclopedia en la página de Rituales
+    Given estoy en la página "/rituales"
+    Then veo un widget con el título "Sobre los Rituales"
+    And veo un botón "Ver más en la Enciclopedia"
+    When hago clic en "Ver más"
+    Then navego a "/enciclopedia/guias/ritual"
+
+  Scenario: Widget es visible para usuarios anónimos y registrados
+    Given soy un usuario anónimo
+    Then el widget "Ver más" está visible sin requerir login
+    And el botón lleva a una página pública de la enciclopedia
+```
+
+---
+
+### HU-ENC-007: Explorar guías de actividades
+
+```gherkin
+Feature: Explorar guías de actividades en la enciclopedia
+  Como usuario de Auguria
+  Quiero leer artículos explicativos sobre cada actividad mística
+  Para comprender mejor cómo funcionan y cómo interpretar los resultados
+
+  Background:
+    Given soy un usuario en Auguria (anónimo o registrado)
+
+  Scenario: Acceder a la sección de Guías desde la enciclopedia
+    Given estoy en "/enciclopedia"
+    When hago clic en la pestaña "Guías"
+    Then veo 6 guías disponibles:
+      - Numerología
+      - Péndulo
+      - Carta Astral
+      - Rituales
+      - Horóscopo Occidental
+      - Horóscopo Chino
+    And cada guía muestra un ícono, título y descripción breve
+
+  Scenario: Leer la guía de Numerología
+    Given estoy en la sección de Guías
+    When hago clic en "Numerología"
+    Then navego a "/enciclopedia/guias/numerologia"
+    And veo una página con:
+      - Introducción: qué es la numerología
+      - Los números 1 al 9 con su significado
+      - Los números maestros 11, 22 y 33
+      - Cómo se calcula el camino de vida
+    And veo un CTA "Calcular mi Numerología" que lleva a "/numerologia"
+
+  Scenario: Leer la guía del Péndulo
+    Given estoy en la sección de Guías
+    When hago clic en "Péndulo"
+    Then navego a "/enciclopedia/guias/pendulo"
+    And veo:
+      - Historia y origen del péndulo
+      - Cómo funciona la radiestesia
+      - Tipos de péndulos (cuarzo, metal, madera)
+      - Cómo interpretar respuestas Sí/No/Quizás
+    And veo un CTA "Usar el Péndulo Digital" que lleva a "/pendulo"
+
+  Scenario: Navegar entre guías con links internos
+    Given estoy leyendo la guía de Carta Astral
+    When veo la mención de "signo solar"
+    Then es un enlace clicable
+    When hago clic en "signo solar"
+    Then navego al artículo del signo correspondiente en la enciclopedia
+
+  Scenario: Leer guía es acceso público
+    Given soy usuario anónimo
+    When navego a "/enciclopedia/guias/numerologia"
+    Then puedo leer el artículo completo sin login
+    And no veo restricciones por plan
+```
+
+---
+
+### HU-ENC-008: Ver artículos de elementos y modalidades
+
+```gherkin
+Feature: Explorar elementos y modalidades astrológicas en la enciclopedia
+  Como usuario de Auguria
+  Quiero entender los elementos y modalidades astrológicas
+  Para interpretar mejor mi carta astral y los arcanos del tarot
+
+  Scenario: Ver la sección de Elementos
+    Given estoy en "/enciclopedia"
+    When navego a la subsección "Elementos"
+    Then veo los 4 elementos: Fuego, Tierra, Aire, Agua
+    And cada elemento muestra los signos que lo rigen
+    And muestra los palos del tarot asociados
+
+  Scenario: Ver detalle de un elemento
+    Given estoy en la enciclopedia de elementos
+    When hago clic en "Fuego"
+    Then veo:
+      - Descripción del elemento Fuego
+      - Signos asociados: Aries, Leo, Sagitario
+      - Palo del tarot: Bastos
+      - Modalidades: Cardinal (Aries), Fijo (Leo), Mutable (Sagitario)
+      - Características generales del carácter
+
+  Scenario: Ver las modalidades astrológicas
+    Given estoy en la enciclopedia de elementos
+    When hago clic en "Modalidades"
+    Then veo las 3 modalidades: Cardinal, Fijo, Mutable
+    And cada una explica su dinámica energética
+    And muestra los 4 signos de cada modalidad
+```
+
+---
+
+### HU-ENC-009: Cross-linking desde módulos hacia la enciclopedia
+
+```gherkin
+Feature: Links cruzados entre módulos y la enciclopedia
+  Como usuario de Auguria
+  Quiero tener acceso fácil a información de la enciclopedia desde los resultados de los módulos
+  Para aprender más sobre los símbolos relevantes en mis consultas
+
+  Scenario: Ver link de enciclopedia en el resultado de Carta Astral - signo
+    Given generé una carta astral
+    When veo el resultado con "Sol en Escorpio"
+    Then "Escorpio" es un enlace
+    When hago clic en "Escorpio"
+    Then navego a "/enciclopedia/astrologia/signos/escorpio"
+
+  Scenario: Ver link de enciclopedia en el resultado de Carta Astral - planeta
+    Given generé una carta astral
+    When veo "Venus en conjunción"
+    Then "Venus" es un enlace
+    When hago clic en "Venus"
+    Then navego a "/enciclopedia/astrologia/planetas/venus"
+
+  Scenario: Ver link desde el detalle de carta de Tarot hacia artículo de planeta
+    Given estoy viendo "La Emperatriz" en la enciclopedia de tarot
+    When veo el campo "Planeta: Venus"
+    Then "Venus" es un enlace clicable
+    When hago clic en "Venus"
+    Then navego a "/enciclopedia/astrologia/planetas/venus"
+```
+
+---
+
+### HU-ENC-010: Búsqueda global en la Enciclopedia Mística
+
+```gherkin
+Feature: Búsqueda global en la enciclopedia mística
+  Como usuario
+  Quiero buscar en toda la enciclopedia con un solo buscador
+  Para encontrar artículos de cualquier categoría rápidamente
+
+  Scenario: Buscar un signo zodiacal
+    Given estoy en "/enciclopedia"
+    And existe un buscador global
+    When escribo "Escorpio" en el buscador
+    Then veo resultados que incluyen:
+      - El artículo "Escorpio" (signo zodiacal)
+      - Las cartas de tarot asociadas a Escorpio
+
+  Scenario: Buscar por categoría semántica
+    Given estoy en "/enciclopedia"
+    When escribo "agua" en el buscador
+    Then veo resultados de múltiples categorías:
+      - Elemento: Agua
+      - Cartas de tarot del palo de Copas
+      - Signos de agua: Cáncer, Escorpio, Piscis
+
+  Scenario: Búsqueda sin resultados
+    Given estoy en "/enciclopedia"
+    When escribo "xyzabc" en el buscador
+    Then veo el mensaje "No se encontraron artículos para 'xyzabc'"
+    And veo sugerencias de búsquedas populares
+
+  Scenario: Búsqueda con mínimo de caracteres
+    Given estoy en la enciclopedia
+    When escribo solo "a" en el buscador
+    Then no se ejecuta la búsqueda
+    And veo un hint "Escribe al menos 2 caracteres"
+```
+
+---
+
+### HU-ENC-011: Navegación por categorías de la Enciclopedia ampliada
+
+```gherkin
+Feature: Navegación por categorías de la enciclopedia mística completa
+  Como usuario
+  Quiero navegar la enciclopedia por categorías claras
+  Para encontrar fácilmente el tipo de información que busco
+
+  Scenario: Ver la página principal de la enciclopedia con todas las categorías
+    Given navego a "/enciclopedia"
+    Then veo tres secciones principales:
+      - "Tarot" con sub-categorías: Arcanos Mayores, Arcanos Menores
+      - "Astrología" con sub-categorías: Signos, Planetas, Casas, Elementos
+      - "Guías" con: Numerología, Péndulo, Carta Astral, Rituales, Horóscopo, Horóscopo Chino
+    And cada sección tiene una descripción breve
+    And cada sección tiene un contador de artículos
+
+  Scenario: Ver página de categoría
+    When hago clic en "Signos Zodiacales"
+    Then navego a una página de listado con los 12 signos
+    And cada elemento de la lista muestra nombre, símbolo e ícono de elemento
+
+  Scenario: Páginas de enciclopedia con SEO
+    Given navego a "/enciclopedia/astrologia/signos/aries"
+    Then la página tiene:
+      | Metadata    | Valor                                         |
+      | title       | Aries - Signo Zodiacal - Enciclopedia Mística |
+      | description | Descripción del signo Aries...                |
+      | og:title    | Aries - Enciclopedia Mística Auguria          |
+    And el contenido está disponible para indexación por buscadores
+```
+
+---
+
+### HU-ENC-012: Guía del Horóscopo Chino en la Enciclopedia
+
+```gherkin
+Feature: Explorar el sistema del horóscopo chino en la enciclopedia
+  Como usuario de Auguria
+  Quiero aprender sobre el zodíaco chino en la enciclopedia
+  Para entender el sistema antes de consultar mi horóscopo
+
+  Scenario: Acceder a la guía del horóscopo chino
+    When navego a "/enciclopedia/guias/horoscopo-chino"
+    Then veo:
+      - Introducción al zodíaco chino
+      - Los 12 animales con su descripción breve
+      - Los elementos Wu Xing (Madera, Fuego, Tierra, Metal, Agua)
+      - Cómo se calcula el animal por año de nacimiento (con el Año Nuevo Chino)
+    And veo un CTA "Ver mi Horóscopo Chino" que lleva a "/horoscopo-chino"
+
+  Scenario: Ver artículo de un animal del zodíaco chino
+    Given estoy en la guía del Horóscopo Chino
+    When hago clic en "Dragón"
+    Then navego a un artículo de detalle
+    And veo:
+      - Características del Dragón
+      - Años del Dragón recientes
+      - Elementos compatibles
+      - Compatibilidades con otros animales
+```
+
+---
 
 # Backend: Entidades y Migraciones
 
@@ -1627,6 +2005,519 @@ Implementar endpoints REST para consultar cartas y gestionar favoritos.
 > - El campo `isFavorite` solo se calcula si hay usuario
 > - La búsqueda requiere mínimo 2 caracteres
 > - Usar ILIKE para búsqueda case-insensitive en PostgreSQL
+
+---
+
+# Backend: Enciclopedia Mística (artículos estáticos)
+
+---
+
+### TASK-309: Crear entidad EncyclopediaArticle y migración
+
+**Módulo:** `src/modules/encyclopedia/`
+**Prioridad:** 🔴 ALTA
+**Estimación:** 1 día
+**Dependencias:** TASK-300 (comparte módulo de enciclopedia existente)
+
+---
+
+#### 📋 Descripción
+
+Ampliar el módulo `encyclopedia` con una nueva entidad `EncyclopediaArticle` para todos los contenidos no-tarot: signos zodiacales, planetas, casas, elementos, modalidades y guías de actividades.
+
+---
+
+#### 🏗️ Contexto Técnico
+
+**Archivos a crear:**
+
+- `src/modules/encyclopedia/entities/encyclopedia-article.entity.ts`
+- `src/modules/encyclopedia/enums/article.enums.ts`
+- `src/database/migrations/XXXX-CreateEncyclopediaArticles.ts`
+
+**Archivo a modificar:**
+
+- `src/modules/encyclopedia/encyclopedia.module.ts` (agregar `EncyclopediaArticle` al `TypeOrmModule.forFeature`)
+
+**Enums:**
+
+```typescript
+// article.enums.ts
+export enum ArticleCategory {
+  ZODIAC_SIGN = 'zodiac_sign',
+  PLANET = 'planet',
+  ASTROLOGICAL_HOUSE = 'astro_house',
+  ELEMENT = 'element',
+  MODALITY = 'modality',
+  GUIDE_NUMEROLOGY = 'guide_numerology',
+  GUIDE_PENDULUM = 'guide_pendulum',
+  GUIDE_BIRTH_CHART = 'guide_birth_chart',
+  GUIDE_RITUAL = 'guide_ritual',
+  GUIDE_HOROSCOPE = 'guide_horoscope',
+  GUIDE_CHINESE = 'guide_chinese',
+}
+```
+
+**Entidad:**
+
+```typescript
+// encyclopedia-article.entity.ts
+@Entity('encyclopedia_articles')
+@Index('idx_article_category', ['category'])
+export class EncyclopediaArticle {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ type: 'varchar', length: 80, unique: true })
+  @Index('idx_article_slug', { unique: true })
+  slug: string; // 'aries', 'mercury', 'house-1', 'guide-numerology'
+
+  @Column({ type: 'varchar', length: 120 })
+  nameEs: string;
+
+  @Column({ type: 'varchar', length: 120, nullable: true })
+  nameEn: string | null;
+
+  @Column({ type: 'enum', enum: ArticleCategory })
+  category: ArticleCategory;
+
+  @Column({ type: 'text' })
+  snippet: string; // 2-3 oraciones para el widget "Ver más"
+
+  @Column({ type: 'text' })
+  content: string; // Markdown completo para la página de detalle
+
+  @Column({ type: 'jsonb', nullable: true })
+  metadata: Record<string, unknown> | null; // Símbolo, fechas, elemento, etc.
+
+  @Column({ type: 'jsonb', nullable: true })
+  relatedArticles: string[] | null; // Slugs de artículos relacionados
+
+  @Column({ type: 'jsonb', nullable: true })
+  relatedTarotCards: number[] | null; // IDs de TarotCard relacionadas
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  imageUrl: string | null;
+
+  @Column({ type: 'smallint', default: 0 })
+  sortOrder: number;
+
+  @Column({ type: 'int', default: 0 })
+  viewCount: number;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+}
+```
+
+**Migración:** Crear tabla `encyclopedia_articles` con enum `article_category_enum` en PostgreSQL. Índices en `slug` (unique) y `category`.
+
+---
+
+#### ✅ Criterios de Aceptación
+
+- [ ] Migración ejecuta sin errores
+- [ ] Entidad soporta todos los tipos de contenido (11 categorías)
+- [ ] Índice de slug permite búsqueda rápida
+- [ ] Campo `snippet` separado de `content` (optimización para widgets)
+
+---
+
+#### 🧪 Tests TDD
+
+```typescript
+// encyclopedia-article.entity.spec.ts
+describe('EncyclopediaArticle entity', () => {
+  it('debe crearse con todos los campos requeridos');
+  it('debe rechazar slug duplicado (constraint unique)');
+  it('debe validar el enum de categoría');
+  it('debe aceptar estructura flexible en JSONB metadata');
+  it('debe inicializar viewCount en 0');
+});
+```
+
+---
+
+#### 📎 Notas para el Agente IA
+
+> - Seguir el mismo patrón de entidad que `tarot-card.entity.ts` (misma convención de decoradores, índices, snake_case para nombres de columna via `NamingStrategy`)
+> - El campo `snippet` (máx ~300 chars) es distinto de `content` (puede ser miles de chars en Markdown)
+> - Los slugs deben ser URL-safe: minúsculas, sin tildes, guiones en lugar de espacios
+
+---
+
+### TASK-310: Crear seeder de artículos de la Enciclopedia Mística
+
+**Módulo:** `src/modules/encyclopedia/data/`
+**Prioridad:** 🔴 ALTA
+**Estimación:** 2 días
+**Dependencias:** TASK-309
+
+---
+
+#### 📋 Descripción
+
+Crear los archivos de datos seed con contenido real en español para las ~95 entradas nuevas: 12 signos, 10 planetas, 12 casas, 4 elementos, 3 modalidades y 6 guías de actividades.
+
+---
+
+#### 🏗️ Contexto Técnico
+
+**Archivos a crear:**
+
+```
+src/modules/encyclopedia/data/
+├── zodiac-signs.data.ts        (12 entradas)
+├── planets.data.ts             (10 entradas)
+├── astrological-houses.data.ts (12 entradas)
+├── elements-modalities.data.ts (7 entradas: 4 elementos + 3 modalidades)
+├── activity-guides.data.ts     (6 guías con contenido editorial extenso)
+└── articles-seed.data.ts       (agrupador que exporta todos)
+
+src/database/seeds/
+└── encyclopedia-articles.seed.ts
+```
+
+**Interfaz de datos:**
+
+```typescript
+export interface ArticleSeedData {
+  slug: string;
+  nameEs: string;
+  nameEn: string | null;
+  category: ArticleCategory;
+  snippet: string; // Máx ~300 caracteres. Texto para el widget "Ver más"
+  content: string; // Markdown completo
+  metadata: Record<string, unknown> | null;
+  relatedTarotCards: number[] | null; // IDs de cartas de tarot relacionadas
+  sortOrder: number;
+}
+```
+
+**Ejemplo de dato para signo zodiacal:**
+
+```typescript
+{
+  slug: 'aries',
+  nameEs: 'Aries',
+  nameEn: 'Aries',
+  category: ArticleCategory.ZODIAC_SIGN,
+  snippet: 'Aries es el primer signo del zodíaco, regido por Marte, con elemento Fuego y modalidad Cardinal. Simboliza el inicio, la energía pionera y el impulso de actuar.',
+  content: `# Aries\n\n**Fechas:** 21 de marzo - 19 de abril\n**Elemento:** Fuego\n**Modalidad:** Cardinal\n**Planeta regente:** Marte\n\n## Carácter y Personalidad\n...`,
+  metadata: {
+    symbol: '♈',
+    element: 'fire',
+    modality: 'cardinal',
+    rulingPlanet: 'mars',
+    dateRange: '21 Mar - 19 Abr',
+    compatibleSigns: ['leo', 'sagittarius', 'gemini', 'aquarius'],
+  },
+  relatedTarotCards: [4], // El Emperador (ID)
+  sortOrder: 1,
+}
+```
+
+**Seed idempotente:**
+
+```typescript
+// encyclopedia-articles.seed.ts
+export async function seedEncyclopediaArticles(dataSource: DataSource) {
+  const repo = dataSource.getRepository(EncyclopediaArticle);
+  const existing = await repo.count();
+  if (existing > 0) return; // No duplicar
+  await repo.insert(ALL_ARTICLES_DATA);
+}
+```
+
+---
+
+#### ✅ Criterios de Aceptación
+
+- [ ] Seed inserta ~95 artículos correctamente
+- [ ] Seed es idempotente (no duplica en ejecuciones sucesivas)
+- [ ] Todos los slugs son únicos y URL-safe
+- [ ] `snippet` y `content` no están vacíos en ningún artículo
+- [ ] Los `relatedTarotCards` referencian IDs válidos del seeder de cartas
+
+---
+
+#### 🧪 Tests TDD
+
+```typescript
+describe('EncyclopediaArticles seeder', () => {
+  it('debe insertar ~95 artículos en la BD');
+  it('no debe duplicar artículos en segunda ejecución');
+  it('todos los slugs deben ser únicos');
+  it('snippet y content deben ser no vacíos');
+  it('sortOrder de signos zodiacales va de 1 a 12');
+});
+```
+
+---
+
+### TASK-311: Crear ArticlesService y DTOs
+
+**Módulo:** `src/modules/encyclopedia/application/`
+**Prioridad:** 🔴 ALTA
+**Estimación:** 1 día
+**Dependencias:** TASK-309, TASK-310
+
+---
+
+#### 📋 Descripción
+
+Crear el servicio `ArticlesService` que gestiona los artículos de la enciclopedia mística y los DTOs de respuesta correspondientes.
+
+---
+
+#### 🏗️ Contexto Técnico
+
+**Archivos a crear:**
+
+- `src/modules/encyclopedia/application/services/articles.service.ts`
+- `src/modules/encyclopedia/application/dto/article-response.dto.ts`
+- `src/modules/encyclopedia/application/dto/article-filters.dto.ts`
+
+**DTOs:**
+
+```typescript
+// article-response.dto.ts
+export class ArticleSnippetDto {
+  @ApiProperty() id: number;
+  @ApiProperty() slug: string;
+  @ApiProperty() nameEs: string;
+  @ApiProperty({ enum: ArticleCategory }) category: ArticleCategory;
+  @ApiProperty() snippet: string;
+  // NO incluye content - optimizado para el widget "Ver más"
+}
+
+export class ArticleSummaryDto extends ArticleSnippetDto {
+  @ApiProperty({ nullable: true }) imageUrl: string | null;
+  @ApiProperty() sortOrder: number;
+}
+
+export class ArticleDetailDto extends ArticleSummaryDto {
+  @ApiProperty({ nullable: true }) nameEn: string | null;
+  @ApiProperty() content: string; // Markdown completo
+  @ApiProperty({ nullable: true }) metadata: Record<string, unknown> | null;
+  @ApiProperty({ type: [ArticleSummaryDto] }) relatedArticles: ArticleSummaryDto[];
+  @ApiProperty({ nullable: true }) relatedTarotCards: number[] | null;
+}
+```
+
+**Métodos del servicio:**
+
+```typescript
+@Injectable()
+export class ArticlesService {
+  constructor(
+    @InjectRepository(EncyclopediaArticle)
+    private readonly articleRepository: Repository<EncyclopediaArticle>,
+  ) {}
+
+  // Para el widget "Ver más" - retorna solo snippet, NO content
+  async getSnippetBySlug(slug: string): Promise<ArticleSnippetDto>
+
+  // Para la página de detalle - retorna content completo con relaciones resueltas
+  async findBySlug(slug: string): Promise<ArticleDetailDto>
+
+  // Para el listado de una categoría
+  async findByCategory(category: ArticleCategory): Promise<ArticleSummaryDto[]>
+
+  // Búsqueda case-insensitive en nombre y snippet
+  async search(term: string): Promise<ArticleSummaryDto[]>
+
+  // Para artículos relacionados (resuelve slugs a entidades)
+  async findRelated(slugs: string[]): Promise<ArticleSummaryDto[]>
+
+  // Fire-and-forget (no await)
+  private incrementViewCount(id: number): void
+}
+```
+
+---
+
+#### ✅ Criterios de Aceptación
+
+- [ ] `getSnippetBySlug` NO incluye el campo `content` en su respuesta
+- [ ] `findBySlug` incluye `content` completo y resuelve `relatedArticles` de slugs a objetos
+- [ ] `search` es case-insensitive (ILIKE en PostgreSQL)
+- [ ] Lanza `NotFoundException` para slug inexistente
+- [ ] `incrementViewCount` es fire-and-forget (no bloquea la respuesta)
+
+---
+
+#### 🧪 Tests TDD
+
+```typescript
+describe('ArticlesService', () => {
+  it('getSnippetBySlug debe retornar snippet sin campo content');
+  it('findBySlug debe retornar articulo con content completo');
+  it('findBySlug debe lanzar NotFoundException si slug no existe');
+  it('search debe ser case-insensitive');
+  it('search con término vacío debe retornar array vacío');
+  it('findByCategory debe retornar artículos ordenados por sortOrder');
+});
+```
+
+---
+
+### TASK-312: Crear endpoints REST de artículos
+
+**Módulo:** `src/modules/encyclopedia/infrastructure/controllers/`
+**Prioridad:** 🔴 ALTA
+**Estimación:** 0.5 días
+**Dependencias:** TASK-311
+
+---
+
+#### 📋 Descripción
+
+Crear el controlador `ArticlesController` con los endpoints públicos para consultar artículos de la enciclopedia mística.
+
+---
+
+#### 🏗️ Contexto Técnico
+
+**Archivo a crear:**
+
+- `src/modules/encyclopedia/infrastructure/controllers/articles.controller.ts`
+
+**Endpoints:**
+
+| Método | Ruta                                        | Descripción                                  | Auth |
+| ------ | ------------------------------------------- | -------------------------------------------- | ---- |
+| GET    | `/encyclopedia/articles`                    | Listar artículos (filtros: category, search) | No   |
+| GET    | `/encyclopedia/articles/categories`         | Listar categorías con conteo de artículos    | No   |
+| GET    | `/encyclopedia/articles/snippet/:slug`      | Snippet del artículo (para el widget)        | No   |
+| GET    | `/encyclopedia/articles/:slug`              | Detalle completo del artículo                | No   |
+| GET    | `/encyclopedia/articles/category/:category` | Artículos de una categoría                   | No   |
+
+**Query params para `/encyclopedia/articles`:**
+
+```typescript
+export class ArticleFiltersDto {
+  @IsOptional()
+  @IsEnum(ArticleCategory)
+  category?: ArticleCategory;
+
+  @IsOptional()
+  @MinLength(2)
+  search?: string;
+}
+```
+
+**Nota importante:** El endpoint `/snippet/:slug` es crítico para el widget frontend — retorna solo `id, slug, nameEs, category, snippet` sin el campo `content` para mantener respuestas rápidas y ligeras.
+
+---
+
+#### ✅ Criterios de Aceptación
+
+- [ ] `GET /articles?category=zodiac_sign` retorna 12 signos
+- [ ] `GET /articles/snippet/aries` retorna solo el snippet (sin `content`)
+- [ ] `GET /articles/aries` retorna artículo completo con `content`
+- [ ] `GET /articles?search=mercurio` retorna resultados relevantes
+- [ ] `GET /articles/nonexistent` retorna `404`
+- [ ] Todos los endpoints documentados en Swagger con `@ApiTags('encyclopedia')`
+
+---
+
+#### 🧪 Tests TDD
+
+```typescript
+describe('ArticlesController', () => {
+  it('GET /articles?category=zodiac_sign debe retornar 12 signos');
+  it('GET /articles/snippet/aries no debe incluir campo content');
+  it('GET /articles/aries debe incluir campo content');
+  it('GET /articles?search=mercurio debe retornar resultados');
+  it('GET /articles/nonexistent debe retornar 404');
+});
+```
+
+---
+
+### TASK-313: Endpoint de búsqueda global unificada
+
+**Módulo:** `src/modules/encyclopedia/`
+**Prioridad:** 🟡 MEDIA
+**Estimación:** 0.5 días
+**Dependencias:** TASK-311, TASK-312
+
+---
+
+#### 📋 Descripción
+
+Ampliar la búsqueda de la enciclopedia para buscar simultáneamente en `TarotCard` (por nombre) y en `EncyclopediaArticle` (por nombre y snippet), retornando resultados unificados.
+
+---
+
+#### 🏗️ Contexto Técnico
+
+**Archivos a modificar:**
+
+- `src/modules/encyclopedia/application/services/encyclopedia.service.ts` (agregar método `globalSearch`)
+- `src/modules/encyclopedia/infrastructure/controllers/encyclopedia.controller.ts` (nuevo endpoint)
+
+**Endpoint:**
+
+```
+GET /encyclopedia/search?q={term}
+```
+
+**Respuesta:**
+
+```typescript
+export class GlobalSearchResultDto {
+  @ApiProperty({ type: [CardSummaryDto] }) tarotCards: CardSummaryDto[];
+  @ApiProperty({ type: [ArticleSummaryDto] }) articles: ArticleSummaryDto[];
+  @ApiProperty() total: number;
+}
+```
+
+**Regla:** Si `term.length < 2` retornar `{ tarotCards: [], articles: [], total: 0 }` sin consultar la BD.
+
+---
+
+#### 🧪 Tests TDD
+
+```typescript
+describe('Encyclopedia globalSearch', () => {
+  it('buscar "mercurio" debe retornar artículo de planeta Y cartas de tarot con mercurio');
+  it('buscar "agua" debe retornar elemento Agua y cartas de Copas');
+  it('búsqueda con menos de 2 caracteres debe retornar arrays vacíos');
+  it('sin resultados debe retornar arrays vacíos con total: 0');
+});
+```
+
+---
+
+### TASK-314: Incremento de viewCount para artículos (fire-and-forget)
+
+**Módulo:** `src/modules/encyclopedia/application/services/`
+**Prioridad:** 🟢 BAJA
+**Estimación:** 0.25 días
+**Dependencias:** TASK-311
+
+---
+
+#### 📋 Descripción
+
+Aplicar el mismo patrón fire-and-forget ya usado para viewCount en el servicio de cartas de tarot. Al llamar `findBySlug` en `ArticlesService` se incrementa el contador de vistas del artículo sin bloquear la respuesta.
+
+**Método a agregar en `ArticlesService`:**
+
+```typescript
+private incrementViewCount(id: number): void {
+  this.articleRepository
+    .increment({ id }, 'viewCount', 1)
+    .catch(() => {/* silencioso */});
+}
+```
+
+---
 
 # Frontend: Types, API y Hooks
 
@@ -3159,6 +4050,708 @@ Crear las páginas principales de la enciclopedia: listado y detalle de cartas.
 > - Favoritos redirige a login si no está autenticado
 > - Usar useCallback para handleSearch (evitar re-renders)
 
+---
+
+# Frontend: Enciclopedia Mística (artículos estáticos)
+
+---
+
+### TASK-315: Crear tipos TypeScript, API y hooks para artículos
+
+**Módulo:** `frontend/src/types/` y `frontend/src/lib/api/`
+**Prioridad:** 🔴 ALTA
+**Estimación:** 0.5 días
+**Dependencias:** TASK-312
+
+---
+
+#### 📋 Descripción
+
+Crear los tipos TypeScript y funciones de API para los nuevos artículos de la enciclopedia mística.
+
+---
+
+#### 🏗️ Contexto Técnico
+
+**Archivos a crear:**
+
+- `frontend/src/types/encyclopedia-article.types.ts`
+- `frontend/src/lib/api/encyclopedia-articles-api.ts`
+- `frontend/src/hooks/api/useEncyclopediaArticles.ts`
+
+**Archivos a modificar:**
+
+- `frontend/src/lib/api/endpoints.ts` (agregar `ENCYCLOPEDIA.ARTICLES.*`)
+- `frontend/src/types/index.ts` (re-exportar nuevos tipos si aplica)
+
+**Tipos principales:**
+
+```typescript
+// encyclopedia-article.types.ts
+export enum ArticleCategory {
+  ZODIAC_SIGN = 'zodiac_sign',
+  PLANET = 'planet',
+  ASTROLOGICAL_HOUSE = 'astro_house',
+  ELEMENT = 'element',
+  MODALITY = 'modality',
+  GUIDE_NUMEROLOGY = 'guide_numerology',
+  GUIDE_PENDULUM = 'guide_pendulum',
+  GUIDE_BIRTH_CHART = 'guide_birth_chart',
+  GUIDE_RITUAL = 'guide_ritual',
+  GUIDE_HOROSCOPE = 'guide_horoscope',
+  GUIDE_CHINESE = 'guide_chinese',
+}
+
+export interface ArticleSnippet {
+  id: number;
+  slug: string;
+  nameEs: string;
+  category: ArticleCategory;
+  snippet: string;
+}
+
+export interface ArticleSummary extends ArticleSnippet {
+  imageUrl: string | null;
+  sortOrder: number;
+}
+
+export interface ArticleDetail extends ArticleSummary {
+  nameEn: string | null;
+  content: string; // Markdown completo
+  metadata: Record<string, unknown> | null;
+  relatedArticles: ArticleSummary[];
+  relatedTarotCards: number[] | null;
+}
+
+export const ARTICLE_CATEGORY_LABELS: Record<ArticleCategory, string> = {
+  [ArticleCategory.ZODIAC_SIGN]: 'Signos Zodiacales',
+  [ArticleCategory.PLANET]: 'Planetas',
+  [ArticleCategory.ASTROLOGICAL_HOUSE]: 'Casas Astrales',
+  [ArticleCategory.ELEMENT]: 'Elementos',
+  [ArticleCategory.MODALITY]: 'Modalidades',
+  [ArticleCategory.GUIDE_NUMEROLOGY]: 'Guía de Numerología',
+  [ArticleCategory.GUIDE_PENDULUM]: 'Guía del Péndulo',
+  [ArticleCategory.GUIDE_BIRTH_CHART]: 'Guía de Carta Astral',
+  [ArticleCategory.GUIDE_RITUAL]: 'Guía de Rituales',
+  [ArticleCategory.GUIDE_HOROSCOPE]: 'Guía del Horóscopo',
+  [ArticleCategory.GUIDE_CHINESE]: 'Guía del Horóscopo Chino',
+};
+```
+
+**Endpoints a agregar en `endpoints.ts`:**
+
+```typescript
+ENCYCLOPEDIA: {
+  // ... endpoints existentes para cartas de tarot ...
+  ARTICLES: '/encyclopedia/articles',
+  ARTICLE_SNIPPET: (slug: string) => `/encyclopedia/articles/snippet/${slug}`,
+  ARTICLE_DETAIL: (slug: string) => `/encyclopedia/articles/${slug}`,
+  ARTICLE_BY_CATEGORY: (category: string) => `/encyclopedia/articles/category/${category}`,
+  SEARCH_GLOBAL: '/encyclopedia/search',
+}
+```
+
+**Hooks:**
+
+```typescript
+// useEncyclopediaArticles.ts
+export const articleKeys = {
+  snippet: (slug: string) => ['encyclopedia', 'article', 'snippet', slug],
+  detail: (slug: string) => ['encyclopedia', 'article', 'detail', slug],
+  byCategory: (category: ArticleCategory) => ['encyclopedia', 'articles', 'category', category],
+  search: (term: string) => ['encyclopedia', 'search', term],
+};
+
+// Para el widget "Ver más" - staleTime: 1h (contenido estático)
+export function useArticleSnippet(slug: string): UseQueryResult<ArticleSnippet>
+
+// Para la página de detalle completa
+export function useArticle(slug: string): UseQueryResult<ArticleDetail>
+
+// Para listado de una categoría
+export function useArticlesByCategory(category: ArticleCategory): UseQueryResult<ArticleSummary[]>
+
+// Búsqueda global (cartas de tarot + artículos)
+// Solo ejecuta si term.length >= 2
+export function useGlobalSearch(term: string): UseQueryResult<GlobalSearchResult>
+```
+
+---
+
+#### ✅ Criterios de Aceptación
+
+- [ ] Tipos exportados sin errores de TypeScript
+- [ ] `useArticleSnippet` llama a `/encyclopedia/articles/snippet/:slug`
+- [ ] `useGlobalSearch` combina resultados de tarot y artículos
+- [ ] `staleTime` de 1 hora para todo el contenido estático
+
+---
+
+#### 🧪 Tests TDD
+
+```typescript
+describe('useEncyclopediaArticles hooks', () => {
+  it('useArticleSnippet debe llamar al endpoint de snippet');
+  it('useArticle debe llamar al endpoint de detalle');
+  it('useGlobalSearch no debe ejecutarse si term.length < 2');
+  it('useArticlesByCategory debe retornar artículos de la categoría correcta');
+});
+```
+
+---
+
+### TASK-316: Crear componente EncyclopediaInfoWidget
+
+**Módulo:** `frontend/src/components/features/encyclopedia/`
+**Prioridad:** 🔴 ALTA
+**Estimación:** 0.5 días
+**Dependencias:** TASK-315
+
+---
+
+#### 📋 Descripción
+
+Crear el componente reutilizable `EncyclopediaInfoWidget` que muestra un snippet de un artículo de la enciclopedia con un botón "Ver más en la Enciclopedia". Seguir exactamente el mismo patrón del `NumerologyWidget` existente.
+
+---
+
+#### 🏗️ Contexto Técnico
+
+**Archivos a crear:**
+
+- `frontend/src/components/features/encyclopedia/EncyclopediaInfoWidget.tsx`
+- `frontend/src/components/features/encyclopedia/EncyclopediaInfoWidget.test.tsx`
+
+**Componente:**
+
+```tsx
+// EncyclopediaInfoWidget.tsx
+'use client';
+
+import { BookOpen } from 'lucide-react';
+import Link from 'next/link';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { useArticleSnippet } from '@/hooks/api/useEncyclopediaArticles';
+
+interface EncyclopediaInfoWidgetProps {
+  slug: string;       // Ej: 'guide-numerology', 'guide-pendulum'
+  title?: string;     // Sobreescribe el nameEs del artículo (opcional)
+  className?: string;
+}
+
+export function EncyclopediaInfoWidget({ slug, title, className }: EncyclopediaInfoWidgetProps) {
+  const { data: article, isLoading, error } = useArticleSnippet(slug);
+
+  if (isLoading) {
+    return (
+      <Card className={className}>
+        <CardHeader><Skeleton className="h-6 w-48" /></CardHeader>
+        <CardContent><Skeleton className="h-16 w-full" /></CardContent>
+      </Card>
+    );
+  }
+
+  // Widget no es crítico - si falla, no rompe la página
+  if (error || !article) return null;
+
+  return (
+    <Card className={className}>
+      <CardHeader>
+        <CardTitle className="font-serif text-lg">
+          {title ?? article.nameEs}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-muted-foreground text-sm">{article.snippet}</p>
+        <Button variant="outline" size="sm" asChild className="mt-4">
+          <Link href={`/enciclopedia/guias/${slug}`}>
+            <BookOpen className="mr-2 h-4 w-4" />
+            Ver más en la Enciclopedia
+          </Link>
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+---
+
+#### ✅ Criterios de Aceptación
+
+- [ ] Muestra `Skeleton` en estado loading
+- [ ] Retorna `null` en estado de error (widget no es crítico)
+- [ ] Muestra snippet y botón cuando hay datos
+- [ ] El link apunta a `/enciclopedia/guias/${slug}`
+- [ ] La prop `title` sobreescribe el `nameEs` del artículo
+
+---
+
+#### 🧪 Tests TDD
+
+```typescript
+describe('EncyclopediaInfoWidget', () => {
+  it('debe mostrar Skeleton en estado loading');
+  it('debe retornar null en estado de error (sin crashear la página)');
+  it('debe mostrar el snippet y el botón cuando hay datos');
+  it('el link debe apuntar a /enciclopedia/guias/{slug}');
+  it('prop title sobreescribe el nombre del artículo');
+});
+```
+
+---
+
+### TASK-317: Integrar EncyclopediaInfoWidget en las 6 páginas de módulos
+
+**Módulo:** `frontend/src/components/features/` y `frontend/src/app/`
+**Prioridad:** 🔴 ALTA
+**Estimación:** 1 día
+**Dependencias:** TASK-316
+
+---
+
+#### 📋 Descripción
+
+Agregar el `EncyclopediaInfoWidget` en cada una de las 6 páginas de módulos. El widget debe aparecer en posición discreta (debajo del hero/título, antes del formulario/contenido principal) sin interrumpir el flujo principal.
+
+---
+
+#### 🏗️ Contexto Técnico
+
+**Archivos a modificar:**
+
+1. **`frontend/src/components/features/numerology/NumerologyPage.tsx`**
+   - Agregar `<EncyclopediaInfoWidget slug="guide-numerology" className="mb-6" />` debajo del título, antes de la calculadora
+
+2. **Componente de Péndulo** (identificar archivo exacto en features/pendulum/)
+   - Agregar `<EncyclopediaInfoWidget slug="guide-pendulum" className="mb-6" />`
+
+3. **`frontend/src/app/horoscopo/page.tsx`** (o su componente feature)
+   - Agregar `<EncyclopediaInfoWidget slug="guide-horoscope" className="mb-6" />`
+
+4. **`frontend/src/app/horoscopo-chino/page.tsx`** (o su componente feature)
+   - Agregar `<EncyclopediaInfoWidget slug="guide-chinese" className="mb-6" />`
+
+5. **Componente de Rituales** (identificar archivo exacto en features/rituals/)
+   - Agregar `<EncyclopediaInfoWidget slug="guide-ritual" className="mb-6" />`
+
+6. **`frontend/src/app/carta-astral/page.tsx`**
+   - Agregar `<EncyclopediaInfoWidget slug="guide-birth-chart" className="mb-6" />`
+
+**Nota:** Identificar los archivos exactos leyendo cada módulo antes de modificar.
+
+---
+
+#### ✅ Criterios de Aceptación
+
+- [ ] Las 6 páginas renderizan `EncyclopediaInfoWidget` con el `slug` correcto
+- [ ] Widget no bloquea el renderizado si el API falla (retorna `null`)
+- [ ] Widget aparece en posición consistente en todas las páginas (debajo del header, antes del contenido principal)
+- [ ] Widget es visible para usuarios anónimos
+
+---
+
+#### 🧪 Tests TDD
+
+```typescript
+// Para cada módulo:
+it('debe renderizar EncyclopediaInfoWidget con slug="guide-{modulo}"');
+it('debe renderizar correctamente si EncyclopediaInfoWidget retorna null');
+```
+
+---
+
+### TASK-318: Componentes de listado para Astrología y Guías
+
+**Módulo:** `frontend/src/components/features/encyclopedia/`
+**Prioridad:** 🟡 MEDIA
+**Estimación:** 1 día
+**Dependencias:** TASK-315
+
+---
+
+#### 📋 Descripción
+
+Crear los componentes de listado para las nuevas categorías de la enciclopedia: signos zodiacales, planetas, casas astrales y guías de actividades.
+
+---
+
+#### 🏗️ Contexto Técnico
+
+**Archivos a crear:**
+
+```
+frontend/src/components/features/encyclopedia/
+├── ArticleCard.tsx          # Tarjeta adaptativa según categoría
+├── ArticleGrid.tsx          # Grid responsive de artículos
+├── ArticleSkeleton.tsx      # Skeleton para carga de artículos
+├── AstrologySection.tsx     # Sección "Astrología" con 3 sub-categorías
+├── GuidesSection.tsx        # Sección "Guías" con 6 actividades
+└── EncyclopediaHome.tsx     # Nueva página hub (Tarot + Astrología + Guías)
+```
+
+**ArticleCard — adaptación por categoría:**
+
+| Categoría | Campos mostrados |
+| --------- | ---------------- |
+| Signo zodiacal | Símbolo (♈), nombre, elemento (con color), modalidad, fechas |
+| Planeta | Símbolo astrológico, nombre, signos que rige |
+| Casa astral | Número romano, nombre, área de vida principal |
+| Elemento/Modalidad | Ícono, nombre, descripción breve |
+| Guía | Ícono de actividad, título, primera línea del snippet |
+
+**GuidesSection — 6 tarjetas:**
+- Numerología, Péndulo, Carta Astral, Rituales, Horóscopo Occidental, Horóscopo Chino
+
+---
+
+#### ✅ Criterios de Aceptación
+
+- [ ] `ArticleCard` renderiza los campos correctos según la categoría del artículo
+- [ ] `ArticleGrid` muestra el número correcto de artículos con layout responsive
+- [ ] `GuidesSection` muestra exactamente 6 guías
+- [ ] `AstrologySection` tiene links funcionales a sus 3 sub-secciones
+
+---
+
+#### 🧪 Tests TDD
+
+```typescript
+describe('ArticleCard', () => {
+  it('debe mostrar símbolo y fechas para signo zodiacal');
+  it('debe mostrar signo(s) que rige para planeta');
+  it('debe mostrar número romano para casa astral');
+});
+describe('GuidesSection', () => {
+  it('debe renderizar exactamente 6 guías');
+  it('cada guía debe tener link correcto');
+});
+```
+
+---
+
+### TASK-319: Componente ArticleDetailView
+
+**Módulo:** `frontend/src/components/features/encyclopedia/`
+**Prioridad:** 🟡 MEDIA
+**Estimación:** 0.5 días
+**Dependencias:** TASK-318
+
+---
+
+#### 📋 Descripción
+
+Crear el componente que renderiza el contenido completo de un artículo usando `react-markdown` para el campo `content`.
+
+---
+
+#### 🏗️ Contexto Técnico
+
+**Archivo a crear:** `frontend/src/components/features/encyclopedia/ArticleDetailView.tsx`
+
+**Estructura del componente:**
+
+```tsx
+interface ArticleDetailViewProps {
+  article: ArticleDetail;
+}
+
+export function ArticleDetailView({ article }: ArticleDetailViewProps) {
+  return (
+    <div className="space-y-8">
+      {/* Breadcrumb de navegación */}
+      {/* Header: nombre del artículo + badge de categoría */}
+      {/* Metadata cards (símbolo, fechas, elemento, etc. según categoría) */}
+      {/* Contenido Markdown renderizado con react-markdown + remark-gfm */}
+      {/* Cartas de tarot relacionadas (si relatedTarotCards no es null) */}
+      {/* Artículos relacionados */}
+      {/* CTA al módulo correspondiente (solo si es guía) */}
+    </div>
+  );
+}
+```
+
+**CTA por tipo de guía:**
+- `guide-numerology` → botón "Calcular mi Numerología" → `/numerologia`
+- `guide-pendulum` → botón "Usar el Péndulo Digital" → `/pendulo`
+- `guide-birth-chart` → botón "Generar mi Carta Astral" → `/carta-astral`
+- `guide-ritual` → botón "Explorar Rituales" → `/rituales`
+- `guide-horoscope` → botón "Ver mi Horóscopo" → `/horoscopo`
+- `guide-chinese` → botón "Ver mi Horóscopo Chino" → `/horoscopo-chino`
+
+---
+
+#### ✅ Criterios de Aceptación
+
+- [ ] Renderiza el contenido Markdown correctamente (headings, listas, tablas)
+- [ ] Muestra cartas de tarot relacionadas si existen
+- [ ] Muestra artículos relacionados
+- [ ] CTA correcto según la categoría del artículo
+- [ ] Breadcrumb navega correctamente
+
+---
+
+#### 🧪 Tests TDD
+
+```typescript
+describe('ArticleDetailView', () => {
+  it('debe renderizar contenido markdown');
+  it('debe mostrar cartas de tarot relacionadas cuando existen');
+  it('no debe mostrar sección de cartas si relatedTarotCards es null');
+  it('debe mostrar CTA correcto para guía de numerología');
+  it('no debe mostrar CTA para signos zodiacales (no son guías)');
+});
+```
+
+---
+
+### TASK-320: Actualizar rutas de la Enciclopedia y crear nuevas páginas
+
+**Módulo:** `frontend/src/app/enciclopedia/`
+**Prioridad:** 🟡 MEDIA
+**Estimación:** 0.5 días
+**Dependencias:** TASK-318
+
+---
+
+#### 📋 Descripción
+
+Reorganizar la estructura de rutas de `/enciclopedia` para soportar las nuevas secciones. La página principal se convierte en hub de 3 secciones.
+
+---
+
+#### 🏗️ Contexto Técnico
+
+**Nueva estructura de rutas:**
+
+```
+/enciclopedia/                                   → Hub principal (Tarot | Astrología | Guías)
+/enciclopedia/tarot/                             → Listado de 78 cartas (actual page.tsx movido)
+/enciclopedia/tarot/[slug]/                      → Detalle de carta (mover de /enciclopedia/[slug])
+/enciclopedia/astrologia/                        → Hub de astrología
+/enciclopedia/astrologia/signos/                 → Listado 12 signos zodiacales
+/enciclopedia/astrologia/signos/[slug]/          → Detalle de signo (ej: /astrologia/signos/aries)
+/enciclopedia/astrologia/planetas/               → Listado 10 planetas
+/enciclopedia/astrologia/planetas/[slug]/        → Detalle de planeta (ej: /astrologia/planetas/venus)
+/enciclopedia/astrologia/casas/                  → Listado 12 casas astrales
+/enciclopedia/astrologia/casas/[slug]/           → Detalle de casa (ej: /astrologia/casas/casa-1)
+/enciclopedia/guias/                             → Listado de 6 guías
+/enciclopedia/guias/[slug]/                      → Detalle de guía (ej: /guias/numerologia)
+/enciclopedia/elementos/[slug]/                  → Detalle de elemento o modalidad
+```
+
+**Archivos a modificar:**
+
+- `frontend/src/app/enciclopedia/page.tsx` → convertir en hub con `EncyclopediaHome`
+- `frontend/src/lib/constants/routes.ts` → agregar nuevas rutas
+
+**Archivos a crear:**
+
+```
+frontend/src/app/enciclopedia/
+├── tarot/
+│   ├── page.tsx               (listado de cartas - mover contenido actual)
+│   └── [slug]/
+│       └── page.tsx           (detalle de carta - mover de /enciclopedia/[slug])
+├── astrologia/
+│   ├── page.tsx
+│   ├── signos/
+│   │   ├── page.tsx
+│   │   └── [slug]/page.tsx
+│   ├── planetas/
+│   │   ├── page.tsx
+│   │   └── [slug]/page.tsx
+│   └── casas/
+│       ├── page.tsx
+│       └── [slug]/page.tsx
+├── guias/
+│   ├── page.tsx
+│   └── [slug]/page.tsx
+└── elementos/
+    └── [slug]/page.tsx
+```
+
+**Redirect 301 para SEO:**
+
+Agregar redirect en `next.config.js` de `/enciclopedia/[slug]` (cartas de tarot) a `/enciclopedia/tarot/[slug]`.
+
+**Nuevas constantes en `routes.ts`:**
+
+```typescript
+ENCICLOPEDIA_TAROT: '/enciclopedia/tarot',
+ENCICLOPEDIA_TAROT_CARD: (slug: string) => `/enciclopedia/tarot/${slug}`,
+ENCICLOPEDIA_ASTROLOGIA: '/enciclopedia/astrologia',
+ENCICLOPEDIA_SIGNO: (slug: string) => `/enciclopedia/astrologia/signos/${slug}`,
+ENCICLOPEDIA_PLANETA: (slug: string) => `/enciclopedia/astrologia/planetas/${slug}`,
+ENCICLOPEDIA_CASA: (slug: string) => `/enciclopedia/astrologia/casas/${slug}`,
+ENCICLOPEDIA_GUIAS: '/enciclopedia/guias',
+ENCICLOPEDIA_GUIA: (slug: string) => `/enciclopedia/guias/${slug}`,
+ENCICLOPEDIA_ELEMENTO: (slug: string) => `/enciclopedia/elementos/${slug}`,
+```
+
+---
+
+#### ✅ Criterios de Aceptación
+
+- [ ] Hub principal muestra 3 secciones: Tarot, Astrología, Guías
+- [ ] Links de categorías navegan correctamente
+- [ ] Redirect 301 funciona: `/enciclopedia/el-loco` → `/enciclopedia/tarot/el-loco`
+- [ ] Páginas de listado de artículos (12 signos, 10 planetas, 12 casas) funcionan
+- [ ] 404 para slug inexistente
+
+---
+
+#### 🧪 Tests TDD
+
+```typescript
+describe('Enciclopedia Hub page', () => {
+  it('debe mostrar las 3 secciones principales');
+  it('links de categorías deben tener href correcto');
+});
+describe('Enciclopedia article pages', () => {
+  it('página de signo debe renderizar ArticleDetailView');
+  it('debe retornar 404 para slug inexistente');
+});
+```
+
+---
+
+### TASK-321: SEO metadata con generateMetadata
+
+**Módulo:** `frontend/src/app/enciclopedia/`
+**Prioridad:** 🟡 MEDIA
+**Estimación:** 0.5 días
+**Dependencias:** TASK-320
+
+---
+
+#### 📋 Descripción
+
+Agregar `generateMetadata` (y opcionalmente `generateStaticParams` para pre-render) en todas las páginas de detalle de la enciclopedia.
+
+---
+
+#### 🏗️ Contexto Técnico
+
+**Archivos a modificar:** Todas las `page.tsx` de detalle creadas en TASK-320
+
+**Patrón para páginas de detalle:**
+
+```typescript
+// enciclopedia/astrologia/signos/[slug]/page.tsx
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const article = await getArticleBySlug(params.slug);
+  if (!article) return {};
+
+  return {
+    title: `${article.nameEs} - Enciclopedia Mística | Auguria`,
+    description: article.snippet,
+    openGraph: {
+      title: `${article.nameEs} - Auguria`,
+      description: article.snippet,
+      type: 'article',
+    },
+  };
+}
+
+// Pre-renderizar en build time para mejor performance y SEO
+export async function generateStaticParams() {
+  const signs = await getArticlesByCategory(ArticleCategory.ZODIAC_SIGN);
+  return signs.map((s) => ({ slug: s.slug }));
+}
+```
+
+---
+
+#### ✅ Criterios de Aceptación
+
+- [ ] `title` de cada página incluye el nombre del artículo
+- [ ] `description` usa el `snippet` del artículo
+- [ ] Open Graph tags presentes
+- [ ] `generateStaticParams` implementado para signos, planetas, casas y guías
+
+---
+
+#### 🧪 Tests TDD
+
+```typescript
+describe('SEO metadata', () => {
+  it('generateMetadata debe incluir el nombre del artículo en title');
+  it('generateMetadata debe usar snippet como description');
+  it('generateMetadata debe retornar objeto vacío si artículo no existe');
+});
+```
+
+---
+
+### TASK-322: Cross-links desde Carta Astral hacia la Enciclopedia
+
+**Módulo:** `frontend/src/components/features/birth-chart/`
+**Prioridad:** 🟢 BAJA
+**Estimación:** 0.5 días
+**Dependencias:** TASK-320
+
+---
+
+#### 📋 Descripción
+
+Agregar enlaces desde los resultados de la Carta Astral hacia los artículos de la enciclopedia (signos y planetas). Al mostrar "Sol en Escorpio", el texto "Escorpio" debe ser un link a `/enciclopedia/astrologia/signos/escorpio`.
+
+---
+
+#### 🏗️ Contexto Técnico
+
+**Archivos a modificar:** Componentes de `birth-chart` que renderizan posiciones planetarias (identificar leyendo el módulo antes de modificar).
+
+**Utilidades a agregar en `routes.ts` o nuevo archivo:**
+
+```typescript
+// Funciones helper para links a la enciclopedia
+export function getSignEncyclopediaLink(sign: string): string {
+  return `/enciclopedia/astrologia/signos/${sign.toLowerCase()}`;
+}
+
+export function getPlanetEncyclopediaLink(planet: string): string {
+  return `/enciclopedia/astrologia/planetas/${planet.toLowerCase()}`;
+}
+```
+
+**Patrón de uso en el componente:**
+
+```tsx
+// Antes:
+<span>Sol en Escorpio</span>
+
+// Después:
+<span>Sol en <Link href={getSignEncyclopediaLink('escorpio')}>Escorpio</Link></span>
+```
+
+---
+
+#### ✅ Criterios de Aceptación
+
+- [ ] Nombres de signos en resultados de Carta Astral son links con href correcto
+- [ ] Nombres de planetas en resultados son links con href correcto
+- [ ] Links abren en la misma pestaña (sin `target="_blank"`)
+- [ ] Links tienen estilo visual diferenciado (underline o color)
+
+---
+
+#### 🧪 Tests TDD
+
+```typescript
+describe('Birth Chart encyclopedia links', () => {
+  it('nombre de signo en resultado debe renderizar como link');
+  it('link de signo debe apuntar a /enciclopedia/astrologia/signos/{slug}');
+  it('nombre de planeta en resultado debe renderizar como link');
+  it('link de planeta debe apuntar a /enciclopedia/astrologia/planetas/{slug}');
+});
+```
+
+---
+
 # Esquema de Datos, Dependencias y Resumen
 
 ---
@@ -3307,6 +4900,8 @@ public/images/tarot/
 
 ## RESUMEN DE TAREAS
 
+### Fase 1: Enciclopedia del Tarot (tareas originales)
+
 | Tarea    | Descripción              | Estimación |
 | -------- | ------------------------ | ---------- |
 | TASK-300 | Entidad TarotCard        | 1 día      |
@@ -3319,43 +4914,100 @@ public/images/tarot/
 | TASK-307 | Componentes de detalle   | 1 día      |
 | TASK-308 | Páginas                  | 1 día      |
 
-**Total:** 8.5 días
+**Subtotal Fase 1:** 8.5 días
+
+---
+
+### Fase 2: Enciclopedia Mística (nuevas tareas)
+
+#### Backend — artículos estáticos
+
+| Tarea    | Descripción                        | Estimación | Prioridad |
+| -------- | ---------------------------------- | ---------- | --------- |
+| TASK-309 | Entidad EncyclopediaArticle        | 1 día      | 🔴 ALTA   |
+| TASK-310 | Seeder de ~95 artículos            | 2 días     | 🔴 ALTA   |
+| TASK-311 | ArticlesService + DTOs             | 1 día      | 🔴 ALTA   |
+| TASK-312 | Endpoints REST de artículos        | 0.5 días   | 🔴 ALTA   |
+| TASK-313 | Búsqueda global unificada          | 0.5 días   | 🟡 MEDIA  |
+| TASK-314 | ViewCount para artículos           | 0.25 días  | 🟢 BAJA   |
+
+#### Frontend — widget e integración
+
+| Tarea    | Descripción                              | Estimación | Prioridad |
+| -------- | ---------------------------------------- | ---------- | --------- |
+| TASK-315 | Tipos TS + API + Hooks para artículos    | 0.5 días   | 🔴 ALTA   |
+| TASK-316 | EncyclopediaInfoWidget                   | 0.5 días   | 🔴 ALTA   |
+| TASK-317 | Integrar widget en 6 módulos             | 1 día      | 🔴 ALTA   |
+| TASK-318 | Componentes de listado (artículos)       | 1 día      | 🟡 MEDIA  |
+| TASK-319 | ArticleDetailView (Markdown)             | 0.5 días   | 🟡 MEDIA  |
+| TASK-320 | Nuevas rutas de enciclopedia             | 0.5 días   | 🟡 MEDIA  |
+| TASK-321 | SEO metadata (generateMetadata)          | 0.5 días   | 🟡 MEDIA  |
+| TASK-322 | Cross-links desde Carta Astral           | 0.5 días   | 🟢 BAJA   |
+
+**Subtotal Fase 2:** 10.25 días
+
+---
+
+**TOTAL PROYECTO:** ~18-19 días
 
 ---
 
 ## ORDEN DE IMPLEMENTACIÓN
 
 ```
-Semana 1: Backend
+Semana 1: Backend Tarot (Fase 1)
 ├── TASK-300: Entidad TarotCard (1d)
 ├── TASK-301: Entidad UserFavoriteCard (0.5d)
 ├── TASK-302: Seeder de cartas (1.5d)
 ├── TASK-303: Módulo y servicios (1d)
 └── TASK-304: Endpoints (1d)
 
-Semana 2: Frontend
+Semana 2: Frontend Tarot (Fase 1)
 ├── TASK-305: Types y hooks (0.5d)
 ├── TASK-306: Componentes lista (1d)
 ├── TASK-307: Componentes detalle (1d)
 └── TASK-308: Páginas (1d)
+
+Semana 3: Backend Enciclopedia Mística (Fase 2 - entrega mínima viable)
+├── TASK-309: Entidad EncyclopediaArticle (1d)
+├── TASK-310: Seeder de ~95 artículos (2d)
+├── TASK-311: ArticlesService + DTOs (1d)
+└── TASK-312: Endpoints REST (0.5d)
+
+Semana 4: Frontend Widget (Fase 2 - entrega mínima viable)
+├── TASK-315: Types + API + Hooks (0.5d)
+├── TASK-316: EncyclopediaInfoWidget (0.5d)
+└── TASK-317: Integrar en 6 módulos (1d)
+[← PRIMERA ENTREGA DE VALOR: widget "Ver más" en todos los módulos]
+
+Semana 4-5: Frontend páginas completas (Fase 2 - enciclopedia completa)
+├── TASK-318: Componentes de listado (1d)
+├── TASK-319: ArticleDetailView (0.5d)
+├── TASK-320: Nuevas rutas (0.5d)
+├── TASK-321: SEO metadata (0.5d)
+├── TASK-313: Búsqueda global (0.5d)
+├── TASK-322: Cross-links Carta Astral (0.5d)
+└── TASK-314: ViewCount artículos (0.25d)
 ```
 
 ---
 
 ## RIESGOS
 
-| Riesgo                          | Probabilidad | Impacto | Mitigación                        |
-| ------------------------------- | ------------ | ------- | --------------------------------- |
-| Contenido de cartas incompleto  | Media        | Alto    | Usar contenido genérico temporal  |
-| Imágenes no disponibles         | Media        | Medio   | Placeholder images                |
-| Seeder toma mucho tiempo        | Baja         | Bajo    | Ejecutar en migración separada    |
-| Búsqueda lenta con muchos datos | Baja         | Bajo    | Solo 78 registros, no es problema |
+| Riesgo                               | Probabilidad | Impacto | Mitigación                          |
+| ------------------------------------ | ------------ | ------- | ----------------------------------- |
+| Contenido de cartas incompleto       | Media        | Alto    | Usar contenido genérico temporal    |
+| Imágenes no disponibles              | Media        | Medio   | Placeholder images                  |
+| Seeder toma mucho tiempo             | Baja         | Bajo    | Ejecutar en migración separada      |
+| Búsqueda lenta con muchos datos      | Baja         | Bajo    | Solo ~173 registros totales         |
+| Contenido editorial de artículos     | Alta         | Medio   | Priorizar snippets (para el widget) |
+| Colisión de rutas al mover /[slug]   | Baja         | Alto    | Redirect 301 en next.config.js      |
 
 ---
 
 ## CHECKLIST DE COMPLETITUD
 
-### Backend
+### Backend — Tarot (Fase 1)
 
 - [ ] TASK-300: Entidad TarotCard creada
 - [ ] TASK-301: Entidad UserFavoriteCard creada
@@ -3363,25 +5015,50 @@ Semana 2: Frontend
 - [ ] TASK-303: Módulo y servicios
 - [ ] TASK-304: Endpoints funcionando
 
-### Frontend
+### Backend — Enciclopedia Mística (Fase 2)
+
+- [ ] TASK-309: Entidad EncyclopediaArticle creada
+- [ ] TASK-310: Seeder con ~95 artículos
+- [ ] TASK-311: ArticlesService con todos los métodos
+- [ ] TASK-312: Endpoints REST funcionando
+- [ ] TASK-313: Búsqueda global unificada
+- [ ] TASK-314: ViewCount para artículos
+
+### Frontend — Tarot (Fase 1)
 
 - [ ] TASK-305: Types y hooks
 - [ ] TASK-306: Componentes de lista
 - [ ] TASK-307: Componentes de detalle
 - [ ] TASK-308: Páginas
 
+### Frontend — Enciclopedia Mística (Fase 2)
+
+- [ ] TASK-315: Types + API + Hooks para artículos
+- [ ] TASK-316: EncyclopediaInfoWidget
+- [ ] TASK-317: Widget integrado en las 6 páginas de módulos
+- [ ] TASK-318: Componentes de listado (ArticleCard, ArticleGrid, etc.)
+- [ ] TASK-319: ArticleDetailView con Markdown
+- [ ] TASK-320: Nuevas rutas y restructura de /enciclopedia
+- [ ] TASK-321: SEO metadata en páginas de artículos
+- [ ] TASK-322: Cross-links desde Carta Astral
+
 ### Contenido
 
 - [ ] 22 Arcanos Mayores con contenido
 - [ ] 56 Arcanos Menores con contenido
-- [ ] 78 imágenes de cartas
+- [ ] 78 imágenes de cartas de tarot
 - [ ] Palabras clave para cada carta
+- [ ] 12 artículos de signos zodiacales
+- [ ] 10 artículos de planetas
+- [ ] 12 artículos de casas astrales
+- [ ] 4 artículos de elementos + 3 de modalidades
+- [ ] 6 guías de actividades (Numerología, Péndulo, Carta Astral, Rituales, Horóscopo, Horóscopo Chino)
 
 ### Testing
 
-- [ ] Tests unitarios de servicios
+- [ ] Tests unitarios de servicios (backend)
 - [ ] Tests e2e de endpoints
-- [ ] Tests de componentes
+- [ ] Tests de componentes (frontend)
 - [ ] Coverage >80%
 
 ---
@@ -3390,26 +5067,26 @@ Semana 2: Frontend
 
 ### SEO
 
-Cada página de carta debería tener:
-
-- Title: "El Loco - Significado del Tarot | Auguria"
-- Description: Primer párrafo del significado
-- Open Graph image: Imagen de la carta
+- Cartas de tarot: "El Loco - Significado del Tarot | Auguria"
+- Signos zodiacales: "Aries - Signo Zodiacal - Enciclopedia Mística | Auguria"
+- Guías: "Guía de Numerología - Enciclopedia Mística | Auguria"
+- Open Graph image: imagen del artículo o de la carta
 
 ### Accesibilidad
 
 - Imágenes con alt text descriptivo
-- Navegación por teclado en el grid
+- Navegación por teclado en los grids
 - Contraste adecuado en badges
 - aria-labels en botones de favoritos
 
 ### Performance
 
 - Las imágenes deben usar `next/image` con sizes apropiados
-- Lazy loading para grid de cartas
-- staleTime de 1 hora (datos estáticos)
-- Prefetch de carta al hover (opcional)
+- Lazy loading para grids de cartas y artículos
+- `staleTime` de 1 hora (datos estáticos)
+- `generateStaticParams` para pre-render de páginas de artículos en build time
+- El endpoint `/snippet/:slug` retorna respuesta mínima para mantener el widget ligero
 
 ---
 
-**Fin del Módulo Enciclopedia del Tarot**
+**Fin del Módulo Enciclopedia Mística**
