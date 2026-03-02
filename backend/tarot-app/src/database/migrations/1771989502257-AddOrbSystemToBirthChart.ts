@@ -863,6 +863,7 @@ export class AddOrbSystemToBirthChart1771989502257 implements MigrationInterface
     await queryRunner.query(
       `CREATE UNIQUE INDEX "idx_horoscope_sign_date" ON "daily_horoscopes" ("zodiac_sign", "horoscope_date") `,
     );
+    await queryRunner.query(`DROP INDEX IF EXISTS "public"."idx_chinese_year"`);
     await queryRunner.query(
       `CREATE INDEX "idx_chinese_year" ON "chinese_horoscopes" ("year") `,
     );
