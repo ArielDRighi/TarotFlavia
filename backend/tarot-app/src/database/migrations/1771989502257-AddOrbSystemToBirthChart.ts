@@ -201,7 +201,9 @@ export class AddOrbSystemToBirthChart1771989502257 implements MigrationInterface
     await queryRunner.query(
       `DROP INDEX "public"."idx_notification_user_created_at_desc"`,
     );
-    await queryRunner.query(`DROP INDEX "public"."idx_chinese_horoscope_year"`);
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "public"."idx_chinese_horoscope_year"`,
+    );
     await queryRunner.query(
       `DROP INDEX "public"."IDX_cached_interpretations_cache_key"`,
     );
