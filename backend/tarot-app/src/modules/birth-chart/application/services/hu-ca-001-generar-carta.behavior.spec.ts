@@ -113,7 +113,7 @@ describe('HU-CA-001: Generar Carta Astral Básica (Comportamiento)', () => {
   let mockEphemeris: jest.Mocked<EphemerisWrapper>;
 
   const defaultInput: ChartCalculationInput = {
-    birthDate: new Date('1990-05-15'),
+    birthDateStr: '1990-05-15',
     birthTime: '14:30',
     latitude: -34.6037,
     longitude: -58.3816,
@@ -475,7 +475,7 @@ describe('HU-CA-001: Generar Carta Astral Básica (Comportamiento)', () => {
     });
 
     it('dado una fecha inválida, cuando se intenta calcular, entonces lanza error', () => {
-      const input = { ...defaultInput, birthDate: new Date('invalid') };
+      const input = { ...defaultInput, birthDateStr: 'fecha-invalida' };
       expect(() => service.calculateChart(input)).toThrow();
     });
 

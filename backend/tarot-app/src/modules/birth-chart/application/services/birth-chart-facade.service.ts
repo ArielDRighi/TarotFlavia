@@ -77,6 +77,7 @@ export class BirthChartFacadeService {
       dto.birthTime,
       dto.latitude,
       dto.longitude,
+      dto.orbSystem,
     );
 
     const cachedCalculation =
@@ -89,7 +90,7 @@ export class BirthChartFacadeService {
       chartData = cachedCalculation.chartData;
     } else {
       const input: ChartCalculationInput = {
-        birthDate,
+        birthDateStr: dto.birthDate,
         birthTime: dto.birthTime,
         latitude: dto.latitude,
         longitude: dto.longitude,
@@ -139,7 +140,7 @@ export class BirthChartFacadeService {
     this.logger.log(`Generating birth chart PDF for user ${user.userId}`);
 
     const input: ChartCalculationInput = {
-      birthDate: parseBirthDate(dto.birthDate),
+      birthDateStr: dto.birthDate,
       birthTime: dto.birthTime,
       latitude: dto.latitude,
       longitude: dto.longitude,
@@ -261,7 +262,7 @@ export class BirthChartFacadeService {
     this.logger.log(`Generating synthesis only for user ${userId}`);
 
     const input: ChartCalculationInput = {
-      birthDate: parseBirthDate(dto.birthDate),
+      birthDateStr: dto.birthDate,
       birthTime: dto.birthTime,
       latitude: dto.latitude,
       longitude: dto.longitude,
@@ -506,12 +507,20 @@ export class BirthChartFacadeService {
         latitude: dto.latitude,
         longitude: dto.longitude,
         timezone: dto.timezone,
+        orbSystem: dto.orbSystem ?? 'commercial',
         chartData: { ...chartData, aiSynthesis },
         sunSign: this.findPlanetSign(chartData, Planet.SUN),
         moonSign: this.findPlanetSign(chartData, Planet.MOON),
         ascendantSign: chartData.ascendant.sign as ZodiacSign,
       },
-      ['userId', 'birthDate', 'birthTime', 'latitude', 'longitude'],
+      [
+        'userId',
+        'birthDate',
+        'birthTime',
+        'latitude',
+        'longitude',
+        'orbSystem',
+      ],
     );
 
     const savedId = result.identifiers[0]?.id as number;

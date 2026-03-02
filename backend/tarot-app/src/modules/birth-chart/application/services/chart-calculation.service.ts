@@ -12,7 +12,7 @@ import { ZodiacSign, ZodiacSignMetadata, OrbSystem } from '../../domain/enums';
 import { localToUtc } from '../../domain/utils/timezone-utils';
 
 export interface ChartCalculationInput {
-  birthDate: Date;
+  birthDateStr: string; // "YYYY-MM-DD" — raw string, nunca se convierte a Date
   birthTime: string; // "HH:mm" o "HH:mm:ss"
   latitude: number;
   longitude: number;
@@ -45,12 +45,12 @@ export class ChartCalculationService {
   calculateChart(input: ChartCalculationInput): ChartCalculationResult {
     const startTime = Date.now();
 
-    this.logger.log(`Calculating chart for: ${input.birthDate.toISOString()}`);
+    this.logger.log(`Calculating chart for: ${input.birthDateStr}`);
 
     try {
       // 1. Parsear fecha y hora (convirtiendo a UTC con el timezone del nacimiento)
       const { year, month, day, hour, minute } = this.parseDateTime(
-        input.birthDate,
+        input.birthDateStr,
         input.birthTime,
         input.timezone,
       );
@@ -142,10 +142,14 @@ export class ChartCalculationService {
   }
 
   /**
-   * Parsea fecha y hora de nacimiento
+   * Parsea fecha y hora de nacimiento.
+   *
+   * Acepta el string crudo "YYYY-MM-DD" sin pasar por un intermediario JS Date,
+   * eliminando la dependencia de la timezone del servidor.
+   * Llama a localToUtc en una sola pasada Luxon respetando el DST histórico IANA.
    */
   private parseDateTime(
-    birthDate: Date,
+    birthDateStr: string,
     birthTime: string,
     timezone: string,
   ): {
@@ -155,7 +159,16 @@ export class ChartCalculationService {
     hour: number;
     minute: number;
   } {
-    // Validar formato de birthTime
+    // 1. Parsear componentes de fecha directamente desde string — sin JS Date
+    const dateParts = birthDateStr.split('-').map(Number);
+    if (dateParts.length !== 3 || dateParts.some(Number.isNaN)) {
+      throw new Error(
+        `Invalid birthDateStr format: "${birthDateStr}". Expected "YYYY-MM-DD".`,
+      );
+    }
+    const [year, month, day] = dateParts;
+
+    // 2. Parsear hora local
     const timeRegex = /^(\d{1,2}):(\d{2})(?::(\d{2}))?$/;
     const match = birthTime.match(timeRegex);
 
@@ -168,7 +181,6 @@ export class ChartCalculationService {
     const localHour = Number(match[1]);
     const localMinute = Number(match[2]);
 
-    // Validar rangos
     if (localHour < 0 || localHour > 23) {
       throw new Error(
         `Invalid hour: ${localHour}. Hour must be between 0 and 23.`,
@@ -181,21 +193,10 @@ export class ChartCalculationService {
       );
     }
 
-    // Validar que birthDate sea válido
-    if (isNaN(birthDate.getTime())) {
-      throw new Error('Invalid birthDate: Date object is invalid (NaN).');
-    }
-
-    // Convertir hora local → UTC usando el timezone IANA del nacimiento
+    // 3. Una sola pasada Luxon: datetime local de nacimiento → UTC
     // Swiss Ephemeris requiere UT (Universal Time) como entrada
     return localToUtc(
-      {
-        year: birthDate.getUTCFullYear(),
-        month: birthDate.getUTCMonth() + 1, // JavaScript usa 0-11
-        day: birthDate.getUTCDate(),
-        hour: localHour,
-        minute: localMinute,
-      },
+      { year, month, day, hour: localHour, minute: localMinute },
       timezone,
     );
   }
