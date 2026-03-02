@@ -3,7 +3,7 @@
 ## Historias de Usuario
 
 **Fecha de creación:** 18 de enero de 2026
-**Última actualización:** 26 de febrero de 2026
+**Última actualización:** 2 de marzo de 2026
 **Módulo:** Enciclopedia Mística
 **Prioridad Global:** 🟡 MEDIA
 **Estimación Total:** ~18-19 días
@@ -559,7 +559,8 @@ Feature: Explorar el sistema del horóscopo chino en la enciclopedia
 **Módulo:** `src/modules/encyclopedia/`  
 **Prioridad:** 🔴 ALTA  
 **Estimación:** 1 día  
-**Dependencias:** Ninguna
+**Dependencias:** Ninguna  
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -600,7 +601,7 @@ src/modules/encyclopedia/
 
 ##### Backend
 
-- [ ] Crear `tarot.enums.ts`:
+- [x] Crear `tarot.enums.ts`:
 
   ```typescript
   export enum ArcanaType {
@@ -659,7 +660,7 @@ src/modules/encyclopedia/
   }
   ```
 
-- [ ] Crear `tarot-card.entity.ts`:
+- [x] Crear `tarot-card.entity.ts` (creada como `encyclopedia-tarot-card.entity.ts` con clase `EncyclopediaTarotCard` y tabla `encyclopedia_tarot_cards`):
 
   ```typescript
   import { Entity, PrimaryGeneratedColumn, Column, Index, CreateDateColumn, UpdateDateColumn } from "typeorm";
@@ -749,7 +750,7 @@ src/modules/encyclopedia/
   }
   ```
 
-- [ ] Crear migración:
+- [x] Crear migración (creada como `1772000000000-CreateEncyclopediaTarotCards.ts`):
 
   ```typescript
   // XXXX-CreateTarotCards.ts
@@ -821,19 +822,19 @@ src/modules/encyclopedia/
 
 ##### Testing
 
-- [ ] Test: Entidad se crea correctamente
-- [ ] Test: Slug es único
-- [ ] Test: JSONB de keywords funciona
-- [ ] Test: Enums validan correctamente
+- [x] Test: Entidad se crea correctamente
+- [x] Test: Slug es único
+- [x] Test: JSONB de keywords funciona
+- [x] Test: Enums validan correctamente
 
 ---
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] Migración ejecuta sin errores
-- [ ] Entidad soporta 78 cartas
-- [ ] Índices creados para búsquedas comunes
-- [ ] Enums cubren todas las opciones
+- [x] Migración ejecuta sin errores
+- [x] Entidad soporta 78 cartas
+- [x] Índices creados para búsquedas comunes
+- [x] Enums cubren todas las opciones
 
 ---
 
