@@ -323,6 +323,9 @@ export class AddOrbSystemToBirthChart1771989502257 implements MigrationInterface
       `ALTER TABLE "anonymous_usage" DROP COLUMN "feature"`,
     );
     await queryRunner.query(
+      `DROP TYPE IF EXISTS "public"."anonymous_usage_feature_enum"`,
+    );
+    await queryRunner.query(
       `CREATE TYPE "public"."anonymous_usage_feature_enum" AS ENUM('daily_card', 'tarot_reading', 'oracle_query', 'interpretation_regeneration', 'pendulum_query', 'birth_chart')`,
     );
     await queryRunner.query(
