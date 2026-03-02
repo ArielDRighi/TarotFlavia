@@ -43,7 +43,6 @@ La Enciclopedia Mística es una sección educativa estática que permite a los u
 - Significados derecha/invertida (cartas de tarot)
 - Palabras clave y asociaciones
 - Relación entre cartas y artículos de astrología
-- Favoritos de cartas (usuarios registrados)
 - Widget "Info + Ver más" integrado en cada página de módulo
 - Páginas estáticas optimizadas para SEO (`generateMetadata` + `generateStaticParams`)
 - Acceso público total sin restricciones de plan
@@ -155,46 +154,6 @@ Feature: Ver información detallada de una carta
     Then navego a "La Sacerdotisa (II)"
     When hago clic en "Anterior"
     Then vuelvo a "El Mago (I)"
-```
-
----
-
-### HU-ENC-003: Gestionar favoritos (Usuario Registrado)
-
-```gherkin
-Feature: Guardar cartas favoritas
-  Como usuario registrado
-  Quiero guardar mis cartas favoritas
-  Para acceder rápidamente a ellas
-
-  Background:
-    Given soy un usuario registrado y autenticado
-    And estoy en la enciclopedia
-
-  Scenario: Agregar carta a favoritos
-    Given estoy viendo "La Estrella"
-    When hago clic en el ícono de corazón
-    Then la carta se agrega a mis favoritos
-    And el ícono cambia a corazón lleno
-    And veo un toast "Agregada a favoritos"
-
-  Scenario: Ver mis cartas favoritas
-    Given tengo 5 cartas en favoritos
-    When voy a "Mis Favoritos" en la enciclopedia
-    Then veo las 5 cartas que guardé
-    And puedo hacer clic en cada una
-
-  Scenario: Quitar carta de favoritos
-    Given "La Luna" está en mis favoritos
-    When hago clic en el corazón de "La Luna"
-    Then la carta se quita de favoritos
-    And el ícono vuelve a corazón vacío
-
-  Scenario: Usuario anónimo intenta agregar favorito
-    Given soy usuario anónimo
-    When intento agregar una carta a favoritos
-    Then veo un mensaje "Inicia sesión para guardar favoritos"
-    And veo un botón para registrarse
 ```
 
 ---
@@ -623,8 +582,7 @@ Crear la entidad principal que representa cada carta del Tarot con toda su infor
 src/modules/encyclopedia/
 ├── encyclopedia.module.ts
 ├── entities/
-│   ├── tarot-card.entity.ts
-│   └── user-favorite-card.entity.ts
+│   └── tarot-card.entity.ts
 ├── enums/
 │   └── tarot.enums.ts
 ├── data/
@@ -888,137 +846,6 @@ src/modules/encyclopedia/
 > - `romanNumeral` es NULL para Arcanos Menores
 > - Las imágenes se almacenan como URLs (no binarios)
 
-# Backend: Entidad de Favoritos
-
----
-
-### TASK-301: Crear entidad UserFavoriteCard
-
-**Módulo:** `src/modules/encyclopedia/entities/`  
-**Prioridad:** 🟡 MEDIA  
-**Estimación:** 0.5 días  
-**Dependencias:** TASK-300
-
----
-
-#### 📋 Descripción
-
-Crear la entidad para almacenar las cartas favoritas de cada usuario.
-
----
-
-#### 🏗️ Contexto Técnico
-
-**Archivos a crear:**
-
-- `src/modules/encyclopedia/entities/user-favorite-card.entity.ts`
-- `src/database/migrations/XXXX-CreateUserFavoriteCards.ts`
-
----
-
-#### ✅ Tareas Específicas
-
-##### Backend
-
-- [ ] Crear `user-favorite-card.entity.ts`:
-
-  ```typescript
-  import {
-    Entity,
-    PrimaryGeneratedColumn,
-    Column,
-    ManyToOne,
-    JoinColumn,
-    CreateDateColumn,
-    Index,
-    Unique,
-  } from "typeorm";
-  import { User } from "@/modules/users/entities/user.entity";
-  import { TarotCard } from "./tarot-card.entity";
-
-  @Entity("user_favorite_cards")
-  @Unique("unique_user_card", ["userId", "cardId"])
-  @Index("idx_favorites_user", ["userId"])
-  export class UserFavoriteCard {
-    @PrimaryGeneratedColumn()
-    id: number;
-
-    @Column()
-    userId: number;
-
-    @Column()
-    cardId: number;
-
-    @ManyToOne(() => User, { onDelete: "CASCADE" })
-    @JoinColumn({ name: "userId" })
-    user: User;
-
-    @ManyToOne(() => TarotCard, { onDelete: "CASCADE" })
-    @JoinColumn({ name: "cardId" })
-    card: TarotCard;
-
-    @CreateDateColumn()
-    createdAt: Date;
-  }
-  ```
-
-- [ ] Crear migración:
-
-  ```typescript
-  // XXXX-CreateUserFavoriteCards.ts
-  export class CreateUserFavoriteCards implements MigrationInterface {
-    public async up(queryRunner: QueryRunner): Promise<void> {
-      await queryRunner.query(`
-        CREATE TABLE user_favorite_cards (
-          id SERIAL PRIMARY KEY,
-          user_id INTEGER NOT NULL,
-          card_id INTEGER NOT NULL,
-          created_at TIMESTAMPTZ DEFAULT NOW(),
-          
-          CONSTRAINT fk_favorite_user
-            FOREIGN KEY (user_id)
-            REFERENCES users(id)
-            ON DELETE CASCADE,
-            
-          CONSTRAINT fk_favorite_card
-            FOREIGN KEY (card_id)
-            REFERENCES tarot_cards(id)
-            ON DELETE CASCADE,
-            
-          CONSTRAINT unique_user_card
-            UNIQUE (user_id, card_id)
-        );
-      `);
-
-      await queryRunner.query(`
-        CREATE INDEX idx_favorites_user ON user_favorite_cards(user_id);
-      `);
-    }
-
-    public async down(queryRunner: QueryRunner): Promise<void> {
-      await queryRunner.query("DROP TABLE IF EXISTS user_favorite_cards");
-    }
-  }
-  ```
-
-##### Testing
-
-- [ ] Test: Crear favorito funciona
-- [ ] Test: Constraint único previene duplicados
-- [ ] Test: Cascade delete funciona con usuario
-- [ ] Test: Cascade delete funciona con carta
-
----
-
-#### 🎯 Criterios de Aceptación
-
-- [ ] Relación muchos-a-muchos funciona
-- [ ] No se pueden duplicar favoritos
-- [ ] Eliminar usuario elimina sus favoritos
-- [ ] Índice en userId para consultas rápidas
-
----
-
 ### TASK-302: Crear Seeder de Cartas del Tarot
 
 **Módulo:** `src/modules/encyclopedia/data/`  
@@ -1274,13 +1101,13 @@ Crear el archivo de datos con las 78 cartas y el comando para poblar la base de 
 **Módulo:** `src/modules/encyclopedia/`  
 **Prioridad:** 🔴 ALTA  
 **Estimación:** 1 día  
-**Dependencias:** TASK-300, TASK-301, TASK-302
+**Dependencias:** TASK-300, TASK-302
 
 ---
 
 #### 📋 Descripción
 
-Crear el módulo NestJS con el servicio principal para consultar cartas y gestionar favoritos.
+Crear el módulo NestJS con el servicio principal para consultar cartas.
 
 ---
 
@@ -1290,7 +1117,6 @@ Crear el módulo NestJS con el servicio principal para consultar cartas y gestio
 
 - `src/modules/encyclopedia/encyclopedia.module.ts`
 - `src/modules/encyclopedia/application/services/encyclopedia.service.ts`
-- `src/modules/encyclopedia/application/services/favorites.service.ts`
 - `src/modules/encyclopedia/application/dto/*.dto.ts`
 
 ---
@@ -1367,9 +1193,6 @@ Crear el módulo NestJS con el servicio principal para consultar cartas y gestio
 
     @ApiProperty({ type: [Number], nullable: true })
     relatedCards: number[] | null;
-
-    @ApiProperty({ example: false })
-    isFavorite: boolean;
   }
   ```
 
@@ -1489,7 +1312,7 @@ Crear el módulo NestJS con el servicio principal para consultar cartas y gestio
       // Incrementar contador de vistas (fire-and-forget)
       this.incrementViewCount(card.id).catch(() => {});
 
-      return this.toDetailDto(card, false); // isFavorite se setea en controller
+      return this.toDetailDto(card);
     }
 
     /**
@@ -1571,7 +1394,7 @@ Crear el módulo NestJS con el servicio principal para consultar cartas y gestio
       };
     }
 
-    private toDetailDto(card: TarotCard, isFavorite: boolean): CardDetailDto {
+    private toDetailDto(card: TarotCard): CardDetailDto {
       return {
         ...this.toSummaryDto(card),
         nameEn: card.nameEn,
@@ -1584,95 +1407,7 @@ Crear el módulo NestJS con el servicio principal para consultar cartas y gestio
         keywords: card.keywords,
         imageUrl: card.imageUrl,
         relatedCards: card.relatedCards,
-        isFavorite,
       };
-    }
-  }
-  ```
-
-- [ ] Crear `favorites.service.ts`:
-
-  ```typescript
-  import { Injectable, ConflictException } from "@nestjs/common";
-  import { InjectRepository } from "@nestjs/typeorm";
-  import { Repository } from "typeorm";
-  import { UserFavoriteCard } from "../entities/user-favorite-card.entity";
-  import { TarotCard } from "../entities/tarot-card.entity";
-  import { CardSummaryDto } from "../application/dto/card-response.dto";
-
-  @Injectable()
-  export class FavoritesService {
-    constructor(
-      @InjectRepository(UserFavoriteCard)
-      private readonly favoriteRepository: Repository<UserFavoriteCard>,
-      @InjectRepository(TarotCard)
-      private readonly cardRepository: Repository<TarotCard>,
-    ) {}
-
-    /**
-     * Agregar carta a favoritos
-     */
-    async addFavorite(userId: number, cardId: number): Promise<void> {
-      const existing = await this.favoriteRepository.findOne({
-        where: { userId, cardId },
-      });
-
-      if (existing) {
-        throw new ConflictException("La carta ya está en favoritos");
-      }
-
-      const favorite = this.favoriteRepository.create({ userId, cardId });
-      await this.favoriteRepository.save(favorite);
-    }
-
-    /**
-     * Quitar carta de favoritos
-     */
-    async removeFavorite(userId: number, cardId: number): Promise<void> {
-      await this.favoriteRepository.delete({ userId, cardId });
-    }
-
-    /**
-     * Verificar si es favorito
-     */
-    async isFavorite(userId: number, cardId: number): Promise<boolean> {
-      const count = await this.favoriteRepository.count({
-        where: { userId, cardId },
-      });
-      return count > 0;
-    }
-
-    /**
-     * Obtener favoritos del usuario
-     */
-    async getUserFavorites(userId: number): Promise<CardSummaryDto[]> {
-      const favorites = await this.favoriteRepository.find({
-        where: { userId },
-        relations: ["card"],
-        order: { createdAt: "DESC" },
-      });
-
-      return favorites.map((fav) => ({
-        id: fav.card.id,
-        slug: fav.card.slug,
-        nameEs: fav.card.nameEs,
-        arcanaType: fav.card.arcanaType,
-        number: fav.card.number,
-        suit: fav.card.suit,
-        thumbnailUrl: fav.card.thumbnailUrl || fav.card.imageUrl,
-      }));
-    }
-
-    /**
-     * Obtener IDs de favoritos (para marcar en listados)
-     */
-    async getUserFavoriteIds(userId: number): Promise<number[]> {
-      const favorites = await this.favoriteRepository.find({
-        where: { userId },
-        select: ["cardId"],
-      });
-
-      return favorites.map((f) => f.cardId);
     }
   }
   ```
@@ -1683,14 +1418,12 @@ Crear el módulo NestJS con el servicio principal para consultar cartas y gestio
   import { Module } from "@nestjs/common";
   import { TypeOrmModule } from "@nestjs/typeorm";
   import { TarotCard } from "./entities/tarot-card.entity";
-  import { UserFavoriteCard } from "./entities/user-favorite-card.entity";
   import { EncyclopediaService } from "./application/services/encyclopedia.service";
-  import { FavoritesService } from "./application/services/favorites.service";
   import { EncyclopediaController } from "./infrastructure/controllers/encyclopedia.controller";
 
   @Module({
-    imports: [TypeOrmModule.forFeature([TarotCard, UserFavoriteCard])],
-    providers: [EncyclopediaService, FavoritesService],
+    imports: [TypeOrmModule.forFeature([TarotCard])],
+    providers: [EncyclopediaService],
     controllers: [EncyclopediaController],
     exports: [EncyclopediaService],
   })
@@ -1707,7 +1440,6 @@ Crear el módulo NestJS con el servicio principal para consultar cartas y gestio
 - [ ] Test: Búsqueda por nombre funciona
 - [ ] Test: findBySlug retorna carta correcta
 - [ ] Test: 404 para slug inexistente
-- [ ] Test: Favoritos CRUD funciona
 
 ---
 
@@ -1716,7 +1448,6 @@ Crear el módulo NestJS con el servicio principal para consultar cartas y gestio
 - [ ] Servicio consulta todas las cartas
 - [ ] Filtros funcionan correctamente
 - [ ] Búsqueda es case-insensitive
-- [ ] Favoritos se gestionan correctamente
 - [ ] ViewCount se incrementa
 
 # Backend: Endpoints
@@ -1734,7 +1465,7 @@ Crear el módulo NestJS con el servicio principal para consultar cartas y gestio
 
 #### 📋 Descripción
 
-Implementar endpoints REST para consultar cartas y gestionar favoritos.
+Implementar endpoints REST para consultar cartas.
 
 ---
 
@@ -1756,9 +1487,6 @@ Implementar endpoints REST para consultar cartas y gestionar favoritos.
 | GET    | `/encyclopedia/cards/:slug`            | Detalle de carta          | No   |
 | GET    | `/encyclopedia/cards/:slug/related`    | Cartas relacionadas       | No   |
 | GET    | `/encyclopedia/cards/:slug/navigation` | Anterior/Siguiente        | No   |
-| GET    | `/encyclopedia/favorites`              | Mis favoritos             | Sí   |
-| POST   | `/encyclopedia/favorites/:cardId`      | Agregar favorito          | Sí   |
-| DELETE | `/encyclopedia/favorites/:cardId`      | Quitar favorito           | Sí   |
 
 ---
 
@@ -1772,23 +1500,12 @@ Implementar endpoints REST para consultar cartas y gestionar favoritos.
   import {
     Controller,
     Get,
-    Post,
-    Delete,
     Param,
     Query,
-    UseGuards,
-    ParseIntPipe,
     ParseEnumPipe,
-    HttpCode,
-    HttpStatus,
   } from "@nestjs/common";
-  import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery } from "@nestjs/swagger";
-  import { JwtAuthGuard } from "@/common/guards/jwt-auth.guard";
-  import { OptionalAuthGuard } from "@/common/guards/optional-auth.guard";
-  import { CurrentUser } from "@/common/decorators/current-user.decorator";
-  import { User } from "@/modules/users/entities/user.entity";
+  import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from "@nestjs/swagger";
   import { EncyclopediaService } from "../application/services/encyclopedia.service";
-  import { FavoritesService } from "../application/services/favorites.service";
   import { CardFiltersDto } from "../application/dto/card-filters.dto";
   import { CardSummaryDto, CardDetailDto } from "../application/dto/card-response.dto";
   import { Suit } from "../enums/tarot.enums";
@@ -1798,7 +1515,6 @@ Implementar endpoints REST para consultar cartas y gestionar favoritos.
   export class EncyclopediaController {
     constructor(
       private readonly encyclopediaService: EncyclopediaService,
-      private readonly favoritesService: FavoritesService,
     ) {}
 
     /**
@@ -1855,21 +1571,12 @@ Implementar endpoints REST para consultar cartas y gestionar favoritos.
      * Obtener detalle de carta
      */
     @Get("cards/:slug")
-    @UseGuards(OptionalAuthGuard)
     @ApiOperation({ summary: "Obtener detalle de una carta" })
     @ApiParam({ name: "slug", example: "the-fool" })
     @ApiResponse({ status: 200, type: CardDetailDto })
     @ApiResponse({ status: 404, description: "Carta no encontrada" })
-    async getCardBySlug(@Param("slug") slug: string, @CurrentUser() user?: User): Promise<CardDetailDto> {
-      const card = await this.encyclopediaService.findBySlug(slug);
-
-      // Verificar si es favorito (si hay usuario)
-      if (user) {
-        const isFavorite = await this.favoritesService.isFavorite(user.id, card.id);
-        return { ...card, isFavorite };
-      }
-
-      return { ...card, isFavorite: false };
+    async getCardBySlug(@Param("slug") slug: string): Promise<CardDetailDto> {
+      return this.encyclopediaService.findBySlug(slug);
     }
 
     /**
@@ -1898,77 +1605,6 @@ Implementar endpoints REST para consultar cartas y gestionar favoritos.
       return this.encyclopediaService.getNavigation(card.id);
     }
 
-    // =====================
-    // FAVORITOS (requieren auth)
-    // =====================
-
-    /**
-     * GET /encyclopedia/favorites
-     * Obtener mis cartas favoritas
-     */
-    @Get("favorites")
-    @UseGuards(JwtAuthGuard)
-    @ApiBearerAuth()
-    @ApiOperation({ summary: "Obtener mis cartas favoritas" })
-    @ApiResponse({ status: 200, type: [CardSummaryDto] })
-    async getMyFavorites(@CurrentUser() user: User): Promise<CardSummaryDto[]> {
-      return this.favoritesService.getUserFavorites(user.id);
-    }
-
-    /**
-     * POST /encyclopedia/favorites/:cardId
-     * Agregar carta a favoritos
-     */
-    @Post("favorites/:cardId")
-    @UseGuards(JwtAuthGuard)
-    @ApiBearerAuth()
-    @HttpCode(HttpStatus.CREATED)
-    @ApiOperation({ summary: "Agregar carta a favoritos" })
-    @ApiParam({ name: "cardId", example: 1 })
-    @ApiResponse({ status: 201, description: "Agregada a favoritos" })
-    @ApiResponse({ status: 409, description: "Ya está en favoritos" })
-    async addFavorite(
-      @CurrentUser() user: User,
-      @Param("cardId", ParseIntPipe) cardId: number,
-    ): Promise<{ message: string }> {
-      await this.favoritesService.addFavorite(user.id, cardId);
-      return { message: "Carta agregada a favoritos" };
-    }
-
-    /**
-     * DELETE /encyclopedia/favorites/:cardId
-     * Quitar carta de favoritos
-     */
-    @Delete("favorites/:cardId")
-    @UseGuards(JwtAuthGuard)
-    @ApiBearerAuth()
-    @HttpCode(HttpStatus.OK)
-    @ApiOperation({ summary: "Quitar carta de favoritos" })
-    @ApiParam({ name: "cardId", example: 1 })
-    @ApiResponse({ status: 200, description: "Eliminada de favoritos" })
-    async removeFavorite(
-      @CurrentUser() user: User,
-      @Param("cardId", ParseIntPipe) cardId: number,
-    ): Promise<{ message: string }> {
-      await this.favoritesService.removeFavorite(user.id, cardId);
-      return { message: "Carta eliminada de favoritos" };
-    }
-  }
-  ```
-
-- [ ] Crear `OptionalAuthGuard` si no existe:
-
-  ```typescript
-  // src/common/guards/optional-auth.guard.ts
-  import { Injectable, ExecutionContext } from "@nestjs/common";
-  import { AuthGuard } from "@nestjs/passport";
-
-  @Injectable()
-  export class OptionalAuthGuard extends AuthGuard("jwt") {
-    handleRequest(err: any, user: any) {
-      // No lanzar error si no hay usuario
-      return user || null;
-    }
   }
   ```
 
@@ -1980,10 +1616,6 @@ Implementar endpoints REST para consultar cartas y gestionar favoritos.
 - [ ] Test e2e: GET /encyclopedia/cards/search?q=mag retorna resultados
 - [ ] Test e2e: GET /encyclopedia/cards/the-fool retorna detalle
 - [ ] Test e2e: GET /encyclopedia/cards/invalid retorna 404
-- [ ] Test e2e: GET /encyclopedia/favorites sin auth retorna 401
-- [ ] Test e2e: POST /encyclopedia/favorites/1 agrega favorito
-- [ ] Test e2e: POST duplicado retorna 409
-- [ ] Test e2e: DELETE /encyclopedia/favorites/1 elimina
 
 ---
 
@@ -1991,8 +1623,6 @@ Implementar endpoints REST para consultar cartas y gestionar favoritos.
 
 - [ ] Todos los endpoints funcionan
 - [ ] Filtros se aplican correctamente
-- [ ] OptionalAuthGuard funciona
-- [ ] Favoritos requieren autenticación
 - [ ] Documentación Swagger completa
 
 ---
@@ -2001,8 +1631,6 @@ Implementar endpoints REST para consultar cartas y gestionar favoritos.
 
 > **IMPORTANTE:**
 >
-> - OptionalAuthGuard permite que el endpoint funcione con o sin auth
-> - El campo `isFavorite` solo se calcula si hay usuario
 > - La búsqueda requiere mínimo 2 caracteres
 > - Usar ILIKE para búsqueda case-insensitive en PostgreSQL
 
@@ -2615,7 +2243,6 @@ Crear los tipos TypeScript y funciones de API para la enciclopedia del Tarot.
     keywords: CardKeywords;
     imageUrl: string;
     relatedCards: number[] | null;
-    isFavorite: boolean;
   }
 
   export interface CardNavigation {
@@ -2699,9 +2326,6 @@ Crear los tipos TypeScript y funciones de API para la enciclopedia del Tarot.
       CARD_DETAIL: (slug: string) => `/encyclopedia/cards/${slug}`,
       CARD_RELATED: (slug: string) => `/encyclopedia/cards/${slug}/related`,
       CARD_NAVIGATION: (slug: string) => `/encyclopedia/cards/${slug}/navigation`,
-      FAVORITES: "/encyclopedia/favorites",
-      ADD_FAVORITE: (cardId: number) => `/encyclopedia/favorites/${cardId}`,
-      REMOVE_FAVORITE: (cardId: number) => `/encyclopedia/favorites/${cardId}`,
     },
   } as const;
   ```
@@ -2756,19 +2380,6 @@ Crear los tipos TypeScript y funciones de API para la enciclopedia del Tarot.
     const response = await apiClient.get<CardNavigation>(API_ENDPOINTS.ENCYCLOPEDIA.CARD_NAVIGATION(slug));
     return response.data;
   }
-
-  export async function getFavorites(): Promise<CardSummary[]> {
-    const response = await apiClient.get<CardSummary[]>(API_ENDPOINTS.ENCYCLOPEDIA.FAVORITES);
-    return response.data;
-  }
-
-  export async function addFavorite(cardId: number): Promise<void> {
-    await apiClient.post(API_ENDPOINTS.ENCYCLOPEDIA.ADD_FAVORITE(cardId));
-  }
-
-  export async function removeFavorite(cardId: number): Promise<void> {
-    await apiClient.delete(API_ENDPOINTS.ENCYCLOPEDIA.REMOVE_FAVORITE(cardId));
-  }
   ```
 
 - [ ] Crear `useEncyclopedia.ts`:
@@ -2776,7 +2387,7 @@ Crear los tipos TypeScript y funciones de API para la enciclopedia del Tarot.
   ```typescript
   "use client";
 
-  import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+  import { useQuery } from "@tanstack/react-query";
   import {
     getCards,
     getMajorArcana,
@@ -2785,9 +2396,6 @@ Crear los tipos TypeScript y funciones de API para la enciclopedia del Tarot.
     getCardBySlug,
     getRelatedCards,
     getCardNavigation,
-    getFavorites,
-    addFavorite,
-    removeFavorite,
   } from "@/lib/api/encyclopedia-api";
   import type { CardFilters, Suit } from "@/types/encyclopedia.types";
 
@@ -2800,7 +2408,6 @@ Crear los tipos TypeScript y funciones de API para la enciclopedia del Tarot.
     card: (slug: string) => [...encyclopediaKeys.all, "card", slug] as const,
     related: (slug: string) => [...encyclopediaKeys.all, "related", slug] as const,
     navigation: (slug: string) => [...encyclopediaKeys.all, "navigation", slug] as const,
-    favorites: () => [...encyclopediaKeys.all, "favorites"] as const,
   };
 
   export function useCards(filters?: CardFilters) {
@@ -2861,33 +2468,6 @@ Crear los tipos TypeScript y funciones de API para la enciclopedia del Tarot.
       enabled: !!slug,
     });
   }
-
-  export function useFavorites() {
-    return useQuery({
-      queryKey: encyclopediaKeys.favorites(),
-      queryFn: getFavorites,
-    });
-  }
-
-  export function useToggleFavorite() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-      mutationFn: async ({ cardId, isFavorite }: { cardId: number; isFavorite: boolean }) => {
-        if (isFavorite) {
-          await removeFavorite(cardId);
-        } else {
-          await addFavorite(cardId);
-        }
-      },
-      onSuccess: (_, { cardId }) => {
-        // Invalidar queries relacionadas
-        queryClient.invalidateQueries({ queryKey: encyclopediaKeys.favorites() });
-        // Actualizar el detalle de la carta si está en caché
-        queryClient.invalidateQueries({ queryKey: encyclopediaKeys.all });
-      },
-    });
-  }
   ```
 
 - [ ] Exportar desde `types/index.ts`
@@ -2898,7 +2478,6 @@ Crear los tipos TypeScript y funciones de API para la enciclopedia del Tarot.
 - [ ] Test: API functions hacen llamadas correctas
 - [ ] Test: Hooks retornan datos esperados
 - [ ] Test: useSearchCards solo ejecuta con 2+ caracteres
-- [ ] Test: useToggleFavorite invalida queries
 
 ---
 
@@ -2907,7 +2486,6 @@ Crear los tipos TypeScript y funciones de API para la enciclopedia del Tarot.
 - [ ] Tipos completos para todas las entidades
 - [ ] API functions cubren todos los endpoints
 - [ ] Hooks con staleTime apropiado (1h para datos estáticos)
-- [ ] Toggle de favoritos funciona con invalidación
 
 # Frontend: Componentes de Lista y Navegación
 
@@ -3256,7 +2834,6 @@ frontend/src/components/features/encyclopedia/
 ├── CardKeywords.tsx
 ├── CardMetadata.tsx
 ├── CardNavigation.tsx
-├── FavoriteButton.tsx
 ├── RelatedCards.tsx
 ```
 
@@ -3479,66 +3056,6 @@ frontend/src/components/features/encyclopedia/
   }
   ```
 
-- [ ] Crear `FavoriteButton.tsx`:
-
-  ```tsx
-  "use client";
-
-  import { Heart } from "lucide-react";
-  import { Button } from "@/components/ui/button";
-  import { useToggleFavorite } from "@/hooks/api/useEncyclopedia";
-  import { useAuthStore } from "@/stores/authStore";
-  import { useToast } from "@/hooks/useToast";
-  import { cn } from "@/lib/utils";
-
-  interface FavoriteButtonProps {
-    cardId: number;
-    isFavorite: boolean;
-    className?: string;
-  }
-
-  export function FavoriteButton({ cardId, isFavorite, className }: FavoriteButtonProps) {
-    const { isAuthenticated } = useAuthStore();
-    const { toast } = useToast();
-    const { mutate, isPending } = useToggleFavorite();
-
-    const handleClick = () => {
-      if (!isAuthenticated) {
-        toast({
-          title: "Inicia sesión",
-          description: "Debes iniciar sesión para guardar favoritos",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      mutate(
-        { cardId, isFavorite },
-        {
-          onSuccess: () => {
-            toast({
-              title: isFavorite ? "Eliminada" : "Agregada",
-              description: isFavorite ? "Carta eliminada de favoritos" : "Carta agregada a favoritos",
-            });
-          },
-        },
-      );
-    };
-
-    return (
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={handleClick}
-        disabled={isPending}
-        className={cn("transition-colors", isFavorite && "text-red-500 hover:text-red-600", className)}
-      >
-        <Heart className={cn("h-5 w-5", isFavorite && "fill-current")} />
-      </Button>
-    );
-  }
-  ```
-
 - [ ] Crear `CardNavigation.tsx`:
 
   ```tsx
@@ -3648,7 +3165,6 @@ frontend/src/components/features/encyclopedia/
   import { CardKeywords } from "./CardKeywords";
   import { CardMetadata } from "./CardMetadata";
   import { CardNavigation } from "./CardNavigation";
-  import { FavoriteButton } from "./FavoriteButton";
   import { RelatedCards } from "./RelatedCards";
   import type { CardDetail } from "@/types/encyclopedia.types";
 
@@ -3667,7 +3183,6 @@ frontend/src/components/features/encyclopedia/
               Enciclopedia
             </Link>
           </Button>
-          <FavoriteButton cardId={card.id} isFavorite={card.isFavorite} />
         </div>
 
         {/* Contenido principal */}
@@ -3709,7 +3224,6 @@ frontend/src/components/features/encyclopedia/
 ##### Testing
 
 - [ ] Test: CardDetailView renderiza todos los componentes
-- [ ] Test: FavoriteButton muestra estado correcto
 - [ ] Test: CardNavigation muestra anterior/siguiente
 - [ ] Test: CardImage abre modal al hacer clic
 - [ ] Test: Tabs de significados funcionan
@@ -3720,7 +3234,6 @@ frontend/src/components/features/encyclopedia/
 
 - [ ] Vista de detalle muestra toda la información
 - [ ] Imagen se puede ampliar en modal
-- [ ] Favoritos funcionan con feedback visual
 - [ ] Navegación entre cartas funciona
 - [ ] Componentes son responsive
 
@@ -3749,7 +3262,6 @@ Crear las páginas principales de la enciclopedia: listado y detalle de cartas.
 
 - `frontend/src/app/enciclopedia/page.tsx`
 - `frontend/src/app/enciclopedia/[slug]/page.tsx`
-- `frontend/src/app/enciclopedia/favoritos/page.tsx`
 
 **Archivos a modificar:**
 
@@ -3769,7 +3281,6 @@ Crear las páginas principales de la enciclopedia: listado y detalle de cartas.
     // ...existentes
     ENCICLOPEDIA: "/enciclopedia",
     ENCICLOPEDIA_CARD: (slug: string) => `/enciclopedia/${slug}`,
-    ENCICLOPEDIA_FAVORITOS: "/enciclopedia/favoritos",
   } as const;
   ```
 
@@ -3940,79 +3451,13 @@ Crear las páginas principales de la enciclopedia: listado y detalle de cartas.
   }
   ```
 
-- [ ] Crear `app/enciclopedia/favoritos/page.tsx`:
-
-  ```tsx
-  "use client";
-
-  import { useRouter } from "next/navigation";
-  import { useEffect } from "react";
-  import { Heart } from "lucide-react";
-  import { CardGrid, EncyclopediaSkeleton } from "@/components/features/encyclopedia";
-  import { useFavorites } from "@/hooks/api/useEncyclopedia";
-  import { useAuthStore } from "@/stores/authStore";
-  import { Button } from "@/components/ui/button";
-  import Link from "next/link";
-  import { ROUTES } from "@/lib/constants/routes";
-
-  export default function FavoritosPage() {
-    const router = useRouter();
-    const { isAuthenticated, isLoading: authLoading } = useAuthStore();
-    const { data: favorites, isLoading } = useFavorites();
-
-    // Redirect si no está autenticado
-    useEffect(() => {
-      if (!authLoading && !isAuthenticated) {
-        router.push("/login?redirect=/enciclopedia/favoritos");
-      }
-    }, [authLoading, isAuthenticated, router]);
-
-    if (authLoading || !isAuthenticated) {
-      return (
-        <div className="container mx-auto py-8 px-4">
-          <EncyclopediaSkeleton variant="grid" count={6} />
-        </div>
-      );
-    }
-
-    return (
-      <div className="container mx-auto py-8 px-4">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Heart className="h-8 w-8 text-red-500" />
-            <h1 className="font-serif text-4xl">Mis Favoritos</h1>
-          </div>
-          <p className="text-muted-foreground">Tus cartas guardadas para referencia rápida</p>
-        </div>
-
-        {/* Contenido */}
-        {isLoading ? (
-          <EncyclopediaSkeleton variant="grid" count={6} />
-        ) : favorites && favorites.length > 0 ? (
-          <CardGrid cards={favorites} />
-        ) : (
-          <div className="text-center py-12">
-            <Heart className="h-16 w-16 mx-auto text-muted-foreground/30 mb-4" />
-            <h2 className="text-xl mb-2">Sin favoritos aún</h2>
-            <p className="text-muted-foreground mb-6">Explora la enciclopedia y guarda las cartas que te interesen</p>
-            <Button asChild>
-              <Link href={ROUTES.ENCICLOPEDIA}>Explorar cartas</Link>
-            </Button>
-          </div>
-        )}
-      </div>
-    );
-  }
-  ```
-
 - [ ] Actualizar `Header.tsx`:
   ```tsx
   const navigationItems = [
     { href: "/carta-del-dia", label: "Carta del Día" },
     { href: "/horoscopo", label: "Horóscopo" },
     { href: "/numerologia", label: "Numerología" },
-    { href: "/enciclopedia", label: "Enciclopedia" },
+    { href: "/enciclopedia", label: "Enciclopedia Mística" },
     { href: "/ritual", label: "Lectura", requiresAuth: true },
   ];
   ```
@@ -4025,8 +3470,6 @@ Crear las páginas principales de la enciclopedia: listado y detalle de cartas.
 - [ ] Test: Búsqueda filtra correctamente
 - [ ] Test: Página de detalle muestra carta
 - [ ] Test: 404 para slug inexistente
-- [ ] Test: Favoritos requiere auth
-- [ ] Test: Estado vacío de favoritos
 
 ---
 
@@ -4035,7 +3478,6 @@ Crear las páginas principales de la enciclopedia: listado y detalle de cartas.
 - [ ] /enciclopedia muestra grid de cartas
 - [ ] Filtros y búsqueda funcionan
 - [ ] /enciclopedia/[slug] muestra detalle
-- [ ] /enciclopedia/favoritos requiere auth
 - [ ] Link en header
 - [ ] Responsive en móvil
 
@@ -4047,7 +3489,6 @@ Crear las páginas principales de la enciclopedia: listado y detalle de cartas.
 >
 > - La búsqueda solo se activa con 2+ caracteres
 > - El selector de palo solo aparece en categoría "minor"
-> - Favoritos redirige a login si no está autenticado
 > - Usar useCallback para handleSearch (evitar re-renders)
 
 ---
@@ -4824,34 +4265,11 @@ CREATE INDEX idx_card_suit ON tarot_cards(suit);
 CREATE INDEX idx_card_element ON tarot_cards(element);
 ```
 
-### Tabla: `user_favorite_cards`
-
-```sql
-CREATE TABLE user_favorite_cards (
-  id SERIAL PRIMARY KEY,
-  user_id INTEGER NOT NULL,
-  card_id INTEGER NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-
-  -- Foreign Keys
-  CONSTRAINT fk_favorite_user
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-  CONSTRAINT fk_favorite_card
-    FOREIGN KEY (card_id) REFERENCES tarot_cards(id) ON DELETE CASCADE,
-
-  -- Único por usuario-carta
-  CONSTRAINT unique_user_card UNIQUE (user_id, card_id)
-);
-
-CREATE INDEX idx_favorites_user ON user_favorite_cards(user_id);
-```
-
 ### Tamaño Estimado
 
 | Tabla               | Registros | Tamaño Aprox            |
 | ------------------- | --------- | ----------------------- |
 | tarot_cards         | 78        | ~200 KB                 |
-| user_favorite_cards | Variable  | ~1 KB por 100 favoritos |
 
 **Nota:** Los datos de cartas son estáticos (seeder), solo view_count cambia.
 
@@ -4905,7 +4323,6 @@ public/images/tarot/
 | Tarea    | Descripción              | Estimación |
 | -------- | ------------------------ | ---------- |
 | TASK-300 | Entidad TarotCard        | 1 día      |
-| TASK-301 | Entidad UserFavoriteCard | 0.5 días   |
 | TASK-302 | Seeder de 78 cartas      | 1.5 días   |
 | TASK-303 | Módulo y servicios       | 1 día      |
 | TASK-304 | Endpoints                | 1 día      |
@@ -4914,7 +4331,7 @@ public/images/tarot/
 | TASK-307 | Componentes de detalle   | 1 día      |
 | TASK-308 | Páginas                  | 1 día      |
 
-**Subtotal Fase 1:** 8.5 días
+**Subtotal Fase 1:** 8 días
 
 ---
 
@@ -4948,7 +4365,7 @@ public/images/tarot/
 
 ---
 
-**TOTAL PROYECTO:** ~18-19 días
+**TOTAL PROYECTO:** ~17.5-18.5 días
 
 ---
 
@@ -4957,7 +4374,6 @@ public/images/tarot/
 ```
 Semana 1: Backend Tarot (Fase 1)
 ├── TASK-300: Entidad TarotCard (1d)
-├── TASK-301: Entidad UserFavoriteCard (0.5d)
 ├── TASK-302: Seeder de cartas (1.5d)
 ├── TASK-303: Módulo y servicios (1d)
 └── TASK-304: Endpoints (1d)
@@ -5010,7 +4426,6 @@ Semana 4-5: Frontend páginas completas (Fase 2 - enciclopedia completa)
 ### Backend — Tarot (Fase 1)
 
 - [ ] TASK-300: Entidad TarotCard creada
-- [ ] TASK-301: Entidad UserFavoriteCard creada
 - [ ] TASK-302: Seeder con 78 cartas
 - [ ] TASK-303: Módulo y servicios
 - [ ] TASK-304: Endpoints funcionando
@@ -5077,7 +4492,6 @@ Semana 4-5: Frontend páginas completas (Fase 2 - enciclopedia completa)
 - Imágenes con alt text descriptivo
 - Navegación por teclado en los grids
 - Contraste adecuado en badges
-- aria-labels en botones de favoritos
 
 ### Performance
 
@@ -5086,6 +4500,1027 @@ Semana 4-5: Frontend páginas completas (Fase 2 - enciclopedia completa)
 - `staleTime` de 1 hora (datos estáticos)
 - `generateStaticParams` para pre-render de páginas de artículos en build time
 - El endpoint `/snippet/:slug` retorna respuesta mínima para mantener el widget ligero
+
+---
+
+## PROMPTS PARA GENERACIÓN DE CONTENIDO (Gemini)
+
+> **Instrucciones de uso:** Cada prompt a continuación debe enviarse a Gemini por separado.
+> La respuesta debe ser TypeScript válido, listo para copiar-pegar en el archivo `.data.ts` correspondiente.
+> Los prompts más pesados (Prompt 2 y Prompt 6) incluyen notas sobre posible subdivisión.
+
+---
+
+### Prompt 1: Arcanos Mayores (`major-arcana.data.ts`)
+
+> **Archivo destino:** `src/modules/encyclopedia/data/major-arcana.data.ts`
+> **Volumen:** 22 cartas
+
+```
+Necesito que generes los datos completos de las 22 cartas de Arcanos Mayores del Tarot Rider-Waite para un seeder de base de datos.
+
+INTERFAZ TYPESCRIPT (cada carta debe cumplir esta interfaz exacta):
+
+export interface CardSeedData {
+  slug: string;               // kebab-case, URL-safe. Ej: "the-fool", "the-magician"
+  nameEn: string;             // Nombre en inglés
+  nameEs: string;             // Nombre en español
+  arcanaType: ArcanaType;     // Siempre ArcanaType.MAJOR para este bloque
+  number: number;             // 0 (El Loco) a 21 (El Mundo)
+  romanNumeral?: string;      // "0", "I", "II", ... "XXI"
+  suit?: string;              // No aplica para Arcanos Mayores (omitir)
+  courtRank?: string;         // No aplica para Arcanos Mayores (omitir)
+  element?: Element;          // Asociación elemental tradicional Rider-Waite
+  planet?: Planet;            // Asociación planetaria tradicional Rider-Waite
+  zodiacSign?: ZodiacAssociation; // Asociación zodiacal tradicional Rider-Waite
+  meaningUpright: string;     // 3+ oraciones en español. Mínimo 50 caracteres.
+  meaningReversed: string;    // 3+ oraciones en español. Mínimo 50 caracteres.
+  description: string;        // Descripción visual de la carta Rider-Waite. Mín 20 chars.
+  keywords: {
+    upright: string[];        // Mínimo 5 palabras clave en español
+    reversed: string[];       // 4-5 palabras clave en español
+  };
+  imageUrl: string;           // Pattern: "/images/tarot/major/{nn}-{slug}.jpg" (nn = 00-21)
+}
+
+ENUMS VÁLIDOS:
+
+enum ArcanaType { MAJOR = "major", MINOR = "minor" }
+
+enum Element { FIRE = "fire", WATER = "water", AIR = "air", EARTH = "earth", SPIRIT = "spirit" }
+
+enum Planet { SUN = "sun", MOON = "moon", MERCURY = "mercury", VENUS = "venus", MARS = "mars", JUPITER = "jupiter", SATURN = "saturn", URANUS = "uranus", NEPTUNE = "neptune", PLUTO = "pluto" }
+
+enum ZodiacAssociation { ARIES = "aries", TAURUS = "taurus", GEMINI = "gemini", CANCER = "cancer", LEO = "leo", VIRGO = "virgo", LIBRA = "libra", SCORPIO = "scorpio", SAGITTARIUS = "sagittarius", CAPRICORN = "capricorn", AQUARIUS = "aquarius", PISCES = "pisces" }
+
+LAS 22 CARTAS A GENERAR (con asociaciones astrológicas tradicionales Rider-Waite):
+
+ 0. El Loco (The Fool) — Air / Uranus
+ 1. El Mago (The Magician) — Air / Mercury
+ 2. La Sacerdotisa (The High Priestess) — Water / Moon
+ 3. La Emperatriz (The Empress) — Earth / Venus
+ 4. El Emperador (The Emperor) — Fire / Aries
+ 5. El Hierofante (The Hierophant) — Earth / Taurus
+ 6. Los Enamorados (The Lovers) — Air / Gemini
+ 7. El Carro (The Chariot) — Water / Cancer
+ 8. La Fuerza (Strength) — Fire / Leo
+ 9. El Ermitaño (The Hermit) — Earth / Virgo
+10. La Rueda de la Fortuna (Wheel of Fortune) — Jupiter
+11. La Justicia (Justice) — Air / Libra
+12. El Colgado (The Hanged Man) — Water / Neptune
+13. La Muerte (Death) — Water / Scorpio
+14. La Templanza (Temperance) — Fire / Sagittarius
+15. El Diablo (The Devil) — Earth / Capricorn
+16. La Torre (The Tower) — Fire / Mars
+17. La Estrella (The Star) — Air / Aquarius
+18. La Luna (The Moon) — Water / Pisces
+19. El Sol (The Sun) — Fire / Sun
+20. El Juicio (Judgement) — Fire / Pluto
+21. El Mundo (The World) — Earth / Saturn
+
+EJEMPLO DE FORMATO DE SALIDA (para las 2 primeras cartas):
+
+import { ArcanaType, Element, Planet, ZodiacAssociation } from "../enums/tarot.enums";
+import { CardSeedData } from "./major-arcana.data";
+
+export const MAJOR_ARCANA: CardSeedData[] = [
+  {
+    slug: "the-fool",
+    nameEn: "The Fool",
+    nameEs: "El Loco",
+    arcanaType: ArcanaType.MAJOR,
+    number: 0,
+    romanNumeral: "0",
+    element: Element.AIR,
+    planet: Planet.URANUS,
+    meaningUpright: "El Loco representa nuevos comienzos, inocencia y espíritu libre. Es la carta del potencial ilimitado y la aventura. Simboliza dar un salto de fe hacia lo desconocido con optimismo y confianza.",
+    meaningReversed: "Invertida, El Loco advierte sobre imprudencia, decisiones precipitadas y falta de dirección. Puede indicar ingenuidad excesiva o resistencia a dar el siguiente paso por miedo.",
+    description: "Un joven está al borde de un precipicio, mirando al cielo con una bolsa al hombro y un perro a sus pies. Representa el inicio del viaje del alma.",
+    keywords: {
+      upright: ["Nuevos comienzos", "Inocencia", "Aventura", "Libertad", "Potencial"],
+      reversed: ["Imprudencia", "Ingenuidad", "Riesgo", "Miedo", "Estancamiento"],
+    },
+    imageUrl: "/images/tarot/major/00-the-fool.jpg",
+  },
+  // ... continuar con las 21 cartas restantes
+];
+
+REGLAS:
+- Todo el texto user-facing en español
+- meaningUpright y meaningReversed: mínimo 3 oraciones, mínimo 50 caracteres
+- description: descripción visual de la ilustración Rider-Waite, mínimo 20 caracteres
+- keywords.upright: mínimo 5 palabras clave
+- keywords.reversed: 4-5 palabras clave
+- Sin texto placeholder ni genérico
+- Usar las asociaciones astrológicas/elementales de la tradición Rider-Waite/Golden Dawn
+- Generar las 22 cartas completas, no usar "// ..." ni comentarios de continuación
+```
+
+---
+
+### Prompt 2: Arcanos Menores (`minor-arcana.data.ts`)
+
+> **Archivo destino:** `src/modules/encyclopedia/data/minor-arcana.data.ts`
+> **Volumen:** 56 cartas (4 palos × 14 cartas)
+> **⚠️ NOTA:** Si Gemini no puede generar las 56 cartas de una vez, dividir en 2 sub-prompts: Bastos+Copas y Espadas+Oros.
+
+```
+Necesito que generes los datos completos de las 56 cartas de Arcanos Menores del Tarot Rider-Waite para un seeder de base de datos.
+
+INTERFAZ TYPESCRIPT (misma que Arcanos Mayores):
+
+export interface CardSeedData {
+  slug: string;               // kebab-case. Ej: "ace-of-cups", "king-of-swords"
+  nameEn: string;             // Ej: "Ace of Cups", "King of Swords"
+  nameEs: string;             // Ej: "As de Copas", "Rey de Espadas"
+  arcanaType: ArcanaType;     // Siempre ArcanaType.MINOR para este bloque
+  number: number;             // 1-10 para numerales, 11=Paje, 12=Caballero, 13=Reina, 14=Rey
+  romanNumeral?: string;      // No aplica para Menores (omitir)
+  suit?: string;              // Suit del enum
+  courtRank?: string;         // Solo para cartas de corte (11-14)
+  element?: Element;          // Elemento del palo
+  planet?: Planet;            // No aplica para Menores (omitir)
+  zodiacSign?: ZodiacAssociation; // No aplica para Menores (omitir)
+  meaningUpright: string;     // 3+ oraciones en español. Mínimo 50 caracteres.
+  meaningReversed: string;    // 3+ oraciones en español. Mínimo 50 caracteres.
+  description: string;        // Descripción visual de la carta Rider-Waite.
+  keywords: {
+    upright: string[];        // Mínimo 5 palabras clave en español
+    reversed: string[];       // 4-5 palabras clave en español
+  };
+  imageUrl: string;           // Pattern: "/images/tarot/{suit}/{nn}-{slug}.jpg"
+}
+
+ENUMS VÁLIDOS:
+
+enum ArcanaType { MAJOR = "major", MINOR = "minor" }
+enum Suit { WANDS = "wands", CUPS = "cups", SWORDS = "swords", PENTACLES = "pentacles" }
+enum CourtRank { PAGE = "page", KNIGHT = "knight", QUEEN = "queen", KING = "king" }
+enum Element { FIRE = "fire", WATER = "water", AIR = "air", EARTH = "earth" }
+
+ASOCIACIONES DE PALOS:
+- Bastos (Wands) → Fuego (Element.FIRE) → imageUrl: /images/tarot/wands/
+- Copas (Cups) → Agua (Element.WATER) → imageUrl: /images/tarot/cups/
+- Espadas (Swords) → Aire (Element.AIR) → imageUrl: /images/tarot/swords/
+- Oros (Pentacles) → Tierra (Element.EARTH) → imageUrl: /images/tarot/pentacles/
+
+ESTRUCTURA POR PALO (14 cartas cada uno):
+- As (1), 2, 3, 4, 5, 6, 7, 8, 9, 10
+- Paje/Page (11), Caballero/Knight (12), Reina/Queen (13), Rey/King (14)
+
+NOMBRES EN ESPAÑOL:
+- Numerales: "As de Copas", "Dos de Copas", ..., "Diez de Copas"
+- Corte: "Paje de Copas", "Caballero de Copas", "Reina de Copas", "Rey de Copas"
+- Palos: Bastos, Copas, Espadas, Oros
+
+EJEMPLO DE FORMATO DE SALIDA:
+
+import { ArcanaType, Suit, CourtRank, Element } from "../enums/tarot.enums";
+import { CardSeedData } from "./major-arcana.data";
+
+export const WANDS: CardSeedData[] = [
+  {
+    slug: "ace-of-wands",
+    nameEn: "Ace of Wands",
+    nameEs: "As de Bastos",
+    arcanaType: ArcanaType.MINOR,
+    number: 1,
+    suit: Suit.WANDS,
+    element: Element.FIRE,
+    meaningUpright: "El As de Bastos representa la chispa de inspiración, nuevos proyectos y energía creativa en bruto. Es el inicio de una aventura llena de pasión y entusiasmo. Las ideas fluyen con fuerza y es momento de actuar.",
+    meaningReversed: "Invertida, puede indicar retrasos en proyectos, falta de motivación o energía creativa bloqueada. La pasión se ha enfriado y cuesta encontrar dirección o propósito.",
+    description: "Una mano emerge de una nube sosteniendo un bastón floreciente del que brotan hojas verdes. Al fondo, un castillo sobre una colina.",
+    keywords: {
+      upright: ["Inspiración", "Nuevos proyectos", "Creatividad", "Pasión", "Potencial"],
+      reversed: ["Bloqueo creativo", "Retrasos", "Desmotivación", "Falta de dirección", "Frustración"],
+    },
+    imageUrl: "/images/tarot/wands/01-ace-of-wands.jpg",
+  },
+  // ... continuar
+];
+
+export const CUPS: CardSeedData[] = [ /* 14 cartas */ ];
+export const SWORDS: CardSeedData[] = [ /* 14 cartas */ ];
+export const PENTACLES: CardSeedData[] = [ /* 14 cartas */ ];
+
+export const MINOR_ARCANA: CardSeedData[] = [...WANDS, ...CUPS, ...SWORDS, ...PENTACLES];
+
+REGLAS:
+- Todo el texto user-facing en español
+- meaningUpright y meaningReversed: mínimo 3 oraciones, mínimo 50 caracteres
+- description: descripción visual de la ilustración Rider-Waite
+- keywords.upright: mínimo 5 palabras clave
+- keywords.reversed: 4-5 palabras clave
+- courtRank SOLO para cartas 11-14 (Paje, Caballero, Reina, Rey)
+- Generar las 56 cartas completas (4 palos × 14), sin "// ..." ni comentarios de continuación
+```
+
+---
+
+### Prompt 3: Signos Zodiacales (`zodiac-signs.data.ts`)
+
+> **Archivo destino:** `src/modules/encyclopedia/data/zodiac-signs.data.ts`
+> **Volumen:** 12 signos
+
+```
+Necesito que generes los datos completos de los 12 signos zodiacales para un seeder de base de datos de una enciclopedia mística.
+
+INTERFAZ TYPESCRIPT:
+
+export interface ArticleSeedData {
+  slug: string;                              // kebab-case. Ej: "aries", "taurus"
+  nameEs: string;                            // Nombre en español. Ej: "Aries"
+  nameEn: string | null;                     // Nombre en inglés. Ej: "Aries"
+  category: ArticleCategory;                 // Siempre ArticleCategory.ZODIAC_SIGN
+  snippet: string;                           // Resumen de 2-3 oraciones. Máximo 300 caracteres.
+  content: string;                           // Artículo completo en Markdown.
+  metadata: Record<string, unknown> | null;  // Datos estructurados del signo
+  relatedTarotCards: number[] | null;        // IDs de cartas del tarot asociadas
+  sortOrder: number;                         // 1-12
+}
+
+ENUM:
+enum ArticleCategory { ZODIAC_SIGN = 'zodiac_sign' }
+
+ESTRUCTURA DE METADATA PARA CADA SIGNO:
+{
+  symbol: string;           // Símbolo Unicode. Ej: "♈"
+  element: string;          // "fire" | "water" | "air" | "earth"
+  modality: string;         // "cardinal" | "fixed" | "mutable"
+  rulingPlanet: string;     // Slug del planeta. Ej: "mars", "venus"
+  dateRange: string;        // Ej: "21 Mar - 19 Abr"
+  compatibleSigns: string[]; // Slugs de signos compatibles
+}
+
+ESTRUCTURA DEL CONTENT (Markdown) PARA CADA SIGNO:
+# {Nombre del signo}
+
+**Fechas:** {rango de fechas}
+**Elemento:** {Fuego/Tierra/Aire/Agua}
+**Modalidad:** {Cardinal/Fijo/Mutable}
+**Planeta regente:** {nombre del planeta}
+**Símbolo:** {símbolo unicode}
+
+## Carácter y Personalidad
+(2-3 párrafos describiendo la personalidad del signo)
+
+## Fortalezas
+(Lista de 5-7 fortalezas con descripción breve)
+
+## Debilidades
+(Lista de 4-6 debilidades con descripción breve)
+
+## En el Amor
+(1-2 párrafos sobre el signo en relaciones románticas)
+
+## En el Trabajo
+(1-2 párrafos sobre el signo en el ámbito laboral)
+
+## Compatibilidades
+(Compatibilidad con cada elemento y mención de los signos más y menos compatibles)
+
+## Carta del Tarot Asociada
+(Breve mención de la carta del tarot asociada y por qué)
+
+LOS 12 SIGNOS A GENERAR:
+
+| # | Signo       | Símbolo | Elemento | Modalidad | Planeta  | Fechas            | Carta Tarot Asociada (ID) |
+|---|-------------|---------|----------|-----------|----------|-------------------|---------------------------|
+| 1 | Aries       | ♈      | fire     | cardinal  | mars     | 21 Mar - 19 Abr   | 4 (El Emperador)          |
+| 2 | Tauro       | ♉      | earth    | fixed     | venus    | 20 Abr - 20 May   | 5 (El Hierofante)         |
+| 3 | Géminis     | ♊      | air      | mutable   | mercury  | 21 May - 20 Jun   | 6 (Los Enamorados)        |
+| 4 | Cáncer      | ♋      | water    | cardinal  | moon     | 21 Jun - 22 Jul   | 7 (El Carro)              |
+| 5 | Leo         | ♌      | fire     | fixed     | sun      | 23 Jul - 22 Ago   | 8 (La Fuerza)             |
+| 6 | Virgo       | ♍      | earth    | mutable   | mercury  | 23 Ago - 22 Sep   | 9 (El Ermitaño)           |
+| 7 | Libra       | ♎      | air      | cardinal  | venus    | 23 Sep - 22 Oct   | 11 (La Justicia)          |
+| 8 | Escorpio    | ♏      | water    | fixed     | pluto    | 23 Oct - 21 Nov   | 13 (La Muerte)            |
+| 9 | Sagitario   | ♐      | fire     | mutable   | jupiter  | 22 Nov - 21 Dic   | 14 (La Templanza)         |
+|10 | Capricornio | ♑      | earth    | cardinal  | saturn   | 22 Dic - 19 Ene   | 15 (El Diablo)            |
+|11 | Acuario     | ♒      | air      | fixed     | uranus   | 20 Ene - 18 Feb   | 17 (La Estrella)          |
+|12 | Piscis      | ♓      | water    | mutable   | neptune  | 19 Feb - 20 Mar   | 12 (El Colgado)           |
+
+EJEMPLO DE FORMATO DE SALIDA:
+
+import { ArticleCategory } from "../enums/article.enums";
+import { ArticleSeedData } from "./articles-seed.data";
+
+export const ZODIAC_SIGNS: ArticleSeedData[] = [
+  {
+    slug: 'aries',
+    nameEs: 'Aries',
+    nameEn: 'Aries',
+    category: ArticleCategory.ZODIAC_SIGN,
+    snippet: 'Aries es el primer signo del zodíaco, regido por Marte, con elemento Fuego y modalidad Cardinal. Simboliza el inicio, la energía pionera y el impulso de actuar.',
+    content: `# Aries\n\n**Fechas:** 21 de marzo - 19 de abril\n**Elemento:** Fuego\n...`,
+    metadata: {
+      symbol: '♈',
+      element: 'fire',
+      modality: 'cardinal',
+      rulingPlanet: 'mars',
+      dateRange: '21 Mar - 19 Abr',
+      compatibleSigns: ['leo', 'sagittarius', 'gemini', 'aquarius'],
+    },
+    relatedTarotCards: [4],
+    sortOrder: 1,
+  },
+  // ... continuar con los 11 signos restantes
+];
+
+REGLAS:
+- Todo el texto en español
+- snippet: máximo 300 caracteres, 2-3 oraciones
+- content: Markdown completo, NO abreviado. Incluir TODAS las secciones listadas arriba para cada signo
+- Generar los 12 signos completos, sin "// ..." ni comentarios de continuación
+```
+
+---
+
+### Prompt 4: Planetas (`planets.data.ts`)
+
+> **Archivo destino:** `src/modules/encyclopedia/data/planets.data.ts`
+> **Volumen:** 10 planetas
+
+```
+Necesito que generes los datos completos de los 10 planetas astrológicos para un seeder de base de datos de una enciclopedia mística.
+
+INTERFAZ TYPESCRIPT:
+
+export interface ArticleSeedData {
+  slug: string;                              // kebab-case. Ej: "sun", "moon", "mercury"
+  nameEs: string;                            // Ej: "Sol", "Luna", "Mercurio"
+  nameEn: string | null;                     // Ej: "Sun", "Moon", "Mercury"
+  category: ArticleCategory;                 // Siempre ArticleCategory.PLANET
+  snippet: string;                           // Resumen de 2-3 oraciones. Máximo 300 caracteres.
+  content: string;                           // Artículo completo en Markdown.
+  metadata: Record<string, unknown> | null;  // Datos estructurados del planeta
+  relatedTarotCards: number[] | null;        // IDs de cartas del tarot asociadas
+  sortOrder: number;                         // 1-10
+}
+
+ENUM:
+enum ArticleCategory { PLANET = 'planet' }
+
+ESTRUCTURA DE METADATA PARA CADA PLANETA:
+{
+  symbol: string;           // Símbolo Unicode del planeta. Ej: "☉" (Sol), "☽" (Luna)
+  type: string;             // "personal" | "social" | "transpersonal"
+  domicile: string[];       // Signos donde el planeta tiene domicilio. Ej: ["aries"] para Marte
+  exaltation: string | null; // Signo donde el planeta está exaltado. Ej: "capricorn" para Marte
+}
+
+ESTRUCTURA DEL CONTENT (Markdown) PARA CADA PLANETA:
+# {Nombre del planeta}
+
+**Símbolo:** {símbolo unicode}
+**Tipo:** {Personal/Social/Transpersonal}
+**Domicilio:** {signos}
+**Exaltación:** {signo}
+
+## Simbolismo y Mitología
+(2-3 párrafos sobre la mitología del planeta y su simbolismo)
+
+## Influencia Astrológica
+(2-3 párrafos sobre qué aspectos de la vida rige este planeta)
+
+## {Planeta} en los Signos
+(Breve descripción de cómo se manifiesta en cada signo que rige)
+
+## Tránsitos de {Planeta}
+(1-2 párrafos sobre qué significan los tránsitos de este planeta)
+
+## Carta del Tarot Asociada
+(Breve mención de la(s) carta(s) del tarot asociada(s))
+
+LOS 10 PLANETAS A GENERAR:
+
+| # | Planeta  | Símbolo | Tipo           | Domicilio              | Exaltación  | Carta Tarot (ID)       |
+|---|----------|---------|----------------|------------------------|-------------|------------------------|
+| 1 | Sol      | ☉       | personal       | leo                    | aries       | 19 (El Sol)            |
+| 2 | Luna     | ☽       | personal       | cancer                 | taurus      | 2 (La Sacerdotisa)     |
+| 3 | Mercurio | ☿       | personal       | gemini, virgo          | virgo       | 1 (El Mago)            |
+| 4 | Venus    | ♀       | personal       | taurus, libra          | pisces      | 3 (La Emperatriz)      |
+| 5 | Marte    | ♂       | personal       | aries, scorpio         | capricorn   | 16 (La Torre)          |
+| 6 | Júpiter  | ♃       | social         | sagittarius, pisces    | cancer      | 10 (Rueda de Fortuna)  |
+| 7 | Saturno  | ♄       | social         | capricorn, aquarius    | libra       | 21 (El Mundo)          |
+| 8 | Urano    | ♅       | transpersonal  | aquarius               | scorpio     | 0 (El Loco)            |
+| 9 | Neptuno  | ♆       | transpersonal  | pisces                 | leo         | 12 (El Colgado)        |
+|10 | Plutón   | ♇       | transpersonal  | scorpio                | aries       | 20 (El Juicio)         |
+
+FORMATO DE SALIDA:
+
+import { ArticleCategory } from "../enums/article.enums";
+import { ArticleSeedData } from "./articles-seed.data";
+
+export const PLANETS: ArticleSeedData[] = [
+  {
+    slug: 'sun',
+    nameEs: 'Sol',
+    nameEn: 'Sun',
+    category: ArticleCategory.PLANET,
+    snippet: '...',
+    content: `# Sol\n\n**Símbolo:** ☉\n...`,
+    metadata: {
+      symbol: '☉',
+      type: 'personal',
+      domicile: ['leo'],
+      exaltation: 'aries',
+    },
+    relatedTarotCards: [19],
+    sortOrder: 1,
+  },
+  // ... continuar con los 9 planetas restantes
+];
+
+REGLAS:
+- Todo el texto en español
+- snippet: máximo 300 caracteres
+- content: Markdown completo con TODAS las secciones
+- Generar los 10 planetas completos, sin abreviar
+```
+
+---
+
+### Prompt 5: Casas Astrales + Elementos + Modalidades
+
+> **Archivos destino:**
+> - `src/modules/encyclopedia/data/astrological-houses.data.ts` (12 casas)
+> - `src/modules/encyclopedia/data/elements-modalities.data.ts` (4 elementos + 3 modalidades)
+> **Volumen:** 19 artículos
+
+```
+Necesito que generes los datos de 19 artículos para un seeder de base de datos de una enciclopedia mística: 12 casas astrales, 4 elementos y 3 modalidades.
+
+INTERFAZ TYPESCRIPT:
+
+export interface ArticleSeedData {
+  slug: string;
+  nameEs: string;
+  nameEn: string | null;
+  category: ArticleCategory;
+  snippet: string;                           // Máximo 300 caracteres
+  content: string;                           // Markdown completo
+  metadata: Record<string, unknown> | null;
+  relatedTarotCards: number[] | null;
+  sortOrder: number;
+}
+
+ENUMS:
+enum ArticleCategory {
+  ASTROLOGICAL_HOUSE = 'astro_house',
+  ELEMENT = 'element',
+  MODALITY = 'modality',
+}
+
+=== BLOQUE 1: 12 CASAS ASTRALES ===
+
+METADATA POR CASA:
+{
+  number: number;          // 1-12
+  naturalSign: string;     // Slug del signo natural. Ej: "aries" para Casa 1
+  rulingPlanet: string;    // Slug del planeta regente. Ej: "mars" para Casa 1
+  keywords: string[];      // 3-5 palabras clave del área de vida
+}
+
+CONTENT MARKDOWN POR CASA:
+# Casa {N}: {Nombre}
+
+**Signo Natural:** {signo}
+**Planeta Regente:** {planeta}
+**Palabras Clave:** {keywords}
+
+## Área de Vida
+(2-3 párrafos sobre qué aspecto de la vida representa esta casa)
+
+## Interpretación
+(1-2 párrafos sobre cómo interpretar planetas en esta casa)
+
+## Planetas en la Casa {N}
+(Breve descripción del efecto de los planetas personales en esta casa)
+
+LAS 12 CASAS:
+
+| # | Nombre                   | Slug      | Signo Natural | Planeta  | Keywords                                |
+|---|--------------------------|-----------|---------------|----------|-----------------------------------------|
+| 1 | Casa del Yo              | house-1   | aries         | mars     | Identidad, apariencia, inicio           |
+| 2 | Casa de los Recursos     | house-2   | taurus        | venus    | Dinero, valores, posesiones             |
+| 3 | Casa de la Comunicación  | house-3   | gemini        | mercury  | Comunicación, hermanos, viajes cortos   |
+| 4 | Casa del Hogar           | house-4   | cancer        | moon     | Hogar, familia, raíces                  |
+| 5 | Casa de la Creatividad   | house-5   | leo           | sun      | Creatividad, romance, hijos             |
+| 6 | Casa de la Salud         | house-6   | virgo         | mercury  | Salud, trabajo diario, servicio         |
+| 7 | Casa de las Relaciones   | house-7   | libra         | venus    | Pareja, asociaciones, contratos         |
+| 8 | Casa de la Transformación| house-8   | scorpio       | pluto    | Transformación, muerte, herencias       |
+| 9 | Casa de la Filosofía     | house-9   | sagittarius   | jupiter  | Viajes largos, filosofía, educación     |
+|10 | Casa de la Carrera       | house-10  | capricorn     | saturn   | Carrera, estatus, logros                |
+|11 | Casa de los Ideales      | house-11  | aquarius      | uranus   | Amigos, grupos, ideales                 |
+|12 | Casa del Inconsciente    | house-12  | pisces        | neptune  | Inconsciente, karma, espiritualidad     |
+
+=== BLOQUE 2: 4 ELEMENTOS ===
+
+METADATA POR ELEMENTO:
+{
+  symbol: string;           // "🔥", "🌍", "💨", "💧"
+  signs: string[];          // Slugs de los 3 signos del elemento
+  qualities: string[];      // 3-5 cualidades principales
+}
+
+CONTENT MARKDOWN POR ELEMENTO:
+# Elemento {Nombre}
+
+**Símbolo:** {emoji}
+**Signos:** {lista de signos}
+**Palo del Tarot:** {palo asociado}
+
+## Características
+(2-3 párrafos sobre las cualidades del elemento)
+
+## Los Signos de {Elemento}
+### {Signo 1}
+(Breve resumen de cómo se manifiesta el elemento en este signo)
+### {Signo 2}
+(ídem)
+### {Signo 3}
+(ídem)
+
+## Compatibilidad Elemental
+(1-2 párrafos sobre cómo interactúa este elemento con los demás)
+
+LOS 4 ELEMENTOS:
+
+| # | Elemento | Slug  | Signos                        | Palo Tarot |
+|---|----------|-------|-------------------------------|------------|
+| 1 | Fuego    | fire  | aries, leo, sagittarius       | Bastos     |
+| 2 | Tierra   | earth | taurus, virgo, capricorn      | Oros       |
+| 3 | Aire     | air   | gemini, libra, aquarius       | Espadas    |
+| 4 | Agua     | water | cancer, scorpio, pisces       | Copas      |
+
+=== BLOQUE 3: 3 MODALIDADES ===
+
+METADATA POR MODALIDAD:
+{
+  signs: string[];          // Slugs de los 4 signos de la modalidad
+  quality: string;          // Descripción breve de la cualidad
+}
+
+CONTENT MARKDOWN POR MODALIDAD:
+# Modalidad {Nombre}
+
+**Signos:** {lista de signos}
+
+## Características
+(2-3 párrafos sobre la cualidad de la modalidad)
+
+## Los Signos {Modalidad}es
+### {Signo 1} ({Elemento})
+(Breve resumen)
+### {Signo 2} ({Elemento})
+(ídem)
+### {Signo 3} ({Elemento})
+(ídem)
+### {Signo 4} ({Elemento})
+(ídem)
+
+LAS 3 MODALIDADES:
+
+| # | Modalidad | Slug     | Signos                              | Cualidad                    |
+|---|-----------|----------|-------------------------------------|-----------------------------|
+| 1 | Cardinal  | cardinal | aries, cancer, libra, capricorn     | Inicio, liderazgo, acción   |
+| 2 | Fijo      | fixed    | taurus, leo, scorpio, aquarius      | Estabilidad, persistencia   |
+| 3 | Mutable   | mutable  | gemini, virgo, sagittarius, pisces  | Adaptabilidad, flexibilidad |
+
+FORMATO DE SALIDA (2 archivos separados):
+
+// === astrological-houses.data.ts ===
+import { ArticleCategory } from "../enums/article.enums";
+import { ArticleSeedData } from "./articles-seed.data";
+
+export const ASTROLOGICAL_HOUSES: ArticleSeedData[] = [ /* 12 casas */ ];
+
+// === elements-modalities.data.ts ===
+import { ArticleCategory } from "../enums/article.enums";
+import { ArticleSeedData } from "./articles-seed.data";
+
+export const ELEMENTS: ArticleSeedData[] = [ /* 4 elementos */ ];
+export const MODALITIES: ArticleSeedData[] = [ /* 3 modalidades */ ];
+export const ELEMENTS_AND_MODALITIES: ArticleSeedData[] = [...ELEMENTS, ...MODALITIES];
+
+REGLAS:
+- Todo el texto en español
+- snippet: máximo 300 caracteres
+- content: Markdown completo con TODAS las secciones, NO abreviado
+- Generar los 19 artículos completos
+- sortOrder: Casas 1-12, Elementos 1-4, Modalidades 1-3
+```
+
+---
+
+### Prompt 6: Guías de Actividades (`activity-guides.data.ts`)
+
+> **Archivo destino:** `src/modules/encyclopedia/data/activity-guides.data.ts`
+> **Volumen:** 7 guías (incluye GUIDE_TAROT nueva)
+> **⚠️ NOTA:** Este es el prompt más pesado. Cada guía tiene contenido Markdown extenso con secciones de cada sub-item. **Se recomienda ejecutar como 7 prompts individuales**, uno por guía, usando el mismo contexto base pero pidiendo solo 1 guía por vez.
+
+**Contexto base (incluir al inicio de cada sub-prompt de guía):**
+
+```
+Necesito que generes el contenido completo de una guía para un seeder de base de datos de una enciclopedia mística. Esta guía se mostrará como artículo principal en la enciclopedia y será accesible desde un widget "Ver más" en la página del módulo correspondiente.
+
+La guía debe ser COMPLETA y AUTO-SUFICIENTE: incluir historia, explicación de cómo funciona, y secciones resumidas de cada sub-item de la actividad.
+
+INTERFAZ TYPESCRIPT:
+
+export interface ArticleSeedData {
+  slug: string;
+  nameEs: string;
+  nameEn: string | null;
+  category: ArticleCategory;
+  snippet: string;                           // Máximo 300 caracteres. Se muestra en el widget "Ver más".
+  content: string;                           // Markdown extenso completo.
+  metadata: Record<string, unknown> | null;
+  relatedTarotCards: number[] | null;
+  sortOrder: number;
+}
+
+METADATA PARA GUÍAS:
+{
+  sections: string[];   // Lista de títulos de secciones H2 del contenido
+}
+```
+
+**Sub-prompt 6.1: Guía del Tarot (NUEVA)**
+
+```
+GUÍA A GENERAR:
+- slug: "guide-tarot"
+- nameEs: "Guía del Tarot"
+- nameEn: "Tarot Guide"
+- category: ArticleCategory.GUIDE_TAROT  (valor: 'guide_tarot')
+- sortOrder: 1
+
+ESTRUCTURA DEL CONTENT (Markdown extenso):
+
+# Guía del Tarot
+
+## Historia del Tarot
+(3-4 párrafos: orígenes, evolución, Rider-Waite)
+
+## ¿Cómo Funciona el Tarot?
+(2-3 párrafos explicando el mecanismo de las lecturas)
+
+## El Mazo Rider-Waite
+(1-2 párrafos sobre por qué se usa este mazo)
+
+## Los 22 Arcanos Mayores
+(Introducción + sección resumida de CADA uno de los 22 Arcanos Mayores con nombre, número romano, significado breve al derecho e invertido, 1-2 oraciones cada uno)
+
+### 0 - El Loco
+### I - El Mago
+### II - La Sacerdotisa
+... hasta ...
+### XXI - El Mundo
+
+## Los Arcanos Menores
+(Introducción sobre la estructura: 4 palos × 14 cartas)
+
+### Bastos (Fuego)
+(Resumen del palo + qué representan, 1-2 oraciones por cada carta del As al Rey)
+
+### Copas (Agua)
+(ídem)
+
+### Espadas (Aire)
+(ídem)
+
+### Oros (Tierra)
+(ídem)
+
+## Tipos de Tiradas
+(Descripción de 4-5 tiradas comunes: Cruz Celta, 3 cartas, Sí/No, etc.)
+
+## Cómo Hacer una Lectura
+(Guía paso a paso para principiantes)
+
+## Consejos para Principiantes
+(5-7 consejos prácticos)
+
+relatedTarotCards: null (todas las cartas son relevantes)
+```
+
+**Sub-prompt 6.2: Guía de Numerología**
+
+```
+GUÍA A GENERAR:
+- slug: "guide-numerology"
+- nameEs: "Guía de Numerología"
+- nameEn: "Numerology Guide"
+- category: ArticleCategory.GUIDE_NUMEROLOGY  (valor: 'guide_numerology')
+- sortOrder: 2
+
+ESTRUCTURA DEL CONTENT (Markdown extenso):
+
+# Guía de Numerología
+
+## Historia de la Numerología
+(2-3 párrafos: Pitágoras, tradiciones, evolución)
+
+## ¿Cómo Funciona?
+(2-3 párrafos sobre cómo se calculan los números)
+
+## Cómo Calcular tu Número Personal
+(Explicación paso a paso con ejemplo)
+
+## Los Números del 1 al 9
+(Sección detallada de CADA número con significado, personalidad, fortalezas y debilidades)
+
+### Número 1 - El Líder
+### Número 2 - El Diplomático
+### Número 3 - El Comunicador
+### Número 4 - El Constructor
+### Número 5 - El Aventurero
+### Número 6 - El Protector
+### Número 7 - El Buscador
+### Número 8 - El Poderoso
+### Número 9 - El Humanitario
+
+## Números Maestros
+(Explicación de qué son y por qué son especiales)
+
+### Número 11 - El Intuitivo
+### Número 22 - El Constructor Maestro
+### Número 33 - El Maestro Sanador
+
+## Numerología y Compatibilidad
+(Cómo interactúan los números entre sí)
+
+## Numerología en la Vida Diaria
+(Aplicaciones prácticas)
+
+relatedTarotCards: null
+```
+
+**Sub-prompt 6.3: Guía del Péndulo**
+
+```
+GUÍA A GENERAR:
+- slug: "guide-pendulum"
+- nameEs: "Guía del Péndulo"
+- nameEn: "Pendulum Guide"
+- category: ArticleCategory.GUIDE_PENDULUM  (valor: 'guide_pendulum')
+- sortOrder: 3
+
+ESTRUCTURA DEL CONTENT (Markdown extenso):
+
+# Guía del Péndulo
+
+## Historia del Péndulo
+(2-3 párrafos: orígenes, radiestesia, usos históricos)
+
+## Tipos de Péndulos
+(Descripción de los tipos: cristal, metal, madera, etc.)
+
+## ¿Cómo Funciona?
+(Explicación del mecanismo: respuesta ideomotora, energía, conexión)
+
+## Cómo Usar el Péndulo
+(Guía paso a paso: calibración, preguntas, interpretación)
+
+### Paso 1: Elegir tu Péndulo
+### Paso 2: Calibrar las Respuestas (Sí/No/Tal vez)
+### Paso 3: Formular Preguntas
+### Paso 4: Interpretar los Movimientos
+
+## Interpretación de Movimientos
+(Círculos, líneas, elipses, inmóvil)
+
+## Consejos y Precauciones
+(5-7 consejos prácticos)
+
+relatedTarotCards: null
+```
+
+**Sub-prompt 6.4: Guía de la Carta Astral**
+
+```
+GUÍA A GENERAR:
+- slug: "guide-birth-chart"
+- nameEs: "Guía de la Carta Astral"
+- nameEn: "Birth Chart Guide"
+- category: ArticleCategory.GUIDE_BIRTH_CHART  (valor: 'guide_birth_chart')
+- sortOrder: 4
+
+ESTRUCTURA DEL CONTENT (Markdown extenso):
+
+# Guía de la Carta Astral
+
+## ¿Qué es una Carta Astral?
+(2-3 párrafos: definición, qué representa, para qué sirve)
+
+## Historia y Origen
+(2-3 párrafos: astrología babilónica, griega, evolución)
+
+## Componentes de la Carta Astral
+(Introducción a los componentes principales)
+
+### El Sol (Tu Esencia)
+### La Luna (Tu Mundo Emocional)
+### El Ascendente (Tu Imagen al Mundo)
+### Los Planetas Personales (Mercurio, Venus, Marte)
+### Los Planetas Sociales (Júpiter, Saturno)
+### Los Planetas Transpersonales (Urano, Neptuno, Plutón)
+
+## Las 12 Casas Astrológicas
+(Resumen de cada casa: nombre, área de vida, 2-3 oraciones cada una)
+
+### Casa 1 a Casa 12
+
+## Los Aspectos
+(Explicación de conjunción, sextil, cuadratura, trígono, oposición)
+
+## Cómo Leer tu Carta Astral
+(Guía paso a paso para principiantes)
+
+## Sistemas de Casas
+(Breve mención de Placidus, Koch, Casas Iguales)
+
+relatedTarotCards: null
+```
+
+**Sub-prompt 6.5: Guía de Rituales**
+
+```
+GUÍA A GENERAR:
+- slug: "guide-ritual"
+- nameEs: "Guía de Rituales"
+- nameEn: "Rituals Guide"
+- category: ArticleCategory.GUIDE_RITUAL  (valor: 'guide_ritual')
+- sortOrder: 5
+
+ESTRUCTURA DEL CONTENT (Markdown extenso):
+
+# Guía de Rituales
+
+## ¿Qué son los Rituales?
+(2-3 párrafos: definición, propósito, tipos)
+
+## Historia de los Rituales
+(2-3 párrafos: tradiciones ancestrales, evolución moderna)
+
+## Tipos de Rituales
+(Descripción de cada tipo con su propósito)
+
+### Rituales de Protección
+### Rituales de Abundancia
+### Rituales de Amor
+### Rituales de Limpieza Energética
+### Rituales de Sanación
+### Rituales de Manifestación
+
+## Las Fases Lunares y los Rituales
+(Cuándo es mejor realizar cada tipo de ritual según la luna)
+
+### Luna Nueva
+### Luna Creciente
+### Luna Llena
+### Luna Menguante
+
+## Cómo Preparar un Ritual
+(Guía paso a paso: espacio, materiales, intención, ejecución, cierre)
+
+## Materiales Comunes
+(Velas, cristales, hierbas, incienso, agua)
+
+## Consejos y Precauciones
+(5-7 consejos)
+
+relatedTarotCards: null
+```
+
+**Sub-prompt 6.6: Guía del Horóscopo Occidental**
+
+```
+GUÍA A GENERAR:
+- slug: "guide-horoscope"
+- nameEs: "Guía del Horóscopo Occidental"
+- nameEn: "Western Horoscope Guide"
+- category: ArticleCategory.GUIDE_HOROSCOPE  (valor: 'guide_horoscope')
+- sortOrder: 6
+
+ESTRUCTURA DEL CONTENT (Markdown extenso):
+
+# Guía del Horóscopo Occidental
+
+## ¿Qué es el Horóscopo?
+(2-3 párrafos: definición, diferencia con carta astral)
+
+## Historia del Horóscopo Occidental
+(3-4 párrafos: Babilonia, Grecia, Roma, era moderna)
+
+## ¿Cómo Funciona?
+(2-3 párrafos: eclíptica, zodiaco tropical vs sideral)
+
+## Los 12 Signos del Zodíaco
+(Sección resumida de CADA signo: fechas, elemento, modalidad, planeta regente, 3-4 oraciones de personalidad)
+
+### Aries (21 Mar - 19 Abr)
+### Tauro (20 Abr - 20 May)
+### Géminis (21 May - 20 Jun)
+### Cáncer (21 Jun - 22 Jul)
+### Leo (23 Jul - 22 Ago)
+### Virgo (23 Ago - 22 Sep)
+### Libra (23 Sep - 22 Oct)
+### Escorpio (23 Oct - 21 Nov)
+### Sagitario (22 Nov - 21 Dic)
+### Capricornio (22 Dic - 19 Ene)
+### Acuario (20 Ene - 18 Feb)
+### Piscis (19 Feb - 20 Mar)
+
+## Los Elementos
+(Breve descripción de Fuego, Tierra, Aire, Agua y qué signos incluyen)
+
+## Las Modalidades
+(Breve descripción de Cardinal, Fijo, Mutable)
+
+## Compatibilidad entre Signos
+(Tabla o secciones de compatibilidad por elemento)
+
+relatedTarotCards: null
+```
+
+**Sub-prompt 6.7: Guía del Horóscopo Chino**
+
+```
+GUÍA A GENERAR:
+- slug: "guide-chinese"
+- nameEs: "Guía del Horóscopo Chino"
+- nameEn: "Chinese Horoscope Guide"
+- category: ArticleCategory.GUIDE_CHINESE  (valor: 'guide_chinese')
+- sortOrder: 7
+
+ESTRUCTURA DEL CONTENT (Markdown extenso):
+
+# Guía del Horóscopo Chino
+
+## ¿Qué es el Horóscopo Chino?
+(2-3 párrafos: definición, diferencias con el occidental)
+
+## Historia y Origen
+(3-4 párrafos: leyenda de los 12 animales, tradición china)
+
+## ¿Cómo Funciona?
+(2-3 párrafos: ciclo de 12 años, cálculo por año de nacimiento)
+
+## Los 12 Animales
+(Sección resumida de CADA animal: años recientes, elemento fijo, personalidad, compatibilidades, 4-5 oraciones cada uno)
+
+### Rata (鼠)
+### Buey (牛)
+### Tigre (虎)
+### Conejo (兔)
+### Dragón (龍)
+### Serpiente (蛇)
+### Caballo (馬)
+### Cabra (羊)
+### Mono (猴)
+### Gallo (鷄)
+### Perro (狗)
+### Cerdo (豬)
+
+## Los 5 Elementos (Wu Xing)
+(Descripción de Madera, Fuego, Tierra, Metal, Agua y cómo modifican al animal)
+
+### Madera (木)
+### Fuego (火)
+### Tierra (土)
+### Metal (金)
+### Agua (水)
+
+## Compatibilidad entre Animales
+(Triángulos de compatibilidad y conflictos)
+
+## El Ciclo de 60 Años
+(Explicación del ciclo completo animal × elemento)
+
+relatedTarotCards: null
+```
+
+**Formato de salida final para el archivo:**
+
+```
+import { ArticleCategory } from "../enums/article.enums";
+import { ArticleSeedData } from "./articles-seed.data";
+
+export const ACTIVITY_GUIDES: ArticleSeedData[] = [
+  // Las 7 guías generadas por los sub-prompts
+];
+```
+
+---
+
+> **NOTA:** Al agregar `GUIDE_TAROT` se debe actualizar también:
+> 1. El enum `ArticleCategory` en `article.enums.ts`: agregar `GUIDE_TAROT = 'guide_tarot'`
+> 2. El enum `ArticleCategory` en `frontend/src/types/encyclopedia-article.types.ts`
+> 3. El mapa `ARTICLE_CATEGORY_LABELS`: agregar `[ArticleCategory.GUIDE_TAROT]: 'Guía del Tarot'`
+> 4. TASK-317: agregar widget `<EncyclopediaInfoWidget slug="guide-tarot" />` en la página de lecturas de tarot
+> 5. La tabla de contenido del Overview del módulo (agregar fila "Guía: Tarot")
 
 ---
 
