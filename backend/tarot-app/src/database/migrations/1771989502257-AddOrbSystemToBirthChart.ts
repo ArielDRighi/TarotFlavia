@@ -946,64 +946,64 @@ export class AddOrbSystemToBirthChart1771989502257 implements MigrationInterface
       `ALTER TABLE "birth_chart_interpretations" ADD CONSTRAINT "uq_interpretation_combo" UNIQUE ("category", "planet", "sign", "house", "aspectType", "planet2")`,
     );
     await queryRunner.query(
-      `ALTER TABLE "tarot_reading" ADD CONSTRAINT "FK_f9be0e8cac3dc2a38a6d2a75d78" FOREIGN KEY ("predefinedQuestionId") REFERENCES "predefined_question"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE "tarot_reading" ADD CONSTRAINT "FK_f9be0e8cac3dc2a38a6d2a75d78" FOREIGN KEY ("predefinedQuestionId") REFERENCES "predefined_question"("id") ON DELETE SET NULL ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "tarot_reading" ADD CONSTRAINT "FK_2c61d048538a585246861e536e9" FOREIGN KEY ("tarotista_id") REFERENCES "tarotistas"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE "tarot_reading" ADD CONSTRAINT "FK_2c61d048538a585246861e536e9" FOREIGN KEY ("tarotista_id") REFERENCES "tarotistas"("id") ON DELETE SET NULL ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "tarot_reading" ADD CONSTRAINT "FK_67f8a6fe854769000309222285b" FOREIGN KEY ("categoryId") REFERENCES "reading_category"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE "tarot_reading" ADD CONSTRAINT "FK_67f8a6fe854769000309222285b" FOREIGN KEY ("categoryId") REFERENCES "reading_category"("id") ON DELETE SET NULL ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "usage_limit" ADD CONSTRAINT "FK_a1ae24517bbbb0dc7337a159351" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE "usage_limit" ADD CONSTRAINT "FK_a1ae24517bbbb0dc7337a159351" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "tarotistas" ADD CONSTRAINT "FK_b8cc1c7c4873dfd9f0257fcff85" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE "tarotistas" ADD CONSTRAINT "FK_b8cc1c7c4873dfd9f0257fcff85" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "user_tarotista_subscriptions" ADD CONSTRAINT "FK_3b7c8e9b2f46a7e4a4f3e18dd92" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE "user_tarotista_subscriptions" ADD CONSTRAINT "FK_3b7c8e9b2f46a7e4a4f3e18dd92" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "user_tarotista_subscriptions" ADD CONSTRAINT "FK_f2ff9124ac12aa334aaf3bcc400" FOREIGN KEY ("tarotista_id") REFERENCES "tarotistas"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE "user_tarotista_subscriptions" ADD CONSTRAINT "FK_f2ff9124ac12aa334aaf3bcc400" FOREIGN KEY ("tarotista_id") REFERENCES "tarotistas"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "tarotista_reviews" ADD CONSTRAINT "FK_e5eb1657757f772a7a40a01c457" FOREIGN KEY ("tarotista_id") REFERENCES "tarotistas"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE "tarotista_reviews" ADD CONSTRAINT "FK_e5eb1657757f772a7a40a01c457" FOREIGN KEY ("tarotista_id") REFERENCES "tarotistas"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "tarotista_reviews" ADD CONSTRAINT "FK_76da3eb212eeb40c060b6456275" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE "tarotista_reviews" ADD CONSTRAINT "FK_76da3eb212eeb40c060b6456275" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "tarotista_reviews" ADD CONSTRAINT "FK_b055df97e5280845a7a93a89aa3" FOREIGN KEY ("reading_id") REFERENCES "tarot_reading"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE "tarotista_reviews" ADD CONSTRAINT "FK_b055df97e5280845a7a93a89aa3" FOREIGN KEY ("reading_id") REFERENCES "tarot_reading"("id") ON DELETE SET NULL ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "tarotista_revenue_metrics" ADD CONSTRAINT "FK_c24274bf3657829cba91656901e" FOREIGN KEY ("tarotista_id") REFERENCES "tarotistas"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE "tarotista_revenue_metrics" ADD CONSTRAINT "FK_c24274bf3657829cba91656901e" FOREIGN KEY ("tarotista_id") REFERENCES "tarotistas"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "tarotista_revenue_metrics" ADD CONSTRAINT "FK_c30b3519a115abad9e6322d1e54" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE "tarotista_revenue_metrics" ADD CONSTRAINT "FK_c30b3519a115abad9e6322d1e54" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "tarotista_revenue_metrics" ADD CONSTRAINT "FK_4c30922358803546839b39264e8" FOREIGN KEY ("reading_id") REFERENCES "tarot_reading"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE "tarotista_revenue_metrics" ADD CONSTRAINT "FK_4c30922358803546839b39264e8" FOREIGN KEY ("reading_id") REFERENCES "tarot_reading"("id") ON DELETE SET NULL ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "tarotista_config" ADD CONSTRAINT "FK_c9a1a2f912e5e88c593b344b100" FOREIGN KEY ("tarotista_id") REFERENCES "tarotistas"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE "tarotista_config" ADD CONSTRAINT "FK_c9a1a2f912e5e88c593b344b100" FOREIGN KEY ("tarotista_id") REFERENCES "tarotistas"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "tarotista_card_meanings" ADD CONSTRAINT "FK_8ef5885c11fcc49f5103a4b4d6e" FOREIGN KEY ("tarotista_id") REFERENCES "tarotistas"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE "tarotista_card_meanings" ADD CONSTRAINT "FK_8ef5885c11fcc49f5103a4b4d6e" FOREIGN KEY ("tarotista_id") REFERENCES "tarotistas"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "tarotista_card_meanings" ADD CONSTRAINT "FK_fdb33a43d2114afb5ce12231637" FOREIGN KEY ("card_id") REFERENCES "tarot_card"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE "tarotista_card_meanings" ADD CONSTRAINT "FK_fdb33a43d2114afb5ce12231637" FOREIGN KEY ("card_id") REFERENCES "tarot_card"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "tarotista_applications" ADD CONSTRAINT "FK_23ce8320cb8e4bb141fdbd14ec9" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE "tarotista_applications" ADD CONSTRAINT "FK_23ce8320cb8e4bb141fdbd14ec9" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "tarotista_applications" ADD CONSTRAINT "FK_933bd8af07d02ce610a8499d134" FOREIGN KEY ("reviewed_by_user_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE "tarotista_applications" ADD CONSTRAINT "FK_933bd8af07d02ce610a8499d134" FOREIGN KEY ("reviewed_by_user_id") REFERENCES "user"("id") ON DELETE SET NULL ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "daily_readings" ADD CONSTRAINT "FK_f138b867aff839616abebd57238" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE "daily_readings" ADD CONSTRAINT "FK_f138b867aff839616abebd57238" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "daily_readings" ADD CONSTRAINT "FK_5427b68773e7cc999a602f5c14a" FOREIGN KEY ("tarotista_id") REFERENCES "tarotistas"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE "daily_readings" ADD CONSTRAINT "FK_5427b68773e7cc999a602f5c14a" FOREIGN KEY ("tarotista_id") REFERENCES "tarotistas"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
       `ALTER TABLE "daily_readings" ADD CONSTRAINT "FK_1b05f2edf1ad3ee7b4e35ebc2c6" FOREIGN KEY ("card_id") REFERENCES "tarot_card"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
@@ -1027,7 +1027,7 @@ export class AddOrbSystemToBirthChart1771989502257 implements MigrationInterface
       `ALTER TABLE "user_ritual_history" ADD CONSTRAINT "FK_e088678925cf2e7ab6a311d8d9e" FOREIGN KEY ("ritual_id") REFERENCES "rituals"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "predefined_question" ADD CONSTRAINT "FK_39748578c913d4c905eca9f5e83" FOREIGN KEY ("category_id") REFERENCES "reading_category"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE "predefined_question" ADD CONSTRAINT "FK_39748578c913d4c905eca9f5e83" FOREIGN KEY ("category_id") REFERENCES "reading_category"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
       `ALTER TABLE "pendulum_queries" ADD CONSTRAINT "FK_3269ba468147820e8230df51e2d" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
