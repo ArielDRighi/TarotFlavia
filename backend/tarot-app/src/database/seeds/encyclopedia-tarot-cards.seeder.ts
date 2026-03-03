@@ -1,5 +1,6 @@
 import { DataSource } from 'typeorm';
 import { EncyclopediaTarotCard } from '../../modules/encyclopedia/entities/encyclopedia-tarot-card.entity';
+import { ArcanaType } from '../../modules/encyclopedia/enums/tarot.enums';
 import {
   ALL_TAROT_CARDS,
   CardSeedData,
@@ -34,12 +35,11 @@ export async function seedEncyclopediaTarotCards(
 
   console.log(`📦 Insertando ${TOTAL_CARDS} cartas del Tarot...`);
 
-  let insertedCount = 0;
-
-  for (const cardData of ALL_TAROT_CARDS) {
+  // Validar contenido y construir entidades para batch insert
+  const cards = ALL_TAROT_CARDS.map((cardData) => {
     validateCardContent(cardData);
 
-    const card = cardRepository.create({
+    return cardRepository.create({
       slug: cardData.slug,
       nameEn: cardData.nameEn,
       nameEs: cardData.nameEs,
@@ -60,18 +60,18 @@ export async function seedEncyclopediaTarotCards(
       relatedCards: null,
       viewCount: 0,
     });
+  });
 
-    await cardRepository.save(card);
-    insertedCount++;
-  }
+  await cardRepository.save(cards);
+  const insertedCount = cards.length;
 
   // Estadísticas finales
   const totalCards = await cardRepository.count();
   const majorCount = ALL_TAROT_CARDS.filter(
-    (c) => c.arcanaType === 'major',
+    (c) => c.arcanaType === ArcanaType.MAJOR,
   ).length;
   const minorCount = ALL_TAROT_CARDS.filter(
-    (c) => c.arcanaType === 'minor',
+    (c) => c.arcanaType === ArcanaType.MINOR,
   ).length;
 
   console.log(

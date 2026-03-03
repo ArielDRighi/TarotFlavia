@@ -378,7 +378,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
       reversed: [
         'mala suerte',
         'resistencia',
-        'stagnación',
+        'estancamiento',
         'ciclos negativos',
         'falta de control',
       ],

@@ -705,7 +705,7 @@ const CUPS_CARDS: CardSeedData[] = [
         'confusión',
         'opciones',
         'ensoñación',
-        'wishful thinking',
+        'ilusiones vanas',
       ],
       reversed: [
         'claridad',
@@ -863,7 +863,7 @@ const CUPS_CARDS: CardSeedData[] = [
     meaningUpright:
       'Romanticismo, propuestas emocionales, mensajes del corazón y la búsqueda de lo bello y lo sublime en la vida.',
     meaningReversed:
-      'Moodiness, decepción romántica, promesas que no se cumplen y fantasía que reemplaza a la acción real.',
+      'Inestabilidad emocional, decepción romántica, promesas que no se cumplen y fantasía que reemplaza a la acción real.',
     description:
       'Un caballero avanza lentamente sobre su caballo blanco, sosteniendo una copa con delicadeza frente a él. Su yelmo y capa están adornados con peces y alas. Es el mensajero del amor, el galán romántico que lleva los sueños del corazón hacia la realidad con elegancia y sentimiento.',
     keywords: {
@@ -878,7 +878,7 @@ const CUPS_CARDS: CardSeedData[] = [
       reversed: [
         'decepción',
         'promesas rotas',
-        'moodiness',
+        'cambios de humor',
         'fantasía sin base',
         'manipulación emocional',
       ],

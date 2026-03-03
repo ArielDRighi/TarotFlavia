@@ -24,8 +24,11 @@ function makeRepository(
       ),
     save: jest
       .fn()
-      .mockImplementation((card: EncyclopediaTarotCard) =>
-        Promise.resolve({ ...card, id: 1 } as EncyclopediaTarotCard),
+      .mockImplementation(
+        (cards: EncyclopediaTarotCard | EncyclopediaTarotCard[]) =>
+          Array.isArray(cards)
+            ? Promise.resolve(cards.map((c, i) => ({ ...c, id: i + 1 })))
+            : Promise.resolve({ ...cards, id: 1 } as EncyclopediaTarotCard),
       ),
     find: jest.fn().mockResolvedValue(savedCards),
   } as unknown as jest.Mocked<Repository<EncyclopediaTarotCard>>;
@@ -80,7 +83,9 @@ describe('seedEncyclopediaTarotCards', () => {
 
     await seedEncyclopediaTarotCards(dataSource);
 
-    expect(repo.save).toHaveBeenCalledTimes(78);
+    expect(repo.save).toHaveBeenCalledTimes(1);
+    const savedCards = repo.save.mock.calls[0][0] as EncyclopediaTarotCard[];
+    expect(savedCards).toHaveLength(78);
   });
 
   // ---- Datos de seed -------------------------------------------------------
