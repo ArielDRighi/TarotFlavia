@@ -545,5 +545,21 @@ describe('EncyclopediaService', () => {
       expect(result.previous).not.toBeNull();
       expect(result.next).toBeNull();
     });
+
+    it('debe lanzar NotFoundException si el ID no existe', async () => {
+      repository.findOne.mockResolvedValue(null);
+
+      await expect(service.getNavigation(999)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('debe lanzar NotFoundException con mensaje en español', async () => {
+      repository.findOne.mockResolvedValue(null);
+
+      await expect(service.getNavigation(999)).rejects.toThrow(
+        'Carta con ID 999 no encontrada',
+      );
+    });
   });
 });

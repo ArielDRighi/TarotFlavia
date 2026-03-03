@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsEnum, IsString, IsBoolean } from 'class-validator';
+import {
+  IsOptional,
+  IsEnum,
+  IsString,
+  IsBoolean,
+  MinLength,
+} from 'class-validator';
 import { Transform } from 'class-transformer';
 import { ArcanaType, Element, Suit } from '../../enums/tarot.enums';
 
@@ -40,9 +46,17 @@ export class CardFiltersDto {
     description:
       'Búsqueda por nombre en español o inglés (mínimo 2 caracteres)',
     example: 'loco',
+    minLength: 2,
   })
   @IsOptional()
   @IsString()
+  @MinLength(2, {
+    message: 'El término de búsqueda debe tener al menos 2 caracteres',
+  })
+  @Transform(({ value }: { value: unknown }) => {
+    if (typeof value === 'string') return value.trim();
+    return value;
+  })
   search?: string;
 
   @ApiProperty({

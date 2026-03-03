@@ -147,11 +147,16 @@ export class EncyclopediaService {
    * @throws NotFoundException si la carta no existe
    */
   async getNavigation(id: number): Promise<CardNavigationDto> {
-    // findById valida que la carta exista (lanza NotFoundException si no)
-    await this.cardRepository.findOne({ where: { id } });
+    // findById valida que la carta exista y lanza NotFoundException si no
+    await this.findById(id);
 
     const allCards = await this.findAll();
     const index = allCards.findIndex((c) => c.id === id);
+
+    // Defensa ante inconsistencia (ej: carta recién eliminada entre llamadas)
+    if (index === -1) {
+      throw new NotFoundException(`Carta con ID ${id} no encontrada`);
+    }
 
     return {
       previous: index > 0 ? allCards[index - 1] : null,
