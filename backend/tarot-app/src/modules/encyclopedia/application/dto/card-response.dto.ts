@@ -69,6 +69,28 @@ export class CardSummaryDto {
 }
 
 /**
+ * DTO de navegación anterior/siguiente entre cartas
+ * Usado en GET /encyclopedia/cards/:slug/navigation
+ */
+export class CardNavigationResponseDto {
+  @ApiProperty({
+    type: CardSummaryDto,
+    nullable: true,
+    description:
+      'Carta anterior en el orden canónico del mazo. Null si es la primera.',
+  })
+  previous: CardSummaryDto | null;
+
+  @ApiProperty({
+    type: CardSummaryDto,
+    nullable: true,
+    description:
+      'Carta siguiente en el orden canónico del mazo. Null si es la última.',
+  })
+  next: CardSummaryDto | null;
+}
+
+/**
  * DTO de detalle completo de una carta
  * Extiende CardSummaryDto con todos los campos de contenido
  */
