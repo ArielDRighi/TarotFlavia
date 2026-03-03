@@ -852,7 +852,8 @@ src/modules/encyclopedia/
 **Módulo:** `src/modules/encyclopedia/data/`  
 **Prioridad:** 🔴 ALTA  
 **Estimación:** 1.5 días  
-**Dependencias:** TASK-300
+**Dependencias:** TASK-300  
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -877,7 +878,7 @@ Crear el archivo de datos con las 78 cartas y el comando para poblar la base de 
 
 ##### Backend
 
-- [ ] Crear `major-arcana.data.ts` (22 cartas):
+- [x] Crear `major-arcana.data.ts` (22 cartas):
 
   ```typescript
   import { ArcanaType, Element, Planet, ZodiacAssociation } from "../enums/tarot.enums";
@@ -972,7 +973,7 @@ Crear el archivo de datos con las 78 cartas y el comando para poblar la base de 
   ];
   ```
 
-- [ ] Crear `minor-arcana.data.ts` (56 cartas, ejemplo de Copas):
+- [x] Crear `minor-arcana.data.ts` (56 cartas, ejemplo de Copas):
 
   ```typescript
   import { ArcanaType, Suit, CourtRank, Element } from "../enums/tarot.enums";
@@ -1036,7 +1037,7 @@ Crear el archivo de datos con las 78 cartas y el comando para poblar la base de 
   ];
   ```
 
-- [ ] Crear `cards-seed.data.ts`:
+- [x] Crear `cards-seed.data.ts`:
 
   ```typescript
   import { MAJOR_ARCANA } from "./major-arcana.data";
@@ -1047,7 +1048,7 @@ Crear el archivo de datos con las 78 cartas y el comando para poblar la base de 
   export const TOTAL_CARDS = 78;
   ```
 
-- [ ] Crear comando de seed:
+- [x] Crear comando de seed:
 
   ```typescript
   // src/database/seeds/tarot-cards.seed.ts
@@ -1078,20 +1079,20 @@ Crear el archivo de datos con las 78 cartas y el comando para poblar la base de 
 
 ##### Testing
 
-- [ ] Test: Seed inserta 78 cartas
-- [ ] Test: No duplica si ya existen
-- [ ] Test: Todos los slugs son únicos
-- [ ] Test: Todas las cartas tienen contenido mínimo
+- [x] Test: Seed inserta 78 cartas
+- [x] Test: No duplica si ya existen
+- [x] Test: Todos los slugs son únicos
+- [x] Test: Todas las cartas tienen contenido mínimo
 
 ---
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] 22 Arcanos Mayores completos
-- [ ] 56 Arcanos Menores completos (14 x 4 palos)
-- [ ] Todos los campos requeridos llenos
-- [ ] Comando de seed funciona
-- [ ] Contenido en español de calidad
+- [x] 22 Arcanos Mayores completos
+- [x] 56 Arcanos Menores completos (14 x 4 palos)
+- [x] Todos los campos requeridos llenos
+- [x] Comando de seed funciona
+- [x] Contenido en español de calidad
 
 # Backend: Módulo y Servicio
 
@@ -4426,8 +4427,8 @@ Semana 4-5: Frontend páginas completas (Fase 2 - enciclopedia completa)
 
 ### Backend — Tarot (Fase 1)
 
-- [ ] TASK-300: Entidad TarotCard creada
-- [ ] TASK-302: Seeder con 78 cartas
+- [x] TASK-300: Entidad TarotCard creada
+- [x] TASK-302: Seeder con 78 cartas
 - [ ] TASK-303: Módulo y servicios
 - [ ] TASK-304: Endpoints funcionando
 
