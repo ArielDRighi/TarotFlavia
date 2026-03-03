@@ -1650,6 +1650,7 @@ Implementar endpoints REST para consultar cartas.
 **Prioridad:** 🔴 ALTA
 **Estimación:** 1 día
 **Dependencias:** TASK-300 (comparte módulo de enciclopedia existente)
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -1751,10 +1752,10 @@ export class EncyclopediaArticle {
 
 #### ✅ Criterios de Aceptación
 
-- [ ] Migración ejecuta sin errores
-- [ ] Entidad soporta todos los tipos de contenido (11 categorías)
-- [ ] Índice de slug permite búsqueda rápida
-- [ ] Campo `snippet` separado de `content` (optimización para widgets)
+- [x] Migración ejecuta sin errores
+- [x] Entidad soporta todos los tipos de contenido (11 categorías)
+- [x] Índice de slug permite búsqueda rápida
+- [x] Campo `snippet` separado de `content` (optimización para widgets)
 
 ---
 
@@ -4343,14 +4344,14 @@ public/images/tarot/
 
 #### Backend — artículos estáticos
 
-| Tarea    | Descripción                        | Estimación | Prioridad |
-| -------- | ---------------------------------- | ---------- | --------- |
-| TASK-309 | Entidad EncyclopediaArticle        | 1 día      | 🔴 ALTA   |
-| TASK-310 | Seeder de ~95 artículos            | 2 días     | 🔴 ALTA   |
-| TASK-311 | ArticlesService + DTOs             | 1 día      | 🔴 ALTA   |
-| TASK-312 | Endpoints REST de artículos        | 0.5 días   | 🔴 ALTA   |
-| TASK-313 | Búsqueda global unificada          | 0.5 días   | 🟡 MEDIA  |
-| TASK-314 | ViewCount para artículos           | 0.25 días  | 🟢 BAJA   |
+| Tarea    | Descripción                        | Estimación | Prioridad | Estado         |
+| -------- | ---------------------------------- | ---------- | --------- | -------------- |
+| TASK-309 | Entidad EncyclopediaArticle        | 1 día      | 🔴 ALTA   | ✅ COMPLETADA  |
+| TASK-310 | Seeder de ~95 artículos            | 2 días     | 🔴 ALTA   | 🔲 Pendiente   |
+| TASK-311 | ArticlesService + DTOs             | 1 día      | 🔴 ALTA   | 🔲 Pendiente   |
+| TASK-312 | Endpoints REST de artículos        | 0.5 días   | 🔴 ALTA   | 🔲 Pendiente   |
+| TASK-313 | Búsqueda global unificada          | 0.5 días   | 🟡 MEDIA  | 🔲 Pendiente   |
+| TASK-314 | ViewCount para artículos           | 0.25 días  | 🟢 BAJA   | 🔲 Pendiente   |
 
 #### Frontend — widget e integración
 
@@ -4436,7 +4437,7 @@ Semana 4-5: Frontend páginas completas (Fase 2 - enciclopedia completa)
 
 ### Backend — Enciclopedia Mística (Fase 2)
 
-- [ ] TASK-309: Entidad EncyclopediaArticle creada
+- [x] TASK-309: Entidad EncyclopediaArticle creada
 - [ ] TASK-310: Seeder con ~95 artículos
 - [ ] TASK-311: ArticlesService con todos los métodos
 - [ ] TASK-312: Endpoints REST funcionando
