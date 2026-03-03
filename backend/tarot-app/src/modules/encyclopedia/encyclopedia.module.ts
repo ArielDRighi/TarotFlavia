@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EncyclopediaTarotCard } from './entities/encyclopedia-tarot-card.entity';
+import { EncyclopediaService } from './application/services/encyclopedia.service';
 
 /**
  * Módulo de la Enciclopedia Mística
@@ -11,8 +12,8 @@ import { EncyclopediaTarotCard } from './entities/encyclopedia-tarot-card.entity
  */
 @Module({
   imports: [TypeOrmModule.forFeature([EncyclopediaTarotCard])],
-  providers: [],
+  providers: [EncyclopediaService],
   controllers: [],
-  exports: [TypeOrmModule],
+  exports: [TypeOrmModule, EncyclopediaService],
 })
 export class EncyclopediaModule {}

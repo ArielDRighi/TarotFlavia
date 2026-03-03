@@ -1098,8 +1098,9 @@ Crear el archivo de datos con las 78 cartas y el comando para poblar la base de 
 
 ---
 
-### TASK-303: Crear módulo y servicio de Enciclopedia
+ ### TASK-303: Crear módulo y servicio de Enciclopedia
 
+**Estado:** ✅ COMPLETADA  
 **Módulo:** `src/modules/encyclopedia/`  
 **Prioridad:** 🔴 ALTA  
 **Estimación:** 1 día  
@@ -1127,7 +1128,7 @@ Crear el módulo NestJS con el servicio principal para consultar cartas.
 
 ##### Backend
 
-- [ ] Crear DTOs:
+- [x] Crear DTOs:
 
   ```typescript
   // card-response.dto.ts
@@ -1414,7 +1415,7 @@ Crear el módulo NestJS con el servicio principal para consultar cartas.
   }
   ```
 
-- [ ] Crear `encyclopedia.module.ts`:
+- [x] Crear `encyclopedia.module.ts`:
 
   ```typescript
   import { Module } from "@nestjs/common";
@@ -1432,25 +1433,25 @@ Crear el módulo NestJS con el servicio principal para consultar cartas.
   export class EncyclopediaModule {}
   ```
 
-- [ ] Registrar en `app.module.ts`
+- [x] Registrar en `app.module.ts`
 
 ##### Testing
 
-- [ ] Test: findAll retorna 78 cartas
-- [ ] Test: Filtro por arcanaType funciona
-- [ ] Test: Filtro por suit funciona
-- [ ] Test: Búsqueda por nombre funciona
-- [ ] Test: findBySlug retorna carta correcta
-- [ ] Test: 404 para slug inexistente
+- [x] Test: findAll retorna 78 cartas
+- [x] Test: Filtro por arcanaType funciona
+- [x] Test: Filtro por suit funciona
+- [x] Test: Búsqueda por nombre funciona
+- [x] Test: findBySlug retorna carta correcta
+- [x] Test: 404 para slug inexistente
 
 ---
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] Servicio consulta todas las cartas
-- [ ] Filtros funcionan correctamente
-- [ ] Búsqueda es case-insensitive
-- [ ] ViewCount se incrementa
+- [x] Servicio consulta todas las cartas
+- [x] Filtros funcionan correctamente
+- [x] Búsqueda es case-insensitive
+- [x] ViewCount se incrementa
 
 # Backend: Endpoints
 
@@ -4429,7 +4430,7 @@ Semana 4-5: Frontend páginas completas (Fase 2 - enciclopedia completa)
 
 - [x] TASK-300: Entidad TarotCard creada
 - [x] TASK-302: Seeder con 78 cartas
-- [ ] TASK-303: Módulo y servicios
+- [x] TASK-303: Módulo y servicios
 - [ ] TASK-304: Endpoints funcionando
 
 ### Backend — Enciclopedia Mística (Fase 2)
