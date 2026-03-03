@@ -1462,7 +1462,8 @@ Crear el módulo NestJS con el servicio principal para consultar cartas.
 **Módulo:** `src/modules/encyclopedia/infrastructure/controllers/`  
 **Prioridad:** 🔴 ALTA  
 **Estimación:** 1 día  
-**Dependencias:** TASK-303
+**Dependencias:** TASK-303  
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -1497,7 +1498,7 @@ Implementar endpoints REST para consultar cartas.
 
 ##### Backend
 
-- [ ] Crear `encyclopedia.controller.ts`:
+- [x] Crear `encyclopedia.controller.ts`:
 
   ```typescript
   import {
@@ -1613,20 +1614,20 @@ Implementar endpoints REST para consultar cartas.
 
 ##### Testing
 
-- [ ] Test e2e: GET /encyclopedia/cards retorna 78 cartas
-- [ ] Test e2e: GET /encyclopedia/cards?arcanaType=major retorna 22
-- [ ] Test e2e: GET /encyclopedia/cards/suit/cups retorna 14
-- [ ] Test e2e: GET /encyclopedia/cards/search?q=mag retorna resultados
-- [ ] Test e2e: GET /encyclopedia/cards/the-fool retorna detalle
-- [ ] Test e2e: GET /encyclopedia/cards/invalid retorna 404
+- [x] Test e2e: GET /encyclopedia/cards retorna 78 cartas
+- [x] Test e2e: GET /encyclopedia/cards?arcanaType=major retorna 22
+- [x] Test e2e: GET /encyclopedia/cards/suit/cups retorna 14
+- [x] Test e2e: GET /encyclopedia/cards/search?q=mag retorna resultados
+- [x] Test e2e: GET /encyclopedia/cards/the-fool retorna detalle
+- [x] Test e2e: GET /encyclopedia/cards/invalid retorna 404
 
 ---
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] Todos los endpoints funcionan
-- [ ] Filtros se aplican correctamente
-- [ ] Documentación Swagger completa
+- [x] Todos los endpoints funcionan
+- [x] Filtros se aplican correctamente
+- [x] Documentación Swagger completa
 
 ---
 
@@ -4431,7 +4432,7 @@ Semana 4-5: Frontend páginas completas (Fase 2 - enciclopedia completa)
 - [x] TASK-300: Entidad TarotCard creada
 - [x] TASK-302: Seeder con 78 cartas
 - [x] TASK-303: Módulo y servicios
-- [ ] TASK-304: Endpoints funcionando
+- [x] TASK-304: Endpoints funcionando
 
 ### Backend — Enciclopedia Mística (Fase 2)
 

@@ -2,18 +2,18 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EncyclopediaTarotCard } from './entities/encyclopedia-tarot-card.entity';
 import { EncyclopediaService } from './application/services/encyclopedia.service';
+import { EncyclopediaController } from './infrastructure/controllers/encyclopedia.controller';
 
 /**
  * Módulo de la Enciclopedia Mística
  *
  * Gestiona las 78 cartas del Tarot con acceso público (sin restricciones de plan).
- * Las tareas TASK-302, TASK-303 y TASK-304 completarán este módulo con
- * seeder de datos, servicio y endpoints REST.
+ * Expone endpoints REST bajo /encyclopedia/cards para explorar el mazo completo.
  */
 @Module({
   imports: [TypeOrmModule.forFeature([EncyclopediaTarotCard])],
   providers: [EncyclopediaService],
-  controllers: [],
+  controllers: [EncyclopediaController],
   exports: [TypeOrmModule, EncyclopediaService],
 })
 export class EncyclopediaModule {}
