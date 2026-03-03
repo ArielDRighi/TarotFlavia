@@ -88,6 +88,22 @@ export class EncyclopediaService {
   }
 
   /**
+   * Retorna el ID de una carta dado su slug, sin incrementar el contador de vistas.
+   * Usar en endpoints auxiliares (related, navigation) donde el detalle no se solicita.
+   * @throws NotFoundException si el slug no existe
+   */
+  async findIdBySlug(slug: string): Promise<number> {
+    const card = await this.cardRepository.findOne({
+      where: { slug },
+      select: ['id'],
+    });
+    if (!card) {
+      throw new NotFoundException(`Carta "${slug}" no encontrada`);
+    }
+    return card.id;
+  }
+
+  /**
    * Retorna el detalle completo de una carta por su slug
    * Incrementa el contador de vistas
    * @throws NotFoundException si el slug no existe

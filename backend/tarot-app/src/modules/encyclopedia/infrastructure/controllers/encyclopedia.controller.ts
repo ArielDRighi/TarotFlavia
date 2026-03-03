@@ -10,9 +10,9 @@ import { EncyclopediaService } from '../../application/services/encyclopedia.ser
 import { CardFiltersDto } from '../../application/dto/card-filters.dto';
 import {
   CardDetailDto,
+  CardNavigationResponseDto,
   CardSummaryDto,
 } from '../../application/dto/card-response.dto';
-import { CardNavigationDto } from '../../application/services/encyclopedia.service';
 import { Suit } from '../../enums/tarot.enums';
 
 /**
@@ -113,10 +113,11 @@ export class EncyclopediaController {
     type: [CardSummaryDto],
   })
   async searchCards(@Query('q') query: string): Promise<CardSummaryDto[]> {
-    if (!query || query.length < 2) {
+    const normalizedQuery = query?.trim();
+    if (!normalizedQuery || normalizedQuery.length < 2) {
       return [];
     }
-    return this.encyclopediaService.search(query);
+    return this.encyclopediaService.search(normalizedQuery);
   }
 
   // ── GET /encyclopedia/cards/:slug ────────────────────────────────────────
@@ -173,8 +174,8 @@ export class EncyclopediaController {
   async getRelatedCards(
     @Param('slug') slug: string,
   ): Promise<CardSummaryDto[]> {
-    const card = await this.encyclopediaService.findBySlug(slug);
-    return this.encyclopediaService.getRelatedCards(card.id);
+    const id = await this.encyclopediaService.findIdBySlug(slug);
+    return this.encyclopediaService.getRelatedCards(id);
   }
 
   // ── GET /encyclopedia/cards/:slug/navigation ─────────────────────────────
@@ -196,13 +197,16 @@ export class EncyclopediaController {
     status: 200,
     description:
       'Navegación previa/siguiente. previous o next pueden ser null si es el primero/último.',
+    type: CardNavigationResponseDto,
   })
   @ApiResponse({
     status: 404,
     description: 'Carta no encontrada',
   })
-  async getNavigation(@Param('slug') slug: string): Promise<CardNavigationDto> {
-    const card = await this.encyclopediaService.findBySlug(slug);
-    return this.encyclopediaService.getNavigation(card.id);
+  async getNavigation(
+    @Param('slug') slug: string,
+  ): Promise<CardNavigationResponseDto> {
+    const id = await this.encyclopediaService.findIdBySlug(slug);
+    return this.encyclopediaService.getNavigation(id);
   }
 }

@@ -56,6 +56,7 @@ const mockEncyclopediaService: jest.Mocked<
     | 'getBySuit'
     | 'search'
     | 'findBySlug'
+    | 'findIdBySlug'
     | 'getRelatedCards'
     | 'getNavigation'
   >
@@ -65,6 +66,7 @@ const mockEncyclopediaService: jest.Mocked<
   getBySuit: jest.fn(),
   search: jest.fn(),
   findBySlug: jest.fn(),
+  findIdBySlug: jest.fn(),
   getRelatedCards: jest.fn(),
   getNavigation: jest.fn(),
 };
@@ -177,6 +179,23 @@ describe('EncyclopediaController', () => {
       expect(result).toEqual(found);
     });
 
+    it('debe normalizar (trim) el query antes de validar la longitud mínima', async () => {
+      const result = await controller.searchCards('  a  ');
+
+      expect(mockEncyclopediaService.search).not.toHaveBeenCalled();
+      expect(result).toEqual([]);
+    });
+
+    it('debe pasar el query normalizado (trim) al servicio', async () => {
+      const found = [buildSummary({ nameEs: 'El Mago' })];
+      mockEncyclopediaService.search.mockResolvedValue(found);
+
+      const result = await controller.searchCards('  ma  ');
+
+      expect(mockEncyclopediaService.search).toHaveBeenCalledWith('ma');
+      expect(result).toEqual(found);
+    });
+
     it('debe retornar array vacío sin llamar al servicio cuando query tiene menos de 2 caracteres', async () => {
       const result = await controller.searchCards('a');
 
@@ -230,24 +249,24 @@ describe('EncyclopediaController', () => {
   // ── GET /encyclopedia/cards/:slug/related ───────────────────────────────
 
   describe('getRelatedCards', () => {
-    it('debe retornar las cartas relacionadas del slug indicado', async () => {
-      const cardDetail = buildDetail({ id: 1 });
+    it('debe retornar las cartas relacionadas del slug indicado sin incrementar vistas', async () => {
       const related = [buildSummary({ id: 2 }), buildSummary({ id: 3 })];
-      mockEncyclopediaService.findBySlug.mockResolvedValue(cardDetail);
+      mockEncyclopediaService.findIdBySlug.mockResolvedValue(1);
       mockEncyclopediaService.getRelatedCards.mockResolvedValue(related);
 
       const result = await controller.getRelatedCards('the-fool');
 
-      expect(mockEncyclopediaService.findBySlug).toHaveBeenCalledWith(
+      // Usa findIdBySlug (sin incremento de vistas), NO findBySlug
+      expect(mockEncyclopediaService.findIdBySlug).toHaveBeenCalledWith(
         'the-fool',
       );
+      expect(mockEncyclopediaService.findBySlug).not.toHaveBeenCalled();
       expect(mockEncyclopediaService.getRelatedCards).toHaveBeenCalledWith(1);
       expect(result).toEqual(related);
     });
 
     it('debe retornar array vacío cuando la carta no tiene relacionadas', async () => {
-      const cardDetail = buildDetail({ id: 1 });
-      mockEncyclopediaService.findBySlug.mockResolvedValue(cardDetail);
+      mockEncyclopediaService.findIdBySlug.mockResolvedValue(1);
       mockEncyclopediaService.getRelatedCards.mockResolvedValue([]);
 
       const result = await controller.getRelatedCards('the-fool');
@@ -256,7 +275,7 @@ describe('EncyclopediaController', () => {
     });
 
     it('debe propagar NotFoundException cuando el slug no existe', async () => {
-      mockEncyclopediaService.findBySlug.mockRejectedValue(
+      mockEncyclopediaService.findIdBySlug.mockRejectedValue(
         new NotFoundException('Carta "invalid-slug" no encontrada'),
       );
 
@@ -269,31 +288,31 @@ describe('EncyclopediaController', () => {
   // ── GET /encyclopedia/cards/:slug/navigation ────────────────────────────
 
   describe('getNavigation', () => {
-    it('debe retornar la navegación anterior/siguiente para una carta', async () => {
-      const cardDetail = buildDetail({ id: 2 });
+    it('debe retornar la navegación anterior/siguiente para una carta sin incrementar vistas', async () => {
       const navigation = {
         previous: buildSummary({ id: 1, slug: 'previous-card' }),
         next: buildSummary({ id: 3, slug: 'next-card' }),
       };
-      mockEncyclopediaService.findBySlug.mockResolvedValue(cardDetail);
+      mockEncyclopediaService.findIdBySlug.mockResolvedValue(2);
       mockEncyclopediaService.getNavigation.mockResolvedValue(navigation);
 
       const result = await controller.getNavigation('the-magician');
 
-      expect(mockEncyclopediaService.findBySlug).toHaveBeenCalledWith(
+      // Usa findIdBySlug (sin incremento de vistas), NO findBySlug
+      expect(mockEncyclopediaService.findIdBySlug).toHaveBeenCalledWith(
         'the-magician',
       );
+      expect(mockEncyclopediaService.findBySlug).not.toHaveBeenCalled();
       expect(mockEncyclopediaService.getNavigation).toHaveBeenCalledWith(2);
       expect(result).toEqual(navigation);
     });
 
     it('debe retornar null en previous cuando la carta es la primera', async () => {
-      const cardDetail = buildDetail({ id: 1 });
       const navigation = {
         previous: null,
         next: buildSummary({ id: 2, slug: 'the-magician' }),
       };
-      mockEncyclopediaService.findBySlug.mockResolvedValue(cardDetail);
+      mockEncyclopediaService.findIdBySlug.mockResolvedValue(1);
       mockEncyclopediaService.getNavigation.mockResolvedValue(navigation);
 
       const result = await controller.getNavigation('the-fool');
@@ -303,12 +322,11 @@ describe('EncyclopediaController', () => {
     });
 
     it('debe retornar null en next cuando la carta es la última', async () => {
-      const cardDetail = buildDetail({ id: 78 });
       const navigation = {
         previous: buildSummary({ id: 77, slug: 'judgement' }),
         next: null,
       };
-      mockEncyclopediaService.findBySlug.mockResolvedValue(cardDetail);
+      mockEncyclopediaService.findIdBySlug.mockResolvedValue(78);
       mockEncyclopediaService.getNavigation.mockResolvedValue(navigation);
 
       const result = await controller.getNavigation('the-world');
@@ -318,7 +336,7 @@ describe('EncyclopediaController', () => {
     });
 
     it('debe propagar NotFoundException cuando el slug no existe', async () => {
-      mockEncyclopediaService.findBySlug.mockRejectedValue(
+      mockEncyclopediaService.findIdBySlug.mockRejectedValue(
         new NotFoundException('Carta "invalid-slug" no encontrada'),
       );
 

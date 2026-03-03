@@ -1614,12 +1614,12 @@ Implementar endpoints REST para consultar cartas.
 
 ##### Testing
 
-- [x] Test e2e: GET /encyclopedia/cards retorna 78 cartas
-- [x] Test e2e: GET /encyclopedia/cards?arcanaType=major retorna 22
-- [x] Test e2e: GET /encyclopedia/cards/suit/cups retorna 14
-- [x] Test e2e: GET /encyclopedia/cards/search?q=mag retorna resultados
-- [x] Test e2e: GET /encyclopedia/cards/the-fool retorna detalle
-- [x] Test e2e: GET /encyclopedia/cards/invalid retorna 404
+- [ ] Test e2e: GET /encyclopedia/cards retorna 78 cartas
+- [ ] Test e2e: GET /encyclopedia/cards?arcanaType=major retorna 22
+- [ ] Test e2e: GET /encyclopedia/cards/suit/cups retorna 14
+- [ ] Test e2e: GET /encyclopedia/cards/search?q=mag retorna resultados
+- [ ] Test e2e: GET /encyclopedia/cards/the-fool retorna detalle
+- [ ] Test e2e: GET /encyclopedia/cards/invalid retorna 404
 
 ---
 
