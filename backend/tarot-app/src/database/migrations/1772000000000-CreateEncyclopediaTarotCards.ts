@@ -79,10 +79,6 @@ export class CreateEncyclopediaTarotCards1772000000000 implements MigrationInter
     await queryRunner.query(`
       CREATE INDEX idx_enc_card_suit ON encyclopedia_tarot_cards(suit);
     `);
-
-    await queryRunner.query(`
-      CREATE UNIQUE INDEX idx_enc_card_slug ON encyclopedia_tarot_cards(slug);
-    `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

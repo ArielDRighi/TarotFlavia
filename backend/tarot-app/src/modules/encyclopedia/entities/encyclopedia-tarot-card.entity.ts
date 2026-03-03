@@ -55,15 +55,15 @@ export class EncyclopediaTarotCard {
     example: 'the-fool',
     description: 'Slug único para URL amigable (ej: "the-fool", "ace-of-cups")',
   })
-  @Column({ type: 'varchar', length: 50, unique: true })
+  @Column({ type: 'varchar', length: 50, unique: true, name: 'slug' })
   slug: string;
 
   @ApiProperty({ example: 'The Fool', description: 'Nombre en inglés' })
-  @Column({ type: 'varchar', length: 100 })
+  @Column({ type: 'varchar', length: 100, name: 'name_en' })
   nameEn: string;
 
   @ApiProperty({ example: 'El Loco', description: 'Nombre en español' })
-  @Column({ type: 'varchar', length: 100 })
+  @Column({ type: 'varchar', length: 100, name: 'name_es' })
   nameEs: string;
 
   // ============================================================================
@@ -74,14 +74,19 @@ export class EncyclopediaTarotCard {
     enum: ArcanaType,
     description: 'Tipo de arcano: mayor o menor',
   })
-  @Column({ type: 'enum', enum: ArcanaType })
+  @Column({
+    type: 'enum',
+    enum: ArcanaType,
+    name: 'arcana_type',
+    enumName: 'enc_arcana_type_enum',
+  })
   arcanaType: ArcanaType;
 
   @ApiProperty({
     example: 0,
     description: 'Número de la carta (0-21 para Mayores, 1-14 para Menores)',
   })
-  @Column({ type: 'smallint' })
+  @Column({ type: 'smallint', name: 'number' })
   number: number;
 
   @ApiProperty({
@@ -89,7 +94,12 @@ export class EncyclopediaTarotCard {
     nullable: true,
     description: 'Número romano (solo Arcanos Mayores). Null para Menores.',
   })
-  @Column({ type: 'varchar', length: 10, nullable: true })
+  @Column({
+    type: 'varchar',
+    length: 10,
+    nullable: true,
+    name: 'roman_numeral',
+  })
   romanNumeral: string | null;
 
   @ApiProperty({
@@ -97,7 +107,13 @@ export class EncyclopediaTarotCard {
     nullable: true,
     description: 'Palo (solo Arcanos Menores). Null para Mayores.',
   })
-  @Column({ type: 'enum', enum: Suit, nullable: true })
+  @Column({
+    type: 'enum',
+    enum: Suit,
+    nullable: true,
+    name: 'suit',
+    enumName: 'enc_suit_enum',
+  })
   suit: Suit | null;
 
   @ApiProperty({
@@ -105,7 +121,13 @@ export class EncyclopediaTarotCard {
     nullable: true,
     description: 'Rango de corte (solo cartas de corte). Null para el resto.',
   })
-  @Column({ type: 'enum', enum: CourtRank, nullable: true })
+  @Column({
+    type: 'enum',
+    enum: CourtRank,
+    nullable: true,
+    name: 'court_rank',
+    enumName: 'enc_court_rank_enum',
+  })
   courtRank: CourtRank | null;
 
   // ============================================================================
@@ -117,7 +139,13 @@ export class EncyclopediaTarotCard {
     nullable: true,
     description: 'Elemento asociado a la carta',
   })
-  @Column({ type: 'enum', enum: Element, nullable: true })
+  @Column({
+    type: 'enum',
+    enum: Element,
+    nullable: true,
+    name: 'element',
+    enumName: 'enc_element_enum',
+  })
   element: Element | null;
 
   @ApiProperty({
@@ -125,7 +153,13 @@ export class EncyclopediaTarotCard {
     nullable: true,
     description: 'Planeta regente (principalmente Arcanos Mayores)',
   })
-  @Column({ type: 'enum', enum: Planet, nullable: true })
+  @Column({
+    type: 'enum',
+    enum: Planet,
+    nullable: true,
+    name: 'planet',
+    enumName: 'enc_planet_enum',
+  })
   planet: Planet | null;
 
   @ApiProperty({
@@ -133,7 +167,13 @@ export class EncyclopediaTarotCard {
     nullable: true,
     description: 'Signo zodiacal asociado',
   })
-  @Column({ type: 'enum', enum: ZodiacAssociation, nullable: true })
+  @Column({
+    type: 'enum',
+    enum: ZodiacAssociation,
+    nullable: true,
+    name: 'zodiac_sign',
+    enumName: 'enc_zodiac_association_enum',
+  })
   zodiacSign: ZodiacAssociation | null;
 
   // ============================================================================
@@ -143,27 +183,27 @@ export class EncyclopediaTarotCard {
   @ApiProperty({
     description: 'Significado de la carta en posición derecha (normal)',
   })
-  @Column({ type: 'text' })
+  @Column({ type: 'text', name: 'meaning_upright' })
   meaningUpright: string;
 
   @ApiProperty({
     description: 'Significado de la carta en posición invertida',
   })
-  @Column({ type: 'text' })
+  @Column({ type: 'text', name: 'meaning_reversed' })
   meaningReversed: string;
 
   @ApiProperty({
     nullable: true,
     description: 'Descripción general de la carta e imagen',
   })
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'text', nullable: true, name: 'description' })
   description: string | null;
 
   @ApiProperty({
     description:
       'Palabras clave agrupadas por posición (upright/reversed). Almacenado como JSONB.',
   })
-  @Column({ type: 'jsonb' })
+  @Column({ type: 'jsonb', name: 'keywords' })
   keywords: CardKeywords;
 
   // ============================================================================
@@ -174,7 +214,7 @@ export class EncyclopediaTarotCard {
     example: '/images/tarot/major/00-the-fool.jpg',
     description: 'URL de la imagen principal de la carta',
   })
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255, name: 'image_url' })
   imageUrl: string;
 
   @ApiProperty({
@@ -183,7 +223,12 @@ export class EncyclopediaTarotCard {
     description:
       'URL del thumbnail. Si es null, se usa imageUrl como fallback.',
   })
-  @Column({ type: 'varchar', length: 255, nullable: true })
+  @Column({
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+    name: 'thumbnail_url',
+  })
   thumbnailUrl: string | null;
 
   // ============================================================================
@@ -196,7 +241,7 @@ export class EncyclopediaTarotCard {
     description:
       'IDs de cartas relacionadas temáticamente. Almacenado como JSONB.',
   })
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'jsonb', nullable: true, name: 'related_cards' })
   relatedCards: number[] | null;
 
   // ============================================================================
@@ -207,15 +252,15 @@ export class EncyclopediaTarotCard {
     example: 0,
     description: 'Contador de vistas (para estadísticas de popularidad)',
   })
-  @Column({ type: 'int', default: 0 })
+  @Column({ type: 'int', default: 0, name: 'view_count' })
   viewCount: number;
 
   @ApiProperty({ description: 'Fecha de creación del registro' })
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
   @ApiProperty({ description: 'Fecha de última actualización' })
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
   // ============================================================================
@@ -226,7 +271,7 @@ export class EncyclopediaTarotCard {
    * Verifica si la carta es una carta de corte (Paje, Caballero, Reina, Rey)
    */
   isCourtCard(): boolean {
-    return this.courtRank !== null;
+    return this.courtRank != null;
   }
 
   /**

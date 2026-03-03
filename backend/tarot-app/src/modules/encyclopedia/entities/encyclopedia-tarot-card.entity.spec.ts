@@ -392,6 +392,11 @@ describe('EncyclopediaTarotCard Entity', () => {
       card.courtRank = null;
       expect(card.isCourtCard()).toBe(false);
     });
+
+    it('debería retornar false cuando courtRank es undefined', () => {
+      card.courtRank = undefined as unknown as null;
+      expect(card.isCourtCard()).toBe(false);
+    });
   });
 
   describe('isMajorArcana helper', () => {
