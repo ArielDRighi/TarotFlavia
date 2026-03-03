@@ -4344,14 +4344,14 @@ public/images/tarot/
 
 #### Backend — artículos estáticos
 
-| Tarea    | Descripción                        | Estimación | Prioridad |
-| -------- | ---------------------------------- | ---------- | --------- |
-| TASK-309 | Entidad EncyclopediaArticle        | 1 día      | ✅ COMPLETADA |
-| TASK-310 | Seeder de ~95 artículos            | 2 días     | 🔴 ALTA   |
-| TASK-311 | ArticlesService + DTOs             | 1 día      | 🔴 ALTA   |
-| TASK-312 | Endpoints REST de artículos        | 0.5 días   | 🔴 ALTA   |
-| TASK-313 | Búsqueda global unificada          | 0.5 días   | 🟡 MEDIA  |
-| TASK-314 | ViewCount para artículos           | 0.25 días  | 🟢 BAJA   |
+| Tarea    | Descripción                        | Estimación | Prioridad | Estado         |
+| -------- | ---------------------------------- | ---------- | --------- | -------------- |
+| TASK-309 | Entidad EncyclopediaArticle        | 1 día      | 🔴 ALTA   | ✅ COMPLETADA  |
+| TASK-310 | Seeder de ~95 artículos            | 2 días     | 🔴 ALTA   | 🔲 Pendiente   |
+| TASK-311 | ArticlesService + DTOs             | 1 día      | 🔴 ALTA   | 🔲 Pendiente   |
+| TASK-312 | Endpoints REST de artículos        | 0.5 días   | 🔴 ALTA   | 🔲 Pendiente   |
+| TASK-313 | Búsqueda global unificada          | 0.5 días   | 🟡 MEDIA  | 🔲 Pendiente   |
+| TASK-314 | ViewCount para artículos           | 0.25 días  | 🟢 BAJA   | 🔲 Pendiente   |
 
 #### Frontend — widget e integración
 

@@ -126,7 +126,7 @@ describe('EncyclopediaArticle Entity', () => {
     });
 
     it('snippet debe ser más corto que content', () => {
-      expect(article.snippet.length).toBeLessThan(article.content.length + 1);
+      expect(article.snippet.length).toBeLessThan(article.content.length);
     });
   });
 

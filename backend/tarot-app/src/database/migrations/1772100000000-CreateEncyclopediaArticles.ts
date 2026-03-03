@@ -57,10 +57,6 @@ export class CreateEncyclopediaArticles1772100000000 implements MigrationInterfa
     await queryRunner.query(`
       CREATE INDEX idx_article_category ON encyclopedia_articles(category);
     `);
-
-    await queryRunner.query(`
-      CREATE UNIQUE INDEX idx_article_slug ON encyclopedia_articles(slug);
-    `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
