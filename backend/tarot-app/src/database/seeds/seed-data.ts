@@ -22,6 +22,7 @@ import { seedFlaviaIAConfig } from './flavia-ia-config.seeder';
 import { seedPlans } from './plans.seeder';
 import { seedRituals } from './rituals.seeder';
 import { seedEncyclopediaTarotCards } from './encyclopedia-tarot-cards.seeder';
+import { seedEncyclopediaArticles } from './encyclopedia-articles.seeder';
 import { seedSacredCalendar } from './sacred-calendar.seeder';
 import { seedBirthChartInterpretations } from './birth-chart-interpretations.seeder';
 import { SacredCalendarService } from '../../modules/rituals/application/services/sacred-calendar.service';
@@ -121,6 +122,9 @@ async function bootstrap() {
 
     // Seed Encyclopedia Tarot Cards (78 cards with full esoteric content)
     await seedEncyclopediaTarotCards(dataSource);
+
+    // Seed Encyclopedia Articles (zodiac signs, planets, houses, elements, modalities, guides)
+    await seedEncyclopediaArticles(dataSource);
 
     // Seed Sacred Calendar Events (Sabbats, lunar phases, portals)
     await seedSacredCalendar(dataSource, sacredCalendarService);

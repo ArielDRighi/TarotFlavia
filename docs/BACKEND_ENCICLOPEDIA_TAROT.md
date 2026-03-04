@@ -1782,12 +1782,13 @@ describe('EncyclopediaArticle entity', () => {
 
 ---
 
-### TASK-310: Crear seeder de artículos de la Enciclopedia Mística
+ ### TASK-310: Crear seeder de artículos de la Enciclopedia Mística
 
 **Módulo:** `src/modules/encyclopedia/data/`
 **Prioridad:** 🔴 ALTA
 **Estimación:** 2 días
 **Dependencias:** TASK-309
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -1869,11 +1870,11 @@ export async function seedEncyclopediaArticles(dataSource: DataSource) {
 
 #### ✅ Criterios de Aceptación
 
-- [ ] Seed inserta ~95 artículos correctamente
-- [ ] Seed es idempotente (no duplica en ejecuciones sucesivas)
-- [ ] Todos los slugs son únicos y URL-safe
-- [ ] `snippet` y `content` no están vacíos en ningún artículo
-- [ ] Los `relatedTarotCards` referencian IDs válidos del seeder de cartas
+- [x] Seed inserta 47 artículos correctamente (12 signos + 10 planetas + 12 casas + 4 elementos + 3 modalidades + 6 guías)
+- [x] Seed es idempotente (no duplica en ejecuciones sucesivas)
+- [x] Todos los slugs son únicos y URL-safe
+- [x] `snippet` y `content` no están vacíos en ningún artículo
+- [x] Los `relatedTarotCards` referencian IDs válidos del seeder de cartas
 
 ---
 
@@ -4347,7 +4348,7 @@ public/images/tarot/
 | Tarea    | Descripción                        | Estimación | Prioridad | Estado         |
 | -------- | ---------------------------------- | ---------- | --------- | -------------- |
 | TASK-309 | Entidad EncyclopediaArticle        | 1 día      | 🔴 ALTA   | ✅ COMPLETADA  |
-| TASK-310 | Seeder de ~95 artículos            | 2 días     | 🔴 ALTA   | 🔲 Pendiente   |
+| TASK-310 | Seeder de ~95 artículos            | 2 días     | 🔴 ALTA   | ✅ Completada  |
 | TASK-311 | ArticlesService + DTOs             | 1 día      | 🔴 ALTA   | 🔲 Pendiente   |
 | TASK-312 | Endpoints REST de artículos        | 0.5 días   | 🔴 ALTA   | 🔲 Pendiente   |
 | TASK-313 | Búsqueda global unificada          | 0.5 días   | 🟡 MEDIA  | 🔲 Pendiente   |
@@ -4438,7 +4439,7 @@ Semana 4-5: Frontend páginas completas (Fase 2 - enciclopedia completa)
 ### Backend — Enciclopedia Mística (Fase 2)
 
 - [x] TASK-309: Entidad EncyclopediaArticle creada
-- [ ] TASK-310: Seeder con ~95 artículos
+- [x] TASK-310: Seeder con ~95 artículos
 - [ ] TASK-311: ArticlesService con todos los métodos
 - [ ] TASK-312: Endpoints REST funcionando
 - [ ] TASK-313: Búsqueda global unificada
