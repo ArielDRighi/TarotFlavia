@@ -1,5 +1,5 @@
 import { ArticleCategory } from '../enums/article.enums';
-import { ArticleSeedData } from './zodiac-signs.data';
+import { ArticleSeedData } from './articles-seed.types';
 
 /**
  * 6 Guías de Actividades — datos seed para la Enciclopedia Mística
@@ -96,7 +96,7 @@ Tu **Año Personal** determina los temas dominantes del ciclo de 12 meses actual
 
 ## ¿Qué es el Péndulo?
 
-El péndulo es una herramienta de radiestesia (detección de energías sútiles) compuesta por un objeto colgado de un hilo o cadena. Se utiliza para acceder a la sabiduría del inconsciente, las respuestas del cuerpo o la información del campo energético que nos rodea.
+El péndulo es una herramienta de radiestesia (detección de energías sutiles) compuesta por un objeto colgado de un hilo o cadena. Se utiliza para acceder a la sabiduría del inconsciente, las respuestas del cuerpo o la información del campo energético que nos rodea.
 
 El movimiento del péndulo es causado por movimientos musculares involuntarios (efecto ideomotor) que responden a información que el consciente no puede acceder directamente. No es magia — es una forma de escuchar más profundamente.
 

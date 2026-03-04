@@ -1,4 +1,5 @@
-import { ZODIAC_SIGNS, ArticleSeedData } from './zodiac-signs.data';
+import { ArticleSeedData } from './articles-seed.types';
+import { ZODIAC_SIGNS } from './zodiac-signs.data';
 import { PLANETS } from './planets.data';
 import { ASTROLOGICAL_HOUSES } from './astrological-houses.data';
 import { ELEMENTS, MODALITIES } from './elements-modalities.data';
@@ -16,9 +17,6 @@ import { ACTIVITY_GUIDES } from './activity-guides.data';
  *  -  6 Guías de actividades  (GUIDE_*)
  *  ──────────────────────────
  *    47 artículos en total (ajustable si el backlog cambia)
- *
- * Re-exporta ArticleSeedData para que el seeder pueda importarla
- * desde este único punto de entrada.
  */
 export type { ArticleSeedData };
 

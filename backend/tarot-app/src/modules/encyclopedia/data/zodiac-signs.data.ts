@@ -1,23 +1,5 @@
 import { ArticleCategory } from '../enums/article.enums';
-
-/**
- * Interfaz de datos para el seed de artículos de la Enciclopedia Mística.
- * Utilizada por todos los archivos de datos de artículos.
- */
-export interface ArticleSeedData {
-  slug: string;
-  nameEs: string;
-  nameEn: string | null;
-  category: ArticleCategory;
-  /** Máx ~400 caracteres. Texto para el widget "Ver más" en páginas de módulos */
-  snippet: string;
-  /** Markdown completo para la página de detalle */
-  content: string;
-  metadata: Record<string, unknown> | null;
-  /** IDs de cartas de tarot relacionadas (referencia a EncyclopediaTarotCard) */
-  relatedTarotCards: number[] | null;
-  sortOrder: number;
-}
+import { ArticleSeedData } from './articles-seed.types';
 
 /**
  * 12 Signos Zodiacales — datos seed para la Enciclopedia Mística
@@ -98,7 +80,7 @@ El arcano mayor asociado a Aries es **El Emperador (IV)**, símbolo de autoridad
       color: 'rojo',
       bodyPart: 'cabeza y cara',
     },
-    relatedTarotCards: [4], // El Emperador
+    relatedTarotCards: [5], // El Emperador (ID 5 = arcano IV, posición 5 en BD)
     sortOrder: 1,
   },
 
@@ -174,7 +156,7 @@ El arcano mayor asociado a Tauro es **La Emperatriz (III)**, símbolo de abundan
       color: 'verde, rosa',
       bodyPart: 'cuello y garganta',
     },
-    relatedTarotCards: [3], // La Emperatriz
+    relatedTarotCards: [4], // La Emperatriz (ID 4 = arcano III, posición 4 en BD)
     sortOrder: 2,
   },
 
@@ -250,7 +232,7 @@ El arcano mayor asociado a Géminis es **Los Enamorados (VI)**, que representa l
       color: 'amarillo, plateado',
       bodyPart: 'pulmones, brazos y sistema nervioso',
     },
-    relatedTarotCards: [6], // Los Enamorados
+    relatedTarotCards: [7], // Los Enamorados (ID 7 = arcano VI, posición 7 en BD)
     sortOrder: 3,
   },
 
@@ -326,7 +308,7 @@ El arcano mayor asociado a Cáncer es **El Carro (VII)**, que simboliza el contr
       color: 'plateado, blanco, turquesa',
       bodyPart: 'pecho y estómago',
     },
-    relatedTarotCards: [7], // El Carro
+    relatedTarotCards: [8], // El Carro (ID 8 = arcano VII, posición 8 en BD)
     sortOrder: 4,
   },
 
@@ -402,7 +384,7 @@ El arcano mayor asociado a Leo es **La Fuerza (VIII/XI)**, símbolo de valor int
       color: 'dorado, naranja',
       bodyPart: 'corazón y columna vertebral',
     },
-    relatedTarotCards: [8], // La Fuerza
+    relatedTarotCards: [9], // La Fuerza (ID 9 = arcano VIII, posición 9 en BD)
     sortOrder: 5,
   },
 
@@ -478,7 +460,7 @@ El arcano mayor asociado a Virgo es **El Ermitaño (IX)**, símbolo de la búsqu
       color: 'verde, café terroso',
       bodyPart: 'intestino delgado y sistema digestivo',
     },
-    relatedTarotCards: [9], // El Ermitaño
+    relatedTarotCards: [10], // El Ermitaño (ID 10 = arcano IX, posición 10 en BD)
     sortOrder: 6,
   },
 
@@ -554,7 +536,7 @@ El arcano mayor asociado a Libra es **La Justicia (VIII/XI)**, símbolo del equi
       color: 'rosa, azul claro, verde menta',
       bodyPart: 'riñones y zona lumbar',
     },
-    relatedTarotCards: [11], // La Justicia
+    relatedTarotCards: [12], // La Justicia (ID 12 = arcano XI, posición 12 en BD)
     sortOrder: 7,
   },
 
@@ -630,7 +612,7 @@ Los arcanos mayores asociados a Escorpio son **La Muerte (XIII)** y **El Juicio 
       color: 'negro, rojo oscuro, granate',
       bodyPart: 'órganos reproductores',
     },
-    relatedTarotCards: [13, 20], // La Muerte, El Juicio
+    relatedTarotCards: [14, 21], // La Muerte (ID 14), El Juicio (ID 21) — posiciones en BD
     sortOrder: 8,
   },
 
@@ -706,7 +688,7 @@ El arcano mayor asociado a Sagitario es **La Templanza (XIV)**, símbolo del equ
       color: 'azul índigo, violeta',
       bodyPart: 'muslos, cadera y sistema nervioso',
     },
-    relatedTarotCards: [14], // La Templanza
+    relatedTarotCards: [15], // La Templanza (ID 15 = arcano XIV, posición 15 en BD)
     sortOrder: 9,
   },
 
@@ -782,7 +764,7 @@ El arcano mayor asociado a Capricornio es **El Diablo (XV)**, que simboliza las 
       color: 'negro, gris, marrón oscuro',
       bodyPart: 'huesos, articulaciones y piel',
     },
-    relatedTarotCards: [15], // El Diablo
+    relatedTarotCards: [16], // El Diablo (ID 16 = arcano XV, posición 16 en BD)
     sortOrder: 10,
   },
 
@@ -858,7 +840,7 @@ El arcano mayor asociado a Acuario es **La Estrella (XVII)**, símbolo de espera
       color: 'azul eléctrico, plateado',
       bodyPart: 'tobillos y sistema circulatorio',
     },
-    relatedTarotCards: [17], // La Estrella
+    relatedTarotCards: [18], // La Estrella (ID 18 = arcano XVII, posición 18 en BD)
     sortOrder: 11,
   },
 
@@ -934,7 +916,7 @@ El arcano mayor asociado a Piscis es **La Luna (XVIII)**, símbolo del inconscie
       color: 'azul marino, violeta, verde mar',
       bodyPart: 'pies y sistema linfático',
     },
-    relatedTarotCards: [18], // La Luna
+    relatedTarotCards: [19], // La Luna (ID 19 = arcano XVIII, posición 19 en BD)
     sortOrder: 12,
   },
 ];

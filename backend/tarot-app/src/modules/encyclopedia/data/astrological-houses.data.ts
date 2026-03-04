@@ -1,5 +1,5 @@
 import { ArticleCategory } from '../enums/article.enums';
-import { ArticleSeedData } from './zodiac-signs.data';
+import { ArticleSeedData } from './articles-seed.types';
 
 /**
  * 12 Casas Astrológicas — datos seed para la Enciclopedia Mística

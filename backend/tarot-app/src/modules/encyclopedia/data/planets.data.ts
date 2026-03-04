@@ -1,5 +1,5 @@
 import { ArticleCategory } from '../enums/article.enums';
-import { ArticleSeedData } from './zodiac-signs.data';
+import { ArticleSeedData } from './articles-seed.types';
 
 /**
  * 10 Planetas astrológicos — datos seed para la Enciclopedia Mística
@@ -173,7 +173,7 @@ Mercurio entra en retrógrado 3-4 veces al año durante aproximadamente 3 semana
 
 ## Mercurio en los Signos
 
-Mercurio siempre está cerca del Sol, máximo a 28° de distancia. Su signo natal (generalmente el mismo o adjacent al Sol) describe el estilo intelectual y comunicativo dominante.
+Mercurio siempre está cerca del Sol, máximo a 28° de distancia. Su signo natal (generalmente el mismo o adyacente al Sol) describe el estilo intelectual y comunicativo dominante.
 
 ## Mitología
 

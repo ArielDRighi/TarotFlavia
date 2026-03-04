@@ -1,5 +1,5 @@
 import { ArticleCategory } from '../enums/article.enums';
-import { ArticleSeedData } from './zodiac-signs.data';
+import { ArticleSeedData } from './articles-seed.types';
 
 /**
  * 4 Elementos + 3 Modalidades — datos seed para la Enciclopedia Mística
@@ -58,7 +58,7 @@ En equilibrio, la energía de Fuego da propósito, vitalidad y la capacidad de i
 
 ## Fuego en la Práctica Espiritual
 
-Rituals de fuego: velas, fogatas sagradas, quema de intenciones. El fuego purifica, transforma y marca el inicio de nuevos ciclos. Las ceremonias con fuego son poderosas herramientas de manifestación y liberación.
+Rituales de fuego: velas, fogatas sagradas, quema de intenciones. El fuego purifica, transforma y marca el inicio de nuevos ciclos. Las ceremonias con fuego son poderosas herramientas de manifestación y liberación.
 `,
     metadata: {
       signs: ['aries', 'leo', 'sagittarius'],

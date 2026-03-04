@@ -4348,7 +4348,7 @@ public/images/tarot/
 | Tarea    | Descripción                        | Estimación | Prioridad | Estado         |
 | -------- | ---------------------------------- | ---------- | --------- | -------------- |
 | TASK-309 | Entidad EncyclopediaArticle        | 1 día      | 🔴 ALTA   | ✅ COMPLETADA  |
-| TASK-310 | Seeder de ~95 artículos            | 2 días     | 🔴 ALTA   | ✅ Completada  |
+| TASK-310 | Seeder de artículos de la enciclopedia | 2 días     | 🔴 ALTA   | ✅ Completada  |
 | TASK-311 | ArticlesService + DTOs             | 1 día      | 🔴 ALTA   | 🔲 Pendiente   |
 | TASK-312 | Endpoints REST de artículos        | 0.5 días   | 🔴 ALTA   | 🔲 Pendiente   |
 | TASK-313 | Búsqueda global unificada          | 0.5 días   | 🟡 MEDIA  | 🔲 Pendiente   |
@@ -4439,7 +4439,7 @@ Semana 4-5: Frontend páginas completas (Fase 2 - enciclopedia completa)
 ### Backend — Enciclopedia Mística (Fase 2)
 
 - [x] TASK-309: Entidad EncyclopediaArticle creada
-- [x] TASK-310: Seeder con ~95 artículos
+- [x] TASK-310: Seeder con artículos iniciales de enciclopedia
 - [ ] TASK-311: ArticlesService con todos los métodos
 - [ ] TASK-312: Endpoints REST funcionando
 - [ ] TASK-313: Búsqueda global unificada
