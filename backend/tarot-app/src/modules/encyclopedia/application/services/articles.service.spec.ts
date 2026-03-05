@@ -84,6 +84,7 @@ describe('ArticlesService', () => {
     return {
       select: jest.fn().mockReturnThis(),
       andWhere: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
       orderBy: jest.fn().mockReturnThis(),
       getOne: jest.fn().mockResolvedValue(results[0] ?? null),
       getMany: jest.fn().mockResolvedValue(results),
@@ -99,7 +100,6 @@ describe('ArticlesService', () => {
           useValue: {
             createQueryBuilder: jest.fn(),
             findOne: jest.fn(),
-            find: jest.fn(),
             increment: jest.fn().mockResolvedValue({ affected: 1 }),
           },
         },
@@ -175,8 +175,11 @@ describe('ArticlesService', () => {
 
   describe('findBySlug', () => {
     it('debe retornar ArticleDetailDto con content completo', async () => {
+      const qb = createQueryBuilderMock([mockArticleLeo]);
       repository.findOne.mockResolvedValue(mockArticleAries);
-      repository.find.mockResolvedValue([mockArticleLeo]);
+      repository.createQueryBuilder.mockReturnValue(
+        qb as unknown as SelectQueryBuilder<EncyclopediaArticle>,
+      );
 
       const result = await service.findBySlug('aries');
 
@@ -188,8 +191,11 @@ describe('ArticlesService', () => {
     });
 
     it('debe resolver relatedArticles de slugs a objetos ArticleSummaryDto', async () => {
+      const qb = createQueryBuilderMock([mockArticleLeo]);
       repository.findOne.mockResolvedValue(mockArticleAries);
-      repository.find.mockResolvedValue([mockArticleLeo]);
+      repository.createQueryBuilder.mockReturnValue(
+        qb as unknown as SelectQueryBuilder<EncyclopediaArticle>,
+      );
 
       const result = await service.findBySlug('aries');
 
@@ -226,8 +232,11 @@ describe('ArticlesService', () => {
     });
 
     it('debe incluir metadata, relatedTarotCards e imageUrl en el resultado', async () => {
+      const qb = createQueryBuilderMock([]);
       repository.findOne.mockResolvedValue(mockArticleAries);
-      repository.find.mockResolvedValue([]);
+      repository.createQueryBuilder.mockReturnValue(
+        qb as unknown as SelectQueryBuilder<EncyclopediaArticle>,
+      );
 
       const result = await service.findBySlug('aries');
 
@@ -340,23 +349,29 @@ describe('ArticlesService', () => {
 
   describe('findRelated', () => {
     it('debe retornar artículos relacionados por slugs', async () => {
-      repository.find.mockResolvedValue([mockArticleLeo]);
+      const qb = createQueryBuilderMock([mockArticleLeo]);
+      repository.createQueryBuilder.mockReturnValue(
+        qb as unknown as SelectQueryBuilder<EncyclopediaArticle>,
+      );
 
       const result = await service.findRelated(['leo', 'sagittarius']);
 
       expect(result).toHaveLength(1);
-      expect(repository.find).toHaveBeenCalled();
+      expect(repository.createQueryBuilder).toHaveBeenCalled();
     });
 
     it('debe retornar array vacío para array de slugs vacío', async () => {
       const result = await service.findRelated([]);
 
       expect(result).toEqual([]);
-      expect(repository.find).not.toHaveBeenCalled();
+      expect(repository.createQueryBuilder).not.toHaveBeenCalled();
     });
 
     it('debe retornar ArticleSummaryDto sin campo content', async () => {
-      repository.find.mockResolvedValue([mockArticleLeo]);
+      const qb = createQueryBuilderMock([mockArticleLeo]);
+      repository.createQueryBuilder.mockReturnValue(
+        qb as unknown as SelectQueryBuilder<EncyclopediaArticle>,
+      );
 
       const result = await service.findRelated(['leo']);
 
@@ -372,8 +387,11 @@ describe('ArticlesService', () => {
 
   describe('incrementViewCount (integrado en findBySlug)', () => {
     it('debe llamar increment al obtener detalle de un artículo', async () => {
+      const qb = createQueryBuilderMock([]);
       repository.findOne.mockResolvedValue(mockArticleAries);
-      repository.find.mockResolvedValue([]);
+      repository.createQueryBuilder.mockReturnValue(
+        qb as unknown as SelectQueryBuilder<EncyclopediaArticle>,
+      );
 
       await service.findBySlug('aries');
 
@@ -385,8 +403,11 @@ describe('ArticlesService', () => {
     });
 
     it('no debe bloquear la respuesta aunque increment falle', async () => {
+      const qb = createQueryBuilderMock([]);
       repository.findOne.mockResolvedValue(mockArticleAries);
-      repository.find.mockResolvedValue([]);
+      repository.createQueryBuilder.mockReturnValue(
+        qb as unknown as SelectQueryBuilder<EncyclopediaArticle>,
+      );
       repository.increment.mockRejectedValue(new Error('DB error'));
 
       // No debe lanzar error — es fire-and-forget

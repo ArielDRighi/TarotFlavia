@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { EncyclopediaArticle } from '../../entities/encyclopedia-article.entity';
 import { ArticleCategory } from '../../enums/article.enums';
 import {
@@ -140,9 +140,19 @@ export class ArticlesService {
       return [];
     }
 
-    const articles = await this.articleRepository.find({
-      where: { slug: In(slugs) },
-    });
+    const articles = await this.articleRepository
+      .createQueryBuilder('article')
+      .select([
+        'article.id',
+        'article.slug',
+        'article.nameEs',
+        'article.category',
+        'article.snippet',
+        'article.imageUrl',
+        'article.sortOrder',
+      ])
+      .where('article.slug IN (:...slugs)', { slugs })
+      .getMany();
 
     return articles.map((a) => this.toSummaryDto(a));
   }
