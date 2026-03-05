@@ -2163,6 +2163,7 @@ private incrementViewCount(id: number): void {
 
 ### TASK-305: Crear tipos TypeScript para Enciclopedia
 
+**Estado:** ✅ COMPLETADA  
 **Módulo:** `frontend/src/types/`  
 **Prioridad:** 🟡 MEDIA  
 **Estimación:** 0.5 días  
@@ -2195,7 +2196,7 @@ Crear los tipos TypeScript y funciones de API para la enciclopedia del Tarot.
 
 ##### Frontend
 
-- [ ] Crear `encyclopedia.types.ts`:
+- [x] Crear `encyclopedia.types.ts`:
 
   ```typescript
   // Enums
@@ -2480,22 +2481,22 @@ Crear los tipos TypeScript y funciones de API para la enciclopedia del Tarot.
   }
   ```
 
-- [ ] Exportar desde `types/index.ts`
+- [x] Exportar desde `types/index.ts`
 
 ##### Testing
 
-- [ ] Test: Tipos se exportan correctamente
-- [ ] Test: API functions hacen llamadas correctas
-- [ ] Test: Hooks retornan datos esperados
-- [ ] Test: useSearchCards solo ejecuta con 2+ caracteres
+- [x] Test: Tipos se exportan correctamente
+- [x] Test: API functions hacen llamadas correctas
+- [x] Test: Hooks retornan datos esperados
+- [x] Test: useSearchCards solo ejecuta con 2+ caracteres
 
 ---
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] Tipos completos para todas las entidades
-- [ ] API functions cubren todos los endpoints
-- [ ] Hooks con staleTime apropiado (1h para datos estáticos)
+- [x] Tipos completos para todas las entidades
+- [x] API functions cubren todos los endpoints
+- [x] Hooks con staleTime apropiado (1h para datos estáticos)
 
 # Frontend: Componentes de Lista y Navegación
 
@@ -4451,7 +4452,7 @@ Semana 4-5: Frontend páginas completas (Fase 2 - enciclopedia completa)
 
 ### Frontend — Tarot (Fase 1)
 
-- [ ] TASK-305: Types y hooks
+- [x] TASK-305: Types y hooks
 - [ ] TASK-306: Componentes de lista
 - [ ] TASK-307: Componentes de detalle
 - [ ] TASK-308: Páginas

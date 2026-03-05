@@ -235,3 +235,21 @@ export type {
   ApiError as BirthChartApiError,
 } from './birth-chart-api.types';
 export { isFullChartResponse, isPremiumChartResponse } from './birth-chart-api.types';
+
+// Encyclopedia Types
+export type {
+  CardKeywords,
+  SuitInfo,
+  CardSummary,
+  CardDetail,
+  CardNavigation,
+  CardFilters,
+} from './encyclopedia.types';
+export {
+  ArcanaType,
+  Suit,
+  CourtRank,
+  Element,
+  SUIT_INFO,
+  ELEMENT_INFO,
+} from './encyclopedia.types';
