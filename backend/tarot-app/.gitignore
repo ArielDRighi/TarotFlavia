@@ -36,5 +36,5 @@ test-output.txt
 
 # Coverage reports
 coverage/
-coverage-integration/
+coverage-*/
 .nyc_output/
