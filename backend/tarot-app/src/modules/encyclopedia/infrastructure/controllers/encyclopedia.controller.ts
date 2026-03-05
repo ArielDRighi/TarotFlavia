@@ -12,16 +12,19 @@ import {
   CardDetailDto,
   CardNavigationResponseDto,
   CardSummaryDto,
+  GlobalSearchResultDto,
 } from '../../application/dto/card-response.dto';
 import { Suit } from '../../enums/tarot.enums';
 
 /**
  * Controlador REST de la Enciclopedia de Tarot
  *
- * Expone endpoints públicos (sin autenticación) para explorar las 78 cartas.
+ * Expone endpoints públicos (sin autenticación) para explorar las 78 cartas
+ * y realizar búsquedas globales unificadas.
  * Todos los endpoints son de solo lectura — no modifican datos.
  *
  * Endpoints:
+ *  GET /encyclopedia/search                  - Búsqueda global unificada (cartas + artículos)
  *  GET /encyclopedia/cards                   - Listar cartas con filtros
  *  GET /encyclopedia/cards/major             - Arcanos Mayores
  *  GET /encyclopedia/cards/suit/:suit        - Cartas por palo
@@ -34,6 +37,38 @@ import { Suit } from '../../enums/tarot.enums';
 @Controller('encyclopedia')
 export class EncyclopediaController {
   constructor(private readonly encyclopediaService: EncyclopediaService) {}
+
+  // ── GET /encyclopedia/search ─────────────────────────────────────────────
+
+  /**
+   * Búsqueda global unificada: busca en cartas del Tarot y artículos simultáneamente.
+   * Requiere mínimo 2 caracteres; retorna arrays vacíos si no se cumple.
+   * Ruta estática — debe declararse ANTES de cualquier ruta con parámetro.
+   */
+  @Get('search')
+  @ApiOperation({
+    summary: 'Búsqueda global unificada en cartas y artículos',
+  })
+  @ApiQuery({
+    name: 'q',
+    required: true,
+    description: 'Término de búsqueda (mínimo 2 caracteres)',
+    example: 'mercurio',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Resultados combinados de cartas del Tarot y artículos',
+    type: GlobalSearchResultDto,
+  })
+  async globalSearch(
+    @Query('q') query: string,
+  ): Promise<GlobalSearchResultDto> {
+    const normalizedQuery = query?.trim();
+    if (!normalizedQuery || normalizedQuery.length < 2) {
+      return { tarotCards: [], articles: [], total: 0 };
+    }
+    return this.encyclopediaService.globalSearch(normalizedQuery);
+  }
 
   // ── GET /encyclopedia/cards ──────────────────────────────────────────────
 

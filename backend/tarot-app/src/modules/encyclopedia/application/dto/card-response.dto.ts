@@ -7,6 +7,7 @@ import {
   Suit,
   ZodiacAssociation,
 } from '../../enums/tarot.enums';
+import { ArticleSummaryDto } from './article-response.dto';
 
 /**
  * DTO para las palabras clave de una carta (upright/reversed)
@@ -163,4 +164,28 @@ export class CardDetailDto extends CardSummaryDto {
     description: 'IDs de cartas relacionadas temáticamente',
   })
   relatedCards: number[] | null;
+}
+
+/**
+ * DTO de resultado de búsqueda global unificada
+ * Combina cartas del Tarot y artículos de la enciclopedia en un solo resultado
+ */
+export class GlobalSearchResultDto {
+  @ApiProperty({
+    type: [CardSummaryDto],
+    description: 'Cartas del Tarot que coinciden con el término de búsqueda',
+  })
+  tarotCards: CardSummaryDto[];
+
+  @ApiProperty({
+    type: [ArticleSummaryDto],
+    description: 'Artículos de la enciclopedia que coinciden con el término',
+  })
+  articles: ArticleSummaryDto[];
+
+  @ApiProperty({
+    example: 5,
+    description: 'Total de resultados combinados (cartas + artículos)',
+  })
+  total: number;
 }

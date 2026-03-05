@@ -6,8 +6,11 @@ import { CardFiltersDto } from '../../application/dto/card-filters.dto';
 import {
   CardDetailDto,
   CardSummaryDto,
+  GlobalSearchResultDto,
 } from '../../application/dto/card-response.dto';
 import { ArcanaType, Element, Suit } from '../../enums/tarot.enums';
+import { ArticleSummaryDto } from '../../application/dto/article-response.dto';
+import { ArticleCategory } from '../../enums/article.enums';
 
 // ─── Helpers de fixtures ────────────────────────────────────────────────────
 
@@ -59,6 +62,7 @@ const mockEncyclopediaService: jest.Mocked<
     | 'findIdBySlug'
     | 'getRelatedCards'
     | 'getNavigation'
+    | 'globalSearch'
   >
 > = {
   findAll: jest.fn(),
@@ -69,6 +73,7 @@ const mockEncyclopediaService: jest.Mocked<
   findIdBySlug: jest.fn(),
   getRelatedCards: jest.fn(),
   getNavigation: jest.fn(),
+  globalSearch: jest.fn(),
 };
 
 // ─── Suite principal ─────────────────────────────────────────────────────────
@@ -364,6 +369,88 @@ describe('EncyclopediaController', () => {
 
       expect(mockEncyclopediaService.findAll).toHaveBeenCalledWith(filters);
       expect(result).toHaveLength(16);
+    });
+  });
+
+  // ── GET /encyclopedia/search ────────────────────────────────────────────
+
+  describe('globalSearch', () => {
+    const buildArticle = (
+      overrides: Partial<ArticleSummaryDto> = {},
+    ): ArticleSummaryDto => ({
+      id: 10,
+      slug: 'mercurio',
+      nameEs: 'Mercurio',
+      category: ArticleCategory.PLANET,
+      snippet: 'Planeta de la comunicación.',
+      imageUrl: '/images/mercury.jpg',
+      sortOrder: 1,
+      ...overrides,
+    });
+
+    it('debe retornar tarotCards, articles y total cuando hay resultados', async () => {
+      const cards = [buildSummary({ nameEs: 'El Mago' })];
+      const articles = [buildArticle()];
+      const expectedResult: GlobalSearchResultDto = {
+        tarotCards: cards,
+        articles,
+        total: 2,
+      };
+      mockEncyclopediaService.globalSearch.mockResolvedValue(expectedResult);
+
+      const result = await controller.globalSearch('mercurio');
+
+      expect(mockEncyclopediaService.globalSearch).toHaveBeenCalledWith(
+        'mercurio',
+      );
+      expect(result.tarotCards).toHaveLength(1);
+      expect(result.articles).toHaveLength(1);
+      expect(result.total).toBe(2);
+    });
+
+    it('debe normalizar (trim) el query antes de llamar al servicio', async () => {
+      const emptyResult: GlobalSearchResultDto = {
+        tarotCards: [],
+        articles: [],
+        total: 0,
+      };
+      mockEncyclopediaService.globalSearch.mockResolvedValue(emptyResult);
+
+      await controller.globalSearch('  mercurio  ');
+
+      expect(mockEncyclopediaService.globalSearch).toHaveBeenCalledWith(
+        'mercurio',
+      );
+    });
+
+    it('debe retornar vacío sin llamar al servicio cuando query tiene menos de 2 caracteres', async () => {
+      const result = await controller.globalSearch('a');
+
+      expect(mockEncyclopediaService.globalSearch).not.toHaveBeenCalled();
+      expect(result).toEqual({ tarotCards: [], articles: [], total: 0 });
+    });
+
+    it('debe retornar vacío sin llamar al servicio cuando query está vacío', async () => {
+      const result = await controller.globalSearch('');
+
+      expect(mockEncyclopediaService.globalSearch).not.toHaveBeenCalled();
+      expect(result).toEqual({ tarotCards: [], articles: [], total: 0 });
+    });
+
+    it('debe retornar vacío sin llamar al servicio cuando query es solo espacios', async () => {
+      const result = await controller.globalSearch('  ');
+
+      expect(mockEncyclopediaService.globalSearch).not.toHaveBeenCalled();
+      expect(result).toEqual({ tarotCards: [], articles: [], total: 0 });
+    });
+
+    it('debe retornar vacío sin llamar al servicio cuando query es undefined', async () => {
+      const result = await controller.globalSearch(
+        undefined as unknown as string,
+      );
+
+      expect(mockEncyclopediaService.globalSearch).not.toHaveBeenCalled();
+      expect(result).toEqual({ tarotCards: [], articles: [], total: 0 });
     });
   });
 });

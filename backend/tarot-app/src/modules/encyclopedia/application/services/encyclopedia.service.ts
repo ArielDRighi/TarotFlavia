@@ -4,7 +4,12 @@ import { In, Repository } from 'typeorm';
 import { EncyclopediaTarotCard } from '../../entities/encyclopedia-tarot-card.entity';
 import { ArcanaType, Suit } from '../../enums/tarot.enums';
 import { CardFiltersDto } from '../dto/card-filters.dto';
-import { CardDetailDto, CardSummaryDto } from '../dto/card-response.dto';
+import {
+  CardDetailDto,
+  CardSummaryDto,
+  GlobalSearchResultDto,
+} from '../dto/card-response.dto';
+import { ArticlesService } from './articles.service';
 
 /**
  * DTO de navegación entre cartas
@@ -28,6 +33,7 @@ export class EncyclopediaService {
   constructor(
     @InjectRepository(EncyclopediaTarotCard)
     private readonly cardRepository: Repository<EncyclopediaTarotCard>,
+    private readonly articlesService: ArticlesService,
   ) {}
 
   // ============================================================================
@@ -155,6 +161,27 @@ export class EncyclopediaService {
    */
   async search(term: string): Promise<CardSummaryDto[]> {
     return this.findAll({ search: term });
+  }
+
+  /**
+   * Búsqueda global unificada: busca en cartas del Tarot y artículos simultáneamente.
+   * Retorna arrays vacíos si el término tiene menos de 2 caracteres.
+   */
+  async globalSearch(term: string): Promise<GlobalSearchResultDto> {
+    if (!term || term.length < 2) {
+      return { tarotCards: [], articles: [], total: 0 };
+    }
+
+    const [tarotCards, articles] = await Promise.all([
+      this.search(term),
+      this.articlesService.search(term),
+    ]);
+
+    return {
+      tarotCards,
+      articles,
+      total: tarotCards.length + articles.length,
+    };
   }
 
   /**

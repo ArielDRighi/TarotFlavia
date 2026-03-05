@@ -3,13 +3,17 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { NotFoundException } from '@nestjs/common';
 import { Repository, SelectQueryBuilder, UpdateQueryBuilder } from 'typeorm';
 import { EncyclopediaService } from './encyclopedia.service';
+import { ArticlesService } from './articles.service';
 import { EncyclopediaTarotCard } from '../../entities/encyclopedia-tarot-card.entity';
 import { ArcanaType, Suit, Element, CourtRank } from '../../enums/tarot.enums';
 import { CardFiltersDto } from '../dto/card-filters.dto';
+import { ArticleSummaryDto } from '../dto/article-response.dto';
+import { ArticleCategory } from '../../enums/article.enums';
 
 describe('EncyclopediaService', () => {
   let service: EncyclopediaService;
   let repository: jest.Mocked<Repository<EncyclopediaTarotCard>>;
+  let mockArticlesService: jest.Mocked<Pick<ArticlesService, 'search'>>;
 
   const mockCard: EncyclopediaTarotCard = {
     id: 1,
@@ -130,6 +134,10 @@ describe('EncyclopediaService', () => {
   };
 
   beforeEach(async () => {
+    mockArticlesService = {
+      search: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         EncyclopediaService,
@@ -140,6 +148,10 @@ describe('EncyclopediaService', () => {
             findOne: jest.fn(),
             find: jest.fn(),
           },
+        },
+        {
+          provide: ArticlesService,
+          useValue: mockArticlesService,
         },
       ],
     }).compile();
@@ -560,6 +572,111 @@ describe('EncyclopediaService', () => {
       await expect(service.getNavigation(999)).rejects.toThrow(
         'Carta con ID 999 no encontrada',
       );
+    });
+  });
+
+  // ============================================================================
+  // globalSearch
+  // ============================================================================
+
+  describe('globalSearch', () => {
+    const mockArticle: ArticleSummaryDto = {
+      id: 10,
+      slug: 'mercurio',
+      nameEs: 'Mercurio',
+      category: ArticleCategory.PLANET,
+      snippet: 'Mercurio es el planeta de la comunicación.',
+      imageUrl: '/images/encyclopedia/planets/mercury.jpg',
+      sortOrder: 1,
+    };
+
+    it('buscar "mercurio" debe retornar artículo de planeta Y cartas de tarot con mercurio', async () => {
+      const mercuryCard = {
+        ...mockCard,
+        planet: 'mercury',
+        nameEs: 'El Mago',
+      } as EncyclopediaTarotCard;
+
+      const qb = createQueryBuilderMock([mercuryCard]);
+      repository.createQueryBuilder.mockReturnValue(
+        qb as unknown as SelectQueryBuilder<EncyclopediaTarotCard>,
+      );
+      mockArticlesService.search.mockResolvedValue([mockArticle]);
+
+      const result = await service.globalSearch('mercurio');
+
+      expect(result.tarotCards).toHaveLength(1);
+      expect(result.articles).toHaveLength(1);
+      expect(result.total).toBe(2);
+      expect(mockArticlesService.search).toHaveBeenCalledWith('mercurio');
+    });
+
+    it('buscar "agua" debe retornar elemento Agua y cartas de Copas', async () => {
+      const qb = createQueryBuilderMock([mockCupsCard]);
+      repository.createQueryBuilder.mockReturnValue(
+        qb as unknown as SelectQueryBuilder<EncyclopediaTarotCard>,
+      );
+
+      const waterArticle: ArticleSummaryDto = {
+        ...mockArticle,
+        id: 11,
+        slug: 'elemento-agua',
+        nameEs: 'Elemento Agua',
+        category: ArticleCategory.ELEMENT,
+      };
+      mockArticlesService.search.mockResolvedValue([waterArticle]);
+
+      const result = await service.globalSearch('agua');
+
+      expect(result.tarotCards).toHaveLength(1);
+      expect(result.articles).toHaveLength(1);
+      expect(result.total).toBe(2);
+    });
+
+    it('búsqueda con menos de 2 caracteres debe retornar arrays vacíos', async () => {
+      const result = await service.globalSearch('a');
+
+      expect(result.tarotCards).toEqual([]);
+      expect(result.articles).toEqual([]);
+      expect(result.total).toBe(0);
+      expect(repository.createQueryBuilder).not.toHaveBeenCalled();
+      expect(mockArticlesService.search).not.toHaveBeenCalled();
+    });
+
+    it('búsqueda con string vacío debe retornar arrays vacíos', async () => {
+      const result = await service.globalSearch('');
+
+      expect(result.tarotCards).toEqual([]);
+      expect(result.articles).toEqual([]);
+      expect(result.total).toBe(0);
+    });
+
+    it('sin resultados debe retornar arrays vacíos con total: 0', async () => {
+      const qb = createQueryBuilderMock([]);
+      repository.createQueryBuilder.mockReturnValue(
+        qb as unknown as SelectQueryBuilder<EncyclopediaTarotCard>,
+      );
+      mockArticlesService.search.mockResolvedValue([]);
+
+      const result = await service.globalSearch('xyznotfound');
+
+      expect(result.tarotCards).toEqual([]);
+      expect(result.articles).toEqual([]);
+      expect(result.total).toBe(0);
+    });
+
+    it('debe calcular total correctamente sumando cartas y artículos', async () => {
+      const qb = createQueryBuilderMock([mockCard, mockCupsCard]);
+      repository.createQueryBuilder.mockReturnValue(
+        qb as unknown as SelectQueryBuilder<EncyclopediaTarotCard>,
+      );
+      mockArticlesService.search.mockResolvedValue([mockArticle]);
+
+      const result = await service.globalSearch('test');
+
+      expect(result.tarotCards).toHaveLength(2);
+      expect(result.articles).toHaveLength(1);
+      expect(result.total).toBe(3);
     });
   });
 });
