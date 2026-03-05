@@ -133,6 +133,17 @@ export const API_ENDPOINTS = {
     RECOMMENDATIONS: '/rituals/recommendations',
   },
 
+  // Encyclopedia (Enciclopedia del Tarot)
+  ENCYCLOPEDIA: {
+    CARDS: '/encyclopedia/cards',
+    MAJOR: '/encyclopedia/cards/major',
+    BY_SUIT: (suit: string) => `/encyclopedia/cards/suit/${suit}`,
+    SEARCH: '/encyclopedia/cards/search',
+    CARD_DETAIL: (slug: string) => `/encyclopedia/cards/${slug}`,
+    CARD_RELATED: (slug: string) => `/encyclopedia/cards/${slug}/related`,
+    CARD_NAVIGATION: (slug: string) => `/encyclopedia/cards/${slug}/navigation`,
+  },
+
   // Sacred Calendar (Calendario Sagrado)
   SACRED_CALENDAR: {
     UPCOMING: '/rituals/calendar/upcoming',
