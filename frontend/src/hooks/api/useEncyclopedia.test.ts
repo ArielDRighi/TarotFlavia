@@ -18,7 +18,8 @@ import * as encyclopediaApi from '@/lib/api/encyclopedia-api';
 import {
   ArcanaType,
   Suit,
-  Element,
+  Planet,
+  ZodiacAssociation,
   type CardSummary,
   type CardDetail,
   type CardNavigation,
@@ -67,7 +68,9 @@ const mockCardDetail: CardDetail = {
   thumbnailUrl: '/images/tarot/major/00-the-fool.jpg',
   romanNumeral: '0',
   courtRank: null,
-  element: Element.AIR,
+  element: null,
+  planet: Planet.URANUS,
+  zodiacSign: ZodiacAssociation.AQUARIUS,
   meaningUpright: 'Nuevos comienzos e inocencia',
   meaningReversed: 'Imprudencia y decisiones precipitadas',
   description: 'Un joven al borde de un precipicio',
@@ -191,6 +194,18 @@ describe('useSearchCards', () => {
     expect(encyclopediaApi.searchCards).toHaveBeenCalledWith('loco');
   });
 
+  it('should trim query before sending to API', async () => {
+    vi.mocked(encyclopediaApi.searchCards).mockResolvedValue([]);
+
+    const { result } = renderHook(() => useSearchCards('  loco  '), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(encyclopediaApi.searchCards).toHaveBeenCalledWith('loco');
+  });
+
   it('should be disabled when query is less than 2 characters', async () => {
     const { result } = renderHook(() => useSearchCards('l'), {
       wrapper: createWrapper(),
@@ -203,6 +218,16 @@ describe('useSearchCards', () => {
 
   it('should be disabled when query is empty', async () => {
     const { result } = renderHook(() => useSearchCards(''), {
+      wrapper: createWrapper(),
+    });
+
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.fetchStatus).toBe('idle');
+    expect(encyclopediaApi.searchCards).not.toHaveBeenCalled();
+  });
+
+  it('should be disabled when query is only whitespace', async () => {
+    const { result } = renderHook(() => useSearchCards('   '), {
       wrapper: createWrapper(),
     });
 

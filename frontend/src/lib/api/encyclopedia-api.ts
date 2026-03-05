@@ -11,6 +11,7 @@ import type {
   CardDetail,
   CardNavigation,
   CardFilters,
+  Suit,
 } from '@/types/encyclopedia.types';
 
 export async function getCards(filters?: CardFilters): Promise<CardSummary[]> {
@@ -23,7 +24,10 @@ export async function getCards(filters?: CardFilters): Promise<CardSummary[]> {
   if (filters.arcanaType) params.append('arcanaType', filters.arcanaType);
   if (filters.suit) params.append('suit', filters.suit);
   if (filters.element) params.append('element', filters.element);
-  if (filters.search) params.append('search', filters.search);
+  const trimmedSearch = filters.search?.trim();
+  if (trimmedSearch && trimmedSearch.length >= 2) {
+    params.append('search', trimmedSearch);
+  }
   if (filters.courtOnly !== undefined) params.append('courtOnly', String(filters.courtOnly));
 
   const query = params.toString();
@@ -40,7 +44,7 @@ export async function getMajorArcana(): Promise<CardSummary[]> {
   return response.data;
 }
 
-export async function getCardsBySuit(suit: string): Promise<CardSummary[]> {
+export async function getCardsBySuit(suit: Suit): Promise<CardSummary[]> {
   const response = await apiClient.get<CardSummary[]>(API_ENDPOINTS.ENCYCLOPEDIA.BY_SUIT(suit));
   return response.data;
 }

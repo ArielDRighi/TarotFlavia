@@ -13,7 +13,7 @@ import {
   getRelatedCards,
   getCardNavigation,
 } from './encyclopedia-api';
-import { ArcanaType, Suit, Element } from '@/types/encyclopedia.types';
+import { ArcanaType, Suit, Element, Planet, ZodiacAssociation } from '@/types/encyclopedia.types';
 import { API_ENDPOINTS } from './endpoints';
 
 // Mock apiClient
@@ -49,7 +49,9 @@ describe('encyclopedia API functions', () => {
     thumbnailUrl: '/images/tarot/major/00-the-fool.jpg',
     romanNumeral: '0',
     courtRank: null,
-    element: Element.AIR,
+    element: null,
+    planet: Planet.URANUS,
+    zodiacSign: ZodiacAssociation.AQUARIUS,
     meaningUpright: 'Nuevos comienzos e inocencia',
     meaningReversed: 'Imprudencia y decisiones precipitadas',
     description: 'Un joven al borde de un precipicio',

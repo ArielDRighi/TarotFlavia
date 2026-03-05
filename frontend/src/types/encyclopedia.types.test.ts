@@ -8,6 +8,8 @@ import {
   Suit,
   CourtRank,
   Element,
+  Planet,
+  ZodiacAssociation,
   SUIT_INFO,
   ELEMENT_INFO,
   type CardKeywords,
@@ -157,7 +159,9 @@ describe('encyclopedia types', () => {
         thumbnailUrl: '/images/tarot/major/00-the-fool.jpg',
         romanNumeral: '0',
         courtRank: null,
-        element: Element.AIR,
+        element: null,
+        planet: Planet.URANUS,
+        zodiacSign: ZodiacAssociation.AQUARIUS,
         meaningUpright: 'Nuevos comienzos e inocencia',
         meaningReversed: 'Imprudencia y decisiones precipitadas',
         description: 'Un joven al borde de un precipicio',
@@ -170,7 +174,9 @@ describe('encyclopedia types', () => {
       };
 
       expect(card.nameEn).toBe('The Fool');
-      expect(card.element).toBe(Element.AIR);
+      expect(card.element).toBeNull();
+      expect(card.planet).toBe(Planet.URANUS);
+      expect(card.zodiacSign).toBe(ZodiacAssociation.AQUARIUS);
       expect(card.meaningUpright).toBeDefined();
       expect(card.meaningReversed).toBeDefined();
       expect(card.relatedCards).toHaveLength(2);
@@ -189,6 +195,8 @@ describe('encyclopedia types', () => {
         romanNumeral: null,
         courtRank: null,
         element: Element.FIRE,
+        planet: null,
+        zodiacSign: null,
         meaningUpright: 'Creatividad y nuevos proyectos',
         meaningReversed: 'Bloqueo creativo',
         description: null,
@@ -203,6 +211,8 @@ describe('encyclopedia types', () => {
       expect(card.romanNumeral).toBeNull();
       expect(card.description).toBeNull();
       expect(card.relatedCards).toBeNull();
+      expect(card.planet).toBeNull();
+      expect(card.zodiacSign).toBeNull();
     });
 
     it('should accept court card with courtRank', () => {
@@ -218,6 +228,8 @@ describe('encyclopedia types', () => {
         romanNumeral: null,
         courtRank: CourtRank.QUEEN,
         element: Element.AIR,
+        planet: null,
+        zodiacSign: ZodiacAssociation.LIBRA,
         meaningUpright: 'Claridad mental y comunicación directa',
         meaningReversed: 'Frialdad emocional',
         description: 'Una reina sentada en su trono',
@@ -230,6 +242,7 @@ describe('encyclopedia types', () => {
       };
 
       expect(card.courtRank).toBe(CourtRank.QUEEN);
+      expect(card.zodiacSign).toBe(ZodiacAssociation.LIBRA);
     });
   });
 

@@ -33,6 +33,34 @@ export enum Element {
   SPIRIT = 'spirit',
 }
 
+export enum Planet {
+  SUN = 'sun',
+  MOON = 'moon',
+  MERCURY = 'mercury',
+  VENUS = 'venus',
+  MARS = 'mars',
+  JUPITER = 'jupiter',
+  SATURN = 'saturn',
+  URANUS = 'uranus',
+  NEPTUNE = 'neptune',
+  PLUTO = 'pluto',
+}
+
+export enum ZodiacAssociation {
+  ARIES = 'aries',
+  TAURUS = 'taurus',
+  GEMINI = 'gemini',
+  CANCER = 'cancer',
+  LEO = 'leo',
+  VIRGO = 'virgo',
+  LIBRA = 'libra',
+  SCORPIO = 'scorpio',
+  SAGITTARIUS = 'sagittarius',
+  CAPRICORN = 'capricorn',
+  AQUARIUS = 'aquarius',
+  PISCES = 'pisces',
+}
+
 // ─── Interfaces ───────────────────────────────────────────────────────────────
 
 export interface CardKeywords {
@@ -63,7 +91,9 @@ export interface CardDetail extends CardSummary {
   nameEn: string;
   romanNumeral: string | null;
   courtRank: CourtRank | null;
-  element: Element;
+  element: Element | null;
+  planet: Planet | null;
+  zodiacSign: ZodiacAssociation | null;
   meaningUpright: string;
   meaningReversed: string;
   description: string | null;

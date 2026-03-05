@@ -14,7 +14,7 @@ import {
   getRelatedCards,
   getCardNavigation,
 } from '@/lib/api/encyclopedia-api';
-import type { CardFilters } from '@/types/encyclopedia.types';
+import type { CardFilters, Suit } from '@/types/encyclopedia.types';
 
 const STALE_TIME_STATIC = 1000 * 60 * 60; // 1 hour — static encyclopedia data
 const STALE_TIME_SEARCH = 1000 * 60 * 5; // 5 minutes — search results
@@ -25,7 +25,7 @@ export const encyclopediaKeys = {
   all: ['encyclopedia'] as const,
   cards: (filters?: CardFilters) => [...encyclopediaKeys.all, 'cards', filters] as const,
   major: () => [...encyclopediaKeys.all, 'major'] as const,
-  bySuit: (suit: string) => [...encyclopediaKeys.all, 'suit', suit] as const,
+  bySuit: (suit: Suit) => [...encyclopediaKeys.all, 'suit', suit] as const,
   search: (query: string) => [...encyclopediaKeys.all, 'search', query] as const,
   detail: (slug: string) => [...encyclopediaKeys.all, 'detail', slug] as const,
   related: (slug: string) => [...encyclopediaKeys.all, 'related', slug] as const,
@@ -50,7 +50,7 @@ export function useMajorArcana() {
   });
 }
 
-export function useCardsBySuit(suit: string) {
+export function useCardsBySuit(suit: Suit) {
   return useQuery({
     queryKey: encyclopediaKeys.bySuit(suit),
     queryFn: () => getCardsBySuit(suit),
@@ -60,11 +60,13 @@ export function useCardsBySuit(suit: string) {
 }
 
 export function useSearchCards(query: string) {
+  const trimmedQuery = query.trim();
+
   return useQuery({
-    queryKey: encyclopediaKeys.search(query),
-    queryFn: () => searchCards(query),
+    queryKey: encyclopediaKeys.search(trimmedQuery),
+    queryFn: () => searchCards(trimmedQuery),
     staleTime: STALE_TIME_SEARCH,
-    enabled: query.length >= 2,
+    enabled: trimmedQuery.length >= 2,
   });
 }
 

@@ -250,6 +250,8 @@ export {
   Suit,
   CourtRank,
   Element,
+  Planet as EncyclopediaPlanet,
+  ZodiacAssociation,
   SUIT_INFO,
   ELEMENT_INFO,
 } from './encyclopedia.types';
