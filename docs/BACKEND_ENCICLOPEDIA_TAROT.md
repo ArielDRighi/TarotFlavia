@@ -2137,6 +2137,7 @@ describe('Encyclopedia globalSearch', () => {
 **Prioridad:** 🟢 BAJA
 **Estimación:** 0.25 días
 **Dependencias:** TASK-311
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -4355,7 +4356,7 @@ public/images/tarot/
 | TASK-311 | ArticlesService + DTOs             | 1 día      | 🔴 ALTA   | ✅ Completada  |
 | TASK-312 | Endpoints REST de artículos        | 0.5 días   | 🔴 ALTA   | ✅ Completada  |
 | TASK-313 | Búsqueda global unificada          | 0.5 días   | 🟡 MEDIA  | ✅ COMPLETADA  |
-| TASK-314 | ViewCount para artículos           | 0.25 días  | 🟢 BAJA   | 🔲 Pendiente   |
+| TASK-314 | ViewCount para artículos           | 0.25 días  | 🟢 BAJA   | ✅ COMPLETADA  |
 
 #### Frontend — widget e integración
 
@@ -4446,7 +4447,7 @@ Semana 4-5: Frontend páginas completas (Fase 2 - enciclopedia completa)
 - [x] TASK-311: ArticlesService con todos los métodos
 - [x] TASK-312: Endpoints REST funcionando
 - [x] TASK-313: Búsqueda global unificada
-- [ ] TASK-314: ViewCount para artículos
+- [x] TASK-314: ViewCount para artículos
 
 ### Frontend — Tarot (Fase 1)
 
