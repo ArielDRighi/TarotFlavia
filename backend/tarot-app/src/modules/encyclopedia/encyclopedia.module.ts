@@ -5,6 +5,7 @@ import { EncyclopediaArticle } from './entities/encyclopedia-article.entity';
 import { EncyclopediaService } from './application/services/encyclopedia.service';
 import { ArticlesService } from './application/services/articles.service';
 import { EncyclopediaController } from './infrastructure/controllers/encyclopedia.controller';
+import { ArticlesController } from './infrastructure/controllers/articles.controller';
 
 /**
  * Módulo de la Enciclopedia Mística
@@ -19,7 +20,7 @@ import { EncyclopediaController } from './infrastructure/controllers/encyclopedi
     TypeOrmModule.forFeature([EncyclopediaTarotCard, EncyclopediaArticle]),
   ],
   providers: [EncyclopediaService, ArticlesService],
-  controllers: [EncyclopediaController],
+  controllers: [EncyclopediaController, ArticlesController],
   exports: [TypeOrmModule, EncyclopediaService, ArticlesService],
 })
 export class EncyclopediaModule {}

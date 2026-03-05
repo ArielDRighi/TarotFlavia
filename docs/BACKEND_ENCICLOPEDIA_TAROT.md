@@ -2006,6 +2006,7 @@ describe('ArticlesService', () => {
 **Prioridad:** 🔴 ALTA
 **Estimación:** 0.5 días
 **Dependencias:** TASK-311
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -2051,12 +2052,12 @@ export class ArticleFiltersDto {
 
 #### ✅ Criterios de Aceptación
 
-- [ ] `GET /articles?category=zodiac_sign` retorna 12 signos
-- [ ] `GET /articles/snippet/aries` retorna solo el snippet (sin `content`)
-- [ ] `GET /articles/aries` retorna artículo completo con `content`
-- [ ] `GET /articles?search=mercurio` retorna resultados relevantes
-- [ ] `GET /articles/nonexistent` retorna `404`
-- [ ] Todos los endpoints documentados en Swagger con `@ApiTags('encyclopedia')`
+- [x] `GET /articles?category=zodiac_sign` retorna 12 signos
+- [x] `GET /articles/snippet/aries` retorna solo el snippet (sin `content`)
+- [x] `GET /articles/aries` retorna artículo completo con `content`
+- [x] `GET /articles?search=mercurio` retorna resultados relevantes
+- [x] `GET /articles/nonexistent` retorna `404`
+- [x] Todos los endpoints documentados en Swagger con `@ApiTags('Enciclopedia - Artículos')`
 
 ---
 
@@ -4351,7 +4352,7 @@ public/images/tarot/
 | TASK-309 | Entidad EncyclopediaArticle        | 1 día      | 🔴 ALTA   | ✅ COMPLETADA  |
 | TASK-310 | Seeder de artículos de la enciclopedia | 2 días     | 🔴 ALTA   | ✅ Completada  |
 | TASK-311 | ArticlesService + DTOs             | 1 día      | 🔴 ALTA   | ✅ Completada  |
-| TASK-312 | Endpoints REST de artículos        | 0.5 días   | 🔴 ALTA   | 🔲 Pendiente   |
+| TASK-312 | Endpoints REST de artículos        | 0.5 días   | 🔴 ALTA   | ✅ Completada  |
 | TASK-313 | Búsqueda global unificada          | 0.5 días   | 🟡 MEDIA  | 🔲 Pendiente   |
 | TASK-314 | ViewCount para artículos           | 0.25 días  | 🟢 BAJA   | 🔲 Pendiente   |
 
@@ -4442,7 +4443,7 @@ Semana 4-5: Frontend páginas completas (Fase 2 - enciclopedia completa)
 - [x] TASK-309: Entidad EncyclopediaArticle creada
 - [x] TASK-310: Seeder con artículos iniciales de enciclopedia
 - [x] TASK-311: ArticlesService con todos los métodos
-- [ ] TASK-312: Endpoints REST funcionando
+- [x] TASK-312: Endpoints REST funcionando
 - [ ] TASK-313: Búsqueda global unificada
 - [ ] TASK-314: ViewCount para artículos
 
