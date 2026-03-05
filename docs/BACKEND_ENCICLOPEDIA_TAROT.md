@@ -1892,12 +1892,13 @@ describe('EncyclopediaArticles seeder', () => {
 
 ---
 
-### TASK-311: Crear ArticlesService y DTOs
+ ### TASK-311: Crear ArticlesService y DTOs
 
 **Módulo:** `src/modules/encyclopedia/application/`
 **Prioridad:** 🔴 ALTA
 **Estimación:** 1 día
 **Dependencias:** TASK-309, TASK-310
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -1976,11 +1977,11 @@ export class ArticlesService {
 
 #### ✅ Criterios de Aceptación
 
-- [ ] `getSnippetBySlug` NO incluye el campo `content` en su respuesta
-- [ ] `findBySlug` incluye `content` completo y resuelve `relatedArticles` de slugs a objetos
-- [ ] `search` es case-insensitive (ILIKE en PostgreSQL)
-- [ ] Lanza `NotFoundException` para slug inexistente
-- [ ] `incrementViewCount` es fire-and-forget (no bloquea la respuesta)
+- [x] `getSnippetBySlug` NO incluye el campo `content` en su respuesta
+- [x] `findBySlug` incluye `content` completo y resuelve `relatedArticles` de slugs a objetos
+- [x] `search` es case-insensitive (ILIKE en PostgreSQL)
+- [x] Lanza `NotFoundException` para slug inexistente
+- [x] `incrementViewCount` es fire-and-forget (no bloquea la respuesta)
 
 ---
 
@@ -4349,7 +4350,7 @@ public/images/tarot/
 | -------- | ---------------------------------- | ---------- | --------- | -------------- |
 | TASK-309 | Entidad EncyclopediaArticle        | 1 día      | 🔴 ALTA   | ✅ COMPLETADA  |
 | TASK-310 | Seeder de artículos de la enciclopedia | 2 días     | 🔴 ALTA   | ✅ Completada  |
-| TASK-311 | ArticlesService + DTOs             | 1 día      | 🔴 ALTA   | 🔲 Pendiente   |
+| TASK-311 | ArticlesService + DTOs             | 1 día      | 🔴 ALTA   | ✅ Completada  |
 | TASK-312 | Endpoints REST de artículos        | 0.5 días   | 🔴 ALTA   | 🔲 Pendiente   |
 | TASK-313 | Búsqueda global unificada          | 0.5 días   | 🟡 MEDIA  | 🔲 Pendiente   |
 | TASK-314 | ViewCount para artículos           | 0.25 días  | 🟢 BAJA   | 🔲 Pendiente   |
@@ -4440,7 +4441,7 @@ Semana 4-5: Frontend páginas completas (Fase 2 - enciclopedia completa)
 
 - [x] TASK-309: Entidad EncyclopediaArticle creada
 - [x] TASK-310: Seeder con artículos iniciales de enciclopedia
-- [ ] TASK-311: ArticlesService con todos los métodos
+- [x] TASK-311: ArticlesService con todos los métodos
 - [ ] TASK-312: Endpoints REST funcionando
 - [ ] TASK-313: Búsqueda global unificada
 - [ ] TASK-314: ViewCount para artículos

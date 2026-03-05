@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { EncyclopediaTarotCard } from './entities/encyclopedia-tarot-card.entity';
 import { EncyclopediaArticle } from './entities/encyclopedia-article.entity';
 import { EncyclopediaService } from './application/services/encyclopedia.service';
+import { ArticlesService } from './application/services/articles.service';
 import { EncyclopediaController } from './infrastructure/controllers/encyclopedia.controller';
 
 /**
@@ -17,8 +18,8 @@ import { EncyclopediaController } from './infrastructure/controllers/encyclopedi
   imports: [
     TypeOrmModule.forFeature([EncyclopediaTarotCard, EncyclopediaArticle]),
   ],
-  providers: [EncyclopediaService],
+  providers: [EncyclopediaService, ArticlesService],
   controllers: [EncyclopediaController],
-  exports: [TypeOrmModule, EncyclopediaService],
+  exports: [TypeOrmModule, EncyclopediaService, ArticlesService],
 })
 export class EncyclopediaModule {}
