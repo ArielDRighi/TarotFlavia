@@ -1,5 +1,11 @@
 import { Controller, Get, Param, ParseEnumPipe, Query } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiOperation,
+  ApiParam,
+  ApiProperty,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ArticlesService } from '../../application/services/articles.service';
 import { ArticleFiltersDto } from '../../application/dto/article-filters.dto';
 import {
@@ -24,8 +30,19 @@ const CATEGORY_LABELS: Record<ArticleCategory, string> = {
   [ArticleCategory.GUIDE_CHINESE]: 'Astrología China',
 };
 
-interface CategoryItem {
+/** DTO que representa una categoría de artículo con su label en español */
+export class CategoryItemDto {
+  @ApiProperty({
+    enum: ArticleCategory,
+    description: 'Valor interno de la categoría',
+    example: ArticleCategory.ZODIAC_SIGN,
+  })
   category: ArticleCategory;
+
+  @ApiProperty({
+    description: 'Nombre legible de la categoría en español',
+    example: 'Signos del Zodíaco',
+  })
   label: string;
 }
 
@@ -87,8 +104,9 @@ export class ArticlesController {
   @ApiResponse({
     status: 200,
     description: 'Lista de categorías con su label en español',
+    type: [CategoryItemDto],
   })
-  getCategories(): CategoryItem[] {
+  getCategories(): CategoryItemDto[] {
     return Object.values(ArticleCategory).map((category) => ({
       category,
       label: CATEGORY_LABELS[category],

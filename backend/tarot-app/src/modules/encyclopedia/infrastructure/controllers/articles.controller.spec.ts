@@ -97,32 +97,6 @@ describe('ArticlesController', () => {
   // ── GET /encyclopedia/articles ────────────────────────────────────────────
 
   describe('GET /encyclopedia/articles (getArticles)', () => {
-    it('debe retornar todos los artículos cuando no hay filtros', async () => {
-      articlesService.findByCategory.mockResolvedValue([]);
-      articlesService.search.mockResolvedValue([
-        mockSummaryAries,
-        mockSummaryLeo,
-        mockSummaryMercury,
-      ]);
-
-      // Sin filtros debe llamar a search con término vacío equivalente
-      // La lógica real determina si delega a findByCategory o search
-      // Verificamos con category filter
-      articlesService.findByCategory.mockResolvedValue([
-        mockSummaryAries,
-        mockSummaryLeo,
-      ]);
-
-      const result = await controller.getArticles({
-        category: ArticleCategory.ZODIAC_SIGN,
-      });
-
-      expect(result).toHaveLength(2);
-      expect(articlesService.findByCategory).toHaveBeenCalledWith(
-        ArticleCategory.ZODIAC_SIGN,
-      );
-    });
-
     it('GET /articles?category=zodiac_sign debe retornar artículos de esa categoría', async () => {
       articlesService.findByCategory.mockResolvedValue([
         mockSummaryAries,
@@ -173,23 +147,23 @@ describe('ArticlesController', () => {
   // ── GET /encyclopedia/articles/categories ─────────────────────────────────
 
   describe('GET /encyclopedia/articles/categories (getCategories)', () => {
-    it('debe retornar lista de categorías disponibles', async () => {
-      const result = await controller.getCategories();
+    it('debe retornar lista de categorías disponibles', () => {
+      const result = controller.getCategories();
 
       expect(result).toBeDefined();
       expect(Array.isArray(result)).toBe(true);
       expect(result.length).toBeGreaterThan(0);
     });
 
-    it('debe incluir las 11 categorías del enum ArticleCategory', async () => {
-      const result = await controller.getCategories();
+    it('debe incluir las 11 categorías del enum ArticleCategory', () => {
+      const result = controller.getCategories();
       const categoryValues = Object.values(ArticleCategory);
 
       expect(result.length).toBe(categoryValues.length);
     });
 
-    it('cada categoría debe tener la estructura correcta', async () => {
-      const result = await controller.getCategories();
+    it('cada categoría debe tener la estructura correcta', () => {
+      const result = controller.getCategories();
 
       result.forEach((item) => {
         expect(item).toHaveProperty('category');
