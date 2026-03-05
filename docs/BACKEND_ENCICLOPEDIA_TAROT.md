@@ -2504,6 +2504,7 @@ Crear los tipos TypeScript y funciones de API para la enciclopedia del Tarot.
 
 ### TASK-306: Crear componentes de listado de cartas
 
+**Estado:** ✅ COMPLETADA  
 **Módulo:** `frontend/src/components/features/encyclopedia/`  
 **Prioridad:** 🟡 MEDIA  
 **Estimación:** 1 día  
@@ -2539,7 +2540,7 @@ frontend/src/components/features/encyclopedia/
 
 ##### Frontend
 
-- [ ] Crear `CardThumbnail.tsx`:
+- [x] Crear `CardThumbnail.tsx`:
 
   ```tsx
   "use client";
@@ -2587,7 +2588,7 @@ frontend/src/components/features/encyclopedia/
   }
   ```
 
-- [ ] Crear `CardGrid.tsx`:
+- [x] Crear `CardGrid.tsx`:
 
   ```tsx
   "use client";
@@ -2630,7 +2631,7 @@ frontend/src/components/features/encyclopedia/
   }
   ```
 
-- [ ] Crear `SuitSelector.tsx`:
+- [x] Crear `SuitSelector.tsx`:
 
   ```tsx
   "use client";
@@ -2663,7 +2664,7 @@ frontend/src/components/features/encyclopedia/
   }
   ```
 
-- [ ] Crear `CategoryTabs.tsx`:
+- [x] Crear `CategoryTabs.tsx`:
 
   ```tsx
   "use client";
@@ -2691,7 +2692,7 @@ frontend/src/components/features/encyclopedia/
   }
   ```
 
-- [ ] Crear `SearchBar.tsx`:
+- [x] Crear `SearchBar.tsx`:
 
   ```tsx
   "use client";
@@ -2743,7 +2744,7 @@ frontend/src/components/features/encyclopedia/
   }
   ```
 
-- [ ] Crear `EncyclopediaSkeleton.tsx`:
+- [x] Crear `EncyclopediaSkeleton.tsx`:
 
   ```tsx
   "use client";
@@ -2785,7 +2786,7 @@ frontend/src/components/features/encyclopedia/
   }
   ```
 
-- [ ] Crear `index.ts`:
+- [x] Crear `index.ts`:
   ```typescript
   export { CardThumbnail } from "./CardThumbnail";
   export { CardGrid } from "./CardGrid";
@@ -2798,21 +2799,21 @@ frontend/src/components/features/encyclopedia/
 
 ##### Testing
 
-- [ ] Test: CardGrid renderiza cartas
-- [ ] Test: CardThumbnail muestra badge correcto
-- [ ] Test: SuitSelector selecciona palo
-- [ ] Test: SearchBar debounce funciona
-- [ ] Test: Skeleton muestra placeholders
+- [x] Test: CardGrid renderiza cartas
+- [x] Test: CardThumbnail muestra badge correcto
+- [x] Test: SuitSelector selecciona palo
+- [x] Test: SearchBar debounce funciona
+- [x] Test: Skeleton muestra placeholders
 
 ---
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] Grid responsive (2-6 columnas)
-- [ ] Badges identifican tipo de carta
-- [ ] Búsqueda con debounce 300ms
-- [ ] Loading states con skeletons
-- [ ] Hover effects en cards
+- [x] Grid responsive (2-6 columnas)
+- [x] Badges identifican tipo de carta
+- [x] Búsqueda con debounce 300ms
+- [x] Loading states con skeletons
+- [x] Hover effects en cards
 
 # Frontend: Componentes de Detalle
 
@@ -4453,7 +4454,7 @@ Semana 4-5: Frontend páginas completas (Fase 2 - enciclopedia completa)
 ### Frontend — Tarot (Fase 1)
 
 - [x] TASK-305: Types y hooks
-- [ ] TASK-306: Componentes de lista
+- [x] TASK-306: Componentes de lista
 - [ ] TASK-307: Componentes de detalle
 - [ ] TASK-308: Páginas
 
