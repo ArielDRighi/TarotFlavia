@@ -2075,12 +2075,13 @@ describe('ArticlesController', () => {
 
 ---
 
-### TASK-313: Endpoint de búsqueda global unificada
+ ### TASK-313: Endpoint de búsqueda global unificada
 
 **Módulo:** `src/modules/encyclopedia/`
 **Prioridad:** 🟡 MEDIA
 **Estimación:** 0.5 días
 **Dependencias:** TASK-311, TASK-312
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -4353,7 +4354,7 @@ public/images/tarot/
 | TASK-310 | Seeder de artículos de la enciclopedia | 2 días     | 🔴 ALTA   | ✅ Completada  |
 | TASK-311 | ArticlesService + DTOs             | 1 día      | 🔴 ALTA   | ✅ Completada  |
 | TASK-312 | Endpoints REST de artículos        | 0.5 días   | 🔴 ALTA   | ✅ Completada  |
-| TASK-313 | Búsqueda global unificada          | 0.5 días   | 🟡 MEDIA  | 🔲 Pendiente   |
+| TASK-313 | Búsqueda global unificada          | 0.5 días   | 🟡 MEDIA  | ✅ COMPLETADA  |
 | TASK-314 | ViewCount para artículos           | 0.25 días  | 🟢 BAJA   | 🔲 Pendiente   |
 
 #### Frontend — widget e integración
@@ -4444,7 +4445,7 @@ Semana 4-5: Frontend páginas completas (Fase 2 - enciclopedia completa)
 - [x] TASK-310: Seeder con artículos iniciales de enciclopedia
 - [x] TASK-311: ArticlesService con todos los métodos
 - [x] TASK-312: Endpoints REST funcionando
-- [ ] TASK-313: Búsqueda global unificada
+- [x] TASK-313: Búsqueda global unificada
 - [ ] TASK-314: ViewCount para artículos
 
 ### Frontend — Tarot (Fase 1)
