@@ -51,7 +51,7 @@ export class EncyclopediaController {
   })
   @ApiQuery({
     name: 'q',
-    required: true,
+    required: false,
     description: 'Término de búsqueda (mínimo 2 caracteres)',
     example: 'mercurio',
   })
@@ -61,9 +61,10 @@ export class EncyclopediaController {
     type: GlobalSearchResultDto,
   })
   async globalSearch(
-    @Query('q') query: string,
+    @Query('q') query: string | string[] | undefined,
   ): Promise<GlobalSearchResultDto> {
-    const normalizedQuery = query?.trim();
+    const rawQuery = Array.isArray(query) ? query[0] : query;
+    const normalizedQuery = rawQuery?.trim();
     if (!normalizedQuery || normalizedQuery.length < 2) {
       return { tarotCards: [], articles: [], total: 0 };
     }

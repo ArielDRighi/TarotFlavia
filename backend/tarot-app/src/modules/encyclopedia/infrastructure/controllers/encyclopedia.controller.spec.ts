@@ -445,12 +445,27 @@ describe('EncyclopediaController', () => {
     });
 
     it('debe retornar vacío sin llamar al servicio cuando query es undefined', async () => {
-      const result = await controller.globalSearch(
-        undefined as unknown as string,
-      );
+      const result = await controller.globalSearch(undefined);
 
       expect(mockEncyclopediaService.globalSearch).not.toHaveBeenCalled();
       expect(result).toEqual({ tarotCards: [], articles: [], total: 0 });
+    });
+
+    it('debe usar el primer elemento cuando query es un array de strings', async () => {
+      const cards = [buildSummary({ nameEs: 'El Mago' })];
+      const expectedResult: GlobalSearchResultDto = {
+        tarotCards: cards,
+        articles: [],
+        total: 1,
+      };
+      mockEncyclopediaService.globalSearch.mockResolvedValue(expectedResult);
+
+      const result = await controller.globalSearch(['mercurio', 'otro']);
+
+      expect(mockEncyclopediaService.globalSearch).toHaveBeenCalledWith(
+        'mercurio',
+      );
+      expect(result).toEqual(expectedResult);
     });
   });
 });
