@@ -7,7 +7,7 @@
  * - CardListItem: Horizontal list item for card display
  * - SuitSelector: Horizontal suit filter buttons
  * - CategoryTabs: Arcana type tab selector
- * - SearchBar: Search input with debounce
+ * - EncyclopediaSearchBar: Search input with debounce (encyclopedia-specific)
  * - EncyclopediaSkeleton: Loading skeleton states
  */
 
@@ -17,7 +17,7 @@ export { CardGrid } from './CardGrid';
 export { CardListItem } from './CardListItem';
 export { SuitSelector } from './SuitSelector';
 export { CategoryTabs } from './CategoryTabs';
-export { SearchBar } from './SearchBar';
+export { EncyclopediaSearchBar } from './EncyclopediaSearchBar';
 export { EncyclopediaSkeleton } from './EncyclopediaSkeleton';
 
 // Type exports
@@ -26,5 +26,5 @@ export type { CardGridProps } from './CardGrid';
 export type { CardListItemProps } from './CardListItem';
 export type { SuitSelectorProps } from './SuitSelector';
 export type { CategoryTabsProps } from './CategoryTabs';
-export type { SearchBarProps } from './SearchBar';
+export type { EncyclopediaSearchBarProps } from './EncyclopediaSearchBar';
 export type { EncyclopediaSkeletonProps } from './EncyclopediaSkeleton';
