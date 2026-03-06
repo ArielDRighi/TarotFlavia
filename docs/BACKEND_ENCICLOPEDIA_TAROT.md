@@ -2819,12 +2819,13 @@ frontend/src/components/features/encyclopedia/
 
 ---
 
-### TASK-307: Crear componentes de detalle de carta
+ ### TASK-307: Crear componentes de detalle de carta
 
 **Módulo:** `frontend/src/components/features/encyclopedia/`  
 **Prioridad:** 🟡 MEDIA  
 **Estimación:** 1 día  
-**Dependencias:** TASK-306
+**Dependencias:** TASK-306  
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -2855,7 +2856,7 @@ frontend/src/components/features/encyclopedia/
 
 ##### Frontend
 
-- [ ] Crear `CardImage.tsx`:
+- [x] Crear `CardImage.tsx`:
 
   ```tsx
   "use client";
@@ -3235,19 +3236,19 @@ frontend/src/components/features/encyclopedia/
 
 ##### Testing
 
-- [ ] Test: CardDetailView renderiza todos los componentes
-- [ ] Test: CardNavigation muestra anterior/siguiente
-- [ ] Test: CardImage abre modal al hacer clic
-- [ ] Test: Tabs de significados funcionan
+- [x] Test: CardDetailView renderiza todos los componentes
+- [x] Test: CardNavigation muestra anterior/siguiente
+- [x] Test: CardImage abre modal al hacer clic
+- [x] Test: Tabs de significados funcionan
 
 ---
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] Vista de detalle muestra toda la información
-- [ ] Imagen se puede ampliar en modal
-- [ ] Navegación entre cartas funciona
-- [ ] Componentes son responsive
+- [x] Vista de detalle muestra toda la información
+- [x] Imagen se puede ampliar en modal
+- [x] Navegación entre cartas funciona
+- [x] Componentes son responsive
 
 # Frontend: Páginas
 
@@ -4455,7 +4456,7 @@ Semana 4-5: Frontend páginas completas (Fase 2 - enciclopedia completa)
 
 - [x] TASK-305: Types y hooks
 - [x] TASK-306: Componentes de lista
-- [ ] TASK-307: Componentes de detalle
+- [x] TASK-307: Componentes de detalle
 - [ ] TASK-308: Páginas
 
 ### Frontend — Enciclopedia Mística (Fase 2)
