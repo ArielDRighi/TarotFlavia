@@ -1,7 +1,14 @@
 'use client';
 
 import { Card } from '@/components/ui/card';
-import { ArcanaType, CourtRank, ELEMENT_INFO, SUIT_INFO } from '@/types/encyclopedia.types';
+import {
+  ArcanaType,
+  CourtRank,
+  ELEMENT_INFO,
+  SUIT_INFO,
+  Planet,
+  ZodiacAssociation,
+} from '@/types/encyclopedia.types';
 import type { CardDetail } from '@/types/encyclopedia.types';
 
 export interface CardMetadataProps {
@@ -13,6 +20,34 @@ const COURT_NAMES: Record<CourtRank, string> = {
   [CourtRank.KNIGHT]: 'Caballero',
   [CourtRank.QUEEN]: 'Reina',
   [CourtRank.KING]: 'Rey',
+};
+
+const PLANET_NAMES: Record<Planet, string> = {
+  [Planet.SUN]: 'Sol',
+  [Planet.MOON]: 'Luna',
+  [Planet.MERCURY]: 'Mercurio',
+  [Planet.VENUS]: 'Venus',
+  [Planet.MARS]: 'Marte',
+  [Planet.JUPITER]: 'Júpiter',
+  [Planet.SATURN]: 'Saturno',
+  [Planet.URANUS]: 'Urano',
+  [Planet.NEPTUNE]: 'Neptuno',
+  [Planet.PLUTO]: 'Plutón',
+};
+
+const ZODIAC_NAMES: Record<ZodiacAssociation, string> = {
+  [ZodiacAssociation.ARIES]: 'Aries',
+  [ZodiacAssociation.TAURUS]: 'Tauro',
+  [ZodiacAssociation.GEMINI]: 'Géminis',
+  [ZodiacAssociation.CANCER]: 'Cáncer',
+  [ZodiacAssociation.LEO]: 'Leo',
+  [ZodiacAssociation.VIRGO]: 'Virgo',
+  [ZodiacAssociation.LIBRA]: 'Libra',
+  [ZodiacAssociation.SCORPIO]: 'Escorpio',
+  [ZodiacAssociation.SAGITTARIUS]: 'Sagitario',
+  [ZodiacAssociation.CAPRICORN]: 'Capricornio',
+  [ZodiacAssociation.AQUARIUS]: 'Acuario',
+  [ZodiacAssociation.PISCES]: 'Piscis',
 };
 
 export function CardMetadata({ card }: CardMetadataProps) {
@@ -60,6 +95,20 @@ export function CardMetadata({ card }: CardMetadataProps) {
             <dd className="font-medium" style={{ color: elementInfo.color }}>
               {elementInfo.nameEs}
             </dd>
+          </div>
+        )}
+
+        {card.planet && (
+          <div className="flex justify-between">
+            <dt className="text-muted-foreground">Planeta</dt>
+            <dd className="font-medium">{PLANET_NAMES[card.planet]}</dd>
+          </div>
+        )}
+
+        {card.zodiacSign && (
+          <div className="flex justify-between">
+            <dt className="text-muted-foreground">Signo Zodiacal</dt>
+            <dd className="font-medium">{ZODIAC_NAMES[card.zodiacSign]}</dd>
           </div>
         )}
       </dl>

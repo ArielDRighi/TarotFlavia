@@ -23,7 +23,7 @@ export function CardKeywords({ keywords }: CardKeywordsProps) {
           </div>
           <div className="flex flex-wrap gap-2">
             {keywords.upright.map((keyword, i) => (
-              <Badge key={i} variant="secondary">
+              <Badge key={`upright-${keyword}-${i}`} variant="secondary">
                 {keyword}
               </Badge>
             ))}
@@ -37,7 +37,7 @@ export function CardKeywords({ keywords }: CardKeywordsProps) {
           </div>
           <div className="flex flex-wrap gap-2">
             {keywords.reversed.map((keyword, i) => (
-              <Badge key={i} variant="outline">
+              <Badge key={`reversed-${keyword}-${i}`} variant="outline">
                 {keyword}
               </Badge>
             ))}

@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 
 import { CardNavigation } from './CardNavigation';
+import { ArcanaType } from '@/types/encyclopedia.types';
+import type { CardSummary } from '@/types/encyclopedia.types';
 
 // Mock the useCardNavigation hook
 vi.mock('@/hooks/api/useEncyclopedia', () => ({
@@ -12,12 +14,12 @@ import { useCardNavigation } from '@/hooks/api/useEncyclopedia';
 
 const mockUseCardNavigation = vi.mocked(useCardNavigation);
 
-function createNavCard(slug: string, nameEs: string) {
+function createNavCard(slug: string, nameEs: string): CardSummary {
   return {
     id: 1,
     slug,
     nameEs,
-    arcanaType: 'major' as const,
+    arcanaType: ArcanaType.MAJOR,
     number: 1,
     suit: null,
     thumbnailUrl: `/images/${slug}.jpg`,

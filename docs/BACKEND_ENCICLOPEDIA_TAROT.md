@@ -2819,7 +2819,7 @@ frontend/src/components/features/encyclopedia/
 
 ---
 
- ### TASK-307: Crear componentes de detalle de carta
+### TASK-307: Crear componentes de detalle de carta
 
 **Módulo:** `frontend/src/components/features/encyclopedia/`  
 **Prioridad:** 🟡 MEDIA  

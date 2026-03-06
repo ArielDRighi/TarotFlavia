@@ -2,7 +2,14 @@ import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 
 import { CardMetadata } from './CardMetadata';
-import { ArcanaType, Suit, CourtRank, Element } from '@/types/encyclopedia.types';
+import {
+  ArcanaType,
+  Suit,
+  CourtRank,
+  Element,
+  Planet,
+  ZodiacAssociation,
+} from '@/types/encyclopedia.types';
 import type { CardDetail } from '@/types/encyclopedia.types';
 
 function createTestCard(overrides?: Partial<CardDetail>): CardDetail {
@@ -125,6 +132,34 @@ describe('CardMetadata', () => {
       render(<CardMetadata card={createTestCard({ element: null })} />);
 
       expect(screen.queryByText('Elemento')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Planet', () => {
+    it('should display planet name when present', () => {
+      render(<CardMetadata card={createTestCard({ planet: Planet.MERCURY })} />);
+
+      expect(screen.getByText('Mercurio')).toBeInTheDocument();
+    });
+
+    it('should not display planet row when planet is null', () => {
+      render(<CardMetadata card={createTestCard({ planet: null })} />);
+
+      expect(screen.queryByText('Planeta')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Zodiac sign', () => {
+    it('should display zodiac sign name when present', () => {
+      render(<CardMetadata card={createTestCard({ zodiacSign: ZodiacAssociation.AQUARIUS })} />);
+
+      expect(screen.getByText('Acuario')).toBeInTheDocument();
+    });
+
+    it('should not display zodiac sign row when zodiacSign is null', () => {
+      render(<CardMetadata card={createTestCard({ zodiacSign: null })} />);
+
+      expect(screen.queryByText('Signo Zodiacal')).not.toBeInTheDocument();
     });
   });
 });

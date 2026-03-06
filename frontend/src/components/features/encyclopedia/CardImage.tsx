@@ -20,8 +20,10 @@ export function CardImage({ src, alt, className }: CardImageProps) {
     <div data-testid="card-image" className={cn('inline-block', className)}>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
-          <div
+          <button
+            type="button"
             data-testid="card-image-trigger"
+            aria-label={`Ampliar imagen: ${alt}`}
             className={cn(
               'relative cursor-zoom-in overflow-hidden rounded-lg shadow-lg',
               'aspect-[2/3] w-full max-w-xs'
@@ -36,7 +38,7 @@ export function CardImage({ src, alt, className }: CardImageProps) {
               priority
               unoptimized
             />
-          </div>
+          </button>
         </DialogTrigger>
         <DialogContent data-testid="card-image-modal" className="max-w-2xl overflow-hidden p-0">
           <div className="relative aspect-[2/3]">
