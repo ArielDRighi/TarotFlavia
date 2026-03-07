@@ -93,7 +93,7 @@ describe('BirthChartPageContent', () => {
     mockUseArticleSnippet.mockReturnValue({
       data: {
         id: 6,
-        slug: 'guide-birth-chart',
+        slug: 'guia-carta-astral',
         nameEs: 'Guía de Carta Astral',
         snippet: 'Snippet de carta astral.',
       },
@@ -102,7 +102,7 @@ describe('BirthChartPageContent', () => {
     });
   });
 
-  it('debe renderizar EncyclopediaInfoWidget con slug="guide-birth-chart"', () => {
+  it('debe renderizar EncyclopediaInfoWidget con slug="guia-carta-astral"', () => {
     renderWithProviders(<BirthChartPageContent />);
 
     const widget = screen.getByTestId('encyclopedia-info-widget');

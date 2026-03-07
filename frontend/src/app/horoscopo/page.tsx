@@ -28,7 +28,11 @@ export default function HoroscopoPage() {
         <p className="text-muted-foreground">Selecciona tu signo para ver las predicciones</p>
       </div>
 
-      <EncyclopediaInfoWidget slug="guide-horoscope" className="mb-6" />
+      <EncyclopediaInfoWidget
+        slug="guia-horoscopo-occidental"
+        href={ROUTES.ENCICLOPEDIA_CARD('guia-horoscopo-occidental')}
+        className="mb-6"
+      />
 
       {!isAuthenticated && (
         <div className="bg-muted/50 mb-8 rounded-lg p-4 text-center">

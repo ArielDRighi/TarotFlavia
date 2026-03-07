@@ -77,7 +77,7 @@ describe('PendulumConsultation', () => {
     mockUseArticleSnippet.mockReturnValue({
       data: {
         id: 2,
-        slug: 'guide-pendulum',
+        slug: 'guia-pendulo',
         nameEs: 'Guía del Péndulo',
         snippet: 'Snippet del péndulo.',
       },
@@ -86,7 +86,7 @@ describe('PendulumConsultation', () => {
     });
   });
 
-  it('debe renderizar EncyclopediaInfoWidget con slug="guide-pendulum"', () => {
+  it('debe renderizar EncyclopediaInfoWidget con slug="guia-pendulo"', () => {
     renderWithProviders(<PendulumConsultation />);
 
     const widget = screen.getByTestId('encyclopedia-info-widget');

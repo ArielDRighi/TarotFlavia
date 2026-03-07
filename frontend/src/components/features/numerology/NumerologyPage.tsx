@@ -79,7 +79,11 @@ export function NumerologyPage() {
 
         <NumerologyIntro className="mb-8" />
 
-        <EncyclopediaInfoWidget slug="guide-numerology" className="mb-6" />
+        <EncyclopediaInfoWidget
+          slug="guia-numerologia"
+          href={ROUTES.ENCICLOPEDIA_CARD('guia-numerologia')}
+          className="mb-6"
+        />
 
         {/* Alert for incomplete profile */}
         {hasIncompleteProfile && (

@@ -188,7 +188,7 @@ describe('HoroscopoChinoPage', () => {
     });
   });
 
-  it('debe renderizar EncyclopediaInfoWidget con slug="guide-chinese"', () => {
+  it('debe renderizar EncyclopediaInfoWidget con slug="guia-horoscopo-chino"', () => {
     mockUseChineseHoroscopesByYear.mockReturnValue({
       isLoading: false,
       data: [],
@@ -198,7 +198,7 @@ describe('HoroscopoChinoPage', () => {
 
     const widget = screen.getByTestId('encyclopedia-info-widget');
     expect(widget).toBeInTheDocument();
-    expect(widget).toHaveAttribute('data-slug', 'guide-chinese');
+    expect(widget).toHaveAttribute('data-slug', 'guia-horoscopo-chino');
   });
 
   it('debe renderizar correctamente si EncyclopediaInfoWidget retorna null', () => {

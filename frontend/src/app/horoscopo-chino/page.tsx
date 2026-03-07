@@ -36,7 +36,11 @@ export default function HoroscopoChinoPage() {
         <p className="text-muted-foreground">Descubre las predicciones anuales según tu animal</p>
       </div>
 
-      <EncyclopediaInfoWidget slug="guide-chinese" className="mb-6" />
+      <EncyclopediaInfoWidget
+        slug="guia-horoscopo-chino"
+        href={ROUTES.ENCICLOPEDIA_CARD('guia-horoscopo-chino')}
+        className="mb-6"
+      />
 
       {/* User's horoscope card (if authenticated and has birthDate) */}
       {isAuthenticated && userBirthDate && myHoroscope && (

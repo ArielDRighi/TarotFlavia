@@ -65,7 +65,7 @@ describe('NumerologyPage', () => {
     mockUseArticleSnippet.mockReturnValue({
       data: {
         id: 1,
-        slug: 'guide-numerology',
+        slug: 'guia-numerologia',
         nameEs: 'Guía de Numerología',
         snippet: 'Snippet de numerología.',
       },
@@ -74,7 +74,7 @@ describe('NumerologyPage', () => {
     });
   });
 
-  it('debe renderizar EncyclopediaInfoWidget con slug="guide-numerology"', () => {
+  it('debe renderizar EncyclopediaInfoWidget con slug="guia-numerologia"', () => {
     renderWithProviders(<NumerologyPage />);
 
     const widget = screen.getByTestId('encyclopedia-info-widget');

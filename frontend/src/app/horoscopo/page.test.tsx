@@ -170,7 +170,7 @@ describe('HoroscopoPage', () => {
     expect(ariesCard).toHaveClass('border-accent');
   });
 
-  it('debe renderizar EncyclopediaInfoWidget con slug="guide-horoscope"', () => {
+  it('debe renderizar EncyclopediaInfoWidget con slug="guia-horoscopo-occidental"', () => {
     mockUseAuthStore.mockReturnValue({
       user: null,
       isAuthenticated: false,
@@ -184,7 +184,7 @@ describe('HoroscopoPage', () => {
 
     const widget = screen.getByTestId('encyclopedia-info-widget');
     expect(widget).toBeInTheDocument();
-    expect(widget).toHaveAttribute('data-slug', 'guide-horoscope');
+    expect(widget).toHaveAttribute('data-slug', 'guia-horoscopo-occidental');
   });
 
   it('debe renderizar correctamente si EncyclopediaInfoWidget retorna null', () => {

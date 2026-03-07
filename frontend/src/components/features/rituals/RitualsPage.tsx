@@ -63,7 +63,11 @@ export function RitualsPage() {
         )}
       </div>
 
-      <EncyclopediaInfoWidget slug="guide-ritual" className="mb-6" />
+      <EncyclopediaInfoWidget
+        slug="guia-rituales"
+        href={ROUTES.ENCICLOPEDIA_CARD('guia-rituales')}
+        className="mb-6"
+      />
 
       {/* Rituales destacados */}
       {!hasFilters && (

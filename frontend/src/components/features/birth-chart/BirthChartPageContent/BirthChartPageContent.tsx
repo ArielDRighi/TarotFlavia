@@ -30,6 +30,7 @@ import { isPremiumChartResponse } from '@/types/birth-chart-api.types';
 
 import { BirthChartLoading } from '@/components/features/birth-chart/BirthChartLoading';
 import { EncyclopediaInfoWidget } from '@/components/features/encyclopedia';
+import { ROUTES } from '@/lib/constants/routes';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -183,7 +184,11 @@ export function BirthChartPageContent() {
         )}
       </div>
 
-      <EncyclopediaInfoWidget slug="guide-birth-chart" className="mb-6" />
+      <EncyclopediaInfoWidget
+        slug="guia-carta-astral"
+        href={ROUTES.ENCICLOPEDIA_CARD('guia-carta-astral')}
+        className="mb-6"
+      />
 
       {/* Error global */}
       {error && (

@@ -75,7 +75,7 @@ describe('RitualsPage', () => {
     mockUseArticleSnippet.mockReturnValue({
       data: {
         id: 5,
-        slug: 'guide-ritual',
+        slug: 'guia-rituales',
         nameEs: 'Guía de Rituales',
         snippet: 'Snippet de rituales.',
       },
@@ -84,7 +84,7 @@ describe('RitualsPage', () => {
     });
   });
 
-  it('debe renderizar EncyclopediaInfoWidget con slug="guide-ritual"', () => {
+  it('debe renderizar EncyclopediaInfoWidget con slug="guia-rituales"', () => {
     renderWithProviders(<RitualsPage />);
 
     const widget = screen.getByTestId('encyclopedia-info-widget');

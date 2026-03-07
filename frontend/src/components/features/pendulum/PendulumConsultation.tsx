@@ -24,6 +24,7 @@ import {
 import { usePendulumQuery, usePendulumCapabilities } from '@/hooks/api/usePendulum';
 import { useAuthStore } from '@/stores/authStore';
 import { EncyclopediaInfoWidget } from '@/components/features/encyclopedia';
+import { ROUTES } from '@/lib/constants/routes';
 import type { PendulumMovement, PendulumQueryResponse } from '@/types/pendulum.types';
 
 export function PendulumConsultation() {
@@ -123,7 +124,11 @@ export function PendulumConsultation() {
           <p className="text-muted-foreground">Formula tu pregunta y deja que el péndulo te guíe</p>
         </div>
 
-        <EncyclopediaInfoWidget slug="guide-pendulum" className="mb-6" />
+        <EncyclopediaInfoWidget
+          slug="guia-pendulo"
+          href={ROUTES.ENCICLOPEDIA_CARD('guia-pendulo')}
+          className="mb-6"
+        />
 
         {/* Límites */}
         <PendulumLimitBanner />
