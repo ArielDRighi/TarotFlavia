@@ -20,6 +20,9 @@
  * - CardMetadata: Card metadata (arcana, element, suit, etc.)
  * - CardNavigation: Previous/next card navigation
  * - RelatedCards: Related cards grid
+ *
+ * Widget components:
+ * - EncyclopediaInfoWidget: Informational snippet widget for embedding in other pages
  */
 
 // Page content components
@@ -60,3 +63,7 @@ export type { CardKeywordsProps } from './CardKeywords';
 export type { CardMetadataProps } from './CardMetadata';
 export type { CardNavigationProps } from './CardNavigation';
 export type { RelatedCardsProps } from './RelatedCards';
+
+// Widget components
+export { EncyclopediaInfoWidget } from './EncyclopediaInfoWidget';
+export type { EncyclopediaInfoWidgetProps } from './EncyclopediaInfoWidget';
