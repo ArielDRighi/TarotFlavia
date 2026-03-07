@@ -3663,6 +3663,7 @@ describe('useEncyclopediaArticles hooks', () => {
 **Prioridad:** 🔴 ALTA
 **Estimación:** 0.5 días
 **Dependencias:** TASK-315
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -3738,11 +3739,11 @@ export function EncyclopediaInfoWidget({ slug, title, className }: EncyclopediaI
 
 #### ✅ Criterios de Aceptación
 
-- [ ] Muestra `Skeleton` en estado loading
-- [ ] Retorna `null` en estado de error (widget no es crítico)
-- [ ] Muestra snippet y botón cuando hay datos
-- [ ] El link apunta a `/enciclopedia/guias/${slug}`
-- [ ] La prop `title` sobreescribe el `nameEs` del artículo
+- [x] Muestra `Skeleton` en estado loading
+- [x] Retorna `null` en estado de error (widget no es crítico)
+- [x] Muestra snippet y botón cuando hay datos
+- [x] El link apunta a `/enciclopedia/guias/${slug}`
+- [x] La prop `title` sobreescribe el `nameEs` del artículo
 
 ---
 
@@ -4465,7 +4466,7 @@ Semana 4-5: Frontend páginas completas (Fase 2 - enciclopedia completa)
 ### Frontend — Enciclopedia Mística (Fase 2)
 
 - [x] TASK-315: Types + API + Hooks para artículos
-- [ ] TASK-316: EncyclopediaInfoWidget
+- [x] TASK-316: EncyclopediaInfoWidget
 - [ ] TASK-317: Widget integrado en las 6 páginas de módulos
 - [ ] TASK-318: Componentes de listado (ArticleCard, ArticleGrid, etc.)
 - [ ] TASK-319: ArticleDetailView con Markdown
