@@ -15,7 +15,7 @@ const mockUseArticleSnippet = vi.mocked(useArticleSnippet);
 
 const mockArticle: ArticleSnippet = {
   id: 1,
-  slug: 'guide-numerology',
+  slug: 'guia-numerologia',
   nameEs: 'Guía de Numerología',
   category: ArticleCategory.GUIDE_NUMEROLOGY,
   snippet:
@@ -35,7 +35,7 @@ describe('EncyclopediaInfoWidget', () => {
         error: null,
       } as ReturnType<typeof useArticleSnippet>);
 
-      render(<EncyclopediaInfoWidget slug="guide-numerology" />);
+      render(<EncyclopediaInfoWidget slug="guia-numerologia" />);
 
       expect(screen.getByTestId('encyclopedia-info-widget-skeleton')).toBeInTheDocument();
     });
@@ -49,7 +49,7 @@ describe('EncyclopediaInfoWidget', () => {
         error: new Error('Error al obtener artículo'),
       } as ReturnType<typeof useArticleSnippet>);
 
-      const { container } = render(<EncyclopediaInfoWidget slug="guide-numerology" />);
+      const { container } = render(<EncyclopediaInfoWidget slug="guia-numerologia" />);
 
       expect(container.firstChild).toBeNull();
     });
@@ -61,7 +61,7 @@ describe('EncyclopediaInfoWidget', () => {
         error: null,
       } as ReturnType<typeof useArticleSnippet>);
 
-      const { container } = render(<EncyclopediaInfoWidget slug="guide-numerology" />);
+      const { container } = render(<EncyclopediaInfoWidget slug="guia-numerologia" />);
 
       expect(container.firstChild).toBeNull();
     });
@@ -77,34 +77,64 @@ describe('EncyclopediaInfoWidget', () => {
     });
 
     it('debe mostrar el snippet del artículo', () => {
-      render(<EncyclopediaInfoWidget slug="guide-numerology" />);
+      render(<EncyclopediaInfoWidget slug="guia-numerologia" />);
 
       expect(screen.getByText(mockArticle.snippet)).toBeInTheDocument();
     });
 
     it('debe mostrar el nombre del artículo como título por defecto', () => {
-      render(<EncyclopediaInfoWidget slug="guide-numerology" />);
+      render(<EncyclopediaInfoWidget slug="guia-numerologia" />);
 
       expect(screen.getByText(mockArticle.nameEs)).toBeInTheDocument();
     });
 
     it('debe mostrar el botón "Ver más en la Enciclopedia"', () => {
-      render(<EncyclopediaInfoWidget slug="guide-numerology" />);
+      render(<EncyclopediaInfoWidget slug="guia-numerologia" />);
 
       expect(screen.getByRole('link', { name: /ver más en la enciclopedia/i })).toBeInTheDocument();
     });
 
-    it('el link debe apuntar a /enciclopedia/guias/{slug}', () => {
-      render(<EncyclopediaInfoWidget slug="guide-numerology" />);
+    it('el link debe apuntar a /enciclopedia/guias/{slug} por defecto', () => {
+      render(<EncyclopediaInfoWidget slug="guia-numerologia" />);
 
       const link = screen.getByRole('link', { name: /ver más en la enciclopedia/i });
-      expect(link).toHaveAttribute('href', '/enciclopedia/guias/guide-numerology');
+      expect(link).toHaveAttribute('href', '/enciclopedia/guias/guia-numerologia');
     });
 
     it('debe renderizar el widget con data-testid', () => {
-      render(<EncyclopediaInfoWidget slug="guide-numerology" />);
+      render(<EncyclopediaInfoWidget slug="guia-numerologia" />);
 
       expect(screen.getByTestId('encyclopedia-info-widget')).toBeInTheDocument();
+    });
+  });
+
+  describe('Prop href sobreescribe la URL del link', () => {
+    it('debe usar href explícito cuando se provee', () => {
+      mockUseArticleSnippet.mockReturnValue({
+        data: mockArticle,
+        isLoading: false,
+        error: null,
+      } as ReturnType<typeof useArticleSnippet>);
+
+      render(
+        <EncyclopediaInfoWidget slug="guia-numerologia" href="/enciclopedia/guias/numerologia" />
+      );
+
+      const link = screen.getByRole('link', { name: /ver más en la enciclopedia/i });
+      expect(link).toHaveAttribute('href', '/enciclopedia/guias/numerologia');
+    });
+
+    it('debe usar /enciclopedia/guias/{slug} cuando no se provee href', () => {
+      mockUseArticleSnippet.mockReturnValue({
+        data: mockArticle,
+        isLoading: false,
+        error: null,
+      } as ReturnType<typeof useArticleSnippet>);
+
+      render(<EncyclopediaInfoWidget slug="guia-pendulo" />);
+
+      const link = screen.getByRole('link', { name: /ver más en la enciclopedia/i });
+      expect(link).toHaveAttribute('href', '/enciclopedia/guias/guia-pendulo');
     });
   });
 
@@ -117,7 +147,7 @@ describe('EncyclopediaInfoWidget', () => {
       } as ReturnType<typeof useArticleSnippet>);
 
       render(
-        <EncyclopediaInfoWidget slug="guide-numerology" title="Aprende Numerología Esotérica" />
+        <EncyclopediaInfoWidget slug="guia-numerologia" title="Aprende Numerología Esotérica" />
       );
 
       expect(screen.getByText('Aprende Numerología Esotérica')).toBeInTheDocument();
@@ -133,7 +163,7 @@ describe('EncyclopediaInfoWidget', () => {
         error: null,
       } as ReturnType<typeof useArticleSnippet>);
 
-      render(<EncyclopediaInfoWidget slug="guide-numerology" className="custom-class mt-4" />);
+      render(<EncyclopediaInfoWidget slug="guia-numerologia" className="custom-class mt-4" />);
 
       const widget = screen.getByTestId('encyclopedia-info-widget');
       expect(widget).toHaveClass('custom-class');

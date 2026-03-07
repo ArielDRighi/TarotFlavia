@@ -13,10 +13,17 @@ import { cn } from '@/lib/utils';
  * EncyclopediaInfoWidget Component Props
  */
 export interface EncyclopediaInfoWidgetProps {
-  /** Slug del artículo de enciclopedia a mostrar (ej: 'guide-numerology', 'guide-pendulum') */
+  /** Slug del artículo de enciclopedia a mostrar (ej: 'guia-numerologia', 'guia-pendulo') */
   slug: string;
   /** Sobreescribe el nameEs del artículo como título (opcional) */
   title?: string;
+  /**
+   * URL destino del botón "Ver más en la Enciclopedia".
+   * Si no se provee, usa `/enciclopedia/guias/${slug}` como fallback.
+   * Útil cuando el route slug del frontend difiere del API slug
+   * (ej: slug="guia-numerologia" pero href="/enciclopedia/guias/numerologia").
+   */
+  href?: string;
   /** Clases CSS adicionales */
   className?: string;
 }
@@ -34,11 +41,23 @@ export interface EncyclopediaInfoWidgetProps {
  *
  * @example
  * ```tsx
- * <EncyclopediaInfoWidget slug="guide-numerology" />
- * <EncyclopediaInfoWidget slug="guide-pendulum" title="Aprende sobre el Péndulo" />
+ * // API slug y route slug coinciden
+ * <EncyclopediaInfoWidget slug="guia-numerologia" />
+ *
+ * // API slug y route slug difieren — usar href explícito
+ * <EncyclopediaInfoWidget
+ *   slug="guia-pendulo"
+ *   href="/enciclopedia/guias/pendulo"
+ *   title="Aprende sobre el Péndulo"
+ * />
  * ```
  */
-export function EncyclopediaInfoWidget({ slug, title, className }: EncyclopediaInfoWidgetProps) {
+export function EncyclopediaInfoWidget({
+  slug,
+  title,
+  href,
+  className,
+}: EncyclopediaInfoWidgetProps) {
   const { data: article, isLoading, error } = useArticleSnippet(slug);
 
   if (isLoading) {
@@ -62,6 +81,7 @@ export function EncyclopediaInfoWidget({ slug, title, className }: EncyclopediaI
   }
 
   const displayTitle = title ?? article.nameEs;
+  const linkHref = href ?? `/enciclopedia/guias/${slug}`;
 
   return (
     <Card data-testid="encyclopedia-info-widget" className={cn(className)}>
@@ -71,7 +91,7 @@ export function EncyclopediaInfoWidget({ slug, title, className }: EncyclopediaI
       <CardContent className="space-y-4">
         <p className="text-muted-foreground text-sm">{article.snippet}</p>
         <Button asChild variant="outline" size="sm">
-          <Link href={`/enciclopedia/guias/${slug}`}>
+          <Link href={linkHref}>
             <BookOpen className="mr-2 h-4 w-4" />
             Ver más en la Enciclopedia
           </Link>
