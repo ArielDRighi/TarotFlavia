@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ZodiacSignSelector, HoroscopeSkeleton } from '@/components/features/horoscope';
+import { EncyclopediaInfoWidget } from '@/components/features/encyclopedia';
 import { useTodayAllHoroscopes } from '@/hooks/api/useHoroscope';
 import { useAuthStore } from '@/stores/authStore';
 import { getZodiacSignFromDate } from '@/lib/utils/zodiac';
@@ -26,6 +27,8 @@ export default function HoroscopoPage() {
         <h1 className="mb-2 font-serif text-4xl">Horóscopo Diario</h1>
         <p className="text-muted-foreground">Selecciona tu signo para ver las predicciones</p>
       </div>
+
+      <EncyclopediaInfoWidget slug="guide-horoscope" className="mb-6" />
 
       {!isAuthenticated && (
         <div className="bg-muted/50 mb-8 rounded-lg p-4 text-center">

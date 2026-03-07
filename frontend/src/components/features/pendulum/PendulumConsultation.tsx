@@ -23,6 +23,7 @@ import {
 } from '@/components/features/pendulum';
 import { usePendulumQuery, usePendulumCapabilities } from '@/hooks/api/usePendulum';
 import { useAuthStore } from '@/stores/authStore';
+import { EncyclopediaInfoWidget } from '@/components/features/encyclopedia';
 import type { PendulumMovement, PendulumQueryResponse } from '@/types/pendulum.types';
 
 export function PendulumConsultation() {
@@ -121,6 +122,8 @@ export function PendulumConsultation() {
           <h1 className="mb-2 font-serif text-4xl">Péndulo Digital</h1>
           <p className="text-muted-foreground">Formula tu pregunta y deja que el péndulo te guíe</p>
         </div>
+
+        <EncyclopediaInfoWidget slug="guide-pendulum" className="mb-6" />
 
         {/* Límites */}
         <PendulumLimitBanner />

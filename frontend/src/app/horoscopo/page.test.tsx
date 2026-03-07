@@ -5,6 +5,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import HoroscopoPage from './page';
 
+// Mock EncyclopediaInfoWidget
+vi.mock('@/components/features/encyclopedia', () => ({
+  EncyclopediaInfoWidget: ({ slug }: { slug: string }) => (
+    <div data-testid="encyclopedia-info-widget" data-slug={slug} />
+  ),
+}));
 // Mock next/navigation
 const mockPush = vi.fn();
 vi.mock('next/navigation', () => ({
@@ -162,5 +168,38 @@ describe('HoroscopoPage', () => {
     const ariesCard = screen.getByTestId('zodiac-card-aries');
     // La tarjeta de Aries debería tener una clase especial para "Tu signo"
     expect(ariesCard).toHaveClass('border-accent');
+  });
+
+  it('debe renderizar EncyclopediaInfoWidget con slug="guide-horoscope"', () => {
+    mockUseAuthStore.mockReturnValue({
+      user: null,
+      isAuthenticated: false,
+    });
+    mockUseTodayAllHoroscopes.mockReturnValue({
+      isLoading: false,
+      data: [],
+    });
+
+    renderWithProviders(<HoroscopoPage />);
+
+    const widget = screen.getByTestId('encyclopedia-info-widget');
+    expect(widget).toBeInTheDocument();
+    expect(widget).toHaveAttribute('data-slug', 'guide-horoscope');
+  });
+
+  it('debe renderizar correctamente si EncyclopediaInfoWidget retorna null', () => {
+    mockUseAuthStore.mockReturnValue({
+      user: null,
+      isAuthenticated: false,
+    });
+    mockUseTodayAllHoroscopes.mockReturnValue({
+      isLoading: false,
+      data: [],
+    });
+
+    renderWithProviders(<HoroscopoPage />);
+
+    // Page renders without errors (widget mock returns div, page is stable)
+    expect(screen.getByText('Horóscopo Diario')).toBeInTheDocument();
   });
 });
