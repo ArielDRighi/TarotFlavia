@@ -4366,7 +4366,7 @@ public/images/tarot/
 
 | Tarea    | Descripción                              | Estimación | Prioridad |
 | -------- | ---------------------------------------- | ---------- | --------- |
-| TASK-315 | Tipos TS + API + Hooks para artículos    | 0.5 días   | ✅ COMPLETADA |
+| TASK-315 | Tipos TS + API + Hooks para artículos    | 0.5 días   | 🔴 ALTA   |
 | TASK-316 | EncyclopediaInfoWidget                   | 0.5 días   | 🔴 ALTA   |
 | TASK-317 | Integrar widget en 6 módulos             | 1 día      | 🔴 ALTA   |
 | TASK-318 | Componentes de listado (artículos)       | 1 día      | 🟡 MEDIA  |
