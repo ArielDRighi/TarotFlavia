@@ -255,3 +255,12 @@ export {
   SUIT_INFO,
   ELEMENT_INFO,
 } from './encyclopedia.types';
+
+// Encyclopedia Article Types
+export type {
+  ArticleSnippet,
+  ArticleSummary,
+  ArticleDetail,
+  GlobalSearchResult,
+} from './encyclopedia-article.types';
+export { ArticleCategory, ARTICLE_CATEGORY_LABELS } from './encyclopedia-article.types';
