@@ -3516,6 +3516,7 @@ Crear las páginas principales de la enciclopedia: listado y detalle de cartas.
 **Prioridad:** 🔴 ALTA
 **Estimación:** 0.5 días
 **Dependencias:** TASK-312
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -3634,10 +3635,10 @@ export function useGlobalSearch(term: string): UseQueryResult<GlobalSearchResult
 
 #### ✅ Criterios de Aceptación
 
-- [ ] Tipos exportados sin errores de TypeScript
-- [ ] `useArticleSnippet` llama a `/encyclopedia/articles/snippet/:slug`
-- [ ] `useGlobalSearch` combina resultados de tarot y artículos
-- [ ] `staleTime` de 1 hora para todo el contenido estático
+- [x] Tipos exportados sin errores de TypeScript
+- [x] `useArticleSnippet` llama a `/encyclopedia/articles/snippet/:slug`
+- [x] `useGlobalSearch` combina resultados de tarot y artículos
+- [x] `staleTime` de 1 hora para todo el contenido estático
 
 ---
 
@@ -4365,7 +4366,7 @@ public/images/tarot/
 
 | Tarea    | Descripción                              | Estimación | Prioridad |
 | -------- | ---------------------------------------- | ---------- | --------- |
-| TASK-315 | Tipos TS + API + Hooks para artículos    | 0.5 días   | 🔴 ALTA   |
+| TASK-315 | Tipos TS + API + Hooks para artículos    | 0.5 días   | ✅ COMPLETADA |
 | TASK-316 | EncyclopediaInfoWidget                   | 0.5 días   | 🔴 ALTA   |
 | TASK-317 | Integrar widget en 6 módulos             | 1 día      | 🔴 ALTA   |
 | TASK-318 | Componentes de listado (artículos)       | 1 día      | 🟡 MEDIA  |
@@ -4461,7 +4462,7 @@ Semana 4-5: Frontend páginas completas (Fase 2 - enciclopedia completa)
 
 ### Frontend — Enciclopedia Mística (Fase 2)
 
-- [ ] TASK-315: Types + API + Hooks para artículos
+- [x] TASK-315: Types + API + Hooks para artículos
 - [ ] TASK-316: EncyclopediaInfoWidget
 - [ ] TASK-317: Widget integrado en las 6 páginas de módulos
 - [ ] TASK-318: Componentes de listado (ArticleCard, ArticleGrid, etc.)

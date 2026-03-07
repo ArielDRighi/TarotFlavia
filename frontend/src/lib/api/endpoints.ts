@@ -142,6 +142,12 @@ export const API_ENDPOINTS = {
     CARD_DETAIL: (slug: string) => `/encyclopedia/cards/${slug}`,
     CARD_RELATED: (slug: string) => `/encyclopedia/cards/${slug}/related`,
     CARD_NAVIGATION: (slug: string) => `/encyclopedia/cards/${slug}/navigation`,
+    // Articles
+    ARTICLES: '/encyclopedia/articles',
+    ARTICLE_SNIPPET: (slug: string) => `/encyclopedia/articles/snippet/${slug}`,
+    ARTICLE_DETAIL: (slug: string) => `/encyclopedia/articles/${slug}`,
+    ARTICLE_BY_CATEGORY: (category: string) => `/encyclopedia/articles/category/${category}`,
+    SEARCH_GLOBAL: '/encyclopedia/search',
   },
 
   // Sacred Calendar (Calendario Sagrado)
