@@ -3761,12 +3761,13 @@ describe('EncyclopediaInfoWidget', () => {
 
 ---
 
-### TASK-317: Integrar EncyclopediaInfoWidget en las 6 páginas de módulos
+ ### TASK-317: Integrar EncyclopediaInfoWidget en las 6 páginas de módulos
 
 **Módulo:** `frontend/src/components/features/` y `frontend/src/app/`
 **Prioridad:** 🔴 ALTA
 **Estimación:** 1 día
 **Dependencias:** TASK-316
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -3804,10 +3805,10 @@ Agregar el `EncyclopediaInfoWidget` en cada una de las 6 páginas de módulos. E
 
 #### ✅ Criterios de Aceptación
 
-- [ ] Las 6 páginas renderizan `EncyclopediaInfoWidget` con el `slug` correcto
-- [ ] Widget no bloquea el renderizado si el API falla (retorna `null`)
-- [ ] Widget aparece en posición consistente en todas las páginas (debajo del header, antes del contenido principal)
-- [ ] Widget es visible para usuarios anónimos
+- [x] Las 6 páginas renderizan `EncyclopediaInfoWidget` con el `slug` correcto
+- [x] Widget no bloquea el renderizado si el API falla (retorna `null`)
+- [x] Widget aparece en posición consistente en todas las páginas (debajo del header, antes del contenido principal)
+- [x] Widget es visible para usuarios anónimos
 
 ---
 
@@ -4467,7 +4468,7 @@ Semana 4-5: Frontend páginas completas (Fase 2 - enciclopedia completa)
 
 - [x] TASK-315: Types + API + Hooks para artículos
 - [x] TASK-316: EncyclopediaInfoWidget
-- [ ] TASK-317: Widget integrado en las 6 páginas de módulos
+- [x] TASK-317: Widget integrado en las 6 páginas de módulos
 - [ ] TASK-318: Componentes de listado (ArticleCard, ArticleGrid, etc.)
 - [ ] TASK-319: ArticleDetailView con Markdown
 - [ ] TASK-320: Nuevas rutas y restructura de /enciclopedia

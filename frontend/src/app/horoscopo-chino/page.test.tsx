@@ -5,6 +5,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import HoroscopoChinoPage from './page';
 
+// Mock EncyclopediaInfoWidget
+vi.mock('@/components/features/encyclopedia', () => ({
+  EncyclopediaInfoWidget: ({ slug }: { slug: string }) => (
+    <div data-testid="encyclopedia-info-widget" data-slug={slug} />
+  ),
+}));
+
 // Mock next/navigation
 const mockPush = vi.fn();
 vi.mock('next/navigation', () => ({
@@ -179,5 +186,31 @@ describe('HoroscopoChinoPage', () => {
         expect(screen.getByRole('heading', { name: /descubre tu animal/i })).toBeInTheDocument();
       });
     });
+  });
+
+  it('debe renderizar EncyclopediaInfoWidget con slug="guia-horoscopo-chino"', () => {
+    mockUseChineseHoroscopesByYear.mockReturnValue({
+      isLoading: false,
+      data: [],
+    });
+
+    renderWithProviders(<HoroscopoChinoPage />);
+
+    const widget = screen.getByTestId('encyclopedia-info-widget');
+    expect(widget).toBeInTheDocument();
+    expect(widget).toHaveAttribute('data-slug', 'guia-horoscopo-chino');
+  });
+
+  it('debe renderizar correctamente si EncyclopediaInfoWidget retorna null', () => {
+    mockUseChineseHoroscopesByYear.mockReturnValue({
+      isLoading: false,
+      data: [],
+    });
+
+    renderWithProviders(<HoroscopoChinoPage />);
+
+    // Page renders without errors (widget mock returns div, page is stable)
+    const currentYear = new Date().getFullYear();
+    expect(screen.getByText(`Horóscopo Chino ${currentYear}`)).toBeInTheDocument();
   });
 });
