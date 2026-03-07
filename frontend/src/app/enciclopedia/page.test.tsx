@@ -246,6 +246,19 @@ describe('EnciclopediaPage', () => {
     });
   });
 
+  it('should not show result count while search is loading', async () => {
+    const user = userEvent.setup();
+    mockUseSearchCards.mockReturnValue({ data: undefined, isLoading: true });
+
+    renderWithProviders(<EnciclopediaPage />);
+
+    const searchInput = screen.getByRole('searchbox');
+    await user.type(searchInput, 'lo');
+
+    // Counter must NOT appear while loading (avoids flash of "0 resultados")
+    expect(screen.queryByText(/resultado/i)).not.toBeInTheDocument();
+  });
+
   it('should reset suit when switching categories', async () => {
     const user = userEvent.setup();
     mockUseCardsBySuit.mockReturnValue({ data: WANDS_CARDS, isLoading: false });

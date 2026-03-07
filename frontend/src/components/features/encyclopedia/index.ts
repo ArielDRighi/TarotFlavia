@@ -22,6 +22,9 @@
  * - RelatedCards: Related cards grid
  */
 
+// Page content components
+export { EnciclopediaContent } from './EnciclopediaContent';
+
 // List components
 export { CardThumbnail } from './CardThumbnail';
 export { CardGrid } from './CardGrid';

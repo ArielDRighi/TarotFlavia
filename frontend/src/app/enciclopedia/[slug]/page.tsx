@@ -24,7 +24,7 @@ export default function CardDetailPage() {
     );
   }
 
-  if (error ?? !card) {
+  if (error || !card) {
     return (
       <div className="container mx-auto px-4 py-8 text-center">
         <h1 className="mb-4 text-2xl">Carta no encontrada</h1>

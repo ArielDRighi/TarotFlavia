@@ -26,10 +26,18 @@ import { ArcanaType, Suit } from '@/types/encyclopedia.types';
  * - Suit filtering within minor arcana
  * - Card search with debounce
  * - Card grid display
+ *
+ * State design:
+ * - `inputValue`: controlled value for the search input (updates on every keystroke)
+ * - `searchQuery`: debounced query used for API calls (updated only via onSearch callback)
+ * This separation ensures the debounce in EncyclopediaSearchBar is actually effective.
  */
 export function EnciclopediaContent() {
   const [selectedCategory, setSelectedCategory] = useState<ArcanaType | undefined>(undefined);
   const [selectedSuit, setSelectedSuit] = useState<Suit | null>(null);
+  // inputValue: controlled input state (immediate, no debounce)
+  const [inputValue, setInputValue] = useState('');
+  // searchQuery: debounced API query state (updated only by onSearch callback)
   const [searchQuery, setSearchQuery] = useState('');
 
   // ─── Queries ─────────────────────────────────────────────────────────────
@@ -41,7 +49,8 @@ export function EnciclopediaContent() {
 
   // ─── Derived state ───────────────────────────────────────────────────────
 
-  const isSearching = searchQuery.length >= 2;
+  // isSearching is based on inputValue (for UI: hide tabs immediately while typing)
+  const isSearching = inputValue.length >= 2;
   const showSuitSelector = selectedCategory === ArcanaType.MINOR && !isSearching;
 
   const getDisplayData = () => {
@@ -86,9 +95,11 @@ export function EnciclopediaContent() {
   const handleCategoryChange = (arcanaType: ArcanaType | undefined) => {
     setSelectedCategory(arcanaType);
     setSelectedSuit(null);
+    setInputValue('');
     setSearchQuery('');
   };
 
+  // onSearch is called by EncyclopediaSearchBar after debounce — updates the API query
   const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
   }, []);
@@ -107,8 +118,8 @@ export function EnciclopediaContent() {
       <div className="mb-8 space-y-4">
         <EncyclopediaSearchBar
           onSearch={handleSearch}
-          value={searchQuery}
-          onChange={setSearchQuery}
+          value={inputValue}
+          onChange={setInputValue}
           placeholder="Buscar carta por nombre..."
           className="mx-auto max-w-md"
         />
@@ -133,10 +144,10 @@ export function EnciclopediaContent() {
         )}
       </div>
 
-      {/* Search result count */}
-      {isSearching && (
+      {/* Search result count — hidden while loading to avoid "0 resultados" flash */}
+      {isSearching && !isLoading && (
         <p className="text-muted-foreground mb-4 text-sm">
-          {cards.length} resultado{cards.length !== 1 ? 's' : ''} para &ldquo;{searchQuery}&rdquo;
+          {cards.length} resultado{cards.length !== 1 ? 's' : ''} para &ldquo;{inputValue}&rdquo;
         </p>
       )}
 
