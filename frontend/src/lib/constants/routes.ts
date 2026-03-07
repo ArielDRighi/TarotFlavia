@@ -42,4 +42,8 @@ export const ROUTES = {
   RITUALES: '/rituales',
   RITUAL_DETAIL: (slug: string) => `/rituales/${slug}`,
   RITUALES_HISTORIAL: '/rituales/historial',
+
+  // Encyclopedia
+  ENCICLOPEDIA: '/enciclopedia',
+  ENCICLOPEDIA_CARD: (slug: string) => `/enciclopedia/${slug}`,
 } as const;
