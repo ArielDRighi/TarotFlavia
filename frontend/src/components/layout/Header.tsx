@@ -72,6 +72,12 @@ export function Header() {
             Rituales
           </Link>
           <Link
+            href={ROUTES.ENCICLOPEDIA}
+            className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
+          >
+            Enciclopedia Mística
+          </Link>
+          <Link
             href={ROUTES.PENDULO}
             className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
           >

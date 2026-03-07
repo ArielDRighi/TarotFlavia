@@ -3254,7 +3254,9 @@ frontend/src/components/features/encyclopedia/
 
 ---
 
-### TASK-308: Crear páginas de Enciclopedia
+ ### TASK-308: Crear páginas de Enciclopedia
+
+**Estado:** ✅ COMPLETADA
 
 **Módulo:** `frontend/src/app/enciclopedia/`  
 **Prioridad:** 🟡 MEDIA  
@@ -3287,7 +3289,7 @@ Crear las páginas principales de la enciclopedia: listado y detalle de cartas.
 
 ##### Frontend
 
-- [ ] Agregar rutas en `routes.ts`:
+- [x] Agregar rutas en `routes.ts`:
 
   ```typescript
   export const ROUTES = {
@@ -3297,7 +3299,7 @@ Crear las páginas principales de la enciclopedia: listado y detalle de cartas.
   } as const;
   ```
 
-- [ ] Crear `app/enciclopedia/page.tsx`:
+- [x] Crear `app/enciclopedia/page.tsx`:
 
   ```tsx
   "use client";
@@ -3418,7 +3420,7 @@ Crear las páginas principales de la enciclopedia: listado y detalle de cartas.
   }
   ```
 
-- [ ] Crear `app/enciclopedia/[slug]/page.tsx`:
+- [x] Crear `app/enciclopedia/[slug]/page.tsx`:
 
   ```tsx
   "use client";
@@ -3464,7 +3466,7 @@ Crear las páginas principales de la enciclopedia: listado y detalle de cartas.
   }
   ```
 
-- [ ] Actualizar `Header.tsx`:
+- [x] Actualizar `Header.tsx`:
   ```tsx
   const navigationItems = [
     { href: "/carta-del-dia", label: "Carta del Día" },
@@ -3477,22 +3479,22 @@ Crear las páginas principales de la enciclopedia: listado y detalle de cartas.
 
 ##### Testing
 
-- [ ] Test: Página principal muestra 78 cartas
-- [ ] Test: Filtro por categoría funciona
-- [ ] Test: Filtro por palo funciona
-- [ ] Test: Búsqueda filtra correctamente
-- [ ] Test: Página de detalle muestra carta
-- [ ] Test: 404 para slug inexistente
+- [x] Test: Página principal muestra 78 cartas
+- [x] Test: Filtro por categoría funciona
+- [x] Test: Filtro por palo funciona
+- [x] Test: Búsqueda filtra correctamente
+- [x] Test: Página de detalle muestra carta
+- [x] Test: 404 para slug inexistente
 
 ---
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] /enciclopedia muestra grid de cartas
-- [ ] Filtros y búsqueda funcionan
-- [ ] /enciclopedia/[slug] muestra detalle
-- [ ] Link en header
-- [ ] Responsive en móvil
+- [x] /enciclopedia muestra grid de cartas
+- [x] Filtros y búsqueda funcionan
+- [x] /enciclopedia/[slug] muestra detalle
+- [x] Link en header
+- [x] Responsive en móvil
 
 ---
 
@@ -4457,7 +4459,7 @@ Semana 4-5: Frontend páginas completas (Fase 2 - enciclopedia completa)
 - [x] TASK-305: Types y hooks
 - [x] TASK-306: Componentes de lista
 - [x] TASK-307: Componentes de detalle
-- [ ] TASK-308: Páginas
+- [x] TASK-308: Páginas
 
 ### Frontend — Enciclopedia Mística (Fase 2)
 
