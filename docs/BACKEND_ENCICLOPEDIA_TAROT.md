@@ -4087,6 +4087,7 @@ describe('Enciclopedia article pages', () => {
 **Prioridad:** 🟡 MEDIA
 **Estimación:** 0.5 días
 **Dependencias:** TASK-320
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -4130,10 +4131,10 @@ export async function generateStaticParams() {
 
 #### ✅ Criterios de Aceptación
 
-- [ ] `title` de cada página incluye el nombre del artículo
-- [ ] `description` usa el `snippet` del artículo
-- [ ] Open Graph tags presentes
-- [ ] `generateStaticParams` implementado para signos, planetas, casas y guías
+- [x] `title` de cada página incluye el nombre del artículo
+- [x] `description` usa el `snippet` del artículo
+- [x] Open Graph tags presentes
+- [x] `generateStaticParams` implementado para signos, planetas, casas y guías
 
 ---
 
@@ -4476,7 +4477,7 @@ Semana 4-5: Frontend páginas completas (Fase 2 - enciclopedia completa)
 - [ ] TASK-318: Componentes de listado (ArticleCard, ArticleGrid, etc.)
 - [x] TASK-319: ArticleDetailView con Markdown
 - [x] TASK-320: Nuevas rutas y restructura de /enciclopedia
-- [ ] TASK-321: SEO metadata en páginas de artículos
+- [x] TASK-321: SEO metadata en páginas de artículos
 - [ ] TASK-322: Cross-links desde Carta Astral
 
 ### Contenido
