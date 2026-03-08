@@ -46,4 +46,24 @@ export const ROUTES = {
   // Encyclopedia
   ENCICLOPEDIA: '/enciclopedia',
   ENCICLOPEDIA_CARD: (slug: string) => `/enciclopedia/${slug}`,
+
+  // Encyclopedia — Tarot
+  ENCICLOPEDIA_TAROT: '/enciclopedia/tarot',
+  ENCICLOPEDIA_TAROT_CARD: (slug: string) => `/enciclopedia/tarot/${slug}`,
+
+  // Encyclopedia — Astrología
+  ENCICLOPEDIA_ASTROLOGIA: '/enciclopedia/astrologia',
+  ENCICLOPEDIA_ASTROLOGIA_SIGNOS: '/enciclopedia/astrologia/signos',
+  ENCICLOPEDIA_ASTROLOGIA_PLANETAS: '/enciclopedia/astrologia/planetas',
+  ENCICLOPEDIA_ASTROLOGIA_CASAS: '/enciclopedia/astrologia/casas',
+  ENCICLOPEDIA_SIGNO: (slug: string) => `/enciclopedia/astrologia/signos/${slug}`,
+  ENCICLOPEDIA_PLANETA: (slug: string) => `/enciclopedia/astrologia/planetas/${slug}`,
+  ENCICLOPEDIA_CASA: (slug: string) => `/enciclopedia/astrologia/casas/${slug}`,
+
+  // Encyclopedia — Guías
+  ENCICLOPEDIA_GUIAS: '/enciclopedia/guias',
+  ENCICLOPEDIA_GUIA: (slug: string) => `/enciclopedia/guias/${slug}`,
+
+  // Encyclopedia — Elementos y modalidades
+  ENCICLOPEDIA_ELEMENTO: (slug: string) => `/enciclopedia/elementos/${slug}`,
 } as const;

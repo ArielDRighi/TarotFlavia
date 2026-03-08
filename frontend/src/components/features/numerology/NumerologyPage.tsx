@@ -81,7 +81,7 @@ export function NumerologyPage() {
 
         <EncyclopediaInfoWidget
           slug="guia-numerologia"
-          href={ROUTES.ENCICLOPEDIA_CARD('guia-numerologia')}
+          href={ROUTES.ENCICLOPEDIA_GUIA('guia-numerologia')}
           className="mb-6"
         />
 
