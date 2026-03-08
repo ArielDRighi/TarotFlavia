@@ -186,7 +186,7 @@ export function BirthChartPageContent() {
 
       <EncyclopediaInfoWidget
         slug="guia-carta-astral"
-        href={ROUTES.ENCICLOPEDIA_CARD('guia-carta-astral')}
+        href={ROUTES.ENCICLOPEDIA_GUIA('guia-carta-astral')}
         className="mb-6"
       />
 

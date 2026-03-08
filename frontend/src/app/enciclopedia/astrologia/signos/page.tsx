@@ -1,5 +1,4 @@
 import { ArticleListPageContent } from '@/components/features/encyclopedia/ArticleListPageContent';
-import { ROUTES } from '@/lib/constants/routes';
 import { ArticleCategory } from '@/types/encyclopedia-article.types';
 
 /**
@@ -13,7 +12,7 @@ export default function SignosPage() {
       category={ArticleCategory.ZODIAC_SIGN}
       title="Signos Zodiacales"
       subtitle="Explora los 12 signos del zodiaco y sus características."
-      getDetailHref={(slug) => ROUTES.ENCICLOPEDIA_SIGNO(slug)}
+      detailHrefPrefix="/enciclopedia/astrologia/signos"
     />
   );
 }

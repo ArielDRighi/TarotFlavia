@@ -30,7 +30,7 @@ export default function HoroscopoPage() {
 
       <EncyclopediaInfoWidget
         slug="guia-horoscopo-occidental"
-        href={ROUTES.ENCICLOPEDIA_CARD('guia-horoscopo-occidental')}
+        href={ROUTES.ENCICLOPEDIA_GUIA('guia-horoscopo-occidental')}
         className="mb-6"
       />
 

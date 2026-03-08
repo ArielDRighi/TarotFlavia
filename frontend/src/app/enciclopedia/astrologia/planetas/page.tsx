@@ -1,5 +1,4 @@
 import { ArticleListPageContent } from '@/components/features/encyclopedia/ArticleListPageContent';
-import { ROUTES } from '@/lib/constants/routes';
 import { ArticleCategory } from '@/types/encyclopedia-article.types';
 
 /**
@@ -13,7 +12,7 @@ export default function PlanetasPage() {
       category={ArticleCategory.PLANET}
       title="Planetas"
       subtitle="Descubre los 10 planetas astrológicos y su influencia."
-      getDetailHref={(slug) => ROUTES.ENCICLOPEDIA_PLANETA(slug)}
+      detailHrefPrefix="/enciclopedia/astrologia/planetas"
     />
   );
 }

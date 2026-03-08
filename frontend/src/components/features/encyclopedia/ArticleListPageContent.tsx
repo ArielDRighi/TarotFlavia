@@ -15,8 +15,8 @@ interface ArticleListPageContentProps {
   title: string;
   /** Page subtitle */
   subtitle: string;
-  /** Function to generate the detail URL for an article */
-  getDetailHref: (slug: string) => string;
+  /** Base path for detail URLs — slug will be appended: `${detailHrefPrefix}/${slug}` */
+  detailHrefPrefix: string;
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -55,7 +55,7 @@ export function ArticleListPageContent({
   category,
   title,
   subtitle,
-  getDetailHref,
+  detailHrefPrefix,
 }: ArticleListPageContentProps) {
   const { data: articles, isLoading } = useArticlesByCategory(category);
 
@@ -80,7 +80,7 @@ export function ArticleListPageContent({
             <ArticleListItem
               key={article.id}
               article={article}
-              detailHref={getDetailHref(article.slug)}
+              detailHref={`${detailHrefPrefix}/${article.slug}`}
             />
           ))}
         </div>

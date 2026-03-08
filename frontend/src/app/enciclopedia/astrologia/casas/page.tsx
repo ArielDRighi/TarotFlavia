@@ -1,5 +1,4 @@
 import { ArticleListPageContent } from '@/components/features/encyclopedia/ArticleListPageContent';
-import { ROUTES } from '@/lib/constants/routes';
 import { ArticleCategory } from '@/types/encyclopedia-article.types';
 
 /**
@@ -13,7 +12,7 @@ export default function CasasPage() {
       category={ArticleCategory.ASTROLOGICAL_HOUSE}
       title="Casas Astrales"
       subtitle="Conoce las 12 casas astrales y los aspectos de la vida que rigen."
-      getDetailHref={(slug) => ROUTES.ENCICLOPEDIA_CASA(slug)}
+      detailHrefPrefix="/enciclopedia/astrologia/casas"
     />
   );
 }

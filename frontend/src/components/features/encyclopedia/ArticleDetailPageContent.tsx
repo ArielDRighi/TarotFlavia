@@ -3,7 +3,7 @@
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 
-import { ArticleDetailView } from '@/components/features/encyclopedia';
+import { ArticleDetailView } from '@/components/features/encyclopedia/ArticleDetailView';
 import { useArticle } from '@/hooks/api/useEncyclopediaArticles';
 import { ROUTES } from '@/lib/constants/routes';
 

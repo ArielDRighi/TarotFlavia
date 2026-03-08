@@ -126,7 +126,7 @@ export function PendulumConsultation() {
 
         <EncyclopediaInfoWidget
           slug="guia-pendulo"
-          href={ROUTES.ENCICLOPEDIA_CARD('guia-pendulo')}
+          href={ROUTES.ENCICLOPEDIA_GUIA('guia-pendulo')}
           className="mb-6"
         />
 
