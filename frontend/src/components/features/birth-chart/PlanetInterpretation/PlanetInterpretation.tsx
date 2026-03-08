@@ -60,12 +60,14 @@ export function PlanetInterpretation({
       <CardHeader>
         <div className="flex items-center gap-2">
           <span className="text-2xl">{planetMetadata.unicode}</span>
-          <Link
-            href={ROUTES.ENCICLOPEDIA_PLANETA(PLANET_ENCYCLOPEDIA_SLUGS[planet])}
-            className="text-xl font-semibold hover:underline"
-          >
-            {planetName}
-          </Link>
+          <h3 className="text-xl font-semibold">
+            <Link
+              href={ROUTES.ENCICLOPEDIA_PLANETA(PLANET_ENCYCLOPEDIA_SLUGS[planet])}
+              className="hover:underline"
+            >
+              {planetName}
+            </Link>
+          </h3>
         </div>
       </CardHeader>
 

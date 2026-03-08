@@ -396,6 +396,15 @@ describe('PlanetPositionsTable', () => {
       expect(linkTexts).not.toContain('AC');
       expect(linkTexts).not.toContain('MC');
     });
+
+    it('links de planeta y signo deben tener clase hover:underline para estilo visual', () => {
+      render(<PlanetPositionsTable planets={mockPlanets} />);
+
+      const links = screen.getAllByRole('link');
+      links.forEach((link) => {
+        expect(link).toHaveClass('hover:underline');
+      });
+    });
   });
 
   describe('Element colors', () => {

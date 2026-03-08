@@ -249,14 +249,20 @@ describe('BigThree', () => {
       });
     });
 
-    it('nombre de signo en variante default debe renderizar como link a la enciclopedia', () => {
+    it('nombre de signo en variante hero debe renderizar como link (confirmación de patrón BigThree)', () => {
       render(<BigThree data={mockData} variant="hero" />);
 
-      // In the default (collapsible) variant, sign name is inside a button trigger —
-      // nesting <a> inside <button> is invalid HTML, so only the hero variant gets links.
-      // This test uses hero to verify the link pattern works for BigThree in general.
+      // Hero variant renders sign names as links to the encyclopedia
       const leoLink = screen.getByRole('link', { name: /Leo/i });
       expect(leoLink).toBeInTheDocument();
+    });
+
+    it('nombre de signo en variante default NO debe renderizar como link (signo está dentro de <button>)', () => {
+      render(<BigThree data={mockData} />);
+
+      // In the default (collapsible) variant, sign name is inside a CollapsibleTrigger (<button>).
+      // Nesting <a> inside <button> is invalid HTML, so the default variant must NOT have links.
+      expect(screen.queryByRole('link')).not.toBeInTheDocument();
     });
   });
 
