@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 
 import { getArticle, getArticlesByCategory } from '@/lib/api/encyclopedia-articles-api';
+import { getArticleMetadata } from '@/lib/metadata/seo';
 import { ArticleCategory } from '@/types/encyclopedia-article.types';
 import { ArticleDetailPageContent } from '@/components/features/encyclopedia/ArticleDetailPageContent';
 
@@ -18,15 +19,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   try {
     const article = await getArticle(slug);
-    return {
-      title: `${article.nameEs} | Enciclopedia Mística`,
-      description: article.snippet,
-      openGraph: {
-        title: `${article.nameEs} | Enciclopedia Mística`,
-        description: article.snippet,
-        type: 'article',
-      },
-    };
+    return getArticleMetadata(article);
   } catch {
     return {};
   }

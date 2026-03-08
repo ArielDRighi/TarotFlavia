@@ -4134,7 +4134,7 @@ export async function generateStaticParams() {
 - [x] `title` de cada página incluye el nombre del artículo
 - [x] `description` usa el `snippet` del artículo
 - [x] Open Graph tags presentes
-- [x] `generateStaticParams` implementado para signos, planetas, casas y guías
+- [x] `generateStaticParams` implementado para signos, planetas, casas, elementos, modalidades y guías
 
 ---
 

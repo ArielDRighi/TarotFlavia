@@ -212,6 +212,23 @@ export function generateTarotistaMetadata(
 }
 
 /**
+ * Generate metadata for encyclopedia article detail pages
+ */
+export function getArticleMetadata(article: { nameEs: string; snippet: string }): Metadata {
+  const title = `${article.nameEs} | Enciclopedia Mística`;
+
+  return {
+    title,
+    description: article.snippet,
+    openGraph: {
+      title,
+      description: article.snippet,
+      type: 'article',
+    },
+  };
+}
+
+/**
  * Generate dynamic metadata for shared reading pages
  */
 export function generateSharedReadingMetadata(reading: {
