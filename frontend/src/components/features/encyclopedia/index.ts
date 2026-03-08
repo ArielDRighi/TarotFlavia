@@ -3,7 +3,7 @@
  *
  * This module exports all components related to the Tarot Encyclopedia feature:
  *
- * List components:
+ * List components (Tarot cards):
  * - CardThumbnail: Card image thumbnail with badge and link
  * - CardGrid: Responsive grid layout for card thumbnails
  * - CardListItem: Horizontal list item for card display
@@ -12,7 +12,7 @@
  * - EncyclopediaSearchBar: Search input with debounce (encyclopedia-specific)
  * - EncyclopediaSkeleton: Loading skeleton states
  *
- * Detail components:
+ * Detail components (Tarot cards):
  * - CardDetailView: Full detail view for a single card
  * - CardImage: Card image with zoom modal
  * - CardMeaning: Upright/reversed meanings with tabs
@@ -20,6 +20,14 @@
  * - CardMetadata: Card metadata (arcana, element, suit, etc.)
  * - CardNavigation: Previous/next card navigation
  * - RelatedCards: Related cards grid
+ *
+ * Article components (Astrology & Guides):
+ * - ArticleCard: Adaptive card for encyclopedia articles (zodiac, planets, houses, guides)
+ * - ArticleGrid: Responsive grid layout for article cards
+ * - ArticleSkeleton: Loading skeleton for article grids
+ * - AstrologySection: Section hub with 3 astrology sub-sections
+ * - GuidesSection: Section hub with 6 guide activity cards
+ * - EncyclopediaHome: Full hub page (Tarot + Astrología + Guías)
  *
  * Widget components:
  * - EncyclopediaInfoWidget: Informational snippet widget for embedding in other pages
@@ -67,3 +75,19 @@ export type { RelatedCardsProps } from './RelatedCards';
 // Widget components
 export { EncyclopediaInfoWidget } from './EncyclopediaInfoWidget';
 export type { EncyclopediaInfoWidgetProps } from './EncyclopediaInfoWidget';
+
+// Article components (Astrology & Guides)
+export { ArticleCard } from './ArticleCard';
+export { ArticleGrid } from './ArticleGrid';
+export { ArticleSkeleton } from './ArticleSkeleton';
+export { AstrologySection } from './AstrologySection';
+export { GuidesSection } from './GuidesSection';
+export { EncyclopediaHome } from './EncyclopediaHome';
+
+// Type exports — article components
+export type { ArticleCardProps } from './ArticleCard';
+export type { ArticleGridProps } from './ArticleGrid';
+export type { ArticleSkeletonProps } from './ArticleSkeleton';
+export type { AstrologySectionProps } from './AstrologySection';
+export type { GuidesSectionProps } from './GuidesSection';
+export type { EncyclopediaHomeProps } from './EncyclopediaHome';
