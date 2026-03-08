@@ -4,50 +4,46 @@ import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
+import { ROUTES } from '@/lib/constants/routes';
 import { ArticleCategory, ARTICLE_CATEGORY_LABELS } from '@/types/encyclopedia-article.types';
 import type { ArticleDetail, ArticleSummary } from '@/types/encyclopedia-article.types';
 import { cn } from '@/lib/utils';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const GUIDE_CATEGORIES = new Set<ArticleCategory>([
-  ArticleCategory.GUIDE_NUMEROLOGY,
-  ArticleCategory.GUIDE_PENDULUM,
-  ArticleCategory.GUIDE_BIRTH_CHART,
-  ArticleCategory.GUIDE_RITUAL,
-  ArticleCategory.GUIDE_HOROSCOPE,
-  ArticleCategory.GUIDE_CHINESE,
-]);
-
 interface GuideCta {
   label: string;
   href: string;
 }
 
+/**
+ * Maps guide categories to their corresponding CTA.
+ * Single source of truth: a category is a guide if and only if it has an entry here.
+ */
 const GUIDE_CTA_MAP: Partial<Record<ArticleCategory, GuideCta>> = {
   [ArticleCategory.GUIDE_NUMEROLOGY]: {
     label: 'Calcular mi Numerología',
-    href: '/numerologia',
+    href: ROUTES.NUMEROLOGIA,
   },
   [ArticleCategory.GUIDE_PENDULUM]: {
     label: 'Usar el Péndulo Digital',
-    href: '/pendulo',
+    href: ROUTES.PENDULO,
   },
   [ArticleCategory.GUIDE_BIRTH_CHART]: {
     label: 'Generar mi Carta Astral',
-    href: '/carta-astral',
+    href: ROUTES.CARTA_ASTRAL,
   },
   [ArticleCategory.GUIDE_RITUAL]: {
     label: 'Explorar Rituales',
-    href: '/rituales',
+    href: ROUTES.RITUALES,
   },
   [ArticleCategory.GUIDE_HOROSCOPE]: {
     label: 'Ver mi Horóscopo',
-    href: '/horoscopo',
+    href: ROUTES.HOROSCOPO,
   },
   [ArticleCategory.GUIDE_CHINESE]: {
     label: 'Ver mi Horóscopo Chino',
-    href: '/horoscopo-chino',
+    href: ROUTES.HOROSCOPO_CHINO,
   },
 };
 
@@ -69,7 +65,7 @@ interface RelatedArticleItemProps {
 function RelatedArticleItem({ article }: RelatedArticleItemProps) {
   return (
     <Link
-      href={`/enciclopedia/${article.slug}`}
+      href={ROUTES.ENCICLOPEDIA_CARD(article.slug)}
       data-testid="related-article-item"
       className="bg-card hover:bg-accent flex items-center gap-3 rounded-lg border p-3 transition-colors"
     >
@@ -97,8 +93,8 @@ function RelatedArticleItem({ article }: RelatedArticleItemProps) {
  */
 export function ArticleDetailView({ article, className }: ArticleDetailViewProps) {
   const categoryLabel = ARTICLE_CATEGORY_LABELS[article.category];
-  const isGuide = GUIDE_CATEGORIES.has(article.category);
   const cta = GUIDE_CTA_MAP[article.category];
+  const isGuide = cta !== undefined;
   const hasRelatedTarotCards =
     article.relatedTarotCards !== null && article.relatedTarotCards.length > 0;
   const hasRelatedArticles = article.relatedArticles.length > 0;
@@ -109,7 +105,7 @@ export function ArticleDetailView({ article, className }: ArticleDetailViewProps
       <nav aria-label="Navegación" className="flex items-center gap-2 text-sm">
         <Link
           data-testid="breadcrumb-enciclopedia"
-          href="/enciclopedia"
+          href={ROUTES.ENCICLOPEDIA}
           className="text-muted-foreground hover:text-foreground transition-colors"
         >
           Enciclopedia
