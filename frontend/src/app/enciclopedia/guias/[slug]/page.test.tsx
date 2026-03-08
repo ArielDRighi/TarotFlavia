@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 
-import GuiaDetailPage from './page';
+import GuiaDetailPage, { generateMetadata, generateStaticParams } from './page';
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
@@ -38,6 +38,14 @@ const mockUseArticle = vi.fn();
 
 vi.mock('@/hooks/api/useEncyclopediaArticles', () => ({
   useArticle: (slug: string) => mockUseArticle(slug),
+}));
+
+const mockGetArticle = vi.fn();
+const mockGetArticlesByCategory = vi.fn();
+
+vi.mock('@/lib/api/encyclopedia-articles-api', () => ({
+  getArticle: (slug: string) => mockGetArticle(slug),
+  getArticlesByCategory: (category: string) => mockGetArticlesByCategory(category),
 }));
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
@@ -82,5 +90,95 @@ describe('GuiaDetailPage (/enciclopedia/guias/[slug])', () => {
     render(<GuiaDetailPage />);
 
     expect(screen.getByText('Artículo no encontrado')).toBeInTheDocument();
+  });
+});
+
+describe('generateMetadata (guias)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('debe incluir el nombre del artículo en title', async () => {
+    mockGetArticle.mockResolvedValue({
+      id: 4,
+      slug: 'guia-numerologia',
+      nameEs: 'Guía de Numerología',
+      snippet: 'Aprende sobre numerología.',
+    });
+
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ slug: 'guia-numerologia' }),
+    });
+
+    expect(metadata.title).toContain('Guía de Numerología');
+    expect(metadata.title).toContain('Enciclopedia Mística');
+  });
+
+  it('debe usar snippet como description', async () => {
+    const snippet = 'Aprende sobre numerología.';
+    mockGetArticle.mockResolvedValue({
+      id: 4,
+      slug: 'guia-numerologia',
+      nameEs: 'Guía de Numerología',
+      snippet,
+    });
+
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ slug: 'guia-numerologia' }),
+    });
+
+    expect(metadata.description).toBe(snippet);
+  });
+
+  it('debe incluir Open Graph tags', async () => {
+    mockGetArticle.mockResolvedValue({
+      id: 4,
+      slug: 'guia-numerologia',
+      nameEs: 'Guía de Numerología',
+      snippet: 'Aprende sobre numerología.',
+    });
+
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ slug: 'guia-numerologia' }),
+    });
+
+    expect(metadata.openGraph).toBeDefined();
+    expect(metadata.openGraph).toMatchObject({
+      title: expect.stringContaining('Guía de Numerología'),
+      type: 'article',
+    });
+  });
+
+  it('debe retornar objeto vacío si el artículo no existe', async () => {
+    mockGetArticle.mockRejectedValue(new Error('Not found'));
+
+    const metadata = await generateMetadata({ params: Promise.resolve({ slug: 'inexistente' }) });
+
+    expect(metadata).toEqual({});
+  });
+});
+
+describe('generateStaticParams (guias)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('debe retornar slugs de todas las guías', async () => {
+    // generateStaticParams calls getArticlesByCategory once per guide category (6 total)
+    mockGetArticlesByCategory
+      .mockResolvedValueOnce([{ slug: 'guia-numerologia' }])
+      .mockResolvedValueOnce([{ slug: 'guia-pendulo' }])
+      .mockResolvedValueOnce([{ slug: 'guia-carta-astral' }])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([]);
+
+    const params = await generateStaticParams();
+
+    expect(params).toEqual([
+      { slug: 'guia-numerologia' },
+      { slug: 'guia-pendulo' },
+      { slug: 'guia-carta-astral' },
+    ]);
   });
 });
