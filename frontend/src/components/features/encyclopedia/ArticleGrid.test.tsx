@@ -95,5 +95,20 @@ describe('ArticleGrid', () => {
 
       expect(screen.getByTestId('article-grid')).toHaveClass('custom-class');
     });
+
+    it('debe aplicar className personalizado en estado loading', () => {
+      const { container } = render(
+        <ArticleGrid articles={[]} isLoading={true} className="loading-class" />
+      );
+
+      expect(container.firstChild).toHaveClass('loading-class');
+    });
+
+    it('debe aplicar className personalizado en estado vacío', () => {
+      render(<ArticleGrid articles={[]} className="empty-class" />);
+
+      const emptyDiv = screen.getByText('No se encontraron artículos').closest('div');
+      expect(emptyDiv).toHaveClass('empty-class');
+    });
   });
 });

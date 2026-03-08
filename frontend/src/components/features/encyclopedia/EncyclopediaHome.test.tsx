@@ -51,4 +51,10 @@ describe('EncyclopediaHome', () => {
 
     expect(screen.getByText('Guías')).toBeInTheDocument();
   });
+
+  it('debe aplicar className personalizado al contenedor raíz', () => {
+    render(<EncyclopediaHome className="custom-class" />);
+
+    expect(screen.getByTestId('encyclopedia-home')).toHaveClass('custom-class');
+  });
 });

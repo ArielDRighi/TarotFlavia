@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 
+import { cn } from '@/lib/utils';
+
 import { AstrologySection } from './AstrologySection';
 import { GuidesSection } from './GuidesSection';
 
@@ -66,9 +68,12 @@ function TarotSection() {
  * <EncyclopediaHome />
  * ```
  */
-export function EncyclopediaHome() {
+export function EncyclopediaHome({ className }: EncyclopediaHomeProps) {
   return (
-    <div data-testid="encyclopedia-home" className="container mx-auto space-y-12 px-4 py-8">
+    <div
+      data-testid="encyclopedia-home"
+      className={cn('container mx-auto space-y-12 px-4 py-8', className)}
+    >
       {/* Header */}
       <div className="text-center">
         <h1 className="mb-2 font-serif text-4xl">Enciclopedia Mística</h1>
