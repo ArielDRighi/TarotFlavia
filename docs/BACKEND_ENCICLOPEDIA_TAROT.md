@@ -3897,6 +3897,7 @@ describe('GuidesSection', () => {
 **Prioridad:** 🟡 MEDIA
 **Estimación:** 0.5 días
 **Dependencias:** TASK-318
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -3944,11 +3945,11 @@ export function ArticleDetailView({ article }: ArticleDetailViewProps) {
 
 #### ✅ Criterios de Aceptación
 
-- [ ] Renderiza el contenido Markdown correctamente (headings, listas, tablas)
-- [ ] Muestra cartas de tarot relacionadas si existen
-- [ ] Muestra artículos relacionados
-- [ ] CTA correcto según la categoría del artículo
-- [ ] Breadcrumb navega correctamente
+- [x] Renderiza el contenido Markdown correctamente (headings, listas, tablas)
+- [x] Muestra cartas de tarot relacionadas si existen
+- [x] Muestra artículos relacionados
+- [x] CTA correcto según la categoría del artículo
+- [x] Breadcrumb navega correctamente
 
 ---
 
@@ -3963,6 +3964,8 @@ describe('ArticleDetailView', () => {
   it('no debe mostrar CTA para signos zodiacales (no son guías)');
 });
 ```
+
+21 tests implementados y pasando. Instalado `remark-gfm`.
 
 ---
 

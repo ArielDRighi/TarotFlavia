@@ -67,3 +67,7 @@ export type { RelatedCardsProps } from './RelatedCards';
 // Widget components
 export { EncyclopediaInfoWidget } from './EncyclopediaInfoWidget';
 export type { EncyclopediaInfoWidgetProps } from './EncyclopediaInfoWidget';
+
+// Article detail components
+export { ArticleDetailView } from './ArticleDetailView';
+export type { ArticleDetailViewProps } from './ArticleDetailView';
