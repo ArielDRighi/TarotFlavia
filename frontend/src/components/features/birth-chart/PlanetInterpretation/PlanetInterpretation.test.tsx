@@ -171,6 +171,42 @@ describe('PlanetInterpretation', () => {
     });
   });
 
+  describe('Encyclopedia cross-links', () => {
+    it('nombre del planeta debe renderizar como link a la enciclopedia', () => {
+      render(<PlanetInterpretation interpretation={mockPlanetInterpretation} />);
+
+      // Sol → /enciclopedia/astrologia/planetas/sol
+      const solLink = screen.getByRole('link', { name: /Sol/i });
+      expect(solLink).toBeInTheDocument();
+    });
+
+    it('link del planeta debe apuntar a /enciclopedia/astrologia/planetas/{slug}', () => {
+      render(<PlanetInterpretation interpretation={mockPlanetInterpretation} />);
+
+      const solLink = screen.getByRole('link', { name: /Sol/i });
+      expect(solLink).toHaveAttribute('href', '/enciclopedia/astrologia/planetas/sol');
+    });
+
+    it('link del planeta no debe tener target="_blank"', () => {
+      render(<PlanetInterpretation interpretation={mockPlanetInterpretation} />);
+
+      const solLink = screen.getByRole('link', { name: /Sol/i });
+      expect(solLink).not.toHaveAttribute('target', '_blank');
+    });
+
+    it('debe renderizar link con slug correcto para Luna', () => {
+      const lunaInterpretation = {
+        ...mockPlanetInterpretation,
+        planet: Planet.MOON,
+        planetName: 'Luna',
+      };
+      render(<PlanetInterpretation interpretation={lunaInterpretation} />);
+
+      const lunaLink = screen.getByRole('link', { name: /Luna/i });
+      expect(lunaLink).toHaveAttribute('href', '/enciclopedia/astrologia/planetas/luna');
+    });
+  });
+
   describe('Casos extremos', () => {
     it('debe renderizar correctamente con solo datos mínimos', () => {
       const minimalInterpretation: PlanetInterpretationType = {

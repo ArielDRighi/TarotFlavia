@@ -2,6 +2,7 @@
 
 // 1. React & Next.js
 import { useState } from 'react';
+import Link from 'next/link';
 
 // 2. Icons
 import { Sun, Moon, Sunrise, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
@@ -21,7 +22,12 @@ import { Badge } from '@/components/ui/badge';
 // 6. Utils & types
 import { cn } from '@/lib/utils';
 import type { BigThreeInterpretation } from '@/types/birth-chart-interpretation.types';
-import { ZODIAC_SIGNS, ZodiacSign } from '@/types/birth-chart.enums';
+import {
+  ZODIAC_SIGNS,
+  ZodiacSign,
+  ZODIAC_SIGN_ENCYCLOPEDIA_SLUGS,
+} from '@/types/birth-chart.enums';
+import { ROUTES } from '@/lib/constants/routes';
 
 // Constants
 const BIG_THREE_CONFIG = {
@@ -120,7 +126,12 @@ export function BigThree({
                 <p className="text-muted-foreground text-sm">{config.label}</p>
                 <h3 className="flex items-center gap-2 text-2xl font-bold break-words">
                   <span className="text-3xl">{signMetadata?.symbol}</span>
-                  <span className="min-w-0">{itemData.signName}</span>
+                  <Link
+                    href={ROUTES.ENCICLOPEDIA_SIGNO(ZODIAC_SIGN_ENCYCLOPEDIA_SLUGS[itemData.sign])}
+                    className="min-w-0 hover:underline"
+                  >
+                    {itemData.signName}
+                  </Link>
                 </h3>
                 <p className="text-muted-foreground mt-1 text-sm">{config.title}</p>
               </div>

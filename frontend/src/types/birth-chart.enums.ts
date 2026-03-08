@@ -199,6 +199,42 @@ export const PLANETS: Record<Planet, { name: string; symbol: string; unicode: st
 };
 
 /**
+ * Mapeo de ZodiacSign enum → slug de enciclopedia (URL)
+ * Los slugs son en español para coincidir con las rutas del backend
+ */
+export const ZODIAC_SIGN_ENCYCLOPEDIA_SLUGS: Record<ZodiacSign, string> = {
+  [ZodiacSign.ARIES]: 'aries',
+  [ZodiacSign.TAURUS]: 'tauro',
+  [ZodiacSign.GEMINI]: 'geminis',
+  [ZodiacSign.CANCER]: 'cancer',
+  [ZodiacSign.LEO]: 'leo',
+  [ZodiacSign.VIRGO]: 'virgo',
+  [ZodiacSign.LIBRA]: 'libra',
+  [ZodiacSign.SCORPIO]: 'escorpio',
+  [ZodiacSign.SAGITTARIUS]: 'sagitario',
+  [ZodiacSign.CAPRICORN]: 'capricornio',
+  [ZodiacSign.AQUARIUS]: 'acuario',
+  [ZodiacSign.PISCES]: 'piscis',
+};
+
+/**
+ * Mapeo de Planet enum → slug de enciclopedia (URL)
+ * Los slugs son en español para coincidir con las rutas del backend
+ */
+export const PLANET_ENCYCLOPEDIA_SLUGS: Record<Planet, string> = {
+  [Planet.SUN]: 'sol',
+  [Planet.MOON]: 'luna',
+  [Planet.MERCURY]: 'mercurio',
+  [Planet.VENUS]: 'venus',
+  [Planet.MARS]: 'marte',
+  [Planet.JUPITER]: 'jupiter',
+  [Planet.SATURN]: 'saturno',
+  [Planet.URANUS]: 'urano',
+  [Planet.NEPTUNE]: 'neptuno',
+  [Planet.PLUTO]: 'pluton',
+};
+
+/**
  * Metadata de aspectos para UI
  * Alineado con AspectTypeMetadata del backend
  */

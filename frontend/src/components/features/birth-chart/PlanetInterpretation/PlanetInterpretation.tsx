@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -10,8 +11,9 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { cn } from '@/lib/utils';
-import { PLANETS, ASPECTS } from '@/types/birth-chart.enums';
+import { PLANETS, ASPECTS, PLANET_ENCYCLOPEDIA_SLUGS } from '@/types/birth-chart.enums';
 import type { PlanetInterpretation as PlanetInterpretationType } from '@/types/birth-chart-interpretation.types';
+import { ROUTES } from '@/lib/constants/routes';
 
 interface PlanetInterpretationProps {
   interpretation: PlanetInterpretationType;
@@ -58,7 +60,14 @@ export function PlanetInterpretation({
       <CardHeader>
         <div className="flex items-center gap-2">
           <span className="text-2xl">{planetMetadata.unicode}</span>
-          <h3 className="text-xl font-semibold">{planetName}</h3>
+          <h3 className="text-xl font-semibold">
+            <Link
+              href={ROUTES.ENCICLOPEDIA_PLANETA(PLANET_ENCYCLOPEDIA_SLUGS[planet])}
+              className="hover:underline"
+            >
+              {planetName}
+            </Link>
+          </h3>
         </div>
       </CardHeader>
 
