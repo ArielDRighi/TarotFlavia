@@ -27,6 +27,10 @@
 
 // Page content components
 export { EnciclopediaContent } from './EnciclopediaContent';
+export { EnciclopediaHubContent } from './EnciclopediaHubContent';
+export { ArticleDetailPageContent } from './ArticleDetailPageContent';
+export { ArticleListPageContent } from './ArticleListPageContent';
+export { GuiasContent } from './GuiasContent';
 
 // List components
 export { CardThumbnail } from './CardThumbnail';

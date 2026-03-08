@@ -56,6 +56,15 @@ const nextConfig: NextConfig = {
       ],
     },
   ],
+
+  // Redirects: legacy /enciclopedia/[slug] → /enciclopedia/tarot/[slug]
+  redirects: async () => [
+    {
+      source: '/enciclopedia/:slug((?!tarot|astrologia|guias|elementos).*)',
+      destination: '/enciclopedia/tarot/:slug',
+      permanent: true,
+    },
+  ],
 };
 
 export default nextConfig;
