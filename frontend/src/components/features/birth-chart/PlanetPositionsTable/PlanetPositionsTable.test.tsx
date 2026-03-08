@@ -333,6 +333,71 @@ describe('PlanetPositionsTable', () => {
     });
   });
 
+  describe('Encyclopedia cross-links', () => {
+    it('nombre de planeta debe renderizar como link a la enciclopedia', () => {
+      render(<PlanetPositionsTable planets={mockPlanets} />);
+
+      // Sol → /enciclopedia/astrologia/planetas/sol
+      const sunLink = screen.getByRole('link', { name: /Sol/i });
+      expect(sunLink).toBeInTheDocument();
+    });
+
+    it('link de planeta debe apuntar a /enciclopedia/astrologia/planetas/{slug}', () => {
+      render(<PlanetPositionsTable planets={mockPlanets} />);
+
+      const sunLink = screen.getByRole('link', { name: /Sol/i });
+      expect(sunLink).toHaveAttribute('href', '/enciclopedia/astrologia/planetas/sol');
+
+      const moonLink = screen.getByRole('link', { name: /Luna/i });
+      expect(moonLink).toHaveAttribute('href', '/enciclopedia/astrologia/planetas/luna');
+    });
+
+    it('nombre de signo en resultado debe renderizar como link a la enciclopedia', () => {
+      render(<PlanetPositionsTable planets={mockPlanets} />);
+
+      // Aries signo
+      const ariesLink = screen.getByRole('link', { name: /Aries/i });
+      expect(ariesLink).toBeInTheDocument();
+    });
+
+    it('link de signo debe apuntar a /enciclopedia/astrologia/signos/{slug}', () => {
+      render(<PlanetPositionsTable planets={mockPlanets} />);
+
+      // Aries → slug 'aries'
+      const ariesLink = screen.getByRole('link', { name: /Aries/i });
+      expect(ariesLink).toHaveAttribute('href', '/enciclopedia/astrologia/signos/aries');
+
+      // Tauro (ZodiacSign.TAURUS) → slug 'tauro'
+      const tauroLink = screen.getByRole('link', { name: /Tauro/i });
+      expect(tauroLink).toHaveAttribute('href', '/enciclopedia/astrologia/signos/tauro');
+    });
+
+    it('links no deben tener target="_blank"', () => {
+      render(<PlanetPositionsTable planets={mockPlanets} />);
+
+      const links = screen.getAllByRole('link');
+      links.forEach((link) => {
+        expect(link).not.toHaveAttribute('target', '_blank');
+      });
+    });
+
+    it('AC y MC no deben renderizar como links de planeta', () => {
+      render(
+        <PlanetPositionsTable
+          planets={mockPlanets}
+          ascendant={mockAscendant}
+          midheaven={mockMidheaven}
+        />
+      );
+
+      // AC and MC are special points, not encyclopedia articles
+      const links = screen.getAllByRole('link');
+      const linkTexts = links.map((l) => l.textContent);
+      expect(linkTexts).not.toContain('AC');
+      expect(linkTexts).not.toContain('MC');
+    });
+  });
+
   describe('Element colors', () => {
     it('should apply fire element color (red) for fire signs', () => {
       const firePlanet: PlanetPosition[] = [

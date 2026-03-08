@@ -11,6 +11,7 @@
 
 'use client';
 
+import Link from 'next/link';
 import { RotateCcw } from 'lucide-react';
 import {
   Table,
@@ -23,9 +24,17 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { PLANETS, ZODIAC_SIGNS, Planet } from '@/types/birth-chart.enums';
+import {
+  PLANETS,
+  ZODIAC_SIGNS,
+  Planet,
+  PLANET_ENCYCLOPEDIA_SLUGS,
+  ZODIAC_SIGN_ENCYCLOPEDIA_SLUGS,
+  ZodiacSign,
+} from '@/types/birth-chart.enums';
 import type { PlanetPosition } from '@/types/birth-chart.types';
 import { formatDegreeSexagesimal } from '../lib/degree.utils';
+import { ROUTES } from '@/lib/constants/routes';
 
 interface PlanetPositionsTableProps {
   planets: PlanetPosition[];
@@ -67,22 +76,25 @@ function getPlanetInfo(planet: Planet): { name: string; symbol: string } {
 }
 
 /**
- * Get zodiac sign display name and symbol
+ * Get zodiac sign display name, symbol, and encyclopedia slug
  */
-function getSignInfo(signName: string): { name: string; symbol: string } {
+function getSignInfo(signName: string): { name: string; symbol: string; slug: string | null } {
   // Find the zodiac sign by matching the signName
   const signEntry = Object.entries(ZODIAC_SIGNS).find(([, data]) => data.name === signName);
 
   if (signEntry) {
+    const signKey = signEntry[0] as ZodiacSign;
     return {
       name: signEntry[1].name,
       symbol: signEntry[1].symbol,
+      slug: ZODIAC_SIGN_ENCYCLOPEDIA_SLUGS[signKey],
     };
   }
 
   return {
     name: signName,
     symbol: '?',
+    slug: null,
   };
 }
 
@@ -177,7 +189,18 @@ export function PlanetPositionsTable({
                     <span className="text-lg" aria-label={`Símbolo de ${planetInfo.name}`}>
                       {planetInfo.symbol}
                     </span>
-                    <span className={compact ? 'text-sm' : ''}>{planetInfo.name}</span>
+                    {!position.displayName && PLANET_ENCYCLOPEDIA_SLUGS[position.planet] ? (
+                      <Link
+                        href={ROUTES.ENCICLOPEDIA_PLANETA(
+                          PLANET_ENCYCLOPEDIA_SLUGS[position.planet]
+                        )}
+                        className={cn('hover:underline', compact ? 'text-sm' : '')}
+                      >
+                        {planetInfo.name}
+                      </Link>
+                    ) : (
+                      <span className={compact ? 'text-sm' : ''}>{planetInfo.name}</span>
+                    )}
                   </div>
                 </TableCell>
 
@@ -190,11 +213,24 @@ export function PlanetPositionsTable({
                     >
                       {signInfo.symbol}
                     </span>
-                    <span
-                      className={cn(compact ? 'text-sm' : '', getElementColor(position.signName))}
-                    >
-                      {signInfo.name}
-                    </span>
+                    {signInfo.slug ? (
+                      <Link
+                        href={ROUTES.ENCICLOPEDIA_SIGNO(signInfo.slug)}
+                        className={cn(
+                          'hover:underline',
+                          compact ? 'text-sm' : '',
+                          getElementColor(position.signName)
+                        )}
+                      >
+                        {signInfo.name}
+                      </Link>
+                    ) : (
+                      <span
+                        className={cn(compact ? 'text-sm' : '', getElementColor(position.signName))}
+                      >
+                        {signInfo.name}
+                      </span>
+                    )}
                   </div>
                 </TableCell>
 

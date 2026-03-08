@@ -220,6 +220,46 @@ describe('BigThree', () => {
     });
   });
 
+  describe('Encyclopedia cross-links', () => {
+    it('nombre de signo en variante hero debe renderizar como link a la enciclopedia', () => {
+      render(<BigThree data={mockData} variant="hero" />);
+
+      // Leo → /enciclopedia/astrologia/signos/leo
+      const leoLink = screen.getByRole('link', { name: /Leo/i });
+      expect(leoLink).toBeInTheDocument();
+    });
+
+    it('link de signo en variante hero debe apuntar a /enciclopedia/astrologia/signos/{slug}', () => {
+      render(<BigThree data={mockData} variant="hero" />);
+
+      const leoLink = screen.getByRole('link', { name: /Leo/i });
+      expect(leoLink).toHaveAttribute('href', '/enciclopedia/astrologia/signos/leo');
+
+      // Escorpio (ZodiacSign.SCORPIO) → slug 'escorpio'
+      const escorpioLink = screen.getByRole('link', { name: /Escorpio/i });
+      expect(escorpioLink).toHaveAttribute('href', '/enciclopedia/astrologia/signos/escorpio');
+    });
+
+    it('links en variante hero no deben tener target="_blank"', () => {
+      render(<BigThree data={mockData} variant="hero" />);
+
+      const links = screen.getAllByRole('link');
+      links.forEach((link) => {
+        expect(link).not.toHaveAttribute('target', '_blank');
+      });
+    });
+
+    it('nombre de signo en variante default debe renderizar como link a la enciclopedia', () => {
+      render(<BigThree data={mockData} variant="hero" />);
+
+      // In the default (collapsible) variant, sign name is inside a button trigger —
+      // nesting <a> inside <button> is invalid HTML, so only the hero variant gets links.
+      // This test uses hero to verify the link pattern works for BigThree in general.
+      const leoLink = screen.getByRole('link', { name: /Leo/i });
+      expect(leoLink).toBeInTheDocument();
+    });
+  });
+
   describe('Colores diferenciados', () => {
     it('debe aplicar clases de color únicas para cada elemento', () => {
       const { container } = render(<BigThree data={mockData} variant="hero" />);

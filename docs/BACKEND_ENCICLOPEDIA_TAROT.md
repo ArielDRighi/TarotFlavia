@@ -4156,6 +4156,7 @@ describe('SEO metadata', () => {
 **Prioridad:** 🟢 BAJA
 **Estimación:** 0.5 días
 **Dependencias:** TASK-320
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -4196,10 +4197,10 @@ export function getPlanetEncyclopediaLink(planet: string): string {
 
 #### ✅ Criterios de Aceptación
 
-- [ ] Nombres de signos en resultados de Carta Astral son links con href correcto
-- [ ] Nombres de planetas en resultados son links con href correcto
-- [ ] Links abren en la misma pestaña (sin `target="_blank"`)
-- [ ] Links tienen estilo visual diferenciado (underline o color)
+- [x] Nombres de signos en resultados de Carta Astral son links con href correcto
+- [x] Nombres de planetas en resultados son links con href correcto
+- [x] Links abren en la misma pestaña (sin `target="_blank"`)
+- [x] Links tienen estilo visual diferenciado (underline o color)
 
 ---
 
@@ -4478,7 +4479,7 @@ Semana 4-5: Frontend páginas completas (Fase 2 - enciclopedia completa)
 - [x] TASK-319: ArticleDetailView con Markdown
 - [x] TASK-320: Nuevas rutas y restructura de /enciclopedia
 - [x] TASK-321: SEO metadata en páginas de artículos
-- [ ] TASK-322: Cross-links desde Carta Astral
+- [x] TASK-322: Cross-links desde Carta Astral
 
 ### Contenido
 
