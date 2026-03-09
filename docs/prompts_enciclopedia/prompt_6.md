@@ -1,24 +1,28 @@
-import { ArticleCategory } from '../enums/article.enums';
-import { ArticleSeedData } from './articles-seed.types';
+export enum ArticleCategory {
+GUIDE_NUMEROLOGY = 'GUIDE_NUMEROLOGY',
+GUIDE_PENDULUM = 'GUIDE_PENDULUM',
+GUIDE_ASTRAL_CHART = 'GUIDE_ASTRAL_CHART',
+GUIDE_RITUAL = 'GUIDE_RITUAL',
+GUIDE_HOROSCOPE = 'GUIDE_HOROSCOPE',
+GUIDE_CHINESE_HOROSCOPE = 'GUIDE_CHINESE_HOROSCOPE'
+}
 
-/**
- * 6 Guías de Actividades — datos seed para la Enciclopedia Mística
- *
- * Guías: Numerología, Péndulo, Carta Astral, Rituales, Horóscopo Occidental, Horóscopo Chino
- * Categorías: GUIDE_NUMEROLOGY, GUIDE_PENDULUM, GUIDE_BIRTH_CHART, GUIDE_RITUAL, GUIDE_HOROSCOPE, GUIDE_CHINESE
- */
-export const ACTIVITY_GUIDES: ArticleSeedData[] = [
-  // ─────────────────────────────────────────────────────────────────────────
-  // GUÍA DE NUMEROLOGÍA
-  // ─────────────────────────────────────────────────────────────────────────
-  {
-    slug: 'guia-numerologia',
-    nameEs: 'Guía de Numerología',
-    nameEn: 'Numerology Guide',
-    category: ArticleCategory.GUIDE_NUMEROLOGY,
-    snippet:
-      'Descubre el lenguaje oculto de los números. Aprende a calcular tu Camino de Vida, tu Número del Alma y comprende cómo la numerología pitagórica revela el propósito de tu destino y tus ciclos personales.',
-    content: `
+export const MYSTIC_GUIDES = [
+{
+slug: 'guia-numerologia',
+nameEs: 'Guía de Numerología',
+nameEn: 'Numerology Guide',
+category: ArticleCategory.GUIDE_NUMEROLOGY,
+snippet: 'Descubre el lenguaje oculto de los números. Aprende a calcular tu Camino de Vida, tu Número del Alma y comprende cómo la numerología pitagórica revela el propósito de tu destino y tus ciclos personales.',
+sortOrder: 1,
+relatedTarotCards: [1, 2, 11], // Loco, Mago, Rueda
+metadata: {
+difficulty: 'Beginner',
+estimatedReadingTimeMin: 15,
+tags: ['numerologia', 'pitagoras', 'camino de vida', 'autoconocimiento']
+},
+content: `
+
 # Guía Completa de Numerología: El Lenguaje Secreto del Universo
 
 La numerología es una de las ciencias metafísicas más antiguas y precisas que existen. Se basa en la premisa fundamental de que el universo entero es un sistema y, una vez desglosado, nos quedamos con los elementos básicos: los números. En esta guía, exploraremos cómo estos números te afectan directamente y cómo puedes utilizarlos para descifrar tu propósito de vida.
@@ -110,27 +114,22 @@ _Ejemplo: Para alguien nacido el 15 de Octubre, en el año 2026 (2+0+2+6 = 10 ->
 Dentro de tu Año Personal, cada mes tiene un tono. Se calcula sumando el número de tu Año Personal al número del mes calendario actual (ej. Marzo = 3). Un mes personal 1 es ideal para iniciar, mientras que un 9 es para soltar.
 
 La numerología no dicta un destino fatalista; más bien, te entrega el mapa topográfico de tu psique para que puedas caminar por tu vida con total maestría.
-`,
-    metadata: {
-      difficulty: 'Beginner',
-      estimatedReadingTimeMin: 15,
-      tags: ['numerologia', 'pitagoras', 'camino de vida', 'autoconocimiento'],
-    },
-    relatedTarotCards: [1, 2, 11],
-    sortOrder: 1,
-  },
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // GUÍA DEL PÉNDULO
-  // ─────────────────────────────────────────────────────────────────────────
+`  },
   {
     slug: 'guia-pendulo',
     nameEs: 'Guía del Péndulo',
     nameEn: 'Pendulum Guide',
     category: ArticleCategory.GUIDE_PENDULUM,
-    snippet:
-      'Aprende el antiguo arte de la radiestesia. Descubre cómo elegir, programar y limpiar tu péndulo para obtener respuestas claras de tu subconsciente y guías espirituales.',
-    content: `
+    snippet: 'Aprende el antiguo arte de la radiestesia. Descubre cómo elegir, programar y limpiar tu péndulo para obtener respuestas claras de tu subconsciente y guías espirituales.',
+    sortOrder: 2,
+    relatedTarotCards: [3, 9], // Sacerdotisa, Ermitaño
+    metadata: {
+      difficulty: 'Beginner',
+      estimatedReadingTimeMin: 10,
+      tags: ['radiestesia', 'pendulo', 'adivinacion', 'subconsciente']
+    },
+    content:`
+
 # Guía Práctica del Péndulo: Conectando con tu Verdad Interior
 
 El péndulo es una de las herramientas de adivinación (radiestesia) más simples pero poderosas que existen. Actúa como una extensión de tu propio sistema nervioso y subconsciente, amplificando los micro-movimientos musculares ideomotores para darte respuestas claras a nivel consciente.
@@ -173,27 +172,22 @@ La precisión de la respuesta depende totalmente de cómo formules la pregunta.
 - **Preguntas efectivas:** Precisas, directas y limitadas. (Ej: _"¿Es para mi mayor bien espiritual renunciar a mi empleo actual este mes?"_).
 
 Mantén tu mente neutral mientras preguntas. Si deseas desesperadamente que la respuesta sea "Sí", tus micro-movimientos musculares forzarán al péndulo a darte esa respuesta, anulando el propósito de la herramienta. Respira, céntrate y permite que la verdad fluya.
-`,
-    metadata: {
-      difficulty: 'Beginner',
-      estimatedReadingTimeMin: 10,
-      tags: ['radiestesia', 'pendulo', 'adivinacion', 'subconsciente'],
-    },
-    relatedTarotCards: [3, 9],
-    sortOrder: 2,
-  },
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // GUÍA DE CARTA ASTRAL
-  // ─────────────────────────────────────────────────────────────────────────
+`  },
   {
     slug: 'guia-carta-astral',
     nameEs: 'Guía de Carta Astral',
     nameEn: 'Birth Chart Guide',
-    category: ArticleCategory.GUIDE_BIRTH_CHART,
-    snippet:
-      'Entiende el mapa del cielo en el momento exacto de tu nacimiento. Domina la interpretación del Sol, la Luna, el Ascendente, las casas astrológicas y los planetas para revelar tu diseño cósmico.',
-    content: `
+    category: ArticleCategory.GUIDE_ASTRAL_CHART,
+    snippet: 'Entiende el mapa del cielo en el momento exacto de tu nacimiento. Domina la interpretación del Sol, la Luna, el Ascendente, las casas astrológicas y los planetas para revelar tu diseño cósmico.',
+    sortOrder: 3,
+    relatedTarotCards: [18, 10, 22], // Estrella, Rueda, Mundo
+    metadata: {
+      difficulty: 'Intermediate',
+      estimatedReadingTimeMin: 20,
+      tags: ['astrologia', 'carta astral', 'zodiaco', 'ascendente', 'casas']
+    },
+    content:`
+
 # Guía de Carta Astral: Leyendo el Mapa de tu Alma
 
 La Carta Astral (o Carta Natal) es una captura de pantalla del cielo astronómico en el minuto exacto y desde el lugar geográfico preciso en el que tomaste tu primera respiración. No es una sentencia determinista, sino un mapa de semillas: muestra tu potencial, tus desafíos kármicos y las energías que tienes a tu disposición.
@@ -248,27 +242,22 @@ Los planetas "hablan" entre sí mediante ángulos.
 - **Sextil (60°):** Oportunidades latentes que requieren esfuerzo para ser activadas.
 
 Leer la carta astral requiere sintetizar todas estas capas. No eres solo tu Sol; eres una sinfonía cósmica irrepetible.
-`,
-    metadata: {
-      difficulty: 'Intermediate',
-      estimatedReadingTimeMin: 20,
-      tags: ['astrologia', 'carta astral', 'zodiaco', 'ascendente', 'casas'],
-    },
-    relatedTarotCards: [18, 10, 22],
-    sortOrder: 3,
-  },
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // GUÍA DE RITUALES
-  // ─────────────────────────────────────────────────────────────────────────
+`  },
   {
-    slug: 'guia-rituales',
+    slug: 'guia-ritual',
     nameEs: 'Guía de Rituales',
-    nameEn: 'Rituals Guide',
+    nameEn: 'Ritual Guide',
     category: ArticleCategory.GUIDE_RITUAL,
-    snippet:
-      'Una introducción práctica a la magia natural. Descubre cómo usar las fases lunares, la limpieza energética y la intención focalizada para manifestar cambios reales en tu vida.',
-    content: `
+    snippet: 'Una introducción práctica a la magia natural. Descubre cómo usar las fases lunares, la limpieza energética y la intención focalizada para manifestar cambios reales en tu vida.',
+    sortOrder: 4,
+    relatedTarotCards: [2, 3, 14], // Mago, Sacerdotisa, Templanza
+    metadata: {
+      difficulty: 'Beginner',
+      estimatedReadingTimeMin: 12,
+      tags: ['rituales', 'magia', 'fases lunares', 'manifestacion', 'velas']
+    },
+    content:`
+
 # Guía de Rituales: El Arte de la Manifestación Consciente
 
 Un ritual no es más que una intención empaquetada en un acto simbólico. La "magia" no ocurre en la vela o en el incienso; ocurre en la alteración de tu estado de conciencia. Las herramientas físicas simplemente sirven como anclas para enfocar tu poder mental y emocional hacia un objetivo específico.
@@ -305,27 +294,22 @@ La Luna rige las aguas de la Tierra y, por correspondencia esotérica, nuestro c
 4.  **Agradecimiento y Cierre:** Da las gracias asumiendo que el pedido ya fue escuchado. Apaga la vela (preferiblemente sin soplar, usando un apagavelas o tus dedos húmedos para no dispersar la energía).
 
 Recuerda: El ritual más elaborado no funcionará si, al terminarlo, tomas acciones en el mundo material que contradigan tu petición mágica.
-`,
-    metadata: {
-      difficulty: 'Beginner',
-      estimatedReadingTimeMin: 12,
-      tags: ['rituales', 'magia', 'fases lunares', 'manifestacion', 'velas'],
-    },
-    relatedTarotCards: [2, 3, 14],
-    sortOrder: 4,
-  },
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // GUÍA DE HORÓSCOPO OCCIDENTAL
-  // ─────────────────────────────────────────────────────────────────────────
+`  },
   {
-    slug: 'guia-horoscopo-occidental',
+    slug: 'guia-horoscopo',
     nameEs: 'Guía del Horóscopo Occidental',
     nameEn: 'Western Horoscope Guide',
     category: ArticleCategory.GUIDE_HOROSCOPE,
-    snippet:
-      'Comprende los 12 signos zodiacales tropicales. Explora cómo los elementos y modalidades conforman las personalidades y descubre cómo los tránsitos diarios afectan tu energía.',
-    content: `
+    snippet: 'Comprende los 12 signos zodiacales tropicales. Explora cómo los elementos y modalidades conforman las personalidades y descubre cómo los tránsitos diarios afectan tu energía.',
+    sortOrder: 5,
+    relatedTarotCards: [11, 22], // Rueda, Mundo
+    metadata: {
+      difficulty: 'Beginner',
+      estimatedReadingTimeMin: 15,
+      tags: ['horoscopo', 'zodiaco occidental', 'signos', 'astrologia']
+    },
+    content:`
+
 # Guía del Horóscopo Occidental: Los Arquetipos Zodiacales
 
 La Astrología Occidental se basa en el zodíaco Tropical, el cual no está vinculado a las constelaciones exactas de hoy en día, sino a las estaciones de la Tierra. Comienza con el equinoccio de primavera en el hemisferio norte (el grado 0 de Aries) y divide la eclíptica en 12 secciones iguales de 30 grados cada una.
@@ -368,27 +352,22 @@ Como regla general, los signos del mismo elemento fluyen perfectamente. Fuego se
 Los mayores roces (y también la mayor atracción sexual para el crecimiento) suelen ocurrir en signos que forman "cuadraturas" (ej. Aries con Cáncer, o Tauro con Acuario).
 
 Entender tu horóscopo no es encasillarte, es obtener el manual de instrucciones de tu propio arquetipo.
-`,
-    metadata: {
-      difficulty: 'Beginner',
-      estimatedReadingTimeMin: 15,
-      tags: ['horoscopo', 'zodiaco occidental', 'signos', 'astrologia'],
-    },
-    relatedTarotCards: [11, 22],
-    sortOrder: 5,
-  },
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // GUÍA DE HORÓSCOPO CHINO
-  // ─────────────────────────────────────────────────────────────────────────
+`  },
   {
     slug: 'guia-horoscopo-chino',
     nameEs: 'Guía del Horóscopo Chino',
     nameEn: 'Chinese Horoscope Guide',
-    category: ArticleCategory.GUIDE_CHINESE,
-    snippet:
-      'Adéntrate en el sistema astrológico oriental. Conoce tu animal regente y descubre cómo interactúan los Cinco Elementos (Wu Xing) en ciclos de 60 años para moldear tu destino.',
-    content: `
+    category: ArticleCategory.GUIDE_CHINESE_HOROSCOPE,
+    snippet: 'Adéntrate en el sistema astrológico oriental. Conoce tu animal regente y descubre cómo interactúan los Cinco Elementos (Wu Xing) en ciclos de 60 años para moldear tu destino.',
+    sortOrder: 6,
+    relatedTarotCards: [10], // Rueda
+    metadata: {
+      difficulty: 'Beginner',
+      estimatedReadingTimeMin: 12,
+      tags: ['horoscopo chino', 'astrologia oriental', 'wu xing', 'signos chinos']
+    },
+    content:`
+
 # Guía del Horóscopo Chino: El Ciclo de los Animales y los Elementos
 
 A diferencia del zodíaco occidental que se basa en el movimiento del sol a través de las estaciones (mensual), la astrología china se basa en un ciclo lunar tradicional, donde cada signo rige un año completo.
@@ -432,18 +411,6 @@ En la astrología china, los animales forman diferentes geometrías.
 - **Choques (Oposiciones):** Los animales que están directamente opuestos en la rueda suelen tener fricciones severas (ej. Caballo y Rata, o Tigre y Mono).
 
 Comprender el pilar de tu año (tu animal y elemento) te brinda una profunda visión estratégica sobre tus ciclos de prosperidad y desafío según el antiguo pensamiento oriental.
-`,
-    metadata: {
-      difficulty: 'Beginner',
-      estimatedReadingTimeMin: 12,
-      tags: [
-        'horoscopo chino',
-        'astrologia oriental',
-        'wu xing',
-        'signos chinos',
-      ],
-    },
-    relatedTarotCards: [10],
-    sortOrder: 6,
-  },
+`
+}
 ];

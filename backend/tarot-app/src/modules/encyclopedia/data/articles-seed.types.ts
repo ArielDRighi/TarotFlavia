@@ -21,5 +21,7 @@ export interface ArticleSeedData {
    *  (arcano 0 = ID 1, arcano I = ID 2, ..., arcano XXI = ID 22).
    */
   relatedTarotCards: number[] | null;
+  /** Slugs de artículos relacionados (referencia a EncyclopediaArticle.slug) */
+  relatedArticles?: string[] | null;
   sortOrder: number;
 }

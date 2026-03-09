@@ -30,6 +30,8 @@ import { seedFlaviaIAConfig } from '../src/database/seeds/flavia-ia-config.seede
 import { seedPlans } from '../src/database/seeds/plans.seeder';
 import { seedRituals } from '../src/database/seeds/rituals.seeder';
 import { seedPendulumInterpretations } from '../src/database/seeds/pendulum-interpretations.seeder';
+import { seedEncyclopediaTarotCards } from '../src/database/seeds/encyclopedia-tarot-cards.seeder';
+import { seedEncyclopediaArticles } from '../src/database/seeds/encyclopedia-articles.seeder';
 
 interface SeederStep {
   name: string;
@@ -174,6 +176,20 @@ async function bootstrap() {
         dependencies: [],
         execute: async () => {
           await seedPendulumInterpretations(dataSource);
+        },
+      },
+      {
+        name: 'Encyclopedia Tarot Cards',
+        dependencies: [],
+        execute: async () => {
+          await seedEncyclopediaTarotCards(dataSource);
+        },
+      },
+      {
+        name: 'Encyclopedia Articles',
+        dependencies: [],
+        execute: async () => {
+          await seedEncyclopediaArticles(dataSource);
         },
       },
     ];

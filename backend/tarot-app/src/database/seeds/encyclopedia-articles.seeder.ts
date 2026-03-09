@@ -52,7 +52,7 @@ export async function seedEncyclopediaArticles(
       snippet: articleData.snippet,
       content: articleData.content,
       metadata: articleData.metadata ?? null,
-      relatedArticles: null,
+      relatedArticles: articleData.relatedArticles ?? null,
       relatedTarotCards: articleData.relatedTarotCards ?? null,
       imageUrl: null,
       sortOrder: articleData.sortOrder,
