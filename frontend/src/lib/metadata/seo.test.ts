@@ -75,12 +75,12 @@ describe('SEO Metadata Configuration', () => {
 
   describe('ritualMetadata', () => {
     it('should have ritual-specific title and description', () => {
-      expect(ritualMetadata.title).toBe('Nueva Lectura de Tarot');
+      expect(ritualMetadata.title).toBe('Tirada de Tarot');
       expect(ritualMetadata.description).toContain('lectura de tarot');
     });
 
     it('should have OpenGraph metadata', () => {
-      expect(ritualMetadata.openGraph?.title).toContain('Nueva Lectura');
+      expect(ritualMetadata.openGraph?.title).toContain('Tirada de Tarot');
     });
   });
 
@@ -96,11 +96,11 @@ describe('SEO Metadata Configuration', () => {
 
   describe('cartaDelDiaMetadata', () => {
     it('should have daily card title', () => {
-      expect(cartaDelDiaMetadata.title).toBe('Carta del Día');
+      expect(cartaDelDiaMetadata.title).toBe('Tarot del Día');
     });
 
     it('should have OpenGraph metadata', () => {
-      expect(cartaDelDiaMetadata.openGraph?.title).toContain('Carta del Día');
+      expect(cartaDelDiaMetadata.openGraph?.title).toContain('Tarot del Día');
     });
   });
 

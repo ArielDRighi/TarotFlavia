@@ -118,11 +118,11 @@ export const registerMetadata: Metadata = {
  * Ritual Page Metadata
  */
 export const ritualMetadata: Metadata = {
-  title: 'Nueva Lectura de Tarot',
+  title: 'Tirada de Tarot',
   description:
     'Inicia una nueva lectura de tarot. Selecciona tu categoría y descubre las respuestas que buscas.',
   openGraph: {
-    title: `Nueva Lectura | ${SITE_NAME}`,
+    title: `Tirada de Tarot | ${SITE_NAME}`,
     description: 'Descubre las respuestas que buscas con una lectura de tarot personalizada',
     images: [DEFAULT_OG_IMAGE],
   },
@@ -145,10 +145,10 @@ export const historialMetadata: Metadata = {
  * Daily Card Page Metadata
  */
 export const cartaDelDiaMetadata: Metadata = {
-  title: 'Carta del Día',
+  title: 'Tarot del Día',
   description: 'Descubre tu carta del día y recibe orientación espiritual para el día de hoy.',
   openGraph: {
-    title: `Carta del Día | ${SITE_NAME}`,
+    title: `Tarot del Día | ${SITE_NAME}`,
     description: 'Descubre tu carta del día y recibe orientación espiritual',
     images: [DEFAULT_OG_IMAGE],
   },

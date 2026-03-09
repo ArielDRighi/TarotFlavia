@@ -4,10 +4,80 @@ import { ArticleSeedData } from './articles-seed.types';
 /**
  * 6 Guías de Actividades — datos seed para la Enciclopedia Mística
  *
- * Guías: Numerología, Péndulo, Carta Astral, Rituales, Horóscopo Occidental, Horóscopo Chino
- * Categorías: GUIDE_NUMEROLOGY, GUIDE_PENDULUM, GUIDE_BIRTH_CHART, GUIDE_RITUAL, GUIDE_HOROSCOPE, GUIDE_CHINESE
+ * Guías: Tarot, Numerología, Péndulo, Carta Astral, Rituales, Horóscopo Occidental, Horóscopo Chino
+ * Categorías: GUIDE_TAROT, GUIDE_NUMEROLOGY, GUIDE_PENDULUM, GUIDE_BIRTH_CHART, GUIDE_RITUAL, GUIDE_HOROSCOPE, GUIDE_CHINESE
  */
 export const ACTIVITY_GUIDES: ArticleSeedData[] = [
+  // ─────────────────────────────────────────────────────────────────────────
+  // GUÍA DEL TAROT
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    slug: 'guia-tarot',
+    nameEs: 'Guía del Tarot',
+    nameEn: 'Tarot Guide',
+    category: ArticleCategory.GUIDE_TAROT,
+    snippet:
+      'Descubre el antiguo arte adivinatorio del Tarot. Conoce los 78 arcanos, los significados de los Arcanos Mayores y Menores, y aprende cómo una tirada de cartas puede revelar mensajes sobre tu camino de vida.',
+    content: `
+# Guía del Tarot: El Espejo del Alma
+
+El Tarot es un sistema simbólico de 78 cartas que se ha utilizado durante siglos como herramienta de autoconocimiento, meditación y orientación. Sus orígenes se remontan al siglo XV en Europa, aunque muchos estudiosos creen que sus raíces simbólicas son mucho más antiguas, vinculadas a tradiciones herméticas, cabalísticas y alquímicas.
+
+## 1. ¿Qué es el Tarot?
+
+El Tarot es mucho más que un mazo de cartas: es un mapa simbólico del viaje humano. Cada carta contiene arquetipos universales que resuenan con las experiencias, emociones y desafíos que todos enfrentamos a lo largo de la vida. No predice el futuro de forma determinista, sino que ilumina patrones, tendencias y posibilidades.
+
+## 2. Los 78 Arcanos
+
+El Tarot se divide en dos grandes grupos:
+
+### Arcanos Mayores (22 cartas)
+
+Los Arcanos Mayores representan arquetipos universales y grandes lecciones de vida. Desde **El Loco** (0), que simboliza el inicio de un viaje sin ataduras, hasta **El Mundo** (XXI), que representa la culminación y la integración, cada carta narra una etapa del camino del alma conocido como *El Viaje del Héroe*.
+
+Estas 22 cartas abordan temas profundos: la voluntad (El Mago), la intuición (La Sacerdotisa), el amor (Los Enamorados), la transformación (La Muerte), la revelación (La Torre) y la renovación (El Juicio), entre otros.
+
+### Arcanos Menores (56 cartas)
+
+Los Arcanos Menores reflejan situaciones cotidianas y se organizan en cuatro palos:
+
+- **Bastos (Fuego):** Creatividad, pasión, acción e inspiración.
+- **Copas (Agua):** Emociones, relaciones, intuición y mundo interior.
+- **Espadas (Aire):** Pensamiento, comunicación, conflictos y verdad.
+- **Pentáculos (Tierra):** Materia, trabajo, finanzas y bienestar físico.
+
+Cada palo contiene cartas numeradas del As al 10 y cuatro cartas de la corte (Sota, Caballero, Reina y Rey), que representan personas o aspectos de la personalidad.
+
+## 3. ¿Cómo funciona una lectura?
+
+Una lectura de Tarot utiliza el simbolismo de las cartas para iluminar patrones y posibilidades en la vida del consultante.
+
+### Tipos de tiradas
+
+- **Carta del Día:** Una sola carta que ofrece un mensaje o reflexión para la jornada.
+- **Tirada de tres cartas:** Pasado, presente y futuro, o situación, acción y resultado.
+- **Cruz Celta:** Una tirada de 10 cartas que ofrece un análisis profundo de una situación.
+
+### Cartas al derecho e invertidas
+
+Cada carta puede aparecer al derecho o invertida, lo que modifica o matiza su significado. Una carta invertida no es necesariamente negativa; puede indicar energía bloqueada, un aspecto interno del tema, o una lección pendiente.
+
+## 4. El Tarot como herramienta de autoconocimiento
+
+Más allá de la adivinación, el Tarot moderno se utiliza ampliamente como herramienta terapéutica y de desarrollo personal. Los arquetipos de los Arcanos Mayores conectan con el inconsciente colectivo descrito por Carl Jung, facilitando la introspección y el crecimiento personal.
+
+## 5. Historia breve del Tarot
+
+Los primeros mazos documentados aparecieron en la Italia del siglo XV como juegos de cartas aristocráticos (*carte da trionfi*). Con el tiempo, ocultistas como Antoine Court de Gébelin, Éliphas Lévi y Arthur Edward Waite transformaron el Tarot en una herramienta esotérica. El mazo **Rider-Waite-Smith** (1909), ilustrado por Pamela Colman Smith, se convirtió en el estándar moderno y sigue siendo el más utilizado en el mundo.
+    `.trim(),
+    sortOrder: 0,
+    metadata: {
+      relatedTools: ['carta-del-dia', 'tirada-de-tarot'],
+      tradition: 'Hermética / Europea',
+      cardCount: 78,
+    },
+    relatedTarotCards: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+  },
   // ─────────────────────────────────────────────────────────────────────────
   // GUÍA DE NUMEROLOGÍA
   // ─────────────────────────────────────────────────────────────────────────

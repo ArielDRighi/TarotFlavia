@@ -8,7 +8,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { NumerologyIntro, NumerologyProfile } from '@/components/features/numerology';
-import { EncyclopediaInfoWidget } from '@/components/features/encyclopedia';
 import { useAuthStore } from '@/stores/authStore';
 import { useCalculateNumerology, useMyNumerologyProfile } from '@/hooks/api/useNumerology';
 import { ROUTES } from '@/lib/constants/routes';
@@ -78,12 +77,6 @@ export function NumerologyPage() {
         </div>
 
         <NumerologyIntro className="mb-8" />
-
-        <EncyclopediaInfoWidget
-          slug="guia-numerologia"
-          href={ROUTES.ENCICLOPEDIA_GUIA('guia-numerologia')}
-          className="mb-6"
-        />
 
         {/* Alert for incomplete profile */}
         {hasIncompleteProfile && (

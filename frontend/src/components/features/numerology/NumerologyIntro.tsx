@@ -1,7 +1,12 @@
 'use client';
 
+import Link from 'next/link';
+import { BookOpen } from 'lucide-react';
+
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { ROUTES } from '@/lib/constants/routes';
 
 interface Props {
   className?: string;
@@ -103,6 +108,13 @@ export function NumerologyIntro({ className }: Props) {
             no se reducen a un solo dígito.
           </p>
         </div>
+
+        <Button asChild variant="outline" size="sm">
+          <Link href={ROUTES.ENCICLOPEDIA_GUIA('guia-numerologia')}>
+            <BookOpen className="mr-2 h-4 w-4" />
+            Ver más en la Enciclopedia
+          </Link>
+        </Button>
       </CardContent>
     </Card>
   );

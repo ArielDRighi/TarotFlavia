@@ -64,6 +64,13 @@ vi.mock('@/hooks/api/useUserCapabilities', () => ({
   useInvalidateCapabilities: () => mockUseInvalidateCapabilities(),
 }));
 
+// Mock EncyclopediaInfoWidget
+vi.mock('@/components/features/encyclopedia', () => ({
+  EncyclopediaInfoWidget: ({ slug }: { slug: string }) => (
+    <div data-testid="encyclopedia-info-widget" data-slug={slug} />
+  ),
+}));
+
 // Mock toast
 vi.mock('@/hooks/utils/useToast', () => ({
   toast: {
@@ -436,7 +443,7 @@ describe('CartaDelDiaPage', () => {
 
       renderWithProviders(<CartaDelDiaPage />);
 
-      expect(screen.getByRole('heading', { level: 1, name: /carta del día/i })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { level: 1, name: /tarot del día/i })).toBeInTheDocument();
     });
 
     it('should have proper ARIA labels on interactive elements', () => {

@@ -171,6 +171,12 @@ export const ARTICLE_RELATIONS: Record<string, string[]> = {
   'modalidad-mutable': ['geminis', 'virgo', 'sagitario', 'piscis'],
 
   // --- GUÍAS PRÁCTICAS Y ESOTÉRICAS (Interconexiones temáticas) ---
+  'guia-tarot': [
+    'guia-carta-astral',
+    'guia-numerologia',
+    'guia-rituales',
+    'guia-horoscopo-occidental',
+  ],
   'guia-numerologia': [
     'guia-carta-astral',
     'sol',
@@ -179,8 +185,20 @@ export const ARTICLE_RELATIONS: Record<string, string[]> = {
     'guia-horoscopo-occidental',
   ],
   'guia-pendulo': ['guia-rituales', 'elemento-agua', 'luna', 'neptuno'],
-  'guia-carta-astral': ['sol', 'luna', 'casa-1', 'guia-horoscopo-occidental'],
-  'guia-rituales': ['luna', 'elemento-fuego', 'elemento-agua', 'guia-pendulo'],
+  'guia-carta-astral': [
+    'sol',
+    'luna',
+    'casa-1',
+    'guia-horoscopo-occidental',
+    'guia-tarot',
+  ],
+  'guia-rituales': [
+    'luna',
+    'elemento-fuego',
+    'elemento-agua',
+    'guia-pendulo',
+    'guia-tarot',
+  ],
   'guia-horoscopo-occidental': [
     'sol',
     'guia-carta-astral',

@@ -15,9 +15,9 @@ import { ArcanaType } from './encyclopedia.types';
 
 describe('encyclopedia article types', () => {
   describe('ArticleCategory enum', () => {
-    it('should have all 11 article categories', () => {
+    it('should have all 12 article categories', () => {
       const categories = Object.values(ArticleCategory);
-      expect(categories).toHaveLength(11);
+      expect(categories).toHaveLength(12);
     });
 
     it('should have correct category values', () => {
@@ -32,6 +32,7 @@ describe('encyclopedia article types', () => {
       expect(ArticleCategory.GUIDE_RITUAL).toBe('guide_ritual');
       expect(ArticleCategory.GUIDE_HOROSCOPE).toBe('guide_horoscope');
       expect(ArticleCategory.GUIDE_CHINESE).toBe('guide_chinese');
+      expect(ArticleCategory.GUIDE_TAROT).toBe('guide_tarot');
     });
   });
 
@@ -198,7 +199,7 @@ describe('encyclopedia article types', () => {
   });
 
   describe('ARTICLE_CATEGORY_LABELS constant', () => {
-    it('should have labels for all 11 categories', () => {
+    it('should have labels for all 12 categories', () => {
       const categories = Object.values(ArticleCategory);
       categories.forEach((category) => {
         expect(ARTICLE_CATEGORY_LABELS[category]).toBeDefined();
@@ -221,6 +222,7 @@ describe('encyclopedia article types', () => {
       expect(ARTICLE_CATEGORY_LABELS[ArticleCategory.GUIDE_CHINESE]).toBe(
         'Guía del Horóscopo Chino'
       );
+      expect(ARTICLE_CATEGORY_LABELS[ArticleCategory.GUIDE_TAROT]).toBe('Guía del Tarot');
     });
   });
 });

@@ -32,6 +32,12 @@ vi.mock('@/components/features/readings/ReadingLimitReached', () => ({
   ReadingLimitReached: () => <div data-testid="limit-reached-modal">Reading Limit Reached</div>,
 }));
 
+vi.mock('@/components/features/encyclopedia', () => ({
+  EncyclopediaInfoWidget: ({ slug }: { slug: string }) => (
+    <div data-testid="encyclopedia-info-widget" data-slug={slug} />
+  ),
+}));
+
 describe('RitualPage', () => {
   const mockPush = vi.fn();
   const mockReplace = vi.fn();
@@ -73,7 +79,7 @@ describe('RitualPage', () => {
   });
 
   describe('Loading States', () => {
-    it('should return null when user is null', () => {
+    it('should not show category selector or limit modal when user is null', () => {
       (useAuth as Mock).mockReturnValue({
         user: null,
         isAuthenticated: false,
@@ -85,12 +91,13 @@ describe('RitualPage', () => {
         isLoading: false,
       });
 
-      const { container } = render(<RitualPage />);
+      render(<RitualPage />);
 
-      expect(container.firstChild).toBeNull();
+      expect(screen.queryByTestId('category-selector')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('limit-reached-modal')).not.toBeInTheDocument();
     });
 
-    it('should return null when capabilities are loading', () => {
+    it('should not show category selector or limit modal when capabilities are loading', () => {
       (useAuth as Mock).mockReturnValue({
         user: { id: 1, plan: 'premium' },
         isAuthenticated: true,
@@ -102,9 +109,10 @@ describe('RitualPage', () => {
         isLoading: true,
       });
 
-      const { container } = render(<RitualPage />);
+      render(<RitualPage />);
 
-      expect(container.firstChild).toBeNull();
+      expect(screen.queryByTestId('category-selector')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('limit-reached-modal')).not.toBeInTheDocument();
     });
   });
 

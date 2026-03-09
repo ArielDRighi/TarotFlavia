@@ -86,6 +86,7 @@ describe('EncyclopediaArticle Entity', () => {
         ArticleCategory.GUIDE_RITUAL,
         ArticleCategory.GUIDE_HOROSCOPE,
         ArticleCategory.GUIDE_CHINESE,
+        ArticleCategory.GUIDE_TAROT,
       ];
 
       categories.forEach((cat) => {
@@ -94,9 +95,9 @@ describe('EncyclopediaArticle Entity', () => {
       });
     });
 
-    it('ArticleCategory debe tener exactamente 11 categorías', () => {
+    it('ArticleCategory debe tener exactamente 12 categorías', () => {
       const categoryValues = Object.values(ArticleCategory);
-      expect(categoryValues).toHaveLength(11);
+      expect(categoryValues).toHaveLength(12);
     });
 
     it('ArticleCategory debe tener los valores correctos', () => {
@@ -111,6 +112,7 @@ describe('EncyclopediaArticle Entity', () => {
       expect(ArticleCategory.GUIDE_RITUAL).toBe('guide_ritual');
       expect(ArticleCategory.GUIDE_HOROSCOPE).toBe('guide_horoscope');
       expect(ArticleCategory.GUIDE_CHINESE).toBe('guide_chinese');
+      expect(ArticleCategory.GUIDE_TAROT).toBe('guide_tarot');
     });
   });
 

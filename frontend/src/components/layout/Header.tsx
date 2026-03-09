@@ -45,7 +45,7 @@ export function Header() {
             href={ROUTES.CARTA_DEL_DIA}
             className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
           >
-            Carta del Día
+            Tarot del Día
           </Link>
           <Link
             href={ROUTES.HOROSCOPO}
@@ -95,7 +95,7 @@ export function Header() {
                 href="/ritual"
                 className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
               >
-                Nueva Lectura
+                Tirada de Tarot
               </Link>
               {/* "Explorar" link hidden in MVP - single tarotista (Flavia) */}
               {/* TODO: Enable when multiple tarotistas are supported */}
