@@ -17,15 +17,15 @@ export default function CartaDelDiaPage() {
           Tarot del Día
         </h1>
 
-        {/* Main Content - All logic delegated to feature component */}
-        <DailyCardExperience />
-
         {/* Encyclopedia Widget */}
         <EncyclopediaInfoWidget
           slug="guia-tarot"
           href={ROUTES.ENCICLOPEDIA_GUIA('guia-tarot')}
-          className="mt-8 w-full"
+          className="mb-8 w-full"
         />
+
+        {/* Main Content - All logic delegated to feature component */}
+        <DailyCardExperience />
       </div>
     </div>
   );
