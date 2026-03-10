@@ -28,6 +28,7 @@ const CATEGORY_LABELS: Record<ArticleCategory, string> = {
   [ArticleCategory.GUIDE_RITUAL]: 'Guía de Rituales',
   [ArticleCategory.GUIDE_HOROSCOPE]: 'Guía de Horóscopo',
   [ArticleCategory.GUIDE_CHINESE]: 'Astrología China',
+  [ArticleCategory.GUIDE_TAROT]: 'Guía del Tarot',
 };
 
 /** DTO que representa una categoría de artículo con su label en español */

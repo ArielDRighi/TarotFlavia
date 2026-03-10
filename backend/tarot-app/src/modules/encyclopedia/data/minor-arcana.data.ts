@@ -43,7 +43,7 @@ const WANDS_CARDS: CardSeedData[] = [
         'impotencia',
       ],
     },
-    imageUrl: '/images/tarot/minor/wands/01-ace-of-wands.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/11/Wands01.jpg',
   },
   {
     slug: 'two-of-wands',
@@ -76,7 +76,7 @@ const WANDS_CARDS: CardSeedData[] = [
         'falta de visión',
       ],
     },
-    imageUrl: '/images/tarot/minor/wands/02-two-of-wands.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/0/0f/Wands02.jpg',
   },
   {
     slug: 'three-of-wands',
@@ -109,7 +109,7 @@ const WANDS_CARDS: CardSeedData[] = [
         'retroceso',
       ],
     },
-    imageUrl: '/images/tarot/minor/wands/03-three-of-wands.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/f/ff/Wands03.jpg',
   },
   {
     slug: 'four-of-wands',
@@ -142,7 +142,7 @@ const WANDS_CARDS: CardSeedData[] = [
         'celebración postergada',
       ],
     },
-    imageUrl: '/images/tarot/minor/wands/04-four-of-wands.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/a4/Wands04.jpg',
   },
   {
     slug: 'five-of-wands',
@@ -175,7 +175,7 @@ const WANDS_CARDS: CardSeedData[] = [
         'armonía restaurada',
       ],
     },
-    imageUrl: '/images/tarot/minor/wands/05-five-of-wands.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/9/9d/Wands05.jpg',
   },
   {
     slug: 'six-of-wands',
@@ -208,7 +208,7 @@ const WANDS_CARDS: CardSeedData[] = [
         'fracaso temporal',
       ],
     },
-    imageUrl: '/images/tarot/minor/wands/06-six-of-wands.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/3b/Wands06.jpg',
   },
   {
     slug: 'seven-of-wands',
@@ -241,7 +241,7 @@ const WANDS_CARDS: CardSeedData[] = [
         'derrota por fatiga',
       ],
     },
-    imageUrl: '/images/tarot/minor/wands/07-seven-of-wands.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/e4/Wands07.jpg',
   },
   {
     slug: 'eight-of-wands',
@@ -274,7 +274,7 @@ const WANDS_CARDS: CardSeedData[] = [
         'espera',
       ],
     },
-    imageUrl: '/images/tarot/minor/wands/08-eight-of-wands.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/6b/Wands08.jpg',
   },
   {
     slug: 'nine-of-wands',
@@ -307,7 +307,8 @@ const WANDS_CARDS: CardSeedData[] = [
         'colapso',
       ],
     },
-    imageUrl: '/images/tarot/minor/wands/09-nine-of-wands.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/4/4d/Tarot_Nine_of_Wands.jpg',
   },
   {
     slug: 'ten-of-wands',
@@ -341,7 +342,7 @@ const WANDS_CARDS: CardSeedData[] = [
         'prioridades',
       ],
     },
-    imageUrl: '/images/tarot/minor/wands/10-ten-of-wands.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/0/0b/Wands10.jpg',
   },
   {
     slug: 'page-of-wands',
@@ -375,7 +376,7 @@ const WANDS_CARDS: CardSeedData[] = [
         'falta de dirección',
       ],
     },
-    imageUrl: '/images/tarot/minor/wands/11-page-of-wands.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/6a/Wands11.jpg',
   },
   {
     slug: 'knight-of-wands',
@@ -409,7 +410,7 @@ const WANDS_CARDS: CardSeedData[] = [
         'dispersión',
       ],
     },
-    imageUrl: '/images/tarot/minor/wands/12-knight-of-wands.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/16/Wands12.jpg',
   },
   {
     slug: 'queen-of-wands',
@@ -443,7 +444,7 @@ const WANDS_CARDS: CardSeedData[] = [
         'autoritarismo',
       ],
     },
-    imageUrl: '/images/tarot/minor/wands/13-queen-of-wands.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/0/0d/Wands13.jpg',
   },
   {
     slug: 'king-of-wands',
@@ -477,7 +478,7 @@ const WANDS_CARDS: CardSeedData[] = [
         'dominio excesivo',
       ],
     },
-    imageUrl: '/images/tarot/minor/wands/14-king-of-wands.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/c/ce/Wands14.jpg',
   },
 ];
 
@@ -495,29 +496,29 @@ const CUPS_CARDS: CardSeedData[] = [
     suit: Suit.CUPS,
     element: Element.WATER,
     meaningUpright:
-      'Nuevo amor, abundancia emocional, intuición despertada y conexión espiritual profunda. La copa rebosa de sentimientos puros y posibilidades emocionales.',
+      'El As de Copas representa el recipiente puro de la gracia divina y el despertar emocional. Es el inicio de un flujo profundo de amor, compasión y receptividad espiritual. Indica un momento donde el corazón se abre a nuevas relaciones, inspiración creativa o un profundo despertar intuitivo. Es la semilla de la conexión anímica incondicional.',
     meaningReversed:
-      'Emociones reprimidas, corazón cerrado, oportunidades de amor rechazadas y bloqueo de la intuición.',
+      'En su aspecto sombrío, señala un bloqueo severo en la capacidad de dar o recibir amor. Representa la represión de las emociones, un corazón cerrado por el dolor pasado, o el agotamiento espiritual. La energía del agua divina se estanca, generando una sensación de vacío interior, egoísmo emocional o una intuición ignorada sistemáticamente.',
     description:
-      'Una mano celestial emerge de las nubes sosteniendo una copa de la que brota agua abundante. Una paloma desciende sosteniendo una oblea. Flores de loto flotan en el estanque de abajo. Representa el nacimiento de sentimientos profundos, la apertura del corazón y el flujo desbordante del amor y la intuición.',
+      'Una mano luminosa emerge de una nube gris, ofreciendo un cáliz dorado rebosante. De la copa brotan cinco corrientes de agua (los cinco sentidos) que caen sobre un lago cubierto de flores de loto en flor, símbolo del despertar espiritual. Una paloma blanca que sostiene una hostia consagrada desciende hacia la copa, representando la encarnación del espíritu y el amor divino.',
     keywords: {
       upright: [
-        'amor',
-        'intuición',
-        'emoción',
-        'abundancia emocional',
-        'conexión espiritual',
-        'apertura',
+        'amor incondicional',
+        'despertar emocional',
+        'intuición pura',
+        'fertilidad',
+        'receptividad',
+        'inspiración',
       ],
       reversed: [
+        'bloqueo emocional',
         'represión',
-        'corazón cerrado',
-        'rechazo emocional',
-        'bloqueo',
-        'pérdida de oportunidad',
+        'vacío interior',
+        'desconexión',
+        'egoísmo',
       ],
     },
-    imageUrl: '/images/tarot/minor/cups/01-ace-of-cups.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/36/Cups01.jpg',
   },
   {
     slug: 'two-of-cups',
@@ -528,29 +529,29 @@ const CUPS_CARDS: CardSeedData[] = [
     suit: Suit.CUPS,
     element: Element.WATER,
     meaningUpright:
-      'Unión, atracción mutua, asociación amorosa y conexión profunda entre dos personas que se reconocen mutuamente.',
+      'Esta carta encarna la alquimia de dos almas que se encuentran en perfecto equilibrio y respeto mutuo. Trasciende el romance superficial para hablar de asociaciones sagradas, contratos anímicos y la profunda armonía que surge cuando dos individuos sanos deciden unir sus fuerzas y compartir sus copas sin perder su propia individualidad.',
     meaningReversed:
-      'Ruptura de relaciones, desconexión emocional, desequilibrio en una asociación y pérdida de la armonía.',
+      'La distorsión del Dos de Copas revela asimetría en los vínculos. Apunta a la codependencia, la falta de comunicación o la pérdida de respeto dentro de una relación. Señala la desconexión emocional, la proyección de heridas no sanadas en la pareja, o alianzas donde uno entrega su energía mientras el otro simplemente la consume sin reciprocidad.',
     description:
-      'Un hombre y una mujer intercambian copas bajo el símbolo del caduceo coronado por una cabeza de león alada. La escena refleja el intercambio igualitario de amor y la alianza entre dos personas. Representa la unión de corazones, la atracción recíproca y el vínculo profundo que nace cuando dos almas se reconocen.',
+      'Un hombre y una mujer se miran a los ojos mientras intercambian cálidamente sus copas. Sobre ellos se alza el Caduceo de Hermes coronado por la cabeza de un león rojo con alas, simbolizando la pasión terrenal purificada y elevada al plano espiritual mediante la comunicación honesta. Al fondo, una casa representa el hogar y la estabilidad que brinda esta unión.',
     keywords: {
       upright: [
-        'unión',
-        'amor recíproco',
-        'conexión',
-        'asociación',
-        'armonía',
-        'atracción',
+        'asociación mutua',
+        'unión sagrada',
+        'atracción profunda',
+        'equilibrio',
+        'compromiso',
+        'empatía',
       ],
       reversed: [
-        'ruptura',
-        'desconexión',
+        'codependencia',
         'desequilibrio',
-        'conflicto',
-        'separación',
+        'desconexión',
+        'ruptura',
+        'falta de armonía',
       ],
     },
-    imageUrl: '/images/tarot/minor/cups/02-two-of-cups.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/f/f8/Cups02.jpg',
   },
   {
     slug: 'three-of-cups',
@@ -561,29 +562,29 @@ const CUPS_CARDS: CardSeedData[] = [
     suit: Suit.CUPS,
     element: Element.WATER,
     meaningUpright:
-      'Celebración, amistad, comunidad y alegría compartida. Es el tiempo de festejar con los seres queridos y disfrutar de la abundancia emocional en compañía.',
+      'El Tres de Copas es la expresión vibrante de la sororidad, la comunidad y el apoyo mutuo. Esotéricamente, marca la manifestación emocional: la energía compartida crea un campo de vibración superior. Habla de celebraciones, amistades verdaderas y el florecimiento que ocurre cuando nos rodeamos de tu "tribu" anímica en un entorno de pura alegría compartida.',
     meaningReversed:
-      'Excesos sociales, frivolidad, chismes entre amigos o distanciamiento de personas cercanas.',
+      'En su sombra, la carta advierte sobre el exceso, la superficialidad y la desconexión del grupo. Puede indicar que te estás perdiendo en la vida social para evadir tu vacío interno (escapismo), o revela dinámicas tóxicas en un círculo de amistades: chismes, exclusión, o la pérdida de la individualidad por la presión y el conformismo del rebaño.',
     description:
-      'Tres mujeres danzan juntas en un jardín lleno de flores y frutos, alzando sus copas en celebración. Representan la alegría de la amistad femenina, la comunidad y los festejos que celebran la vida y sus bendiciones compartidas entre personas que se quieren.',
+      'Tres doncellas con túnicas fluidas (blanca, roja y dorada) danzan en círculo, elevando sus copas en un brindis festivo. A sus pies, la tierra rebosa de frutas y cosechas, representando la abundancia que surge del esfuerzo colectivo. Sus brazos se entrelazan suavemente, simbolizando la conexión sincera, el respeto mutuo y la red de apoyo incondicional.',
     keywords: {
       upright: [
         'celebración',
-        'amistad',
         'comunidad',
-        'alegría',
-        'festejo',
+        'sororidad',
+        'alegría compartida',
+        'abundancia',
         'apoyo mutuo',
       ],
       reversed: [
         'exceso',
-        'frivolidad',
+        'aislamiento',
         'chismes',
-        'distanciamiento',
-        'soledad social',
+        'superficialidad',
+        'conformismo',
       ],
     },
-    imageUrl: '/images/tarot/minor/cups/03-three-of-cups.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/7/7a/Cups03.jpg',
   },
   {
     slug: 'four-of-cups',
@@ -594,29 +595,29 @@ const CUPS_CARDS: CardSeedData[] = [
     suit: Suit.CUPS,
     element: Element.WATER,
     meaningUpright:
-      'Contemplación, apatía emocional, descontento con lo que se tiene e ignorar las oportunidades que el universo presenta.',
+      'Representa el letargo místico y el ensimismamiento. A nivel espiritual, es la apatía que surge tras la desilusión terrenal; el individuo se desconecta de su entorno buscando respuestas internas, pero en el proceso se vuelve ciego a las nuevas oportunidades (gracia divina) que el universo le ofrece. Es un periodo de reevaluación emocional pasiva.',
     meaningReversed:
-      'Despertar de la apatía, aceptar una nueva oportunidad, apertura emocional y salir de la introversión excesiva.',
+      'El despertar repentino de un estado de apatía profunda. La sombra se rompe y la persona finalmente toma consciencia de los dones y oportunidades que había ignorado. Señala el fin de una depresión o estancamiento, el momento en que se abandona la actitud defensiva para volver a interactuar de forma proactiva con las corrientes de la vida.',
     description:
-      'Un hombre sentado con los brazos cruzados bajo un árbol contempla tres copas ante él mientras ignora una cuarta copa que una mano celestial le ofrece. Representa el descontento, la introspección excesiva y la tendencia a ignorar las oportunidades que nos rodean cuando estamos atrapados en nuestros pensamientos.',
+      'Un hombre joven está sentado bajo un árbol en la cima de una montaña, con los brazos y las piernas fuertemente cruzados en actitud defensiva o meditabunda. Frente a él hay tres copas alineadas en el suelo que él ignora. Desde una nube mística, una mano fantasmal le ofrece una cuarta copa, pero su mirada baja y desconectada no le permite verla.',
     keywords: {
       upright: [
         'apatía',
-        'contemplación',
-        'descontento',
-        'introspección',
-        'oportunidades ignoradas',
-        'desengaño',
+        'ensimismamiento',
+        'letargo emocional',
+        'insatisfacción',
+        'meditación',
+        'desilusión',
       ],
       reversed: [
-        'apertura',
-        'nueva oportunidad',
         'despertar',
-        'gratitud',
-        'salir del caparazón',
+        'renovación',
+        'aceptación',
+        'proactividad',
+        'reconexión',
       ],
     },
-    imageUrl: '/images/tarot/minor/cups/04-four-of-cups.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/35/Cups04.jpg',
   },
   {
     slug: 'five-of-cups',
@@ -627,29 +628,29 @@ const CUPS_CARDS: CardSeedData[] = [
     suit: Suit.CUPS,
     element: Element.WATER,
     meaningUpright:
-      'Pérdida, duelo, decepción y enfoque en lo que se perdió en lugar de ver lo que permanece. Es el tiempo del dolor emocional necesario.',
+      'El Cinco de Copas es el arquetipo del luto, el arrepentimiento y el enfoque en lo que se ha perdido. Es un estado emocional de dolor profundo donde la mente se queda anclada en el trauma o el error pasado. Sin embargo, encierra una lección crucial: la tristeza es válida, pero la ceguera al amor y a las posibilidades que aún quedan en pie perpetúa el sufrimiento.',
     meaningReversed:
-      'Aceptación del duelo, perdonar el pasado, renovación emocional y capacidad de ver que aún hay razones para seguir adelante.',
+      'El perdón, la sanación y la capacidad de dejar el pasado atrás. La persona atraviesa la noche oscura del alma y, al voltearse, descubre las copas que aún siguen en pie. Es la integración dolorosa pero necesaria de una pérdida, permitiendo que la energía emocional vuelva a fluir hacia la reconstrucción y la aceptación del presente.',
     description:
-      'Una figura encapuchada y vestida de negro llora frente a tres copas derramadas, sin notar las dos copas que permanecen de pie detrás de ella. Un río fluye entre ella y un castillo. Representa el enfoque en las pérdidas y decepciones mientras se ignoran las bendiciones que todavía están presentes.',
+      'Una figura vestida con una pesada y oscura capa negra se encorva en señal de luto profundo, mirando hacia tres copas derramadas en el suelo (cuya agua se filtra en la tierra). A sus espaldas, y fuera de su campo de visión, dos copas permanecen de pie e intactas. A lo lejos fluye un río con un puente que conduce a un castillo, símbolo de un futuro que aún puede cruzarse.',
     keywords: {
       upright: [
-        'pérdida',
         'duelo',
-        'decepción',
-        'tristeza',
-        'lamento',
-        'foco en lo negativo',
+        'arrepentimiento',
+        'pérdida',
+        'pesimismo',
+        'tristeza profunda',
+        'enfoque negativo',
       ],
       reversed: [
+        'sanación',
         'aceptación',
         'perdón',
-        'renovación',
-        'mirar hacia adelante',
-        'sanación emocional',
+        'reconstrucción',
+        'superación',
       ],
     },
-    imageUrl: '/images/tarot/minor/cups/05-five-of-cups.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/d/d7/Cups05.jpg',
   },
   {
     slug: 'six-of-cups',
@@ -660,29 +661,29 @@ const CUPS_CARDS: CardSeedData[] = [
     suit: Suit.CUPS,
     element: Element.WATER,
     meaningUpright:
-      'Nostalgia, recuerdos del pasado, inocencia infantil y reconexión con la alegría simple de los primeros años.',
+      'El retorno a la inocencia original del alma. Representa los vínculos kármicos, las raíces familiares y la pureza de las emociones sin condiciones. Esotéricamente, alude al "niño interior" y a la curación que proviene de recordar quiénes éramos antes de ser condicionados por el mundo. Momentos de profunda nostalgia que nutren el alma.',
     meaningReversed:
-      'Vivir atrapado en el pasado, idealización de tiempos idos y dificultad para avanzar hacia el presente y el futuro.',
+      'Aferramiento patológico al pasado. El individuo se niega a crecer o asumir responsabilidades adultas, viviendo en una ilusión melancólica ("cualquier tiempo pasado fue mejor"). Puede indicar traumas infantiles no resueltos, una idealización tóxica de viejos amores, o el estancamiento evolutivo por miedo a enfrentar el presente y el futuro.',
     description:
-      'Un niño mayor le ofrece flores en una copa a una niña más pequeña en el jardín de una antigua mansión. Otras copas llenas de flores los rodean. Representa los recuerdos dulces de la infancia, la nostalgia sana, los reencuentros con personas del pasado y la inocencia recuperada.',
+      'En un patio soleado, seguro y acogedor (quizás un castillo antiguo), un niño mayor ofrece una copa rebosante de flores blancas (símbolo de pureza) a una niña pequeña. Alrededor de ellos hay cinco copas adicionales, también llenas de flores. Un guardia vestido de manera adulta camina alejándose en el fondo, marcando el abandono de las preocupaciones mundanas.',
     keywords: {
       upright: [
-        'nostalgia',
-        'recuerdos',
-        'infancia',
         'inocencia',
-        'reencuentro',
-        'pasado feliz',
+        'nostalgia',
+        'niño interior',
+        'recuerdos',
+        'raíces',
+        'pureza',
       ],
       reversed: [
-        'pasado idealizado',
-        'atrapado en recuerdos',
-        'incapacidad de avanzar',
-        'añoranza dañina',
-        'regresión',
+        'estancamiento',
+        'inmadurez',
+        'aferramiento',
+        'trauma infantil',
+        'idealización',
       ],
     },
-    imageUrl: '/images/tarot/minor/cups/06-six-of-cups.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/17/Cups06.jpg',
   },
   {
     slug: 'seven-of-cups',
@@ -693,30 +694,29 @@ const CUPS_CARDS: CardSeedData[] = [
     suit: Suit.CUPS,
     element: Element.WATER,
     meaningUpright:
-      'Ilusiones, ensoñación, múltiples opciones abrumadoras y confusión entre lo que es real y lo que es deseo o fantasía.',
+      'El laberinto de la psique y el mundo de las ilusiones. Representa la confrontación con nuestras fantasías, deseos proyectados y las trampas del ego. Múltiples opciones se presentan, pero carecen de sustancia material. Es un momento de fuerte imaginación y sueños, advirtiendo sobre la necesidad de discernimiento para no perderse en los "espejismos" de la mente.',
     meaningReversed:
-      'Claridad entre la fantasía y la realidad, toma de decisiones con fundamento y enfoque en metas alcanzables.',
+      'El colapso de las ilusiones. La caída dolorosa pero liberadora a la realidad. Se toman decisiones claras tras un periodo de confusión mental profunda. Los velos de Maya (la ilusión esotérica) se rasgan, permitiendo ver las opciones por lo que realmente son. Fin del autoengaño y enfoque pragmático frente a las opciones disponibles.',
     description:
-      'Una figura contempla siete copas flotando en las nubes, cada una conteniendo algo diferente: una serpiente, un castillo, una corona, un dragón, una figura cubierta, joyas y una cabeza laureada. Representa la multiplicidad de ilusiones, los sueños no anclados en la realidad y la dificultad de elegir cuando todo parece posible.',
+      'Una sombra humana, de espaldas al espectador, contempla asombrado siete copas que flotan mágicamente en nubes de humo espeso (simbolizando la ilusión). Cada copa contiene un arquetipo diferente: una cabeza humana (ego), una figura brillante velada (espíritu), una serpiente (sabiduría/tentación), un castillo (poder), joyas (riqueza), una corona (gloria) y un dragón (miedo vital).',
     keywords: {
       upright: [
         'ilusiones',
         'fantasía',
-        'confusión',
-        'opciones',
-        'ensoñación',
-        'ilusiones vanas',
+        'opciones múltiples',
+        'espejismos',
+        'proyección',
+        'ensueño',
       ],
       reversed: [
         'claridad',
-        'realismo',
-        'decisión',
-        'enfoque',
         'discernimiento',
-        'propósito',
+        'realidad',
+        'toma de decisiones',
+        'desengaño',
       ],
     },
-    imageUrl: '/images/tarot/minor/cups/07-seven-of-cups.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/ae/Cups07.jpg',
   },
   {
     slug: 'eight-of-cups',
@@ -727,29 +727,29 @@ const CUPS_CARDS: CardSeedData[] = [
     suit: Suit.CUPS,
     element: Element.WATER,
     meaningUpright:
-      'Abandonar lo que ya no satisface, búsqueda de algo más profundo y el coraje de dejar atrás lo conocido aunque sea difícil.',
+      'El viaje del buscador espiritual. Esta carta marca el momento valiente en el que decides abandonar lo que ya se ha consolidado pero que, secretamente, ha dejado de nutrir tu alma. Representa el desapego, el viaje hacia el autodescubrimiento en la soledad, dejando atrás el éxito emocional o material hueco en busca de un propósito superior y más auténtico.',
     meaningReversed:
-      'Miedo a dejar ir, apego a situaciones agotadas y postergación de una partida necesaria.',
+      'El miedo paralizante a lo desconocido que te mantiene anclado a una situación marchita. Sabes internamente que debes partir (de una relación, un trabajo, un estado mental), pero la cobardía emocional o el apego a la familiaridad te impiden dar el paso. Es conformarse con la mediocridad espiritual por temor a caminar en la oscuridad temporal.',
     description:
-      'Una figura con capa roja y bastón camina de espaldas hacia montañas oscuras bajo una luna menguante, dejando atrás ocho copas apiladas pero incompletas. Representa la decisión valiente de buscar algo más significativo, de abandonar lo familiar aunque funcione y de responder al llamado de una vida más auténtica.',
+      'Bajo la luz de un eclipse o una luna menguante (que representa el fin de un ciclo y el instinto), una figura envuelta en una capa roja camina alejándose con la ayuda de un bastón hacia montañas escarpadas y desoladas. En el primer plano deja atrás ocho copas apiladas cuidadosamente; ninguna está volcada, simbolizando que no huye del caos, sino de la falta de plenitud.',
     keywords: {
       upright: [
-        'abandono',
-        'búsqueda',
-        'partida',
-        'crecimiento',
-        'dejar ir',
-        'profundidad',
+        'desapego',
+        'búsqueda espiritual',
+        'abandono voluntario',
+        'transición',
+        'introspección',
+        'evolución',
       ],
       reversed: [
-        'miedo a dejar ir',
-        'apego',
-        'postergación',
-        'quedarse por comodidad',
-        'resignación',
+        'estancamiento',
+        'miedo al cambio',
+        'apego paralizante',
+        'conformismo',
+        'evasión',
       ],
     },
-    imageUrl: '/images/tarot/minor/cups/08-eight-of-cups.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/60/Cups08.jpg',
   },
   {
     slug: 'nine-of-cups',
@@ -760,29 +760,29 @@ const CUPS_CARDS: CardSeedData[] = [
     suit: Suit.CUPS,
     element: Element.WATER,
     meaningUpright:
-      'Satisfacción emocional, deseos cumplidos, contentamiento y el disfrute pleno de los placeres de la vida. Es la carta del deseo que se hace realidad.',
+      'Conocida tradicionalmente como "la carta de los deseos cumplidos". Esotéricamente, representa la saturación de Júpiter: el momento de profunda complacencia, amor propio y satisfacción material y emocional. Es la celebración de la independencia afectiva, la recompensa después de tiempos difíciles, disfrutando de los placeres sensuales y la abundancia del cosmos con total confianza.',
     meaningReversed:
-      'Insatisfacción a pesar de los logros, materialismo vacío y deseos cumplidos que no aportan la felicidad esperada.',
+      'La soberbia espiritual o el hedonismo egoísta. Cuando se invierte, advierte sobre un deseo que se cumplió pero trajo consigo un profundo vacío existencial (el síndrome de "es esto todo lo que hay"). Puede indicar presunción, indulgencia excesiva en placeres terrenales, o la arrogancia de creer que el éxito material reemplaza a la verdadera evolución espiritual.',
     description:
-      'Un hombre satisfecho y de brazos cruzados está sentado frente a un arco adornado con nueve copas. Su postura y sonrisa expresan contentamiento total. Conocida como la "carta del deseo", representa la satisfacción plena, los sueños realizados y el goce de los frutos del propio esfuerzo y las bendiciones de la vida.',
+      'Un hombre de aspecto próspero, robusto y bien vestido, está sentado en un taburete de madera con los brazos cruzados sobre el pecho, mostrando una expresión de profunda autosatisfacción y orgullo. Detrás de él, sobre una mesa o estructura de madera semicircular cubierta con una tela azul, reposan nueve copas doradas perfectamente ordenadas como trofeos de sus conquistas.',
     keywords: {
       upright: [
+        'deseo cumplido',
         'satisfacción',
-        'deseos cumplidos',
-        'contentamiento',
-        'placer',
         'abundancia',
-        'gratitud',
+        'amor propio',
+        'placer',
+        'recompensa',
       ],
       reversed: [
-        'insatisfacción',
-        'materialismo',
-        'vacío interno',
-        'deseos sin sentido',
-        'apego',
+        'hedonismo',
+        'soberbia',
+        'vacío existencial',
+        'indulgencia',
+        'insatisfacción profunda',
       ],
     },
-    imageUrl: '/images/tarot/minor/cups/09-nine-of-cups.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/2/24/Cups09.jpg',
   },
   {
     slug: 'ten-of-cups',
@@ -793,29 +793,29 @@ const CUPS_CARDS: CardSeedData[] = [
     suit: Suit.CUPS,
     element: Element.WATER,
     meaningUpright:
-      'Plenitud familiar, armonía en el hogar, felicidad duradera y la realización del ideal de amor en comunidad.',
+      'El estado de gracia terrenal y la bienaventuranza máxima. Representa la alineación divina donde los valores espirituales y las relaciones humanas coexisten en perfecta armonía. Simboliza la familia de alma, la paz duradera y el destino final del amor maduro. Es la confirmación de que seguir al corazón, con integridad, nos lleva a nuestro verdadero hogar vibracional.',
     meaningReversed:
-      'Conflictos familiares, expectativas no cumplidas y armonía que se rompe en el entorno más cercano.',
+      'La ilusión rota del "felices para siempre". El Diez de Copas invertido revela fisuras profundas en el núcleo familiar o en la comunidad. Denota disputas domésticas, la presión por mantener las apariencias frente a los demás escondiendo la infelicidad real, o la desconexión profunda de nuestros valores fundamentales debido a conflictos prolongados.',
     description:
-      'Una pareja se abraza mientras sus hijos danzan en el jardín de su hermoso hogar bajo un arco iris adornado con diez copas. Representa la plenitud emocional en su forma más completa: el amor familiar, la armonía del hogar y la felicidad compartida que trasciende lo individual.',
+      'Una pareja amorosa está de pie, con los brazos alrededor del otro, levantando sus manos libres hacia el cielo en un gesto de reverencia y gratitud. Junto a ellos, dos niños bailan alegremente. Por encima de la idílica escena campestre, un arcoíris brillante atraviesa el cielo conteniendo diez copas doradas, el puente cósmico que sella el pacto de paz y plenitud.',
     keywords: {
       upright: [
-        'plenitud',
-        'familia',
-        'armonía',
-        'felicidad',
+        'bienaventuranza',
+        'armonía familiar',
+        'plenitud total',
+        'alineación divina',
+        'paz duradera',
         'hogar',
-        'amor duradero',
       ],
       reversed: [
-        'conflicto familiar',
-        'expectativas',
-        'armonía rota',
-        'desunión',
-        'tristeza familiar',
+        'conflictos familiares',
+        'falsa apariencia',
+        'desarmonía',
+        'desconexión',
+        'ideales rotos',
       ],
     },
-    imageUrl: '/images/tarot/minor/cups/10-ten-of-cups.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/8/84/Cups10.jpg',
   },
   {
     slug: 'page-of-cups',
@@ -827,29 +827,29 @@ const CUPS_CARDS: CardSeedData[] = [
     courtRank: CourtRank.PAGE,
     element: Element.WATER,
     meaningUpright:
-      'Mensajes emocionales, intuición juvenil, creatividad imaginativa y apertura a las señales del mundo interior.',
+      'El arquetipo del soñador místico y el nacimiento de la intuición consciente. Como mensajero del agua, trae inspiración creativa pura, sincronías y una invitación a explorar el subconsciente sin miedo. Es el niño interior despierto, curioso por el arte, la espiritualidad y los sentimientos emergentes. Te anima a prestar atención a tus sueños y corazonadas irracionales.',
     meaningReversed:
-      'Inmadurez emocional, sueños sin fundamento y sensibilidad que desborda los límites saludables.',
+      'Escapismo crónico y vulnerabilidad extrema. El paje invertido pierde su anclaje y se ahoga en sus propias fantasías, volviéndose caprichoso, hipersensible o emocionalmente inmaduro. Puede representar bloqueos creativos severos, la tendencia a huir de la realidad dura mediante adicciones emocionales, o el rechazo directo del niño interior herido.',
     description:
-      'Un joven elegante sostiene una copa de la que asoma un pez que parece hablarle. El océano se agita detrás de él. Representa la sensibilidad intuitiva, la apertura a los mensajes del subconsciente, la creatividad imaginativa y la disponibilidad para escuchar al corazón con inocencia y asombro.',
+      'Un joven vestido con una túnica extravagante de motivos florales se encuentra de pie a la orilla del mar agitado. Sostiene una copa en sus manos, y de ella emerge sorprendentemente un pez vivo que parece mirarle a los ojos, como si le estuviera comunicando un mensaje del abismo del subconsciente. Su postura es relajada, receptiva y maravillada.',
     keywords: {
       upright: [
-        'intuición',
-        'creatividad',
-        'sensibilidad',
-        'mensajes',
-        'imaginación',
-        'apertura',
+        'inspiración',
+        'curiosidad intuitiva',
+        'mensajes oníricos',
+        'niño interior',
+        'asombro',
+        'arte incipiente',
       ],
       reversed: [
-        'inmadurez',
-        'sueños irreales',
-        'sensibilidad excesiva',
-        'fantasía',
-        'falta de dirección',
+        'inmadurez emocional',
+        'escapismo',
+        'capricho',
+        'hipersensibilidad',
+        'bloqueo creativo',
       ],
     },
-    imageUrl: '/images/tarot/minor/cups/11-page-of-cups.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/ad/Cups11.jpg',
   },
   {
     slug: 'knight-of-cups',
@@ -861,29 +861,29 @@ const CUPS_CARDS: CardSeedData[] = [
     courtRank: CourtRank.KNIGHT,
     element: Element.WATER,
     meaningUpright:
-      'Romanticismo, propuestas emocionales, mensajes del corazón y la búsqueda de lo bello y lo sublime en la vida.',
+      'El poeta guerrero impulsado por la devoción. Este arquetipo domina el arte de llevar el romanticismo, la visión y la imaginación hacia el mundo exterior a través de la acción (el fuego del Caballero actuando sobre el agua de las Copas). Invita a seguir la brújula del corazón por encima de la lógica, abrazando la belleza, el idealismo y la caballerosidad con gracia.',
     meaningReversed:
-      'Inestabilidad emocional, decepción romántica, promesas que no se cumplen y fantasía que reemplaza a la acción real.',
+      'El encantador manipulador o el soñador paralizado. En la sombra, el idealismo se vuelve tóxico: expectativas románticas poco realistas, promesas vacías y la incapacidad de concretar las grandes visiones creativas. Muestra a alguien que se deja llevar por los cambios bruscos de humor, celos y el drama emocional continuo, sin bases terrenales reales.',
     description:
-      'Un caballero avanza lentamente sobre su caballo blanco, sosteniendo una copa con delicadeza frente a él. Su yelmo y capa están adornados con peces y alas. Es el mensajero del amor, el galán romántico que lleva los sueños del corazón hacia la realidad con elegancia y sentimiento.',
+      'Un caballero apuesto, adornado con una capa cubierta de imágenes de peces rojos y alas de Hermes en su yelmo y talones (símbolos de imaginación y mensajes psíquicos), cabalga lentamente y con gracia sobre un caballo blanco majestuoso y dócil. Avanza pacíficamente a través de un paisaje árido con un río serpenteante, sosteniendo una copa como si fuera el Santo Grial.',
     keywords: {
       upright: [
-        'romanticismo',
-        'propuesta',
+        'idealismo',
+        'devoción',
+        'acción romántica',
+        'visión artística',
         'encanto',
-        'mensaje de amor',
-        'sensibilidad',
-        'creatividad',
+        'seguir al corazón',
       ],
       reversed: [
-        'decepción',
-        'promesas rotas',
-        'cambios de humor',
-        'fantasía sin base',
-        'manipulación emocional',
+        'manipulación',
+        'promesas vacías',
+        'humor inestable',
+        'falta de realismo',
+        'drama emocional',
       ],
     },
-    imageUrl: '/images/tarot/minor/cups/12-knight-of-cups.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/f/fa/Cups12.jpg',
   },
   {
     slug: 'queen-of-cups',
@@ -895,29 +895,29 @@ const CUPS_CARDS: CardSeedData[] = [
     courtRank: CourtRank.QUEEN,
     element: Element.WATER,
     meaningUpright:
-      'Empatía profunda, compasión, intuición desarrollada y la capacidad de nutrir emocionalmente a los demás con amor incondicional.',
+      'La suma sacerdotisa del mundo cotidiano y el dominio del elemento agua. Ella es la empatía encarnada, capaz de comprender las profundidades del dolor humano sin hundirse en ellas. Arquetipo de la sanadora, canalizadora y madre espiritual, rige mediante la contención amorosa y la sabiduría intuitiva profunda. Confía en lo invisible con absoluta certeza.',
     meaningReversed:
-      'Dependencia emocional, inestabilidad, manipulación sutil y pérdida de los propios límites por exceso de empatía.',
+      'La esponja emocional saturada. La Reina invertida sufre de agotamiento por empatía, adoptando el rol de mártir. Al carecer de límites energéticos, absorbe los problemas ajenos hasta perderse a sí misma. Puede volverse codependiente, manipuladora emocional pasivo-agresiva, utilizando el chantaje afectivo y la victimización para mantener el control sobre los demás.',
     description:
-      'Una reina de aspecto soñador está sentada en un trono ornamentado sobre el agua, contemplando una copa cerrada y elaborada que sostiene con ambas manos. Su trono está decorado con ninfas del agua y peces. Representa la maestría del mundo emocional, la sabiduría intuitiva y la capacidad de sostener y sanar emocionalmente a quienes la rodean.',
+      'Una mujer de gran belleza serena se sienta en un trono de piedra tallado con querubines y sirenas, justo donde la tierra se encuentra con el mar. Contempla fijamente y sostiene con ambas manos un cáliz ornamentado y cerrado (la única copa tapada del mazo), indicando que los misterios y las emociones que custodia provienen de las profundidades sagradas y ocultas del inconsciente.',
     keywords: {
       upright: [
-        'empatía',
-        'compasión',
-        'intuición',
-        'nurtura',
-        'sabiduría emocional',
-        'amor incondicional',
+        'empatía profunda',
+        'sanación',
+        'sabiduría intuitiva',
+        'contención',
+        'amor maternal',
+        'canalización',
       ],
       reversed: [
-        'dependencia',
-        'inestabilidad',
-        'manipulación',
-        'límites perdidos',
-        'absorción de energía',
+        'codependencia',
+        'martirio',
+        'chantaje emocional',
+        'agotamiento empático',
+        'falta de límites',
       ],
     },
-    imageUrl: '/images/tarot/minor/cups/13-queen-of-cups.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/62/Cups13.jpg',
   },
   {
     slug: 'king-of-cups',
@@ -929,29 +929,29 @@ const CUPS_CARDS: CardSeedData[] = [
     courtRank: CourtRank.KING,
     element: Element.WATER,
     meaningUpright:
-      'Madurez emocional, dominio de los sentimientos, compasión y la capacidad de liderar con el corazón sin perder la cabeza.',
+      'El maestro de la inteligencia emocional. Este arquetipo ha aprendido a navegar por mares turbulentos sin perder el equilibrio. No reprime el agua (las emociones), sino que le da estructura (la autoridad del Rey). Es compasivo, diplomático, sabio y ecuánime. Un guía espiritual o consejero que lidera desde el corazón, pero mantiene la templanza mental y la madurez total.',
     meaningReversed:
-      'Represión emocional, manipulación, inestabilidad bajo presión y uso de la frialdad como mecanismo de defensa.',
+      'El narcisista encubierto o la represión emocional destructiva. Un Rey de Copas invertido usa su profundo conocimiento de la psicología humana para manipular, controlar y hacer luz de gas (gaslighting) a los demás. Oculta sus verdaderos sentimientos detrás de un muro gélido de poder intelectual, volviéndose volátil en privado y vengativo, gobernado por pasiones reprimidas.',
     description:
-      'Un rey de aspecto sereno está sentado en un trono que flota sobre el mar agitado, con una copa en una mano y un cetro en la otra. A su alrededor el mar es turbulento pero él permanece en calma. Representa el dominio maduro de las emociones, la sabiduría compasiva y la capacidad de mantener la serenidad en medio del caos.',
+      'El monarca está sentado en un pesado trono de piedra que inexplicablemente flota sobre el mar agitado, simbolizando su total dominio sobre las turbulencias emocionales. Lleva un collar con un amuleto en forma de pez. En una mano sostiene firmemente su cetro dorado (poder del mundo material) y en la otra una copa (el reino del espíritu). A lo lejos, un barco sortea las olas de forma segura.',
     keywords: {
       upright: [
-        'madurez emocional',
-        'compasión',
-        'dominio',
-        'serenidad',
-        'liderazgo con el corazón',
-        'sabiduría',
+        'inteligencia emocional',
+        'madurez',
+        'diplomacia',
+        'compasión ecuánime',
+        'equilibrio psíquico',
+        'sabio consejero',
       ],
       reversed: [
-        'represión',
-        'manipulación',
-        'inestabilidad',
-        'frialdad',
-        'desconexión emocional',
+        'manipulación oculta',
+        'narcisismo',
+        'represión tóxica',
+        'volatilidad',
+        'control afectivo',
       ],
     },
-    imageUrl: '/images/tarot/minor/cups/14-king-of-cups.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/0/04/Cups14.jpg',
   },
 ];
 
@@ -991,7 +991,8 @@ const SWORDS_CARDS: CardSeedData[] = [
         'caos mental',
       ],
     },
-    imageUrl: '/images/tarot/minor/swords/01-ace-of-swords.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/1/1a/Swords01.jpg',
   },
   {
     slug: 'two-of-swords',
@@ -1024,7 +1025,8 @@ const SWORDS_CARDS: CardSeedData[] = [
         'claridad',
       ],
     },
-    imageUrl: '/images/tarot/minor/swords/02-two-of-swords.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/9/9e/Swords02.jpg',
   },
   {
     slug: 'three-of-swords',
@@ -1057,7 +1059,8 @@ const SWORDS_CARDS: CardSeedData[] = [
         'superación del dolor',
       ],
     },
-    imageUrl: '/images/tarot/minor/swords/03-three-of-swords.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/0/02/Swords03.jpg',
   },
   {
     slug: 'four-of-swords',
@@ -1090,7 +1093,8 @@ const SWORDS_CARDS: CardSeedData[] = [
         'estrés',
       ],
     },
-    imageUrl: '/images/tarot/minor/swords/04-four-of-swords.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/b/bf/Swords04.jpg',
   },
   {
     slug: 'five-of-swords',
@@ -1123,7 +1127,8 @@ const SWORDS_CARDS: CardSeedData[] = [
         'rendición',
       ],
     },
-    imageUrl: '/images/tarot/minor/swords/05-five-of-swords.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/2/23/Swords05.jpg',
   },
   {
     slug: 'six-of-swords',
@@ -1156,7 +1161,8 @@ const SWORDS_CARDS: CardSeedData[] = [
         'regreso difícil',
       ],
     },
-    imageUrl: '/images/tarot/minor/swords/06-six-of-swords.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/2/29/Swords06.jpg',
   },
   {
     slug: 'seven-of-swords',
@@ -1189,7 +1195,8 @@ const SWORDS_CARDS: CardSeedData[] = [
         'abandonar el engaño',
       ],
     },
-    imageUrl: '/images/tarot/minor/swords/07-seven-of-swords.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/3/34/Swords07.jpg',
   },
   {
     slug: 'eight-of-swords',
@@ -1222,7 +1229,8 @@ const SWORDS_CARDS: CardSeedData[] = [
         'salida encontrada',
       ],
     },
-    imageUrl: '/images/tarot/minor/swords/08-eight-of-swords.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/a/a7/Swords08.jpg',
   },
   {
     slug: 'nine-of-swords',
@@ -1255,7 +1263,8 @@ const SWORDS_CARDS: CardSeedData[] = [
         'esperanza',
       ],
     },
-    imageUrl: '/images/tarot/minor/swords/09-nine-of-swords.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/2/2f/Swords09.jpg',
   },
   {
     slug: 'ten-of-swords',
@@ -1288,7 +1297,8 @@ const SWORDS_CARDS: CardSeedData[] = [
         'sobrevivir',
       ],
     },
-    imageUrl: '/images/tarot/minor/swords/10-ten-of-swords.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/d/d4/Swords10.jpg',
   },
   {
     slug: 'page-of-swords',
@@ -1322,7 +1332,8 @@ const SWORDS_CARDS: CardSeedData[] = [
         'pensamiento dañino',
       ],
     },
-    imageUrl: '/images/tarot/minor/swords/11-page-of-swords.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/4/4c/Swords11.jpg',
   },
   {
     slug: 'knight-of-swords',
@@ -1356,7 +1367,8 @@ const SWORDS_CARDS: CardSeedData[] = [
         'agresión verbal',
       ],
     },
-    imageUrl: '/images/tarot/minor/swords/12-knight-of-swords.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/b/b0/Swords12.jpg',
   },
   {
     slug: 'queen-of-swords',
@@ -1390,7 +1402,8 @@ const SWORDS_CARDS: CardSeedData[] = [
         'juicio duro',
       ],
     },
-    imageUrl: '/images/tarot/minor/swords/13-queen-of-swords.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/d/d4/Swords13.jpg',
   },
   {
     slug: 'king-of-swords',
@@ -1424,7 +1437,8 @@ const SWORDS_CARDS: CardSeedData[] = [
         'distorsión de la verdad',
       ],
     },
-    imageUrl: '/images/tarot/minor/swords/14-king-of-swords.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/3/33/Swords14.jpg',
   },
 ];
 
@@ -1464,7 +1478,7 @@ const PENTACLES_CARDS: CardSeedData[] = [
         'materialismo',
       ],
     },
-    imageUrl: '/images/tarot/minor/pentacles/01-ace-of-pentacles.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/f/fd/Pents01.jpg',
   },
   {
     slug: 'two-of-pentacles',
@@ -1497,7 +1511,7 @@ const PENTACLES_CARDS: CardSeedData[] = [
         'agotamiento',
       ],
     },
-    imageUrl: '/images/tarot/minor/pentacles/02-two-of-pentacles.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/9/9f/Pents02.jpg',
   },
   {
     slug: 'three-of-pentacles',
@@ -1530,7 +1544,7 @@ const PENTACLES_CARDS: CardSeedData[] = [
         'conflicto grupal',
       ],
     },
-    imageUrl: '/images/tarot/minor/pentacles/03-three-of-pentacles.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/42/Pents03.jpg',
   },
   {
     slug: 'four-of-pentacles',
@@ -1563,7 +1577,7 @@ const PENTACLES_CARDS: CardSeedData[] = [
         'apertura',
       ],
     },
-    imageUrl: '/images/tarot/minor/pentacles/04-four-of-pentacles.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/35/Pents04.jpg',
   },
   {
     slug: 'five-of-pentacles',
@@ -1596,7 +1610,7 @@ const PENTACLES_CARDS: CardSeedData[] = [
         'esperanza',
       ],
     },
-    imageUrl: '/images/tarot/minor/pentacles/05-five-of-pentacles.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/9/96/Pents05.jpg',
   },
   {
     slug: 'six-of-pentacles',
@@ -1629,7 +1643,7 @@ const PENTACLES_CARDS: CardSeedData[] = [
         'tacañería disfrazada',
       ],
     },
-    imageUrl: '/images/tarot/minor/pentacles/06-six-of-pentacles.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/a6/Pents06.jpg',
   },
   {
     slug: 'seven-of-pentacles',
@@ -1662,7 +1676,7 @@ const PENTACLES_CARDS: CardSeedData[] = [
         'frustración',
       ],
     },
-    imageUrl: '/images/tarot/minor/pentacles/07-seven-of-pentacles.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/6a/Pents07.jpg',
   },
   {
     slug: 'eight-of-pentacles',
@@ -1695,7 +1709,7 @@ const PENTACLES_CARDS: CardSeedData[] = [
         'trabajo mediocre',
       ],
     },
-    imageUrl: '/images/tarot/minor/pentacles/08-eight-of-pentacles.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/49/Pents08.jpg',
   },
   {
     slug: 'nine-of-pentacles',
@@ -1728,7 +1742,7 @@ const PENTACLES_CARDS: CardSeedData[] = [
         'autoestima baja',
       ],
     },
-    imageUrl: '/images/tarot/minor/pentacles/09-nine-of-pentacles.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/f/f0/Pents09.jpg',
   },
   {
     slug: 'ten-of-pentacles',
@@ -1761,7 +1775,7 @@ const PENTACLES_CARDS: CardSeedData[] = [
         'inestabilidad',
       ],
     },
-    imageUrl: '/images/tarot/minor/pentacles/10-ten-of-pentacles.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/42/Pents10.jpg',
   },
   {
     slug: 'page-of-pentacles',
@@ -1795,7 +1809,7 @@ const PENTACLES_CARDS: CardSeedData[] = [
         'dispersión',
       ],
     },
-    imageUrl: '/images/tarot/minor/pentacles/11-page-of-pentacles.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/e4/Pents11.jpg',
   },
   {
     slug: 'knight-of-pentacles',
@@ -1829,7 +1843,7 @@ const PENTACLES_CARDS: CardSeedData[] = [
         'estancamiento',
       ],
     },
-    imageUrl: '/images/tarot/minor/pentacles/12-knight-of-pentacles.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/d/d5/Pents12.jpg',
   },
   {
     slug: 'queen-of-pentacles',
@@ -1863,7 +1877,7 @@ const PENTACLES_CARDS: CardSeedData[] = [
         'falta de cuidado',
       ],
     },
-    imageUrl: '/images/tarot/minor/pentacles/13-queen-of-pentacles.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/8/88/Pents13.jpg',
   },
   {
     slug: 'king-of-pentacles',
@@ -1897,7 +1911,7 @@ const PENTACLES_CARDS: CardSeedData[] = [
         'pérdida del sentido',
       ],
     },
-    imageUrl: '/images/tarot/minor/pentacles/14-king-of-pentacles.jpg',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/1c/Pents14.jpg',
   },
 ];
 

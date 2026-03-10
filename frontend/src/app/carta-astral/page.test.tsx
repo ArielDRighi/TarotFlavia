@@ -29,6 +29,10 @@ const mockSetFormData = vi.fn();
 const mockSetChartResult = vi.fn();
 const mockRouterPush = vi.fn();
 
+vi.mock('@/components/features/encyclopedia', () => ({
+  EncyclopediaInfoWidget: () => null,
+}));
+
 vi.mock('@/stores/authStore');
 vi.mock('@/hooks/api/useBirthChart');
 vi.mock('@/stores/birthChartStore');

@@ -57,7 +57,7 @@ export async function seedEncyclopediaTarotCards(
       keywords: cardData.keywords,
       imageUrl: cardData.imageUrl,
       thumbnailUrl: null,
-      relatedCards: null,
+      relatedCards: cardData.relatedCards ?? null,
       viewCount: 0,
     });
   });

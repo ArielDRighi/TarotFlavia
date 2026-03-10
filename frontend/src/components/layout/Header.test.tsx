@@ -59,7 +59,7 @@ describe('Header', () => {
     it('should render logo as a link to home', () => {
       render(<Header />);
 
-      const logoLink = screen.getByRole('link', { name: /tarot/i });
+      const logoLink = screen.getByRole('link', { name: /^tarot$/i });
       expect(logoLink).toHaveAttribute('href', '/');
     });
   });
@@ -141,10 +141,10 @@ describe('Header', () => {
       mockUseAuthStore.mockReturnValue({ user: mockUser });
     });
 
-    it('should show "Nueva Lectura" link when authenticated', () => {
+    it('should show "Tirada de Tarot" link when authenticated', () => {
       render(<Header />);
 
-      const link = screen.getByRole('link', { name: /nueva lectura/i });
+      const link = screen.getByRole('link', { name: /tirada de tarot/i });
       expect(link).toBeInTheDocument();
       expect(link).toHaveAttribute('href', '/ritual');
     });
@@ -209,7 +209,7 @@ describe('Header', () => {
   });
 
   describe('Public Navigation Links', () => {
-    it('should display Carta del Día link for all users', () => {
+    it('should display Tarot del Día link for all users', () => {
       mockUseAuthStore.mockReturnValue({
         user: null,
         isAuthenticated: false,
@@ -217,7 +217,7 @@ describe('Header', () => {
 
       render(<Header />);
 
-      const cartaLink = screen.getByRole('link', { name: /carta del día/i });
+      const cartaLink = screen.getByRole('link', { name: /tarot del día/i });
       expect(cartaLink).toBeInTheDocument();
       expect(cartaLink).toHaveAttribute('href', '/carta-del-dia');
     });

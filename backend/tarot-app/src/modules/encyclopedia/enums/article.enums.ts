@@ -15,4 +15,5 @@ export enum ArticleCategory {
   GUIDE_RITUAL = 'guide_ritual',
   GUIDE_HOROSCOPE = 'guide_horoscope',
   GUIDE_CHINESE = 'guide_chinese',
+  GUIDE_TAROT = 'guide_tarot',
 }

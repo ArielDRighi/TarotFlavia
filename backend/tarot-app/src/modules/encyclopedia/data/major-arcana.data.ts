@@ -21,11 +21,11 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
     element: Element.AIR,
     planet: Planet.URANUS,
     meaningUpright:
-      'Nuevos comienzos, inocencia, espontaneidad, aventura y espíritu libre. El Loco representa el inicio de un viaje sin miedo al futuro, confiando en el universo.',
+      'El Loco representa el salto de fe absoluto, el potencial puro y el comienzo de un viaje espiritual libre de cargas. En el amor, indica una relación fresca, espontánea y libre de expectativas tóxicas; un romance que invita a la aventura. En el trabajo, señala nuevos emprendimientos, riesgos creativos y la necesidad de innovar confiando en tus instintos. Espiritualmente, es el alma pura encarnando en la materia, recordándote que el universo sostiene a quienes confían ciegamente en el flujo natural de la vida.',
     meaningReversed:
-      'Imprudencia, irresponsabilidad, ingenuidad excesiva y tomar riesgos sin considerar las consecuencias. Necesidad de reflexión antes de actuar.',
+      'En su sombra, El Loco revela imprudencia, inmadurez crónica o un miedo paralizante a dar el primer paso. El bloqueo surge de la negligencia o de la falta de preparación básica frente a la realidad. Para trabajarlo, debes encontrar el equilibrio entre la fe ciega y la insensatez; evalúa los riesgos sin dejar que la ansiedad te detenga, asumiendo la responsabilidad de las consecuencias de tus actos impulsivos.',
     description:
-      'El Loco es la carta número 0 del Tarot, el alma en su estado más puro antes de comenzar el viaje de la vida. Representa la inocencia, la libertad y el potencial ilimitado. Un joven camina hacia el borde de un precipicio mirando al cielo, con un pequeño bolso al hombro, simbolizando que lo lleva todo consigo sin cargar con el pasado.',
+      'Un joven andrógino con ropajes coloridos y extravagantes se encuentra al borde de un precipicio blanco. Sostiene una rosa blanca, que representa la pureza de sus intenciones, y un pequeño hatillo atado a una vara negra, portando solo lo esencial de sus experiencias pasadas. Un perrito blanco salta a sus pies, simbolizando el instinto natural que lo guía y protege. El sol amarillo brillante de fondo ilumina su espíritu libre, mientras las montañas nevadas a lo lejos indican los picos espirituales que aún debe alcanzar en su largo recorrido.',
     keywords: {
       upright: [
         'nuevos comienzos',
@@ -43,7 +43,8 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'riesgo excesivo',
       ],
     },
-    imageUrl: '/images/tarot/major/00-the-fool.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/9/90/RWS_Tarot_00_Fool.jpg',
   },
   {
     slug: 'the-magician',
@@ -55,11 +56,11 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
     element: Element.AIR,
     planet: Planet.MERCURY,
     meaningUpright:
-      'Manifestación, poder personal, habilidad, concentración y voluntad. El Mago tiene todas las herramientas necesarias para crear su realidad y actuar con determinación.',
+      'El Mago es el arquetipo de la manifestación consciente, el poder personal y la alquimia. En el amor, sugiere tomar la iniciativa, utilizar la comunicación asertiva y crear conscientemente la dinámica de pareja que deseas. En el trabajo, es la señal definitiva de que posees todos los recursos, habilidades y herramientas necesarias para triunfar en tus proyectos. Espiritualmente, canalizas la energía divina hacia el plano físico, recordando el axioma hermético: "Como es arriba, es abajo".',
     meaningReversed:
-      'Manipulación, ilusión, talentos desperdiciados y falta de claridad de propósito. Cuidado con el engaño propio o ajeno.',
+      'La distorsión del Mago se manifiesta como manipulación, estafas, o talentos desperdiciados. El bloqueo principal es la inseguridad profunda que te impide usar tus herramientas, o el uso del intelecto para engañar a otros (y a ti mismo) por beneficio personal. Para trabajarlo, debes alinear tus intenciones con la ética, soltar la necesidad de control absoluto y enfocarte en construir desde la honestidad, reconociendo tu propio valor sin pisotear a nadie.',
     description:
-      'El Mago está de pie ante una mesa con los cuatro símbolos de los palos del tarot: una copa, una espada, una vara y un pentáculo. Con una mano señala al cielo y con la otra a la tierra, canalizando la energía del universo. Representa el poder de la voluntad consciente para transformar la realidad.',
+      'Un hombre imponente se yergue frente a un altar esotérico, vistiendo una túnica blanca de pureza bajo un manto rojo de pasión y acción consciente. Con la mano derecha, sostiene una vara de doble punta elevada hacia el cielo, mientras su mano izquierda señala hacia la tierra, canalizando la energía cósmica. Frente a él, sobre la mesa, descansan los cuatro elementos del tarot (copa, basto, espada, oro). Sobre su cabeza flota el símbolo del infinito, y su cintura está ceñida por una serpiente que se muerde la cola (Ouroboros), denotando el ciclo eterno de creación.',
     keywords: {
       upright: [
         'manifestación',
@@ -77,7 +78,8 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'ilusión',
       ],
     },
-    imageUrl: '/images/tarot/major/01-the-magician.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/d/de/RWS_Tarot_01_Magician.jpg',
   },
   {
     slug: 'the-high-priestess',
@@ -89,11 +91,11 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
     element: Element.WATER,
     planet: Planet.MOON,
     meaningUpright:
-      'Intuición, sabiduría interior, misterio, subconsciente y conocimiento espiritual. La Suma Sacerdotisa invita a confiar en la voz interior y los sueños.',
+      'La Sacerdotisa encarna la sabiduría intuitiva, los misterios del subconsciente y el conocimiento sagrado y oculto. En el amor, señala una conexión profunda, telepática o kármica, y te pide escuchar tu voz interior antes de actuar. En el trabajo, es momento de pausar, observar y formarte, manteniendo tus planes en secreto hasta que maduren. Espiritualmente, es la invitación a meditar, acceder a tus registros internos y confiar en tu videncia natural, comprendiendo los ritmos de la luna y tu propia psique.',
     meaningReversed:
-      'Secretos ocultos, desconexión de la intuición, información retenida y confusión interior. Se ignoran las señales intuitivas.',
+      'En posición invertida, revela intuición bloqueada, secretos tóxicos, chismes o dependencia emocional. El bloqueo reside en ignorar deliberadamente tu voz interior por miedo a lo que pueda decir, o en desconectarte de tu feminidad sagrada. Para sanarlo, debes alejarte del ruido exterior, enfrentar las verdades incómodas que tu subconsciente te muestra a través de sueños o ansiedades, y dejar de buscar validación en el mundo material para encontrarla en tu templo interno.',
     description:
-      'La Suma Sacerdotisa está sentada entre dos columnas, Boaz y Jakin, guardando el velo del Templo. Sostiene un pergamino parcialmente oculto y lleva una corona con una luna creciente a sus pies. Representa el conocimiento oculto, la sabiduría femenina y el acceso a los misterios del subconsciente.',
+      'Una figura femenina majestuosa se sienta entre dos pilares del Templo de Salomón: uno negro con la letra "B" (Boaz, la fuerza) y otro blanco con la letra "J" (Jachin, la justicia), simbolizando su absoluto dominio sobre la dualidad. Viste un manto azul fluido que se transforma en agua a sus pies. En su regazo sostiene un pergamino semiescondido (la Tora o ley oculta). Detrás de ella cuelga un velo adornado con granadas y palmeras (fertilidad divina), que oculta el vasto océano del inconsciente cósmico. Lleva la corona de Isis, marcando su conexión lunar.',
     keywords: {
       upright: [
         'intuición',
@@ -111,7 +113,8 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'desconexión espiritual',
       ],
     },
-    imageUrl: '/images/tarot/major/02-the-high-priestess.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/8/88/RWS_Tarot_02_High_Priestess.jpg',
   },
   {
     slug: 'the-empress',
@@ -123,11 +126,11 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
     element: Element.EARTH,
     planet: Planet.VENUS,
     meaningUpright:
-      'Feminidad, fertilidad, abundancia, naturaleza y nurtura. La Emperatriz representa la creación, la sensualidad y la conexión con la madre tierra.',
+      'La Emperatriz es la máxima expresión de la feminidad, la fertilidad, la abundancia y la conexión con la madre naturaleza. En el amor, anuncia sensualidad, relaciones sumamente protectoras, gestación (física o de ideas) y armonía doméstica. En el trabajo, promete el crecimiento exuberante de tus proyectos, prosperidad financiera y éxito creativo sin precedentes. Espiritualmente, te enseña a nutrir tu cuerpo como templo y a encontrar la divinidad en los placeres sensoriales y la belleza terrenal.',
     meaningReversed:
-      'Dependencia, sofocación, bloqueo creativo y descuido de uno mismo. Desequilibrio en la relación con la naturaleza y el cuerpo.',
+      'Su sombra se manifiesta como dependencia emocional extrema, asfixia afectiva, bloqueos creativos o abandono del autocuidado. El bloqueo proviene del síndrome del nido vacío o de dar en exceso hasta agotarse. Para trabajarlo, es imperativo establecer límites sanos, aprender a nutrirte a ti misma antes que a los demás, y reconectar con la naturaleza para sanar problemas de imagen corporal o complejos de inferioridad que secan tu creatividad.',
     description:
-      'La Emperatriz está sentada en un trono rodeada de exuberante vegetación, con una corona de doce estrellas y un cetro. Representa la fertilidad, la abundancia y el poder creativo de la naturaleza. Es la madre del Tarot, la fuente de toda vida y prosperidad material.',
+      'Una mujer de apariencia serena, rubia y maternal, está sentada en un cómodo trono adornado con mullidos cojines, en medio de un frondoso bosque. Viste una túnica blanca salpicada de granadas rojas, símbolo absoluto de fertilidad y pasión vital. En su cabeza porta una corona con doce estrellas (los doce signos zodiacales). A sus pies madura un campo de trigo dorado, y un río serpenteante fluye al fondo, representando el flujo constante de la vida. A su lado reposa un escudo en forma de corazón con el símbolo astrológico de Venus grabado en él.',
     keywords: {
       upright: [
         'fertilidad',
@@ -145,7 +148,8 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'infertilidad',
       ],
     },
-    imageUrl: '/images/tarot/major/03-the-empress.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/d/d2/RWS_Tarot_03_Empress.jpg',
   },
   {
     slug: 'the-emperor',
@@ -157,11 +161,11 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
     element: Element.FIRE,
     zodiacSign: ZodiacAssociation.ARIES,
     meaningUpright:
-      'Autoridad, estructura, estabilidad, disciplina y liderazgo. El Emperador representa el poder paternal, el orden establecido y la capacidad de gobernar con sabiduría.',
+      'El Emperador representa la estructura, el liderazgo consolidado, la autoridad benevolente y la ley del mundo material. En el amor, señala una pareja estable, protectora y proveedora, o la necesidad de poner límites claros y fundaciones sólidas en tu relación. En el trabajo, es un augurio excelente para ascensos, emprendimientos con bases firmes, disciplina financiera y organización sistemática. Espiritualmente, enseña que para alcanzar metas superiores, primero se necesita maestría, disciplina y orden sobre los instintos básicos terrenales.',
     meaningReversed:
-      'Tiranía, rigidez excesiva, abuso de autoridad y falta de flexibilidad. Control excesivo que sofoca el crecimiento.',
+      'La sombra del Emperador es la tiranía, la rigidez mental, el abuso de poder o, por el contrario, la total falta de disciplina y cobardía. El bloqueo se origina en traumas con figuras de autoridad o un ego desmedido que se niega a ceder el control. Para trabajarlo, debes ablandar tu coraza, aprender a delegar con confianza, abrazar la vulnerabilidad y reestructurar tus rutinas diarias sin que se conviertan en una prisión autoimpuesta.',
     description:
-      'El Emperador está sentado en un trono de granito adornado con cabezas de carnero, sosteniendo un cetro y un orbe. Viste armadura bajo su manto rojo, simbolizando que está preparado para defender su reino. Representa el poder masculino, la autoridad establecida y la capacidad de crear estructuras duraderas.',
+      'Un hombre maduro, con una larga barba blanca que denota experiencia y sabiduría ganada, está sentado en un austero y rígido trono de piedra pura, decorado con cuatro cabezas de carnero (símbolo de su regencia ariana). Debajo de su manto rojo (pasión, poder y acción) lleva una armadura metálica completa, mostrando que siempre está preparado para defender su imperio. En su mano derecha sostiene un cetro en forma de cruz ansada (Ankh), y en la izquierda un globo terráqueo, simbolizando su dominio absoluto sobre el mundo estructural y material. Al fondo, unas montañas yermas reflejan su inflexibilidad.',
     keywords: {
       upright: [
         'autoridad',
@@ -179,7 +183,8 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'control excesivo',
       ],
     },
-    imageUrl: '/images/tarot/major/04-the-emperor.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/c/c3/RWS_Tarot_04_Emperor.jpg',
   },
   {
     slug: 'the-hierophant',
@@ -191,11 +196,11 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
     element: Element.EARTH,
     zodiacSign: ZodiacAssociation.TAURUS,
     meaningUpright:
-      'Tradición, instituciones, conformidad, espiritualidad formal y sabiduría transmitida. El Hierofante guía a través del conocimiento espiritual establecido.',
+      'El Hierofante es el puente entre lo terrenal y lo divino, guardián de las tradiciones, la educación ortodoxa y el compromiso moral. En el amor, apunta a relaciones tradicionales, matrimonios convencionales o compartir un mismo sistema de creencias con la pareja. En el trabajo, sugiere seguir las reglas establecidas, buscar a un mentor experimentado, o prosperar en instituciones consolidadas (universidades, corporaciones). Espiritualmente, te invita a integrar rituales, filosofías ancestrales y dogmas que den un marco estructurado a tu fe.',
     meaningReversed:
-      'Dogmatismo, rebeldía ante las normas, cuestionamiento de la tradición y búsqueda de un camino espiritual propio fuera de las instituciones.',
+      'En su reverso, muestra rebelión extrema contra el statu quo, dogma ciego, líderes sectarios o la represión de la propia libertad de pensamiento. El bloqueo surge de seguir ciegamente normas que no resuenan con tu alma por miedo al rechazo social. Para trabajarlo, debes cuestionar las creencias heredadas, romper las estructuras ortodoxas que te asfixian y encontrar tu propia brújula moral, convirtiéndote en tu propio maestro espiritual.',
     description:
-      'El Hierofante está sentado en un trono entre dos pilares, bendiciendo a dos monjes arrodillados ante él. Lleva una triple corona y sostiene un cetro papal. Representa la tradición religiosa, la sabiduría institucional y el papel del maestro espiritual en la transmisión del conocimiento sagrado.',
+      'Un líder religioso (el Papa del Tarot) se sienta majestuoso entre dos sólidos pilares de piedra gris, que representan la ley y la libertad institucional. Viste tres elaboradas túnicas cruzadas (roja, blanca y azul) y una corona papal de tres niveles, denotando su dominio sobre el consciente, el subconsciente y el superconsciente. Su mano derecha se alza en un gesto tradicional de bendición, mientras la izquierda sostiene una cruz papal triple. A sus pies, dos llaves cruzadas (oro y plata) abren los misterios del cielo y la tierra, mientras dos sacerdotes arrodillados (uno con rosas rojas, otro con lirios blancos) escuchan devotamente sus enseñanzas.',
     keywords: {
       upright: [
         'tradición',
@@ -213,7 +218,8 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'rechazo a la tradición',
       ],
     },
-    imageUrl: '/images/tarot/major/05-the-hierophant.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/8/8d/RWS_Tarot_05_Hierophant.jpg',
   },
   {
     slug: 'the-lovers',
@@ -225,11 +231,11 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
     element: Element.AIR,
     zodiacSign: ZodiacAssociation.GEMINI,
     meaningUpright:
-      'Amor, armonía, relaciones, valores y elecciones importantes. Los Enamorados representan la unión, la alineación con los valores personales y las decisiones del corazón.',
+      'Los Enamorados simbolizan el amor consciente, la alineación de valores, la armonía y la necesidad de tomar decisiones trascendentales basadas en el deseo genuino. En el amor, es el indicio más poderoso de almas gemelas, una profunda intimidad sexual y espiritual, y uniones que transforman la vida. En el trabajo, sugiere asociaciones altamente beneficiosas donde las fortalezas se complementan. Espiritualmente, representa el equilibrio entre tu dualidad interior (ánima y ánimus) y la elección moral de alinearte con tu verdad más elevada.',
     meaningReversed:
-      'Desalineación de valores, relaciones desequilibradas, decisiones apresuradas y conflictos internos sobre lo que realmente se desea.',
+      'Su sombra revela desarmonía, conflictos internos severos, infidelidad o decisiones tomadas desde el miedo y la presión externa. El bloqueo radica en la fragmentación de tus valores o en permanecer en relaciones o trabajos que traicionan tu esencia. Para sanarlo, debes asumir la responsabilidad de tus elecciones, cortar con vínculos que drenan tu energía y realizar un profundo trabajo de amor propio para unificar tus partes fracturadas antes de vincularte con otro.',
     description:
-      'Una pareja está desnuda bajo la bendición de un ángel, con el Árbol del Conocimiento detrás de la mujer y el Árbol de la Vida detrás del hombre. Representa la unión armoniosa, las elecciones de vida importantes y el amor que trasciende lo físico para convertirse en un encuentro de almas.',
+      'Bajo el resplandor de un sol radiante, el arcángel Rafael (sanador divino) bendice a un hombre y una mujer desnudos desde una nube púrpura. La mujer, representando a Eva y al subconsciente, está de pie frente al Árbol de la Ciencia del Bien y del Mal, en el cual se enrosca la serpiente de la tentación y la sabiduría. El hombre, representando a Adán y a la mente consciente, se encuentra junto al Árbol de la Vida, con doce frutos en forma de llama. Él mira hacia la mujer, quien a su vez mira hacia el ángel, ilustrando que la mente consciente alcanza la divinidad únicamente a través de la intuición del subconsciente.',
     keywords: {
       upright: [
         'amor',
@@ -247,7 +253,8 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'relación tóxica',
       ],
     },
-    imageUrl: '/images/tarot/major/06-the-lovers.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/d/db/RWS_Tarot_06_Lovers.jpg',
   },
   {
     slug: 'the-chariot',
@@ -259,11 +266,11 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
     element: Element.WATER,
     zodiacSign: ZodiacAssociation.CANCER,
     meaningUpright:
-      'Control, voluntad, victoria, determinación y confianza. El Carro representa el triunfo a través de la disciplina y el control de las fuerzas opuestas.',
+      'El Carro es el emblema del triunfo, la fuerza de voluntad indomable, la determinación y el éxito a través de la disciplina y el control de los opuestos. En el amor, indica el avance decidido de una relación superando obstáculos externos, o la unión de dos personalidades fuertes bajo un objetivo común. En el trabajo, augura victorias contundentes, ambición bien canalizada, viajes de negocios y promociones merecidas. Espiritualmente, es el dominio del ego y de los impulsos contradictorios, conduciendo el vehículo humano con un enfoque láser hacia la evolución.',
     meaningReversed:
-      'Falta de control, agresión, dispersión de energía y viaje bloqueado. Las fuerzas internas en conflicto impiden el avance.',
+      'La distorsión del Carro es la pérdida total de control, la agresión desmedida, el egoísmo aplastante o, inversamente, la falta absoluta de dirección. El bloqueo surge de dejar que las emociones conflictivas tiren de ti en diferentes direcciones, o de intentar forzar tu voluntad sobre los demás violentamente. Para trabajarlo, debes soltar las riendas del micro-control, reevaluar tus verdaderas metas y alinear tus instintos internos para que no se saboteen entre sí, avanzando paso a paso.',
     description:
-      'Un guerrero victorioso conduce un carro tirado por dos esfinges, una negra y una blanca, representando las fuerzas opuestas que debe controlar. Lleva una corona de estrellas y sostiene un cetro. Representa el triunfo de la voluntad sobre los obstáculos mediante la disciplina y el enfoque mental.',
+      'Un joven guerrero se alza victorioso dentro de un carro de piedra con un dosel estrellado (su conexión con lo celestial). Viste una armadura decorada con lunas crecientes en los hombros (sus raíces regidas por Cáncer) y un cuadrado en el pecho (el plano terrenal). En lugar de caballos, el carro es arrastrado por dos esfinges, una blanca y otra negra, que representan fuerzas duales, positivas y negativas, conscientes e inconscientes. El guerrero no usa riendas; dirige a las bestias místicas puramente con la fuerza de su voluntad mágica (la vara en su mano) y su enfoque mental inquebrantable.',
     keywords: {
       upright: [
         'victoria',
@@ -281,7 +288,8 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'derrota',
       ],
     },
-    imageUrl: '/images/tarot/major/07-the-chariot.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/9/9b/RWS_Tarot_07_Chariot.jpg',
   },
   {
     slug: 'strength',
@@ -293,11 +301,11 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
     element: Element.FIRE,
     zodiacSign: ZodiacAssociation.LEO,
     meaningUpright:
-      'Fortaleza interior, coraje, paciencia, compasión y control sobre los impulsos. La Fuerza muestra que el verdadero poder viene de la gentileza y la perseverancia.',
+      'La Fuerza representa el coraje sereno, el dominio compasivo de los instintos primarios, la resistencia moral y la paciencia. En el amor, denota una relación apasionada pero sumamente respetuosa, donde se doma el carácter explosivo con ternura y comprensión mutua. En el trabajo, es el éxito logrado mediante la persuasión gentil, la diplomacia y la perseverancia frente a situaciones estresantes. Espiritualmente, enseña que el verdadero poder no reside en aplastar a tu bestia interior (el ego/miedos), sino en aceptarla, amarla e integrarla para transmutar su fiereza en energía vital.',
     meaningReversed:
-      'Inseguridad, debilidad, falta de autocontrol y dudas sobre la propia capacidad. Los miedos internos obstaculizan el crecimiento.',
+      'Invertida, señala debilidad de carácter, explosiones de ira incontrolables, instintos bajos dominando la razón o, por el contrario, una severa represión de la propia vitalidad. El bloqueo es la inseguridad paralizante o el odio hacia uno mismo. Para sanar esto, debes dejar de pelear contra tus miedos y pasiones, dejar el auto-castigo y practicar la compasión radical hacia tus propios errores; recuperarás tu fuerza cuando dejes de intentar reprimir tu naturaleza salvaje.',
     description:
-      'Una mujer con suavidad cierra las fauces de un león, mostrando que lo domina con amor y no con fuerza bruta. Sobre su cabeza flota el símbolo del infinito. Representa el poder interior, la valentía tranquila y la capacidad de transformar la bestia que llevamos dentro mediante la compasión y la paciencia.',
+      'Bajo un cielo dorado y cálido, una mujer vestida con una fluida túnica blanca engalanada con guirnaldas de flores (la pureza y la conexión natural) se inclina con absoluta tranquilidad sobre un imponente león adulto. En lugar de luchar o usar armas, ella le acaricia suavemente las mandíbulas, y la fiera, símbolo de los instintos primarios, el ego y las pasiones ardientes, se rinde dócilmente lamiendo su mano. Sobre la cabeza de la mujer flota el símbolo del infinito (la lemniscata), idéntico al del Mago, revelando que su poder es ilimitado y de naturaleza espiritual profunda.',
     keywords: {
       upright: [
         'fortaleza',
@@ -315,7 +323,8 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'impulsividad',
       ],
     },
-    imageUrl: '/images/tarot/major/08-strength.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/f/f5/RWS_Tarot_08_Strength.jpg',
   },
   {
     slug: 'the-hermit',
@@ -327,11 +336,11 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
     element: Element.EARTH,
     zodiacSign: ZodiacAssociation.VIRGO,
     meaningUpright:
-      'Introspección, soledad, orientación interior, búsqueda de la verdad y sabiduría. El Ermitaño invita a retirarse del mundo para encontrar respuestas dentro de uno mismo.',
+      'El Ermitaño es el arquetipo de la introspección profunda, la sabiduría solitaria, la búsqueda de la verdad interna y el guía espiritual. En el amor, puede indicar un periodo necesario de celibato, la búsqueda del amor propio antes de compartir la vida, o una pareja madura que valora enormemente su espacio individual. En el trabajo, sugiere aislarse de las distracciones para enfocarse en el estudio, o asumir un rol de mentor discreto. Espiritualmente, es el retiro voluntario del ruido del mundo para escuchar la voz del alma y encontrar tu propia luz interior.',
     meaningReversed:
-      'Aislamiento excesivo, soledad no deseada, rechazo de la ayuda y perderse en el camino espiritual sin guía.',
+      'En su sombra, revela aislamiento extremo, misantropía, paranoia, o el rechazo crónico a relacionarse. El bloqueo es usar la espiritualidad o el estudio como escondite para evitar vivir la realidad emocional. Para trabajarlo, debes reconocer cuándo el tiempo a solas se convierte en una prisión, forzarte a salir de tu cueva, compartir tus conocimientos con el mundo y permitirte ser vulnerable frente a otras personas sin miedo a perder tu esencia.',
     description:
-      'Un anciano de larga barba blanca está de pie en la cima de una montaña nevada, sosteniendo un farol que ilumina el camino y un bastón. Representa la búsqueda de la verdad interior, el retiro consciente para la reflexión profunda y la iluminación que proviene del autoconocimiento.',
+      'Un anciano sabio, de larga barba blanca que refleja el paso de mucho tiempo en contemplación, camina solo en la cima de una montaña gélida y nevada. Viste una pesada capa y capucha gris (el color del misterio y el aislamiento voluntario). En su mano izquierda se apoya en un bastón amarillo largo, símbolo de su autoridad adquirida y del apoyo de su mente subconsciente. En la mano derecha alza en alto un farol radiante; dentro de él brilla una estrella de seis puntas (el Sello de Salomón), que representa la sabiduría divina que guía sus pasos en la oscuridad y que él ofrece humildemente a quienes están más abajo.',
     keywords: {
       upright: [
         'introspección',
@@ -349,7 +358,8 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'rechazo',
       ],
     },
-    imageUrl: '/images/tarot/major/09-the-hermit.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/4/4d/RWS_Tarot_09_Hermit.jpg',
   },
   {
     slug: 'wheel-of-fortune',
@@ -361,11 +371,11 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
     element: Element.FIRE,
     planet: Planet.JUPITER,
     meaningUpright:
-      'Ciclos, destino, buena suerte, cambio de circunstancias y punto de inflexión. La Rueda gira siempre y los cambios son parte natural de la existencia.',
+      'La Rueda de la Fortuna rige los ciclos kármicos irrevocables, el destino, los cambios repentinos y los puntos de inflexión decisivos. En el amor, señala un giro del destino: un encuentro kármico, o una crisis necesaria que lleva la relación a una nueva fase. En el trabajo, indica suerte impredecible, oportunidades caídas del cielo y cambios importantes en tu carrera. Espiritualmente, te enseña el principio de impermanencia; aceptar que todo sube y baja, y que el único punto de paz está en el centro inmóvil de tu propio ser.',
     meaningReversed:
-      'Mala suerte, resistencia al cambio, rupturas de ciclos negativos y falta de control sobre los acontecimientos externos.',
+      'Invertida, se experimenta como una racha de "mala suerte", resistencia inútil al cambio o repetición ciega de ciclos kármicos dolorosos. El bloqueo es la mentalidad de víctima, creyendo que el universo está en tu contra. Para trabajarlo, debes soltar la ilusión de control, aceptar la caída con gracia, aprender la lección oculta detrás del patrón repetitivo y asumir tu cuota de responsabilidad para finalmente romper el ciclo y volver a girar la rueda a tu favor.',
     description:
-      'Una gran rueda gira en el centro de la carta, con figuras ascendiendo y descendiendo. En las esquinas están los cuatro seres vivientes del Apocalipsis. La rueda tiene inscripciones esotéricas y representa los ciclos de la vida, la fortuna cambiante y las fuerzas del destino que mueven la existencia.',
+      'En el centro del cielo azul cuelga una enorme rueda mística de color bronce, inscrita con las letras T-A-R-O (Torah/Tarot) entrelazadas con el Nombre Inefable hebreo de Dios (YHVH). Tres figuras místicas la rodean: a la izquierda, la serpiente Tifón desciende (la caída material); a la derecha, el dios Anubis asciende con cabeza de chacal (el progreso y la resurrección); y en la cima, una Esfinge armada con una espada vigila (la sabiduría inmutable en el centro del caos). En las cuatro esquinas de la carta se ubican los símbolos alados de los cuatro evangelistas (o los cuatro signos fijos: Acuario, Escorpio, Leo, Tauro), que estudian atentamente la ley universal.',
     keywords: {
       upright: [
         'ciclos',
@@ -383,7 +393,8 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'falta de control',
       ],
     },
-    imageUrl: '/images/tarot/major/10-wheel-of-fortune.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/3/3c/RWS_Tarot_10_Wheel_of_Fortune.jpg',
   },
   {
     slug: 'justice',
@@ -395,11 +406,11 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
     element: Element.AIR,
     zodiacSign: ZodiacAssociation.LIBRA,
     meaningUpright:
-      'Justicia, verdad, imparcialidad, causa y efecto, ley y equilibrio. La Justicia representa las consecuencias de las acciones y la necesidad de actuar con integridad.',
+      'La Justicia simboliza la verdad objetiva, la ley de causa y efecto, el equilibrio racional y la integridad ética absoluta. En el amor, exige honestidad radical, acuerdos equitativos, divorcios limpios o matrimonios justos basados en el respeto mutuo real, no en la fantasía. En el trabajo, garantiza resolución a favor en temas legales, firmas de contratos importantes y recompensas proporcionales a tu esfuerzo puro. Espiritualmente, es el veredicto del karma: cosechas exactamente lo que siembras, obligándote a asumir la responsabilidad total de tus pensamientos y acciones.',
     meaningReversed:
-      'Injusticia, deshonestidad, falta de responsabilidad y evitar las consecuencias de los propios actos.',
+      'La sombra de la Justicia muestra deshonestidad, prejuicios, burocracia aplastante, juicios injustos o trato desigual. El bloqueo radica en evadir tu propia responsabilidad, culpar a otros de tu situación y rehusarte a ver la verdad objetiva de un conflicto. Para trabajarlo, debes dejar las justificaciones, limpiar tu karma pidiendo perdón si has obrado mal, y actuar con integridad total aunque nadie te esté mirando, equilibrando tu propia balanza interna.',
     description:
-      'Una figura de justicia está sentada en un trono entre dos columnas, sosteniendo una espada en la mano derecha y una balanza en la izquierda. Representa la imparcialidad, la verdad objetiva y la ley del karma: que toda acción tiene consecuencias proporcionales.',
+      'Una figura andrógina, solemne e imponente, se sienta estoicamente entre dos pilares de piedra desnuda, frente a una cortina púrpura que oculta la compasión para primar la objetividad. Lleva una corona dorada con un rubí cuadrado en el centro, señal de su pensamiento lógico y estructurado. En su mano derecha sostiene una espada de doble filo apuntando recta hacia arriba, representando el rigor mental, la decisión clara y el corte de las mentiras. En su mano izquierda, balancea perfectamente una balanza de oro, sopesando las acciones, la intuición y la razón en perfecta simetría.',
     keywords: {
       upright: [
         'justicia',
@@ -417,7 +428,8 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'evasión',
       ],
     },
-    imageUrl: '/images/tarot/major/11-justice.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/e/e0/RWS_Tarot_11_Justice.jpg',
   },
   {
     slug: 'the-hanged-man',
@@ -429,11 +441,11 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
     element: Element.WATER,
     planet: Planet.NEPTUNE,
     meaningUpright:
-      'Pausa, rendición, perspectiva nueva, sacrificio voluntario e iluminación. El Colgado elige detenerse para ganar claridad desde un punto de vista diferente.',
+      'El Colgado representa el sacrificio voluntario, la suspensión en el tiempo, el cambio radical de perspectiva y la rendición al destino. En el amor, exige pausar los dramas, sacrificar el ego por el bienestar mutuo y ver las cosas desde los zapatos del otro. En el trabajo, indica demoras inevitables, la necesidad de soltar el control y proyectos que requieren un enfoque totalmente alternativo. Espiritualmente, es la iluminación adquirida a través de la quietud y la entrega; cuando dejas de resistirte a la realidad, experimentas un despertar místico.',
     meaningReversed:
-      'Demora, resistencia al sacrificio necesario, martirio y apego excesivo que impide el progreso.',
+      'Invertida, revela martirio inútil, estancamiento crónico, resistencia obstinada, o la incapacidad de hacer un sacrificio necesario. El bloqueo es tu propia terquedad intentando forzar resultados o adoptando el rol de víctima eterna esperando que otros te rescaten. Para trabajarlo, debes admitir que tus viejos métodos ya no funcionan, dejar de inmolarte por personas o causas que no lo merecen, y tomar medidas activas (o cambiar tu enfoque mental) para destrabar tu vida de inmediato.',
     description:
-      'Un hombre cuelga boca abajo de un árbol vivo por un pie, con el otro pie cruzado formando una cruz. Su expresión es serena y tiene un halo de luz alrededor de la cabeza. Representa la voluntad de rendirse, cambiar la perspectiva y encontrar iluminación a través del sacrificio consciente.',
+      'Un joven se encuentra suspendido boca abajo, atado por el tobillo derecho a un madero vivo en forma de cruz Tau, del cual brotan hojas verdes, simbolizando que esta suspensión es una pausa fértil y vital, no un castigo de muerte. Su pierna libre está cruzada formando un número "4", mientras sus brazos están doblados tras la espalda formando un triángulo invertido, el símbolo del agua y la receptividad. A pesar de su posición extraña y aparentemente incómoda, su rostro irradia una paz profunda y un aura dorada de iluminación resplandece alrededor de su cabeza.',
     keywords: {
       upright: [
         'pausa',
@@ -445,7 +457,8 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
       ],
       reversed: ['demora', 'resistencia', 'martirio', 'apego', 'indecisión'],
     },
-    imageUrl: '/images/tarot/major/12-the-hanged-man.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/2/2b/RWS_Tarot_12_Hanged_Man.jpg',
   },
   {
     slug: 'death',
@@ -457,11 +470,11 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
     element: Element.WATER,
     zodiacSign: ZodiacAssociation.SCORPIO,
     meaningUpright:
-      'Transformación, finales, transición, cambio inevitable y renovación. La Muerte rara vez significa muerte física; representa el cierre de un ciclo para que comience uno nuevo.',
+      'La Muerte es la carta de la transformación profunda, el fin de una era, la poda necesaria y la transición hacia lo nuevo. En el amor, significa el divorcio o el fin de una relación estancada, o la muerte radical de viejos patrones tóxicos para permitir que la pareja renazca purificada. En el trabajo, es el cierre de un ciclo laboral, despidos que abren nuevas puertas o un cambio de carrera total. Espiritualmente, es el ego muriendo: la impermanencia absoluta, limpiar el terreno quemado para que crezcan brotes nuevos y más auténticos.',
     meaningReversed:
-      'Resistencia al cambio, incapacidad de soltar el pasado y aferrarse a lo que ya terminó impidiendo la transformación necesaria.',
+      'El reverso señala resistencia brutal al cambio, aferrarse a relaciones muertas, estancamiento doloroso y putrefacción espiritual. El bloqueo es el pánico paralizante a soltar lo conocido, prefiriendo la familiaridad del dolor a la incertidumbre del renacimiento. Para trabajarlo, debes atravesar tu duelo. Corta los lazos que ya no tienen pulso, purga tu entorno de objetos y personas estancadas, y acepta que cuanto más te resistas a la corriente cósmica, más doloroso será el arrastre.',
     description:
-      'Un esqueleto con armadura negra montado en un caballo blanco avanza mientras figuras de todos los estratos sociales caen ante él. Lleva una bandera con una rosa blanca. Detrás, el sol sale entre dos torres. Representa el cambio inevitable, los finales necesarios y la promesa de renovación tras cada cierre.',
+      'Un esqueleto (la esencia inalterable del ser tras la disolución temporal de la carne) avanza implacablemente sobre un imponente caballo blanco (la pureza y la marcha ineludible del tiempo). Viste una armadura negra, símbolo del vacío y del final de lo físico. En su mano alza un estandarte negro estampado con la Rosa Mística blanca de cinco pétalos, indicando purificación y renacimiento. A su paso, figuras de todos los estatus sociales caen o se rinden: un rey muerto (el ego), un sacerdote implorante, una mujer apartando la vista y un niño inocente que le ofrece flores. Al fondo, tras dos torres, amanece un sol radiante, la promesa del nuevo día tras la muerte.',
     keywords: {
       upright: [
         'transformación',
@@ -479,7 +492,8 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'negación',
       ],
     },
-    imageUrl: '/images/tarot/major/13-death.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/d/d7/RWS_Tarot_13_Death.jpg',
   },
   {
     slug: 'temperance',
@@ -491,11 +505,11 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
     element: Element.FIRE,
     zodiacSign: ZodiacAssociation.SAGITTARIUS,
     meaningUpright:
-      'Equilibrio, moderación, paciencia, propósito y flujo. La Templanza representa la integración armoniosa de opuestos y la búsqueda del camino del medio.',
+      'La Templanza encarna la alquimia interior, la moderación, el equilibrio dinámico, la paciencia y la sanación profunda. En el amor, indica una convivencia pacífica, compromiso, la mezcla perfecta de personalidades opuestas y la curación de viejas heridas afectivas. En el trabajo, aconseja administración moderada, fusiones de negocios exitosas y un progreso lento pero sumamente sólido. Espiritualmente, es encontrar el "camino del medio", integrando tus luces y tus sombras para forjar un espíritu purificado, elevándote como un sanador consciente.',
     meaningReversed:
-      'Desequilibrio, excesos, falta de moderación, impaciencia y conflicto entre aspectos de la vida que no se integran bien.',
+      'Invertida revela excesos, desequilibrio químico o emocional, imprudencia, choque constante de fuerzas e impaciencia destructiva. El bloqueo es el comportamiento extremista, las adicciones o el desgaste energético por querer forzar los flujos naturales. Para sanarlo, debes recuperar el control de tu biología y tus emociones, cortar con los hábitos destructivos y compulsivos, moderar tus reacciones e instaurar una rutina equilibrada de descanso, trabajo y paz mental.',
     description:
-      'Un ángel andrógino está de pie con un pie en el agua y otro en tierra, transfiriendo agua entre dos copas doradas. Tiene un triángulo dentro de un cuadrado en el pecho y un halo solar. Representa la alquimia personal, la moderación, el equilibrio entre lo espiritual y lo material, y la paciencia del tiempo.',
+      'Un majestuoso arcángel de género neutro, con alas de fuego rojo oscuro, se encuentra de pie junto a un estanque. Tiene un pie firmemente apoyado en la tierra firme (lo material) y el otro sumergido en el agua ondulante (el subconsciente). En su túnica blanca brilla un triángulo dentro de un cuadrado, símbolo de la ascensión del espíritu sobre la materia. El ángel vierte magistral y delicadamente un flujo ininterrumpido de agua mágica entre dos cálices dorados, mezclando elementos opuestos sin derramar una gota. Al fondo, un sendero recto y largo conduce hacia una brillante corona de luz sobre las montañas.',
     keywords: {
       upright: [
         'equilibrio',
@@ -513,7 +527,8 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'falta de moderación',
       ],
     },
-    imageUrl: '/images/tarot/major/14-temperance.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/f/f8/RWS_Tarot_14_Temperance.jpg',
   },
   {
     slug: 'the-devil',
@@ -525,11 +540,11 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
     element: Element.EARTH,
     zodiacSign: ZodiacAssociation.CAPRICORN,
     meaningUpright:
-      'Sombra, apego, adicciones, materialismo y restricciones autoimpuestas. El Diablo representa las cadenas con las que nos atamos a nosotros mismos por miedo o deseo.',
+      'El Diablo es el arquetipo de la sombra, los apegos materiales, las pasiones crudas, la sexualidad animal y la autoesclavitud. En el amor, advierte sobre la lujuria sin límites, la codependencia extrema, los celos posesivos, dinámicas kármicas tóxicas y manipulaciones. En el trabajo, señala ambición ciega, obsesión por el estatus y el dinero, o sentirse atrapado en un empleo por conveniencia económica. Espiritualmente, representa tus cadenas autoimpuestas, mostrándote que eres esclavo de tus propios miedos, vicios y limitaciones autoengañadas.',
     meaningReversed:
-      'Liberación de ataduras, ruptura de cadenas, recuperación de poder personal y confrontación con las propias sombras.',
+      'La inversión del Diablo es liberadora: marca el desapego radical de hábitos destructivos, la ruptura de cadenas mentales y el escape de situaciones de abuso. El bloqueo, sin embargo, puede manifestarse como una negación total de la propia sombra. Para trabajarlo de forma efectiva, debes mirar tu oscuridad de frente, abrazar tu sexualidad e instintos sin culpa ni pudor tóxico, y tomar decisiones conscientes que te devuelvan el control de tu libertad personal, paso a paso.',
     description:
-      'Una figura demoníaca con alas de murciélago y patas de cabra está sentada en un pedestal al que están encadenados un hombre y una mujer. Sin embargo, las cadenas son lo suficientemente amplias para quitárselas. Representa los vínculos que nosotros mismos creamos, las adicciones, los miedos y las ilusiones que nos mantienen prisioneros.',
+      'En el centro de una caverna totalmente oscura, una figura demoníaca hermafrodita e imponente (el Baphomet) se yergue sobre un pedestal cúbico negro (la materia densa). Tiene cuernos de cabra, alas de murciélago vampiro y una estrella de cinco puntas invertida en la frente (la primacía de lo material sobre lo espiritual). Su mano derecha está levantada en el saludo vulgar de la ignorancia, mientras que en la izquierda sostiene una antorcha ardiente apuntando hacia abajo, encendiendo la cola del hombre. Un hombre y una mujer desnudos están encadenados al pedestal por el cuello, pero las cadenas están tan sueltas que podrían liberarse a sí mismos si tuvieran la voluntad de hacerlo.',
     keywords: {
       upright: [
         'sombra',
@@ -547,7 +562,8 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'desapego',
       ],
     },
-    imageUrl: '/images/tarot/major/15-the-devil.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/5/55/RWS_Tarot_15_Devil.jpg',
   },
   {
     slug: 'the-tower',
@@ -559,11 +575,11 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
     element: Element.FIRE,
     planet: Planet.MARS,
     meaningUpright:
-      'Caos repentino, destrucción de lo construido sobre bases falsas, revelación súbita y colapso inevitable. La Torre destruye lo que no sirve para permitir una reconstrucción más sólida.',
+      'La Torre encarna la destrucción repentina de viejos paradigmas, el colapso de cimientos falsos, revelaciones impactantes y el caos liberador. En el amor, predice rupturas abruptas, escándalos o la explosión inevitable de secretos y tensiones reprimidas; el fin del engaño. En el trabajo, señala quiebras, despidos repentinos, o el fracaso estrepitoso de planes mal construidos. Espiritualmente, es un rayo de verdad divina destrozando la prisión del ego. Doloroso pero esencial, elimina implacablemente lo que ya no es verdadero para tu alma.',
     meaningReversed:
-      'Evitar el colapso necesario, resistirse a la transformación urgente o vivir con miedo constante a un desastre inminente.',
+      'Invertida, indica el miedo paralizante a sufrir el desastre, postergación de lo inevitable, sobrevivir a un evento destructivo o la incapacidad de soltar los escombros. El bloqueo es tu propia terquedad intentando reparar una estructura que ya está irremediablemente podrida por miedo al vacío. Para trabajarlo, debes dejar que todo colapse. Deja de luchar para sostener la mentira. Atraviesa el pánico y acepta la destrucción para poder barrer los escombros y reconstruir sobre roca firme.',
     description:
-      'Un rayo impacta la cima de una torre, derribando su corona dorada mientras figuras caen al vacío desde sus ventanas. Llamas salen por las aberturas. Representa los cambios abruptos e inevitables, la destrucción de las estructuras falsas o caducas y la liberación violenta que precede a una nueva y más auténtica construcción.',
+      'En medio de la densa noche, una imponente torre de piedra construida sobre la cima de un pico montañoso es impactada violentamente por un enorme rayo de fuego (la intervención brutal de lo divino o la verdad cósmica). La corona que servía de techo a la torre es expulsada hacia arriba por la fuerza de la explosión. Dos figuras humanas (un hombre con una capa y una mujer) caen despavoridas al vacío en medio de las llamas, representando la caída del orgullo material y espiritual. Veintidós pequeñas gotas de fuego flotan en el aire, correspondientes a los arcanos mayores o las letras hebreas.',
     keywords: {
       upright: [
         'caos',
@@ -581,7 +597,8 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'negación',
       ],
     },
-    imageUrl: '/images/tarot/major/16-the-tower.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/5/53/RWS_Tarot_16_Tower.jpg',
   },
   {
     slug: 'the-star',
@@ -593,11 +610,11 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
     element: Element.AIR,
     zodiacSign: ZodiacAssociation.AQUARIUS,
     meaningUpright:
-      'Esperanza, renovación, fe, inspiración y serenidad. La Estrella trae luz después de la oscuridad, recordándonos que siempre hay esperanza y que el universo nos cuida.',
+      'La Estrella es el bálsamo cósmico: esperanza renovada, sanación profunda, paz espiritual, inspiración y fe en el futuro. En el amor, augura un periodo de enorme vulnerabilidad hermosa, sanación de viejos traumas de pareja y conexiones platónicas o espirituales puras. En el trabajo, es el momento de fluir, innovar, brillar en proyectos humanitarios y confiar en que el éxito llegará orgánicamente. Espiritualmente, has sobrevivido a la Torre y ahora estás conectado directamente con la fuente divina, recibiendo gracia, purificación y claridad absoluta.',
     meaningReversed:
-      'Desesperanza, falta de fe, desconexión espiritual y pérdida del sentido de propósito y dirección.',
+      'La sombra de La Estrella revela desesperanza, cinismo, pérdida de fe, pesimismo crónico y falta de inspiración. El bloqueo es el escepticismo extremo o el agotamiento espiritual que te hace sentir totalmente desconectado del universo y de tu propio propósito. Para sanarlo, debes volver a confiar. Realiza prácticas de limpieza y purificación, perdona tu propio cinismo, y enfócate tenazmente en pensamientos positivos, abriendo tus canales sutiles para volver a recibir la nutrición celestial.',
     description:
-      'Una figura femenina desnuda vierte agua de dos jarras, una en tierra y otra en el lago, bajo el cielo estrellado. Una gran estrella de ocho puntas brilla en el centro, rodeada de siete estrellas más pequeñas. Representa la renovación espiritual, la esperanza que persiste tras la tormenta y la conexión con el universo.',
+      'Bajo un cielo nocturno iluminado por una resplandeciente estrella amarilla de ocho puntas (símbolo del infinito cósmico) rodeada por siete estrellas blancas más pequeñas, una mujer rubia completamente desnuda se arrodilla junto a un estanque, representando la vulnerabilidad total y la verdad sin velos. Con una jarra, vierte agua pura (la energía psíquica) en el estanque para nutrir el inconsciente, mientras con otra jarra derrama agua sobre la exuberante tierra verde (la materia). En un árbol cercano, posa un ibis sagrado, el ave del dios Thoth, representando el conocimiento, el arte y la comunicación profunda.',
     keywords: {
       upright: [
         'esperanza',
@@ -615,7 +632,8 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'falta de propósito',
       ],
     },
-    imageUrl: '/images/tarot/major/17-the-star.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/d/db/RWS_Tarot_17_Star.jpg',
   },
   {
     slug: 'the-moon',
@@ -627,11 +645,11 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
     element: Element.WATER,
     zodiacSign: ZodiacAssociation.PISCES,
     meaningUpright:
-      'Ilusión, miedo, subconsciente, sueños y confusión. La Luna ilumina el camino tenuemente, mostrando que no todo es lo que parece y que debemos navegar el territorio de lo desconocido con intuición.',
+      'La Luna rige el reino del inconsciente, la intuición poderosa, los sueños, pero también la ilusión, el miedo y la confusión profunda. En el amor, advierte sobre secretos ocultos, engaños, proyecciones psicológicas y la necesidad de guiarse por instintos en medio de un terreno pantanoso y poco claro. En el trabajo, señala estafas, malos entendidos, o un periodo de gestación intensamente creativo donde la lógica falla. Espiritualmente, es el viaje aterrador pero necesario a través de tus sombras, traumas reprimidos y vidas pasadas para reclamar tu luz psíquica.',
     meaningReversed:
-      'Claridad después de la confusión, liberación de los miedos, verdad revelada y superación de ilusiones o engaños.',
+      'Invertida, significa la disipación de ilusiones, el fin de la confusión mental, la revelación de mentiras o, por el contrario, ataques de ansiedad y paranoia clínica severa. El bloqueo es quedar atrapado en el delirio, los miedos irracionales y la imaginación destructiva. Para trabajarlo, debes aferrarte firmemente a la realidad objetiva, evitar las drogas o métodos de evasión, y enfrentar los demonios subconscientes con la luz de la razón y la terapia, esperando pacientemente el amanecer.',
     description:
-      'La luna llena brilla entre dos torres mientras un cangrejo emerge del agua, un perro y un lobo aúllan a la luna. Un largo camino se pierde en la distancia. Representa el reino del subconsciente, los miedos irracionales, las ilusiones y la necesidad de confiar en la intuición para navegar la incertidumbre.',
+      'Una luna llena enorme y melancólica en el cielo nocturno, que contiene a la vez un rostro de perfil, el cuarto creciente y 15 lágrimas en forma de yods (semillas de luz divina) descendiendo hacia la tierra. Abajo, en la penumbra de la medianoche, un perro domesticado y un lobo salvaje (representando la mente civilizada y los impulsos salvajes) aúllan al astro. En primer plano, desde las oscuras y estancadas aguas del inconsciente colectivo, emerge reptando un cangrejo de río (los miedos más primarios que suben a la conciencia). Un largo y sinuoso sendero serpentea entre dos torres grises y amenazantes hacia montañas distantes e invisibles.',
     keywords: {
       upright: [
         'ilusión',
@@ -649,7 +667,8 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'realidad',
       ],
     },
-    imageUrl: '/images/tarot/major/18-the-moon.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/7/7f/RWS_Tarot_18_Moon.jpg',
   },
   {
     slug: 'the-sun',
@@ -661,11 +680,11 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
     element: Element.FIRE,
     planet: Planet.SUN,
     meaningUpright:
-      'Alegría, éxito, vitalidad, positividad y claridad. El Sol es una de las cartas más positivas del Tarot, radiando energía, felicidad y la certeza de que todo saldrá bien.',
+      'El Sol es el arcano supremo de la alegría vital, el éxito radiante, la vitalidad, la claridad absoluta y la verdad iluminada. En el amor, augura matrimonios felices, embarazos, relaciones cálidas llenas de risas mutuas y una total falta de engaños. En el trabajo, es el éxito rotundo, reconocimiento público, abundancia material y liderazgo carismático y magnético. Espiritualmente, es el despertar final; el ego y el alma están en perfecta armonía, vibrando en la más alta frecuencia de amor y celebración infantil y pura.',
     meaningReversed:
-      'Optimismo excesivo, egocentrismo, energía bloqueada o dificultad para ver el lado positivo de las situaciones.',
+      'En su reverso, El Sol rara vez es totalmente negativo; señala egoísmo, arrogancia, entusiasmo excesivo sin base realista, o un retraso temporal del éxito. El bloqueo es el orgullo desmedido o el comportamiento infantil inmaduro ("síndrome de Peter Pan"). Para trabajarlo, debes bajar de tu nube de egocentrismo, compartir tu éxito con los demás, cultivar la humildad y abrazar a tu niño interior sanamente, sin evadir las responsabilidades adultas de tu vida diaria.',
     description:
-      'Un niño desnudo cabalga un caballo blanco bajo un sol radiante que brilla en un cielo despejado. Girasoles florecen detrás de una pared. El niño lleva una bandera roja y tiene una corona de flores. Representa la alegría pura, el éxito, la vitalidad y la claridad con que la consciencia ve el mundo cuando está en armonía.',
+      'Un sol gigantesco, brillante y resplandeciente domina todo el cielo, irradiando luz amarilla y anaranjada en forma de líneas rectas y onduladas, representando tanto la luz penetrante como el calor envolvente del espíritu. Frente a un austero muro de ladrillo gris (los límites terrenales ya superados), florecen cuatro altísimos girasoles. En primer plano, un niño pequeño y regordete, completamente desnudo para mostrar su inocencia prístina, cabalga feliz y con los brazos abiertos sobre un caballo blanco sin montura. Lleva en su mano izquierda un estandarte victorioso de color rojo anaranjado y una corona floral de vida.',
     keywords: {
       upright: [
         'alegría',
@@ -683,7 +702,8 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'falta de claridad',
       ],
     },
-    imageUrl: '/images/tarot/major/19-the-sun.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/1/17/RWS_Tarot_19_Sun.jpg',
   },
   {
     slug: 'judgement',
@@ -695,11 +715,11 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
     element: Element.FIRE,
     planet: Planet.PLUTO,
     meaningUpright:
-      'Renacimiento, llamado interior, absolución, transformación profunda y despertar espiritual. El Juicio invita a responder al llamado del alma y trascender el pasado.',
+      'El Juicio es el toque de trompeta del despertar, el renacimiento, la absolución kármica y el llamado a un propósito superior de vida. En el amor, indica una renovación profunda de los votos, curación milagrosa de rupturas o decisiones conjuntas que cambiarán la vida para siempre. En el trabajo, señala el resultado inminente de una larga evaluación, la elección de tu verdadera vocación o el éxito tras un largo esfuerzo. Espiritualmente, es la redención; te liberas definitivamente de la culpa del pasado, escuchando la llamada divina para renacer en una versión evolucionada de ti mismo.',
     meaningReversed:
-      'Autodudas, incapacidad de perdonarse a uno mismo, ignorar el llamado interior y resistirse al despertar espiritual necesario.',
+      'Invertida, señala dudas paralizantes, ignorar repetidamente la "llamada", auto-castigo severo, crítica excesiva o la incapacidad de aprender lecciones pasadas. El bloqueo es el miedo extremo a ser juzgado (por otros o por uno mismo) que te mantiene en un ataúd de inercia. Para trabajarlo, debes perdonarte a ti mismo radicalmente. Deja de castigarte por errores de una versión tuya que ya no existe, acepta la absolución del universo y atrévete a levantarte y cambiar el rumbo de tu vida sin dudar más.',
     description:
-      'El arcángel Gabriel toca su trompeta desde las nubes mientras figuras emergen de sus ataúdes en respuesta al llamado. Montañas cubiertas de hielo enmarcan la escena. Representa el despertar espiritual, el llamado a responder al propósito del alma, la redención y la posibilidad de renacer liberado del pasado.',
+      'En lo alto de los cielos, emergiendo majestuosamente de una nube brillante, el inmenso arcángel Gabriel toca una trompeta dorada decorada con una bandera blanca que porta una cruz roja (símbolo del equilibrio espiritual en el mundo terrenal). Abajo, en un paisaje acuático que representa el mar del inconsciente o la fluidez cósmica, hombres, mujeres y niños desnudos y pálidos se levantan de sus tumbas flotantes en forma de ataúdes grises. Sus brazos están abiertos en una postura de adoración, sorpresa y agradecimiento absoluto frente a este milagro de resurrección y despertar espiritual supremo.',
     keywords: {
       upright: [
         'renacimiento',
@@ -717,7 +737,8 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'resistencia',
       ],
     },
-    imageUrl: '/images/tarot/major/20-judgement.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/d/dd/RWS_Tarot_20_Judgement.jpg',
   },
   {
     slug: 'the-world',
@@ -729,11 +750,11 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
     element: Element.EARTH,
     planet: Planet.SATURN,
     meaningUpright:
-      'Completud, integración, logro, plenitud y viaje culminado. El Mundo representa el final exitoso de un ciclo, la realización plena y la armonía entre todos los aspectos del ser.',
+      'El Mundo es la culminación gloriosa, el éxito definitivo, la integración total de todos los aspectos del ser y el fin de un largo viaje kármico. En el amor, es la relación que te hace sentir "completo", el matrimonio definitivo, y la armonía duradera y madura. En el trabajo, marca la finalización exitosa de un proyecto masivo, el alcance de tu meta más alta, reconocimiento internacional y viajes. Espiritualmente, es la iluminación; el Ouroboros cerrado. Eres uno con el universo, dominando los cuatro elementos y listo para iniciar un nuevo ciclo desde un plano de conciencia superior.',
     meaningReversed:
-      'Incompletud, objetivos sin terminar, falta de cierre y resistencia al final de un ciclo importante.',
+      'En su sombra, revela falta de cierre, aplazamientos de último minuto, estancamiento en la zona de confort o la incapacidad dolorosa de terminar lo que has empezado. El bloqueo es un profundo apego a una etapa de tu vida que ya concluyó, impidiendo la evolución natural hacia lo nuevo. Para sanarlo, debes enfrentarte al miedo al vacío que sigue al éxito. Ata los cabos sueltos, celebra activamente tus pequeños logros, y atrévete a poner el punto final, aceptando que cada final es el preludio perfecto para convertirte nuevamente en El Loco.',
     description:
-      'Una figura andrógina danzante está rodeada por una corona de laurel en forma de elipse, sosteniendo dos varitas. En las cuatro esquinas están los cuatro seres vivientes: el toro, el león, el águila y el ángel. Representa la culminación del viaje del alma, la integración de todos los aprendizajes y la danza de la plenitud.',
+      'En el centro del cosmos, una mujer misteriosa, andrógina y radiante baila suspendida en el cielo vacío, envuelta solo por un trozo de tela púrpura (símbolo de majestad y misterio) que oculta sus órganos reproductores, formando una espiral dinámica. Sostiene dos varitas gemelas (la dualidad evolucionada y equilibrada del Mago). A su alrededor, hay una enorme y victoriosa corona elíptica de laurel verde, atada con lazos rojos en los polos norte y sur (el infinito cósmico y el ciclo completado). En las cuatro esquinas se hallan nuevamente las figuras de los cuatro querubines del apocalipsis o signos fijos (Hombre, Águila, León, Toro), observando la integración final del espíritu en la materia.',
     keywords: {
       upright: [
         'completud',
@@ -751,6 +772,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'estancamiento',
       ],
     },
-    imageUrl: '/images/tarot/major/21-the-world.jpg',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/f/ff/RWS_Tarot_21_World.jpg',
   },
 ];

@@ -4,12 +4,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { NumerologyPage } from './NumerologyPage';
 
-// Mock useArticleSnippet so EncyclopediaInfoWidget renders with data
-const mockUseArticleSnippet = vi.fn();
-vi.mock('@/hooks/api/useEncyclopediaArticles', () => ({
-  useArticleSnippet: () => mockUseArticleSnippet(),
-}));
-
 // Mock hooks
 const mockUseAuthStore = vi.fn();
 const mockUseCalculateNumerology = vi.fn();
@@ -62,36 +56,17 @@ describe('NumerologyPage', () => {
       data: null,
       isLoading: false,
     });
-    mockUseArticleSnippet.mockReturnValue({
-      data: {
-        id: 1,
-        slug: 'guia-numerologia',
-        nameEs: 'Guía de Numerología',
-        snippet: 'Snippet de numerología.',
-      },
-      isLoading: false,
-      error: null,
-    });
   });
 
-  it('debe renderizar EncyclopediaInfoWidget con slug="guia-numerologia"', () => {
+  it('debe renderizar NumerologyIntro (que incluye link a enciclopedia)', () => {
     renderWithProviders(<NumerologyPage />);
 
-    const widget = screen.getByTestId('encyclopedia-info-widget');
-    expect(widget).toBeInTheDocument();
+    expect(screen.getByTestId('numerology-intro')).toBeInTheDocument();
   });
 
-  it('debe renderizar correctamente si EncyclopediaInfoWidget retorna null', () => {
-    // Simulate widget returning null (error state)
-    mockUseArticleSnippet.mockReturnValue({
-      data: undefined,
-      isLoading: false,
-      error: new Error('API error'),
-    });
-
+  it('debe renderizar correctamente la página sin errores', () => {
     renderWithProviders(<NumerologyPage />);
 
-    // The page should still render without errors
     expect(screen.getByTestId('numerologia-page')).toBeInTheDocument();
   });
 

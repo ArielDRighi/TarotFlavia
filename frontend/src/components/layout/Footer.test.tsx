@@ -113,14 +113,14 @@ describe('Footer', () => {
       render(<Footer />);
 
       const footer = screen.getByRole('contentinfo');
-      expect(footer).toHaveClass('py-6');
+      expect(footer).toHaveClass('py-8');
     });
 
     it('should center content', () => {
       render(<Footer />);
 
       const footer = screen.getByRole('contentinfo');
-      expect(footer).toHaveClass('text-center');
+      expect(footer).toHaveClass('border-t');
     });
   });
 
@@ -134,7 +134,7 @@ describe('Footer', () => {
     it('should have navigation landmark for links', () => {
       render(<Footer />);
 
-      expect(screen.getByRole('navigation')).toBeInTheDocument();
+      expect(screen.getAllByRole('navigation')).toHaveLength(2);
     });
   });
 });

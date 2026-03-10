@@ -20,6 +20,7 @@ export enum ArticleCategory {
   GUIDE_RITUAL = 'guide_ritual',
   GUIDE_HOROSCOPE = 'guide_horoscope',
   GUIDE_CHINESE = 'guide_chinese',
+  GUIDE_TAROT = 'guide_tarot',
 }
 
 // ─── Interfaces ───────────────────────────────────────────────────────────────
@@ -65,4 +66,5 @@ export const ARTICLE_CATEGORY_LABELS: Record<ArticleCategory, string> = {
   [ArticleCategory.GUIDE_RITUAL]: 'Guía de Rituales',
   [ArticleCategory.GUIDE_HOROSCOPE]: 'Guía del Horóscopo',
   [ArticleCategory.GUIDE_CHINESE]: 'Guía del Horóscopo Chino',
+  [ArticleCategory.GUIDE_TAROT]: 'Guía del Tarot',
 };

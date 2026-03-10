@@ -33,7 +33,7 @@ describe('Page Metadata Exports', () => {
     it('ritual layout should export ritualMetadata', async () => {
       const ritualLayout = await import('@/app/ritual/layout');
       expect(ritualLayout.metadata).toBeDefined();
-      expect((ritualLayout.metadata as Metadata).title).toBe('Nueva Lectura de Tarot');
+      expect((ritualLayout.metadata as Metadata).title).toBe('Tirada de Tarot');
     });
 
     it('registro layout should export registerMetadata', async () => {
@@ -59,7 +59,7 @@ describe('Page Metadata Exports', () => {
     it('carta-del-dia layout should export cartaDelDiaMetadata', async () => {
       const cartaDelDiaLayout = await import('@/app/carta-del-dia/layout');
       expect(cartaDelDiaLayout.metadata).toBeDefined();
-      expect((cartaDelDiaLayout.metadata as Metadata).title).toBe('Carta del Día');
+      expect((cartaDelDiaLayout.metadata as Metadata).title).toBe('Tarot del Día');
     });
 
     it('explorar layout should export explorarMetadata', async () => {
