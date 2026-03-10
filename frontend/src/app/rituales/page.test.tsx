@@ -16,6 +16,10 @@ vi.mock('next/navigation', () => ({
   }),
 }));
 
+vi.mock('@/components/features/encyclopedia', () => ({
+  EncyclopediaInfoWidget: () => null,
+}));
+
 // Mock hooks
 vi.mock('@/hooks/api/useRituals', () => ({
   useRituals: vi.fn(),

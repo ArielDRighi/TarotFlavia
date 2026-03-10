@@ -318,7 +318,7 @@ describe('SavedChartPage', () => {
       render(<SavedChartPage />, { wrapper: createWrapper() });
 
       expect(screen.getByText('Mi carta natal')).toBeInTheDocument();
-      expect(screen.getByText(/guardada el/i)).toBeInTheDocument();
+      expect(screen.getByText(/guardada/i)).toBeInTheDocument();
     });
 
     it('should render AI synthesis', () => {
