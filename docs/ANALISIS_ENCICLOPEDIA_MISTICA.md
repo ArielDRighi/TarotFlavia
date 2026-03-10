@@ -19,7 +19,7 @@ La Enciclopedia Mística está **implementada en su totalidad a nivel de código
 | Servicios Backend | ✅ Completo | Filtros, búsqueda, navegación, viewCount |
 | Controllers Backend | ✅ Completo | 15 endpoints públicos, Swagger documentado |
 | DTOs Backend | ✅ Completo | Herencia Snippet → Summary → Detail |
-| Seeders Backend | ⚠️ Código OK, no integrados | No están en `db-seed-all.ts` |
+| Seeders Backend | ✅ Integrados | `db-seed-all.ts` incluye ambos seeders (TASK-323) |
 | Datos Seed (Tarot) | ✅ 78 cartas con contenido | Contenido rico en español |
 | Datos Seed (Artículos) | ✅ 47 artículos con Markdown | Signos, planetas, casas, elementos, guías |
 | Tests Backend | ✅ Completo | Entidades, servicios, controllers |
@@ -36,38 +36,13 @@ La Enciclopedia Mística está **implementada en su totalidad a nivel de código
 
 ## 2. HALLAZGOS CRÍTICOS
 
-### 2.1 🔴 Seeders no integrados en `db-seed-all.ts`
+### 2.1 ✅ Seeders integrados en `db-seed-all.ts` (resuelto en TASK-323)
 
-**Problema:** Los seeders `seedEncyclopediaTarotCards` y `seedEncyclopediaArticles` existen en `src/database/seeds/` pero **NO están referenciados** en el script `scripts/db-seed-all.ts`. Esto significa que ejecutar `npm run db:seed:all` **no pobla las tablas de la enciclopedia**.
+**Estado:** ~~🔴 Pendiente~~ → **✅ Resuelto**
 
-**Archivos afectados:**
-- `scripts/db-seed-all.ts` — falta importar y registrar ambos seeders
-- `src/database/seeds/encyclopedia-tarot-cards.seeder.ts` — existe, no se invoca
-- `src/database/seeds/encyclopedia-articles.seeder.ts` — existe, no se invoca
-
-**Impacto:** La enciclopedia aparece vacía en la web ("No hay cartas para mostrar"). Los widgets "Ver más" en páginas de módulos no se renderizan (error 404 en snippet API).
-
-**Solución:** Agregar los 2 seeders al final del array `seeders` en `db-seed-all.ts`:
-```typescript
-import { seedEncyclopediaTarotCards } from '../src/database/seeds/encyclopedia-tarot-cards.seeder';
-import { seedEncyclopediaArticles } from '../src/database/seeds/encyclopedia-articles.seeder';
-
-// En el array seeders, agregar:
-{
-  name: 'Encyclopedia Tarot Cards',
-  dependencies: [],
-  execute: async () => {
-    await seedEncyclopediaTarotCards(dataSource);
-  },
-},
-{
-  name: 'Encyclopedia Articles',
-  dependencies: [],
-  execute: async () => {
-    await seedEncyclopediaArticles(dataSource);
-  },
-},
-```
+Los seeders `seedEncyclopediaTarotCards` y `seedEncyclopediaArticles` están integrados en `scripts/db-seed-all.ts` con las dependencias correctas:
+- `Encyclopedia Tarot Cards` — `dependencies: []`
+- `Encyclopedia Articles` — `dependencies: ['Encyclopedia Tarot Cards']` (garantiza orden para `relatedTarotCards`)
 
 ### 2.2 🟡 TASK-318 marcada como pendiente en backlog
 

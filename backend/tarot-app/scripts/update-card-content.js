@@ -18,9 +18,29 @@ const { Client } = require('pg');
 // ---------------------------------------------------------------------------
 // Database connection
 // ---------------------------------------------------------------------------
+// Load .env from backend/tarot-app/ if present
+const envPath = path.resolve(__dirname, '../.env');
+if (require('fs').existsSync(envPath)) {
+  require('fs')
+    .readFileSync(envPath, 'utf8')
+    .split('\n')
+    .forEach((line) => {
+      const [key, ...rest] = line.split('=');
+      if (key && rest.length && !process.env[key.trim()]) {
+        process.env[key.trim()] = rest.join('=').trim();
+      }
+    });
+}
+
 const DB_CONFIG = {
   connectionString:
-    'postgresql://tarotflavia_user:tarotflavia_secure_password_2024@localhost:5435/tarot_db',
+    process.env.TAROTFLAVIA_DATABASE_URL ||
+    process.env.DATABASE_URL ||
+    (() => {
+      throw new Error(
+        'No database URL found. Set TAROTFLAVIA_DATABASE_URL or DATABASE_URL environment variable.',
+      );
+    })(),
 };
 
 // ---------------------------------------------------------------------------

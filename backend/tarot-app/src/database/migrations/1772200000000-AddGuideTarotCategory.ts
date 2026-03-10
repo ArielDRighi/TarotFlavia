@@ -7,7 +7,7 @@ export class AddGuideTarotCategory1772200000000 implements MigrationInterface {
     );
   }
 
-  public async down(_queryRunner: QueryRunner): Promise<void> {
+  public async down(): Promise<void> {
     // PostgreSQL does not support removing enum values directly
     // Manual intervention required for rollback
   }

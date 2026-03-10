@@ -187,7 +187,7 @@ async function bootstrap() {
       },
       {
         name: 'Encyclopedia Articles',
-        dependencies: [],
+        dependencies: ['Encyclopedia Tarot Cards'],
         execute: async () => {
           await seedEncyclopediaArticles(dataSource);
         },
