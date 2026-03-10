@@ -65,7 +65,7 @@ export function RitualsPage() {
 
       <EncyclopediaInfoWidget
         slug="guia-rituales"
-        href={ROUTES.ENCICLOPEDIA_CARD('guia-rituales')}
+        href={ROUTES.ENCICLOPEDIA_GUIA('guia-rituales')}
         className="mb-6"
       />
 

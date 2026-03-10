@@ -3898,6 +3898,7 @@ describe('GuidesSection', () => {
 **Prioridad:** 🟡 MEDIA
 **Estimación:** 0.5 días
 **Dependencias:** TASK-318
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -3945,11 +3946,11 @@ export function ArticleDetailView({ article }: ArticleDetailViewProps) {
 
 #### ✅ Criterios de Aceptación
 
-- [ ] Renderiza el contenido Markdown correctamente (headings, listas, tablas)
-- [ ] Muestra cartas de tarot relacionadas si existen
-- [ ] Muestra artículos relacionados
-- [ ] CTA correcto según la categoría del artículo
-- [ ] Breadcrumb navega correctamente
+- [x] Renderiza el contenido Markdown correctamente (headings, listas, tablas)
+- [x] Muestra cartas de tarot relacionadas si existen
+- [x] Muestra artículos relacionados
+- [x] CTA correcto según la categoría del artículo
+- [x] Breadcrumb navega correctamente
 
 ---
 
@@ -3965,6 +3966,8 @@ describe('ArticleDetailView', () => {
 });
 ```
 
+21 tests implementados y pasando. Instalado `remark-gfm`.
+
 ---
 
 ### TASK-320: Actualizar rutas de la Enciclopedia y crear nuevas páginas
@@ -3973,6 +3976,7 @@ describe('ArticleDetailView', () => {
 **Prioridad:** 🟡 MEDIA
 **Estimación:** 0.5 días
 **Dependencias:** TASK-318
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -4055,11 +4059,11 @@ ENCICLOPEDIA_ELEMENTO: (slug: string) => `/enciclopedia/elementos/${slug}`,
 
 #### ✅ Criterios de Aceptación
 
-- [ ] Hub principal muestra 3 secciones: Tarot, Astrología, Guías
-- [ ] Links de categorías navegan correctamente
-- [ ] Redirect 301 funciona: `/enciclopedia/el-loco` → `/enciclopedia/tarot/el-loco`
-- [ ] Páginas de listado de artículos (12 signos, 10 planetas, 12 casas) funcionan
-- [ ] 404 para slug inexistente
+- [x] Hub principal muestra 3 secciones: Tarot, Astrología, Guías
+- [x] Links de categorías navegan correctamente
+- [x] Redirect 301 funciona: `/enciclopedia/el-loco` → `/enciclopedia/tarot/el-loco`
+- [x] Páginas de listado de artículos (12 signos, 10 planetas, 12 casas) funcionan
+- [x] 404 para slug inexistente
 
 ---
 
@@ -4084,6 +4088,7 @@ describe('Enciclopedia article pages', () => {
 **Prioridad:** 🟡 MEDIA
 **Estimación:** 0.5 días
 **Dependencias:** TASK-320
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -4127,10 +4132,10 @@ export async function generateStaticParams() {
 
 #### ✅ Criterios de Aceptación
 
-- [ ] `title` de cada página incluye el nombre del artículo
-- [ ] `description` usa el `snippet` del artículo
-- [ ] Open Graph tags presentes
-- [ ] `generateStaticParams` implementado para signos, planetas, casas y guías
+- [x] `title` de cada página incluye el nombre del artículo
+- [x] `description` usa el `snippet` del artículo
+- [x] Open Graph tags presentes
+- [x] `generateStaticParams` implementado para signos, planetas, casas, elementos, modalidades y guías
 
 ---
 
@@ -4152,6 +4157,7 @@ describe('SEO metadata', () => {
 **Prioridad:** 🟢 BAJA
 **Estimación:** 0.5 días
 **Dependencias:** TASK-320
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -4192,10 +4198,10 @@ export function getPlanetEncyclopediaLink(planet: string): string {
 
 #### ✅ Criterios de Aceptación
 
-- [ ] Nombres de signos en resultados de Carta Astral son links con href correcto
-- [ ] Nombres de planetas en resultados son links con href correcto
-- [ ] Links abren en la misma pestaña (sin `target="_blank"`)
-- [ ] Links tienen estilo visual diferenciado (underline o color)
+- [x] Nombres de signos en resultados de Carta Astral son links con href correcto
+- [x] Nombres de planetas en resultados son links con href correcto
+- [x] Links abren en la misma pestaña (sin `target="_blank"`)
+- [x] Links tienen estilo visual diferenciado (underline o color)
 
 ---
 
@@ -4471,10 +4477,10 @@ Semana 4-5: Frontend páginas completas (Fase 2 - enciclopedia completa)
 - [x] TASK-316: EncyclopediaInfoWidget
 - [x] TASK-317: Widget integrado en las 6 páginas de módulos
 - [ ] TASK-318: Componentes de listado (ArticleCard, ArticleGrid, etc.)
-- [ ] TASK-319: ArticleDetailView con Markdown
-- [ ] TASK-320: Nuevas rutas y restructura de /enciclopedia
-- [ ] TASK-321: SEO metadata en páginas de artículos
-- [ ] TASK-322: Cross-links desde Carta Astral
+- [x] TASK-319: ArticleDetailView con Markdown
+- [x] TASK-320: Nuevas rutas y restructura de /enciclopedia
+- [x] TASK-321: SEO metadata en páginas de artículos
+- [x] TASK-322: Cross-links desde Carta Astral
 
 ### Contenido
 

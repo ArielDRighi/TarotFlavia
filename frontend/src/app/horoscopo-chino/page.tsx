@@ -38,7 +38,7 @@ export default function HoroscopoChinoPage() {
 
       <EncyclopediaInfoWidget
         slug="guia-horoscopo-chino"
-        href={ROUTES.ENCICLOPEDIA_CARD('guia-horoscopo-chino')}
+        href={ROUTES.ENCICLOPEDIA_GUIA('guia-horoscopo-chino')}
         className="mb-6"
       />
 

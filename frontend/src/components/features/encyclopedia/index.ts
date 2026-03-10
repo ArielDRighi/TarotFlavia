@@ -35,6 +35,10 @@
 
 // Page content components
 export { EnciclopediaContent } from './EnciclopediaContent';
+export { EnciclopediaHubContent } from './EnciclopediaHubContent';
+export { ArticleDetailPageContent } from './ArticleDetailPageContent';
+export { ArticleListPageContent } from './ArticleListPageContent';
+export { GuiasContent } from './GuiasContent';
 
 // List components
 export { CardThumbnail } from './CardThumbnail';
@@ -91,3 +95,7 @@ export type { ArticleSkeletonProps } from './ArticleSkeleton';
 export type { AstrologySectionProps } from './AstrologySection';
 export type { GuidesSectionProps } from './GuidesSection';
 export type { EncyclopediaHomeProps } from './EncyclopediaHome';
+
+// Article detail components
+export { ArticleDetailView } from './ArticleDetailView';
+export type { ArticleDetailViewProps } from './ArticleDetailView';

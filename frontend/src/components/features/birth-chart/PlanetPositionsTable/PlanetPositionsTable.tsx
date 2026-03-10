@@ -11,6 +11,7 @@
 
 'use client';
 
+import Link from 'next/link';
 import { RotateCcw } from 'lucide-react';
 import {
   Table,
@@ -23,9 +24,17 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { PLANETS, ZODIAC_SIGNS, Planet } from '@/types/birth-chart.enums';
+import {
+  PLANETS,
+  ZODIAC_SIGNS,
+  Planet,
+  PLANET_ENCYCLOPEDIA_SLUGS,
+  ZODIAC_SIGN_ENCYCLOPEDIA_SLUGS,
+  ZodiacSign,
+} from '@/types/birth-chart.enums';
 import type { PlanetPosition } from '@/types/birth-chart.types';
 import { formatDegreeSexagesimal } from '../lib/degree.utils';
+import { ROUTES } from '@/lib/constants/routes';
 
 interface PlanetPositionsTableProps {
   planets: PlanetPosition[];
@@ -38,12 +47,11 @@ interface PlanetPositionsTableProps {
 }
 
 /**
- * Get Tailwind color class based on zodiac element
+ * Get Tailwind color class based on zodiac element.
+ * Uses the typed ZodiacSign enum directly to avoid fragile string lookups.
  */
-function getElementColor(signName: string): string {
-  // Find the zodiac sign by matching the signName
-  const signEntry = Object.entries(ZODIAC_SIGNS).find(([, data]) => data.name === signName);
-  const element = signEntry?.[1].element || 'fire';
+function getElementColor(sign: ZodiacSign): string {
+  const element = ZODIAC_SIGNS[sign]?.element ?? 'fire';
 
   const colors: Record<string, string> = {
     fire: 'text-red-500',
@@ -52,7 +60,7 @@ function getElementColor(signName: string): string {
     water: 'text-blue-500',
   };
 
-  return colors[element] || 'text-foreground';
+  return colors[element] ?? 'text-foreground';
 }
 
 /**
@@ -61,28 +69,24 @@ function getElementColor(signName: string): string {
 function getPlanetInfo(planet: Planet): { name: string; symbol: string } {
   const planetData = PLANETS[planet];
   return {
-    name: planetData?.name || planet,
-    symbol: planetData?.symbol || '?',
+    name: planetData?.name ?? planet,
+    symbol: planetData?.symbol ?? '?',
   };
 }
 
 /**
- * Get zodiac sign display name and symbol
+ * Get zodiac sign display name, symbol, and encyclopedia slug.
+ * Uses the typed ZodiacSign enum directly — no fragile string-based search.
  */
-function getSignInfo(signName: string): { name: string; symbol: string } {
-  // Find the zodiac sign by matching the signName
-  const signEntry = Object.entries(ZODIAC_SIGNS).find(([, data]) => data.name === signName);
-
-  if (signEntry) {
-    return {
-      name: signEntry[1].name,
-      symbol: signEntry[1].symbol,
-    };
-  }
-
+function getSignInfo(
+  sign: ZodiacSign,
+  signNameFallback: string
+): { name: string; symbol: string; slug: string } {
+  const signData = ZODIAC_SIGNS[sign];
   return {
-    name: signName,
-    symbol: '?',
+    name: signData?.name ?? signNameFallback,
+    symbol: signData?.symbol ?? '?',
+    slug: ZODIAC_SIGN_ENCYCLOPEDIA_SLUGS[sign],
   };
 }
 
@@ -155,7 +159,7 @@ export function PlanetPositionsTable({
             const planetInfo = position.displayName
               ? { name: position.displayName, symbol: position.displaySymbol || '?' }
               : getPlanetInfo(position.planet);
-            const signInfo = getSignInfo(position.signName);
+            const signInfo = getSignInfo(position.sign, position.signName);
             const formattedDegree = formatDegreeSexagesimal(position.signDegree);
             const isHighlighted = highlightPlanet === position.planet;
 
@@ -177,7 +181,19 @@ export function PlanetPositionsTable({
                     <span className="text-lg" aria-label={`Símbolo de ${planetInfo.name}`}>
                       {planetInfo.symbol}
                     </span>
-                    <span className={compact ? 'text-sm' : ''}>{planetInfo.name}</span>
+                    {!position.displayName && PLANET_ENCYCLOPEDIA_SLUGS[position.planet] ? (
+                      <Link
+                        href={ROUTES.ENCICLOPEDIA_PLANETA(
+                          PLANET_ENCYCLOPEDIA_SLUGS[position.planet]
+                        )}
+                        className={cn('hover:underline', compact ? 'text-sm' : '')}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {planetInfo.name}
+                      </Link>
+                    ) : (
+                      <span className={compact ? 'text-sm' : ''}>{planetInfo.name}</span>
+                    )}
                   </div>
                 </TableCell>
 
@@ -185,16 +201,30 @@ export function PlanetPositionsTable({
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <span
-                      className={cn('text-lg', getElementColor(position.signName))}
+                      className={cn('text-lg', getElementColor(position.sign))}
                       aria-label={`Símbolo de ${signInfo.name}`}
                     >
                       {signInfo.symbol}
                     </span>
-                    <span
-                      className={cn(compact ? 'text-sm' : '', getElementColor(position.signName))}
-                    >
-                      {signInfo.name}
-                    </span>
+                    {!position.displayName ? (
+                      <Link
+                        href={ROUTES.ENCICLOPEDIA_SIGNO(signInfo.slug)}
+                        className={cn(
+                          'hover:underline',
+                          compact ? 'text-sm' : '',
+                          getElementColor(position.sign)
+                        )}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {signInfo.name}
+                      </Link>
+                    ) : (
+                      <span
+                        className={cn(compact ? 'text-sm' : '', getElementColor(position.sign))}
+                      >
+                        {signInfo.name}
+                      </span>
+                    )}
                   </div>
                 </TableCell>
 
