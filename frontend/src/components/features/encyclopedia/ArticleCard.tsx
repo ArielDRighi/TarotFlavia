@@ -20,6 +20,7 @@ const CATEGORY_ICONS: Record<ArticleCategory, string> = {
   [ArticleCategory.GUIDE_RITUAL]: '🕯️',
   [ArticleCategory.GUIDE_HOROSCOPE]: '♏',
   [ArticleCategory.GUIDE_CHINESE]: '🐉',
+  [ArticleCategory.GUIDE_TAROT]: '🃏',
 };
 
 // ─── Types ────────────────────────────────────────────────────────────────────
