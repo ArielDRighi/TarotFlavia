@@ -3828,6 +3828,7 @@ it('debe renderizar correctamente si EncyclopediaInfoWidget retorna null');
 **Prioridad:** 🟡 MEDIA
 **Estimación:** 1 día
 **Dependencias:** TASK-315
+**Estado:** ✅ COMPLETADA
 
 ---
 
@@ -3868,10 +3869,10 @@ frontend/src/components/features/encyclopedia/
 
 #### ✅ Criterios de Aceptación
 
-- [ ] `ArticleCard` renderiza los campos correctos según la categoría del artículo
-- [ ] `ArticleGrid` muestra el número correcto de artículos con layout responsive
-- [ ] `GuidesSection` muestra exactamente 6 guías
-- [ ] `AstrologySection` tiene links funcionales a sus 3 sub-secciones
+- [x] `ArticleCard` renderiza los campos correctos según la categoría del artículo
+- [x] `ArticleGrid` muestra el número correcto de artículos con layout responsive
+- [x] `GuidesSection` muestra exactamente 6 guías
+- [x] `AstrologySection` tiene links funcionales a sus 3 sub-secciones
 
 ---
 
