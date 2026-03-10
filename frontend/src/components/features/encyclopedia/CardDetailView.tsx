@@ -18,8 +18,12 @@ export interface CardDetailViewProps {
 }
 
 export function CardDetailView({ card }: CardDetailViewProps) {
+  const descriptionParagraphs = card.description
+    ? card.description.split(/\r?\n\r?\n/).filter((p) => p.trim().length > 0)
+    : [];
+
   return (
-    <div data-testid="card-detail-view" className="space-y-8">
+    <div data-testid="card-detail-view" className="mx-auto max-w-3xl space-y-8">
       {/* Header con navegación */}
       <div className="flex items-center justify-between">
         <Button variant="ghost" asChild>
@@ -30,29 +34,33 @@ export function CardDetailView({ card }: CardDetailViewProps) {
         </Button>
       </div>
 
-      {/* Contenido principal */}
-      <div className="flex flex-col gap-8 md:flex-row">
+      {/* Imagen + identificación + metadata */}
+      <div className="flex flex-col gap-8 sm:flex-row">
         {/* Imagen */}
-        <div className="mx-auto flex-shrink-0 md:mx-0">
+        <div className="mx-auto flex-shrink-0 sm:mx-0">
           <CardImage src={card.imageUrl} alt={card.nameEs} />
         </div>
 
-        {/* Info */}
+        {/* Nombre + metadata */}
         <div className="flex-1 space-y-6">
           <div>
             <h1 className="mb-2 font-serif text-4xl">{card.nameEs}</h1>
             <p className="text-muted-foreground text-xl">{card.nameEn}</p>
           </div>
-
-          {card.description && (
-            <p data-testid="card-detail-description" className="text-muted-foreground">
-              {card.description}
-            </p>
-          )}
-
           <CardMetadata card={card} />
         </div>
       </div>
+
+      {/* Descripción narrativa — párrafos separados */}
+      {descriptionParagraphs.length > 0 && (
+        <div data-testid="card-detail-description" className="space-y-4">
+          {descriptionParagraphs.map((paragraph, i) => (
+            <p key={i} className="leading-relaxed text-gray-700">
+              {paragraph.trim()}
+            </p>
+          ))}
+        </div>
+      )}
 
       {/* Significados */}
       <CardMeaning meaningUpright={card.meaningUpright} meaningReversed={card.meaningReversed} />
