@@ -25,7 +25,7 @@ export class HolisticServiceResponseDto {
   @ApiProperty({ enum: SessionType, example: SessionType.FAMILY_TREE })
   sessionType: SessionType;
 
-  @ApiProperty({ example: null, nullable: true, required: false })
+  @ApiProperty({ example: null, nullable: true })
   imageUrl: string | null;
 
   @ApiProperty({ example: 1 })
