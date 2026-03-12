@@ -61,19 +61,32 @@ export class TypeOrmHolisticServiceRepository implements IHolisticServiceReposit
     id: number,
     data: Partial<HolisticService>,
   ): Promise<HolisticService | null> {
-    // Explicitly exclude relation fields and immutable fields (id, createdAt,
-    // updatedAt) so they can never leak into the TypeORM update payload.
-    const {
-      id: _id,
-      purchases: _purchases,
-      createdAt: _createdAt,
-      updatedAt: _updatedAt,
-      ...updateData
-    } = data as HolisticService;
-    await this.repository.update(
-      id,
-      updateData as Partial<HolisticServiceUpdateData>,
-    );
+    // Build a safe update payload by picking only the allowed scalar/value
+    // fields. This prevents relation fields (purchases) and immutable fields
+    // (id, createdAt, updatedAt) from ever leaking into the TypeORM update.
+    const allowedKeys: (keyof HolisticServiceUpdateData)[] = [
+      'name',
+      'slug',
+      'shortDescription',
+      'longDescription',
+      'priceArs',
+      'durationMinutes',
+      'sessionType',
+      'whatsappNumber',
+      'mercadoPagoLink',
+      'imageUrl',
+      'displayOrder',
+      'isActive',
+    ];
+    const updateData: Partial<HolisticServiceUpdateData> = {};
+    for (const key of allowedKeys) {
+      if (key in data) {
+        (updateData as Record<string, unknown>)[key] = (
+          data as Record<string, unknown>
+        )[key];
+      }
+    }
+    await this.repository.update(id, updateData);
     return this.repository.findOne({ where: { id } });
   }
 }

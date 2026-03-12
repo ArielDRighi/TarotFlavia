@@ -82,22 +82,33 @@ export class TypeOrmServicePurchaseRepository implements IServicePurchaseReposit
     status: PurchaseStatus,
     extra?: Partial<ServicePurchase>,
   ): Promise<ServicePurchase | null> {
-    // Destructure out all relation fields AND fields that must never be overridden
-    // (id, createdAt, updatedAt, paymentStatus). paymentStatus is assigned last
-    // explicitly so the status argument always wins over any value in extra.
-    const {
-      id: _id,
-      user: _user,
-      holisticService: _holisticService,
-      session: _session,
-      createdAt: _createdAt,
-      updatedAt: _updatedAt,
-      paymentStatus: _paymentStatus,
-      ...scalarExtra
-    } = (extra ?? {}) as ServicePurchase;
+    // Build a safe update payload by picking only the allowed scalar fields.
+    // This prevents relation fields (user, holisticService, session) and
+    // immutable fields (id, createdAt, updatedAt) from leaking into the
+    // TypeORM update. paymentStatus is assigned explicitly so the status
+    // argument always wins.
+    const allowedKeys: (keyof ServicePurchaseScalarFields)[] = [
+      'userId',
+      'holisticServiceId',
+      'sessionId',
+      'amountArs',
+      'paymentReference',
+      'paidAt',
+      'approvedByAdminId',
+    ];
+    const scalarExtra: Partial<ServicePurchaseScalarFields> = {};
+    if (extra) {
+      for (const key of allowedKeys) {
+        if (key in extra) {
+          (scalarExtra as Record<string, unknown>)[key] = (
+            extra as Record<string, unknown>
+          )[key];
+        }
+      }
+    }
 
     await this.repository.update(id, {
-      ...(scalarExtra as Partial<ServicePurchaseScalarFields>),
+      ...scalarExtra,
       paymentStatus: status,
     });
     return this.repository.findOne({ where: { id } });

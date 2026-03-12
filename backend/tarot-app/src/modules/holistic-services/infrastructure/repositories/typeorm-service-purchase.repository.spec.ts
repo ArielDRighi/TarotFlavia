@@ -265,7 +265,8 @@ describe('TypeOrmServicePurchaseRepository', () => {
 
       await repository.updateStatus(1, PurchaseStatus.PAID, extra);
 
-      const updateCall = typeOrmRepository.update.mock.calls[0][1] as Partial<ServicePurchase>;
+      const updateCall = typeOrmRepository.update.mock
+        .calls[0][1] as Partial<ServicePurchase>;
       expect(updateCall.paymentStatus).toBe(PurchaseStatus.PAID);
     });
   });

@@ -210,7 +210,8 @@ describe('TypeOrmHolisticServiceRepository', () => {
 
       await repository.update(1, dirtyData);
 
-      const updateCall = typeOrmRepository.update.mock.calls[0][1] as Partial<HolisticService>;
+      const updateCall = typeOrmRepository.update.mock
+        .calls[0][1] as Partial<HolisticService>;
       expect(updateCall).not.toHaveProperty('id');
       expect(updateCall).not.toHaveProperty('purchases');
       expect(updateCall).not.toHaveProperty('createdAt');
