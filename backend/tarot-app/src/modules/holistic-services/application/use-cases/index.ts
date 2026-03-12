@@ -1,4 +1,5 @@
 export { GetAllActiveServicesUseCase } from './get-all-active-services.use-case';
+export { AdminGetAllServicesUseCase } from './admin-get-all-services.use-case';
 export { GetServiceBySlugUseCase } from './get-service-by-slug.use-case';
 export { AdminCreateServiceUseCase } from './admin-create-service.use-case';
 export { AdminUpdateServiceUseCase } from './admin-update-service.use-case';

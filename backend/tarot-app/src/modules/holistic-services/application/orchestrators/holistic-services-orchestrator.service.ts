@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { GetAllActiveServicesUseCase } from '../use-cases/get-all-active-services.use-case';
+import { AdminGetAllServicesUseCase } from '../use-cases/admin-get-all-services.use-case';
 import { GetServiceBySlugUseCase } from '../use-cases/get-service-by-slug.use-case';
 import { AdminCreateServiceUseCase } from '../use-cases/admin-create-service.use-case';
 import { AdminUpdateServiceUseCase } from '../use-cases/admin-update-service.use-case';
@@ -23,6 +24,7 @@ import { CreatePurchaseDto, ApprovePurchaseDto } from '../dto/purchase.dto';
 export class HolisticServicesOrchestratorService {
   constructor(
     private readonly getAllActiveServicesUseCase: GetAllActiveServicesUseCase,
+    private readonly adminGetAllServicesUseCase: AdminGetAllServicesUseCase,
     private readonly getServiceBySlugUseCase: GetServiceBySlugUseCase,
     private readonly adminCreateServiceUseCase: AdminCreateServiceUseCase,
     private readonly adminUpdateServiceUseCase: AdminUpdateServiceUseCase,
@@ -36,6 +38,10 @@ export class HolisticServicesOrchestratorService {
 
   getAllActiveServices(): Promise<HolisticServiceResponseDto[]> {
     return this.getAllActiveServicesUseCase.execute();
+  }
+
+  adminGetAllServices(): Promise<HolisticServiceAdminResponseDto[]> {
+    return this.adminGetAllServicesUseCase.execute();
   }
 
   getServiceBySlug(slug: string): Promise<HolisticServiceDetailResponseDto> {

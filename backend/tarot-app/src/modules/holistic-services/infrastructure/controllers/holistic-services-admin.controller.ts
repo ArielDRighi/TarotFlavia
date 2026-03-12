@@ -24,7 +24,6 @@ import { Roles } from '../../../../common/decorators/roles.decorator';
 import { UserRole } from '../../../../common/enums/user-role.enum';
 import { HolisticServicesOrchestratorService } from '../../application/orchestrators/holistic-services-orchestrator.service';
 import { HolisticServiceAdminResponseDto } from '../../application/dto/holistic-service-response.dto';
-import { HolisticServiceResponseDto } from '../../application/dto/holistic-service-response.dto';
 import { PurchaseResponseDto } from '../../application/dto/purchase-response.dto';
 import { CreateHolisticServiceDto } from '../../application/dto/create-holistic-service.dto';
 import { UpdateHolisticServiceDto } from '../../application/dto/update-holistic-service.dto';
@@ -47,10 +46,10 @@ export class HolisticServicesAdminController {
   @ApiResponse({
     status: 200,
     description: 'Lista de todos los servicios holísticos',
-    type: [HolisticServiceResponseDto],
+    type: [HolisticServiceAdminResponseDto],
   })
-  async getAllServices(): Promise<HolisticServiceResponseDto[]> {
-    return this.orchestrator.getAllActiveServices();
+  async getAllServices(): Promise<HolisticServiceAdminResponseDto[]> {
+    return this.orchestrator.adminGetAllServices();
   }
 
   @Post()

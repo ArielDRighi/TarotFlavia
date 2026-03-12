@@ -21,6 +21,7 @@ import {
 
 // ==================== Use Cases ====================
 import { GetAllActiveServicesUseCase } from './application/use-cases/get-all-active-services.use-case';
+import { AdminGetAllServicesUseCase } from './application/use-cases/admin-get-all-services.use-case';
 import { GetServiceBySlugUseCase } from './application/use-cases/get-service-by-slug.use-case';
 import { AdminCreateServiceUseCase } from './application/use-cases/admin-create-service.use-case';
 import { AdminUpdateServiceUseCase } from './application/use-cases/admin-update-service.use-case';
@@ -61,6 +62,7 @@ import { EmailModule } from '../email/email.module';
 
     // Use Cases
     GetAllActiveServicesUseCase,
+    AdminGetAllServicesUseCase,
     GetServiceBySlugUseCase,
     AdminCreateServiceUseCase,
     AdminUpdateServiceUseCase,

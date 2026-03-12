@@ -18,14 +18,14 @@ describe('HolisticServicesAdminController', () => {
       HolisticServicesOrchestratorService,
       | 'adminCreateService'
       | 'adminUpdateService'
-      | 'getAllActiveServices'
+      | 'adminGetAllServices'
       | 'approvePurchase'
       | 'getPendingPayments'
     >
   > = {
     adminCreateService: jest.fn(),
     adminUpdateService: jest.fn(),
-    getAllActiveServices: jest.fn(),
+    adminGetAllServices: jest.fn(),
     approvePurchase: jest.fn(),
     getPendingPayments: jest.fn(),
   };
@@ -82,12 +82,12 @@ describe('HolisticServicesAdminController', () => {
 
   describe('GET /admin/holistic-services', () => {
     it('should return all services including inactive', async () => {
-      mockOrchestrator.getAllActiveServices.mockResolvedValue([]);
+      mockOrchestrator.adminGetAllServices.mockResolvedValue([]);
 
       const result = await controller.getAllServices();
 
       expect(result).toEqual([]);
-      expect(mockOrchestrator.getAllActiveServices).toHaveBeenCalledTimes(1);
+      expect(mockOrchestrator.adminGetAllServices).toHaveBeenCalledTimes(1);
     });
   });
 

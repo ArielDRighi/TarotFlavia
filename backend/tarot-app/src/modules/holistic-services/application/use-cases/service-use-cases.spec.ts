@@ -1,6 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { GetAllActiveServicesUseCase } from './get-all-active-services.use-case';
+import { AdminGetAllServicesUseCase } from './admin-get-all-services.use-case';
 import { GetServiceBySlugUseCase } from './get-service-by-slug.use-case';
 import { AdminCreateServiceUseCase } from './admin-create-service.use-case';
 import { AdminUpdateServiceUseCase } from './admin-update-service.use-case';
@@ -84,6 +85,62 @@ describe('GetAllActiveServicesUseCase', () => {
 
     expect(result[0]).not.toHaveProperty('whatsappNumber');
     expect(result[0]).not.toHaveProperty('mercadoPagoLink');
+  });
+});
+
+describe('AdminGetAllServicesUseCase', () => {
+  let useCase: AdminGetAllServicesUseCase;
+  let mockRepo: jest.Mocked<IHolisticServiceRepository>;
+
+  beforeEach(async () => {
+    mockRepo = {
+      findAllActive: jest.fn(),
+      findBySlug: jest.fn(),
+      findById: jest.fn(),
+      findAll: jest.fn(),
+      save: jest.fn(),
+      update: jest.fn(),
+    };
+
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        AdminGetAllServicesUseCase,
+        { provide: HOLISTIC_SERVICE_REPOSITORY, useValue: mockRepo },
+      ],
+    }).compile();
+
+    useCase = module.get(AdminGetAllServicesUseCase);
+  });
+
+  afterEach(() => jest.clearAllMocks());
+
+  it('debe retornar todos los servicios incluidos los inactivos', async () => {
+    const inactiveService = { ...mockHolisticService, id: 2, isActive: false };
+    mockRepo.findAll.mockResolvedValue([mockHolisticService, inactiveService]);
+
+    const result = await useCase.execute();
+
+    expect(result).toHaveLength(2);
+    expect(result[1].isActive).toBe(false);
+    expect(mockRepo.findAll).toHaveBeenCalledTimes(1);
+    expect(mockRepo.findAllActive).not.toHaveBeenCalled();
+  });
+
+  it('debe exponer whatsappNumber y mercadoPagoLink en la respuesta admin', async () => {
+    mockRepo.findAll.mockResolvedValue([mockHolisticService]);
+
+    const result = await useCase.execute();
+
+    expect(result[0].whatsappNumber).toBe('+5491112345678');
+    expect(result[0].mercadoPagoLink).toBe('https://mpago.la/1234567');
+  });
+
+  it('debe retornar lista vacía si no hay servicios', async () => {
+    mockRepo.findAll.mockResolvedValue([]);
+
+    const result = await useCase.execute();
+
+    expect(result).toHaveLength(0);
   });
 });
 
