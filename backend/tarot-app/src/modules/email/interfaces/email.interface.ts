@@ -67,3 +67,11 @@ export interface ProviderCostLimitReachedData {
   currentCost: number;
   monthlyLimit: number;
 }
+
+export interface HolisticServiceConfirmationData {
+  userName: string;
+  serviceName: string;
+  amountArs: number;
+  whatsappNumber: string;
+  bookingUrl: string;
+}

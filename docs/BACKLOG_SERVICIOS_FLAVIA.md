@@ -522,7 +522,7 @@ De espacios físicos tanto laborales como del hogar, armonizaciones energéticas
 | ID       | Tarea                                                          | Tipo     | Prioridad  | Estimación |
 | -------- | -------------------------------------------------------------- | -------- | ---------- | ---------- |
 | T-SF-B01 | Capa de dominio: Enums, Entidades, Migración y Repositorios    | Backend  | ✅ Completada | 3 días     |
-| T-SF-B02 | Capa de aplicación: DTOs, Use Cases y Orchestrator             | Backend  | 🔴 Crítica | 3 días     |
+| T-SF-B02 | Capa de aplicación: DTOs, Use Cases y Orchestrator             | Backend  | ✅ Completada | 3 días     |
 | T-SF-B03 | Capa de infraestructura: Controllers, Módulo y Endpoints REST  | Backend  | 🔴 Crítica | 3 días     |
 | T-SF-B04 | Email de confirmación, Seed Data y Tests E2E                   | Backend  | 🟡 Alta    | 2 días     |
 | T-SF-F01 | Foundation: Types, API functions, Hooks y Rutas                | Frontend | 🔴 Crítica | 2 días     |
@@ -600,50 +600,45 @@ Crear toda la capa de dominio y persistencia del módulo `holistic-services`. In
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 3 días
 **Dependencias:** T-SF-B01
-**Estado:** 🔲 No iniciada
-**Cubre HUS:** HUS-001, HUS-002, HUS-003, HUS-004, HUS-005, HUS-007 (parcial — lógica de negocio)
-
-#### 📋 Descripción
-
-Implementar toda la lógica de negocio del módulo: DTOs de entrada/salida con validación class-validator, use cases para las operaciones principales, y el orchestrator que coordina los use cases. Esta capa no tiene dependencia de HTTP ni de framework — es pura lógica de dominio.
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
 **DTOs de Servicios:**
 
-- [ ] `HolisticServiceResponseDto` — respuesta pública del servicio (sin `whatsappNumber` ni `mercadoPagoLink`)
-- [ ] `HolisticServiceDetailResponseDto` — detalle público con descripción larga (sin datos sensibles)
-- [ ] `HolisticServiceAdminResponseDto` — respuesta completa para admin (incluye todos los campos)
-- [ ] `CreateHolisticServiceDto` — para admin, con validaciones class-validator
-- [ ] `UpdateHolisticServiceDto` — PartialType del create
+- [x] `HolisticServiceResponseDto` — respuesta pública del servicio (sin `whatsappNumber` ni `mercadoPagoLink`)
+- [x] `HolisticServiceDetailResponseDto` — detalle público con descripción larga (sin datos sensibles)
+- [x] `HolisticServiceAdminResponseDto` — respuesta completa para admin (incluye todos los campos)
+- [x] `CreateHolisticServiceDto` — para admin, con validaciones class-validator
+- [x] `UpdateHolisticServiceDto` — PartialType del create
 
 **DTOs de Compras:**
 
-- [ ] `CreatePurchaseDto` — solo `holisticServiceId` (el resto se infiere del auth)
-- [ ] `PurchaseResponseDto` — respuesta de compra (incluye `whatsappNumber` SOLO si `paymentStatus === PAID`)
-- [ ] `ApprovePurchaseDto` — para admin, con `paymentReference` opcional
-- [ ] `PurchaseListResponseDto` — para listado con paginación
+- [x] `CreatePurchaseDto` — solo `holisticServiceId` (el resto se infiere del auth)
+- [x] `PurchaseResponseDto` — respuesta de compra (incluye `whatsappNumber` SOLO si `paymentStatus === PAID`)
+- [x] `ApprovePurchaseDto` — para admin, con `paymentReference` opcional
+- [x] `PurchaseListResponseDto` — para listado con paginación
 
 **Use Cases de Servicios:**
 
-- [ ] `GetAllActiveServicesUseCase` — retorna servicios activos ordenados por `displayOrder`
-- [ ] `GetServiceBySlugUseCase` — retorna detalle por slug, valida que esté activo
-- [ ] `AdminCreateServiceUseCase` — crea servicio (solo admin)
-- [ ] `AdminUpdateServiceUseCase` — actualiza servicio (solo admin)
+- [x] `GetAllActiveServicesUseCase` — retorna servicios activos ordenados por `displayOrder`
+- [x] `GetServiceBySlugUseCase` — retorna detalle por slug, valida que esté activo
+- [x] `AdminCreateServiceUseCase` — crea servicio (solo admin)
+- [x] `AdminUpdateServiceUseCase` — actualiza servicio (solo admin)
 
 **Use Cases de Compras:**
 
-- [ ] `CreatePurchaseUseCase` — crea compra con status PENDING, valida que servicio esté activo, valida que usuario no tenga compra PENDING del mismo servicio
-- [ ] `ApprovePurchaseUseCase` — cambia status a PAID, registra admin que aprobó y fecha de pago, dispara envío de email (delega en EmailService)
-- [ ] `GetUserPurchasesUseCase` — retorna compras del usuario autenticado con datos del servicio
-- [ ] `GetPendingPaymentsUseCase` — retorna compras PENDING (solo admin)
-- [ ] `CancelPurchaseUseCase` — cancela compra PENDING (usuario propio o admin)
+- [x] `CreatePurchaseUseCase` — crea compra con status PENDING, valida que servicio esté activo, valida que usuario no tenga compra PENDING del mismo servicio
+- [x] `ApprovePurchaseUseCase` — cambia status a PAID, registra admin que aprobó y fecha de pago, dispara envío de email (delega en EmailService)
+- [x] `GetUserPurchasesUseCase` — retorna compras del usuario autenticado con datos del servicio
+- [x] `GetPendingPaymentsUseCase` — retorna compras PENDING (solo admin)
+- [x] `CancelPurchaseUseCase` — cancela compra PENDING (usuario propio o admin)
 
 **Orchestrator:**
 
-- [ ] `HolisticServicesOrchestratorService` que coordina los use cases
-- [ ] Cada método del orchestrator delega en el use case correspondiente
-- [ ] Tests unitarios del orchestrator con mocks de use cases
+- [x] `HolisticServicesOrchestratorService` que coordina los use cases
+- [x] Cada método del orchestrator delega en el use case correspondiente
+- [x] Tests unitarios del orchestrator con mocks de use cases
 
 #### 🎯 Criterios de aceptación
 
