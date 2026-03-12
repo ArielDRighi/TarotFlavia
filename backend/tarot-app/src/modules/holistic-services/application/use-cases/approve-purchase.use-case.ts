@@ -44,7 +44,7 @@ export class ApprovePurchaseUseCase {
       );
     }
 
-    const updated = await this.servicePurchaseRepository.updateStatus(
+    const updateResult = await this.servicePurchaseRepository.updateStatus(
       purchaseId,
       PurchaseStatus.PAID,
       {
@@ -54,9 +54,18 @@ export class ApprovePurchaseUseCase {
       },
     );
 
-    if (!updated) {
+    if (!updateResult) {
       throw new NotFoundException(
         `Error al actualizar la compra: ${purchaseId}`,
+      );
+    }
+
+    const updated =
+      await this.servicePurchaseRepository.findByIdWithRelations(purchaseId);
+
+    if (!updated) {
+      throw new NotFoundException(
+        `Error al recuperar la compra actualizada: ${purchaseId}`,
       );
     }
 
@@ -71,8 +80,8 @@ export class ApprovePurchaseUseCase {
   ): Promise<void> {
     try {
       const frontendUrl =
-        this.configService.get<string>('FRONTEND_URL') ??
-        'http://localhost:3001';
+        this.configService.get<string>('FRONTEND_URL') ||
+        'http://localhost:3000';
       const bookingUrl = `${frontendUrl}/servicios/reservar/${updated.id}`;
 
       await this.emailService.sendHolisticServiceConfirmation(

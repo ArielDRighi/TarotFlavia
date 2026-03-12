@@ -28,7 +28,7 @@ export class PurchaseResponseDto {
   @ApiProperty({ type: PurchasedServiceSummaryDto, required: false })
   holisticService?: PurchasedServiceSummaryDto;
 
-  @ApiProperty({ example: null, nullable: true, required: false })
+  @ApiProperty({ example: null, nullable: true })
   sessionId: number | null;
 
   @ApiProperty({ enum: PurchaseStatus, example: PurchaseStatus.PENDING })
@@ -37,10 +37,10 @@ export class PurchaseResponseDto {
   @ApiProperty({ example: 15000.0 })
   amountArs: number;
 
-  @ApiProperty({ example: null, nullable: true, required: false })
+  @ApiProperty({ example: null, nullable: true })
   paymentReference: string | null;
 
-  @ApiProperty({ example: null, nullable: true, required: false })
+  @ApiProperty({ example: null, nullable: true })
   paidAt: Date | null;
 
   @ApiProperty({

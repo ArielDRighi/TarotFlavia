@@ -202,7 +202,7 @@ describe('ApprovePurchaseUseCase', () => {
   afterEach(() => jest.clearAllMocks());
 
   it('debe cambiar el status a PAID y llamar a EmailService', async () => {
-    mockPurchaseRepo.findByIdWithRelations.mockResolvedValue({
+    const purchaseWithRelations = {
       ...mockPurchasePending,
       user: {
         id: 5,
@@ -210,7 +210,13 @@ describe('ApprovePurchaseUseCase', () => {
         name: 'Test User',
       } as ServicePurchase['user'],
       holisticService: mockService,
-    });
+    };
+    mockPurchaseRepo.findByIdWithRelations
+      .mockResolvedValueOnce(purchaseWithRelations)
+      .mockResolvedValueOnce({
+        ...mockPurchasePaid,
+        holisticService: mockService,
+      });
     mockPurchaseRepo.updateStatus.mockResolvedValue(mockPurchasePaid);
 
     const result = await useCase.execute(10, 99, dto);
@@ -248,7 +254,7 @@ describe('ApprovePurchaseUseCase', () => {
   });
 
   it('debe incluir whatsappNumber en la respuesta cuando está PAID', async () => {
-    mockPurchaseRepo.findByIdWithRelations.mockResolvedValue({
+    const purchaseWithRelations = {
       ...mockPurchasePending,
       user: {
         id: 5,
@@ -256,11 +262,14 @@ describe('ApprovePurchaseUseCase', () => {
         name: 'Test User',
       } as ServicePurchase['user'],
       holisticService: mockService,
-    });
-    mockPurchaseRepo.updateStatus.mockResolvedValue({
-      ...mockPurchasePaid,
-      holisticService: mockService,
-    });
+    };
+    mockPurchaseRepo.findByIdWithRelations
+      .mockResolvedValueOnce(purchaseWithRelations)
+      .mockResolvedValueOnce({
+        ...mockPurchasePaid,
+        holisticService: mockService,
+      });
+    mockPurchaseRepo.updateStatus.mockResolvedValue(mockPurchasePaid);
 
     const result = await useCase.execute(10, 99, dto);
 
@@ -268,7 +277,7 @@ describe('ApprovePurchaseUseCase', () => {
   });
 
   it('debe continuar aunque el email falle (no relanzar el error)', async () => {
-    mockPurchaseRepo.findByIdWithRelations.mockResolvedValue({
+    const purchaseWithRelations = {
       ...mockPurchasePending,
       user: {
         id: 5,
@@ -276,7 +285,13 @@ describe('ApprovePurchaseUseCase', () => {
         name: 'Test User',
       } as ServicePurchase['user'],
       holisticService: mockService,
-    });
+    };
+    mockPurchaseRepo.findByIdWithRelations
+      .mockResolvedValueOnce(purchaseWithRelations)
+      .mockResolvedValueOnce({
+        ...mockPurchasePaid,
+        holisticService: mockService,
+      });
     mockPurchaseRepo.updateStatus.mockResolvedValue(mockPurchasePaid);
     mockEmailService.sendHolisticServiceConfirmation.mockRejectedValue(
       new Error('SMTP error'),
