@@ -1,5 +1,6 @@
 import { ServicePurchase } from '../../entities/service-purchase.entity';
 import { PurchaseStatus } from '../enums/purchase-status.enum';
+import { SessionType } from '../../../scheduling/domain/enums/session-type.enum';
 
 export interface IServicePurchaseRepository {
   save(purchase: Partial<ServicePurchase>): Promise<ServicePurchase>;
@@ -23,5 +24,14 @@ export interface IServicePurchaseRepository {
     id: number,
     status: PurchaseStatus,
     extra?: Partial<ServicePurchase>,
+  ): Promise<ServicePurchase | null>;
+
+  /**
+   * Finds a paid purchase for a user with no session assigned yet,
+   * matching the holistic service's session type.
+   */
+  findPaidUnassignedByUserAndSessionType(
+    userId: number,
+    sessionType: SessionType,
   ): Promise<ServicePurchase | null>;
 }

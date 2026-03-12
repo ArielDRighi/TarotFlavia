@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { GetAllActiveServicesUseCase } from '../use-cases/get-all-active-services.use-case';
+import { AdminGetAllServicesUseCase } from '../use-cases/admin-get-all-services.use-case';
 import { GetServiceBySlugUseCase } from '../use-cases/get-service-by-slug.use-case';
 import { AdminCreateServiceUseCase } from '../use-cases/admin-create-service.use-case';
 import { AdminUpdateServiceUseCase } from '../use-cases/admin-update-service.use-case';
@@ -8,6 +9,7 @@ import { ApprovePurchaseUseCase } from '../use-cases/approve-purchase.use-case';
 import { GetUserPurchasesUseCase } from '../use-cases/get-user-purchases.use-case';
 import { GetPendingPaymentsUseCase } from '../use-cases/get-pending-payments.use-case';
 import { CancelPurchaseUseCase } from '../use-cases/cancel-purchase.use-case';
+import { GetPurchaseByIdUseCase } from '../use-cases/get-purchase-by-id.use-case';
 import { HolisticServiceResponseDto } from '../dto/holistic-service-response.dto';
 import {
   HolisticServiceDetailResponseDto,
@@ -22,6 +24,7 @@ import { CreatePurchaseDto, ApprovePurchaseDto } from '../dto/purchase.dto';
 export class HolisticServicesOrchestratorService {
   constructor(
     private readonly getAllActiveServicesUseCase: GetAllActiveServicesUseCase,
+    private readonly adminGetAllServicesUseCase: AdminGetAllServicesUseCase,
     private readonly getServiceBySlugUseCase: GetServiceBySlugUseCase,
     private readonly adminCreateServiceUseCase: AdminCreateServiceUseCase,
     private readonly adminUpdateServiceUseCase: AdminUpdateServiceUseCase,
@@ -30,10 +33,15 @@ export class HolisticServicesOrchestratorService {
     private readonly getUserPurchasesUseCase: GetUserPurchasesUseCase,
     private readonly getPendingPaymentsUseCase: GetPendingPaymentsUseCase,
     private readonly cancelPurchaseUseCase: CancelPurchaseUseCase,
+    private readonly getPurchaseByIdUseCase: GetPurchaseByIdUseCase,
   ) {}
 
   getAllActiveServices(): Promise<HolisticServiceResponseDto[]> {
     return this.getAllActiveServicesUseCase.execute();
+  }
+
+  adminGetAllServices(): Promise<HolisticServiceAdminResponseDto[]> {
+    return this.adminGetAllServicesUseCase.execute();
   }
 
   getServiceBySlug(slug: string): Promise<HolisticServiceDetailResponseDto> {
@@ -86,5 +94,12 @@ export class HolisticServicesOrchestratorService {
       requestingUserId,
       isAdmin,
     );
+  }
+
+  getPurchaseById(
+    purchaseId: number,
+    requestingUserId: number,
+  ): Promise<PurchaseResponseDto> {
+    return this.getPurchaseByIdUseCase.execute(purchaseId, requestingUserId);
   }
 }

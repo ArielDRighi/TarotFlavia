@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HolisticServicesOrchestratorService } from './holistic-services-orchestrator.service';
 import { GetAllActiveServicesUseCase } from '../use-cases/get-all-active-services.use-case';
+import { AdminGetAllServicesUseCase } from '../use-cases/admin-get-all-services.use-case';
 import { GetServiceBySlugUseCase } from '../use-cases/get-service-by-slug.use-case';
 import { AdminCreateServiceUseCase } from '../use-cases/admin-create-service.use-case';
 import { AdminUpdateServiceUseCase } from '../use-cases/admin-update-service.use-case';
@@ -9,7 +10,9 @@ import { ApprovePurchaseUseCase } from '../use-cases/approve-purchase.use-case';
 import { GetUserPurchasesUseCase } from '../use-cases/get-user-purchases.use-case';
 import { GetPendingPaymentsUseCase } from '../use-cases/get-pending-payments.use-case';
 import { CancelPurchaseUseCase } from '../use-cases/cancel-purchase.use-case';
+import { GetPurchaseByIdUseCase } from '../use-cases/get-purchase-by-id.use-case';
 import { HolisticServiceResponseDto } from '../dto/holistic-service-response.dto';
+import { HolisticServiceAdminResponseDto } from '../dto/holistic-service-response.dto';
 import { PurchaseResponseDto } from '../dto/purchase-response.dto';
 import { PurchaseStatus } from '../../domain/enums/purchase-status.enum';
 import { SessionType } from '../../../scheduling/domain/enums';
@@ -50,6 +53,9 @@ describe('HolisticServicesOrchestratorService', () => {
   let mockGetAllActive: jest.Mocked<
     Pick<GetAllActiveServicesUseCase, 'execute'>
   >;
+  let mockAdminGetAll: jest.Mocked<
+    Pick<AdminGetAllServicesUseCase, 'execute'>
+  >;
   let mockGetBySlug: jest.Mocked<Pick<GetServiceBySlugUseCase, 'execute'>>;
   let mockAdminCreate: jest.Mocked<Pick<AdminCreateServiceUseCase, 'execute'>>;
   let mockAdminUpdate: jest.Mocked<Pick<AdminUpdateServiceUseCase, 'execute'>>;
@@ -62,9 +68,11 @@ describe('HolisticServicesOrchestratorService', () => {
     Pick<GetPendingPaymentsUseCase, 'execute'>
   >;
   let mockCancelPurchase: jest.Mocked<Pick<CancelPurchaseUseCase, 'execute'>>;
+  let mockGetPurchaseById: jest.Mocked<Pick<GetPurchaseByIdUseCase, 'execute'>>;
 
   beforeEach(async () => {
     mockGetAllActive = { execute: jest.fn() };
+    mockAdminGetAll = { execute: jest.fn() };
     mockGetBySlug = { execute: jest.fn() };
     mockAdminCreate = { execute: jest.fn() };
     mockAdminUpdate = { execute: jest.fn() };
@@ -73,11 +81,13 @@ describe('HolisticServicesOrchestratorService', () => {
     mockGetUserPurchases = { execute: jest.fn() };
     mockGetPendingPayments = { execute: jest.fn() };
     mockCancelPurchase = { execute: jest.fn() };
+    mockGetPurchaseById = { execute: jest.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         HolisticServicesOrchestratorService,
         { provide: GetAllActiveServicesUseCase, useValue: mockGetAllActive },
+        { provide: AdminGetAllServicesUseCase, useValue: mockAdminGetAll },
         { provide: GetServiceBySlugUseCase, useValue: mockGetBySlug },
         { provide: AdminCreateServiceUseCase, useValue: mockAdminCreate },
         { provide: AdminUpdateServiceUseCase, useValue: mockAdminUpdate },
@@ -89,6 +99,7 @@ describe('HolisticServicesOrchestratorService', () => {
           useValue: mockGetPendingPayments,
         },
         { provide: CancelPurchaseUseCase, useValue: mockCancelPurchase },
+        { provide: GetPurchaseByIdUseCase, useValue: mockGetPurchaseById },
       ],
     }).compile();
 
@@ -105,6 +116,24 @@ describe('HolisticServicesOrchestratorService', () => {
 
       expect(mockGetAllActive.execute).toHaveBeenCalledTimes(1);
       expect(result).toHaveLength(1);
+    });
+  });
+
+  describe('adminGetAllServices', () => {
+    it('debe delegar en AdminGetAllServicesUseCase y retornar respuesta admin', async () => {
+      const adminResponse: HolisticServiceAdminResponseDto = {
+        ...mockServiceResponse,
+        longDescription: 'Descripción larga...',
+        whatsappNumber: '+5491112345678',
+        mercadoPagoLink: 'https://mpago.la/123',
+      };
+      mockAdminGetAll.execute.mockResolvedValue([adminResponse]);
+
+      const result = await orchestrator.adminGetAllServices();
+
+      expect(mockAdminGetAll.execute).toHaveBeenCalledTimes(1);
+      expect(result).toHaveLength(1);
+      expect(result[0].whatsappNumber).toBe('+5491112345678');
     });
   });
 
@@ -228,6 +257,17 @@ describe('HolisticServicesOrchestratorService', () => {
 
       expect(mockCancelPurchase.execute).toHaveBeenCalledWith(10, 5, false);
       expect(result.paymentStatus).toBe(PurchaseStatus.CANCELLED);
+    });
+  });
+
+  describe('getPurchaseById', () => {
+    it('debe delegar en GetPurchaseByIdUseCase con purchaseId y requestingUserId', async () => {
+      mockGetPurchaseById.execute.mockResolvedValue(mockPurchaseResponse);
+
+      const result = await orchestrator.getPurchaseById(10, 5);
+
+      expect(mockGetPurchaseById.execute).toHaveBeenCalledWith(10, 5);
+      expect(result.id).toBe(10);
     });
   });
 });

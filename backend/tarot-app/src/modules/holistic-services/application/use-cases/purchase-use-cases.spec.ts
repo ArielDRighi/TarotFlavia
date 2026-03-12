@@ -10,6 +10,7 @@ import { ApprovePurchaseUseCase } from './approve-purchase.use-case';
 import { GetUserPurchasesUseCase } from './get-user-purchases.use-case';
 import { GetPendingPaymentsUseCase } from './get-pending-payments.use-case';
 import { CancelPurchaseUseCase } from './cancel-purchase.use-case';
+import { GetPurchaseByIdUseCase } from './get-purchase-by-id.use-case';
 import {
   HOLISTIC_SERVICE_REPOSITORY,
   IHolisticServiceRepository,
@@ -93,6 +94,7 @@ describe('CreatePurchaseUseCase', () => {
       findPendingPayments: jest.fn(),
       findByIdWithRelations: jest.fn(),
       updateStatus: jest.fn(),
+      findPaidUnassignedByUserAndSessionType: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -178,6 +180,7 @@ describe('ApprovePurchaseUseCase', () => {
       findPendingPayments: jest.fn(),
       findByIdWithRelations: jest.fn(),
       updateStatus: jest.fn(),
+      findPaidUnassignedByUserAndSessionType: jest.fn(),
     };
     mockEmailService = {
       sendHolisticServiceConfirmation: jest.fn().mockResolvedValue(undefined),
@@ -315,6 +318,7 @@ describe('GetUserPurchasesUseCase', () => {
       findPendingPayments: jest.fn(),
       findByIdWithRelations: jest.fn(),
       updateStatus: jest.fn(),
+      findPaidUnassignedByUserAndSessionType: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -384,6 +388,7 @@ describe('GetPendingPaymentsUseCase', () => {
       findPendingPayments: jest.fn(),
       findByIdWithRelations: jest.fn(),
       updateStatus: jest.fn(),
+      findPaidUnassignedByUserAndSessionType: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -434,6 +439,7 @@ describe('CancelPurchaseUseCase', () => {
       findPendingPayments: jest.fn(),
       findByIdWithRelations: jest.fn(),
       updateStatus: jest.fn(),
+      findPaidUnassignedByUserAndSessionType: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -501,5 +507,101 @@ describe('CancelPurchaseUseCase', () => {
       BadRequestException,
     );
     expect(mockPurchaseRepo.updateStatus).not.toHaveBeenCalled();
+  });
+});
+
+describe('GetPurchaseByIdUseCase', () => {
+  let useCase: GetPurchaseByIdUseCase;
+  let mockPurchaseRepo: jest.Mocked<IServicePurchaseRepository>;
+
+  beforeEach(async () => {
+    mockPurchaseRepo = {
+      save: jest.fn(),
+      findById: jest.fn(),
+      findByUserId: jest.fn(),
+      findByUserIdWithService: jest.fn(),
+      findPendingByUserAndService: jest.fn(),
+      findPendingPayments: jest.fn(),
+      findByIdWithRelations: jest.fn(),
+      updateStatus: jest.fn(),
+      findPaidUnassignedByUserAndSessionType: jest.fn(),
+    };
+
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        GetPurchaseByIdUseCase,
+        { provide: SERVICE_PURCHASE_REPOSITORY, useValue: mockPurchaseRepo },
+      ],
+    }).compile();
+
+    useCase = module.get(GetPurchaseByIdUseCase);
+    jest.clearAllMocks();
+  });
+
+  it('debe retornar la compra cuando existe y pertenece al usuario', async () => {
+    mockPurchaseRepo.findByIdWithRelations.mockResolvedValue(
+      mockPurchasePending,
+    );
+
+    const result = await useCase.execute(10, 5);
+
+    expect(mockPurchaseRepo.findByIdWithRelations).toHaveBeenCalledWith(10);
+    expect(result.id).toBe(10);
+    expect(result.userId).toBe(5);
+    expect(result.paymentStatus).toBe(PurchaseStatus.PENDING);
+  });
+
+  it('debe incluir el holisticService en la respuesta', async () => {
+    mockPurchaseRepo.findByIdWithRelations.mockResolvedValue(
+      mockPurchasePending,
+    );
+
+    const result = await useCase.execute(10, 5);
+
+    expect(result.holisticService).toBeDefined();
+    expect(result.holisticService?.id).toBe(1);
+    expect(result.holisticService?.name).toBe(
+      'Trabajo con el Árbol Genealógico',
+    );
+  });
+
+  it('debe incluir whatsappNumber si la compra está PAID', async () => {
+    mockPurchaseRepo.findByIdWithRelations.mockResolvedValue(mockPurchasePaid);
+
+    const result = await useCase.execute(11, 5);
+
+    expect(result.paymentStatus).toBe(PurchaseStatus.PAID);
+    expect(result.whatsappNumber).toBe('+5491112345678');
+  });
+
+  it('NO debe incluir whatsappNumber si la compra está PENDING', async () => {
+    mockPurchaseRepo.findByIdWithRelations.mockResolvedValue(
+      mockPurchasePending,
+    );
+
+    const result = await useCase.execute(10, 5);
+
+    expect(result.paymentStatus).toBe(PurchaseStatus.PENDING);
+    expect(result.whatsappNumber).toBeUndefined();
+  });
+
+  it('debe lanzar NotFoundException si la compra no existe', async () => {
+    mockPurchaseRepo.findByIdWithRelations.mockResolvedValue(null);
+
+    await expect(useCase.execute(999, 5)).rejects.toThrow(NotFoundException);
+    await expect(useCase.execute(999, 5)).rejects.toThrow(
+      'Compra no encontrada',
+    );
+  });
+
+  it('debe lanzar ForbiddenException si la compra no pertenece al usuario', async () => {
+    mockPurchaseRepo.findByIdWithRelations.mockResolvedValue(
+      mockPurchasePending,
+    );
+
+    await expect(useCase.execute(10, 999)).rejects.toThrow(ForbiddenException);
+    await expect(useCase.execute(10, 999)).rejects.toThrow(
+      'No tienes permiso para ver esta compra',
+    );
   });
 });
