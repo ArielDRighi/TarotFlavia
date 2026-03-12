@@ -8,6 +8,7 @@ import {
   QuotaLimitReachedData,
   ProviderCostWarningData,
   ProviderCostLimitReachedData,
+  HolisticServiceConfirmationData,
 } from './interfaces/email.interface';
 
 @Injectable()
@@ -236,6 +237,33 @@ export class EmailService {
         error instanceof Error ? error.stack : String(error),
       );
       // Don't throw, just log (email is not critical)
+    }
+  }
+
+  /**
+   * Envía email de confirmación de pago aprobado para servicio holístico
+   */
+  async sendHolisticServiceConfirmation(
+    to: string,
+    data: HolisticServiceConfirmationData,
+  ): Promise<void> {
+    try {
+      await this.mailerService.sendMail({
+        to,
+        subject: `Pago confirmado: ${data.serviceName}`,
+        template: 'holistic-service-confirmation',
+        context: data,
+      });
+
+      this.logger.log(
+        `Email de confirmación de servicio holístico enviado exitosamente a ${to}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error al enviar email de confirmación de servicio holístico a ${to}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+      // No relanzar — el pago ya fue aprobado, el email es no crítico
     }
   }
 }
