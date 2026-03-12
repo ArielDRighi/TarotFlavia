@@ -37,6 +37,7 @@ import { PendulumModule } from './modules/pendulum/pendulum.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { BirthChartModule } from './modules/birth-chart/birth-chart.module';
 import { EncyclopediaModule } from './modules/encyclopedia/encyclopedia.module';
+import { HolisticServicesModule } from './modules/holistic-services/holistic-services.module';
 import { CustomThrottlerGuard } from './common/guards/custom-throttler.guard';
 import { ThrottlerExceptionFilter } from './common/filters/throttler-exception.filter';
 import { RateLimitingModule } from './common/rate-limiting/rate-limiting.module';
@@ -97,6 +98,7 @@ import { validate } from './config/env-validator';
     NumerologyModule,
     BirthChartModule,
     EncyclopediaModule,
+    HolisticServicesModule,
     RitualsModule,
     PendulumModule,
     NotificationsModule,

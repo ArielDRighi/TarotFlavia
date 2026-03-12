@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { ServicePurchase } from '../../entities/service-purchase.entity';
 import { IServicePurchaseRepository } from '../../domain/interfaces/service-purchase-repository.interface';
 import { PurchaseStatus } from '../../domain/enums/purchase-status.enum';
+import { SessionType } from '../../../scheduling/domain/enums/session-type.enum';
 
 type ServicePurchaseScalarFields = Pick<
   ServicePurchase,
@@ -74,6 +75,21 @@ export class TypeOrmServicePurchaseRepository implements IServicePurchaseReposit
     return this.repository.findOne({
       where: { id },
       relations: ['user', 'holisticService', 'session'],
+    });
+  }
+
+  async findPaidUnassignedByUserAndSessionType(
+    userId: number,
+    sessionType: SessionType,
+  ): Promise<ServicePurchase | null> {
+    return this.repository.findOne({
+      where: {
+        userId,
+        paymentStatus: PurchaseStatus.PAID,
+        sessionId: IsNull(),
+        holisticService: { sessionType },
+      },
+      relations: ['holisticService'],
     });
   }
 

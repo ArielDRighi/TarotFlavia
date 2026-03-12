@@ -30,6 +30,9 @@ import { CompleteSessionUseCase } from './application/use-cases/complete-session
 import { AvailabilityOrchestratorService } from './application/services/availability-orchestrator.service';
 import { SessionOrchestratorService } from './application/services/session-orchestrator.service';
 
+// External Modules
+import { HolisticServicesModule } from '../holistic-services/holistic-services.module';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([
@@ -37,6 +40,7 @@ import { SessionOrchestratorService } from './application/services/session-orche
       TarotistException,
       Session,
     ]),
+    HolisticServicesModule,
   ],
   controllers: [TarotistSchedulingController, UserSchedulingController],
   providers: [

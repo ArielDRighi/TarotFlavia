@@ -8,6 +8,7 @@ import { ApprovePurchaseUseCase } from '../use-cases/approve-purchase.use-case';
 import { GetUserPurchasesUseCase } from '../use-cases/get-user-purchases.use-case';
 import { GetPendingPaymentsUseCase } from '../use-cases/get-pending-payments.use-case';
 import { CancelPurchaseUseCase } from '../use-cases/cancel-purchase.use-case';
+import { GetPurchaseByIdUseCase } from '../use-cases/get-purchase-by-id.use-case';
 import { HolisticServiceResponseDto } from '../dto/holistic-service-response.dto';
 import {
   HolisticServiceDetailResponseDto,
@@ -30,6 +31,7 @@ export class HolisticServicesOrchestratorService {
     private readonly getUserPurchasesUseCase: GetUserPurchasesUseCase,
     private readonly getPendingPaymentsUseCase: GetPendingPaymentsUseCase,
     private readonly cancelPurchaseUseCase: CancelPurchaseUseCase,
+    private readonly getPurchaseByIdUseCase: GetPurchaseByIdUseCase,
   ) {}
 
   getAllActiveServices(): Promise<HolisticServiceResponseDto[]> {
@@ -86,5 +88,12 @@ export class HolisticServicesOrchestratorService {
       requestingUserId,
       isAdmin,
     );
+  }
+
+  getPurchaseById(
+    purchaseId: number,
+    requestingUserId: number,
+  ): Promise<PurchaseResponseDto> {
+    return this.getPurchaseByIdUseCase.execute(purchaseId, requestingUserId);
   }
 }

@@ -3,10 +3,14 @@ import {
   Inject,
   ConflictException,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { ISessionRepository } from '../../domain/interfaces/session-repository.interface';
 import { SESSION_REPOSITORY } from '../../domain/interfaces/repository.tokens';
+import { IServicePurchaseRepository } from '../../../holistic-services/domain/interfaces/service-purchase-repository.interface';
+import { SERVICE_PURCHASE_REPOSITORY } from '../../../holistic-services/domain/interfaces/repository.tokens';
+import { PurchaseStatus } from '../../../holistic-services/domain/enums/purchase-status.enum';
 import { BookSessionDto } from '../dto/book-session.dto';
 import { SessionResponseDto } from '../dto/session-response.dto';
 import { SessionStatus, SessionType, PaymentStatus } from '../../domain/enums';
@@ -14,11 +18,19 @@ import { generateGoogleMeetLink } from '../helpers/google-meet.helper';
 import { GetAvailableSlotsUseCase } from './get-available-slots.use-case';
 import { Session } from '../../entities/session.entity';
 
+const HOLISTIC_SESSION_TYPES: SessionType[] = [
+  SessionType.FAMILY_TREE,
+  SessionType.ENERGY_CLEANING,
+  SessionType.HEBREW_PENDULUM,
+];
+
 @Injectable()
 export class BookSessionUseCase {
   constructor(
     @Inject(SESSION_REPOSITORY)
     private readonly sessionRepo: ISessionRepository,
+    @Inject(SERVICE_PURCHASE_REPOSITORY)
+    private readonly servicePurchaseRepo: IServicePurchaseRepository,
     private readonly getAvailableSlotsUseCase: GetAvailableSlotsUseCase,
     private readonly dataSource: DataSource,
   ) {}
@@ -37,6 +49,22 @@ export class BookSessionUseCase {
       throw new BadRequestException(
         'Las sesiones deben reservarse con al menos 2 horas de anticipación',
       );
+    }
+
+    const isHolistic = HOLISTIC_SESSION_TYPES.includes(dto.sessionType);
+
+    // Para sesiones holísticas, verificar que exista una compra pagada sin sesión asignada
+    if (isHolistic) {
+      const purchase =
+        await this.servicePurchaseRepo.findPaidUnassignedByUserAndSessionType(
+          userId,
+          dto.sessionType,
+        );
+      if (!purchase) {
+        throw new NotFoundException(
+          'No se encontró una compra pagada para este servicio holístico. Debes abonar el servicio antes de reservar la sesión.',
+        );
+      }
     }
 
     // Verificar que el usuario no tenga ya una sesión pending con este tarotista
@@ -101,8 +129,8 @@ export class BookSessionUseCase {
         dto.durationMinutes,
       );
 
-      // Generar link de Google Meet
-      const googleMeetLink = generateGoogleMeetLink();
+      // Generar link de Google Meet solo para sesiones no holísticas
+      const googleMeetLink = isHolistic ? '' : generateGoogleMeetLink();
 
       // Crear sesión
       const session = queryRunner.manager.create(Session, {
@@ -123,6 +151,22 @@ export class BookSessionUseCase {
       const savedSession = await queryRunner.manager.save(session);
 
       await queryRunner.commitTransaction();
+
+      // Para sesiones holísticas, vincular el sessionId a la compra correspondiente
+      if (isHolistic) {
+        const purchase =
+          await this.servicePurchaseRepo.findPaidUnassignedByUserAndSessionType(
+            userId,
+            dto.sessionType,
+          );
+        if (purchase) {
+          await this.servicePurchaseRepo.updateStatus(
+            purchase.id,
+            PurchaseStatus.PAID,
+            { sessionId: savedSession.id },
+          );
+        }
+      }
 
       // TODO: Enviar emails a usuario y tarotista (TASK-016 EmailService)
 

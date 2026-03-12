@@ -9,6 +9,7 @@ import { ApprovePurchaseUseCase } from '../use-cases/approve-purchase.use-case';
 import { GetUserPurchasesUseCase } from '../use-cases/get-user-purchases.use-case';
 import { GetPendingPaymentsUseCase } from '../use-cases/get-pending-payments.use-case';
 import { CancelPurchaseUseCase } from '../use-cases/cancel-purchase.use-case';
+import { GetPurchaseByIdUseCase } from '../use-cases/get-purchase-by-id.use-case';
 import { HolisticServiceResponseDto } from '../dto/holistic-service-response.dto';
 import { PurchaseResponseDto } from '../dto/purchase-response.dto';
 import { PurchaseStatus } from '../../domain/enums/purchase-status.enum';
@@ -62,6 +63,7 @@ describe('HolisticServicesOrchestratorService', () => {
     Pick<GetPendingPaymentsUseCase, 'execute'>
   >;
   let mockCancelPurchase: jest.Mocked<Pick<CancelPurchaseUseCase, 'execute'>>;
+  let mockGetPurchaseById: jest.Mocked<Pick<GetPurchaseByIdUseCase, 'execute'>>;
 
   beforeEach(async () => {
     mockGetAllActive = { execute: jest.fn() };
@@ -73,6 +75,7 @@ describe('HolisticServicesOrchestratorService', () => {
     mockGetUserPurchases = { execute: jest.fn() };
     mockGetPendingPayments = { execute: jest.fn() };
     mockCancelPurchase = { execute: jest.fn() };
+    mockGetPurchaseById = { execute: jest.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -89,6 +92,7 @@ describe('HolisticServicesOrchestratorService', () => {
           useValue: mockGetPendingPayments,
         },
         { provide: CancelPurchaseUseCase, useValue: mockCancelPurchase },
+        { provide: GetPurchaseByIdUseCase, useValue: mockGetPurchaseById },
       ],
     }).compile();
 
@@ -228,6 +232,17 @@ describe('HolisticServicesOrchestratorService', () => {
 
       expect(mockCancelPurchase.execute).toHaveBeenCalledWith(10, 5, false);
       expect(result.paymentStatus).toBe(PurchaseStatus.CANCELLED);
+    });
+  });
+
+  describe('getPurchaseById', () => {
+    it('debe delegar en GetPurchaseByIdUseCase con purchaseId y requestingUserId', async () => {
+      mockGetPurchaseById.execute.mockResolvedValue(mockPurchaseResponse);
+
+      const result = await orchestrator.getPurchaseById(10, 5);
+
+      expect(mockGetPurchaseById.execute).toHaveBeenCalledWith(10, 5);
+      expect(result.id).toBe(10);
     });
   });
 });

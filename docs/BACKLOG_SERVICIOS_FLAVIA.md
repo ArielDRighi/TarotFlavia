@@ -523,7 +523,7 @@ De espacios físicos tanto laborales como del hogar, armonizaciones energéticas
 | -------- | -------------------------------------------------------------- | -------- | ---------- | ---------- |
 | T-SF-B01 | Capa de dominio: Enums, Entidades, Migración y Repositorios    | Backend  | ✅ Completada | 3 días     |
 | T-SF-B02 | Capa de aplicación: DTOs, Use Cases y Orchestrator             | Backend  | ✅ Completada | 3 días     |
-| T-SF-B03 | Capa de infraestructura: Controllers, Módulo y Endpoints REST  | Backend  | 🔴 Crítica | 3 días     |
+| T-SF-B03 | Capa de infraestructura: Controllers, Módulo y Endpoints REST  | Backend  | ✅ Completada | 3 días     |
 | T-SF-B04 | Email de confirmación, Seed Data y Tests E2E                   | Backend  | 🟡 Alta    | 2 días     |
 | T-SF-F01 | Foundation: Types, API functions, Hooks y Rutas                | Frontend | 🔴 Crítica | 2 días     |
 | T-SF-F02 | Páginas públicas: Catálogo y Detalle de Servicio               | Frontend | 🔴 Crítica | 3 días     |
@@ -653,12 +653,12 @@ Crear toda la capa de dominio y persistencia del módulo `holistic-services`. In
 
 ---
 
-### T-SF-B03: Capa de Infraestructura — Controllers, Módulo y Endpoints REST
+ ### T-SF-B03: Capa de Infraestructura — Controllers, Módulo y Endpoints REST
 
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 3 días
 **Dependencias:** T-SF-B02
-**Estado:** 🔲 No iniciada
+**Estado:** ✅ COMPLETADA
 **Cubre HUS:** HUS-001, HUS-002, HUS-003, HUS-004, HUS-005, HUS-007
 
 #### 📋 Descripción
@@ -669,54 +669,54 @@ Crear los controllers REST, registrar el módulo `HolisticServicesModule` en el 
 
 **Controller Público (sin auth):**
 
-- [ ] `GET /holistic-services` — Listar servicios activos (público)
-- [ ] `GET /holistic-services/:slug` — Detalle de servicio por slug (público)
+- [x] `GET /holistic-services` — Listar servicios activos (público)
+- [x] `GET /holistic-services/:slug` — Detalle de servicio por slug (público)
 
 **Controller Autenticado (requiere JWT):**
 
-- [ ] `POST /holistic-services/purchases` — Crear compra (usuario autenticado)
-- [ ] `GET /holistic-services/purchases/my` — Listar compras del usuario
-- [ ] `GET /holistic-services/purchases/:id` — Detalle de compra del usuario (valida ownership)
-- [ ] `PATCH /holistic-services/purchases/:id/cancel` — Cancelar compra PENDING
+- [x] `POST /holistic-services/purchases` — Crear compra (usuario autenticado)
+- [x] `GET /holistic-services/purchases/my` — Listar compras del usuario
+- [x] `GET /holistic-services/purchases/:id` — Detalle de compra del usuario (valida ownership)
+- [x] `PATCH /holistic-services/purchases/:id/cancel` — Cancelar compra PENDING
 
 **Controller Admin (requiere JWT + RolesGuard):**
 
-- [ ] `GET /admin/holistic-services` — Listar todos los servicios (incluye inactivos)
-- [ ] `POST /admin/holistic-services` — Crear servicio
-- [ ] `PATCH /admin/holistic-services/:id` — Actualizar servicio
-- [ ] `GET /admin/holistic-services/payments` — Listar pagos pendientes
-- [ ] `PATCH /admin/holistic-services/payments/:id/approve` — Aprobar pago
+- [x] `GET /admin/holistic-services` — Listar todos los servicios (incluye inactivos)
+- [x] `POST /admin/holistic-services` — Crear servicio
+- [x] `PATCH /admin/holistic-services/:id` — Actualizar servicio
+- [x] `GET /admin/holistic-services/payments` — Listar pagos pendientes
+- [x] `PATCH /admin/holistic-services/payments/:id/approve` — Aprobar pago
 
 **Módulo:**
 
-- [ ] Crear `HolisticServicesModule` con todos los providers (repos, use cases, orchestrator, controllers)
-- [ ] Importar módulos necesarios: TypeOrmModule, UsersModule, EmailModule, SchedulingModule
-- [ ] Registrar en AppModule
-- [ ] Exportar lo necesario para que otros módulos puedan consumir
+- [x] Crear `HolisticServicesModule` con todos los providers (repos, use cases, orchestrator, controllers)
+- [x] Importar módulos necesarios: TypeOrmModule, UsersModule, EmailModule, SchedulingModule
+- [x] Registrar en AppModule
+- [x] Exportar lo necesario para que otros módulos puedan consumir
 
 **Integración con Scheduling:**
 
-- [ ] Modificar `BookSessionUseCase` (o crear guard/interceptor) para validar que al reservar una sesión de tipo holístico (FAMILY_TREE, ENERGY_CLEANING, HEBREW_PENDULUM), exista una `ServicePurchase` con `paymentStatus === PAID` y sin `sessionId` asignado
-- [ ] Al confirmar la reserva, actualizar el `sessionId` en la `ServicePurchase` correspondiente
-- [ ] Para sesiones holísticas: usar `whatsappNumber` del servicio en lugar de generar Google Meet link
+- [x] Modificar `BookSessionUseCase` (o crear guard/interceptor) para validar que al reservar una sesión de tipo holístico (FAMILY_TREE, ENERGY_CLEANING, HEBREW_PENDULUM), exista una `ServicePurchase` con `paymentStatus === PAID` y sin `sessionId` asignado
+- [x] Al confirmar la reserva, actualizar el `sessionId` en la `ServicePurchase` correspondiente
+- [x] Para sesiones holísticas: usar `whatsappNumber` del servicio en lugar de generar Google Meet link
 
 **Documentación Swagger:**
 
-- [ ] Decoradores `@ApiTags`, `@ApiOperation`, `@ApiResponse` en todos los endpoints
-- [ ] Descripciones en español
-- [ ] Ejemplos de request/response
+- [x] Decoradores `@ApiTags`, `@ApiOperation`, `@ApiResponse` en todos los endpoints
+- [x] Descripciones en español
+- [x] Ejemplos de request/response
 
 #### 🎯 Criterios de aceptación
 
-- Todos los endpoints públicos funcionan sin autenticación
-- Endpoints de compras requieren JWT y validan ownership
-- Endpoints admin requieren rol ADMIN
-- La reserva de sesiones holísticas exige pago aprobado (403 si no hay pago)
-- Las sesiones holísticas NO generan Google Meet link, usan WhatsApp
-- El `sessionId` se vincula correctamente a la compra tras la reserva
-- Swagger documenta todos los endpoints
-- Tests unitarios de controllers con mocks del orchestrator
-- Coverage ≥ 80%
+- [x] Todos los endpoints públicos funcionan sin autenticación
+- [x] Endpoints de compras requieren JWT y validan ownership
+- [x] Endpoints admin requieren rol ADMIN
+- [x] La reserva de sesiones holísticas exige pago aprobado (403 si no hay pago)
+- [x] Las sesiones holísticas NO generan Google Meet link, usan WhatsApp
+- [x] El `sessionId` se vincula correctamente a la compra tras la reserva
+- [x] Swagger documenta todos los endpoints
+- [x] Tests unitarios de controllers con mocks del orchestrator
+- [x] Coverage ≥ 80%
 
 ---
 
