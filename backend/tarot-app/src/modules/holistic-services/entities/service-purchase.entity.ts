@@ -63,6 +63,10 @@ export class ServicePurchase {
     type: 'decimal',
     precision: 10,
     scale: 2,
+    transformer: {
+      to: (value: number) => value,
+      from: (value: string): number => parseFloat(value),
+    },
   })
   amountArs: number;
 

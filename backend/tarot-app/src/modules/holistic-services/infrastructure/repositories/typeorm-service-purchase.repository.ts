@@ -10,7 +10,6 @@ type ServicePurchaseScalarFields = Pick<
   | 'userId'
   | 'holisticServiceId'
   | 'sessionId'
-  | 'paymentStatus'
   | 'amountArs'
   | 'paymentReference'
   | 'paidAt'
@@ -83,16 +82,23 @@ export class TypeOrmServicePurchaseRepository implements IServicePurchaseReposit
     status: PurchaseStatus,
     extra?: Partial<ServicePurchase>,
   ): Promise<ServicePurchase | null> {
+    // Destructure out all relation fields AND fields that must never be overridden
+    // (id, createdAt, updatedAt, paymentStatus). paymentStatus is assigned last
+    // explicitly so the status argument always wins over any value in extra.
     const {
+      id: _id,
       user: _user,
       holisticService: _holisticService,
       session: _session,
+      createdAt: _createdAt,
+      updatedAt: _updatedAt,
+      paymentStatus: _paymentStatus,
       ...scalarExtra
     } = (extra ?? {}) as ServicePurchase;
 
     await this.repository.update(id, {
-      paymentStatus: status,
       ...(scalarExtra as Partial<ServicePurchaseScalarFields>),
+      paymentStatus: status,
     });
     return this.repository.findOne({ where: { id } });
   }

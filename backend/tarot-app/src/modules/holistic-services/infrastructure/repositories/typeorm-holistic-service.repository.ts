@@ -61,7 +61,15 @@ export class TypeOrmHolisticServiceRepository implements IHolisticServiceReposit
     id: number,
     data: Partial<HolisticService>,
   ): Promise<HolisticService | null> {
-    const { purchases: _purchases, ...updateData } = data as HolisticService;
+    // Explicitly exclude relation fields and immutable fields (id, createdAt,
+    // updatedAt) so they can never leak into the TypeORM update payload.
+    const {
+      id: _id,
+      purchases: _purchases,
+      createdAt: _createdAt,
+      updatedAt: _updatedAt,
+      ...updateData
+    } = data as HolisticService;
     await this.repository.update(
       id,
       updateData as Partial<HolisticServiceUpdateData>,

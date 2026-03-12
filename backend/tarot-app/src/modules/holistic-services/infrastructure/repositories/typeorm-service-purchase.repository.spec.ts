@@ -218,8 +218,10 @@ describe('TypeOrmServicePurchaseRepository', () => {
       );
 
       expect(typeOrmRepository.update).toHaveBeenCalledWith(1, {
+        paidAt: extra.paidAt,
+        approvedByAdminId: extra.approvedByAdminId,
+        paymentReference: extra.paymentReference,
         paymentStatus: PurchaseStatus.PAID,
-        ...extra,
       });
       expect(result).toEqual(mockPaidPurchase);
     });
@@ -248,6 +250,23 @@ describe('TypeOrmServicePurchaseRepository', () => {
       const result = await repository.updateStatus(999, PurchaseStatus.PAID);
 
       expect(result).toBeNull();
+    });
+
+    it('should not allow paymentStatus in extra to override the status argument', async () => {
+      // extra provides a different paymentStatus — status argument must always win
+      const extra: Partial<ServicePurchase> = {
+        paymentStatus: PurchaseStatus.CANCELLED,
+        paidAt: new Date(),
+        approvedByAdminId: 99,
+      };
+
+      typeOrmRepository.update.mockResolvedValue({ affected: 1 } as never);
+      typeOrmRepository.findOne.mockResolvedValue(mockPaidPurchase);
+
+      await repository.updateStatus(1, PurchaseStatus.PAID, extra);
+
+      const updateCall = typeOrmRepository.update.mock.calls[0][1] as Partial<ServicePurchase>;
+      expect(updateCall.paymentStatus).toBe(PurchaseStatus.PAID);
     });
   });
 });

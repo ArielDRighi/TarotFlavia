@@ -34,11 +34,6 @@ export class CreateHolisticServicesTables1772300000000 implements MigrationInter
     `);
 
     await queryRunner.query(`
-      CREATE UNIQUE INDEX "idx_holistic_services_slug"
-      ON "holistic_services" ("slug")
-    `);
-
-    await queryRunner.query(`
       CREATE INDEX "idx_holistic_services_display_order"
       ON "holistic_services" ("display_order")
     `);
@@ -123,9 +118,6 @@ export class CreateHolisticServicesTables1772300000000 implements MigrationInter
     );
     await queryRunner.query(
       `DROP INDEX IF EXISTS "idx_holistic_services_display_order"`,
-    );
-    await queryRunner.query(
-      `DROP INDEX IF EXISTS "idx_holistic_services_slug"`,
     );
 
     // Drop tables

@@ -194,5 +194,29 @@ describe('TypeOrmHolisticServiceRepository', () => {
 
       expect(result).toBeNull();
     });
+
+    it('should strip id, createdAt, updatedAt and purchases from the update payload', async () => {
+      const dirtyData: Partial<HolisticService> = {
+        id: 99,
+        priceArs: 20000,
+        isActive: false,
+        purchases: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      typeOrmRepository.update.mockResolvedValue({ affected: 1 } as never);
+      typeOrmRepository.findOne.mockResolvedValue(mockService);
+
+      await repository.update(1, dirtyData);
+
+      const updateCall = typeOrmRepository.update.mock.calls[0][1] as Partial<HolisticService>;
+      expect(updateCall).not.toHaveProperty('id');
+      expect(updateCall).not.toHaveProperty('purchases');
+      expect(updateCall).not.toHaveProperty('createdAt');
+      expect(updateCall).not.toHaveProperty('updatedAt');
+      expect(updateCall.priceArs).toBe(20000);
+      expect(updateCall.isActive).toBe(false);
+    });
   });
 });

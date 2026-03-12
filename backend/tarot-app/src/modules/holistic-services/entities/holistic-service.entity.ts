@@ -14,7 +14,6 @@ import { ServicePurchase } from './service-purchase.entity';
  * Holistic service offered by Flavia (e.g. Family Tree, Hebrew Pendulum, Energy Cleaning)
  */
 @Entity('holistic_services')
-@Index('idx_holistic_services_slug', ['slug'], { unique: true })
 @Index('idx_holistic_services_display_order', ['displayOrder'])
 export class HolisticService {
   @PrimaryGeneratedColumn('increment')
@@ -38,6 +37,10 @@ export class HolisticService {
     precision: 10,
     scale: 2,
     default: 0,
+    transformer: {
+      to: (value: number) => value,
+      from: (value: string): number => parseFloat(value),
+    },
   })
   priceArs: number;
 
