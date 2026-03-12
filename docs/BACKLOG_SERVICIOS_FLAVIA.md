@@ -521,7 +521,7 @@ De espacios físicos tanto laborales como del hogar, armonizaciones energéticas
 
 | ID       | Tarea                                                          | Tipo     | Prioridad  | Estimación |
 | -------- | -------------------------------------------------------------- | -------- | ---------- | ---------- |
-| T-SF-B01 | Capa de dominio: Enums, Entidades, Migración y Repositorios    | Backend  | 🔴 Crítica | 3 días     |
+| T-SF-B01 | Capa de dominio: Enums, Entidades, Migración y Repositorios    | Backend  | ✅ Completada | 3 días     |
 | T-SF-B02 | Capa de aplicación: DTOs, Use Cases y Orchestrator             | Backend  | 🔴 Crítica | 3 días     |
 | T-SF-B03 | Capa de infraestructura: Controllers, Módulo y Endpoints REST  | Backend  | 🔴 Crítica | 3 días     |
 | T-SF-B04 | Email de confirmación, Seed Data y Tests E2E                   | Backend  | 🟡 Alta    | 2 días     |
@@ -543,7 +543,7 @@ De espacios físicos tanto laborales como del hogar, armonizaciones energéticas
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 3 días
 **Dependencias:** Ninguna (es la base de todo el módulo)
-**Estado:** 🔲 No iniciada
+**Estado:** ✅ COMPLETADA
 **Cubre HUS:** HUS-001, HUS-002, HUS-003, HUS-004, HUS-007 (parcial — capa de datos)
 
 #### 📋 Descripción
@@ -554,34 +554,34 @@ Crear toda la capa de dominio y persistencia del módulo `holistic-services`. In
 
 **Enums:**
 
-- [ ] Agregar valor `FAMILY_TREE = 'family_tree'` al enum `SessionType` existente en `scheduling/domain/enums/session-type.enum.ts`
-- [ ] Crear enum `PurchaseStatus` con valores: `PENDING`, `PAID`, `CANCELLED`, `REFUNDED`
+- [x] Agregar valor `FAMILY_TREE = 'family_tree'` al enum `SessionType` existente en `scheduling/domain/enums/session-type.enum.ts`
+- [x] Crear enum `PurchaseStatus` con valores: `PENDING`, `PAID`, `CANCELLED`, `REFUNDED`
 
 **Entidad HolisticService:**
 
-- [ ] Crear entidad con campos: `id`, `name`, `slug` (unique), `shortDescription`, `longDescription`, `priceArs` (decimal), `durationMinutes`, `sessionType` (SessionType enum), `whatsappNumber`, `mercadoPagoLink`, `imageUrl` (nullable), `displayOrder`, `isActive`, `createdAt`, `updatedAt`
-- [ ] Índices en `slug` (unique) y `displayOrder`
-- [ ] Relación OneToMany con `ServicePurchase`
+- [x] Crear entidad con campos: `id`, `name`, `slug` (unique), `shortDescription`, `longDescription`, `priceArs` (decimal), `durationMinutes`, `sessionType` (SessionType enum), `whatsappNumber`, `mercadoPagoLink`, `imageUrl` (nullable), `displayOrder`, `isActive`, `createdAt`, `updatedAt`
+- [x] Índices en `slug` (unique) y `displayOrder`
+- [x] Relación OneToMany con `ServicePurchase`
 
 **Entidad ServicePurchase:**
 
-- [ ] Crear entidad con campos: `id`, `userId` (FK User), `holisticServiceId` (FK HolisticService), `sessionId` (FK Session, nullable — se asigna post-reserva), `paymentStatus` (PurchaseStatus enum), `amountArs` (decimal), `paymentReference` (nullable — para referencia de Mercado Pago), `paidAt` (nullable), `approvedByAdminId` (nullable), `createdAt`, `updatedAt`
-- [ ] Índices compuestos en `(userId, paymentStatus)` y `(holisticServiceId, paymentStatus)`
-- [ ] Relaciones ManyToOne con User, HolisticService y Session
+- [x] Crear entidad con campos: `id`, `userId` (FK User), `holisticServiceId` (FK HolisticService), `sessionId` (FK Session, nullable — se asigna post-reserva), `paymentStatus` (PurchaseStatus enum), `amountArs` (decimal), `paymentReference` (nullable — para referencia de Mercado Pago), `paidAt` (nullable), `approvedByAdminId` (nullable), `createdAt`, `updatedAt`
+- [x] Índices compuestos en `(userId, paymentStatus)` y `(holisticServiceId, paymentStatus)`
+- [x] Relaciones ManyToOne con User, HolisticService y Session
 
 **Migración:**
 
-- [ ] Crear migración que genere las tablas `holistic_services` y `service_purchases`
-- [ ] Agregar valor `family_tree` al tipo enum `session_type` en PostgreSQL (ALTER TYPE)
-- [ ] Agregar valor `cancelled` al tipo enum `payment_status` si no existe
-- [ ] Foreign keys con ON DELETE apropiado (CASCADE para user, RESTRICT para servicio)
+- [x] Crear migración que genere las tablas `holistic_services` y `service_purchases`
+- [x] Agregar valor `family_tree` al tipo enum `session_type` en PostgreSQL (ALTER TYPE)
+- [x] Agregar valor `cancelled` al tipo enum `payment_status` si no existe
+- [x] Foreign keys con ON DELETE apropiado (CASCADE para user, RESTRICT para servicio)
 
 **Repositorios:**
 
-- [ ] Crear interfaces `IHolisticServiceRepository` e `IServicePurchaseRepository` con los métodos necesarios (findAll, findBySlug, findById, save, findByUserId, findPendingPayments, etc.)
-- [ ] Crear tokens de inyección para DI de NestJS
-- [ ] Crear implementaciones TypeORM de ambos repositorios
-- [ ] Tests unitarios de repositorios con mocks de TypeORM
+- [x] Crear interfaces `IHolisticServiceRepository` e `IServicePurchaseRepository` con los métodos necesarios (findAll, findBySlug, findById, save, findByUserId, findPendingPayments, etc.)
+- [x] Crear tokens de inyección para DI de NestJS
+- [x] Crear implementaciones TypeORM de ambos repositorios
+- [x] Tests unitarios de repositorios con mocks de TypeORM
 
 #### 🎯 Criterios de aceptación
 

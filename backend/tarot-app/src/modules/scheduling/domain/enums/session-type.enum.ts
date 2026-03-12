@@ -6,4 +6,5 @@ export enum SessionType {
   ENERGY_CLEANING = 'energy_cleaning',
   HEBREW_PENDULUM = 'hebrew_pendulum',
   CONSULTATION = 'consultation',
+  FAMILY_TREE = 'family_tree',
 }

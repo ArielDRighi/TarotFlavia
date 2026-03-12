@@ -144,14 +144,15 @@ export class BookSessionUseCase {
     durationMinutes: number,
   ): number {
     // Precios base por minuto según tipo de sesión
-    const baseRates = {
+    const baseRates: Record<SessionType, number> = {
       [SessionType.TAROT_READING]: 0.83, // $50/60min
       [SessionType.ENERGY_CLEANING]: 1.0, // $60/60min
       [SessionType.HEBREW_PENDULUM]: 0.67, // $40/60min
       [SessionType.CONSULTATION]: 0.5, // $30/60min
+      [SessionType.FAMILY_TREE]: 0.5, // $30/60min
     };
 
-    const rate = baseRates[sessionType] || 0.5;
+    const rate = baseRates[sessionType];
     return Number((rate * durationMinutes).toFixed(2));
   }
 

@@ -14,7 +14,11 @@ const THRESHOLD_LINES = 1500;
 // The module is under active development (TASK-302 seeder, upcoming TASK-303+ for services/controllers).
 // Layered structure (domain/application/infrastructure) will be applied when the module reaches full complexity.
 // Target: Apply layers when encyclopedia services/controllers are implemented (Q1-Q2 2026).
-const MODULES_PENDING_LAYERS = new Set(['encyclopedia']);
+// TODO[ARCH-HOLISTIC-SERVICES-LAYERS]: Temporary exception for holistic-services module.
+// T-SF-B01 implements domain layer only (entities, repositories, enums, migration).
+// The application/ layer (use cases, DTOs, orchestrator) will be added in T-SF-B02+.
+// Target: Remove exception once application/ folder is introduced in subsequent tasks.
+const MODULES_PENDING_LAYERS = new Set(['encyclopedia', 'holistic-services']);
 
 let exitCode = 0;
 
