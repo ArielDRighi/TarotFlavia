@@ -18,6 +18,7 @@ import { User } from '../src/modules/users/entities/user.entity';
 import { Tarotista } from '../src/modules/tarotistas/entities/tarotista.entity';
 import { TarotistaConfig } from '../src/modules/tarotistas/entities/tarotista-config.entity';
 import { Plan } from '../src/modules/plan-config/entities/plan.entity';
+import { HolisticService } from '../src/modules/holistic-services/entities/holistic-service.entity';
 import { seedTarotDecks } from '../src/database/seeds/tarot-decks.seeder';
 import { seedTarotCards } from '../src/database/seeds/tarot-cards.seeder';
 import { seedTarotSpreads } from '../src/database/seeds/tarot-spreads.seeder';
@@ -32,6 +33,7 @@ import { seedRituals } from '../src/database/seeds/rituals.seeder';
 import { seedPendulumInterpretations } from '../src/database/seeds/pendulum-interpretations.seeder';
 import { seedEncyclopediaTarotCards } from '../src/database/seeds/encyclopedia-tarot-cards.seeder';
 import { seedEncyclopediaArticles } from '../src/database/seeds/encyclopedia-articles.seeder';
+import { seedHolisticServices } from '../src/database/seeds/holistic-services.seeder';
 
 interface SeederStep {
   name: string;
@@ -62,6 +64,9 @@ async function bootstrap() {
     getRepositoryToken(TarotistaConfig),
   );
   const planRepository = app.get<Repository<Plan>>(getRepositoryToken(Plan));
+  const holisticServiceRepository = app.get<Repository<HolisticService>>(
+    getRepositoryToken(HolisticService),
+  );
 
   try {
     console.log(
@@ -190,6 +195,13 @@ async function bootstrap() {
         dependencies: ['Encyclopedia Tarot Cards'],
         execute: async () => {
           await seedEncyclopediaArticles(dataSource);
+        },
+      },
+      {
+        name: 'Holistic Services',
+        dependencies: [],
+        execute: async () => {
+          await seedHolisticServices(holisticServiceRepository);
         },
       },
     ];
