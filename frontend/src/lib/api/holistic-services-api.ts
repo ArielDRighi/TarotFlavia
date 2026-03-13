@@ -10,7 +10,6 @@ import type {
   HolisticService,
   HolisticServiceDetail,
   ServicePurchase,
-  PaginatedPurchases,
   CreatePurchasePayload,
 } from '@/types';
 
@@ -78,17 +77,14 @@ export async function createPurchase(data: CreatePurchasePayload): Promise<Servi
 }
 
 /**
- * Fetch the authenticated user's purchases with optional pagination
- * @param page - Page number (1-indexed, defaults to 1)
- * @param limit - Items per page (defaults to 10)
- * @returns Promise<PaginatedPurchases> Paginated list of purchases
+ * Fetch the authenticated user's purchases
+ * @returns Promise<ServicePurchase[]> Array of the user's purchases
  * @throws Error with clear message on failure
  */
-export async function getMyPurchases(page = 1, limit = 10): Promise<PaginatedPurchases> {
+export async function getMyPurchases(): Promise<ServicePurchase[]> {
   try {
-    const response = await apiClient.get<PaginatedPurchases>(
-      API_ENDPOINTS.HOLISTIC_SERVICES.MY_PURCHASES,
-      { params: { page, limit } }
+    const response = await apiClient.get<ServicePurchase[]>(
+      API_ENDPOINTS.HOLISTIC_SERVICES.MY_PURCHASES
     );
     return response.data;
   } catch {
@@ -127,7 +123,7 @@ export async function getPurchaseDetail(id: number): Promise<ServicePurchase> {
  */
 export async function cancelPurchase(id: number): Promise<void> {
   try {
-    await apiClient.post(API_ENDPOINTS.HOLISTIC_SERVICES.CANCEL_PURCHASE(id));
+    await apiClient.patch(API_ENDPOINTS.HOLISTIC_SERVICES.CANCEL_PURCHASE(id));
   } catch (error: unknown) {
     if (error && typeof error === 'object' && 'response' in error) {
       const axiosError = error as { response?: { status?: number } };

@@ -11,7 +11,6 @@ import type {
   CreateHolisticServicePayload,
   UpdateHolisticServicePayload,
   ServicePurchase,
-  PaginatedPurchases,
   ApprovePurchasePayload,
 } from '@/types';
 
@@ -89,12 +88,12 @@ export async function adminUpdateHolisticService(
 
 /**
  * Fetch all purchases pending payment approval (admin only)
- * @returns Promise<PaginatedPurchases> Paginated list of pending purchases
+ * @returns Promise<ServicePurchase[]> Array of pending purchases
  * @throws Error with clear message on failure
  */
-export async function adminGetPendingPayments(): Promise<PaginatedPurchases> {
+export async function adminGetPendingPayments(): Promise<ServicePurchase[]> {
   try {
-    const response = await apiClient.get<PaginatedPurchases>(
+    const response = await apiClient.get<ServicePurchase[]>(
       API_ENDPOINTS.HOLISTIC_SERVICES.ADMIN_PENDING_PAYMENTS
     );
     return response.data;
@@ -115,7 +114,7 @@ export async function adminApprovePayment(
   data: ApprovePurchasePayload = {}
 ): Promise<ServicePurchase> {
   try {
-    const response = await apiClient.post<ServicePurchase>(
+    const response = await apiClient.patch<ServicePurchase>(
       API_ENDPOINTS.HOLISTIC_SERVICES.ADMIN_APPROVE_PAYMENT(id),
       data
     );

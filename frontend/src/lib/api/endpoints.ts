@@ -193,14 +193,14 @@ export const API_ENDPOINTS = {
     DETAIL: (slug: string) => `/holistic-services/${slug}`,
     // Authenticated user (purchases)
     PURCHASE: '/holistic-services/purchases',
-    MY_PURCHASES: '/holistic-services/purchases/my-purchases',
+    MY_PURCHASES: '/holistic-services/purchases/my',
     PURCHASE_DETAIL: (id: number) => `/holistic-services/purchases/${id}`,
     CANCEL_PURCHASE: (id: number) => `/holistic-services/purchases/${id}/cancel`,
     // Admin
     ADMIN_LIST: '/admin/holistic-services',
     ADMIN_BY_ID: (id: number) => `/admin/holistic-services/${id}`,
-    ADMIN_PENDING_PAYMENTS: '/admin/holistic-services/purchases/pending',
-    ADMIN_APPROVE_PAYMENT: (id: number) => `/admin/holistic-services/purchases/${id}/approve`,
+    ADMIN_PENDING_PAYMENTS: '/admin/holistic-services/payments',
+    ADMIN_APPROVE_PAYMENT: (id: number) => `/admin/holistic-services/payments/${id}/approve`,
   },
 
   // Admin Dashboard

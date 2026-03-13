@@ -6,20 +6,10 @@
  */
 
 /**
- * Pagination metadata matching backend's standard format
- */
-export interface PurchasePaginationMeta {
-  page: number;
-  limit: number;
-  totalItems: number;
-  totalPages: number;
-}
-
-/**
  * Purchase status enum
- * DEBE coincidir exactamente con backend PurchaseStatus enum
+ * DEBE coincidir exactamente con backend PurchaseStatus enum (lowercase)
  */
-export type PurchaseStatus = 'PENDING' | 'PAID' | 'CANCELLED' | 'REFUNDED';
+export type PurchaseStatus = 'pending' | 'paid' | 'cancelled' | 'refunded';
 
 /**
  * Summary of the purchased holistic service (nested in purchase response)
@@ -49,15 +39,6 @@ export interface ServicePurchase {
   whatsappNumber?: string;
   createdAt: string;
   updatedAt: string;
-}
-
-/**
- * Paginated list of purchases
- * Coincide con backend PurchaseListResponseDto
- */
-export interface PaginatedPurchases {
-  data: ServicePurchase[];
-  meta: PurchasePaginationMeta;
 }
 
 /**

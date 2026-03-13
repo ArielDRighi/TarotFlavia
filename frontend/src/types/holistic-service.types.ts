@@ -6,16 +6,11 @@
  * Reflect exactly the backend HolisticService entity contracts.
  */
 
-import type { SessionType } from './session.types';
-
 /**
- * Holistic service session type subset
- * Only session types used by holistic services
+ * Holistic service session type
+ * Values match backend session-type.enum.ts for holistic services (snake_case)
  */
-export type HolisticSessionType = Extract<
-  SessionType,
-  'FAMILY_TREE' | 'ENERGY_CLEANING' | 'HEBREW_PENDULUM'
->;
+export type HolisticSessionType = 'family_tree' | 'energy_cleaning' | 'hebrew_pendulum';
 
 /**
  * Public holistic service (catalog listing)
@@ -32,6 +27,8 @@ export interface HolisticService {
   imageUrl: string | null;
   displayOrder: number;
   isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 /**

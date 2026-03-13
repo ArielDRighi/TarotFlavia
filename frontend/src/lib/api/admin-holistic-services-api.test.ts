@@ -10,12 +10,7 @@ import {
   adminApprovePayment,
 } from './admin-holistic-services-api';
 import { apiClient } from './axios-config';
-import type {
-  HolisticServiceAdmin,
-  CreateHolisticServicePayload,
-  ServicePurchase,
-  PaginatedPurchases,
-} from '@/types';
+import type { HolisticServiceAdmin, CreateHolisticServicePayload, ServicePurchase } from '@/types';
 
 // Mock axios client
 vi.mock('./axios-config', () => ({
@@ -38,7 +33,7 @@ const mockAdminService: HolisticServiceAdmin = {
   longDescription: 'Descripción larga completa del servicio',
   priceArs: 15000,
   durationMinutes: 90,
-  sessionType: 'FAMILY_TREE',
+  sessionType: 'family_tree',
   imageUrl: 'https://example.com/arbol.jpg',
   displayOrder: 1,
   isActive: true,
@@ -55,7 +50,7 @@ const mockCreatePayload: CreateHolisticServicePayload = {
   longDescription: 'Descripción larga completa del servicio',
   priceArs: 15000,
   durationMinutes: 90,
-  sessionType: 'FAMILY_TREE',
+  sessionType: 'family_tree',
   whatsappNumber: '+54911234567',
   mercadoPagoLink: 'https://mpago.la/abc123',
 };
@@ -65,17 +60,12 @@ const mockPurchase: ServicePurchase = {
   userId: 100,
   holisticServiceId: 1,
   sessionId: null,
-  paymentStatus: 'PENDING',
+  paymentStatus: 'pending',
   amountArs: 15000,
   paymentReference: null,
   paidAt: null,
   createdAt: '2026-01-01T10:00:00Z',
   updatedAt: '2026-01-01T10:00:00Z',
-};
-
-const mockPaginatedPurchases: PaginatedPurchases = {
-  data: [mockPurchase],
-  meta: { page: 1, limit: 10, totalItems: 1, totalPages: 1 },
 };
 
 describe('Admin Holistic Services API', () => {
@@ -178,12 +168,20 @@ describe('Admin Holistic Services API', () => {
 
   describe('adminGetPendingPayments', () => {
     it('should fetch pending purchases for admin review', async () => {
-      vi.mocked(apiClient.get).mockResolvedValue({ data: mockPaginatedPurchases });
+      vi.mocked(apiClient.get).mockResolvedValue({ data: [mockPurchase] });
 
       const result = await adminGetPendingPayments();
 
-      expect(result).toEqual(mockPaginatedPurchases);
-      expect(apiClient.get).toHaveBeenCalledWith('/admin/holistic-services/purchases/pending');
+      expect(result).toEqual([mockPurchase]);
+      expect(apiClient.get).toHaveBeenCalledWith('/admin/holistic-services/payments');
+    });
+
+    it('should return empty array when no pending purchases', async () => {
+      vi.mocked(apiClient.get).mockResolvedValue({ data: [] });
+
+      const result = await adminGetPendingPayments();
+
+      expect(result).toEqual([]);
     });
 
     it('should throw error with Spanish message on failure', async () => {
@@ -199,14 +197,14 @@ describe('Admin Holistic Services API', () => {
 
   describe('adminApprovePayment', () => {
     it('should approve a payment without reference', async () => {
-      const approvedPurchase = { ...mockPurchase, paymentStatus: 'PAID' as const };
-      vi.mocked(apiClient.post).mockResolvedValue({ data: approvedPurchase });
+      const approvedPurchase = { ...mockPurchase, paymentStatus: 'paid' as const };
+      vi.mocked(apiClient.patch).mockResolvedValue({ data: approvedPurchase });
 
       const result = await adminApprovePayment(10);
 
       expect(result).toEqual(approvedPurchase);
-      expect(apiClient.post).toHaveBeenCalledWith(
-        '/admin/holistic-services/purchases/10/approve',
+      expect(apiClient.patch).toHaveBeenCalledWith(
+        '/admin/holistic-services/payments/10/approve',
         {}
       );
     });
@@ -214,27 +212,27 @@ describe('Admin Holistic Services API', () => {
     it('should approve a payment with payment reference', async () => {
       const approvedPurchase = {
         ...mockPurchase,
-        paymentStatus: 'PAID' as const,
+        paymentStatus: 'paid' as const,
         paymentReference: 'REF-001',
       };
-      vi.mocked(apiClient.post).mockResolvedValue({ data: approvedPurchase });
+      vi.mocked(apiClient.patch).mockResolvedValue({ data: approvedPurchase });
 
       const result = await adminApprovePayment(10, { paymentReference: 'REF-001' });
 
       expect(result.paymentReference).toBe('REF-001');
-      expect(apiClient.post).toHaveBeenCalledWith('/admin/holistic-services/purchases/10/approve', {
+      expect(apiClient.patch).toHaveBeenCalledWith('/admin/holistic-services/payments/10/approve', {
         paymentReference: 'REF-001',
       });
     });
 
     it('should throw "Compra no encontrada" on 404', async () => {
-      vi.mocked(apiClient.post).mockRejectedValue({ response: { status: 404 } });
+      vi.mocked(apiClient.patch).mockRejectedValue({ response: { status: 404 } });
 
       await expect(adminApprovePayment(999)).rejects.toThrow('Compra no encontrada');
     });
 
     it('should throw generic error on non-404 failures', async () => {
-      vi.mocked(apiClient.post).mockRejectedValue(new Error('Network error'));
+      vi.mocked(apiClient.patch).mockRejectedValue(new Error('Network error'));
 
       await expect(adminApprovePayment(10)).rejects.toThrow('Error al aprobar el pago');
     });

@@ -33,7 +33,7 @@ const mockPurchase: ServicePurchase = {
   userId: 100,
   holisticServiceId: 1,
   sessionId: null,
-  paymentStatus: 'PENDING',
+  paymentStatus: 'pending',
   amountArs: 15000,
   paymentReference: null,
   paidAt: null,

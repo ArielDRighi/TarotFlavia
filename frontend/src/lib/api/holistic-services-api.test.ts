@@ -11,18 +11,14 @@ import {
   cancelPurchase,
 } from './holistic-services-api';
 import { apiClient } from './axios-config';
-import type {
-  HolisticService,
-  HolisticServiceDetail,
-  ServicePurchase,
-  PaginatedPurchases,
-} from '@/types';
+import type { HolisticService, HolisticServiceDetail, ServicePurchase } from '@/types';
 
 // Mock axios client
 vi.mock('./axios-config', () => ({
   apiClient: {
     get: vi.fn(),
     post: vi.fn(),
+    patch: vi.fn(),
   },
 }));
 
@@ -37,10 +33,12 @@ const mockService: HolisticService = {
   shortDescription: 'Descubre tu historia familiar',
   priceArs: 15000,
   durationMinutes: 90,
-  sessionType: 'FAMILY_TREE',
+  sessionType: 'family_tree',
   imageUrl: 'https://example.com/arbol.jpg',
   displayOrder: 1,
   isActive: true,
+  createdAt: '2026-01-01T00:00:00Z',
+  updatedAt: '2026-01-01T00:00:00Z',
 };
 
 const mockServiceDetail: HolisticServiceDetail = {
@@ -59,17 +57,12 @@ const mockPurchase: ServicePurchase = {
     durationMinutes: 90,
   },
   sessionId: null,
-  paymentStatus: 'PENDING',
+  paymentStatus: 'pending',
   amountArs: 15000,
   paymentReference: null,
   paidAt: null,
   createdAt: '2026-01-01T10:00:00Z',
   updatedAt: '2026-01-01T10:00:00Z',
-};
-
-const mockPaginatedPurchases: PaginatedPurchases = {
-  data: [mockPurchase],
-  meta: { page: 1, limit: 10, totalItems: 1, totalPages: 1 },
 };
 
 describe('Holistic Services API', () => {
@@ -165,25 +158,21 @@ describe('Holistic Services API', () => {
   // ============================================================================
 
   describe('getMyPurchases', () => {
-    it('should fetch paginated purchases with default params', async () => {
-      vi.mocked(apiClient.get).mockResolvedValue({ data: mockPaginatedPurchases });
+    it('should fetch user purchases as array', async () => {
+      vi.mocked(apiClient.get).mockResolvedValue({ data: [mockPurchase] });
 
       const result = await getMyPurchases();
 
-      expect(result).toEqual(mockPaginatedPurchases);
-      expect(apiClient.get).toHaveBeenCalledWith('/holistic-services/purchases/my-purchases', {
-        params: { page: 1, limit: 10 },
-      });
+      expect(result).toEqual([mockPurchase]);
+      expect(apiClient.get).toHaveBeenCalledWith('/holistic-services/purchases/my');
     });
 
-    it('should pass custom page and limit params', async () => {
-      vi.mocked(apiClient.get).mockResolvedValue({ data: mockPaginatedPurchases });
+    it('should return empty array when no purchases exist', async () => {
+      vi.mocked(apiClient.get).mockResolvedValue({ data: [] });
 
-      await getMyPurchases(2, 5);
+      const result = await getMyPurchases();
 
-      expect(apiClient.get).toHaveBeenCalledWith('/holistic-services/purchases/my-purchases', {
-        params: { page: 2, limit: 5 },
-      });
+      expect(result).toEqual([]);
     });
 
     it('should throw error with Spanish message on failure', async () => {
@@ -226,20 +215,20 @@ describe('Holistic Services API', () => {
 
   describe('cancelPurchase', () => {
     it('should cancel a purchase successfully', async () => {
-      vi.mocked(apiClient.post).mockResolvedValue({ data: undefined });
+      vi.mocked(apiClient.patch).mockResolvedValue({ data: undefined });
 
       await expect(cancelPurchase(10)).resolves.toBeUndefined();
-      expect(apiClient.post).toHaveBeenCalledWith('/holistic-services/purchases/10/cancel');
+      expect(apiClient.patch).toHaveBeenCalledWith('/holistic-services/purchases/10/cancel');
     });
 
     it('should throw "Compra no encontrada" on 404', async () => {
-      vi.mocked(apiClient.post).mockRejectedValue({ response: { status: 404 } });
+      vi.mocked(apiClient.patch).mockRejectedValue({ response: { status: 404 } });
 
       await expect(cancelPurchase(999)).rejects.toThrow('Compra no encontrada');
     });
 
     it('should throw generic error on non-404 failures', async () => {
-      vi.mocked(apiClient.post).mockRejectedValue(new Error('Network error'));
+      vi.mocked(apiClient.patch).mockRejectedValue(new Error('Network error'));
 
       await expect(cancelPurchase(10)).rejects.toThrow('Error al cancelar la compra');
     });

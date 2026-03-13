@@ -280,8 +280,6 @@ export type {
   PurchaseStatus,
   PurchasedServiceSummary,
   ServicePurchase,
-  PaginatedPurchases,
   CreatePurchasePayload,
   ApprovePurchasePayload,
-  PurchasePaginationMeta,
 } from './service-purchase.types';

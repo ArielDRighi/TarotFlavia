@@ -23,8 +23,7 @@ export const holisticServiceQueryKeys = {
   details: () => [...holisticServiceQueryKeys.all, 'detail'] as const,
   detail: (slug: string) => [...holisticServiceQueryKeys.details(), slug] as const,
   purchases: () => [...holisticServiceQueryKeys.all, 'purchases'] as const,
-  myPurchases: (page: number, limit: number) =>
-    [...holisticServiceQueryKeys.purchases(), 'mine', page, limit] as const,
+  myPurchases: () => [...holisticServiceQueryKeys.purchases(), 'mine'] as const,
   purchaseDetail: (id: number) => [...holisticServiceQueryKeys.purchases(), 'detail', id] as const,
 } as const;
 
@@ -63,15 +62,13 @@ export function useHolisticServiceDetail(slug: string) {
 // ============================================================================
 
 /**
- * Hook to fetch the authenticated user's paginated purchases
- * @param page - Page number (1-indexed, defaults to 1)
- * @param limit - Items per page (defaults to 10)
- * @returns TanStack Query result with paginated purchases
+ * Hook to fetch the authenticated user's purchases
+ * @returns TanStack Query result with array of purchases
  */
-export function useMyPurchases(page = 1, limit = 10) {
+export function useMyPurchases() {
   return useQuery({
-    queryKey: holisticServiceQueryKeys.myPurchases(page, limit),
-    queryFn: () => getMyPurchases(page, limit),
+    queryKey: holisticServiceQueryKeys.myPurchases(),
+    queryFn: getMyPurchases,
     staleTime: 1 * 60 * 1000, // 1 minute - purchases may change after payment
   });
 }

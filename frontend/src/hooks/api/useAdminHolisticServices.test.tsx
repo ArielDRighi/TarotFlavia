@@ -15,9 +15,8 @@ import {
 import * as adminApi from '@/lib/api/admin-holistic-services-api';
 import type {
   HolisticServiceAdmin,
-  CreateHolisticServicePayload,
   ServicePurchase,
-  PaginatedPurchases,
+  CreateHolisticServicePayload,
 } from '@/types';
 
 // Mock API module
@@ -51,7 +50,7 @@ const mockAdminService: HolisticServiceAdmin = {
   longDescription: 'Descripción larga',
   priceArs: 15000,
   durationMinutes: 90,
-  sessionType: 'FAMILY_TREE',
+  sessionType: 'family_tree',
   imageUrl: null,
   displayOrder: 1,
   isActive: true,
@@ -66,7 +65,7 @@ const mockPurchase: ServicePurchase = {
   userId: 100,
   holisticServiceId: 1,
   sessionId: null,
-  paymentStatus: 'PENDING',
+  paymentStatus: 'pending',
   amountArs: 15000,
   paymentReference: null,
   paidAt: null,
@@ -74,21 +73,16 @@ const mockPurchase: ServicePurchase = {
   updatedAt: '2026-01-01T10:00:00Z',
 };
 
-const mockPaginatedPurchases: PaginatedPurchases = {
-  data: [mockPurchase],
-  meta: { page: 1, limit: 10, totalItems: 1, totalPages: 1 },
-};
-
 const mockCreatePayload: CreateHolisticServicePayload = {
-  name: 'Nuevo Servicio',
-  slug: 'nuevo-servicio',
-  shortDescription: 'Descripción corta',
-  longDescription: 'Descripción larga',
-  priceArs: 10000,
-  durationMinutes: 60,
-  sessionType: 'ENERGY_CLEANING',
-  whatsappNumber: '+54911111111',
-  mercadoPagoLink: 'https://mpago.la/nuevo',
+  name: 'Árbol Genealógico',
+  slug: 'arbol-genealogico',
+  shortDescription: 'Descubre tu historia familiar',
+  longDescription: 'Descripción larga del servicio',
+  priceArs: 15000,
+  durationMinutes: 90,
+  sessionType: 'family_tree',
+  whatsappNumber: '+54911234567',
+  mercadoPagoLink: 'https://mpago.la/abc123',
 };
 
 describe('useAdminHolisticServices Hooks', () => {
@@ -137,7 +131,7 @@ describe('useAdminHolisticServices Hooks', () => {
 
   describe('usePendingPayments', () => {
     it('should fetch pending payments for admin review', async () => {
-      vi.mocked(adminApi.adminGetPendingPayments).mockResolvedValue(mockPaginatedPurchases);
+      vi.mocked(adminApi.adminGetPendingPayments).mockResolvedValue([mockPurchase]);
 
       const queryClient = createTestQueryClient();
       const { result } = renderHook(() => usePendingPayments(), {
@@ -146,8 +140,8 @@ describe('useAdminHolisticServices Hooks', () => {
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-      expect(result.current.data).toEqual(mockPaginatedPurchases);
-      expect(result.current.data?.data).toHaveLength(1);
+      expect(result.current.data).toEqual([mockPurchase]);
+      expect(result.current.data).toHaveLength(1);
     });
 
     it('should handle errors', async () => {
@@ -268,7 +262,7 @@ describe('useAdminHolisticServices Hooks', () => {
 
   describe('useApprovePayment', () => {
     it('should approve a payment successfully', async () => {
-      const approvedPurchase = { ...mockPurchase, paymentStatus: 'PAID' as const };
+      const approvedPurchase = { ...mockPurchase, paymentStatus: 'paid' as const };
       vi.mocked(adminApi.adminApprovePayment).mockResolvedValue(approvedPurchase);
 
       const queryClient = createTestQueryClient();
@@ -280,14 +274,14 @@ describe('useAdminHolisticServices Hooks', () => {
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-      expect(result.current.data?.paymentStatus).toBe('PAID');
+      expect(result.current.data?.paymentStatus).toBe('paid');
       expect(adminApi.adminApprovePayment).toHaveBeenCalledWith(10, undefined);
     });
 
     it('should approve a payment with reference', async () => {
       const approvedPurchase = {
         ...mockPurchase,
-        paymentStatus: 'PAID' as const,
+        paymentStatus: 'paid' as const,
         paymentReference: 'REF-001',
       };
       vi.mocked(adminApi.adminApprovePayment).mockResolvedValue(approvedPurchase);
@@ -307,7 +301,7 @@ describe('useAdminHolisticServices Hooks', () => {
     });
 
     it('should invalidate pending payments and purchases on success', async () => {
-      const approvedPurchase = { ...mockPurchase, paymentStatus: 'PAID' as const };
+      const approvedPurchase = { ...mockPurchase, paymentStatus: 'paid' as const };
       vi.mocked(adminApi.adminApprovePayment).mockResolvedValue(approvedPurchase);
 
       const queryClient = createTestQueryClient();

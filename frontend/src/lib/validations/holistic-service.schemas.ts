@@ -8,8 +8,9 @@ import { z } from 'zod';
 
 /**
  * Valid session types for holistic services
+ * Values match backend session-type.enum.ts (snake_case)
  */
-const holisticSessionTypeSchema = z.enum(['FAMILY_TREE', 'ENERGY_CLEANING', 'HEBREW_PENDULUM'], {
+const holisticSessionTypeSchema = z.enum(['family_tree', 'energy_cleaning', 'hebrew_pendulum'], {
   errorMap: () => ({ message: 'Tipo de sesión no válido' }),
 });
 
@@ -20,16 +21,19 @@ export const createHolisticServiceSchema = z.object({
   name: z
     .string()
     .min(3, 'El nombre debe tener al menos 3 caracteres')
-    .max(100, 'El nombre no puede exceder 100 caracteres'),
+    .max(255, 'El nombre no puede exceder 255 caracteres'),
   slug: z
     .string()
     .min(3, 'El slug debe tener al menos 3 caracteres')
     .max(100, 'El slug no puede exceder 100 caracteres')
-    .regex(/^[a-z0-9-]+$/, 'El slug solo puede contener letras minúsculas, números y guiones'),
+    .regex(
+      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+      'El slug solo puede contener letras minúsculas, números y guiones (sin guiones al inicio o al final)'
+    ),
   shortDescription: z
     .string()
     .min(10, 'La descripción corta debe tener al menos 10 caracteres')
-    .max(250, 'La descripción corta no puede exceder 250 caracteres'),
+    .max(500, 'La descripción corta no puede exceder 500 caracteres'),
   longDescription: z
     .string()
     .min(20, 'La descripción larga debe tener al menos 20 caracteres')
@@ -47,7 +51,8 @@ export const createHolisticServiceSchema = z.object({
   whatsappNumber: z
     .string()
     .min(10, 'El número de WhatsApp debe tener al menos 10 caracteres')
-    .max(20, 'El número de WhatsApp no puede exceder 20 caracteres'),
+    .max(50, 'El número de WhatsApp no puede exceder 50 caracteres')
+    .regex(/^\+?[\d\s\-()]{7,50}$/, 'El número de WhatsApp debe ser un número de teléfono válido'),
   mercadoPagoLink: z
     .string()
     .url('El link de MercadoPago debe ser una URL válida')
