@@ -186,6 +186,23 @@ export const API_ENDPOINTS = {
     GEOCODE: '/birth-chart/geocode',
   },
 
+  // Holistic Services (Servicios Holísticos de Flavia)
+  HOLISTIC_SERVICES: {
+    // Public
+    LIST: '/holistic-services',
+    DETAIL: (slug: string) => `/holistic-services/${slug}`,
+    // Authenticated user (purchases)
+    PURCHASE: '/holistic-services/purchases',
+    MY_PURCHASES: '/holistic-services/purchases/my-purchases',
+    PURCHASE_DETAIL: (id: number) => `/holistic-services/purchases/${id}`,
+    CANCEL_PURCHASE: (id: number) => `/holistic-services/purchases/${id}/cancel`,
+    // Admin
+    ADMIN_LIST: '/admin/holistic-services',
+    ADMIN_BY_ID: (id: number) => `/admin/holistic-services/${id}`,
+    ADMIN_PENDING_PAYMENTS: '/admin/holistic-services/purchases/pending',
+    ADMIN_APPROVE_PAYMENT: (id: number) => `/admin/holistic-services/purchases/${id}/approve`,
+  },
+
   // Admin Dashboard
   ADMIN: {
     DASHBOARD_STATS: '/admin/dashboard/stats',

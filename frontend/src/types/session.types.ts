@@ -17,7 +17,12 @@ export interface TimeSlot {
  * Session type enum
  * DEBE coincidir exactamente con backend SessionType enum
  */
-export type SessionType = 'TAROT_READING' | 'ENERGY_CLEANING' | 'HEBREW_PENDULUM' | 'CONSULTATION';
+export type SessionType =
+  | 'TAROT_READING'
+  | 'ENERGY_CLEANING'
+  | 'HEBREW_PENDULUM'
+  | 'CONSULTATION'
+  | 'FAMILY_TREE';
 
 /**
  * Payment status enum

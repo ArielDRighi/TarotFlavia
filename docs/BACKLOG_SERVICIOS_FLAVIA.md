@@ -525,7 +525,7 @@ De espacios físicos tanto laborales como del hogar, armonizaciones energéticas
 | T-SF-B02 | Capa de aplicación: DTOs, Use Cases y Orchestrator             | Backend  | ✅ Completada | 3 días     |
 | T-SF-B03 | Capa de infraestructura: Controllers, Módulo y Endpoints REST  | Backend  | ✅ Completada | 3 días     |
 | T-SF-B04 | Email de confirmación, Seed Data y Tests E2E                   | Backend  | ✅ Completada | 2 días     |
-| T-SF-F01 | Foundation: Types, API functions, Hooks y Rutas                | Frontend | 🔴 Crítica | 2 días     |
+| T-SF-F01 | Foundation: Types, API functions, Hooks y Rutas                | Frontend | ✅ Completada | 2 días     |
 | T-SF-F02 | Páginas públicas: Catálogo y Detalle de Servicio               | Frontend | 🔴 Crítica | 3 días     |
 | T-SF-F03 | Flujo autenticado: Pago, Reserva, Confirmación y Mis Servicios | Frontend | 🔴 Crítica | 3 días     |
 | T-SF-F04 | Panel Admin: Gestión de Servicios y Aprobación de Pagos        | Frontend | 🟡 Alta    | 3 días     |
@@ -780,7 +780,7 @@ Completar el módulo backend con el template de email de confirmación post-pago
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 2 días
 **Dependencias:** T-SF-B03 (endpoints backend deben existir)
-**Estado:** 🔲 No iniciada
+**Estado:** ✅ COMPLETADA
 **Cubre HUS:** Todas (infraestructura base del frontend)
 
 #### 📋 Descripción
@@ -791,45 +791,45 @@ Crear toda la infraestructura frontend necesaria antes de construir las páginas
 
 **TypeScript Types:**
 
-- [ ] Crear `types/holistic-service.types.ts` con interfaces: `HolisticService`, `HolisticServiceDetail`, `HolisticServiceAdmin`
-- [ ] Crear `types/service-purchase.types.ts` con interfaces: `ServicePurchase`, `PurchaseStatus`, `CreatePurchasePayload`
-- [ ] Exportar desde `types/index.ts`
-- [ ] Los IDs son numéricos (number), los precios son number, las fechas son string ISO
+- [x] Crear `types/holistic-service.types.ts` con interfaces: `HolisticService`, `HolisticServiceDetail`, `HolisticServiceAdmin`
+- [x] Crear `types/service-purchase.types.ts` con interfaces: `ServicePurchase`, `PurchaseStatus`, `CreatePurchasePayload`
+- [x] Exportar desde `types/index.ts`
+- [x] Los IDs son numéricos (number), los precios son number, las fechas son string ISO
 
 **API Endpoints y Functions:**
 
-- [ ] Agregar sección `HOLISTIC_SERVICES` en `lib/api/endpoints.ts` con todos los endpoints (públicos, autenticados, admin)
-- [ ] Crear `lib/api/holistic-services-api.ts` con funciones: `getHolisticServices()`, `getHolisticServiceBySlug(slug)`, `createPurchase(data)`, `getMyPurchases()`, `getPurchaseDetail(id)`, `cancelPurchase(id)`
-- [ ] Crear `lib/api/admin-holistic-services-api.ts` con funciones admin: `getAdminServices()`, `createService(data)`, `updateService(id, data)`, `getPendingPayments()`, `approvePayment(id, data)`
+- [x] Agregar sección `HOLISTIC_SERVICES` en `lib/api/endpoints.ts` con todos los endpoints (públicos, autenticados, admin)
+- [x] Crear `lib/api/holistic-services-api.ts` con funciones: `getHolisticServices()`, `getHolisticServiceBySlug(slug)`, `createPurchase(data)`, `getMyPurchases()`, `getPurchaseDetail(id)`, `cancelPurchase(id)`
+- [x] Crear `lib/api/admin-holistic-services-api.ts` con funciones admin: `getAdminServices()`, `createService(data)`, `updateService(id, data)`, `getPendingPayments()`, `approvePayment(id, data)`
 
 **TanStack Query Hooks:**
 
-- [ ] Crear `hooks/api/useHolisticServices.ts` con hooks: `useHolisticServices()`, `useHolisticServiceDetail(slug)`, `useMyPurchases()`, `usePurchaseDetail(id)`
-- [ ] Crear `hooks/api/useHolisticServiceMutations.ts` con mutations: `useCreatePurchase()`, `useCancelPurchase()`
-- [ ] Crear `hooks/api/useAdminHolisticServices.ts` con hooks admin: `useAdminHolisticServices()`, `usePendingPayments()`, `useUpdateService()`, `useApprovePayment()`, `useCreateService()`
-- [ ] Invalidación de queries apropiada después de mutations
+- [x] Crear `hooks/api/useHolisticServices.ts` con hooks: `useHolisticServices()`, `useHolisticServiceDetail(slug)`, `useMyPurchases()`, `usePurchaseDetail(id)`
+- [x] Crear `hooks/api/useHolisticServiceMutations.ts` con mutations: `useCreatePurchase()`, `useCancelPurchase()`
+- [x] Crear `hooks/api/useAdminHolisticServices.ts` con hooks admin: `useAdminHolisticServices()`, `usePendingPayments()`, `useUpdateService()`, `useApprovePayment()`, `useCreateService()`
+- [x] Invalidación de queries apropiada después de mutations
 
 **Rutas (App Router):**
 
-- [ ] Crear estructura: `app/servicios/page.tsx`, `app/servicios/[slug]/page.tsx`, `app/servicios/[slug]/pago/page.tsx`, `app/servicios/reservar/[purchaseId]/page.tsx`
-- [ ] Crear `app/mis-servicios/page.tsx`
-- [ ] Las páginas de pago y reserva deben requerir autenticación (redirección a login si no autenticado)
+- [x] Crear estructura: `app/servicios/page.tsx`, `app/servicios/[slug]/page.tsx`, `app/servicios/[slug]/pago/page.tsx`, `app/servicios/reservar/[purchaseId]/page.tsx`
+- [x] Crear `app/mis-servicios/page.tsx`
+- [x] Las páginas de pago y reserva deben requerir autenticación (redirección a login si no autenticado)
 
 **Zod Validations:**
 
-- [ ] Crear `lib/validations/holistic-service.schema.ts` para validaciones de forms admin (create/edit service)
-- [ ] Crear `lib/validations/purchase.schema.ts` para validaciones de compra
+- [x] Crear `lib/validations/holistic-service.schema.ts` para validaciones de forms admin (create/edit service)
+- [x] Crear `lib/validations/purchase.schema.ts` para validaciones de compra
 
 #### 🎯 Criterios de aceptación
 
-- Los tipos TypeScript reflejan exactamente los contratos del backend (IDs numéricos, paginación con meta estándar)
-- Los endpoints usan `API_ENDPOINTS.HOLISTIC_SERVICES.xxx` (centralizados, no hardcoded)
-- Los hooks manejan loading, error y data states correctamente
-- Las rutas existen y renderizan componentes placeholder
-- Los schemas Zod validan los forms correctamente
-- Tests para hooks y API functions
-- `npm run type-check` pasa sin errores
-- `npm run build` compila sin errores
+- [x] Los tipos TypeScript reflejan exactamente los contratos del backend (IDs numéricos, paginación con meta estándar)
+- [x] Los endpoints usan `API_ENDPOINTS.HOLISTIC_SERVICES.xxx` (centralizados, no hardcoded)
+- [x] Los hooks manejan loading, error y data states correctamente
+- [x] Las rutas existen y renderizan componentes placeholder
+- [x] Los schemas Zod validan los forms correctamente
+- [x] Tests para hooks y API functions (61 tests, todos pasando)
+- [x] `npm run type-check` pasa sin errores
+- [x] `npm run build` compila sin errores
 
 ---
 
