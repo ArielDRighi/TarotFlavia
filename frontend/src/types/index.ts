@@ -264,3 +264,22 @@ export type {
   GlobalSearchResult,
 } from './encyclopedia-article.types';
 export { ArticleCategory, ARTICLE_CATEGORY_LABELS } from './encyclopedia-article.types';
+
+// Holistic Service Types
+export type {
+  HolisticSessionType,
+  HolisticService,
+  HolisticServiceDetail,
+  HolisticServiceAdmin,
+  CreateHolisticServicePayload,
+  UpdateHolisticServicePayload,
+} from './holistic-service.types';
+
+// Service Purchase Types
+export type {
+  PurchaseStatus,
+  PurchasedServiceSummary,
+  ServicePurchase,
+  CreatePurchasePayload,
+  ApprovePurchasePayload,
+} from './service-purchase.types';
