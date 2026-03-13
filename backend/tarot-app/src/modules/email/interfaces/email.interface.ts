@@ -73,5 +73,6 @@ export interface HolisticServiceConfirmationData {
   serviceName: string;
   amountArs: number;
   whatsappNumber: string;
+  whatsappNumberForLink: string;
   bookingUrl: string;
 }

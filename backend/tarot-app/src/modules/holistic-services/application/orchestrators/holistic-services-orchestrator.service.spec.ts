@@ -53,9 +53,7 @@ describe('HolisticServicesOrchestratorService', () => {
   let mockGetAllActive: jest.Mocked<
     Pick<GetAllActiveServicesUseCase, 'execute'>
   >;
-  let mockAdminGetAll: jest.Mocked<
-    Pick<AdminGetAllServicesUseCase, 'execute'>
-  >;
+  let mockAdminGetAll: jest.Mocked<Pick<AdminGetAllServicesUseCase, 'execute'>>;
   let mockGetBySlug: jest.Mocked<Pick<GetServiceBySlugUseCase, 'execute'>>;
   let mockAdminCreate: jest.Mocked<Pick<AdminCreateServiceUseCase, 'execute'>>;
   let mockAdminUpdate: jest.Mocked<Pick<AdminUpdateServiceUseCase, 'execute'>>;

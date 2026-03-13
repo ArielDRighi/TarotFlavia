@@ -524,7 +524,7 @@ De espacios físicos tanto laborales como del hogar, armonizaciones energéticas
 | T-SF-B01 | Capa de dominio: Enums, Entidades, Migración y Repositorios    | Backend  | ✅ Completada | 3 días     |
 | T-SF-B02 | Capa de aplicación: DTOs, Use Cases y Orchestrator             | Backend  | ✅ Completada | 3 días     |
 | T-SF-B03 | Capa de infraestructura: Controllers, Módulo y Endpoints REST  | Backend  | ✅ Completada | 3 días     |
-| T-SF-B04 | Email de confirmación, Seed Data y Tests E2E                   | Backend  | 🟡 Alta    | 2 días     |
+| T-SF-B04 | Email de confirmación, Seed Data y Tests E2E                   | Backend  | ✅ Completada | 2 días     |
 | T-SF-F01 | Foundation: Types, API functions, Hooks y Rutas                | Frontend | 🔴 Crítica | 2 días     |
 | T-SF-F02 | Páginas públicas: Catálogo y Detalle de Servicio               | Frontend | 🔴 Crítica | 3 días     |
 | T-SF-F03 | Flujo autenticado: Pago, Reserva, Confirmación y Mis Servicios | Frontend | 🔴 Crítica | 3 días     |
@@ -725,7 +725,7 @@ Crear los controllers REST, registrar el módulo `HolisticServicesModule` en el 
 **Prioridad:** 🟡 ALTA
 **Estimación:** 2 días
 **Dependencias:** T-SF-B03
-**Estado:** 🔲 No iniciada
+**Estado:** ✅ COMPLETADA
 **Cubre HUS:** HUS-006, HUS-001 (seed data)
 
 #### 📋 Descripción
@@ -736,38 +736,38 @@ Completar el módulo backend con el template de email de confirmación post-pago
 
 **Email de Confirmación:**
 
-- [ ] Crear template Handlebars `holistic-service-confirmation.hbs` con: nombre del usuario, nombre del servicio, monto pagado, WhatsApp de Flavia, link para reservar turno, placeholders de branding
-- [ ] Agregar método `sendHolisticServiceConfirmation(to, data)` al `EmailService` existente
-- [ ] Crear interface `HolisticServiceConfirmationData` con los campos necesarios
-- [ ] En modo test (sin SMTP), el email se loguea a consola con `jsonTransport`
+- [x] Crear template Handlebars `holistic-service-confirmation.hbs` con: nombre del usuario, nombre del servicio, monto pagado, WhatsApp de Flavia, link para reservar turno, placeholders de branding
+- [x] Agregar método `sendHolisticServiceConfirmation(to, data)` al `EmailService` existente
+- [x] Crear interface `HolisticServiceConfirmationData` con los campos necesarios
+- [x] En modo test (sin SMTP), el email se loguea a consola con `jsonTransport`
 
 **Seed Data:**
 
-- [ ] Crear script/servicio de seed que inserte los 3 servicios holísticos definidos en la sección "SERVICIOS — CONTENIDO PARA SEED" de este documento
-- [ ] El seed debe ser idempotente (no duplicar si ya existen, usando slug como clave)
-- [ ] Verificar el `tarotistaId` de Flavia antes de insertar (consultar DB)
-- [ ] Los precios se dejan en 0 o un valor placeholder (admin los configura después)
+- [x] Crear script/servicio de seed que inserte los 3 servicios holísticos definidos en la sección "SERVICIOS — CONTENIDO PARA SEED" de este documento
+- [x] El seed debe ser idempotente (no duplicar si ya existen, usando slug como clave)
+- [x] Verificar el `tarotistaId` de Flavia antes de insertar (consultar DB)
+- [x] Los precios se dejan en 0 o un valor placeholder (admin los configura después)
 
 **Tests E2E:**
 
-- [ ] Test: GET /holistic-services retorna los 3 servicios activos
-- [ ] Test: GET /holistic-services/:slug retorna detalle sin whatsappNumber
-- [ ] Test: POST /holistic-services/purchases requiere autenticación (401)
-- [ ] Test: POST /holistic-services/purchases crea compra PENDING (201)
-- [ ] Test: POST /holistic-services/purchases previene duplicados PENDING (409/400)
-- [ ] Test: PATCH /admin/.../approve cambia status a PAID (requiere admin)
-- [ ] Test: Reserva de sesión holística sin pago aprobado falla (403)
-- [ ] Test: Endpoints admin requieren rol admin (403 para usuario normal)
+- [x] Test: GET /holistic-services retorna los 3 servicios activos
+- [x] Test: GET /holistic-services/:slug retorna detalle sin whatsappNumber
+- [x] Test: POST /holistic-services/purchases requiere autenticación (401)
+- [x] Test: POST /holistic-services/purchases crea compra PENDING (201)
+- [x] Test: POST /holistic-services/purchases previene duplicados PENDING (409/400)
+- [x] Test: PATCH /admin/.../approve cambia status a PAID (requiere admin)
+- [x] Test: Reserva de sesión holística sin pago aprobado falla (403)
+- [x] Test: Endpoints admin requieren rol admin (403 para usuario normal)
 
 #### 🎯 Criterios de aceptación
 
-- El email de confirmación se envía al aprobar un pago (o se loguea en modo test)
-- El template tiene diseño profesional y responsivo, consistente con templates existentes
-- El seed crea los 3 servicios correctamente y es re-ejecutable
-- Los tests E2E cubren los flujos críticos: catálogo público, compra, aprobación admin, restricción de reserva sin pago
-- Todos los tests E2E pasan consistentemente
-- Suite completa (unitarios + E2E) pasa sin errores
-- Build exitoso
+- [x] El email de confirmación se envía al aprobar un pago (o se loguea en modo test)
+- [x] El template tiene diseño profesional y responsivo, consistente con templates existentes
+- [x] El seed crea los 3 servicios correctamente y es re-ejecutable
+- [x] Los tests E2E cubren los flujos críticos: catálogo público, compra, aprobación admin, restricción de reserva sin pago
+- [x] Todos los tests E2E pasan consistentemente
+- [x] Suite completa (unitarios + E2E) pasa sin errores
+- [x] Build exitoso
 
 ---
 
