@@ -83,6 +83,9 @@ export class ApprovePurchaseUseCase {
         this.configService.get<string>('FRONTEND_URL') ||
         'http://localhost:3000';
       const bookingUrl = `${frontendUrl}/servicios/reservar/${updated.id}`;
+      const rawWhatsapp = original.holisticService.whatsappNumber;
+      // wa.me requiere el número sin '+', espacios ni separadores
+      const whatsappNumberForLink = rawWhatsapp.replace(/\D/g, '');
 
       await this.emailService.sendHolisticServiceConfirmation(
         original.user.email,
@@ -90,7 +93,8 @@ export class ApprovePurchaseUseCase {
           userName: original.user.name,
           serviceName: original.holisticService.name,
           amountArs: updated.amountArs,
-          whatsappNumber: original.holisticService.whatsappNumber,
+          whatsappNumber: rawWhatsapp,
+          whatsappNumberForLink,
           bookingUrl,
         },
       );
