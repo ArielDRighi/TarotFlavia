@@ -143,26 +143,31 @@ export function BookingCalendar({ tarotistaId, onBook, readOnly = false }: Booki
         </div>
       )}
 
-      {/* Duration Selector */}
-      <div>
-        <h3 className="mb-3 font-serif text-lg font-medium">Duración</h3>
-        <RadioGroup
-          value={String(selectedDuration)}
-          onValueChange={handleDurationChange}
-          aria-label="Duración de la sesión"
-        >
-          <div className="space-y-2">
-            {DURATIONS.map((duration) => (
-              <div key={duration.value} className="flex items-center space-x-2">
-                <RadioGroupItem value={String(duration.value)} id={`duration-${duration.value}`} />
-                <Label htmlFor={`duration-${duration.value}`} className="cursor-pointer">
-                  {duration.label} - ${duration.price} USD
-                </Label>
-              </div>
-            ))}
-          </div>
-        </RadioGroup>
-      </div>
+      {/* Duration Selector — hidden in readOnly mode (public detail page uses fixed duration) */}
+      {!readOnly && (
+        <div>
+          <h3 className="mb-3 font-serif text-lg font-medium">Duración</h3>
+          <RadioGroup
+            value={String(selectedDuration)}
+            onValueChange={handleDurationChange}
+            aria-label="Duración de la sesión"
+          >
+            <div className="space-y-2">
+              {DURATIONS.map((duration) => (
+                <div key={duration.value} className="flex items-center space-x-2">
+                  <RadioGroupItem
+                    value={String(duration.value)}
+                    id={`duration-${duration.value}`}
+                  />
+                  <Label htmlFor={`duration-${duration.value}`} className="cursor-pointer">
+                    {duration.label} - ${duration.price} USD
+                  </Label>
+                </div>
+              ))}
+            </div>
+          </RadioGroup>
+        </div>
+      )}
 
       {/* Booking Summary */}
       {isReadyToBook && !readOnly && (

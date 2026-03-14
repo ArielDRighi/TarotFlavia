@@ -4,12 +4,11 @@
  * Public detail page for a single holistic service.
  * Shows name, long description, price, duration, a read-only BookingCalendar,
  * availability disclaimer, and a "Contratar servicio" CTA.
- * Handles loading skeleton and 404 via notFound().
+ * Handles loading skeleton, 404 not-found state, and generic error state on the client.
  */
 'use client';
 
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
 import { BookingCalendar } from '@/components/features/marketplace/BookingCalendar';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -30,12 +29,40 @@ function formatArs(amount: number): string {
 export function ServiceDetailPage({ slug }: ServiceDetailPageProps) {
   const { data: service, isLoading, isError, error } = useHolisticServiceDetail(slug);
 
-  // Handle 404 — trigger Next.js not-found page
+  // Handle 404 — render client-side not-found state
   if (isError) {
-    const axiosLike = error as { response?: { status?: number } } | null;
-    if (axiosLike?.response?.status === 404) {
-      notFound();
+    const isNotFound = error instanceof Error && error.message === 'Servicio no encontrado';
+    if (isNotFound) {
+      return (
+        <div
+          data-testid="service-detail-not-found"
+          className="bg-bg-main flex min-h-screen flex-col items-center justify-center px-4 py-8 text-center"
+        >
+          <h1 className="mb-4 font-serif text-3xl font-semibold">Servicio no encontrado</h1>
+          <p className="text-text-secondary mb-6">
+            El servicio que buscás no existe o fue eliminado.
+          </p>
+          <Button asChild variant="outline">
+            <Link href={ROUTES.SERVICIOS}>Volver al catálogo</Link>
+          </Button>
+        </div>
+      );
     }
+
+    return (
+      <div
+        data-testid="service-detail-error"
+        className="bg-bg-main flex min-h-screen flex-col items-center justify-center px-4 py-8 text-center"
+      >
+        <h1 className="mb-4 font-serif text-3xl font-semibold">Error al cargar el servicio</h1>
+        <p className="text-text-secondary mb-6">
+          Ocurrió un error inesperado. Por favor, intentá de nuevo más tarde.
+        </p>
+        <Button asChild variant="outline">
+          <Link href={ROUTES.SERVICIOS}>Volver al catálogo</Link>
+        </Button>
+      </div>
+    );
   }
 
   if (isLoading) {

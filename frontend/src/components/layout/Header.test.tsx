@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Header } from './Header';
+import * as nextNavigation from 'next/navigation';
 
 // Mock next/navigation
 vi.mock('next/navigation', () => ({
@@ -8,6 +9,7 @@ vi.mock('next/navigation', () => ({
     push: vi.fn(),
     replace: vi.fn(),
   })),
+  usePathname: vi.fn(() => '/'),
 }));
 
 // Mock useAuthStore
@@ -300,6 +302,40 @@ describe('Header', () => {
       const cartaAstralLink = screen.getByRole('link', { name: /carta astral/i });
       expect(cartaAstralLink).toBeInTheDocument();
       expect(cartaAstralLink).toHaveAttribute('href', '/carta-astral');
+    });
+  });
+
+  describe('Active Navigation Links', () => {
+    it('should highlight Servicios link when on /servicios path', () => {
+      mockUseAuthStore.mockReturnValue({ user: null });
+      vi.mocked(nextNavigation.usePathname).mockReturnValue('/servicios');
+
+      render(<Header />);
+
+      const serviciosLink = screen.getByRole('link', { name: /^servicios$/i });
+      expect(serviciosLink).toHaveClass('text-primary');
+      expect(serviciosLink).toHaveClass('font-semibold');
+    });
+
+    it('should highlight Servicios link when on a nested /servicios/* path', () => {
+      mockUseAuthStore.mockReturnValue({ user: null });
+      vi.mocked(nextNavigation.usePathname).mockReturnValue('/servicios/arbol-genealogico');
+
+      render(<Header />);
+
+      const serviciosLink = screen.getByRole('link', { name: /^servicios$/i });
+      expect(serviciosLink).toHaveClass('text-primary');
+      expect(serviciosLink).toHaveClass('font-semibold');
+    });
+
+    it('should NOT highlight Servicios link when on a different path', () => {
+      mockUseAuthStore.mockReturnValue({ user: null });
+      vi.mocked(nextNavigation.usePathname).mockReturnValue('/horoscopo');
+
+      render(<Header />);
+
+      const serviciosLink = screen.getByRole('link', { name: /^servicios$/i });
+      expect(serviciosLink).not.toHaveClass('font-semibold');
     });
   });
 });

@@ -380,5 +380,38 @@ describe('BookingCalendar', () => {
 
       expect(mockOnBook).not.toHaveBeenCalled();
     });
+
+    it('should hide duration selector when readOnly is true', () => {
+      vi.mocked(useAvailableSlotsHook.useAvailableSlots).mockReturnValue({
+        data: [],
+        isLoading: false,
+        isError: false,
+        error: null,
+      } as unknown as ReturnType<typeof useAvailableSlotsHook.useAvailableSlots>);
+
+      render(<BookingCalendar tarotistaId={1} onBook={mockOnBook} readOnly={true} />, { wrapper });
+
+      expect(
+        screen.queryByRole('radiogroup', { name: /duración de la sesión/i })
+      ).not.toBeInTheDocument();
+      expect(screen.queryByLabelText(/30 min/i)).not.toBeInTheDocument();
+      expect(screen.queryByLabelText(/60 min/i)).not.toBeInTheDocument();
+      expect(screen.queryByLabelText(/90 min/i)).not.toBeInTheDocument();
+    });
+
+    it('should show duration selector when readOnly is false', () => {
+      vi.mocked(useAvailableSlotsHook.useAvailableSlots).mockReturnValue({
+        data: [],
+        isLoading: false,
+        isError: false,
+        error: null,
+      } as unknown as ReturnType<typeof useAvailableSlotsHook.useAvailableSlots>);
+
+      render(<BookingCalendar tarotistaId={1} onBook={mockOnBook} readOnly={false} />, { wrapper });
+
+      expect(screen.getByLabelText(/30 min/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/60 min/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/90 min/i)).toBeInTheDocument();
+    });
   });
 });

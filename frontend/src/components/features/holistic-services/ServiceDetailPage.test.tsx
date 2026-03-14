@@ -21,15 +21,11 @@ vi.mock('@/components/features/marketplace/BookingCalendar', () => ({
   ),
 }));
 
-// Mock Next.js Link and navigation
+// Mock Next.js Link
 vi.mock('next/link', () => ({
   default: ({ children, href }: { children: React.ReactNode; href: string }) => (
     <a href={href}>{children}</a>
   ),
-}));
-
-vi.mock('next/navigation', () => ({
-  notFound: vi.fn(),
 }));
 
 const mockServiceDetail: HolisticServiceDetail = {
@@ -201,18 +197,31 @@ describe('ServiceDetailPage', () => {
     expect(screen.getByTestId('service-detail-skeleton')).toBeInTheDocument();
   });
 
-  it('should call notFound when service is not found (404)', async () => {
-    const { notFound } = await import('next/navigation');
-
+  it('should render not-found state when service is not found (404)', () => {
     vi.mocked(useHolisticServicesHook.useHolisticServiceDetail).mockReturnValue({
       data: undefined,
       isLoading: false,
       isError: true,
-      error: { response: { status: 404 } } as unknown as Error,
+      error: new Error('Servicio no encontrado'),
     } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServiceDetail>);
 
     render(<ServiceDetailPage slug="slug-inexistente" />, { wrapper });
 
-    expect(notFound).toHaveBeenCalled();
+    expect(screen.getByTestId('service-detail-not-found')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /volver al catálogo/i })).toBeInTheDocument();
+  });
+
+  it('should render error state for non-404 errors', () => {
+    vi.mocked(useHolisticServicesHook.useHolisticServiceDetail).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      error: new Error('Network Error'),
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServiceDetail>);
+
+    render(<ServiceDetailPage slug="arbol-genealogico" />, { wrapper });
+
+    expect(screen.getByTestId('service-detail-error')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /volver al catálogo/i })).toBeInTheDocument();
   });
 });
