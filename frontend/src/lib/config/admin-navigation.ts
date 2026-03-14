@@ -9,6 +9,7 @@ import {
   Shield,
   Database,
   ScrollText,
+  HandHeart,
 } from 'lucide-react';
 
 export interface NavItem {
@@ -36,6 +37,7 @@ export const adminNavSections: NavSection[] = [
       { name: 'Usuarios', href: '/admin/usuarios', icon: Users },
       { name: 'Tarotistas', href: '/admin/tarotistas', icon: Sparkles },
       { name: 'Lecturas', href: '/admin/lecturas', icon: BookOpen },
+      { name: 'Servicios', href: '/admin/servicios', icon: HandHeart },
     ],
   },
   {
