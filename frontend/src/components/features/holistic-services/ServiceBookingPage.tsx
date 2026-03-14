@@ -16,20 +16,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { usePurchaseDetail } from '@/hooks/api/useHolisticServices';
 import { useBookSession } from '@/hooks/api/useSessions';
 import { ROUTES } from '@/lib/constants/routes';
-import type { HolisticSessionType, SessionType } from '@/types';
+import type { SessionType } from '@/types';
 
 // ============================================================================
 // Constants
 // ============================================================================
 
 const FLAVIA_TAROTISTA_ID = 1;
-
-// Map holistic session types to session booking types
-const SESSION_TYPE_MAP: Record<HolisticSessionType, SessionType> = {
-  family_tree: 'FAMILY_TREE',
-  energy_cleaning: 'ENERGY_CLEANING',
-  hebrew_pendulum: 'HEBREW_PENDULUM',
-};
 
 // ============================================================================
 // Types
@@ -62,8 +55,7 @@ export function ServiceBookingPage({ purchaseId }: ServiceBookingPageProps) {
 
       setBookingError(null);
 
-      const sessionType =
-        SESSION_TYPE_MAP[purchase.holisticService.slug as HolisticSessionType] ?? 'CONSULTATION';
+      const sessionType = purchase.holisticService.sessionType.toUpperCase() as SessionType;
 
       try {
         await bookSession({
@@ -71,7 +63,7 @@ export function ServiceBookingPage({ purchaseId }: ServiceBookingPageProps) {
           sessionDate: date,
           sessionTime: time,
           durationMinutes: duration,
-          sessionType: sessionType as SessionType,
+          sessionType: sessionType,
         });
 
         setConfirmedBooking({ date, time, duration });

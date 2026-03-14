@@ -15,6 +15,7 @@ import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { useMyPurchases } from '@/hooks/api/useHolisticServices';
+import { useSessionDetail } from '@/hooks/api/useSessions';
 import { ROUTES } from '@/lib/constants/routes';
 import { cn } from '@/lib/utils';
 import type { ServicePurchase, PurchaseStatus } from '@/types';
@@ -76,6 +77,46 @@ interface PurchaseCardProps {
   purchase: ServicePurchase;
 }
 
+interface SessionInfoProps {
+  sessionId: number;
+  whatsappNumber?: string;
+  purchaseId: number;
+}
+
+function SessionInfo({ sessionId, whatsappNumber, purchaseId }: SessionInfoProps) {
+  const { data: session } = useSessionDetail(sessionId);
+
+  return (
+    <div data-testid={`session-info-${purchaseId}`} className="space-y-1">
+      {session && (
+        <div className="text-text-secondary flex flex-wrap gap-4 text-sm">
+          <span data-testid={`session-date-${purchaseId}`}>
+            Fecha:{' '}
+            {new Date(session.sessionDate + 'T' + session.sessionTime).toLocaleDateString('es-AR', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+            })}
+          </span>
+          <span data-testid={`session-time-${purchaseId}`}>Hora: {session.sessionTime}</span>
+        </div>
+      )}
+
+      {whatsappNumber && (
+        <a
+          href={`https://wa.me/${whatsappNumber.replace(/\D/g, '')}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 rounded-lg bg-green-500 px-3 py-1.5 text-sm text-white hover:bg-green-600"
+          data-testid={`whatsapp-link-${purchaseId}`}
+        >
+          Contactar por WhatsApp
+        </a>
+      )}
+    </div>
+  );
+}
+
 function PurchaseCard({ purchase }: PurchaseCardProps) {
   const serviceName = purchase.holisticService?.name ?? 'Servicio';
   const isPaid = purchase.paymentStatus === 'paid';
@@ -107,16 +148,12 @@ function PurchaseCard({ purchase }: PurchaseCardProps) {
         </Button>
       )}
 
-      {isPaid && hasSession && purchase.whatsappNumber && (
-        <a
-          href={`https://wa.me/${purchase.whatsappNumber.replace(/\D/g, '')}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-lg bg-green-500 px-3 py-1.5 text-sm text-white hover:bg-green-600"
-          data-testid={`whatsapp-link-${purchase.id}`}
-        >
-          Contactar por WhatsApp
-        </a>
+      {isPaid && hasSession && (
+        <SessionInfo
+          sessionId={purchase.sessionId as number}
+          whatsappNumber={purchase.whatsappNumber}
+          purchaseId={purchase.id}
+        />
       )}
     </div>
   );

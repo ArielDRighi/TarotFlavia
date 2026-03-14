@@ -5,6 +5,8 @@
  * Reflect exactly the backend ServicePurchase entity contracts.
  */
 
+import type { HolisticSessionType } from './holistic-service.types';
+
 /**
  * Purchase status enum
  * DEBE coincidir exactamente con backend PurchaseStatus enum (lowercase)
@@ -19,6 +21,7 @@ export interface PurchasedServiceSummary {
   name: string;
   slug: string;
   durationMinutes: number;
+  sessionType: HolisticSessionType;
 }
 
 /**
@@ -37,6 +40,7 @@ export interface ServicePurchase {
   paymentReference: string | null;
   paidAt: string | null;
   whatsappNumber?: string;
+  mercadoPagoUrl?: string;
   createdAt: string;
   updatedAt: string;
 }

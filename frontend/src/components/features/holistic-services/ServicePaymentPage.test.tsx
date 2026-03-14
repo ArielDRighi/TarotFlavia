@@ -27,8 +27,12 @@ vi.mock('next/link', () => ({
   ),
 }));
 
-// Mock window.open
-const mockWindowOpen = vi.fn();
+// Mock window.open — returns a controllable tab object to test blank-tab trick
+const mockMpTab = {
+  location: { href: '' },
+  close: vi.fn(),
+};
+const mockWindowOpen = vi.fn().mockReturnValue(mockMpTab);
 Object.defineProperty(window, 'open', { value: mockWindowOpen, writable: true });
 
 const mockService: HolisticServiceDetail = {
@@ -69,6 +73,9 @@ describe('ServicePaymentPage', () => {
     queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     vi.clearAllMocks();
     mockWindowOpen.mockReset();
+    mockWindowOpen.mockReturnValue(mockMpTab);
+    mockMpTab.location.href = '';
+    mockMpTab.close.mockReset();
   });
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -261,7 +268,10 @@ describe('ServicePaymentPage', () => {
     await userEvent.click(screen.getByRole('button', { name: /pagar con mercado pago/i }));
 
     await waitFor(() => {
-      expect(mockWindowOpen).toHaveBeenCalledWith('https://mp.com/pay/123', '_blank');
+      // Blank tab opened first (inside user gesture to avoid popup blocker)
+      expect(mockWindowOpen).toHaveBeenCalledWith('', '_blank');
+      // URL assigned to tab after API call resolves
+      expect(mockMpTab.location.href).toBe('https://mp.com/pay/123');
     });
   });
 

@@ -49,17 +49,23 @@ export function ServicePaymentPage({ slug }: ServicePaymentPageProps) {
 
     setPurchaseError(null);
 
+    // Open a blank tab immediately (within the user gesture) to avoid popup blockers.
+    // The tab stays open while we await the API; we assign the URL after.
+    const mpTab = window.open('', '_blank');
+
     try {
       const purchase = await createPurchase({ holisticServiceId: service.id });
 
-      // Open MP link if returned by the backend
-      const mpUrl = (purchase as { mercadoPagoUrl?: string }).mercadoPagoUrl;
-      if (mpUrl) {
-        window.open(mpUrl, '_blank');
+      if (purchase.mercadoPagoUrl && mpTab) {
+        mpTab.location.href = purchase.mercadoPagoUrl;
+      } else {
+        // Close the blank tab if there is no URL to navigate to
+        mpTab?.close();
       }
 
       setPaymentInitiated(true);
     } catch {
+      mpTab?.close();
       setPurchaseError(
         'No fue posible iniciar el pago. Es posible que ya hayas contratado este servicio. Por favor, revisá "Mis Servicios" o intentá de nuevo.'
       );

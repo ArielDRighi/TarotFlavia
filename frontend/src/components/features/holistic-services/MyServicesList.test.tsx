@@ -4,14 +4,19 @@
  * TDD RED phase — tests written before implementation.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MyServicesList } from './MyServicesList';
 import * as useHolisticServicesHook from '@/hooks/api/useHolisticServices';
-import type { ServicePurchase } from '@/types';
+import * as useSessionsHook from '@/hooks/api/useSessions';
+import type { ServicePurchase, SessionDetail } from '@/types';
 
 vi.mock('@/hooks/api/useHolisticServices', () => ({
   useMyPurchases: vi.fn(),
+}));
+
+vi.mock('@/hooks/api/useSessions', () => ({
+  useSessionDetail: vi.fn(),
 }));
 
 // Mock Next.js Link
@@ -30,6 +35,7 @@ const mockPurchasePending: ServicePurchase = {
     name: 'Árbol Genealógico',
     slug: 'arbol-genealogico',
     durationMinutes: 90,
+    sessionType: 'family_tree',
   },
   sessionId: null,
   paymentStatus: 'pending',
@@ -49,6 +55,7 @@ const mockPurchasePaidNoSession: ServicePurchase = {
     name: 'Péndulo Hebreo',
     slug: 'pendulo-hebreo',
     durationMinutes: 60,
+    sessionType: 'hebrew_pendulum',
   },
   sessionId: null,
   paymentStatus: 'paid',
@@ -69,6 +76,7 @@ const mockPurchasePaidWithSession: ServicePurchase = {
     name: 'Limpieza Energética',
     slug: 'limpieza-energetica',
     durationMinutes: 60,
+    sessionType: 'energy_cleaning',
   },
   sessionId: 55,
   paymentStatus: 'paid',
@@ -89,6 +97,7 @@ const mockPurchaseCancelled: ServicePurchase = {
     name: 'Árbol Genealógico',
     slug: 'arbol-genealogico',
     durationMinutes: 90,
+    sessionType: 'family_tree',
   },
   sessionId: null,
   paymentStatus: 'cancelled',
@@ -99,12 +108,37 @@ const mockPurchaseCancelled: ServicePurchase = {
   updatedAt: '2025-01-10T00:00:00.000Z',
 };
 
+const mockSessionDetail: SessionDetail = {
+  id: 55,
+  tarotistaId: 1,
+  userId: 7,
+  sessionDate: '2026-04-20',
+  sessionTime: '14:00',
+  durationMinutes: 60,
+  sessionType: 'ENERGY_CLEANING',
+  status: 'confirmed',
+  priceUsd: 0,
+  paymentStatus: 'PAID',
+  googleMeetLink: '',
+  userEmail: 'user@test.com',
+  createdAt: '2025-02-01T12:00:00.000Z',
+  updatedAt: '2025-02-01T12:00:00.000Z',
+};
+
 describe('MyServicesList', () => {
   let queryClient: QueryClient;
 
   beforeEach(() => {
     queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     vi.clearAllMocks();
+
+    // Default: no session detail (for purchases without sessionId)
+    vi.mocked(useSessionsHook.useSessionDetail).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useSessionsHook.useSessionDetail>);
   });
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -275,6 +309,13 @@ describe('MyServicesList', () => {
       error: null,
     } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
 
+    vi.mocked(useSessionsHook.useSessionDetail).mockReturnValue({
+      data: mockSessionDetail,
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useSessionsHook.useSessionDetail>);
+
     render(<MyServicesList />, { wrapper });
 
     const waLink = screen.getByRole('link', { name: /whatsapp/i });
@@ -290,8 +331,60 @@ describe('MyServicesList', () => {
       error: null,
     } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
 
+    vi.mocked(useSessionsHook.useSessionDetail).mockReturnValue({
+      data: mockSessionDetail,
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useSessionsHook.useSessionDetail>);
+
     render(<MyServicesList />, { wrapper });
 
     expect(screen.queryByRole('link', { name: /reservar turno/i })).not.toBeInTheDocument();
+  });
+
+  it('should show session date and time when session is booked', async () => {
+    vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
+      data: [mockPurchasePaidWithSession],
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
+
+    vi.mocked(useSessionsHook.useSessionDetail).mockReturnValue({
+      data: mockSessionDetail,
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useSessionsHook.useSessionDetail>);
+
+    render(<MyServicesList />, { wrapper });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('session-date-12')).toBeInTheDocument();
+      expect(screen.getByTestId('session-time-12')).toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId('session-time-12')).toHaveTextContent('14:00');
+  });
+
+  it('should render session-info container when purchase has session', () => {
+    vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
+      data: [mockPurchasePaidWithSession],
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
+
+    vi.mocked(useSessionsHook.useSessionDetail).mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useSessionsHook.useSessionDetail>);
+
+    render(<MyServicesList />, { wrapper });
+
+    expect(screen.getByTestId('session-info-12')).toBeInTheDocument();
   });
 });

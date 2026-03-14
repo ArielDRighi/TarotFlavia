@@ -53,6 +53,7 @@ const mockPendingPurchase: ServicePurchase = {
     name: 'Árbol Genealógico',
     slug: 'arbol-genealogico',
     durationMinutes: 90,
+    sessionType: 'family_tree',
   },
   sessionId: null,
   paymentStatus: 'pending',
@@ -219,6 +220,7 @@ describe('ServiceBookingPage', () => {
           sessionDate: '2026-04-15',
           sessionTime: '10:00',
           durationMinutes: 90,
+          sessionType: 'FAMILY_TREE',
         })
       );
     });
