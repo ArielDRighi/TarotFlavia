@@ -89,6 +89,12 @@ export function Header() {
           >
             Carta Astral
           </Link>
+          <Link
+            href={ROUTES.SERVICIOS}
+            className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
+          >
+            Servicios
+          </Link>
           {user && (
             <>
               <Link

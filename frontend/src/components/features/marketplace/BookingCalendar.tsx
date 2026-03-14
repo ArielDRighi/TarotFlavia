@@ -19,6 +19,7 @@ import { cn } from '@/lib/utils/cn';
 interface BookingCalendarProps {
   tarotistaId: number;
   onBook: (date: string, time: string, duration: number) => void;
+  readOnly?: boolean;
 }
 
 // Durations available with prices (mock prices for now)
@@ -28,7 +29,7 @@ const DURATIONS = [
   { value: 90, label: '90 min', price: 65 },
 ] as const;
 
-export function BookingCalendar({ tarotistaId, onBook }: BookingCalendarProps) {
+export function BookingCalendar({ tarotistaId, onBook, readOnly = false }: BookingCalendarProps) {
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [selectedDuration, setSelectedDuration] = useState<number>(60); // Default 60min
@@ -129,10 +130,10 @@ export function BookingCalendar({ tarotistaId, onBook }: BookingCalendarProps) {
                   className={cn(
                     'w-full',
                     selectedTime === slot.time && 'bg-primary hover:bg-primary/90 text-white',
-                    !slot.available && 'cursor-not-allowed opacity-50'
+                    (!slot.available || readOnly) && 'cursor-not-allowed opacity-50'
                   )}
-                  onClick={() => slot.available && handleTimeSelect(slot.time)}
-                  disabled={!slot.available}
+                  onClick={() => !readOnly && slot.available && handleTimeSelect(slot.time)}
+                  disabled={!slot.available || readOnly}
                 >
                   {slot.time}
                 </Button>
@@ -164,7 +165,7 @@ export function BookingCalendar({ tarotistaId, onBook }: BookingCalendarProps) {
       </div>
 
       {/* Booking Summary */}
-      {isReadyToBook && (
+      {isReadyToBook && !readOnly && (
         <Card className="border-primary/20 sticky bottom-4 shadow-lg">
           <CardHeader>
             <CardTitle className="text-lg">Resumen de Reserva</CardTitle>
@@ -198,7 +199,7 @@ export function BookingCalendar({ tarotistaId, onBook }: BookingCalendarProps) {
       )}
 
       {/* Confirm Button (when summary not visible) */}
-      {!isReadyToBook && (
+      {!isReadyToBook && !readOnly && (
         <Button className="w-full" size="lg" disabled>
           Confirmar y Reservar
         </Button>

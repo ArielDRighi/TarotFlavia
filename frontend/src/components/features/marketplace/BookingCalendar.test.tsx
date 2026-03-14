@@ -282,4 +282,103 @@ describe('BookingCalendar', () => {
     // Verificar mensaje de no disponibilidad
     expect(screen.getByText(/no hay horarios disponibles/i)).toBeInTheDocument();
   });
+
+  // ============================================================================
+  // readOnly prop tests
+  // ============================================================================
+
+  describe('readOnly prop', () => {
+    it('should hide confirm button when readOnly is true', () => {
+      vi.mocked(useAvailableSlotsHook.useAvailableSlots).mockReturnValue({
+        data: [],
+        isLoading: false,
+        isError: false,
+        error: null,
+      } as unknown as ReturnType<typeof useAvailableSlotsHook.useAvailableSlots>);
+
+      render(<BookingCalendar tarotistaId={1} onBook={mockOnBook} readOnly={true} />, { wrapper });
+
+      expect(
+        screen.queryByRole('button', { name: /confirmar y reservar/i })
+      ).not.toBeInTheDocument();
+    });
+
+    it('should show confirm button when readOnly is false', () => {
+      vi.mocked(useAvailableSlotsHook.useAvailableSlots).mockReturnValue({
+        data: [],
+        isLoading: false,
+        isError: false,
+        error: null,
+      } as unknown as ReturnType<typeof useAvailableSlotsHook.useAvailableSlots>);
+
+      render(<BookingCalendar tarotistaId={1} onBook={mockOnBook} readOnly={false} />, { wrapper });
+
+      expect(screen.getByRole('button', { name: /confirmar y reservar/i })).toBeInTheDocument();
+    });
+
+    it('should show confirm button when readOnly is not provided (default behavior)', () => {
+      vi.mocked(useAvailableSlotsHook.useAvailableSlots).mockReturnValue({
+        data: [],
+        isLoading: false,
+        isError: false,
+        error: null,
+      } as unknown as ReturnType<typeof useAvailableSlotsHook.useAvailableSlots>);
+
+      render(<BookingCalendar tarotistaId={1} onBook={mockOnBook} />, { wrapper });
+
+      expect(screen.getByRole('button', { name: /confirmar y reservar/i })).toBeInTheDocument();
+    });
+
+    it('should disable time slot selection when readOnly is true', () => {
+      const mockSlots: TimeSlot[] = [
+        { date: '2025-12-15', time: '09:00', durationMinutes: 60, available: true },
+      ];
+
+      vi.mocked(useAvailableSlotsHook.useAvailableSlots).mockReturnValue({
+        data: mockSlots,
+        isLoading: false,
+        isError: false,
+        error: null,
+      } as unknown as ReturnType<typeof useAvailableSlotsHook.useAvailableSlots>);
+
+      render(<BookingCalendar tarotistaId={1} onBook={mockOnBook} readOnly={true} />, { wrapper });
+
+      // Select a date first
+      const firstDateChip = screen.getAllByRole('button', {
+        name: /^(lun|mar|mié|jue|vie|sáb|dom)/i,
+      })[0];
+      fireEvent.click(firstDateChip);
+
+      // Available slot should be disabled in readOnly mode
+      const timeSlot = screen.getByRole('button', { name: '09:00' });
+      expect(timeSlot).toBeDisabled();
+    });
+
+    it('should not call onBook when slot is clicked in readOnly mode', () => {
+      const mockSlots: TimeSlot[] = [
+        { date: '2025-12-15', time: '09:00', durationMinutes: 60, available: true },
+      ];
+
+      vi.mocked(useAvailableSlotsHook.useAvailableSlots).mockReturnValue({
+        data: mockSlots,
+        isLoading: false,
+        isError: false,
+        error: null,
+      } as unknown as ReturnType<typeof useAvailableSlotsHook.useAvailableSlots>);
+
+      render(<BookingCalendar tarotistaId={1} onBook={mockOnBook} readOnly={true} />, { wrapper });
+
+      // Select a date first
+      const firstDateChip = screen.getAllByRole('button', {
+        name: /^(lun|mar|mié|jue|vie|sáb|dom)/i,
+      })[0];
+      fireEvent.click(firstDateChip);
+
+      // Attempt to click an available slot
+      const timeSlot = screen.getByRole('button', { name: '09:00' });
+      fireEvent.click(timeSlot);
+
+      expect(mockOnBook).not.toHaveBeenCalled();
+    });
+  });
 });
