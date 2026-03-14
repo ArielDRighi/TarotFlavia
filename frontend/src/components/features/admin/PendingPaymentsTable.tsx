@@ -17,6 +17,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { CheckCircle } from 'lucide-react';
+import { formatTimestampLocalized } from '@/lib/utils/date';
 import type { ServicePurchase } from '@/types';
 
 // ============================================================================
@@ -28,7 +29,7 @@ function formatPriceArs(amount: number): string {
 }
 
 function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString('es-AR', {
+  return formatTimestampLocalized(dateString, 'es-AR', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -66,6 +67,7 @@ export function PendingPaymentsTable({ purchases, onApprove }: PendingPaymentsTa
         <TableHeader>
           <TableRow>
             <TableHead>ID</TableHead>
+            <TableHead>Usuario</TableHead>
             <TableHead>Servicio</TableHead>
             <TableHead>Monto</TableHead>
             <TableHead>Estado</TableHead>
@@ -77,6 +79,7 @@ export function PendingPaymentsTable({ purchases, onApprove }: PendingPaymentsTa
           {purchases.map((purchase) => (
             <TableRow key={purchase.id}>
               <TableCell>#{purchase.id}</TableCell>
+              <TableCell>Usuario #{purchase.userId}</TableCell>
               <TableCell className="font-medium">{purchase.holisticService?.name ?? '—'}</TableCell>
               <TableCell>{formatPriceArs(purchase.amountArs)}</TableCell>
               <TableCell>

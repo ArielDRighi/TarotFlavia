@@ -41,7 +41,11 @@ export function HolisticServicesManagement() {
     isLoading: servicesLoading,
     error: servicesError,
   } = useAdminHolisticServices();
-  const { data: pendingPayments, isLoading: paymentsLoading } = usePendingPayments();
+  const {
+    data: pendingPayments,
+    isLoading: paymentsLoading,
+    error: paymentsError,
+  } = usePendingPayments();
 
   // ---- Mutations ----
   const createServiceMutation = useCreateHolisticService();
@@ -138,8 +142,10 @@ export function HolisticServicesManagement() {
       {/* Tab buttons */}
       <div role="tablist" className="mb-6 flex gap-2">
         <button
+          id="tab-servicios"
           role="tab"
           aria-selected={activeTab === 'servicios'}
+          aria-controls="tabpanel-servicios"
           onClick={() => setActiveTab('servicios')}
           className={cn(
             'rounded-md px-4 py-2 text-sm font-medium transition-colors',
@@ -151,8 +157,10 @@ export function HolisticServicesManagement() {
           Servicios
         </button>
         <button
+          id="tab-pagos-pendientes"
           role="tab"
           aria-selected={activeTab === 'pagos-pendientes'}
+          aria-controls="tabpanel-pagos-pendientes"
           onClick={() => setActiveTab('pagos-pendientes')}
           className={cn(
             'flex items-center rounded-md px-4 py-2 text-sm font-medium transition-colors',
@@ -172,7 +180,7 @@ export function HolisticServicesManagement() {
 
       {/* TAB 1: SERVICIOS */}
       {activeTab === 'servicios' && (
-        <div role="tabpanel">
+        <div id="tabpanel-servicios" role="tabpanel" aria-labelledby="tab-servicios">
           <div className="mb-4 flex justify-end">
             <Button onClick={handleNewService}>
               <Plus className="mr-2 h-4 w-4" />
@@ -200,12 +208,18 @@ export function HolisticServicesManagement() {
 
       {/* TAB 2: PAGOS PENDIENTES */}
       {activeTab === 'pagos-pendientes' && (
-        <div role="tabpanel">
+        <div id="tabpanel-pagos-pendientes" role="tabpanel" aria-labelledby="tab-pagos-pendientes">
           {paymentsLoading ? (
             <div className="space-y-4">
               {[1, 2, 3].map((i) => (
                 <Skeleton key={i} className="h-16" />
               ))}
+            </div>
+          ) : paymentsError ? (
+            <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
+              <p className="text-red-700">
+                Error al cargar pagos pendientes. Por favor, intenta de nuevo.
+              </p>
             </div>
           ) : (
             <PendingPaymentsTable

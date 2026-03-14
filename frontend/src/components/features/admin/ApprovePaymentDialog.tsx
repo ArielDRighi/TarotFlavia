@@ -67,7 +67,7 @@ export function ApprovePaymentDialog({
           <AlertDialogTitle>Aprobar Pago</AlertDialogTitle>
           <AlertDialogDescription>
             ¿Confirmar la aprobación del pago de{' '}
-            <span className="font-semibold">{purchase.holisticService?.name}</span> por{' '}
+            <span className="font-semibold">{purchase.holisticService?.name ?? '—'}</span> por{' '}
             <span className="font-semibold">{formatPriceArs(purchase.amountArs)}</span>?
           </AlertDialogDescription>
         </AlertDialogHeader>

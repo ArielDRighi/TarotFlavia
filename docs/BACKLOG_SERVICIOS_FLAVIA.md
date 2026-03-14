@@ -528,7 +528,7 @@ De espacios físicos tanto laborales como del hogar, armonizaciones energéticas
 | T-SF-F01 | Foundation: Types, API functions, Hooks y Rutas                | Frontend | ✅ Completada | 2 días     |
 | T-SF-F02 | Páginas públicas: Catálogo y Detalle de Servicio               | Frontend | ✅ Completada | 3 días     |
 | T-SF-F03 | Flujo autenticado: Pago, Reserva, Confirmación y Mis Servicios | Frontend | ✅ Completada | 3 días     |
-| T-SF-F04 | Panel Admin: Gestión de Servicios y Aprobación de Pagos        | Frontend | 🟡 Alta    | ✅ COMPLETADA |
+| T-SF-F04 | Panel Admin: Gestión de Servicios y Aprobación de Pagos        | Frontend | ✅ Completada | 3 días     |
 
 **Estimación total:** ~22 días de desarrollo (incluye TDD + ciclos de calidad)
 
@@ -970,7 +970,7 @@ Crear la sección de administración de servicios holísticos dentro del panel a
 
 **Tab "Servicios" (CRUD):**
 
-- [x] Tabla con columnas: Nombre, Precio ARS, Duración, Activo (toggle), acciones (Editar)
+- [x] Tabla con columnas: Nombre, Precio ARS, Duración, Activo (badge), acciones (Editar)
 - [x] Modal de edición con React Hook Form + Zod: campos para nombre, descripción corta, descripción larga, precio ARS, link Mercado Pago, WhatsApp, duración en minutos, estado activo, orden de visualización
 - [x] Modal de creación de nuevo servicio (reutilizar formulario del modal de edición)
 - [x] Validaciones Zod: precio > 0, duración > 0, WhatsApp formato válido, slug auto-generado desde nombre
@@ -978,7 +978,7 @@ Crear la sección de administración de servicios holísticos dentro del panel a
 
 **Tab "Pagos Pendientes":**
 
-- [x] Tabla con columnas: Usuario (nombre + email), Servicio, Monto ARS, Fecha de compra, Acciones
+- [x] Tabla con columnas: Usuario (userId), Servicio, Monto ARS, Fecha de compra, Acciones
 - [x] Botón "Aprobar pago" con confirmación (dialog: "¿Confirmar aprobación del pago de $X de [usuario] para [servicio]?")
 - [x] Campo opcional para `paymentReference` al aprobar
 - [x] Al aprobar: el pago desaparece de la tabla (invalidar query), toast de éxito

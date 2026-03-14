@@ -80,7 +80,7 @@ describe('ServicesTable', () => {
     expect(screen.getByText('Inactivo')).toBeInTheDocument();
   });
 
-  it('should render session type labels', () => {
+  it('should render all service names in the table', () => {
     render(<ServicesTable services={mockServices} onEdit={mockOnEdit} />);
 
     expect(screen.getByText('Árbol Genealógico')).toBeInTheDocument();

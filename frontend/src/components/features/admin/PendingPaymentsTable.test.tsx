@@ -106,4 +106,11 @@ describe('PendingPaymentsTable', () => {
     const tableCells = screen.getAllByRole('cell');
     expect(tableCells.length).toBeGreaterThan(0);
   });
+
+  it('should render userId for each payment', () => {
+    render(<PendingPaymentsTable purchases={mockPendingPayments} onApprove={mockOnApprove} />);
+
+    expect(screen.getByText('Usuario #5')).toBeInTheDocument();
+    expect(screen.getByText('Usuario #6')).toBeInTheDocument();
+  });
 });
