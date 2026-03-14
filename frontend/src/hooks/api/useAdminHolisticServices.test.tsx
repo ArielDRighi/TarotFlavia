@@ -13,11 +13,7 @@ import {
   useApprovePayment,
 } from './useAdminHolisticServices';
 import * as adminApi from '@/lib/api/admin-holistic-services-api';
-import type {
-  HolisticServiceAdmin,
-  ServicePurchase,
-  CreateHolisticServicePayload,
-} from '@/types';
+import type { HolisticServiceAdmin, ServicePurchase, CreateHolisticServicePayload } from '@/types';
 
 // Mock API module
 vi.mock('@/lib/api/admin-holistic-services-api');

@@ -42,6 +42,8 @@ export const ROUTES = {
   SERVICIOS: '/servicios',
   SERVICIO_DETAIL: (slug: string) => `/servicios/${slug}`,
   SERVICIO_PAGO: (slug: string) => `/servicios/${slug}/pago`,
+  SERVICIO_RESERVAR: (purchaseId: number) => `/servicios/reservar/${purchaseId}`,
+  MIS_SERVICIOS: '/mis-servicios',
 
   // Rituals
   RITUALES: '/rituales',

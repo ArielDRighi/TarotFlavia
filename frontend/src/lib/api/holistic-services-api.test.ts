@@ -55,6 +55,7 @@ const mockPurchase: ServicePurchase = {
     name: 'Árbol Genealógico',
     slug: 'arbol-genealogico',
     durationMinutes: 90,
+    sessionType: 'family_tree' as const,
   },
   sessionId: null,
   paymentStatus: 'pending',

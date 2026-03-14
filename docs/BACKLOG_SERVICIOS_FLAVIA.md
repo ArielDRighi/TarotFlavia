@@ -526,8 +526,8 @@ De espacios físicos tanto laborales como del hogar, armonizaciones energéticas
 | T-SF-B03 | Capa de infraestructura: Controllers, Módulo y Endpoints REST  | Backend  | ✅ Completada | 3 días     |
 | T-SF-B04 | Email de confirmación, Seed Data y Tests E2E                   | Backend  | ✅ Completada | 2 días     |
 | T-SF-F01 | Foundation: Types, API functions, Hooks y Rutas                | Frontend | ✅ Completada | 2 días     |
-| T-SF-F02 | Páginas públicas: Catálogo y Detalle de Servicio               | Frontend | 🔴 Crítica | 3 días     |
-| T-SF-F03 | Flujo autenticado: Pago, Reserva, Confirmación y Mis Servicios | Frontend | 🔴 Crítica | 3 días     |
+| T-SF-F02 | Páginas públicas: Catálogo y Detalle de Servicio               | Frontend | ✅ Completada | 3 días     |
+| T-SF-F03 | Flujo autenticado: Pago, Reserva, Confirmación y Mis Servicios | Frontend | ✅ Completada | 3 días     |
 | T-SF-F04 | Panel Admin: Gestión de Servicios y Aprobación de Pagos        | Frontend | 🟡 Alta    | 3 días     |
 
 **Estimación total:** ~22 días de desarrollo (incluye TDD + ciclos de calidad)
@@ -896,7 +896,7 @@ Construir las páginas públicas del catálogo de servicios: la grilla de servic
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 3 días
 **Dependencias:** T-SF-F02
-**Estado:** 🔲 No iniciada
+**Estado:** ✅ COMPLETADA
 **Cubre HUS:** HUS-003, HUS-004, HUS-005
 
 #### 📋 Descripción
@@ -907,46 +907,46 @@ Implementar el flujo completo post-detalle: página de pago con resumen y link a
 
 **Página de Pago (`/servicios/[slug]/pago`):**
 
-- [ ] Redirección a login si no autenticado (con retorno a esta página después del login)
-- [ ] Resumen del servicio: nombre, precio en ARS formateado (ej: $15.000), duración
-- [ ] Botón "Pagar con Mercado Pago" que: crea la compra vía `useCreatePurchase()`, abre el link de Mercado Pago en nueva pestaña (`window.open`)
-- [ ] Mensaje post-clic: _"Tu pago está siendo verificado. Una vez confirmado, te habilitaremos la reserva de turno y recibirás un email con todos los datos."_
-- [ ] Manejo de error si la creación de compra falla (ej: compra duplicada)
+- [x] Redirección a login si no autenticado (con retorno a esta página después del login)
+- [x] Resumen del servicio: nombre, precio en ARS formateado (ej: $15.000), duración
+- [x] Botón "Pagar con Mercado Pago" que: crea la compra vía `useCreatePurchase()`, abre el link de Mercado Pago en nueva pestaña (`window.open`)
+- [x] Mensaje post-clic: _"Tu pago está siendo verificado. Una vez confirmado, te habilitaremos la reserva de turno y recibirás un email con todos los datos."_
+- [x] Manejo de error si la creación de compra falla (ej: compra duplicada)
 
 **Página de Reserva (`/servicios/reservar/[purchaseId]`):**
 
-- [ ] Validar que la compra existe, pertenece al usuario, y tiene `paymentStatus === PAID`
-- [ ] Si pago NO aprobado: mensaje _"Tu pago aún está siendo verificado. Te notificaremos cuando puedas reservar tu turno."_
-- [ ] Si pago aprobado: `BookingCalendar` en modo interactivo con props pre-configurados del servicio (`tarotistaId` de Flavia, `durationMinutes` del servicio, `sessionType` del servicio)
-- [ ] Al confirmar reserva: llamar al endpoint de booking existente y luego vincular la sesión a la compra
-- [ ] Tras reserva exitosa: mostrar confirmación
+- [x] Validar que la compra existe, pertenece al usuario, y tiene `paymentStatus === PAID`
+- [x] Si pago NO aprobado: mensaje _"Tu pago aún está siendo verificado. Te notificaremos cuando puedas reservar tu turno."_
+- [x] Si pago aprobado: `BookingCalendar` en modo interactivo con props pre-configurados del servicio (`tarotistaId` de Flavia, `durationMinutes` del servicio, `sessionType` del servicio)
+- [x] Al confirmar reserva: llamar al endpoint de booking existente y luego vincular la sesión a la compra
+- [x] Tras reserva exitosa: mostrar confirmación
 
 **Vista de Confirmación:**
 
-- [ ] Nombre del servicio, fecha, hora, duración
-- [ ] Número de WhatsApp de Flavia con link clickeable `wa.me/[número]`
-- [ ] Botón para ir a "Mis Servicios"
+- [x] Nombre del servicio, fecha, hora, duración
+- [x] Número de WhatsApp de Flavia con link clickeable `wa.me/[número]`
+- [x] Botón para ir a "Mis Servicios"
 
 **Página Mis Servicios (`/mis-servicios`):**
 
-- [ ] Lista de compras del usuario usando `useMyPurchases()`
-- [ ] Cada card muestra: nombre del servicio, fecha de compra, monto ARS, estado con badge de color (PENDING=amber, PAID=verde, CANCELLED=rojo)
-- [ ] Si `PAID` y sin reserva: botón "Reservar Turno" que navega a `/servicios/reservar/:purchaseId`
-- [ ] Si `PAID` y con reserva: mostrar datos de la sesión (fecha, hora, WhatsApp)
-- [ ] Estado vacío: ilustración + "No tenés servicios contratados" + link al catálogo
-- [ ] Skeleton loading
+- [x] Lista de compras del usuario usando `useMyPurchases()`
+- [x] Cada card muestra: nombre del servicio, fecha de compra, monto ARS, estado con badge de color (PENDING=amber, PAID=verde, CANCELLED=rojo)
+- [x] Si `PAID` y sin reserva: botón "Reservar Turno" que navega a `/servicios/reservar/:purchaseId`
+- [x] Si `PAID` y con reserva: mostrar datos de la sesión (fecha, hora, WhatsApp)
+- [x] Estado vacío: ilustración + "No tenés servicios contratados" + link al catálogo
+- [x] Skeleton loading
 
 #### 🎯 Criterios de aceptación
 
-- El flujo completo funciona: detalle → pago → esperar aprobación → reservar → confirmación
-- La página de pago redirige a login si no autenticado y retorna después
-- El link de Mercado Pago se abre en nueva pestaña
-- La reserva solo se habilita con pago aprobado
-- La confirmación muestra el WhatsApp como link clickeable `wa.me/`
-- "Mis Servicios" refleja correctamente el estado de cada compra
-- Tests de componentes con mocks de hooks
-- Texto user-facing en español
-- Build exitoso
+- [x] El flujo completo funciona: detalle → pago → esperar aprobación → reservar → confirmación
+- [x] La página de pago redirige a login si no autenticado y retorna después
+- [x] El link de Mercado Pago se abre en nueva pestaña
+- [x] La reserva solo se habilita con pago aprobado
+- [x] La confirmación muestra el WhatsApp como link clickeable `wa.me/`
+- [x] "Mis Servicios" refleja correctamente el estado de cada compra
+- [x] Tests de componentes con mocks de hooks
+- [x] Texto user-facing en español
+- [x] Build exitoso
 
 ---
 
