@@ -38,6 +38,11 @@ export const ROUTES = {
   ADMIN_USERS: '/admin/users',
   ADMIN_STATS: '/admin/stats',
 
+  // Holistic Services (Servicios Flavia)
+  SERVICIOS: '/servicios',
+  SERVICIO_DETAIL: (slug: string) => `/servicios/${slug}`,
+  SERVICIO_PAGO: (slug: string) => `/servicios/${slug}/pago`,
+
   // Rituals
   RITUALES: '/rituales',
   RITUAL_DETAIL: (slug: string) => `/rituales/${slug}`,

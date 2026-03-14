@@ -838,7 +838,7 @@ Crear toda la infraestructura frontend necesaria antes de construir las páginas
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 3 días
 **Dependencias:** T-SF-F01
-**Estado:** 🔲 No iniciada
+**Estado:** ✅ COMPLETADA
 **Cubre HUS:** HUS-001, HUS-002
 
 #### 📋 Descripción
@@ -849,33 +849,33 @@ Construir las páginas públicas del catálogo de servicios: la grilla de servic
 
 **Página de Catálogo (`/servicios`):**
 
-- [ ] Componente `ServiciosPage` que consume `useHolisticServices()` hook
-- [ ] Componente `ServiceCard` con: nombre, descripción corta, precio formateado en ARS, duración, botón "Ver más"
-- [ ] Grilla responsive: 1 columna mobile, 2 tablet, 3 desktop
-- [ ] Skeleton loading mientras carga
-- [ ] Estado vacío si no hay servicios activos
-- [ ] Estado de error con retry
+- [x] Componente `ServiciosPage` que consume `useHolisticServices()` hook
+- [x] Componente `ServiceCard` con: nombre, descripción corta, precio formateado en ARS, duración, botón "Ver más"
+- [x] Grilla responsive: 1 columna mobile, 2 tablet, 3 desktop
+- [x] Skeleton loading mientras carga
+- [x] Estado vacío si no hay servicios activos
+- [x] Estado de error con retry
 
 **Página de Detalle (`/servicios/[slug]`):**
 
-- [ ] Componente `ServiceDetailPage` que consume `useHolisticServiceDetail(slug)`
-- [ ] Secciones: nombre (h1), descripción larga formateada con markdown/HTML, precio, duración, modalidad (WhatsApp)
-- [ ] `BookingCalendar` en modo `readOnly` (nueva prop a agregar al componente existente)
-- [ ] Disclaimer debajo del calendario: _"Las fechas disponibles son al momento de la consulta. Una vez realizado el pago, la fecha que observaste libre podría ya estar ocupada."_
-- [ ] El número de WhatsApp NO se muestra en el detalle público
-- [ ] Botón "Contratar servicio" que navega a la página de pago
-- [ ] Manejo de slug no encontrado (404)
+- [x] Componente `ServiceDetailPage` que consume `useHolisticServiceDetail(slug)`
+- [x] Secciones: nombre (h1), descripción larga formateada con markdown/HTML, precio, duración, modalidad (WhatsApp)
+- [x] `BookingCalendar` en modo `readOnly` (nueva prop a agregar al componente existente)
+- [x] Disclaimer debajo del calendario: _"Las fechas disponibles son al momento de la consulta. Una vez realizado el pago, la fecha que observaste libre podría ya estar ocupada."_
+- [x] El número de WhatsApp NO se muestra en el detalle público
+- [x] Botón "Contratar servicio" que navega a la página de pago
+- [x] Manejo de slug no encontrado (404)
 
 **Navegación:**
 
-- [ ] Agregar link "Servicios" en el Header principal, visible para todos los usuarios (autenticados y no autenticados)
-- [ ] El link activo se destaca cuando estamos en `/servicios/*`
+- [x] Agregar link "Servicios" en el Header principal, visible para todos los usuarios (autenticados y no autenticados)
+- [x] El link activo se destaca cuando estamos en `/servicios/*`
 
 **BookingCalendar - Prop readOnly:**
 
-- [ ] Agregar prop `readOnly?: boolean` al componente `BookingCalendar` existente
-- [ ] Cuando `readOnly={true}`: se muestran slots disponibles pero no se puede seleccionar ni reservar, se oculta el botón de confirmar reserva
-- [ ] No romper la funcionalidad existente del calendario cuando `readOnly` es `false` o no se pasa
+- [x] Agregar prop `readOnly?: boolean` al componente `BookingCalendar` existente
+- [x] Cuando `readOnly={true}`: se muestran slots disponibles pero no se puede seleccionar ni reservar, se oculta el botón de confirmar reserva
+- [x] No romper la funcionalidad existente del calendario cuando `readOnly` es `false` o no se pasa
 
 #### 🎯 Criterios de aceptación
 

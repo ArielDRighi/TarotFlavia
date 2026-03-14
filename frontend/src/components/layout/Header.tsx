@@ -1,12 +1,14 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/stores/authStore';
 import { UserMenu } from './UserMenu';
 import { NotificationBell } from '@/components/features/notifications';
 import { ROUTES } from '@/lib/constants/routes';
+import { cn } from '@/lib/utils/cn';
 
 /**
  * Header component
@@ -15,6 +17,7 @@ import { ROUTES } from '@/lib/constants/routes';
  */
 export function Header() {
   const { user } = useAuthStore();
+  const pathname = usePathname();
 
   return (
     <header className="bg-surface shadow-soft sticky top-0 z-50 w-full border-b" role="banner">
@@ -88,6 +91,17 @@ export function Header() {
             className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
           >
             Carta Astral
+          </Link>
+          <Link
+            href={ROUTES.SERVICIOS}
+            className={cn(
+              'text-sm font-medium transition-colors',
+              pathname.startsWith('/servicios')
+                ? 'text-primary font-semibold'
+                : 'text-text-primary hover:text-primary'
+            )}
+          >
+            Servicios
           </Link>
           {user && (
             <>
