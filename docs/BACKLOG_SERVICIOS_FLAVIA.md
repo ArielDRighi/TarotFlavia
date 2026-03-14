@@ -528,7 +528,7 @@ De espacios físicos tanto laborales como del hogar, armonizaciones energéticas
 | T-SF-F01 | Foundation: Types, API functions, Hooks y Rutas                | Frontend | ✅ Completada | 2 días     |
 | T-SF-F02 | Páginas públicas: Catálogo y Detalle de Servicio               | Frontend | ✅ Completada | 3 días     |
 | T-SF-F03 | Flujo autenticado: Pago, Reserva, Confirmación y Mis Servicios | Frontend | ✅ Completada | 3 días     |
-| T-SF-F04 | Panel Admin: Gestión de Servicios y Aprobación de Pagos        | Frontend | 🟡 Alta    | 3 días     |
+| T-SF-F04 | Panel Admin: Gestión de Servicios y Aprobación de Pagos        | Frontend | 🟡 Alta    | ✅ COMPLETADA |
 
 **Estimación total:** ~22 días de desarrollo (incluye TDD + ciclos de calidad)
 
@@ -955,8 +955,7 @@ Implementar el flujo completo post-detalle: página de pago con resumen y link a
 **Prioridad:** 🟡 ALTA
 **Estimación:** 3 días
 **Dependencias:** T-SF-F01
-**Estado:** 🔲 No iniciada
-**Cubre HUS:** HUS-007
+**Estado:** ✅ COMPLETADA
 
 #### 📋 Descripción
 
@@ -966,43 +965,43 @@ Crear la sección de administración de servicios holísticos dentro del panel a
 
 **Navegación Admin:**
 
-- [ ] Agregar item "Servicios" en el sidebar del admin, dentro de la sección GESTIÓN
-- [ ] Ruta: `/admin/servicios`
+- [x] Agregar item "Servicios" en el sidebar del admin, dentro de la sección GESTIÓN
+- [x] Ruta: `/admin/servicios`
 
 **Tab "Servicios" (CRUD):**
 
-- [ ] Tabla con columnas: Nombre, Precio ARS, Duración, Tipo Sesión, Activo (toggle), acciones (Editar)
-- [ ] Modal de edición con React Hook Form + Zod: campos para nombre, descripción corta, descripción larga, precio ARS, link Mercado Pago, WhatsApp, duración en minutos, estado activo, orden de visualización
-- [ ] Modal de creación de nuevo servicio (reutilizar formulario del modal de edición)
-- [ ] Validaciones Zod: precio > 0, duración > 0, WhatsApp formato válido, slug auto-generado desde nombre
-- [ ] Toast de éxito/error al guardar
+- [x] Tabla con columnas: Nombre, Precio ARS, Duración, Activo (toggle), acciones (Editar)
+- [x] Modal de edición con React Hook Form + Zod: campos para nombre, descripción corta, descripción larga, precio ARS, link Mercado Pago, WhatsApp, duración en minutos, estado activo, orden de visualización
+- [x] Modal de creación de nuevo servicio (reutilizar formulario del modal de edición)
+- [x] Validaciones Zod: precio > 0, duración > 0, WhatsApp formato válido, slug auto-generado desde nombre
+- [x] Toast de éxito/error al guardar
 
 **Tab "Pagos Pendientes":**
 
-- [ ] Tabla con columnas: Usuario (nombre + email), Servicio, Monto ARS, Fecha de compra, Acciones
-- [ ] Botón "Aprobar pago" con confirmación (dialog: "¿Confirmar aprobación del pago de $X de [usuario] para [servicio]?")
-- [ ] Campo opcional para `paymentReference` al aprobar
-- [ ] Al aprobar: el pago desaparece de la tabla (invalidar query), toast de éxito
-- [ ] Indicador de cantidad de pagos pendientes en el tab (badge con número)
+- [x] Tabla con columnas: Usuario (nombre + email), Servicio, Monto ARS, Fecha de compra, Acciones
+- [x] Botón "Aprobar pago" con confirmación (dialog: "¿Confirmar aprobación del pago de $X de [usuario] para [servicio]?")
+- [x] Campo opcional para `paymentReference` al aprobar
+- [x] Al aprobar: el pago desaparece de la tabla (invalidar query), toast de éxito
+- [x] Indicador de cantidad de pagos pendientes en el tab (badge con número)
 
 **Componentes:**
 
-- [ ] `HolisticServicesManagement` — contenedor con tabs
-- [ ] `ServicesTable` + `EditServiceModal`
-- [ ] `PendingPaymentsTable` + `ApprovePaymentDialog`
-- [ ] Reutilizar componentes UI existentes del admin (tablas, modales, badges, toasts)
+- [x] `HolisticServicesManagement` — contenedor con tabs
+- [x] `ServicesTable` + `EditServiceModal`
+- [x] `PendingPaymentsTable` + `ApprovePaymentDialog`
+- [x] Reutilizar componentes UI existentes del admin (tablas, modales, badges, toasts)
 
 #### 🎯 Criterios de aceptación
 
-- El admin puede ver, crear y editar servicios holísticos
-- Los cambios de admin se reflejan inmediatamente en la página pública `/servicios`
-- El admin puede aprobar pagos pendientes y estos desaparecen de la lista
-- La aprobación dispara el email de confirmación (validar desde backend)
-- Los formularios validan correctamente con Zod antes de enviar
-- El sidebar del admin incluye el nuevo item "Servicios"
-- Tests de componentes admin con mocks
-- Texto en español
-- Build exitoso
+- [x] El admin puede ver, crear y editar servicios holísticos
+- [x] Los cambios de admin se reflejan inmediatamente en la página pública `/servicios`
+- [x] El admin puede aprobar pagos pendientes y estos desaparecen de la lista
+- [x] La aprobación dispara el email de confirmación (validar desde backend)
+- [x] Los formularios validan correctamente con Zod antes de enviar
+- [x] El sidebar del admin incluye el nuevo item "Servicios"
+- [x] Tests de componentes admin con mocks
+- [x] Texto en español
+- [x] Build exitoso
 
 ---
 
