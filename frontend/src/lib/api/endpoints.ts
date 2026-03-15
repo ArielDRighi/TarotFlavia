@@ -248,5 +248,14 @@ export const API_ENDPOINTS = {
     INVALIDATE_TAROTISTA_CACHE: (tarotistaId: number) => `/admin/cache/tarotistas/${tarotistaId}`, // DELETE
     // NOTA: No existe endpoint para invalidar por spread en el backend
     TRIGGER_CACHE_WARMING: '/admin/cache/warm', // POST - endpoint correcto
+    // Scheduling / Agenda
+    TAROTISTA_AVAILABILITY: (tarotistaId: number) =>
+      `/admin/tarotistas/${tarotistaId}/availability`,
+    TAROTISTA_AVAILABILITY_BY_ID: (tarotistaId: number, availabilityId: number) =>
+      `/admin/tarotistas/${tarotistaId}/availability/${availabilityId}`,
+    TAROTISTA_BLOCKED_DATES: (tarotistaId: number) =>
+      `/admin/tarotistas/${tarotistaId}/blocked-dates`,
+    TAROTISTA_BLOCKED_DATE_BY_ID: (tarotistaId: number, dateId: number) =>
+      `/admin/tarotistas/${tarotistaId}/blocked-dates/${dateId}`,
   },
 } as const;

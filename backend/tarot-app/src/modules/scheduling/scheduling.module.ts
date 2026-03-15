@@ -5,6 +5,7 @@ import { AvailabilityService, SessionService } from './services';
 import {
   TarotistSchedulingController,
   UserSchedulingController,
+  AdminSchedulingController,
 } from './infrastructure/controllers';
 
 // Domain
@@ -25,10 +26,17 @@ import { BookSessionUseCase } from './application/use-cases/book-session.use-cas
 import { CancelSessionUseCase } from './application/use-cases/cancel-session.use-case';
 import { ConfirmSessionUseCase } from './application/use-cases/confirm-session.use-case';
 import { CompleteSessionUseCase } from './application/use-cases/complete-session.use-case';
+import { AdminGetWeeklyAvailabilityUseCase } from './application/use-cases/admin-get-weekly-availability.use-case';
+import { AdminSetWeeklyAvailabilityUseCase } from './application/use-cases/admin-set-weekly-availability.use-case';
+import { AdminRemoveWeeklyAvailabilityUseCase } from './application/use-cases/admin-remove-weekly-availability.use-case';
+import { AdminGetExceptionsUseCase } from './application/use-cases/admin-get-exceptions.use-case';
+import { AdminAddExceptionUseCase } from './application/use-cases/admin-add-exception.use-case';
+import { AdminRemoveExceptionUseCase } from './application/use-cases/admin-remove-exception.use-case';
 
 // Application - Orchestrators
 import { AvailabilityOrchestratorService } from './application/services/availability-orchestrator.service';
 import { SessionOrchestratorService } from './application/services/session-orchestrator.service';
+import { AdminSchedulingOrchestratorService } from './application/services/admin-scheduling-orchestrator.service';
 
 // External Modules
 import { HolisticServicesModule } from '../holistic-services/holistic-services.module';
@@ -42,7 +50,11 @@ import { HolisticServicesModule } from '../holistic-services/holistic-services.m
     ]),
     forwardRef(() => HolisticServicesModule),
   ],
-  controllers: [TarotistSchedulingController, UserSchedulingController],
+  controllers: [
+    TarotistSchedulingController,
+    UserSchedulingController,
+    AdminSchedulingController,
+  ],
   providers: [
     // Legacy services (mantener temporalmente para compatibilidad)
     AvailabilityService,
@@ -69,9 +81,18 @@ import { HolisticServicesModule } from '../holistic-services/holistic-services.m
     ConfirmSessionUseCase,
     CompleteSessionUseCase,
 
+    // Admin use cases
+    AdminGetWeeklyAvailabilityUseCase,
+    AdminSetWeeklyAvailabilityUseCase,
+    AdminRemoveWeeklyAvailabilityUseCase,
+    AdminGetExceptionsUseCase,
+    AdminAddExceptionUseCase,
+    AdminRemoveExceptionUseCase,
+
     // Orchestrators
     AvailabilityOrchestratorService,
     SessionOrchestratorService,
+    AdminSchedulingOrchestratorService,
   ],
   exports: [
     // Exportar tanto legacy como nuevos para transición gradual

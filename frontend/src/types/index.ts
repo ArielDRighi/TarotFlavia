@@ -285,3 +285,12 @@ export type {
   CreatePurchasePayload,
   ApprovePurchasePayload,
 } from './service-purchase.types';
+
+// Scheduling Admin Types
+export { DayOfWeek, ExceptionType, DAY_LABELS } from './scheduling-admin.types';
+export type {
+  TarotistAvailability,
+  TarotistException,
+  SetWeeklyAvailabilityDto,
+  AddExceptionDto,
+} from './scheduling-admin.types';
