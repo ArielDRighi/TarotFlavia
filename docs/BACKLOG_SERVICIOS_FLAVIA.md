@@ -1060,7 +1060,7 @@ T-SF-F01 (Foundation Frontend)
 
 | ID       | Tarea                                                          | Tipo      | Prioridad | Estimación |
 | -------- | -------------------------------------------------------------- | --------- | --------- | ---------- |
-| T-SF-M01 | Calendario de disponibilidad: rediseño a cuadrícula mensual    | Frontend  | 🔴 Alta   | 2 días     |
+| T-SF-M01 | Calendario de disponibilidad: rediseño a cuadrícula mensual    | Frontend  | ✅ COMPLETADA | 2 días     |
 | T-SF-M02 | Endpoint de disponibilidad público + preview funcional         | Fullstack | 🔴 Alta   | 2 días     |
 | T-SF-M03 | Admin: gestión de disponibilidad/agenda de la tarotista        | Fullstack | 🔴 Alta   | 4 días     |
 
@@ -1073,7 +1073,7 @@ T-SF-F01 (Foundation Frontend)
 **Prioridad:** 🔴 ALTA
 **Estimación:** 2 días
 **Dependencias:** Ninguna (refactor visual independiente)
-**Estado:** 🔲 PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Contexto:** El componente `BookingCalendar` actual muestra las fechas como una línea horizontal de botones con scroll. Esto no es estándar UX — todos los calendarios de reserva del mercado (Calendly, Google Calendar, etc.) usan una cuadrícula mensual.
 
 #### 📋 Descripción
@@ -1084,29 +1084,29 @@ Rediseñar el componente `BookingCalendar` para que presente los días en un gri
 
 **Componente BookingCalendar:**
 
-- [ ] Reemplazar la fila horizontal de botones por un grid de 7 columnas (Lun, Mar, Mié, Jue, Vie, Sáb, Dom)
-- [ ] Agregar navegación por mes (flechas ← →) con nombre del mes y año como header
-- [ ] Marcar visualmente el día actual (today)
-- [ ] Deshabilitar días pasados (no seleccionables)
-- [ ] Colorear días con disponibilidad vs días sin horarios disponibles (si el endpoint está público — ver T-SF-M02)
-- [ ] Mantener el comportamiento de selección de fecha → carga de horarios
-- [ ] Responsive: en mobile el grid se adapta sin scroll horizontal
+- [x] Reemplazar la fila horizontal de botones por un grid de 7 columnas (Lun, Mar, Mié, Jue, Vie, Sáb, Dom)
+- [x] Agregar navegación por mes (flechas ← →) con nombre del mes y año como header
+- [x] Marcar visualmente el día actual (today)
+- [x] Deshabilitar días pasados (no seleccionables)
+- [x] Colorear días con disponibilidad vs días sin horarios disponibles (si el endpoint está público — ver T-SF-M02)
+- [x] Mantener el comportamiento de selección de fecha → carga de horarios
+- [x] Responsive: en mobile el grid se adapta sin scroll horizontal
 
 **Tests:**
 
-- [ ] Tests unitarios del componente con grid mensual
-- [ ] Test de navegación entre meses
-- [ ] Test de que días pasados no son seleccionables
-- [ ] Test responsive (viewport pequeño)
+- [x] Tests unitarios del componente con grid mensual
+- [x] Test de navegación entre meses
+- [x] Test de que días pasados no son seleccionables
+- [x] Test responsive (viewport pequeño)
 
 #### 🎯 Criterios de aceptación
 
-- El calendario muestra un grid mensual con días de la semana como headers
-- Se puede navegar entre meses con flechas
-- Días pasados están deshabilitados
-- El diseño es responsive y no requiere scroll horizontal
-- Los tests existentes del BookingCalendar se actualizan y pasan
-- `npm run build`, `npm run type-check`, `npm run lint:fix` pasan sin errores
+- [x] El calendario muestra un grid mensual con días de la semana como headers
+- [x] Se puede navegar entre meses con flechas
+- [x] Días pasados están deshabilitados
+- [x] El diseño es responsive y no requiere scroll horizontal
+- [x] Los tests existentes del BookingCalendar se actualizan y pasan
+- [x] `npm run build`, `npm run type-check`, `npm run lint:fix` pasan sin errores
 
 #### 📁 Archivos involucrados
 
