@@ -16,19 +16,14 @@ import {
 } from '../../../scheduling/domain/interfaces/repository.tokens';
 import { ExceptionType, SessionStatus } from '../../../scheduling/domain/enums';
 import { Session } from '../../../scheduling/entities/session.entity';
+import {
+  ServiceAvailabilitySlotDto,
+  ServiceAvailabilityResponseDto,
+} from '../dto/service-availability-response.dto';
 
 const FLAVIA_TAROTISTA_ID = 1;
 const SLOT_INTERVAL_MINUTES = 30;
-
-export interface ServiceAvailabilitySlot {
-  time: string;
-  available: boolean;
-}
-
-export interface ServiceAvailabilityResponseDto {
-  date: string;
-  slots: ServiceAvailabilitySlot[];
-}
+const MIN_ADVANCE_HOURS = 2;
 
 @Injectable()
 export class GetServiceAvailabilityUseCase {
@@ -127,15 +122,22 @@ export class GetServiceAvailabilityUseCase {
       SLOT_INTERVAL_MINUTES,
     );
 
-    // 8. Map each slot to available/occupied
-    const slots: ServiceAvailabilitySlot[] = timeSlots.map((time) => {
-      const available = !this.isSlotOccupied(
+    // 8. Map each slot to available/occupied, applying min-advance-hours filter
+    const now = new Date();
+    const minDateTime = new Date(
+      now.getTime() + MIN_ADVANCE_HOURS * 60 * 60 * 1000,
+    );
+
+    const slots: ServiceAvailabilitySlotDto[] = timeSlots.map((time) => {
+      const slotDateTime = new Date(`${date}T${time}:00`);
+      const isTooSoon = slotDateTime < minDateTime;
+      const isOccupied = this.isSlotOccupied(
         sessions,
         date,
         time,
         service.durationMinutes,
       );
-      return { time, available };
+      return { time, available: !isTooSoon && !isOccupied };
     });
 
     return { date, slots };

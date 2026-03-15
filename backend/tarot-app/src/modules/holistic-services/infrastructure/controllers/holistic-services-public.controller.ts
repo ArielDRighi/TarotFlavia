@@ -9,7 +9,7 @@ import {
 import { HolisticServicesOrchestratorService } from '../../application/orchestrators/holistic-services-orchestrator.service';
 import { HolisticServiceResponseDto } from '../../application/dto/holistic-service-response.dto';
 import { HolisticServiceDetailResponseDto } from '../../application/dto/holistic-service-response.dto';
-import { ServiceAvailabilityResponseDto } from '../../application/use-cases/get-service-availability.use-case';
+import { ServiceAvailabilityResponseDto } from '../../application/dto/service-availability-response.dto';
 
 @ApiTags('Servicios Holísticos')
 @Controller('holistic-services')
@@ -42,6 +42,7 @@ export class HolisticServicesPublicController {
   @ApiResponse({
     status: 200,
     description: 'Disponibilidad del servicio para la fecha indicada',
+    type: ServiceAvailabilityResponseDto,
   })
   @ApiResponse({ status: 400, description: 'Fecha inválida o en el pasado' })
   @ApiResponse({ status: 404, description: 'Servicio no encontrado' })

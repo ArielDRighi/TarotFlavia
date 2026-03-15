@@ -9,8 +9,4 @@ export { GetUserPurchasesUseCase } from './get-user-purchases.use-case';
 export { GetPendingPaymentsUseCase } from './get-pending-payments.use-case';
 export { CancelPurchaseUseCase } from './cancel-purchase.use-case';
 export { GetPurchaseByIdUseCase } from './get-purchase-by-id.use-case';
-export {
-  GetServiceAvailabilityUseCase,
-  ServiceAvailabilityResponseDto,
-  ServiceAvailabilitySlot,
-} from './get-service-availability.use-case';
+export { GetServiceAvailabilityUseCase } from './get-service-availability.use-case';

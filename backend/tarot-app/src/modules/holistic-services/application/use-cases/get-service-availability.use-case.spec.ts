@@ -334,4 +334,72 @@ describe('GetServiceAvailabilityUseCase', () => {
       expect(availableSlots.length).toBeGreaterThan(0);
     });
   });
+
+  describe('filtro de anticipación mínima (minAdvanceHours)', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+      mockHolisticRepo.findBySlug.mockResolvedValue(mockHolisticService);
+      mockExceptionRepo.getExceptionsByDateRange.mockResolvedValue([]);
+      mockSessionRepo.findSessionsByTarotistAndDateRange.mockResolvedValue([]);
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('debe marcar available=false para slots con menos de 2 horas de anticipación', async () => {
+      // "now" = 09:00 → minDateTime = 11:00 → slots 09:00 y 09:30 quedan dentro del umbral
+      jest.setSystemTime(new Date('2099-06-01T09:00:00'));
+
+      mockAvailabilityRepo.getWeeklyAvailability.mockResolvedValue([
+        mockAvailabilityMonday, // 09:00-11:00 → 09:00, 09:30, 10:00, 10:30
+      ]);
+
+      const result = await useCase.execute('arbol-genealogico', '2099-06-01');
+
+      // 09:00 < minDateTime (11:00) → no disponible
+      const slot900 = result.slots.find((s) => s.time === '09:00');
+      expect(slot900).toBeDefined();
+      expect(slot900?.available).toBe(false);
+
+      // 09:30 < 11:00 → no disponible
+      const slot930 = result.slots.find((s) => s.time === '09:30');
+      expect(slot930).toBeDefined();
+      expect(slot930?.available).toBe(false);
+    });
+
+    it('debe mantener available=true para slots con 2 horas o más de anticipación', async () => {
+      // "now" = 07:00 → minDateTime = 09:00 → slot 09:00 es exactamente el umbral
+      jest.setSystemTime(new Date('2099-06-01T07:00:00'));
+
+      mockAvailabilityRepo.getWeeklyAvailability.mockResolvedValue([
+        mockAvailabilityMonday, // 09:00-11:00
+      ]);
+
+      const result = await useCase.execute('arbol-genealogico', '2099-06-01');
+
+      // 09:00 == minDateTime → disponible (no es estrictamente menor)
+      const slot900 = result.slots.find((s) => s.time === '09:00');
+      expect(slot900).toBeDefined();
+      expect(slot900?.available).toBe(true);
+    });
+
+    it('debe incluir todos los slots en la respuesta aunque algunos no estén disponibles por anticipación', async () => {
+      // "now" = 10:00 → minDateTime = 12:00 → los 4 slots (09:00-11:00) quedan antes
+      jest.setSystemTime(new Date('2099-06-01T10:00:00'));
+
+      mockAvailabilityRepo.getWeeklyAvailability.mockResolvedValue([
+        mockAvailabilityMonday, // 09:00-11:00 → 4 slots
+      ]);
+
+      const result = await useCase.execute('arbol-genealogico', '2099-06-01');
+
+      // Todos los 4 slots deben estar presentes
+      expect(result.slots).toHaveLength(4);
+      // Todos marcados como no disponibles por anticipación insuficiente
+      result.slots.forEach((slot) => {
+        expect(slot.available).toBe(false);
+      });
+    });
+  });
 });

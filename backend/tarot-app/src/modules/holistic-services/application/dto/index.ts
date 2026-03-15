@@ -10,3 +10,7 @@ export {
   PurchaseResponseDto,
   PurchaseListResponseDto,
 } from './purchase-response.dto';
+export {
+  ServiceAvailabilitySlotDto,
+  ServiceAvailabilityResponseDto,
+} from './service-availability-response.dto';
