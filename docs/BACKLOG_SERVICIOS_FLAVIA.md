@@ -1048,3 +1048,42 @@ T-SF-F01 (Foundation Frontend)
 ---
 
 **FIN DE PARTE B — TAREAS TÉCNICAS**
+
+---
+
+## PARTE C: MEJORAS PENDIENTES (detectadas en testing E2E)
+
+> Identificadas durante validación Playwright del módulo completo (14/03/2026)
+
+### T-SF-M01 — Calendario de disponibilidad: rediseño a cuadrícula
+
+- **Prioridad:** Alta
+- **Estado:** 🔲 PENDIENTE
+- **Descripción:** El componente `BookingCalendar` actual muestra las fechas como una línea horizontal de botones. Rediseñar como cuadrícula tipo calendario mensual (grid de 7 columnas lun-dom, filas por semana). Es el estándar UX universal para calendarios de reserva.
+- **Archivos involucrados:**
+  - `frontend/src/components/features/marketplace/BookingCalendar.tsx`
+- **Criterio de aceptación:** El calendario muestra un grid mensual navegable con días de la semana como headers.
+
+### T-SF-M02 — Endpoint de disponibilidad público + preview funcional
+
+- **Prioridad:** Alta
+- **Estado:** 🔲 PENDIENTE
+- **Descripción:** El endpoint `GET /scheduling/available-slots` requiere autenticación (401), pero el usuario necesita ver la disponibilidad real (fechas y horarios libres) ANTES de pagar. El calendario en la página de detalle debe mostrar disponibilidad real como preview. Lo que NO puede hacer el usuario es **agendar** un turno hasta que tenga un pago aprobado.
+- **Cambios necesarios:**
+  - Backend: hacer público `GET /scheduling/available-slots` (o crear un endpoint público equivalente)
+  - Frontend: el `BookingCalendar` en modo `readOnly` muestra slots reales pero no permite reservar
+- **Archivos involucrados:**
+  - `backend/tarot-app/src/modules/scheduling/infrastructure/controllers/scheduling.controller.ts`
+  - `frontend/src/components/features/marketplace/BookingCalendar.tsx`
+  - `frontend/src/components/features/holistic-services/ServiceDetailPage.tsx`
+- **Criterio de aceptación:** Un usuario no autenticado puede ver fechas y horarios disponibles. Solo puede reservar tras pago aprobado.
+
+### T-SF-M03 — Admin: gestión de disponibilidad de la tarotista
+
+- **Prioridad:** Alta
+- **Estado:** 🔲 PENDIENTE
+- **Descripción:** Falta un panel en el admin donde la tarotista (Flavia) pueda gestionar su agenda: cargar fechas/horarios disponibles, marcar fechas como ocupadas/bloqueadas, y que eso se refleje en el calendario público de cada servicio.
+- **Cambios necesarios:**
+  - Backend: endpoints para CRUD de disponibilidad/bloqueos de la tarotista
+  - Frontend: nueva sección en admin panel para gestión de agenda
+- **Criterio de aceptación:** La tarotista puede configurar su disponibilidad desde el admin. Los usuarios ven reflejados los horarios reales en el calendario público.

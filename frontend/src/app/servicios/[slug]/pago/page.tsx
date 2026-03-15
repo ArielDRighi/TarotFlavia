@@ -1,5 +1,6 @@
 'use client';
 
+import { use } from 'react';
 import { Loader2 } from 'lucide-react';
 
 import { ServicePaymentPage } from '@/components/features/holistic-services';
@@ -12,10 +13,11 @@ import { useRequireAuth } from '@/hooks/useRequireAuth';
  * Business logic delegated to ServicePaymentPage component.
  */
 interface Props {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export default function ServicioPagoPage({ params }: Props) {
+  const { slug } = use(params);
   const { isLoading: isAuthLoading } = useRequireAuth();
 
   if (isAuthLoading) {
@@ -29,5 +31,5 @@ export default function ServicioPagoPage({ params }: Props) {
     );
   }
 
-  return <ServicePaymentPage slug={params.slug} />;
+  return <ServicePaymentPage slug={slug} />;
 }

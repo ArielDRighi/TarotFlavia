@@ -6,9 +6,10 @@
 import { ServiceDetailPage } from '@/components/features/holistic-services';
 
 interface Props {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
-export default function ServicioDetailRoute({ params }: Props) {
-  return <ServiceDetailPage slug={params.slug} />;
+export default async function ServicioDetailRoute({ params }: Props) {
+  const { slug } = await params;
+  return <ServiceDetailPage slug={slug} />;
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import { use } from 'react';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -15,10 +16,11 @@ import { Button } from '@/components/ui/button';
  * Business logic delegated to ServiceBookingPage component.
  */
 interface Props {
-  params: { purchaseId: string };
+  params: Promise<{ purchaseId: string }>;
 }
 
 export default function ReservarServicioPage({ params }: Props) {
+  const { purchaseId: rawPurchaseId } = use(params);
   const { isLoading: isAuthLoading } = useRequireAuth();
 
   if (isAuthLoading) {
@@ -32,7 +34,7 @@ export default function ReservarServicioPage({ params }: Props) {
     );
   }
 
-  const purchaseId = Number(params.purchaseId);
+  const purchaseId = Number(rawPurchaseId);
 
   if (!Number.isFinite(purchaseId) || purchaseId <= 0) {
     return (
