@@ -183,7 +183,9 @@ export class AddOrbSystemToBirthChart1771989502257 implements MigrationInterface
     await queryRunner.query(
       `DROP INDEX "public"."IDX_security_events_ip_address_created_at"`,
     );
-    await queryRunner.query(`DROP INDEX "public"."idx_sacred_event_slug"`);
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "public"."idx_sacred_event_slug"`,
+    );
     await queryRunner.query(
       `DROP INDEX "public"."IDX_predefined_question_category"`,
     );

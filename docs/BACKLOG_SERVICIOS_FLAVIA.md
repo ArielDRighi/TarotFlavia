@@ -1048,3 +1048,204 @@ T-SF-F01 (Foundation Frontend)
 ---
 
 **FIN DE PARTE B — TAREAS TÉCNICAS**
+
+---
+
+## PARTE C: MEJORAS PENDIENTES (detectadas en testing E2E)
+
+> Identificadas durante validación Playwright del módulo completo (14/03/2026)
+> **Convención de IDs:** `T-SF-M0X` = Mejora (fullstack)
+
+### Índice de Mejoras
+
+| ID       | Tarea                                                          | Tipo      | Prioridad | Estimación |
+| -------- | -------------------------------------------------------------- | --------- | --------- | ---------- |
+| T-SF-M01 | Calendario de disponibilidad: rediseño a cuadrícula mensual    | Frontend  | 🔴 Alta   | 2 días     |
+| T-SF-M02 | Endpoint de disponibilidad público + preview funcional         | Fullstack | 🔴 Alta   | 2 días     |
+| T-SF-M03 | Admin: gestión de disponibilidad/agenda de la tarotista        | Fullstack | 🔴 Alta   | 4 días     |
+
+**Estimación total:** ~8 días de desarrollo (incluye TDD + ciclos de calidad)
+
+---
+
+### T-SF-M01: Calendario de Disponibilidad — Rediseño a Cuadrícula Mensual
+
+**Prioridad:** 🔴 ALTA
+**Estimación:** 2 días
+**Dependencias:** Ninguna (refactor visual independiente)
+**Estado:** 🔲 PENDIENTE
+**Contexto:** El componente `BookingCalendar` actual muestra las fechas como una línea horizontal de botones con scroll. Esto no es estándar UX — todos los calendarios de reserva del mercado (Calendly, Google Calendar, etc.) usan una cuadrícula mensual.
+
+#### 📋 Descripción
+
+Rediseñar el componente `BookingCalendar` para que presente los días en un grid de calendario mensual (7 columnas lun-dom, filas por semana) con navegación por mes. El componente se usa tanto en la página pública de detalle de servicio (readOnly) como en la página de reserva post-pago (interactivo).
+
+#### ✅ Tareas específicas
+
+**Componente BookingCalendar:**
+
+- [ ] Reemplazar la fila horizontal de botones por un grid de 7 columnas (Lun, Mar, Mié, Jue, Vie, Sáb, Dom)
+- [ ] Agregar navegación por mes (flechas ← →) con nombre del mes y año como header
+- [ ] Marcar visualmente el día actual (today)
+- [ ] Deshabilitar días pasados (no seleccionables)
+- [ ] Colorear días con disponibilidad vs días sin horarios disponibles (si el endpoint está público — ver T-SF-M02)
+- [ ] Mantener el comportamiento de selección de fecha → carga de horarios
+- [ ] Responsive: en mobile el grid se adapta sin scroll horizontal
+
+**Tests:**
+
+- [ ] Tests unitarios del componente con grid mensual
+- [ ] Test de navegación entre meses
+- [ ] Test de que días pasados no son seleccionables
+- [ ] Test responsive (viewport pequeño)
+
+#### 🎯 Criterios de aceptación
+
+- El calendario muestra un grid mensual con días de la semana como headers
+- Se puede navegar entre meses con flechas
+- Días pasados están deshabilitados
+- El diseño es responsive y no requiere scroll horizontal
+- Los tests existentes del BookingCalendar se actualizan y pasan
+- `npm run build`, `npm run type-check`, `npm run lint:fix` pasan sin errores
+
+#### 📁 Archivos involucrados
+
+- `frontend/src/components/features/marketplace/BookingCalendar.tsx` — refactor completo del layout
+- `frontend/src/components/features/marketplace/BookingCalendar.test.tsx` — actualizar tests
+
+---
+
+### T-SF-M02: Endpoint de Disponibilidad Público + Preview Funcional
+
+**Prioridad:** 🔴 ALTA
+**Estimación:** 2 días
+**Dependencias:** T-SF-M01 (ideal hacer juntas, pero no bloqueante)
+**Estado:** 🔲 PENDIENTE
+**Contexto:** El endpoint `GET /scheduling/available-slots` requiere autenticación (devuelve 401 sin token). Sin embargo, el flujo de usuario requiere que pueda ver las fechas y horarios disponibles ANTES de pagar. Solo la acción de **agendar/reservar** un turno debe estar bloqueada hasta tener un pago aprobado.
+
+#### 📋 Descripción
+
+Hacer que la consulta de disponibilidad sea pública para que el calendario en la página de detalle del servicio muestre los horarios reales de la tarotista. El usuario puede explorar la disponibilidad libremente; la restricción es solo al momento de confirmar la reserva.
+
+#### ✅ Tareas específicas
+
+**Backend:**
+
+- [ ] Crear endpoint público `GET /holistic-services/:slug/availability` que retorne slots disponibles para una fecha dada (sin requerir auth)
+  - Query params: `date` (YYYY-MM-DD)
+  - Retorna: `{ date: string, slots: { time: string, available: boolean }[] }`
+  - Internamente consulta el scheduling del tarotista asociado al servicio
+- [ ] Alternativa: hacer público el endpoint existente `GET /scheduling/available-slots` (evaluar impacto de seguridad)
+- [ ] Tests unitarios del nuevo endpoint/cambio
+- [ ] Tests de integración para verificar acceso sin auth
+
+**Frontend:**
+
+- [ ] Actualizar el hook `useAvailableSlots` para usar el nuevo endpoint público cuando se usa desde la página de detalle
+- [ ] En `ServiceDetailPage`, el `BookingCalendar` en modo `readOnly` muestra los slots reales
+  - Los botones de horario se ven pero no son clickeables (visualización solo)
+  - Colores: verde/disponible, gris/ocupado
+- [ ] En la página de reserva post-pago, el calendario permite seleccionar horarios (modo interactivo)
+- [ ] Tests del componente con datos reales mockeados
+
+#### 🎯 Criterios de aceptación
+
+- Un visitante no autenticado en `/servicios/arbol-genealogico` puede seleccionar una fecha y ver los horarios disponibles
+- Los horarios se muestran como preview (no clickeables en modo readOnly)
+- No se puede reservar sin autenticación + pago aprobado
+- El endpoint no expone información sensible (solo time + available)
+- Coverage ≥ 80% en archivos modificados
+- Ciclo de calidad completo pasa (backend + frontend)
+
+#### 📁 Archivos involucrados
+
+**Backend:**
+- `backend/tarot-app/src/modules/holistic-services/infrastructure/controllers/holistic-services.controller.ts` — nuevo endpoint
+- `backend/tarot-app/src/modules/holistic-services/application/use-cases/` — nuevo use case si aplica
+- `backend/tarot-app/src/modules/scheduling/` — consulta de disponibilidad
+
+**Frontend:**
+- `frontend/src/hooks/api/useAvailableSlots.ts` — adaptar para endpoint público
+- `frontend/src/lib/api/scheduling-api.ts` — nueva función API
+- `frontend/src/components/features/holistic-services/ServiceDetailPage.tsx` — integración
+- `frontend/src/components/features/marketplace/BookingCalendar.tsx` — visualización de slots
+
+---
+
+### T-SF-M03: Admin — Gestión de Disponibilidad/Agenda de la Tarotista
+
+**Prioridad:** 🔴 ALTA
+**Estimación:** 4 días
+**Dependencias:** T-SF-M02 (el sistema de disponibilidad debe estar público para validar)
+**Estado:** 🔲 PENDIENTE
+**Contexto:** Actualmente no existe forma de que la tarotista (Flavia) configure su agenda desde el admin. No puede indicar en qué días y horarios está disponible, ni bloquear fechas. Sin esto, el calendario público no refleja disponibilidad real.
+
+#### 📋 Descripción
+
+Crear un panel de gestión de agenda en el admin donde la tarotista pueda configurar su disponibilidad semanal (horarios recurrentes) y bloquear fechas específicas (vacaciones, ausencias). Esta configuración alimenta el sistema de scheduling existente y se refleja en el calendario público.
+
+#### ✅ Tareas específicas
+
+**Backend — Modelo de datos:**
+
+- [ ] Crear entidad `TarotistaAvailability` con campos: `id`, `tarotistaId` (FK), `dayOfWeek` (0-6), `startTime` (HH:mm), `endTime` (HH:mm), `isActive`, `createdAt`, `updatedAt`
+- [ ] Crear entidad `TarotistaBlockedDate` con campos: `id`, `tarotistaId` (FK), `date` (DATE), `reason` (nullable), `createdAt`
+- [ ] Migración para crear ambas tablas
+- [ ] Repositorios con interfaces + implementaciones TypeORM
+
+**Backend — Endpoints admin:**
+
+- [ ] `GET /admin/tarotistas/:id/availability` — retorna configuración semanal
+- [ ] `PUT /admin/tarotistas/:id/availability` — actualiza horarios semanales (bulk upsert)
+- [ ] `GET /admin/tarotistas/:id/blocked-dates` — retorna fechas bloqueadas
+- [ ] `POST /admin/tarotistas/:id/blocked-dates` — bloquear fecha
+- [ ] `DELETE /admin/tarotistas/:id/blocked-dates/:dateId` — desbloquear fecha
+- [ ] Integrar con el sistema de scheduling para que `available-slots` consulte estos datos
+
+**Backend — Tests:**
+
+- [ ] Tests unitarios de use cases
+- [ ] Tests de integración de los endpoints
+
+**Frontend — Panel de agenda:**
+
+- [ ] Nueva pestaña "Agenda" en `/admin/servicios` o nueva ruta `/admin/agenda`
+- [ ] Vista de horarios semanales: grid de 7 días con franjas horarias editables
+- [ ] Vista de fechas bloqueadas: lista con botón de agregar/eliminar
+- [ ] Formulario para agregar bloqueo: fecha picker + razón opcional
+- [ ] Hooks TanStack Query para los endpoints de disponibilidad
+
+**Frontend — Tests:**
+
+- [ ] Tests de componentes del panel de agenda
+- [ ] Tests de hooks API
+
+#### 🎯 Criterios de aceptación
+
+- Desde el admin, la tarotista puede configurar su horario semanal (ej: lunes a viernes de 9:00 a 18:00)
+- Puede bloquear fechas específicas (ej: "15/04/2026 — Vacaciones")
+- Las fechas bloqueadas NO aparecen como disponibles en el calendario público
+- Los horarios fuera del rango configurado NO aparecen como disponibles
+- Los cambios se reflejan inmediatamente en el calendario público
+- Coverage ≥ 80% en archivos nuevos
+- Ciclo de calidad completo pasa (backend + frontend)
+
+#### 📁 Archivos involucrados
+
+**Backend:**
+- `backend/tarot-app/src/modules/scheduling/domain/entities/` — nuevas entidades
+- `backend/tarot-app/src/modules/scheduling/domain/interfaces/` — nuevos repositorios
+- `backend/tarot-app/src/modules/scheduling/infrastructure/repositories/` — implementaciones
+- `backend/tarot-app/src/modules/scheduling/infrastructure/controllers/` — endpoints admin
+- `backend/tarot-app/src/modules/scheduling/application/use-cases/` — nuevos use cases
+- `backend/tarot-app/src/database/migrations/` — nueva migración
+
+**Frontend:**
+- `frontend/src/components/features/admin/` — componentes de gestión de agenda
+- `frontend/src/hooks/api/` — hooks para endpoints de disponibilidad
+- `frontend/src/lib/api/` — funciones API
+- `frontend/src/app/admin/` — ruta del panel de agenda
+
+---
+
+**FIN DE PARTE C — MEJORAS PENDIENTES**
