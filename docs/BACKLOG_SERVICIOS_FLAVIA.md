@@ -1062,7 +1062,7 @@ T-SF-F01 (Foundation Frontend)
 | -------- | -------------------------------------------------------------- | --------- | --------- | ---------- |
 | T-SF-M01 | Calendario de disponibilidad: rediseño a cuadrícula mensual    | Frontend  | ✅ COMPLETADA | 2 días     |
 | T-SF-M02 | Endpoint de disponibilidad público + preview funcional         | Fullstack | 🔴 Alta   | 2 días     |
-| T-SF-M03 | Admin: gestión de disponibilidad/agenda de la tarotista        | Fullstack | 🔴 Alta   | 4 días     |
+| T-SF-M03 | Admin: gestión de disponibilidad/agenda de la tarotista        | Fullstack | ✅ COMPLETADA | 4 días     |
 
 **Estimación total:** ~8 días de desarrollo (incluye TDD + ciclos de calidad)
 
@@ -1182,7 +1182,7 @@ Hacer que la consulta de disponibilidad sea pública para que el calendario en l
 **Prioridad:** 🔴 ALTA
 **Estimación:** 4 días
 **Dependencias:** T-SF-M02 (el sistema de disponibilidad debe estar público para validar)
-**Estado:** 🔲 PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Contexto:** Actualmente no existe forma de que la tarotista (Flavia) configure su agenda desde el admin. No puede indicar en qué días y horarios está disponible, ni bloquear fechas. Sin esto, el calendario público no refleja disponibilidad real.
 
 #### 📋 Descripción
@@ -1193,37 +1193,37 @@ Crear un panel de gestión de agenda en el admin donde la tarotista pueda config
 
 **Backend — Modelo de datos:**
 
-- [ ] Crear entidad `TarotistaAvailability` con campos: `id`, `tarotistaId` (FK), `dayOfWeek` (0-6), `startTime` (HH:mm), `endTime` (HH:mm), `isActive`, `createdAt`, `updatedAt`
-- [ ] Crear entidad `TarotistaBlockedDate` con campos: `id`, `tarotistaId` (FK), `date` (DATE), `reason` (nullable), `createdAt`
-- [ ] Migración para crear ambas tablas
-- [ ] Repositorios con interfaces + implementaciones TypeORM
+- [x] Crear entidad `TarotistaAvailability` con campos: `id`, `tarotistaId` (FK), `dayOfWeek` (0-6), `startTime` (HH:mm), `endTime` (HH:mm), `isActive`, `createdAt`, `updatedAt`
+- [x] Crear entidad `TarotistaBlockedDate` con campos: `id`, `tarotistaId` (FK), `date` (DATE), `reason` (nullable), `createdAt`
+- [x] Migración para crear ambas tablas
+- [x] Repositorios con interfaces + implementaciones TypeORM
 
 **Backend — Endpoints admin:**
 
-- [ ] `GET /admin/tarotistas/:id/availability` — retorna configuración semanal
-- [ ] `PUT /admin/tarotistas/:id/availability` — actualiza horarios semanales (bulk upsert)
-- [ ] `GET /admin/tarotistas/:id/blocked-dates` — retorna fechas bloqueadas
-- [ ] `POST /admin/tarotistas/:id/blocked-dates` — bloquear fecha
-- [ ] `DELETE /admin/tarotistas/:id/blocked-dates/:dateId` — desbloquear fecha
-- [ ] Integrar con el sistema de scheduling para que `available-slots` consulte estos datos
+- [x] `GET /admin/tarotistas/:id/availability` — retorna configuración semanal
+- [x] `PUT /admin/tarotistas/:id/availability` — actualiza horarios semanales (bulk upsert)
+- [x] `GET /admin/tarotistas/:id/blocked-dates` — retorna fechas bloqueadas
+- [x] `POST /admin/tarotistas/:id/blocked-dates` — bloquear fecha
+- [x] `DELETE /admin/tarotistas/:id/blocked-dates/:dateId` — desbloquear fecha
+- [x] Integrar con el sistema de scheduling para que `available-slots` consulte estos datos
 
 **Backend — Tests:**
 
-- [ ] Tests unitarios de use cases
-- [ ] Tests de integración de los endpoints
+- [x] Tests unitarios de use cases
+- [x] Tests de integración de los endpoints
 
 **Frontend — Panel de agenda:**
 
-- [ ] Nueva pestaña "Agenda" en `/admin/servicios` o nueva ruta `/admin/agenda`
-- [ ] Vista de horarios semanales: grid de 7 días con franjas horarias editables
-- [ ] Vista de fechas bloqueadas: lista con botón de agregar/eliminar
-- [ ] Formulario para agregar bloqueo: fecha picker + razón opcional
-- [ ] Hooks TanStack Query para los endpoints de disponibilidad
+- [x] Nueva pestaña "Agenda" en `/admin/servicios` o nueva ruta `/admin/agenda`
+- [x] Vista de horarios semanales: grid de 7 días con franjas horarias editables
+- [x] Vista de fechas bloqueadas: lista con botón de agregar/eliminar
+- [x] Formulario para agregar bloqueo: fecha picker + razón opcional
+- [x] Hooks TanStack Query para los endpoints de disponibilidad
 
 **Frontend — Tests:**
 
-- [ ] Tests de componentes del panel de agenda
-- [ ] Tests de hooks API
+- [x] Tests de componentes del panel de agenda
+- [x] Tests de hooks API
 
 #### 🎯 Criterios de aceptación
 
