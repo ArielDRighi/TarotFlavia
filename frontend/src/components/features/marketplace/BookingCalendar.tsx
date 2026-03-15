@@ -29,6 +29,7 @@ import {
 } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils/cn';
+import { formatDateFullWithYear } from '@/lib/utils/date';
 
 interface BookingCalendarProps {
   tarotistaId: number;
@@ -167,7 +168,7 @@ export function BookingCalendar({ tarotistaId, onBook, readOnly = false }: Booki
 
         {/* Leading blank cells */}
         {Array.from({ length: calendarGrid.leadingBlanks }).map((_, i) => (
-          <div key={`blank-${i}`} />
+          <div key={`blank-${i}`} data-empty="true" aria-hidden="true" />
         ))}
 
         {/* Day cells */}
@@ -186,6 +187,8 @@ export function BookingCalendar({ tarotistaId, onBook, readOnly = false }: Booki
               data-empty="false"
               disabled={isPast}
               onClick={() => !isPast && handleDateSelect(day)}
+              aria-label={format(day, "d 'de' MMMM yyyy", { locale: es })}
+              aria-current={isTodayDay ? 'date' : undefined}
               className={cn(
                 'rounded-md py-2 text-center text-sm transition-colors',
                 'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
@@ -294,9 +297,7 @@ export function BookingCalendar({ tarotistaId, onBook, readOnly = false }: Booki
               <p className="text-sm font-medium text-gray-500">Fecha seleccionada</p>
               <p className="font-serif text-base">
                 {selectedDate && !isNaN(new Date(selectedDate).getTime())
-                  ? format(new Date(selectedDate + 'T12:00:00'), "EEEE, d 'de' MMMM yyyy", {
-                      locale: es,
-                    })
+                  ? formatDateFullWithYear(selectedDate)
                   : 'Fecha inválida'}
               </p>
             </div>

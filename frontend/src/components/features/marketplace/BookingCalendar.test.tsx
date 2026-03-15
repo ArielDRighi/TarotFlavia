@@ -15,14 +15,6 @@ vi.mock('@/hooks/api/useAvailableSlots', () => ({
   useAvailableSlots: vi.fn(),
 }));
 
-// Mock date-fns/locale para evitar problemas de timezone en CI
-vi.mock('date-fns', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('date-fns')>();
-  return {
-    ...actual,
-  };
-});
-
 describe('BookingCalendar', () => {
   let queryClient: QueryClient;
   const mockOnBook = vi.fn();
@@ -250,8 +242,11 @@ describe('BookingCalendar', () => {
 
         // Cambiar a segunda fecha — el horario debe resetearse
         fireEvent.click(futureDays[1]);
-        // El slot ya no debería tener data-selected porque se re-renderizó
-        // (el hook mockeado devuelve los mismos slots, el test valida el reset interno)
+        // El slot debe volver a data-selected="false" porque selectedTime se resetea al cambiar de fecha
+        expect(screen.getByRole('button', { name: '09:00' })).toHaveAttribute(
+          'data-selected',
+          'false'
+        );
       }
     });
   });
