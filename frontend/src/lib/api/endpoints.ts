@@ -191,6 +191,8 @@ export const API_ENDPOINTS = {
     // Public
     LIST: '/holistic-services',
     DETAIL: (slug: string) => `/holistic-services/${slug}`,
+    AVAILABILITY: (slug: string, date: string) =>
+      `/holistic-services/${slug}/availability?date=${date}`,
     // Authenticated user (purchases)
     PURCHASE: '/holistic-services/purchases',
     MY_PURCHASES: '/holistic-services/purchases/my',

@@ -273,6 +273,8 @@ export type {
   HolisticServiceAdmin,
   CreateHolisticServicePayload,
   UpdateHolisticServicePayload,
+  ServiceAvailabilitySlot,
+  ServiceAvailabilityResponse,
 } from './holistic-service.types';
 
 // Service Purchase Types

@@ -16,8 +16,12 @@ vi.mock('@/hooks/api/useHolisticServices', () => ({
 
 // Mock BookingCalendar
 vi.mock('@/components/features/marketplace/BookingCalendar', () => ({
-  BookingCalendar: ({ readOnly }: { readOnly?: boolean }) => (
-    <div data-testid="booking-calendar" data-readonly={String(readOnly ?? false)} />
+  BookingCalendar: ({ readOnly, serviceSlug }: { readOnly?: boolean; serviceSlug?: string }) => (
+    <div
+      data-testid="booking-calendar"
+      data-readonly={String(readOnly ?? false)}
+      data-service-slug={serviceSlug ?? ''}
+    />
   ),
 }));
 
@@ -154,6 +158,20 @@ describe('ServiceDetailPage', () => {
     const calendar = screen.getByTestId('booking-calendar');
     expect(calendar).toBeInTheDocument();
     expect(calendar).toHaveAttribute('data-readonly', 'true');
+  });
+
+  it('should pass serviceSlug to BookingCalendar', () => {
+    vi.mocked(useHolisticServicesHook.useHolisticServiceDetail).mockReturnValue({
+      data: mockServiceDetail,
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServiceDetail>);
+
+    render(<ServiceDetailPage slug="arbol-genealogico" />, { wrapper });
+
+    const calendar = screen.getByTestId('booking-calendar');
+    expect(calendar).toHaveAttribute('data-service-slug', 'arbol-genealogico');
   });
 
   it('should show calendar availability disclaimer', () => {

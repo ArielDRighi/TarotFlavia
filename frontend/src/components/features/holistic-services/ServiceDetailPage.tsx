@@ -124,7 +124,12 @@ export function ServiceDetailPage({ slug }: ServiceDetailPageProps) {
         {/* Booking Calendar (read-only preview) */}
         <div>
           <h2 className="mb-4 font-serif text-2xl font-medium">Disponibilidad</h2>
-          <BookingCalendar tarotistaId={FLAVIA_TAROTISTA_ID} onBook={() => {}} readOnly={true} />
+          <BookingCalendar
+            tarotistaId={FLAVIA_TAROTISTA_ID}
+            onBook={() => {}}
+            readOnly={true}
+            serviceSlug={slug}
+          />
           <p className="text-text-secondary mt-3 text-xs">
             Las fechas disponibles son al momento de la consulta. Una vez realizado el pago, la
             fecha que observaste libre podría ya estar ocupada.

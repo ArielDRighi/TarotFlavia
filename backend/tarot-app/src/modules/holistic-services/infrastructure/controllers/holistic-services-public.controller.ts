@@ -1,8 +1,15 @@
-import { Controller, Get, Param } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { Controller, Get, Param, Query } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { HolisticServicesOrchestratorService } from '../../application/orchestrators/holistic-services-orchestrator.service';
 import { HolisticServiceResponseDto } from '../../application/dto/holistic-service-response.dto';
 import { HolisticServiceDetailResponseDto } from '../../application/dto/holistic-service-response.dto';
+import { ServiceAvailabilityResponseDto } from '../../application/use-cases/get-service-availability.use-case';
 
 @ApiTags('Servicios Holísticos')
 @Controller('holistic-services')
@@ -20,6 +27,29 @@ export class HolisticServicesPublicController {
   })
   async getAll(): Promise<HolisticServiceResponseDto[]> {
     return this.orchestrator.getAllActiveServices();
+  }
+
+  @Get(':slug/availability')
+  @ApiOperation({
+    summary: 'Consultar disponibilidad de un servicio holístico (público)',
+  })
+  @ApiParam({ name: 'slug', type: String, description: 'Slug del servicio' })
+  @ApiQuery({
+    name: 'date',
+    type: String,
+    description: 'Fecha a consultar en formato YYYY-MM-DD',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Disponibilidad del servicio para la fecha indicada',
+  })
+  @ApiResponse({ status: 400, description: 'Fecha inválida o en el pasado' })
+  @ApiResponse({ status: 404, description: 'Servicio no encontrado' })
+  async getAvailability(
+    @Param('slug') slug: string,
+    @Query('date') date: string,
+  ): Promise<ServiceAvailabilityResponseDto> {
+    return this.orchestrator.getServiceAvailability(slug, date);
   }
 
   @Get(':slug')
