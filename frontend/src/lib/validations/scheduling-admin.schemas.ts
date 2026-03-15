@@ -10,8 +10,10 @@ import { DayOfWeek, ExceptionType } from '@/types';
 // Set Weekly Availability
 // ============================================================================
 
-/** HH:MM format (24h) */
-const timeSchema = z.string().regex(/^\d{2}:\d{2}$/, 'El horario debe tener formato HH:MM');
+/** HH:MM format (24h) — aligned with backend @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/) */
+const timeSchema = z
+  .string()
+  .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, 'El horario debe tener formato HH:MM (00-23:00-59)');
 
 export const setWeeklyAvailabilitySchema = z
   .object({
@@ -36,7 +38,10 @@ export const addBlockedDateSchema = z
   .object({
     exceptionDate: z
       .string()
-      .regex(/^\d{4}-\d{2}-\d{2}$/, 'La fecha debe tener formato YYYY-MM-DD'),
+      .regex(/^\d{4}-\d{2}-\d{2}$/, 'La fecha debe tener formato YYYY-MM-DD')
+      .refine((val) => !isNaN(new Date(val).getTime()), {
+        message: 'La fecha no es válida',
+      }),
     exceptionType: z.nativeEnum(ExceptionType, {
       errorMap: () => ({ message: 'Selecciona un tipo válido' }),
     }),

@@ -277,6 +277,7 @@ export function AgendaManagementContent() {
               {addAvailabilityDay !== null && (
                 <div className="mt-4">
                   <WeeklyAvailabilityForm
+                    key={addAvailabilityDay}
                     selectedDay={addAvailabilityDay}
                     onSubmit={handleAvailabilityFormSubmit}
                     onCancel={() => setAddAvailabilityDay(null)}

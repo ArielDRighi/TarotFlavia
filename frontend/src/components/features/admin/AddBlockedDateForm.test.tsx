@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AddBlockedDateForm } from './AddBlockedDateForm';
 import { ExceptionType } from '@/types';
+import { addBlockedDateSchema } from '@/lib/validations/scheduling-admin.schemas';
 
 describe('AddBlockedDateForm', () => {
   const onSubmit = vi.fn();
@@ -49,6 +50,19 @@ describe('AddBlockedDateForm', () => {
     await userEvent.click(screen.getByRole('button', { name: /guardar/i }));
     expect(await screen.findByText(/fecha debe tener formato/i)).toBeInTheDocument();
     expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('rejects an impossible calendar date like 2026-99-99 at schema level', () => {
+    const result = addBlockedDateSchema.safeParse({
+      exceptionDate: '2026-99-99',
+      exceptionType: ExceptionType.BLOCKED,
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const dateError = result.error.issues.find((i) => i.path.includes('exceptionDate'));
+      expect(dateError).toBeDefined();
+      expect(dateError?.message).toMatch(/no es válida/i);
+    }
   });
 
   it('calls onSubmit with correct data for blocked type', async () => {
