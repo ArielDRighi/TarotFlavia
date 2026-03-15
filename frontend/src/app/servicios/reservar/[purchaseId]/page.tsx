@@ -1,6 +1,6 @@
 'use client';
 
-import { use } from 'react';
+import { useParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -15,12 +15,8 @@ import { Button } from '@/components/ui/button';
  * Protected page for scheduling the holistic session after payment approval.
  * Business logic delegated to ServiceBookingPage component.
  */
-interface Props {
-  params: Promise<{ purchaseId: string }>;
-}
-
-export default function ReservarServicioPage({ params }: Props) {
-  const { purchaseId: rawPurchaseId } = use(params);
+export default function ReservarServicioPage() {
+  const { purchaseId: rawPurchaseId } = useParams<{ purchaseId: string }>();
   const { isLoading: isAuthLoading } = useRequireAuth();
 
   if (isAuthLoading) {

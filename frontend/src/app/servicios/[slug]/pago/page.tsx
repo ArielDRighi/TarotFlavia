@@ -1,6 +1,6 @@
 'use client';
 
-import { use } from 'react';
+import { useParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 
 import { ServicePaymentPage } from '@/components/features/holistic-services';
@@ -12,12 +12,8 @@ import { useRequireAuth } from '@/hooks/useRequireAuth';
  * Protected page showing payment instructions after a purchase is created.
  * Business logic delegated to ServicePaymentPage component.
  */
-interface Props {
-  params: Promise<{ slug: string }>;
-}
-
-export default function ServicioPagoPage({ params }: Props) {
-  const { slug } = use(params);
+export default function ServicioPagoPage() {
+  const { slug } = useParams<{ slug: string }>();
   const { isLoading: isAuthLoading } = useRequireAuth();
 
   if (isAuthLoading) {
