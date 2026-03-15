@@ -2,19 +2,34 @@
  * BookingCalendar Component
  *
  * Interactive calendar for selecting date, time, and duration for tarotista sessions.
+ * T-SF-M01: Rediseño a cuadrícula mensual con navegación por mes.
  */
 'use client';
 
 import { useState, useMemo } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAvailableSlots } from '@/hooks/api/useAvailableSlots';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { format, addDays } from 'date-fns';
+import {
+  format,
+  addMonths,
+  subMonths,
+  startOfMonth,
+  endOfMonth,
+  eachDayOfInterval,
+  getDay,
+  isSameDay,
+  isBefore,
+  startOfDay,
+  isToday,
+} from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils/cn';
+import { formatDateFullWithYear } from '@/lib/utils/date';
 
 interface BookingCalendarProps {
   tarotistaId: number;
@@ -29,75 +44,168 @@ const DURATIONS = [
   { value: 90, label: '90 min', price: 65 },
 ] as const;
 
+// Day of week headers — starts on Monday (ISO week)
+const DAY_HEADERS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+
+/**
+ * Returns the ISO day-of-week index (0=Monday, 6=Sunday) for a given Date.
+ * date-fns getDay() returns 0=Sunday; we convert to Monday-first.
+ */
+function getISODayIndex(date: Date): number {
+  const day = getDay(date); // 0=Sun, 1=Mon, ..., 6=Sat
+  return day === 0 ? 6 : day - 1; // 0=Mon, ..., 6=Sun
+}
+
 export function BookingCalendar({ tarotistaId, onBook, readOnly = false }: BookingCalendarProps) {
+  const today = useMemo(() => startOfDay(new Date()), []);
+
+  const [currentMonth, setCurrentMonth] = useState<Date>(startOfMonth(today));
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [selectedTime, setSelectedTime] = useState<string>('');
-  const [selectedDuration, setSelectedDuration] = useState<number>(60); // Default 60min
+  const [selectedDuration, setSelectedDuration] = useState<number>(60);
 
-  // Generate next 30 days
-  const dates = useMemo(() => {
-    const today = new Date();
-    return Array.from({ length: 30 }, (_, i) => {
-      const date = addDays(today, i);
-      return {
-        value: format(date, 'yyyy-MM-dd'),
-        label: format(date, 'EEE d', { locale: es }),
-      };
-    });
-  }, []);
+  // Build the calendar grid for the current month
+  const calendarGrid = useMemo(() => {
+    const firstDay = startOfMonth(currentMonth);
+    const lastDay = endOfMonth(currentMonth);
+    const days = eachDayOfInterval({ start: firstDay, end: lastDay });
+
+    // Leading empty cells so the first day lands on the correct column (Mon-based)
+    const leadingBlanks = getISODayIndex(firstDay);
+
+    return { days, leadingBlanks };
+  }, [currentMonth]);
 
   // Fetch available slots for selected date
   const { data: slots, isLoading, isError } = useAvailableSlots(tarotistaId, selectedDate);
 
-  // Handle date selection
-  const handleDateSelect = (date: string) => {
-    setSelectedDate(date);
-    setSelectedTime(''); // Reset time when date changes
+  // Navigation
+  const handlePrevMonth = () => {
+    setCurrentMonth((prev) => subMonths(prev, 1));
+    setSelectedDate('');
+    setSelectedTime('');
   };
 
-  // Handle time selection
+  const handleNextMonth = () => {
+    setCurrentMonth((prev) => addMonths(prev, 1));
+    setSelectedDate('');
+    setSelectedTime('');
+  };
+
+  // Disable previous month navigation when we're already on the current month
+  const isPrevDisabled = isSameDay(currentMonth, startOfMonth(today));
+
+  // Date selection
+  const handleDateSelect = (date: Date) => {
+    const formatted = format(date, 'yyyy-MM-dd');
+    setSelectedDate(formatted);
+    setSelectedTime('');
+  };
+
+  // Time selection
   const handleTimeSelect = (time: string) => {
     setSelectedTime(time);
   };
 
-  // Handle duration selection
+  // Duration selection
   const handleDurationChange = (duration: string) => {
     setSelectedDuration(Number(duration));
   };
 
-  // Handle booking confirmation
+  // Booking confirmation
   const handleConfirm = () => {
     if (selectedDate && selectedTime && selectedDuration) {
       onBook(selectedDate, selectedTime, selectedDuration);
     }
   };
 
-  // Check if all fields are selected
   const isReadyToBook = Boolean(selectedDate && selectedTime && selectedDuration);
-
-  // Get current duration price
-  const currentPrice = DURATIONS.find((d) => d.value === selectedDuration)?.price || 0;
+  const currentPrice = DURATIONS.find((d) => d.value === selectedDuration)?.price ?? 0;
 
   return (
     <div className="space-y-6">
-      {/* Date Selector */}
-      <div>
-        <h3 className="mb-3 font-serif text-lg font-medium">Selecciona una fecha</h3>
-        <div className="flex gap-2 overflow-x-auto pb-2">
-          {dates.map((date) => (
-            <Button
-              key={date.value}
-              variant={selectedDate === date.value ? 'default' : 'outline'}
+      {/* Month navigation header */}
+      <div className="flex items-center justify-between">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={handlePrevMonth}
+          disabled={isPrevDisabled}
+          data-testid="calendar-prev-month"
+          aria-label="Mes anterior"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+
+        <h3
+          className="font-serif text-lg font-medium capitalize"
+          data-testid="calendar-month-header"
+        >
+          {format(currentMonth, 'MMMM yyyy', { locale: es })}
+        </h3>
+
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={handleNextMonth}
+          data-testid="calendar-next-month"
+          aria-label="Mes siguiente"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
+
+      {/* Day-of-week headers */}
+      <div className="grid grid-cols-7 gap-1">
+        {DAY_HEADERS.map((day) => (
+          <div
+            key={day}
+            className="text-muted-foreground py-1 text-center text-xs font-medium uppercase"
+          >
+            {day}
+          </div>
+        ))}
+
+        {/* Leading blank cells */}
+        {Array.from({ length: calendarGrid.leadingBlanks }).map((_, i) => (
+          <div key={`blank-${i}`} data-empty="true" aria-hidden="true" />
+        ))}
+
+        {/* Day cells */}
+        {calendarGrid.days.map((day) => {
+          const dateStr = format(day, 'yyyy-MM-dd');
+          const isPast = isBefore(day, today) && !isToday(day);
+          const isTodayDay = isToday(day);
+          const isSelected = selectedDate === dateStr;
+
+          return (
+            <button
+              key={dateStr}
+              data-testid={isTodayDay ? 'calendar-day-today' : `calendar-day-${dateStr}`}
+              data-past={String(isPast)}
+              data-selected={String(isSelected)}
+              data-empty="false"
+              disabled={isPast}
+              onClick={() => !isPast && handleDateSelect(day)}
+              aria-label={format(day, "d 'de' MMMM yyyy", { locale: es })}
+              aria-current={isTodayDay ? 'date' : undefined}
               className={cn(
-                'min-w-[80px] whitespace-nowrap',
-                selectedDate === date.value && 'bg-secondary hover:bg-secondary/90 text-white'
+                'rounded-md py-2 text-center text-sm transition-colors',
+                'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
+                // Past days
+                isPast && 'text-muted-foreground cursor-not-allowed opacity-40',
+                // Today ring
+                isTodayDay && !isSelected && 'ring-secondary text-secondary font-semibold ring-2',
+                // Selected
+                isSelected && 'bg-secondary font-semibold text-white',
+                // Future days (not selected, not today)
+                !isPast && !isSelected && !isTodayDay && 'hover:bg-accent cursor-pointer'
               )}
-              onClick={() => handleDateSelect(date.value)}
             >
-              {date.label}
-            </Button>
-          ))}
-        </div>
+              {format(day, 'd')}
+            </button>
+          );
+        })}
       </div>
 
       {/* Time Slots */}
@@ -123,27 +231,36 @@ export function BookingCalendar({ tarotistaId, onBook, readOnly = false }: Booki
 
           {!isLoading && !isError && slots && slots.length > 0 && (
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">
-              {slots.map((slot) => (
-                <Button
-                  key={slot.time}
-                  variant={selectedTime === slot.time ? 'default' : 'outline'}
-                  className={cn(
-                    'w-full',
-                    selectedTime === slot.time && 'bg-primary hover:bg-primary/90 text-white',
-                    (!slot.available || readOnly) && 'cursor-not-allowed opacity-50'
-                  )}
-                  onClick={() => !readOnly && slot.available && handleTimeSelect(slot.time)}
-                  disabled={!slot.available || readOnly}
-                >
-                  {slot.time}
-                </Button>
-              ))}
+              {slots.map((slot) => {
+                const isSlotSelected = selectedTime === slot.time;
+                return (
+                  <button
+                    key={slot.time}
+                    data-selected={String(isSlotSelected)}
+                    disabled={!slot.available || readOnly}
+                    onClick={() => !readOnly && slot.available && handleTimeSelect(slot.time)}
+                    className={cn(
+                      'inline-flex items-center justify-center rounded-md border px-3 py-2 text-sm font-medium transition-colors',
+                      'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
+                      isSlotSelected && 'bg-primary border-primary text-white',
+                      !isSlotSelected &&
+                        slot.available &&
+                        !readOnly &&
+                        'bg-background hover:bg-accent border-input',
+                      (!slot.available || readOnly) &&
+                        'bg-background border-input cursor-not-allowed opacity-50'
+                    )}
+                  >
+                    {slot.time}
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
       )}
 
-      {/* Duration Selector — hidden in readOnly mode (public detail page uses fixed duration) */}
+      {/* Duration Selector — hidden in readOnly mode */}
       {!readOnly && (
         <div>
           <h3 className="mb-3 font-serif text-lg font-medium">Duración</h3>
@@ -180,7 +297,7 @@ export function BookingCalendar({ tarotistaId, onBook, readOnly = false }: Booki
               <p className="text-sm font-medium text-gray-500">Fecha seleccionada</p>
               <p className="font-serif text-base">
                 {selectedDate && !isNaN(new Date(selectedDate).getTime())
-                  ? format(new Date(selectedDate), "EEEE, d 'de' MMMM yyyy", { locale: es })
+                  ? formatDateFullWithYear(selectedDate)
                   : 'Fecha inválida'}
               </p>
             </div>
