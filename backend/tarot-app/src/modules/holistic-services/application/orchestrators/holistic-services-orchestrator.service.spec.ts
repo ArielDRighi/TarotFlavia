@@ -11,6 +11,7 @@ import { GetUserPurchasesUseCase } from '../use-cases/get-user-purchases.use-cas
 import { GetPendingPaymentsUseCase } from '../use-cases/get-pending-payments.use-case';
 import { CancelPurchaseUseCase } from '../use-cases/cancel-purchase.use-case';
 import { GetPurchaseByIdUseCase } from '../use-cases/get-purchase-by-id.use-case';
+import { GetServiceAvailabilityUseCase } from '../use-cases/get-service-availability.use-case';
 import { HolisticServiceResponseDto } from '../dto/holistic-service-response.dto';
 import { HolisticServiceAdminResponseDto } from '../dto/holistic-service-response.dto';
 import { PurchaseResponseDto } from '../dto/purchase-response.dto';
@@ -67,6 +68,9 @@ describe('HolisticServicesOrchestratorService', () => {
   >;
   let mockCancelPurchase: jest.Mocked<Pick<CancelPurchaseUseCase, 'execute'>>;
   let mockGetPurchaseById: jest.Mocked<Pick<GetPurchaseByIdUseCase, 'execute'>>;
+  let mockGetServiceAvailability: jest.Mocked<
+    Pick<GetServiceAvailabilityUseCase, 'execute'>
+  >;
 
   beforeEach(async () => {
     mockGetAllActive = { execute: jest.fn() };
@@ -80,6 +84,7 @@ describe('HolisticServicesOrchestratorService', () => {
     mockGetPendingPayments = { execute: jest.fn() };
     mockCancelPurchase = { execute: jest.fn() };
     mockGetPurchaseById = { execute: jest.fn() };
+    mockGetServiceAvailability = { execute: jest.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -98,6 +103,10 @@ describe('HolisticServicesOrchestratorService', () => {
         },
         { provide: CancelPurchaseUseCase, useValue: mockCancelPurchase },
         { provide: GetPurchaseByIdUseCase, useValue: mockGetPurchaseById },
+        {
+          provide: GetServiceAvailabilityUseCase,
+          useValue: mockGetServiceAvailability,
+        },
       ],
     }).compile();
 
@@ -266,6 +275,31 @@ describe('HolisticServicesOrchestratorService', () => {
 
       expect(mockGetPurchaseById.execute).toHaveBeenCalledWith(10, 5);
       expect(result.id).toBe(10);
+    });
+  });
+
+  describe('getServiceAvailability', () => {
+    it('debe delegar en GetServiceAvailabilityUseCase con slug y date correctos', async () => {
+      const mockAvailability = {
+        date: '2099-06-01',
+        slots: [
+          { time: '09:00', available: true },
+          { time: '09:30', available: false },
+        ],
+      };
+      mockGetServiceAvailability.execute.mockResolvedValue(mockAvailability);
+
+      const result = await orchestrator.getServiceAvailability(
+        'arbol-genealogico',
+        '2099-06-01',
+      );
+
+      expect(mockGetServiceAvailability.execute).toHaveBeenCalledWith(
+        'arbol-genealogico',
+        '2099-06-01',
+      );
+      expect(result.date).toBe('2099-06-01');
+      expect(result.slots).toHaveLength(2);
     });
   });
 });

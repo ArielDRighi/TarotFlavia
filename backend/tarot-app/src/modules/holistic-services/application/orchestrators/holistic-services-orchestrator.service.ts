@@ -10,6 +10,8 @@ import { GetUserPurchasesUseCase } from '../use-cases/get-user-purchases.use-cas
 import { GetPendingPaymentsUseCase } from '../use-cases/get-pending-payments.use-case';
 import { CancelPurchaseUseCase } from '../use-cases/cancel-purchase.use-case';
 import { GetPurchaseByIdUseCase } from '../use-cases/get-purchase-by-id.use-case';
+import { GetServiceAvailabilityUseCase } from '../use-cases/get-service-availability.use-case';
+import { ServiceAvailabilityResponseDto } from '../dto/service-availability-response.dto';
 import { HolisticServiceResponseDto } from '../dto/holistic-service-response.dto';
 import {
   HolisticServiceDetailResponseDto,
@@ -34,6 +36,7 @@ export class HolisticServicesOrchestratorService {
     private readonly getPendingPaymentsUseCase: GetPendingPaymentsUseCase,
     private readonly cancelPurchaseUseCase: CancelPurchaseUseCase,
     private readonly getPurchaseByIdUseCase: GetPurchaseByIdUseCase,
+    private readonly getServiceAvailabilityUseCase: GetServiceAvailabilityUseCase,
   ) {}
 
   getAllActiveServices(): Promise<HolisticServiceResponseDto[]> {
@@ -101,5 +104,12 @@ export class HolisticServicesOrchestratorService {
     requestingUserId: number,
   ): Promise<PurchaseResponseDto> {
     return this.getPurchaseByIdUseCase.execute(purchaseId, requestingUserId);
+  }
+
+  getServiceAvailability(
+    slug: string,
+    date: string,
+  ): Promise<ServiceAvailabilityResponseDto> {
+    return this.getServiceAvailabilityUseCase.execute(slug, date);
   }
 }

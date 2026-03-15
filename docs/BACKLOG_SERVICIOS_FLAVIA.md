@@ -1120,7 +1120,8 @@ Rediseñar el componente `BookingCalendar` para que presente los días en un gri
 **Prioridad:** 🔴 ALTA
 **Estimación:** 2 días
 **Dependencias:** T-SF-M01 (ideal hacer juntas, pero no bloqueante)
-**Estado:** 🔲 PENDIENTE
+**Estado:** ✅ COMPLETADA
+
 **Contexto:** El endpoint `GET /scheduling/available-slots` requiere autenticación (devuelve 401 sin token). Sin embargo, el flujo de usuario requiere que pueda ver las fechas y horarios disponibles ANTES de pagar. Solo la acción de **agendar/reservar** un turno debe estar bloqueada hasta tener un pago aprobado.
 
 #### 📋 Descripción
@@ -1131,44 +1132,48 @@ Hacer que la consulta de disponibilidad sea pública para que el calendario en l
 
 **Backend:**
 
-- [ ] Crear endpoint público `GET /holistic-services/:slug/availability` que retorne slots disponibles para una fecha dada (sin requerir auth)
+- [x] Crear endpoint público `GET /holistic-services/:slug/availability` que retorne slots disponibles para una fecha dada (sin requerir auth)
   - Query params: `date` (YYYY-MM-DD)
   - Retorna: `{ date: string, slots: { time: string, available: boolean }[] }`
   - Internamente consulta el scheduling del tarotista asociado al servicio
-- [ ] Alternativa: hacer público el endpoint existente `GET /scheduling/available-slots` (evaluar impacto de seguridad)
-- [ ] Tests unitarios del nuevo endpoint/cambio
-- [ ] Tests de integración para verificar acceso sin auth
+- [x] Alternativa: hacer público el endpoint existente `GET /scheduling/available-slots` (evaluar impacto de seguridad) → se optó por nuevo endpoint en holistic-services
+- [x] Tests unitarios del nuevo endpoint/cambio
+- [x] Tests de integración para verificar acceso sin auth
 
 **Frontend:**
 
-- [ ] Actualizar el hook `useAvailableSlots` para usar el nuevo endpoint público cuando se usa desde la página de detalle
-- [ ] En `ServiceDetailPage`, el `BookingCalendar` en modo `readOnly` muestra los slots reales
+- [x] Actualizar el hook `useAvailableSlots` para usar el nuevo endpoint público cuando se usa desde la página de detalle → se creó `useHolisticServiceAvailability` en `useHolisticServices.ts`
+- [x] En `ServiceDetailPage`, el `BookingCalendar` en modo `readOnly` muestra los slots reales
   - Los botones de horario se ven pero no son clickeables (visualización solo)
   - Colores: verde/disponible, gris/ocupado
-- [ ] En la página de reserva post-pago, el calendario permite seleccionar horarios (modo interactivo)
-- [ ] Tests del componente con datos reales mockeados
+- [x] En la página de reserva post-pago, el calendario permite seleccionar horarios (modo interactivo)
+- [x] Tests del componente con datos reales mockeados
 
 #### 🎯 Criterios de aceptación
 
-- Un visitante no autenticado en `/servicios/arbol-genealogico` puede seleccionar una fecha y ver los horarios disponibles
-- Los horarios se muestran como preview (no clickeables en modo readOnly)
-- No se puede reservar sin autenticación + pago aprobado
-- El endpoint no expone información sensible (solo time + available)
-- Coverage ≥ 80% en archivos modificados
-- Ciclo de calidad completo pasa (backend + frontend)
+- [x] Un visitante no autenticado en `/servicios/arbol-genealogico` puede seleccionar una fecha y ver los horarios disponibles
+- [x] Los horarios se muestran como preview (no clickeables en modo readOnly)
+- [x] No se puede reservar sin autenticación + pago aprobado
+- [x] El endpoint no expone información sensible (solo time + available)
+- [x] Coverage ≥ 80% en archivos modificados
+- [x] Ciclo de calidad completo pasa (backend + frontend)
 
 #### 📁 Archivos involucrados
 
 **Backend:**
-- `backend/tarot-app/src/modules/holistic-services/infrastructure/controllers/holistic-services.controller.ts` — nuevo endpoint
-- `backend/tarot-app/src/modules/holistic-services/application/use-cases/` — nuevo use case si aplica
-- `backend/tarot-app/src/modules/scheduling/` — consulta de disponibilidad
+- `backend/tarot-app/src/modules/holistic-services/application/use-cases/get-service-availability.use-case.ts` ← CREADO
+- `backend/tarot-app/src/modules/holistic-services/application/use-cases/get-service-availability.use-case.spec.ts` ← CREADO
+- `backend/tarot-app/src/modules/holistic-services/infrastructure/controllers/holistic-services-public.controller.ts` ← MODIFICADO
+- `backend/tarot-app/src/modules/holistic-services/holistic-services.module.ts` ← MODIFICADO
+- `backend/tarot-app/src/modules/scheduling/scheduling.module.ts` ← MODIFICADO
 
 **Frontend:**
-- `frontend/src/hooks/api/useAvailableSlots.ts` — adaptar para endpoint público
-- `frontend/src/lib/api/scheduling-api.ts` — nueva función API
-- `frontend/src/components/features/holistic-services/ServiceDetailPage.tsx` — integración
-- `frontend/src/components/features/marketplace/BookingCalendar.tsx` — visualización de slots
+- `frontend/src/types/holistic-service.types.ts` ← nuevos tipos `ServiceAvailabilitySlot`, `ServiceAvailabilityResponse`
+- `frontend/src/lib/api/endpoints.ts` ← nuevo endpoint `HOLISTIC_SERVICES.AVAILABILITY`
+- `frontend/src/lib/api/holistic-services-api.ts` ← nueva función `getHolisticServiceAvailability`
+- `frontend/src/hooks/api/useHolisticServices.ts` ← nuevo hook `useHolisticServiceAvailability`
+- `frontend/src/components/features/marketplace/BookingCalendar.tsx` ← prop `serviceSlug`, estilos verde/gris
+- `frontend/src/components/features/holistic-services/ServiceDetailPage.tsx` ← pasa `serviceSlug={slug}`
 
 ---
 

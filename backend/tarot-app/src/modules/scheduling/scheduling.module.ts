@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TarotistAvailability, TarotistException, Session } from './entities';
 import { AvailabilityService, SessionService } from './services';
@@ -40,7 +40,7 @@ import { HolisticServicesModule } from '../holistic-services/holistic-services.m
       TarotistException,
       Session,
     ]),
-    HolisticServicesModule,
+    forwardRef(() => HolisticServicesModule),
   ],
   controllers: [TarotistSchedulingController, UserSchedulingController],
   providers: [
@@ -79,6 +79,10 @@ import { HolisticServicesModule } from '../holistic-services/holistic-services.m
     SessionService,
     AvailabilityOrchestratorService,
     SessionOrchestratorService,
+    // Repository tokens para uso en otros módulos (via forwardRef)
+    AVAILABILITY_REPOSITORY,
+    EXCEPTION_REPOSITORY,
+    SESSION_REPOSITORY,
   ],
 })
 export class SchedulingModule {}

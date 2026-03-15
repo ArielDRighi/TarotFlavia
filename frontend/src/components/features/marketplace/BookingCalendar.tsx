@@ -9,6 +9,7 @@
 import { useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAvailableSlots } from '@/hooks/api/useAvailableSlots';
+import { useHolisticServiceAvailability } from '@/hooks/api/useHolisticServices';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -35,6 +36,7 @@ interface BookingCalendarProps {
   tarotistaId: number;
   onBook: (date: string, time: string, duration: number) => void;
   readOnly?: boolean;
+  serviceSlug?: string;
 }
 
 // Durations available with prices (mock prices for now)
@@ -56,7 +58,12 @@ function getISODayIndex(date: Date): number {
   return day === 0 ? 6 : day - 1; // 0=Mon, ..., 6=Sun
 }
 
-export function BookingCalendar({ tarotistaId, onBook, readOnly = false }: BookingCalendarProps) {
+export function BookingCalendar({
+  tarotistaId,
+  onBook,
+  readOnly = false,
+  serviceSlug,
+}: BookingCalendarProps) {
   const today = useMemo(() => startOfDay(new Date()), []);
 
   const [currentMonth, setCurrentMonth] = useState<Date>(startOfMonth(today));
@@ -76,8 +83,28 @@ export function BookingCalendar({ tarotistaId, onBook, readOnly = false }: Booki
     return { days, leadingBlanks };
   }, [currentMonth]);
 
-  // Fetch available slots for selected date
-  const { data: slots, isLoading, isError } = useAvailableSlots(tarotistaId, selectedDate);
+  // Fetch slots via authenticated endpoint (booking mode)
+  const {
+    data: authenticatedSlots,
+    isLoading: isLoadingAuthenticated,
+    isError: isErrorAuthenticated,
+  } = useAvailableSlots(tarotistaId, !readOnly || !serviceSlug ? selectedDate : '');
+
+  // Fetch slots via public endpoint (readOnly preview mode with serviceSlug)
+  const {
+    data: publicAvailability,
+    isLoading: isLoadingPublic,
+    isError: isErrorPublic,
+  } = useHolisticServiceAvailability(
+    serviceSlug ?? '',
+    readOnly && !!serviceSlug ? selectedDate : ''
+  );
+
+  // Resolve which data source to use
+  const usePublicSlots = readOnly && !!serviceSlug;
+  const slots = usePublicSlots ? (publicAvailability?.slots ?? undefined) : authenticatedSlots;
+  const isLoading = usePublicSlots ? isLoadingPublic : isLoadingAuthenticated;
+  const isError = usePublicSlots ? isErrorPublic : isErrorAuthenticated;
 
   // Navigation
   const handlePrevMonth = () => {
@@ -237,17 +264,30 @@ export function BookingCalendar({ tarotistaId, onBook, readOnly = false }: Booki
                   <button
                     key={slot.time}
                     data-selected={String(isSlotSelected)}
+                    data-available={String(slot.available)}
                     disabled={!slot.available || readOnly}
                     onClick={() => !readOnly && slot.available && handleTimeSelect(slot.time)}
                     className={cn(
                       'inline-flex items-center justify-center rounded-md border px-3 py-2 text-sm font-medium transition-colors',
                       'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
+                      // Selected (booking mode only)
                       isSlotSelected && 'bg-primary border-primary text-white',
+                      // Available — booking mode (interactive)
                       !isSlotSelected &&
                         slot.available &&
                         !readOnly &&
                         'bg-background hover:bg-accent border-input',
-                      (!slot.available || readOnly) &&
+                      // Available — readOnly preview mode (green, non-interactive)
+                      slot.available &&
+                        readOnly &&
+                        'cursor-default border-green-300 bg-green-50 text-green-800',
+                      // Occupied — readOnly preview mode (gray)
+                      !slot.available &&
+                        readOnly &&
+                        'cursor-not-allowed border-gray-200 bg-gray-50 text-gray-400 opacity-60',
+                      // Occupied — booking mode (disabled)
+                      !slot.available &&
+                        !readOnly &&
                         'bg-background border-input cursor-not-allowed opacity-50'
                     )}
                   >

@@ -75,3 +75,25 @@ export interface CreateHolisticServicePayload {
  * All fields are optional (Partial of create)
  */
 export type UpdateHolisticServicePayload = Partial<CreateHolisticServicePayload>;
+
+// ============================================================================
+// Public Availability (T-SF-M02)
+// ============================================================================
+
+/**
+ * A single availability slot for a given date
+ * Coincide con backend ServiceAvailabilitySlot
+ */
+export interface ServiceAvailabilitySlot {
+  time: string;
+  available: boolean;
+}
+
+/**
+ * Response from the public availability endpoint
+ * Coincide con backend ServiceAvailabilityResponseDto
+ */
+export interface ServiceAvailabilityResponse {
+  date: string;
+  slots: ServiceAvailabilitySlot[];
+}

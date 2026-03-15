@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   getHolisticServices,
   getHolisticServiceDetail,
+  getHolisticServiceAvailability,
   getMyPurchases,
   getPurchaseDetail,
 } from '@/lib/api/holistic-services-api';
@@ -22,6 +23,9 @@ export const holisticServiceQueryKeys = {
   lists: () => [...holisticServiceQueryKeys.all, 'list'] as const,
   details: () => [...holisticServiceQueryKeys.all, 'detail'] as const,
   detail: (slug: string) => [...holisticServiceQueryKeys.details(), slug] as const,
+  availability: () => [...holisticServiceQueryKeys.all, 'availability'] as const,
+  availabilityByDate: (slug: string, date: string) =>
+    [...holisticServiceQueryKeys.availability(), slug, date] as const,
   purchases: () => [...holisticServiceQueryKeys.all, 'purchases'] as const,
   myPurchases: () => [...holisticServiceQueryKeys.purchases(), 'mine'] as const,
   purchaseDetail: (id: number) => [...holisticServiceQueryKeys.purchases(), 'detail', id] as const,
@@ -54,6 +58,21 @@ export function useHolisticServiceDetail(slug: string) {
     queryFn: () => getHolisticServiceDetail(slug),
     enabled: slug.length > 0,
     staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+}
+
+/**
+ * Hook to fetch public availability slots for a holistic service on a given date
+ * @param slug - Service slug
+ * @param date - Date string in YYYY-MM-DD format (empty string disables query)
+ * @returns TanStack Query result with date and slots array
+ */
+export function useHolisticServiceAvailability(slug: string, date: string) {
+  return useQuery({
+    queryKey: holisticServiceQueryKeys.availabilityByDate(slug, date),
+    queryFn: () => getHolisticServiceAvailability(slug, date),
+    enabled: slug.length > 0 && date.length > 0,
+    staleTime: 2 * 60 * 1000, // 2 minutes — availability changes more frequently
   });
 }
 

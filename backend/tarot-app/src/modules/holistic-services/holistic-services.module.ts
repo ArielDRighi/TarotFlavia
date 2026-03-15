@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 
@@ -31,18 +31,21 @@ import { GetUserPurchasesUseCase } from './application/use-cases/get-user-purcha
 import { GetPendingPaymentsUseCase } from './application/use-cases/get-pending-payments.use-case';
 import { CancelPurchaseUseCase } from './application/use-cases/cancel-purchase.use-case';
 import { GetPurchaseByIdUseCase } from './application/use-cases/get-purchase-by-id.use-case';
+import { GetServiceAvailabilityUseCase } from './application/use-cases/get-service-availability.use-case';
 
 // ==================== Orchestrator ====================
 import { HolisticServicesOrchestratorService } from './application/orchestrators/holistic-services-orchestrator.service';
 
 // ==================== External Modules ====================
 import { EmailModule } from '../email/email.module';
+import { SchedulingModule } from '../scheduling/scheduling.module';
 
 @Module({
   imports: [
     ConfigModule,
     TypeOrmModule.forFeature([HolisticService, ServicePurchase]),
     EmailModule,
+    forwardRef(() => SchedulingModule),
   ],
   controllers: [
     HolisticServicesPublicController,
@@ -72,6 +75,7 @@ import { EmailModule } from '../email/email.module';
     GetPendingPaymentsUseCase,
     CancelPurchaseUseCase,
     GetPurchaseByIdUseCase,
+    GetServiceAvailabilityUseCase,
 
     // Orchestrator
     HolisticServicesOrchestratorService,

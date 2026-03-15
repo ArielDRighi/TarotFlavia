@@ -9,6 +9,7 @@ import { API_ENDPOINTS } from './endpoints';
 import type {
   HolisticService,
   HolisticServiceDetail,
+  ServiceAvailabilityResponse,
   ServicePurchase,
   CreatePurchasePayload,
 } from '@/types';
@@ -51,6 +52,40 @@ export async function getHolisticServiceDetail(slug: string): Promise<HolisticSe
       }
     }
     throw new Error('Error al obtener detalle del servicio');
+  }
+}
+
+// ============================================================================
+// Public: Availability (T-SF-M02)
+// ============================================================================
+
+/**
+ * Fetch availability slots for a holistic service on a given date (public)
+ * @param slug - Service slug
+ * @param date - Date string in YYYY-MM-DD format
+ * @returns Promise<ServiceAvailabilityResponse> with date and slots array
+ * @throws Error with clear message on failure
+ */
+export async function getHolisticServiceAvailability(
+  slug: string,
+  date: string
+): Promise<ServiceAvailabilityResponse> {
+  try {
+    const response = await apiClient.get<ServiceAvailabilityResponse>(
+      API_ENDPOINTS.HOLISTIC_SERVICES.AVAILABILITY(slug, date)
+    );
+    return response.data;
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'response' in error) {
+      const axiosError = error as { response?: { status?: number } };
+      if (axiosError.response?.status === 404) {
+        throw new Error('Servicio no encontrado');
+      }
+      if (axiosError.response?.status === 400) {
+        throw new Error('Fecha inválida');
+      }
+    }
+    throw new Error('Error al obtener disponibilidad del servicio');
   }
 }
 

@@ -8,11 +8,17 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BookingCalendar } from './BookingCalendar';
 import * as useAvailableSlotsHook from '@/hooks/api/useAvailableSlots';
-import type { TimeSlot } from '@/types';
+import * as useHolisticServicesHook from '@/hooks/api/useHolisticServices';
+import type { TimeSlot, ServiceAvailabilityResponse } from '@/types';
 
-// Mock del hook
+// Mock del hook de slots autenticados
 vi.mock('@/hooks/api/useAvailableSlots', () => ({
   useAvailableSlots: vi.fn(),
+}));
+
+// Mock del hook de disponibilidad pública
+vi.mock('@/hooks/api/useHolisticServices', () => ({
+  useHolisticServiceAvailability: vi.fn(),
 }));
 
 describe('BookingCalendar', () => {
@@ -28,13 +34,20 @@ describe('BookingCalendar', () => {
       },
     });
     vi.clearAllMocks();
-    // Default mock: no slots loaded
+    // Default mock: no slots loaded (authenticated)
     vi.mocked(useAvailableSlotsHook.useAvailableSlots).mockReturnValue({
       data: undefined,
       isLoading: false,
       isError: false,
       error: null,
     } as unknown as ReturnType<typeof useAvailableSlotsHook.useAvailableSlots>);
+    // Default mock: no availability loaded (public)
+    vi.mocked(useHolisticServicesHook.useHolisticServiceAvailability).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServiceAvailability>);
   });
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -587,6 +600,198 @@ describe('BookingCalendar', () => {
       expect(screen.queryByLabelText(/30 min/i)).not.toBeInTheDocument();
       expect(screen.queryByLabelText(/60 min/i)).not.toBeInTheDocument();
       expect(screen.queryByLabelText(/90 min/i)).not.toBeInTheDocument();
+    });
+  });
+
+  // ============================================================================
+  // serviceSlug prop — public availability preview (T-SF-M02)
+  // ============================================================================
+
+  describe('serviceSlug prop (public availability preview)', () => {
+    it('should use public availability hook when readOnly=true and serviceSlug is provided', () => {
+      const mockPublicAvailability: ServiceAvailabilityResponse = {
+        date: '2025-12-15',
+        slots: [
+          { time: '09:00', available: true },
+          { time: '10:00', available: false },
+          { time: '11:00', available: true },
+        ],
+      };
+
+      vi.mocked(useHolisticServicesHook.useHolisticServiceAvailability).mockReturnValue({
+        data: mockPublicAvailability,
+        isLoading: false,
+        isError: false,
+        error: null,
+      } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServiceAvailability>);
+
+      render(
+        <BookingCalendar
+          tarotistaId={1}
+          onBook={mockOnBook}
+          readOnly={true}
+          serviceSlug="arbol-genealogico"
+        />,
+        { wrapper }
+      );
+
+      const futureDays = screen
+        .getAllByTestId(/^calendar-day-/)
+        .filter(
+          (el) =>
+            el.getAttribute('data-past') === 'false' && el.getAttribute('data-empty') !== 'true'
+        );
+
+      if (futureDays.length > 0) {
+        fireEvent.click(futureDays[0]);
+        expect(screen.getByText('09:00')).toBeInTheDocument();
+        expect(screen.getByText('10:00')).toBeInTheDocument();
+        expect(screen.getByText('11:00')).toBeInTheDocument();
+      }
+    });
+
+    it('should mark available slots with data-available=true in readOnly+serviceSlug mode', () => {
+      const mockPublicAvailability: ServiceAvailabilityResponse = {
+        date: '2025-12-15',
+        slots: [
+          { time: '09:00', available: true },
+          { time: '10:00', available: false },
+        ],
+      };
+
+      vi.mocked(useHolisticServicesHook.useHolisticServiceAvailability).mockReturnValue({
+        data: mockPublicAvailability,
+        isLoading: false,
+        isError: false,
+        error: null,
+      } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServiceAvailability>);
+
+      render(
+        <BookingCalendar
+          tarotistaId={1}
+          onBook={mockOnBook}
+          readOnly={true}
+          serviceSlug="arbol-genealogico"
+        />,
+        { wrapper }
+      );
+
+      const futureDays = screen
+        .getAllByTestId(/^calendar-day-/)
+        .filter(
+          (el) =>
+            el.getAttribute('data-past') === 'false' && el.getAttribute('data-empty') !== 'true'
+        );
+
+      if (futureDays.length > 0) {
+        fireEvent.click(futureDays[0]);
+        expect(screen.getByRole('button', { name: '09:00' })).toHaveAttribute(
+          'data-available',
+          'true'
+        );
+        expect(screen.getByRole('button', { name: '10:00' })).toHaveAttribute(
+          'data-available',
+          'false'
+        );
+      }
+    });
+
+    it('should disable all slots (readOnly) even when slots are available', () => {
+      const mockPublicAvailability: ServiceAvailabilityResponse = {
+        date: '2025-12-15',
+        slots: [{ time: '09:00', available: true }],
+      };
+
+      vi.mocked(useHolisticServicesHook.useHolisticServiceAvailability).mockReturnValue({
+        data: mockPublicAvailability,
+        isLoading: false,
+        isError: false,
+        error: null,
+      } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServiceAvailability>);
+
+      render(
+        <BookingCalendar
+          tarotistaId={1}
+          onBook={mockOnBook}
+          readOnly={true}
+          serviceSlug="arbol-genealogico"
+        />,
+        { wrapper }
+      );
+
+      const futureDays = screen
+        .getAllByTestId(/^calendar-day-/)
+        .filter(
+          (el) =>
+            el.getAttribute('data-past') === 'false' && el.getAttribute('data-empty') !== 'true'
+        );
+
+      if (futureDays.length > 0) {
+        fireEvent.click(futureDays[0]);
+        const slot = screen.getByRole('button', { name: '09:00' });
+        // Even though available=true, readOnly disables interaction
+        expect(slot).toBeDisabled();
+        expect(mockOnBook).not.toHaveBeenCalled();
+      }
+    });
+
+    it('should show loading state when public availability is loading', () => {
+      vi.mocked(useHolisticServicesHook.useHolisticServiceAvailability).mockReturnValue({
+        data: undefined,
+        isLoading: true,
+        isError: false,
+        error: null,
+      } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServiceAvailability>);
+
+      render(
+        <BookingCalendar
+          tarotistaId={1}
+          onBook={mockOnBook}
+          readOnly={true}
+          serviceSlug="arbol-genealogico"
+        />,
+        { wrapper }
+      );
+
+      const futureDays = screen
+        .getAllByTestId(/^calendar-day-/)
+        .filter(
+          (el) =>
+            el.getAttribute('data-past') === 'false' && el.getAttribute('data-empty') !== 'true'
+        );
+
+      if (futureDays.length > 0) {
+        fireEvent.click(futureDays[0]);
+        expect(screen.getByText(/cargando/i)).toBeInTheDocument();
+      }
+    });
+
+    it('should fall back to authenticated hook when serviceSlug is not provided', () => {
+      const mockSlots: TimeSlot[] = [
+        { date: '2025-12-15', time: '14:00', durationMinutes: 60, available: true },
+      ];
+
+      vi.mocked(useAvailableSlotsHook.useAvailableSlots).mockReturnValue({
+        data: mockSlots,
+        isLoading: false,
+        isError: false,
+        error: null,
+      } as unknown as ReturnType<typeof useAvailableSlotsHook.useAvailableSlots>);
+
+      // readOnly=true but no serviceSlug — should use authenticated slots
+      render(<BookingCalendar tarotistaId={1} onBook={mockOnBook} readOnly={true} />, { wrapper });
+
+      const futureDays = screen
+        .getAllByTestId(/^calendar-day-/)
+        .filter(
+          (el) =>
+            el.getAttribute('data-past') === 'false' && el.getAttribute('data-empty') !== 'true'
+        );
+
+      if (futureDays.length > 0) {
+        fireEvent.click(futureDays[0]);
+        expect(screen.getByText('14:00')).toBeInTheDocument();
+      }
     });
   });
 });
