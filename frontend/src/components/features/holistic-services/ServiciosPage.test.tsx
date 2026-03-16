@@ -9,16 +9,31 @@ import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ServiciosPage } from './ServiciosPage';
 import * as useHolisticServicesHook from '@/hooks/api/useHolisticServices';
+import { useAuthStore } from '@/stores/authStore';
 import type { HolisticService } from '@/types';
 
 vi.mock('@/hooks/api/useHolisticServices', () => ({
   useHolisticServices: vi.fn(),
 }));
 
+vi.mock('@/stores/authStore', () => ({
+  useAuthStore: vi.fn(),
+}));
+
 // Mock Next.js Link
 vi.mock('next/link', () => ({
-  default: ({ children, href }: { children: React.ReactNode; href: string }) => (
-    <a href={href}>{children}</a>
+  default: ({
+    children,
+    href,
+    ...props
+  }: {
+    children: React.ReactNode;
+    href: string;
+    [key: string]: unknown;
+  }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
   ),
 }));
 
@@ -59,6 +74,12 @@ describe('ServiciosPage', () => {
   beforeEach(() => {
     queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     vi.clearAllMocks();
+    // Default: unauthenticated user
+    vi.mocked(useAuthStore).mockReturnValue({
+      isAuthenticated: false,
+      user: null,
+      isLoading: false,
+    } as ReturnType<typeof useAuthStore>);
   });
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -175,5 +196,47 @@ describe('ServiciosPage', () => {
     const grid = screen.getByTestId('servicios-grid');
     expect(grid).toBeInTheDocument();
     expect(grid.className).toMatch(/grid/);
+  });
+
+  it('should show "Mis Servicios" link for authenticated users', () => {
+    vi.mocked(useAuthStore).mockReturnValue({
+      isAuthenticated: true,
+      user: {
+        id: 1,
+        email: 'test@test.com',
+        name: 'Test',
+        roles: ['consumer'],
+        plan: 'free',
+        profilePicture: null,
+      },
+      isLoading: false,
+    } as ReturnType<typeof useAuthStore>);
+
+    vi.mocked(useHolisticServicesHook.useHolisticServices).mockReturnValue({
+      data: mockServices,
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServices>);
+
+    render(<ServiciosPage />, { wrapper });
+
+    const link = screen.getByTestId('mis-servicios-link');
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute('href', '/mis-servicios');
+    expect(screen.getByText('Mis Servicios')).toBeInTheDocument();
+  });
+
+  it('should NOT show "Mis Servicios" link for unauthenticated users', () => {
+    vi.mocked(useHolisticServicesHook.useHolisticServices).mockReturnValue({
+      data: mockServices,
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServices>);
+
+    render(<ServiciosPage />, { wrapper });
+
+    expect(screen.queryByTestId('mis-servicios-link')).not.toBeInTheDocument();
   });
 });
