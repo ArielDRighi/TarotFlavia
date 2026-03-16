@@ -10,6 +10,7 @@ import * as useChineseHoroscopeModule from '@/hooks/api/useChineseHoroscope';
 import * as useNumerologyModule from '@/hooks/api/useNumerology';
 import * as useSacredCalendarModule from '@/hooks/api/useSacredCalendar';
 import * as useRitualRecommendationsModule from '@/hooks/api/useRitualRecommendations';
+import * as useHolisticServicesModule from '@/hooks/api/useHolisticServices';
 import type {
   AuthUser,
   UserProfile,
@@ -33,6 +34,7 @@ vi.mock('@/hooks/api/useChineseHoroscope');
 vi.mock('@/hooks/api/useNumerology');
 vi.mock('@/hooks/api/useSacredCalendar');
 vi.mock('@/hooks/api/useRitualRecommendations');
+vi.mock('@/hooks/api/useHolisticServices');
 
 // Helper to create AuthUser mock without limits fields
 function createMockAuthUser(overrides?: Partial<AuthUser>): AuthUser {
@@ -106,6 +108,14 @@ describe('UserDashboard', () => {
       error: null,
       refetch: vi.fn(),
     } as unknown as UseQueryResult<RitualRecommendationsResponse, Error>);
+
+    // Default mock for useMyPurchases (MyServicesWidget)
+    vi.spyOn(useHolisticServicesModule, 'useMyPurchases').mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    } as unknown as ReturnType<typeof useHolisticServicesModule.useMyPurchases>);
   });
 
   it('should render WelcomeHeader', () => {

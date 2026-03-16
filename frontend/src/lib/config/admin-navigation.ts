@@ -10,6 +10,7 @@ import {
   Database,
   ScrollText,
   HandHeart,
+  CalendarClock,
 } from 'lucide-react';
 
 export interface NavItem {
@@ -38,6 +39,7 @@ export const adminNavSections: NavSection[] = [
       { name: 'Tarotistas', href: '/admin/tarotistas', icon: Sparkles },
       { name: 'Lecturas', href: '/admin/lecturas', icon: BookOpen },
       { name: 'Servicios', href: '/admin/servicios', icon: HandHeart },
+      { name: 'Agenda', href: '/admin/agenda', icon: CalendarClock },
     ],
   },
   {

@@ -13,6 +13,7 @@ import { ChineseHoroscopeWidget } from '@/components/features/chinese-horoscope'
 import { NumerologyWidget } from '@/components/features/numerology';
 import { SacredEventsWidget } from './SacredEventsWidget';
 import { PersonalizedRitualsWidget } from './PersonalizedRitualsWidget';
+import { MyServicesWidget } from './MyServicesWidget';
 
 /**
  * User Dashboard component for authenticated users
@@ -26,6 +27,7 @@ import { PersonalizedRitualsWidget } from './PersonalizedRitualsWidget';
  * - Numerology widget (All authenticated users)
  * - Sacred Events widget (All authenticated users)
  * - Personalized Rituals widget (All users, Premium features)
+ * - My Services widget (All users, hidden if no purchases)
  * - Stats section (Premium only)
  * - Upgrade banner (Free users only)
  *
@@ -62,6 +64,9 @@ export function UserDashboard() {
           <div className="space-y-8 lg:col-span-2">
             {/* Did You Know Section */}
             <DidYouKnowSection />
+
+            {/* My Services Widget */}
+            <MyServicesWidget />
 
             {/* Upgrade Banner - Only for non-Premium users */}
             {!isPremium && <UpgradeBanner onUpgradeClick={handleUpgradeClick} />}
