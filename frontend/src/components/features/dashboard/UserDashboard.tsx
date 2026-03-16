@@ -27,6 +27,7 @@ import { MyServicesWidget } from './MyServicesWidget';
  * - Numerology widget (All authenticated users)
  * - Sacred Events widget (All authenticated users)
  * - Personalized Rituals widget (All users, Premium features)
+ * - My Services widget (All users, hidden if no purchases)
  * - Stats section (Premium only)
  * - Upgrade banner (Free users only)
  *

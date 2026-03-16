@@ -71,6 +71,26 @@ describe('MyServicesWidget', () => {
     expect(screen.getByTestId('my-services-widget-loading')).toBeInTheDocument();
   });
 
+  it('should render error state with retry when fetch fails', async () => {
+    const mockRefetch = vi.fn();
+    vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      error: new Error('Network error'),
+      refetch: mockRefetch,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
+
+    render(<MyServicesWidget />, { wrapper });
+
+    expect(screen.getByTestId('my-services-widget-error')).toBeInTheDocument();
+    expect(screen.getByText('No se pudieron cargar tus servicios.')).toBeInTheDocument();
+
+    const { default: userEvent } = await import('@testing-library/user-event');
+    await userEvent.click(screen.getByRole('button', { name: /reintentar/i }));
+    expect(mockRefetch).toHaveBeenCalledTimes(1);
+  });
+
   it('should render nothing when user has no purchases', () => {
     vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
       data: [],

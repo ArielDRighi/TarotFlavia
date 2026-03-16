@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { HandHeart, ArrowRight, CalendarCheck, Clock } from 'lucide-react';
+import { HandHeart, ArrowRight, CalendarCheck, Clock, AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMyPurchases } from '@/hooks/api/useHolisticServices';
@@ -80,7 +81,7 @@ function PurchaseItem({ purchase }: PurchaseItemProps) {
  * Hidden when the user has no purchases.
  */
 export function MyServicesWidget() {
-  const { data: purchases, isLoading } = useMyPurchases();
+  const { data: purchases, isLoading, isError, refetch } = useMyPurchases();
 
   if (isLoading) {
     return (
@@ -88,6 +89,25 @@ export function MyServicesWidget() {
         <Skeleton className="mb-4 h-6 w-40" />
         <Skeleton className="mb-2 h-12 w-full" />
         <Skeleton className="h-12 w-full" />
+      </Card>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Card className="p-6" data-testid="my-services-widget-error">
+        <div className="flex items-center gap-2 text-sm text-red-600">
+          <AlertCircle className="h-4 w-4 shrink-0" />
+          <span>No se pudieron cargar tus servicios.</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="ml-auto text-red-600 hover:text-red-800"
+            onClick={() => void refetch()}
+          >
+            Reintentar
+          </Button>
+        </div>
       </Card>
     );
   }
