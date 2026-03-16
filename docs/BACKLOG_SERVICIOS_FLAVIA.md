@@ -1254,3 +1254,285 @@ Crear un panel de gestión de agenda en el admin donde la tarotista pueda config
 ---
 
 **FIN DE PARTE C — MEJORAS PENDIENTES**
+
+---
+
+## PARTE D: REDISEÑO DEL FLUJO DE CONTRATACIÓN
+
+**Fecha:** 15 de marzo de 2026
+**Prioridad:** 🔴 CRÍTICA
+**Contexto:** El flujo actual permite al usuario pagar un servicio sin haber seleccionado fecha/horario, y requiere aprobación manual del admin. Esto es incorrecto: Mercado Pago notifica automáticamente cuando un pago se confirma (webhooks/IPN), por lo que la aprobación manual no tiene sentido. Además, el usuario debe elegir fecha y horario ANTES de pagar, y al confirmarse el pago el turno se agenda automáticamente.
+
+**Flujo actual (incorrecto):**
+1. Usuario ve detalle del servicio
+2. Paga sin elegir horario
+3. Admin aprueba manualmente el pago
+4. Usuario reserva turno después del pago
+
+**Flujo correcto:**
+1. Usuario ve detalle del servicio + calendario con disponibilidad real
+2. Selecciona fecha y horario disponible
+3. Paga por Mercado Pago
+4. Webhook de MP confirma pago → sistema agenda turno automáticamente
+5. Usuario ve en "Mis Servicios" el servicio contratado con fecha, horario y precio
+
+---
+
+### T-SF-D01: Integración Mercado Pago con Webhooks (Backend)
+
+**Prioridad:** 🔴 CRÍTICA
+**Estimación:** 3 días
+**Dependencias:** Ninguna
+**Estado:** 📋 PENDIENTE
+
+**Contexto:** Actualmente el pago se "aprueba" manualmente desde el panel de admin. Mercado Pago provee webhooks (IPN — Instant Payment Notification) que notifican automáticamente cuando un pago cambia de estado. Se debe integrar este mecanismo para eliminar la intervención manual.
+
+#### 📋 Descripción
+
+Implementar un endpoint de webhook que reciba notificaciones de Mercado Pago, valide la autenticidad, actualice el estado del pago y dispare las acciones post-pago (agendar turno, enviar email de confirmación).
+
+#### ✅ Tareas específicas
+
+**Backend — Webhook endpoint:**
+
+- [ ] Crear endpoint `POST /webhooks/mercadopago` (público, sin auth JWT)
+- [ ] Validar firma/autenticidad de la notificación de MP (x-signature header)
+- [ ] Procesar notificaciones de tipo `payment` → consultar estado en API de MP
+- [ ] Si estado es `approved`: actualizar `ServicePurchase.paymentStatus` a `paid`, setear `paidAt`
+- [ ] Disparar flujo post-pago: crear sesión automáticamente con los datos de fecha/horario guardados en la compra
+- [ ] Enviar email de confirmación al usuario con datos del turno
+- [ ] Manejar estados `rejected`, `pending`, `in_process` apropiadamente
+- [ ] Idempotencia: si la notificación se recibe más de una vez, no duplicar acciones
+- [ ] Logging de todas las notificaciones recibidas para auditoría
+
+**Backend — Modelo de datos:**
+
+- [ ] Agregar campo `selectedDate` (date) a `ServicePurchase` — fecha elegida por el usuario al momento de contratar
+- [ ] Agregar campo `selectedTime` (varchar) a `ServicePurchase` — horario elegido (HH:MM)
+- [ ] Agregar campo `mercadoPagoPaymentId` (varchar, nullable) a `ServicePurchase` — ID del pago en MP para reconciliación
+- [ ] Crear migración para los nuevos campos
+- [ ] Actualizar DTOs de creación de purchase para incluir `selectedDate` y `selectedTime`
+
+**Backend — Crear pago en MP (Checkout Pro):**
+
+- [ ] Integrar SDK de Mercado Pago (`mercadopago` npm package)
+- [ ] Al crear purchase: generar preferencia de pago en MP con `back_urls` y `notification_url`
+- [ ] Guardar `preference_id` en la purchase
+- [ ] Retornar `init_point` (URL de pago) al frontend
+- [ ] Configurar `notification_url` apuntando al webhook
+
+**Backend — Eliminar aprobación manual:**
+
+- [ ] Deprecar/remover endpoint `PATCH /admin/purchases/:id/approve`
+- [ ] Remover flujo de aprobación manual en el admin orchestrator
+- [ ] Mantener endpoint admin de listado de purchases (para visibilidad)
+
+**Backend — Tests:**
+
+- [ ] Tests unitarios del webhook handler (payment approved, rejected, duplicado)
+- [ ] Tests de integración del endpoint webhook
+- [ ] Tests del flujo completo: crear purchase → webhook approved → sesión creada
+- [ ] Tests de validación de firma MP
+- [ ] Coverage ≥ 80%
+
+#### 🎯 Criterios de aceptación
+
+- El webhook recibe notificaciones de MP y actualiza el estado del pago automáticamente
+- Al confirmarse un pago, se crea la sesión automáticamente con la fecha/hora seleccionada
+- Se envía email de confirmación al usuario
+- No se requiere intervención manual del admin para aprobar pagos
+- Las notificaciones duplicadas no generan acciones duplicadas
+- Coverage ≥ 80% en archivos nuevos
+- Ciclo de calidad completo pasa
+
+#### 📁 Archivos involucrados
+
+**Backend:**
+- `backend/tarot-app/src/modules/holistic-services/infrastructure/controllers/` — webhook controller
+- `backend/tarot-app/src/modules/holistic-services/application/use-cases/` — process-payment use case
+- `backend/tarot-app/src/modules/holistic-services/domain/entities/` — actualizar ServicePurchase
+- `backend/tarot-app/src/database/migrations/` — nueva migración
+- `backend/tarot-app/src/config/` — configuración de MP (access token, etc.)
+
+---
+
+### T-SF-D02: Rediseño del Flujo Frontend — Selección de Horario Pre-Pago
+
+**Prioridad:** 🔴 CRÍTICA
+**Estimación:** 2-3 días
+**Dependencias:** T-SF-D01 (backend debe aceptar selectedDate/selectedTime en la purchase)
+**Estado:** 📋 PENDIENTE
+
+**Contexto:** Actualmente el usuario paga sin elegir horario. El flujo correcto es: ver disponibilidad → elegir fecha/horario → pagar. El horario seleccionado se envía junto con la creación de la compra, y queda reservado al confirmarse el pago.
+
+#### 📋 Descripción
+
+Rediseñar el flujo de contratación para que el usuario seleccione fecha y horario antes de pagar. La página de pago muestra un resumen con servicio + fecha + hora + precio. Al pagar, se crea la purchase con los datos del slot seleccionado.
+
+#### ✅ Tareas específicas
+
+**Frontend — Página de detalle (refactor):**
+
+- [ ] El `BookingCalendar` en la página de detalle pasa de readOnly a interactivo
+- [ ] Al seleccionar un slot disponible, se habilita el botón "Contratar servicio"
+- [ ] El botón "Contratar servicio" lleva a la página de pago con la fecha/hora seleccionada como query params o state
+- [ ] Si no hay disponibilidad configurada (0 slots en los próximos 14 días), mostrar aviso y deshabilitar CTA
+- [ ] Si el usuario no seleccionó un horario, el botón de contratar permanece deshabilitado
+
+**Frontend — Página de pago (refactor):**
+
+- [ ] Recibir fecha y horario seleccionados (via query params, state o store)
+- [ ] Mostrar resumen: servicio + fecha + hora + duración + precio
+- [ ] Validar que el slot sigue disponible antes de permitir el pago (llamar al endpoint de available-slots)
+- [ ] Al crear la purchase, enviar `selectedDate` y `selectedTime` al backend
+- [ ] Abrir link de MP (init_point) en nueva pestaña
+- [ ] Mostrar mensaje de "pago en proceso" con instrucciones
+
+**Frontend — Eliminar flujo de reserva post-pago:**
+
+- [ ] Eliminar o deprecar la página `/servicios/reservar/[purchaseId]` (ya no es necesaria)
+- [ ] El flujo post-pago ya no requiere que el usuario elija horario — se agendó automáticamente
+
+**Frontend — Tests:**
+
+- [ ] Tests de selección de slot en la página de detalle
+- [ ] Tests de la página de pago con datos de slot
+- [ ] Tests de validación de disponibilidad pre-pago
+- [ ] Tests de estados: slot no seleccionado, slot ocupado, pago exitoso
+- [ ] Coverage ≥ 80%
+
+#### 🎯 Criterios de aceptación
+
+- El usuario DEBE seleccionar fecha y horario antes de poder pagar
+- La página de pago muestra el resumen completo (servicio + fecha + hora + precio)
+- Si no hay disponibilidad, no se puede contratar
+- Si el slot se ocupó entre la selección y el pago, se muestra error y se pide elegir otro
+- El flujo es: detalle → elegir slot → pagar → confirmación automática
+- Coverage ≥ 80%
+- Ciclo de calidad completo pasa
+
+#### 📁 Archivos involucrados
+
+**Frontend:**
+- `frontend/src/components/features/holistic-services/ServiceDetailPage.tsx` — calendario interactivo
+- `frontend/src/components/features/holistic-services/ServicePaymentPage.tsx` — resumen con slot
+- `frontend/src/components/features/holistic-services/ServiceBookingPage.tsx` — deprecar/eliminar
+- `frontend/src/hooks/api/useHolisticServiceMutations.ts` — actualizar createPurchase con slot data
+- `frontend/src/types/service-purchase.types.ts` — agregar selectedDate, selectedTime
+
+---
+
+### T-SF-D03: Mejora de "Mis Servicios" — Información Completa del Turno
+
+**Prioridad:** 🟡 MEDIA
+**Estimación:** 1 día
+**Dependencias:** T-SF-D01 y T-SF-D02
+**Estado:** 📋 PENDIENTE
+
+**Contexto:** Actualmente "Mis Servicios" muestra solo precio y fecha de compra. Debe mostrar la información relevante del turno agendado: nombre del servicio, fecha y horario del turno, duración, precio pagado, y estado.
+
+#### 📋 Descripción
+
+Rediseñar las cards de "Mis Servicios" para mostrar información completa y útil del turno contratado.
+
+#### ✅ Tareas específicas
+
+**Frontend — Rediseño de cards:**
+
+- [ ] Mostrar nombre del servicio (ya existe)
+- [ ] Mostrar fecha y horario del turno agendado (no la fecha de compra)
+- [ ] Mostrar duración del servicio
+- [ ] Mostrar precio pagado
+- [ ] Mostrar estado del turno: Confirmado, Pendiente de pago, Completado, Cancelado
+- [ ] Mostrar link de WhatsApp para contacto (post-pago)
+- [ ] Diseño visual mejorado con iconos y badges informativos
+
+**Frontend — Estados de la card:**
+
+- [ ] **Pendiente de pago**: badge amarillo, sin datos de turno, link a reintentar pago
+- [ ] **Confirmado**: badge verde, fecha/hora del turno, link WhatsApp, countdown si es próximo
+- [ ] **Completado**: badge gris, fecha del turno pasada
+- [ ] **Cancelado**: badge rojo, motivo si existe
+
+**Frontend — Tests:**
+
+- [ ] Tests de renderizado de cada estado
+- [ ] Tests de datos mostrados (fecha, hora, precio, servicio)
+- [ ] Tests de acciones por estado (WhatsApp, reintentar pago)
+- [ ] Coverage ≥ 80%
+
+#### 🎯 Criterios de aceptación
+
+- Cada card de servicio muestra: nombre del servicio, fecha y hora del turno, duración, precio y estado
+- Los estados tienen badges visuales diferenciados
+- El link de WhatsApp solo aparece para turnos confirmados
+- El diseño es responsive y consistente con el resto de la app
+- Coverage ≥ 80%
+- Ciclo de calidad completo pasa
+
+#### 📁 Archivos involucrados
+
+**Frontend:**
+- `frontend/src/components/features/holistic-services/MyServicesList.tsx` — rediseño cards
+- `frontend/src/components/features/holistic-services/MyServicesList.test.tsx` — tests actualizados
+- `frontend/src/types/service-purchase.types.ts` — posibles nuevos campos
+- `frontend/src/components/features/dashboard/MyServicesWidget.tsx` — actualizar widget del home
+
+---
+
+### T-SF-D04: Eliminar Aprobación Manual del Admin
+
+**Prioridad:** 🟡 MEDIA
+**Estimación:** 1 día
+**Dependencias:** T-SF-D01 (webhook funcional)
+**Estado:** 📋 PENDIENTE
+
+**Contexto:** Con los webhooks de MP activos, la funcionalidad de aprobación manual del admin ya no es necesaria. Se debe remover del frontend y backend para evitar confusión.
+
+#### 📋 Descripción
+
+Eliminar el flujo de aprobación manual de pagos del panel admin y reemplazarlo con una vista de solo lectura de transacciones.
+
+#### ✅ Tareas específicas
+
+**Backend:**
+
+- [ ] Deprecar endpoint `PATCH /admin/purchases/:id/approve`
+- [ ] Mantener `GET /admin/purchases` como vista de lectura (listado de transacciones)
+- [ ] Agregar información de MP (payment_id, estado) a la respuesta del listado
+
+**Frontend — Panel admin:**
+
+- [ ] Remover botón "Aprobar pago" de la tabla de pagos pendientes
+- [ ] Reemplazar tabla de "Pagos Pendientes" por "Historial de Transacciones"
+- [ ] Mostrar: servicio, usuario, monto, estado MP, fecha de pago, fecha del turno
+- [ ] Filtros: por estado, por fecha, por servicio
+
+**Frontend — Tests:**
+
+- [ ] Actualizar tests del panel admin
+- [ ] Tests de la nueva vista de transacciones
+- [ ] Coverage ≥ 80%
+
+#### 🎯 Criterios de aceptación
+
+- No existe botón de aprobación manual en el admin
+- El admin puede ver el historial de transacciones con estados de MP
+- La información es de solo lectura (no se pueden modificar pagos manualmente)
+- Coverage ≥ 80%
+- Ciclo de calidad completo pasa
+
+#### 📁 Archivos involucrados
+
+**Backend:**
+- `backend/tarot-app/src/modules/holistic-services/infrastructure/controllers/` — remover approve
+- `backend/tarot-app/src/modules/holistic-services/application/` — remover approve use case
+
+**Frontend:**
+- `frontend/src/components/features/admin/PendingPaymentsTable.tsx` — reemplazar por historial
+- `frontend/src/components/features/admin/ApprovePaymentDialog.tsx` — eliminar
+- `frontend/src/hooks/api/useAdminHolisticServices.ts` — remover mutation de approve
+
+---
+
+**FIN DE PARTE D — REDISEÑO DEL FLUJO DE CONTRATACIÓN**
